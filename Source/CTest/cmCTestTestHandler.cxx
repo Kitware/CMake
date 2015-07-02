@@ -656,9 +656,8 @@ int cmCTestTestHandler::ProcessHandler()
 void cmCTestTestHandler::PrintLabelSummary()
 {
   cmCTestTestHandler::ListOfTests::iterator it = this->TestList.begin();
-  cmCTestTestHandler::TestResultsVector::iterator ri =
-    this->TestResults.begin();
   std::map<std::string, double> labelTimes;
+  std::map<std::string, int> labelCounts;
   std::set<std::string> labels;
   // initialize maps
   std::string::size_type maxlen = 0;
@@ -676,10 +675,12 @@ void cmCTestTestHandler::PrintLabelSummary()
           }
         labels.insert(*l);
         labelTimes[*l] = 0;
+        labelCounts[*l] = 0;
         }
       }
     }
-  ri = this->TestResults.begin();
+  cmCTestTestHandler::TestResultsVector::iterator ri =
+      this->TestResults.begin();
   // fill maps
   for(; ri != this->TestResults.end(); ++ri)
     {
@@ -691,6 +692,7 @@ void cmCTestTestHandler::PrintLabelSummary()
           l !=  p.Labels.end(); ++l)
         {
         labelTimes[*l] += result.ExecutionTime;
+        ++labelCounts[*l];
         }
       }
     }
@@ -705,10 +707,21 @@ void cmCTestTestHandler::PrintLabelSummary()
     {
     std::string label = *i;
     label.resize(maxlen +3, ' ');
+
     char buf[1024];
     sprintf(buf, "%6.2f sec", labelTimes[*i]);
+
+    std::ostringstream labelCountStr;
+    labelCountStr << "(" << labelCounts[*i] << " test";
+    if (labelCounts[*i] > 1)
+      {
+          labelCountStr << "s";
+      }
+    labelCountStr << ")";
+
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "\n"
-               << label << " = " << buf, this->Quiet );
+               << label << " = " << buf << " " << labelCountStr.str(),
+               this->Quiet );
     if ( this->LogFile )
       {
       *this->LogFile << "\n" << *i << " = "

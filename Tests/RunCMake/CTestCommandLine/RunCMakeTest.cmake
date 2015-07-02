@@ -54,6 +54,29 @@ add_test(MergeOutput \"${CMAKE_COMMAND}\" -P \"${RunCMake_SOURCE_DIR}/MergeOutpu
 endfunction()
 run_MergeOutput()
 
+function(run_LabelCount)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/LabelCount)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(test1 ${CMAKE_COMMAND} -E echo test1)
+set_tests_properties(test1 PROPERTIES LABELS 'bar')
+
+add_test(test2 ${CMAKE_COMMAND} -E echo test2)
+set_tests_properties(test2 PROPERTIES LABELS 'bar')
+
+add_test(test3 ${CMAKE_COMMAND} -E echo test3)
+set_tests_properties(test3 PROPERTIES LABELS 'foo')
+
+add_test(test4 ${CMAKE_COMMAND} -E echo test4)
+set_tests_properties(test4 PROPERTIES LABELS 'bar')
+")
+
+  run_cmake_command(LabelCount ${CMAKE_CTEST_COMMAND} -V)
+endfunction()
+
+run_LabelCount()
 
 function(run_TestLoad name load)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestLoad)
