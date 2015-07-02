@@ -100,19 +100,6 @@ public:
   cmsys::auto_ptr<cmFunctionBlocker>
   RemoveFunctionBlocker(cmFunctionBlocker* fb, const cmListFileFunction& lff);
 
-  /** Push/pop a lexical (function blocker) barrier automatically.  */
-  class LexicalPushPop
-  {
-  public:
-    LexicalPushPop(cmMakefile* mf);
-    ~LexicalPushPop();
-    void Quiet() { this->ReportError = false; }
-  private:
-    cmMakefile* Makefile;
-    bool ReportError;
-  };
-  friend class LexicalPushPop;
-
   /**
    * Try running cmake and building a file. This is used for dynalically
    * loaded commands, not as part of the usual build process.
@@ -838,6 +825,8 @@ public:
 
   std::string GetExecutionFilePath() const;
 
+  void EnforceDirectoryLevelRules() const;
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const std::string& name, cmTarget& target);
@@ -968,6 +957,10 @@ private:
   friend class cmCMakePolicyCommand;
   class IncludeScope;
   friend class IncludeScope;
+  class ListFileScope;
+  friend class ListFileScope;
+  class BuildsystemFileScope;
+  friend class BuildsystemFileScope;
 
   // stack of policy settings
   struct PolicyStackEntry: public cmPolicies::PolicyMap
@@ -983,9 +976,6 @@ private:
   std::vector<PolicyStackType::size_type> PolicyBarriers;
   cmPolicies::PolicyStatus
   GetPolicyStatusInternal(cmPolicies::PolicyID id) const;
-
-  // Enforce rules about CMakeLists.txt files.
-  void EnforceDirectoryLevelRules() const;
 
   // CMP0053 == old
   cmake::MessageType ExpandVariablesInStringOld(
