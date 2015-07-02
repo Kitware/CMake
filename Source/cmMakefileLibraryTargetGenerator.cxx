@@ -18,6 +18,7 @@
 #include "cmSourceFile.h"
 #include "cmTarget.h"
 #include "cmake.h"
+#include "cmAlgorithms.h"
 
 //----------------------------------------------------------------------------
 cmMakefileLibraryTargetGenerator
@@ -567,9 +568,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   if (this->Target->GetType() == cmTarget::SHARED_LIBRARY &&
       this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
     {
-    std::string const autodef_prop = "WINDOWS_EXPORT_ALL_SYMBOLS";
-    const char *autodef = this->Target->GetProperty(autodef_prop);
-    if (autodef && *autodef)
+    if(this->Target->GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS"))
       {
       std::string name_of_def_file =
         this->Target->GetSupportDirectory();
@@ -595,7 +594,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       for(std::vector<std::string>::const_iterator i = this->Objects.begin();
           i != this->Objects.end(); ++i)
         {
-        fout << *i << "\n";
+        if(cmHasLiteralSuffix(*i, ".obj"))
+          {
+          fout << *i << "\n";
+          }
         }
       for(std::vector<std::string>::const_iterator i =
         this->ExternalObjects.begin();

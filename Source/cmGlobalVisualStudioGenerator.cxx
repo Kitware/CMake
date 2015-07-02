@@ -20,6 +20,7 @@
 #include "cmSourceFile.h"
 #include "cmTarget.h"
 #include <cmsys/Encoding.hxx>
+#include "cmAlgorithms.h"
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(cmake* cm)
@@ -951,7 +952,10 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
     // replace $(ConfigurationName) in the object names
     cmSystemTools::ReplaceString(objFile, this->GetCMakeCFGIntDir(),
                                  configName.c_str());
-    fout << objFile << "\n";
+    if(cmHasLiteralSuffix(objFile, ".obj"))
+      {
+      fout << objFile << "\n";
+      }
     }
   cmCustomCommandLines commandLines;
   commandLines.push_back(cmdl);

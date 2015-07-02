@@ -489,9 +489,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   if(this->GetMakefile()->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")
      && target.GetType() == cmTarget::SHARED_LIBRARY)
     {
-    std::string const autodef_prop = "WINDOWS_EXPORT_ALL_SYMBOLS";
-    const char *autodef = target.GetProperty(autodef_prop);
-    if (autodef && *autodef)
+    if(target.GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS"))
       {
       std::string dllname = targetOutput;
       std::string name_of_def_file
@@ -622,9 +620,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   if (target.GetType() == cmTarget::SHARED_LIBRARY &&
       this->GetMakefile()->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
     {
-    std::string const autodef_prop = "WINDOWS_EXPORT_ALL_SYMBOLS";
-    const char *autodef = target.GetProperty(autodef_prop);
-    if (autodef && *autodef)
+    if(target.GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS"))
       {
       std::string cmakeCommand =
       this->GetLocalGenerator()->ConvertToOutputFormat(
@@ -651,7 +647,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       cmGeneratedFileStream fout(obj_list_file.c_str());
       for(cmNinjaDeps::iterator i=objs.begin(); i != objs.end(); ++i)
         {
-        fout << *i << "\n";
+        if(cmHasLiteralSuffix(*i, ".obj"))
+          {
+          fout << *i << "\n";
+          }
         }
       }
     }
