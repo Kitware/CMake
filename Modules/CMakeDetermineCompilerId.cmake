@@ -304,15 +304,12 @@ Id flags: ${testflags}
       set(ENV{MACOSX_DEPLOYMENT_TARGET} "${_ENV_MACOSX_DEPLOYMENT_TARGET}")
     endif()
 
-    # Match the link line from xcodebuild output of the form
-    #  Ld ...
-    #      ...
-    #      /path/to/cc ...CompilerId${lang}/...
-    # to extract the compiler front-end for the language.
-    if("${CMAKE_${lang}_COMPILER_ID_OUTPUT}" MATCHES "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerId${lang}/(\\./)?(CompilerId${lang}.xctest/)?CompilerId${lang}[ \t\n\\\"]")
-      set(_comp "${CMAKE_MATCH_2}")
-      if(EXISTS "${_comp}")
-        set(CMAKE_${lang}_COMPILER_ID_TOOL "${_comp}" PARENT_SCOPE)
+    if(DEFINED CMAKE_${lang}_COMPILER_ID_TOOL_MATCH_REGEX)
+      if("${CMAKE_${lang}_COMPILER_ID_OUTPUT}" MATCHES "${CMAKE_${lang}_COMPILER_ID_TOOL_MATCH_REGEX}")
+        set(_comp "${CMAKE_MATCH_${CMAKE_${lang}_COMPILER_ID_TOOL_MATCH_INDEX}}")
+        if(EXISTS "${_comp}")
+          set(CMAKE_${lang}_COMPILER_ID_TOOL "${_comp}" PARENT_SCOPE)
+        endif()
       endif()
     endif()
   else()
