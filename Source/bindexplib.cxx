@@ -97,6 +97,22 @@ typedef struct cmANON_OBJECT_HEADER_BIGOBJ {
     DWORD   NumberOfSymbols;
 } cmANON_OBJECT_HEADER_BIGOBJ;
 
+typedef struct _cmIMAGE_SYMBOL_EX {
+    union {
+        BYTE     ShortName[8];
+        struct {
+            DWORD   Short;     // if 0, use LongName
+            DWORD   Long;      // offset into string table
+        } Name;
+        DWORD   LongName[2];    // PBYTE  [2]
+    } N;
+    DWORD   Value;
+    LONG    SectionNumber;
+    WORD    Type;
+    BYTE    StorageClass;
+    BYTE    NumberOfAuxSymbols;
+} cmIMAGE_SYMBOL_EX;
+typedef cmIMAGE_SYMBOL_EX UNALIGNED *PcmIMAGE_SYMBOL_EX;
 
 PIMAGE_SECTION_HEADER GetSectionHeaderOffset(PIMAGE_FILE_HEADER
                                              pImageFileHeader)
@@ -142,7 +158,7 @@ const char* StrNStr(const char* start, const char* find, size_t &size) {
 template <
   // cmANON_OBJECT_HEADER_BIGOBJ or IMAGE_FILE_HEADER
   class ObjectHeaderType,
-  // PIMAGE_SYMBOL_EX or PIMAGE_SYMBOL
+  // PcmIMAGE_SYMBOL_EX or PIMAGE_SYMBOL
   class SymbolTableType>
 class DumpSymbols
 {
@@ -404,7 +420,7 @@ DumpFile(const char* filename, FILE *fout)
        (cmANON_OBJECT_HEADER_BIGOBJ*) lpFileBase;
      if(h->Sig1 == 0x0 && h->Sig2 == 0xffff)
        {
-       DumpSymbols<cmANON_OBJECT_HEADER_BIGOBJ, IMAGE_SYMBOL_EX>
+       DumpSymbols<cmANON_OBJECT_HEADER_BIGOBJ, cmIMAGE_SYMBOL_EX>
          symbolDumper((cmANON_OBJECT_HEADER_BIGOBJ*) lpFileBase, fout);
        symbolDumper.DumpObjFile();
        }
