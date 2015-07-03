@@ -78,6 +78,26 @@
 #include <fstream>
 #include <iostream>
 
+typedef struct cmANON_OBJECT_HEADER_BIGOBJ {
+   /* same as ANON_OBJECT_HEADER_V2 */
+    WORD    Sig1;            // Must be IMAGE_FILE_MACHINE_UNKNOWN
+    WORD    Sig2;            // Must be 0xffff
+    WORD    Version;         // >= 2 (implies the Flags field is present)
+    WORD    Machine;         // Actual machine - IMAGE_FILE_MACHINE_xxx
+    DWORD   TimeDateStamp;
+    CLSID   ClassID;         // {D1BAA1C7-BAEE-4ba9-AF20-FAF66AA4DCB8}
+    DWORD   SizeOfData;      // Size of data that follows the header
+    DWORD   Flags;           // 0x1 -> contains metadata
+    DWORD   MetaDataSize;    // Size of CLR metadata
+    DWORD   MetaDataOffset;  // Offset of CLR metadata
+
+    /* bigobj specifics */
+    DWORD   NumberOfSections; // extended from WORD
+    DWORD   PointerToSymbolTable;
+    DWORD   NumberOfSymbols;
+} cmANON_OBJECT_HEADER_BIGOBJ;
+
+
 PIMAGE_SECTION_HEADER GetSectionHeaderOffset(PIMAGE_FILE_HEADER
                                              pImageFileHeader)
 {
@@ -87,12 +107,12 @@ PIMAGE_SECTION_HEADER GetSectionHeaderOffset(PIMAGE_FILE_HEADER
      pImageFileHeader->SizeOfOptionalHeader);
 }
 
-PIMAGE_SECTION_HEADER GetSectionHeaderOffset(ANON_OBJECT_HEADER_BIGOBJ*
+PIMAGE_SECTION_HEADER GetSectionHeaderOffset(cmANON_OBJECT_HEADER_BIGOBJ*
                                              pImageFileHeader)
 {
   return (PIMAGE_SECTION_HEADER)
       ((DWORD_PTR)pImageFileHeader          +
-       sizeof(ANON_OBJECT_HEADER_BIGOBJ));
+       sizeof(cmANON_OBJECT_HEADER_BIGOBJ));
 }
 
 /*
@@ -120,7 +140,7 @@ const char* StrNStr(const char* start, const char* find, size_t &size) {
 }
 
 template <
-  // ANON_OBJECT_HEADER_BIGOBJ or IMAGE_FILE_HEADER
+  // cmANON_OBJECT_HEADER_BIGOBJ or IMAGE_FILE_HEADER
   class ObjectHeaderType,
   // PIMAGE_SYMBOL_EX or PIMAGE_SYMBOL
   class SymbolTableType>
@@ -380,11 +400,12 @@ DumpFile(const char* filename, FILE *fout)
       symbolDumper.DumpObjFile();
    } else {
    // check for /bigobj format
-     ANON_OBJECT_HEADER_BIGOBJ* h = (ANON_OBJECT_HEADER_BIGOBJ*) lpFileBase;
+     cmANON_OBJECT_HEADER_BIGOBJ* h =
+       (cmANON_OBJECT_HEADER_BIGOBJ*) lpFileBase;
      if(h->Sig1 == 0x0 && h->Sig2 == 0xffff)
        {
-       DumpSymbols<ANON_OBJECT_HEADER_BIGOBJ, IMAGE_SYMBOL_EX>
-         symbolDumper((ANON_OBJECT_HEADER_BIGOBJ*) lpFileBase, fout);
+       DumpSymbols<cmANON_OBJECT_HEADER_BIGOBJ, IMAGE_SYMBOL_EX>
+         symbolDumper((cmANON_OBJECT_HEADER_BIGOBJ*) lpFileBase, fout);
        symbolDumper.DumpObjFile();
        }
      // if we don't know what it is die so the build will stop
