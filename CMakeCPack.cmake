@@ -82,6 +82,8 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     endif()
     if(BUILD_QtDialog)
       list(APPEND _CPACK_IFW_COMPONENTS_ALL cmake-gui)
+      set(_CPACK_IFW_COMPONENT_CMAKE-GUI_LICENSES "set(CPACK_IFW_COMPONENT_CMAKE-GUI_LICENSES
+    \"LGPLv2.1\" \"${CMake_SOURCE_DIR}/Licenses/LGPLv2.1.txt\")")
     endif()
     if(SPHINX_MAN)
       list(APPEND _CPACK_IFW_COMPONENTS_ALL sphinx-man)
@@ -100,6 +102,11 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   set(CPACK_COMPONENTS_ALL \"${_CPACK_IFW_COMPONENTS_ALL}\")
   set(CPACK_COMPONENTS_GROUPING IGNORE)
 ")
+  else()
+    if(BUILD_QtDialog AND CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL)
+      set(_CPACK_IFW_ADDITIONAL_LICENSES
+        "\"LGPLv2.1\" \"${CMake_SOURCE_DIR}/Licenses/LGPLv2.1.txt\"")
+    endif()
   endif()
 
   # Components scripts configuration
