@@ -59,6 +59,17 @@ if(CMAKE_ENCODING_UTF8)
   set(KWSYS_ENCODING_DEFAULT_CODEPAGE CP_UTF8)
 endif()
 
+# option to use COMPONENT with install command
+option(CMake_INSTALL_COMPONENTS "Using components when installing" OFF)
+mark_as_advanced(CMake_INSTALL_COMPONENTS)
+macro(CMake_OPTIONAL_COMPONENT NAME)
+  if(CMake_INSTALL_COMPONENTS)
+    set(COMPONENT COMPONENT ${NAME})
+  else()
+    set(COMPONENT)
+  endif()
+endmacro()
+
 #-----------------------------------------------------------------------
 # a macro to deal with system libraries, implemented as a macro
 # simply to improve readability of the main script
@@ -652,7 +663,6 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
     DIRECTORY_PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
                           GROUP_READ GROUP_EXECUTE
                           WORLD_READ WORLD_EXECUTE
-    COMPONENT data
     PATTERN "*.sh*" PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
                                 GROUP_READ GROUP_EXECUTE
                                 WORLD_READ WORLD_EXECUTE

@@ -743,7 +743,8 @@ if(APPLE)
 endif()
 
 foreach(_tool ${_tools})
-  install(TARGETS ${_tool} DESTINATION bin COMPONENT ${_tool})
+  CMake_OPTIONAL_COMPONENT(${_tool})
+  install(TARGETS ${_tool} DESTINATION bin ${COMPONENT})
 endforeach()
 
 install(FILES cmCPluginAPI.h DESTINATION ${CMAKE_DATA_DIR}/include)

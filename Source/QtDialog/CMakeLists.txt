@@ -14,6 +14,7 @@ project(QtDialog)
 if(POLICY CMP0020)
   cmake_policy(SET CMP0020 NEW) # Drop when CMake >= 2.8.11 required
 endif()
+CMake_OPTIONAL_COMPONENT(cmake-gui)
 find_package(Qt5Widgets QUIET)
 if (Qt5Widgets_FOUND)
   include_directories(${Qt5Widgets_INCLUDE_DIRS})
@@ -48,7 +49,7 @@ if (Qt5Widgets_FOUND)
         set(_qt_plugin_dest "PlugIns/${_qt_plugin_type}")
         install(FILES "${_qt_plugin_path}"
           DESTINATION "${_qt_plugin_dest}"
-          COMPONENT cmake-gui)
+          ${COMPONENT})
         set(${_qt_plugins_var}
           "${${_qt_plugins_var}};\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${_qt_plugin_dest}/${_qt_plugin_file}")
       else()
@@ -60,7 +61,7 @@ if (Qt5Widgets_FOUND)
       "[Paths]\nPlugins = PlugIns\n")
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
       DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
-      COMPONENT cmake-gui)
+      ${COMPONENT})
   endif()
 
   if(WIN32 AND TARGET Qt5::Core)
@@ -133,7 +134,7 @@ endif()
 if(CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL)
   install(FILES ${CMake_SOURCE_DIR}/Licenses/LGPLv2.1.txt
     DESTINATION ${CMAKE_DATA_DIR}/Licenses
-    COMPONENT cmake-gui)
+    ${COMPONENT})
   set_property(SOURCE CMakeSetupDialog.cxx
     PROPERTY COMPILE_DEFINITIONS CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL)
 endif()
@@ -166,10 +167,10 @@ if(APPLE)
     )
 endif()
 set(CMAKE_INSTALL_DESTINATION_ARGS
-  BUNDLE DESTINATION "${CMAKE_BUNDLE_LOCATION}" COMPONENT cmake-gui)
+  BUNDLE DESTINATION "${CMAKE_BUNDLE_LOCATION}" ${COMPONENT})
 
 install(TARGETS cmake-gui
-  RUNTIME DESTINATION bin COMPONENT cmake-gui
+  RUNTIME DESTINATION bin ${COMPONENT}
   ${CMAKE_INSTALL_DESTINATION_ARGS})
 
 if(UNIX AND NOT APPLE)
@@ -177,7 +178,7 @@ if(UNIX AND NOT APPLE)
     install(
       FILES       "${CMAKE_CURRENT_SOURCE_DIR}/CMakeSetup${size}.png"
       DESTINATION "share/icons/hicolor/${size}x${size}/apps"
-      COMPONENT cmake-gui
+      ${COMPONENT}
       RENAME      "CMakeSetup.png")
   endforeach ()
 
@@ -185,17 +186,17 @@ if(UNIX AND NOT APPLE)
   # with an icon
   install(FILES CMake.desktop
     DESTINATION share/applications
-    COMPONENT cmake-gui)
+    ${COMPONENT})
   install(FILES cmakecache.xml
     DESTINATION share/mime/packages
-    COMPONENT cmake-gui)
+    ${COMPONENT})
 endif()
 
 if(APPLE)
   install(CODE "
     execute_process(COMMAND ln -s \"../MacOS/CMake\" cmake-gui
         WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin)
-  " COMPONENT cmake-gui)
+  " ${COMPONENT})
 endif()
 
 if(APPLE OR WIN32)
@@ -209,7 +210,7 @@ if(APPLE OR WIN32)
     include(\"${CMake_SOURCE_DIR}/Modules/BundleUtilities.cmake\")
     set(BU_CHMOD_BUNDLE_ITEMS ON)
     fixup_bundle(\"${fixup_exe}\" \"${QT_PLUGINS}\" \"${QT_LIBRARY_DIR};${QT_BINARY_DIR}\")
-  " COMPONENT cmake-gui)
+  " ${COMPONENT})
 endif()
 
 set(CMAKE_PACKAGE_QTGUI TRUE)
