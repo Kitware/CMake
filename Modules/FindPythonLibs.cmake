@@ -53,6 +53,15 @@ include(${CMAKE_CURRENT_LIST_DIR}/CMakeFindFrameworks.cmake)
 # Search for the python framework on Apple.
 CMAKE_FIND_FRAMEWORKS(Python)
 
+# Save CMAKE_FIND_FRAMEWORK
+if(DEFINED CMAKE_FIND_FRAMEWORK)
+  set(_PythonLibs_CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK})
+else()
+  unset(_PythonLibs_CMAKE_FIND_FRAMEWORK)
+endif()
+# To avoid picking up the system Python.h pre-maturely.
+set(CMAKE_FIND_FRAMEWORK LAST)
+
 set(_PYTHON1_VERSIONS 1.6 1.5)
 set(_PYTHON2_VERSIONS 2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0)
 set(_PYTHON3_VERSIONS 3.4 3.3 3.2 3.1 3.0)
@@ -111,14 +120,22 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
       )
   endif()
 
+  set(PYTHON_FRAMEWORK_LIBRARIES)
+  if(Python_FRAMEWORKS AND NOT PYTHON_LIBRARY)
+    foreach(dir ${Python_FRAMEWORKS})
+      list(APPEND PYTHON_FRAMEWORK_LIBRARIES
+           ${dir}/Versions/${_CURRENT_VERSION}/lib)
+    endforeach()
+  endif()
   find_library(PYTHON_LIBRARY
     NAMES
-    python${_CURRENT_VERSION_NO_DOTS}
-    python${_CURRENT_VERSION}mu
-    python${_CURRENT_VERSION}m
-    python${_CURRENT_VERSION}u
-    python${_CURRENT_VERSION}
+      python${_CURRENT_VERSION_NO_DOTS}
+      python${_CURRENT_VERSION}mu
+      python${_CURRENT_VERSION}m
+      python${_CURRENT_VERSION}u
+      python${_CURRENT_VERSION}
     PATHS
+      ${PYTHON_FRAMEWORK_LIBRARIES}
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
     # Avoid finding the .dll in the PATH.  We want the .lib.
@@ -143,8 +160,8 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
   set(PYTHON_FRAMEWORK_INCLUDES)
   if(Python_FRAMEWORKS AND NOT PYTHON_INCLUDE_DIR)
     foreach(dir ${Python_FRAMEWORKS})
-      set(PYTHON_FRAMEWORK_INCLUDES ${PYTHON_FRAMEWORK_INCLUDES}
-        ${dir}/Versions/${_CURRENT_VERSION}/include/python${_CURRENT_VERSION})
+      list(APPEND PYTHON_FRAMEWORK_INCLUDES
+           ${dir}/Versions/${_CURRENT_VERSION}/include/python${_CURRENT_VERSION})
     endforeach()
   endif()
 
@@ -200,6 +217,14 @@ SELECT_LIBRARY_CONFIGURATIONS(PYTHON)
 # Unset this, this prefix doesn't match the module prefix, they are different
 # for historical reasons.
 unset(PYTHON_FOUND)
+
+# Restore CMAKE_FIND_FRAMEWORK
+if(DEFINED _PythonLibs_CMAKE_FIND_FRAMEWORK)
+  set(CMAKE_FIND_FRAMEWORK ${_PythonLibs_CMAKE_FIND_FRAMEWORK})
+  unset(_PythonLibs_CMAKE_FIND_FRAMEWORK)
+else()
+  unset(CMAKE_FIND_FRAMEWORK)
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonLibs
