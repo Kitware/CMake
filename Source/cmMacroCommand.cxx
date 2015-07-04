@@ -132,7 +132,6 @@ bool cmMacroHelperCommand::InvokeInitialPass
     newLFF.Arguments.clear();
     newLFF.Arguments.reserve(this->Functions[c].Arguments.size());
     newLFF.Name = this->Functions[c].Name;
-    newLFF.FilePath = this->Functions[c].FilePath;
     newLFF.Line = this->Functions[c].Line;
 
     // for each argument of the current function
