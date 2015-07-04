@@ -63,7 +63,6 @@ static void cmVariableWatchCommandVariableAccessed(
       cmListFileArgument(stack, cmListFileArgument::Quoted,
                          9999));
     newLFF.Name = data->Command;
-    newLFF.FilePath = "unknown";
     newLFF.Line = 9999;
     cmExecutionStatus status;
     if(!makefile->ExecuteCommand(newLFF,status))
