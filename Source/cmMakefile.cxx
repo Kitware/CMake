@@ -280,7 +280,8 @@ cmListFileBacktrace cmMakefile::GetBacktrace() const
       i = this->ContextStack.rbegin();
       i != this->ContextStack.rend(); ++i)
     {
-    backtrace.Append(*(*i));
+    cmListFileContext frame = *(*i);
+    backtrace.Append(frame);
     }
   return backtrace;
 }
@@ -295,7 +296,8 @@ cmMakefile::GetBacktrace(cmListFileContext const& lfc) const
       i = this->ContextStack.rbegin();
       i != this->ContextStack.rend(); ++i)
     {
-    backtrace.Append(*(*i));
+    cmListFileContext frame = *(*i);
+    backtrace.Append(frame);
     }
   return backtrace;
 }
