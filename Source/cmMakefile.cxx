@@ -276,11 +276,13 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
 cmListFileBacktrace cmMakefile::GetBacktrace() const
 {
   cmListFileBacktrace backtrace(this->StateSnapshot);
+  cmState::Snapshot snp = this->StateSnapshot;
   for(std::vector<cmListFileContext const*>::const_reverse_iterator
       i = this->ContextStack.rbegin();
-      i != this->ContextStack.rend(); ++i)
+      i != this->ContextStack.rend(); ++i, snp = snp.GetCallStackParent())
     {
     cmListFileContext frame = *(*i);
+    frame.FilePath = snp.GetExecutionListFile();
     backtrace.Append(frame);
     }
   return backtrace;
@@ -292,11 +294,15 @@ cmMakefile::GetBacktrace(cmListFileContext const& lfc) const
 {
   cmListFileBacktrace backtrace(this->StateSnapshot);
   backtrace.Append(lfc);
+  cmState::Snapshot snp = this->StateSnapshot;
+  assert(snp.GetExecutionListFile() == lfc.FilePath);
+  snp = snp.GetCallStackParent();
   for(std::vector<cmListFileContext const*>::const_reverse_iterator
       i = this->ContextStack.rbegin();
-      i != this->ContextStack.rend(); ++i)
+      i != this->ContextStack.rend(); ++i, snp = snp.GetCallStackParent())
     {
     cmListFileContext frame = *(*i);
+    frame.FilePath = snp.GetExecutionListFile();
     backtrace.Append(frame);
     }
   return backtrace;
