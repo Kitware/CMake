@@ -59,6 +59,7 @@ public:
 
     bool IsValid() const;
     Snapshot GetBuildsystemDirectoryParent() const;
+    Snapshot GetCallStackParent() const;
 
     cmState* GetState() const;
 

@@ -854,6 +854,28 @@ cmState::Snapshot cmState::Snapshot::GetBuildsystemDirectoryParent() const
   return snapshot;
 }
 
+cmState::Snapshot cmState::Snapshot::GetCallStackParent() const
+{
+  assert(this->State);
+  assert(this->Position != this->State->SnapshotData.Root());
+
+  Snapshot snapshot;
+  if (this->Position->SnapshotType == cmState::BuildsystemDirectoryType)
+    {
+    return snapshot;
+    }
+
+  PositionType parentPos = this->Position;
+  ++parentPos;
+  if (parentPos == this->State->SnapshotData.Root())
+    {
+    return snapshot;
+    }
+
+  snapshot = Snapshot(this->State, parentPos);
+  return snapshot;
+}
+
 cmState* cmState::Snapshot::GetState() const
 {
   return this->State;
