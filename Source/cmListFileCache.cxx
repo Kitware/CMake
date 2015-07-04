@@ -251,7 +251,6 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
 {
   // Inintialize a new function call.
   this->Function = cmListFileFunction();
-  this->Function.FilePath = this->FileName;
   this->Function.Name = name;
   this->Function.Line = line;
 

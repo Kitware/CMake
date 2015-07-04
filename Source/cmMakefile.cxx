@@ -277,12 +277,15 @@ cmListFileBacktrace cmMakefile::GetBacktrace() const
 {
   cmListFileBacktrace backtrace(this->StateSnapshot);
   cmState::Snapshot snp = this->StateSnapshot;
-  for(std::vector<cmListFileContext const*>::const_reverse_iterator
+  for(std::vector<cmCommandContext const*>::const_reverse_iterator
       i = this->ContextStack.rbegin();
-      i != this->ContextStack.rend(); ++i, snp = snp.GetCallStackParent())
+      i != this->ContextStack.rend();
+      ++i, snp = snp.GetCallStackParent())
     {
-    cmListFileContext frame = *(*i);
-    frame.FilePath = snp.GetExecutionListFile();
+    assert(snp.IsValid());
+    cmListFileContext frame =
+        cmListFileContext::FromCommandContext(*(*i),
+                                              snp.GetExecutionListFile());
     backtrace.Append(frame);
     }
   return backtrace;
@@ -297,12 +300,15 @@ cmMakefile::GetBacktrace(cmListFileContext const& lfc) const
   cmState::Snapshot snp = this->StateSnapshot;
   assert(snp.GetExecutionListFile() == lfc.FilePath);
   snp = snp.GetCallStackParent();
-  for(std::vector<cmListFileContext const*>::const_reverse_iterator
+  for(std::vector<cmCommandContext const*>::const_reverse_iterator
       i = this->ContextStack.rbegin();
-      i != this->ContextStack.rend(); ++i, snp = snp.GetCallStackParent())
+      i != this->ContextStack.rend();
+      ++i, snp = snp.GetCallStackParent())
     {
-    cmListFileContext frame = *(*i);
-    frame.FilePath = snp.GetExecutionListFile();
+    assert(snp.IsValid());
+    cmListFileContext frame =
+        cmListFileContext::FromCommandContext(*(*i),
+                                              snp.GetExecutionListFile());
     backtrace.Append(frame);
     }
   return backtrace;
@@ -311,7 +317,9 @@ cmMakefile::GetBacktrace(cmListFileContext const& lfc) const
 //----------------------------------------------------------------------------
 cmListFileContext cmMakefile::GetExecutionContext() const
 {
-  return *this->ContextStack.back();
+  return cmListFileContext::FromCommandContext(
+        *this->ContextStack.back(),
+        this->StateSnapshot.GetExecutionListFile());
 }
 
 //----------------------------------------------------------------------------
@@ -561,7 +569,6 @@ public:
   cmParseFileScope(cmMakefile* mf)
     : Makefile(mf)
   {
-    this->Context.FilePath = this->Makefile->GetExecutionFilePath();
     this->Makefile->ContextStack.push_back(&this->Context);
   }
 
@@ -572,7 +579,7 @@ public:
 
 private:
   cmMakefile* Makefile;
-  cmListFileContext Context;
+  cmCommandContext Context;
 };
 
 bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
@@ -3581,11 +3588,13 @@ cmMakefile::RemoveFunctionBlocker(cmFunctionBlocker* fb,
       if(!(*pos)->ShouldRemove(lff, *this))
         {
         cmListFileContext const& lfc = fb->GetStartingContext();
+        cmListFileContext closingContext =
+            cmListFileContext::FromCommandContext(lff, lfc.FilePath);
         std::ostringstream e;
         e << "A logical block opening on the line\n"
           << "  " << lfc << "\n"
           << "closes on the line\n"
-          << "  " << lff << "\n"
+          << "  " << closingContext << "\n"
           << "with mis-matching arguments.";
         this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
         }
@@ -5595,7 +5604,7 @@ cmMakefile::MacroPushPop::~MacroPushPop()
   this->Makefile->PopMacroScope(this->ReportError);
 }
 
-cmMakefileCall::cmMakefileCall(cmMakefile* mf, const cmListFileContext& lfc,
+cmMakefileCall::cmMakefileCall(cmMakefile* mf, const cmCommandContext& lfc,
                                cmExecutionStatus& status): Makefile(mf)
 {
   this->Makefile->ContextStack.push_back(&lfc);

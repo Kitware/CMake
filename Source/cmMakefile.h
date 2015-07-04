@@ -937,7 +937,7 @@ private:
   // stack of list files being read
   std::vector<std::string> ListFileStack;
 
-  std::vector<cmListFileContext const*> ContextStack;
+  std::vector<cmCommandContext const*> ContextStack;
   std::vector<cmExecutionStatus*> ExecutionStatusStack;
   friend class cmMakefileCall;
   friend class cmParseFileScope;
@@ -1055,7 +1055,7 @@ class cmMakefileCall
 {
 public:
   cmMakefileCall(cmMakefile* mf,
-                 cmListFileContext const& lfc,
+                 cmCommandContext const& lfc,
                  cmExecutionStatus& status);
   ~cmMakefileCall();
 private:
