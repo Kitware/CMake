@@ -3418,7 +3418,8 @@ std::string cmMakefile::GetExecutionFilePath() const
     {
     return std::string();
     }
-  return this->ContextStack.back()->FilePath;
+  assert(this->StateSnapshot.IsValid());
+  return this->StateSnapshot.GetExecutionListFile();
 }
 
 //----------------------------------------------------------------------------
