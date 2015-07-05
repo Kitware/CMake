@@ -4770,6 +4770,7 @@ cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id) const
 cmPolicies::PolicyStatus
 cmMakefile::GetPolicyStatusInternal(cmPolicies::PolicyID id) const
 {
+  cmPolicies::PolicyStatus status = cmPolicies::GetPolicyStatus(id);
   cmLocalGenerator* lg = this->LocalGenerator;
   while(lg)
     {
@@ -4779,14 +4780,15 @@ cmMakefile::GetPolicyStatusInternal(cmPolicies::PolicyID id) const
       {
       if(psi->IsDefined(id))
         {
-        return psi->Get(id);
+        status = psi->Get(id);
+        return status;
         }
       }
     lg = lg->GetParent();
     }
 
   // The policy is not set.  Use the default for this CMake version.
-  return cmPolicies::GetPolicyStatus(id);
+  return status;
 }
 
 //----------------------------------------------------------------------------
