@@ -175,6 +175,23 @@ Create custom targets to build projects in external trees
   ``LOG_INSTALL 1``
     Wrap install in script to log output
 
+  Steps can be given direct access to the terminal if possible.  With
+  the :generator:`Ninja` generator, this places the steps in the
+  ``console`` :prop_gbl:`pool <JOB_POOLS>`.  Options are:
+
+  ``USES_TERMINAL_DOWNLOAD 1``
+    Give download terminal access.
+  ``USES_TERMINAL_UPDATE 1``
+    Give update terminal access.
+  ``USES_TERMINAL_CONFIGURE 1``
+    Give configure terminal access.
+  ``USES_TERMINAL_BUILD 1``
+    Give build terminal access.
+  ``USES_TERMINAL_TEST 1``
+    Give test terminal access.
+  ``USES_TERMINAL_INSTALL 1``
+    Give install terminal access.
+
   Other options are:
 
   ``STEP_TARGETS <step-target>...``
@@ -256,6 +273,8 @@ Create custom targets to build projects in external trees
     Working directory for command
   ``LOG 1``
     Wrap step in script to log output
+  ``USES_TERMINAL 1``
+    Give the step direct access to the terminal if possible.
 
   The command line, comment, working directory, and byproducts of every
   standard and custom step are processed to replace tokens ``<SOURCE_DIR>``,
@@ -1463,6 +1482,14 @@ function(ExternalProject_Add_Step name step)
     get_property(comment TARGET ${name} PROPERTY _EP_${step}_COMMENT)
   endif()
 
+  # Uses terminal?
+  get_property(uses_terminal TARGET ${name} PROPERTY _EP_${step}_USES_TERMINAL)
+  if(uses_terminal)
+    set(uses_terminal USES_TERMINAL)
+  else()
+    set(uses_terminal "")
+  endif()
+
   # Run every time?
   get_property(always TARGET ${name} PROPERTY _EP_${step}_ALWAYS)
   if(always)
@@ -1505,6 +1532,7 @@ function(ExternalProject_Add_Step name step)
     DEPENDS ${depends}
     WORKING_DIRECTORY ${work_dir}
     VERBATIM
+    ${uses_terminal}
     )
   set_property(TARGET ${name} APPEND PROPERTY _EP_STEPS ${step})
 
@@ -1890,6 +1918,14 @@ function(_ep_add_download_command name)
     set(log "")
   endif()
 
+  get_property(uses_terminal TARGET ${name} PROPERTY
+    _EP_USES_TERMINAL_DOWNLOAD)
+  if(uses_terminal)
+    set(uses_terminal USES_TERMINAL 1)
+  else()
+    set(uses_terminal "")
+  endif()
+
   ExternalProject_Add_Step(${name} download
     COMMENT ${comment}
     COMMAND ${cmd}
@@ -1897,6 +1933,7 @@ function(_ep_add_download_command name)
     DEPENDS ${depends}
     DEPENDEES mkdir
     ${log}
+    ${uses_terminal}
     )
 endfunction()
 
@@ -2001,6 +2038,14 @@ Update to Mercurial >= 2.1.1.
     set(log "")
   endif()
 
+  get_property(uses_terminal TARGET ${name} PROPERTY
+    _EP_USES_TERMINAL_UPDATE)
+  if(uses_terminal)
+    set(uses_terminal USES_TERMINAL 1)
+  else()
+    set(uses_terminal "")
+  endif()
+
   ExternalProject_Add_Step(${name} update
     COMMENT ${comment}
     COMMAND ${cmd}
@@ -2009,6 +2054,7 @@ Update to Mercurial >= 2.1.1.
     WORKING_DIRECTORY ${work_dir}
     DEPENDEES download
     ${log}
+    ${uses_terminal}
     )
 
   if(always AND update_disconnected)
@@ -2021,6 +2067,7 @@ Update to Mercurial >= 2.1.1.
       WORKING_DIRECTORY ${work_dir}
       DEPENDEES download
       ${log}
+      ${uses_terminal}
     )
     set_property(SOURCE ${skip-update_stamp_file} PROPERTY SYMBOLIC 1)
   endif()
@@ -2149,6 +2196,14 @@ function(_ep_add_configure_command name)
     set(log "")
   endif()
 
+  get_property(uses_terminal TARGET ${name} PROPERTY
+    _EP_USES_TERMINAL_CONFIGURE)
+  if(uses_terminal)
+    set(uses_terminal USES_TERMINAL 1)
+  else()
+    set(uses_terminal "")
+  endif()
+
   get_property(update_disconnected_set TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED SET)
   if(update_disconnected_set)
     get_property(update_disconnected TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED)
@@ -2167,6 +2222,7 @@ function(_ep_add_configure_command name)
     DEPENDEES ${update_dep} patch
     DEPENDS ${file_deps}
     ${log}
+    ${uses_terminal}
     )
 endfunction()
 
@@ -2188,6 +2244,14 @@ function(_ep_add_build_command name)
     set(log "")
   endif()
 
+  get_property(uses_terminal TARGET ${name} PROPERTY
+    _EP_USES_TERMINAL_BUILD)
+  if(uses_terminal)
+    set(uses_terminal USES_TERMINAL 1)
+  else()
+    set(uses_terminal "")
+  endif()
+
   get_property(build_always TARGET ${name} PROPERTY _EP_BUILD_ALWAYS)
   if(build_always)
     set(always 1)
@@ -2204,6 +2268,7 @@ function(_ep_add_build_command name)
     DEPENDEES configure
     ALWAYS ${always}
     ${log}
+    ${uses_terminal}
     )
 endfunction()
 
@@ -2225,11 +2290,20 @@ function(_ep_add_install_command name)
     set(log "")
   endif()
 
+  get_property(uses_terminal TARGET ${name} PROPERTY
+    _EP_USES_TERMINAL_INSTALL)
+  if(uses_terminal)
+    set(uses_terminal USES_TERMINAL 1)
+  else()
+    set(uses_terminal "")
+  endif()
+
   ExternalProject_Add_Step(${name} install
     COMMAND ${cmd}
     WORKING_DIRECTORY ${binary_dir}
     DEPENDEES build
     ${log}
+    ${uses_terminal}
     )
 endfunction()
 
@@ -2277,6 +2351,14 @@ function(_ep_add_test_command name)
       set(log "")
     endif()
 
+    get_property(uses_terminal TARGET ${name} PROPERTY
+      _EP_USES_TERMINAL_TEST)
+    if(uses_terminal)
+      set(uses_terminal USES_TERMINAL 1)
+    else()
+      set(uses_terminal "")
+    endif()
+
     ExternalProject_Add_Step(${name} test
       COMMAND ${cmd}
       WORKING_DIRECTORY ${binary_dir}
@@ -2284,6 +2366,7 @@ function(_ep_add_test_command name)
       ${dependers_args}
       ${exclude_args}
       ${log}
+      ${uses_terminal}
       )
   endif()
 endfunction()
