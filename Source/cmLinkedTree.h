@@ -87,6 +87,24 @@ public:
       return this->Tree->GetPointer(this->Position - 1);
     }
 
+    ReferenceType operator*() const
+    {
+      assert(this->Tree);
+      assert(this->Tree->UpPositions.size() == this->Tree->Data.size());
+      assert(this->Position <= this->Tree->Data.size());
+      assert(this->Position > 0);
+      return this->Tree->GetReference(this->Position - 1);
+    }
+
+    ReferenceType operator*()
+    {
+      assert(this->Tree);
+      assert(this->Tree->UpPositions.size() == this->Tree->Data.size());
+      assert(this->Position <= this->Tree->Data.size());
+      assert(this->Position > 0);
+      return this->Tree->GetReference(this->Position - 1);
+    }
+
     bool operator==(iterator other) const
     {
       assert(this->Tree);

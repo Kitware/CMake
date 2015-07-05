@@ -251,7 +251,6 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
 {
   // Inintialize a new function call.
   this->Function = cmListFileFunction();
-  this->Function.FilePath = this->FileName;
   this->Function.Name = name;
   this->Function.Line = line;
 
@@ -399,40 +398,50 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
     }
 }
 
-void cmListFileBacktrace::Append(cmListFileContext const& context)
-{
-  this->push_back(context);
-}
-
 void cmListFileBacktrace::PrintTitle(std::ostream& out)
 {
-  if (this->empty())
+  if (!this->Snapshot.IsValid())
     {
     return;
     }
-
   cmOutputConverter converter(this->Snapshot);
-  cmListFileContext lfc = this->front();
+  cmListFileContext lfc =
+      cmListFileContext::FromCommandContext(
+        this->Context, this->Snapshot.GetExecutionListFile());
   lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
   out << (lfc.Line ? " at " : " in ") << lfc;
 }
 
 void cmListFileBacktrace::PrintCallStack(std::ostream& out)
 {
-  if (size() <= 1)
+  if (!this->Snapshot.IsValid())
+    {
+    return;
+    }
+  cmState::Snapshot parent = this->Snapshot.GetCallStackParent();
+  if (!parent.IsValid() || parent.GetExecutionListFile().empty())
     {
     return;
     }
 
   cmOutputConverter converter(this->Snapshot);
-  const_iterator i = this->begin() + 1;
+  std::string commandName = this->Snapshot.GetEntryPointCommand();
+  long commandLine = this->Snapshot.GetEntryPointLine();
+
   out << "Call Stack (most recent call first):\n";
-  while(i != this->end())
+  while(parent.IsValid())
     {
-    cmListFileContext lfc = *i;
-    lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
+    cmListFileContext lfc;
+    lfc.Name = commandName;
+    lfc.Line = commandLine;
+
+    lfc.FilePath = converter.Convert(parent.GetExecutionListFile(),
+                                     cmOutputConverter::HOME);
     out << "  " << lfc << "\n";
-    ++i;
+
+    commandName = parent.GetEntryPointCommand();
+    commandLine = parent.GetEntryPointLine();
+    parent = parent.GetCallStackParent();
     }
 }
 

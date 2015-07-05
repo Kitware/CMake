@@ -247,11 +247,11 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
                               std::string const& text) const
 {
   // Collect context information.
-  if(!this->CallStack.empty())
+  if(!this->ExecutionStatusStack.empty())
     {
     if((t == cmake::FATAL_ERROR) || (t == cmake::INTERNAL_ERROR))
       {
-      this->CallStack.back().Status->SetNestedError(true);
+      this->ExecutionStatusStack.back()->SetNestedError(true);
       }
     this->GetCMakeInstance()->IssueMessage(t, text, this->GetBacktrace());
     }
@@ -275,33 +275,29 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
 //----------------------------------------------------------------------------
 cmListFileBacktrace cmMakefile::GetBacktrace() const
 {
-  cmListFileBacktrace backtrace(this->StateSnapshot);
-  for(CallStackType::const_reverse_iterator i = this->CallStack.rbegin();
-      i != this->CallStack.rend(); ++i)
+  cmListFileBacktrace backtrace;
+  if (!this->ContextStack.empty())
     {
-    backtrace.Append(*i->Context);
+    backtrace = cmListFileBacktrace(this->StateSnapshot,
+                                    *this->ContextStack.back());
     }
   return backtrace;
 }
 
 //----------------------------------------------------------------------------
 cmListFileBacktrace
-cmMakefile::GetBacktrace(cmListFileContext const& lfc) const
+cmMakefile::GetBacktrace(cmCommandContext const& cc) const
 {
-  cmListFileBacktrace backtrace(this->StateSnapshot);
-  backtrace.Append(lfc);
-  for(CallStackType::const_reverse_iterator i = this->CallStack.rbegin();
-      i != this->CallStack.rend(); ++i)
-    {
-    backtrace.Append(*i->Context);
-    }
-  return backtrace;
+  cmState::Snapshot snp = this->StateSnapshot;
+  return cmListFileBacktrace(snp, cc);
 }
 
 //----------------------------------------------------------------------------
 cmListFileContext cmMakefile::GetExecutionContext() const
 {
-  return *this->CallStack.back().Context;
+  return cmListFileContext::FromCommandContext(
+        *this->ContextStack.back(),
+        this->StateSnapshot.GetExecutionListFile());
 }
 
 //----------------------------------------------------------------------------
@@ -461,11 +457,22 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
   this->Makefile->PushPolicyBarrier();
   this->Makefile->ListFileStack.push_back(filenametoread);
   this->Makefile->PushFunctionBlockerBarrier();
+
+  this->Makefile->StateSnapshot =
+      this->Makefile->GetState()->CreateCallStackSnapshot(
+        this->Makefile->StateSnapshot,
+        this->Makefile->ContextStack.back()->Name,
+        this->Makefile->ContextStack.back()->Line,
+        filenametoread);
 }
 
 //----------------------------------------------------------------------------
 cmMakefile::IncludeScope::~IncludeScope()
 {
+  this->Makefile->StateSnapshot =
+      this->Makefile->GetState()->Pop(this->Makefile->StateSnapshot);
+  assert(this->Makefile->StateSnapshot.IsValid());
+
   this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
   // Enforce matching policy scopes inside the included file.
   this->Makefile->PopPolicyBarrier(this->ReportError);
@@ -534,6 +541,24 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
     }
 }
 
+struct cmParseFileScope
+{
+  cmParseFileScope(cmMakefile* mf)
+    : Makefile(mf)
+  {
+    this->Makefile->ContextStack.push_back(&this->Context);
+  }
+
+  ~cmParseFileScope()
+  {
+    this->Makefile->ContextStack.pop_back();
+  }
+
+private:
+  cmMakefile* Makefile;
+  cmCommandContext Context;
+};
+
 bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE",
@@ -545,10 +570,14 @@ bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
   IncludeScope incScope(this, filenametoread, noPolicyScope);
 
   cmListFile listFile;
+  {
+  cmParseFileScope pfs(this);
   if (!listFile.ParseFile(filenametoread.c_str(), false, this))
     {
     return false;
     }
+  }
+
   this->ReadListFile(listFile, filenametoread);
   if(cmSystemTools::GetFatalErrorOccured())
     {
@@ -565,11 +594,27 @@ public:
   {
     this->Makefile->ListFileStack.push_back(filenametoread);
     this->Makefile->PushPolicyBarrier();
+
+    long line = 0;
+    std::string name;
+    if (!this->Makefile->ContextStack.empty())
+      {
+      line = this->Makefile->ContextStack.back()->Line;
+      name = this->Makefile->ContextStack.back()->Name;
+      }
+    this->Makefile->StateSnapshot =
+        this->Makefile->GetState()->CreateInlineListFileSnapshot(
+          this->Makefile->StateSnapshot, name, line, filenametoread);
+    assert(this->Makefile->StateSnapshot.IsValid());
     this->Makefile->PushFunctionBlockerBarrier();
   }
 
   ~ListFileScope()
   {
+    this->Makefile->StateSnapshot =
+        this->Makefile->GetState()->Pop(this->Makefile->StateSnapshot);
+    assert(this->Makefile->StateSnapshot.IsValid());
+
     this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
     this->Makefile->PopPolicyBarrier(this->ReportError);
     this->Makefile->ListFileStack.pop_back();
@@ -590,10 +635,13 @@ bool cmMakefile::ReadListFile(const char* filename)
   ListFileScope scope(this, filenametoread);
 
   cmListFile listFile;
+  {
+  cmParseFileScope pfs(this);
   if (!listFile.ParseFile(filenametoread.c_str(), false, this))
     {
     return false;
     }
+  }
 
   this->ReadListFile(listFile, filenametoread);
   if(cmSystemTools::GetFatalErrorOccured())
@@ -1571,8 +1619,16 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   this->ImportedTargets = parent->ImportedTargets;
 }
 
-void cmMakefile::PushFunctionScope(const cmPolicies::PolicyMap& pm)
+void cmMakefile::PushFunctionScope(std::string const& fileName,
+                                   const cmPolicies::PolicyMap& pm)
 {
+  this->StateSnapshot =
+      this->GetState()->CreateFunctionCallSnapshot(
+        this->StateSnapshot,
+        this->ContextStack.back()->Name, this->ContextStack.back()->Line,
+        fileName);
+  assert(this->StateSnapshot.IsValid());
+
   this->Internal->PushDefinitions();
 
   this->PushLoopBlockBarrier();
@@ -1592,6 +1648,9 @@ void cmMakefile::PopFunctionScope(bool reportError)
   this->PopPolicyBarrier(reportError);
   this->PopPolicy();
 
+  this->StateSnapshot = this->GetState()->Pop(this->StateSnapshot);
+  assert(this->StateSnapshot.IsValid());
+
   this->PopFunctionBlockerBarrier(reportError);
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -1605,8 +1664,16 @@ void cmMakefile::PopFunctionScope(bool reportError)
   this->Internal->PopDefinitions();
 }
 
-void cmMakefile::PushMacroScope(const cmPolicies::PolicyMap& pm)
+void cmMakefile::PushMacroScope(std::string const& fileName,
+                                const cmPolicies::PolicyMap& pm)
 {
+  this->StateSnapshot =
+      this->GetState()->CreateMacroCallSnapshot(
+        this->StateSnapshot,
+        this->ContextStack.back()->Name, this->ContextStack.back()->Line,
+        fileName);
+  assert(this->StateSnapshot.IsValid());
+
   this->PushFunctionBlockerBarrier();
 
   this->PushPolicy(true, pm);
@@ -1617,6 +1684,9 @@ void cmMakefile::PopMacroScope(bool reportError)
 {
   this->PopPolicyBarrier(reportError);
   this->PopPolicy();
+
+  this->StateSnapshot = this->GetState()->Pop(this->StateSnapshot);
+  assert(this->StateSnapshot.IsValid());
 
   this->PopFunctionBlockerBarrier(reportError);
 }
@@ -1635,6 +1705,7 @@ public:
     std::string currentStart =
         this->Makefile->StateSnapshot.GetCurrentSourceDirectory();
     currentStart += "/CMakeLists.txt";
+    this->Makefile->StateSnapshot.SetListFile(currentStart);
     this->Makefile->ListFileStack.push_back(currentStart);
     this->Makefile->PushPolicyBarrier();
     this->Makefile->PushFunctionBlockerBarrier();
@@ -1686,11 +1757,14 @@ void cmMakefile::Configure()
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentStart.c_str());
 
   cmListFile listFile;
+  {
+  cmParseFileScope pfs(this);
   if (!listFile.ParseFile(currentStart.c_str(), this->IsRootMakefile(), this))
     {
     this->SetConfigured();
     return;
     }
+  }
   this->ReadListFile(listFile, currentStart);
   if(cmSystemTools::GetFatalErrorOccured())
     {
@@ -1778,7 +1852,9 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
     }
 
   cmState::Snapshot newSnapshot = this->GetState()
-      ->CreateBuildsystemDirectorySnapshot(this->StateSnapshot);
+      ->CreateBuildsystemDirectorySnapshot(this->StateSnapshot,
+                                           this->ContextStack.back()->Name,
+                                           this->ContextStack.back()->Line);
 
   // create a new local generator and set its parent
   cmLocalGenerator *lg2 = this->GetGlobalGenerator()
@@ -1996,7 +2072,7 @@ void cmMakefile::LogUnused(const char* reason,
     {
     std::string path;
     cmListFileContext lfc;
-    if (!this->CallStack.empty())
+    if (!this->ExecutionStatusStack.empty())
       {
       lfc = this->GetExecutionContext();
       path = lfc.FilePath;
@@ -3360,11 +3436,12 @@ bool cmMakefile::IsLoopBlock() const
 
 std::string cmMakefile::GetExecutionFilePath() const
 {
-  if (this->CallStack.empty())
+  if (this->ContextStack.empty())
     {
     return std::string();
     }
-  return this->CallStack.back().Context->FilePath;
+  assert(this->StateSnapshot.IsValid());
+  return this->StateSnapshot.GetExecutionListFile();
 }
 
 //----------------------------------------------------------------------------
@@ -3455,7 +3532,7 @@ bool cmMakefile::ExpandArguments(
 //----------------------------------------------------------------------------
 void cmMakefile::AddFunctionBlocker(cmFunctionBlocker* fb)
 {
-  if(!this->CallStack.empty())
+  if(!this->ExecutionStatusStack.empty())
     {
     // Record the context in which the blocker is created.
     fb->SetStartingContext(this->GetExecutionContext());
@@ -3488,11 +3565,13 @@ cmMakefile::RemoveFunctionBlocker(cmFunctionBlocker* fb,
       if(!(*pos)->ShouldRemove(lff, *this))
         {
         cmListFileContext const& lfc = fb->GetStartingContext();
+        cmListFileContext closingContext =
+            cmListFileContext::FromCommandContext(lff, lfc.FilePath);
         std::ostringstream e;
         e << "A logical block opening on the line\n"
           << "  " << lfc << "\n"
           << "closes on the line\n"
-          << "  " << lff << "\n"
+          << "  " << closingContext << "\n"
           << "with mis-matching arguments.";
         this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
         }
@@ -5476,10 +5555,11 @@ AddRequiredTargetCFeature(cmTarget *target, const std::string& feature) const
 
 
 cmMakefile::FunctionPushPop::FunctionPushPop(cmMakefile* mf,
+                                             const std::string& fileName,
                                              cmPolicies::PolicyMap const& pm)
   : Makefile(mf), ReportError(true)
 {
-  this->Makefile->PushFunctionScope(pm);
+  this->Makefile->PushFunctionScope(fileName, pm);
 }
 
 cmMakefile::FunctionPushPop::~FunctionPushPop()
@@ -5489,10 +5569,11 @@ cmMakefile::FunctionPushPop::~FunctionPushPop()
 
 
 cmMakefile::MacroPushPop::MacroPushPop(cmMakefile* mf,
+                                       const std::string& fileName,
                                        const cmPolicies::PolicyMap& pm)
   : Makefile(mf), ReportError(true)
 {
-  this->Makefile->PushMacroScope(pm);
+  this->Makefile->PushMacroScope(fileName, pm);
 }
 
 cmMakefile::MacroPushPop::~MacroPushPop()
@@ -5500,14 +5581,15 @@ cmMakefile::MacroPushPop::~MacroPushPop()
   this->Makefile->PopMacroScope(this->ReportError);
 }
 
-cmMakefileCall::cmMakefileCall(cmMakefile* mf, const cmListFileContext& lfc,
+cmMakefileCall::cmMakefileCall(cmMakefile* mf, const cmCommandContext& lfc,
                                cmExecutionStatus& status): Makefile(mf)
 {
-  cmMakefile::CallStackEntry entry = {&lfc, &status};
-  this->Makefile->CallStack.push_back(entry);
+  this->Makefile->ContextStack.push_back(&lfc);
+  this->Makefile->ExecutionStatusStack.push_back(&status);
 }
 
 cmMakefileCall::~cmMakefileCall()
 {
-  this->Makefile->CallStack.pop_back();
+  this->Makefile->ExecutionStatusStack.pop_back();
+  this->Makefile->ContextStack.pop_back();
 }
