@@ -547,6 +547,26 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
     }
 }
 
+class cmParseFileScope
+{
+public:
+  cmParseFileScope(cmMakefile* mf)
+    : Makefile(mf)
+  {
+    this->Context.FilePath = this->Makefile->GetExecutionFilePath();
+    this->Makefile->ContextStack.push_back(&this->Context);
+  }
+
+  ~cmParseFileScope()
+  {
+    this->Makefile->ContextStack.pop_back();
+  }
+
+private:
+  cmMakefile* Makefile;
+  cmListFileContext Context;
+};
+
 bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE",
@@ -558,10 +578,14 @@ bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
   IncludeScope incScope(this, filenametoread, noPolicyScope);
 
   cmListFile listFile;
+  {
+  cmParseFileScope pfs(this);
   if (!listFile.ParseFile(filenametoread.c_str(), false, this))
     {
     return false;
     }
+  }
+
   this->ReadListFile(listFile, filenametoread);
   if(cmSystemTools::GetFatalErrorOccured())
     {
@@ -619,10 +643,13 @@ bool cmMakefile::ReadListFile(const char* filename)
   ListFileScope scope(this, filenametoread);
 
   cmListFile listFile;
+  {
+  cmParseFileScope pfs(this);
   if (!listFile.ParseFile(filenametoread.c_str(), false, this))
     {
     return false;
     }
+  }
 
   this->ReadListFile(listFile, filenametoread);
   if(cmSystemTools::GetFatalErrorOccured())
@@ -1738,11 +1765,14 @@ void cmMakefile::Configure()
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentStart.c_str());
 
   cmListFile listFile;
+  {
+  cmParseFileScope pfs(this);
   if (!listFile.ParseFile(currentStart.c_str(), this->IsRootMakefile(), this))
     {
     this->SetConfigured();
     return;
     }
+  }
   this->ReadListFile(listFile, currentStart);
   if(cmSystemTools::GetFatalErrorOccured())
     {
