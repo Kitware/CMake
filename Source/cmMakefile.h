@@ -940,6 +940,7 @@ private:
   std::vector<cmListFileContext const*> ContextStack;
   std::vector<cmExecutionStatus*> ExecutionStatusStack;
   friend class cmMakefileCall;
+  friend class cmParseFileScope;
 
   std::vector<cmTarget*> ImportedTargetsOwned;
   TargetMap ImportedTargets;
