@@ -541,8 +541,9 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
     }
 }
 
-struct cmParseFileScope
+class cmParseFileScope
 {
+public:
   cmParseFileScope(cmMakefile* mf)
     : Makefile(mf)
   {
