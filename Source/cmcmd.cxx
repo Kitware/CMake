@@ -36,7 +36,7 @@
 #include <stdlib.h> // required for atoi
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
 // defined in binexplib.cxx
-void DumpFile(const char* filename, FILE *fout);
+bool DumpFile(const char* filename, FILE *fout);
 #endif
 
 void CMakeCommandUsage(const char* program)
@@ -242,7 +242,10 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::string objfile;
       while(cmSystemTools::GetLineFromStream(fin, objfile))
         {
-        DumpFile(objfile.c_str(), fout);
+        if (!DumpFile(objfile.c_str(), fout))
+          {
+          return 1;
+          }
         }
       return 0;
       }
