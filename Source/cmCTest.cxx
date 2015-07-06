@@ -1220,7 +1220,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
 
   char* data;
   int length;
-  cmCTestLog(this, HANDLER_OUTPUT,
+  cmCTestLog(this, HANDLER_PROGRESS_OUTPUT,
     "   Each . represents " << tick_len << " bytes of output" << std::endl
     << "    " << std::flush);
   while(cmsysProcess_WaitForData(cp, &data, &length, 0))
@@ -1236,10 +1236,10 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
     while ( output.size() > (tick * tick_len) )
       {
       tick ++;
-      cmCTestLog(this, HANDLER_OUTPUT, "." << std::flush);
+      cmCTestLog(this, HANDLER_PROGRESS_OUTPUT, "." << std::flush);
       if ( tick % tick_line_len == 0 && tick > 0 )
         {
-        cmCTestLog(this, HANDLER_OUTPUT,
+        cmCTestLog(this, HANDLER_PROGRESS_OUTPUT,
                    "  Size: "
                    << int((double(output.size()) / 1024.0) + 1)
                    << "K" << std::endl
@@ -1252,7 +1252,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
       ofs << cmCTestLogWrite(data, length);
       }
     }
-  cmCTestLog(this, OUTPUT, " Size of output: "
+  cmCTestLog(this, HANDLER_PROGRESS_OUTPUT, " Size of output: "
     << int(double(output.size()) / 1024.0) << "K" << std::endl);
 
   cmsysProcess_WaitForExit(cp, 0);
@@ -3101,6 +3101,7 @@ static const char* cmCTestStringLogType[] =
   "DEBUG",
   "OUTPUT",
   "HANDLER_OUTPUT",
+  "HANDLER_PROGRESS_OUTPUT",
   "HANDLER_VERBOSE_OUTPUT",
   "WARNING",
   "ERROR_MESSAGE",
@@ -3136,6 +3137,11 @@ void cmCTest::Log(int logType, const char* file, int line, const char* msg,
     return;
     }
   if ( suppress && logType != cmCTest::ERROR_MESSAGE )
+    {
+    return;
+    }
+  if ( logType == cmCTest::HANDLER_PROGRESS_OUTPUT &&
+      ( this->Debug || this->ExtraVerbose ) )
     {
     return;
     }

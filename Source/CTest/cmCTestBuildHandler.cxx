@@ -920,7 +920,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
 
   char* data;
   int length;
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+  cmCTestOptionalLog(this->CTest, HANDLER_PROGRESS_OUTPUT,
     "   Each symbol represents " << tick_len << " bytes of output."
     << std::endl
     << (this->UseCTestLaunch? "" :
@@ -968,7 +968,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
   this->ProcessBuffer(0, 0, tick, tick_len, ofs, &this->BuildProcessingQueue);
   this->ProcessBuffer(0, 0, tick, tick_len, ofs,
     &this->BuildProcessingErrorQueue);
-  cmCTestOptionalLog(this->CTest, OUTPUT, " Size of output: "
+  cmCTestOptionalLog(this->CTest, HANDLER_PROGRESS_OUTPUT, " Size of output: "
     << ((this->BuildOutputLogSize + 512) / 1024) << "K" << std::endl,
     this->Quiet);
 
@@ -1175,12 +1175,12 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, int length,
   while ( this->BuildOutputLogSize > (tick * tick_len) )
     {
     tick ++;
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->LastTickChar,
-      this->Quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_PROGRESS_OUTPUT,
+      this->LastTickChar, this->Quiet);
     tickDisplayed = true;
     if ( tick % tick_line_len == 0 && tick > 0 )
       {
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "  Size: "
+      cmCTestOptionalLog(this->CTest, HANDLER_PROGRESS_OUTPUT, "  Size: "
         << ((this->BuildOutputLogSize + 512) / 1024) << "K" << std::endl
         << "    ", this->Quiet);
       }
