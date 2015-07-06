@@ -4743,6 +4743,13 @@ cmPolicies::PolicyStatus
 cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id) const
 {
   cmPolicies::PolicyStatus status = cmPolicies::GetPolicyStatus(id);
+
+  if(status == cmPolicies::REQUIRED_ALWAYS ||
+     status == cmPolicies::REQUIRED_IF_USED)
+    {
+    return status;
+    }
+
   cmLocalGenerator* lg = this->LocalGenerator;
   while(lg)
     {
@@ -4758,20 +4765,6 @@ cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id) const
       }
     lg = lg->GetParent();
     }
-
-  // If the policy is required to be set to NEW but is not, ignore the
-  // current setting and tell the caller.
-  if(status != cmPolicies::NEW)
-    {
-    cmPolicies::PolicyStatus def = cmPolicies::GetPolicyStatus(id);
-    if(def == cmPolicies::REQUIRED_ALWAYS ||
-       def == cmPolicies::REQUIRED_IF_USED)
-      {
-      return def;
-      }
-    }
-
-  // The current setting is okay.
   return status;
 }
 
