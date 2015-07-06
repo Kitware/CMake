@@ -4763,11 +4763,6 @@ cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id) const
   // current setting and tell the caller.
   if(status != cmPolicies::NEW)
     {
-    if(status == cmPolicies::REQUIRED_ALWAYS ||
-       status == cmPolicies::REQUIRED_IF_USED)
-      {
-      return status;
-      }
     cmPolicies::PolicyStatus def = cmPolicies::GetPolicyStatus(id);
     if(def == cmPolicies::REQUIRED_ALWAYS ||
        def == cmPolicies::REQUIRED_IF_USED)
