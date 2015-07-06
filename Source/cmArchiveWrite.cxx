@@ -84,7 +84,8 @@ cmArchiveWrite::cmArchiveWrite(
     Stream(os),
     Archive(archive_write_new()),
     Disk(archive_read_disk_new()),
-    Verbose(false)
+    Verbose(false),
+    Format(format)
 {
   switch (c)
     {
@@ -282,6 +283,14 @@ bool cmArchiveWrite::AddFile(const char* file,
   archive_entry_acl_clear(e);
   archive_entry_xattr_clear(e);
   archive_entry_set_fflags(e, 0, 0);
+
+  if (this->Format == "pax" || this->Format == "paxr")
+    {
+    // Sparse files are a GNU tar extension.
+    // Do not use them in standard tar files.
+    archive_entry_sparse_clear(e);
+    }
+
   if(archive_write_header(this->Archive, e) != ARCHIVE_OK)
     {
     this->Error = "archive_write_header: ";
