@@ -4822,25 +4822,6 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
     previous_was_weak = psi->Weak;
     }
 
-  // Special hook for presenting compatibility variable as soon as
-  // the user requests it.
-  if(id == cmPolicies::CMP0001 &&
-     (status == cmPolicies::WARN || status == cmPolicies::OLD))
-    {
-    if(!(this->GetState()
-         ->GetInitializedCacheValue("CMAKE_BACKWARDS_COMPATIBILITY")))
-      {
-      // Set it to 2.4 because that is the last version where the
-      // variable had meaning.
-      this->AddCacheDefinition
-        ("CMAKE_BACKWARDS_COMPATIBILITY", "2.4",
-         "For backwards compatibility, what version of CMake "
-         "commands and "
-         "syntax should this version of CMake try to support.",
-         cmState::STRING);
-      }
-    }
-
   return true;
 }
 

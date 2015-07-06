@@ -255,6 +255,22 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
           {
           return false;
           }
+        if(pid == cmPolicies::CMP0001 &&
+           (status == cmPolicies::WARN || status == cmPolicies::OLD))
+          {
+          if(!(mf->GetState()
+               ->GetInitializedCacheValue("CMAKE_BACKWARDS_COMPATIBILITY")))
+            {
+            // Set it to 2.4 because that is the last version where the
+            // variable had meaning.
+            mf->AddCacheDefinition
+              ("CMAKE_BACKWARDS_COMPATIBILITY", "2.4",
+               "For backwards compatibility, what version of CMake "
+               "commands and "
+               "syntax should this version of CMake try to support.",
+               cmState::STRING);
+            }
+          }
         }
       }
     else
