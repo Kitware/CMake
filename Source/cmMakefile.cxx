@@ -4742,34 +4742,6 @@ const char* cmMakefile::GetDefineFlagsCMP0059() const
 cmPolicies::PolicyStatus
 cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id) const
 {
-  // Get the current setting of the policy.
-  cmPolicies::PolicyStatus cur = this->GetPolicyStatusInternal(id);
-
-  // If the policy is required to be set to NEW but is not, ignore the
-  // current setting and tell the caller.
-  if(cur != cmPolicies::NEW)
-    {
-    if(cur == cmPolicies::REQUIRED_ALWAYS ||
-       cur == cmPolicies::REQUIRED_IF_USED)
-      {
-      return cur;
-      }
-    cmPolicies::PolicyStatus def = cmPolicies::GetPolicyStatus(id);
-    if(def == cmPolicies::REQUIRED_ALWAYS ||
-       def == cmPolicies::REQUIRED_IF_USED)
-      {
-      return def;
-      }
-    }
-
-  // The current setting is okay.
-  return cur;
-}
-
-//----------------------------------------------------------------------------
-cmPolicies::PolicyStatus
-cmMakefile::GetPolicyStatusInternal(cmPolicies::PolicyID id) const
-{
   cmPolicies::PolicyStatus status = cmPolicies::GetPolicyStatus(id);
   cmLocalGenerator* lg = this->LocalGenerator;
   while(lg)
@@ -4787,7 +4759,24 @@ cmMakefile::GetPolicyStatusInternal(cmPolicies::PolicyID id) const
     lg = lg->GetParent();
     }
 
-  // The policy is not set.  Use the default for this CMake version.
+  // If the policy is required to be set to NEW but is not, ignore the
+  // current setting and tell the caller.
+  if(status != cmPolicies::NEW)
+    {
+    if(status == cmPolicies::REQUIRED_ALWAYS ||
+       status == cmPolicies::REQUIRED_IF_USED)
+      {
+      return status;
+      }
+    cmPolicies::PolicyStatus def = cmPolicies::GetPolicyStatus(id);
+    if(def == cmPolicies::REQUIRED_ALWAYS ||
+       def == cmPolicies::REQUIRED_IF_USED)
+      {
+      return def;
+      }
+    }
+
+  // The current setting is okay.
   return status;
 }
 
