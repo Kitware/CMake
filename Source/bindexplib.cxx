@@ -112,7 +112,7 @@ typedef struct _cmIMAGE_SYMBOL_EX {
     BYTE    StorageClass;
     BYTE    NumberOfAuxSymbols;
 } cmIMAGE_SYMBOL_EX;
-typedef cmIMAGE_SYMBOL_EX UNALIGNED *PcmIMAGE_SYMBOL_EX;
+typedef cmIMAGE_SYMBOL_EX UNALIGNED *cmPIMAGE_SYMBOL_EX;
 
 PIMAGE_SECTION_HEADER GetSectionHeaderOffset(PIMAGE_FILE_HEADER
                                              pImageFileHeader)
@@ -158,7 +158,7 @@ const char* StrNStr(const char* start, const char* find, size_t &size) {
 template <
   // cmANON_OBJECT_HEADER_BIGOBJ or IMAGE_FILE_HEADER
   class ObjectHeaderType,
-  // PcmIMAGE_SYMBOL_EX or PIMAGE_SYMBOL
+  // cmPIMAGE_SYMBOL_EX or PIMAGE_SYMBOL
   class SymbolTableType>
 class DumpSymbols
 {
@@ -173,8 +173,7 @@ public:
    */
 
    DumpSymbols(ObjectHeaderType* ih,
-               FILE* fout)
-    {
+               FILE* fout) {
       this->ObjectImageHeader = ih;
       this->SymbolTable = (SymbolTableType*)
       ((DWORD_PTR)this->ObjectImageHeader
@@ -184,58 +183,56 @@ public:
         GetSectionHeaderOffset(this->ObjectImageHeader);
       this->ImportFlag = true;
       this->SymbolCount = this->ObjectImageHeader->NumberOfSymbols;
-    }
+   }
 
-/*
- *----------------------------------------------------------------------
- * HaveExportedObjects --
- *
- *      Returns true if export directives (declspec(dllexport)) exist.
- *
- *----------------------------------------------------------------------
- */
+  /*
+   *----------------------------------------------------------------------
+   * HaveExportedObjects --
+   *
+   *      Returns true if export directives (declspec(dllexport)) exist.
+   *
+   *----------------------------------------------------------------------
+   */
 
-  bool HaveExportedObjects()
-    {
-      WORD i = 0;
-      size_t size = 0;
-      char foundExports = 0;
-      const char * rawdata = 0;
-      PIMAGE_SECTION_HEADER pDirectivesSectionHeader = 0;
-      PIMAGE_SECTION_HEADER pSectionHeaders = this->SectionHeaders;
-      for(i = 0; (i < this->ObjectImageHeader->NumberOfSections &&
-                  !pDirectivesSectionHeader); i++)
-        if (!strncmp((const char*)&pSectionHeaders[i].Name[0], ".drectve",8))
-          pDirectivesSectionHeader = &pSectionHeaders[i];
-      if (!pDirectivesSectionHeader) return 0;
+  bool HaveExportedObjects() {
+     WORD i = 0;
+     size_t size = 0;
+     const char * rawdata = 0;
+     PIMAGE_SECTION_HEADER pDirectivesSectionHeader = 0;
+     PIMAGE_SECTION_HEADER pSectionHeaders = this->SectionHeaders;
+     for(i = 0; (i < this->ObjectImageHeader->NumberOfSections &&
+                 !pDirectivesSectionHeader); i++)
+       if (!strncmp((const char*)&pSectionHeaders[i].Name[0], ".drectve",8))
+         pDirectivesSectionHeader = &pSectionHeaders[i];
+     if (!pDirectivesSectionHeader) return 0;
 
-      rawdata=(const char*)
-        this->ObjectImageHeader+pDirectivesSectionHeader->PointerToRawData;
-      if (!pDirectivesSectionHeader->PointerToRawData || !rawdata) return 0;
+     rawdata=(const char*)
+       this->ObjectImageHeader+pDirectivesSectionHeader->PointerToRawData;
+     if (!pDirectivesSectionHeader->PointerToRawData || !rawdata) return 0;
 
-      size = pDirectivesSectionHeader->SizeOfRawData;
-      const char* posImportFlag = rawdata;
-      while ((posImportFlag = StrNStr(posImportFlag, " /EXPORT:", size))) {
-        const char* lookingForDict = posImportFlag + 9;
-        if (!strncmp(lookingForDict, "_G__cpp_",8) ||
-            !strncmp(lookingForDict, "_G__set_cpp_",12)) {
+     size = pDirectivesSectionHeader->SizeOfRawData;
+     const char* posImportFlag = rawdata;
+     while ((posImportFlag = StrNStr(posImportFlag, " /EXPORT:", size))) {
+       const char* lookingForDict = posImportFlag + 9;
+       if (!strncmp(lookingForDict, "_G__cpp_",8) ||
+           !strncmp(lookingForDict, "_G__set_cpp_",12)) {
           posImportFlag = lookingForDict;
           continue;
-        }
+       }
 
-        const char* lookingForDATA = posImportFlag + 9;
-        while (*(++lookingForDATA) && *lookingForDATA != ' ');
-        lookingForDATA -= 5;
-        // ignore DATA exports
-        if (strncmp(lookingForDATA, ",DATA", 5)) break;
-        posImportFlag = lookingForDATA + 5;
-      }
-      if(posImportFlag)
-        {
+       const char* lookingForDATA = posImportFlag + 9;
+       while (*(++lookingForDATA) && *lookingForDATA != ' ');
+       lookingForDATA -= 5;
+       // ignore DATA exports
+       if (strncmp(lookingForDATA, ",DATA", 5)) break;
+       posImportFlag = lookingForDATA + 5;
+     }
+     if(posImportFlag) {
         return true;
-        }
-      return false;
-    }
+     }
+     return false;
+  }
+
   /*
    *----------------------------------------------------------------------
    * DumpObjFile --
@@ -243,23 +240,20 @@ public:
    *      Dump an object file's exported symbols.
    *----------------------------------------------------------------------
    */
-
-  void DumpObjFile()
-    {
-      if(!HaveExportedObjects())
-        {
+  void DumpObjFile() {
+     if(!HaveExportedObjects()) {
         this->DumpExternalsObjects();
-        }
-    }
-/*
- *----------------------------------------------------------------------
- * DumpExternalsObjects --
- *
- *      Dumps a COFF symbol table from an OBJ.
- *----------------------------------------------------------------------
- */
-  void DumpExternalsObjects()
-    {
+     }
+  }
+
+  /*
+   *----------------------------------------------------------------------
+   * DumpExternalsObjects --
+   *
+   *      Dumps a COFF symbol table from an OBJ.
+   *----------------------------------------------------------------------
+   */
+  void DumpExternalsObjects() {
     unsigned i;
     PSTR stringTable;
     std::string symbol;
@@ -353,7 +347,7 @@ public:
       pSymbolTable += pSymbolTable->NumberOfAuxSymbols;
       pSymbolTable++;
     }
-    }
+  }
 private:
   bool ImportFlag;
   FILE* FileOut;
@@ -363,7 +357,7 @@ private:
   SymbolTableType*  SymbolTable;
 };
 
-void
+bool
 DumpFile(const char* filename, FILE *fout)
 {
    HANDLE hFile;
@@ -376,15 +370,15 @@ DumpFile(const char* filename, FILE *fout)
       OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 
    if (hFile == INVALID_HANDLE_VALUE) {
-      fprintf(stderr, "Couldn't open file [%s] with CreateFile()\n", filename);
-      return;
+      fprintf(stderr, "Couldn't open file '%s' with CreateFile()\n", filename);
+      return false;
    }
 
    hFileMapping = CreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
    if (hFileMapping == 0) {
       CloseHandle(hFile);
       fprintf(stderr, "Couldn't open file mapping with CreateFileMapping()\n");
-      return;
+      return false;
    }
 
    lpFileBase = MapViewOfFile(hFileMapping, FILE_MAP_READ, 0, 0, 0);
@@ -392,13 +386,13 @@ DumpFile(const char* filename, FILE *fout)
       CloseHandle(hFileMapping);
       CloseHandle(hFile);
       fprintf(stderr, "Couldn't map view of file with MapViewOfFile()\n");
-      return;
+      return false;
    }
 
    dosHeader = (PIMAGE_DOS_HEADER)lpFileBase;
    if (dosHeader->e_magic == IMAGE_DOS_SIGNATURE) {
       fprintf(stderr, "File is an executable.  I don't dump those.\n");
-      exit(1);  // die so build stops
+      return false;
    }
    /* Does it look like a i386 COFF OBJ file??? */
    else if (
@@ -415,23 +409,20 @@ DumpFile(const char* filename, FILE *fout)
         symbolDumper((PIMAGE_FILE_HEADER) lpFileBase, fout);
       symbolDumper.DumpObjFile();
    } else {
-   // check for /bigobj format
-     cmANON_OBJECT_HEADER_BIGOBJ* h =
-       (cmANON_OBJECT_HEADER_BIGOBJ*) lpFileBase;
-     if(h->Sig1 == 0x0 && h->Sig2 == 0xffff)
-       {
-       DumpSymbols<cmANON_OBJECT_HEADER_BIGOBJ, cmIMAGE_SYMBOL_EX>
-         symbolDumper((cmANON_OBJECT_HEADER_BIGOBJ*) lpFileBase, fout);
-       symbolDumper.DumpObjFile();
-       }
-     // if we don't know what it is die so the build will stop
-     else
-       {
-       printf("unrecognized file format abort %s\n", filename);
-       exit(1);
-       }
+      // check for /bigobj format
+      cmANON_OBJECT_HEADER_BIGOBJ* h =
+        (cmANON_OBJECT_HEADER_BIGOBJ*) lpFileBase;
+      if(h->Sig1 == 0x0 && h->Sig2 == 0xffff) {
+         DumpSymbols<cmANON_OBJECT_HEADER_BIGOBJ, cmIMAGE_SYMBOL_EX>
+           symbolDumper((cmANON_OBJECT_HEADER_BIGOBJ*) lpFileBase, fout);
+         symbolDumper.DumpObjFile();
+      } else {
+         printf("unrecognized file format in '%s'\n", filename);
+         return false;
+      }
    }
    UnmapViewOfFile(lpFileBase);
    CloseHandle(hFileMapping);
    CloseHandle(hFile);
+   return true;
 }
