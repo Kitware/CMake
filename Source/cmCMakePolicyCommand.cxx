@@ -93,6 +93,22 @@ bool cmCMakePolicyCommand::HandleSetMode(std::vector<std::string> const& args)
     this->SetError("SET failed to set policy.");
     return false;
     }
+  if(args[1] == "CMP0001" &&
+     (status == cmPolicies::WARN || status == cmPolicies::OLD))
+    {
+    if(!(this->Makefile->GetState()
+         ->GetInitializedCacheValue("CMAKE_BACKWARDS_COMPATIBILITY")))
+      {
+      // Set it to 2.4 because that is the last version where the
+      // variable had meaning.
+      this->Makefile->AddCacheDefinition
+        ("CMAKE_BACKWARDS_COMPATIBILITY", "2.4",
+         "For backwards compatibility, what version of CMake "
+         "commands and "
+         "syntax should this version of CMake try to support.",
+         cmState::STRING);
+      }
+    }
   return true;
 }
 
