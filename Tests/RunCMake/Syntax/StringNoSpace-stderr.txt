@@ -1,7 +1,7 @@
 CMake Warning \(dev\) in StringNoSpace.cmake:
   Syntax Warning in cmake code at
 
-    .*Tests/RunCMake/Syntax/StringNoSpace.cmake:2:28
+    .*/Tests/RunCMake/Syntax/StringNoSpace.cmake:2:28
 
   Argument not separated from preceding token by whitespace.
 Call Stack \(most recent call first\):
@@ -11,7 +11,7 @@ This warning is for project developers.  Use -Wno-dev to suppress it.
 CMake Warning \(dev\) in StringNoSpace.cmake:
   Syntax Warning in cmake code at
 
-    .*Tests/RunCMake/Syntax/StringNoSpace.cmake:2:31
+    .*/Tests/RunCMake/Syntax/StringNoSpace.cmake:2:31
 
   Argument not separated from preceding token by whitespace.
 Call Stack \(most recent call first\):
