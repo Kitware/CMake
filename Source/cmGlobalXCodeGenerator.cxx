@@ -843,6 +843,10 @@ GetSourcecodeValueFromFileExtension(const std::string& _ext,
     {
     sourcecode += ".c.objc";
     }
+  else if (ext == "swift")
+    {
+    sourcecode += ".swift";
+    }
   else if(ext == "plist")
     {
     sourcecode += ".text.plist";
