@@ -715,7 +715,7 @@ void cmCTestTestHandler::PrintLabelSummary()
     labelCountStr << "(" << labelCounts[*i] << " test";
     if (labelCounts[*i] > 1)
       {
-          labelCountStr << "s";
+      labelCountStr << "s";
       }
     labelCountStr << ")";
 
