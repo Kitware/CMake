@@ -32,8 +32,6 @@
 # include <cmsys/MD5.h>
 #endif
 
-#include <cmsys/System.h>
-
 #include <ctype.h> // for isalpha
 
 #include <assert.h>
