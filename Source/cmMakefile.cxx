@@ -4439,14 +4439,22 @@ void cmMakefile::AddCMakeDependFilesFromUser()
 
 std::string cmMakefile::FormatListFileStack() const
 {
+  std::vector<std::string> listFiles;
+  cmState::Snapshot snp = this->StateSnapshot;
+  while (snp.IsValid())
+    {
+    listFiles.push_back(snp.GetExecutionListFile());
+    snp = snp.GetCallStackParent();
+    }
+  std::reverse(listFiles.begin(), listFiles.end());
   std::ostringstream tmp;
-  size_t depth = this->ListFileStack.size();
+  size_t depth = listFiles.size();
   if (depth > 0)
     {
-    std::vector<std::string>::const_iterator it = this->ListFileStack.end();
+    std::vector<std::string>::const_iterator it = listFiles.end();
     do
       {
-      if (depth != this->ListFileStack.size())
+      if (depth != listFiles.size())
         {
         tmp << "\n                ";
         }
@@ -4457,7 +4465,7 @@ std::string cmMakefile::FormatListFileStack() const
       tmp << *it;
       depth--;
       }
-    while (it != this->ListFileStack.begin());
+    while (it != listFiles.begin());
     }
   return tmp.str();
 }
