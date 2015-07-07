@@ -1714,8 +1714,7 @@ public:
     this->GG = mf->GetGlobalGenerator();
     this->CurrentMakefile = this->GG->GetCurrentMakefile();
     this->Snapshot = this->GG->GetCMakeInstance()->GetCurrentSnapshot();
-    this->GG->GetCMakeInstance()->SetCurrentSnapshot(
-          this->GG->GetCMakeInstance()->GetCurrentSnapshot());
+    this->GG->GetCMakeInstance()->SetCurrentSnapshot(this->Snapshot);
     this->GG->SetCurrentMakefile(mf);
 #if defined(CMAKE_BUILD_WITH_CMAKE)
     this->GG->GetFileLockPool().PushFileScope();
