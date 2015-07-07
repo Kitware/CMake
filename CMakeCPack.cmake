@@ -68,6 +68,9 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   # Components
   if(CMake_INSTALL_COMPONENTS)
     set(_CPACK_IFW_COMPONENTS_ALL cmake ctest cpack)
+    if(APPLE)
+      list(APPEND _CPACK_IFW_COMPONENTS_ALL cmakexbuild)
+    endif()
     if(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME)
       set(_CPACK_IFW_COMPONENT_UNSPECIFIED_NAME
         ${CMAKE_INSTALL_DEFAULT_COMPONENT_NAME})
