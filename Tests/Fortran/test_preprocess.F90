@@ -46,6 +46,8 @@ PROGRAM PPTEST
 #endif
 ! 0 ; <empty>
 
+USE PPAvailable
+
 #include "test_preprocess.h"
 
 END PROGRAM
