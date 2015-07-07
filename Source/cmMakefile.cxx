@@ -455,7 +455,6 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
 
   // The included file cannot pop our policy scope.
   this->Makefile->PushPolicyBarrier();
-  this->Makefile->ListFileStack.push_back(filenametoread);
   this->Makefile->PushFunctionBlockerBarrier();
 
   this->Makefile->StateSnapshot =
@@ -498,7 +497,6 @@ cmMakefile::IncludeScope::~IncludeScope()
       this->EnforceCMP0011();
       }
     }
-  this->Makefile->ListFileStack.pop_back();
 }
 
 //----------------------------------------------------------------------------
@@ -593,7 +591,6 @@ public:
   ListFileScope(cmMakefile* mf, std::string const& filenametoread)
     : Makefile(mf), ReportError(true)
   {
-    this->Makefile->ListFileStack.push_back(filenametoread);
     this->Makefile->PushPolicyBarrier();
 
     long line = 0;
@@ -618,7 +615,6 @@ public:
 
     this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
     this->Makefile->PopPolicyBarrier(this->ReportError);
-    this->Makefile->ListFileStack.pop_back();
   }
 
   void Quiet() { this->ReportError = false; }
@@ -1707,7 +1703,6 @@ public:
         this->Makefile->StateSnapshot.GetCurrentSourceDirectory();
     currentStart += "/CMakeLists.txt";
     this->Makefile->StateSnapshot.SetListFile(currentStart);
-    this->Makefile->ListFileStack.push_back(currentStart);
     this->Makefile->PushPolicyBarrier();
     this->Makefile->PushFunctionBlockerBarrier();
 
