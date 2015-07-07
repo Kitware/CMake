@@ -12,6 +12,8 @@
 #ifndef cmMakefileTargetGenerator_h
 #define cmMakefileTargetGenerator_h
 
+#include "cmCommonTargetGenerator.h"
+
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmOSXBundleGenerator.h"
 
@@ -30,7 +32,7 @@ class cmSourceFile;
  * \brief Support Routines for writing makefiles
  *
  */
-class cmMakefileTargetGenerator
+class cmMakefileTargetGenerator: public cmCommonTargetGenerator
 {
 public:
   // constructor to set the ivars

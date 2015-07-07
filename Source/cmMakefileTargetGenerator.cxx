@@ -33,7 +33,8 @@
 #include <ctype.h>
 
 cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
-  : OSXBundleGenerator(0)
+  : cmCommonTargetGenerator()
+  , OSXBundleGenerator(0)
   , MacOSXContentGenerator(0)
 {
   this->BuildFileStream = 0;

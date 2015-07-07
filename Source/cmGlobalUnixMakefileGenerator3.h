@@ -12,7 +12,7 @@
 #ifndef cmGlobalUnixMakefileGenerator3_h
 #define cmGlobalUnixMakefileGenerator3_h
 
-#include "cmGlobalGenerator.h"
+#include "cmGlobalCommonGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
 
 class cmGeneratedFileStream;
@@ -51,7 +51,7 @@ class cmLocalUnixMakefileGenerator3;
 
  */
 
-class cmGlobalUnixMakefileGenerator3 : public cmGlobalGenerator
+class cmGlobalUnixMakefileGenerator3 : public cmGlobalCommonGenerator
 {
 public:
   cmGlobalUnixMakefileGenerator3(cmake* cm);

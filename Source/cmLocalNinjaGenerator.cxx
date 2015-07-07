@@ -25,7 +25,7 @@
 cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
                                              cmLocalGenerator* parent,
                                              cmState::Snapshot snapshot)
-  : cmLocalGenerator(gg, parent, snapshot)
+  : cmLocalCommonGenerator(gg, parent, snapshot)
   , ConfigName("")
   , HomeRelativeOutputPath("")
 {

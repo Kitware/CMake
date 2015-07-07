@@ -248,6 +248,7 @@ CMAKE_CXX_SOURCES="\
   cmCommandArgumentLexer \
   cmCommandArgumentParser \
   cmCommandArgumentParserHelper \
+  cmCommonTargetGenerator \
   cmCPackPropertiesGenerator \
   cmDefinitions \
   cmDepends \
@@ -276,8 +277,10 @@ CMAKE_CXX_SOURCES="\
   cmGeneratorExpressionNode \
   cmGeneratorExpressionParser \
   cmGeneratorExpression \
+  cmGlobalCommonGenerator \
   cmGlobalGenerator \
   cmInstallDirectoryGenerator \
+  cmLocalCommonGenerator \
   cmLocalGenerator \
   cmInstalledFile \
   cmInstallGenerator \

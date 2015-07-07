@@ -13,7 +13,7 @@
 #ifndef cmLocalNinjaGenerator_h
 #  define cmLocalNinjaGenerator_h
 
-#  include "cmLocalGenerator.h"
+#  include "cmLocalCommonGenerator.h"
 #  include "cmNinjaTypes.h"
 
 class cmCustomCommandGenerator;
@@ -28,7 +28,7 @@ class cmake;
  * cmLocalNinjaGenerator produces a local build.ninja file from its
  * member Makefile.
  */
-class cmLocalNinjaGenerator : public cmLocalGenerator
+class cmLocalNinjaGenerator : public cmLocalCommonGenerator
 {
 public:
   cmLocalNinjaGenerator(cmGlobalGenerator* gg, cmLocalGenerator* parent,

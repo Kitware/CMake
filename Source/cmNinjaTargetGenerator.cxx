@@ -58,7 +58,7 @@ cmNinjaTargetGenerator::New(cmGeneratorTarget* target)
 }
 
 cmNinjaTargetGenerator::cmNinjaTargetGenerator(cmGeneratorTarget* target)
-  :
+  : cmCommonTargetGenerator(),
     MacOSXContentGenerator(0),
     OSXBundleGenerator(0),
     MacContentFolders(),

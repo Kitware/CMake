@@ -21,7 +21,7 @@
 #include "cmAlgorithms.h"
 
 cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3(cmake* cm)
-  : cmGlobalGenerator(cm)
+  : cmGlobalCommonGenerator(cm)
 {
   // This type of makefile always requires unix style paths
   this->ForceUnixPaths = true;

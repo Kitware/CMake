@@ -13,6 +13,8 @@
 #ifndef cmNinjaTargetGenerator_h
 #define cmNinjaTargetGenerator_h
 
+#include "cmCommonTargetGenerator.h"
+
 #include "cmStandardIncludes.h"
 #include "cmNinjaTypes.h"
 #include "cmLocalNinjaGenerator.h"
@@ -26,7 +28,7 @@ class cmMakefile;
 class cmSourceFile;
 class cmCustomCommand;
 
-class cmNinjaTargetGenerator
+class cmNinjaTargetGenerator: public cmCommonTargetGenerator
 {
 public:
   /// Create a cmNinjaTargetGenerator according to the @a target's type.
