@@ -1439,19 +1439,6 @@ int cmake::ActualConfigure()
       }
     }
 
-  if(cmSystemTools::GetFatalErrorOccured())
-    {
-    const char* makeProgram =
-        this->State->GetInitializedCacheValue("CMAKE_MAKE_PROGRAM");
-    if (!makeProgram || cmSystemTools::IsOff(makeProgram))
-      {
-      // We must have a bad generator selection.  Wipe the cache entry so the
-      // user can select another.
-      this->State->RemoveCacheEntry("CMAKE_GENERATOR");
-      this->State->RemoveCacheEntry("CMAKE_EXTRA_GENERATOR");
-      }
-    }
-
   cmMakefile* mf=this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
   if (mf->IsOn("CTEST_USE_LAUNCHERS")
               && !this->State->GetGlobalProperty("RULE_LAUNCH_COMPILE"))
