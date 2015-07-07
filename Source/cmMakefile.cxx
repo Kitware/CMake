@@ -4199,16 +4199,6 @@ void cmMakefile::SetProperty(const std::string& prop, const char* value)
     return;
     }
 
-  if ( prop == "ADDITIONAL_MAKE_CLEAN_FILES" )
-    {
-    // This property is not inherrited
-    if ( strcmp(this->GetCurrentSourceDirectory(),
-                this->GetCurrentSourceDirectory()) != 0 )
-      {
-      return;
-      }
-    }
-
   this->Properties.SetProperty(prop, value);
 }
 
