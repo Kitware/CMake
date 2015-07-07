@@ -65,6 +65,61 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     endif()
   endif()
 
+  # Components
+  if(CMake_INSTALL_COMPONENTS)
+    set(_CPACK_IFW_COMPONENTS_ALL cmake ctest cpack)
+    if(APPLE)
+      list(APPEND _CPACK_IFW_COMPONENTS_ALL cmakexbuild)
+    endif()
+    if(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME)
+      set(_CPACK_IFW_COMPONENT_UNSPECIFIED_NAME
+        ${CMAKE_INSTALL_DEFAULT_COMPONENT_NAME})
+    else()
+      set(_CPACK_IFW_COMPONENT_UNSPECIFIED_NAME Unspecified)
+    endif()
+    list(APPEND _CPACK_IFW_COMPONENTS_ALL ${_CPACK_IFW_COMPONENT_UNSPECIFIED_NAME})
+    string(TOUPPER "${_CPACK_IFW_COMPONENT_UNSPECIFIED_NAME}"
+      _CPACK_IFW_COMPONENT_UNSPECIFIED_UNAME)
+    if(BUILD_CursesDialog)
+      list(APPEND _CPACK_IFW_COMPONENTS_ALL ccmake)
+    endif()
+    if(BUILD_QtDialog)
+      list(APPEND _CPACK_IFW_COMPONENTS_ALL cmake-gui)
+      set(_CPACK_IFW_COMPONENT_CMAKE-GUI_LICENSES "set(CPACK_IFW_COMPONENT_CMAKE-GUI_LICENSES
+    \"LGPLv2.1\" \"${CMake_SOURCE_DIR}/Licenses/LGPLv2.1.txt\")")
+    endif()
+    if(SPHINX_MAN)
+      list(APPEND _CPACK_IFW_COMPONENTS_ALL sphinx-man)
+    endif()
+    if(SPHINX_HTML)
+      list(APPEND _CPACK_IFW_COMPONENTS_ALL sphinx-html)
+    endif()
+    if(SPHINX_SINGLEHTML)
+      list(APPEND _CPACK_IFW_COMPONENTS_ALL sphinx-singlehtml)
+    endif()
+    if(SPHINX_QTHELP)
+      list(APPEND _CPACK_IFW_COMPONENTS_ALL sphinx-qthelp)
+    endif()
+    set(_CPACK_IFW_COMPONENTS_CONFIGURATION "
+  # Components
+  set(CPACK_COMPONENTS_ALL \"${_CPACK_IFW_COMPONENTS_ALL}\")
+  set(CPACK_COMPONENTS_GROUPING IGNORE)
+")
+  else()
+    if(BUILD_QtDialog AND CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL)
+      set(_CPACK_IFW_ADDITIONAL_LICENSES
+        "\"LGPLv2.1\" \"${CMake_SOURCE_DIR}/Licenses/LGPLv2.1.txt\"")
+    endif()
+  endif()
+
+  # Components scripts configuration
+  foreach(_script
+    CMake
+    CMake.Documentation.SphinxHTML)
+    configure_file("${CMake_SOURCE_DIR}/Source/QtIFW/${_script}.qs.in"
+      "${CMake_BINARY_DIR}/${_script}.qs" @ONLY)
+  endforeach()
+
   if(${CMAKE_SYSTEM_NAME} MATCHES Windows)
     set(_CPACK_IFW_PACKAGE_ICON
         "set(CPACK_IFW_PACKAGE_ICON \"${CMake_SOURCE_DIR}/Source/QtDialog/CMakeSetup.ico\")")
@@ -78,9 +133,13 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
       "${CMake_BINARY_DIR}/installscript.qs" @ONLY
     )
     install(FILES "${CMake_SOURCE_DIR}/Source/QtIFW/cmake.org.html"
-      DESTINATION "."
+      DESTINATION "${CMAKE_DOC_DIR}"
     )
-    set(_CPACK_IFW_PACKAGE_SCRIPT "set(CPACK_IFW_COMPONENT_GROUP_CMAKE_SCRIPT \"${CMake_BINARY_DIR}/installscript.qs\")")
+    if(CMake_INSTALL_COMPONENTS)
+      set(_CPACK_IFW_PACKAGE_SCRIPT "${CMake_BINARY_DIR}/CMake.qs")
+    else()
+      set(_CPACK_IFW_PACKAGE_SCRIPT "${CMake_BINARY_DIR}/installscript.qs")
+    endif()
   endif()
 
   if(${CMAKE_SYSTEM_NAME} MATCHES Linux)

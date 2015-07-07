@@ -735,9 +735,17 @@ endif()
 include (${CMake_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 include (${CMake_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 
-install(TARGETS cmake ctest cpack DESTINATION bin)
+# Install tools
+
+set(_tools cmake ctest cpack)
+
 if(APPLE)
-  install(TARGETS cmakexbuild DESTINATION bin)
+  list(APPEND _tools cmakexbuild)
 endif()
+
+foreach(_tool ${_tools})
+  CMake_OPTIONAL_COMPONENT(${_tool})
+  install(TARGETS ${_tool} DESTINATION bin ${COMPONENT})
+endforeach()
 
 install(FILES cmCPluginAPI.h DESTINATION ${CMAKE_DATA_DIR}/include)
