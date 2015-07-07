@@ -15,6 +15,7 @@ String operations.
   string(REPLACE <match_string>
          <replace_string> <output variable>
          <input> [<input>...])
+  string(APPEND <string variable> [<input>...])
   string(CONCAT <output variable> [<input>...])
   string(<MD5|SHA1|SHA224|SHA256|SHA384|SHA512>
          <output variable> <input>)
@@ -54,6 +55,8 @@ through argument parsing.
 
 ``REPLACE`` will replace all occurrences of ``match_string`` in the input
 with ``replace_string`` and store the result in the output.
+
+``APPEND`` will append all the input arguments to the string.
 
 ``CONCAT`` will concatenate all the input arguments together and store
 the result in the named output variable.
