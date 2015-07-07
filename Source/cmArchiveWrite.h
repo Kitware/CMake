@@ -84,6 +84,7 @@ private:
   struct archive* Archive;
   struct archive* Disk;
   bool Verbose;
+  std::string Format;
   std::string Error;
   std::string MTime;
 };
