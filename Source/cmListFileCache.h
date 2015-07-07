@@ -25,6 +25,13 @@
 
 class cmMakefile;
 
+struct cmCommandContext
+{
+  std::string Name;
+  long Line;
+  cmCommandContext(): Name(), Line(0) {}
+};
+
 struct cmListFileArgument
 {
   enum Delimiter
@@ -57,6 +64,16 @@ struct cmListFileContext
   std::string FilePath;
   long Line;
   cmListFileContext(): Name(), FilePath(), Line(0) {}
+
+  static cmListFileContext FromCommandContext(cmCommandContext const& lfcc,
+                                              std::string const& fileName)
+  {
+    cmListFileContext lfc;
+    lfc.FilePath = fileName;
+    lfc.Line = lfcc.Line;
+    lfc.Name = lfcc.Name;
+    return lfc;
+  }
 };
 
 std::ostream& operator<<(std::ostream&, cmListFileContext const&);
@@ -64,24 +81,24 @@ bool operator<(const cmListFileContext& lhs, const cmListFileContext& rhs);
 bool operator==(cmListFileContext const& lhs, cmListFileContext const& rhs);
 bool operator!=(cmListFileContext const& lhs, cmListFileContext const& rhs);
 
-struct cmListFileFunction: public cmListFileContext
+struct cmListFileFunction: public cmCommandContext
 {
   std::vector<cmListFileArgument> Arguments;
 };
 
-class cmListFileBacktrace: private std::vector<cmListFileContext>
+class cmListFileBacktrace
 {
   public:
-    cmListFileBacktrace(cmState::Snapshot snapshot = cmState::Snapshot())
-      : Snapshot(snapshot)
+    cmListFileBacktrace(cmState::Snapshot snapshot = cmState::Snapshot(),
+                        cmCommandContext const& cc = cmCommandContext())
+      : Context(cc), Snapshot(snapshot)
     {
     }
-
-    void Append(cmListFileContext const& context);
 
     void PrintTitle(std::ostream& out);
     void PrintCallStack(std::ostream& out);
   private:
+    cmCommandContext Context;
     cmState::Snapshot Snapshot;
 };
 

@@ -31,7 +31,11 @@ public:
 
   enum SnapshotType
   {
-    BuildsystemDirectoryType
+    BuildsystemDirectoryType,
+    FunctionCallType,
+    MacroCallType,
+    CallStackType,
+    InlineListFileType
   };
 
   class Snapshot {
@@ -43,6 +47,8 @@ public:
     const char* GetCurrentBinaryDirectory() const;
     void SetCurrentBinaryDirectory(std::string const& dir);
 
+    void SetListFile(std::string const& listfile);
+
     std::vector<std::string> const&
     GetCurrentSourceDirectoryComponents() const;
     std::vector<std::string> const&
@@ -53,8 +59,13 @@ public:
     void SetRelativePathTopSource(const char* dir);
     void SetRelativePathTopBinary(const char* dir);
 
+    std::string GetExecutionListFile() const;
+    std::string GetEntryPointCommand() const;
+    long GetEntryPointLine() const;
+
     bool IsValid() const;
     Snapshot GetBuildsystemDirectoryParent() const;
+    Snapshot GetCallStackParent() const;
 
     cmState* GetState() const;
 
@@ -69,7 +80,27 @@ public:
   };
 
   Snapshot CreateBaseSnapshot();
-  Snapshot CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot);
+  Snapshot
+  CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot,
+                                     std::string const& entryPointCommand,
+                                     long entryPointLine);
+  Snapshot CreateFunctionCallSnapshot(Snapshot originSnapshot,
+                                      std::string const& entryPointCommand,
+                                      long entryPointLine,
+                                      std::string const& fileName);
+  Snapshot CreateMacroCallSnapshot(Snapshot originSnapshot,
+                                   std::string const& entryPointCommand,
+                                   long entryPointLine,
+                                   std::string const& fileName);
+  Snapshot CreateCallStackSnapshot(Snapshot originSnapshot,
+                                   std::string const& entryPointCommand,
+                                   long entryPointLine,
+                                   std::string const& fileName);
+  Snapshot CreateInlineListFileSnapshot(Snapshot originSnapshot,
+                                        const std::string& entryPointCommand,
+                                        long entryPointLine,
+                                        std::string const& fileName);
+  Snapshot Pop(Snapshot originSnapshot);
 
   enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC,
                        UNINITIALIZED };
@@ -174,6 +205,8 @@ private:
 
   struct BuildsystemDirectoryStateType;
   cmLinkedTree<BuildsystemDirectoryStateType> BuildsystemDirectory;
+
+  cmLinkedTree<std::string> ExecutionListFiles;
 
   cmLinkedTree<SnapshotDataType> SnapshotData;
 
