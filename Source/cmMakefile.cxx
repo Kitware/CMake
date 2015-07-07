@@ -4282,7 +4282,15 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     }
   else if (prop == "LISTFILE_STACK")
     {
-    output = cmJoin(this->ListFileStack, ";");
+    std::vector<std::string> listFiles;
+    cmState::Snapshot snp = this->StateSnapshot;
+    while (snp.IsValid())
+      {
+      listFiles.push_back(snp.GetExecutionListFile());
+      snp = snp.GetCallStackParent();
+      }
+    std::reverse(listFiles.begin(), listFiles.end());
+    output = cmJoin(listFiles, ";");
     return output.c_str();
     }
   else if ( prop == "CACHE_VARIABLES" )
