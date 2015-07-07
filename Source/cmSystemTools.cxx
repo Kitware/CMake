@@ -556,25 +556,6 @@ void cmSystemTools::ParseUnixCommandLine(const char* command,
   argv.Store(args);
 }
 
-std::string cmSystemTools::EscapeWindowsShellArgument(const char* arg,
-                                                      int shell_flags)
-{
-  char local_buffer[1024];
-  char* buffer = local_buffer;
-  int size = cmsysSystem_Shell_GetArgumentSizeForWindows(arg, shell_flags);
-  if(size > 1024)
-    {
-    buffer = new char[size];
-    }
-  cmsysSystem_Shell_GetArgumentForWindows(arg, buffer, shell_flags);
-  std::string result(buffer);
-  if(buffer != local_buffer)
-    {
-    delete [] buffer;
-    }
-  return result;
-}
-
 std::vector<std::string> cmSystemTools::ParseArguments(const char* command)
 {
   std::vector<std::string> args;

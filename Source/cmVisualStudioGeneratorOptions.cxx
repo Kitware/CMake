@@ -1,4 +1,5 @@
 #include "cmVisualStudioGeneratorOptions.h"
+#include "cmOutputConverter.h"
 #include "cmSystemTools.h"
 #include <cmsys/System.h>
 #include "cmVisualStudio10TargetGenerator.h"
@@ -246,7 +247,7 @@ void cmVisualStudioGeneratorOptions::StoreUnknownFlag(const char* flag)
   // This option is not known.  Store it in the output flags.
   this->FlagString += " ";
   this->FlagString +=
-    cmSystemTools::EscapeWindowsShellArgument(
+    cmOutputConverter::EscapeWindowsShellArgument(
       flag,
       cmsysSystem_Shell_Flag_AllowMakeVariables |
       cmsysSystem_Shell_Flag_VSIDE);

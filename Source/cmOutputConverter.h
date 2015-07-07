@@ -71,6 +71,11 @@ public:
 
   static std::string EscapeForCMake(const std::string& str);
 
+  /** Compute an escaped version of the given argument for use in a
+      windows shell.  */
+  static std::string EscapeWindowsShellArgument(const char* arg,
+                                                int shell_flags);
+
   enum FortranFormat
     {
     FortranFormatNone,
