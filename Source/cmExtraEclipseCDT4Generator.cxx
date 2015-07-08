@@ -598,7 +598,8 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(
                 linkName4 += "/";
                 linkName4 += cmSystemTools::GetFilenameName(fullPath);
                 this->AppendLinkedResource(fout, linkName4,
-                                           fullPath, LinkToFile);
+                                           this->GetEclipsePath(fullPath),
+                                           LinkToFile);
                 }
               }
             }
