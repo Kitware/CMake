@@ -46,8 +46,6 @@ public:
    */
   virtual void Generate();
 
-  std::string const& GetConfigName() { return this->ConfigName; }
-
   // this returns the relative path between the HomeOutputDirectory and this
   // local generators StartOutputDirectory
   const std::string &GetHomeRelativeOutputPath();
@@ -253,8 +251,6 @@ private:
   friend class cmGlobalUnixMakefileGenerator3;
 
   ImplicitDependTargetMap ImplicitDepends;
-
-  std::string ConfigName;
 
   std::string HomeRelativeOutputPath;
 

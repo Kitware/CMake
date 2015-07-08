@@ -24,6 +24,12 @@ public:
                          cmLocalGenerator* parent,
                          cmState::Snapshot snapshot);
   ~cmLocalCommonGenerator();
+
+  std::string const& GetConfigName() { return this->ConfigName; }
+
+protected:
+  void SetConfigName();
+  std::string ConfigName;
 };
 
 #endif

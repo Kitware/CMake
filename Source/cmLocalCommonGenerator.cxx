@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmLocalCommonGenerator.h"
 
+#include "cmMakefile.h"
+
 cmLocalCommonGenerator::cmLocalCommonGenerator(cmGlobalGenerator* gg,
                                                cmLocalGenerator* parent,
                                                cmState::Snapshot snapshot):
@@ -20,4 +22,19 @@ cmLocalCommonGenerator::cmLocalCommonGenerator(cmGlobalGenerator* gg,
 
 cmLocalCommonGenerator::~cmLocalCommonGenerator()
 {
+}
+
+void cmLocalCommonGenerator::SetConfigName()
+{
+  // Store the configuration name that will be generated.
+  if(const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE"))
+    {
+    // Use the build type given by the user.
+    this->ConfigName = config;
+    }
+  else
+    {
+    // No configuration type given.
+    this->ConfigName = "";
+    }
 }

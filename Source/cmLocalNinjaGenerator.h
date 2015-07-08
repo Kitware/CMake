@@ -46,9 +46,6 @@ public:
   const cmake* GetCMakeInstance() const;
   cmake* GetCMakeInstance();
 
-  std::string const& GetConfigName() const
-  { return this->ConfigName; }
-
   /// @returns the relative path between the HomeOutputDirectory and this
   /// local generators StartOutputDirectory.
   std::string GetHomeRelativeOutputPath() const
@@ -110,8 +107,6 @@ private:
   void WriteProcessedMakefile(std::ostream& os);
   void WritePools(std::ostream& os);
 
-  void SetConfigName();
-
   void WriteCustomCommandRule();
   void WriteCustomCommandBuildStatement(cmCustomCommand const *cc,
                                         const cmNinjaDeps& orderOnlyDeps);
@@ -120,7 +115,6 @@ private:
 
   std::string MakeCustomLauncher(cmCustomCommandGenerator const& ccg);
 
-  std::string ConfigName;
   std::string HomeRelativeOutputPath;
 
   typedef std::map<cmCustomCommand const*, std::set<cmTarget*> >

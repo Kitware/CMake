@@ -100,17 +100,7 @@ cmLocalUnixMakefileGenerator3::~cmLocalUnixMakefileGenerator3()
 //----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::Generate()
 {
-  // Store the configuration name that will be generated.
-  if(const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE"))
-    {
-    // Use the build type given by the user.
-    this->ConfigName = config;
-    }
-  else
-    {
-    // No configuration type given.
-    this->ConfigName = "";
-    }
+  this->SetConfigName();
 
   // Record whether some options are enabled to avoid checking many
   // times later.

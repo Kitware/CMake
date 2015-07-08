@@ -26,7 +26,6 @@ cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
                                              cmLocalGenerator* parent,
                                              cmState::Snapshot snapshot)
   : cmLocalCommonGenerator(gg, parent, snapshot)
-  , ConfigName("")
   , HomeRelativeOutputPath("")
 {
   this->TargetImplib = "$TARGET_IMPLIB";
@@ -259,22 +258,6 @@ void cmLocalNinjaGenerator::WriteNinjaFilesInclusion(std::ostream& os)
                                       cmGlobalNinjaGenerator::NINJA_RULES_FILE,
                                        "Include rules file.");
   os << "\n";
-}
-
-void cmLocalNinjaGenerator::SetConfigName()
-{
-  // Store the configuration name that will be generated.
-  if(const char* config =
-       this->GetMakefile()->GetDefinition("CMAKE_BUILD_TYPE"))
-    {
-    // Use the build type given by the user.
-    this->ConfigName = config;
-    }
-  else
-    {
-    // No configuration type given.
-    this->ConfigName = "";
-    }
 }
 
 //----------------------------------------------------------------------------
