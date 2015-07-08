@@ -11,6 +11,7 @@
 ============================================================================*/
 #include "cmCommonTargetGenerator.h"
 
+#include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalCommonGenerator.h"
 #include "cmLocalCommonGenerator.h"
@@ -221,4 +222,65 @@ cmCommonTargetGenerator
     this->LocalGenerator->AppendFlags(
       flags, this->Makefile->GetDefinition(var));
     }
+}
+
+//----------------------------------------------------------------------------
+std::string cmCommonTargetGenerator::GetFrameworkFlags(std::string const& l)
+{
+ if(!this->Makefile->IsOn("APPLE"))
+   {
+   return std::string();
+   }
+
+  std::string fwSearchFlagVar = "CMAKE_" + l + "_FRAMEWORK_SEARCH_FLAG";
+  const char* fwSearchFlag =
+    this->Makefile->GetDefinition(fwSearchFlagVar);
+  if(!(fwSearchFlag && *fwSearchFlag))
+    {
+    return std::string();
+    }
+
+ std::set<std::string> emitted;
+#ifdef __APPLE__  /* don't insert this when crosscompiling e.g. to iphone */
+  emitted.insert("/System/Library/Frameworks");
+#endif
+  std::vector<std::string> includes;
+
+  const std::string& config =
+    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  this->LocalGenerator->GetIncludeDirectories(includes,
+                                              this->GeneratorTarget,
+                                              "C", config);
+  // check all include directories for frameworks as this
+  // will already have added a -F for the framework
+  for(std::vector<std::string>::iterator i = includes.begin();
+      i != includes.end(); ++i)
+    {
+    if(this->Target->NameResolvesToFramework(*i))
+      {
+      std::string frameworkDir = *i;
+      frameworkDir += "/../";
+      frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir);
+      emitted.insert(frameworkDir);
+      }
+    }
+
+  std::string flags;
+  const char* cfg = this->LocalGenerator->GetConfigName().c_str();
+  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(cfg))
+    {
+    std::vector<std::string> const& frameworks = cli->GetFrameworkPaths();
+    for(std::vector<std::string>::const_iterator i = frameworks.begin();
+        i != frameworks.end(); ++i)
+      {
+      if(emitted.insert(*i).second)
+        {
+        flags += fwSearchFlag;
+        flags += this->LocalGenerator
+                     ->ConvertToOutputFormat(*i, cmLocalGenerator::SHELL);
+        flags += " ";
+        }
+      }
+    }
+  return flags;
 }

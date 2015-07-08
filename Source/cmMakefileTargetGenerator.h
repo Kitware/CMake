@@ -126,9 +126,6 @@ protected:
 
   void DriveCustomCommands(std::vector<std::string>& depends);
 
-  // Return the a string with -F flags on apple
-  std::string GetFrameworkFlags(std::string const& l);
-
   // append intertarget dependencies
   void AppendTargetDepends(std::vector<std::string>& depends);
 
