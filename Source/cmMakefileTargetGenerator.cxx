@@ -507,35 +507,6 @@ void cmMakefileTargetGenerator
 //----------------------------------------------------------------------------
 void
 cmMakefileTargetGenerator
-::AppendFortranFormatFlags(std::string& flags, cmSourceFile const& source)
-{
-  const char* srcfmt = source.GetProperty("Fortran_FORMAT");
-  cmLocalGenerator::FortranFormat format =
-    this->LocalGenerator->GetFortranFormat(srcfmt);
-  if(format == cmLocalGenerator::FortranFormatNone)
-    {
-    const char* tgtfmt = this->Target->GetProperty("Fortran_FORMAT");
-    format = this->LocalGenerator->GetFortranFormat(tgtfmt);
-    }
-  const char* var = 0;
-  switch (format)
-    {
-    case cmLocalGenerator::FortranFormatFixed:
-      var = "CMAKE_Fortran_FORMAT_FIXED_FLAG"; break;
-    case cmLocalGenerator::FortranFormatFree:
-      var = "CMAKE_Fortran_FORMAT_FREE_FLAG"; break;
-    default: break;
-    }
-  if(var)
-    {
-    this->LocalGenerator->AppendFlags(
-      flags, this->Makefile->GetDefinition(var));
-    }
-}
-
-//----------------------------------------------------------------------------
-void
-cmMakefileTargetGenerator
 ::WriteObjectBuildFile(std::string &obj,
                        const std::string& lang,
                        cmSourceFile const& source,

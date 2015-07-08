@@ -20,6 +20,7 @@ class cmGeneratorTarget;
 class cmGlobalCommonGenerator;
 class cmLocalCommonGenerator;
 class cmMakefile;
+class cmSourceFile;
 class cmTarget;
 
 /** \class cmCommonTargetGenerator
@@ -67,6 +68,9 @@ protected:
                       cmLocalGenerator::RelativeRoot relative,
                       cmLocalGenerator::OutputFormat output =
                       cmLocalGenerator::UNCHANGED);
+
+  void AppendFortranFormatFlags(std::string& flags,
+                                cmSourceFile const& source);
 };
 
 #endif
