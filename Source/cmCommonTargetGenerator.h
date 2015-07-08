@@ -14,14 +14,27 @@
 
 #include "cmStandardIncludes.h"
 
+class cmGeneratorTarget;
+class cmGlobalCommonGenerator;
+class cmLocalCommonGenerator;
+class cmMakefile;
+class cmTarget;
+
 /** \class cmCommonTargetGenerator
  * \brief Common infrastructure for Makefile and Ninja per-target generators
  */
 class cmCommonTargetGenerator
 {
 public:
-  cmCommonTargetGenerator();
+  cmCommonTargetGenerator(cmGeneratorTarget* gt);
   virtual ~cmCommonTargetGenerator();
+
+protected:
+  cmGeneratorTarget* GeneratorTarget;
+  cmTarget* Target;
+  cmMakefile* Makefile;
+  cmLocalCommonGenerator* LocalGenerator;
+  cmGlobalCommonGenerator* GlobalGenerator;
 };
 
 #endif

@@ -11,7 +11,18 @@
 ============================================================================*/
 #include "cmCommonTargetGenerator.h"
 
-cmCommonTargetGenerator::cmCommonTargetGenerator()
+#include "cmGeneratorTarget.h"
+#include "cmGlobalCommonGenerator.h"
+#include "cmLocalCommonGenerator.h"
+#include "cmTarget.h"
+
+cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
+  : GeneratorTarget(gt)
+  , Target(gt->Target)
+  , Makefile(gt->Makefile)
+  , LocalGenerator(static_cast<cmLocalCommonGenerator*>(gt->LocalGenerator))
+  , GlobalGenerator(static_cast<cmGlobalCommonGenerator*>(
+                      gt->LocalGenerator->GetGlobalGenerator()))
 {
 }
 

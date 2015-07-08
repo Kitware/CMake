@@ -152,9 +152,6 @@ protected:
                             cmNinjaVars& vars);
 
 private:
-  cmTarget* Target;
-  cmGeneratorTarget* GeneratorTarget;
-  cmMakefile* Makefile;
   cmLocalNinjaGenerator* LocalGenerator;
   /// List of object files for this target.
   cmNinjaDeps Objects;

@@ -175,11 +175,8 @@ protected:
   virtual void CloseFileStreams();
   void RemoveForbiddenFlags(const char* flagVar, const std::string& linkLang,
                             std::string& linkFlags);
-  cmTarget *Target;
-  cmGeneratorTarget* GeneratorTarget;
   cmLocalUnixMakefileGenerator3 *LocalGenerator;
   cmGlobalUnixMakefileGenerator3 *GlobalGenerator;
-  cmMakefile *Makefile;
   std::string ConfigName;
 
   enum CustomCommandDriveType { OnBuild, OnDepends, OnUtility };
