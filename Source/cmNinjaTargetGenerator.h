@@ -115,9 +115,6 @@ protected:
   cmNinjaDeps GetObjects() const
   { return this->Objects; }
 
-  // Helper to add flag for windows .def file.
-  void AddModuleDefinitionFlag(std::string& flags);
-
   void EnsureDirectoryExists(const std::string& dir) const;
   void EnsureParentDirectoryExists(const std::string& path) const;
 
@@ -153,9 +150,6 @@ private:
 
   typedef std::map<std::string, std::string> LanguageFlagMap;
   LanguageFlagMap LanguageFlags;
-
-  // The windows module definition source file (.def), if any.
-  std::string ModuleDefinitionFile;
 };
 
 #endif // ! cmNinjaTargetGenerator_h

@@ -40,12 +40,18 @@ protected:
   const char* GetFeature(const std::string& feature);
   bool GetFeatureAsBool(const std::string& feature);
 
+  // Helper to add flag for windows .def file.
+  void AddModuleDefinitionFlag(std::string& flags);
+
   cmGeneratorTarget* GeneratorTarget;
   cmTarget* Target;
   cmMakefile* Makefile;
   cmLocalCommonGenerator* LocalGenerator;
   cmGlobalCommonGenerator* GlobalGenerator;
   std::string ConfigName;
+
+  // The windows module definition source file (.def), if any.
+  std::string ModuleDefinitionFile;
 };
 
 #endif

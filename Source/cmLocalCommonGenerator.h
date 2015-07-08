@@ -14,6 +14,8 @@
 
 #include "cmLocalGenerator.h"
 
+class cmCommonTargetGenerator;
+
 /** \class cmLocalCommonGenerator
  * \brief Common infrastructure for Makefile and Ninja local generators.
  */
@@ -30,6 +32,8 @@ public:
 protected:
   void SetConfigName();
   std::string ConfigName;
+
+  friend class cmCommonTargetGenerator;
 };
 
 #endif

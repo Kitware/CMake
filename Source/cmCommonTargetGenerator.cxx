@@ -14,6 +14,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalCommonGenerator.h"
 #include "cmLocalCommonGenerator.h"
+#include "cmMakefile.h"
 #include "cmTarget.h"
 
 cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
@@ -24,6 +25,7 @@ cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
   , GlobalGenerator(static_cast<cmGlobalCommonGenerator*>(
                       gt->LocalGenerator->GetGlobalGenerator()))
   , ConfigName(LocalGenerator->GetConfigName())
+  , ModuleDefinitionFile(GeneratorTarget->GetModuleDefinitionFile(ConfigName))
 {
 }
 
@@ -60,4 +62,28 @@ void cmCommonTargetGenerator::AddFeatureFlags(
     {
     this->LocalGenerator->AppendFeatureOptions(flags, lang, "IPO");
     }
+}
+
+//----------------------------------------------------------------------------
+void cmCommonTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
+{
+  if(this->ModuleDefinitionFile.empty())
+    {
+    return;
+    }
+
+  // TODO: Create a per-language flag variable.
+  const char* defFileFlag =
+    this->Makefile->GetDefinition("CMAKE_LINK_DEF_FILE_FLAG");
+  if(!defFileFlag)
+    {
+    return;
+    }
+
+  // Append the flag and value.  Use ConvertToLinkReference to help
+  // vs6's "cl -link" pass it to the linker.
+  std::string flag = defFileFlag;
+  flag += (this->LocalGenerator->ConvertToLinkReference(
+             this->ModuleDefinitionFile));
+  this->LocalGenerator->AppendFlags(flags, flag);
 }

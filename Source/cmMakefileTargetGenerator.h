@@ -255,9 +255,6 @@ protected:
   // Compute target-specific Fortran language flags.
   void AddFortranFlags(std::string& flags);
 
-  // Helper to add flag for windows .def file.
-  void AddModuleDefinitionFlag(std::string& flags);
-
   //==================================================================
   // Convenience routines that do nothing more than forward to
   // implementaitons
