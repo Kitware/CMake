@@ -62,7 +62,7 @@ find_path(XercesC_INCLUDE_DIR
 mark_as_advanced(XercesC_INCLUDE_DIR)
 
 # Find all XercesC libraries
-find_library(XercesC_LIBRARY "xerces-c"
+find_library(XercesC_LIBRARY NAMES "xerces-c" "xerces-c_3"
   DOC "Xerces-C++ libraries")
 mark_as_advanced(XercesC_LIBRARY)
 
