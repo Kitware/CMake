@@ -273,6 +273,21 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
     }
 }
 
+std::vector<cmValueWithOrigin> cmMakefile::GetIncludeDirectoriesEntries() const
+{
+  return this->IncludeDirectoriesEntries;
+}
+
+std::vector<cmValueWithOrigin> cmMakefile::GetCompileOptionsEntries() const
+{
+  return this->CompileOptionsEntries;
+}
+
+std::vector<cmValueWithOrigin> cmMakefile::GetCompileDefinitionsEntries() const
+{
+  return this->CompileDefinitionsEntries;
+}
+
 //----------------------------------------------------------------------------
 cmListFileBacktrace cmMakefile::GetBacktrace() const
 {
