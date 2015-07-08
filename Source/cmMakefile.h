@@ -746,15 +746,15 @@ public:
   /** Set whether or not to report a CMP0000 violation.  */
   void SetCheckCMP0000(bool b) { this->CheckCMP0000 = b; }
 
-  const std::vector<cmValueWithOrigin>& GetIncludeDirectoriesEntries() const
+  std::vector<cmValueWithOrigin> GetIncludeDirectoriesEntries() const
   {
     return this->IncludeDirectoriesEntries;
   }
-  const std::vector<cmValueWithOrigin>& GetCompileOptionsEntries() const
+  std::vector<cmValueWithOrigin> GetCompileOptionsEntries() const
   {
     return this->CompileOptionsEntries;
   }
-  const std::vector<cmValueWithOrigin>& GetCompileDefinitionsEntries() const
+  std::vector<cmValueWithOrigin> GetCompileDefinitionsEntries() const
   {
     return this->CompileDefinitionsEntries;
   }
