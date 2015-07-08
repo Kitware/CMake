@@ -55,6 +55,14 @@ protected:
   // The windows module definition source file (.def), if any.
   std::string ModuleDefinitionFile;
 
+  // Target-wide Fortran module output directory.
+  bool FortranModuleDirectoryComputed;
+  std::string FortranModuleDirectory;
+  const char* GetFortranModuleDirectory();
+
+  // Compute target-specific Fortran language flags.
+  void AddFortranFlags(std::string& flags);
+
   std::string Convert(std::string const& source,
                       cmLocalGenerator::RelativeRoot relative,
                       cmLocalGenerator::OutputFormat output =

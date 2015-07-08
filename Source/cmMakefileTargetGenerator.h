@@ -246,14 +246,6 @@ protected:
   ByLanguageMap FlagsByLanguage;
   std::string GetDefines(const std::string &l);
   ByLanguageMap DefinesByLanguage;
-
-  // Target-wide Fortran module output directory.
-  bool FortranModuleDirectoryComputed;
-  std::string FortranModuleDirectory;
-  const char* GetFortranModuleDirectory();
-
-  // Compute target-specific Fortran language flags.
-  void AddFortranFlags(std::string& flags);
 };
 
 #endif
