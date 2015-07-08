@@ -11,14 +11,12 @@
 ============================================================================*/
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(Process.h)
-#include KWSYS_HEADER(System.h)
 #include KWSYS_HEADER(Encoding.h)
 
 /* Work-around CMake dependency scanning limitation.  This must
    duplicate the above list of headers.  */
 #if 0
 # include "Process.h.in"
-# include "System.h.in"
 # include "Encoding_c.h.in"
 #endif
 
@@ -120,11 +118,6 @@ static void kwsysProcessSetupPipeNative(HANDLE native, PHANDLE handle);
 static void kwsysProcessCleanupHandle(PHANDLE h);
 static void kwsysProcessCleanup(kwsysProcess* cp, int error);
 static void kwsysProcessCleanErrorMessage(kwsysProcess* cp);
-static int kwsysProcessComputeCommandLength(kwsysProcess* cp,
-                                            char const* const* command);
-static void kwsysProcessComputeCommandLine(kwsysProcess* cp,
-                                           char const* const* command,
-                                           char* cmd);
 static int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
                                       kwsysProcessTime* timeoutTime);
 static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
@@ -602,36 +595,68 @@ int kwsysProcess_AddCommand(kwsysProcess* cp, char const* const* command)
     }
   }
 
-  /* We need to construct a single string representing the command
-     and its arguments.  We will surround each argument containing
-     spaces with double-quotes.  Inside a double-quoted argument, we
-     need to escape double-quotes and all backslashes before them.
-     We also need to escape backslashes at the end of an argument
-     because they come before the closing double-quote for the
-     argument.  */
-  {
-  /* First determine the length of the final string.  */
-  int length = kwsysProcessComputeCommandLength(cp, command);
-
-  /* Allocate enough space for the command.  We do not need an extra
-     byte for the terminating null because we allocated a space for
-     the first argument that we will not use.  */
-  char* new_cmd = malloc(length);
-  if(!new_cmd)
+  if (cp->Verbatim)
     {
-    /* Out of memory.  */
+    /* Copy the verbatim command line into the buffer.  */
+    newCommands[cp->NumberOfCommands] = kwsysEncoding_DupToWide(*command);
+    }
+  else
+    {
+    /* Encode the arguments so CommandLineToArgvW can decode
+       them from the command line string in the child.  */
+    char buffer[32768]; /* CreateProcess max command-line length.  */
+    char* end = buffer + sizeof(buffer);
+    char* out = buffer;
+    char const* const* a;
+    for (a = command; *a; ++a)
+      {
+      int quote = !**a; /* Quote the empty string.  */
+      int slashes = 0;
+      char const* c;
+      if (a != command && out != end) { *out++ = ' '; }
+      for (c = *a; !quote && *c; ++c)
+        { quote = (*c == ' ' || *c == '\t'); }
+      if (quote && out != end) { *out++ = '"'; }
+      for (c = *a; *c; ++c)
+        {
+        if (*c == '\\')
+          {
+          ++slashes;
+          }
+        else
+          {
+          if (*c == '"')
+            {
+            // Add n+1 backslashes to total 2n+1 before internal '"'.
+            while(slashes-- >= 0 && out != end) { *out++ = '\\'; }
+            }
+          slashes = 0;
+          }
+        if (out != end) { *out++ = *c; }
+        }
+      if (quote)
+        {
+        // Add n backslashes to total 2n before ending '"'.
+        while (slashes-- > 0 && out != end) { *out++ = '\\'; }
+        if (out != end) { *out++ = '"'; }
+        }
+      }
+    if(out != end)
+      {
+      *out = '\0';
+      newCommands[cp->NumberOfCommands] = kwsysEncoding_DupToWide(buffer);
+      }
+    else
+      {
+      newCommands[cp->NumberOfCommands] = 0;
+      }
+    }
+  if (!newCommands[cp->NumberOfCommands])
+    {
+    /* Out of memory or command line too long.  */
     free(newCommands);
     return 0;
     }
-
-  /* Construct the command line in the allocated buffer.  */
-  kwsysProcessComputeCommandLine(cp, command,
-                                 new_cmd);
-
-  newCommands[cp->NumberOfCommands] = kwsysEncoding_DupToWide(new_cmd);
-  free(new_cmd);
-  }
-
 
   /* Save the new array of commands.  */
   free(cp->Commands);
@@ -1958,66 +1983,6 @@ void kwsysProcessCleanErrorMessage(kwsysProcess* cp)
   if(length > 0 && cp->ErrorMessage[length-1] == '.')
     {
     cp->ErrorMessage[length-1] = 0;
-    }
-}
-
-/*--------------------------------------------------------------------------*/
-int kwsysProcessComputeCommandLength(kwsysProcess* cp,
-                                     char const* const* command)
-{
-  int length = 0;
-  if(cp->Verbatim)
-    {
-    /* Treat the first argument as a verbatim command line.  Use its
-       length directly and add space for the null-terminator.  */
-    length = (int)strlen(*command)+1;
-    }
-  else
-    {
-    /* Compute the length of the command line when it is converted to
-       a single string.  Space for the null-terminator is allocated by
-       the whitespace character allocated for the first argument that
-       will not be used.  */
-    char const* const* arg;
-    for(arg = command; *arg; ++arg)
-      {
-      /* Add the length of this argument.  It already includes room
-         for a separating space or terminating null.  */
-      length += kwsysSystem_Shell_GetArgumentSizeForWindows(*arg, 0);
-      }
-    }
-
-  return length;
-}
-
-/*--------------------------------------------------------------------------*/
-void kwsysProcessComputeCommandLine(kwsysProcess* cp,
-                                    char const* const* command,
-                                    char* cmd)
-{
-  if(cp->Verbatim)
-    {
-    /* Copy the verbatim command line into the buffer.  */
-    strcpy(cmd, *command);
-    }
-  else
-    {
-    /* Construct the command line in the allocated buffer.  */
-    char const* const* arg;
-    for(arg = command; *arg; ++arg)
-      {
-      /* Add the separating space if this is not the first argument.  */
-      if(arg != command)
-        {
-        *cmd++ = ' ';
-        }
-
-      /* Add the current argument.  */
-      cmd = kwsysSystem_Shell_GetArgumentForWindows(*arg, cmd, 0);
-      }
-
-    /* Add the terminating null character to the command line.  */
-    *cmd = 0;
     }
 }
 
