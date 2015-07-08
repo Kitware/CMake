@@ -73,6 +73,12 @@ install(TARGETS testLibPerConfigDest EXPORT exp
   DESTINATION lib/$<$<BOOL:$<CONFIG>>:$<CONFIG>>$<$<NOT:$<BOOL:$<CONFIG>>>:NoConfig>
   )
 
+# Test OUTPUT_NAME properties with generator expressions
+add_library(testLib7 STATIC testLib7.c)
+set_property(TARGET testLib7 PROPERTY OUTPUT_NAME_DEBUG testLib7D-$<CONFIG>)
+set_property(TARGET testLib7 PROPERTY OUTPUT_NAME_RELEASE testLib7R-$<CONFIG>)
+set_property(TARGET testLib7 PROPERTY OUTPUT_NAME testLib7-$<CONFIG>)
+
 # Work-around: Visual Studio 6 does not support per-target object files.
 set(VS6)
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
@@ -446,7 +452,7 @@ install(
   TARGETS
   testExe1 testLib1 testLib2 testExe2 testLib3 testLib4 testExe3
   testExe2lib testLib4lib testLib4libdbg testLib4libopt
-  testLib6
+  testLib6 testLib7
   testLibCycleA testLibCycleB
   cmp0022NEW cmp0022OLD
   systemlib
@@ -505,7 +511,7 @@ export(TARGETS testExe1 testLib1 testLib2 testLib3
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
   )
-export(TARGETS testExe2 testLib4 testLib5 testLib6 testExe3 testExe2lib
+export(TARGETS testExe2 testLib4 testLib5 testLib6 testLib7 testExe3 testExe2lib
   testLib4lib testLib4libdbg testLib4libopt
   testLibCycleA testLibCycleB
   testLibPerConfigDest

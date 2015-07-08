@@ -4597,15 +4597,25 @@ std::string cmTarget::GetOutputName(const std::string& config,
   // OUTPUT_NAME
   props.push_back("OUTPUT_NAME");
 
+  std::string outName;
   for(std::vector<std::string>::const_iterator i = props.begin();
       i != props.end(); ++i)
     {
-    if(const char* outName = this->GetProperty(*i))
+    if (const char* outNameProp = this->GetProperty(*i))
       {
-      return outName;
+      outName = outNameProp;
+      break;
       }
     }
-  return this->GetName();
+
+  if (outName.empty())
+    {
+    outName = this->GetName();
+    }
+
+  cmGeneratorExpression ge;
+  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(outName);
+  return cge->Evaluate(this->Makefile, config);
 }
 
 //----------------------------------------------------------------------------

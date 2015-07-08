@@ -33,6 +33,7 @@ target_link_libraries(imp_testExe1
   exp_testLib4
   exp_testLib5
   exp_testLib6
+  exp_testLib7
   exp_testLibCycleA
   exp_testLibPerConfigDest
   )
@@ -66,6 +67,7 @@ target_link_libraries(imp_testExe1b
   bld_testLib4
   bld_testLib5
   bld_testLib6
+  bld_testLib7
   bld_testLibCycleA
   bld_testLibPerConfigDest
   )
