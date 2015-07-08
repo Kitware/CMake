@@ -31,3 +31,12 @@ endif()
   endif()
 endfunction()
 run_BuildFailure()
+
+function(run_BuildChangeId)
+  set(CASE_TEST_PREFIX_CODE [[
+    set(CTEST_CHANGE_ID "<>1")
+  ]])
+
+  run_ctest(BuildChangeId)
+endfunction()
+run_BuildChangeId()
