@@ -878,7 +878,7 @@ cmTargetTraceDependencies
 {
   // Transform command names that reference targets built in this
   // project to corresponding target-level dependencies.
-  cmGeneratorExpression ge(&cc.GetBacktrace());
+  cmGeneratorExpression ge(cc.GetBacktrace());
 
   // Add target-level dependencies referenced by generator expressions.
   std::set<cmTarget*> targets;
