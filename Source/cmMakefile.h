@@ -748,7 +748,8 @@ public:
 
   std::vector<cmValueWithOrigin> GetIncludeDirectoriesEntries() const;
   std::vector<cmValueWithOrigin> GetCompileOptionsEntries() const;
-  std::vector<cmValueWithOrigin> GetCompileDefinitionsEntries() const;
+  std::vector<std::string> GetCompileDefinitionsEntries() const;
+  std::vector<cmListFileBacktrace> GetCompileDefinitionsBacktraces() const;
 
   bool IsConfigured() const { return this->Configured; }
   void SetConfigured(){ this->Configured = true; }

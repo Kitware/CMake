@@ -576,7 +576,8 @@ public:
                      bool before = false);
   void InsertCompileOption(const cmValueWithOrigin &entry,
                      bool before = false);
-  void InsertCompileDefinition(const cmValueWithOrigin &entry);
+  void InsertCompileDefinition(std::string const& entry,
+                               cmListFileBacktrace const& bt);
 
   void AppendBuildInterfaceIncludes();
 
