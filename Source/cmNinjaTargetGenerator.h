@@ -69,10 +69,6 @@ protected:
 
   std::string LanguageCompilerRule(const std::string& lang) const;
 
-  const char* GetFeature(const std::string& feature);
-  bool GetFeatureAsBool(const std::string& feature);
-  void AddFeatureFlags(std::string& flags, const std::string& lang);
-
   std::string OrderDependsTargetForTarget();
 
   std::string ComputeOrderDependsForTarget();

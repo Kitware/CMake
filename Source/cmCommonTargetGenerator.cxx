@@ -35,3 +35,29 @@ std::string const& cmCommonTargetGenerator::GetConfigName() const
 {
   return this->ConfigName;
 }
+
+//----------------------------------------------------------------------------
+const char* cmCommonTargetGenerator::GetFeature(const std::string& feature)
+{
+  return this->GeneratorTarget->GetFeature(feature, this->ConfigName);
+}
+
+//----------------------------------------------------------------------------
+bool cmCommonTargetGenerator::GetFeatureAsBool(const std::string& feature)
+{
+  return this->GeneratorTarget->GetFeatureAsBool(feature, this->ConfigName);
+}
+
+//----------------------------------------------------------------------------
+void cmCommonTargetGenerator::AddFeatureFlags(
+  std::string& flags, const std::string& lang
+  )
+{
+  // Add language-specific flags.
+  this->LocalGenerator->AddLanguageFlags(flags, lang, this->ConfigName);
+
+  if(this->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION"))
+    {
+    this->LocalGenerator->AppendFeatureOptions(flags, lang, "IPO");
+    }
+}

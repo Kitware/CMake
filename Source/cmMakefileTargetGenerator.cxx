@@ -2099,29 +2099,3 @@ void cmMakefileTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
   flag += (this->LocalGenerator->ConvertToLinkReference(def));
   this->LocalGenerator->AppendFlags(flags, flag);
 }
-
-//----------------------------------------------------------------------------
-const char* cmMakefileTargetGenerator::GetFeature(const std::string& feature)
-{
-  return this->GeneratorTarget->GetFeature(feature, this->ConfigName);
-}
-
-//----------------------------------------------------------------------------
-bool cmMakefileTargetGenerator::GetFeatureAsBool(const std::string& feature)
-{
-  return this->GeneratorTarget->GetFeatureAsBool(feature, this->ConfigName);
-}
-
-//----------------------------------------------------------------------------
-void cmMakefileTargetGenerator::AddFeatureFlags(
-  std::string& flags, const std::string& lang
-  )
-{
-  // Add language-specific flags.
-  this->LocalGenerator->AddLanguageFlags(flags, lang, this->ConfigName);
-
-  if(this->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION"))
-    {
-    this->LocalGenerator->AppendFeatureOptions(flags, lang, "IPO");
-    }
-}

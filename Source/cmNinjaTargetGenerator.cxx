@@ -96,32 +96,6 @@ std::string cmNinjaTargetGenerator::LanguageCompilerRule(
     cmGlobalNinjaGenerator::EncodeRuleName(this->Target->GetName());
 }
 
-// TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.
-const char* cmNinjaTargetGenerator::GetFeature(const std::string& feature)
-{
-  return this->GeneratorTarget->GetFeature(feature, this->GetConfigName());
-}
-
-// TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.
-bool cmNinjaTargetGenerator::GetFeatureAsBool(const std::string& feature)
-{
-  return this->GeneratorTarget->GetFeatureAsBool(feature,
-                                                 this->GetConfigName());
-}
-
-// TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.
-void cmNinjaTargetGenerator::AddFeatureFlags(std::string& flags,
-                                             const std::string& lang)
-{
-  // Add language-specific flags.
-  this->LocalGenerator->AddLanguageFlags(flags, lang, this->GetConfigName());
-
-  if(this->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION"))
-    {
-    this->LocalGenerator->AppendFeatureOptions(flags, lang, "IPO");
-    }
-}
-
 std::string
 cmNinjaTargetGenerator::OrderDependsTargetForTarget()
 {
