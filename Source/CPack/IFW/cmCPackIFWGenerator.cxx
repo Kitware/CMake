@@ -254,9 +254,11 @@ int cmCPackIFWGenerator::InitializeInternal()
 
   const std::string BinCreatorOpt = "CPACK_IFW_BINARYCREATOR_EXECUTABLE";
   const std::string RepoGenOpt = "CPACK_IFW_REPOGEN_EXECUTABLE";
+  const std::string FrameworkVersionOpt = "CPACK_IFW_FRAMEWORK_VERSION";
 
   if(!this->IsSet(BinCreatorOpt) ||
-     !this->IsSet(RepoGenOpt))
+     !this->IsSet(RepoGenOpt) ||
+     !this->IsSet(FrameworkVersionOpt))
     {
     this->ReadListFile("CPackIFW.cmake");
     }
@@ -296,7 +298,7 @@ int cmCPackIFWGenerator::InitializeInternal()
 
   // Framework version
   if(const char* FrameworkVersionSrt =
-      this->GetOption("CPACK_IFW_FRAMEWORK_VERSION"))
+      this->GetOption(FrameworkVersionOpt))
     {
     FrameworkVersion = FrameworkVersionSrt;
     }
