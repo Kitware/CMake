@@ -23,9 +23,15 @@ cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
   , LocalGenerator(static_cast<cmLocalCommonGenerator*>(gt->LocalGenerator))
   , GlobalGenerator(static_cast<cmGlobalCommonGenerator*>(
                       gt->LocalGenerator->GetGlobalGenerator()))
+  , ConfigName(LocalGenerator->GetConfigName())
 {
 }
 
 cmCommonTargetGenerator::~cmCommonTargetGenerator()
 {
+}
+
+std::string const& cmCommonTargetGenerator::GetConfigName() const
+{
+  return this->ConfigName;
 }

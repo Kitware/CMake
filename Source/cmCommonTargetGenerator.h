@@ -29,12 +29,15 @@ public:
   cmCommonTargetGenerator(cmGeneratorTarget* gt);
   virtual ~cmCommonTargetGenerator();
 
+  std::string const& GetConfigName() const;
+
 protected:
   cmGeneratorTarget* GeneratorTarget;
   cmTarget* Target;
   cmMakefile* Makefile;
   cmLocalCommonGenerator* LocalGenerator;
   cmGlobalCommonGenerator* GlobalGenerator;
+  std::string ConfigName;
 };
 
 #endif

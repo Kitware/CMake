@@ -89,11 +89,6 @@ cmGlobalNinjaGenerator* cmNinjaTargetGenerator::GetGlobalGenerator() const
   return this->LocalGenerator->GetGlobalNinjaGenerator();
 }
 
-std::string const& cmNinjaTargetGenerator::GetConfigName() const
-{
-  return this->LocalGenerator->GetConfigName();
-}
-
 std::string cmNinjaTargetGenerator::LanguageCompilerRule(
   const std::string& lang) const
 {
