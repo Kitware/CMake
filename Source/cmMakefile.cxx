@@ -273,20 +273,17 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
     }
 }
 
-std::vector<cmValueWithOrigin> cmMakefile::GetIncludeDirectoriesEntries() const
+std::vector<std::string> cmMakefile::GetIncludeDirectoriesEntries() const
 {
-  std::vector<cmValueWithOrigin> entries;
-  entries.reserve(this->IncludeDirectoriesEntries.size());
-  std::vector<cmListFileBacktrace>::const_iterator btIt =
-      this->IncludeDirectoriesEntryBacktraces.begin();
-  for(std::vector<std::string>::const_iterator it =
-      this->IncludeDirectoriesEntries.begin();
-      it != this->IncludeDirectoriesEntries.end(); ++it, ++btIt)
-    {
-    entries.push_back(cmValueWithOrigin(*it, *btIt));
-    }
-  return entries;
+  return this->IncludeDirectoriesEntries;
 }
+
+std::vector<cmListFileBacktrace>
+cmMakefile::GetIncludeDirectoriesBacktraces() const
+{
+  return this->IncludeDirectoriesEntryBacktraces;
+}
+
 
 std::vector<std::string> cmMakefile::GetCompileOptionsEntries() const
 {
@@ -1942,7 +1939,6 @@ void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
 
   cmListFileBacktrace lfbt = this->GetBacktrace();
   std::string entryString = cmJoin(incs, ";");
-  cmValueWithOrigin entry(entryString, lfbt);
   this->IncludeDirectoriesEntries.insert(position, entryString);
   this->IncludeDirectoriesEntryBacktraces.insert(btPos, lfbt);
 
@@ -1951,7 +1947,7 @@ void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
        l != this->Targets.end(); ++l)
     {
     cmTarget &t = l->second;
-    t.InsertInclude(entry, before);
+    t.InsertInclude(entryString, lfbt, before);
     }
 }
 

@@ -572,7 +572,8 @@ public:
   std::vector<std::string> GetIncludeDirectories(
                      const std::string& config,
                      const std::string& language) const;
-  void InsertInclude(const cmValueWithOrigin &entry,
+  void InsertInclude(std::string const& entry,
+                     cmListFileBacktrace const& bt,
                      bool before = false);
   void InsertCompileOption(std::string const& entry,
                            cmListFileBacktrace const& bt,

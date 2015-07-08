@@ -402,13 +402,18 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     {
     // Initialize the INCLUDE_DIRECTORIES property based on the current value
     // of the same directory property:
-    const std::vector<cmValueWithOrigin> parentIncludes =
-                                this->Makefile->GetIncludeDirectoriesEntries();
+    const std::vector<std::string> parentIncludes =
+        this->Makefile->GetIncludeDirectoriesEntries();
+    const std::vector<cmListFileBacktrace> parentIncludesBts =
+        this->Makefile->GetIncludeDirectoriesBacktraces();
 
-    for (std::vector<cmValueWithOrigin>::const_iterator it
-                = parentIncludes.begin(); it != parentIncludes.end(); ++it)
+    std::vector<cmListFileBacktrace>::const_iterator btIt =
+        parentIncludesBts.begin();
+    for (std::vector<std::string>::const_iterator it
+                = parentIncludes.begin();
+         it != parentIncludes.end(); ++it, ++btIt)
       {
-      this->InsertInclude(*it);
+      this->InsertInclude(*it, *btIt);
       }
     const std::set<std::string> parentSystemIncludes =
                                 this->Makefile->GetSystemIncludeDirectories();
@@ -421,8 +426,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     const std::vector<cmListFileBacktrace> parentOptionsBts =
                                 this->Makefile->GetCompileOptionsBacktraces();
 
-    std::vector<cmListFileBacktrace>::const_iterator btIt =
-        parentOptionsBts.begin();
+    btIt = parentOptionsBts.begin();
     for (std::vector<std::string>::const_iterator it
                 = parentOptions.begin();
          it != parentOptions.end(); ++it, ++btIt)
@@ -1931,17 +1935,18 @@ void cmTarget::AppendBuildInterfaceIncludes()
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::InsertInclude(const cmValueWithOrigin &entry,
-                     bool before)
+void cmTarget::InsertInclude(std::string const& entry,
+                             cmListFileBacktrace const& bt,
+                             bool before)
 {
-  cmGeneratorExpression ge(entry.Backtrace);
+  cmGeneratorExpression ge(bt);
 
   std::vector<cmTargetInternals::TargetPropertyEntry*>::iterator position
                 = before ? this->Internal->IncludeDirectoriesEntries.begin()
                          : this->Internal->IncludeDirectoriesEntries.end();
 
   this->Internal->IncludeDirectoriesEntries.insert(position,
-      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry.Value)));
+      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry)));
 }
 
 //----------------------------------------------------------------------------
