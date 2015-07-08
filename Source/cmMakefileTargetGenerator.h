@@ -254,18 +254,6 @@ protected:
 
   // Compute target-specific Fortran language flags.
   void AddFortranFlags(std::string& flags);
-
-  //==================================================================
-  // Convenience routines that do nothing more than forward to
-  // implementaitons
-  std::string Convert(const std::string& source,
-                      cmLocalGenerator::RelativeRoot relative,
-                      cmLocalGenerator::OutputFormat output =
-                      cmLocalGenerator::UNCHANGED)
-  {
-    return this->LocalGenerator->Convert(source, relative, output);
-  }
-
 };
 
 #endif

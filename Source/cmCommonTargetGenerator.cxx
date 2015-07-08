@@ -38,6 +38,14 @@ std::string const& cmCommonTargetGenerator::GetConfigName() const
   return this->ConfigName;
 }
 
+std::string cmCommonTargetGenerator::Convert(
+  std::string const& source,
+  cmLocalGenerator::RelativeRoot relative,
+  cmLocalGenerator::OutputFormat output)
+{
+  return this->LocalGenerator->Convert(source, relative, output);
+}
+
 //----------------------------------------------------------------------------
 const char* cmCommonTargetGenerator::GetFeature(const std::string& feature)
 {

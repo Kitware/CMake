@@ -14,6 +14,8 @@
 
 #include "cmStandardIncludes.h"
 
+#include "cmLocalGenerator.h"
+
 class cmGeneratorTarget;
 class cmGlobalCommonGenerator;
 class cmLocalCommonGenerator;
@@ -52,6 +54,11 @@ protected:
 
   // The windows module definition source file (.def), if any.
   std::string ModuleDefinitionFile;
+
+  std::string Convert(std::string const& source,
+                      cmLocalGenerator::RelativeRoot relative,
+                      cmLocalGenerator::OutputFormat output =
+                      cmLocalGenerator::UNCHANGED);
 };
 
 #endif
