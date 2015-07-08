@@ -288,19 +288,15 @@ std::vector<cmValueWithOrigin> cmMakefile::GetIncludeDirectoriesEntries() const
   return entries;
 }
 
-std::vector<cmValueWithOrigin> cmMakefile::GetCompileOptionsEntries() const
+std::vector<std::string> cmMakefile::GetCompileOptionsEntries() const
 {
-  std::vector<cmValueWithOrigin> entries;
-  entries.reserve(this->CompileOptionsEntries.size());
-  std::vector<cmListFileBacktrace>::const_iterator btIt =
-      this->CompileOptionsEntryBacktraces.begin();
-  for(std::vector<std::string>::const_iterator it =
-      this->CompileOptionsEntries.begin();
-      it != this->CompileOptionsEntries.end(); ++it, ++btIt)
-    {
-    entries.push_back(cmValueWithOrigin(*it, *btIt));
-    }
-  return entries;
+  return this->CompileOptionsEntries;
+}
+
+std::vector<cmListFileBacktrace>
+cmMakefile::GetCompileOptionsBacktraces() const
+{
+  return this->CompileOptionsEntryBacktraces;
 }
 
 std::vector<std::string> cmMakefile::GetCompileDefinitionsEntries() const
