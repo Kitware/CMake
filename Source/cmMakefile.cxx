@@ -303,19 +303,15 @@ std::vector<cmValueWithOrigin> cmMakefile::GetCompileOptionsEntries() const
   return entries;
 }
 
-std::vector<cmValueWithOrigin> cmMakefile::GetCompileDefinitionsEntries() const
+std::vector<std::string> cmMakefile::GetCompileDefinitionsEntries() const
 {
-  std::vector<cmValueWithOrigin> entries;
-  entries.reserve(this->CompileDefinitionsEntries.size());
-  std::vector<cmListFileBacktrace>::const_iterator btIt =
-      this->CompileDefinitionsEntryBacktraces.begin();
-  for(std::vector<std::string>::const_iterator it =
-      this->CompileDefinitionsEntries.begin();
-      it != this->CompileDefinitionsEntries.end(); ++it, ++btIt)
-    {
-    entries.push_back(cmValueWithOrigin(*it, *btIt));
-    }
-  return entries;
+  return this->CompileDefinitionsEntries;
+}
+
+std::vector<cmListFileBacktrace>
+cmMakefile::GetCompileDefinitionsBacktraces() const
+{
+  return this->CompileDefinitionsEntryBacktraces;
 }
 
 //----------------------------------------------------------------------------

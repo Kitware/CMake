@@ -1954,12 +1954,13 @@ void cmTarget::InsertCompileOption(const cmValueWithOrigin &entry,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::InsertCompileDefinition(const cmValueWithOrigin &entry)
+void cmTarget::InsertCompileDefinition(std::string const& entry,
+                                       cmListFileBacktrace const& bt)
 {
-  cmGeneratorExpression ge(entry.Backtrace);
+  cmGeneratorExpression ge(bt);
 
   this->Internal->CompileDefinitionsEntries.push_back(
-      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry.Value)));
+      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry)));
 }
 
 //----------------------------------------------------------------------------
