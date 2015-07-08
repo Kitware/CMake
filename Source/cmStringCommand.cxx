@@ -74,6 +74,10 @@ bool cmStringCommand
     {
     return this->HandleLengthCommand(args);
     }
+  else if(subCommand == "APPEND")
+    {
+    return this->HandleAppendCommand(args);
+    }
   else if(subCommand == "CONCAT")
     {
     return this->HandleConcatCommand(args);
@@ -726,6 +730,34 @@ bool cmStringCommand
   sprintf(buffer, "%d", static_cast<int>(length));
 
   this->Makefile->AddDefinition(variableName, buffer);
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmStringCommand::HandleAppendCommand(std::vector<std::string> const& args)
+{
+  if(args.size() < 2)
+    {
+    this->SetError("sub-command APPEND requires at least one argument.");
+    return false;
+    }
+
+  // Skip if nothing to append.
+  if(args.size() < 3)
+    {
+    return true;
+    }
+
+  const std::string& variable = args[1];
+
+  std::string value;
+  const char* oldValue = this->Makefile->GetDefinition(variable);
+  if(oldValue)
+    {
+    value = oldValue;
+    }
+  value += cmJoin(cmRange(args).advance(2), std::string());
+  this->Makefile->AddDefinition(variable, value.c_str());
   return true;
 }
 
