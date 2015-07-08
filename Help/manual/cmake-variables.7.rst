@@ -381,6 +381,7 @@ Variables for CTest
    /variable/CTEST_P4_COMMAND
    /variable/CTEST_P4_OPTIONS
    /variable/CTEST_P4_UPDATE_OPTIONS
+   /variable/CTEST_PULL_REQUEST
    /variable/CTEST_SCP_COMMAND
    /variable/CTEST_SITE
    /variable/CTEST_SOURCE_DIRECTORY

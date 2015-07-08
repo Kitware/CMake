@@ -109,6 +109,13 @@ bool cmCTestHandlerCommand
       this->Quiet);
     }
 
+  if(const char* pullRequest =
+     this->Makefile->GetDefinition("CTEST_PULL_REQUEST"))
+    {
+    this->CTest->SetCTestConfiguration("PullRequest", pullRequest,
+      this->Quiet);
+    }
+
   cmCTestLog(this->CTest, DEBUG, "Initialize handler" << std::endl;);
   cmCTestGenericHandler* handler = this->InitializeHandler();
   if ( !handler )
