@@ -1081,6 +1081,14 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       this->ConvertToOutputFormat(this->ModuleDefinitionFile, SHELL);
     linkOptions.AddFlag("ModuleDefinitionFile", defFile.c_str());
     }
+  if (target.GetType() == cmTarget::SHARED_LIBRARY &&
+      this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
+    {
+    if (target.GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS"))
+      {
+      linkOptions.AddFlag("ModuleDefinitionFile", "$(IntDir)/exportall.def");
+      }
+    }
   switch(target.GetType())
     {
     case cmTarget::UNKNOWN_LIBRARY:
@@ -2015,7 +2023,28 @@ void cmLocalVisualStudio7Generator
   // Add pre-link event.
   tool = this->FortranProject? "VFPreLinkEventTool":"VCPreLinkEventTool";
   event.Start(tool);
-  event.Write(target.GetPreLinkCommands());
+  bool addedPrelink = false;
+  if (target.GetType() == cmTarget::SHARED_LIBRARY &&
+      this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
+    {
+    if (target.GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS"))
+      {
+      addedPrelink = true;
+      std::vector<cmCustomCommand> commands =
+        target.GetPreLinkCommands();
+      cmGlobalVisualStudioGenerator* gg
+        = static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator);
+      cmGeneratorTarget* gt =
+        this->GlobalGenerator->GetGeneratorTarget(&target);
+      gg->AddSymbolExportCommand(
+        gt, commands, configName);
+      event.Write(commands);
+      }
+    }
+  if (!addedPrelink)
+    {
+    event.Write(target.GetPreLinkCommands());
+    }
   cmsys::auto_ptr<cmCustomCommand> pcc(
     this->MaybeCreateImplibDir(target, configName, this->FortranProject));
   if(pcc.get())

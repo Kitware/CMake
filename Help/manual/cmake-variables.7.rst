@@ -275,6 +275,7 @@ Variables that Control the Build
    /variable/CMAKE_USE_RELATIVE_PATHS
    /variable/CMAKE_VISIBILITY_INLINES_HIDDEN
    /variable/CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD
+   /variable/CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS
    /variable/CMAKE_WIN32_EXECUTABLE
    /variable/CMAKE_XCODE_ATTRIBUTE_an-attribute
    /variable/EXECUTABLE_OUTPUT_PATH
