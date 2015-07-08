@@ -416,13 +416,18 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     this->SystemIncludeDirectories.insert(parentSystemIncludes.begin(),
                                           parentSystemIncludes.end());
 
-    const std::vector<cmValueWithOrigin> parentOptions =
+    const std::vector<std::string> parentOptions =
                                 this->Makefile->GetCompileOptionsEntries();
+    const std::vector<cmListFileBacktrace> parentOptionsBts =
+                                this->Makefile->GetCompileOptionsBacktraces();
 
-    for (std::vector<cmValueWithOrigin>::const_iterator it
-                = parentOptions.begin(); it != parentOptions.end(); ++it)
+    std::vector<cmListFileBacktrace>::const_iterator btIt =
+        parentOptionsBts.begin();
+    for (std::vector<std::string>::const_iterator it
+                = parentOptions.begin();
+         it != parentOptions.end(); ++it, ++btIt)
       {
-      this->InsertCompileOption(*it);
+      this->InsertCompileOption(*it, *btIt);
       }
     }
 
@@ -1940,17 +1945,18 @@ void cmTarget::InsertInclude(const cmValueWithOrigin &entry,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::InsertCompileOption(const cmValueWithOrigin &entry,
-                     bool before)
+void cmTarget::InsertCompileOption(std::string const& entry,
+                                   cmListFileBacktrace const& bt,
+                                   bool before)
 {
-  cmGeneratorExpression ge(entry.Backtrace);
+  cmGeneratorExpression ge(bt);
 
   std::vector<cmTargetInternals::TargetPropertyEntry*>::iterator position
                 = before ? this->Internal->CompileOptionsEntries.begin()
                          : this->Internal->CompileOptionsEntries.end();
 
   this->Internal->CompileOptionsEntries.insert(position,
-      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry.Value)));
+      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry)));
 }
 
 //----------------------------------------------------------------------------

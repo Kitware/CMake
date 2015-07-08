@@ -747,7 +747,8 @@ public:
   void SetCheckCMP0000(bool b) { this->CheckCMP0000 = b; }
 
   std::vector<cmValueWithOrigin> GetIncludeDirectoriesEntries() const;
-  std::vector<cmValueWithOrigin> GetCompileOptionsEntries() const;
+  std::vector<std::string> GetCompileOptionsEntries() const;
+  std::vector<cmListFileBacktrace> GetCompileOptionsBacktraces() const;
   std::vector<std::string> GetCompileDefinitionsEntries() const;
   std::vector<cmListFileBacktrace> GetCompileDefinitionsBacktraces() const;
 
