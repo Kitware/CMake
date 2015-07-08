@@ -46,6 +46,7 @@ public:
    */
   virtual void Generate();
 
+  std::string const& GetConfigName() { return this->ConfigName; }
 
   // this returns the relative path between the HomeOutputDirectory and this
   // local generators StartOutputDirectory
@@ -253,7 +254,7 @@ private:
 
   ImplicitDependTargetMap ImplicitDepends;
 
-  std::string ConfigurationName;
+  std::string ConfigName;
 
   std::string HomeRelativeOutputPath;
 

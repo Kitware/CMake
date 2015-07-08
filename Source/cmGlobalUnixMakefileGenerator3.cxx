@@ -483,7 +483,7 @@ cmGlobalUnixMakefileGenerator3
       if((!check_all || !gtarget->GetPropertyAsBool("EXCLUDE_FROM_ALL")) &&
          (!check_relink ||
           gtarget->Target
-                   ->NeedRelinkBeforeInstall(lg->ConfigurationName)))
+            ->NeedRelinkBeforeInstall(lg->GetConfigName())))
         {
         std::string tname = lg->GetRelativeTargetDirectory(*gtarget->Target);
         tname += "/";
@@ -692,7 +692,7 @@ cmGlobalUnixMakefileGenerator3
         // Add a local name for the rule to relink the target before
         // installation.
         if(gtarget->Target
-                    ->NeedRelinkBeforeInstall(lg->ConfigurationName))
+             ->NeedRelinkBeforeInstall(lg->GetConfigName()))
           {
           makeTargetName = lg->GetRelativeTargetDirectory(*gtarget->Target);
           makeTargetName += "/preinstall";
@@ -865,7 +865,7 @@ cmGlobalUnixMakefileGenerator3
 
       // Add rules to prepare the target for installation.
       if(gtarget->Target
-                  ->NeedRelinkBeforeInstall(lg->ConfigurationName))
+           ->NeedRelinkBeforeInstall(lg->GetConfigName()))
         {
         localName = lg->GetRelativeTargetDirectory(*gtarget->Target);
         localName += "/preinstall";

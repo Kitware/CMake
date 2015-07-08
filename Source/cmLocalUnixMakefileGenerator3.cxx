@@ -104,12 +104,12 @@ void cmLocalUnixMakefileGenerator3::Generate()
   if(const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE"))
     {
     // Use the build type given by the user.
-    this->ConfigurationName = config;
+    this->ConfigName = config;
     }
   else
     {
     // No configuration type given.
-    this->ConfigurationName = "";
+    this->ConfigName = "";
     }
 
   // Record whether some options are enabled to avoid checking many
@@ -497,7 +497,7 @@ void cmLocalUnixMakefileGenerator3
       // Add a local name for the rule to relink the target before
       // installation.
       if(t->second->Target
-                  ->NeedRelinkBeforeInstall(this->ConfigurationName))
+                  ->NeedRelinkBeforeInstall(this->ConfigName))
         {
         makeTargetName = this->GetRelativeTargetDirectory(*t->second->Target);
         makeTargetName += "/preinstall";
@@ -1017,7 +1017,7 @@ cmLocalUnixMakefileGenerator3
   for(std::vector<cmCustomCommand>::const_iterator i = ccs.begin();
       i != ccs.end(); ++i)
     {
-    cmCustomCommandGenerator ccg(*i, this->ConfigurationName,
+    cmCustomCommandGenerator ccg(*i, this->ConfigName,
                                  this->Makefile);
     this->AppendCustomDepend(depends, ccg);
     }
@@ -1034,7 +1034,7 @@ cmLocalUnixMakefileGenerator3
     {
     // Lookup the real name of the dependency in case it is a CMake target.
     std::string dep;
-    if(this->GetRealDependency(*d, this->ConfigurationName,
+    if(this->GetRealDependency(*d, this->ConfigName,
                                dep))
       {
       depends.push_back(dep);
@@ -1053,7 +1053,7 @@ cmLocalUnixMakefileGenerator3
   for(std::vector<cmCustomCommand>::const_iterator i = ccs.begin();
       i != ccs.end(); ++i)
     {
-    cmCustomCommandGenerator ccg(*i, this->ConfigurationName,
+    cmCustomCommandGenerator ccg(*i, this->ConfigName,
                                  this->Makefile);
     this->AppendCustomCommand(commands, ccg, target, true, relative);
     }
@@ -2043,7 +2043,7 @@ void cmLocalUnixMakefileGenerator3
     // Build a list of preprocessor definitions for the target.
     std::set<std::string> defines;
     this->AddCompileDefinitions(defines, &target,
-                                this->ConfigurationName, l->first);
+                                this->ConfigName, l->first);
     if(!defines.empty())
       {
       cmakefileStream
