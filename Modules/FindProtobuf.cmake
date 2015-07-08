@@ -9,8 +9,9 @@
 # ``PROTOBUF_SRC_ROOT_FOLDER``
 #   When compiling with MSVC, if this cache variable is set
 #   the protobuf-default VS project build locations
-#   (vsprojects/Debug & vsprojects/Release) will be searched
-#   for libraries and binaries.
+#   (vsprojects/Debug and vsprojects/Release
+#   or vsprojects/x64/Debug and vsprojects/x64/Release)
+#   will be searched for libraries and binaries.
 # ``PROTOBUF_IMPORT_DIRS``
 #   List of additional directories to be searched for
 #   imported .proto files.
@@ -146,18 +147,22 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
   set(${HDRS} ${${HDRS}} PARENT_SCOPE)
 endfunction()
 
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(_PROTOBUF_ARCH_DIR x64/)
+endif()
+
 # Internal function: search for normal library as well as a debug one
 #    if the debug one is specified also include debug/optimized keywords
 #    in *_LIBRARIES variable
 function(_protobuf_find_libraries name filename)
    find_library(${name}_LIBRARY
        NAMES ${filename}
-       PATHS ${PROTOBUF_SRC_ROOT_FOLDER}/vsprojects/Release)
+       PATHS ${PROTOBUF_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Release)
    mark_as_advanced(${name}_LIBRARY)
 
    find_library(${name}_LIBRARY_DEBUG
        NAMES ${filename}
-       PATHS ${PROTOBUF_SRC_ROOT_FOLDER}/vsprojects/Debug)
+       PATHS ${PROTOBUF_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Debug)
    mark_as_advanced(${name}_LIBRARY_DEBUG)
 
    if(NOT ${name}_LIBRARY_DEBUG)
@@ -234,8 +239,8 @@ find_program(PROTOBUF_PROTOC_EXECUTABLE
     NAMES protoc
     DOC "The Google Protocol Buffers Compiler"
     PATHS
-    ${PROTOBUF_SRC_ROOT_FOLDER}/vsprojects/Release
-    ${PROTOBUF_SRC_ROOT_FOLDER}/vsprojects/Debug
+    ${PROTOBUF_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Release
+    ${PROTOBUF_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Debug
 )
 mark_as_advanced(PROTOBUF_PROTOC_EXECUTABLE)
 
