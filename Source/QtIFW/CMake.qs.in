@@ -1,14 +1,12 @@
 function Component()
 {
-    // default constructor
+    // Default constructor
 }
 
 Component.prototype.createOperations = function()
 {
     // Create shortcut
     if (installer.value("os") === "win") {
-
-@_CPACK_IFW_SHORTCUT_OPTIONAL@
 
         component.addOperation("CreateShortcut",
                                installer.value("TargetDir") + "/@CMAKE_DOC_DIR@/cmake.org.html",

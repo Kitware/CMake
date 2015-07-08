@@ -19,6 +19,9 @@ if(NOT CMake_SOURCE_DIR)
   include(${CMake_SOURCE_DIR}/Source/CMakeInstallDestinations.cmake)
   unset(CMAKE_DATA_DIR)
   unset(CMAKE_DATA_DIR CACHE)
+  macro(CMake_OPTIONAL_COMPONENT)
+    set(COMPONENT "")
+  endmacro()
 endif()
 project(CMakeHelp NONE)
 
@@ -153,28 +156,35 @@ if(SPHINX_MAN)
     if("x${m}" MATCHES "^x(.+)\\.([1-9])\\.rst$")
       set(name "${CMAKE_MATCH_1}")
       set(sec "${CMAKE_MATCH_2}")
+      CMake_OPTIONAL_COMPONENT(sphinx-man)
       install(FILES ${CMAKE_CURRENT_BINARY_DIR}/man/${name}.${sec}
-              DESTINATION ${CMAKE_MAN_DIR}/man${sec})
+              DESTINATION ${CMAKE_MAN_DIR}/man${sec}
+              ${COMPONENT})
     endif()
   endforeach()
 endif()
 
 if(SPHINX_HTML)
+  CMake_OPTIONAL_COMPONENT(sphinx-html)
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
           DESTINATION ${CMAKE_DOC_DIR}
+          ${COMPONENT}
           PATTERN .buildinfo EXCLUDE
           )
 endif()
 
 if(SPHINX_SINGLEHTML)
+  CMake_OPTIONAL_COMPONENT(sphinx-singlehtml)
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/singlehtml
           DESTINATION ${CMAKE_DOC_DIR}
+          ${COMPONENT}
           PATTERN .buildinfo EXCLUDE
           )
 endif()
 
 if(SPHINX_QTHELP)
+  CMake_OPTIONAL_COMPONENT(sphinx-qthelp)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake-${CMake_VERSION_MAJOR}${CMake_VERSION_MINOR}${CMake_VERSION_PATCH}.qch
-          DESTINATION ${CMAKE_DOC_DIR}
+          DESTINATION ${CMAKE_DOC_DIR} ${COMPONENT}
           )
 endif()
