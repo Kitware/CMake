@@ -110,55 +110,7 @@ std::string
 cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile const* source,
                                               const std::string& language)
 {
-  bool hasLangCached = this->LanguageFlags.count(language) != 0;
-  std::string& languageFlags = this->LanguageFlags[language];
-  if(!hasLangCached)
-    {
-    this->AddFeatureFlags(languageFlags, language);
-
-    this->GetLocalGenerator()->AddArchitectureFlags(languageFlags,
-                                                    this->GeneratorTarget,
-                                                    language,
-                                                    this->GetConfigName());
-
-    // Fortran-specific flags computed for this target.
-    if(language == "Fortran")
-      {
-      this->AddFortranFlags(languageFlags);
-      }
-
-    // Add shared-library flags if needed.
-    this->LocalGenerator->AddCMP0018Flags(languageFlags, this->Target,
-                                          language,
-                                          this->GetConfigName());
-
-    this->LocalGenerator->AddVisibilityPresetFlags(languageFlags, this->Target,
-                                                   language);
-
-    // Add include directory flags.
-    this->AddIncludeFlags(languageFlags, language);
-
-    // Append old-style preprocessor definition flags.
-    this->LocalGenerator->AppendFlags(languageFlags,
-                                      this->Makefile->GetDefineFlags());
-
-    // Add framework directory flags.
-    this->LocalGenerator->
-      AppendFlags(languageFlags, this->GetFrameworkFlags(language));
-
-    // Add target-specific flags.
-    this->LocalGenerator->AddCompileOptions(languageFlags, this->Target,
-                                            language,
-                                            this->GetConfigName());
-    }
-
-  std::string flags = languageFlags;
-
-  // Add Fortran format flags.
-  if(language == "Fortran")
-    {
-    this->AppendFortranFormatFlags(flags, *source);
-    }
+  std::string flags = this->GetFlags(language);
 
   // Add source file specific flags.
   this->LocalGenerator->AppendFlags(flags,

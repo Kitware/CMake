@@ -74,6 +74,13 @@ protected:
 
   // Return the a string with -F flags on apple
   std::string GetFrameworkFlags(std::string const& l);
+
+  virtual void AddIncludeFlags(std::string& flags,
+                               std::string const& lang) = 0;
+
+  typedef std::map<std::string, std::string> ByLanguageMap;
+  std::string GetFlags(const std::string &l);
+  ByLanguageMap FlagsByLanguage;
 };
 
 #endif
