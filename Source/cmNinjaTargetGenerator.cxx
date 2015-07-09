@@ -163,16 +163,6 @@ cmNinjaTargetGenerator::
 ComputeDefines(cmSourceFile const* source, const std::string& language)
 {
   std::set<std::string> defines;
-
-  // Add the export symbol definition for shared library objects.
-  if(const char* exportMacro = this->Target->GetExportMacro())
-    {
-    this->LocalGenerator->AppendDefines(defines, exportMacro);
-    }
-
-  // Add preprocessor definitions for this target and configuration.
-  this->LocalGenerator->AddCompileDefinitions(defines, this->Target,
-                                             this->GetConfigName(), language);
   this->LocalGenerator->AppendDefines
     (defines,
      source->GetProperty("COMPILE_DEFINITIONS"));
@@ -184,7 +174,7 @@ ComputeDefines(cmSourceFile const* source, const std::string& language)
      source->GetProperty(defPropName));
   }
 
-  std::string definesString;
+  std::string definesString = this->GetDefines(language);
   this->LocalGenerator->JoinDefines(defines, definesString,
      language);
 
