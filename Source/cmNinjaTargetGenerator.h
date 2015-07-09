@@ -13,6 +13,8 @@
 #ifndef cmNinjaTargetGenerator_h
 #define cmNinjaTargetGenerator_h
 
+#include "cmCommonTargetGenerator.h"
+
 #include "cmStandardIncludes.h"
 #include "cmNinjaTypes.h"
 #include "cmLocalNinjaGenerator.h"
@@ -26,7 +28,7 @@ class cmMakefile;
 class cmSourceFile;
 class cmCustomCommand;
 
-class cmNinjaTargetGenerator
+class cmNinjaTargetGenerator: public cmCommonTargetGenerator
 {
 public:
   /// Create a cmNinjaTargetGenerator according to the @a target's type.
@@ -65,13 +67,7 @@ protected:
   cmMakefile* GetMakefile() const
   { return this->Makefile; }
 
-  std::string const& GetConfigName() const;
-
   std::string LanguageCompilerRule(const std::string& lang) const;
-
-  const char* GetFeature(const std::string& feature);
-  bool GetFeatureAsBool(const std::string& feature);
-  void AddFeatureFlags(std::string& flags, const std::string& lang);
 
   std::string OrderDependsTargetForTarget();
 
@@ -84,6 +80,8 @@ protected:
    */
   std::string ComputeFlagsForObject(cmSourceFile const* source,
                                     const std::string& language);
+
+  void AddIncludeFlags(std::string& flags, std::string const& lang);
 
   std::string ComputeDefines(cmSourceFile const* source,
                              const std::string& language);
@@ -119,9 +117,6 @@ protected:
   cmNinjaDeps GetObjects() const
   { return this->Objects; }
 
-  // Helper to add flag for windows .def file.
-  void AddModuleDefinitionFlag(std::string& flags);
-
   void EnsureDirectoryExists(const std::string& dir) const;
   void EnsureParentDirectoryExists(const std::string& path) const;
 
@@ -150,19 +145,10 @@ protected:
                             cmNinjaVars& vars);
 
 private:
-  cmTarget* Target;
-  cmGeneratorTarget* GeneratorTarget;
-  cmMakefile* Makefile;
   cmLocalNinjaGenerator* LocalGenerator;
   /// List of object files for this target.
   cmNinjaDeps Objects;
   std::vector<cmCustomCommand const*> CustomCommands;
-
-  typedef std::map<std::string, std::string> LanguageFlagMap;
-  LanguageFlagMap LanguageFlags;
-
-  // The windows module definition source file (.def), if any.
-  std::string ModuleDefinitionFile;
 };
 
 #endif // ! cmNinjaTargetGenerator_h

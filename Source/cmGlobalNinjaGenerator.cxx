@@ -505,7 +505,7 @@ void cmGlobalNinjaGenerator::WriteDefault(std::ostream& os,
 
 
 cmGlobalNinjaGenerator::cmGlobalNinjaGenerator(cmake* cm)
-  : cmGlobalGenerator(cm)
+  : cmGlobalCommonGenerator(cm)
   , BuildFileStream(0)
   , RulesFileStream(0)
   , CompileCommandsStream(0)
