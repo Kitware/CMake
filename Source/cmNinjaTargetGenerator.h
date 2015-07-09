@@ -81,6 +81,8 @@ protected:
   std::string ComputeFlagsForObject(cmSourceFile const* source,
                                     const std::string& language);
 
+  void AddIncludeFlags(std::string& flags, std::string const& lang);
+
   std::string ComputeDefines(cmSourceFile const* source,
                              const std::string& language);
 

@@ -135,23 +135,8 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile const* source,
     this->LocalGenerator->AddVisibilityPresetFlags(languageFlags, this->Target,
                                                    language);
 
-    std::vector<std::string> includes;
-    this->LocalGenerator->GetIncludeDirectories(includes,
-                                                this->GeneratorTarget,
-                                                language,
-                                                this->GetConfigName());
     // Add include directory flags.
-    std::string includeFlags =
-      this->LocalGenerator->GetIncludeFlags(includes, this->GeneratorTarget,
-                                            language,
-      language == "RC" ? true : false,  // full include paths for RC
-                                        // needed by cmcldeps
-                                            false,
-                                            this->GetConfigName());
-    if (this->GetGlobalGenerator()->IsGCCOnWindows())
-      cmSystemTools::ReplaceString(includeFlags, "\\", "/");
-
-    this->LocalGenerator->AppendFlags(languageFlags, includeFlags);
+    this->AddIncludeFlags(languageFlags, language);
 
     // Append old-style preprocessor definition flags.
     this->LocalGenerator->AppendFlags(languageFlags,
@@ -178,6 +163,28 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile const* source,
   // TODO: Handle Apple frameworks.
 
   return flags;
+}
+
+void cmNinjaTargetGenerator::AddIncludeFlags(std::string& languageFlags,
+                                             std::string const& language)
+{
+  std::vector<std::string> includes;
+  this->LocalGenerator->GetIncludeDirectories(includes,
+                                              this->GeneratorTarget,
+                                              language,
+                                              this->GetConfigName());
+  // Add include directory flags.
+  std::string includeFlags =
+    this->LocalGenerator->GetIncludeFlags(includes, this->GeneratorTarget,
+                                          language,
+        language == "RC" ? true : false,  // full include paths for RC
+                                          // needed by cmcldeps
+                                          false,
+                                          this->GetConfigName());
+  if (this->GetGlobalGenerator()->IsGCCOnWindows())
+    cmSystemTools::ReplaceString(includeFlags, "\\", "/");
+
+  this->LocalGenerator->AppendFlags(languageFlags, includeFlags);
 }
 
 bool cmNinjaTargetGenerator::NeedDepTypeMSVC(const std::string& lang) const
