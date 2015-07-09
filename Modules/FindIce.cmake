@@ -20,6 +20,13 @@
 #   Ice_SLICE_DIRS - the directories containing the Ice slice interface
 #                    definitions
 #
+# Imported targets::
+#
+#   Ice::<C>
+#
+# Where ``<C>`` is the name of an Ice component, for example
+# ``Ice::Glacier2``.
+#
 # Ice slice programs are reported in::
 #
 #   Ice_SLICE2CPP_EXECUTABLE - path to slice2cpp executable
