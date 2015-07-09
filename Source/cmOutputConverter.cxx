@@ -14,9 +14,10 @@
 #include "cmAlgorithms.h"
 #include "cmake.h"
 
-#include <cmsys/System.h>
-
 #include <assert.h>
+
+#include <string.h> /* strlen */
+#include <ctype.h>  /* isalpha */
 
 cmOutputConverter::cmOutputConverter(cmState::Snapshot snapshot)
   : StateSnapshot(snapshot), LinkScriptShell(false)
@@ -330,51 +331,51 @@ std::string cmOutputConverter::EscapeForShell(const std::string& str,
   int flags = 0;
   if(this->GetState()->UseWindowsVSIDE())
     {
-    flags |= cmsysSystem_Shell_Flag_VSIDE;
+    flags |= Shell_Flag_VSIDE;
     }
   else if(!this->LinkScriptShell)
     {
-    flags |= cmsysSystem_Shell_Flag_Make;
+    flags |= Shell_Flag_Make;
     }
   if(makeVars)
     {
-    flags |= cmsysSystem_Shell_Flag_AllowMakeVariables;
+    flags |= Shell_Flag_AllowMakeVariables;
     }
   if(forEcho)
     {
-    flags |= cmsysSystem_Shell_Flag_EchoWindows;
+    flags |= Shell_Flag_EchoWindows;
     }
   if(useWatcomQuote)
     {
-    flags |= cmsysSystem_Shell_Flag_WatcomQuote;
+    flags |= Shell_Flag_WatcomQuote;
     }
   if(this->GetState()->UseWatcomWMake())
     {
-    flags |= cmsysSystem_Shell_Flag_WatcomWMake;
+    flags |= Shell_Flag_WatcomWMake;
     }
   if(this->GetState()->UseMinGWMake())
     {
-    flags |= cmsysSystem_Shell_Flag_MinGWMake;
+    flags |= Shell_Flag_MinGWMake;
     }
   if(this->GetState()->UseNMake())
     {
-    flags |= cmsysSystem_Shell_Flag_NMake;
+    flags |= Shell_Flag_NMake;
     }
 
   // Compute the buffer size needed.
   int size = (this->GetState()->UseWindowsShell() ?
-              cmsysSystem_Shell_GetArgumentSizeForWindows(str.c_str(), flags) :
-              cmsysSystem_Shell_GetArgumentSizeForUnix(str.c_str(), flags));
+              Shell_GetArgumentSizeForWindows(str.c_str(), flags) :
+              Shell_GetArgumentSizeForUnix(str.c_str(), flags));
 
   // Compute the shell argument itself.
   std::vector<char> arg(size);
   if(this->GetState()->UseWindowsShell())
     {
-    cmsysSystem_Shell_GetArgumentForWindows(str.c_str(), &arg[0], flags);
+    Shell_GetArgumentForWindows(str.c_str(), &arg[0], flags);
     }
   else
     {
-    cmsysSystem_Shell_GetArgumentForUnix(str.c_str(), &arg[0], flags);
+    Shell_GetArgumentForUnix(str.c_str(), &arg[0], flags);
     }
   return std::string(&arg[0]);
 }
@@ -412,6 +413,26 @@ std::string cmOutputConverter::EscapeForCMake(const std::string& str)
 }
 
 //----------------------------------------------------------------------------
+std::string
+cmOutputConverter::EscapeWindowsShellArgument(const char* arg, int shell_flags)
+{
+  char local_buffer[1024];
+  char* buffer = local_buffer;
+  int size = Shell_GetArgumentSizeForWindows(arg, shell_flags);
+  if(size > 1024)
+    {
+    buffer = new char[size];
+    }
+  Shell_GetArgumentForWindows(arg, buffer, shell_flags);
+  std::string result(buffer);
+  if(buffer != local_buffer)
+    {
+    delete [] buffer;
+    }
+  return result;
+}
+
+//----------------------------------------------------------------------------
 cmOutputConverter::FortranFormat
 cmOutputConverter::GetFortranFormat(const char* value)
 {
@@ -444,4 +465,586 @@ void cmOutputConverter::SetLinkScriptShell(bool linkScriptShell)
 cmState* cmOutputConverter::GetState() const
 {
   return this->StateSnapshot.GetState();
+}
+
+//----------------------------------------------------------------------------
+/*
+
+Notes:
+
+Make variable replacements open a can of worms.  Sometimes they should
+be quoted and sometimes not.  Sometimes their replacement values are
+already quoted.
+
+VS variables cause problems.  In order to pass the referenced value
+with spaces the reference must be quoted.  If the variable value ends
+in a backslash then it will escape the ending quote!  In order to make
+the ending backslash appear we need this:
+
+  "$(InputDir)\"
+
+However if there is not a trailing backslash then this will put a
+quote in the value so we need:
+
+  "$(InputDir)"
+
+Make variable references are platform specific so we should probably
+just NOT quote them and let the listfile author deal with it.
+
+*/
+
+/*
+TODO: For windows echo:
+
+To display a pipe (|) or redirection character (< or >) when using the
+echo command, use a caret character immediately before the pipe or
+redirection character (for example, ^>, ^<, or ^| ). If you need to
+use the caret character itself (^), use two in a row (^^).
+*/
+
+/*--------------------------------------------------------------------------*/
+int cmOutputConverter::Shell__CharIsWhitespace(char c)
+{
+  return ((c == ' ') || (c == '\t'));
+}
+
+/*--------------------------------------------------------------------------*/
+int cmOutputConverter::Shell__CharNeedsQuotesOnUnix(char c)
+{
+  return ((c == '\'') || (c == '`') || (c == ';') || (c == '#') ||
+          (c == '&') || (c == '$') || (c == '(') || (c == ')') ||
+          (c == '~') || (c == '<') || (c == '>') || (c == '|') ||
+          (c == '*') || (c == '^') || (c == '\\'));
+}
+
+/*--------------------------------------------------------------------------*/
+int cmOutputConverter::Shell__CharNeedsQuotesOnWindows(char c)
+{
+  return ((c == '\'') || (c == '#') || (c == '&') ||
+          (c == '<') || (c == '>') || (c == '|') || (c == '^'));
+}
+
+/*--------------------------------------------------------------------------*/
+int cmOutputConverter::Shell__CharNeedsQuotes(char c, int isUnix, int flags)
+{
+  /* On Windows the built-in command shell echo never needs quotes.  */
+  if(!isUnix && (flags & Shell_Flag_EchoWindows))
+    {
+    return 0;
+    }
+
+  /* On all platforms quotes are needed to preserve whitespace.  */
+  if(Shell__CharIsWhitespace(c))
+    {
+    return 1;
+    }
+
+  if(isUnix)
+    {
+    /* On UNIX several special characters need quotes to preserve them.  */
+    if(Shell__CharNeedsQuotesOnUnix(c))
+      {
+      return 1;
+      }
+    }
+  else
+    {
+    /* On Windows several special characters need quotes to preserve them.  */
+    if(Shell__CharNeedsQuotesOnWindows(c))
+      {
+      return 1;
+      }
+    }
+  return 0;
+}
+
+/*--------------------------------------------------------------------------*/
+int cmOutputConverter::Shell__CharIsMakeVariableName(char c)
+{
+  return c && (c == '_' || isalpha(((int)c)));
+}
+
+/*--------------------------------------------------------------------------*/
+const char* cmOutputConverter::Shell__SkipMakeVariables(const char* c)
+{
+  while(*c == '$' && *(c+1) == '(')
+    {
+    const char* skip = c+2;
+    while(Shell__CharIsMakeVariableName(*skip))
+      {
+      ++skip;
+      }
+    if(*skip == ')')
+      {
+      c = skip+1;
+      }
+    else
+      {
+      break;
+      }
+    }
+  return c;
+}
+
+/*
+Allowing make variable replacements opens a can of worms.  Sometimes
+they should be quoted and sometimes not.  Sometimes their replacement
+values are already quoted or contain escapes.
+
+Some Visual Studio variables cause problems.  In order to pass the
+referenced value with spaces the reference must be quoted.  If the
+variable value ends in a backslash then it will escape the ending
+quote!  In order to make the ending backslash appear we need this:
+
+  "$(InputDir)\"
+
+However if there is not a trailing backslash then this will put a
+quote in the value so we need:
+
+  "$(InputDir)"
+
+This macro decides whether we quote an argument just because it
+contains a make variable reference.  This should be replaced with a
+flag later when we understand applications of this better.
+*/
+#define KWSYS_SYSTEM_SHELL_QUOTE_MAKE_VARIABLES 0
+
+/*--------------------------------------------------------------------------*/
+int cmOutputConverter::Shell__ArgumentNeedsQuotes(const char* in,
+                                                  int isUnix, int flags)
+{
+  /* The empty string needs quotes.  */
+  if(!*in)
+    {
+    return 1;
+    }
+
+  /* Scan the string for characters that require quoting.  */
+  {
+  const char* c;
+  for(c=in; *c; ++c)
+    {
+    /* Look for $(MAKEVAR) syntax if requested.  */
+    if(flags & Shell_Flag_AllowMakeVariables)
+      {
+#if KWSYS_SYSTEM_SHELL_QUOTE_MAKE_VARIABLES
+      const char* skip = Shell__SkipMakeVariables(c);
+      if(skip != c)
+        {
+        /* We need to quote make variable references to preserve the
+           string with contents substituted in its place.  */
+        return 1;
+        }
+#else
+      /* Skip over the make variable references if any are present.  */
+      c = Shell__SkipMakeVariables(c);
+
+      /* Stop if we have reached the end of the string.  */
+      if(!*c)
+        {
+        break;
+        }
+#endif
+      }
+
+    /* Check whether this character needs quotes.  */
+    if(Shell__CharNeedsQuotes(*c, isUnix, flags))
+      {
+      return 1;
+      }
+    }
+  }
+
+  /* On Windows some single character arguments need quotes.  */
+  if(!isUnix && *in && !*(in+1))
+    {
+    char c = *in;
+    if((c == '?') || (c == '&') || (c == '^') || (c == '|') || (c == '#'))
+      {
+      return 1;
+      }
+    }
+
+  return 0;
+}
+
+/*--------------------------------------------------------------------------*/
+int cmOutputConverter::Shell__GetArgumentSize(const char* in,
+                                              int isUnix, int flags)
+{
+  /* Start with the length of the original argument, plus one for
+     either a terminating null or a separating space.  */
+  int size = (int)strlen(in) + 1;
+
+  /* String iterator.  */
+  const char* c;
+
+  /* Keep track of how many backslashes have been encountered in a row.  */
+  int windows_backslashes = 0;
+
+  /* Scan the string for characters that require escaping or quoting.  */
+  for(c=in; *c; ++c)
+    {
+    /* Look for $(MAKEVAR) syntax if requested.  */
+    if(flags & Shell_Flag_AllowMakeVariables)
+      {
+      /* Skip over the make variable references if any are present.  */
+      c = Shell__SkipMakeVariables(c);
+
+      /* Stop if we have reached the end of the string.  */
+      if(!*c)
+        {
+        break;
+        }
+      }
+
+    /* Check whether this character needs escaping for the shell.  */
+    if(isUnix)
+      {
+      /* On Unix a few special characters need escaping even inside a
+         quoted argument.  */
+      if(*c == '\\' || *c == '"' || *c == '`' || *c == '$')
+        {
+        /* This character needs a backslash to escape it.  */
+        ++size;
+        }
+      }
+    else if(flags & Shell_Flag_EchoWindows)
+      {
+      /* On Windows the built-in command shell echo never needs escaping.  */
+      }
+    else
+      {
+      /* On Windows only backslashes and double-quotes need escaping.  */
+      if(*c == '\\')
+        {
+        /* Found a backslash.  It may need to be escaped later.  */
+        ++windows_backslashes;
+        }
+      else if(*c == '"')
+        {
+        /* Found a double-quote.  We need to escape it and all
+           immediately preceding backslashes.  */
+        size += windows_backslashes + 1;
+        windows_backslashes = 0;
+        }
+      else
+        {
+        /* Found another character.  This eliminates the possibility
+           that any immediately preceding backslashes will be
+           escaped.  */
+        windows_backslashes = 0;
+        }
+      }
+
+    /* Check whether this character needs escaping for a make tool.  */
+    if(*c == '$')
+      {
+      if(flags & Shell_Flag_Make)
+        {
+        /* In Makefiles a dollar is written $$ so we need one extra
+           character.  */
+        ++size;
+        }
+      else if(flags & Shell_Flag_VSIDE)
+        {
+        /* In a VS IDE a dollar is written "$" so we need two extra
+           characters.  */
+        size += 2;
+        }
+      }
+    else if(*c == '#')
+      {
+      if((flags & Shell_Flag_Make) &&
+         (flags & Shell_Flag_WatcomWMake))
+        {
+        /* In Watcom WMake makefiles a pound is written $# so we need
+           one extra character.  */
+        ++size;
+        }
+      }
+    else if(*c == '%')
+      {
+      if((flags & Shell_Flag_VSIDE) ||
+         ((flags & Shell_Flag_Make) &&
+          ((flags & Shell_Flag_MinGWMake) ||
+           (flags & Shell_Flag_NMake))))
+        {
+        /* In the VS IDE, NMake, or MinGW make a percent is written %%
+           so we need one extra characters.  */
+        size += 1;
+        }
+      }
+    else if(*c == ';')
+      {
+      if(flags & Shell_Flag_VSIDE)
+        {
+        /* In a VS IDE a semicolon is written ";" so we need two extra
+           characters.  */
+        size += 2;
+        }
+      }
+    }
+
+  /* Check whether the argument needs surrounding quotes.  */
+  if(Shell__ArgumentNeedsQuotes(in, isUnix, flags))
+    {
+    /* Surrounding quotes are needed.  Allocate space for them.  */
+    if((flags & Shell_Flag_WatcomQuote) && (isUnix))
+      {
+        size += 2;
+      }
+    size += 2;
+
+    /* We must escape all ending backslashes when quoting on windows.  */
+    size += windows_backslashes;
+    }
+
+  return size;
+}
+
+/*--------------------------------------------------------------------------*/
+char* cmOutputConverter::Shell__GetArgument(const char* in, char* out,
+                                            int isUnix, int flags)
+{
+  /* String iterator.  */
+  const char* c;
+
+  /* Keep track of how many backslashes have been encountered in a row.  */
+  int windows_backslashes = 0;
+
+  /* Whether the argument must be quoted.  */
+  int needQuotes = Shell__ArgumentNeedsQuotes(in, isUnix, flags);
+  if(needQuotes)
+    {
+    /* Add the opening quote for this argument.  */
+    if(flags & Shell_Flag_WatcomQuote)
+      {
+      if(isUnix)
+        {
+        *out++ = '"';
+        }
+      *out++ = '\'';
+      }
+    else
+      {
+      *out++ = '"';
+      }
+    }
+
+  /* Scan the string for characters that require escaping or quoting.  */
+  for(c=in; *c; ++c)
+    {
+    /* Look for $(MAKEVAR) syntax if requested.  */
+    if(flags & Shell_Flag_AllowMakeVariables)
+      {
+      const char* skip = Shell__SkipMakeVariables(c);
+      if(skip != c)
+        {
+        /* Copy to the end of the make variable references.  */
+        while(c != skip)
+          {
+          *out++ = *c++;
+          }
+
+        /* The make variable reference eliminates any escaping needed
+           for preceding backslashes.  */
+        windows_backslashes = 0;
+
+        /* Stop if we have reached the end of the string.  */
+        if(!*c)
+          {
+          break;
+          }
+        }
+      }
+
+    /* Check whether this character needs escaping for the shell.  */
+    if(isUnix)
+      {
+      /* On Unix a few special characters need escaping even inside a
+         quoted argument.  */
+      if(*c == '\\' || *c == '"' || *c == '`' || *c == '$')
+        {
+        /* This character needs a backslash to escape it.  */
+        *out++ = '\\';
+        }
+      }
+    else if(flags & Shell_Flag_EchoWindows)
+      {
+      /* On Windows the built-in command shell echo never needs escaping.  */
+      }
+    else
+      {
+      /* On Windows only backslashes and double-quotes need escaping.  */
+      if(*c == '\\')
+        {
+        /* Found a backslash.  It may need to be escaped later.  */
+        ++windows_backslashes;
+        }
+      else if(*c == '"')
+        {
+        /* Found a double-quote.  Escape all immediately preceding
+           backslashes.  */
+        while(windows_backslashes > 0)
+          {
+          --windows_backslashes;
+          *out++ = '\\';
+          }
+
+        /* Add the backslash to escape the double-quote.  */
+        *out++ = '\\';
+        }
+      else
+        {
+        /* We encountered a normal character.  This eliminates any
+           escaping needed for preceding backslashes.  */
+        windows_backslashes = 0;
+        }
+      }
+
+    /* Check whether this character needs escaping for a make tool.  */
+    if(*c == '$')
+      {
+      if(flags & Shell_Flag_Make)
+        {
+        /* In Makefiles a dollar is written $$.  The make tool will
+           replace it with just $ before passing it to the shell.  */
+        *out++ = '$';
+        *out++ = '$';
+        }
+      else if(flags & Shell_Flag_VSIDE)
+        {
+        /* In a VS IDE a dollar is written "$".  If this is written in
+           an un-quoted argument it starts a quoted segment, inserts
+           the $ and ends the segment.  If it is written in a quoted
+           argument it ends quoting, inserts the $ and restarts
+           quoting.  Either way the $ is isolated from surrounding
+           text to avoid looking like a variable reference.  */
+        *out++ = '"';
+        *out++ = '$';
+        *out++ = '"';
+        }
+      else
+        {
+        /* Otherwise a dollar is written just $. */
+        *out++ = '$';
+        }
+      }
+    else if(*c == '#')
+      {
+      if((flags & Shell_Flag_Make) &&
+         (flags & Shell_Flag_WatcomWMake))
+        {
+        /* In Watcom WMake makefiles a pound is written $#.  The make
+           tool will replace it with just # before passing it to the
+           shell.  */
+        *out++ = '$';
+        *out++ = '#';
+        }
+      else
+        {
+        /* Otherwise a pound is written just #. */
+        *out++ = '#';
+        }
+      }
+    else if(*c == '%')
+      {
+      if((flags & Shell_Flag_VSIDE) ||
+         ((flags & Shell_Flag_Make) &&
+          ((flags & Shell_Flag_MinGWMake) ||
+           (flags & Shell_Flag_NMake))))
+        {
+        /* In the VS IDE, NMake, or MinGW make a percent is written %%.  */
+        *out++ = '%';
+        *out++ = '%';
+        }
+      else
+        {
+        /* Otherwise a percent is written just %. */
+        *out++ = '%';
+        }
+      }
+    else if(*c == ';')
+      {
+      if(flags & Shell_Flag_VSIDE)
+        {
+        /* In a VS IDE a semicolon is written ";".  If this is written
+           in an un-quoted argument it starts a quoted segment,
+           inserts the ; and ends the segment.  If it is written in a
+           quoted argument it ends quoting, inserts the ; and restarts
+           quoting.  Either way the ; is isolated.  */
+        *out++ = '"';
+        *out++ = ';';
+        *out++ = '"';
+        }
+      else
+        {
+        /* Otherwise a semicolon is written just ;. */
+        *out++ = ';';
+        }
+      }
+    else
+      {
+      /* Store this character.  */
+      *out++ = *c;
+      }
+    }
+
+  if(needQuotes)
+    {
+    /* Add enough backslashes to escape any trailing ones.  */
+    while(windows_backslashes > 0)
+      {
+      --windows_backslashes;
+      *out++ = '\\';
+      }
+
+    /* Add the closing quote for this argument.  */
+    if(flags & Shell_Flag_WatcomQuote)
+      {
+      *out++ = '\'';
+      if(isUnix)
+        {
+        *out++ = '"';
+        }
+      }
+    else
+      {
+      *out++ = '"';
+      }
+    }
+
+  /* Store a terminating null without incrementing.  */
+  *out = 0;
+
+  return out;
+}
+
+/*--------------------------------------------------------------------------*/
+char* cmOutputConverter::Shell_GetArgumentForWindows(const char* in,
+                                                     char* out, int flags)
+{
+  return Shell__GetArgument(in, out, 0, flags);
+}
+
+/*--------------------------------------------------------------------------*/
+char* cmOutputConverter::Shell_GetArgumentForUnix(const char* in,
+                                                  char* out, int flags)
+{
+  return Shell__GetArgument(in, out, 1, flags);
+}
+
+/*--------------------------------------------------------------------------*/
+int cmOutputConverter::Shell_GetArgumentSizeForWindows(const char* in,
+                                                       int flags)
+{
+  return Shell__GetArgumentSize(in, 0, flags);
+}
+
+/*--------------------------------------------------------------------------*/
+int cmOutputConverter::Shell_GetArgumentSizeForUnix(const char* in,
+                                                    int flags)
+{
+  return Shell__GetArgumentSize(in, 1, flags);
 }

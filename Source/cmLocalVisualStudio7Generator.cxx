@@ -23,8 +23,6 @@
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratedFileStream.h"
 
-#include <cmsys/System.h>
-
 #include <ctype.h> // for isspace
 
 static bool cmLVS6G_IsFAT(const char* dir);
