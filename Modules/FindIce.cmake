@@ -20,6 +20,13 @@
 #   Ice_SLICE_DIRS - the directories containing the Ice slice interface
 #                    definitions
 #
+# Imported targets::
+#
+#   Ice::<C>
+#
+# Where ``<C>`` is the name of an Ice component, for example
+# ``Ice::Glacier2``.
+#
 # Ice slice programs are reported in::
 #
 #   Ice_SLICE2CPP_EXECUTABLE - path to slice2cpp executable
@@ -433,13 +440,21 @@ if(Ice_FOUND)
     set(_Ice_component_cache "Ice_${_Ice_component_upcase}_LIBRARY")
     set(_Ice_component_lib "Ice_${_Ice_component_upcase}_LIBRARIES")
     set(_Ice_component_found "${_Ice_component_upcase}_FOUND")
+    set(_Ice_imported_target "Ice::${_Ice_component}")
     if(${_Ice_component_found})
       set("${_Ice_component_lib}" "${${_Ice_component_cache}}")
+      if(NOT TARGET ${_Ice_imported_target})
+        add_library(${_Ice_imported_target} UNKNOWN IMPORTED)
+        set_target_properties(${_Ice_imported_target} PROPERTIES
+          IMPORTED_LOCATION "${${_Ice_component_cache}}"
+          INTERFACE_INCLUDE_DIRECTORIES "${Ice_INCLUDE_DIR}")
+      endif()
     endif()
     unset(_Ice_component_upcase)
     unset(_Ice_component_cache)
     unset(_Ice_component_lib)
     unset(_Ice_component_found)
+    unset(_Ice_imported_target)
   endforeach()
 endif()
 
