@@ -398,7 +398,7 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
     }
 }
 
-void cmListFileBacktrace::PrintTitle(std::ostream& out)
+void cmListFileBacktrace::PrintTitle(std::ostream& out) const
 {
   if (!this->Snapshot.IsValid())
     {
@@ -412,7 +412,7 @@ void cmListFileBacktrace::PrintTitle(std::ostream& out)
   out << (lfc.Line ? " at " : " in ") << lfc;
 }
 
-void cmListFileBacktrace::PrintCallStack(std::ostream& out)
+void cmListFileBacktrace::PrintCallStack(std::ostream& out) const
 {
   if (!this->Snapshot.IsValid())
     {
