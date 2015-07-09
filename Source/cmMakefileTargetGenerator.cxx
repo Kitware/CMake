@@ -306,7 +306,7 @@ std::string cmMakefileTargetGenerator::GetFlags(const std::string &l)
     this->LocalGenerator->
       AppendFlags(flags, this->Makefile->GetDefineFlags());
 
-    // Add include directory flags.
+    // Add framework directory flags.
     this->LocalGenerator->
       AppendFlags(flags,this->GetFrameworkFlags(l));
 
