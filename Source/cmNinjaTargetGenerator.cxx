@@ -142,6 +142,10 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile const* source,
     this->LocalGenerator->AppendFlags(languageFlags,
                                       this->Makefile->GetDefineFlags());
 
+    // Add framework directory flags.
+    this->LocalGenerator->
+      AppendFlags(languageFlags, this->GetFrameworkFlags(language));
+
     // Add target-specific flags.
     this->LocalGenerator->AddCompileOptions(languageFlags, this->Target,
                                             language,
@@ -159,8 +163,6 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile const* source,
   // Add source file specific flags.
   this->LocalGenerator->AppendFlags(flags,
     source->GetProperty("COMPILE_FLAGS"));
-
-  // TODO: Handle Apple frameworks.
 
   return flags;
 }
