@@ -272,32 +272,6 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
     << "\n\n";
 }
 
-std::string cmMakefileTargetGenerator::GetDefines(const std::string &l)
-{
-  ByLanguageMap::iterator i = this->DefinesByLanguage.find(l);
-  if (i == this->DefinesByLanguage.end())
-    {
-    std::set<std::string> defines;
-    const char *lang = l.c_str();
-    // Add the export symbol definition for shared library objects.
-    if(const char* exportMacro = this->Target->GetExportMacro())
-      {
-      this->LocalGenerator->AppendDefines(defines, exportMacro);
-      }
-
-    // Add preprocessor definitions for this target and configuration.
-    this->LocalGenerator->AddCompileDefinitions(defines, this->Target,
-                            this->LocalGenerator->GetConfigName(), l);
-
-    std::string definesString;
-    this->LocalGenerator->JoinDefines(defines, definesString, lang);
-
-    ByLanguageMap::value_type entry(l, definesString);
-    i = this->DefinesByLanguage.insert(entry).first;
-    }
-  return i->second;
-}
-
 void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 {
   // write language flags for target

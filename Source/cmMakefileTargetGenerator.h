@@ -234,9 +234,6 @@ protected:
   std::set<std::string> MacContentFolders;
   cmOSXBundleGenerator* OSXBundleGenerator;
   MacOSXContentGeneratorType* MacOSXContentGenerator;
-
-  std::string GetDefines(const std::string &l);
-  ByLanguageMap DefinesByLanguage;
 };
 
 #endif

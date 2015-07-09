@@ -81,6 +81,8 @@ protected:
   typedef std::map<std::string, std::string> ByLanguageMap;
   std::string GetFlags(const std::string &l);
   ByLanguageMap FlagsByLanguage;
+  std::string GetDefines(const std::string &l);
+  ByLanguageMap DefinesByLanguage;
 };
 
 #endif
