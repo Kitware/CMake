@@ -1739,9 +1739,12 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   else if (prop == "LINK_LIBRARIES")
     {
     this->Internal->LinkImplementationPropertyEntries.clear();
-    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmValueWithOrigin entry(value, lfbt);
-    this->Internal->LinkImplementationPropertyEntries.push_back(entry);
+    if (value)
+      {
+      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      cmValueWithOrigin entry(value, lfbt);
+      this->Internal->LinkImplementationPropertyEntries.push_back(entry);
+      }
     }
   else if (prop == "SOURCES")
     {
@@ -1825,9 +1828,12 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     }
   else if (prop == "LINK_LIBRARIES")
     {
-    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmValueWithOrigin entry(value, lfbt);
-    this->Internal->LinkImplementationPropertyEntries.push_back(entry);
+    if (value)
+      {
+      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      cmValueWithOrigin entry(value, lfbt);
+      this->Internal->LinkImplementationPropertyEntries.push_back(entry);
+      }
     }
   else if (prop == "SOURCES")
     {
