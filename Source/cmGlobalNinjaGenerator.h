@@ -13,7 +13,7 @@
 #ifndef cmGlobalNinjaGenerator_h
 #  define cmGlobalNinjaGenerator_h
 
-#  include "cmGlobalGenerator.h"
+#  include "cmGlobalCommonGenerator.h"
 #  include "cmGlobalGeneratorFactory.h"
 #  include "cmNinjaTypes.h"
 
@@ -42,7 +42,7 @@ class cmGeneratorTarget;
  * - We extensively use Ninja variable overloading system to minimize the
  *   number of generated rules.
  */
-class cmGlobalNinjaGenerator : public cmGlobalGenerator
+class cmGlobalNinjaGenerator : public cmGlobalCommonGenerator
 {
 public:
   /// The default name of Ninja's build file. Typically: build.ninja.

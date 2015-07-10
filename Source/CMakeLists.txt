@@ -165,6 +165,8 @@ set(SRCS
   cmCommandArgumentLexer.cxx
   cmCommandArgumentParser.cxx
   cmCommandArgumentParserHelper.cxx
+  cmCommonTargetGenerator.cxx
+  cmCommonTargetGenerator.h
   cmComputeComponentGraph.cxx
   cmComputeComponentGraph.h
   cmComputeLinkDepends.cxx
@@ -260,6 +262,8 @@ set(SRCS
   cmGeneratorExpression.h
   cmGeneratorTarget.cxx
   cmGeneratorTarget.h
+  cmGlobalCommonGenerator.cxx
+  cmGlobalCommonGenerator.h
   cmGlobalGenerator.cxx
   cmGlobalGenerator.h
   cmGlobalGeneratorFactory.h
@@ -285,6 +289,8 @@ set(SRCS
   cmListFileCache.cxx
   cmListFileCache.h
   cmListFileLexer.c
+  cmLocalCommonGenerator.cxx
+  cmLocalCommonGenerator.h
   cmLocalGenerator.cxx
   cmLocalGenerator.h
   cmLocalUnixMakefileGenerator3.cxx

@@ -33,23 +33,19 @@
 #include <ctype.h>
 
 cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
-  : OSXBundleGenerator(0)
+  : cmCommonTargetGenerator(target)
+  , OSXBundleGenerator(0)
   , MacOSXContentGenerator(0)
 {
   this->BuildFileStream = 0;
   this->InfoFileStream = 0;
   this->FlagFileStream = 0;
   this->CustomCommandDriver = OnBuild;
-  this->FortranModuleDirectoryComputed = false;
-  this->Target = target->Target;
-  this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator =
     static_cast<cmLocalUnixMakefileGenerator3*>(target->GetLocalGenerator());
-  this->ConfigName = this->LocalGenerator->ConfigurationName.c_str();
   this->GlobalGenerator =
     static_cast<cmGlobalUnixMakefileGenerator3*>(
       this->LocalGenerator->GetGlobalGenerator());
-  this->GeneratorTarget = target;
   cmake* cm = this->GlobalGenerator->GetCMakeInstance();
   this->NoRuleMessages = false;
   if(const char* ruleStatus = cm->GetState()
@@ -276,80 +272,6 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
     << "\n\n";
 }
 
-//----------------------------------------------------------------------------
-std::string cmMakefileTargetGenerator::GetFlags(const std::string &l)
-{
-  ByLanguageMap::iterator i = this->FlagsByLanguage.find(l);
-  if (i == this->FlagsByLanguage.end())
-    {
-    std::string flags;
-    const char *lang = l.c_str();
-
-    // Add language feature flags.
-    this->AddFeatureFlags(flags, lang);
-
-    this->LocalGenerator->AddArchitectureFlags(flags, this->GeneratorTarget,
-                                               lang, this->ConfigName);
-
-    // Fortran-specific flags computed for this target.
-    if(l == "Fortran")
-      {
-      this->AddFortranFlags(flags);
-      }
-
-    this->LocalGenerator->AddCMP0018Flags(flags, this->Target,
-                                          lang, this->ConfigName);
-
-    this->LocalGenerator->AddVisibilityPresetFlags(flags, this->Target,
-                                                   lang);
-
-    // Add include directory flags.
-    this->AddIncludeFlags(flags, lang);
-
-    // Append old-style preprocessor definition flags.
-    this->LocalGenerator->
-      AppendFlags(flags, this->Makefile->GetDefineFlags());
-
-    // Add include directory flags.
-    this->LocalGenerator->
-      AppendFlags(flags,this->GetFrameworkFlags(l));
-
-    // Add target-specific flags.
-    this->LocalGenerator->AddCompileOptions(flags, this->Target,
-                                            lang, this->ConfigName);
-
-    ByLanguageMap::value_type entry(l, flags);
-    i = this->FlagsByLanguage.insert(entry).first;
-    }
-  return i->second;
-}
-
-std::string cmMakefileTargetGenerator::GetDefines(const std::string &l)
-{
-  ByLanguageMap::iterator i = this->DefinesByLanguage.find(l);
-  if (i == this->DefinesByLanguage.end())
-    {
-    std::set<std::string> defines;
-    const char *lang = l.c_str();
-    // Add the export symbol definition for shared library objects.
-    if(const char* exportMacro = this->Target->GetExportMacro())
-      {
-      this->LocalGenerator->AppendDefines(defines, exportMacro);
-      }
-
-    // Add preprocessor definitions for this target and configuration.
-    this->LocalGenerator->AddCompileDefinitions(defines, this->Target,
-                            this->LocalGenerator->ConfigurationName, l);
-
-    std::string definesString;
-    this->LocalGenerator->JoinDefines(defines, definesString, lang);
-
-    ByLanguageMap::value_type entry(l, definesString);
-    i = this->DefinesByLanguage.insert(entry).first;
-    }
-  return i->second;
-}
-
 void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 {
   // write language flags for target
@@ -511,35 +433,6 @@ void cmMakefileTargetGenerator
 //----------------------------------------------------------------------------
 void
 cmMakefileTargetGenerator
-::AppendFortranFormatFlags(std::string& flags, cmSourceFile const& source)
-{
-  const char* srcfmt = source.GetProperty("Fortran_FORMAT");
-  cmLocalGenerator::FortranFormat format =
-    this->LocalGenerator->GetFortranFormat(srcfmt);
-  if(format == cmLocalGenerator::FortranFormatNone)
-    {
-    const char* tgtfmt = this->Target->GetProperty("Fortran_FORMAT");
-    format = this->LocalGenerator->GetFortranFormat(tgtfmt);
-    }
-  const char* var = 0;
-  switch (format)
-    {
-    case cmLocalGenerator::FortranFormatFixed:
-      var = "CMAKE_Fortran_FORMAT_FIXED_FLAG"; break;
-    case cmLocalGenerator::FortranFormatFree:
-      var = "CMAKE_Fortran_FORMAT_FREE_FLAG"; break;
-    default: break;
-    }
-  if(var)
-    {
-    this->LocalGenerator->AppendFlags(
-      flags, this->Makefile->GetDefinition(var));
-    }
-}
-
-//----------------------------------------------------------------------------
-void
-cmMakefileTargetGenerator
 ::WriteObjectBuildFile(std::string &obj,
                        const std::string& lang,
                        cmSourceFile const& source,
@@ -567,7 +460,7 @@ cmMakefileTargetGenerator
   this->LocalGenerator->AppendFlags(flags, langFlags);
 
   std::string configUpper =
-    cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
+    cmSystemTools::UpperCase(this->LocalGenerator->GetConfigName());
 
   // Add Fortran format flags.
   if(lang == "Fortran")
@@ -1158,7 +1051,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
     << "# Targets to which this target links.\n"
     << "set(CMAKE_TARGET_LINKED_INFO_FILES\n";
   std::set<cmTarget const*> emitted;
-  const char* cfg = this->LocalGenerator->ConfigurationName.c_str();
+  const char* cfg = this->LocalGenerator->GetConfigName().c_str();
   if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(cfg))
     {
     cmComputeLinkInformation::ItemVector const& items = cli->GetItems();
@@ -1558,67 +1451,6 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(
 }
 
 //----------------------------------------------------------------------------
-std::string cmMakefileTargetGenerator::GetFrameworkFlags(std::string const& l)
-{
- if(!this->Makefile->IsOn("APPLE"))
-   {
-   return std::string();
-   }
-
-  std::string fwSearchFlagVar = "CMAKE_" + l + "_FRAMEWORK_SEARCH_FLAG";
-  const char* fwSearchFlag =
-    this->Makefile->GetDefinition(fwSearchFlagVar);
-  if(!(fwSearchFlag && *fwSearchFlag))
-    {
-    return std::string();
-    }
-
- std::set<std::string> emitted;
-#ifdef __APPLE__  /* don't insert this when crosscompiling e.g. to iphone */
-  emitted.insert("/System/Library/Frameworks");
-#endif
-  std::vector<std::string> includes;
-
-  const std::string& config =
-    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  this->LocalGenerator->GetIncludeDirectories(includes,
-                                              this->GeneratorTarget,
-                                              "C", config);
-  // check all include directories for frameworks as this
-  // will already have added a -F for the framework
-  for(std::vector<std::string>::iterator i = includes.begin();
-      i != includes.end(); ++i)
-    {
-    if(this->Target->NameResolvesToFramework(*i))
-      {
-      std::string frameworkDir = *i;
-      frameworkDir += "/../";
-      frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir);
-      emitted.insert(frameworkDir);
-      }
-    }
-
-  std::string flags;
-  const char* cfg = this->LocalGenerator->ConfigurationName.c_str();
-  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(cfg))
-    {
-    std::vector<std::string> const& frameworks = cli->GetFrameworkPaths();
-    for(std::vector<std::string>::const_iterator i = frameworks.begin();
-        i != frameworks.end(); ++i)
-      {
-      if(emitted.insert(*i).second)
-        {
-        flags += fwSearchFlag;
-        flags += this->LocalGenerator
-                     ->ConvertToOutputFormat(*i, cmLocalGenerator::SHELL);
-        flags += " ";
-        }
-      }
-    }
-  return flags;
-}
-
-//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator
 ::AppendTargetDepends(std::vector<std::string>& depends)
 {
@@ -1629,7 +1461,7 @@ void cmMakefileTargetGenerator
     }
 
   // Loop over all library dependencies.
-  const char* cfg = this->LocalGenerator->ConfigurationName.c_str();
+  const char* cfg = this->LocalGenerator->GetConfigName().c_str();
   if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(cfg))
     {
     std::vector<std::string> const& libDeps = cli->GetDepends();
@@ -1671,11 +1503,9 @@ void cmMakefileTargetGenerator
   this->AppendTargetDepends(depends);
 
   // Add a dependency on the link definitions file, if any.
-  std::string def = this->GeneratorTarget->GetModuleDefinitionFile(
-                      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
-  if(!def.empty())
+  if(!this->ModuleDefinitionFile.empty())
     {
-    depends.push_back(def);
+    depends.push_back(this->ModuleDefinitionFile);
     }
 
   // Add user-specified dependencies.
@@ -1980,151 +1810,5 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
   else
     {
     this->LocalGenerator->AppendFlags(flags, includeFlags);
-    }
-}
-
-//----------------------------------------------------------------------------
-const char* cmMakefileTargetGenerator::GetFortranModuleDirectory()
-{
-  // Compute the module directory.
-  if(!this->FortranModuleDirectoryComputed)
-    {
-    const char* target_mod_dir =
-      this->Target->GetProperty("Fortran_MODULE_DIRECTORY");
-    const char* moddir_flag =
-      this->Makefile->GetDefinition("CMAKE_Fortran_MODDIR_FLAG");
-    if(target_mod_dir && moddir_flag)
-      {
-      // Compute the full path to the module directory.
-      if(cmSystemTools::FileIsFullPath(target_mod_dir))
-        {
-        // Already a full path.
-        this->FortranModuleDirectory = target_mod_dir;
-        }
-      else
-        {
-        // Interpret relative to the current output directory.
-        this->FortranModuleDirectory =
-          this->Makefile->GetCurrentBinaryDirectory();
-        this->FortranModuleDirectory += "/";
-        this->FortranModuleDirectory += target_mod_dir;
-        }
-
-      // Make sure the module output directory exists.
-      cmSystemTools::MakeDirectory(this->FortranModuleDirectory.c_str());
-      }
-    this->FortranModuleDirectoryComputed = true;
-    }
-
-  // Return the computed directory.
-  if(this->FortranModuleDirectory.empty())
-    {
-    return 0;
-    }
-  else
-    {
-    return this->FortranModuleDirectory.c_str();
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmMakefileTargetGenerator::AddFortranFlags(std::string& flags)
-{
-  // Enable module output if necessary.
-  if(const char* modout_flag =
-     this->Makefile->GetDefinition("CMAKE_Fortran_MODOUT_FLAG"))
-    {
-    this->LocalGenerator->AppendFlags(flags, modout_flag);
-    }
-
-  // Add a module output directory flag if necessary.
-  const char* mod_dir = this->GetFortranModuleDirectory();
-  if(!mod_dir)
-    {
-    mod_dir = this->Makefile->GetDefinition("CMAKE_Fortran_MODDIR_DEFAULT");
-    }
-  if(mod_dir)
-    {
-    const char* moddir_flag =
-      this->Makefile->GetRequiredDefinition("CMAKE_Fortran_MODDIR_FLAG");
-    std::string modflag = moddir_flag;
-    modflag += this->Convert(mod_dir,
-                             cmLocalGenerator::START_OUTPUT,
-                             cmLocalGenerator::SHELL);
-    this->LocalGenerator->AppendFlags(flags, modflag);
-    }
-
-  // If there is a separate module path flag then duplicate the
-  // include path with it.  This compiler does not search the include
-  // path for modules.
-  if(const char* modpath_flag =
-     this->Makefile->GetDefinition("CMAKE_Fortran_MODPATH_FLAG"))
-    {
-    std::vector<std::string> includes;
-    const std::string& config =
-      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-    this->LocalGenerator->GetIncludeDirectories(includes,
-                                                this->GeneratorTarget,
-                                                "C", config);
-    for(std::vector<std::string>::const_iterator idi = includes.begin();
-        idi != includes.end(); ++idi)
-      {
-      std::string flg = modpath_flag;
-      flg += this->Convert(*idi,
-                           cmLocalGenerator::NONE,
-                           cmLocalGenerator::SHELL);
-      this->LocalGenerator->AppendFlags(flags, flg);
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmMakefileTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
-{
-  std::string def = this->GeneratorTarget->GetModuleDefinitionFile(
-                      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
-  if(def.empty())
-    {
-    return;
-    }
-
-  // TODO: Create a per-language flag variable.
-  const char* defFileFlag =
-    this->Makefile->GetDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-  if(!defFileFlag)
-    {
-    return;
-    }
-
-  // Append the flag and value.  Use ConvertToLinkReference to help
-  // vs6's "cl -link" pass it to the linker.
-  std::string flag = defFileFlag;
-  flag += (this->LocalGenerator->ConvertToLinkReference(def));
-  this->LocalGenerator->AppendFlags(flags, flag);
-}
-
-//----------------------------------------------------------------------------
-const char* cmMakefileTargetGenerator::GetFeature(const std::string& feature)
-{
-  return this->GeneratorTarget->GetFeature(feature, this->ConfigName);
-}
-
-//----------------------------------------------------------------------------
-bool cmMakefileTargetGenerator::GetFeatureAsBool(const std::string& feature)
-{
-  return this->GeneratorTarget->GetFeatureAsBool(feature, this->ConfigName);
-}
-
-//----------------------------------------------------------------------------
-void cmMakefileTargetGenerator::AddFeatureFlags(
-  std::string& flags, const std::string& lang
-  )
-{
-  // Add language-specific flags.
-  this->LocalGenerator->AddLanguageFlags(flags, lang, this->ConfigName);
-
-  if(this->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION"))
-    {
-    this->LocalGenerator->AppendFeatureOptions(flags, lang, "IPO");
     }
 }

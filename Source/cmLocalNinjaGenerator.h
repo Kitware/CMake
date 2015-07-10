@@ -13,7 +13,7 @@
 #ifndef cmLocalNinjaGenerator_h
 #  define cmLocalNinjaGenerator_h
 
-#  include "cmLocalGenerator.h"
+#  include "cmLocalCommonGenerator.h"
 #  include "cmNinjaTypes.h"
 
 class cmCustomCommandGenerator;
@@ -28,7 +28,7 @@ class cmake;
  * cmLocalNinjaGenerator produces a local build.ninja file from its
  * member Makefile.
  */
-class cmLocalNinjaGenerator : public cmLocalGenerator
+class cmLocalNinjaGenerator : public cmLocalCommonGenerator
 {
 public:
   cmLocalNinjaGenerator(cmGlobalGenerator* gg, cmLocalGenerator* parent,
@@ -45,9 +45,6 @@ public:
 
   const cmake* GetCMakeInstance() const;
   cmake* GetCMakeInstance();
-
-  std::string const& GetConfigName() const
-  { return this->ConfigName; }
 
   /// @returns the relative path between the HomeOutputDirectory and this
   /// local generators StartOutputDirectory.
@@ -110,8 +107,6 @@ private:
   void WriteProcessedMakefile(std::ostream& os);
   void WritePools(std::ostream& os);
 
-  void SetConfigName();
-
   void WriteCustomCommandRule();
   void WriteCustomCommandBuildStatement(cmCustomCommand const *cc,
                                         const cmNinjaDeps& orderOnlyDeps);
@@ -120,7 +115,6 @@ private:
 
   std::string MakeCustomLauncher(cmCustomCommandGenerator const& ccg);
 
-  std::string ConfigName;
   std::string HomeRelativeOutputPath;
 
   typedef std::map<cmCustomCommand const*, std::set<cmTarget*> >

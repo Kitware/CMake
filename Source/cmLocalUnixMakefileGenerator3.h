@@ -12,7 +12,7 @@
 #ifndef cmLocalUnixMakefileGenerator3_h
 #define cmLocalUnixMakefileGenerator3_h
 
-#include "cmLocalGenerator.h"
+#include "cmLocalCommonGenerator.h"
 
 // for cmDepends::DependencyVector
 #include "cmDepends.h"
@@ -31,7 +31,7 @@ class cmSourceFile;
  * cmLocalUnixMakefileGenerator3 produces a LocalUnix makefile from its
  * member Makefile.
  */
-class cmLocalUnixMakefileGenerator3 : public cmLocalGenerator
+class cmLocalUnixMakefileGenerator3 : public cmLocalCommonGenerator
 {
 public:
   cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg,
@@ -45,7 +45,6 @@ public:
    * Generate the makefile for this directory.
    */
   virtual void Generate();
-
 
   // this returns the relative path between the HomeOutputDirectory and this
   // local generators StartOutputDirectory
@@ -252,8 +251,6 @@ private:
   friend class cmGlobalUnixMakefileGenerator3;
 
   ImplicitDependTargetMap ImplicitDepends;
-
-  std::string ConfigurationName;
 
   std::string HomeRelativeOutputPath;
 
