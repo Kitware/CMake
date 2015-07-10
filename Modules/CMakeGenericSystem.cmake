@@ -52,6 +52,9 @@ if(CMAKE_GENERATOR MATCHES "Make")
   if(DEFINED CMAKE_RULE_MESSAGES)
     set_property(GLOBAL PROPERTY RULE_MESSAGES ${CMAKE_RULE_MESSAGES})
   endif()
+  if(DEFINED CMAKE_TARGET_MESSAGES)
+    set_property(GLOBAL PROPERTY TARGET_MESSAGES ${CMAKE_TARGET_MESSAGES})
+  endif()
   if(CMAKE_GENERATOR MATCHES "Unix Makefiles")
     set(CMAKE_EXPORT_COMPILE_COMMANDS OFF CACHE BOOL
       "Enable/Disable output of compile commands during generation."
