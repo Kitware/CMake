@@ -112,6 +112,12 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile const* source,
 {
   std::string flags = this->GetFlags(language);
 
+  // Add Fortran format flags.
+  if(language == "Fortran")
+    {
+    this->AppendFortranFormatFlags(flags, *source);
+    }
+
   // Add source file specific flags.
   this->LocalGenerator->AppendFlags(flags,
     source->GetProperty("COMPILE_FLAGS"));
