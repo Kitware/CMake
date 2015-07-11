@@ -4,6 +4,13 @@
 cmake_minimum_required(VERSION 2.4)
 project (Complex)
 
+# Test that renaming a built-in works when configured multiple times.
+message("message")
+function(message)
+  _message(${ARGN})
+endfunction()
+message("message")
+
 # Try setting a new policy.  The IF test is for coverage.
 if(POLICY CMP0003)
   cmake_policy(SET CMP0003 NEW)
