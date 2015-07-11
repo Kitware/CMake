@@ -430,6 +430,7 @@ std::vector<std::string> cmState::GetCommandNames() const
 
 void cmState::RemoveUserDefinedCommands()
 {
+  std::vector<cmCommand*> renamedCommands;
   for(std::map<std::string, cmCommand*>::iterator j = this->Commands.begin();
       j != this->Commands.end(); )
     {
@@ -441,8 +442,18 @@ void cmState::RemoveUserDefinedCommands()
       }
     else
       {
+      if (j->first != j->second->GetName())
+        {
+        renamedCommands.push_back(j->second);
+        this->Commands.erase(j);
+        }
       ++j;
       }
+    }
+  for (std::vector<cmCommand*>::const_iterator it = renamedCommands.begin();
+       it != renamedCommands.end(); ++it)
+    {
+    this->Commands[cmSystemTools::LowerCase((*it)->GetName())] = *it;
     }
 }
 
