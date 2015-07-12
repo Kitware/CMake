@@ -440,13 +440,13 @@ void cmState::RemoveUserDefinedCommands()
       delete j->second;
       this->Commands.erase(j++);
       }
+    else if (j->first != j->second->GetName())
+      {
+      renamedCommands.push_back(j->second);
+      this->Commands.erase(j++);
+      }
     else
       {
-      if (j->first != j->second->GetName())
-        {
-        renamedCommands.push_back(j->second);
-        this->Commands.erase(j);
-        }
       ++j;
       }
     }
