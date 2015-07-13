@@ -312,9 +312,6 @@ std::string cmCommonTargetGenerator::GetFlags(const std::string &l)
     this->LocalGenerator->AddVisibilityPresetFlags(flags, this->Target,
                                                    lang);
 
-    // Add include directory flags.
-    this->AddIncludeFlags(flags, lang);
-
     // Append old-style preprocessor definition flags.
     this->LocalGenerator->
       AppendFlags(flags, this->Makefile->GetDefineFlags());
@@ -355,6 +352,19 @@ std::string cmCommonTargetGenerator::GetDefines(const std::string &l)
 
     ByLanguageMap::value_type entry(l, definesString);
     i = this->DefinesByLanguage.insert(entry).first;
+    }
+  return i->second;
+}
+
+std::string cmCommonTargetGenerator::GetIncludes(std::string const& l)
+{
+  ByLanguageMap::iterator i = this->IncludesByLanguage.find(l);
+  if (i == this->IncludesByLanguage.end())
+    {
+    std::string includes;
+    this->AddIncludeFlags(includes, l);
+    ByLanguageMap::value_type entry(l, includes);
+    i = this->IncludesByLanguage.insert(entry).first;
     }
   return i->second;
 }

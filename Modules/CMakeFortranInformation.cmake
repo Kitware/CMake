@@ -207,7 +207,7 @@ endif()
 # (put -o after -c to workaround bug in at least one mpif77 wrapper)
 if(NOT CMAKE_Fortran_COMPILE_OBJECT)
   set(CMAKE_Fortran_COMPILE_OBJECT
-    "<CMAKE_Fortran_COMPILER> <DEFINES> <FLAGS> -c <SOURCE> -o <OBJECT>")
+    "<CMAKE_Fortran_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -c <SOURCE> -o <OBJECT>")
 endif()
 
 # link a fortran program
