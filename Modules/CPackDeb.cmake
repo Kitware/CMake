@@ -272,6 +272,7 @@
 #
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+#               CPACK_DEBIAN_<COMPONENT>_PACKAGE_CONTROL_EXTRA
 #
 #  This variable allow advanced user to add custom script to the
 #  control.tar.gz.
@@ -582,13 +583,20 @@ function(cpack_deb_prepare_package_vars)
   # - conffiles
   # - postinst
   # - postrm
-  # - prerm"
+  # - prerm
   # Usage:
   # set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
   #    "${CMAKE_CURRENT_SOURCE_DIR/prerm;${CMAKE_CURRENT_SOURCE_DIR}/postrm")
 
   # Are we packaging components ?
   if(CPACK_DEB_PACKAGE_COMPONENT)
+    # override values with per component version if set
+    foreach(VAR_NAME_ "PACKAGE_CONTROL_EXTRA")
+      if(CPACK_DEBIAN_${_local_component_name}_${VAR_NAME_})
+        set(CPACK_DEBIAN_${VAR_NAME_} "${CPACK_DEBIAN_${_local_component_name}_${VAR_NAME_}}")
+      endif()
+    endforeach()
+
     set(CPACK_DEB_PACKAGE_COMPONENT_PART_NAME "-${CPACK_DEB_PACKAGE_COMPONENT}")
     string(TOLOWER "${CPACK_PACKAGE_NAME}${CPACK_DEB_PACKAGE_COMPONENT_PART_NAME}" CPACK_DEBIAN_PACKAGE_NAME)
   else()
