@@ -90,7 +90,7 @@ macro(__embarcadero_language lang)
   # place <DEFINES> outside the response file because Borland refuses
   # to parse quotes from the response file.
   set(CMAKE_${lang}_COMPILE_OBJECT
-    "<CMAKE_${lang}_COMPILER> ${_tR} <DEFINES> -DWIN32 -o<OBJECT> <FLAGS> ${_COMPILE_${lang}} <SOURCE>"
+    "<CMAKE_${lang}_COMPILER> ${_tR} -DWIN32 <DEFINES> <FLAGS> -o<OBJECT> ${_COMPILE_${lang}} <SOURCE>"
     )
 
   set(CMAKE_${lang}_LINK_EXECUTABLE
@@ -101,7 +101,7 @@ macro(__embarcadero_language lang)
   # place <DEFINES> outside the response file because Borland refuses
   # to parse quotes from the response file.
   set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE
-    "cpp32 <DEFINES> -DWIN32 <FLAGS> -o<PREPROCESSED_SOURCE> ${_COMPILE_${lang}} <SOURCE>"
+    "cpp32 -DWIN32 <DEFINES> <FLAGS> -o<PREPROCESSED_SOURCE> ${_COMPILE_${lang}} <SOURCE>"
     )
   # Borland >= 5.6 allows -P option for cpp32, <= 5.5 does not
 
