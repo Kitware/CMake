@@ -16,7 +16,7 @@ set(CMAKE_Fortran_VERBOSE_FLAG "-Wl,-v") # Runs gcc under the hood.
 
 # Need -fpp explicitly on case-insensitive filesystem.
 set(CMAKE_Fortran_COMPILE_OBJECT
-  "<CMAKE_Fortran_COMPILER> -fpp -o <OBJECT> <DEFINES> <FLAGS> -c <SOURCE>")
+  "<CMAKE_Fortran_COMPILER> -fpp -o <OBJECT> <DEFINES> <INCLUDES> <FLAGS> -c <SOURCE>")
 
 set(CMAKE_Fortran_OSX_COMPATIBILITY_VERSION_FLAG "-Wl,-compatibility_version -Wl,")
 set(CMAKE_Fortran_OSX_CURRENT_VERSION_FLAG "-Wl,-current_version -Wl,")

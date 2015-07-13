@@ -766,6 +766,10 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
     {
     return replaceValues.Defines;
     }
+  if(replaceValues.Includes && variable == "INCLUDES")
+    {
+    return replaceValues.Includes;
+    }
   if(replaceValues.TargetPDB )
     {
     if(variable == "TARGET_PDB")

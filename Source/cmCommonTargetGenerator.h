@@ -83,6 +83,8 @@ protected:
   ByLanguageMap FlagsByLanguage;
   std::string GetDefines(const std::string &l);
   ByLanguageMap DefinesByLanguage;
+  std::string GetIncludes(std::string const& l);
+  ByLanguageMap IncludesByLanguage;
 };
 
 #endif

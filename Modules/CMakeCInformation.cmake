@@ -187,7 +187,7 @@ endif()
 # compile a C file into an object file
 if(NOT CMAKE_C_COMPILE_OBJECT)
   set(CMAKE_C_COMPILE_OBJECT
-    "<CMAKE_C_COMPILER> <DEFINES> <FLAGS> -o <OBJECT>   -c <SOURCE>")
+    "<CMAKE_C_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT>   -c <SOURCE>")
 endif()
 
 if(NOT CMAKE_C_LINK_EXECUTABLE)

@@ -295,11 +295,14 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     {
     std::string flags = this->GetFlags(*l);
     std::string defines = this->GetDefines(*l);
+    std::string includes = this->GetIncludes(*l);
     // Escape comment characters so they do not terminate assignment.
     cmSystemTools::ReplaceString(flags, "#", "\\#");
     cmSystemTools::ReplaceString(defines, "#", "\\#");
+    cmSystemTools::ReplaceString(includes, "#", "\\#");
     *this->FlagFileStream << *l << "_FLAGS = " << flags << "\n\n";
     *this->FlagFileStream << *l << "_DEFINES = " << defines << "\n\n";
+    *this->FlagFileStream << *l << "_INCLUDES = " << includes << "\n\n";
     }
 }
 
@@ -611,6 +614,9 @@ cmMakefileTargetGenerator
 
   vars.Defines = definesString.c_str();
 
+  std::string const includesString = "$(" + lang + "_INCLUDES)";
+  vars.Includes = includesString.c_str();
+
   // At the moment, it is assumed that C, C++, and Fortran have both
   // assembly and preprocessor capabilities. The same is true for the
   // ability to export compile commands
@@ -643,6 +649,9 @@ cmMakefileTargetGenerator
     std::string langDefines = std::string("$(") + lang + "_DEFINES)";
     compileCommand.replace(compileCommand.find(langDefines),
                            langDefines.size(), this->GetDefines(lang));
+    std::string langIncludes = std::string("$(") + lang + "_INCLUDES)";
+    compileCommand.replace(compileCommand.find(langIncludes),
+                           langIncludes.size(), this->GetIncludes(lang));
     this->GlobalGenerator->AddCXXCompileCommand(
       source.GetFullPath(), workingDirectory, compileCommand);
     }
