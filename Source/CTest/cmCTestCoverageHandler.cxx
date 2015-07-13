@@ -446,7 +446,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     }
   std::set<std::string> uncovered = this->FindUncoveredFiles(&cont);
 
-  if ( file_count == 0 )
+  if ( file_count == 0 && this->ExtraCoverageGlobs.size() == 0)
     {
     cmCTestOptionalLog(this->CTest, WARNING,
       " Cannot find any coverage files. Ignoring Coverage request."
