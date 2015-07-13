@@ -18,9 +18,11 @@
 # :code:`CPACK_DEBIAN_XXX` variables.
 #
 # :code:`CPACK_DEBIAN_<COMPONENT>_XXXX` variables may be used in order to have
-# **component** specific values.  Note however that <COMPONENT> refers to the
+# **component** specific values. Note however that <COMPONENT> refers to the
 # **grouping name** written in upper case. It may be either a component name or
-# a component GROUP name.
+# a component GROUP name. Variables that have <COMPONENT> version are marked
+# with :code:`Component : YES` and by default non component version value is
+# used as fallback if component version of the variable is not set.
 #
 # You'll find a detailed usage on the wiki:
 # http://www.cmake.org/Wiki/CMake:CPackPackageGenerators#DEB_.28UNIX_only.29 .
@@ -31,6 +33,7 @@
 #  The Debian package summary
 #
 #  * Mandatory : YES
+#  * Component : NO
 #  * Default   : :variable:`CPACK_PACKAGE_NAME` (lower case)
 #
 #
@@ -39,6 +42,7 @@
 #  The Debian package version
 #
 #  * Mandatory : YES
+#  * Component : NO
 #  * Default   : :variable:`CPACK_PACKAGE_VERSION`
 #
 #
@@ -47,16 +51,17 @@
 #  The Debian package architecture
 #
 #  * Mandatory : YES
+#  * Component : NO
 #  * Default   : Output of :code:`dpkg --print-architecture` (or :code:`i386`
 #    if :code:`dpkg` is not found)
 #
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_DEPENDS
-#               CPACK_DEBIAN_<COMPONENT>_PACKAGE_DEPENDS
 #
 #  Sets the Debian dependencies of this package.
 #
 #  * Mandatory : NO
+#  * Component : YES
 #  * Default   :
 #
 #    - An empty string for non-component based installations
@@ -83,15 +88,16 @@
 #  The Debian package maintainer
 #
 #  * Mandatory : YES
+#  * Component : NO
 #  * Default   : :code:`CPACK_PACKAGE_CONTACT`
 #
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_DESCRIPTION
-#               CPACK_COMPONENT_<COMPONENT>_DESCRIPTION
 #
 #  The Debian package description
 #
 #  * Mandatory : YES
+#  * Component : YES
 #  * Default   :
 #
 #    - :variable:`CPACK_DEBIAN_PACKAGE_DESCRIPTION` if set or
@@ -101,6 +107,7 @@
 # .. variable:: CPACK_DEBIAN_PACKAGE_SECTION
 #
 #  * Mandatory : YES
+#  * Component : NO
 #  * Default   : 'devel'
 #
 # .. variable:: CPACK_DEBIAN_COMPRESSION_TYPE
@@ -109,6 +116,7 @@
 #  Possible values are: lzma, xz, bzip2 and gzip.
 #
 #  * Mandatory : YES
+#  * Component : NO
 #  * Default   : 'gzip'
 #
 #
@@ -117,6 +125,7 @@
 #  The Debian package priority
 #
 #  * Mandatory : YES
+#  * Component : NO
 #  * Default   : 'optional'
 #
 #
@@ -127,6 +136,7 @@
 #  upstream documentation or information may be found.
 #
 #  * Mandatory : NO
+#  * Component : NO
 #  * Default   : -
 #
 #  .. note::
@@ -136,12 +146,12 @@
 #
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_SHLIBDEPS
-#               CPACK_DEBIAN_<COMPONENT>_PACKAGE_SHLIBDEPS
 #
 #  May be set to ON in order to use :code:`dpkg-shlibdeps` to generate
 #  better package dependency list.
 #
 #  * Mandatory : NO
+#  * Component : YES
 #  * Default   :
 #
 #    - :variable:`CPACK_DEBIAN_PACKAGE_SHLIBDEPS` if set or
@@ -161,6 +171,7 @@
 #  during CPackDeb run.
 #
 #  * Mandatory : NO
+#  * Component : NO
 #  * Default   : -
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_PREDEPENDS
@@ -172,6 +183,7 @@
 #  pre-dependency.
 #
 #  * Mandatory : NO
+#  * Component : NO
 #  * Default   : -
 #
 #  See http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
@@ -184,6 +196,7 @@
 #  functionality of another package.
 #
 #  * Mandatory : NO
+#  * Component : NO
 #  * Default   : -
 #
 #  See http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
@@ -199,6 +212,7 @@
 #  packages (B) cannot be reconfigured again.
 #
 #  * Mandatory : NO
+#  * Component : NO
 #  * Default   : -
 #
 #  See https://www.debian.org/doc/debian-policy/ch-relationships.html#s-breaks
@@ -212,6 +226,7 @@
 #  the same time.
 #
 #  * Mandatory : NO
+#  * Component : NO
 #  * Default   : -
 #
 #  See https://www.debian.org/doc/debian-policy/ch-relationships.html#s-conflicts
@@ -231,6 +246,7 @@
 #  another package.
 #
 #  * Mandatory : NO
+#  * Component : NO
 #  * Default   : -
 #
 #  See https://www.debian.org/doc/debian-policy/ch-relationships.html#s-virtual
@@ -243,6 +259,7 @@
 #  files in certain other packages, or completely replace other packages.
 #
 #  * Mandatory : NO
+#  * Component : NO
 #  * Default   : -
 #
 #  See http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
@@ -255,6 +272,7 @@
 #  packages.
 #
 #  * Mandatory : NO
+#  * Component : NO
 #  * Default   : -
 #
 #  See http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
@@ -266,6 +284,7 @@
 #  Allows packages to declare a suggested package install grouping.
 #
 #  * Mandatory : NO
+#  * Component : NO
 #  * Default   : -
 #
 #  See http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
@@ -278,6 +297,7 @@
 #  Typical usage is for conffiles, postinst, postrm, prerm.
 #
 #  * Mandatory : NO
+#  * Component : YES
 #  * Default   : -
 #
 #  Usage::
@@ -498,7 +518,6 @@ function(cpack_deb_prepare_package_vars)
   # if per-component dependency, overrides the global CPACK_DEBIAN_PACKAGE_DEPENDS
   # automatic dependency discovery will be performed afterwards.
   if(CPACK_DEB_PACKAGE_COMPONENT)
-    string(TOUPPER "${CPACK_DEB_PACKAGE_COMPONENT}" _local_component_name)
     set(_component_depends_var "CPACK_DEBIAN_${_local_component_name}_PACKAGE_DEPENDS")
 
     # if set, overrides the global dependency
@@ -542,7 +561,6 @@ function(cpack_deb_prepare_package_vars)
       set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
     endif()
   else()
-    string(TOUPPER ${CPACK_DEB_PACKAGE_COMPONENT} _local_component_name)
     set(component_description_var CPACK_COMPONENT_${_local_component_name}_DESCRIPTION)
 
     # component description overrides package description
@@ -584,13 +602,20 @@ function(cpack_deb_prepare_package_vars)
   # - conffiles
   # - postinst
   # - postrm
-  # - prerm"
+  # - prerm
   # Usage:
   # set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
   #    "${CMAKE_CURRENT_SOURCE_DIR/prerm;${CMAKE_CURRENT_SOURCE_DIR}/postrm")
 
   # Are we packaging components ?
   if(CPACK_DEB_PACKAGE_COMPONENT)
+    # override values with per component version if set
+    foreach(VAR_NAME_ "PACKAGE_CONTROL_EXTRA")
+      if(CPACK_DEBIAN_${_local_component_name}_${VAR_NAME_})
+        set(CPACK_DEBIAN_${VAR_NAME_} "${CPACK_DEBIAN_${_local_component_name}_${VAR_NAME_}}")
+      endif()
+    endforeach()
+
     set(CPACK_DEB_PACKAGE_COMPONENT_PART_NAME "-${CPACK_DEB_PACKAGE_COMPONENT}")
     string(TOLOWER "${CPACK_PACKAGE_NAME}${CPACK_DEB_PACKAGE_COMPONENT_PART_NAME}" CPACK_DEBIAN_PACKAGE_NAME)
   else()
