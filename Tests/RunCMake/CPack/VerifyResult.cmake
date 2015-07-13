@@ -15,13 +15,13 @@ include("${src_dir}/${GENERATOR_TYPE}/${RunCMake_TEST}-ExpectedFiles.cmake")
 
 if(NOT EXPECTED_FILES_COUNT EQUAL 0)
   foreach(file_no_ RANGE 1 ${EXPECTED_FILES_COUNT})
-    file(GLOB foundFile_ RELATIVE "${bin_dir}" "${EXPECTED_FILE_${file_no_}}")
-    set(foundFiles_ "${foundFiles_};${foundFile_}")
-    list(LENGTH foundFile_ foundFilesCount_)
+    file(GLOB FOUND_FILE_${file_no_} RELATIVE "${bin_dir}" "${EXPECTED_FILE_${file_no_}}")
+    set(foundFiles_ "${foundFiles_};${FOUND_FILE_${file_no_}}")
+    list(LENGTH FOUND_FILE_${file_no_} foundFilesCount_)
 
     if(foundFilesCount_ EQUAL 1)
       unset(PACKAGE_CONTENT)
-      getPackageContent("${bin_dir}/${foundFile_}" "PACKAGE_CONTENT")
+      getPackageContent("${bin_dir}/${FOUND_FILE_${file_no_}}" "PACKAGE_CONTENT")
 
       string(REGEX MATCH "${EXPECTED_FILE_CONTENT_${file_no_}}"
           expected_content_list "${PACKAGE_CONTENT}")
@@ -36,7 +36,7 @@ if(NOT EXPECTED_FILES_COUNT EQUAL 0)
       message(FATAL_ERROR
         "Found more than one file for file No. '${file_no_}'!"
         " Found files count '${foundFilesCount_}'."
-        " Files: '${foundFile_}'"
+        " Files: '${FOUND_FILE_${file_no_}}'"
         "${output_error_message}")
     endif()
   endforeach()
