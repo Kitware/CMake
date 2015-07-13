@@ -498,7 +498,6 @@ function(cpack_deb_prepare_package_vars)
   # if per-component dependency, overrides the global CPACK_DEBIAN_PACKAGE_DEPENDS
   # automatic dependency discovery will be performed afterwards.
   if(CPACK_DEB_PACKAGE_COMPONENT)
-    string(TOUPPER "${CPACK_DEB_PACKAGE_COMPONENT}" _local_component_name)
     set(_component_depends_var "CPACK_DEBIAN_${_local_component_name}_PACKAGE_DEPENDS")
 
     # if set, overrides the global dependency
@@ -542,7 +541,6 @@ function(cpack_deb_prepare_package_vars)
       set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
     endif()
   else()
-    string(TOUPPER ${CPACK_DEB_PACKAGE_COMPONENT} _local_component_name)
     set(component_description_var CPACK_COMPONENT_${_local_component_name}_DESCRIPTION)
 
     # component description overrides package description
