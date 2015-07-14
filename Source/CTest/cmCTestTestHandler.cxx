@@ -1175,10 +1175,11 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
   xml.StartElement("Testing");
   xml.Element("StartDateTime", this->StartTest);
   xml.Element("StartTestTime", this->StartTestTime);
-  std::string pullRequest = this->CTest->GetCTestConfiguration("PullRequest");
-  if(!pullRequest.empty())
+  std::string changeID =
+    cmXMLSafe(this->CTest->GetCTestConfiguration("ChangeID")).str();
+  if(!changeID.empty())
     {
-    xml.Element("PullRequest", pullRequest);
+    xml.Element("ChangeID", changeID);
     }
   xml.StartElement("TestList");
   cmCTestTestHandler::TestResultsVector::size_type cc;

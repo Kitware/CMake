@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
+@CASE_TEST_PREFIX_CODE@
 
 set(CTEST_SITE                          "test-site")
 set(CTEST_BUILD_NAME                    "test-build-name")
@@ -15,3 +16,4 @@ ctest_start(Experimental)
 ctest_configure()
 ctest_build()
 ctest_test(${ctest_test_args})
+@CASE_TEST_SUFFIX_CODE@

@@ -31,3 +31,25 @@ endif()
   endif()
 endfunction()
 run_BuildFailure()
+
+
+function(run_BuildChangeID)
+  set(CASE_TEST_PREFIX_CODE [[
+    set(CTEST_CHANGE_ID "<>1")
+  ]])
+
+  set(CASE_TEST_SUFFIX_CODE [[
+file(GLOB_RECURSE build_xml_file
+  "${CTEST_BINARY_DIRECTORY}/Testing/Build.xml")
+if(build_xml_file)
+  file(STRINGS "${build_xml_file}" line
+    REGEX "^.*<ChangeID>(.*)</ChangeID>$" LIMIT_COUNT 1)
+  if("${line}" MATCHES "<ChangeID>&amp\\\;lt\\\;&amp\\\;gt\\\;1</ChangeID>")
+    message("expected ChangeID found")
+  endif()
+endif()
+]])
+
+  run_ctest(BuildChangeID)
+endfunction()
+run_BuildChangeID()

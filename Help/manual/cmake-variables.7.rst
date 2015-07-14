@@ -351,6 +351,7 @@ Variables for CTest
    /variable/CTEST_BUILD_NAME
    /variable/CTEST_BZR_COMMAND
    /variable/CTEST_BZR_UPDATE_OPTIONS
+   /variable/CTEST_CHANGE_ID
    /variable/CTEST_CHECKOUT_COMMAND
    /variable/CTEST_CONFIGURATION_TYPE
    /variable/CTEST_CONFIGURE_COMMAND
@@ -381,7 +382,6 @@ Variables for CTest
    /variable/CTEST_P4_COMMAND
    /variable/CTEST_P4_OPTIONS
    /variable/CTEST_P4_UPDATE_OPTIONS
-   /variable/CTEST_PULL_REQUEST
    /variable/CTEST_SCP_COMMAND
    /variable/CTEST_SITE
    /variable/CTEST_SOURCE_DIRECTORY
