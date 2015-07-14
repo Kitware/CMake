@@ -7,9 +7,6 @@ foreach(_arg "" 0 1 2 ${TRUE_NAMES} ${FALSE_NAMES})
   set(VAR_${_arg} "${_arg}")
 endforeach()
 
-include("@CMAKE_CURRENT_SOURCE_DIR@/../RegexEscapeString.cmake")
-REGEX_ESCAPE_STRING(CTEST_ESCAPED_CMAKE_CURRENT_SOURCE_DIR "@CMAKE_CURRENT_SOURCE_DIR@")
-
 macro(test_vars _old)
   # Variables set to false or not set.
   foreach(_var "" 0 ${FALSE_NAMES} UNDEFINED)
@@ -159,11 +156,3 @@ foreach(_bad 2x -2x)
 endforeach()
 
 test_vars("")
-
-set(Invalid-Argument-RESULT 1)
-set(Invalid-Argument-STDERR ".*CMake Error at (${CTEST_ESCAPED_CMAKE_CURRENT_SOURCE_DIR}/)?If-Invalid-Argument.cmake:1 \\(if\\):.*Unknown arguments specified.*")
-
-include("@CMAKE_CURRENT_SOURCE_DIR@/CheckCMakeTest.cmake")
-check_cmake_test(If
-  Invalid-Argument
-)

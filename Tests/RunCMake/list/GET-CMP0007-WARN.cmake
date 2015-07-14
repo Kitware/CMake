@@ -1,3 +1,4 @@
+cmake_policy(VERSION 2.4)
 set(thelist "" NEW OLD)
 
 list(GET thelist 1 thevalue)
