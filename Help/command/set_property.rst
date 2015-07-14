@@ -64,3 +64,6 @@ property value in the form of a semicolon-separated list.  If the
 value.  If the ``APPEND_STRING`` option is given the string is append to any
 existing property value as string, i.e.  it results in a longer string
 and not a list of strings.
+
+See the :manual:`cmake-properties(7)` manual for a list of properties
+in each scope.
