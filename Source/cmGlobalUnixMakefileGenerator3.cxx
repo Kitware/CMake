@@ -801,8 +801,20 @@ cmGlobalUnixMakefileGenerator3
         }
       progress.Arg = progressArg.str();
       }
-      lg->AppendEcho(commands, "Built target " + name,
-        cmLocalUnixMakefileGenerator3::EchoNormal, &progress);
+
+      bool targetMessages = true;
+      if (const char* tgtMsg = this->GetCMakeInstance()
+                                   ->GetState()
+                                   ->GetGlobalProperty("TARGET_MESSAGES"))
+        {
+        targetMessages = cmSystemTools::IsOn(tgtMsg);
+        }
+
+      if (targetMessages)
+        {
+        lg->AppendEcho(commands, "Built target " + name,
+          cmLocalUnixMakefileGenerator3::EchoNormal, &progress);
+        }
 
       this->AppendGlobalTargetDepends(depends, gtarget);
       lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
