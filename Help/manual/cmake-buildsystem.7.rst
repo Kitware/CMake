@@ -85,6 +85,22 @@ It is a type which is loaded as a plugin using runtime techniques.
 
   add_library(archive MODULE 7z.cpp)
 
+.. _`Apple Frameworks`:
+
+Apple Frameworks
+""""""""""""""""
+
+A ``SHARED`` library may be marked with the :prop_tgt:`FRAMEWORK`
+target property to create an OS X Framework:
+
+.. code-block:: cmake
+
+  add_library(MyFramework SHARED MyFramework.cpp)
+  set_target_properties(MyFramework PROPERTIES
+    FRAMEWORK 1
+    FRAMEWORK_VERSION A
+    )
+
 .. _`Object Libraries`:
 
 Object Libraries
