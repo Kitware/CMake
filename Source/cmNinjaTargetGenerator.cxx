@@ -321,6 +321,7 @@ cmNinjaTargetGenerator
   vars.Source = "$in";
   vars.Object = "$out";
   vars.Defines = "$DEFINES";
+  vars.Includes = "$INCLUDES";
   vars.TargetPDB = "$TARGET_PDB";
   vars.TargetCompilePDB = "$TARGET_COMPILE_PDB";
   vars.ObjectDir = "$OBJECT_DIR";
@@ -598,6 +599,7 @@ cmNinjaTargetGenerator
   cmNinjaVars vars;
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
   vars["DEFINES"] = this->ComputeDefines(source, language);
+  vars["INCLUDES"] = this->GetIncludes(language);
   if (!this->NeedDepTypeMSVC(language)) {
     vars["DEP_FILE"] =
             cmGlobalNinjaGenerator::EncodeDepfileSpace(objectFileName + ".d");
@@ -643,6 +645,7 @@ cmNinjaTargetGenerator
     compileObjectVars.ObjectFileDir = objectFileDir.c_str();
     compileObjectVars.Flags = vars["FLAGS"].c_str();
     compileObjectVars.Defines = vars["DEFINES"].c_str();
+    compileObjectVars.Includes = vars["INCLUDES"].c_str();
 
     // Rule for compiling object file.
     std::string compileCmdVar = "CMAKE_";

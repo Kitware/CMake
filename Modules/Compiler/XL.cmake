@@ -33,8 +33,8 @@ macro(__compiler_xl lang)
   set(CMAKE_${lang}_FLAGS_RELEASE_INIT "-O")
   set(CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "-O")
   set(CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT "-g")
-  set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "<CMAKE_${lang}_COMPILER> <DEFINES> <FLAGS> -E <SOURCE> > <PREPROCESSED_SOURCE>")
-  set(CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE     "<CMAKE_${lang}_COMPILER> <DEFINES> <FLAGS> -S <SOURCE> -o <ASSEMBLY_SOURCE>")
+  set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "<CMAKE_${lang}_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -E <SOURCE> > <PREPROCESSED_SOURCE>")
+  set(CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE     "<CMAKE_${lang}_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -S <SOURCE> -o <ASSEMBLY_SOURCE>")
 
   # CMAKE_XL_CreateExportList is part of the AIX XL compilers but not the linux ones.
   # If we found the tool, we'll use it to create exports, otherwise stick with the regular
