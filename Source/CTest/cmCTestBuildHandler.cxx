@@ -561,12 +561,6 @@ void cmCTestBuildHandler::GenerateXMLHeader(cmXMLWriter& xml)
   xml.Element("StartBuildTime",
     static_cast<unsigned int>(this->StartBuildTime));
   xml.Element("BuildCommand", this->GetMakeCommand());
-
-  std::string changeId = this->CTest->GetCTestConfiguration("ChangeId");
-  if(!changeId.empty())
-    {
-    xml.Element("ChangeId", changeId);
-    }
 }
 
 //----------------------------------------------------------------------------

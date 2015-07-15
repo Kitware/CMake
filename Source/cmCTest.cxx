@@ -1567,6 +1567,13 @@ void cmCTest::StartXML(cmXMLWriter& xml, bool append)
   xml.Attribute("LogicalProcessorsPerPhysical",
                      info.GetLogicalProcessorsPerPhysical());
   xml.Attribute("ProcessorClockFrequency", info.GetProcessorClockFrequency());
+
+  std::string changeId = this->GetCTestConfiguration("ChangeId");
+  if(!changeId.empty())
+    {
+    xml.Attribute("ChangeId", changeId);
+    }
+
   this->AddSiteProperties(xml);
 }
 
