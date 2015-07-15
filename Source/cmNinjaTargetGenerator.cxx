@@ -546,22 +546,39 @@ cmNinjaTargetGenerator
 ::WriteObjectBuildStatement(
   cmSourceFile const* source, bool writeOrderDependsTargetForTarget)
 {
+  std::string const language = source->GetLanguage();
+  std::string const sourceFileName =
+    language=="RC" ? source->GetFullPath() : this->GetSourceFilePath(source);
+  std::string const objectDir = this->Target->GetSupportDirectory();
+  std::string const objectFileName = this->GetObjectFilePath(source);
+  std::string const objectFileDir =
+    cmSystemTools::GetFilenamePath(objectFileName);
+
+  cmNinjaVars vars;
+  vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
+  vars["DEFINES"] = this->ComputeDefines(source, language);
+  vars["INCLUDES"] = this->GetIncludes(language);
+  if (!this->NeedDepTypeMSVC(language))
+    {
+    vars["DEP_FILE"] =
+      cmGlobalNinjaGenerator::EncodeDepfileSpace(objectFileName + ".d");
+    }
+
+  this->ExportObjectCompileCommand(
+    language, sourceFileName,
+    objectDir, objectFileName, objectFileDir,
+    vars["FLAGS"], vars["DEFINES"], vars["INCLUDES"]
+    );
+
   std::string comment;
-  const std::string language = source->GetLanguage();
   std::string rule = this->LanguageCompilerRule(language);
 
   cmNinjaDeps outputs;
-  std::string objectFileName = this->GetObjectFilePath(source);
   outputs.push_back(objectFileName);
   // Add this object to the list of object files.
   this->Objects.push_back(objectFileName);
 
   cmNinjaDeps explicitDeps;
-  std::string sourceFileName;
-  if (language == "RC")
-    sourceFileName = source->GetFullPath();
-  else
-    sourceFileName = this->GetSourceFilePath(source);
   explicitDeps.push_back(sourceFileName);
 
   cmNinjaDeps implicitDeps;
@@ -596,21 +613,11 @@ cmNinjaTargetGenerator
                                                              orderOnlyDeps);
   }
 
-  cmNinjaVars vars;
-  vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
-  vars["DEFINES"] = this->ComputeDefines(source, language);
-  vars["INCLUDES"] = this->GetIncludes(language);
-  if (!this->NeedDepTypeMSVC(language)) {
-    vars["DEP_FILE"] =
-            cmGlobalNinjaGenerator::EncodeDepfileSpace(objectFileName + ".d");
-  }
   EnsureParentDirectoryExists(objectFileName);
 
-  std::string objectDir = this->Target->GetSupportDirectory();
   vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
                          ConvertToNinjaPath(objectDir),
                          cmLocalGenerator::SHELL);
-  std::string objectFileDir = cmSystemTools::GetFilenamePath(objectFileName);
   vars["OBJECT_FILE_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
                               ConvertToNinjaPath(objectFileDir),
                               cmLocalGenerator::SHELL);
@@ -618,54 +625,6 @@ cmNinjaTargetGenerator
   this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetTarget(), vars);
 
   this->SetMsvcTargetPdbVariable(vars);
-
-  if(this->Makefile->IsOn("CMAKE_EXPORT_COMPILE_COMMANDS"))
-    {
-    cmLocalGenerator::RuleVariables compileObjectVars;
-    std::string lang = language;
-    compileObjectVars.Language = lang.c_str();
-
-    std::string escapedSourceFileName = sourceFileName;
-
-    if (!cmSystemTools::FileIsFullPath(sourceFileName.c_str()))
-      {
-      escapedSourceFileName = cmSystemTools::CollapseFullPath(
-        escapedSourceFileName,
-        this->GetGlobalGenerator()->GetCMakeInstance()->
-          GetHomeOutputDirectory());
-      }
-
-    escapedSourceFileName =
-      this->LocalGenerator->ConvertToOutputFormat(
-        escapedSourceFileName, cmLocalGenerator::SHELL);
-
-    compileObjectVars.Source = escapedSourceFileName.c_str();
-    compileObjectVars.Object = objectFileName.c_str();
-    compileObjectVars.ObjectDir = objectDir.c_str();
-    compileObjectVars.ObjectFileDir = objectFileDir.c_str();
-    compileObjectVars.Flags = vars["FLAGS"].c_str();
-    compileObjectVars.Defines = vars["DEFINES"].c_str();
-    compileObjectVars.Includes = vars["INCLUDES"].c_str();
-
-    // Rule for compiling object file.
-    std::string compileCmdVar = "CMAKE_";
-    compileCmdVar += language;
-    compileCmdVar += "_COMPILE_OBJECT";
-    std::string compileCmd =
-      this->GetMakefile()->GetRequiredDefinition(compileCmdVar);
-    std::vector<std::string> compileCmds;
-    cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
-
-    for (std::vector<std::string>::iterator i = compileCmds.begin();
-        i != compileCmds.end(); ++i)
-      this->GetLocalGenerator()->ExpandRuleVariables(*i, compileObjectVars);
-
-    std::string cmdLine =
-      this->GetLocalGenerator()->BuildCommandLine(compileCmds);
-
-    this->GetGlobalGenerator()->AddCXXCompileCommand(cmdLine,
-                                                     sourceFileName);
-    }
 
   this->GetGlobalGenerator()->WriteBuild(this->GetBuildFileStream(),
                                          comment,
@@ -686,6 +645,69 @@ cmNinjaTargetGenerator
                                                 outputList,
                                                 outputs);
   }
+}
+
+void
+cmNinjaTargetGenerator
+::ExportObjectCompileCommand(
+  std::string const& language,
+  std::string const& sourceFileName,
+  std::string const& objectDir,
+  std::string const& objectFileName,
+  std::string const& objectFileDir,
+  std::string const& flags,
+  std::string const& defines,
+  std::string const& includes
+  )
+{
+  if(!this->Makefile->IsOn("CMAKE_EXPORT_COMPILE_COMMANDS"))
+    {
+    return;
+    }
+
+  cmLocalGenerator::RuleVariables compileObjectVars;
+  compileObjectVars.Language = language.c_str();
+
+  std::string escapedSourceFileName = sourceFileName;
+
+  if (!cmSystemTools::FileIsFullPath(sourceFileName.c_str()))
+    {
+    escapedSourceFileName = cmSystemTools::CollapseFullPath(
+      escapedSourceFileName,
+      this->GetGlobalGenerator()->GetCMakeInstance()->
+      GetHomeOutputDirectory());
+    }
+
+  escapedSourceFileName =
+    this->LocalGenerator->ConvertToOutputFormat(
+      escapedSourceFileName, cmLocalGenerator::SHELL);
+
+  compileObjectVars.Source = escapedSourceFileName.c_str();
+  compileObjectVars.Object = objectFileName.c_str();
+  compileObjectVars.ObjectDir = objectDir.c_str();
+  compileObjectVars.ObjectFileDir = objectFileDir.c_str();
+  compileObjectVars.Flags = flags.c_str();
+  compileObjectVars.Defines = defines.c_str();
+  compileObjectVars.Includes = includes.c_str();
+
+  // Rule for compiling object file.
+  std::string compileCmdVar = "CMAKE_";
+  compileCmdVar += language;
+  compileCmdVar += "_COMPILE_OBJECT";
+  std::string compileCmd =
+    this->GetMakefile()->GetRequiredDefinition(compileCmdVar);
+  std::vector<std::string> compileCmds;
+  cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
+
+  for (std::vector<std::string>::iterator i = compileCmds.begin();
+       i != compileCmds.end(); ++i)
+    this->GetLocalGenerator()->ExpandRuleVariables(*i, compileObjectVars);
+
+  std::string cmdLine =
+    this->GetLocalGenerator()->BuildCommandLine(compileCmds);
+
+  this->GetGlobalGenerator()->AddCXXCompileCommand(cmdLine,
+                                                   sourceFileName);
 }
 
 void
