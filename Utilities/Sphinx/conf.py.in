@@ -13,7 +13,6 @@ import sys
 import os
 import re
 import glob
-from sphinx import version_info
 
 sys.path.insert(0, r'@conf_path@')
 
@@ -60,11 +59,7 @@ man_show_urls = False
 html_show_sourcelink = True
 html_static_path = ['@conf_path@/static']
 html_style = 'cmake.css'
-if isinstance(version_info, tuple) and \
-   (version_info[0]*100 + version_info[1]) > 102:
-    html_theme = 'classic'
-else:
-    html_theme = 'default'
+html_theme = 'default'
 html_title = 'CMake %s Documentation' % release
 html_short_title = '%s Documentation' % release
 html_favicon = '@conf_path@/static/cmake-favicon.ico'
