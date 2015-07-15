@@ -16,4 +16,3 @@ ctest_start(Experimental)
 ctest_configure()
 ctest_build()
 ctest_test(${ctest_test_args})
-@CASE_TEST_SUFFIX_CODE@
