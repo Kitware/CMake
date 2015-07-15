@@ -54,6 +54,8 @@ namespace @KWSYS_NAMESPACE@
 {
 
 class SystemToolsTranslationMap;
+class SystemToolsPathCaseMap;
+
 /** \class SystemToolsManager
  * \brief Use to make sure SystemTools is initialized before it is used
  * and is the last static object destroyed
@@ -944,7 +946,9 @@ private:
    * Each time 'dir' will be found it will be replace by 'refdir'
    */
   static SystemToolsTranslationMap *TranslationMap;
-  static SystemToolsTranslationMap *LongPathMap;
+#ifdef _WIN32
+  static SystemToolsPathCaseMap *PathCaseMap;
+#endif
 #ifdef __CYGWIN__
   static SystemToolsTranslationMap *Cyg2Win32Map;
 #endif
