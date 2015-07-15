@@ -272,6 +272,7 @@
 #
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+#               CPACK_DEBIAN_<COMPONENT>_PACKAGE_CONTROL_EXTRA
 #
 #  This variable allow advanced user to add custom script to the
 #  control.tar.gz.
