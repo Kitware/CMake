@@ -51,23 +51,11 @@ run_ctest_test(TestLoadOrder TEST_LOAD "ERR4")
 unset(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING})
 unset(CASE_CTEST_TEST_LOAD)
 
-function(run_TestChangeID)
+function(run_TestChangeId)
   set(CASE_TEST_PREFIX_CODE [[
     set(CTEST_CHANGE_ID "<>1")
   ]])
 
-  set(CASE_TEST_SUFFIX_CODE [[
-file(GLOB_RECURSE test_xml_file
-  "${CTEST_BINARY_DIRECTORY}/Testing/Test.xml")
-if(test_xml_file)
-  file(STRINGS "${test_xml_file}" line
-    REGEX "^.*<ChangeID>(.*)</ChangeID>$" LIMIT_COUNT 1)
-  if("${line}" MATCHES "<ChangeID>&amp\\\;lt\\\;&amp\\\;gt\\\;1</ChangeID>")
-    message("expected ChangeID found")
-  endif()
-endif()
-]])
-
-  run_ctest(TestChangeID)
+  run_ctest(TestChangeId)
 endfunction()
-run_TestChangeID()
+run_TestChangeId()
