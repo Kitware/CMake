@@ -105,6 +105,19 @@ target_link_libraries(testLib4
 add_executable(testExe3 testExe3.c)
 set_property(TARGET testExe3 PROPERTY MACOSX_BUNDLE 1)
 
+# Test <ARCHIVE|LIBRARY|RUNTIME>_OUTPUT_DIRECTORY[_<CONFIG>] properties with generator expressions
+add_executable(testExe4 testExe4.c)
+target_link_libraries(testExe4 testExe1lib)
+set_property(TARGET testLib7 PROPERTY ARCHIVE_OUTPUT_DIRECTORY_DEBUG testLib7D-$<CONFIG>)
+set_property(TARGET testLib7 PROPERTY ARCHIVE_OUTPUT_DIRECTORY_RELEASE testLib7R-$<CONFIG>)
+set_property(TARGET testLib7 PROPERTY ARCHIVE_OUTPUT_DIRECTORY testLib7-$<CONFIG>)
+set_property(TARGET testLib4 PROPERTY LIBRARY_OUTPUT_DIRECTORY_DEBUG testLib4D-$<CONFIG>)
+set_property(TARGET testLib4 PROPERTY LIBRARY_OUTPUT_DIRECTORY_RELEASE testLib4R-$<CONFIG>)
+set_property(TARGET testLib4 PROPERTY LIBRARY_OUTPUT_DIRECTORY testLib4-$<CONFIG>)
+set_property(TARGET testExe4 PROPERTY RUNTIME_OUTPUT_DIRECTORY_DEBUG testExe4D-$<CONFIG>)
+set_property(TARGET testExe4 PROPERTY RUNTIME_OUTPUT_DIRECTORY_RELEASE testExe4R-$<CONFIG>)
+set_property(TARGET testExe4 PROPERTY RUNTIME_OUTPUT_DIRECTORY testExe4-$<CONFIG>)
+
 # Test cyclic dependencies.
 add_library(testLibCycleA STATIC
   testLibCycleA1.c testLibCycleA2.c testLibCycleA3.c)
@@ -450,7 +463,7 @@ install(FILES
 # Install and export from install tree.
 install(
   TARGETS
-  testExe1 testLib1 testLib2 testExe2 testLib3 testLib4 testExe3
+  testExe1 testLib1 testLib2 testExe2 testLib3 testLib4 testExe3 testExe4
   testExe2lib testLib4lib testLib4libdbg testLib4libopt
   testLib6 testLib7
   testLibCycleA testLibCycleB
@@ -511,7 +524,7 @@ export(TARGETS testExe1 testLib1 testLib2 testLib3
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
   )
-export(TARGETS testExe2 testLib4 testLib5 testLib6 testLib7 testExe3 testExe2lib
+export(TARGETS testExe2 testLib4 testLib5 testLib6 testLib7 testExe3 testExe4 testExe2lib
   testLib4lib testLib4libdbg testLib4libopt
   testLibCycleA testLibCycleB
   testLibPerConfigDest
