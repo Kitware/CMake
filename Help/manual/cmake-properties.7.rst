@@ -40,6 +40,7 @@ Properties of Global Scope
    /prop_gbl/RULE_LAUNCH_LINK
    /prop_gbl/RULE_MESSAGES
    /prop_gbl/TARGET_ARCHIVES_MAY_BE_SHARED_LIBS
+   /prop_gbl/TARGET_MESSAGES
    /prop_gbl/TARGET_SUPPORTS_SHARED_LIBS
    /prop_gbl/USE_FOLDERS
 
