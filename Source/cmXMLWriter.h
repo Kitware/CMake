@@ -62,6 +62,8 @@ public:
 
   void CData(std::string const& data);
 
+  void Doctype(const char* doctype);
+
   void ProcessingInstruction(const char* target, const char* data);
 
   void FragmentFile(const char* fname);

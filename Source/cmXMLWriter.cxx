@@ -92,6 +92,13 @@ void cmXMLWriter::CData(std::string const& data)
   this->Output << "<![CDATA[" << data << "]]>";
 }
 
+void cmXMLWriter::Doctype(const char* doctype)
+{
+  this->CloseStartElement();
+  this->ConditionalLineBreak(!this->IsContent, this->Elements.size());
+  this->Output << "<!DOCTYPE " << doctype << ">";
+}
+
 void cmXMLWriter::ProcessingInstruction(const char* target, const char* data)
 {
   this->CloseStartElement();
