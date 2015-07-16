@@ -18,6 +18,7 @@
 
 #include <cmGeneratedFileStream.h>
 #include <cmTimestamp.h>
+#include <cmXMLWriter.h>
 
 //----------------------------------------------------------------- Logger ---
 #ifdef cmCPackLogger
@@ -447,35 +448,28 @@ void cmCPackIFWPackage::GeneratePackageFile()
     }
 
   // Output stream
-  cmGeneratedFileStream xout((Directory + "/meta/package.xml").data());
+  cmGeneratedFileStream fout((Directory + "/meta/package.xml").data());
+  cmXMLWriter xout(fout);
 
-  xout << "<?xml version=\"1.0\"?>" << std::endl;
+  xout.StartDocument();
 
   WriteGeneratedByToStrim(xout);
 
-  xout << "<Package>" << std::endl;
+  xout.StartElement("Package");
 
-  xout << "    <DisplayName>" << DisplayName
-       << "</DisplayName>" << std::endl;
+  xout.Element("DisplayName", DisplayName);
+  xout.Element("Description", Description);
+  xout.Element("Name", Name);
+  xout.Element("Version", Version);
 
-  xout << "    <Description>" << Description
-       << "</Description>" << std::endl;
-
-  xout << "    <Name>" << Name << "</Name>" << std::endl;
-
-  xout << "    <Version>" <<  Version
-       << "</Version>" << std::endl;
-
-  xout << "    <ReleaseDate>";
-  if(ReleaseDate.empty())
+  if (!ReleaseDate.empty())
     {
-    xout << cmTimestamp().CurrentTime("%Y-%m-%d", true);
+    xout.Element("ReleaseDate", ReleaseDate);
     }
   else
     {
-    xout << ReleaseDate;
+    xout.Element("ReleaseDate", cmTimestamp().CurrentTime("%Y-%m-%d", true));
     }
-  xout << "</ReleaseDate>" << std::endl;
 
   // Script (copy to meta dir)
   if(!Script.empty())
@@ -483,7 +477,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
     std::string name = cmSystemTools::GetFilenameName(Script);
     std::string path = Directory + "/meta/" + name;
     cmsys::SystemTools::CopyFileIfDifferent(Script.data(), path.data());
-    xout << "    <Script>" << name << "</Script>" << std::endl;
+    xout.Element("Script", name);
     }
 
   // Dependencies
@@ -501,16 +495,16 @@ void cmCPackIFWPackage::GeneratePackageFile()
   // Write dependencies
   if  (!compDepSet.empty())
     {
-    xout << "    <Dependencies>";
+    std::stringstream dependencies;
     std::set<DependenceStruct>::iterator it = compDepSet.begin();
-    xout << it->NameWithCompare();
+    dependencies << it->NameWithCompare();
     ++it;
     while(it != compDepSet.end())
       {
-      xout << "," << it->NameWithCompare();
+      dependencies << "," << it->NameWithCompare();
       ++it;
       }
-    xout << "</Dependencies>" << std::endl;
+    xout.Element("Dependencies", dependencies.str());
     }
 
   // Licenses (copy to meta dir)
@@ -524,43 +518,42 @@ void cmCPackIFWPackage::GeneratePackageFile()
     }
   if(!licenses.empty())
     {
-    xout << "    <Licenses>" << std::endl;
+    xout.StartElement("Licenses");
     for(size_t i = 0; i < licenses.size(); i += 2)
       {
-      xout << "        <License "
-           << "name=\"" << licenses[i] << "\" "
-           << "file=\"" << licenses[i + 1] << "\" "
-           << "/>" <<std::endl;
+      xout.StartElement("License");
+      xout.Attribute("name", licenses[i]);
+      xout.Attribute("file", licenses[i + 1]);
+      xout.EndElement();
       }
-    xout << "    </Licenses>" << std::endl;
+    xout.EndElement();
     }
 
   if (!ForcedInstallation.empty())
     {
-    xout << "    <ForcedInstallation>" << ForcedInstallation
-         << "</ForcedInstallation>" << std::endl;
+    xout.Element("ForcedInstallation", ForcedInstallation);
     }
 
   if (!Virtual.empty())
     {
-    xout << "    <Virtual>" << Virtual << "</Virtual>" << std::endl;
+    xout.Element("Virtual", Virtual);
     }
   else if (!Default.empty())
     {
-    xout << "    <Default>" << Default << "</Default>" << std::endl;
+    xout.Element("Default", Default);
     }
 
   // Priority
   if(!SortingPriority.empty())
     {
-    xout << "    <SortingPriority>" << SortingPriority
-         << "</SortingPriority>" << std::endl;
+    xout.Element("SortingPriority", SortingPriority);
     }
 
-  xout << "</Package>" << std::endl;
+  xout.EndElement();
+  xout.EndDocument();
 }
 
-void cmCPackIFWPackage::WriteGeneratedByToStrim(cmGeneratedFileStream &xout)
+void cmCPackIFWPackage::WriteGeneratedByToStrim(cmXMLWriter &xout)
 {
   if(Generator) Generator->WriteGeneratedByToStrim(xout);
 }

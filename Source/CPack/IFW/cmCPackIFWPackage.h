@@ -14,12 +14,12 @@
 #define cmCPackIFWPackage_h
 
 #include <cmStandardIncludes.h>
-#include <cmGeneratedFileStream.h>
 
 class cmCPackComponent;
 class cmCPackComponentGroup;
 class cmCPackIFWInstaller;
 class cmCPackIFWGenerator;
+class cmXMLWriter;
 
 /** \class cmCPackIFWPackage
  * \brief A single component to be installed by CPack IFW generator
@@ -135,7 +135,7 @@ public: // Internal implementation
   std::string Directory;
 
 protected:
-  void WriteGeneratedByToStrim(cmGeneratedFileStream& xout);
+  void WriteGeneratedByToStrim(cmXMLWriter& xout);
 };
 
 #endif // cmCPackIFWPackage_h

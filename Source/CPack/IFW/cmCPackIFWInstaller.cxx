@@ -17,7 +17,7 @@
 #include <CPack/cmCPackLog.h>
 
 #include <cmGeneratedFileStream.h>
-#include <cmXMLSafe.h>
+#include <cmXMLWriter.h>
 
 #ifdef cmCPackLogger
 # undef cmCPackLogger
@@ -334,30 +334,27 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
     }
 
   // Output stream
-  cmGeneratedFileStream xout((Directory + "/config/config.xml").data());
+  cmGeneratedFileStream fout((Directory + "/config/config.xml").data());
+  cmXMLWriter xout(fout);
 
-  xout << "<?xml version=\"1.0\"?>" << std::endl;
+  xout.StartDocument();
 
   WriteGeneratedByToStrim(xout);
 
-  xout << "<Installer>" << std::endl;
+  xout.StartElement("Installer");
 
-  xout << "    <Name>" << cmXMLSafe(Name).str() << "</Name>" << std::endl;
-
-  xout << "    <Version>" << Version << "</Version>" << std::endl;
-
-  xout << "    <Title>" << cmXMLSafe(Title).str() << "</Title>"
-       << std::endl;
+  xout.Element("Name", Name);
+  xout.Element("Version", Version);
+  xout.Element("Title", Title);
 
   if(!Publisher.empty())
     {
-    xout << "    <Publisher>" << cmXMLSafe(Publisher).str()
-         << "</Publisher>" << std::endl;
+    xout.Element("Publisher", Publisher);
     }
 
   if(!ProductUrl.empty())
     {
-    xout << "    <ProductUrl>" << ProductUrl << "</ProductUrl>" << std::endl;
+    xout.Element("ProductUrl", ProductUrl);
     }
 
   // ApplicationIcon
@@ -369,8 +366,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
     name = cmSystemTools::GetFilenameWithoutExtension(name);
     cmsys::SystemTools::CopyFileIfDifferent(
       InstallerApplicationIcon.data(), path.data());
-    xout << "    <InstallerApplicationIcon>" << name
-         << "</InstallerApplicationIcon>" << std::endl;
+    xout.Element("InstallerApplicationIcon", name);
     }
 
   // WindowIcon
@@ -380,8 +376,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
     std::string path = Directory + "/config/" + name;
     cmsys::SystemTools::CopyFileIfDifferent(
       InstallerWindowIcon.data(), path.data());
-    xout << "    <InstallerWindowIcon>" << name
-         << "</InstallerWindowIcon>" << std::endl;
+    xout.Element("InstallerWindowIcon", name);
     }
 
   // Logo
@@ -390,104 +385,91 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
     std::string name = cmSystemTools::GetFilenameName(Logo);
     std::string path = Directory + "/config/" + name;
     cmsys::SystemTools::CopyFileIfDifferent(Logo.data(), path.data());
-    xout << "    <Logo>" << name << "</Logo>" << std::endl;
+    xout.Element("Logo", name);
     }
 
   // Start menu
   if(!IsVersionLess("2.0"))
     {
-    xout << "    <StartMenuDir>" << StartMenuDir
-         << "</StartMenuDir>" << std::endl;
+    xout.Element("StartMenuDir", StartMenuDir);
     }
 
   // Target dir
   if(!TargetDir.empty())
     {
-    xout << "    <TargetDir>" << TargetDir << "</TargetDir>" << std::endl;
+    xout.Element("TargetDir", TargetDir);
     }
 
   // Admin target dir
   if(!AdminTargetDir.empty())
     {
-    xout << "    <AdminTargetDir>" << AdminTargetDir
-         << "</AdminTargetDir>" << std::endl;
+    xout.Element("AdminTargetDir", AdminTargetDir);
     }
 
   // Remote repositories
   if (!Repositories.empty())
     {
-    xout << "    <RemoteRepositories>" << std::endl;
+    xout.StartElement("RemoteRepositories");
     for(std::vector<RepositoryStruct>::iterator
         rit = Repositories.begin(); rit != Repositories.end(); ++rit)
       {
-      xout << "        <Repository>" << std::endl;
+      xout.StartElement("Repository");
       // Url
-      xout << "            <Url>" << rit->Url
-           << "</Url>" << std::endl;
+      xout.Element("Url", rit->Url);
       // Enabled
       if(!rit->Enabled.empty())
         {
-        xout << "            <Enabled>" << rit->Enabled
-             << "</Enabled>" << std::endl;
+        xout.Element("Enabled", rit->Enabled);
         }
       // Username
       if(!rit->Username.empty())
         {
-        xout << "            <Username>" << rit->Username
-             << "</Username>" << std::endl;
+        xout.Element("Username", rit->Username);
         }
       // Password
       if(!rit->Password.empty())
         {
-        xout << "            <Password>" << rit->Password
-             << "</Password>" << std::endl;
+        xout.Element("Password", rit->Password);
         }
       // DisplayName
       if(!rit->DisplayName.empty())
         {
-        xout << "            <DisplayName>" << rit->DisplayName
-             << "</DisplayName>" << std::endl;
+        xout.Element("DisplayName", rit->DisplayName);
         }
-      xout << "        </Repository>" << std::endl;
+      xout.EndElement();
       }
-    xout << "    </RemoteRepositories>" << std::endl;
+    xout.EndElement();
     }
 
   // Maintenance tool
   if(!IsVersionLess("2.0") && !MaintenanceToolName.empty())
     {
-    xout << "    <MaintenanceToolName>" << MaintenanceToolName
-         << "</MaintenanceToolName>" << std::endl;
+    xout.Element("MaintenanceToolName", MaintenanceToolName);
     }
 
   // Maintenance tool ini file
   if(!IsVersionLess("2.0") && !MaintenanceToolIniFile.empty())
     {
-    xout << "    <MaintenanceToolIniFile>" << MaintenanceToolIniFile
-         << "</MaintenanceToolIniFile>" << std::endl;
+    xout.Element("MaintenanceToolIniFile", MaintenanceToolIniFile);
     }
 
   // Different allows
   if(IsVersionLess("2.0"))
     {
     // CPack IFW default policy
-    xout << "    <!-- CPack IFW default policy for QtIFW less 2.0 -->"
-         << std::endl;
-    xout << "    <AllowNonAsciiCharacters>true</AllowNonAsciiCharacters>"
-         << std::endl;
-    xout << "    <AllowSpaceInPath>true</AllowSpaceInPath>" << std::endl;
+    xout.Comment("CPack IFW default policy for QtIFW less 2.0");
+    xout.Element("AllowNonAsciiCharacters", "true");
+    xout.Element("AllowSpaceInPath", "true");
     }
   else
     {
       if(!AllowNonAsciiCharacters.empty())
         {
-        xout << "    <AllowNonAsciiCharacters>" << AllowNonAsciiCharacters
-             << "</AllowNonAsciiCharacters>" << std::endl;
+        xout.Element("AllowNonAsciiCharacters", AllowNonAsciiCharacters);
         }
       if(!AllowSpaceInPath.empty())
         {
-        xout << "    <AllowAllowSpaceInPath>" << AllowSpaceInPath
-             << "</AllowSpaceInPath>" << std::endl;
+        xout.Element("AllowSpaceInPath", AllowSpaceInPath);
         }
     }
 
@@ -497,10 +479,11 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
     std::string name = cmSystemTools::GetFilenameName(ControlScript);
     std::string path = Directory + "/config/" + name;
     cmsys::SystemTools::CopyFileIfDifferent(ControlScript.data(), path.data());
-    xout << "    <ControlScript>" << name << "</ControlScript>" << std::endl;
+    xout.Element("ControlScript", name);
     }
 
-  xout << "</Installer>" << std::endl;
+  xout.EndElement();
+  xout.EndDocument();
 }
 
 //----------------------------------------------------------------------------
@@ -535,7 +518,7 @@ void cmCPackIFWInstaller::GeneratePackageFiles()
   }
 }
 
-void cmCPackIFWInstaller::WriteGeneratedByToStrim(cmGeneratedFileStream &xout)
+void cmCPackIFWInstaller::WriteGeneratedByToStrim(cmXMLWriter &xout)
 {
   if(Generator) Generator->WriteGeneratedByToStrim(xout);
 }
