@@ -14,7 +14,6 @@
 #include "cmCTest.h"
 #include "cmSystemTools.h"
 #include "cmAlgorithms.h"
-#include "cmXMLSafe.h"
 
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/ios/sstream>
