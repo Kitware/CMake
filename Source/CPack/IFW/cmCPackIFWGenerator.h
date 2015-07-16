@@ -13,11 +13,12 @@
 #ifndef cmCPackIFWGenerator_h
 #define cmCPackIFWGenerator_h
 
-#include <cmGeneratedFileStream.h>
 #include <CPack/cmCPackGenerator.h>
 
 #include "cmCPackIFWPackage.h"
 #include "cmCPackIFWInstaller.h"
+
+class cmXMLWriter;
 
 /** \class cmCPackIFWGenerator
  * \brief A generator for Qt Installer Framework tools
@@ -121,7 +122,7 @@ protected: // Methods
   cmCPackIFWPackage* GetGroupPackage(cmCPackComponentGroup *group) const;
   cmCPackIFWPackage* GetComponentPackage(cmCPackComponent *component) const;
 
-  void WriteGeneratedByToStrim(cmGeneratedFileStream& xout);
+  void WriteGeneratedByToStrim(cmXMLWriter& xout);
 
 protected: // Data
 
