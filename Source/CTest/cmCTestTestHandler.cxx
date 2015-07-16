@@ -2070,7 +2070,7 @@ bool cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length)
         }
       current = next;
       }
-    else // Bad byte will be handled by cmXMLSafe.
+    else // Bad byte will be handled by cmXMLWriter.
       {
       ++current;
       }

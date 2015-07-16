@@ -22,7 +22,6 @@
 #include <cmsys/FStream.hxx>
 #include "cmDynamicLoader.h"
 #include "cmGeneratedFileStream.h"
-#include "cmXMLSafe.h"
 #include "cmVersionMacros.h"
 #include "cmCTestCommand.h"
 #include "cmCTestStartCommand.h"
@@ -156,7 +155,7 @@ std::string cmCTest::CurrentTime()
     strftime(current_time, 1000, "%a %b %d %H:%M:%S %Z %Y", t);
     }
   cmCTestLog(this, DEBUG, "   Current_Time: " << current_time << std::endl);
-  return cmXMLSafe(cmCTest::CleanString(current_time)).str();
+  return cmCTest::CleanString(current_time);
 }
 
 //----------------------------------------------------------------------
@@ -1477,8 +1476,6 @@ std::string cmCTest::SafeBuildIdField(const std::string& value)
         cmSystemTools::ReplaceString(safevalue, replace, "");
         }
       }
-
-    safevalue = cmXMLSafe(safevalue).str();
     }
 
   if (safevalue == "")
