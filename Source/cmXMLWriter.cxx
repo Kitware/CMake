@@ -67,6 +67,13 @@ void cmXMLWriter::EndElement()
   this->ElementOpen = false;
 }
 
+void cmXMLWriter::Element(const char* name)
+{
+  this->CloseStartElement();
+  this->ConditionalLineBreak(!this->IsContent, this->Elements.size());
+  this->Output << '<' << name << "/>";
+}
+
 void cmXMLWriter::BreakAttributes()
 {
   this->BreakAttrib = true;
