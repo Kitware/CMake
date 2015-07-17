@@ -109,6 +109,12 @@ bool cmCTestHandlerCommand
       this->Quiet);
     }
 
+  if(const char* changeId =
+     this->Makefile->GetDefinition("CTEST_CHANGE_ID"))
+    {
+    this->CTest->SetCTestConfiguration("ChangeId", changeId, this->Quiet);
+    }
+
   cmCTestLog(this->CTest, DEBUG, "Initialize handler" << std::endl;);
   cmCTestGenericHandler* handler = this->InitializeHandler();
   if ( !handler )

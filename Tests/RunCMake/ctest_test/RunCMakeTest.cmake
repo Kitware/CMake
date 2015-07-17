@@ -49,3 +49,13 @@ set(CASE_CTEST_TEST_LOAD "ERR3")
 run_ctest_test(TestLoadOrder TEST_LOAD "ERR4")
 
 unset(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING})
+unset(CASE_CTEST_TEST_LOAD)
+
+function(run_TestChangeId)
+  set(CASE_TEST_PREFIX_CODE [[
+    set(CTEST_CHANGE_ID "<>1")
+  ]])
+
+  run_ctest(TestChangeId)
+endfunction()
+run_TestChangeId()
