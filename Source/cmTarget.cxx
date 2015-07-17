@@ -4466,10 +4466,7 @@ bool cmTarget::ComputeOutputDir(const std::string& config,
   if(const char* config_outdir = this->GetProperty(configProp))
     {
     // Use the user-specified per-configuration output directory.
-    cmGeneratorExpression ge;
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-      ge.Parse(config_outdir);
-    out = cge->Evaluate(this->Makefile, config);
+    out = config_outdir;
 
     // Skip per-configuration subdirectory.
     conf = "";
@@ -4477,10 +4474,7 @@ bool cmTarget::ComputeOutputDir(const std::string& config,
   else if(const char* outdir = this->GetProperty(propertyName))
     {
     // Use the user-specified output directory.
-    cmGeneratorExpression ge;
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-      ge.Parse(outdir);
-    out = cge->Evaluate(this->Makefile, config);
+    out = outdir;
     }
   else if(this->GetType() == cmTarget::EXECUTABLE)
     {
