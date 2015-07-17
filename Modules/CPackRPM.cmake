@@ -188,6 +188,23 @@
 #
 #   rpm -qp --requires file.rpm
 #
+# .. variable:: CPACK_RPM_PACKAGE_CONFLICTS
+#               CPACK_RPM_<component>_PACKAGE_CONFLICTS
+#
+#  RPM spec conflicts field.
+#
+#  * Mandatory : NO
+#  * Default   : -
+#
+#  May be used to set negative RPM dependencies (conflicts). Note that you must enclose
+#  the complete requires string between quotes, for example::
+#
+#   set(CPACK_RPM_PACKAGE_CONFLICTS "libxml2")
+#
+#  The conflicting package list of an RPM file could be printed with::
+#
+#   rpm -qp --conflicts file.rpm
+#
 # .. variable:: CPACK_RPM_PACKAGE_REQUIRES_PRE
 #               CPACK_RPM_<component>_PACKAGE_REQUIRES_PRE
 #
