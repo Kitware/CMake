@@ -3806,18 +3806,6 @@ cmVariableWatch *cmMakefile::GetVariableWatch() const
 }
 #endif
 
-void cmMakefile::AddMacro(const char* name)
-{
-  assert(name);
-  this->MacrosList.push_back(name);
-}
-
-void cmMakefile::GetListOfMacros(std::string& macros) const
-{
-  assert(macros.empty());
-  macros = cmJoin(this->MacrosList, ";");
-}
-
 cmState *cmMakefile::GetState() const
 {
   return this->GetCMakeInstance()->GetState();
@@ -4239,11 +4227,6 @@ const char *cmMakefile::GetProperty(const std::string& prop,
   else if (prop == "VARIABLES")
     {
     output = cmJoin(this->GetDefinitions(), ";");
-    return output.c_str();
-    }
-  else if (prop == "MACROS")
-    {
-    this->GetListOfMacros(output);
     return output.c_str();
     }
   else if (prop == "INCLUDE_DIRECTORIES")

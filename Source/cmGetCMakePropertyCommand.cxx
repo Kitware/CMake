@@ -40,7 +40,10 @@ bool cmGetCMakePropertyCommand
   else if ( args[1] == "MACROS" )
     {
     output.clear();
-    this->Makefile->GetListOfMacros(output);
+    if (const char* macrosProp = this->Makefile->GetProperty("MACROS"))
+      {
+      output = macrosProp;
+      }
     }
   else if ( args[1] == "COMPONENTS" )
     {
