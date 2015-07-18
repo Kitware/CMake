@@ -23,6 +23,7 @@ class cmCommand;
 class cmState
 {
   struct SnapshotDataType;
+  struct BuildsystemDirectoryStateType;
   typedef cmLinkedTree<SnapshotDataType>::iterator PositionType;
   friend class Snapshot;
 public:
@@ -38,26 +39,13 @@ public:
     InlineListFileType
   };
 
+  class Directory;
+
   class Snapshot {
   public:
     Snapshot(cmState* state = 0, PositionType position = PositionType());
 
-    const char* GetCurrentSourceDirectory() const;
-    void SetCurrentSourceDirectory(std::string const& dir);
-    const char* GetCurrentBinaryDirectory() const;
-    void SetCurrentBinaryDirectory(std::string const& dir);
-
     void SetListFile(std::string const& listfile);
-
-    std::vector<std::string> const&
-    GetCurrentSourceDirectoryComponents() const;
-    std::vector<std::string> const&
-    GetCurrentBinaryDirectoryComponents() const;
-
-    const char* GetRelativePathTopSource() const;
-    const char* GetRelativePathTopBinary() const;
-    void SetRelativePathTopSource(const char* dir);
-    void SetRelativePathTopBinary(const char* dir);
 
     std::string GetExecutionListFile() const;
     std::string GetEntryPointCommand() const;
@@ -69,14 +57,43 @@ public:
 
     cmState* GetState() const;
 
+    Directory GetDirectory() const;
+
+  private:
+    friend class cmState;
+    friend class Directory;
+    cmState* State;
+    cmState::PositionType Position;
+  };
+
+  class Directory
+  {
+    Directory(cmLinkedTree<BuildsystemDirectoryStateType>::iterator iter,
+              Snapshot const& snapshot);
+  public:
+    const char* GetCurrentSource() const;
+    void SetCurrentSource(std::string const& dir);
+    const char* GetCurrentBinary() const;
+    void SetCurrentBinary(std::string const& dir);
+
+    std::vector<std::string> const&
+    GetCurrentSourceComponents() const;
+    std::vector<std::string> const&
+    GetCurrentBinaryComponents() const;
+
+    const char* GetRelativePathTopSource() const;
+    const char* GetRelativePathTopBinary() const;
+    void SetRelativePathTopSource(const char* dir);
+    void SetRelativePathTopBinary(const char* dir);
+
   private:
     void ComputeRelativePathTopSource();
     void ComputeRelativePathTopBinary();
 
   private:
-    friend class cmState;
-    cmState* State;
-    cmState::PositionType Position;
+    cmLinkedTree<BuildsystemDirectoryStateType>::iterator DirectoryState;
+    Snapshot Snapshot_;
+    friend class Snapshot;
   };
 
   Snapshot CreateBaseSnapshot();
@@ -203,7 +220,6 @@ private:
   cmPropertyMap GlobalProperties;
   cmake* CMakeInstance;
 
-  struct BuildsystemDirectoryStateType;
   cmLinkedTree<BuildsystemDirectoryStateType> BuildsystemDirectory;
 
   cmLinkedTree<std::string> ExecutionListFiles;
