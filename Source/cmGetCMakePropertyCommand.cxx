@@ -32,10 +32,9 @@ bool cmGetCMakePropertyCommand
 
   if ( args[1] == "VARIABLES" )
     {
-    std::vector<std::string> vars = this->Makefile->GetDefinitions();
-    if (!vars.empty())
+    if (const char* varsProp = this->Makefile->GetProperty("VARIABLES"))
       {
-      output = cmJoin(vars, ";");
+      output = varsProp;
       }
     }
   else if ( args[1] == "MACROS" )
