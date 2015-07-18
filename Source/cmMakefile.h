@@ -846,13 +846,6 @@ protected:
   std::vector<std::string> HeaderFileExtensions;
   std::string DefineFlags;
 
-  std::vector<std::string> IncludeDirectoriesEntries;
-  std::vector<cmListFileBacktrace> IncludeDirectoriesEntryBacktraces;
-  std::vector<std::string> CompileOptionsEntries;
-  std::vector<cmListFileBacktrace> CompileOptionsEntryBacktraces;
-  std::vector<std::string> CompileDefinitionsEntries;
-  std::vector<cmListFileBacktrace> CompileDefinitionsEntryBacktraces;
-
   // Track the value of the computed DEFINITIONS property.
   void AddDefineFlag(const char*, std::string&);
   void RemoveDefineFlag(const char*, std::string::size_type, std::string&);

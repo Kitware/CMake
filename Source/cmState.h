@@ -16,6 +16,7 @@
 #include "cmPropertyDefinitionMap.h"
 #include "cmPropertyMap.h"
 #include "cmLinkedTree.h"
+#include "cmAlgorithms.h"
 
 class cmake;
 class cmCommand;
@@ -56,6 +57,8 @@ public:
     Snapshot GetBuildsystemDirectoryParent() const;
     Snapshot GetCallStackParent() const;
 
+    void InitializeFromParent();
+
     cmState* GetState() const;
 
     Directory GetDirectory() const;
@@ -86,6 +89,32 @@ public:
     const char* GetRelativePathTopBinary() const;
     void SetRelativePathTopSource(const char* dir);
     void SetRelativePathTopBinary(const char* dir);
+
+    cmStringRange GetIncludeDirectoriesEntries() const;
+    cmBacktraceRange GetIncludeDirectoriesEntryBacktraces() const;
+    void AppendIncludeDirectoriesEntry(std::string const& vec,
+                                       cmListFileBacktrace const& lfbt);
+    void PrependIncludeDirectoriesEntry(std::string const& vec,
+                                        cmListFileBacktrace const& lfbt);
+    void SetIncludeDirectories(std::string const& vec,
+                               cmListFileBacktrace const& lfbt);
+    void ClearIncludeDirectories();
+
+    cmStringRange GetCompileDefinitionsEntries() const;
+    cmBacktraceRange GetCompileDefinitionsEntryBacktraces() const;
+    void AppendCompileDefinitionsEntry(std::string const& vec,
+                                       cmListFileBacktrace const& lfbt);
+    void SetCompileDefinitions(std::string const& vec,
+                               cmListFileBacktrace const& lfbt);
+    void ClearCompileDefinitions();
+
+    cmStringRange GetCompileOptionsEntries() const;
+    cmBacktraceRange GetCompileOptionsEntryBacktraces() const;
+    void AppendCompileOptionsEntry(std::string const& vec,
+                                       cmListFileBacktrace const& lfbt);
+    void SetCompileOptions(std::string const& vec,
+                               cmListFileBacktrace const& lfbt);
+    void ClearCompileOptions();
 
   private:
     void ComputeRelativePathTopSource();
