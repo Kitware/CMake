@@ -260,7 +260,7 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
     cmListFileContext lfc;
     // We are not currently executing a command.  Add whatever context
     // information we have.
-    lfc.FilePath = this->ListFileStack.back();
+    lfc.FilePath = this->GetExecutionFilePath();
 
     if(!this->GetCMakeInstance()->GetIsInTryCompile())
       {
@@ -514,7 +514,7 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
       std::ostringstream w;
       w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0011) << "\n"
         << "The included script\n  "
-        << this->Makefile->ListFileStack.back() << "\n"
+        << this->Makefile->GetExecutionFilePath() << "\n"
         << "affects policy settings.  "
         << "CMake is implying the NO_POLICY_SCOPE option for compatibility, "
         << "so the effects are applied to the including context.";
@@ -527,7 +527,7 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
       std::ostringstream e;
       e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0011) << "\n"
         << "The included script\n  "
-        << this->Makefile->ListFileStack.back() << "\n"
+        << this->Makefile->GetExecutionFilePath() << "\n"
         << "affects policy settings, so it requires this policy to be set.";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       }
