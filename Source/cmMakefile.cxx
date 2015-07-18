@@ -260,7 +260,7 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
     cmListFileContext lfc;
     // We are not currently executing a command.  Add whatever context
     // information we have.
-    lfc.FilePath = this->ListFileStack.back();
+    lfc.FilePath = this->GetExecutionFilePath();
 
     if(!this->GetCMakeInstance()->GetIsInTryCompile())
       {
@@ -455,7 +455,6 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
 
   // The included file cannot pop our policy scope.
   this->Makefile->PushPolicyBarrier();
-  this->Makefile->ListFileStack.push_back(filenametoread);
   this->Makefile->PushFunctionBlockerBarrier();
 
   this->Makefile->StateSnapshot =
@@ -498,7 +497,6 @@ cmMakefile::IncludeScope::~IncludeScope()
       this->EnforceCMP0011();
       }
     }
-  this->Makefile->ListFileStack.pop_back();
 }
 
 //----------------------------------------------------------------------------
@@ -514,7 +512,7 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
       std::ostringstream w;
       w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0011) << "\n"
         << "The included script\n  "
-        << this->Makefile->ListFileStack.back() << "\n"
+        << this->Makefile->GetExecutionFilePath() << "\n"
         << "affects policy settings.  "
         << "CMake is implying the NO_POLICY_SCOPE option for compatibility, "
         << "so the effects are applied to the including context.";
@@ -527,7 +525,7 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
       std::ostringstream e;
       e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0011) << "\n"
         << "The included script\n  "
-        << this->Makefile->ListFileStack.back() << "\n"
+        << this->Makefile->GetExecutionFilePath() << "\n"
         << "affects policy settings, so it requires this policy to be set.";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       }
@@ -593,7 +591,6 @@ public:
   ListFileScope(cmMakefile* mf, std::string const& filenametoread)
     : Makefile(mf), ReportError(true)
   {
-    this->Makefile->ListFileStack.push_back(filenametoread);
     this->Makefile->PushPolicyBarrier();
 
     long line = 0;
@@ -618,7 +615,6 @@ public:
 
     this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
     this->Makefile->PopPolicyBarrier(this->ReportError);
-    this->Makefile->ListFileStack.pop_back();
   }
 
   void Quiet() { this->ReportError = false; }
@@ -1707,15 +1703,13 @@ public:
         this->Makefile->StateSnapshot.GetCurrentSourceDirectory();
     currentStart += "/CMakeLists.txt";
     this->Makefile->StateSnapshot.SetListFile(currentStart);
-    this->Makefile->ListFileStack.push_back(currentStart);
     this->Makefile->PushPolicyBarrier();
     this->Makefile->PushFunctionBlockerBarrier();
 
     this->GG = mf->GetGlobalGenerator();
     this->CurrentMakefile = this->GG->GetCurrentMakefile();
     this->Snapshot = this->GG->GetCMakeInstance()->GetCurrentSnapshot();
-    this->GG->GetCMakeInstance()->SetCurrentSnapshot(
-          this->GG->GetCMakeInstance()->GetCurrentSnapshot());
+    this->GG->GetCMakeInstance()->SetCurrentSnapshot(this->Snapshot);
     this->GG->SetCurrentMakefile(mf);
 #if defined(CMAKE_BUILD_WITH_CMAKE)
     this->GG->GetFileLockPool().PushFileScope();
@@ -3437,10 +3431,6 @@ bool cmMakefile::IsLoopBlock() const
 
 std::string cmMakefile::GetExecutionFilePath() const
 {
-  if (this->ContextStack.empty())
-    {
-    return std::string();
-    }
   assert(this->StateSnapshot.IsValid());
   return this->StateSnapshot.GetExecutionListFile();
 }
@@ -4272,7 +4262,15 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     }
   else if (prop == "LISTFILE_STACK")
     {
-    output = cmJoin(this->ListFileStack, ";");
+    std::vector<std::string> listFiles;
+    cmState::Snapshot snp = this->StateSnapshot;
+    while (snp.IsValid())
+      {
+      listFiles.push_back(snp.GetExecutionListFile());
+      snp = snp.GetCallStackParent();
+      }
+    std::reverse(listFiles.begin(), listFiles.end());
+    output = cmJoin(listFiles, ";");
     return output.c_str();
     }
   else if ( prop == "CACHE_VARIABLES" )
@@ -4429,14 +4427,22 @@ void cmMakefile::AddCMakeDependFilesFromUser()
 
 std::string cmMakefile::FormatListFileStack() const
 {
+  std::vector<std::string> listFiles;
+  cmState::Snapshot snp = this->StateSnapshot;
+  while (snp.IsValid())
+    {
+    listFiles.push_back(snp.GetExecutionListFile());
+    snp = snp.GetCallStackParent();
+    }
+  std::reverse(listFiles.begin(), listFiles.end());
   std::ostringstream tmp;
-  size_t depth = this->ListFileStack.size();
+  size_t depth = listFiles.size();
   if (depth > 0)
     {
-    std::vector<std::string>::const_iterator it = this->ListFileStack.end();
+    std::vector<std::string>::const_iterator it = listFiles.end();
     do
       {
-      if (depth != this->ListFileStack.size())
+      if (depth != listFiles.size())
         {
         tmp << "\n                ";
         }
@@ -4447,7 +4453,7 @@ std::string cmMakefile::FormatListFileStack() const
       tmp << *it;
       depth--;
       }
-    while (it != this->ListFileStack.begin());
+    while (it != listFiles.begin());
     }
   return tmp.str();
 }
