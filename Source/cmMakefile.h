@@ -702,9 +702,6 @@ public:
   bool GetPropertyAsBool(const std::string& prop) const;
   std::vector<std::string> GetPropertyKeys() const;
 
-  // Get the properties
-  cmPropertyMap &GetProperties() { return this->Properties; }
-
   ///! Initialize a makefile from its parent
   void InitializeFromParent(cmMakefile* parent);
 
