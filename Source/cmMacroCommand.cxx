@@ -211,7 +211,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
     // if this is the endmacro for this macro then execute
     if (!this->Depth)
       {
-      mf.AddMacro(this->Args[0].c_str());
+      mf.AppendProperty("MACROS", this->Args[0].c_str());
       // create a new command and add it to cmake
       cmMacroHelperCommand *f = new cmMacroHelperCommand();
       f->Args = this->Args;
