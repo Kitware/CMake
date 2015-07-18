@@ -1,4 +1,17 @@
-^CMake Error at CMP0057-OLD.cmake:5 \(if\):
+CMake Warning \(dev\) at CMP0057-OLD.cmake:5 \(if\):
+  Policy CMP0057 behavior is triggered: Support new IN_LIST if\(\) operator.
+  Run "cmake --help-policy CMP0057" for policy details.
+
+  This policy was introduced in CMake 3.3.0 and issues a warning regardless
+  of the policy setting.  For third party users of this software, the command
+  line option -Wno-dev may be used to suppress this warning.
+
+  IN_LIST will be interpreted as an operator when the policy is set to NEW.
+  Since the policy is not set to NEW, the OLD behavior will be used.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
++
+CMake Error at CMP0057-OLD.cmake:5 \(if\):
   if given arguments:
 
     "foo" "IN_LIST" "MY_LIST"
