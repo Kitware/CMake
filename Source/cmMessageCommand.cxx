@@ -69,7 +69,7 @@ bool cmMessageCommand
     ++i;
     }
 
-  std::string message = cmJoin(cmRange(i, args.end()), std::string());
+  std::string message = cmJoin(cmMakeRange(i, args.end()), std::string());
 
   if (type != cmake::MESSAGE)
     {

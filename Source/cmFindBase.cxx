@@ -170,8 +170,8 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     else
       {
       this->VariableDocumentation += "one of the ";
-      this->VariableDocumentation += cmJoin(cmRange(this->Names).retreat(1),
-                                            ", ");
+      this->VariableDocumentation +=
+        cmJoin(cmMakeRange(this->Names).retreat(1), ", ");
       this->VariableDocumentation += " or "
         + this->Names[this->Names.size() - 1] + " libraries be found";
       }

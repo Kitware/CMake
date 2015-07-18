@@ -1427,7 +1427,7 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
           std::remove(defs.begin(), defs.end(), define);
       std::vector<std::string>::const_iterator defBegin =
           defs.begin();
-      std::string ndefs = cmJoin(cmRange(defBegin, defEnd), ";");
+      std::string ndefs = cmJoin(cmMakeRange(defBegin, defEnd), ";");
 
       // Store the new list.
       this->SetProperty("COMPILE_DEFINITIONS", ndefs.c_str());

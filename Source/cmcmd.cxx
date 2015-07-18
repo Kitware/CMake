@@ -335,14 +335,14 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     // Echo string
     else if (args[1] == "echo" )
       {
-      std::cout << cmJoin(cmRange(args).advance(2), " ") << std::endl;
+      std::cout << cmJoin(cmMakeRange(args).advance(2), " ") << std::endl;
       return 0;
       }
 
     // Echo string no new line
     else if (args[1] == "echo_append" )
       {
-      std::cout << cmJoin(cmRange(args).advance(2), " ");
+      std::cout << cmJoin(cmMakeRange(args).advance(2), " ");
       return 0;
       }
 
@@ -511,7 +511,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     // Clock command
     else if (args[1] == "time" && args.size() > 2)
       {
-      std::string command = cmJoin(cmRange(args).advance(2), " ");
+      std::string command = cmJoin(cmMakeRange(args).advance(2), " ");
 
       clock_t clock_start, clock_finish;
       time_t time_start, time_finish;
@@ -572,7 +572,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         return 1;
         }
 
-      std::string command = cmWrap('"', cmRange(args).advance(3), '"', " ");
+      std::string command =
+        cmWrap('"', cmMakeRange(args).advance(3), '"', " ");
       int retval = 0;
       int timeout = 0;
       if ( cmSystemTools::RunSingleCommand(command.c_str(), 0, 0, &retval,

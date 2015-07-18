@@ -293,7 +293,7 @@ cmOutputConverter::ConvertToRelativePath(const std::vector<std::string>& local,
     {
     relative += "/";
     }
-  relative += cmJoin(cmRange(remote).advance(common), "/");
+  relative += cmJoin(cmMakeRange(remote).advance(common), "/");
 
   // Finally return the path.
   return relative;
