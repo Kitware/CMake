@@ -470,8 +470,6 @@ void cmState::AppendGlobalProperty(const std::string& prop,
 
 const char *cmState::GetGlobalProperty(const std::string& prop)
 {
-  // watch for special properties
-  std::string output = "";
   if ( prop == "CACHE_VARIABLES" )
     {
     std::vector<std::string> cacheKeys = this->GetCacheEntryKeys();
