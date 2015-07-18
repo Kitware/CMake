@@ -814,14 +814,15 @@ void cmGlobalVisualStudio7Generator
 {
   bool extensibilityGlobalsOverridden = false;
   bool extensibilityAddInsOverridden = false;
-  const cmPropertyMap& props = root->GetMakefile()->GetProperties();
-  for(cmPropertyMap::const_iterator itProp = props.begin();
-      itProp != props.end(); ++itProp)
+  const std::vector<std::string> propKeys =
+      root->GetMakefile()->GetPropertyKeys();
+  for(std::vector<std::string>::const_iterator it = propKeys.begin();
+      it != propKeys.end(); ++it)
     {
-    if(itProp->first.find("VS_GLOBAL_SECTION_") == 0)
+    if(it->find("VS_GLOBAL_SECTION_") == 0)
       {
       std::string sectionType;
-      std::string name = itProp->first.substr(18);
+      std::string name = it->substr(18);
       if(name.find("PRE_") == 0)
         {
         name = name.substr(4);
@@ -842,8 +843,9 @@ void cmGlobalVisualStudio7Generator
           extensibilityAddInsOverridden = true;
         fout << "\tGlobalSection(" << name << ") = " << sectionType << "\n";
         std::vector<std::string> keyValuePairs;
-        cmSystemTools::ExpandListArgument(itProp->second.GetValue(),
-                                          keyValuePairs);
+        cmSystemTools::ExpandListArgument(
+              root->GetMakefile()->GetProperty(it->c_str()),
+              keyValuePairs);
         for(std::vector<std::string>::const_iterator itPair =
             keyValuePairs.begin(); itPair != keyValuePairs.end(); ++itPair)
           {
