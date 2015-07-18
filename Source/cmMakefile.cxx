@@ -4292,6 +4292,18 @@ bool cmMakefile::GetPropertyAsBool(const std::string& prop) const
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }
 
+std::vector<std::string> cmMakefile::GetPropertyKeys() const
+{
+  std::vector<std::string> keys;
+  keys.reserve(this->Properties.size());
+  for(cmPropertyMap::const_iterator it = this->Properties.begin();
+      it != this->Properties.end(); ++it)
+    {
+    keys.push_back(it->first);
+    }
+  return keys;
+}
+
 cmTarget* cmMakefile::FindTarget(const std::string& name,
                                  bool excludeAliases) const
 {
