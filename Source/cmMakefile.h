@@ -14,7 +14,6 @@
 
 #include "cmExecutionStatus.h"
 #include "cmListFileCache.h"
-#include "cmPropertyMap.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmNewLineStyle.h"
@@ -902,8 +901,6 @@ private:
   std::vector<cmMakefile*> UnConfiguredDirectories;
 
   std::vector<cmGeneratorExpressionEvaluationFile*> EvaluationFiles;
-
-  cmPropertyMap Properties;
 
   std::vector<cmCommandContext const*> ContextStack;
   std::vector<cmExecutionStatus*> ExecutionStatusStack;
