@@ -65,5 +65,5 @@ void cmLinkDirectoriesCommand::AddLinkDir(std::string const& dir)
       unixPath = tmp;
       }
     }
-  this->Makefile->AddLinkDirectory(unixPath);
+  this->Makefile->AppendProperty("LINK_DIRECTORIES", unixPath.c_str());
 }
