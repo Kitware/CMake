@@ -150,7 +150,7 @@ cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
   this->SuppressWatches = false;
 
   // Setup the default include file regular expression (match everything).
-  this->IncludeFileRegularExpression = "^.*$";
+  this->SetProperty("INCLUDE_REGULAR_EXPRESSION", "^.*$");
   // Setup the default include complaint regular expression (match nothing).
   this->ComplainFileRegularExpression = "^$";
   // Source and header file extensions that we can handle
@@ -1585,7 +1585,6 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   this->ProjectName = parent->ProjectName;
 
   // Copy include regular expressions.
-  this->IncludeFileRegularExpression = parent->IncludeFileRegularExpression;
   this->ComplainFileRegularExpression = parent->ComplainFileRegularExpression;
 
   // Imported targets.
@@ -4164,12 +4163,6 @@ void cmMakefile::SetProperty(const std::string& prop, const char* value)
     return;
     }
 
-  if ( prop == "INCLUDE_REGULAR_EXPRESSION" )
-    {
-    this->SetIncludeRegularExpression(value);
-    return;
-    }
-
   this->Properties.SetProperty(prop, value);
 }
 
@@ -4224,11 +4217,6 @@ const char *cmMakefile::GetProperty(const std::string& prop,
       return parent.GetCurrentSourceDirectory();
       }
     return "";
-    }
-  else if (prop == "INCLUDE_REGULAR_EXPRESSION" )
-    {
-    output = this->GetIncludeRegularExpression();
-    return output.c_str();
     }
   else if (prop == "LISTFILE_STACK")
     {
