@@ -33,24 +33,24 @@ which work with both new and existing CMake releases.
 The lifecycle of a policy is:
 
 1. The Policy is introduced in a new version of CMake.  By default the
-  policy issues a warning if code is encountered which depends on ``OLD``
-  behavior.  The warning can be disabled in this release by using
-  the :command:`cmake_policy` command, or by passing ``-Wno-dev`` to
-  the :manual:`cmake(1)` program.
+   policy issues a warning if code is encountered which depends on ``OLD``
+   behavior.  The warning can be disabled in this release by using
+   the :command:`cmake_policy` command, or by passing ``-Wno-dev`` to
+   the :manual:`cmake(1)` program.
 2. In the release following its introduction, use of
-  the :command:`cmake_policy` command has no effect on whether the
-  warning is issued or not.  Passing ``-Wno-dev`` to
-  the :manual:`cmake(1)` program still silences the warning.
+   the :command:`cmake_policy` command has no effect on whether the
+   warning is issued or not.  Passing ``-Wno-dev`` to
+   the :manual:`cmake(1)` program still silences the warning.
 3. Two releases after the introduction of the policy,
-  passing ``-Wno-dev`` to the :manual:`cmake(1)` program no longer
-  has any effect.
+   passing ``-Wno-dev`` to the :manual:`cmake(1)` program no longer
+   has any effect.
 4. Four releases after the introduction of the policy, the policy may
-  issue an error instead of a warning if ``OLD`` behavior is relied upon.
-  This indicates that the policy has reached the end of its life and the
-  code implementing the ``OLD`` behavior has been removed from the CMake
-  implementation.  Some policies may continue to issue only a warning
-  even four releases after introduction.  This does not mean that it is
-  ok to continue to rely on ``OLD`` behavior.
+   issue an error instead of a warning if ``OLD`` behavior is relied upon.
+   This indicates that the policy has reached the end of its life and the
+   code implementing the ``OLD`` behavior has been removed from the CMake
+   implementation.  Some policies may continue to issue only a warning
+   even four releases after introduction.  This does not mean that it is
+   ok to continue to rely on ``OLD`` behavior.
 
 Note that many existing policies currently have states that appear to not
 follow this lifecycle.  This does not mean that it is ok to continue to
