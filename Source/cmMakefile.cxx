@@ -273,68 +273,34 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
     }
 }
 
-template<typename Range, typename T>
-typename Range::const_iterator find_backwards(Range const& range, T t)
-{
-  typename Range::const_reverse_iterator rend =
-      std::find(range.rbegin(), range.rend(), t);
-  return rend.base();
-}
-
 cmStringRange cmMakefile::GetIncludeDirectoriesEntries() const
 {
-  std::vector<std::string>::const_iterator it =
-      find_backwards(this->IncludeDirectoriesEntries, std::string());
-  return cmMakeRange(it, this->IncludeDirectoriesEntries.end());
+  return this->StateSnapshot.GetDirectory().GetIncludeDirectoriesEntries();
 }
 
 cmBacktraceRange cmMakefile::GetIncludeDirectoriesBacktraces() const
 {
-  std::vector<cmListFileBacktrace>::const_iterator btIt =
-      this->IncludeDirectoriesEntryBacktraces.begin();
-  std::vector<std::string>::const_iterator it =
-      find_backwards(this->IncludeDirectoriesEntries, std::string());
-  std::advance(btIt,
-               std::distance(this->IncludeDirectoriesEntries.begin(), it));
-  return cmMakeRange(
-        btIt, this->IncludeDirectoriesEntryBacktraces.end());
+  return this->StateSnapshot.GetDirectory().GetIncludeDirectoriesEntryBacktraces();
 }
 
 cmStringRange cmMakefile::GetCompileOptionsEntries() const
 {
-  std::vector<std::string>::const_iterator it =
-      find_backwards(this->CompileOptionsEntries, std::string());
-  return cmMakeRange(it, this->CompileOptionsEntries.end());
+  return this->StateSnapshot.GetDirectory().GetCompileOptionsEntries();
 }
 
 cmBacktraceRange cmMakefile::GetCompileOptionsBacktraces() const
 {
-  std::vector<cmListFileBacktrace>::const_iterator btIt =
-      this->CompileOptionsEntryBacktraces.begin();
-  std::vector<std::string>::const_iterator it =
-      find_backwards(this->CompileOptionsEntries, std::string());
-  std::advance(btIt, std::distance(this->CompileOptionsEntries.begin(), it));
-  return cmMakeRange(
-        btIt, this->CompileOptionsEntryBacktraces.end());
+  return this->StateSnapshot.GetDirectory().GetCompileOptionsEntryBacktraces();
 }
 
 cmStringRange cmMakefile::GetCompileDefinitionsEntries() const
 {
-  std::vector<std::string>::const_iterator it =
-      find_backwards(this->CompileDefinitionsEntries, std::string());
-  return cmMakeRange(it, this->CompileDefinitionsEntries.end());
+  return this->StateSnapshot.GetDirectory().GetCompileDefinitionsEntries();
 }
 
 cmBacktraceRange cmMakefile::GetCompileDefinitionsBacktraces() const
 {
-  std::vector<cmListFileBacktrace>::const_iterator btIt =
-      this->CompileDefinitionsEntryBacktraces.begin();
-  std::vector<std::string>::const_iterator it =
-      find_backwards(this->CompileDefinitionsEntries, std::string());
-  std::advance(btIt,
-               std::distance(this->CompileDefinitionsEntries.begin(), it));
-  return cmMakeRange(
-        btIt, this->CompileDefinitionsEntryBacktraces.end());
+  return this->StateSnapshot.GetDirectory().GetCompileDefinitionsEntryBacktraces();
 }
 
 //----------------------------------------------------------------------------
@@ -1591,62 +1557,7 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   this->AddDefinition("CMAKE_CURRENT_BINARY_DIR",
                       this->GetCurrentBinaryDirectory());
 
-  {
-  std::vector<std::string>::const_iterator it =
-      find_backwards(parent->IncludeDirectoriesEntries, std::string());
-  std::vector<std::string>::const_iterator begin =
-      parent->IncludeDirectoriesEntries.begin();
-  std::vector<std::string>::const_iterator end =
-      parent->IncludeDirectoriesEntries.end();
-  this->IncludeDirectoriesEntries.insert(
-        this->IncludeDirectoriesEntries.end(), it, end);
-
-  std::vector<cmListFileBacktrace>::const_iterator btIt =
-      parent->IncludeDirectoriesEntryBacktraces.begin();
-  std::advance(btIt, std::distance(begin, it));
-  std::vector<cmListFileBacktrace>::const_iterator btEnd =
-      parent->IncludeDirectoriesEntryBacktraces.end();
-  this->IncludeDirectoriesEntryBacktraces.insert(
-        this->IncludeDirectoriesEntryBacktraces.end(), btIt, btEnd);
-  }
-
-  {
-  std::vector<std::string>::const_iterator it =
-      find_backwards(parent->CompileOptionsEntries, std::string());
-  std::vector<std::string>::const_iterator begin =
-      parent->CompileOptionsEntries.begin();
-  std::vector<std::string>::const_iterator end =
-      parent->CompileOptionsEntries.end();
-  this->CompileOptionsEntries.insert(
-        this->CompileOptionsEntries.end(), it, end);
-
-  std::vector<cmListFileBacktrace>::const_iterator btIt =
-      parent->CompileOptionsEntryBacktraces.begin();
-  std::advance(btIt, std::distance(begin, it));
-  std::vector<cmListFileBacktrace>::const_iterator btEnd =
-      parent->CompileOptionsEntryBacktraces.end();
-  this->CompileOptionsEntryBacktraces.insert(
-        this->CompileOptionsEntryBacktraces.end(), btIt, btEnd);
-  }
-
-  {
-  std::vector<std::string>::const_iterator it =
-      find_backwards(parent->CompileDefinitionsEntries, std::string());
-  std::vector<std::string>::const_iterator begin =
-      parent->CompileDefinitionsEntries.begin();
-  std::vector<std::string>::const_iterator end =
-      parent->CompileDefinitionsEntries.end();
-  this->CompileDefinitionsEntries.insert(
-        this->CompileDefinitionsEntries.end(), it, end);
-
-  std::vector<cmListFileBacktrace>::const_iterator btIt =
-      parent->CompileDefinitionsEntryBacktraces.begin();
-  std::advance(btIt, std::distance(begin, it));
-  std::vector<cmListFileBacktrace>::const_iterator btEnd =
-      parent->CompileDefinitionsEntryBacktraces.end();
-  this->CompileDefinitionsEntryBacktraces.insert(
-        this->CompileDefinitionsEntryBacktraces.end(), btIt, btEnd);
-  }
+  this->StateSnapshot.InitializeFromParent();
 
   this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
 
@@ -1990,14 +1901,17 @@ void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
     return;
     }
 
-  std::vector<std::string>::iterator position =
-                              before ? this->IncludeDirectoriesEntries.begin()
-                                    : this->IncludeDirectoriesEntries.end();
-
   cmListFileBacktrace lfbt = this->GetBacktrace();
   std::string entryString = cmJoin(incs, ";");
-  this->IncludeDirectoriesEntries.insert(position, entryString);
-  this->IncludeDirectoriesEntryBacktraces.push_back(lfbt);
+  if (before)
+    {
+    this->StateSnapshot.GetDirectory().PrependIncludeDirectoriesEntry(entryString, lfbt);
+    }
+  else
+    {
+    this->StateSnapshot.GetDirectory().AppendIncludeDirectoriesEntry(entryString, lfbt);
+    }
+  // Note: Deleted code was not correct. Used push_back with backtraces.
 
   // Property on each target:
   for (cmTargets::iterator l = this->Targets.begin();
@@ -4223,41 +4137,35 @@ void cmMakefile::SetProperty(const std::string& prop, const char* value)
 {
   if (prop == "INCLUDE_DIRECTORIES")
     {
-    this->IncludeDirectoriesEntries.push_back(std::string());
-    this->IncludeDirectoriesEntryBacktraces.push_back(cmListFileBacktrace());
     if (!value)
       {
+      this->StateSnapshot.GetDirectory().ClearIncludeDirectories();
       return;
       }
     cmListFileBacktrace lfbt = this->GetBacktrace();
-    this->IncludeDirectoriesEntries.push_back(value);
-    this->IncludeDirectoriesEntryBacktraces.push_back(lfbt);
+    this->StateSnapshot.GetDirectory().SetIncludeDirectories(value, lfbt);
     return;
     }
   if (prop == "COMPILE_OPTIONS")
     {
-    this->CompileOptionsEntries.push_back(std::string());
-    this->CompileDefinitionsEntryBacktraces.push_back(cmListFileBacktrace());
     if (!value)
       {
+      this->StateSnapshot.GetDirectory().ClearCompileOptions();
       return;
       }
     cmListFileBacktrace lfbt = this->GetBacktrace();
-    this->CompileOptionsEntries.push_back(value);
-    this->CompileOptionsEntryBacktraces.push_back(lfbt);
+    this->StateSnapshot.GetDirectory().SetCompileOptions(value, lfbt);
     return;
     }
   if (prop == "COMPILE_DEFINITIONS")
     {
-    this->CompileDefinitionsEntries.push_back(std::string());
-    this->CompileDefinitionsEntryBacktraces.push_back(cmListFileBacktrace());
     if (!value)
       {
+      this->StateSnapshot.GetDirectory().ClearCompileDefinitions();
       return;
       }
     cmListFileBacktrace lfbt = this->GetBacktrace();
-    this->CompileDefinitionsEntries.push_back(value);
-    this->CompileDefinitionsEntryBacktraces.push_back(lfbt);
+    this->StateSnapshot.GetDirectory().SetCompileDefinitions(value, lfbt);
     return;
     }
 
@@ -4271,22 +4179,19 @@ void cmMakefile::AppendProperty(const std::string& prop,
   if (prop == "INCLUDE_DIRECTORIES")
     {
     cmListFileBacktrace lfbt = this->GetBacktrace();
-    this->IncludeDirectoriesEntries.push_back(value);
-    this->IncludeDirectoriesEntryBacktraces.push_back(lfbt);
+    this->StateSnapshot.GetDirectory().AppendIncludeDirectoriesEntry(value, lfbt);
     return;
     }
   if (prop == "COMPILE_OPTIONS")
     {
     cmListFileBacktrace lfbt = this->GetBacktrace();
-    this->CompileOptionsEntries.push_back(value);
-    this->CompileOptionsEntryBacktraces.push_back(lfbt);
+    this->StateSnapshot.GetDirectory().AppendCompileOptionsEntry(value, lfbt);
     return;
     }
   if (prop == "COMPILE_DEFINITIONS")
     {
     cmListFileBacktrace lfbt = this->GetBacktrace();
-    this->CompileDefinitionsEntries.push_back(value);
-    this->CompileDefinitionsEntryBacktraces.push_back(lfbt);
+    this->StateSnapshot.GetDirectory().AppendCompileDefinitionsEntry(value, lfbt);
     return;
     }
 
@@ -4341,25 +4246,17 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     }
   else if (prop == "INCLUDE_DIRECTORIES")
     {
-    std::vector<std::string>::const_iterator it =
-        find_backwards(this->IncludeDirectoriesEntries, std::string());
-    output = cmJoin(cmMakeRange(it, this->IncludeDirectoriesEntries.end()),
-                    ";");
+    output = cmJoin(this->StateSnapshot.GetDirectory().GetIncludeDirectoriesEntries(), ";");
     return output.c_str();
     }
   else if (prop == "COMPILE_OPTIONS")
     {
-    std::vector<std::string>::const_iterator it =
-        find_backwards(this->CompileOptionsEntries, std::string());
-    output = cmJoin(cmMakeRange(it, this->CompileOptionsEntries.end()), ";");
+    output = cmJoin(this->StateSnapshot.GetDirectory().GetCompileOptionsEntries(), ";");
     return output.c_str();
     }
   else if (prop == "COMPILE_DEFINITIONS")
     {
-    std::vector<std::string>::const_iterator it =
-        find_backwards(this->CompileDefinitionsEntries, std::string());
-    output = cmJoin(cmMakeRange(it, this->CompileDefinitionsEntries.end()),
-                    ";");
+    output = cmJoin(this->StateSnapshot.GetDirectory().GetCompileDefinitionsEntries(), ";");
     return output.c_str();
     }
 
