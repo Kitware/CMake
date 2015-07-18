@@ -6674,7 +6674,7 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
       }
     std::sort(props.begin(), props.end());
 
-    std::string propsString = cmJoin(cmRange(props).retreat(1), ", ");
+    std::string propsString = cmJoin(cmMakeRange(props).retreat(1), ", ");
     propsString += " and the " + props.back();
 
     std::ostringstream e;

@@ -108,7 +108,7 @@ bool cmSetCommand
     }
 
   // collect any values into a single semi-colon separated value list
-  value = cmJoin(cmRange(args).advance(1).retreat(ignoreLastArgs), ";");
+  value = cmJoin(cmMakeRange(args).advance(1).retreat(ignoreLastArgs), ";");
 
   if (parentScope)
     {

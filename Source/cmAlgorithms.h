@@ -179,14 +179,14 @@ private:
 }
 
 template<typename Iter1, typename Iter2>
-ContainerAlgorithms::Range<Iter1> cmRange(Iter1 begin, Iter2 end)
+ContainerAlgorithms::Range<Iter1> cmMakeRange(Iter1 begin, Iter2 end)
 {
   return ContainerAlgorithms::Range<Iter1>(begin, end);
 }
 
 template<typename Range>
 ContainerAlgorithms::Range<typename Range::const_iterator>
-cmRange(Range const& range)
+cmMakeRange(Range const& range)
 {
   return ContainerAlgorithms::Range<typename Range::const_iterator>(
       range.begin(), range.end());
