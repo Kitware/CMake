@@ -402,14 +402,13 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     {
     // Initialize the INCLUDE_DIRECTORIES property based on the current value
     // of the same directory property:
-    const std::vector<std::string> parentIncludes =
+    const cmStringRange parentIncludes =
         this->Makefile->GetIncludeDirectoriesEntries();
-    const std::vector<cmListFileBacktrace> parentIncludesBts =
+    const cmBacktraceRange parentIncludesBts =
         this->Makefile->GetIncludeDirectoriesBacktraces();
 
-    std::vector<cmListFileBacktrace>::const_iterator btIt =
-        parentIncludesBts.begin();
-    for (std::vector<std::string>::const_iterator it
+    cmBacktraceRange::const_iterator btIt = parentIncludesBts.begin();
+    for (cmStringRange::const_iterator it
                 = parentIncludes.begin();
          it != parentIncludes.end(); ++it, ++btIt)
       {
@@ -421,13 +420,13 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     this->SystemIncludeDirectories.insert(parentSystemIncludes.begin(),
                                           parentSystemIncludes.end());
 
-    const std::vector<std::string> parentOptions =
+    const cmStringRange parentOptions =
                                 this->Makefile->GetCompileOptionsEntries();
-    const std::vector<cmListFileBacktrace> parentOptionsBts =
+    const cmBacktraceRange parentOptionsBts =
                                 this->Makefile->GetCompileOptionsBacktraces();
 
     btIt = parentOptionsBts.begin();
-    for (std::vector<std::string>::const_iterator it
+    for (cmStringRange::const_iterator it
                 = parentOptions.begin();
          it != parentOptions.end(); ++it, ++btIt)
       {

@@ -273,38 +273,34 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
     }
 }
 
-std::vector<std::string> cmMakefile::GetIncludeDirectoriesEntries() const
+cmStringRange cmMakefile::GetIncludeDirectoriesEntries() const
 {
-  return this->IncludeDirectoriesEntries;
+  return cmMakeRange(this->IncludeDirectoriesEntries);
 }
 
-std::vector<cmListFileBacktrace>
-cmMakefile::GetIncludeDirectoriesBacktraces() const
+cmBacktraceRange cmMakefile::GetIncludeDirectoriesBacktraces() const
 {
-  return this->IncludeDirectoriesEntryBacktraces;
+  return cmMakeRange(this->IncludeDirectoriesEntryBacktraces);
 }
 
-
-std::vector<std::string> cmMakefile::GetCompileOptionsEntries() const
+cmStringRange cmMakefile::GetCompileOptionsEntries() const
 {
-  return this->CompileOptionsEntries;
+  return cmMakeRange(this->CompileOptionsEntries);
 }
 
-std::vector<cmListFileBacktrace>
-cmMakefile::GetCompileOptionsBacktraces() const
+cmBacktraceRange cmMakefile::GetCompileOptionsBacktraces() const
 {
-  return this->CompileOptionsEntryBacktraces;
+  return cmMakeRange(this->CompileOptionsEntryBacktraces);
 }
 
-std::vector<std::string> cmMakefile::GetCompileDefinitionsEntries() const
+cmStringRange cmMakefile::GetCompileDefinitionsEntries() const
 {
-  return this->CompileDefinitionsEntries;
+  return cmMakeRange(this->CompileDefinitionsEntries);
 }
 
-std::vector<cmListFileBacktrace>
-cmMakefile::GetCompileDefinitionsBacktraces() const
+cmBacktraceRange cmMakefile::GetCompileDefinitionsBacktraces() const
 {
-  return this->CompileDefinitionsEntryBacktraces;
+  return cmMakeRange(this->CompileDefinitionsEntryBacktraces);
 }
 
 //----------------------------------------------------------------------------

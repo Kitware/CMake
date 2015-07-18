@@ -22,6 +22,7 @@
 #include "cmExpandedCommandArgument.h"
 #include "cmake.h"
 #include "cmState.h"
+#include "cmAlgorithms.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmSourceGroup.h"
@@ -746,12 +747,12 @@ public:
   /** Set whether or not to report a CMP0000 violation.  */
   void SetCheckCMP0000(bool b) { this->CheckCMP0000 = b; }
 
-  std::vector<std::string> GetIncludeDirectoriesEntries() const;
-  std::vector<cmListFileBacktrace> GetIncludeDirectoriesBacktraces() const;
-  std::vector<std::string> GetCompileOptionsEntries() const;
-  std::vector<cmListFileBacktrace> GetCompileOptionsBacktraces() const;
-  std::vector<std::string> GetCompileDefinitionsEntries() const;
-  std::vector<cmListFileBacktrace> GetCompileDefinitionsBacktraces() const;
+  cmStringRange GetIncludeDirectoriesEntries() const;
+  cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
+  cmStringRange GetCompileOptionsEntries() const;
+  cmBacktraceRange GetCompileOptionsBacktraces() const;
+  cmStringRange GetCompileDefinitionsEntries() const;
+  cmBacktraceRange GetCompileDefinitionsBacktraces() const;
 
   bool IsConfigured() const { return this->Configured; }
   void SetConfigured(){ this->Configured = true; }
