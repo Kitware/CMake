@@ -4183,7 +4183,11 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     }
   else if (prop == "VARIABLES")
     {
-    output = cmJoin(this->GetDefinitions(), ";");
+    std::vector<std::string> res = this->StateSnapshot.ClosureKeys();
+    std::vector<std::string> cacheKeys = this->GetState()->GetCacheEntryKeys();
+    res.insert(res.end(), cacheKeys.begin(), cacheKeys.end());
+    std::sort(res.begin(), res.end());
+    output = cmJoin(res, ";");
     return output.c_str();
     }
   else if (prop == "INCLUDE_DIRECTORIES")
