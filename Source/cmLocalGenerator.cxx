@@ -70,7 +70,7 @@ void cmLocalGenerator::IssueMessage(cmake::MessageType t,
                                     std::string const& text) const
 {
   cmListFileContext lfc;
-  lfc.FilePath = this->StateSnapshot.GetCurrentSourceDirectory();
+  lfc.FilePath = this->StateSnapshot.GetDirectory().GetCurrentSource();
   lfc.FilePath += "/CMakeLists.txt";
 
   if(!this->GlobalGenerator->GetCMakeInstance()->GetIsInTryCompile())
@@ -161,7 +161,8 @@ void cmLocalGenerator::GenerateTestFiles()
   const std::string& config =
     this->Makefile->GetConfigurations(configurationTypes, false);
 
-  std::string file = this->StateSnapshot.GetCurrentBinaryDirectory();
+  std::string file =
+      this->StateSnapshot.GetDirectory().GetCurrentBinary();
   file += "/";
   file += "CTestTestfile.cmake";
 
@@ -170,9 +171,11 @@ void cmLocalGenerator::GenerateTestFiles()
 
   fout << "# CMake generated Testfile for " << std::endl
        << "# Source directory: "
-       << this->StateSnapshot.GetCurrentSourceDirectory() << std::endl
+       << this->StateSnapshot.GetDirectory().GetCurrentSource()
+       << std::endl
        << "# Build directory: "
-       << this->StateSnapshot.GetCurrentBinaryDirectory() << std::endl
+       << this->StateSnapshot.GetDirectory().GetCurrentBinary()
+       << std::endl
        << "# " << std::endl
        << "# This file includes the relevant testing commands "
        << "required for " << std::endl
@@ -286,7 +289,8 @@ void cmLocalGenerator::GenerateInstallRules()
     }
 
   // Create the install script file.
-  std::string file = this->StateSnapshot.GetCurrentBinaryDirectory();
+  std::string file =
+      this->StateSnapshot.GetDirectory().GetCurrentBinary();
   std::string homedir = this->GetState()->GetBinaryDirectory();
   int toplevel_install = 0;
   if (file == homedir)
@@ -299,7 +303,7 @@ void cmLocalGenerator::GenerateInstallRules()
 
   // Write the header.
   fout << "# Install script for directory: "
-       << this->StateSnapshot.GetCurrentSourceDirectory()
+       << this->StateSnapshot.GetDirectory().GetCurrentSource()
        << std::endl << std::endl;
   fout << "# Set the install prefix" << std::endl
        << "if(NOT DEFINED CMAKE_INSTALL_PREFIX)" << std::endl
@@ -518,7 +522,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
     source.GetFullPath(),
     commandLines,
     comment.c_str(),
-    this->StateSnapshot.GetCurrentBinaryDirectory()
+    this->StateSnapshot.GetDirectory().GetCurrentBinary()
     );
 }
 
@@ -540,12 +544,13 @@ void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
        !sf->GetPropertyAsBool("EXTERNAL_OBJECT"))
       {
       std::string dir_max;
-      dir_max += this->StateSnapshot.GetCurrentBinaryDirectory();
+      dir_max += this->StateSnapshot.GetDirectory().GetCurrentBinary();
       dir_max += "/";
       std::string obj = this->GetObjectFileNameWithoutTarget(*sf, dir_max);
       if(!obj.empty())
         {
-        std::string ofname = this->StateSnapshot.GetCurrentBinaryDirectory();
+        std::string ofname =
+            this->StateSnapshot.GetDirectory().GetCurrentBinary();
         ofname += "/";
         ofname += obj;
         objVector.push_back(ofname);
@@ -615,7 +620,7 @@ void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
     "",
     commandLines,
     comment.c_str(),
-    this->StateSnapshot.GetCurrentBinaryDirectory()
+    this->StateSnapshot.GetDirectory().GetCurrentBinary()
     );
   this->Makefile->GetSource(targetFullPath);
   target.Target->AddSource(targetFullPath);
@@ -1369,20 +1374,20 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   // Store the automatic include paths.
   if(includeBinaryDir)
     {
-    if(emitted.find(
-        this->StateSnapshot.GetCurrentBinaryDirectory()) == emitted.end())
+    std::string binDir = this->StateSnapshot.GetDirectory().GetCurrentBinary();
+    if(emitted.find(binDir) == emitted.end())
       {
-      dirs.push_back(this->StateSnapshot.GetCurrentBinaryDirectory());
-      emitted.insert(this->StateSnapshot.GetCurrentBinaryDirectory());
+      dirs.push_back(binDir);
+      emitted.insert(binDir);
       }
     }
   if(includeSourceDir)
     {
-    if(emitted.find(
-        this->StateSnapshot.GetCurrentSourceDirectory()) == emitted.end())
+    std::string srcDir = this->StateSnapshot.GetDirectory().GetCurrentSource();
+    if(emitted.find(srcDir) == emitted.end())
       {
-      dirs.push_back(this->StateSnapshot.GetCurrentSourceDirectory());
-      emitted.insert(this->StateSnapshot.GetCurrentSourceDirectory());
+      dirs.push_back(srcDir);
+      emitted.insert(srcDir);
       }
     }
 
@@ -1983,7 +1988,7 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
 
   // Treat the name as relative to the source directory in which it
   // was given.
-  dep = this->StateSnapshot.GetCurrentSourceDirectory();
+  dep = this->StateSnapshot.GetDirectory().GetCurrentSource();
   dep += "/";
   dep += inName;
   return true;

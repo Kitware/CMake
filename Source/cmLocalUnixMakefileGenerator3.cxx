@@ -530,10 +530,10 @@ void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
   infoFileStream
     << "# Relative path conversion top directories.\n"
     << "set(CMAKE_RELATIVE_PATH_TOP_SOURCE \""
-    << this->StateSnapshot.GetRelativePathTopSource()
+    << this->StateSnapshot.GetDirectory().GetRelativePathTopSource()
     << "\")\n"
     << "set(CMAKE_RELATIVE_PATH_TOP_BINARY \""
-    << this->StateSnapshot.GetRelativePathTopBinary()
+    << this->StateSnapshot.GetDirectory().GetRelativePathTopBinary()
     << "\")\n"
     << "\n";
 
@@ -1602,12 +1602,14 @@ cmLocalUnixMakefileGenerator3
     if(const char* relativePathTopSource =
        mf->GetDefinition("CMAKE_RELATIVE_PATH_TOP_SOURCE"))
       {
-      this->StateSnapshot.SetRelativePathTopSource(relativePathTopSource);
+      this->StateSnapshot.GetDirectory()
+            .SetRelativePathTopSource(relativePathTopSource);
       }
     if(const char* relativePathTopBinary =
        mf->GetDefinition("CMAKE_RELATIVE_PATH_TOP_BINARY"))
       {
-      this->StateSnapshot.SetRelativePathTopBinary(relativePathTopBinary);
+      this->StateSnapshot.GetDirectory()
+            .SetRelativePathTopBinary(relativePathTopBinary);
       }
     }
   else
