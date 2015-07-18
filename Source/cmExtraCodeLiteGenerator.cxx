@@ -141,24 +141,6 @@ void cmExtraCodeLiteGenerator
     return;
     }
 
-  // figure out the compiler
-  //std::string compiler = this->GetCBCompilerId(mf);
-  std::string workspaceSourcePath = mf->GetHomeDirectory();
-  std::string workspaceOutputDir =  mf->GetHomeOutputDirectory();
-  std::vector<std::string> outputFiles = mf->GetOutputFiles();
-  std::string projectName = mf->GetProjectName();
-  std::string incDirs;
-  std::vector<cmValueWithOrigin> incDirsVec =
-    mf->GetIncludeDirectoriesEntries();
-  std::vector<cmValueWithOrigin>::const_iterator iterInc = incDirsVec.begin();
-
-  //std::cout << "GetIncludeDirectories:" << std::endl;
-  for(; iterInc != incDirsVec.end(); ++iterInc )
-    {
-    //std::cout << (*ItStrVec) << std::endl;
-    incDirs += iterInc->Value + " ";
-    }
-
   ////////////////////////////////////
   fout << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
        "<CodeLite_Project Name=\"" << mf->GetProjectName()

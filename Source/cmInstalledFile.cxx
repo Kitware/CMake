@@ -44,7 +44,7 @@ cmInstalledFile::Property::~Property()
 void cmInstalledFile::SetName(cmMakefile* mf, const std::string& name)
 {
   cmListFileBacktrace backtrace = mf->GetBacktrace();
-  cmGeneratorExpression ge(&backtrace);
+  cmGeneratorExpression ge(backtrace);
 
   this->Name = name;
   this->NameExpression = ge.Parse(name).release();
@@ -81,7 +81,7 @@ void cmInstalledFile::AppendProperty(cmMakefile const* mf,
   const std::string& prop, const char* value, bool /*asString*/)
 {
   cmListFileBacktrace backtrace = mf->GetBacktrace();
-  cmGeneratorExpression ge(&backtrace);
+  cmGeneratorExpression ge(backtrace);
 
   Property& property = this->Properties[prop];
   property.ValueExpressions.push_back(ge.Parse(value).release());

@@ -3565,11 +3565,11 @@ void cmFileCommand::AddEvaluationFile(const std::string &inputName,
 {
   cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
 
-  cmGeneratorExpression outputGe(&lfbt);
+  cmGeneratorExpression outputGe(lfbt);
   cmsys::auto_ptr<cmCompiledGeneratorExpression> outputCge
                                                 = outputGe.Parse(outputExpr);
 
-  cmGeneratorExpression conditionGe(&lfbt);
+  cmGeneratorExpression conditionGe(lfbt);
   cmsys::auto_ptr<cmCompiledGeneratorExpression> conditionCge
                                               = conditionGe.Parse(condition);
 

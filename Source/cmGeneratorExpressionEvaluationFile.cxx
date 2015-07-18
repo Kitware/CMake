@@ -152,7 +152,7 @@ void cmGeneratorExpressionEvaluationFile::Generate()
     }
 
   cmListFileBacktrace lfbt = this->OutputFileExpr->GetBacktrace();
-  cmGeneratorExpression contentGE(&lfbt);
+  cmGeneratorExpression contentGE(lfbt);
   cmsys::auto_ptr<cmCompiledGeneratorExpression> inputExpression
                                               = contentGE.Parse(inputContent);
 
