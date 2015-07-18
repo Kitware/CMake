@@ -23,6 +23,7 @@ class cmCommand;
 class cmState
 {
   struct SnapshotDataType;
+  struct BuildsystemDirectoryStateType;
   typedef cmLinkedTree<SnapshotDataType>::iterator PositionType;
   friend class Snapshot;
 public:
@@ -203,7 +204,6 @@ private:
   cmPropertyMap GlobalProperties;
   cmake* CMakeInstance;
 
-  struct BuildsystemDirectoryStateType;
   cmLinkedTree<BuildsystemDirectoryStateType> BuildsystemDirectory;
 
   cmLinkedTree<std::string> ExecutionListFiles;
