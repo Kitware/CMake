@@ -1417,9 +1417,9 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
     {
     cmMakefile *mf = this->LocalGenerators[i]->GetMakefile();
 
-    const std::vector<std::string> noconfig_compile_definitions =
+    const cmStringRange noconfig_compile_definitions =
                                 mf->GetCompileDefinitionsEntries();
-    const std::vector<cmListFileBacktrace> noconfig_compile_definitions_bts =
+    const cmBacktraceRange noconfig_compile_definitions_bts =
                                 mf->GetCompileDefinitionsBacktraces();
 
     cmTargets& targets = mf->GetTargets();
@@ -1435,9 +1435,9 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
         continue;
         }
 
-      std::vector<cmListFileBacktrace>::const_iterator btIt
+      cmBacktraceRange::const_iterator btIt
           = noconfig_compile_definitions_bts.begin();
-      for (std::vector<std::string>::const_iterator it
+      for (cmStringRange::const_iterator it
                                       = noconfig_compile_definitions.begin();
           it != noconfig_compile_definitions.end(); ++it, ++btIt)
         {
