@@ -3436,10 +3436,6 @@ bool cmMakefile::IsLoopBlock() const
 
 std::string cmMakefile::GetExecutionFilePath() const
 {
-  if (this->ContextStack.empty())
-    {
-    return std::string();
-    }
   assert(this->StateSnapshot.IsValid());
   return this->StateSnapshot.GetExecutionListFile();
 }
