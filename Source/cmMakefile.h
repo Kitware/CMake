@@ -233,10 +233,6 @@ public:
    */
   void AddLinkDirectory(const std::string&);
 
-  const std::vector<std::string>& GetLinkDirectories() const
-    {
-      return this->LinkDirectories;
-    }
   void SetLinkDirectories(const std::vector<std::string>& vec)
     {
       this->LinkDirectories = vec;

@@ -4302,7 +4302,7 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     }
   else if (prop == "LINK_DIRECTORIES")
     {
-    output = cmJoin(this->GetLinkDirectories(), ";");
+    output = cmJoin(this->LinkDirectories, ";");
     return output.c_str();
     }
   else if (prop == "INCLUDE_DIRECTORIES")
