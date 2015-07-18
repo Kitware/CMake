@@ -19,6 +19,7 @@
 #include "cmLocalGenerator.h"
 #include "cmCommands.h"
 #include "cmState.h"
+#include "cmOutputConverter.h"
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
 #include "cmCommandArgumentParserHelper.h"
