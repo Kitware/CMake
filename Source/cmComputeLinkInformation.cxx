@@ -563,7 +563,7 @@ bool cmComputeLinkInformation::Compute()
       "link line will ask the linker to search for these by library "
       "name."
       ;
-    this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
+    this->CMakeInstance->IssueMessage(cmake::POLICY_OPTIONAL_WARNING, w.str(),
                                       this->Target->GetBacktrace());
     }
 
@@ -1213,6 +1213,7 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
   // Check the policy for whether we should use the approach below.
   switch (this->Target->GetPolicyStatusCMP0060())
     {
+    case cmPolicies::OLD:
     case cmPolicies::WARN:
       if (this->CMP0060Warn)
         {
@@ -1224,7 +1225,6 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
           this->CMP0060WarnItems.insert(item);
           }
         }
-    case cmPolicies::OLD:
       break;
     case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::REQUIRED_IF_USED:

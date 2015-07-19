@@ -14,7 +14,7 @@
 
   For compatibility CMake is not honoring them for this target.
 Call Stack \(most recent call first\):
-  CMP0063-WARN-yes.cmake:[0-9]+ \(include\)
+  CMP0063-OLD.cmake:[0-9]+ \(include\)
   CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Warning \(dev\) at CMP0063-Common.cmake:[0-9]+ \(add_library\):
@@ -33,7 +33,7 @@ CMake Warning \(dev\) at CMP0063-Common.cmake:[0-9]+ \(add_library\):
 
   For compatibility CMake is not honoring them for this target.
 Call Stack \(most recent call first\):
-  CMP0063-WARN-yes.cmake:[0-9]+ \(include\)
+  CMP0063-OLD.cmake:[0-9]+ \(include\)
   CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Warning \(dev\) at CMP0063-Common.cmake:[0-9]+ \(add_library\):
@@ -52,5 +52,5 @@ CMake Warning \(dev\) at CMP0063-Common.cmake:[0-9]+ \(add_library\):
 
   For compatibility CMake is not honoring them for this target.
 Call Stack \(most recent call first\):
-  CMP0063-WARN-yes.cmake:[0-9]+ \(include\)
+  CMP0063-OLD.cmake:[0-9]+ \(include\)
   CMakeLists.txt:[0-9]+ \(include\)$

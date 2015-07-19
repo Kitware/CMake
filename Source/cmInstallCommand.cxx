@@ -882,14 +882,14 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
       {
       const char *modal = 0;
       std::ostringstream e;
-      cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+      cmake::MessageType messageType = cmake::POLICY_OPTIONAL_WARNING;
 
       switch(status)
         {
+        case cmPolicies::OLD:
         case cmPolicies::WARN:
           e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0062) << "\n";
           modal = "should";
-        case cmPolicies::OLD:
           break;
         case cmPolicies::REQUIRED_IF_USED:
         case cmPolicies::REQUIRED_ALWAYS:

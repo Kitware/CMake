@@ -90,10 +90,10 @@ bool cmGetDirectoryPropertyCommand
       {
       switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0059))
         {
-        case cmPolicies::WARN:
-          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
-                           cmPolicies::GetPolicyWarning(cmPolicies::CMP0059));
         case cmPolicies::OLD:
+        case cmPolicies::WARN:
+          this->Makefile->IssueMessage(cmake::POLICY_OPTIONAL_WARNING,
+                           cmPolicies::GetPolicyWarning(cmPolicies::CMP0059));
           this->StoreResult(variable,
                                    this->Makefile->GetDefineFlagsCMP0059());
         return true;

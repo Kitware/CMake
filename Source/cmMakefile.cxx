@@ -430,6 +430,7 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
     // Check CMP0011 to determine the policy scope type.
     switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0011))
       {
+      case cmPolicies::OLD:
       case cmPolicies::WARN:
         // We need to push a scope to detect whether the script sets
         // any policies that would affect the includer and therefore
@@ -437,10 +438,6 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
         // behavior by allowing policy changes to affect the includer.
         this->Makefile->PushPolicy(true);
         this->CheckCMP0011 = true;
-        break;
-      case cmPolicies::OLD:
-        // OLD behavior is to not push a scope at all.
-        this->NoPolicyScope = true;
         break;
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
@@ -507,8 +504,8 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
   // script might actually set this policy for its includer.
   switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0011))
     {
+    case cmPolicies::OLD:
     case cmPolicies::WARN:
-      // Warn because the user did not set this policy.
       {
       std::ostringstream w;
       w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0011) << "\n"
@@ -517,7 +514,7 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
         << "affects policy settings.  "
         << "CMake is implying the NO_POLICY_SCOPE option for compatibility, "
         << "so the effects are applied to the including context.";
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+      this->Makefile->IssueMessage(cmake::POLICY_WARNING, w.str());
       }
       break;
     case cmPolicies::REQUIRED_IF_USED:
@@ -531,7 +528,6 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       }
       break;
-    case cmPolicies::OLD:
     case cmPolicies::NEW:
       // The script set this policy.  We assume the purpose of the
       // script is to initialize policies for its includer, and since
@@ -4960,9 +4956,9 @@ bool cmMakefile::IgnoreErrorsCMP0061() const
   bool ignoreErrors = true;
   switch (this->GetPolicyStatus(cmPolicies::CMP0061))
     {
+    case cmPolicies::OLD:
     case cmPolicies::WARN:
       // No warning for this policy!
-    case cmPolicies::OLD:
       break;
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:

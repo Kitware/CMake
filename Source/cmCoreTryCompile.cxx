@@ -328,6 +328,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       }
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0056))
       {
+      case cmPolicies::OLD:
       case cmPolicies::WARN:
         if(this->Makefile->PolicyOptionalWarningEnabled(
              "CMAKE_POLICY_WARNING_CMP0056"))
@@ -338,10 +339,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
             "is not honoring caller link flags (e.g. CMAKE_EXE_LINKER_FLAGS) "
             "in the test project."
             ;
-          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+          this->Makefile->IssueMessage(cmake::POLICY_WARNING, w.str());
           }
-      case cmPolicies::OLD:
-        // OLD behavior is to do nothing.
         break;
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
