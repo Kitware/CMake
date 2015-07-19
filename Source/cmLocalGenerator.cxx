@@ -199,18 +199,15 @@ void cmLocalGenerator::GenerateTestFiles()
     (*gi)->Compute(this);
     (*gi)->Generate(fout, config, configurationTypes);
     }
-  if (!this->Children.empty())
+  size_t i;
+  for(i = 0; i < this->Children.size(); ++i)
     {
-    size_t i;
-    for(i = 0; i < this->Children.size(); ++i)
-      {
-      // TODO: Use add_subdirectory instead?
-      fout << "subdirs(";
-      std::string outP =
-        this->Children[i]->GetMakefile()->GetCurrentBinaryDirectory();
-      fout << this->Convert(outP,START_OUTPUT);
-      fout << ")" << std::endl;
-      }
+    // TODO: Use add_subdirectory instead?
+    fout << "subdirs(";
+    std::string outP =
+      this->Children[i]->GetMakefile()->GetCurrentBinaryDirectory();
+    fout << this->Convert(outP,START_OUTPUT);
+    fout << ")" << std::endl;
     }
 }
 
