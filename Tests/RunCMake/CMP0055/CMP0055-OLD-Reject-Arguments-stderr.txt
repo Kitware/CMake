@@ -1,4 +1,4 @@
-CMake Warning \(dev\) at CMP0055-WARN-Reject-Arguments.cmake:3 \(break\):
+CMake Warning \(dev\) at CMP0055-OLD-Reject-Arguments.cmake:5 \(break\):
   Policy CMP0055 behavior is triggered: Strict checking for break\(\) command.
   Run "cmake --help-policy CMP0055" for policy details.
 
