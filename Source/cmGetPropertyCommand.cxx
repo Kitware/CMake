@@ -283,10 +283,10 @@ bool cmGetPropertyCommand::HandleDirectoryMode()
     {
     switch(mf->GetPolicyStatus(cmPolicies::CMP0059))
       {
-      case cmPolicies::WARN:
-        mf->IssueMessage(cmake::AUTHOR_WARNING,
-                         cmPolicies::GetPolicyWarning(cmPolicies::CMP0059));
       case cmPolicies::OLD:
+      case cmPolicies::WARN:
+        mf->IssueMessage(cmake::POLICY_OPTIONAL_WARNING,
+                         cmPolicies::GetPolicyWarning(cmPolicies::CMP0059));
         return this->StoreResult(mf->GetDefineFlagsCMP0059());
       case cmPolicies::NEW:
       case cmPolicies::REQUIRED_ALWAYS:
