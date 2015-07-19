@@ -285,8 +285,9 @@ bool cmPolicies::GetPolicyID(const char *id, cmPolicies::PolicyID &pid)
 
 static bool ignoreWNoDev(cmPolicies::PolicyID id)
 {
-  return id >= cmPolicies::CMP0055
-      && id <= cmPolicies::CMP0056;
+  return id == cmPolicies::CMP0011
+      || (id >= cmPolicies::CMP0055
+          && id <= cmPolicies::CMP0056);
 }
 
 static bool ignorePolicySetting(cmPolicies::PolicyID id)
