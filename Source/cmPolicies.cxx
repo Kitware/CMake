@@ -286,7 +286,7 @@ bool cmPolicies::GetPolicyID(const char *id, cmPolicies::PolicyID &pid)
 static bool ignorePolicySetting(cmPolicies::PolicyID id)
 {
   return id >= cmPolicies::CMP0057
-      && id <= cmPolicies::CMP0061;
+      && id <= cmPolicies::CMP0062;
 }
 
 ///! return a warning string for a given policy
