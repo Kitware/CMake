@@ -5014,9 +5014,9 @@ bool cmMakefile::IgnoreErrorsCMP0061() const
   bool ignoreErrors = true;
   switch (this->GetPolicyStatus(cmPolicies::CMP0061))
     {
+    case cmPolicies::OLD:
     case cmPolicies::WARN:
       // No warning for this policy!
-    case cmPolicies::OLD:
       break;
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:
