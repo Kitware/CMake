@@ -495,10 +495,12 @@ cmGlobalUnixMakefileGenerator3
 
   // The directory-level rule should depend on the directory-level
   // rules of the subdirectories.
-  for(std::vector<cmLocalGenerator*>::iterator sdi =
-        lg->GetChildren().begin(); sdi != lg->GetChildren().end(); ++sdi)
+  std::vector<cmState::Snapshot> children
+      = lg->GetMakefile()->GetStateSnapshot().GetChildren();
+  for(std::vector<cmState::Snapshot>::const_iterator
+        ci = children.begin(); ci != children.end(); ++ci)
     {
-    std::string subdir = (*sdi)->GetMakefile()->GetCurrentBinaryDirectory();
+    std::string subdir = ci->GetDirectory().GetCurrentBinary();
     subdir += "/";
     subdir += pass;
     depends.push_back(subdir);

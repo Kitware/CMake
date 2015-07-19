@@ -200,12 +200,13 @@ void cmLocalGenerator::GenerateTestFiles()
     (*gi)->Generate(fout, config, configurationTypes);
     }
   size_t i;
-  for(i = 0; i < this->Children.size(); ++i)
+  std::vector<cmState::Snapshot> children
+      = this->Makefile->GetStateSnapshot().GetChildren();
+  for(i = 0; i < children.size(); ++i)
     {
     // TODO: Use add_subdirectory instead?
     fout << "subdirs(";
-    std::string outP =
-      this->Children[i]->GetMakefile()->GetCurrentBinaryDirectory();
+    std::string outP = children[i].GetDirectory().GetCurrentBinary();
     fout << this->Convert(outP,START_OUTPUT);
     fout << ")" << std::endl;
     }
@@ -413,16 +414,18 @@ void cmLocalGenerator::GenerateInstallRules()
   this->GenerateTargetInstallRules(fout, config, configurationTypes);
 
   // Include install scripts from subdirectories.
-  if(!this->Children.empty())
+  std::vector<cmState::Snapshot> children
+      = this->Makefile->GetStateSnapshot().GetChildren();
+  if(!children.empty())
     {
     fout << "if(NOT CMAKE_INSTALL_LOCAL_ONLY)\n";
     fout << "  # Include the install script for each subdirectory.\n";
-    for(std::vector<cmLocalGenerator*>::const_iterator
-          ci = this->Children.begin(); ci != this->Children.end(); ++ci)
+    for(std::vector<cmState::Snapshot>::const_iterator
+          ci = children.begin(); ci != children.end(); ++ci)
       {
-      if(!(*ci)->GetMakefile()->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
+      if(!ci->GetDirectory().GetPropertyAsBool("EXCLUDE_FROM_ALL"))
         {
-        std::string odir = (*ci)->GetMakefile()->GetCurrentBinaryDirectory();
+        std::string odir = ci->GetDirectory().GetCurrentBinary();
         cmSystemTools::ConvertToUnixSlashes(odir);
         fout << "  include(\"" <<  odir
              << "/cmake_install.cmake\")" << std::endl;
