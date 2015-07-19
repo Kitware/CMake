@@ -283,6 +283,11 @@ bool cmPolicies::GetPolicyID(const char *id, cmPolicies::PolicyID &pid)
   return stringToId(id, pid);
 }
 
+static bool ignoreWNoDev(cmPolicies::PolicyID id)
+{
+  return id == cmPolicies::CMP0056;
+}
+
 static bool ignorePolicySetting(cmPolicies::PolicyID id)
 {
   return id >= cmPolicies::CMP0057
@@ -294,7 +299,17 @@ std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
 {
   std::ostringstream msg;
 
-  if (ignorePolicySetting(id))
+  if (ignoreWNoDev(id))
+    {
+    msg <<
+        "Policy " << idToString(id) << " behavior is triggered: "
+        "" << idToShortDescription(id) << "  "
+        "Run \"cmake --help-policy " << idToString(id) << "\" for "
+        "policy details.\nThis policy was introduced in CMake "
+        << idToVersion(id)
+        << " and issues a warning regardless of the policy setting.";
+    }
+  else if (ignorePolicySetting(id))
     {
     msg <<
         "Policy " << idToString(id) << " behavior is triggered: "
