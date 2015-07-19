@@ -51,6 +51,9 @@ The lifecycle of a policy is:
    implementation.  Some policies may continue to issue only a warning
    even four releases after introduction.  This does not mean that it is
    ok to continue to rely on ``OLD`` behavior.
+5. Two releases after making the ``OLD`` behavior of the policy an error,
+   the error will no longer be diagnosed, and ``NEW`` behavior will be
+   used without further notification.
 
 Note that many existing policies currently have states that appear to not
 follow this lifecycle.  This does not mean that it is ok to continue to
