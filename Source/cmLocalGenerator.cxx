@@ -50,10 +50,6 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
   assert(snapshot.IsValid());
   this->GlobalGenerator = gg;
   this->Parent = parent;
-  if (parent)
-    {
-    parent->AddChild(this);
-    }
 
   this->Makefile = new cmMakefile(this);
 
