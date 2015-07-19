@@ -498,9 +498,7 @@ cmGlobalUnixMakefileGenerator3
   for(std::vector<cmLocalGenerator*>::iterator sdi =
         lg->GetChildren().begin(); sdi != lg->GetChildren().end(); ++sdi)
     {
-    cmLocalUnixMakefileGenerator3* slg =
-      static_cast<cmLocalUnixMakefileGenerator3*>(*sdi);
-    std::string subdir = slg->GetMakefile()->GetCurrentBinaryDirectory();
+    std::string subdir = (*sdi)->GetMakefile()->GetCurrentBinaryDirectory();
     subdir += "/";
     subdir += pass;
     depends.push_back(subdir);
