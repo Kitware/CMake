@@ -2419,6 +2419,17 @@ bool cmake::PrintMessagePreamble(cmake::MessageType t, std::ostream& msg)
     {
     msg << "CMake Deprecation Warning";
     }
+  else if (t == cmake::POLICY_OPTIONAL_WARNING)
+    {
+    // Allow suppression of these warnings.
+    const char* suppress = this->State->GetCacheEntryValue(
+                                      "CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
+    if(suppress && cmSystemTools::IsOn(suppress))
+      {
+      return false;
+      }
+    msg << "CMake Warning (dev)";
+    }
   else
     {
     msg << "CMake Warning";
