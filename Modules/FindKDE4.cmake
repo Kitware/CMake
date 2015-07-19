@@ -105,7 +105,7 @@ if (KDE4_DATA_DIR)
    endif ()
 
    # use FindKDE4Internal.cmake to do the rest
-   find_package(KDE4Internal ${_req} ${_quiet})
+   find_package(KDE4Internal ${_req} ${_quiet} NO_POLICY_SCOPE)
 else ()
    if (KDE4_FIND_REQUIRED)
       message(FATAL_ERROR "ERROR: cmake/modules/FindKDE4Internal.cmake not found in ${_data_DIR}")
