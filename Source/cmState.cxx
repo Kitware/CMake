@@ -1157,26 +1157,26 @@ void cmState::Directory::AppendIncludeDirectoriesEntry(
 void cmState::Directory::PrependIncludeDirectoriesEntry(
     const std::string& vec, const cmListFileBacktrace& lfbt)
 {
-  std::vector<std::string>::const_iterator entryEnd =
-      this->DirectoryState->IncludeDirectories.begin();
-  std::advance(
-      entryEnd, this->Snapshot_.Position->ThisIncludeDirectoryPosition);
+  std::vector<std::string>::iterator entryEnd =
+      this->DirectoryState->IncludeDirectories.begin()
+      + this->Snapshot_.Position->ThisIncludeDirectoryPosition;
 
   std::vector<std::string>::const_reverse_iterator rend =
       this->DirectoryState->IncludeDirectories.rend();
-  std::vector<std::string>::const_reverse_iterator rbegin =
-      std::reverse_iterator<std::vector<std::string>::const_iterator>(entryEnd);
-  rbegin = std::find(rbegin, rend, std::string());
+  std::vector<std::string>::reverse_iterator rbegin =
+      std::reverse_iterator<std::vector<std::string>::iterator>(entryEnd);
+  std::vector<std::string>::const_reverse_iterator crbegin = rbegin;
+  crbegin = std::find(crbegin, rend, std::string());
 
-  std::vector<std::string>::const_iterator entryIt = rbegin.base();
+  std::vector<std::string>::const_iterator entryIt = crbegin.base();
   std::vector<std::string>::const_iterator entryBegin =
       this->DirectoryState->IncludeDirectories.begin();
 
-  std::vector<cmListFileBacktrace>::const_iterator btIt =
-      this->DirectoryState->IncludeDirectoryBacktraces.begin();
-  std::advance(btIt, std::distance(entryBegin, entryIt));
+  std::vector<cmListFileBacktrace>::iterator btIt =
+      this->DirectoryState->IncludeDirectoryBacktraces.begin()
+      + std::distance(entryBegin, entryIt);
 
-  this->DirectoryState->IncludeDirectories.insert(entryIt, vec);
+  this->DirectoryState->IncludeDirectories.insert(rbegin.base(), vec);
   this->DirectoryState->IncludeDirectoryBacktraces.insert(btIt, lfbt);
 
   this->Snapshot_.Position->ThisIncludeDirectoryPosition =
