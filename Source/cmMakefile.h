@@ -934,9 +934,6 @@ private:
 
   cmPropertyMap Properties;
 
-  // stack of list files being read
-  std::vector<std::string> ListFileStack;
-
   std::vector<cmCommandContext const*> ContextStack;
   std::vector<cmExecutionStatus*> ExecutionStatusStack;
   friend class cmMakefileCall;
