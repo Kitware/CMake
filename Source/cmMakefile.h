@@ -700,9 +700,7 @@ public:
   const char *GetProperty(const std::string& prop) const;
   const char *GetProperty(const std::string& prop, bool chain) const;
   bool GetPropertyAsBool(const std::string& prop) const;
-
-  // Get the properties
-  cmPropertyMap &GetProperties() { return this->Properties; }
+  std::vector<std::string> GetPropertyKeys() const;
 
   ///! Initialize a makefile from its parent
   void InitializeFromParent(cmMakefile* parent);
