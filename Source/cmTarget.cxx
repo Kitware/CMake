@@ -916,7 +916,7 @@ void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)
     this->Internal->SourceFilesMap.clear();
     this->LinkImplementationLanguageIsContextDependent = true;
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(&lfbt);
+    cmGeneratorExpression ge(lfbt);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(srcFiles);
     cge->SetEvaluateForBuildsystem(true);
     this->Internal->SourceEntries.push_back(
@@ -956,7 +956,7 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
     this->Internal->SourceFilesMap.clear();
     this->LinkImplementationLanguageIsContextDependent = true;
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(&lfbt);
+    cmGeneratorExpression ge(lfbt);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(srcFiles);
     cge->SetEvaluateForBuildsystem(true);
     this->Internal->SourceEntries.push_back(
@@ -1089,7 +1089,7 @@ cmSourceFile* cmTarget::AddSource(const std::string& src)
     this->Internal->SourceFilesMap.clear();
     this->LinkImplementationLanguageIsContextDependent = true;
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(&lfbt);
+    cmGeneratorExpression ge(lfbt);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(src);
     cge->SetEvaluateForBuildsystem(true);
     this->Internal->SourceEntries.push_back(
@@ -1710,7 +1710,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   else if(prop == "INCLUDE_DIRECTORIES")
     {
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(&lfbt);
+    cmGeneratorExpression ge(lfbt);
     deleteAndClear(this->Internal->IncludeDirectoriesEntries);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
     this->Internal->IncludeDirectoriesEntries.push_back(
@@ -1719,7 +1719,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   else if(prop == "COMPILE_OPTIONS")
     {
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(&lfbt);
+    cmGeneratorExpression ge(lfbt);
     deleteAndClear(this->Internal->CompileOptionsEntries);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
     this->Internal->CompileOptionsEntries.push_back(
@@ -1728,7 +1728,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   else if(prop == "COMPILE_FEATURES")
     {
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(&lfbt);
+    cmGeneratorExpression ge(lfbt);
     deleteAndClear(this->Internal->CompileFeaturesEntries);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
     this->Internal->CompileFeaturesEntries.push_back(
@@ -1737,7 +1737,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   else if(prop == "COMPILE_DEFINITIONS")
     {
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(&lfbt);
+    cmGeneratorExpression ge(lfbt);
     deleteAndClear(this->Internal->CompileDefinitionsEntries);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
     this->Internal->CompileDefinitionsEntries.push_back(
@@ -1772,7 +1772,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       }
     this->Internal->SourceFilesMap.clear();
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(&lfbt);
+    cmGeneratorExpression ge(lfbt);
     this->Internal->SourceEntries.clear();
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
     this->Internal->SourceEntries.push_back(
@@ -1808,28 +1808,28 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
   else if(prop == "INCLUDE_DIRECTORIES")
     {
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(&lfbt);
+    cmGeneratorExpression ge(lfbt);
     this->Internal->IncludeDirectoriesEntries.push_back(
               new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
     }
   else if(prop == "COMPILE_OPTIONS")
     {
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(&lfbt);
+    cmGeneratorExpression ge(lfbt);
     this->Internal->CompileOptionsEntries.push_back(
               new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
     }
   else if(prop == "COMPILE_FEATURES")
     {
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(&lfbt);
+    cmGeneratorExpression ge(lfbt);
     this->Internal->CompileFeaturesEntries.push_back(
               new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
     }
   else if(prop == "COMPILE_DEFINITIONS")
     {
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(&lfbt);
+    cmGeneratorExpression ge(lfbt);
     this->Internal->CompileDefinitionsEntries.push_back(
               new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
     }
@@ -1861,7 +1861,7 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
       }
       this->Internal->SourceFilesMap.clear();
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-      cmGeneratorExpression ge(&lfbt);
+      cmGeneratorExpression ge(lfbt);
       cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
       this->Internal->SourceEntries.push_back(
                             new cmTargetInternals::TargetPropertyEntry(cge));
@@ -1929,7 +1929,7 @@ void cmTarget::AppendBuildInterfaceIncludes()
 void cmTarget::InsertInclude(const cmValueWithOrigin &entry,
                      bool before)
 {
-  cmGeneratorExpression ge(&entry.Backtrace);
+  cmGeneratorExpression ge(entry.Backtrace);
 
   std::vector<cmTargetInternals::TargetPropertyEntry*>::iterator position
                 = before ? this->Internal->IncludeDirectoriesEntries.begin()
@@ -1943,7 +1943,7 @@ void cmTarget::InsertInclude(const cmValueWithOrigin &entry,
 void cmTarget::InsertCompileOption(const cmValueWithOrigin &entry,
                      bool before)
 {
-  cmGeneratorExpression ge(&entry.Backtrace);
+  cmGeneratorExpression ge(entry.Backtrace);
 
   std::vector<cmTargetInternals::TargetPropertyEntry*>::iterator position
                 = before ? this->Internal->CompileOptionsEntries.begin()
@@ -1956,7 +1956,7 @@ void cmTarget::InsertCompileOption(const cmValueWithOrigin &entry,
 //----------------------------------------------------------------------------
 void cmTarget::InsertCompileDefinition(const cmValueWithOrigin &entry)
 {
-  cmGeneratorExpression ge(&entry.Backtrace);
+  cmGeneratorExpression ge(entry.Backtrace);
 
   this->Internal->CompileDefinitionsEntries.push_back(
       new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry.Value)));
@@ -6162,7 +6162,7 @@ void cmTargetInternals::AddInterfaceEntries(
         {
         std::string genex =
           "$<TARGET_PROPERTY:" + *it + "," + prop + ">";
-        cmGeneratorExpression ge(&it->Backtrace);
+        cmGeneratorExpression ge(it->Backtrace);
         cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
         cge->SetEvaluateForBuildsystem(true);
         entries.push_back(
@@ -6258,7 +6258,7 @@ cmTargetInternals::ComputeLinkImplementationLibraries(
     cmGeneratorExpressionDAGChecker dagChecker(
                                         thisTarget->GetName(),
                                         "LINK_LIBRARIES", 0, 0);
-    cmGeneratorExpression ge(&le->Backtrace);
+    cmGeneratorExpression ge(le->Backtrace);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> const cge =
       ge.Parse(le->Value);
     std::string const evaluated =

@@ -19,6 +19,7 @@
 #include "cmLocalGenerator.h"
 #include "cmCommands.h"
 #include "cmState.h"
+#include "cmOutputConverter.h"
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
 #include "cmCommandArgumentParserHelper.h"
@@ -4150,10 +4151,10 @@ void cmMakefile::SetProperty(const std::string& prop, const char* value)
   if (prop == "INCLUDE_DIRECTORIES")
     {
     this->IncludeDirectoriesEntries.clear();
-      if (!value)
-        {
-        return;
-        }
+    if (!value)
+      {
+      return;
+      }
     cmListFileBacktrace lfbt = this->GetBacktrace();
     this->IncludeDirectoriesEntries.push_back(
                                         cmValueWithOrigin(value, lfbt));
@@ -4162,10 +4163,10 @@ void cmMakefile::SetProperty(const std::string& prop, const char* value)
   if (prop == "COMPILE_OPTIONS")
     {
     this->CompileOptionsEntries.clear();
-      if (!value)
-        {
-        return;
-        }
+    if (!value)
+      {
+      return;
+      }
     cmListFileBacktrace lfbt = this->GetBacktrace();
     this->CompileOptionsEntries.push_back(cmValueWithOrigin(value, lfbt));
     return;
@@ -4187,16 +4188,6 @@ void cmMakefile::SetProperty(const std::string& prop, const char* value)
     {
     this->SetIncludeRegularExpression(value);
     return;
-    }
-
-  if ( prop == "ADDITIONAL_MAKE_CLEAN_FILES" )
-    {
-    // This property is not inherrited
-    if ( strcmp(this->GetCurrentSourceDirectory(),
-                this->GetCurrentSourceDirectory()) != 0 )
-      {
-      return;
-      }
     }
 
   this->Properties.SetProperty(prop, value);
