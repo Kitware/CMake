@@ -1,10 +1,7 @@
 CMake Warning \(dev\) at CMP0062-WARN.cmake:[0-9]+ \(install\):
-  Policy CMP0062 behavior is triggered: Disallow install\(\) of export\(\)
-  result.  Run "cmake --help-policy CMP0062" for policy details.
-
-  This policy was introduced in CMake 3.3.0 and issues a warning regardless
-  of the policy setting.  For third party users of this software, the command
-  line option -Wno-dev may be used to suppress this warning.
+  Policy CMP0062 is not set: Disallow install\(\) of export\(\) result.  Run
+  "cmake --help-policy CMP0062" for policy details.  Use the cmake_policy
+  command to set the policy and suppress this warning.
 
   The file
 
@@ -16,3 +13,4 @@ CMake Warning \(dev\) at CMP0062-WARN.cmake:[0-9]+ \(install\):
 
 Call Stack \(most recent call first\):
   CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.

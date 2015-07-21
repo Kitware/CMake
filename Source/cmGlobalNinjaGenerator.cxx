@@ -1122,7 +1122,7 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
                             "",
                             deps,
                             cmNinjaDeps());
-      if (this->PolicyCMP0058 <= cmPolicies::WARN &&
+      if (this->PolicyCMP0058 == cmPolicies::WARN &&
           !inSourceBuild && warnExplicitDepends.size() < 10)
         {
         warnExplicitDepends.push_back(*i);
@@ -1146,8 +1146,7 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
       "Project authors should add the missing BYPRODUCTS or OUTPUT "
       "options to the custom commands that produce these files."
       ;
-    this->GetCMakeInstance()->IssueMessage(cmake::POLICY_OPTIONAL_WARNING,
-                                           w.str());
+    this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING, w.str());
     }
 }
 

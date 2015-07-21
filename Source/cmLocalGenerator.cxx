@@ -2215,6 +2215,7 @@ void cmLocalGenerator
     switch (target->GetPolicyStatusCMP0063())
       {
       case cmPolicies::OLD:
+        return;
       case cmPolicies::WARN:
         pWarnCMP0063 = &warnCMP0063;
         break;
@@ -2242,8 +2243,7 @@ void cmLocalGenerator
       warnCMP0063 <<
       "For compatibility CMake is not honoring them for this target.";
     target->GetMakefile()->GetCMakeInstance()
-      ->IssueMessage(cmake::POLICY_OPTIONAL_WARNING,
-                     w.str(), target->GetBacktrace());
+      ->IssueMessage(cmake::AUTHOR_WARNING, w.str(), target->GetBacktrace());
     }
 }
 

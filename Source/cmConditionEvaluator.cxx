@@ -688,17 +688,16 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
           this->HandleBinaryOp(result,
             reducible, arg, newArgs, argP1, argP2);
           }
-        else
-          {
-          std::ostringstream e;
-          e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0057) << "\n";
-          e << "IN_LIST will be interpreted as an operator "
-            "when the policy is set to NEW.  "
-            "Since the policy is not set to NEW, the OLD behavior will be "
-            "used.";
+          else if(this->Policy57Status == cmPolicies::WARN)
+            {
+            std::ostringstream e;
+            e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0057) << "\n";
+            e << "IN_LIST will be interpreted as an operator "
+              "when the policy is set to NEW.  "
+              "Since the policy is not set the OLD behavior will be used.";
 
-          this->Makefile.IssueMessage(cmake::POLICY_OPTIONAL_WARNING, e.str());
-          }
+            this->Makefile.IssueMessage(cmake::AUTHOR_WARNING, e.str());
+            }
         }
 
       ++arg;

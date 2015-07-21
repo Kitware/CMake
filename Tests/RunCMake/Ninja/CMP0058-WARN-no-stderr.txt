@@ -1,11 +1,7 @@
 ^CMake Warning \(dev\):
-  Policy CMP0058 behavior is triggered: Ninja requires custom command
-  byproducts to be explicit.  Run "cmake --help-policy CMP0058" for policy
-  details.
-
-  This policy was introduced in CMake 3.3.0 and issues a warning regardless
-  of the policy setting.  For third party users of this software, the command
-  line option -Wno-dev may be used to suppress this warning.
+  Policy CMP0058 is not set: Ninja requires custom command byproducts to be
+  explicit.  Run "cmake --help-policy CMP0058" for policy details.  Use the
+  cmake_policy command to set the policy and suppress this warning.
 
   This project specifies custom command DEPENDS on files in the build tree
   that are not specified as the OUTPUT or BYPRODUCTS of any
@@ -20,3 +16,4 @@
 
   Project authors should add the missing BYPRODUCTS or OUTPUT options to the
   custom commands that produce these files.
+This warning is for project developers.  Use -Wno-dev to suppress it.

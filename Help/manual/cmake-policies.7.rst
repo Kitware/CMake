@@ -23,42 +23,8 @@ either ``NEW`` or ``OLD`` behavior explicitly on the command line with the
 A policy is a deprecation mechanism and not a reliable feature toggle.
 A policy should almost never be set to ``OLD``, except to silence warnings
 in an otherwise frozen or stable codebase, or temporarily as part of a
-larger migration path.  The ``OLD`` behavior of each policy is undesirable
+larger migration path. The ``OLD`` behavior of each policy is undesirable
 and will be replaced with an error condition in a future release.
-Maintainers should take timely action to ensure their code works with both
-new and existing versions of CMake without requiring an explicit policy
-setting.  Most policies indicate ways that the code should be changed
-which work with both new and existing CMake releases.
-
-The lifecycle of a policy is:
-
-1. The Policy is introduced in a new version of CMake.  By default the
-   policy issues a warning if code is encountered which depends on ``OLD``
-   behavior.  The warning can be disabled in this release by using
-   the :command:`cmake_policy` command, or by passing ``-Wno-dev`` to
-   the :manual:`cmake(1)` program.
-2. In the release following its introduction, use of
-   the :command:`cmake_policy` command has no effect on whether the
-   warning is issued or not.  Passing ``-Wno-dev`` to
-   the :manual:`cmake(1)` program still silences the warning.
-3. Two releases after the introduction of the policy,
-   passing ``-Wno-dev`` to the :manual:`cmake(1)` program no longer
-   has any effect.
-4. Four releases after the introduction of the policy, the policy may
-   issue an error instead of a warning if ``OLD`` behavior is relied upon.
-   This indicates that the policy has reached the end of its life and the
-   code implementing the ``OLD`` behavior has been removed from the CMake
-   implementation.  Some policies may continue to issue only a warning
-   even four releases after introduction.  This does not mean that it is
-   ok to continue to rely on ``OLD`` behavior.
-5. Two releases after making the ``OLD`` behavior of the policy an error,
-   the error will no longer be diagnosed, and ``NEW`` behavior will be
-   used without further notification.
-
-Note that many existing policies currently have states that appear to not
-follow this lifecycle.  This does not mean that it is ok to continue to
-rely on ``OLD`` behavior for those policies; they will be brought in line
-with this lifecycle in a future release of CMake.
 
 The :command:`cmake_minimum_required` command does more than report an
 error if a too-old version of CMake is used to build a project.  It
