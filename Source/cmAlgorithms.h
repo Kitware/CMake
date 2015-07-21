@@ -363,4 +363,10 @@ cmReverseRange(Range const& range)
       range.rbegin(), range.rend());
 }
 
+template <class Iter>
+std::reverse_iterator<Iter> cmMakeReverseIterator(Iter it)
+{
+  return std::reverse_iterator<Iter>(it);
+}
+
 #endif
