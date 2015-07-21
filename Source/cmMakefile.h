@@ -387,11 +387,11 @@ public:
    */
   void SetIncludeRegularExpression(const char* regex)
     {
-      this->IncludeFileRegularExpression = regex;
+      this->SetProperty("INCLUDE_REGULAR_EXPRESSION", regex);
     }
   const char* GetIncludeRegularExpression() const
     {
-      return this->IncludeFileRegularExpression.c_str();
+      return this->GetProperty("INCLUDE_REGULAR_EXPRESSION");
     }
 
   /**
@@ -873,7 +873,6 @@ protected:
   std::vector<cmInstallGenerator*> InstallGenerators;
   std::vector<cmTestGenerator*> TestGenerators;
 
-  std::string IncludeFileRegularExpression;
   std::string ComplainFileRegularExpression;
   std::vector<std::string> SourceFileExtensions;
   std::vector<std::string> HeaderFileExtensions;
