@@ -229,20 +229,6 @@ public:
   void AddLinkDirectoryForTarget(const std::string& tgt, const std::string& d);
 
   /**
-   * Add a link directory to the build.
-   */
-  void AddLinkDirectory(const std::string&);
-
-  const std::vector<std::string>& GetLinkDirectories() const
-    {
-      return this->LinkDirectories;
-    }
-  void SetLinkDirectories(const std::vector<std::string>& vec)
-    {
-      this->LinkDirectories = vec;
-    }
-
-  /**
    * Add a subdirectory to the build.
    */
   void AddSubDirectory(const std::string& fullSrcDir,

@@ -1517,31 +1517,6 @@ void cmMakefile::AddLinkLibrary(const std::string& lib)
   this->AddLinkLibrary(lib,cmTarget::GENERAL);
 }
 
-void cmMakefile::AddLinkDirectory(const std::string& dir)
-{
-  // Don't add a link directory that is already present.  Yes, this
-  // linear search results in n^2 behavior, but n won't be getting
-  // much bigger than 20.  We cannot use a set because of order
-  // dependency of the link search path.
-
-  if(dir.empty())
-    {
-    return;
-    }
-  std::string newdir = dir;
-  // remove trailing slashes
-  if(*dir.rbegin() == '/')
-    {
-    newdir = dir.substr(0, dir.size()-1);
-    }
-  if(std::find(this->LinkDirectories.begin(),
-               this->LinkDirectories.end(), newdir)
-      == this->LinkDirectories.end())
-    {
-    this->LinkDirectories.push_back(dir);
-    }
-}
-
 void cmMakefile::InitializeFromParent(cmMakefile* parent)
 {
   // Initialize definitions with the closure of the parent scope.
@@ -1604,7 +1579,8 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   this->LinkLibraries = parent->LinkLibraries;
 
   // link directories
-  this->LinkDirectories = parent->LinkDirectories;
+  this->SetProperty("LINK_DIRECTORIES",
+                    parent->GetProperty("LINK_DIRECTORIES"));
 
   // the initial project name
   this->ProjectName = parent->ProjectName;
@@ -2140,11 +2116,26 @@ void cmMakefile::AddGlobalLinkInformation(const std::string& name,
       return;
     default:;
     }
-  std::vector<std::string>::iterator j;
-  for(j = this->LinkDirectories.begin();
-      j != this->LinkDirectories.end(); ++j)
+  if (const char* linkDirsProp = this->GetProperty("LINK_DIRECTORIES"))
     {
-    target.AddLinkDirectory(*j);
+    std::vector<std::string> linkDirs;
+    cmSystemTools::ExpandListArgument(linkDirsProp, linkDirs);
+
+    for(std::vector<std::string>::iterator j = linkDirs.begin();
+        j != linkDirs.end(); ++j)
+      {
+      std::string newdir = *j;
+      // remove trailing slashes
+      if(*j->rbegin() == '/')
+        {
+        newdir = j->substr(0, j->size()-1);
+        }
+      if(std::find(this->LinkDirectories.begin(),
+                   this->LinkDirectories.end(), newdir)
+          == this->LinkDirectories.end())
+        {target.AddLinkDirectory(*j);
+        }
+      }
     }
   target.MergeLinkLibraries( *this, name, this->LinkLibraries );
 }
@@ -2419,19 +2410,19 @@ void cmMakefile::ExpandVariablesCMP0019()
       }
     }
 
-  for(std::vector<std::string>::iterator d = this->LinkDirectories.begin();
-      d != this->LinkDirectories.end(); ++d)
+  if (const char* linkDirsProp = this->GetProperty("LINK_DIRECTORIES"))
     {
-    if(mightExpandVariablesCMP0019(d->c_str()))
+    if(mightExpandVariablesCMP0019(linkDirsProp))
       {
-      std::string orig = *d;
-      this->ExpandVariablesInString(*d, true, true);
-      if(pol == cmPolicies::WARN && *d != orig)
+      std::string d = linkDirsProp;
+      std::string orig = linkDirsProp;
+      this->ExpandVariablesInString(d, true, true);
+      if(pol == cmPolicies::WARN && d != orig)
         {
-        w << "Evaluated link directory\n"
+        w << "Evaluated link directories\n"
           << "  " << orig << "\n"
           << "as\n"
-          << "  " << *d << "\n";
+          << "  " << d << "\n";
         }
       }
     }
@@ -4138,16 +4129,6 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
 
 void cmMakefile::SetProperty(const std::string& prop, const char* value)
 {
-  if ( prop == "LINK_DIRECTORIES" )
-    {
-    std::vector<std::string> varArgsExpanded;
-    if(value)
-      {
-      cmSystemTools::ExpandListArgument(value, varArgsExpanded);
-      }
-    this->SetLinkDirectories(varArgsExpanded);
-    return;
-    }
   if (prop == "INCLUDE_DIRECTORIES")
     {
     this->IncludeDirectoriesEntries.clear();
@@ -4212,17 +4193,6 @@ void cmMakefile::AppendProperty(const std::string& prop,
                                         cmValueWithOrigin(value, lfbt));
     return;
     }
-  if ( prop == "LINK_DIRECTORIES" )
-    {
-    std::vector<std::string> varArgsExpanded;
-    cmSystemTools::ExpandListArgument(value, varArgsExpanded);
-    for(std::vector<std::string>::const_iterator vi = varArgsExpanded.begin();
-        vi != varArgsExpanded.end(); ++vi)
-      {
-      this->AddLinkDirectory(*vi);
-      }
-    return;
-    }
 
   this->Properties.AppendProperty(prop, value, asString);
 }
@@ -4276,11 +4246,6 @@ const char *cmMakefile::GetProperty(const std::string& prop,
   else if (prop == "MACROS")
     {
     this->GetListOfMacros(output);
-    return output.c_str();
-    }
-  else if (prop == "LINK_DIRECTORIES")
-    {
-    output = cmJoin(this->GetLinkDirectories(), ";");
     return output.c_str();
     }
   else if (prop == "INCLUDE_DIRECTORIES")

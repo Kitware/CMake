@@ -21,13 +21,13 @@ CMake Warning \(dev\) in CMakeLists.txt:
 
     /usr/include/VAL_INCLUDE;/usr/include/normal
 
-  Evaluated link directory
+  Evaluated link directories
 
-    /usr/lib/\${VAR_LINK_DIRS}
+    /usr/lib/\${VAR_LINK_DIRS};/usr/lib/normal
 
   as
 
-    /usr/lib/VAL_LINK_DIRS
+    /usr/lib/VAL_LINK_DIRS;/usr/lib/normal
 
   Evaluated link library
 
