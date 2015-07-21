@@ -72,7 +72,8 @@ bool cmTargetIncludeDirectoriesCommand
                       bool prepend, bool system)
 {
   cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-  tgt->InsertInclude(this->Join(content), lfbt, prepend);
+  cmValueWithOrigin entry(this->Join(content), lfbt);
+  tgt->InsertInclude(entry, prepend);
   if (system)
     {
     tgt->AddSystemIncludeDirectories(content);

@@ -50,6 +50,7 @@ bool cmTargetCompileOptionsCommand
                                    bool, bool)
 {
   cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-  tgt->InsertCompileOption(this->Join(content), lfbt);
+  cmValueWithOrigin entry(this->Join(content), lfbt);
+  tgt->InsertCompileOption(entry);
   return true;
 }
