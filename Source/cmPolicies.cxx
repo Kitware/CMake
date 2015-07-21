@@ -283,55 +283,17 @@ bool cmPolicies::GetPolicyID(const char *id, cmPolicies::PolicyID &pid)
   return stringToId(id, pid);
 }
 
-static bool ignoreWNoDev(cmPolicies::PolicyID id)
-{
-  return id == cmPolicies::CMP0011
-      || (id >= cmPolicies::CMP0055
-          && id <= cmPolicies::CMP0056);
-}
-
-static bool ignorePolicySetting(cmPolicies::PolicyID id)
-{
-  return id >= cmPolicies::CMP0057
-      && id <= cmPolicies::CMP0063;
-}
-
 ///! return a warning string for a given policy
 std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
 {
   std::ostringstream msg;
-
-  if (ignoreWNoDev(id))
-    {
-    msg <<
-        "Policy " << idToString(id) << " behavior is triggered: "
-        "" << idToShortDescription(id) << "  "
-        "Run \"cmake --help-policy " << idToString(id) << "\" for "
-        "policy details.\nThis policy was introduced in CMake "
-        << idToVersion(id)
-        << " and issues a warning regardless of the policy setting.";
-    }
-  else if (ignorePolicySetting(id))
-    {
-    msg <<
-        "Policy " << idToString(id) << " behavior is triggered: "
-        "" << idToShortDescription(id) << "  "
-        "Run \"cmake --help-policy " << idToString(id) << "\" for "
-        "policy details.\nThis policy was introduced in CMake "
-        << idToVersion(id)
-        << " and issues a warning regardless of the policy setting.  For "
-           "third party users of this software, the command line option "
-           "-Wno-dev may be used to suppress this warning.";
-    }
-  else
-    {
-    msg <<
-      "Policy " << idToString(id) << " is not set: "
-      "" << idToShortDescription(id) << "  "
-      "Run \"cmake --help-policy " << idToString(id) << "\" for "
-      "policy details.  Use the cmake_policy command to set the policy "
-         "and suppress this warning.";
-    }
+  msg <<
+    "Policy " << idToString(id) << " is not set: "
+    "" << idToShortDescription(id) << "  "
+    "Run \"cmake --help-policy " << idToString(id) << "\" for "
+    "policy details.  "
+    "Use the cmake_policy command to set the policy "
+    "and suppress this warning.";
   return msg.str();
 }
 

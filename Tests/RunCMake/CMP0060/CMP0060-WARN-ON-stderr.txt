@@ -1,11 +1,7 @@
 ^CMake Warning \(dev\) at CMP0060-Common.cmake:[0-9]+ \(add_executable\):
-  Policy CMP0060 behavior is triggered: Link libraries by full path even in
-  implicit directories.  Run "cmake --help-policy CMP0060" for policy
-  details.
-
-  This policy was introduced in CMake 3.3.0 and issues a warning regardless
-  of the policy setting.  For third party users of this software, the command
-  line option -Wno-dev may be used to suppress this warning.
+  Policy CMP0060 is not set: Link libraries by full path even in implicit
+  directories.  Run "cmake --help-policy CMP0060" for policy details.  Use
+  the cmake_policy command to set the policy and suppress this warning.
 
   Some library files are in directories implicitly searched by the linker
   when invoked for C:
@@ -17,3 +13,4 @@
 Call Stack \(most recent call first\):
   CMP0060-WARN-ON.cmake:[0-9]+ \(include\)
   CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.$

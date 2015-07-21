@@ -1,10 +1,7 @@
 ^CMake Warning \(dev\) at CMP0063-Common.cmake:[0-9]+ \(add_executable\):
-  Policy CMP0063 behavior is triggered: Honor visibility properties for all
-  target types.  Run "cmake --help-policy CMP0063" for policy details.
-
-  This policy was introduced in CMake 3.3.0 and issues a warning regardless
-  of the policy setting.  For third party users of this software, the command
-  line option -Wno-dev may be used to suppress this warning.
+  Policy CMP0063 is not set: Honor visibility properties for all target
+  types.  Run "cmake --help-policy CMP0063" for policy details.  Use the
+  cmake_policy command to set the policy and suppress this warning.
 
   Target "myexe" of type "EXECUTABLE" has the following visibility properties
   set for CXX:
@@ -16,14 +13,12 @@
 Call Stack \(most recent call first\):
   CMP0063-WARN-yes.cmake:[0-9]+ \(include\)
   CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
 +
 CMake Warning \(dev\) at CMP0063-Common.cmake:[0-9]+ \(add_library\):
-  Policy CMP0063 behavior is triggered: Honor visibility properties for all
-  target types.  Run "cmake --help-policy CMP0063" for policy details.
-
-  This policy was introduced in CMake 3.3.0 and issues a warning regardless
-  of the policy setting.  For third party users of this software, the command
-  line option -Wno-dev may be used to suppress this warning.
+  Policy CMP0063 is not set: Honor visibility properties for all target
+  types.  Run "cmake --help-policy CMP0063" for policy details.  Use the
+  cmake_policy command to set the policy and suppress this warning.
 
   Target "myobject" of type "OBJECT_LIBRARY" has the following visibility
   properties set for CXX:
@@ -35,14 +30,12 @@ CMake Warning \(dev\) at CMP0063-Common.cmake:[0-9]+ \(add_library\):
 Call Stack \(most recent call first\):
   CMP0063-WARN-yes.cmake:[0-9]+ \(include\)
   CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
 +
 CMake Warning \(dev\) at CMP0063-Common.cmake:[0-9]+ \(add_library\):
-  Policy CMP0063 behavior is triggered: Honor visibility properties for all
-  target types.  Run "cmake --help-policy CMP0063" for policy details.
-
-  This policy was introduced in CMake 3.3.0 and issues a warning regardless
-  of the policy setting.  For third party users of this software, the command
-  line option -Wno-dev may be used to suppress this warning.
+  Policy CMP0063 is not set: Honor visibility properties for all target
+  types.  Run "cmake --help-policy CMP0063" for policy details.  Use the
+  cmake_policy command to set the policy and suppress this warning.
 
   Target "mystatic" of type "STATIC_LIBRARY" has the following visibility
   properties set for CXX:
@@ -53,4 +46,5 @@ CMake Warning \(dev\) at CMP0063-Common.cmake:[0-9]+ \(add_library\):
   For compatibility CMake is not honoring them for this target.
 Call Stack \(most recent call first\):
   CMP0063-WARN-yes.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.$
