@@ -22,7 +22,6 @@
 #include "cmExpandedCommandArgument.h"
 #include "cmake.h"
 #include "cmState.h"
-#include "cmAlgorithms.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmSourceGroup.h"
@@ -747,12 +746,18 @@ public:
   /** Set whether or not to report a CMP0000 violation.  */
   void SetCheckCMP0000(bool b) { this->CheckCMP0000 = b; }
 
-  cmStringRange GetIncludeDirectoriesEntries() const;
-  cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
-  cmStringRange GetCompileOptionsEntries() const;
-  cmBacktraceRange GetCompileOptionsBacktraces() const;
-  cmStringRange GetCompileDefinitionsEntries() const;
-  cmBacktraceRange GetCompileDefinitionsBacktraces() const;
+  const std::vector<cmValueWithOrigin>& GetIncludeDirectoriesEntries() const
+  {
+    return this->IncludeDirectoriesEntries;
+  }
+  const std::vector<cmValueWithOrigin>& GetCompileOptionsEntries() const
+  {
+    return this->CompileOptionsEntries;
+  }
+  const std::vector<cmValueWithOrigin>& GetCompileDefinitionsEntries() const
+  {
+    return this->CompileDefinitionsEntries;
+  }
 
   bool IsConfigured() const { return this->Configured; }
   void SetConfigured(){ this->Configured = true; }
@@ -846,12 +851,9 @@ protected:
   std::vector<std::string> HeaderFileExtensions;
   std::string DefineFlags;
 
-  std::vector<std::string> IncludeDirectoriesEntries;
-  std::vector<cmListFileBacktrace> IncludeDirectoriesEntryBacktraces;
-  std::vector<std::string> CompileOptionsEntries;
-  std::vector<cmListFileBacktrace> CompileOptionsEntryBacktraces;
-  std::vector<std::string> CompileDefinitionsEntries;
-  std::vector<cmListFileBacktrace> CompileDefinitionsEntryBacktraces;
+  std::vector<cmValueWithOrigin> IncludeDirectoriesEntries;
+  std::vector<cmValueWithOrigin> CompileOptionsEntries;
+  std::vector<cmValueWithOrigin> CompileDefinitionsEntries;
 
   // Track the value of the computed DEFINITIONS property.
   void AddDefineFlag(const char*, std::string&);
