@@ -655,12 +655,6 @@ public:
    */
   cmSourceFile *GetSourceFileWithOutput(const std::string& outName) const;
 
-  /**
-   * Add a macro to the list of macros. The arguments should be name of the
-   * macro and a documentation signature of it
-   */
-  void AddMacro(const char* name);
-
   ///! Add a new cmTest to the list of tests for this makefile.
   cmTest* CreateTest(const std::string& testName);
 
@@ -668,11 +662,6 @@ public:
    *  not found, then a null pointer is returned.
    */
   cmTest* GetTest(const std::string& testName) const;
-
-  /**
-   * Get a list of macros as a ; separated string
-   */
-  void GetListOfMacros(std::string& macros) const;
 
   /**
    * Return a location of a file in cmake or custom modules directory
@@ -905,8 +894,6 @@ private:
   void PopFunctionBlockerBarrier(bool reportError = true);
 
   std::stack<int> LoopBlockCounter;
-
-  std::vector<std::string> MacrosList;
 
   mutable cmsys::RegularExpression cmDefineRegex;
   mutable cmsys::RegularExpression cmDefine01Regex;
