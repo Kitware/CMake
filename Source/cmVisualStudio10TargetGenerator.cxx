@@ -1623,6 +1623,11 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     {
     defines += cdefs;
     }
+  std::vector<std::string> depends;
+  if (const char* deps = sf.GetProperty("OBJECT_DEPENDS"))
+    {
+    cmSystemTools::ExpandListArgument(deps, depends);
+    }
   std::string lang =
     this->GlobalGenerator->GetLanguageFromExtension
     (sf.GetExtension().c_str());
@@ -1683,7 +1688,8 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       }
     // if we have flags or defines for this config then
     // use them
-    if(!flags.empty() || !configDefines.empty() || compileAs || noWinRT)
+    if(!flags.empty() || !configDefines.empty() ||
+       compileAs || noWinRT || !depends.empty())
       {
       (*this->BuildFileStream ) << firstString;
       firstString = ""; // only do firstString once
@@ -1710,6 +1716,10 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         {
         clOptions.AppendFlag("DisableSpecificWarnings",
                              "%(DisableSpecificWarnings)");
+        }
+      if (!depends.empty())
+        {
+        clOptions.AddFlag("AdditionalInputs", depends);
         }
       clOptions.AddDefines(configDefines.c_str());
       clOptions.SetConfiguration((*config).c_str());
