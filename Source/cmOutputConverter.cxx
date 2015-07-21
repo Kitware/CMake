@@ -81,11 +81,15 @@ const char* cmOutputConverter::GetRelativeRootPath(RelativeRoot relroot) const
 {
   switch (relroot)
     {
-    case HOME:         return this->GetState()->GetSourceDirectory();
-    case START:        return this->StateSnapshot.GetCurrentSourceDirectory();
-    case HOME_OUTPUT:  return this->GetState()->GetBinaryDirectory();
-    case START_OUTPUT: return this->StateSnapshot.GetCurrentBinaryDirectory();
-    default: break;
+  case HOME:
+    return this->GetState()->GetSourceDirectory();
+  case START:
+    return this->StateSnapshot.GetDirectory().GetCurrentSource();
+  case HOME_OUTPUT:
+    return this->GetState()->GetBinaryDirectory();
+  case START_OUTPUT:
+    return this->StateSnapshot.GetDirectory().GetCurrentBinary();
+  default: break;
     }
   return 0;
 }
@@ -105,7 +109,8 @@ std::string cmOutputConverter::Convert(const std::string& source,
     break;
   case START:
     result = this->ConvertToRelativePath(
-          this->StateSnapshot.GetCurrentSourceDirectoryComponents(), result);
+          this->StateSnapshot.GetDirectory().GetCurrentSourceComponents(),
+          result);
     break;
   case HOME_OUTPUT:
     result = this->ConvertToRelativePath(
@@ -113,7 +118,8 @@ std::string cmOutputConverter::Convert(const std::string& source,
     break;
   case START_OUTPUT:
     result = this->ConvertToRelativePath(
-          this->StateSnapshot.GetCurrentBinaryDirectoryComponents(), result);
+          this->StateSnapshot.GetDirectory().GetCurrentBinaryComponents(),
+          result);
     break;
   case FULL:
     result = cmSystemTools::CollapseFullPath(result);
@@ -213,13 +219,13 @@ cmOutputConverter::ConvertToRelativePath(const std::vector<std::string>& local,
     // or both in the binary tree.
     std::string local_path = cmSystemTools::JoinPath(local);
     if(!((cmOutputConverterNotAbove(local_path.c_str(),
-              this->StateSnapshot.GetRelativePathTopBinary()) &&
-          cmOutputConverterNotAbove(in_remote.c_str(),
-              this->StateSnapshot.GetRelativePathTopBinary())) ||
-         (cmOutputConverterNotAbove(local_path.c_str(),
-              this->StateSnapshot.GetRelativePathTopSource()) &&
-          cmOutputConverterNotAbove(in_remote.c_str(),
-              this->StateSnapshot.GetRelativePathTopSource()))))
+              this->StateSnapshot.GetDirectory().GetRelativePathTopBinary())
+          && cmOutputConverterNotAbove(in_remote.c_str(),
+              this->StateSnapshot.GetDirectory().GetRelativePathTopBinary()))
+         || (cmOutputConverterNotAbove(local_path.c_str(),
+              this->StateSnapshot.GetDirectory().GetRelativePathTopSource())
+             && cmOutputConverterNotAbove(in_remote.c_str(),
+              this->StateSnapshot.GetDirectory().GetRelativePathTopSource()))))
       {
       return in_remote;
       }

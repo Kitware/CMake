@@ -1700,7 +1700,7 @@ public:
     : Makefile(mf), ReportError(true)
   {
     std::string currentStart =
-        this->Makefile->StateSnapshot.GetCurrentSourceDirectory();
+        this->Makefile->StateSnapshot.GetDirectory().GetCurrentSource();
     currentStart += "/CMakeLists.txt";
     this->Makefile->StateSnapshot.SetListFile(currentStart);
     this->Makefile->PushPolicyBarrier();
@@ -1742,11 +1742,12 @@ void cmMakefile::Configure()
   BuildsystemFileScope scope(this);
 
   // make sure the CMakeFiles dir is there
-  std::string filesDir = this->StateSnapshot.GetCurrentBinaryDirectory();
+  std::string filesDir = this->StateSnapshot.GetDirectory().GetCurrentBinary();
   filesDir += cmake::GetCMakeFilesDirectory();
   cmSystemTools::MakeDirectory(filesDir.c_str());
 
-  std::string currentStart = this->StateSnapshot.GetCurrentSourceDirectory();
+  std::string currentStart =
+      this->StateSnapshot.GetDirectory().GetCurrentSource();
   currentStart += "/CMakeLists.txt";
   assert(cmSystemTools::FileExists(currentStart.c_str(), true));
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentStart.c_str());
@@ -1878,27 +1879,27 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
 
 void cmMakefile::SetCurrentSourceDirectory(const std::string& dir)
 {
-  this->StateSnapshot.SetCurrentSourceDirectory(dir);
+  this->StateSnapshot.GetDirectory().SetCurrentSource(dir);
   this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
-                      this->StateSnapshot.GetCurrentSourceDirectory());
+                      this->StateSnapshot.GetDirectory().GetCurrentSource());
 }
 
 const char* cmMakefile::GetCurrentSourceDirectory() const
 {
-  return this->StateSnapshot.GetCurrentSourceDirectory();
+  return this->StateSnapshot.GetDirectory().GetCurrentSource();
 }
 
 void cmMakefile::SetCurrentBinaryDirectory(const std::string& dir)
 {
-  this->StateSnapshot.SetCurrentBinaryDirectory(dir);
-  const char* binDir = this->StateSnapshot.GetCurrentBinaryDirectory();
+  this->StateSnapshot.GetDirectory().SetCurrentBinary(dir);
+  const char* binDir = this->StateSnapshot.GetDirectory().GetCurrentBinary();
   cmSystemTools::MakeDirectory(binDir);
   this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", binDir);
 }
 
 const char* cmMakefile::GetCurrentBinaryDirectory() const
 {
-  return this->StateSnapshot.GetCurrentBinaryDirectory();
+  return this->StateSnapshot.GetDirectory().GetCurrentBinary();
 }
 
 //----------------------------------------------------------------------------
@@ -4245,7 +4246,7 @@ const char *cmMakefile::GetProperty(const std::string& prop,
         this->StateSnapshot.GetBuildsystemDirectoryParent();
     if(parent.IsValid())
       {
-      return parent.GetCurrentSourceDirectory();
+      return parent.GetDirectory().GetCurrentSource();
       }
     return "";
     }
