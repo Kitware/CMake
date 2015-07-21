@@ -114,6 +114,7 @@ Properties on Targets
    /prop_tgt/AUTOUIC_OPTIONS
    /prop_tgt/AUTORCC
    /prop_tgt/AUTORCC_OPTIONS
+   /prop_tgt/BINARY_DIR
    /prop_tgt/BUILD_WITH_INSTALL_RPATH
    /prop_tgt/BUNDLE_EXTENSION
    /prop_tgt/BUNDLE
@@ -244,6 +245,7 @@ Properties on Targets
    /prop_tgt/RUNTIME_OUTPUT_NAME_CONFIG
    /prop_tgt/RUNTIME_OUTPUT_NAME
    /prop_tgt/SKIP_BUILD_RPATH
+   /prop_tgt/SOURCE_DIR
    /prop_tgt/SOURCES
    /prop_tgt/SOVERSION
    /prop_tgt/STATIC_LIBRARY_FLAGS_CONFIG

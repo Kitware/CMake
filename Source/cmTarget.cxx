@@ -2970,6 +2970,8 @@ const char *cmTarget::GetProperty(const std::string& prop,
   MAKE_STATIC_PROP(COMPILE_DEFINITIONS);
   MAKE_STATIC_PROP(IMPORTED);
   MAKE_STATIC_PROP(NAME);
+  MAKE_STATIC_PROP(BINARY_DIR);
+  MAKE_STATIC_PROP(SOURCE_DIR);
   MAKE_STATIC_PROP(SOURCES);
 #undef MAKE_STATIC_PROP
   if(specialProps.empty())
@@ -2982,6 +2984,8 @@ const char *cmTarget::GetProperty(const std::string& prop,
     specialProps.insert(propCOMPILE_DEFINITIONS);
     specialProps.insert(propIMPORTED);
     specialProps.insert(propNAME);
+    specialProps.insert(propBINARY_DIR);
+    specialProps.insert(propSOURCE_DIR);
     specialProps.insert(propSOURCES);
     }
   if(specialProps.count(prop))
@@ -3063,6 +3067,14 @@ const char *cmTarget::GetProperty(const std::string& prop,
     else if (prop == propNAME)
       {
       return this->GetName().c_str();
+      }
+    else if (prop == propBINARY_DIR)
+      {
+      return this->GetMakefile()->GetCurrentBinaryDirectory();
+      }
+    else if (prop == propSOURCE_DIR)
+      {
+      return this->GetMakefile()->GetCurrentSourceDirectory();
       }
     else if(prop == propSOURCES)
       {
