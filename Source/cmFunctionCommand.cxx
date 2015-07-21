@@ -125,7 +125,7 @@ bool cmFunctionHelperCommand::InvokeInitialPass
   std::string argvDef = cmJoin(expandedArgs, ";");
   std::vector<std::string>::const_iterator eit
       = expandedArgs.begin() + (this->Args.size()-1);
-  std::string argnDef = cmJoin(cmRange(eit, expandedArgs.end()), ";");
+  std::string argnDef = cmJoin(cmMakeRange(eit, expandedArgs.end()), ";");
   this->Makefile->AddDefinition("ARGV", argvDef.c_str());
   this->Makefile->MarkVariableAsUsed("ARGV");
   this->Makefile->AddDefinition("ARGN", argnDef.c_str());

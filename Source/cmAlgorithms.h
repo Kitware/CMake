@@ -122,35 +122,6 @@ struct DefaultDeleter<Range, /* valueTypeIsPair = */ true>
   }
 };
 
-template<typename const_iterator_>
-struct Range
-{
-  typedef const_iterator_ const_iterator;
-  typedef typename std::iterator_traits<const_iterator>::value_type value_type;
-  typedef typename std::iterator_traits<const_iterator>::difference_type
-    difference_type;
-  Range(const_iterator begin_, const_iterator end_)
-    : Begin(begin_), End(end_) {}
-  const_iterator begin() const { return Begin; }
-  const_iterator end() const { return End; }
-  bool empty() const { return std::distance(Begin, End) == 0; }
-  difference_type size() const { return std::distance(Begin, End); }
-  Range& advance(cmIML_INT_intptr_t amount)
-  {
-    std::advance(Begin, amount);
-    return *this;
-  }
-
-  Range& retreat(cmIML_INT_intptr_t amount)
-  {
-    std::advance(End, -amount);
-    return *this;
-  }
-private:
-  const_iterator Begin;
-  const_iterator End;
-};
-
 template<typename FwdIt>
 FwdIt RemoveN(FwdIt i1, FwdIt i2, size_t n)
 {
@@ -178,17 +149,52 @@ private:
 
 }
 
-template<typename Iter1, typename Iter2>
-ContainerAlgorithms::Range<Iter1> cmRange(Iter1 begin, Iter2 end)
+template<typename const_iterator_>
+struct cmRange
 {
-  return ContainerAlgorithms::Range<Iter1>(begin, end);
+  typedef const_iterator_ const_iterator;
+  typedef typename std::iterator_traits<const_iterator>::value_type value_type;
+  typedef typename std::iterator_traits<const_iterator>::difference_type
+    difference_type;
+  cmRange(const_iterator begin_, const_iterator end_)
+    : Begin(begin_), End(end_) {}
+  const_iterator begin() const { return Begin; }
+  const_iterator end() const { return End; }
+  bool empty() const { return std::distance(Begin, End) == 0; }
+  difference_type size() const { return std::distance(Begin, End); }
+  cmRange& advance(cmIML_INT_intptr_t amount)
+  {
+    std::advance(Begin, amount);
+    return *this;
+  }
+
+  cmRange& retreat(cmIML_INT_intptr_t amount)
+  {
+    std::advance(End, -amount);
+    return *this;
+  }
+private:
+  const_iterator Begin;
+  const_iterator End;
+};
+
+typedef cmRange<std::vector<std::string>::const_iterator> cmStringRange;
+
+class cmListFileBacktrace;
+typedef
+cmRange<std::vector<cmListFileBacktrace>::const_iterator> cmBacktraceRange;
+
+template<typename Iter1, typename Iter2>
+cmRange<Iter1> cmMakeRange(Iter1 begin, Iter2 end)
+{
+  return cmRange<Iter1>(begin, end);
 }
 
 template<typename Range>
-ContainerAlgorithms::Range<typename Range::const_iterator>
-cmRange(Range const& range)
+cmRange<typename Range::const_iterator>
+cmMakeRange(Range const& range)
 {
-  return ContainerAlgorithms::Range<typename Range::const_iterator>(
+  return cmRange<typename Range::const_iterator>(
       range.begin(), range.end());
 }
 
@@ -350,10 +356,10 @@ typename Range::const_iterator cmFindNot(Range const& r, T const& t)
 }
 
 template<typename Range>
-ContainerAlgorithms::Range<typename Range::const_reverse_iterator>
+cmRange<typename Range::const_reverse_iterator>
 cmReverseRange(Range const& range)
 {
-  return ContainerAlgorithms::Range<typename Range::const_reverse_iterator>(
+  return cmRange<typename Range::const_reverse_iterator>(
       range.rbegin(), range.rend());
 }
 

@@ -270,7 +270,7 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
     this->SetError(error);
     return false;
     }
-  std::string message = cmJoin(cmRange(i, args.end()), std::string());
+  std::string message = cmJoin(cmMakeRange(i, args.end()), std::string());
   file << message;
   file.close();
   if(mode)

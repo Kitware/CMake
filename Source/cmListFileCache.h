@@ -14,6 +14,7 @@
 
 #include "cmStandardIncludes.h"
 
+#include "cmAlgorithms.h"
 #include "cmState.h"
 
 /** \class cmListFileCache

@@ -2259,7 +2259,7 @@ cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p,
                           std::string());
       std::vector<std::string>::const_iterator compStart
           = components.begin() + 1;
-      result += cmJoin(cmRange(compStart, compEnd), slash);
+      result += cmJoin(cmMakeRange(compStart, compEnd), slash);
       // Only the last component can be empty to avoid double slashes.
       result += slash;
       result += components.back();
