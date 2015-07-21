@@ -69,6 +69,9 @@ file(WRITE ${BuildDepends_BINARY_DIR}/Project/link_depends_no_shared_exe.h
   "#define link_depends_no_shared_exe_value 0\n")
 set(link_depends_no_shared_check_txt ${BuildDepends_BINARY_DIR}/Project/link_depends_no_shared_check.txt)
 
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/object_depends.txt "0\n")
+set(object_depends_check_txt ${BuildDepends_BINARY_DIR}/Project/object_depends_check.txt)
+
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/external.in "external original\n")
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/multi1-in.txt "multi1-in original\n")
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/multi2-stamp.txt "multi2-stamp original\n")
@@ -246,6 +249,8 @@ file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_macro_tgt.hxx
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/link_depends_no_shared_lib.h
   "#define link_depends_no_shared_lib_value 0\n")
 
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/object_depends.txt "1\n")
+
 if(TEST_LINK_DEPENDS)
   file(WRITE ${TEST_LINK_DEPENDS} "2")
 endif()
@@ -357,6 +362,20 @@ if(EXISTS "${link_depends_no_shared_check_txt}")
 else()
   message(SEND_ERROR "Project did not rebuild properly.  "
     "Targets link_depends_no_shared_lib and link_depends_no_shared_exe not both built.")
+endif()
+
+if(EXISTS "${object_depends_check_txt}")
+  file(STRINGS "${object_depends_check_txt}" object_depends_check LIMIT_COUNT 1)
+  if("${object_depends_check}" STREQUAL "1")
+    message(STATUS "object_depends exe is newer than object_depends.txt as expected.")
+  elseif(XCODE)
+    message(STATUS "Known limitation: OBJECT_DEPENDS not implemented for Xcode.")
+  else()
+    message(SEND_ERROR "Project did not rebuild properly: object_depends exe is not newer than object_depends.txt.")
+  endif()
+else()
+  message(SEND_ERROR "Project did not rebuild properly.  "
+    "object_depends exe and object_depends.txt are not both present.")
 endif()
 
 if(EXISTS ${BuildDepends_BINARY_DIR}/Project/external.out)
