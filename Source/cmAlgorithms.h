@@ -178,12 +178,6 @@ private:
   const_iterator End;
 };
 
-typedef cmRange<std::vector<std::string>::const_iterator> cmStringRange;
-
-class cmListFileBacktrace;
-typedef
-cmRange<std::vector<cmListFileBacktrace>::const_iterator> cmBacktraceRange;
-
 template<typename Iter1, typename Iter2>
 cmRange<Iter1> cmMakeRange(Iter1 begin, Iter2 end)
 {
