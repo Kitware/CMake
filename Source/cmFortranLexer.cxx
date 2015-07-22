@@ -9,9 +9,9 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#line 2 "cmDependsFortranLexer.cxx"
+#line 2 "cmFortranLexer.cxx"
 
-#line 4 "cmDependsFortranLexer.cxx"
+#line 4 "cmFortranLexer.cxx"
 
 #define  YY_INT_ALIGNED short int
 
@@ -164,7 +164,7 @@ typedef void* yyscan_t;
 #define YY_STATE_EOF(state) (YY_END_OF_BUFFER + state + 1)
 
 /* Special action meaning "start processing a new file". */
-#define YY_NEW_FILE cmDependsFortran_yyrestart(yyin ,yyscanner )
+#define YY_NEW_FILE cmFortran_yyrestart(yyin ,yyscanner )
 
 #define YY_END_OF_BUFFER_CHAR 0
 
@@ -274,7 +274,7 @@ struct yy_buffer_state
          * possible backing-up.
          *
          * When we actually see the EOF, we change the status to "new"
-         * (via cmDependsFortran_yyrestart()), so that the user can continue scanning by
+         * (via cmFortran_yyrestart()), so that the user can continue scanning by
          * just pointing yyin at a new input file.
          */
 #define YY_BUFFER_EOF_PENDING 2
@@ -297,36 +297,36 @@ struct yy_buffer_state
  */
 #define YY_CURRENT_BUFFER_LVALUE yyg->yy_buffer_stack[yyg->yy_buffer_stack_top]
 
-void cmDependsFortran_yyrestart (FILE *input_file ,yyscan_t yyscanner );
-void cmDependsFortran_yy_switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmDependsFortran_yy_create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void cmDependsFortran_yy_delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void cmDependsFortran_yy_flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void cmDependsFortran_yypush_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-void cmDependsFortran_yypop_buffer_state (yyscan_t yyscanner );
+void cmFortran_yyrestart (FILE *input_file ,yyscan_t yyscanner );
+void cmFortran_yy_switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+YY_BUFFER_STATE cmFortran_yy_create_buffer (FILE *file,int size ,yyscan_t yyscanner );
+void cmFortran_yy_delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void cmFortran_yy_flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void cmFortran_yypush_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+void cmFortran_yypop_buffer_state (yyscan_t yyscanner );
 
-static void cmDependsFortran_yyensure_buffer_stack (yyscan_t yyscanner );
-static void cmDependsFortran_yy_load_buffer_state (yyscan_t yyscanner );
-static void cmDependsFortran_yy_init_buffer (YY_BUFFER_STATE b,FILE *file ,yyscan_t yyscanner );
+static void cmFortran_yyensure_buffer_stack (yyscan_t yyscanner );
+static void cmFortran_yy_load_buffer_state (yyscan_t yyscanner );
+static void cmFortran_yy_init_buffer (YY_BUFFER_STATE b,FILE *file ,yyscan_t yyscanner );
 
-#define YY_FLUSH_BUFFER cmDependsFortran_yy_flush_buffer(YY_CURRENT_BUFFER ,yyscanner)
+#define YY_FLUSH_BUFFER cmFortran_yy_flush_buffer(YY_CURRENT_BUFFER ,yyscanner)
 
-YY_BUFFER_STATE cmDependsFortran_yy_scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmDependsFortran_yy_scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmDependsFortran_yy_scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
+YY_BUFFER_STATE cmFortran_yy_scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
+YY_BUFFER_STATE cmFortran_yy_scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
+YY_BUFFER_STATE cmFortran_yy_scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
 
-void *cmDependsFortran_yyalloc (yy_size_t ,yyscan_t yyscanner );
-void *cmDependsFortran_yyrealloc (void *,yy_size_t ,yyscan_t yyscanner );
-void cmDependsFortran_yyfree (void * ,yyscan_t yyscanner );
+void *cmFortran_yyalloc (yy_size_t ,yyscan_t yyscanner );
+void *cmFortran_yyrealloc (void *,yy_size_t ,yyscan_t yyscanner );
+void cmFortran_yyfree (void * ,yyscan_t yyscanner );
 
-#define yy_new_buffer cmDependsFortran_yy_create_buffer
+#define yy_new_buffer cmFortran_yy_create_buffer
 
 #define yy_set_interactive(is_interactive) \
         { \
         if ( ! YY_CURRENT_BUFFER ){ \
-        cmDependsFortran_yyensure_buffer_stack (yyscanner); \
+        cmFortran_yyensure_buffer_stack (yyscanner); \
                 YY_CURRENT_BUFFER_LVALUE =    \
-            cmDependsFortran_yy_create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+            cmFortran_yy_create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
         } \
         YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
         }
@@ -334,9 +334,9 @@ void cmDependsFortran_yyfree (void * ,yyscan_t yyscanner );
 #define yy_set_bol(at_bol) \
         { \
         if ( ! YY_CURRENT_BUFFER ){\
-        cmDependsFortran_yyensure_buffer_stack (yyscanner); \
+        cmFortran_yyensure_buffer_stack (yyscanner); \
                 YY_CURRENT_BUFFER_LVALUE =    \
-            cmDependsFortran_yy_create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+            cmFortran_yy_create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
         } \
         YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
         }
@@ -345,7 +345,7 @@ void cmDependsFortran_yyfree (void * ,yyscan_t yyscanner );
 
 /* Begin user sect3 */
 
-#define cmDependsFortran_yywrap(n) 1
+#define cmFortran_yywrap(n) 1
 #define YY_SKIP_YYWRAP
 
 typedef unsigned char YY_CHAR;
@@ -622,8 +622,8 @@ static yyconst flex_int16_t yy_chk[547] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "cmDependsFortranLexer.in.l"
-#line 2 "cmDependsFortranLexer.in.l"
+#line 1 "cmFortranLexer.in.l"
+#line 2 "cmFortranLexer.in.l"
 /*============================================================================
   CMake - Cross Platform Makefile Generator
   Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
@@ -651,17 +651,17 @@ This file must be translated to C and modified to build everywhere.
 
 Run flex like this:
 
-  flex -i --prefix=cmDependsFortran_yy --header-file=cmDependsFortranLexer.h -ocmDependsFortranLexer.cxx cmDependsFortranLexer.in.l
+  flex -i --prefix=cmFortran_yy --header-file=cmFortranLexer.h -ocmFortranLexer.cxx cmFortranLexer.in.l
 
-Modify cmDependsFortranLexer.cxx:
+Modify cmFortranLexer.cxx:
   - remove TABs
   - remove "yyscanner" argument from these methods:
-      yy_fatal_error, cmDependsFortran_yyalloc, cmDependsFortran_yyrealloc, cmDependsFortran_yyfree
-  - remove "yyscanner = NULL" from end of cmDependsFortran_yylex_destroy
+      yy_fatal_error, cmFortran_yyalloc, cmFortran_yyrealloc, cmFortran_yyfree
+  - remove "yyscanner = NULL" from end of cmFortran_yylex_destroy
   - remove all YY_BREAK lines occurring right after return statements
   - change while ( 1 ) to for(;;)
 
-Modify cmDependsFortranLexer.h:
+Modify cmFortranLexer.h:
   - remove TABs
   - remove the yy_init_globals function
   - remove the block that includes unistd.h
@@ -671,21 +671,21 @@ Modify cmDependsFortranLexer.h:
 
 #include "cmStandardLexer.h"
 
-#define cmDependsFortranLexer_cxx
-#include "cmDependsFortranParser.h" /* Interface to parser object.  */
+#define cmFortranLexer_cxx
+#include "cmFortranParser.h" /* Interface to parser object.  */
 
 /* Replace the lexer input function.  */
 #undef YY_INPUT
 #define YY_INPUT(buf, result, max_size) \
-  { result = cmDependsFortranParser_Input(yyextra, buf, max_size); }
+  { result = cmFortranParser_Input(yyextra, buf, max_size); }
 
 /* Include the set of tokens from the parser.  */
-#include "cmDependsFortranParserTokens.h"
+#include "cmFortranParserTokens.h"
 
 /*--------------------------------------------------------------------------*/
 
 
-#line 678 "cmDependsFortranLexer.cxx"
+#line 678 "cmFortranLexer.cxx"
 
 #define INITIAL 0
 #define free_fmt 1
@@ -741,38 +741,38 @@ struct yyguts_t
 
 static int yy_init_globals (yyscan_t yyscanner );
 
-int cmDependsFortran_yylex_init (yyscan_t* scanner);
+int cmFortran_yylex_init (yyscan_t* scanner);
 
-int cmDependsFortran_yylex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
+int cmFortran_yylex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
 
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int cmDependsFortran_yylex_destroy (yyscan_t yyscanner );
+int cmFortran_yylex_destroy (yyscan_t yyscanner );
 
-int cmDependsFortran_yyget_debug (yyscan_t yyscanner );
+int cmFortran_yyget_debug (yyscan_t yyscanner );
 
-void cmDependsFortran_yyset_debug (int debug_flag ,yyscan_t yyscanner );
+void cmFortran_yyset_debug (int debug_flag ,yyscan_t yyscanner );
 
-YY_EXTRA_TYPE cmDependsFortran_yyget_extra (yyscan_t yyscanner );
+YY_EXTRA_TYPE cmFortran_yyget_extra (yyscan_t yyscanner );
 
-void cmDependsFortran_yyset_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void cmFortran_yyset_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
 
-FILE *cmDependsFortran_yyget_in (yyscan_t yyscanner );
+FILE *cmFortran_yyget_in (yyscan_t yyscanner );
 
-void cmDependsFortran_yyset_in  (FILE * in_str ,yyscan_t yyscanner );
+void cmFortran_yyset_in  (FILE * in_str ,yyscan_t yyscanner );
 
-FILE *cmDependsFortran_yyget_out (yyscan_t yyscanner );
+FILE *cmFortran_yyget_out (yyscan_t yyscanner );
 
-void cmDependsFortran_yyset_out  (FILE * out_str ,yyscan_t yyscanner );
+void cmFortran_yyset_out  (FILE * out_str ,yyscan_t yyscanner );
 
-int cmDependsFortran_yyget_leng (yyscan_t yyscanner );
+int cmFortran_yyget_leng (yyscan_t yyscanner );
 
-char *cmDependsFortran_yyget_text (yyscan_t yyscanner );
+char *cmFortran_yyget_text (yyscan_t yyscanner );
 
-int cmDependsFortran_yyget_lineno (yyscan_t yyscanner );
+int cmFortran_yyget_lineno (yyscan_t yyscanner );
 
-void cmDependsFortran_yyset_lineno (int line_number ,yyscan_t yyscanner );
+void cmFortran_yyset_lineno (int line_number ,yyscan_t yyscanner );
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -780,9 +780,9 @@ void cmDependsFortran_yyset_lineno (int line_number ,yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int cmDependsFortran_yywrap (yyscan_t yyscanner );
+extern "C" int cmFortran_yywrap (yyscan_t yyscanner );
 #else
-extern int cmDependsFortran_yywrap (yyscan_t yyscanner );
+extern int cmFortran_yywrap (yyscan_t yyscanner );
 #endif
 #endif
 
@@ -886,9 +886,9 @@ static int input (yyscan_t yyscanner );
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int cmDependsFortran_yylex (yyscan_t yyscanner);
+extern int cmFortran_yylex (yyscan_t yyscanner);
 
-#define YY_DECL int cmDependsFortran_yylex (yyscan_t yyscanner)
+#define YY_DECL int cmFortran_yylex (yyscan_t yyscanner)
 #endif /* !YY_DECL */
 
 /* Code executed at the beginning of each rule, after yytext and yyleng
@@ -918,10 +918,10 @@ YY_DECL
         int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 71 "cmDependsFortranLexer.in.l"
+#line 71 "cmFortranLexer.in.l"
 
 
-#line 914 "cmDependsFortranLexer.cxx"
+#line 914 "cmFortranLexer.cxx"
 
         if ( !yyg->yy_init )
                 {
@@ -941,12 +941,12 @@ YY_DECL
                         yyout = stdout;
 
                 if ( ! YY_CURRENT_BUFFER ) {
-                        cmDependsFortran_yyensure_buffer_stack (yyscanner);
+                        cmFortran_yyensure_buffer_stack (yyscanner);
                         YY_CURRENT_BUFFER_LVALUE =
-                                cmDependsFortran_yy_create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
+                                cmFortran_yy_create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
                 }
 
-                cmDependsFortran_yy_load_buffer_state(yyscanner );
+                cmFortran_yy_load_buffer_state(yyscanner );
                 }
 
         for(;;)             /* loops until end-of-file is reached */
@@ -1007,47 +1007,47 @@ do_action:      /* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 73 "cmDependsFortranLexer.in.l"
+#line 73 "cmFortranLexer.in.l"
 {
-  cmDependsFortranParser_StringStart(yyextra);
-  cmDependsFortranParser_SetOldStartcond(yyextra, YY_START);
+  cmFortranParser_StringStart(yyextra);
+  cmFortranParser_SetOldStartcond(yyextra, YY_START);
   BEGIN(str_dq);
 }
         YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 79 "cmDependsFortranLexer.in.l"
+#line 79 "cmFortranLexer.in.l"
 {
-  cmDependsFortranParser_StringStart(yyextra);
-  cmDependsFortranParser_SetOldStartcond(yyextra, YY_START);
+  cmFortranParser_StringStart(yyextra);
+  cmFortranParser_SetOldStartcond(yyextra, YY_START);
   BEGIN(str_sq);
 }
         YY_BREAK
 case 3:
-#line 86 "cmDependsFortranLexer.in.l"
+#line 86 "cmFortranLexer.in.l"
 case 4:
 YY_RULE_SETUP
-#line 86 "cmDependsFortranLexer.in.l"
+#line 86 "cmFortranLexer.in.l"
 {
-  BEGIN(cmDependsFortranParser_GetOldStartcond(yyextra) );
-  yylvalp->string = strdup(cmDependsFortranParser_StringEnd(yyextra));
+  BEGIN(cmFortranParser_GetOldStartcond(yyextra) );
+  yylvalp->string = strdup(cmFortranParser_StringEnd(yyextra));
   return STRING;
 }
 case 5:
 /* rule 5 can match eol */
-#line 93 "cmDependsFortranLexer.in.l"
+#line 93 "cmFortranLexer.in.l"
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 93 "cmDependsFortranLexer.in.l"
+#line 93 "cmFortranLexer.in.l"
 /* Ignore (continued strings, free fmt) */
         YY_BREAK
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-#line 95 "cmDependsFortranLexer.in.l"
+#line 95 "cmFortranLexer.in.l"
 {
-  if (cmDependsFortranParser_GetOldStartcond(yyextra) == fixed_fmt)
+  if (cmFortranParser_GetOldStartcond(yyextra) == fixed_fmt)
     ; /* Ignore (cont. strings, fixed fmt) */
   else
     {
@@ -1058,7 +1058,7 @@ YY_RULE_SETUP
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 105 "cmDependsFortranLexer.in.l"
+#line 105 "cmFortranLexer.in.l"
 {
   unput ('\n');
   BEGIN(INITIAL);
@@ -1066,25 +1066,25 @@ YY_RULE_SETUP
 }
 case 9:
 YY_RULE_SETUP
-#line 111 "cmDependsFortranLexer.in.l"
+#line 111 "cmFortranLexer.in.l"
 {
-  cmDependsFortranParser_StringAppend(yyextra, yytext[0]);
+  cmFortranParser_StringAppend(yyextra, yytext[0]);
 }
         YY_BREAK
 case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
-#line 115 "cmDependsFortranLexer.in.l"
+#line 115 "cmFortranLexer.in.l"
 { return EOSTMT; } /* Treat comments like */
 case 11:
 /* rule 11 can match eol */
 YY_RULE_SETUP
-#line 116 "cmDependsFortranLexer.in.l"
+#line 116 "cmFortranLexer.in.l"
 { return EOSTMT; } /* empty lines */
 case 12:
 /* rule 12 can match eol */
 YY_RULE_SETUP
-#line 118 "cmDependsFortranLexer.in.l"
+#line 118 "cmFortranLexer.in.l"
 {
   yytext[yyleng-1] = 0;
   yylvalp->string = strdup(strchr(yytext, '<')+1);
@@ -1092,149 +1092,149 @@ YY_RULE_SETUP
 }
 case 13:
 YY_RULE_SETUP
-#line 123 "cmDependsFortranLexer.in.l"
+#line 123 "cmFortranLexer.in.l"
 { return CPP_INCLUDE; }
 case 14:
 YY_RULE_SETUP
-#line 124 "cmDependsFortranLexer.in.l"
+#line 124 "cmFortranLexer.in.l"
 { return F90PPR_INCLUDE; }
 case 15:
 YY_RULE_SETUP
-#line 125 "cmDependsFortranLexer.in.l"
+#line 125 "cmFortranLexer.in.l"
 { return COCO_INCLUDE; }
 case 16:
 YY_RULE_SETUP
-#line 127 "cmDependsFortranLexer.in.l"
+#line 127 "cmFortranLexer.in.l"
 { return CPP_DEFINE; }
 case 17:
 YY_RULE_SETUP
-#line 128 "cmDependsFortranLexer.in.l"
+#line 128 "cmFortranLexer.in.l"
 { return F90PPR_DEFINE; }
 case 18:
 YY_RULE_SETUP
-#line 130 "cmDependsFortranLexer.in.l"
+#line 130 "cmFortranLexer.in.l"
 { return CPP_UNDEF; }
 case 19:
 YY_RULE_SETUP
-#line 131 "cmDependsFortranLexer.in.l"
+#line 131 "cmFortranLexer.in.l"
 { return F90PPR_UNDEF; }
 case 20:
 YY_RULE_SETUP
-#line 133 "cmDependsFortranLexer.in.l"
+#line 133 "cmFortranLexer.in.l"
 { return CPP_IFDEF; }
 case 21:
 YY_RULE_SETUP
-#line 134 "cmDependsFortranLexer.in.l"
+#line 134 "cmFortranLexer.in.l"
 { return CPP_IFNDEF; }
 case 22:
 YY_RULE_SETUP
-#line 135 "cmDependsFortranLexer.in.l"
+#line 135 "cmFortranLexer.in.l"
 { return CPP_IF; }
 case 23:
 YY_RULE_SETUP
-#line 136 "cmDependsFortranLexer.in.l"
+#line 136 "cmFortranLexer.in.l"
 { return CPP_ELIF; }
 case 24:
 YY_RULE_SETUP
-#line 137 "cmDependsFortranLexer.in.l"
+#line 137 "cmFortranLexer.in.l"
 { return CPP_ELSE; }
 case 25:
 YY_RULE_SETUP
-#line 138 "cmDependsFortranLexer.in.l"
+#line 138 "cmFortranLexer.in.l"
 { return CPP_ENDIF; }
 case 26:
 YY_RULE_SETUP
-#line 140 "cmDependsFortranLexer.in.l"
+#line 140 "cmFortranLexer.in.l"
 { return F90PPR_IFDEF; }
 case 27:
 YY_RULE_SETUP
-#line 141 "cmDependsFortranLexer.in.l"
+#line 141 "cmFortranLexer.in.l"
 { return F90PPR_IFNDEF; }
 case 28:
 YY_RULE_SETUP
-#line 142 "cmDependsFortranLexer.in.l"
+#line 142 "cmFortranLexer.in.l"
 { return F90PPR_IF; }
 case 29:
 YY_RULE_SETUP
-#line 143 "cmDependsFortranLexer.in.l"
+#line 143 "cmFortranLexer.in.l"
 { return F90PPR_ELIF; }
 case 30:
 YY_RULE_SETUP
-#line 144 "cmDependsFortranLexer.in.l"
+#line 144 "cmFortranLexer.in.l"
 { return F90PPR_ELSE; }
 case 31:
 YY_RULE_SETUP
-#line 145 "cmDependsFortranLexer.in.l"
+#line 145 "cmFortranLexer.in.l"
 { return F90PPR_ENDIF; }
 /* Line continuations, possible involving comments.  */
 case 32:
 /* rule 32 can match eol */
 YY_RULE_SETUP
-#line 148 "cmDependsFortranLexer.in.l"
+#line 148 "cmFortranLexer.in.l"
 
         YY_BREAK
 case 33:
 /* rule 33 can match eol */
 YY_RULE_SETUP
-#line 149 "cmDependsFortranLexer.in.l"
+#line 149 "cmFortranLexer.in.l"
 
         YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 151 "cmDependsFortranLexer.in.l"
+#line 151 "cmFortranLexer.in.l"
 { return COMMA; }
 case 35:
 YY_RULE_SETUP
-#line 153 "cmDependsFortranLexer.in.l"
+#line 153 "cmFortranLexer.in.l"
 { return DCOLON; }
 case 36:
 /* rule 36 can match eol */
 YY_RULE_SETUP
-#line 155 "cmDependsFortranLexer.in.l"
+#line 155 "cmFortranLexer.in.l"
 { return GARBAGE; }
 case 37:
 YY_RULE_SETUP
-#line 157 "cmDependsFortranLexer.in.l"
+#line 157 "cmFortranLexer.in.l"
 { return ASSIGNMENT_OP; }
 case 38:
 YY_RULE_SETUP
-#line 159 "cmDependsFortranLexer.in.l"
+#line 159 "cmFortranLexer.in.l"
 {
   yylvalp->string = strdup(yytext);
   return WORD;
 }
 case 39:
 YY_RULE_SETUP
-#line 164 "cmDependsFortranLexer.in.l"
+#line 164 "cmFortranLexer.in.l"
 { return GARBAGE; }
 case 40:
 /* rule 40 can match eol */
 YY_RULE_SETUP
-#line 166 "cmDependsFortranLexer.in.l"
+#line 166 "cmFortranLexer.in.l"
 { return EOSTMT; }
 case 41:
 YY_RULE_SETUP
-#line 169 "cmDependsFortranLexer.in.l"
+#line 169 "cmFortranLexer.in.l"
 /* Ignore */
         YY_BREAK
 case 42:
 /* rule 42 can match eol */
 YY_RULE_SETUP
-#line 170 "cmDependsFortranLexer.in.l"
+#line 170 "cmFortranLexer.in.l"
 /* Ignore line-endings preceeded by \ */
         YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 172 "cmDependsFortranLexer.in.l"
+#line 172 "cmFortranLexer.in.l"
 { return *yytext; }
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(free_fmt):
 case YY_STATE_EOF(fixed_fmt):
 case YY_STATE_EOF(str_sq):
 case YY_STATE_EOF(str_dq):
-#line 174 "cmDependsFortranLexer.in.l"
+#line 174 "cmFortranLexer.in.l"
 {
-  if(!cmDependsFortranParser_FilePop(yyextra) )
+  if(!cmFortranParser_FilePop(yyextra) )
     {
     return YY_NULL;
     }
@@ -1242,10 +1242,10 @@ case YY_STATE_EOF(str_dq):
         YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 181 "cmDependsFortranLexer.in.l"
+#line 181 "cmFortranLexer.in.l"
 ECHO;
         YY_BREAK
-#line 1270 "cmDependsFortranLexer.cxx"
+#line 1270 "cmFortranLexer.cxx"
 
         case YY_END_OF_BUFFER:
                 {
@@ -1261,7 +1261,7 @@ ECHO;
                         /* We're scanning a new file or input source.  It's
                          * possible that this happened because the user
                          * just pointed yyin at a new source and called
-                         * cmDependsFortran_yylex().  If so, then we have to assure
+                         * cmFortran_yylex().  If so, then we have to assure
                          * consistency between YY_CURRENT_BUFFER and our
                          * globals.  Here is the right place to do so, because
                          * this is the first action (other than possibly a
@@ -1321,7 +1321,7 @@ ECHO;
                                 {
                                 yyg->yy_did_buffer_switch_on_eof = 0;
 
-                                if ( cmDependsFortran_yywrap(yyscanner ) )
+                                if ( cmFortran_yywrap(yyscanner ) )
                                         {
                                         /* Note: because we've taken care in
                                          * yy_get_next_buffer() to have set up
@@ -1374,7 +1374,7 @@ ECHO;
                         "fatal flex scanner internal error--no action found" );
         } /* end of action switch */
                 } /* end of scanning one token */
-} /* end of cmDependsFortran_yylex */
+} /* end of cmFortran_yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
  *
@@ -1453,7 +1453,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
                                 b->yy_ch_buf = (char *)
                                         /* Include room in for 2 EOB chars. */
-                                        cmDependsFortran_yyrealloc((void *) b->yy_ch_buf,b->yy_buf_size + 2 ,yyscanner );
+                                        cmFortran_yyrealloc((void *) b->yy_ch_buf,b->yy_buf_size + 2 ,yyscanner );
                                 }
                         else
                                 /* Can't grow it, we don't own it. */
@@ -1485,7 +1485,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
                 if ( number_to_move == YY_MORE_ADJ )
                         {
                         ret_val = EOB_ACT_END_OF_FILE;
-                        cmDependsFortran_yyrestart(yyin  ,yyscanner);
+                        cmFortran_yyrestart(yyin  ,yyscanner);
                         }
 
                 else
@@ -1502,7 +1502,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
         if ((yy_size_t) (yyg->yy_n_chars + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
                 /* Extend the array by 50%, plus the number we really need. */
                 yy_size_t new_size = yyg->yy_n_chars + number_to_move + (yyg->yy_n_chars >> 1);
-                YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) cmDependsFortran_yyrealloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size ,yyscanner );
+                YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) cmFortran_yyrealloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size ,yyscanner );
                 if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
                         YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
         }
@@ -1656,13 +1656,13 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
                                          */
 
                                         /* Reset buffer status. */
-                                        cmDependsFortran_yyrestart(yyin ,yyscanner);
+                                        cmFortran_yyrestart(yyin ,yyscanner);
 
                                         /*FALLTHROUGH*/
 
                                 case EOB_ACT_END_OF_FILE:
                                         {
-                                        if ( cmDependsFortran_yywrap(yyscanner ) )
+                                        if ( cmFortran_yywrap(yyscanner ) )
                                                 return EOF;
 
                                         if ( ! yyg->yy_did_buffer_switch_on_eof )
@@ -1696,34 +1696,34 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  * @note This function does not reset the start condition to @c INITIAL .
  */
-    void cmDependsFortran_yyrestart  (FILE * input_file , yyscan_t yyscanner)
+    void cmFortran_yyrestart  (FILE * input_file , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
         if ( ! YY_CURRENT_BUFFER ){
-        cmDependsFortran_yyensure_buffer_stack (yyscanner);
+        cmFortran_yyensure_buffer_stack (yyscanner);
                 YY_CURRENT_BUFFER_LVALUE =
-            cmDependsFortran_yy_create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
+            cmFortran_yy_create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
         }
 
-        cmDependsFortran_yy_init_buffer(YY_CURRENT_BUFFER,input_file ,yyscanner);
-        cmDependsFortran_yy_load_buffer_state(yyscanner );
+        cmFortran_yy_init_buffer(YY_CURRENT_BUFFER,input_file ,yyscanner);
+        cmFortran_yy_load_buffer_state(yyscanner );
 }
 
 /** Switch to a different input buffer.
  * @param new_buffer The new input buffer.
  * @param yyscanner The scanner object.
  */
-    void cmDependsFortran_yy_switch_to_buffer  (YY_BUFFER_STATE  new_buffer , yyscan_t yyscanner)
+    void cmFortran_yy_switch_to_buffer  (YY_BUFFER_STATE  new_buffer , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
         /* TODO. We should be able to replace this entire function body
          * with
-         *              cmDependsFortran_yypop_buffer_state();
-         *              cmDependsFortran_yypush_buffer_state(new_buffer);
+         *              cmFortran_yypop_buffer_state();
+         *              cmFortran_yypush_buffer_state(new_buffer);
      */
-        cmDependsFortran_yyensure_buffer_stack (yyscanner);
+        cmFortran_yyensure_buffer_stack (yyscanner);
         if ( YY_CURRENT_BUFFER == new_buffer )
                 return;
 
@@ -1736,17 +1736,17 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
                 }
 
         YY_CURRENT_BUFFER_LVALUE = new_buffer;
-        cmDependsFortran_yy_load_buffer_state(yyscanner );
+        cmFortran_yy_load_buffer_state(yyscanner );
 
         /* We don't actually know whether we did this switch during
-         * EOF (cmDependsFortran_yywrap()) processing, but the only time this flag
-         * is looked at is after cmDependsFortran_yywrap() is called, so it's safe
+         * EOF (cmFortran_yywrap()) processing, but the only time this flag
+         * is looked at is after cmFortran_yywrap() is called, so it's safe
          * to go ahead and always set it.
          */
         yyg->yy_did_buffer_switch_on_eof = 1;
 }
 
-static void cmDependsFortran_yy_load_buffer_state  (yyscan_t yyscanner)
+static void cmFortran_yy_load_buffer_state  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
         yyg->yy_n_chars = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
@@ -1761,35 +1761,35 @@ static void cmDependsFortran_yy_load_buffer_state  (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  * @return the allocated buffer state.
  */
-    YY_BUFFER_STATE cmDependsFortran_yy_create_buffer  (FILE * file, int  size , yyscan_t yyscanner)
+    YY_BUFFER_STATE cmFortran_yy_create_buffer  (FILE * file, int  size , yyscan_t yyscanner)
 {
         YY_BUFFER_STATE b;
 
-        b = (YY_BUFFER_STATE) cmDependsFortran_yyalloc(sizeof( struct yy_buffer_state ) ,yyscanner );
+        b = (YY_BUFFER_STATE) cmFortran_yyalloc(sizeof( struct yy_buffer_state ) ,yyscanner );
         if ( ! b )
-                YY_FATAL_ERROR( "out of dynamic memory in cmDependsFortran_yy_create_buffer()" );
+                YY_FATAL_ERROR( "out of dynamic memory in cmFortran_yy_create_buffer()" );
 
         b->yy_buf_size = size;
 
         /* yy_ch_buf has to be 2 characters longer than the size given because
          * we need to put in 2 end-of-buffer characters.
          */
-        b->yy_ch_buf = (char *) cmDependsFortran_yyalloc(b->yy_buf_size + 2 ,yyscanner );
+        b->yy_ch_buf = (char *) cmFortran_yyalloc(b->yy_buf_size + 2 ,yyscanner );
         if ( ! b->yy_ch_buf )
-                YY_FATAL_ERROR( "out of dynamic memory in cmDependsFortran_yy_create_buffer()" );
+                YY_FATAL_ERROR( "out of dynamic memory in cmFortran_yy_create_buffer()" );
 
         b->yy_is_our_buffer = 1;
 
-        cmDependsFortran_yy_init_buffer(b,file ,yyscanner);
+        cmFortran_yy_init_buffer(b,file ,yyscanner);
 
         return b;
 }
 
 /** Destroy the buffer.
- * @param b a buffer created with cmDependsFortran_yy_create_buffer()
+ * @param b a buffer created with cmFortran_yy_create_buffer()
  * @param yyscanner The scanner object.
  */
-    void cmDependsFortran_yy_delete_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
+    void cmFortran_yy_delete_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
@@ -1800,9 +1800,9 @@ static void cmDependsFortran_yy_load_buffer_state  (yyscan_t yyscanner)
                 YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
 
         if ( b->yy_is_our_buffer )
-                cmDependsFortran_yyfree((void *) b->yy_ch_buf ,yyscanner );
+                cmFortran_yyfree((void *) b->yy_ch_buf ,yyscanner );
 
-        cmDependsFortran_yyfree((void *) b ,yyscanner );
+        cmFortran_yyfree((void *) b ,yyscanner );
 }
 
 #ifndef __cplusplus
@@ -1811,21 +1811,21 @@ extern int isatty (int );
 
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
- * such as during a cmDependsFortran_yyrestart() or at EOF.
+ * such as during a cmFortran_yyrestart() or at EOF.
  */
-    static void cmDependsFortran_yy_init_buffer  (YY_BUFFER_STATE  b, FILE * file , yyscan_t yyscanner)
+    static void cmFortran_yy_init_buffer  (YY_BUFFER_STATE  b, FILE * file , yyscan_t yyscanner)
 
 {
         int oerrno = errno;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-        cmDependsFortran_yy_flush_buffer(b ,yyscanner);
+        cmFortran_yy_flush_buffer(b ,yyscanner);
 
         b->yy_input_file = file;
         b->yy_fill_buffer = 1;
 
-    /* If b is the current buffer, then cmDependsFortran_yy_init_buffer was _probably_
-     * called from cmDependsFortran_yyrestart() or through yy_get_next_buffer.
+    /* If b is the current buffer, then cmFortran_yy_init_buffer was _probably_
+     * called from cmFortran_yyrestart() or through yy_get_next_buffer.
      * In that case, we don't want to reset the lineno or column.
      */
     if (b != YY_CURRENT_BUFFER){
@@ -1842,7 +1842,7 @@ extern int isatty (int );
  * @param b the buffer state to be flushed, usually @c YY_CURRENT_BUFFER.
  * @param yyscanner The scanner object.
  */
-    void cmDependsFortran_yy_flush_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
+    void cmFortran_yy_flush_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
         if ( ! b )
@@ -1863,7 +1863,7 @@ extern int isatty (int );
         b->yy_buffer_status = YY_BUFFER_NEW;
 
         if ( b == YY_CURRENT_BUFFER )
-                cmDependsFortran_yy_load_buffer_state(yyscanner );
+                cmFortran_yy_load_buffer_state(yyscanner );
 }
 
 /** Pushes the new state onto the stack. The new state becomes
@@ -1872,15 +1872,15 @@ extern int isatty (int );
  *  @param new_buffer The new state.
  *  @param yyscanner The scanner object.
  */
-void cmDependsFortran_yypush_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscanner)
+void cmFortran_yypush_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
         if (new_buffer == NULL)
                 return;
 
-        cmDependsFortran_yyensure_buffer_stack(yyscanner);
+        cmFortran_yyensure_buffer_stack(yyscanner);
 
-        /* This block is copied from cmDependsFortran_yy_switch_to_buffer. */
+        /* This block is copied from cmFortran_yy_switch_to_buffer. */
         if ( YY_CURRENT_BUFFER )
                 {
                 /* Flush out information for old buffer. */
@@ -1894,8 +1894,8 @@ void cmDependsFortran_yypush_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t
                 yyg->yy_buffer_stack_top++;
         YY_CURRENT_BUFFER_LVALUE = new_buffer;
 
-        /* copied from cmDependsFortran_yy_switch_to_buffer. */
-        cmDependsFortran_yy_load_buffer_state(yyscanner );
+        /* copied from cmFortran_yy_switch_to_buffer. */
+        cmFortran_yy_load_buffer_state(yyscanner );
         yyg->yy_did_buffer_switch_on_eof = 1;
 }
 
@@ -1903,19 +1903,19 @@ void cmDependsFortran_yypush_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t
  *  The next element becomes the new top.
  *  @param yyscanner The scanner object.
  */
-void cmDependsFortran_yypop_buffer_state (yyscan_t yyscanner)
+void cmFortran_yypop_buffer_state (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
         if (!YY_CURRENT_BUFFER)
                 return;
 
-        cmDependsFortran_yy_delete_buffer(YY_CURRENT_BUFFER ,yyscanner);
+        cmFortran_yy_delete_buffer(YY_CURRENT_BUFFER ,yyscanner);
         YY_CURRENT_BUFFER_LVALUE = NULL;
         if (yyg->yy_buffer_stack_top > 0)
                 --yyg->yy_buffer_stack_top;
 
         if (YY_CURRENT_BUFFER) {
-                cmDependsFortran_yy_load_buffer_state(yyscanner );
+                cmFortran_yy_load_buffer_state(yyscanner );
                 yyg->yy_did_buffer_switch_on_eof = 1;
         }
 }
@@ -1923,7 +1923,7 @@ void cmDependsFortran_yypop_buffer_state (yyscan_t yyscanner)
 /* Allocates the stack if it does not exist.
  *  Guarantees space for at least one push.
  */
-static void cmDependsFortran_yyensure_buffer_stack (yyscan_t yyscanner)
+static void cmFortran_yyensure_buffer_stack (yyscan_t yyscanner)
 {
         int num_to_alloc;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
@@ -1935,11 +1935,11 @@ static void cmDependsFortran_yyensure_buffer_stack (yyscan_t yyscanner)
                  * immediate realloc on the next call.
          */
                 num_to_alloc = 1;
-                yyg->yy_buffer_stack = (struct yy_buffer_state**)cmDependsFortran_yyalloc
+                yyg->yy_buffer_stack = (struct yy_buffer_state**)cmFortran_yyalloc
                                                                 (num_to_alloc * sizeof(struct yy_buffer_state*)
                                                                 , yyscanner);
                 if ( ! yyg->yy_buffer_stack )
-                        YY_FATAL_ERROR( "out of dynamic memory in cmDependsFortran_yyensure_buffer_stack()" );
+                        YY_FATAL_ERROR( "out of dynamic memory in cmFortran_yyensure_buffer_stack()" );
 
                 memset(yyg->yy_buffer_stack, 0, num_to_alloc * sizeof(struct yy_buffer_state*));
 
@@ -1954,12 +1954,12 @@ static void cmDependsFortran_yyensure_buffer_stack (yyscan_t yyscanner)
                 int grow_size = 8 /* arbitrary grow size */;
 
                 num_to_alloc = yyg->yy_buffer_stack_max + grow_size;
-                yyg->yy_buffer_stack = (struct yy_buffer_state**)cmDependsFortran_yyrealloc
+                yyg->yy_buffer_stack = (struct yy_buffer_state**)cmFortran_yyrealloc
                                                                 (yyg->yy_buffer_stack,
                                                                 num_to_alloc * sizeof(struct yy_buffer_state*)
                                                                 , yyscanner);
                 if ( ! yyg->yy_buffer_stack )
-                        YY_FATAL_ERROR( "out of dynamic memory in cmDependsFortran_yyensure_buffer_stack()" );
+                        YY_FATAL_ERROR( "out of dynamic memory in cmFortran_yyensure_buffer_stack()" );
 
                 /* zero only the new slots.*/
                 memset(yyg->yy_buffer_stack + yyg->yy_buffer_stack_max, 0, grow_size * sizeof(struct yy_buffer_state*));
@@ -1973,7 +1973,7 @@ static void cmDependsFortran_yyensure_buffer_stack (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE cmDependsFortran_yy_scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
+YY_BUFFER_STATE cmFortran_yy_scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
 {
         YY_BUFFER_STATE b;
 
@@ -1983,9 +1983,9 @@ YY_BUFFER_STATE cmDependsFortran_yy_scan_buffer  (char * base, yy_size_t  size ,
                 /* They forgot to leave room for the EOB's. */
                 return 0;
 
-        b = (YY_BUFFER_STATE) cmDependsFortran_yyalloc(sizeof( struct yy_buffer_state ) ,yyscanner );
+        b = (YY_BUFFER_STATE) cmFortran_yyalloc(sizeof( struct yy_buffer_state ) ,yyscanner );
         if ( ! b )
-                YY_FATAL_ERROR( "out of dynamic memory in cmDependsFortran_yy_scan_buffer()" );
+                YY_FATAL_ERROR( "out of dynamic memory in cmFortran_yy_scan_buffer()" );
 
         b->yy_buf_size = size - 2;      /* "- 2" to take care of EOB's */
         b->yy_buf_pos = b->yy_ch_buf = base;
@@ -1997,33 +1997,33 @@ YY_BUFFER_STATE cmDependsFortran_yy_scan_buffer  (char * base, yy_size_t  size ,
         b->yy_fill_buffer = 0;
         b->yy_buffer_status = YY_BUFFER_NEW;
 
-        cmDependsFortran_yy_switch_to_buffer(b ,yyscanner );
+        cmFortran_yy_switch_to_buffer(b ,yyscanner );
 
         return b;
 }
 
-/** Setup the input buffer state to scan a string. The next call to cmDependsFortran_yylex() will
+/** Setup the input buffer state to scan a string. The next call to cmFortran_yylex() will
  * scan from a @e copy of @a str.
  * @param yystr a NUL-terminated string to scan
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  * @note If you want to scan bytes that may contain NUL values, then use
- *       cmDependsFortran_yy_scan_bytes() instead.
+ *       cmFortran_yy_scan_bytes() instead.
  */
-YY_BUFFER_STATE cmDependsFortran_yy_scan_string (yyconst char * yystr , yyscan_t yyscanner)
+YY_BUFFER_STATE cmFortran_yy_scan_string (yyconst char * yystr , yyscan_t yyscanner)
 {
 
-        return cmDependsFortran_yy_scan_bytes(yystr,strlen(yystr) ,yyscanner);
+        return cmFortran_yy_scan_bytes(yystr,strlen(yystr) ,yyscanner);
 }
 
-/** Setup the input buffer state to scan the given bytes. The next call to cmDependsFortran_yylex() will
+/** Setup the input buffer state to scan the given bytes. The next call to cmFortran_yylex() will
  * scan from a @e copy of @a bytes.
  * @param yybytes the byte buffer to scan
  * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE cmDependsFortran_yy_scan_bytes  (yyconst char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
+YY_BUFFER_STATE cmFortran_yy_scan_bytes  (yyconst char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
 {
         YY_BUFFER_STATE b;
         char *buf;
@@ -2032,18 +2032,18 @@ YY_BUFFER_STATE cmDependsFortran_yy_scan_bytes  (yyconst char * yybytes, int  _y
 
         /* Get memory for full buffer, including space for trailing EOB's. */
         n = _yybytes_len + 2;
-        buf = (char *) cmDependsFortran_yyalloc(n ,yyscanner );
+        buf = (char *) cmFortran_yyalloc(n ,yyscanner );
         if ( ! buf )
-                YY_FATAL_ERROR( "out of dynamic memory in cmDependsFortran_yy_scan_bytes()" );
+                YY_FATAL_ERROR( "out of dynamic memory in cmFortran_yy_scan_bytes()" );
 
         for ( i = 0; i < _yybytes_len; ++i )
                 buf[i] = yybytes[i];
 
         buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
 
-        b = cmDependsFortran_yy_scan_buffer(buf,n ,yyscanner);
+        b = cmFortran_yy_scan_buffer(buf,n ,yyscanner);
         if ( ! b )
-                YY_FATAL_ERROR( "bad buffer in cmDependsFortran_yy_scan_bytes()" );
+                YY_FATAL_ERROR( "bad buffer in cmFortran_yy_scan_bytes()" );
 
         /* It's okay to grow etc. this buffer, and we should throw it
          * away when we're done.
@@ -2085,7 +2085,7 @@ static void yy_fatal_error (yyconst char* msg , yyscan_t)
 /** Get the user-defined data for this scanner.
  * @param yyscanner The scanner object.
  */
-YY_EXTRA_TYPE cmDependsFortran_yyget_extra  (yyscan_t yyscanner)
+YY_EXTRA_TYPE cmFortran_yyget_extra  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyextra;
@@ -2094,7 +2094,7 @@ YY_EXTRA_TYPE cmDependsFortran_yyget_extra  (yyscan_t yyscanner)
 /** Get the current line number.
  * @param yyscanner The scanner object.
  */
-int cmDependsFortran_yyget_lineno  (yyscan_t yyscanner)
+int cmFortran_yyget_lineno  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
@@ -2107,7 +2107,7 @@ int cmDependsFortran_yyget_lineno  (yyscan_t yyscanner)
 /** Get the current column number.
  * @param yyscanner The scanner object.
  */
-int cmDependsFortran_yyget_column  (yyscan_t yyscanner)
+int cmFortran_yyget_column  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
@@ -2120,7 +2120,7 @@ int cmDependsFortran_yyget_column  (yyscan_t yyscanner)
 /** Get the input stream.
  * @param yyscanner The scanner object.
  */
-FILE *cmDependsFortran_yyget_in  (yyscan_t yyscanner)
+FILE *cmFortran_yyget_in  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyin;
@@ -2129,7 +2129,7 @@ FILE *cmDependsFortran_yyget_in  (yyscan_t yyscanner)
 /** Get the output stream.
  * @param yyscanner The scanner object.
  */
-FILE *cmDependsFortran_yyget_out  (yyscan_t yyscanner)
+FILE *cmFortran_yyget_out  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyout;
@@ -2138,7 +2138,7 @@ FILE *cmDependsFortran_yyget_out  (yyscan_t yyscanner)
 /** Get the length of the current token.
  * @param yyscanner The scanner object.
  */
-int cmDependsFortran_yyget_leng  (yyscan_t yyscanner)
+int cmFortran_yyget_leng  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyleng;
@@ -2148,7 +2148,7 @@ int cmDependsFortran_yyget_leng  (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  */
 
-char *cmDependsFortran_yyget_text  (yyscan_t yyscanner)
+char *cmFortran_yyget_text  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yytext;
@@ -2158,7 +2158,7 @@ char *cmDependsFortran_yyget_text  (yyscan_t yyscanner)
  * @param user_defined The data to be associated with this scanner.
  * @param yyscanner The scanner object.
  */
-void cmDependsFortran_yyset_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
+void cmFortran_yyset_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyextra = user_defined ;
@@ -2168,13 +2168,13 @@ void cmDependsFortran_yyset_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscan
  * @param line_number The line number to set.
  * @param yyscanner The scanner object.
  */
-void cmDependsFortran_yyset_lineno (int  line_number , yyscan_t yyscanner)
+void cmFortran_yyset_lineno (int  line_number , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
         /* lineno is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           yy_fatal_error( "cmDependsFortran_yyset_lineno called with no buffer" , yyscanner);
+           yy_fatal_error( "cmFortran_yyset_lineno called with no buffer" , yyscanner);
 
     yylineno = line_number;
 }
@@ -2183,13 +2183,13 @@ void cmDependsFortran_yyset_lineno (int  line_number , yyscan_t yyscanner)
  * @param column_no The column number to set.
  * @param yyscanner The scanner object.
  */
-void cmDependsFortran_yyset_column (int  column_no , yyscan_t yyscanner)
+void cmFortran_yyset_column (int  column_no , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
         /* column is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           yy_fatal_error( "cmDependsFortran_yyset_column called with no buffer" , yyscanner);
+           yy_fatal_error( "cmFortran_yyset_column called with no buffer" , yyscanner);
 
     yycolumn = column_no;
 }
@@ -2198,27 +2198,27 @@ void cmDependsFortran_yyset_column (int  column_no , yyscan_t yyscanner)
  * input buffer.
  * @param in_str A readable stream.
  * @param yyscanner The scanner object.
- * @see cmDependsFortran_yy_switch_to_buffer
+ * @see cmFortran_yy_switch_to_buffer
  */
-void cmDependsFortran_yyset_in (FILE *  in_str , yyscan_t yyscanner)
+void cmFortran_yyset_in (FILE *  in_str , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyin = in_str ;
 }
 
-void cmDependsFortran_yyset_out (FILE *  out_str , yyscan_t yyscanner)
+void cmFortran_yyset_out (FILE *  out_str , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyout = out_str ;
 }
 
-int cmDependsFortran_yyget_debug  (yyscan_t yyscanner)
+int cmFortran_yyget_debug  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yy_flex_debug;
 }
 
-void cmDependsFortran_yyset_debug (int  bdebug , yyscan_t yyscanner)
+void cmFortran_yyset_debug (int  bdebug , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yy_flex_debug = bdebug ;
@@ -2228,12 +2228,12 @@ void cmDependsFortran_yyset_debug (int  bdebug , yyscan_t yyscanner)
 
 /* User-visible API */
 
-/* cmDependsFortran_yylex_init is special because it creates the scanner itself, so it is
+/* cmFortran_yylex_init is special because it creates the scanner itself, so it is
  * the ONLY reentrant function that doesn't take the scanner as the last argument.
  * That's why we explicitly handle the declaration, instead of using our macros.
  */
 
-int cmDependsFortran_yylex_init(yyscan_t* ptr_yy_globals)
+int cmFortran_yylex_init(yyscan_t* ptr_yy_globals)
 
 {
     if (ptr_yy_globals == NULL){
@@ -2241,7 +2241,7 @@ int cmDependsFortran_yylex_init(yyscan_t* ptr_yy_globals)
         return 1;
     }
 
-    *ptr_yy_globals = (yyscan_t) cmDependsFortran_yyalloc ( sizeof( struct yyguts_t ), NULL );
+    *ptr_yy_globals = (yyscan_t) cmFortran_yyalloc ( sizeof( struct yyguts_t ), NULL );
 
     if (*ptr_yy_globals == NULL){
         errno = ENOMEM;
@@ -2254,27 +2254,27 @@ int cmDependsFortran_yylex_init(yyscan_t* ptr_yy_globals)
     return yy_init_globals ( *ptr_yy_globals );
 }
 
-/* cmDependsFortran_yylex_init_extra has the same functionality as cmDependsFortran_yylex_init, but follows the
+/* cmFortran_yylex_init_extra has the same functionality as cmFortran_yylex_init, but follows the
  * convention of taking the scanner as the last argument. Note however, that
  * this is a *pointer* to a scanner, as it will be allocated by this call (and
  * is the reason, too, why this function also must handle its own declaration).
- * The user defined value in the first argument will be available to cmDependsFortran_yyalloc in
+ * The user defined value in the first argument will be available to cmFortran_yyalloc in
  * the yyextra field.
  */
 
-int cmDependsFortran_yylex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_globals )
+int cmFortran_yylex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_globals )
 
 {
     struct yyguts_t dummy_yyguts;
 
-    cmDependsFortran_yyset_extra (yy_user_defined, &dummy_yyguts);
+    cmFortran_yyset_extra (yy_user_defined, &dummy_yyguts);
 
     if (ptr_yy_globals == NULL){
         errno = EINVAL;
         return 1;
     }
 
-    *ptr_yy_globals = (yyscan_t) cmDependsFortran_yyalloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
+    *ptr_yy_globals = (yyscan_t) cmFortran_yyalloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
 
     if (*ptr_yy_globals == NULL){
         errno = ENOMEM;
@@ -2285,7 +2285,7 @@ int cmDependsFortran_yylex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* pt
     yy_init_globals. Leave at 0x00 for releases. */
     memset(*ptr_yy_globals,0x00,sizeof(struct yyguts_t));
 
-    cmDependsFortran_yyset_extra (yy_user_defined, *ptr_yy_globals);
+    cmFortran_yyset_extra (yy_user_defined, *ptr_yy_globals);
 
     return yy_init_globals ( *ptr_yy_globals );
 }
@@ -2294,7 +2294,7 @@ static int yy_init_globals (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     /* Initialization is the same as for the non-reentrant scanner.
-     * This function is called from cmDependsFortran_yylex_destroy(), so don't allocate here.
+     * This function is called from cmFortran_yylex_destroy(), so don't allocate here.
      */
 
     yyg->yy_buffer_stack = 0;
@@ -2318,37 +2318,37 @@ static int yy_init_globals (yyscan_t yyscanner)
 #endif
 
     /* For future reference: Set errno on error, since we are called by
-     * cmDependsFortran_yylex_init()
+     * cmFortran_yylex_init()
      */
     return 0;
 }
 
-/* cmDependsFortran_yylex_destroy is for both reentrant and non-reentrant scanners. */
-int cmDependsFortran_yylex_destroy  (yyscan_t yyscanner)
+/* cmFortran_yylex_destroy is for both reentrant and non-reentrant scanners. */
+int cmFortran_yylex_destroy  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
     /* Pop the buffer stack, destroying each element. */
         while(YY_CURRENT_BUFFER){
-                cmDependsFortran_yy_delete_buffer(YY_CURRENT_BUFFER ,yyscanner );
+                cmFortran_yy_delete_buffer(YY_CURRENT_BUFFER ,yyscanner );
                 YY_CURRENT_BUFFER_LVALUE = NULL;
-                cmDependsFortran_yypop_buffer_state(yyscanner);
+                cmFortran_yypop_buffer_state(yyscanner);
         }
 
         /* Destroy the stack itself. */
-        cmDependsFortran_yyfree(yyg->yy_buffer_stack ,yyscanner);
+        cmFortran_yyfree(yyg->yy_buffer_stack ,yyscanner);
         yyg->yy_buffer_stack = NULL;
 
     /* Destroy the start condition stack. */
-        cmDependsFortran_yyfree(yyg->yy_start_stack ,yyscanner );
+        cmFortran_yyfree(yyg->yy_start_stack ,yyscanner );
         yyg->yy_start_stack = NULL;
 
     /* Reset the globals. This is important in a non-reentrant scanner so the next time
-     * cmDependsFortran_yylex() is called, initialization will occur. */
+     * cmFortran_yylex() is called, initialization will occur. */
     yy_init_globals( yyscanner);
 
     /* Destroy the main struct (reentrant only). */
-    cmDependsFortran_yyfree ( yyscanner , yyscanner );
+    cmFortran_yyfree ( yyscanner , yyscanner );
     return 0;
 }
 
@@ -2376,12 +2376,12 @@ static int yy_flex_strlen (yyconst char * s , yyscan_t yyscanner)
 }
 #endif
 
-void *cmDependsFortran_yyalloc (yy_size_t  size , yyscan_t)
+void *cmFortran_yyalloc (yy_size_t  size , yyscan_t)
 {
         return (void *) malloc( size );
 }
 
-void *cmDependsFortran_yyrealloc  (void * ptr, yy_size_t  size , yyscan_t)
+void *cmFortran_yyrealloc  (void * ptr, yy_size_t  size , yyscan_t)
 {
         /* The cast to (char *) in the following accommodates both
          * implementations that use char* generic pointers, and those
@@ -2393,19 +2393,19 @@ void *cmDependsFortran_yyrealloc  (void * ptr, yy_size_t  size , yyscan_t)
         return (void *) realloc( (char *) ptr, size );
 }
 
-void cmDependsFortran_yyfree (void * ptr , yyscan_t)
+void cmFortran_yyfree (void * ptr , yyscan_t)
 {
-        free( (char *) ptr );   /* see cmDependsFortran_yyrealloc() for (char *) cast */
+        free( (char *) ptr );   /* see cmFortran_yyrealloc() for (char *) cast */
 }
 
 #define YYTABLES_NAME "yytables"
 
-#line 181 "cmDependsFortranLexer.in.l"
+#line 181 "cmFortranLexer.in.l"
 
 
 
 /*--------------------------------------------------------------------------*/
-YY_BUFFER_STATE cmDependsFortranLexer_GetCurrentBuffer(yyscan_t yyscanner)
+YY_BUFFER_STATE cmFortranLexer_GetCurrentBuffer(yyscan_t yyscanner)
 {
   /* Hack into the internal flex-generated scanner to get the buffer.  */
   struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;

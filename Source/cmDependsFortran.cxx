@@ -16,7 +16,7 @@
 #include "cmMakefile.h"
 #include "cmGeneratedFileStream.h"
 
-#include "cmDependsFortranParser.h" /* Interface to parser object.  */
+#include "cmFortranParser.h" /* Interface to parser object.  */
 #include <cmsys/FStream.hxx>
 #include <assert.h>
 #include <stack>
@@ -27,7 +27,7 @@
 
 //----------------------------------------------------------------------------
 // Information about a single source file.
-class cmDependsFortranSourceInfo
+class cmFortranSourceInfo
 {
 public:
   // The name of the source file.
@@ -45,16 +45,16 @@ public:
 // Parser methods not included in generated interface.
 
 // Get the current buffer processed by the lexer.
-YY_BUFFER_STATE cmDependsFortranLexer_GetCurrentBuffer(yyscan_t yyscanner);
+YY_BUFFER_STATE cmFortranLexer_GetCurrentBuffer(yyscan_t yyscanner);
 
 // The parser entry point.
-int cmDependsFortran_yyparse(yyscan_t);
+int cmFortran_yyparse(yyscan_t);
 
 //----------------------------------------------------------------------------
 // Define parser object internal structure.
-struct cmDependsFortranFile
+struct cmFortranFile
 {
-  cmDependsFortranFile(FILE* file, YY_BUFFER_STATE buffer,
+  cmFortranFile(FILE* file, YY_BUFFER_STATE buffer,
                        const std::string& dir):
     File(file), Buffer(buffer), Directory(dir) {}
   FILE* File;
@@ -62,12 +62,12 @@ struct cmDependsFortranFile
   std::string Directory;
 };
 
-struct cmDependsFortranParser_s
+struct cmFortranParser_s
 {
-  cmDependsFortranParser_s(cmDependsFortran* self,
+  cmFortranParser_s(cmDependsFortran* self,
                            std::set<std::string>& ppDefines,
-                           cmDependsFortranSourceInfo& info);
-  ~cmDependsFortranParser_s();
+                           cmFortranSourceInfo& info);
+  ~cmFortranParser_s();
 
   // Pointer back to the main class.
   cmDependsFortran* Self;
@@ -76,7 +76,7 @@ struct cmDependsFortranParser_s
   yyscan_t Scanner;
 
   // Stack of open files in the translation unit.
-  std::stack<cmDependsFortranFile> FileStack;
+  std::stack<cmFortranFile> FileStack;
 
   // Buffer for string literals.
   std::string TokenString;
@@ -90,7 +90,7 @@ struct cmDependsFortranParser_s
   std::stack<bool> SkipToEnd;
 
   // Information about the parsed source.
-  cmDependsFortranSourceInfo& Info;
+  cmFortranSourceInfo& Info;
 };
 
 //----------------------------------------------------------------------------
@@ -105,18 +105,18 @@ public:
   TargetRequiresMap TargetRequires;
 
   // Information about each object file.
-  typedef std::map<std::string, cmDependsFortranSourceInfo> ObjectInfoMap;
+  typedef std::map<std::string, cmFortranSourceInfo> ObjectInfoMap;
   ObjectInfoMap ObjectInfo;
 
-  cmDependsFortranSourceInfo& CreateObjectInfo(const char* obj,
+  cmFortranSourceInfo& CreateObjectInfo(const char* obj,
                                                const char* src)
     {
-    std::map<std::string, cmDependsFortranSourceInfo>::iterator i =
+    std::map<std::string, cmFortranSourceInfo>::iterator i =
       this->ObjectInfo.find(obj);
     if(i == this->ObjectInfo.end())
       {
-      std::map<std::string, cmDependsFortranSourceInfo>::value_type
-        entry(obj, cmDependsFortranSourceInfo());
+      std::map<std::string, cmFortranSourceInfo>::value_type
+        entry(obj, cmFortranSourceInfo());
       i = this->ObjectInfo.insert(entry).first;
       i->second.Source = src;
       }
@@ -192,7 +192,7 @@ bool cmDependsFortran::WriteDependencies(
     {
     const std::string& src = *it;
     // Get the information object for this source.
-    cmDependsFortranSourceInfo& info =
+    cmFortranSourceInfo& info =
       this->Internal->CreateObjectInfo(obj.c_str(), src.c_str());
 
     // Make a copy of the macros defined via ADD_DEFINITIONS
@@ -201,13 +201,13 @@ bool cmDependsFortran::WriteDependencies(
 
     // Create the parser object. The constructor takes ppMacro and info per
     // reference, so we may look into the resulting objects later.
-    cmDependsFortranParser parser(this, ppDefines, info);
+    cmFortranParser parser(this, ppDefines, info);
 
     // Push on the starting file.
-    cmDependsFortranParser_FilePush(&parser, src.c_str());
+    cmFortranParser_FilePush(&parser, src.c_str());
 
     // Parse the translation unit.
-    if(cmDependsFortran_yyparse(parser.Scanner) != 0)
+    if(cmFortran_yyparse(parser.Scanner) != 0)
       {
       // Failed to parse the file.  Report failure to write dependencies.
       okay = false;
@@ -318,7 +318,7 @@ void cmDependsFortran::LocateModules()
   for(ObjectInfoMap::const_iterator infoI = objInfo.begin();
       infoI != objInfo.end(); ++infoI)
     {
-    cmDependsFortranSourceInfo const& info = infoI->second;
+    cmFortranSourceInfo const& info = infoI->second;
     // Include this module in the set provided by this target.
     this->Internal->TargetProvides.insert(info.Provides.begin(),
                                           info.Provides.end());
@@ -428,7 +428,7 @@ void cmDependsFortran::ConsiderModule(const char* name,
 bool
 cmDependsFortran
 ::WriteDependenciesReal(const char *obj,
-                        cmDependsFortranSourceInfo const& info,
+                        cmFortranSourceInfo const& info,
                         const char* mod_dir, const char* stamp_dir,
                         std::ostream& makeDepends,
                         std::ostream& internalDepends)
@@ -701,7 +701,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
 // is later used for longer sequences it should be re-written using an
 // efficient string search algorithm such as Boyer-Moore.
 static
-bool cmDependsFortranStreamContainsSequence(std::istream& ifs,
+bool cmFortranStreamContainsSequence(std::istream& ifs,
                                             const char* seq, int len)
 {
   assert(len > 0);
@@ -734,7 +734,7 @@ bool cmDependsFortranStreamContainsSequence(std::istream& ifs,
 
 //----------------------------------------------------------------------------
 // Helper function to compare the remaining content in two streams.
-static bool cmDependsFortranStreamsDiffer(std::istream& ifs1,
+static bool cmFortranStreamsDiffer(std::istream& ifs1,
                                           std::istream& ifs2)
 {
   // Compare the remaining content.
@@ -837,7 +837,7 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
       const char seq[1] = {'\n'};
       const int seqlen = 1;
 
-      if(!cmDependsFortranStreamContainsSequence(finModFile, seq, seqlen))
+      if(!cmFortranStreamContainsSequence(finModFile, seq, seqlen))
         {
         // The module is of unexpected format.  Assume it is different.
         std::cerr << compilerId << " fortran module " << modFile
@@ -845,7 +845,7 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
         return true;
         }
 
-      if(!cmDependsFortranStreamContainsSequence(finStampFile, seq, seqlen))
+      if(!cmFortranStreamContainsSequence(finStampFile, seq, seqlen))
         {
         // The stamp must differ if the sequence is not contained.
         return true;
@@ -857,7 +857,7 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
     const char seq[2] = {'\n', '\0'};
     const int seqlen = 2;
 
-    if(!cmDependsFortranStreamContainsSequence(finModFile, seq, seqlen))
+    if(!cmFortranStreamContainsSequence(finModFile, seq, seqlen))
       {
       // The module is of unexpected format.  Assume it is different.
       std::cerr << compilerId << " fortran module " << modFile
@@ -865,7 +865,7 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
       return true;
       }
 
-    if(!cmDependsFortranStreamContainsSequence(finStampFile, seq, seqlen))
+    if(!cmFortranStreamContainsSequence(finStampFile, seq, seqlen))
       {
       // The stamp must differ if the sequence is not contained.
       return true;
@@ -875,7 +875,7 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
   // Compare the remaining content.  If no compiler id matched above,
   // including the case none was given, this will compare the whole
   // content.
-  if(!cmDependsFortranStreamsDiffer(finModFile, finStampFile))
+  if(!cmFortranStreamsDiffer(finModFile, finStampFile))
     {
     return false;
     }
@@ -926,34 +926,34 @@ bool cmDependsFortran::FindIncludeFile(const char* dir,
 }
 
 //----------------------------------------------------------------------------
-cmDependsFortranParser_s
-::cmDependsFortranParser_s(cmDependsFortran* self,
+cmFortranParser_s
+::cmFortranParser_s(cmDependsFortran* self,
                            std::set<std::string>& ppDefines,
-                           cmDependsFortranSourceInfo& info):
+                           cmFortranSourceInfo& info):
   Self(self), PPDefinitions(ppDefines), Info(info)
 {
   this->InInterface = 0;
   this->InPPFalseBranch = 0;
 
   // Initialize the lexical scanner.
-  cmDependsFortran_yylex_init(&this->Scanner);
-  cmDependsFortran_yyset_extra(this, this->Scanner);
+  cmFortran_yylex_init(&this->Scanner);
+  cmFortran_yyset_extra(this, this->Scanner);
 
   // Create a dummy buffer that is never read but is the fallback
   // buffer when the last file is popped off the stack.
   YY_BUFFER_STATE buffer =
-    cmDependsFortran_yy_create_buffer(0, 4, this->Scanner);
-  cmDependsFortran_yy_switch_to_buffer(buffer, this->Scanner);
+    cmFortran_yy_create_buffer(0, 4, this->Scanner);
+  cmFortran_yy_switch_to_buffer(buffer, this->Scanner);
 }
 
 //----------------------------------------------------------------------------
-cmDependsFortranParser_s::~cmDependsFortranParser_s()
+cmFortranParser_s::~cmFortranParser_s()
 {
-  cmDependsFortran_yylex_destroy(this->Scanner);
+  cmFortran_yylex_destroy(this->Scanner);
 }
 
 //----------------------------------------------------------------------------
-bool cmDependsFortranParser_FilePush(cmDependsFortranParser* parser,
+bool cmFortranParser_FilePush(cmFortranParser* parser,
                                     const char* fname)
 {
   // Open the new file and push it onto the stack.  Save the old
@@ -961,12 +961,12 @@ bool cmDependsFortranParser_FilePush(cmDependsFortranParser* parser,
   if(FILE* file = cmsys::SystemTools::Fopen(fname, "rb"))
     {
     YY_BUFFER_STATE current =
-      cmDependsFortranLexer_GetCurrentBuffer(parser->Scanner);
+      cmFortranLexer_GetCurrentBuffer(parser->Scanner);
     std::string dir = cmSystemTools::GetParentDirectory(fname);
-    cmDependsFortranFile f(file, current, dir);
+    cmFortranFile f(file, current, dir);
     YY_BUFFER_STATE buffer =
-      cmDependsFortran_yy_create_buffer(0, 16384, parser->Scanner);
-    cmDependsFortran_yy_switch_to_buffer(buffer, parser->Scanner);
+      cmFortran_yy_create_buffer(0, 16384, parser->Scanner);
+    cmFortran_yy_switch_to_buffer(buffer, parser->Scanner);
     parser->FileStack.push(f);
     return 1;
     }
@@ -977,7 +977,7 @@ bool cmDependsFortranParser_FilePush(cmDependsFortranParser* parser,
 }
 
 //----------------------------------------------------------------------------
-bool cmDependsFortranParser_FilePop(cmDependsFortranParser* parser)
+bool cmFortranParser_FilePop(cmFortranParser* parser)
 {
   // Pop one file off the stack and close it.  Switch the lexer back
   // to the next one on the stack.
@@ -987,18 +987,18 @@ bool cmDependsFortranParser_FilePop(cmDependsFortranParser* parser)
     }
   else
     {
-    cmDependsFortranFile f = parser->FileStack.top(); parser->FileStack.pop();
+    cmFortranFile f = parser->FileStack.top(); parser->FileStack.pop();
     fclose(f.File);
     YY_BUFFER_STATE current =
-      cmDependsFortranLexer_GetCurrentBuffer(parser->Scanner);
-    cmDependsFortran_yy_delete_buffer(current, parser->Scanner);
-    cmDependsFortran_yy_switch_to_buffer(f.Buffer, parser->Scanner);
+      cmFortranLexer_GetCurrentBuffer(parser->Scanner);
+    cmFortran_yy_delete_buffer(current, parser->Scanner);
+    cmFortran_yy_switch_to_buffer(f.Buffer, parser->Scanner);
     return 1;
     }
 }
 
 //----------------------------------------------------------------------------
-int cmDependsFortranParser_Input(cmDependsFortranParser* parser,
+int cmFortranParser_Input(cmFortranParser* parser,
                                  char* buffer, size_t bufferSize)
 {
   // Read from the file on top of the stack.  If the stack is empty,
@@ -1012,26 +1012,26 @@ int cmDependsFortranParser_Input(cmDependsFortranParser* parser,
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_StringStart(cmDependsFortranParser* parser)
+void cmFortranParser_StringStart(cmFortranParser* parser)
 {
   parser->TokenString = "";
 }
 
 //----------------------------------------------------------------------------
-const char* cmDependsFortranParser_StringEnd(cmDependsFortranParser* parser)
+const char* cmFortranParser_StringEnd(cmFortranParser* parser)
 {
   return parser->TokenString.c_str();
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_StringAppend(cmDependsFortranParser* parser,
+void cmFortranParser_StringAppend(cmFortranParser* parser,
                                          char c)
 {
   parser->TokenString += c;
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_SetInInterface(cmDependsFortranParser* parser,
+void cmFortranParser_SetInInterface(cmFortranParser* parser,
                                            bool in)
 {
   if(parser->InPPFalseBranch)
@@ -1043,26 +1043,26 @@ void cmDependsFortranParser_SetInInterface(cmDependsFortranParser* parser,
 }
 
 //----------------------------------------------------------------------------
-bool cmDependsFortranParser_GetInInterface(cmDependsFortranParser* parser)
+bool cmFortranParser_GetInInterface(cmFortranParser* parser)
 {
   return parser->InInterface;
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_SetOldStartcond(cmDependsFortranParser* parser,
+void cmFortranParser_SetOldStartcond(cmFortranParser* parser,
                                             int arg)
 {
   parser->OldStartcond = arg;
 }
 
 //----------------------------------------------------------------------------
-int cmDependsFortranParser_GetOldStartcond(cmDependsFortranParser* parser)
+int cmFortranParser_GetOldStartcond(cmFortranParser* parser)
 {
   return parser->OldStartcond;
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_Error(cmDependsFortranParser*, const char*)
+void cmFortranParser_Error(cmFortranParser*, const char*)
 {
   // If there is a parser error just ignore it.  The source will not
   // compile and the user will edit it.  Then dependencies will have
@@ -1070,7 +1070,7 @@ void cmDependsFortranParser_Error(cmDependsFortranParser*, const char*)
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleUse(cmDependsFortranParser* parser,
+void cmFortranParser_RuleUse(cmFortranParser* parser,
                                     const char* name)
 {
   if(!parser->InPPFalseBranch)
@@ -1080,7 +1080,7 @@ void cmDependsFortranParser_RuleUse(cmDependsFortranParser* parser,
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleInclude(cmDependsFortranParser* parser,
+void cmFortranParser_RuleInclude(cmFortranParser* parser,
                                         const char* name)
 {
   if(parser->InPPFalseBranch)
@@ -1106,12 +1106,12 @@ void cmDependsFortranParser_RuleInclude(cmDependsFortranParser* parser,
     parser->Info.Includes.insert(fullName);
 
     // Parse it immediately to translate the source inline.
-    cmDependsFortranParser_FilePush(parser, fullName.c_str());
+    cmFortranParser_FilePush(parser, fullName.c_str());
     }
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleModule(cmDependsFortranParser* parser,
+void cmFortranParser_RuleModule(cmFortranParser* parser,
                                        const char* name)
 {
   if(!parser->InPPFalseBranch && !parser->InInterface)
@@ -1121,7 +1121,7 @@ void cmDependsFortranParser_RuleModule(cmDependsFortranParser* parser,
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleDefine(cmDependsFortranParser* parser,
+void cmFortranParser_RuleDefine(cmFortranParser* parser,
                                        const char* macro)
 {
   if(!parser->InPPFalseBranch)
@@ -1131,7 +1131,7 @@ void cmDependsFortranParser_RuleDefine(cmDependsFortranParser* parser,
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleUndef(cmDependsFortranParser* parser,
+void cmFortranParser_RuleUndef(cmFortranParser* parser,
                                       const char* macro)
 {
   if(!parser->InPPFalseBranch)
@@ -1146,7 +1146,7 @@ void cmDependsFortranParser_RuleUndef(cmDependsFortranParser* parser,
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleIfdef(cmDependsFortranParser* parser,
+void cmFortranParser_RuleIfdef(cmFortranParser* parser,
                                       const char* macro)
 {
   // A new PP branch has been opened
@@ -1167,7 +1167,7 @@ void cmDependsFortranParser_RuleIfdef(cmDependsFortranParser* parser,
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleIfndef(cmDependsFortranParser* parser,
+void cmFortranParser_RuleIfndef(cmFortranParser* parser,
   const char* macro)
 {
   // A new PP branch has been opened
@@ -1189,7 +1189,7 @@ void cmDependsFortranParser_RuleIfndef(cmDependsFortranParser* parser,
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleIf(cmDependsFortranParser* parser)
+void cmFortranParser_RuleIf(cmFortranParser* parser)
 {
   /* Note: The current parser is _not_ able to get statements like
    *   #if 0
@@ -1223,10 +1223,10 @@ void cmDependsFortranParser_RuleIf(cmDependsFortranParser* parser)
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleElif(cmDependsFortranParser* parser)
+void cmFortranParser_RuleElif(cmFortranParser* parser)
 {
   /* Note: There are parser limitations.  See the note at
-   * cmDependsFortranParser_RuleIf(..)
+   * cmFortranParser_RuleIf(..)
    */
 
   // Always taken unless an #ifdef or #ifndef-branch has been taken
@@ -1240,7 +1240,7 @@ void cmDependsFortranParser_RuleElif(cmDependsFortranParser* parser)
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleElse(cmDependsFortranParser* parser)
+void cmFortranParser_RuleElse(cmFortranParser* parser)
 {
   // if the parent branch is false do nothing!
   if(parser->InPPFalseBranch > 1)
@@ -1262,7 +1262,7 @@ void cmDependsFortranParser_RuleElse(cmDependsFortranParser* parser)
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleEndif(cmDependsFortranParser* parser)
+void cmFortranParser_RuleEndif(cmFortranParser* parser)
 {
   if(!parser->SkipToEnd.empty())
     {

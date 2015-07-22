@@ -26,21 +26,21 @@ This file must be translated to C and modified to build everywhere.
 
 Run bison like this:
 
-  bison --yacc --name-prefix=cmDependsFortran_yy
-        --defines=cmDependsFortranParserTokens.h
-         -ocmDependsFortranParser.cxx
-          cmDependsFortranParser.y
+  bison --yacc --name-prefix=cmFortran_yy
+        --defines=cmFortranParserTokens.h
+         -ocmFortranParser.cxx
+          cmFortranParser.y
 
-Modify cmDependsFortranParser.cxx:
+Modify cmFortranParser.cxx:
   - remove TABs
   - remove use of the 'register' storage class specifier
   - Remove the yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]
 */
 
 /*-------------------------------------------------------------------------*/
-#define cmDependsFortranParser_cxx
-#include "cmDependsFortranParser.h" /* Interface to parser object.  */
-#include "cmDependsFortranParserTokens.h" /* Need YYSTYPE for YY_DECL.  */
+#define cmFortranParser_cxx
+#include "cmFortranParser.h" /* Interface to parser object.  */
+#include "cmFortranParserTokens.h" /* Need YYSTYPE for YY_DECL.  */
 
 #include <cmsys/String.h>
 
@@ -48,20 +48,20 @@ Modify cmDependsFortranParser.cxx:
 #define YYPARSE_PARAM yyscanner
 #define YYLEX_PARAM yyscanner
 #define YYERROR_VERBOSE 1
-#define cmDependsFortran_yyerror(x) \
-        cmDependsFortranError(yyscanner, x)
+#define cmFortran_yyerror(x) \
+        cmFortranError(yyscanner, x)
 
 /* Forward declare the lexer entry point.  */
 YY_DECL;
 
 /* Helper function to forward error callback.  */
-static void cmDependsFortranError(yyscan_t yyscanner, const char* message)
+static void cmFortranError(yyscan_t yyscanner, const char* message)
 {
-  cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
-  cmDependsFortranParser_Error(parser, message);
+  cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+  cmFortranParser_Error(parser, message);
 }
 
-static bool cmDependsFortranParserIsKeyword(const char* word,
+static bool cmFortranParserIsKeyword(const char* word,
                                             const char* keyword)
 {
   return cmsysString_strcasecmp(word, keyword) == 0;
@@ -115,63 +115,63 @@ assignment_stmt: WORD ASSIGNMENT_OP other EOSTMT    /* Ignore */
 keyword_stmt:
   WORD EOSTMT
     {
-    if (cmDependsFortranParserIsKeyword($1, "interface"))
+    if (cmFortranParserIsKeyword($1, "interface"))
       {
-      cmDependsFortranParser* parser =
-        cmDependsFortran_yyget_extra(yyscanner);
-      cmDependsFortranParser_SetInInterface(parser, true);
+      cmFortranParser* parser =
+        cmFortran_yyget_extra(yyscanner);
+      cmFortranParser_SetInInterface(parser, true);
       }
     free($1);
     }
 | WORD WORD other EOSTMT
     {
-    if (cmDependsFortranParserIsKeyword($1, "use"))
+    if (cmFortranParserIsKeyword($1, "use"))
       {
-      cmDependsFortranParser* parser =
-        cmDependsFortran_yyget_extra(yyscanner);
-      cmDependsFortranParser_RuleUse(parser, $2);
+      cmFortranParser* parser =
+        cmFortran_yyget_extra(yyscanner);
+      cmFortranParser_RuleUse(parser, $2);
       }
-    else if (cmDependsFortranParserIsKeyword($1, "module"))
+    else if (cmFortranParserIsKeyword($1, "module"))
       {
-      cmDependsFortranParser* parser =
-        cmDependsFortran_yyget_extra(yyscanner);
-      cmDependsFortranParser_RuleModule(parser, $2);
+      cmFortranParser* parser =
+        cmFortran_yyget_extra(yyscanner);
+      cmFortranParser_RuleModule(parser, $2);
       }
-    else if (cmDependsFortranParserIsKeyword($1, "interface"))
+    else if (cmFortranParserIsKeyword($1, "interface"))
       {
-      cmDependsFortranParser* parser =
-        cmDependsFortran_yyget_extra(yyscanner);
-      cmDependsFortranParser_SetInInterface(parser, true);
+      cmFortranParser* parser =
+        cmFortran_yyget_extra(yyscanner);
+      cmFortranParser_SetInInterface(parser, true);
       }
-    else if (cmDependsFortranParserIsKeyword($2, "interface") &&
-             cmDependsFortranParserIsKeyword($1, "end"))
+    else if (cmFortranParserIsKeyword($2, "interface") &&
+             cmFortranParserIsKeyword($1, "end"))
       {
-      cmDependsFortranParser* parser =
-        cmDependsFortran_yyget_extra(yyscanner);
-      cmDependsFortranParser_SetInInterface(parser, false);
+      cmFortranParser* parser =
+        cmFortran_yyget_extra(yyscanner);
+      cmFortranParser_SetInInterface(parser, false);
       }
     free($1);
     free($2);
     }
 | WORD DCOLON WORD other EOSTMT
     {
-    if (cmDependsFortranParserIsKeyword($1, "use"))
+    if (cmFortranParserIsKeyword($1, "use"))
       {
-      cmDependsFortranParser* parser =
-        cmDependsFortran_yyget_extra(yyscanner);
-      cmDependsFortranParser_RuleUse(parser, $3);
+      cmFortranParser* parser =
+        cmFortran_yyget_extra(yyscanner);
+      cmFortranParser_RuleUse(parser, $3);
       }
     free($1);
     free($3);
     }
 | WORD COMMA WORD DCOLON WORD other EOSTMT
     {
-    if (cmDependsFortranParserIsKeyword($1, "use") &&
-        cmDependsFortranParserIsKeyword($3, "non_intrinsic") )
+    if (cmFortranParserIsKeyword($1, "use") &&
+        cmFortranParserIsKeyword($3, "non_intrinsic") )
       {
-      cmDependsFortranParser* parser =
-        cmDependsFortran_yyget_extra(yyscanner);
-      cmDependsFortranParser_RuleUse(parser, $5);
+      cmFortranParser* parser =
+        cmFortran_yyget_extra(yyscanner);
+      cmFortranParser_RuleUse(parser, $5);
       }
     free($1);
     free($3);
@@ -179,72 +179,72 @@ keyword_stmt:
     }
 | WORD STRING other EOSTMT /* Ignore */
     {
-    if (cmDependsFortranParserIsKeyword($1, "include"))
+    if (cmFortranParserIsKeyword($1, "include"))
       {
-      cmDependsFortranParser* parser =
-        cmDependsFortran_yyget_extra(yyscanner);
-      cmDependsFortranParser_RuleInclude(parser, $2);
+      cmFortranParser* parser =
+        cmFortran_yyget_extra(yyscanner);
+      cmFortranParser_RuleInclude(parser, $2);
       }
     free($1);
     free($2);
     }
 | CPP_INCLUDE_ANGLE other EOSTMT
     {
-    cmDependsFortranParser* parser =
-      cmDependsFortran_yyget_extra(yyscanner);
-    cmDependsFortranParser_RuleInclude(parser, $1);
+    cmFortranParser* parser =
+      cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleInclude(parser, $1);
     free($1);
     }
 | include STRING other EOSTMT
     {
-    cmDependsFortranParser* parser =
-      cmDependsFortran_yyget_extra(yyscanner);
-    cmDependsFortranParser_RuleInclude(parser, $2);
+    cmFortranParser* parser =
+      cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleInclude(parser, $2);
     free($2);
     }
 | define WORD other EOSTMT
     {
-    cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
-    cmDependsFortranParser_RuleDefine(parser, $2);
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleDefine(parser, $2);
     free($2);
     }
 | undef WORD other EOSTMT
     {
-    cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
-    cmDependsFortranParser_RuleUndef(parser, $2);
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleUndef(parser, $2);
     free($2);
     }
 | ifdef WORD other EOSTMT
     {
-    cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
-    cmDependsFortranParser_RuleIfdef(parser, $2);
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleIfdef(parser, $2);
     free($2);
     }
 | ifndef WORD other EOSTMT
     {
-    cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
-    cmDependsFortranParser_RuleIfndef(parser, $2);
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleIfndef(parser, $2);
     free($2);
     }
 | if other EOSTMT
     {
-    cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
-    cmDependsFortranParser_RuleIf(parser);
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleIf(parser);
     }
 | elif other EOSTMT
     {
-    cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
-    cmDependsFortranParser_RuleElif(parser);
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleElif(parser);
     }
 | else other EOSTMT
     {
-    cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
-    cmDependsFortranParser_RuleElse(parser);
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleElse(parser);
     }
 | endif other EOSTMT
     {
-    cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
-    cmDependsFortranParser_RuleEndif(parser);
+    cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleEndif(parser);
     }
 | WORD GARBAGE other EOSTMT             /* Ignore */
     {

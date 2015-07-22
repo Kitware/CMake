@@ -9,13 +9,13 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef cmDependsFortran_h
-#define cmDependsFortran_h
+#ifndef cmFortran_h
+#define cmFortran_h
 
 #include "cmDepends.h"
 
 class cmDependsFortranInternals;
-class cmDependsFortranSourceInfo;
+class cmFortranSourceInfo;
 
 /** \class cmDependsFortran
  * \brief Dependency scanner for Fortran object files.
@@ -71,7 +71,7 @@ protected:
 
   // Actually write the depenencies to the streams.
   bool WriteDependenciesReal(const char *obj,
-                             cmDependsFortranSourceInfo const& info,
+                             cmFortranSourceInfo const& info,
                              const char* mod_dir, const char* stamp_dir,
                              std::ostream& makeDepends,
                              std::ostream& internalDepends);

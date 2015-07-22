@@ -107,14 +107,14 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 89 "cmDependsFortranParser.y"
+#line 89 "cmFortranParser.y"
 
   char* string;
 
 
 
 /* Line 2068 of yacc.c  */
-#line 118 "cmDependsFortranParserTokens.h"
+#line 118 "cmFortranParserTokens.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
