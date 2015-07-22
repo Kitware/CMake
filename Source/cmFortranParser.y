@@ -32,9 +32,7 @@ Run bison like this:
           cmFortranParser.y
 
 Modify cmFortranParser.cxx:
-  - remove TABs
-  - remove use of the 'register' storage class specifier
-  - Remove the yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]
+  - "#if 0" out yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]
 */
 
 /*-------------------------------------------------------------------------*/
@@ -44,18 +42,11 @@ Modify cmFortranParser.cxx:
 
 #include <cmsys/String.h>
 
-/* Configure the parser to use a lexer object.  */
-#define YYPARSE_PARAM yyscanner
-#define YYLEX_PARAM yyscanner
-#define YYERROR_VERBOSE 1
-#define cmFortran_yyerror(x) \
-        cmFortranError(yyscanner, x)
-
 /* Forward declare the lexer entry point.  */
 YY_DECL;
 
-/* Helper function to forward error callback.  */
-static void cmFortranError(yyscan_t yyscanner, const char* message)
+/* Helper function to forward error callback from parser.  */
+static void cmFortran_yyerror(yyscan_t yyscanner, const char* message)
 {
   cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
   cmFortranParser_Error(parser, message);
@@ -79,7 +70,13 @@ static bool cmFortranParserIsKeyword(const char* word,
 %}
 
 /* Generate a reentrant parser object.  */
-%pure-parser
+%define api.pure
+
+/* Configure the parser to use a lexer object.  */
+%lex-param   {yyscan_t yyscanner}
+%parse-param {yyscan_t yyscanner}
+
+%define parse.error verbose
 
 %union {
   char* string;
