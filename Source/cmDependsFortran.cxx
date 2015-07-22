@@ -64,13 +64,16 @@ struct cmFortranFile
 
 struct cmFortranParser_s
 {
-  cmFortranParser_s(cmDependsFortran* self,
-                           std::set<std::string>& ppDefines,
-                           cmFortranSourceInfo& info);
+  cmFortranParser_s(std::vector<std::string> const& includes,
+                    std::set<std::string>& ppDefines,
+                    cmFortranSourceInfo& info);
   ~cmFortranParser_s();
 
-  // Pointer back to the main class.
-  cmDependsFortran* Self;
+  bool FindIncludeFile(const char* dir, const char* includeName,
+                       std::string& fileName);
+
+  // The include file search path.
+  std::vector<std::string> IncludePath;
 
   // Lexical scanner instance.
   yyscan_t Scanner;
@@ -201,7 +204,7 @@ bool cmDependsFortran::WriteDependencies(
 
     // Create the parser object. The constructor takes ppMacro and info per
     // reference, so we may look into the resulting objects later.
-    cmFortranParser parser(this, ppDefines, info);
+    cmFortranParser parser(this->IncludePath, ppDefines, info);
 
     // Push on the starting file.
     cmFortranParser_FilePush(&parser, src.c_str());
@@ -885,9 +888,9 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
 }
 
 //----------------------------------------------------------------------------
-bool cmDependsFortran::FindIncludeFile(const char* dir,
-                                       const char* includeName,
-                                       std::string& fileName)
+bool cmFortranParser_s::FindIncludeFile(const char* dir,
+                                        const char* includeName,
+                                        std::string& fileName)
 {
   // If the file is a full path, include it directly.
   if(cmSystemTools::FileIsFullPath(includeName))
@@ -927,10 +930,10 @@ bool cmDependsFortran::FindIncludeFile(const char* dir,
 
 //----------------------------------------------------------------------------
 cmFortranParser_s
-::cmFortranParser_s(cmDependsFortran* self,
-                           std::set<std::string>& ppDefines,
-                           cmFortranSourceInfo& info):
-  Self(self), PPDefinitions(ppDefines), Info(info)
+::cmFortranParser_s(std::vector<std::string> const& includes,
+                    std::set<std::string>& ppDefines,
+                    cmFortranSourceInfo& info):
+  IncludePath(includes), PPDefinitions(ppDefines), Info(info)
 {
   this->InInterface = 0;
   this->InPPFalseBranch = 0;
@@ -1100,7 +1103,7 @@ void cmFortranParser_RuleInclude(cmFortranParser* parser,
   // problem because either the source will not compile or the user
   // does not care about depending on this included source.
   std::string fullName;
-  if(parser->Self->FindIncludeFile(dir.c_str(), name, fullName))
+  if(parser->FindIncludeFile(dir.c_str(), name, fullName))
     {
     // Found the included file.  Save it in the set of included files.
     parser->Info.Includes.insert(fullName);

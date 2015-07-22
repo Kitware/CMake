@@ -46,12 +46,6 @@ public:
   static bool  ModulesDiffer(const char* modFile, const char* stampFile,
                              const char* compilerId);
 
-  /** Method to find an included file in the include path.  Fortran
-      always searches the directory containing the including source
-      first.  */
-  bool FindIncludeFile(const char* dir, const char* includeName,
-                       std::string& fileName);
-
 protected:
   // Finalize the dependency information for the target.
   virtual bool Finalize(std::ostream& makeDepends,
