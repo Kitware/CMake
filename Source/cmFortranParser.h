@@ -12,6 +12,10 @@
 #ifndef cmFortranParser_h
 #define cmFortranParser_h
 
+#if !defined(cmFortranLexer_cxx) && !defined(cmFortranParser_cxx)
+# include "cmStandardIncludes.h"
+#endif
+
 #include <stddef.h> /* size_t */
 
 /* Forward declare parser object type.  */
@@ -91,6 +95,81 @@ int cmFortran_yylex(YYSTYPE* yylvalp, yyscan_t yyscanner)
 # undef YYSTYPE
 # undef YYSTYPE_IS_DECLARED
 #endif
+#endif
+
+#if !defined(cmFortranLexer_cxx) && !defined(cmFortranParser_cxx)
+#include <stack>
+
+//----------------------------------------------------------------------------
+// Information about a single source file.
+class cmFortranSourceInfo
+{
+public:
+  // The name of the source file.
+  std::string Source;
+
+  // Set of provided and required modules.
+  std::set<std::string> Provides;
+  std::set<std::string> Requires;
+
+  // Set of files included in the translation unit.
+  std::set<std::string> Includes;
+};
+
+//----------------------------------------------------------------------------
+// Parser methods not included in generated interface.
+
+// Get the current buffer processed by the lexer.
+YY_BUFFER_STATE cmFortranLexer_GetCurrentBuffer(yyscan_t yyscanner);
+
+// The parser entry point.
+int cmFortran_yyparse(yyscan_t);
+
+//----------------------------------------------------------------------------
+// Define parser object internal structure.
+struct cmFortranFile
+{
+  cmFortranFile(FILE* file, YY_BUFFER_STATE buffer,
+                       const std::string& dir):
+    File(file), Buffer(buffer), Directory(dir) {}
+  FILE* File;
+  YY_BUFFER_STATE Buffer;
+  std::string Directory;
+};
+
+struct cmFortranParser_s
+{
+  cmFortranParser_s(std::vector<std::string> const& includes,
+                    std::set<std::string> const& defines,
+                    cmFortranSourceInfo& info);
+  ~cmFortranParser_s();
+
+  bool FindIncludeFile(const char* dir, const char* includeName,
+                       std::string& fileName);
+
+  // The include file search path.
+  std::vector<std::string> IncludePath;
+
+  // Lexical scanner instance.
+  yyscan_t Scanner;
+
+  // Stack of open files in the translation unit.
+  std::stack<cmFortranFile> FileStack;
+
+  // Buffer for string literals.
+  std::string TokenString;
+
+  // Flag for whether lexer is reading from inside an interface.
+  bool InInterface;
+
+  int OldStartcond;
+  std::set<std::string> PPDefinitions;
+  size_t InPPFalseBranch;
+  std::stack<bool> SkipToEnd;
+
+  // Information about the parsed source.
+  cmFortranSourceInfo& Info;
+};
 #endif
 
 #endif

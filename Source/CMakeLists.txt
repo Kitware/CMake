@@ -244,6 +244,7 @@ set(SRCS
   cmFortranLexer.h
   cmFortranParser.cxx
   cmFortranParser.h
+  cmFortranParserImpl.cxx
   cmGeneratedFileStream.cxx
   cmGeneratorExpressionContext.cxx
   cmGeneratorExpressionContext.h
