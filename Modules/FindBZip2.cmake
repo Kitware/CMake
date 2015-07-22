@@ -56,11 +56,13 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(BZip2
                                   VERSION_VAR BZIP2_VERSION_STRING)
 
 if (BZIP2_FOUND)
-   include(${CMAKE_CURRENT_LIST_DIR}/CheckLibraryExists.cmake)
+   include(${CMAKE_CURRENT_LIST_DIR}/CheckSymbolExists.cmake)
    include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
    cmake_push_check_state()
    set(CMAKE_REQUIRED_QUIET ${BZip2_FIND_QUIETLY})
-   CHECK_LIBRARY_EXISTS("${BZIP2_LIBRARIES}" BZ2_bzCompressInit "" BZIP2_NEED_PREFIX)
+   set(CMAKE_REQUIRED_INCLUDES ${BZIP2_INCLUDE_DIR})
+   set(CMAKE_REQUIRED_LIBRARIES ${BZIP2_LIBRARIES})
+   CHECK_SYMBOL_EXISTS(BZ2_bzCompressInit "bzlib.h" BZIP2_NEED_PREFIX)
    cmake_pop_check_state()
 endif ()
 
