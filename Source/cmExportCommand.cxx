@@ -177,6 +177,12 @@ bool cmExportCommand
           this->SetError(e.str());
           return false;
           }
+        if (target->GetType() == cmTarget::UTILITY)
+          {
+          this->SetError("given custom target \"" + *currentTarget
+                         + "\" which may not be exported.");
+          return false;
+          }
         }
       else
         {
