@@ -402,13 +402,17 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     {
     // Initialize the INCLUDE_DIRECTORIES property based on the current value
     // of the same directory property:
-    const std::vector<cmValueWithOrigin> parentIncludes =
-                                this->Makefile->GetIncludeDirectoriesEntries();
+    const cmStringRange parentIncludes =
+        this->Makefile->GetIncludeDirectoriesEntries();
+    const cmBacktraceRange parentIncludesBts =
+        this->Makefile->GetIncludeDirectoriesBacktraces();
 
-    for (std::vector<cmValueWithOrigin>::const_iterator it
-                = parentIncludes.begin(); it != parentIncludes.end(); ++it)
+    cmBacktraceRange::const_iterator btIt = parentIncludesBts.begin();
+    for (cmStringRange::const_iterator it
+                = parentIncludes.begin();
+         it != parentIncludes.end(); ++it, ++btIt)
       {
-      this->InsertInclude(*it);
+      this->InsertInclude(*it, *btIt);
       }
     const std::set<std::string> parentSystemIncludes =
                                 this->Makefile->GetSystemIncludeDirectories();
@@ -416,13 +420,17 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     this->SystemIncludeDirectories.insert(parentSystemIncludes.begin(),
                                           parentSystemIncludes.end());
 
-    const std::vector<cmValueWithOrigin> parentOptions =
+    const cmStringRange parentOptions =
                                 this->Makefile->GetCompileOptionsEntries();
+    const cmBacktraceRange parentOptionsBts =
+                                this->Makefile->GetCompileOptionsBacktraces();
 
-    for (std::vector<cmValueWithOrigin>::const_iterator it
-                = parentOptions.begin(); it != parentOptions.end(); ++it)
+    btIt = parentOptionsBts.begin();
+    for (cmStringRange::const_iterator it
+                = parentOptions.begin();
+         it != parentOptions.end(); ++it, ++btIt)
       {
-      this->InsertCompileOption(*it);
+      this->InsertCompileOption(*it, *btIt);
       }
     }
 
@@ -1926,40 +1934,43 @@ void cmTarget::AppendBuildInterfaceIncludes()
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::InsertInclude(const cmValueWithOrigin &entry,
-                     bool before)
+void cmTarget::InsertInclude(std::string const& entry,
+                             cmListFileBacktrace const& bt,
+                             bool before)
 {
-  cmGeneratorExpression ge(entry.Backtrace);
+  cmGeneratorExpression ge(bt);
 
   std::vector<cmTargetInternals::TargetPropertyEntry*>::iterator position
                 = before ? this->Internal->IncludeDirectoriesEntries.begin()
                          : this->Internal->IncludeDirectoriesEntries.end();
 
   this->Internal->IncludeDirectoriesEntries.insert(position,
-      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry.Value)));
+      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry)));
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::InsertCompileOption(const cmValueWithOrigin &entry,
-                     bool before)
+void cmTarget::InsertCompileOption(std::string const& entry,
+                                   cmListFileBacktrace const& bt,
+                                   bool before)
 {
-  cmGeneratorExpression ge(entry.Backtrace);
+  cmGeneratorExpression ge(bt);
 
   std::vector<cmTargetInternals::TargetPropertyEntry*>::iterator position
                 = before ? this->Internal->CompileOptionsEntries.begin()
                          : this->Internal->CompileOptionsEntries.end();
 
   this->Internal->CompileOptionsEntries.insert(position,
-      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry.Value)));
+      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry)));
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::InsertCompileDefinition(const cmValueWithOrigin &entry)
+void cmTarget::InsertCompileDefinition(std::string const& entry,
+                                       cmListFileBacktrace const& bt)
 {
-  cmGeneratorExpression ge(entry.Backtrace);
+  cmGeneratorExpression ge(bt);
 
   this->Internal->CompileDefinitionsEntries.push_back(
-      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry.Value)));
+      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry)));
 }
 
 //----------------------------------------------------------------------------

@@ -1417,8 +1417,10 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
     {
     cmMakefile *mf = this->LocalGenerators[i]->GetMakefile();
 
-    const std::vector<cmValueWithOrigin> noconfig_compile_definitions =
+    const cmStringRange noconfig_compile_definitions =
                                 mf->GetCompileDefinitionsEntries();
+    const cmBacktraceRange noconfig_compile_definitions_bts =
+                                mf->GetCompileDefinitionsBacktraces();
 
     cmTargets& targets = mf->GetTargets();
     for(cmTargets::iterator ti = targets.begin();
@@ -1433,11 +1435,13 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
         continue;
         }
 
-      for (std::vector<cmValueWithOrigin>::const_iterator it
+      cmBacktraceRange::const_iterator btIt
+          = noconfig_compile_definitions_bts.begin();
+      for (cmStringRange::const_iterator it
                                       = noconfig_compile_definitions.begin();
-          it != noconfig_compile_definitions.end(); ++it)
+          it != noconfig_compile_definitions.end(); ++it, ++btIt)
         {
-        t->InsertCompileDefinition(*it);
+        t->InsertCompileDefinition(*it, *btIt);
         }
 
       cmPolicies::PolicyStatus polSt

@@ -273,6 +273,36 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
     }
 }
 
+cmStringRange cmMakefile::GetIncludeDirectoriesEntries() const
+{
+  return cmMakeRange(this->IncludeDirectoriesEntries);
+}
+
+cmBacktraceRange cmMakefile::GetIncludeDirectoriesBacktraces() const
+{
+  return cmMakeRange(this->IncludeDirectoriesEntryBacktraces);
+}
+
+cmStringRange cmMakefile::GetCompileOptionsEntries() const
+{
+  return cmMakeRange(this->CompileOptionsEntries);
+}
+
+cmBacktraceRange cmMakefile::GetCompileOptionsBacktraces() const
+{
+  return cmMakeRange(this->CompileOptionsEntryBacktraces);
+}
+
+cmStringRange cmMakefile::GetCompileDefinitionsEntries() const
+{
+  return cmMakeRange(this->CompileDefinitionsEntries);
+}
+
+cmBacktraceRange cmMakefile::GetCompileDefinitionsBacktraces() const
+{
+  return cmMakeRange(this->CompileDefinitionsEntryBacktraces);
+}
+
 //----------------------------------------------------------------------------
 cmListFileBacktrace cmMakefile::GetBacktrace() const
 {
@@ -1527,23 +1557,32 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   this->AddDefinition("CMAKE_CURRENT_BINARY_DIR",
                       this->GetCurrentBinaryDirectory());
 
-  const std::vector<cmValueWithOrigin>& parentIncludes =
-                                        parent->GetIncludeDirectoriesEntries();
-  this->IncludeDirectoriesEntries.insert(this->IncludeDirectoriesEntries.end(),
-                                         parentIncludes.begin(),
-                                         parentIncludes.end());
+  this->IncludeDirectoriesEntries.insert(
+        this->IncludeDirectoriesEntries.end(),
+        parent->IncludeDirectoriesEntries.begin(),
+        parent->IncludeDirectoriesEntries.end());
+  this->IncludeDirectoriesEntryBacktraces.insert(
+        this->IncludeDirectoriesEntryBacktraces.end(),
+        parent->IncludeDirectoriesEntryBacktraces.begin(),
+        parent->IncludeDirectoriesEntryBacktraces.end());
 
-  const std::vector<cmValueWithOrigin>& parentOptions =
-                                        parent->GetCompileOptionsEntries();
-  this->CompileOptionsEntries.insert(this->CompileOptionsEntries.end(),
-                                     parentOptions.begin(),
-                                     parentOptions.end());
+  this->CompileOptionsEntries.insert(
+        this->CompileOptionsEntries.end(),
+        parent->CompileOptionsEntries.begin(),
+        parent->CompileOptionsEntries.end());
+  this->CompileOptionsEntryBacktraces.insert(
+        this->CompileOptionsEntryBacktraces.end(),
+        parent->CompileOptionsEntryBacktraces.begin(),
+        parent->CompileOptionsEntryBacktraces.end());
 
-  const std::vector<cmValueWithOrigin>& parentDefines =
-                                      parent->GetCompileDefinitionsEntries();
-  this->CompileDefinitionsEntries.insert(this->CompileDefinitionsEntries.end(),
-                                         parentDefines.begin(),
-                                         parentDefines.end());
+  this->CompileDefinitionsEntries.insert(
+        this->CompileDefinitionsEntries.end(),
+        parent->CompileDefinitionsEntries.begin(),
+        parent->CompileDefinitionsEntries.end());
+  this->CompileDefinitionsEntryBacktraces.insert(
+        this->CompileDefinitionsEntryBacktraces.end(),
+        parent->CompileDefinitionsEntryBacktraces.begin(),
+        parent->CompileDefinitionsEntryBacktraces.end());
 
   this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
 
@@ -1887,20 +1926,24 @@ void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
     return;
     }
 
-  std::vector<cmValueWithOrigin>::iterator position =
+  std::vector<std::string>::iterator position =
                               before ? this->IncludeDirectoriesEntries.begin()
                                     : this->IncludeDirectoriesEntries.end();
+  std::vector<cmListFileBacktrace>::iterator btPos =
+      this->IncludeDirectoriesEntryBacktraces.begin()
+      + std::distance(this->IncludeDirectoriesEntries.begin(), position);
 
   cmListFileBacktrace lfbt = this->GetBacktrace();
-  cmValueWithOrigin entry(cmJoin(incs, ";"), lfbt);
-  this->IncludeDirectoriesEntries.insert(position, entry);
+  std::string entryString = cmJoin(incs, ";");
+  this->IncludeDirectoriesEntries.insert(position, entryString);
+  this->IncludeDirectoriesEntryBacktraces.insert(btPos, lfbt);
 
   // Property on each target:
   for (cmTargets::iterator l = this->Targets.begin();
        l != this->Targets.end(); ++l)
     {
     cmTarget &t = l->second;
-    t.InsertInclude(entry, before);
+    t.InsertInclude(entryString, lfbt, before);
     }
 }
 
@@ -4120,36 +4163,40 @@ void cmMakefile::SetProperty(const std::string& prop, const char* value)
   if (prop == "INCLUDE_DIRECTORIES")
     {
     this->IncludeDirectoriesEntries.clear();
+    this->IncludeDirectoriesEntryBacktraces.clear();
     if (!value)
       {
       return;
       }
     cmListFileBacktrace lfbt = this->GetBacktrace();
-    this->IncludeDirectoriesEntries.push_back(
-                                        cmValueWithOrigin(value, lfbt));
+    this->IncludeDirectoriesEntries.push_back(value);
+    this->IncludeDirectoriesEntryBacktraces.push_back(lfbt);
     return;
     }
   if (prop == "COMPILE_OPTIONS")
     {
     this->CompileOptionsEntries.clear();
+    this->CompileDefinitionsEntryBacktraces.clear();
     if (!value)
       {
       return;
       }
     cmListFileBacktrace lfbt = this->GetBacktrace();
-    this->CompileOptionsEntries.push_back(cmValueWithOrigin(value, lfbt));
+    this->CompileOptionsEntries.push_back(value);
+    this->CompileOptionsEntryBacktraces.push_back(lfbt);
     return;
     }
   if (prop == "COMPILE_DEFINITIONS")
     {
     this->CompileDefinitionsEntries.clear();
+    this->CompileDefinitionsEntryBacktraces.clear();
     if (!value)
       {
       return;
       }
     cmListFileBacktrace lfbt = this->GetBacktrace();
-    cmValueWithOrigin entry(value, lfbt);
-    this->CompileDefinitionsEntries.push_back(entry);
+    this->CompileDefinitionsEntries.push_back(value);
+    this->CompileDefinitionsEntryBacktraces.push_back(lfbt);
     return;
     }
 
@@ -4163,22 +4210,22 @@ void cmMakefile::AppendProperty(const std::string& prop,
   if (prop == "INCLUDE_DIRECTORIES")
     {
     cmListFileBacktrace lfbt = this->GetBacktrace();
-    this->IncludeDirectoriesEntries.push_back(
-                                        cmValueWithOrigin(value, lfbt));
+    this->IncludeDirectoriesEntries.push_back(value);
+    this->IncludeDirectoriesEntryBacktraces.push_back(lfbt);
     return;
     }
   if (prop == "COMPILE_OPTIONS")
     {
     cmListFileBacktrace lfbt = this->GetBacktrace();
-    this->CompileOptionsEntries.push_back(
-                                        cmValueWithOrigin(value, lfbt));
+    this->CompileOptionsEntries.push_back(value);
+    this->CompileOptionsEntryBacktraces.push_back(lfbt);
     return;
     }
   if (prop == "COMPILE_DEFINITIONS")
     {
     cmListFileBacktrace lfbt = this->GetBacktrace();
-    this->CompileDefinitionsEntries.push_back(
-                                        cmValueWithOrigin(value, lfbt));
+    this->CompileDefinitionsEntries.push_back(value);
+    this->CompileDefinitionsEntryBacktraces.push_back(lfbt);
     return;
     }
 
@@ -4233,44 +4280,17 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     }
   else if (prop == "INCLUDE_DIRECTORIES")
     {
-    std::string sep;
-    for (std::vector<cmValueWithOrigin>::const_iterator
-        it = this->IncludeDirectoriesEntries.begin(),
-        end = this->IncludeDirectoriesEntries.end();
-        it != end; ++it)
-      {
-      output += sep;
-      output += it->Value;
-      sep = ";";
-      }
+    output = cmJoin(this->IncludeDirectoriesEntries, ";");
     return output.c_str();
     }
   else if (prop == "COMPILE_OPTIONS")
     {
-    std::string sep;
-    for (std::vector<cmValueWithOrigin>::const_iterator
-        it = this->CompileOptionsEntries.begin(),
-        end = this->CompileOptionsEntries.end();
-        it != end; ++it)
-      {
-      output += sep;
-      output += it->Value;
-      sep = ";";
-      }
+    output = cmJoin(this->CompileOptionsEntries, ";");
     return output.c_str();
     }
   else if (prop == "COMPILE_DEFINITIONS")
     {
-    std::string sep;
-    for (std::vector<cmValueWithOrigin>::const_iterator
-        it = this->CompileDefinitionsEntries.begin(),
-        end = this->CompileDefinitionsEntries.end();
-        it != end; ++it)
-      {
-      output += sep;
-      output += it->Value;
-      sep = ";";
-      }
+    output = cmJoin(this->CompileDefinitionsEntries, ";");
     return output.c_str();
     }
 
