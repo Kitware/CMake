@@ -23,58 +23,60 @@
 # define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
 #endif
 #if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
-# define kwsysProcess                     kwsys_ns(Process)
-# define kwsysProcess_s                   kwsys_ns(Process_s)
-# define kwsysProcess_New                 kwsys_ns(Process_New)
-# define kwsysProcess_Delete              kwsys_ns(Process_Delete)
-# define kwsysProcess_SetCommand          kwsys_ns(Process_SetCommand)
-# define kwsysProcess_AddCommand          kwsys_ns(Process_AddCommand)
-# define kwsysProcess_SetTimeout          kwsys_ns(Process_SetTimeout)
-# define kwsysProcess_SetWorkingDirectory kwsys_ns(Process_SetWorkingDirectory)
-# define kwsysProcess_SetPipeFile         kwsys_ns(Process_SetPipeFile)
-# define kwsysProcess_SetPipeNative       kwsys_ns(Process_SetPipeNative)
-# define kwsysProcess_SetPipeShared       kwsys_ns(Process_SetPipeShared)
-# define kwsysProcess_Option_Detach       kwsys_ns(Process_Option_Detach)
-# define kwsysProcess_Option_HideWindow   kwsys_ns(Process_Option_HideWindow)
-# define kwsysProcess_Option_MergeOutput  kwsys_ns(Process_Option_MergeOutput)
-# define kwsysProcess_Option_Verbatim     kwsys_ns(Process_Option_Verbatim)
-# define kwsysProcess_GetOption           kwsys_ns(Process_GetOption)
-# define kwsysProcess_SetOption           kwsys_ns(Process_SetOption)
-# define kwsysProcess_Option_e            kwsys_ns(Process_Option_e)
-# define kwsysProcess_State_Starting      kwsys_ns(Process_State_Starting)
-# define kwsysProcess_State_Error         kwsys_ns(Process_State_Error)
-# define kwsysProcess_State_Exception     kwsys_ns(Process_State_Exception)
-# define kwsysProcess_State_Executing     kwsys_ns(Process_State_Executing)
-# define kwsysProcess_State_Exited        kwsys_ns(Process_State_Exited)
-# define kwsysProcess_State_Expired       kwsys_ns(Process_State_Expired)
-# define kwsysProcess_State_Killed        kwsys_ns(Process_State_Killed)
-# define kwsysProcess_State_Disowned      kwsys_ns(Process_State_Disowned)
-# define kwsysProcess_GetState            kwsys_ns(Process_GetState)
-# define kwsysProcess_State_e             kwsys_ns(Process_State_e)
-# define kwsysProcess_Exception_None      kwsys_ns(Process_Exception_None)
-# define kwsysProcess_Exception_Fault     kwsys_ns(Process_Exception_Fault)
-# define kwsysProcess_Exception_Illegal   kwsys_ns(Process_Exception_Illegal)
-# define kwsysProcess_Exception_Interrupt kwsys_ns(Process_Exception_Interrupt)
-# define kwsysProcess_Exception_Numerical kwsys_ns(Process_Exception_Numerical)
-# define kwsysProcess_Exception_Other     kwsys_ns(Process_Exception_Other)
-# define kwsysProcess_GetExitException    kwsys_ns(Process_GetExitException)
-# define kwsysProcess_Exception_e         kwsys_ns(Process_Exception_e)
-# define kwsysProcess_GetExitCode         kwsys_ns(Process_GetExitCode)
-# define kwsysProcess_GetExitValue        kwsys_ns(Process_GetExitValue)
-# define kwsysProcess_GetErrorString      kwsys_ns(Process_GetErrorString)
-# define kwsysProcess_GetExceptionString  kwsys_ns(Process_GetExceptionString)
-# define kwsysProcess_Execute             kwsys_ns(Process_Execute)
-# define kwsysProcess_Disown              kwsys_ns(Process_Disown)
-# define kwsysProcess_WaitForData         kwsys_ns(Process_WaitForData)
-# define kwsysProcess_Pipes_e             kwsys_ns(Process_Pipes_e)
-# define kwsysProcess_Pipe_None           kwsys_ns(Process_Pipe_None)
-# define kwsysProcess_Pipe_STDIN          kwsys_ns(Process_Pipe_STDIN)
-# define kwsysProcess_Pipe_STDOUT         kwsys_ns(Process_Pipe_STDOUT)
-# define kwsysProcess_Pipe_STDERR         kwsys_ns(Process_Pipe_STDERR)
-# define kwsysProcess_Pipe_Timeout        kwsys_ns(Process_Pipe_Timeout)
-# define kwsysProcess_Pipe_Handle         kwsys_ns(Process_Pipe_Handle)
-# define kwsysProcess_WaitForExit         kwsys_ns(Process_WaitForExit)
-# define kwsysProcess_Kill                kwsys_ns(Process_Kill)
+# define kwsysProcess                           kwsys_ns(Process)
+# define kwsysProcess_s                         kwsys_ns(Process_s)
+# define kwsysProcess_New                       kwsys_ns(Process_New)
+# define kwsysProcess_Delete                    kwsys_ns(Process_Delete)
+# define kwsysProcess_SetCommand                kwsys_ns(Process_SetCommand)
+# define kwsysProcess_AddCommand                kwsys_ns(Process_AddCommand)
+# define kwsysProcess_SetTimeout                kwsys_ns(Process_SetTimeout)
+# define kwsysProcess_SetWorkingDirectory       kwsys_ns(Process_SetWorkingDirectory)
+# define kwsysProcess_SetPipeFile               kwsys_ns(Process_SetPipeFile)
+# define kwsysProcess_SetPipeNative             kwsys_ns(Process_SetPipeNative)
+# define kwsysProcess_SetPipeShared             kwsys_ns(Process_SetPipeShared)
+# define kwsysProcess_Option_Detach             kwsys_ns(Process_Option_Detach)
+# define kwsysProcess_Option_HideWindow         kwsys_ns(Process_Option_HideWindow)
+# define kwsysProcess_Option_MergeOutput        kwsys_ns(Process_Option_MergeOutput)
+# define kwsysProcess_Option_Verbatim           kwsys_ns(Process_Option_Verbatim)
+# define kwsysProcess_Option_CreateProcessGroup kwsys_ns(Process_Option_CreateProcessGroup)
+# define kwsysProcess_GetOption                 kwsys_ns(Process_GetOption)
+# define kwsysProcess_SetOption                 kwsys_ns(Process_SetOption)
+# define kwsysProcess_Option_e                  kwsys_ns(Process_Option_e)
+# define kwsysProcess_State_Starting            kwsys_ns(Process_State_Starting)
+# define kwsysProcess_State_Error               kwsys_ns(Process_State_Error)
+# define kwsysProcess_State_Exception           kwsys_ns(Process_State_Exception)
+# define kwsysProcess_State_Executing           kwsys_ns(Process_State_Executing)
+# define kwsysProcess_State_Exited              kwsys_ns(Process_State_Exited)
+# define kwsysProcess_State_Expired             kwsys_ns(Process_State_Expired)
+# define kwsysProcess_State_Killed              kwsys_ns(Process_State_Killed)
+# define kwsysProcess_State_Disowned            kwsys_ns(Process_State_Disowned)
+# define kwsysProcess_GetState                  kwsys_ns(Process_GetState)
+# define kwsysProcess_State_e                   kwsys_ns(Process_State_e)
+# define kwsysProcess_Exception_None            kwsys_ns(Process_Exception_None)
+# define kwsysProcess_Exception_Fault           kwsys_ns(Process_Exception_Fault)
+# define kwsysProcess_Exception_Illegal         kwsys_ns(Process_Exception_Illegal)
+# define kwsysProcess_Exception_Interrupt       kwsys_ns(Process_Exception_Interrupt)
+# define kwsysProcess_Exception_Numerical       kwsys_ns(Process_Exception_Numerical)
+# define kwsysProcess_Exception_Other           kwsys_ns(Process_Exception_Other)
+# define kwsysProcess_GetExitException          kwsys_ns(Process_GetExitException)
+# define kwsysProcess_Exception_e               kwsys_ns(Process_Exception_e)
+# define kwsysProcess_GetExitCode               kwsys_ns(Process_GetExitCode)
+# define kwsysProcess_GetExitValue              kwsys_ns(Process_GetExitValue)
+# define kwsysProcess_GetErrorString            kwsys_ns(Process_GetErrorString)
+# define kwsysProcess_GetExceptionString        kwsys_ns(Process_GetExceptionString)
+# define kwsysProcess_Execute                   kwsys_ns(Process_Execute)
+# define kwsysProcess_Disown                    kwsys_ns(Process_Disown)
+# define kwsysProcess_WaitForData               kwsys_ns(Process_WaitForData)
+# define kwsysProcess_Pipes_e                   kwsys_ns(Process_Pipes_e)
+# define kwsysProcess_Pipe_None                 kwsys_ns(Process_Pipe_None)
+# define kwsysProcess_Pipe_STDIN                kwsys_ns(Process_Pipe_STDIN)
+# define kwsysProcess_Pipe_STDOUT               kwsys_ns(Process_Pipe_STDOUT)
+# define kwsysProcess_Pipe_STDERR               kwsys_ns(Process_Pipe_STDERR)
+# define kwsysProcess_Pipe_Timeout              kwsys_ns(Process_Pipe_Timeout)
+# define kwsysProcess_Pipe_Handle               kwsys_ns(Process_Pipe_Handle)
+# define kwsysProcess_WaitForExit               kwsys_ns(Process_WaitForExit)
+# define kwsysProcess_Interrupt                 kwsys_ns(Process_Interrupt)
+# define kwsysProcess_Kill                      kwsys_ns(Process_Kill)
 #endif
 
 #if defined(__cplusplus)
@@ -199,6 +201,15 @@ kwsysEXPORT void kwsysProcess_SetPipeNative(kwsysProcess* cp, int pipe,
  *                                 and ignore the rest of the arguments.
  *         0 = No (default)
  *         1 = Yes
+ *
+ *  kwsysProcess_Option_CreateProcessGroup = Whether to place the process in a
+ *                                           new process group.  This is
+ *                                           useful if you want to send Ctrl+C
+ *                                           to the process.  On UNIX, also
+ *                                           places the process in a new
+ *                                           session.
+ *         0 = No (default)
+ *         1 = Yes
  */
 kwsysEXPORT int kwsysProcess_GetOption(kwsysProcess* cp, int optionId);
 kwsysEXPORT void kwsysProcess_SetOption(kwsysProcess* cp, int optionId,
@@ -208,7 +219,8 @@ enum kwsysProcess_Option_e
   kwsysProcess_Option_HideWindow,
   kwsysProcess_Option_Detach,
   kwsysProcess_Option_MergeOutput,
-  kwsysProcess_Option_Verbatim
+  kwsysProcess_Option_Verbatim,
+  kwsysProcess_Option_CreateProcessGroup
 };
 
 /**
@@ -363,6 +375,17 @@ enum kwsysProcess_Pipes_e
 kwsysEXPORT int kwsysProcess_WaitForExit(kwsysProcess* cp, double* timeout);
 
 /**
+ * Interrupt the process group for the child process that is currently
+ * running by sending it the appropriate operating-system specific signal.
+ * The caller should call WaitForExit after this returns to wait for the
+ * child to terminate.
+ *
+ * WARNING:  If you didn't specify kwsysProcess_Option_CreateProcessGroup,
+ * you will interrupt your own process group.
+ */
+kwsysEXPORT void kwsysProcess_Interrupt(kwsysProcess* cp);
+
+/**
  * Forcefully terminate the child process that is currently running.
  * The caller should call WaitForExit after this returns to wait for
  * the child to terminate.
@@ -394,6 +417,7 @@ kwsysEXPORT void kwsysProcess_Kill(kwsysProcess* cp);
 #  undef kwsysProcess_Option_HideWindow
 #  undef kwsysProcess_Option_MergeOutput
 #  undef kwsysProcess_Option_Verbatim
+#  undef kwsysProcess_Option_CreateProcessGroup
 #  undef kwsysProcess_GetOption
 #  undef kwsysProcess_SetOption
 #  undef kwsysProcess_Option_e
@@ -430,6 +454,7 @@ kwsysEXPORT void kwsysProcess_Kill(kwsysProcess* cp);
 #  undef kwsysProcess_Pipe_Timeout
 #  undef kwsysProcess_Pipe_Handle
 #  undef kwsysProcess_WaitForExit
+#  undef kwsysProcess_Interrupt
 #  undef kwsysProcess_Kill
 # endif
 #endif
