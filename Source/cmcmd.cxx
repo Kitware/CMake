@@ -572,7 +572,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         return 1;
         }
 
-      std::string command = cmWrap('"', cmMakeRange(args).advance(3), '"', " ");
+      std::string command =
+        cmWrap('"', cmMakeRange(args).advance(3), '"', " ");
       int retval = 0;
       int timeout = 0;
       if ( cmSystemTools::RunSingleCommand(command.c_str(), 0, 0, &retval,
