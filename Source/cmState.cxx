@@ -740,12 +740,6 @@ cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot,
   pos->BuildSystemDirectory =
       this->BuildsystemDirectory.Extend(
         originSnapshot.Position->BuildSystemDirectory);
-  pos->IncludeDirectoryPosition =
-      pos->BuildSystemDirectory->IncludeDirectories.size();
-  pos->CompileDefinitionsPosition =
-      pos->BuildSystemDirectory->CompileDefinitions.size();
-  pos->CompileOptionsPosition =
-      pos->BuildSystemDirectory->CompileOptions.size();
   pos->ExecutionListFile =
       this->ExecutionListFiles.Extend(
         originSnapshot.Position->ExecutionListFile);
@@ -763,12 +757,6 @@ cmState::CreateFunctionCallSnapshot(cmState::Snapshot originSnapshot,
   pos->CallStackParent = originSnapshot.Position;
   pos->EntryPointLine = entryPointLine;
   pos->EntryPointCommand = entryPointCommand;
-  pos->IncludeDirectoryPosition =
-      pos->BuildSystemDirectory->IncludeDirectories.size();
-  pos->CompileDefinitionsPosition =
-      pos->BuildSystemDirectory->CompileDefinitions.size();
-  pos->CompileOptionsPosition =
-      pos->BuildSystemDirectory->CompileOptions.size();
   pos->SnapshotType = FunctionCallType;
   pos->ExecutionListFile = this->ExecutionListFiles.Extend(
         originSnapshot.Position->ExecutionListFile, fileName);
@@ -787,12 +775,6 @@ cmState::CreateMacroCallSnapshot(cmState::Snapshot originSnapshot,
   pos->CallStackParent = originSnapshot.Position;
   pos->EntryPointLine = entryPointLine;
   pos->EntryPointCommand = entryPointCommand;
-  pos->IncludeDirectoryPosition =
-      pos->BuildSystemDirectory->IncludeDirectories.size();
-  pos->CompileDefinitionsPosition =
-      pos->BuildSystemDirectory->CompileDefinitions.size();
-  pos->CompileOptionsPosition =
-      pos->BuildSystemDirectory->CompileOptions.size();
   pos->SnapshotType = MacroCallType;
   pos->ExecutionListFile = this->ExecutionListFiles.Extend(
         originSnapshot.Position->ExecutionListFile, fileName);
@@ -810,12 +792,6 @@ cmState::CreateCallStackSnapshot(cmState::Snapshot originSnapshot,
   pos->CallStackParent = originSnapshot.Position;
   pos->EntryPointLine = entryPointLine;
   pos->EntryPointCommand = entryPointCommand;
-  pos->IncludeDirectoryPosition =
-      pos->BuildSystemDirectory->IncludeDirectories.size();
-  pos->CompileDefinitionsPosition =
-      pos->BuildSystemDirectory->CompileDefinitions.size();
-  pos->CompileOptionsPosition =
-      pos->BuildSystemDirectory->CompileOptions.size();
   pos->SnapshotType = CallStackType;
   pos->ExecutionListFile = this->ExecutionListFiles.Extend(
         originSnapshot.Position->ExecutionListFile, fileName);
@@ -833,12 +809,6 @@ cmState::CreateInlineListFileSnapshot(cmState::Snapshot originSnapshot,
   pos->CallStackParent = originSnapshot.Position;
   pos->EntryPointLine = entryPointLine;
   pos->EntryPointCommand = entryPointCommand;
-  pos->IncludeDirectoryPosition =
-      pos->BuildSystemDirectory->IncludeDirectories.size();
-  pos->CompileDefinitionsPosition =
-      pos->BuildSystemDirectory->CompileDefinitions.size();
-  pos->CompileOptionsPosition =
-      pos->BuildSystemDirectory->CompileOptions.size();
   pos->SnapshotType = InlineListFileType;
   pos->ExecutionListFile = this->ExecutionListFiles.Extend(
         originSnapshot.Position->ExecutionListFile, fileName);
@@ -850,25 +820,17 @@ cmState::Snapshot cmState::Pop(cmState::Snapshot originSnapshot)
   PositionType pos = originSnapshot.Position;
   PositionType prevPos = pos;
   ++prevPos;
+  prevPos->IncludeDirectoryPosition =
+      prevPos->BuildSystemDirectory->IncludeDirectories.size();
+  prevPos->CompileDefinitionsPosition =
+      prevPos->BuildSystemDirectory->CompileDefinitions.size();
+  prevPos->CompileOptionsPosition =
+      prevPos->BuildSystemDirectory->CompileOptions.size();
+
   if (prevPos == this->SnapshotData.Root())
     {
-      prevPos->IncludeDirectoryPosition =
-          prevPos->BuildSystemDirectory->IncludeDirectories.size();
-      prevPos->CompileDefinitionsPosition =
-          prevPos->BuildSystemDirectory->CompileDefinitions.size();
-      prevPos->CompileOptionsPosition =
-          prevPos->BuildSystemDirectory->CompileOptions.size();
     return Snapshot(this, prevPos);
     }
-  originSnapshot.Position->CallStackParent->IncludeDirectoryPosition =
-      originSnapshot.Position->CallStackParent
-      ->BuildSystemDirectory->IncludeDirectories.size();
-  originSnapshot.Position->CallStackParent->CompileDefinitionsPosition =
-      originSnapshot.Position->CallStackParent
-      ->BuildSystemDirectory->CompileDefinitions.size();
-  originSnapshot.Position->CallStackParent->CompileOptionsPosition =
-      originSnapshot.Position->CallStackParent
-      ->BuildSystemDirectory->CompileOptions.size();
   return Snapshot(this, originSnapshot.Position->CallStackParent);
 }
 

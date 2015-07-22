@@ -1554,12 +1554,12 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   // Initialize definitions with the closure of the parent scope.
   this->Internal->InitializeDefinitions(parent);
 
+  this->StateSnapshot.InitializeFromParent();
+
   this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
                       this->GetCurrentSourceDirectory());
   this->AddDefinition("CMAKE_CURRENT_BINARY_DIR",
                       this->GetCurrentBinaryDirectory());
-
-  this->StateSnapshot.InitializeFromParent();
 
   this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
 
