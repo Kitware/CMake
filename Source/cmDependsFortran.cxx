@@ -65,7 +65,7 @@ struct cmFortranFile
 struct cmFortranParser_s
 {
   cmFortranParser_s(std::vector<std::string> const& includes,
-                    std::set<std::string>& ppDefines,
+                    std::set<std::string> const& defines,
                     cmFortranSourceInfo& info);
   ~cmFortranParser_s();
 
@@ -129,7 +129,7 @@ public:
 
 //----------------------------------------------------------------------------
 cmDependsFortran::cmDependsFortran():
-  PPDefinitions(0), Internal(0)
+  Internal(0)
 {
 }
 
@@ -162,7 +162,7 @@ cmDependsFortran
       {
       def = it->substr(0, assignment);
       }
-    this->PPDefinitions.push_back(def);
+    this->PPDefinitions.insert(def);
     }
 }
 
@@ -198,13 +198,9 @@ bool cmDependsFortran::WriteDependencies(
     cmFortranSourceInfo& info =
       this->Internal->CreateObjectInfo(obj.c_str(), src.c_str());
 
-    // Make a copy of the macros defined via ADD_DEFINITIONS
-    std::set<std::string> ppDefines(this->PPDefinitions.begin(),
-                                    this->PPDefinitions.end());
-
-    // Create the parser object. The constructor takes ppMacro and info per
-    // reference, so we may look into the resulting objects later.
-    cmFortranParser parser(this->IncludePath, ppDefines, info);
+    // Create the parser object. The constructor takes info by reference,
+    // so we may look into the resulting objects later.
+    cmFortranParser parser(this->IncludePath, this->PPDefinitions, info);
 
     // Push on the starting file.
     cmFortranParser_FilePush(&parser, src.c_str());
@@ -931,9 +927,9 @@ bool cmFortranParser_s::FindIncludeFile(const char* dir,
 //----------------------------------------------------------------------------
 cmFortranParser_s
 ::cmFortranParser_s(std::vector<std::string> const& includes,
-                    std::set<std::string>& ppDefines,
+                    std::set<std::string> const& defines,
                     cmFortranSourceInfo& info):
-  IncludePath(includes), PPDefinitions(ppDefines), Info(info)
+  IncludePath(includes), PPDefinitions(defines), Info(info)
 {
   this->InInterface = 0;
   this->InPPFalseBranch = 0;

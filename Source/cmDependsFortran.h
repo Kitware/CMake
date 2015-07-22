@@ -73,7 +73,7 @@ protected:
   // The source file from which to start scanning.
   std::string SourceFile;
 
-  std::vector<std::string> PPDefinitions;
+  std::set<std::string> PPDefinitions;
 
   // Internal implementation details.
   cmDependsFortranInternals* Internal;
