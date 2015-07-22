@@ -88,7 +88,7 @@ typedef ssize_t kwsysProcess_ssize_t;
 typedef int kwsysProcess_ssize_t;
 #endif
 
-#if defined(__BEOS__) && !defined(__ZETA__) 
+#if defined(__BEOS__) && !defined(__ZETA__)
 /* BeOS 5 doesn't have usleep(), but it has snooze(), which is identical. */
 # include <be/kernel/OS.h>
 static inline void kwsysProcess_usleep(unsigned int msec)
@@ -151,6 +151,7 @@ typedef struct kwsysProcessCreateInformation_s
 } kwsysProcessCreateInformation;
 
 /*--------------------------------------------------------------------------*/
+static void kwsysProcessVolatileFree(volatile void* p);
 static int kwsysProcessInitialize(kwsysProcess* cp);
 static void kwsysProcessCleanup(kwsysProcess* cp, int error);
 static void kwsysProcessCleanupDescriptor(int* pfd);
@@ -197,7 +198,7 @@ struct kwsysProcess_s
 {
   /* The command lines to execute.  */
   char*** Commands;
-  int NumberOfCommands;
+  volatile int NumberOfCommands;
 
   /* Descriptors for the read ends of the child's output pipes and
      the signal pipe. */
@@ -213,8 +214,10 @@ struct kwsysProcess_s
   /* Buffer for pipe data.  */
   char PipeBuffer[KWSYSPE_PIPE_BUFFER_SIZE];
 
-  /* Process IDs returned by the calls to fork.  */
-  pid_t* ForkPIDs;
+  /* Process IDs returned by the calls to fork.  Everything is volatile
+     because the signal handler accesses them.  You must be very careful
+     when reaping PIDs or modifying this array to avoid race conditions.  */
+  volatile pid_t* volatile ForkPIDs;
 
   /* Flag for whether the children were terminated by a faild select.  */
   int SelectError;
@@ -237,6 +240,9 @@ struct kwsysProcess_s
   /* Whether to merge stdout/stderr of the child.  */
   int MergeOutput;
 
+  /* Whether to create the process in a new process group.  */
+  volatile sig_atomic_t CreateProcessGroup;
+
   /* Time at which the child started.  Negative for no timeout.  */
   kwsysProcessTime StartTime;
 
@@ -257,8 +263,9 @@ struct kwsysProcess_s
   /* The number of children still executing.  */
   int CommandsLeft;
 
-  /* The current status of the child process. */
-  int State;
+  /* The current status of the child process.  Must be atomic because
+     the signal handler checks this to avoid a race.  */
+  volatile sig_atomic_t State;
 
   /* The exceptional behavior that terminated the child process, if
    * any.  */
@@ -271,7 +278,7 @@ struct kwsysProcess_s
   int ExitValue;
 
   /* Whether the process was killed.  */
-  int Killed;
+  volatile sig_atomic_t Killed;
 
   /* Buffer for error message in case of failure.  */
   char ErrorMessage[KWSYSPE_PIPE_BUFFER_SIZE+1];
@@ -649,6 +656,8 @@ int kwsysProcess_GetOption(kwsysProcess* cp, int optionId)
     case kwsysProcess_Option_Detach: return cp->OptionDetach;
     case kwsysProcess_Option_MergeOutput: return cp->MergeOutput;
     case kwsysProcess_Option_Verbatim: return cp->Verbatim;
+    case kwsysProcess_Option_CreateProcessGroup:
+      return cp->CreateProcessGroup;
     default: return 0;
     }
 }
@@ -666,6 +675,8 @@ void kwsysProcess_SetOption(kwsysProcess* cp, int optionId, int value)
     case kwsysProcess_Option_Detach: cp->OptionDetach = value; break;
     case kwsysProcess_Option_MergeOutput: cp->MergeOutput = value; break;
     case kwsysProcess_Option_Verbatim: cp->Verbatim = value; break;
+    case kwsysProcess_Option_CreateProcessGroup:
+      cp->CreateProcessGroup = value; break;
     default: break;
     }
 }
@@ -1490,6 +1501,45 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
 }
 
 /*--------------------------------------------------------------------------*/
+void kwsysProcess_Interrupt(kwsysProcess* cp)
+{
+  int i;
+  /* Make sure we are executing a process.  */
+  if(!cp || cp->State != kwsysProcess_State_Executing || cp->TimeoutExpired ||
+     cp->Killed)
+    {
+    return;
+    }
+
+  /* Interrupt the children.  */
+  if (cp->CreateProcessGroup)
+    {
+    if(cp->ForkPIDs)
+      {
+      for(i=0; i < cp->NumberOfCommands; ++i)
+        {
+        /* Make sure the PID is still valid. */
+        if(cp->ForkPIDs[i])
+          {
+          /* The user created a process group for this process.  The group ID
+             is the process ID for the original process in the group.  */
+          kill(-cp->ForkPIDs[i], SIGINT);
+          }
+        }
+      }
+    }
+  else
+    {
+    /* No process group was created.  Kill our own process group.
+       NOTE:  While one could argue that we could call kill(cp->ForkPIDs[i],
+       SIGINT) as a way to still interrupt the process even though it's not in
+       a special group, this is not an option on Windows.  Therefore, we kill
+       the current process group for consistency with Windows.  */
+    kill(0, SIGINT);
+    }
+}
+
+/*--------------------------------------------------------------------------*/
 void kwsysProcess_Kill(kwsysProcess* cp)
 {
   int i;
@@ -1539,10 +1589,28 @@ void kwsysProcess_Kill(kwsysProcess* cp)
 }
 
 /*--------------------------------------------------------------------------*/
+/* Call the free() function with a pointer to volatile without causing
+   compiler warnings.  */
+static void kwsysProcessVolatileFree(volatile void* p)
+{
+  /* clang has made it impossible to free memory that points to volatile
+     without first using special pragmas to disable a warning...  */
+#if defined(__clang__)
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wcast-qual"
+#endif
+  free((void*)p); /* The cast will silence most compilers, but not clang.  */
+#if defined(__clang__)
+# pragma clang diagnostic pop
+#endif
+}
+
+/*--------------------------------------------------------------------------*/
 /* Initialize a process control structure for kwsysProcess_Execute.  */
 static int kwsysProcessInitialize(kwsysProcess* cp)
 {
   int i;
+  volatile pid_t* oldForkPIDs;
   for(i=0; i < KWSYSPE_PIPE_COUNT; ++i)
     {
     cp->PipeReadEnds[i] = -1;
@@ -1571,16 +1639,21 @@ static int kwsysProcessInitialize(kwsysProcess* cp)
   cp->ErrorMessage[0] = 0;
   strcpy(cp->ExitExceptionString, "No exception");
 
-  if(cp->ForkPIDs)
+  oldForkPIDs = cp->ForkPIDs;
+  cp->ForkPIDs = (volatile pid_t*)malloc(
+    sizeof(volatile pid_t)*(size_t)(cp->NumberOfCommands));
+  if(oldForkPIDs)
     {
-    free(cp->ForkPIDs);
+    kwsysProcessVolatileFree(oldForkPIDs);
     }
-  cp->ForkPIDs = (pid_t*)malloc(sizeof(pid_t)*(size_t)(cp->NumberOfCommands));
   if(!cp->ForkPIDs)
     {
     return 0;
     }
-  memset(cp->ForkPIDs, 0, sizeof(pid_t)*(size_t)(cp->NumberOfCommands));
+  for(i=0; i < cp->NumberOfCommands; ++i)
+    {
+    cp->ForkPIDs[i] = 0; /* can't use memset due to volatile */
+    }
 
   if(cp->CommandExitCodes)
     {
@@ -1671,7 +1744,7 @@ static void kwsysProcessCleanup(kwsysProcess* cp, int error)
   /* Free memory.  */
   if(cp->ForkPIDs)
     {
-    free(cp->ForkPIDs);
+    kwsysProcessVolatileFree(cp->ForkPIDs);
     cp->ForkPIDs = 0;
     }
   if(cp->RealWorkingDirectory)
@@ -1758,15 +1831,49 @@ int decc$set_child_standard_streams(int fd1, int fd2, int fd3);
 static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
                               kwsysProcessCreateInformation* si)
 {
+  sigset_t mask, old_mask;
+  int pgidPipe[2];
+  char tmp;
+  ssize_t readRes;
+
   /* Create the error reporting pipe.  */
   if(pipe(si->ErrorPipe) < 0)
     {
     return 0;
     }
 
-  /* Set close-on-exec flag on the error pipe's write end.  */
-  if(fcntl(si->ErrorPipe[1], F_SETFD, FD_CLOEXEC) < 0)
+  /* Create a pipe for detecting that the child process has created a process
+     group and session.  */
+  if(pipe(pgidPipe) < 0)
     {
+    kwsysProcessCleanupDescriptor(&si->ErrorPipe[0]);
+    kwsysProcessCleanupDescriptor(&si->ErrorPipe[1]);
+    return 0;
+    }
+
+  /* Set close-on-exec flag on the pipe's write end.  */
+  if(fcntl(si->ErrorPipe[1], F_SETFD, FD_CLOEXEC) < 0 ||
+     fcntl(pgidPipe[1], F_SETFD, FD_CLOEXEC) < 0)
+    {
+    kwsysProcessCleanupDescriptor(&si->ErrorPipe[0]);
+    kwsysProcessCleanupDescriptor(&si->ErrorPipe[1]);
+    kwsysProcessCleanupDescriptor(&pgidPipe[0]);
+    kwsysProcessCleanupDescriptor(&pgidPipe[1]);
+    return 0;
+    }
+
+  /* Block SIGINT / SIGTERM while we start.  The purpose is so that our signal
+     handler doesn't get called from the child process after the fork and
+     before the exec, and subsequently start kill()'ing PIDs from ForkPIDs. */
+  sigemptyset(&mask);
+  sigaddset(&mask, SIGINT);
+  sigaddset(&mask, SIGTERM);
+  if(sigprocmask(SIG_BLOCK, &mask, &old_mask) < 0)
+    {
+    kwsysProcessCleanupDescriptor(&si->ErrorPipe[0]);
+    kwsysProcessCleanupDescriptor(&si->ErrorPipe[1]);
+    kwsysProcessCleanupDescriptor(&pgidPipe[0]);
+    kwsysProcessCleanupDescriptor(&pgidPipe[1]);
     return 0;
     }
 
@@ -1774,13 +1881,19 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
 #if defined(__VMS)
   /* VMS needs vfork and execvp to be in the same function because
      they use setjmp/longjmp to run the child startup code in the
-     parent!  TODO: OptionDetach.  */
+     parent!  TODO: OptionDetach.  Also
+     TODO:  CreateProcessGroup.  */
   cp->ForkPIDs[prIndex] = vfork();
 #else
   cp->ForkPIDs[prIndex] = kwsysProcessFork(cp, si);
 #endif
   if(cp->ForkPIDs[prIndex] < 0)
     {
+    sigprocmask(SIG_SETMASK, &old_mask, 0);
+    kwsysProcessCleanupDescriptor(&si->ErrorPipe[0]);
+    kwsysProcessCleanupDescriptor(&si->ErrorPipe[1]);
+    kwsysProcessCleanupDescriptor(&pgidPipe[0]);
+    kwsysProcessCleanupDescriptor(&pgidPipe[1]);
     return 0;
     }
 
@@ -1790,8 +1903,10 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
     /* Specify standard pipes for child process.  */
     decc$set_child_standard_streams(si->StdIn, si->StdOut, si->StdErr);
 #else
-    /* Close the read end of the error reporting pipe.  */
+    /* Close the read end of the error reporting / process group
+       setup pipe.  */
     close(si->ErrorPipe[0]);
+    close(pgidPipe[0]);
 
     /* Setup the stdin, stdout, and stderr pipes.  */
     if(si->StdIn > 0)
@@ -1819,11 +1934,25 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
 
     /* Restore all default signal handlers. */
     kwsysProcessRestoreDefaultSignalHandlers();
+
+    /* Now that we have restored default signal handling and created the
+       process group, restore mask.  */
+    sigprocmask(SIG_SETMASK, &old_mask, 0);
+
+    /* Create new process group.  We use setsid instead of setpgid to avoid
+       the child getting hung up on signals like SIGTTOU.  (In the real world,
+       this has been observed where "git svn" ends up calling the "resize"
+       program which opens /dev/tty.  */
+    if(cp->CreateProcessGroup && setsid() < 0)
+      {
+      kwsysProcessChildErrorExit(si->ErrorPipe[1]);
+      }
 #endif
 
     /* Execute the real process.  If successful, this does not return.  */
     execvp(cp->Commands[prIndex][0], cp->Commands[prIndex]);
     /* TODO: What does VMS do if the child fails to start?  */
+    /* TODO: On VMS, how do we put the process in a new group?  */
 
     /* Failure.  Report error to parent and terminate.  */
     kwsysProcessChildErrorExit(si->ErrorPipe[1]);
@@ -1834,11 +1963,33 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
   decc$set_child_standard_streams(0, 1, 2);
 #endif
 
+  /* We are done with the error reporting pipe and process group setup pipe
+     write end.  */
+  kwsysProcessCleanupDescriptor(&si->ErrorPipe[1]);
+  kwsysProcessCleanupDescriptor(&pgidPipe[1]);
+
+  /* Make sure the child is in the process group before we proceed.  This
+     avoids race conditions with calls to the kill function that we make for
+     signalling process groups.  */
+  while((readRes = read(pgidPipe[0], &tmp, 1)) > 0);
+  if(readRes < 0)
+    {
+    sigprocmask(SIG_SETMASK, &old_mask, 0);
+    kwsysProcessCleanupDescriptor(&si->ErrorPipe[0]);
+    kwsysProcessCleanupDescriptor(&pgidPipe[0]);
+    return 0;
+    }
+  kwsysProcessCleanupDescriptor(&pgidPipe[0]);
+
+  /* Unmask signals.  */
+  if(sigprocmask(SIG_SETMASK, &old_mask, 0) < 0)
+    {
+    kwsysProcessCleanupDescriptor(&si->ErrorPipe[0]);
+    return 0;
+    }
+
   /* A child has been created.  */
   ++cp->CommandsLeft;
-
-  /* We are done with the error reporting pipe write end.  */
-  kwsysProcessCleanupDescriptor(&si->ErrorPipe[1]);
 
   /* Block until the child's exec call succeeds and closes the error
      pipe or writes data to the pipe to report an error.  */
@@ -1877,6 +2028,17 @@ static void kwsysProcessDestroy(kwsysProcess* cp)
   /* A child process has terminated.  Reap it if it is one handled by
      this object.  */
   int i;
+  /* Temporarily disable signals that access ForkPIDs.  We don't want them to
+     read a reaped PID, and writes to ForkPIDs are not atomic.  */
+  sigset_t mask, old_mask;
+  sigemptyset(&mask);
+  sigaddset(&mask, SIGINT);
+  sigaddset(&mask, SIGTERM);
+  if(sigprocmask(SIG_BLOCK, &mask, &old_mask) < 0)
+    {
+    return;
+    }
+
   for(i=0; i < cp->NumberOfCommands; ++i)
     {
     if(cp->ForkPIDs[i])
@@ -1910,6 +2072,9 @@ static void kwsysProcessDestroy(kwsysProcess* cp)
         }
       }
     }
+
+  /* Re-enable signals.  */
+  sigprocmask(SIG_SETMASK, &old_mask, 0);
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1938,7 +2103,7 @@ static int kwsysProcessSetupOutputPipeFile(int* p, const char* name)
 
   /* Assign the replacement descriptor.  */
   *p = fout;
-  return 1;  
+  return 1;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2582,19 +2747,23 @@ typedef struct kwsysProcessInstances_s
 } kwsysProcessInstances;
 static kwsysProcessInstances kwsysProcesses;
 
-/* The old SIGCHLD handler.  */
+/* The old SIGCHLD / SIGINT / SIGTERM handlers.  */
 static struct sigaction kwsysProcessesOldSigChldAction;
+static struct sigaction kwsysProcessesOldSigIntAction;
+static struct sigaction kwsysProcessesOldSigTermAction;
 
 /*--------------------------------------------------------------------------*/
 static void kwsysProcessesUpdate(kwsysProcessInstances* newProcesses)
 {
-  /* Block SIGCHLD while we update the set of pipes to check.
+  /* Block signals while we update the set of pipes to check.
      TODO: sigprocmask is undefined for threaded apps.  See
      pthread_sigmask.  */
   sigset_t newset;
   sigset_t oldset;
   sigemptyset(&newset);
   sigaddset(&newset, SIGCHLD);
+  sigaddset(&newset, SIGINT);
+  sigaddset(&newset, SIGTERM);
   sigprocmask(SIG_BLOCK, &newset, &oldset);
 
   /* Store the new set in that seen by the signal handler.  */
@@ -2686,20 +2855,35 @@ static int kwsysProcessesAdd(kwsysProcess* cp)
     {
     /* Install our handler for SIGCHLD.  Repeat call until it is not
        interrupted.  */
-    struct sigaction newSigChldAction;
-    memset(&newSigChldAction, 0, sizeof(struct sigaction));
+    struct sigaction newSigAction;
+    memset(&newSigAction, 0, sizeof(struct sigaction));
 #if KWSYSPE_USE_SIGINFO
-    newSigChldAction.sa_sigaction = kwsysProcessesSignalHandler;
-    newSigChldAction.sa_flags = SA_NOCLDSTOP | SA_SIGINFO;
+    newSigAction.sa_sigaction = kwsysProcessesSignalHandler;
+    newSigAction.sa_flags = SA_NOCLDSTOP | SA_SIGINFO;
 # ifdef SA_RESTART
-    newSigChldAction.sa_flags |= SA_RESTART;
+    newSigAction.sa_flags |= SA_RESTART;
 # endif
 #else
-    newSigChldAction.sa_handler = kwsysProcessesSignalHandler;
-    newSigChldAction.sa_flags = SA_NOCLDSTOP;
+    newSigAction.sa_handler = kwsysProcessesSignalHandler;
+    newSigAction.sa_flags = SA_NOCLDSTOP;
 #endif
-    while((sigaction(SIGCHLD, &newSigChldAction,
+    sigemptyset(&newSigAction.sa_mask);
+    while((sigaction(SIGCHLD, &newSigAction,
                      &kwsysProcessesOldSigChldAction) < 0) &&
+          (errno == EINTR));
+
+    /* Install our handler for SIGINT / SIGTERM.  Repeat call until
+       it is not interrupted.  */
+    sigemptyset(&newSigAction.sa_mask);
+    sigaddset(&newSigAction.sa_mask, SIGTERM);
+    while((sigaction(SIGINT, &newSigAction,
+                     &kwsysProcessesOldSigIntAction) < 0) &&
+          (errno == EINTR));
+
+    sigemptyset(&newSigAction.sa_mask);
+    sigaddset(&newSigAction.sa_mask, SIGINT);
+    while((sigaction(SIGTERM, &newSigAction,
+                     &kwsysProcessesOldSigIntAction) < 0) &&
           (errno == EINTR));
     }
   }
@@ -2734,9 +2918,13 @@ static void kwsysProcessesRemove(kwsysProcess* cp)
     /* If this was the last process, disable the signal handler.  */
     if(newProcesses.Count == 0)
       {
-      /* Restore the SIGCHLD handler.  Repeat call until it is not
+      /* Restore the signal handlers.  Repeat call until it is not
          interrupted.  */
       while((sigaction(SIGCHLD, &kwsysProcessesOldSigChldAction, 0) < 0) &&
+            (errno == EINTR));
+      while((sigaction(SIGINT, &kwsysProcessesOldSigIntAction, 0) < 0) &&
+            (errno == EINTR));
+      while((sigaction(SIGTERM, &kwsysProcessesOldSigTermAction, 0) < 0) &&
             (errno == EINTR));
 
       /* Free the table of process pointers since it is now empty.
@@ -2763,39 +2951,108 @@ static void kwsysProcessesSignalHandler(int signum
 #endif
   )
 {
-  (void)signum;
+  int i, j, procStatus, old_errno = errno;
 #if KWSYSPE_USE_SIGINFO
   (void)info;
   (void)ucontext;
 #endif
 
   /* Signal all process objects that a child has terminated.  */
-  {
-  int i;
-  for(i=0; i < kwsysProcesses.Count; ++i)
+  switch(signum)
     {
-    /* Set the pipe in a signalled state.  */
-    char buf = 1;
-    kwsysProcess* cp = kwsysProcesses.Processes[i];
-    kwsysProcess_ssize_t status=
-      read(cp->PipeReadEnds[KWSYSPE_PIPE_SIGNAL], &buf, 1);
-    (void)status;
-    status=write(cp->SignalPipe, &buf, 1);
-    (void)status;
+    case SIGCHLD:
+      for(i=0; i < kwsysProcesses.Count; ++i)
+        {
+        /* Set the pipe in a signalled state.  */
+        char buf = 1;
+        kwsysProcess* cp = kwsysProcesses.Processes[i];
+        kwsysProcess_ssize_t pipeStatus=
+          read(cp->PipeReadEnds[KWSYSPE_PIPE_SIGNAL], &buf, 1);
+        (void)pipeStatus;
+        pipeStatus=write(cp->SignalPipe, &buf, 1);
+        (void)pipeStatus;
+        }
+      break;
+    case SIGINT:
+    case SIGTERM:
+      /* Signal child processes that are running in new process groups.  */
+      for(i=0; i < kwsysProcesses.Count; ++i)
+        {
+        kwsysProcess* cp = kwsysProcesses.Processes[i];
+        /* Check Killed to avoid data race condition when killing.
+           Check State to avoid data race condition in kwsysProcessCleanup
+           when there is an error (it leaves a reaped PID).  */
+        if(cp->CreateProcessGroup && !cp->Killed &&
+           cp->State != kwsysProcess_State_Error && cp->ForkPIDs)
+          {
+          for(j=0; j < cp->NumberOfCommands; ++j)
+            {
+            /* Make sure the PID is still valid. */
+            if(cp->ForkPIDs[j])
+              {
+              /* The user created a process group for this process.  The group ID
+                 is the process ID for the original process in the group.  */
+              kill(-cp->ForkPIDs[j], SIGINT);
+              }
+            }
+          }
+        }
+
+      /* Wait for all processes to terminate.  */
+      while(wait(&procStatus) >= 0 || errno != ECHILD)
+        {
+        }
+
+      /* Terminate the process, which is now in an inconsistent state
+         because we reaped all the PIDs that it may have been reaping
+         or may have reaped in the future.  Reraise the signal so that
+         the proper exit code is returned.  */
+      {
+      /* Install default signal handler.  */
+      struct sigaction defSigAction;
+      sigset_t unblockSet;
+      memset(&defSigAction, 0, sizeof(defSigAction));
+      defSigAction.sa_handler = SIG_DFL;
+      sigemptyset(&defSigAction.sa_mask);
+      while((sigaction(signum, &defSigAction, 0) < 0) &&
+            (errno == EINTR));
+      /* Unmask the signal.  */
+      sigemptyset(&unblockSet);
+      sigaddset(&unblockSet, signum);
+      sigprocmask(SIG_UNBLOCK, &unblockSet, 0);
+      /* Raise the signal again.  */
+      raise(signum);
+      /* We shouldn't get here... but if we do... */
+      _exit(1);
+      }
+      /* break omitted to silence unreachable code clang compiler warning.  */
     }
-  }
 
 #if !KWSYSPE_USE_SIGINFO
-  /* Re-Install our handler for SIGCHLD.  Repeat call until it is not
-     interrupted.  */
+  /* Re-Install our handler.  Repeat call until it is not interrupted.  */
   {
-  struct sigaction newSigChldAction;
-  memset(&newSigChldAction, 0, sizeof(struct sigaction));
+  struct sigaction newSigAction;
+  struct sigaction &oldSigAction;
+  memset(&newSigAction, 0, sizeof(struct sigaction));
   newSigChldAction.sa_handler = kwsysProcessesSignalHandler;
   newSigChldAction.sa_flags = SA_NOCLDSTOP;
-  while((sigaction(SIGCHLD, &newSigChldAction,
-                   &kwsysProcessesOldSigChldAction) < 0) &&
+  sigemptyset(&newSigAction.sa_mask);
+  switch(signum)
+    {
+    case SIGCHLD: oldSigAction = &kwsysProcessesOldSigChldAction; break;
+    case SIGINT:
+      sigaddset(&newSigAction.sa_mask, SIGTERM);
+      oldSigAction = &kwsysProcessesOldSigIntAction; break;
+    case SIGTERM:
+      sigaddset(&newSigAction.sa_mask, SIGINT);
+      oldSigAction = &kwsysProcessesOldSigTermAction; break;
+    default: return 0;
+    }
+  while((sigaction(signum, &newSigAction,
+                   oldSigAction) < 0) &&
         (errno == EINTR));
   }
 #endif
+
+  errno = old_errno;
 }
