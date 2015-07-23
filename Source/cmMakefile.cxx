@@ -4747,7 +4747,7 @@ cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id) const
   cmLocalGenerator* lg = this->LocalGenerator;
   while(lg)
     {
-    cmMakefile* mf = lg->GetMakefile();
+    cmMakefile const* mf = lg->GetMakefile();
     for(PolicyStackType::const_reverse_iterator psi =
         mf->PolicyStack.rbegin(); psi != mf->PolicyStack.rend(); ++psi)
       {
