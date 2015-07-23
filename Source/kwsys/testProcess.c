@@ -394,7 +394,7 @@ static int runChild2(kwsysProcess* kp,
 
   if(interruptDelay)
     {
-    testProcess_sleep(interruptDelay);
+    testProcess_sleep((unsigned int)interruptDelay);
     kwsysProcess_Interrupt(kp);
     }
 
