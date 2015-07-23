@@ -43,7 +43,8 @@ public:
 
   class Snapshot {
   public:
-    Snapshot(cmState* state = 0, PositionType position = PositionType());
+    Snapshot(cmState* state = 0);
+    Snapshot(cmState* state, PositionType position);
 
     void SetListFile(std::string const& listfile);
 
