@@ -10,7 +10,7 @@
  containing SET commands that use the CACHE option, not a
  cache-format file.
 
-``-D <var>:<type>=<value>``
+``-D <var>:<type>=<value>, -D <var>=<value>``
  Create a cmake cache entry.
 
  When cmake is first run in an empty build tree, it creates a
@@ -18,6 +18,17 @@
  the project.  This option may be used to specify a setting that
  takes priority over the project's default value.  The option may be
  repeated for as many cache entries as desired.
+
+ If the ``:<type>`` portion is given it must be one of the types
+ specified by the :command:`set` command documentation for its
+ ``CACHE`` signature.
+ If the ``:<type>`` portion is omitted the entry will be created
+ with no type if it does not exist with a type already.  If a
+ command in the project sets the type to ``PATH`` or ``FILEPATH``
+ then the ``<value>`` will be converted to an absolute path.
+
+ This option may also be given as a single argument:
+ ``-D<var>:<type>=<value>`` or ``-D<var>=<value>``.
 
 ``-U <globbing_expr>``
  Remove matching entries from CMake cache.
@@ -35,7 +46,7 @@
  CMake may support multiple native build systems on certain
  platforms.  A generator is responsible for generating a particular
  build system.  Possible generator names are specified in the
- Generators section.
+ :manual:`cmake-generators(7)` manual.
 
 ``-T <toolset-name>``
  Specify toolset name if supported by generator.

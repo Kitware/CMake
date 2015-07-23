@@ -43,6 +43,7 @@ public:
     newC->Args = this->Args;
     newC->Functions = this->Functions;
     newC->Policies = this->Policies;
+    newC->FilePath = this->FilePath;
     return newC;
   }
 
@@ -71,8 +72,8 @@ public:
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
   cmPolicies::PolicyMap Policies;
+  std::string FilePath;
 };
-
 
 bool cmFunctionHelperCommand::InvokeInitialPass
 (const std::vector<cmListFileArgument>& args,
@@ -93,14 +94,9 @@ bool cmFunctionHelperCommand::InvokeInitialPass
     return false;
     }
 
-  // we push a scope on the makefile
-  cmMakefile::LexicalPushPop lexScope(this->Makefile);
-  cmMakefile::ScopePushPop varScope(this->Makefile);
-  static_cast<void>(varScope);
-
-  // Push a weak policy scope which restores the policies recorded at
-  // function creation.
-  cmMakefile::PolicyPushPop polScope(this->Makefile, true, this->Policies);
+  cmMakefile::FunctionPushPop functionScope(this->Makefile,
+                                            this->FilePath,
+                                            this->Policies);
 
   // set the value of argc
   std::ostringstream strStream;
@@ -145,8 +141,7 @@ bool cmFunctionHelperCommand::InvokeInitialPass
       {
       // The error message should have already included the call stack
       // so we do not need to report an error here.
-      lexScope.Quiet();
-      polScope.Quiet();
+      functionScope.Quiet();
       inStatus.SetNestedError(true);
       return false;
       }
@@ -179,23 +174,12 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
       cmFunctionHelperCommand *f = new cmFunctionHelperCommand();
       f->Args = this->Args;
       f->Functions = this->Functions;
+      f->FilePath = this->GetStartingContext().FilePath;
       mf.RecordPolicies(f->Policies);
 
-      // Set the FilePath on the arguments to match the function since it is
-      // not stored and the original values may be freed
-      for (unsigned int i = 0; i < f->Functions.size(); ++i)
-        {
-        for (unsigned int j = 0; j < f->Functions[i].Arguments.size(); ++j)
-          {
-          f->Functions[i].Arguments[j].FilePath =
-            f->Functions[i].FilePath.c_str();
-          }
-        }
-
       std::string newName = "_" + this->Args[0];
-      mf.GetCMakeInstance()->RenameCommand(this->Args[0],
-                                           newName);
-      mf.AddCommand(f);
+      mf.GetState()->RenameCommand(this->Args[0], newName);
+      mf.GetState()->AddCommand(f);
 
       // remove the function blocker now that the function is defined
       mf.RemoveFunctionBlocker(this, lff);
@@ -221,7 +205,8 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf)
   if(!cmSystemTools::Strucmp(lff.Name.c_str(),"endfunction"))
     {
     std::vector<std::string> expandedArguments;
-    mf.ExpandArguments(lff.Arguments, expandedArguments);
+    mf.ExpandArguments(lff.Arguments, expandedArguments,
+                       this->GetStartingContext().FilePath.c_str());
     // if the endfunction has arguments then make sure
     // they match the ones in the opening function command
     if ((expandedArguments.empty() ||

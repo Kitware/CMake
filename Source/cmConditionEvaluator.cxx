@@ -15,7 +15,8 @@
 cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile):
   Makefile(makefile),
   Policy12Status(makefile.GetPolicyStatus(cmPolicies::CMP0012)),
-  Policy54Status(makefile.GetPolicyStatus(cmPolicies::CMP0054))
+  Policy54Status(makefile.GetPolicyStatus(cmPolicies::CMP0054)),
+  Policy57Status(makefile.GetPolicyStatus(cmPolicies::CMP0057))
 {
 
 }
@@ -111,14 +112,10 @@ const char* cmConditionEvaluator::GetDefinitionIfUnquoted(
 
   if(def && argument.WasQuoted() && this->Policy54Status == cmPolicies::WARN)
     {
-    bool hasBeenReported = this->Makefile.HasCMP0054AlreadyBeenReported(
-      this->Makefile.GetBacktrace()[0]);
-
-    if(!hasBeenReported)
+    if(!this->Makefile.HasCMP0054AlreadyBeenReported())
       {
       std::ostringstream e;
-      e << (this->Makefile.GetPolicies()->GetPolicyWarning(
-        cmPolicies::CMP0054)) << "\n";
+      e << (cmPolicies::GetPolicyWarning(cmPolicies::CMP0054)) << "\n";
       e << "Quoted variables like \"" << argument.GetValue() <<
         "\" will no longer be dereferenced "
         "when the policy is set to NEW.  "
@@ -161,14 +158,10 @@ bool cmConditionEvaluator::IsKeyword(std::string const& keyword,
   if(isKeyword && argument.WasQuoted() &&
     this->Policy54Status == cmPolicies::WARN)
     {
-    bool hasBeenReported = this->Makefile.HasCMP0054AlreadyBeenReported(
-      this->Makefile.GetBacktrace()[0]);
-
-    if(!hasBeenReported)
+    if(!this->Makefile.HasCMP0054AlreadyBeenReported())
       {
       std::ostringstream e;
-      e << (this->Makefile.GetPolicies()->GetPolicyWarning(
-        cmPolicies::CMP0054)) << "\n";
+      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0054) << "\n";
       e << "Quoted keywords like \"" << argument.GetValue() <<
         "\" will no longer be interpreted as keywords "
         "when the policy is set to NEW.  "
@@ -279,10 +272,9 @@ bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
       {
       case cmPolicies::WARN:
         {
-        cmPolicies* policies = this->Makefile.GetPolicies();
         errorString = "An argument named \"" + newArg.GetValue()
           + "\" appears in a conditional statement.  "
-          + policies->GetPolicyWarning(cmPolicies::CMP0012);
+          + cmPolicies::GetPolicyWarning(cmPolicies::CMP0012);
         status = cmake::AUTHOR_WARNING;
         }
       case cmPolicies::OLD:
@@ -290,10 +282,9 @@ bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
         {
-        cmPolicies* policies = this->Makefile.GetPolicies();
         errorString = "An argument named \"" + newArg.GetValue()
           + "\" appears in a conditional statement.  "
-          + policies->GetRequiredPolicyError(cmPolicies::CMP0012);
+          + cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0012);
         status = cmake::FATAL_ERROR;
         }
       case cmPolicies::NEW:
@@ -481,8 +472,10 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList &newArgs,
       // does a command exist
       if (this->IsKeyword("COMMAND", *arg) && argP1  != newArgs.end())
         {
+        cmCommand* command =
+            this->Makefile.GetState()->GetCommand(argP1->c_str());
         this->HandlePredicate(
-          this->Makefile.CommandExists(argP1->c_str()),
+          command ? true : false,
           reducible, arg, newArgs, argP1, argP2);
         }
       // does a policy exist
@@ -490,8 +483,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList &newArgs,
         {
         cmPolicies::PolicyID pid;
         this->HandlePredicate(
-          this->Makefile.GetPolicies()->GetPolicyID(
-            argP1->c_str(), pid),
+          cmPolicies::GetPolicyID(argP1->c_str(), pid),
             reducible, arg, newArgs, argP1, argP2);
         }
       // does a target exist
@@ -672,6 +664,40 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
         this->HandleBinaryOp(
           (success==false || fileIsNewer==1 || fileIsNewer==0),
           reducible, arg, newArgs, argP1, argP2);
+        }
+
+      if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
+          this->IsKeyword("IN_LIST", *argP1))
+        {
+        if(this->Policy57Status != cmPolicies::OLD &&
+          this->Policy57Status != cmPolicies::WARN)
+          {
+          bool result = false;
+
+          def = this->GetVariableOrString(*arg);
+          def2 = this->Makefile.GetDefinition(argP2->GetValue());
+
+          if(def2)
+            {
+            std::vector<std::string> list;
+            cmSystemTools::ExpandListArgument(def2, list, true);
+
+            result = std::find(list.begin(), list.end(), def) != list.end();
+            }
+
+          this->HandleBinaryOp(result,
+            reducible, arg, newArgs, argP1, argP2);
+          }
+          else if(this->Policy57Status == cmPolicies::WARN)
+            {
+            std::ostringstream e;
+            e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0057) << "\n";
+            e << "IN_LIST will be interpreted as an operator "
+              "when the policy is set to NEW.  "
+              "Since the policy is not set the OLD behavior will be used.";
+
+            this->Makefile.IssueMessage(cmake::AUTHOR_WARNING, e.str());
+            }
         }
 
       ++arg;

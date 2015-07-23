@@ -23,8 +23,26 @@
 class cmGlobalVisualStudioGenerator : public cmGlobalGenerator
 {
 public:
-  cmGlobalVisualStudioGenerator();
+  /** Known versions of Visual Studio.  */
+  enum VSVersion
+  {
+    VS6 = 60,
+    VS7 = 70,
+    VS71 = 71,
+    VS8 = 80,
+    VS9 = 90,
+    VS10 = 100,
+    VS11 = 110,
+    VS12 = 120,
+    /* VS13 = 130 was skipped */
+    VS14 = 140
+  };
+
+  cmGlobalVisualStudioGenerator(cmake* cm);
   virtual ~cmGlobalVisualStudioGenerator();
+
+  VSVersion GetVersion() const;
+  void SetVersion(VSVersion v);
 
   /**
    * Configure CMake's Visual Studio macros file into the user's Visual
@@ -51,8 +69,8 @@ public:
    * Call the ReloadProjects macro if necessary based on
    * GetFilesReplacedDuringGenerate results.
    */
-  virtual void CallVisualStudioMacro(MacroName m,
-                                     const char* vsSolutionFile = 0);
+  void CallVisualStudioMacro(MacroName m,
+                             const char* vsSolutionFile = 0);
 
   // return true if target is fortran only
   bool TargetIsFortranOnly(cmTarget const& t);
@@ -73,7 +91,8 @@ public:
   class TargetSet: public std::set<cmTarget const*> {};
   struct TargetCompare
   {
-    bool operator()(cmTarget const* l, cmTarget const* r) const;
+    bool operator()(cmGeneratorTarget const* l,
+                    cmGeneratorTarget const* r) const;
   };
   class OrderedTargetDependSet;
 
@@ -84,6 +103,10 @@ public:
                                       const std::string& config) const;
 
   void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
+
+  void AddSymbolExportCommand(
+    cmGeneratorTarget*, std::vector<cmCustomCommand>& commands,
+    std::string const& configName);
 protected:
   virtual void Generate();
 
@@ -106,6 +129,9 @@ protected:
   std::string GetUtilityDepend(cmTarget const* target);
   typedef std::map<cmTarget const*, std::string> UtilityDependsMap;
   UtilityDependsMap UtilityDepends;
+
+protected:
+  VSVersion Version;
 
 private:
   virtual std::string GetVSMakeProgram() = 0;

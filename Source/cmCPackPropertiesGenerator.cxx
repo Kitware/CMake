@@ -1,6 +1,6 @@
 #include "cmCPackPropertiesGenerator.h"
 
-#include "cmLocalGenerator.h"
+#include "cmOutputConverter.h"
 
 cmCPackPropertiesGenerator::cmCPackPropertiesGenerator(
   cmMakefile* mf,
@@ -29,15 +29,15 @@ void cmCPackPropertiesGenerator::GenerateScriptForConfig(std::ostream& os,
     cmInstalledFile::Property const& property = i->second;
 
     os << indent << "set_property(INSTALL " <<
-      cmLocalGenerator::EscapeForCMake(expandedFileName) << " PROPERTY " <<
-      cmLocalGenerator::EscapeForCMake(name);
+      cmOutputConverter::EscapeForCMake(expandedFileName) << " PROPERTY " <<
+      cmOutputConverter::EscapeForCMake(name);
 
     for(cmInstalledFile::ExpressionVectorType::const_iterator
       j = property.ValueExpressions.begin();
       j != property.ValueExpressions.end(); ++j)
       {
       std::string value = (*j)->Evaluate(this->Makefile, config);
-      os << " " << cmLocalGenerator::EscapeForCMake(value);
+      os << " " << cmOutputConverter::EscapeForCMake(value);
       }
 
     os << ")\n";

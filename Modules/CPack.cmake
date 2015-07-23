@@ -228,7 +228,7 @@
 #
 #  List of four values that specify what project to install. The four values
 #  are: Build directory, Project Name, Project Component, Directory. If
-#  omitted, CPack will build an installer that installers everything.
+#  omitted, CPack will build an installer that installs everything.
 #
 # .. variable:: CPACK_SYSTEM_NAME
 #

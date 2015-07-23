@@ -1,409 +1,179 @@
 #include "cmPolicies.h"
 #include "cmake.h"
 #include "cmMakefile.h"
-#include "cmSourceFile.h"
 #include "cmVersion.h"
 #include "cmVersionMacros.h"
+#include "cmAlgorithms.h"
 #include <map>
 #include <set>
 #include <queue>
 #include <assert.h>
 
-const char* cmPolicies::PolicyStatusNames[] = {
-  "OLD", "WARN", "NEW", "REQUIRED_IF_USED", "REQUIRED_ALWAYS"
-};
-
-class cmPolicy
+static bool stringToId(const char* input, cmPolicies::PolicyID& pid)
 {
-public:
-  cmPolicy(cmPolicies::PolicyID iD,
-            const char *idString,
-            const char *shortDescription,
-            unsigned int majorVersionIntroduced,
-            unsigned int minorVersionIntroduced,
-            unsigned int patchVersionIntroduced,
-            cmPolicies::PolicyStatus status)
-  {
-    if (!idString || !shortDescription)
-      {
-      cmSystemTools::Error("Attempt to define a policy without "
-        "all parameters being specified!");
-      return;
-      }
-    this->ID = iD;
-    this->IDString = idString;
-    this->ShortDescription = shortDescription;
-    this->MajorVersionIntroduced = majorVersionIntroduced;
-    this->MinorVersionIntroduced = minorVersionIntroduced;
-    this->PatchVersionIntroduced = patchVersionIntroduced;
-    this->Status = status;
-  }
-
-  std::string GetVersionString()
-  {
-    std::ostringstream v;
-    v << this->MajorVersionIntroduced << "." << this->MinorVersionIntroduced;
-    if(this->PatchVersionIntroduced > 0)
-      {
-      v << "." << this->PatchVersionIntroduced;
-      }
-    return v.str();
-  }
-
-  bool IsPolicyNewerThan(unsigned int majorV,
-                         unsigned int minorV,
-                         unsigned int patchV)
-  {
-    if (majorV < this->MajorVersionIntroduced)
-      {
-      return true;
-      }
-    if (majorV > this->MajorVersionIntroduced)
-      {
-      return false;
-      }
-    if (minorV < this->MinorVersionIntroduced)
-      {
-      return true;
-      }
-    if (minorV > this->MinorVersionIntroduced)
-      {
-      return false;
-      }
-    return (patchV < this->PatchVersionIntroduced);
-  }
-
-  cmPolicies::PolicyID ID;
-  std::string IDString;
-  std::string ShortDescription;
-  unsigned int MajorVersionIntroduced;
-  unsigned int MinorVersionIntroduced;
-  unsigned int PatchVersionIntroduced;
-  cmPolicies::PolicyStatus Status;
-};
-
-cmPolicies::cmPolicies()
-{
-  // define all the policies
-  this->DefinePolicy(
-    CMP0000, "CMP0000",
-    "A minimum required CMake version must be specified.",
-    2,6,0, cmPolicies::WARN
-    );
-
-  this->DefinePolicy(
-    CMP0001, "CMP0001",
-    "CMAKE_BACKWARDS_COMPATIBILITY should no longer be used.",
-    2,6,0, cmPolicies::WARN
-    );
-
-  this->DefinePolicy(
-    CMP0002, "CMP0002",
-    "Logical target names must be globally unique.",
-    2,6,0, cmPolicies::WARN
-    );
-
-  this->DefinePolicy(
-    CMP0003, "CMP0003",
-    "Libraries linked via full path no longer produce linker search paths.",
-    2,6,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0004, "CMP0004",
-    "Libraries linked may not have leading or trailing whitespace.",
-    2,6,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0005, "CMP0005",
-    "Preprocessor definition values are now escaped automatically.",
-    2,6,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0006, "CMP0006",
-    "Installing MACOSX_BUNDLE targets requires a BUNDLE DESTINATION.",
-    2,6,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0007, "CMP0007",
-    "list command no longer ignores empty elements.",
-    2,6,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0008, "CMP0008",
-    "Libraries linked by full-path must have a valid library file name.",
-    2,6,1, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0009, "CMP0009",
-    "FILE GLOB_RECURSE calls should not follow symlinks by default.",
-    2,6,2, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0010, "CMP0010",
-    "Bad variable reference syntax is an error.",
-    2,6,3, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0011, "CMP0011",
-    "Included scripts do automatic cmake_policy PUSH and POP.",
-    2,6,3, cmPolicies::WARN);
-
-    this->DefinePolicy(
-    CMP0012, "CMP0012",
-    "if() recognizes numbers and boolean constants.",
-    2,8,0, cmPolicies::WARN);
-
-    this->DefinePolicy(
-    CMP0013, "CMP0013",
-    "Duplicate binary directories are not allowed.",
-    2,8,0, cmPolicies::WARN);
-
-    this->DefinePolicy(
-    CMP0014, "CMP0014",
-    "Input directories must have CMakeLists.txt.",
-    2,8,0, cmPolicies::WARN);
-
-    this->DefinePolicy(
-    CMP0015, "CMP0015",
-    "link_directories() treats paths relative to the source dir.",
-    2,8,1, cmPolicies::WARN);
-
-    this->DefinePolicy(
-    CMP0016, "CMP0016",
-    "target_link_libraries() reports error if its only argument "
-    "is not a target.",
-    2,8,3, cmPolicies::WARN);
-
-    this->DefinePolicy(
-    CMP0017, "CMP0017",
-    "Prefer files from the CMake module directory when including from there.",
-    2,8,4, cmPolicies::WARN);
-
-    this->DefinePolicy(
-    CMP0018, "CMP0018",
-    "Ignore CMAKE_SHARED_LIBRARY_<Lang>_FLAGS variable.",
-    2,8,9, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0019, "CMP0019",
-    "Do not re-expand variables in include and link information.",
-    2,8,11, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0020, "CMP0020",
-    "Automatically link Qt executables to qtmain target on Windows.",
-    2,8,11, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0021, "CMP0021",
-    "Fatal error on relative paths in INCLUDE_DIRECTORIES target property.",
-    2,8,12, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0022, "CMP0022",
-    "INTERFACE_LINK_LIBRARIES defines the link interface.",
-    2,8,12, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0023, "CMP0023",
-    "Plain and keyword target_link_libraries signatures cannot be mixed.",
-    2,8,12, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0024, "CMP0024",
-    "Disallow include export result.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0025, "CMP0025",
-    "Compiler id for Apple Clang is now AppleClang.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0026, "CMP0026",
-    "Disallow use of the LOCATION target property.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0027, "CMP0027",
-    "Conditionally linked imported targets with missing include directories.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0028, "CMP0028",
-    "Double colon in target name means ALIAS or IMPORTED target.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0029, "CMP0029",
-    "The subdir_depends command should not be called.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0030, "CMP0030",
-    "The use_mangled_mesa command should not be called.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0031, "CMP0031",
-    "The load_command command should not be called.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0032, "CMP0032",
-    "The output_required_files command should not be called.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0033, "CMP0033",
-    "The export_library_dependencies command should not be called.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0034, "CMP0034",
-    "The utility_source command should not be called.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0035, "CMP0035",
-    "The variable_requires command should not be called.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0036, "CMP0036",
-    "The build_name command should not be called.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0037, "CMP0037",
-    "Target names should not be reserved and should match a validity pattern.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0038, "CMP0038",
-    "Targets may not link directly to themselves.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0039, "CMP0039",
-    "Utility targets may not have link dependencies.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0040, "CMP0040",
-    "The target in the TARGET signature of add_custom_command() must exist.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0041, "CMP0041",
-    "Error on relative include with generator expression.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0042, "CMP0042",
-    "MACOSX_RPATH is enabled by default.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0043, "CMP0043",
-    "Ignore COMPILE_DEFINITIONS_<Config> properties.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0044, "CMP0044",
-    "Case sensitive <LANG>_COMPILER_ID generator expressions.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0045, "CMP0045",
-    "Error on non-existent target in get_target_property.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0046, "CMP0046",
-    "Error on non-existent dependency in add_dependencies.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0047, "CMP0047",
-    "Use QCC compiler id for the qcc drivers on QNX.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0048, "CMP0048",
-    "project() command manages VERSION variables.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0049, "CMP0049",
-    "Do not expand variables in target source entries.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0050, "CMP0050",
-    "Disallow add_custom_command SOURCE signatures.",
-    3,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0051, "CMP0051",
-    "List TARGET_OBJECTS in SOURCES target property.",
-    3,1,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0052, "CMP0052",
-    "Reject source and build dirs in installed "
-    "INTERFACE_INCLUDE_DIRECTORIES.",
-    3,1,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0053, "CMP0053",
-    "Simplify variable reference and escape sequence evaluation.",
-    3,1,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0054, "CMP0054",
-    "Only interpret if() arguments as variables or keywords when unquoted.",
-    3,1,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0055, "CMP0055",
-    "Strict checking for break() command.",
-    3,2,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0056, "CMP0056",
-    "Honor link flags in try_compile() source-file signature.",
-    3,2,0, cmPolicies::WARN);
-}
-
-cmPolicies::~cmPolicies()
-{
-  cmDeleteAll(this->Policies);
-}
-
-void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
-                              const char *idString,
-                              const char *shortDescription,
-                              unsigned int majorVersionIntroduced,
-                              unsigned int minorVersionIntroduced,
-                              unsigned int patchVersionIntroduced,
-                              cmPolicies::PolicyStatus status)
-{
-  // a policy must be unique and can only be defined once
-  if (this->Policies.find(iD) != this->Policies.end())
+  assert(input);
+  if (strlen(input) != 7)
     {
-    cmSystemTools::Error("Attempt to redefine a CMake policy for policy "
-      "ID ", this->GetPolicyIDString(iD).c_str());
-    return;
+    return false;
+    }
+  if (!cmHasLiteralPrefix(input, "CMP"))
+    {
+    return false;
+    }
+  if (cmHasLiteralSuffix(input, "0000"))
+    {
+    pid = cmPolicies::CMP0000;
+    return true;
+    }
+  for (int i = 3; i < 7; ++i)
+    {
+    if (!isdigit(*(input + i)))
+      {
+      return false;
+      }
+    }
+  long id;
+  if (!cmSystemTools::StringToLong(input + 3, &id))
+    {
+    return false;
+    }
+  if (id >= cmPolicies::CMPCOUNT)
+    {
+    return false;
+    }
+  pid = cmPolicies::PolicyID(id);
+  return true;
+}
+
+#define CM_SELECT_ID_VERSION(F, A1, A2, A3, A4, A5, A6) F(A1, A3, A4, A5)
+#define CM_FOR_EACH_POLICY_ID_VERSION(POLICY) \
+  CM_FOR_EACH_POLICY_TABLE(POLICY, CM_SELECT_ID_VERSION)
+
+#define CM_SELECT_ID_DOC(F, A1, A2, A3, A4, A5, A6) F(A1, A2)
+#define CM_FOR_EACH_POLICY_ID_DOC(POLICY) \
+  CM_FOR_EACH_POLICY_TABLE(POLICY, CM_SELECT_ID_DOC)
+
+static const char* idToString(cmPolicies::PolicyID id)
+{
+  switch(id)
+    {
+#define POLICY_CASE(ID) \
+    case cmPolicies::ID: \
+      return #ID;
+  CM_FOR_EACH_POLICY_ID(POLICY_CASE)
+#undef POLICY_CASE
+    case cmPolicies::CMPCOUNT:
+      return 0;
+    }
+  return 0;
+}
+
+static const char* idToVersion(cmPolicies::PolicyID id)
+{
+  switch(id)
+    {
+#define POLICY_CASE(ID, V_MAJOR, V_MINOR, V_PATCH) \
+    case cmPolicies::ID: \
+      return #V_MAJOR "." #V_MINOR "." #V_PATCH;
+  CM_FOR_EACH_POLICY_ID_VERSION(POLICY_CASE)
+#undef POLICY_CASE
+    case cmPolicies::CMPCOUNT:
+      return 0;
+    }
+  return 0;
+}
+
+static bool isPolicyNewerThan(cmPolicies::PolicyID id,
+                       unsigned int majorV,
+                       unsigned int minorV,
+                       unsigned int patchV)
+{
+  switch(id)
+    {
+#define POLICY_CASE(ID, V_MAJOR, V_MINOR, V_PATCH) \
+    case cmPolicies::ID: \
+      return (majorV < V_MAJOR || \
+             (majorV == V_MAJOR && \
+              minorV + 1 < V_MINOR + 1) || \
+             (majorV == V_MAJOR && \
+              minorV == V_MINOR && \
+              patchV + 1 < V_PATCH + 1));
+  CM_FOR_EACH_POLICY_ID_VERSION(POLICY_CASE)
+#undef POLICY_CASE
+    case cmPolicies::CMPCOUNT:
+      return false;
+    }
+  return false;
+}
+
+const char* idToShortDescription(cmPolicies::PolicyID id)
+{
+  switch(id)
+    {
+#define POLICY_CASE(ID, SHORT_DESCRIPTION) \
+    case cmPolicies::ID: \
+      return SHORT_DESCRIPTION;
+  CM_FOR_EACH_POLICY_ID_DOC(POLICY_CASE)
+#undef POLICY_CASE
+    case cmPolicies::CMPCOUNT:
+      return 0;
+    }
+  return 0;
+}
+
+//----------------------------------------------------------------------------
+static void DiagnoseAncientPolicies(
+    std::vector<cmPolicies::PolicyID> const& ancient,
+    unsigned int majorVer,
+    unsigned int minorVer,
+    unsigned int patchVer,
+    cmMakefile* mf)
+{
+  std::ostringstream e;
+  e << "The project requests behavior compatible with CMake version \""
+    << majorVer << "." << minorVer << "." << patchVer
+    << "\", which requires the OLD behavior for some policies:\n";
+  for(std::vector<cmPolicies::PolicyID>::const_iterator
+        i = ancient.begin(); i != ancient.end(); ++i)
+    {
+    e << "  " << idToString(*i) << ": " << idToShortDescription(*i) << "\n";
+    }
+  e << "However, this version of CMake no longer supports the OLD "
+    << "behavior for these policies.  "
+    << "Please either update your CMakeLists.txt files to conform to "
+    << "the new behavior or use an older version of CMake that still "
+    << "supports the old behavior.";
+  mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+}
+
+//----------------------------------------------------------------------------
+static bool GetPolicyDefault(cmMakefile* mf, std::string const& policy,
+                             cmPolicies::PolicyStatus* defaultSetting)
+{
+  std::string defaultVar = "CMAKE_POLICY_DEFAULT_" + policy;
+  std::string defaultValue = mf->GetSafeDefinition(defaultVar);
+  if(defaultValue == "NEW")
+    {
+    *defaultSetting = cmPolicies::NEW;
+    }
+  else if(defaultValue == "OLD")
+    {
+    *defaultSetting = cmPolicies::OLD;
+    }
+  else if(defaultValue == "")
+    {
+    *defaultSetting = cmPolicies::WARN;
+    }
+  else
+    {
+    std::ostringstream e;
+    e << defaultVar << " has value \"" << defaultValue
+      << "\" but must be \"OLD\", \"NEW\", or \"\" (empty).";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return false;
     }
 
-  this->Policies[iD] = new cmPolicy(iD, idString,
-                                    shortDescription,
-                                    majorVersionIntroduced,
-                                    minorVersionIntroduced,
-                                    patchVersionIntroduced,
-                                    status);
-  this->PolicyStringMap[idString] = iD;
+  return true;
 }
 
 //----------------------------------------------------------------------------
@@ -468,20 +238,20 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
 
   // now loop over all the policies and set them as appropriate
   std::vector<cmPolicies::PolicyID> ancientPolicies;
-  for(std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i
-                     = this->Policies.begin(); i != this->Policies.end(); ++i)
+  for(PolicyID pid = cmPolicies::CMP0000;
+      pid != cmPolicies::CMPCOUNT; pid = PolicyID(pid+1))
     {
-    if (i->second->IsPolicyNewerThan(majorVer,minorVer,patchVer))
+    if (isPolicyNewerThan(pid, majorVer, minorVer, patchVer))
       {
-      if(i->second->Status == cmPolicies::REQUIRED_ALWAYS)
+      if(cmPolicies::GetPolicyStatus(pid) == cmPolicies::REQUIRED_ALWAYS)
         {
-        ancientPolicies.push_back(i->first);
+        ancientPolicies.push_back(pid);
         }
       else
         {
         cmPolicies::PolicyStatus status = cmPolicies::WARN;
-        if(!this->GetPolicyDefault(mf, i->second->IDString, &status) ||
-           !mf->SetPolicy(i->second->ID, status))
+        if(!GetPolicyDefault(mf, idToString(pid), &status) ||
+           !mf->SetPolicy(pid, status))
           {
           return false;
           }
@@ -489,7 +259,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
       }
     else
       {
-      if (!mf->SetPolicy(i->second->ID, cmPolicies::NEW))
+      if (!mf->SetPolicy(pid, cmPolicies::NEW))
         {
         return false;
         }
@@ -499,39 +269,9 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
   // Make sure the project does not use any ancient policies.
   if(!ancientPolicies.empty())
     {
-    this->DiagnoseAncientPolicies(ancientPolicies,
-                                  majorVer, minorVer, patchVer, mf);
+    DiagnoseAncientPolicies(ancientPolicies,
+                            majorVer, minorVer, patchVer, mf);
     cmSystemTools::SetFatalErrorOccured();
-    return false;
-    }
-
-  return true;
-}
-
-//----------------------------------------------------------------------------
-bool cmPolicies::GetPolicyDefault(cmMakefile* mf, std::string const& policy,
-                                  cmPolicies::PolicyStatus* defaultSetting)
-{
-  std::string defaultVar = "CMAKE_POLICY_DEFAULT_" + policy;
-  std::string defaultValue = mf->GetSafeDefinition(defaultVar);
-  if(defaultValue == "NEW")
-    {
-    *defaultSetting = cmPolicies::NEW;
-    }
-  else if(defaultValue == "OLD")
-    {
-    *defaultSetting = cmPolicies::OLD;
-    }
-  else if(defaultValue == "")
-    {
-    *defaultSetting = cmPolicies::WARN;
-    }
-  else
-    {
-    std::ostringstream e;
-    e << defaultVar << " has value \"" << defaultValue
-      << "\" but must be \"OLD\", \"NEW\", or \"\" (empty).";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
     return false;
     }
 
@@ -540,49 +280,17 @@ bool cmPolicies::GetPolicyDefault(cmMakefile* mf, std::string const& policy,
 
 bool cmPolicies::GetPolicyID(const char *id, cmPolicies::PolicyID &pid)
 {
-  if (!id || strlen(id) < 1)
-    {
-    return false;
-    }
-  std::map<std::string,cmPolicies::PolicyID>::iterator pos =
-    this->PolicyStringMap.find(id);
-  if (pos == this->PolicyStringMap.end())
-    {
-    return false;
-    }
-  pid = pos->second;
-  return true;
+  return stringToId(id, pid);
 }
-
-std::string cmPolicies::GetPolicyIDString(cmPolicies::PolicyID pid)
-{
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos =
-    this->Policies.find(pid);
-  if (pos == this->Policies.end())
-    {
-    return "";
-    }
-  return pos->second->IDString;
-}
-
 
 ///! return a warning string for a given policy
 std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
 {
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos =
-    this->Policies.find(id);
-  if (pos == this->Policies.end())
-    {
-    cmSystemTools::Error(
-      "Request for warning text for undefined policy!");
-    return "Request for warning text for undefined policy!";
-    }
-
   std::ostringstream msg;
   msg <<
-    "Policy " << pos->second->IDString << " is not set: "
-    "" << pos->second->ShortDescription << "  "
-    "Run \"cmake --help-policy " << pos->second->IDString << "\" for "
+    "Policy " << idToString(id) << " is not set: "
+    "" << idToShortDescription(id) << "  "
+    "Run \"cmake --help-policy " << idToString(id) << "\" for "
     "policy details.  "
     "Use the cmake_policy command to set the policy "
     "and suppress this warning.";
@@ -593,26 +301,17 @@ std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
 ///! return an error string for when a required policy is unspecified
 std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
 {
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos =
-    this->Policies.find(id);
-  if (pos == this->Policies.end())
-    {
-    cmSystemTools::Error(
-      "Request for error text for undefined policy!");
-    return "Request for error text for undefined policy!";
-    }
-
   std::ostringstream error;
   error <<
-    "Policy " << pos->second->IDString << " is not set to NEW: "
-    "" << pos->second->ShortDescription << "  "
-    "Run \"cmake --help-policy " << pos->second->IDString << "\" for "
+    "Policy " << idToString(id) << " is not set to NEW: "
+    "" << idToShortDescription(id) << "  "
+    "Run \"cmake --help-policy " << idToString(id) << "\" for "
     "policy details.  "
     "CMake now requires this policy to be set to NEW by the project.  "
     "The policy may be set explicitly using the code\n"
-    "  cmake_policy(SET " << pos->second->IDString << " NEW)\n"
+    "  cmake_policy(SET " << idToString(id) << " NEW)\n"
     "or by upgrading all policies with the code\n"
-    "  cmake_policy(VERSION " << pos->second->GetVersionString() <<
+    "  cmake_policy(VERSION " << idToVersion(id) <<
     ") # or later\n"
     "Run \"cmake --help-command cmake_policy\" for more information.";
   return error.str();
@@ -620,30 +319,21 @@ std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
 
 ///! Get the default status for a policy
 cmPolicies::PolicyStatus
-cmPolicies::GetPolicyStatus(cmPolicies::PolicyID id)
+cmPolicies::GetPolicyStatus(cmPolicies::PolicyID)
 {
-  // if the policy is not know then what?
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos =
-    this->Policies.find(id);
-  if (pos == this->Policies.end())
-    {
-    // TODO is this right?
-    return cmPolicies::WARN;
-    }
-
-  return pos->second->Status;
+  return cmPolicies::WARN;
 }
 
 //----------------------------------------------------------------------------
 std::string
 cmPolicies::GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id)
 {
-  std::string pid = this->GetPolicyIDString(id);
+  std::string pid = idToString(id);
   std::ostringstream e;
   e << "Policy " << pid << " may not be set to OLD behavior because this "
     << "version of CMake no longer supports it.  "
     << "The policy was introduced in "
-    << "CMake version " << this->Policies[id]->GetVersionString()
+    << "CMake version " << idToVersion(id)
     << ", and use of NEW behavior is now required."
     << "\n"
     << "Please either update your CMakeLists.txt files to conform to "
@@ -653,28 +343,52 @@ cmPolicies::GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id)
   return e.str();
 }
 
-//----------------------------------------------------------------------------
-void
-cmPolicies::DiagnoseAncientPolicies(std::vector<PolicyID> const& ancient,
-                                    unsigned int majorVer,
-                                    unsigned int minorVer,
-                                    unsigned int patchVer,
-                                    cmMakefile* mf)
+cmPolicies::PolicyStatus
+cmPolicies::PolicyMap::Get(cmPolicies::PolicyID id) const
 {
-  std::ostringstream e;
-  e << "The project requests behavior compatible with CMake version \""
-    << majorVer << "." << minorVer << "." << patchVer
-    << "\", which requires the OLD behavior for some policies:\n";
-  for(std::vector<PolicyID>::const_iterator
-        i = ancient.begin(); i != ancient.end(); ++i)
+  PolicyStatus status = cmPolicies::WARN;
+
+  if (this->Status[(POLICY_STATUS_COUNT * id) + OLD])
     {
-    cmPolicy const* policy = this->Policies[*i];
-    e << "  " << policy->IDString << ": " << policy->ShortDescription << "\n";
+    status = cmPolicies::OLD;
     }
-  e << "However, this version of CMake no longer supports the OLD "
-    << "behavior for these policies.  "
-    << "Please either update your CMakeLists.txt files to conform to "
-    << "the new behavior or use an older version of CMake that still "
-    << "supports the old behavior.";
-  mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+  else if (this->Status[(POLICY_STATUS_COUNT * id) + NEW])
+    {
+    status = cmPolicies::NEW;
+    }
+  else if (this->Status[(POLICY_STATUS_COUNT * id) + REQUIRED_ALWAYS])
+    {
+    status = cmPolicies::REQUIRED_ALWAYS;
+    }
+  else if (this->Status[(POLICY_STATUS_COUNT * id) + REQUIRED_IF_USED])
+    {
+    status = cmPolicies::REQUIRED_IF_USED;
+    }
+  return status;
+}
+
+void cmPolicies::PolicyMap::Set(cmPolicies::PolicyID id,
+                                cmPolicies::PolicyStatus status)
+{
+  this->Status[(POLICY_STATUS_COUNT * id) + OLD] = (status == OLD);
+  this->Status[(POLICY_STATUS_COUNT * id) + WARN] = (status == WARN);
+  this->Status[(POLICY_STATUS_COUNT * id) + NEW] = (status == NEW);
+  this->Status[(POLICY_STATUS_COUNT * id) + REQUIRED_ALWAYS] =
+      (status == REQUIRED_ALWAYS);
+  this->Status[(POLICY_STATUS_COUNT * id) + REQUIRED_IF_USED] =
+      (status == REQUIRED_IF_USED);
+}
+
+bool cmPolicies::PolicyMap::IsDefined(cmPolicies::PolicyID id) const
+{
+  return this->Status[(POLICY_STATUS_COUNT * id) + OLD]
+      || this->Status[(POLICY_STATUS_COUNT * id) + WARN]
+      || this->Status[(POLICY_STATUS_COUNT * id) + NEW]
+      || this->Status[(POLICY_STATUS_COUNT * id) + REQUIRED_ALWAYS]
+      || this->Status[(POLICY_STATUS_COUNT * id) + REQUIRED_IF_USED];
+}
+
+bool cmPolicies::PolicyMap::IsEmpty() const
+{
+  return this->Status.none();
 }

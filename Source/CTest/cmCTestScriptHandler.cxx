@@ -214,7 +214,7 @@ void cmCTestScriptHandler::AddCTestCommand(cmCTestCommand* command)
   cmCTestCommand* newCom = command;
   newCom->CTest = this->CTest;
   newCom->CTestScriptHandler = this;
-  this->CMake->AddCommand(newCom);
+  this->CMake->GetState()->AddCommand(newCom);
 }
 
 int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
@@ -336,24 +336,25 @@ void cmCTestScriptHandler::CreateCMake()
     delete this->LocalGenerator;
     }
   this->CMake = new cmake;
+  this->CMake->SetHomeDirectory("");
+  this->CMake->SetHomeOutputDirectory("");
   this->CMake->AddCMakePaths();
-  this->GlobalGenerator = new cmGlobalGenerator;
-  this->GlobalGenerator->SetCMakeInstance(this->CMake);
+  this->GlobalGenerator = new cmGlobalGenerator(this->CMake);
 
-  this->LocalGenerator = this->GlobalGenerator->CreateLocalGenerator();
+  this->LocalGenerator = this->GlobalGenerator->MakeLocalGenerator();
   this->Makefile = this->LocalGenerator->GetMakefile();
 
   this->CMake->SetProgressCallback(ctestScriptProgressCallback, this->CTest);
 
   // Set CMAKE_CURRENT_SOURCE_DIR and CMAKE_CURRENT_BINARY_DIR.
-  // Also, some commands need Makefile->GetCurrentDirectory().
+  // Also, some commands need Makefile->GetCurrentSourceDirectory().
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  this->Makefile->SetStartDirectory(cwd);
-  this->Makefile->SetStartOutputDirectory(cwd);
+  this->Makefile->SetCurrentSourceDirectory(cwd);
+  this->Makefile->SetCurrentBinaryDirectory(cwd);
 
   // remove all cmake commands which are not scriptable, since they can't be
   // used in ctest scripts
-  this->CMake->RemoveUnscriptableCommands();
+  this->CMake->GetState()->RemoveUnscriptableCommands();
 
   // add any ctest specific commands, probably should have common superclass
   // for ctest commands to clean this up. If a couple more commands are
@@ -420,6 +421,10 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
     this->Makefile->AddDefinition("CTEST_SCRIPT_ARG", script_arg.c_str());
     }
 
+#if defined(__CYGWIN__)
+  this->Makefile->AddDefinition("CMAKE_LEGACY_CYGWIN_WIN32", "0");
+#endif
+
   // always add a function blocker to update the elapsed time
   cmCTestScriptFunctionBlocker *f = new cmCTestScriptFunctionBlocker();
   f->CTestScriptHandler = this;
@@ -433,7 +438,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   ctest scripting easier. */
   std::string systemFile =
       this->Makefile->GetModulesFile("CTestScriptMode.cmake");
-  if (!this->Makefile->ReadListFile(0, systemFile.c_str()) ||
+  if (!this->Makefile->ReadListFile(systemFile.c_str()) ||
       cmSystemTools::GetErrorOccuredFlag())
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read:"
@@ -451,7 +456,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
     }
 
   // finally read in the script
-  if (!this->Makefile->ReadListFile(0, script.c_str()) ||
+  if (!this->Makefile->ReadListFile(script.c_str()) ||
     cmSystemTools::GetErrorOccuredFlag())
     {
     // Reset the error flag so that it can run more than
@@ -709,7 +714,8 @@ int cmCTestScriptHandler::CheckOutSourceDir()
     output = "";
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
       "Run cvs: " << this->CVSCheckOut << std::endl);
-    res = cmSystemTools::RunSingleCommand(this->CVSCheckOut.c_str(), &output,
+    res = cmSystemTools::RunSingleCommand(
+      this->CVSCheckOut.c_str(), &output, &output,
       &retVal, this->CTestRoot.c_str(), this->HandlerVerbose,
       0 /*this->TimeOut*/);
     if (!res || retVal != 0)
@@ -789,7 +795,8 @@ int cmCTestScriptHandler::PerformExtraUpdates()
       retVal = 0;
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run Update: "
         << fullCommand << std::endl);
-      res = cmSystemTools::RunSingleCommand(fullCommand.c_str(), &output,
+      res = cmSystemTools::RunSingleCommand(
+        fullCommand.c_str(), &output, &output,
         &retVal, cvsArgs[0].c_str(),
         this->HandlerVerbose, 0 /*this->TimeOut*/);
       if (!res || retVal != 0)
@@ -910,7 +917,8 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     retVal = 0;
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run cmake command: "
       << command << std::endl);
-    res = cmSystemTools::RunSingleCommand(command.c_str(), &output,
+    res = cmSystemTools::RunSingleCommand(
+      command.c_str(), &output, &output,
       &retVal, this->BinaryDir.c_str(),
       this->HandlerVerbose, 0 /*this->TimeOut*/);
 
@@ -956,7 +964,8 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     retVal = 0;
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run ctest command: "
       << command << std::endl);
-    res = cmSystemTools::RunSingleCommand(command.c_str(), &output,
+    res = cmSystemTools::RunSingleCommand(
+      command.c_str(), &output, &output,
       &retVal, this->BinaryDir.c_str(), this->HandlerVerbose,
       0 /*this->TimeOut*/);
 

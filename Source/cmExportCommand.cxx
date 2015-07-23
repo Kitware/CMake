@@ -113,14 +113,13 @@ bool cmExportCommand
   else
     {
     // Interpret relative paths with respect to the current build dir.
-    std::string dir = this->Makefile->GetCurrentOutputDirectory();
+    std::string dir = this->Makefile->GetCurrentBinaryDirectory();
     fname = dir + "/" + fname;
     }
 
   std::vector<std::string> targets;
 
-  cmGlobalGenerator *gg = this->Makefile->GetLocalGenerator()
-                                        ->GetGlobalGenerator();
+  cmGlobalGenerator *gg = this->Makefile->GetGlobalGenerator();
 
   if(args[0] == "EXPORT")
     {
@@ -176,6 +175,12 @@ bool cmExportCommand
           e << "given OBJECT library \"" << *currentTarget
             << "\" which may not be exported.";
           this->SetError(e.str());
+          return false;
+          }
+        if (target->GetType() == cmTarget::UTILITY)
+          {
+          this->SetError("given custom target \"" + *currentTarget
+                         + "\" which may not be exported.");
           return false;
           }
         }
@@ -295,7 +300,7 @@ bool cmExportCommand::HandlePackage(std::vector<std::string> const& args)
   // We store the current build directory in the registry as a value
   // named by a hash of its own content.  This is deterministic and is
   // unique with high probability.
-  const char* outDir = this->Makefile->GetCurrentOutputDirectory();
+  const char* outDir = this->Makefile->GetCurrentBinaryDirectory();
   std::string hash = cmSystemTools::ComputeStringMD5(outDir);
 #if defined(_WIN32) && !defined(__CYGWIN__)
   this->StorePackageRegistryWin(package, outDir, hash.c_str());

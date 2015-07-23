@@ -23,6 +23,7 @@ macro (CHECK_COMPILER_FLAG_COMMON_PATTERNS _VAR)
    set(${_VAR}
      FAIL_REGEX "[Uu]nrecogni[sz]ed .*option"               # GNU, NAG
      FAIL_REGEX "unknown .*option"                          # Clang
+     FAIL_REGEX "optimization flag .* not supported"        # Clang
      FAIL_REGEX "ignoring unknown option"                   # MSVC, Intel
      FAIL_REGEX "warning D9002"                             # MSVC, any lang
      FAIL_REGEX "option.*not supported"                     # Intel

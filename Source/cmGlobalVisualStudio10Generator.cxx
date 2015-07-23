@@ -17,6 +17,7 @@
 #include "cmVisualStudioSlnData.h"
 #include "cmVisualStudioSlnParser.h"
 #include "cmake.h"
+#include "cmAlgorithms.h"
 
 static const char vs10generatorName[] = "Visual Studio 10 2010";
 
@@ -41,8 +42,8 @@ class cmGlobalVisualStudio10Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(
-                                            const std::string& name) const
+  virtual cmGlobalGenerator*
+  CreateGlobalGenerator(const std::string& name, cmake* cm) const
     {
     std::string genName;
     const char* p = cmVS10GenName(name, genName);
@@ -50,28 +51,28 @@ public:
       { return 0; }
     if(!*p)
       {
-      return new cmGlobalVisualStudio10Generator(
-        genName, "");
+      return new cmGlobalVisualStudio10Generator(cm, genName, "");
       }
     if(*p++ != ' ')
       { return 0; }
     if(strcmp(p, "Win64") == 0)
       {
-      return new cmGlobalVisualStudio10Generator(
-        genName, "x64");
+      return new cmGlobalVisualStudio10Generator(cm, genName, "x64");
       }
     if(strcmp(p, "IA64") == 0)
       {
-      return new cmGlobalVisualStudio10Generator(
-        genName, "Itanium");
+      return new cmGlobalVisualStudio10Generator(cm, genName, "Itanium");
       }
     return 0;
     }
 
   virtual void GetDocumentation(cmDocumentationEntry& entry) const
     {
-    entry.Name = vs10generatorName;
-    entry.Brief = "Generates Visual Studio 10 (VS 2010) project files.";
+    entry.Name = std::string(vs10generatorName) + " [arch]";
+    entry.Brief =
+      "Generates Visual Studio 2010 project files.  "
+      "Optional [arch] can be \"Win64\" or \"IA64\"."
+      ;
     }
 
   virtual void GetGenerators(std::vector<std::string>& names) const
@@ -89,9 +90,9 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio10Generator::NewFactory()
 }
 
 //----------------------------------------------------------------------------
-cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
+cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(cmake* cm,
   const std::string& name, const std::string& platformName)
-  : cmGlobalVisualStudio8Generator(name, platformName)
+  : cmGlobalVisualStudio8Generator(cm, name, platformName)
 {
   std::string vc10Express;
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(
@@ -101,6 +102,7 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   this->SystemIsWindowsPhone = false;
   this->SystemIsWindowsStore = false;
   this->MSBuildCommandInitialized = false;
+  this->Version = VS10;
 }
 
 //----------------------------------------------------------------------------
@@ -304,12 +306,11 @@ void cmGlobalVisualStudio10Generator::WriteSLNHeader(std::ostream& fout)
 }
 
 ///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalVisualStudio10Generator::CreateLocalGenerator()
+cmLocalGenerator *
+cmGlobalVisualStudio10Generator::CreateLocalGenerator(cmLocalGenerator* parent,
+                                                    cmState::Snapshot snapshot)
 {
-  cmLocalVisualStudio10Generator* lg =
-    new cmLocalVisualStudio10Generator(cmLocalVisualStudioGenerator::VS10);
-  lg->SetGlobalGenerator(this);
-  return lg;
+  return new cmLocalVisualStudio10Generator(this, parent, snapshot);
 }
 
 //----------------------------------------------------------------------------
@@ -334,7 +335,7 @@ void cmGlobalVisualStudio10Generator::Generate()
       "  " << this->LongestSource.SourceFile->GetFullPath() << "\n"
       "This is because some Visual Studio tools would append the relative "
       "path to the end of the referencing directory path, as in:\n"
-      "  " << mf->GetCurrentOutputDirectory() << "/"
+      "  " << mf->GetCurrentBinaryDirectory() << "/"
       << this->LongestSource.SourceRel << "\n"
       "and then incorrectly complain that the file does not exist because "
       "the path length is too long for some internal buffer or API.  "
@@ -364,39 +365,6 @@ const char* cmGlobalVisualStudio10Generator::GetPlatformToolset() const
     return this->DefaultPlatformToolset.c_str();
     }
   return 0;
-}
-
-//----------------------------------------------------------------------------
-std::string cmGlobalVisualStudio10Generator::GetUserMacrosDirectory()
-{
-  std::string base;
-  std::string path;
-
-  // base begins with the VisualStudioProjectsLocation reg value...
-  if (cmSystemTools::ReadRegistryValue(
-    "HKEY_CURRENT_USER\\Software\\Microsoft\\VisualStudio\\10.0;"
-    "VisualStudioProjectsLocation",
-    base))
-    {
-    cmSystemTools::ConvertToUnixSlashes(base);
-
-    // 9.0 macros folder:
-    path = base + "/VSMacros80";
-      // *NOT* a typo; right now in Visual Studio 2008 beta the macros
-      // folder is VSMacros80... They may change it to 90 before final
-      // release of 2008 or they may not... we'll have to keep our eyes
-      // on it
-    }
-
-  // path is (correctly) still empty if we did not read the base value from
-  // the Registry value
-  return path;
-}
-
-//----------------------------------------------------------------------------
-std::string cmGlobalVisualStudio10Generator::GetUserMacrosRegKeyBase()
-{
-  return "Software\\Microsoft\\VisualStudio\\10.0\\vsmacros";
 }
 
 //----------------------------------------------------------------------------
@@ -614,7 +582,7 @@ cmGlobalVisualStudio10Generator
 void cmGlobalVisualStudio10Generator::PathTooLong(
   cmTarget* target, cmSourceFile const* sf, std::string const& sfRel)
 {
-  size_t len = (strlen(target->GetMakefile()->GetCurrentOutputDirectory()) +
+  size_t len = (strlen(target->GetMakefile()->GetCurrentBinaryDirectory()) +
                 1 + sfRel.length());
   if(len > this->LongestSource.Length)
     {

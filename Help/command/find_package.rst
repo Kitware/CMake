@@ -68,7 +68,7 @@ The complete Config mode command signature is::
                [NO_CMAKE_PATH]
                [NO_SYSTEM_ENVIRONMENT_PATH]
                [NO_CMAKE_PACKAGE_REGISTRY]
-               [NO_CMAKE_BUILDS_PATH]
+               [NO_CMAKE_BUILDS_PATH] # Deprecated; does nothing.
                [NO_CMAKE_SYSTEM_PATH]
                [NO_CMAKE_SYSTEM_PACKAGE_REGISTRY]
                [CMAKE_FIND_ROOT_PATH_BOTH |
@@ -228,9 +228,9 @@ installation directory.  Those marked with (U) are intended for
 installations on UNIX platforms where the prefix is shared by multiple
 packages.  This is merely a convention, so all (W) and (U) directories
 are still searched on all platforms.  Directories marked with (A) are
-intended for installations on Apple platforms.  The cmake variables
-``CMAKE_FIND_FRAMEWORK`` and ``CMAKE_FIND_APPBUNDLE``
-determine the order of preference as specified below.
+intended for installations on Apple platforms.  The
+:variable:`CMAKE_FIND_FRAMEWORK` and :variable:`CMAKE_FIND_APPBUNDLE`
+variables determine the order of preference.
 
 The set of installation prefixes is constructed using the following
 steps.  If ``NO_DEFAULT_PATH`` is specified all ``NO_*`` options are
@@ -265,20 +265,14 @@ enabled.
 
      PATH
 
-5. Search project build trees recently configured in a :manual:`cmake-gui(1)`.
-   This can be skipped if ``NO_CMAKE_BUILDS_PATH`` is passed.  It is intended
-   for the case when a user is building multiple dependent projects one
-   after another.
-   (This step is implemented only on Windows.)
-
-6. Search paths stored in the CMake :ref:`User Package Registry`.
+5. Search paths stored in the CMake :ref:`User Package Registry`.
    This can be skipped if ``NO_CMAKE_PACKAGE_REGISTRY`` is passed or by
    setting the :variable:`CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY`
    to ``TRUE``.
    See the :manual:`cmake-packages(7)` manual for details on the user
    package registry.
 
-7. Search cmake variables defined in the Platform files for the
+6. Search cmake variables defined in the Platform files for the
    current system.  This can be skipped if ``NO_CMAKE_SYSTEM_PATH`` is
    passed::
 
@@ -286,14 +280,14 @@ enabled.
      CMAKE_SYSTEM_FRAMEWORK_PATH
      CMAKE_SYSTEM_APPBUNDLE_PATH
 
-8. Search paths stored in the CMake :ref:`System Package Registry`.
+7. Search paths stored in the CMake :ref:`System Package Registry`.
    This can be skipped if ``NO_CMAKE_SYSTEM_PACKAGE_REGISTRY`` is passed
    or by setting the
    :variable:`CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY` to ``TRUE``.
    See the :manual:`cmake-packages(7)` manual for details on the system
    package registry.
 
-9. Search paths specified by the ``PATHS`` option.  These are typically
+8. Search paths specified by the ``PATHS`` option.  These are typically
    hard-coded guesses.
 
 .. |FIND_XXX| replace:: find_package
@@ -301,7 +295,6 @@ enabled.
 .. |CMAKE_FIND_ROOT_PATH_MODE_XXX| replace::
    :variable:`CMAKE_FIND_ROOT_PATH_MODE_PACKAGE`
 
-.. include:: FIND_XXX_MAC.txt
 .. include:: FIND_XXX_ROOT.txt
 .. include:: FIND_XXX_ORDER.txt
 

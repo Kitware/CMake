@@ -13,6 +13,7 @@
 #include "cmGeneratorExpressionDAGChecker.h"
 
 #include "cmMakefile.h"
+#include "cmAlgorithms.h"
 
 //----------------------------------------------------------------------------
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
@@ -34,7 +35,7 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
                 const GeneratorExpressionContent *content,
                 cmGeneratorExpressionDAGChecker *parent)
   : Parent(parent), Target(target), Property(property),
-    Content(content), Backtrace(NULL), TransitivePropertiesOnly(false)
+    Content(content), Backtrace(), TransitivePropertiesOnly(false)
 {
   Initialize();
 }

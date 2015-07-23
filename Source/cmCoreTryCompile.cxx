@@ -11,9 +11,9 @@
 ============================================================================*/
 #include "cmCoreTryCompile.h"
 #include "cmake.h"
-#include "cmCacheManager.h"
-#include "cmLocalGenerator.h"
+#include "cmOutputConverter.h"
 #include "cmGlobalGenerator.h"
+#include "cmAlgorithms.h"
 #include "cmExportTryCompileFileGenerator.h"
 #include <cmsys/Directory.hxx>
 
@@ -242,8 +242,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       }
 
     // Detect languages to enable.
-    cmLocalGenerator* lg = this->Makefile->GetLocalGenerator();
-    cmGlobalGenerator* gg = lg->GetGlobalGenerator();
+    cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
     std::set<std::string> testLangs;
     for(std::vector<std::string>::iterator si = sources.begin();
         si != sources.end(); ++si)
@@ -323,7 +322,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       std::string langFlags = "CMAKE_" + *li + "_FLAGS";
       const char* flags = this->Makefile->GetDefinition(langFlags);
       fprintf(fout, "set(CMAKE_%s_FLAGS %s)\n", li->c_str(),
-              lg->EscapeForCMake(flags?flags:"").c_str());
+              cmOutputConverter::EscapeForCMake(flags?flags:"").c_str());
       fprintf(fout, "set(CMAKE_%s_FLAGS \"${CMAKE_%s_FLAGS}"
               " ${COMPILE_DEFINITIONS}\")\n", li->c_str(), li->c_str());
       }
@@ -334,8 +333,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
              "CMAKE_POLICY_WARNING_CMP0056"))
           {
           std::ostringstream w;
-          w << (this->Makefile->GetCMakeInstance()->GetPolicies()
-                ->GetPolicyWarning(cmPolicies::CMP0056)) << "\n"
+          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0056) << "\n"
             "For compatibility with older versions of CMake, try_compile "
             "is not honoring caller link flags (e.g. CMAKE_EXE_LINKER_FLAGS) "
             "in the test project."
@@ -349,8 +347,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       case cmPolicies::REQUIRED_ALWAYS:
         this->Makefile->IssueMessage(
           cmake::FATAL_ERROR,
-          this->Makefile->GetCMakeInstance()->GetPolicies()
-          ->GetRequiredPolicyError(cmPolicies::CMP0056)
+          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0056)
           );
       case cmPolicies::NEW:
         // NEW behavior is to pass linker flags.
@@ -358,7 +355,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
         const char* exeLinkFlags =
           this->Makefile->GetDefinition("CMAKE_EXE_LINKER_FLAGS");
         fprintf(fout, "set(CMAKE_EXE_LINKER_FLAGS %s)\n",
-                lg->EscapeForCMake(exeLinkFlags?exeLinkFlags:"").c_str());
+                cmOutputConverter::EscapeForCMake(
+                    exeLinkFlags ? exeLinkFlags : "").c_str());
         } break;
       }
     fprintf(fout, "set(CMAKE_EXE_LINKER_FLAGS \"${CMAKE_EXE_LINKER_FLAGS}"
@@ -526,7 +524,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
   this->Makefile->AddCacheDefinition(argv[0],
                                      (res == 0 ? "TRUE" : "FALSE"),
                                      "Result of TRY_COMPILE",
-                                     cmCacheManager::INTERNAL);
+                                     cmState::INTERNAL);
 
   if (!outputVariable.empty())
     {

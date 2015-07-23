@@ -17,52 +17,12 @@
 
 //----------------------------------------------------------------------------
 cmCustomCommand::cmCustomCommand()
-  : Backtrace(NULL)
+  : Backtrace()
 {
   this->HaveComment = false;
   this->EscapeOldStyle = true;
   this->EscapeAllowMakeVars = false;
   this->UsesTerminal = false;
-}
-
-//----------------------------------------------------------------------------
-cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
-  Outputs(r.Outputs),
-  Byproducts(r.Byproducts),
-  Depends(r.Depends),
-  CommandLines(r.CommandLines),
-  HaveComment(r.HaveComment),
-  Comment(r.Comment),
-  WorkingDirectory(r.WorkingDirectory),
-  EscapeAllowMakeVars(r.EscapeAllowMakeVars),
-  EscapeOldStyle(r.EscapeOldStyle),
-  Backtrace(r.Backtrace),
-  UsesTerminal(r.UsesTerminal)
-{
-}
-
-//----------------------------------------------------------------------------
-cmCustomCommand& cmCustomCommand::operator=(cmCustomCommand const& r)
-{
-  if(this == &r)
-    {
-    return *this;
-    }
-
-  this->Outputs = r.Outputs;
-  this->Byproducts= r.Byproducts;
-  this->Depends = r.Depends;
-  this->CommandLines = r.CommandLines;
-  this->HaveComment = r.HaveComment;
-  this->Comment = r.Comment;
-  this->WorkingDirectory = r.WorkingDirectory;
-  this->EscapeAllowMakeVars = r.EscapeAllowMakeVars;
-  this->EscapeOldStyle = r.EscapeOldStyle;
-  this->ImplicitDepends = r.ImplicitDepends;
-  this->Backtrace = r.Backtrace;
-  this->UsesTerminal = r.UsesTerminal;
-
-  return *this;
 }
 
 //----------------------------------------------------------------------------
@@ -77,24 +37,17 @@ cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
   Byproducts(byproducts),
   Depends(depends),
   CommandLines(commandLines),
-  HaveComment(comment?true:false),
+  Backtrace(),
   Comment(comment?comment:""),
   WorkingDirectory(workingDirectory?workingDirectory:""),
+  HaveComment(comment?true:false),
   EscapeAllowMakeVars(false),
-  EscapeOldStyle(true),
-  Backtrace(NULL)
+  EscapeOldStyle(true)
 {
-  this->EscapeOldStyle = true;
-  this->EscapeAllowMakeVars = false;
   if(mf)
     {
     this->Backtrace = mf->GetBacktrace();
     }
-}
-
-//----------------------------------------------------------------------------
-cmCustomCommand::~cmCustomCommand()
-{
 }
 
 //----------------------------------------------------------------------------

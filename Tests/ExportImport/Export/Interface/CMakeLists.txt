@@ -39,7 +39,11 @@ install(FILES
   DESTINATION src
 )
 
+add_library(cmakeonly INTERFACE)
+set_property(TARGET cmakeonly PROPERTY INTERFACE_COMPILE_DEFINITIONS [[DEF="\"\$\B"]])
+
 install(TARGETS headeronly sharediface use_auto_type use_c_restrict source_target
+                cmakeonly
   EXPORT expInterface
 )
 install(TARGETS sharedlib

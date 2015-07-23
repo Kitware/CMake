@@ -14,7 +14,6 @@
 #include "cmSetTestsPropertiesCommand.h"
 #include "cmSetSourceFilesPropertiesCommand.h"
 
-#include "cmCacheManager.h"
 
 //----------------------------------------------------------------------------
 cmSetPropertyCommand::cmSetPropertyCommand()
@@ -198,7 +197,7 @@ bool cmSetPropertyCommand::HandleDirectoryMode()
     std::string dir = *this->Names.begin();
     if(!cmSystemTools::FileIsFullPath(dir.c_str()))
       {
-      dir = this->Makefile->GetCurrentDirectory();
+      dir = this->Makefile->GetCurrentSourceDirectory();
       dir += "/";
       dir += *this->Names.begin();
       }
@@ -208,8 +207,7 @@ bool cmSetPropertyCommand::HandleDirectoryMode()
 
     // Lookup the generator.
     if(cmLocalGenerator* lg =
-       (this->Makefile->GetLocalGenerator()
-        ->GetGlobalGenerator()->FindLocalGenerator(dir)))
+       this->Makefile->GetGlobalGenerator()->FindLocalGenerator(dir))
       {
       // Use the makefile for the directory found.
       mf = lg->GetMakefile();
@@ -426,7 +424,7 @@ bool cmSetPropertyCommand::HandleCacheMode()
     }
   else if(this->PropertyName == "TYPE")
     {
-    if(!cmCacheManager::IsType(this->PropertyValue.c_str()))
+    if(!cmState::IsCacheEntryType(this->PropertyValue.c_str()))
       {
       std::ostringstream e;
       e << "given invalid CACHE entry TYPE \"" << this->PropertyValue << "\"";
@@ -452,11 +450,11 @@ bool cmSetPropertyCommand::HandleCacheMode()
     // Get the source file.
     cmMakefile* mf = this->GetMakefile();
     cmake* cm = mf->GetCMakeInstance();
-    cmCacheManager::CacheIterator it =
-      cm->GetCacheManager()->GetCacheIterator(ni->c_str());
-    if(!it.IsAtEnd())
+    const char* existingValue
+                          = cm->GetState()->GetCacheEntryValue(*ni);
+    if(existingValue)
       {
-      if(!this->HandleCacheEntry(it))
+      if(!this->HandleCacheEntry(*ni))
         {
         return false;
         }
@@ -474,22 +472,24 @@ bool cmSetPropertyCommand::HandleCacheMode()
 }
 
 //----------------------------------------------------------------------------
-bool cmSetPropertyCommand::HandleCacheEntry(cmCacheManager::CacheIterator& it)
+bool cmSetPropertyCommand::HandleCacheEntry(std::string const& cacheKey)
 {
   // Set or append the property.
   const char* name = this->PropertyName.c_str();
   const char* value = this->PropertyValue.c_str();
+  cmState* state = this->Makefile->GetState();
   if (this->Remove)
     {
-    value = 0;
+    state->RemoveCacheEntryProperty(cacheKey, name);
     }
   if(this->AppendMode)
     {
-    it.AppendProperty(name, value, this->AppendAsString);
+    state->AppendCacheEntryProperty(cacheKey, name, value,
+                                     this->AppendAsString);
     }
   else
     {
-    it.SetProperty(name, value);
+    state->SetCacheEntryProperty(cacheKey, name, value);
     }
 
   return true;

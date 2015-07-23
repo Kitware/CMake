@@ -13,7 +13,6 @@
 #define _cmDocumentation_h
 
 #include "cmStandardIncludes.h"
-#include "cmProperty.h"
 #include "cmDocumentationFormatter.h"
 #include "cmDocumentationSection.h"
 #include "cmake.h"
@@ -117,6 +116,7 @@ private:
   bool PrintHelpListProperties(std::ostream& os);
   bool PrintHelpListVariables(std::ostream& os);
   bool PrintHelpListPolicies(std::ostream& os);
+  bool PrintHelpListGenerators(std::ostream& os);
   bool PrintOldCustomModules(std::ostream& os);
 
   const char* GetNameString() const;

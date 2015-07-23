@@ -20,6 +20,7 @@
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmAlgorithms.h"
 
 #include <queue>
 
@@ -55,6 +56,7 @@ struct ResxTag {};
 struct ModuleDefinitionFileTag {};
 struct AppManifestTag{};
 struct CertificatesTag{};
+struct XamlTag{};
 
 template<typename Tag, typename OtherTag>
 struct IsSameTag
@@ -97,6 +99,20 @@ struct DoAccept<true>
     data.ExpectedResxHeaders.insert(hFileName);
     data.ResxSources.push_back(f);
     }
+  static void Do(cmGeneratorTarget::XamlData& data, cmSourceFile* f)
+    {
+    // Build and save the name of the corresponding .h and .cpp file
+    // This relationship will be used later when building the project files.
+    // Both names would have been auto generated from Visual Studio
+    // where the user supplied the file name and Visual Studio
+    // appended the suffix.
+    std::string xaml = f->GetFullPath();
+    std::string hFileName = xaml + ".h";
+    std::string cppFileName = xaml + ".cpp";
+    data.ExpectedXamlHeaders.insert(hFileName);
+    data.ExpectedXamlSources.insert(cppFileName);
+    data.XamlSources.push_back(f);
+    }
   static void Do(std::string& data, cmSourceFile* f)
     {
     data = f->GetFullPath();
@@ -116,8 +132,7 @@ struct TagVisitor
 
   TagVisitor(cmTarget *target, DataType& data)
     : Data(data), Target(target),
-    GlobalGenerator(target->GetMakefile()
-                          ->GetLocalGenerator()->GetGlobalGenerator()),
+    GlobalGenerator(target->GetMakefile()->GetGlobalGenerator()),
     Header(CM_HEADER_REGEX),
     IsObjLib(target->GetType() == cmTarget::OBJECT_LIBRARY)
   {
@@ -185,6 +200,10 @@ struct TagVisitor
       {
       DoAccept<IsSameTag<Tag, CertificatesTag>::Result>::Do(this->Data, sf);
       }
+    else if (ext == "xaml")
+      {
+      DoAccept<IsSameTag<Tag, XamlTag>::Result>::Do(this->Data, sf);
+      }
     else if(this->Header.find(sf->GetFullPath().c_str()))
       {
       DoAccept<IsSameTag<Tag, HeaderSourcesTag>::Result>::Do(this->Data, sf);
@@ -201,12 +220,18 @@ struct TagVisitor
 };
 
 //----------------------------------------------------------------------------
-cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t),
+cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
+  : Target(t),
   SourceFileFlagsConstructed(false)
 {
   this->Makefile = this->Target->GetMakefile();
-  this->LocalGenerator = this->Makefile->GetLocalGenerator();
-  this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
+  this->LocalGenerator = lg;
+  this->GlobalGenerator = this->Makefile->GetGlobalGenerator();
+}
+
+cmLocalGenerator* cmGeneratorTarget::GetLocalGenerator() const
+{
+  return this->LocalGenerator;
 }
 
 //----------------------------------------------------------------------------
@@ -334,6 +359,34 @@ void cmGeneratorTarget::ComputeObjectMapping()
 }
 
 //----------------------------------------------------------------------------
+const char* cmGeneratorTarget::GetFeature(const std::string& feature,
+                                          const std::string& config) const
+{
+  if(!config.empty())
+    {
+    std::string featureConfig = feature;
+    featureConfig += "_";
+    featureConfig += cmSystemTools::UpperCase(config);
+    if(const char* value = this->Target->GetProperty(featureConfig))
+      {
+      return value;
+      }
+    }
+  if(const char* value = this->Target->GetProperty(feature))
+    {
+    return value;
+    }
+  return this->LocalGenerator->GetFeature(feature, config);
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::GetFeatureAsBool(const std::string& feature,
+                                         const std::string& config) const
+{
+  return cmSystemTools::IsOn(this->GetFeature(feature, config));
+}
+
+//----------------------------------------------------------------------------
 const std::string& cmGeneratorTarget::GetObjectName(cmSourceFile const* file)
 {
   this->ComputeObjectMapping();
@@ -434,6 +487,36 @@ cmGeneratorTarget
                   const std::string& config) const
 {
   IMPLEMENT_VISIT(Certificates);
+}
+
+//----------------------------------------------------------------------------
+void
+cmGeneratorTarget::GetExpectedXamlHeaders(std::set<std::string>& headers,
+                                          const std::string& config) const
+{
+  XamlData data;
+  IMPLEMENT_VISIT_IMPL(Xaml, COMMA cmGeneratorTarget::XamlData)
+  headers = data.ExpectedXamlHeaders;
+}
+
+//----------------------------------------------------------------------------
+void
+cmGeneratorTarget::GetExpectedXamlSources(std::set<std::string>& srcs,
+                                          const std::string& config) const
+{
+  XamlData data;
+  IMPLEMENT_VISIT_IMPL(Xaml, COMMA cmGeneratorTarget::XamlData)
+  srcs = data.ExpectedXamlSources;
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget
+::GetXamlSources(std::vector<cmSourceFile const*>& srcs,
+                 const std::string& config) const
+{
+  XamlData data;
+  IMPLEMENT_VISIT_IMPL(Xaml, COMMA cmGeneratorTarget::XamlData)
+  srcs = data.XamlSources;
 }
 
 //----------------------------------------------------------------------------
@@ -598,8 +681,7 @@ cmTargetTraceDependencies
 {
   // Convenience.
   this->Makefile = this->Target->GetMakefile();
-  this->GlobalGenerator =
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+  this->GlobalGenerator = this->Makefile->GetGlobalGenerator();
   this->CurrentEntry = 0;
 
   // Queue all the source files already specified for the target.
@@ -629,7 +711,8 @@ cmTargetTraceDependencies
           e << "Evaluation output file\n  \"" << sf->GetFullPath()
             << "\"\ndepends on the sources of a target it is used in.  This "
               "is a dependency loop and is not allowed.";
-          this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+          this->GeneratorTarget
+              ->LocalGenerator->IssueMessage(cmake::FATAL_ERROR, e.str());
           return;
           }
         if(emitted.insert(sf).second && this->SourcesQueued.insert(sf).second)
@@ -795,7 +878,7 @@ cmTargetTraceDependencies
 {
   // Transform command names that reference targets built in this
   // project to corresponding target-level dependencies.
-  cmGeneratorExpression ge(&cc.GetBacktrace());
+  cmGeneratorExpression ge(cc.GetBacktrace());
 
   // Add target-level dependencies referenced by generator expressions.
   std::set<cmTarget*> targets;
@@ -935,7 +1018,7 @@ cmGeneratorTarget::GetCreateRuleVariable(std::string const& lang,
     case cmTarget::STATIC_LIBRARY:
       {
       std::string var = "CMAKE_" + lang + "_CREATE_STATIC_LIBRARY";
-      if(this->Target->GetFeatureAsBool(
+      if(this->GetFeatureAsBool(
            "INTERPROCEDURAL_OPTIMIZATION", config))
         {
         std::string varIPO = var + "_IPO";
@@ -960,9 +1043,10 @@ cmGeneratorTarget::GetCreateRuleVariable(std::string const& lang,
 
 //----------------------------------------------------------------------------
 std::vector<std::string>
-cmGeneratorTarget::GetIncludeDirectories(const std::string& config) const
+cmGeneratorTarget::GetIncludeDirectories(const std::string& config,
+                                         const std::string& lang) const
 {
-  return this->Target->GetIncludeDirectories(config);
+  return this->Target->GetIncludeDirectories(config, lang);
 }
 
 //----------------------------------------------------------------------------
@@ -974,8 +1058,7 @@ void cmGeneratorTarget::GenerateTargetManifest(
     return;
     }
   cmMakefile* mf = this->Target->GetMakefile();
-  cmLocalGenerator* lg = mf->GetLocalGenerator();
-  cmGlobalGenerator* gg = lg->GetGlobalGenerator();
+  cmGlobalGenerator* gg = mf->GetGlobalGenerator();
 
   // Get the names.
   std::string name;
@@ -1048,8 +1131,8 @@ bool cmStrictTargetComparison::operator()(cmTarget const* t1,
   int nameResult = strcmp(t1->GetName().c_str(), t2->GetName().c_str());
   if (nameResult == 0)
     {
-    return strcmp(t1->GetMakefile()->GetStartOutputDirectory(),
-                  t2->GetMakefile()->GetStartOutputDirectory()) < 0;
+    return strcmp(t1->GetMakefile()->GetCurrentBinaryDirectory(),
+                  t2->GetMakefile()->GetCurrentBinaryDirectory()) < 0;
     }
   return nameResult < 0;
 }

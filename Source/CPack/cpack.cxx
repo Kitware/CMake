@@ -198,11 +198,15 @@ int main (int argc, char const* const* argv)
     "Read CPack config file: " << cpackConfigFile << std::endl);
 
   cmake cminst;
-  cminst.RemoveUnscriptableCommands();
-  cmGlobalGenerator cmgg;
-  cmgg.SetCMakeInstance(&cminst);
-  cmsys::auto_ptr<cmLocalGenerator> cmlg(cmgg.CreateLocalGenerator());
+  cminst.SetHomeDirectory("");
+  cminst.SetHomeOutputDirectory("");
+  cminst.GetState()->RemoveUnscriptableCommands();
+  cmGlobalGenerator cmgg(&cminst);
+  cmsys::auto_ptr<cmLocalGenerator> cmlg(cmgg.MakeLocalGenerator());
   cmMakefile* globalMF = cmlg->GetMakefile();
+#if defined(__CYGWIN__)
+  globalMF->AddDefinition("CMAKE_LEGACY_CYGWIN_WIN32", "0");
+#endif
 
   bool cpackConfigFileSpecified = true;
   if ( cpackConfigFile.empty() )
@@ -241,7 +245,7 @@ int main (int argc, char const* const* argv)
     // paths, so FIND_XXX() commands can be used in scripts
     std::string systemFile =
       globalMF->GetModulesFile("CMakeDetermineSystem.cmake");
-    if (!globalMF->ReadListFile(0, systemFile.c_str()))
+    if (!globalMF->ReadListFile(systemFile.c_str()))
       {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
         "Error reading CMakeDetermineSystem.cmake" << std::endl);
@@ -250,7 +254,7 @@ int main (int argc, char const* const* argv)
 
     systemFile =
       globalMF->GetModulesFile("CMakeSystemSpecificInformation.cmake");
-    if (!globalMF->ReadListFile(0, systemFile.c_str()))
+    if (!globalMF->ReadListFile(systemFile.c_str()))
       {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
         "Error reading CMakeSystemSpecificInformation.cmake" << std::endl);
@@ -269,7 +273,7 @@ int main (int argc, char const* const* argv)
       cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
         "Read CPack configuration file: " << cpackConfigFile
         << std::endl);
-      if ( !globalMF->ReadListFile(0, cpackConfigFile.c_str()) )
+      if ( !globalMF->ReadListFile(cpackConfigFile.c_str()) )
         {
         cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
           "Problem reading CPack config file: \""
@@ -353,8 +357,8 @@ int main (int argc, char const* const* argv)
         ++it )
         {
         const char* gen = it->c_str();
-        cmMakefile newMF(*globalMF);
-        cmMakefile* mf = &newMF;
+        cmMakefile::ScopePushPop raii(globalMF);
+        cmMakefile* mf = globalMF;
         cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
           "Specified generator: " << gen << std::endl);
         if ( parsed && !mf->GetDefinition("CPACK_PACKAGE_NAME") )

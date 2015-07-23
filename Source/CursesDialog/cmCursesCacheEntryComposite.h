@@ -12,7 +12,6 @@
 #ifndef cmCursesCacheEntryComposite_h
 #define cmCursesCacheEntryComposite_h
 
-#include "../cmCacheManager.h"
 #include "cmCursesLabelWidget.h"
 
 class cmCursesCacheEntryComposite
@@ -21,7 +20,7 @@ public:
   cmCursesCacheEntryComposite(const std::string& key, int labelwidth,
                               int entrywidth);
   cmCursesCacheEntryComposite(const std::string& key,
-                              const cmCacheManager::CacheIterator& it,
+                              cmake *cm,
                               bool isNew, int labelwidth, int entrywidth);
   ~cmCursesCacheEntryComposite();
   const char* GetValue();

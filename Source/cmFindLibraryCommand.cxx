@@ -10,7 +10,6 @@
   See the License for more information.
 ============================================================================*/
 #include "cmFindLibraryCommand.h"
-#include "cmCacheManager.h"
 #include <cmsys/Directory.hxx>
 #include <cmsys/stl/algorithm>
 
@@ -39,7 +38,7 @@ bool cmFindLibraryCommand
       {
       this->Makefile->AddCacheDefinition(this->VariableName, "",
                                          this->VariableDocumentation.c_str(),
-                                         cmCacheManager::FILEPATH);
+                                         cmState::FILEPATH);
       }
     return true;
     }
@@ -55,8 +54,8 @@ bool cmFindLibraryCommand
       }
     }
 
-  if(this->Makefile->GetCMakeInstance()
-     ->GetPropertyAsBool("FIND_LIBRARY_USE_LIB64_PATHS"))
+  if(this->Makefile->GetState()
+         ->GetGlobalPropertyAsBool("FIND_LIBRARY_USE_LIB64_PATHS"))
     {
     // add special 64 bit paths if this is a 64 bit compile.
     if(this->Makefile->PlatformIs64Bit())
@@ -72,14 +71,14 @@ bool cmFindLibraryCommand
     this->Makefile->AddCacheDefinition(this->VariableName,
                                        library.c_str(),
                                        this->VariableDocumentation.c_str(),
-                                       cmCacheManager::FILEPATH);
+                                       cmState::FILEPATH);
     return true;
     }
   std::string notfound = this->VariableName + "-NOTFOUND";
   this->Makefile->AddCacheDefinition(this->VariableName,
                                      notfound.c_str(),
                                      this->VariableDocumentation.c_str(),
-                                     cmCacheManager::FILEPATH);
+                                     cmState::FILEPATH);
   return true;
 }
 
@@ -213,7 +212,7 @@ struct cmFindLibraryHelper
 cmFindLibraryHelper::cmFindLibraryHelper(cmMakefile* mf):
   Makefile(mf)
 {
-  this->GG = this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+  this->GG = this->Makefile->GetGlobalGenerator();
 
   // Collect the list of library name prefixes/suffixes to try.
   const char* prefixes_list =
@@ -227,8 +226,8 @@ cmFindLibraryHelper::cmFindLibraryHelper(cmMakefile* mf):
 
   // Check whether to use OpenBSD-style library version comparisons.
   this->OpenBSD =
-    this->Makefile->GetCMakeInstance()
-    ->GetPropertyAsBool("FIND_LIBRARY_USE_OPENBSD_VERSIONING");
+    this->Makefile->GetState()
+        ->GetGlobalPropertyAsBool("FIND_LIBRARY_USE_OPENBSD_VERSIONING");
 }
 
 //----------------------------------------------------------------------------

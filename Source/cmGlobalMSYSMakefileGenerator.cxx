@@ -15,12 +15,14 @@
 #include "cmake.h"
 #include <cmsys/FStream.hxx>
 
-cmGlobalMSYSMakefileGenerator::cmGlobalMSYSMakefileGenerator()
+cmGlobalMSYSMakefileGenerator::cmGlobalMSYSMakefileGenerator(cmake* cm)
+  : cmGlobalUnixMakefileGenerator3(cm)
 {
   this->FindMakeProgramFile = "CMakeMSYSFindMake.cmake";
   this->ForceUnixPaths = true;
   this->ToolSupportsColor = true;
   this->UseLinkScript = false;
+  cm->GetState()->SetMSYSShell(true);
 }
 
 std::string
@@ -90,19 +92,6 @@ void cmGlobalMSYSMakefileGenerator
       ("CMAKE_AR was not found, please set to archive program. ",
        mf->GetDefinition("CMAKE_AR"));
     }
-}
-
-///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalMSYSMakefileGenerator::CreateLocalGenerator()
-{
-  cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
-  lg->SetWindowsShell(false);
-  lg->SetMSYSShell(true);
-  lg->SetGlobalGenerator(this);
-  lg->SetIgnoreLibPrefix(true);
-  lg->SetPassMakeflags(false);
-  lg->SetUnixCD(true);
-  return lg;
 }
 
 //----------------------------------------------------------------------------

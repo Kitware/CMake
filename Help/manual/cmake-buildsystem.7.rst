@@ -85,6 +85,22 @@ It is a type which is loaded as a plugin using runtime techniques.
 
   add_library(archive MODULE 7z.cpp)
 
+.. _`Apple Frameworks`:
+
+Apple Frameworks
+""""""""""""""""
+
+A ``SHARED`` library may be marked with the :prop_tgt:`FRAMEWORK`
+target property to create an OS X Framework:
+
+.. code-block:: cmake
+
+  add_library(MyFramework SHARED MyFramework.cpp)
+  set_target_properties(MyFramework PROPERTIES
+    FRAMEWORK 1
+    FRAMEWORK_VERSION A
+    )
+
 .. _`Object Libraries`:
 
 Object Libraries
@@ -142,6 +158,11 @@ use particular :prop_tgt:`COMPILE_OPTIONS` or
 :prop_tgt:`COMPILE_DEFINITIONS` etc for convenience only.  The contents of
 the properties must be **requirements**, not merely recommendations or
 convenience.
+
+See the :ref:`Creating Relocatable Packages` section of the
+:manual:`cmake-packages(7)` manual for discussion of additional care
+that must be taken when specifying usage requirements while creating
+packages for redistribution.
 
 Target Properties
 -----------------
@@ -627,7 +648,7 @@ may be enabled, with an equivalent effect to:
 
 .. code-block:: cmake
 
-  set_property(TARGET tgt APPEND PROPERTY
+  set_property(TARGET tgt APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR}>
   )
 
@@ -690,8 +711,10 @@ edge of linking ``exe1`` is determined by the same
 :prop_tgt:`POSITION_INDEPENDENT_CODE` property, the dependency graph above
 contains a cycle.  :manual:`cmake(1)` issues a diagnostic in this case.
 
-Output Files
-------------
+.. _`Output Artifacts`:
+
+Output Artifacts
+----------------
 
 The buildsystem targets created by the :command:`add_library` and
 :command:`add_executable` commands create rules to create binary outputs.
@@ -702,6 +725,71 @@ link-language of linked dependencies etc.  ``TARGET_FILE``,
 name and location of generated binaries.  These expressions do not work
 for ``OBJECT`` libraries however, as there is no single file generated
 by such libraries which is relevant to the expressions.
+
+There are three kinds of output artifacts that may be build by targets
+as detailed in the following sections.  Their classification differs
+between DLL platforms and non-DLL platforms.  All Windows-based
+systems including Cygwin are DLL platforms.
+
+.. _`Runtime Output Artifacts`:
+
+Runtime Output Artifacts
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+A *runtime* output artifact of a buildsystem target may be:
+
+* The executable file (e.g. ``.exe``) of an executable target
+  created by the :command:`add_executable` command.
+
+* On DLL platforms: the executable file (e.g. ``.dll``) of a shared
+  library target created by the :command:`add_library` command
+  with the ``SHARED`` option.
+
+The :prop_tgt:`RUNTIME_OUTPUT_DIRECTORY` and :prop_tgt:`RUNTIME_OUTPUT_NAME`
+target properties may be used to control runtime output artifact locations
+and names in the build tree.
+
+.. _`Library Output Artifacts`:
+
+Library Output Artifacts
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+A *library* output artifact of a buildsystem target may be:
+
+* The loadable module file (e.g. ``.dll`` or ``.so``) of a module
+  library target created by the :command:`add_library` command
+  with the ``MODULE`` option.
+
+* On non-DLL platforms: the shared library file (e.g. ``.so`` or ``.dylib``)
+  of a shared shared library target created by the :command:`add_library`
+  command with the ``SHARED`` option.
+
+The :prop_tgt:`LIBRARY_OUTPUT_DIRECTORY` and :prop_tgt:`LIBRARY_OUTPUT_NAME`
+target properties may be used to control library output artifact locations
+and names in the build tree.
+
+.. _`Archive Output Artifacts`:
+
+Archive Output Artifacts
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+An *archive* output artifact of a buildsystem target may be:
+
+* The static library file (e.g. ``.lib`` or ``.a``) of a static
+  library target created by the :command:`add_library` command
+  with the ``STATIC`` option.
+
+* On DLL platforms: the import library file (e.g. ``.lib``) of a shared
+  library target created by the :command:`add_library` command
+  with the ``SHARED`` option.
+
+* On DLL platforms: the import library file (e.g. ``.lib``) of an
+  executable target created by the :command:`add_executable` command
+  when its :prop_tgt:`ENABLE_EXPORTS` target property is set.
+
+The :prop_tgt:`ARCHIVE_OUTPUT_DIRECTORY` and :prop_tgt:`ARCHIVE_OUTPUT_NAME`
+target properties may be used to control archive output artifact locations
+and names in the build tree.
 
 Directory-Scoped Commands
 -------------------------
@@ -814,9 +902,9 @@ It may specify usage requirements such as
 :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`,
 :prop_tgt:`INTERFACE_COMPILE_DEFINITIONS`,
 :prop_tgt:`INTERFACE_COMPILE_OPTIONS`,
-:prop_tgt:`INTERFACE_LINK_LIBRARIES`, and
+:prop_tgt:`INTERFACE_LINK_LIBRARIES`,
 :prop_tgt:`INTERFACE_SOURCES`,
-:prop_tgt:`INTERFACE_POSITION_INDEPENDENT_CODE`.
+and :prop_tgt:`INTERFACE_POSITION_INDEPENDENT_CODE`.
 Only the ``INTERFACE`` modes of the :command:`target_include_directories`,
 :command:`target_compile_definitions`, :command:`target_compile_options`,
 :command:`target_sources`, and :command:`target_link_libraries` commands

@@ -33,8 +33,11 @@ set(CTEST_CUSTOM_WARNING_EXCEPTION
   "warning .980: wrong number of actual arguments to intrinsic function .std::basic_"
   "LINK : warning LNK4089: all references to.*ADVAPI32.dll.*discarded by /OPT:REF"
   "LINK : warning LNK4089: all references to.*PSAPI.DLL.*discarded by /OPT:REF"
+  "LINK : warning LNK4089: all references to.*RPCRT4.dll.*discarded by /OPT:REF"
   "LINK : warning LNK4089: all references to.*SHELL32.dll.*discarded by /OPT:REF"
   "LINK : warning LNK4089: all references to.*USER32.dll.*discarded by /OPT:REF"
+  "LINK : warning LNK4089: all references to.*ole32.dll.*discarded by /OPT:REF"
+  "Warning.*: .*/Utilities/KWIML/test/test_INT_format.h.* # Redundant preprocessing concatenation"
   "Warning: library was too large for page size.*"
   "Warning: public.*_archive_.*in module.*archive_*clashes with prior module.*archive_.*"
   "Warning: public.*BZ2_bz.*in module.*bzlib.*clashes with prior module.*bzlib.*"
@@ -53,6 +56,9 @@ set(CTEST_CUSTOM_WARNING_EXCEPTION
   "CMakeSetupManifest.xml.*manifest authoring warning.*Unrecognized Element"
   "cc-3968 CC: WARNING File.*" # "implicit" truncation by static_cast
   "ld: warning: directory not found for option .-(F|L)"
+  "ld: warning .*/libgcc.a archive's cputype"
+  "ld: warning: ignoring file .*/libgcc.a, file was built for archive which is not the architecture being linked"
+  "ld: warning: in .*/libgcc.a, file is not of required architecture"
   "warning.*This version of Mac OS X is unsupported"
   "clang.*: warning: argument unused during compilation: .-g"
   "note: in expansion of macro" # diagnostic context note
@@ -62,6 +68,18 @@ set(CTEST_CUSTOM_WARNING_EXCEPTION
   # Ignore clang's summary warning, assuming prior text has matched some
   # other warning expression:
   "[0-9,]+ warnings? generated."
+
+# scanbuild exceptions
+  "char_traits.h:.*: warning: Null pointer argument in call to string length function"
+  "stl_construct.h:.*: warning: Forming reference to null pointer"
+  ".*stl_uninitialized.h:75:19: warning: Forming reference to null pointer.*"
+  ".*stl_vector.h:.*: warning: Returning null reference.*"
+  "warning: Value stored to 'yymsg' is never read"
+  "warning: Value stored to 'yytoken' is never read"
+  "index_encoder.c.241.2. warning: Value stored to .out_start. is never read"
+  "index.c.*warning: Access to field.*results in a dereference of a null pointer.*loaded from variable.*"
+  "cm_sha2.*warning: Value stored to.*is never read"
+  "testProcess.*warning: Dereference of null pointer .loaded from variable .invalidAddress.."
   )
 
 if(NOT "@CMAKE_GENERATOR@" MATCHES "Xcode")

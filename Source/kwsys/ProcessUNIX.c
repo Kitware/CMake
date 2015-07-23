@@ -157,7 +157,7 @@ static void kwsysProcessCleanupDescriptor(int* pfd);
 static void kwsysProcessClosePipes(kwsysProcess* cp);
 static int kwsysProcessSetNonBlocking(int fd);
 static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
-                              kwsysProcessCreateInformation* si, int* readEnd);
+                              kwsysProcessCreateInformation* si);
 static void kwsysProcessDestroy(kwsysProcess* cp);
 static int kwsysProcessSetupOutputPipeFile(int* p, const char* name);
 static int kwsysProcessSetupOutputPipeNative(int* p, int des[2]);
@@ -203,6 +203,10 @@ struct kwsysProcess_s
      the signal pipe. */
   int PipeReadEnds[KWSYSPE_PIPE_COUNT];
 
+  /* Descriptors for the child's ends of the pipes.
+     Used temporarily during process creation.  */
+  int PipeChildStd[3];
+
   /* Write descriptor for child termination signal pipe.  */
   int SignalPipe;
 
@@ -229,6 +233,9 @@ struct kwsysProcess_s
 
   /* Whether to treat command lines as verbatim.  */
   int Verbatim;
+
+  /* Whether to merge stdout/stderr of the child.  */
+  int MergeOutput;
 
   /* Time at which the child started.  Negative for no timeout.  */
   kwsysProcessTime StartTime;
@@ -640,6 +647,7 @@ int kwsysProcess_GetOption(kwsysProcess* cp, int optionId)
   switch(optionId)
     {
     case kwsysProcess_Option_Detach: return cp->OptionDetach;
+    case kwsysProcess_Option_MergeOutput: return cp->MergeOutput;
     case kwsysProcess_Option_Verbatim: return cp->Verbatim;
     default: return 0;
     }
@@ -656,6 +664,7 @@ void kwsysProcess_SetOption(kwsysProcess* cp, int optionId, int value)
   switch(optionId)
     {
     case kwsysProcess_Option_Detach: cp->OptionDetach = value; break;
+    case kwsysProcess_Option_MergeOutput: cp->MergeOutput = value; break;
     case kwsysProcess_Option_Verbatim: cp->Verbatim = value; break;
     default: break;
     }
@@ -717,7 +726,6 @@ const char* kwsysProcess_GetExceptionString(kwsysProcess* cp)
 void kwsysProcess_Execute(kwsysProcess* cp)
 {
   int i;
-  kwsysProcessCreateInformation si = {-1, -1, -1, {-1, -1}};
 
   /* Do not execute a second copy simultaneously.  */
   if(!cp || cp->State == kwsysProcess_State_Executing)
@@ -785,7 +793,110 @@ void kwsysProcess_Execute(kwsysProcess* cp)
       }
     }
 
-  /* Setup the stderr pipe to be shared by all processes.  */
+  /* Setup the stdin pipe for the first process.  */
+  if(cp->PipeFileSTDIN)
+    {
+    /* Open a file for the child's stdin to read.  */
+    cp->PipeChildStd[0] = open(cp->PipeFileSTDIN, O_RDONLY);
+    if(cp->PipeChildStd[0] < 0)
+      {
+      kwsysProcessCleanup(cp, 1);
+      return;
+      }
+
+    /* Set close-on-exec flag on the pipe's end.  */
+    if(fcntl(cp->PipeChildStd[0], F_SETFD, FD_CLOEXEC) < 0)
+      {
+      kwsysProcessCleanup(cp, 1);
+      return;
+      }
+    }
+  else if(cp->PipeSharedSTDIN)
+    {
+    cp->PipeChildStd[0] = 0;
+    }
+  else if(cp->PipeNativeSTDIN[0] >= 0)
+    {
+    cp->PipeChildStd[0] = cp->PipeNativeSTDIN[0];
+
+    /* Set close-on-exec flag on the pipe's ends.  The read end will
+       be dup2-ed into the stdin descriptor after the fork but before
+       the exec.  */
+    if((fcntl(cp->PipeNativeSTDIN[0], F_SETFD, FD_CLOEXEC) < 0) ||
+       (fcntl(cp->PipeNativeSTDIN[1], F_SETFD, FD_CLOEXEC) < 0))
+      {
+      kwsysProcessCleanup(cp, 1);
+      return;
+      }
+    }
+  else
+    {
+    cp->PipeChildStd[0] = -1;
+    }
+
+  /* Create the output pipe for the last process.
+     We always create this so the pipe can be passed to select even if
+     it will report closed immediately.  */
+  {
+  /* Create the pipe.  */
+  int p[2];
+  if(pipe(p KWSYSPE_VMS_NONBLOCK) < 0)
+    {
+    kwsysProcessCleanup(cp, 1);
+    return;
+    }
+
+  /* Store the pipe.  */
+  cp->PipeReadEnds[KWSYSPE_PIPE_STDOUT] = p[0];
+  cp->PipeChildStd[1] = p[1];
+
+  /* Set close-on-exec flag on the pipe's ends.  */
+  if((fcntl(p[0], F_SETFD, FD_CLOEXEC) < 0) ||
+     (fcntl(p[1], F_SETFD, FD_CLOEXEC) < 0))
+    {
+    kwsysProcessCleanup(cp, 1);
+    return;
+    }
+
+  /* Set to non-blocking in case select lies, or for the polling
+     implementation.  */
+  if(!kwsysProcessSetNonBlocking(p[0]))
+    {
+    kwsysProcessCleanup(cp, 1);
+    return;
+    }
+  }
+
+  if (cp->PipeFileSTDOUT)
+    {
+    /* Use a file for stdout.  */
+    if(!kwsysProcessSetupOutputPipeFile(&cp->PipeChildStd[1],
+                                        cp->PipeFileSTDOUT))
+      {
+      kwsysProcessCleanup(cp, 1);
+      return;
+      }
+    }
+  else if (cp->PipeSharedSTDOUT)
+    {
+    /* Use the parent stdout.  */
+    kwsysProcessCleanupDescriptor(&cp->PipeChildStd[1]);
+    cp->PipeChildStd[1] = 1;
+    }
+  else if (cp->PipeNativeSTDOUT[1] >= 0)
+    {
+    /* Use the given descriptor for stdout.  */
+    if(!kwsysProcessSetupOutputPipeNative(&cp->PipeChildStd[1],
+                                          cp->PipeNativeSTDOUT))
+      {
+      kwsysProcessCleanup(cp, 1);
+      return;
+      }
+    }
+
+  /* Create stderr pipe to be shared by all processes in the pipeline.
+     We always create this so the pipe can be passed to select even if
+     it will report closed immediately.  */
   {
   /* Create the pipe.  */
   int p[2];
@@ -797,14 +908,13 @@ void kwsysProcess_Execute(kwsysProcess* cp)
 
   /* Store the pipe.  */
   cp->PipeReadEnds[KWSYSPE_PIPE_STDERR] = p[0];
-  si.StdErr = p[1];
+  cp->PipeChildStd[2] = p[1];
 
   /* Set close-on-exec flag on the pipe's ends.  */
   if((fcntl(p[0], F_SETFD, FD_CLOEXEC) < 0) ||
      (fcntl(p[1], F_SETFD, FD_CLOEXEC) < 0))
     {
     kwsysProcessCleanup(cp, 1);
-    kwsysProcessCleanupDescriptor(&si.StdErr);
     return;
     }
 
@@ -813,41 +923,33 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   if(!kwsysProcessSetNonBlocking(p[0]))
     {
     kwsysProcessCleanup(cp, 1);
-    kwsysProcessCleanupDescriptor(&si.StdErr);
     return;
     }
   }
 
-  /* Replace the stderr pipe with a file if requested.  In this case
-     the select call will report that stderr is closed immediately.  */
-  if(cp->PipeFileSTDERR)
+  if (cp->PipeFileSTDERR)
     {
-    if(!kwsysProcessSetupOutputPipeFile(&si.StdErr, cp->PipeFileSTDERR))
+    /* Use a file for stderr.  */
+    if(!kwsysProcessSetupOutputPipeFile(&cp->PipeChildStd[2],
+                                        cp->PipeFileSTDERR))
       {
       kwsysProcessCleanup(cp, 1);
-      kwsysProcessCleanupDescriptor(&si.StdErr);
       return;
       }
     }
-
-  /* Replace the stderr pipe with the parent's if requested.  In this
-     case the select call will report that stderr is closed
-     immediately.  */
-  if(cp->PipeSharedSTDERR)
+  else if (cp->PipeSharedSTDERR)
     {
-    kwsysProcessCleanupDescriptor(&si.StdErr);
-    si.StdErr = 2;
+    /* Use the parent stderr.  */
+    kwsysProcessCleanupDescriptor(&cp->PipeChildStd[2]);
+    cp->PipeChildStd[2] = 2;
     }
-
-  /* Replace the stderr pipe with the native pipe provided if any.  In
-     this case the select call will report that stderr is closed
-     immediately.  */
-  if(cp->PipeNativeSTDERR[1] >= 0)
+  else if (cp->PipeNativeSTDERR[1] >= 0)
     {
-    if(!kwsysProcessSetupOutputPipeNative(&si.StdErr, cp->PipeNativeSTDERR))
+    /* Use the given handle for stderr.  */
+    if(!kwsysProcessSetupOutputPipeNative(&cp->PipeChildStd[2],
+                                          cp->PipeNativeSTDERR))
       {
       kwsysProcessCleanup(cp, 1);
-      kwsysProcessCleanupDescriptor(&si.StdErr);
       return;
       }
     }
@@ -859,54 +961,85 @@ void kwsysProcess_Execute(kwsysProcess* cp)
 
   /* Create the pipeline of processes.  */
   {
-  int readEnd = -1;
-  int failed = 0;
+  kwsysProcessCreateInformation si = {-1, -1, -1, {-1, -1}};
+  int nextStdIn = cp->PipeChildStd[0];
   for(i=0; i < cp->NumberOfCommands; ++i)
     {
-    if(!kwsysProcessCreate(cp, i, &si, &readEnd))
+    /* Setup the process's pipes.  */
+    si.StdIn = nextStdIn;
+    if (i == cp->NumberOfCommands-1)
       {
-      failed = 1;
+      nextStdIn = -1;
+      si.StdOut = cp->PipeChildStd[1];
+      }
+    else
+      {
+      /* Create a pipe to sit between the children.  */
+      int p[2] = {-1,-1};
+      if(pipe(p KWSYSPE_VMS_NONBLOCK) < 0)
+        {
+        if (nextStdIn != cp->PipeChildStd[0])
+          {
+          kwsysProcessCleanupDescriptor(&nextStdIn);
+          }
+        kwsysProcessCleanup(cp, 1);
+        return;
+        }
+
+      /* Set close-on-exec flag on the pipe's ends.  */
+      if((fcntl(p[0], F_SETFD, FD_CLOEXEC) < 0) ||
+         (fcntl(p[1], F_SETFD, FD_CLOEXEC) < 0))
+        {
+        close(p[0]);
+        close(p[1]);
+        if (nextStdIn != cp->PipeChildStd[0])
+          {
+          kwsysProcessCleanupDescriptor(&nextStdIn);
+          }
+        kwsysProcessCleanup(cp, 1);
+        return;
+        }
+      nextStdIn = p[0];
+      si.StdOut = p[1];
+      }
+    si.StdErr = cp->MergeOutput? cp->PipeChildStd[1] : cp->PipeChildStd[2];
+
+    {
+    int res = kwsysProcessCreate(cp, i, &si);
+
+    /* Close our copies of pipes used between children.  */
+    if (si.StdIn != cp->PipeChildStd[0])
+      {
+      kwsysProcessCleanupDescriptor(&si.StdIn);
+      }
+    if (si.StdOut != cp->PipeChildStd[1])
+      {
+      kwsysProcessCleanupDescriptor(&si.StdOut);
+      }
+    if (si.StdErr != cp->PipeChildStd[2] && !cp->MergeOutput)
+      {
+      kwsysProcessCleanupDescriptor(&si.StdErr);
       }
 
-    /* Set the output pipe of the last process to be non-blocking in
-       case select lies, or for the polling implementation.  */
-    if(i == (cp->NumberOfCommands-1) && !kwsysProcessSetNonBlocking(readEnd))
+    if(!res)
       {
-      failed = 1;
-      }
-
-    if(failed)
-      {
-      kwsysProcessCleanup(cp, 1);
-
-      /* Release resources that may have been allocated for this
-         process before an error occurred.  */
-      kwsysProcessCleanupDescriptor(&readEnd);
-      if(si.StdIn != 0)
-        {
-        kwsysProcessCleanupDescriptor(&si.StdIn);
-        }
-      if(si.StdOut != 1)
-        {
-        kwsysProcessCleanupDescriptor(&si.StdOut);
-        }
-      if(si.StdErr != 2)
-        {
-        kwsysProcessCleanupDescriptor(&si.StdErr);
-        }
       kwsysProcessCleanupDescriptor(&si.ErrorPipe[0]);
       kwsysProcessCleanupDescriptor(&si.ErrorPipe[1]);
+      if (nextStdIn != cp->PipeChildStd[0])
+        {
+        kwsysProcessCleanupDescriptor(&nextStdIn);
+        }
+      kwsysProcessCleanup(cp, 1);
       return;
       }
     }
-  /* Save a handle to the output pipe for the last process.  */
-  cp->PipeReadEnds[KWSYSPE_PIPE_STDOUT] = readEnd;
+    }
   }
 
-  /* The parent process does not need the output pipe write ends.  */
-  if(si.StdErr != 2)
+  /* The parent process does not need the child's pipe ends.  */
+  for (i=0; i < 3; ++i)
     {
-    kwsysProcessCleanupDescriptor(&si.StdErr);
+    kwsysProcessCleanupDescriptor(&cp->PipeChildStd[i]);
     }
 
   /* Restore the working directory. */
@@ -1414,6 +1547,10 @@ static int kwsysProcessInitialize(kwsysProcess* cp)
     {
     cp->PipeReadEnds[i] = -1;
     }
+  for(i=0; i < 3; ++i)
+    {
+    cp->PipeChildStd[i] = -1;
+    }
   cp->SignalPipe = -1;
   cp->SelectError = 0;
   cp->StartTime.tv_sec = -1;
@@ -1548,13 +1685,17 @@ static void kwsysProcessCleanup(kwsysProcess* cp, int error)
     {
     kwsysProcessCleanupDescriptor(&cp->PipeReadEnds[i]);
     }
+  for(i=0; i < 3; ++i)
+    {
+    kwsysProcessCleanupDescriptor(&cp->PipeChildStd[i]);
+    }
 }
 
 /*--------------------------------------------------------------------------*/
 /* Close the given file descriptor if it is open.  Reset its value to -1.  */
 static void kwsysProcessCleanupDescriptor(int* pfd)
 {
-  if(pfd && *pfd >= 0)
+  if(pfd && *pfd > 2)
     {
     /* Keep trying to close until it is not interrupted by a
      * signal.  */
@@ -1615,100 +1756,8 @@ int decc$set_child_standard_streams(int fd1, int fd2, int fd3);
 
 /*--------------------------------------------------------------------------*/
 static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
-                              kwsysProcessCreateInformation* si, int* readEnd)
+                              kwsysProcessCreateInformation* si)
 {
-  /* Setup the process's stdin.  */
-  if(prIndex > 0)
-    {
-    si->StdIn = *readEnd;
-    *readEnd = 0;
-    }
-  else if(cp->PipeFileSTDIN)
-    {
-    /* Open a file for the child's stdin to read.  */
-    si->StdIn = open(cp->PipeFileSTDIN, O_RDONLY);
-    if(si->StdIn < 0)
-      {
-      return 0;
-      }
-
-    /* Set close-on-exec flag on the pipe's end.  */
-    if(fcntl(si->StdIn, F_SETFD, FD_CLOEXEC) < 0)
-      {
-      return 0;
-      }
-    }
-  else if(cp->PipeSharedSTDIN)
-    {
-    si->StdIn = 0;
-    }
-  else if(cp->PipeNativeSTDIN[0] >= 0)
-    {
-    si->StdIn = cp->PipeNativeSTDIN[0];
-
-    /* Set close-on-exec flag on the pipe's ends.  The read end will
-       be dup2-ed into the stdin descriptor after the fork but before
-       the exec.  */
-    if((fcntl(cp->PipeNativeSTDIN[0], F_SETFD, FD_CLOEXEC) < 0) ||
-       (fcntl(cp->PipeNativeSTDIN[1], F_SETFD, FD_CLOEXEC) < 0))
-      {
-      return 0;
-      }
-    }
-  else
-    {
-    si->StdIn = -1;
-    }
-
-  /* Setup the process's stdout.  */
-  {
-  /* Create the pipe.  */
-  int p[2];
-  if(pipe(p KWSYSPE_VMS_NONBLOCK) < 0)
-    {
-    return 0;
-    }
-  *readEnd = p[0];
-  si->StdOut = p[1];
-
-  /* Set close-on-exec flag on the pipe's ends.  */
-  if((fcntl(p[0], F_SETFD, FD_CLOEXEC) < 0) ||
-     (fcntl(p[1], F_SETFD, FD_CLOEXEC) < 0))
-    {
-    return 0;
-    }
-  }
-
-  /* Replace the stdout pipe with a file if requested.  In this case
-     the select call will report that stdout is closed immediately.  */
-  if(prIndex == cp->NumberOfCommands-1 && cp->PipeFileSTDOUT)
-    {
-    if(!kwsysProcessSetupOutputPipeFile(&si->StdOut, cp->PipeFileSTDOUT))
-      {
-      return 0;
-      }
-    }
-
-  /* Replace the stdout pipe with the parent's if requested.  In this
-     case the select call will report that stderr is closed
-     immediately.  */
-  if(prIndex == cp->NumberOfCommands-1 && cp->PipeSharedSTDOUT)
-    {
-    kwsysProcessCleanupDescriptor(&si->StdOut);
-    si->StdOut = 1;
-    }
-
-  /* Replace the stdout pipe with the native pipe provided if any.  In
-     this case the select call will report that stdout is closed
-     immediately.  */
-  if(prIndex == cp->NumberOfCommands-1 && cp->PipeNativeSTDOUT[1] >= 0)
-    {
-    if(!kwsysProcessSetupOutputPipeNative(&si->StdOut, cp->PipeNativeSTDOUT))
-      {
-      return 0;
-      }
-    }
-
   /* Create the error reporting pipe.  */
   if(pipe(si->ErrorPipe) < 0)
     {
@@ -1818,19 +1867,6 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
     return 0;
     }
   }
-
-  /* Successfully created this child process.  */
-  if(prIndex > 0 || si->StdIn > 0)
-    {
-    /* The parent process does not need the input pipe read end.  */
-    kwsysProcessCleanupDescriptor(&si->StdIn);
-    }
-
-  /* The parent process does not need the output pipe write ends.  */
-  if(si->StdOut != 1)
-    {
-    kwsysProcessCleanupDescriptor(&si->StdOut);
-    }
 
   return 1;
 }

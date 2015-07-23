@@ -13,6 +13,7 @@
 #ifndef cmCPackIFWInstaller_h
 #define cmCPackIFWInstaller_h
 
+#include <cmGeneratedFileStream.h>
 #include <cmStandardIncludes.h>
 
 class cmCPackIFWPackage;
@@ -69,16 +70,38 @@ public: // Configuration
   /// Filename for a logo
   std::string Logo;
 
+  /// Name of the default program group in the Windows Start menu
+  std::string StartMenuDir;
+
   /// Default target directory for installation
   std::string TargetDir;
 
   /// Default target directory for installation with administrator rights
   std::string AdminTargetDir;
 
+  /// Filename of the generated maintenance tool
+  std::string MaintenanceToolName;
+
+  /// Filename for the configuration of the generated maintenance tool
+  std::string MaintenanceToolIniFile;
+
+  /// Set to true if the installation path can contain non-ASCII characters
+  std::string AllowNonAsciiCharacters;
+
+  /// Set to false if the installation path cannot contain space characters
+  std::string AllowSpaceInPath;
+
+  /// Filename for a custom installer control script
+  std::string ControlScript;
+
 public: // Internal implementation
 
   const char* GetOption(const std::string& op) const;
   bool IsOn(const std::string& op) const;
+
+  bool IsVersionLess(const char *version);
+  bool IsVersionGreater(const char *version);
+  bool IsVersionEqual(const char *version);
 
   void ConfigureFromOptions();
 
@@ -90,6 +113,9 @@ public: // Internal implementation
   PackagesMap Packages;
   std::vector<RepositoryStruct> Repositories;
   std::string Directory;
+
+protected:
+  void WriteGeneratedByToStrim(cmGeneratedFileStream& xout);
 };
 
 #endif // cmCPackIFWInstaller_h

@@ -24,8 +24,7 @@ bool cmInstallFilesCommand
     }
 
   // Enable the install target.
-  this->Makefile->GetLocalGenerator()
-    ->GetGlobalGenerator()->EnableInstallTarget();
+  this->Makefile->GetGlobalGenerator()->EnableInstallTarget();
 
   this->Destination = args[0];
 
@@ -48,7 +47,7 @@ bool cmInstallFilesCommand
                            args.begin() + 1, args.end());
     }
 
-  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+  this->Makefile->GetGlobalGenerator()
                       ->AddInstallComponent(this->Makefile->GetSafeDefinition(
                                       "CMAKE_INSTALL_DEFAULT_COMPONENT_NAME"));
 
@@ -95,7 +94,7 @@ void cmInstallFilesCommand::FinalPass()
     {
     std::vector<std::string> files;
     std::string regex = this->FinalArgs[0];
-    cmSystemTools::Glob(this->Makefile->GetCurrentDirectory(),
+    cmSystemTools::Glob(this->Makefile->GetCurrentSourceDirectory(),
                         regex, files);
 
     std::vector<std::string>::iterator s = files.begin();
@@ -152,10 +151,10 @@ std::string cmInstallFilesCommand::FindInstallSource(const char* name) const
     }
 
   // This is a relative path.
-  std::string tb = this->Makefile->GetCurrentOutputDirectory();
+  std::string tb = this->Makefile->GetCurrentBinaryDirectory();
   tb += "/";
   tb += name;
-  std::string ts = this->Makefile->GetCurrentDirectory();
+  std::string ts = this->Makefile->GetCurrentSourceDirectory();
   ts += "/";
   ts += name;
 

@@ -132,6 +132,24 @@ bool cmCPackIFWPackage::IsOn(const std::string &op) const
 }
 
 //----------------------------------------------------------------------------
+bool cmCPackIFWPackage::IsVersionLess(const char *version)
+{
+  return Generator ? Generator->IsVersionLess(version) : false;
+}
+
+//----------------------------------------------------------------------------
+bool cmCPackIFWPackage::IsVersionGreater(const char *version)
+{
+  return Generator ? Generator->IsVersionGreater(version) : false;
+}
+
+//----------------------------------------------------------------------------
+bool cmCPackIFWPackage::IsVersionEqual(const char *version)
+{
+  return Generator ? Generator->IsVersionEqual(version) : false;
+}
+
+//----------------------------------------------------------------------------
 std::string cmCPackIFWPackage::GetComponentName(cmCPackComponent *component)
 {
   if (!component) return "";
@@ -432,6 +450,9 @@ void cmCPackIFWPackage::GeneratePackageFile()
   cmGeneratedFileStream xout((Directory + "/meta/package.xml").data());
 
   xout << "<?xml version=\"1.0\"?>" << std::endl;
+
+  WriteGeneratedByToStrim(xout);
+
   xout << "<Package>" << std::endl;
 
   xout << "    <DisplayName>" << DisplayName
@@ -537,4 +558,9 @@ void cmCPackIFWPackage::GeneratePackageFile()
     }
 
   xout << "</Package>" << std::endl;
+}
+
+void cmCPackIFWPackage::WriteGeneratedByToStrim(cmGeneratedFileStream &xout)
+{
+  if(Generator) Generator->WriteGeneratedByToStrim(xout);
 }

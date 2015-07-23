@@ -67,17 +67,17 @@ private:
     int Root;
     int VisitIndex;
   };
-  int TarjanWalkId;
   std::vector<int> TarjanVisited;
   std::vector<int> TarjanComponents;
   std::vector<TarjanEntry> TarjanEntries;
+  std::vector<NodeList> Components;
   std::stack<int> TarjanStack;
+  int TarjanWalkId;
   int TarjanIndex;
   void Tarjan();
   void TarjanVisit(int i);
 
   // Connected components.
-  std::vector<NodeList> Components;
 };
 
 #endif

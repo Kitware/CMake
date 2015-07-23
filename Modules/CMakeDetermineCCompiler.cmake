@@ -80,6 +80,7 @@ else()
   # Each entry in this list is a set of extra flags to try
   # adding to the compile line to see if it helps produce
   # a valid identification file.
+  set(CMAKE_C_COMPILER_ID_TEST_FLAGS_FIRST)
   set(CMAKE_C_COMPILER_ID_TEST_FLAGS
     # Try compiling to an object file only.
     "-c"
@@ -103,6 +104,14 @@ if(NOT CMAKE_C_COMPILER_ID_RUN)
   list(APPEND CMAKE_C_COMPILER_ID_VENDORS IAR)
   set(CMAKE_C_COMPILER_ID_VENDOR_FLAGS_IAR )
   set(CMAKE_C_COMPILER_ID_VENDOR_REGEX_IAR "IAR .+ Compiler")
+
+  # Match the link line from xcodebuild output of the form
+  #  Ld ...
+  #      ...
+  #      /path/to/cc ...CompilerIdC/...
+  # to extract the compiler front-end for the language.
+  set(CMAKE_C_COMPILER_ID_TOOL_MATCH_REGEX "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerIdC/(\\./)?(CompilerIdC.xctest/)?CompilerIdC[ \t\n\\\"]")
+  set(CMAKE_C_COMPILER_ID_TOOL_MATCH_INDEX 2)
 
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
   CMAKE_DETERMINE_COMPILER_ID(C CFLAGS CMakeCCompilerId.c)

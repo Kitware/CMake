@@ -12,6 +12,17 @@
 #include "cmWhileCommand.h"
 #include "cmConditionEvaluator.h"
 
+cmWhileFunctionBlocker::cmWhileFunctionBlocker(cmMakefile* mf):
+  Makefile(mf), Depth(0)
+{
+  this->Makefile->PushLoopBlock();
+}
+
+cmWhileFunctionBlocker::~cmWhileFunctionBlocker()
+{
+  this->Makefile->PopLoopBlock();
+}
+
 bool cmWhileFunctionBlocker::
 IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
                   cmExecutionStatus &inStatus)
@@ -27,8 +38,6 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
     // if this is the endwhile for this while loop then execute
     if (!this->Depth)
       {
-      cmMakefile::LoopBlockPop loopBlockPop(&mf);
-
       // Remove the function blocker for this scope or bail.
       cmsys::auto_ptr<cmFunctionBlocker>
         fb(mf.RemoveFunctionBlocker(this, lff));
@@ -140,11 +149,9 @@ bool cmWhileCommand
     }
 
   // create a function blocker
-  cmWhileFunctionBlocker *f = new cmWhileFunctionBlocker();
+  cmWhileFunctionBlocker *f = new cmWhileFunctionBlocker(this->Makefile);
   f->Args = args;
   this->Makefile->AddFunctionBlocker(f);
-
-  this->Makefile->PushLoopBlock();
 
   return true;
 }

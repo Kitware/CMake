@@ -278,7 +278,7 @@ endif()
 # compile a C++ file into an object file
 if(NOT CMAKE_CXX_COMPILE_OBJECT)
   set(CMAKE_CXX_COMPILE_OBJECT
-    "<CMAKE_CXX_COMPILER>  <DEFINES> <FLAGS> -o <OBJECT> -c <SOURCE>")
+    "<CMAKE_CXX_COMPILER>  <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>")
 endif()
 
 if(NOT CMAKE_CXX_LINK_EXECUTABLE)

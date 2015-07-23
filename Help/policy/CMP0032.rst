@@ -11,3 +11,5 @@ functionality is better achieved through dedicated outside tools.
 
 .. |disallowed_version| replace:: 3.0
 .. include:: DISALLOWED_COMMAND.txt
+
+.. include:: DEPRECATED.txt

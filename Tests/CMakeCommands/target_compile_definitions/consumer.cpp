@@ -15,4 +15,22 @@
 #error Expected DASH_D_DEFINE
 #endif
 
+#ifdef TEST_LANG_DEFINES
+  #ifndef CONSUMER_LANG_CXX
+  #error Expected CONSUMER_LANG_CXX
+  #endif
+
+  #ifdef CONSUMER_LANG_C
+  #error Unexpected CONSUMER_LANG_C
+  #endif
+
+  #if !LANG_IS_CXX
+  #error Expected LANG_IS_CXX
+  #endif
+
+  #if LANG_IS_C
+  #error Unexpected LANG_IS_C
+  #endif
+#endif
+
 int main() { return 0; }

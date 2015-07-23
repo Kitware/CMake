@@ -25,13 +25,12 @@
 #include "cmCustomCommandGenerator.h"
 #include "cmVersion.h"
 #include "cmake.h"
+#include "cmAlgorithms.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # define CM_LG_ENCODE_OBJECT_NAMES
 # include <cmsys/MD5.h>
 #endif
-
-#include <cmsys/System.h>
 
 #include <ctype.h> // for isalpha
 
@@ -42,23 +41,22 @@
 #include <StorageDefs.h>
 #endif
 
-cmLocalGenerator::cmLocalGenerator()
+cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
+                                   cmLocalGenerator* parent,
+                                   cmState::Snapshot snapshot)
+  : cmOutputConverter(snapshot), StateSnapshot(snapshot)
 {
-  this->Makefile = 0; // moved to after set on global
-  this->Parent = 0;
-  this->WindowsShell = false;
-  this->WindowsVSIDE = false;
-  this->WatcomWMake = false;
-  this->MinGWMake = false;
-  this->NMake = false;
-  this->MSYSShell = false;
-  this->LinkScriptShell = false;
-  this->IgnoreLibPrefix = false;
-  this->UseRelativePaths = false;
-  this->Configured = false;
+  assert(snapshot.IsValid());
+  this->GlobalGenerator = gg;
+  this->Parent = parent;
+  if (parent)
+    {
+    parent->AddChild(this);
+    }
+
+  this->Makefile = new cmMakefile(this);
+
   this->EmitUniversalBinaryFlags = true;
-  this->RelativePathsConfigured = false;
-  this->PathConversionsSetup = false;
   this->BackwardsCompatibility = 0;
   this->BackwardsCompatibilityFinal = false;
 }
@@ -68,68 +66,20 @@ cmLocalGenerator::~cmLocalGenerator()
   delete this->Makefile;
 }
 
-//----------------------------------------------------------------------------
-class cmLocalGeneratorCurrent
+void cmLocalGenerator::IssueMessage(cmake::MessageType t,
+                                    std::string const& text) const
 {
-  cmGlobalGenerator* GG;
-  cmLocalGenerator* LG;
-public:
-  cmLocalGeneratorCurrent(cmLocalGenerator* lg)
+  cmListFileContext lfc;
+  lfc.FilePath = this->StateSnapshot.GetDirectory().GetCurrentSource();
+  lfc.FilePath += "/CMakeLists.txt";
+
+  if(!this->GlobalGenerator->GetCMakeInstance()->GetIsInTryCompile())
     {
-    this->GG = lg->GetGlobalGenerator();
-    this->LG = this->GG->GetCurrentLocalGenerator();
-    this->GG->SetCurrentLocalGenerator(lg);
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-    this->GG->GetFileLockPool().PushFileScope();
-#endif
+    cmOutputConverter converter(this->StateSnapshot);
+    lfc.FilePath = converter.Convert(lfc.FilePath, cmLocalGenerator::HOME);
     }
-  ~cmLocalGeneratorCurrent()
-    {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-    this->GG->GetFileLockPool().PopFileScope();
-#endif
-    this->GG->SetCurrentLocalGenerator(this->LG);
-    }
-};
-
-//----------------------------------------------------------------------------
-void cmLocalGenerator::Configure()
-{
-  // Manage the global generator's current local generator.
-  cmLocalGeneratorCurrent clg(this);
-  static_cast<void>(clg);
-
-  // make sure the CMakeFiles dir is there
-  std::string filesDir = this->Makefile->GetStartOutputDirectory();
-  filesDir += cmake::GetCMakeFilesDirectory();
-  cmSystemTools::MakeDirectory(filesDir.c_str());
-
-  // find & read the list file
-  this->ReadInputFile();
-
-  // at the end of the ReadListFile handle any old style subdirs
-  // first get all the subdirectories
-  std::vector<cmLocalGenerator *> subdirs = this->GetChildren();
-
-  // for each subdir recurse
-  std::vector<cmLocalGenerator *>::iterator sdi = subdirs.begin();
-  for (; sdi != subdirs.end(); ++sdi)
-    {
-    if (!(*sdi)->Configured)
-      {
-      this->Makefile->ConfigureSubDirectory(*sdi);
-      }
-    }
-
-  this->Makefile->AddCMakeDependFilesFromUser();
-
-  // Check whether relative paths should be used for optionally
-  // relative paths.
-  this->UseRelativePaths = this->Makefile->IsOn("CMAKE_USE_RELATIVE_PATHS");
-
-  this->ComputeObjectMaxPath();
-
-  this->Configured = true;
+  lfc.Line = 0;
+  this->GlobalGenerator->GetCMakeInstance()->IssueMessage(t, text, lfc);
 }
 
 //----------------------------------------------------------------------------
@@ -157,7 +107,7 @@ void cmLocalGenerator::ComputeObjectMaxPath()
         w << "CMAKE_OBJECT_PATH_MAX is set to " << pmax
           << ", which is less than the minimum of 128.  "
           << "The value will be ignored.";
-        this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+        this->IssueMessage(cmake::AUTHOR_WARNING, w.str());
         }
       }
     else
@@ -166,101 +116,10 @@ void cmLocalGenerator::ComputeObjectMaxPath()
       w << "CMAKE_OBJECT_PATH_MAX is set to \"" << plen
         << "\", which fails to parse as a positive integer.  "
         << "The value will be ignored.";
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+      this->IssueMessage(cmake::AUTHOR_WARNING, w.str());
       }
     }
   this->ObjectMaxPathViolations.clear();
-}
-
-//----------------------------------------------------------------------------
-void cmLocalGenerator::ReadInputFile()
-{
-  // Look for the CMakeLists.txt file.
-  std::string currentStart = this->Makefile->GetStartDirectory();
-  currentStart += "/CMakeLists.txt";
-  if(cmSystemTools::FileExists(currentStart.c_str(), true))
-    {
-    this->Makefile->ReadListFile(currentStart.c_str());
-    return;
-    }
-
-  if(!this->Parent)
-    {
-    return;
-    }
-
-  // The file is missing.  Check policy CMP0014.
-  cmMakefile* mf = this->Parent->GetMakefile();
-  std::ostringstream e;
-  e << "The source directory\n"
-    << "  " << this->Makefile->GetStartDirectory() << "\n"
-    << "does not contain a CMakeLists.txt file.";
-  switch (mf->GetPolicyStatus(cmPolicies::CMP0014))
-    {
-    case cmPolicies::WARN:
-      // Print the warning.
-      e << "\n"
-        << "CMake does not support this case but it used "
-        << "to work accidentally and is being allowed for "
-        << "compatibility."
-        << "\n"
-        << mf->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0014);
-      mf->IssueMessage(cmake::AUTHOR_WARNING, e.str());
-    case cmPolicies::OLD:
-      // OLD behavior does not warn.
-      return;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
-      e << "\n"
-        << mf->GetPolicies()->GetRequiredPolicyError(cmPolicies::CMP0014);
-    case cmPolicies::NEW:
-      // NEW behavior prints the error.
-      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
-      break;
-    }
-}
-
-void cmLocalGenerator::SetupPathConversions()
-{
-  // Setup the current output directory components for use by
-  // Convert
-  std::string outdir;
-  outdir =
-    cmSystemTools::CollapseFullPath(this->Makefile->GetHomeDirectory());
-  cmSystemTools::SplitPath(outdir, this->HomeDirectoryComponents);
-  outdir =
-    cmSystemTools::CollapseFullPath(this->Makefile->GetStartDirectory());
-  cmSystemTools::SplitPath(outdir, this->StartDirectoryComponents);
-
-  outdir = cmSystemTools::CollapseFullPath
-    (this->Makefile->GetHomeOutputDirectory());
-  cmSystemTools::SplitPath(outdir,
-                           this->HomeOutputDirectoryComponents);
-
-  outdir = cmSystemTools::CollapseFullPath
-    (this->Makefile->GetStartOutputDirectory());
-  cmSystemTools::SplitPath(outdir,
-                           this->StartOutputDirectoryComponents);
-}
-
-
-void cmLocalGenerator::SetGlobalGenerator(cmGlobalGenerator *gg)
-{
-  this->GlobalGenerator = gg;
-  this->Makefile = new cmMakefile;
-  this->Makefile->SetLocalGenerator(this);
-
-  // setup the home directories
-  this->Makefile->GetProperties().SetCMakeInstance(gg->GetCMakeInstance());
-  this->Makefile->SetHomeDirectory(
-    gg->GetCMakeInstance()->GetHomeDirectory());
-  this->Makefile->SetHomeOutputDirectory(
-    gg->GetCMakeInstance()->GetHomeOutputDirectory());
-}
-
-void cmLocalGenerator::ConfigureFinalPass()
-{
-  this->Makefile->ConfigureFinalPass();
 }
 
 void cmLocalGenerator::TraceDependencies()
@@ -302,7 +161,8 @@ void cmLocalGenerator::GenerateTestFiles()
   const std::string& config =
     this->Makefile->GetConfigurations(configurationTypes, false);
 
-  std::string file = this->Makefile->GetStartOutputDirectory();
+  std::string file =
+      this->StateSnapshot.GetDirectory().GetCurrentBinary();
   file += "/";
   file += "CTestTestfile.cmake";
 
@@ -311,9 +171,11 @@ void cmLocalGenerator::GenerateTestFiles()
 
   fout << "# CMake generated Testfile for " << std::endl
        << "# Source directory: "
-       << this->Makefile->GetStartDirectory() << std::endl
+       << this->StateSnapshot.GetDirectory().GetCurrentSource()
+       << std::endl
        << "# Build directory: "
-       << this->Makefile->GetStartOutputDirectory() << std::endl
+       << this->StateSnapshot.GetDirectory().GetCurrentBinary()
+       << std::endl
        << "# " << std::endl
        << "# This file includes the relevant testing commands "
        << "required for " << std::endl
@@ -343,7 +205,7 @@ void cmLocalGenerator::GenerateTestFiles()
       // TODO: Use add_subdirectory instead?
       fout << "subdirs(";
       std::string outP =
-        this->Children[i]->GetMakefile()->GetStartOutputDirectory();
+        this->Children[i]->GetMakefile()->GetCurrentBinaryDirectory();
       fout << this->Convert(outP,START_OUTPUT);
       fout << ")" << std::endl;
       }
@@ -427,14 +289,11 @@ void cmLocalGenerator::GenerateInstallRules()
     }
 
   // Create the install script file.
-  std::string file = this->Makefile->GetStartOutputDirectory();
-  std::string homedir = this->Makefile->GetHomeOutputDirectory();
-  std::string currdir = this->Makefile->GetCurrentOutputDirectory();
-  cmSystemTools::ConvertToUnixSlashes(file);
-  cmSystemTools::ConvertToUnixSlashes(homedir);
-  cmSystemTools::ConvertToUnixSlashes(currdir);
+  std::string file =
+      this->StateSnapshot.GetDirectory().GetCurrentBinary();
+  std::string homedir = this->GetState()->GetBinaryDirectory();
   int toplevel_install = 0;
-  if ( currdir == homedir )
+  if (file == homedir)
     {
     toplevel_install = 1;
     }
@@ -444,7 +303,8 @@ void cmLocalGenerator::GenerateInstallRules()
 
   // Write the header.
   fout << "# Install script for directory: "
-       << this->Makefile->GetCurrentDirectory() << std::endl << std::endl;
+       << this->StateSnapshot.GetDirectory().GetCurrentSource()
+       << std::endl << std::endl;
   fout << "# Set the install prefix" << std::endl
        << "if(NOT DEFINED CMAKE_INSTALL_PREFIX)" << std::endl
        << "  set(CMAKE_INSTALL_PREFIX \"" << prefix << "\")" << std::endl
@@ -516,7 +376,7 @@ void cmLocalGenerator::GenerateInstallRules()
       {
       if(!(*ci)->GetMakefile()->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
         {
-        std::string odir = (*ci)->GetMakefile()->GetStartOutputDirectory();
+        std::string odir = (*ci)->GetMakefile()->GetCurrentBinaryDirectory();
         cmSystemTools::ConvertToUnixSlashes(odir);
         fout << "  include(\"" <<  odir
              << "/cmake_install.cmake\")" << std::endl;
@@ -578,6 +438,16 @@ void cmLocalGenerator::GenerateTargetManifest()
     }
 }
 
+cmState* cmLocalGenerator::GetState() const
+{
+  return this->GlobalGenerator->GetCMakeInstance()->GetState();
+}
+
+cmState::Snapshot cmLocalGenerator::GetStateSnapshot() const
+{
+  return this->StateSnapshot;
+}
+
 void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
                                                     const std::string& lang,
                                                     cmSourceFile& source,
@@ -587,7 +457,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
   objectDir = this->Convert(objectDir,START_OUTPUT,SHELL);
   std::string objectFile = this->Convert(ofname,START_OUTPUT,SHELL);
   std::string sourceFile =
-    this->Convert(source.GetFullPath(),START_OUTPUT,SHELL,true);
+      this->ConvertToOutputFormat(source.GetFullPath(), SHELL);
   std::string varString = "CMAKE_";
   varString += lang;
   varString += "_COMPILE_OBJECT";
@@ -652,7 +522,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
     source.GetFullPath(),
     commandLines,
     comment.c_str(),
-    this->Makefile->GetStartOutputDirectory()
+    this->StateSnapshot.GetDirectory().GetCurrentBinary()
     );
 }
 
@@ -674,12 +544,13 @@ void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
        !sf->GetPropertyAsBool("EXTERNAL_OBJECT"))
       {
       std::string dir_max;
-      dir_max += this->Makefile->GetCurrentOutputDirectory();
+      dir_max += this->StateSnapshot.GetDirectory().GetCurrentBinary();
       dir_max += "/";
       std::string obj = this->GetObjectFileNameWithoutTarget(*sf, dir_max);
       if(!obj.empty())
         {
-        std::string ofname = this->Makefile->GetCurrentOutputDirectory();
+        std::string ofname =
+            this->StateSnapshot.GetDirectory().GetCurrentBinary();
         ofname += "/";
         ofname += obj;
         objVector.push_back(ofname);
@@ -749,7 +620,7 @@ void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
     "",
     commandLines,
     comment.c_str(),
-    this->Makefile->GetStartOutputDirectory()
+    this->StateSnapshot.GetDirectory().GetCurrentBinary()
     );
   this->Makefile->GetSource(targetFullPath);
   target.Target->AddSource(targetFullPath);
@@ -899,6 +770,10 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
   if(replaceValues.Defines && variable == "DEFINES")
     {
     return replaceValues.Defines;
+    }
+  if(replaceValues.Includes && variable == "INCLUDES")
+    {
+    return replaceValues.Includes;
     }
   if(replaceValues.TargetPDB )
     {
@@ -1059,12 +934,10 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
     }
   if(variable == "CMAKE_COMMAND")
     {
-    const char* cmcommand =
-      this->GetMakefile()->GetDefinition("CMAKE_COMMAND");
-    return this->Convert(cmcommand, FULL, SHELL);
+    return this->Convert(cmSystemTools::GetCMakeCommand(), FULL, SHELL);
     }
-  std::vector<std::string> enabledLanguages;
-  this->GlobalGenerator->GetEnabledLanguages(enabledLanguages);
+  std::vector<std::string> enabledLanguages =
+      this->GetState()->GetEnabledLanguages();
   // loop over language specific replace variables
   int pos = 0;
   while(ruleReplaceVars[pos])
@@ -1236,56 +1109,6 @@ void cmLocalGenerator::InsertRuleLauncher(std::string& s, cmTarget* target,
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalGenerator::ConvertToOutputForExistingCommon(const std::string& remote,
-                                                   std::string const& result,
-                                                   OutputFormat format)
-{
-  // If this is a windows shell, the result has a space, and the path
-  // already exists, we can use a short-path to reference it without a
-  // space.
-  if(this->WindowsShell && result.find(' ') != result.npos &&
-     cmSystemTools::FileExists(remote.c_str()))
-    {
-    std::string tmp;
-    if(cmSystemTools::GetShortPath(remote, tmp))
-      {
-      return this->Convert(tmp, NONE, format, true);
-      }
-    }
-
-  // Otherwise, leave it unchanged.
-  return result;
-}
-
-//----------------------------------------------------------------------------
-std::string
-cmLocalGenerator::ConvertToOutputForExisting(const std::string& remote,
-                                             RelativeRoot local,
-                                             OutputFormat format)
-{
-  // Perform standard conversion.
-  std::string result = this->Convert(remote, local, format, true);
-
-  // Consider short-path.
-  return this->ConvertToOutputForExistingCommon(remote, result, format);
-}
-
-//----------------------------------------------------------------------------
-std::string
-cmLocalGenerator::ConvertToOutputForExisting(RelativeRoot remote,
-                                             const std::string& local,
-                                             OutputFormat format)
-{
-  // Perform standard conversion.
-  std::string result = this->Convert(remote, local, format, true);
-
-  // Consider short-path.
-  const char* remotePath = this->GetRelativeRootPath(remote);
-  return this->ConvertToOutputForExistingCommon(remotePath, result, format);
-}
-
-//----------------------------------------------------------------------------
-std::string
 cmLocalGenerator::ConvertToIncludeReference(std::string const& path,
                                             OutputFormat format,
                                             bool forceFullPaths)
@@ -1383,8 +1206,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
           {
           includeFlags << fwSearchFlag;
           }
-        includeFlags << this->Convert(frameworkDir, START_OUTPUT,
-                                      shellFormat, true)
+        includeFlags << this->ConvertToOutputFormat(frameworkDir, shellFormat)
           << " ";
         }
       continue;
@@ -1428,11 +1250,11 @@ std::string cmLocalGenerator::GetIncludeFlags(
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddCompileDefinitions(std::set<std::string>& defines,
                                              cmTarget const* target,
-                                             const std::string& config)
+                                             const std::string& config,
+                                             const std::string& lang)
 {
   std::vector<std::string> targetDefines;
-  target->GetCompileDefinitions(targetDefines,
-                               config);
+  target->GetCompileDefinitions(targetDefines, config, lang);
   this->AppendDefines(defines, targetDefines);
 }
 
@@ -1453,7 +1275,7 @@ void cmLocalGenerator::AddCompileOptions(
       {
       cmSystemTools::ParseWindowsCommandLine(targetFlags, opts);
       }
-    target->GetCompileOptions(opts, config);
+    target->GetCompileOptions(opts, config, lang);
     for(std::vector<std::string>::const_iterator i = opts.begin();
         i != opts.end(); ++i)
       {
@@ -1474,7 +1296,7 @@ void cmLocalGenerator::AddCompileOptions(
       this->AppendFlags(flags, targetFlags);
       }
     std::vector<std::string> opts;
-    target->GetCompileOptions(opts, config);
+    target->GetCompileOptions(opts, config, lang);
     for(std::vector<std::string>::const_iterator i = opts.begin();
         i != opts.end(); ++i)
       {
@@ -1513,7 +1335,7 @@ void cmLocalGenerator::AddCompileOptions(
         "higher \"" << it->first << "_STANDARD\" \"" << standard << "\".  "
         "This is not permitted. The COMPILE_FEATURES may not both depend on "
         "and be depended on by the link implementation." << std::endl;
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->IssueMessage(cmake::FATAL_ERROR, e.str());
       return;
       }
     }
@@ -1526,7 +1348,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
                                              const std::string& lang,
                                              const std::string& config,
                                              bool stripImplicitInclDirs
-                                            )
+                                            ) const
 {
   // Need to decide whether to automatically include the source and
   // binary directories at the beginning of the include path.
@@ -1552,19 +1374,20 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   // Store the automatic include paths.
   if(includeBinaryDir)
     {
-    if(emitted.find(
-                this->Makefile->GetStartOutputDirectory()) == emitted.end())
+    std::string binDir = this->StateSnapshot.GetDirectory().GetCurrentBinary();
+    if(emitted.find(binDir) == emitted.end())
       {
-      dirs.push_back(this->Makefile->GetStartOutputDirectory());
-      emitted.insert(this->Makefile->GetStartOutputDirectory());
+      dirs.push_back(binDir);
+      emitted.insert(binDir);
       }
     }
   if(includeSourceDir)
     {
-    if(emitted.find(this->Makefile->GetStartDirectory()) == emitted.end())
+    std::string srcDir = this->StateSnapshot.GetDirectory().GetCurrentSource();
+    if(emitted.find(srcDir) == emitted.end())
       {
-      dirs.push_back(this->Makefile->GetStartDirectory());
-      emitted.insert(this->Makefile->GetStartDirectory());
+      dirs.push_back(srcDir);
+      emitted.insert(srcDir);
       }
     }
 
@@ -1600,14 +1423,14 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   // Get the target-specific include directories.
   std::vector<std::string> includes;
 
-  includes = target->GetIncludeDirectories(config);
+  includes = target->GetIncludeDirectories(config, lang);
 
   // Support putting all the in-project include directories first if
   // it is requested by the project.
   if(this->Makefile->IsOn("CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE"))
     {
-    const char* topSourceDir = this->Makefile->GetHomeDirectory();
-    const char* topBinaryDir = this->Makefile->GetHomeOutputDirectory();
+    const char* topSourceDir = this->GetState()->GetSourceDirectory();
+    const char* topBinaryDir = this->GetState()->GetBinaryDirectory();
     for(std::vector<std::string>::const_iterator i = includes.begin();
         i != includes.end(); ++i)
       {
@@ -1905,7 +1728,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
         fdi != fwDirs.end(); ++fdi)
       {
       frameworkPath += fwSearchFlag;
-      frameworkPath += this->Convert(*fdi, NONE, shellFormat, false);
+      frameworkPath += this->Convert(*fdi, NONE, shellFormat);
       frameworkPath += " ";
       }
     }
@@ -1959,7 +1782,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
         ri != runtimeDirs.end(); ++ri)
       {
       rpath += cli.GetRuntimeFlag();
-      rpath += this->Convert(*ri, NONE, shellFormat, false);
+      rpath += this->Convert(*ri, NONE, shellFormat);
       rpath += " ";
       }
     fout << rpath;
@@ -2003,7 +1826,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
-                                            cmGeneratorTarget* target,
+                                            cmGeneratorTarget const* target,
                                             const std::string& lang,
                                             const std::string& config)
 {
@@ -2165,7 +1988,7 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
 
   // Treat the name as relative to the source directory in which it
   // was given.
-  dep = this->Makefile->GetCurrentDirectory();
+  dep = this->StateSnapshot.GetDirectory().GetCurrentSource();
   dep += "/";
   dep += inName;
   return true;
@@ -2190,7 +2013,7 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::
-AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
+AddCompilerRequirementFlag(std::string &flags, cmTarget const* target,
                            const std::string& lang)
 {
   if (lang.empty())
@@ -2236,7 +2059,7 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
            "dialect \"" << lang << standardProp << "\" "
         << (ext ? "(with compiler extensions)" : "") << ", but CMake "
            "does not know the compile flags to use to enable it.";
-      this->GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->IssueMessage(cmake::FATAL_ERROR, e.str());
       }
     else
       {
@@ -2280,7 +2103,7 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
     std::string e =
       "CMAKE_" + lang + "_STANDARD_DEFAULT is set to invalid value '" +
       std::string(defaultStd) + "'";
-    this->Makefile->IssueMessage(cmake::INTERNAL_ERROR, e);
+    this->IssueMessage(cmake::INTERNAL_ERROR, e);
     return;
     }
 
@@ -2312,9 +2135,11 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
     }
 }
 
-static void AddVisibilityCompileOption(std::string &flags, cmTarget* target,
+static void AddVisibilityCompileOption(std::string &flags,
+                                       cmTarget const* target,
                                        cmLocalGenerator *lg,
-                                       const std::string& lang)
+                                       const std::string& lang,
+                                       std::string* warnCMP0063)
 {
   std::string l(lang);
   std::string compileOption = "CMAKE_" + l + "_COMPILE_OPTIONS_VISIBILITY";
@@ -2328,6 +2153,11 @@ static void AddVisibilityCompileOption(std::string &flags, cmTarget* target,
   const char *prop = target->GetProperty(flagDefine);
   if (!prop)
     {
+    return;
+    }
+  if (warnCMP0063)
+    {
+    *warnCMP0063 += "  " + flagDefine + "\n";
     return;
     }
   if (strcmp(prop, "hidden") != 0
@@ -2346,8 +2176,9 @@ static void AddVisibilityCompileOption(std::string &flags, cmTarget* target,
 }
 
 static void AddInlineVisibilityCompileOption(std::string &flags,
-                                       cmTarget* target,
-                                       cmLocalGenerator *lg)
+                                       cmTarget const* target,
+                                       cmLocalGenerator *lg,
+                                       std::string* warnCMP0063)
 {
   std::string compileOption
                 = "CMAKE_CXX_COMPILE_OPTIONS_VISIBILITY_INLINES_HIDDEN";
@@ -2362,38 +2193,68 @@ static void AddInlineVisibilityCompileOption(std::string &flags,
     {
     return;
     }
+  if (warnCMP0063)
+    {
+    *warnCMP0063 += "  VISIBILITY_INLINES_HIDDEN\n";
+    return;
+    }
   lg->AppendFlags(flags, opt);
 }
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator
-::AddVisibilityPresetFlags(std::string &flags, cmTarget* target,
+::AddVisibilityPresetFlags(std::string &flags, cmTarget const* target,
                             const std::string& lang)
 {
-  int targetType = target->GetType();
-  bool suitableTarget = ((targetType == cmTarget::SHARED_LIBRARY)
-                      || (targetType == cmTarget::MODULE_LIBRARY)
-                      || (target->IsExecutableWithExports()));
-
-  if (!suitableTarget)
-    {
-    return;
-    }
-
   if (lang.empty())
     {
     return;
     }
-  AddVisibilityCompileOption(flags, target, this, lang);
+
+  std::string warnCMP0063;
+  std::string *pWarnCMP0063 = 0;
+  if (target->GetType() != cmTarget::SHARED_LIBRARY &&
+      target->GetType() != cmTarget::MODULE_LIBRARY &&
+      !target->IsExecutableWithExports())
+    {
+    switch (target->GetPolicyStatusCMP0063())
+      {
+      case cmPolicies::OLD:
+        return;
+      case cmPolicies::WARN:
+        pWarnCMP0063 = &warnCMP0063;
+        break;
+      default:
+        break;
+      }
+    }
+
+  AddVisibilityCompileOption(flags, target, this, lang, pWarnCMP0063);
 
   if(lang == "CXX")
     {
-    AddInlineVisibilityCompileOption(flags, target, this);
+    AddInlineVisibilityCompileOption(flags, target, this, pWarnCMP0063);
+    }
+
+  if (!warnCMP0063.empty() &&
+      this->WarnCMP0063.insert(target).second)
+    {
+    std::ostringstream w;
+    w <<
+      cmPolicies::GetPolicyWarning(cmPolicies::CMP0063) << "\n"
+      "Target \"" << target->GetName() << "\" of "
+      "type \"" << cmTarget::GetTargetTypeName(target->GetType()) << "\" "
+      "has the following visibility properties set for " << lang << ":\n" <<
+      warnCMP0063 <<
+      "For compatibility CMake is not honoring them for this target.";
+    target->GetMakefile()->GetCMakeInstance()
+      ->IssueMessage(cmake::AUTHOR_WARNING, w.str(), target->GetBacktrace());
     }
 }
 
 //----------------------------------------------------------------------------
-void cmLocalGenerator::AddCMP0018Flags(std::string &flags, cmTarget* target,
+void cmLocalGenerator::AddCMP0018Flags(std::string &flags,
+                                       cmTarget const* target,
                                        std::string const& lang,
                                        const std::string& config)
 {
@@ -2456,10 +2317,9 @@ bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
             "shared libraries and will use the " << flagsVar << " variable "
             "instead.  This may cause errors if the original content of "
             << flagsVar << " was removed.\n"
-            << this->Makefile->GetPolicies()->GetPolicyWarning(
-                                                      cmPolicies::CMP0018);
+            << cmPolicies::GetPolicyWarning(cmPolicies::CMP0018);
 
-          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+          this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
           // fall through to OLD behaviour
         }
         case cmPolicies::OLD:
@@ -2613,7 +2473,7 @@ void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
     {
     // Append the definition with proper escaping.
     std::string def = dflag;
-    if(this->WatcomWMake)
+    if(this->GetState()->UseWatcomWMake())
       {
       // The Watcom compiler does its own command line parsing instead
       // of using the windows shell rules.  Definitions are one of
@@ -2673,6 +2533,33 @@ void cmLocalGenerator::AppendFeatureOptions(
 }
 
 //----------------------------------------------------------------------------
+const char* cmLocalGenerator::GetFeature(const std::string& feature,
+                                         const std::string& config)
+{
+  // TODO: Define accumulation policy for features (prepend, append, replace).
+  // Currently we always replace.
+  if(!config.empty())
+    {
+    std::string featureConfig = feature;
+    featureConfig += "_";
+    featureConfig += cmSystemTools::UpperCase(config);
+    if(const char* value = this->Makefile->GetProperty(featureConfig))
+      {
+      return value;
+      }
+    }
+  if(const char* value = this->Makefile->GetProperty(feature))
+    {
+    return value;
+    }
+  if(cmLocalGenerator* parent = this->GetParent())
+    {
+    return parent->GetFeature(feature, config);
+    }
+  return 0;
+}
+
+//----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConstructComment(cmCustomCommandGenerator const& ccg,
                                    const char* default_comment)
@@ -2701,321 +2588,6 @@ cmLocalGenerator::ConstructComment(cmCustomCommandGenerator const& ccg,
 
   // Otherwise use the provided default.
   return default_comment;
-}
-
-//----------------------------------------------------------------------------
-std::string
-cmLocalGenerator::ConvertToOptionallyRelativeOutputPath(
-                                                    const std::string& remote)
-{
-  return this->Convert(remote, START_OUTPUT, SHELL, true);
-}
-
-//----------------------------------------------------------------------------
-const char* cmLocalGenerator::GetRelativeRootPath(RelativeRoot relroot)
-{
-  switch (relroot)
-    {
-    case HOME:         return this->Makefile->GetHomeDirectory();
-    case START:        return this->Makefile->GetStartDirectory();
-    case HOME_OUTPUT:  return this->Makefile->GetHomeOutputDirectory();
-    case START_OUTPUT: return this->Makefile->GetStartOutputDirectory();
-    default: break;
-    }
-  return 0;
-}
-
-//----------------------------------------------------------------------------
-std::string cmLocalGenerator::Convert(const std::string& source,
-                                      RelativeRoot relative,
-                                      OutputFormat output,
-                                      bool optional)
-{
-  // Make sure the relative path conversion components are set.
-  if(!this->PathConversionsSetup)
-    {
-    this->SetupPathConversions();
-    this->PathConversionsSetup = true;
-    }
-
-  // Convert the path to a relative path.
-  std::string result = source;
-
-  if (!optional || this->UseRelativePaths)
-    {
-    switch (relative)
-      {
-      case HOME:
-        //result = cmSystemTools::CollapseFullPath(result.c_str());
-        result = this->ConvertToRelativePath(this->HomeDirectoryComponents,
-                                             result);
-        break;
-      case START:
-        //result = cmSystemTools::CollapseFullPath(result.c_str());
-        result = this->ConvertToRelativePath(this->StartDirectoryComponents,
-                                             result);
-        break;
-      case HOME_OUTPUT:
-        //result = cmSystemTools::CollapseFullPath(result.c_str());
-        result =
-          this->ConvertToRelativePath(this->HomeOutputDirectoryComponents,
-                                      result);
-        break;
-      case START_OUTPUT:
-        //result = cmSystemTools::CollapseFullPath(result.c_str());
-        result =
-          this->ConvertToRelativePath(this->StartOutputDirectoryComponents,
-                                      result);
-        break;
-      case FULL:
-        result = cmSystemTools::CollapseFullPath(result);
-        break;
-      case NONE:
-        break;
-      }
-    }
-  return this->ConvertToOutputFormat(result, output);
-}
-
-//----------------------------------------------------------------------------
-std::string cmLocalGenerator::ConvertToOutputFormat(const std::string& source,
-                                                    OutputFormat output)
-{
-  std::string result = source;
-  // Convert it to an output path.
-  if (output == MAKERULE)
-    {
-    result = cmSystemTools::ConvertToOutputPath(result.c_str());
-    }
-  else if(output == SHELL || output == WATCOMQUOTE)
-    {
-        // For the MSYS shell convert drive letters to posix paths, so
-    // that c:/some/path becomes /c/some/path.  This is needed to
-    // avoid problems with the shell path translation.
-    if(this->MSYSShell && !this->LinkScriptShell)
-      {
-      if(result.size() > 2 && result[1] == ':')
-        {
-        result[1] = result[0];
-        result[0] = '/';
-        }
-      }
-    if(this->WindowsShell)
-      {
-      std::replace(result.begin(), result.end(), '/', '\\');
-      }
-    result = this->EscapeForShell(result, true, false, output == WATCOMQUOTE);
-    }
-  else if(output == RESPONSE)
-    {
-    result = this->EscapeForShell(result, false, false, false);
-    }
-  return result;
-}
-
-//----------------------------------------------------------------------------
-std::string cmLocalGenerator::Convert(RelativeRoot remote,
-                                      const std::string& local,
-                                      OutputFormat output,
-                                      bool optional)
-{
-  const char* remotePath = this->GetRelativeRootPath(remote);
-
-  // The relative root must have a path (i.e. not FULL or NONE)
-  assert(remotePath != 0);
-
-  if(!local.empty() && (!optional || this->UseRelativePaths))
-    {
-    std::vector<std::string> components;
-    cmSystemTools::SplitPath(local, components);
-    std::string result = this->ConvertToRelativePath(components, remotePath);
-    return this->ConvertToOutputFormat(result, output);
-    }
-  else
-    {
-    return this->ConvertToOutputFormat(remotePath, output);
-    }
-}
-
-//----------------------------------------------------------------------------
-std::string cmLocalGenerator::FindRelativePathTopSource()
-{
-  // Relative path conversion within a single tree managed by CMake is
-  // safe.  We can use our parent relative path top if and only if
-  // this is a subdirectory of that top.
-  if(cmLocalGenerator* parent = this->GetParent())
-    {
-    std::string parentTop = parent->FindRelativePathTopSource();
-    if(cmSystemTools::IsSubDirectory(
-         this->Makefile->GetStartDirectory(), parentTop))
-      {
-      return parentTop;
-      }
-    }
-
-  // Otherwise this directory itself is the new top.
-  return this->Makefile->GetStartDirectory();
-}
-
-//----------------------------------------------------------------------------
-std::string cmLocalGenerator::FindRelativePathTopBinary()
-{
-  // Relative path conversion within a single tree managed by CMake is
-  // safe.  We can use our parent relative path top if and only if
-  // this is a subdirectory of that top.
-  if(cmLocalGenerator* parent = this->GetParent())
-    {
-    std::string parentTop = parent->FindRelativePathTopBinary();
-    if(cmSystemTools::IsSubDirectory(
-         this->Makefile->GetStartOutputDirectory(), parentTop))
-      {
-      return parentTop;
-      }
-    }
-
-  // Otherwise this directory itself is the new top.
-  return this->Makefile->GetStartOutputDirectory();
-}
-
-//----------------------------------------------------------------------------
-void cmLocalGenerator::ConfigureRelativePaths()
-{
-  // Relative path conversion inside the source tree is not used to
-  // construct relative paths passed to build tools so it is safe to
-  // even when the source is a network path.
-  std::string source = this->FindRelativePathTopSource();
-  this->RelativePathTopSource = source;
-
-  // The current working directory on Windows cannot be a network
-  // path.  Therefore relative paths cannot work when the binary tree
-  // is a network path.
-  std::string binary = this->FindRelativePathTopBinary();
-  if(binary.size() < 2 || binary.substr(0, 2) != "//")
-    {
-    this->RelativePathTopBinary = binary;
-    }
-  else
-    {
-    this->RelativePathTopBinary = "";
-    }
-}
-
-//----------------------------------------------------------------------------
-static bool cmLocalGeneratorNotAbove(const char* a, const char* b)
-{
-  return (cmSystemTools::ComparePath(a, b) ||
-          cmSystemTools::IsSubDirectory(a, b));
-}
-
-//----------------------------------------------------------------------------
-std::string
-cmLocalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
-                                        const std::string& in_remote,
-                                        bool force)
-{
-  // The path should never be quoted.
-  assert(in_remote[0] != '\"');
-
-  // The local path should never have a trailing slash.
-  assert(!local.empty() && !(local[local.size()-1] == ""));
-
-  // If the path is already relative then just return the path.
-  if(!cmSystemTools::FileIsFullPath(in_remote.c_str()))
-    {
-    return in_remote;
-    }
-
-  // Make sure relative path conversion is configured.
-  if(!this->RelativePathsConfigured)
-    {
-    this->ConfigureRelativePaths();
-    this->RelativePathsConfigured = true;
-    }
-
-  if(!force)
-    {
-    // Skip conversion if the path and local are not both in the source
-    // or both in the binary tree.
-    std::string local_path = cmSystemTools::JoinPath(local);
-    if(!((cmLocalGeneratorNotAbove(local_path.c_str(),
-                                   this->RelativePathTopBinary.c_str()) &&
-          cmLocalGeneratorNotAbove(in_remote.c_str(),
-                                   this->RelativePathTopBinary.c_str())) ||
-         (cmLocalGeneratorNotAbove(local_path.c_str(),
-                                   this->RelativePathTopSource.c_str()) &&
-          cmLocalGeneratorNotAbove(in_remote.c_str(),
-                                   this->RelativePathTopSource.c_str()))))
-      {
-      return in_remote;
-      }
-    }
-
-  // Identify the longest shared path component between the remote
-  // path and the local path.
-  std::vector<std::string> remote;
-  cmSystemTools::SplitPath(in_remote, remote);
-  unsigned int common=0;
-  while(common < remote.size() &&
-        common < local.size() &&
-        cmSystemTools::ComparePath(remote[common],
-                                   local[common]))
-    {
-    ++common;
-    }
-
-  // If no part of the path is in common then return the full path.
-  if(common == 0)
-    {
-    return in_remote;
-    }
-
-  // If the entire path is in common then just return a ".".
-  if(common == remote.size() &&
-     common == local.size())
-    {
-    return ".";
-    }
-
-  // If the entire path is in common except for a trailing slash then
-  // just return a "./".
-  if(common+1 == remote.size() &&
-     remote[common].empty() &&
-     common == local.size())
-    {
-    return "./";
-    }
-
-  // Construct the relative path.
-  std::string relative;
-
-  // First add enough ../ to get up to the level of the shared portion
-  // of the path.  Leave off the trailing slash.  Note that the last
-  // component of local will never be empty because local should never
-  // have a trailing slash.
-  for(unsigned int i=common; i < local.size(); ++i)
-    {
-    relative += "..";
-    if(i < local.size()-1)
-      {
-      relative += "/";
-      }
-    }
-
-  // Now add the portion of the destination path that is not included
-  // in the shared portion of the path.  Add a slash the first time
-  // only if there was already something in the path.  If there was a
-  // trailing slash in the input then the last iteration of the loop
-  // will add a slash followed by an empty string which will preserve
-  // the trailing slash in the output.
-
-  if(!relative.empty() && !remote.empty())
-    {
-    relative += "/";
-    }
-  relative += cmJoin(cmRange(remote).advance(common), "/");
-
-  // Finally return the path.
-  return relative;
 }
 
 //----------------------------------------------------------------------------
@@ -3259,7 +2831,7 @@ cmLocalGenerator
           << "  " << ssin << "\n"
           << "cannot be safely placed under this directory.  "
           << "The build may not work correctly.";
-        this->Makefile->IssueMessage(cmake::WARNING, m.str());
+        this->IssueMessage(cmake::WARNING, m.str());
         }
       }
 #else
@@ -3281,6 +2853,26 @@ void cmLocalGenerator::ComputeObjectFilenames(
                             cmGeneratorTarget const*)
 {
 
+}
+
+bool cmLocalGenerator::IsWindowsShell() const
+{
+  return this->GetState()->UseWindowsShell();
+}
+
+bool cmLocalGenerator::IsWatcomWMake() const
+{
+  return this->GetState()->UseWatcomWMake();
+}
+
+bool cmLocalGenerator::IsMinGWMake() const
+{
+  return this->GetState()->UseMinGWMake();
+}
+
+bool cmLocalGenerator::IsNMake() const
+{
+  return this->GetState()->UseNMake();
 }
 
 //----------------------------------------------------------------------------
@@ -3391,179 +2983,6 @@ cmLocalGenerator
 }
 
 //----------------------------------------------------------------------------
-std::string cmLocalGenerator::EscapeForShellOldStyle(const std::string& str)
-{
-  std::string result;
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  // if there are spaces
-  std::string temp = str;
-  if (temp.find(" ") != std::string::npos &&
-      temp.find("\"")==std::string::npos)
-    {
-    result = "\"";
-    result += str;
-    result += "\"";
-    return result;
-    }
-  return str;
-#else
-  for(const char* ch = str.c_str(); *ch != '\0'; ++ch)
-    {
-    if(*ch == ' ')
-      {
-      result += '\\';
-      }
-    result += *ch;
-    }
-  return result;
-#endif
-}
-
-//----------------------------------------------------------------------------
-static bool cmLocalGeneratorIsShellOperator(const std::string& str)
-{
-  static std::set<std::string> shellOperators;
-  if(shellOperators.empty())
-    {
-    shellOperators.insert("<");
-    shellOperators.insert(">");
-    shellOperators.insert("<<");
-    shellOperators.insert(">>");
-    shellOperators.insert("|");
-    shellOperators.insert("||");
-    shellOperators.insert("&&");
-    shellOperators.insert("&>");
-    shellOperators.insert("1>");
-    shellOperators.insert("2>");
-    shellOperators.insert("2>&1");
-    shellOperators.insert("1>&2");
-    }
-  return shellOperators.count(str) > 0;
-}
-
-//----------------------------------------------------------------------------
-std::string cmLocalGenerator::EscapeForShell(const std::string& str,
-                                             bool makeVars,
-                                             bool forEcho,
-                                             bool useWatcomQuote)
-{
-  // Do not escape shell operators.
-  if(cmLocalGeneratorIsShellOperator(str))
-    {
-    return str;
-    }
-
-  // Compute the flags for the target shell environment.
-  int flags = 0;
-  if(this->WindowsVSIDE)
-    {
-    flags |= cmsysSystem_Shell_Flag_VSIDE;
-    }
-  else if(!this->LinkScriptShell)
-    {
-    flags |= cmsysSystem_Shell_Flag_Make;
-    }
-  if(makeVars)
-    {
-    flags |= cmsysSystem_Shell_Flag_AllowMakeVariables;
-    }
-  if(forEcho)
-    {
-    flags |= cmsysSystem_Shell_Flag_EchoWindows;
-    }
-  if(useWatcomQuote)
-    {
-    flags |= cmsysSystem_Shell_Flag_WatcomQuote;
-    }
-  if(this->WatcomWMake)
-    {
-    flags |= cmsysSystem_Shell_Flag_WatcomWMake;
-    }
-  if(this->MinGWMake)
-    {
-    flags |= cmsysSystem_Shell_Flag_MinGWMake;
-    }
-  if(this->NMake)
-    {
-    flags |= cmsysSystem_Shell_Flag_NMake;
-    }
-
-  // Compute the buffer size needed.
-  int size = (this->WindowsShell ?
-              cmsysSystem_Shell_GetArgumentSizeForWindows(str.c_str(), flags) :
-              cmsysSystem_Shell_GetArgumentSizeForUnix(str.c_str(), flags));
-
-  // Compute the shell argument itself.
-  std::vector<char> arg(size);
-  if(this->WindowsShell)
-    {
-    cmsysSystem_Shell_GetArgumentForWindows(str.c_str(), &arg[0], flags);
-    }
-  else
-    {
-    cmsysSystem_Shell_GetArgumentForUnix(str.c_str(), &arg[0], flags);
-    }
-  return std::string(&arg[0]);
-}
-
-//----------------------------------------------------------------------------
-std::string cmLocalGenerator::EscapeForCMake(const std::string& str)
-{
-  // Always double-quote the argument to take care of most escapes.
-  std::string result = "\"";
-  for(const char* c = str.c_str(); *c; ++c)
-    {
-    if(*c == '"')
-      {
-      // Escape the double quote to avoid ending the argument.
-      result += "\\\"";
-      }
-    else if(*c == '$')
-      {
-      // Escape the dollar to avoid expanding variables.
-      result += "\\$";
-      }
-    else if(*c == '\\')
-      {
-      // Escape the backslash to avoid other escapes.
-      result += "\\\\";
-      }
-    else
-      {
-      // Other characters will be parsed correctly.
-      result += *c;
-      }
-    }
-  result += "\"";
-  return result;
-}
-
-//----------------------------------------------------------------------------
-cmLocalGenerator::FortranFormat
-cmLocalGenerator::GetFortranFormat(const char* value)
-{
-  FortranFormat format = FortranFormatNone;
-  if(value && *value)
-    {
-    std::vector<std::string> fmt;
-    cmSystemTools::ExpandListArgument(value, fmt);
-    for(std::vector<std::string>::iterator fi = fmt.begin();
-        fi != fmt.end(); ++fi)
-      {
-      if(*fi == "FIXED")
-        {
-        format = FortranFormatFixed;
-        }
-      if(*fi == "FREE")
-        {
-        format = FortranFormatFree;
-        }
-      }
-    }
-  return format;
-}
-
-//----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::GetTargetDirectory(cmTarget const&) const
 {
@@ -3593,7 +3012,7 @@ cmIML_INT_uint64_t cmLocalGenerator::GetBackwardsCompatibility()
         }
       }
     this->BackwardsCompatibility = CMake_VERSION_ENCODE(major, minor, patch);
-    this->BackwardsCompatibilityFinal = this->Configured;
+    this->BackwardsCompatibilityFinal = this->Makefile->IsConfigured();
     }
 
   return this->BackwardsCompatibility;

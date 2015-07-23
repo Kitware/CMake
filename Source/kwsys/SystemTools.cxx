@@ -385,6 +385,26 @@ class SystemToolsTranslationMap :
 {
 };
 
+#ifdef _WIN32
+struct SystemToolsPathCaseCmp
+{
+  bool operator()(kwsys_stl::string const& l, kwsys_stl::string const& r) const
+    {
+# ifdef _MSC_VER
+    return _stricmp(l.c_str(), r.c_str()) < 0;
+# elif defined(__GNUC__)
+    return strcasecmp(l.c_str(), r.c_str()) < 0;
+# else
+    return SystemTools::Strucmp(l.c_str(), r.c_str()) < 0;
+# endif
+    }
+};
+
+class SystemToolsPathCaseMap:
+  public kwsys_stl::map<kwsys_stl::string, kwsys_stl::string,
+                        SystemToolsPathCaseCmp> {};
+#endif
+
 // adds the elements of the env variable path to the arg passed in
 void SystemTools::GetPath(kwsys_stl::vector<kwsys_stl::string>& path, const char* env)
 {
@@ -1260,15 +1280,22 @@ bool SystemTools::PathCygwinToWin32(const char *path, char *win32_path)
 
 bool SystemTools::Touch(const kwsys_stl::string& filename, bool create)
 {
-  if(create && !SystemTools::FileExists(filename))
+  if (!SystemTools::FileExists(filename))
     {
-    FILE* file = Fopen(filename, "a+b");
-    if(file)
+    if(create)
       {
-      fclose(file);
+      FILE* file = Fopen(filename, "a+b");
+      if(file)
+        {
+        fclose(file);
+        return true;
+        }
+      return false;
+      }
+    else
+      {
       return true;
       }
-    return false;
     }
 #if defined(_WIN32) && !defined(__CYGWIN__)
   HANDLE h = CreateFileW(
@@ -2667,27 +2694,43 @@ kwsys_stl::string SystemTools::GetLastSystemError()
 bool SystemTools::RemoveFile(const kwsys_stl::string& source)
 {
 #ifdef _WIN32
-  mode_t mode;
-  if ( !SystemTools::GetPermissions(source, mode) )
+  kwsys_stl::wstring const& ws =
+    SystemTools::ConvertToWindowsExtendedPath(source);
+  if (DeleteFileW(ws.c_str()))
+    {
+    return true;
+    }
+  DWORD err = GetLastError();
+  if (err == ERROR_FILE_NOT_FOUND ||
+      err == ERROR_PATH_NOT_FOUND)
+    {
+    return true;
+    }
+  if (err != ERROR_ACCESS_DENIED)
     {
     return false;
     }
-  /* Win32 unlink is stupid --- it fails if the file is read-only  */
-  SystemTools::SetPermissions(source, S_IWRITE);
-#endif
-#ifdef _WIN32
-  bool res =
-    _wunlink(SystemTools::ConvertToWindowsExtendedPath(source).c_str()) == 0;
-#else
-  bool res = unlink(source.c_str()) != 0 ? false : true;
-#endif
-#ifdef _WIN32
-  if ( !res )
+  /* The file may be read-only.  Try adding write permission.  */
+  mode_t mode;
+  if (!SystemTools::GetPermissions(source, mode) ||
+      !SystemTools::SetPermissions(source, S_IWRITE))
     {
-    SystemTools::SetPermissions(source, mode);
+    SetLastError(err);
+    return false;
     }
+  if (DeleteFileW(ws.c_str()) ||
+      GetLastError() == ERROR_FILE_NOT_FOUND ||
+      GetLastError() == ERROR_PATH_NOT_FOUND)
+    {
+    return true;
+    }
+  /* Try to restore the original permissions.  */
+  SystemTools::SetPermissions(source, mode);
+  SetLastError(err);
+  return false;
+#else
+  return unlink(source.c_str()) == 0 || errno == ENOENT;
 #endif
-  return res;
 }
 
 bool SystemTools::RemoveADirectory(const kwsys_stl::string& source)
@@ -3667,6 +3710,11 @@ static int GetCasePathName(const kwsys_stl::string & pathIn,
   // Start with root component.
   kwsys_stl::vector<kwsys_stl::string>::size_type idx = 0;
   casePath = path_components[idx++];
+  // make sure drive letter is always upper case
+  if(casePath.size() > 1 && casePath[1] == ':')
+    {
+    casePath[0] = toupper(casePath[0]);
+    }
   const char* sep = "";
 
   // If network path, fill casePath with server/share so FindFirstFile
@@ -3722,27 +3770,21 @@ kwsys_stl::string SystemTools::GetActualCaseForPath(const kwsys_stl::string& p)
 #ifndef _WIN32
   return p;
 #else
-  kwsys_stl::string casePath = p;
-  // make sure drive letter is always upper case
-  if(casePath.size() > 1 && casePath[1] == ':')
-    {
-    casePath[0] = toupper(casePath[0]);
-    }
-
   // Check to see if actual case has already been called
-  // for this path, and the result is stored in the LongPathMap
-  SystemToolsTranslationMap::iterator i =
-    SystemTools::LongPathMap->find(casePath);
-  if(i != SystemTools::LongPathMap->end())
+  // for this path, and the result is stored in the PathCaseMap
+  SystemToolsPathCaseMap::iterator i =
+    SystemTools::PathCaseMap->find(p);
+  if(i != SystemTools::PathCaseMap->end())
     {
     return i->second;
     }
+  kwsys_stl::string casePath;
   int len = GetCasePathName(p, casePath);
   if(len == 0 || len > MAX_PATH+1)
     {
     return p;
     }
-  (*SystemTools::LongPathMap)[p] = casePath;
+  (*SystemTools::PathCaseMap)[p] = casePath;
   return casePath;
 #endif
 }
@@ -4385,7 +4427,7 @@ bool SystemTools::FileIsFullPath(const char* in_name, size_t len)
 
 bool SystemTools::GetShortPath(const kwsys_stl::string& path, kwsys_stl::string& shortPath)
 {
-#if defined(WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__)
   const int size = int(path.size()) +1; // size of return
   char *tempPath = new char[size];  // create a buffer
   DWORD ret;
@@ -5116,7 +5158,9 @@ bool SystemTools::ParseURL( const kwsys_stl::string& URL,
 // necessary.
 static unsigned int SystemToolsManagerCount;
 SystemToolsTranslationMap *SystemTools::TranslationMap;
-SystemToolsTranslationMap *SystemTools::LongPathMap;
+#ifdef _WIN32
+SystemToolsPathCaseMap *SystemTools::PathCaseMap;
+#endif
 #ifdef __CYGWIN__
 SystemToolsTranslationMap *SystemTools::Cyg2Win32Map;
 #endif
@@ -5164,7 +5208,9 @@ void SystemTools::ClassInitialize()
 #endif
   // Allocate the translation map first.
   SystemTools::TranslationMap = new SystemToolsTranslationMap;
-  SystemTools::LongPathMap = new SystemToolsTranslationMap;
+#ifdef _WIN32
+  SystemTools::PathCaseMap = new SystemToolsPathCaseMap;
+#endif
 #ifdef __CYGWIN__
   SystemTools::Cyg2Win32Map = new SystemToolsTranslationMap;
 #endif
@@ -5221,7 +5267,9 @@ void SystemTools::ClassInitialize()
 void SystemTools::ClassFinalize()
 {
   delete SystemTools::TranslationMap;
-  delete SystemTools::LongPathMap;
+#ifdef _WIN32
+  delete SystemTools::PathCaseMap;
+#endif
 #ifdef __CYGWIN__
   delete SystemTools::Cyg2Win32Map;
 #endif

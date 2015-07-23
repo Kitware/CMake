@@ -556,25 +556,6 @@ void cmSystemTools::ParseUnixCommandLine(const char* command,
   argv.Store(args);
 }
 
-std::string cmSystemTools::EscapeWindowsShellArgument(const char* arg,
-                                                      int shell_flags)
-{
-  char local_buffer[1024];
-  char* buffer = local_buffer;
-  int size = cmsysSystem_Shell_GetArgumentSizeForWindows(arg, shell_flags);
-  if(size > 1024)
-    {
-    buffer = new char[size];
-    }
-  cmsysSystem_Shell_GetArgumentForWindows(arg, buffer, shell_flags);
-  std::string result(buffer);
-  if(buffer != local_buffer)
-    {
-    delete [] buffer;
-    }
-  return result;
-}
-
 std::vector<std::string> cmSystemTools::ParseArguments(const char* command)
 {
   std::vector<std::string> args;
@@ -659,7 +640,8 @@ std::vector<std::string> cmSystemTools::ParseArguments(const char* command)
 
 
 bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
-                                     std::string* output ,
+                                     std::string* captureStdOut,
+                                     std::string* captureStdErr,
                                      int* retVal , const char* dir ,
                                      OutputOption outputflag ,
                                      double timeout )
@@ -671,9 +653,13 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
     argv.push_back(a->c_str());
     }
   argv.push_back(0);
-  if ( output )
+  if ( captureStdOut )
     {
-    *output = "";
+    *captureStdOut = "";
+    }
+  if (captureStdErr && captureStdErr != captureStdOut)
+    {
+    *captureStdErr = "";
     }
 
   cmsysProcess* cp = cmsysProcess_New();
@@ -693,15 +679,17 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
   cmsysProcess_SetTimeout(cp, timeout);
   cmsysProcess_Execute(cp);
 
-  std::vector<char> tempOutput;
+  std::vector<char> tempStdOut;
+  std::vector<char> tempStdErr;
   char* data;
   int length;
   int pipe;
-  if(outputflag != OUTPUT_PASSTHROUGH && (output || outputflag != OUTPUT_NONE))
+  if(outputflag != OUTPUT_PASSTHROUGH &&
+     (captureStdOut || captureStdErr || outputflag != OUTPUT_NONE))
     {
     while((pipe = cmsysProcess_WaitForData(cp, &data, &length, 0)) > 0)
       {
-      if(output || outputflag != OUTPUT_NONE)
+      if(captureStdOut || captureStdErr || outputflag != OUTPUT_NONE)
         {
         // Translate NULL characters in the output into valid text.
         // Visual Studio 7 puts these characters in the output of its
@@ -714,9 +702,21 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
             }
           }
         }
-      if ( output )
+      if(pipe == cmsysProcess_Pipe_STDOUT ||
+         (pipe == cmsysProcess_Pipe_STDERR &&
+          captureStdOut == captureStdErr))
         {
-        tempOutput.insert(tempOutput.end(), data, data+length);
+        if (captureStdOut)
+          {
+          tempStdOut.insert(tempStdOut.end(), data, data+length);
+          }
+        }
+      else if(pipe == cmsysProcess_Pipe_STDERR)
+        {
+        if (captureStdErr)
+          {
+          tempStdErr.insert(tempStdErr.end(), data, data+length);
+          }
         }
       if(outputflag != OUTPUT_NONE)
         {
@@ -740,9 +740,14 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
     }
 
   cmsysProcess_WaitForExit(cp, 0);
-  if ( output && tempOutput.begin() != tempOutput.end())
+  if ( captureStdOut && tempStdOut.begin() != tempStdOut.end())
     {
-    output->append(&*tempOutput.begin(), tempOutput.size());
+    captureStdOut->append(&*tempStdOut.begin(), tempStdOut.size());
+    }
+  if ( captureStdErr && captureStdErr != captureStdOut &&
+       tempStdErr.begin() != tempStdErr.end())
+    {
+    captureStdErr->append(&*tempStdErr.begin(), tempStdErr.size());
     }
 
   bool result = true;
@@ -767,9 +772,9 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
       {
       std::cerr << exception_str << std::endl;
       }
-    if ( output )
+    if ( captureStdErr )
       {
-      output->append(exception_str, strlen(exception_str));
+      captureStdErr->append(exception_str, strlen(exception_str));
       }
     result = false;
     }
@@ -780,9 +785,9 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
       {
       std::cerr << error_str << std::endl;
       }
-    if ( output )
+    if ( captureStdErr )
       {
-      output->append(error_str, strlen(error_str));
+      captureStdErr->append(error_str, strlen(error_str));
       }
     result = false;
     }
@@ -793,9 +798,9 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
       {
       std::cerr << error_str << std::endl;
       }
-    if ( output )
+    if ( captureStdErr )
       {
-      output->append(error_str, strlen(error_str));
+      captureStdErr->append(error_str, strlen(error_str));
       }
     result = false;
     }
@@ -806,7 +811,8 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
 
 bool cmSystemTools::RunSingleCommand(
   const char* command,
-  std::string* output,
+  std::string* captureStdOut,
+  std::string* captureStdErr,
   int *retVal,
   const char* dir,
   OutputOption outputflag,
@@ -823,8 +829,8 @@ bool cmSystemTools::RunSingleCommand(
     {
     return false;
     }
-  return cmSystemTools::RunSingleCommand(args, output,retVal,
-                                         dir, outputflag, timeout);
+  return cmSystemTools::RunSingleCommand(args, captureStdOut, captureStdErr,
+                                         retVal, dir, outputflag, timeout);
 }
 
 std::string
@@ -1461,21 +1467,15 @@ void cmSystemTools::EnableVSConsoleOutput()
 
 bool cmSystemTools::IsPathToFramework(const char* path)
 {
-  if(cmSystemTools::FileIsFullPath(path))
-    {
-    std::string libname = path;
-    if(libname.find(".framework") == libname.size()+1-sizeof(".framework"))
-      {
-      return true;
-      }
-    }
-  return false;
+  return (cmSystemTools::FileIsFullPath(path) &&
+          cmHasLiteralSuffix(path, ".framework"));
 }
 
 bool cmSystemTools::CreateTar(const char* outFileName,
                               const std::vector<std::string>& files,
                               cmTarCompression compressType,
-                              bool verbose, std::string const& mtime)
+                              bool verbose, std::string const& mtime,
+                              std::string const& format)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
@@ -1505,8 +1505,10 @@ bool cmSystemTools::CreateTar(const char* outFileName,
       compress = cmArchiveWrite::CompressNone;
       break;
     }
+
   cmArchiveWrite a(fout, compress,
-                   cmArchiveWrite::TypeTAR);
+    format.empty() ? "paxr" : format);
+
   a.SetMTime(mtime);
   a.SetVerbose(verbose);
   for(std::vector<std::string>::const_iterator i = files.begin();
@@ -2932,5 +2934,14 @@ bool cmSystemTools::StringToLong(const char* str, long* value)
   errno = 0;
   char *endp;
   *value = strtol(str, &endp, 10);
+  return (*endp == '\0') && (endp != str) && (errno == 0);
+}
+
+//----------------------------------------------------------------------------
+bool cmSystemTools::StringToULong(const char* str, unsigned long* value)
+{
+  errno = 0;
+  char *endp;
+  *value = strtoul(str, &endp, 10);
   return (*endp == '\0') && (endp != str) && (errno == 0);
 }

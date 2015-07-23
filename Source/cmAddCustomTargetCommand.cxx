@@ -138,7 +138,7 @@ bool cmAddCustomTargetCommand
           std::string filename;
           if (!cmSystemTools::FileIsFullPath(copy.c_str()))
             {
-            filename = this->Makefile->GetCurrentOutputDirectory();
+            filename = this->Makefile->GetCurrentBinaryDirectory();
             filename += "/";
             }
           filename += copy;
@@ -194,8 +194,7 @@ bool cmAddCustomTargetCommand
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0037))
       {
       case cmPolicies::WARN:
-        e << (this->Makefile->GetPolicies()
-          ->GetPolicyWarning(cmPolicies::CMP0037)) << "\n";
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0037) << "\n";
         issueMessage = true;
       case cmPolicies::OLD:
         break;
@@ -240,7 +239,7 @@ bool cmAddCustomTargetCommand
   // Convert working directory to a full path.
   if(!working_directory.empty())
     {
-    const char* build_dir = this->Makefile->GetCurrentOutputDirectory();
+    const char* build_dir = this->Makefile->GetCurrentBinaryDirectory();
     working_directory =
       cmSystemTools::CollapseFullPath(working_directory, build_dir);
     }

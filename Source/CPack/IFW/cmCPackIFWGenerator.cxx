@@ -29,6 +29,8 @@
 #include <cmMakefile.h>
 #include <cmGeneratedFileStream.h>
 #include <cmXMLSafe.h>
+#include <cmVersionConfig.h>
+#include <cmTimestamp.h>
 
 //----------------------------------------------------------------------------
 cmCPackIFWGenerator::cmCPackIFWGenerator()
@@ -38,6 +40,27 @@ cmCPackIFWGenerator::cmCPackIFWGenerator()
 //----------------------------------------------------------------------------
 cmCPackIFWGenerator::~cmCPackIFWGenerator()
 {
+}
+
+//----------------------------------------------------------------------------
+bool cmCPackIFWGenerator::IsVersionLess(const char *version)
+{
+  return cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
+    FrameworkVersion.data(), version);
+}
+
+//----------------------------------------------------------------------------
+bool cmCPackIFWGenerator::IsVersionGreater(const char *version)
+{
+  return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER,
+    FrameworkVersion.data(), version);
+}
+
+//----------------------------------------------------------------------------
+bool cmCPackIFWGenerator::IsVersionEqual(const char *version)
+{
+  return cmSystemTools::VersionCompare(cmSystemTools::OP_EQUAL,
+    FrameworkVersion.data(), version);
 }
 
 //----------------------------------------------------------------------------
@@ -59,7 +82,12 @@ int cmCPackIFWGenerator::PackageFiles()
   if (!Installer.Repositories.empty())
     {
     std::string ifwCmd = RepoGen;
-    ifwCmd += " -c " + this->toplevel + "/config/config.xml";
+
+    if(IsVersionLess("2.0.0"))
+      {
+      ifwCmd += " -c " + this->toplevel + "/config/config.xml";
+      }
+
     ifwCmd += " -p " + this->toplevel + "/packages";
 
     if(!PkgsDirsVector.empty())
@@ -92,7 +120,8 @@ int cmCPackIFWGenerator::PackageFiles()
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                   "- Generate repository" << std::endl);
     bool res = cmSystemTools::RunSingleCommand(
-      ifwCmd.c_str(), &output, &retVal, 0, this->GeneratorVerbose, 0);
+      ifwCmd.c_str(), &output, &output,
+      &retVal, 0, this->GeneratorVerbose, 0);
     if ( !res || retVal )
       {
       cmGeneratedFileStream ofs(ifwTmpFile.c_str());
@@ -176,7 +205,8 @@ int cmCPackIFWGenerator::PackageFiles()
   int retVal = 1;
   cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- Generate package" << std::endl);
   bool res = cmSystemTools::RunSingleCommand(
-    ifwCmd.c_str(), &output, &retVal, 0, this->GeneratorVerbose, 0);
+    ifwCmd.c_str(), &output, &output,
+    &retVal, 0, this->GeneratorVerbose, 0);
   if ( !res || retVal )
     {
     cmGeneratedFileStream ofs(ifwTmpFile.c_str());
@@ -214,8 +244,7 @@ const char *cmCPackIFWGenerator::GetPackagingInstallPrefix()
 //----------------------------------------------------------------------------
 const char *cmCPackIFWGenerator::GetOutputExtension()
 {
-  const char *suffix = this->GetOption("CMAKE_EXECUTABLE_SUFFIX");
-  return suffix ? suffix : cmCPackGenerator::GetOutputExtension();
+  return ExecutableSuffix.c_str();
 }
 
 //----------------------------------------------------------------------------
@@ -225,9 +254,11 @@ int cmCPackIFWGenerator::InitializeInternal()
 
   const std::string BinCreatorOpt = "CPACK_IFW_BINARYCREATOR_EXECUTABLE";
   const std::string RepoGenOpt = "CPACK_IFW_REPOGEN_EXECUTABLE";
+  const std::string FrameworkVersionOpt = "CPACK_IFW_FRAMEWORK_VERSION";
 
   if(!this->IsSet(BinCreatorOpt) ||
-     !this->IsSet(RepoGenOpt))
+     !this->IsSet(RepoGenOpt) ||
+     !this->IsSet(FrameworkVersionOpt))
     {
     this->ReadListFile("CPackIFW.cmake");
     }
@@ -263,6 +294,17 @@ int cmCPackIFWGenerator::InitializeInternal()
   else
     {
     RepoGen = RepoGenStr;
+    }
+
+  // Framework version
+  if(const char* FrameworkVersionSrt =
+      this->GetOption(FrameworkVersionOpt))
+    {
+    FrameworkVersion = FrameworkVersionSrt;
+    }
+  else
+    {
+    FrameworkVersion = "1.9.9";
     }
 
   // Variables that Change Behavior
@@ -304,6 +346,24 @@ int cmCPackIFWGenerator::InitializeInternal()
                 << std::endl);
   return 0;
   }
+
+  // Executable suffix
+  if(const char *optExeSuffix = this->GetOption("CMAKE_EXECUTABLE_SUFFIX"))
+    {
+    ExecutableSuffix = optExeSuffix;
+    if(ExecutableSuffix.empty())
+      {
+      std::string sysName(this->GetOption("CMAKE_SYSTEM_NAME"));
+      if(sysName == "Linux")
+        {
+        ExecutableSuffix = ".run";
+        }
+      }
+    }
+  else
+    {
+    ExecutableSuffix = cmCPackGenerator::GetOutputExtension();
+    }
 
   return this->Superclass::InitializeInternal();
 }
@@ -549,4 +609,21 @@ cmCPackIFWPackage* cmCPackIFWGenerator::GetComponentPackage(
   std::map<cmCPackComponent*, cmCPackIFWPackage*>::const_iterator pit
     = ComponentPackages.find(component);
   return pit != ComponentPackages.end() ? pit->second : 0;
+}
+
+//----------------------------------------------------------------------------
+void cmCPackIFWGenerator::WriteGeneratedByToStrim(cmGeneratedFileStream &xout)
+{
+  xout << "<!-- Generated by CPack " << CMake_VERSION << " IFW generator "
+       << "for QtIFW ";
+  if(IsVersionLess("2.0"))
+    {
+    xout << "less 2.0";
+    }
+  else
+    {
+    xout << FrameworkVersion;
+    }
+  xout << " tools at " << cmTimestamp().CurrentTime("", true) << " -->"
+       << std::endl;
 }

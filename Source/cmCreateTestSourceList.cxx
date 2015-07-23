@@ -73,7 +73,7 @@ bool cmCreateTestSourceList
       "You must specify a file extension for the test driver file.");
     return false;
     }
-  std::string driver = this->Makefile->GetCurrentOutputDirectory();
+  std::string driver = this->Makefile->GetCurrentBinaryDirectory();
   driver += "/";
   driver += *i;
   ++i;

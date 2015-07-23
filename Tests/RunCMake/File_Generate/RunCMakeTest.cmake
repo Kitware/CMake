@@ -17,6 +17,16 @@ if (NOT file_contents MATCHES "generated.cpp.rule")
   message(SEND_ERROR "Rule file not in target sources! ${file_contents}")
 endif()
 
+if (NOT RunCMake_GENERATOR MATCHES "Visual Studio")
+  run_cmake(COMPILE_LANGUAGE-genex)
+  foreach(l CXX C)
+    file(READ "${RunCMake_BINARY_DIR}/COMPILE_LANGUAGE-genex-build/opts-${l}.txt" l_defs)
+    if (NOT l_defs STREQUAL "LANG_IS_${l}\n")
+      message(FATAL_ERROR "File content does not match: ${l_defs}")
+    endif()
+  endforeach()
+endif()
+
 set(timeformat "%Y%j%H%M%S")
 
 file(REMOVE "${RunCMake_BINARY_DIR}/WriteIfDifferent-build/output_file.txt")

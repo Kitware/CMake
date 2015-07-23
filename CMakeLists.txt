@@ -37,11 +37,19 @@ if("${CMake_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
 endif()
 
 # Use most-recent available language dialects with GNU and Clang
-if(NOT DEFINED CMAKE_C_STANDARD)
+if(NOT DEFINED CMAKE_C_STANDARD AND NOT CMake_NO_C_STANDARD)
   set(CMAKE_C_STANDARD 11)
 endif()
-if(NOT DEFINED CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+if(NOT DEFINED CMAKE_CXX_STANDARD AND NOT CMake_NO_CXX_STANDARD)
+  include(${CMake_SOURCE_DIR}/Source/Checks/cm_cxx14_cstdio.cmake)
+  if(NOT CMake_CXX14_CSTDIO_BROKEN)
+    set(CMAKE_CXX_STANDARD 14)
+  else()
+    set(CMAKE_CXX_STANDARD 11)
+  endif()
+endif()
+if(NOT CMake_TEST_EXTERNAL_CMAKE)
+  include(${CMake_SOURCE_DIR}/Source/Checks/cm_cxx11_unordered_map.cmake)
 endif()
 
 # option to set the internal encoding of CMake to UTF-8
@@ -50,6 +58,17 @@ mark_as_advanced(CMAKE_ENCODING_UTF8)
 if(CMAKE_ENCODING_UTF8)
   set(KWSYS_ENCODING_DEFAULT_CODEPAGE CP_UTF8)
 endif()
+
+# option to use COMPONENT with install command
+option(CMake_INSTALL_COMPONENTS "Using components when installing" OFF)
+mark_as_advanced(CMake_INSTALL_COMPONENTS)
+macro(CMake_OPTIONAL_COMPONENT NAME)
+  if(CMake_INSTALL_COMPONENTS)
+    set(COMPONENT COMPONENT ${NAME})
+  else()
+    set(COMPONENT)
+  endif()
+endmacro()
 
 #-----------------------------------------------------------------------
 # a macro to deal with system libraries, implemented as a macro
@@ -543,10 +562,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
         "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
       set(CMAKE_BUNDLE_LOCATION "${CMAKE_INSTALL_PREFIX}")
       # make sure CMAKE_INSTALL_PREFIX ends in /
-      string(LENGTH "${CMAKE_INSTALL_PREFIX}" LEN)
-      math(EXPR LEN "${LEN} -1" )
-      string(SUBSTRING "${CMAKE_INSTALL_PREFIX}" ${LEN} 1 ENDCH)
-      if(NOT "${ENDCH}" STREQUAL "/")
+      if(NOT CMAKE_INSTALL_PREFIX MATCHES "/$")
         set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/")
       endif()
       set(CMAKE_INSTALL_PREFIX

@@ -62,8 +62,7 @@ bool cmInstallCommand::InitialPass(std::vector<std::string> const& args,
     }
 
   // Enable the install target.
-  this->Makefile->GetLocalGenerator()
-    ->GetGlobalGenerator()->EnableInstallTarget();
+  this->Makefile->GetGlobalGenerator()->EnableInstallTarget();
 
   this->DefaultComponentName = this->Makefile->GetSafeDefinition(
                                        "CMAKE_INSTALL_DEFAULT_COMPONENT_NAME");
@@ -163,7 +162,7 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
       std::string script = args[i];
       if(!cmSystemTools::FileIsFullPath(script.c_str()))
         {
-        script = this->Makefile->GetCurrentDirectory();
+        script = this->Makefile->GetCurrentSourceDirectory();
         script += "/";
         script += args[i];
         }
@@ -198,7 +197,7 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
     }
 
   //Tell the global generator about any installation component names specified.
-  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+  this->Makefile->GetGlobalGenerator()
                              ->AddInstallComponent(component.c_str());
 
   return true;
@@ -774,7 +773,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       te->HeaderGenerator = publicHeaderGenerator;
       te->LibraryGenerator = libraryGenerator;
       te->RuntimeGenerator = runtimeGenerator;
-      this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+      this->Makefile->GetGlobalGenerator()
         ->GetExportSets()[exports.GetString()]->AddTargetExport(te);
 
       te->InterfaceIncludeDirectories =
@@ -786,43 +785,42 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   // specified
   if (installsArchive)
     {
-    this->Makefile->GetLocalGenerator()->
-      GetGlobalGenerator()
+    this->Makefile->GetGlobalGenerator()
       ->AddInstallComponent(archiveArgs.GetComponent().c_str());
     }
   if (installsLibrary)
     {
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+    this->Makefile->GetGlobalGenerator()
       ->AddInstallComponent(libraryArgs.GetComponent().c_str());
     }
   if (installsRuntime)
     {
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+    this->Makefile->GetGlobalGenerator()
       ->AddInstallComponent(runtimeArgs.GetComponent().c_str());
     }
   if (installsFramework)
     {
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+    this->Makefile->GetGlobalGenerator()
       ->AddInstallComponent(frameworkArgs.GetComponent().c_str());
     }
   if (installsBundle)
     {
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+    this->Makefile->GetGlobalGenerator()
       ->AddInstallComponent(bundleArgs.GetComponent().c_str());
     }
   if (installsPrivateHeader)
     {
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+    this->Makefile->GetGlobalGenerator()
       ->AddInstallComponent(privateHeaderArgs.GetComponent().c_str());
     }
   if (installsPublicHeader)
     {
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+    this->Makefile->GetGlobalGenerator()
       ->AddInstallComponent(publicHeaderArgs.GetComponent().c_str());
     }
   if (installsResource)
     {
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+    this->Makefile->GetGlobalGenerator()
       ->AddInstallComponent(resourceArgs.GetComponent().c_str());
     }
 
@@ -850,13 +848,15 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
     return false;
     }
 
+  const std::vector<std::string>& filesVector = files.GetVector();
+
   // Check if there is something to do.
-  if(files.GetVector().empty())
+  if(filesVector.empty())
     {
     return true;
     }
 
-  if(!ica.GetRename().empty() && files.GetVector().size() > 1)
+  if(!ica.GetRename().empty() && filesVector.size() > 1)
     {
     // The rename option works only with one file.
     std::ostringstream e;
@@ -866,9 +866,50 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
     }
 
   std::vector<std::string> absFiles;
-  if (!this->MakeFilesFullPath(args[0].c_str(), files.GetVector(), absFiles))
+  if (!this->MakeFilesFullPath(args[0].c_str(), filesVector, absFiles))
     {
     return false;
+    }
+
+  cmPolicies::PolicyStatus status =
+      this->Makefile->GetPolicyStatus(cmPolicies::CMP0062);
+
+  cmGlobalGenerator *gg = this->Makefile->GetGlobalGenerator();
+  for(std::vector<std::string>::const_iterator fileIt = filesVector.begin();
+      fileIt != filesVector.end(); ++fileIt)
+    {
+    if (gg->IsExportedTargetsFile(*fileIt))
+      {
+      const char *modal = 0;
+      std::ostringstream e;
+      cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+
+      switch(status)
+        {
+        case cmPolicies::WARN:
+          e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0062) << "\n";
+          modal = "should";
+        case cmPolicies::OLD:
+          break;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::NEW:
+          modal = "may";
+          messageType = cmake::FATAL_ERROR;
+        }
+      if (modal)
+        {
+        e << "The file\n  " << *fileIt << "\nwas generated by the export() "
+          "command.  It " << modal << " not be installed with the "
+          "install() command.  Use the install(EXPORT) mechanism "
+          "instead.  See the cmake-packages(7) manual for more.\n";
+        this->Makefile->IssueMessage(messageType, e.str());
+        if (messageType == cmake::FATAL_ERROR)
+          {
+          return false;
+          }
+        }
+      }
     }
 
   if (!ica.Finalize())
@@ -890,7 +931,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
     CreateInstallFilesGenerator(this->Makefile, absFiles, ica, programs));
 
   //Tell the global generator about any installation component names specified.
-  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+  this->Makefile->GetGlobalGenerator()
                              ->AddInstallComponent(ica.GetComponent().c_str());
 
   return true;
@@ -1093,7 +1134,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       std::string dir = args[i];
       if(!cmSystemTools::FileIsFullPath(dir.c_str()))
         {
-        dir = this->Makefile->GetCurrentDirectory();
+        dir = this->Makefile->GetCurrentSourceDirectory();
         dir += "/";
         dir += args[i];
         }
@@ -1235,7 +1276,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
 
   // Tell the global generator about any installation component names
   // specified.
-  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+  this->Makefile->GetGlobalGenerator()
     ->AddInstallComponent(component.c_str());
 
   return true;
@@ -1322,8 +1363,8 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
       }
     }
 
-  cmExportSet *exportSet = this->Makefile->GetLocalGenerator()
-                    ->GetGlobalGenerator()->GetExportSets()[exp.GetString()];
+  cmExportSet *exportSet = this->Makefile->GetGlobalGenerator()
+                                         ->GetExportSets()[exp.GetString()];
   if (exportOld.IsEnabled())
     {
     for(std::vector<cmTargetExport*>::const_iterator
@@ -1376,7 +1417,7 @@ bool cmInstallCommand::MakeFilesFullPath(const char* modeName,
     std::string::size_type gpos = cmGeneratorExpression::Find(file);
     if(gpos != 0 && !cmSystemTools::FileIsFullPath(file.c_str()))
       {
-      file = this->Makefile->GetCurrentDirectory();
+      file = this->Makefile->GetCurrentSourceDirectory();
       file += "/";
       file += *fileIt;
       }
@@ -1404,7 +1445,7 @@ bool cmInstallCommand::CheckCMP0006(bool& failure)
       {
       this->Makefile->IssueMessage(
         cmake::AUTHOR_WARNING,
-        this->Makefile->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0006)
+        cmPolicies::GetPolicyWarning(cmPolicies::CMP0006)
         );
       }
     case cmPolicies::OLD:
@@ -1418,8 +1459,7 @@ bool cmInstallCommand::CheckCMP0006(bool& failure)
       failure = true;
       this->Makefile->IssueMessage(
         cmake::FATAL_ERROR,
-        this->Makefile->GetPolicies()
-        ->GetRequiredPolicyError(cmPolicies::CMP0006)
+        cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0006)
         );
       break;
     }

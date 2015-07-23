@@ -3,7 +3,7 @@ variable_requires
 
 Disallowed.  See CMake Policy :policy:`CMP0035`.
 
-Use the if() command instead.
+Use the :command:`if` command instead.
 
 Assert satisfaction of an option's required variables.
 
@@ -13,10 +13,10 @@ Assert satisfaction of an option's required variables.
                     REQUIRED_VARIABLE1
                     REQUIRED_VARIABLE2 ...)
 
-The first argument (TEST_VARIABLE) is the name of the variable to be
+The first argument (``TEST_VARIABLE``) is the name of the variable to be
 tested, if that variable is false nothing else is done.  If
-TEST_VARIABLE is true, then the next argument (RESULT_VARIABLE) is a
-variable that is set to true if all the required variables are set.
+``TEST_VARIABLE`` is true, then the next argument (``RESULT_VARIABLE``)
+is a variable that is set to true if all the required variables are set.
 The rest of the arguments are variables that must be true or not set
 to NOTFOUND to avoid an error.  If any are not true, an error is
 reported.

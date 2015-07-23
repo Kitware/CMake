@@ -12,6 +12,7 @@
 #include "cmGlobalVisualStudio12Generator.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
+#include "cmAlgorithms.h"
 
 static const char vs12generatorName[] = "Visual Studio 12 2013";
 
@@ -36,8 +37,8 @@ class cmGlobalVisualStudio12Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(
-                                                const std::string& name) const
+  virtual cmGlobalGenerator*
+  CreateGlobalGenerator(const std::string& name, cmake* cm) const
     {
     std::string genName;
     const char* p = cmVS12GenName(name, genName);
@@ -45,28 +46,28 @@ public:
       { return 0; }
     if(!*p)
       {
-      return new cmGlobalVisualStudio12Generator(
-        genName, "");
+      return new cmGlobalVisualStudio12Generator(cm, genName, "");
       }
     if(*p++ != ' ')
       { return 0; }
     if(strcmp(p, "Win64") == 0)
       {
-      return new cmGlobalVisualStudio12Generator(
-        genName, "x64");
+      return new cmGlobalVisualStudio12Generator(cm, genName, "x64");
       }
     if(strcmp(p, "ARM") == 0)
       {
-      return new cmGlobalVisualStudio12Generator(
-        genName, "ARM");
+      return new cmGlobalVisualStudio12Generator(cm, genName, "ARM");
       }
     return 0;
     }
 
   virtual void GetDocumentation(cmDocumentationEntry& entry) const
     {
-    entry.Name = vs12generatorName;
-    entry.Brief = "Generates Visual Studio 12 (VS 2013) project files.";
+    entry.Name = std::string(vs12generatorName) + " [arch]";
+    entry.Brief =
+      "Generates Visual Studio 2013 project files.  "
+      "Optional [arch] can be \"Win64\" or \"ARM\"."
+      ;
     }
 
   virtual void GetGenerators(std::vector<std::string>& names) const
@@ -84,15 +85,16 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio12Generator::NewFactory()
 }
 
 //----------------------------------------------------------------------------
-cmGlobalVisualStudio12Generator::cmGlobalVisualStudio12Generator(
+cmGlobalVisualStudio12Generator::cmGlobalVisualStudio12Generator(cmake* cm,
   const std::string& name, const std::string& platformName)
-  : cmGlobalVisualStudio11Generator(name, platformName)
+  : cmGlobalVisualStudio11Generator(cm, name, platformName)
 {
   std::string vc12Express;
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\12.0\\Setup\\VC;"
     "ProductDir", vc12Express, cmSystemTools::KeyWOW64_32);
   this->DefaultPlatformToolset = "v120";
+  this->Version = VS12;
 }
 
 //----------------------------------------------------------------------------
@@ -210,15 +212,6 @@ void cmGlobalVisualStudio12Generator::WriteSLNHeader(std::ostream& fout)
     {
     fout << "# Visual Studio 2013\n";
     }
-}
-
-//----------------------------------------------------------------------------
-cmLocalGenerator *cmGlobalVisualStudio12Generator::CreateLocalGenerator()
-{
-  cmLocalVisualStudio10Generator* lg =
-    new cmLocalVisualStudio10Generator(cmLocalVisualStudioGenerator::VS12);
-  lg->SetGlobalGenerator(this);
-  return lg;
 }
 
 //----------------------------------------------------------------------------

@@ -81,7 +81,7 @@ void cmXCodeObject::Indent(int level, std::ostream& out)
 {
   while(level)
     {
-    out << "       ";
+    out << "\t";
     level--;
     }
 }
@@ -91,18 +91,15 @@ void cmXCodeObject::Print(std::ostream& out)
 {
   std::string separator = "\n";
   int indentFactor = 1;
+  cmXCodeObject::Indent(2*indentFactor, out);
   if(this->Version > 15
      && (this->IsA == PBXFileReference || this->IsA == PBXBuildFile))
     {
     separator = " ";
     indentFactor = 0;
     }
-  cmXCodeObject::Indent(2*indentFactor, out);
-  out << this->Id << " ";
-  if(!(this->IsA == PBXGroup && this->Comment.size() == 0))
-    {
-    this->PrintComment(out);
-    }
+  out << this->Id;
+  this->PrintComment(out);
   out << " = {";
   if(separator == "\n")
     {
@@ -129,7 +126,7 @@ void cmXCodeObject::Print(std::ostream& out)
       for(unsigned int k = 0; k < i->second->List.size(); k++)
         {
         cmXCodeObject::Indent(4*indentFactor, out);
-        out << i->second->List[k]->Id << " ";
+        out << i->second->List[k]->Id;
         i->second->List[k]->PrintComment(out);
         out << "," << separator;
         }
@@ -139,7 +136,11 @@ void cmXCodeObject::Print(std::ostream& out)
     else if(object->TypeValue == ATTRIBUTE_GROUP)
       {
       std::map<std::string, cmXCodeObject*>::iterator j;
-      out << i->first << " = {" << separator;
+      out << i->first << " = {";
+      if(separator == "\n")
+        {
+        out << separator;
+        }
       for(j = object->ObjectAttributes.begin(); j !=
             object->ObjectAttributes.end(); ++j)
         {
@@ -188,7 +189,6 @@ void cmXCodeObject::Print(std::ostream& out)
       out << " = " << object->Object->Id;
       if(object->Object->HasComment() && i->first != "remoteGlobalIDString")
         {
-        out << " ";
         object->Object->PrintComment(out);
         }
       out << ";" << separator;
@@ -242,7 +242,8 @@ void cmXCodeObject::PrintString(std::ostream& os,std::string String)
   // considered special by the Xcode project file parser.
   bool needQuote =
     (String.empty() ||
-     String.find_first_of(" <>.+-=@$[],") != String.npos);
+     String.find("//") != String.npos ||
+     String.find_first_of(" <>+-*=@[](){},") != String.npos);
   const char* quote = needQuote? "\"" : "";
 
   // Print the string, quoted and escaped as necessary.

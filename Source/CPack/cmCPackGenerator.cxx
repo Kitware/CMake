@@ -290,7 +290,8 @@ int cmCPackGenerator::InstallProjectViaInstallCommands(
         << std::endl);
       std::string output;
       int retVal = 1;
-      bool resB = cmSystemTools::RunSingleCommand(it->c_str(), &output,
+      bool resB = cmSystemTools::RunSingleCommand(
+        it->c_str(), &output, &output,
         &retVal, 0, this->GeneratorVerbose, 0);
       if ( !resB || retVal )
         {
@@ -525,7 +526,7 @@ int cmCPackGenerator::InstallProjectViaInstallScript(
         tempInstallDirectory.c_str());
       this->SetOptionIfNotSet("CMAKE_CURRENT_SOURCE_DIR",
         tempInstallDirectory.c_str());
-      int res = this->MakefileMap->ReadListFile(0, installScript.c_str());
+      int res = this->MakefileMap->ReadListFile(installScript.c_str());
       if ( cmSystemTools::GetErrorOccuredFlag() || !res )
         {
         return 0;
@@ -655,27 +656,20 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
       cmSystemTools::SetForceUnixPaths(globalGenerator->GetForceUnixPaths());
 
       // Does this generator require pre-install?
-      if ( globalGenerator->GetPreinstallTargetName() )
+      if (const char* preinstall = globalGenerator->GetPreinstallTargetName())
         {
-        globalGenerator->FindMakeProgram(this->MakefileMap);
-        std::string cmakeMakeProgram
-          = this->MakefileMap->GetSafeDefinition("CMAKE_MAKE_PROGRAM");
-        std::vector<std::string> buildCommand;
-        globalGenerator->GenerateBuildCommand(buildCommand, cmakeMakeProgram,
-            installProjectName, installDirectory,
-            globalGenerator->GetPreinstallTargetName(),
-            buildConfig, false, false);
-        std::string buildCommandStr =
-          cmSystemTools::PrintSingleCommand(buildCommand);
+        std::string buildCommand =
+          globalGenerator->GenerateCMakeBuildCommand(
+            preinstall, buildConfig, "", false);
         cmCPackLogger(cmCPackLog::LOG_DEBUG,
-          "- Install command: " << buildCommandStr << std::endl);
+          "- Install command: " << buildCommand << std::endl);
         cmCPackLogger(cmCPackLog::LOG_OUTPUT,
           "- Run preinstall target for: " << installProjectName << std::endl);
         std::string output;
         int retVal = 1;
         bool resB =
-          cmSystemTools::RunSingleCommand(buildCommand,
-                                          &output,
+          cmSystemTools::RunSingleCommand(buildCommand.c_str(),
+                                          &output, &output,
                                           &retVal,
                                           installDirectory.c_str(),
                                           this->GeneratorVerbose, 0);
@@ -684,12 +678,12 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
           tmpFile += "/PreinstallOutput.log";
           cmGeneratedFileStream ofs(tmpFile.c_str());
-          ofs << "# Run command: " << buildCommandStr << std::endl
+          ofs << "# Run command: " << buildCommand << std::endl
             << "# Directory: " << installDirectory << std::endl
             << "# Output:" << std::endl
             << output << std::endl;
           cmCPackLogger(cmCPackLog::LOG_ERROR,
-            "Problem running install command: " << buildCommandStr
+            "Problem running install command: " << buildCommand
             << std::endl
             << "Please check " << tmpFile << " for errors"
             << std::endl);
@@ -717,11 +711,12 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           }
 
         cmake cm;
+        cm.SetHomeDirectory("");
+        cm.SetHomeOutputDirectory("");
         cm.AddCMakePaths();
         cm.SetProgressCallback(cmCPackGeneratorProgress, this);
-        cmGlobalGenerator gg;
-        gg.SetCMakeInstance(&cm);
-        cmsys::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
+        cmGlobalGenerator gg(&cm);
+        cmsys::auto_ptr<cmLocalGenerator> lg(gg.MakeLocalGenerator());
         cmMakefile *mf = lg->GetMakefile();
         std::string realInstallDirectory = tempInstallDirectory;
         if ( !installSubDirectory.empty() && installSubDirectory != "/" )
@@ -895,7 +890,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
                               "1");
           }
         // do installation
-        int res = mf->ReadListFile(0, installFile.c_str());
+        int res = mf->ReadListFile(installFile.c_str());
         // forward definition of CMAKE_ABSOLUTE_DESTINATION_FILES
         // to CPack (may be used by generators like CPack RPM or DEB)
         // in order to transparently handle ABSOLUTE PATH
@@ -987,7 +982,7 @@ bool cmCPackGenerator::ReadListFile(const char* moduleName)
 {
   bool retval;
   std::string fullPath = this->MakefileMap->GetModulesFile(moduleName);
-  retval = this->MakefileMap->ReadListFile(0, fullPath.c_str());
+  retval = this->MakefileMap->ReadListFile(fullPath.c_str());
   // include FATAL_ERROR and ERROR in the return status
   retval = retval && (! cmSystemTools::GetErrorOccuredFlag());
   return retval;
@@ -1506,7 +1501,10 @@ bool cmCPackGenerator::SupportsComponentInstallation() const
 //----------------------------------------------------------------------
 bool cmCPackGenerator::WantsComponentInstallation() const
 {
-  return (!IsOn("CPACK_MONOLITHIC_INSTALL") & SupportsComponentInstallation());
+  return (!IsOn("CPACK_MONOLITHIC_INSTALL")
+        && SupportsComponentInstallation()
+        // check that we have at least one group or component
+        && (!this->ComponentGroups.empty() || !this->Components.empty()));
 }
 
 //----------------------------------------------------------------------

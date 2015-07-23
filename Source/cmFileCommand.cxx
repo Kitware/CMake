@@ -15,7 +15,10 @@
 #include "cmHexFileConverter.h"
 #include "cmInstallType.h"
 #include "cmFileTimeComparison.h"
+#include "cmLocalGenerator.h"
+#include "cmGlobalGenerator.h"
 #include "cmCryptoHash.h"
+#include "cmAlgorithms.h"
 
 #include "cmTimestamp.h"
 
@@ -63,7 +66,7 @@ static mode_t mode_setuid = S_ISUID;
 static mode_t mode_setgid = S_ISGID;
 #endif
 
-#if defined(WIN32) && defined(CMAKE_ENCODING_UTF8)
+#if defined(_WIN32) && defined(CMAKE_ENCODING_UTF8)
 // libcurl doesn't support file:// urls for unicode filenames on Windows.
 // Convert string from UTF-8 to ACP if this is a file:// URL.
 static std::string fix_file_url_windows(const std::string& url)
@@ -224,7 +227,7 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
   std::string fileName = *i;
   if ( !cmsys::SystemTools::FileIsFullPath(i->c_str()) )
     {
-    fileName = this->Makefile->GetCurrentDirectory();
+    fileName = this->Makefile->GetCurrentSourceDirectory();
     fileName += "/" + *i;
     }
 
@@ -306,7 +309,7 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
   std::string fileName = fileNameArg.GetString();
   if ( !cmsys::SystemTools::FileIsFullPath(fileName.c_str()) )
     {
-    fileName = this->Makefile->GetCurrentDirectory();
+    fileName = this->Makefile->GetCurrentSourceDirectory();
     fileName += "/" + fileNameArg.GetString();
     }
 
@@ -442,7 +445,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   std::string fileName = args[1];
   if(!cmsys::SystemTools::FileIsFullPath(fileName.c_str()))
     {
-    fileName = this->Makefile->GetCurrentDirectory();
+    fileName = this->Makefile->GetCurrentSourceDirectory();
     fileName += "/" + args[1];
     }
 
@@ -642,7 +645,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   if (hex_conversion_enabled)
     {
     // TODO: should work without temp file, but just on a memory buffer
-    std::string binaryFileName = this->Makefile->GetCurrentOutputDirectory();
+    std::string binaryFileName = this->Makefile->GetCurrentBinaryDirectory();
     binaryFileName += cmake::GetCMakeFilesDirectory();
     binaryFileName += "/FileCommandStringsBinaryFile";
     if(cmHexFileConverter::TryConvert(fileName.c_str(),binaryFileName.c_str()))
@@ -903,13 +906,13 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
     {
     switch(status)
       {
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
       case cmPolicies::NEW:
         g.RecurseThroughSymlinksOff();
         break;
       case cmPolicies::OLD:
       case cmPolicies::WARN:
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
         g.RecurseThroughSymlinksOn();
         break;
       }
@@ -919,6 +922,35 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
   bool first = true;
   for ( ; i != args.end(); ++i )
     {
+    if( *i == "LIST_DIRECTORIES" )
+      {
+      ++i;
+      if(i != args.end())
+        {
+        if(cmSystemTools::IsOn(i->c_str()))
+          {
+          g.SetListDirs(true);
+          g.SetRecurseListDirs(true);
+          }
+        else if(cmSystemTools::IsOff(i->c_str()))
+          {
+          g.SetListDirs(false);
+          g.SetRecurseListDirs(false);
+          }
+        else
+          {
+          this->SetError("LIST_DIRECTORIES missing bool value.");
+          return false;
+          }
+        }
+      else
+        {
+        this->SetError("LIST_DIRECTORIES missing bool value.");
+        return false;
+        }
+      ++i;
+      }
+
     if ( recurse && (*i == "FOLLOW_SYMLINKS") )
       {
       explicitFollowSymlinks = true;
@@ -949,23 +981,50 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
         }
       }
 
+    cmsys::Glob::GlobMessages globMessages;
     if ( !cmsys::SystemTools::FileIsFullPath(i->c_str()) )
       {
-      std::string expr = this->Makefile->GetCurrentDirectory();
+      std::string expr = this->Makefile->GetCurrentSourceDirectory();
       // Handle script mode
       if (!expr.empty())
         {
         expr += "/" + *i;
-        g.FindFiles(expr);
+        g.FindFiles(expr, &globMessages);
         }
       else
         {
-        g.FindFiles(*i);
+        g.FindFiles(*i, &globMessages);
         }
       }
     else
       {
-      g.FindFiles(*i);
+      g.FindFiles(*i, &globMessages);
+      }
+
+    if(!globMessages.empty())
+      {
+      bool shouldExit = false;
+      for(cmsys::Glob::GlobMessagesIterator it=globMessages.begin();
+        it != globMessages.end(); ++it)
+        {
+        if(it->type == cmsys::Glob::cyclicRecursion)
+          {
+          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
+            "Cyclic recursion detected while globbing for '"
+            + *i + "':\n" + it->content);
+          }
+        else
+          {
+          this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+            "Error has occured while globbing for '"
+            + *i + "' - " + it->content);
+          shouldExit = true;
+          }
+        }
+      if(shouldExit)
+        {
+          return false;
+        }
       }
 
     std::vector<std::string>::size_type cc;
@@ -985,6 +1044,8 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
     {
     switch (status)
       {
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
       case cmPolicies::NEW:
         // Correct behavior, yay!
         break;
@@ -997,17 +1058,9 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
         if(g.GetFollowedSymlinkCount() != 0)
           {
           this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
-            this->Makefile->GetPolicies()->
-              GetPolicyWarning(cmPolicies::CMP0009));
+            cmPolicies::GetPolicyWarning(cmPolicies::CMP0009));
           }
         break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        this->SetError("policy CMP0009 error");
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR,
-          this->Makefile->GetPolicies()->
-            GetRequiredPolicyError(cmPolicies::CMP0009));
-        return false;
       }
     }
 
@@ -1032,7 +1085,7 @@ bool cmFileCommand::HandleMakeDirectoryCommand(
     const std::string* cdir = &(*i);
     if ( !cmsys::SystemTools::FileIsFullPath(i->c_str()) )
       {
-      expr = this->Makefile->GetCurrentDirectory();
+      expr = this->Makefile->GetCurrentSourceDirectory();
       expr += "/" + *i;
       cdir = &expr;
       }
@@ -1497,7 +1550,7 @@ bool cmFileCopier::CheckValue(std::string const& arg)
         }
       else
         {
-        std::string file = this->Makefile->GetCurrentDirectory();
+        std::string file = this->Makefile->GetCurrentSourceDirectory();
         file += "/" + arg;
         this->Files.push_back(file);
         }
@@ -1509,7 +1562,7 @@ bool cmFileCopier::CheckValue(std::string const& arg)
         }
       else
         {
-        this->Destination = this->Makefile->GetCurrentOutputDirectory();
+        this->Destination = this->Makefile->GetCurrentBinaryDirectory();
         this->Destination += "/" + arg;
         }
       this->Doing = DoingNone;
@@ -2599,13 +2652,13 @@ bool cmFileCommand::HandleRename(std::vector<std::string> const& args)
   std::string oldname = args[1];
   if(!cmsys::SystemTools::FileIsFullPath(oldname.c_str()))
     {
-    oldname = this->Makefile->GetCurrentDirectory();
+    oldname = this->Makefile->GetCurrentSourceDirectory();
     oldname += "/" + args[1];
     }
   std::string newname = args[2];
   if(!cmsys::SystemTools::FileIsFullPath(newname.c_str()))
     {
-    newname = this->Makefile->GetCurrentDirectory();
+    newname = this->Makefile->GetCurrentSourceDirectory();
     newname += "/" + args[2];
     }
 
@@ -2639,7 +2692,7 @@ bool cmFileCommand::HandleRemove(std::vector<std::string> const& args,
     std::string fileName = *i;
     if(!cmsys::SystemTools::FileIsFullPath(fileName.c_str()))
       {
-      fileName = this->Makefile->GetCurrentDirectory();
+      fileName = this->Makefile->GetCurrentSourceDirectory();
       fileName += "/" + *i;
       }
 
@@ -2741,13 +2794,36 @@ namespace {
 
 
   static size_t
-  cmFileCommandCurlDebugCallback(CURL *, curl_infotype, char *chPtr,
+  cmFileCommandCurlDebugCallback(CURL *, curl_infotype type, char *chPtr,
                                  size_t size, void *data)
     {
     cmFileCommandVectorOfChar *vec
       = static_cast<cmFileCommandVectorOfChar*>(data);
-    vec->insert(vec->end(), chPtr, chPtr + size);
-    return size;
+    switch(type)
+      {
+      case CURLINFO_TEXT:
+      case CURLINFO_HEADER_IN:
+      case CURLINFO_HEADER_OUT:
+        vec->insert(vec->end(), chPtr, chPtr + size);
+        break;
+      case CURLINFO_DATA_IN:
+      case CURLINFO_DATA_OUT:
+      case CURLINFO_SSL_DATA_IN:
+      case CURLINFO_SSL_DATA_OUT:
+        {
+        char buf[128];
+        int n = sprintf(buf, "[%" cmIML_INT_PRIu64 " bytes data]\n",
+                        static_cast<cmIML_INT_uint64_t>(size));
+        if (n > 0)
+          {
+          vec->insert(vec->end(), buf, buf + n);
+          }
+        }
+        break;
+      default:
+        break;
+      }
+    return 0;
     }
 
 
@@ -2906,7 +2982,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
 
   long timeout = 0;
   long inactivity_timeout = 0;
-  std::string verboseLog;
+  std::string logVar;
   std::string statusVar;
   bool tls_verify = this->Makefile->IsOn("CMAKE_TLS_VERIFY");
   const char* cainfo = this->Makefile->GetDefinition("CMAKE_TLS_CAINFO");
@@ -2951,7 +3027,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
         this->SetError("DOWNLOAD missing VAR for LOG.");
         return false;
         }
-      verboseLog = *i;
+      logVar = *i;
       }
     else if(*i == "STATUS")
       {
@@ -3080,7 +3156,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
     return false;
     }
 
-#if defined(WIN32) && defined(CMAKE_ENCODING_UTF8)
+#if defined(_WIN32) && defined(CMAKE_ENCODING_UTF8)
   url = fix_file_url_windows(url);
 #endif
 
@@ -3143,7 +3219,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   res = ::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   check_curl_result(res, "DOWNLOAD cannot set follow-redirect option: ");
 
-  if(!verboseLog.empty())
+  if(!logVar.empty())
     {
     res = ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
     check_curl_result(res, "DOWNLOAD cannot set verbose: ");
@@ -3230,22 +3306,10 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
       }
     }
 
-  if(!chunkDebug.empty())
+  if (!logVar.empty())
     {
     chunkDebug.push_back(0);
-    if(CURLE_OPERATION_TIMEOUTED == res)
-      {
-      std::string output = &*chunkDebug.begin();
-
-      if(!verboseLog.empty())
-        {
-        this->Makefile->AddDefinition(verboseLog,
-                                      &*chunkDebug.begin());
-        }
-      }
-
-    this->Makefile->AddDefinition(verboseLog,
-                                  &*chunkDebug.begin());
+    this->Makefile->AddDefinition(logVar, &*chunkDebug.begin());
     }
 
   return true;
@@ -3347,7 +3411,7 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
 
   unsigned long file_size = cmsys::SystemTools::FileLength(filename);
 
-#if defined(WIN32) && defined(CMAKE_ENCODING_UTF8)
+#if defined(_WIN32) && defined(CMAKE_ENCODING_UTF8)
   url = fix_file_url_windows(url);
 #endif
 
@@ -3365,6 +3429,7 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
 
   // enable HTTP ERROR parsing
   ::CURLcode res = ::curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
+  check_curl_result(res, "UPLOAD cannot set fail on error flag: ");
 
   // enable uploading
   res = ::curl_easy_setopt(curl, CURLOPT_UPLOAD, 1);
@@ -3500,16 +3565,15 @@ void cmFileCommand::AddEvaluationFile(const std::string &inputName,
 {
   cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
 
-  cmGeneratorExpression outputGe(&lfbt);
+  cmGeneratorExpression outputGe(lfbt);
   cmsys::auto_ptr<cmCompiledGeneratorExpression> outputCge
                                                 = outputGe.Parse(outputExpr);
 
-  cmGeneratorExpression conditionGe(&lfbt);
+  cmGeneratorExpression conditionGe(lfbt);
   cmsys::auto_ptr<cmCompiledGeneratorExpression> conditionCge
                                               = conditionGe.Parse(condition);
 
-  this->Makefile->GetLocalGenerator()
-                ->GetGlobalGenerator()->AddEvaluationFile(inputName,
+  this->Makefile->GetGlobalGenerator()->AddEvaluationFile(inputName,
                                                           outputCge,
                                                           this->Makefile,
                                                           conditionCge,
@@ -3683,7 +3747,7 @@ bool cmFileCommand::HandleLockCommand(
 
   if (!cmsys::SystemTools::FileIsFullPath(path))
     {
-    path = this->Makefile->GetCurrentDirectory() + ("/" + path);
+    path = this->Makefile->GetCurrentSourceDirectory() + ("/" + path);
     }
 
   // Unify path (remove '//', '/../', ...)
@@ -3712,8 +3776,8 @@ bool cmFileCommand::HandleLockCommand(
   fclose(file);
 
   // Actual lock/unlock
-  cmFileLockPool& lockPool = this->Makefile->GetLocalGenerator()->
-      GetGlobalGenerator()->GetFileLockPool();
+  cmFileLockPool& lockPool = this->Makefile->GetGlobalGenerator()
+                                           ->GetFileLockPool();
 
   cmFileLockResult fileLockResult(cmFileLockResult::MakeOk());
   if (release)

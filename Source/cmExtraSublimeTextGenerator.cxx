@@ -79,7 +79,7 @@ void cmExtraSublimeTextGenerator::CreateProjectFile(
                                      const std::vector<cmLocalGenerator*>& lgs)
 {
   const cmMakefile* mf=lgs[0]->GetMakefile();
-  std::string outputDir=mf->GetStartOutputDirectory();
+  std::string outputDir=mf->GetCurrentBinaryDirectory();
   std::string projectName=mf->GetProjectName();
 
   const std::string filename =
@@ -174,7 +174,7 @@ void cmExtraSublimeTextGenerator::
           {
           // Only add the global targets from CMAKE_BINARY_DIR,
           // not from the subdirs
-          if (strcmp(makefile->GetStartOutputDirectory(),
+          if (strcmp(makefile->GetCurrentBinaryDirectory(),
                      makefile->GetHomeOutputDirectory())==0)
             {
             this->AppendTarget(fout, ti->first, *lg, 0,
@@ -436,7 +436,7 @@ ComputeDefines(cmSourceFile *source, cmLocalGenerator* lg, cmTarget *target,
     }
 
   // Add preprocessor definitions for this target and configuration.
-  lg->AddCompileDefinitions(defines, target, config);
+  lg->AddCompileDefinitions(defines, target, config, language);
   lg->AppendDefines(defines, source->GetProperty("COMPILE_DEFINITIONS"));
   {
   std::string defPropName = "COMPILE_DEFINITIONS_";

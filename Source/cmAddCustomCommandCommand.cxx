@@ -168,7 +168,7 @@ bool cmAddCustomCommandCommand
             // and later references "${CMAKE_CURRENT_SOURCE_DIR}/out.txt".
             // This is fairly obscure so we can wait for someone to
             // complain.
-            filename = this->Makefile->GetCurrentOutputDirectory();
+            filename = this->Makefile->GetCurrentBinaryDirectory();
             filename += "/";
             }
           filename += copy;
@@ -315,7 +315,7 @@ bool cmAddCustomCommandCommand
   // Convert working directory to a full path.
   if(!working.empty())
     {
-    const char* build_dir = this->Makefile->GetCurrentOutputDirectory();
+    const char* build_dir = this->Makefile->GetCurrentBinaryDirectory();
     working = cmSystemTools::CollapseFullPath(working, build_dir);
     }
 
@@ -380,8 +380,7 @@ bool cmAddCustomCommandCommand
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0050))
     {
     case cmPolicies::WARN:
-      e << (this->Makefile->GetPolicies()
-                ->GetPolicyWarning(cmPolicies::CMP0050)) << "\n";
+      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0050) << "\n";
       break;
     case cmPolicies::OLD:
       issueMessage = false;

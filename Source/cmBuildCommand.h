@@ -53,6 +53,8 @@ public:
   virtual std::string GetName() const {return "build_command";}
 
   cmTypeMacro(cmBuildCommand, cmCommand);
+private:
+  bool IgnoreErrors() const;
 };
 
 #endif

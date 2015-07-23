@@ -15,10 +15,12 @@
 #include "cmOrderDirectories.h"
 
 #include "cmGlobalGenerator.h"
-#include "cmLocalGenerator.h"
+#include "cmState.h"
+#include "cmOutputConverter.h"
 #include "cmMakefile.h"
 #include "cmTarget.h"
 #include "cmake.h"
+#include "cmAlgorithms.h"
 
 #include <ctype.h>
 
@@ -244,13 +246,12 @@ cmComputeLinkInformation
   // Store context information.
   this->Target = target;
   this->Makefile = this->Target->GetMakefile();
-  this->LocalGenerator = this->Makefile->GetLocalGenerator();
-  this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
+  this->GlobalGenerator = this->Makefile->GetGlobalGenerator();
   this->CMakeInstance = this->GlobalGenerator->GetCMakeInstance();
 
   // Check whether to recognize OpenBSD-style library versioned names.
-  this->OpenBSD = this->Makefile->GetCMakeInstance()
-    ->GetPropertyAsBool("FIND_LIBRARY_USE_OPENBSD_VERSIONING");
+  this->OpenBSD = this->Makefile->GetState()
+            ->GetGlobalPropertyAsBool("FIND_LIBRARY_USE_OPENBSD_VERSIONING");
 
   // The configuration being linked.
   this->Config = config;
@@ -410,6 +411,10 @@ cmComputeLinkInformation
     std::vector<std::string> const& dirs = this->Target->GetLinkDirectories();
     this->OldLinkDirMask.insert(dirs.begin(), dirs.end());
     }
+
+  this->CMP0060Warn =
+    this->Makefile->PolicyOptionalWarningEnabled(
+      "CMAKE_POLICY_WARNING_CMP0060");
 }
 
 //----------------------------------------------------------------------------
@@ -547,6 +552,21 @@ bool cmComputeLinkInformation::Compute()
   // Add implicit language runtime libraries and directories.
   this->AddImplicitLinkInfo();
 
+  if (!this->CMP0060WarnItems.empty())
+    {
+    std::ostringstream w;
+    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0060) << "\n"
+      "Some library files are in directories implicitly searched by "
+      "the linker when invoked for " << this->LinkLanguage << ":\n"
+      " " << cmJoin(this->CMP0060WarnItems, "\n ") << "\n"
+      "For compatibility with older versions of CMake, the generated "
+      "link line will ask the linker to search for these by library "
+      "name."
+      ;
+    this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
+                                      this->Target->GetBacktrace());
+    }
+
   return true;
 }
 
@@ -631,6 +651,13 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       this->Items.push_back(Item(linkItem, true, tgt));
       this->Depends.push_back(exe);
       }
+    else if(tgt->GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      // Add the interface library as an item so it can be considered as part
+      // of COMPATIBLE_INTERFACE_ enforcement.  The generators will ignore
+      // this for the actual link line.
+      this->Items.push_back(Item(std::string(), true, tgt));
+      }
     else
       {
       // Decide whether to use an import library.
@@ -638,11 +665,6 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
         (this->UseImportLibrary &&
          (impexe || tgt->GetType() == cmTarget::SHARED_LIBRARY));
 
-      if(tgt->GetType() == cmTarget::INTERFACE_LIBRARY)
-        {
-        this->Items.push_back(Item(std::string(), true, tgt));
-        return;
-        }
       // Pass the full path to the target file.
       std::string lib = tgt->GetFullPath(config, implib, true);
       if(!this->LinkDependsNoShared ||
@@ -775,9 +797,8 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
 void cmComputeLinkInformation::ComputeLinkTypeInfo()
 {
   // Check whether archives may actually be shared libraries.
-  this->ArchivesMayBeShared =
-    this->CMakeInstance->GetPropertyAsBool(
-      "TARGET_ARCHIVES_MAY_BE_SHARED_LIBS");
+  this->ArchivesMayBeShared = this->CMakeInstance->GetState()
+              ->GetGlobalPropertyAsBool("TARGET_ARCHIVES_MAY_BE_SHARED_LIBS");
 
   // First assume we cannot do link type stuff.
   this->LinkTypeEnabled = false;
@@ -1189,6 +1210,28 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
     return false;
     }
 
+  // Check the policy for whether we should use the approach below.
+  switch (this->Target->GetPolicyStatusCMP0060())
+    {
+    case cmPolicies::WARN:
+      if (this->CMP0060Warn)
+        {
+        // Print the warning at most once for this item.
+        std::string const& wid = "CMP0060-WARNING-GIVEN-" + item;
+        if (!this->CMakeInstance->GetPropertyAsBool(wid))
+          {
+          this->CMakeInstance->SetProperty(wid, "1");
+          this->CMP0060WarnItems.insert(item);
+          }
+        }
+    case cmPolicies::OLD:
+      break;
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::NEW:
+      return false;
+    }
+
   // Many system linkers support multiple architectures by
   // automatically selecting the implicit linker search path for the
   // current architecture.  If the library appears in an implicit link
@@ -1351,7 +1394,8 @@ void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
 
   // Add the item using the -framework option.
   this->Items.push_back(Item("-framework", false));
-  fw = this->LocalGenerator->EscapeForShell(fw);
+  cmOutputConverter converter(this->Makefile->GetStateSnapshot());
+  fw = converter.EscapeForShell(fw);
   this->Items.push_back(Item(fw, false));
 }
 
@@ -1484,12 +1528,12 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
       // Print the warning at most once for this item.
       std::string wid = "CMP0008-WARNING-GIVEN-";
       wid += item;
-      if(!this->CMakeInstance->GetPropertyAsBool(wid))
+      if(!this->CMakeInstance->GetState()
+              ->GetGlobalPropertyAsBool(wid))
         {
-        this->CMakeInstance->SetProperty(wid, "1");
+        this->CMakeInstance->GetState()->SetGlobalProperty(wid, "1");
         std::ostringstream w;
-        w << (this->Makefile->GetPolicies()
-              ->GetPolicyWarning(cmPolicies::CMP0008)) << "\n"
+        w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0008) << "\n"
           << "Target \"" << this->Target->GetName() << "\" links to item\n"
           << "  " << item << "\n"
           << "which is a full-path but not a valid library file name.";
@@ -1507,8 +1551,7 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
     case cmPolicies::REQUIRED_ALWAYS:
       {
       std::ostringstream e;
-      e << (this->Makefile->GetPolicies()->
-            GetRequiredPolicyError(cmPolicies::CMP0008)) << "\n"
+      e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0008) << "\n"
           << "Target \"" << this->Target->GetName() << "\" links to item\n"
           << "  " << item << "\n"
           << "which is a full-path but not a valid library file name.";
@@ -1533,9 +1576,11 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
   switch(this->Target->GetPolicyStatusCMP0003())
     {
     case cmPolicies::WARN:
-      if(!this->CMakeInstance->GetPropertyAsBool("CMP0003-WARNING-GIVEN"))
+      if(!this->CMakeInstance->GetState()
+              ->GetGlobalPropertyAsBool("CMP0003-WARNING-GIVEN"))
         {
-        this->CMakeInstance->SetProperty("CMP0003-WARNING-GIVEN", "1");
+        this->CMakeInstance->GetState()
+            ->SetGlobalProperty("CMP0003-WARNING-GIVEN", "1");
         std::ostringstream w;
         this->PrintLinkPolicyDiagnosis(w);
         this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
@@ -1552,8 +1597,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
     case cmPolicies::REQUIRED_ALWAYS:
       {
       std::ostringstream e;
-      e << (this->Makefile->GetPolicies()->
-            GetRequiredPolicyError(cmPolicies::CMP0003)) << "\n";
+      e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0003) << "\n";
       this->PrintLinkPolicyDiagnosis(e);
       this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
                                         this->Target->GetBacktrace());

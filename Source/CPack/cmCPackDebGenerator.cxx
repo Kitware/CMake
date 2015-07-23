@@ -20,6 +20,7 @@
 #include <cmsys/Glob.hxx>
 
 #include <limits.h> // USHRT_MAX
+#include <sys/stat.h>
 
 // NOTE:
 // A debian package .deb is simply an 'ar' archive. The only subtle difference
@@ -90,7 +91,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string initialTopLevel,
     }
 
   cmsys::Glob gl;
-  std::string findExpr(this->GetOption("WDIR"));
+  std::string findExpr(this->GetOption("GEN_WDIR"));
   findExpr += "/*";
   gl.RecurseOn();
   if ( !gl.FindFiles(findExpr) )
@@ -217,7 +218,7 @@ int cmCPackDebGenerator::PackageComponentsAllInOne()
     }
 
   cmsys::Glob gl;
-  std::string findExpr(this->GetOption("WDIR"));
+  std::string findExpr(this->GetOption("GEN_WDIR"));
   findExpr += "/*";
   gl.RecurseOn();
   if ( !gl.FindFiles(findExpr) )
@@ -282,11 +283,9 @@ int cmCPackDebGenerator::PackageFiles()
 
 int cmCPackDebGenerator::createDeb()
 {
-  const char* cmakeExecutable = this->GetOption("CMAKE_COMMAND");
-
   // debian-binary file
   std::string dbfilename;
-    dbfilename += this->GetOption("WDIR");
+    dbfilename += this->GetOption("GEN_WDIR");
   dbfilename += "/debian-binary";
     { // the scope is needed for cmGeneratedFileStream
     cmGeneratedFileStream out(dbfilename.c_str());
@@ -296,44 +295,47 @@ int cmCPackDebGenerator::createDeb()
 
   // control file
   std::string ctlfilename;
-    ctlfilename = this->GetOption("WDIR");
+    ctlfilename = this->GetOption("GEN_WDIR");
   ctlfilename += "/control";
 
   // debian policy enforce lower case for package name
   // mandatory entries:
   std::string debian_pkg_name = cmsys::SystemTools::LowerCase(
-                                this->GetOption("CPACK_DEBIAN_PACKAGE_NAME") );
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_NAME") );
   const char* debian_pkg_version =
-                               this->GetOption("CPACK_DEBIAN_PACKAGE_VERSION");
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_VERSION");
   const char* debian_pkg_section =
-                               this->GetOption("CPACK_DEBIAN_PACKAGE_SECTION");
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_SECTION");
   const char* debian_pkg_priority =
-                              this->GetOption("CPACK_DEBIAN_PACKAGE_PRIORITY");
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_PRIORITY");
   const char* debian_pkg_arch =
-                          this->GetOption("CPACK_DEBIAN_PACKAGE_ARCHITECTURE");
-  const char* maintainer =  this->GetOption("CPACK_DEBIAN_PACKAGE_MAINTAINER");
-  const char* desc =       this->GetOption("CPACK_DEBIAN_PACKAGE_DESCRIPTION");
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_ARCHITECTURE");
+  const char* maintainer =
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_MAINTAINER");
+  const char* desc =
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_DESCRIPTION");
 
   // optional entries
-  const char* debian_pkg_dep = this->GetOption("CPACK_DEBIAN_PACKAGE_DEPENDS");
+  const char* debian_pkg_dep =
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_DEPENDS");
   const char* debian_pkg_rec =
-                            this->GetOption("CPACK_DEBIAN_PACKAGE_RECOMMENDS");
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_RECOMMENDS");
   const char* debian_pkg_sug =
-                              this->GetOption("CPACK_DEBIAN_PACKAGE_SUGGESTS");
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_SUGGESTS");
   const char* debian_pkg_url =
-                              this->GetOption("CPACK_DEBIAN_PACKAGE_HOMEPAGE");
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_HOMEPAGE");
   const char* debian_pkg_predep =
-                    this->GetOption("CPACK_DEBIAN_PACKAGE_PREDEPENDS");
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_PREDEPENDS");
   const char* debian_pkg_enhances =
-                    this->GetOption("CPACK_DEBIAN_PACKAGE_ENHANCES");
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_ENHANCES");
   const char* debian_pkg_breaks =
-                    this->GetOption("CPACK_DEBIAN_PACKAGE_BREAKS");
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_BREAKS");
   const char* debian_pkg_conflicts =
-                    this->GetOption("CPACK_DEBIAN_PACKAGE_CONFLICTS");
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_CONFLICTS");
   const char* debian_pkg_provides =
-                    this->GetOption("CPACK_DEBIAN_PACKAGE_PROVIDES");
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_PROVIDES");
   const char* debian_pkg_replaces =
-                    this->GetOption("CPACK_DEBIAN_PACKAGE_REPLACES");
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_REPLACES");
 
     { // the scope is needed for cmGeneratedFileStream
     cmGeneratedFileStream out(ctlfilename.c_str());
@@ -399,13 +401,10 @@ int cmCPackDebGenerator::createDeb()
     out << std::endl;
     }
 
-  std::string cmd;
-  if (NULL != this->GetOption("CPACK_DEBIAN_FAKEROOT_EXECUTABLE")) {
-      cmd += this->GetOption("CPACK_DEBIAN_FAKEROOT_EXECUTABLE");
-  }
+  std::string cmd(this->GetOption("GEN_CPACK_DEBIAN_FAKEROOT_EXECUTABLE"));
 
   const char* debian_compression_type =
-      this->GetOption("CPACK_DEBIAN_COMPRESSION_TYPE");
+      this->GetOption("GEN_CPACK_DEBIAN_COMPRESSION_TYPE");
   if(!debian_compression_type)
     {
     debian_compression_type = "gzip";
@@ -419,15 +418,15 @@ int cmCPackDebGenerator::createDeb()
   } else if(!strcmp(debian_compression_type, "bzip2")) {
       compression_suffix = ".bz2";
       compression_modifier = "j";
-      cmake_tar += "\"" + std::string(cmakeExecutable) + "\" -E ";
+      cmake_tar += "\"" + cmSystemTools::GetCMakeCommand() + "\" -E ";
   } else if(!strcmp(debian_compression_type, "gzip")) {
       compression_suffix = ".gz";
       compression_modifier = "z";
-      cmake_tar += "\"" + std::string(cmakeExecutable) + "\" -E ";
+      cmake_tar += "\"" + cmSystemTools::GetCMakeCommand() + "\" -E ";
   } else if(!strcmp(debian_compression_type, "none")) {
       compression_suffix = "";
       compression_modifier = "";
-      cmake_tar += "\"" + std::string(cmakeExecutable) + "\" -E ";
+      cmake_tar += "\"" + cmSystemTools::GetCMakeCommand() + "\" -E ";
   } else {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Error unrecognized compression type: "
@@ -440,8 +439,9 @@ int cmCPackDebGenerator::createDeb()
   // now add all directories which have to be compressed
   // collect all top level install dirs for that
   // e.g. /opt/bin/foo, /usr/bin/bar and /usr/bin/baz would give /usr and /opt
-    size_t topLevelLength = std::string(this->GetOption("WDIR")).length();
-    cmCPackLogger(cmCPackLog::LOG_DEBUG, "WDIR: \"" << this->GetOption("WDIR")
+    size_t topLevelLength = std::string(this->GetOption("GEN_WDIR")).length();
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "WDIR: \""
+          << this->GetOption("GEN_WDIR")
           << "\", length = " << topLevelLength
           << std::endl);
   std::set<std::string> installDirs;
@@ -466,8 +466,8 @@ int cmCPackDebGenerator::createDeb()
 
   std::string output;
     int retval = -1;
-  int res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output,
-      &retval, this->GetOption("WDIR"), this->GeneratorVerbose, 0);
+  int res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output, &output,
+      &retval, this->GetOption("GEN_WDIR"), this->GeneratorVerbose, 0);
 
     if ( !res || retval )
     {
@@ -485,7 +485,7 @@ int cmCPackDebGenerator::createDeb()
     }
 
   std::string md5filename;
-    md5filename = this->GetOption("WDIR");
+    md5filename = this->GetOption("GEN_WDIR");
   md5filename += "/md5sums";
 
     { // the scope is needed for cmGeneratedFileStream
@@ -499,14 +499,19 @@ int cmCPackDebGenerator::createDeb()
             fileIt != packageFiles.end(); ++ fileIt )
       {
       cmd = "\"";
-      cmd += cmakeExecutable;
+      cmd += cmSystemTools::GetCMakeCommand();
       cmd += "\" -E md5sum \"";
       cmd += *fileIt;
       cmd += "\"";
       //std::string output;
       //int retVal = -1;
-      res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output,
+      res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output, &output,
           &retval, toplevel.c_str(), this->GeneratorVerbose, 0);
+      if ( !res || retval )
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running cmake -E md5sum "
+                      << cmd << std::endl);
+        }
       // debian md5sums entries are like this:
       // 014f3604694729f3bf19263bac599765  usr/bin/ccmake
       // thus strip the full path (with the trailing slash)
@@ -518,14 +523,15 @@ int cmCPackDebGenerator::createDeb()
     // Do not end the md5sum file with yet another (invalid)
     }
 
-    cmd = "";
-    if (NULL != this->GetOption("CPACK_DEBIAN_FAKEROOT_EXECUTABLE"))
-      {
-      cmd = this->GetOption("CPACK_DEBIAN_FAKEROOT_EXECUTABLE");
-      }
+    // set md5sum file permissins to RW-R--R-- so that deb lintian doesn't warn
+    // about it
+    cmSystemTools::SetPermissions(md5filename.c_str(),
+        S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+
+    cmd = this->GetOption("GEN_CPACK_DEBIAN_FAKEROOT_EXECUTABLE");
     cmd += cmake_tar + "tar czf control.tar.gz ./control ./md5sums";
     const char* controlExtra =
-      this->GetOption("CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA");
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA");
   if( controlExtra )
     {
     std::vector<std::string> controlExtraList;
@@ -535,7 +541,7 @@ int cmCPackDebGenerator::createDeb()
       {
       std::string filenamename =
         cmsys::SystemTools::GetFilenameName(*i);
-      std::string localcopy = this->GetOption("WDIR");
+      std::string localcopy = this->GetOption("GEN_WDIR");
       localcopy += "/";
       localcopy += filenamename;
       // if we can copy the file, it means it does exist, let's add it:
@@ -548,8 +554,8 @@ int cmCPackDebGenerator::createDeb()
         }
       }
     }
-  res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output,
-      &retval, this->GetOption("WDIR"), this->GeneratorVerbose, 0);
+  res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output, &output,
+      &retval, this->GetOption("GEN_WDIR"), this->GeneratorVerbose, 0);
 
     if ( !res || retval )
     {
@@ -570,7 +576,7 @@ int cmCPackDebGenerator::createDeb()
   // since debian packages require BSD ar (most Linux distros and even
   // FreeBSD and NetBSD ship GNU ar) we use a copy of OpenBSD ar here.
   std::vector<std::string> arFiles;
-    std::string topLevelString = this->GetOption("WDIR");
+    std::string topLevelString = this->GetOption("GEN_WDIR");
   topLevelString += "/";
   arFiles.push_back(topLevelString + "debian-binary");
   arFiles.push_back(topLevelString + "control.tar.gz");
@@ -800,12 +806,14 @@ static int put_arobj(CF *cfp, struct stat *sb)
   if (lname > sizeof(hdr->ar_name) || strchr(name, ' '))
     (void)sprintf(ar_hb, HDR1, AR_EFMT1, (int)lname,
                   (long int)sb->st_mtime, (unsigned)uid, (unsigned)gid,
-                  sb->st_mode, (long long)sb->st_size + lname, ARFMAG);
+                  (unsigned)sb->st_mode, (long long)sb->st_size + lname,
+                  ARFMAG);
     else {
       lname = 0;
       (void)sprintf(ar_hb, HDR2, name,
                     (long int)sb->st_mtime, (unsigned)uid, (unsigned)gid,
-                    sb->st_mode, (long long)sb->st_size, ARFMAG);
+                    (unsigned)sb->st_mode, (long long)sb->st_size,
+                    ARFMAG);
       }
     off_t size = sb->st_size;
 

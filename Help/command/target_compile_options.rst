@@ -20,8 +20,8 @@ alternative commands exist to add preprocessor definitions
 (:command:`target_compile_definitions` and :command:`add_definitions`) or
 include directories (:command:`target_include_directories` and
 :command:`include_directories`).  See documentation of the
-:prop_tgt:`directory <COMPILE_OPTIONS>` and
-:prop_tgt:` target <COMPILE_OPTIONS>` ``COMPILE_OPTIONS`` properties.
+:prop_dir:`directory <COMPILE_OPTIONS>` and
+:prop_tgt:`target <COMPILE_OPTIONS>` ``COMPILE_OPTIONS`` properties.
 
 The ``INTERFACE``, ``PUBLIC`` and ``PRIVATE`` keywords are required to
 specify the scope of the following arguments.  ``PRIVATE`` and ``PUBLIC``

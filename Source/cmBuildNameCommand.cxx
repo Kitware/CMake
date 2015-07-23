@@ -39,7 +39,7 @@ bool cmBuildNameCommand
       this->Makefile->AddCacheDefinition(args[0],
                                      cv.c_str(),
                                      "Name of build.",
-                                     cmCacheManager::STRING);
+                                     cmState::STRING);
       }
     return true;
     }
@@ -49,7 +49,7 @@ bool cmBuildNameCommand
   if(this->Makefile->GetDefinition("UNIX"))
     {
     buildname = "";
-    cmSystemTools::RunSingleCommand("uname -a", &buildname);
+    cmSystemTools::RunSingleCommand("uname -a", &buildname, &buildname);
     if(!buildname.empty())
       {
       std::string RegExp = "([^ ]*) [^ ]* ([^ ]*) ";
@@ -74,7 +74,7 @@ bool cmBuildNameCommand
   this->Makefile->AddCacheDefinition(args[0],
                                  buildname.c_str(),
                                  "Name of build.",
-                                 cmCacheManager::STRING);
+                                 cmState::STRING);
   return true;
 }
 

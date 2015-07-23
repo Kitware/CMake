@@ -34,12 +34,19 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
 
   # Try building with no extra flags and then try each set
   # of helper flags.  Stop when the compiler is identified.
-  foreach(flags "" ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS})
-    if(NOT CMAKE_${lang}_COMPILER_ID)
-      CMAKE_DETERMINE_COMPILER_ID_BUILD("${lang}" "${flags}" "${src}")
-      foreach(file ${COMPILER_${lang}_PRODUCED_FILES})
-        CMAKE_DETERMINE_COMPILER_ID_CHECK("${lang}" "${CMAKE_${lang}_COMPILER_ID_DIR}/${file}" "${src}")
-      endforeach()
+  foreach(flags ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS_FIRST}
+                ""
+                ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS})
+    CMAKE_DETERMINE_COMPILER_ID_BUILD("${lang}" "${flags}" "${src}")
+    CMAKE_DETERMINE_COMPILER_ID_MATCH_VENDOR("${lang}" "${COMPILER_${lang}_PRODUCED_OUTPUT}")
+    if(CMAKE_${lang}_COMPILER_ID)
+      break()
+    endif()
+    foreach(file ${COMPILER_${lang}_PRODUCED_FILES})
+      CMAKE_DETERMINE_COMPILER_ID_CHECK("${lang}" "${CMAKE_${lang}_COMPILER_ID_DIR}/${file}" "${src}")
+    endforeach()
+    if(CMAKE_${lang}_COMPILER_ID)
+      break()
     endif()
   endforeach()
 
@@ -210,7 +217,7 @@ Id flags: ${testflags}
       set(id_subsystem 1)
     endif()
     set(id_dir ${CMAKE_${lang}_COMPILER_ID_DIR})
-    get_filename_component(id_src "${src}" NAME)
+    set(id_src "${src}")
     configure_file(${CMAKE_ROOT}/Modules/CompilerId/VS-${v}.${ext}.in
       ${id_dir}/CompilerId${lang}.${ext} @ONLY)
     if(CMAKE_VS_MSBUILD_COMMAND AND NOT lang STREQUAL "Fortran")
@@ -249,7 +256,7 @@ Id flags: ${testflags}
     set(id_lang "${lang}")
     set(id_type ${CMAKE_${lang}_COMPILER_XCODE_TYPE})
     set(id_dir ${CMAKE_${lang}_COMPILER_ID_DIR})
-    get_filename_component(id_src "${src}" NAME)
+    set(id_src "${src}")
     if(CMAKE_XCODE_PLATFORM_TOOLSET)
       set(id_toolset "GCC_VERSION = ${CMAKE_XCODE_PLATFORM_TOOLSET};")
     else()
@@ -297,15 +304,12 @@ Id flags: ${testflags}
       set(ENV{MACOSX_DEPLOYMENT_TARGET} "${_ENV_MACOSX_DEPLOYMENT_TARGET}")
     endif()
 
-    # Match the link line from xcodebuild output of the form
-    #  Ld ...
-    #      ...
-    #      /path/to/cc ...CompilerId${lang}/...
-    # to extract the compiler front-end for the language.
-    if("${CMAKE_${lang}_COMPILER_ID_OUTPUT}" MATCHES "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerId${lang}/(\\./)?(CompilerId${lang}.xctest/)?CompilerId${lang}[ \t\n\\\"]")
-      set(_comp "${CMAKE_MATCH_2}")
-      if(EXISTS "${_comp}")
-        set(CMAKE_${lang}_COMPILER_ID_TOOL "${_comp}" PARENT_SCOPE)
+    if(DEFINED CMAKE_${lang}_COMPILER_ID_TOOL_MATCH_REGEX)
+      if("${CMAKE_${lang}_COMPILER_ID_OUTPUT}" MATCHES "${CMAKE_${lang}_COMPILER_ID_TOOL_MATCH_REGEX}")
+        set(_comp "${CMAKE_MATCH_${CMAKE_${lang}_COMPILER_ID_TOOL_MATCH_INDEX}}")
+        if(EXISTS "${_comp}")
+          set(CMAKE_${lang}_COMPILER_ID_TOOL "${_comp}" PARENT_SCOPE)
+        endif()
       endif()
     endif()
   else()
@@ -355,6 +359,7 @@ ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
 
     # No output files should be inspected.
     set(COMPILER_${lang}_PRODUCED_FILES)
+    set(COMPILER_${lang}_PRODUCED_OUTPUT)
   else()
     # Compilation succeeded.
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
@@ -395,10 +400,24 @@ ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
         "${src}\" did not produce an executable in \""
         "${CMAKE_${lang}_COMPILER_ID_DIR}\".\n\n")
     endif()
+
+    set(COMPILER_${lang}_PRODUCED_OUTPUT "${CMAKE_${lang}_COMPILER_ID_OUTPUT}")
   endif()
 
   # Return the files produced by the compilation.
   set(COMPILER_${lang}_PRODUCED_FILES "${COMPILER_${lang}_PRODUCED_FILES}" PARENT_SCOPE)
+  set(COMPILER_${lang}_PRODUCED_OUTPUT "${COMPILER_${lang}_PRODUCED_OUTPUT}" PARENT_SCOPE)
+endfunction()
+
+#-----------------------------------------------------------------------------
+# Function to extract the compiler id from compiler output.
+function(CMAKE_DETERMINE_COMPILER_ID_MATCH_VENDOR lang output)
+  foreach(vendor ${CMAKE_${lang}_COMPILER_ID_MATCH_VENDORS})
+    if(output MATCHES "${CMAKE_${lang}_COMPILER_ID_MATCH_VENDOR_REGEX_${vendor}}")
+      set(CMAKE_${lang}_COMPILER_ID "${vendor}")
+    endif()
+  endforeach()
+  set(CMAKE_${lang}_COMPILER_ID "${CMAKE_${lang}_COMPILER_ID}" PARENT_SCOPE)
 endfunction()
 
 #-----------------------------------------------------------------------------

@@ -18,16 +18,26 @@
 #include "windows.h"
 
 //----------------------------------------------------------------------------
-cmLocalVisualStudioGenerator::cmLocalVisualStudioGenerator(VSVersion v)
+cmLocalVisualStudioGenerator
+::cmLocalVisualStudioGenerator(cmGlobalGenerator* gg,
+                               cmLocalGenerator* parent,
+                               cmState::Snapshot snapshot)
+  : cmLocalGenerator(gg, parent, snapshot)
 {
-  this->WindowsShell = true;
-  this->WindowsVSIDE = true;
-  this->Version = v;
 }
 
 //----------------------------------------------------------------------------
 cmLocalVisualStudioGenerator::~cmLocalVisualStudioGenerator()
 {
+}
+
+//----------------------------------------------------------------------------
+cmGlobalVisualStudioGenerator::VSVersion
+cmLocalVisualStudioGenerator::GetVersion() const
+{
+  cmGlobalVisualStudioGenerator* gg =
+    static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator);
+  return gg->GetVersion();
 }
 
 //----------------------------------------------------------------------------
@@ -90,7 +100,7 @@ cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmTarget& target,
 
   // Add a pre-build event to create the directory.
   cmCustomCommandLine command;
-  command.push_back(this->Makefile->GetRequiredDefinition("CMAKE_COMMAND"));
+  command.push_back(cmSystemTools::GetCMakeCommand());
   command.push_back("-E");
   command.push_back("make_directory");
   command.push_back(impDir);

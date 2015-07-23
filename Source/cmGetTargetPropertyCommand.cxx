@@ -40,7 +40,11 @@ bool cmGetTargetPropertyCommand
   else if(cmTarget* tgt = this->Makefile->FindTargetToUse(targetName))
     {
     cmTarget& target = *tgt;
-    const char* prop_cstr = target.GetProperty(args[2], this->Makefile);
+    const char* prop_cstr = 0;
+    if (!args[2].empty())
+      {
+      prop_cstr = target.GetProperty(args[2], this->Makefile);
+      }
     if(prop_cstr)
       {
       prop = prop_cstr;
@@ -56,8 +60,7 @@ bool cmGetTargetPropertyCommand
       {
       case cmPolicies::WARN:
         issueMessage = true;
-        e << this->Makefile->GetPolicies()
-                          ->GetPolicyWarning(cmPolicies::CMP0045) << "\n";
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0045) << "\n";
       case cmPolicies::OLD:
         break;
       case cmPolicies::REQUIRED_IF_USED:

@@ -24,6 +24,7 @@ class cmGeneratedFileStream;
 class cmCTestCommand;
 class cmCTestScriptHandler;
 class cmCTestStartCommand;
+class cmXMLWriter;
 
 #define cmCTestLog(ctSelf, logType, msg) \
   do { \
@@ -160,6 +161,9 @@ public:
   int GetParallelLevel() { return this->ParallelLevel; }
   void SetParallelLevel(int);
 
+  unsigned long GetTestLoad() { return this->TestLoad; }
+  void SetTestLoad(unsigned long);
+
   /**
    * Check if CTest file exists
    */
@@ -273,10 +277,10 @@ public:
   static std::string SafeBuildIdField(const std::string& value);
 
   //! Start CTest XML output file
-  void StartXML(std::ostream& ostr, bool append);
+  void StartXML(cmXMLWriter& xml, bool append);
 
   //! End CTest XML output file
-  void EndXML(std::ostream& ostr);
+  void EndXML(cmXMLWriter& xml);
 
   //! Run command specialized for make and configure. Returns process status
   // and retVal is return value or exception.
@@ -378,6 +382,7 @@ public:
     DEBUG = 0,
     OUTPUT,
     HANDLER_OUTPUT,
+    HANDLER_PROGRESS_OUTPUT,
     HANDLER_VERBOSE_OUTPUT,
     WARNING,
     ERROR_MESSAGE,
@@ -420,7 +425,7 @@ public:
   /** Direct process output to given streams.  */
   void SetStreams(std::ostream* out, std::ostream* err)
     { this->StreamOut = out; this->StreamErr = err; }
-  void AddSiteProperties(std::ostream& );
+  void AddSiteProperties(cmXMLWriter& xml);
   bool GetLabelSummary() { return this->LabelSummary;}
 
   std::string GetCostDataFile();
@@ -429,8 +434,13 @@ public:
     {
     return this->Definitions;
     }
-
+  // return the number of times a test should be run
+  int GetTestRepeat() { return this->RepeatTests;}
+  // return true if test should run until fail
+  bool GetRepeatUntilFail() { return this->RepeatUntilFail;}
 private:
+  int RepeatTests;
+  bool RepeatUntilFail;
   std::string ConfigType;
   std::string ScheduleType;
   std::string StopTime;
@@ -493,6 +503,8 @@ private:
   int                     ParallelLevel;
   bool                    ParallelLevelSetInCli;
 
+  unsigned long           TestLoad;
+
   int                     CompatibilityMode;
 
   // information for the --build-and-test options
@@ -535,8 +547,9 @@ private:
   bool AddVariableDefinition(const std::string &arg);
 
   //! parse and process most common command line arguments
-  void HandleCommandLineArguments(size_t &i,
-                                  std::vector<std::string> &args);
+  bool HandleCommandLineArguments(size_t &i,
+                                  std::vector<std::string> &args,
+                                  std::string& errormsg);
 
   //! hande the -S -SP and -SR arguments
   void HandleScriptArguments(size_t &i,
@@ -547,7 +560,7 @@ private:
   bool UpdateCTestConfiguration();
 
   //! Create note from files.
-  int GenerateCTestNotesOutput(std::ostream& os,
+  int GenerateCTestNotesOutput(cmXMLWriter& xml,
     const VectorOfStrings& files);
 
   //! Check if the argument is the one specified

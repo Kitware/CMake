@@ -26,8 +26,8 @@ public:
   /** Types of help provided.  */
   enum Type
   {
-    None, Version, Usage, Help, Full, ListManuals,
-    ListCommands, ListModules, ListProperties, ListVariables, ListPolicies,
+    None, Version, Usage, Help, Full, ListManuals, ListCommands,
+    ListModules, ListProperties, ListVariables, ListPolicies, ListGenerators,
     OneManual, OneCommand, OneModule, OneProperty, OneVariable, OnePolicy,
     OldCustomModules
   };

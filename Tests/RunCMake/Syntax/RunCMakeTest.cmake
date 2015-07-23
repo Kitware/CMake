@@ -108,3 +108,9 @@ run_cmake(CMP0053-NameWithNewlineQuoted)
 run_cmake(CMP0053-NameWithCarriageReturnQuoted)
 run_cmake(CMP0053-NameWithEscapedSpacesQuoted)
 run_cmake(CMP0053-NameWithEscapedTabsQuoted)
+
+# Function and macro tests.
+run_cmake(FunctionUnmatched)
+run_cmake(FunctionUnmatchedForeach)
+run_cmake(MacroUnmatched)
+run_cmake(MacroUnmatchedForeach)

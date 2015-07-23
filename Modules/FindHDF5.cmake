@@ -51,6 +51,7 @@
 #                               bindings.
 #   HDF5_LIBRARIES - Required libraries for all requested bindings
 #   HDF5_FOUND - true if HDF5 was found on the system
+#   HDF5_VERSION - HDF5 version in format Major.Minor.Release
 #   HDF5_LIBRARY_DIRS - the full set of library directories
 #   HDF5_IS_PARALLEL - Whether or not HDF5 was found with parallel IO support
 #   HDF5_C_COMPILER_EXECUTABLE - the path to the HDF5 C wrapper compiler
@@ -59,6 +60,7 @@
 #   HDF5_DIFF_EXECUTABLE - the path to the HDF5 dataset comparison tool
 
 #=============================================================================
+# Copyright 2015 Axel Huebl, Helmholtz-Zentrum Dresden - Rossendorf
 # Copyright 2009 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
@@ -335,15 +337,28 @@ if( NOT HDF5_FOUND )
     # If the HDF5 include directory was found, open H5pubconf.h to determine if
     # HDF5 was compiled with parallel IO support
     set( HDF5_IS_PARALLEL FALSE )
+    set( HDF5_VERSION "" )
     foreach( _dir IN LISTS HDF5_INCLUDE_DIRS )
-        if( EXISTS "${_dir}/H5pubconf.h" )
-            file( STRINGS "${_dir}/H5pubconf.h"
+      foreach(_hdr "${_dir}/H5pubconf.h" "${_dir}/H5pubconf-64.h" "${_dir}/H5pubconf-32.h")
+        if( EXISTS "${_hdr}" )
+            file( STRINGS "${_hdr}"
                 HDF5_HAVE_PARALLEL_DEFINE
                 REGEX "HAVE_PARALLEL 1" )
             if( HDF5_HAVE_PARALLEL_DEFINE )
                 set( HDF5_IS_PARALLEL TRUE )
             endif()
+            unset(HDF5_HAVE_PARALLEL_DEFINE)
+
+            file( STRINGS "${_hdr}"
+                HDF5_VERSION_DEFINE
+                REGEX "^[ \t]*#[ \t]*define[ \t]+H5_VERSION[ \t]+" )
+            if( "${HDF5_VERSION_DEFINE}" MATCHES
+                "H5_VERSION[ \t]+\"([0-9]+\\.[0-9]+\\.[0-9]+).*\"" )
+                set( HDF5_VERSION "${CMAKE_MATCH_1}" )
+            endif()
+            unset(HDF5_VERSION_DEFINE)
         endif()
+      endforeach()
     endforeach()
     set( HDF5_IS_PARALLEL ${HDF5_IS_PARALLEL} CACHE BOOL
         "HDF5 library compiled with parallel IO support" )
@@ -357,8 +372,8 @@ if( NOT HDF5_FOUND )
 
 endif()
 
-find_package_handle_standard_args( HDF5 DEFAULT_MSG
-    HDF5_LIBRARIES
-    HDF5_INCLUDE_DIRS
+find_package_handle_standard_args( HDF5
+    REQUIRED_VARS HDF5_LIBRARIES HDF5_INCLUDE_DIRS
+    VERSION_VAR   HDF5_VERSION
 )
 

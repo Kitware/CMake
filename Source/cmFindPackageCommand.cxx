@@ -14,6 +14,7 @@
 #include <cmsys/Directory.hxx>
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Encoding.hxx>
+#include "cmAlgorithms.h"
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
 #include "cmVariableWatch.h"
@@ -41,7 +42,6 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->Required = false;
   this->NoUserRegistry = false;
   this->NoSystemRegistry = false;
-  this->NoBuilds = false;
   this->UseConfigFiles = true;
   this->UseFindModules = true;
   this->DebugMode = false;
@@ -119,8 +119,8 @@ bool cmFindPackageCommand
 
   // Lookup whether lib64 paths should be used.
   if(this->Makefile->PlatformIs64Bit() &&
-     this->Makefile->GetCMakeInstance()
-     ->GetPropertyAsBool("FIND_LIBRARY_USE_LIB64_PATHS"))
+     this->Makefile->GetState()
+         ->GetGlobalPropertyAsBool("FIND_LIBRARY_USE_LIB64_PATHS"))
     {
     this->UseLib64Paths = true;
     }
@@ -245,7 +245,7 @@ bool cmFindPackageCommand
       }
     else if(args[i] == "NO_CMAKE_BUILDS_PATH")
       {
-      this->NoBuilds = true;
+      // Ignore legacy option.
       configArgs.insert(i);
       doing = DoingNone;
       }
@@ -662,7 +662,7 @@ bool cmFindPackageCommand::HandlePackageMode()
       if(!cmSystemTools::FileIsFullPath(dir.c_str()))
         {
         dir = "/" + dir;
-        dir = this->Makefile->GetCurrentDirectory() + dir;
+        dir = this->Makefile->GetCurrentSourceDirectory() + dir;
         }
       // The file location was cached.  Look for the correct file.
       std::string file;
@@ -678,7 +678,6 @@ bool cmFindPackageCommand::HandlePackageMode()
     if(cmSystemTools::IsOff(def) || !fileFound)
       {
       fileFound = this->FindConfig();
-      def = this->Makefile->GetDefinition(this->Variable);
       }
 
     // Sanity check.
@@ -947,7 +946,7 @@ bool cmFindPackageCommand::FindConfig()
   // We force the value since we do not get here if it was already set.
   this->Makefile->AddCacheDefinition(this->Variable,
                                      init.c_str(), help.c_str(),
-                                     cmCacheManager::PATH, true);
+                                     cmState::PATH, true);
   return found;
 }
 
@@ -999,8 +998,8 @@ bool cmFindPackageCommand::FindAppBundleConfig()
 //----------------------------------------------------------------------------
 bool cmFindPackageCommand::ReadListFile(const char* f, PolicyScopeRule psr)
 {
-  if(this->Makefile->ReadListFile(this->Makefile->GetCurrentListFile(), f, 0,
-                                  !this->PolicyScope || psr == NoPolicyScope))
+  const bool noPolicyScope = !this->PolicyScope || psr == NoPolicyScope;
+  if(this->Makefile->ReadDependentFile(f, noPolicyScope))
     {
     return true;
     }
@@ -1015,8 +1014,8 @@ bool cmFindPackageCommand::ReadListFile(const char* f, PolicyScopeRule psr)
 void cmFindPackageCommand::AppendToFoundProperty(bool found)
 {
   std::vector<std::string> foundContents;
-  const char *foundProp =
-             this->Makefile->GetCMakeInstance()->GetProperty("PACKAGES_FOUND");
+  const char *foundProp = this->Makefile->GetState()
+                              ->GetGlobalProperty("PACKAGES_FOUND");
   if (foundProp && *foundProp)
     {
     std::string tmp = foundProp;
@@ -1032,7 +1031,8 @@ void cmFindPackageCommand::AppendToFoundProperty(bool found)
 
   std::vector<std::string> notFoundContents;
   const char *notFoundProp =
-         this->Makefile->GetCMakeInstance()->GetProperty("PACKAGES_NOT_FOUND");
+         this->Makefile->GetState()
+             ->GetGlobalProperty("PACKAGES_NOT_FOUND");
   if (notFoundProp && *notFoundProp)
     {
     std::string tmp = notFoundProp;
@@ -1057,12 +1057,12 @@ void cmFindPackageCommand::AppendToFoundProperty(bool found)
 
 
   std::string tmp = cmJoin(foundContents, ";");
-  this->Makefile->GetCMakeInstance()->SetProperty("PACKAGES_FOUND",
-                                                  tmp.c_str());
+  this->Makefile->GetState()
+      ->SetGlobalProperty("PACKAGES_FOUND", tmp.c_str());
 
   tmp = cmJoin(notFoundContents, ";");
-  this->Makefile->GetCMakeInstance()->SetProperty("PACKAGES_NOT_FOUND",
-                                                  tmp.c_str());
+  this->Makefile->GetState()
+      ->SetGlobalProperty("PACKAGES_NOT_FOUND", tmp.c_str());
 }
 
 //----------------------------------------------------------------------------
@@ -1071,8 +1071,8 @@ void cmFindPackageCommand::AppendSuccessInformation()
   {
   std::string transitivePropName = "_CMAKE_";
   transitivePropName += this->Name + "_TRANSITIVE_DEPENDENCY";
-  this->Makefile->GetCMakeInstance()
-                ->SetProperty(transitivePropName, "False");
+  this->Makefile->GetState()
+                ->SetGlobalProperty(transitivePropName, "False");
   }
   std::string found = this->Name;
   found += "_FOUND";
@@ -1090,8 +1090,8 @@ void cmFindPackageCommand::AppendSuccessInformation()
   std::string quietInfoPropName = "_CMAKE_";
   quietInfoPropName += this->Name;
   quietInfoPropName += "_QUIET";
-  this->Makefile->GetCMakeInstance()->SetProperty(quietInfoPropName,
-                                               this->Quiet ? "TRUE" : "FALSE");
+  this->Makefile->GetState()
+      ->SetGlobalProperty(quietInfoPropName, this->Quiet ? "TRUE" : "FALSE");
 
   // set a global property to record the required version of this package
   std::string versionInfoPropName = "_CMAKE_";
@@ -1104,15 +1104,15 @@ void cmFindPackageCommand::AppendSuccessInformation()
     versionInfo += " ";
     versionInfo += this->Version;
     }
-  this->Makefile->GetCMakeInstance()->SetProperty(versionInfoPropName,
-                                                  versionInfo.c_str());
+  this->Makefile->GetState()
+      ->SetGlobalProperty(versionInfoPropName, versionInfo.c_str());
   if (this->Required)
     {
     std::string requiredInfoPropName = "_CMAKE_";
     requiredInfoPropName += this->Name;
     requiredInfoPropName += "_TYPE";
-    this->Makefile->GetCMakeInstance()->SetProperty(
-                                     requiredInfoPropName, "REQUIRED");
+    this->Makefile->GetState()
+        ->SetGlobalProperty(requiredInfoPropName, "REQUIRED");
     }
 
 
@@ -1140,10 +1140,6 @@ void cmFindPackageCommand::ComputePrefixes()
     if(!this->NoUserRegistry)
       {
       this->FillPrefixesUserRegistry();
-      }
-    if(!this->NoBuilds)
-      {
-      this->FillPrefixesBuilds();
       }
     if(!this->NoCMakeSystemPath)
       {
@@ -1437,29 +1433,6 @@ bool cmFindPackageCommand::CheckPackageRegistryEntry(const std::string& fname,
 }
 
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::FillPrefixesBuilds()
-{
-  cmSearchPath &paths = this->LabeledPaths[PathLabel::Builds];
-
-  // It is likely that CMake will have recently built the project.
-  for(int i=0; i <= 10; ++i)
-    {
-    std::ostringstream r;
-    r <<
-      "[HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\"
-      "Settings\\StartPath;WhereBuild" << i << "]";
-    std::string f = r.str();
-    cmSystemTools::ExpandRegistryValues(f);
-    cmSystemTools::ConvertToUnixSlashes(f);
-    if(cmSystemTools::FileIsFullPath(f.c_str()) &&
-       cmSystemTools::FileIsDirectory(f))
-      {
-      paths.AddPath(f);
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::FillPrefixesCMakeSystemVariable()
 {
   cmSearchPath &paths = this->LabeledPaths[PathLabel::CMakeSystem];
@@ -1597,7 +1570,6 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
   if ((haveResult == false) && (this->Version.empty()))
     {
     result = true;
-    haveResult = true;
     }
 
   ConfigFileInfo configFileInfo;

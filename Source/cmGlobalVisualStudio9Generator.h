@@ -24,12 +24,9 @@ class cmGlobalVisualStudio9Generator :
   public cmGlobalVisualStudio8Generator
 {
 public:
-  cmGlobalVisualStudio9Generator(const std::string& name,
+  cmGlobalVisualStudio9Generator(cmake* cm, const std::string& name,
     const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
-
-  ///! create the correct local generator
-  virtual cmLocalGenerator *CreateLocalGenerator();
 
   /**
    * Try to determine system information such as shared library

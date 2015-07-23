@@ -12,7 +12,7 @@
 #ifndef cmLocalUnixMakefileGenerator3_h
 #define cmLocalUnixMakefileGenerator3_h
 
-#include "cmLocalGenerator.h"
+#include "cmLocalCommonGenerator.h"
 
 // for cmDepends::DependencyVector
 #include "cmDepends.h"
@@ -31,23 +31,20 @@ class cmSourceFile;
  * cmLocalUnixMakefileGenerator3 produces a LocalUnix makefile from its
  * member Makefile.
  */
-class cmLocalUnixMakefileGenerator3 : public cmLocalGenerator
+class cmLocalUnixMakefileGenerator3 : public cmLocalCommonGenerator
 {
 public:
-  cmLocalUnixMakefileGenerator3();
+  cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg,
+                                cmLocalGenerator* parent,
+                                cmState::Snapshot snapshot);
   virtual ~cmLocalUnixMakefileGenerator3();
 
-  /**
-   * Process the CMakeLists files for this directory to fill in the
-   * Makefile ivar
-   */
-  virtual void Configure();
+  virtual void ComputeHomeRelativeOutputPath();
 
   /**
    * Generate the makefile for this directory.
    */
   virtual void Generate();
-
 
   // this returns the relative path between the HomeOutputDirectory and this
   // local generators StartOutputDirectory
@@ -61,91 +58,14 @@ public:
                      const std::vector<std::string>& commands,
                      bool symbolic,
                      bool in_help = false);
-  void WriteMakeRule(std::ostream& os,
-                     const char* comment,
-                     const std::vector<std::string>& outputs,
-                     const std::vector<std::string>& depends,
-                     const std::vector<std::string>& commands,
-                     bool symbolic,
-                     bool in_help = false);
 
   // write the main variables used by the makefiles
   void WriteMakeVariables(std::ostream& makefileStream);
 
   /**
-   * If true, then explicitly pass MAKEFLAGS on the make all target for makes
-   * that do not use environment variables.
-   *
-   */
-  void SetPassMakeflags(bool s){this->PassMakeflags = s;}
-  bool GetPassMakeflags() { return this->PassMakeflags; }
-
-  /**
-   * Set the flag used to keep the make program silent.
-   */
-  void SetMakeSilentFlag(const std::string& s) { this->MakeSilentFlag = s; }
-  std::string &GetMakeSilentFlag() { return this->MakeSilentFlag; }
-
-  /**
-   * Set to true if the shell being used is the windows shell.
-   * This controls if statements in the makefile and the SHELL variable.
-   * The default is false.
-   */
-  void SetWindowsShell(bool v)  {this->WindowsShell = v;}
-
-  /**
-   * Set to true if the make tool being used is Watcom WMake.
-   */
-  void SetWatcomWMake(bool v)  {this->WatcomWMake = v;}
-
-  /**
-   * Set to true if the make tool being used is MinGW Make.
-   */
-  void SetMinGWMake(bool v)  {this->MinGWMake = v;}
-
-  /**
-   * Set to true if the make tool being used is NMake.
-   */
-  void SetNMake(bool v)  {this->NMake = v;}
-
-  /**
-   * Set to true if the shell being used is the MSYS shell.
-   * This controls if statements in the makefile and the SHELL variable.
-   * The default is false.
-   */
-  void SetMSYSShell(bool v)  {this->MSYSShell = v;}
-
-  /**
-   * If set to true, then NULL is set to nil for non Windows_NT.
-   * This uses make syntax used by nmake and borland.
-   * The default is false.
-   */
-  void SetDefineWindowsNULL(bool v)  {this->DefineWindowsNULL = v;}
-
-  /**
-   * If set to true, cd dir && command is used to
-   * run commands in a different directory.
-   */
-  void SetUnixCD(bool v)  {this->UnixCD = v;}
-
-  /**
-   * Set the string used to include one makefile into another default
-   * is include.
-   */
-  void SetIncludeDirective(const std::string& s)
-    { this->IncludeDirective = s; }
-  const std::string& GetIncludeDirective() { return this->IncludeDirective; }
-
-  /**
    * Set max makefile variable size, default is 0 which means unlimited.
    */
   void SetMakefileVariableSize(int s) { this->MakefileVariableSize = s; }
-
-  /**
-   * If ignore lib prefix is true, then do not strip lib from the name
-   * of a library.
-   */
-  void SetIgnoreLibPrefix(bool s) { this->IgnoreLibPrefix = s; }
 
   /**
    * Set whether passing a make target on a command line requires an
@@ -160,9 +80,6 @@ public:
    */
   void SetBorlandMakeCurlyHack(bool b)
     { this->BorlandMakeCurlyHack = b; }
-
-  void SetNoMultiOutputMultiDepRules(bool b)
-    { this->NoMultiOutputMultiDepRules = b; }
 
   // used in writing out Cmake files such as WriteDirectoryInformation
   static void WriteCMakeArgument(std::ostream& os, const char* s);
@@ -230,9 +147,6 @@ public:
 
   void AddImplicitDepends(cmTarget const& tgt, const std::string& lang,
                           const char* obj, const char* src);
-
-  void AppendGlobalTargetDepends(std::vector<std::string>& depends,
-                                 cmTarget& target);
 
   // write the target rules for the local Makefile into the stream
   void WriteLocalAllRules(std::ostream& ruleFileStream);
@@ -338,31 +252,7 @@ private:
 
   ImplicitDependTargetMap ImplicitDepends;
 
-  //==========================================================================
-  // Configuration settings.
-  int MakefileVariableSize;
-  std::string IncludeDirective;
-  std::string MakeSilentFlag;
-  std::string ConfigurationName;
-  bool DefineWindowsNULL;
-  bool UnixCD;
-  bool PassMakeflags;
-  bool MakeCommandEscapeTargetTwice;
-  bool BorlandMakeCurlyHack;
-  bool NoMultiOutputMultiDepRules;
-  //==========================================================================
-
   std::string HomeRelativeOutputPath;
-
-  /* Copy the setting of CMAKE_COLOR_MAKEFILE from the makefile at the
-     beginning of generation to avoid many duplicate lookups.  */
-  bool ColorMakefile;
-
-  /* Copy the setting of CMAKE_SKIP_PREPROCESSED_SOURCE_RULES and
-     CMAKE_SKIP_ASSEMBLY_SOURCE_RULES at the beginning of generation to
-     avoid many duplicate lookups.  */
-  bool SkipPreprocessedSourceRules;
-  bool SkipAssemblySourceRules;
 
   struct LocalObjectEntry
   {
@@ -392,6 +282,13 @@ private:
   /* does the work for each target */
   std::map<std::string, std::string> MakeVariableMap;
   std::map<std::string, std::string> ShortMakeVariableMap;
+
+  int MakefileVariableSize;
+  bool MakeCommandEscapeTargetTwice;
+  bool BorlandMakeCurlyHack;
+  bool ColorMakefile;
+  bool SkipPreprocessedSourceRules;
+  bool SkipAssemblySourceRules;
 };
 
 #endif

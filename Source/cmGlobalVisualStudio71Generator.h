@@ -23,7 +23,8 @@
 class cmGlobalVisualStudio71Generator : public cmGlobalVisualStudio7Generator
 {
 public:
-  cmGlobalVisualStudio71Generator(const std::string& platformName = "");
+  cmGlobalVisualStudio71Generator(cmake* cm,
+                                  const std::string& platformName = "");
   static cmGlobalGeneratorFactory* NewFactory() {
     return new cmGlobalGeneratorSimpleFactory
       <cmGlobalVisualStudio71Generator>(); }
@@ -35,9 +36,6 @@ public:
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
-
-  ///! Create a local generator appropriate to this Global Generator
-  virtual cmLocalGenerator *CreateLocalGenerator();
 
   /**
    * Where does this version of Visual Studio look for macros for the
@@ -57,7 +55,8 @@ protected:
   virtual void WriteSLNFile(std::ostream& fout,
                             cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);
-  virtual void WriteSolutionConfigurations(std::ostream& fout);
+  virtual void WriteSolutionConfigurations(
+    std::ostream& fout, std::vector<std::string> const& configs);
   virtual void WriteProject(std::ostream& fout,
                             const std::string& name, const char* path,
                             cmTarget const& t);
@@ -66,6 +65,7 @@ protected:
                            cmTarget const& t);
   virtual void WriteProjectConfigurations(
     std::ostream& fout, const std::string& name, cmTarget::TargetType type,
+    std::vector<std::string> const& configs,
     const std::set<std::string>& configsPartOfDefaultBuild,
     const std::string& platformMapping = "");
   virtual void WriteExternalProject(std::ostream& fout,

@@ -48,8 +48,7 @@ public:
    * Read one line of output but block for no more than timeout.
    * Returns:
    *   cmsysProcess_Pipe_None    = Process terminated and all output read
-   *   cmsysProcess_Pipe_STDOUT  = Line came from stdout
-   *   cmsysProcess_Pipe_STDOUT  = Line came from stderr
+   *   cmsysProcess_Pipe_STDOUT  = Line came from stdout or stderr
    *   cmsysProcess_Pipe_Timeout = Timeout expired while waiting
    */
   int GetNextOutputLine(std::string& line, double timeout);
@@ -68,13 +67,11 @@ private:
     bool GetLine(std::string& line);
     bool GetLast(std::string& line);
   };
-  Buffer StdErr;
-  Buffer StdOut;
+  Buffer Output;
   std::string Command;
   std::string WorkingDirectory;
   std::vector<std::string> Arguments;
   std::vector<const char*> ProcessArgs;
-  std::string Output;
   int Id;
   int ExitValue;
 };

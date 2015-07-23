@@ -34,6 +34,11 @@ These generators support command-line build tools.  In order to use them,
 one must launch CMake from a command-line prompt whose environment is
 already configured for the chosen compiler and build tool.
 
+.. _`Makefile Generators`:
+
+Makefile Generators
+^^^^^^^^^^^^^^^^^^^
+
 .. toctree::
    :maxdepth: 1
 
@@ -42,9 +47,16 @@ already configured for the chosen compiler and build tool.
    /generator/MinGW Makefiles
    /generator/NMake Makefiles
    /generator/NMake Makefiles JOM
-   /generator/Ninja
    /generator/Unix Makefiles
    /generator/Watcom WMake
+
+Ninja Generator
+^^^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+
+   /generator/Ninja
 
 IDE Build Tool Generators
 -------------------------
@@ -52,6 +64,11 @@ IDE Build Tool Generators
 These generators support Integrated Development Environment (IDE)
 project files.  Since the IDEs configure their own environment
 one may launch CMake from any environment.
+
+.. _`Visual Studio Generators`:
+
+Visual Studio Generators
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. toctree::
    :maxdepth: 1
@@ -65,6 +82,14 @@ one may launch CMake from any environment.
    /generator/Visual Studio 11 2012
    /generator/Visual Studio 12 2013
    /generator/Visual Studio 14 2015
+
+Other Generators
+^^^^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+
+   /generator/Green Hills MULTI
    /generator/Xcode
 
 Extra Generators

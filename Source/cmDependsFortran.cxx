@@ -143,7 +143,7 @@ cmDependsFortran
   std::vector<std::string> definitions;
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
   if(const char* c_defines =
-     mf->GetDefinition("CMAKE_TARGET_DEFINITIONS"))
+     mf->GetDefinition("CMAKE_TARGET_DEFINITIONS_Fortran"))
     {
     cmSystemTools::ExpandListArgument(c_defines, definitions);
     }
@@ -237,7 +237,7 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
   else
     {
     mod_dir =
-      this->LocalGenerator->GetMakefile()->GetCurrentOutputDirectory();
+      this->LocalGenerator->GetMakefile()->GetCurrentBinaryDirectory();
     }
 
   // Actually write dependencies to the streams.

@@ -12,7 +12,7 @@
 #ifndef cmCursesWidget_h
 #define cmCursesWidget_h
 
-#include "../cmCacheManager.h"
+#include "../cmState.h"
 #include "cmCursesStandardIncludes.h"
 
 class cmCursesMainForm;
@@ -46,7 +46,7 @@ public:
   /**
    * Get the type of the widget (STRING, PATH etc...)
    */
-  cmCacheManager::CacheEntryType GetType()
+  cmState::CacheEntryType GetType()
     { return this->Type; }
 
   /**
@@ -77,7 +77,7 @@ protected:
   cmCursesWidget(const cmCursesWidget& from);
   void operator=(const cmCursesWidget&);
 
-  cmCacheManager::CacheEntryType Type;
+  cmState::CacheEntryType Type;
   std::string Value;
   FIELD* Field;
   // The page in the main form this widget is in

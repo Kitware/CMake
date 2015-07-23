@@ -24,7 +24,9 @@ class cmTarget;
 class cmGeneratorTarget
 {
 public:
-  cmGeneratorTarget(cmTarget*);
+  cmGeneratorTarget(cmTarget*, cmLocalGenerator* lg);
+
+  cmLocalGenerator* GetLocalGenerator() const;
 
   int GetType() const;
   std::string GetName() const;
@@ -58,8 +60,19 @@ public:
                       const std::string& config) const;
   void GetCertificates(std::vector<cmSourceFile const*>&,
                        const std::string& config) const;
+  void GetXamlSources(std::vector<cmSourceFile const*>&,
+                      const std::string& config) const;
+  void GetExpectedXamlHeaders(std::set<std::string>&,
+                              const std::string& config) const;
+  void GetExpectedXamlSources(std::set<std::string>&,
+                              const std::string& config) const;
 
   void ComputeObjectMapping();
+
+  const char* GetFeature(const std::string& feature,
+                         const std::string& config) const;
+  bool GetFeatureAsBool(const std::string& feature,
+                        const std::string& config) const;
 
   cmTarget* Target;
   cmMakefile* Makefile;
@@ -85,7 +98,7 @@ public:
 
   /** Get the include directories for this target.  */
   std::vector<std::string> GetIncludeDirectories(
-      const std::string& config) const;
+      const std::string& config, const std::string& lang) const;
 
   bool IsSystemIncludeDirectory(const std::string& dir,
                                 const std::string& config) const;
@@ -132,6 +145,13 @@ public:
     mutable std::set<std::string> ExpectedResxHeaders;
     mutable std::vector<cmSourceFile const*> ResxSources;
   };
+
+  struct XamlData {
+    std::set<std::string> ExpectedXamlHeaders;
+    std::set<std::string> ExpectedXamlSources;
+    std::vector<cmSourceFile const*> XamlSources;
+  };
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };

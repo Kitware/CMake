@@ -17,6 +17,8 @@
    \* CMP0042
    \* CMP0046
    \* CMP0052
+   \* CMP0060
+   \* CMP0063
 
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)

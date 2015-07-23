@@ -98,6 +98,10 @@ else()
   # Each entry in this list is a set of extra flags to try
   # adding to the compile line to see if it helps produce
   # a valid identification executable.
+  set(CMAKE_Fortran_COMPILER_ID_TEST_FLAGS_FIRST
+    # Get verbose output to help distinguish compilers.
+    "-v"
+    )
   set(CMAKE_Fortran_COMPILER_ID_TEST_FLAGS
     # Try compiling to an object file only.
     "-c"
@@ -111,6 +115,10 @@ endif()
 if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   set(CMAKE_Fortran_COMPILER_ID_RUN 1)
 
+  # Table of per-vendor compiler output regular expressions.
+  list(APPEND CMAKE_Fortran_COMPILER_ID_MATCH_VENDORS CCur)
+  set(CMAKE_Fortran_COMPILER_ID_MATCH_VENDOR_REGEX_CCur "Concurrent Fortran [0-9]+ Compiler")
+
   # Table of per-vendor compiler id flags with expected output.
   list(APPEND CMAKE_Fortran_COMPILER_ID_VENDORS Compaq)
   set(CMAKE_Fortran_COMPILER_ID_VENDOR_FLAGS_Compaq "-what")
@@ -118,6 +126,14 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   list(APPEND CMAKE_Fortran_COMPILER_ID_VENDORS NAG) # Numerical Algorithms Group
   set(CMAKE_Fortran_COMPILER_ID_VENDOR_FLAGS_NAG "-V")
   set(CMAKE_Fortran_COMPILER_ID_VENDOR_REGEX_NAG "NAG Fortran Compiler")
+
+  # Match the link line from xcodebuild output of the form
+  #  Ld ...
+  #      ...
+  #      /path/to/cc ...CompilerIdFortran/...
+  # to extract the compiler front-end for the language.
+  set(CMAKE_Fortran_COMPILER_ID_TOOL_MATCH_REGEX "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerIdFortran/(\\./)?(CompilerIdFortran.xctest/)?CompilerIdFortran[ \t\n\\\"]")
+  set(CMAKE_Fortran_COMPILER_ID_TOOL_MATCH_INDEX 2)
 
   set(_version_info "")
   foreach(m MAJOR MINOR PATCH TWEAK)

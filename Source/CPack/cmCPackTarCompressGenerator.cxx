@@ -15,7 +15,7 @@
 //----------------------------------------------------------------------
 cmCPackTarCompressGenerator::cmCPackTarCompressGenerator()
   :cmCPackArchiveGenerator(cmArchiveWrite::CompressCompress,
-                           cmArchiveWrite::TypeTAR)
+                           "paxr")
 {
 }
 

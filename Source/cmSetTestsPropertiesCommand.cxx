@@ -26,14 +26,12 @@ bool cmSetTestsPropertiesCommand
 
   // first collect up the list of files
   std::vector<std::string> propertyPairs;
-  bool doingFiles = true;
   int numFiles = 0;
   std::vector<std::string>::const_iterator j;
   for(j= args.begin(); j != args.end();++j)
     {
     if(*j == "PROPERTIES")
       {
-      doingFiles = false;
       // now loop through the rest of the arguments, new style
       ++j;
       if (std::distance(j, args.end()) % 2 != 0)
@@ -44,15 +42,9 @@ bool cmSetTestsPropertiesCommand
       propertyPairs.insert(propertyPairs.end(), j, args.end());
       break;
       }
-    else if (doingFiles)
-      {
-      numFiles++;
-      }
     else
       {
-      this->SetError("called with illegal arguments, maybe "
-                     "missing a PROPERTIES specifier?");
-      return false;
+      numFiles++;
       }
     }
   if(propertyPairs.empty())
@@ -61,7 +53,6 @@ bool cmSetTestsPropertiesCommand
                    "missing a PROPERTIES specifier?");
     return false;
     }
-
 
   // now loop over all the targets
   int i;
@@ -94,8 +85,10 @@ bool cmSetTestsPropertiesCommand
     unsigned int k;
     for (k = 0; k < propertyPairs.size(); k = k + 2)
       {
-      test->SetProperty(propertyPairs[k],
-                        propertyPairs[k+1].c_str());
+      if (!propertyPairs[k].empty())
+        {
+        test->SetProperty(propertyPairs[k], propertyPairs[k+1].c_str());
+        }
       }
     }
   else

@@ -40,18 +40,17 @@ void cmLinkDirectoriesCommand::AddLinkDir(std::string const& dir)
     e << "This command specifies the relative path\n"
       << "  " << unixPath << "\n"
       << "as a link directory.\n";
-    cmPolicies* policies = this->Makefile->GetPolicies();
     switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0015))
       {
       case cmPolicies::WARN:
-        e << policies->GetPolicyWarning(cmPolicies::CMP0015);
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0015);
         this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
       case cmPolicies::OLD:
         // OLD behavior does not convert
         break;
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
-        e << policies->GetRequiredPolicyError(cmPolicies::CMP0015);
+        e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0015);
         this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       case cmPolicies::NEW:
         // NEW behavior converts
@@ -60,11 +59,11 @@ void cmLinkDirectoriesCommand::AddLinkDir(std::string const& dir)
       }
     if (convertToAbsolute)
       {
-      std::string tmp = this->Makefile->GetStartDirectory();
+      std::string tmp = this->Makefile->GetCurrentSourceDirectory();
       tmp += "/";
       tmp += unixPath;
       unixPath = tmp;
       }
     }
-  this->Makefile->AddLinkDirectory(unixPath);
+  this->Makefile->AppendProperty("LINK_DIRECTORIES", unixPath.c_str());
 }

@@ -18,7 +18,7 @@
 
 //----------------------------------------------------------------------------
 cmExportBuildFileGenerator::cmExportBuildFileGenerator()
-  : Backtrace(NULL)
+  : Backtrace()
 {
   this->Makefile = 0;
   this->ExportSet = 0;
@@ -274,7 +274,7 @@ cmExportBuildFileGenerator
 ::FindNamespaces(cmMakefile* mf, const std::string& name)
 {
   std::vector<std::string> namespaces;
-  cmGlobalGenerator* gg = mf->GetLocalGenerator()->GetGlobalGenerator();
+  cmGlobalGenerator* gg = mf->GetGlobalGenerator();
 
   std::map<std::string, cmExportBuildFileGenerator*>& exportSets
                                                   = gg->GetBuildExportSets();

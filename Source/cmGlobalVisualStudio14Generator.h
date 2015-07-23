@@ -20,19 +20,13 @@ class cmGlobalVisualStudio14Generator:
   public cmGlobalVisualStudio12Generator
 {
 public:
-  cmGlobalVisualStudio14Generator(const std::string& name,
+  cmGlobalVisualStudio14Generator(cmake* cm, const std::string& name,
     const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   virtual bool MatchesGeneratorName(const std::string& name) const;
 
   virtual void WriteSLNHeader(std::ostream& fout);
-
-  ///! create the correct local generator
-  virtual cmLocalGenerator *CreateLocalGenerator();
-
-  /** TODO: VS 14 user macro support. */
-  virtual std::string GetUserMacrosDirectory() { return ""; }
 
   virtual const char* GetToolsVersion() { return "14.0"; }
 protected:

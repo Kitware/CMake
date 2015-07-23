@@ -102,6 +102,27 @@ add_library(ExternalLibrary STATIC IMPORTED)
 set_property(TARGET ExternalLibrary PROPERTY IMPORTED_LOCATION ${ExternalLibrary_LIBRARY})
 add_dependencies(ExternalLibrary ExternalTarget)
 
+# Generate the library file of an imported target as a byproduct
+# of an external project. The byproduct uses <BINARY_DIR> that is substituted
+# by the real binary path
+if(CMAKE_CONFIGURATION_TYPES)
+  set(cfg /${CMAKE_CFG_INTDIR})
+else()
+  set(cfg)
+endif()
+include(ExternalProject)
+ExternalProject_Add(ExtTargetSubst
+  SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/External"
+  DOWNLOAD_COMMAND ""
+  INSTALL_COMMAND ""
+  BUILD_BYPRODUCTS "<BINARY_DIR>${cfg}/${CMAKE_STATIC_LIBRARY_PREFIX}ExternalLibrary${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  )
+ExternalProject_Get_Property(ExtTargetSubst binary_dir)
+add_library(ExternalLibraryWithSubstitution STATIC IMPORTED)
+set_property(TARGET ExternalLibraryWithSubstitution PROPERTY IMPORTED_LOCATION
+  ${binary_dir}${cfg}/${CMAKE_STATIC_LIBRARY_PREFIX}ExternalLibrary${CMAKE_STATIC_LIBRARY_SUFFIX})
+add_dependencies(ExternalLibraryWithSubstitution ExtTargetSubst)
+
 # Add an executable consuming all the byproducts.
 add_executable(CustomCommandByproducts
   CustomCommandByproducts.c

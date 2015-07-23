@@ -19,10 +19,10 @@
  *
  * cmGlobalBorlandMakefileGenerator manages nmake build process for a tree
  */
-class cmGlobalBorlandMakefileGenerator : public cmGlobalNMakeMakefileGenerator
+class cmGlobalBorlandMakefileGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
-  cmGlobalBorlandMakefileGenerator();
+  cmGlobalBorlandMakefileGenerator(cmake* cm);
   static cmGlobalGeneratorFactory* NewFactory() {
     return new cmGlobalGeneratorSimpleFactory
       <cmGlobalBorlandMakefileGenerator>(); }
@@ -36,7 +36,8 @@ public:
   static void GetDocumentation(cmDocumentationEntry& entry);
 
   ///! Create a local generator appropriate to this Global Generator
-  virtual cmLocalGenerator *CreateLocalGenerator();
+  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent,
+                                                 cmState::Snapshot snapshot);
 
   /**
    * Try to determine system information such as shared library
@@ -46,6 +47,7 @@ public:
                               cmMakefile *, bool optional);
 
   virtual bool AllowNotParallel() const { return false; }
+  virtual bool AllowDeleteOnError() const { return false; }
 };
 
 #endif

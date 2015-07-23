@@ -13,7 +13,7 @@
 #ifndef cmGlobalNinjaGenerator_h
 #  define cmGlobalNinjaGenerator_h
 
-#  include "cmGlobalGenerator.h"
+#  include "cmGlobalCommonGenerator.h"
 #  include "cmGlobalGeneratorFactory.h"
 #  include "cmNinjaTypes.h"
 
@@ -42,7 +42,7 @@ class cmGeneratorTarget;
  * - We extensively use Ninja variable overloading system to minimize the
  *   number of generated rules.
  */
-class cmGlobalNinjaGenerator : public cmGlobalGenerator
+class cmGlobalNinjaGenerator : public cmGlobalCommonGenerator
 {
 public:
   /// The default name of Ninja's build file. Typically: build.ninja.
@@ -61,9 +61,10 @@ public:
   /// Write a divider in the given output stream @a os.
   static void WriteDivider(std::ostream& os);
 
+  static std::string EncodeRuleName(std::string const& name);
   static std::string EncodeIdent(const std::string &ident, std::ostream &vars);
   static std::string EncodeLiteral(const std::string &lit);
-  static std::string EncodePath(const std::string &path);
+  std::string EncodePath(const std::string &path);
   static std::string EncodeDepfileSpace(const std::string &path);
 
   /**
@@ -87,7 +88,8 @@ public:
                   const cmNinjaDeps& orderOnlyDeps,
                   const cmNinjaVars& variables,
                   const std::string& rspfile = std::string(),
-                  int cmdLineLimit = -1);
+                  int cmdLineLimit = -1,
+                  bool* usedResponseFile = 0);
 
   /**
    * Helper to write a build statement with the special 'phony' rule.
@@ -155,13 +157,10 @@ public:
                            const cmNinjaDeps& targets,
                            const std::string& comment = "");
 
-
-  static bool IsMinGW() { return UsingMinGW; }
-
+  bool IsGCCOnWindows() const { return UsingGCCOnWindows; }
 
 public:
-  /// Default constructor.
-  cmGlobalNinjaGenerator();
+  cmGlobalNinjaGenerator(cmake* cm);
 
   /// Convenience method for creating an instance of this class.
   static cmGlobalGeneratorFactory* NewFactory() {
@@ -171,7 +170,8 @@ public:
   virtual ~cmGlobalNinjaGenerator() { }
 
   /// Overloaded methods. @see cmGlobalGenerator::CreateLocalGenerator()
-  virtual cmLocalGenerator* CreateLocalGenerator();
+  virtual cmLocalGenerator* CreateLocalGenerator(cmLocalGenerator* parent,
+                                                 cmState::Snapshot snapshot);
 
   /// Overloaded methods. @see cmGlobalGenerator::GetName().
   virtual std::string GetName() const {
@@ -362,11 +362,18 @@ private:
   /// The set of dependencies to add to the "all" target.
   cmNinjaDeps AllDependencies;
 
+  bool UsingGCCOnWindows;
+
   /// The set of custom commands we have seen.
   std::set<cmCustomCommand const*> CustomCommands;
 
   /// The set of custom command outputs we have seen.
   std::set<std::string> CustomCommandOutputs;
+
+  /// Whether we are collecting known build outputs and needed
+  /// dependencies to determine unknown dependencies.
+  bool ComputingUnknownDependencies;
+  cmPolicies::PolicyStatus PolicyCMP0058;
 
   /// The combined explicit dependencies of custom build commands
   std::set<std::string> CombinedCustomCommandExplicitDependencies;
@@ -380,11 +387,6 @@ private:
 
   typedef std::map<std::string, cmTarget*> TargetAliasMap;
   TargetAliasMap TargetAliases;
-
-  static cmLocalGenerator* LocalGenerator;
-
-  static bool UsingMinGW;
-
 };
 
 #endif // ! cmGlobalNinjaGenerator_h

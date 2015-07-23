@@ -10,7 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmVariableRequiresCommand.h"
-#include "cmCacheManager.h"
+#include "cmState.h"
 
 // cmLibraryCommand
 bool cmVariableRequiresCommand
@@ -34,6 +34,7 @@ bool cmVariableRequiresCommand
   bool requirementsMet = true;
   std::string notSet;
   bool hasAdvanced = false;
+  cmState* state = this->Makefile->GetState();
   for(unsigned int i = 2; i < args.size(); ++i)
     {
     if(!this->Makefile->IsOn(args[i]))
@@ -41,9 +42,8 @@ bool cmVariableRequiresCommand
       requirementsMet = false;
       notSet += args[i];
       notSet += "\n";
-      cmCacheManager::CacheIterator it =
-        this->Makefile->GetCacheManager()->GetCacheIterator(args[i].c_str());
-      if(!it.IsAtEnd() && it.GetPropertyAsBool("ADVANCED"))
+      if(state->GetCacheEntryValue(args[i]) &&
+          state->GetCacheEntryPropertyAsBool(args[i], "ADVANCED"))
         {
         hasAdvanced = true;
         }

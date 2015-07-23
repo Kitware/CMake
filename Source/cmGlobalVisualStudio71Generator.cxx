@@ -16,22 +16,12 @@
 #include "cmake.h"
 
 //----------------------------------------------------------------------------
-cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(
+cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(cmake* cm,
   const std::string& platformName)
-  : cmGlobalVisualStudio7Generator(platformName)
+  : cmGlobalVisualStudio7Generator(cm, platformName)
 {
   this->ProjectConfigurationSectionName = "ProjectConfiguration";
-}
-
-//----------------------------------------------------------------------------
-///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalVisualStudio71Generator::CreateLocalGenerator()
-{
-  cmLocalVisualStudio7Generator *lg =
-    new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS71);
-  lg->SetExtraFlagTable(this->GetExtraFlagTableVS7());
-  lg->SetGlobalGenerator(this);
-  return lg;
+  this->Version = VS71;
 }
 
 //----------------------------------------------------------------------------
@@ -93,6 +83,9 @@ void cmGlobalVisualStudio71Generator
                cmLocalGenerator* root,
                std::vector<cmLocalGenerator*>& generators)
 {
+  std::vector<std::string> configs;
+  root->GetMakefile()->GetConfigurations(configs);
+
   // Write out the header for a SLN file
   this->WriteSLNHeader(fout);
 
@@ -114,11 +107,11 @@ void cmGlobalVisualStudio71Generator
   // Write out the configurations information for the solution
   fout << "Global\n";
   // Write out the configurations for the solution
-  this->WriteSolutionConfigurations(fout);
+  this->WriteSolutionConfigurations(fout, configs);
   fout << "\tGlobalSection(" << this->ProjectConfigurationSectionName
        << ") = postSolution\n";
   // Write out the configurations for all the targets in the project
-  this->WriteTargetConfigurations(fout, orderedProjectTargets);
+  this->WriteTargetConfigurations(fout, configs, orderedProjectTargets);
   fout << "\tEndGlobalSection\n";
 
   if (useFolderProperty)
@@ -139,11 +132,12 @@ void cmGlobalVisualStudio71Generator
 //----------------------------------------------------------------------------
 void
 cmGlobalVisualStudio71Generator
-::WriteSolutionConfigurations(std::ostream& fout)
+::WriteSolutionConfigurations(std::ostream& fout,
+                              std::vector<std::string> const& configs)
 {
   fout << "\tGlobalSection(SolutionConfiguration) = preSolution\n";
-  for(std::vector<std::string>::iterator i = this->Configurations.begin();
-      i != this->Configurations.end(); ++i)
+  for(std::vector<std::string>::const_iterator i = configs.begin();
+      i != configs.end(); ++i)
     {
     fout << "\t\t" << *i << " = " << *i << "\n";
     }
@@ -279,14 +273,15 @@ void cmGlobalVisualStudio71Generator
 void cmGlobalVisualStudio71Generator
 ::WriteProjectConfigurations(
   std::ostream& fout, const std::string& name, cmTarget::TargetType,
+  std::vector<std::string> const& configs,
   const std::set<std::string>& configsPartOfDefaultBuild,
   std::string const& platformMapping)
 {
   const std::string& platformName =
     !platformMapping.empty() ? platformMapping : this->GetPlatformName();
   std::string guid = this->GetGUID(name);
-  for(std::vector<std::string>::iterator i = this->Configurations.begin();
-      i != this->Configurations.end(); ++i)
+  for(std::vector<std::string>::const_iterator i = configs.begin();
+      i != configs.end(); ++i)
     {
     fout << "\t\t{" << guid << "}." << *i
          << ".ActiveCfg = " << *i << "|" << platformName << std::endl;

@@ -18,8 +18,9 @@
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmGeneratedFileStream.h"
-#include "cmXMLSafe.h"
+#include "cmXMLWriter.h"
 #include "cmFileTimeComparison.h"
+#include "cmAlgorithms.h"
 
 //#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Process.h>
@@ -67,13 +68,13 @@ static const char* cmCTestErrorMatches[] = {
   "^CMake Error.*:",
   ":[ \\t]cannot find",
   ":[ \\t]can't find",
-  ": \\*\\*\\* No rule to make target \\[`'].*\\'.  Stop",
+  ": \\*\\*\\* No rule to make target [`'].*\\'.  Stop",
   ": \\*\\*\\* No targets specified and no makefile found",
   ": Invalid loader fixup for symbol",
   ": Invalid fixups exist",
   ": Can't find library for",
   ": internal link edit command failed",
-  ": Unrecognized option \\[`'].*\\'",
+  ": Unrecognized option [`'].*\\'",
   "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\([^WI]\\)",
   "ld: 0706-006 Cannot find or open library file: -l ",
   "ild: \\(argument error\\) can't find library argument ::",
@@ -522,16 +523,17 @@ int cmCTestBuildHandler::ProcessHandler()
       << std::endl);
     return -1;
     }
-  this->GenerateXMLHeader(xofs);
+  cmXMLWriter xml(xofs);
+  this->GenerateXMLHeader(xml);
   if(this->UseCTestLaunch)
     {
-    this->GenerateXMLLaunched(xofs);
+    this->GenerateXMLLaunched(xml);
     }
   else
     {
-    this->GenerateXMLLogScraped(xofs);
+    this->GenerateXMLLogScraped(xml);
     }
-  this->GenerateXMLFooter(xofs, elapsed_build_time);
+  this->GenerateXMLFooter(xml, elapsed_build_time);
 
   if (res != cmsysProcess_State_Exited || retVal || this->TotalErrors > 0)
     {
@@ -551,17 +553,14 @@ int cmCTestBuildHandler::ProcessHandler()
 }
 
 //----------------------------------------------------------------------------
-void cmCTestBuildHandler::GenerateXMLHeader(std::ostream& os)
+void cmCTestBuildHandler::GenerateXMLHeader(cmXMLWriter& xml)
 {
-  this->CTest->StartXML(os, this->AppendXML);
-  os << "<Build>\n"
-     << "\t<StartDateTime>" << this->StartBuild << "</StartDateTime>\n"
-     << "\t<StartBuildTime>" <<
-    static_cast<unsigned int>(this->StartBuildTime)
-     << "</StartBuildTime>\n"
-     << "<BuildCommand>"
-     << cmXMLSafe(this->GetMakeCommand())
-     << "</BuildCommand>" << std::endl;
+  this->CTest->StartXML(xml, this->AppendXML);
+  xml.StartElement("Build");
+  xml.Element("StartDateTime", this->StartBuild);
+  xml.Element("StartBuildTime",
+    static_cast<unsigned int>(this->StartBuildTime));
+  xml.Element("BuildCommand", this->GetMakeCommand());
 }
 
 //----------------------------------------------------------------------------
@@ -590,7 +589,7 @@ private:
 };
 
 //----------------------------------------------------------------------------
-void cmCTestBuildHandler::GenerateXMLLaunched(std::ostream& os)
+void cmCTestBuildHandler::GenerateXMLLaunched(cmXMLWriter& xml)
 {
   if(this->CTestLaunchDir.empty())
     {
@@ -631,12 +630,12 @@ void cmCTestBuildHandler::GenerateXMLLaunched(std::ostream& os)
   for(Fragments::const_iterator fi = fragments.begin();
       fi != fragments.end(); ++fi)
     {
-    this->GenerateXMLLaunchedFragment(os, fi->c_str());
+    xml.FragmentFile(fi->c_str());
     }
 }
 
 //----------------------------------------------------------------------------
-void cmCTestBuildHandler::GenerateXMLLogScraped(std::ostream& os)
+void cmCTestBuildHandler::GenerateXMLLogScraped(cmXMLWriter& xml)
 {
   std::vector<cmCTestBuildErrorWarning>& ew = this->ErrorsAndWarnings;
   std::vector<cmCTestBuildErrorWarning>::iterator it;
@@ -664,10 +663,9 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(std::ostream& os)
         {
         numWarningsAllowed--;
         }
-      os << "\t<" << (cm->Error ? "Error" : "Warning") << ">\n"
-         << "\t\t<BuildLogLine>" << cm->LogLine << "</BuildLogLine>\n"
-         << "\t\t<Text>" << cmXMLSafe(cm->Text).Quotes(false)
-         << "\n</Text>" << std::endl;
+      xml.StartElement(cm->Error ? "Error" : "Warning");
+      xml.Element("BuildLogLine", cm->LogLine);
+      xml.Element("Text", cm->Text);
       std::vector<cmCTestCompileErrorWarningRex>::iterator rit;
       for ( rit = this->ErrorWarningFileLineRegex.begin();
             rit != this->ErrorWarningFileLineRegex.end(); ++ rit )
@@ -705,62 +703,48 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(std::ostream& os)
         {
         if (!cm->SourceFile.empty())
           {
-          os << "\t\t<SourceFile>" << cm->SourceFile << "</SourceFile>"
-            << std::endl;
+          xml.Element("SourceFile", cm->SourceFile);
           }
         if (!cm->SourceFileTail.empty())
           {
-          os << "\t\t<SourceFileTail>" << cm->SourceFileTail
-            << "</SourceFileTail>" << std::endl;
+          xml.Element("SourceFileTail", cm->SourceFileTail);
           }
         if ( cm->LineNumber >= 0 )
           {
-          os << "\t\t<SourceLineNumber>" << cm->LineNumber
-            << "</SourceLineNumber>" << std::endl;
+          xml.Element("SourceLineNumber", cm->LineNumber);
           }
         }
-      os << "\t\t<PreContext>" << cmXMLSafe(cm->PreContext).Quotes(false)
-         << "</PreContext>\n"
-         << "\t\t<PostContext>" << cmXMLSafe(cm->PostContext).Quotes(false);
+      xml.Element("PreContext", cm->PreContext);
+      xml.StartElement("PostContext");
+      xml.Content(cm->PostContext);
       // is this the last warning or error, if so notify
       if ((cm->Error && !numErrorsAllowed) ||
           (!cm->Error && !numWarningsAllowed))
         {
-        os << "\nThe maximum number of reported warnings or errors has been "
-          "reached!!!\n";
+        xml.Content("\nThe maximum number of reported warnings or errors "
+          "has been reached!!!\n");
         }
-      os << "</PostContext>\n"
-         << "\t\t<RepeatCount>0</RepeatCount>\n"
-         << "</" << (cm->Error ? "Error" : "Warning") << ">\n\n"
-         << std::endl;
+      xml.EndElement(); // PostContext
+      xml.Element("RepeatCount", "0");
+      xml.EndElement(); // "Error" / "Warning"
       }
     }
 }
 
 //----------------------------------------------------------------------------
-void cmCTestBuildHandler::GenerateXMLFooter(std::ostream& os,
+void cmCTestBuildHandler::GenerateXMLFooter(cmXMLWriter& xml,
                                             double elapsed_build_time)
 {
-  os << "\t<Log Encoding=\"base64\" Compression=\"/bin/gzip\">\n\t</Log>\n"
-     << "\t<EndDateTime>" << this->EndBuild << "</EndDateTime>\n"
-     << "\t<EndBuildTime>" << static_cast<unsigned int>(this->EndBuildTime)
-     << "</EndBuildTime>\n"
-     << "<ElapsedMinutes>" << static_cast<int>(elapsed_build_time/6)/10.0
-     << "</ElapsedMinutes>"
-     << "</Build>" << std::endl;
-  this->CTest->EndXML(os);
-}
+  xml.StartElement("Log");
+  xml.Attribute("Encoding", "base64");
+  xml.Attribute("Compression", "bin/gzip");
+  xml.EndElement(); // Log
 
-//----------------------------------------------------------------------------
-void cmCTestBuildHandler::GenerateXMLLaunchedFragment(std::ostream& os,
-                                                      const char* fname)
-{
-  cmsys::ifstream fin(fname, std::ios::in | std::ios::binary);
-  std::string line;
-  while(cmSystemTools::GetLineFromStream(fin, line))
-    {
-    os << line << "\n";
-    }
+  xml.Element("EndDateTime", this->EndBuild);
+  xml.Element("EndBuildTime", static_cast<unsigned int>(this->EndBuildTime));
+  xml.Element("ElapsedMinutes", static_cast<int>(elapsed_build_time/6)/10.0);
+  xml.EndElement(); // Build
+  this->CTest->EndXML(xml);
 }
 
 //----------------------------------------------------------------------------
@@ -936,7 +920,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
 
   char* data;
   int length;
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+  cmCTestOptionalLog(this->CTest, HANDLER_PROGRESS_OUTPUT,
     "   Each symbol represents " << tick_len << " bytes of output."
     << std::endl
     << (this->UseCTestLaunch? "" :
@@ -984,7 +968,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
   this->ProcessBuffer(0, 0, tick, tick_len, ofs, &this->BuildProcessingQueue);
   this->ProcessBuffer(0, 0, tick, tick_len, ofs,
     &this->BuildProcessingErrorQueue);
-  cmCTestOptionalLog(this->CTest, OUTPUT, " Size of output: "
+  cmCTestOptionalLog(this->CTest, HANDLER_PROGRESS_OUTPUT, " Size of output: "
     << ((this->BuildOutputLogSize + 512) / 1024) << "K" << std::endl,
     this->Quiet);
 
@@ -1191,12 +1175,12 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, int length,
   while ( this->BuildOutputLogSize > (tick * tick_len) )
     {
     tick ++;
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->LastTickChar,
-      this->Quiet);
+    cmCTestOptionalLog(this->CTest, HANDLER_PROGRESS_OUTPUT,
+      this->LastTickChar, this->Quiet);
     tickDisplayed = true;
     if ( tick % tick_line_len == 0 && tick > 0 )
       {
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "  Size: "
+      cmCTestOptionalLog(this->CTest, HANDLER_PROGRESS_OUTPUT, "  Size: "
         << ((this->BuildOutputLogSize + 512) / 1024) << "K" << std::endl
         << "    ", this->Quiet);
       }

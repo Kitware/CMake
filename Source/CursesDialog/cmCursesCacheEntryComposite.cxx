@@ -18,6 +18,10 @@
 #include "cmCursesFilePathWidget.h"
 #include "cmCursesDummyWidget.h"
 #include "../cmSystemTools.h"
+#include "../cmake.h"
+#include "../cmState.h"
+
+#include <assert.h>
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
                                                         const std::string& key,
@@ -32,7 +36,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
 }
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
-  const std::string& key, const cmCacheManager::CacheIterator& it, bool isNew,
+  const std::string& key, cmake *cm, bool isNew,
   int labelwidth, int entrywidth)
   : Key(key), LabelWidth(labelwidth), EntryWidth(entrywidth)
 {
@@ -47,11 +51,13 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
     }
 
   this->Entry = 0;
-  switch ( it.GetType() )
+  const char* value = cm->GetState()->GetCacheEntryValue(key);
+  assert(value);
+  switch (cm->GetState()->GetCacheEntryType(key))
     {
-    case  cmCacheManager::BOOL:
+    case cmState::BOOL:
       this->Entry = new cmCursesBoolWidget(this->EntryWidth, 1, 1, 1);
-      if (cmSystemTools::IsOn(it.GetValue().c_str()))
+      if (cmSystemTools::IsOn(value))
         {
         static_cast<cmCursesBoolWidget*>(this->Entry)->SetValueAsBool(true);
         }
@@ -60,42 +66,42 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
         static_cast<cmCursesBoolWidget*>(this->Entry)->SetValueAsBool(false);
         }
       break;
-    case cmCacheManager::PATH:
+    case cmState::PATH:
       this->Entry = new cmCursesPathWidget(this->EntryWidth, 1, 1, 1);
-      static_cast<cmCursesPathWidget*>(this->Entry)->SetString(
-        it.GetValue());
+      static_cast<cmCursesPathWidget*>(this->Entry)->SetString(value);
       break;
-    case cmCacheManager::FILEPATH:
+    case cmState::FILEPATH:
       this->Entry = new cmCursesFilePathWidget(this->EntryWidth, 1, 1, 1);
-      static_cast<cmCursesFilePathWidget*>(this->Entry)->SetString(
-        it.GetValue());
+      static_cast<cmCursesFilePathWidget*>(this->Entry)->SetString(value);
       break;
-    case cmCacheManager::STRING:
-      if(it.PropertyExists("STRINGS"))
+    case cmState::STRING:
+      {
+      const char* stringsProp = cm->GetState()
+                                  ->GetCacheEntryProperty(key, "STRINGS");
+      if(stringsProp)
         {
         cmCursesOptionsWidget* ow =
           new cmCursesOptionsWidget(this->EntryWidth, 1, 1, 1);
         this->Entry = ow;
         std::vector<std::string> options;
-        cmSystemTools::ExpandListArgument(
-          std::string(it.GetProperty("STRINGS")), options);
+        cmSystemTools::ExpandListArgument(stringsProp, options);
         for(std::vector<std::string>::iterator
               si = options.begin(); si != options.end(); ++si)
           {
           ow->AddOption(*si);
           }
-        ow->SetOption(it.GetValue());
+        ow->SetOption(value);
         }
       else
         {
         this->Entry = new cmCursesStringWidget(this->EntryWidth, 1, 1, 1);
-        static_cast<cmCursesStringWidget*>(this->Entry)->SetString(
-          it.GetValue());
+        static_cast<cmCursesStringWidget*>(this->Entry)->SetString(value);
         }
       break;
-    case cmCacheManager::UNINITIALIZED:
+      }
+    case cmState::UNINITIALIZED:
       cmSystemTools::Error("Found an undefined variable: ",
-                           it.GetName().c_str());
+                           key.c_str());
       break;
     default:
       // TODO : put warning message here

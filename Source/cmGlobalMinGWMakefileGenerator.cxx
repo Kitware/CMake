@@ -13,12 +13,15 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 
-cmGlobalMinGWMakefileGenerator::cmGlobalMinGWMakefileGenerator()
+cmGlobalMinGWMakefileGenerator::cmGlobalMinGWMakefileGenerator(cmake* cm)
+  : cmGlobalUnixMakefileGenerator3(cm)
 {
   this->FindMakeProgramFile = "CMakeMinGWFindMake.cmake";
   this->ForceUnixPaths = true;
   this->ToolSupportsColor = true;
   this->UseLinkScript = true;
+  cm->GetState()->SetWindowsShell(true);
+  cm->GetState()->SetMinGWMake(true);
 }
 
 void cmGlobalMinGWMakefileGenerator
@@ -26,21 +29,34 @@ void cmGlobalMinGWMakefileGenerator
                  cmMakefile *mf,
                  bool optional)
 {
-  this->EnableMinGWLanguage(mf);
+  this->FindMakeProgram(mf);
+  std::string makeProgram = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  std::vector<std::string> locations;
+  locations.push_back(cmSystemTools::GetProgramPath(makeProgram));
+  locations.push_back("/mingw/bin");
+  locations.push_back("c:/mingw/bin");
+  std::string tgcc = cmSystemTools::FindProgram("gcc", locations);
+  std::string gcc = "gcc.exe";
+  if(!tgcc.empty())
+    {
+    gcc = tgcc;
+    }
+  std::string tgxx = cmSystemTools::FindProgram("g++", locations);
+  std::string gxx = "g++.exe";
+  if(!tgxx.empty())
+    {
+    gxx = tgxx;
+    }
+  std::string trc = cmSystemTools::FindProgram("windres", locations);
+  std::string rc = "windres.exe";
+  if(!trc.empty())
+    {
+    rc = trc;
+    }
+  mf->AddDefinition("CMAKE_GENERATOR_CC", gcc.c_str());
+  mf->AddDefinition("CMAKE_GENERATOR_CXX", gxx.c_str());
+  mf->AddDefinition("CMAKE_GENERATOR_RC", rc.c_str());
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
-}
-
-///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalMinGWMakefileGenerator::CreateLocalGenerator()
-{
-  cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
-  lg->SetWindowsShell(true);
-  lg->SetGlobalGenerator(this);
-  lg->SetIgnoreLibPrefix(true);
-  lg->SetPassMakeflags(false);
-  lg->SetUnixCD(true);
-  lg->SetMinGWMake(true);
-  return lg;
 }
 
 //----------------------------------------------------------------------------

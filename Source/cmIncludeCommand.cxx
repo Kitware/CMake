@@ -91,10 +91,9 @@ bool cmIncludeCommand
 
   std::string fname_abs =
       cmSystemTools::CollapseFullPath(fname,
-                                      this->Makefile->GetStartDirectory());
+                                 this->Makefile->GetCurrentSourceDirectory());
 
-  cmGlobalGenerator *gg = this->Makefile->GetLocalGenerator()
-                                        ->GetGlobalGenerator();
+  cmGlobalGenerator *gg = this->Makefile->GetGlobalGenerator();
   if (gg->IsExportedTargetsFile(fname_abs))
     {
     const char *modal = 0;
@@ -104,8 +103,7 @@ bool cmIncludeCommand
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0024))
       {
       case cmPolicies::WARN:
-        e << (this->Makefile->GetPolicies()
-          ->GetPolicyWarning(cmPolicies::CMP0024)) << "\n";
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0024) << "\n";
         modal = "should";
       case cmPolicies::OLD:
         break;
@@ -130,17 +128,26 @@ bool cmIncludeCommand
     gg->GenerateImportFile(fname_abs);
     }
 
-  std::string fullFilePath;
+  std::string listFile =
+    cmSystemTools::CollapseFullPath(fname.c_str(),
+                                  this->Makefile->GetCurrentSourceDirectory());
+  if(optional && !cmSystemTools::FileExists(listFile.c_str()))
+    {
+    if (!resultVarName.empty())
+      {
+      this->Makefile->AddDefinition(resultVarName, "NOTFOUND");
+      }
+    return true;
+    }
+
   bool readit =
-    this->Makefile->ReadListFile( this->Makefile->GetCurrentListFile(),
-                                  fname.c_str(), &fullFilePath,
-                                  noPolicyScope);
+    this->Makefile->ReadDependentFile(listFile.c_str(), noPolicyScope);
 
   // add the location of the included file if a result variable was given
   if (!resultVarName.empty())
     {
       this->Makefile->AddDefinition(resultVarName,
-                                    readit?fullFilePath.c_str():"NOTFOUND");
+                                    readit?fname_abs.c_str():"NOTFOUND");
     }
 
   if(!optional && !readit && !cmSystemTools::GetFatalErrorOccured())

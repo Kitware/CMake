@@ -1,9 +1,15 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.3)
 project(VSNsightTegra C CXX)
 
+set(CMAKE_ANDROID_ARCH armv7-a-hard)
+set(CMAKE_ANDROID_STL_TYPE stlport_shared)
 set(CMAKE_ANDROID_API_MIN 9)
 set(CMAKE_ANDROID_API 15)
 set(CMAKE_ANDROID_GUI 1)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
 
 set(FIRST_C_FILES
   jni/first.c
@@ -38,3 +44,14 @@ add_executable(twolib-second
 target_include_directories(twolib-second PUBLIC jni)
 target_link_libraries(twolib-second twolib-first)
 target_link_libraries(twolib-second m) # test linking to library by name
+
+set_property(TARGET twolib-second PROPERTY C_STANDARD 11)
+set_target_properties(twolib-second PROPERTIES ANDROID_SKIP_ANT_STEP 1)
+set_target_properties(twolib-second PROPERTIES ANDROID_PROGUARD 1)
+set_target_properties(twolib-second PROPERTIES ANDROID_PROGUARD_CONFIG_PATH proguard-android.txt)
+set_target_properties(twolib-second PROPERTIES ANDROID_SECURE_PROPS_PATH /definitely/insecure)
+
+set_property(TARGET twolib-second PROPERTY ANDROID_NATIVE_LIB_DIRECTORIES $<TARGET_FILE_DIR:twolib-second>)
+set_property(TARGET twolib-second PROPERTY ANDROID_NATIVE_LIB_DEPENDENCIES $<TARGET_FILE_NAME:twolib-second>)
+
+set_property(TARGET twolib-second PROPERTY ANDROID_JAR_DIRECTORIES $<TARGET_FILE_DIR:twolib-first>)

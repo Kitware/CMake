@@ -27,10 +27,10 @@ public:
                       bool chain);
 
   // has a named property been defined
-  bool IsPropertyDefined(const std::string& name);
+  bool IsPropertyDefined(const std::string& name) const;
 
   // is a named property set to chain
-  bool IsPropertyChained(const std::string& name);
+  bool IsPropertyChained(const std::string& name) const;
 };
 
 #endif

@@ -49,6 +49,51 @@ install(FILES mylib.h
   DESTINATION include
   COMPONENT headers)
 
+if("${CPACK_GENERATOR}" MATCHES "RPM")
+  ############## test man pages
+  install(FILES mylib
+    DESTINATION share/man/mylib/man3/mylib.1)
+  install(FILES mylib
+    DESTINATION share/man/mylib/man3/mylib.1 RENAME mylib2)
+
+  ############## test symlinks
+  # Package symbolic links
+  install(DIRECTORY DESTINATION ${CMAKE_INSTALL_LIBDIR}/inside_relocatable_one/depth_two/depth_three COMPONENT libraries)
+  install(DIRECTORY DESTINATION ${CMAKE_INSTALL_LIBDIR}/inside_relocatable_two/depth_two/different_relocatable/bar COMPONENT libraries)
+  install(DIRECTORY DESTINATION other_relocatable/depth_two COMPONENT libraries)
+  install(DIRECTORY DESTINATION non_relocatable/depth_two COMPONENT libraries)
+  # test symbolic links to same dir
+  execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink depth_three symlink_samedir_path)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/symlink_samedir_path DESTINATION ${CMAKE_INSTALL_LIBDIR}/inside_relocatable_one/depth_two COMPONENT libraries)
+  # test symbolic links to same dir with current dir ./ prefix
+  execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ./depth_three symlink_samedir_path_current_dir)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/symlink_samedir_path_current_dir DESTINATION ${CMAKE_INSTALL_LIBDIR}/inside_relocatable_one/depth_two COMPONENT libraries)
+  # test symbolic links to same dir with longer relative path
+  execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../../../${CMAKE_INSTALL_LIBDIR}/.././${CMAKE_INSTALL_LIBDIR}/inside_relocatable_one/./depth_two/depth_three symlink_samedir_path_longer)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/symlink_samedir_path_longer DESTINATION ${CMAKE_INSTALL_LIBDIR}/inside_relocatable_one/depth_two COMPONENT libraries)
+  # test symbolic links to sub dir
+  execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../../${CMAKE_INSTALL_LIBDIR}/inside_relocatable_one/depth_two/depth_three symlink_subdir_path)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/symlink_subdir_path DESTINATION ${CMAKE_INSTALL_LIBDIR}/inside_relocatable_one COMPONENT libraries)
+  # test symbolic links to parent dir
+  execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink .././../../../${CMAKE_INSTALL_LIBDIR}/inside_relocatable_one/./depth_two symlink_parentdir_path)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/symlink_parentdir_path DESTINATION ${CMAKE_INSTALL_LIBDIR}/inside_relocatable_one/depth_two/depth_three COMPONENT libraries)
+  # test symbolic link to another relocatable path
+  execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink .././.././../other_relocatable/./depth_two symlink_other_relocatable_path)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/symlink_other_relocatable_path DESTINATION ${CMAKE_INSTALL_LIBDIR}/inside_relocatable_two/depth_two COMPONENT libraries)
+  # test symbolic link to non relocatable path
+  execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink .././../../non_relocatable/./depth_two symlink_to_non_relocatable_path)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/symlink_to_non_relocatable_path DESTINATION ${CMAKE_INSTALL_LIBDIR}/inside_relocatable_two/depth_two COMPONENT libraries)
+  # test symbolic link from non relocatable path
+  execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink .././../${CMAKE_INSTALL_LIBDIR}/inside_relocatable_two/depth_two symlink_from_non_relocatable_path)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/symlink_from_non_relocatable_path DESTINATION non_relocatable/depth_two COMPONENT libraries)
+  # test symbolic link relocatable path to its relocatable subpath
+  execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../../inside_relocatable_two/depth_two/different_relocatable/bar symlink_relocatable_subpath)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/symlink_relocatable_subpath DESTINATION ${CMAKE_INSTALL_LIBDIR}/inside_relocatable_one/depth_two COMPONENT libraries)
+  # test symbolic link to location outside package
+  execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ./outside_package symlink_outside_package)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/symlink_outside_package DESTINATION ${CMAKE_INSTALL_LIBDIR}/inside_relocatable_one/depth_two COMPONENT libraries)
+endif()
+
 # CPack boilerplate for this project
 set(CPACK_PACKAGE_NAME "MyLib")
 set(CPACK_PACKAGE_CONTACT "None")
@@ -114,7 +159,8 @@ set(CPACK_COMPONENT_APPLICATIONS_INSTALL_TYPES Full)
 # can not be used in CPack scripts due to CMAKE_SIZEOF_VOID_P
 # variable not being set
 set(CPACK_RPM_RELOCATION_PATHS "${CMAKE_INSTALL_INCLUDEDIR}"
-  "${CMAKE_INSTALL_LIBDIR}" "${CMAKE_INSTALL_BINDIR}")
+  "${CMAKE_INSTALL_LIBDIR}" "${CMAKE_INSTALL_BINDIR}" "other_relocatable"
+  "${CMAKE_INSTALL_LIBDIR}/inside_relocatable_two/depth_two/different_relocatable")
 
 # We may use the CPack specific config file in order
 # to tailor CPack behavior on a CPack generator specific way

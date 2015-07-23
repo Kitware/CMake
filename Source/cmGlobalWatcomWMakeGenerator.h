@@ -22,7 +22,7 @@
 class cmGlobalWatcomWMakeGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
-  cmGlobalWatcomWMakeGenerator();
+  cmGlobalWatcomWMakeGenerator(cmake* cm);
   static cmGlobalGeneratorFactory* NewFactory() {
     return new cmGlobalGeneratorSimpleFactory
       <cmGlobalWatcomWMakeGenerator>(); }
@@ -34,9 +34,6 @@ public:
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
 
-  ///! Create a local generator appropriate to this Global Generator
-  virtual cmLocalGenerator *CreateLocalGenerator();
-
   /**
    * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
@@ -45,6 +42,7 @@ public:
                               cmMakefile *, bool optional);
 
   virtual bool AllowNotParallel() const { return false; }
+  virtual bool AllowDeleteOnError() const { return false; }
 };
 
 #endif

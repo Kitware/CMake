@@ -13,7 +13,8 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 
-cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator()
+cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator(cmake* cm)
+  : cmGlobalUnixMakefileGenerator3(cm)
 {
   this->FindMakeProgramFile = "CMakeFindWMake.cmake";
 #ifdef _WIN32
@@ -22,6 +23,14 @@ cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator()
   this->ToolSupportsColor = true;
   this->NeedSymbolicMark = true;
   this->EmptyRuleHackCommand = "@cd .";
+#ifdef _WIN32
+  cm->GetState()->SetWindowsShell(true);
+#endif
+  cm->GetState()->SetWatcomWMake(true);
+  this->IncludeDirective = "!include";
+  this->DefineWindowsNULL = true;
+  this->UnixCD = false;
+  this->MakeSilentFlag = "-h";
 }
 
 void cmGlobalWatcomWMakeGenerator
@@ -38,24 +47,6 @@ void cmGlobalWatcomWMakeGenerator
   mf->AddDefinition("CMAKE_GENERATOR_CC", "wcl386");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "wcl386");
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
-}
-
-///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalWatcomWMakeGenerator::CreateLocalGenerator()
-{
-  cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
-  lg->SetDefineWindowsNULL(true);
-#ifdef _WIN32
-  lg->SetWindowsShell(true);
-#endif
-  lg->SetWatcomWMake(true);
-  lg->SetMakeSilentFlag("-h");
-  lg->SetGlobalGenerator(this);
-  lg->SetIgnoreLibPrefix(true);
-  lg->SetPassMakeflags(false);
-  lg->SetUnixCD(false);
-  lg->SetIncludeDirective("!include");
-  return lg;
 }
 
 //----------------------------------------------------------------------------

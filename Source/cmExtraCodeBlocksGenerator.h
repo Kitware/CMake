@@ -39,12 +39,17 @@ public:
 
   virtual void Generate();
 private:
+  struct CbpUnit
+  {
+    std::vector<const cmTarget*> Targets;
+  };
 
   void CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs);
 
   void CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,
                                 const std::string& filename);
-  std::string CreateDummyTargetFile(cmMakefile* mf, cmTarget* target) const;
+  std::string CreateDummyTargetFile(cmLocalGenerator* lg,
+                                    cmTarget* target) const;
 
   std::string GetCBCompilerId(const cmMakefile* mf);
   int GetCBTargetType(cmTarget* target);
@@ -54,7 +59,7 @@ private:
                     const std::string& targetName,
                     cmTarget* target,
                     const char* make,
-                    const cmMakefile* makefile,
+                    const cmLocalGenerator* lg,
                     const char* compiler);
 
 };

@@ -1,22 +1,50 @@
 include(RunCMake)
 
-run_cmake_command(E_tar-bad-opt1   ${CMAKE_COMMAND} -E tar cvf bad.tar --bad)
-run_cmake_command(E_tar-bad-mtime1 ${CMAKE_COMMAND} -E tar cvf bad.tar --mtime=bad .)
-run_cmake_command(E_tar-bad-from1  ${CMAKE_COMMAND} -E tar cvf bad.tar --files-from=bad)
-run_cmake_command(E_tar-bad-from2  ${CMAKE_COMMAND} -E tar cvf bad.tar --files-from=.)
-run_cmake_command(E_tar-bad-from3  ${CMAKE_COMMAND} -E tar cvf bad.tar --files-from=${CMAKE_CURRENT_LIST_DIR}/E_tar-bad-from3.txt)
-run_cmake_command(E_tar-bad-from4  ${CMAKE_COMMAND} -E tar cvf bad.tar --files-from=${CMAKE_CURRENT_LIST_DIR}/E_tar-bad-from4.txt)
-run_cmake_command(E_tar-bad-from5  ${CMAKE_COMMAND} -E tar cvf bad.tar --files-from=${CMAKE_CURRENT_LIST_DIR}/E_tar-bad-from5.txt)
-run_cmake_command(E_tar-end-opt1   ${CMAKE_COMMAND} -E tar cvf bad.tar -- --bad)
-run_cmake_command(E_tar-end-opt2   ${CMAKE_COMMAND} -E tar cvf bad.tar --)
-run_cmake_command(E_tar-mtime      ${CMAKE_COMMAND} -E tar cvf bad.tar "--mtime=1970-01-01 00:00:00 UTC")
+run_cmake_command(NoArgs ${CMAKE_COMMAND})
+run_cmake_command(C-no-arg ${CMAKE_COMMAND} -C)
+run_cmake_command(C-no-file ${CMAKE_COMMAND} -C nosuchcachefile.txt)
+run_cmake_command(cache-no-file ${CMAKE_COMMAND} nosuchsubdir/CMakeCache.txt)
+run_cmake_command(lists-no-file ${CMAKE_COMMAND} nosuchsubdir/CMakeLists.txt)
+run_cmake_command(D-no-arg ${CMAKE_COMMAND} -D)
+run_cmake_command(U-no-arg ${CMAKE_COMMAND} -U)
+run_cmake_command(E-no-arg ${CMAKE_COMMAND} -E)
+run_cmake_command(E_echo_append ${CMAKE_COMMAND} -E echo_append)
+run_cmake_command(E_rename-no-arg ${CMAKE_COMMAND} -E rename)
+run_cmake_command(E_touch_nocreate-no-arg ${CMAKE_COMMAND} -E touch_nocreate)
 
+run_cmake_command(E___run_iwyu-no-iwyu ${CMAKE_COMMAND} -E __run_iwyu -- command-does-not-exist)
+run_cmake_command(E___run_iwyu-bad-iwyu ${CMAKE_COMMAND} -E __run_iwyu --iwyu=iwyu-does-not-exist -- command-does-not-exist)
+run_cmake_command(E___run_iwyu-no--- ${CMAKE_COMMAND} -E __run_iwyu --iwyu=iwyu-does-not-exist command-does-not-exist)
+run_cmake_command(E___run_iwyu-no-cc ${CMAKE_COMMAND} -E __run_iwyu --iwyu=iwyu-does-not-exist --)
+
+run_cmake_command(G_no-arg ${CMAKE_COMMAND} -G)
+run_cmake_command(G_bad-arg ${CMAKE_COMMAND} -G NoSuchGenerator)
+run_cmake_command(P_no-arg ${CMAKE_COMMAND} -P)
+run_cmake_command(P_no-file ${CMAKE_COMMAND} -P nosuchscriptfile.cmake)
+
+run_cmake_command(build-no-dir
+  ${CMAKE_COMMAND} --build)
 run_cmake_command(build-no-cache
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR})
 run_cmake_command(build-no-generator
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-no-generator)
+run_cmake_command(build-bad-dir
+  ${CMAKE_COMMAND} --build dir-does-not-exist)
 run_cmake_command(build-bad-generator
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-bad-generator)
+
+function(run_BuildDir)
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/BuildDir-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake(BuildDir)
+  run_cmake_command(BuildDir--build ${CMAKE_COMMAND} -E chdir ..
+    ${CMAKE_COMMAND} --build BuildDir-build --target CustomTarget)
+endfunction()
+run_BuildDir()
 
 if(RunCMake_GENERATOR STREQUAL "Ninja")
   # Use a single build tree for a few tests without cleaning.
@@ -34,7 +62,22 @@ if(RunCMake_GENERATOR STREQUAL "Ninja")
   unset(RunCMake_TEST_NO_CLEAN)
 endif()
 
+if(RunCMake_GENERATOR STREQUAL "Visual Studio 6")
+  set(RunCMake_WARN_VS6 1)
+  run_cmake(DeprecateVS6-WARN-ON)
+  unset(RunCMake_WARN_VS6)
+  run_cmake(DeprecateVS6-WARN-OFF)
+elseif(RunCMake_GENERATOR STREQUAL "Visual Studio 7")
+  set(RunCMake_WARN_VS70 1)
+  run_cmake(DeprecateVS70-WARN-ON)
+  unset(RunCMake_WARN_VS70)
+  run_cmake(DeprecateVS70-WARN-OFF)
+endif()
+
 if(UNIX)
+  run_cmake_command(E_create_symlink-no-arg
+    ${CMAKE_COMMAND} -E create_symlink
+    )
   run_cmake_command(E_create_symlink-missing-dir
     ${CMAKE_COMMAND} -E create_symlink T missing-dir/L
     )
@@ -80,3 +123,49 @@ run_cmake(D_nested_cache)
 set(RunCMake_TEST_OPTIONS
   "-DFOO:STRING=-DBAR:BOOL=BAZ")
 run_cmake(D_typed_nested_cache)
+
+set(RunCMake_TEST_OPTIONS -Wno-dev)
+run_cmake(Wno-dev)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS -Wno-dev -Wdev)
+run_cmake(Wdev)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --debug-output)
+run_cmake(debug-output)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --trace)
+run_cmake(trace)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --debug-trycompile)
+run_cmake(debug-trycompile)
+unset(RunCMake_TEST_OPTIONS)
+
+function(run_cmake_depends)
+  set(RunCMake_TEST_SOURCE_DIR "${RunCMake_SOURCE_DIR}/cmake_depends")
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/cmake_depends-build")
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/DepTarget.dir/DependInfo.cmake" "
+set(CMAKE_DEPENDS_LANGUAGES \"C\")
+set(CMAKE_DEPENDS_CHECK_C
+  \"${RunCMake_TEST_SOURCE_DIR}/test.c\"
+  \"${RunCMake_TEST_BINARY_DIR}/CMakeFiles/DepTarget.dir/test.c.o\"
+  )
+")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/CMakeDirectoryInformation.cmake" "
+set(CMAKE_RELATIVE_PATH_TOP_SOURCE \"${RunCMake_TEST_SOURCE_DIR}\")
+set(CMAKE_RELATIVE_PATH_TOP_BINARY \"${RunCMake_TEST_BINARY_DIR}\")
+")
+  run_cmake_command(cmake_depends ${CMAKE_COMMAND} -E cmake_depends
+    "Unix Makefiles"
+    ${RunCMake_TEST_SOURCE_DIR} ${RunCMake_TEST_SOURCE_DIR}
+    ${RunCMake_TEST_BINARY_DIR} ${RunCMake_TEST_BINARY_DIR}
+    ${RunCMake_TEST_BINARY_DIR}/CMakeFiles/DepTarget.dir/DependInfo.cmake
+    )
+endfunction()
+run_cmake_depends()

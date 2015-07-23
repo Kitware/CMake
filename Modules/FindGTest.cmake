@@ -115,11 +115,11 @@ function(GTEST_ADD_TESTS executable extra_args)
         # obtain sources used for building that executable
         get_property(ARGN TARGET ${executable} PROPERTY SOURCES)
     endif()
-    set(gtest_case_name_regex ".*\\( *([A-Za-z_0-9]+), *([A-Za-z_0-9]+) *\\).*")
+    set(gtest_case_name_regex ".*\\( *([A-Za-z_0-9]+) *, *([A-Za-z_0-9]+) *\\).*")
     set(gtest_test_type_regex "(TYPED_TEST|TEST_?[FP]?)")
     foreach(source ${ARGN})
         file(READ "${source}" contents)
-        string(REGEX MATCHALL "${gtest_test_type_regex}\\(([A-Za-z_0-9 ,]+)\\)" found_tests ${contents})
+        string(REGEX MATCHALL "${gtest_test_type_regex} *\\(([A-Za-z_0-9 ,]+)\\)" found_tests ${contents})
         foreach(hit ${found_tests})
           string(REGEX MATCH "${gtest_test_type_regex}" test_type ${hit})
 

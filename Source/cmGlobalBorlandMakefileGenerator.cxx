@@ -14,13 +14,19 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 
-cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator()
+cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator(cmake* cm)
+  : cmGlobalUnixMakefileGenerator3(cm)
 {
   this->EmptyRuleHackDepends = "NUL";
   this->FindMakeProgramFile = "CMakeBorlandFindMake.cmake";
   this->ForceUnixPaths = false;
   this->ToolSupportsColor = true;
   this->UseLinkScript = false;
+  cm->GetState()->SetWindowsShell(true);
+  this->IncludeDirective = "!include";
+  this->DefineWindowsNULL = true;
+  this->PassMakeflags = true;
+  this->UnixCD = false;
 }
 
 
@@ -29,7 +35,7 @@ void cmGlobalBorlandMakefileGenerator
                  cmMakefile *mf,
                  bool optional)
 {
-  std::string outdir = this->CMakeInstance->GetStartOutputDirectory();
+  std::string outdir = this->CMakeInstance->GetHomeOutputDirectory();
   mf->AddDefinition("BORLAND", "1");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "bcc32");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "bcc32");
@@ -37,19 +43,14 @@ void cmGlobalBorlandMakefileGenerator
 }
 
 ///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator()
+cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator(
+    cmLocalGenerator* parent, cmState::Snapshot snapshot)
 {
-  cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
-  lg->SetIncludeDirective("!include");
-  lg->SetWindowsShell(true);
-  lg->SetDefineWindowsNULL(true);
+  cmLocalUnixMakefileGenerator3* lg =
+      new cmLocalUnixMakefileGenerator3(this, parent, snapshot);
   lg->SetMakefileVariableSize(32);
-  lg->SetPassMakeflags(true);
-  lg->SetGlobalGenerator(this);
-  lg->SetUnixCD(false);
   lg->SetMakeCommandEscapeTargetTwice(true);
   lg->SetBorlandMakeCurlyHack(true);
-  lg->SetNoMultiOutputMultiDepRules(true);
   return lg;
 }
 

@@ -14,23 +14,24 @@
 
 #include "cmStandardIncludes.h"
 
-class cmTarget;
+class cmGeneratorTarget;
 
 /** One edge in the global target dependency graph.
     It may be marked as a 'link' or 'util' edge or both.  */
 class cmTargetDepend
 {
-  cmTarget const* Target;
+  cmGeneratorTarget const* Target;
 
   // The set order depends only on the Target, so we use
   // mutable members to acheive a map with set syntax.
   mutable bool Link;
   mutable bool Util;
 public:
-  cmTargetDepend(cmTarget const* t): Target(t), Link(false), Util(false) {}
-  operator cmTarget const*() const { return this->Target; }
-  cmTarget const* operator->() const { return this->Target; }
-  cmTarget const& operator*() const { return *this->Target; }
+  cmTargetDepend(cmGeneratorTarget const* t)
+    : Target(t), Link(false), Util(false) {}
+  operator cmGeneratorTarget const*() const { return this->Target; }
+  cmGeneratorTarget const* operator->() const { return this->Target; }
+  cmGeneratorTarget const& operator*() const { return *this->Target; }
   friend bool operator < (cmTargetDepend const& l, cmTargetDepend const& r)
     { return l.Target < r.Target; }
   void SetType(bool strong) const

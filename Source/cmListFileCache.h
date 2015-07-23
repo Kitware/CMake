@@ -14,7 +14,7 @@
 
 #include "cmStandardIncludes.h"
 
-class cmLocalGenerator;
+#include "cmState.h"
 
 /** \class cmListFileCache
  * \brief A class to cache list file contents.
@@ -25,6 +25,13 @@ class cmLocalGenerator;
 
 class cmMakefile;
 
+struct cmCommandContext
+{
+  std::string Name;
+  long Line;
+  cmCommandContext(): Name(), Line(0) {}
+};
+
 struct cmListFileArgument
 {
   enum Delimiter
@@ -33,12 +40,11 @@ struct cmListFileArgument
     Quoted,
     Bracket
     };
-  cmListFileArgument(): Value(), Delim(Unquoted), FilePath(0), Line(0) {}
-  cmListFileArgument(const cmListFileArgument& r):
-    Value(r.Value), Delim(r.Delim), FilePath(r.FilePath), Line(r.Line) {}
-  cmListFileArgument(const std::string& v, Delimiter d, const char* file,
-                     long line): Value(v), Delim(d),
-                                 FilePath(file), Line(line) {}
+  cmListFileArgument(): Value(), Delim(Unquoted), Line(0) {}
+  cmListFileArgument(const cmListFileArgument& r)
+    : Value(r.Value), Delim(r.Delim), Line(r.Line) {}
+  cmListFileArgument(const std::string& v, Delimiter d, long line)
+    : Value(v), Delim(d), Line(line) {}
   bool operator == (const cmListFileArgument& r) const
     {
     return (this->Value == r.Value) && (this->Delim == r.Delim);
@@ -49,7 +55,6 @@ struct cmListFileArgument
     }
   std::string Value;
   Delimiter Delim;
-  const char* FilePath;
   long Line;
 };
 
@@ -59,41 +64,50 @@ struct cmListFileContext
   std::string FilePath;
   long Line;
   cmListFileContext(): Name(), FilePath(), Line(0) {}
+
+  static cmListFileContext FromCommandContext(cmCommandContext const& lfcc,
+                                              std::string const& fileName)
+  {
+    cmListFileContext lfc;
+    lfc.FilePath = fileName;
+    lfc.Line = lfcc.Line;
+    lfc.Name = lfcc.Name;
+    return lfc;
+  }
 };
 
 std::ostream& operator<<(std::ostream&, cmListFileContext const&);
+bool operator<(const cmListFileContext& lhs, const cmListFileContext& rhs);
+bool operator==(cmListFileContext const& lhs, cmListFileContext const& rhs);
+bool operator!=(cmListFileContext const& lhs, cmListFileContext const& rhs);
 
-struct cmListFileFunction: public cmListFileContext
+struct cmListFileFunction: public cmCommandContext
 {
   std::vector<cmListFileArgument> Arguments;
 };
 
-class cmListFileBacktrace: public std::vector<cmListFileContext>
+class cmListFileBacktrace
 {
   public:
-    cmListFileBacktrace(cmLocalGenerator* localGen)
-      : LocalGenerator(localGen)
-      , Relative(localGen ? false : true)
+    cmListFileBacktrace(cmState::Snapshot snapshot = cmState::Snapshot(),
+                        cmCommandContext const& cc = cmCommandContext())
+      : Context(cc), Snapshot(snapshot)
     {
     }
 
-    void MakeRelative();
+    void PrintTitle(std::ostream& out) const;
+    void PrintCallStack(std::ostream& out) const;
   private:
-    cmLocalGenerator* LocalGenerator;
-    bool Relative;
+    cmCommandContext Context;
+    cmState::Snapshot Snapshot;
 };
 
 struct cmListFile
 {
-  cmListFile()
-    :ModifiedTime(0)
-    {
-    }
   bool ParseFile(const char* path,
                  bool topLevel,
                  cmMakefile *mf);
 
-  long int ModifiedTime;
   std::vector<cmListFileFunction> Functions;
 };
 

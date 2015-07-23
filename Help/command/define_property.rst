@@ -11,11 +11,11 @@ Define and document custom properties.
                    BRIEF_DOCS <brief-doc> [docs...]
                    FULL_DOCS <full-doc> [docs...])
 
-Define one property in a scope for use with the set_property and
-get_property commands.  This is primarily useful to associate
+Define one property in a scope for use with the :command:`set_property` and
+:command:`get_property` commands.  This is primarily useful to associate
 documentation with property names that may be retrieved with the
-get_property command.  The first argument determines the kind of scope
-in which the property should be used.  It must be one of the
+:command:`get_property` command. The first argument determines the kind of
+scope in which the property should be used.  It must be one of the
 following:
 
 ::
@@ -28,18 +28,18 @@ following:
   VARIABLE  = documents a CMake language variable
   CACHED_VARIABLE = documents a CMake cache variable
 
-Note that unlike set_property and get_property no actual scope needs
-to be given; only the kind of scope is important.
+Note that unlike :command:`set_property` and :command:`get_property` no
+actual scope needs to be given; only the kind of scope is important.
 
-The required PROPERTY option is immediately followed by the name of
+The required ``PROPERTY`` option is immediately followed by the name of
 the property being defined.
 
-If the INHERITED option then the get_property command will chain up to
-the next higher scope when the requested property is not set in the
-scope given to the command.  DIRECTORY scope chains to GLOBAL.
-TARGET, SOURCE, and TEST chain to DIRECTORY.
+If the ``INHERITED`` option then the :command:`get_property` command will
+chain up to the next higher scope when the requested property is not set
+in the scope given to the command. ``DIRECTORY`` scope chains to
+``GLOBAL``. ``TARGET``, ``SOURCE``, and ``TEST`` chain to ``DIRECTORY``.
 
-The BRIEF_DOCS and FULL_DOCS options are followed by strings to be
+The ``BRIEF_DOCS`` and ``FULL_DOCS`` options are followed by strings to be
 associated with the property as its brief and full documentation.
-Corresponding options to the get_property command will retrieve the
-documentation.
+Corresponding options to the :command:`get_property` command will retrieve
+the documentation.

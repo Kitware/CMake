@@ -21,7 +21,7 @@
 #include <cmsys/Glob.hxx>
 #include <cmsys/FStream.hxx>
 #include "cmMakefile.h"
-#include "cmXMLSafe.h"
+#include "cmXMLWriter.h"
 
 #include <stdlib.h>
 #include <math.h>
@@ -352,55 +352,52 @@ void cmCTestMemCheckHandler::PopulateCustomVectors(cmMakefile *mf)
 }
 
 //----------------------------------------------------------------------
-void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
+void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
 {
   if ( !this->CTest->GetProduceXML() )
     {
     return;
     }
-  this->CTest->StartXML(os, this->AppendXML);
-  os << "<DynamicAnalysis Checker=\"";
+  this->CTest->StartXML(xml, this->AppendXML);
+  xml.StartElement("DynamicAnalysis");
   switch ( this->MemoryTesterStyle )
     {
     case cmCTestMemCheckHandler::VALGRIND:
-      os << "Valgrind";
+      xml.Attribute("Checker", "Valgrind");
       break;
     case cmCTestMemCheckHandler::PURIFY:
-      os << "Purify";
+      xml.Attribute("Checker", "Purify");
       break;
     case cmCTestMemCheckHandler::BOUNDS_CHECKER:
-      os << "BoundsChecker";
+      xml.Attribute("Checker", "BoundsChecker");
       break;
     case cmCTestMemCheckHandler::ADDRESS_SANITIZER:
-      os << "AddressSanitizer";
+      xml.Attribute("Checker", "AddressSanitizer");
       break;
     case cmCTestMemCheckHandler::THREAD_SANITIZER:
-      os << "ThreadSanitizer";
+      xml.Attribute("Checker", "ThreadSanitizer");
       break;
     case cmCTestMemCheckHandler::MEMORY_SANITIZER:
-      os << "MemorySanitizer";
+      xml.Attribute("Checker", "MemorySanitizer");
       break;
     case cmCTestMemCheckHandler::UB_SANITIZER:
-      os << "UndefinedBehaviorSanitizer";
+      xml.Attribute("Checker", "UndefinedBehaviorSanitizer");
       break;
     default:
-      os << "Unknown";
+      xml.Attribute("Checker", "Unknown");
     }
-  os << "\">" << std::endl;
 
-  os << "\t<StartDateTime>" << this->StartTest << "</StartDateTime>\n"
-     << "\t<StartTestTime>" << this->StartTestTime << "</StartTestTime>\n"
-     << "\t<TestList>\n";
+  xml.Element("StartDateTime", this->StartTest);
+  xml.Element("StartTestTime", this->StartTestTime);
+  xml.StartElement("TestList");
   cmCTestMemCheckHandler::TestResultsVector::size_type cc;
   for ( cc = 0; cc < this->TestResults.size(); cc ++ )
     {
     cmCTestTestResult *result = &this->TestResults[cc];
     std::string testPath = result->Path + "/" + result->Name;
-    os << "\t\t<Test>" << cmXMLSafe(
-      this->CTest->GetShortPathToFile(testPath.c_str()))
-      << "</Test>" << std::endl;
+    xml.Element("Test", this->CTest->GetShortPathToFile(testPath.c_str()));
     }
-  os << "\t</TestList>\n";
+  xml.EndElement(); // TestList
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
     "-- Processing memory checking output: ", this->Quiet);
   size_t total = this->TestResults.size();
@@ -419,37 +416,33 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
       }
     this->CleanTestOutput(memcheckstr,
       static_cast<size_t>(this->CustomMaximumFailedTestOutputSize));
-    this->WriteTestResultHeader(os, result);
-    os << "\t\t<Results>" << std::endl;
+    this->WriteTestResultHeader(xml, result);
+    xml.StartElement("Results");
     for(std::vector<int>::size_type kk = 0;
         kk < memcheckresults.size(); ++kk)
       {
       if ( memcheckresults[kk] )
         {
-        os << "\t\t\t<Defect type=\"" << this->ResultStringsLong[kk]
-          << "\">"
-           << memcheckresults[kk]
-           << "</Defect>" << std::endl;
+        xml.StartElement("Defect");
+        xml.Attribute("type", this->ResultStringsLong[kk]);
+        xml.Content(memcheckresults[kk]);
+        xml.EndElement(); // Defect
         }
       this->GlobalResults[kk] += memcheckresults[kk];
       }
+    xml.EndElement(); // Results
 
-    std::string logTag;
+    xml.StartElement("Log");
     if(this->CTest->ShouldCompressMemCheckOutput())
       {
       this->CTest->CompressString(memcheckstr);
-      logTag = "\t<Log compression=\"gzip\" encoding=\"base64\">\n";
+      xml.Attribute("compression", "gzip");
+      xml.Attribute("encoding", "base64");
       }
-    else
-      {
-      logTag = "\t<Log>\n";
-      }
+    xml.Content(memcheckstr);
+    xml.EndElement(); // Log
 
-    os
-      << "\t\t</Results>\n"
-      << logTag << cmXMLSafe(memcheckstr) << std::endl
-      << "\t</Log>\n";
-    this->WriteTestResultFooter(os, result);
+    this->WriteTestResultFooter(xml, result);
     if ( current < cc )
       {
       cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "#" << std::flush,
@@ -460,7 +453,7 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, std::endl, this->Quiet);
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "Memory checking results:"
     << std::endl, this->Quiet);
-  os << "\t<DefectList>" << std::endl;
+  xml.StartElement("DefectList");
   for ( cc = 0; cc < this->GlobalResults.size(); cc ++ )
     {
     if ( this->GlobalResults[cc] )
@@ -473,21 +466,20 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
       cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
         this->ResultStringsLong[cc] << " - "
         << this->GlobalResults[cc] << std::endl, this->Quiet);
-      os << "\t\t<Defect Type=\"" << this->ResultStringsLong[cc]
-        << "\"/>" << std::endl;
+      xml.StartElement("Defect");
+      xml.Attribute("Type", this->ResultStringsLong[cc]);
+      xml.EndElement();
       }
     }
-  os << "\t</DefectList>" << std::endl;
+  xml.EndElement(); // DefectList
 
-  os << "\t<EndDateTime>" << this->EndTest << "</EndDateTime>" << std::endl;
-  os << "\t<EndTestTime>" << this->EndTestTime
-     << "</EndTestTime>" << std::endl;
-  os << "<ElapsedMinutes>"
-     << static_cast<int>(this->ElapsedTestingTime/6)/10.0
-     << "</ElapsedMinutes>\n";
+  xml.Element("EndDateTime", this->EndTest);
+  xml.Element("EndTestTime", this->EndTestTime);
+  xml.Element("ElapsedMinutes",
+    static_cast<int>(this->ElapsedTestingTime/6)/10.0);
 
-  os << "</DynamicAnalysis>" << std::endl;
-  this->CTest->EndXML(os);
+  xml.EndElement(); // DynamicAnalysis
+  this->CTest->EndXML(xml);
 }
 
 //----------------------------------------------------------------------

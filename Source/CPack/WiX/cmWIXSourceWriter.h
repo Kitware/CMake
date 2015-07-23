@@ -43,7 +43,7 @@ public:
   void AddAttributeUnlessEmpty(
     std::string const& key, std::string const& value);
 
-  static std::string WindowsCodepageToUtf8(std::string const& value);
+  static std::string CMakeEncodingToUtf8(std::string const& value);
 
 protected:
    cmCPackLog* Logger;

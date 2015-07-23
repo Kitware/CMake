@@ -159,10 +159,14 @@ set(SRCS
   cmCacheManager.cxx
   cmCacheManager.h
   "${CMAKE_CURRENT_BINARY_DIR}/cmCommands.cxx"
+  cmCLocaleEnvironmentScope.h
+  cmCLocaleEnvironmentScope.cxx
   cmCommands.h
   cmCommandArgumentLexer.cxx
   cmCommandArgumentParser.cxx
   cmCommandArgumentParserHelper.cxx
+  cmCommonTargetGenerator.cxx
+  cmCommonTargetGenerator.h
   cmComputeComponentGraph.cxx
   cmComputeComponentGraph.h
   cmComputeLinkDepends.cxx
@@ -219,6 +223,8 @@ set(SRCS
   cmExportSet.cxx
   cmExportSetMap.h
   cmExportSetMap.cxx
+  cmExternalMakefileProjectGenerator.cxx
+  cmExternalMakefileProjectGenerator.h
   cmExtraCodeBlocksGenerator.cxx
   cmExtraCodeBlocksGenerator.h
   cmExtraCodeLiteGenerator.cxx
@@ -238,18 +244,26 @@ set(SRCS
   cmFileTimeComparison.cxx
   cmFileTimeComparison.h
   cmGeneratedFileStream.cxx
+  cmGeneratorExpressionContext.cxx
+  cmGeneratorExpressionContext.h
   cmGeneratorExpressionDAGChecker.cxx
   cmGeneratorExpressionDAGChecker.h
+  cmGeneratorExpressionEvaluationFile.cxx
+  cmGeneratorExpressionEvaluationFile.h
   cmGeneratorExpressionEvaluator.cxx
   cmGeneratorExpressionEvaluator.h
   cmGeneratorExpressionLexer.cxx
   cmGeneratorExpressionLexer.h
+  cmGeneratorExpressionNode.cxx
+  cmGeneratorExpressionNode.h
   cmGeneratorExpressionParser.cxx
   cmGeneratorExpressionParser.h
   cmGeneratorExpression.cxx
   cmGeneratorExpression.h
   cmGeneratorTarget.cxx
   cmGeneratorTarget.h
+  cmGlobalCommonGenerator.cxx
+  cmGlobalCommonGenerator.h
   cmGlobalGenerator.cxx
   cmGlobalGenerator.h
   cmGlobalGeneratorFactory.h
@@ -271,9 +285,12 @@ set(SRCS
   cmInstallTargetGenerator.cxx
   cmInstallDirectoryGenerator.h
   cmInstallDirectoryGenerator.cxx
+  cmLinkedTree.h
   cmListFileCache.cxx
   cmListFileCache.h
   cmListFileLexer.c
+  cmLocalCommonGenerator.cxx
+  cmLocalCommonGenerator.h
   cmLocalGenerator.cxx
   cmLocalGenerator.h
   cmLocalUnixMakefileGenerator3.cxx
@@ -289,6 +306,8 @@ set(SRCS
   cmMakefileUtilityTargetGenerator.cxx
   cmOSXBundleGenerator.cxx
   cmOSXBundleGenerator.h
+  cmOutputConverter.cxx
+  cmOutputConverter.h
   cmNewLineStyle.h
   cmNewLineStyle.cxx
   cmOrderDirectories.cxx
@@ -317,6 +336,8 @@ set(SRCS
   cmSourceFileLocation.h
   cmSourceGroup.cxx
   cmSourceGroup.h
+  cmState.cxx
+  cmState.h
   cmSystemTools.cxx
   cmSystemTools.h
   cmTarget.cxx
@@ -335,6 +356,8 @@ set(SRCS
   cmXMLParser.h
   cmXMLSafe.cxx
   cmXMLSafe.h
+  cmXMLWriter.cxx
+  cmXMLWriter.h
   cmake.cxx
   cmake.h
 
@@ -413,6 +436,7 @@ if (WIN32)
   set(SRCS ${SRCS}
     cmCallVisualStudioMacro.cxx
     cmCallVisualStudioMacro.h
+    bindexplib.cxx
     )
 
   if(NOT UNIX)
@@ -466,6 +490,14 @@ if (WIN32)
       cmVisualStudioSlnParser.cxx
       cmVisualStudioWCEPlatformParser.h
       cmVisualStudioWCEPlatformParser.cxx
+      cmGlobalGhsMultiGenerator.cxx
+      cmGlobalGhsMultiGenerator.h
+      cmLocalGhsMultiGenerator.cxx
+      cmLocalGhsMultiGenerator.h
+      cmGhsMultiTargetGenerator.cxx
+      cmGhsMultiTargetGenerator.h
+      cmGhsMultiGpj.cxx
+      cmGhsMultiGpj.h
       )
   endif()
 endif ()
@@ -493,6 +525,7 @@ set(SRCS ${SRCS}
   cmNinjaUtilityTargetGenerator.cxx
   cmNinjaUtilityTargetGenerator.h
   )
+
 if(WIN32 AND NOT CYGWIN)
   set_source_files_properties(cmcldeps.cxx PROPERTIES COMPILE_DEFINITIONS _WIN32_WINNT=0x0501)
   add_executable(cmcldeps cmcldeps.cxx)
@@ -708,9 +741,17 @@ endif()
 include (${CMake_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 include (${CMake_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 
-install(TARGETS cmake ctest cpack DESTINATION bin)
+# Install tools
+
+set(_tools cmake ctest cpack)
+
 if(APPLE)
-  install(TARGETS cmakexbuild DESTINATION bin)
+  list(APPEND _tools cmakexbuild)
 endif()
+
+foreach(_tool ${_tools})
+  CMake_OPTIONAL_COMPONENT(${_tool})
+  install(TARGETS ${_tool} DESTINATION bin ${COMPONENT})
+endforeach()
 
 install(FILES cmCPluginAPI.h DESTINATION ${CMAKE_DATA_DIR}/include)

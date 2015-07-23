@@ -22,14 +22,13 @@ bool cmInstallProgramsCommand
     }
 
   // Enable the install target.
-  this->Makefile->GetLocalGenerator()
-    ->GetGlobalGenerator()->EnableInstallTarget();
+  this->Makefile->GetGlobalGenerator()->EnableInstallTarget();
 
   this->Destination = args[0];
 
   this->FinalArgs.insert(this->FinalArgs.end(), args.begin() + 1, args.end());
 
-  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+  this->Makefile->GetGlobalGenerator()
                        ->AddInstallComponent(this->Makefile->GetSafeDefinition(
                                       "CMAKE_INSTALL_DEFAULT_COMPONENT_NAME"));
 
@@ -63,7 +62,7 @@ void cmInstallProgramsCommand::FinalPass()
   else     // reg exp list
     {
     std::vector<std::string> programs;
-    cmSystemTools::Glob(this->Makefile->GetCurrentDirectory(),
+    cmSystemTools::Glob(this->Makefile->GetCurrentSourceDirectory(),
                         this->FinalArgs[0], programs);
 
     std::vector<std::string>::iterator s = programs.begin();
@@ -115,10 +114,10 @@ std::string cmInstallProgramsCommand
     }
 
   // This is a relative path.
-  std::string tb = this->Makefile->GetCurrentOutputDirectory();
+  std::string tb = this->Makefile->GetCurrentBinaryDirectory();
   tb += "/";
   tb += name;
-  std::string ts = this->Makefile->GetCurrentDirectory();
+  std::string ts = this->Makefile->GetCurrentSourceDirectory();
   ts += "/";
   ts += name;
 

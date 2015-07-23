@@ -19,7 +19,11 @@
 
 #include <cmsys/auto_ptr.hxx>
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include <cmsys/hash_map.hxx>
+# ifdef CMake_HAVE_CXX11_UNORDERED_MAP
+#  include <unordered_map>
+# else
+#  include <cmsys/hash_map.hxx>
+# endif
 #endif
 
 #define CM_FOR_EACH_TARGET_POLICY(F) \
@@ -34,7 +38,9 @@
   F(CMP0041) \
   F(CMP0042) \
   F(CMP0046) \
-  F(CMP0052)
+  F(CMP0052) \
+  F(CMP0060) \
+  F(CMP0063)
 
 class cmake;
 class cmMakefile;
@@ -60,7 +66,7 @@ public:
 class cmLinkImplItem: public cmLinkItem
 {
 public:
-  cmLinkImplItem(): cmLinkItem(), Backtrace(0), FromGenex(false) {}
+  cmLinkImplItem(): cmLinkItem(), Backtrace(), FromGenex(false) {}
   cmLinkImplItem(std::string const& n,
                  cmTarget const* t,
                  cmListFileBacktrace const& bt,
@@ -138,7 +144,7 @@ public:
 
 #define DECLARE_TARGET_POLICY(POLICY) \
   cmPolicies::PolicyStatus GetPolicyStatus ## POLICY () const \
-    { return this->PolicyStatus ## POLICY; }
+    { return this->PolicyMap.Get(cmPolicies::POLICY); }
 
   CM_FOR_EACH_TARGET_POLICY(DECLARE_TARGET_POLICY)
 
@@ -201,7 +207,8 @@ public:
     KeywordTLLSignature,
     PlainTLLSignature
   };
-  bool PushTLLCommandTrace(TLLSignature signature);
+  bool PushTLLCommandTrace(TLLSignature signature,
+                           cmListFileContext const& lfc);
   void GetTllSignatureTraces(std::ostringstream &s, TLLSignature sig) const;
 
   void MergeLinkLibraries( cmMakefile& mf, const std::string& selfname,
@@ -253,11 +260,6 @@ public:
   const char *GetProperty(const std::string& prop, cmMakefile* context) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   void CheckProperty(const std::string& prop, cmMakefile* context) const;
-
-  const char* GetFeature(const std::string& feature,
-                         const std::string& config) const;
-  bool GetFeatureAsBool(const std::string& feature,
-                        const std::string& config) const;
 
   bool IsImported() const {return this->IsImportedTarget;}
 
@@ -488,15 +490,13 @@ public:
                        const char** imp,
                        std::string& suffix) const;
 
-  // Define the properties
-  static void DefineProperties(cmake *cm);
-
   /** Get the macro to define when building sources in this target.
       If no macro should be defined null is returned.  */
   const char* GetExportMacro() const;
 
   void GetCompileDefinitions(std::vector<std::string> &result,
-                             const std::string& config) const;
+                             const std::string& config,
+                             const std::string& language) const;
 
   // Compute the set of languages compiled by the target.  This is
   // computed every time it is called because the languages can change
@@ -525,6 +525,9 @@ public:
 
   /** Return whether this target is a CFBundle (plugin) on Apple.  */
   bool IsCFBundleOnApple() const;
+
+  /** Return whether this target is a XCTest on Apple.  */
+  bool IsXCTestOnApple() const;
 
   /** Return whether this target is an executable Bundle on Apple.  */
   bool IsAppBundleOnApple() const;
@@ -567,7 +570,8 @@ public:
                                     bool contentOnly) const;
 
   std::vector<std::string> GetIncludeDirectories(
-                     const std::string& config) const;
+                     const std::string& config,
+                     const std::string& language) const;
   void InsertInclude(const cmValueWithOrigin &entry,
                      bool before = false);
   void InsertCompileOption(const cmValueWithOrigin &entry,
@@ -577,7 +581,8 @@ public:
   void AppendBuildInterfaceIncludes();
 
   void GetCompileOptions(std::vector<std::string> &result,
-                         const std::string& config) const;
+                         const std::string& config,
+                         const std::string& language) const;
   void GetAutoUicOptions(std::vector<std::string> &result,
                          const std::string& config) const;
   void GetCompileFeatures(std::vector<std::string> &features,
@@ -632,12 +637,6 @@ public:
 
 private:
   bool HandleLocationPropertyPolicy(cmMakefile* context) const;
-
-  // The set of include directories that are marked as system include
-  // directories.
-  std::set<std::string> SystemIncludeDirectories;
-
-  std::vector<std::pair<TLLSignature, cmListFileBacktrace> > TLLCommands;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   /**
@@ -733,40 +732,48 @@ private:
   void GetSourceFiles(std::vector<std::string> &files,
                       const std::string& config) const;
 private:
-  std::string Name;
-  std::vector<cmCustomCommand> PreBuildCommands;
-  std::vector<cmCustomCommand> PreLinkCommands;
-  std::vector<cmCustomCommand> PostBuildCommands;
-  TargetType TargetTypeValue;
-  LinkLibraryVectorType PrevLinkedLibraries;
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  LinkLibraryVectorType LinkLibrariesForVS6;
-  bool LinkLibrariesForVS6Analyzed;
-#endif
-  std::vector<std::string> LinkDirectories;
+  mutable cmPropertyMap Properties;
+  std::set<std::string> SystemIncludeDirectories;
   std::set<std::string> LinkDirectoriesEmmitted;
-  bool HaveInstallRule;
+  std::set<std::string> Utilities;
+  mutable std::set<std::string> LinkImplicitNullProperties;
+  std::map<std::string, cmListFileBacktrace> UtilityBacktraces;
+  mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
+  mutable std::map<std::string, std::string> MaxLanguageStandards;
+  cmPolicies::PolicyMap PolicyMap;
+  std::string Name;
   std::string InstallPath;
   std::string RuntimeInstallPath;
   mutable std::string ExportMacro;
-  std::set<std::string> Utilities;
-  std::map<std::string, cmListFileBacktrace> UtilityBacktraces;
-  bool RecordDependencies;
-  mutable cmPropertyMap Properties;
+  std::vector<std::string> LinkDirectories;
+  std::vector<cmCustomCommand> PreBuildCommands;
+  std::vector<cmCustomCommand> PreLinkCommands;
+  std::vector<cmCustomCommand> PostBuildCommands;
+  std::vector<std::pair<TLLSignature, cmListFileContext> > TLLCommands;
+  LinkLibraryVectorType PrevLinkedLibraries;
   LinkLibraryVectorType OriginalLinkLibraries;
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  LinkLibraryVectorType LinkLibrariesForVS6;
+#endif
+  cmMakefile* Makefile;
+  cmTargetInternalPointer Internal;
+  TargetType TargetTypeValue;
+  bool HaveInstallRule;
+  bool RecordDependencies;
   bool DLLPlatform;
   bool IsAndroid;
   bool IsApple;
   bool IsImportedTarget;
+  bool BuildInterfaceIncludesAppended;
   mutable bool DebugIncludesDone;
-  mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
   mutable bool DebugCompileOptionsDone;
   mutable bool DebugCompileDefinitionsDone;
   mutable bool DebugSourcesDone;
   mutable bool DebugCompileFeaturesDone;
-  mutable std::set<std::string> LinkImplicitNullProperties;
-  mutable std::map<std::string, std::string> MaxLanguageStandards;
-  bool BuildInterfaceIncludesAppended;
+  mutable bool LinkImplementationLanguageIsContextDependent;
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  bool LinkLibrariesForVS6Analyzed;
+#endif
 
   // Cache target output paths for each configuration.
   struct OutputInfo;
@@ -816,23 +823,10 @@ private:
 
   void ProcessSourceExpression(std::string const& expr);
 
-  // The cmMakefile instance that owns this target.  This should
-  // always be set.
-  cmMakefile* Makefile;
-
-  // Policy status recorded when target was created.
-#define TARGET_POLICY_MEMBER(POLICY) \
-  cmPolicies::PolicyStatus PolicyStatus ## POLICY;
-
-  CM_FOR_EACH_TARGET_POLICY(TARGET_POLICY_MEMBER)
-
-#undef TARGET_POLICY_MEMBER
-
   // Internal representation details.
   friend class cmTargetInternals;
   friend class cmGeneratorTarget;
   friend class cmTargetTraceDependencies;
-  cmTargetInternalPointer Internal;
 
   void ComputeVersionedName(std::string& vName,
                             std::string const& prefix,
@@ -840,12 +834,14 @@ private:
                             std::string const& suffix,
                             std::string const& name,
                             const char* version) const;
-
-  mutable bool LinkImplementationLanguageIsContextDependent;
 };
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-typedef cmsys::hash_map<std::string,cmTarget> cmTargets;
+#ifdef CMake_HAVE_CXX11_UNORDERED_MAP
+typedef std::unordered_map<std::string, cmTarget> cmTargets;
+#else
+typedef cmsys::hash_map<std::string, cmTarget> cmTargets;
+#endif
 #else
 typedef std::map<std::string,cmTarget> cmTargets;
 #endif

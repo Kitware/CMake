@@ -12,6 +12,7 @@
 #include "cmMacroCommand.h"
 
 #include "cmake.h"
+#include "cmAlgorithms.h"
 
 // define the class for macro commands
 class cmMacroHelperCommand : public cmCommand
@@ -95,12 +96,9 @@ bool cmMacroHelperCommand::InvokeInitialPass
     return false;
     }
 
-  // Enforce matching logical blocks inside the macro.
-  cmMakefile::LexicalPushPop lexScope(this->Makefile);
-
-  // Push a weak policy scope which restores the policies recorded at
-  // macro creation.
-  cmMakefile::PolicyPushPop polScope(this->Makefile, true, this->Policies);
+  cmMakefile::MacroPushPop macroScope(this->Makefile,
+                                      this->FilePath,
+                                      this->Policies);
 
   // set the value of argc
   std::ostringstream argcDefStream;
@@ -125,10 +123,6 @@ bool cmMacroHelperCommand::InvokeInitialPass
     sprintf(argvName,"${ARGV%i}",j);
     argVs.push_back(argvName);
     }
-  if(!this->Functions.empty())
-    {
-    this->FilePath = this->Functions[0].FilePath;
-    }
   // Invoke all the functions that were collected in the block.
   cmListFileFunction newLFF;
   // for each function
@@ -138,7 +132,6 @@ bool cmMacroHelperCommand::InvokeInitialPass
     newLFF.Arguments.clear();
     newLFF.Arguments.reserve(this->Functions[c].Arguments.size());
     newLFF.Name = this->Functions[c].Name;
-    newLFF.FilePath = this->Functions[c].FilePath;
     newLFF.Line = this->Functions[c].Line;
 
     // for each argument of the current function
@@ -146,10 +139,6 @@ bool cmMacroHelperCommand::InvokeInitialPass
            this->Functions[c].Arguments.begin();
          k != this->Functions[c].Arguments.end(); ++k)
       {
-      // Set the FilePath on the arguments to match the function since it is
-      // not stored and the original values may be freed
-      k->FilePath = this->FilePath.c_str();
-
       cmListFileArgument arg;
       arg.Value = k->Value;
       if(k->Delim != cmListFileArgument::Bracket)
@@ -180,7 +169,6 @@ bool cmMacroHelperCommand::InvokeInitialPass
           }
         }
       arg.Delim = k->Delim;
-      arg.FilePath = k->FilePath;
       arg.Line = k->Line;
       newLFF.Arguments.push_back(arg);
       }
@@ -190,8 +178,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
       {
       // The error message should have already included the call stack
       // so we do not need to report an error here.
-      lexScope.Quiet();
-      polScope.Quiet();
+      macroScope.Quiet();
       inStatus.SetNestedError(true);
       return false;
       }
@@ -224,16 +211,16 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
     // if this is the endmacro for this macro then execute
     if (!this->Depth)
       {
-      mf.AddMacro(this->Args[0].c_str());
+      mf.AppendProperty("MACROS", this->Args[0].c_str());
       // create a new command and add it to cmake
       cmMacroHelperCommand *f = new cmMacroHelperCommand();
       f->Args = this->Args;
       f->Functions = this->Functions;
+      f->FilePath = this->GetStartingContext().FilePath;
       mf.RecordPolicies(f->Policies);
       std::string newName = "_" + this->Args[0];
-      mf.GetCMakeInstance()->RenameCommand(this->Args[0],
-                                           newName);
-      mf.AddCommand(f);
+      mf.GetState()->RenameCommand(this->Args[0], newName);
+      mf.GetState()->AddCommand(f);
 
       // remove the function blocker now that the macro is defined
       mf.RemoveFunctionBlocker(this, lff);
@@ -259,7 +246,8 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf)
   if(!cmSystemTools::Strucmp(lff.Name.c_str(),"endmacro"))
     {
     std::vector<std::string> expandedArguments;
-    mf.ExpandArguments(lff.Arguments, expandedArguments);
+    mf.ExpandArguments(lff.Arguments, expandedArguments,
+                       this->GetStartingContext().FilePath.c_str());
     // if the endmacro has arguments make sure they
     // match the arguments of the macro
     if ((expandedArguments.empty() ||

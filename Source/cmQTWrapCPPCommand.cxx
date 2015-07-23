@@ -41,7 +41,7 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args,
       // Compute the name of the file to generate.
       std::string srcName =
         cmSystemTools::GetFilenameWithoutLastExtension(*j);
-      std::string newName = this->Makefile->GetCurrentOutputDirectory();
+      std::string newName = this->Makefile->GetCurrentBinaryDirectory();
       newName += "/moc_";
       newName += srcName;
       newName += ".cxx";
@@ -62,11 +62,11 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args,
         {
         if(curr && curr->GetPropertyAsBool("GENERATED"))
           {
-          hname = this->Makefile->GetCurrentOutputDirectory();
+          hname = this->Makefile->GetCurrentBinaryDirectory();
           }
         else
           {
-          hname = this->Makefile->GetCurrentDirectory();
+          hname = this->Makefile->GetCurrentSourceDirectory();
           }
         hname += "/";
         hname += *j;

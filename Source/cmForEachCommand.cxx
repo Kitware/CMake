@@ -13,6 +13,17 @@
 
 #include <cmsys/auto_ptr.hxx>
 
+cmForEachFunctionBlocker::cmForEachFunctionBlocker(cmMakefile* mf):
+  Makefile(mf), Depth(0)
+{
+  this->Makefile->PushLoopBlock();
+}
+
+cmForEachFunctionBlocker::~cmForEachFunctionBlocker()
+{
+  this->Makefile->PopLoopBlock();
+}
+
 bool cmForEachFunctionBlocker::
 IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
                   cmExecutionStatus &inStatus)
@@ -27,8 +38,6 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
     // if this is the endofreach for this statement
     if (!this->Depth)
       {
-      cmMakefile::LoopBlockPop loopBlockPop(&mf);
-
       // Remove the function blocker for this scope or bail.
       cmsys::auto_ptr<cmFunctionBlocker>
         fb(mf.RemoveFunctionBlocker(this, lff));
@@ -44,8 +53,6 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
       std::vector<std::string>::const_iterator j = this->Args.begin();
       ++j;
 
-      std::string tmps;
-      cmListFileArgument arg;
       for( ; j != this->Args.end(); ++j)
         {
         // set the variable to the loop value
@@ -130,7 +137,7 @@ bool cmForEachCommand
     }
 
   // create a function blocker
-  cmForEachFunctionBlocker *f = new cmForEachFunctionBlocker();
+  cmForEachFunctionBlocker *f = new cmForEachFunctionBlocker(this->Makefile);
   if ( args.size() > 1 )
     {
     if ( args[1] == "RANGE" )
@@ -206,15 +213,14 @@ bool cmForEachCommand
     }
   this->Makefile->AddFunctionBlocker(f);
 
-  this->Makefile->PushLoopBlock();
-
   return true;
 }
 
 //----------------------------------------------------------------------------
 bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
 {
-  cmsys::auto_ptr<cmForEachFunctionBlocker> f(new cmForEachFunctionBlocker());
+  cmsys::auto_ptr<cmForEachFunctionBlocker>
+    f(new cmForEachFunctionBlocker(this->Makefile));
   f->Args.push_back(args[0]);
 
   enum Doing { DoingNone, DoingLists, DoingItems };
@@ -251,8 +257,6 @@ bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
     }
 
   this->Makefile->AddFunctionBlocker(f.release()); // TODO: pass auto_ptr
-
-  this->Makefile->PushLoopBlock();
 
   return true;
 }

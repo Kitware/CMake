@@ -29,9 +29,9 @@ void cmPropertyDefinitionMap
     }
 }
 
-bool cmPropertyDefinitionMap::IsPropertyDefined(const std::string& name)
+bool cmPropertyDefinitionMap::IsPropertyDefined(const std::string& name) const
 {
-  cmPropertyDefinitionMap::iterator it = this->find(name);
+  cmPropertyDefinitionMap::const_iterator it = this->find(name);
   if (it == this->end())
     {
     return false;
@@ -40,9 +40,9 @@ bool cmPropertyDefinitionMap::IsPropertyDefined(const std::string& name)
   return true;
 }
 
-bool cmPropertyDefinitionMap::IsPropertyChained(const std::string& name)
+bool cmPropertyDefinitionMap::IsPropertyChained(const std::string& name) const
 {
-  cmPropertyDefinitionMap::iterator it = this->find(name);
+  cmPropertyDefinitionMap::const_iterator it = this->find(name);
   if (it == this->end())
     {
     return false;

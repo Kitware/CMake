@@ -16,7 +16,7 @@ cmCursesBoolWidget::cmCursesBoolWidget(int width, int height,
                                        int left, int top) :
   cmCursesWidget(width, height, left, top)
 {
-  this->Type = cmCacheManager::BOOL;
+  this->Type = cmState::BOOL;
   set_field_fore(this->Field,  A_NORMAL);
   set_field_back(this->Field,  A_STANDOUT);
   field_opts_off(this->Field,  O_STATIC);

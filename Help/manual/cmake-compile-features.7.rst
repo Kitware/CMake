@@ -278,7 +278,7 @@ properties:
   add_library(foo INTERFACE)
   set(with_variadics ${CMAKE_CURRENT_SOURCE_DIR}/with_variadics)
   set(no_variadics ${CMAKE_CURRENT_SOURCE_DIR}/no_variadics)
-  target_link_libraries(foo
+  target_include_directories(foo
     INTERFACE
       "$<$<COMPILE_FEATURES:cxx_variadic_templates>:${with_variadics}>"
       "$<$<NOT:$<COMPILE_FEATURES:cxx_variadic_templates>>:${no_variadics}>"
@@ -295,3 +295,17 @@ the feature-appropriate include directory
 
   add_executable(consumer_no consumer_no.cpp)
   target_link_libraries(consumer_no foo)
+
+Supported Compilers
+===================
+
+CMake is currently aware of the :prop_tgt:`language standards <CXX_STANDARD>`
+and :prop_gbl:`compile features <CMAKE_CXX_KNOWN_FEATURES>` available from
+the following :variable:`compiler ids <CMAKE_<LANG>_COMPILER_ID>` as of the
+versions specified for each:
+
+* ``AppleClang``: Apple Clang for Xcode versions 4.4 though 6.2.
+* ``Clang``: Clang compiler versions 2.9 through 3.4.
+* ``GNU``: GNU compiler versions 4.4 through 5.0.
+* ``MSVC``: Microsoft Visual Studio versions 2010 through 2015.
+* ``SunPro``: Oracle SolarisStudio version 12.4.

@@ -50,7 +50,7 @@ void cmGlobalKdevelopGenerator::Generate()
       ++it)
     {
     cmMakefile* mf = it->second[0]->GetMakefile();
-    std::string outputDir=mf->GetStartOutputDirectory();
+    std::string outputDir=mf->GetCurrentBinaryDirectory();
     std::string projectDir=mf->GetHomeDirectory();
     std::string projectName=mf->GetProjectName();
     std::string cmakeFilePattern("CMakeLists.txt;*.cmake;");

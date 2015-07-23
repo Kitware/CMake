@@ -75,6 +75,8 @@ static const char * cmDocumentationOptions[][2] =
    "Run a specific number of tests by number."},
   {"-U, --union", "Take the Union of -I and -R"},
   {"--rerun-failed", "Run only the tests that failed previously"},
+  {"--repeat-until-fail <n>", "Require each test to run <n> "
+   "times without failing in order to pass"},
   {"--max-width <width>", "Set the max width for a test name to output"},
   {"--interactive-debug-mode [0|1]", "Set the interactive mode to 0 or 1."},
   {"--no-label-summary", "Disable timing summary information for labels."},
@@ -96,6 +98,7 @@ static const char * cmDocumentationOptions[][2] =
 
   {"--test-command", "The test to run with the --build-and-test option."},
   {"--test-timeout", "The time limit in seconds, internal use only."},
+  {"--test-load", "CPU load threshold for starting new parallel tests."},
   {"--tomorrow-tag", "Nightly or experimental starts with next day tag."},
   {"--ctest-config", "The configuration file used to initialize CTest state "
    "when submitting dashboards."},
@@ -158,6 +161,8 @@ int main (int argc, char const* const* argv)
     if(doc.CheckOptions(argc, argv))
       {
       cmake hcm;
+      hcm.SetHomeDirectory("");
+      hcm.SetHomeOutputDirectory("");
       hcm.AddCMakePaths();
 
       // Construct and print requested documentation.

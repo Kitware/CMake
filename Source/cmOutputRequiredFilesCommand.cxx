@@ -11,6 +11,7 @@
 ============================================================================*/
 #include "cmOutputRequiredFilesCommand.h"
 #include "cmMakeDepend.h"
+#include "cmAlgorithms.h"
 #include <cmsys/FStream.hxx>
 
 class cmLBDepend : public cmMakeDepend
@@ -191,7 +192,7 @@ bool cmOutputRequiredFilesCommand
   // compute the list of files
   cmLBDepend md;
   md.SetMakefile(this->Makefile);
-  md.AddSearchPath(this->Makefile->GetStartDirectory());
+  md.AddSearchPath(this->Makefile->GetCurrentSourceDirectory());
   // find the depends for a file
   const cmDependInformation *info = md.FindDependencies(this->File.c_str());
   if (info)

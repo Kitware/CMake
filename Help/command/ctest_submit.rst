@@ -1,46 +1,55 @@
 ctest_submit
 ------------
 
-Submit results to a dashboard server.
+Perform the :ref:`CTest Submit Step` as a :ref:`Dashboard Client`.
 
 ::
 
-  ctest_submit([PARTS ...] [FILES ...]
-               [RETRY_COUNT count]
-               [RETRY_DELAY delay]
-               [RETURN_VALUE res]
+  ctest_submit([PARTS <part>...] [FILES <file>...]
+               [RETRY_COUNT <count>]
+               [RETRY_DELAY <delay>]
+               [RETURN_VALUE <result-var>]
                [QUIET]
                )
 
-By default all available parts are submitted if no PARTS or FILES are
-specified.  The PARTS option lists a subset of parts to be submitted.
-Valid part names are:
+Submit results to a dashboard server.
+By default all available parts are submitted.
 
-::
+The options are:
 
-  Start      = nothing
-  Update     = ctest_update results, in Update.xml
-  Configure  = ctest_configure results, in Configure.xml
-  Build      = ctest_build results, in Build.xml
-  Test       = ctest_test results, in Test.xml
-  Coverage   = ctest_coverage results, in Coverage.xml
-  MemCheck   = ctest_memcheck results, in DynamicAnalysis.xml
-  Notes      = Files listed by CTEST_NOTES_FILES, in Notes.xml
-  ExtraFiles = Files listed by CTEST_EXTRA_SUBMIT_FILES
-  Upload     = Files prepared for upload by ctest_upload(), in Upload.xml
-  Submit     = nothing
+``PARTS <part>...``
+  Specify a subset of parts to submit.  Valid part names are::
 
-The FILES option explicitly lists specific files to be submitted.
-Each individual file must exist at the time of the call.
+    Start      = nothing
+    Update     = ctest_update results, in Update.xml
+    Configure  = ctest_configure results, in Configure.xml
+    Build      = ctest_build results, in Build.xml
+    Test       = ctest_test results, in Test.xml
+    Coverage   = ctest_coverage results, in Coverage.xml
+    MemCheck   = ctest_memcheck results, in DynamicAnalysis.xml
+    Notes      = Files listed by CTEST_NOTES_FILES, in Notes.xml
+    ExtraFiles = Files listed by CTEST_EXTRA_SUBMIT_FILES
+    Upload     = Files prepared for upload by ctest_upload(), in Upload.xml
+    Submit     = nothing
 
-The RETRY_DELAY option specifies how long in seconds to wait after a
-timed-out submission before attempting to re-submit.
+``FILES <file>...``
+  Specify an explicit list of specific files to be submitted.
+  Each individual file must exist at the time of the call.
 
-The RETRY_COUNT option specifies how many times to retry a timed-out
-submission.
+``RETRY_COUNT <count>``
+  Specify how many times to retry a timed-out submission.
 
-The QUIET option suppresses all non-error messages that would have
-otherwise been printed by this call to ctest_submit().
+``RETRY_DELAY <delay>``
+  Specify how long (in seconds) to wait after a timed-out submission
+  before attempting to re-submit.
+
+``RETURN_VALUE <result-var>``
+  Store in the ``<result-var>`` variable ``0`` for success and
+  non-zero on failure.
+
+``QUIET``
+  Suppress all non-error messages that would have otherwise been
+  printed to the console.
 
 Submit to CDash Upload API
 ^^^^^^^^^^^^^^^^^^^^^^^^^^

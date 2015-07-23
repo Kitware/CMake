@@ -62,6 +62,7 @@ bool cmProcess::StartProcess()
                                      this->WorkingDirectory.c_str());
     }
   cmsysProcess_SetTimeout(this->Process, this->Timeout);
+  cmsysProcess_SetOption(this->Process, cmsysProcess_Option_MergeOutput, 1);
   cmsysProcess_Execute(this->Process);
   return (cmsysProcess_GetState(this->Process)
           == cmsysProcess_State_Executing);
@@ -124,13 +125,9 @@ int cmProcess::GetNextOutputLine(std::string& line, double timeout)
   for(;;)
     {
     // Look for lines already buffered.
-    if(this->StdOut.GetLine(line))
+    if(this->Output.GetLine(line))
       {
       return cmsysProcess_Pipe_STDOUT;
-      }
-    else if(this->StdErr.GetLine(line))
-      {
-      return cmsysProcess_Pipe_STDERR;
       }
 
     // Check for more data from the process.
@@ -143,11 +140,7 @@ int cmProcess::GetNextOutputLine(std::string& line, double timeout)
       }
     else if(p == cmsysProcess_Pipe_STDOUT)
       {
-      this->StdOut.insert(this->StdOut.end(), data, data+length);
-      }
-    else if(p == cmsysProcess_Pipe_STDERR)
-      {
-      this->StdErr.insert(this->StdErr.end(), data, data+length);
+      this->Output.insert(this->Output.end(), data, data+length);
       }
     else // p == cmsysProcess_Pipe_None
       {
@@ -157,13 +150,9 @@ int cmProcess::GetNextOutputLine(std::string& line, double timeout)
     }
 
   // Look for partial last lines.
-  if(this->StdOut.GetLast(line))
+  if(this->Output.GetLast(line))
     {
     return cmsysProcess_Pipe_STDOUT;
-    }
-  else if(this->StdErr.GetLast(line))
-    {
-    return cmsysProcess_Pipe_STDERR;
     }
 
   // No more data.  Wait for process exit.

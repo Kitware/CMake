@@ -15,6 +15,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
+#include "cmAlgorithms.h"
 #include <cmsys/FStream.hxx>
 
 #include <ctype.h> // isspace
@@ -241,13 +242,22 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
           cmsys::ifstream fin(fullName.c_str());
           if(fin)
             {
-            // Add this file as a dependency.
-            dependencies.insert(fullName);
+            cmsys::FStream::BOM bom = cmsys::FStream::ReadBOM(fin);
+            if(bom == cmsys::FStream::BOM_None ||
+               bom == cmsys::FStream::BOM_UTF8)
+              {
+              // Add this file as a dependency.
+              dependencies.insert(fullName);
 
-            // Scan this file for new dependencies.  Pass the directory
-            // containing the file to handle double-quote includes.
-            std::string dir = cmSystemTools::GetFilenamePath(fullName);
-            this->Scan(fin, dir.c_str(), fullName);
+              // Scan this file for new dependencies.  Pass the directory
+              // containing the file to handle double-quote includes.
+              std::string dir = cmSystemTools::GetFilenamePath(fullName);
+              this->Scan(fin, dir.c_str(), fullName);
+              }
+            else
+              {
+              // Skip file with encoding we do not implement.
+              }
             }
           }
         }

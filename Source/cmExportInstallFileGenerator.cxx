@@ -19,6 +19,7 @@
 #include "cmInstallExportGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmTargetExport.h"
+#include "cmAlgorithms.h"
 
 //----------------------------------------------------------------------------
 cmExportInstallFileGenerator
@@ -478,7 +479,7 @@ cmExportInstallFileGenerator
 ::FindNamespaces(cmMakefile* mf, const std::string& name)
 {
   std::vector<std::string> namespaces;
-  cmGlobalGenerator* gg = mf->GetLocalGenerator()->GetGlobalGenerator();
+  cmGlobalGenerator* gg = mf->GetGlobalGenerator();
   const cmExportSetMap& exportSets = gg->GetExportSets();
 
   for(cmExportSetMap::const_iterator expIt = exportSets.begin();

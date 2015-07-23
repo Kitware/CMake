@@ -16,6 +16,7 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmGeneratedFileStream.h"
+#include "cmState.h"
 #include "cmTarget.h"
 #include "cmSourceFile.h"
 
@@ -205,7 +206,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
 
   std::string cacheEntryName = "CMAKE_ECLIPSE_ENVVAR_";
   cacheEntryName += envVar;
-  const char* cacheValue = mf->GetCacheManager()->GetCacheValue(
+  const char* cacheValue = mf->GetState()->GetInitializedCacheValue(
                                                        cacheEntryName);
 
   // now we have both, decide which one to use
@@ -221,9 +222,9 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
     // in the cache
     valueToUse = envVarValue;
     mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
-                           cacheEntryName.c_str(), cmCacheManager::STRING,
+                           cacheEntryName.c_str(), cmState::STRING,
                            true);
-    mf->GetCacheManager()->SaveCache(mf->GetHomeOutputDirectory());
+    mf->GetCMakeInstance()->SaveCache(mf->GetHomeOutputDirectory());
     }
   else if (envVarValue==0 && cacheValue!=0)
     {
@@ -242,9 +243,9 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
       {
       valueToUse = envVarValue;
       mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
-                             cacheEntryName.c_str(), cmCacheManager::STRING,
+                             cacheEntryName.c_str(), cmState::STRING,
                              true);
-      mf->GetCacheManager()->SaveCache(mf->GetHomeOutputDirectory());
+      mf->GetCMakeInstance()->SaveCache(mf->GetHomeOutputDirectory());
       }
     }
 
@@ -468,8 +469,8 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     fout << "\t\t<nature>" << *nit << "</nature>\n";
     }
 
-  if (const char *extraNaturesProp = mf->GetCMakeInstance()->
-        GetProperty("ECLIPSE_EXTRA_NATURES", cmProperty::GLOBAL))
+  if (const char *extraNaturesProp = mf->GetState()
+        ->GetGlobalProperty("ECLIPSE_EXTRA_NATURES"))
     {
     std::vector<std::string> extraNatures;
     cmSystemTools::ExpandListArgument(extraNaturesProp, extraNatures);
@@ -494,7 +495,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
 
     std::string sourceLinkedResourceName = "[Source directory]";
     std::string linkSourceDirectory = this->GetEclipsePath(
-                                                      mf->GetStartDirectory());
+                                             mf->GetCurrentSourceDirectory());
     // .project dir can't be subdir of a linked resource dir
     if (!cmSystemTools::IsSubDirectory(this->HomeOutputDirectory,
                                          linkSourceDirectory))
@@ -597,7 +598,8 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(
                 linkName4 += "/";
                 linkName4 += cmSystemTools::GetFilenameName(fullPath);
                 this->AppendLinkedResource(fout, linkName4,
-                                           fullPath, LinkToFile);
+                                           this->GetEclipsePath(fullPath),
+                                           LinkToFile);
                 }
               }
             }
@@ -632,7 +634,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
        ++it)
     {
     std::string linkSourceDirectory = this->GetEclipsePath(
-                            it->second[0]->GetMakefile()->GetStartDirectory());
+                   it->second[0]->GetMakefile()->GetCurrentSourceDirectory());
     // a linked resource must not point to a parent directory of .project or
     // .project itself
     if ((baseDir != linkSourceDirectory) &&
@@ -1007,7 +1009,6 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   const std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   const std::string makeArgs = mf->GetSafeDefinition(
                                                "CMAKE_ECLIPSE_MAKE_ARGUMENTS");
-  const std::string cmake = mf->GetRequiredDefinition("CMAKE_COMMAND");
 
   cmGlobalGenerator* generator
     = const_cast<cmGlobalGenerator*>(this->GlobalGenerator);
@@ -1032,7 +1033,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     {
     const cmTargets& targets = (*it)->GetMakefile()->GetTargets();
     cmMakefile* makefile=(*it)->GetMakefile();
-    std::string subdir = (*it)->Convert(makefile->GetCurrentOutputDirectory(),
+    std::string subdir = (*it)->Convert(makefile->GetCurrentBinaryDirectory(),
                            cmLocalGenerator::HOME_OUTPUT);
     if (subdir == ".")
       {
@@ -1093,13 +1094,14 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
                              ti->first.c_str());
 
           std::string cleanArgs = "-E chdir \"";
-          cleanArgs += makefile->GetCurrentOutputDirectory();
+          cleanArgs += makefile->GetCurrentBinaryDirectory();
           cleanArgs += "\" \"";
-          cleanArgs += cmake;
+          cleanArgs += cmSystemTools::GetCMakeCommand();
           cleanArgs += "\" -P \"";
           cleanArgs += (*it)->GetTargetDirectory(ti->second);
           cleanArgs += "/cmake_clean.cmake\"";
-          this->AppendTarget(fout, "Clean", cmake, cleanArgs, virtDir, "", "");
+          this->AppendTarget(fout, "Clean", cmSystemTools::GetCMakeCommand(),
+                             cleanArgs, virtDir, "", "");
           }
          }
          break;
@@ -1162,7 +1164,7 @@ cmExtraEclipseCDT4Generator::GetEclipsePath(const std::string& path)
 #if defined(__CYGWIN__)
   std::string cmd = "cygpath -m " + path;
   std::string out;
-  if (!cmSystemTools::RunSingleCommand(cmd.c_str(), &out))
+  if (!cmSystemTools::RunSingleCommand(cmd.c_str(), &out, &out))
     {
     return path;
     }

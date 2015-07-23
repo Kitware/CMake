@@ -405,6 +405,8 @@ function(_Boost_GUESS_COMPILER_PREFIX _ret)
     else()
       set (_boost_COMPILER "-il")
     endif()
+  elseif (GHSMULTI)
+    set(_boost_COMPILER "-ghs")
   elseif (MSVC14)
     set(_boost_COMPILER "-vc140")
   elseif (MSVC12)
@@ -777,7 +779,8 @@ endif()
 # ------------------------------------------------------------------------
 
 set(Boost_LIB_PREFIX "")
-if ( WIN32 AND Boost_USE_STATIC_LIBS AND NOT CYGWIN)
+if ( (GHSMULTI AND Boost_USE_STATIC_LIBS) OR
+    (WIN32 AND Boost_USE_STATIC_LIBS AND NOT CYGWIN) )
   set(Boost_LIB_PREFIX "lib")
 endif()
 
@@ -879,8 +882,10 @@ endif()
 #  Begin finding boost libraries
 # ------------------------------------------------------------------------
 
+set(_Boost_VARS_LIB "")
 foreach(c DEBUG RELEASE)
   set(_Boost_VARS_LIB_${c} BOOST_LIBRARYDIR Boost_LIBRARY_DIR_${c})
+  list(APPEND _Boost_VARS_LIB ${_Boost_VARS_LIB_${c}})
   _Boost_CHANGE_DETECT(_Boost_CHANGE_LIBDIR_${c} ${_Boost_VARS_DIR} ${_Boost_VARS_LIB_${c}} Boost_INCLUDE_DIR)
   # Clear Boost_LIBRARY_DIR_${c} if it did not change but other input affecting the
   # location did.  We will find a new one based on the new inputs.

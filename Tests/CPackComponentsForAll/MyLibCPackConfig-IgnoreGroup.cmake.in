@@ -22,12 +22,16 @@ if(CPACK_GENERATOR MATCHES "RPM")
   # test cross-built rpm
   set(CPACK_RPM_applications_PACKAGE_ARCHITECTURE "armv7hf")
 
-  # test package summary override
+  # test package summary override - headers rpm is generated in the middle
   set(CPACK_RPM_PACKAGE_SUMMARY "default summary")
-  set(CPACK_RPM_libraries_PACKAGE_SUMMARY "libraries summary")
+  set(CPACK_RPM_headers_PACKAGE_SUMMARY "headers summary")
 
-  # test package description override
-  set(CPACK_RPM_libraries_PACKAGE_DESCRIPTION "libraries description")
+  # test package description override - headers rpm is generated in the middle
+  set(CPACK_RPM_headers_PACKAGE_DESCRIPTION "headers description")
+
+  # test package do not use CPACK_PACKAGING_INSTALL_PREFIX
+  # as relocation path
+  set(CPACK_RPM_NO_libraries_INSTALL_PREFIX_RELOCATION true)
 endif()
 
 if(CPACK_GENERATOR MATCHES "DEB")

@@ -16,35 +16,9 @@
 #include <string>
 
 #include "cmListFileCache.h"
+#include "cmGeneratorExpressionContext.h"
 
 class cmTarget;
-
-//----------------------------------------------------------------------------
-struct cmGeneratorExpressionContext
-{
-  cmGeneratorExpressionContext()
-    : Backtrace(NULL)
-  {
-  }
-
-  cmListFileBacktrace Backtrace;
-  std::set<cmTarget*> DependTargets;
-  std::set<cmTarget const*> AllTargets;
-  std::set<std::string> SeenTargetProperties;
-  std::set<cmTarget const*> SourceSensitiveTargets;
-  std::map<cmTarget const*, std::map<std::string, std::string> >
-                                                          MaxLanguageStandard;
-  cmMakefile *Makefile;
-  std::string Config;
-  cmTarget const* HeadTarget; // The target whose property is being evaluated.
-  cmTarget const* CurrentTarget; // The dependent of HeadTarget which appears
-                                 // directly or indirectly in the property.
-  bool Quiet;
-  bool HadError;
-  bool HadContextSensitiveCondition;
-  bool HadHeadSensitiveCondition;
-  bool EvaluateForBuildsystem;
-};
 
 struct cmGeneratorExpressionDAGChecker;
 struct cmGeneratorExpressionNode;

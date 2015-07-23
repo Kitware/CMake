@@ -106,6 +106,18 @@
 #      CUDA_COMPUTE_SEPARABLE_COMPILATION_OBJECT_FILE_NAME and
 #      CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS should be called.
 #
+#   CUDA_SOURCE_PROPERTY_FORMAT
+#   -- If this source file property is set, it can override the format specified
+#      to CUDA_WRAP_SRCS (OBJ, PTX, CUBIN, or FATBIN).  If an input source file
+#      is not a .cu file, setting this file will cause it to be treated as a .cu
+#      file. See documentation for set_source_files_properties on how to set
+#      this property.
+#
+#   CUDA_USE_STATIC_CUDA_RUNTIME (Default ON)
+#   -- When enabled the static version of the CUDA runtime library will be used
+#      in CUDA_LIBRARIES.  If the version of CUDA configured doesn't support
+#      this option, then it will be silently disabled.
+#
 #   CUDA_VERBOSE_BUILD (Default OFF)
 #   -- Set to ON to see all the commands used when building the CUDA file.  When
 #      using a Makefile generator the value defaults to VERBOSE (run make
@@ -272,6 +284,8 @@
 #   CUDA_CUBLAS_LIBRARIES -- Device or emulation library for the Cuda BLAS
 #                            implementation (alterative to:
 #                            CUDA_ADD_CUBLAS_TO_TARGET macro).
+#   CUDA_cudart_static_LIBRARY -- Statically linkable cuda runtime library.
+#                                 Only available for CUDA version 5.5+
 #   CUDA_cupti_LIBRARY    -- CUDA Profiling Tools Interface library.
 #                            Only available for CUDA version 4.0+.
 #   CUDA_curand_LIBRARY   -- CUDA Random Number Generation library.
@@ -454,17 +468,31 @@ set(CUDA_NVCC_FLAGS "" CACHE STRING "Semi-colon delimit multiple arguments.")
 if(CMAKE_GENERATOR MATCHES "Visual Studio")
   set(CUDA_HOST_COMPILER "$(VCInstallDir)bin" CACHE FILEPATH "Host side compiler used by NVCC")
 else()
-  # Using cc which is symlink to clang may let NVCC think it is GCC and issue
-  # unhandled -dumpspecs option to clang. Also in case neither
-  # CMAKE_C_COMPILER is defined (project does not use C language) nor
-  # CUDA_HOST_COMPILER is specified manually we should skip -ccbin and let
-  # nvcc use its own default C compiler.
-  if(DEFINED CMAKE_C_COMPILER AND NOT DEFINED CUDA_HOST_COMPILER)
-    get_filename_component(c_compiler_realpath "${CMAKE_C_COMPILER}" REALPATH)
+  if(APPLE
+      AND "${CMAKE_C_COMPILER_ID}" MATCHES "Clang"
+      AND "${CMAKE_C_COMPILER}" MATCHES "/cc$")
+    # Using cc which is symlink to clang may let NVCC think it is GCC and issue
+    # unhandled -dumpspecs option to clang. Also in case neither
+    # CMAKE_C_COMPILER is defined (project does not use C language) nor
+    # CUDA_HOST_COMPILER is specified manually we should skip -ccbin and let
+    # nvcc use its own default C compiler.
+    # Only care about this on APPLE with clang to avoid
+    # following symlinks to things like ccache
+    if(DEFINED CMAKE_C_COMPILER AND NOT DEFINED CUDA_HOST_COMPILER)
+      get_filename_component(c_compiler_realpath "${CMAKE_C_COMPILER}" REALPATH)
+      # if the real path does not end up being clang then
+      # go back to using CMAKE_C_COMPILER
+      if(NOT "${c_compiler_realpath}" MATCHES "/clang$")
+        set(c_compiler_realpath "${CMAKE_C_COMPILER}")
+      endif()
+    else()
+      set(c_compiler_realpath "")
+    endif()
+    set(CUDA_HOST_COMPILER "${c_compiler_realpath}" CACHE FILEPATH "Host side compiler used by NVCC")
   else()
-    set(c_compiler_realpath "")
+    set(CUDA_HOST_COMPILER "${CMAKE_C_COMPILER}"
+      CACHE FILEPATH "Host side compiler used by NVCC")
   endif()
-  set(CUDA_HOST_COMPILER "${c_compiler_realpath}" CACHE FILEPATH "Host side compiler used by NVCC")
 endif()
 
 # Propagate the host flags to the host compiler via -Xcompiler
@@ -518,11 +546,12 @@ macro(cuda_unset_include_and_libraries)
     # This only existed in the 3.0 version of the CUDA toolkit
     unset(CUDA_CUDARTEMU_LIBRARY CACHE)
   endif()
-  unset(CUDA_cupti_LIBRARY CACHE)
+  unset(CUDA_cudart_static_LIBRARY CACHE)
   unset(CUDA_cublas_LIBRARY CACHE)
   unset(CUDA_cublasemu_LIBRARY CACHE)
   unset(CUDA_cufft_LIBRARY CACHE)
   unset(CUDA_cufftemu_LIBRARY CACHE)
+  unset(CUDA_cupti_LIBRARY CACHE)
   unset(CUDA_curand_LIBRARY CACHE)
   unset(CUDA_cusolver_LIBRARY CACHE)
   unset(CUDA_cusparse_LIBRARY CACHE)
@@ -532,6 +561,8 @@ macro(cuda_unset_include_and_libraries)
   unset(CUDA_npps_LIBRARY CACHE)
   unset(CUDA_nvcuvenc_LIBRARY CACHE)
   unset(CUDA_nvcuvid_LIBRARY CACHE)
+
+  unset(CUDA_USE_STATIC_CUDA_RUNTIME CACHE)
 endmacro()
 
 # Check to see if the CUDA_TOOLKIT_ROOT_DIR and CUDA_SDK_ROOT_DIR have changed,
@@ -539,8 +570,8 @@ endmacro()
 if(NOT "${CUDA_TOOLKIT_ROOT_DIR}" STREQUAL "${CUDA_TOOLKIT_ROOT_DIR_INTERNAL}")
   unset(CUDA_TOOLKIT_TARGET_DIR CACHE)
   unset(CUDA_NVCC_EXECUTABLE CACHE)
-  unset(CUDA_VERSION CACHE)
   cuda_unset_include_and_libraries()
+  unset(CUDA_VERSION CACHE)
 endif()
 
 if(NOT "${CUDA_TOOLKIT_TARGET_DIR}" STREQUAL "${CUDA_TOOLKIT_TARGET_DIR_INTERNAL}")
@@ -696,6 +727,53 @@ if(CUDA_VERSION VERSION_EQUAL "3.0")
     CUDA_CUDARTEMU_LIBRARY
     )
 endif()
+if(NOT CUDA_VERSION VERSION_LESS "5.5")
+  cuda_find_library_local_first(CUDA_cudart_static_LIBRARY cudart_static "static CUDA runtime library")
+  mark_as_advanced(CUDA_cudart_static_LIBRARY)
+endif()
+if(CUDA_cudart_static_LIBRARY)
+  # Set whether to use the static cuda runtime.
+  option(CUDA_USE_STATIC_CUDA_RUNTIME "Use the static version of the CUDA runtime library if available" ON)
+else()
+  option(CUDA_USE_STATIC_CUDA_RUNTIME "Use the static version of the CUDA runtime library if available" OFF)
+endif()
+
+if(CUDA_USE_STATIC_CUDA_RUNTIME)
+  if(UNIX)
+    # Check for the dependent libraries.  Here we look for pthreads.
+    if (DEFINED CMAKE_THREAD_PREFER_PTHREAD)
+      set(_cuda_cmake_thread_prefer_pthread ${CMAKE_THREAD_PREFER_PTHREAD})
+    endif()
+    set(CMAKE_THREAD_PREFER_PTHREAD 1)
+
+    # Many of the FindXYZ CMake comes with makes use of try_compile with int main(){return 0;}
+    # as the source file.  Unfortunately this causes a warning with -Wstrict-prototypes and
+    # -Werror causes the try_compile to fail.  We will just temporarily disable other flags
+    # when doing the find_package command here.
+    set(_cuda_cmake_c_flags ${CMAKE_C_FLAGS})
+    set(CMAKE_C_FLAGS "-fPIC")
+    find_package(Threads REQUIRED)
+    set(CMAKE_C_FLAGS ${_cuda_cmake_c_flags})
+
+    if (DEFINED _cuda_cmake_thread_prefer_pthread)
+      set(CMAKE_THREAD_PREFER_PTHREAD ${_cuda_cmake_thread_prefer_pthread})
+      unset(_cuda_cmake_thread_prefer_pthread)
+    else()
+      unset(CMAKE_THREAD_PREFER_PTHREAD)
+    endif()
+    if (NOT APPLE)
+      # Here is librt that has things such as, clock_gettime, shm_open, and shm_unlink.
+      find_library(CUDA_rt_LIBRARY rt)
+      find_library(CUDA_dl_LIBRARY dl)
+      if (NOT CUDA_rt_LIBRARY)
+        message(WARNING "Expecting to find librt for libcudart_static, but didn't find it.")
+      endif()
+      if (NOT CUDA_dl_LIBRARY)
+        message(WARNING "Expecting to find libdl for libcudart_static, but didn't find it.")
+      endif()
+    endif()
+  endif()
+endif()
 
 # CUPTI library showed up in cuda toolkit 4.0
 if(NOT CUDA_VERSION VERSION_LESS "4.0")
@@ -703,12 +781,32 @@ if(NOT CUDA_VERSION VERSION_LESS "4.0")
   mark_as_advanced(CUDA_cupti_LIBRARY)
 endif()
 
+# Set the CUDA_LIBRARIES variable.  This is the set of stuff to link against if you are
+# using the CUDA runtime.  For the dynamic version of the runtime, most of the
+# dependencies are brough in, but for the static version there are additional libraries
+# and linker commands needed.
+# Initialize to empty
+set(CUDA_LIBRARIES)
+
 # If we are using emulation mode and we found the cudartemu library then use
 # that one instead of cudart.
 if(CUDA_BUILD_EMULATION AND CUDA_CUDARTEMU_LIBRARY)
-  set(CUDA_LIBRARIES ${CUDA_CUDARTEMU_LIBRARY})
+  list(APPEND CUDA_LIBRARIES ${CUDA_CUDARTEMU_LIBRARY})
+elseif(CUDA_USE_STATIC_CUDA_RUNTIME AND CUDA_cudart_static_LIBRARY)
+  list(APPEND CUDA_LIBRARIES ${CUDA_cudart_static_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
+  if (CUDA_rt_LIBRARY)
+    list(APPEND CUDA_LIBRARIES ${CUDA_rt_LIBRARY})
+  endif()
+  if (CUDA_dl_LIBRARY)
+    list(APPEND CUDA_LIBRARIES ${CUDA_dl_LIBRARY})
+  endif()
+  if(APPLE)
+    # We need to add the default path to the driver (libcuda.dylib) as an rpath, so that
+    # the static cuda runtime can find it at runtime.
+    list(APPEND CUDA_LIBRARIES -Wl,-rpath,/usr/local/cuda/lib)
+  endif()
 else()
-  set(CUDA_LIBRARIES ${CUDA_CUDART_LIBRARY})
+  list(APPEND CUDA_LIBRARIES ${CUDA_CUDART_LIBRARY})
 endif()
 
 # 1.1 toolkit on linux doesn't appear to have a separate library on
@@ -1184,6 +1282,19 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
     set(_cuda_nvcc_flags_config "${_cuda_nvcc_flags_config}\nset(CUDA_NVCC_FLAGS_${config_upper} ${CUDA_NVCC_FLAGS_${config_upper}} ;; ${CUDA_WRAP_OPTION_NVCC_FLAGS_${config_upper}})")
   endforeach()
 
+  # Process the C++11 flag.  If the host sets the flag, we need to add it to nvcc and
+  # remove it from the host. This is because -Xcompile -std=c++ will choke nvcc (it uses
+  # the C preprocessor).  In order to get this to work correctly, we need to use nvcc's
+  # specific c++11 flag.
+  if( "${_cuda_host_flags}" MATCHES "-std=c\\+\\+11")
+    # Add the c++11 flag to nvcc if it isn't already present.  Note that we only look at
+    # the main flag instead of the configuration specific flags.
+    if( NOT "${CUDA_NVCC_FLAGS}" MATCHES "-std;c\\+\\+11" )
+      list(APPEND nvcc_flags --std c++11)
+    endif()
+    string(REGEX REPLACE "[-]+std=c\\+\\+11" "" _cuda_host_flags "${_cuda_host_flags}")
+  endif()
+
   # Get the list of definitions from the directory property
   get_directory_property(CUDA_NVCC_DEFINITIONS COMPILE_DEFINITIONS)
   if(CUDA_NVCC_DEFINITIONS)
@@ -1204,12 +1315,18 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   foreach(file ${ARGN})
     # Ignore any file marked as a HEADER_FILE_ONLY
     get_source_file_property(_is_header ${file} HEADER_FILE_ONLY)
-    if(${file} MATCHES "\\.cu$" AND NOT _is_header)
+    # Allow per source file overrides of the format.  Also allows compiling non-.cu files.
+    get_source_file_property(_cuda_source_format ${file} CUDA_SOURCE_PROPERTY_FORMAT)
+    if((${file} MATCHES "\\.cu$" OR _cuda_source_format) AND NOT _is_header)
 
-      # Allow per source file overrides of the format.
-      get_source_file_property(_cuda_source_format ${file} CUDA_SOURCE_PROPERTY_FORMAT)
       if(NOT _cuda_source_format)
         set(_cuda_source_format ${format})
+      endif()
+      # If file isn't a .cu file, we need to tell nvcc to treat it as such.
+      if(NOT ${file} MATCHES "\\.cu$")
+        set(cuda_language_flag -x=cu)
+      else()
+        set(cuda_language_flag)
       endif()
 
       if( ${_cuda_source_format} MATCHES "OBJ")
@@ -1223,7 +1340,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
         elseif( ${_cuda_source_format} MATCHES "FATBIN")
           set( cuda_compile_to_external_module_type "fatbin" )
         else()
-          message( FATAL_ERROR "Invalid format flag passed to CUDA_WRAP_SRCS for file '${file}': '${_cuda_source_format}'.  Use OBJ, PTX, CUBIN or FATBIN.")
+          message( FATAL_ERROR "Invalid format flag passed to CUDA_WRAP_SRCS or set with CUDA_SOURCE_PROPERTY_FORMAT file property for file '${file}': '${_cuda_source_format}'.  Use OBJ, PTX, CUBIN or FATBIN.")
         endif()
       endif()
 
@@ -1382,10 +1499,10 @@ endmacro()
 
 function(_cuda_get_important_host_flags important_flags flag_string)
   if(CMAKE_GENERATOR MATCHES "Visual Studio")
-    string(REGEX MATCHALL "/M[DT][d]?" flags ${flag_string})
+    string(REGEX MATCHALL "/M[DT][d]?" flags "${flag_string}")
     list(APPEND ${important_flags} ${flags})
   else()
-    string(REGEX MATCHALL "-fPIC" flags ${flag_string})
+    string(REGEX MATCHALL "-fPIC" flags "${flag_string}")
     list(APPEND ${important_flags} ${flags})
   endif()
   set(${important_flags} ${${important_flags}} PARENT_SCOPE)
@@ -1445,14 +1562,14 @@ function(CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS output_file cuda_target options
         list(APPEND config_specific_flags $<$<CONFIG:${config}>:${f}>)
       endforeach()
       set(important_host_flags)
-      _cuda_get_important_host_flags(important_host_flags ${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}})
+      _cuda_get_important_host_flags(important_host_flags "${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}}")
       foreach(f ${important_host_flags})
         list(APPEND flags $<$<CONFIG:${config}>:-Xcompiler> $<$<CONFIG:${config}>:${f}>)
       endforeach()
     endforeach()
     # Add CMAKE_${CUDA_C_OR_CXX}_FLAGS
     set(important_host_flags)
-    _cuda_get_important_host_flags(important_host_flags ${CMAKE_${CUDA_C_OR_CXX}_FLAGS})
+    _cuda_get_important_host_flags(important_host_flags "${CMAKE_${CUDA_C_OR_CXX}_FLAGS}")
     foreach(f ${important_host_flags})
       list(APPEND flags -Xcompiler ${f})
     endforeach()
@@ -1482,10 +1599,12 @@ function(CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS output_file cuda_target options
         COMMENT "Building NVCC intermediate link file ${output_file_relative_path}"
         )
     else()
+      get_filename_component(output_file_dir "${output_file}" DIRECTORY)
       add_custom_command(
         TARGET ${cuda_target}
         PRE_LINK
         COMMAND ${CMAKE_COMMAND} -E echo "Building NVCC intermediate link file ${output_file_relative_path}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${output_file_dir}"
         COMMAND ${CUDA_NVCC_EXECUTABLE} ${nvcc_flags} ${flags} -dlink ${object_files} -o "${output_file}"
         )
     endif()

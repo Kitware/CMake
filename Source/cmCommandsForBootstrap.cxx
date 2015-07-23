@@ -11,6 +11,6 @@
 ============================================================================*/
 #include "cmCommands.h"
 
-void GetPredefinedCommands(std::list<cmCommand*>&)
+void GetPredefinedCommands(std::vector<cmCommand*>&)
 {
 }

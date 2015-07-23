@@ -12,7 +12,7 @@
 #ifndef cmGlobalUnixMakefileGenerator3_h
 #define cmGlobalUnixMakefileGenerator3_h
 
-#include "cmGlobalGenerator.h"
+#include "cmGlobalCommonGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
 
 class cmGeneratedFileStream;
@@ -51,10 +51,10 @@ class cmLocalUnixMakefileGenerator3;
 
  */
 
-class cmGlobalUnixMakefileGenerator3 : public cmGlobalGenerator
+class cmGlobalUnixMakefileGenerator3 : public cmGlobalCommonGenerator
 {
 public:
-  cmGlobalUnixMakefileGenerator3();
+  cmGlobalUnixMakefileGenerator3(cmake* cm);
   static cmGlobalGeneratorFactory* NewFactory() {
     return new cmGlobalGeneratorSimpleFactory
       <cmGlobalUnixMakefileGenerator3>(); }
@@ -68,7 +68,8 @@ public:
   static void GetDocumentation(cmDocumentationEntry& entry);
 
   ///! Create a local generator appropriate to this Global Generator3
-  virtual cmLocalGenerator *CreateLocalGenerator();
+  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent,
+                                                 cmState::Snapshot snapshot);
 
   /**
    * Try to determine system information such as shared library
@@ -128,7 +129,15 @@ public:
   /** Does the make tool tolerate .NOTPARALLEL? */
   virtual bool AllowNotParallel() const { return true; }
 
+  /** Does the make tool tolerate .DELETE_ON_ERROR? */
+  virtual bool AllowDeleteOnError() const { return true; }
+
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
+
+  std::string IncludeDirective;
+  bool DefineWindowsNULL;
+  bool PassMakeflags;
+  bool UnixCD;
 protected:
   void WriteMainMakefile2();
   void WriteMainCMakefile();
@@ -144,7 +153,7 @@ protected:
                             cmLocalUnixMakefileGenerator3* lg);
 
   void AppendGlobalTargetDepends(std::vector<std::string>& depends,
-                                 cmTarget& target);
+                                 cmGeneratorTarget* target);
 
   // does this generator need a requires step for any of its targets
   bool NeedRequiresStep(cmTarget const&);
@@ -189,8 +198,8 @@ protected:
                    cmStrictTargetComparison> ProgressMapType;
   ProgressMapType ProgressMap;
 
-  size_t CountProgressMarksInTarget(cmTarget const* target,
-                                    std::set<cmTarget const*>& emitted);
+  size_t CountProgressMarksInTarget(cmGeneratorTarget const* target,
+                                 std::set<cmGeneratorTarget const*>& emitted);
   size_t CountProgressMarksInAll(cmLocalUnixMakefileGenerator3* lg);
 
   cmGeneratedFileStream *CommandDatabase;

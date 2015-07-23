@@ -12,6 +12,7 @@
 #include "cmMakeDepend.h"
 #include "cmSystemTools.h"
 #include "cmGeneratorExpression.h"
+#include "cmAlgorithms.h"
 
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/FStream.hxx>
@@ -48,7 +49,7 @@ void cmMakeDepend::SetMakefile(cmMakefile* makefile)
 
   // Now extract the include file regular expression from the makefile.
   this->IncludeFileRegularExpression.compile(
-    this->Makefile->IncludeFileRegularExpression.c_str());
+    this->Makefile->GetIncludeRegularExpression());
   this->ComplainFileRegularExpression.compile(
     this->Makefile->ComplainFileRegularExpression.c_str());
 

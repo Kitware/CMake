@@ -63,7 +63,7 @@ bool cmSiteNameCommand
     {
     std::string host;
     cmSystemTools::RunSingleCommand(hostname_cmd.c_str(),
-      &host, 0, 0, cmSystemTools::OUTPUT_NONE);
+      &host, 0, 0, 0, cmSystemTools::OUTPUT_NONE);
 
     // got the hostname
     if (!host.empty())
@@ -88,7 +88,7 @@ bool cmSiteNameCommand
     AddCacheDefinition(args[0],
                        siteName.c_str(),
                        "Name of the computer/site where compile is being run",
-                       cmCacheManager::STRING);
+                       cmState::STRING);
 
   return true;
 }

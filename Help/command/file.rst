@@ -92,15 +92,21 @@ store it in a ``<variable>``.
 
 ::
 
-  file(GLOB <variable> [RELATIVE <path>] [<globbing-expressions>...])
-  file(GLOB_RECURSE <variable> [RELATIVE <path>]
-       [FOLLOW_SYMLINKS] [<globbing-expressions>...])
+  file(GLOB <variable>
+       [LIST_DIRECTORIES true|false] [RELATIVE <path>]
+       [<globbing-expressions>...])
+  file(GLOB_RECURSE <variable> [FOLLOW_SYMLINKS]
+       [LIST_DIRECTORIES true|false] [RELATIVE <path>]
+       [<globbing-expressions>...])
 
 Generate a list of files that match the ``<globbing-expressions>`` and
 store it into the ``<variable>``.  Globbing expressions are similar to
 regular expressions, but much simpler.  If ``RELATIVE`` flag is
 specified, the results will be returned as relative paths to the given
 path.
+
+By default ``GLOB`` lists directories - directories are omited in result if
+``LIST_DIRECTORIES`` is set to false.
 
 .. note::
   We do not recommend using GLOB to collect a list of source files from
@@ -118,6 +124,11 @@ The ``GLOB_RECURSE`` mode will traverse all the subdirectories of the
 matched directory and match the files.  Subdirectories that are symlinks
 are only traversed if ``FOLLOW_SYMLINKS`` is given or policy
 :policy:`CMP0009` is not set to ``NEW``.
+
+By default ``GLOB_RECURSE`` omits directories from result list - setting
+``LIST_DIRECTORIES`` to true adds directories to result list.
+If ``FOLLOW_SYMLINKS`` is given or policy :policy:`CMP0009` is not set to
+``OLD`` then ``LIST_DIRECTORIES`` treats symlinks as directories.
 
 Examples of recursive globbing include::
 
@@ -302,8 +313,12 @@ preserves input file timestamps, and optimizes out a file if it exists
 at the destination with the same timestamp.  Copying preserves input
 permissions unless explicit permissions or ``NO_SOURCE_PERMISSIONS``
 are given (default is ``USE_SOURCE_PERMISSIONS``).
+
 See the :command:`install(DIRECTORY)` command for documentation of
-permissions, ``PATTERN``, ``REGEX``, and ``EXCLUDE`` options.
+permissions, ``FILES_MATCHING``, ``PATTERN``, ``REGEX``, and
+``EXCLUDE`` options.  Copying directories preserves the structure
+of their content even if options are used to select a subset of
+files.
 
 The ``INSTALL`` signature differs slightly from ``COPY``: it prints
 status messages (subject to the :variable:`CMAKE_INSTALL_MESSAGE` variable),

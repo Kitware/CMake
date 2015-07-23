@@ -9,7 +9,6 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include "../cmCacheManager.h"
 #include "../cmSystemTools.h"
 #include "../cmake.h"
 #include "../cmDocumentation.h"
@@ -105,6 +104,8 @@ int main(int argc, char const* const* argv)
   if(doc.CheckOptions(argc, argv))
     {
     cmake hcm;
+    hcm.SetHomeDirectory("");
+    hcm.SetHomeOutputDirectory("");
     hcm.AddCMakePaths();
     std::vector<cmDocumentationEntry> generators;
     hcm.GetGeneratorDocumentation(generators);

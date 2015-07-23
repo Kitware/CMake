@@ -12,6 +12,7 @@
 #include "cmGlobalVisualStudio14Generator.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
+#include "cmAlgorithms.h"
 
 static const char vs14generatorName[] = "Visual Studio 14 2015";
 
@@ -36,8 +37,8 @@ class cmGlobalVisualStudio14Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(
-                                                const std::string& name) const
+  virtual cmGlobalGenerator*
+  CreateGlobalGenerator(const std::string& name, cmake* cm) const
     {
     std::string genName;
     const char* p = cmVS14GenName(name, genName);
@@ -45,28 +46,28 @@ public:
       { return 0; }
     if(!*p)
       {
-      return new cmGlobalVisualStudio14Generator(
-        genName, "");
+      return new cmGlobalVisualStudio14Generator(cm, genName, "");
       }
     if(*p++ != ' ')
       { return 0; }
     if(strcmp(p, "Win64") == 0)
       {
-      return new cmGlobalVisualStudio14Generator(
-        genName, "x64");
+      return new cmGlobalVisualStudio14Generator(cm, genName, "x64");
       }
     if(strcmp(p, "ARM") == 0)
       {
-      return new cmGlobalVisualStudio14Generator(
-        genName, "ARM");
+      return new cmGlobalVisualStudio14Generator(cm, genName, "ARM");
       }
     return 0;
     }
 
   virtual void GetDocumentation(cmDocumentationEntry& entry) const
     {
-    entry.Name = vs14generatorName;
-    entry.Brief = "Generates Visual Studio 14 (VS 2015) project files.";
+    entry.Name = std::string(vs14generatorName) + " [arch]";
+    entry.Brief =
+      "Generates Visual Studio 2015 project files.  "
+      "Optional [arch] can be \"Win64\" or \"ARM\"."
+      ;
     }
 
   virtual void GetGenerators(std::vector<std::string>& names) const
@@ -84,15 +85,16 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio14Generator::NewFactory()
 }
 
 //----------------------------------------------------------------------------
-cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(
+cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(cmake* cm,
   const std::string& name, const std::string& platformName)
-  : cmGlobalVisualStudio12Generator(name, platformName)
+  : cmGlobalVisualStudio12Generator(cm, name, platformName)
 {
   std::string vc14Express;
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\14.0\\Setup\\VC;"
     "ProductDir", vc14Express, cmSystemTools::KeyWOW64_32);
   this->DefaultPlatformToolset = "v140";
+  this->Version = VS14;
 }
 
 //----------------------------------------------------------------------------
@@ -121,13 +123,4 @@ void cmGlobalVisualStudio14Generator::WriteSLNHeader(std::ostream& fout)
     {
     fout << "# Visual Studio 14\n";
     }
-}
-
-//----------------------------------------------------------------------------
-cmLocalGenerator *cmGlobalVisualStudio14Generator::CreateLocalGenerator()
-{
-  cmLocalVisualStudio10Generator* lg =
-    new cmLocalVisualStudio10Generator(cmLocalVisualStudioGenerator::VS14);
-  lg->SetGlobalGenerator(this);
-  return lg;
 }

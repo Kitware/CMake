@@ -68,15 +68,15 @@ void cmExtraCodeLiteGenerator::Generate()
     const cmMakefile* mf =it->second[0]->GetMakefile();
     this->ConfigName = GetConfigurationName( mf );
 
-    if (strcmp(mf->GetStartOutputDirectory(),
+    if (strcmp(mf->GetCurrentBinaryDirectory(),
                mf->GetHomeOutputDirectory()) == 0)
       {
-      workspaceOutputDir   = mf->GetStartOutputDirectory();
+      workspaceOutputDir   = mf->GetCurrentBinaryDirectory();
       workspaceProjectName = mf->GetProjectName();
       workspaceSourcePath  = mf->GetHomeDirectory();
       workspaceFileName    = workspaceOutputDir+"/";
       workspaceFileName   += workspaceProjectName + ".workspace";
-      this->WorkspacePath = mf->GetStartOutputDirectory();;
+      this->WorkspacePath = mf->GetCurrentBinaryDirectory();;
 
       fout.Open(workspaceFileName.c_str(), false, false);
       fout << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
@@ -92,7 +92,7 @@ void cmExtraCodeLiteGenerator::Generate()
     {
     // retrive project information
     const cmMakefile* mf    = it->second[0]->GetMakefile();
-    std::string outputDir   = mf->GetStartOutputDirectory();
+    std::string outputDir   = mf->GetCurrentBinaryDirectory();
     std::string projectName = mf->GetProjectName();
     std::string filename    = outputDir + "/" + projectName + ".project";
 
@@ -122,7 +122,7 @@ void cmExtraCodeLiteGenerator::CreateProjectFile(
   const std::vector<cmLocalGenerator*>& lgs)
 {
   const cmMakefile* mf    = lgs[0]->GetMakefile();
-  std::string outputDir   = mf->GetStartOutputDirectory();
+  std::string outputDir   = mf->GetCurrentBinaryDirectory();
   std::string projectName = mf->GetProjectName();
   std::string filename    = outputDir + "/";
 
@@ -139,24 +139,6 @@ void cmExtraCodeLiteGenerator
   if(!fout)
     {
     return;
-    }
-
-  // figure out the compiler
-  //std::string compiler = this->GetCBCompilerId(mf);
-  std::string workspaceSourcePath = mf->GetHomeDirectory();
-  std::string workspaceOutputDir =  mf->GetHomeOutputDirectory();
-  std::vector<std::string> outputFiles = mf->GetOutputFiles();
-  std::string projectName = mf->GetProjectName();
-  std::string incDirs;
-  std::vector<cmValueWithOrigin> incDirsVec =
-    mf->GetIncludeDirectoriesEntries();
-  std::vector<cmValueWithOrigin>::const_iterator iterInc = incDirsVec.begin();
-
-  //std::cout << "GetIncludeDirectories:" << std::endl;
-  for(; iterInc != incDirsVec.end(); ++iterInc )
-    {
-    //std::cout << (*ItStrVec) << std::endl;
-    incDirs += iterInc->Value + " ";
     }
 
   ////////////////////////////////////

@@ -18,17 +18,16 @@
 #include "cmGeneratedFileStream.h"
 #include "cmSourceFile.h"
 #include "cmake.h"
+#include "cmState.h"
 
 #include <assert.h>
 
-cmLocalNinjaGenerator::cmLocalNinjaGenerator()
-  : cmLocalGenerator()
-  , ConfigName("")
+cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
+                                             cmLocalGenerator* parent,
+                                             cmState::Snapshot snapshot)
+  : cmLocalCommonGenerator(gg, parent, snapshot)
   , HomeRelativeOutputPath("")
 {
-#ifdef _WIN32
-  this->WindowsShell = true;
-#endif
   this->TargetImplib = "$TARGET_IMPLIB";
 }
 
@@ -41,6 +40,15 @@ cmLocalNinjaGenerator::~cmLocalNinjaGenerator()
 
 void cmLocalNinjaGenerator::Generate()
 {
+  // Compute the path to use when referencing the current output
+  // directory from the top output directory.
+  this->HomeRelativeOutputPath =
+    this->Convert(this->Makefile->GetCurrentBinaryDirectory(), HOME_OUTPUT);
+  if(this->HomeRelativeOutputPath == ".")
+    {
+    this->HomeRelativeOutputPath = "";
+    }
+
   this->SetConfigName();
 
   this->WriteProcessedMakefile(this->GetBuildFileStream());
@@ -49,7 +57,7 @@ void cmLocalNinjaGenerator::Generate()
 #endif
 
   // We do that only once for the top CMakeLists.txt file.
-  if(this->isRootMakefile())
+  if(this->Makefile->IsRootMakefile())
     {
     this->WriteBuildFileTop();
 
@@ -89,25 +97,6 @@ void cmLocalNinjaGenerator::Generate()
     }
 
   this->WriteCustomCommandBuildStatements();
-}
-
-// Implemented in:
-//   cmLocalUnixMakefileGenerator3.
-// Used in:
-//   Source/cmMakefile.cxx
-//   Source/cmGlobalGenerator.cxx
-void cmLocalNinjaGenerator::Configure()
-{
-  // Compute the path to use when referencing the current output
-  // directory from the top output directory.
-  this->HomeRelativeOutputPath =
-    this->Convert(this->Makefile->GetStartOutputDirectory(), HOME_OUTPUT);
-  if(this->HomeRelativeOutputPath == ".")
-    {
-    this->HomeRelativeOutputPath = "";
-    }
-  this->cmLocalGenerator::Configure();
-
 }
 
 // TODO: Picked up from cmLocalUnixMakefileGenerator3.  Refactor it.
@@ -180,12 +169,6 @@ cmake* cmLocalNinjaGenerator::GetCMakeInstance()
   return this->GetGlobalGenerator()->GetCMakeInstance();
 }
 
-bool cmLocalNinjaGenerator::isRootMakefile() const
-{
-  return (strcmp(this->Makefile->GetCurrentDirectory(),
-                 this->GetCMakeInstance()->GetHomeDirectory()) == 0);
-}
-
 void cmLocalNinjaGenerator::WriteBuildFileTop()
 {
   // For the build file.
@@ -235,8 +218,8 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
 
-  const char* jobpools = this->GetCMakeInstance()
-                               ->GetProperty("JOB_POOLS", cmProperty::GLOBAL);
+  const char* jobpools = this->GetCMakeInstance()->GetState()
+                             ->GetGlobalProperty("JOB_POOLS");
   if (jobpools)
     {
     cmGlobalNinjaGenerator::WriteComment(os,
@@ -277,22 +260,6 @@ void cmLocalNinjaGenerator::WriteNinjaFilesInclusion(std::ostream& os)
   os << "\n";
 }
 
-void cmLocalNinjaGenerator::SetConfigName()
-{
-  // Store the configuration name that will be generated.
-  if(const char* config =
-       this->GetMakefile()->GetDefinition("CMAKE_BUILD_TYPE"))
-    {
-    // Use the build type given by the user.
-    this->ConfigName = config;
-    }
-  else
-    {
-    // No configuration type given.
-    this->ConfigName = "";
-    }
-}
-
 //----------------------------------------------------------------------------
 void cmLocalNinjaGenerator::ComputeObjectFilenames(
                         std::map<cmSourceFile const*, std::string>& mapping,
@@ -312,9 +279,9 @@ void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
   cmGlobalNinjaGenerator::WriteDivider(os);
   os
     << "# Write statements declared in CMakeLists.txt:" << std::endl
-    << "# " << this->Makefile->GetCurrentListFile() << std::endl
-    ;
-  if(this->isRootMakefile())
+    << "# "
+    << this->Makefile->GetDefinition("CMAKE_CURRENT_LIST_FILE") << std::endl;
+  if(this->Makefile->IsRootMakefile())
     os << "# Which is the root file." << std::endl;
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << std::endl;
@@ -407,7 +374,7 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(
   if (ccg.GetNumberOfCommands() > 0) {
     std::string wd = ccg.GetWorkingDirectory();
     if (wd.empty())
-      wd = this->GetMakefile()->GetStartOutputDirectory();
+      wd = this->GetMakefile()->GetCurrentBinaryDirectory();
 
     std::ostringstream cdCmd;
 #ifdef _WIN32

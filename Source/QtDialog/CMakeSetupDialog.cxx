@@ -27,7 +27,6 @@
 #include <QUrl>
 #include <QShortcut>
 #include <QKeySequence>
-#include <QMacInstallDialog.h>
 #include <QInputDialog>
 
 #include "QCMake.h"
@@ -121,7 +120,7 @@ CMakeSetupDialog::CMakeSetupDialog()
                    this, SLOT(showUserChanges()));
 #if defined(Q_WS_MAC) || defined(Q_OS_MAC)
   this->InstallForCommandLineAction
-    = ToolsMenu->addAction(tr("&Install For Command Line Use"));
+    = ToolsMenu->addAction(tr("&How to Install For Command Line Use"));
   QObject::connect(this->InstallForCommandLineAction, SIGNAL(triggered(bool)),
                    this, SLOT(doInstallForCommandLine()));
 #endif
@@ -420,8 +419,38 @@ bool CMakeSetupDialog::doConfigureInternal()
 
 void CMakeSetupDialog::doInstallForCommandLine()
 {
-  QMacInstallDialog setupdialog(0);
-  setupdialog.exec();
+  QString title = tr("How to Install For Command Line Use");
+  QString msg = tr(
+    "One may add CMake to the PATH:\n"
+    "\n"
+    " PATH=\"%1\":\"$PATH\"\n"
+    "\n"
+    "Or, to install symlinks to '/usr/local/bin', run:\n"
+    "\n"
+    " sudo \"%2\" --install\n"
+    "\n"
+    "Or, to install symlinks to another directory, run:\n"
+    "\n"
+    " sudo \"%3\" --install=/path/to/bin\n"
+    );
+  msg = msg.arg(cmSystemTools::GetFilenamePath(
+                  cmSystemTools::GetCMakeCommand()).c_str());
+  msg = msg.arg(cmSystemTools::GetCMakeGUICommand().c_str());
+  msg = msg.arg(cmSystemTools::GetCMakeGUICommand().c_str());
+
+  QDialog dialog;
+  dialog.setWindowTitle(title);
+  QVBoxLayout* l = new QVBoxLayout(&dialog);
+  QLabel* lab = new QLabel(&dialog);
+  l->addWidget(lab);
+  lab->setText(msg);
+  lab->setWordWrap(false);
+  lab->setTextInteractionFlags(Qt::TextSelectableByMouse);
+  QDialogButtonBox* btns = new QDialogButtonBox(QDialogButtonBox::Ok,
+                                                Qt::Horizontal, &dialog);
+  QObject::connect(btns, SIGNAL(accepted()), &dialog, SLOT(accept()));
+  l->addWidget(btns);
+  dialog.exec();
 }
 
 bool CMakeSetupDialog::doGenerateInternal()

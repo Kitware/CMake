@@ -6,6 +6,9 @@ macro(run_cmake test)
   _run_cmake(${test})
 endmacro()
 
+# Protect tests from running inside the default install prefix.
+set(RunCMake_TEST_OPTIONS "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/NotDefaultPrefix")
+
 run_cmake(RelativePathInInterface)
 run_cmake(RelativePathInGenex)
 run_cmake(export-NOWARN)

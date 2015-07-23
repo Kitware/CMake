@@ -11,3 +11,5 @@ the CMake process.  It has been mostly superseded by the
 
 .. |disallowed_version| replace:: 3.0
 .. include:: DISALLOWED_COMMAND.txt
+
+.. include:: DEPRECATED.txt

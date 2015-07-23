@@ -14,7 +14,6 @@
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmSourceFile.h"
-#include "cmCacheManager.h"
 #include "cmGeneratorTarget.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmake.h"
@@ -24,8 +23,11 @@
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/FStream.hxx>
 
-cmLocalVisualStudio6Generator::cmLocalVisualStudio6Generator():
-  cmLocalVisualStudioGenerator(VS6)
+cmLocalVisualStudio6Generator
+::cmLocalVisualStudio6Generator(cmGlobalGenerator* gg,
+                                cmLocalGenerator* parent,
+                                cmState::Snapshot snapshot):
+  cmLocalVisualStudioGenerator(gg, parent, snapshot)
 {
 }
 
@@ -118,14 +120,14 @@ void cmLocalVisualStudio6Generator::Generate()
 void cmLocalVisualStudio6Generator::OutputDSPFile()
 {
   // If not an in source build, then create the output directory
-  if(strcmp(this->Makefile->GetStartOutputDirectory(),
+  if(strcmp(this->Makefile->GetCurrentBinaryDirectory(),
             this->Makefile->GetHomeDirectory()) != 0)
     {
     if(!cmSystemTools::MakeDirectory
-       (this->Makefile->GetStartOutputDirectory()))
+       (this->Makefile->GetCurrentBinaryDirectory()))
       {
       cmSystemTools::Error("Error creating directory ",
-                           this->Makefile->GetStartOutputDirectory());
+                           this->Makefile->GetCurrentBinaryDirectory());
       }
     }
 
@@ -170,7 +172,7 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
       std::string::size_type pos = l->first.rfind('/');
       if(pos != std::string::npos)
         {
-        std::string dir = this->Makefile->GetStartOutputDirectory();
+        std::string dir = this->Makefile->GetCurrentBinaryDirectory();
         dir += "/";
         dir += l->first.substr(0, pos);
         if(!cmSystemTools::MakeDirectory(dir.c_str()))
@@ -196,7 +198,7 @@ void cmLocalVisualStudio6Generator::CreateSingleDSP(const std::string& lname,
 
   // create the dsp.cmake file
   std::string fname;
-  fname = this->Makefile->GetStartOutputDirectory();
+  fname = this->Makefile->GetCurrentBinaryDirectory();
   fname += "/";
   fname += pname;
   fname += ".dsp";
@@ -220,11 +222,9 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
 {
   std::string dspname = GetVS6TargetName(tgt.GetName());
   dspname += ".dsp.cmake";
-  const char* dsprule =
-    this->Makefile->GetRequiredDefinition("CMAKE_COMMAND");
   cmCustomCommandLine commandLine;
-  commandLine.push_back(dsprule);
-  std::string makefileIn = this->Makefile->GetStartDirectory();
+  commandLine.push_back(cmSystemTools::GetCMakeCommand());
+  std::string makefileIn = this->Makefile->GetCurrentSourceDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
   if(!cmSystemTools::FileExists(makefileIn.c_str()))
@@ -235,13 +235,10 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
   comment += makefileIn;
   std::string args;
   args = "-H";
-  args += this->Convert(this->Makefile->GetHomeDirectory(),
-                        START_OUTPUT, UNCHANGED, true);
+  args += this->Makefile->GetHomeDirectory();
   commandLine.push_back(args);
   args = "-B";
-  args +=
-    this->Convert(this->Makefile->GetHomeOutputDirectory(),
-                  START_OUTPUT, UNCHANGED, true);
+  args += this->Makefile->GetHomeOutputDirectory();
   commandLine.push_back(args);
 
   std::vector<std::string> const& listFiles = this->Makefile->GetListFiles();
@@ -498,7 +495,7 @@ void cmLocalVisualStudio6Generator
       // Tell MS-Dev what the source is.  If the compiler knows how to
       // build it, then it will.
       fout << "SOURCE=" <<
-        this->ConvertToOptionallyRelativeOutputPath(source.c_str()) << "\n\n";
+        this->ConvertToOutputFormat(source.c_str(), SHELL) << "\n\n";
       if(!depends.empty())
         {
         // Write out the dependencies for the rule.
@@ -507,7 +504,7 @@ void cmLocalVisualStudio6Generator
             d != depends.end(); ++d)
           {
           fout << "\\\n\t" <<
-            this->ConvertToOptionallyRelativeOutputPath(d->c_str());
+            this->ConvertToOutputFormat(d->c_str(), SHELL);
           }
         fout << "\n";
         }
@@ -586,9 +583,9 @@ cmLocalVisualStudio6Generator
                         const cmCustomCommand& origCommand)
 {
   // Create a fake output that forces the rule to run.
-  char* output = new char[(strlen(this->Makefile->GetStartOutputDirectory()) +
-                           target.GetName().size() + 30)];
-  sprintf(output,"%s/%s_force_%i", this->Makefile->GetStartOutputDirectory(),
+  char* output = new char[(strlen(this->Makefile->GetCurrentBinaryDirectory())
+                           + target.GetName().size() + 30)];
+  sprintf(output,"%s/%s_force_%i", this->Makefile->GetCurrentBinaryDirectory(),
           target.GetName().c_str(), count);
   const char* comment = origCommand.GetComment();
   if(!comment && origCommand.GetOutputs().empty())
@@ -663,7 +660,7 @@ cmLocalVisualStudio6Generator
       if(this->GetRealDependency(d->c_str(), config.c_str(), dep))
         {
         fout << "\\\n\t" <<
-          this->ConvertToOptionallyRelativeOutputPath(dep.c_str());
+          this->ConvertToOutputFormat(dep.c_str(), SHELL);
         }
       }
     fout << "\n";
@@ -689,7 +686,7 @@ cmLocalVisualStudio6Generator
           ++o)
         {
         // Write a rule for every output generated by this command.
-        fout << this->ConvertToOptionallyRelativeOutputPath(o->c_str())
+        fout << this->ConvertToOutputFormat(o->c_str(), SHELL)
              << " :  \"$(SOURCE)\" \"$(INTDIR)\" \"$(OUTDIR)\"\n\t";
         fout << script.c_str() << "\n\n";
         }
@@ -816,7 +813,7 @@ cmLocalVisualStudio6Generator::MaybeCreateOutputDir(cmTarget& target,
 
   // Add a pre-link event to create the directory.
   cmCustomCommandLine command;
-  command.push_back(this->Makefile->GetRequiredDefinition("CMAKE_COMMAND"));
+  command.push_back(cmSystemTools::GetCMakeCommand());
   command.push_back("-E");
   command.push_back("make_directory");
   command.push_back(outDir);
@@ -906,7 +903,7 @@ cmLocalVisualStudio6Generator::GetTargetIncludeOptions(cmTarget &target,
     for(i = includes.begin(); i != includes.end(); ++i)
       {
       std::string tmp =
-        this->ConvertToOptionallyRelativeOutputPath(i->c_str());
+        this->ConvertToOutputFormat(i->c_str(), SHELL);
       if(useShortPath)
         {
         cmSystemTools::GetShortPath(tmp.c_str(), tmp);
@@ -997,14 +994,14 @@ void cmLocalVisualStudio6Generator
   if(libPath.size())
     {
     std::string lpath =
-      this->ConvertToOptionallyRelativeOutputPath(libPath.c_str());
+      this->ConvertToOutputFormat(libPath.c_str(), SHELL);
     if(lpath.size() == 0)
       {
       lpath = ".";
       }
     std::string lpathIntDir = libPath + "$(INTDIR)";
     lpathIntDir =
-      this->ConvertToOptionallyRelativeOutputPath(lpathIntDir.c_str());
+      this->ConvertToOutputFormat(lpathIntDir.c_str(), SHELL);
     if(pathEmitted.insert(lpath).second)
       {
       libOptions += " /LIBPATH:";
@@ -1030,14 +1027,14 @@ void cmLocalVisualStudio6Generator
   if(exePath.size())
     {
     std::string lpath =
-      this->ConvertToOptionallyRelativeOutputPath(exePath.c_str());
+      this->ConvertToOutputFormat(exePath.c_str(), SHELL);
     if(lpath.size() == 0)
       {
       lpath = ".";
       }
     std::string lpathIntDir = exePath + "$(INTDIR)";
     lpathIntDir =
-      this->ConvertToOptionallyRelativeOutputPath(lpathIntDir.c_str());
+      this->ConvertToOutputFormat(lpathIntDir.c_str(), SHELL);
 
     if(pathEmitted.insert(lpath).second)
       {
@@ -1071,14 +1068,14 @@ void cmLocalVisualStudio6Generator
       path += "/";
       }
     std::string lpath =
-      this->ConvertToOptionallyRelativeOutputPath(path.c_str());
+      this->ConvertToOutputFormat(path.c_str(), SHELL);
     if(lpath.size() == 0)
       {
       lpath = ".";
       }
     std::string lpathIntDir = path + "$(INTDIR)";
     lpathIntDir =
-      this->ConvertToOptionallyRelativeOutputPath(lpathIntDir.c_str());
+      this->ConvertToOutputFormat(lpathIntDir.c_str(), SHELL);
     if(pathEmitted.insert(lpath).second)
       {
       libOptions += " /LIBPATH:";
@@ -1142,9 +1139,9 @@ void cmLocalVisualStudio6Generator
           libDebug += ".lib";
           }
         }
-      lib = this->ConvertToOptionallyRelativeOutputPath(lib.c_str());
+      lib = this->ConvertToOutputFormat(lib.c_str(), SHELL);
       libDebug =
-        this->ConvertToOptionallyRelativeOutputPath(libDebug.c_str());
+        this->ConvertToOutputFormat(libDebug.c_str(), SHELL);
 
       if (j->second == cmTarget::GENERAL)
         {
@@ -1367,21 +1364,21 @@ void cmLocalVisualStudio6Generator
     {
 #ifdef CM_USE_OLD_VS6
     outputDirOld =
-      removeQuotes(this->ConvertToOptionallyRelativeOutputPath
-                   (target.GetDirectory().c_str()));
+      removeQuotes(this->ConvertToOutputFormat
+                   (target.GetDirectory().c_str(), SHELL));
 #endif
     outputDirDebug =
-        removeQuotes(this->ConvertToOptionallyRelativeOutputPath(
-                       target.GetDirectory("Debug").c_str()));
+        removeQuotes(this->ConvertToOutputFormat(
+                       target.GetDirectory("Debug").c_str(), SHELL));
     outputDirRelease =
-        removeQuotes(this->ConvertToOptionallyRelativeOutputPath(
-                 target.GetDirectory("Release").c_str()));
+        removeQuotes(this->ConvertToOutputFormat(
+                 target.GetDirectory("Release").c_str(), SHELL));
     outputDirMinSizeRel =
-        removeQuotes(this->ConvertToOptionallyRelativeOutputPath(
-                 target.GetDirectory("MinSizeRel").c_str()));
+        removeQuotes(this->ConvertToOutputFormat(
+                 target.GetDirectory("MinSizeRel").c_str(), SHELL));
     outputDirRelWithDebInfo =
-        removeQuotes(this->ConvertToOptionallyRelativeOutputPath(
-                 target.GetDirectory("RelWithDebInfo").c_str()));
+        removeQuotes(this->ConvertToOutputFormat(
+                 target.GetDirectory("RelWithDebInfo").c_str(), SHELL));
     }
   else if(target.GetType() == cmTarget::OBJECT_LIBRARY)
     {
@@ -1449,15 +1446,13 @@ void cmLocalVisualStudio6Generator
     targetImplibFlagMinSizeRel = "/implib:";
     targetImplibFlagRelWithDebInfo = "/implib:";
     targetImplibFlagDebug +=
-      this->ConvertToOptionallyRelativeOutputPath(fullPathImpDebug.c_str());
+      this->ConvertToOutputFormat(fullPathImpDebug.c_str(), SHELL);
     targetImplibFlagRelease +=
-      this->ConvertToOptionallyRelativeOutputPath(fullPathImpRelease.c_str());
+      this->ConvertToOutputFormat(fullPathImpRelease.c_str(), SHELL);
     targetImplibFlagMinSizeRel +=
-      this->ConvertToOptionallyRelativeOutputPath(
-        fullPathImpMinSizeRel.c_str());
+      this->ConvertToOutputFormat(fullPathImpMinSizeRel.c_str(), SHELL);
     targetImplibFlagRelWithDebInfo +=
-      this->ConvertToOptionallyRelativeOutputPath(
-        fullPathImpRelWithDebInfo.c_str());
+      this->ConvertToOutputFormat(fullPathImpRelWithDebInfo.c_str(), SHELL);
     }
 
 #ifdef CM_USE_OLD_VS6
@@ -1669,12 +1664,12 @@ void cmLocalVisualStudio6Generator
     // to convert to output path for unix to win32 conversion
     cmSystemTools::ReplaceString
       (line, "LIBRARY_OUTPUT_PATH",
-       removeQuotes(this->ConvertToOptionallyRelativeOutputPath
-                    (libPath.c_str())).c_str());
+       removeQuotes(this->ConvertToOutputFormat
+                    (libPath.c_str(), SHELL)).c_str());
     cmSystemTools::ReplaceString
       (line, "EXECUTABLE_OUTPUT_PATH",
-       removeQuotes(this->ConvertToOptionallyRelativeOutputPath
-                    (exePath.c_str())).c_str());
+       removeQuotes(this->ConvertToOutputFormat
+                    (exePath.c_str(), SHELL)).c_str());
 #endif
 
     if(targetBuilds || target.GetType() == cmTarget::OBJECT_LIBRARY)
@@ -1701,15 +1696,15 @@ void cmLocalVisualStudio6Generator
       = this->Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
     cmSystemTools::ReplaceString(line, "DEBUG_POSTFIX",
                                  debugPostfix?debugPostfix:"");
-    // store flags for each configuration
-    std::string flags = " ";
-    std::string flagsRelease = " ";
-    std::string flagsMinSizeRel = " ";
-    std::string flagsDebug = " ";
-    std::string flagsRelWithDebInfo = " ";
     if(target.GetType() >= cmTarget::EXECUTABLE &&
        target.GetType() <= cmTarget::OBJECT_LIBRARY)
       {
+      // store flags for each configuration
+      std::string flags = " ";
+      std::string flagsRelease = " ";
+      std::string flagsMinSizeRel = " ";
+      std::string flagsDebug = " ";
+      std::string flagsRelWithDebInfo = " ";
       std::vector<std::string> configs;
       target.GetMakefile()->GetConfigurations(configs);
       std::vector<std::string>::const_iterator it = configs.begin();
@@ -1760,72 +1755,77 @@ void cmLocalVisualStudio6Generator
                               "MinSizeRel");
       this->AddCompileOptions(flagsRelWithDebInfo, &target, linkLanguage,
                               "RelWithDebInfo");
+
+      // if _UNICODE and _SBCS are not found, then add -D_MBCS
+      std::string defs = this->Makefile->GetDefineFlags();
+      if(flags.find("D_UNICODE") == flags.npos &&
+         defs.find("D_UNICODE") == flags.npos &&
+         flags.find("D_SBCS") == flags.npos &&
+         defs.find("D_SBCS") == flags.npos)
+        {
+        flags += " /D \"_MBCS\"";
+        }
+
+      // Add per-target and per-configuration preprocessor definitions.
+      std::set<std::string> definesSet;
+      std::set<std::string> debugDefinesSet;
+      std::set<std::string> releaseDefinesSet;
+      std::set<std::string> minsizeDefinesSet;
+      std::set<std::string> debugrelDefinesSet;
+
+      this->AddCompileDefinitions(definesSet, &target, "", linkLanguage);
+      this->AddCompileDefinitions(debugDefinesSet, &target,
+                                  "DEBUG", linkLanguage);
+      this->AddCompileDefinitions(releaseDefinesSet, &target,
+                                  "RELEASE", linkLanguage);
+      this->AddCompileDefinitions(minsizeDefinesSet, &target,
+                                  "MINSIZEREL", linkLanguage);
+      this->AddCompileDefinitions(debugrelDefinesSet, &target,
+                                  "RELWITHDEBINFO", linkLanguage);
+
+      std::string defines = " ";
+      std::string debugDefines = " ";
+      std::string releaseDefines = " ";
+      std::string minsizeDefines = " ";
+      std::string debugrelDefines = " ";
+
+      this->JoinDefines(definesSet, defines, "");
+      this->JoinDefines(debugDefinesSet, debugDefines, "");
+      this->JoinDefines(releaseDefinesSet, releaseDefines, "");
+      this->JoinDefines(minsizeDefinesSet, minsizeDefines, "");
+      this->JoinDefines(debugrelDefinesSet, debugrelDefines, "");
+
+      flags += defines;
+      flagsDebug += debugDefines;
+      flagsRelease += releaseDefines;
+      flagsMinSizeRel += minsizeDefines;
+      flagsRelWithDebInfo += debugrelDefines;
+
+      // The template files have CXX FLAGS in them, that need to be replaced.
+      // There are not separate CXX and C template files, so we use the same
+      // variable names.   The previous code sets up flags* variables to
+      // contain the correct C or CXX flags
+      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_MINSIZEREL",
+                                   flagsMinSizeRel.c_str());
+      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_DEBUG",
+                                   flagsDebug.c_str());
+      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELWITHDEBINFO",
+                                   flagsRelWithDebInfo.c_str());
+      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELEASE",
+                                   flagsRelease.c_str());
+      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS", flags.c_str());
+
+      cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_MINSIZEREL",
+                                   minsizeDefines.c_str());
+      cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_DEBUG",
+                                   debugDefines.c_str());
+      cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_RELWITHDEBINFO",
+                                   debugrelDefines.c_str());
+      cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_RELEASE",
+                                   releaseDefines.c_str());
+      cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS",
+                                   defines.c_str());
       }
-
-    // if _UNICODE and _SBCS are not found, then add -D_MBCS
-    std::string defs = this->Makefile->GetDefineFlags();
-    if(flags.find("D_UNICODE") == flags.npos &&
-       defs.find("D_UNICODE") == flags.npos &&
-       flags.find("D_SBCS") == flags.npos &&
-       defs.find("D_SBCS") == flags.npos)
-      {
-      flags += " /D \"_MBCS\"";
-      }
-
-    // Add per-target and per-configuration preprocessor definitions.
-    std::set<std::string> definesSet;
-    std::set<std::string> debugDefinesSet;
-    std::set<std::string> releaseDefinesSet;
-    std::set<std::string> minsizeDefinesSet;
-    std::set<std::string> debugrelDefinesSet;
-
-    this->AddCompileDefinitions(definesSet, &target, "");
-    this->AddCompileDefinitions(debugDefinesSet, &target, "DEBUG");
-    this->AddCompileDefinitions(releaseDefinesSet, &target, "RELEASE");
-    this->AddCompileDefinitions(minsizeDefinesSet, &target, "MINSIZEREL");
-    this->AddCompileDefinitions(debugrelDefinesSet, &target, "RELWITHDEBINFO");
-
-    std::string defines = " ";
-    std::string debugDefines = " ";
-    std::string releaseDefines = " ";
-    std::string minsizeDefines = " ";
-    std::string debugrelDefines = " ";
-
-    this->JoinDefines(definesSet, defines, "");
-    this->JoinDefines(debugDefinesSet, debugDefines, "");
-    this->JoinDefines(releaseDefinesSet, releaseDefines, "");
-    this->JoinDefines(minsizeDefinesSet, minsizeDefines, "");
-    this->JoinDefines(debugrelDefinesSet, debugrelDefines, "");
-
-    flags += defines;
-    flagsDebug += debugDefines;
-    flagsRelease += releaseDefines;
-    flagsMinSizeRel += minsizeDefines;
-    flagsRelWithDebInfo += debugrelDefines;
-
-    // The template files have CXX FLAGS in them, that need to be replaced.
-    // There are not separate CXX and C template files, so we use the same
-    // variable names.   The previous code sets up flags* variables to contain
-    // the correct C or CXX flags
-    cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_MINSIZEREL",
-                                 flagsMinSizeRel.c_str());
-    cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_DEBUG",
-                                 flagsDebug.c_str());
-    cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELWITHDEBINFO",
-                                 flagsRelWithDebInfo.c_str());
-    cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELEASE",
-                                 flagsRelease.c_str());
-    cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS", flags.c_str());
-
-    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_MINSIZEREL",
-                                 minsizeDefines.c_str());
-    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_DEBUG",
-                                 debugDefines.c_str());
-    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_RELWITHDEBINFO",
-                                 debugrelDefines.c_str());
-    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_RELEASE",
-                                 releaseDefines.c_str());
-    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS", defines.c_str());
 
     fout << line.c_str() << std::endl;
     }
@@ -1879,9 +1879,9 @@ void cmLocalVisualStudio6Generator
         }
       dir += "$(IntDir)";
       options += "# ADD LINK32 /LIBPATH:";
-      options += this->ConvertToOptionallyRelativeOutputPath(dir.c_str());
+      options += this->ConvertToOutputFormat(dir.c_str(), SHELL);
       options += " /LIBPATH:";
-      options += this->ConvertToOptionallyRelativeOutputPath(d->c_str());
+      options += this->ConvertToOutputFormat(d->c_str(), SHELL);
       options += "\n";
       }
     }
@@ -1892,7 +1892,7 @@ void cmLocalVisualStudio6Generator
     if(l->IsPath)
       {
       options +=
-        this->ConvertToOptionallyRelativeOutputPath(l->Value.c_str());
+        this->ConvertToOutputFormat(l->Value.c_str(), SHELL);
       }
     else if (!l->Target
         || l->Target->GetType() != cmTarget::INTERFACE_LIBRARY)
@@ -1928,7 +1928,7 @@ void cmLocalVisualStudio6Generator
     options += "# ADD ";
     options += tool;
     options += "32 ";
-    options += this->ConvertToOptionallyRelativeOutputPath(oi->c_str());
+    options += this->ConvertToOutputFormat(oi->c_str(), SHELL);
     options += "\n";
     }
 }
@@ -1964,7 +1964,7 @@ cmLocalVisualStudio6Generator
   // files directory for any configuration.  This is used to construct
   // object file names that do not produce paths that are too long.
   std::string dir_max;
-  dir_max += this->Makefile->GetCurrentOutputDirectory();
+  dir_max += this->Makefile->GetCurrentBinaryDirectory();
   dir_max += "/";
   dir_max += config_max;
   dir_max += "/";

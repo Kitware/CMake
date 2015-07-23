@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmUtilitySourceCommand.h"
 
+#include "cmCacheManager.h"
+
 // cmUtilitySourceCommand
 bool cmUtilitySourceCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
@@ -52,11 +54,13 @@ bool cmUtilitySourceCommand
     }
   else
     {
+    cmCacheManager *manager =
+        this->Makefile->GetCMakeInstance()->GetCacheManager();
     haveCacheValue = (cacheValue &&
      (strstr(cacheValue, "(IntDir)") == 0 ||
       (intDir && strcmp(intDir, "$(IntDir)") == 0)) &&
-     (this->Makefile->GetCacheMajorVersion() != 0 &&
-      this->Makefile->GetCacheMinorVersion() != 0 ));
+     (manager->GetCacheMajorVersion() != 0 &&
+      manager->GetCacheMinorVersion() != 0 ));
     }
 
   if(haveCacheValue)
@@ -71,7 +75,7 @@ bool cmUtilitySourceCommand
   // The third argument specifies the relative directory of the source
   // of the utility.
   std::string relativeSource = *arg++;
-  std::string utilitySource = this->Makefile->GetCurrentDirectory();
+  std::string utilitySource = this->Makefile->GetCurrentSourceDirectory();
   utilitySource = utilitySource+"/"+relativeSource;
 
   // If the directory doesn't exist, the source has not been included.
@@ -89,7 +93,7 @@ bool cmUtilitySourceCommand
   // The source exists.
   std::string cmakeCFGout =
     this->Makefile->GetRequiredDefinition("CMAKE_CFG_INTDIR");
-  std::string utilityDirectory = this->Makefile->GetCurrentOutputDirectory();
+  std::string utilityDirectory = this->Makefile->GetCurrentBinaryDirectory();
   std::string exePath;
   if (this->Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
     {
@@ -116,14 +120,14 @@ bool cmUtilitySourceCommand
   this->Makefile->AddCacheDefinition(cacheEntry,
                                  utilityExecutable.c_str(),
                                  "Path to an internal program.",
-                                 cmCacheManager::FILEPATH);
+                                 cmState::FILEPATH);
   // add a value into the cache that maps from the
   // full path to the name of the project
   cmSystemTools::ConvertToUnixSlashes(utilityExecutable);
   this->Makefile->AddCacheDefinition(utilityExecutable,
                                  utilityName.c_str(),
                                  "Executable to project name.",
-                                 cmCacheManager::INTERNAL);
+                                 cmState::INTERNAL);
 
   return true;
 }

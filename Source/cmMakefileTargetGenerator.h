@@ -12,6 +12,8 @@
 #ifndef cmMakefileTargetGenerator_h
 #define cmMakefileTargetGenerator_h
 
+#include "cmCommonTargetGenerator.h"
+
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmOSXBundleGenerator.h"
 
@@ -30,11 +32,11 @@ class cmSourceFile;
  * \brief Support Routines for writing makefiles
  *
  */
-class cmMakefileTargetGenerator
+class cmMakefileTargetGenerator: public cmCommonTargetGenerator
 {
 public:
   // constructor to set the ivars
-  cmMakefileTargetGenerator(cmTarget* target);
+  cmMakefileTargetGenerator(cmGeneratorTarget* target);
   virtual ~cmMakefileTargetGenerator();
 
   // construct using this factory call
@@ -124,12 +126,6 @@ protected:
 
   void DriveCustomCommands(std::vector<std::string>& depends);
 
-  // Return the a string with -F flags on apple
-  std::string GetFrameworkFlags(std::string const& l);
-
-  void AppendFortranFormatFlags(std::string& flags,
-                                cmSourceFile const& source);
-
   // append intertarget dependencies
   void AppendTargetDepends(std::vector<std::string>& depends);
 
@@ -173,12 +169,8 @@ protected:
   virtual void CloseFileStreams();
   void RemoveForbiddenFlags(const char* flagVar, const std::string& linkLang,
                             std::string& linkFlags);
-  cmTarget *Target;
-  cmGeneratorTarget* GeneratorTarget;
   cmLocalUnixMakefileGenerator3 *LocalGenerator;
   cmGlobalUnixMakefileGenerator3 *GlobalGenerator;
-  cmMakefile *Makefile;
-  std::string ConfigName;
 
   enum CustomCommandDriveType { OnBuild, OnDepends, OnUtility };
   CustomCommandDriveType CustomCommandDriver;
@@ -222,6 +214,15 @@ protected:
   // Set of extra output files to be driven by the build.
   std::set<std::string> ExtraFiles;
 
+  typedef std::map<std::string, std::string> MultipleOutputPairsType;
+  MultipleOutputPairsType MultipleOutputPairs;
+  bool WriteMakeRule(std::ostream& os,
+                     const char* comment,
+                     const std::vector<std::string>& outputs,
+                     const std::vector<std::string>& depends,
+                     const std::vector<std::string>& commands,
+                     bool in_help = false);
+
   // Target name info.
   std::string TargetNameOut;
   std::string TargetNameSO;
@@ -233,43 +234,6 @@ protected:
   std::set<std::string> MacContentFolders;
   cmOSXBundleGenerator* OSXBundleGenerator;
   MacOSXContentGeneratorType* MacOSXContentGenerator;
-
-  typedef std::map<std::string, std::string> ByLanguageMap;
-  std::string GetFlags(const std::string &l);
-  ByLanguageMap FlagsByLanguage;
-  std::string GetDefines(const std::string &l);
-  ByLanguageMap DefinesByLanguage;
-
-  // Target-wide Fortran module output directory.
-  bool FortranModuleDirectoryComputed;
-  std::string FortranModuleDirectory;
-  const char* GetFortranModuleDirectory();
-
-  // Compute target-specific Fortran language flags.
-  void AddFortranFlags(std::string& flags);
-
-  // Helper to add flag for windows .def file.
-  void AddModuleDefinitionFlag(std::string& flags);
-
-  // Add language feature flags.
-  void AddFeatureFlags(std::string& flags, const std::string& lang);
-
-  // Feature query methods.
-  const char* GetFeature(const std::string& feature);
-  bool GetFeatureAsBool(const std::string& feature);
-
-  //==================================================================
-  // Convenience routines that do nothing more than forward to
-  // implementaitons
-  std::string Convert(const std::string& source,
-                      cmLocalGenerator::RelativeRoot relative,
-                      cmLocalGenerator::OutputFormat output =
-                      cmLocalGenerator::UNCHANGED,
-                      bool optional = false)
-  {
-    return this->LocalGenerator->Convert(source, relative, output, optional);
-  }
-
 };
 
 #endif

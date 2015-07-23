@@ -13,6 +13,8 @@
 
 #include "cmSystemTools.h"
 #include "cmMakefile.h"
+#include "cmState.h"
+#include "cmOutputConverter.h"
 
 #include "cmCommandArgumentLexer.h"
 
@@ -90,7 +92,8 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
     }
   if ( strcmp(key, "CACHE") == 0 )
     {
-    if(const char* c = this->Makefile->GetCacheManager()->GetCacheValue(var))
+    if(const char* c = this->Makefile->GetState()
+                           ->GetInitializedCacheValue(var))
       {
       if(this->EscapeQuotes)
         {
@@ -137,14 +140,15 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
                                      this->Makefile->GetHomeOutputDirectory()))
         {
         std::ostringstream msg;
-        cmListFileBacktrace bt(this->Makefile->GetLocalGenerator());
         cmListFileContext lfc;
-        lfc.FilePath = this->FileName;
+        cmOutputConverter converter(this->Makefile->GetStateSnapshot());
+        lfc.FilePath = converter.Convert(this->FileName,
+                                         cmOutputConverter::HOME);
+
         lfc.Line = this->FileLine;
-        bt.push_back(lfc);
         msg << "uninitialized variable \'" << var << "\'";
         this->Makefile->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
-                                                        msg.str(), bt);
+                                                        msg.str(), lfc);
         }
       }
     return 0;

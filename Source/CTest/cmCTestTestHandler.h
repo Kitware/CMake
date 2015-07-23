@@ -18,6 +18,7 @@
 #include <cmsys/RegularExpression.hxx>
 
 class cmMakefile;
+class cmXMLWriter;
 
 /** \class cmCTestTestHandler
  * \brief A class that handles ctest -S invocations
@@ -128,7 +129,7 @@ public:
     bool        CompressOutput;
     std::string CompletionStatus;
     std::string Output;
-    std::string RegressionImages;
+    std::string DartString;
     int         TestCount;
     cmCTestTestProperties* Properties;
   };
@@ -164,10 +165,10 @@ protected:
   virtual void GenerateTestCommand(std::vector<std::string>& args, int test);
   int ExecuteCommands(std::vector<std::string>& vec);
 
-  void WriteTestResultHeader(std::ostream& os, cmCTestTestResult* result);
-  void WriteTestResultFooter(std::ostream& os, cmCTestTestResult* result);
+  void WriteTestResultHeader(cmXMLWriter& xml, cmCTestTestResult* result);
+  void WriteTestResultFooter(cmXMLWriter& xml, cmCTestTestResult* result);
   // Write attached test files into the xml
-  void AttachFiles(std::ostream& os, cmCTestTestResult* result);
+  void AttachFiles(cmXMLWriter& xml, cmCTestTestResult* result);
 
   //! Clean test output to specified length
   bool CleanTestOutput(std::string& output, size_t length);
@@ -204,7 +205,7 @@ private:
   /**
    * Generate the Dart compatible output
    */
-  virtual void GenerateDartOutput(std::ostream& os);
+  virtual void GenerateDartOutput(cmXMLWriter& xml);
 
   void PrintLabelSummary();
   /**
@@ -270,7 +271,7 @@ private:
   cmsys::RegularExpression IncludeTestsRegularExpression;
   cmsys::RegularExpression ExcludeTestsRegularExpression;
 
-  std::string GenerateRegressionImages(const std::string& xml);
+  void GenerateRegressionImages(cmXMLWriter& xml, const std::string& dart);
   cmsys::RegularExpression DartStuff1;
   void CheckLabelFilter(cmCTestTestProperties& it);
   void CheckLabelFilterExclude(cmCTestTestProperties& it);

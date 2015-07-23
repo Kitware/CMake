@@ -14,6 +14,7 @@
 #include "cmMakefile.h"
 #include "cmTarget.h"
 #include "assert.h"
+#include "cmAlgorithms.h"
 
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionLexer.h"
@@ -22,7 +23,7 @@
 
 //----------------------------------------------------------------------------
 cmGeneratorExpression::cmGeneratorExpression(
-  cmListFileBacktrace const* backtrace):
+    const cmListFileBacktrace& backtrace):
   Backtrace(backtrace)
 {
 }
@@ -32,9 +33,7 @@ cmsys::auto_ptr<cmCompiledGeneratorExpression>
 cmGeneratorExpression::Parse(std::string const& input)
 {
   return cmsys::auto_ptr<cmCompiledGeneratorExpression>(
-    new cmCompiledGeneratorExpression(
-      this->Backtrace ? *this->Backtrace : cmListFileBacktrace(NULL),
-      input));
+    new cmCompiledGeneratorExpression(this->Backtrace, input));
 }
 
 //----------------------------------------------------------------------------
@@ -52,14 +51,16 @@ cmGeneratorExpression::~cmGeneratorExpression()
 const char *cmCompiledGeneratorExpression::Evaluate(
   cmMakefile* mf, const std::string& config, bool quiet,
   cmTarget const* headTarget,
-  cmGeneratorExpressionDAGChecker *dagChecker) const
+  cmGeneratorExpressionDAGChecker *dagChecker,
+                       std::string const& language) const
 {
   return this->Evaluate(mf,
                         config,
                         quiet,
                         headTarget,
                         headTarget,
-                        dagChecker);
+                        dagChecker,
+                        language);
 }
 
 //----------------------------------------------------------------------------
@@ -67,7 +68,21 @@ const char *cmCompiledGeneratorExpression::Evaluate(
   cmMakefile* mf, const std::string& config, bool quiet,
   cmTarget const* headTarget,
   cmTarget const* currentTarget,
-  cmGeneratorExpressionDAGChecker *dagChecker) const
+  cmGeneratorExpressionDAGChecker *dagChecker,
+  std::string const& language) const
+{
+  cmGeneratorExpressionContext context(mf, config, quiet, headTarget,
+                                  currentTarget ? currentTarget : headTarget,
+                                  this->EvaluateForBuildsystem,
+                                  this->Backtrace, language);
+
+  return this->EvaluateWithContext(context, dagChecker);
+}
+
+//----------------------------------------------------------------------------
+const char* cmCompiledGeneratorExpression::EvaluateWithContext(
+                            cmGeneratorExpressionContext& context,
+                            cmGeneratorExpressionDAGChecker *dagChecker) const
 {
   if (!this->NeedsEvaluation)
     {
@@ -80,19 +95,6 @@ const char *cmCompiledGeneratorExpression::Evaluate(
                                                   = this->Evaluators.begin();
   const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator end
                                                   = this->Evaluators.end();
-
-  cmGeneratorExpressionContext context;
-  context.Makefile = mf;
-  context.Config = config;
-  context.Quiet = quiet;
-  context.HadError = false;
-  context.HadContextSensitiveCondition = false;
-  context.HadHeadSensitiveCondition = false;
-  context.SourceSensitiveTargets.clear();
-  context.HeadTarget = headTarget;
-  context.EvaluateForBuildsystem = this->EvaluateForBuildsystem;
-  context.CurrentTarget = currentTarget ? currentTarget : headTarget;
-  context.Backtrace = this->Backtrace;
 
   for ( ; it != end; ++it)
     {

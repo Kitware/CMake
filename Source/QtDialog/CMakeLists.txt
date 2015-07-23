@@ -14,6 +14,7 @@ project(QtDialog)
 if(POLICY CMP0020)
   cmake_policy(SET CMP0020 NEW) # Drop when CMake >= 2.8.11 required
 endif()
+CMake_OPTIONAL_COMPONENT(cmake-gui)
 find_package(Qt5Widgets QUIET)
 if (Qt5Widgets_FOUND)
   include_directories(${Qt5Widgets_INCLUDE_DIRS})
@@ -45,11 +46,12 @@ if (Qt5Widgets_FOUND)
         get_filename_component(_qt_plugin_file "${_qt_plugin_path}" NAME)
         get_filename_component(_qt_plugin_type "${_qt_plugin_path}" PATH)
         get_filename_component(_qt_plugin_type "${_qt_plugin_type}" NAME)
-        set(_qt_plugin_dest "${CMAKE_INSTALL_PREFIX}/PlugIns/${_qt_plugin_type}")
+        set(_qt_plugin_dest "PlugIns/${_qt_plugin_type}")
         install(FILES "${_qt_plugin_path}"
-          DESTINATION "${_qt_plugin_dest}")
+          DESTINATION "${_qt_plugin_dest}"
+          ${COMPONENT})
         set(${_qt_plugins_var}
-          "${${_qt_plugins_var}};${_qt_plugin_dest}/${_qt_plugin_file}")
+          "${${_qt_plugins_var}};\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${_qt_plugin_dest}/${_qt_plugin_file}")
       else()
         message(FATAL_ERROR "QT plugin ${_qt_plugin_name} not found")
       endif()
@@ -58,7 +60,8 @@ if (Qt5Widgets_FOUND)
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
       "[Paths]\nPlugins = PlugIns\n")
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
-      DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources")
+      DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
+      ${COMPONENT})
   endif()
 
   if(WIN32 AND TARGET Qt5::Core)
@@ -99,15 +102,12 @@ set(SRCS
   QCMakeCacheView.h
   QCMakeWidgets.cxx
   QCMakeWidgets.h
-  QMacInstallDialog.cxx
-  QMacInstallDialog.h
   )
 QT4_WRAP_UI(UI_SRCS
   CMakeSetupDialog.ui
   Compilers.ui
   CrossCompiler.ui
   AddCacheEntry.ui
-  MacInstallDialog.ui
   )
 QT4_WRAP_CPP(MOC_SRCS
   AddCacheEntry.h
@@ -117,7 +117,6 @@ QT4_WRAP_CPP(MOC_SRCS
   QCMake.h
   QCMakeCacheView.h
   QCMakeWidgets.h
-  QMacInstallDialog.h
   )
 QT4_ADD_RESOURCES(RC_SRCS CMakeSetup.qrc)
 
@@ -134,7 +133,8 @@ endif()
 
 if(CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL)
   install(FILES ${CMake_SOURCE_DIR}/Licenses/LGPLv2.1.txt
-    DESTINATION ${CMAKE_DATA_DIR}/Licenses)
+    DESTINATION ${CMAKE_DATA_DIR}/Licenses
+    ${COMPONENT})
   set_property(SOURCE CMakeSetupDialog.cxx
     PROPERTY COMPILE_DEFINITIONS CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL)
 endif()
@@ -167,27 +167,36 @@ if(APPLE)
     )
 endif()
 set(CMAKE_INSTALL_DESTINATION_ARGS
-  BUNDLE DESTINATION "${CMAKE_BUNDLE_LOCATION}")
+  BUNDLE DESTINATION "${CMAKE_BUNDLE_LOCATION}" ${COMPONENT})
 
-install(TARGETS cmake-gui RUNTIME DESTINATION bin ${CMAKE_INSTALL_DESTINATION_ARGS})
+install(TARGETS cmake-gui
+  RUNTIME DESTINATION bin ${COMPONENT}
+  ${CMAKE_INSTALL_DESTINATION_ARGS})
 
 if(UNIX AND NOT APPLE)
   foreach (size IN ITEMS 32 128)
     install(
       FILES       "${CMAKE_CURRENT_SOURCE_DIR}/CMakeSetup${size}.png"
       DESTINATION "share/icons/hicolor/${size}x${size}/apps"
+      ${COMPONENT}
       RENAME      "CMakeSetup.png")
   endforeach ()
 
   # install a desktop file so CMake appears in the application start menu
   # with an icon
-  install(FILES CMake.desktop DESTINATION share/applications )
-  install(FILES cmakecache.xml DESTINATION share/mime/packages )
+  install(FILES CMake.desktop
+    DESTINATION share/applications
+    ${COMPONENT})
+  install(FILES cmakecache.xml
+    DESTINATION share/mime/packages
+    ${COMPONENT})
 endif()
 
 if(APPLE)
-  install(CODE "execute_process(COMMAND ln -s \"../MacOS/CMake\" cmake-gui
-                WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin)")
+  install(CODE "
+    execute_process(COMMAND ln -s \"../MacOS/CMake\" cmake-gui
+        WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin)
+  " ${COMPONENT})
 endif()
 
 if(APPLE OR WIN32)
@@ -201,7 +210,7 @@ if(APPLE OR WIN32)
     include(\"${CMake_SOURCE_DIR}/Modules/BundleUtilities.cmake\")
     set(BU_CHMOD_BUNDLE_ITEMS ON)
     fixup_bundle(\"${fixup_exe}\" \"${QT_PLUGINS}\" \"${QT_LIBRARY_DIR};${QT_BINARY_DIR}\")
-  ")
+  " ${COMPONENT})
 endif()
 
 set(CMAKE_PACKAGE_QTGUI TRUE)

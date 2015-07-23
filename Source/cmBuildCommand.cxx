@@ -105,9 +105,9 @@ bool cmBuildCommand
       "Ignoring PROJECT_NAME option because it has no effect.");
     }
 
-  std::string makecommand = this->Makefile->GetLocalGenerator()
-    ->GetGlobalGenerator()->GenerateCMakeBuildCommand(target, configuration,
-                                                      "", true);
+  std::string makecommand = this->Makefile->GetGlobalGenerator()
+    ->GenerateCMakeBuildCommand(target, configuration, "",
+                                this->Makefile->IgnoreErrorsCMP0061());
 
   this->Makefile->AddDefinition(variable, makecommand.c_str());
 
@@ -130,14 +130,14 @@ bool cmBuildCommand
 
   std::string configType = "Release";
   const char* cfg = getenv("CMAKE_CONFIG_TYPE");
-  if ( cfg )
+  if ( cfg && *cfg )
     {
     configType = cfg;
     }
 
-  std::string makecommand = this->Makefile->GetLocalGenerator()
-    ->GetGlobalGenerator()->GenerateCMakeBuildCommand("", configType,
-                                                      "", true);
+  std::string makecommand = this->Makefile->GetGlobalGenerator()
+    ->GenerateCMakeBuildCommand("", configType, "",
+                                this->Makefile->IgnoreErrorsCMP0061());
 
   if(cacheValue)
     {
@@ -147,6 +147,6 @@ bool cmBuildCommand
                                  makecommand.c_str(),
                                  "Command used to build entire project "
                                  "from the command line.",
-                                 cmCacheManager::STRING);
+                                 cmState::STRING);
   return true;
 }

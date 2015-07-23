@@ -97,7 +97,7 @@ bool cmGetFilenameComponentCommand
     // If the path given is relative evaluate it relative to the
     // current source directory.
     result = cmSystemTools::CollapseFullPath(
-      filename, this->Makefile->GetCurrentDirectory());
+      filename, this->Makefile->GetCurrentSourceDirectory());
     if(args[2] == "REALPATH")
       {
       // Resolve symlinks if possible
@@ -117,13 +117,13 @@ bool cmGetFilenameComponentCommand
       {
       this->Makefile->AddCacheDefinition
         (storeArgs, programArgs.c_str(),
-         "", args[2] == "PATH" ? cmCacheManager::FILEPATH
-         : cmCacheManager::STRING);
+         "", args[2] == "PATH" ? cmState::FILEPATH
+         : cmState::STRING);
       }
     this->Makefile->AddCacheDefinition
       (args[0], result.c_str(), "",
-       args[2] == "PATH" ? cmCacheManager::FILEPATH
-       : cmCacheManager::STRING);
+       args[2] == "PATH" ? cmState::FILEPATH
+       : cmState::STRING);
     }
   else
     {

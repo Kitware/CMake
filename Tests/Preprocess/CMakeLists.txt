@@ -134,6 +134,15 @@ if((NOT MSVC OR PP_NMAKE) AND
   set(EXPR_OP1 "%")
 endif()
 
+# XL: )(
+# The XL compiler cannot pass unbalanced parens correctly to a tool
+# it launches internally.
+if(CMAKE_C_COMPILER_ID STREQUAL "XL")
+  set(STRING_EXTRA "${STRING_EXTRA}()")
+else()
+  set(STRING_EXTRA "${STRING_EXTRA})(")
+endif()
+
 # General: \"
 # Make tools do not reliably accept \\\" syntax:
 #  - MinGW and MSYS make tools crash with \\\"
@@ -141,7 +150,10 @@ endif()
 #    or $(BACKSLASH)\" where BACKSLASH is a variable set to \\
 #  - VS IDE gets confused about the bounds of the definition value \\\"
 #  - NMake is okay with just \\\"
-if(PP_NMAKE OR PP_UMAKE)
+#  - The XL compiler does not re-escape \\\" when launching an
+#    internal tool to do preprocessing .
+if((PP_NMAKE OR PP_UMAKE) AND
+    NOT CMAKE_C_COMPILER_ID STREQUAL "XL")
   set(STRING_EXTRA "${STRING_EXTRA}\\\"")
 endif()
 
@@ -160,7 +172,7 @@ endif()
 # support it and it is not an operator it is not worthwhile.
 
 # Compose the final test string.
-set(STRING_VALUE "hello`~!@$*)(_+-=}{][:'.?/${STRING_EXTRA}world")
+set(STRING_VALUE "hello`~!@$*_+-=}{][:'.?/${STRING_EXTRA}world")
 
 #-----------------------------------------------------------------------------
 # Function-style macro command-line support:

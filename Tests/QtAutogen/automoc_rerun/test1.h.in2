@@ -1,0 +1,7 @@
+#include <QObject>
+class test1 : public QObject
+{
+  Q_OBJECT
+ public slots:
+   void onTst1() {}
+};

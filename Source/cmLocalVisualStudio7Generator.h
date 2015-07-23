@@ -35,7 +35,9 @@ class cmLocalVisualStudio7Generator : public cmLocalVisualStudioGenerator
 {
 public:
   ///! Set cache only and recurse to false by default.
-  cmLocalVisualStudio7Generator(VSVersion v);
+  cmLocalVisualStudio7Generator(cmGlobalGenerator* gg,
+                                cmLocalGenerator* parent,
+                                cmState::Snapshot snapshot);
 
   virtual ~cmLocalVisualStudio7Generator();
 
@@ -53,8 +55,6 @@ public:
    */
   void SetBuildType(BuildType,const std::string& name);
 
-  void SetExtraFlagTable(cmVS7FlagTable const* table)
-    { this->ExtraFlagTable = table; }
   virtual std::string GetTargetDirectory(cmTarget const&) const;
   cmSourceFile* CreateVCProjBuildRule();
   void WriteStampFiles();
@@ -78,6 +78,7 @@ private:
   void WriteVCProjFile(std::ostream& fout, const std::string& libName,
                        cmTarget &tgt);
   void WriteConfigurations(std::ostream& fout,
+                           std::vector<std::string> const& configs,
                            const std::string& libName, cmTarget &tgt);
   void WriteConfiguration(std::ostream& fout,
                           const std::string& configName,
@@ -102,6 +103,7 @@ private:
   void WriteVCProjEndGroup(std::ostream& fout);
 
   void WriteCustomRule(std::ostream& fout,
+                       std::vector<std::string> const& configs,
                        const char* source,
                        const cmCustomCommand& command,
                        FCInfo& fcinfo);
@@ -110,7 +112,7 @@ private:
   bool WriteGroup(const cmSourceGroup *sg,
                   cmTarget& target, std::ostream &fout,
                   const std::string& libName,
-                  std::vector<std::string> *configs);
+                  std::vector<std::string> const& configs);
 
   friend class cmLocalVisualStudio7GeneratorFCInfo;
   friend class cmLocalVisualStudio7GeneratorInternals;
@@ -118,7 +120,6 @@ private:
   class EventWriter;
   friend class EventWriter;
 
-  cmVS7FlagTable const* ExtraFlagTable;
   std::string ModuleDefinitionFile;
   bool FortranProject;
   bool WindowsCEProject;

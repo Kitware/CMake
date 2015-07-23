@@ -15,16 +15,14 @@
 
 #include "cmListFileCache.h"
 #include "cmSystemTools.h"
-#include "cmPropertyDefinitionMap.h"
-#include "cmPropertyMap.h"
 #include "cmInstalledFile.h"
+#include "cmCacheManager.h"
+#include "cmState.h"
 
 class cmGlobalGeneratorFactory;
 class cmGlobalGenerator;
 class cmLocalGenerator;
-class cmCacheManager;
 class cmMakefile;
-class cmCommand;
 class cmVariableWatch;
 class cmFileTimeComparison;
 class cmExternalMakefileProjectGenerator;
@@ -42,7 +40,7 @@ class cmGeneratedFileStream;
  * The basic process for a GUI is as follows:
  *
  * -# Create a cmake instance
- * -# Set the Home & Start directories, generator, and cmake command. this
+ * -# Set the Home directories, generator, and cmake command. this
  *    can be done using the Set methods or by using SetArgs and passing in
  *    command line arguments.
  * -# Load the cache by calling LoadCache (duh)
@@ -53,7 +51,7 @@ class cmGeneratedFileStream;
  * -# Let the user change values and go back to step 5
  * -# call Generate
 
- * If your GUI allows the user to change the start & home directories then
+ * If your GUI allows the user to change the home directories then
  * you must at a minimum redo steps 2 through 7.
  */
 
@@ -92,7 +90,6 @@ class cmake
      */
     FIND_PACKAGE_MODE
   };
-  typedef std::map<std::string, cmCommand*> RegisteredCommandsMap;
   typedef std::map<std::string, cmInstalledFile> InstalledFilesMap;
 
   /// Default constructor
@@ -108,48 +105,12 @@ class cmake
   /**
    * Set/Get the home directory (or output directory) in the project. The
    * home directory is the top directory of the project. It is the
-   * path-to-source cmake was run with. Remember that CMake processes
-   * CMakeLists files by recursing up the tree starting at the StartDirectory
-   * and going up until it reaches the HomeDirectory.
+   * path-to-source cmake was run with.
    */
   void SetHomeDirectory(const std::string& dir);
-  const char* GetHomeDirectory() const
-    {
-    return this->cmHomeDirectory.c_str();
-    }
-  void SetHomeOutputDirectory(const std::string& lib);
-  const char* GetHomeOutputDirectory() const
-    {
-    return this->HomeOutputDirectory.c_str();
-    }
-  //@}
-
-  //@{
-  /**
-   * Set/Get the start directory (or output directory). The start directory
-   * is the directory of the CMakeLists.txt file that started the current
-   * round of processing. Remember that CMake processes CMakeLists files by
-   * recursing up the tree starting at the StartDirectory and going up until
-   * it reaches the HomeDirectory.
-   */
-  void SetStartDirectory(const std::string& dir)
-    {
-      this->cmStartDirectory = dir;
-      cmSystemTools::ConvertToUnixSlashes(this->cmStartDirectory);
-    }
-  const char* GetStartDirectory() const
-    {
-      return this->cmStartDirectory.c_str();
-    }
-  void SetStartOutputDirectory(const std::string& lib)
-    {
-      this->StartOutputDirectory = lib;
-      cmSystemTools::ConvertToUnixSlashes(this->StartOutputDirectory);
-    }
-  const char* GetStartOutputDirectory() const
-    {
-      return this->StartOutputDirectory.c_str();
-    }
+  const char* GetHomeDirectory() const;
+  void SetHomeOutputDirectory(const std::string& dir);
+  const char* GetHomeOutputDirectory() const;
   //@}
 
   /**
@@ -173,7 +134,19 @@ class cmake
   int Configure();
   int ActualConfigure();
 
+  ///! Break up a line like VAR:type="value" into var, type and value
+  static bool ParseCacheEntry(const std::string& entry,
+                         std::string& var,
+                         std::string& value,
+                         cmState::CacheEntryType& type);
+
   int LoadCache();
+  bool LoadCache(const std::string& path);
+  bool LoadCache(const std::string& path, bool internal,
+                 std::set<std::string>& excludes,
+                 std::set<std::string>& includes);
+  bool SaveCache(const std::string& path);
+  bool DeleteCache(const std::string& path);
   void PreLoadCMakeFiles();
 
   ///! Create a GlobalGenerator
@@ -224,34 +197,13 @@ class cmake
    */
   int GetSystemInformation(std::vector<std::string>&);
 
-  /**
-   * Add a command to this cmake instance
-   */
-  void AddCommand(cmCommand* );
-  void RenameCommand(const std::string& oldName, const std::string& newName);
-  void RemoveCommand(const std::string& name);
-  void RemoveUnscriptableCommands();
-
-  /**
-   * Get a command by its name
-   */
-  cmCommand *GetCommand(const std::string& name);
-
-  /** Get list of all commands */
-  RegisteredCommandsMap* GetCommands() { return &this->Commands; }
-
-  /** Check if a command exists. */
-  bool CommandExists(const std::string& name) const;
-
   ///! Parse command line arguments
   void SetArgs(const std::vector<std::string>&,
                bool directoriesSetBefore = false);
 
   ///! Is this cmake running as a result of a TRY_COMPILE command
-  bool GetIsInTryCompile() { return this->InTryCompile; }
-
-  ///! Is this cmake running as a result of a TRY_COMPILE command
-  void SetIsInTryCompile(bool i) { this->InTryCompile = i; }
+  bool GetIsInTryCompile() const;
+  void SetIsInTryCompile(bool b);
 
   ///! Parse command line arguments that might set cache values
   bool SetCacheArgs(const std::vector<std::string>&);
@@ -270,9 +222,6 @@ class cmake
   ///! this is called by generators to update the progress
   void UpdateProgress(const char *msg, float prog);
 
-  ///!  get the cmake policies instance
-  cmPolicies *GetPolicies() {return this->Policies;}
-
   ///! Get the variable watch object
   cmVariableWatch* GetVariableWatch() { return this->VariableWatch; }
 
@@ -283,12 +232,7 @@ class cmake
   void AppendProperty(const std::string& prop,
                       const char *value,bool asString=false);
   const char *GetProperty(const std::string& prop);
-  const char *GetProperty(const std::string& prop,
-                          cmProperty::ScopeType scope);
   bool GetPropertyAsBool(const std::string& prop);
-
-  // Get the properties
-  cmPropertyMap &GetProperties() { return this->Properties; }
 
   ///! Get or create an cmInstalledFile instance and return a pointer to it
   cmInstalledFile *GetOrCreateInstalledFile(
@@ -337,23 +281,9 @@ class cmake
 
   void MarkCliAsUsed(const std::string& variable);
 
-  // Define a property
-  void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
-                      const char *ShortDescription,
-                      const char *FullDescription,
-                      bool chain = false);
-
-  // get property definition
-  cmPropertyDefinition *GetPropertyDefinition
-  (const std::string& name, cmProperty::ScopeType scope);
-
-  // Is a property defined?
-  bool IsPropertyDefined(const std::string& name, cmProperty::ScopeType scope);
-  bool IsPropertyChained(const std::string& name, cmProperty::ScopeType scope);
-
   /** Get the list of configurations (in upper case) considered to be
       debugging configurations.*/
-  std::vector<std::string> const& GetDebugConfigs();
+  std::vector<std::string> GetDebugConfigs();
 
   void SetCMakeEditCommand(std::string const& s)
     { this->CMakeEditCommand = s; }
@@ -368,7 +298,10 @@ class cmake
 
   /** Display a message to the user.  */
   void IssueMessage(cmake::MessageType t, std::string const& text,
-        cmListFileBacktrace const& backtrace = cmListFileBacktrace(NULL));
+        cmListFileBacktrace const& backtrace = cmListFileBacktrace());
+  void IssueMessage(cmake::MessageType t, std::string const& text,
+        cmListFileContext const& lfc);
+
   ///! run the --build option
   int Build(const std::string& dir,
             const std::string& target,
@@ -378,22 +311,23 @@ class cmake
 
   void UnwatchUnusedCli(const std::string& var);
   void WatchUnusedCli(const std::string& var);
+
+  cmState* GetState() const { return this->State; }
+  void SetCurrentSnapshot(cmState::Snapshot snapshot)
+  { this->CurrentSnapshot = snapshot; }
+  cmState::Snapshot GetCurrentSnapshot() const
+  { return this->CurrentSnapshot; }
+
 protected:
   void RunCheckForUnusedVariables();
   void InitializeProperties();
   int HandleDeleteCacheVariables(const std::string& var);
-  cmPropertyMap Properties;
-  std::set<std::pair<std::string,cmProperty::ScopeType> > AccessedProperties;
-
-  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap>
-  PropertyDefinitions;
 
   typedef
      cmExternalMakefileProjectGenerator* (*CreateExtraGeneratorFunctionType)();
   typedef std::map<std::string,
                 CreateExtraGeneratorFunctionType> RegisteredExtraGeneratorsMap;
   typedef std::vector<cmGlobalGeneratorFactory*> RegisteredGeneratorsVector;
-  RegisteredCommandsMap Commands;
   RegisteredGeneratorsVector Generators;
   RegisteredExtraGeneratorsMap ExtraGenerators;
   void AddDefaultCommands();
@@ -405,10 +339,6 @@ protected:
   cmPolicies *Policies;
   cmGlobalGenerator *GlobalGenerator;
   cmCacheManager *CacheManager;
-  std::string cmHomeDirectory;
-  std::string HomeOutputDirectory;
-  std::string cmStartDirectory;
-  std::string StartOutputDirectory;
   bool SuppressDevWarnings;
   bool DoSuppressDevWarnings;
   std::string GeneratorPlatform;
@@ -464,15 +394,22 @@ private:
   bool DebugTryCompile;
   cmFileTimeComparison* FileComparison;
   std::string GraphVizFile;
-  std::vector<std::string> DebugConfigs;
   InstalledFilesMap InstalledFiles;
 
+  cmState* State;
+  cmState::Snapshot CurrentSnapshot;
+
   void UpdateConversionPathTable();
+
+  // Print a list of valid generators to stderr.
+  void PrintGeneratorList();
+
+  bool PrintMessagePreamble(cmake::MessageType t, std::ostream& msg);
 };
 
 #define CMAKE_STANDARD_OPTIONS_TABLE \
   {"-C <initial-cache>", "Pre-load a script to populate the cache."}, \
-  {"-D <var>:<type>=<value>", "Create a cmake cache entry."}, \
+  {"-D <var>[:<type>]=<value>", "Create a cmake cache entry."}, \
   {"-U <globbing_expr>", "Remove matching entries from CMake cache."}, \
   {"-G <generator-name>", "Specify a build system generator."},\
   {"-T <toolset-name>", "Specify toolset name if supported by generator."}, \

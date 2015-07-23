@@ -13,21 +13,39 @@
 #include "cmGlobalVisualStudioGenerator.h"
 
 #include "cmCallVisualStudioMacro.h"
+#include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudioGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmTarget.h"
 #include <cmsys/Encoding.hxx>
+#include "cmAlgorithms.h"
 
 //----------------------------------------------------------------------------
-cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator()
+cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(cmake* cm)
+  : cmGlobalGenerator(cm)
 {
+  cm->GetState()->SetWindowsShell(true);
+  cm->GetState()->SetWindowsVSIDE(true);
 }
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::~cmGlobalVisualStudioGenerator()
 {
+}
+
+//----------------------------------------------------------------------------
+cmGlobalVisualStudioGenerator::VSVersion
+cmGlobalVisualStudioGenerator::GetVersion() const
+{
+  return this->Version;
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudioGenerator::SetVersion(VSVersion v)
+{
+  this->Version = v;
 }
 
 //----------------------------------------------------------------------------
@@ -121,7 +139,7 @@ void cmGlobalVisualStudioGenerator::Generate()
 void cmGlobalVisualStudioGenerator
 ::ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const
 {
-  std::string dir = gt->Makefile->GetCurrentOutputDirectory();
+  std::string dir = gt->Makefile->GetCurrentBinaryDirectory();
   dir += "/";
   std::string tgtDir = gt->LocalGenerator->GetTargetDirectory(*gt->Target);
   if(!tgtDir.empty())
@@ -225,7 +243,7 @@ cmGlobalVisualStudioGenerator
         }
       else
         {
-        topLevelSlnName = mf->GetStartOutputDirectory();
+        topLevelSlnName = mf->GetCurrentBinaryDirectory();
         topLevelSlnName += "/";
         topLevelSlnName += mf->GetProjectName();
         topLevelSlnName += ".sln";
@@ -283,13 +301,14 @@ void cmGlobalVisualStudioGenerator::FillLinkClosure(cmTarget const* target,
 {
   if(linked.insert(target).second)
     {
-    TargetDependSet const& depends = this->GetTargetDirectDepends(*target);
+    cmGeneratorTarget* gt = this->GetGeneratorTarget(target);
+    TargetDependSet const& depends = this->GetTargetDirectDepends(gt);
     for(TargetDependSet::const_iterator di = depends.begin();
         di != depends.end(); ++di)
       {
       if(di->IsLink())
         {
-        this->FillLinkClosure(*di, linked);
+        this->FillLinkClosure((*di)->Target, linked);
         }
       }
     }
@@ -322,13 +341,14 @@ void cmGlobalVisualStudioGenerator::FollowLinkDepends(
     {
     // Static library targets do not list their link dependencies so
     // we must follow them transitively now.
-    TargetDependSet const& depends = this->GetTargetDirectDepends(*target);
+    cmGeneratorTarget* gt = this->GetGeneratorTarget(target);
+    TargetDependSet const& depends = this->GetTargetDirectDepends(gt);
     for(TargetDependSet::const_iterator di = depends.begin();
         di != depends.end(); ++di)
       {
       if(di->IsLink())
         {
-        this->FollowLinkDepends(*di, linked);
+        this->FollowLinkDepends((*di)->Target, linked);
         }
       }
     }
@@ -397,7 +417,8 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(cmTarget& target)
                         target.GetType() != cmTarget::MODULE_LIBRARY &&
                         target.GetType() != cmTarget::EXECUTABLE);
 
-  TargetDependSet const& depends = this->GetTargetDirectDepends(target);
+  cmGeneratorTarget* gt = this->GetGeneratorTarget(&target);
+  TargetDependSet const& depends = this->GetTargetDirectDepends(gt);
 
   // Collect implicit link dependencies (target_link_libraries).
   // Static libraries cannot depend on their link implementation
@@ -411,7 +432,7 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(cmTarget& target)
       cmTargetDepend dep = *di;
       if(dep.IsLink())
         {
-        this->FollowLinkDepends(dep, linkDepends);
+        this->FollowLinkDepends(dep->Target, linkDepends);
         }
       }
     }
@@ -424,7 +445,7 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(cmTarget& target)
     cmTargetDepend dep = *di;
     if(dep.IsUtil())
       {
-      this->FollowLinkDepends(dep, utilDepends);
+      this->FollowLinkDepends(dep->Target, utilDepends);
       }
     }
 
@@ -827,7 +848,7 @@ cmGlobalVisualStudioGenerator::TargetIsFortranOnly(cmTarget const& target)
 //----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudioGenerator::TargetCompare
-::operator()(cmTarget const* l, cmTarget const* r) const
+::operator()(cmGeneratorTarget const* l, cmGeneratorTarget const* r) const
 {
   // Make sure ALL_BUILD is first so it is the default active project.
   if(r->GetName() == "ALL_BUILD")
@@ -852,7 +873,13 @@ cmGlobalVisualStudioGenerator::OrderedTargetDependSet
 cmGlobalVisualStudioGenerator::OrderedTargetDependSet
 ::OrderedTargetDependSet(TargetSet const& targets)
 {
-  this->insert(targets.begin(), targets.end());
+  for (TargetSet::const_iterator it = targets.begin();
+       it != targets.end(); ++it)
+    {
+    cmGeneratorTarget* gt =
+        (*it)->GetMakefile()->GetGlobalGenerator()->GetGeneratorTarget(*it);
+    this->insert(gt);
+    }
 }
 
 std::string cmGlobalVisualStudioGenerator::ExpandCFGIntDir(
@@ -870,4 +897,72 @@ std::string cmGlobalVisualStudioGenerator::ExpandCFGIntDir(
     i += config.size();
     }
   return tmp;
+}
+
+void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
+  cmGeneratorTarget* gt, std::vector<cmCustomCommand>& commands,
+  std::string const& configName)
+{
+  std::vector<std::string> outputs;
+  std::string deffile = gt->ObjectDirectory;
+  deffile += "/exportall.def";
+  outputs.push_back(deffile);
+  std::vector<std::string> empty;
+  std::vector<cmSourceFile const*> objectSources;
+  gt->GetObjectSources(objectSources, configName);
+  std::map<cmSourceFile const*, std::string> mapping;
+  for(std::vector<cmSourceFile const*>::const_iterator it
+        = objectSources.begin(); it != objectSources.end(); ++it)
+    {
+    mapping[*it];
+    }
+  gt->LocalGenerator->
+    ComputeObjectFilenames(mapping, gt);
+  std::string obj_dir = gt->ObjectDirectory;
+  std::string cmakeCommand = cmSystemTools::GetCMakeCommand();
+  cmSystemTools::ConvertToWindowsExtendedPath(cmakeCommand);
+  cmCustomCommandLine cmdl;
+  cmdl.push_back(cmakeCommand);
+  cmdl.push_back("-E");
+  cmdl.push_back("__create_def");
+  cmdl.push_back(deffile);
+  std::string obj_dir_expanded = obj_dir;
+  cmSystemTools::ReplaceString(obj_dir_expanded,
+                               this->GetCMakeCFGIntDir(),
+                               configName.c_str());
+  std::string objs_file = obj_dir_expanded;
+  cmSystemTools::MakeDirectory(objs_file.c_str());
+  objs_file += "/objects.txt";
+  cmdl.push_back(objs_file);
+  cmGeneratedFileStream fout(objs_file.c_str());
+  if(!fout)
+    {
+    cmSystemTools::Error("could not open ", objs_file.c_str());
+    return;
+    }
+  for(std::vector<cmSourceFile const*>::const_iterator it
+        = objectSources.begin(); it != objectSources.end(); ++it)
+    {
+    // Find the object file name corresponding to this source file.
+    std::map<cmSourceFile const*, std::string>::const_iterator
+      map_it = mapping.find(*it);
+    // It must exist because we populated the mapping just above.
+    assert(!map_it->second.empty());
+    std::string objFile = obj_dir + map_it->second;
+    // replace $(ConfigurationName) in the object names
+    cmSystemTools::ReplaceString(objFile, this->GetCMakeCFGIntDir(),
+                                 configName.c_str());
+    if(cmHasLiteralSuffix(objFile, ".obj"))
+      {
+      fout << objFile << "\n";
+      }
+    }
+  cmCustomCommandLines commandLines;
+  commandLines.push_back(cmdl);
+  cmCustomCommand command(gt->Target->GetMakefile(),
+                          outputs, empty, empty,
+                          commandLines,
+                          "Auto build dll exports",
+                          ".");
+  commands.push_back(command);
 }

@@ -13,7 +13,7 @@
 #ifndef cmLocalNinjaGenerator_h
 #  define cmLocalNinjaGenerator_h
 
-#  include "cmLocalGenerator.h"
+#  include "cmLocalCommonGenerator.h"
 #  include "cmNinjaTypes.h"
 
 class cmCustomCommandGenerator;
@@ -28,39 +28,23 @@ class cmake;
  * cmLocalNinjaGenerator produces a local build.ninja file from its
  * member Makefile.
  */
-class cmLocalNinjaGenerator : public cmLocalGenerator
+class cmLocalNinjaGenerator : public cmLocalCommonGenerator
 {
 public:
-  /// Default constructor.
-  cmLocalNinjaGenerator();
+  cmLocalNinjaGenerator(cmGlobalGenerator* gg, cmLocalGenerator* parent,
+                        cmState::Snapshot snapshot);
 
-  /// Destructor.
   virtual ~cmLocalNinjaGenerator();
 
-  /// Overloaded methods. @see cmLocalGenerator::Generate()
   virtual void Generate();
 
-  /// Overloaded methods. @see cmLocalGenerator::Configure()
-  virtual void Configure();
-
-  /// Overloaded methods. @see cmLocalGenerator::GetTargetDirectory()
   virtual std::string GetTargetDirectory(cmTarget const& target) const;
 
   const cmGlobalNinjaGenerator* GetGlobalNinjaGenerator() const;
   cmGlobalNinjaGenerator* GetGlobalNinjaGenerator();
 
-  /**
-   * Shortcut to get the cmake instance throw the global generator.
-   * @return an instance of the cmake object.
-   */
   const cmake* GetCMakeInstance() const;
   cmake* GetCMakeInstance();
-
-  std::string const& GetConfigName() const
-  { return this->ConfigName; }
-
-  /// @return whether we are processing the top CMakeLists.txt file.
-  bool isRootMakefile() const;
 
   /// @returns the relative path between the HomeOutputDirectory and this
   /// local generators StartOutputDirectory.
@@ -123,8 +107,6 @@ private:
   void WriteProcessedMakefile(std::ostream& os);
   void WritePools(std::ostream& os);
 
-  void SetConfigName();
-
   void WriteCustomCommandRule();
   void WriteCustomCommandBuildStatement(cmCustomCommand const *cc,
                                         const cmNinjaDeps& orderOnlyDeps);
@@ -133,7 +115,6 @@ private:
 
   std::string MakeCustomLauncher(cmCustomCommandGenerator const& ccg);
 
-  std::string ConfigName;
   std::string HomeRelativeOutputPath;
 
   typedef std::map<cmCustomCommand const*, std::set<cmTarget*> >

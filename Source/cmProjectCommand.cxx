@@ -29,20 +29,20 @@ bool cmProjectCommand
 
   this->Makefile->AddCacheDefinition
     (bindir,
-     this->Makefile->GetCurrentOutputDirectory(),
-     "Value Computed by CMake", cmCacheManager::STATIC);
+     this->Makefile->GetCurrentBinaryDirectory(),
+     "Value Computed by CMake", cmState::STATIC);
   this->Makefile->AddCacheDefinition
     (srcdir,
-     this->Makefile->GetCurrentDirectory(),
-     "Value Computed by CMake", cmCacheManager::STATIC);
+     this->Makefile->GetCurrentSourceDirectory(),
+     "Value Computed by CMake", cmState::STATIC);
 
   bindir = "PROJECT_BINARY_DIR";
   srcdir = "PROJECT_SOURCE_DIR";
 
   this->Makefile->AddDefinition(bindir,
-          this->Makefile->GetCurrentOutputDirectory());
+          this->Makefile->GetCurrentBinaryDirectory());
   this->Makefile->AddDefinition(srcdir,
-          this->Makefile->GetCurrentDirectory());
+          this->Makefile->GetCurrentSourceDirectory());
 
   this->Makefile->AddDefinition("PROJECT_NAME", args[0].c_str());
 
@@ -53,13 +53,13 @@ bool cmProjectCommand
   // CMAKE_PROJECT_NAME will match PROJECT_NAME, and cmake --build
   // will work.
   if(!this->Makefile->GetDefinition("CMAKE_PROJECT_NAME")
-     || (this->Makefile->GetLocalGenerator()->GetParent() == 0) )
+     || (this->Makefile->IsRootMakefile()))
     {
     this->Makefile->AddDefinition("CMAKE_PROJECT_NAME", args[0].c_str());
     this->Makefile->AddCacheDefinition
       ("CMAKE_PROJECT_NAME",
        args[0].c_str(),
-       "Value Computed by CMake", cmCacheManager::STATIC);
+       "Value Computed by CMake", cmState::STATIC);
     }
 
   bool haveVersion = false;
@@ -216,8 +216,7 @@ bool cmProjectCommand
     if(!vw.empty())
       {
       std::ostringstream w;
-      w << (this->Makefile->GetPolicies()
-            ->GetPolicyWarning(cmPolicies::CMP0048))
+      w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0048)
         << "\nThe following variable(s) would be set to empty:" << vw;
       this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
       }
@@ -234,10 +233,8 @@ bool cmProjectCommand
   const char* include = this->Makefile->GetDefinition(extraInclude);
   if(include)
     {
-    std::string fullFilePath;
     bool readit =
-      this->Makefile->ReadListFile( this->Makefile->GetCurrentListFile(),
-                                    include);
+      this->Makefile->ReadDependentFile(include);
     if(!readit && !cmSystemTools::GetFatalErrorOccured())
       {
       std::string m =

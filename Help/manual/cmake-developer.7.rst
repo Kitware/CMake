@@ -605,6 +605,7 @@ have a .cmake file in this directory NOT show up in the modules
 documentation, simply leave out the ``Help/module/<module-name>.rst``
 file and the ``Help/manual/cmake-modules.7.rst`` toctree entry.
 
+.. _`Find Modules`:
 
 Find Modules
 ------------
@@ -866,7 +867,6 @@ look.
   find_path(Foo_INCLUDE_DIR
     NAMES foo.h
     PATHS ${PC_Foo_INCLUDE_DIRS}
-    # if you need to put #include <Foo/foo.h> in your code, add:
     PATH_SUFFIXES Foo
   )
   find_library(Foo_LIBRARY

@@ -14,6 +14,7 @@
 #define cmCPackIFWPackage_h
 
 #include <cmStandardIncludes.h>
+#include <cmGeneratedFileStream.h>
 
 class cmCPackComponent;
 class cmCPackComponentGroup;
@@ -107,6 +108,10 @@ public: // Internal implementation
   const char* GetOption(const std::string& op) const;
   bool IsOn(const std::string& op) const;
 
+  bool IsVersionLess(const char *version);
+  bool IsVersionGreater(const char *version);
+  bool IsVersionEqual(const char *version);
+
   std::string GetComponentName(cmCPackComponent *component);
 
   void DefaultConfiguration();
@@ -128,6 +133,9 @@ public: // Internal implementation
   std::set<DependenceStruct*> AlienDependencies;
   // Patch to package directory
   std::string Directory;
+
+protected:
+  void WriteGeneratedByToStrim(cmGeneratedFileStream& xout);
 };
 
 #endif // cmCPackIFWPackage_h

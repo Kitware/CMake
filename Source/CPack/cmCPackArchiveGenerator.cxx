@@ -27,10 +27,10 @@
 
 //----------------------------------------------------------------------
 cmCPackArchiveGenerator::cmCPackArchiveGenerator(cmArchiveWrite::Compress t,
-  cmArchiveWrite::Type at)
+  std::string const& format)
 {
   this->Compress = t;
-  this->Archive = at;
+  this->ArchiveFormat = format;
 }
 
 //----------------------------------------------------------------------
@@ -61,6 +61,14 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(cmArchiveWrite& archive,
   if (this->IsOn("CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY"))
     {
     filePrefix = this->GetOption("CPACK_PACKAGE_FILE_NAME");
+    filePrefix += "/";
+    }
+  const char* installPrefix =
+    this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX");
+  if(installPrefix && installPrefix[0] == '/' && installPrefix[1] != 0)
+    {
+    // add to file prefix and remove the leading '/'
+    filePrefix += installPrefix+1;
     filePrefix += "/";
     }
   std::vector<std::string>::const_iterator fileIt;
@@ -100,7 +108,7 @@ if (!GenerateHeader(&gf)) \
             << ">." << std::endl); \
     return 0; \
   } \
-cmArchiveWrite archive(gf,this->Compress, this->Archive); \
+cmArchiveWrite archive(gf,this->Compress, this->ArchiveFormat); \
 if (!archive) \
   { \
   cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem to create archive < " \

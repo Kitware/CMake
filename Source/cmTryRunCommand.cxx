@@ -10,7 +10,6 @@
   See the License for more information.
 ============================================================================*/
 #include "cmTryRunCommand.h"
-#include "cmCacheManager.h"
 #include "cmTryCompileCommand.h"
 #include <cmsys/FStream.hxx>
 
@@ -149,7 +148,8 @@ bool cmTryRunCommand
       {
       // "run" it and capture the output
       std::string runOutputContents;
-      if (this->Makefile->IsOn("CMAKE_CROSSCOMPILING"))
+      if (this->Makefile->IsOn("CMAKE_CROSSCOMPILING") &&
+          !this->Makefile->IsDefinitionSet("CMAKE_CROSSCOMPILING_EMULATOR"))
         {
         this->DoNotRunExecutable(runArgs,
                                  argv[3],
@@ -195,7 +195,28 @@ void cmTryRunCommand::RunExecutable(const std::string& runArgs,
                                     std::string* out)
 {
   int retVal = -1;
-  std::string finalCommand = cmSystemTools::ConvertToRunCommandPath(
+
+  std::string finalCommand;
+  const std::string emulator =
+  this->Makefile->GetSafeDefinition("CMAKE_CROSSCOMPILING_EMULATOR");
+  if (!emulator.empty())
+    {
+    std::vector<std::string> emulatorWithArgs;
+    cmSystemTools::ExpandListArgument(emulator, emulatorWithArgs);
+    finalCommand += cmSystemTools::ConvertToRunCommandPath(
+                                 emulatorWithArgs[0].c_str());
+    finalCommand += " ";
+    for (std::vector<std::string>::const_iterator ei =
+         emulatorWithArgs.begin()+1;
+         ei != emulatorWithArgs.end(); ++ei)
+      {
+      finalCommand += "\"";
+      finalCommand += *ei;
+      finalCommand += "\"";
+      finalCommand += " ";
+      }
+    }
+  finalCommand += cmSystemTools::ConvertToRunCommandPath(
                                this->OutputFile.c_str());
   if (!runArgs.empty())
     {
@@ -203,7 +224,7 @@ void cmTryRunCommand::RunExecutable(const std::string& runArgs,
     }
   int timeout = 0;
   bool worked = cmSystemTools::RunSingleCommand(finalCommand.c_str(),
-                out, &retVal,
+                out, out, &retVal,
                 0, cmSystemTools::OUTPUT_NONE, timeout);
   // set the run var
   char retChar[1000];
@@ -217,7 +238,7 @@ void cmTryRunCommand::RunExecutable(const std::string& runArgs,
     }
   this->Makefile->AddCacheDefinition(this->RunResultVariable, retChar,
                                      "Result of TRY_RUN",
-                                     cmCacheManager::INTERNAL);
+                                     cmState::INTERNAL);
 }
 
 /* This is only used when cross compiling. Instead of running the
@@ -262,13 +283,14 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
     this->Makefile->AddCacheDefinition(this->RunResultVariable,
                                        "PLEASE_FILL_OUT-FAILED_TO_RUN",
                                        comment.c_str(),
-                                       cmCacheManager::STRING);
+                                       cmState::STRING);
 
-    cmCacheManager::CacheIterator it = this->Makefile->GetCacheManager()->
-                             GetCacheIterator(this->RunResultVariable.c_str());
-    if ( !it.IsAtEnd() )
+    cmState* state = this->Makefile->GetState();
+    const char* existingValue
+                        = state->GetCacheEntryValue(this->RunResultVariable);
+    if (existingValue)
       {
-      it.SetProperty("ADVANCED", "1");
+      state->SetCacheEntryProperty(this->RunResultVariable, "ADVANCED", "1");
       }
 
     error = true;
@@ -289,12 +311,14 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
       this->Makefile->AddCacheDefinition(internalRunOutputName,
                                          "PLEASE_FILL_OUT-NOTFOUND",
                                          comment.c_str(),
-                                         cmCacheManager::STRING);
-      cmCacheManager::CacheIterator it = this->Makefile->GetCacheManager()->
-                               GetCacheIterator(internalRunOutputName.c_str());
-      if ( !it.IsAtEnd() )
+                                         cmState::STRING);
+      cmState* state = this->Makefile->GetState();
+      const char* existing =
+          state->GetCacheEntryValue(internalRunOutputName);
+      if (existing)
         {
-        it.SetProperty("ADVANCED", "1");
+        state->SetCacheEntryProperty(internalRunOutputName,
+                                      "ADVANCED", "1");
         }
 
       error = true;
@@ -351,7 +375,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
       comment += "Run arguments : ";
       comment += runArgs;
       comment += "\n";
-      comment += "   Called from: " + this->Makefile->GetListFileStack();
+      comment += "   Called from: " + this->Makefile->FormatListFileStack();
       cmsys::SystemTools::ReplaceString(comment, "\n", "\n# ");
       file << comment << "\n\n";
 

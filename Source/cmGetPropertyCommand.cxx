@@ -12,6 +12,7 @@
 #include "cmGetPropertyCommand.h"
 
 #include "cmake.h"
+#include "cmState.h"
 #include "cmTest.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
@@ -141,8 +142,7 @@ bool cmGetPropertyCommand
     {
     // Lookup brief documentation.
     std::string output;
-    if(cmPropertyDefinition* def =
-       this->Makefile->GetCMakeInstance()->
+    if(cmPropertyDefinition const* def = this->Makefile->GetState()->
        GetPropertyDefinition(this->PropertyName, scope))
       {
       output = def->GetShortDescription();
@@ -157,8 +157,7 @@ bool cmGetPropertyCommand
     {
     // Lookup full documentation.
     std::string output;
-    if(cmPropertyDefinition* def =
-       this->Makefile->GetCMakeInstance()->
+    if(cmPropertyDefinition const* def = this->Makefile->GetState()->
        GetPropertyDefinition(this->PropertyName, scope))
       {
       output = def->GetFullDescription();
@@ -172,7 +171,7 @@ bool cmGetPropertyCommand
   else if(this->InfoType == OutDefined)
     {
     // Lookup if the property is defined
-    if(this->Makefile->GetCMakeInstance()->
+    if(this->Makefile->GetState()->
        GetPropertyDefinition(this->PropertyName, scope))
       {
       this->Makefile->AddDefinition(this->Variable, "1");
@@ -236,7 +235,8 @@ bool cmGetPropertyCommand::HandleGlobalMode()
 
   // Get the property.
   cmake* cm = this->Makefile->GetCMakeInstance();
-  return this->StoreResult(cm->GetProperty(this->PropertyName));
+  return this->StoreResult(cm->GetState()
+             ->GetGlobalProperty(this->PropertyName));
 }
 
 //----------------------------------------------------------------------------
@@ -253,7 +253,7 @@ bool cmGetPropertyCommand::HandleDirectoryMode()
     std::string dir = this->Name;
     if(!cmSystemTools::FileIsFullPath(dir.c_str()))
       {
-      dir = this->Makefile->GetCurrentDirectory();
+      dir = this->Makefile->GetCurrentSourceDirectory();
       dir += "/";
       dir += this->Name;
       }
@@ -263,8 +263,7 @@ bool cmGetPropertyCommand::HandleDirectoryMode()
 
     // Lookup the generator.
     if(cmLocalGenerator* lg =
-       (this->Makefile->GetLocalGenerator()
-        ->GetGlobalGenerator()->FindLocalGenerator(dir)))
+       (this->Makefile->GetGlobalGenerator()->FindLocalGenerator(dir)))
       {
       // Use the makefile for the directory found.
       mf = lg->GetMakefile();
@@ -277,6 +276,22 @@ bool cmGetPropertyCommand::HandleDirectoryMode()
          "This could be because the directory argument was invalid or, "
          "it is valid but has not been processed yet.");
       return false;
+      }
+    }
+
+  if (this->PropertyName == "DEFINITIONS")
+    {
+    switch(mf->GetPolicyStatus(cmPolicies::CMP0059))
+      {
+      case cmPolicies::WARN:
+        mf->IssueMessage(cmake::AUTHOR_WARNING,
+                         cmPolicies::GetPolicyWarning(cmPolicies::CMP0059));
+      case cmPolicies::OLD:
+        return this->StoreResult(mf->GetDefineFlagsCMP0059());
+      case cmPolicies::NEW:
+      case cmPolicies::REQUIRED_ALWAYS:
+      case cmPolicies::REQUIRED_IF_USED:
+        break;
       }
     }
 
@@ -391,11 +406,10 @@ bool cmGetPropertyCommand::HandleCacheMode()
     }
 
   const char* value = 0;
-  cmCacheManager::CacheIterator it =
-    this->Makefile->GetCacheManager()->GetCacheIterator(this->Name.c_str());
-  if(!it.IsAtEnd())
+  if(this->Makefile->GetState()->GetCacheEntryValue(this->Name))
     {
-    value = it.GetProperty(this->PropertyName);
+    value = this->Makefile->GetState()
+                ->GetCacheEntryProperty(this->Name, this->PropertyName);
     }
   this->StoreResult(value);
   return true;

@@ -15,6 +15,7 @@
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmSystemTools.h"
+#include "cmAlgorithms.h"
 
 #include "assert.h"
 
@@ -92,7 +93,7 @@ void cmSourceFileLocation::DirectoryUseSource()
     {
     this->Directory =
       cmSystemTools::CollapseFullPath(
-        this->Directory, this->Makefile->GetCurrentDirectory());
+        this->Directory, this->Makefile->GetCurrentSourceDirectory());
     this->AmbiguousDirectory = false;
     }
 }
@@ -105,7 +106,7 @@ void cmSourceFileLocation::DirectoryUseBinary()
     {
     this->Directory =
       cmSystemTools::CollapseFullPath(
-        this->Directory, this->Makefile->GetCurrentOutputDirectory());
+        this->Directory, this->Makefile->GetCurrentBinaryDirectory());
     this->AmbiguousDirectory = false;
     }
 }
@@ -119,8 +120,7 @@ void cmSourceFileLocation::UpdateExtension(const std::string& name)
   if(!ext.empty()) { ext = ext.substr(1); }
 
   // The global generator checks extensions of enabled languages.
-  cmGlobalGenerator* gg =
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+  cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
   cmMakefile const* mf = this->Makefile;
   const std::vector<std::string>& srcExts = mf->GetSourceExtensions();
   const std::vector<std::string>& hdrExts = mf->GetHeaderExtensions();
@@ -142,7 +142,7 @@ void cmSourceFileLocation::UpdateExtension(const std::string& name)
       // Check the source tree only because a file in the build tree should
       // be specified by full path at least once.  We do not want this
       // detection to depend on whether the project has already been built.
-      tryPath = this->Makefile->GetCurrentDirectory();
+      tryPath = this->Makefile->GetCurrentSourceDirectory();
       tryPath += "/";
       }
     if(!this->Directory.empty())
@@ -281,10 +281,10 @@ bool cmSourceFileLocation::Matches(cmSourceFileLocation const& loc)
     // Compare possible directory combinations.
     std::string const& srcDir =
       cmSystemTools::CollapseFullPath(
-        this->Directory, this->Makefile->GetCurrentDirectory());
+        this->Directory, this->Makefile->GetCurrentSourceDirectory());
     std::string const& binDir =
       cmSystemTools::CollapseFullPath(
-        this->Directory, this->Makefile->GetCurrentOutputDirectory());
+        this->Directory, this->Makefile->GetCurrentBinaryDirectory());
     if(srcDir != loc.Directory &&
        binDir != loc.Directory)
       {
@@ -296,10 +296,10 @@ bool cmSourceFileLocation::Matches(cmSourceFileLocation const& loc)
     // Compare possible directory combinations.
     std::string const& srcDir =
       cmSystemTools::CollapseFullPath(
-        loc.Directory, loc.Makefile->GetCurrentDirectory());
+        loc.Directory, loc.Makefile->GetCurrentSourceDirectory());
     std::string const& binDir =
       cmSystemTools::CollapseFullPath(
-        loc.Directory, loc.Makefile->GetCurrentOutputDirectory());
+        loc.Directory, loc.Makefile->GetCurrentBinaryDirectory());
     if(srcDir != this->Directory &&
        binDir != this->Directory)
       {

@@ -31,9 +31,11 @@ std::string GetVS6TargetName(const std::string& targetName)
   return name;
 }
 
-cmGlobalVisualStudio6Generator::cmGlobalVisualStudio6Generator()
+cmGlobalVisualStudio6Generator::cmGlobalVisualStudio6Generator(cmake* cm)
+  : cmGlobalVisualStudioGenerator(cm)
 {
   this->MSDevCommandInitialized = false;
+  this->Version = VS6;
 }
 
 void cmGlobalVisualStudio6Generator
@@ -60,7 +62,7 @@ void cmGlobalVisualStudio6Generator::GenerateConfigurations(cmMakefile* mf)
     fname += "/Templates";
     }
   fname += "/CMakeVisualStudio6Configurations.cmake";
-  if(!mf->ReadListFile(mf->GetCurrentListFile(), fname.c_str()))
+  if(!mf->ReadDependentFile(fname.c_str()))
     {
     cmSystemTools::Error("Cannot open ", fname.c_str(),
                          ".  Please copy this file from the main "
@@ -170,11 +172,11 @@ cmGlobalVisualStudio6Generator::GenerateBuildCommand(
 }
 
 ///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalVisualStudio6Generator::CreateLocalGenerator()
+cmLocalGenerator *
+cmGlobalVisualStudio6Generator::CreateLocalGenerator(cmLocalGenerator* parent,
+                                                   cmState::Snapshot snapshot)
 {
-  cmLocalGenerator *lg = new cmLocalVisualStudio6Generator;
-  lg->SetGlobalGenerator(this);
-  return lg;
+  return new cmLocalVisualStudio6Generator(this, parent, snapshot);
 }
 
 
@@ -185,6 +187,22 @@ void cmGlobalVisualStudio6Generator::Generate()
 
   // Now write out the DSW
   this->OutputDSWFile();
+
+  if (!this->CMakeInstance->GetIsInTryCompile())
+    {
+    const char* cmakeWarnVS6 =
+      this->CMakeInstance->GetState()->GetCacheEntryValue("CMAKE_WARN_VS6");
+    if (!cmakeWarnVS6 || !cmSystemTools::IsOff(cmakeWarnVS6))
+      {
+      this->CMakeInstance->IssueMessage(
+        cmake::WARNING,
+        "The \"Visual Studio 6\" generator is deprecated "
+        "and will be removed in a future version of CMake."
+        "\n"
+        "Add CMAKE_WARN_VS6=OFF to the cache to disable this warning."
+        );
+      }
+    }
 }
 
 // Write a DSW file to the stream
@@ -206,7 +224,7 @@ void cmGlobalVisualStudio6Generator
         tt = orderedProjectTargets.begin();
       tt != orderedProjectTargets.end(); ++tt)
     {
-    cmTarget const* target = *tt;
+    cmTarget const* target = (*tt)->Target;
     if(target->GetType() == cmTarget::INTERFACE_LIBRARY)
       {
       continue;
@@ -223,7 +241,7 @@ void cmGlobalVisualStudio6Generator
     else
       {
       std::string dspname = GetVS6TargetName(target->GetName());
-      std::string dir = target->GetMakefile()->GetStartOutputDirectory();
+      std::string dir = target->GetMakefile()->GetCurrentBinaryDirectory();
       dir = root->Convert(dir.c_str(), cmLocalGenerator::START_OUTPUT);
       this->WriteProject(fout, dspname.c_str(), dir.c_str(), *target);
       }
@@ -241,7 +259,7 @@ void cmGlobalVisualStudio6Generator
     {
     return;
     }
-  std::string fname = root->GetMakefile()->GetStartOutputDirectory();
+  std::string fname = root->GetMakefile()->GetCurrentBinaryDirectory();
   fname += "/";
   fname += root->GetMakefile()->GetProjectName();
   fname += ".dsw";
@@ -370,7 +388,7 @@ cmGlobalVisualStudio6Generator::WriteUtilityDepend(cmTarget const* target)
   std::string pname = target->GetName();
   pname += "_UTILITY";
   pname = GetVS6TargetName(pname.c_str());
-  std::string fname = target->GetMakefile()->GetStartOutputDirectory();
+  std::string fname = target->GetMakefile()->GetCurrentBinaryDirectory();
   fname += "/";
   fname += pname;
   fname += ".dsp";
@@ -411,7 +429,7 @@ void cmGlobalVisualStudio6Generator
 ::GetDocumentation(cmDocumentationEntry& entry)
 {
   entry.Name = cmGlobalVisualStudio6Generator::GetActualName();
-  entry.Brief = "Generates Visual Studio 6 project files.";
+  entry.Brief = "Deprecated. Generates Visual Studio 6 project files.";
 }
 
 //----------------------------------------------------------------------------

@@ -25,6 +25,17 @@ When version 2.4 or lower is given the command implicitly invokes
 
 which enables compatibility features for CMake 2.4 and lower.
 
-The FATAL_ERROR option is accepted but ignored by CMake 2.6 and
+The ``FATAL_ERROR`` option is accepted but ignored by CMake 2.6 and
 higher.  It should be specified so CMake versions 2.4 and lower fail
 with an error instead of just a warning.
+
+.. note::
+  Call the ``cmake_minimum_required()`` command at the beginning of
+  the top-level ``CMakeLists.txt`` file even before calling the
+  :command:`project` command.  It is important to establish version
+  and policy settings before invoking other commands whose behavior
+  they may affect.  See also policy :policy:`CMP0000`.
+
+  Calling ``cmake_minimum_required()`` inside a :command:`function`
+  limits some effects to the function scope when invoked.  Such calls
+  should not be made with the intention of having global effects.

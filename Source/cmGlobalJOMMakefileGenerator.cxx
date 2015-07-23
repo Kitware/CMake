@@ -13,12 +13,19 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 
-cmGlobalJOMMakefileGenerator::cmGlobalJOMMakefileGenerator()
+cmGlobalJOMMakefileGenerator::cmGlobalJOMMakefileGenerator(cmake* cm)
+  : cmGlobalUnixMakefileGenerator3(cm)
 {
   this->FindMakeProgramFile = "CMakeJOMFindMake.cmake";
   this->ForceUnixPaths = false;
   this->ToolSupportsColor = true;
   this->UseLinkScript = false;
+  cm->GetState()->SetWindowsShell(true);
+  cm->GetState()->SetNMake(true);
+  this->DefineWindowsNULL = true;
+  this->PassMakeflags = true;
+  this->UnixCD = false;
+  this->MakeSilentFlag = "/nologo";
 }
 
 void cmGlobalJOMMakefileGenerator
@@ -42,21 +49,6 @@ void cmGlobalJOMMakefileGenerator
     }
 
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
-}
-
-///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalJOMMakefileGenerator::CreateLocalGenerator()
-{
-  cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
-  lg->SetDefineWindowsNULL(true);
-  lg->SetWindowsShell(true);
-  lg->SetMakeSilentFlag("/nologo");
-  lg->SetGlobalGenerator(this);
-  lg->SetIgnoreLibPrefix(true);
-  lg->SetPassMakeflags(true);
-  lg->SetNMake(true);
-  lg->SetUnixCD(false);
-  return lg;
 }
 
 //----------------------------------------------------------------------------

@@ -2,6 +2,19 @@
 # CMakeExpandImportedTargets
 # --------------------------
 #
+# Deprecated.  Do not use.
+#
+# This module was once needed to expand imported targets to the underlying
+# libraries they reference on disk for use with the :command:`try_compile`
+# and :command:`try_run` commands.  These commands now support imported
+# libraries in their ``LINK_LIBRARIES`` options (since CMake 2.8.11
+# for :command:`try_compile` and since CMake 3.2 for :command:`try_run`).
+#
+# This module does not support the policy :policy:`CMP0022` ``NEW``
+# behavior or use of the :prop_tgt:`INTERFACE_LINK_LIBRARIES` property
+# because :manual:`generator expressions <cmake-generator-expressions(7)>`
+# cannot be evaluated during configuration.
+#
 # ::
 #
 #  CMAKE_EXPAND_IMPORTED_TARGETS(<var> LIBRARIES lib1 lib2...libN
@@ -14,9 +27,6 @@
 # respective configuration of the imported targets if it exists.  If no
 # CONFIGURATION is given, it uses the first configuration from
 # ${CMAKE_CONFIGURATION_TYPES} if set, otherwise ${CMAKE_BUILD_TYPE}.
-# This macro is used by all Check*.cmake files which use try_compile()
-# or try_run() and support CMAKE_REQUIRED_LIBRARIES , so that these
-# checks support imported targets in CMAKE_REQUIRED_LIBRARIES:
 #
 # ::
 #

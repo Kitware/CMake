@@ -167,12 +167,20 @@ if(_CMAKE_OSX_SYSROOT_PATH)
     ${_CMAKE_OSX_SYSROOT_PATH}/System/Library/Frameworks
     )
   # add platform developer framework path if exists
-  get_filename_component(_CMAKE_OSX_PLATFORM_FRAMEWORK_PATH
-    ${_CMAKE_OSX_SYSROOT_PATH}/../../Library/Frameworks ABSOLUTE)
-  if(IS_DIRECTORY ${_CMAKE_OSX_PLATFORM_FRAMEWORK_PATH})
-    list(APPEND CMAKE_SYSTEM_FRAMEWORK_PATH
-      ${_CMAKE_OSX_PLATFORM_FRAMEWORK_PATH})
-  endif()
+  foreach(_path
+    # Xcode 6
+    ${_CMAKE_OSX_SYSROOT_PATH}/../../Library/Frameworks
+    # Xcode 5 iOS
+    ${_CMAKE_OSX_SYSROOT_PATH}/Developer/Library/Frameworks
+    # Xcode 5 OSX
+    ${_CMAKE_OSX_SYSROOT_PATH}/../../../../../Library/Frameworks
+    )
+    get_filename_component(_abolute_path "${_path}" ABSOLUTE)
+    if(EXISTS "${_abolute_path}")
+      list(APPEND CMAKE_SYSTEM_FRAMEWORK_PATH "${_abolute_path}")
+      break()
+    endif()
+  endforeach()
 endif()
 list(APPEND CMAKE_SYSTEM_FRAMEWORK_PATH
   /Library/Frameworks

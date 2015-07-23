@@ -1,13 +1,13 @@
 install_files
 -------------
 
-Deprecated.  Use the install(FILES ) command instead.
+Deprecated.  Use the :command:`install(FILES)` command instead.
 
-This command has been superceded by the install command.  It is
-provided for compatibility with older CMake code.  The FILES form is
-directly replaced by the FILES form of the install command.  The
-regexp form can be expressed more clearly using the GLOB form of the
-file command.
+This command has been superceded by the :command:`install` command.  It is
+provided for compatibility with older CMake code.  The ``FILES`` form is
+directly replaced by the ``FILES`` form of the :command:`install`
+command.  The regexp form can be expressed more clearly using the ``GLOB``
+form of the :command:`file` command.
 
 ::
 
@@ -32,8 +32,8 @@ expression will be installed.
 
   install_files(<dir> FILES file file ...)
 
-Any files listed after the FILES keyword will be installed explicitly
+Any files listed after the ``FILES`` keyword will be installed explicitly
 from the names given.  Full paths are allowed in this form.
 
-The directory <dir> is relative to the installation prefix, which is
-stored in the variable CMAKE_INSTALL_PREFIX.
+The directory ``<dir>`` is relative to the installation prefix, which is
+stored in the variable :variable:`CMAKE_INSTALL_PREFIX`.

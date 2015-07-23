@@ -485,6 +485,8 @@ The :command:`macro`/:command:`endmacro`, and
 :command:`function`/:command:`endfunction` commands delimit
 code blocks to be recorded for later invocation as commands.
 
+.. _`CMake Language Variables`:
+
 Variables
 =========
 
@@ -537,6 +539,8 @@ Otherwise, the variable reference evaluates to an empty string.
 The :manual:`cmake-variables(7)` manual documents many variables
 that are provided by CMake or have meaning to CMake when set
 by project code.
+
+.. _`CMake Language Lists`:
 
 Lists
 =====

@@ -21,7 +21,7 @@
 //----------------------------------------------------------------------------
 cmMakefileUtilityTargetGenerator
 ::cmMakefileUtilityTargetGenerator(cmGeneratorTarget* target):
-  cmMakefileTargetGenerator(target->Target)
+  cmMakefileTargetGenerator(target)
 {
   this->CustomCommandDriver = OnUtility;
   this->OSXBundleGenerator = new cmOSXBundleGenerator(target,
@@ -51,7 +51,7 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
     // Include the progress variables for the target.
     *this->BuildFileStream
       << "# Include the progress variables for this target.\n"
-      << this->LocalGenerator->IncludeDirective << " " << root
+      << this->GlobalGenerator->IncludeDirective << " " << root
       << this->Convert(this->ProgressFileNameFull,
                        cmLocalGenerator::HOME_OUTPUT,
                        cmLocalGenerator::MAKERULE)

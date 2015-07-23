@@ -7,6 +7,8 @@ cmake-properties(7)
 
    .. contents::
 
+.. _`Global Properties`:
+
 Properties of Global Scope
 ==========================
 
@@ -38,8 +40,11 @@ Properties of Global Scope
    /prop_gbl/RULE_LAUNCH_LINK
    /prop_gbl/RULE_MESSAGES
    /prop_gbl/TARGET_ARCHIVES_MAY_BE_SHARED_LIBS
+   /prop_gbl/TARGET_MESSAGES
    /prop_gbl/TARGET_SUPPORTS_SHARED_LIBS
    /prop_gbl/USE_FOLDERS
+
+.. _`Directory Properties`:
 
 Properties on Directories
 =========================
@@ -72,6 +77,8 @@ Properties on Directories
    /prop_dir/VS_GLOBAL_SECTION_POST_section
    /prop_dir/VS_GLOBAL_SECTION_PRE_section
 
+.. _`Target Properties`:
+
 Properties on Targets
 =====================
 
@@ -79,9 +86,23 @@ Properties on Targets
    :maxdepth: 1
 
    /prop_tgt/ALIASED_TARGET
+   /prop_tgt/ANDROID_ANT_ADDITIONAL_OPTIONS
    /prop_tgt/ANDROID_API
    /prop_tgt/ANDROID_API_MIN
+   /prop_tgt/ANDROID_ARCH
+   /prop_tgt/ANDROID_ASSETS_DIRECTORIES
    /prop_tgt/ANDROID_GUI
+   /prop_tgt/ANDROID_JAR_DEPENDENCIES
+   /prop_tgt/ANDROID_JAR_DIRECTORIES
+   /prop_tgt/ANDROID_JAVA_SOURCE_DIR
+   /prop_tgt/ANDROID_NATIVE_LIB_DEPENDENCIES
+   /prop_tgt/ANDROID_NATIVE_LIB_DIRECTORIES
+   /prop_tgt/ANDROID_PROCESS_MAX
+   /prop_tgt/ANDROID_PROGUARD
+   /prop_tgt/ANDROID_PROGUARD_CONFIG_PATH
+   /prop_tgt/ANDROID_SECURE_PROPS_PATH
+   /prop_tgt/ANDROID_SKIP_ANT_STEP
+   /prop_tgt/ANDROID_STL_TYPE
    /prop_tgt/ARCHIVE_OUTPUT_DIRECTORY_CONFIG
    /prop_tgt/ARCHIVE_OUTPUT_DIRECTORY
    /prop_tgt/ARCHIVE_OUTPUT_NAME_CONFIG
@@ -93,6 +114,7 @@ Properties on Targets
    /prop_tgt/AUTOUIC_OPTIONS
    /prop_tgt/AUTORCC
    /prop_tgt/AUTORCC_OPTIONS
+   /prop_tgt/BINARY_DIR
    /prop_tgt/BUILD_WITH_INSTALL_RPATH
    /prop_tgt/BUNDLE_EXTENSION
    /prop_tgt/BUNDLE
@@ -113,6 +135,7 @@ Properties on Targets
    /prop_tgt/COMPILE_PDB_OUTPUT_DIRECTORY_CONFIG
    /prop_tgt/CONFIG_OUTPUT_NAME
    /prop_tgt/CONFIG_POSTFIX
+   /prop_tgt/CROSSCOMPILING_EMULATOR
    /prop_tgt/CXX_EXTENSIONS
    /prop_tgt/CXX_STANDARD
    /prop_tgt/CXX_STANDARD_REQUIRED
@@ -128,6 +151,7 @@ Properties on Targets
    /prop_tgt/Fortran_FORMAT
    /prop_tgt/Fortran_MODULE_DIRECTORY
    /prop_tgt/FRAMEWORK
+   /prop_tgt/FRAMEWORK_VERSION
    /prop_tgt/GENERATOR_FILE_NAME
    /prop_tgt/GNUtoMS
    /prop_tgt/HAS_CXX
@@ -170,6 +194,8 @@ Properties on Targets
    /prop_tgt/JOB_POOL_COMPILE
    /prop_tgt/JOB_POOL_LINK
    /prop_tgt/LABELS
+   /prop_tgt/LANG_COMPILER_LAUNCHER
+   /prop_tgt/LANG_INCLUDE_WHAT_YOU_USE
    /prop_tgt/LANG_VISIBILITY_PRESET
    /prop_tgt/LIBRARY_OUTPUT_DIRECTORY_CONFIG
    /prop_tgt/LIBRARY_OUTPUT_DIRECTORY
@@ -219,6 +245,7 @@ Properties on Targets
    /prop_tgt/RUNTIME_OUTPUT_NAME_CONFIG
    /prop_tgt/RUNTIME_OUTPUT_NAME
    /prop_tgt/SKIP_BUILD_RPATH
+   /prop_tgt/SOURCE_DIR
    /prop_tgt/SOURCES
    /prop_tgt/SOVERSION
    /prop_tgt/STATIC_LIBRARY_FLAGS_CONFIG
@@ -242,7 +269,11 @@ Properties on Targets
    /prop_tgt/VS_WINRT_EXTENSIONS
    /prop_tgt/VS_WINRT_REFERENCES
    /prop_tgt/WIN32_EXECUTABLE
+   /prop_tgt/WINDOWS_EXPORT_ALL_SYMBOLS
    /prop_tgt/XCODE_ATTRIBUTE_an-attribute
+   /prop_tgt/XCTEST
+
+.. _`Test Properties`:
 
 Properties on Tests
 ===================
@@ -267,6 +298,8 @@ Properties on Tests
    /prop_test/TIMEOUT
    /prop_test/WILL_FAIL
    /prop_test/WORKING_DIRECTORY
+
+.. _`Source File Properties`:
 
 Properties on Source Files
 ==========================
@@ -297,9 +330,12 @@ Properties on Source Files
    /prop_sf/VS_SHADER_FLAGS
    /prop_sf/VS_SHADER_MODEL
    /prop_sf/VS_SHADER_TYPE
+   /prop_sf/VS_XAML_TYPE
    /prop_sf/WRAP_EXCLUDE
    /prop_sf/XCODE_EXPLICIT_FILE_TYPE
    /prop_sf/XCODE_LAST_KNOWN_FILE_TYPE
+
+.. _`Cache Entry Properties`:
 
 Properties on Cache Entries
 ===========================
@@ -313,6 +349,8 @@ Properties on Cache Entries
    /prop_cache/STRINGS
    /prop_cache/TYPE
    /prop_cache/VALUE
+
+.. _`Installed File Properties`:
 
 Properties on Installed Files
 =============================
@@ -329,7 +367,7 @@ Properties on Installed Files
 
 
 Deprecated Properties on Directories
-=====================================
+====================================
 
 .. toctree::
    :maxdepth: 1

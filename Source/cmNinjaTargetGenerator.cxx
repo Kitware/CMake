@@ -22,6 +22,7 @@
 #include "cmComputeLinkInformation.h"
 #include "cmSourceFile.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmAlgorithms.h"
 
 #include <algorithm>
 
@@ -45,7 +46,8 @@ cmNinjaTargetGenerator::New(cmGeneratorTarget* target)
         // (i.e. top-level) directory.  CMake creates copies of these targets
         // in every directory, which we don't need.
         cmMakefile *mf = target->Target->GetMakefile();
-        if (strcmp(mf->GetStartDirectory(), mf->GetHomeDirectory()) == 0)
+        if (strcmp(mf->GetCurrentSourceDirectory(),
+                   mf->GetHomeDirectory()) == 0)
           return new cmNinjaUtilityTargetGenerator(target);
         // else fallthrough
       }
@@ -55,19 +57,15 @@ cmNinjaTargetGenerator::New(cmGeneratorTarget* target)
     }
 }
 
-cmNinjaTargetGenerator::cmNinjaTargetGenerator(cmTarget* target)
-  :
+cmNinjaTargetGenerator::cmNinjaTargetGenerator(cmGeneratorTarget* target)
+  : cmCommonTargetGenerator(target),
     MacOSXContentGenerator(0),
     OSXBundleGenerator(0),
     MacContentFolders(),
-    Target(target),
-    Makefile(target->GetMakefile()),
     LocalGenerator(
-      static_cast<cmLocalNinjaGenerator*>(Makefile->GetLocalGenerator())),
+      static_cast<cmLocalNinjaGenerator*>(target->GetLocalGenerator())),
     Objects()
 {
-  this->GeneratorTarget =
-    this->GetGlobalGenerator()->GetGeneratorTarget(target);
   MacOSXContentGenerator = new MacOSXContentGeneratorType(this);
 }
 
@@ -91,34 +89,11 @@ cmGlobalNinjaGenerator* cmNinjaTargetGenerator::GetGlobalGenerator() const
   return this->LocalGenerator->GetGlobalNinjaGenerator();
 }
 
-std::string const& cmNinjaTargetGenerator::GetConfigName() const
+std::string cmNinjaTargetGenerator::LanguageCompilerRule(
+  const std::string& lang) const
 {
-  return this->LocalGenerator->GetConfigName();
-}
-
-// TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.
-const char* cmNinjaTargetGenerator::GetFeature(const std::string& feature)
-{
-  return this->Target->GetFeature(feature, this->GetConfigName());
-}
-
-// TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.
-bool cmNinjaTargetGenerator::GetFeatureAsBool(const std::string& feature)
-{
-  return this->Target->GetFeatureAsBool(feature, this->GetConfigName());
-}
-
-// TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.
-void cmNinjaTargetGenerator::AddFeatureFlags(std::string& flags,
-                                             const std::string& lang)
-{
-  // Add language-specific flags.
-  this->LocalGenerator->AddLanguageFlags(flags, lang, this->GetConfigName());
-
-  if(this->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION"))
-    {
-    this->LocalGenerator->AppendFeatureOptions(flags, lang, "IPO");
-    }
+  return lang + "_COMPILER__" +
+    cmGlobalNinjaGenerator::EncodeRuleName(this->Target->GetName());
 }
 
 std::string
@@ -135,69 +110,41 @@ std::string
 cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile const* source,
                                               const std::string& language)
 {
-  // TODO: Fortran support.
-  // // Fortran-specific flags computed for this target.
-  // if(*l == "Fortran")
-  //   {
-  //   this->AddFortranFlags(flags);
-  //   }
+  std::string flags = this->GetFlags(language);
 
-  bool hasLangCached = this->LanguageFlags.count(language) != 0;
-  std::string& languageFlags = this->LanguageFlags[language];
-  if(!hasLangCached)
+  // Add Fortran format flags.
+  if(language == "Fortran")
     {
-    this->AddFeatureFlags(languageFlags, language);
-
-    this->GetLocalGenerator()->AddArchitectureFlags(languageFlags,
-                                                    this->GeneratorTarget,
-                                                    language,
-                                                    this->GetConfigName());
-
-    // Add shared-library flags if needed.
-    this->LocalGenerator->AddCMP0018Flags(languageFlags, this->Target,
-                                          language,
-                                          this->GetConfigName());
-
-    this->LocalGenerator->AddVisibilityPresetFlags(languageFlags, this->Target,
-                                                   language);
-
-    std::vector<std::string> includes;
-    this->LocalGenerator->GetIncludeDirectories(includes,
-                                                this->GeneratorTarget,
-                                                language,
-                                                this->GetConfigName());
-    // Add include directory flags.
-    std::string includeFlags =
-      this->LocalGenerator->GetIncludeFlags(includes, this->GeneratorTarget,
-                                            language,
-      language == "RC" ? true : false,  // full include paths for RC
-                                        // needed by cmcldeps
-                                            false,
-                                            this->GetConfigName());
-    if(cmGlobalNinjaGenerator::IsMinGW())
-      cmSystemTools::ReplaceString(includeFlags, "\\", "/");
-
-    this->LocalGenerator->AppendFlags(languageFlags, includeFlags);
-
-    // Append old-style preprocessor definition flags.
-    this->LocalGenerator->AppendFlags(languageFlags,
-                                      this->Makefile->GetDefineFlags());
-
-    // Add target-specific flags.
-    this->LocalGenerator->AddCompileOptions(languageFlags, this->Target,
-                                            language,
-                                            this->GetConfigName());
+    this->AppendFortranFormatFlags(flags, *source);
     }
-
-  std::string flags = languageFlags;
 
   // Add source file specific flags.
   this->LocalGenerator->AppendFlags(flags,
     source->GetProperty("COMPILE_FLAGS"));
 
-  // TODO: Handle Apple frameworks.
-
   return flags;
+}
+
+void cmNinjaTargetGenerator::AddIncludeFlags(std::string& languageFlags,
+                                             std::string const& language)
+{
+  std::vector<std::string> includes;
+  this->LocalGenerator->GetIncludeDirectories(includes,
+                                              this->GeneratorTarget,
+                                              language,
+                                              this->GetConfigName());
+  // Add include directory flags.
+  std::string includeFlags =
+    this->LocalGenerator->GetIncludeFlags(includes, this->GeneratorTarget,
+                                          language,
+        language == "RC" ? true : false,  // full include paths for RC
+                                          // needed by cmcldeps
+                                          false,
+                                          this->GetConfigName());
+  if (this->GetGlobalGenerator()->IsGCCOnWindows())
+    cmSystemTools::ReplaceString(includeFlags, "\\", "/");
+
+  this->LocalGenerator->AppendFlags(languageFlags, includeFlags);
 }
 
 bool cmNinjaTargetGenerator::NeedDepTypeMSVC(const std::string& lang) const
@@ -222,16 +169,6 @@ cmNinjaTargetGenerator::
 ComputeDefines(cmSourceFile const* source, const std::string& language)
 {
   std::set<std::string> defines;
-
-  // Add the export symbol definition for shared library objects.
-  if(const char* exportMacro = this->Target->GetExportMacro())
-    {
-    this->LocalGenerator->AppendDefines(defines, exportMacro);
-    }
-
-  // Add preprocessor definitions for this target and configuration.
-  this->LocalGenerator->AddCompileDefinitions(defines, this->Target,
-                                             this->GetConfigName());
   this->LocalGenerator->AppendDefines
     (defines,
      source->GetProperty("COMPILE_DEFINITIONS"));
@@ -243,7 +180,7 @@ ComputeDefines(cmSourceFile const* source, const std::string& language)
      source->GetProperty(defPropName));
   }
 
-  std::string definesString;
+  std::string definesString = this->GetDefines(language);
   this->LocalGenerator->JoinDefines(defines, definesString,
      language);
 
@@ -269,7 +206,7 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
   // Add a dependency on the link definitions file, if any.
   if(!this->ModuleDefinitionFile.empty())
     {
-    result.push_back(this->ModuleDefinitionFile);
+    result.push_back(this->ConvertToNinjaPath(this->ModuleDefinitionFile));
     }
 
   return result;
@@ -384,6 +321,7 @@ cmNinjaTargetGenerator
   vars.Source = "$in";
   vars.Object = "$out";
   vars.Defines = "$DEFINES";
+  vars.Includes = "$INCLUDES";
   vars.TargetPDB = "$TARGET_PDB";
   vars.TargetCompilePDB = "$TARGET_COMPILE_PDB";
   vars.ObjectDir = "$OBJECT_DIR";
@@ -449,6 +387,42 @@ cmNinjaTargetGenerator
   std::string compileCmd = mf->GetRequiredDefinition(cmdVar);
   std::vector<std::string> compileCmds;
   cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
+
+  // Maybe insert an include-what-you-use runner.
+  if (!compileCmds.empty() && (lang == "C" || lang == "CXX"))
+    {
+    std::string const iwyu_prop = lang + "_INCLUDE_WHAT_YOU_USE";
+    const char *iwyu = this->Target->GetProperty(iwyu_prop);
+    if (iwyu && *iwyu)
+      {
+      std::string run_iwyu =
+        this->GetLocalGenerator()->ConvertToOutputFormat(
+          cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
+      run_iwyu += " -E __run_iwyu --iwyu=";
+      run_iwyu += this->GetLocalGenerator()->EscapeForShell(iwyu);
+      run_iwyu += " -- ";
+      compileCmds.front().insert(0, run_iwyu);
+      }
+    }
+
+  // Maybe insert a compiler launcher like ccache or distcc
+  if (!compileCmds.empty() && (lang == "C" || lang == "CXX"))
+    {
+    std::string const clauncher_prop = lang + "_COMPILER_LAUNCHER";
+    const char *clauncher = this->Target->GetProperty(clauncher_prop);
+    if (clauncher && *clauncher)
+      {
+      std::vector<std::string> launcher_cmd;
+      cmSystemTools::ExpandListArgument(clauncher, launcher_cmd, true);
+      for (std::vector<std::string>::iterator i = launcher_cmd.begin(),
+             e = launcher_cmd.end(); i != e; ++i)
+        {
+        *i = this->LocalGenerator->EscapeForShell(*i);
+        }
+      std::string const& run_launcher = cmJoin(launcher_cmd, " ") + " ";
+      compileCmds.front().insert(0, run_launcher);
+      }
+    }
 
   if (!compileCmds.empty())
     {
@@ -563,11 +537,6 @@ cmNinjaTargetGenerator
     {
     this->WriteObjectBuildStatement(*si, !orderOnlyDeps.empty());
     }
-  std::string def = this->GeneratorTarget->GetModuleDefinitionFile(config);
-  if(!def.empty())
-    {
-    this->ModuleDefinitionFile = this->ConvertToNinjaPath(def);
-    }
 
   this->GetBuildFileStream() << "\n";
 }
@@ -630,6 +599,7 @@ cmNinjaTargetGenerator
   cmNinjaVars vars;
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
   vars["DEFINES"] = this->ComputeDefines(source, language);
+  vars["INCLUDES"] = this->GetIncludes(language);
   if (!this->NeedDepTypeMSVC(language)) {
     vars["DEP_FILE"] =
             cmGlobalNinjaGenerator::EncodeDepfileSpace(objectFileName + ".d");
@@ -675,6 +645,7 @@ cmNinjaTargetGenerator
     compileObjectVars.ObjectFileDir = objectFileDir.c_str();
     compileObjectVars.Flags = vars["FLAGS"].c_str();
     compileObjectVars.Defines = vars["DEFINES"].c_str();
+    compileObjectVars.Includes = vars["INCLUDES"].c_str();
 
     // Rule for compiling object file.
     std::string compileCmdVar = "CMAKE_";
@@ -715,32 +686,6 @@ cmNinjaTargetGenerator
                                                 outputList,
                                                 outputs);
   }
-}
-
-//----------------------------------------------------------------------------
-void
-cmNinjaTargetGenerator
-::AddModuleDefinitionFlag(std::string& flags)
-{
-  if(this->ModuleDefinitionFile.empty())
-    {
-    return;
-    }
-
-  // TODO: Create a per-language flag variable.
-  const char* defFileFlag =
-    this->Makefile->GetDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-  if(!defFileFlag)
-    {
-    return;
-    }
-
-  // Append the flag and value.  Use ConvertToLinkReference to help
-  // vs6's "cl -link" pass it to the linker.
-  std::string flag = defFileFlag;
-  flag += (this->LocalGenerator->ConvertToLinkReference(
-             this->ModuleDefinitionFile));
-  this->LocalGenerator->AppendFlags(flags, flag);
 }
 
 void

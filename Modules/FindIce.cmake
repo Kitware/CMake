@@ -20,7 +20,14 @@
 #   Ice_SLICE_DIRS - the directories containing the Ice slice interface
 #                    definitions
 #
-# Ice programs are reported in::
+# Imported targets::
+#
+#   Ice::<C>
+#
+# Where ``<C>`` is the name of an Ice component, for example
+# ``Ice::Glacier2``.
+#
+# Ice slice programs are reported in::
 #
 #   Ice_SLICE2CPP_EXECUTABLE - path to slice2cpp executable
 #   Ice_SLICE2CS_EXECUTABLE - path to slice2cs executable
@@ -28,9 +35,48 @@
 #   Ice_SLICE2FREEZE_EXECUTABLE - path to slice2freeze executable
 #   Ice_SLICE2HTML_EXECUTABLE - path to slice2html executable
 #   Ice_SLICE2JAVA_EXECUTABLE - path to slice2java executable
+#   Ice_SLICE2JS_EXECUTABLE - path to slice2js executable
 #   Ice_SLICE2PHP_EXECUTABLE - path to slice2php executable
 #   Ice_SLICE2PY_EXECUTABLE - path to slice2py executable
 #   Ice_SLICE2RB_EXECUTABLE - path to slice2rb executable
+#
+# Ice programs are reported in::
+#
+#   Ice_GLACIER2ROUTER_EXECUTABLE - path to glacier2router executable
+#   Ice_ICEBOX_EXECUTABLE - path to icebox executable
+#   Ice_ICEBOXADMIN_EXECUTABLE - path to iceboxadmin executable
+#   Ice_ICEBOXD_EXECUTABLE - path to iceboxd executable
+#   Ice_ICEBOXNET_EXECUTABLE - path to iceboxnet executable
+#   Ice_ICEGRIDADMIN_EXECUTABLE - path to icegridadmin executable
+#   Ice_ICEGRIDNODE_EXECUTABLE - path to icegridnode executable
+#   Ice_ICEGRIDNODED_EXECUTABLE - path to icegridnoded executable
+#   Ice_ICEGRIDREGISTRY_EXECUTABLE - path to icegridregistry executable
+#   Ice_ICEGRIDREGISTRYD_EXECUTABLE - path to icegridregistryd executable
+#   Ice_ICEPATCH2CALC_EXECUTABLE - path to icepatch2calc executable
+#   Ice_ICEPATCH2CLIENT_EXECUTABLE - path to icepatch2client executable
+#   Ice_ICEPATCH2SERVER_EXECUTABLE - path to icepatch2server executable
+#   Ice_ICESERVICEINSTALL_EXECUTABLE - path to iceserviceinstall executable
+#   Ice_ICESTORMADMIN_EXECUTABLE - path to icestormadmin executable
+#   Ice_ICESTORMMIGRATE_EXECUTABLE - path to icestormmigrate executable
+#
+# Ice db programs (Windows only; standard system versions on all other
+# platforms) are reported in::
+#
+#   Ice_DB_ARCHIVE_EXECUTABLE - path to db_archive executable
+#   Ice_DB_CHECKPOINT_EXECUTABLE - path to db_checkpoint executable
+#   Ice_DB_DEADLOCK_EXECUTABLE - path to db_deadlock executable
+#   Ice_DB_DUMP_EXECUTABLE - path to db_dump executable
+#   Ice_DB_HOTBACKUP_EXECUTABLE - path to db_hotbackup executable
+#   Ice_DB_LOAD_EXECUTABLE - path to db_load executable
+#   Ice_DB_LOG_VERIFY_EXECUTABLE - path to db_log_verify executable
+#   Ice_DB_PRINTLOG_EXECUTABLE - path to db_printlog executable
+#   Ice_DB_RECOVER_EXECUTABLE - path to db_recover executable
+#   Ice_DB_STAT_EXECUTABLE - path to db_stat executable
+#   Ice_DB_TUNER_EXECUTABLE - path to db_tuner executable
+#   Ice_DB_UPGRADE_EXECUTABLE - path to db_upgrade executable
+#   Ice_DB_VERIFY_EXECUTABLE - path to db_verify executable
+#   Ice_DUMPDB_EXECUTABLE - path to dumpdb executable
+#   Ice_TRANSFORMDB_EXECUTABLE - path to transformdb executable
 #
 # Ice component libraries are reported in::
 #
@@ -76,7 +122,7 @@
 # Written by Roger Leigh <rleigh@codelibre.net>
 
 #=============================================================================
-# Copyright 2014 University of Dundee
+# Copyright 2014-2015 University of Dundee
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -94,6 +140,8 @@ function(_Ice_FIND)
   # Released versions of Ice, including generic short forms
   set(ice_versions
       3
+      3.6
+      3.6.0
       3.5
       3.5.1
       3.5.0
@@ -198,19 +246,55 @@ function(_Ice_FIND)
     endforeach()
   endif()
 
+  set(db_programs
+      db_archive
+      db_checkpoint
+      db_deadlock
+      db_dump
+      db_hotbackup
+      db_load
+      db_log_verify
+      db_printlog
+      db_recover
+      db_stat
+      db_tuner
+      db_upgrade
+      db_verify
+      dumpdb
+      transformdb)
+
   set(ice_programs
+      glacier2router
+      icebox
+      iceboxadmin
+      iceboxd
+      iceboxnet
+      icegridadmin
+      icegridnode
+      icegridnoded
+      icegridregistry
+      icegridregistryd
+      icepatch2calc
+      icepatch2client
+      icepatch2server
+      iceserviceinstall
+      icestormadmin
+      icestormmigrate)
+
+  set(slice_programs
       slice2cpp
       slice2cs
       slice2freezej
       slice2freeze
       slice2html
       slice2java
+      slice2js
       slice2php
       slice2py
       slice2rb)
 
   # Find all Ice programs
-  foreach(program ${ice_programs})
+  foreach(program ${db_programs} ${ice_programs} ${slice_programs})
     string(TOUPPER "${program}" program_upcase)
     set(cache_var "Ice_${program_upcase}_EXECUTABLE")
     set(program_var "Ice_${program_upcase}_EXECUTABLE")
@@ -356,13 +440,21 @@ if(Ice_FOUND)
     set(_Ice_component_cache "Ice_${_Ice_component_upcase}_LIBRARY")
     set(_Ice_component_lib "Ice_${_Ice_component_upcase}_LIBRARIES")
     set(_Ice_component_found "${_Ice_component_upcase}_FOUND")
+    set(_Ice_imported_target "Ice::${_Ice_component}")
     if(${_Ice_component_found})
       set("${_Ice_component_lib}" "${${_Ice_component_cache}}")
+      if(NOT TARGET ${_Ice_imported_target})
+        add_library(${_Ice_imported_target} UNKNOWN IMPORTED)
+        set_target_properties(${_Ice_imported_target} PROPERTIES
+          IMPORTED_LOCATION "${${_Ice_component_cache}}"
+          INTERFACE_INCLUDE_DIRECTORIES "${Ice_INCLUDE_DIR}")
+      endif()
     endif()
     unset(_Ice_component_upcase)
     unset(_Ice_component_cache)
     unset(_Ice_component_lib)
     unset(_Ice_component_found)
+    unset(_Ice_imported_target)
   endforeach()
 endif()
 
@@ -373,15 +465,51 @@ if(Ice_DEBUG)
   message(STATUS "Ice_INCLUDE_DIR directory: ${Ice_INCLUDE_DIR}")
   message(STATUS "Ice_SLICE_DIR directory: ${Ice_SLICE_DIR}")
   message(STATUS "Ice_LIBRARIES: ${Ice_LIBRARIES}")
+
   message(STATUS "slice2cpp executable: ${Ice_SLICE2CPP_EXECUTABLE}")
   message(STATUS "slice2cs executable: ${Ice_SLICE2CS_EXECUTABLE}")
   message(STATUS "slice2freezej executable: ${Ice_SLICE2FREEZEJ_EXECUTABLE}")
   message(STATUS "slice2freeze executable: ${Ice_SLICE2FREEZE_EXECUTABLE}")
   message(STATUS "slice2html executable: ${Ice_SLICE2HTML_EXECUTABLE}")
   message(STATUS "slice2java executable: ${Ice_SLICE2JAVA_EXECUTABLE}")
+  message(STATUS "slice2js executable: ${Ice_SLICE2JS_EXECUTABLE}")
   message(STATUS "slice2php executable: ${Ice_SLICE2PHP_EXECUTABLE}")
   message(STATUS "slice2py executable: ${Ice_SLICE2PY_EXECUTABLE}")
   message(STATUS "slice2rb executable: ${Ice_SLICE2RB_EXECUTABLE}")
+  message(STATUS "glacier2router executable: ${Ice_GLACIER2ROUTER_EXECUTABLE}")
+
+  message(STATUS "icebox executable: ${Ice_ICEBOX_EXECUTABLE}")
+  message(STATUS "iceboxadmin executable: ${Ice_ICEBOXADMIN_EXECUTABLE}")
+  message(STATUS "iceboxd executable: ${Ice_ICEBOXD_EXECUTABLE}")
+  message(STATUS "iceboxnet executable: ${Ice_ICEBOXNET_EXECUTABLE}")
+  message(STATUS "icegridadmin executable: ${Ice_ICEGRIDADMIN_EXECUTABLE}")
+  message(STATUS "icegridnode executable: ${Ice_ICEGRIDNODE_EXECUTABLE}")
+  message(STATUS "icegridnoded executable: ${Ice_ICEGRIDNODED_EXECUTABLE}")
+  message(STATUS "icegridregistry executable: ${Ice_ICEGRIDREGISTRY_EXECUTABLE}")
+  message(STATUS "icegridregistryd executable: ${Ice_ICEGRIDREGISTRYD_EXECUTABLE}")
+  message(STATUS "icepatch2calc executable: ${Ice_ICEPATCH2CALC_EXECUTABLE}")
+  message(STATUS "icepatch2client executable: ${Ice_ICEPATCH2CLIENT_EXECUTABLE}")
+  message(STATUS "icepatch2server executable: ${Ice_ICEPATCH2SERVER_EXECUTABLE}")
+  message(STATUS "iceserviceinstall executable: ${Ice_ICESERVICEINSTALL_EXECUTABLE}")
+  message(STATUS "icestormadmin executable: ${Ice_ICESTORMADMIN_EXECUTABLE}")
+  message(STATUS "icestormmigrate executable: ${Ice_ICESTORMMIGRATE_EXECUTABLE}")
+
+  message(STATUS "db_archive executable: ${Ice_DB_ARCHIVE_EXECUTABLE}")
+  message(STATUS "db_checkpoint executable: ${Ice_DB_CHECKPOINT_EXECUTABLE}")
+  message(STATUS "db_deadlock executable: ${Ice_DB_DEADLOCK_EXECUTABLE}")
+  message(STATUS "db_dump executable: ${Ice_DB_DUMP_EXECUTABLE}")
+  message(STATUS "db_hotbackup executable: ${Ice_DB_HOTBACKUP_EXECUTABLE}")
+  message(STATUS "db_load executable: ${Ice_DB_LOAD_EXECUTABLE}")
+  message(STATUS "db_log_verify executable: ${Ice_DB_LOG_VERIFY_EXECUTABLE}")
+  message(STATUS "db_printlog executable: ${Ice_DB_PRINTLOG_EXECUTABLE}")
+  message(STATUS "db_recover executable: ${Ice_DB_RECOVER_EXECUTABLE}")
+  message(STATUS "db_stat executable: ${Ice_DB_STAT_EXECUTABLE}")
+  message(STATUS "db_tuner executable: ${Ice_DB_TUNER_EXECUTABLE}")
+  message(STATUS "db_upgrade executable: ${Ice_DB_UPGRADE_EXECUTABLE}")
+  message(STATUS "db_verify executable: ${Ice_DB_VERIFY_EXECUTABLE}")
+  message(STATUS "dumpdb executable: ${Ice_DUMPDB_EXECUTABLE}")
+  message(STATUS "transformdb executable: ${Ice_TRANSFORMDB_EXECUTABLE}")
+
   foreach(component ${Ice_FIND_COMPONENTS})
     string(TOUPPER "${component}" component_upcase)
     set(component_lib "Ice_${component_upcase}_LIBRARIES")

@@ -64,7 +64,8 @@ bool cmCPackWIXGenerator::RunWiXCommand(std::string const& command)
   std::string output;
 
   int returnValue = 0;
-  bool status = cmSystemTools::RunSingleCommand(command.c_str(), &output,
+  bool status = cmSystemTools::RunSingleCommand(
+    command.c_str(), &output, &output,
     &returnValue, 0, cmSystemTools::OUTPUT_NONE);
 
   cmsys::ofstream logFile(logFileName.c_str(), std::ios::app);
@@ -265,13 +266,30 @@ bool cmCPackWIXGenerator::PackageFilesImpl()
 
   AppendUserSuppliedExtraSources();
 
+  std::set<std::string> usedBaseNames;
+
   std::stringstream objectFiles;
   for(size_t i = 0; i < this->WixSources.size(); ++i)
     {
     std::string const& sourceFilename = this->WixSources[i];
 
+    std::string baseName =
+      cmSystemTools::GetFilenameWithoutLastExtension(sourceFilename);
+
+    unsigned int counter = 0;
+    std::string uniqueBaseName = baseName;
+
+    while(usedBaseNames.find(uniqueBaseName) != usedBaseNames.end())
+      {
+      std::stringstream tmp;
+      tmp << baseName << ++counter;
+      uniqueBaseName = tmp.str();
+      }
+
+    usedBaseNames.insert(uniqueBaseName);
+
     std::string objectFilename =
-      cmSystemTools::GetFilenameWithoutExtension(sourceFilename) + ".wixobj";
+      this->CPackTopLevel + "/" + uniqueBaseName + ".wixobj";
 
     if(!RunCandleCommand(sourceFilename, objectFilename))
       {
@@ -413,7 +431,7 @@ void cmCPackWIXGenerator::AddDefinition(cmWIXSourceWriter& source,
   tmp << name << "=\"" << value << '"';
 
   source.AddProcessingInstruction("define",
-    cmWIXSourceWriter::WindowsCodepageToUtf8(tmp.str()));
+    cmWIXSourceWriter::CMakeEncodingToUtf8(tmp.str()));
 }
 
 bool cmCPackWIXGenerator::CreateWiXSourceFiles()
@@ -474,6 +492,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 
   featureDefinitions.AddAttribute("Title", cpackPackageName);
   featureDefinitions.AddAttribute("Level", "1");
+  this->Patch->ApplyFragment("#PRODUCTFEATURE", featureDefinitions);
 
   const char* package = GetOption("CPACK_WIX_CMAKE_PACKAGE_REGISTRY");
   if(package)

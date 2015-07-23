@@ -1,3 +1,7 @@
+# prevent older policies from interfearing with this script
+cmake_policy(PUSH)
+cmake_policy(VERSION ${CMAKE_VERSION})
+
 message(STATUS "=============================================================================")
 message(STATUS "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)")
 message(STATUS "")
@@ -132,12 +136,13 @@ if(CPackGen MATCHES "RPM")
   endif()
 
   set(CPACK_RPM_PACKAGE_SUMMARY "default summary")
-  set(CPACK_RPM_libraries_PACKAGE_SUMMARY "libraries summary")
-  set(CPACK_RPM_libraries_PACKAGE_DESCRIPTION "libraries description")
+  set(CPACK_RPM_headers_PACKAGE_SUMMARY "headers summary")
+  set(CPACK_RPM_headers_PACKAGE_DESCRIPTION "headers description")
   set(CPACK_COMPONENT_APPLICATIONS_DESCRIPTION
     "An extremely useful application that makes use of MyLib")
-  set(CPACK_COMPONENT_HEADERS_DESCRIPTION
-    "C/C\\+\\+ header files for use with MyLib")
+  set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION
+    "Static libraries used to build programs with MyLib")
+  set(LIB_SUFFIX "6?4?")
 
   # test package info
   if(${CPackComponentWay} STREQUAL "IgnoreGroup")
@@ -158,37 +163,69 @@ if(CPackGen MATCHES "RPM")
           ERROR_QUIET
           OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+      execute_process(COMMAND ${RPM_EXECUTABLE} -pqa ${check_file}
+          RESULT_VARIABLE check_package_architecture_result
+          OUTPUT_VARIABLE check_package_architecture
+          ERROR_QUIET
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+
       execute_process(COMMAND ${RPM_EXECUTABLE} -pql ${check_file}
           OUTPUT_VARIABLE check_package_content
           ERROR_QUIET
           OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+      set(whitespaces "[\\t\\n\\r ]*")
+
       if(check_file_libraries_match)
-        set(check_file_match_expected_summary ".*${CPACK_RPM_libraries_PACKAGE_SUMMARY}.*")
-        set(check_file_match_expected_description ".*${CPACK_RPM_libraries_PACKAGE_DESCRIPTION}.*")
-        set(check_file_match_expected_relocation_path "Relocations : ${CPACK_PACKAGING_INSTALL_PREFIX} ${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-        set(check_file_match_expected_architecture "Architecture: ${CPACK_RPM_applications_PACKAGE_ARCHITECTURE}")
-        set(spec_regex "*libraries*")
-        set(check_content_list "^/usr/foo/bar\n/usr/foo/bar/lib.*\n/usr/foo/bar/lib.*/libmylib.a$")
-      elseif(check_file_headers_match)
         set(check_file_match_expected_summary ".*${CPACK_RPM_PACKAGE_SUMMARY}.*")
-        set(check_file_match_expected_description ".*${CPACK_COMPONENT_HEADERS_DESCRIPTION}.*")
-        set(check_file_match_expected_relocation_path "Relocations : ${CPACK_PACKAGING_INSTALL_PREFIX} ${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
-        set(check_file_match_expected_architecture "Architecture: ${CPACK_RPM_libraries_PACKAGE_ARCHITECTURE}")
+        set(check_file_match_expected_description ".*${CPACK_COMPONENT_LIBRARIES_DESCRIPTION}.*")
+        set(check_file_match_expected_relocation_path "Relocations${whitespaces}:${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}${LIB_SUFFIX}${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}/other_relocatable${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}${LIB_SUFFIX}/inside_relocatable_two/depth_two/different_relocatable")
+        set(check_file_match_expected_architecture "") # we don't explicitly set this value so it is different on each platform - ignore it
+        set(spec_regex "*libraries*")
+        set(check_content_list "^/usr/foo/bar/lib${LIB_SUFFIX}
+/usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_one
+/usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_one/depth_two
+/usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_one/depth_two/depth_three
+/usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_one/depth_two/depth_three/symlink_parentdir_path
+/usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_one/depth_two/symlink_outside_package
+/usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_one/depth_two/symlink_relocatable_subpath
+/usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_one/depth_two/symlink_samedir_path
+/usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_one/depth_two/symlink_samedir_path_current_dir
+/usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_one/depth_two/symlink_samedir_path_longer
+/usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_one/symlink_subdir_path
+/usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_two
+/usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_two/depth_two
+/usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_two/depth_two/different_relocatable
+/usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_two/depth_two/different_relocatable/bar
+/usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_two/depth_two/symlink_other_relocatable_path
+/usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_two/depth_two/symlink_to_non_relocatable_path
+/usr/foo/bar/lib${LIB_SUFFIX}/libmylib.a
+/usr/foo/bar/non_relocatable
+/usr/foo/bar/non_relocatable/depth_two
+/usr/foo/bar/non_relocatable/depth_two/symlink_from_non_relocatable_path
+/usr/foo/bar/other_relocatable
+/usr/foo/bar/other_relocatable/depth_two$")
+      elseif(check_file_headers_match)
+        set(check_file_match_expected_summary ".*${CPACK_RPM_headers_PACKAGE_SUMMARY}.*")
+        set(check_file_match_expected_description ".*${CPACK_RPM_headers_PACKAGE_DESCRIPTION}.*")
+        set(check_file_match_expected_relocation_path "Relocations${whitespaces}:${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
+        set(check_file_match_expected_architecture "noarch")
         set(spec_regex "*headers*")
         set(check_content_list "^/usr/foo/bar\n/usr/foo/bar/include\n/usr/foo/bar/include/mylib.h$")
       elseif(check_file_applications_match)
         set(check_file_match_expected_summary ".*${CPACK_RPM_PACKAGE_SUMMARY}.*")
         set(check_file_match_expected_description ".*${CPACK_COMPONENT_APPLICATIONS_DESCRIPTION}.*")
-        set(check_file_match_expected_relocation_path "Relocations : ${CPACK_PACKAGING_INSTALL_PREFIX} ${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
-        set(check_file_match_expected_architecture "Architecture: ${CPACK_RPM_headers_PACKAGE_ARCHITECTURE}")
+        set(check_file_match_expected_relocation_path "Relocations${whitespaces}:${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
+        set(check_file_match_expected_architecture "armv7hf")
         set(spec_regex "*applications*")
-        set(check_content_list "^/usr/foo/bar\n/usr/foo/bar/bin\n/usr/foo/bar/bin/mylibapp$")
+        set(check_content_list "^/usr/foo/bar
+/usr/foo/bar/bin
+/usr/foo/bar/bin/mylibapp$")
       elseif(check_file_Unspecified_match)
         set(check_file_match_expected_summary ".*${CPACK_RPM_PACKAGE_SUMMARY}.*")
         set(check_file_match_expected_description ".*DESCRIPTION.*")
-        set(check_file_match_expected_relocation_path "Relocations : ${CPACK_PACKAGING_INSTALL_PREFIX} ${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
-        set(check_file_match_expected_architecture "Architecture: ${CPACK_RPM_Unspecified_PACKAGE_ARCHITECTURE}")
+        set(check_file_match_expected_relocation_path "Relocations${whitespaces}:${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
+        set(check_file_match_expected_architecture "") # we don't explicitly set this value so it is different on each platform - ignore it
         set(spec_regex "*Unspecified*")
         set(check_content_list "^/usr/foo/bar
 /usr/foo/bar/bin
@@ -196,7 +233,14 @@ if(CPackGen MATCHES "RPM")
 /usr/foo/bar/bin/@in@_@path@@with/@and
 /usr/foo/bar/bin/@in@_@path@@with/@and/@
 /usr/foo/bar/bin/@in@_@path@@with/@and/@/@in_path@
-/usr/foo/bar/bin/@in@_@path@@with/@and/@/@in_path@/mylibapp2$")
+/usr/foo/bar/bin/@in@_@path@@with/@and/@/@in_path@/mylibapp2
+/usr/foo/bar/share
+/usr/foo/bar/share/man
+/usr/foo/bar/share/man/mylib
+/usr/foo/bar/share/man/mylib/man3
+/usr/foo/bar/share/man/mylib/man3/mylib.1
+/usr/foo/bar/share/man/mylib/man3/mylib.1/mylib
+/usr/foo/bar/share/man/mylib/man3/mylib.1/mylib2$")
       else()
         message(FATAL_ERROR "error: unexpected rpm package '${check_file}'")
       endif()
@@ -228,9 +272,22 @@ if(CPackGen MATCHES "RPM")
         message(FATAL_ERROR "error: '${check_file}' rpm package relocation path does not match expected value - regex '${check_file_match_expected_relocation_path}'; RPM output: '${check_file_content}'; generated spec file: '${spec_file_content}'")
       endif()
 
-      string(REGEX MATCH ${check_file_match_expected_architecture} check_file_match_architecture ${check_file_content})
-      if (NOT check_file_match_architecture)
+      #######################
+      # test package architecture
+      #######################
+      string(REGEX MATCH "Architecture${whitespaces}:" check_info_contains_arch ${check_file_content})
+      if(check_info_contains_arch) # test for rpm versions that contain architecture in package info (e.g. 4.11.x)
+        string(REGEX MATCH "Architecture${whitespaces}:${whitespaces}${check_file_match_expected_architecture}" check_file_match_architecture ${check_file_content})
+        if(NOT check_file_match_architecture)
           message(FATAL_ERROR "error: '${check_file}' Architecture does not match expected value - '${check_file_match_expected_architecture}'; RPM output: '${check_file_content}'; generated spec file: '${spec_file_content}'")
+        endif()
+      elseif(NOT check_package_architecture_result) # test result only on platforms that support -pqa rpm query
+        # test for rpm versions that do not contain architecture in package info (e.g. 4.8.x)
+        string(REGEX MATCH ".*${check_file_match_expected_architecture}" check_file_match_architecture "${check_package_architecture}")
+        if(NOT check_file_match_architecture)
+          message(FATAL_ERROR "error: '${check_file}' Architecture does not match expected value - '${check_file_match_expected_architecture}'; RPM output: '${check_package_architecture}'; generated spec file: '${spec_file_content}'")
+        endif()
+      # else rpm version too old (e.g. 4.4.x) - skip test
       endif()
 
       #######################
@@ -248,5 +305,59 @@ if(CPackGen MATCHES "RPM")
         message(FATAL_ERROR "error: '${check_file}' rpm package content does not match expected value - regex '${check_content_list}'; RPM output: '${check_package_content}'; generated spec file: '${spec_file_content}'")
       endif()
     endforeach()
+
+    #######################
+    # verify generated symbolic links
+    #######################
+    file(GLOB_RECURSE symlink_files RELATIVE "${CPackComponentsForAll_BINARY_DIR}" "${CPackComponentsForAll_BINARY_DIR}/*/symlink_*")
+
+    foreach(check_symlink IN LISTS symlink_files)
+      get_filename_component(symlink_name "${check_symlink}" NAME)
+      execute_process(COMMAND ls -la "${check_symlink}"
+                WORKING_DIRECTORY "${CPackComponentsForAll_BINARY_DIR}"
+                OUTPUT_VARIABLE SYMLINK_POINT_
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+      if("${symlink_name}" STREQUAL "symlink_samedir_path"
+          OR "${symlink_name}" STREQUAL "symlink_samedir_path_current_dir"
+          OR "${symlink_name}" STREQUAL "symlink_samedir_path_longer")
+        string(REGEX MATCH "^.*${whitespaces}->${whitespaces}depth_three$" check_symlink "${SYMLINK_POINT_}")
+      elseif("${symlink_name}" STREQUAL "symlink_subdir_path")
+        string(REGEX MATCH "^.*${whitespaces}->${whitespaces}depth_two/depth_three$" check_symlink "${SYMLINK_POINT_}")
+      elseif("${symlink_name}" STREQUAL "symlink_parentdir_path")
+        string(REGEX MATCH "^.*${whitespaces}->${whitespaces}../$" check_symlink "${SYMLINK_POINT_}")
+      elseif("${symlink_name}" STREQUAL "symlink_to_non_relocatable_path")
+        string(REGEX MATCH "^.*${whitespaces}->${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}/non_relocatable/depth_two$" check_symlink "${SYMLINK_POINT_}")
+      elseif("${symlink_name}" STREQUAL "symlink_outside_package")
+        string(REGEX MATCH "^.*${whitespaces}->${whitespaces}outside_package$" check_symlink "${SYMLINK_POINT_}")
+      elseif("${symlink_name}" STREQUAL "symlink_other_relocatable_path"
+          OR "${symlink_name}" STREQUAL "symlink_from_non_relocatable_path"
+          OR "${symlink_name}" STREQUAL "symlink_relocatable_subpath")
+        # these links were not canged - post install script only - ignore them
+      else()
+        message(FATAL_ERROR "error: unexpected rpm symbolic link '${check_symlink}'")
+      endif()
+
+      if(NOT check_symlink)
+        message(FATAL_ERROR "symlink points to unexpected location '${SYMLINK_POINT_}'")
+      endif()
+    endforeach()
+
+    # verify post install symlink relocation script
+    file(GLOB_RECURSE spec_file "${CPackComponentsForAll_BINARY_DIR}/*libraries*.spec")
+    file(READ ${spec_file} spec_file_content)
+    file(READ "${CMAKE_CURRENT_LIST_DIR}/symlink_postinstall_expected.txt" symlink_postinstall_expected)
+    # prepare regex
+    string(STRIP "${symlink_postinstall_expected}" symlink_postinstall_expected)
+    string(REPLACE "[" "\\[" symlink_postinstall_expected "${symlink_postinstall_expected}")
+    string(REPLACE "$" "\\$" symlink_postinstall_expected "${symlink_postinstall_expected}")
+    string(REPLACE "lib" "lib${LIB_SUFFIX}" symlink_postinstall_expected "${symlink_postinstall_expected}")
+    # compare
+    string(REGEX MATCH ".*${symlink_postinstall_expected}.*" symlink_postinstall_expected_matches "${spec_file_content}")
+    if(NOT symlink_postinstall_expected_matches)
+      message(FATAL_ERROR "error: unexpected rpm symbolic link postinstall script! generated spec file: '${spec_file_content}'")
+    endif()
   endif()
 endif()
+
+cmake_policy(POP)

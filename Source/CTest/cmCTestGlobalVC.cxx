@@ -13,7 +13,7 @@
 
 #include "cmCTest.h"
 #include "cmSystemTools.h"
-#include "cmXMLSafe.h"
+#include "cmXMLWriter.h"
 
 #include <cmsys/RegularExpression.hxx>
 
@@ -91,36 +91,36 @@ void cmCTestGlobalVC::DoModification(PathStatus status,
 }
 
 //----------------------------------------------------------------------------
-void cmCTestGlobalVC::WriteXMLDirectory(std::ostream& xml,
+void cmCTestGlobalVC::WriteXMLDirectory(cmXMLWriter& xml,
                                         std::string const& path,
                                         Directory const& dir)
 {
   const char* slash = path.empty()? "":"/";
-  xml << "\t<Directory>\n"
-      << "\t\t<Name>" << cmXMLSafe(path) << "</Name>\n";
+  xml.StartElement("Directory");
+  xml.Element("Name", path);
   for(Directory::const_iterator fi = dir.begin(); fi != dir.end(); ++fi)
     {
     std::string full = path + slash + fi->first;
     this->WriteXMLEntry(xml, path, fi->first, full, fi->second);
     }
-  xml << "\t</Directory>\n";
+  xml.EndElement(); // Directory
 }
 
 //----------------------------------------------------------------------------
-void cmCTestGlobalVC::WriteXMLGlobal(std::ostream& xml)
+void cmCTestGlobalVC::WriteXMLGlobal(cmXMLWriter& xml)
 {
   if(!this->NewRevision.empty())
     {
-    xml << "\t<Revision>" << this->NewRevision << "</Revision>\n";
+    xml.Element("Revision", this->NewRevision);
     }
   if(!this->OldRevision.empty() && this->OldRevision != this->NewRevision)
     {
-    xml << "\t<PriorRevision>" << this->OldRevision << "</PriorRevision>\n";
+    xml.Element("PriorRevision", this->OldRevision);
     }
 }
 
 //----------------------------------------------------------------------------
-bool cmCTestGlobalVC::WriteXMLUpdates(std::ostream& xml)
+bool cmCTestGlobalVC::WriteXMLUpdates(cmXMLWriter& xml)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
              "   Gathering version information (one . per revision):\n"

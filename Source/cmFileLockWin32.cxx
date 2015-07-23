@@ -38,6 +38,9 @@ cmFileLockResult cmFileLock::Release()
 
   this->Filename = "";
 
+  CloseHandle(this->File);
+  this->File = INVALID_HANDLE_VALUE;
+
   if (unlockResult)
     {
     return cmFileLockResult::MakeOk();

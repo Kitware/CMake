@@ -15,7 +15,7 @@
 //----------------------------------------------------------------------
 cmCPack7zGenerator::cmCPack7zGenerator()
   :cmCPackArchiveGenerator(cmArchiveWrite::CompressNone,
-                           cmArchiveWrite::Type7Zip)
+                           "7zip")
 {
 }
 

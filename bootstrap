@@ -74,6 +74,7 @@ cmake_sphinx_man=""
 cmake_sphinx_html=""
 cmake_sphinx_qthelp=""
 cmake_sphinx_build=""
+cmake_sphinx_flags=""
 
 # Determine whether this is a Cygwin environment.
 if echo "${cmake_system}" | grep CYGWIN >/dev/null 2>&1; then
@@ -247,6 +248,7 @@ CMAKE_CXX_SOURCES="\
   cmCommandArgumentLexer \
   cmCommandArgumentParser \
   cmCommandArgumentParserHelper \
+  cmCommonTargetGenerator \
   cmCPackPropertiesGenerator \
   cmDefinitions \
   cmDepends \
@@ -264,15 +266,21 @@ CMAKE_CXX_SOURCES="\
   cmExportTryCompileFileGenerator \
   cmExportSet \
   cmExportSetMap \
-  cmInstallDirectoryGenerator \
+  cmExternalMakefileProjectGenerator \
+  cmGeneratorExpressionEvaluationFile \
   cmGeneratedFileStream \
   cmGeneratorTarget \
+  cmGeneratorExpressionContext \
   cmGeneratorExpressionDAGChecker \
   cmGeneratorExpressionEvaluator \
   cmGeneratorExpressionLexer \
+  cmGeneratorExpressionNode \
   cmGeneratorExpressionParser \
   cmGeneratorExpression \
+  cmGlobalCommonGenerator \
   cmGlobalGenerator \
+  cmInstallDirectoryGenerator \
+  cmLocalCommonGenerator \
   cmLocalGenerator \
   cmInstalledFile \
   cmInstallGenerator \
@@ -283,6 +291,7 @@ CMAKE_CXX_SOURCES="\
   cmScriptGenerator \
   cmSourceFile \
   cmSourceFileLocation \
+  cmState \
   cmSystemTools \
   cmTestGenerator \
   cmVersion \
@@ -293,6 +302,7 @@ CMAKE_CXX_SOURCES="\
   cmMakefileLibraryTargetGenerator \
   cmMakefileTargetGenerator \
   cmMakefileUtilityTargetGenerator \
+  cmOutputConverter \
   cmOSXBundleGenerator \
   cmNewLineStyle \
   cmBootstrapCommands1 \
@@ -418,6 +428,7 @@ Configuration:
   --sphinx-html           build html help with Sphinx
   --sphinx-qthelp         build qch help with Sphinx
   --sphinx-build=<sb>     use <sb> as the sphinx-build executable
+  --sphinx-flags=<flags>  pass <flags> to sphinx-build executable
 
 Directory and file names:
   --prefix=PREFIX         install files in tree rooted at PREFIX
@@ -655,6 +666,7 @@ while test $# != 0; do
   --sphinx-html) cmake_sphinx_html="1" ;;
   --sphinx-qthelp) cmake_sphinx_qthelp="1" ;;
   --sphinx-build=*) cmake_sphinx_build=`cmake_arg "$1"` ;;
+  --sphinx-flags=*) cmake_sphinx_flags=`cmake_arg "$1"` ;;
   --help) cmake_usage ;;
   --version) cmake_version_display ; exit 2 ;;
   --verbose) cmake_verbose=TRUE ;;
@@ -1661,22 +1673,27 @@ set (QT_QMAKE_EXECUTABLE "'"${cmake_bootstrap_qt_qmake}"'" CACHE FILEPATH "Locat
 fi
 if [ "x${cmake_sphinx_man}" != "x" ]; then
   echo '
-set (SPHINX_MAN "'"${cmake_sphinx_man}"'" CACHE FILEPATH "Build man pages with Sphinx" FORCE)
+set (SPHINX_MAN "'"${cmake_sphinx_man}"'" CACHE BOOL "Build man pages with Sphinx" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
 if [ "x${cmake_sphinx_html}" != "x" ]; then
   echo '
-set (SPHINX_HTML "'"${cmake_sphinx_html}"'" CACHE FILEPATH "Build html help with Sphinx" FORCE)
+set (SPHINX_HTML "'"${cmake_sphinx_html}"'" CACHE BOOL "Build html help with Sphinx" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
 if [ "x${cmake_sphinx_qthelp}" != "x" ]; then
   echo '
-set (SPHINX_QTHELP "'"${cmake_sphinx_qthelp}"'" CACHE FILEPATH "Build qch help with Sphinx" FORCE)
+set (SPHINX_QTHELP "'"${cmake_sphinx_qthelp}"'" CACHE BOOL "Build qch help with Sphinx" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
 if [ "x${cmake_sphinx_build}" != "x" ]; then
   echo '
 set (SPHINX_EXECUTABLE "'"${cmake_sphinx_build}"'" CACHE FILEPATH "Location of Qt sphinx-build" FORCE)
+' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
+fi
+if [ "x${cmake_sphinx_flags}" != "x" ]; then
+  echo '
+set (SPHINX_FLAGS [==['"${cmake_sphinx_flags}"']==] CACHE STRING "Flags to pass to sphinx-build" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
 

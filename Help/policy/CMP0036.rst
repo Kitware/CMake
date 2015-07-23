@@ -10,3 +10,5 @@ and :variable:`CMAKE_<LANG>_COMPILER` variables.
 
 .. |disallowed_version| replace:: 3.0
 .. include:: DISALLOWED_COMMAND.txt
+
+.. include:: DEPRECATED.txt

@@ -324,7 +324,7 @@ int cmCPackNSISGenerator::PackageFiles()
     << std::endl);
   std::string output;
   int retVal = 1;
-  bool res = cmSystemTools::RunSingleCommand(nsisCmd.c_str(), &output,
+  bool res = cmSystemTools::RunSingleCommand(nsisCmd.c_str(), &output, &output,
     &retVal, 0, this->GeneratorVerbose, 0);
   if ( !res || retVal )
     {
@@ -430,8 +430,8 @@ int cmCPackNSISGenerator::InitializeInternal()
     << nsisCmd << std::endl);
   std::string output;
   int retVal = 1;
-  bool resS = cmSystemTools::RunSingleCommand(nsisCmd.c_str(),
-    &output, &retVal, 0, this->GeneratorVerbose, 0);
+  bool resS = cmSystemTools::RunSingleCommand(
+    nsisCmd.c_str(), &output, &output, &retVal, 0, this->GeneratorVerbose, 0);
   cmsys::RegularExpression versionRex("v([0-9]+.[0-9]+)");
   cmsys::RegularExpression versionRexCVS("v(.*)\\.cvs");
   if ( !resS || retVal ||
@@ -836,9 +836,9 @@ CreateComponentDescription(cmCPackComponent *component,
                                       zipListFileName.c_str());
     std::string output;
     int retVal = -1;
-    int res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output, &retVal,
-                                              dirName.c_str(),
-                                              cmSystemTools::OUTPUT_NONE, 0);
+    int res = cmSystemTools::RunSingleCommand(
+      cmd.c_str(), &output, &output,
+      &retVal, dirName.c_str(), cmSystemTools::OUTPUT_NONE, 0);
     if ( !res || retVal )
     {
       std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");

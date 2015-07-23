@@ -255,7 +255,7 @@ bool cmExecuteProcessCommand
   cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
 
   // Check the output variables.
-  bool merge_output = (output_variable == error_variable);
+  bool merge_output = false;
   if(!input_file.empty())
     {
     cmsysProcess_SetPipeFile(cp, cmsysProcess_Pipe_STDIN, input_file.c_str());
@@ -267,8 +267,23 @@ bool cmExecuteProcessCommand
     }
   if(!error_file.empty())
     {
-    cmsysProcess_SetPipeFile(cp, cmsysProcess_Pipe_STDERR,
-                             error_file.c_str());
+    if (error_file == output_file)
+      {
+      merge_output = true;
+      }
+    else
+      {
+      cmsysProcess_SetPipeFile(cp, cmsysProcess_Pipe_STDERR,
+                               error_file.c_str());
+      }
+    }
+  if (!output_variable.empty() && output_variable == error_variable)
+    {
+    merge_output = true;
+    }
+  if (merge_output)
+    {
+    cmsysProcess_SetOption(cp, cmsysProcess_Option_MergeOutput, 1);
     }
 
   // Set the timeout if any.
@@ -289,8 +304,7 @@ bool cmExecuteProcessCommand
   while((p = cmsysProcess_WaitForData(cp, &data, &length, 0), p))
     {
     // Put the output in the right place.
-    if((p == cmsysProcess_Pipe_STDOUT && !output_quiet) ||
-       (p == cmsysProcess_Pipe_STDERR && !error_quiet && merge_output))
+    if (p == cmsysProcess_Pipe_STDOUT && !output_quiet)
       {
       if(output_variable.empty())
         {

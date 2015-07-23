@@ -106,6 +106,8 @@ Create custom targets to build projects in external trees
     :manual:`CMake Options <cmake(1)>`. Arguments in the form
     ``-Dvar:string=on`` are always passed to the command line, and
     therefore cannot be changed by the user.
+    Arguments may use
+    :manual:`generator expressions <cmake-generator-expressions(7)>`.
   ``CMAKE_CACHE_ARGS <arg>...``
     Initial cache arguments, of the form ``-Dvar:string=on``.
     These arguments are written in a pre-load a script that populates
@@ -113,6 +115,8 @@ Create custom targets to build projects in external trees
     overcome command line length limits.
     These arguments are :command:`set` using the ``FORCE`` argument,
     and therefore cannot be changed by the user.
+    Arguments may use
+    :manual:`generator expressions <cmake-generator-expressions(7)>`.
   ``CMAKE_CACHE_DEFAULT_ARGS <arg>...``
     Initial default cache arguments, of the form ``-Dvar:string=on``.
     These arguments are written in a pre-load a script that populates
@@ -121,6 +125,8 @@ Create custom targets to build projects in external trees
     These arguments can be used as default value that will be set if no
     previous value is found in the cache, and that the user can change
     later.
+    Arguments may use
+    :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
   Build step options are:
 
@@ -168,6 +174,23 @@ Create custom targets to build projects in external trees
     Wrap test in script to log output
   ``LOG_INSTALL 1``
     Wrap install in script to log output
+
+  Steps can be given direct access to the terminal if possible.  With
+  the :generator:`Ninja` generator, this places the steps in the
+  ``console`` :prop_gbl:`pool <JOB_POOLS>`.  Options are:
+
+  ``USES_TERMINAL_DOWNLOAD 1``
+    Give download terminal access.
+  ``USES_TERMINAL_UPDATE 1``
+    Give update terminal access.
+  ``USES_TERMINAL_CONFIGURE 1``
+    Give configure terminal access.
+  ``USES_TERMINAL_BUILD 1``
+    Give build terminal access.
+  ``USES_TERMINAL_TEST 1``
+    Give test terminal access.
+  ``USES_TERMINAL_INSTALL 1``
+    Give install terminal access.
 
   Other options are:
 
@@ -250,9 +273,11 @@ Create custom targets to build projects in external trees
     Working directory for command
   ``LOG 1``
     Wrap step in script to log output
+  ``USES_TERMINAL 1``
+    Give the step direct access to the terminal if possible.
 
-  The command line, comment, and working directory of every standard and
-  custom step is processed to replace tokens ``<SOURCE_DIR>``,
+  The command line, comment, working directory, and byproducts of every
+  standard and custom step are processed to replace tokens ``<SOURCE_DIR>``,
   ``<BINARY_DIR>``, ``<INSTALL_DIR>``, and ``<TMP_DIR>`` with
   corresponding property values.
 
@@ -266,6 +291,9 @@ will be executed in order and aborted if any one fails.  For example::
 specifies to run ``make`` and then ``echo done`` during the build step.
 Whether the current working directory is preserved between commands is
 not defined.  Behavior of shell operators like ``&&`` is not defined.
+
+Arguments to ``<step>_COMMAND`` or ``COMMAND`` options may use
+:manual:`generator expressions <cmake-generator-expressions(7)>`.
 
 .. command:: ExternalProject_Get_Property
 
@@ -520,7 +548,7 @@ if(error_code)
 endif()
 
 execute_process(
-  COMMAND \"${git_EXECUTABLE}\" submodule init
+  COMMAND \"${git_EXECUTABLE}\" submodule init ${git_submodules}
   WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
@@ -1126,10 +1154,7 @@ function(_ep_write_initial_cache target_name script_filename script_initial_cach
   # Replace location tags.
   _ep_replace_location_tags(${target_name} script_initial_cache)
   # Write out the initial cache file to the location specified.
-  if(NOT EXISTS "${script_filename}.in")
-    file(WRITE "${script_filename}.in" "\@script_initial_cache\@\n")
-  endif()
-  configure_file("${script_filename}.in" "${script_filename}")
+  file(GENERATE OUTPUT "${script_filename}" CONTENT "${script_initial_cache}")
 endfunction()
 
 
@@ -1197,7 +1222,10 @@ function(_ep_get_build_command name step cmd_var)
         else()
           set(cmd "${CMAKE_COMMAND}")
         endif()
-        set(args --build ${binary_dir} --config ${CMAKE_CFG_INTDIR})
+        set(args --build ".")
+        if (CMAKE_CFG_INTDIR AND NOT CMAKE_CFG_INTDIR STREQUAL ".")
+          list(APPEND args --config "${CMAKE_CFG_INTDIR}")
+        endif ()
         if(step STREQUAL "INSTALL")
           list(APPEND args --target install)
         endif()
@@ -1273,7 +1301,7 @@ endif()
 
   # Wrap multiple 'COMMAND' lines up into a second-level wrapper
   # script so all output can be sent to one log file.
-  if(command MATCHES ";COMMAND;")
+  if(command MATCHES "(^|;)COMMAND;")
     set(code_execute_process "
 ${code_cygpath_make}
 execute_process(COMMAND \${command} RESULT_VARIABLE result)
@@ -1290,7 +1318,9 @@ endif()
     set(sep "")
     foreach(arg IN LISTS command)
       if("x${arg}" STREQUAL "xCOMMAND")
-        set(code "${code}set(command \"${cmd}\")${code_execute_process}")
+        if(NOT "x${cmd}" STREQUAL "x")
+          set(code "${code}set(command \"${cmd}\")${code_execute_process}")
+        endif()
         set(cmd "")
         set(sep "")
       else()
@@ -1299,14 +1329,14 @@ endif()
       endif()
     endforeach()
     set(code "${code}set(command \"${cmd}\")${code_execute_process}")
-    file(WRITE ${stamp_dir}/${name}-${step}-impl.cmake "${code}")
-    set(command ${CMAKE_COMMAND} "-Dmake=\${make}" "-Dconfig=\${config}" -P ${stamp_dir}/${name}-${step}-impl.cmake)
+    file(GENERATE OUTPUT "${stamp_dir}/${name}-${step}-$<CONFIG>-impl.cmake" CONTENT "${code}")
+    set(command ${CMAKE_COMMAND} "-Dmake=\${make}" "-Dconfig=\${config}" -P ${stamp_dir}/${name}-${step}-$<CONFIG>-impl.cmake)
   endif()
 
   # Wrap the command in a script to log output to files.
-  set(script ${stamp_dir}/${name}-${step}.cmake)
+  set(script ${stamp_dir}/${name}-${step}-$<CONFIG>.cmake)
   set(logbase ${stamp_dir}/${name}-${step})
-  file(WRITE ${script} "
+  set(code "
 ${code_cygpath_make}
 set(command \"${command}\")
 execute_process(
@@ -1327,6 +1357,7 @@ else()
   message(STATUS \"\${msg}\")
 endif()
 ")
+  file(GENERATE OUTPUT "${script}" CONTENT "${code}")
   set(command ${CMAKE_COMMAND} ${make} ${config} -P ${script})
   set(${cmd_var} "${command}" PARENT_SCOPE)
 endfunction()
@@ -1443,12 +1474,20 @@ function(ExternalProject_Add_Step name step)
   endif()
 
   # Replace location tags.
-  _ep_replace_location_tags(${name} comment command work_dir)
+  _ep_replace_location_tags(${name} comment command work_dir byproducts)
 
   # Custom comment?
   get_property(comment_set TARGET ${name} PROPERTY _EP_${step}_COMMENT SET)
   if(comment_set)
     get_property(comment TARGET ${name} PROPERTY _EP_${step}_COMMENT)
+  endif()
+
+  # Uses terminal?
+  get_property(uses_terminal TARGET ${name} PROPERTY _EP_${step}_USES_TERMINAL)
+  if(uses_terminal)
+    set(uses_terminal USES_TERMINAL)
+  else()
+    set(uses_terminal "")
   endif()
 
   # Run every time?
@@ -1493,6 +1532,7 @@ function(ExternalProject_Add_Step name step)
     DEPENDS ${depends}
     WORKING_DIRECTORY ${work_dir}
     VERBATIM
+    ${uses_terminal}
     )
   set_property(TARGET ${name} APPEND PROPERTY _EP_STEPS ${step})
 
@@ -1529,6 +1569,11 @@ function(ExternalProject_Add_StepDependencies name step)
     message(FATAL_ERROR "Cannot find target \"${name}\". Perhaps it has not yet been created using ExternalProject_Add.")
   endif()
 
+  get_property(type TARGET ${name} PROPERTY TYPE)
+  if(NOT type STREQUAL "UTILITY")
+    message(FATAL_ERROR "Target \"${name}\" was not generated by ExternalProject_Add.")
+  endif()
+
   get_property(is_ep TARGET ${name} PROPERTY _EP_IS_EXTERNAL_PROJECT)
   if(NOT is_ep)
     message(FATAL_ERROR "Target \"${name}\" was not generated by ExternalProject_Add.")
@@ -1541,9 +1586,13 @@ function(ExternalProject_Add_StepDependencies name step)
   endif()
 
   if(TARGET ${name}-${step})
+    get_property(type TARGET ${name}-${step} PROPERTY TYPE)
+    if(NOT type STREQUAL "UTILITY")
+      message(FATAL_ERROR "Target \"${name}-${step}\" was not generated by ExternalProject_Add_StepTargets.")
+    endif()
     get_property(is_ep_step TARGET ${name}-${step} PROPERTY _EP_IS_EXTERNAL_PROJECT_STEP)
     if(NOT is_ep_step)
-      message(FATAL_ERROR "Target \"${name}\" was not generated by ExternalProject_Add_StepTargets.")
+      message(FATAL_ERROR "Target \"${name}-${step}\" was not generated by ExternalProject_Add_StepTargets.")
     endif()
   endif()
 
@@ -1847,7 +1896,18 @@ function(_ep_add_download_command name)
   else()
     _ep_is_dir_empty("${source_dir}" empty)
     if(${empty})
-      message(SEND_ERROR "error: no download info for '${name}' -- please specify existing/non-empty SOURCE_DIR or one of URL, CVS_REPOSITORY and CVS_MODULE, SVN_REPOSITORY, GIT_REPOSITORY, HG_REPOSITORY or DOWNLOAD_COMMAND")
+      message(SEND_ERROR
+        "No download info given for '${name}' and its source directory:\n"
+        " ${source_dir}\n"
+        "is not an existing non-empty directory.  Please specify one of:\n"
+        " * SOURCE_DIR with an existing non-empty directory\n"
+        " * URL\n"
+        " * GIT_REPOSITORY\n"
+        " * HG_REPOSITORY\n"
+        " * CVS_REPOSITORY and CVS_MODULE\n"
+        " * SVN_REVISION\n"
+        " * DOWNLOAD_COMMAND"
+        )
     endif()
   endif()
 
@@ -1858,6 +1918,14 @@ function(_ep_add_download_command name)
     set(log "")
   endif()
 
+  get_property(uses_terminal TARGET ${name} PROPERTY
+    _EP_USES_TERMINAL_DOWNLOAD)
+  if(uses_terminal)
+    set(uses_terminal USES_TERMINAL 1)
+  else()
+    set(uses_terminal "")
+  endif()
+
   ExternalProject_Add_Step(${name} download
     COMMENT ${comment}
     COMMAND ${cmd}
@@ -1865,6 +1933,7 @@ function(_ep_add_download_command name)
     DEPENDS ${depends}
     DEPENDEES mkdir
     ${log}
+    ${uses_terminal}
     )
 endfunction()
 
@@ -1969,6 +2038,14 @@ Update to Mercurial >= 2.1.1.
     set(log "")
   endif()
 
+  get_property(uses_terminal TARGET ${name} PROPERTY
+    _EP_USES_TERMINAL_UPDATE)
+  if(uses_terminal)
+    set(uses_terminal USES_TERMINAL 1)
+  else()
+    set(uses_terminal "")
+  endif()
+
   ExternalProject_Add_Step(${name} update
     COMMENT ${comment}
     COMMAND ${cmd}
@@ -1977,6 +2054,7 @@ Update to Mercurial >= 2.1.1.
     WORKING_DIRECTORY ${work_dir}
     DEPENDEES download
     ${log}
+    ${uses_terminal}
     )
 
   if(always AND update_disconnected)
@@ -1989,6 +2067,7 @@ Update to Mercurial >= 2.1.1.
       WORKING_DIRECTORY ${work_dir}
       DEPENDEES download
       ${log}
+      ${uses_terminal}
     )
     set_property(SOURCE ${skip-update_stamp_file} PROPERTY SYMBOLIC 1)
   endif()
@@ -2024,10 +2103,13 @@ function(_ep_add_configure_command name)
   set(file_deps)
   get_property(deps TARGET ${name} PROPERTY _EP_DEPENDS)
   foreach(dep IN LISTS deps)
-    get_property(is_ep TARGET ${dep} PROPERTY _EP_IS_EXTERNAL_PROJECT)
-    if(is_ep)
-      _ep_get_step_stampfile(${dep} "done" done_stamp_file)
-      list(APPEND file_deps ${done_stamp_file})
+    get_property(dep_type TARGET ${dep} PROPERTY TYPE)
+    if(dep_type STREQUAL "UTILITY")
+      get_property(is_ep TARGET ${dep} PROPERTY _EP_IS_EXTERNAL_PROJECT)
+      if(is_ep)
+        _ep_get_step_stampfile(${dep} "done" done_stamp_file)
+        list(APPEND file_deps ${done_stamp_file})
+      endif()
     endif()
   endforeach()
 
@@ -2051,7 +2133,7 @@ function(_ep_add_configure_command name)
     get_property(cmake_cache_default_args TARGET ${name} PROPERTY _EP_CMAKE_CACHE_DEFAULT_ARGS)
 
     if(cmake_cache_args OR cmake_cache_default_args)
-      set(_ep_cache_args_script "${tmp_dir}/${name}-cache.cmake")
+      set(_ep_cache_args_script "${tmp_dir}/${name}-cache-$<CONFIG>.cmake")
       if(cmake_cache_args)
         _ep_command_line_to_initial_cache(script_initial_cache_force "${cmake_cache_args}" 1)
       endif()
@@ -2114,6 +2196,14 @@ function(_ep_add_configure_command name)
     set(log "")
   endif()
 
+  get_property(uses_terminal TARGET ${name} PROPERTY
+    _EP_USES_TERMINAL_CONFIGURE)
+  if(uses_terminal)
+    set(uses_terminal USES_TERMINAL 1)
+  else()
+    set(uses_terminal "")
+  endif()
+
   get_property(update_disconnected_set TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED SET)
   if(update_disconnected_set)
     get_property(update_disconnected TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED)
@@ -2132,6 +2222,7 @@ function(_ep_add_configure_command name)
     DEPENDEES ${update_dep} patch
     DEPENDS ${file_deps}
     ${log}
+    ${uses_terminal}
     )
 endfunction()
 
@@ -2153,6 +2244,14 @@ function(_ep_add_build_command name)
     set(log "")
   endif()
 
+  get_property(uses_terminal TARGET ${name} PROPERTY
+    _EP_USES_TERMINAL_BUILD)
+  if(uses_terminal)
+    set(uses_terminal USES_TERMINAL 1)
+  else()
+    set(uses_terminal "")
+  endif()
+
   get_property(build_always TARGET ${name} PROPERTY _EP_BUILD_ALWAYS)
   if(build_always)
     set(always 1)
@@ -2169,6 +2268,7 @@ function(_ep_add_build_command name)
     DEPENDEES configure
     ALWAYS ${always}
     ${log}
+    ${uses_terminal}
     )
 endfunction()
 
@@ -2190,11 +2290,20 @@ function(_ep_add_install_command name)
     set(log "")
   endif()
 
+  get_property(uses_terminal TARGET ${name} PROPERTY
+    _EP_USES_TERMINAL_INSTALL)
+  if(uses_terminal)
+    set(uses_terminal USES_TERMINAL 1)
+  else()
+    set(uses_terminal "")
+  endif()
+
   ExternalProject_Add_Step(${name} install
     COMMAND ${cmd}
     WORKING_DIRECTORY ${binary_dir}
     DEPENDEES build
     ${log}
+    ${uses_terminal}
     )
 endfunction()
 
@@ -2242,6 +2351,14 @@ function(_ep_add_test_command name)
       set(log "")
     endif()
 
+    get_property(uses_terminal TARGET ${name} PROPERTY
+      _EP_USES_TERMINAL_TEST)
+    if(uses_terminal)
+      set(uses_terminal USES_TERMINAL 1)
+    else()
+      set(uses_terminal "")
+    endif()
+
     ExternalProject_Add_Step(${name} test
       COMMAND ${cmd}
       WORKING_DIRECTORY ${binary_dir}
@@ -2249,6 +2366,7 @@ function(_ep_add_test_command name)
       ${dependers_args}
       ${exclude_args}
       ${log}
+      ${uses_terminal}
       )
   endif()
 endfunction()

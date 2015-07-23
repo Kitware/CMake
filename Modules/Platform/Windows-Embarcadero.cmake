@@ -74,6 +74,12 @@ set (CMAKE_MODULE_LINKER_FLAGS_INIT ${CMAKE_SHARED_LINKER_FLAGS_INIT})
 set (CMAKE_MODULE_LINKER_FLAGS_DEBUG_INIT ${CMAKE_SHARED_LINKER_FLAGS_DEBUG_INIT})
 set (CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO_INIT ${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO_INIT})
 
+# The Borland link tool does not support multiple concurrent
+# invocations within a single working directory.
+if(NOT DEFINED CMAKE_JOB_POOL_LINK)
+  set(CMAKE_JOB_POOL_LINK BCC32LinkPool)
+  set_property(GLOBAL APPEND PROPERTY JOB_POOLS BCC32LinkPool=1)
+endif()
 
 macro(__embarcadero_language lang)
   set(CMAKE_${lang}_COMPILE_OPTIONS_DLL "${_tD}") # Note: This variable is a ';' separated list
@@ -84,7 +90,7 @@ macro(__embarcadero_language lang)
   # place <DEFINES> outside the response file because Borland refuses
   # to parse quotes from the response file.
   set(CMAKE_${lang}_COMPILE_OBJECT
-    "<CMAKE_${lang}_COMPILER> ${_tR} <DEFINES> -DWIN32 -o<OBJECT> <FLAGS> ${_COMPILE_${lang}} <SOURCE>"
+    "<CMAKE_${lang}_COMPILER> ${_tR} -DWIN32 <DEFINES> <INCLUDES> <FLAGS> -o<OBJECT> ${_COMPILE_${lang}} <SOURCE>"
     )
 
   set(CMAKE_${lang}_LINK_EXECUTABLE
@@ -95,7 +101,7 @@ macro(__embarcadero_language lang)
   # place <DEFINES> outside the response file because Borland refuses
   # to parse quotes from the response file.
   set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE
-    "cpp32 <DEFINES> -DWIN32 <FLAGS> -o<PREPROCESSED_SOURCE> ${_COMPILE_${lang}} <SOURCE>"
+    "cpp32 -DWIN32 <DEFINES> <INCLUDES> <FLAGS> -o<PREPROCESSED_SOURCE> ${_COMPILE_${lang}} <SOURCE>"
     )
   # Borland >= 5.6 allows -P option for cpp32, <= 5.5 does not
 

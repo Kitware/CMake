@@ -48,6 +48,10 @@ DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const kwsys_stl::string&
 //----------------------------------------------------------------------------
 int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
 {
+  if (!lib)
+    {
+    return 0;
+    }
   return !shl_unload(lib);
 }
 

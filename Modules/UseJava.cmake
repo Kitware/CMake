@@ -340,6 +340,13 @@ set(_JAVA_SYMLINK_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/UseJavaSymlinks.cmake)
 
 function(add_jar _TARGET_NAME)
 
+    cmake_parse_arguments(_add_jar
+      ""
+      "VERSION;OUTPUT_DIR;OUTPUT_NAME;ENTRY_POINT;MANIFEST"
+      "SOURCES;INCLUDE_JARS"
+      ${ARGN}
+    )
+
     # In CMake < 2.8.12, add_jar used variables which were set prior to calling
     # add_jar for customizing the behavior of add_jar. In order to be backwards
     # compatible, check if any of those variables are set, and use them to
@@ -347,27 +354,20 @@ function(add_jar _TARGET_NAME)
     # argument will override the value set here.)
     #
     # New features should use named arguments only.
-    if(DEFINED CMAKE_JAVA_TARGET_VERSION)
+    if(NOT DEFINED _add_jar_VERSION AND DEFINED CMAKE_JAVA_TARGET_VERSION)
         set(_add_jar_VERSION "${CMAKE_JAVA_TARGET_VERSION}")
     endif()
-    if(DEFINED CMAKE_JAVA_TARGET_OUTPUT_DIR)
+    if(NOT DEFINED _add_jar_OUTPUT_DIR AND DEFINED CMAKE_JAVA_TARGET_OUTPUT_DIR)
         set(_add_jar_OUTPUT_DIR "${CMAKE_JAVA_TARGET_OUTPUT_DIR}")
     endif()
-    if(DEFINED CMAKE_JAVA_TARGET_OUTPUT_NAME)
+    if(NOT DEFINED _add_jar_OUTPUT_NAME AND DEFINED CMAKE_JAVA_TARGET_OUTPUT_NAME)
         set(_add_jar_OUTPUT_NAME "${CMAKE_JAVA_TARGET_OUTPUT_NAME}")
         # reset
         set(CMAKE_JAVA_TARGET_OUTPUT_NAME)
     endif()
-    if(DEFINED CMAKE_JAVA_JAR_ENTRY_POINT)
+    if(NOT DEFINED _add_jar_ENTRY_POINT AND DEFINED CMAKE_JAVA_JAR_ENTRY_POINT)
         set(_add_jar_ENTRY_POINT "${CMAKE_JAVA_JAR_ENTRY_POINT}")
     endif()
-
-    cmake_parse_arguments(_add_jar
-      ""
-      "VERSION;OUTPUT_DIR;OUTPUT_NAME;ENTRY_POINT;MANIFEST"
-      "SOURCES;INCLUDE_JARS"
-      ${ARGN}
-    )
 
     set(_JAVA_SOURCE_FILES ${_add_jar_SOURCES} ${_add_jar_UNPARSED_ARGUMENTS})
 

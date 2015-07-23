@@ -19,9 +19,9 @@ does not create entries in the local project's cache.
 
 Load in the values from another cache and store them in the local
 project's cache as internal entries.  This is useful for a project
-that depends on another project built in a different tree.  EXCLUDE
+that depends on another project built in a different tree.  ``EXCLUDE``
 option can be used to provide a list of entries to be excluded.
-INCLUDE_INTERNALS can be used to provide a list of internal entries to
+``INCLUDE_INTERNALS`` can be used to provide a list of internal entries to
 be included.  Normally, no internal entries are brought in.  Use of
 this form of the command is strongly discouraged, but it is provided
 for backward compatibility.

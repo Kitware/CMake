@@ -14,6 +14,7 @@
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 #include "cmRST.h"
+#include "cmAlgorithms.h"
 
 #include <cmsys/Directory.hxx>
 #include <cmsys/Glob.hxx>
@@ -137,6 +138,8 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
       return this->PrintHelpListVariables(os);
     case cmDocumentation::ListPolicies:
       return this->PrintHelpListPolicies(os);
+    case cmDocumentation::ListGenerators:
+      return this->PrintHelpListGenerators(os);
     case cmDocumentation::Version:
       return this->PrintVersion(os);
     case cmDocumentation::OldCustomModules:
@@ -812,6 +815,19 @@ bool cmDocumentation::PrintHelpOnePolicy(std::ostream& os)
 bool cmDocumentation::PrintHelpListPolicies(std::ostream& os)
 {
   this->PrintNames(os, "policy/*");
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::PrintHelpListGenerators(std::ostream& os)
+{
+  std::map<std::string,cmDocumentationSection*>::iterator si;
+  si = this->AllSections.find("Generators");
+  if(si != this->AllSections.end())
+    {
+    this->Formatter.SetIndent("  ");
+    this->Formatter.PrintSection(os, *si->second);
+    }
   return true;
 }
 

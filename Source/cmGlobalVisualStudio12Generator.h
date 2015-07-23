@@ -20,19 +20,13 @@ class cmGlobalVisualStudio12Generator:
   public cmGlobalVisualStudio11Generator
 {
 public:
-  cmGlobalVisualStudio12Generator(const std::string& name,
+  cmGlobalVisualStudio12Generator(cmake* cm, const std::string& name,
     const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   virtual bool MatchesGeneratorName(const std::string& name) const;
 
   virtual void WriteSLNHeader(std::ostream& fout);
-
-  ///! create the correct local generator
-  virtual cmLocalGenerator *CreateLocalGenerator();
-
-  /** TODO: VS 12 user macro support. */
-  virtual std::string GetUserMacrosDirectory() { return ""; }
 
   //in Visual Studio 2013 they detached the MSBuild tools version
   //from the .Net Framework version and instead made it have it's own

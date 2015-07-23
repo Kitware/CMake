@@ -42,7 +42,6 @@
 #include "cmEndWhileCommand.cxx"
 #include "cmExecProgramCommand.cxx"
 #include "cmExecuteProcessCommand.cxx"
-#include "cmExternalMakefileProjectGenerator.cxx"
 #include "cmFindBase.cxx"
 #include "cmFindCommon.cxx"
 #include "cmFileCommand.cxx"
@@ -56,7 +55,7 @@
 #include "cmPathLabel.cxx"
 #include "cmSearchPath.cxx"
 
-void GetBootstrapCommands1(std::list<cmCommand*>& commands)
+void GetBootstrapCommands1(std::vector<cmCommand*>& commands)
 {
   commands.push_back(new cmAddCustomCommandCommand);
   commands.push_back(new cmAddCustomTargetCommand);

@@ -147,8 +147,37 @@ function(ctest_coverage_collect_gcov)
     \"Binary\": \"${binary_dir}\"
 }")
   # collect the gcov files
+  set(unfiltered_gcov_files)
+  file(GLOB_RECURSE unfiltered_gcov_files RELATIVE ${binary_dir} "${coverage_dir}/*.gcov")
+
   set(gcov_files)
-  file(GLOB_RECURSE gcov_files RELATIVE ${binary_dir} "${coverage_dir}/*.gcov")
+  foreach(gcov_file ${unfiltered_gcov_files})
+    file(STRINGS ${binary_dir}/${gcov_file} first_line LIMIT_COUNT 1 ENCODING UTF-8)
+
+    set(is_excluded false)
+    if(first_line MATCHES "^        -:    0:Source:(.*)$")
+      set(source_file ${CMAKE_MATCH_1})
+    elseif(NOT GCOV_QUIET)
+      message(STATUS "Could not determine source file corresponding to: ${gcov_file}")
+    endif()
+
+    foreach(exclude_entry ${CTEST_CUSTOM_COVERAGE_EXCLUDE})
+      if(source_file MATCHES "${exclude_entry}")
+        set(is_excluded true)
+
+        if(NOT GCOV_QUIET)
+          message("Excluding coverage for: ${source_file} which matches ${exclude_entry}")
+        endif()
+
+        break()
+      endif()
+    endforeach()
+
+    if(NOT is_excluded)
+      list(APPEND gcov_files ${gcov_file})
+    endif()
+  endforeach()
+
   # tar up the coverage info with the same date so that the md5
   # sum will be the same for the tar file independent of file time
   # stamps
@@ -169,6 +198,7 @@ ${label_files}
   execute_process(COMMAND
     ${CMAKE_COMMAND} -E tar ${tar_opts} ${GCOV_TARBALL}
     "--mtime=1970-01-01 0:0:0 UTC"
+    "--format=gnutar"
     --files-from=${coverage_dir}/coverage_file_list.txt
     WORKING_DIRECTORY ${binary_dir})
 endfunction()

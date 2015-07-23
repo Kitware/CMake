@@ -38,16 +38,10 @@ public:
     CompressXZ
   };
 
-  /** Archive Type */
-  enum Type
-  {
-    TypeTAR,
-    TypeZIP,
-    Type7Zip
-  };
-
   /** Construct with output stream to which to write archive.  */
-  cmArchiveWrite(std::ostream& os, Compress c = CompressNone, Type = TypeTAR);
+  cmArchiveWrite(std::ostream& os, Compress c = CompressNone,
+    std::string const& format = "paxr");
+
   ~cmArchiveWrite();
 
   /**
@@ -90,6 +84,7 @@ private:
   struct archive* Archive;
   struct archive* Disk;
   bool Verbose;
+  std::string Format;
   std::string Error;
   std::string MTime;
 };

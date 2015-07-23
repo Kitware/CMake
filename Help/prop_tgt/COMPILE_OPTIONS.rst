@@ -3,12 +3,13 @@ COMPILE_OPTIONS
 
 List of options to pass to the compiler.
 
-This property specifies the list of options specified so far for this
-property.
+This property holds a :ref:`;-list <CMake Language Lists>` of options
+specified so far for its target.  Use the :command:`target_compile_options`
+command to append more options.
 
 This property is intialized by the :prop_dir:`COMPILE_OPTIONS` directory
-property, which is used by the generators to set the options for the
-compiler.
+property when a target is created, and is used by the generators to set
+the options for the compiler.
 
 Contents of ``COMPILE_OPTIONS`` may use "generator expressions" with the
 syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)` manual

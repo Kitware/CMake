@@ -1,0 +1,6 @@
+^CMake Error at CMakeLists.txt:3 \(include\):
+  A logical block opening on the line
+
+    .*/Tests/RunCMake/while/EndMissing.cmake:1 \(while\)
+
+  is not closed.$

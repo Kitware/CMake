@@ -27,6 +27,25 @@
 # define isfinite finite
 #endif
 
+// AIX
+#if defined(_AIX)
+# if !defined(isfinite)
+#  define isfinite finite
+# endif
+#endif
+
+// HP-UX
+#if defined(__hpux)
+# if !defined(isfinite)
+#  if defined(__ia64) && !defined(finite)
+#   define isfinite(x) ((sizeof(x) == sizeof(float) ? \
+                        _Isfinitef(x) : _Isfinite(x)))
+#  else
+#   define isfinite finite
+#  endif
+# endif
+#endif
+
 // Ancient glibc
 #if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ < 2
 # if !defined(isfinite)

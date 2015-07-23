@@ -79,6 +79,9 @@ The options are:
   If ``COMMAND`` specifies an executable target (created by the
   :command:`add_executable` command) it will automatically be replaced
   by the location of the executable created at build time.
+  (Use the ``TARGET_FILE``
+  :manual:`generator expression <cmake-generator-expressions(7)>` to
+  reference an executable later in the command line.)
   Additionally a target-level dependency will be added so that the
   executable target will be built before any target using this custom
   command.  However this does NOT add a file-level dependency that
