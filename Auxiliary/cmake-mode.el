@@ -71,20 +71,16 @@ set the path with these commands:
 
 ;------------------------------------------------------------------------------
 
-;;
-;; Helper functions for line indentation function.
-;;
+;; Line indentation helper functions
+
 (defun cmake-line-starts-inside-string ()
   "Determine whether the beginning of the current line is in a string."
-  (if (save-excursion
-        (beginning-of-line)
-        (let ((parse-end (point)))
-          (goto-char (point-min))
-          (nth 3 (parse-partial-sexp (point) parse-end))
-          )
-        )
-      t
-    nil
+  (save-excursion
+    (beginning-of-line)
+    (let ((parse-end (point)))
+      (goto-char (point-min))
+      (nth 3 (parse-partial-sexp (point) parse-end))
+      )
     )
   )
 
@@ -111,57 +107,40 @@ set the path with these commands:
 ;; Line indentation function.
 ;;
 (defun cmake-indent ()
-  "Indent current line as CMAKE code."
+  "Indent current line as CMake code."
   (interactive)
-  (if (cmake-line-starts-inside-string)
-      ()
+  (unless (cmake-line-starts-inside-string)
     (if (bobp)
         (cmake-indent-line-to 0)
       (let (cur-indent)
-
         (save-excursion
           (beginning-of-line)
-
           (let ((point-start (point))
                 (case-fold-search t)  ;; case-insensitive
                 token)
-
             ; Search back for the last indented line.
             (cmake-find-last-indented-line)
-
             ; Start with the indentation on this line.
             (setq cur-indent (current-indentation))
-
             ; Search forward counting tokens that adjust indentation.
             (while (re-search-forward cmake-regex-token point-start t)
               (setq token (match-string 0))
-              (if (string-match (concat "^" cmake-regex-paren-left "$") token)
-                  (setq cur-indent (+ cur-indent cmake-tab-width))
-                )
-              (if (string-match (concat "^" cmake-regex-paren-right "$") token)
-                  (setq cur-indent (- cur-indent cmake-tab-width))
-                )
-              (if (and
-                   (string-match cmake-regex-block-open token)
-                   (looking-at (concat "[ \t]*" cmake-regex-paren-left))
-                   )
-                  (setq cur-indent (+ cur-indent cmake-tab-width))
-                )
+              (when (or (string-match (concat "^" cmake-regex-paren-left "$") token)
+                        (and (string-match cmake-regex-block-open token)
+                             (looking-at (concat "[ \t]*" cmake-regex-paren-left))))
+                (setq cur-indent (+ cur-indent cmake-tab-width)))
+              (when (string-match (concat "^" cmake-regex-paren-right "$") token)
+                (setq cur-indent (- cur-indent cmake-tab-width)))
               )
             (goto-char point-start)
-
-            ; If this is the end of a block, decrease indentation.
-            (if (looking-at cmake-regex-block-close)
-                (setq cur-indent (- cur-indent cmake-tab-width))
+            ;; If next token closes the block, decrease indentation
+            (when (looking-at cmake-regex-block-close)
+              (setq cur-indent (- cur-indent cmake-tab-width))
               )
             )
           )
-
         ; Indent this line by the amount selected.
-        (if (< cur-indent 0)
-            (cmake-indent-line-to 0)
-          (cmake-indent-line-to cur-indent)
-          )
+        (cmake-indent-line-to (max cur-indent 0))
         )
       )
     )
