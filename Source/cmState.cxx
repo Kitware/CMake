@@ -834,6 +834,12 @@ cmState::Snapshot cmState::Pop(cmState::Snapshot originSnapshot)
   return Snapshot(this, originSnapshot.Position->CallStackParent);
 }
 
+cmState::Snapshot::Snapshot(cmState* state)
+  : State(state)
+  , Position()
+{
+}
+
 cmState::Snapshot::Snapshot(cmState* state, PositionType position)
   : State(state),
   Position(position)
