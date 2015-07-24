@@ -39,7 +39,7 @@ if (Qt5Widgets_FOUND)
   # We need to install platform plugin and add qt.conf for Qt5 on Mac and Windows.
   # FIXME: This should be part of Qt5 CMake scripts, but unfortunatelly
   # Qt5 support is missing there.
-  if(APPLE OR WIN32)
+  if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
     macro(install_qt5_plugin _qt_plugin_name _qt_plugins_var)
       get_target_property(_qt_plugin_path "${_qt_plugin_name}" LOCATION)
       if(EXISTS "${_qt_plugin_path}")
@@ -213,7 +213,7 @@ if(APPLE)
   " ${COMPONENT})
 endif()
 
-if(APPLE OR WIN32)
+if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
   # install rules for including 3rd party libs such as Qt
   # if a system Qt is used (e.g. installed in /usr/lib/), it will not be included in the installation
   set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/cmake-gui${CMAKE_EXECUTABLE_SUFFIX}")
