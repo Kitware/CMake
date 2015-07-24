@@ -176,7 +176,7 @@ bool cmCTestAddSubdirectoryCommand
   cmSystemTools::ChangeDirectory(cwd);
   std::string fname = cwd;
   fname += "/";
-  fname += args[1];
+  fname += args[0];
 
   if ( !cmSystemTools::FileExists(fname.c_str()) )
     {
