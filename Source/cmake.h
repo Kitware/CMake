@@ -270,6 +270,8 @@ class cmake
   // Do we want trace output during the cmake run.
   bool GetTrace() { return this->Trace;}
   void SetTrace(bool b) {  this->Trace = b;}
+  bool GetTraceExpand() { return this->TraceExpand;}
+  void SetTraceExpand(bool b) {  this->TraceExpand = b;}
   bool GetWarnUninitialized() { return this->WarnUninitialized;}
   void SetWarnUninitialized(bool b) {  this->WarnUninitialized = b;}
   bool GetWarnUnused() { return this->WarnUnused;}
@@ -378,6 +380,7 @@ private:
   WorkingMode CurrentWorkingMode;
   bool DebugOutput;
   bool Trace;
+  bool TraceExpand;
   bool WarnUninitialized;
   bool WarnUnused;
   bool WarnUnusedCli;

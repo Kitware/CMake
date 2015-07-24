@@ -121,6 +121,7 @@ void cmWarnUnusedCliWarning(const std::string& variable,
 cmake::cmake()
 {
   this->Trace = false;
+  this->TraceExpand = false;
   this->WarnUninitialized = false;
   this->WarnUnused = false;
   this->WarnUnusedCli = true;
@@ -617,10 +618,17 @@ void cmake::SetArgs(const std::vector<std::string>& args,
       std::cout << "Running with debug output on.\n";
       this->SetDebugOutputOn(true);
       }
+    else if(arg.find("--trace-expand",0) == 0)
+      {
+      std::cout << "Running with expanded trace output on.\n";
+      this->SetTrace(true);
+      this->SetTraceExpand(true);
+      }
     else if(arg.find("--trace",0) == 0)
       {
       std::cout << "Running with trace output on.\n";
       this->SetTrace(true);
+      this->SetTraceExpand(false);
       }
     else if(arg.find("--warn-uninitialized",0) == 0)
       {
