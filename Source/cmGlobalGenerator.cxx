@@ -1170,11 +1170,11 @@ void cmGlobalGenerator::Configure()
 
 }
 
-void cmGlobalGenerator::CreateGenerationObjects()
+void cmGlobalGenerator::CreateGenerationObjects(TargetTypes targetTypes)
 {
   cmDeleteAll(this->GeneratorTargets);
   this->GeneratorTargets.clear();
-  this->CreateGeneratorTargets();
+  this->CreateGeneratorTargets(targetTypes);
 }
 
 cmExportBuildFileGenerator*
@@ -1485,18 +1485,22 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::CreateGeneratorTargets(cmLocalGenerator *lg)
+void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes,
+                                               cmLocalGenerator *lg)
 {
   cmGeneratorTargetsType generatorTargets;
   cmMakefile* mf = lg->GetMakefile();
-  cmTargets& targets = mf->GetTargets();
-  for(cmTargets::iterator ti = targets.begin();
-      ti != targets.end(); ++ti)
+  if (targetTypes == AllTargets)
     {
-    cmTarget* t = &ti->second;
-    cmGeneratorTarget* gt = new cmGeneratorTarget(t, lg);
-    this->GeneratorTargets[t] = gt;
-    generatorTargets[t] = gt;
+    cmTargets& targets = mf->GetTargets();
+    for(cmTargets::iterator ti = targets.begin();
+        ti != targets.end(); ++ti)
+      {
+      cmTarget* t = &ti->second;
+      cmGeneratorTarget* gt = new cmGeneratorTarget(t, lg);
+      this->GeneratorTargets[t] = gt;
+      generatorTargets[t] = gt;
+      }
     }
 
   for(std::vector<cmTarget*>::const_iterator
@@ -1524,12 +1528,12 @@ void cmGlobalGenerator::InitGeneratorTargets()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::CreateGeneratorTargets()
+void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes)
 {
   // Construct per-target generator information.
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
-    this->CreateGeneratorTargets(this->LocalGenerators[i]);
+    this->CreateGeneratorTargets(targetTypes, this->LocalGenerators[i]);
     }
 }
 

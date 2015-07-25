@@ -13,9 +13,16 @@
 #include "cmExportTryCompileFileGenerator.h"
 
 #include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 
 //----------------------------------------------------------------------------
+cmExportTryCompileFileGenerator::cmExportTryCompileFileGenerator(
+    cmGlobalGenerator* gg)
+{
+  gg->CreateGenerationObjects(cmGlobalGenerator::ImportedOnly);
+}
+
 bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)
 {
   std::set<cmTarget const*> emitted;
