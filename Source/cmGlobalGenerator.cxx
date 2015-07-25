@@ -2698,12 +2698,8 @@ void cmGlobalGenerator::AddTargetDepends(cmGeneratorTarget const* target,
 
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::AddToManifest(const std::string& config,
-                                      std::string const& f)
+void cmGlobalGenerator::AddToManifest(std::string const& f)
 {
-  // Add to the main manifest for this configuration.
-  this->TargetManifest[config].insert(f);
-
   // Add to the content listing for the file's directory.
   std::string dir = cmSystemTools::GetFilenamePath(f);
   std::string file = cmSystemTools::GetFilenameName(f);
