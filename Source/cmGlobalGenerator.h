@@ -264,11 +264,6 @@ public:
                                         const std::string& suffix,
                                         std::string& dir);
 
-  /** Get the manifest of all targets that will be built for each
-      configuration.  This is valid during generation only.  */
-  cmTargetManifest const& GetTargetManifest() const
-    { return this->TargetManifest; }
-
   /** Get the content of a directory.  Directory listings are cached
       and re-loaded from disk only when modified.  During the generation
       step the content will include the target files to be built even if
