@@ -1149,6 +1149,25 @@ void cmGlobalGenerator::Configure()
       }
     this->CMakeInstance->UpdateProgress(msg.str().c_str(), -1);
     }
+
+  unsigned int i;
+
+  // Put a copy of each global target in every directory.
+  cmTargets globalTargets;
+  this->CreateDefaultGlobalTargets(&globalTargets);
+
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    cmMakefile* mf = this->LocalGenerators[i]->GetMakefile();
+    cmTargets* targets = &(mf->GetTargets());
+    cmTargets::iterator tit;
+    for ( tit = globalTargets.begin(); tit != globalTargets.end(); ++ tit )
+      {
+      (*targets)[tit->first] = tit->second;
+      (*targets)[tit->first].SetMakefile(mf);
+      }
+    }
+
 }
 
 void cmGlobalGenerator::CreateGenerationObjects()
@@ -1222,23 +1241,11 @@ void cmGlobalGenerator::Generate()
   this->CreateQtAutoGeneratorsTargets(autogens);
 #endif
 
-  // For each existing cmLocalGenerator
   unsigned int i;
 
-  // Put a copy of each global target in every directory.
-  cmTargets globalTargets;
-  this->CreateDefaultGlobalTargets(&globalTargets);
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
     this->LocalGenerators[i]->ComputeObjectMaxPath();
-    cmMakefile* mf = this->LocalGenerators[i]->GetMakefile();
-    cmTargets* targets = &(mf->GetTargets());
-    cmTargets::iterator tit;
-    for ( tit = globalTargets.begin(); tit != globalTargets.end(); ++ tit )
-      {
-      (*targets)[tit->first] = tit->second;
-      (*targets)[tit->first].SetMakefile(mf);
-      }
     }
 
   // Add generator specific helper commands
