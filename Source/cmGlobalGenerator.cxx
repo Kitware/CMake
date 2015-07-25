@@ -1240,6 +1240,7 @@ void cmGlobalGenerator::Generate()
   AutogensType autogens;
   this->CreateQtAutoGeneratorsTargets(autogens);
 #endif
+  this->CreateGenerationObjects();
 
   unsigned int i;
 
@@ -1254,7 +1255,6 @@ void cmGlobalGenerator::Generate()
     this->LocalGenerators[i]->AddHelperCommands();
     }
 
-  this->CreateGenerationObjects();
   this->InitGeneratorTargets();
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
