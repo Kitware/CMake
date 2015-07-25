@@ -86,7 +86,7 @@ public:
    */
   virtual void Configure();
 
-  void Compute();
+  bool Compute();
 
   enum TargetTypes {
     AllTargets,
