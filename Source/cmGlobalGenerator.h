@@ -300,6 +300,11 @@ public:
   /** Get per-target generator information.  */
   cmGeneratorTarget* GetGeneratorTarget(cmTarget const*) const;
 
+  void AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt)
+  {
+    this->GeneratorTargets[t] = gt;
+  }
+
   const std::map<std::string, std::vector<cmLocalGenerator*> >& GetProjectMap()
                                                const {return this->ProjectMap;}
 
