@@ -86,6 +86,8 @@ public:
    */
   virtual void Configure();
 
+  void CreateGenerationObjects();
+
   /**
    * Generate the all required files for building this project/tree. This
    * basically creates a series of LocalGenerators for each directory and
