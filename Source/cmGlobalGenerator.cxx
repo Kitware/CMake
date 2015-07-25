@@ -3050,7 +3050,8 @@ bool cmGlobalGenerator::GenerateCPackPropertiesFile()
   cmake::InstalledFilesMap const& installedFiles =
     this->CMakeInstance->GetInstalledFiles();
 
-  cmMakefile* mf = this->LocalGenerators[0]->GetMakefile();
+  cmLocalGenerator* lg = this->LocalGenerators[0];
+  cmMakefile* mf = lg->GetMakefile();
 
   std::vector<std::string> configs;
   std::string config = mf->GetConfigurations(configs, false);
@@ -3072,7 +3073,7 @@ bool cmGlobalGenerator::GenerateCPackPropertiesFile()
     cmInstalledFile const& installedFile = i->second;
 
     cmCPackPropertiesGenerator cpackPropertiesGenerator(
-      mf, installedFile, configs);
+      lg, installedFile, configs);
 
     cpackPropertiesGenerator.Generate(file, config, configs);
     }
