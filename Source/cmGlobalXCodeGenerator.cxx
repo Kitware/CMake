@@ -1668,7 +1668,7 @@ void  cmGlobalXCodeGenerator
   for(std::vector<cmCustomCommand>::const_iterator i = commands.begin();
       i != commands.end(); ++i)
     {
-    cmCustomCommandGenerator ccg(*i, configName, this->CurrentMakefile);
+    cmCustomCommandGenerator ccg(*i, configName, this->CurrentLocalGenerator);
     if(ccg.GetNumberOfCommands() > 0)
       {
       const std::vector<std::string>& outputs = ccg.GetOutputs();
@@ -1694,7 +1694,7 @@ void  cmGlobalXCodeGenerator
   for(std::vector<cmCustomCommand>::const_iterator i = commands.begin();
       i != commands.end(); ++i)
     {
-    cmCustomCommandGenerator ccg(*i, configName, this->CurrentMakefile);
+    cmCustomCommandGenerator ccg(*i, configName, this->CurrentLocalGenerator);
     if(ccg.GetNumberOfCommands() > 0)
       {
       makefileStream << "\n";

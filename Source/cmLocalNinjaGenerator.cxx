@@ -404,7 +404,7 @@ cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
   if (this->GetGlobalNinjaGenerator()->SeenCustomCommand(cc))
     return;
 
-  cmCustomCommandGenerator ccg(*cc, this->GetConfigName(), this->Makefile);
+  cmCustomCommandGenerator ccg(*cc, this->GetConfigName(), this);
 
   const std::vector<std::string> &outputs = ccg.GetOutputs();
   const std::vector<std::string> &byproducts = ccg.GetByproducts();

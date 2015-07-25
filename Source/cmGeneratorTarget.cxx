@@ -938,7 +938,8 @@ void cmTargetTraceDependencies::FollowCommandDepends(cmCustomCommand const& cc,
                                               const std::string& config,
                                               std::set<std::string>& emitted)
 {
-  cmCustomCommandGenerator ccg(cc, config, this->Makefile);
+  cmCustomCommandGenerator ccg(cc, config,
+                               this->GeneratorTarget->LocalGenerator);
 
   const std::vector<std::string>& depends = ccg.GetDepends();
 

@@ -619,7 +619,7 @@ public:
     }
   void Write(cmCustomCommand const& cc)
     {
-    cmCustomCommandGenerator ccg(cc, this->Config, this->LG->GetMakefile());
+    cmCustomCommandGenerator ccg(cc, this->Config, this->LG);
     if(this->First)
       {
       const char* comment = ccg.GetComment();
@@ -1903,7 +1903,7 @@ WriteCustomRule(std::ostream& fout,
   for (std::vector<std::string>::const_iterator i = configs.begin();
        i != configs.end(); ++i)
     {
-    cmCustomCommandGenerator ccg(command, *i, this->Makefile);
+    cmCustomCommandGenerator ccg(command, *i, this);
     cmLVS7GFileConfig const& fc = fcinfo.FileConfigMap[*i];
     fout << "\t\t\t\t<FileConfiguration\n";
     fout << "\t\t\t\t\tName=\"" << *i << "|"
