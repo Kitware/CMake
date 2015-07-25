@@ -86,7 +86,13 @@ public:
    */
   virtual void Configure();
 
-  void CreateGenerationObjects();
+
+  enum TargetTypes {
+    AllTargets,
+    ImportedOnly
+  };
+
+  void CreateGenerationObjects(TargetTypes targetTypes = AllTargets);
 
   /**
    * Generate the all required files for building this project/tree. This
@@ -491,9 +497,9 @@ private:
   // Per-target generator information.
   cmGeneratorTargetsType GeneratorTargets;
   friend class cmake;
-  void CreateGeneratorTargets(cmLocalGenerator* lg);
+  void CreateGeneratorTargets(TargetTypes targetTypes, cmLocalGenerator* lg);
   void InitGeneratorTargets();
-  void CreateGeneratorTargets();
+  void CreateGeneratorTargets(TargetTypes targetTypes);
 
   void ClearGeneratorMembers();
 
