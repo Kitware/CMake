@@ -15,14 +15,14 @@
 #include "cmStandardIncludes.h"
 
 class cmCustomCommand;
-class cmMakefile;
+class cmLocalGenerator;
 class cmGeneratorExpression;
 
 class cmCustomCommandGenerator
 {
   cmCustomCommand const& CC;
   std::string Config;
-  cmMakefile* Makefile;
+  cmLocalGenerator* LG;
   bool OldStyle;
   bool MakeVars;
   cmGeneratorExpression* GE;
@@ -31,7 +31,7 @@ class cmCustomCommandGenerator
 public:
   cmCustomCommandGenerator(cmCustomCommand const& cc,
                            const std::string& config,
-                           cmMakefile* mf);
+                           cmLocalGenerator* lg);
   ~cmCustomCommandGenerator();
   cmCustomCommand const& GetCC() const { return this->CC; }
   unsigned int GetNumberOfCommands() const;

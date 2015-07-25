@@ -62,7 +62,7 @@ public:
     }
   void Write(cmCustomCommand const& cc)
     {
-    cmCustomCommandGenerator ccg(cc, this->Config, this->LG->GetMakefile());
+    cmCustomCommandGenerator ccg(cc, this->Config, this->LG);
     if(this->First)
       {
       this->Code += this->Event + "_Cmds=";
@@ -625,7 +625,7 @@ cmLocalVisualStudio6Generator
   for(i = this->Configurations.begin(); i != this->Configurations.end(); ++i)
     {
     std::string config = this->GetConfigName(*i);
-    cmCustomCommandGenerator ccg(command, config, this->Makefile);
+    cmCustomCommandGenerator ccg(command, config, this);
     std::string comment =
       this->ConstructComment(ccg, "Building Custom Rule $(InputPath)");
     if(comment == "<hack>")

@@ -509,7 +509,7 @@ cmNinjaTargetGenerator
     {
     cmCustomCommand const* cc = *cci;
     cmCustomCommandGenerator ccg(*cc, this->GetConfigName(),
-                                 this->GetMakefile());
+                                 this->GetLocalGenerator());
     const std::vector<std::string>& ccoutputs = ccg.GetOutputs();
     const std::vector<std::string>& ccbyproducts= ccg.GetByproducts();
     std::transform(ccoutputs.begin(), ccoutputs.end(),
