@@ -723,7 +723,7 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
 {
   assert(this->GetType() != INTERFACE_LIBRARY);
 
-  if (this->Makefile->GetGeneratorTargets().empty())
+  if (!this->Makefile->IsConfigured())
     {
     // At configure-time, this method can be called as part of getting the
     // LOCATION property or to export() a file to be include()d.  However
@@ -5249,7 +5249,7 @@ void cmTarget::GetLanguages(std::set<std::string>& languages,
 
   std::vector<cmTarget*> objectLibraries;
   std::vector<cmSourceFile const*> externalObjects;
-  if (this->Makefile->GetGeneratorTargets().empty())
+  if (!this->Makefile->IsConfigured())
     {
     this->GetObjectLibrariesCMP0026(objectLibraries);
     }
