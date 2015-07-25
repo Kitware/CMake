@@ -1699,7 +1699,8 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
     }
 
   // Look for a CMake target with the given name.
-  if(cmTarget* target = this->Makefile->FindTargetToUse(name))
+  if(cmGeneratorTarget* target =
+     this->Makefile->FindGeneratorTargetToUse(name))
     {
     // make sure it is not just a coincidence that the target name
     // found is part of the inName
@@ -1709,7 +1710,7 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
       if(target->GetType() >= cmTarget::EXECUTABLE &&
          target->GetType() <= cmTarget::MODULE_LIBRARY)
         {
-        tLocation = target->GetLocation(config);
+        tLocation = target->Target->GetLocation(config);
         tLocation = cmSystemTools::GetFilenamePath(tLocation);
         tLocation = cmSystemTools::CollapseFullPath(tLocation);
         }
@@ -1732,7 +1733,7 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
       case cmTarget::SHARED_LIBRARY:
       case cmTarget::MODULE_LIBRARY:
       case cmTarget::UNKNOWN_LIBRARY:
-        dep = target->GetLocation(config);
+        dep = target->Target->GetLocation(config);
         return true;
       case cmTarget::OBJECT_LIBRARY:
         // An object library has no single file on which to depend.
