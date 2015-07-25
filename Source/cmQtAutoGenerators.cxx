@@ -287,7 +287,8 @@ std::string cmQtAutoGenerators::ListQt4RccInputs(cmSourceFile* sf,
   return entriesList;
 }
 
-bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
+bool cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
+                                                 cmTarget* target)
 {
   cmMakefile* makefile = target->GetMakefile();
   // don't do anything if there is no Qt4 or Qt5Core (which contains moc):
@@ -473,6 +474,10 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
                                 workingDirectory.c_str(),
                                 /*byproducts=*/rcc_output, depends,
                                 commandLines, false, autogenComment.c_str());
+
+    cmGeneratorTarget* gt = new cmGeneratorTarget(autogenTarget, lg);
+    lg->GetGlobalGenerator()->AddGeneratorTarget(autogenTarget, gt);
+    makefile->AddGeneratorTarget(autogenTarget, gt);
 
     // Set target folder
     const char* autogenFolder = makefile->GetState()
