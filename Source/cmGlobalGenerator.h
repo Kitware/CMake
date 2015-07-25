@@ -86,6 +86,7 @@ public:
    */
   virtual void Configure();
 
+  void Compute();
 
   enum TargetTypes {
     AllTargets,
@@ -99,7 +100,7 @@ public:
    * basically creates a series of LocalGenerators for each directory and
    * requests that they Generate.
    */
-  void DoGenerate();
+  virtual void Generate();
 
   /**
    * Set/Get and Clear the enabled languages.
@@ -368,8 +369,6 @@ public:
 
   std::string MakeSilentFlag;
 protected:
-  virtual void Generate();
-
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
   // for a project collect all its targets by following depend
   // information, and also collect all the targets

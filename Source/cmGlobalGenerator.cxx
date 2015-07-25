@@ -1212,7 +1212,7 @@ bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const
   return false;
 }
 
-void cmGlobalGenerator::DoGenerate()
+void cmGlobalGenerator::Compute()
 {
   // Some generators track files replaced during the Generate.
   // Start with an empty vector:
@@ -1220,8 +1220,6 @@ void cmGlobalGenerator::DoGenerate()
 
   // clear targets to issue warning CMP0042 for
   this->CMP0042WarnTargets.clear();
-
-  this->Generate();
 }
 
 void cmGlobalGenerator::Generate()
