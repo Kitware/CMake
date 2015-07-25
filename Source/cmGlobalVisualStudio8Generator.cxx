@@ -347,8 +347,13 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudio8Generator::Generate()
+bool cmGlobalVisualStudio8Generator::Compute()
 {
+  if (!cmGlobalVisualStudio7Generator::Compute())
+    {
+    return false;
+    }
+
   if(this->AddCheckTarget())
     {
     // All targets depend on the build-system check target.
@@ -362,9 +367,7 @@ void cmGlobalVisualStudio8Generator::Generate()
         }
       }
     }
-
-  // Now perform the main generation.
-  this->cmGlobalVisualStudio7Generator::Generate();
+  return true;
 }
 
 //----------------------------------------------------------------------------
