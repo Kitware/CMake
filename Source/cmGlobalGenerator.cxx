@@ -1242,6 +1242,7 @@ void cmGlobalGenerator::Generate()
 
   // Create per-target generator information.
   this->CreateGeneratorTargets();
+  this->InitGeneratorTargets();
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   for (AutogensType::iterator it = autogens.begin(); it != autogens.end();
@@ -1471,7 +1472,6 @@ void cmGlobalGenerator::CreateGeneratorTargets(cmLocalGenerator *lg)
     {
     cmTarget* t = &ti->second;
     cmGeneratorTarget* gt = new cmGeneratorTarget(t, lg);
-    this->ComputeTargetObjectDirectory(gt);
     this->GeneratorTargets[t] = gt;
     generatorTargets[t] = gt;
     }
@@ -1485,6 +1485,19 @@ void cmGlobalGenerator::CreateGeneratorTargets(cmLocalGenerator *lg)
     generatorTargets[*j] = gt;
     }
   mf->SetGeneratorTargets(generatorTargets);
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::InitGeneratorTargets()
+{
+  for(cmGeneratorTargetsType::iterator ti =
+      this->GeneratorTargets.begin(); ti != this->GeneratorTargets.end(); ++ti)
+    {
+    if (!ti->second->Target->IsImported())
+      {
+      this->ComputeTargetObjectDirectory(ti->second);
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
