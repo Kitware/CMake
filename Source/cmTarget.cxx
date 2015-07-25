@@ -2950,8 +2950,11 @@ const char *cmTarget::GetProperty(const std::string& prop,
         }
       else
         {
+        cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
+        gg->CreateGenerationObjects();
+        cmGeneratorTarget* gt = gg->GetGeneratorTarget(this);
         this->Properties.SetProperty(
-                prop, this->GetFullPath(configName, false).c_str());
+                prop, gt->Target->GetFullPath(configName, false).c_str());
         }
       }
     // Support "<CONFIG>_LOCATION".
@@ -2971,8 +2974,11 @@ const char *cmTarget::GetProperty(const std::string& prop,
           }
         else
           {
+          cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
+          gg->CreateGenerationObjects();
+          cmGeneratorTarget* gt = gg->GetGeneratorTarget(this);
           this->Properties.SetProperty(
-                  prop, this->GetFullPath(configName, false).c_str());
+                  prop, gt->Target->GetFullPath(configName, false).c_str());
           }
         }
       }
