@@ -1234,13 +1234,14 @@ void cmGlobalGenerator::Generate()
 
   this->FinalizeTargetCompileInfo();
 
+  this->CreateGenerationObjects();
+
 #ifdef CMAKE_BUILD_WITH_CMAKE
   // Iterate through all targets and set up automoc for those which have
   // the AUTOMOC, AUTOUIC or AUTORCC property set
   AutogensType autogens;
   this->CreateQtAutoGeneratorsTargets(autogens);
 #endif
-  this->CreateGenerationObjects();
 
   unsigned int i;
 
@@ -1410,7 +1411,8 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
             && !target.IsImported())
           {
           cmQtAutoGenerators autogen;
-          if(autogen.InitializeAutogenTarget(&target))
+          if(autogen.InitializeAutogenTarget(this->LocalGenerators[i],
+                                             &target))
             {
             autogens.push_back(std::make_pair(autogen, &target));
             }
