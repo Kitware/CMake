@@ -1016,7 +1016,8 @@ cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
         cmGeneratorExpression ge;
         cmsys::auto_ptr<cmCompiledGeneratorExpression>
           cge = ge.Parse(propertyValue);
-        if(cmSystemTools::IsOn(cge->Evaluate(target->GetMakefile(), *i)))
+        cmGeneratorTarget* gt = this->GetGeneratorTarget(target);
+        if(cmSystemTools::IsOn(cge->Evaluate(gt->GetLocalGenerator(), *i)))
           {
           activeConfigs.insert(*i);
           }

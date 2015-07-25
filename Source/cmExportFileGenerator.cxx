@@ -456,7 +456,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
                                             true);
   this->ReplaceInstallPrefix(dirs);
   cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(dirs);
-  std::string exportDirs = cge->Evaluate(target->Target->GetMakefile(), "",
+  std::string exportDirs = cge->Evaluate(target->GetLocalGenerator(), "",
                                          false, target->Target);
 
   if (cge->GetHadContextSensitiveCondition())

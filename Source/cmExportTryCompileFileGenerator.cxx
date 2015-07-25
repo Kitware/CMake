@@ -79,7 +79,7 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
   cmGeneratorTarget* gtgt =
       tgt->GetMakefile()->GetGlobalGenerator()->GetGeneratorTarget(tgt);
 
-  std::string result = cge->Evaluate(gtgt->Target->GetMakefile(), this->Config,
+  std::string result = cge->Evaluate(gtgt->GetLocalGenerator(), this->Config,
                                      false, &dummyHead,
                                      gtgt->Target, &dagChecker);
 

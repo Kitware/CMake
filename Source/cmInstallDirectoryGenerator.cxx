@@ -97,5 +97,5 @@ cmInstallDirectoryGenerator::GetDestination(std::string const& config) const
 {
   cmGeneratorExpression ge;
   return ge.Parse(this->Destination)
-    ->Evaluate(this->LocalGenerator->GetMakefile(), config);
+    ->Evaluate(this->LocalGenerator, config);
 }

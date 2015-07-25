@@ -1370,7 +1370,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
         }
       for(size_t i = 0; i != this->Configurations.size(); ++i)
         {
-        if(0 == strcmp(cge->Evaluate(this->Makefile,
+        if(0 == strcmp(cge->Evaluate(this->LocalGenerator,
                                      this->Configurations[i]), "1"))
           {
           this->WriteString("<DeploymentContent Condition=\""
@@ -2301,7 +2301,8 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
     cmGeneratorExpression ge;
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
         ge.Parse(nativeLibDirectoriesExpression);
-    std::string nativeLibDirs = cge->Evaluate(this->Makefile, configName);
+    std::string nativeLibDirs = cge->Evaluate(this->LocalGenerator,
+                                              configName);
     this->WriteString("<NativeLibDirectories>", 3);
     (*this->BuildFileStream) << cmVS10EscapeXML(nativeLibDirs) <<
       "</NativeLibDirectories>\n";
@@ -2313,7 +2314,8 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
     cmGeneratorExpression ge;
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
         ge.Parse(nativeLibDependenciesExpression);
-    std::string nativeLibDeps = cge->Evaluate(this->Makefile, configName);
+    std::string nativeLibDeps = cge->Evaluate(this->LocalGenerator,
+                                              configName);
     this->WriteString("<NativeLibDependencies>", 3);
     (*this->BuildFileStream) << cmVS10EscapeXML(nativeLibDeps) <<
       "</NativeLibDependencies>\n";
@@ -2333,7 +2335,8 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
     cmGeneratorExpression ge;
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
       ge.Parse(jarDirectoriesExpression);
-    std::string jarDirectories = cge->Evaluate(this->Makefile, configName);
+    std::string jarDirectories = cge->Evaluate(this->LocalGenerator,
+                                               configName);
     this->WriteString("<JarDirectories>", 3);
     (*this->BuildFileStream) << cmVS10EscapeXML(jarDirectories) <<
       "</JarDirectories>\n";

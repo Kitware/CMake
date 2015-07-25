@@ -68,7 +68,7 @@ cmInstallFilesGenerator::GetDestination(std::string const& config) const
 {
   cmGeneratorExpression ge;
   return ge.Parse(this->Destination)
-    ->Evaluate(this->LocalGenerator->GetMakefile(), config);
+    ->Evaluate(this->LocalGenerator, config);
 }
 
 //----------------------------------------------------------------------------
@@ -117,7 +117,7 @@ void cmInstallFilesGenerator::GenerateScriptForConfig(std::ostream& os,
     {
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*i);
     cmSystemTools::ExpandListArgument(cge->Evaluate(
-        this->LocalGenerator->GetMakefile(), config), files);
+        this->LocalGenerator, config), files);
     }
   this->AddFilesInstallRule(os, config, indent, files);
 }

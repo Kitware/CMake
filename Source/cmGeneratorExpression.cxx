@@ -48,13 +48,13 @@ cmGeneratorExpression::~cmGeneratorExpression()
 }
 
 //----------------------------------------------------------------------------
-const char *cmCompiledGeneratorExpression::Evaluate(
-  cmMakefile* mf, const std::string& config, bool quiet,
+const char *cmCompiledGeneratorExpression::Evaluate(cmLocalGenerator* lg,
+  const std::string& config, bool quiet,
   cmTarget const* headTarget,
   cmGeneratorExpressionDAGChecker *dagChecker,
                        std::string const& language) const
 {
-  return this->Evaluate(mf,
+  return this->Evaluate(lg,
                         config,
                         quiet,
                         headTarget,
@@ -65,13 +65,13 @@ const char *cmCompiledGeneratorExpression::Evaluate(
 
 //----------------------------------------------------------------------------
 const char *cmCompiledGeneratorExpression::Evaluate(
-  cmMakefile* mf, const std::string& config, bool quiet,
+  cmLocalGenerator* lg, const std::string& config, bool quiet,
   cmTarget const* headTarget,
   cmTarget const* currentTarget,
   cmGeneratorExpressionDAGChecker *dagChecker,
   std::string const& language) const
 {
-  cmGeneratorExpressionContext context(mf, config, quiet, headTarget,
+  cmGeneratorExpressionContext context(lg, config, quiet, headTarget,
                                   currentTarget ? currentTarget : headTarget,
                                   this->EvaluateForBuildsystem,
                                   this->Backtrace, language);

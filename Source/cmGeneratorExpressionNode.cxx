@@ -17,7 +17,7 @@
 
 //----------------------------------------------------------------------------
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
-    std::string const& prop, cmMakefile *makefile,
+    std::string const& prop, cmLocalGenerator *lg,
     cmGeneratorExpressionContext *context,
     cmTarget const* headTarget, cmTarget const* currentTarget,
     cmGeneratorExpressionDAGChecker *dagChecker)
@@ -25,7 +25,7 @@ std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   cmGeneratorExpression ge(context->Backtrace);
   cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
   cge->SetEvaluateForBuildsystem(context->EvaluateForBuildsystem);
-  std::string result = cge->Evaluate(makefile,
+  std::string result = cge->Evaluate(lg,
                         context->Config,
                         context->Quiet,
                         headTarget,
@@ -367,7 +367,8 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
                        const std::string &lang) const
   {
     const char *compilerId =
-      context->Makefile->GetSafeDefinition("CMAKE_" + lang + "_COMPILER_ID");
+      context->LG->GetMakefile()
+        ->GetSafeDefinition("CMAKE_" + lang + "_COMPILER_ID");
     if (parameters.empty())
       {
       return compilerId ? compilerId : "";
@@ -391,13 +392,13 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
 
     if (cmsysString_strcasecmp(parameters.begin()->c_str(), compilerId) == 0)
       {
-      switch(context->Makefile->GetPolicyStatus(cmPolicies::CMP0044))
+      switch(context->LG->GetMakefile()->GetPolicyStatus(cmPolicies::CMP0044))
         {
         case cmPolicies::WARN:
           {
           std::ostringstream e;
           e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0044);
-          context->Makefile->GetCMakeInstance()
+          context->LG->GetCMakeInstance()
                  ->IssueMessage(cmake::AUTHOR_WARNING,
                                 e.str(), context->Backtrace);
           }
@@ -470,8 +471,9 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
                        cmGeneratorExpressionDAGChecker *,
                        const std::string &lang) const
   {
-    const char *compilerVersion = context->Makefile->GetSafeDefinition(
-        "CMAKE_" + lang + "_COMPILER_VERSION");
+    const char *compilerVersion =
+        context->LG->GetMakefile()->GetSafeDefinition(
+          "CMAKE_" + lang + "_COMPILER_VERSION");
     if (parameters.empty())
       {
       return compilerVersion ? compilerVersion : "";
@@ -553,7 +555,7 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
                        cmGeneratorExpressionDAGChecker *) const
   {
     const char *platformId =
-      context->Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME");
+      context->LG->GetMakefile()->GetSafeDefinition("CMAKE_SYSTEM_NAME");
     if (parameters.empty())
       {
       return platformId ? platformId : "";
@@ -768,7 +770,7 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
       }
 
     std::vector<std::string> enabledLanguages;
-    cmGlobalGenerator* gg = context->Makefile->GetGlobalGenerator();
+    cmGlobalGenerator* gg = context->LG->GetGlobalGenerator();
     gg->GetEnabledLanguages(enabledLanguages);
     if (!parameters.empty() &&
           std::find(enabledLanguages.begin(), enabledLanguages.end(),
@@ -858,7 +860,7 @@ getLinkedTargetsContent(
     {
     linkedTargetsContent =
         cmGeneratorExpressionNode::EvaluateDependentExpression(depString,
-                                        target->Target->GetMakefile(),
+                                        target->GetLocalGenerator(),
                                         context,
                                         headTarget->Target,
                                         target->Target, dagChecker);
@@ -940,16 +942,17 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         }
       if(propertyName == "ALIASED_TARGET")
         {
-        if(context->Makefile->IsAlias(targetName))
+        if(context->LG->GetMakefile()->IsAlias(targetName))
           {
-          if(cmTarget* tgt = context->Makefile->FindTargetToUse(targetName))
+          if(cmTarget* tgt =
+             context->LG->GetMakefile()->FindTargetToUse(targetName))
             {
             return tgt->GetName();
             }
           }
         return "";
         }
-      target = context->Makefile->FindTargetToUse(targetName);
+      target = context->LG->GetMakefile()->FindTargetToUse(targetName);
 
       if (!target)
         {
@@ -994,7 +997,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     assert(target);
 
     cmGeneratorTarget* gtgt =
-        context->Makefile->GetGlobalGenerator()->GetGeneratorTarget(target);
+        context->LG->GetGlobalGenerator()->GetGeneratorTarget(target);
 
     if (propertyName == "LINKER_LANGUAGE")
       {
@@ -1099,7 +1102,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                            "COMPILE_DEFINITIONS_"))
       {
       cmPolicies::PolicyStatus polSt =
-                      context->Makefile->GetPolicyStatus(cmPolicies::CMP0043);
+          context->LG->GetMakefile()->GetPolicyStatus(cmPolicies::CMP0043);
       if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD)
         {
         interfacePropertyName = "INTERFACE_COMPILE_DEFINITIONS";
@@ -1112,7 +1115,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     if(isInterfaceProperty)
       {
       cmGeneratorTarget* gHeadTarget =
-          context->Makefile->GetGlobalGenerator()
+          context->LG->GetGlobalGenerator()
           ->GetGeneratorTarget(headTarget);
       if(cmLinkInterfaceLibraries const* iface =
          gtgt->GetLinkInterfaceLibraries(context->Config, gHeadTarget, true))
@@ -1213,7 +1216,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     if(!interfacePropertyName.empty())
       {
       std::string result = this->EvaluateDependentExpression(prop,
-                                        context->Makefile, context,
+                                        context->LG, context,
                                         headTarget, target, &dagChecker);
       if (!linkedTargetsContent.empty())
         {
@@ -1269,7 +1272,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
 
     std::string tgtName = parameters.front();
     cmGeneratorTarget* gt =
-                context->Makefile->FindGeneratorTargetToUse(tgtName);
+                context->LG->GetMakefile()->FindGeneratorTargetToUse(tgtName);
     if (!gt)
       {
       std::ostringstream e;
@@ -1312,7 +1315,8 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       assert(!map_it->second.empty());
       result += sep;
       std::string objFile = obj_dir + map_it->second;
-      cmSourceFile* sf = context->Makefile->GetOrCreateSource(objFile, true);
+      cmSourceFile* sf =
+          context->LG->GetMakefile()->GetOrCreateSource(objFile, true);
       sf->SetObjectLibrary(tgtName);
       sf->SetProperty("EXTERNAL_OBJECT", "1");
       result += objFile;
@@ -1354,7 +1358,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
       {
       std::string error;
       std::string lang;
-      if (!context->Makefile->CompileFeatureKnown(context->HeadTarget,
+      if (!context->LG->GetMakefile()->CompileFeatureKnown(context->HeadTarget,
                                                   *it, lang, &error))
         {
         reportError(context, content->GetOriginalExpression(), error);
@@ -1365,7 +1369,8 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
       if (availableFeatures.find(lang) == availableFeatures.end())
         {
         const char* featuresKnown
-                  = context->Makefile->CompileFeaturesAvailable(lang, &error);
+            = context->LG->GetMakefile()->CompileFeaturesAvailable(lang,
+                                                                   &error);
         if (!featuresKnown)
           {
           reportError(context, content->GetOriginalExpression(), error);
@@ -1383,7 +1388,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
       {
       std::vector<std::string> const& langAvailable
                                               = availableFeatures[lit->first];
-      const char* standardDefault = context->Makefile
+      const char* standardDefault = context->LG->GetMakefile()
         ->GetDefinition("CMAKE_" + lit->first + "_STANDARD_DEFAULT");
       for (std::vector<std::string>::const_iterator it = lit->second.begin();
           it != lit->second.end(); ++it)
@@ -1399,7 +1404,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
           // All features known for the language are always available.
           continue;
           }
-        if (!context->Makefile->HaveStandardAvailable(target,
+        if (!context->LG->GetMakefile()->HaveStandardAvailable(target,
                                                       lit->first, *it))
           {
           if (evalLL)
@@ -1617,7 +1622,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
 
     std::string pdbSupportVar = "CMAKE_" + language + "_LINKER_SUPPORTS_PDB";
 
-    if(!context->Makefile->IsOn(pdbSupportVar))
+    if(!context->LG->GetMakefile()->IsOn(pdbSupportVar))
       {
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_PDB_FILE is not supported by the target linker.");
@@ -1731,7 +1736,7 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
       return std::string();
       }
     cmGeneratorTarget* target =
-        context->Makefile->FindGeneratorTargetToUse(name);
+        context->LG->GetMakefile()->FindGeneratorTargetToUse(name);
     if(!target)
       {
       ::reportError(context, content->GetOriginalExpression(),
@@ -1813,7 +1818,7 @@ static const struct ShellPathNode : public cmGeneratorExpressionNode
                   "\"" + parameters.front() + "\" is not an absolute path.");
       return std::string();
       }
-    cmOutputConverter converter(context->Makefile->GetStateSnapshot());
+    cmOutputConverter converter(context->LG->GetStateSnapshot());
     return converter.ConvertDirectorySeparatorsForShell(parameters.front());
   }
 } shellPathNode;
@@ -1897,7 +1902,7 @@ void reportError(cmGeneratorExpressionContext *context,
   e << "Error evaluating generator expression:\n"
     << "  " << expr << "\n"
     << result;
-  context->Makefile->GetCMakeInstance()
+  context->LG->GetCMakeInstance()
     ->IssueMessage(cmake::FATAL_ERROR, e.str(),
                     context->Backtrace);
 }

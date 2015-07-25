@@ -2486,7 +2486,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
         {
         cmGeneratorExpression ge;
         std::string processed = ge.Parse(i->second.GetValue())
-          ->Evaluate(this->CurrentMakefile, configName);
+          ->Evaluate(this->CurrentLocalGenerator, configName);
         buildSettings->AddAttribute(attribute.c_str(),
                                     this->CreateString(processed));
         }

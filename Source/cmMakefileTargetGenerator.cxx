@@ -147,7 +147,8 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
                                             ge.Parse(additional_clean_files);
 
-    cmSystemTools::ExpandListArgument(cge->Evaluate(this->Makefile, config,
+    cmSystemTools::ExpandListArgument(cge->Evaluate(this->LocalGenerator,
+                                                    config,
                                                   false, this->Target, 0, 0),
                                       this->CleanFiles);
     }
