@@ -608,7 +608,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
          ci = cmdLists[i]->begin();
          ci != cmdLists[i]->end(); ++ci)
       {
-      cmCustomCommandGenerator ccg(*ci, cfgName, mf);
+      cmCustomCommandGenerator ccg(*ci, cfgName, this->GetLocalGenerator());
       localGen.AppendCustomCommandLines(ccg, *cmdLineLists[i]);
       std::vector<std::string> const& ccByproducts = ccg.GetByproducts();
       std::transform(ccByproducts.begin(), ccByproducts.end(),

@@ -12,14 +12,15 @@
 #include "cmCustomCommandGenerator.h"
 
 #include "cmMakefile.h"
+#include "cmLocalGenerator.h"
 #include "cmCustomCommand.h"
 #include "cmOutputConverter.h"
 #include "cmGeneratorExpression.h"
 
 //----------------------------------------------------------------------------
 cmCustomCommandGenerator::cmCustomCommandGenerator(
-  cmCustomCommand const& cc, const std::string& config, cmMakefile* mf):
-  CC(cc), Config(config), Makefile(mf),
+  cmCustomCommand const& cc, const std::string& config, cmLocalGenerator* lg):
+  CC(cc), Config(config), LG(lg),
   OldStyle(cc.GetEscapeOldStyle()), MakeVars(cc.GetEscapeAllowMakeVars()),
   GE(new cmGeneratorExpression(cc.GetBacktrace())), DependsDone(false)
 {
@@ -41,13 +42,14 @@ unsigned int cmCustomCommandGenerator::GetNumberOfCommands() const
 std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
 {
   std::string const& argv0 = this->CC.GetCommandLines()[c][0];
-  cmTarget* target = this->Makefile->FindTargetToUse(argv0);
+  cmTarget* target = this->LG->GetMakefile()->FindTargetToUse(argv0);
   if(target && target->GetType() == cmTarget::EXECUTABLE &&
-     (target->IsImported() || !this->Makefile->IsOn("CMAKE_CROSSCOMPILING")))
+     (target->IsImported()
+      || !this->LG->GetMakefile()->IsOn("CMAKE_CROSSCOMPILING")))
     {
     return target->GetLocation(this->Config);
     }
-  return this->GE->Parse(argv0)->Evaluate(this->Makefile, this->Config);
+  return this->GE->Parse(argv0)->Evaluate(this->LG->GetMakefile(), this->Config);
 }
 
 //----------------------------------------------------------------------------
@@ -87,8 +89,9 @@ cmCustomCommandGenerator
   cmCustomCommandLine const& commandLine = this->CC.GetCommandLines()[c];
   for(unsigned int j=1;j < commandLine.size(); ++j)
     {
-    std::string arg = this->GE->Parse(commandLine[j])->Evaluate(this->Makefile,
-                                                               this->Config);
+    std::string arg =
+        this->GE->Parse(commandLine[j])->Evaluate(this->LG->GetMakefile(),
+                                                  this->Config);
     cmd += " ";
     if(this->OldStyle)
       {
@@ -96,7 +99,7 @@ cmCustomCommandGenerator
       }
     else
       {
-      cmOutputConverter converter(this->Makefile->GetStateSnapshot());
+      cmOutputConverter converter(this->LG->GetMakefile()->GetStateSnapshot());
       cmd += converter.EscapeForShell(arg, this->MakeVars);
       }
     }
@@ -141,7 +144,7 @@ std::vector<std::string> const& cmCustomCommandGenerator::GetDepends() const
                                               = this->GE->Parse(*i);
       std::vector<std::string> result;
       cmSystemTools::ExpandListArgument(
-                  cge->Evaluate(this->Makefile, this->Config), result);
+            cge->Evaluate(this->LG->GetMakefile(), this->Config), result);
       for (std::vector<std::string>::iterator it = result.begin();
           it != result.end(); ++it)
         {
