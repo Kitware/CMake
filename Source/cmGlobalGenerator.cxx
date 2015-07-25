@@ -1151,6 +1151,13 @@ void cmGlobalGenerator::Configure()
     }
 }
 
+void cmGlobalGenerator::CreateGenerationObjects()
+{
+  cmDeleteAll(this->GeneratorTargets);
+  this->GeneratorTargets.clear();
+  this->CreateGeneratorTargets();
+}
+
 cmExportBuildFileGenerator*
 cmGlobalGenerator::GetExportedTargetsFile(const std::string &filename) const
 {
@@ -1240,8 +1247,7 @@ void cmGlobalGenerator::Generate()
     this->LocalGenerators[i]->AddHelperCommands();
     }
 
-  // Create per-target generator information.
-  this->CreateGeneratorTargets();
+  this->CreateGenerationObjects();
   this->InitGeneratorTargets();
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
