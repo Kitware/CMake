@@ -200,7 +200,7 @@ public:
   cmExportSetMap& GetExportSets() {return this->ExportSets;}
 
   /** Add a file to the manifest of generated targets for a configuration.  */
-  void AddToManifest(const std::string& config, std::string const& f);
+  void AddToManifest(std::string const& f);
 
   void EnableInstallTarget();
 
@@ -423,10 +423,6 @@ protected:
   cmExportSetMap ExportSets;
   std::map<std::string, cmExportBuildFileGenerator*> BuildExportSets;
   std::map<std::string, cmExportBuildFileGenerator*> BuildExportExportSets;
-
-  // Manifest of all targets that will be built for each configuration.
-  // This is computed just before local generators generate.
-  cmTargetManifest TargetManifest;
 
   // All targets in the entire project.
 #if defined(CMAKE_BUILD_WITH_CMAKE)
