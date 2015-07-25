@@ -2917,11 +2917,21 @@ const char *cmTarget::GetProperty(const std::string& prop,
       // For an imported target this is the location of an arbitrary
       // available configuration.
       //
-      // For a non-imported target this is deprecated because it
-      // cannot take into account the per-configuration name of the
-      // target because the configuration type may not be known at
-      // CMake time.
-      this->Properties.SetProperty(propLOCATION, this->GetLocationForBuild());
+      if(this->IsImported())
+        {
+        this->Properties.SetProperty(
+                propLOCATION, this->ImportedGetFullPath("", false).c_str());
+        }
+      else
+        {
+        // For a non-imported target this is deprecated because it
+        // cannot take into account the per-configuration name of the
+        // target because the configuration type may not be known at
+        // CMake time.
+        this->Properties.SetProperty(
+                propLOCATION, this->GetLocationForBuild());
+        }
+
       }
 
     // Support "LOCATION_<CONFIG>".
@@ -2932,7 +2942,17 @@ const char *cmTarget::GetProperty(const std::string& prop,
         return 0;
         }
       const char* configName = prop.c_str() + 9;
-      this->Properties.SetProperty(prop, this->GetLocation(configName));
+
+      if (this->IsImported())
+        {
+        this->Properties.SetProperty(
+                prop, this->ImportedGetFullPath(configName, false).c_str());
+        }
+      else
+        {
+        this->Properties.SetProperty(
+                prop, this->GetFullPath(configName, false).c_str());
+        }
       }
     // Support "<CONFIG>_LOCATION".
     else if(cmHasLiteralSuffix(prop, "_LOCATION"))
@@ -2944,7 +2964,16 @@ const char *cmTarget::GetProperty(const std::string& prop,
           {
           return 0;
           }
-        this->Properties.SetProperty(prop, this->GetLocation(configName));
+        if (this->IsImported())
+          {
+          this->Properties.SetProperty(
+                  prop, this->ImportedGetFullPath(configName, false).c_str());
+          }
+        else
+          {
+          this->Properties.SetProperty(
+                  prop, this->GetFullPath(configName, false).c_str());
+          }
         }
       }
     }
