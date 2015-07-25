@@ -12,7 +12,7 @@
 #ifndef cmPolicies_h
 #define cmPolicies_h
 
-#include "cmCustomCommand.h"
+#include "cmStandardIncludes.h"
 
 #include <bitset>
 
