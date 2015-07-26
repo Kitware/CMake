@@ -35,7 +35,6 @@ public:
 
   virtual ~cmLocalVisualStudio6Generator();
 
-  virtual void AddHelperCommands();
   virtual void AddCMakeListsRules();
 
   /**
