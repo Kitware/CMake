@@ -17,6 +17,7 @@
 #include "cmPropertyMap.h"
 #include "cmLinkedTree.h"
 #include "cmAlgorithms.h"
+#include "cmPolicies.h"
 
 class cmake;
 class cmCommand;
@@ -24,6 +25,7 @@ class cmCommand;
 class cmState
 {
   struct SnapshotDataType;
+  struct PolicyStackEntry;
   struct BuildsystemDirectoryStateType;
   typedef cmLinkedTree<SnapshotDataType>::iterator PositionType;
   friend class Snapshot;
@@ -60,6 +62,13 @@ public:
     SnapshotType GetType() const;
 
     void InitializeFromParent();
+
+    void SetPolicy(cmPolicies::PolicyID id, cmPolicies::PolicyStatus status);
+    cmPolicies::PolicyStatus GetPolicy(cmPolicies::PolicyID id) const;
+    bool HasDefinedPolicyCMP0011();
+    void PushPolicy(cmPolicies::PolicyMap entry, bool weak);
+    bool PopPolicy();
+    bool CanPopPolicyScope();
 
     cmState* GetState() const;
 
@@ -257,6 +266,7 @@ private:
 
   cmLinkedTree<std::string> ExecutionListFiles;
 
+  cmLinkedTree<PolicyStackEntry> PolicyStack;
   cmLinkedTree<SnapshotDataType> SnapshotData;
 
   std::vector<std::string> SourceDirectoryComponents;

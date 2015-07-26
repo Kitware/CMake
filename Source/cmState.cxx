@@ -21,6 +21,9 @@
 struct cmState::SnapshotDataType
 {
   cmState::PositionType DirectoryParent;
+  cmLinkedTree<cmState::PolicyStackEntry>::iterator Policies;
+  cmLinkedTree<cmState::PolicyStackEntry>::iterator PolicyRoot;
+  cmLinkedTree<cmState::PolicyStackEntry>::iterator PolicyScope;
   cmState::SnapshotType SnapshotType;
   cmLinkedTree<std::string>::iterator ExecutionListFile;
   cmLinkedTree<cmState::BuildsystemDirectoryStateType>::iterator
@@ -30,6 +33,15 @@ struct cmState::SnapshotDataType
   std::vector<std::string>::size_type IncludeDirectoryPosition;
   std::vector<std::string>::size_type CompileDefinitionsPosition;
   std::vector<std::string>::size_type CompileOptionsPosition;
+};
+
+struct cmState::PolicyStackEntry: public cmPolicies::PolicyMap
+{
+  typedef cmPolicies::PolicyMap derived;
+  PolicyStackEntry(bool w = false): derived(), Weak(w) {}
+  PolicyStackEntry(derived const& d, bool w): derived(d), Weak(w) {}
+  PolicyStackEntry(PolicyStackEntry const& r): derived(r), Weak(r.Weak) {}
+  bool Weak;
 };
 
 struct cmState::BuildsystemDirectoryStateType
@@ -255,6 +267,13 @@ cmState::Snapshot cmState::Reset()
   it->CompileOptionsBacktraces.clear();
   it->DirectoryEnd = pos;
   }
+
+  this->PolicyStack.Clear();
+  pos->Policies = this->PolicyStack.Root();
+  pos->PolicyRoot = this->PolicyStack.Root();
+  pos->PolicyScope = this->PolicyStack.Root();
+  assert(pos->Policies.IsValid());
+  assert(pos->PolicyRoot.IsValid());
 
   this->DefineProperty
     ("RULE_LAUNCH_COMPILE", cmProperty::DIRECTORY,
@@ -726,6 +745,11 @@ cmState::Snapshot cmState::CreateBaseSnapshot()
   pos->CompileDefinitionsPosition = 0;
   pos->CompileOptionsPosition = 0;
   pos->BuildSystemDirectory->DirectoryEnd = pos;
+  pos->Policies = this->PolicyStack.Root();
+  pos->PolicyRoot = this->PolicyStack.Root();
+  pos->PolicyScope = this->PolicyStack.Root();
+  assert(pos->Policies.IsValid());
+  assert(pos->PolicyRoot.IsValid());
   return cmState::Snapshot(this, pos);
 }
 
@@ -747,6 +771,11 @@ cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot,
       this->ExecutionListFiles.Extend(
         originSnapshot.Position->ExecutionListFile);
   pos->BuildSystemDirectory->DirectoryEnd = pos;
+  pos->Policies = originSnapshot.Position->Policies;
+  pos->PolicyRoot = originSnapshot.Position->Policies;
+  pos->PolicyScope = originSnapshot.Position->Policies;
+  assert(pos->Policies.IsValid());
+  assert(pos->PolicyRoot.IsValid());
   return cmState::Snapshot(this, pos);
 }
 
@@ -764,6 +793,7 @@ cmState::CreateFunctionCallSnapshot(cmState::Snapshot originSnapshot,
   pos->ExecutionListFile = this->ExecutionListFiles.Extend(
         originSnapshot.Position->ExecutionListFile, fileName);
   pos->BuildSystemDirectory->DirectoryEnd = pos;
+  pos->PolicyScope = originSnapshot.Position->Policies;
   return cmState::Snapshot(this, pos);
 }
 
@@ -782,6 +812,7 @@ cmState::CreateMacroCallSnapshot(cmState::Snapshot originSnapshot,
   pos->ExecutionListFile = this->ExecutionListFiles.Extend(
         originSnapshot.Position->ExecutionListFile, fileName);
   pos->BuildSystemDirectory->DirectoryEnd = pos;
+  pos->PolicyScope = originSnapshot.Position->Policies;
   return cmState::Snapshot(this, pos);
 }
 
@@ -799,6 +830,7 @@ cmState::CreateCallStackSnapshot(cmState::Snapshot originSnapshot,
   pos->ExecutionListFile = this->ExecutionListFiles.Extend(
         originSnapshot.Position->ExecutionListFile, fileName);
   pos->BuildSystemDirectory->DirectoryEnd = pos;
+  pos->PolicyScope = originSnapshot.Position->Policies;
   return cmState::Snapshot(this, pos);
 }
 
@@ -816,15 +848,18 @@ cmState::CreateInlineListFileSnapshot(cmState::Snapshot originSnapshot,
   pos->ExecutionListFile = this->ExecutionListFiles.Extend(
         originSnapshot.Position->ExecutionListFile, fileName);
   pos->BuildSystemDirectory->DirectoryEnd = pos;
+  pos->PolicyScope = originSnapshot.Position->Policies;
   return cmState::Snapshot(this, pos);
 }
 
-cmState::Snapshot cmState::CreatePolicyScopeSnapshot(cmState::Snapshot originSnapshot)
+cmState::Snapshot
+cmState::CreatePolicyScopeSnapshot(cmState::Snapshot originSnapshot)
 {
   PositionType pos = this->SnapshotData.Extend(originSnapshot.Position,
                                                *originSnapshot.Position);
   pos->SnapshotType = PolicyScopeType;
   pos->BuildSystemDirectory->DirectoryEnd = pos;
+  pos->PolicyScope = originSnapshot.Position->Policies;
   return cmState::Snapshot(this, pos);
 }
 
@@ -1002,6 +1037,88 @@ cmState::Snapshot cmState::Snapshot::GetCallStackParent() const
 
   snapshot = Snapshot(this->State, parentPos);
   return snapshot;
+}
+
+void cmState::Snapshot::PushPolicy(cmPolicies::PolicyMap entry, bool weak)
+{
+  PositionType pos = this->Position;
+  pos->Policies =
+      this->State->PolicyStack.Extend(pos->Policies,
+                                      PolicyStackEntry(entry, weak));
+}
+
+bool cmState::Snapshot::PopPolicy()
+{
+  PositionType pos = this->Position;
+  if (pos->Policies == pos->PolicyScope)
+    {
+    return false;
+    }
+  ++pos->Policies;
+  return true;
+}
+
+bool cmState::Snapshot::CanPopPolicyScope()
+{
+  return this->Position->Policies == this->Position->PolicyScope;
+}
+
+void cmState::Snapshot::SetPolicy(cmPolicies::PolicyID id,
+                                  cmPolicies::PolicyStatus status)
+{
+  // Update the policy stack from the top to the top-most strong entry.
+  bool previous_was_weak = true;
+  for(cmLinkedTree<PolicyStackEntry>::iterator psi = this->Position->Policies;
+      previous_was_weak && psi != this->Position->PolicyRoot; ++psi)
+    {
+    psi->Set(id, status);
+    previous_was_weak = psi->Weak;
+    }
+}
+
+cmPolicies::PolicyStatus
+cmState::Snapshot::GetPolicy(cmPolicies::PolicyID id) const
+{
+  cmPolicies::PolicyStatus status = cmPolicies::GetPolicyStatus(id);
+
+  if(status == cmPolicies::REQUIRED_ALWAYS ||
+     status == cmPolicies::REQUIRED_IF_USED)
+    {
+    return status;
+    }
+
+  cmLinkedTree<BuildsystemDirectoryStateType>::iterator dir =
+      this->Position->BuildSystemDirectory;
+
+  while (true)
+    {
+    assert(dir.IsValid());
+    cmLinkedTree<PolicyStackEntry>::iterator leaf =
+        dir->DirectoryEnd->Policies;
+    cmLinkedTree<PolicyStackEntry>::iterator root =
+        dir->DirectoryEnd->PolicyRoot;
+    for( ; leaf != root; ++leaf)
+      {
+      if(leaf->IsDefined(id))
+        {
+        status = leaf->Get(id);
+        return status;
+        }
+      }
+    cmState::PositionType e = dir->DirectoryEnd;
+    cmState::PositionType p = e->DirectoryParent;
+    if (p == this->State->SnapshotData.Root())
+      {
+      break;
+      }
+    dir = p->BuildSystemDirectory;
+    }
+  return status;
+}
+
+bool cmState::Snapshot::HasDefinedPolicyCMP0011()
+{
+  return !this->Position->Policies->IsEmpty();
 }
 
 static const std::string cmPropertySentinal = std::string();
