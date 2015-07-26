@@ -192,9 +192,6 @@ cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
   this->StateSnapshot = this->StateSnapshot.GetState()
       ->CreatePolicyScopeSnapshot(this->StateSnapshot);
 
-  // Protect the directory-level policies.
-  this->PushPolicyBarrier();
-
   // Enter a policy level for this directory.
   this->PushPolicy();
 
@@ -239,11 +236,6 @@ cmMakefile::~cmMakefile()
   cmDeleteAll(this->FinalPassCommands);
   cmDeleteAll(this->FunctionBlockers);
   this->FunctionBlockers.clear();
-  if (this->PolicyStack.size() != 1)
-  {
-    cmSystemTools::Error("Internal CMake Error, Policy Stack has not been"
-      " popped properly");
-  }
 }
 
 //----------------------------------------------------------------------------
@@ -479,7 +471,6 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
         this->Makefile->ContextStack.back()->Name,
         this->Makefile->ContextStack.back()->Line,
         filenametoread);
-  this->Makefile->PushPolicyBarrier();
   if(!this->NoPolicyScope)
     {
     // Check CMP0011 to determine the policy scope type.
@@ -519,7 +510,8 @@ cmMakefile::IncludeScope::~IncludeScope()
     // one we pushed above.  If the entry is empty, then the included
     // script did not set any policies that might affect the includer so
     // we do not need to enforce the policy.
-    if(this->CheckCMP0011 && this->Makefile->PolicyStack.back().IsEmpty())
+    if(this->CheckCMP0011
+       && !this->Makefile->StateSnapshot.HasDefinedPolicyCMP0011())
       {
       this->CheckCMP0011 = false;
       }
@@ -535,9 +527,6 @@ cmMakefile::IncludeScope::~IncludeScope()
       }
     }
   this->Makefile->PopPolicyBarrier(this->ReportError);
-  this->Makefile->StateSnapshot =
-      this->Makefile->GetState()->Pop(this->Makefile->StateSnapshot);
-  assert(this->Makefile->StateSnapshot.IsValid());
 
   this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
 }
@@ -646,19 +635,12 @@ public:
           this->Makefile->StateSnapshot, name, line, filenametoread);
     assert(this->Makefile->StateSnapshot.IsValid());
 
-    this->Makefile->PushPolicyBarrier();
-
     this->Makefile->PushFunctionBlockerBarrier();
   }
 
   ~ListFileScope()
   {
     this->Makefile->PopPolicyBarrier(this->ReportError);
-
-    this->Makefile->StateSnapshot =
-        this->Makefile->GetState()->Pop(this->Makefile->StateSnapshot);
-    assert(this->Makefile->StateSnapshot.IsValid());
-
     this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
   }
 
@@ -1630,7 +1612,6 @@ void cmMakefile::PushFunctionScope(std::string const& fileName,
         this->ContextStack.back()->Name, this->ContextStack.back()->Line,
         fileName);
   assert(this->StateSnapshot.IsValid());
-  this->PushPolicyBarrier();
 
   this->Internal->PushDefinitions();
 
@@ -1650,8 +1631,6 @@ void cmMakefile::PopFunctionScope(bool reportError)
   this->PopPolicy();
 
   this->PopPolicyBarrier(reportError);
-  this->StateSnapshot = this->GetState()->Pop(this->StateSnapshot);
-  assert(this->StateSnapshot.IsValid());
 
   this->PopFunctionBlockerBarrier(reportError);
 
@@ -1675,7 +1654,6 @@ void cmMakefile::PushMacroScope(std::string const& fileName,
         this->ContextStack.back()->Name, this->ContextStack.back()->Line,
         fileName);
   assert(this->StateSnapshot.IsValid());
-  this->PushPolicyBarrier();
 
   this->PushFunctionBlockerBarrier();
 
@@ -1686,9 +1664,6 @@ void cmMakefile::PopMacroScope(bool reportError)
 {
   this->PopPolicy();
   this->PopPolicyBarrier(reportError);
-
-  this->StateSnapshot = this->GetState()->Pop(this->StateSnapshot);
-  assert(this->StateSnapshot.IsValid());
 
   this->PopFunctionBlockerBarrier(reportError);
 }
@@ -1710,7 +1685,6 @@ public:
     this->Makefile->StateSnapshot.SetListFile(currentStart);
     this->Makefile->StateSnapshot = this->Makefile->StateSnapshot.GetState()
         ->CreatePolicyScopeSnapshot(this->Makefile->StateSnapshot);
-    this->Makefile->PushPolicyBarrier();
     this->Makefile->PushFunctionBlockerBarrier();
 
     this->GG = mf->GetGlobalGenerator();
@@ -1727,8 +1701,6 @@ public:
   {
     this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
     this->Makefile->PopPolicyBarrier(this->ReportError);
-    this->Makefile->StateSnapshot = this->Makefile->StateSnapshot.GetState()
-        ->Pop(this->Makefile->StateSnapshot);
 #if defined(CMAKE_BUILD_WITH_CMAKE)
     this->GG->GetFileLockPool().PopFileScope();
 #endif
@@ -4759,30 +4731,7 @@ const char* cmMakefile::GetDefineFlagsCMP0059() const
 cmPolicies::PolicyStatus
 cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id) const
 {
-  cmPolicies::PolicyStatus status = cmPolicies::GetPolicyStatus(id);
-
-  if(status == cmPolicies::REQUIRED_ALWAYS ||
-     status == cmPolicies::REQUIRED_IF_USED)
-    {
-    return status;
-    }
-
-  cmLocalGenerator* lg = this->LocalGenerator;
-  while(lg)
-    {
-    cmMakefile const* mf = lg->GetMakefile();
-    for(PolicyStackType::const_reverse_iterator psi =
-        mf->PolicyStack.rbegin(); psi != mf->PolicyStack.rend(); ++psi)
-      {
-      if(psi->IsDefined(id))
-        {
-        status = psi->Get(id);
-        return status;
-        }
-      }
-    lg = lg->GetParent();
-    }
-  return status;
+  return this->StateSnapshot.GetPolicy(id);
 }
 
 //----------------------------------------------------------------------------
@@ -4831,15 +4780,7 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
     return false;
     }
 
-  // Update the policy stack from the top to the top-most strong entry.
-  bool previous_was_weak = true;
-  for(PolicyStackType::reverse_iterator psi = this->PolicyStack.rbegin();
-      previous_was_weak && psi != this->PolicyStack.rend(); ++psi)
-    {
-    psi->Set(id, status);
-    previous_was_weak = psi->Weak;
-    }
-
+  this->StateSnapshot.SetPolicy(id, status);
   return true;
 }
 
@@ -4850,7 +4791,6 @@ cmMakefile::PolicyPushPop::PolicyPushPop(cmMakefile* m, bool weak,
 {
   this->Makefile->StateSnapshot = this->Makefile->StateSnapshot.GetState()
       ->CreatePolicyScopeSnapshot(this->Makefile->StateSnapshot);
-  this->Makefile->PushPolicyBarrier();
   this->Makefile->PushPolicy(weak, pm);
 }
 
@@ -4859,25 +4799,18 @@ cmMakefile::PolicyPushPop::~PolicyPushPop()
 {
   this->Makefile->PopPolicy();
   this->Makefile->PopPolicyBarrier(this->ReportError);
-  this->Makefile->StateSnapshot = this->Makefile->StateSnapshot.GetState()
-      ->Pop(this->Makefile->StateSnapshot);
 }
 
 //----------------------------------------------------------------------------
 void cmMakefile::PushPolicy(bool weak, cmPolicies::PolicyMap const& pm)
 {
-  // Allocate a new stack entry.
-  this->PolicyStack.push_back(PolicyStackEntry(pm, weak));
+  this->StateSnapshot.PushPolicy(pm, weak);
 }
 
 //----------------------------------------------------------------------------
 void cmMakefile::PopPolicy()
 {
-  if(this->PolicyStack.size() > this->PolicyBarriers.back())
-    {
-    this->PolicyStack.pop_back();
-    }
-  else
+  if (!this->StateSnapshot.PopPolicy())
     {
     this->IssueMessage(cmake::FATAL_ERROR,
                        "cmake_policy POP without matching PUSH");
@@ -4885,17 +4818,9 @@ void cmMakefile::PopPolicy()
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::PushPolicyBarrier()
-{
-  this->PolicyBarriers.push_back(this->PolicyStack.size());
-}
-
-//----------------------------------------------------------------------------
 void cmMakefile::PopPolicyBarrier(bool reportError)
 {
-  // Remove any extra entries pushed on the barrier.
-  PolicyStackType::size_type barrier = this->PolicyBarriers.back();
-  while(this->PolicyStack.size() > barrier)
+  while (!this->StateSnapshot.CanPopPolicyScope())
     {
     if(reportError)
       {
@@ -4906,8 +4831,8 @@ void cmMakefile::PopPolicyBarrier(bool reportError)
     this->PopPolicy();
     }
 
-  // Remove the barrier.
-  this->PolicyBarriers.pop_back();
+  this->StateSnapshot = this->GetState()->Pop(this->StateSnapshot);
+  assert(this->StateSnapshot.IsValid());
 }
 
 //----------------------------------------------------------------------------
