@@ -56,6 +56,7 @@ public:
     bool IsValid() const;
     Snapshot GetBuildsystemDirectoryParent() const;
     Snapshot GetCallStackParent() const;
+    SnapshotType GetType() const;
 
     void InitializeFromParent();
 

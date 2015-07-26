@@ -847,6 +847,11 @@ cmState::Snapshot::Snapshot(cmState* state, PositionType position)
 
 }
 
+cmState::SnapshotType cmState::Snapshot::GetType() const
+{
+  return this->Position->SnapshotType;
+}
+
 const char* cmState::Directory::GetCurrentSource() const
 {
   return this->DirectoryState->Location.c_str();
