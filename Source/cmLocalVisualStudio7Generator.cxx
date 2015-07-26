@@ -68,15 +68,6 @@ cmLocalVisualStudio7Generator::~cmLocalVisualStudio7Generator()
 
 void cmLocalVisualStudio7Generator::AddHelperCommands()
 {
-  std::set<std::string> lang;
-  lang.insert("C");
-  lang.insert("CXX");
-  lang.insert("RC");
-  lang.insert("IDL");
-  lang.insert("DEF");
-  lang.insert("Fortran");
-  this->CreateCustomTargetsAndCommands(lang);
-
   // Now create GUIDs for targets
   cmTargets &tgts = this->Makefile->GetTargets();
 
