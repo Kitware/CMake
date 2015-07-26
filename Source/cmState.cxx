@@ -809,6 +809,14 @@ cmState::CreateInlineListFileSnapshot(cmState::Snapshot originSnapshot,
   return cmState::Snapshot(this, pos);
 }
 
+cmState::Snapshot cmState::CreatePolicyScopeSnapshot(cmState::Snapshot originSnapshot)
+{
+  PositionType pos = this->SnapshotData.Extend(originSnapshot.Position,
+                                               *originSnapshot.Position);
+  pos->SnapshotType = PolicyScopeType;
+  return cmState::Snapshot(this, pos);
+}
+
 cmState::Snapshot cmState::Pop(cmState::Snapshot originSnapshot)
 {
   PositionType pos = originSnapshot.Position;
@@ -959,13 +967,22 @@ cmState::Snapshot cmState::Snapshot::GetCallStackParent() const
   assert(this->Position != this->State->SnapshotData.Root());
 
   Snapshot snapshot;
-  if (this->Position->SnapshotType == cmState::BuildsystemDirectoryType)
+  PositionType parentPos = this->Position;
+  while(parentPos->SnapshotType == cmState::PolicyScopeType)
+    {
+    ++parentPos;
+    }
+  if (parentPos->SnapshotType == cmState::BuildsystemDirectoryType)
     {
     return snapshot;
     }
 
-  PositionType parentPos = this->Position;
   ++parentPos;
+  while(parentPos->SnapshotType == cmState::PolicyScopeType)
+    {
+    ++parentPos;
+    }
+
   if (parentPos == this->State->SnapshotData.Root())
     {
     return snapshot;

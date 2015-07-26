@@ -189,6 +189,9 @@ cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
   this->cmAtVarRegex.compile("(@[A-Za-z_0-9/.+-]+@)");
   this->cmNamedCurly.compile("^[A-Za-z0-9/_.+-]+{");
 
+  this->StateSnapshot = this->StateSnapshot.GetState()
+      ->CreatePolicyScopeSnapshot(this->StateSnapshot);
+
   // Protect the directory-level policies.
   this->PushPolicyBarrier();
 
@@ -1705,6 +1708,8 @@ public:
         this->Makefile->StateSnapshot.GetDirectory().GetCurrentSource();
     currentStart += "/CMakeLists.txt";
     this->Makefile->StateSnapshot.SetListFile(currentStart);
+    this->Makefile->StateSnapshot = this->Makefile->StateSnapshot.GetState()
+        ->CreatePolicyScopeSnapshot(this->Makefile->StateSnapshot);
     this->Makefile->PushPolicyBarrier();
     this->Makefile->PushFunctionBlockerBarrier();
 
@@ -1722,6 +1727,8 @@ public:
   {
     this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
     this->Makefile->PopPolicyBarrier(this->ReportError);
+    this->Makefile->StateSnapshot = this->Makefile->StateSnapshot.GetState()
+        ->Pop(this->Makefile->StateSnapshot);
 #if defined(CMAKE_BUILD_WITH_CMAKE)
     this->GG->GetFileLockPool().PopFileScope();
 #endif
@@ -4841,6 +4848,8 @@ cmMakefile::PolicyPushPop::PolicyPushPop(cmMakefile* m, bool weak,
                                          cmPolicies::PolicyMap const& pm):
   Makefile(m), ReportError(true)
 {
+  this->Makefile->StateSnapshot = this->Makefile->StateSnapshot.GetState()
+      ->CreatePolicyScopeSnapshot(this->Makefile->StateSnapshot);
   this->Makefile->PushPolicyBarrier();
   this->Makefile->PushPolicy(weak, pm);
 }
@@ -4850,6 +4859,8 @@ cmMakefile::PolicyPushPop::~PolicyPushPop()
 {
   this->Makefile->PopPolicy();
   this->Makefile->PopPolicyBarrier(this->ReportError);
+  this->Makefile->StateSnapshot = this->Makefile->StateSnapshot.GetState()
+      ->Pop(this->Makefile->StateSnapshot);
 }
 
 //----------------------------------------------------------------------------
