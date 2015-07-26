@@ -338,12 +338,6 @@ protected:
                                       const std::string& lang,
                                       cmSourceFile& source,
                                       cmGeneratorTarget& target);
-  // Create Custom Targets and commands for unsupported languages
-  // The set passed in should contain the languages supported by the
-  // generator directly.  Any targets containing files that are not
-  // of the types listed will be compiled as custom commands and added
-  // to a custom target.
-  void CreateCustomTargetsAndCommands(std::set<std::string> const&);
 
   // Handle old-style install rules stored in the targets.
   void GenerateTargetInstallRules(
