@@ -626,48 +626,6 @@ void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
   target.Target->AddSource(targetFullPath);
 }
 
-
-void cmLocalGenerator
-::CreateCustomTargetsAndCommands(std::set<std::string> const& lang)
-{
-  cmGeneratorTargetsType tgts = this->Makefile->GetGeneratorTargets();
-  for(cmGeneratorTargetsType::iterator l = tgts.begin();
-      l != tgts.end(); l++)
-    {
-    if (l->first->IsImported())
-      {
-      continue;
-      }
-    cmGeneratorTarget& target = *l->second;
-    switch(target.GetType())
-      {
-      case cmTarget::STATIC_LIBRARY:
-      case cmTarget::SHARED_LIBRARY:
-      case cmTarget::MODULE_LIBRARY:
-      case cmTarget::EXECUTABLE:
-        {
-        std::string llang = target.Target->GetLinkerLanguage();
-        if(llang.empty())
-          {
-          cmSystemTools::Error
-            ("CMake can not determine linker language for target: ",
-             target.Target->GetName().c_str());
-          return;
-          }
-        // if the language is not in the set lang then create custom
-        // commands to build the target
-        if(lang.count(llang) == 0)
-          {
-          this->AddBuildTargetRule(llang, target);
-          }
-        }
-        break;
-      default:
-        break;
-      }
-    }
-}
-
 // List of variables that are replaced when
 // rules are expanced.  These variables are
 // replaced in the form <var> with GetSafeDefinition(var).
