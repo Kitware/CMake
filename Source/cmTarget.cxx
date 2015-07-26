@@ -731,7 +731,7 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
 {
   assert(this->GetType() != INTERFACE_LIBRARY);
 
-  if (this->Makefile->GetGeneratorTargets().empty())
+  if (!this->Makefile->IsConfigured())
     {
     // At configure-time, this method can be called as part of getting the
     // LOCATION property or to export() a file to be include()d.  However
@@ -2750,50 +2750,11 @@ std::string cmTarget::GetCompilePDBDirectory(const std::string& config) const
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetLocation(const std::string& config) const
+const char* cmTarget::ImportedGetLocation(const std::string& config) const
 {
   static std::string location;
-  if (this->IsImported())
-    {
-    location = this->ImportedGetFullPath(config, false);
-    }
-  else
-    {
-    location = this->GetFullPath(config, false);
-    }
-  return location.c_str();
-}
-
-//----------------------------------------------------------------------------
-const char* cmTarget::GetLocationForBuild() const
-{
-  static std::string location;
-  if(this->IsImported())
-    {
-    location = this->ImportedGetFullPath("", false);
-    return location.c_str();
-    }
-
-  // Now handle the deprecated build-time configuration location.
-  location = this->GetDirectory();
-  const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
-  if(cfgid && strcmp(cfgid, ".") != 0)
-    {
-    location += "/";
-    location += cfgid;
-    }
-
-  if(this->IsAppBundleOnApple())
-    {
-    std::string macdir = this->BuildMacContentDirectory("", "", false);
-    if(!macdir.empty())
-      {
-      location += "/";
-      location += macdir;
-      }
-    }
-  location += "/";
-  location += this->GetFullName("", false);
+  assert(this->IsImported());
+  location = this->ImportedGetFullPath(config, false);
   return location.c_str();
 }
 
@@ -2928,11 +2889,24 @@ const char *cmTarget::GetProperty(const std::string& prop,
       // For an imported target this is the location of an arbitrary
       // available configuration.
       //
-      // For a non-imported target this is deprecated because it
-      // cannot take into account the per-configuration name of the
-      // target because the configuration type may not be known at
-      // CMake time.
-      this->Properties.SetProperty(propLOCATION, this->GetLocationForBuild());
+      if(this->IsImported())
+        {
+        this->Properties.SetProperty(
+                propLOCATION, this->ImportedGetFullPath("", false).c_str());
+        }
+      else
+        {
+        // For a non-imported target this is deprecated because it
+        // cannot take into account the per-configuration name of the
+        // target because the configuration type may not be known at
+        // CMake time.
+        cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
+        gg->CreateGenerationObjects();
+        cmGeneratorTarget* gt = gg->GetGeneratorTarget(this);
+        this->Properties.SetProperty(propLOCATION,
+                                     gt->GetLocationForBuild());
+        }
+
       }
 
     // Support "LOCATION_<CONFIG>".
@@ -2943,7 +2917,20 @@ const char *cmTarget::GetProperty(const std::string& prop,
         return 0;
         }
       const char* configName = prop.c_str() + 9;
-      this->Properties.SetProperty(prop, this->GetLocation(configName));
+
+      if (this->IsImported())
+        {
+        this->Properties.SetProperty(
+                prop, this->ImportedGetFullPath(configName, false).c_str());
+        }
+      else
+        {
+        cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
+        gg->CreateGenerationObjects();
+        cmGeneratorTarget* gt = gg->GetGeneratorTarget(this);
+        this->Properties.SetProperty(
+                prop, gt->GetFullPath(configName, false).c_str());
+        }
       }
     // Support "<CONFIG>_LOCATION".
     else if(cmHasLiteralSuffix(prop, "_LOCATION"))
@@ -2955,7 +2942,19 @@ const char *cmTarget::GetProperty(const std::string& prop,
           {
           return 0;
           }
-        this->Properties.SetProperty(prop, this->GetLocation(configName));
+        if (this->IsImported())
+          {
+          this->Properties.SetProperty(
+                  prop, this->ImportedGetFullPath(configName, false).c_str());
+          }
+        else
+          {
+          cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
+          gg->CreateGenerationObjects();
+          cmGeneratorTarget* gt = gg->GetGeneratorTarget(this);
+          this->Properties.SetProperty(
+                  prop, gt->GetFullPath(configName, false).c_str());
+          }
         }
       }
     }
@@ -3771,44 +3770,6 @@ bool cmTarget::IsImportedSharedLibWithoutSOName(
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::NormalGetRealName(const std::string& config) const
-{
-  // This should not be called for imported targets.
-  // TODO: Split cmTarget into a class hierarchy to get compile-time
-  // enforcement of the limited imported target API.
-  if(this->IsImported())
-    {
-    std::string msg =  "NormalGetRealName called on imported target: ";
-    msg += this->GetName();
-    this->GetMakefile()->
-      IssueMessage(cmake::INTERNAL_ERROR,
-                   msg);
-    }
-
-  if(this->GetType() == cmTarget::EXECUTABLE)
-    {
-    // Compute the real name that will be built.
-    std::string name;
-    std::string realName;
-    std::string impName;
-    std::string pdbName;
-    this->GetExecutableNames(name, realName, impName, pdbName, config);
-    return realName;
-    }
-  else
-    {
-    // Compute the real name that will be built.
-    std::string name;
-    std::string soName;
-    std::string realName;
-    std::string impName;
-    std::string pdbName;
-    this->GetLibraryNames(name, soName, realName, impName, pdbName, config);
-    return realName;
-    }
-}
-
-//----------------------------------------------------------------------------
 std::string cmTarget::GetFullName(const std::string& config,
                                   bool implib) const
 {
@@ -3837,48 +3798,6 @@ void cmTarget::GetFullNameComponents(std::string& prefix, std::string& base,
                                      bool implib) const
 {
   this->GetFullNameInternal(config, implib, prefix, base, suffix);
-}
-
-//----------------------------------------------------------------------------
-std::string cmTarget::GetFullPath(const std::string& config, bool implib,
-                                  bool realname) const
-{
-  if(this->IsImported())
-    {
-    return this->ImportedGetFullPath(config, implib);
-    }
-  else
-    {
-    return this->NormalGetFullPath(config, implib, realname);
-    }
-}
-
-//----------------------------------------------------------------------------
-std::string cmTarget::NormalGetFullPath(const std::string& config,
-                                        bool implib, bool realname) const
-{
-  std::string fpath = this->GetDirectory(config, implib);
-  fpath += "/";
-  if(this->IsAppBundleOnApple())
-    {
-    fpath = this->BuildMacContentDirectory(fpath, config, false);
-    fpath += "/";
-    }
-
-  // Add the full name of the target.
-  if(implib)
-    {
-    fpath += this->GetFullName(config, true);
-    }
-  else if(realname)
-    {
-    fpath += this->NormalGetRealName(config);
-    }
-  else
-    {
-    fpath += this->GetFullName(config, false);
-    }
-  return fpath;
 }
 
 //----------------------------------------------------------------------------
@@ -5260,7 +5179,7 @@ void cmTarget::GetLanguages(std::set<std::string>& languages,
 
   std::vector<cmTarget*> objectLibraries;
   std::vector<cmSourceFile const*> externalObjects;
-  if (this->Makefile->GetGeneratorTargets().empty())
+  if (!this->Makefile->IsConfigured())
     {
     this->GetObjectLibrariesCMP0026(objectLibraries);
     }

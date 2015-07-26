@@ -374,14 +374,7 @@ public:
       compiler pdb output directory is given.  */
   std::string GetCompilePDBDirectory(const std::string& config = "") const;
 
-  /** Get the location of the target in the build tree for the given
-      configuration.  */
-  const char* GetLocation(const std::string& config) const;
-
-  /** Get the location of the target in the build tree with a placeholder
-      referencing the configuration in the native build system.  This
-      location is suitable for use as the LOCATION target property.  */
-  const char* GetLocationForBuild() const;
+  const char* ImportedGetLocation(const std::string& config) const;
 
   /** Get the target major and minor version numbers interpreted from
       the VERSION property.  Version 0 is returned if the property is
@@ -430,11 +423,6 @@ public:
   /** Test for special case of a third-party shared library that has
       no soname at all.  */
   bool IsImportedSharedLibWithoutSOName(const std::string& config) const;
-
-  /** Get the full path to the target according to the settings in its
-      makefile and the configuration type.  */
-  std::string GetFullPath(const std::string& config="", bool implib = false,
-                          bool realname = false) const;
 
   /** Get the names of the library needed to generate a build rule
       that takes into account shared library version numbers.  This
@@ -718,14 +706,6 @@ private:
 
   std::string ImportedGetFullPath(const std::string& config,
                                   bool implib) const;
-  std::string NormalGetFullPath(const std::string& config, bool implib,
-                                bool realname) const;
-
-  /** Get the real name of the target.  Allowed only for non-imported
-      targets.  When a library or executable file is versioned this is
-      the full versioned name.  If the target is not versioned this is
-      the same as GetFullName.  */
-  std::string NormalGetRealName(const std::string& config) const;
 
   /** Append to @a base the mac content directory and return it. */
   std::string BuildMacContentDirectory(const std::string& base,

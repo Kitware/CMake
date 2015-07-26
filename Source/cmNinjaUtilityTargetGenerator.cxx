@@ -44,7 +44,7 @@ void cmNinjaUtilityTargetGenerator::Generate()
     for (std::vector<cmCustomCommand>::const_iterator
          ci = cmdLists[i]->begin(); ci != cmdLists[i]->end(); ++ci) {
       cmCustomCommandGenerator ccg(*ci, this->GetConfigName(),
-                                   this->GetMakefile());
+                                   this->GetLocalGenerator());
       this->GetLocalGenerator()->AppendCustomCommandDeps(ccg, deps);
       this->GetLocalGenerator()->AppendCustomCommandLines(ccg, commands);
       std::vector<std::string> const& ccByproducts = ccg.GetByproducts();
@@ -65,7 +65,7 @@ void cmNinjaUtilityTargetGenerator::Generate()
     if(cmCustomCommand* cc = (*source)->GetCustomCommand())
       {
       cmCustomCommandGenerator ccg(*cc, this->GetConfigName(),
-                                   this->GetMakefile());
+                                   this->GetLocalGenerator());
       this->GetLocalGenerator()->AddCustomCommandTarget(cc, this->GetTarget());
 
       // Depend on all custom command outputs.

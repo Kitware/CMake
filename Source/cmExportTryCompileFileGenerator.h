@@ -20,6 +20,8 @@ class cmInstallTargetGenerator;
 class cmExportTryCompileFileGenerator: public cmExportFileGenerator
 {
 public:
+  cmExportTryCompileFileGenerator(cmGlobalGenerator* gg);
+
   /** Set the list of targets to export.  */
   void SetExports(const std::vector<cmTarget const*> &exports)
     { this->Exports = exports; }

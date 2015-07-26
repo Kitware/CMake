@@ -910,10 +910,14 @@ cmGlobalNinjaGenerator
   case cmTarget::SHARED_LIBRARY:
   case cmTarget::STATIC_LIBRARY:
   case cmTarget::MODULE_LIBRARY:
+    {
+    cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
+                                    ->GetGlobalGenerator()
+                                    ->GetGeneratorTarget(target);
     outputs.push_back(ng->ConvertToNinjaPath(
-      target->GetFullPath(configName, false, realname)));
+      gtgt->GetFullPath(configName, false, realname)));
     break;
-
+    }
   case cmTarget::OBJECT_LIBRARY:
   case cmTarget::UTILITY: {
     std::string path = ng->ConvertToNinjaPath(

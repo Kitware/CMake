@@ -70,13 +70,13 @@ void cmGlobalKdevelopGenerator::Generate()
          lg!=lgs.end(); lg++)
       {
       cmMakefile* makefile=(*lg)->GetMakefile();
-      cmTargets& targets=makefile->GetTargets();
-      for (cmTargets::iterator ti = targets.begin();
+      cmGeneratorTargetsType const& targets = makefile->GetGeneratorTargets();
+      for (cmGeneratorTargetsType::const_iterator ti = targets.begin();
            ti != targets.end(); ti++)
         {
-        if (ti->second.GetType()==cmTarget::EXECUTABLE)
+        if (ti->second->GetType()==cmTarget::EXECUTABLE)
           {
-          executable = ti->second.GetLocation("");
+          executable = ti->second->GetLocation("");
           break;
           }
         }

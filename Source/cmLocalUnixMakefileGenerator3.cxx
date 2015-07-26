@@ -1007,8 +1007,7 @@ cmLocalUnixMakefileGenerator3
   for(std::vector<cmCustomCommand>::const_iterator i = ccs.begin();
       i != ccs.end(); ++i)
     {
-    cmCustomCommandGenerator ccg(*i, this->ConfigName,
-                                 this->Makefile);
+    cmCustomCommandGenerator ccg(*i, this->ConfigName, this);
     this->AppendCustomDepend(depends, ccg);
     }
 }
@@ -1043,8 +1042,7 @@ cmLocalUnixMakefileGenerator3
   for(std::vector<cmCustomCommand>::const_iterator i = ccs.begin();
       i != ccs.end(); ++i)
     {
-    cmCustomCommandGenerator ccg(*i, this->ConfigName,
-                                 this->Makefile);
+    cmCustomCommandGenerator ccg(*i, this->ConfigName, this);
     this->AppendCustomCommand(commands, ccg, target, true, relative);
     }
 }

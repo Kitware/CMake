@@ -82,14 +82,6 @@ private:
   std::string Event;
 };
 
-void cmLocalVisualStudio6Generator::AddHelperCommands()
-{
-  std::set<std::string> lang;
-  lang.insert("C");
-  lang.insert("CXX");
-  this->CreateCustomTargetsAndCommands(lang);
-}
-
 void cmLocalVisualStudio6Generator::AddCMakeListsRules()
 {
   cmTargets &tgts = this->Makefile->GetTargets();
