@@ -37,7 +37,8 @@ public:
     FunctionCallType,
     MacroCallType,
     CallStackType,
-    InlineListFileType
+    InlineListFileType,
+    PolicyScopeType
   };
 
   class Directory;
@@ -148,6 +149,7 @@ public:
                                         const std::string& entryPointCommand,
                                         long entryPointLine,
                                         std::string const& fileName);
+  Snapshot CreatePolicyScopeSnapshot(Snapshot originSnapshot);
   Snapshot Pop(Snapshot originSnapshot);
 
   enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC,
