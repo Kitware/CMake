@@ -36,17 +36,22 @@ if (Qt5Widgets_FOUND)
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
-  # We need to install Cocoa platform plugin and add qt.conf for Qt5 on Mac.
+  # We need to install platform plugin and add qt.conf for Qt5 on Mac and Windows.
   # FIXME: This should be part of Qt5 CMake scripts, but unfortunatelly
-  # Qt5 Mac support is missing there.
-  if(APPLE)
+  # Qt5 support is missing there.
+  if(APPLE OR WIN32)
     macro(install_qt5_plugin _qt_plugin_name _qt_plugins_var)
       get_target_property(_qt_plugin_path "${_qt_plugin_name}" LOCATION)
       if(EXISTS "${_qt_plugin_path}")
         get_filename_component(_qt_plugin_file "${_qt_plugin_path}" NAME)
         get_filename_component(_qt_plugin_type "${_qt_plugin_path}" PATH)
         get_filename_component(_qt_plugin_type "${_qt_plugin_type}" NAME)
-        set(_qt_plugin_dest "PlugIns/${_qt_plugin_type}")
+        if(APPLE)
+          set(_qt_plugin_dir "PlugIns")
+        elseif(WIN32)
+          set(_qt_plugin_dir "plugins")
+        endif()
+        set(_qt_plugin_dest "${_qt_plugin_dir}/${_qt_plugin_type}")
         install(FILES "${_qt_plugin_path}"
           DESTINATION "${_qt_plugin_dest}"
           ${COMPONENT})
@@ -56,12 +61,21 @@ if (Qt5Widgets_FOUND)
         message(FATAL_ERROR "QT plugin ${_qt_plugin_name} not found")
       endif()
     endmacro()
-    install_qt5_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS)
-    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
-      "[Paths]\nPlugins = PlugIns\n")
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
-      DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
-      ${COMPONENT})
+    if(APPLE)
+      install_qt5_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS)
+      file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
+        "[Paths]\nPlugins = ${_qt_plugin_dir}\n")
+      install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
+        DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
+        ${COMPONENT})
+    elseif(WIN32)
+      install_qt5_plugin("Qt5::QWindowsIntegrationPlugin" QT_PLUGINS)
+      file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
+        "[Paths]\nPlugins = ../${_qt_plugin_dir}\n")
+      install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
+        DESTINATION bin
+        ${COMPONENT})
+    endif()
   endif()
 
   if(WIN32 AND TARGET Qt5::Core)
