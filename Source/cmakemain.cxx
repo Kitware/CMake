@@ -83,6 +83,7 @@ static const char * cmDocumentationOptions[][2] =
    "useful on one try_compile at a time."},
   {"--debug-output", "Put cmake in a debug mode."},
   {"--trace", "Put cmake in trace mode."},
+  {"--trace-expand", "Put cmake in trace mode with variable expansion."},
   {"--warn-uninitialized", "Warn about uninitialized values."},
   {"--warn-unused-vars", "Warn about unused variables."},
   {"--no-warn-unused-cli", "Don't warn about command line options."},

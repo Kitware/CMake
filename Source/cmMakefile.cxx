@@ -339,10 +339,21 @@ void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
   std::ostringstream msg;
   msg << this->GetExecutionFilePath() << "(" << lff.Line << "):  ";
   msg << lff.Name << "(";
+  bool expand = this->GetCMakeInstance()->GetTraceExpand();
+  std::string temp;
   for(std::vector<cmListFileArgument>::const_iterator i =
         lff.Arguments.begin(); i != lff.Arguments.end(); ++i)
     {
-    msg << i->Value;
+    if (expand)
+      {
+      temp = i->Value;
+      this->ExpandVariablesInString(temp);
+      msg << temp;
+      }
+    else
+      {
+      msg << i->Value;
+      }
     msg << " ";
     }
   msg << ")";
@@ -4773,7 +4784,8 @@ bool cmMakefile::PolicyOptionalWarningEnabled(std::string const& var)
       return cmSystemTools::IsOn(val);
       }
     }
-  // Enable optional policy warnings with --debug-output or --trace.
+  // Enable optional policy warnings with --debug-output, --trace,
+  // or --trace-expand.
   cmake* cm = this->GetCMakeInstance();
   return cm->GetDebugOutput() || cm->GetTrace();
 }

@@ -140,6 +140,10 @@ set(RunCMake_TEST_OPTIONS --trace)
 run_cmake(trace)
 unset(RunCMake_TEST_OPTIONS)
 
+set(RunCMake_TEST_OPTIONS --trace-expand)
+run_cmake(trace-expand)
+unset(RunCMake_TEST_OPTIONS)
+
 set(RunCMake_TEST_OPTIONS --debug-trycompile)
 run_cmake(debug-trycompile)
 unset(RunCMake_TEST_OPTIONS)
