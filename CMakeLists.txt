@@ -70,6 +70,11 @@ macro(CMake_OPTIONAL_COMPONENT NAME)
   endif()
 endmacro()
 
+# option to disable installing 3rd-party dependencies
+option(CMake_INSTALL_DEPENDENCIES
+  "Whether to install 3rd-party runtime dependencies" ON)
+mark_as_advanced(CMake_INSTALL_DEPENDENCIES)
+
 #-----------------------------------------------------------------------
 # a macro to deal with system libraries, implemented as a macro
 # simply to improve readability of the main script

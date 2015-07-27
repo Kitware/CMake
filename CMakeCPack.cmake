@@ -22,7 +22,9 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
       set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS ON)
     endif()
 
-    include(${CMake_SOURCE_DIR}/Modules/InstallRequiredSystemLibraries.cmake)
+    if(CMake_INSTALL_DEPENDENCIES)
+      include(${CMake_SOURCE_DIR}/Modules/InstallRequiredSystemLibraries.cmake)
+    endif()
   endif()
 
   set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "CMake is a build tool")
