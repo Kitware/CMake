@@ -328,17 +328,6 @@ protected:
   void InsertRuleLauncher(std::string& s, cmTarget* target,
                           const std::string& prop);
 
-
-  /** Convert a target to a utility target for unsupported
-   *  languages of a generator */
-  void AddBuildTargetRule(const std::string& llang,
-                          cmGeneratorTarget& target);
-  ///! add a custom command to build a .o file that is part of a target
-  void AddCustomCommandToCreateObject(const char* ofname,
-                                      const std::string& lang,
-                                      cmSourceFile& source,
-                                      cmGeneratorTarget& target);
-
   // Handle old-style install rules stored in the targets.
   void GenerateTargetInstallRules(
     std::ostream& os, const std::string& config,

@@ -1392,6 +1392,10 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
     for(cmTargets::iterator ti = targets.begin();
         ti != targets.end(); ++ti)
       {
+      if (ti->second.GetType() == cmTarget::GLOBAL_TARGET)
+        {
+        continue;
+        }
       targetNames.push_back(ti->second.GetName());
       }
     for(std::vector<std::string>::iterator ti = targetNames.begin();
@@ -1443,6 +1447,10 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
         ti != targets.end(); ++ti)
       {
       cmTarget* t = &ti->second;
+      if (t->GetType() == cmTarget::GLOBAL_TARGET)
+        {
+        continue;
+        }
 
       t->AppendBuildInterfaceIncludes();
 
