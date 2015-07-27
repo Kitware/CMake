@@ -12,7 +12,7 @@
 #ifndef cmPolicies_h
 #define cmPolicies_h
 
-#include "cmCustomCommand.h"
+#include "cmStandardIncludes.h"
 
 #include <bitset>
 
@@ -244,7 +244,6 @@ public:
     REQUIRED_IF_USED,
     REQUIRED_ALWAYS ///< Issue an error unless user sets policy status to NEW.
   };
-#define POLICY_STATUS_COUNT 5
 
   /// Policy identifiers
   enum PolicyID
@@ -288,6 +287,7 @@ public:
     bool IsEmpty() const;
 
   private:
+#define POLICY_STATUS_COUNT 3
     std::bitset<cmPolicies::CMPCOUNT * POLICY_STATUS_COUNT> Status;
   };
 };

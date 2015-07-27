@@ -929,8 +929,6 @@ private:
   typedef std::vector<PolicyStackEntry> PolicyStackType;
   PolicyStackType PolicyStack;
   std::vector<PolicyStackType::size_type> PolicyBarriers;
-  cmPolicies::PolicyStatus
-  GetPolicyStatusInternal(cmPolicies::PolicyID id) const;
 
   // CMP0053 == old
   cmake::MessageType ExpandVariablesInStringOld(

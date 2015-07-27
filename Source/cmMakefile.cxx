@@ -4736,53 +4736,30 @@ const char* cmMakefile::GetDefineFlagsCMP0059() const
 cmPolicies::PolicyStatus
 cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id) const
 {
-  // Get the current setting of the policy.
-  cmPolicies::PolicyStatus cur = this->GetPolicyStatusInternal(id);
+  cmPolicies::PolicyStatus status = cmPolicies::GetPolicyStatus(id);
 
-  // If the policy is required to be set to NEW but is not, ignore the
-  // current setting and tell the caller.
-  if(cur != cmPolicies::NEW)
+  if(status == cmPolicies::REQUIRED_ALWAYS ||
+     status == cmPolicies::REQUIRED_IF_USED)
     {
-    if(cur == cmPolicies::REQUIRED_ALWAYS ||
-       cur == cmPolicies::REQUIRED_IF_USED)
-      {
-      return cur;
-      }
-    cmPolicies::PolicyStatus def = cmPolicies::GetPolicyStatus(id);
-    if(def == cmPolicies::REQUIRED_ALWAYS ||
-       def == cmPolicies::REQUIRED_IF_USED)
-      {
-      return def;
-      }
+    return status;
     }
 
-  // The current setting is okay.
-  return cur;
-}
-
-//----------------------------------------------------------------------------
-cmPolicies::PolicyStatus
-cmMakefile::GetPolicyStatusInternal(cmPolicies::PolicyID id) const
-{
-  // Is the policy set in our stack?
-  for(PolicyStackType::const_reverse_iterator psi = this->PolicyStack.rbegin();
-      psi != this->PolicyStack.rend(); ++psi)
+  cmLocalGenerator* lg = this->LocalGenerator;
+  while(lg)
     {
-    if(psi->IsDefined(id))
+    cmMakefile const* mf = lg->GetMakefile();
+    for(PolicyStackType::const_reverse_iterator psi =
+        mf->PolicyStack.rbegin(); psi != mf->PolicyStack.rend(); ++psi)
       {
-      return psi->Get(id);
+      if(psi->IsDefined(id))
+        {
+        status = psi->Get(id);
+        return status;
+        }
       }
+    lg = lg->GetParent();
     }
-
-  // If we have a parent directory, recurse up to it.
-  if(this->LocalGenerator->GetParent())
-    {
-    cmMakefile* parent = this->LocalGenerator->GetParent()->GetMakefile();
-    return parent->GetPolicyStatusInternal(id);
-    }
-
-  // The policy is not set.  Use the default for this CMake version.
-  return cmPolicies::GetPolicyStatus(id);
+  return status;
 }
 
 //----------------------------------------------------------------------------
@@ -4837,25 +4814,6 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
     {
     psi->Set(id, status);
     previous_was_weak = psi->Weak;
-    }
-
-  // Special hook for presenting compatibility variable as soon as
-  // the user requests it.
-  if(id == cmPolicies::CMP0001 &&
-     (status == cmPolicies::WARN || status == cmPolicies::OLD))
-    {
-    if(!(this->GetState()
-         ->GetInitializedCacheValue("CMAKE_BACKWARDS_COMPATIBILITY")))
-      {
-      // Set it to 2.4 because that is the last version where the
-      // variable had meaning.
-      this->AddCacheDefinition
-        ("CMAKE_BACKWARDS_COMPATIBILITY", "2.4",
-         "For backwards compatibility, what version of CMake "
-         "commands and "
-         "syntax should this version of CMake try to support.",
-         cmState::STRING);
-      }
     }
 
   return true;
