@@ -1436,3 +1436,84 @@ void cmGeneratorTarget::ConstructSourceFileFlags() const
       }
     }
 }
+
+//----------------------------------------------------------------------------
+const cmGeneratorTarget::CompatibleInterfacesBase&
+cmGeneratorTarget::GetCompatibleInterfaces(std::string const& config) const
+{
+  cmGeneratorTarget::CompatibleInterfaces& compat =
+    this->CompatibleInterfacesMap[config];
+  if(!compat.Done)
+    {
+    compat.Done = true;
+    compat.PropsBool.insert("POSITION_INDEPENDENT_CODE");
+    compat.PropsString.insert("AUTOUIC_OPTIONS");
+    std::vector<cmTarget const*> const& deps =
+      this->Target->GetLinkImplementationClosure(config);
+    for(std::vector<cmTarget const*>::const_iterator li = deps.begin();
+        li != deps.end(); ++li)
+      {
+#define CM_READ_COMPATIBLE_INTERFACE(X, x) \
+      if(const char* prop = (*li)->GetProperty("COMPATIBLE_INTERFACE_" #X)) \
+        { \
+        std::vector<std::string> props; \
+        cmSystemTools::ExpandListArgument(prop, props); \
+        compat.Props##x.insert(props.begin(), props.end()); \
+        }
+      CM_READ_COMPATIBLE_INTERFACE(BOOL, Bool)
+      CM_READ_COMPATIBLE_INTERFACE(STRING, String)
+      CM_READ_COMPATIBLE_INTERFACE(NUMBER_MIN, NumberMin)
+      CM_READ_COMPATIBLE_INTERFACE(NUMBER_MAX, NumberMax)
+#undef CM_READ_COMPATIBLE_INTERFACE
+      }
+    }
+  return compat;
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::IsLinkInterfaceDependentBoolProperty(
+    const std::string &p, const std::string& config) const
+{
+  if (this->Target->GetType() == cmTarget::OBJECT_LIBRARY
+      || this->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
+    {
+    return false;
+    }
+  return this->GetCompatibleInterfaces(config).PropsBool.count(p) > 0;
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::IsLinkInterfaceDependentStringProperty(
+    const std::string &p, const std::string& config) const
+{
+  if (this->Target->GetType() == cmTarget::OBJECT_LIBRARY
+      || this->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
+    {
+    return false;
+    }
+  return this->GetCompatibleInterfaces(config).PropsString.count(p) > 0;
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::IsLinkInterfaceDependentNumberMinProperty(
+    const std::string &p, const std::string& config) const
+{
+  if (this->Target->GetType() == cmTarget::OBJECT_LIBRARY
+      || this->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
+    {
+    return false;
+    }
+  return this->GetCompatibleInterfaces(config).PropsNumberMin.count(p) > 0;
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::IsLinkInterfaceDependentNumberMaxProperty(
+    const std::string &p, const std::string& config) const
+{
+  if (this->Target->GetType() == cmTarget::OBJECT_LIBRARY
+      || this->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
+    {
+    return false;
+    }
+  return this->GetCompatibleInterfaces(config).PropsNumberMax.count(p) > 0;
+}
