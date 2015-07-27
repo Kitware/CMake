@@ -9,8 +9,8 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef cmExportInstallFileGenerator_h
-#define cmExportInstallFileGenerator_h
+#ifndef cmExportTryCompileFileGenerator_h
+#define cmExportTryCompileFileGenerator_h
 
 #include "cmExportFileGenerator.h"
 
