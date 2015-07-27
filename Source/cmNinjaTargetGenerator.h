@@ -114,6 +114,17 @@ protected:
   void WriteObjectBuildStatement(cmSourceFile const* source,
                                  bool writeOrderDependsTargetForTarget);
 
+  void ExportObjectCompileCommand(
+    std::string const& language,
+    std::string const& sourceFileName,
+    std::string const& objectDir,
+    std::string const& objectFileName,
+    std::string const& objectFileDir,
+    std::string const& flags,
+    std::string const& defines,
+    std::string const& includes
+    );
+
   cmNinjaDeps GetObjects() const
   { return this->Objects; }
 
