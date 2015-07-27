@@ -70,7 +70,7 @@ static void testProcess_sleep(unsigned int sec)
 int runChild(const char* cmd[], int state, int exception, int value,
              int share, int output, int delay, double timeout, int poll,
              int repeat, int disown, int createNewGroup,
-             int interruptDelay);
+             unsigned int interruptDelay);
 
 static int test1(int argc, const char* argv[])
 {
@@ -360,7 +360,8 @@ static int test10_grandchild(int argc, const char* argv[])
 static int runChild2(kwsysProcess* kp,
               const char* cmd[], int state, int exception, int value,
               int share, int output, int delay, double timeout,
-              int poll, int disown, int createNewGroup, int interruptDelay)
+              int poll, int disown, int createNewGroup,
+              unsigned int interruptDelay)
 {
   int result = 0;
   char* data = 0;
@@ -394,7 +395,7 @@ static int runChild2(kwsysProcess* kp,
 
   if(interruptDelay)
     {
-    testProcess_sleep((unsigned int)interruptDelay);
+    testProcess_sleep(interruptDelay);
     kwsysProcess_Interrupt(kp);
     }
 
@@ -542,7 +543,7 @@ static int runChild2(kwsysProcess* kp,
 int runChild(const char* cmd[], int state, int exception, int value,
              int share, int output, int delay, double timeout,
              int poll, int repeat, int disown, int createNewGroup,
-             int interruptDelay)
+             unsigned int interruptDelay)
 {
   int result = 1;
   kwsysProcess* kp = kwsysProcess_New();
@@ -661,7 +662,7 @@ int main(int argc, const char* argv[])
     int polls[10] = {0, 0, 0, 0, 0, 0, 1, 0, 0, 0};
     int repeat[10] = {2, 1, 1, 1, 1, 1, 1, 1, 1, 1};
     int createNewGroups[10] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 1};
-    int interruptDelays[10] = {0, 0, 0, 0, 0, 0, 0, 0, 3, 2};
+    unsigned int interruptDelays[10] = {0, 0, 0, 0, 0, 0, 0, 0, 3, 2};
     int r;
     const char* cmd[4];
 #ifdef _WIN32
