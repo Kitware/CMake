@@ -9,13 +9,13 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef cmDependsFortran_h
-#define cmDependsFortran_h
+#ifndef cmFortran_h
+#define cmFortran_h
 
 #include "cmDepends.h"
 
 class cmDependsFortranInternals;
-class cmDependsFortranSourceInfo;
+class cmFortranSourceInfo;
 
 /** \class cmDependsFortran
  * \brief Dependency scanner for Fortran object files.
@@ -46,12 +46,6 @@ public:
   static bool  ModulesDiffer(const char* modFile, const char* stampFile,
                              const char* compilerId);
 
-  /** Method to find an included file in the include path.  Fortran
-      always searches the directory containing the including source
-      first.  */
-  bool FindIncludeFile(const char* dir, const char* includeName,
-                       std::string& fileName);
-
 protected:
   // Finalize the dependency information for the target.
   virtual bool Finalize(std::ostream& makeDepends,
@@ -71,7 +65,7 @@ protected:
 
   // Actually write the depenencies to the streams.
   bool WriteDependenciesReal(const char *obj,
-                             cmDependsFortranSourceInfo const& info,
+                             cmFortranSourceInfo const& info,
                              const char* mod_dir, const char* stamp_dir,
                              std::ostream& makeDepends,
                              std::ostream& internalDepends);
@@ -79,7 +73,7 @@ protected:
   // The source file from which to start scanning.
   std::string SourceFile;
 
-  std::vector<std::string> PPDefinitions;
+  std::set<std::string> PPDefinitions;
 
   // Internal implementation details.
   cmDependsFortranInternals* Internal;

@@ -88,7 +88,7 @@ option(CMAKE_REGENERATE_YACCLEX
   "Regenerate YACC and LEXX files" OFF)
 mark_as_advanced(CMAKE_REGENERATE_YACCLEX)
 if(CMAKE_REGENERATE_YACCLEX)
-  set(parsersLexers cmDependsFortran cmCommandArgument cmExpr)
+  set(parsersLexers cmFortran cmCommandArgument cmExpr)
   find_program(YACC_EXECUTABLE
     NAMES yacc bison
     PATHS /usr/bin
@@ -193,9 +193,6 @@ set(SRCS
   cmDependsC.h
   cmDependsFortran.cxx
   cmDependsFortran.h
-  cmDependsFortranLexer.cxx
-  cmDependsFortranParser.cxx
-  cmDependsFortranParser.h
   cmDependsJava.cxx
   cmDependsJava.h
   cmDependsJavaLexer.cxx
@@ -243,6 +240,11 @@ set(SRCS
   cmFileLockResult.h
   cmFileTimeComparison.cxx
   cmFileTimeComparison.h
+  cmFortranLexer.cxx
+  cmFortranLexer.h
+  cmFortranParser.cxx
+  cmFortranParser.h
+  cmFortranParserImpl.cxx
   cmGeneratedFileStream.cxx
   cmGeneratorExpressionContext.cxx
   cmGeneratorExpressionContext.h
