@@ -99,7 +99,8 @@ protected:
 
   template <typename T>
   void SetImportLinkProperty(std::string const& suffix,
-                             cmGeneratorTarget* target, const std::string& propName,
+                             cmGeneratorTarget* target,
+                             const std::string& propName,
                              std::vector<T> const& entries,
                              ImportPropertyMap& properties,
                              std::vector<std::string>& missingTargets);
