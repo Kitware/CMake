@@ -1128,6 +1128,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         }
       }
 
+    cmGeneratorTarget* gtgt =
+        context->Makefile->GetGlobalGenerator()->GetGeneratorTarget(target);
+
     if (!prop)
       {
       if (target->IsImported()
@@ -1135,16 +1138,16 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         {
         return linkedTargetsContent;
         }
-      if (target->IsLinkInterfaceDependentBoolProperty(propertyName,
-                                                       context->Config))
+      if (gtgt->IsLinkInterfaceDependentBoolProperty(propertyName,
+                                                     context->Config))
         {
         context->HadContextSensitiveCondition = true;
         return target->GetLinkInterfaceDependentBoolProperty(
                                                 propertyName,
                                                 context->Config) ? "1" : "0";
         }
-      if (target->IsLinkInterfaceDependentStringProperty(propertyName,
-                                                         context->Config))
+      if (gtgt->IsLinkInterfaceDependentStringProperty(propertyName,
+                                                       context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
@@ -1153,8 +1156,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                                 context->Config);
         return propContent ? propContent : "";
         }
-      if (target->IsLinkInterfaceDependentNumberMinProperty(propertyName,
-                                                         context->Config))
+      if (gtgt->IsLinkInterfaceDependentNumberMinProperty(propertyName,
+                                                          context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
@@ -1163,8 +1166,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                                 context->Config);
         return propContent ? propContent : "";
         }
-      if (target->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
-                                                         context->Config))
+      if (gtgt->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
+                                                          context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
@@ -1180,8 +1183,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     if (!target->IsImported()
         && dagCheckerParent && !dagCheckerParent->EvaluatingLinkLibraries())
       {
-      if (target->IsLinkInterfaceDependentNumberMinProperty(propertyName,
-                                                        context->Config))
+      if (gtgt->IsLinkInterfaceDependentNumberMinProperty(propertyName,
+                                                          context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
@@ -1190,8 +1193,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                                 context->Config);
         return propContent ? propContent : "";
         }
-      if (target->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
-                                                        context->Config))
+      if (gtgt->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
+                                                          context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
