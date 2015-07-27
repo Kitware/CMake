@@ -107,7 +107,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
 
   std::vector<std::string>::const_iterator eit
       = expandedArgs.begin() + (this->Args.size() - 1);
-  std::string expandedArgn = cmJoin(cmRange(eit, expandedArgs.end()), ";");
+  std::string expandedArgn = cmJoin(cmMakeRange(eit, expandedArgs.end()), ";");
   std::string expandedArgv = cmJoin(expandedArgs, ";");
   std::vector<std::string> variables;
   variables.reserve(this->Args.size() - 1);
