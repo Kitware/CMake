@@ -1525,23 +1525,23 @@ bool cmGeneratorTarget::IsLinkInterfaceDependentNumberMaxProperty(
 }
 
 template<typename PropertyType>
-PropertyType getLinkInterfaceDependentProperty(cmTarget const* tgt,
+PropertyType getLinkInterfaceDependentProperty(cmGeneratorTarget const* tgt,
                                                const std::string& prop,
                                                const std::string& config,
                                                cmTarget::CompatibleType,
                                                PropertyType *);
 
 template<>
-bool getLinkInterfaceDependentProperty(cmTarget const* tgt,
+bool getLinkInterfaceDependentProperty(cmGeneratorTarget const* tgt,
                                        const std::string& prop,
                                        const std::string& config,
                                        cmTarget::CompatibleType, bool *)
 {
-  return tgt->GetLinkInterfaceDependentBoolProperty(prop, config);
+  return tgt->Target->GetLinkInterfaceDependentBoolProperty(prop, config);
 }
 
 template<>
-const char * getLinkInterfaceDependentProperty(cmTarget const* tgt,
+const char * getLinkInterfaceDependentProperty(cmGeneratorTarget const* tgt,
                                                const std::string& prop,
                                                const std::string& config,
                                                cmTarget::CompatibleType t,
@@ -1553,11 +1553,13 @@ const char * getLinkInterfaceDependentProperty(cmTarget const* tgt,
     assert(0 && "String compatibility check function called for boolean");
     return 0;
   case cmTarget::StringType:
-    return tgt->GetLinkInterfaceDependentStringProperty(prop, config);
+    return tgt->Target->GetLinkInterfaceDependentStringProperty(prop, config);
   case cmTarget::NumberMinType:
-    return tgt->GetLinkInterfaceDependentNumberMinProperty(prop, config);
+    return tgt->Target
+        ->GetLinkInterfaceDependentNumberMinProperty(prop, config);
   case cmTarget::NumberMaxType:
-    return tgt->GetLinkInterfaceDependentNumberMaxProperty(prop, config);
+    return tgt->Target
+        ->GetLinkInterfaceDependentNumberMaxProperty(prop, config);
   }
   assert(0 && "Unreachable!");
   return 0;
@@ -1565,7 +1567,7 @@ const char * getLinkInterfaceDependentProperty(cmTarget const* tgt,
 
 //----------------------------------------------------------------------------
 template<typename PropertyType>
-void checkPropertyConsistency(cmTarget const* depender,
+void checkPropertyConsistency(cmGeneratorTarget const* depender,
                               cmTarget const* dependee,
                               const std::string& propName,
                               std::set<std::string> &emitted,
@@ -1597,7 +1599,7 @@ void checkPropertyConsistency(cmTarget const* depender,
         << *pi << "\" listed in its " << propName << " property.  "
           "This is not allowed.  Only user-defined properties may appear "
           "listed in the " << propName << " property.";
-      depender->GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str());
+      depender->GetLocalGenerator()->IssueMessage(cmake::FATAL_ERROR, e.str());
       return;
       }
     if(emitted.insert(*pi).second)
@@ -1681,14 +1683,14 @@ void cmGeneratorTarget::CheckPropertyCompatibility(
       continue;
       }
 
-    checkPropertyConsistency<bool>(this->Target, li->Target,
+    checkPropertyConsistency<bool>(this, li->Target,
                                 strBool,
                                 emittedBools, config, cmTarget::BoolType, 0);
     if (cmSystemTools::GetErrorOccuredFlag())
       {
       return;
       }
-    checkPropertyConsistency<const char *>(this->Target, li->Target,
+    checkPropertyConsistency<const char *>(this, li->Target,
                                 strString,
                                 emittedStrings, config,
                                 cmTarget::StringType, 0);
@@ -1696,7 +1698,7 @@ void cmGeneratorTarget::CheckPropertyCompatibility(
       {
       return;
       }
-    checkPropertyConsistency<const char *>(this->Target, li->Target,
+    checkPropertyConsistency<const char *>(this, li->Target,
                                 strNumMin,
                                 emittedMinNumbers, config,
                                 cmTarget::NumberMinType, 0);
@@ -1704,7 +1706,7 @@ void cmGeneratorTarget::CheckPropertyCompatibility(
       {
       return;
       }
-    checkPropertyConsistency<const char *>(this->Target, li->Target,
+    checkPropertyConsistency<const char *>(this, li->Target,
                                 strNumMax,
                                 emittedMaxNumbers, config,
                                 cmTarget::NumberMaxType, 0);
