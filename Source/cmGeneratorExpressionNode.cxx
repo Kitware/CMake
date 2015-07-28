@@ -1369,8 +1369,6 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
 
     bool evalLL = dagChecker && dagChecker->EvaluatingLinkLibraries();
 
-    std::string result;
-
     for (LangMap::const_iterator lit = testedFeatures.begin();
           lit != testedFeatures.end(); ++lit)
       {
