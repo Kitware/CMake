@@ -546,6 +546,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       }
     }
 
+  cmNinjaDeps byproducts;
+
   if (!this->TargetNameImport.empty())
     {
     const std::string impLibPath = localGen.ConvertToOutputFormat(
@@ -555,7 +557,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     EnsureParentDirectoryExists(impLibPath);
     if(target.HasImportLibrary())
       {
-      outputs.push_back(targetOutputImplib);
+      byproducts.push_back(targetOutputImplib);
       }
     }
 
@@ -601,7 +603,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     &postBuildCmdLines
   };
 
-  cmNinjaDeps byproducts;
   for (unsigned i = 0; i != 3; ++i)
     {
     for (std::vector<cmCustomCommand>::const_iterator
