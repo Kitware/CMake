@@ -379,7 +379,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
     if (!targets.empty())
       {
       std::string fname = "/" + std::string(targetName) + "Targets.cmake";
-      cmExportTryCompileFileGenerator tcfg;
+      cmExportTryCompileFileGenerator tcfg(gg);
       tcfg.SetExportFile((this->BinaryDirectory + fname).c_str());
       tcfg.SetExports(targets);
       tcfg.SetConfig(this->Makefile->GetSafeDefinition(

@@ -68,15 +68,6 @@ cmLocalVisualStudio7Generator::~cmLocalVisualStudio7Generator()
 
 void cmLocalVisualStudio7Generator::AddHelperCommands()
 {
-  std::set<std::string> lang;
-  lang.insert("C");
-  lang.insert("CXX");
-  lang.insert("RC");
-  lang.insert("IDL");
-  lang.insert("DEF");
-  lang.insert("Fortran");
-  this->CreateCustomTargetsAndCommands(lang);
-
   // Now create GUIDs for targets
   cmTargets &tgts = this->Makefile->GetTargets();
 
@@ -619,7 +610,7 @@ public:
     }
   void Write(cmCustomCommand const& cc)
     {
-    cmCustomCommandGenerator ccg(cc, this->Config, this->LG->GetMakefile());
+    cmCustomCommandGenerator ccg(cc, this->Config, this->LG);
     if(this->First)
       {
       const char* comment = ccg.GetComment();
@@ -1903,7 +1894,7 @@ WriteCustomRule(std::ostream& fout,
   for (std::vector<std::string>::const_iterator i = configs.begin();
        i != configs.end(); ++i)
     {
-    cmCustomCommandGenerator ccg(command, *i, this->Makefile);
+    cmCustomCommandGenerator ccg(command, *i, this);
     cmLVS7GFileConfig const& fc = fcinfo.FileConfigMap[*i];
     fout << "\t\t\t\t<FileConfiguration\n";
     fout << "\t\t\t\t\tName=\"" << *i << "|"

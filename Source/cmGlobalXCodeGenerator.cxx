@@ -1668,7 +1668,7 @@ void  cmGlobalXCodeGenerator
   for(std::vector<cmCustomCommand>::const_iterator i = commands.begin();
       i != commands.end(); ++i)
     {
-    cmCustomCommandGenerator ccg(*i, configName, this->CurrentMakefile);
+    cmCustomCommandGenerator ccg(*i, configName, this->CurrentLocalGenerator);
     if(ccg.GetNumberOfCommands() > 0)
       {
       const std::vector<std::string>& outputs = ccg.GetOutputs();
@@ -1694,7 +1694,7 @@ void  cmGlobalXCodeGenerator
   for(std::vector<cmCustomCommand>::const_iterator i = commands.begin();
       i != commands.end(); ++i)
     {
-    cmCustomCommandGenerator ccg(*i, configName, this->CurrentMakefile);
+    cmCustomCommandGenerator ccg(*i, configName, this->CurrentLocalGenerator);
     if(ccg.GetNumberOfCommands() > 0)
       {
       makefileStream << "\n";
@@ -3598,6 +3598,7 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
       {
       cmXCodeObject* target = *i;
       cmTarget* t =target->GetTarget();
+      cmGeneratorTarget *gt = this->GetGeneratorTarget(t);
 
       if(t->GetType() == cmTarget::EXECUTABLE ||
 // Nope - no post-build for OBJECT_LIRBRARY
@@ -3615,7 +3616,7 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
          t->GetType() == cmTarget::SHARED_LIBRARY ||
          t->GetType() == cmTarget::MODULE_LIBRARY)
         {
-        std::string tfull = t->GetFullPath(configName);
+        std::string tfull = gt->GetFullPath(configName);
         std::string trel = this->ConvertToRelativeForMake(tfull.c_str());
 
         // Add this target to the post-build phases of its dependencies.

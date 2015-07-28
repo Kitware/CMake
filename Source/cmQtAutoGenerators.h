@@ -18,6 +18,7 @@
 
 class cmGlobalGenerator;
 class cmMakefile;
+class cmLocalGenerator;
 
 class cmQtAutoGenerators
 {
@@ -25,7 +26,7 @@ public:
   cmQtAutoGenerators();
   bool Run(const std::string& targetDirectory, const std::string& config);
 
-  bool InitializeAutogenTarget(cmTarget* target);
+  bool InitializeAutogenTarget(cmLocalGenerator* lg, cmTarget* target);
   void SetupAutoGenerateTarget(cmTarget const* target);
   void SetupSourceFiles(cmTarget const* target);
 

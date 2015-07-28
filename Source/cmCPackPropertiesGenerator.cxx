@@ -1,13 +1,14 @@
 #include "cmCPackPropertiesGenerator.h"
 
 #include "cmOutputConverter.h"
+#include "cmLocalGenerator.h"
 
 cmCPackPropertiesGenerator::cmCPackPropertiesGenerator(
-  cmMakefile* mf,
+  cmLocalGenerator* lg,
   cmInstalledFile const& installedFile,
   std::vector<std::string> const& configurations):
     cmScriptGenerator("CPACK_BUILD_CONFIG", configurations),
-    Makefile(mf),
+    LG(lg),
     InstalledFile(installedFile)
 {
   this->ActionsPerConfig = true;
@@ -17,7 +18,8 @@ void cmCPackPropertiesGenerator::GenerateScriptForConfig(std::ostream& os,
   const std::string& config, Indent const& indent)
 {
   std::string const& expandedFileName =
-      this->InstalledFile.GetNameExpression().Evaluate(this->Makefile, config);
+      this->InstalledFile.GetNameExpression().Evaluate(this->LG->GetMakefile(),
+                                                       config);
 
   cmInstalledFile::PropertyMapType const& properties =
     this->InstalledFile.GetProperties();
@@ -36,7 +38,7 @@ void cmCPackPropertiesGenerator::GenerateScriptForConfig(std::ostream& os,
       j = property.ValueExpressions.begin();
       j != property.ValueExpressions.end(); ++j)
       {
-      std::string value = (*j)->Evaluate(this->Makefile, config);
+      std::string value = (*j)->Evaluate(LG->GetMakefile(), config);
       os << " " << cmOutputConverter::EscapeForCMake(value);
       }
 

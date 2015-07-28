@@ -1149,6 +1149,32 @@ void cmGlobalGenerator::Configure()
       }
     this->CMakeInstance->UpdateProgress(msg.str().c_str(), -1);
     }
+
+  unsigned int i;
+
+  // Put a copy of each global target in every directory.
+  cmTargets globalTargets;
+  this->CreateDefaultGlobalTargets(&globalTargets);
+
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    cmMakefile* mf = this->LocalGenerators[i]->GetMakefile();
+    cmTargets* targets = &(mf->GetTargets());
+    cmTargets::iterator tit;
+    for ( tit = globalTargets.begin(); tit != globalTargets.end(); ++ tit )
+      {
+      (*targets)[tit->first] = tit->second;
+      (*targets)[tit->first].SetMakefile(mf);
+      }
+    }
+
+}
+
+void cmGlobalGenerator::CreateGenerationObjects(TargetTypes targetTypes)
+{
+  cmDeleteAll(this->GeneratorTargets);
+  this->GeneratorTargets.clear();
+  this->CreateGeneratorTargets(targetTypes);
 }
 
 cmExportBuildFileGenerator*
@@ -1208,6 +1234,8 @@ void cmGlobalGenerator::Generate()
 
   this->FinalizeTargetCompileInfo();
 
+  this->CreateGenerationObjects();
+
 #ifdef CMAKE_BUILD_WITH_CMAKE
   // Iterate through all targets and set up automoc for those which have
   // the AUTOMOC, AUTOUIC or AUTORCC property set
@@ -1215,23 +1243,11 @@ void cmGlobalGenerator::Generate()
   this->CreateQtAutoGeneratorsTargets(autogens);
 #endif
 
-  // For each existing cmLocalGenerator
   unsigned int i;
 
-  // Put a copy of each global target in every directory.
-  cmTargets globalTargets;
-  this->CreateDefaultGlobalTargets(&globalTargets);
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
     this->LocalGenerators[i]->ComputeObjectMaxPath();
-    cmMakefile* mf = this->LocalGenerators[i]->GetMakefile();
-    cmTargets* targets = &(mf->GetTargets());
-    cmTargets::iterator tit;
-    for ( tit = globalTargets.begin(); tit != globalTargets.end(); ++ tit )
-      {
-      (*targets)[tit->first] = tit->second;
-      (*targets)[tit->first].SetMakefile(mf);
-      }
     }
 
   // Add generator specific helper commands
@@ -1240,8 +1256,7 @@ void cmGlobalGenerator::Generate()
     this->LocalGenerators[i]->AddHelperCommands();
     }
 
-  // Create per-target generator information.
-  this->CreateGeneratorTargets();
+  this->InitGeneratorTargets();
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   for (AutogensType::iterator it = autogens.begin(); it != autogens.end();
@@ -1377,6 +1392,10 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
     for(cmTargets::iterator ti = targets.begin();
         ti != targets.end(); ++ti)
       {
+      if (ti->second.GetType() == cmTarget::GLOBAL_TARGET)
+        {
+        continue;
+        }
       targetNames.push_back(ti->second.GetName());
       }
     for(std::vector<std::string>::iterator ti = targetNames.begin();
@@ -1396,7 +1415,8 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
             && !target.IsImported())
           {
           cmQtAutoGenerators autogen;
-          if(autogen.InitializeAutogenTarget(&target))
+          if(autogen.InitializeAutogenTarget(this->LocalGenerators[i],
+                                             &target))
             {
             autogens.push_back(std::make_pair(autogen, &target));
             }
@@ -1427,6 +1447,10 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
         ti != targets.end(); ++ti)
       {
       cmTarget* t = &ti->second;
+      if (t->GetType() == cmTarget::GLOBAL_TARGET)
+        {
+        continue;
+        }
 
       t->AppendBuildInterfaceIncludes();
 
@@ -1465,19 +1489,22 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::CreateGeneratorTargets(cmLocalGenerator *lg)
+void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes,
+                                               cmLocalGenerator *lg)
 {
   cmGeneratorTargetsType generatorTargets;
   cmMakefile* mf = lg->GetMakefile();
-  cmTargets& targets = mf->GetTargets();
-  for(cmTargets::iterator ti = targets.begin();
-      ti != targets.end(); ++ti)
+  if (targetTypes == AllTargets)
     {
-    cmTarget* t = &ti->second;
-    cmGeneratorTarget* gt = new cmGeneratorTarget(t, lg);
-    this->ComputeTargetObjectDirectory(gt);
-    this->GeneratorTargets[t] = gt;
-    generatorTargets[t] = gt;
+    cmTargets& targets = mf->GetTargets();
+    for(cmTargets::iterator ti = targets.begin();
+        ti != targets.end(); ++ti)
+      {
+      cmTarget* t = &ti->second;
+      cmGeneratorTarget* gt = new cmGeneratorTarget(t, lg);
+      this->GeneratorTargets[t] = gt;
+      generatorTargets[t] = gt;
+      }
     }
 
   for(std::vector<cmTarget*>::const_iterator
@@ -1492,12 +1519,25 @@ void cmGlobalGenerator::CreateGeneratorTargets(cmLocalGenerator *lg)
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::CreateGeneratorTargets()
+void cmGlobalGenerator::InitGeneratorTargets()
+{
+  for(cmGeneratorTargetsType::iterator ti =
+      this->GeneratorTargets.begin(); ti != this->GeneratorTargets.end(); ++ti)
+    {
+    if (!ti->second->Target->IsImported())
+      {
+      this->ComputeTargetObjectDirectory(ti->second);
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes)
 {
   // Construct per-target generator information.
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
-    this->CreateGeneratorTargets(this->LocalGenerators[i]);
+    this->CreateGeneratorTargets(targetTypes, this->LocalGenerators[i]);
     }
 }
 
@@ -3054,7 +3094,8 @@ bool cmGlobalGenerator::GenerateCPackPropertiesFile()
   cmake::InstalledFilesMap const& installedFiles =
     this->CMakeInstance->GetInstalledFiles();
 
-  cmMakefile* mf = this->LocalGenerators[0]->GetMakefile();
+  cmLocalGenerator* lg = this->LocalGenerators[0];
+  cmMakefile* mf = lg->GetMakefile();
 
   std::vector<std::string> configs;
   std::string config = mf->GetConfigurations(configs, false);
@@ -3076,7 +3117,7 @@ bool cmGlobalGenerator::GenerateCPackPropertiesFile()
     cmInstalledFile const& installedFile = i->second;
 
     cmCPackPropertiesGenerator cpackPropertiesGenerator(
-      mf, installedFile, configs);
+      lg, installedFile, configs);
 
     cpackPropertiesGenerator.Generate(file, config, configs);
     }

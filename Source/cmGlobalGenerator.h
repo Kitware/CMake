@@ -86,6 +86,14 @@ public:
    */
   virtual void Configure();
 
+
+  enum TargetTypes {
+    AllTargets,
+    ImportedOnly
+  };
+
+  void CreateGenerationObjects(TargetTypes targetTypes = AllTargets);
+
   /**
    * Generate the all required files for building this project/tree. This
    * basically creates a series of LocalGenerators for each directory and
@@ -298,6 +306,11 @@ public:
   /** Get per-target generator information.  */
   cmGeneratorTarget* GetGeneratorTarget(cmTarget const*) const;
 
+  void AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt)
+  {
+    this->GeneratorTargets[t] = gt;
+  }
+
   const std::map<std::string, std::vector<cmLocalGenerator*> >& GetProjectMap()
                                                const {return this->ProjectMap;}
 
@@ -484,8 +497,9 @@ private:
   // Per-target generator information.
   cmGeneratorTargetsType GeneratorTargets;
   friend class cmake;
-  void CreateGeneratorTargets(cmLocalGenerator* lg);
-  void CreateGeneratorTargets();
+  void CreateGeneratorTargets(TargetTypes targetTypes, cmLocalGenerator* lg);
+  void InitGeneratorTargets();
+  void CreateGeneratorTargets(TargetTypes targetTypes);
 
   void ClearGeneratorMembers();
 

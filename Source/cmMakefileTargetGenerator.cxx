@@ -167,7 +167,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     {
     cmCustomCommandGenerator ccg(*(*si)->GetCustomCommand(),
                                  this->ConfigName,
-                                 this->Makefile);
+                                 this->LocalGenerator);
     this->GenerateCustomRuleFile(ccg);
     if (clean)
       {
@@ -546,7 +546,7 @@ cmMakefileTargetGenerator
      this->Target->GetType() == cmTarget::MODULE_LIBRARY)
     {
     targetFullPathReal =
-      this->Target->GetFullPath(this->ConfigName, false, true);
+      this->GeneratorTarget->GetFullPath(this->ConfigName, false, true);
     targetFullPathPDB = this->Target->GetPDBDirectory(this->ConfigName);
     targetFullPathPDB += "/";
     targetFullPathPDB += this->Target->GetPDBName(this->ConfigName);
@@ -1182,7 +1182,8 @@ cmMakefileTargetGenerator
     {
     if(cmCustomCommand* cc = (*source)->GetCustomCommand())
       {
-      cmCustomCommandGenerator ccg(*cc, this->ConfigName, this->Makefile);
+      cmCustomCommandGenerator ccg(*cc, this->ConfigName,
+                                   this->LocalGenerator);
       const std::vector<std::string>& outputs = ccg.GetOutputs();
       depends.insert(depends.end(), outputs.begin(), outputs.end());
       }

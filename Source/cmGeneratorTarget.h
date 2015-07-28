@@ -28,6 +28,14 @@ public:
 
   cmLocalGenerator* GetLocalGenerator() const;
 
+  bool IsImported() const;
+  const char *GetLocation(const std::string& config) const;
+
+  /** Get the location of the target in the build tree with a placeholder
+      referencing the configuration in the native build system.  This
+      location is suitable for use as the LOCATION target property.  */
+  const char* GetLocationForBuild() const;
+
   int GetType() const;
   std::string GetName() const;
   const char *GetProperty(const std::string& prop) const;
@@ -73,6 +81,14 @@ public:
                          const std::string& config) const;
   bool GetFeatureAsBool(const std::string& feature,
                         const std::string& config) const;
+
+  /** Get the full path to the target according to the settings in its
+      makefile and the configuration type.  */
+  std::string GetFullPath(const std::string& config="", bool implib = false,
+                          bool realname = false) const;
+  std::string NormalGetFullPath(const std::string& config, bool implib,
+                                bool realname) const;
+  std::string NormalGetRealName(const std::string& config) const;
 
   cmTarget* Target;
   cmMakefile* Makefile;

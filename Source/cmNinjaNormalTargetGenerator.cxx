@@ -398,15 +398,16 @@ static int calculateCommandLineLengthLimit(int linkRuleLength)
 void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 {
   cmTarget& target = *this->GetTarget();
+  cmGeneratorTarget& gt = *this->GetGeneratorTarget();
   const std::string cfgName = this->GetConfigName();
   std::string targetOutput = ConvertToNinjaPath(
-                               target.GetFullPath(cfgName));
+                               gt.GetFullPath(cfgName));
   std::string targetOutputReal = ConvertToNinjaPath(
-                                   target.GetFullPath(cfgName,
+                                   gt.GetFullPath(cfgName,
                                       /*implib=*/false,
                                       /*realpath=*/true));
   std::string targetOutputImplib = ConvertToNinjaPath(
-                                     target.GetFullPath(cfgName,
+                                     gt.GetFullPath(cfgName,
                                        /*implib=*/true));
 
   if (target.IsAppBundleOnApple())
@@ -608,7 +609,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
          ci = cmdLists[i]->begin();
          ci != cmdLists[i]->end(); ++ci)
       {
-      cmCustomCommandGenerator ccg(*ci, cfgName, mf);
+      cmCustomCommandGenerator ccg(*ci, cfgName, this->GetLocalGenerator());
       localGen.AppendCustomCommandLines(ccg, *cmdLineLists[i]);
       std::vector<std::string> const& ccByproducts = ccg.GetByproducts();
       std::transform(ccByproducts.begin(), ccByproducts.end(),

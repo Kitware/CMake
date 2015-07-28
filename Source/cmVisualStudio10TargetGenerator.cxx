@@ -890,7 +890,7 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile const* source,
         i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)
     {
-    cmCustomCommandGenerator ccg(command, *i, this->Makefile);
+    cmCustomCommandGenerator ccg(command, *i, this->LocalGenerator);
     std::string comment = lg->ConstructComment(ccg);
     comment = cmVS10EscapeComment(comment);
     std::string script =
@@ -2794,7 +2794,7 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
   for(std::vector<cmCustomCommand>::const_iterator i = commands.begin();
       i != commands.end(); ++i)
     {
-    cmCustomCommandGenerator ccg(*i, configName, this->Makefile);
+    cmCustomCommandGenerator ccg(*i, configName, this->LocalGenerator);
     comment += pre;
     comment += lg->ConstructComment(ccg);
     script += pre;
