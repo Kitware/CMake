@@ -1142,7 +1142,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                                      context->Config))
         {
         context->HadContextSensitiveCondition = true;
-        return target->GetLinkInterfaceDependentBoolProperty(
+        return gtgt->GetLinkInterfaceDependentBoolProperty(
                                                 propertyName,
                                                 context->Config) ? "1" : "0";
         }
@@ -1151,7 +1151,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                              target->GetLinkInterfaceDependentStringProperty(
+                              gtgt->GetLinkInterfaceDependentStringProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
@@ -1161,7 +1161,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                          target->GetLinkInterfaceDependentNumberMinProperty(
+                          gtgt->GetLinkInterfaceDependentNumberMinProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
@@ -1171,7 +1171,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                          target->GetLinkInterfaceDependentNumberMaxProperty(
+                          gtgt->GetLinkInterfaceDependentNumberMaxProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
@@ -1188,7 +1188,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                            target->GetLinkInterfaceDependentNumberMinProperty(
+                            gtgt->GetLinkInterfaceDependentNumberMinProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
@@ -1198,7 +1198,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                            target->GetLinkInterfaceDependentNumberMaxProperty(
+                            gtgt->GetLinkInterfaceDependentNumberMaxProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
