@@ -910,6 +910,14 @@ cmGeneratorTarget::GetAppBundleDirectory(const std::string& config,
 }
 
 //----------------------------------------------------------------------------
+bool cmGeneratorTarget::IsBundleOnApple() const
+{
+  return this->Target->IsFrameworkOnApple()
+      || this->Target->IsAppBundleOnApple()
+      || this->Target->IsCFBundleOnApple();
+}
+
+//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetCFBundleDirectory(const std::string& config,
                                                     bool contentOnly) const
 {
