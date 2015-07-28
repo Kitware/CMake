@@ -35,7 +35,6 @@ cmInstallTargetGenerator
 {
   this->ActionsPerConfig = true;
   this->NamelinkMode = NamelinkModeNone;
-  this->Target->SetHaveInstallRule(true);
 }
 
 //----------------------------------------------------------------------------

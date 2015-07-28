@@ -752,6 +752,12 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     installsPublicHeader = installsPublicHeader || publicHeaderGenerator != 0;
     installsResource = installsResource || resourceGenerator;
 
+    if (installsArchive || installsRuntime || installsFramework
+        || installsLibrary || installsBundle)
+      {
+      target.SetHaveInstallRule(true);
+      }
+
     this->Makefile->AddInstallGenerator(archiveGenerator);
     this->Makefile->AddInstallGenerator(libraryGenerator);
     this->Makefile->AddInstallGenerator(runtimeGenerator);
