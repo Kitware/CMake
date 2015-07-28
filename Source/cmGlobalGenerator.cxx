@@ -34,6 +34,7 @@
 #include "cmExportBuildFileGenerator.h"
 #include "cmCPackPropertiesGenerator.h"
 #include "cmAlgorithms.h"
+#include "cmInstallGenerator.h"
 
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
@@ -1259,6 +1260,17 @@ bool cmGlobalGenerator::Compute()
     it->first.SetupAutoGenerateTarget(it->second);
     }
 #endif
+
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    cmMakefile* mf = this->LocalGenerators[i]->GetMakefile();
+    std::vector<cmInstallGenerator*>& gens = mf->GetInstallGenerators();
+    for (std::vector<cmInstallGenerator*>::const_iterator git = gens.begin();
+         git != gens.end(); ++git)
+      {
+      (*git)->Compute(this->LocalGenerators[i]);
+      }
+    }
 
   return true;
 }
