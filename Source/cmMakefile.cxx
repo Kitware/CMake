@@ -1909,6 +1909,7 @@ const char* cmMakefile::GetCurrentBinaryDirectory() const
 void cmMakefile::AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt)
 {
   this->GeneratorTargets[t] = gt;
+  this->GetGlobalGenerator()->AddGeneratorTarget(t, gt);
 }
 
 //----------------------------------------------------------------------------
