@@ -13,7 +13,9 @@
 #define cmInstallTargetGenerator_h
 
 #include "cmInstallGenerator.h"
-#include "cmTarget.h"
+
+class cmTarget;
+class cmGeneratorTarget;
 
 /** \class cmInstallTargetGenerator
  * \brief Generate target installation rules.
@@ -58,7 +60,7 @@ public:
 
   void Compute(cmLocalGenerator* lg);
 
-  cmTarget* GetTarget() const { return this->Target; }
+  cmGeneratorTarget* GetTarget() const { return this->Target; }
 
   bool IsImportLibrary() const { return this->ImportLibrary; }
 
@@ -102,7 +104,7 @@ protected:
                      const std::string& toDestDirPath);
 
   std::string TargetName;
-  cmTarget* Target;
+  cmGeneratorTarget* Target;
   std::string FilePermissions;
   NamelinkModeType NamelinkMode;
   bool ImportLibrary;
