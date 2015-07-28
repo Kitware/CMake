@@ -452,6 +452,8 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   cmTarget* allbuild = mf->AddUtilityCommand("ALL_BUILD", true, no_depends,
                         no_working_directory,
                         "echo", "Build all projects");
+  cmGeneratorTarget* gt = new cmGeneratorTarget(allBuild, root);
+  mf->AddGeneratorTarget(allBuild, gt);
 
   // Refer to the main build configuration file for easy editing.
   std::string listfile = mf->GetCurrentSourceDirectory();
@@ -480,9 +482,12 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
     std::string file = this->ConvertToRelativeForMake(
       this->CurrentReRunCMakeMakefile.c_str());
     cmSystemTools::ReplaceString(file, "\\ ", " ");
-    mf->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, true, no_depends,
+    cmTarget* check = mf->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET,
+                          true, no_depends,
                           no_working_directory,
                           "make", "-f", file.c_str());
+    cmGeneratorTarget* gt = new cmGeneratorTarget(check, root);
+    mf->AddGeneratorTarget(check, gt);
     }
 
   // now make the allbuild depend on all the non-utility targets

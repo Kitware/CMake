@@ -254,6 +254,8 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     mf->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false,
                           no_working_directory, no_depends,
                           noCommandLines);
+  cmGeneratorTarget* gt = new cmGeneratorTarget(tgt, root);
+  mf->AddGeneratorTarget(tgt, gt);
 
   // Organize in the "predefined targets" folder:
   //

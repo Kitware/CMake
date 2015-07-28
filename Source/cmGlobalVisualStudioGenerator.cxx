@@ -85,6 +85,8 @@ void cmGlobalVisualStudioGenerator::Generate()
         AddUtilityCommand("ALL_BUILD", true, no_working_dir,
                           no_depends, no_commands, false,
                           "Build all projects");
+      cmGeneratorTarget* gt = new cmGeneratorTarget(allBuild, root);
+      allBuild->GetMakefile()->AddGeneratorTarget(allBuild, gt);
 
 #if 0
       // Can't activate this code because we want ALL_BUILD
