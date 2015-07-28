@@ -4537,46 +4537,6 @@ bool cmTarget::IsNullImpliedByLinkLibraries(const std::string &p) const
 
 //----------------------------------------------------------------------------
 void
-cmTarget::ReportPropertyOrigin(const std::string &p,
-                               const std::string &result,
-                               const std::string &report,
-                               const std::string &compatibilityType) const
-{
-  std::vector<std::string> debugProperties;
-  const char *debugProp =
-          this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
-  if (debugProp)
-    {
-    cmSystemTools::ExpandListArgument(debugProp, debugProperties);
-    }
-
-  bool debugOrigin = !this->DebugCompatiblePropertiesDone[p]
-                    && std::find(debugProperties.begin(),
-                                 debugProperties.end(),
-                                 p)
-                        != debugProperties.end();
-
-  if (this->Makefile->IsConfigured())
-    {
-    this->DebugCompatiblePropertiesDone[p] = true;
-    }
-  if (!debugOrigin)
-    {
-    return;
-    }
-
-  std::string areport = compatibilityType;
-  areport += std::string(" of property \"") + p + "\" for target \"";
-  areport += std::string(this->GetName());
-  areport += "\" (result: \"";
-  areport += result;
-  areport += "\"):\n" + report;
-
-  this->Makefile->GetCMakeInstance()->IssueMessage(cmake::LOG, areport);
-}
-
-//----------------------------------------------------------------------------
-void
 cmTarget::GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const
 {
   // At configure-time, this method can be called as part of getting the
