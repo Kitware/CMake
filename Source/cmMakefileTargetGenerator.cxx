@@ -1059,33 +1059,11 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
     << "\n"
     << "# Targets to which this target links.\n"
     << "set(CMAKE_TARGET_LINKED_INFO_FILES\n";
-  std::set<cmTarget const*> emitted;
-  const char* cfg = this->LocalGenerator->GetConfigName().c_str();
-  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(cfg))
+  std::vector<std::string> dirs = this->GetLinkedTargetDirectories();
+  for (std::vector<std::string>::iterator i = dirs.begin();
+       i != dirs.end(); ++i)
     {
-    cmComputeLinkInformation::ItemVector const& items = cli->GetItems();
-    for(cmComputeLinkInformation::ItemVector::const_iterator
-          i = items.begin(); i != items.end(); ++i)
-      {
-      cmTarget const* linkee = i->Target;
-      if(linkee && !linkee->IsImported()
-                // We can ignore the INTERFACE_LIBRARY items because
-                // Target->GetLinkInformation already processed their
-                // link interface and they don't have any output themselves.
-                && linkee->GetType() != cmTarget::INTERFACE_LIBRARY
-                && emitted.insert(linkee).second)
-        {
-        cmGeneratorTarget* gt =
-            this->GlobalGenerator->GetGeneratorTarget(linkee);
-        cmLocalGenerator* lg = gt->GetLocalGenerator();
-        cmMakefile* mf = linkee->GetMakefile();
-        std::string di = mf->GetCurrentBinaryDirectory();
-        di += "/";
-        di += lg->GetTargetDirectory(*linkee);
-        di += "/DependInfo.cmake";
-        *this->InfoFileStream << "  \"" << di << "\"\n";
-        }
-      }
+    *this->InfoFileStream << "  \"" << *i << "/DependInfo.cmake\"\n";
     }
   *this->InfoFileStream
     << "  )\n";

@@ -368,3 +368,37 @@ std::string cmCommonTargetGenerator::GetIncludes(std::string const& l)
     }
   return i->second;
 }
+
+std::vector<std::string>
+cmCommonTargetGenerator::GetLinkedTargetDirectories() const
+{
+  std::vector<std::string> dirs;
+  std::set<cmTarget const*> emitted;
+  if (cmComputeLinkInformation* cli =
+      this->Target->GetLinkInformation(this->ConfigName))
+    {
+    cmComputeLinkInformation::ItemVector const& items = cli->GetItems();
+    for(cmComputeLinkInformation::ItemVector::const_iterator
+          i = items.begin(); i != items.end(); ++i)
+      {
+      cmTarget const* linkee = i->Target;
+      if(linkee && !linkee->IsImported()
+                // We can ignore the INTERFACE_LIBRARY items because
+                // Target->GetLinkInformation already processed their
+                // link interface and they don't have any output themselves.
+                && linkee->GetType() != cmTarget::INTERFACE_LIBRARY
+                && emitted.insert(linkee).second)
+        {
+        cmGeneratorTarget* gt =
+          this->GlobalGenerator->GetGeneratorTarget(linkee);
+        cmLocalGenerator* lg = gt->GetLocalGenerator();
+        cmMakefile* mf = linkee->GetMakefile();
+        std::string di = mf->GetCurrentBinaryDirectory();
+        di += "/";
+        di += lg->GetTargetDirectory(*linkee);
+        dirs.push_back(di);
+        }
+      }
+    }
+  return dirs;
+}

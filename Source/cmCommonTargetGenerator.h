@@ -85,6 +85,8 @@ protected:
   ByLanguageMap DefinesByLanguage;
   std::string GetIncludes(std::string const& l);
   ByLanguageMap IncludesByLanguage;
+
+  std::vector<std::string> GetLinkedTargetDirectories() const;
 };
 
 #endif
