@@ -502,6 +502,11 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
       {
       cmTarget& target = l->second;
 
+      if (target.GetType() == cmTarget::GLOBAL_TARGET)
+        {
+        continue;
+        }
+
       if (regenerate && (l->first != CMAKE_CHECK_BUILD_SYSTEM_TARGET))
         {
         target.AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
