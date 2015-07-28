@@ -26,18 +26,18 @@ This file must be translated to C and modified to build everywhere.
 
 Run flex like this:
 
-  flex -i --prefix=cmDependsFortran_yy --header-file=cmDependsFortranLexer.h -ocmDependsFortranLexer.cxx cmDependsFortranLexer.in.l
+  flex -i --prefix=cmFortran_yy --header-file=cmFortranLexer.h -ocmFortranLexer.cxx cmFortranLexer.in.l
 
-Modify cmDependsFortranLexer.cxx:
+Modify cmFortranLexer.cxx:
   - remove TABs
   - remove use of the 'register' storage class specifier
   - remove "yyscanner" argument from these methods:
-      yy_fatal_error, cmDependsFortran_yyalloc, cmDependsFortran_yyrealloc, cmDependsFortran_yyfree
-  - remove "yyscanner = NULL" from end of cmDependsFortran_yylex_destroy
+      yy_fatal_error, cmFortran_yyalloc, cmFortran_yyrealloc, cmFortran_yyfree
+  - remove "yyscanner = NULL" from end of cmFortran_yylex_destroy
   - remove all YY_BREAK lines occurring right after return statements
   - change while ( 1 ) to for(;;)
 
-Modify cmDependsFortranLexer.h:
+Modify cmFortranLexer.h:
   - remove TABs
   - remove the yy_init_globals function
   - remove the block that includes unistd.h
@@ -47,16 +47,16 @@ Modify cmDependsFortranLexer.h:
 
 #include "cmStandardLexer.h"
 
-#define cmDependsFortranLexer_cxx
-#include "cmDependsFortranParser.h" /* Interface to parser object.  */
+#define cmFortranLexer_cxx
+#include "cmFortranParser.h" /* Interface to parser object.  */
 
 /* Replace the lexer input function.  */
 #undef YY_INPUT
 #define YY_INPUT(buf, result, max_size) \
-  { result = cmDependsFortranParser_Input(yyextra, buf, max_size); }
+  { result = cmFortranParser_Input(yyextra, buf, max_size); }
 
 /* Include the set of tokens from the parser.  */
-#include "cmDependsFortranParserTokens.h"
+#include "cmFortranParserTokens.h"
 
 /*--------------------------------------------------------------------------*/
 %}
@@ -72,21 +72,21 @@ Modify cmDependsFortranLexer.h:
 %%
 
 \"              {
-  cmDependsFortranParser_StringStart(yyextra);
-  cmDependsFortranParser_SetOldStartcond(yyextra, YY_START);
+  cmFortranParser_StringStart(yyextra);
+  cmFortranParser_SetOldStartcond(yyextra, YY_START);
   BEGIN(str_dq);
 }
 
 '               {
-  cmDependsFortranParser_StringStart(yyextra);
-  cmDependsFortranParser_SetOldStartcond(yyextra, YY_START);
+  cmFortranParser_StringStart(yyextra);
+  cmFortranParser_SetOldStartcond(yyextra, YY_START);
   BEGIN(str_sq);
 }
 
 <str_dq>\" |
 <str_sq>'  {
-  BEGIN(cmDependsFortranParser_GetOldStartcond(yyextra) );
-  yylvalp->string = strdup(cmDependsFortranParser_StringEnd(yyextra));
+  BEGIN(cmFortranParser_GetOldStartcond(yyextra) );
+  yylvalp->string = strdup(cmFortranParser_StringEnd(yyextra));
   return STRING;
 }
 
@@ -94,7 +94,7 @@ Modify cmDependsFortranLexer.h:
 <str_dq,str_sq>&[ \t]*\n[ \t]*&  /* Ignore (continued strings, free fmt) */
 
 <fixed_fmt,str_dq,str_sq>\n[ ]{5}[^ \t\n] {
-  if (cmDependsFortranParser_GetOldStartcond(yyextra) == fixed_fmt)
+  if (cmFortranParser_GetOldStartcond(yyextra) == fixed_fmt)
     ; /* Ignore (cont. strings, fixed fmt) */
   else
     {
@@ -110,7 +110,7 @@ Modify cmDependsFortranLexer.h:
 }
 
 <str_sq,str_dq>. {
-  cmDependsFortranParser_StringAppend(yyextra, yytext[0]);
+  cmFortranParser_StringAppend(yyextra, yytext[0]);
 }
 
 !.*\n                   { return EOSTMT; } /* Treat comments like */
@@ -173,7 +173,7 @@ $[ \t]*endif    { return F90PPR_ENDIF; }
 . { return *yytext; }
 
 <<EOF>> {
-  if(!cmDependsFortranParser_FilePop(yyextra) )
+  if(!cmFortranParser_FilePop(yyextra) )
     {
     return YY_NULL;
     }
@@ -182,7 +182,7 @@ $[ \t]*endif    { return F90PPR_ENDIF; }
 %%
 
 /*--------------------------------------------------------------------------*/
-YY_BUFFER_STATE cmDependsFortranLexer_GetCurrentBuffer(yyscan_t yyscanner)
+YY_BUFFER_STATE cmFortranLexer_GetCurrentBuffer(yyscan_t yyscanner)
 {
   /* Hack into the internal flex-generated scanner to get the buffer.  */
   struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;

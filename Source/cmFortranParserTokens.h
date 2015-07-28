@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 2.5.  */
+/* A Bison parser, made by GNU Bison 3.0.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-      Copyright (C) 1984, 1989-1990, 2000-2011 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,43 +30,51 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
+#ifndef YY_CMFORTRAN_YY_CMFORTRANPARSERTOKENS_H_INCLUDED
+# define YY_CMFORTRAN_YY_CMFORTRANPARSERTOKENS_H_INCLUDED
+/* Debug traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+#if YYDEBUG
+extern int cmFortran_yydebug;
+#endif
 
-/* Tokens.  */
+/* Token type.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-   /* Put the tokens into the symbol table, so that GDB and other debuggers
-      know about them.  */
-   enum yytokentype {
-     EOSTMT = 258,
-     ASSIGNMENT_OP = 259,
-     GARBAGE = 260,
-     CPP_INCLUDE = 261,
-     F90PPR_INCLUDE = 262,
-     COCO_INCLUDE = 263,
-     F90PPR_DEFINE = 264,
-     CPP_DEFINE = 265,
-     F90PPR_UNDEF = 266,
-     CPP_UNDEF = 267,
-     CPP_IFDEF = 268,
-     CPP_IFNDEF = 269,
-     CPP_IF = 270,
-     CPP_ELSE = 271,
-     CPP_ELIF = 272,
-     CPP_ENDIF = 273,
-     F90PPR_IFDEF = 274,
-     F90PPR_IFNDEF = 275,
-     F90PPR_IF = 276,
-     F90PPR_ELSE = 277,
-     F90PPR_ELIF = 278,
-     F90PPR_ENDIF = 279,
-     COMMA = 280,
-     DCOLON = 281,
-     CPP_TOENDL = 282,
-     UNTERMINATED_STRING = 283,
-     STRING = 284,
-     WORD = 285,
-     CPP_INCLUDE_ANGLE = 286
-   };
+  enum yytokentype
+  {
+    EOSTMT = 258,
+    ASSIGNMENT_OP = 259,
+    GARBAGE = 260,
+    CPP_INCLUDE = 261,
+    F90PPR_INCLUDE = 262,
+    COCO_INCLUDE = 263,
+    F90PPR_DEFINE = 264,
+    CPP_DEFINE = 265,
+    F90PPR_UNDEF = 266,
+    CPP_UNDEF = 267,
+    CPP_IFDEF = 268,
+    CPP_IFNDEF = 269,
+    CPP_IF = 270,
+    CPP_ELSE = 271,
+    CPP_ELIF = 272,
+    CPP_ENDIF = 273,
+    F90PPR_IFDEF = 274,
+    F90PPR_IFNDEF = 275,
+    F90PPR_IF = 276,
+    F90PPR_ELSE = 277,
+    F90PPR_ELIF = 278,
+    F90PPR_ENDIF = 279,
+    COMMA = 280,
+    DCOLON = 281,
+    CPP_TOENDL = 282,
+    UNTERMINATED_STRING = 283,
+    STRING = 284,
+    WORD = 285,
+    CPP_INCLUDE_ANGLE = 286
+  };
 #endif
 /* Tokens.  */
 #define EOSTMT 258
@@ -99,24 +107,23 @@
 #define WORD 285
 #define CPP_INCLUDE_ANGLE 286
 
-
-
-
+/* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE
+typedef union YYSTYPE YYSTYPE;
+union YYSTYPE
 {
-
-/* Line 2068 of yacc.c  */
-#line 89 "cmDependsFortranParser.y"
+#line 81 "cmFortranParser.y" /* yacc.c:1909  */
 
   char* string;
 
-
-
-/* Line 2068 of yacc.c  */
-#line 118 "cmDependsFortranParserTokens.h"
-} YYSTYPE;
+#line 120 "cmFortranParserTokens.h" /* yacc.c:1909  */
+};
 # define YYSTYPE_IS_TRIVIAL 1
-# define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 #endif
+
+
+
+int cmFortran_yyparse (yyscan_t yyscanner);
+
+#endif /* !YY_CMFORTRAN_YY_CMFORTRANPARSERTOKENS_H_INCLUDED  */
