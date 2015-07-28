@@ -890,6 +890,19 @@ std::string cmGeneratorTarget::GetSOName(const std::string& config) const
     }
 }
 
+
+//----------------------------------------------------------------------------
+std::string
+cmGeneratorTarget::GetAppBundleDirectory(const std::string& config,
+                                         bool contentOnly) const
+{
+  std::string fpath = this->Target->GetFullName(config, false);
+  fpath += ".app/Contents";
+  if(!contentOnly)
+    fpath += "/MacOS";
+  return fpath;
+}
+
 //----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::GetInstallNameDirForBuildTree(
@@ -965,6 +978,47 @@ void cmGeneratorTarget::GetFullNameComponents(std::string& prefix,
                                               bool implib) const
 {
   this->Target->GetFullNameInternal(config, implib, prefix, base, suffix);
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmGeneratorTarget::BuildMacContentDirectory(const std::string& base,
+                                            const std::string& config,
+                                            bool contentOnly) const
+{
+  std::string fpath = base;
+  if(this->Target->IsAppBundleOnApple())
+    {
+    fpath += this->GetAppBundleDirectory(config, contentOnly);
+    }
+  if(this->Target->IsFrameworkOnApple())
+    {
+    fpath += this->Target->GetFrameworkDirectory(config, contentOnly);
+    }
+  if(this->Target->IsCFBundleOnApple())
+    {
+    fpath += this->Target->GetCFBundleDirectory(config, contentOnly);
+    }
+  return fpath;
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmGeneratorTarget::GetMacContentDirectory(const std::string& config,
+                                          bool implib) const
+{
+  // Start with the output directory for the target.
+  std::string fpath = this->Target->GetDirectory(config, implib);
+  fpath += "/";
+  bool contentOnly = true;
+  if(this->Target->IsFrameworkOnApple())
+    {
+    // additional files with a framework go into the version specific
+    // directory
+    contentOnly = false;
+    }
+  fpath = this->BuildMacContentDirectory(fpath, config, contentOnly);
+  return fpath;
 }
 
 //----------------------------------------------------------------------------
