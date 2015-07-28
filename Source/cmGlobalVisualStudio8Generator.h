@@ -67,7 +67,7 @@ public:
     return !this->WindowsCEVersion.empty(); }
 
 protected:
-  virtual bool Compute();
+  virtual void Generate();
   virtual const char* GetIDEVersion() { return "8.0"; }
 
   virtual std::string FindDevEnvCommand();

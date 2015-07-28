@@ -54,6 +54,9 @@ public:
   void Generate(std::ostream& os, const std::string& config,
                 std::vector<std::string> const& configurationTypes);
 
+  const std::vector<std::string>& GetConfigurations() const
+    { return this->Configurations; }
+
 protected:
   typedef cmScriptGeneratorIndent Indent;
   virtual void GenerateScript(std::ostream& os);

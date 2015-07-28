@@ -62,8 +62,6 @@ public:
   /** Select message level from CMAKE_INSTALL_MESSAGE or 'never'.  */
   static MessageLevel SelectMessageLevel(cmMakefile* mf, bool never = false);
 
-  virtual void Compute(cmLocalGenerator*) {}
-
 protected:
   virtual void GenerateScript(std::ostream& os);
 

@@ -254,8 +254,6 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     mf->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false,
                           no_working_directory, no_depends,
                           noCommandLines);
-  cmGeneratorTarget* gt = new cmGeneratorTarget(tgt, root);
-  mf->AddGeneratorTarget(tgt, gt);
 
   // Organize in the "predefined targets" folder:
   //
@@ -347,13 +345,8 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
 }
 
 //----------------------------------------------------------------------------
-bool cmGlobalVisualStudio8Generator::Compute()
+void cmGlobalVisualStudio8Generator::Generate()
 {
-  if (!cmGlobalVisualStudio7Generator::Compute())
-    {
-    return false;
-    }
-
   if(this->AddCheckTarget())
     {
     // All targets depend on the build-system check target.
@@ -367,7 +360,9 @@ bool cmGlobalVisualStudio8Generator::Compute()
         }
       }
     }
-  return true;
+
+  // Now perform the main generation.
+  this->cmGlobalVisualStudio7Generator::Generate();
 }
 
 //----------------------------------------------------------------------------

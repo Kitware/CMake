@@ -13,9 +13,7 @@
 #define cmInstallTargetGenerator_h
 
 #include "cmInstallGenerator.h"
-
-class cmTarget;
-class cmGeneratorTarget;
+#include "cmTarget.h"
 
 /** \class cmInstallTargetGenerator
  * \brief Generate target installation rules.
@@ -24,7 +22,7 @@ class cmInstallTargetGenerator: public cmInstallGenerator
 {
 public:
   cmInstallTargetGenerator(
-    std::string const& targetName, const char* dest, bool implib,
+    cmTarget& t, const char* dest, bool implib,
     const char* file_permissions,
     std::vector<std::string> const& configurations,
     const char* component,
@@ -58,10 +56,7 @@ public:
                                         const std::string& config,
                                         NameType nameType = NameNormal);
 
-  void Compute(cmLocalGenerator* lg);
-
-  cmGeneratorTarget* GetTarget() const { return this->Target; }
-
+  cmTarget* GetTarget() const { return this->Target; }
   bool IsImportLibrary() const { return this->ImportLibrary; }
 
   std::string GetDestination(std::string const& config) const;
@@ -103,8 +98,7 @@ protected:
   void AddRanlibRule(std::ostream& os, Indent const& indent,
                      const std::string& toDestDirPath);
 
-  std::string TargetName;
-  cmGeneratorTarget* Target;
+  cmTarget* Target;
   std::string FilePermissions;
   NamelinkModeType NamelinkMode;
   bool ImportLibrary;
