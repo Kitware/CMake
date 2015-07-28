@@ -86,6 +86,7 @@ public:
    */
   virtual void Configure();
 
+  virtual bool Compute();
 
   enum TargetTypes {
     AllTargets,
@@ -99,7 +100,7 @@ public:
    * basically creates a series of LocalGenerators for each directory and
    * requests that they Generate.
    */
-  void DoGenerate();
+  virtual void Generate();
 
   /**
    * Set/Get and Clear the enabled languages.
@@ -200,7 +201,7 @@ public:
   cmExportSetMap& GetExportSets() {return this->ExportSets;}
 
   /** Add a file to the manifest of generated targets for a configuration.  */
-  void AddToManifest(const std::string& config, std::string const& f);
+  void AddToManifest(std::string const& f);
 
   void EnableInstallTarget();
 
@@ -263,11 +264,6 @@ public:
                                         const std::string& config,
                                         const std::string& suffix,
                                         std::string& dir);
-
-  /** Get the manifest of all targets that will be built for each
-      configuration.  This is valid during generation only.  */
-  cmTargetManifest const& GetTargetManifest() const
-    { return this->TargetManifest; }
 
   /** Get the content of a directory.  Directory listings are cached
       and re-loaded from disk only when modified.  During the generation
@@ -373,8 +369,6 @@ public:
 
   std::string MakeSilentFlag;
 protected:
-  virtual void Generate();
-
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
   // for a project collect all its targets by following depend
   // information, and also collect all the targets
@@ -428,10 +422,6 @@ protected:
   cmExportSetMap ExportSets;
   std::map<std::string, cmExportBuildFileGenerator*> BuildExportSets;
   std::map<std::string, cmExportBuildFileGenerator*> BuildExportExportSets;
-
-  // Manifest of all targets that will be built for each configuration.
-  // This is computed just before local generators generate.
-  cmTargetManifest TargetManifest;
 
   // All targets in the entire project.
 #if defined(CMAKE_BUILD_WITH_CMAKE)

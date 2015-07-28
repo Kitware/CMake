@@ -476,7 +476,6 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
                                 commandLines, false, autogenComment.c_str());
 
     cmGeneratorTarget* gt = new cmGeneratorTarget(autogenTarget, lg);
-    lg->GetGlobalGenerator()->AddGeneratorTarget(autogenTarget, gt);
     makefile->AddGeneratorTarget(autogenTarget, gt);
 
     // Set target folder
