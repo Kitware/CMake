@@ -590,6 +590,14 @@ public:
   return this->LinkLibrariesForVS6;}
 #endif
 
+  enum CompatibleType
+  {
+    BoolType,
+    StringType,
+    NumberMinType,
+    NumberMaxType
+  };
+
 private:
   bool HandleLocationPropertyPolicy(cmMakefile* context) const;
 
@@ -753,9 +761,6 @@ private:
   // Cache target compile paths for each configuration.
   struct CompileInfo;
   CompileInfo const* GetCompileInfo(const std::string& config) const;
-
-  void CheckPropertyCompatibility(cmComputeLinkInformation *info,
-                                  const std::string& config) const;
 
   LinkInterface const*
     GetImportLinkInterface(const std::string& config, cmTarget const* head,
