@@ -468,6 +468,14 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
   Makefile(mf), NoPolicyScope(noPolicyScope),
   CheckCMP0011(false), ReportError(true)
 {
+  this->Makefile->PushFunctionBlockerBarrier();
+
+  this->Makefile->StateSnapshot =
+      this->Makefile->GetState()->CreateCallStackSnapshot(
+        this->Makefile->StateSnapshot,
+        this->Makefile->ContextStack.back()->Name,
+        this->Makefile->ContextStack.back()->Line,
+        filenametoread);
   this->Makefile->PushPolicyBarrier();
   if(!this->NoPolicyScope)
     {
@@ -497,27 +505,11 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
         break;
       }
     }
-
-  this->Makefile->PushFunctionBlockerBarrier();
-
-  this->Makefile->StateSnapshot =
-      this->Makefile->GetState()->CreateCallStackSnapshot(
-        this->Makefile->StateSnapshot,
-        this->Makefile->ContextStack.back()->Name,
-        this->Makefile->ContextStack.back()->Line,
-        filenametoread);
 }
 
 //----------------------------------------------------------------------------
 cmMakefile::IncludeScope::~IncludeScope()
 {
-  this->Makefile->StateSnapshot =
-      this->Makefile->GetState()->Pop(this->Makefile->StateSnapshot);
-  assert(this->Makefile->StateSnapshot.IsValid());
-
-  this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
-  // Enforce matching policy scopes inside the included file.
-
   if(!this->NoPolicyScope)
     {
     // If we need to enforce policy CMP0011 then the top entry is the
@@ -540,6 +532,11 @@ cmMakefile::IncludeScope::~IncludeScope()
       }
     }
   this->Makefile->PopPolicyBarrier(this->ReportError);
+  this->Makefile->StateSnapshot =
+      this->Makefile->GetState()->Pop(this->Makefile->StateSnapshot);
+  assert(this->Makefile->StateSnapshot.IsValid());
+
+  this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
 }
 
 //----------------------------------------------------------------------------
@@ -634,8 +631,6 @@ public:
   ListFileScope(cmMakefile* mf, std::string const& filenametoread)
     : Makefile(mf), ReportError(true)
   {
-    this->Makefile->PushPolicyBarrier();
-
     long line = 0;
     std::string name;
     if (!this->Makefile->ContextStack.empty())
@@ -647,17 +642,21 @@ public:
         this->Makefile->GetState()->CreateInlineListFileSnapshot(
           this->Makefile->StateSnapshot, name, line, filenametoread);
     assert(this->Makefile->StateSnapshot.IsValid());
+
+    this->Makefile->PushPolicyBarrier();
+
     this->Makefile->PushFunctionBlockerBarrier();
   }
 
   ~ListFileScope()
   {
+    this->Makefile->PopPolicyBarrier(this->ReportError);
+
     this->Makefile->StateSnapshot =
         this->Makefile->GetState()->Pop(this->Makefile->StateSnapshot);
     assert(this->Makefile->StateSnapshot.IsValid());
 
     this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
-    this->Makefile->PopPolicyBarrier(this->ReportError);
   }
 
   void Quiet() { this->ReportError = false; }
@@ -1628,6 +1627,7 @@ void cmMakefile::PushFunctionScope(std::string const& fileName,
         this->ContextStack.back()->Name, this->ContextStack.back()->Line,
         fileName);
   assert(this->StateSnapshot.IsValid());
+  this->PushPolicyBarrier();
 
   this->Internal->PushDefinitions();
 
@@ -1639,15 +1639,14 @@ void cmMakefile::PushFunctionScope(std::string const& fileName,
 
   this->PushFunctionBlockerBarrier();
 
-  this->PushPolicyBarrier();
   this->PushPolicy(true, pm);
 }
 
 void cmMakefile::PopFunctionScope(bool reportError)
 {
   this->PopPolicy();
-  this->PopPolicyBarrier(reportError);
 
+  this->PopPolicyBarrier(reportError);
   this->StateSnapshot = this->GetState()->Pop(this->StateSnapshot);
   assert(this->StateSnapshot.IsValid());
 
@@ -1673,10 +1672,10 @@ void cmMakefile::PushMacroScope(std::string const& fileName,
         this->ContextStack.back()->Name, this->ContextStack.back()->Line,
         fileName);
   assert(this->StateSnapshot.IsValid());
+  this->PushPolicyBarrier();
 
   this->PushFunctionBlockerBarrier();
 
-  this->PushPolicyBarrier();
   this->PushPolicy(true, pm);
 }
 
