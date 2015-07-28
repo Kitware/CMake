@@ -1228,13 +1228,13 @@ bool cmGlobalGenerator::Compute()
     }
   this->FinalizeTargetCompileInfo();
 
+  this->CreateGenerationObjects();
+
   return true;
 }
 
 void cmGlobalGenerator::Generate()
 {
-  this->CreateGenerationObjects();
-
 #ifdef CMAKE_BUILD_WITH_CMAKE
   // Iterate through all targets and set up automoc for those which have
   // the AUTOMOC, AUTOUIC or AUTORCC property set
