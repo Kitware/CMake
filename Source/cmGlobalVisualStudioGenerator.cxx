@@ -108,6 +108,10 @@ void cmGlobalVisualStudioGenerator::Generate()
         for(cmTargets::iterator t = targets.begin();
             t != targets.end(); ++t)
           {
+          if (t->second.GetType() == cmTarget::GLOBAL_TARGET)
+            {
+            continue;
+            }
           if(!this->IsExcluded(gen[0], t->second))
             {
             allBuild->AddUtility(t->second.GetName());
