@@ -1906,6 +1906,11 @@ const char* cmMakefile::GetCurrentBinaryDirectory() const
   return this->StateSnapshot.GetDirectory().GetCurrentBinary();
 }
 
+void cmMakefile::AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt)
+{
+  this->GeneratorTargets[t] = gt;
+}
+
 //----------------------------------------------------------------------------
 void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
                                        bool before)
