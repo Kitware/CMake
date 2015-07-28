@@ -119,6 +119,10 @@ public:
   std::string GetAppBundleDirectory(const std::string& config,
                                     bool contentOnly) const;
 
+  /** Return whether this target is an executable Bundle, a framework
+      or CFBundle on Apple.  */
+  bool IsBundleOnApple() const;
+
   /** Get the full name of the target according to the settings in its
       makefile.  */
   std::string GetFullName(const std::string& config="",
