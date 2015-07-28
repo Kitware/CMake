@@ -1226,13 +1226,13 @@ bool cmGlobalGenerator::Compute()
     {
     return false;
     }
+  this->FinalizeTargetCompileInfo();
+
   return true;
 }
 
 void cmGlobalGenerator::Generate()
 {
-  this->FinalizeTargetCompileInfo();
-
   this->CreateGenerationObjects();
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
