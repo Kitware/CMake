@@ -553,15 +553,6 @@ public:
                           const std::string& config) const;
 
   bool IsNullImpliedByLinkLibraries(const std::string &p) const;
-  bool GetLinkInterfaceDependentBoolProperty(const std::string &p,
-                                             const std::string& config) const;
-
-  const char *GetLinkInterfaceDependentStringProperty(const std::string &p,
-                         const std::string& config) const;
-  const char *GetLinkInterfaceDependentNumberMinProperty(const std::string &p,
-                         const std::string& config) const;
-  const char *GetLinkInterfaceDependentNumberMaxProperty(const std::string &p,
-                         const std::string& config) const;
 
   std::string GetDebugGeneratorExpressions(const std::string &value,
                                   cmTarget::LinkLibraryType llt) const;

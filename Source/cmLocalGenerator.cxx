@@ -2059,7 +2059,9 @@ void cmLocalGenerator::AddCMP0018Flags(std::string &flags,
       return;
       }
 
-    if (target->GetLinkInterfaceDependentBoolProperty(
+    cmGeneratorTarget* gtgt =
+        this->GlobalGenerator->GetGeneratorTarget(target);
+    if (gtgt->GetLinkInterfaceDependentBoolProperty(
                                                 "POSITION_INDEPENDENT_CODE",
                                                 config))
       {
