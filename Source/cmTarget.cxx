@@ -590,13 +590,6 @@ bool cmTarget::IsXCTestOnApple() const
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::IsBundleOnApple() const
-{
-  return this->IsFrameworkOnApple() || this->IsAppBundleOnApple() ||
-         this->IsCFBundleOnApple();
-}
-
-//----------------------------------------------------------------------------
 static bool processSources(cmTarget const* tgt,
       const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
       std::vector<std::string> &srcs,
