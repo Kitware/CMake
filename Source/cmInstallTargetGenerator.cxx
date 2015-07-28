@@ -22,20 +22,22 @@
 
 //----------------------------------------------------------------------------
 cmInstallTargetGenerator
-::cmInstallTargetGenerator(cmTarget& t, const char* dest, bool implib,
+::cmInstallTargetGenerator(const std::string& targetName,
+                           const char* dest, bool implib,
                            const char* file_permissions,
                            std::vector<std::string> const& configurations,
                            const char* component,
                            MessageLevel message,
                            bool optional):
-  cmInstallGenerator(dest, configurations, component, message), Target(&t),
+  cmInstallGenerator(dest, configurations, component, message),
+  TargetName(targetName),
+  Target(0),
   FilePermissions(file_permissions),
   ImportLibrary(implib),
   Optional(optional)
 {
   this->ActionsPerConfig = true;
   this->NamelinkMode = NamelinkModeNone;
-  this->Target->SetHaveInstallRule(true);
 }
 
 //----------------------------------------------------------------------------
@@ -429,6 +431,11 @@ cmInstallTargetGenerator::GetInstallFilename(cmTarget const* target,
     }
 
   return fname;
+}
+
+void cmInstallTargetGenerator::Compute(cmLocalGenerator* lg)
+{
+  this->Target = lg->GetMakefile()->FindTarget(this->TargetName);
 }
 
 //----------------------------------------------------------------------------
