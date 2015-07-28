@@ -449,10 +449,9 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   // Add ALL_BUILD
   const char* no_working_directory = 0;
   std::vector<std::string> no_depends;
-  mf->AddUtilityCommand("ALL_BUILD", true, no_depends,
+  cmTarget* allbuild = mf->AddUtilityCommand("ALL_BUILD", true, no_depends,
                         no_working_directory,
                         "echo", "Build all projects");
-  cmTarget* allbuild = mf->FindTarget("ALL_BUILD");
 
   // Refer to the main build configuration file for easy editing.
   std::string listfile = mf->GetCurrentSourceDirectory();
