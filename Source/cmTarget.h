@@ -581,14 +581,6 @@ public:
   return this->LinkLibrariesForVS6;}
 #endif
 
-  enum CompatibleType
-  {
-    BoolType,
-    StringType,
-    NumberMinType,
-    NumberMaxType
-  };
-
 private:
   bool HandleLocationPropertyPolicy(cmMakefile* context) const;
 
