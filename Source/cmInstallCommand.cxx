@@ -27,7 +27,8 @@ static cmInstallTargetGenerator* CreateInstallTargetGenerator(cmTarget& target,
 {
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(target.GetMakefile());
-  return new cmInstallTargetGenerator(target, args.GetDestination().c_str(),
+  return new cmInstallTargetGenerator(target.GetName(),
+                        args.GetDestination().c_str(),
                         impLib, args.GetPermissions().c_str(),
                         args.GetConfigurations(), args.GetComponent().c_str(),
                         message,
