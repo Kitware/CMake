@@ -108,10 +108,6 @@ void cmLocalVisualStudio7Generator::AddCMakeListsRules()
       // Add the rule to targets that need it.
       for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
         {
-        if (l->second.GetType() == cmTarget::GLOBAL_TARGET)
-          {
-          continue;
-          }
         if(l->first != CMAKE_CHECK_BUILD_SYSTEM_TARGET)
           {
           l->second.AddSource(sf->GetFullPath());

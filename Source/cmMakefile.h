@@ -416,7 +416,10 @@ public:
     {
       this->GeneratorTargets = targets;
     }
-  void AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt);
+  void AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt)
+  {
+    this->GeneratorTargets[t] = gt;
+  }
 
   cmTarget* FindTarget(const std::string& name,
                        bool excludeAliases = false) const;

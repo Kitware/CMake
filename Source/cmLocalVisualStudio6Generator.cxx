@@ -88,8 +88,7 @@ void cmLocalVisualStudio6Generator::AddCMakeListsRules()
   for(cmTargets::iterator l = tgts.begin();
       l != tgts.end(); l++)
     {
-    if (l->second.GetType() == cmTarget::INTERFACE_LIBRARY
-        || l->second.GetType() == cmTarget::GLOBAL_TARGET)
+    if (l->second.GetType() == cmTarget::INTERFACE_LIBRARY)
       {
       continue;
       }
