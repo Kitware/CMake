@@ -2375,11 +2375,15 @@ cmLocalGenerator::ConstructComment(cmCustomCommandGenerator const& ccg,
 class cmInstallTargetGeneratorLocal: public cmInstallTargetGenerator
 {
 public:
-  cmInstallTargetGeneratorLocal(cmTarget& t, const char* dest, bool implib):
+  cmInstallTargetGeneratorLocal(cmLocalGenerator* lg, std::string const& t,
+                                const char* dest, bool implib):
     cmInstallTargetGenerator(
       t, dest, implib, "", std::vector<std::string>(), "Unspecified",
-      cmInstallGenerator::SelectMessageLevel(t.GetMakefile()),
-      false) {}
+      cmInstallGenerator::SelectMessageLevel(lg->GetMakefile()),
+      false)
+  {
+    this->Compute(lg);
+  }
 };
 
 //----------------------------------------------------------------------------
@@ -2428,7 +2432,7 @@ cmLocalGenerator
           {
           // Use a target install generator.
           cmInstallTargetGeneratorLocal
-            g(l->second, destination.c_str(), false);
+            g(this, l->first, destination.c_str(), false);
           g.Generate(os, config, configurationTypes);
           }
           break;
@@ -2439,18 +2443,18 @@ cmLocalGenerator
           // to the normal destination and the DLL to the runtime
           // destination.
           cmInstallTargetGeneratorLocal
-            g1(l->second, destination.c_str(), true);
+            g1(this, l->first, destination.c_str(), true);
           g1.Generate(os, config, configurationTypes);
           // We also skip over the leading slash given by the user.
           destination = l->second.GetRuntimeInstallPath().substr(1);
           cmSystemTools::ConvertToUnixSlashes(destination);
           cmInstallTargetGeneratorLocal
-            g2(l->second, destination.c_str(), false);
+            g2(this, l->first, destination.c_str(), false);
           g2.Generate(os, config, configurationTypes);
 #else
           // Use a target install generator.
           cmInstallTargetGeneratorLocal
-            g(l->second, destination.c_str(), false);
+            g(this, l->first, destination.c_str(), false);
           g.Generate(os, config, configurationTypes);
 #endif
           }

@@ -22,7 +22,7 @@ class cmInstallTargetGenerator: public cmInstallGenerator
 {
 public:
   cmInstallTargetGenerator(
-    cmTarget& t, const char* dest, bool implib,
+    std::string const& targetName, const char* dest, bool implib,
     const char* file_permissions,
     std::vector<std::string> const& configurations,
     const char* component,
@@ -56,7 +56,10 @@ public:
                                         const std::string& config,
                                         NameType nameType = NameNormal);
 
+  void Compute(cmLocalGenerator* lg);
+
   cmTarget* GetTarget() const { return this->Target; }
+
   bool IsImportLibrary() const { return this->ImportLibrary; }
 
   std::string GetDestination(std::string const& config) const;
@@ -98,6 +101,7 @@ protected:
   void AddRanlibRule(std::ostream& os, Indent const& indent,
                      const std::string& toDestDirPath);
 
+  std::string TargetName;
   cmTarget* Target;
   std::string FilePermissions;
   NamelinkModeType NamelinkMode;
