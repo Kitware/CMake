@@ -1205,15 +1205,16 @@ cmMakefile::AddCustomCommandOldStyle(const std::string& target,
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::AddUtilityCommand(const std::string& utilityName,
-                                   bool excludeFromAll,
-                                   const std::vector<std::string>& depends,
-                                   const char* workingDirectory,
-                                   const char* command,
-                                   const char* arg1,
-                                   const char* arg2,
-                                   const char* arg3,
-                                   const char* arg4)
+cmTarget*
+cmMakefile::AddUtilityCommand(const std::string& utilityName,
+                              bool excludeFromAll,
+                              const std::vector<std::string>& depends,
+                              const char* workingDirectory,
+                              const char* command,
+                              const char* arg1,
+                              const char* arg2,
+                              const char* arg3,
+                              const char* arg4)
 {
   // Construct the command line for the custom command.
   cmCustomCommandLine commandLine;
@@ -1238,8 +1239,8 @@ void cmMakefile::AddUtilityCommand(const std::string& utilityName,
   commandLines.push_back(commandLine);
 
   // Call the real signature of this method.
-  this->AddUtilityCommand(utilityName, excludeFromAll, workingDirectory,
-                          depends, commandLines);
+  return this->AddUtilityCommand(utilityName, excludeFromAll, workingDirectory,
+                                 depends, commandLines);
 }
 
 //----------------------------------------------------------------------------
