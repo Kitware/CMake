@@ -26,3 +26,13 @@ function(verifyDebControl FILE PREFIX VERIFY_FILES)
     endif()
   endforeach()
 endfunction()
+
+function(getPackageInfo FILE RESULT_VAR)
+  execute_process(COMMAND ${DPKG_EXECUTABLE} -I ${FILE}
+          WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+          OUTPUT_VARIABLE package_info_
+          ERROR_QUIET
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  set(${RESULT_VAR} "${package_info_}" PARENT_SCOPE)
+endfunction()
