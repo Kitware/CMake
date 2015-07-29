@@ -64,8 +64,13 @@ std::string cmGlobalVisualStudioGenerator::GetRegistryBase(
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudioGenerator::Generate()
+bool cmGlobalVisualStudioGenerator::Compute()
 {
+  if (!cmGlobalGenerator::Compute())
+    {
+    return false;
+    }
+
   // Add a special target that depends on ALL projects for easy build
   // of one configuration only.
   const char* no_working_dir = 0;
@@ -85,6 +90,8 @@ void cmGlobalVisualStudioGenerator::Generate()
         AddUtilityCommand("ALL_BUILD", true, no_working_dir,
                           no_depends, no_commands, false,
                           "Build all projects");
+      cmGeneratorTarget* gt = new cmGeneratorTarget(allBuild, gen[0]);
+      allBuild->GetMakefile()->AddGeneratorTarget(allBuild, gt);
 
 #if 0
       // Can't activate this code because we want ALL_BUILD
@@ -108,6 +115,10 @@ void cmGlobalVisualStudioGenerator::Generate()
         for(cmTargets::iterator t = targets.begin();
             t != targets.end(); ++t)
           {
+          if (t->second.GetType() == cmTarget::GLOBAL_TARGET)
+            {
+            continue;
+            }
           if(!this->IsExcluded(gen[0], t->second))
             {
             allBuild->AddUtility(t->second.GetName());
@@ -130,9 +141,7 @@ void cmGlobalVisualStudioGenerator::Generate()
       static_cast<cmLocalVisualStudioGenerator*>(*lgi);
     lg->AddCMakeListsRules();
     }
-
-  // Run all the local generators.
-  this->cmGlobalGenerator::Generate();
+  return true;
 }
 
 //----------------------------------------------------------------------------

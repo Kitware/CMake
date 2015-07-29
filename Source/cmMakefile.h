@@ -194,14 +194,15 @@ public:
    * Add a utility to the build.  A utiltity target is a command that
    * is run every time the target is built.
    */
-  void AddUtilityCommand(const std::string& utilityName, bool excludeFromAll,
-                         const std::vector<std::string>& depends,
-                         const char* workingDirectory,
-                         const char* command,
-                         const char* arg1=0,
-                         const char* arg2=0,
-                         const char* arg3=0,
-                         const char* arg4=0);
+  cmTarget* AddUtilityCommand(const std::string& utilityName,
+                              bool excludeFromAll,
+                              const std::vector<std::string>& depends,
+                              const char* workingDirectory,
+                              const char* command,
+                              const char* arg1=0,
+                              const char* arg2=0,
+                              const char* arg3=0,
+                              const char* arg4=0);
   cmTarget* AddUtilityCommand(const std::string& utilityName,
                               bool excludeFromAll,
                               const char* workingDirectory,
@@ -416,10 +417,7 @@ public:
     {
       this->GeneratorTargets = targets;
     }
-  void AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt)
-  {
-    this->GeneratorTargets[t] = gt;
-  }
+  void AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt);
 
   cmTarget* FindTarget(const std::string& name,
                        bool excludeAliases = false) const;
