@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+cmake_minimum_required(VERSION ${CMAKE_VERSION} FATAL_ERROR)
 
 include("${config_file}")
 include("${src_dir}/${GENERATOR_TYPE}/Helpers.cmake")
