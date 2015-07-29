@@ -62,6 +62,7 @@ protected:
   bool FortranModuleDirectoryComputed;
   std::string FortranModuleDirectory;
   std::string GetFortranModuleDirectory();
+  virtual std::string ComputeFortranModuleDirectory() const;
 
   // Compute target-specific Fortran language flags.
   void AddFortranFlags(std::string& flags);
