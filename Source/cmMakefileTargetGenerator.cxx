@@ -414,7 +414,6 @@ void cmMakefileTargetGenerator
   // we compute some depends when writing the depend.make that we will also
   // use in the build.make, same with depMakeFile
   std::vector<std::string> depends;
-  std::string depMakeFile;
 
   // generate the build rule file
   this->WriteObjectBuildFile(obj, lang, source, depends);
