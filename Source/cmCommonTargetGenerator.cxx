@@ -20,8 +20,12 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
-cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
-  : GeneratorTarget(gt)
+cmCommonTargetGenerator::cmCommonTargetGenerator(
+  cmOutputConverter::RelativeRoot wd,
+  cmGeneratorTarget* gt
+  )
+  : WorkingDirectory(wd)
+  , GeneratorTarget(gt)
   , Target(gt->Target)
   , Makefile(gt->Makefile)
   , LocalGenerator(static_cast<cmLocalCommonGenerator*>(gt->LocalGenerator))
@@ -152,7 +156,7 @@ void cmCommonTargetGenerator::AddFortranFlags(std::string& flags)
   if (!mod_dir.empty())
     {
     mod_dir = this->Convert(mod_dir,
-                            cmLocalGenerator::START_OUTPUT,
+                            this->WorkingDirectory,
                             cmLocalGenerator::SHELL);
     }
   else

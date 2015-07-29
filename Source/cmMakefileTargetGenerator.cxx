@@ -33,7 +33,7 @@
 #include <ctype.h>
 
 cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
-  : cmCommonTargetGenerator(target)
+  : cmCommonTargetGenerator(cmOutputConverter::START_OUTPUT, target)
   , OSXBundleGenerator(0)
   , MacOSXContentGenerator(0)
 {
