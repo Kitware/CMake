@@ -66,7 +66,8 @@ protected:
   // Actually write the depenencies to the streams.
   bool WriteDependenciesReal(const char *obj,
                              cmFortranSourceInfo const& info,
-                             const char* mod_dir, const char* stamp_dir,
+                             std::string const& mod_dir,
+                             const char* stamp_dir,
                              std::ostream& makeDepends,
                              std::ostream& internalDepends);
 

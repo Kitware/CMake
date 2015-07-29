@@ -20,8 +20,12 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
-cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
-  : GeneratorTarget(gt)
+cmCommonTargetGenerator::cmCommonTargetGenerator(
+  cmOutputConverter::RelativeRoot wd,
+  cmGeneratorTarget* gt
+  )
+  : WorkingDirectory(wd)
+  , GeneratorTarget(gt)
   , Target(gt->Target)
   , Makefile(gt->Makefile)
   , LocalGenerator(static_cast<cmLocalCommonGenerator*>(gt->LocalGenerator))
@@ -101,47 +105,47 @@ void cmCommonTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
 }
 
 //----------------------------------------------------------------------------
-const char* cmCommonTargetGenerator::GetFortranModuleDirectory()
+std::string cmCommonTargetGenerator::ComputeFortranModuleDirectory() const
+{
+  std::string mod_dir;
+  const char* target_mod_dir =
+    this->Target->GetProperty("Fortran_MODULE_DIRECTORY");
+  const char* moddir_flag =
+    this->Makefile->GetDefinition("CMAKE_Fortran_MODDIR_FLAG");
+  if(target_mod_dir && moddir_flag)
+    {
+    // Compute the full path to the module directory.
+    if(cmSystemTools::FileIsFullPath(target_mod_dir))
+      {
+      // Already a full path.
+      mod_dir = target_mod_dir;
+      }
+    else
+      {
+      // Interpret relative to the current output directory.
+      mod_dir = this->Makefile->GetCurrentBinaryDirectory();
+      mod_dir += "/";
+      mod_dir += target_mod_dir;
+      }
+
+    // Make sure the module output directory exists.
+    cmSystemTools::MakeDirectory(mod_dir);
+    }
+  return mod_dir;
+}
+
+//----------------------------------------------------------------------------
+std::string cmCommonTargetGenerator::GetFortranModuleDirectory()
 {
   // Compute the module directory.
   if(!this->FortranModuleDirectoryComputed)
     {
-    const char* target_mod_dir =
-      this->Target->GetProperty("Fortran_MODULE_DIRECTORY");
-    const char* moddir_flag =
-      this->Makefile->GetDefinition("CMAKE_Fortran_MODDIR_FLAG");
-    if(target_mod_dir && moddir_flag)
-      {
-      // Compute the full path to the module directory.
-      if(cmSystemTools::FileIsFullPath(target_mod_dir))
-        {
-        // Already a full path.
-        this->FortranModuleDirectory = target_mod_dir;
-        }
-      else
-        {
-        // Interpret relative to the current output directory.
-        this->FortranModuleDirectory =
-          this->Makefile->GetCurrentBinaryDirectory();
-        this->FortranModuleDirectory += "/";
-        this->FortranModuleDirectory += target_mod_dir;
-        }
-
-      // Make sure the module output directory exists.
-      cmSystemTools::MakeDirectory(this->FortranModuleDirectory.c_str());
-      }
     this->FortranModuleDirectoryComputed = true;
+    this->FortranModuleDirectory = this->ComputeFortranModuleDirectory();
     }
 
   // Return the computed directory.
-  if(this->FortranModuleDirectory.empty())
-    {
-    return 0;
-    }
-  else
-    {
-    return this->FortranModuleDirectory.c_str();
-    }
+  return this->FortranModuleDirectory;
 }
 
 //----------------------------------------------------------------------------
@@ -155,19 +159,24 @@ void cmCommonTargetGenerator::AddFortranFlags(std::string& flags)
     }
 
   // Add a module output directory flag if necessary.
-  const char* mod_dir = this->GetFortranModuleDirectory();
-  if(!mod_dir)
+  std::string mod_dir = this->GetFortranModuleDirectory();
+  if (!mod_dir.empty())
     {
-    mod_dir = this->Makefile->GetDefinition("CMAKE_Fortran_MODDIR_DEFAULT");
+    mod_dir = this->Convert(mod_dir,
+                            this->WorkingDirectory,
+                            cmLocalGenerator::SHELL);
     }
-  if(mod_dir)
+  else
+    {
+    mod_dir =
+      this->Makefile->GetSafeDefinition("CMAKE_Fortran_MODDIR_DEFAULT");
+    }
+  if (!mod_dir.empty())
     {
     const char* moddir_flag =
       this->Makefile->GetRequiredDefinition("CMAKE_Fortran_MODDIR_FLAG");
     std::string modflag = moddir_flag;
-    modflag += this->Convert(mod_dir,
-                             cmLocalGenerator::START_OUTPUT,
-                             cmLocalGenerator::SHELL);
+    modflag += mod_dir;
     this->LocalGenerator->AppendFlags(flags, modflag);
     }
 
