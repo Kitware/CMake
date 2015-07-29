@@ -1069,14 +1069,11 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
     << "  )\n";
   }
 
-  // Check for a target-specific module output directory.
-  if(const char* mdir = this->GetFortranModuleDirectory())
-    {
-    *this->InfoFileStream
-      << "\n"
-      << "# Fortran module output directory.\n"
-      << "set(CMAKE_Fortran_TARGET_MODULE_DIR \"" << mdir << "\")\n";
-    }
+  *this->InfoFileStream
+    << "\n"
+    << "# Fortran module output directory.\n"
+    << "set(CMAKE_Fortran_TARGET_MODULE_DIR \""
+    << this->GetFortranModuleDirectory() << "\")\n";
 
   // and now write the rule to use it
   std::vector<std::string> depends;

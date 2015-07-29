@@ -101,7 +101,7 @@ void cmCommonTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
 }
 
 //----------------------------------------------------------------------------
-const char* cmCommonTargetGenerator::GetFortranModuleDirectory()
+std::string cmCommonTargetGenerator::GetFortranModuleDirectory()
 {
   // Compute the module directory.
   if(!this->FortranModuleDirectoryComputed)
@@ -134,14 +134,7 @@ const char* cmCommonTargetGenerator::GetFortranModuleDirectory()
     }
 
   // Return the computed directory.
-  if(this->FortranModuleDirectory.empty())
-    {
-    return 0;
-    }
-  else
-    {
-    return this->FortranModuleDirectory.c_str();
-    }
+  return this->FortranModuleDirectory;
 }
 
 //----------------------------------------------------------------------------
@@ -155,19 +148,24 @@ void cmCommonTargetGenerator::AddFortranFlags(std::string& flags)
     }
 
   // Add a module output directory flag if necessary.
-  const char* mod_dir = this->GetFortranModuleDirectory();
-  if(!mod_dir)
+  std::string mod_dir = this->GetFortranModuleDirectory();
+  if (!mod_dir.empty())
     {
-    mod_dir = this->Makefile->GetDefinition("CMAKE_Fortran_MODDIR_DEFAULT");
+    mod_dir = this->Convert(mod_dir,
+                            cmLocalGenerator::START_OUTPUT,
+                            cmLocalGenerator::SHELL);
     }
-  if(mod_dir)
+  else
+    {
+    mod_dir =
+      this->Makefile->GetSafeDefinition("CMAKE_Fortran_MODDIR_DEFAULT");
+    }
+  if (!mod_dir.empty())
     {
     const char* moddir_flag =
       this->Makefile->GetRequiredDefinition("CMAKE_Fortran_MODDIR_FLAG");
     std::string modflag = moddir_flag;
-    modflag += this->Convert(mod_dir,
-                             cmLocalGenerator::START_OUTPUT,
-                             cmLocalGenerator::SHELL);
+    modflag += mod_dir;
     this->LocalGenerator->AppendFlags(flags, modflag);
     }
 

@@ -59,7 +59,7 @@ protected:
   // Target-wide Fortran module output directory.
   bool FortranModuleDirectoryComputed;
   std::string FortranModuleDirectory;
-  const char* GetFortranModuleDirectory();
+  std::string GetFortranModuleDirectory();
 
   // Compute target-specific Fortran language flags.
   void AddFortranFlags(std::string& flags);
