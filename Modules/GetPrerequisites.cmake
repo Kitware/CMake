@@ -700,6 +700,8 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     return()
   endif()
 
+  set(gp_cmd_maybe_filter)      # optional command to pre-filter gp_tool results
+
   if(gp_tool STREQUAL "ldd")
     set(gp_cmd_args "")
     set(gp_regex "^[\t ]*[^\t ]+ => ([^\t\(]+) .*${eol_char}$")
@@ -724,6 +726,11 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     set(gp_regex_error "")
     set(gp_regex_fallback "")
     set(gp_regex_cmp_count 1)
+    # objdump generaates copious output so we create a grep filter to pre-filter results
+    find_program(gp_grep_cmd grep)
+    if(gp_grep_cmd)
+      set(gp_cmd_maybe_filter COMMAND ${gp_grep_cmd} "^[[:blank:]]*DLL Name: ")
+    endif()
   else()
     message(STATUS "warning: gp_tool='${gp_tool}' is an unknown tool...")
     message(STATUS "CMake function get_prerequisites needs more code to handle '${gp_tool}'")
@@ -780,6 +787,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   #
   execute_process(
     COMMAND ${gp_cmd} ${gp_cmd_args} ${target}
+    ${gp_cmd_maybe_filter}
     RESULT_VARIABLE gp_rv
     OUTPUT_VARIABLE gp_cmd_ov
     ERROR_VARIABLE gp_ev
