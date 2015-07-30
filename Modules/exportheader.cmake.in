@@ -4,15 +4,18 @@
 
 #ifdef @STATIC_DEFINE@
 #  define @EXPORT_MACRO_NAME@
+#  define @EXPORT_MACRO_NAME@_TEMPLATE
 #  define @NO_EXPORT_MACRO_NAME@
 #else
 #  ifndef @EXPORT_MACRO_NAME@
 #    ifdef @EXPORT_IMPORT_CONDITION@
         /* We are building this library */
 #      define @EXPORT_MACRO_NAME@ @DEFINE_EXPORT@
+#      define @EXPORT_MACRO_NAME@_TEMPLATE
 #    else
         /* We are using this library */
 #      define @EXPORT_MACRO_NAME@ @DEFINE_IMPORT@
+#      define @EXPORT_MACRO_NAME@_TEMPLATE extern
 #    endif
 #  endif
 
