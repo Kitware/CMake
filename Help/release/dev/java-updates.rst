@@ -7,3 +7,7 @@ java-updates
 * The :module:`UseJava` module ``add_jar`` function learned
   to support response files (e.g. ``@srcs.txt``) for source
   specification.
+
+* The :module:`UseJava` module ``install_jar`` function learned
+  new ``DESTINATION`` and ``COMPONENT`` options to specify
+  the corresponding :command:`install` command options.
