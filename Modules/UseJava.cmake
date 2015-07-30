@@ -211,14 +211,16 @@
 #
 # ::
 #
-#  install_jar(TARGET_NAME DESTINATION)
+#  install_jar(target_name destination)
+#  install_jar(target_name DESTINATION destination [COMPONENT component])
 #
 # This command installs the TARGET_NAME files to the given DESTINATION.
 # It should be called in the same scope as add_jar() or it will fail.
 #
 # ::
 #
-#  install_jni_symlink(TARGET_NAME DESTINATION)
+#  install_jni_symlink(target_name destination)
+#  install_jni_symlink(target_name DESTINATION destination [COMPONENT component])
 #
 # This command installs the TARGET_NAME JNI symlinks to the given
 # DESTINATION.  It should be called in the same scope as add_jar() or it
@@ -629,7 +631,26 @@ function(add_jar _TARGET_NAME)
 
 endfunction()
 
-function(INSTALL_JAR _TARGET_NAME _DESTINATION)
+function(INSTALL_JAR _TARGET_NAME)
+    if (ARGC EQUAL 2)
+      set (_DESTINATION ${ARGV1})
+    else()
+      cmake_parse_arguments(_install_jar
+        ""
+        "DESTINATION;COMPONENT"
+        ""
+        ${ARGN})
+      if (_install_jar_DESTINATION)
+        set (_DESTINATION ${_install_jar_DESTINATION})
+      else()
+        message(SEND_ERROR "install_jar: ${_TARGET_NAME}: DESTINATION must be specified.")
+      endif()
+
+      if (_install_jar_COMPONENT)
+        set (_COMPONENT COMPONENT ${_install_jar_COMPONENT})
+      endif()
+    endif()
+
     get_property(__FILES
         TARGET
             ${_TARGET_NAME}
@@ -643,13 +664,33 @@ function(INSTALL_JAR _TARGET_NAME _DESTINATION)
                 ${__FILES}
             DESTINATION
                 ${_DESTINATION}
+            ${_COMPONENT}
         )
     else ()
-        message(SEND_ERROR "The target ${_TARGET_NAME} is not known in this scope.")
+        message(SEND_ERROR "install_jar: The target ${_TARGET_NAME} is not known in this scope.")
     endif ()
 endfunction()
 
-function(INSTALL_JNI_SYMLINK _TARGET_NAME _DESTINATION)
+function(INSTALL_JNI_SYMLINK _TARGET_NAME)
+    if (ARGC EQUAL 2)
+      set (_DESTINATION ${ARGV1})
+    else()
+      cmake_parse_arguments(_install_jni_symlink
+        ""
+        "DESTINATION;COMPONENT"
+        ""
+        ${ARGN})
+      if (_install_jni_symlink_DESTINATION)
+        set (_DESTINATION ${_install_jni_symlink_DESTINATION})
+      else()
+        message(SEND_ERROR "install_jni_symlink: ${_TARGET_NAME}: DESTINATION must be specified.")
+      endif()
+
+      if (_install_jni_symlink_COMPONENT)
+        set (_COMPONENT COMPONENT ${_install_jni_symlink_COMPONENT})
+      endif()
+    endif()
+
     get_property(__SYMLINK
         TARGET
             ${_TARGET_NAME}
@@ -663,9 +704,10 @@ function(INSTALL_JNI_SYMLINK _TARGET_NAME _DESTINATION)
                 ${__SYMLINK}
             DESTINATION
                 ${_DESTINATION}
+            ${_COMPONENT}
         )
     else ()
-        message(SEND_ERROR "The target ${_TARGET_NAME} is not known in this scope.")
+        message(SEND_ERROR "install_jni_symlink: The target ${_TARGET_NAME} is not known in this scope.")
     endif ()
 endfunction()
 
