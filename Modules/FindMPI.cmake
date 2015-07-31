@@ -102,7 +102,6 @@
 
 # include this to handle the QUIETLY and REQUIRED arguments
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/GetPrerequisites.cmake)
 
 #
 # This part detects MPI compilers, attempting to wade through the mess of compiler names in
@@ -578,14 +577,13 @@ foreach (lang C CXX Fortran)
   if (CMAKE_${lang}_COMPILER_WORKS)
     # If the user supplies a compiler *name* instead of an absolute path, assume that we need to find THAT compiler.
     if (MPI_${lang}_COMPILER)
-      is_file_executable(MPI_${lang}_COMPILER MPI_COMPILER_IS_EXECUTABLE)
-      if (NOT MPI_COMPILER_IS_EXECUTABLE)
+      if (NOT IS_ABSOLUTE "${MPI_${lang}_COMPILER}")
         # Get rid of our default list of names and just search for the name the user wants.
         set(_MPI_${lang}_COMPILER_NAMES ${MPI_${lang}_COMPILER})
         set(MPI_${lang}_COMPILER "MPI_${lang}_COMPILER-NOTFOUND" CACHE FILEPATH "Cleared" FORCE)
-        # If the user specifies a compiler, we don't want to try to search libraries either.
-        set(try_libs FALSE)
       endif()
+      # If the user specifies a compiler, we don't want to try to search libraries either.
+      set(try_libs FALSE)
     else()
       set(try_libs TRUE)
     endif()
