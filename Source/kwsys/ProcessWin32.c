@@ -109,14 +109,15 @@ static DWORD WINAPI kwsysProcessPipeThreadWake(LPVOID ptd);
 static void kwsysProcessPipeThreadWakePipe(kwsysProcess* cp,
                                            kwsysProcessPipeData* td);
 static int kwsysProcessInitialize(kwsysProcess* cp);
-static int kwsysProcessCreate(kwsysProcess* cp, int index,
-                              kwsysProcessCreateInformation* si);
+static DWORD kwsysProcessCreate(kwsysProcess* cp, int index,
+                                kwsysProcessCreateInformation* si);
 static void kwsysProcessDestroy(kwsysProcess* cp, int event);
-static int kwsysProcessSetupOutputPipeFile(PHANDLE handle, const char* name);
+static DWORD kwsysProcessSetupOutputPipeFile(PHANDLE handle,
+                                             const char* name);
 static void kwsysProcessSetupSharedPipe(DWORD nStdHandle, PHANDLE handle);
 static void kwsysProcessSetupPipeNative(HANDLE native, PHANDLE handle);
 static void kwsysProcessCleanupHandle(PHANDLE h);
-static void kwsysProcessCleanup(kwsysProcess* cp, int error);
+static void kwsysProcessCleanup(kwsysProcess* cp, DWORD error);
 static void kwsysProcessCleanErrorMessage(kwsysProcess* cp);
 static int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
                                       kwsysProcessTime* timeoutTime);
@@ -969,7 +970,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     if(!GetCurrentDirectoryW(cp->RealWorkingDirectoryLength,
                             cp->RealWorkingDirectory))
       {
-      kwsysProcessCleanup(cp, 1);
+      kwsysProcessCleanup(cp, GetLastError());
       return;
       }
     SetCurrentDirectoryW(cp->WorkingDirectory);
@@ -981,14 +982,16 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     {
     /* Create a handle to read a file for stdin.  */
     wchar_t* wstdin = kwsysEncoding_DupToWide(cp->PipeFileSTDIN);
+    DWORD error;
     cp->PipeChildStd[0] =
       CreateFileW(wstdin, GENERIC_READ|GENERIC_WRITE,
                   FILE_SHARE_READ|FILE_SHARE_WRITE,
                   0, OPEN_EXISTING, 0, 0);
+    error = GetLastError(); /* Check now in case free changes this.  */
     free(wstdin);
     if(cp->PipeChildStd[0] == INVALID_HANDLE_VALUE)
       {
-      kwsysProcessCleanup(cp, 1);
+      kwsysProcessCleanup(cp, error);
       return;
       }
     }
@@ -1014,17 +1017,18 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   if(!CreatePipe(&cp->Pipe[KWSYSPE_PIPE_STDOUT].Read,
                  &cp->Pipe[KWSYSPE_PIPE_STDOUT].Write, 0, 0))
     {
-    kwsysProcessCleanup(cp, 1);
+    kwsysProcessCleanup(cp, GetLastError());
     return;
     }
 
   if(cp->PipeFileSTDOUT)
     {
     /* Use a file for stdout.  */
-    if(!kwsysProcessSetupOutputPipeFile(&cp->PipeChildStd[1],
-                                        cp->PipeFileSTDOUT))
+    DWORD error = kwsysProcessSetupOutputPipeFile(&cp->PipeChildStd[1],
+                                                  cp->PipeFileSTDOUT);
+    if(error)
       {
-      kwsysProcessCleanup(cp, 1);
+      kwsysProcessCleanup(cp, error);
       return;
       }
     }
@@ -1047,7 +1051,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
                         GetCurrentProcess(), &cp->PipeChildStd[1],
                         0, FALSE, DUPLICATE_SAME_ACCESS))
       {
-      kwsysProcessCleanup(cp, 1);
+      kwsysProcessCleanup(cp, GetLastError());
       return;
       }
     }
@@ -1058,17 +1062,18 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   if(!CreatePipe(&cp->Pipe[KWSYSPE_PIPE_STDERR].Read,
                  &cp->Pipe[KWSYSPE_PIPE_STDERR].Write, 0, 0))
     {
-    kwsysProcessCleanup(cp, 1);
+    kwsysProcessCleanup(cp, GetLastError());
     return;
     }
 
   if(cp->PipeFileSTDERR)
     {
     /* Use a file for stderr.  */
-    if(!kwsysProcessSetupOutputPipeFile(&cp->PipeChildStd[2],
-                                        cp->PipeFileSTDERR))
+    DWORD error = kwsysProcessSetupOutputPipeFile(&cp->PipeChildStd[2],
+                                                  cp->PipeFileSTDERR);
+    if(error)
       {
-      kwsysProcessCleanup(cp, 1);
+      kwsysProcessCleanup(cp, error);
       return;
       }
     }
@@ -1091,7 +1096,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
                         GetCurrentProcess(), &cp->PipeChildStd[2],
                         0, FALSE, DUPLICATE_SAME_ACCESS))
       {
-      kwsysProcessCleanup(cp, 1);
+      kwsysProcessCleanup(cp, GetLastError());
       return;
       }
     }
@@ -1130,11 +1135,12 @@ void kwsysProcess_Execute(kwsysProcess* cp)
       HANDLE p[2] = {INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE};
       if (!CreatePipe(&p[0], &p[1], 0, 0))
         {
+        DWORD error = GetLastError();
         if (nextStdInput != cp->PipeChildStd[0])
           {
           kwsysProcessCleanupHandle(&nextStdInput);
           }
-        kwsysProcessCleanup(cp, 1);
+        kwsysProcessCleanup(cp, error);
         return;
         }
       nextStdInput = p[0];
@@ -1143,7 +1149,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     si.hStdError = cp->MergeOutput? cp->PipeChildStd[1] : cp->PipeChildStd[2];
 
     {
-    int res = kwsysProcessCreate(cp, i, &si);
+    DWORD error = kwsysProcessCreate(cp, i, &si);
 
     /* Close our copies of pipes used between children.  */
     if (si.hStdInput != cp->PipeChildStd[0])
@@ -1158,7 +1164,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
       {
       kwsysProcessCleanupHandle(&si.hStdError);
       }
-    if (res)
+    if (!error)
       {
       cp->ProcessEvents[i+1] = cp->ProcessInformation[i].hProcess;
       }
@@ -1168,7 +1174,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
         {
         kwsysProcessCleanupHandle(&nextStdInput);
         }
-      kwsysProcessCleanup(cp, 1);
+      kwsysProcessCleanup(cp, error);
       return;
       }
     }
@@ -1757,7 +1763,7 @@ int kwsysProcessInitialize(kwsysProcess* cp)
 }
 
 /*--------------------------------------------------------------------------*/
-static int kwsysProcessCreateChildHandle(PHANDLE out, HANDLE in, int isStdIn)
+static DWORD kwsysProcessCreateChildHandle(PHANDLE out, HANDLE in, int isStdIn)
 {
   DWORD flags;
 
@@ -1768,13 +1774,19 @@ static int kwsysProcessCreateChildHandle(PHANDLE out, HANDLE in, int isStdIn)
     if (flags & HANDLE_FLAG_INHERIT)
       {
       *out = in;
-      return 1;
+      return ERROR_SUCCESS;
       }
 
     /* Create an inherited copy of this handle.  */
-    return DuplicateHandle(GetCurrentProcess(), in,
-                           GetCurrentProcess(), out,
-                           0, TRUE, DUPLICATE_SAME_ACCESS);
+    if (DuplicateHandle(GetCurrentProcess(), in, GetCurrentProcess(), out,
+                        0, TRUE, DUPLICATE_SAME_ACCESS))
+      {
+      return ERROR_SUCCESS;
+      }
+    else
+      {
+      return GetLastError();
+      }
     }
   else
     {
@@ -1790,17 +1802,16 @@ static int kwsysProcessCreateChildHandle(PHANDLE out, HANDLE in, int isStdIn)
                         (GENERIC_WRITE | FILE_READ_ATTRIBUTES)),
                        FILE_SHARE_READ|FILE_SHARE_WRITE,
                        &sa, OPEN_EXISTING, 0, 0);
-    return *out != INVALID_HANDLE_VALUE;
+    return (*out != INVALID_HANDLE_VALUE) ? ERROR_SUCCESS : GetLastError();
     }
-
 }
 
 /*--------------------------------------------------------------------------*/
-int kwsysProcessCreate(kwsysProcess* cp, int index,
-                       kwsysProcessCreateInformation* si)
+DWORD kwsysProcessCreate(kwsysProcess* cp, int index,
+                         kwsysProcessCreateInformation* si)
 {
   DWORD creationFlags;
-  int res;
+  DWORD error = ERROR_SUCCESS;
 
   /* Check if we are currently exiting.  */
   if (!kwsysTryEnterCreateProcessSection())
@@ -1820,18 +1831,17 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
     creationFlags |= CREATE_NEW_PROCESS_GROUP;
     }
 
-  res =
-
-    /* Create inherited copies the handles.  */
-    kwsysProcessCreateChildHandle(&si->StartupInfo.hStdInput,
-                                  si->hStdInput, 1) &&
-    kwsysProcessCreateChildHandle(&si->StartupInfo.hStdOutput,
-                                  si->hStdOutput, 0) &&
-    kwsysProcessCreateChildHandle(&si->StartupInfo.hStdError,
-                                  si->hStdError, 0) &&
-
-    CreateProcessW(0, cp->Commands[index], 0, 0, TRUE, creationFlags, 0,
-                   0, &si->StartupInfo, &cp->ProcessInformation[index]);
+  /* Create inherited copies of the handles.  */
+  (error = kwsysProcessCreateChildHandle(&si->StartupInfo.hStdInput,
+                                          si->hStdInput, 1)) ||
+  (error = kwsysProcessCreateChildHandle(&si->StartupInfo.hStdOutput,
+                                          si->hStdOutput, 0)) ||
+  (error = kwsysProcessCreateChildHandle(&si->StartupInfo.hStdError,
+                                          si->hStdError, 0)) ||
+  /* Create the process.  */
+  (!CreateProcessW(0, cp->Commands[index], 0, 0, TRUE, creationFlags, 0,
+                  0, &si->StartupInfo, &cp->ProcessInformation[index]) &&
+    (error = GetLastError()));
 
   /* Close the inherited copies of the handles. */
   if (si->StartupInfo.hStdInput != si->hStdInput)
@@ -1848,7 +1858,8 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
     }
 
   /* Add the process to the global list of processes. */
-  if (!kwsysProcessesAdd(cp->ProcessInformation[index].hProcess,
+  if (!error &&
+      !kwsysProcessesAdd(cp->ProcessInformation[index].hProcess,
       cp->ProcessInformation[index].dwProcessId, cp->CreateProcessGroup))
     {
     /* This failed for some reason.  Kill the suspended process. */
@@ -1856,12 +1867,13 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
     /* And clean up... */
     kwsysProcessCleanupHandle(&cp->ProcessInformation[index].hProcess);
     kwsysProcessCleanupHandle(&cp->ProcessInformation[index].hThread);
-    res = 0;
+    strcpy(cp->ErrorMessage, "kwsysProcessesAdd function failed");
+    error = ERROR_NOT_ENOUGH_MEMORY; /* Most likely reason.  */
     }
 
   /* If the console Ctrl handler is waiting for us, this will release it... */
   kwsysLeaveCreateProcessSection();
-  return res;
+  return error;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1920,13 +1932,14 @@ void kwsysProcessDestroy(kwsysProcess* cp, int event)
 }
 
 /*--------------------------------------------------------------------------*/
-int kwsysProcessSetupOutputPipeFile(PHANDLE phandle, const char* name)
+DWORD kwsysProcessSetupOutputPipeFile(PHANDLE phandle, const char* name)
 {
   HANDLE fout;
   wchar_t* wname;
+  DWORD error;
   if(!name)
     {
-    return 1;
+    return ERROR_INVALID_PARAMETER;
     }
 
   /* Close the existing handle.  */
@@ -1936,15 +1949,16 @@ int kwsysProcessSetupOutputPipeFile(PHANDLE phandle, const char* name)
   wname = kwsysEncoding_DupToWide(name);
   fout = CreateFileW(wname, GENERIC_WRITE, FILE_SHARE_READ, 0,
                     CREATE_ALWAYS, 0, 0);
+  error = GetLastError();
   free(wname);
   if(fout == INVALID_HANDLE_VALUE)
     {
-    return 0;
+    return error;
     }
 
   /* Assign the replacement handle.  */
   *phandle = fout;
-  return 1;
+  return ERROR_SUCCESS;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1983,7 +1997,7 @@ void kwsysProcessCleanupHandle(PHANDLE h)
 /*--------------------------------------------------------------------------*/
 
 /* Close all handles created by kwsysProcess_Execute.  */
-void kwsysProcessCleanup(kwsysProcess* cp, int error)
+void kwsysProcessCleanup(kwsysProcess* cp, DWORD error)
 {
   int i;
   /* If this is an error case, report the error.  */
@@ -1993,21 +2007,27 @@ void kwsysProcessCleanup(kwsysProcess* cp, int error)
     if(cp->ErrorMessage[0] == 0)
       {
       /* Format the error message.  */
-      DWORD original = GetLastError();
       wchar_t err_msg[KWSYSPE_PIPE_BUFFER_SIZE];
       DWORD length = FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM |
-                                   FORMAT_MESSAGE_IGNORE_INSERTS, 0, original,
+                                   FORMAT_MESSAGE_IGNORE_INSERTS, 0, error,
                                    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                                    err_msg, KWSYSPE_PIPE_BUFFER_SIZE, 0);
-      WideCharToMultiByte(CP_UTF8, 0, err_msg, -1, cp->ErrorMessage,
-                          KWSYSPE_PIPE_BUFFER_SIZE, NULL, NULL);
       if(length < 1)
         {
         /* FormatMessage failed.  Use a default message.  */
         _snprintf(cp->ErrorMessage, KWSYSPE_PIPE_BUFFER_SIZE,
                   "Process execution failed with error 0x%X.  "
                   "FormatMessage failed with error 0x%X",
-                  original, GetLastError());
+                  error, GetLastError());
+        }
+      if(!WideCharToMultiByte(CP_UTF8, 0, err_msg, -1, cp->ErrorMessage,
+                              KWSYSPE_PIPE_BUFFER_SIZE, NULL, NULL))
+        {
+        /* WideCharToMultiByte failed.  Use a default message.  */
+        _snprintf(cp->ErrorMessage, KWSYSPE_PIPE_BUFFER_SIZE,
+                  "Process execution failed with error 0x%X.  "
+                  "WideCharToMultiByte failed with error 0x%X",
+                  error, GetLastError());
         }
       }
 
