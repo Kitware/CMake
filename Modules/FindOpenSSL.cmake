@@ -99,15 +99,20 @@ if(WIN32 AND NOT CYGWIN)
     # We are using the libraries located in the VC subdir instead of the parent directory eventhough :
     # libeay32MD.lib is identical to ../libeay32.lib, and
     # ssleay32MD.lib is identical to ../ssleay32.lib
+
+    set(_OPENSSL_PATH_SUFFIXES
+      "lib"
+      "VC"
+      "lib/VC"
+      )
+
     find_library(LIB_EAY_DEBUG
       NAMES
         libeay32MDd
         libeay32d
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
-        "lib"
-        "VC"
-        "lib/VC"
+        ${_OPENSSL_PATH_SUFFIXES}
     )
 
     find_library(LIB_EAY_RELEASE
@@ -116,9 +121,7 @@ if(WIN32 AND NOT CYGWIN)
         libeay32
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
-        "lib"
-        "VC"
-        "lib/VC"
+        ${_OPENSSL_PATH_SUFFIXES}
     )
 
     find_library(SSL_EAY_DEBUG
@@ -127,9 +130,7 @@ if(WIN32 AND NOT CYGWIN)
         ssleay32d
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
-        "lib"
-        "VC"
-        "lib/VC"
+        ${_OPENSSL_PATH_SUFFIXES}
     )
 
     find_library(SSL_EAY_RELEASE
@@ -139,9 +140,7 @@ if(WIN32 AND NOT CYGWIN)
         ssl
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
-        "lib"
-        "VC"
-        "lib/VC"
+        ${_OPENSSL_PATH_SUFFIXES}
     )
 
     set(LIB_EAY_LIBRARY_DEBUG "${LIB_EAY_DEBUG}")
@@ -155,9 +154,9 @@ if(WIN32 AND NOT CYGWIN)
 
     mark_as_advanced(LIB_EAY_LIBRARY_DEBUG LIB_EAY_LIBRARY_RELEASE
                      SSL_EAY_LIBRARY_DEBUG SSL_EAY_LIBRARY_RELEASE)
-    set( OPENSSL_SSL_LIBRARY ${SSL_EAY_LIBRARY} )
-    set( OPENSSL_CRYPTO_LIBRARY ${LIB_EAY_LIBRARY} )
-    set( OPENSSL_LIBRARIES ${SSL_EAY_LIBRARY} ${LIB_EAY_LIBRARY} )
+    set(OPENSSL_SSL_LIBRARY ${SSL_EAY_LIBRARY} )
+    set(OPENSSL_CRYPTO_LIBRARY ${LIB_EAY_LIBRARY} )
+    set(OPENSSL_LIBRARIES ${SSL_EAY_LIBRARY} ${LIB_EAY_LIBRARY} )
   elseif(MINGW)
     # same player, for MinGW
     set(LIB_EAY_NAMES libeay32)
@@ -185,9 +184,9 @@ if(WIN32 AND NOT CYGWIN)
     )
 
     mark_as_advanced(SSL_EAY LIB_EAY)
-    set( OPENSSL_SSL_LIBRARY ${SSL_EAY} )
-    set( OPENSSL_CRYPTO_LIBRARY ${LIB_EAY} )
-    set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
+    set(OPENSSL_SSL_LIBRARY ${SSL_EAY} )
+    set(OPENSSL_CRYPTO_LIBRARY ${LIB_EAY} )
+    set(OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
     unset(LIB_EAY_NAMES)
     unset(SSL_EAY_NAMES)
   else()
@@ -213,9 +212,9 @@ if(WIN32 AND NOT CYGWIN)
     )
 
     mark_as_advanced(SSL_EAY LIB_EAY)
-    set( OPENSSL_SSL_LIBRARY ${SSL_EAY} )
-    set( OPENSSL_CRYPTO_LIBRARY ${LIB_EAY} )
-    set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
+    set(OPENSSL_SSL_LIBRARY ${SSL_EAY} )
+    set(OPENSSL_CRYPTO_LIBRARY ${LIB_EAY} )
+    set(OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
   endif()
 else()
 
