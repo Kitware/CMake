@@ -7,14 +7,6 @@ if(CMAKE_SYSTEM MATCHES "SunOS-4")
    set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP ":")
 endif()
 
-if(CMAKE_COMPILER_IS_GNUCXX)
-  if(CMAKE_COMPILER_IS_GNUCC)
-    set(CMAKE_CXX_CREATE_SHARED_LIBRARY
-        "<CMAKE_C_COMPILER> <CMAKE_SHARED_LIBRARY_CXX_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS>  <SONAME_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>")
-  else()
-    # Take default rule from CMakeDefaultMakeRuleVariables.cmake.
-  endif()
-endif()
 include(Platform/UnixPaths)
 
 # Add the compiler's implicit link directories.
