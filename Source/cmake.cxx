@@ -126,8 +126,6 @@ cmake::cmake()
   this->WarnUnused = false;
   this->WarnUnusedCli = true;
   this->CheckSystemVars = false;
-  this->SuppressDevWarnings = false;
-  this->DoSuppressDevWarnings = false;
   this->DebugOutput = false;
   this->DebugTryCompile = false;
   this->ClearBuildSystem = false;
@@ -252,15 +250,70 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         return false;
         }
       }
-    else if(arg.find("-Wno-dev",0) == 0)
+    else if(cmHasLiteralPrefix(arg, "-W"))
       {
-      this->SuppressDevWarnings = true;
-      this->DoSuppressDevWarnings = true;
+      std::string entry = arg.substr(2);
+      if (entry.empty())
+        {
+        ++i;
+        if (i < args.size())
+          {
+          entry = args[i];
+          }
+        else
+          {
+          cmSystemTools::Error(
+            "-W must be followed with [no-][error=]<name>.");
+          return false;
+        }
       }
-    else if(arg.find("-Wdev",0) == 0)
-      {
-      this->SuppressDevWarnings = false;
-      this->DoSuppressDevWarnings = true;
+
+      std::string name;
+      bool foundNo = false;
+      bool foundError = false;
+      unsigned int nameStartPosition = 0;
+
+      if (entry.find("no-", nameStartPosition) == 0)
+        {
+        foundNo = true;
+        nameStartPosition += 3;
+        }
+
+      if (entry.find("error=", nameStartPosition) == 0)
+        {
+        foundError = true;
+        nameStartPosition += 6;
+        }
+
+      name = entry.substr(nameStartPosition);
+      if (name.empty())
+        {
+        cmSystemTools::Error("No warning name provided.");
+        return false;
+        }
+
+      if (!foundNo && !foundError)
+        {
+        // -W<name>
+        this->WarningLevels[name] = std::max(this->WarningLevels[name],
+                                             WARNING_LEVEL);
+        }
+      else if (foundNo && !foundError)
+        {
+         // -Wno<name>
+         this->WarningLevels[name] = IGNORE_LEVEL;
+        }
+      else if (!foundNo && foundError)
+        {
+        // -Werror=<name>
+        this->WarningLevels[name] = ERROR_LEVEL;
+        }
+      else
+        {
+        // -Wno-error=<name>
+        this->WarningLevels[name] = std::min(this->WarningLevels[name],
+                                             WARNING_LEVEL);
+        }
       }
     else if(arg.find("-U",0) == 0)
       {
@@ -589,11 +642,7 @@ void cmake::SetArgs(const std::vector<std::string>& args,
       // skip for now
       i++;
       }
-    else if(arg.find("-Wno-dev",0) == 0)
-      {
-      // skip for now
-      }
-    else if(arg.find("-Wdev",0) == 0)
+    else if(arg.find("-W",0) == 0)
       {
       // skip for now
       }
@@ -1180,25 +1229,121 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
 
 int cmake::Configure()
 {
-  if(this->DoSuppressDevWarnings)
+  WarningLevel warningLevel;
+
+  if (this->WarningLevels.count("deprecated") == 1)
     {
-    if(this->SuppressDevWarnings)
+    warningLevel = this->WarningLevels["deprecated"];
+    if (warningLevel == IGNORE_LEVEL)
+      {
+      this->CacheManager->
+        AddCacheEntry("CMAKE_WARN_DEPRECATED", "FALSE",
+                      "Whether to issue deprecation warnings for"
+                      " macros and functions.",
+                      cmState::BOOL);
+      this->CacheManager->
+        AddCacheEntry("CMAKE_ERROR_DEPRECATED", "FALSE",
+                      "Whether to issue deprecation errors for macros"
+                      " and functions.",
+                      cmState::BOOL);
+      }
+    if (warningLevel == WARNING_LEVEL)
+      {
+      this->CacheManager->
+        AddCacheEntry("CMAKE_WARN_DEPRECATED", "TRUE",
+                      "Whether to issue deprecation warnings for"
+                      " macros and functions.",
+                      cmState::BOOL);
+      }
+    else if (warningLevel == ERROR_LEVEL)
+      {
+      this->CacheManager->
+        AddCacheEntry("CMAKE_ERROR_DEPRECATED", "TRUE",
+                      "Whether to issue deprecation errors for macros"
+                      " and functions.",
+                      cmState::BOOL);
+      }
+    }
+
+  if (this->WarningLevels.count("dev") == 1)
+    {
+    bool setDeprecatedVariables = false;
+
+    const char* cachedWarnDeprecated =
+           this->State->GetCacheEntryValue("CMAKE_WARN_DEPRECATED");
+    const char* cachedErrorDeprecated =
+           this->State->GetCacheEntryValue("CMAKE_ERROR_DEPRECATED");
+
+    // don't overwrite deprecated warning setting from a previous invocation
+    if (!cachedWarnDeprecated && !cachedErrorDeprecated)
+      {
+      setDeprecatedVariables = true;
+      }
+
+    warningLevel = this->WarningLevels["dev"];
+    if (warningLevel == IGNORE_LEVEL)
       {
       this->CacheManager->
         AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "TRUE",
                       "Suppress Warnings that are meant for"
                       " the author of the CMakeLists.txt files.",
                       cmState::INTERNAL);
+      this->CacheManager->
+        AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_ERRORS", "TRUE",
+                      "Suppress errors that are meant for"
+                      " the author of the CMakeLists.txt files.",
+                      cmState::INTERNAL);
+
+      if (setDeprecatedVariables)
+        {
+        this->CacheManager->
+          AddCacheEntry("CMAKE_WARN_DEPRECATED", "FALSE",
+                        "Whether to issue deprecation warnings for"
+                        " macros and functions.",
+                        cmState::BOOL);
+        this->CacheManager->
+          AddCacheEntry("CMAKE_ERROR_DEPRECATED", "FALSE",
+                        "Whether to issue deprecation errors for macros"
+                        " and functions.",
+                        cmState::BOOL);
+        }
       }
-    else
+    else if (warningLevel == WARNING_LEVEL)
       {
       this->CacheManager->
         AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "FALSE",
                       "Suppress Warnings that are meant for"
                       " the author of the CMakeLists.txt files.",
                       cmState::INTERNAL);
+
+      if (setDeprecatedVariables)
+        {
+        this->CacheManager->
+          AddCacheEntry("CMAKE_WARN_DEPRECATED", "TRUE",
+                        "Whether to issue deprecation warnings for"
+                        " macros and functions.",
+                        cmState::BOOL);
+        }
+      }
+    else if (warningLevel == ERROR_LEVEL)
+      {
+      this->CacheManager->
+        AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_ERRORS", "FALSE",
+                      "Suppress errors that are meant for"
+                      " the author of the CMakeLists.txt files.",
+                      cmState::INTERNAL);
+
+      if (setDeprecatedVariables)
+        {
+        this->CacheManager->
+          AddCacheEntry("CMAKE_ERROR_DEPRECATED", "TRUE",
+                        "Whether to issue deprecation errors for macros"
+                        " and functions.",
+                        cmState::BOOL);
+        }
       }
     }
+
   int ret = this->ActualConfigure();
   const char* delCacheVars = this->State
                     ->GetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_");
@@ -1529,6 +1674,18 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     {
     this->AddCMakePaths();
     }
+
+  // don't turn dev warnings into errors by default, if no value has been
+  // specified for the flag, enable it
+  if (!this->State->GetCacheEntryValue("CMAKE_SUPPRESS_DEVELOPER_ERRORS"))
+    {
+    this->CacheManager->
+            AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_ERRORS", "TRUE",
+                          "Suppress errors that are meant for"
+                          " the author of the CMakeLists.txt files.",
+                          cmState::INTERNAL);
+    }
+
   // Add any cache args
   if ( !this->SetCacheArgs(args) )
     {
@@ -2431,20 +2588,17 @@ bool cmake::PrintMessagePreamble(cmake::MessageType t, std::ostream& msg)
     {
     msg << "CMake Deprecation Warning";
     }
+  else if (t == cmake::AUTHOR_WARNING)
+    {
+    msg << "CMake Warning (dev)";
+    }
+  else if (t == cmake::AUTHOR_ERROR)
+    {
+    msg << "CMake Error (dev)";
+    }
   else
     {
     msg << "CMake Warning";
-    if(t == cmake::AUTHOR_WARNING)
-      {
-      // Allow suppression of these warnings.
-      const char* suppress = this->State->GetCacheEntryValue(
-                                        "CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
-      if(suppress && cmSystemTools::IsOn(suppress))
-        {
-        return false;
-        }
-      msg << " (dev)";
-      }
     }
   return true;
 }
@@ -2465,6 +2619,12 @@ void displayMessage(cmake::MessageType t, std::ostringstream& msg)
     {
     msg <<
       "This warning is for project developers.  Use -Wno-dev to suppress it.";
+    }
+  else if (t == cmake::AUTHOR_ERROR)
+    {
+    msg <<
+      "This error is for project developers. Use -Wno-error=dev to suppress "
+      "it.";
     }
 
   // Add a terminating blank line.
@@ -2489,7 +2649,8 @@ void displayMessage(cmake::MessageType t, std::ostringstream& msg)
   // Output the message.
   if(t == cmake::FATAL_ERROR
      || t == cmake::INTERNAL_ERROR
-     || t == cmake::DEPRECATION_ERROR)
+     || t == cmake::DEPRECATION_ERROR
+     || t == cmake::AUTHOR_ERROR)
     {
     cmSystemTools::SetErrorOccured();
     cmSystemTools::Message(msg.str().c_str(), "Error");
@@ -2666,4 +2827,19 @@ void cmake::RunCheckForUnusedVariables()
     this->IssueMessage(cmake::WARNING, msg.str());
     }
 #endif
+}
+
+void cmake::SetSuppressDevWarnings(bool b)
+{
+  // equivalent to -Wno-dev
+  if (b)
+    {
+    this->WarningLevels["dev"] = IGNORE_LEVEL;
+    }
+  // equivalent to -Wdev
+  else
+    {
+    this->WarningLevels["dev"] = std::max(this->WarningLevels["dev"],
+                                          WARNING_LEVEL);
+    }
 }
