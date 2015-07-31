@@ -453,7 +453,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
 
     typedef LONG (FAR WINAPI *cmRtlGetVersion)(CMRTL_OSVERSIONINFOEXW*);
     cmRtlGetVersion rtlGetVersion = reinterpret_cast<cmRtlGetVersion>(
-      GetProcAddress(GetModuleHandle(L"ntdll.dll"), "RtlGetVersion"));
+      GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlGetVersion"));
     if (rtlGetVersion && rtlGetVersion(&osviex) == 0)
       {
       std::ostringstream windowsVersionString;
