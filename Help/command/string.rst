@@ -96,7 +96,7 @@ random number generator.
 ``FIND`` will return the position where the given substring was found in
 the supplied string.  If the ``REVERSE`` flag was used, the command will
 search for the position of the last occurrence of the specified
-substring.
+substring.  If the substring is not found, a position of -1 is returned.
 
 The following characters have special meaning in regular expressions:
 
