@@ -243,7 +243,7 @@ void cmXCodeObject::PrintString(std::ostream& os,std::string String)
   bool needQuote =
     (String.empty() ||
      String.find("//") != String.npos ||
-     String.find_first_of(" <>+-*=@[](){},") != String.npos);
+     String.find_first_of(" <>+-*=@[](){},~") != String.npos);
   const char* quote = needQuote? "\"" : "";
 
   // Print the string, quoted and escaped as necessary.
