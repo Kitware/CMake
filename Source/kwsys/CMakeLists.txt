@@ -1237,7 +1237,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
     IF(NOT CYGWIN)
       SET(KWSYS_TEST_PROCESS_7 7)
     ENDIF()
-    FOREACH(n 1 2 3 4 5 6 ${KWSYS_TEST_PROCESS_7})
+    FOREACH(n 1 2 3 4 5 6 ${KWSYS_TEST_PROCESS_7} 9 10)
       ADD_TEST(kwsys.testProcess-${n} ${EXEC_DIR}/${KWSYS_NAMESPACE}TestProcess ${n})
       SET_PROPERTY(TEST kwsys.testProcess-${n} PROPERTY LABELS ${KWSYS_LABELS_TEST})
       SET_TESTS_PROPERTIES(kwsys.testProcess-${n} PROPERTIES TIMEOUT 120)
@@ -1269,6 +1269,10 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       SET_TESTS_PROPERTIES(kwsys.testFail PROPERTIES MEASUREMENT "Some Key=Some Value")
       MESSAGE(STATUS "GET_TEST_PROPERTY returned: ${wfv}")
     ENDIF()
+
+    # Set up ctest custom configuration file.
+    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/CTestCustom.cmake.in
+                   ${PROJECT_BINARY_DIR}/CTestCustom.cmake @ONLY)
 
     # Suppress known consistent failures on buggy systems.
     IF(KWSYS_TEST_BOGUS_FAILURES)
