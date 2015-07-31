@@ -1150,35 +1150,35 @@ void cmGeneratorTarget::GenerateTargetManifest(
     f = dir;
     f += "/";
     f += name;
-    gg->AddToManifest(config, f);
+    gg->AddToManifest(f);
     }
   if(!soName.empty())
     {
     f = dir;
     f += "/";
     f += soName;
-    gg->AddToManifest(config, f);
+    gg->AddToManifest(f);
     }
   if(!realName.empty())
     {
     f = dir;
     f += "/";
     f += realName;
-    gg->AddToManifest(config, f);
+    gg->AddToManifest(f);
     }
   if(!pdbName.empty())
     {
     f = dir;
     f += "/";
     f += pdbName;
-    gg->AddToManifest(config, f);
+    gg->AddToManifest(f);
     }
   if(!impName.empty())
     {
     f = this->Target->GetDirectory(config, true);
     f += "/";
     f += impName;
-    gg->AddToManifest(config, f);
+    gg->AddToManifest(f);
     }
 }
 

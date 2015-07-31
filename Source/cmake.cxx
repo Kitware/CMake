@@ -1607,7 +1607,11 @@ int cmake::Generate()
     {
     return -1;
     }
-  this->GlobalGenerator->DoGenerate();
+  if (!this->GlobalGenerator->Compute())
+    {
+    return -1;
+    }
+  this->GlobalGenerator->Generate();
   if ( !this->GraphVizFile.empty() )
     {
     std::cout << "Generate graphviz: " << this->GraphVizFile << std::endl;

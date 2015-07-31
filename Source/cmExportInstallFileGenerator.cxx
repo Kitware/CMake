@@ -398,7 +398,7 @@ cmExportInstallFileGenerator
     }
 
   // Get the target to be installed.
-  cmTarget* target = itgen->GetTarget();
+  cmTarget* target = itgen->GetTarget()->Target;
 
   // Construct the installed location of the target.
   std::string dest = itgen->GetDestination(config);

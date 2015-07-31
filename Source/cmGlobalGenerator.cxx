@@ -34,6 +34,7 @@
 #include "cmExportBuildFileGenerator.h"
 #include "cmCPackPropertiesGenerator.h"
 #include "cmAlgorithms.h"
+#include "cmInstallGenerator.h"
 
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
@@ -1212,7 +1213,7 @@ bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const
   return false;
 }
 
-void cmGlobalGenerator::DoGenerate()
+bool cmGlobalGenerator::Compute()
 {
   // Some generators track files replaced during the Generate.
   // Start with an empty vector:
@@ -1221,17 +1222,11 @@ void cmGlobalGenerator::DoGenerate()
   // clear targets to issue warning CMP0042 for
   this->CMP0042WarnTargets.clear();
 
-  this->Generate();
-}
-
-void cmGlobalGenerator::Generate()
-{
   // Check whether this generator is allowed to run.
   if(!this->CheckALLOW_DUPLICATE_CUSTOM_TARGETS())
     {
-    return;
+    return false;
     }
-
   this->FinalizeTargetCompileInfo();
 
   this->CreateGenerationObjects();
@@ -1265,6 +1260,24 @@ void cmGlobalGenerator::Generate()
     it->first.SetupAutoGenerateTarget(it->second);
     }
 #endif
+
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    cmMakefile* mf = this->LocalGenerators[i]->GetMakefile();
+    std::vector<cmInstallGenerator*>& gens = mf->GetInstallGenerators();
+    for (std::vector<cmInstallGenerator*>::const_iterator git = gens.begin();
+         git != gens.end(); ++git)
+      {
+      (*git)->Compute(this->LocalGenerators[i]);
+      }
+    }
+
+  return true;
+}
+
+void cmGlobalGenerator::Generate()
+{
+  unsigned int i;
 
   // Trace the dependencies, after that no custom commands should be added
   // because their dependencies might not be handled correctly
@@ -2698,12 +2711,8 @@ void cmGlobalGenerator::AddTargetDepends(cmGeneratorTarget const* target,
 
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::AddToManifest(const std::string& config,
-                                      std::string const& f)
+void cmGlobalGenerator::AddToManifest(std::string const& f)
 {
-  // Add to the main manifest for this configuration.
-  this->TargetManifest[config].insert(f);
-
   // Add to the content listing for the file's directory.
   std::string dir = cmSystemTools::GetFilenamePath(f);
   std::string file = cmSystemTools::GetFilenameName(f);
