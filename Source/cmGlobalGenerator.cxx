@@ -484,7 +484,8 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
 # pragma warning (pop)
 #endif
       std::ostringstream windowsVersionString;
-      windowsVersionString << osvi.dwMajorVersion << "." << osvi.dwMinorVersion;
+      windowsVersionString << osvi.dwMajorVersion << "."
+                           << osvi.dwMinorVersion;
       windowsVersionString.str();
       mf->AddDefinition("CMAKE_HOST_SYSTEM_VERSION",
                         windowsVersionString.str().c_str());
