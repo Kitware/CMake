@@ -736,7 +736,7 @@ cmState::Snapshot cmState::CreateBaseSnapshot()
 {
   PositionType pos = this->SnapshotData.Extend(this->SnapshotData.Root());
   pos->DirectoryParent = this->SnapshotData.Root();
-  pos->SnapshotType = BuildsystemDirectoryType;
+  pos->SnapshotType = BaseType;
   pos->BuildSystemDirectory =
       this->BuildsystemDirectory.Extend(this->BuildsystemDirectory.Root());
   pos->ExecutionListFile =
@@ -1019,7 +1019,8 @@ cmState::Snapshot cmState::Snapshot::GetCallStackParent() const
     {
     ++parentPos;
     }
-  if (parentPos->SnapshotType == cmState::BuildsystemDirectoryType)
+  if (parentPos->SnapshotType == cmState::BuildsystemDirectoryType
+      || parentPos->SnapshotType == cmState::BaseType)
     {
     return snapshot;
     }
