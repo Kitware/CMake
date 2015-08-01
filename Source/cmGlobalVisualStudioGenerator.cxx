@@ -112,7 +112,7 @@ bool cmGlobalVisualStudioGenerator::Compute()
           i != gen.end(); ++i)
         {
         cmGeneratorTargetsType targets =
-            lg->GetMakefile()->GetGeneratorTargets();
+            (*i)->GetMakefile()->GetGeneratorTargets();
         for(cmGeneratorTargetsType::iterator t = targets.begin();
             t != targets.end(); ++t)
           {
