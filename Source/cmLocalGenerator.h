@@ -305,6 +305,8 @@ public:
 
   void IssueMessage(cmake::MessageType t, std::string const& text) const;
 
+  void CreateEvaluationFileOutputs(const std::string& config);
+  void ProcessEvaluationFiles(std::vector<std::string>& generatedFiles);
 
   void ComputeObjectMaxPath();
 protected:

@@ -3573,11 +3573,8 @@ void cmFileCommand::AddEvaluationFile(const std::string &inputName,
   cmsys::auto_ptr<cmCompiledGeneratorExpression> conditionCge
                                               = conditionGe.Parse(condition);
 
-  this->Makefile->GetGlobalGenerator()->AddEvaluationFile(inputName,
-                                                          outputCge,
-                                                          this->Makefile,
-                                                          conditionCge,
-                                                          inputIsContent);
+  this->Makefile->AddEvaluationFile(inputName, outputCge,
+                                    conditionCge, inputIsContent);
 }
 
 //----------------------------------------------------------------------------
