@@ -362,7 +362,7 @@ cmExportInstallFileGenerator
     if(!properties.empty())
       {
       // Get the rest of the target details.
-      cmGeneratorTarget *gtgt = te->Target->GetMakefile()->GetLocalGenerator()
+      cmGeneratorTarget *gtgt = te->Target->GetMakefile()
                     ->GetGlobalGenerator()->GetGeneratorTarget(te->Target);
       this->SetImportDetailProperties(config, suffix,
                                       gtgt, properties, missingTargets);
