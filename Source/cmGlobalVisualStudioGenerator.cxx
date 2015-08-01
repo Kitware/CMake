@@ -111,17 +111,18 @@ bool cmGlobalVisualStudioGenerator::Compute()
       for(std::vector<cmLocalGenerator*>::iterator i = gen.begin();
           i != gen.end(); ++i)
         {
-        cmTargets& targets = (*i)->GetMakefile()->GetTargets();
-        for(cmTargets::iterator t = targets.begin();
+        cmGeneratorTargetsType targets =
+            lg->GetMakefile()->GetGeneratorTargets();
+        for(cmGeneratorTargetsType::iterator t = targets.begin();
             t != targets.end(); ++t)
           {
-          if (t->second.GetType() == cmTarget::GLOBAL_TARGET)
+          if (t->second->GetType() == cmTarget::GLOBAL_TARGET)
             {
             continue;
             }
           if(!this->IsExcluded(gen[0], t->second))
             {
-            allBuild->AddUtility(t->second.GetName());
+            allBuild->AddUtility(t->second->GetName());
             }
           }
         }

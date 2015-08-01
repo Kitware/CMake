@@ -1199,7 +1199,7 @@ public:
       : Preference(0), Target(target)
     {
     this->Makefile = this->Target->Makefile;
-    this->GG = this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+    this->GG = this->Makefile->GetGlobalGenerator();
     }
   void Consider(const char* lang)
     {

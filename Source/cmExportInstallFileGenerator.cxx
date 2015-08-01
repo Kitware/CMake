@@ -193,7 +193,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 
     this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE",
                                   te, properties);
-    cmGeneratorTarget *gtgt = te->GetMakefile()->GetLocalGenerator()
+    cmGeneratorTarget *gtgt = te->GetMakefile()
                                 ->GetGlobalGenerator()
                                 ->GetGeneratorTarget(te);
 
@@ -362,7 +362,7 @@ cmExportInstallFileGenerator
     if(!properties.empty())
       {
       // Get the rest of the target details.
-      cmGeneratorTarget *gtgt = te->Target->GetMakefile()->GetLocalGenerator()
+      cmGeneratorTarget *gtgt = te->Target->GetMakefile()
                     ->GetGlobalGenerator()->GetGeneratorTarget(te->Target);
       this->SetImportDetailProperties(config, suffix,
                                       gtgt, properties, missingTargets);

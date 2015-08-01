@@ -372,7 +372,7 @@ cmInstallTargetGenerator::GetInstallFilename(cmTarget const* target,
 {
   std::string fname;
   // Compute the name of the library.
-  cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
+  cmGeneratorTarget *gtgt = target->GetMakefile()
                                   ->GetGlobalGenerator()
                                   ->GetGeneratorTarget(target);
   if(target->GetType() == cmTarget::EXECUTABLE)
@@ -577,7 +577,6 @@ cmInstallTargetGenerator
         }
 
       cmGeneratorTarget *gtgt = tgt->GetMakefile()
-                                          ->GetLocalGenerator()
                                           ->GetGlobalGenerator()
                                           ->GetGeneratorTarget(tgt);
       // If the build tree and install tree use different path
