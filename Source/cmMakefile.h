@@ -52,6 +52,7 @@ class cmVariableWatch;
 class cmake;
 class cmMakefileCall;
 class cmCMakePolicyCommand;
+class cmGeneratorExpressionEvaluationFile;
 
 /** \class cmMakefile
  * \brief Process the input CMakeLists.txt file.
@@ -799,6 +800,12 @@ public:
 
   void EnforceDirectoryLevelRules() const;
 
+  void AddEvaluationFile(const std::string &inputFile,
+                  cmsys::auto_ptr<cmCompiledGeneratorExpression> outputName,
+                  cmsys::auto_ptr<cmCompiledGeneratorExpression> condition,
+                  bool inputIsContent);
+  std::vector<cmGeneratorExpressionEvaluationFile*> GetEvaluationFiles() const;
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const std::string& name, cmTarget& target);
@@ -894,6 +901,8 @@ private:
   mutable cmsys::RegularExpression cmNamedCurly;
 
   std::vector<cmMakefile*> UnConfiguredDirectories;
+
+  std::vector<cmGeneratorExpressionEvaluationFile*> EvaluationFiles;
 
   cmPropertyMap Properties;
 
