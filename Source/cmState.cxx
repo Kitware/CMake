@@ -34,6 +34,8 @@ struct cmState::SnapshotDataType
 
 struct cmState::BuildsystemDirectoryStateType
 {
+  cmState::PositionType DirectoryEnd;
+
   std::string Location;
   std::string OutputLocation;
 
@@ -239,6 +241,9 @@ cmState::Snapshot cmState::Reset()
   this->GlobalProperties.clear();
   this->PropertyDefinitions.clear();
 
+  PositionType pos = this->SnapshotData.Truncate();
+  this->ExecutionListFiles.Truncate();
+
   {
   cmLinkedTree<BuildsystemDirectoryStateType>::iterator it =
       this->BuildsystemDirectory.Truncate();
@@ -248,9 +253,8 @@ cmState::Snapshot cmState::Reset()
   it->CompileDefinitionsBacktraces.clear();
   it->CompileOptions.clear();
   it->CompileOptionsBacktraces.clear();
+  it->DirectoryEnd = pos;
   }
-  PositionType pos = this->SnapshotData.Truncate();
-  this->ExecutionListFiles.Truncate();
 
   this->DefineProperty
     ("RULE_LAUNCH_COMPILE", cmProperty::DIRECTORY,
@@ -721,6 +725,7 @@ cmState::Snapshot cmState::CreateBaseSnapshot()
   pos->IncludeDirectoryPosition = 0;
   pos->CompileDefinitionsPosition = 0;
   pos->CompileOptionsPosition = 0;
+  pos->BuildSystemDirectory->DirectoryEnd = pos;
   return cmState::Snapshot(this, pos);
 }
 
@@ -741,6 +746,7 @@ cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot,
   pos->ExecutionListFile =
       this->ExecutionListFiles.Extend(
         originSnapshot.Position->ExecutionListFile);
+  pos->BuildSystemDirectory->DirectoryEnd = pos;
   return cmState::Snapshot(this, pos);
 }
 
@@ -757,6 +763,7 @@ cmState::CreateFunctionCallSnapshot(cmState::Snapshot originSnapshot,
   pos->SnapshotType = FunctionCallType;
   pos->ExecutionListFile = this->ExecutionListFiles.Extend(
         originSnapshot.Position->ExecutionListFile, fileName);
+  pos->BuildSystemDirectory->DirectoryEnd = pos;
   return cmState::Snapshot(this, pos);
 }
 
@@ -774,6 +781,7 @@ cmState::CreateMacroCallSnapshot(cmState::Snapshot originSnapshot,
   pos->SnapshotType = MacroCallType;
   pos->ExecutionListFile = this->ExecutionListFiles.Extend(
         originSnapshot.Position->ExecutionListFile, fileName);
+  pos->BuildSystemDirectory->DirectoryEnd = pos;
   return cmState::Snapshot(this, pos);
 }
 
@@ -790,6 +798,7 @@ cmState::CreateCallStackSnapshot(cmState::Snapshot originSnapshot,
   pos->SnapshotType = CallStackType;
   pos->ExecutionListFile = this->ExecutionListFiles.Extend(
         originSnapshot.Position->ExecutionListFile, fileName);
+  pos->BuildSystemDirectory->DirectoryEnd = pos;
   return cmState::Snapshot(this, pos);
 }
 
@@ -806,6 +815,7 @@ cmState::CreateInlineListFileSnapshot(cmState::Snapshot originSnapshot,
   pos->SnapshotType = InlineListFileType;
   pos->ExecutionListFile = this->ExecutionListFiles.Extend(
         originSnapshot.Position->ExecutionListFile, fileName);
+  pos->BuildSystemDirectory->DirectoryEnd = pos;
   return cmState::Snapshot(this, pos);
 }
 
@@ -815,6 +825,7 @@ cmState::CreatePolicyScopeSnapshot(cmState::Snapshot originSnapshot)
   PositionType pos = this->SnapshotData.Extend(originSnapshot.Position,
                                                *originSnapshot.Position);
   pos->SnapshotType = PolicyScopeType;
+  pos->BuildSystemDirectory->DirectoryEnd = pos;
   return cmState::Snapshot(this, pos);
 }
 
@@ -829,6 +840,7 @@ cmState::Snapshot cmState::Pop(cmState::Snapshot originSnapshot)
       prevPos->BuildSystemDirectory->CompileDefinitions.size();
   prevPos->CompileOptionsPosition =
       prevPos->BuildSystemDirectory->CompileOptions.size();
+  prevPos->BuildSystemDirectory->DirectoryEnd = prevPos;
 
   return Snapshot(this, prevPos);
 }
