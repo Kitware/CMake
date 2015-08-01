@@ -1888,7 +1888,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
 
   std::string flags;
   const std::string& linkLanguage =
-    this->Target->GetLinkerLanguage(configName.c_str());
+    this->GeneratorTarget->GetLinkerLanguage(configName.c_str());
   if(linkLanguage.empty())
     {
     const std::string& linkLanguage =
