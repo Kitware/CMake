@@ -1060,9 +1060,7 @@ bool cmState::Snapshot::PopPolicy()
 
 bool cmState::Snapshot::CanPopPolicyScope()
 {
-  PositionType pos = this->Position;
-  bool ok = (pos->Policies == pos->PolicyScope);
-  return ok;
+  return this->Position->Policies == this->Position->PolicyScope;
 }
 
 void cmState::Snapshot::SetPolicy(cmPolicies::PolicyID id,
