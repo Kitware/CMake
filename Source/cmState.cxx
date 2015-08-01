@@ -20,6 +20,7 @@
 
 struct cmState::SnapshotDataType
 {
+  cmState::PositionType ScopeParent;
   cmState::PositionType DirectoryParent;
   cmLinkedTree<cmState::PolicyStackEntry>::iterator Policies;
   cmLinkedTree<cmState::PolicyStackEntry>::iterator PolicyRoot;
@@ -736,6 +737,7 @@ cmState::Snapshot cmState::CreateBaseSnapshot()
 {
   PositionType pos = this->SnapshotData.Extend(this->SnapshotData.Root());
   pos->DirectoryParent = this->SnapshotData.Root();
+  pos->ScopeParent = this->SnapshotData.Root();
   pos->SnapshotType = BaseType;
   pos->BuildSystemDirectory =
       this->BuildsystemDirectory.Extend(this->BuildsystemDirectory.Root());
@@ -763,6 +765,7 @@ cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot,
   pos->EntryPointLine = entryPointLine;
   pos->EntryPointCommand = entryPointCommand;
   pos->DirectoryParent = originSnapshot.Position;
+  pos->ScopeParent = originSnapshot.Position;
   pos->SnapshotType = BuildsystemDirectoryType;
   pos->BuildSystemDirectory =
       this->BuildsystemDirectory.Extend(
@@ -787,6 +790,7 @@ cmState::CreateFunctionCallSnapshot(cmState::Snapshot originSnapshot,
 {
   PositionType pos = this->SnapshotData.Extend(originSnapshot.Position,
                                                *originSnapshot.Position);
+  pos->ScopeParent = originSnapshot.Position;
   pos->EntryPointLine = entryPointLine;
   pos->EntryPointCommand = entryPointCommand;
   pos->SnapshotType = FunctionCallType;
@@ -831,6 +835,21 @@ cmState::CreateCallStackSnapshot(cmState::Snapshot originSnapshot,
         originSnapshot.Position->ExecutionListFile, fileName);
   pos->BuildSystemDirectory->DirectoryEnd = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
+  return cmState::Snapshot(this, pos);
+}
+
+cmState::Snapshot
+cmState::CreateVariableScopeSnapshot(cmState::Snapshot originSnapshot,
+                                     std::string const& entryPointCommand,
+                                     long entryPointLine)
+{
+  PositionType pos = this->SnapshotData.Extend(originSnapshot.Position,
+                                               *originSnapshot.Position);
+  pos->ScopeParent = originSnapshot.Position;
+  pos->EntryPointLine = entryPointLine;
+  pos->EntryPointCommand = entryPointCommand;
+  pos->SnapshotType = VariableScopeType;
+
   return cmState::Snapshot(this, pos);
 }
 
