@@ -35,6 +35,7 @@ public:
 
   enum SnapshotType
   {
+    BaseType,
     BuildsystemDirectoryType,
     FunctionCallType,
     MacroCallType,
