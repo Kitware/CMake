@@ -4462,6 +4462,17 @@ void cmMakefile::PushScope()
 {
   this->Internal->PushDefinitions(Internals::VariableScope);
 
+  std::string commandName;
+  long line = 0;
+  if (!this->ContextStack.empty())
+    {
+    commandName = this->ContextStack.back()->Name;
+    line = this->ContextStack.back()->Line;
+    }
+  this->StateSnapshot = this->GetState()->CreateVariableScopeSnapshot(
+        this->StateSnapshot,
+        commandName,
+        line);
   this->PushLoopBlockBarrier();
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -4480,6 +4491,9 @@ void cmMakefile::PopScope()
   this->CheckForUnusedVariables();
 
   this->Internal->PopDefinitions();
+  this->StateSnapshot =
+      this->GetState()->Pop(this->StateSnapshot);
+  assert(this->StateSnapshot.IsValid());
 }
 
 void cmMakefile::RaiseScope(const std::string& var, const char *varDef)

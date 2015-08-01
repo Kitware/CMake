@@ -41,7 +41,8 @@ public:
     MacroCallType,
     CallStackType,
     InlineListFileType,
-    PolicyScopeType
+    PolicyScopeType,
+    VariableScopeType
   };
 
   class Directory;
@@ -155,6 +156,9 @@ public:
                                    std::string const& entryPointCommand,
                                    long entryPointLine,
                                    std::string const& fileName);
+  Snapshot CreateVariableScopeSnapshot(Snapshot originSnapshot,
+                                       std::string const& entryPointCommand,
+                                       long entryPointLine);
   Snapshot CreateInlineListFileSnapshot(Snapshot originSnapshot,
                                         const std::string& entryPointCommand,
                                         long entryPointLine,
