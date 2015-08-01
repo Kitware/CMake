@@ -230,6 +230,9 @@ public:
   /** Get the path for the MSVC /Fd option for this target.  */
   std::string GetCompilePDBPath(const std::string& config="") const;
 
+  // Get the target base name.
+  std::string GetOutputName(const std::string& config, bool implib) const;
+
   /**
    * Flags for a given source file as used in this target. Typically assigned
    * via SET_TARGET_PROPERTIES when the property is a list of source files.
