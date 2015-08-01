@@ -220,7 +220,7 @@ void cmLocalGenerator::CreateEvaluationFileOutputs(std::string const& config)
   for(std::vector<cmGeneratorExpressionEvaluationFile*>::const_iterator
       li = ef.begin(); li != ef.end(); ++li)
     {
-    (*li)->CreateOutputFile(config);
+    (*li)->CreateOutputFile(this, config);
     }
 }
 
@@ -234,7 +234,7 @@ void cmLocalGenerator::ProcessEvaluationFiles(
       li != ef.end();
       ++li)
     {
-    (*li)->Generate();
+    (*li)->Generate(this);
     if (cmSystemTools::GetFatalErrorOccured())
       {
       return;

@@ -788,7 +788,7 @@ void cmMakefile::AddEvaluationFile(const std::string& inputFile,
 {
   this->EvaluationFiles.push_back(
               new cmGeneratorExpressionEvaluationFile(inputFile, outputName,
-                                                      this, condition,
+                                                      condition,
                                                       inputIsContent));
 }
 
