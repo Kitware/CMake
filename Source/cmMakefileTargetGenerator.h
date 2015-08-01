@@ -53,6 +53,7 @@ public:
     { return this->ProgressFileNameFull; }
 
   cmTarget* GetTarget() { return this->Target;}
+  cmGeneratorTarget* GetGeneratorTarget() { return this->GeneratorTarget;}
 
 protected:
 

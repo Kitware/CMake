@@ -27,6 +27,7 @@ cmExportBuildFileGenerator::cmExportBuildFileGenerator()
 //----------------------------------------------------------------------------
 bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 {
+  std::vector<cmGeneratorTarget*> allTargets;
   {
   std::string expectedTargets;
   std::string sep;
@@ -68,7 +69,8 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
         tei = this->Exports.begin();
       tei != this->Exports.end(); ++tei)
     {
-    cmTarget* te = (*tei)->Target;
+    cmGeneratorTarget* gte = *tei;
+    cmTarget* te = gte->Target;
     this->GenerateImportTargetCode(os, te);
 
     te->AppendBuildInterfaceIncludes();
@@ -104,7 +106,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
       }
-    this->PopulateCompatibleInterfaceProperties(te, properties);
+    this->PopulateCompatibleInterfaceProperties(gte, properties);
 
     this->GenerateInterfaceProperties(te, os, properties);
     }
@@ -331,12 +333,12 @@ cmExportBuildFileGenerator
 }
 
 std::string
-cmExportBuildFileGenerator::InstallNameDir(cmTarget* target,
+cmExportBuildFileGenerator::InstallNameDir(cmGeneratorTarget* target,
                                            const std::string& config)
 {
   std::string install_name_dir;
 
-  cmMakefile* mf = target->GetMakefile();
+  cmMakefile* mf = target->Target->GetMakefile();
   if(mf->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
     {
     install_name_dir =

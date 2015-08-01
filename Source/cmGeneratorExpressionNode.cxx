@@ -990,6 +990,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     assert(target);
 
+    cmGeneratorTarget* gtgt =
+        context->Makefile->GetGlobalGenerator()->GetGeneratorTarget(target);
+
     if (propertyName == "LINKER_LANGUAGE")
       {
       if (target->LinkLanguagePropagatesToDependents() &&
@@ -1001,7 +1004,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
             "link libraries for a static library");
         return std::string();
         }
-      return target->GetLinkerLanguage(context->Config);
+      return gtgt->GetLinkerLanguage(context->Config);
       }
 
     cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace,
@@ -1135,40 +1138,40 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         {
         return linkedTargetsContent;
         }
-      if (target->IsLinkInterfaceDependentBoolProperty(propertyName,
-                                                       context->Config))
+      if (gtgt->IsLinkInterfaceDependentBoolProperty(propertyName,
+                                                     context->Config))
         {
         context->HadContextSensitiveCondition = true;
-        return target->GetLinkInterfaceDependentBoolProperty(
+        return gtgt->GetLinkInterfaceDependentBoolProperty(
                                                 propertyName,
                                                 context->Config) ? "1" : "0";
         }
-      if (target->IsLinkInterfaceDependentStringProperty(propertyName,
-                                                         context->Config))
+      if (gtgt->IsLinkInterfaceDependentStringProperty(propertyName,
+                                                       context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                              target->GetLinkInterfaceDependentStringProperty(
+                              gtgt->GetLinkInterfaceDependentStringProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
         }
-      if (target->IsLinkInterfaceDependentNumberMinProperty(propertyName,
-                                                         context->Config))
+      if (gtgt->IsLinkInterfaceDependentNumberMinProperty(propertyName,
+                                                          context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                          target->GetLinkInterfaceDependentNumberMinProperty(
+                          gtgt->GetLinkInterfaceDependentNumberMinProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
         }
-      if (target->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
-                                                         context->Config))
+      if (gtgt->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
+                                                          context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                          target->GetLinkInterfaceDependentNumberMaxProperty(
+                          gtgt->GetLinkInterfaceDependentNumberMaxProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
@@ -1180,22 +1183,22 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     if (!target->IsImported()
         && dagCheckerParent && !dagCheckerParent->EvaluatingLinkLibraries())
       {
-      if (target->IsLinkInterfaceDependentNumberMinProperty(propertyName,
-                                                        context->Config))
+      if (gtgt->IsLinkInterfaceDependentNumberMinProperty(propertyName,
+                                                          context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                            target->GetLinkInterfaceDependentNumberMinProperty(
+                            gtgt->GetLinkInterfaceDependentNumberMinProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
         }
-      if (target->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
-                                                        context->Config))
+      if (gtgt->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
+                                                          context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                            target->GetLinkInterfaceDependentNumberMaxProperty(
+                            gtgt->GetLinkInterfaceDependentNumberMaxProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
@@ -1584,7 +1587,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactSonameTag>
       }
     std::string result = target->Target->GetDirectory(context->Config);
     result += "/";
-    result += target->Target->GetSOName(context->Config);
+    result += target->GetSOName(context->Config);
     return result;
   }
 };
@@ -1597,7 +1600,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
                             cmGeneratorExpressionContext *context,
                             const GeneratorExpressionContent *content)
   {
-    std::string language = target->Target->GetLinkerLanguage(context->Config);
+    std::string language = target->GetLinkerLanguage(context->Config);
 
     std::string pdbSupportVar = "CMAKE_" + language + "_LINKER_SUPPORTS_PDB";
 
@@ -1622,7 +1625,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
 
     std::string result = target->Target->GetPDBDirectory(context->Config);
     result += "/";
-    result += target->Target->GetPDBName(context->Config);
+    result += target->GetPDBName(context->Config);
     return result;
   }
 };

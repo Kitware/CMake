@@ -1627,7 +1627,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     this->GlobalGenerator->GetLanguageFromExtension
     (sf.GetExtension().c_str());
   std::string sourceLang = this->LocalGenerator->GetSourceFileLanguage(sf);
-  const std::string& linkLanguage = this->Target->GetLinkerLanguage();
+  const std::string& linkLanguage = this->GeneratorTarget->GetLinkerLanguage();
   bool needForceLang = false;
   // source file does not match its extension language
   if(lang != sourceLang)
@@ -1774,7 +1774,7 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
       else
         {
         outDir = this->Target->GetDirectory(config->c_str()) + "/";
-        targetNameFull = this->Target->GetFullName(config->c_str());
+        targetNameFull = this->GeneratorTarget->GetFullName(config->c_str());
         }
       this->ConvertToWindowsSlash(intermediateDir);
       this->ConvertToWindowsSlash(outDir);
@@ -1891,10 +1891,40 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     this->Target->GetLinkerLanguage(configName.c_str());
   if(linkLanguage.empty())
     {
-    cmSystemTools::Error
-      ("CMake can not determine linker language for target: ",
-       this->Name.c_str());
-    return false;
+    const std::string& linkLanguage =
+      this->GeneratorTarget->GetLinkerLanguage(configName.c_str());
+    if(linkLanguage.empty())
+      {
+      cmSystemTools::Error
+        ("CMake can not determine linker language for target: ",
+         this->Name.c_str());
+      return false;
+      }
+    if(linkLanguage == "C" || linkLanguage == "CXX"
+       || linkLanguage == "Fortran")
+      {
+      std::string baseFlagVar = "CMAKE_";
+      baseFlagVar += linkLanguage;
+      baseFlagVar += "_FLAGS";
+      flags = this->
+        Target->GetMakefile()->GetRequiredDefinition(baseFlagVar.c_str());
+      std::string flagVar = baseFlagVar + std::string("_") +
+        cmSystemTools::UpperCase(configName);
+      flags += " ";
+      flags += this->
+        Target->GetMakefile()->GetRequiredDefinition(flagVar.c_str());
+      }
+    // set the correct language
+    if(linkLanguage == "C")
+      {
+      flags += " /TC ";
+      }
+    if(linkLanguage == "CXX")
+      {
+      flags += " /TP ";
+      }
+    this->LocalGenerator->AddCompileOptions(flags, this->Target,
+                                            linkLanguage, configName.c_str());
     }
   if(linkLanguage == "C" || linkLanguage == "CXX"
      || linkLanguage == "Fortran")
@@ -2026,7 +2056,8 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
       }
 
     // Specify the compiler program database file if configured.
-    std::string pdb = this->Target->GetCompilePDBPath(configName.c_str());
+    std::string pdb =
+        this->GeneratorTarget->GetCompilePDBPath(configName.c_str());
     if(!pdb.empty())
       {
       this->ConvertToWindowsSlash(pdb);
@@ -2370,7 +2401,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   Options& linkOptions = *pOptions;
 
   const std::string& linkLanguage =
-    this->Target->GetLinkerLanguage(config.c_str());
+    this->GeneratorTarget->GetLinkerLanguage(config.c_str());
   if(linkLanguage.empty())
     {
     cmSystemTools::Error
@@ -2438,7 +2469,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   cmSystemTools::ExpandListArgument(libs, libVec);
 
   cmComputeLinkInformation* pcli =
-    this->Target->GetLinkInformation(config.c_str());
+    this->GeneratorTarget->GetLinkInformation(config.c_str());
   if(!pcli)
     {
     cmSystemTools::Error
@@ -2471,13 +2502,14 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   std::string targetNamePDB;
   if(this->Target->GetType() == cmTarget::EXECUTABLE)
     {
-    this->Target->GetExecutableNames(targetName, targetNameFull,
+    this->GeneratorTarget->GetExecutableNames(targetName, targetNameFull,
                                      targetNameImport, targetNamePDB,
                                      config.c_str());
     }
   else
     {
-    this->Target->GetLibraryNames(targetName, targetNameSO, targetNameFull,
+    this->GeneratorTarget->GetLibraryNames(targetName, targetNameSO,
+                                  targetNameFull,
                                   targetNameImport, targetNamePDB,
                                   config.c_str());
     }

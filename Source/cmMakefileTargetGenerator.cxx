@@ -313,7 +313,7 @@ cmMakefileTargetGenerator::MacOSXContentGeneratorType::operator()
   (cmSourceFile const& source, const char* pkgloc)
 {
   // Skip OS X content when not building a Framework or Bundle.
-  if(!this->Generator->GetTarget()->IsBundleOnApple())
+  if(!this->Generator->GetGeneratorTarget()->IsBundleOnApple())
     {
     return;
     }
@@ -548,12 +548,12 @@ cmMakefileTargetGenerator
       this->GeneratorTarget->GetFullPath(this->ConfigName, false, true);
     targetFullPathPDB = this->Target->GetPDBDirectory(this->ConfigName);
     targetFullPathPDB += "/";
-    targetFullPathPDB += this->Target->GetPDBName(this->ConfigName);
+    targetFullPathPDB += this->GeneratorTarget->GetPDBName(this->ConfigName);
     }
   if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY)
     {
     targetFullPathCompilePDB =
-      this->Target->GetCompilePDBPath(this->ConfigName);
+      this->GeneratorTarget->GetCompilePDBPath(this->ConfigName);
     if(targetFullPathCompilePDB.empty())
       {
       targetFullPathCompilePDB = this->Target->GetSupportDirectory() + "/";
@@ -1446,7 +1446,8 @@ void cmMakefileTargetGenerator
 
   // Loop over all library dependencies.
   const char* cfg = this->LocalGenerator->GetConfigName().c_str();
-  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(cfg))
+  if(cmComputeLinkInformation* cli =
+                              this->GeneratorTarget->GetLinkInformation(cfg))
     {
     std::vector<std::string> const& libDeps = cli->GetDepends();
     depends.insert(depends.end(), libDeps.begin(), libDeps.end());
@@ -1508,7 +1509,7 @@ std::string cmMakefileTargetGenerator::GetLinkRule(
   if(this->Target->HasImplibGNUtoMS())
     {
     std::string ruleVar = "CMAKE_";
-    ruleVar += this->Target->GetLinkerLanguage(this->ConfigName);
+    ruleVar += this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
     ruleVar += "_GNUtoMS_RULE";
     if(const char* rule = this->Makefile->GetDefinition(ruleVar))
       {
@@ -1662,7 +1663,8 @@ cmMakefileTargetGenerator
     {
     // Lookup the response file reference flag.
     std::string responseFlagVar = "CMAKE_";
-    responseFlagVar += this->Target->GetLinkerLanguage(this->ConfigName);
+    responseFlagVar += this->GeneratorTarget
+                           ->GetLinkerLanguage(this->ConfigName);
     responseFlagVar += "_RESPONSE_FILE_LINK_FLAG";
     const char* responseFlag =
       this->Makefile->GetDefinition(responseFlagVar);
@@ -1706,7 +1708,8 @@ cmMakefileTargetGenerator
 
     // Lookup the response file reference flag.
     std::string responseFlagVar = "CMAKE_";
-    responseFlagVar += this->Target->GetLinkerLanguage(this->ConfigName);
+    responseFlagVar += this->GeneratorTarget
+                           ->GetLinkerLanguage(this->ConfigName);
     responseFlagVar += "_RESPONSE_FILE_LINK_FLAG";
     const char* responseFlag =
       this->Makefile->GetDefinition(responseFlagVar);

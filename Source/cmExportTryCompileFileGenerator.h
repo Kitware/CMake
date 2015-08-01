@@ -45,7 +45,7 @@ protected:
                           ImportPropertyMap& properties,
                           std::set<cmTarget const*> &emitted);
 
-  std::string InstallNameDir(cmTarget* target,
+  std::string InstallNameDir(cmGeneratorTarget* target,
                              const std::string& config);
 private:
   std::string FindTargets(const std::string& prop, cmTarget const* tgt,

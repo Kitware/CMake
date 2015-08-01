@@ -525,7 +525,7 @@ void getPropertyContents(cmTarget const* tgt, const std::string& prop,
 }
 
 //----------------------------------------------------------------------------
-void getCompatibleInterfaceProperties(cmTarget *target,
+void getCompatibleInterfaceProperties(cmGeneratorTarget *target,
                                       std::set<std::string> &ifaceProperties,
                                       const std::string& config)
 {
@@ -533,7 +533,7 @@ void getCompatibleInterfaceProperties(cmTarget *target,
 
   if (!info)
     {
-    cmMakefile* mf = target->GetMakefile();
+    cmMakefile* mf = target->Target->GetMakefile();
     std::ostringstream e;
     e << "Exporting the target \"" << target->GetName() << "\" is not "
         "allowed since its linker language cannot be determined";
@@ -568,9 +568,10 @@ void getCompatibleInterfaceProperties(cmTarget *target,
 
 //----------------------------------------------------------------------------
 void cmExportFileGenerator::PopulateCompatibleInterfaceProperties(
-                                cmTarget *target,
+                                cmGeneratorTarget *gtarget,
                                 ImportPropertyMap &properties)
 {
+  cmTarget *target = gtarget->Target;
   this->PopulateInterfaceProperty("COMPATIBLE_INTERFACE_BOOL",
                                 target, properties);
   this->PopulateInterfaceProperty("COMPATIBLE_INTERFACE_STRING",
@@ -591,7 +592,7 @@ void cmExportFileGenerator::PopulateCompatibleInterfaceProperties(
 
   if (target->GetType() != cmTarget::INTERFACE_LIBRARY)
     {
-    getCompatibleInterfaceProperties(target, ifaceProperties, "");
+    getCompatibleInterfaceProperties(gtarget, ifaceProperties, "");
 
     std::vector<std::string> configNames;
     target->GetMakefile()->GetConfigurations(configNames);
@@ -599,7 +600,7 @@ void cmExportFileGenerator::PopulateCompatibleInterfaceProperties(
     for (std::vector<std::string>::const_iterator ci = configNames.begin();
       ci != configNames.end(); ++ci)
       {
-      getCompatibleInterfaceProperties(target, ifaceProperties, *ci);
+      getCompatibleInterfaceProperties(gtarget, ifaceProperties, *ci);
       }
     }
 
@@ -888,14 +889,14 @@ cmExportFileGenerator
       {
       std::string prop;
       std::string value;
-      if(target->Target->HasSOName(config))
+      if(target->HasSOName(config))
         {
         if(mf->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
           {
-          value = this->InstallNameDir(target->Target, config);
+          value = this->InstallNameDir(target, config);
           }
         prop = "IMPORTED_SONAME";
-        value += target->Target->GetSOName(config);
+        value += target->GetSOName(config);
         }
       else
         {

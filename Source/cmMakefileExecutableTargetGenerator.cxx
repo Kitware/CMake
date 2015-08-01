@@ -25,7 +25,7 @@ cmMakefileExecutableTargetGenerator
   cmMakefileTargetGenerator(target)
 {
   this->CustomCommandDriver = OnDepends;
-  this->Target->GetExecutableNames(
+  this->GeneratorTarget->GetExecutableNames(
     this->TargetNameOut, this->TargetNameReal, this->TargetNameImport,
     this->TargetNamePDB, this->ConfigName);
 
@@ -58,7 +58,7 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
 
   // write the link rules
   this->WriteExecutableRule(false);
-  if(this->Target->NeedRelinkBeforeInstall(this->ConfigName))
+  if(this->GeneratorTarget->NeedRelinkBeforeInstall(this->ConfigName))
     {
     // Write rules to link an installable version of the target.
     this->WriteExecutableRule(true);
@@ -94,7 +94,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string targetNameReal;
   std::string targetNameImport;
   std::string targetNamePDB;
-  this->Target->GetExecutableNames
+  this->GeneratorTarget->GetExecutableNames
     (targetName, targetNameReal, targetNameImport, targetNamePDB,
      this->ConfigName);
 
@@ -130,7 +130,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     }
 
   std::string compilePdbOutputPath =
-    this->Target->GetCompilePDBDirectory(this->ConfigName);
+    this->GeneratorTarget->GetCompilePDBDirectory(this->ConfigName);
   cmSystemTools::MakeDirectory(compilePdbOutputPath.c_str());
 
   std::string pdbOutputPath = this->Target->GetPDBDirectory(this->ConfigName);
@@ -161,7 +161,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Get the language to use for linking this executable.
   std::string linkLanguage =
-    this->Target->GetLinkerLanguage(this->ConfigName);
+    this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
 
   // Make sure we have a link language.
   if(linkLanguage.empty())
