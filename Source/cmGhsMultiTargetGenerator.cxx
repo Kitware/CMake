@@ -128,7 +128,8 @@ void cmGhsMultiTargetGenerator::Generate()
       {
       config = "RELEASE";
       }
-    const std::string language(this->Target->GetLinkerLanguage(config));
+    const std::string language(
+          this->GeneratorTarget->GetLinkerLanguage(config));
     config = cmSystemTools::UpperCase(config);
     this->DynamicDownload = this->DetermineIfDynamicDownload(config, language);
     if (this->DynamicDownload)

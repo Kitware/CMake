@@ -805,7 +805,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   if (this->FortranProject)
     {
     // Intel Fortran >= 15.0 uses TargetName property.
-    std::string targetNameFull = target.GetFullName(configName);
+    std::string targetNameFull = gt->GetFullName(configName);
     std::string targetName =
       cmSystemTools::GetFilenameWithoutLastExtension(targetNameFull);
     std::string targetExt =

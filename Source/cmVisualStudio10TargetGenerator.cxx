@@ -1888,43 +1888,13 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
 
   std::string flags;
   const std::string& linkLanguage =
-    this->Target->GetLinkerLanguage(configName.c_str());
+    this->GeneratorTarget->GetLinkerLanguage(configName.c_str());
   if(linkLanguage.empty())
     {
-    const std::string& linkLanguage =
-      this->GeneratorTarget->GetLinkerLanguage(configName.c_str());
-    if(linkLanguage.empty())
-      {
-      cmSystemTools::Error
-        ("CMake can not determine linker language for target: ",
-         this->Name.c_str());
-      return false;
-      }
-    if(linkLanguage == "C" || linkLanguage == "CXX"
-       || linkLanguage == "Fortran")
-      {
-      std::string baseFlagVar = "CMAKE_";
-      baseFlagVar += linkLanguage;
-      baseFlagVar += "_FLAGS";
-      flags = this->
-        Target->GetMakefile()->GetRequiredDefinition(baseFlagVar.c_str());
-      std::string flagVar = baseFlagVar + std::string("_") +
-        cmSystemTools::UpperCase(configName);
-      flags += " ";
-      flags += this->
-        Target->GetMakefile()->GetRequiredDefinition(flagVar.c_str());
-      }
-    // set the correct language
-    if(linkLanguage == "C")
-      {
-      flags += " /TC ";
-      }
-    if(linkLanguage == "CXX")
-      {
-      flags += " /TP ";
-      }
-    this->LocalGenerator->AddCompileOptions(flags, this->Target,
-                                            linkLanguage, configName.c_str());
+    cmSystemTools::Error
+      ("CMake can not determine linker language for target: ",
+       this->Name.c_str());
+    return false;
     }
   if(linkLanguage == "C" || linkLanguage == "CXX"
      || linkLanguage == "Fortran")
