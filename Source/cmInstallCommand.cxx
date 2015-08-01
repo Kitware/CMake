@@ -42,7 +42,7 @@ static cmInstallFilesGenerator* CreateInstallFilesGenerator(
 {
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(mf);
-  return new cmInstallFilesGenerator(mf,
+  return new cmInstallFilesGenerator(
                         absFiles, args.GetDestination().c_str(),
                         programs, args.GetPermissions().c_str(),
                         args.GetConfigurations(), args.GetComponent().c_str(),
