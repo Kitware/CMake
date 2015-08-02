@@ -23,7 +23,6 @@ class cmLocalCommonGenerator: public cmLocalGenerator
 {
 public:
   cmLocalCommonGenerator(cmGlobalGenerator* gg,
-                         cmLocalGenerator* parent,
                          cmState::Snapshot snapshot);
   ~cmLocalCommonGenerator();
 

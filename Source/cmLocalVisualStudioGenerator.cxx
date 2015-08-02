@@ -20,9 +20,8 @@
 //----------------------------------------------------------------------------
 cmLocalVisualStudioGenerator
 ::cmLocalVisualStudioGenerator(cmGlobalGenerator* gg,
-                               cmLocalGenerator* parent,
                                cmState::Snapshot snapshot)
-  : cmLocalGenerator(gg, parent, snapshot)
+  : cmLocalGenerator(gg, snapshot)
 {
 }
 

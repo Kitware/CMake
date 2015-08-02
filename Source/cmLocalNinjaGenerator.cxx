@@ -23,9 +23,8 @@
 #include <assert.h>
 
 cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
-                                             cmLocalGenerator* parent,
                                              cmState::Snapshot snapshot)
-  : cmLocalCommonGenerator(gg, parent, snapshot)
+  : cmLocalCommonGenerator(gg, snapshot)
   , HomeRelativeOutputPath("")
 {
   this->TargetImplib = "$TARGET_IMPLIB";

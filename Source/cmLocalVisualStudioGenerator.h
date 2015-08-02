@@ -32,7 +32,6 @@ class cmLocalVisualStudioGenerator : public cmLocalGenerator
 {
 public:
   cmLocalVisualStudioGenerator(cmGlobalGenerator* gg,
-                               cmLocalGenerator* parent,
                                cmState::Snapshot snapshot);
   virtual ~cmLocalVisualStudioGenerator();
 

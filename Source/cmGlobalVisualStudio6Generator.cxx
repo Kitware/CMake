@@ -173,10 +173,10 @@ cmGlobalVisualStudio6Generator::GenerateBuildCommand(
 
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *
-cmGlobalVisualStudio6Generator::CreateLocalGenerator(cmLocalGenerator* parent,
+cmGlobalVisualStudio6Generator::CreateLocalGenerator(
                                                    cmState::Snapshot snapshot)
 {
-  return new cmLocalVisualStudio6Generator(this, parent, snapshot);
+  return new cmLocalVisualStudio6Generator(this, snapshot);
 }
 
 

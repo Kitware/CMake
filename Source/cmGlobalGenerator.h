@@ -56,9 +56,8 @@ public:
   cmGlobalGenerator(cmake* cm);
   virtual ~cmGlobalGenerator();
 
-  cmLocalGenerator* MakeLocalGenerator(
-      cmState::Snapshot snapshot = cmState::Snapshot(),
-      cmLocalGenerator* parent = 0);
+  cmLocalGenerator*
+  MakeLocalGenerator(cmState::Snapshot snapshot = cmState::Snapshot());
 
   ///! Get the name for this generator
   virtual std::string GetName() const { return "Generic"; }
@@ -442,8 +441,7 @@ protected:
 
 private:
   ///! Create a local generator appropriate to this Global Generator
-  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent,
-                                                 cmState::Snapshot snapshot);
+  virtual cmLocalGenerator *CreateLocalGenerator(cmState::Snapshot snapshot);
 
   cmMakefile* TryCompileOuterMakefile;
   // If you add a new map here, make sure it is copied
