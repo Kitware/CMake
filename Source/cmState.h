@@ -93,6 +93,10 @@ public:
     };
 
   private:
+    friend bool operator==(const cmState::Snapshot& lhs,
+                           const cmState::Snapshot& rhs);
+    friend bool operator!=(const cmState::Snapshot& lhs,
+                           const cmState::Snapshot& rhs);
     friend class cmState;
     friend class Directory;
     friend struct StrictWeakOrder;
@@ -313,5 +317,8 @@ private:
   bool NMake;
   bool MSYSShell;
 };
+
+bool operator==(const cmState::Snapshot& lhs, const cmState::Snapshot& rhs);
+bool operator!=(const cmState::Snapshot& lhs, const cmState::Snapshot& rhs);
 
 #endif
