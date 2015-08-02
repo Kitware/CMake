@@ -2821,9 +2821,9 @@ cmGlobalGenerator::AddRuleHash(const std::vector<std::string>& outputs,
   }
 
   // Shorten the output name (in expected use case).
-  cmLocalGenerator* lg = this->GetLocalGenerators()[0];
-  std::string fname = lg->Convert(outputs[0],
-                                  cmLocalGenerator::HOME_OUTPUT);
+  cmOutputConverter converter(this->GetMakefiles()[0]->GetStateSnapshot());
+  std::string fname = converter.Convert(
+        outputs[0], cmLocalGenerator::HOME_OUTPUT);
 
   // Associate the hash with this output.
   this->RuleHashes[fname] = hash;
