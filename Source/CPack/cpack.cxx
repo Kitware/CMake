@@ -203,7 +203,7 @@ int main (int argc, char const* const* argv)
   cminst.GetState()->RemoveUnscriptableCommands();
   cmGlobalGenerator cmgg(&cminst);
   cmsys::auto_ptr<cmLocalGenerator> cmlg(
-        cmgg.MakeLocalGenerator(cminst.GetCurrentSnapshot()));
+        cmgg.CreateLocalGenerator(cminst.GetCurrentSnapshot()));
   cmMakefile* globalMF = cmlg->GetMakefile();
 #if defined(__CYGWIN__)
   globalMF->AddDefinition("CMAKE_LEGACY_CYGWIN_WIN32", "0");
