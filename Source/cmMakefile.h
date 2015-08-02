@@ -274,12 +274,12 @@ public:
   /**
    * Specify the name of the project for this build.
    */
-  void SetProjectName(const char*);
+  void SetProjectName(std::string const& name);
 
   /**
    * Get the name of the project for this build.
    */
-  const char* GetProjectName() const;
+  std::string GetProjectName() const;
 
   /** Get the configurations to be generated.  */
   std::string GetConfigurations(std::vector<std::string>& configs,
