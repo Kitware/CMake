@@ -1482,9 +1482,9 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
 void cmGlobalGenerator::FinalizeTargetCompileInfo()
 {
   // Construct per-target generator information.
-  for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
+  for(unsigned int i=0; i < this->Makefiles.size(); ++i)
     {
-    cmMakefile *mf = this->LocalGenerators[i]->GetMakefile();
+    cmMakefile *mf = this->Makefiles[i];
 
     const cmStringRange noconfig_compile_definitions =
                                 mf->GetCompileDefinitionsEntries();
