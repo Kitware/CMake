@@ -2376,14 +2376,14 @@ const char* cmLocalGenerator::GetFeature(const std::string& feature,
     featureName += "_";
     featureName += cmSystemTools::UpperCase(config);
     }
-  cmLocalGenerator* lg = this;
-  while(lg)
+  cmState::Snapshot snp = this->StateSnapshot;
+  while(snp.IsValid())
     {
-    if(const char* value = lg->GetMakefile()->GetProperty(featureName))
+    if(const char* value = snp.GetDirectory().GetProperty(featureName))
       {
       return value;
       }
-    lg = lg->GetParent();
+    snp = snp.GetBuildsystemDirectoryParent();
     }
   return 0;
 }
