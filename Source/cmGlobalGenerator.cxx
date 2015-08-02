@@ -2247,7 +2247,7 @@ inline std::string removeQuotes(const std::string& s)
 
 void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
 {
-  cmMakefile* mf = this->LocalGenerators[0]->GetMakefile();
+  cmMakefile* mf = this->Makefiles[0];
   const char* cmakeCfgIntDir = this->GetCMakeCFGIntDir();
 
   // CPack
