@@ -2046,27 +2046,23 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
 {
   assert(gen);
 
-  if(gen == root)
+  cmLocalGenerator* lg = gen;
+  while (lg)
     {
-    // No directory excludes itself.
-    return false;
-    }
+    if(lg == root)
+      {
+      // No directory excludes itself.
+      return false;
+      }
 
-  if(gen->GetMakefile()->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
-    {
-    // This directory is excluded from its parent.
-    return true;
+    if(lg->GetMakefile()->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
+      {
+      // This directory is excluded from its parent.
+      return true;
+      }
+    lg = lg->GetParent();
     }
-
-  cmLocalGenerator* lg = gen->GetParent();
-  if (!lg)
-    {
-    return false;
-    }
-
-  // This directory is included in its parent.  Check whether the
-  // parent is excluded.
-  return this->IsExcluded(root, lg);
+  return false;
 }
 
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
