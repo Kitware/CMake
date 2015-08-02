@@ -1146,6 +1146,22 @@ void cmGlobalGenerator::Configure()
   dirMf->Configure();
   dirMf->EnforceDirectoryLevelRules();
 
+  // Put a copy of each global target in every directory.
+  cmTargets globalTargets;
+  this->CreateDefaultGlobalTargets(&globalTargets);
+
+  for (unsigned int i = 0; i < this->Makefiles.size(); ++i)
+    {
+    cmMakefile* mf = this->Makefiles[i];
+    cmTargets* targets = &(mf->GetTargets());
+    cmTargets::iterator tit;
+    for ( tit = globalTargets.begin(); tit != globalTargets.end(); ++ tit )
+      {
+      (*targets)[tit->first] = tit->second;
+      (*targets)[tit->first].SetMakefile(mf);
+      }
+    }
+
   // update the cache entry for the number of local generators, this is used
   // for progress
   char num[100];
@@ -1183,25 +1199,6 @@ void cmGlobalGenerator::Configure()
       }
     this->CMakeInstance->UpdateProgress(msg.str().c_str(), -1);
     }
-
-  unsigned int i;
-
-  // Put a copy of each global target in every directory.
-  cmTargets globalTargets;
-  this->CreateDefaultGlobalTargets(&globalTargets);
-
-  for (i = 0; i < this->Makefiles.size(); ++i)
-    {
-    cmMakefile* mf = this->Makefiles[i];
-    cmTargets* targets = &(mf->GetTargets());
-    cmTargets::iterator tit;
-    for ( tit = globalTargets.begin(); tit != globalTargets.end(); ++ tit )
-      {
-      (*targets)[tit->first] = tit->second;
-      (*targets)[tit->first].SetMakefile(mf);
-      }
-    }
-
 }
 
 void cmGlobalGenerator::CreateGenerationObjects(TargetTypes targetTypes)
