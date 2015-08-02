@@ -1193,9 +1193,9 @@ void cmGlobalGenerator::Configure()
   cmTargets globalTargets;
   this->CreateDefaultGlobalTargets(&globalTargets);
 
-  for (i = 0; i < this->LocalGenerators.size(); ++i)
+  for (i = 0; i < this->Makefiles.size(); ++i)
     {
-    cmMakefile* mf = this->LocalGenerators[i]->GetMakefile();
+    cmMakefile* mf = this->Makefiles[i];
     cmTargets* targets = &(mf->GetTargets());
     cmTargets::iterator tit;
     for ( tit = globalTargets.begin(); tit != globalTargets.end(); ++ tit )
