@@ -16,7 +16,6 @@
 #include "cmSourceFileLocation.h"
 #include "cmSystemTools.h"
 #include "cmGlobalGenerator.h"
-#include "cmLocalGenerator.h"
 #include "cmCommands.h"
 #include "cmState.h"
 #include "cmOutputConverter.h"
@@ -1754,13 +1753,15 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
                                            this->ContextStack.back()->Name,
                                            this->ContextStack.back()->Line);
 
+  cmMakefile* subMf = new cmMakefile(this->GlobalGenerator, newSnapshot);
+  this->GetGlobalGenerator()->AddMakefile(subMf);
+
   // create a new local generator and set its parent
   cmLocalGenerator *lg2 = this->GetGlobalGenerator()
-        ->CreateLocalGenerator(newSnapshot);
+        ->CreateLocalGenerator(subMf);
   this->GetGlobalGenerator()->AddMakefile(lg2->GetMakefile());
   this->GetGlobalGenerator()->AddLocalGenerator(lg2);
 
-  cmMakefile* subMf = lg2->GetMakefile();
 
   // set the subdirs start dirs
   subMf->SetCurrentSourceDirectory(srcPath);

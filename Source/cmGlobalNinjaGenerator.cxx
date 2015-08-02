@@ -528,9 +528,9 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator(cmake* cm)
 // Virtual public methods.
 
 cmLocalGenerator*
-cmGlobalNinjaGenerator::CreateLocalGenerator(cmState::Snapshot snapshot)
+cmGlobalNinjaGenerator::CreateLocalGenerator(cmMakefile* mf)
 {
-  return new cmLocalNinjaGenerator(this, snapshot);
+  return new cmLocalNinjaGenerator(this, mf);
 }
 
 void cmGlobalNinjaGenerator

@@ -1127,8 +1127,10 @@ void cmGlobalGenerator::Configure()
   this->FirstTimeProgress = 0.0f;
   this->ClearGeneratorMembers();
 
-  // start with this directory
-  cmLocalGenerator *lg = this->CreateLocalGenerator();
+  cmMakefile* dirMf =
+      new cmMakefile(this, this->GetCMakeInstance()->GetCurrentSnapshot());
+  this->AddMakefile(dirMf);
+  cmLocalGenerator *lg = this->CreateLocalGenerator(dirMf);
   this->Makefiles.push_back(lg->GetMakefile());
   this->LocalGenerators.push_back(lg);
 
@@ -1600,6 +1602,7 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   cmDeleteAll(this->BuildExportSets);
   this->BuildExportSets.clear();
 
+  cmDeleteAll(this->Makefiles);
   this->Makefiles.clear();
 
   cmDeleteAll(this->LocalGenerators);
@@ -1986,9 +1989,9 @@ void cmGlobalGenerator::EnableInstallTarget()
 }
 
 cmLocalGenerator*
-cmGlobalGenerator::CreateLocalGenerator(cmState::Snapshot snapshot)
+cmGlobalGenerator::CreateLocalGenerator(cmMakefile* mf)
 {
-  return new cmLocalGenerator(this, snapshot);
+  return new cmLocalGenerator(this, mf);
 }
 
 void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen,

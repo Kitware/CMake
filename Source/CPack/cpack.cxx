@@ -202,9 +202,10 @@ int main (int argc, char const* const* argv)
   cminst.SetHomeOutputDirectory("");
   cminst.GetState()->RemoveUnscriptableCommands();
   cmGlobalGenerator cmgg(&cminst);
+  cmsys::auto_ptr<cmMakefile> globalMF(
+        new cmMakefile(&cmgg, cminst.GetCurrentSnapshot()));
   cmsys::auto_ptr<cmLocalGenerator> cmlg(
-        cmgg.CreateLocalGenerator(cminst.GetCurrentSnapshot()));
-  cmMakefile* globalMF = cmlg->GetMakefile();
+        cmgg.CreateLocalGenerator(globalMF.get()));
 #if defined(__CYGWIN__)
   globalMF->AddDefinition("CMAKE_LEGACY_CYGWIN_WIN32", "0");
 #endif
@@ -358,8 +359,8 @@ int main (int argc, char const* const* argv)
         ++it )
         {
         const char* gen = it->c_str();
-        cmMakefile::ScopePushPop raii(globalMF);
-        cmMakefile* mf = globalMF;
+        cmMakefile::ScopePushPop raii(globalMF.get());
+        cmMakefile* mf = globalMF.get();
         cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
           "Specified generator: " << gen << std::endl);
         if ( parsed && !mf->GetDefinition("CPACK_PACKAGE_NAME") )
