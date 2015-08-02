@@ -1157,7 +1157,7 @@ void cmGlobalGenerator::Configure()
 
   // check for link libraries and include directories containing "NOTFOUND"
   // and for infinite loops
-  this->CheckLocalGenerators();
+  this->CheckTargetProperties();
 
   // at this point this->LocalGenerators has been filled,
   // so create the map from project name to vector of local generators
@@ -1637,7 +1637,7 @@ void cmGlobalGenerator::ComputeTargetObjectDirectory(cmGeneratorTarget*) const
 {
 }
 
-void cmGlobalGenerator::CheckLocalGenerators()
+void cmGlobalGenerator::CheckTargetProperties()
 {
   std::map<std::string, std::string> notFoundMap;
 //  std::set<std::string> notFoundMap;
