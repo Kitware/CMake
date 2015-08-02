@@ -1756,13 +1756,6 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
   cmMakefile* subMf = new cmMakefile(this->GlobalGenerator, newSnapshot);
   this->GetGlobalGenerator()->AddMakefile(subMf);
 
-  // create a new local generator and set its parent
-  cmLocalGenerator *lg2 = this->GetGlobalGenerator()
-        ->CreateLocalGenerator(subMf);
-  this->GetGlobalGenerator()->AddMakefile(lg2->GetMakefile());
-  this->GetGlobalGenerator()->AddLocalGenerator(lg2);
-
-
   // set the subdirs start dirs
   subMf->SetCurrentSourceDirectory(srcPath);
   subMf->SetCurrentBinaryDirectory(binPath);

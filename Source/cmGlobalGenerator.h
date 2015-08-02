@@ -91,6 +91,7 @@ public:
     ImportedOnly
   };
 
+  void CreateLocalGenerators();
   void CreateGenerationObjects(TargetTypes targetTypes = AllTargets);
 
   /**
