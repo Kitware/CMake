@@ -49,7 +49,7 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
   assert(snapshot.IsValid());
   this->GlobalGenerator = gg;
 
-  this->Makefile = new cmMakefile(this);
+  this->Makefile = new cmMakefile(gg, snapshot);
 
   this->EmitUniversalBinaryFlags = true;
   this->BackwardsCompatibility = 0;
