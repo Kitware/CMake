@@ -2049,6 +2049,10 @@ void cmMakefile::SetProjectName(const char* p)
   this->ProjectName = p;
 }
 
+const char* cmMakefile::GetProjectName() const
+{
+  return this->ProjectName.c_str();
+}
 
 void cmMakefile::AddGlobalLinkInformation(const std::string& name,
                                           cmTarget& target)

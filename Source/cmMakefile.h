@@ -279,10 +279,7 @@ public:
   /**
    * Get the name of the project for this build.
    */
-  const char* GetProjectName() const
-    {
-      return this->ProjectName.c_str();
-    }
+  const char* GetProjectName() const;
 
   /** Get the configurations to be generated.  */
   std::string GetConfigurations(std::vector<std::string>& configs,
