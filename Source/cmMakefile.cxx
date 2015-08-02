@@ -2334,7 +2334,8 @@ void cmMakefile::ExpandVariablesCMP0019()
        l != this->Targets.end(); ++l)
     {
     cmTarget &t = l->second;
-    if (t.GetType() == cmTarget::INTERFACE_LIBRARY)
+    if (t.GetType() == cmTarget::INTERFACE_LIBRARY
+        || t.GetType() == cmTarget::GLOBAL_TARGET)
       {
       continue;
       }
