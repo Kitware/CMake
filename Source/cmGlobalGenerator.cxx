@@ -2044,7 +2044,9 @@ void cmGlobalGenerator::SetConfiguredFilesPath(cmGlobalGenerator* gen)
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
                                    cmLocalGenerator* gen) const
 {
-  if(!gen || gen == root)
+  assert(gen);
+
+  if(gen == root)
     {
     // No directory excludes itself.
     return false;
@@ -2056,9 +2058,15 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
     return true;
     }
 
+  cmLocalGenerator* lg = gen->GetParent();
+  if (!lg)
+    {
+    return false;
+    }
+
   // This directory is included in its parent.  Check whether the
   // parent is excluded.
-  return this->IsExcluded(root, gen->GetParent());
+  return this->IsExcluded(root, lg);
 }
 
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
