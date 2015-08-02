@@ -1129,6 +1129,7 @@ void cmGlobalGenerator::Configure()
 
   // start with this directory
   cmLocalGenerator *lg = this->MakeLocalGenerator();
+  this->Makefiles.push_back(lg->GetMakefile());
   this->LocalGenerators.push_back(lg);
 
   // set the Start directories
@@ -1599,6 +1600,8 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   cmDeleteAll(this->BuildExportSets);
   this->BuildExportSets.clear();
 
+  this->Makefiles.clear();
+
   cmDeleteAll(this->LocalGenerators);
   this->LocalGenerators.clear();
 
@@ -1926,6 +1929,12 @@ std::string cmGlobalGenerator::GenerateCMakeBuildCommand(
     makeCommand += native;
     }
   return makeCommand;
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::AddMakefile(cmMakefile *mf)
+{
+  this->Makefiles.push_back(mf);
 }
 
 //----------------------------------------------------------------------------
