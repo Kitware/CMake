@@ -74,9 +74,16 @@ public:
 
     Directory GetDirectory() const;
 
+    struct StrictWeakOrder
+    {
+      bool operator()(const cmState::Snapshot& lhs,
+                      const cmState::Snapshot& rhs) const;
+    };
+
   private:
     friend class cmState;
     friend class Directory;
+    friend struct StrictWeakOrder;
     cmState* State;
     cmState::PositionType Position;
   };

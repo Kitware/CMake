@@ -128,6 +128,13 @@ public:
         }
       return this->Position <= this->Tree->Data.size();
     }
+
+    bool StrictWeakOrdered(iterator other) const
+    {
+      assert(this->Tree);
+      assert(this->Tree == other.Tree);
+      return this->Position < other.Position;
+    }
   };
 
   iterator Root() const
