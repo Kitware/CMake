@@ -1610,7 +1610,6 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->TargetDependencies.clear();
   this->TotalTargets.clear();
   this->ImportedTargets.clear();
-  this->LocalGeneratorToTargetMap.clear();
   this->ProjectMap.clear();
   this->RuleHashes.clear();
   this->DirectoryContentMap.clear();
