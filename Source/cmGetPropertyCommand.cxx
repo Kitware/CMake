@@ -262,13 +262,8 @@ bool cmGetPropertyCommand::HandleDirectoryMode()
     dir = cmSystemTools::CollapseFullPath(dir);
 
     // Lookup the generator.
-    if(cmLocalGenerator* lg =
-       (this->Makefile->GetGlobalGenerator()->FindLocalGenerator(dir)))
-      {
-      // Use the makefile for the directory found.
-      mf = lg->GetMakefile();
-      }
-    else
+    mf = this->Makefile->GetGlobalGenerator()->FindMakefile(dir);
+    if (!mf)
       {
       // Could not find the directory.
       this->SetError

@@ -51,10 +51,8 @@ bool cmGetDirectoryPropertyCommand
     sd = cmSystemTools::CollapseFullPath(sd);
 
     // lookup the makefile from the directory name
-    cmLocalGenerator *lg =
-      this->Makefile->GetGlobalGenerator()->
-      FindLocalGenerator(sd);
-    if (!lg)
+    dir = this->Makefile->GetGlobalGenerator()->FindMakefile(sd);
+    if (!dir)
       {
       this->SetError
         ("DIRECTORY argument provided but requested directory not found. "
@@ -62,7 +60,6 @@ bool cmGetDirectoryPropertyCommand
          "it is valid but has not been processed yet.");
       return false;
       }
-    dir = lg->GetMakefile();
     ++i;
     }
 

@@ -2160,6 +2160,20 @@ void cmGlobalGenerator::FillLocalGeneratorToTargetMap()
     }
 }
 
+cmMakefile*
+cmGlobalGenerator::FindMakefile(const std::string& start_dir) const
+{
+  for(std::vector<cmMakefile*>::const_iterator it =
+      this->Makefiles.begin(); it != this->Makefiles.end(); ++it)
+    {
+    std::string sd = (*it)->GetCurrentSourceDirectory();
+    if (sd == start_dir)
+      {
+      return *it;
+      }
+    }
+  return 0;
+}
 
 ///! Find a local generator by its startdirectory
 cmLocalGenerator*
