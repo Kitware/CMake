@@ -19,10 +19,28 @@
 #include "cmState.h"
 #include "cmTarget.h"
 #include "cmSourceFile.h"
+#include "cmXMLWriter.h"
 
 #include "cmSystemTools.h"
 #include <stdlib.h>
 #include <assert.h>
+
+static void AppendAttribute(cmXMLWriter& xml, const char* keyval)
+{
+  xml.StartElement("attribute");
+  xml.Attribute("key", keyval);
+  xml.Attribute("value", keyval);
+  xml.EndElement();
+}
+
+template<typename T>
+void AppendDictionary(cmXMLWriter& xml, const char* key, T const& value)
+{
+  xml.StartElement("dictionary");
+  xml.Element("key", key);
+  xml.Element("value", value);
+  xml.EndElement();
+}
 
 //----------------------------------------------------------------------------
 cmExtraEclipseCDT4Generator
@@ -172,34 +190,30 @@ void cmExtraEclipseCDT4Generator::CreateSourceProjectFile()
     return;
     }
 
-  fout <<
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-    "<projectDescription>\n"
-    "\t<name>" << this->EscapeForXML(name) << "</name>\n"
-    "\t<comment></comment>\n"
-    "\t<projects>\n"
-    "\t</projects>\n"
-    "\t<buildSpec>\n"
-    "\t</buildSpec>\n"
-    "\t<natures>\n"
-    "\t</natures>\n"
-    "\t<linkedResources>\n";
+  cmXMLWriter xml(fout);
+  xml.StartDocument("UTF-8");
+  xml.StartElement("projectDescription");
+  xml.Element("name", name);
+  xml.Element("comment", "");
+  xml.Element("projects", "");
+  xml.Element("buildSpec", "");
+  xml.Element("natures", "");
+  xml.StartElement("linkedResources");
 
   if (this->SupportsVirtualFolders)
     {
-    this->CreateLinksToSubprojects(fout, this->HomeDirectory);
+    this->CreateLinksToSubprojects(xml, this->HomeDirectory);
     this->SrcLinkedResources.clear();
     }
 
-  fout <<
-    "\t</linkedResources>\n"
-    "</projectDescription>\n"
-    ;
+  xml.EndElement(); // linkedResources
+  xml.EndElement(); // projectDescription
+  xml.EndDocument();
 }
 
 
 //----------------------------------------------------------------------------
-void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
+void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
                                             const char* envVar,
                                             cmLocalGenerator* lg)
 {
@@ -257,7 +271,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
 
   if (!valueToUse.empty())
     {
-    fout << envVar << "=" << valueToUse << "|";
+    out << envVar << "=" << valueToUse << "|";
     }
 }
 
@@ -282,197 +296,125 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     compilerId = mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID");
     }
 
-  fout <<
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-    "<projectDescription>\n"
-    "\t<name>" <<
-    this->GenerateProjectName(lg->GetProjectName(),
-                              mf->GetSafeDefinition("CMAKE_BUILD_TYPE"),
-                              this->GetPathBasename(this->HomeOutputDirectory))
-    << "</name>\n"
-    "\t<comment></comment>\n"
-    "\t<projects>\n"
-    "\t</projects>\n"
-    "\t<buildSpec>\n"
-    "\t\t<buildCommand>\n"
-    "\t\t\t<name>org.eclipse.cdt.make.core.makeBuilder</name>\n"
-    "\t\t\t<triggers>clean,full,incremental,</triggers>\n"
-    "\t\t\t<arguments>\n"
-    ;
+  cmXMLWriter xml(fout);
+
+  xml.StartDocument("UTF-8");
+  xml.StartElement("projectDescription");
+
+  xml.Element("name", this->GenerateProjectName(lg->GetProjectName(),
+      mf->GetSafeDefinition("CMAKE_BUILD_TYPE"),
+      this->GetPathBasename(this->HomeOutputDirectory)));
+
+  xml.Element("comment", "");
+  xml.Element("projects", "");
+
+  xml.StartElement("buildSpec");
+  xml.StartElement("buildCommand");
+  xml.Element("name", "org.eclipse.cdt.make.core.makeBuilder");
+  xml.Element("triggers", "clean,full,incremental,");
+  xml.StartElement("arguments");
 
   // use clean target
-  fout <<
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.cleanBuildTarget</key>\n"
-    "\t\t\t\t\t<value>clean</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.enableCleanBuild</key>\n"
-    "\t\t\t\t\t<value>true</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.append_environment</key>\n"
-    "\t\t\t\t\t<value>true</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.stopOnError</key>\n"
-    "\t\t\t\t\t<value>true</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    ;
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.cleanBuildTarget", "clean");
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.enableCleanBuild", "true");
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.append_environment","true");
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.stopOnError", "true");
 
   // set the make command
-  std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
-  const std::string makeArgs = mf->GetSafeDefinition(
-                                               "CMAKE_ECLIPSE_MAKE_ARGUMENTS");
-
-  fout <<
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.enabledIncrementalBuild</key>\n"
-    "\t\t\t\t\t<value>true</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.build.command</key>\n"
-    "\t\t\t\t\t<value>" << this->GetEclipsePath(make) << "</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.contents</key>\n"
-    "\t\t\t\t\t<value>org.eclipse.cdt.make.core.activeConfigSettings</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.build.target.inc</key>\n"
-    "\t\t\t\t\t<value>all</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.build.arguments</key>\n"
-    "\t\t\t\t\t<value>" << makeArgs << "</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.buildLocation</key>\n"
-    "\t\t\t\t\t<value>"
-     << this->GetEclipsePath(this->HomeOutputDirectory) << "</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.useDefaultBuildCmd</key>\n"
-    "\t\t\t\t\t<value>false</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    ;
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.enabledIncrementalBuild",
+      "true");
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.build.command",
+      this->GetEclipsePath(mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM")));
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.contents",
+      "org.eclipse.cdt.make.core.activeConfigSettings");
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.build.target.inc", "all");
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.build.arguments",
+      mf->GetSafeDefinition("CMAKE_ECLIPSE_MAKE_ARGUMENTS"));
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.buildLocation",
+      this->GetEclipsePath(this->HomeOutputDirectory));
+  AppendDictionary(xml,
+      "org.eclipse.cdt.make.core.useDefaultBuildCmd", "false");
 
   // set project specific environment
-  fout <<
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.environment</key>\n"
-    "\t\t\t\t\t<value>VERBOSE=1|CMAKE_NO_VERBOSE=1|"  //verbose Makefile output
-    ;
+  std::stringstream environment;
+  environment << "VERBOSE=1|CMAKE_NO_VERBOSE=1|"; //verbose Makefile output
   // set vsvars32.bat environment available at CMake time,
   //   but not necessarily when eclipse is open
   if (compilerId == "MSVC")
     {
-    AddEnvVar(fout, "PATH", lg);
-    AddEnvVar(fout, "INCLUDE", lg);
-    AddEnvVar(fout, "LIB", lg);
-    AddEnvVar(fout, "LIBPATH", lg);
+    AddEnvVar(environment, "PATH", lg);
+    AddEnvVar(environment, "INCLUDE", lg);
+    AddEnvVar(environment, "LIB", lg);
+    AddEnvVar(environment, "LIBPATH", lg);
     }
   else if (compilerId == "Intel")
     {
     // if the env.var is set, use this one and put it in the cache
     // if the env.var is not set, but the value is in the cache,
     // use it from the cache:
-    AddEnvVar(fout, "INTEL_LICENSE_FILE", lg);
+    AddEnvVar(environment, "INTEL_LICENSE_FILE", lg);
     }
-  fout <<
-    "</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    ;
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.environment",
+                   environment.str());
 
-  fout <<
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.enableFullBuild</key>\n"
-    "\t\t\t\t\t<value>true</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.build.target.auto</key>\n"
-    "\t\t\t\t\t<value>all</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.enableAutoBuild</key>\n"
-    "\t\t\t\t\t<value>false</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.build.target.clean</key>\n"
-    "\t\t\t\t\t<value>clean</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.fullBuildTarget</key>\n"
-    "\t\t\t\t\t<value>all</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.buildArguments</key>\n"
-    "\t\t\t\t\t<value></value>\n"
-    "\t\t\t\t</dictionary>\n"
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.build.location</key>\n"
-    "\t\t\t\t\t<value>"
-    << this->GetEclipsePath(this->HomeOutputDirectory) << "</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.make.core.autoBuildTarget</key>\n"
-    "\t\t\t\t\t<value>all</value>\n"
-    "\t\t\t\t</dictionary>\n"
-    ;
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.enableFullBuild", "true");
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.build.target.auto", "all");
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.enableAutoBuild", "false");
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.build.target.clean",
+      "clean");
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.fullBuildTarget", "all");
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.buildArguments", "");
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.build.location",
+      this->GetEclipsePath(this->HomeOutputDirectory));
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.autoBuildTarget", "all");
 
   // set error parsers
-  fout <<
-    "\t\t\t\t<dictionary>\n"
-    "\t\t\t\t\t<key>org.eclipse.cdt.core.errorOutputParser</key>\n"
-    "\t\t\t\t\t<value>"
-    ;
+  std::stringstream errorOutputParser;
+
   if (compilerId == "MSVC")
     {
-    fout << "org.eclipse.cdt.core.VCErrorParser;";
+    errorOutputParser << "org.eclipse.cdt.core.VCErrorParser;";
     }
   else if (compilerId == "Intel")
     {
-    fout << "org.eclipse.cdt.core.ICCErrorParser;";
+    errorOutputParser << "org.eclipse.cdt.core.ICCErrorParser;";
     }
 
   if (this->SupportsGmakeErrorParser)
     {
-    fout << "org.eclipse.cdt.core.GmakeErrorParser;";
+    errorOutputParser << "org.eclipse.cdt.core.GmakeErrorParser;";
     }
   else
     {
-    fout << "org.eclipse.cdt.core.MakeErrorParser;";
+    errorOutputParser << "org.eclipse.cdt.core.MakeErrorParser;";
     }
 
-  fout <<
+  errorOutputParser <<
     "org.eclipse.cdt.core.GCCErrorParser;"
     "org.eclipse.cdt.core.GASErrorParser;"
     "org.eclipse.cdt.core.GLDErrorParser;"
-    "</value>\n"
-    "\t\t\t\t</dictionary>\n"
     ;
+  AppendDictionary(xml, "org.eclipse.cdt.core.errorOutputParser",
+      errorOutputParser.str());
 
-  fout <<
-    "\t\t\t</arguments>\n"
-    "\t\t</buildCommand>\n"
-    "\t\t<buildCommand>\n"
-    "\t\t\t<name>org.eclipse.cdt.make.core.ScannerConfigBuilder</name>\n"
-    "\t\t\t<arguments>\n"
-    "\t\t\t</arguments>\n"
-    "\t\t</buildCommand>\n"
-    "\t</buildSpec>\n"
-    ;
+  xml.EndElement(); // arguments
+  xml.EndElement(); // buildCommand
+  xml.StartElement("buildCommand");
+  xml.Element("name", "org.eclipse.cdt.make.core.ScannerConfigBuilder");
+  xml.StartElement("arguments");
+  xml.EndElement(); // arguments
+  xml.EndElement(); // buildCommand
+  xml.EndElement(); // buildSpec
 
   // set natures for c/c++ projects
-  fout <<
-    "\t<natures>\n"
-    "\t\t<nature>org.eclipse.cdt.make.core.makeNature</nature>\n"
-    "\t\t<nature>org.eclipse.cdt.make.core.ScannerConfigNature</nature>\n";
+  xml.StartElement("natures");
+  xml.Element("nature", "org.eclipse.cdt.make.core.makeNature");
+  xml.Element("nature", "org.eclipse.cdt.make.core.ScannerConfigNature");;
 
   for (std::set<std::string>::const_iterator nit=this->Natures.begin();
        nit != this->Natures.end(); ++nit)
     {
-    fout << "\t\t<nature>" << *nit << "</nature>\n";
+    xml.Element("nature", *nit);
     }
 
   if (const char *extraNaturesProp = mf->GetState()
@@ -483,13 +425,13 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     for (std::vector<std::string>::const_iterator nit = extraNatures.begin();
          nit != extraNatures.end(); ++nit)
       {
-      fout << "\t\t<nature>" << *nit << "</nature>\n";
+      xml.Element("nature", *nit);
       }
     }
 
-  fout << "\t</natures>\n";
+  xml.EndElement(); // natures
 
-  fout << "\t<linkedResources>\n";
+  xml.StartElement("linkedResources");
   // create linked resources
   if (this->IsOutOfSourceBuild)
     {
@@ -506,7 +448,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     if (!cmSystemTools::IsSubDirectory(this->HomeOutputDirectory,
                                          linkSourceDirectory))
       {
-      this->AppendLinkedResource(fout, sourceLinkedResourceName,
+      this->AppendLinkedResource(xml, sourceLinkedResourceName,
                                  this->GetEclipsePath(linkSourceDirectory),
                                  LinkToFolder);
       this->SrcLinkedResources.push_back(sourceLinkedResourceName);
@@ -516,23 +458,21 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
 
   if (this->SupportsVirtualFolders)
     {
-    this->CreateLinksToSubprojects(fout, this->HomeOutputDirectory);
+    this->CreateLinksToSubprojects(xml, this->HomeOutputDirectory);
 
-    this->CreateLinksForTargets(fout);
+    this->CreateLinksForTargets(xml);
     }
 
-  fout << "\t</linkedResources>\n";
-
-  fout << "</projectDescription>\n";
+  xml.EndElement(); // linkedResources
+  xml.EndElement(); // projectDescription
 }
 
 
 //----------------------------------------------------------------------------
-void cmExtraEclipseCDT4Generator::CreateLinksForTargets(
-                                                   cmGeneratedFileStream& fout)
+void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
 {
   std::string linkName = "[Targets]";
-  this->AppendLinkedResource(fout, linkName, "virtual:/virtual",VirtualFolder);
+  this->AppendLinkedResource(xml, linkName, "virtual:/virtual", VirtualFolder);
 
   for (std::vector<cmLocalGenerator*>::const_iterator
        lgIt = this->GlobalGenerator->GetLocalGenerators().begin();
@@ -560,7 +500,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(
                                                           "[exe] " : "[lib] ");
           linkName2 += prefix;
           linkName2 += (*ti)->GetName();
-          this->AppendLinkedResource(fout, linkName2, "virtual:/virtual",
+          this->AppendLinkedResource(xml, linkName2, "virtual:/virtual",
                                      VirtualFolder);
           if (!this->GenerateLinkedResources)
             {
@@ -590,7 +530,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(
             std::string linkName3 = linkName2;
             linkName3 += "/";
             linkName3 += sgIt->GetFullName();
-            this->AppendLinkedResource(fout, linkName3, "virtual:/virtual",
+            this->AppendLinkedResource(xml, linkName3, "virtual:/virtual",
                                        VirtualFolder);
 
             std::vector<const cmSourceFile*> sFiles = sgIt->GetSourceFiles();
@@ -605,7 +545,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(
                 std::string linkName4 = linkName3;
                 linkName4 += "/";
                 linkName4 += cmSystemTools::GetFilenameName(fullPath);
-                this->AppendLinkedResource(fout, linkName4,
+                this->AppendLinkedResource(xml, linkName4,
                                            this->GetEclipsePath(fullPath),
                                            LinkToFile);
                 }
@@ -624,7 +564,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(
 
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
-                       cmGeneratedFileStream& fout, const std::string& baseDir)
+                       cmXMLWriter& xml, const std::string& baseDir)
 {
   if (!this->GenerateLinkedResources)
     {
@@ -633,7 +573,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
 
   // for each sub project create a linked resource to the source dir
   // - only if it is an out-of-source build
-  this->AppendLinkedResource(fout, "[Subprojects]",
+  this->AppendLinkedResource(xml, "[Subprojects]",
                              "virtual:/virtual", VirtualFolder);
 
   for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
@@ -651,7 +591,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
       {
       std::string linkName = "[Subprojects]/";
       linkName += it->first;
-      this->AppendLinkedResource(fout, linkName,
+      this->AppendLinkedResource(xml, linkName,
                                  this->GetEclipsePath(linkSourceDirectory),
                                  LinkToFolder
                                 );
@@ -664,7 +604,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
 
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::AppendIncludeDirectories(
-                            cmGeneratedFileStream& fout,
+                            cmXMLWriter& xml,
                             const std::vector<std::string>& includeDirs,
                             std::set<std::string>& emittedDirs)
 {
@@ -688,10 +628,13 @@ void cmExtraEclipseCDT4Generator::AppendIncludeDirectories(
       if(emittedDirs.find(dir) == emittedDirs.end())
         {
         emittedDirs.insert(dir);
-        fout << "<pathentry include=\""
-             << cmExtraEclipseCDT4Generator::EscapeForXML(
-                              cmExtraEclipseCDT4Generator::GetEclipsePath(dir))
-             << "\" kind=\"inc\" path=\"\" system=\"true\"/>\n";
+        xml.StartElement("pathentry");
+        xml.Attribute("include",
+            cmExtraEclipseCDT4Generator::GetEclipsePath(dir));
+        xml.Attribute("kind", "inc");
+        xml.Attribute("path", "");
+        xml.Attribute("system", "true");
+        xml.EndElement();
         }
       }
     }
@@ -713,95 +656,100 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     return;
     }
 
-  // add header
-  fout <<
-    "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
-    "<?fileVersion 4.0.0?>\n\n"
-    "<cproject>\n"
-    "<storageModule moduleId=\"org.eclipse.cdt.core.settings\">\n"
-    ;
+  cmXMLWriter xml(fout);
 
-  fout << "<cconfiguration id=\"org.eclipse.cdt.core.default.config.1\">\n";
+  // add header
+  xml.StartDocument("UTF-8");
+  xml.ProcessingInstruction("fileVersion", "4.0.0");
+  xml.StartElement("cproject");
+  xml.StartElement("storageModule");
+  xml.Attribute("moduleId", "org.eclipse.cdt.core.settings");
+
+  xml.StartElement("cconfiguration");
+  xml.Attribute("id", "org.eclipse.cdt.core.default.config.1");
 
   // Configuration settings...
-  fout <<
-    "<storageModule"
-    " buildSystemId=\"org.eclipse.cdt.core.defaultConfigDataProvider\""
-    " id=\"org.eclipse.cdt.core.default.config.1\""
-    " moduleId=\"org.eclipse.cdt.core.settings\" name=\"Configuration\">\n"
-    "<externalSettings/>\n"
-    "<extensions>\n"
-    ;
+  xml.StartElement("storageModule");
+  xml.Attribute("buildSystemId",
+      "org.eclipse.cdt.core.defaultConfigDataProvider");
+  xml.Attribute("id", "org.eclipse.cdt.core.default.config.1");
+  xml.Attribute("moduleId", "org.eclipse.cdt.core.settings");
+  xml.Attribute("name", "Configuration");
+  xml.Element("externalSettings");
+  xml.StartElement("extensions");
+
   // TODO: refactor this out...
   std::string executableFormat = mf->GetSafeDefinition(
                                                     "CMAKE_EXECUTABLE_FORMAT");
   if (executableFormat == "ELF")
     {
-    fout << "<extension id=\"org.eclipse.cdt.core.ELF\""
-            " point=\"org.eclipse.cdt.core.BinaryParser\"/>\n"
-            ;
-    fout << "<extension id=\"org.eclipse.cdt.core.GNU_ELF\""
-            " point=\"org.eclipse.cdt.core.BinaryParser\">\n"
-            "<attribute key=\"addr2line\" value=\"addr2line\"/>\n"
-            "<attribute key=\"c++filt\" value=\"c++filt\"/>\n"
-            "</extension>\n"
-            ;
+    xml.StartElement("extension");
+    xml.Attribute("id", "org.eclipse.cdt.core.ELF");
+    xml.Attribute("point", "org.eclipse.cdt.core.BinaryParser");
+    xml.EndElement(); // extension
+
+    xml.StartElement("extension");
+    xml.Attribute("id", "org.eclipse.cdt.core.GNU_ELF");
+    xml.Attribute("point", "org.eclipse.cdt.core.BinaryParser");
+    AppendAttribute(xml, "addr2line");
+    AppendAttribute(xml, "c++filt");
+    xml.EndElement(); // extension
     }
   else
     {
     std::string systemName = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
     if (systemName == "CYGWIN")
       {
-      fout << "<extension id=\"org.eclipse.cdt.core.Cygwin_PE\""
-              " point=\"org.eclipse.cdt.core.BinaryParser\">\n"
-              "<attribute key=\"addr2line\" value=\"addr2line\"/>\n"
-              "<attribute key=\"c++filt\" value=\"c++filt\"/>\n"
-              "<attribute key=\"cygpath\" value=\"cygpath\"/>\n"
-              "<attribute key=\"nm\" value=\"nm\"/>\n"
-              "</extension>\n"
-              ;
+      xml.StartElement("extension");
+      xml.Attribute("id", "org.eclipse.cdt.core.Cygwin_PE");
+      xml.Attribute("point", "org.eclipse.cdt.core.BinaryParser");
+      AppendAttribute(xml, "addr2line");
+      AppendAttribute(xml, "c++filt");
+      AppendAttribute(xml, "cygpath");
+      AppendAttribute(xml, "nm");
+      xml.EndElement(); // extension
       }
     else if (systemName == "Windows")
       {
-      fout << "<extension id=\"org.eclipse.cdt.core.PE\""
-              " point=\"org.eclipse.cdt.core.BinaryParser\"/>\n"
-              ;
+      xml.StartElement("extension");
+      xml.Attribute("id", "org.eclipse.cdt.core.PE");
+      xml.Attribute("point", "org.eclipse.cdt.core.BinaryParser");
+      xml.EndElement(); // extension
       }
     else if (systemName == "Darwin")
       {
-      fout << "<extension id=\"" <<
-           (this->SupportsMachO64Parser ? "org.eclipse.cdt.core.MachO64"
-                                        : "org.eclipse.cdt.core.MachO") << "\""
-              " point=\"org.eclipse.cdt.core.BinaryParser\">\n"
-              "<attribute key=\"c++filt\" value=\"c++filt\"/>\n"
-              "</extension>\n"
-              ;
+      xml.StartElement("extension");
+      xml.Attribute("id",  this->SupportsMachO64Parser ?
+              "org.eclipse.cdt.core.MachO64" : "org.eclipse.cdt.core.MachO");
+      xml.Attribute("point", "org.eclipse.cdt.core.BinaryParser");
+      AppendAttribute(xml, "c++filt");
+      xml.EndElement(); // extension
       }
     else
       {
       // *** Should never get here ***
-      fout << "<error_toolchain_type/>\n";
+      xml.Element("error_toolchain_type");
       }
     }
 
-  fout << "</extensions>\n"
-          "</storageModule>\n"
-          ;
+  xml.EndElement(); // extensions
+  xml.EndElement(); // storageModule
 
   // ???
-  fout <<
-    "<storageModule moduleId=\"org.eclipse.cdt.core.language.mapping\">\n"
-    "<project-mappings/>\n"
-    "</storageModule>\n"
-    ;
+  xml.StartElement("storageModule");
+  xml.Attribute("moduleId", "org.eclipse.cdt.core.language.mapping");
+  xml.Element("project-mappings");
+  xml.EndElement(); // storageModule
 
   // ???
-  fout<<"<storageModule moduleId=\"org.eclipse.cdt.core.externalSettings\"/>\n"
-          ;
+  xml.StartElement("storageModule");
+  xml.Attribute("moduleId", "org.eclipse.cdt.core.externalSettings");
+  xml.EndElement(); // storageModule
 
   // set the path entries (includes, libs, source dirs, etc.)
-  fout << "<storageModule moduleId=\"org.eclipse.cdt.core.pathentry\">\n"
-          ;
+  xml.StartElement("storageModule");
+  xml.Attribute("moduleId", "org.eclipse.cdt.core.pathentry");
+
   // for each sub project with a linked resource to the source dir:
   // - make it type 'src'
   // - and exclude it from type 'out'
@@ -824,21 +772,27 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
        it != this->SrcLinkedResources.end();
        ++it)
     {
-    fout << "<pathentry kind=\"src\" path=\"" << this->EscapeForXML(*it)
-         << "\"/>\n";
+    xml.StartElement("pathentry");
+    xml.Attribute("kind", "src");
+    xml.Attribute("path", *it);
+    xml.EndElement();
 
     // exlude source directory from output search path
     // - only if not named the same as an output directory
     if (!cmSystemTools::FileIsDirectory(
            std::string(this->HomeOutputDirectory + "/" + *it)))
       {
-      excludeFromOut += this->EscapeForXML(*it) + "/|";
+      excludeFromOut += *it + "/|";
       }
     }
 
   excludeFromOut += "**/CMakeFiles/";
-  fout << "<pathentry excluding=\"" << excludeFromOut
-       << "\" kind=\"out\" path=\"\"/>\n";
+
+  xml.StartElement("pathentry");
+  xml.Attribute("excluding", excludeFromOut);
+  xml.Attribute("kind", "out");
+  xml.Attribute("path", "");
+  xml.EndElement();
 
   // add pre-processor definitions to allow eclipse to gray out sections
   emmited.clear();
@@ -884,9 +838,12 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
         if(emmited.find(def) == emmited.end())
           {
           emmited.insert(def);
-          fout << "<pathentry kind=\"mac\" name=\"" << def
-               << "\" path=\"\" value=\"" << this->EscapeForXML(val)
-               << "\"/>\n";
+          xml.StartElement("pathentry");
+          xml.Attribute("kind", "mac");
+          xml.Attribute("name", def);
+          xml.Attribute("path", "");
+          xml.Attribute("value", val);
+          xml.EndElement();
           }
         }
       }
@@ -919,9 +876,12 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
         if(emmited.find(def) == emmited.end())
           {
           emmited.insert(def);
-          fout << "<pathentry kind=\"mac\" name=\"" << def
-               << "\" path=\"\" value=\"" << this->EscapeForXML(val)
-               << "\"/>\n";
+          xml.StartElement("pathentry");
+          xml.Attribute("kind", "mac");
+          xml.Attribute("name", def);
+          xml.Attribute("path", "");
+          xml.Attribute("value", val);
+          xml.EndElement();
           }
         }
       }
@@ -954,9 +914,12 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
         if(emmited.find(def) == emmited.end())
           {
           emmited.insert(def);
-          fout << "<pathentry kind=\"mac\" name=\"" << def
-               << "\" path=\"\" value=\"" << this->EscapeForXML(val)
-               << "\"/>\n";
+          xml.StartElement("pathentry");
+          xml.Attribute("kind", "mac");
+          xml.Attribute("name", def);
+          xml.Attribute("path", "");
+          xml.Attribute("value", val);
+          xml.EndElement();
           }
         }
       }
@@ -976,7 +939,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
       std::vector<std::string> includeDirs;
       std::string config = mf->GetSafeDefinition("CMAKE_BUILD_TYPE");
       (*it)->GetIncludeDirectories(includeDirs, *l, "C", config);
-      this->AppendIncludeDirectories(fout, includeDirs, emmited);
+      this->AppendIncludeDirectories(xml, includeDirs, emmited);
       }
     }
   // now also the system include directories, in case we found them in
@@ -989,7 +952,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
                                 "CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
     std::vector<std::string> dirs;
     cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
-    this->AppendIncludeDirectories(fout, dirs, emmited);
+    this->AppendIncludeDirectories(xml, dirs, emmited);
     }
   compiler = mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
   if (this->CXXEnabled && !compiler.empty())
@@ -998,16 +961,15 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
                               "CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_INCLUDE_DIRS");
     std::vector<std::string> dirs;
     cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
-    this->AppendIncludeDirectories(fout, dirs, emmited);
+    this->AppendIncludeDirectories(xml, dirs, emmited);
     }
 
-  fout << "</storageModule>\n";
+  xml.EndElement(); // storageModule
 
   // add build targets
-  fout <<
-    "<storageModule moduleId=\"org.eclipse.cdt.make.core.buildtargets\">\n"
-    "<buildTargets>\n"
-    ;
+  xml.StartElement("storageModule");
+  xml.Attribute("moduleId", "org.eclipse.cdt.make.core.buildtargets");
+  xml.StartElement("buildTargets");
   emmited.clear();
   const std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   const std::string makeArgs = mf->GetSafeDefinition(
@@ -1055,7 +1017,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           // not from the subdirs
           if (subdir.empty())
            {
-           this->AppendTarget(fout, targetName, make, makeArgs, subdir, ": ");
+           this->AppendTarget(xml, targetName, make, makeArgs, subdir, ": ");
            }
          }
          break;
@@ -1070,7 +1032,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
            break;
            }
 
-         this->AppendTarget(fout, targetName, make, makeArgs, subdir, ": ");
+         this->AppendTarget(xml, targetName, make, makeArgs, subdir, ": ");
          break;
        case cmState::EXECUTABLE:
        case cmState::STATIC_LIBRARY:
@@ -1080,10 +1042,10 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
          {
          const char* prefix = ((*ti)->GetType()==cmState::EXECUTABLE ?
                                                           "[exe] " : "[lib] ");
-         this->AppendTarget(fout, targetName, make, makeArgs, subdir, prefix);
+         this->AppendTarget(xml, targetName, make, makeArgs, subdir, prefix);
          std::string fastTarget = targetName;
          fastTarget += "/fast";
-         this->AppendTarget(fout, fastTarget, make, makeArgs, subdir, prefix);
+         this->AppendTarget(xml, fastTarget, make, makeArgs, subdir, prefix);
 
          // Add Build and Clean targets in the virtual folder of targets:
          if (this->SupportsVirtualFolders)
@@ -1095,7 +1057,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           buildArgs += (*it)->GetBinaryDirectory();
           buildArgs += "\" ";
           buildArgs += makeArgs;
-          this->AppendTarget(fout, "Build", make, buildArgs, virtDir, "",
+          this->AppendTarget(xml, "Build", make, buildArgs, virtDir, "",
                              targetName.c_str());
 
           std::string cleanArgs = "-E chdir \"";
@@ -1106,7 +1068,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           cmGeneratorTarget* gt = *ti;
           cleanArgs += (*it)->GetTargetDirectory(gt);
           cleanArgs += "/cmake_clean.cmake\"";
-          this->AppendTarget(fout, "Clean", cmSystemTools::GetCMakeCommand(),
+          this->AppendTarget(xml, "Clean", cmSystemTools::GetCMakeCommand(),
                              cleanArgs, virtDir, "", "");
           }
          }
@@ -1119,11 +1081,11 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     // insert the all and clean targets in every subdir
     if (!allTarget.empty())
       {
-      this->AppendTarget(fout, allTarget, make, makeArgs, subdir, ": ");
+      this->AppendTarget(xml, allTarget, make, makeArgs, subdir, ": ");
       }
     if (!cleanTarget.empty())
       {
-      this->AppendTarget(fout, cleanTarget, make, makeArgs, subdir, ": ");
+      this->AppendTarget(xml, cleanTarget, make, makeArgs, subdir, ": ");
       }
 
     //insert rules for compiling, preprocessing and assembling individual files
@@ -1142,25 +1104,29 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
         {
         prefix = "[pre] ";
         }
-      this->AppendTarget(fout, *fit, make, makeArgs, subdir, prefix);
+      this->AppendTarget(xml, *fit, make, makeArgs, subdir, prefix);
       }
     }
 
-  fout << "</buildTargets>\n"
-          "</storageModule>\n"
-          ;
+  xml.EndElement(); // buildTargets
+  xml.EndElement(); // storageModule
 
-  this->AppendStorageScanners(fout, *mf);
+  this->AppendStorageScanners(xml, *mf);
 
-  fout << "</cconfiguration>\n"
-          "</storageModule>\n"
-          "<storageModule moduleId=\"cdtBuildSystem\" version=\"4.0.0\">\n"
-          "<project id=\"" << this->EscapeForXML(lg->GetProjectName())
-       << ".null.1\" name=\"" << this->EscapeForXML(lg->GetProjectName())
-       << "\"/>\n"
-          "</storageModule>\n"
-          "</cproject>\n"
-          ;
+  xml.EndElement(); // cconfiguration
+  xml.EndElement(); // storageModule
+
+  xml.StartElement("storageModule");
+  xml.Attribute("moduleId", "cdtBuildSystem");
+  xml.Attribute("version", "4.0.0");
+
+  xml.StartElement("project");
+  xml.Attribute("id", std::string(lg->GetProjectName()) + ".null.1");
+  xml.Attribute("name", lg->GetProjectName());
+  xml.EndElement(); // project
+
+  xml.EndElement(); // storageModule
+  xml.EndElement(); // cproject
 }
 
 //----------------------------------------------------------------------------
@@ -1208,28 +1174,14 @@ cmExtraEclipseCDT4Generator::GenerateProjectName(const std::string& name,
                                                  const std::string& type,
                                                  const std::string& path)
 {
-  return cmExtraEclipseCDT4Generator::EscapeForXML(name)
-                                +(type.empty() ? "" : "-") + type + "@" + path;
-}
-
-std::string cmExtraEclipseCDT4Generator::EscapeForXML(const std::string& value)
-{
-  std::string str = value;
-  cmSystemTools::ReplaceString(str, "&", "&amp;");
-  cmSystemTools::ReplaceString(str, "<", "&lt;");
-  cmSystemTools::ReplaceString(str, ">", "&gt;");
-  cmSystemTools::ReplaceString(str, "\"", "&quot;");
-  // NOTE: This one is not necessary, since as of Eclipse CDT4 it will
-  //       automatically change this to the original value (').
-  //cmSystemTools::ReplaceString(str, "'", "&apos;");
-  return str;
+  return name + (type.empty() ? "" : "-") + type + "@" + path;
 }
 
 //----------------------------------------------------------------------------
 // Helper functions
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator
-::AppendStorageScanners(cmGeneratedFileStream& fout,
+::AppendStorageScanners(cmXMLWriter& xml,
                         const cmMakefile& makefile)
 {
   // we need the "make" and the C (or C++) compiler which are used, Alex
@@ -1255,24 +1207,28 @@ void cmExtraEclipseCDT4Generator
     compilerArgs = arg1 + compilerArgs;
     }
 
-  fout <<
-    "<storageModule moduleId=\"scannerConfiguration\">\n"
-    "<autodiscovery enabled=\"true\" problemReportingEnabled=\"true\""
-    " selectedProfileId="
-    "\"org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile\"/>\n"
-    ;
-  cmExtraEclipseCDT4Generator::AppendScannerProfile(fout,
+  xml.StartElement("storageModule");
+  xml.Attribute("moduleId", "scannerConfiguration");
+
+  xml.StartElement("autodiscovery");
+  xml.Attribute("enabled", "true");
+  xml.Attribute("problemReportingEnabled", "true");
+  xml.Attribute("selectedProfileId",
+      "org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile");
+  xml.EndElement(); // autodiscovery
+
+  cmExtraEclipseCDT4Generator::AppendScannerProfile(xml,
     "org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile",
     true, "", true, "specsFile",
     compilerArgs,
     compiler, true, true);
-  cmExtraEclipseCDT4Generator::AppendScannerProfile(fout,
+  cmExtraEclipseCDT4Generator::AppendScannerProfile(xml,
     "org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile",
     true, "", true, "makefileGenerator",
     "-f ${project_name}_scd.mk",
     make, true, true);
 
-  fout << "</storageModule>\n";
+  xml.EndElement(); // storageModule
 }
 
 // The prefix is prepended before the actual name of the target. The purpose
@@ -1283,7 +1239,7 @@ void cmExtraEclipseCDT4Generator
 // finally the assembly files "[to asm] ". Note the "to" in "to asm",
 // without it, "asm" would be the first targets in the list, with the "to"
 // they are the last targets, which makes more sense.
-void cmExtraEclipseCDT4Generator::AppendTarget(cmGeneratedFileStream& fout,
+void cmExtraEclipseCDT4Generator::AppendTarget(cmXMLWriter& xml,
                                                const std::string&     target,
                                                const std::string&     make,
                                                const std::string&     makeArgs,
@@ -1292,31 +1248,21 @@ void cmExtraEclipseCDT4Generator::AppendTarget(cmGeneratedFileStream& fout,
                                                const char* makeTarget
                                               )
 {
-  std::string targetXml = cmExtraEclipseCDT4Generator::EscapeForXML(target);
-  std::string makeTargetXml = targetXml;
-  if (makeTarget != NULL)
-    {
-    makeTargetXml = cmExtraEclipseCDT4Generator::EscapeForXML(makeTarget);
-    }
-  cmExtraEclipseCDT4Generator::EscapeForXML(target);
-  std::string pathXml = cmExtraEclipseCDT4Generator::EscapeForXML(path);
-  fout <<
-    "<target name=\"" << prefix << targetXml << "\""
-    " path=\"" << pathXml << "\""
-    " targetID=\"org.eclipse.cdt.make.MakeTargetBuilder\">\n"
-    "<buildCommand>"
-    << cmExtraEclipseCDT4Generator::GetEclipsePath(make)
-    << "</buildCommand>\n"
-    "<buildArguments>"  << makeArgs << "</buildArguments>\n"
-    "<buildTarget>" << makeTargetXml << "</buildTarget>\n"
-    "<stopOnError>true</stopOnError>\n"
-    "<useDefaultCommand>false</useDefaultCommand>\n"
-    "</target>\n"
-    ;
+  xml.StartElement("target");
+  xml.Attribute("name", prefix + target);
+  xml.Attribute("path", path);
+  xml.Attribute("targetID", "org.eclipse.cdt.make.MakeTargetBuilder");
+  xml.Element("buildCommand",
+      cmExtraEclipseCDT4Generator::GetEclipsePath(make));
+  xml.Element("buildArguments", makeArgs);
+  xml.Element("buildTarget", makeTarget ? makeTarget : target.c_str());
+  xml.Element("stopOnError", "true");
+  xml.Element("useDefaultCommand", "false");
+  xml.EndElement();
 }
 
 void cmExtraEclipseCDT4Generator
-::AppendScannerProfile(cmGeneratedFileStream& fout,
+::AppendScannerProfile(cmXMLWriter& xml,
                        const std::string&     profileID,
                        bool                   openActionEnabled,
                        const std::string&     openActionFilePath,
@@ -1327,49 +1273,54 @@ void cmExtraEclipseCDT4Generator
                        bool                   runActionUseDefault,
                        bool                   sipParserEnabled)
 {
-  fout <<
-    "<profile id=\"" << profileID << "\">\n"
-    "<buildOutputProvider>\n"
-    "<openAction enabled=\"" << (openActionEnabled ? "true" : "false")
-    << "\" filePath=\"" << openActionFilePath << "\"/>\n"
-    "<parser enabled=\"" << (pParserEnabled ? "true" : "false") << "\"/>\n"
-    "</buildOutputProvider>\n"
-    "<scannerInfoProvider id=\"" << scannerInfoProviderID << "\">\n"
-    "<runAction arguments=\"" << runActionArguments << "\""
-    " command=\"" << runActionCommand
-    << "\" useDefault=\"" << (runActionUseDefault ? "true":"false") << "\"/>\n"
-    "<parser enabled=\"" << (sipParserEnabled ? "true" : "false") << "\"/>\n"
-    "</scannerInfoProvider>\n"
-    "</profile>\n"
-    ;
+  xml.StartElement("profile");
+  xml.Attribute("id", profileID);
+
+  xml.StartElement("buildOutputProvider");
+  xml.StartElement("openAction");
+  xml.Attribute("enabled", openActionEnabled ? "true" : "false");
+  xml.Attribute("filePath", openActionFilePath);
+  xml.EndElement(); // openAction
+  xml.StartElement("parser");
+  xml.Attribute("enabled", pParserEnabled ? "true" : "false");
+  xml.EndElement(); // parser
+  xml.EndElement(); // buildOutputProvider
+
+  xml.StartElement("scannerInfoProvider");
+  xml.Attribute("id", scannerInfoProviderID);
+  xml.StartElement("runAction");
+  xml.Attribute("arguments", runActionArguments);
+  xml.Attribute("command", runActionCommand);
+  xml.Attribute("useDefault", runActionUseDefault ? "true" : "false");
+  xml.EndElement(); // runAction
+  xml.StartElement("parser");
+  xml.Attribute("enabled", sipParserEnabled ? "true" : "false");
+  xml.EndElement(); // parser
+  xml.EndElement(); // scannerInfoProvider
+
+  xml.EndElement(); // profile
 }
 
 void cmExtraEclipseCDT4Generator
-::AppendLinkedResource (cmGeneratedFileStream& fout,
+::AppendLinkedResource (cmXMLWriter& xml,
                         const std::string&     name,
                         const std::string&     path,
                         LinkType linkType)
 {
   const char* locationTag = "location";
-  const char* typeTag = "2";
+  int typeTag = 2;
   if (linkType == VirtualFolder) // ... and not a linked folder
     {
     locationTag = "locationURI";
     }
   if (linkType == LinkToFile)
     {
-    typeTag = "1";
+    typeTag = 1;
     }
 
-  fout <<
-    "\t\t<link>\n"
-    "\t\t\t<name>"
-    << cmExtraEclipseCDT4Generator::EscapeForXML(name)
-    << "</name>\n"
-    "\t\t\t<type>" << typeTag << "</type>\n"
-    "\t\t\t<" << locationTag << ">"
-    << cmExtraEclipseCDT4Generator::EscapeForXML(path)
-    << "</" << locationTag << ">\n"
-    "\t\t</link>\n"
-    ;
+  xml.StartElement("link");
+  xml.Element("name", name);
+  xml.Element("type", typeTag);
+  xml.Element(locationTag, path);
+  xml.EndElement();
 }
