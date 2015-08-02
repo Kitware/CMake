@@ -17,7 +17,7 @@
 #include "cmExternalMakefileProjectGenerator.h"
 
 class cmMakefile;
-class cmGeneratedFileStream;
+class cmXMLWriter;
 
 /** \class cmExtraEclipseCDT4Generator
  * \brief Write Eclipse project files for Makefile based projects
@@ -67,19 +67,17 @@ private:
                                          const std::string& type,
                                          const std::string& path);
 
-  static std::string EscapeForXML(const std::string& value);
-
   // Helper functions
-  static void AppendStorageScanners(cmGeneratedFileStream& fout,
+  static void AppendStorageScanners(cmXMLWriter& xml,
                                     const cmMakefile& makefile);
-  static void AppendTarget         (cmGeneratedFileStream& fout,
+  static void AppendTarget         (cmXMLWriter& xml,
                                     const std::string&     target,
                                     const std::string&     make,
                                     const std::string&     makeArguments,
                                     const std::string&     path,
                                     const char* prefix = "",
                                     const char* makeTarget = NULL);
-  static void AppendScannerProfile (cmGeneratedFileStream& fout,
+  static void AppendScannerProfile (cmXMLWriter& xml,
                                     const std::string&   profileID,
                                     bool                 openActionEnabled,
                                     const std::string&   openActionFilePath,
@@ -90,21 +88,20 @@ private:
                                     bool                 runActionUseDefault,
                                     bool                 sipParserEnabled);
 
-  static void AppendLinkedResource (cmGeneratedFileStream& fout,
+  static void AppendLinkedResource (cmXMLWriter& xml,
                                     const std::string&     name,
                                     const std::string&     path,
                                     LinkType linkType);
 
-  static void AppendIncludeDirectories(cmGeneratedFileStream& fout,
+  static void AppendIncludeDirectories(cmXMLWriter& xml,
                                    const std::vector<std::string>& includeDirs,
                                    std::set<std::string>& emittedDirs);
 
-  static void AddEnvVar(cmGeneratedFileStream& fout, const char* envVar,
+  static void AddEnvVar(std::ostream& out, const char* envVar,
                         cmLocalGenerator* lg);
 
-  void CreateLinksToSubprojects(cmGeneratedFileStream& fout,
-                                const std::string& baseDir);
-  void CreateLinksForTargets(cmGeneratedFileStream& fout);
+  void CreateLinksToSubprojects(cmXMLWriter& xml, const std::string& baseDir);
+  void CreateLinksForTargets(cmXMLWriter& xml);
 
   std::vector<std::string> SrcLinkedResources;
   std::set<std::string> Natures;
