@@ -936,9 +936,17 @@ void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
 
       cmGeneratorTarget* gt = this->GetGeneratorTarget(&target);
 
+      cmLocalGenerator* tlg = gt->GetLocalGenerator();
+
+      if(gt->GetType() == cmTarget::INTERFACE_LIBRARY
+          || gt->Target->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
+        {
+        continue;
+        }
+
       // Consider the directory containing the target and all its
       // parents until something excludes the target.
-      for(cmLocalGenerator* clg = lg; clg && !this->IsExcluded(clg, gt);
+      for(cmLocalGenerator* clg = lg; clg && !this->IsExcluded(clg, tlg);
           clg = clg->GetParent())
         {
         // This local generator includes the target.
