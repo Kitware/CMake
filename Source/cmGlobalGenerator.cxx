@@ -2046,21 +2046,22 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
 {
   assert(gen);
 
-  cmLocalGenerator* lg = gen;
-  while (lg)
+  cmState::Snapshot rootSnp = root->GetStateSnapshot();
+  cmState::Snapshot snp = gen->GetStateSnapshot();
+  while (snp.IsValid())
     {
-    if(lg == root)
+    if(snp == rootSnp)
       {
       // No directory excludes itself.
       return false;
       }
 
-    if(lg->GetMakefile()->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
+    if(snp.GetDirectory().GetPropertyAsBool("EXCLUDE_FROM_ALL"))
       {
       // This directory is excluded from its parent.
       return true;
       }
-    lg = lg->GetParent();
+    snp = snp.GetBuildsystemDirectoryParent();
     }
   return false;
 }
