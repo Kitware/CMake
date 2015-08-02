@@ -2368,19 +2368,15 @@ void cmLocalGenerator::AppendFeatureOptions(
 const char* cmLocalGenerator::GetFeature(const std::string& feature,
                                          const std::string& config)
 {
+  std::string featureName = feature;
   // TODO: Define accumulation policy for features (prepend, append, replace).
   // Currently we always replace.
   if(!config.empty())
     {
-    std::string featureConfig = feature;
-    featureConfig += "_";
-    featureConfig += cmSystemTools::UpperCase(config);
-    if(const char* value = this->Makefile->GetProperty(featureConfig))
-      {
-      return value;
-      }
+    featureName += "_";
+    featureName += cmSystemTools::UpperCase(config);
     }
-  if(const char* value = this->Makefile->GetProperty(feature))
+  if(const char* value = this->Makefile->GetProperty(featureName))
     {
     return value;
     }
