@@ -86,6 +86,9 @@ public:
 
     Directory GetDirectory() const;
 
+    void SetProjectName(std::string const& name);
+    std::string GetProjectName() const;
+
     struct StrictWeakOrder
     {
       bool operator()(const cmState::Snapshot& lhs,

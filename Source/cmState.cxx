@@ -38,6 +38,8 @@ struct cmState::SnapshotDataType
   std::vector<std::string>::size_type IncludeDirectoryPosition;
   std::vector<std::string>::size_type CompileDefinitionsPosition;
   std::vector<std::string>::size_type CompileOptionsPosition;
+
+  std::string ProjectName;
 };
 
 struct cmState::PolicyStackEntry: public cmPolicies::PolicyMap
@@ -1310,6 +1312,16 @@ cmState* cmState::Snapshot::GetState() const
 cmState::Directory cmState::Snapshot::GetDirectory() const
 {
   return Directory(this->Position->BuildSystemDirectory, *this);
+}
+
+void cmState::Snapshot::SetProjectName(const std::string& name)
+{
+  this->Position->ProjectName = name;
+}
+
+std::string cmState::Snapshot::GetProjectName() const
+{
+  return this->Position->ProjectName;
 }
 
 cmState::Directory::Directory(
