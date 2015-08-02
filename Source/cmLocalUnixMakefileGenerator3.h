@@ -35,7 +35,6 @@ class cmLocalUnixMakefileGenerator3 : public cmLocalCommonGenerator
 {
 public:
   cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg,
-                                cmLocalGenerator* parent,
                                 cmState::Snapshot snapshot);
   virtual ~cmLocalUnixMakefileGenerator3();
 

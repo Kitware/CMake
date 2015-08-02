@@ -43,13 +43,11 @@
 #endif
 
 cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
-                                   cmLocalGenerator* parent,
                                    cmState::Snapshot snapshot)
   : cmOutputConverter(snapshot), StateSnapshot(snapshot)
 {
   assert(snapshot.IsValid());
   this->GlobalGenerator = gg;
-  this->Parent = parent;
 
   this->Makefile = new cmMakefile(this);
 

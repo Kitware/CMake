@@ -43,8 +43,7 @@ public:
   std::string const& GetPlatformName() const;
 
   ///! Create a local generator appropriate to this Global Generator
-  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent,
-                                                 cmState::Snapshot snapshot);
+  virtual cmLocalGenerator *CreateLocalGenerator(cmState::Snapshot snapshot);
 
   virtual bool SetSystemName(std::string const& s, cmMakefile* mf);
 

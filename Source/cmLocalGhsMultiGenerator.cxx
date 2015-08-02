@@ -17,9 +17,8 @@
 #include "cmGeneratedFileStream.h"
 
 cmLocalGhsMultiGenerator::cmLocalGhsMultiGenerator(cmGlobalGenerator* gg,
-                                                   cmLocalGenerator* parent,
                                                    cmState::Snapshot snapshot)
-  : cmLocalGenerator(gg, parent, snapshot)
+  : cmLocalGenerator(gg, snapshot)
 {
 }
 
