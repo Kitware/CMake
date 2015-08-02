@@ -2384,11 +2384,12 @@ const char* cmLocalGenerator::GetFeature(const std::string& feature,
     {
     return value;
     }
-  if(cmLocalGenerator* parent = this->GetParent())
+  cmLocalGenerator* parent = this->GetParent();
+  if(!parent)
     {
-    return parent->GetFeature(feature, config);
+    return 0;
     }
-  return 0;
+  return parent->GetFeature(feature, config);
 }
 
 //----------------------------------------------------------------------------
