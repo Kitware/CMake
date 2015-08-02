@@ -2070,12 +2070,9 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
     // This target is excluded from its directory.
     return true;
     }
-  else
-    {
-    // This target is included in its directory.  Check whether the
-    // directory is excluded.
-    return this->IsExcluded(root, target->GetLocalGenerator());
-    }
+  // This target is included in its directory.  Check whether the
+  // directory is excluded.
+  return this->IsExcluded(root, target->GetLocalGenerator());
 }
 
 void
