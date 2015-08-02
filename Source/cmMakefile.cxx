@@ -2044,12 +2044,12 @@ void cmMakefile::RemoveCacheDefinition(const std::string& name)
   this->GetState()->RemoveCacheEntry(name);
 }
 
-void cmMakefile::SetProjectName(const char* p)
+void cmMakefile::SetProjectName(std::string const& p)
 {
   this->ProjectName = p;
 }
 
-const char* cmMakefile::GetProjectName() const
+std::string cmMakefile::GetProjectName() const
 {
   return this->ProjectName.c_str();
 }
