@@ -919,7 +919,7 @@ cmGlobalUnixMakefileGenerator3
 
 // Build a map that contains a the set of targets used by each local
 // generator directory level.
-void cmGlobalUnixMakefileGenerator3::FillLocalGeneratorToTargetMap()
+void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
 {
   this->LocalGeneratorToTargetMap.clear();
   // Loop over all targets in all local generators.

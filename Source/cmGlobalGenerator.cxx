@@ -1340,7 +1340,7 @@ void cmGlobalGenerator::Generate()
 
   // Create a map from local generator to the complete set of targets
   // it builds by default.
-  this->FillLocalGeneratorToTargetMap();
+  this->InitializeProgressMarks();
 
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {

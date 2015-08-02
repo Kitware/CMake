@@ -209,7 +209,7 @@ private:
 
   std::map<cmLocalGenerator*, std::set<cmGeneratorTarget const*> >
                                                     LocalGeneratorToTargetMap;
-  virtual void FillLocalGeneratorToTargetMap();
+  virtual void InitializeProgressMarks();
 };
 
 #endif

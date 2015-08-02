@@ -398,7 +398,7 @@ protected:
   void CheckLocalGenerators();
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen) const;
   bool IsExcluded(cmLocalGenerator* root, cmGeneratorTarget* target) const;
-  virtual void FillLocalGeneratorToTargetMap() {}
+  virtual void InitializeProgressMarks() {}
   void CreateDefaultGlobalTargets(cmTargets* targets);
   cmTarget CreateGlobalTarget(const std::string& name, const char* message,
     const cmCustomCommandLines* commandLines,
