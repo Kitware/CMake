@@ -1592,7 +1592,7 @@ int cmake::ActualConfigure()
       }
     }
 
-  cmMakefile* mf=this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
+  cmMakefile* mf=this->GlobalGenerator->GetMakefiles()[0];
   if (mf->IsOn("CTEST_USE_LAUNCHERS")
               && !this->State->GetGlobalProperty("RULE_LAUNCH_COMPILE"))
     {
