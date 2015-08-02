@@ -207,8 +207,9 @@ private:
   virtual const char* GetBuildIgnoreErrorsFlag() const { return "-i"; }
   virtual std::string GetEditCacheCommand() const;
 
-  std::map<cmLocalGenerator*, std::set<cmGeneratorTarget const*> >
-                                                    DirectoryTargetsMap;
+  std::map<cmState::Snapshot,
+           std::set<cmGeneratorTarget const*>,
+           cmState::Snapshot::StrictWeakOrder> DirectoryTargetsMap;
   virtual void InitializeProgressMarks();
 };
 

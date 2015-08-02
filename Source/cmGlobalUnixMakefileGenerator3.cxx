@@ -943,7 +943,7 @@ void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
         {
         // This local generator includes the target.
         std::set<cmGeneratorTarget const*>& targetSet =
-          this->DirectoryTargetsMap[clg];
+          this->DirectoryTargetsMap[clg->GetStateSnapshot()];
         targetSet.insert(gt);
 
         // Add dependencies of the included target.  An excluded
@@ -992,7 +992,7 @@ cmGlobalUnixMakefileGenerator3
   size_t count = 0;
   std::set<cmGeneratorTarget const*> emitted;
   std::set<cmGeneratorTarget const*> const& targets
-                                        = this->DirectoryTargetsMap[lg];
+      = this->DirectoryTargetsMap[lg->GetStateSnapshot()];
   for(std::set<cmGeneratorTarget const*>::const_iterator t = targets.begin();
       t != targets.end(); ++t)
     {
