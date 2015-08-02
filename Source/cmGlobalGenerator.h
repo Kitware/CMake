@@ -256,6 +256,7 @@ public:
       that is a framework. */
   bool NameResolvesToFramework(const std::string& libname) const;
 
+  cmMakefile* FindMakefile(const std::string& start_dir) const;
   ///! Find a local generator by its startdirectory
   cmLocalGenerator* FindLocalGenerator(const std::string& start_dir) const;
 
