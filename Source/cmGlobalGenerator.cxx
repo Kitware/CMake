@@ -1134,17 +1134,17 @@ void cmGlobalGenerator::Configure()
   this->LocalGenerators.push_back(lg);
 
   // set the Start directories
-  lg->GetMakefile()->SetCurrentSourceDirectory
+  dirMf->SetCurrentSourceDirectory
     (this->CMakeInstance->GetHomeDirectory());
-  lg->GetMakefile()->SetCurrentBinaryDirectory
+  dirMf->SetCurrentBinaryDirectory
     (this->CMakeInstance->GetHomeOutputDirectory());
 
   this->BinaryDirectories.insert(
       this->CMakeInstance->GetHomeOutputDirectory());
 
   // now do it
-  lg->GetMakefile()->Configure();
-  lg->GetMakefile()->EnforceDirectoryLevelRules();
+  dirMf->Configure();
+  dirMf->EnforceDirectoryLevelRules();
 
   // update the cache entry for the number of local generators, this is used
   // for progress
