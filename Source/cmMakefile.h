@@ -810,8 +810,6 @@ protected:
 
   mutable std::set<cmListFileContext> CMP0054ReportedIds;
 
-  std::string ProjectName;    // project name
-
   // libraries, classes, and executables
   mutable cmTargets Targets;
 #if defined(CMAKE_BUILD_WITH_CMAKE)
