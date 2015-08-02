@@ -35,8 +35,7 @@ class cmLocalVisualStudio7Generator : public cmLocalVisualStudioGenerator
 {
 public:
   ///! Set cache only and recurse to false by default.
-  cmLocalVisualStudio7Generator(cmGlobalGenerator* gg,
-                                cmState::Snapshot snapshot);
+  cmLocalVisualStudio7Generator(cmGlobalGenerator* gg, cmMakefile* mf);
 
   virtual ~cmLocalVisualStudio7Generator();
 

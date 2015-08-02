@@ -520,10 +520,10 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cmGlobalGenerator gg(&cm);
-  cmsys::auto_ptr<cmLocalGenerator> lg(
-        gg.CreateLocalGenerator(cm.GetCurrentSnapshot()));
-  cmMakefile *mf = lg->GetMakefile();
-  if ( !this->ReadCustomConfigurationFileTree(this->BinaryDir.c_str(), mf) )
+  cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(&gg, cm.GetCurrentSnapshot()));
+  cmsys::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator(mf.get()));
+  if ( !this->ReadCustomConfigurationFileTree(this->BinaryDir.c_str(),
+                                              mf.get()) )
     {
     cmCTestOptionalLog(this, DEBUG,
       "Cannot find custom configuration file tree" << std::endl, quiet);

@@ -167,7 +167,7 @@ public:
 
   virtual ~cmGlobalNinjaGenerator() { }
 
-  virtual cmLocalGenerator* CreateLocalGenerator(cmState::Snapshot snapshot);
+  virtual cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf);
 
   virtual std::string GetName() const {
     return cmGlobalNinjaGenerator::GetActualName(); }

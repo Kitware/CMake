@@ -57,7 +57,7 @@ public:
   virtual ~cmGlobalGenerator();
 
   virtual cmLocalGenerator*
-  CreateLocalGenerator(cmState::Snapshot snapshot = cmState::Snapshot());
+  CreateLocalGenerator(cmMakefile* mf);
 
   ///! Get the name for this generator
   virtual std::string GetName() const { return "Generic"; }

@@ -44,10 +44,10 @@ void cmGlobalBorlandMakefileGenerator
 
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator(
-    cmState::Snapshot snapshot)
+    cmMakefile *mf)
 {
   cmLocalUnixMakefileGenerator3* lg =
-      new cmLocalUnixMakefileGenerator3(this, snapshot);
+      new cmLocalUnixMakefileGenerator3(this, mf);
   lg->SetMakefileVariableSize(32);
   lg->SetMakeCommandEscapeTargetTwice(true);
   lg->SetBorlandMakeCurlyHack(true);

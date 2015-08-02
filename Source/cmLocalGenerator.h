@@ -36,7 +36,7 @@ class cmCustomCommandGenerator;
 class cmLocalGenerator : public cmOutputConverter
 {
 public:
-  cmLocalGenerator(cmGlobalGenerator* gg, cmState::Snapshot snapshot);
+  cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile);
   virtual ~cmLocalGenerator();
 
   /**

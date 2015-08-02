@@ -33,9 +33,9 @@ cmGlobalGhsMultiGenerator::~cmGlobalGhsMultiGenerator()
 }
 
 cmLocalGenerator *
-cmGlobalGhsMultiGenerator::CreateLocalGenerator(cmState::Snapshot snapshot)
+cmGlobalGhsMultiGenerator::CreateLocalGenerator(cmMakefile* mf)
 {
-  return new cmLocalGhsMultiGenerator(this, snapshot);
+  return new cmLocalGhsMultiGenerator(this, mf);
 }
 
 void cmGlobalGhsMultiGenerator::GetDocumentation(cmDocumentationEntry &entry)

@@ -22,8 +22,7 @@ class cmCommonTargetGenerator;
 class cmLocalCommonGenerator: public cmLocalGenerator
 {
 public:
-  cmLocalCommonGenerator(cmGlobalGenerator* gg,
-                         cmState::Snapshot snapshot);
+  cmLocalCommonGenerator(cmGlobalGenerator* gg, cmMakefile* mf);
   ~cmLocalCommonGenerator();
 
   std::string const& GetConfigName() { return this->ConfigName; }

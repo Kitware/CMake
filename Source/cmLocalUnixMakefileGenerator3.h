@@ -34,8 +34,7 @@ class cmSourceFile;
 class cmLocalUnixMakefileGenerator3 : public cmLocalCommonGenerator
 {
 public:
-  cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg,
-                                cmState::Snapshot snapshot);
+  cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg, cmMakefile* mf);
   virtual ~cmLocalUnixMakefileGenerator3();
 
   virtual void ComputeHomeRelativeOutputPath();
