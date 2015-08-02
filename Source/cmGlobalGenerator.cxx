@@ -1124,7 +1124,6 @@ void cmGlobalGenerator::Configure()
   // now do it
   this->ConfigureDoneCMP0026 = false;
   dirMf->Configure();
-  this->CreateLocalGenerators();
   dirMf->EnforceDirectoryLevelRules();
 
   this->ConfigureDoneCMP0026 = true;
@@ -1186,6 +1185,7 @@ void cmGlobalGenerator::Configure()
 
 void cmGlobalGenerator::CreateGenerationObjects(TargetTypes targetTypes)
 {
+  this->CreateLocalGenerators();
   cmDeleteAll(this->GeneratorTargets);
   this->GeneratorTargets.clear();
   this->CreateGeneratorTargets(targetTypes);
