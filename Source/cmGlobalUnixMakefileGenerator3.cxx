@@ -944,14 +944,17 @@ void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
         continue;
         }
 
+      cmState::Snapshot csnp = lg->GetStateSnapshot();
+      cmState::Snapshot tsnp = tlg->GetStateSnapshot();
+
       // Consider the directory containing the target and all its
       // parents until something excludes the target.
-      for(cmLocalGenerator* clg = lg; clg && !this->IsExcluded(clg, tlg);
-          clg = clg->GetParent())
+      for( ; csnp.IsValid() && !this->IsExcluded(csnp, tsnp);
+          csnp = csnp.GetBuildsystemDirectoryParent())
         {
         // This local generator includes the target.
         std::set<cmGeneratorTarget const*>& targetSet =
-          this->DirectoryTargetsMap[clg->GetStateSnapshot()];
+          this->DirectoryTargetsMap[csnp];
         targetSet.insert(gt);
 
         // Add dependencies of the included target.  An excluded
