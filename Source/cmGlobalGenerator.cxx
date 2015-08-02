@@ -2041,13 +2041,10 @@ void cmGlobalGenerator::SetConfiguredFilesPath(cmGlobalGenerator* gen)
     }
 }
 
-bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
-                                   cmLocalGenerator* gen) const
+bool cmGlobalGenerator::IsExcluded(cmState::Snapshot const& rootSnp,
+                       cmState::Snapshot const& snp_) const
 {
-  assert(gen);
-
-  cmState::Snapshot rootSnp = root->GetStateSnapshot();
-  cmState::Snapshot snp = gen->GetStateSnapshot();
+  cmState::Snapshot snp = snp_;
   while (snp.IsValid())
     {
     if(snp == rootSnp)
@@ -2064,6 +2061,17 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
     snp = snp.GetBuildsystemDirectoryParent();
     }
   return false;
+}
+
+bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
+                                   cmLocalGenerator* gen) const
+{
+  assert(gen);
+
+  cmState::Snapshot rootSnp = root->GetStateSnapshot();
+  cmState::Snapshot snp = gen->GetStateSnapshot();
+
+  return this->IsExcluded(rootSnp, snp);
 }
 
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
