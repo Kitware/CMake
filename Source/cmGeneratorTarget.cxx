@@ -234,7 +234,7 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
 {
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = lg;
-  this->GlobalGenerator = this->Makefile->GetGlobalGenerator();
+  this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
 }
 
 cmGeneratorTarget::~cmGeneratorTarget()
@@ -1556,7 +1556,7 @@ cmTargetTraceDependencies
 {
   // Convenience.
   this->Makefile = this->Target->GetMakefile();
-  this->GlobalGenerator = this->Makefile->GetGlobalGenerator();
+  this->GlobalGenerator = target->GetLocalGenerator()->GetGlobalGenerator();
   this->CurrentEntry = 0;
 
   // Queue all the source files already specified for the target.
@@ -1944,8 +1944,7 @@ void cmGeneratorTarget::GenerateTargetManifest(
     {
     return;
     }
-  cmMakefile* mf = this->Target->GetMakefile();
-  cmGlobalGenerator* gg = mf->GetGlobalGenerator();
+  cmGlobalGenerator* gg = this->LocalGenerator->GetGlobalGenerator();
 
   // Get the names.
   std::string name;
