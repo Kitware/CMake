@@ -1641,11 +1641,11 @@ void cmGlobalGenerator::CheckLocalGenerators()
 //  std::set<std::string> notFoundMap;
   // after it is all done do a ConfigureFinalPass
   cmState* state = this->GetCMakeInstance()->GetState();
-  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
+  for (unsigned int i = 0; i < this->Makefiles.size(); ++i)
     {
-    this->LocalGenerators[i]->GetMakefile()->ConfigureFinalPass();
+    this->Makefiles[i]->ConfigureFinalPass();
     cmTargets &targets =
-      this->LocalGenerators[i]->GetMakefile()->GetTargets();
+      this->Makefiles[i]->GetTargets();
     for (cmTargets::iterator l = targets.begin();
          l != targets.end(); l++)
       {
@@ -1700,15 +1700,14 @@ void cmGlobalGenerator::CheckLocalGenerators()
             }
           std::string text = notFoundMap[varName];
           text += "\n   used as include directory in directory ";
-          text += this->LocalGenerators[i]
-                      ->GetMakefile()->GetCurrentSourceDirectory();
+          text += this->Makefiles[i]->GetCurrentSourceDirectory();
           notFoundMap[varName] = text;
           }
         }
       }
     this->CMakeInstance->UpdateProgress
       ("Configuring", 0.9f+0.1f*(static_cast<float>(i)+1.0f)/
-        static_cast<float>(this->LocalGenerators.size()));
+        static_cast<float>(this->Makefiles.size()));
     }
 
   if(!notFoundMap.empty())
