@@ -2376,16 +2376,16 @@ const char* cmLocalGenerator::GetFeature(const std::string& feature,
     featureName += "_";
     featureName += cmSystemTools::UpperCase(config);
     }
-  if(const char* value = this->Makefile->GetProperty(featureName))
+  cmLocalGenerator* lg = this;
+  while(lg)
     {
-    return value;
+    if(const char* value = lg->GetMakefile()->GetProperty(featureName))
+      {
+      return value;
+      }
+    lg = lg->GetParent();
     }
-  cmLocalGenerator* parent = this->GetParent();
-  if(!parent)
-    {
-    return 0;
-    }
-  return parent->GetFeature(feature, config);
+  return 0;
 }
 
 //----------------------------------------------------------------------------
