@@ -394,7 +394,7 @@ protected:
   // Fill the ProjectMap, this must be called after LocalGenerators
   // has been populated.
   void FillProjectMap();
-  void CheckLocalGenerators();
+  void CheckTargetProperties();
   bool IsExcluded(cmState::Snapshot const& root,
                   cmState::Snapshot const& snp) const;
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen) const;
