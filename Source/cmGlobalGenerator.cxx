@@ -1128,7 +1128,7 @@ void cmGlobalGenerator::Configure()
   this->ClearGeneratorMembers();
 
   // start with this directory
-  cmLocalGenerator *lg = this->MakeLocalGenerator();
+  cmLocalGenerator *lg = this->CreateLocalGenerator();
   this->Makefiles.push_back(lg->GetMakefile());
   this->LocalGenerators.push_back(lg);
 
@@ -1983,12 +1983,6 @@ void cmGlobalGenerator::AddInstallComponent(const char* component)
 void cmGlobalGenerator::EnableInstallTarget()
 {
   this->InstallTargetEnabled = true;
-}
-
-cmLocalGenerator *
-cmGlobalGenerator::MakeLocalGenerator(cmState::Snapshot snapshot)
-{
-  return this->CreateLocalGenerator(snapshot);
 }
 
 cmLocalGenerator*

@@ -56,8 +56,8 @@ public:
   cmGlobalGenerator(cmake* cm);
   virtual ~cmGlobalGenerator();
 
-  cmLocalGenerator*
-  MakeLocalGenerator(cmState::Snapshot snapshot = cmState::Snapshot());
+  virtual cmLocalGenerator*
+  CreateLocalGenerator(cmState::Snapshot snapshot = cmState::Snapshot());
 
   ///! Get the name for this generator
   virtual std::string GetName() const { return "Generic"; }
@@ -440,9 +440,6 @@ protected:
   virtual bool UseFolderProperty();
 
 private:
-  ///! Create a local generator appropriate to this Global Generator
-  virtual cmLocalGenerator *CreateLocalGenerator(cmState::Snapshot snapshot);
-
   cmMakefile* TryCompileOuterMakefile;
   // If you add a new map here, make sure it is copied
   // in EnableLanguagesFromGenerator

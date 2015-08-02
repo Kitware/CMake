@@ -342,7 +342,7 @@ void cmCTestScriptHandler::CreateCMake()
   this->GlobalGenerator = new cmGlobalGenerator(this->CMake);
 
   cmState::Snapshot snapshot = this->CMake->GetCurrentSnapshot();
-  this->LocalGenerator = this->GlobalGenerator->MakeLocalGenerator(snapshot);
+  this->LocalGenerator = this->GlobalGenerator->CreateLocalGenerator(snapshot);
   this->Makefile = this->LocalGenerator->GetMakefile();
 
   this->CMake->SetProgressCallback(ctestScriptProgressCallback, this->CTest);
