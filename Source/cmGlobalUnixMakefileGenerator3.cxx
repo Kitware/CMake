@@ -917,6 +917,49 @@ cmGlobalUnixMakefileGenerator3
     }
 }
 
+// Build a map that contains a the set of targets used by each local
+// generator directory level.
+void cmGlobalUnixMakefileGenerator3::FillLocalGeneratorToTargetMap()
+{
+  this->LocalGeneratorToTargetMap.clear();
+  // Loop over all targets in all local generators.
+  for(std::vector<cmLocalGenerator*>::const_iterator
+        lgi = this->LocalGenerators.begin();
+      lgi != this->LocalGenerators.end(); ++lgi)
+    {
+    cmLocalGenerator* lg = *lgi;
+    cmMakefile* mf = lg->GetMakefile();
+    cmTargets const& targets = mf->GetTargets();
+    for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
+      {
+      cmTarget const& target = t->second;
+
+      cmGeneratorTarget* gt = this->GetGeneratorTarget(&target);
+
+      // Consider the directory containing the target and all its
+      // parents until something excludes the target.
+      for(cmLocalGenerator* clg = lg; clg && !this->IsExcluded(clg, gt);
+          clg = clg->GetParent())
+        {
+        // This local generator includes the target.
+        std::set<cmGeneratorTarget const*>& targetSet =
+          this->LocalGeneratorToTargetMap[clg];
+        targetSet.insert(gt);
+
+        // Add dependencies of the included target.  An excluded
+        // target may still be included if it is a dependency of a
+        // non-excluded target.
+        TargetDependSet const& tgtdeps = this->GetTargetDirectDepends(gt);
+        for(TargetDependSet::const_iterator ti = tgtdeps.begin();
+            ti != tgtdeps.end(); ++ti)
+          {
+          targetSet.insert(*ti);
+          }
+        }
+      }
+    }
+}
+
 //----------------------------------------------------------------------------
 size_t
 cmGlobalUnixMakefileGenerator3

@@ -206,6 +206,10 @@ protected:
 private:
   virtual const char* GetBuildIgnoreErrorsFlag() const { return "-i"; }
   virtual std::string GetEditCacheCommand() const;
+
+  std::map<cmLocalGenerator*, std::set<cmGeneratorTarget const*> >
+                                                    LocalGeneratorToTargetMap;
+  virtual void FillLocalGeneratorToTargetMap();
 };
 
 #endif

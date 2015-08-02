@@ -398,7 +398,7 @@ protected:
   void CheckLocalGenerators();
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen) const;
   bool IsExcluded(cmLocalGenerator* root, cmGeneratorTarget* target) const;
-  void FillLocalGeneratorToTargetMap();
+  virtual void FillLocalGeneratorToTargetMap() {}
   void CreateDefaultGlobalTargets(cmTargets* targets);
   cmTarget CreateGlobalTarget(const std::string& name, const char* message,
     const cmCustomCommandLines* commandLines,
@@ -413,8 +413,6 @@ protected:
   cmMakefile* CurrentMakefile;
   // map from project name to vector of local generators in that project
   std::map<std::string, std::vector<cmLocalGenerator*> > ProjectMap;
-  std::map<cmLocalGenerator*, std::set<cmGeneratorTarget const*> >
-                                                    LocalGeneratorToTargetMap;
 
   // Set of named installation components requested by the project.
   std::set<std::string> InstallComponents;
