@@ -44,9 +44,10 @@
 #include <assert.h>
 
 // default is not to be building executables
-cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
-  : LocalGenerator(localGenerator),
-    StateSnapshot(localGenerator->GetStateSnapshot())
+cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
+                       cmState::Snapshot const& snapshot)
+  : GlobalGenerator(globalGenerator),
+    StateSnapshot(snapshot)
 {
   this->IsSourceFileTryCompile = false;
 
@@ -3744,12 +3745,12 @@ bool cmMakefile::GetIsSourceFileTryCompile() const
 
 cmake *cmMakefile::GetCMakeInstance() const
 {
-  return this->GetGlobalGenerator()->GetCMakeInstance();
+  return this->GlobalGenerator->GetCMakeInstance();
 }
 
 cmGlobalGenerator* cmMakefile::GetGlobalGenerator() const
 {
-  return this->LocalGenerator->GetGlobalGenerator();
+  return this->GlobalGenerator;
 }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
