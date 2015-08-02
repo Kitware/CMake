@@ -1159,10 +1159,6 @@ void cmGlobalGenerator::Configure()
   // and for infinite loops
   this->CheckTargetProperties();
 
-  // at this point this->LocalGenerators has been filled,
-  // so create the map from project name to vector of local generators
-  this->FillProjectMap();
-
   if ( this->CMakeInstance->GetWorkingMode() == cmake::NORMAL_MODE)
     {
     std::ostringstream msg;
@@ -1268,6 +1264,10 @@ bool cmGlobalGenerator::Compute()
   this->FinalizeTargetCompileInfo();
 
   this->CreateGenerationObjects();
+
+  // at this point this->LocalGenerators has been filled,
+  // so create the map from project name to vector of local generators
+  this->FillProjectMap();
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   // Iterate through all targets and set up automoc for those which have
