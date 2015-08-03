@@ -1248,6 +1248,7 @@ void cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
   UNORDERED_SET<std::string> languages;
   cmTarget::LinkImplementation const* impl =
                             this->Target->GetLinkImplementation(config);
+  assert(impl);
   for(std::vector<std::string>::const_iterator li = impl->Languages.begin();
       li != impl->Languages.end(); ++li)
     {
