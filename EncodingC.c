@@ -45,8 +45,11 @@ wchar_t* kwsysEncoding_DupToWide(const char* str)
   if(length > 0)
     {
     ret = (wchar_t*)malloc((length)*sizeof(wchar_t));
-    ret[0] = 0;
-    kwsysEncoding_mbstowcs(ret, str, length);
+    if(ret)
+      {
+      ret[0] = 0;
+      kwsysEncoding_mbstowcs(ret, str, length);
+      }
     }
   return ret;
 }
@@ -72,8 +75,11 @@ char* kwsysEncoding_DupToNarrow(const wchar_t* str)
   if(length > 0)
     {
     ret = (char*)malloc(length);
-    ret[0] = 0;
-    kwsysEncoding_wcstombs(ret, str, length);
+    if(ret)
+      {
+      ret[0] = 0;
+      kwsysEncoding_wcstombs(ret, str, length);
+      }
     }
   return ret;
 }
