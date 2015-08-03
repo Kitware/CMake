@@ -1289,7 +1289,7 @@ int cmake::Configure()
                       " the author of the CMakeLists.txt files.",
                       cmState::INTERNAL);
       this->CacheManager->
-        AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_ERRORS", "TRUE",
+        AddCacheEntry("CMAKE_ERROR_DEVELOPER_WARNINGS", "FALSE",
                       "Suppress errors that are meant for"
                       " the author of the CMakeLists.txt files.",
                       cmState::INTERNAL);
@@ -1328,7 +1328,7 @@ int cmake::Configure()
     else if (warningLevel == ERROR_LEVEL)
       {
       this->CacheManager->
-        AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_ERRORS", "FALSE",
+        AddCacheEntry("CMAKE_ERROR_DEVELOPER_WARNINGS", "TRUE",
                       "Suppress errors that are meant for"
                       " the author of the CMakeLists.txt files.",
                       cmState::INTERNAL);
@@ -1676,11 +1676,11 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     }
 
   // don't turn dev warnings into errors by default, if no value has been
-  // specified for the flag, enable it
-  if (!this->State->GetCacheEntryValue("CMAKE_SUPPRESS_DEVELOPER_ERRORS"))
+  // specified for the flag, disable it
+  if (!this->State->GetCacheEntryValue("CMAKE_ERROR_DEVELOPER_WARNINGS"))
     {
     this->CacheManager->
-            AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_ERRORS", "TRUE",
+            AddCacheEntry("CMAKE_ERROR_DEVELOPER_WARNINGS", "FALSE",
                           "Suppress errors that are meant for"
                           " the author of the CMakeLists.txt files.",
                           cmState::INTERNAL);

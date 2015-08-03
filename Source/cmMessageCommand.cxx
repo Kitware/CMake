@@ -43,7 +43,7 @@ bool cmMessageCommand
     }
   else if (*i == "AUTHOR_WARNING")
     {
-    if (!this->Makefile->IsOn("CMAKE_SUPPRESS_DEVELOPER_ERRORS"))
+    if (this->Makefile->IsOn("CMAKE_ERROR_DEVELOPER_WARNINGS"))
       {
       fatal = true;
       type = cmake::AUTHOR_ERROR;
