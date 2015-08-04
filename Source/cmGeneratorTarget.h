@@ -404,6 +404,14 @@ private:
     GetImportLinkInterface(const std::string& config, cmTarget const* head,
                            bool usage_requirements_only) const;
 
+  void ExpandLinkItems(std::string const& prop, std::string const& value,
+                       std::string const& config, cmTarget const* headTarget,
+                       bool usage_requirements_only,
+                       std::vector<cmLinkItem>& items,
+                       bool& hadHeadSensitiveCondition) const;
+  void LookupLinkItems(std::vector<std::string> const& names,
+                       std::vector<cmLinkItem>& items) const;
+
   typedef std::pair<std::string, bool> OutputNameKey;
   typedef std::map<OutputNameKey, std::string> OutputNameMapType;
   mutable OutputNameMapType OutputNameMap;

@@ -3363,6 +3363,51 @@ cmGeneratorTarget::ReportPropertyOrigin(const std::string &p,
 }
 
 //----------------------------------------------------------------------------
+void cmGeneratorTarget::LookupLinkItems(std::vector<std::string> const& names,
+                               std::vector<cmLinkItem>& items) const
+{
+  for(std::vector<std::string>::const_iterator i = names.begin();
+      i != names.end(); ++i)
+    {
+    std::string name = this->Target->CheckCMP0004(*i);
+    if(name == this->GetName() || name.empty())
+      {
+      continue;
+      }
+    items.push_back(cmLinkItem(name, this->Target->FindTargetToLink(name)));
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
+                               std::string const& value,
+                               std::string const& config,
+                               cmTarget const* headTarget,
+                               bool usage_requirements_only,
+                               std::vector<cmLinkItem>& items,
+                               bool& hadHeadSensitiveCondition) const
+{
+  cmGeneratorExpression ge;
+  cmGeneratorExpressionDAGChecker dagChecker(this->GetName(), prop, 0, 0);
+  // The $<LINK_ONLY> expression may be in a link interface to specify private
+  // link dependencies that are otherwise excluded from usage requirements.
+  if(usage_requirements_only)
+    {
+    dagChecker.SetTransitivePropertiesOnly();
+    }
+  std::vector<std::string> libs;
+  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
+  cmSystemTools::ExpandListArgument(cge->Evaluate(
+                                      this->Makefile,
+                                      config,
+                                      false,
+                                      headTarget,
+                                      this->Target, &dagChecker), libs);
+  this->LookupLinkItems(libs, items);
+  hadHeadSensitiveCondition = cge->GetHadHeadSensitiveCondition();
+}
+
+//----------------------------------------------------------------------------
 cmLinkInterface const*
 cmGeneratorTarget::GetLinkInterface(const std::string& config,
                                     cmTarget const* head) const
@@ -3644,7 +3689,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
   if(explicitLibraries)
     {
     // The interface libraries have been explicitly set.
-    this->Target->ExpandLinkItems(linkIfaceProp, explicitLibraries,
+    this->ExpandLinkItems(linkIfaceProp, explicitLibraries,
                                   config,
                                 headTarget, usage_requirements_only,
                                 iface.Libraries,
@@ -3673,7 +3718,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
       if(const char* newExplicitLibraries = this->GetProperty(newProp))
         {
         bool hadHeadSensitiveConditionDummy = false;
-        this->Target->ExpandLinkItems(newProp, newExplicitLibraries, config,
+        this->ExpandLinkItems(newProp, newExplicitLibraries, config,
                                     headTarget, usage_requirements_only,
                                 ifaceLibs, hadHeadSensitiveConditionDummy);
         }
@@ -3737,14 +3782,14 @@ cmGeneratorTarget::GetImportLinkInterface(const std::string& config,
     iface.AllDone = true;
     iface.Multiplicity = info->Multiplicity;
     cmSystemTools::ExpandListArgument(info->Languages, iface.Languages);
-    this->Target->ExpandLinkItems(info->LibrariesProp, info->Libraries,
+    this->ExpandLinkItems(info->LibrariesProp, info->Libraries,
                                   config,
                           headTarget, usage_requirements_only,
                           iface.Libraries,
                           iface.HadHeadSensitiveCondition);
     std::vector<std::string> deps;
     cmSystemTools::ExpandListArgument(info->SharedDeps, deps);
-    this->Target->LookupLinkItems(deps, iface.SharedDeps);
+    this->LookupLinkItems(deps, iface.SharedDeps);
     }
 
   return &iface;
