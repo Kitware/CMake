@@ -160,6 +160,9 @@ public:
   std::vector<cmSourceFile*> const*
   GetSourceDepends(cmSourceFile const* sf) const;
 
+  /** Whether this library has soname enabled and platform supports it.  */
+  bool HasSOName(const std::string& config) const;
+
   /**
    * Flags for a given source file as used in this target. Typically assigned
    * via SET_TARGET_PROPERTIES when the property is a list of source files.
