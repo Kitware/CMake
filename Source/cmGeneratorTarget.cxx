@@ -693,8 +693,8 @@ std::string cmGeneratorTarget::GetSOName(const std::string& config) const
     std::string realName;
     std::string impName;
     std::string pdbName;
-    this->Target->GetLibraryNames(name, soName, realName,
-                                  impName, pdbName, config);
+    this->GetLibraryNames(name, soName, realName,
+                          impName, pdbName, config);
     return soName;
     }
 }
@@ -1254,7 +1254,7 @@ void cmGeneratorTarget::GenerateTargetManifest(
           this->GetType() == cmTarget::SHARED_LIBRARY ||
           this->GetType() == cmTarget::MODULE_LIBRARY)
     {
-    this->Target->GetLibraryNames(name, soName, realName, impName, pdbName,
+    this->GetLibraryNames(name, soName, realName, impName, pdbName,
                                   config);
     }
   else
@@ -1378,10 +1378,97 @@ cmGeneratorTarget::NormalGetRealName(const std::string& config) const
     std::string realName;
     std::string impName;
     std::string pdbName;
-    this->Target->GetLibraryNames(name, soName, realName,
-                                  impName, pdbName, config);
+    this->GetLibraryNames(name, soName, realName,
+                          impName, pdbName, config);
     return realName;
     }
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::GetLibraryNames(std::string& name,
+                               std::string& soName,
+                               std::string& realName,
+                               std::string& impName,
+                               std::string& pdbName,
+                               const std::string& config) const
+{
+  // This should not be called for imported targets.
+  // TODO: Split cmTarget into a class hierarchy to get compile-time
+  // enforcement of the limited imported target API.
+  if(this->Target->IsImported())
+    {
+    std::string msg =  "GetLibraryNames called on imported target: ";
+    msg += this->GetName();
+    this->LocalGenerator->IssueMessage(cmake::INTERNAL_ERROR,
+                                 msg);
+    return;
+    }
+
+  // Check for library version properties.
+  const char* version = this->GetProperty("VERSION");
+  const char* soversion = this->GetProperty("SOVERSION");
+  if(!this->Target->HasSOName(config) ||
+     this->Target->IsFrameworkOnApple())
+    {
+    // Versioning is supported only for shared libraries and modules,
+    // and then only when the platform supports an soname flag.
+    version = 0;
+    soversion = 0;
+    }
+  if(version && !soversion)
+    {
+    // The soversion must be set if the library version is set.  Use
+    // the library version as the soversion.
+    soversion = version;
+    }
+  if(!version && soversion)
+    {
+    // Use the soversion as the library version.
+    version = soversion;
+    }
+
+  // Get the components of the library name.
+  std::string prefix;
+  std::string base;
+  std::string suffix;
+  this->Target->GetFullNameInternal(config, false, prefix, base, suffix);
+
+  // The library name.
+  name = prefix+base+suffix;
+
+  if(this->Target->IsFrameworkOnApple())
+    {
+    realName = prefix;
+    realName += "Versions/";
+    realName += this->Target->GetFrameworkVersion();
+    realName += "/";
+    realName += base;
+    soName = realName;
+    }
+  else
+  {
+    // The library's soname.
+    this->Target->ComputeVersionedName(soName, prefix, base, suffix,
+                              name, soversion);
+
+    // The library's real name on disk.
+    this->Target->ComputeVersionedName(realName, prefix, base, suffix,
+                              name, version);
+  }
+
+  // The import library name.
+  if(this->GetType() == cmTarget::SHARED_LIBRARY ||
+     this->GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    impName = this->Target->GetFullNameInternal(config, true);
+    }
+  else
+    {
+    impName = "";
+    }
+
+  // The program database file name.
+  pdbName = this->Target->GetPDBName(config);
 }
 
 //----------------------------------------------------------------------------
@@ -1445,7 +1532,6 @@ void cmGeneratorTarget::GetExecutableNames(std::string& name,
   // The program database file name.
   pdbName = this->Target->GetPDBName(config);
 }
-
 
 bool cmStrictTargetComparison::operator()(cmTarget const* t1,
                                           cmTarget const* t2) const
