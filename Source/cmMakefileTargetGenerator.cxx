@@ -1446,7 +1446,8 @@ void cmMakefileTargetGenerator
 
   // Loop over all library dependencies.
   const char* cfg = this->LocalGenerator->GetConfigName().c_str();
-  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(cfg))
+  if(cmComputeLinkInformation* cli =
+                              this->GeneratorTarget->GetLinkInformation(cfg))
     {
     std::vector<std::string> const& libDeps = cli->GetDepends();
     depends.insert(depends.end(), libDeps.begin(), libDeps.end());

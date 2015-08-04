@@ -1468,7 +1468,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
   bool escapeAllowMakeVars = !forResponseFile;
   std::ostringstream fout;
   std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  cmComputeLinkInformation* pcli = tgt.Target->GetLinkInformation(config);
+  cmComputeLinkInformation* pcli = tgt.GetLinkInformation(config);
   if(!pcli)
     {
     return;
