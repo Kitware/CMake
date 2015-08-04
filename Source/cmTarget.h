@@ -552,9 +552,6 @@ private:
   // Returns ARCHIVE, LIBRARY, or RUNTIME based on platform and type.
   const char* GetOutputTargetType(bool implib) const;
 
-  // Get the target base name.
-  std::string GetOutputName(const std::string& config, bool implib) const;
-
   std::string GetFullNameImported(const std::string& config,
                                   bool implib) const;
 
