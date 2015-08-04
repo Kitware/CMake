@@ -881,7 +881,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   if(target.GetType() <= cmTarget::OBJECT_LIBRARY)
     {
     // Specify the compiler program database file if configured.
-    std::string pdb = target.GetCompilePDBPath(configName);
+    std::string pdb = gt->GetCompilePDBPath(configName);
     if(!pdb.empty())
       {
       fout <<  "\t\t\t\tProgramDataBaseFileName=\""

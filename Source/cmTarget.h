@@ -380,12 +380,6 @@ public:
   /** Get the name of the pdb file for the target.  */
   std::string GetPDBName(const std::string& config) const;
 
-  /** Get the name of the compiler pdb file for the target.  */
-  std::string GetCompilePDBName(const std::string& config="") const;
-
-  /** Get the path for the MSVC /Fd option for this target.  */
-  std::string GetCompilePDBPath(const std::string& config="") const;
-
   /** Whether this library has \@rpath and platform supports it.  */
   bool HasMacOSXRpathInstallNameDir(const std::string& config) const;
 

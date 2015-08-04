@@ -3492,49 +3492,6 @@ std::string cmTarget::GetPDBName(const std::string& config) const
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetCompilePDBName(const std::string& config) const
-{
-  std::string prefix;
-  std::string base;
-  std::string suffix;
-  this->GetFullNameInternal(config, false, prefix, base, suffix);
-
-  // Check for a per-configuration output directory target property.
-  std::string configUpper = cmSystemTools::UpperCase(config);
-  std::string configProp = "COMPILE_PDB_NAME_";
-  configProp += configUpper;
-  const char* config_name = this->GetProperty(configProp);
-  if(config_name && *config_name)
-    {
-    return prefix + config_name + ".pdb";
-    }
-
-  const char* name = this->GetProperty("COMPILE_PDB_NAME");
-  if(name && *name)
-    {
-    return prefix + name + ".pdb";
-    }
-
-  return "";
-}
-
-//----------------------------------------------------------------------------
-std::string cmTarget::GetCompilePDBPath(const std::string& config) const
-{
-  std::string dir = this->GetCompilePDBDirectory(config);
-  std::string name = this->GetCompilePDBName(config);
-  if(dir.empty() && !name.empty())
-    {
-    dir = this->GetPDBDirectory(config);
-    }
-  if(!dir.empty())
-    {
-    dir += "/";
-    }
-  return dir + name;
-}
-
-//----------------------------------------------------------------------------
 bool cmTarget::HasMacOSXRpathInstallNameDir(const std::string& config) const
 {
   bool install_name_is_rpath = false;
