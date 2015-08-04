@@ -249,6 +249,9 @@ public:
                          const std::string& config,
                          const std::string& language) const;
 
+  void GetCompileFeatures(std::vector<std::string> &features,
+                          const std::string& config) const;
+
   bool IsSystemIncludeDirectory(const std::string& dir,
                                 const std::string& config) const;
 
@@ -455,9 +458,11 @@ private:
   mutable bool PolicyWarnedCMP0022;
   mutable bool DebugIncludesDone;
   mutable bool DebugCompileOptionsDone;
+  mutable bool DebugCompileFeaturesDone;
 
   std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
   std::vector<TargetPropertyEntry*> CompileOptionsEntries;
+  std::vector<TargetPropertyEntry*> CompileFeaturesEntries;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config, cmTarget const* headTarget,
