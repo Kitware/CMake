@@ -537,7 +537,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     vars["SONAME"] = this->TargetNameSO;
     if (targetType == cmTarget::SHARED_LIBRARY)
       {
-      std::string install_dir = target.GetInstallNameDirForBuildTree(cfgName);
+      std::string install_dir =
+          this->GetGeneratorTarget()->GetInstallNameDirForBuildTree(cfgName);
       if (!install_dir.empty())
         {
         vars["INSTALLNAME_DIR"] = localGen.Convert(install_dir,

@@ -2331,7 +2331,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
     // Get the install_name directory for the build tree.
-    install_name_dir = target.GetInstallNameDirForBuildTree(configName);
+    install_name_dir = gtgt->GetInstallNameDirForBuildTree(configName);
     // Xcode doesn't create the correct install_name in some cases.
     // That is, if the INSTALL_PATH is empty, or if we have versioning
     // of dylib libraries, we want to specify the install_name.
