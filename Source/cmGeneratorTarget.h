@@ -217,6 +217,10 @@ public:
   std::vector<std::string> GetIncludeDirectories(
       const std::string& config, const std::string& lang) const;
 
+  void GetCompileOptions(std::vector<std::string> &result,
+                         const std::string& config,
+                         const std::string& language) const;
+
   bool IsSystemIncludeDirectory(const std::string& dir,
                                 const std::string& config) const;
 
@@ -407,6 +411,7 @@ private:
                            bool usage_requirements_only) const;
 
   std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
+  std::vector<TargetPropertyEntry*> CompileOptionsEntries;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config, cmTarget const* headTarget,
@@ -421,6 +426,7 @@ private:
   mutable OutputNameMapType OutputNameMap;
   mutable bool PolicyWarnedCMP0022;
   mutable bool DebugIncludesDone;
+  mutable bool DebugCompileOptionsDone;
 
 public:
   std::vector<cmTarget const*> const&
