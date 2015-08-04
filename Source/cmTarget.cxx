@@ -174,7 +174,9 @@ public:
   std::vector<std::string> CompileOptionsEntries;
   std::vector<cmListFileBacktrace> CompileOptionsBacktraces;
   std::vector<TargetPropertyEntry*> CompileOptionsItems;
-  std::vector<TargetPropertyEntry*> CompileFeaturesEntries;
+  std::vector<std::string> CompileFeaturesEntries;
+  std::vector<cmListFileBacktrace> CompileFeaturesBacktraces;
+  std::vector<TargetPropertyEntry*> CompileFeaturesItems;
   std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
   std::vector<TargetPropertyEntry*> SourceEntries;
   std::vector<cmValueWithOrigin> LinkImplementationPropertyEntries;
@@ -467,6 +469,11 @@ void cmTarget::Compute()
         this->Internal->CompileOptionsEntries,
         this->Internal->CompileOptionsBacktraces,
         this->Internal->CompileOptionsItems);
+
+  CreatePropertyGeneratorExpressions(
+        this->Internal->CompileFeaturesEntries,
+        this->Internal->CompileFeaturesBacktraces,
+        this->Internal->CompileFeaturesItems);
 }
 
 //----------------------------------------------------------------------------
@@ -1713,12 +1720,11 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     }
   else if(prop == "COMPILE_FEATURES")
     {
+    this->Internal->CompileFeaturesEntries.clear();
+    this->Internal->CompileFeaturesBacktraces.clear();
+    this->Internal->CompileFeaturesEntries.push_back(value);
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
-    deleteAndClear(this->Internal->CompileFeaturesEntries);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
-    this->Internal->CompileFeaturesEntries.push_back(
-                          new cmTargetInternals::TargetPropertyEntry(cge));
+    this->Internal->CompileFeaturesBacktraces.push_back(lfbt);
     }
   else if(prop == "COMPILE_DEFINITIONS")
     {
@@ -1805,10 +1811,9 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     }
   else if(prop == "COMPILE_FEATURES")
     {
+    this->Internal->CompileFeaturesEntries.push_back(value);
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
-    this->Internal->CompileFeaturesEntries.push_back(
-              new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
+    this->Internal->CompileFeaturesBacktraces.push_back(lfbt);
     }
   else if(prop == "COMPILE_DEFINITIONS")
     {
@@ -2433,7 +2438,7 @@ void cmTarget::GetCompileFeatures(std::vector<std::string> &result,
     }
 
   processCompileFeatures(this,
-                            this->Internal->CompileFeaturesEntries,
+                            this->Internal->CompileFeaturesItems,
                             result,
                             uniqueFeatures,
                             &dagChecker,
@@ -2941,7 +2946,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
         }
 
       static std::string output;
-      MakePropertyList(output, this->Internal->CompileFeaturesEntries);
+      output = cmJoin(this->Internal->CompileFeaturesEntries, ";");
       return output.c_str();
       }
     else if(prop == propCOMPILE_OPTIONS)
@@ -4838,7 +4843,7 @@ cmTargetInternalPointer::~cmTargetInternalPointer()
 {
   cmDeleteAll(this->Pointer->IncludeDirectoriesItems);
   cmDeleteAll(this->Pointer->CompileOptionsItems);
-  cmDeleteAll(this->Pointer->CompileFeaturesEntries);
+  cmDeleteAll(this->Pointer->CompileFeaturesItems);
   cmDeleteAll(this->Pointer->CompileDefinitionsEntries);
   cmDeleteAll(this->Pointer->SourceEntries);
   delete this->Pointer;
