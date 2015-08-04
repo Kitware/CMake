@@ -96,6 +96,17 @@ public:
   bool IsLinkInterfaceDependentNumberMaxProperty(const std::string &p,
                          const std::string& config) const;
 
+  bool GetLinkInterfaceDependentBoolProperty(const std::string &p,
+                                             const std::string& config) const;
+
+  const char *GetLinkInterfaceDependentStringProperty(const std::string &p,
+                         const std::string& config) const;
+  const char *GetLinkInterfaceDependentNumberMinProperty(const std::string &p,
+                         const std::string& config) const;
+  const char *GetLinkInterfaceDependentNumberMaxProperty(const std::string &p,
+                         const std::string& config) const;
+
+
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
   std::string GetFullPath(const std::string& config="", bool implib = false,
