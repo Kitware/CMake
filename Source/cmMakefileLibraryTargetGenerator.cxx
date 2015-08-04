@@ -133,7 +133,7 @@ void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
 void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
 {
   std::string linkLanguage =
-    this->Target->GetLinkerLanguage(this->ConfigName);
+    this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
   std::string linkRuleVar = "CMAKE_";
   linkRuleVar += linkLanguage;
   linkRuleVar += "_CREATE_STATIC_LIBRARY";
@@ -159,7 +159,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
     return;
     }
   std::string linkLanguage =
-    this->Target->GetLinkerLanguage(this->ConfigName);
+    this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
   std::string linkRuleVar = "CMAKE_";
   linkRuleVar += linkLanguage;
   linkRuleVar += "_CREATE_SHARED_LIBRARY";
@@ -183,7 +183,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 {
   std::string linkLanguage =
-    this->Target->GetLinkerLanguage(this->ConfigName);
+    this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
   std::string linkRuleVar = "CMAKE_";
   linkRuleVar += linkLanguage;
   linkRuleVar += "_CREATE_SHARED_MODULE";
@@ -206,7 +206,7 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
 {
   std::string linkLanguage =
-    this->Target->GetLinkerLanguage(this->ConfigName);
+    this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
   std::string linkRuleVar = "CMAKE_";
   linkRuleVar += linkLanguage;
   linkRuleVar += "_CREATE_MACOSX_FRAMEWORK";
@@ -238,7 +238,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 
   // Get the language to use for linking this library.
   std::string linkLanguage =
-    this->Target->GetLinkerLanguage(this->ConfigName);
+    this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
 
   // Make sure we have a link language.
   if(linkLanguage.empty())
