@@ -1525,7 +1525,7 @@ void cmGeneratorTarget::GetLibraryNames(std::string& name,
     }
 
   // The program database file name.
-  pdbName = this->Target->GetPDBName(config);
+  pdbName = this->GetPDBName(config);
 }
 
 //----------------------------------------------------------------------------
@@ -1587,7 +1587,39 @@ void cmGeneratorTarget::GetExecutableNames(std::string& name,
   impName = this->Target->GetFullNameInternal(config, true);
 
   // The program database file name.
-  pdbName = this->Target->GetPDBName(config);
+  pdbName = this->GetPDBName(config);
+}
+
+//----------------------------------------------------------------------------
+std::string cmGeneratorTarget::GetPDBName(const std::string& config) const
+{
+  std::string prefix;
+  std::string base;
+  std::string suffix;
+  this->Target->GetFullNameInternal(config, false, prefix, base, suffix);
+
+  std::vector<std::string> props;
+  std::string configUpper =
+    cmSystemTools::UpperCase(config);
+  if(!configUpper.empty())
+    {
+    // PDB_NAME_<CONFIG>
+    props.push_back("PDB_NAME_" + configUpper);
+    }
+
+  // PDB_NAME
+  props.push_back("PDB_NAME");
+
+  for(std::vector<std::string>::const_iterator i = props.begin();
+      i != props.end(); ++i)
+    {
+    if(const char* outName = this->GetProperty(*i))
+      {
+      base = outName;
+      break;
+      }
+    }
+  return prefix+base+".pdb";
 }
 
 bool cmStrictTargetComparison::operator()(cmTarget const* t1,
