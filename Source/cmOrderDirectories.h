@@ -19,7 +19,7 @@
 class cmGlobalGenerator;
 class cmOrderDirectoriesConstraint;
 class cmOrderDirectoriesConstraintLibrary;
-class cmTarget;
+class cmGeneratorTarget;
 
 /** \class cmOrderDirectories
  * \brief Compute a safe runtime path order for a set of shared libraries.
@@ -27,7 +27,7 @@ class cmTarget;
 class cmOrderDirectories
 {
 public:
-  cmOrderDirectories(cmGlobalGenerator* gg, cmTarget const* target,
+  cmOrderDirectories(cmGlobalGenerator* gg, cmGeneratorTarget const* target,
                      const char* purpose);
   ~cmOrderDirectories();
   void AddRuntimeLibrary(std::string const& fullPath, const char* soname = 0);
@@ -41,7 +41,7 @@ public:
   std::vector<std::string> const& GetOrderedDirectories();
 private:
   cmGlobalGenerator* GlobalGenerator;
-  cmTarget const* Target;
+  cmGeneratorTarget const* Target;
   std::string Purpose;
 
   std::vector<std::string> OrderedDirectories;
