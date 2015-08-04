@@ -891,6 +891,16 @@ std::string cmGeneratorTarget::GetSOName(const std::string& config) const
 }
 
 //----------------------------------------------------------------------------
+void cmGeneratorTarget::GetFullNameComponents(std::string& prefix,
+                                              std::string& base,
+                                              std::string& suffix,
+                                              const std::string& config,
+                                              bool implib) const
+{
+  this->Target->GetFullNameInternal(config, implib, prefix, base, suffix);
+}
+
+//----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::GetModuleDefinitionFile(const std::string& config) const
 {
