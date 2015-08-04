@@ -1356,6 +1356,46 @@ cmGeneratorTarget::GetMacContentDirectory(const std::string& config,
   return fpath;
 }
 
+
+//----------------------------------------------------------------------------
+cmGeneratorTarget::CompileInfo const* cmGeneratorTarget::GetCompileInfo(
+                                            const std::string& config) const
+{
+  // There is no compile information for imported targets.
+  if(this->IsImported())
+    {
+    return 0;
+    }
+
+  if(this->GetType() > cmTarget::OBJECT_LIBRARY)
+    {
+    std::string msg = "cmTarget::GetCompileInfo called for ";
+    msg += this->GetName();
+    msg += " which has type ";
+    msg += cmTarget::GetTargetTypeName(this->Target->GetType());
+    this->Makefile->IssueMessage(cmake::INTERNAL_ERROR, msg);
+    return 0;
+    }
+
+  // Lookup/compute/cache the compile information for this configuration.
+  std::string config_upper;
+  if(!config.empty())
+    {
+    config_upper = cmSystemTools::UpperCase(config);
+    }
+  CompileInfoMapType::const_iterator i =
+    this->CompileInfoMap.find(config_upper);
+  if(i == this->CompileInfoMap.end())
+    {
+    CompileInfo info;
+    this->Target
+        ->ComputePDBOutputDir("COMPILE_PDB", config, info.CompilePdbDir);
+    CompileInfoMapType::value_type entry(config_upper, info);
+    i = this->CompileInfoMap.insert(entry).first;
+    }
+  return &i->second;
+}
+
 //----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::GetModuleDefinitionFile(const std::string& config) const
@@ -1827,7 +1867,7 @@ void cmGeneratorTarget::TraceDependencies()
 std::string
 cmGeneratorTarget::GetCompilePDBDirectory(const std::string& config) const
 {
-  if(cmTarget::CompileInfo const* info = this->Target->GetCompileInfo(config))
+  if(CompileInfo const* info = this->GetCompileInfo(config))
     {
     return info->CompilePdbDir;
     }

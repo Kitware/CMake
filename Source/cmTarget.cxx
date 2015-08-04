@@ -126,9 +126,6 @@ public:
   typedef std::map<std::string, cmTarget::ImportInfo> ImportInfoMapType;
   ImportInfoMapType ImportInfoMap;
 
-  typedef std::map<std::string, cmTarget::CompileInfo> CompileInfoMapType;
-  CompileInfoMapType CompileInfoMap;
-
   // Cache link implementation computation from each configuration.
   struct OptionalLinkImplementation: public cmTarget::LinkImplementation
   {
@@ -2593,45 +2590,6 @@ cmTarget::OutputInfo const* cmTarget::GetOutputInfo(
       }
     OutputInfoMapType::value_type entry(config_upper, info);
     i = this->Internal->OutputInfoMap.insert(entry).first;
-    }
-  return &i->second;
-}
-
-//----------------------------------------------------------------------------
-cmTarget::CompileInfo const* cmTarget::GetCompileInfo(
-                                            const std::string& config) const
-{
-  // There is no compile information for imported targets.
-  if(this->IsImported())
-    {
-    return 0;
-    }
-
-  if(this->GetType() > cmTarget::OBJECT_LIBRARY)
-    {
-    std::string msg = "cmTarget::GetCompileInfo called for ";
-    msg += this->GetName();
-    msg += " which has type ";
-    msg += cmTarget::GetTargetTypeName(this->GetType());
-    this->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR, msg);
-    return 0;
-    }
-
-  // Lookup/compute/cache the compile information for this configuration.
-  std::string config_upper;
-  if(!config.empty())
-    {
-    config_upper = cmSystemTools::UpperCase(config);
-    }
-  typedef cmTargetInternals::CompileInfoMapType CompileInfoMapType;
-  CompileInfoMapType::const_iterator i =
-    this->Internal->CompileInfoMap.find(config_upper);
-  if(i == this->Internal->CompileInfoMap.end())
-    {
-    CompileInfo info;
-    this->ComputePDBOutputDir("COMPILE_PDB", config, info.CompilePdbDir);
-    CompileInfoMapType::value_type entry(config_upper, info);
-    i = this->Internal->CompileInfoMap.insert(entry).first;
     }
   return &i->second;
 }
