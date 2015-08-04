@@ -1617,6 +1617,11 @@ void cmGlobalGenerator::ClearGeneratorMembers()
 cmGeneratorTarget*
 cmGlobalGenerator::GetGeneratorTarget(cmTarget const* t) const
 {
+  if (!t)
+    {
+    return 0;
+    }
+
   cmGeneratorTargetsType::const_iterator ti = this->GeneratorTargets.find(t);
   if(ti == this->GeneratorTargets.end())
     {
