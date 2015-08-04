@@ -375,9 +375,6 @@ public:
 
   void AppendBuildInterfaceIncludes();
 
-  void GetCompileFeatures(std::vector<std::string> &features,
-                          const std::string& config) const;
-
   bool IsNullImpliedByLinkLibraries(const std::string &p) const;
 
   std::string GetDebugGeneratorExpressions(const std::string &value,
@@ -401,6 +398,9 @@ public:
 
   cmStringRange GetCompileOptionsEntries() const;
   cmBacktraceRange GetCompileOptionsBacktraces() const;
+
+  cmStringRange GetCompileFeaturesEntries() const;
+  cmBacktraceRange GetCompileFeaturesBacktraces() const;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   const LinkLibraryVectorType &GetLinkLibrariesForVS6() const {
@@ -518,7 +518,6 @@ private:
   bool BuildInterfaceIncludesAppended;
   mutable bool DebugCompileDefinitionsDone;
   mutable bool DebugSourcesDone;
-  mutable bool DebugCompileFeaturesDone;
   mutable bool LinkImplementationLanguageIsContextDependent;
 #if defined(_WIN32) && !defined(__CYGWIN__)
   bool LinkLibrariesForVS6Analyzed;

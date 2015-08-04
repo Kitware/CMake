@@ -143,7 +143,6 @@ public:
   std::vector<cmListFileBacktrace> CompileOptionsBacktraces;
   std::vector<std::string> CompileFeaturesEntries;
   std::vector<cmListFileBacktrace> CompileFeaturesBacktraces;
-  std::vector<TargetPropertyEntry*> CompileFeaturesItems;
   std::vector<std::string> CompileDefinitionsEntries;
   std::vector<cmListFileBacktrace> CompileDefinitionsBacktraces;
   std::vector<TargetPropertyEntry*> CompileDefinitionsItems;
@@ -175,7 +174,6 @@ cmTarget::cmTarget()
   this->IsApple = false;
   this->IsImportedTarget = false;
   this->BuildInterfaceIncludesAppended = false;
-  this->DebugCompileFeaturesDone = false;
   this->DebugCompileDefinitionsDone = false;
   this->DebugSourcesDone = false;
   this->LinkImplementationLanguageIsContextDependent = true;
@@ -421,11 +419,6 @@ void CreatePropertyGeneratorExpressions(
 
 void cmTarget::Compute()
 {
-  CreatePropertyGeneratorExpressions(
-        this->Internal->CompileFeaturesEntries,
-        this->Internal->CompileFeaturesBacktraces,
-        this->Internal->CompileFeaturesItems);
-
   CreatePropertyGeneratorExpressions(
         this->Internal->CompileDefinitionsEntries,
         this->Internal->CompileDefinitionsBacktraces,
@@ -1325,6 +1318,16 @@ cmBacktraceRange cmTarget::GetCompileOptionsBacktraces() const
   return cmMakeRange(this->Internal->CompileOptionsBacktraces);
 }
 
+cmStringRange cmTarget::GetCompileFeaturesEntries() const
+{
+  return cmMakeRange(this->Internal->CompileFeaturesEntries);
+}
+
+cmBacktraceRange cmTarget::GetCompileFeaturesBacktraces() const
+{
+  return cmMakeRange(this->Internal->CompileFeaturesBacktraces);
+}
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
 //----------------------------------------------------------------------------
 void
@@ -2069,73 +2072,6 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
                             language);
 
   cmDeleteAll(linkInterfaceCompileDefinitionsEntries);
-}
-
-//----------------------------------------------------------------------------
-static void processCompileFeatures(cmTarget const* tgt,
-      const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
-      std::vector<std::string> &options,
-      UNORDERED_SET<std::string> &uniqueOptions,
-      cmGeneratorExpressionDAGChecker *dagChecker,
-      const std::string& config, bool debugOptions)
-{
-  processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
-                                dagChecker, config, debugOptions, "features",
-                                std::string());
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::GetCompileFeatures(std::vector<std::string> &result,
-                                  const std::string& config) const
-{
-  UNORDERED_SET<std::string> uniqueFeatures;
-
-  cmGeneratorExpressionDAGChecker dagChecker(this->GetName(),
-                                             "COMPILE_FEATURES",
-                                             0, 0);
-
-  std::vector<std::string> debugProperties;
-  const char *debugProp =
-              this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
-  if (debugProp)
-    {
-    cmSystemTools::ExpandListArgument(debugProp, debugProperties);
-    }
-
-  bool debugFeatures = !this->DebugCompileFeaturesDone
-                    && std::find(debugProperties.begin(),
-                                 debugProperties.end(),
-                                 "COMPILE_FEATURES")
-                        != debugProperties.end();
-
-  if (this->Makefile->IsConfigured())
-    {
-    this->DebugCompileFeaturesDone = true;
-    }
-
-  processCompileFeatures(this,
-                            this->Internal->CompileFeaturesItems,
-                            result,
-                            uniqueFeatures,
-                            &dagChecker,
-                            config,
-                            debugFeatures);
-
-  std::vector<cmTargetInternals::TargetPropertyEntry*>
-    linkInterfaceCompileFeaturesEntries;
-  this->Internal->AddInterfaceEntries(
-    this, config, "INTERFACE_COMPILE_FEATURES",
-    linkInterfaceCompileFeaturesEntries);
-
-  processCompileFeatures(this,
-                         linkInterfaceCompileFeaturesEntries,
-                            result,
-                            uniqueFeatures,
-                            &dagChecker,
-                            config,
-                            debugFeatures);
-
-  cmDeleteAll(linkInterfaceCompileFeaturesEntries);
 }
 
 //----------------------------------------------------------------------------
@@ -4098,7 +4034,6 @@ cmTargetInternalPointer
 //----------------------------------------------------------------------------
 cmTargetInternalPointer::~cmTargetInternalPointer()
 {
-  cmDeleteAll(this->Pointer->CompileFeaturesItems);
   cmDeleteAll(this->Pointer->CompileDefinitionsItems);
   cmDeleteAll(this->Pointer->SourceEntries);
   delete this->Pointer;
