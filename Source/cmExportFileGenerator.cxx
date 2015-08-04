@@ -895,7 +895,7 @@ cmExportFileGenerator
           value = this->InstallNameDir(target->Target, config);
           }
         prop = "IMPORTED_SONAME";
-        value += target->Target->GetSOName(config);
+        value += target->GetSOName(config);
         }
       else
         {

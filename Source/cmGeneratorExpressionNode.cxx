@@ -1584,7 +1584,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactSonameTag>
       }
     std::string result = target->Target->GetDirectory(context->Config);
     result += "/";
-    result += target->Target->GetSOName(context->Config);
+    result += target->GetSOName(context->Config);
     return result;
   }
 };

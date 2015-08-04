@@ -756,6 +756,8 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
     return;
     }
 
+  cmGeneratorTarget *gtgt = 0;
+
   // Get a full path to the dependent shared library.
   // Add it to the runtime path computation so that the target being
   // linked will be able to find it.
@@ -763,8 +765,8 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
   if(tgt)
     {
     cmGeneratorTarget *gtgt = tgt->GetMakefile()
-                                 ->GetGlobalGenerator()
-                                 ->GetGeneratorTarget(tgt);
+        ->GetGlobalGenerator()->GetGeneratorTarget(tgt);
+
     lib = gtgt->GetFullPath(this->Config, this->UseImportLibrary);
     this->AddLibraryRuntimeInfo(lib, tgt);
     }
@@ -790,9 +792,9 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
     }
   if(order)
     {
-    if(tgt)
+    if(gtgt)
       {
-      std::string soName = tgt->GetSOName(this->Config);
+      std::string soName = gtgt->GetSOName(this->Config);
       const char* soname = soName.empty()? 0 : soName.c_str();
       order->AddRuntimeLibrary(lib, soname);
       }
@@ -1804,7 +1806,10 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath,
 
   // Try to get the soname of the library.  Only files with this name
   // could possibly conflict.
-  std::string soName = target->GetSOName(this->Config);
+  cmGeneratorTarget *gtgt = target->GetMakefile()
+                                  ->GetGlobalGenerator()
+                                  ->GetGeneratorTarget(target);
+  std::string soName = gtgt->GetSOName(this->Config);
   const char* soname = soName.empty()? 0 : soName.c_str();
 
   // Include this library in the runtime path ordering.
