@@ -215,6 +215,9 @@ public:
    */
   bool NeedRelinkBeforeInstall(const std::string& config) const;
 
+  /** Return true if builtin chrpath will work for this target */
+  bool IsChrpathUsed(const std::string& config) const;
+
   struct SourceFileFlags
   GetTargetSourceFileFlags(const cmSourceFile* sf) const;
 
