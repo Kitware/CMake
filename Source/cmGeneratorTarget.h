@@ -199,6 +199,11 @@ public:
     std::vector<cmSourceFile const*> XamlSources;
   };
 
+  void ReportPropertyOrigin(const std::string &p,
+                            const std::string &result,
+                            const std::string &report,
+                            const std::string &compatibilityType) const;
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
@@ -211,6 +216,8 @@ private:
   void ConstructSourceFileFlags() const;
   mutable bool SourceFileFlagsConstructed;
   mutable std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
+
+  mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
 
   struct CompatibleInterfacesBase
   {

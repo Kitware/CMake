@@ -1937,24 +1937,24 @@ std::pair<bool, const char*> consistentProperty(const char *lhs,
 
 //----------------------------------------------------------------------------
 template<typename PropertyType>
-PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
+PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
                                           const std::string &p,
                                           const std::string& config,
                                           const char *defaultValue,
                                           CompatibleType t,
                                           PropertyType *)
 {
-  PropertyType propContent = getTypedProperty<PropertyType>(tgt, p);
-  const bool explicitlySet = tgt->GetProperties()
+  PropertyType propContent = getTypedProperty<PropertyType>(tgt->Target, p);
+  const bool explicitlySet = tgt->Target->GetProperties()
                                   .find(p)
-                                  != tgt->GetProperties().end();
+                                  != tgt->Target->GetProperties().end();
   const bool impliedByUse =
-          tgt->IsNullImpliedByLinkLibraries(p);
+          tgt->Target->IsNullImpliedByLinkLibraries(p);
   assert((impliedByUse ^ explicitlySet)
       || (!impliedByUse && !explicitlySet));
 
   std::vector<cmTarget const*> const& deps =
-    tgt->GetLinkImplementationClosure(config);
+    tgt->Target->GetLinkImplementationClosure(config);
 
   if(deps.empty())
     {
@@ -2125,7 +2125,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
 bool cmGeneratorTarget::GetLinkInterfaceDependentBoolProperty(
     const std::string &p, const std::string& config) const
 {
-  return checkInterfacePropertyCompatibility<bool>(this->Target, p, config,
+  return checkInterfacePropertyCompatibility<bool>(this, p, config,
                                                    "FALSE",
                                                    BoolType, 0);
 }
@@ -2135,7 +2135,7 @@ const char* cmGeneratorTarget::GetLinkInterfaceDependentStringProperty(
                                               const std::string &p,
                                               const std::string& config) const
 {
-  return checkInterfacePropertyCompatibility<const char *>(this->Target,
+  return checkInterfacePropertyCompatibility<const char *>(this,
                                                            p,
                                                            config,
                                                            "empty",
@@ -2147,7 +2147,7 @@ const char * cmGeneratorTarget::GetLinkInterfaceDependentNumberMinProperty(
                                               const std::string &p,
                                               const std::string& config) const
 {
-  return checkInterfacePropertyCompatibility<const char *>(this->Target,
+  return checkInterfacePropertyCompatibility<const char *>(this,
                                                            p,
                                                            config,
                                                            "empty",
@@ -2159,7 +2159,7 @@ const char * cmGeneratorTarget::GetLinkInterfaceDependentNumberMaxProperty(
                                               const std::string &p,
                                               const std::string& config) const
 {
-  return checkInterfacePropertyCompatibility<const char *>(this->Target,
+  return checkInterfacePropertyCompatibility<const char *>(this,
                                                            p,
                                                            config,
                                                            "empty",
@@ -2195,4 +2195,44 @@ cmGeneratorTarget::GetLinkInformation(const std::string& config) const
       }
     }
   return i->second;
+}
+
+//----------------------------------------------------------------------------
+void
+cmGeneratorTarget::ReportPropertyOrigin(const std::string &p,
+                               const std::string &result,
+                               const std::string &report,
+                               const std::string &compatibilityType) const
+{
+  std::vector<std::string> debugProperties;
+  const char *debugProp = this->Target->GetMakefile()
+      ->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
+  if (debugProp)
+    {
+    cmSystemTools::ExpandListArgument(debugProp, debugProperties);
+    }
+
+  bool debugOrigin = !this->DebugCompatiblePropertiesDone[p]
+                    && std::find(debugProperties.begin(),
+                                 debugProperties.end(),
+                                 p)
+                        != debugProperties.end();
+
+  if (this->Target->GetMakefile()->IsConfigured())
+    {
+    this->DebugCompatiblePropertiesDone[p] = true;
+    }
+  if (!debugOrigin)
+    {
+    return;
+    }
+
+  std::string areport = compatibilityType;
+  areport += std::string(" of property \"") + p + "\" for target \"";
+  areport += std::string(this->GetName());
+  areport += "\" (result: \"";
+  areport += result;
+  areport += "\"):\n" + report;
+
+  this->Makefile->GetCMakeInstance()->IssueMessage(cmake::LOG, areport);
 }
