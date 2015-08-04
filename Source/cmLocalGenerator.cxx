@@ -1094,6 +1094,10 @@ void cmLocalGenerator::AddCompileOptions(
   )
 {
   std::string langFlagRegexVar = std::string("CMAKE_")+lang+"_FLAG_REGEX";
+
+  cmGeneratorTarget* gtgt =
+      this->GlobalGenerator->GetGeneratorTarget(target);
+
   if(const char* langFlagRegexStr =
      this->Makefile->GetDefinition(langFlagRegexVar))
     {
@@ -1104,7 +1108,7 @@ void cmLocalGenerator::AddCompileOptions(
       {
       cmSystemTools::ParseWindowsCommandLine(targetFlags, opts);
       }
-    target->GetCompileOptions(opts, config, lang);
+    gtgt->GetCompileOptions(opts, config, lang);
     for(std::vector<std::string>::const_iterator i = opts.begin();
         i != opts.end(); ++i)
       {
@@ -1125,7 +1129,7 @@ void cmLocalGenerator::AddCompileOptions(
       this->AppendFlags(flags, targetFlags);
       }
     std::vector<std::string> opts;
-    target->GetCompileOptions(opts, config, lang);
+    gtgt->GetCompileOptions(opts, config, lang);
     for(std::vector<std::string>::const_iterator i = opts.begin();
         i != opts.end(); ++i)
       {

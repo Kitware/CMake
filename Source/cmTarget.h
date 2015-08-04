@@ -375,9 +375,6 @@ public:
 
   void AppendBuildInterfaceIncludes();
 
-  void GetCompileOptions(std::vector<std::string> &result,
-                         const std::string& config,
-                         const std::string& language) const;
   void GetCompileFeatures(std::vector<std::string> &features,
                           const std::string& config) const;
 
@@ -401,6 +398,9 @@ public:
 
   cmStringRange GetIncludeDirectoriesEntries() const;
   cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
+
+  cmStringRange GetCompileOptionsEntries() const;
+  cmBacktraceRange GetCompileOptionsBacktraces() const;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   const LinkLibraryVectorType &GetLinkLibrariesForVS6() const {
@@ -516,7 +516,6 @@ private:
   bool IsApple;
   bool IsImportedTarget;
   bool BuildInterfaceIncludesAppended;
-  mutable bool DebugCompileOptionsDone;
   mutable bool DebugCompileDefinitionsDone;
   mutable bool DebugSourcesDone;
   mutable bool DebugCompileFeaturesDone;
