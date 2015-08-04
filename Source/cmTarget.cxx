@@ -69,21 +69,6 @@ struct cmTarget::OutputInfo
 };
 
 //----------------------------------------------------------------------------
-struct cmTarget::ImportInfo
-{
-  ImportInfo(): NoSOName(false), Multiplicity(0) {}
-  bool NoSOName;
-  int Multiplicity;
-  std::string Location;
-  std::string SOName;
-  std::string ImportLibrary;
-  std::string Languages;
-  std::string Libraries;
-  std::string LibrariesProp;
-  std::string SharedDeps;
-};
-
-//----------------------------------------------------------------------------
 struct cmTarget::CompileInfo
 {
   std::string CompilePdbDir;
@@ -3599,48 +3584,6 @@ bool cmTarget::HasSOName(const std::string& config) const
            this->GetType() == cmTarget::MODULE_LIBRARY) &&
           !this->GetPropertyAsBool("NO_SONAME") &&
           this->Makefile->GetSONameFlag(this->GetLinkerLanguage(config)));
-}
-
-//----------------------------------------------------------------------------
-std::string cmTarget::GetSOName(const std::string& config) const
-{
-  if(this->IsImported())
-    {
-    // Lookup the imported soname.
-    if(cmTarget::ImportInfo const* info = this->GetImportInfo(config))
-      {
-      if(info->NoSOName)
-        {
-        // The imported library has no builtin soname so the name
-        // searched at runtime will be just the filename.
-        return cmSystemTools::GetFilenameName(info->Location);
-        }
-      else
-        {
-        // Use the soname given if any.
-        if(info->SOName.find("@rpath/") == 0)
-          {
-          return info->SOName.substr(6);
-          }
-        return info->SOName;
-        }
-      }
-    else
-      {
-      return "";
-      }
-    }
-  else
-    {
-    // Compute the soname that will be built.
-    std::string name;
-    std::string soName;
-    std::string realName;
-    std::string impName;
-    std::string pdbName;
-    this->GetLibraryNames(name, soName, realName, impName, pdbName, config);
-    return soName;
-    }
 }
 
 //----------------------------------------------------------------------------

@@ -2345,7 +2345,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       install_name += install_name_dir;
       install_name += "/";
       }
-    install_name += target.GetSOName(configName);
+    install_name += gtgt->GetSOName(configName);
 
     if((realName != soName) || install_name_dir.empty())
       {
