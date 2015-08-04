@@ -746,7 +746,7 @@ cmGeneratorTarget::NeedRelinkBeforeInstall(const std::string& config) const
     }
 
   // If chrpath is going to be used no relinking is needed.
-  if(this->Target->IsChrpathUsed(config))
+  if(this->IsChrpathUsed(config))
     {
     return false;
     }
@@ -777,6 +777,73 @@ cmGeneratorTarget::NeedRelinkBeforeInstall(const std::string& config) const
   // this target must be relinked.
   return this->Target->HaveBuildTreeRPATH(config)
       || this->Target->HaveInstallTreeRPATH();
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::IsChrpathUsed(const std::string& config) const
+{
+  // Only certain target types have an rpath.
+  if(!(this->GetType() == cmTarget::SHARED_LIBRARY ||
+       this->GetType() == cmTarget::MODULE_LIBRARY ||
+       this->GetType() == cmTarget::EXECUTABLE))
+    {
+    return false;
+    }
+
+  // If the target will not be installed we do not need to change its
+  // rpath.
+  if(!this->Target->GetHaveInstallRule())
+    {
+    return false;
+    }
+
+  // Skip chrpath if skipping rpath altogether.
+  if(this->Makefile->IsOn("CMAKE_SKIP_RPATH"))
+    {
+    return false;
+    }
+
+  // Skip chrpath if it does not need to be changed at install time.
+  if(this->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"))
+    {
+    return false;
+    }
+
+  // Allow the user to disable builtin chrpath explicitly.
+  if(this->Makefile->IsOn("CMAKE_NO_BUILTIN_CHRPATH"))
+    {
+    return false;
+    }
+
+  if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
+    {
+    return true;
+    }
+
+#if defined(CMAKE_USE_ELF_PARSER)
+  // Enable if the rpath flag uses a separator and the target uses ELF
+  // binaries.
+  std::string ll = this->Target->GetLinkerLanguage(config);
+  if(!ll.empty())
+    {
+    std::string sepVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
+    sepVar += ll;
+    sepVar += "_FLAG_SEP";
+    const char* sep = this->Makefile->GetDefinition(sepVar);
+    if(sep && *sep)
+      {
+      // TODO: Add ELF check to ABI detection and get rid of
+      // CMAKE_EXECUTABLE_FORMAT.
+      if(const char* fmt =
+         this->Makefile->GetDefinition("CMAKE_EXECUTABLE_FORMAT"))
+        {
+        return strcmp(fmt, "ELF") == 0;
+        }
+      }
+    }
+#endif
+  static_cast<void>(config);
+  return false;
 }
 
 

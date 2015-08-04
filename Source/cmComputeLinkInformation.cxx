@@ -321,7 +321,11 @@ cmComputeLinkInformation
     this->RuntimeAlways =
       (this->Makefile->
        GetSafeDefinition("CMAKE_PLATFORM_REQUIRED_RUNTIME_PATH"));
-    this->RuntimeUseChrpath = this->Target->IsChrpathUsed(config);
+
+    cmGeneratorTarget *gtgt = this->Target->GetMakefile()
+                                  ->GetGlobalGenerator()
+                                  ->GetGeneratorTarget(this->Target);
+    this->RuntimeUseChrpath = gtgt->IsChrpathUsed(config);
 
     // Get options needed to help find dependent libraries.
     std::string rlVar = "CMAKE_";
