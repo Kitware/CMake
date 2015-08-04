@@ -891,6 +891,73 @@ std::string cmGeneratorTarget::GetSOName(const std::string& config) const
 }
 
 //----------------------------------------------------------------------------
+std::string
+cmGeneratorTarget::GetInstallNameDirForBuildTree(
+                                            const std::string& config) const
+{
+  // If building directly for installation then the build tree install_name
+  // is the same as the install tree.
+  if(this->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"))
+    {
+    return this->GetInstallNameDirForInstallTree();
+    }
+
+  // Use the build tree directory for the target.
+  if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME") &&
+     !this->Makefile->IsOn("CMAKE_SKIP_RPATH") &&
+     !this->GetPropertyAsBool("SKIP_BUILD_RPATH"))
+    {
+    std::string dir;
+    if(this->Target->MacOSXRpathInstallNameDirDefault())
+      {
+      dir = "@rpath";
+      }
+    else
+      {
+      dir = this->Target->GetDirectory(config);
+      }
+    dir += "/";
+    return dir;
+    }
+  else
+    {
+    return "";
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string cmGeneratorTarget::GetInstallNameDirForInstallTree() const
+{
+  if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
+    {
+    std::string dir;
+    const char* install_name_dir = this->GetProperty("INSTALL_NAME_DIR");
+
+    if(!this->Makefile->IsOn("CMAKE_SKIP_RPATH") &&
+       !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH"))
+      {
+      if(install_name_dir && *install_name_dir)
+        {
+        dir = install_name_dir;
+        dir += "/";
+        }
+      }
+    if(!install_name_dir)
+      {
+      if(this->Target->MacOSXRpathInstallNameDirDefault())
+        {
+        dir = "@rpath/";
+        }
+      }
+    return dir;
+    }
+  else
+    {
+    return "";
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetFullNameComponents(std::string& prefix,
                                               std::string& base,
                                               std::string& suffix,
