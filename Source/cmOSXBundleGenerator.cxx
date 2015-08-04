@@ -47,7 +47,7 @@ void cmOSXBundleGenerator::CreateAppBundle(const std::string& targetName,
   // Compute bundle directory names.
   std::string out = outpath;
   out += "/";
-  out += this->GT->Target->GetAppBundleDirectory(this->ConfigName, false);
+  out += this->GT->GetAppBundleDirectory(this->ConfigName, false);
   cmSystemTools::MakeDirectory(out.c_str());
   this->Makefile->AddCMakeOutputFile(out);
 
@@ -57,7 +57,7 @@ void cmOSXBundleGenerator::CreateAppBundle(const std::string& targetName,
   // to be set.
   std::string plist = outpath;
   plist += "/";
-  plist += this->GT->Target->GetAppBundleDirectory(this->ConfigName, true);
+  plist += this->GT->GetAppBundleDirectory(this->ConfigName, true);
   plist += "/Info.plist";
   this->LocalGenerator->GenerateAppleInfoPList(this->GT->Target,
                                                targetName,
