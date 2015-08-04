@@ -904,6 +904,48 @@ cmGeneratorTarget::GetAppBundleDirectory(const std::string& config,
 }
 
 //----------------------------------------------------------------------------
+std::string cmGeneratorTarget::GetCFBundleDirectory(const std::string& config,
+                                                    bool contentOnly) const
+{
+  std::string fpath;
+  fpath += this->Target->GetOutputName(config, false);
+  fpath += ".";
+  const char *ext = this->Target->GetProperty("BUNDLE_EXTENSION");
+  if (!ext)
+    {
+    if (this->Target->IsXCTestOnApple())
+      {
+      ext = "xctest";
+      }
+    else
+      {
+      ext = "bundle";
+      }
+    }
+  fpath += ext;
+  fpath += "/Contents";
+  if(!contentOnly)
+    fpath += "/MacOS";
+  return fpath;
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmGeneratorTarget::GetFrameworkDirectory(const std::string& config,
+                                         bool rootDir) const
+{
+  std::string fpath;
+  fpath += this->Target->GetOutputName(config, false);
+  fpath += ".framework";
+  if(!rootDir)
+    {
+    fpath += "/Versions/";
+    fpath += this->Target->GetFrameworkVersion();
+    }
+  return fpath;
+}
+
+//----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::GetFullName(const std::string& config, bool implib) const
 {
@@ -1007,11 +1049,11 @@ cmGeneratorTarget::BuildMacContentDirectory(const std::string& base,
     }
   if(this->Target->IsFrameworkOnApple())
     {
-    fpath += this->Target->GetFrameworkDirectory(config, contentOnly);
+    fpath += this->GetFrameworkDirectory(config, contentOnly);
     }
   if(this->Target->IsCFBundleOnApple())
     {
-    fpath += this->Target->GetCFBundleDirectory(config, contentOnly);
+    fpath += this->GetCFBundleDirectory(config, contentOnly);
     }
   return fpath;
 }
@@ -1982,7 +2024,7 @@ void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
 
   if(this->Target->IsCFBundleOnApple())
     {
-    fw_prefix = this->Target->GetCFBundleDirectory(config, false);
+    fw_prefix = this->GetCFBundleDirectory(config, false);
     fw_prefix += "/";
     targetPrefix = fw_prefix.c_str();
     targetSuffix = 0;
