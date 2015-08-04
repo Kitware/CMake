@@ -1944,7 +1944,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
 
   const char* version = target.GetProperty("VERSION");
   const char* soversion = target.GetProperty("SOVERSION");
-  if(!target.HasSOName(configName) || target.IsFrameworkOnApple())
+  if(!gtgt->HasSOName(configName) || target.IsFrameworkOnApple())
     {
     version = 0;
     soversion = 0;
