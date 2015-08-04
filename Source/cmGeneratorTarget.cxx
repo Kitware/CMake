@@ -890,6 +890,19 @@ std::string cmGeneratorTarget::GetSOName(const std::string& config) const
     }
 }
 
+
+//----------------------------------------------------------------------------
+std::string
+cmGeneratorTarget::GetAppBundleDirectory(const std::string& config,
+                                         bool contentOnly) const
+{
+  std::string fpath = this->Target->GetFullName(config, false);
+  fpath += ".app/Contents";
+  if(!contentOnly)
+    fpath += "/MacOS";
+  return fpath;
+}
+
 //----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::GetInstallNameDirForBuildTree(
@@ -976,7 +989,7 @@ cmGeneratorTarget::BuildMacContentDirectory(const std::string& base,
   std::string fpath = base;
   if(this->Target->IsAppBundleOnApple())
     {
-    fpath += this->Target->GetAppBundleDirectory(config, contentOnly);
+    fpath += this->GetAppBundleDirectory(config, contentOnly);
     }
   if(this->Target->IsFrameworkOnApple())
     {

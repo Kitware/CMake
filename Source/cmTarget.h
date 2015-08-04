@@ -473,10 +473,6 @@ public:
   std::string GetCFBundleDirectory(const std::string& config,
                                    bool contentOnly) const;
 
-  /** @return the Mac App directory without the base */
-  std::string GetAppBundleDirectory(const std::string& config,
-                                    bool contentOnly) const;
-
   std::vector<std::string> GetIncludeDirectories(
                      const std::string& config,
                      const std::string& language) const;
