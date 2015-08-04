@@ -1115,10 +1115,12 @@ void cmLocalVisualStudio6Generator
       cmTarget* tgt = this->GlobalGenerator->FindTarget(j->first.c_str());
       if(tgt)
         {
+        cmGeneratorTarget* gt =
+          this->GlobalGenerator->GetGeneratorTarget(tgt);
         lib = cmSystemTools::GetFilenameWithoutExtension
-          (tgt->GetFullName().c_str());
+          (gt->GetFullName().c_str());
         libDebug = cmSystemTools::GetFilenameWithoutExtension
-          (tgt->GetFullName("Debug").c_str());
+          (gt->GetFullName("Debug").c_str());
         lib += ".lib";
         libDebug += ".lib";
         }
@@ -1258,8 +1260,8 @@ void cmLocalVisualStudio6Generator
     extraLinkOptionsRelWithDebInfo += targetLinkFlags;
     }
 
-
-
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
 
   // Get standard libraries for this language.
   if(targetBuilds)
@@ -1328,11 +1330,11 @@ void cmLocalVisualStudio6Generator
      target.GetType() == cmTarget::SHARED_LIBRARY ||
      target.GetType() == cmTarget::MODULE_LIBRARY)
     {
-    outputName = target.GetFullName();
-    outputNameDebug = target.GetFullName("Debug");
-    outputNameRelease = target.GetFullName("Release");
-    outputNameMinSizeRel = target.GetFullName("MinSizeRel");
-    outputNameRelWithDebInfo = target.GetFullName("RelWithDebInfo");
+    outputName = gt->GetFullName();
+    outputNameDebug = gt->GetFullName("Debug");
+    outputNameRelease = gt->GetFullName("Release");
+    outputNameMinSizeRel = gt->GetFullName("MinSizeRel");
+    outputNameRelWithDebInfo = gt->GetFullName("RelWithDebInfo");
     }
   else if(target.GetType() == cmTarget::OBJECT_LIBRARY)
     {
@@ -1429,10 +1431,10 @@ void cmLocalVisualStudio6Generator
     fullPathImpRelease += "/";
     fullPathImpMinSizeRel += "/";
     fullPathImpRelWithDebInfo += "/";
-    fullPathImpDebug += target.GetFullName("Debug", true);
-    fullPathImpRelease += target.GetFullName("Release", true);
-    fullPathImpMinSizeRel += target.GetFullName("MinSizeRel", true);
-    fullPathImpRelWithDebInfo += target.GetFullName("RelWithDebInfo", true);
+    fullPathImpDebug += gt->GetFullName("Debug", true);
+    fullPathImpRelease += gt->GetFullName("Release", true);
+    fullPathImpMinSizeRel += gt->GetFullName("MinSizeRel", true);
+    fullPathImpRelWithDebInfo += gt->GetFullName("RelWithDebInfo", true);
 
     targetImplibFlagDebug = "/implib:";
     targetImplibFlagRelease = "/implib:";
