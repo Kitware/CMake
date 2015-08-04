@@ -171,7 +171,9 @@ public:
   std::vector<std::string> IncludeDirectoriesEntries;
   std::vector<cmListFileBacktrace> IncludeDirectoriesBacktraces;
   std::vector<TargetPropertyEntry*> IncludeDirectoriesItems;
-  std::vector<TargetPropertyEntry*> CompileOptionsEntries;
+  std::vector<std::string> CompileOptionsEntries;
+  std::vector<cmListFileBacktrace> CompileOptionsBacktraces;
+  std::vector<TargetPropertyEntry*> CompileOptionsItems;
   std::vector<TargetPropertyEntry*> CompileFeaturesEntries;
   std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
   std::vector<TargetPropertyEntry*> SourceEntries;
@@ -386,13 +388,12 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     const cmBacktraceRange parentOptionsBts =
                                 this->Makefile->GetCompileOptionsBacktraces();
 
-    cmBacktraceRange::const_iterator btIt = parentOptionsBts.begin();
-    for (cmStringRange::const_iterator it
-                = parentOptions.begin();
-         it != parentOptions.end(); ++it, ++btIt)
-      {
-      this->InsertCompileOption(*it, *btIt);
-      }
+    this->Internal->CompileOptionsEntries.insert(
+          this->Internal->CompileOptionsEntries.end(),
+          parentOptions.begin(), parentOptions.end());
+    this->Internal->CompileOptionsBacktraces.insert(
+          this->Internal->CompileOptionsBacktraces.end(),
+          parentOptionsBts.begin(), parentOptionsBts.end());
     }
 
   if (this->GetType() != INTERFACE_LIBRARY && this->GetType() != UTILITY)
@@ -461,6 +462,11 @@ void cmTarget::Compute()
         this->Internal->IncludeDirectoriesEntries,
         this->Internal->IncludeDirectoriesBacktraces,
         this->Internal->IncludeDirectoriesItems);
+
+  CreatePropertyGeneratorExpressions(
+        this->Internal->CompileOptionsEntries,
+        this->Internal->CompileOptionsBacktraces,
+        this->Internal->CompileOptionsItems);
 }
 
 //----------------------------------------------------------------------------
@@ -1699,12 +1705,11 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     }
   else if(prop == "COMPILE_OPTIONS")
     {
+    this->Internal->CompileOptionsEntries.clear();
+    this->Internal->CompileOptionsBacktraces.clear();
+    this->Internal->CompileOptionsEntries.push_back(value);
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
-    deleteAndClear(this->Internal->CompileOptionsEntries);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
-    this->Internal->CompileOptionsEntries.push_back(
-                          new cmTargetInternals::TargetPropertyEntry(cge));
+    this->Internal->CompileOptionsBacktraces.push_back(lfbt);
     }
   else if(prop == "COMPILE_FEATURES")
     {
@@ -1794,10 +1799,9 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     }
   else if(prop == "COMPILE_OPTIONS")
     {
+    this->Internal->CompileOptionsEntries.push_back(value);
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
-    this->Internal->CompileOptionsEntries.push_back(
-              new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
+    this->Internal->CompileOptionsBacktraces.push_back(lfbt);
     }
   else if(prop == "COMPILE_FEATURES")
     {
@@ -1927,14 +1931,16 @@ void cmTarget::InsertCompileOption(std::string const& entry,
                                    cmListFileBacktrace const& bt,
                                    bool before)
 {
-  cmGeneratorExpression ge(bt);
+  std::vector<std::string>::iterator position =
+      before ? this->Internal->CompileOptionsEntries.begin()
+             : this->Internal->CompileOptionsEntries.end();
 
-  std::vector<cmTargetInternals::TargetPropertyEntry*>::iterator position
-                = before ? this->Internal->CompileOptionsEntries.begin()
-                         : this->Internal->CompileOptionsEntries.end();
+  std::vector<cmListFileBacktrace>::iterator btPosition =
+      before ? this->Internal->CompileOptionsBacktraces.begin()
+             : this->Internal->CompileOptionsBacktraces.end();
 
-  this->Internal->CompileOptionsEntries.insert(position,
-      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry)));
+  this->Internal->CompileOptionsEntries.insert(position, entry);
+  this->Internal->CompileOptionsBacktraces.insert(btPosition, bt);
 }
 
 //----------------------------------------------------------------------------
@@ -2255,7 +2261,7 @@ void cmTarget::GetCompileOptions(std::vector<std::string> &result,
     }
 
   processCompileOptions(this,
-                            this->Internal->CompileOptionsEntries,
+                            this->Internal->CompileOptionsItems,
                             result,
                             uniqueOptions,
                             &dagChecker,
@@ -2946,7 +2952,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
         }
 
       static std::string output;
-      MakePropertyList(output, this->Internal->CompileOptionsEntries);
+      output = cmJoin(this->Internal->CompileOptionsEntries, ";");
       return output.c_str();
       }
     else if(prop == propCOMPILE_DEFINITIONS)
@@ -4831,7 +4837,7 @@ cmTargetInternalPointer
 cmTargetInternalPointer::~cmTargetInternalPointer()
 {
   cmDeleteAll(this->Pointer->IncludeDirectoriesItems);
-  cmDeleteAll(this->Pointer->CompileOptionsEntries);
+  cmDeleteAll(this->Pointer->CompileOptionsItems);
   cmDeleteAll(this->Pointer->CompileFeaturesEntries);
   cmDeleteAll(this->Pointer->CompileDefinitionsEntries);
   cmDeleteAll(this->Pointer->SourceEntries);
