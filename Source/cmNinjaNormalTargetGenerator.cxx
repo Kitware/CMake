@@ -43,7 +43,7 @@ cmNinjaNormalTargetGenerator(cmGeneratorTarget* target)
   this->TargetLinkLanguage = target->Target
                                    ->GetLinkerLanguage(this->GetConfigName());
   if (target->GetType() == cmTarget::EXECUTABLE)
-    target->Target->GetExecutableNames(this->TargetNameOut,
+    this->GetGeneratorTarget()->GetExecutableNames(this->TargetNameOut,
                                this->TargetNameReal,
                                this->TargetNameImport,
                                this->TargetNamePDB,
