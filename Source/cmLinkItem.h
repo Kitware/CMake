@@ -44,4 +44,16 @@ public:
   bool FromGenex;
 };
 
+/** The link implementation specifies the direct library
+    dependencies needed by the object files of the target.  */
+struct cmLinkImplementationLibraries
+{
+  // Libraries linked directly in this configuration.
+  std::vector<cmLinkImplItem> Libraries;
+
+  // Libraries linked directly in other configurations.
+  // Needed only for OLD behavior of CMP0003.
+  std::vector<cmLinkItem> WrongConfigLibraries;
+};
+
 #endif

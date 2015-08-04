@@ -3381,7 +3381,7 @@ bool cmTarget::HaveBuildTreeRPATH(const std::string& config) const
     {
     return false;
     }
-  if(LinkImplementationLibraries const* impl =
+  if(cmLinkImplementationLibraries const* impl =
      this->GetLinkImplementationLibraries(config))
     {
     return !impl->Libraries.empty();
@@ -4331,7 +4331,7 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
     // to the link implementation.
     {
     // The link implementation is the default link interface.
-    cmTarget::LinkImplementationLibraries const* impl =
+    cmLinkImplementationLibraries const* impl =
       thisTarget->GetLinkImplementationLibrariesInternal(config, headTarget);
     iface.Libraries.insert(iface.Libraries.end(),
                            impl->Libraries.begin(), impl->Libraries.end());
@@ -4431,7 +4431,7 @@ void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
         || thisTarget->GetPolicyStatusCMP0022() == cmPolicies::OLD)
     {
     // The link implementation is the default link interface.
-    cmTarget::LinkImplementationLibraries const*
+    cmLinkImplementationLibraries const*
       impl = thisTarget->GetLinkImplementationLibrariesInternal(config,
                                                                 headTarget);
     iface.ImplementationIsInterface = true;
@@ -4482,7 +4482,7 @@ void cmTargetInternals::AddInterfaceEntries(
   cmTarget const* thisTarget, std::string const& config,
   std::string const& prop, std::vector<TargetPropertyEntry*>& entries)
 {
-  if(cmTarget::LinkImplementationLibraries const* impl =
+  if(cmLinkImplementationLibraries const* impl =
      thisTarget->GetLinkImplementationLibraries(config))
     {
     for (std::vector<cmLinkImplItem>::const_iterator
@@ -4532,14 +4532,14 @@ cmTarget::GetLinkImplementation(const std::string& config) const
 }
 
 //----------------------------------------------------------------------------
-cmTarget::LinkImplementationLibraries const*
+cmLinkImplementationLibraries const*
 cmTarget::GetLinkImplementationLibraries(const std::string& config) const
 {
   return this->GetLinkImplementationLibrariesInternal(config, this);
 }
 
 //----------------------------------------------------------------------------
-cmTarget::LinkImplementationLibraries const*
+cmLinkImplementationLibraries const*
 cmTarget::GetLinkImplementationLibrariesInternal(const std::string& config,
                                                  cmTarget const* head) const
 {

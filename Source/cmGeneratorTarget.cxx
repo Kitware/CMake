@@ -1506,7 +1506,7 @@ cmGeneratorTarget::GetLinkImplementationClosure(
     tgts.Done = true;
     std::set<cmTarget const*> emitted;
 
-    cmTarget::LinkImplementationLibraries const* impl
+    cmLinkImplementationLibraries const* impl
       = this->Target->GetLinkImplementationLibraries(config);
 
     for(std::vector<cmLinkImplItem>::const_iterator
