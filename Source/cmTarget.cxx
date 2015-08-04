@@ -5323,17 +5323,6 @@ std::string cmTarget::GetCFBundleDirectory(const std::string& config,
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetAppBundleDirectory(const std::string& config,
-                                            bool contentOnly) const
-{
-  std::string fpath = this->GetFullName(config, false);
-  fpath += ".app/Contents";
-  if(!contentOnly)
-    fpath += "/MacOS";
-  return fpath;
-}
-
-//----------------------------------------------------------------------------
 cmTargetInternalPointer::cmTargetInternalPointer()
 {
   this->Pointer = new cmTargetInternals;
