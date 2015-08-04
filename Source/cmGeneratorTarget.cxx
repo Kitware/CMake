@@ -714,6 +714,73 @@ bool cmGeneratorTarget::HasSOName(const std::string& config) const
 }
 
 //----------------------------------------------------------------------------
+bool
+cmGeneratorTarget::NeedRelinkBeforeInstall(const std::string& config) const
+{
+  // Only executables and shared libraries can have an rpath and may
+  // need relinking.
+  if(this->GetType() != cmTarget::EXECUTABLE &&
+     this->GetType() != cmTarget::SHARED_LIBRARY &&
+     this->GetType() != cmTarget::MODULE_LIBRARY)
+    {
+    return false;
+    }
+
+  // If there is no install location this target will not be installed
+  // and therefore does not need relinking.
+  if(!this->Target->GetHaveInstallRule())
+    {
+    return false;
+    }
+
+  // If skipping all rpaths completely then no relinking is needed.
+  if(this->Makefile->IsOn("CMAKE_SKIP_RPATH"))
+    {
+    return false;
+    }
+
+  // If building with the install-tree rpath no relinking is needed.
+  if(this->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"))
+    {
+    return false;
+    }
+
+  // If chrpath is going to be used no relinking is needed.
+  if(this->Target->IsChrpathUsed(config))
+    {
+    return false;
+    }
+
+  // Check for rpath support on this platform.
+  std::string ll = this->Target->GetLinkerLanguage(config);
+  if(!ll.empty())
+    {
+    std::string flagVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
+    flagVar += ll;
+    flagVar += "_FLAG";
+    if(!this->Makefile->IsSet(flagVar))
+      {
+      // There is no rpath support on this platform so nothing needs
+      // relinking.
+      return false;
+      }
+    }
+  else
+    {
+    // No linker language is known.  This error will be reported by
+    // other code.
+    return false;
+    }
+
+  // If either a build or install tree rpath is set then the rpath
+  // will likely change between the build tree and install tree and
+  // this target must be relinked.
+  return this->Target->HaveBuildTreeRPATH(config)
+      || this->Target->HaveInstallTreeRPATH();
+}
+
+
+//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetSOName(const std::string& config) const
 {
   if(this->Target->IsImported())

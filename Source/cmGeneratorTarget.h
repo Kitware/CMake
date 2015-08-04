@@ -210,6 +210,11 @@ public:
                        std::string& realName, std::string& impName,
                        std::string& pdbName, const std::string& config) const;
 
+  /**
+   * Compute whether this target must be relinked before installing.
+   */
+  bool NeedRelinkBeforeInstall(const std::string& config) const;
+
   struct SourceFileFlags
   GetTargetSourceFileFlags(const cmSourceFile* sf) const;
 
