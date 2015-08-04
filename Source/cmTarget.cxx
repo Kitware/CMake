@@ -170,13 +170,6 @@ public:
   };
   std::map<std::string, LinkImplClosure> LinkImplClosureMap;
 
-  struct CompatibleInterfaces: public cmTarget::CompatibleInterfaces
-  {
-    CompatibleInterfaces(): Done(false) {}
-    bool Done;
-  };
-  std::map<std::string, CompatibleInterfaces> CompatibleInterfacesMap;
-
   typedef std::map<std::string, std::vector<cmSourceFile*> >
                                                        SourceFilesMapType;
   SourceFilesMapType SourceFilesMap;
@@ -4991,54 +4984,6 @@ const char * cmTarget::GetLinkInterfaceDependentNumberMaxProperty(
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::IsLinkInterfaceDependentBoolProperty(const std::string &p,
-                                           const std::string& config) const
-{
-  if (this->TargetTypeValue == OBJECT_LIBRARY
-      || this->TargetTypeValue == INTERFACE_LIBRARY)
-    {
-    return false;
-    }
-  return this->GetCompatibleInterfaces(config).PropsBool.count(p) > 0;
-}
-
-//----------------------------------------------------------------------------
-bool cmTarget::IsLinkInterfaceDependentStringProperty(const std::string &p,
-                                    const std::string& config) const
-{
-  if (this->TargetTypeValue == OBJECT_LIBRARY
-      || this->TargetTypeValue == INTERFACE_LIBRARY)
-    {
-    return false;
-    }
-  return this->GetCompatibleInterfaces(config).PropsString.count(p) > 0;
-}
-
-//----------------------------------------------------------------------------
-bool cmTarget::IsLinkInterfaceDependentNumberMinProperty(const std::string &p,
-                                    const std::string& config) const
-{
-  if (this->TargetTypeValue == OBJECT_LIBRARY
-      || this->TargetTypeValue == INTERFACE_LIBRARY)
-    {
-    return false;
-    }
-  return this->GetCompatibleInterfaces(config).PropsNumberMin.count(p) > 0;
-}
-
-//----------------------------------------------------------------------------
-bool cmTarget::IsLinkInterfaceDependentNumberMaxProperty(const std::string &p,
-                                    const std::string& config) const
-{
-  if (this->TargetTypeValue == OBJECT_LIBRARY
-      || this->TargetTypeValue == INTERFACE_LIBRARY)
-    {
-    return false;
-    }
-  return this->GetCompatibleInterfaces(config).PropsNumberMax.count(p) > 0;
-}
-
-//----------------------------------------------------------------------------
 void
 cmTarget::GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const
 {
@@ -5722,39 +5667,6 @@ cmTarget::GetLinkImplementationClosure(const std::string& config) const
       }
     }
   return tgts;
-}
-
-//----------------------------------------------------------------------------
-cmTarget::CompatibleInterfaces const&
-cmTarget::GetCompatibleInterfaces(std::string const& config) const
-{
-  cmTargetInternals::CompatibleInterfaces& compat =
-    this->Internal->CompatibleInterfacesMap[config];
-  if(!compat.Done)
-    {
-    compat.Done = true;
-    compat.PropsBool.insert("POSITION_INDEPENDENT_CODE");
-    compat.PropsString.insert("AUTOUIC_OPTIONS");
-    std::vector<cmTarget const*> const& deps =
-      this->GetLinkImplementationClosure(config);
-    for(std::vector<cmTarget const*>::const_iterator li = deps.begin();
-        li != deps.end(); ++li)
-      {
-#define CM_READ_COMPATIBLE_INTERFACE(X, x) \
-      if(const char* prop = (*li)->GetProperty("COMPATIBLE_INTERFACE_" #X)) \
-        { \
-        std::vector<std::string> props; \
-        cmSystemTools::ExpandListArgument(prop, props); \
-        compat.Props##x.insert(props.begin(), props.end()); \
-        }
-      CM_READ_COMPATIBLE_INTERFACE(BOOL, Bool)
-      CM_READ_COMPATIBLE_INTERFACE(STRING, String)
-      CM_READ_COMPATIBLE_INTERFACE(NUMBER_MIN, NumberMin)
-      CM_READ_COMPATIBLE_INTERFACE(NUMBER_MAX, NumberMax)
-#undef CM_READ_COMPATIBLE_INTERFACE
-      }
-    }
-  return compat;
 }
 
 //----------------------------------------------------------------------------
