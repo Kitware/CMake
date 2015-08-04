@@ -1524,6 +1524,240 @@ bool cmGeneratorTarget::IsLinkInterfaceDependentNumberMaxProperty(
   return this->GetCompatibleInterfaces(config).PropsNumberMax.count(p) > 0;
 }
 
+template<typename PropertyType>
+PropertyType getLinkInterfaceDependentProperty(cmTarget const* tgt,
+                                               const std::string& prop,
+                                               const std::string& config,
+                                               cmTarget::CompatibleType,
+                                               PropertyType *);
+
+template<>
+bool getLinkInterfaceDependentProperty(cmTarget const* tgt,
+                                       const std::string& prop,
+                                       const std::string& config,
+                                       cmTarget::CompatibleType, bool *)
+{
+  return tgt->GetLinkInterfaceDependentBoolProperty(prop, config);
+}
+
+template<>
+const char * getLinkInterfaceDependentProperty(cmTarget const* tgt,
+                                               const std::string& prop,
+                                               const std::string& config,
+                                               cmTarget::CompatibleType t,
+                                               const char **)
+{
+  switch(t)
+  {
+  case cmTarget::BoolType:
+    assert(0 && "String compatibility check function called for boolean");
+    return 0;
+  case cmTarget::StringType:
+    return tgt->GetLinkInterfaceDependentStringProperty(prop, config);
+  case cmTarget::NumberMinType:
+    return tgt->GetLinkInterfaceDependentNumberMinProperty(prop, config);
+  case cmTarget::NumberMaxType:
+    return tgt->GetLinkInterfaceDependentNumberMaxProperty(prop, config);
+  }
+  assert(0 && "Unreachable!");
+  return 0;
+}
+
+//----------------------------------------------------------------------------
+template<typename PropertyType>
+void checkPropertyConsistency(cmTarget const* depender,
+                              cmTarget const* dependee,
+                              const std::string& propName,
+                              std::set<std::string> &emitted,
+                              const std::string& config,
+                              cmTarget::CompatibleType t,
+                              PropertyType *)
+{
+  const char *prop = dependee->GetProperty(propName);
+  if (!prop)
+    {
+    return;
+    }
+
+  std::vector<std::string> props;
+  cmSystemTools::ExpandListArgument(prop, props);
+  std::string pdir =
+    dependee->GetMakefile()->GetRequiredDefinition("CMAKE_ROOT");
+  pdir += "/Help/prop_tgt/";
+
+  for(std::vector<std::string>::iterator pi = props.begin();
+      pi != props.end(); ++pi)
+    {
+    std::string pname = cmSystemTools::HelpFileName(*pi);
+    std::string pfile = pdir + pname + ".rst";
+    if(cmSystemTools::FileExists(pfile.c_str(), true))
+      {
+      std::ostringstream e;
+      e << "Target \"" << dependee->GetName() << "\" has property \""
+        << *pi << "\" listed in its " << propName << " property.  "
+          "This is not allowed.  Only user-defined properties may appear "
+          "listed in the " << propName << " property.";
+      depender->GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return;
+      }
+    if(emitted.insert(*pi).second)
+      {
+      getLinkInterfaceDependentProperty<PropertyType>(depender, *pi, config,
+                                                      t, 0);
+      if (cmSystemTools::GetErrorOccuredFlag())
+        {
+        return;
+        }
+      }
+    }
+}
+
+static std::string intersect(const std::set<std::string> &s1,
+                             const std::set<std::string> &s2)
+{
+  std::set<std::string> intersect;
+  std::set_intersection(s1.begin(),s1.end(),
+                        s2.begin(),s2.end(),
+                      std::inserter(intersect,intersect.begin()));
+  if (!intersect.empty())
+    {
+    return *intersect.begin();
+    }
+  return "";
+}
+
+static std::string intersect(const std::set<std::string> &s1,
+                       const std::set<std::string> &s2,
+                       const std::set<std::string> &s3)
+{
+  std::string result;
+  result = intersect(s1, s2);
+  if (!result.empty())
+    return result;
+  result = intersect(s1, s3);
+  if (!result.empty())
+    return result;
+  return intersect(s2, s3);
+}
+
+static std::string intersect(const std::set<std::string> &s1,
+                       const std::set<std::string> &s2,
+                       const std::set<std::string> &s3,
+                       const std::set<std::string> &s4)
+{
+  std::string result;
+  result = intersect(s1, s2);
+  if (!result.empty())
+    return result;
+  result = intersect(s1, s3);
+  if (!result.empty())
+    return result;
+  result = intersect(s1, s4);
+  if (!result.empty())
+    return result;
+  return intersect(s2, s3, s4);
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::CheckPropertyCompatibility(
+    cmComputeLinkInformation *info, const std::string& config) const
+{
+  const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
+
+  std::set<std::string> emittedBools;
+  static std::string strBool = "COMPATIBLE_INTERFACE_BOOL";
+  std::set<std::string> emittedStrings;
+  static std::string strString = "COMPATIBLE_INTERFACE_STRING";
+  std::set<std::string> emittedMinNumbers;
+  static std::string strNumMin = "COMPATIBLE_INTERFACE_NUMBER_MIN";
+  std::set<std::string> emittedMaxNumbers;
+  static std::string strNumMax = "COMPATIBLE_INTERFACE_NUMBER_MAX";
+
+  for(cmComputeLinkInformation::ItemVector::const_iterator li =
+      deps.begin(); li != deps.end(); ++li)
+    {
+    if (!li->Target)
+      {
+      continue;
+      }
+
+    checkPropertyConsistency<bool>(this->Target, li->Target,
+                                strBool,
+                                emittedBools, config, cmTarget::BoolType, 0);
+    if (cmSystemTools::GetErrorOccuredFlag())
+      {
+      return;
+      }
+    checkPropertyConsistency<const char *>(this->Target, li->Target,
+                                strString,
+                                emittedStrings, config,
+                                cmTarget::StringType, 0);
+    if (cmSystemTools::GetErrorOccuredFlag())
+      {
+      return;
+      }
+    checkPropertyConsistency<const char *>(this->Target, li->Target,
+                                strNumMin,
+                                emittedMinNumbers, config,
+                                cmTarget::NumberMinType, 0);
+    if (cmSystemTools::GetErrorOccuredFlag())
+      {
+      return;
+      }
+    checkPropertyConsistency<const char *>(this->Target, li->Target,
+                                strNumMax,
+                                emittedMaxNumbers, config,
+                                cmTarget::NumberMaxType, 0);
+    if (cmSystemTools::GetErrorOccuredFlag())
+      {
+      return;
+      }
+    }
+
+  std::string prop = intersect(emittedBools,
+                               emittedStrings,
+                               emittedMinNumbers,
+                               emittedMaxNumbers);
+
+  if (!prop.empty())
+    {
+    // Use a sorted std::vector to keep the error message sorted.
+    std::vector<std::string> props;
+    std::set<std::string>::const_iterator i = emittedBools.find(prop);
+    if (i != emittedBools.end())
+      {
+      props.push_back(strBool);
+      }
+    i = emittedStrings.find(prop);
+    if (i != emittedStrings.end())
+      {
+      props.push_back(strString);
+      }
+    i = emittedMinNumbers.find(prop);
+    if (i != emittedMinNumbers.end())
+      {
+      props.push_back(strNumMin);
+      }
+    i = emittedMaxNumbers.find(prop);
+    if (i != emittedMaxNumbers.end())
+      {
+      props.push_back(strNumMax);
+      }
+    std::sort(props.begin(), props.end());
+
+    std::string propsString = cmJoin(cmMakeRange(props).retreat(1), ", ");
+    propsString += " and the " + props.back();
+
+    std::ostringstream e;
+    e << "Property \"" << prop << "\" appears in both the "
+      << propsString <<
+    " property in the dependencies of target \"" << this->GetName() <<
+    "\".  This is not allowed. A property may only require compatibility "
+    "in a boolean interpretation, a numeric minimum, a numeric maximum or a "
+    "string interpretation, but not a mixture.";
+    this->LocalGenerator->IssueMessage(cmake::FATAL_ERROR, e.str());
+    }
+}
 
 //----------------------------------------------------------------------------
 cmComputeLinkInformation*
@@ -1550,7 +1784,7 @@ cmGeneratorTarget::GetLinkInformation(const std::string& config) const
 
     if (info)
       {
-      this->Target->CheckPropertyCompatibility(info, config);
+      this->CheckPropertyCompatibility(info, config);
       }
     }
   return i->second;

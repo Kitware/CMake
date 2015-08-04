@@ -4554,23 +4554,16 @@ const char *getTypedProperty<const char *>(cmTarget const* tgt,
   return tgt->GetProperty(prop);
 }
 
-enum CompatibleType
-{
-  BoolType,
-  StringType,
-  NumberMinType,
-  NumberMaxType
-};
-
 //----------------------------------------------------------------------------
 template<typename PropertyType>
 std::pair<bool, PropertyType> consistentProperty(PropertyType lhs,
                                                  PropertyType rhs,
-                                                 CompatibleType t);
+                                                 cmTarget::CompatibleType t);
 
 //----------------------------------------------------------------------------
 template<>
-std::pair<bool, bool> consistentProperty(bool lhs, bool rhs, CompatibleType)
+std::pair<bool, bool> consistentProperty(bool lhs, bool rhs,
+                                         cmTarget::CompatibleType)
 {
   return std::make_pair(lhs == rhs, lhs);
 }
@@ -4585,8 +4578,8 @@ std::pair<bool, const char*> consistentStringProperty(const char *lhs,
 
 //----------------------------------------------------------------------------
 std::pair<bool, const char*> consistentNumberProperty(const char *lhs,
-                                                      const char *rhs,
-                                                      CompatibleType t)
+                                                   const char *rhs,
+                                                   cmTarget::CompatibleType t)
 {
   char *pEnd;
 
@@ -4604,7 +4597,7 @@ std::pair<bool, const char*> consistentNumberProperty(const char *lhs,
     return std::pair<bool, const char*>(false, null_ptr);
     }
 
-  if (t == NumberMaxType)
+  if (t == cmTarget::NumberMaxType)
     {
     return std::make_pair(true, std::max(lnum, rnum) == lnum ? lhs : rhs);
     }
@@ -4618,7 +4611,7 @@ std::pair<bool, const char*> consistentNumberProperty(const char *lhs,
 template<>
 std::pair<bool, const char*> consistentProperty(const char *lhs,
                                                 const char *rhs,
-                                                CompatibleType t)
+                                                cmTarget::CompatibleType t)
 {
   if (!lhs && !rhs)
     {
@@ -4637,13 +4630,13 @@ std::pair<bool, const char*> consistentProperty(const char *lhs,
 
   switch(t)
   {
-  case BoolType:
+  case cmTarget::BoolType:
     assert(0 && "consistentProperty for strings called with BoolType");
     return std::pair<bool, const char*>(false, null_ptr);
-  case StringType:
+  case cmTarget::StringType:
     return consistentStringProperty(lhs, rhs);
-  case NumberMinType:
-  case NumberMaxType:
+  case cmTarget::NumberMinType:
+  case cmTarget::NumberMaxType:
     return consistentNumberProperty(lhs, rhs, t);
   }
   assert(0 && "Unreachable!");
@@ -4718,17 +4711,17 @@ cmTarget::ReportPropertyOrigin(const std::string &p,
 }
 
 //----------------------------------------------------------------------------
-std::string compatibilityType(CompatibleType t)
+std::string compatibilityType(cmTarget::CompatibleType t)
 {
   switch(t)
     {
-    case BoolType:
+    case cmTarget::BoolType:
       return "Boolean compatibility";
-    case StringType:
+    case cmTarget::StringType:
       return "String compatibility";
-    case NumberMaxType:
+    case cmTarget::NumberMaxType:
       return "Numeric maximum compatibility";
-    case NumberMinType:
+    case cmTarget::NumberMinType:
       return "Numeric minimum compatibility";
     }
   assert(0 && "Unreachable!");
@@ -4736,15 +4729,15 @@ std::string compatibilityType(CompatibleType t)
 }
 
 //----------------------------------------------------------------------------
-std::string compatibilityAgree(CompatibleType t, bool dominant)
+std::string compatibilityAgree(cmTarget::CompatibleType t, bool dominant)
 {
   switch(t)
     {
-    case BoolType:
-    case StringType:
+    case cmTarget::BoolType:
+    case cmTarget::StringType:
       return dominant ? "(Disagree)\n" : "(Agree)\n";
-    case NumberMaxType:
-    case NumberMinType:
+    case cmTarget::NumberMaxType:
+    case cmTarget::NumberMinType:
       return dominant ? "(Dominant)\n" : "(Ignored)\n";
     }
   assert(0 && "Unreachable!");
@@ -4757,7 +4750,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
                                           const std::string &p,
                                           const std::string& config,
                                           const char *defaultValue,
-                                          CompatibleType t,
+                                          cmTarget::CompatibleType t,
                                           PropertyType *)
 {
   PropertyType propContent = getTypedProperty<PropertyType>(tgt, p);
@@ -6222,240 +6215,6 @@ std::string cmTarget::CheckCMP0004(std::string const& item) const
       }
     }
   return lib;
-}
-
-template<typename PropertyType>
-PropertyType getLinkInterfaceDependentProperty(cmTarget const* tgt,
-                                               const std::string& prop,
-                                               const std::string& config,
-                                               CompatibleType,
-                                               PropertyType *);
-
-template<>
-bool getLinkInterfaceDependentProperty(cmTarget const* tgt,
-                                       const std::string& prop,
-                                       const std::string& config,
-                                       CompatibleType, bool *)
-{
-  return tgt->GetLinkInterfaceDependentBoolProperty(prop, config);
-}
-
-template<>
-const char * getLinkInterfaceDependentProperty(cmTarget const* tgt,
-                                               const std::string& prop,
-                                               const std::string& config,
-                                               CompatibleType t,
-                                               const char **)
-{
-  switch(t)
-  {
-  case BoolType:
-    assert(0 && "String compatibility check function called for boolean");
-    return 0;
-  case StringType:
-    return tgt->GetLinkInterfaceDependentStringProperty(prop, config);
-  case NumberMinType:
-    return tgt->GetLinkInterfaceDependentNumberMinProperty(prop, config);
-  case NumberMaxType:
-    return tgt->GetLinkInterfaceDependentNumberMaxProperty(prop, config);
-  }
-  assert(0 && "Unreachable!");
-  return 0;
-}
-
-//----------------------------------------------------------------------------
-template<typename PropertyType>
-void checkPropertyConsistency(cmTarget const* depender,
-                              cmTarget const* dependee,
-                              const std::string& propName,
-                              std::set<std::string> &emitted,
-                              const std::string& config,
-                              CompatibleType t,
-                              PropertyType *)
-{
-  const char *prop = dependee->GetProperty(propName);
-  if (!prop)
-    {
-    return;
-    }
-
-  std::vector<std::string> props;
-  cmSystemTools::ExpandListArgument(prop, props);
-  std::string pdir =
-    dependee->GetMakefile()->GetRequiredDefinition("CMAKE_ROOT");
-  pdir += "/Help/prop_tgt/";
-
-  for(std::vector<std::string>::iterator pi = props.begin();
-      pi != props.end(); ++pi)
-    {
-    std::string pname = cmSystemTools::HelpFileName(*pi);
-    std::string pfile = pdir + pname + ".rst";
-    if(cmSystemTools::FileExists(pfile.c_str(), true))
-      {
-      std::ostringstream e;
-      e << "Target \"" << dependee->GetName() << "\" has property \""
-        << *pi << "\" listed in its " << propName << " property.  "
-          "This is not allowed.  Only user-defined properties may appear "
-          "listed in the " << propName << " property.";
-      depender->GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str());
-      return;
-      }
-    if(emitted.insert(*pi).second)
-      {
-      getLinkInterfaceDependentProperty<PropertyType>(depender, *pi, config,
-                                                      t, 0);
-      if (cmSystemTools::GetErrorOccuredFlag())
-        {
-        return;
-        }
-      }
-    }
-}
-
-static std::string intersect(const std::set<std::string> &s1,
-                             const std::set<std::string> &s2)
-{
-  std::set<std::string> intersect;
-  std::set_intersection(s1.begin(),s1.end(),
-                        s2.begin(),s2.end(),
-                      std::inserter(intersect,intersect.begin()));
-  if (!intersect.empty())
-    {
-    return *intersect.begin();
-    }
-  return "";
-}
-static std::string intersect(const std::set<std::string> &s1,
-                       const std::set<std::string> &s2,
-                       const std::set<std::string> &s3)
-{
-  std::string result;
-  result = intersect(s1, s2);
-  if (!result.empty())
-    return result;
-  result = intersect(s1, s3);
-  if (!result.empty())
-    return result;
-  return intersect(s2, s3);
-}
-static std::string intersect(const std::set<std::string> &s1,
-                       const std::set<std::string> &s2,
-                       const std::set<std::string> &s3,
-                       const std::set<std::string> &s4)
-{
-  std::string result;
-  result = intersect(s1, s2);
-  if (!result.empty())
-    return result;
-  result = intersect(s1, s3);
-  if (!result.empty())
-    return result;
-  result = intersect(s1, s4);
-  if (!result.empty())
-    return result;
-  return intersect(s2, s3, s4);
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
-                                          const std::string& config) const
-{
-  const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
-
-  std::set<std::string> emittedBools;
-  static std::string strBool = "COMPATIBLE_INTERFACE_BOOL";
-  std::set<std::string> emittedStrings;
-  static std::string strString = "COMPATIBLE_INTERFACE_STRING";
-  std::set<std::string> emittedMinNumbers;
-  static std::string strNumMin = "COMPATIBLE_INTERFACE_NUMBER_MIN";
-  std::set<std::string> emittedMaxNumbers;
-  static std::string strNumMax = "COMPATIBLE_INTERFACE_NUMBER_MAX";
-
-  for(cmComputeLinkInformation::ItemVector::const_iterator li =
-      deps.begin();
-      li != deps.end(); ++li)
-    {
-    if (!li->Target)
-      {
-      continue;
-      }
-
-    checkPropertyConsistency<bool>(this, li->Target,
-                                strBool,
-                                emittedBools, config, BoolType, 0);
-    if (cmSystemTools::GetErrorOccuredFlag())
-      {
-      return;
-      }
-    checkPropertyConsistency<const char *>(this, li->Target,
-                                strString,
-                                emittedStrings, config,
-                                StringType, 0);
-    if (cmSystemTools::GetErrorOccuredFlag())
-      {
-      return;
-      }
-    checkPropertyConsistency<const char *>(this, li->Target,
-                                strNumMin,
-                                emittedMinNumbers, config,
-                                NumberMinType, 0);
-    if (cmSystemTools::GetErrorOccuredFlag())
-      {
-      return;
-      }
-    checkPropertyConsistency<const char *>(this, li->Target,
-                                strNumMax,
-                                emittedMaxNumbers, config,
-                                NumberMaxType, 0);
-    if (cmSystemTools::GetErrorOccuredFlag())
-      {
-      return;
-      }
-    }
-
-  std::string prop = intersect(emittedBools,
-                               emittedStrings,
-                               emittedMinNumbers,
-                               emittedMaxNumbers);
-
-  if (!prop.empty())
-    {
-    // Use a sorted std::vector to keep the error message sorted.
-    std::vector<std::string> props;
-    std::set<std::string>::const_iterator i = emittedBools.find(prop);
-    if (i != emittedBools.end())
-      {
-      props.push_back(strBool);
-      }
-    i = emittedStrings.find(prop);
-    if (i != emittedStrings.end())
-      {
-      props.push_back(strString);
-      }
-    i = emittedMinNumbers.find(prop);
-    if (i != emittedMinNumbers.end())
-      {
-      props.push_back(strNumMin);
-      }
-    i = emittedMaxNumbers.find(prop);
-    if (i != emittedMaxNumbers.end())
-      {
-      props.push_back(strNumMax);
-      }
-    std::sort(props.begin(), props.end());
-
-    std::string propsString = cmJoin(cmMakeRange(props).retreat(1), ", ");
-    propsString += " and the " + props.back();
-
-    std::ostringstream e;
-    e << "Property \"" << prop << "\" appears in both the "
-      << propsString <<
-    " property in the dependencies of target \"" << this->GetName() <<
-    "\".  This is not allowed. A property may only require compatibility "
-    "in a boolean interpretation, a numeric minimum, a numeric maximum or a "
-    "string interpretation, but not a mixture.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-    }
 }
 
 //----------------------------------------------------------------------------
