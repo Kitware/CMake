@@ -136,7 +136,9 @@ public:
     const cmsys::auto_ptr<cmCompiledGeneratorExpression> ge;
     cmLinkImplItem const& LinkImplItem;
   };
-  std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
+  std::vector<std::string> IncludeDirectoriesEntries;
+  std::vector<cmListFileBacktrace> IncludeDirectoriesBacktraces;
+  std::vector<TargetPropertyEntry*> IncludeDirectoriesItems;
   std::vector<TargetPropertyEntry*> CompileOptionsEntries;
   std::vector<TargetPropertyEntry*> CompileFeaturesEntries;
   std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
@@ -334,13 +336,13 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     const cmBacktraceRange parentIncludesBts =
         this->Makefile->GetIncludeDirectoriesBacktraces();
 
-    cmBacktraceRange::const_iterator btIt = parentIncludesBts.begin();
-    for (cmStringRange::const_iterator it
-                = parentIncludes.begin();
-         it != parentIncludes.end(); ++it, ++btIt)
-      {
-      this->InsertInclude(*it, *btIt);
-      }
+    this->Internal->IncludeDirectoriesEntries.insert(
+          this->Internal->IncludeDirectoriesEntries.end(),
+          parentIncludes.begin(), parentIncludes.end());
+    this->Internal->IncludeDirectoriesBacktraces.insert(
+          this->Internal->IncludeDirectoriesBacktraces.end(),
+          parentIncludesBts.begin(), parentIncludesBts.end());
+
     const std::set<std::string> parentSystemIncludes =
                                 this->Makefile->GetSystemIncludeDirectories();
 
@@ -352,7 +354,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     const cmBacktraceRange parentOptionsBts =
                                 this->Makefile->GetCompileOptionsBacktraces();
 
-    btIt = parentOptionsBts.begin();
+    cmBacktraceRange::const_iterator btIt = parentOptionsBts.begin();
     for (cmStringRange::const_iterator it
                 = parentOptions.begin();
          it != parentOptions.end(); ++it, ++btIt)
@@ -404,6 +406,29 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     this->SetPropertyDefault("JOB_POOL_COMPILE", 0);
     this->SetPropertyDefault("JOB_POOL_LINK", 0);
     }
+}
+
+void CreatePropertyGeneratorExpressions(
+    std::vector<std::string> const& entries,
+    std::vector<cmListFileBacktrace> const& backtraces,
+    std::vector<cmTargetInternals::TargetPropertyEntry*>& items)
+{
+  std::vector<cmListFileBacktrace>::const_iterator btIt = backtraces.begin();
+  for (std::vector<std::string>::const_iterator it = entries.begin();
+       it != entries.end(); ++it, ++btIt)
+    {
+    cmGeneratorExpression ge(*btIt);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*it);
+    items.push_back(new cmTargetInternals::TargetPropertyEntry(cge));
+    }
+}
+
+void cmTarget::Compute()
+{
+  CreatePropertyGeneratorExpressions(
+        this->Internal->IncludeDirectoriesEntries,
+        this->Internal->IncludeDirectoriesBacktraces,
+        this->Internal->IncludeDirectoriesItems);
 }
 
 //----------------------------------------------------------------------------
@@ -1632,12 +1657,11 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     }
   else if(prop == "INCLUDE_DIRECTORIES")
     {
+    this->Internal->IncludeDirectoriesEntries.clear();
+    this->Internal->IncludeDirectoriesBacktraces.clear();
+    this->Internal->IncludeDirectoriesEntries.push_back(value);
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
-    deleteAndClear(this->Internal->IncludeDirectoriesEntries);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
-    this->Internal->IncludeDirectoriesEntries.push_back(
-                          new cmTargetInternals::TargetPropertyEntry(cge));
+    this->Internal->IncludeDirectoriesBacktraces.push_back(lfbt);
     }
   else if(prop == "COMPILE_OPTIONS")
     {
@@ -1730,10 +1754,9 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     }
   else if(prop == "INCLUDE_DIRECTORIES")
     {
+    this->Internal->IncludeDirectoriesEntries.push_back(value);
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
-    this->Internal->IncludeDirectoriesEntries.push_back(
-              new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
+    this->Internal->IncludeDirectoriesBacktraces.push_back(lfbt);
     }
   else if(prop == "COMPILE_OPTIONS")
     {
@@ -1853,14 +1876,16 @@ void cmTarget::InsertInclude(std::string const& entry,
                              cmListFileBacktrace const& bt,
                              bool before)
 {
-  cmGeneratorExpression ge(bt);
+  std::vector<std::string>::iterator position =
+      before ? this->Internal->IncludeDirectoriesEntries.begin()
+             : this->Internal->IncludeDirectoriesEntries.end();
 
-  std::vector<cmTargetInternals::TargetPropertyEntry*>::iterator position
-                = before ? this->Internal->IncludeDirectoriesEntries.begin()
-                         : this->Internal->IncludeDirectoriesEntries.end();
+  std::vector<cmListFileBacktrace>::iterator btPosition =
+      before ? this->Internal->IncludeDirectoriesBacktraces.begin()
+             : this->Internal->IncludeDirectoriesBacktraces.end();
 
-  this->Internal->IncludeDirectoriesEntries.insert(position,
-      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry)));
+  this->Internal->IncludeDirectoriesEntries.insert(position, entry);
+  this->Internal->IncludeDirectoriesBacktraces.insert(btPosition, bt);
 }
 
 //----------------------------------------------------------------------------
@@ -2049,7 +2074,7 @@ cmTarget::GetIncludeDirectories(const std::string& config,
     }
 
   processIncludeDirectories(this,
-                            this->Internal->IncludeDirectoriesEntries,
+                            this->Internal->IncludeDirectoriesItems,
                             includes,
                             uniqueIncludes,
                             &dagChecker,
@@ -2865,7 +2890,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
         }
 
       static std::string output;
-      MakePropertyList(output, this->Internal->IncludeDirectoriesEntries);
+      output = cmJoin(this->Internal->IncludeDirectoriesEntries, ";");
       return output.c_str();
       }
     else if(prop == propCOMPILE_FEATURES)
@@ -4339,7 +4364,7 @@ cmTargetInternalPointer
 //----------------------------------------------------------------------------
 cmTargetInternalPointer::~cmTargetInternalPointer()
 {
-  cmDeleteAll(this->Pointer->IncludeDirectoriesEntries);
+  cmDeleteAll(this->Pointer->IncludeDirectoriesItems);
   cmDeleteAll(this->Pointer->CompileOptionsEntries);
   cmDeleteAll(this->Pointer->CompileFeaturesEntries);
   cmDeleteAll(this->Pointer->CompileDefinitionsEntries);
