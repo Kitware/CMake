@@ -2099,7 +2099,8 @@ cmTarget::GetIncludeDirectories(const std::string& config,
 
   if(this->Makefile->IsOn("APPLE"))
     {
-    LinkImplementation const* impl = this->GetLinkImplementation(config);
+    cmLinkImplementationLibraries const* impl =
+        this->GetLinkImplementationLibraries(config);
     for(std::vector<cmLinkImplItem>::const_iterator
         it = impl->Libraries.begin();
         it != impl->Libraries.end(); ++it)
