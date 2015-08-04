@@ -1564,8 +1564,8 @@ void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
     cmSystemTools::Message(msg.c_str());
     }
 
-  currentStart += "/CMakeLists.txt";
-  if(!cmSystemTools::FileExists(currentStart.c_str(), true))
+  std::string const currentStartFile = currentStart + "/CMakeLists.txt";
+  if (!cmSystemTools::FileExists(currentStartFile, true))
     {
     // The file is missing.  Check policy CMP0014.
     std::ostringstream e;
