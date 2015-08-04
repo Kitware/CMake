@@ -82,6 +82,15 @@ public:
   bool GetFeatureAsBool(const std::string& feature,
                         const std::string& config) const;
 
+  bool IsLinkInterfaceDependentBoolProperty(const std::string &p,
+                         const std::string& config) const;
+  bool IsLinkInterfaceDependentStringProperty(const std::string &p,
+                         const std::string& config) const;
+  bool IsLinkInterfaceDependentNumberMinProperty(const std::string &p,
+                         const std::string& config) const;
+  bool IsLinkInterfaceDependentNumberMaxProperty(const std::string &p,
+                         const std::string& config) const;
+
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
   std::string GetFullPath(const std::string& config="", bool implib = false,
@@ -186,6 +195,23 @@ private:
   void ConstructSourceFileFlags() const;
   mutable bool SourceFileFlagsConstructed;
   mutable std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
+
+  struct CompatibleInterfacesBase
+  {
+    std::set<std::string> PropsBool;
+    std::set<std::string> PropsString;
+    std::set<std::string> PropsNumberMax;
+    std::set<std::string> PropsNumberMin;
+  };
+  CompatibleInterfacesBase const&
+    GetCompatibleInterfaces(std::string const& config) const;
+
+  struct CompatibleInterfaces: public CompatibleInterfacesBase
+  {
+    CompatibleInterfaces(): Done(false) {}
+    bool Done;
+  };
+  mutable std::map<std::string, CompatibleInterfaces> CompatibleInterfacesMap;
 
   cmGeneratorTarget(cmGeneratorTarget const&);
   void operator=(cmGeneratorTarget const&);

@@ -305,16 +305,6 @@ public:
   std::vector<cmTarget const*> const&
     GetLinkImplementationClosure(const std::string& config) const;
 
-  struct CompatibleInterfaces
-  {
-    std::set<std::string> PropsBool;
-    std::set<std::string> PropsString;
-    std::set<std::string> PropsNumberMax;
-    std::set<std::string> PropsNumberMin;
-  };
-  CompatibleInterfaces const&
-    GetCompatibleInterfaces(std::string const& config) const;
-
   /** The link implementation specifies the direct library
       dependencies needed by the object files of the target.  */
   struct LinkImplementationLibraries
@@ -575,15 +565,6 @@ public:
                           const std::string& config) const;
 
   bool IsNullImpliedByLinkLibraries(const std::string &p) const;
-  bool IsLinkInterfaceDependentBoolProperty(const std::string &p,
-                         const std::string& config) const;
-  bool IsLinkInterfaceDependentStringProperty(const std::string &p,
-                         const std::string& config) const;
-  bool IsLinkInterfaceDependentNumberMinProperty(const std::string &p,
-                         const std::string& config) const;
-  bool IsLinkInterfaceDependentNumberMaxProperty(const std::string &p,
-                         const std::string& config) const;
-
   bool GetLinkInterfaceDependentBoolProperty(const std::string &p,
                                              const std::string& config) const;
 
