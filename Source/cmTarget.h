@@ -132,8 +132,6 @@ public:
   void AddPostBuildCommand(cmCustomCommand const &cmd)
     {this->PostBuildCommands.push_back(cmd);}
 
-  void Compute();
-
   /**
    * Get the list of the source files used by this target
    */
@@ -309,10 +307,6 @@ public:
       If no macro should be defined null is returned.  */
   const char* GetExportMacro() const;
 
-  void GetCompileDefinitions(std::vector<std::string> &result,
-                             const std::string& config,
-                             const std::string& language) const;
-
   // Compute the set of languages compiled by the target.  This is
   // computed every time it is called because the languages can change
   // when source file properties are changed and we do not have enough
@@ -401,6 +395,9 @@ public:
 
   cmStringRange GetCompileFeaturesEntries() const;
   cmBacktraceRange GetCompileFeaturesBacktraces() const;
+
+  cmStringRange GetCompileDefinitionsEntries() const;
+  cmBacktraceRange GetCompileDefinitionsBacktraces() const;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   const LinkLibraryVectorType &GetLinkLibrariesForVS6() const {
@@ -516,7 +513,6 @@ private:
   bool IsApple;
   bool IsImportedTarget;
   bool BuildInterfaceIncludesAppended;
-  mutable bool DebugCompileDefinitionsDone;
   mutable bool DebugSourcesDone;
   mutable bool LinkImplementationLanguageIsContextDependent;
 #if defined(_WIN32) && !defined(__CYGWIN__)

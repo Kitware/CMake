@@ -224,6 +224,10 @@ public:
   void GetCompileFeatures(std::vector<std::string> &features,
                           const std::string& config) const;
 
+  void GetCompileDefinitions(std::vector<std::string> &result,
+                             const std::string& config,
+                             const std::string& language) const;
+
   bool IsSystemIncludeDirectory(const std::string& dir,
                                 const std::string& config) const;
 
@@ -416,6 +420,7 @@ private:
   std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
   std::vector<TargetPropertyEntry*> CompileOptionsEntries;
   std::vector<TargetPropertyEntry*> CompileFeaturesEntries;
+  std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config, cmTarget const* headTarget,
@@ -432,6 +437,7 @@ private:
   mutable bool DebugIncludesDone;
   mutable bool DebugCompileOptionsDone;
   mutable bool DebugCompileFeaturesDone;
+  mutable bool DebugCompileDefinitionsDone;
 
 public:
   std::vector<cmTarget const*> const&

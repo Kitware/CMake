@@ -330,7 +330,8 @@ void cmGhsMultiTargetGenerator::WriteCompilerDefinitions(
   const std::string &config, const std::string &language)
 {
   std::vector<std::string> compileDefinitions;
-  this->Target->GetCompileDefinitions(compileDefinitions, config, language);
+  this->GeneratorTarget->GetCompileDefinitions(compileDefinitions,
+                                               config, language);
   for (std::vector<std::string>::const_iterator cdI =
          compileDefinitions.begin();
        cdI != compileDefinitions.end(); ++cdI)
