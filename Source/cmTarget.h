@@ -565,11 +565,6 @@ public:
   bool LinkLanguagePropagatesToDependents() const
   { return this->TargetTypeValue == STATIC_LIBRARY; }
 
-  void ReportPropertyOrigin(const std::string &p,
-                            const std::string &result,
-                            const std::string &report,
-                            const std::string &compatibilityType) const;
-
   std::map<std::string, std::string> const&
   GetMaxLanguageStandards() const
   {
@@ -676,7 +671,6 @@ private:
   std::set<std::string> Utilities;
   mutable std::set<std::string> LinkImplicitNullProperties;
   std::map<std::string, cmListFileBacktrace> UtilityBacktraces;
-  mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
   mutable std::map<std::string, std::string> MaxLanguageStandards;
   cmPolicies::PolicyMap PolicyMap;
   std::string Name;
