@@ -520,8 +520,6 @@ void cmTarget::ClearLinkMaps()
   this->Internal->LinkInterfaceUsageRequirementsOnlyMap.clear();
   this->Internal->LinkClosureMap.clear();
   this->Internal->SourceFilesMap.clear();
-  cmDeleteAll(this->LinkInformation);
-  this->LinkInformation.clear();
 }
 
 //----------------------------------------------------------------------------
@@ -6461,37 +6459,6 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
 }
 
 //----------------------------------------------------------------------------
-cmComputeLinkInformation*
-cmTarget::GetLinkInformation(const std::string& config) const
-{
-  // Lookup any existing information for this configuration.
-  std::string key(cmSystemTools::UpperCase(config));
-  cmTargetLinkInformationMap::iterator
-    i = this->LinkInformation.find(key);
-  if(i == this->LinkInformation.end())
-    {
-    // Compute information for this configuration.
-    cmComputeLinkInformation* info =
-      new cmComputeLinkInformation(this, config);
-    if(!info || !info->Compute())
-      {
-      delete info;
-      info = 0;
-      }
-
-    // Store the information for this configuration.
-    cmTargetLinkInformationMap::value_type entry(key, info);
-    i = this->LinkInformation.insert(entry).first;
-
-    if (info)
-      {
-      this->CheckPropertyCompatibility(info, config);
-      }
-    }
-  return i->second;
-}
-
-//----------------------------------------------------------------------------
 std::string cmTarget::GetFrameworkDirectory(const std::string& config,
                                             bool rootDir) const
 {
@@ -6580,26 +6547,6 @@ std::string cmTarget::GetMacContentDirectory(const std::string& config,
     }
   fpath = this->BuildMacContentDirectory(fpath, config, contentOnly);
   return fpath;
-}
-
-//----------------------------------------------------------------------------
-cmTargetLinkInformationMap
-::cmTargetLinkInformationMap(cmTargetLinkInformationMap const& r): derived()
-{
-  // Ideally cmTarget instances should never be copied.  However until
-  // we can make a sweep to remove that, this copy constructor avoids
-  // allowing the resources (LinkInformation) from getting copied.  In
-  // the worst case this will lead to extra cmComputeLinkInformation
-  // instances.  We also enforce in debug mode that the map be emptied
-  // when copied.
-  static_cast<void>(r);
-  assert(r.empty());
-}
-
-//----------------------------------------------------------------------------
-cmTargetLinkInformationMap::~cmTargetLinkInformationMap()
-{
-  cmDeleteAll(*this);
 }
 
 //----------------------------------------------------------------------------
