@@ -222,6 +222,9 @@ private:
                                                    cmTargetLinkInformationMap;
   mutable cmTargetLinkInformationMap LinkInformation;
 
+  void CheckPropertyCompatibility(cmComputeLinkInformation *info,
+                                  const std::string& config) const;
+
   cmGeneratorTarget(cmGeneratorTarget const&);
   void operator=(cmGeneratorTarget const&);
 };
