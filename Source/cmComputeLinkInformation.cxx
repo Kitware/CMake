@@ -19,6 +19,7 @@
 #include "cmOutputConverter.h"
 #include "cmMakefile.h"
 #include "cmTarget.h"
+#include "cmGeneratorTarget.h"
 #include "cmake.h"
 #include "cmAlgorithms.h"
 
@@ -579,8 +580,12 @@ bool cmComputeLinkInformation::Compute()
 //----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddImplicitLinkInfo()
 {
+  cmGeneratorTarget *gtgt = this->Target->GetMakefile()
+                                ->GetGlobalGenerator()
+                                ->GetGeneratorTarget(this->Target);
+
   // The link closure lists all languages whose implicit info is needed.
-  cmTarget::LinkClosure const* lc=this->Target->GetLinkClosure(this->Config);
+  cmGeneratorTarget::LinkClosure const* lc=gtgt->GetLinkClosure(this->Config);
   for(std::vector<std::string>::const_iterator li = lc->Languages.begin();
       li != lc->Languages.end(); ++li)
     {
@@ -2007,8 +2012,12 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
   // Add runtime paths required by the languages to always be
   // present.  This is done even when skipping rpath support.
   {
-  cmTarget::LinkClosure const* lc =
-    this->Target->GetLinkClosure(this->Config);
+  cmGeneratorTarget *gtgt = this->Makefile
+                                ->GetGlobalGenerator()
+                                ->GetGeneratorTarget(this->Target);
+
+  cmGeneratorTarget::LinkClosure const* lc =
+    gtgt->GetLinkClosure(this->Config);
   for(std::vector<std::string>::const_iterator li = lc->Languages.begin();
       li != lc->Languages.end(); ++li)
     {
