@@ -184,6 +184,12 @@ public:
   void GetAutoUicOptions(std::vector<std::string> &result,
                          const std::string& config) const;
 
+  /** Get the names of the executable needed to generate a build rule
+      that takes into account executable version numbers.  This should
+      be called only on an executable target.  */
+  void GetExecutableNames(std::string& name, std::string& realName,
+                          std::string& impName, std::string& pdbName,
+                          const std::string& config) const;
 
   struct SourceFileFlags
   GetTargetSourceFileFlags(const cmSourceFile* sf) const;
