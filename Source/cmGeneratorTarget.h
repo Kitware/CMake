@@ -360,6 +360,8 @@ public:
                             const std::string &report,
                             const std::string &compatibilityType) const;
 
+  class TargetPropertyEntry;
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
@@ -447,6 +449,9 @@ private:
   mutable LinkInterfaceMapType LinkInterfaceUsageRequirementsOnlyMap;
 
   mutable bool PolicyWarnedCMP0022;
+  mutable bool DebugIncludesDone;
+
+  std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config, cmTarget const* headTarget,

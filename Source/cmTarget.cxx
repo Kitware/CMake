@@ -140,7 +140,6 @@ public:
   };
   std::vector<std::string> IncludeDirectoriesEntries;
   std::vector<cmListFileBacktrace> IncludeDirectoriesBacktraces;
-  std::vector<TargetPropertyEntry*> IncludeDirectoriesItems;
   std::vector<std::string> CompileOptionsEntries;
   std::vector<cmListFileBacktrace> CompileOptionsBacktraces;
   std::vector<TargetPropertyEntry*> CompileOptionsItems;
@@ -178,7 +177,6 @@ cmTarget::cmTarget()
   this->IsApple = false;
   this->IsImportedTarget = false;
   this->BuildInterfaceIncludesAppended = false;
-  this->DebugIncludesDone = false;
   this->DebugCompileOptionsDone = false;
   this->DebugCompileFeaturesDone = false;
   this->DebugCompileDefinitionsDone = false;
@@ -426,11 +424,6 @@ void CreatePropertyGeneratorExpressions(
 
 void cmTarget::Compute()
 {
-  CreatePropertyGeneratorExpressions(
-        this->Internal->IncludeDirectoriesEntries,
-        this->Internal->IncludeDirectoriesBacktraces,
-        this->Internal->IncludeDirectoriesItems);
-
   CreatePropertyGeneratorExpressions(
         this->Internal->CompileOptionsEntries,
         this->Internal->CompileOptionsBacktraces,
@@ -1320,6 +1313,16 @@ cmTarget::AddSystemIncludeDirectories(const std::set<std::string> &incs)
   this->SystemIncludeDirectories.insert(incs.begin(), incs.end());
 }
 
+cmStringRange cmTarget::GetIncludeDirectoriesEntries() const
+{
+  return cmMakeRange(this->Internal->IncludeDirectoriesEntries);
+}
+
+cmBacktraceRange cmTarget::GetIncludeDirectoriesBacktraces() const
+{
+  return cmMakeRange(this->Internal->IncludeDirectoriesBacktraces);
+}
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
 //----------------------------------------------------------------------------
 void
@@ -1914,222 +1917,6 @@ void cmTarget::InsertCompileDefinition(std::string const& entry,
 {
   this->Internal->CompileDefinitionsEntries.push_back(entry);
   this->Internal->CompileDefinitionsBacktraces.push_back(bt);
-}
-
-//----------------------------------------------------------------------------
-static void processIncludeDirectories(cmTarget const* tgt,
-      const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
-      std::vector<std::string> &includes,
-      UNORDERED_SET<std::string> &uniqueIncludes,
-      cmGeneratorExpressionDAGChecker *dagChecker,
-      const std::string& config, bool debugIncludes,
-      const std::string& language)
-{
-  cmMakefile *mf = tgt->GetMakefile();
-
-  for (std::vector<cmTargetInternals::TargetPropertyEntry*>::const_iterator
-      it = entries.begin(), end = entries.end(); it != end; ++it)
-    {
-    cmLinkImplItem const& item = (*it)->LinkImplItem;
-    std::string const& targetName = item;
-    bool const fromImported = item.Target && item.Target->IsImported();
-    bool const checkCMP0027 = item.FromGenex;
-    std::vector<std::string> entryIncludes;
-    cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(mf,
-                                              config,
-                                              false,
-                                              tgt,
-                                              dagChecker, language),
-                                    entryIncludes);
-
-    std::string usedIncludes;
-    for(std::vector<std::string>::iterator
-          li = entryIncludes.begin(); li != entryIncludes.end(); ++li)
-      {
-      if (fromImported
-          && !cmSystemTools::FileExists(li->c_str()))
-        {
-        std::ostringstream e;
-        cmake::MessageType messageType = cmake::FATAL_ERROR;
-        if (checkCMP0027)
-          {
-          switch(tgt->GetPolicyStatusCMP0027())
-            {
-            case cmPolicies::WARN:
-              e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0027) << "\n";
-            case cmPolicies::OLD:
-              messageType = cmake::AUTHOR_WARNING;
-              break;
-            case cmPolicies::REQUIRED_ALWAYS:
-            case cmPolicies::REQUIRED_IF_USED:
-            case cmPolicies::NEW:
-              break;
-            }
-          }
-        e << "Imported target \"" << targetName << "\" includes "
-             "non-existent path\n  \"" << *li << "\"\nin its "
-             "INTERFACE_INCLUDE_DIRECTORIES. Possible reasons include:\n"
-             "* The path was deleted, renamed, or moved to another "
-             "location.\n"
-             "* An install or uninstall procedure did not complete "
-             "successfully.\n"
-             "* The installation package was faulty and references files it "
-             "does not provide.\n";
-        tgt->GetMakefile()->IssueMessage(messageType, e.str());
-        return;
-        }
-
-      if (!cmSystemTools::FileIsFullPath(li->c_str()))
-        {
-        std::ostringstream e;
-        bool noMessage = false;
-        cmake::MessageType messageType = cmake::FATAL_ERROR;
-        if (!targetName.empty())
-          {
-          e << "Target \"" << targetName << "\" contains relative "
-            "path in its INTERFACE_INCLUDE_DIRECTORIES:\n"
-            "  \"" << *li << "\"";
-          }
-        else
-          {
-          switch(tgt->GetPolicyStatusCMP0021())
-            {
-            case cmPolicies::WARN:
-              {
-              e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0021) << "\n";
-              messageType = cmake::AUTHOR_WARNING;
-              }
-              break;
-            case cmPolicies::OLD:
-              noMessage = true;
-            case cmPolicies::REQUIRED_IF_USED:
-            case cmPolicies::REQUIRED_ALWAYS:
-            case cmPolicies::NEW:
-              // Issue the fatal message.
-              break;
-            }
-          e << "Found relative path while evaluating include directories of "
-          "\"" << tgt->GetName() << "\":\n  \"" << *li << "\"\n";
-          }
-        if (!noMessage)
-          {
-          tgt->GetMakefile()->IssueMessage(messageType, e.str());
-          if (messageType == cmake::FATAL_ERROR)
-            {
-            return;
-            }
-          }
-        }
-
-      if (!cmSystemTools::IsOff(li->c_str()))
-        {
-        cmSystemTools::ConvertToUnixSlashes(*li);
-        }
-      std::string inc = *li;
-
-      if(uniqueIncludes.insert(inc).second)
-        {
-        includes.push_back(inc);
-        if (debugIncludes)
-          {
-          usedIncludes += " * " + inc + "\n";
-          }
-        }
-      }
-    if (!usedIncludes.empty())
-      {
-      mf->GetCMakeInstance()->IssueMessage(cmake::LOG,
-                            std::string("Used includes for target ")
-                            + tgt->GetName() + ":\n"
-                            + usedIncludes, (*it)->ge->GetBacktrace());
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
-std::vector<std::string>
-cmTarget::GetIncludeDirectories(const std::string& config,
-                                const std::string& language) const
-{
-  std::vector<std::string> includes;
-  UNORDERED_SET<std::string> uniqueIncludes;
-
-  cmGeneratorExpressionDAGChecker dagChecker(this->GetName(),
-                                             "INCLUDE_DIRECTORIES", 0, 0);
-
-  std::vector<std::string> debugProperties;
-  const char *debugProp =
-              this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
-  if (debugProp)
-    {
-    cmSystemTools::ExpandListArgument(debugProp, debugProperties);
-    }
-
-  bool debugIncludes = !this->DebugIncludesDone
-                    && std::find(debugProperties.begin(),
-                                 debugProperties.end(),
-                                 "INCLUDE_DIRECTORIES")
-                        != debugProperties.end();
-
-  if (this->Makefile->IsConfigured())
-    {
-    this->DebugIncludesDone = true;
-    }
-
-  processIncludeDirectories(this,
-                            this->Internal->IncludeDirectoriesItems,
-                            includes,
-                            uniqueIncludes,
-                            &dagChecker,
-                            config,
-                            debugIncludes,
-                            language);
-
-  std::vector<cmTargetInternals::TargetPropertyEntry*>
-    linkInterfaceIncludeDirectoriesEntries;
-  this->Internal->AddInterfaceEntries(
-    this, config, "INTERFACE_INCLUDE_DIRECTORIES",
-    linkInterfaceIncludeDirectoriesEntries);
-
-  if(this->Makefile->IsOn("APPLE"))
-    {
-    cmLinkImplementationLibraries const* impl =
-        this->GetLinkImplementationLibraries(config);
-    for(std::vector<cmLinkImplItem>::const_iterator
-        it = impl->Libraries.begin();
-        it != impl->Libraries.end(); ++it)
-      {
-      std::string libDir = cmSystemTools::CollapseFullPath(*it);
-
-      static cmsys::RegularExpression
-        frameworkCheck("(.*\\.framework)(/Versions/[^/]+)?/[^/]+$");
-      if(!frameworkCheck.find(libDir))
-        {
-        continue;
-        }
-
-      libDir = frameworkCheck.match(1);
-
-      cmGeneratorExpression ge;
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                ge.Parse(libDir.c_str());
-      linkInterfaceIncludeDirectoriesEntries
-              .push_back(new cmTargetInternals::TargetPropertyEntry(cge));
-      }
-    }
-
-  processIncludeDirectories(this,
-                            linkInterfaceIncludeDirectoriesEntries,
-                            includes,
-                            uniqueIncludes,
-                            &dagChecker,
-                            config,
-                            debugIncludes,
-                            language);
-
-  cmDeleteAll(linkInterfaceIncludeDirectoriesEntries);
-
-  return includes;
 }
 
 //----------------------------------------------------------------------------
@@ -4380,7 +4167,6 @@ cmTargetInternalPointer
 //----------------------------------------------------------------------------
 cmTargetInternalPointer::~cmTargetInternalPointer()
 {
-  cmDeleteAll(this->Pointer->IncludeDirectoriesItems);
   cmDeleteAll(this->Pointer->CompileOptionsItems);
   cmDeleteAll(this->Pointer->CompileFeaturesItems);
   cmDeleteAll(this->Pointer->CompileDefinitionsItems);
