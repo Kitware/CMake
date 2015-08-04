@@ -878,8 +878,11 @@ void cmQtAutoGenerators::MergeUicOptions(std::vector<std::string> &opts,
 static void GetUicOpts(cmTarget const* target, const std::string& config,
                        std::string &optString)
 {
+  cmGeneratorTarget *gtgt = target->GetMakefile()
+                                  ->GetGlobalGenerator()
+                                  ->GetGeneratorTarget(target);
   std::vector<std::string> opts;
-  target->GetAutoUicOptions(opts, config);
+  gtgt->GetAutoUicOptions(opts, config);
   optString = cmJoin(opts, ";");
 }
 
