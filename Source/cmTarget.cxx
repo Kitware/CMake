@@ -161,14 +161,6 @@ public:
 cmLinkImplItem cmTargetInternals::TargetPropertyEntry::NoLinkImplItem;
 
 //----------------------------------------------------------------------------
-static void deleteAndClear(
-      std::vector<cmTargetInternals::TargetPropertyEntry*> &entries)
-{
-  cmDeleteAll(entries);
-  entries.clear();
-}
-
-//----------------------------------------------------------------------------
 cmTargetInternals::~cmTargetInternals()
 {
 }
@@ -783,7 +775,7 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
     this->LinkImplementationLanguageIsContextDependent = false;
     }
 
-  deleteAndClear(linkInterfaceSourcesEntries);
+  cmDeleteAll(linkInterfaceSourcesEntries);
 }
 
 //----------------------------------------------------------------------------
@@ -2138,7 +2130,7 @@ cmTarget::GetIncludeDirectories(const std::string& config,
                             debugIncludes,
                             language);
 
-  deleteAndClear(linkInterfaceIncludeDirectoriesEntries);
+  cmDeleteAll(linkInterfaceIncludeDirectoriesEntries);
 
   return includes;
 }
@@ -2259,7 +2251,7 @@ void cmTarget::GetCompileOptions(std::vector<std::string> &result,
                             debugOptions,
                             language);
 
-  deleteAndClear(linkInterfaceCompileOptionsEntries);
+  cmDeleteAll(linkInterfaceCompileOptionsEntries);
 }
 
 //----------------------------------------------------------------------------
@@ -2361,7 +2353,7 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
                             debugDefines,
                             language);
 
-  deleteAndClear(linkInterfaceCompileDefinitionsEntries);
+  cmDeleteAll(linkInterfaceCompileDefinitionsEntries);
 }
 
 //----------------------------------------------------------------------------
@@ -2428,7 +2420,7 @@ void cmTarget::GetCompileFeatures(std::vector<std::string> &result,
                             config,
                             debugFeatures);
 
-  deleteAndClear(linkInterfaceCompileFeaturesEntries);
+  cmDeleteAll(linkInterfaceCompileFeaturesEntries);
 }
 
 //----------------------------------------------------------------------------
