@@ -1627,7 +1627,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     this->GlobalGenerator->GetLanguageFromExtension
     (sf.GetExtension().c_str());
   std::string sourceLang = this->LocalGenerator->GetSourceFileLanguage(sf);
-  const std::string& linkLanguage = this->Target->GetLinkerLanguage();
+  const std::string& linkLanguage = this->GeneratorTarget->GetLinkerLanguage();
   bool needForceLang = false;
   // source file does not match its extension language
   if(lang != sourceLang)
@@ -1888,7 +1888,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
 
   std::string flags;
   const std::string& linkLanguage =
-    this->Target->GetLinkerLanguage(configName.c_str());
+    this->GeneratorTarget->GetLinkerLanguage(configName.c_str());
   if(linkLanguage.empty())
     {
     cmSystemTools::Error
@@ -2371,7 +2371,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   Options& linkOptions = *pOptions;
 
   const std::string& linkLanguage =
-    this->Target->GetLinkerLanguage(config.c_str());
+    this->GeneratorTarget->GetLinkerLanguage(config.c_str());
   if(linkLanguage.empty())
     {
     cmSystemTools::Error

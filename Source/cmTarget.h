@@ -365,9 +365,6 @@ public:
   void
   GetTargetVersion(bool soversion, int& major, int& minor, int& patch) const;
 
-  ///! Return the preferred linker language for this target
-  std::string GetLinkerLanguage(const std::string& config = "") const;
-
   /** Whether this library has \@rpath and platform supports it.  */
   bool HasMacOSXRpathInstallNameDir(const std::string& config) const;
 
