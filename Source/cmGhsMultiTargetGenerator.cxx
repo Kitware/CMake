@@ -558,7 +558,7 @@ bool cmGhsMultiTargetGenerator::IsNotKernel(std::string const &config,
 {
   bool output;
   std::vector<std::string> options;
-  this->Target->GetCompileOptions(options, config, language);
+  this->GeneratorTarget->GetCompileOptions(options, config, language);
   output =
     options.end() == std::find(options.begin(), options.end(), "-kernel");
   return output;
@@ -587,7 +587,7 @@ bool cmGhsMultiTargetGenerator::DetermineIfDynamicDownload(
 {
   std::vector<std::string> options;
   bool output = false;
-  this->Target->GetCompileOptions(options, config, language);
+  this->GeneratorTarget->GetCompileOptions(options, config, language);
   for (std::vector<std::string>::const_iterator options_i = options.begin();
        options_i != options.end(); ++options_i)
     {
