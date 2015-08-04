@@ -242,11 +242,12 @@ because this need be done only for shared libraries without soname-s.
 
 //----------------------------------------------------------------------------
 cmComputeLinkInformation
-::cmComputeLinkInformation(cmTarget const* target, const std::string& config)
+::cmComputeLinkInformation(const cmGeneratorTarget* target,
+                           const std::string& config)
 {
   // Store context information.
   this->Target = target;
-  this->Makefile = this->Target->GetMakefile();
+  this->Makefile = this->Target->Target->GetMakefile();
   this->GlobalGenerator = this->Makefile->GetGlobalGenerator();
   this->CMakeInstance = this->GlobalGenerator->GetCMakeInstance();
 
@@ -259,17 +260,15 @@ cmComputeLinkInformation
 
   // Allocate internals.
   this->OrderLinkerSearchPath =
-    new cmOrderDirectories(this->GlobalGenerator, target,
+    new cmOrderDirectories(this->GlobalGenerator, target->Target,
                            "linker search path");
   this->OrderRuntimeSearchPath =
-    new cmOrderDirectories(this->GlobalGenerator, target,
+    new cmOrderDirectories(this->GlobalGenerator, target->Target,
                            "runtime search path");
   this->OrderDependentRPath = 0;
 
-  cmGeneratorTarget *gtgt = this->GlobalGenerator
-                                ->GetGeneratorTarget(this->Target);
   // Get the language used for linking this target.
-  this->LinkLanguage = gtgt->GetLinkerLanguage(config);
+  this->LinkLanguage = this->Target->GetLinkerLanguage(config);
   if(this->LinkLanguage.empty())
     {
     // The Compute method will do nothing, so skip the rest of the
@@ -283,14 +282,14 @@ cmComputeLinkInformation
 
   // Check whether we should skip dependencies on shared library files.
   this->LinkDependsNoShared =
-    this->Target->GetPropertyAsBool("LINK_DEPENDS_NO_SHARED");
+    this->Target->Target->GetPropertyAsBool("LINK_DEPENDS_NO_SHARED");
 
   // On platforms without import libraries there may be a special flag
   // to use when creating a plugin (module) that obtains symbols from
   // the program that will load it.
   this->LoaderFlag = 0;
   if(!this->UseImportLibrary &&
-     this->Target->GetType() == cmTarget::MODULE_LIBRARY)
+     this->Target->Target->GetType() == cmTarget::MODULE_LIBRARY)
     {
     std::string loader_flag_var = "CMAKE_SHARED_MODULE_LOADER_";
     loader_flag_var += this->LinkLanguage;
@@ -308,10 +307,10 @@ cmComputeLinkInformation
 
   // Get options needed to specify RPATHs.
   this->RuntimeUseChrpath = false;
-  if(this->Target->GetType() != cmTarget::STATIC_LIBRARY)
+  if(this->Target->Target->GetType() != cmTarget::STATIC_LIBRARY)
     {
     const char* tType =
-      ((this->Target->GetType() == cmTarget::EXECUTABLE)?
+      ((this->Target->Target->GetType() == cmTarget::EXECUTABLE)?
        "EXECUTABLE" : "SHARED_LIBRARY");
     std::string rtVar = "CMAKE_";
     rtVar += tType;
@@ -325,7 +324,7 @@ cmComputeLinkInformation
       (this->Makefile->
        GetSafeDefinition("CMAKE_PLATFORM_REQUIRED_RUNTIME_PATH"));
 
-    this->RuntimeUseChrpath = gtgt->IsChrpathUsed(config);
+    this->RuntimeUseChrpath = this->Target->IsChrpathUsed(config);
 
     // Get options needed to help find dependent libraries.
     std::string rlVar = "CMAKE_";
@@ -371,15 +370,15 @@ cmComputeLinkInformation
     {
     this->SharedDependencyMode = SharedDepModeDir;
     this->OrderDependentRPath =
-      new cmOrderDirectories(this->GlobalGenerator, target,
+      new cmOrderDirectories(this->GlobalGenerator, target->Target,
                              "dependent library path");
     }
 
   // Add the search path entries requested by the user to path ordering.
   this->OrderLinkerSearchPath
-    ->AddUserDirectories(this->Target->GetLinkDirectories());
+    ->AddUserDirectories(this->Target->Target->GetLinkDirectories());
   this->OrderRuntimeSearchPath
-    ->AddUserDirectories(this->Target->GetLinkDirectories());
+    ->AddUserDirectories(this->Target->Target->GetLinkDirectories());
 
   // Set up the implicit link directories.
   this->LoadImplicitLinkInfo();
@@ -407,12 +406,13 @@ cmComputeLinkInformation
   // order to support such projects we need to add the directories
   // containing libraries linked with a full path to the -L path.
   this->OldLinkDirMode =
-    this->Target->GetPolicyStatusCMP0003() != cmPolicies::NEW;
+    this->Target->Target->GetPolicyStatusCMP0003() != cmPolicies::NEW;
   if(this->OldLinkDirMode)
     {
     // Construct a mask to not bother with this behavior for link
     // directories already specified by the user.
-    std::vector<std::string> const& dirs = this->Target->GetLinkDirectories();
+    std::vector<std::string> const& dirs =
+        this->Target->Target->GetLinkDirectories();
     this->OldLinkDirMask.insert(dirs.begin(), dirs.end());
     }
 
@@ -497,7 +497,7 @@ bool cmComputeLinkInformation::Compute()
     }
 
   // Compute the ordered link line items.
-  cmComputeLinkDepends cld(this->Target, this->Config);
+  cmComputeLinkDepends cld(this->Target->Target, this->Config);
   cld.SetOldLinkDirMode(this->OldLinkDirMode);
   cmComputeLinkDepends::EntryVector const& linkEntries = cld.Compute();
 
@@ -518,7 +518,8 @@ bool cmComputeLinkInformation::Compute()
 
   // Restore the target link type so the correct system runtime
   // libraries are found.
-  const char* lss = this->Target->GetProperty("LINK_SEARCH_END_STATIC");
+  const char* lss =
+      this->Target->Target->GetProperty("LINK_SEARCH_END_STATIC");
   if(cmSystemTools::IsOn(lss))
     {
     this->SetCurrentLinkType(LinkStatic);
@@ -571,7 +572,7 @@ bool cmComputeLinkInformation::Compute()
       "name."
       ;
     this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
-                                      this->Target->GetBacktrace());
+                                      this->Target->Target->GetBacktrace());
     }
 
   return true;
@@ -580,12 +581,9 @@ bool cmComputeLinkInformation::Compute()
 //----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddImplicitLinkInfo()
 {
-  cmGeneratorTarget *gtgt = this->Target->GetMakefile()
-                                ->GetGlobalGenerator()
-                                ->GetGeneratorTarget(this->Target);
-
   // The link closure lists all languages whose implicit info is needed.
-  cmGeneratorTarget::LinkClosure const* lc=gtgt->GetLinkClosure(this->Config);
+  cmGeneratorTarget::LinkClosure const* lc =
+      this->Target->GetLinkClosure(this->Config);
   for(std::vector<std::string>::const_iterator li = lc->Languages.begin();
       li != lc->Languages.end(); ++li)
     {
@@ -864,7 +862,8 @@ void cmComputeLinkInformation::ComputeLinkTypeInfo()
     }
 
   // Lookup the starting link type from the target (linked statically?).
-  const char* lss = this->Target->GetProperty("LINK_SEARCH_START_STATIC");
+  const char* lss =
+      this->Target->Target->GetProperty("LINK_SEARCH_START_STATIC");
   this->StartLinkType = cmSystemTools::IsOn(lss)? LinkStatic : LinkShared;
   this->CurrentLinkType = this->StartLinkType;
 }
@@ -1150,7 +1149,7 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
   // Full path libraries should specify a valid library file name.
   // See documentation of CMP0008.
   std::string generator = this->GlobalGenerator->GetName();
-  if(this->Target->GetPolicyStatusCMP0008() != cmPolicies::NEW &&
+  if(this->Target->Target->GetPolicyStatusCMP0008() != cmPolicies::NEW &&
      (generator.find("Visual Studio") != generator.npos ||
       generator.find("Xcode") != generator.npos))
     {
@@ -1231,7 +1230,7 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
     }
 
   // Check the policy for whether we should use the approach below.
-  switch (this->Target->GetPolicyStatusCMP0060())
+  switch (this->Target->Target->GetPolicyStatusCMP0060())
     {
     case cmPolicies::WARN:
       if (this->CMP0060Warn)
@@ -1541,7 +1540,7 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
   this->OrderLinkerSearchPath->AddLinkLibrary(item);
 
   // Produce any needed message.
-  switch(this->Target->GetPolicyStatusCMP0008())
+  switch(this->Target->Target->GetPolicyStatusCMP0008())
     {
     case cmPolicies::WARN:
       {
@@ -1558,7 +1557,7 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
           << "  " << item << "\n"
           << "which is a full-path but not a valid library file name.";
         this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
-                                          this->Target->GetBacktrace());
+                                        this->Target->Target->GetBacktrace());
         }
       }
     case cmPolicies::OLD:
@@ -1576,7 +1575,7 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
           << "  " << item << "\n"
           << "which is a full-path but not a valid library file name.";
       this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                                        this->Target->GetBacktrace());
+                                        this->Target->Target->GetBacktrace());
       }
       break;
     }
@@ -1593,7 +1592,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
     }
 
   // Enforce policy constraints.
-  switch(this->Target->GetPolicyStatusCMP0003())
+  switch(this->Target->Target->GetPolicyStatusCMP0003())
     {
     case cmPolicies::WARN:
       if(!this->CMakeInstance->GetState()
@@ -1604,7 +1603,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
         std::ostringstream w;
         this->PrintLinkPolicyDiagnosis(w);
         this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
-                                          this->Target->GetBacktrace());
+                                        this->Target->Target->GetBacktrace());
         }
     case cmPolicies::OLD:
       // OLD behavior is to add the paths containing libraries with
@@ -1620,7 +1619,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
       e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0003) << "\n";
       this->PrintLinkPolicyDiagnosis(e);
       this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                                        this->Target->GetBacktrace());
+                                        this->Target->Target->GetBacktrace());
       return false;
       }
     }
@@ -1924,23 +1923,24 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
   // build tree.
   bool linking_for_install =
     (for_install ||
-     this->Target->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"));
+     this->Target->Target->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"));
   bool use_install_rpath =
-    (outputRuntime && this->Target->HaveInstallTreeRPATH() &&
+    (outputRuntime && this->Target->Target->HaveInstallTreeRPATH() &&
      linking_for_install);
   bool use_build_rpath =
-    (outputRuntime && this->Target->HaveBuildTreeRPATH(this->Config) &&
+    (outputRuntime && this->Target->Target->HaveBuildTreeRPATH(this->Config) &&
      !linking_for_install);
   bool use_link_rpath =
     outputRuntime && linking_for_install &&
     !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH") &&
-    this->Target->GetPropertyAsBool("INSTALL_RPATH_USE_LINK_PATH");
+    this->Target->Target->GetPropertyAsBool("INSTALL_RPATH_USE_LINK_PATH");
 
   // Construct the RPATH.
   std::set<std::string> emitted;
   if(use_install_rpath)
     {
-    const char* install_rpath = this->Target->GetProperty("INSTALL_RPATH");
+    const char* install_rpath =
+        this->Target->Target->GetProperty("INSTALL_RPATH");
     cmCLI_ExpandListUnique(install_rpath, runtimeDirs, emitted);
     }
   if(use_build_rpath || use_link_rpath)
@@ -2012,12 +2012,8 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
   // Add runtime paths required by the languages to always be
   // present.  This is done even when skipping rpath support.
   {
-  cmGeneratorTarget *gtgt = this->Makefile
-                                ->GetGlobalGenerator()
-                                ->GetGeneratorTarget(this->Target);
-
   cmGeneratorTarget::LinkClosure const* lc =
-    gtgt->GetLinkClosure(this->Config);
+    this->Target->GetLinkClosure(this->Config);
   for(std::vector<std::string>::const_iterator li = lc->Languages.begin();
       li != lc->Languages.end(); ++li)
     {
