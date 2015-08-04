@@ -78,15 +78,6 @@ public:
   bool FromGenex;
 };
 
-struct cmTargetLinkInformationMap:
-  public std::map<std::string, cmComputeLinkInformation*>
-{
-  typedef std::map<std::string, cmComputeLinkInformation*> derived;
-  cmTargetLinkInformationMap() {}
-  cmTargetLinkInformationMap(cmTargetLinkInformationMap const& r);
-  ~cmTargetLinkInformationMap();
-};
-
 class cmTargetInternals;
 class cmTargetInternalPointer
 {
@@ -454,9 +445,6 @@ public:
     * install tree.  For example: "\@rpath/" or "\@loader_path/". */
   std::string GetInstallNameDirForInstallTree() const;
 
-  cmComputeLinkInformation*
-    GetLinkInformation(const std::string& config) const;
-
   // Get the properties
   cmPropertyMap &GetProperties() const { return this->Properties; }
 
@@ -766,7 +754,6 @@ private:
   struct CompileInfo;
   CompileInfo const* GetCompileInfo(const std::string& config) const;
 
-  mutable cmTargetLinkInformationMap LinkInformation;
   void CheckPropertyCompatibility(cmComputeLinkInformation *info,
                                   const std::string& config) const;
 
