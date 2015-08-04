@@ -245,6 +245,18 @@ private:
 
   cmGeneratorTarget(cmGeneratorTarget const&);
   void operator=(cmGeneratorTarget const&);
+
+  struct LinkImplClosure: public std::vector<cmTarget const*>
+  {
+    LinkImplClosure(): Done(false) {}
+    bool Done;
+  };
+  mutable std::map<std::string, LinkImplClosure> LinkImplClosureMap;
+
+public:
+  std::vector<cmTarget const*> const&
+    GetLinkImplementationClosure(const std::string& config) const;
+
 };
 
 struct cmStrictTargetComparison {
