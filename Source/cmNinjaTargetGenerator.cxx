@@ -273,7 +273,7 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
       {
       pdbPath = this->Target->GetPDBDirectory(this->GetConfigName());
       pdbPath += "/";
-      pdbPath += this->Target->GetPDBName(this->GetConfigName());
+      pdbPath += this->GeneratorTarget->GetPDBName(this->GetConfigName());
       }
     if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY)
       {
