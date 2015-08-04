@@ -230,6 +230,16 @@ public:
   /** Whether this library has soname enabled and platform supports it.  */
   bool HasSOName(const std::string& config) const;
 
+  struct CompileInfo
+  {
+    std::string CompilePdbDir;
+  };
+
+  CompileInfo const* GetCompileInfo(const std::string& config) const;
+
+  typedef std::map<std::string, CompileInfo> CompileInfoMapType;
+  mutable CompileInfoMapType CompileInfoMap;
+
   /** Get the name of the compiler pdb file for the target.  */
   std::string GetCompilePDBName(const std::string& config="") const;
 
