@@ -463,7 +463,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   cmTarget* allbuild = mf->AddUtilityCommand("ALL_BUILD", true, no_depends,
                         no_working_directory,
                         "echo", "Build all projects");
-  allbuild->Compute();
+
   cmGeneratorTarget* allBuildGt = new cmGeneratorTarget(allbuild, root);
   mf->AddGeneratorTarget(allbuild, allBuildGt);
 
@@ -498,7 +498,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
                           true, no_depends,
                           no_working_directory,
                           "make", "-f", file.c_str());
-    check->Compute();
+
     cmGeneratorTarget* checkGt = new cmGeneratorTarget(check, root);
     mf->AddGeneratorTarget(check, checkGt);
     }
@@ -1855,7 +1855,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     this->AppendDefines(ppDefs, exportMacro);
     }
   std::vector<std::string> targetDefines;
-  target.GetCompileDefinitions(targetDefines, configName, "C");
+  gtgt->GetCompileDefinitions(targetDefines, configName, "C");
   this->AppendDefines(ppDefs, targetDefines);
   buildSettings->AddAttribute
     ("GCC_PREPROCESSOR_DEFINITIONS", ppDefs.CreateList());

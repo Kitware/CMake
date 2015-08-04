@@ -254,7 +254,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     mf->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false,
                           no_working_directory, no_depends,
                           noCommandLines);
-  tgt->Compute();
+
   cmGeneratorTarget* gt = new cmGeneratorTarget(tgt, lg);
   mf->AddGeneratorTarget(tgt, gt);
 

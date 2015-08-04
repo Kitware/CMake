@@ -1083,7 +1083,8 @@ void cmLocalGenerator::AddCompileDefinitions(std::set<std::string>& defines,
                                              const std::string& lang)
 {
   std::vector<std::string> targetDefines;
-  target->GetCompileDefinitions(targetDefines, config, lang);
+  cmGeneratorTarget* gtgt = this->GlobalGenerator->GetGeneratorTarget(target);
+  gtgt->GetCompileDefinitions(targetDefines, config, lang);
   this->AppendDefines(defines, targetDefines);
 }
 

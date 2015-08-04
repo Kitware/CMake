@@ -262,7 +262,8 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   SourceFileFlagsConstructed(false),
   DebugIncludesDone(false),
   DebugCompileOptionsDone(false),
-  DebugCompileFeaturesDone(false)
+  DebugCompileFeaturesDone(false),
+  DebugCompileDefinitionsDone(false)
 {
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = lg;
@@ -282,6 +283,11 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
         t->GetCompileFeaturesEntries(),
         t->GetCompileFeaturesBacktraces(),
         this->CompileFeaturesEntries);
+
+  CreatePropertyGeneratorExpressions(
+        t->GetCompileDefinitionsEntries(),
+        t->GetCompileDefinitionsBacktraces(),
+        this->CompileDefinitionsEntries);
 }
 
 cmGeneratorTarget::~cmGeneratorTarget()
@@ -289,6 +295,7 @@ cmGeneratorTarget::~cmGeneratorTarget()
   cmDeleteAll(this->IncludeDirectoriesEntries);
   cmDeleteAll(this->CompileOptionsEntries);
   cmDeleteAll(this->CompileFeaturesEntries);
+  cmDeleteAll(this->CompileDefinitionsEntries);
   cmDeleteAll(this->LinkInformation);
   this->LinkInformation.clear();
 }
@@ -2442,6 +2449,108 @@ void cmGeneratorTarget::GetCompileFeatures(std::vector<std::string> &result,
                             debugFeatures);
 
   cmDeleteAll(linkInterfaceCompileFeaturesEntries);
+}
+
+//----------------------------------------------------------------------------
+static void processCompileDefinitions(cmGeneratorTarget const* tgt,
+      const std::vector<cmGeneratorTarget::TargetPropertyEntry*> &entries,
+      std::vector<std::string> &options,
+      UNORDERED_SET<std::string> &uniqueOptions,
+      cmGeneratorExpressionDAGChecker *dagChecker,
+      const std::string& config, bool debugOptions,
+      std::string const& language)
+{
+  processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
+                                dagChecker, config, debugOptions,
+                                "definitions", language);
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::GetCompileDefinitions(std::vector<std::string> &list,
+                                            const std::string& config,
+                                            const std::string& language) const
+{
+  UNORDERED_SET<std::string> uniqueOptions;
+
+  cmGeneratorExpressionDAGChecker dagChecker(this->GetName(),
+                                             "COMPILE_DEFINITIONS", 0, 0);
+
+  std::vector<std::string> debugProperties;
+  const char *debugProp =
+              this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
+  if (debugProp)
+    {
+    cmSystemTools::ExpandListArgument(debugProp, debugProperties);
+    }
+
+  bool debugDefines = !this->DebugCompileDefinitionsDone
+                          && std::find(debugProperties.begin(),
+                                debugProperties.end(),
+                                "COMPILE_DEFINITIONS")
+                        != debugProperties.end();
+
+  if (this->Makefile->IsConfigured())
+    {
+    this->DebugCompileDefinitionsDone = true;
+    }
+
+  processCompileDefinitions(this,
+                            this->CompileDefinitionsEntries,
+                            list,
+                            uniqueOptions,
+                            &dagChecker,
+                            config,
+                            debugDefines,
+                            language);
+
+  std::vector<cmGeneratorTarget::TargetPropertyEntry*>
+    linkInterfaceCompileDefinitionsEntries;
+  AddInterfaceEntries(
+    this, config, "INTERFACE_COMPILE_DEFINITIONS",
+    linkInterfaceCompileDefinitionsEntries);
+  if (!config.empty())
+    {
+    std::string configPropName = "COMPILE_DEFINITIONS_"
+                                        + cmSystemTools::UpperCase(config);
+    const char *configProp = this->Target->GetProperty(configPropName);
+    if (configProp)
+      {
+      switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0043))
+        {
+        case cmPolicies::WARN:
+          {
+          std::ostringstream e;
+          e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0043);
+          this->LocalGenerator->IssueMessage(cmake::AUTHOR_WARNING,
+                                       e.str());
+          }
+        case cmPolicies::OLD:
+          {
+          cmGeneratorExpression ge;
+          cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+                                                      ge.Parse(configProp);
+          linkInterfaceCompileDefinitionsEntries
+                .push_back(new cmGeneratorTarget::TargetPropertyEntry(cge));
+          }
+          break;
+        case cmPolicies::NEW:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::REQUIRED_IF_USED:
+          break;
+        }
+      }
+    }
+
+  processCompileDefinitions(this,
+                            linkInterfaceCompileDefinitionsEntries,
+                            list,
+                            uniqueOptions,
+                            &dagChecker,
+                            config,
+                            debugDefines,
+                            language);
+
+  cmDeleteAll(linkInterfaceCompileDefinitionsEntries);
 }
 
 //----------------------------------------------------------------------------
