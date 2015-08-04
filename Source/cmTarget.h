@@ -364,9 +364,6 @@ public:
   /** @return whether this target have a well defined output file name. */
   bool HaveWellDefinedOutputFiles() const;
 
-  std::vector<std::string> GetIncludeDirectories(
-                     const std::string& config,
-                     const std::string& language) const;
   void InsertInclude(std::string const& entry,
                      cmListFileBacktrace const& bt,
                      bool before = false);
@@ -401,6 +398,9 @@ public:
   {
     return this->MaxLanguageStandards;
   }
+
+  cmStringRange GetIncludeDirectoriesEntries() const;
+  cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   const LinkLibraryVectorType &GetLinkLibrariesForVS6() const {
@@ -516,7 +516,6 @@ private:
   bool IsApple;
   bool IsImportedTarget;
   bool BuildInterfaceIncludesAppended;
-  mutable bool DebugIncludesDone;
   mutable bool DebugCompileOptionsDone;
   mutable bool DebugCompileDefinitionsDone;
   mutable bool DebugSourcesDone;
