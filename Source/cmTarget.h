@@ -244,6 +244,9 @@ public:
                                           cmOptionalLinkImplementation& impl
                                           ) const;
 
+  cmOptionalLinkImplementation&
+  GetLinkImplMap(std::string const& config) const;
+
   cmTarget const* FindTargetToLink(std::string const& name) const;
 
   /** Strip off leading and trailing whitespace from an item named in

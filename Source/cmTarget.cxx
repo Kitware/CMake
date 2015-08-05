@@ -3575,10 +3575,7 @@ cmTarget::GetLinkImplementation(const std::string& config) const
     return 0;
     }
 
-  // Populate the link implementation for this configuration.
-  std::string CONFIG = cmSystemTools::UpperCase(config);
-  cmOptionalLinkImplementation&
-    impl = this->Internal->LinkImplMap[CONFIG][this];
+  cmOptionalLinkImplementation& impl = this->GetLinkImplMap(config);
   if(!impl.LibrariesDone)
     {
     impl.LibrariesDone = true;
@@ -3590,6 +3587,14 @@ cmTarget::GetLinkImplementation(const std::string& config) const
     this->ComputeLinkImplementationLanguages(config, impl);
     }
   return &impl;
+}
+
+cmOptionalLinkImplementation&
+cmTarget::GetLinkImplMap(std::string const& config) const
+{
+  // Populate the link implementation for this configuration.
+  std::string CONFIG = cmSystemTools::UpperCase(config);
+  return Internal->LinkImplMap[CONFIG][this];
 }
 
 //----------------------------------------------------------------------------
