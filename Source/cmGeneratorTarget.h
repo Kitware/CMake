@@ -201,6 +201,8 @@ public:
   cmLinkImplementation const*
     GetLinkImplementation(const std::string& config) const;
 
+  bool HaveBuildTreeRPATH(const std::string& config) const;
+
   /** Full path with trailing slash to the top-level directory
       holding object files for this target.  Includes the build
       time config name placeholder if needed for the generator.  */
