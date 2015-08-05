@@ -1920,7 +1920,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     (for_install ||
      this->Target->Target->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"));
   bool use_install_rpath =
-    (outputRuntime && this->Target->Target->HaveInstallTreeRPATH() &&
+    (outputRuntime && this->Target->HaveInstallTreeRPATH() &&
      linking_for_install);
   bool use_build_rpath =
     (outputRuntime && this->Target->HaveBuildTreeRPATH(this->Config) &&

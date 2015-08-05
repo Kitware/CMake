@@ -407,6 +407,8 @@ public:
 
   class TargetPropertyEntry;
 
+  bool HaveInstallTreeRPATH() const;
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };

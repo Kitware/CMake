@@ -262,8 +262,6 @@ public:
   bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
                         const char* newExt = 0) const;
 
-  bool HaveInstallTreeRPATH() const;
-
   // Get the properties
   cmPropertyMap &GetProperties() const { return this->Properties; }
 

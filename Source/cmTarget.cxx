@@ -2384,14 +2384,6 @@ void cmTarget::SetPropertyDefault(const std::string& property,
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::HaveInstallTreeRPATH() const
-{
-  const char* install_rpath = this->GetProperty("INSTALL_RPATH");
-  return (install_rpath && *install_rpath) &&
-          !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH");
-}
-
-//----------------------------------------------------------------------------
 const char* cmTarget::GetOutputTargetType(bool implib) const
 {
   switch(this->GetType())

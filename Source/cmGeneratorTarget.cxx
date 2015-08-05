@@ -1212,7 +1212,7 @@ cmGeneratorTarget::NeedRelinkBeforeInstall(const std::string& config) const
   // will likely change between the build tree and install tree and
   // this target must be relinked.
   return this->HaveBuildTreeRPATH(config)
-      || this->Target->HaveInstallTreeRPATH();
+      || this->HaveInstallTreeRPATH();
 }
 
 //----------------------------------------------------------------------------
@@ -4692,6 +4692,14 @@ bool cmGeneratorTarget::ComputePDBOutputDir(const std::string& kind,
       AppendDirectoryForConfig("/", conf, "", out);
     }
   return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::HaveInstallTreeRPATH() const
+{
+  const char* install_rpath = this->GetProperty("INSTALL_RPATH");
+  return (install_rpath && *install_rpath) &&
+          !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH");
 }
 
 //----------------------------------------------------------------------------
