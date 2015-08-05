@@ -62,4 +62,15 @@ struct cmLinkImplementation: public cmLinkImplementationLibraries
   std::vector<std::string> Languages;
 };
 
+// Cache link implementation computation from each configuration.
+struct cmOptionalLinkImplementation: public cmLinkImplementation
+{
+  cmOptionalLinkImplementation():
+    LibrariesDone(false), LanguagesDone(false),
+    HadHeadSensitiveCondition(false) {}
+  bool LibrariesDone;
+  bool LanguagesDone;
+  bool HadHeadSensitiveCondition;
+};
+
 #endif
