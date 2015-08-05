@@ -265,6 +265,7 @@ Properties on Targets
    /prop_tgt/VS_SCC_LOCALPATH
    /prop_tgt/VS_SCC_PROJECTNAME
    /prop_tgt/VS_SCC_PROVIDER
+   /prop_tgt/VS_WINDOWS_TARGET_PLATFORM_VERSION
    /prop_tgt/VS_WINRT_COMPONENT
    /prop_tgt/VS_WINRT_EXTENSIONS
    /prop_tgt/VS_WINRT_REFERENCES
