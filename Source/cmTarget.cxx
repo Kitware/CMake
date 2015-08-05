@@ -3132,50 +3132,6 @@ cmTarget::GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GetLanguages(std::set<std::string>& languages,
-                            const std::string& config) const
-{
-  std::vector<cmSourceFile*> sourceFiles;
-  this->GetSourceFiles(sourceFiles, config);
-  for(std::vector<cmSourceFile*>::const_iterator
-        i = sourceFiles.begin(); i != sourceFiles.end(); ++i)
-    {
-    const std::string& lang = (*i)->GetLanguage();
-    if(!lang.empty())
-      {
-      languages.insert(lang);
-      }
-    }
-
-  std::vector<cmTarget*> objectLibraries;
-  std::vector<cmSourceFile const*> externalObjects;
-  if (!this->Makefile->IsConfigured())
-    {
-    this->GetObjectLibrariesCMP0026(objectLibraries);
-    }
-  else
-    {
-    cmGeneratorTarget* gt = this->Makefile->GetGlobalGenerator()
-                                ->GetGeneratorTarget(this);
-    gt->GetExternalObjects(externalObjects, config);
-    for(std::vector<cmSourceFile const*>::const_iterator
-          i = externalObjects.begin(); i != externalObjects.end(); ++i)
-      {
-      std::string objLib = (*i)->GetObjectLibrary();
-      if (cmTarget* tgt = this->Makefile->FindTargetToUse(objLib))
-        {
-        objectLibraries.push_back(tgt);
-        }
-      }
-    }
-  for(std::vector<cmTarget*>::const_iterator
-      i = objectLibraries.begin(); i != objectLibraries.end(); ++i)
-    {
-    (*i)->GetLanguages(languages, config);
-    }
-}
-
-//----------------------------------------------------------------------------
 cmTarget::ImportInfo const*
 cmTarget::GetImportInfo(const std::string& config) const
 {
