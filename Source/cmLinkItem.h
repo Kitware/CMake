@@ -56,4 +56,10 @@ struct cmLinkImplementationLibraries
   std::vector<cmLinkItem> WrongConfigLibraries;
 };
 
+struct cmLinkImplementation: public cmLinkImplementationLibraries
+{
+  // Languages whose runtime libraries must be linked.
+  std::vector<std::string> Languages;
+};
+
 #endif

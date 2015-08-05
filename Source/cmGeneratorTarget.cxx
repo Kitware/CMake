@@ -1335,7 +1335,7 @@ void cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
 {
   // Get languages built in this target.
   UNORDERED_SET<std::string> languages;
-  cmTarget::LinkImplementation const* impl =
+  cmLinkImplementation const* impl =
                             this->Target->GetLinkImplementation(config);
   assert(impl);
   for(std::vector<std::string>::const_iterator li = impl->Languages.begin();
@@ -4294,7 +4294,7 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
         }
       if (this->GetType() != cmTarget::INTERFACE_LIBRARY)
         {
-        cmTarget::LinkImplementation const* impl =
+        cmLinkImplementation const* impl =
             this->Target->GetLinkImplementation(config);
         for(std::vector<cmLinkImplItem>::const_iterator
               li = impl->Libraries.begin(); li != impl->Libraries.end(); ++li)
@@ -4335,7 +4335,7 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
   if(this->Target->LinkLanguagePropagatesToDependents())
     {
     // Targets using this archive need its language runtime libraries.
-    if(cmTarget::LinkImplementation const* impl =
+    if(cmLinkImplementation const* impl =
        this->Target->GetLinkImplementation(config))
       {
       iface.Languages = impl->Languages;
