@@ -114,7 +114,8 @@ public:
   std::vector<cmListFileBacktrace> CompileDefinitionsBacktraces;
   std::vector<std::string> SourceEntries;
   std::vector<cmListFileBacktrace> SourceBacktraces;
-  std::vector<cmValueWithOrigin> LinkImplementationPropertyEntries;
+  std::vector<std::string> LinkImplementationPropertyEntries;
+  std::vector<cmListFileBacktrace> LinkImplementationPropertyBacktraces;
 };
 
 //----------------------------------------------------------------------------
@@ -1380,11 +1381,12 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   else if (prop == "LINK_LIBRARIES")
     {
     this->Internal->LinkImplementationPropertyEntries.clear();
+    this->Internal->LinkImplementationPropertyBacktraces.clear();
     if (value)
       {
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-      cmValueWithOrigin entry(value, lfbt);
-      this->Internal->LinkImplementationPropertyEntries.push_back(entry);
+      this->Internal->LinkImplementationPropertyEntries.push_back(value);
+      this->Internal->LinkImplementationPropertyBacktraces.push_back(lfbt);
       }
     }
   else if (prop == "SOURCES")
@@ -1482,8 +1484,8 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     if (value && *value)
       {
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-      cmValueWithOrigin entry(value, lfbt);
-      this->Internal->LinkImplementationPropertyEntries.push_back(entry);
+      this->Internal->LinkImplementationPropertyEntries.push_back(value);
+      this->Internal->LinkImplementationPropertyBacktraces.push_back(lfbt);
       }
     }
   else if (prop == "SOURCES")
@@ -2048,17 +2050,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
         }
 
       static std::string output;
-      output = "";
-      std::string sep;
-      for (std::vector<cmValueWithOrigin>::const_iterator
-          it = this->Internal->LinkImplementationPropertyEntries.begin(),
-          end = this->Internal->LinkImplementationPropertyEntries.end();
-          it != end; ++it)
-        {
-        output += sep;
-        output += it->Value;
-        sep = ";";
-        }
+      output = cmJoin(this->Internal->LinkImplementationPropertyEntries, ";");
       return output.c_str();
       }
     // the type property returns what type the target is
@@ -3223,19 +3215,21 @@ void cmTarget::ComputeLinkImplementationLibraries(
   cmOptionalLinkImplementation& impl,
   cmTarget const* head) const
 {
+  std::vector<cmListFileBacktrace>::const_iterator btIt =
+      this->Internal->LinkImplementationPropertyBacktraces.begin();
   // Collect libraries directly linked in this configuration.
-  for (std::vector<cmValueWithOrigin>::const_iterator
+  for (std::vector<std::string>::const_iterator
       le = this->Internal->LinkImplementationPropertyEntries.begin(),
       end = this->Internal->LinkImplementationPropertyEntries.end();
-      le != end; ++le)
+      le != end; ++le, ++btIt)
     {
     std::vector<std::string> llibs;
     cmGeneratorExpressionDAGChecker dagChecker(
                                         this->GetName(),
                                         "LINK_LIBRARIES", 0, 0);
-    cmGeneratorExpression ge(le->Backtrace);
+    cmGeneratorExpression ge(*btIt);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> const cge =
-      ge.Parse(le->Value);
+      ge.Parse(*le);
     std::string const evaluated =
       cge->Evaluate(this->Makefile, config, false, head, &dagChecker);
     cmSystemTools::ExpandListArgument(evaluated, llibs);
@@ -3290,7 +3284,7 @@ void cmTarget::ComputeLinkImplementationLibraries(
       // The entry is meant for this configuration.
       impl.Libraries.push_back(
         cmLinkImplItem(name, this->FindTargetToLink(name),
-                       le->Backtrace, evaluated != le->Value));
+                       *btIt, evaluated != *le));
       }
 
     std::set<std::string> const& seenProps = cge->GetSeenTargetProperties();
