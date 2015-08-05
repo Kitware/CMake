@@ -1383,7 +1383,7 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmTarget& cmtarget)
   if(llang.empty()) { return; }
 
   // If the language is compiled as a source trust Xcode to link with it.
-  cmTarget::LinkImplementation const* impl =
+  cmLinkImplementation const* impl =
     cmtarget.GetLinkImplementation("NOCONFIG");
   for(std::vector<std::string>::const_iterator li = impl->Languages.begin();
       li != impl->Languages.end(); ++li)
