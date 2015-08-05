@@ -237,9 +237,6 @@ public:
   void ComputeLinkImplementationLibraries(const std::string& config,
                                           cmOptionalLinkImplementation& impl,
                                           cmTarget const* head) const;
-  void ComputeLinkImplementationLanguages(const std::string& config,
-                                          cmOptionalLinkImplementation& impl
-                                          ) const;
 
   cmOptionalLinkImplementation& GetLinkImplMap(std::string const& config) const;
 

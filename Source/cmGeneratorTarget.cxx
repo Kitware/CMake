@@ -4390,9 +4390,23 @@ cmGeneratorTarget::GetLinkImplementation(const std::string& config) const
   if(!impl.LanguagesDone)
     {
     impl.LanguagesDone = true;
-    this->Target->ComputeLinkImplementationLanguages(config, impl);
+    this->ComputeLinkImplementationLanguages(config, impl);
     }
   return &impl;
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::ComputeLinkImplementationLanguages(
+  const std::string& config,
+  cmOptionalLinkImplementation& impl) const
+{
+  // This target needs runtime libraries for its source languages.
+  std::set<std::string> languages;
+  // Get languages used in our source files.
+  this->Target->GetLanguages(languages, config);
+  // Copy the set of langauges to the link implementation.
+  impl.Languages.insert(impl.Languages.begin(),
+                        languages.begin(), languages.end());
 }
 
 //----------------------------------------------------------------------------
