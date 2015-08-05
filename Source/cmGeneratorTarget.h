@@ -207,6 +207,13 @@ public:
                                           cmOptionalLinkImplementation& impl
                                           ) const;
 
+  cmLinkImplementationLibraries const*
+    GetLinkImplementationLibraries(const std::string& config) const;
+
+  void ComputeLinkImplementationLibraries(const std::string& config,
+                                          cmOptionalLinkImplementation& impl,
+                                          cmTarget const* head) const;
+
   // Compute the set of languages compiled by the target.  This is
   // computed every time it is called because the languages can change
   // when source file properties are changed and we do not have enough
@@ -462,6 +469,16 @@ private:
   void GetSourceFiles(std::vector<std::string>& files,
                       const std::string& config) const;
 
+  struct HeadToLinkImplementationMap:
+    public std::map<cmTarget const*, cmOptionalLinkImplementation> {};
+  typedef std::map<std::string,
+                   HeadToLinkImplementationMap> LinkImplMapType;
+  mutable LinkImplMapType LinkImplMap;
+
+  cmLinkImplementationLibraries const*
+    GetLinkImplementationLibrariesInternal(const std::string& config,
+                                           cmTarget const* head) const;
+
   typedef std::pair<std::string, bool> OutputNameKey;
   typedef std::map<OutputNameKey, std::string> OutputNameMapType;
   mutable OutputNameMapType OutputNameMap;
@@ -477,6 +494,12 @@ public:
   std::vector<cmTarget const*> const&
     GetLinkImplementationClosure(const std::string& config) const;
 
+  mutable std::map<std::string, std::string> MaxLanguageStandards;
+  std::map<std::string, std::string> const&
+  GetMaxLanguageStandards() const
+  {
+    return this->MaxLanguageStandards;
+  }
 };
 
 struct cmStrictTargetComparison {

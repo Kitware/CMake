@@ -1152,8 +1152,8 @@ void cmLocalGenerator::AddCompileOptions(
     }
 
   for(std::map<std::string, std::string>::const_iterator it
-      = target->GetMaxLanguageStandards().begin();
-      it != target->GetMaxLanguageStandards().end(); ++it)
+      = gtgt->GetMaxLanguageStandards().begin();
+      it != gtgt->GetMaxLanguageStandards().end(); ++it)
     {
     const char* standard = target->GetProperty(it->first + "_STANDARD");
     if(!standard)

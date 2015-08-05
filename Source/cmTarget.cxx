@@ -95,12 +95,6 @@ public:
   typedef std::map<std::string, cmTarget::ImportInfo> ImportInfoMapType;
   ImportInfoMapType ImportInfoMap;
 
-  struct HeadToLinkImplementationMap:
-    public std::map<cmTarget const*, cmOptionalLinkImplementation> {};
-  typedef std::map<std::string,
-                   HeadToLinkImplementationMap> LinkImplMapType;
-  LinkImplMapType LinkImplMap;
-
   std::set<cmLinkItem> UtilityItems;
   bool UtilityItemsDone;
 
@@ -405,7 +399,6 @@ void cmTarget::FinishConfigure()
   // on-demand during the configuration.  This ensures that build
   // system generation uses up-to-date information even if other cache
   // invalidation code in this source file is buggy.
-  this->ClearLinkMaps();
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   // Do old-style link dependency analysis only for CM_USE_OLD_VS6.
@@ -414,12 +407,6 @@ void cmTarget::FinishConfigure()
     this->AnalyzeLibDependenciesForVS6(*this->Makefile);
     }
 #endif
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::ClearLinkMaps()
-{
-  this->Internal->LinkImplMap.clear();
 }
 
 //----------------------------------------------------------------------------
@@ -884,7 +871,6 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
   this->LinkLibrariesForVS6.push_back( tmp );
 #endif
   this->OriginalLinkLibraries.push_back(tmp);
-  this->ClearLinkMaps();
 
   // Add the explicit dependency information for this target. This is
   // simply a set of libraries separated by ";". There should always
@@ -981,6 +967,16 @@ cmStringRange cmTarget::GetSourceEntries() const
 cmBacktraceRange cmTarget::GetSourceBacktraces() const
 {
   return cmMakeRange(this->Internal->SourceBacktraces);
+}
+
+cmStringRange cmTarget::GetLinkImplementationEntries() const
+{
+  return cmMakeRange(this->Internal->LinkImplementationPropertyEntries);
+}
+
+cmBacktraceRange cmTarget::GetLinkImplementationBacktraces() const
+{
+  return cmMakeRange(this->Internal->LinkImplementationPropertyBacktraces);
 }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -1610,10 +1606,6 @@ void cmTarget::MaybeInvalidatePropertyCache(const std::string& prop)
   if(this->IsImported() && cmHasLiteralPrefix(prop, "IMPORTED"))
     {
     this->Internal->ImportInfoMap.clear();
-    }
-  if(!this->IsImported() && cmHasLiteralPrefix(prop, "LINK_INTERFACE_"))
-    {
-    this->ClearLinkMaps();
     }
 }
 
@@ -3158,163 +3150,6 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
             this->GetProperty("IMPORTED_LINK_INTERFACE_MULTIPLICITY"))
       {
       sscanf(reps, "%u", &info.Multiplicity);
-      }
-    }
-}
-
-cmOptionalLinkImplementation&
-cmTarget::GetLinkImplMap(std::string const& config) const
-{
-  // Populate the link implementation for this configuration.
-  std::string CONFIG = cmSystemTools::UpperCase(config);
-  return Internal->LinkImplMap[CONFIG][this];
-}
-
-//----------------------------------------------------------------------------
-cmLinkImplementationLibraries const*
-cmTarget::GetLinkImplementationLibraries(const std::string& config) const
-{
-  return this->GetLinkImplementationLibrariesInternal(config, this);
-}
-
-//----------------------------------------------------------------------------
-cmLinkImplementationLibraries const*
-cmTarget::GetLinkImplementationLibrariesInternal(const std::string& config,
-                                                 cmTarget const* head) const
-{
-  // There is no link implementation for imported targets.
-  if(this->IsImported())
-    {
-    return 0;
-    }
-
-  // Populate the link implementation libraries for this configuration.
-  std::string CONFIG = cmSystemTools::UpperCase(config);
-  cmTargetInternals::HeadToLinkImplementationMap& hm =
-    this->Internal->LinkImplMap[CONFIG];
-
-  // If the link implementation does not depend on the head target
-  // then return the one we computed first.
-  if(!hm.empty() && !hm.begin()->second.HadHeadSensitiveCondition)
-    {
-    return &hm.begin()->second;
-    }
-
-  cmOptionalLinkImplementation& impl = hm[head];
-  if(!impl.LibrariesDone)
-    {
-    impl.LibrariesDone = true;
-    this->ComputeLinkImplementationLibraries(config, impl, head);
-    }
-  return &impl;
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::ComputeLinkImplementationLibraries(
-  const std::string& config,
-  cmOptionalLinkImplementation& impl,
-  cmTarget const* head) const
-{
-  std::vector<cmListFileBacktrace>::const_iterator btIt =
-      this->Internal->LinkImplementationPropertyBacktraces.begin();
-  // Collect libraries directly linked in this configuration.
-  for (std::vector<std::string>::const_iterator
-      le = this->Internal->LinkImplementationPropertyEntries.begin(),
-      end = this->Internal->LinkImplementationPropertyEntries.end();
-      le != end; ++le, ++btIt)
-    {
-    std::vector<std::string> llibs;
-    cmGeneratorExpressionDAGChecker dagChecker(
-                                        this->GetName(),
-                                        "LINK_LIBRARIES", 0, 0);
-    cmGeneratorExpression ge(*btIt);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> const cge =
-      ge.Parse(*le);
-    std::string const evaluated =
-      cge->Evaluate(this->Makefile, config, false, head, &dagChecker);
-    cmSystemTools::ExpandListArgument(evaluated, llibs);
-    if(cge->GetHadHeadSensitiveCondition())
-      {
-      impl.HadHeadSensitiveCondition = true;
-      }
-
-    for(std::vector<std::string>::const_iterator li = llibs.begin();
-        li != llibs.end(); ++li)
-      {
-      // Skip entries that resolve to the target itself or are empty.
-      std::string name = this->CheckCMP0004(*li);
-      if(name == this->GetName() || name.empty())
-        {
-        if(name == this->GetName())
-          {
-          bool noMessage = false;
-          cmake::MessageType messageType = cmake::FATAL_ERROR;
-          std::ostringstream e;
-          switch(this->GetPolicyStatusCMP0038())
-            {
-            case cmPolicies::WARN:
-              {
-              e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0038) << "\n";
-              messageType = cmake::AUTHOR_WARNING;
-              }
-              break;
-            case cmPolicies::OLD:
-              noMessage = true;
-            case cmPolicies::REQUIRED_IF_USED:
-            case cmPolicies::REQUIRED_ALWAYS:
-            case cmPolicies::NEW:
-              // Issue the fatal message.
-              break;
-            }
-
-          if(!noMessage)
-            {
-            e << "Target \"" << this->GetName() << "\" links to itself.";
-            this->Makefile->GetCMakeInstance()->IssueMessage(
-              messageType, e.str(), this->GetBacktrace());
-            if (messageType == cmake::FATAL_ERROR)
-              {
-              return;
-              }
-            }
-          }
-        continue;
-        }
-
-      // The entry is meant for this configuration.
-      impl.Libraries.push_back(
-        cmLinkImplItem(name, this->FindTargetToLink(name),
-                       *btIt, evaluated != *le));
-      }
-
-    std::set<std::string> const& seenProps = cge->GetSeenTargetProperties();
-    for (std::set<std::string>::const_iterator it = seenProps.begin();
-        it != seenProps.end(); ++it)
-      {
-      if (!this->GetProperty(*it))
-        {
-        this->LinkImplicitNullProperties.insert(*it);
-        }
-      }
-    cge->GetMaxLanguageStandard(this, this->MaxLanguageStandards);
-    }
-
-  cmTarget::LinkLibraryType linkType = this->ComputeLinkType(config);
-  cmTarget::LinkLibraryVectorType const& oldllibs =
-    this->GetOriginalLinkLibraries();
-  for(cmTarget::LinkLibraryVectorType::const_iterator li = oldllibs.begin();
-      li != oldllibs.end(); ++li)
-    {
-    if(li->second != cmTarget::GENERAL && li->second != linkType)
-      {
-      std::string name = this->CheckCMP0004(li->first);
-      if(name == this->GetName() || name.empty())
-        {
-        continue;
-        }
-      // Support OLD behavior for CMP0003.
-      impl.WrongConfigLibraries.push_back(
-        cmLinkItem(name, this->FindTargetToLink(name)));
       }
     }
 }

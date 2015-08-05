@@ -225,16 +225,6 @@ public:
 
   void GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const;
 
-  cmLinkImplementationLibraries const*
-    GetLinkImplementationLibraries(const std::string& config) const;
-
-  void ComputeLinkImplementationLibraries(const std::string& config,
-                                          cmOptionalLinkImplementation& impl,
-                                          cmTarget const* head) const;
-
-  cmOptionalLinkImplementation&
-  GetLinkImplMap(std::string const& config) const;
-
   cmTarget const* FindTargetToLink(std::string const& name) const;
 
   /** Strip off leading and trailing whitespace from an item named in
@@ -365,12 +355,6 @@ public:
   bool LinkLanguagePropagatesToDependents() const
   { return this->TargetTypeValue == STATIC_LIBRARY; }
 
-  std::map<std::string, std::string> const&
-  GetMaxLanguageStandards() const
-  {
-    return this->MaxLanguageStandards;
-  }
-
   cmStringRange GetIncludeDirectoriesEntries() const;
   cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
 
@@ -385,6 +369,9 @@ public:
 
   cmStringRange GetSourceEntries() const;
   cmBacktraceRange GetSourceBacktraces() const;
+  cmStringRange GetLinkImplementationEntries() const;
+  cmBacktraceRange GetLinkImplementationBacktraces() const;
+
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   const LinkLibraryVectorType &GetLinkLibrariesForVS6() const {
@@ -471,7 +458,6 @@ private:
   std::set<std::string> Utilities;
   mutable std::set<std::string> LinkImplicitNullProperties;
   std::map<std::string, cmListFileBacktrace> UtilityBacktraces;
-  mutable std::map<std::string, std::string> MaxLanguageStandards;
   cmPolicies::PolicyMap PolicyMap;
   std::string Name;
   std::string InstallPath;
@@ -529,13 +515,7 @@ private:
   void ComputeImportInfo(std::string const& desired_config,
                          ImportInfo& info) const;
 
-  cmLinkImplementationLibraries const*
-    GetLinkImplementationLibrariesInternal(const std::string& config,
-                                           cmTarget const* head) const;
-
   std::string ProcessSourceItemCMP0049(const std::string& s);
-
-  void ClearLinkMaps();
 
   void MaybeInvalidatePropertyCache(const std::string& prop);
 
