@@ -24,7 +24,7 @@ bool cmGetFilenameComponentCommand
 
   // Check and see if the value has been stored in the cache
   // already, if so use that value
-  if(args.size() == 4 && args[3] == "CACHE")
+  if(args.size() >= 4 && args[args.size() - 1] == "CACHE")
     {
     const char* cacheValue = this->Makefile->GetDefinition(args[0]);
     if(cacheValue && !cmSystemTools::IsNOTFOUND(cacheValue))
@@ -111,7 +111,7 @@ bool cmGetFilenameComponentCommand
     return false;
     }
 
-  if(args.size() == 4 && args[3] == "CACHE")
+  if(args.size() >= 4 && args[args.size() - 1] == "CACHE")
     {
     if(!programArgs.empty() && !storeArgs.empty())
       {

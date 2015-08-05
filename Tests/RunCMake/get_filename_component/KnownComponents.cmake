@@ -62,6 +62,38 @@ check("CACHE 3" "${test_cache}" "/path/to/other")
 
 list(APPEND cache_vars test_cache)
 
+# Test the PROGRAM component type with CACHE specified.
+
+# 1. Make sure it makes a cache variable in the first place for basic usage:
+get_filename_component(test_cache_program_name_1 "/ arg1 arg2" PROGRAM CACHE)
+check("PROGRAM CACHE 1 with no args output" "${test_cache_program_name_1}" "/")
+list(APPEND cache_vars test_cache_program_name_1)
+
+# 2. Set some existing cache variables & make sure the function returns them:
+set(test_cache_program_name_2 DummyProgramName CACHE FILEPATH "")
+get_filename_component(test_cache_program_name_2 "/ arg1 arg2" PROGRAM CACHE)
+check("PROGRAM CACHE 2 with no args output" "${test_cache_program_name_2}"
+  "DummyProgramName")
+list(APPEND cache_vars test_cache_program_name_2)
+
+# 3. Now test basic usage when PROGRAM_ARGS is used:
+get_filename_component(test_cache_program_name_3 "/ arg1 arg2" PROGRAM
+  PROGRAM_ARGS test_cache_program_args_3 CACHE)
+check("PROGRAM CACHE 3 name" "${test_cache_program_name_3}" "/")
+check("PROGRAM CACHE 3 args" "${test_cache_program_args_3}" " arg1 arg2")
+list(APPEND cache_vars test_cache_program_name_3)
+list(APPEND cache_vars test_cache_program_args_3)
+
+# 4. Test that existing cache variables are returned when PROGRAM_ARGS is used:
+set(test_cache_program_name_4 DummyPgm CACHE FILEPATH "")
+set(test_cache_program_args_4 DummyArgs CACHE STRING "")
+get_filename_component(test_cache_program_name_4 "/ arg1 arg2" PROGRAM
+  PROGRAM_ARGS test_cache_program_args_4 CACHE)
+check("PROGRAM CACHE 4 name" "${test_cache_program_name_4}" "DummyPgm")
+check("PROGRAM CACHE 4 args" "${test_cache_program_args_4}" "DummyArgs")
+list(APPEND cache_vars test_cache_program_name_4)
+list(APPEND cache_vars test_cache_program_name_4)
+
 # Test that ONLY the expected cache variables were created.
 get_cmake_property(current_cache_vars CACHE_VARIABLES)
 get_cmake_property(current_vars VARIABLES)
