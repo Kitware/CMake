@@ -237,6 +237,13 @@ public:
   cmLinkImplementationLibraries const*
     GetLinkImplementationLibraries(const std::string& config) const;
 
+  void ComputeLinkImplementationLibraries(const std::string& config,
+                                          cmOptionalLinkImplementation& impl,
+                                          cmTarget const* head) const;
+  void ComputeLinkImplementationLanguages(const std::string& config,
+                                          cmOptionalLinkImplementation& impl
+                                          ) const;
+
   cmTarget const* FindTargetToLink(std::string const& name) const;
 
   /** Strip off leading and trailing whitespace from an item named in

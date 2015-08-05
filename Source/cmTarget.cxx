@@ -95,27 +95,8 @@ public:
   typedef std::map<std::string, cmTarget::ImportInfo> ImportInfoMapType;
   ImportInfoMapType ImportInfoMap;
 
-  // Cache link implementation computation from each configuration.
-  struct OptionalLinkImplementation: public cmLinkImplementation
-  {
-    OptionalLinkImplementation():
-      LibrariesDone(false), LanguagesDone(false),
-      HadHeadSensitiveCondition(false) {}
-    bool LibrariesDone;
-    bool LanguagesDone;
-    bool HadHeadSensitiveCondition;
-  };
-  void ComputeLinkImplementationLibraries(cmTarget const* thisTarget,
-                                          const std::string& config,
-                                          OptionalLinkImplementation& impl,
-                                          cmTarget const* head) const;
-  void ComputeLinkImplementationLanguages(cmTarget const* thisTarget,
-                                          const std::string& config,
-                                          OptionalLinkImplementation& impl
-                                          ) const;
-
   struct HeadToLinkImplementationMap:
-    public std::map<cmTarget const*, OptionalLinkImplementation> {};
+    public std::map<cmTarget const*, cmOptionalLinkImplementation> {};
   typedef std::map<std::string,
                    HeadToLinkImplementationMap> LinkImplMapType;
   LinkImplMapType LinkImplMap;
@@ -3595,18 +3576,17 @@ cmTarget::GetLinkImplementation(const std::string& config) const
 
   // Populate the link implementation for this configuration.
   std::string CONFIG = cmSystemTools::UpperCase(config);
-  cmTargetInternals::OptionalLinkImplementation&
+  cmOptionalLinkImplementation&
     impl = this->Internal->LinkImplMap[CONFIG][this];
   if(!impl.LibrariesDone)
     {
     impl.LibrariesDone = true;
-    this->Internal
-      ->ComputeLinkImplementationLibraries(this, config, impl, this);
+    this->ComputeLinkImplementationLibraries(config, impl, this);
     }
   if(!impl.LanguagesDone)
     {
     impl.LanguagesDone = true;
-    this->Internal->ComputeLinkImplementationLanguages(this, config, impl);
+    this->ComputeLinkImplementationLanguages(config, impl);
     }
   return &impl;
 }
@@ -3641,39 +3621,36 @@ cmTarget::GetLinkImplementationLibrariesInternal(const std::string& config,
     return &hm.begin()->second;
     }
 
-  cmTargetInternals::OptionalLinkImplementation& impl = hm[head];
+  cmOptionalLinkImplementation& impl = hm[head];
   if(!impl.LibrariesDone)
     {
     impl.LibrariesDone = true;
-    this->Internal
-      ->ComputeLinkImplementationLibraries(this, config, impl, head);
+    this->ComputeLinkImplementationLibraries(config, impl, head);
     }
   return &impl;
 }
 
 //----------------------------------------------------------------------------
-void
-cmTargetInternals::ComputeLinkImplementationLibraries(
-  cmTarget const* thisTarget,
+void cmTarget::ComputeLinkImplementationLibraries(
   const std::string& config,
-  OptionalLinkImplementation& impl,
+  cmOptionalLinkImplementation& impl,
   cmTarget const* head) const
 {
   // Collect libraries directly linked in this configuration.
   for (std::vector<cmValueWithOrigin>::const_iterator
-      le = this->LinkImplementationPropertyEntries.begin(),
-      end = this->LinkImplementationPropertyEntries.end();
+      le = this->Internal->LinkImplementationPropertyEntries.begin(),
+      end = this->Internal->LinkImplementationPropertyEntries.end();
       le != end; ++le)
     {
     std::vector<std::string> llibs;
     cmGeneratorExpressionDAGChecker dagChecker(
-                                        thisTarget->GetName(),
+                                        this->GetName(),
                                         "LINK_LIBRARIES", 0, 0);
     cmGeneratorExpression ge(le->Backtrace);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> const cge =
       ge.Parse(le->Value);
     std::string const evaluated =
-      cge->Evaluate(thisTarget->Makefile, config, false, head, &dagChecker);
+      cge->Evaluate(this->Makefile, config, false, head, &dagChecker);
     cmSystemTools::ExpandListArgument(evaluated, llibs);
     if(cge->GetHadHeadSensitiveCondition())
       {
@@ -3684,15 +3661,15 @@ cmTargetInternals::ComputeLinkImplementationLibraries(
         li != llibs.end(); ++li)
       {
       // Skip entries that resolve to the target itself or are empty.
-      std::string name = thisTarget->CheckCMP0004(*li);
-      if(name == thisTarget->GetName() || name.empty())
+      std::string name = this->CheckCMP0004(*li);
+      if(name == this->GetName() || name.empty())
         {
-        if(name == thisTarget->GetName())
+        if(name == this->GetName())
           {
           bool noMessage = false;
           cmake::MessageType messageType = cmake::FATAL_ERROR;
           std::ostringstream e;
-          switch(thisTarget->GetPolicyStatusCMP0038())
+          switch(this->GetPolicyStatusCMP0038())
             {
             case cmPolicies::WARN:
               {
@@ -3711,9 +3688,9 @@ cmTargetInternals::ComputeLinkImplementationLibraries(
 
           if(!noMessage)
             {
-            e << "Target \"" << thisTarget->GetName() << "\" links to itself.";
-            thisTarget->Makefile->GetCMakeInstance()->IssueMessage(
-              messageType, e.str(), thisTarget->GetBacktrace());
+            e << "Target \"" << this->GetName() << "\" links to itself.";
+            this->Makefile->GetCMakeInstance()->IssueMessage(
+              messageType, e.str(), this->GetBacktrace());
             if (messageType == cmake::FATAL_ERROR)
               {
               return;
@@ -3725,7 +3702,7 @@ cmTargetInternals::ComputeLinkImplementationLibraries(
 
       // The entry is meant for this configuration.
       impl.Libraries.push_back(
-        cmLinkImplItem(name, thisTarget->FindTargetToLink(name),
+        cmLinkImplItem(name, this->FindTargetToLink(name),
                        le->Backtrace, evaluated != le->Value));
       }
 
@@ -3733,45 +3710,43 @@ cmTargetInternals::ComputeLinkImplementationLibraries(
     for (std::set<std::string>::const_iterator it = seenProps.begin();
         it != seenProps.end(); ++it)
       {
-      if (!thisTarget->GetProperty(*it))
+      if (!this->GetProperty(*it))
         {
-        thisTarget->LinkImplicitNullProperties.insert(*it);
+        this->LinkImplicitNullProperties.insert(*it);
         }
       }
-    cge->GetMaxLanguageStandard(thisTarget, thisTarget->MaxLanguageStandards);
+    cge->GetMaxLanguageStandard(this, this->MaxLanguageStandards);
     }
 
-  cmTarget::LinkLibraryType linkType = thisTarget->ComputeLinkType(config);
+  cmTarget::LinkLibraryType linkType = this->ComputeLinkType(config);
   cmTarget::LinkLibraryVectorType const& oldllibs =
-    thisTarget->GetOriginalLinkLibraries();
+    this->GetOriginalLinkLibraries();
   for(cmTarget::LinkLibraryVectorType::const_iterator li = oldllibs.begin();
       li != oldllibs.end(); ++li)
     {
     if(li->second != cmTarget::GENERAL && li->second != linkType)
       {
-      std::string name = thisTarget->CheckCMP0004(li->first);
-      if(name == thisTarget->GetName() || name.empty())
+      std::string name = this->CheckCMP0004(li->first);
+      if(name == this->GetName() || name.empty())
         {
         continue;
         }
       // Support OLD behavior for CMP0003.
       impl.WrongConfigLibraries.push_back(
-        cmLinkItem(name, thisTarget->FindTargetToLink(name)));
+        cmLinkItem(name, this->FindTargetToLink(name)));
       }
     }
 }
 
 //----------------------------------------------------------------------------
-void
-cmTargetInternals::ComputeLinkImplementationLanguages(
-  cmTarget const* thisTarget,
+void cmTarget::ComputeLinkImplementationLanguages(
   const std::string& config,
-  OptionalLinkImplementation& impl) const
+  cmOptionalLinkImplementation& impl) const
 {
   // This target needs runtime libraries for its source languages.
   std::set<std::string> languages;
   // Get languages used in our source files.
-  thisTarget->GetLanguages(languages, config);
+  this->GetLanguages(languages, config);
   // Copy the set of langauges to the link implementation.
   impl.Languages.insert(impl.Languages.begin(),
                         languages.begin(), languages.end());
