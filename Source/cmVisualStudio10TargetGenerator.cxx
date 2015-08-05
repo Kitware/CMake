@@ -2581,7 +2581,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
       {
       linkOptions.AddFlag("GenerateDebugInformation", "false");
       }
-    std::string pdb = this->Target->GetPDBDirectory(config.c_str());
+    std::string pdb = this->GeneratorTarget->GetPDBDirectory(config.c_str());
     pdb += "/";
     pdb += targetNamePDB;
     std::string imLib =

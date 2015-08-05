@@ -1130,7 +1130,7 @@ cmGeneratorTarget::GetCompilePDBPath(const std::string& config) const
   std::string name = this->GetCompilePDBName(config);
   if(dir.empty() && !name.empty())
     {
-    dir = this->Target->GetPDBDirectory(config);
+    dir = this->GetPDBDirectory(config);
     }
   if(!dir.empty())
     {
@@ -4994,4 +4994,16 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         cmLinkItem(name, this->Target->FindTargetToLink(name)));
       }
     }
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmGeneratorTarget::GetPDBDirectory(const std::string& config) const
+{
+  if(cmTarget::OutputInfo const* info = this->Target->GetOutputInfo(config))
+    {
+    // Return the directory in which the target will be built.
+    return info->PdbDir;
+    }
+  return "";
 }

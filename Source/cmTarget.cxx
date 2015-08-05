@@ -1771,17 +1771,6 @@ cmTarget::OutputInfo const* cmTarget::GetOutputInfo(
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetPDBDirectory(const std::string& config) const
-{
-  if(OutputInfo const* info = this->GetOutputInfo(config))
-    {
-    // Return the directory in which the target will be built.
-    return info->PdbDir;
-    }
-  return "";
-}
-
-//----------------------------------------------------------------------------
 const char* cmTarget::ImportedGetLocation(const std::string& config) const
 {
   static std::string location;

@@ -133,7 +133,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     this->GeneratorTarget->GetCompilePDBDirectory(this->ConfigName);
   cmSystemTools::MakeDirectory(compilePdbOutputPath.c_str());
 
-  std::string pdbOutputPath = this->Target->GetPDBDirectory(this->ConfigName);
+  std::string pdbOutputPath =
+      this->GeneratorTarget->GetPDBDirectory(this->ConfigName);
   cmSystemTools::MakeDirectory(pdbOutputPath.c_str());
   pdbOutputPath += "/";
 

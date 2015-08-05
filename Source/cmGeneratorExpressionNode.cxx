@@ -1631,7 +1631,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
       return std::string();
       }
 
-    std::string result = target->Target->GetPDBDirectory(context->Config);
+    std::string result = target->GetPDBDirectory(context->Config);
     result += "/";
     result += target->GetPDBName(context->Config);
     return result;
