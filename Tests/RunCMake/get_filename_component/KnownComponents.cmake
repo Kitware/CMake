@@ -38,6 +38,18 @@ check("ABSOLUTE .. in windows root" "${test_absolute}" "c:/path/to/filename.ext.
 
 list(APPEND non_cache_vars test_absolute)
 
+# Test the PROGRAM component type.
+get_filename_component(test_program_name "/ arg1 arg2" PROGRAM)
+check("PROGRAM with no args output" "${test_program_name}" "/")
+
+get_filename_component(test_program_name "/ arg1 arg2" PROGRAM
+  PROGRAM_ARGS test_program_args)
+check("PROGRAM with args output: name" "${test_program_name}" "/")
+check("PROGRAM with args output: args" "${test_program_args}" " arg1 arg2")
+
+list(APPEND non_cache_vars test_program_name)
+list(APPEND non_cache_vars test_program_args)
+
 # Test CACHE parameter for most component types.
 get_filename_component(test_cache "/path/to/filename.ext.in" DIRECTORY CACHE)
 check("CACHE 1" "${test_cache}" "/path/to")
