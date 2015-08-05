@@ -8,6 +8,7 @@ set(EXPECTED_FILE_CONTENT_2 "^.*/usr/foo_auto${whitespaces_}.*/usr/foo_auto/test
 set(EXPECTED_FILE_3 "dependencies*-headers.deb")
 set(EXPECTED_FILE_CONTENT_3 "^.*/usr/bar${whitespaces_}.*/usr/bar/CMakeLists.txt$")
 set(EXPECTED_FILE_4 "dependencies*-libs.deb")
-set(EXPECTED_FILE_CONTENT_4 "^.*/usr/bas${whitespaces_}.*/usr/bas/libtest_lib.so$")
+# dynamic lib extension is .so on Linux and .dylib on Mac so we will use a wildcard .* for it
+set(EXPECTED_FILE_CONTENT_4 "^.*/usr/bas${whitespaces_}.*/usr/bas/libtest_lib\\..*$")
 set(EXPECTED_FILE_5 "dependencies*-libs_auto.deb")
-set(EXPECTED_FILE_CONTENT_5 "^.*/usr/bas_auto${whitespaces_}.*/usr/bas_auto/libtest_lib.so$")
+set(EXPECTED_FILE_CONTENT_5 "^.*/usr/bas_auto${whitespaces_}.*/usr/bas_auto/libtest_lib\\..*$")
