@@ -415,9 +415,6 @@ private:
   void SetPropertyDefault(const std::string& property,
                           const char* default_value);
 
-  // Returns ARCHIVE, LIBRARY, or RUNTIME based on platform and type.
-  const char* GetOutputTargetType(bool implib) const;
-
   std::string GetFullNameImported(const std::string& config,
                                   bool implib) const;
 

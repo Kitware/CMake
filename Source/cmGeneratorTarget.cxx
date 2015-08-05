@@ -340,6 +340,62 @@ const char *cmGeneratorTarget::GetProperty(const std::string& prop) const
 }
 
 //----------------------------------------------------------------------------
+const char* cmGeneratorTarget::GetOutputTargetType(bool implib) const
+{
+  switch(this->GetType())
+    {
+    case cmTarget::SHARED_LIBRARY:
+      if(this->Target->IsDLLPlatform())
+        {
+        if(implib)
+          {
+          // A DLL import library is treated as an archive target.
+          return "ARCHIVE";
+          }
+        else
+          {
+          // A DLL shared library is treated as a runtime target.
+          return "RUNTIME";
+          }
+        }
+      else
+        {
+        // For non-DLL platforms shared libraries are treated as
+        // library targets.
+        return "LIBRARY";
+        }
+    case cmTarget::STATIC_LIBRARY:
+      // Static libraries are always treated as archive targets.
+      return "ARCHIVE";
+    case cmTarget::MODULE_LIBRARY:
+      if(implib)
+        {
+        // Module libraries are always treated as library targets.
+        return "ARCHIVE";
+        }
+      else
+        {
+        // Module import libraries are treated as archive targets.
+        return "LIBRARY";
+        }
+    case cmTarget::EXECUTABLE:
+      if(implib)
+        {
+        // Executable import libraries are treated as archive targets.
+        return "ARCHIVE";
+        }
+      else
+        {
+        // Executables are always treated as runtime targets.
+        return "RUNTIME";
+        }
+    default:
+      break;
+    }
+  return "";
+}
+
+//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetOutputName(const std::string& config,
                                              bool implib) const
 {
@@ -355,7 +411,7 @@ std::string cmGeneratorTarget::GetOutputName(const std::string& config,
 
     // Compute output name.
     std::vector<std::string> props;
-    std::string type = this->Target->GetOutputTargetType(implib);
+    std::string type = this->GetOutputTargetType(implib);
     std::string configUpper = cmSystemTools::UpperCase(config);
     if(!type.empty() && !configUpper.empty())
       {
@@ -4662,7 +4718,7 @@ bool cmGeneratorTarget::ComputeOutputDir(const std::string& config,
 
   // Look for a target property defining the target output directory
   // based on the target type.
-  std::string targetTypeName = this->Target->GetOutputTargetType(implib);
+  std::string targetTypeName = this->GetOutputTargetType(implib);
   const char* propertyName = 0;
   std::string propertyNameStr = targetTypeName;
   if(!propertyNameStr.empty())

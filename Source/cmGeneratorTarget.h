@@ -439,6 +439,9 @@ private:
   typedef std::map<std::string, LinkClosure> LinkClosureMapType;
   mutable LinkClosureMapType LinkClosureMap;
 
+  // Returns ARCHIVE, LIBRARY, or RUNTIME based on platform and type.
+  const char* GetOutputTargetType(bool implib) const;
+
   struct CompatibleInterfacesBase
   {
     std::set<std::string> PropsBool;

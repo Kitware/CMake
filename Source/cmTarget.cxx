@@ -2272,62 +2272,6 @@ void cmTarget::SetPropertyDefault(const std::string& property,
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetOutputTargetType(bool implib) const
-{
-  switch(this->GetType())
-    {
-    case cmTarget::SHARED_LIBRARY:
-      if(this->DLLPlatform)
-        {
-        if(implib)
-          {
-          // A DLL import library is treated as an archive target.
-          return "ARCHIVE";
-          }
-        else
-          {
-          // A DLL shared library is treated as a runtime target.
-          return "RUNTIME";
-          }
-        }
-      else
-        {
-        // For non-DLL platforms shared libraries are treated as
-        // library targets.
-        return "LIBRARY";
-        }
-    case cmTarget::STATIC_LIBRARY:
-      // Static libraries are always treated as archive targets.
-      return "ARCHIVE";
-    case cmTarget::MODULE_LIBRARY:
-      if(implib)
-        {
-        // Module libraries are always treated as library targets.
-        return "ARCHIVE";
-        }
-      else
-        {
-        // Module import libraries are treated as archive targets.
-        return "LIBRARY";
-        }
-    case cmTarget::EXECUTABLE:
-      if(implib)
-        {
-        // Executable import libraries are treated as archive targets.
-        return "ARCHIVE";
-        }
-      else
-        {
-        // Executables are always treated as runtime targets.
-        return "RUNTIME";
-        }
-    default:
-      break;
-    }
-  return "";
-}
-
-//----------------------------------------------------------------------------
 std::string cmTarget::GetFrameworkVersion() const
 {
   assert(this->GetType() != INTERFACE_LIBRARY);
