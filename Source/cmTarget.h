@@ -244,12 +244,6 @@ public:
   void
   GetTargetVersion(bool soversion, int& major, int& minor, int& patch) const;
 
-  /** Whether this library has \@rpath and platform supports it.  */
-  bool HasMacOSXRpathInstallNameDir(const std::string& config) const;
-
-  /** Whether this library defaults to \@rpath.  */
-  bool MacOSXRpathInstallNameDirDefault() const;
-
   /** Test for special case of a third-party shared library that has
       no soname at all.  */
   bool IsImportedSharedLibWithoutSOName(const std::string& config) const;

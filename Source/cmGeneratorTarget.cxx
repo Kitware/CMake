@@ -1284,6 +1284,120 @@ bool cmGeneratorTarget::IsChrpathUsed(const std::string& config) const
 
 
 //----------------------------------------------------------------------------
+bool cmGeneratorTarget::HasMacOSXRpathInstallNameDir(
+    const std::string& config) const
+{
+  bool install_name_is_rpath = false;
+  bool macosx_rpath = false;
+
+  if(!this->IsImported())
+    {
+    if(this->GetType() != cmTarget::SHARED_LIBRARY)
+      {
+      return false;
+      }
+    const char* install_name = this->GetProperty("INSTALL_NAME_DIR");
+    bool use_install_name =
+      this->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH");
+    if(install_name && use_install_name &&
+       std::string(install_name) == "@rpath")
+      {
+      install_name_is_rpath = true;
+      }
+    else if(install_name && use_install_name)
+      {
+      return false;
+      }
+    if(!install_name_is_rpath)
+      {
+      macosx_rpath = this->MacOSXRpathInstallNameDirDefault();
+      }
+    }
+  else
+    {
+    // Lookup the imported soname.
+    if(cmTarget::ImportInfo const* info = this->Target->GetImportInfo(config))
+      {
+      if(!info->NoSOName && !info->SOName.empty())
+        {
+        if(info->SOName.find("@rpath/") == 0)
+          {
+          install_name_is_rpath = true;
+          }
+        }
+      else
+        {
+        std::string install_name;
+        cmSystemTools::GuessLibraryInstallName(info->Location, install_name);
+        if(install_name.find("@rpath") != std::string::npos)
+          {
+          install_name_is_rpath = true;
+          }
+        }
+      }
+    }
+
+  if(!install_name_is_rpath && !macosx_rpath)
+    {
+    return false;
+    }
+
+  if(!this->Makefile->IsSet("CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG"))
+    {
+    std::ostringstream w;
+    w << "Attempting to use";
+    if(macosx_rpath)
+      {
+      w << " MACOSX_RPATH";
+      }
+    else
+      {
+      w << " @rpath";
+      }
+    w << " without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being set.";
+    w << "  This could be because you are using a Mac OS X version";
+    w << " less than 10.5 or because CMake's platform configuration is";
+    w << " corrupt.";
+    cmake* cm = this->Makefile->GetCMakeInstance();
+    cm->IssueMessage(cmake::FATAL_ERROR, w.str(),
+                     this->Target->GetBacktrace());
+    }
+
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::MacOSXRpathInstallNameDirDefault() const
+{
+  // we can't do rpaths when unsupported
+  if(!this->Makefile->IsSet("CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG"))
+    {
+    return false;
+    }
+
+  const char* macosx_rpath_str = this->GetProperty("MACOSX_RPATH");
+  if(macosx_rpath_str)
+    {
+    return this->GetPropertyAsBool("MACOSX_RPATH");
+    }
+
+  cmPolicies::PolicyStatus cmp0042 = this->Target->GetPolicyStatusCMP0042();
+
+  if(cmp0042 == cmPolicies::WARN)
+    {
+    this->Makefile->GetGlobalGenerator()->
+      AddCMP0042WarnTarget(this->GetName());
+    }
+
+  if(cmp0042 == cmPolicies::NEW)
+    {
+    return true;
+    }
+
+  return false;
+}
+
+//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetSOName(const std::string& config) const
 {
   if(this->Target->IsImported())
@@ -1428,7 +1542,7 @@ cmGeneratorTarget::GetInstallNameDirForBuildTree(
      !this->GetPropertyAsBool("SKIP_BUILD_RPATH"))
     {
     std::string dir;
-    if(this->Target->MacOSXRpathInstallNameDirDefault())
+    if(this->MacOSXRpathInstallNameDirDefault())
       {
       dir = "@rpath";
       }
@@ -1464,7 +1578,7 @@ std::string cmGeneratorTarget::GetInstallNameDirForInstallTree() const
       }
     if(!install_name_dir)
       {
-      if(this->Target->MacOSXRpathInstallNameDirDefault())
+      if(this->MacOSXRpathInstallNameDirDefault())
         {
         dir = "@rpath/";
         }

@@ -1783,12 +1783,13 @@ void
 cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath,
                                                 cmTarget const* target)
 {
+  cmGeneratorTarget *gtgt = this->GlobalGenerator->GetGeneratorTarget(target);
   // Ignore targets on Apple where install_name is not @rpath.
   // The dependenty library can be found with other means such as
   // @loader_path or full paths.
   if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
     {
-    if(!target->HasMacOSXRpathInstallNameDir(this->Config))
+    if(!gtgt->HasMacOSXRpathInstallNameDir(this->Config))
       {
       return;
       }
@@ -1810,7 +1811,6 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath,
 
   // Try to get the soname of the library.  Only files with this name
   // could possibly conflict.
-  cmGeneratorTarget *gtgt = this->GlobalGenerator->GetGeneratorTarget(target);
   std::string soName = gtgt->GetSOName(this->Config);
   const char* soname = soName.empty()? 0 : soName.c_str();
 

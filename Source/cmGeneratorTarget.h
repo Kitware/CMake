@@ -409,6 +409,12 @@ public:
 
   bool HaveInstallTreeRPATH() const;
 
+  /** Whether this library has \@rpath and platform supports it.  */
+  bool HasMacOSXRpathInstallNameDir(const std::string& config) const;
+
+  /** Whether this library defaults to \@rpath.  */
+  bool MacOSXRpathInstallNameDirDefault() const;
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };

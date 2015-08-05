@@ -56,7 +56,8 @@ void cmLocalXCodeGenerator::Generate()
       iter != targets.end(); ++iter)
     {
     cmTarget* t = &iter->second;
-    t->HasMacOSXRpathInstallNameDir("");
+    cmGeneratorTarget* gt = this->GlobalGenerator->GetGeneratorTarget(t);
+    gt->HasMacOSXRpathInstallNameDir("");
     }
 }
 
@@ -70,7 +71,8 @@ void cmLocalXCodeGenerator::GenerateInstallRules()
       iter != targets.end(); ++iter)
     {
     cmTarget* t = &iter->second;
-    t->HasMacOSXRpathInstallNameDir("");
+    cmGeneratorTarget* gt = this->GlobalGenerator->GetGeneratorTarget(t);
+    gt->HasMacOSXRpathInstallNameDir("");
     }
 }
 
