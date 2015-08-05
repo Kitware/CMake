@@ -231,12 +231,7 @@ public:
 
   void GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const;
 
-  struct LinkImplementation: public cmLinkImplementationLibraries
-  {
-    // Languages whose runtime libraries must be linked.
-    std::vector<std::string> Languages;
-  };
-  LinkImplementation const*
+  cmLinkImplementation const*
     GetLinkImplementation(const std::string& config) const;
 
   cmLinkImplementationLibraries const*

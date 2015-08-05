@@ -101,4 +101,10 @@ struct cmHeadToLinkInterfaceMap:
 {
 };
 
+struct cmLinkImplementation: public cmLinkImplementationLibraries
+{
+  // Languages whose runtime libraries must be linked.
+  std::vector<std::string> Languages;
+};
+
 #endif
