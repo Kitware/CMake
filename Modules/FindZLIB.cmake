@@ -74,15 +74,17 @@ set(_ZLIB_SEARCH_NORMAL
   )
 list(APPEND _ZLIB_SEARCHES _ZLIB_SEARCH_NORMAL)
 
-set(ZLIB_NAMES z zlib zdll zlib1 zlibd zlibd1)
-
 # Try each search configuration.
 foreach(search ${_ZLIB_SEARCHES})
-  find_path(ZLIB_INCLUDE_DIR NAMES zlib.h        ${${search}} PATH_SUFFIXES include)
-  find_library(ZLIB_LIBRARY  NAMES ${ZLIB_NAMES} ${${search}} PATH_SUFFIXES lib)
+  find_path(ZLIB_INCLUDE_DIR        NAMES zlib.h            ${${search}} PATH_SUFFIXES include)
+  find_library(ZLIB_LIBRARY_RELEASE NAMES z zlib zdll zlib1 ${${search}} PATH_SUFFIXES lib)
+  find_library(ZLIB_LIBRARY_DEBUG   NAMES zlibd zlibd1      ${${search}} PATH_SUFFIXES lib)
 endforeach()
 
-mark_as_advanced(ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
+mark_as_advanced(ZLIB_INCLUDE_DIR ZLIB_LIBRARY_RELEASE ZLIB_LIBRARY_DEBUG)
+
+include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+select_library_configurations(ZLIB)
 
 if(ZLIB_INCLUDE_DIR AND EXISTS "${ZLIB_INCLUDE_DIR}/zlib.h")
     file(STRINGS "${ZLIB_INCLUDE_DIR}/zlib.h" ZLIB_H REGEX "^#define ZLIB_VERSION \"[^\"]*\"$")
