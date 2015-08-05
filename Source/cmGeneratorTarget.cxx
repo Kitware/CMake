@@ -908,7 +908,7 @@ cmGeneratorTarget::NeedRelinkBeforeInstall(const std::string& config) const
   // If either a build or install tree rpath is set then the rpath
   // will likely change between the build tree and install tree and
   // this target must be relinked.
-  return this->Target->HaveBuildTreeRPATH(config)
+  return this->HaveBuildTreeRPATH(config)
       || this->Target->HaveInstallTreeRPATH();
 }
 
@@ -4393,4 +4393,19 @@ cmGeneratorTarget::GetLinkImplementation(const std::string& config) const
     this->Target->ComputeLinkImplementationLanguages(config, impl);
     }
   return &impl;
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::HaveBuildTreeRPATH(const std::string& config) const
+{
+  if (this->Target->GetPropertyAsBool("SKIP_BUILD_RPATH"))
+    {
+    return false;
+    }
+  if(cmLinkImplementationLibraries const* impl =
+     this->Target->GetLinkImplementationLibraries(config))
+    {
+    return !impl->Libraries.empty();
+    }
+  return false;
 }
