@@ -11,3 +11,6 @@ java-updates
 * The :module:`UseJava` module ``install_jar`` function learned
   new ``DESTINATION`` and ``COMPONENT`` options to specify
   the corresponding :command:`install` command options.
+
+* The :module:`UseJava` module gained a new ``create_javah``
+  function to create C headers from Java classes.
