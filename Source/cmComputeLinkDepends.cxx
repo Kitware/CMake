@@ -556,7 +556,7 @@ void cmComputeLinkDepends::AddDirectLinkEntries()
 {
   // Add direct link dependencies in this configuration.
   cmLinkImplementation const* impl =
-    this->Target->Target->GetLinkImplementation(this->Config);
+    this->Target->GetLinkImplementation(this->Config);
   this->AddLinkEntries(-1, impl->Libraries);
   for(std::vector<cmLinkItem>::const_iterator
         wi = impl->WrongConfigLibraries.begin();

@@ -226,6 +226,9 @@ public:
   LinkClosure const* GetLinkClosure(const std::string& config) const;
   void ComputeLinkClosure(const std::string& config, LinkClosure& lc) const;
 
+  cmLinkImplementation const*
+    GetLinkImplementation(const std::string& config) const;
+
   /** Full path with trailing slash to the top-level directory
       holding object files for this target.  Includes the build
       time config name placeholder if needed for the generator.  */

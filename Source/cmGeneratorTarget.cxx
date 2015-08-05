@@ -1336,7 +1336,7 @@ void cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
   // Get languages built in this target.
   UNORDERED_SET<std::string> languages;
   cmLinkImplementation const* impl =
-                            this->Target->GetLinkImplementation(config);
+                            this->GetLinkImplementation(config);
   assert(impl);
   for(std::vector<std::string>::const_iterator li = impl->Languages.begin();
       li != impl->Languages.end(); ++li)
@@ -4295,7 +4295,7 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
       if (this->GetType() != cmTarget::INTERFACE_LIBRARY)
         {
         cmLinkImplementation const* impl =
-            this->Target->GetLinkImplementation(config);
+            this->GetLinkImplementation(config);
         for(std::vector<cmLinkImplItem>::const_iterator
               li = impl->Libraries.begin(); li != impl->Libraries.end(); ++li)
           {
@@ -4336,7 +4336,7 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
     {
     // Targets using this archive need its language runtime libraries.
     if(cmLinkImplementation const* impl =
-       this->Target->GetLinkImplementation(config))
+       this->GetLinkImplementation(config))
       {
       iface.Languages = impl->Languages;
       }
@@ -4369,4 +4369,29 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
       sscanf(reps, "%u", &iface.Multiplicity);
       }
     }
+}
+
+//----------------------------------------------------------------------------
+const cmLinkImplementation *
+cmGeneratorTarget::GetLinkImplementation(const std::string& config) const
+{
+  // There is no link implementation for imported targets.
+  if(this->Target->IsImported())
+    {
+    return 0;
+    }
+
+  cmOptionalLinkImplementation& impl = this->Target->GetLinkImplMap(config);
+  if(!impl.LibrariesDone)
+    {
+    impl.LibrariesDone = true;
+    this->Target->ComputeLinkImplementationLibraries(config, impl,
+                                                     this->Target);
+    }
+  if(!impl.LanguagesDone)
+    {
+    impl.LanguagesDone = true;
+    this->Target->ComputeLinkImplementationLanguages(config, impl);
+    }
+  return &impl;
 }
