@@ -3565,30 +3565,6 @@ void cmTargetInternals::AddInterfaceEntries(
     }
 }
 
-//----------------------------------------------------------------------------
-const cmLinkImplementation *
-cmTarget::GetLinkImplementation(const std::string& config) const
-{
-  // There is no link implementation for imported targets.
-  if(this->IsImported())
-    {
-    return 0;
-    }
-
-  cmOptionalLinkImplementation& impl = this->GetLinkImplMap(config);
-  if(!impl.LibrariesDone)
-    {
-    impl.LibrariesDone = true;
-    this->ComputeLinkImplementationLibraries(config, impl, this);
-    }
-  if(!impl.LanguagesDone)
-    {
-    impl.LanguagesDone = true;
-    this->ComputeLinkImplementationLanguages(config, impl);
-    }
-  return &impl;
-}
-
 cmOptionalLinkImplementation& cmTarget::GetLinkImplMap(std::string const& config) const
 {
   // Populate the link implementation for this configuration.

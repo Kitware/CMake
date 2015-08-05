@@ -231,9 +231,6 @@ public:
 
   void GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const;
 
-  cmLinkImplementation const*
-    GetLinkImplementation(const std::string& config) const;
-
   cmLinkImplementationLibraries const*
     GetLinkImplementationLibraries(const std::string& config) const;
 
