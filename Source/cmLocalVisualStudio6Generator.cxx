@@ -305,9 +305,12 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
   // We may be modifying the source groups temporarily, so make a copy.
   std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
 
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
+
   // get the classes from the source lists then add them to the groups
   std::vector<cmSourceFile*> classes;
-  if (!target.GetConfigCommonSourceFiles(classes))
+  if (!gt->GetConfigCommonSourceFiles(classes))
     {
     return;
     }

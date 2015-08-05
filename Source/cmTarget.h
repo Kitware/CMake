@@ -137,8 +137,6 @@ public:
    */
   void GetSourceFiles(std::vector<cmSourceFile*> &files,
                       const std::string& config) const;
-  bool GetConfigCommonSourceFiles(std::vector<cmSourceFile*>& files) const;
-
   /**
    * Add sources to the target.
    */
