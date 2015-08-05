@@ -317,6 +317,8 @@ public:
   typedef std::map<std::string, CompileInfo> CompileInfoMapType;
   mutable CompileInfoMapType CompileInfoMap;
 
+  bool IsNullImpliedByLinkLibraries(const std::string &p) const;
+
   /** Get the name of the compiler pdb file for the target.  */
   std::string GetCompilePDBName(const std::string& config="") const;
 
@@ -486,6 +488,7 @@ private:
   std::vector<TargetPropertyEntry*> CompileFeaturesEntries;
   std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
   std::vector<TargetPropertyEntry*> SourceEntries;
+  mutable std::set<std::string> LinkImplicitNullProperties;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config, cmTarget const* headTarget,

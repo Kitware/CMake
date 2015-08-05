@@ -2554,13 +2554,6 @@ const char* cmTarget::GetExportMacro() const
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::IsNullImpliedByLinkLibraries(const std::string &p) const
-{
-  return this->LinkImplicitNullProperties.find(p)
-      != this->LinkImplicitNullProperties.end();
-}
-
-//----------------------------------------------------------------------------
 void
 cmTarget::GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const
 {

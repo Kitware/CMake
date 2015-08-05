@@ -3928,7 +3928,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
                                   .find(p)
                                   != tgt->Target->GetProperties().end();
   const bool impliedByUse =
-          tgt->Target->IsNullImpliedByLinkLibraries(p);
+          tgt->IsNullImpliedByLinkLibraries(p);
   assert((impliedByUse ^ explicitlySet)
       || (!impliedByUse && !explicitlySet));
 
@@ -5046,6 +5046,14 @@ cmGeneratorTarget::GetLinkImplementationLibrariesInternal(
 }
 
 //----------------------------------------------------------------------------
+bool
+cmGeneratorTarget::IsNullImpliedByLinkLibraries(const std::string &p) const
+{
+  return this->LinkImplicitNullProperties.find(p)
+      != this->LinkImplicitNullProperties.end();
+}
+
+//----------------------------------------------------------------------------
 void cmGeneratorTarget::ComputeLinkImplementationLibraries(
   const std::string& config,
   cmOptionalLinkImplementation& impl,
@@ -5130,7 +5138,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       {
       if (!this->GetProperty(*it))
         {
-        this->Target->LinkImplicitNullProperties.insert(*it);
+        this->LinkImplicitNullProperties.insert(*it);
         }
       }
     cge->GetMaxLanguageStandard(this->Target,

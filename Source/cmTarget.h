@@ -326,8 +326,6 @@ public:
 
   void AppendBuildInterfaceIncludes();
 
-  bool IsNullImpliedByLinkLibraries(const std::string &p) const;
-
   std::string GetDebugGeneratorExpressions(const std::string &value,
                                   cmTarget::LinkLibraryType llt) const;
 
@@ -439,7 +437,6 @@ private:
   std::set<std::string> SystemIncludeDirectories;
   std::set<std::string> LinkDirectoriesEmmitted;
   std::set<std::string> Utilities;
-  mutable std::set<std::string> LinkImplicitNullProperties;
   std::map<std::string, cmListFileBacktrace> UtilityBacktraces;
   cmPolicies::PolicyMap PolicyMap;
   std::string Name;
