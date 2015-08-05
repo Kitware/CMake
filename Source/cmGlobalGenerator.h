@@ -374,6 +374,8 @@ protected:
   void SetLanguageEnabledFlag(const std::string& l, cmMakefile* mf);
   void SetLanguageEnabledMaps(const std::string& l, cmMakefile* mf);
   void FillExtensionToLanguageMap(const std::string& l, cmMakefile* mf);
+  virtual void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
+                                   const char* envVar) const;
 
   virtual bool ComputeTargetDepends();
 
@@ -462,8 +464,6 @@ private:
 
   virtual void ForceLinkerLanguages();
 
-  virtual void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
-                                   const char* envVar) const;
   void CheckCompilerIdCompatibility(cmMakefile* mf,
                                     std::string const& lang) const;
 

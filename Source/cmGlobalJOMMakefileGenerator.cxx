@@ -36,18 +36,6 @@ void cmGlobalJOMMakefileGenerator
   // pick a default
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
-  if(!(cmSystemTools::GetEnv("INCLUDE") &&
-       cmSystemTools::GetEnv("LIB"))
-    )
-    {
-    std::string message = "To use the JOM generator, cmake must be run "
-      "from a shell that can use the compiler cl from the command line. "
-      "This environment does not contain INCLUDE, LIB, or LIBPATH, and "
-      "these must be set for the cl compiler to work. ";
-    mf->IssueMessage(cmake::WARNING,
-                     message);
-    }
-
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 }
 
@@ -57,4 +45,20 @@ void cmGlobalJOMMakefileGenerator
 {
   entry.Name = cmGlobalJOMMakefileGenerator::GetActualName();
   entry.Brief = "Generates JOM makefiles.";
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalJOMMakefileGenerator::PrintCompilerAdvice(std::ostream& os,
+                                                  std::string const& lang,
+                                                  const char* envVar) const
+{
+  if(lang == "CXX" || lang == "C")
+    {
+    os <<
+      "To use the JOM generator with Visual C++, cmake must be run from a "
+      "shell that can use the compiler cl from the command line. This "
+      "environment is unable to invoke the cl compiler. To fix this problem, "
+      "run cmake from the Visual Studio Command Prompt (vcvarsall.bat).\n";
+    }
+  this->cmGlobalUnixMakefileGenerator3::PrintCompilerAdvice(os, lang, envVar);
 }
