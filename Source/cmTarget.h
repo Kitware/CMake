@@ -467,9 +467,6 @@ private:
   bool LinkLibrariesForVS6Analyzed;
 #endif
 
-  bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
-                           std::string& out) const;
-
   // Cache import information from properties for each configuration.
   struct ImportInfo
   {

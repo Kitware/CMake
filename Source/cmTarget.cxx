@@ -2448,67 +2448,6 @@ const char* cmTarget::GetOutputTargetType(bool implib) const
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::ComputePDBOutputDir(const std::string& kind,
-                                   const std::string& config,
-                                   std::string& out) const
-{
-  // Look for a target property defining the target output directory
-  // based on the target type.
-  const char* propertyName = 0;
-  std::string propertyNameStr = kind;
-  if(!propertyNameStr.empty())
-    {
-    propertyNameStr += "_OUTPUT_DIRECTORY";
-    propertyName = propertyNameStr.c_str();
-    }
-  std::string conf = config;
-
-  // Check for a per-configuration output directory target property.
-  std::string configUpper = cmSystemTools::UpperCase(conf);
-  const char* configProp = 0;
-  std::string configPropStr = kind;
-  if(!configPropStr.empty())
-    {
-    configPropStr += "_OUTPUT_DIRECTORY_";
-    configPropStr += configUpper;
-    configProp = configPropStr.c_str();
-    }
-
-  // Select an output directory.
-  if(const char* config_outdir = this->GetProperty(configProp))
-    {
-    // Use the user-specified per-configuration output directory.
-    out = config_outdir;
-
-    // Skip per-configuration subdirectory.
-    conf = "";
-    }
-  else if(const char* outdir = this->GetProperty(propertyName))
-    {
-    // Use the user-specified output directory.
-    out = outdir;
-    }
-  if(out.empty())
-    {
-    return false;
-    }
-
-  // Convert the output path to a full path in case it is
-  // specified as a relative path.  Treat a relative path as
-  // relative to the current output directory for this makefile.
-  out = (cmSystemTools::CollapseFullPath
-         (out, this->Makefile->GetCurrentBinaryDirectory()));
-
-  // The generator may add the configuration's subdirectory.
-  if(!conf.empty())
-    {
-    this->Makefile->GetGlobalGenerator()->
-      AppendDirectoryForConfig("/", conf, "", out);
-    }
-  return true;
-}
-
-//----------------------------------------------------------------------------
 std::string cmTarget::GetFrameworkVersion() const
 {
   assert(this->GetType() != INTERFACE_LIBRARY);

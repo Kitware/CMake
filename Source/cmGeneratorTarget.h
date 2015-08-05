@@ -528,6 +528,9 @@ private:
   mutable bool DebugSourcesDone;
   mutable bool LinkImplementationLanguageIsContextDependent;
 
+  bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
+                           std::string& out) const;
+
 public:
   std::vector<cmTarget const*> const&
     GetLinkImplementationClosure(const std::string& config) const;
