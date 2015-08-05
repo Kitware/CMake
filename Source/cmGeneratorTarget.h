@@ -229,6 +229,10 @@ public:
   cmLinkImplementation const*
     GetLinkImplementation(const std::string& config) const;
 
+  void ComputeLinkImplementationLanguages(const std::string& config,
+                                          cmOptionalLinkImplementation& impl
+                                          ) const;
+
   bool HaveBuildTreeRPATH(const std::string& config) const;
 
   /** Full path with trailing slash to the top-level directory
