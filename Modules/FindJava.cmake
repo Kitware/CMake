@@ -8,21 +8,34 @@
 # include files and libraries are.  The caller may set variable JAVA_HOME
 # to specify a Java installation prefix explicitly.
 #
+#
+# Specify one or more of the following components as you call this find module. See example below.
+#
+# ::
+#
+#   Runtime     = User just want to execute some Java byte-compiled
+#   Development = Development tools (java, javac, javah and javadoc), includes Runtime component
+#   IdlJ        = idl compiler for Java
+#   JarSigner   = signer tool for jar
+#
+#
 # This module sets the following result variables:
 #
 # ::
 #
-#   Java_JAVA_EXECUTABLE    = the full path to the Java runtime
-#   Java_JAVAC_EXECUTABLE   = the full path to the Java compiler
-#   Java_JAVAH_EXECUTABLE   = the full path to the Java header generator
-#   Java_JAVADOC_EXECUTABLE = the full path to the Java documention generator
-#   Java_JAR_EXECUTABLE     = the full path to the Java archiver
-#   Java_VERSION_STRING     = Version of java found, eg. 1.6.0_12
-#   Java_VERSION_MAJOR      = The major version of the package found.
-#   Java_VERSION_MINOR      = The minor version of the package found.
-#   Java_VERSION_PATCH      = The patch version of the package found.
-#   Java_VERSION_TWEAK      = The tweak version of the package found (after '_')
-#   Java_VERSION            = This is set to: $major.$minor.$patch(.$tweak)
+#   Java_JAVA_EXECUTABLE      = the full path to the Java runtime
+#   Java_JAVAC_EXECUTABLE     = the full path to the Java compiler
+#   Java_JAVAH_EXECUTABLE     = the full path to the Java header generator
+#   Java_JAVADOC_EXECUTABLE   = the full path to the Java documention generator
+#   Java_IDLJ_EXECUTABLE      = the full path to the Java idl compiler
+#   Java_JAR_EXECUTABLE       = the full path to the Java archiver
+#   Java_JARSIGNER_EXECUTABLE = the full path to the Java jar signer
+#   Java_VERSION_STRING       = Version of java found, eg. 1.6.0_12
+#   Java_VERSION_MAJOR        = The major version of the package found.
+#   Java_VERSION_MINOR        = The minor version of the package found.
+#   Java_VERSION_PATCH        = The patch version of the package found.
+#   Java_VERSION_TWEAK        = The tweak version of the package found (after '_')
+#   Java_VERSION              = This is set to: $major.$minor.$patch(.$tweak)
 #
 #
 #
@@ -184,28 +197,61 @@ find_program(Java_JAVADOC_EXECUTABLE
   PATHS ${_JAVA_PATHS}
 )
 
+find_program(Java_IDLJ_EXECUTABLE
+  NAMES idlj
+  HINTS ${_JAVA_HINTS}
+  PATHS ${_JAVA_PATHS}
+)
+
+find_program(Java_JARSIGNER_EXECUTABLE
+  NAMES jarsigner
+  HINTS ${_JAVA_HINTS}
+  PATHS ${_JAVA_PATHS}
+)
+
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 if(Java_FIND_COMPONENTS)
+  set(_JAVA_REQUIRED_VARS)
   foreach(component ${Java_FIND_COMPONENTS})
     # User just want to execute some Java byte-compiled
-    if(component STREQUAL "Runtime")
-      find_package_handle_standard_args(Java
-        REQUIRED_VARS Java_JAVA_EXECUTABLE
-        VERSION_VAR Java_VERSION
-        )
+    If(component STREQUAL "Runtime")
+      list(APPEND _JAVA_REQUIRED_VARS Java_JAVA_EXECUTABLE)
+      if(Java_JAVA_EXECUTABLE)
+        set(Java_Runtime_FOUND TRUE)
+      endif()
     elseif(component STREQUAL "Development")
-      find_package_handle_standard_args(Java
-        REQUIRED_VARS Java_JAVA_EXECUTABLE Java_JAR_EXECUTABLE Java_JAVAC_EXECUTABLE
-                      Java_JAVAH_EXECUTABLE Java_JAVADOC_EXECUTABLE
-        VERSION_VAR Java_VERSION
-        )
+      list(APPEND _JAVA_REQUIRED_VARS Java_JAVA_EXECUTABLE Java_JAVAC_EXECUTABLE
+                                      Java_JAVAH_EXECUTABLE Java_JAVADOC_EXECUTABLE)
+      if(Java_JAVA_EXECUTABLE AND Java_JAVAC_EXECUTABLE
+          AND Java_JAVAH_EXECUTABLE AND Java_JAVADOC_EXECUTABLE)
+        set(Java_Development_FOUND TRUE)
+      endif()
+    elseif(component STREQUAL "IdlJ")
+      list(APPEND _JAVA_REQUIRED_VARS Java_IDLJ_EXECUTABLE)
+      if(Java_IdlJ_EXECUTABLE)
+        set(Java_Extra_FOUND TRUE)
+      endif()
+    elseif(component STREQUAL "JarSigner")
+      list(APPEND _JAVA_REQUIRED_VARS Java_JARSIGNER_EXECUTABLE)
+      if(Java_IDLJ_EXECUTABLE)
+        set(Java_JarSigner_FOUND TRUE)
+      endif()
     else()
       message(FATAL_ERROR "Comp: ${component} is not handled")
     endif()
-    set(Java_${component}_FOUND TRUE)
   endforeach()
+  list (REMOVE_DUPLICATES _JAVA_REQUIRED_VARS)
+  find_package_handle_standard_args(Java
+    REQUIRED_VARS ${_JAVA_REQUIRED_VARS} HANDLE_COMPONENTS
+    VERSION_VAR Java_VERSION
+    )
+  if(Java_FOUND)
+    foreach(component ${Java_FIND_COMPONENTS})
+      set(Java_${component}_FOUND TRUE)
+    endforeach()
+  endif()
 else()
-  # Check for everything
+  # Check for Development
   find_package_handle_standard_args(Java
     REQUIRED_VARS Java_JAVA_EXECUTABLE Java_JAR_EXECUTABLE Java_JAVAC_EXECUTABLE
                   Java_JAVAH_EXECUTABLE Java_JAVADOC_EXECUTABLE
@@ -220,6 +266,8 @@ mark_as_advanced(
   Java_JAVAC_EXECUTABLE
   Java_JAVAH_EXECUTABLE
   Java_JAVADOC_EXECUTABLE
+  Java_IDLJ_EXECUTABLE
+  Java_JARSIGNER_EXECUTABLE
   )
 
 # LEGACY

@@ -3008,17 +3008,30 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     if(JNI_H AND EXISTS "${JNI_H}") # in case jni.h is a broken symlink
       file(READ "${JNI_H}" JNI_FILE)
       if("${JNI_FILE}" MATCHES "JDK1_2")
-        add_test(Java ${CMAKE_CTEST_COMMAND}
+        add_test(Java.Jar ${CMAKE_CTEST_COMMAND}
           --build-and-test
           "${CMake_SOURCE_DIR}/Tests/Java"
-          "${CMake_BINARY_DIR}/Tests/Java"
+          "${CMake_BINARY_DIR}/Tests/JavaJar"
           ${build_generator_args}
           --build-project hello
+          --build-target hello
           --build-two-config
-          --build-run-dir "${CMake_BINARY_DIR}/Tests/Java/"
+          --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaJar/"
           --build-options ${build_options}
           --test-command ${JAVA_RUNTIME} -classpath hello.jar HelloWorld)
-        list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Java")
+        list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJar")
+        add_test(Java.JarSourceList ${CMAKE_CTEST_COMMAND}
+          --build-and-test
+          "${CMake_SOURCE_DIR}/Tests/Java"
+          "${CMake_BINARY_DIR}/Tests/JavaJarSourceList"
+          ${build_generator_args}
+          --build-project hello
+          --build-target hello2
+          --build-two-config
+          --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaJarSourceList/"
+          --build-options ${build_options}
+          --test-command ${JAVA_RUNTIME} -classpath hello2.jar HelloWorld)
+        list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJarSourceList")
       endif()
     endif()
   endif()

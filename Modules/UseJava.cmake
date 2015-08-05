@@ -21,7 +21,8 @@
 #
 # This command creates a <target_name>.jar.  It compiles the given
 # source files (source) and adds the given resource files (resource) to
-# the jar file.  If only resource files are given then just a jar file
+# the jar file.  Source files can be java files or listing files
+# (prefixed by '@').  If only resource files are given then just a jar file
 # is created.  The list of include jars are added to the classpath when
 # compiling the java sources and also to the dependencies of the target.
 # INCLUDE_JARS also accepts other target names created by add_jar.  For
@@ -210,14 +211,16 @@
 #
 # ::
 #
-#  install_jar(TARGET_NAME DESTINATION)
+#  install_jar(target_name destination)
+#  install_jar(target_name DESTINATION destination [COMPONENT component])
 #
 # This command installs the TARGET_NAME files to the given DESTINATION.
 # It should be called in the same scope as add_jar() or it will fail.
 #
 # ::
 #
-#  install_jni_symlink(TARGET_NAME DESTINATION)
+#  install_jni_symlink(target_name destination)
+#  install_jni_symlink(target_name DESTINATION destination [COMPONENT component])
 #
 # This command installs the TARGET_NAME JNI symlinks to the given
 # DESTINATION.  It should be called in the same scope as add_jar() or it
@@ -423,6 +426,7 @@ function(add_jar _TARGET_NAME)
 
     set(_JAVA_CLASS_FILES)
     set(_JAVA_COMPILE_FILES)
+    set(_JAVA_COMPILE_FILELISTS)
     set(_JAVA_DEPENDS)
     set(_JAVA_COMPILE_DEPENDS)
     set(_JAVA_RESOURCE_FILES)
@@ -433,7 +437,11 @@ function(add_jar _TARGET_NAME)
         get_filename_component(_JAVA_PATH ${_JAVA_SOURCE_FILE} PATH)
         get_filename_component(_JAVA_FULL ${_JAVA_SOURCE_FILE} ABSOLUTE)
 
-        if (_JAVA_EXT MATCHES ".java")
+        if (_JAVA_SOURCE_FILE MATCHES "^@(.+)$")
+            get_filename_component(_JAVA_FULL ${CMAKE_MATCH_1} ABSOLUTE)
+            list(APPEND _JAVA_COMPILE_FILELISTS ${_JAVA_FULL})
+
+        elseif (_JAVA_EXT MATCHES ".java")
             file(RELATIVE_PATH _JAVA_REL_BINARY_PATH ${_add_jar_OUTPUT_DIR} ${_JAVA_FULL})
             file(RELATIVE_PATH _JAVA_REL_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR} ${_JAVA_FULL})
             string(LENGTH ${_JAVA_REL_BINARY_PATH} _BIN_LEN)
@@ -492,11 +500,21 @@ function(add_jar _TARGET_NAME)
         file(WRITE ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist "")
     endif()
 
-    if (_JAVA_COMPILE_FILES)
-        # Create the list of files to compile.
-        set(_JAVA_SOURCES_FILE ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_sources)
-        string(REPLACE ";" "\"\n\"" _JAVA_COMPILE_STRING "\"${_JAVA_COMPILE_FILES}\"")
-        file(WRITE ${_JAVA_SOURCES_FILE} ${_JAVA_COMPILE_STRING})
+    if (_JAVA_COMPILE_FILES OR _JAVA_COMPILE_FILELISTS)
+        set (_JAVA_SOURCES_FILELISTS)
+
+        if (_JAVA_COMPILE_FILES)
+            # Create the list of files to compile.
+            set(_JAVA_SOURCES_FILE ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_sources)
+            string(REPLACE ";" "\"\n\"" _JAVA_COMPILE_STRING "\"${_JAVA_COMPILE_FILES}\"")
+            file(WRITE ${_JAVA_SOURCES_FILE} ${_JAVA_COMPILE_STRING})
+            list (APPEND _JAVA_SOURCES_FILELISTS "@${_JAVA_SOURCES_FILE}")
+        endif()
+        if (_JAVA_COMPILE_FILELISTS)
+            foreach (_JAVA_FILELIST IN LISTS _JAVA_COMPILE_FILELISTS)
+                list (APPEND _JAVA_SOURCES_FILELISTS "@${_JAVA_FILELIST}")
+            endforeach()
+        endif()
 
         # Compile the java files and create a list of class files
         add_custom_command(
@@ -506,9 +524,9 @@ function(add_jar _TARGET_NAME)
                 ${CMAKE_JAVA_COMPILE_FLAGS}
                 -classpath "${CMAKE_JAVA_INCLUDE_PATH_FINAL}"
                 -d ${CMAKE_JAVA_CLASS_OUTPUT_PATH}
-                @${_JAVA_SOURCES_FILE}
+                ${_JAVA_SOURCES_FILELISTS}
             COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_compiled_${_TARGET_NAME}
-            DEPENDS ${_JAVA_COMPILE_FILES} ${_JAVA_COMPILE_DEPENDS}
+            DEPENDS ${_JAVA_COMPILE_FILES} ${_JAVA_COMPILE_FILELISTS} ${_JAVA_COMPILE_DEPENDS}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             COMMENT "Building Java objects for ${_TARGET_NAME}.jar"
         )
@@ -613,7 +631,26 @@ function(add_jar _TARGET_NAME)
 
 endfunction()
 
-function(INSTALL_JAR _TARGET_NAME _DESTINATION)
+function(INSTALL_JAR _TARGET_NAME)
+    if (ARGC EQUAL 2)
+      set (_DESTINATION ${ARGV1})
+    else()
+      cmake_parse_arguments(_install_jar
+        ""
+        "DESTINATION;COMPONENT"
+        ""
+        ${ARGN})
+      if (_install_jar_DESTINATION)
+        set (_DESTINATION ${_install_jar_DESTINATION})
+      else()
+        message(SEND_ERROR "install_jar: ${_TARGET_NAME}: DESTINATION must be specified.")
+      endif()
+
+      if (_install_jar_COMPONENT)
+        set (_COMPONENT COMPONENT ${_install_jar_COMPONENT})
+      endif()
+    endif()
+
     get_property(__FILES
         TARGET
             ${_TARGET_NAME}
@@ -627,13 +664,33 @@ function(INSTALL_JAR _TARGET_NAME _DESTINATION)
                 ${__FILES}
             DESTINATION
                 ${_DESTINATION}
+            ${_COMPONENT}
         )
     else ()
-        message(SEND_ERROR "The target ${_TARGET_NAME} is not known in this scope.")
+        message(SEND_ERROR "install_jar: The target ${_TARGET_NAME} is not known in this scope.")
     endif ()
 endfunction()
 
-function(INSTALL_JNI_SYMLINK _TARGET_NAME _DESTINATION)
+function(INSTALL_JNI_SYMLINK _TARGET_NAME)
+    if (ARGC EQUAL 2)
+      set (_DESTINATION ${ARGV1})
+    else()
+      cmake_parse_arguments(_install_jni_symlink
+        ""
+        "DESTINATION;COMPONENT"
+        ""
+        ${ARGN})
+      if (_install_jni_symlink_DESTINATION)
+        set (_DESTINATION ${_install_jni_symlink_DESTINATION})
+      else()
+        message(SEND_ERROR "install_jni_symlink: ${_TARGET_NAME}: DESTINATION must be specified.")
+      endif()
+
+      if (_install_jni_symlink_COMPONENT)
+        set (_COMPONENT COMPONENT ${_install_jni_symlink_COMPONENT})
+      endif()
+    endif()
+
     get_property(__SYMLINK
         TARGET
             ${_TARGET_NAME}
@@ -647,9 +704,10 @@ function(INSTALL_JNI_SYMLINK _TARGET_NAME _DESTINATION)
                 ${__SYMLINK}
             DESTINATION
                 ${_DESTINATION}
+            ${_COMPONENT}
         )
     else ()
-        message(SEND_ERROR "The target ${_TARGET_NAME} is not known in this scope.")
+        message(SEND_ERROR "install_jni_symlink: The target ${_TARGET_NAME} is not known in this scope.")
     endif ()
 endfunction()
 
