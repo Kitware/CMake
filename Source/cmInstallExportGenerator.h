@@ -32,12 +32,14 @@ public:
                            const char* component,
                            MessageLevel message,
                            const char* filename, const char* name_space,
-                           bool exportOld, cmMakefile* mf);
+                           bool exportOld);
   ~cmInstallExportGenerator();
 
   cmExportSet* GetExportSet() {return this->ExportSet;}
 
-  cmMakefile* GetMakefile() const { return this->Makefile; }
+  void Compute(cmLocalGenerator* lg);
+
+  cmLocalGenerator* GetLocalGenerator() const { return this->LocalGenerator; }
 
   const std::string& GetNamespace() const { return this->Namespace; }
 
@@ -57,7 +59,7 @@ protected:
   std::string FileName;
   std::string Namespace;
   bool ExportOld;
-  cmMakefile* Makefile;
+  cmLocalGenerator* LocalGenerator;
 
   std::string TempDir;
   std::string MainImportFile;

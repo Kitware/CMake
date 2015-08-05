@@ -1406,7 +1406,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
       ica.GetDestination().c_str(),
       ica.GetPermissions().c_str(), ica.GetConfigurations(),
       ica.GetComponent().c_str(), message, fname.c_str(),
-      name_space.GetCString(), exportOld.IsEnabled(), this->Makefile);
+      name_space.GetCString(), exportOld.IsEnabled());
   this->Makefile->AddInstallGenerator(exportGenerator);
 
   return true;

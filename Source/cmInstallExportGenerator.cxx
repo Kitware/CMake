@@ -34,15 +34,14 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   const char* component,
   MessageLevel message,
   const char* filename, const char* name_space,
-  bool exportOld,
-  cmMakefile* mf)
+  bool exportOld)
   :cmInstallGenerator(destination, configurations, component, message)
   ,ExportSet(exportSet)
   ,FilePermissions(file_permissions)
   ,FileName(filename)
   ,Namespace(name_space)
   ,ExportOld(exportOld)
-  ,Makefile(mf)
+  ,LocalGenerator(0)
 {
   this->EFGen = new cmExportInstallFileGenerator(this);
   exportSet->AddInstallation(this);
@@ -54,12 +53,18 @@ cmInstallExportGenerator::~cmInstallExportGenerator()
   delete this->EFGen;
 }
 
+void cmInstallExportGenerator::Compute(cmLocalGenerator* lg)
+{
+  this->LocalGenerator = lg;
+}
+
 //----------------------------------------------------------------------------
 void cmInstallExportGenerator::ComputeTempDir()
 {
   // Choose a temporary directory in which to generate the import
   // files to be installed.
-  this->TempDir = this->Makefile->GetCurrentBinaryDirectory();
+  this->TempDir =
+      this->LocalGenerator->GetMakefile()->GetCurrentBinaryDirectory();
   this->TempDir += cmake::GetCMakeFilesDirectory();
   this->TempDir += "/Export";
   if(this->Destination.empty())
