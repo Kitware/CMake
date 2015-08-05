@@ -309,6 +309,65 @@
 #
 #
 # if you don't set the INSTALLPATH.
+#
+# ::
+#
+#  create_javah(TARGET <target>
+#               GENERATED_FILES <VAR>
+#               CLASSES <class>...
+#               [CLASSPATH <classpath>...]
+#               [DEPENDS <depend>...]
+#               [OUTPUT_NAME <path>|OUTPUT_DIR <path>]
+#               )
+#
+# Create C header files from java classes. These files provide the connective glue
+# that allow your Java and C code to interact.
+#
+# There are two main signatures for create_javah.  The first signature
+# returns generated files throught variable specified by GENERATED_FILES option:
+#
+# ::
+#
+#    Example:
+#    Create_javah(GENERATED_FILES files_headers
+#      CLASSES org.cmake.HelloWorld
+#      CLASSPATH hello.jar
+#    )
+#
+#
+#
+# The second signature for create_javah creates a target which encapsulates
+# header files generation.
+#
+# ::
+#
+#    Example:
+#    Create_javah(TARGET target_headers
+#      CLASSES org.cmake.HelloWorld
+#      CLASSPATH hello.jar
+#    )
+#
+#
+#
+# Both signatures share same options.
+#
+#  ``CLASSES <class>...``
+#    Specifies Java classes used to generate headers.
+#
+#  ``CLASSPATH <classpath>...``
+#    Specifies various paths to look up classes. Here .class files, jar files or targets
+#    created by command add_jar can be used.
+#
+#  ``DEPENDS <depend>...``
+#    Targets on which the javah target depends
+#
+#  ``OUTPUT_NAME <path>``
+#    Concatenates the resulting header files for all the classes listed by option CLASSES
+#    into <path>. Same behavior as option '-o' of javah tool.
+#
+#  ``OUTPUT_DIR <path>``
+#    Sets the directory where the header files will be generated. Same behavior as option
+#    '-d' of javah tool. If not specified, ${CMAKE_CURRENT_BINARY_DIR} is used as output directory.
 
 #=============================================================================
 # Copyright 2013 OpenGamma Ltd. <graham@opengamma.com>
@@ -1130,4 +1189,102 @@ function(create_javadoc _target)
         DIRECTORY ${_javadoc_builddir}
         DESTINATION ${_javadoc_installpath}
     )
+endfunction()
+
+function (create_javah)
+    cmake_parse_arguments(_create_javah
+      ""
+      "TARGET;GENERATED_FILES;OUTPUT_NAME;OUTPUT_DIR"
+      "CLASSES;CLASSPATH;DEPENDS"
+      ${ARGN})
+
+    # ckeck parameters
+    if (NOT _create_javah_TARGET AND NOT _create_javah_GENERATED_FILES)
+      message (FATAL_ERROR "create_javah: TARGET or GENERATED_FILES must be specified.")
+    endif()
+    if (_create_javah_OUTPUT_NAME AND _create_javah_OUTPUT_DIR)
+      message (FATAL_ERROR "create_javah: OUTPUT_NAME and OUTPUT_DIR are mutually exclusive.")
+    endif()
+
+    if (NOT _create_javah_CLASSES)
+      message (FATAL_ERROR "create_javah: CLASSES is a required parameter.")
+    endif()
+
+    set (_output_files)
+    if (WIN32 AND NOT CYGWIN AND CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
+      set(_classpath_sep ";")
+    else ()
+      set(_classpath_sep ":")
+    endif()
+
+    # handle javah options
+    set (_javah_options)
+
+    if (_create_javah_CLASSPATH)
+      # CLASSPATH can specify directories, jar files or targets created with add_jar command
+      set (_classpath)
+      foreach (_path IN LISTS _create_javah_CLASSPATH)
+        if (TARGET ${_path})
+          get_target_property (_jar_path ${_path} JAR_FILE)
+          if (_jar_path)
+            list (APPEND _classpath "${_jar_path}")
+            list (APPEND _create_javah_DEPENDS "${_path}")
+          else()
+            message(SEND_ERROR "create_javah: CLASSPATH target ${_path} is not a jar.")
+          endif()
+        elseif (EXISTS "${_path}")
+          list (APPEND _classpath "${_path}")
+          if (NOT IS_DIRECTORY "${_path}")
+            list (APPEND _create_javah_DEPENDS "${_path}")
+          endif()
+        else()
+          message(SEND_ERROR "create_javah: CLASSPATH entry ${_path} does not exist.")
+        endif()
+      endforeach()
+      string (REPLACE ";" "${_classpath_sep}" _classpath "${_classpath}")
+      list (APPEND _javah_options -classpath ${_classpath})
+    endif()
+
+    if (_create_javah_OUTPUT_DIR)
+      list (APPEND _javah_options -d "${_create_javah_OUTPUT_DIR}")
+    endif()
+
+    if (_create_javah_OUTPUT_NAME)
+      list (APPEND _javah_options -o "${_create_javah_OUTPUT_NAME}")
+      set (_output_files "${_create_javah_OUTPUT_NAME}")
+
+      get_filename_component (_create_javah_OUTPUT_DIR "${_create_javah_OUTPUT_NAME}" DIRECTORY)
+      get_filename_component (_create_javah_OUTPUT_DIR "${_create_javah_OUTPUT_DIR}" ABSOLUTE)
+    endif()
+
+    if (NOT _create_javah_OUTPUT_DIR)
+      set (_create_javah_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+    endif()
+
+    if (NOT _create_javah_OUTPUT_NAME)
+      # compute output names
+      foreach (_class IN LISTS _create_javah_CLASSES)
+        string (REPLACE "." "_" _c_header "${_class}")
+        set (_c_header  "${_create_javah_OUTPUT_DIR}/${_c_header}.h")
+        list (APPEND _output_files "${_c_header}")
+      endforeach()
+    endif()
+
+    # finalize custom command arguments
+    if (_create_javah_DEPENDS)
+      list (INSERT _create_javah_DEPENDS 0 DEPENDS)
+    endif()
+
+    add_custom_command (OUTPUT ${_output_files}
+      COMMAND "${Java_JAVAH_EXECUTABLE}" ${_javah_options} -jni ${_create_javah_CLASSES}
+      ${_create_javah_DEPENDS}
+      WORKING_DIRECTORY ${_create_javah_OUTPUT_DIR}
+      COMMENT "Building C header files from classes...")
+
+    if (_create_javah_TARGET)
+      add_custom_target (${_create_javah_TARGET} ALL DEPENDS ${_output_files})
+    endif()
+    if (_create_javah_GENERATED_FILES)
+      set (${_create_javah_GENERATED_FILES} ${_output_files} PARENT_SCOPE)
+    endif()
 endfunction()
