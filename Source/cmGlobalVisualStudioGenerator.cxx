@@ -843,7 +843,7 @@ cmGlobalVisualStudioGenerator::TargetIsFortranOnly(cmTarget const& target)
   {
   // Issue diagnostic if the source files depend on the config.
   std::vector<cmSourceFile*> sources;
-  if (!target.GetConfigCommonSourceFiles(sources))
+  if (!gt->GetConfigCommonSourceFiles(sources))
     {
     return false;
     }
