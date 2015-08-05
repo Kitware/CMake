@@ -97,7 +97,7 @@ public:
   ImportInfoMapType ImportInfoMap;
 
   // Cache link implementation computation from each configuration.
-  struct OptionalLinkImplementation: public cmTarget::LinkImplementation
+  struct OptionalLinkImplementation: public cmLinkImplementation
   {
     OptionalLinkImplementation():
       LibrariesDone(false), LanguagesDone(false),
@@ -3585,7 +3585,7 @@ void cmTargetInternals::AddInterfaceEntries(
 }
 
 //----------------------------------------------------------------------------
-cmTarget::LinkImplementation const*
+const cmLinkImplementation *
 cmTarget::GetLinkImplementation(const std::string& config) const
 {
   // There is no link implementation for imported targets.
