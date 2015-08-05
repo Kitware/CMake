@@ -233,6 +233,14 @@ public:
                                           cmOptionalLinkImplementation& impl
                                           ) const;
 
+  // Compute the set of languages compiled by the target.  This is
+  // computed every time it is called because the languages can change
+  // when source file properties are changed and we do not have enough
+  // information to forward these property changes to the targets
+  // until we have per-target object file properties.
+  void GetLanguages(std::set<std::string>& languages,
+                    std::string const& config) const;
+
   bool HaveBuildTreeRPATH(const std::string& config) const;
 
   /** Full path with trailing slash to the top-level directory
