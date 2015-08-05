@@ -14,6 +14,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmOutputConverter.h"
 #include "cmMakefile.h"
+#include "cmLocalGenerator.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTest.h"
@@ -27,12 +28,18 @@ cmTestGenerator
 {
   this->ActionsPerConfig = !test->GetOldStyle();
   this->TestGenerated = false;
+  this->LG = 0;
 }
 
 //----------------------------------------------------------------------------
 cmTestGenerator
 ::~cmTestGenerator()
 {
+}
+
+void cmTestGenerator::Compute(cmLocalGenerator* lg)
+{
+  this->LG = lg;
 }
 
 //----------------------------------------------------------------------------
@@ -81,8 +88,8 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   // Check whether the command executable is a target whose name is to
   // be translated.
   std::string exe = command[0];
-  cmMakefile* mf = this->Test->GetMakefile();
-  cmGeneratorTarget* target = mf->FindGeneratorTargetToUse(exe);
+  cmGeneratorTarget* target =
+      this->LG->GetMakefile()->FindGeneratorTargetToUse(exe);
   if(target && target->GetType() == cmTarget::EXECUTABLE)
     {
     // Use the target file on disk.
@@ -110,7 +117,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   else
     {
     // Use the command name given.
-    exe = ge.Parse(exe.c_str())->Evaluate(mf, config);
+    exe = ge.Parse(exe.c_str())->Evaluate(this->LG->GetMakefile(), config);
     cmSystemTools::ConvertToUnixSlashes(exe);
     }
 
@@ -120,7 +127,8 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
       ci != command.end(); ++ci)
     {
     os << " " << cmOutputConverter::EscapeForCMake(
-                                         ge.Parse(*ci)->Evaluate(mf, config));
+                                         ge.Parse(*ci)->Evaluate(
+                                            this->LG->GetMakefile(), config));
     }
 
   // Finish the test command.
@@ -137,7 +145,8 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
       {
       os << " " << i->first
          << " " << cmOutputConverter::EscapeForCMake(
-           ge.Parse(i->second.GetValue())->Evaluate(mf, config));
+           ge.Parse(i->second.GetValue())->Evaluate(this->LG->GetMakefile(),
+                                                    config));
       }
     os << ")" << std::endl;
     }
