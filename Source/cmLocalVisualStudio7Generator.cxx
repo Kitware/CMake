@@ -1469,10 +1469,13 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   // We may be modifying the source groups temporarily, so make a copy.
   std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
 
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
+
   // get the classes from the source lists then add them to the groups
   this->ModuleDefinitionFile = "";
   std::vector<cmSourceFile*> classes;
-  if (!target.GetConfigCommonSourceFiles(classes))
+  if (!gt->GetConfigCommonSourceFiles(classes))
     {
     return;
     }
@@ -1514,8 +1517,6 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
     {
     // VS >= 8 support per-config source locations so we
     // list object library content as external objects.
-    cmGeneratorTarget* gt =
-      this->GlobalGenerator->GetGeneratorTarget(&target);
     std::vector<std::string> objs;
     gt->UseObjectLibraries(objs, "");
     if(!objs.empty())

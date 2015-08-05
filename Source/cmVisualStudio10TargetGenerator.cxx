@@ -965,7 +965,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   std::vector<cmSourceGroup> sourceGroups =
     this->Makefile->GetSourceGroups();
   std::vector<cmSourceFile*> classes;
-  if (!this->Target->GetConfigCommonSourceFiles(classes))
+  if (!this->GeneratorTarget->GetConfigCommonSourceFiles(classes))
     {
     return;
     }

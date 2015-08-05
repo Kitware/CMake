@@ -1124,7 +1124,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
 
     // organize the sources
     std::vector<cmSourceFile*> classes;
-    if (!cmtarget.GetConfigCommonSourceFiles(classes))
+    if (!gtgt->GetConfigCommonSourceFiles(classes))
       {
       return false;
       }
@@ -1505,7 +1505,8 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
     }
 
   std::vector<cmSourceFile*> classes;
-  if (!cmtarget.GetConfigCommonSourceFiles(classes))
+  cmGeneratorTarget* gtgt = this->GetGeneratorTarget(&cmtarget);
+  if (!gtgt->GetConfigCommonSourceFiles(classes))
     {
     return;
     }
@@ -2557,7 +2558,8 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
   if(cmtarget.GetType() == cmTarget::UTILITY)
     {
     std::vector<cmSourceFile*> sources;
-    if (!cmtarget.GetConfigCommonSourceFiles(sources))
+    cmGeneratorTarget* gtgt = this->GetGeneratorTarget(&cmtarget);
+    if (!gtgt->GetConfigCommonSourceFiles(sources))
       {
       return 0;
       }
@@ -3085,7 +3087,8 @@ bool cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
         }
 
       std::vector<cmSourceFile*> classes;
-      if (!cmtarget.GetConfigCommonSourceFiles(classes))
+      cmGeneratorTarget* gtgt = this->GetGeneratorTarget(&cmtarget);
+      if (!gtgt->GetConfigCommonSourceFiles(classes))
         {
         return false;
         }
