@@ -2667,14 +2667,6 @@ bool cmTarget::ComputePDBOutputDir(const std::string& kind,
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::UsesDefaultOutputDir(const std::string& config,
-                                    bool implib) const
-{
-  std::string dir;
-  return this->ComputeOutputDir(config, implib, dir);
-}
-
-//----------------------------------------------------------------------------
 std::string cmTarget::GetFrameworkVersion() const
 {
   assert(this->GetType() != INTERFACE_LIBRARY);

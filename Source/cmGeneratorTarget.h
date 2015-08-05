@@ -285,6 +285,10 @@ public:
   std::vector<cmSourceFile*> const*
   GetSourceDepends(cmSourceFile const* sf) const;
 
+  /** Return whether this target uses the default value for its output
+      directory.  */
+  bool UsesDefaultOutputDir(const std::string& config, bool implib) const;
+
   /** Get the name of the pdb file for the target.  */
   std::string GetPDBName(const std::string& config="") const;
 

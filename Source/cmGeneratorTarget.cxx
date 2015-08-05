@@ -4474,6 +4474,14 @@ std::string cmGeneratorTarget::GetDirectory(const std::string& config,
 }
 
 //----------------------------------------------------------------------------
+bool cmGeneratorTarget::UsesDefaultOutputDir(const std::string& config,
+                                    bool implib) const
+{
+  std::string dir;
+  return this->Target->ComputeOutputDir(config, implib, dir);
+}
+
+//----------------------------------------------------------------------------
 void
 cmGeneratorTarget::ComputeLinkInterfaceLibraries(
   const std::string& config,

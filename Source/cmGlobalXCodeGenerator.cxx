@@ -1975,7 +1975,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     if(this->XcodeVersion >= 21)
       {
-      if(!target.UsesDefaultOutputDir(configName, false))
+      if(!gtgt->UsesDefaultOutputDir(configName, false))
         {
         std::string pncdir = gtgt->GetDirectory(configName);
         buildSettings->AddAttribute("CONFIGURATION_BUILD_DIR",

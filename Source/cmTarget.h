@@ -312,10 +312,6 @@ public:
   /** Get a build-tree directory in which to place target support files.  */
   std::string GetSupportDirectory() const;
 
-  /** Return whether this target uses the default value for its output
-      directory.  */
-  bool UsesDefaultOutputDir(const std::string& config, bool implib) const;
-
   /** @return whether this target have a well defined output file name. */
   bool HaveWellDefinedOutputFiles() const;
 
