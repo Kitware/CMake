@@ -34,7 +34,7 @@ if(WIN32 AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "Intel")
   set(_cmake_options "-DCMAKE_EXE_LINKER_FLAGS=")
 endif()
 
-if("${CMAKE_GENERATOR}" MATCHES "Make")
+if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
   set(TEST_LINK_DEPENDS ${BuildDepends_BINARY_DIR}/Project/linkdep.txt)
   file(WRITE ${TEST_LINK_DEPENDS} "1")
 endif()
