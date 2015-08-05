@@ -2811,21 +2811,6 @@ void cmTarget::SetPropertyDefault(const std::string& property,
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::HaveBuildTreeRPATH(const std::string& config) const
-{
-  if (this->GetPropertyAsBool("SKIP_BUILD_RPATH"))
-    {
-    return false;
-    }
-  if(cmLinkImplementationLibraries const* impl =
-     this->GetLinkImplementationLibraries(config))
-    {
-    return !impl->Libraries.empty();
-    }
-  return false;
-}
-
-//----------------------------------------------------------------------------
 bool cmTarget::HaveInstallTreeRPATH() const
 {
   const char* install_rpath = this->GetProperty("INSTALL_RPATH");
