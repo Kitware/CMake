@@ -762,9 +762,7 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
     return;
     }
 
-  cmGeneratorTarget *gtgt = tgt->GetMakefile()
-                               ->GetGlobalGenerator()
-                               ->GetGeneratorTarget(tgt);
+  cmGeneratorTarget *gtgt = 0;
 
   // Get a full path to the dependent shared library.
   // Add it to the runtime path computation so that the target being
@@ -772,6 +770,9 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
   std::string lib;
   if(tgt)
     {
+    cmGeneratorTarget *gtgt = tgt->GetMakefile()
+        ->GetGlobalGenerator()->GetGeneratorTarget(tgt);
+
     lib = gtgt->GetFullPath(this->Config, this->UseImportLibrary);
     this->AddLibraryRuntimeInfo(lib, tgt);
     }
@@ -797,7 +798,7 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
     }
   if(order)
     {
-    if(tgt)
+    if(gtgt)
       {
       std::string soName = gtgt->GetSOName(this->Config);
       const char* soname = soName.empty()? 0 : soName.c_str();
