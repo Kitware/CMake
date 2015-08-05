@@ -241,6 +241,8 @@ public:
   void GetLanguages(std::set<std::string>& languages,
                     std::string const& config) const;
 
+  bool GetConfigCommonSourceFiles(std::vector<cmSourceFile*>& files) const;
+
   bool HaveBuildTreeRPATH(const std::string& config) const;
 
   /** Full path with trailing slash to the top-level directory

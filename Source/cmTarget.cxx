@@ -726,62 +726,6 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
 }
 
 //----------------------------------------------------------------------------
-bool
-cmTarget::GetConfigCommonSourceFiles(std::vector<cmSourceFile*>& files) const
-{
-  std::vector<std::string> configs;
-  this->Makefile->GetConfigurations(configs);
-  if (configs.empty())
-    {
-    configs.push_back("");
-    }
-
-  std::vector<std::string>::const_iterator it = configs.begin();
-  const std::string& firstConfig = *it;
-  this->GetSourceFiles(files, firstConfig);
-
-  for ( ; it != configs.end(); ++it)
-    {
-    std::vector<cmSourceFile*> configFiles;
-    this->GetSourceFiles(configFiles, *it);
-    if (configFiles != files)
-      {
-      std::string firstConfigFiles;
-      const char* sep = "";
-      for (std::vector<cmSourceFile*>::const_iterator fi = files.begin();
-           fi != files.end(); ++fi)
-        {
-        firstConfigFiles += sep;
-        firstConfigFiles += (*fi)->GetFullPath();
-        sep = "\n  ";
-        }
-
-      std::string thisConfigFiles;
-      sep = "";
-      for (std::vector<cmSourceFile*>::const_iterator fi = configFiles.begin();
-           fi != configFiles.end(); ++fi)
-        {
-        thisConfigFiles += sep;
-        thisConfigFiles += (*fi)->GetFullPath();
-        sep = "\n  ";
-        }
-      std::ostringstream e;
-      e << "Target \"" << this->Name << "\" has source files which vary by "
-        "configuration. This is not supported by the \""
-        << this->Makefile->GetGlobalGenerator()->GetName()
-        << "\" generator.\n"
-          "Config \"" << firstConfig << "\":\n"
-          "  " << firstConfigFiles << "\n"
-          "Config \"" << *it << "\":\n"
-          "  " << thisConfigFiles << "\n";
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-      return false;
-      }
-    }
-  return true;
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files,
                               const std::string& config) const
 {
