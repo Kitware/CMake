@@ -836,9 +836,12 @@ void RegisterVisualStudioMacros(const std::string& macrosFile,
 bool
 cmGlobalVisualStudioGenerator::TargetIsFortranOnly(cmTarget const& target)
 {
+  cmGeneratorTarget* gt = this->GetGeneratorTarget(&target);
+
   // check to see if this is a fortran build
   std::set<std::string> languages;
   {
+
   // Issue diagnostic if the source files depend on the config.
   std::vector<cmSourceFile*> sources;
   if (!target.GetConfigCommonSourceFiles(sources))
@@ -846,7 +849,7 @@ cmGlobalVisualStudioGenerator::TargetIsFortranOnly(cmTarget const& target)
     return false;
     }
   }
-  target.GetLanguages(languages, "");
+  gt->GetLanguages(languages, "");
   if(languages.size() == 1)
     {
     if(*languages.begin() == "Fortran")
