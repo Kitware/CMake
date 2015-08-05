@@ -4397,11 +4397,68 @@ cmGeneratorTarget::GetLinkImplementation(const std::string& config) const
 }
 
 //----------------------------------------------------------------------------
+bool cmGeneratorTarget::GetConfigCommonSourceFiles(
+    std::vector<cmSourceFile*>& files) const
+{
+  std::vector<std::string> configs;
+  this->Makefile->GetConfigurations(configs);
+  if (configs.empty())
+    {
+    configs.push_back("");
+    }
+
+  std::vector<std::string>::const_iterator it = configs.begin();
+  const std::string& firstConfig = *it;
+  this->Target->GetSourceFiles(files, firstConfig);
+
+  for ( ; it != configs.end(); ++it)
+    {
+    std::vector<cmSourceFile*> configFiles;
+    this->Target->GetSourceFiles(configFiles, *it);
+    if (configFiles != files)
+      {
+      std::string firstConfigFiles;
+      const char* sep = "";
+      for (std::vector<cmSourceFile*>::const_iterator fi = files.begin();
+           fi != files.end(); ++fi)
+        {
+        firstConfigFiles += sep;
+        firstConfigFiles += (*fi)->GetFullPath();
+        sep = "\n  ";
+        }
+
+      std::string thisConfigFiles;
+      sep = "";
+      for (std::vector<cmSourceFile*>::const_iterator fi = configFiles.begin();
+           fi != configFiles.end(); ++fi)
+        {
+        thisConfigFiles += sep;
+        thisConfigFiles += (*fi)->GetFullPath();
+        sep = "\n  ";
+        }
+      std::ostringstream e;
+      e << "Target \"" << this->GetName()
+        << "\" has source files which vary by "
+        "configuration. This is not supported by the \""
+        << this->LocalGenerator->GetGlobalGenerator()->GetName()
+        << "\" generator.\n"
+          "Config \"" << firstConfig << "\":\n"
+          "  " << firstConfigFiles << "\n"
+          "Config \"" << *it << "\":\n"
+          "  " << thisConfigFiles << "\n";
+      this->LocalGenerator->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return false;
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
                             const std::string& config) const
 {
   std::vector<cmSourceFile*> sourceFiles;
-  this->Target->GetSourceFiles(sourceFiles, config);
+  this->GetSourceFiles(sourceFiles, config);
   for(std::vector<cmSourceFile*>::const_iterator
         i = sourceFiles.begin(); i != sourceFiles.end(); ++i)
     {
