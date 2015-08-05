@@ -2178,20 +2178,6 @@ const char* cmTarget::GetPrefixVariableInternal(bool implib) const
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::IsImportedSharedLibWithoutSOName(
-                                          const std::string& config) const
-{
-  if(this->IsImported() && this->GetType() == cmTarget::SHARED_LIBRARY)
-    {
-    if(cmTarget::ImportInfo const* info = this->GetImportInfo(config))
-      {
-      return info->NoSOName;
-      }
-    }
-  return false;
-}
-
-//----------------------------------------------------------------------------
 std::string
 cmTarget::GetFullNameImported(const std::string& config, bool implib) const
 {

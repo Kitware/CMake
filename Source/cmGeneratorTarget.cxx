@@ -1338,6 +1338,19 @@ bool cmGeneratorTarget::IsChrpathUsed(const std::string& config) const
   return false;
 }
 
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::IsImportedSharedLibWithoutSOName(
+                                          const std::string& config) const
+{
+  if(this->IsImported() && this->GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    if(cmTarget::ImportInfo const* info = this->Target->GetImportInfo(config))
+      {
+      return info->NoSOName;
+      }
+    }
+  return false;
+}
 
 //----------------------------------------------------------------------------
 bool cmGeneratorTarget::HasMacOSXRpathInstallNameDir(

@@ -244,10 +244,6 @@ public:
   void
   GetTargetVersion(bool soversion, int& major, int& minor, int& patch) const;
 
-  /** Test for special case of a third-party shared library that has
-      no soname at all.  */
-  bool IsImportedSharedLibWithoutSOName(const std::string& config) const;
-
   /** Does this target have a GNU implib to convert to MS format?  */
   bool HasImplibGNUtoMS() const;
 

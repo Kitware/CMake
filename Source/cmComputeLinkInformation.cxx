@@ -1101,9 +1101,10 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
     this->SharedLibrariesLinked.insert(target);
     }
 
+  cmGeneratorTarget *gtgt = this->GlobalGenerator->GetGeneratorTarget(target);
   // Handle case of an imported shared library with no soname.
   if(this->NoSONameUsesPath &&
-     target->IsImportedSharedLibWithoutSOName(this->Config))
+     gtgt->IsImportedSharedLibWithoutSOName(this->Config))
     {
     this->AddSharedLibNoSOName(item);
     return;

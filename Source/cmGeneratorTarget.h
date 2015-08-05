@@ -415,6 +415,10 @@ public:
   /** Whether this library defaults to \@rpath.  */
   bool MacOSXRpathInstallNameDirDefault() const;
 
+  /** Test for special case of a third-party shared library that has
+      no soname at all.  */
+  bool IsImportedSharedLibWithoutSOName(const std::string& config) const;
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
