@@ -79,9 +79,6 @@ public:
   // The backtrace when the target was created.
   cmListFileBacktrace Backtrace;
 
-  typedef std::map<std::string, cmTarget::OutputInfo> OutputInfoMapType;
-  OutputInfoMapType OutputInfoMap;
-
   typedef std::map<std::string, cmTarget::ImportInfo> ImportInfoMapType;
   ImportInfoMapType ImportInfoMap;
 
@@ -1710,67 +1707,6 @@ bool cmTarget::HaveWellDefinedOutputFiles() const
 }
 
 //----------------------------------------------------------------------------
-cmTarget::OutputInfo const* cmTarget::GetOutputInfo(
-    const std::string& config) const
-{
-  // There is no output information for imported targets.
-  if(this->IsImported())
-    {
-    return 0;
-    }
-
-  // Only libraries and executables have well-defined output files.
-  if(!this->HaveWellDefinedOutputFiles())
-    {
-    std::string msg = "cmTarget::GetOutputInfo called for ";
-    msg += this->GetName();
-    msg += " which has type ";
-    msg += cmTarget::GetTargetTypeName(this->GetType());
-    this->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR, msg);
-    return 0;
-    }
-
-  // Lookup/compute/cache the output information for this configuration.
-  std::string config_upper;
-  if(!config.empty())
-    {
-    config_upper = cmSystemTools::UpperCase(config);
-    }
-  typedef cmTargetInternals::OutputInfoMapType OutputInfoMapType;
-  OutputInfoMapType::iterator i =
-    this->Internal->OutputInfoMap.find(config_upper);
-  if(i == this->Internal->OutputInfoMap.end())
-    {
-    // Add empty info in map to detect potential recursion.
-    OutputInfo info;
-    OutputInfoMapType::value_type entry(config_upper, info);
-    i = this->Internal->OutputInfoMap.insert(entry).first;
-
-    // Compute output directories.
-    this->ComputeOutputDir(config, false, info.OutDir);
-    this->ComputeOutputDir(config, true, info.ImpDir);
-    if(!this->ComputePDBOutputDir("PDB", config, info.PdbDir))
-      {
-      info.PdbDir = info.OutDir;
-      }
-
-    // Now update the previously-prepared map entry.
-    i->second = info;
-    }
-  else if(i->second.empty())
-    {
-    // An empty map entry indicates we have been called recursively
-    // from the above block.
-    this->Makefile->GetCMakeInstance()->IssueMessage(
-      cmake::FATAL_ERROR,
-      "Target '" + this->GetName() + "' OUTPUT_DIRECTORY depends on itself.",
-      this->GetBacktrace());
-    return 0;
-    }
-  return &i->second;
-}
-
-//----------------------------------------------------------------------------
 const char* cmTarget::ImportedGetLocation(const std::string& config) const
 {
   static std::string location;
@@ -2509,100 +2445,6 @@ const char* cmTarget::GetOutputTargetType(bool implib) const
       break;
     }
   return "";
-}
-
-//----------------------------------------------------------------------------
-bool cmTarget::ComputeOutputDir(const std::string& config,
-                                bool implib, std::string& out) const
-{
-  bool usesDefaultOutputDir = false;
-  std::string conf = config;
-
-  // Look for a target property defining the target output directory
-  // based on the target type.
-  std::string targetTypeName = this->GetOutputTargetType(implib);
-  const char* propertyName = 0;
-  std::string propertyNameStr = targetTypeName;
-  if(!propertyNameStr.empty())
-    {
-    propertyNameStr += "_OUTPUT_DIRECTORY";
-    propertyName = propertyNameStr.c_str();
-    }
-
-  // Check for a per-configuration output directory target property.
-  std::string configUpper = cmSystemTools::UpperCase(conf);
-  const char* configProp = 0;
-  std::string configPropStr = targetTypeName;
-  if(!configPropStr.empty())
-    {
-    configPropStr += "_OUTPUT_DIRECTORY_";
-    configPropStr += configUpper;
-    configProp = configPropStr.c_str();
-    }
-
-  // Select an output directory.
-  if(const char* config_outdir = this->GetProperty(configProp))
-    {
-    // Use the user-specified per-configuration output directory.
-    cmGeneratorExpression ge;
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-      ge.Parse(config_outdir);
-    out = cge->Evaluate(this->Makefile, config);
-
-    // Skip per-configuration subdirectory.
-    conf = "";
-    }
-  else if(const char* outdir = this->GetProperty(propertyName))
-    {
-    // Use the user-specified output directory.
-    cmGeneratorExpression ge;
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-      ge.Parse(outdir);
-    out = cge->Evaluate(this->Makefile, config);
-
-    // Skip per-configuration subdirectory if the value contained a
-    // generator expression.
-    if (out != outdir)
-      {
-      conf = "";
-      }
-    }
-  else if(this->GetType() == cmTarget::EXECUTABLE)
-    {
-    // Lookup the output path for executables.
-    out = this->Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
-    }
-  else if(this->GetType() == cmTarget::STATIC_LIBRARY ||
-          this->GetType() == cmTarget::SHARED_LIBRARY ||
-          this->GetType() == cmTarget::MODULE_LIBRARY)
-    {
-    // Lookup the output path for libraries.
-    out = this->Makefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
-    }
-  if(out.empty())
-    {
-    // Default to the current output directory.
-    usesDefaultOutputDir = true;
-    out = ".";
-    }
-
-  // Convert the output path to a full path in case it is
-  // specified as a relative path.  Treat a relative path as
-  // relative to the current output directory for this makefile.
-  out = (cmSystemTools::CollapseFullPath
-         (out, this->Makefile->GetCurrentBinaryDirectory()));
-
-  // The generator may add the configuration's subdirectory.
-  if(!conf.empty())
-    {
-    bool iosPlatform = this->Makefile->PlatformIsAppleIos();
-    std::string suffix =
-      usesDefaultOutputDir && iosPlatform ? "${EFFECTIVE_PLATFORM_NAME}" : "";
-    this->Makefile->GetGlobalGenerator()->
-      AppendDirectoryForConfig("/", conf, suffix, out);
-    }
-
-  return usesDefaultOutputDir;
 }
 
 //----------------------------------------------------------------------------

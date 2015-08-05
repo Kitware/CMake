@@ -470,20 +470,6 @@ private:
   bool LinkLibrariesForVS6Analyzed;
 #endif
 
-  // Cache target output paths for each configuration.
-  struct OutputInfo
-  {
-    std::string OutDir;
-    std::string ImpDir;
-    std::string PdbDir;
-    bool empty() const
-     { return OutDir.empty() && ImpDir.empty() && PdbDir.empty(); }
-  };
-
-  OutputInfo const* GetOutputInfo(const std::string& config) const;
-  bool
-  ComputeOutputDir(const std::string& config,
-                   bool implib, std::string& out) const;
   bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
                            std::string& out) const;
 
