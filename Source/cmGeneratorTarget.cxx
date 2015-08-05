@@ -4397,6 +4397,57 @@ cmGeneratorTarget::GetLinkImplementation(const std::string& config) const
 }
 
 //----------------------------------------------------------------------------
+void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
+                            const std::string& config) const
+{
+  std::vector<cmSourceFile*> sourceFiles;
+  this->Target->GetSourceFiles(sourceFiles, config);
+  for(std::vector<cmSourceFile*>::const_iterator
+        i = sourceFiles.begin(); i != sourceFiles.end(); ++i)
+    {
+    const std::string& lang = (*i)->GetLanguage();
+    if(!lang.empty())
+      {
+      languages.insert(lang);
+      }
+    }
+
+  std::vector<cmGeneratorTarget*> objectLibraries;
+  std::vector<cmSourceFile const*> externalObjects;
+  if (!this->Makefile->IsConfigured())
+    {
+    std::vector<cmTarget*> objectTargets;
+    this->Target->GetObjectLibrariesCMP0026(objectTargets);
+    objectLibraries.reserve(objectTargets.size());
+    for (std::vector<cmTarget*>::const_iterator it = objectTargets.begin();
+         it != objectTargets.end(); ++it)
+      {
+      objectLibraries.push_back(this->LocalGenerator->GetGlobalGenerator()
+                                ->GetGeneratorTarget(*it));
+      }
+    }
+  else
+    {
+    this->GetExternalObjects(externalObjects, config);
+    for(std::vector<cmSourceFile const*>::const_iterator
+          i = externalObjects.begin(); i != externalObjects.end(); ++i)
+      {
+      std::string objLib = (*i)->GetObjectLibrary();
+      if (cmTarget* tgt = this->Makefile->FindTargetToUse(objLib))
+        {
+        objectLibraries.push_back(this->LocalGenerator->GetGlobalGenerator()
+                                  ->GetGeneratorTarget(tgt));
+        }
+      }
+    }
+  for(std::vector<cmGeneratorTarget*>::const_iterator
+      i = objectLibraries.begin(); i != objectLibraries.end(); ++i)
+    {
+    (*i)->GetLanguages(languages, config);
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmGeneratorTarget::ComputeLinkImplementationLanguages(
   const std::string& config,
   cmOptionalLinkImplementation& impl) const
@@ -4404,7 +4455,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLanguages(
   // This target needs runtime libraries for its source languages.
   std::set<std::string> languages;
   // Get languages used in our source files.
-  this->Target->GetLanguages(languages, config);
+  this->GetLanguages(languages, config);
   // Copy the set of langauges to the link implementation.
   impl.Languages.insert(impl.Languages.begin(),
                         languages.begin(), languages.end());
