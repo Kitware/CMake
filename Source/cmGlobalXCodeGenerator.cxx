@@ -1805,7 +1805,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
 
   // Compute the compilation flags for each language.
   std::set<std::string> languages;
-  target.GetLanguages(languages, configName);
+  cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&target);
+  gtgt->GetLanguages(languages, configName);
   std::map<std::string, std::string> cflags;
   for (std::set<std::string>::iterator li = languages.begin();
        li != languages.end(); ++li)
@@ -1827,7 +1828,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       AddCompileOptions(flags, &target, lang, configName);
     }
 
-  cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&target);
   std::string llang = gtgt->GetLinkerLanguage(configName);
   if(binary && llang.empty())
     {
