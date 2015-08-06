@@ -31,7 +31,6 @@
 #endif
 #include "cmInstallGenerator.h"
 #include "cmTestGenerator.h"
-#include "cmDefinitions.h"
 #include "cmAlgorithms.h"
 #include "cmake.h"
 #include <stdlib.h> // required for atoi
@@ -47,92 +46,7 @@
 class cmMakefile::Internals
 {
 public:
-  std::list<cmDefinitions> VarStack;
   bool IsSourceFileTryCompile;
-
-  void PushDefinitions()
-  {
-    this->VarStack.push_back(cmDefinitions());
-  }
-
-  void InitializeDefinitions(cmMakefile* parent)
-  {
-    this->VarStack.back() =
-        cmDefinitions::MakeClosure(parent->Internal->VarStack.rbegin(),
-                                   parent->Internal->VarStack.rend());
-  }
-
-  const char* GetDefinition(std::string const& name)
-  {
-    return cmDefinitions::Get(name, this->VarStack.rbegin(),
-                                    this->VarStack.rend());
-  }
-
-  bool IsInitialized(std::string const& name)
-  {
-    return cmDefinitions::HasKey(name, this->VarStack.rbegin(),
-                                 this->VarStack.rend());
-  }
-
-  void SetDefinition(std::string const& name, std::string const& value)
-  {
-    this->VarStack.back().Set(name, value.c_str());
-  }
-
-  void RemoveDefinition(std::string const& name)
-  {
-    this->VarStack.back().Set(name, 0);
-  }
-
-  std::vector<std::string> UnusedKeys() const
-  {
-    return this->VarStack.back().UnusedKeys();
-  }
-
-  std::vector<std::string> ClosureKeys() const
-  {
-    return cmDefinitions::ClosureKeys(this->VarStack.rbegin(),
-                                      this->VarStack.rend());
-  }
-
-  void PopDefinitions()
-  {
-    this->VarStack.pop_back();
-  }
-
-  bool RaiseScope(std::string const& var, const char* varDef, cmMakefile* mf)
-  {
-    std::list<cmDefinitions>::reverse_iterator it = this->VarStack.rbegin();
-    assert(it != this->VarStack.rend());
-    ++it;
-    if(it == this->VarStack.rend())
-      {
-      cmLocalGenerator* plg = mf->LocalGenerator->GetParent();
-      if(!plg)
-        {
-        return false;
-        }
-      // Update the definition in the parent directory top scope.  This
-      // directory's scope was initialized by the closure of the parent
-      // scope, so we do not need to localize the definition first.
-      cmMakefile* parent = plg->GetMakefile();
-      if (varDef)
-        {
-        parent->AddDefinition(var, varDef);
-        }
-      else
-        {
-        parent->RemoveDefinition(var);
-        }
-      return true;
-      }
-    // First localize the definition in the current scope.
-    cmDefinitions::Raise(var, this->VarStack.rbegin(), this->VarStack.rend());
-
-    // Now update the definition in the parent scope.
-    it->Set(var, varDef);
-    return true;
-  }
 };
 
 // default is not to be building executables
@@ -141,7 +55,6 @@ cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
     LocalGenerator(localGenerator),
     StateSnapshot(localGenerator->GetStateSnapshot())
 {
-  this->Internal->PushDefinitions();
   this->Internal->IsSourceFileTryCompile = false;
 
   // Initialize these first since AddDefaultDefinitions calls AddDefinition
@@ -1567,9 +1480,6 @@ void cmMakefile::AddLinkLibrary(const std::string& lib)
 
 void cmMakefile::InitializeFromParent(cmMakefile* parent)
 {
-  // Initialize definitions with the closure of the parent scope.
-  this->Internal->InitializeDefinitions(parent);
-
   this->StateSnapshot.InitializeFromParent();
 
   this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
@@ -1634,8 +1544,6 @@ void cmMakefile::PushFunctionScope(std::string const& fileName,
         fileName);
   assert(this->StateSnapshot.IsValid());
 
-  this->Internal->PushDefinitions();
-
   this->PushLoopBlockBarrier();
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -1662,8 +1570,6 @@ void cmMakefile::PopFunctionScope(bool reportError)
   this->PopLoopBlockBarrier();
 
   this->CheckForUnusedVariables();
-
-  this->Internal->PopDefinitions();
 }
 
 void cmMakefile::PushMacroScope(std::string const& fileName,
@@ -1967,7 +1873,7 @@ void cmMakefile::AddDefinition(const std::string& name, const char* value)
     {
     this->LogUnused("changing definition", name);
     }
-  this->Internal->SetDefinition(name, value);
+  this->StateSnapshot.SetDefinition(name, value);
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
@@ -2030,7 +1936,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
   this->GetState()->AddCacheEntry(name, haveVal ? val.c_str() : 0,
                                           doc, type);
   // if there was a definition then remove it
-  this->Internal->RemoveDefinition(name);
+  this->StateSnapshot.RemoveDefinition(name);
 }
 
 
@@ -2040,7 +1946,9 @@ void cmMakefile::AddDefinition(const std::string& name, bool value)
     {
     this->LogUnused("changing definition", name);
     }
-  this->Internal->SetDefinition(name, value ? "ON" : "OFF");
+
+  this->StateSnapshot.SetDefinition(name, value ? "ON" : "OFF");
+
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
@@ -2057,7 +1965,7 @@ void cmMakefile::CheckForUnusedVariables() const
     {
     return;
     }
-  const std::vector<std::string>& unused = this->Internal->UnusedKeys();
+  const std::vector<std::string>& unused = this->StateSnapshot.UnusedKeys();
   std::vector<std::string>::const_iterator it = unused.begin();
   for (; it != unused.end(); ++it)
     {
@@ -2067,12 +1975,12 @@ void cmMakefile::CheckForUnusedVariables() const
 
 void cmMakefile::MarkVariableAsUsed(const std::string& var)
 {
-  this->Internal->GetDefinition(var);
+  this->StateSnapshot.GetDefinition(var);
 }
 
 bool cmMakefile::VariableInitialized(const std::string& var) const
 {
-  return this->Internal->IsInitialized(var);
+  return this->StateSnapshot.IsInitialized(var);
 }
 
 void cmMakefile::LogUnused(const char* reason,
@@ -2120,7 +2028,7 @@ void cmMakefile::RemoveDefinition(const std::string& name)
     {
     this->LogUnused("unsetting", name);
     }
-  this->Internal->RemoveDefinition(name);
+  this->StateSnapshot.RemoveDefinition(name);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
@@ -2586,7 +2494,7 @@ const char* cmMakefile::GetRequiredDefinition(const std::string& name) const
 
 bool cmMakefile::IsDefinitionSet(const std::string& name) const
 {
-  const char* def = this->Internal->GetDefinition(name);
+  const char* def = this->StateSnapshot.GetDefinition(name);
   if(!def)
     {
     def = this->GetState()->GetInitializedCacheValue(name);
@@ -2607,7 +2515,7 @@ bool cmMakefile::IsDefinitionSet(const std::string& name) const
 
 const char* cmMakefile::GetDefinition(const std::string& name) const
 {
-  const char* def = this->Internal->GetDefinition(name);
+  const char* def = this->StateSnapshot.GetDefinition(name);
   if(!def)
     {
     def = this->GetState()->GetInitializedCacheValue(name);
@@ -2643,7 +2551,7 @@ const char* cmMakefile::GetSafeDefinition(const std::string& def) const
 
 std::vector<std::string> cmMakefile::GetDefinitions() const
 {
-  std::vector<std::string> res = this->Internal->ClosureKeys();
+  std::vector<std::string> res = this->StateSnapshot.ClosureKeys();
   std::vector<std::string> cacheKeys = this->GetState()->GetCacheEntryKeys();
   res.insert(res.end(), cacheKeys.begin(), cacheKeys.end());
   std::sort(res.begin(), res.end());
@@ -4422,8 +4330,17 @@ std::string cmMakefile::FormatListFileStack() const
 
 void cmMakefile::PushScope()
 {
-  this->Internal->PushDefinitions();
-
+  std::string commandName;
+  long line = 0;
+  if (!this->ContextStack.empty())
+    {
+    commandName = this->ContextStack.back()->Name;
+    line = this->ContextStack.back()->Line;
+    }
+  this->StateSnapshot = this->GetState()->CreateVariableScopeSnapshot(
+        this->StateSnapshot,
+        commandName,
+        line);
   this->PushLoopBlockBarrier();
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -4441,7 +4358,9 @@ void cmMakefile::PopScope()
 
   this->CheckForUnusedVariables();
 
-  this->Internal->PopDefinitions();
+  this->StateSnapshot =
+      this->GetState()->Pop(this->StateSnapshot);
+  assert(this->StateSnapshot.IsValid());
 }
 
 void cmMakefile::RaiseScope(const std::string& var, const char *varDef)
@@ -4451,7 +4370,7 @@ void cmMakefile::RaiseScope(const std::string& var, const char *varDef)
     return;
     }
 
-  if (!this->Internal->RaiseScope(var, varDef, this))
+  if (!this->StateSnapshot.RaiseScope(var, varDef))
     {
     std::ostringstream m;
     m << "Cannot set \"" << var << "\": current scope has no parent.";
