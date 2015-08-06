@@ -209,6 +209,15 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
     result.push_back(this->ConvertToNinjaPath(this->ModuleDefinitionFile));
     }
 
+  // Add user-specified dependencies.
+  if (const char* linkDepends = this->Target->GetProperty("LINK_DEPENDS"))
+    {
+    std::vector<std::string> linkDeps;
+    cmSystemTools::ExpandListArgument(linkDepends, linkDeps);
+    std::transform(linkDeps.begin(), linkDeps.end(),
+                   std::back_inserter(result), MapToNinjaPath());
+    }
+
   return result;
 }
 
