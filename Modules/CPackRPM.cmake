@@ -95,6 +95,7 @@
 #  * Default   : CPACK_PACKAGE_VENDOR if set or "unknown"
 #
 # .. variable:: CPACK_RPM_PACKAGE_URL
+#               CPACK_RPM_<component>_PACKAGE_URL
 #
 #  The projects URL.
 #
@@ -123,7 +124,55 @@
 #  compression whereas older cannot use such RPM.  Using this one can enforce
 #  compression type to be used.  Possible value are: lzma, xz, bzip2 and gzip.
 #
+# .. variable:: CPACK_RPM_PACKAGE_AUTOREQ
+#               CPACK_RPM_<component>_PACKAGE_AUTOREQ
+#
+#  RPM spec autoreq field.
+#
+#  * Mandatory : NO
+#  * Default   : -
+#
+#  May be used to enable (1, yes) or disable (0, no) automatic shared libraries
+#  dependency detection. Dependencies are added to requires list.
+#
+#  .. note::
+#
+#    By defalut automatic dependency detection is enabled by rpm generator.
+#
+# .. variable:: CPACK_RPM_PACKAGE_AUTOPROV
+#               CPACK_RPM_<component>_PACKAGE_AUTOPROV
+#
+#  RPM spec autoprov field.
+#
+#  * Mandatory : NO
+#  * Default   : -
+#
+#  May be used to enable (1, yes) or disable (0, no) automatic listing of shared
+#  libraries that are provided by the package. Shared libraries are added to
+#  provides list.
+#
+#  .. note::
+#
+#    By defalut automatic provides detection is enabled by rpm generator.
+#
+# .. variable:: CPACK_RPM_PACKAGE_AUTOREQPROV
+#               CPACK_RPM_<component>_PACKAGE_AUTOREQPROV
+#
+#  RPM spec autoreqprov field.
+#
+#  * Mandatory : NO
+#  * Default   : -
+#
+#  Variable enables/disables autoreq and autoprov at the same time.
+#  See :variable:`CPACK_RPM_PACKAGE_AUTOREQ` and :variable:`CPACK_RPM_PACKAGE_AUTOPROV`
+#  for more details.
+#
+#  .. note::
+#
+#    By defalut automatic detection feature is enabled by rpm.
+#
 # .. variable:: CPACK_RPM_PACKAGE_REQUIRES
+#               CPACK_RPM_<component>_PACKAGE_REQUIRES
 #
 #  RPM spec requires field.
 #
@@ -139,7 +188,25 @@
 #
 #   rpm -qp --requires file.rpm
 #
+# .. variable:: CPACK_RPM_PACKAGE_CONFLICTS
+#               CPACK_RPM_<component>_PACKAGE_CONFLICTS
+#
+#  RPM spec conflicts field.
+#
+#  * Mandatory : NO
+#  * Default   : -
+#
+#  May be used to set negative RPM dependencies (conflicts). Note that you must enclose
+#  the complete requires string between quotes, for example::
+#
+#   set(CPACK_RPM_PACKAGE_CONFLICTS "libxml2")
+#
+#  The conflicting package list of an RPM file could be printed with::
+#
+#   rpm -qp --conflicts file.rpm
+#
 # .. variable:: CPACK_RPM_PACKAGE_REQUIRES_PRE
+#               CPACK_RPM_<component>_PACKAGE_REQUIRES_PRE
 #
 #  RPM spec requires(pre) field.
 #
@@ -152,6 +219,7 @@
 #   set(CPACK_RPM_PACKAGE_REQUIRES_PRE "shadow-utils, initscripts")
 #
 # .. variable:: CPACK_RPM_PACKAGE_REQUIRES_POST
+#               CPACK_RPM_<component>_PACKAGE_REQUIRES_POST
 #
 #  RPM spec requires(post) field.
 #
@@ -165,6 +233,7 @@
 #
 #
 # .. variable:: CPACK_RPM_PACKAGE_REQUIRES_POSTUN
+#               CPACK_RPM_<component>_PACKAGE_REQUIRES_POSTUN
 #
 #  RPM spec requires(postun) field.
 #
@@ -178,6 +247,7 @@
 #
 #
 # .. variable:: CPACK_RPM_PACKAGE_REQUIRES_PREUN
+#               CPACK_RPM_<component>_PACKAGE_REQUIRES_PREUN
 #
 #  RPM spec requires(preun) field.
 #
@@ -190,6 +260,7 @@
 #   set(CPACK_RPM_PACKAGE_REQUIRES_PREUN "shadow-utils, initscripts")
 #
 # .. variable:: CPACK_RPM_PACKAGE_SUGGESTS
+#               CPACK_RPM_<component>_PACKAGE_SUGGESTS
 #
 #  RPM spec suggest field.
 #
@@ -200,6 +271,7 @@
 #  enclose the complete requires string between quotes.
 #
 # .. variable:: CPACK_RPM_PACKAGE_PROVIDES
+#               CPACK_RPM_<component>_PACKAGE_PROVIDES
 #
 #  RPM spec provides field.
 #
@@ -212,6 +284,7 @@
 #   rpm -qp --provides file.rpm
 #
 # .. variable:: CPACK_RPM_PACKAGE_OBSOLETES
+#               CPACK_RPM_<component>_PACKAGE_OBSOLETES
 #
 #  RPM spec obsoletes field.
 #
