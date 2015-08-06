@@ -369,7 +369,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   bool usePRE_BUILD = false;
-  cmGlobalGenerator* gg = makefile->GetGlobalGenerator();
+  cmGlobalGenerator* gg = lg->GetGlobalGenerator();
   if(gg->GetName().find("Visual Studio") != std::string::npos)
     {
     cmGlobalVisualStudioGenerator* vsgg =
@@ -396,7 +396,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
 
   std::vector<std::string> rcc_output;
   bool const isNinja =
-    makefile->GetGlobalGenerator()->GetName() == "Ninja";
+    lg->GetGlobalGenerator()->GetName() == "Ninja";
   if(isNinja
 #if defined(_WIN32) && !defined(__CYGWIN__)
         || usePRE_BUILD

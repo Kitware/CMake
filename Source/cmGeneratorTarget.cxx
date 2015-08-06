@@ -36,7 +36,7 @@
 
 //----------------------------------------------------------------------------
 void reportBadObjLib(std::vector<cmSourceFile*> const& badObjLib,
-                     cmTarget *target, cmake *cm)
+                     cmGeneratorTarget const* target, cmake *cm)
 {
   if(!badObjLib.empty())
     {
@@ -50,7 +50,7 @@ void reportBadObjLib(std::vector<cmSourceFile*> const& badObjLib,
     e << "but may contain only sources that compile, header files, and "
          "other files that would not affect linking of a normal library.";
     cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                     target->GetBacktrace());
+                     target->Target->GetBacktrace());
     }
 }
 
@@ -133,14 +133,14 @@ struct TagVisitor
 {
   DataType& Data;
   std::vector<cmSourceFile*> BadObjLibFiles;
-  cmTarget *Target;
+  cmGeneratorTarget const* Target;
   cmGlobalGenerator *GlobalGenerator;
   cmsys::RegularExpression Header;
   bool IsObjLib;
 
-  TagVisitor(cmTarget *target, DataType& data)
+  TagVisitor(cmGeneratorTarget const* target, DataType& data)
     : Data(data), Target(target),
-    GlobalGenerator(target->GetMakefile()->GetGlobalGenerator()),
+    GlobalGenerator(target->GetLocalGenerator()->GetGlobalGenerator()),
     Header(CM_HEADER_REGEX),
     IsObjLib(target->GetType() == cmTarget::OBJECT_LIBRARY)
   {
@@ -234,7 +234,7 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
 {
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = lg;
-  this->GlobalGenerator = this->Makefile->GetGlobalGenerator();
+  this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
 }
 
 cmGeneratorTarget::~cmGeneratorTarget()
@@ -362,7 +362,7 @@ static void handleSystemIncludesDep(cmMakefile *mf, cmTarget const* depTgt,
   { \
   std::vector<cmSourceFile*> sourceFiles; \
   this->Target->GetSourceFiles(sourceFiles, config); \
-  TagVisitor<DATA ## Tag DATATYPE> visitor(this->Target, data); \
+  TagVisitor<DATA ## Tag DATATYPE> visitor(this, data); \
   for(std::vector<cmSourceFile*>::const_iterator si = sourceFiles.begin(); \
       si != sourceFiles.end(); ++si) \
     { \
@@ -1557,7 +1557,7 @@ cmTargetTraceDependencies
 {
   // Convenience.
   this->Makefile = this->Target->GetMakefile();
-  this->GlobalGenerator = this->Makefile->GetGlobalGenerator();
+  this->GlobalGenerator = target->GetLocalGenerator()->GetGlobalGenerator();
   this->CurrentEntry = 0;
 
   // Queue all the source files already specified for the target.
@@ -1945,8 +1945,7 @@ void cmGeneratorTarget::GenerateTargetManifest(
     {
     return;
     }
-  cmMakefile* mf = this->Target->GetMakefile();
-  cmGlobalGenerator* gg = mf->GetGlobalGenerator();
+  cmGlobalGenerator* gg = this->LocalGenerator->GetGlobalGenerator();
 
   // Get the names.
   std::string name;
