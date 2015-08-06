@@ -1600,6 +1600,13 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
                             cmGeneratorExpressionContext *context,
                             const GeneratorExpressionContent *content)
   {
+    if (target->IsImported())
+      {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_PDB_FILE not allowed for IMPORTED targets.");
+      return std::string();
+      }
+
     std::string language = target->GetLinkerLanguage(context->Config);
 
     std::string pdbSupportVar = "CMAKE_" + language + "_LINKER_SUPPORTS_PDB";
