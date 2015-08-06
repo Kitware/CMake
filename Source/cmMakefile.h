@@ -918,7 +918,6 @@ private:
   void PushPolicy(bool weak = false,
                   cmPolicies::PolicyMap const& pm = cmPolicies::PolicyMap());
   void PopPolicy();
-  void PushPolicyBarrier();
   void PopPolicyBarrier(bool reportError = true);
   friend class cmCMakePolicyCommand;
   class IncludeScope;
@@ -928,18 +927,6 @@ private:
   class BuildsystemFileScope;
   friend class BuildsystemFileScope;
 
-  // stack of policy settings
-  struct PolicyStackEntry: public cmPolicies::PolicyMap
-  {
-    typedef cmPolicies::PolicyMap derived;
-    PolicyStackEntry(bool w = false): derived(), Weak(w) {}
-    PolicyStackEntry(derived const& d, bool w = false): derived(d), Weak(w) {}
-    PolicyStackEntry(PolicyStackEntry const& r): derived(r), Weak(r.Weak) {}
-    bool Weak;
-  };
-  typedef std::vector<PolicyStackEntry> PolicyStackType;
-  PolicyStackType PolicyStack;
-  std::vector<PolicyStackType::size_type> PolicyBarriers;
 
   // CMP0053 == old
   cmake::MessageType ExpandVariablesInStringOld(
