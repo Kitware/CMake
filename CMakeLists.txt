@@ -72,7 +72,7 @@ endmacro()
 
 # option to disable installing 3rd-party dependencies
 option(CMake_INSTALL_DEPENDENCIES
-  "Whether to install 3rd-party runtime dependencies" ON)
+  "Whether to install 3rd-party runtime dependencies" OFF)
 mark_as_advanced(CMake_INSTALL_DEPENDENCIES)
 
 #-----------------------------------------------------------------------
