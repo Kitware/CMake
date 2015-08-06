@@ -18,31 +18,32 @@
 
 #include "cmGeneratorExpression.h"
 
+class cmLocalGenerator;
+
 //----------------------------------------------------------------------------
 class cmGeneratorExpressionEvaluationFile
 {
 public:
   cmGeneratorExpressionEvaluationFile(const std::string &input,
         cmsys::auto_ptr<cmCompiledGeneratorExpression> outputFileExpr,
-        cmMakefile *makefile,
         cmsys::auto_ptr<cmCompiledGeneratorExpression> condition,
         bool inputIsContent);
 
-  void Generate();
+  void Generate(cmLocalGenerator* lg);
 
   std::vector<std::string> GetFiles() const { return this->Files; }
 
-  void CreateOutputFile(std::string const& config);
+  void CreateOutputFile(cmLocalGenerator* lg, std::string const& config);
 
 private:
-  void Generate(const std::string& config, const std::string& lang,
-              cmCompiledGeneratorExpression* inputExpression,
-              std::map<std::string, std::string> &outputFiles, mode_t perm);
+  void Generate(cmLocalGenerator* lg, const std::string& config,
+                const std::string& lang,
+                cmCompiledGeneratorExpression* inputExpression,
+                std::map<std::string, std::string> &outputFiles, mode_t perm);
 
 private:
   const std::string Input;
   const cmsys::auto_ptr<cmCompiledGeneratorExpression> OutputFileExpr;
-  cmMakefile *Makefile;
   const cmsys::auto_ptr<cmCompiledGeneratorExpression> Condition;
   std::vector<std::string> Files;
   const bool InputIsContent;

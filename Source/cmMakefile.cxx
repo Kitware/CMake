@@ -21,6 +21,7 @@
 #include "cmState.h"
 #include "cmOutputConverter.h"
 #include "cmFunctionBlocker.h"
+#include "cmGeneratorExpressionEvaluationFile.h"
 #include "cmListFileCache.h"
 #include "cmCommandArgumentParserHelper.h"
 #include "cmGeneratorExpression.h"
@@ -235,6 +236,9 @@ cmMakefile::~cmMakefile()
   cmDeleteAll(this->ImportedTargetsOwned);
   cmDeleteAll(this->FinalPassCommands);
   cmDeleteAll(this->FunctionBlockers);
+  cmDeleteAll(this->EvaluationFiles);
+  this->EvaluationFiles.clear();
+
   this->FunctionBlockers.clear();
   if (this->PolicyStack.size() != 1)
   {
@@ -775,6 +779,23 @@ void cmMakefile::EnforceDirectoryLevelRules() const
         return;
       }
     }
+}
+
+void cmMakefile::AddEvaluationFile(const std::string& inputFile,
+                     cmsys::auto_ptr<cmCompiledGeneratorExpression> outputName,
+                     cmsys::auto_ptr<cmCompiledGeneratorExpression> condition,
+                     bool inputIsContent)
+{
+  this->EvaluationFiles.push_back(
+              new cmGeneratorExpressionEvaluationFile(inputFile, outputName,
+                                                      condition,
+                                                      inputIsContent));
+}
+
+std::vector<cmGeneratorExpressionEvaluationFile*>
+cmMakefile::GetEvaluationFiles() const
+{
+  return this->EvaluationFiles;
 }
 
 namespace

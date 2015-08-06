@@ -1055,23 +1055,21 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
       {
       knownDependencies.insert( ng->ConvertToNinjaPath( *j ) );
       }
-    }
-  knownDependencies.insert( "CMakeCache.txt" );
-
-  for(std::vector<cmGeneratorExpressionEvaluationFile*>::const_iterator
-      li = this->EvaluationFiles.begin();
-      li != this->EvaluationFiles.end();
-      ++li)
-    {
-    //get all the files created by generator expressions and convert them
-    //to ninja paths
-    std::vector<std::string> files = (*li)->GetFiles();
-    typedef std::vector<std::string>::const_iterator vect_it;
-    for(vect_it j = files.begin(); j != files.end(); ++j)
+    std::vector<cmGeneratorExpressionEvaluationFile*> const& ef =
+        (*i)->GetMakefile()->GetEvaluationFiles();
+    for(std::vector<cmGeneratorExpressionEvaluationFile*>::const_iterator
+        li = ef.begin(); li != ef.end(); ++li)
       {
-      knownDependencies.insert( ng->ConvertToNinjaPath( *j ) );
+      //get all the files created by generator expressions and convert them
+      //to ninja paths
+      std::vector<std::string> evaluationFiles = (*li)->GetFiles();
+      for(vect_it j = evaluationFiles.begin(); j != evaluationFiles.end(); ++j)
+        {
+        knownDependencies.insert( ng->ConvertToNinjaPath( *j ) );
+        }
       }
     }
+  knownDependencies.insert( "CMakeCache.txt" );
 
   for(TargetAliasMap::const_iterator i= this->TargetAliases.begin();
       i != this->TargetAliases.end();

@@ -34,7 +34,6 @@
 
 class cmake;
 class cmGeneratorTarget;
-class cmGeneratorExpressionEvaluationFile;
 class cmMakefile;
 class cmLocalGenerator;
 class cmExternalMakefileProjectGenerator;
@@ -334,12 +333,6 @@ public:
 
   static std::string EscapeJSON(const std::string& s);
 
-  void AddEvaluationFile(const std::string &inputFile,
-                  cmsys::auto_ptr<cmCompiledGeneratorExpression> outputName,
-                  cmMakefile *makefile,
-                  cmsys::auto_ptr<cmCompiledGeneratorExpression> condition,
-                  bool inputIsContent);
-
   void ProcessEvaluationFiles();
 
   std::map<std::string, cmExportBuildFileGenerator*>& GetBuildExportSets()
@@ -436,7 +429,6 @@ protected:
   TargetMap TotalTargets;
   TargetMap AliasTargets;
   TargetMap ImportedTargets;
-  std::vector<cmGeneratorExpressionEvaluationFile*> EvaluationFiles;
 
   const char* GetPredefinedTargetsFolder();
   virtual bool UseFolderProperty();
