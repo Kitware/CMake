@@ -821,7 +821,7 @@ cmGlobalUnixMakefileGenerator3
                         localName, depends, commands, true);
 
       // add the all/all dependency
-      if(!this->IsExcluded(this->LocalGenerators[0], *gtarget->Target))
+      if(!this->IsExcluded(this->LocalGenerators[0], gtarget))
         {
         depends.clear();
         depends.push_back(localName);
@@ -889,7 +889,7 @@ cmGlobalUnixMakefileGenerator3
                           "Pre-install relink rule for target.",
                           localName, depends, commands, true);
 
-        if(!this->IsExcluded(this->LocalGenerators[0], *gtarget->Target))
+        if(!this->IsExcluded(this->LocalGenerators[0], gtarget))
           {
           depends.clear();
           depends.push_back(localName);

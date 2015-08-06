@@ -114,10 +114,6 @@ public:
 
   bool GetIsSourceFileTryCompile() const;
 
-  ///! Get the current makefile generator.
-  cmLocalGenerator* GetLocalGenerator() const
-    { return this->LocalGenerator;}
-
   /**
    * Help enforce global target name uniqueness.
    */
