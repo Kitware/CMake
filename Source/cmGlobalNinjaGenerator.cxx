@@ -911,9 +911,7 @@ cmGlobalNinjaGenerator
   case cmTarget::STATIC_LIBRARY:
   case cmTarget::MODULE_LIBRARY:
     {
-    cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
-                                    ->GetGlobalGenerator()
-                                    ->GetGeneratorTarget(target);
+    cmGeneratorTarget *gtgt = this->GetGeneratorTarget(target);
     outputs.push_back(ng->ConvertToNinjaPath(
       gtgt->GetFullPath(configName, false, realname)));
     break;

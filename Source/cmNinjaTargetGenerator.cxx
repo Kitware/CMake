@@ -195,7 +195,7 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
     return cmNinjaDeps();
 
   cmComputeLinkInformation* cli =
-    this->Target->GetLinkInformation(this->GetConfigName());
+    this->GeneratorTarget->GetLinkInformation(this->GetConfigName());
   if(!cli)
     return cmNinjaDeps();
 
@@ -273,11 +273,12 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
       {
       pdbPath = this->Target->GetPDBDirectory(this->GetConfigName());
       pdbPath += "/";
-      pdbPath += this->Target->GetPDBName(this->GetConfigName());
+      pdbPath += this->GeneratorTarget->GetPDBName(this->GetConfigName());
       }
     if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY)
       {
-      compilePdbPath = this->Target->GetCompilePDBPath(this->GetConfigName());
+      compilePdbPath =
+              this->GeneratorTarget->GetCompilePDBPath(this->GetConfigName());
       if(compilePdbPath.empty())
         {
         compilePdbPath = this->Target->GetSupportDirectory() + "/";
@@ -741,7 +742,7 @@ cmNinjaTargetGenerator::MacOSXContentGeneratorType::operator()(
   cmSourceFile const& source, const char* pkgloc)
 {
   // Skip OS X content when not building a Framework or Bundle.
-  if(!this->Generator->GetTarget()->IsBundleOnApple())
+  if(!this->Generator->GetGeneratorTarget()->IsBundleOnApple())
     {
     return;
     }

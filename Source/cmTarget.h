@@ -78,15 +78,6 @@ public:
   bool FromGenex;
 };
 
-struct cmTargetLinkInformationMap:
-  public std::map<std::string, cmComputeLinkInformation*>
-{
-  typedef std::map<std::string, cmComputeLinkInformation*> derived;
-  cmTargetLinkInformationMap() {}
-  cmTargetLinkInformationMap(cmTargetLinkInformationMap const& r);
-  ~cmTargetLinkInformationMap();
-};
-
 class cmTargetInternals;
 class cmTargetInternalPointer
 {
@@ -302,19 +293,6 @@ public:
                               cmTarget const* headTarget,
                               bool usage_requirements_only) const;
 
-  std::vector<cmTarget const*> const&
-    GetLinkImplementationClosure(const std::string& config) const;
-
-  struct CompatibleInterfaces
-  {
-    std::set<std::string> PropsBool;
-    std::set<std::string> PropsString;
-    std::set<std::string> PropsNumberMax;
-    std::set<std::string> PropsNumberMin;
-  };
-  CompatibleInterfaces const&
-    GetCompatibleInterfaces(std::string const& config) const;
-
   /** The link implementation specifies the direct library
       dependencies needed by the object files of the target.  */
   struct LinkImplementationLibraries
@@ -337,18 +315,6 @@ public:
   LinkImplementationLibraries const*
     GetLinkImplementationLibraries(const std::string& config) const;
 
-  /** Link information from the transitive closure of the link
-      implementation and the interfaces of its dependencies.  */
-  struct LinkClosure
-  {
-    // The preferred linker language.
-    std::string LinkerLanguage;
-
-    // Languages whose runtime libraries must be linked.
-    std::vector<std::string> Languages;
-  };
-  LinkClosure const* GetLinkClosure(const std::string& config) const;
-
   cmTarget const* FindTargetToLink(std::string const& name) const;
 
   /** Strip off leading and trailing whitespace from an item named in
@@ -368,12 +334,6 @@ public:
       pdb output directory is given.  */
   std::string GetPDBDirectory(const std::string& config) const;
 
-  /** Get the directory in which to place the target compiler .pdb file.
-      If the configuration name is given then the generator will add its
-      subdirectory for that configuration.  Otherwise just the canonical
-      compiler pdb output directory is given.  */
-  std::string GetCompilePDBDirectory(const std::string& config = "") const;
-
   const char* ImportedGetLocation(const std::string& config) const;
 
   /** Get the target major and minor version numbers interpreted from
@@ -387,33 +347,6 @@ public:
   void
   GetTargetVersion(bool soversion, int& major, int& minor, int& patch) const;
 
-  ///! Return the preferred linker language for this target
-  std::string GetLinkerLanguage(const std::string& config = "") const;
-
-  /** Get the full name of the target according to the settings in its
-      makefile.  */
-  std::string GetFullName(const std::string& config="",
-                          bool implib = false) const;
-  void GetFullNameComponents(std::string& prefix,
-                             std::string& base, std::string& suffix,
-                             const std::string& config="",
-                             bool implib = false) const;
-
-  /** Get the name of the pdb file for the target.  */
-  std::string GetPDBName(const std::string& config) const;
-
-  /** Get the name of the compiler pdb file for the target.  */
-  std::string GetCompilePDBName(const std::string& config="") const;
-
-  /** Get the path for the MSVC /Fd option for this target.  */
-  std::string GetCompilePDBPath(const std::string& config="") const;
-
-  /** Whether this library has soname enabled and platform supports it.  */
-  bool HasSOName(const std::string& config) const;
-
-  /** Get the soname of the target.  Allowed only for a shared library.  */
-  std::string GetSOName(const std::string& config) const;
-
   /** Whether this library has \@rpath and platform supports it.  */
   bool HasMacOSXRpathInstallNameDir(const std::string& config) const;
 
@@ -424,21 +357,6 @@ public:
       no soname at all.  */
   bool IsImportedSharedLibWithoutSOName(const std::string& config) const;
 
-  /** Get the names of the library needed to generate a build rule
-      that takes into account shared library version numbers.  This
-      should be called only on a library target.  */
-  void GetLibraryNames(std::string& name, std::string& soName,
-                       std::string& realName, std::string& impName,
-                       std::string& pdbName, const std::string& config) const;
-
-  /** Get the names of the executable needed to generate a build rule
-      that takes into account executable version numbers.  This should
-      be called only on an executable target.  */
-  void GetExecutableNames(std::string& name, std::string& realName,
-                          std::string& impName,
-                          std::string& pdbName,
-                          const std::string& config) const;
-
   /** Does this target have a GNU implib to convert to MS format?  */
   bool HasImplibGNUtoMS() const;
 
@@ -447,28 +365,8 @@ public:
   bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
                         const char* newExt = 0) const;
 
-  /**
-   * Compute whether this target must be relinked before installing.
-   */
-  bool NeedRelinkBeforeInstall(const std::string& config) const;
-
   bool HaveBuildTreeRPATH(const std::string& config) const;
   bool HaveInstallTreeRPATH() const;
-
-  /** Return true if builtin chrpath will work for this target */
-  bool IsChrpathUsed(const std::string& config) const;
-
-  /** Return the install name directory for the target in the
-    * build tree.  For example: "\@rpath/", "\@loader_path/",
-    * or "/full/path/to/library".  */
-  std::string GetInstallNameDirForBuildTree(const std::string& config) const;
-
-  /** Return the install name directory for the target in the
-    * install tree.  For example: "\@rpath/" or "\@loader_path/". */
-  std::string GetInstallNameDirForInstallTree() const;
-
-  cmComputeLinkInformation*
-    GetLinkInformation(const std::string& config) const;
 
   // Get the properties
   cmPropertyMap &GetProperties() const { return this->Properties; }
@@ -520,10 +418,6 @@ public:
   /** Return whether this target is an executable Bundle on Apple.  */
   bool IsAppBundleOnApple() const;
 
-  /** Return whether this target is an executable Bundle, a framework
-      or CFBundle on Apple.  */
-  bool IsBundleOnApple() const;
-
   /** Return the framework version string.  Undefined if
       IsFrameworkOnApple returns false.  */
   std::string GetFrameworkVersion() const;
@@ -538,24 +432,8 @@ public:
       directory.  */
   bool UsesDefaultOutputDir(const std::string& config, bool implib) const;
 
-  /** @return the mac content directory for this target. */
-  std::string GetMacContentDirectory(const std::string& config,
-                                     bool implib) const;
-
   /** @return whether this target have a well defined output file name. */
   bool HaveWellDefinedOutputFiles() const;
-
-  /** @return the Mac framework directory without the base. */
-  std::string GetFrameworkDirectory(const std::string& config,
-                                    bool rootDir) const;
-
-  /** @return the Mac CFBundle directory without the base */
-  std::string GetCFBundleDirectory(const std::string& config,
-                                   bool contentOnly) const;
-
-  /** @return the Mac App directory without the base */
-  std::string GetAppBundleDirectory(const std::string& config,
-                                    bool contentOnly) const;
 
   std::vector<std::string> GetIncludeDirectories(
                      const std::string& config,
@@ -574,30 +452,10 @@ public:
   void GetCompileOptions(std::vector<std::string> &result,
                          const std::string& config,
                          const std::string& language) const;
-  void GetAutoUicOptions(std::vector<std::string> &result,
-                         const std::string& config) const;
   void GetCompileFeatures(std::vector<std::string> &features,
                           const std::string& config) const;
 
   bool IsNullImpliedByLinkLibraries(const std::string &p) const;
-  bool IsLinkInterfaceDependentBoolProperty(const std::string &p,
-                         const std::string& config) const;
-  bool IsLinkInterfaceDependentStringProperty(const std::string &p,
-                         const std::string& config) const;
-  bool IsLinkInterfaceDependentNumberMinProperty(const std::string &p,
-                         const std::string& config) const;
-  bool IsLinkInterfaceDependentNumberMaxProperty(const std::string &p,
-                         const std::string& config) const;
-
-  bool GetLinkInterfaceDependentBoolProperty(const std::string &p,
-                                             const std::string& config) const;
-
-  const char *GetLinkInterfaceDependentStringProperty(const std::string &p,
-                         const std::string& config) const;
-  const char *GetLinkInterfaceDependentNumberMinProperty(const std::string &p,
-                         const std::string& config) const;
-  const char *GetLinkInterfaceDependentNumberMaxProperty(const std::string &p,
-                         const std::string& config) const;
 
   std::string GetDebugGeneratorExpressions(const std::string &value,
                                   cmTarget::LinkLibraryType llt) const;
@@ -609,11 +467,6 @@ public:
 
   bool LinkLanguagePropagatesToDependents() const
   { return this->TargetTypeValue == STATIC_LIBRARY; }
-
-  void ReportPropertyOrigin(const std::string &p,
-                            const std::string &result,
-                            const std::string &report,
-                            const std::string &compatibilityType) const;
 
   std::map<std::string, std::string> const&
   GetMaxLanguageStandards() const
@@ -684,11 +537,6 @@ private:
 
   const char* GetSuffixVariableInternal(bool implib) const;
   const char* GetPrefixVariableInternal(bool implib) const;
-  std::string GetFullNameInternal(const std::string& config,
-                                  bool implib) const;
-  void GetFullNameInternal(const std::string& config, bool implib,
-                           std::string& outPrefix, std::string& outBase,
-                           std::string& outSuffix) const;
 
   // Use a makefile variable to set a default for the given property.
   // If the variable is not defined use the given default instead.
@@ -698,19 +546,12 @@ private:
   // Returns ARCHIVE, LIBRARY, or RUNTIME based on platform and type.
   const char* GetOutputTargetType(bool implib) const;
 
-  // Get the target base name.
-  std::string GetOutputName(const std::string& config, bool implib) const;
-
   std::string GetFullNameImported(const std::string& config,
                                   bool implib) const;
 
   std::string ImportedGetFullPath(const std::string& config,
                                   bool implib) const;
 
-  /** Append to @a base the mac content directory and return it. */
-  std::string BuildMacContentDirectory(const std::string& base,
-                                       const std::string& config,
-                                       bool contentOnly) const;
 
   void GetSourceFiles(std::vector<std::string> &files,
                       const std::string& config) const;
@@ -721,7 +562,6 @@ private:
   std::set<std::string> Utilities;
   mutable std::set<std::string> LinkImplicitNullProperties;
   std::map<std::string, cmListFileBacktrace> UtilityBacktraces;
-  mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
   mutable std::map<std::string, std::string> MaxLanguageStandards;
   cmPolicies::PolicyMap PolicyMap;
   std::string Name;
@@ -768,18 +608,24 @@ private:
                            std::string& out) const;
 
   // Cache import information from properties for each configuration.
-  struct ImportInfo;
+  struct ImportInfo
+  {
+    ImportInfo(): NoSOName(false), Multiplicity(0) {}
+    bool NoSOName;
+    int Multiplicity;
+    std::string Location;
+    std::string SOName;
+    std::string ImportLibrary;
+    std::string Languages;
+    std::string Libraries;
+    std::string LibrariesProp;
+    std::string SharedDeps;
+  };
+
   ImportInfo const* GetImportInfo(const std::string& config) const;
   void ComputeImportInfo(std::string const& desired_config,
                          ImportInfo& info) const;
 
-  // Cache target compile paths for each configuration.
-  struct CompileInfo;
-  CompileInfo const* GetCompileInfo(const std::string& config) const;
-
-  mutable cmTargetLinkInformationMap LinkInformation;
-  void CheckPropertyCompatibility(cmComputeLinkInformation *info,
-                                  const std::string& config) const;
 
   LinkInterface const*
     GetImportLinkInterface(const std::string& config, cmTarget const* head,
@@ -788,7 +634,6 @@ private:
   LinkImplementationLibraries const*
     GetLinkImplementationLibrariesInternal(const std::string& config,
                                            cmTarget const* head) const;
-  void ComputeLinkClosure(const std::string& config, LinkClosure& lc) const;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config, cmTarget const* headTarget,

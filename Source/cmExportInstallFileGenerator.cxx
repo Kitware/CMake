@@ -193,7 +193,11 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 
     this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE",
                                   te, properties);
-    this->PopulateCompatibleInterfaceProperties(te, properties);
+    cmGeneratorTarget *gtgt = te->GetMakefile()
+                                ->GetGlobalGenerator()
+                                ->GetGeneratorTarget(te);
+
+    this->PopulateCompatibleInterfaceProperties(gtgt, properties);
 
     this->GenerateInterfaceProperties(te, os, properties);
     }
@@ -358,7 +362,7 @@ cmExportInstallFileGenerator
     if(!properties.empty())
       {
       // Get the rest of the target details.
-      cmGeneratorTarget *gtgt = te->Target->GetMakefile()->GetLocalGenerator()
+      cmGeneratorTarget *gtgt = te->Target->GetMakefile()
                     ->GetGlobalGenerator()->GetGeneratorTarget(te->Target);
       this->SetImportDetailProperties(config, suffix,
                                       gtgt, properties, missingTargets);
@@ -542,12 +546,12 @@ cmExportInstallFileGenerator
 }
 
 std::string
-cmExportInstallFileGenerator::InstallNameDir(cmTarget* target,
+cmExportInstallFileGenerator::InstallNameDir(cmGeneratorTarget* target,
                                              const std::string&)
 {
   std::string install_name_dir;
 
-  cmMakefile* mf = target->GetMakefile();
+  cmMakefile* mf = target->Target->GetMakefile();
   if(mf->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
     {
     install_name_dir =

@@ -18,6 +18,7 @@
 #include "cmMakefile.h"
 #include "cmGeneratorTarget.h"
 #include "cmake.h"
+#include "cmGeneratorTarget.h"
 
 #include <assert.h>
 
@@ -72,7 +73,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
 {
   // Compute the build tree directory from which to copy the target.
   std::string fromDirConfig;
-  if(this->Target->Target->NeedRelinkBeforeInstall(config))
+  if(this->Target->NeedRelinkBeforeInstall(config))
     {
     fromDirConfig =
         this->Target->Target->GetMakefile()->GetCurrentBinaryDirectory();
@@ -124,7 +125,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
     std::string targetNameReal;
     std::string targetNameImport;
     std::string targetNamePDB;
-    this->Target->Target->GetExecutableNames(targetName, targetNameReal,
+    this->Target->GetExecutableNames(targetName, targetNameReal,
                                      targetNameImport, targetNamePDB,
                                      config);
     if(this->ImportLibrary)
@@ -184,7 +185,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
     std::string targetNameReal;
     std::string targetNameImport;
     std::string targetNamePDB;
-    this->Target->Target->GetLibraryNames(targetName, targetNameSO,
+    this->Target->GetLibraryNames(targetName, targetNameSO,
                                           targetNameReal,
                                   targetNameImport, targetNamePDB,
                                   config);
@@ -371,13 +372,16 @@ cmInstallTargetGenerator::GetInstallFilename(cmTarget const* target,
 {
   std::string fname;
   // Compute the name of the library.
+  cmGeneratorTarget *gtgt = target->GetMakefile()
+                                  ->GetGlobalGenerator()
+                                  ->GetGeneratorTarget(target);
   if(target->GetType() == cmTarget::EXECUTABLE)
     {
     std::string targetName;
     std::string targetNameReal;
     std::string targetNameImport;
     std::string targetNamePDB;
-    target->GetExecutableNames(targetName, targetNameReal,
+    gtgt->GetExecutableNames(targetName, targetNameReal,
                                targetNameImport, targetNamePDB,
                                config);
     if(nameType == NameImplib)
@@ -407,7 +411,7 @@ cmInstallTargetGenerator::GetInstallFilename(cmTarget const* target,
     std::string targetNameReal;
     std::string targetNameImport;
     std::string targetNamePDB;
-    target->GetLibraryNames(targetName, targetNameSO, targetNameReal,
+    gtgt->GetLibraryNames(targetName, targetNameSO, targetNameReal,
                             targetNameImport, targetNamePDB, config);
     if(nameType == NameImplib)
       {
@@ -557,8 +561,7 @@ cmInstallTargetGenerator
   // Build a map of build-tree install_name to install-tree install_name for
   // shared libraries linked to this target.
   std::map<std::string, std::string> install_name_remap;
-  if(cmComputeLinkInformation* cli =
-     this->Target->Target->GetLinkInformation(config))
+  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(config))
     {
     std::set<cmTarget const*> const& sharedLibs
                                             = cli->GetSharedLibrariesLinked();
@@ -573,11 +576,14 @@ cmInstallTargetGenerator
         continue;
         }
 
+      cmGeneratorTarget *gtgt = tgt->GetMakefile()
+                                          ->GetGlobalGenerator()
+                                          ->GetGeneratorTarget(tgt);
       // If the build tree and install tree use different path
       // components of the install_name field then we need to create a
       // mapping to be applied after installation.
-      std::string for_build = tgt->GetInstallNameDirForBuildTree(config);
-      std::string for_install = tgt->GetInstallNameDirForInstallTree();
+      std::string for_build = gtgt->GetInstallNameDirForBuildTree(config);
+      std::string for_install = gtgt->GetInstallNameDirForInstallTree();
       if(for_build != for_install)
         {
         // The directory portions differ.  Append the filename to
@@ -602,9 +608,9 @@ cmInstallTargetGenerator
   if(this->Target->GetType() == cmTarget::SHARED_LIBRARY)
     {
     std::string for_build =
-      this->Target->Target->GetInstallNameDirForBuildTree(config);
+      this->Target->GetInstallNameDirForBuildTree(config);
     std::string for_install =
-      this->Target->Target->GetInstallNameDirForInstallTree();
+      this->Target->GetInstallNameDirForInstallTree();
 
     if(this->Target->Target->IsFrameworkOnApple() && for_install.empty())
       {
@@ -653,11 +659,10 @@ cmInstallTargetGenerator
                     std::string const& toDestDirPath)
 {
   // Skip the chrpath if the target does not need it.
-  if(this->ImportLibrary || !this->Target->Target->IsChrpathUsed(config))
+  if(this->ImportLibrary || !this->Target->IsChrpathUsed(config))
     {
     return;
     }
-
   // Skip if on Apple
   if(this->Target->Target->GetMakefile()
      ->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
@@ -667,8 +672,7 @@ cmInstallTargetGenerator
 
   // Get the link information for this target.
   // It can provide the RPATH.
-  cmComputeLinkInformation* cli =
-      this->Target->Target->GetLinkInformation(config);
+  cmComputeLinkInformation* cli = this->Target->GetLinkInformation(config);
   if(!cli)
     {
     return;
@@ -693,15 +697,14 @@ cmInstallTargetGenerator
                       std::string const& toDestDirPath)
 {
   // Skip the chrpath if the target does not need it.
-  if(this->ImportLibrary || !this->Target->Target->IsChrpathUsed(config))
+  if(this->ImportLibrary || !this->Target->IsChrpathUsed(config))
     {
     return;
     }
 
   // Get the link information for this target.
   // It can provide the RPATH.
-  cmComputeLinkInformation* cli =
-      this->Target->Target->GetLinkInformation(config);
+  cmComputeLinkInformation* cli = this->Target->GetLinkInformation(config);
   if(!cli)
     {
     return;

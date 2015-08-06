@@ -71,7 +71,8 @@ protected:
                                  cmGeneratorTarget* target,
                                  ImportPropertyMap& properties);
 
-  std::string InstallNameDir(cmTarget* target, const std::string& config);
+  std::string InstallNameDir(cmGeneratorTarget* target,
+                             const std::string& config);
 
   std::vector<std::string>
   FindNamespaces(cmMakefile* mf, const std::string& name);

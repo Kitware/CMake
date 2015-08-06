@@ -125,12 +125,12 @@ cmExportTryCompileFileGenerator::PopulateProperties(cmTarget const* target,
 }
 
 std::string
-cmExportTryCompileFileGenerator::InstallNameDir(cmTarget* target,
+cmExportTryCompileFileGenerator::InstallNameDir(cmGeneratorTarget* target,
                                                 const std::string& config)
 {
   std::string install_name_dir;
 
-  cmMakefile* mf = target->GetMakefile();
+  cmMakefile* mf = target->Target->GetMakefile();
   if(mf->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
     {
     install_name_dir =

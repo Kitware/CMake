@@ -276,7 +276,8 @@ std::string cmCommonTargetGenerator::GetFrameworkFlags(std::string const& l)
 
   std::string flags;
   const char* cfg = this->LocalGenerator->GetConfigName().c_str();
-  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(cfg))
+  if(cmComputeLinkInformation* cli =
+     this->GeneratorTarget->GetLinkInformation(cfg))
     {
     std::vector<std::string> const& frameworks = cli->GetFrameworkPaths();
     for(std::vector<std::string>::const_iterator i = frameworks.begin();
@@ -384,7 +385,7 @@ cmCommonTargetGenerator::GetLinkedTargetDirectories() const
   std::vector<std::string> dirs;
   std::set<cmTarget const*> emitted;
   if (cmComputeLinkInformation* cli =
-      this->Target->GetLinkInformation(this->ConfigName))
+      this->GeneratorTarget->GetLinkInformation(this->ConfigName))
     {
     cmComputeLinkInformation::ItemVector const& items = cli->GetItems();
     for(cmComputeLinkInformation::ItemVector::const_iterator

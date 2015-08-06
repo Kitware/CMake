@@ -482,7 +482,7 @@ cmGlobalUnixMakefileGenerator3
       // Add this to the list of depends rules in this directory.
       if((!check_all || !gtarget->GetPropertyAsBool("EXCLUDE_FROM_ALL")) &&
          (!check_relink ||
-          gtarget->Target
+          gtarget
             ->NeedRelinkBeforeInstall(lg->GetConfigName())))
         {
         std::string tname = lg->GetRelativeTargetDirectory(*gtarget->Target);
@@ -691,7 +691,7 @@ cmGlobalUnixMakefileGenerator3
 
         // Add a local name for the rule to relink the target before
         // installation.
-        if(gtarget->Target
+        if(gtarget
              ->NeedRelinkBeforeInstall(lg->GetConfigName()))
           {
           makeTargetName = lg->GetRelativeTargetDirectory(*gtarget->Target);
@@ -876,7 +876,7 @@ cmGlobalUnixMakefileGenerator3
                         name, depends, commands, true);
 
       // Add rules to prepare the target for installation.
-      if(gtarget->Target
+      if(gtarget
            ->NeedRelinkBeforeInstall(lg->GetConfigName()))
         {
         localName = lg->GetRelativeTargetDirectory(*gtarget->Target);
