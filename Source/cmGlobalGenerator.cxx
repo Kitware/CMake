@@ -1615,6 +1615,7 @@ void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes,
         ti != targets.end(); ++ti)
       {
       cmTarget* t = &ti->second;
+      t->Compute();
       cmGeneratorTarget* gt = new cmGeneratorTarget(t, lg);
       this->GeneratorTargets[t] = gt;
       generatorTargets[t] = gt;
@@ -1685,6 +1686,11 @@ void cmGlobalGenerator::ClearGeneratorMembers()
 cmGeneratorTarget*
 cmGlobalGenerator::GetGeneratorTarget(cmTarget const* t) const
 {
+  if (!t)
+    {
+    return 0;
+    }
+
   cmGeneratorTargetsType::const_iterator ti = this->GeneratorTargets.find(t);
   if(ti == this->GeneratorTargets.end())
     {

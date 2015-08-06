@@ -75,13 +75,11 @@ public:
   cmTargetInternals()
     : Backtrace()
     {
-    this->PolicyWarnedCMP0022 = false;
     this->UtilityItemsDone = false;
     }
   cmTargetInternals(cmTargetInternals const&)
     : Backtrace()
     {
-    this->PolicyWarnedCMP0022 = false;
     this->UtilityItemsDone = false;
     }
   ~cmTargetInternals();
@@ -89,36 +87,6 @@ public:
   // The backtrace when the target was created.
   cmListFileBacktrace Backtrace;
 
-  // Cache link interface computation from each configuration.
-  struct OptionalLinkInterface: public cmTarget::LinkInterface
-  {
-    OptionalLinkInterface():
-      LibrariesDone(false), AllDone(false),
-      Exists(false), HadHeadSensitiveCondition(false),
-      ExplicitLibraries(0) {}
-    bool LibrariesDone;
-    bool AllDone;
-    bool Exists;
-    bool HadHeadSensitiveCondition;
-    const char* ExplicitLibraries;
-  };
-  void ComputeLinkInterface(cmTarget const* thisTarget,
-                            const std::string& config,
-                            OptionalLinkInterface& iface,
-                            cmTarget const* head) const;
-  void ComputeLinkInterfaceLibraries(cmTarget const* thisTarget,
-                                     const std::string& config,
-                                     OptionalLinkInterface& iface,
-                                     cmTarget const* head,
-                                     bool usage_requirements_only);
-
-  struct HeadToLinkInterfaceMap:
-    public std::map<cmTarget const*, OptionalLinkInterface> {};
-  typedef std::map<std::string, HeadToLinkInterfaceMap>
-                                                          LinkInterfaceMapType;
-  LinkInterfaceMapType LinkInterfaceMap;
-  LinkInterfaceMapType LinkInterfaceUsageRequirementsOnlyMap;
-  bool PolicyWarnedCMP0022;
 
   typedef std::map<std::string, cmTarget::OutputInfo> OutputInfoMapType;
   OutputInfoMapType OutputInfoMap;
@@ -168,11 +136,21 @@ public:
     const cmsys::auto_ptr<cmCompiledGeneratorExpression> ge;
     cmLinkImplItem const& LinkImplItem;
   };
-  std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
-  std::vector<TargetPropertyEntry*> CompileOptionsEntries;
-  std::vector<TargetPropertyEntry*> CompileFeaturesEntries;
-  std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
-  std::vector<TargetPropertyEntry*> SourceEntries;
+  std::vector<std::string> IncludeDirectoriesEntries;
+  std::vector<cmListFileBacktrace> IncludeDirectoriesBacktraces;
+  std::vector<TargetPropertyEntry*> IncludeDirectoriesItems;
+  std::vector<std::string> CompileOptionsEntries;
+  std::vector<cmListFileBacktrace> CompileOptionsBacktraces;
+  std::vector<TargetPropertyEntry*> CompileOptionsItems;
+  std::vector<std::string> CompileFeaturesEntries;
+  std::vector<cmListFileBacktrace> CompileFeaturesBacktraces;
+  std::vector<TargetPropertyEntry*> CompileFeaturesItems;
+  std::vector<std::string> CompileDefinitionsEntries;
+  std::vector<cmListFileBacktrace> CompileDefinitionsBacktraces;
+  std::vector<TargetPropertyEntry*> CompileDefinitionsItems;
+  std::vector<std::string> SourceEntries;
+  std::vector<cmListFileBacktrace> SourceBacktraces;
+  std::vector<TargetPropertyEntry*> SourceItems;
   std::vector<cmValueWithOrigin> LinkImplementationPropertyEntries;
 
   void AddInterfaceEntries(
@@ -181,14 +159,6 @@ public:
 };
 
 cmLinkImplItem cmTargetInternals::TargetPropertyEntry::NoLinkImplItem;
-
-//----------------------------------------------------------------------------
-static void deleteAndClear(
-      std::vector<cmTargetInternals::TargetPropertyEntry*> &entries)
-{
-  cmDeleteAll(entries);
-  entries.clear();
-}
 
 //----------------------------------------------------------------------------
 cmTargetInternals::~cmTargetInternals()
@@ -366,13 +336,13 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     const cmBacktraceRange parentIncludesBts =
         this->Makefile->GetIncludeDirectoriesBacktraces();
 
-    cmBacktraceRange::const_iterator btIt = parentIncludesBts.begin();
-    for (cmStringRange::const_iterator it
-                = parentIncludes.begin();
-         it != parentIncludes.end(); ++it, ++btIt)
-      {
-      this->InsertInclude(*it, *btIt);
-      }
+    this->Internal->IncludeDirectoriesEntries.insert(
+          this->Internal->IncludeDirectoriesEntries.end(),
+          parentIncludes.begin(), parentIncludes.end());
+    this->Internal->IncludeDirectoriesBacktraces.insert(
+          this->Internal->IncludeDirectoriesBacktraces.end(),
+          parentIncludesBts.begin(), parentIncludesBts.end());
+
     const std::set<std::string> parentSystemIncludes =
                                 this->Makefile->GetSystemIncludeDirectories();
 
@@ -384,13 +354,12 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     const cmBacktraceRange parentOptionsBts =
                                 this->Makefile->GetCompileOptionsBacktraces();
 
-    btIt = parentOptionsBts.begin();
-    for (cmStringRange::const_iterator it
-                = parentOptions.begin();
-         it != parentOptions.end(); ++it, ++btIt)
-      {
-      this->InsertCompileOption(*it, *btIt);
-      }
+    this->Internal->CompileOptionsEntries.insert(
+          this->Internal->CompileOptionsEntries.end(),
+          parentOptions.begin(), parentOptions.end());
+    this->Internal->CompileOptionsBacktraces.insert(
+          this->Internal->CompileOptionsBacktraces.end(),
+          parentOptionsBts.begin(), parentOptionsBts.end());
     }
 
   if (this->GetType() != INTERFACE_LIBRARY && this->GetType() != UTILITY)
@@ -436,6 +405,51 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     this->SetPropertyDefault("JOB_POOL_COMPILE", 0);
     this->SetPropertyDefault("JOB_POOL_LINK", 0);
     }
+}
+
+void CreatePropertyGeneratorExpressions(
+    std::vector<std::string> const& entries,
+    std::vector<cmListFileBacktrace> const& backtraces,
+    std::vector<cmTargetInternals::TargetPropertyEntry*>& items,
+    bool evaluateForBuildsystem = false)
+{
+  std::vector<cmListFileBacktrace>::const_iterator btIt = backtraces.begin();
+  for (std::vector<std::string>::const_iterator it = entries.begin();
+       it != entries.end(); ++it, ++btIt)
+    {
+    cmGeneratorExpression ge(*btIt);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*it);
+    cge->SetEvaluateForBuildsystem(evaluateForBuildsystem);
+    items.push_back(new cmTargetInternals::TargetPropertyEntry(cge));
+    }
+}
+
+void cmTarget::Compute()
+{
+  CreatePropertyGeneratorExpressions(
+        this->Internal->IncludeDirectoriesEntries,
+        this->Internal->IncludeDirectoriesBacktraces,
+        this->Internal->IncludeDirectoriesItems);
+
+  CreatePropertyGeneratorExpressions(
+        this->Internal->CompileOptionsEntries,
+        this->Internal->CompileOptionsBacktraces,
+        this->Internal->CompileOptionsItems);
+
+  CreatePropertyGeneratorExpressions(
+        this->Internal->CompileFeaturesEntries,
+        this->Internal->CompileFeaturesBacktraces,
+        this->Internal->CompileFeaturesItems);
+
+  CreatePropertyGeneratorExpressions(
+        this->Internal->CompileDefinitionsEntries,
+        this->Internal->CompileDefinitionsBacktraces,
+        this->Internal->CompileDefinitionsItems);
+
+  CreatePropertyGeneratorExpressions(
+        this->Internal->SourceEntries,
+        this->Internal->SourceBacktraces,
+        this->Internal->SourceItems, true);
 }
 
 //----------------------------------------------------------------------------
@@ -497,8 +511,6 @@ void cmTarget::ClearLinkMaps()
 {
   this->LinkImplementationLanguageIsContextDependent = true;
   this->Internal->LinkImplMap.clear();
-  this->Internal->LinkInterfaceMap.clear();
-  this->Internal->LinkInterfaceUsageRequirementsOnlyMap.clear();
   this->Internal->SourceFilesMap.clear();
 }
 
@@ -688,13 +700,11 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
     // for TARGET_OBJECTS instead for backwards compatibility with OLD
     // behavior of CMP0024 and CMP0026 only.
 
-    typedef cmTargetInternals::TargetPropertyEntry
-                                TargetPropertyEntry;
-    for(std::vector<TargetPropertyEntry*>::const_iterator
+    for(std::vector<std::string>::const_iterator
           i = this->Internal->SourceEntries.begin();
         i != this->Internal->SourceEntries.end(); ++i)
       {
-      std::string entry = (*i)->ge->GetInput();
+      std::string const& entry = *i;
 
       std::vector<std::string> items;
       cmSystemTools::ExpandListArgument(entry, items);
@@ -736,7 +746,7 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
 
   UNORDERED_SET<std::string> uniqueSrcs;
   bool contextDependentDirectSources = processSources(this,
-                 this->Internal->SourceEntries,
+                 this->Internal->SourceItems,
                  files,
                  uniqueSrcs,
                  &dagChecker,
@@ -765,7 +775,7 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
     this->LinkImplementationLanguageIsContextDependent = false;
     }
 
-  deleteAndClear(linkInterfaceSourcesEntries);
+  cmDeleteAll(linkInterfaceSourcesEntries);
 }
 
 //----------------------------------------------------------------------------
@@ -873,11 +883,12 @@ void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)
     this->Internal->SourceFilesMap.clear();
     this->LinkImplementationLanguageIsContextDependent = true;
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+    this->Internal->SourceEntries.push_back(srcFiles);
+    this->Internal->SourceBacktraces.push_back(lfbt);
     cmGeneratorExpression ge(lfbt);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(srcFiles);
-    cge->SetEvaluateForBuildsystem(true);
-    this->Internal->SourceEntries.push_back(
-                          new cmTargetInternals::TargetPropertyEntry(cge));
+    this->Internal->SourceItems.push_back(
+          new cmTargetInternals::TargetPropertyEntry(cge));
     }
 }
 
@@ -913,11 +924,8 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
     this->Internal->SourceFilesMap.clear();
     this->LinkImplementationLanguageIsContextDependent = true;
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(srcFiles);
-    cge->SetEvaluateForBuildsystem(true);
-    this->Internal->SourceEntries.push_back(
-                          new cmTargetInternals::TargetPropertyEntry(cge));
+    this->Internal->SourceEntries.push_back(srcFiles);
+    this->Internal->SourceBacktraces.push_back(lfbt);
     }
 }
 
@@ -1021,10 +1029,10 @@ public:
 
   }
 
-  bool operator()(cmTargetInternals::TargetPropertyEntry* entry)
+  bool operator()(std::string const& entry)
   {
     std::vector<std::string> files;
-    cmSystemTools::ExpandListArgument(entry->ge->GetInput(), files);
+    cmSystemTools::ExpandListArgument(entry, files);
     std::vector<cmSourceFileLocation> locations(files.size());
     std::transform(files.begin(), files.end(), locations.begin(),
                    CreateLocation(this->Needle.GetMakefile()));
@@ -1046,11 +1054,8 @@ cmSourceFile* cmTarget::AddSource(const std::string& src)
     this->Internal->SourceFilesMap.clear();
     this->LinkImplementationLanguageIsContextDependent = true;
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(src);
-    cge->SetEvaluateForBuildsystem(true);
-    this->Internal->SourceEntries.push_back(
-                          new cmTargetInternals::TargetPropertyEntry(cge));
+    this->Internal->SourceEntries.push_back(src);
+    this->Internal->SourceBacktraces.push_back(lfbt);
     }
   if (cmGeneratorExpression::Find(src) != std::string::npos)
     {
@@ -1666,39 +1671,35 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     }
   else if(prop == "INCLUDE_DIRECTORIES")
     {
+    this->Internal->IncludeDirectoriesEntries.clear();
+    this->Internal->IncludeDirectoriesBacktraces.clear();
+    this->Internal->IncludeDirectoriesEntries.push_back(value);
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
-    deleteAndClear(this->Internal->IncludeDirectoriesEntries);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
-    this->Internal->IncludeDirectoriesEntries.push_back(
-                          new cmTargetInternals::TargetPropertyEntry(cge));
+    this->Internal->IncludeDirectoriesBacktraces.push_back(lfbt);
     }
   else if(prop == "COMPILE_OPTIONS")
     {
+    this->Internal->CompileOptionsEntries.clear();
+    this->Internal->CompileOptionsBacktraces.clear();
+    this->Internal->CompileOptionsEntries.push_back(value);
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
-    deleteAndClear(this->Internal->CompileOptionsEntries);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
-    this->Internal->CompileOptionsEntries.push_back(
-                          new cmTargetInternals::TargetPropertyEntry(cge));
+    this->Internal->CompileOptionsBacktraces.push_back(lfbt);
     }
   else if(prop == "COMPILE_FEATURES")
     {
+    this->Internal->CompileFeaturesEntries.clear();
+    this->Internal->CompileFeaturesBacktraces.clear();
+    this->Internal->CompileFeaturesEntries.push_back(value);
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
-    deleteAndClear(this->Internal->CompileFeaturesEntries);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
-    this->Internal->CompileFeaturesEntries.push_back(
-                          new cmTargetInternals::TargetPropertyEntry(cge));
+    this->Internal->CompileFeaturesBacktraces.push_back(lfbt);
     }
   else if(prop == "COMPILE_DEFINITIONS")
     {
+    this->Internal->CompileDefinitionsEntries.clear();
+    this->Internal->CompileDefinitionsBacktraces.clear();
+    this->Internal->CompileDefinitionsEntries.push_back(value);
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
-    deleteAndClear(this->Internal->CompileDefinitionsEntries);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
-    this->Internal->CompileDefinitionsEntries.push_back(
-                          new cmTargetInternals::TargetPropertyEntry(cge));
+    this->Internal->CompileDefinitionsBacktraces.push_back(lfbt);
     }
   else if(prop == "EXPORT_NAME" && this->IsImported())
     {
@@ -1729,11 +1730,11 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       }
     this->Internal->SourceFilesMap.clear();
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
+
     this->Internal->SourceEntries.clear();
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
-    this->Internal->SourceEntries.push_back(
-                          new cmTargetInternals::TargetPropertyEntry(cge));
+    this->Internal->SourceBacktraces.clear();
+    this->Internal->SourceEntries.push_back(value);
+    this->Internal->SourceBacktraces.push_back(lfbt);
     }
   else
     {
@@ -1764,31 +1765,27 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     }
   else if(prop == "INCLUDE_DIRECTORIES")
     {
+    this->Internal->IncludeDirectoriesEntries.push_back(value);
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
-    this->Internal->IncludeDirectoriesEntries.push_back(
-              new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
+    this->Internal->IncludeDirectoriesBacktraces.push_back(lfbt);
     }
   else if(prop == "COMPILE_OPTIONS")
     {
+    this->Internal->CompileOptionsEntries.push_back(value);
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
-    this->Internal->CompileOptionsEntries.push_back(
-              new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
+    this->Internal->CompileOptionsBacktraces.push_back(lfbt);
     }
   else if(prop == "COMPILE_FEATURES")
     {
+    this->Internal->CompileFeaturesEntries.push_back(value);
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
-    this->Internal->CompileFeaturesEntries.push_back(
-              new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
+    this->Internal->CompileFeaturesBacktraces.push_back(lfbt);
     }
   else if(prop == "COMPILE_DEFINITIONS")
     {
+    this->Internal->CompileDefinitionsEntries.push_back(value);
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
-    this->Internal->CompileDefinitionsEntries.push_back(
-              new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
+    this->Internal->CompileDefinitionsBacktraces.push_back(lfbt);
     }
   else if(prop == "EXPORT_NAME" && this->IsImported())
     {
@@ -1818,10 +1815,8 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
       }
       this->Internal->SourceFilesMap.clear();
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-      cmGeneratorExpression ge(lfbt);
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
-      this->Internal->SourceEntries.push_back(
-                            new cmTargetInternals::TargetPropertyEntry(cge));
+      this->Internal->SourceEntries.push_back(value);
+      this->Internal->SourceBacktraces.push_back(lfbt);
     }
   else
     {
@@ -1887,14 +1882,16 @@ void cmTarget::InsertInclude(std::string const& entry,
                              cmListFileBacktrace const& bt,
                              bool before)
 {
-  cmGeneratorExpression ge(bt);
+  std::vector<std::string>::iterator position =
+      before ? this->Internal->IncludeDirectoriesEntries.begin()
+             : this->Internal->IncludeDirectoriesEntries.end();
 
-  std::vector<cmTargetInternals::TargetPropertyEntry*>::iterator position
-                = before ? this->Internal->IncludeDirectoriesEntries.begin()
-                         : this->Internal->IncludeDirectoriesEntries.end();
+  std::vector<cmListFileBacktrace>::iterator btPosition =
+      before ? this->Internal->IncludeDirectoriesBacktraces.begin()
+             : this->Internal->IncludeDirectoriesBacktraces.end();
 
-  this->Internal->IncludeDirectoriesEntries.insert(position,
-      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry)));
+  this->Internal->IncludeDirectoriesEntries.insert(position, entry);
+  this->Internal->IncludeDirectoriesBacktraces.insert(btPosition, bt);
 }
 
 //----------------------------------------------------------------------------
@@ -1902,24 +1899,24 @@ void cmTarget::InsertCompileOption(std::string const& entry,
                                    cmListFileBacktrace const& bt,
                                    bool before)
 {
-  cmGeneratorExpression ge(bt);
+  std::vector<std::string>::iterator position =
+      before ? this->Internal->CompileOptionsEntries.begin()
+             : this->Internal->CompileOptionsEntries.end();
 
-  std::vector<cmTargetInternals::TargetPropertyEntry*>::iterator position
-                = before ? this->Internal->CompileOptionsEntries.begin()
-                         : this->Internal->CompileOptionsEntries.end();
+  std::vector<cmListFileBacktrace>::iterator btPosition =
+      before ? this->Internal->CompileOptionsBacktraces.begin()
+             : this->Internal->CompileOptionsBacktraces.end();
 
-  this->Internal->CompileOptionsEntries.insert(position,
-      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry)));
+  this->Internal->CompileOptionsEntries.insert(position, entry);
+  this->Internal->CompileOptionsBacktraces.insert(btPosition, bt);
 }
 
 //----------------------------------------------------------------------------
 void cmTarget::InsertCompileDefinition(std::string const& entry,
                                        cmListFileBacktrace const& bt)
 {
-  cmGeneratorExpression ge(bt);
-
-  this->Internal->CompileDefinitionsEntries.push_back(
-      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry)));
+  this->Internal->CompileDefinitionsEntries.push_back(entry);
+  this->Internal->CompileDefinitionsBacktraces.push_back(bt);
 }
 
 //----------------------------------------------------------------------------
@@ -2083,7 +2080,7 @@ cmTarget::GetIncludeDirectories(const std::string& config,
     }
 
   processIncludeDirectories(this,
-                            this->Internal->IncludeDirectoriesEntries,
+                            this->Internal->IncludeDirectoriesItems,
                             includes,
                             uniqueIncludes,
                             &dagChecker,
@@ -2099,7 +2096,8 @@ cmTarget::GetIncludeDirectories(const std::string& config,
 
   if(this->Makefile->IsOn("APPLE"))
     {
-    LinkImplementation const* impl = this->GetLinkImplementation(config);
+    cmLinkImplementationLibraries const* impl =
+        this->GetLinkImplementationLibraries(config);
     for(std::vector<cmLinkImplItem>::const_iterator
         it = impl->Libraries.begin();
         it != impl->Libraries.end(); ++it)
@@ -2132,7 +2130,7 @@ cmTarget::GetIncludeDirectories(const std::string& config,
                             debugIncludes,
                             language);
 
-  deleteAndClear(linkInterfaceIncludeDirectoriesEntries);
+  cmDeleteAll(linkInterfaceIncludeDirectoriesEntries);
 
   return includes;
 }
@@ -2229,7 +2227,7 @@ void cmTarget::GetCompileOptions(std::vector<std::string> &result,
     }
 
   processCompileOptions(this,
-                            this->Internal->CompileOptionsEntries,
+                            this->Internal->CompileOptionsItems,
                             result,
                             uniqueOptions,
                             &dagChecker,
@@ -2253,7 +2251,7 @@ void cmTarget::GetCompileOptions(std::vector<std::string> &result,
                             debugOptions,
                             language);
 
-  deleteAndClear(linkInterfaceCompileOptionsEntries);
+  cmDeleteAll(linkInterfaceCompileOptionsEntries);
 }
 
 //----------------------------------------------------------------------------
@@ -2300,7 +2298,7 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
     }
 
   processCompileDefinitions(this,
-                            this->Internal->CompileDefinitionsEntries,
+                            this->Internal->CompileDefinitionsItems,
                             list,
                             uniqueOptions,
                             &dagChecker,
@@ -2355,7 +2353,7 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
                             debugDefines,
                             language);
 
-  deleteAndClear(linkInterfaceCompileDefinitionsEntries);
+  cmDeleteAll(linkInterfaceCompileDefinitionsEntries);
 }
 
 //----------------------------------------------------------------------------
@@ -2401,7 +2399,7 @@ void cmTarget::GetCompileFeatures(std::vector<std::string> &result,
     }
 
   processCompileFeatures(this,
-                            this->Internal->CompileFeaturesEntries,
+                            this->Internal->CompileFeaturesItems,
                             result,
                             uniqueFeatures,
                             &dagChecker,
@@ -2422,7 +2420,7 @@ void cmTarget::GetCompileFeatures(std::vector<std::string> &result,
                             config,
                             debugFeatures);
 
-  deleteAndClear(linkInterfaceCompileFeaturesEntries);
+  cmDeleteAll(linkInterfaceCompileFeaturesEntries);
 }
 
 //----------------------------------------------------------------------------
@@ -2708,22 +2706,6 @@ bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
 }
 
 //----------------------------------------------------------------------------
-static void MakePropertyList(std::string& output,
-    std::vector<cmTargetInternals::TargetPropertyEntry*> const& values)
-{
-  output = "";
-  std::string sep;
-  for (std::vector<cmTargetInternals::TargetPropertyEntry*>::const_iterator
-       it = values.begin(), end = values.end();
-       it != end; ++it)
-    {
-    output += sep;
-    output += (*it)->ge->GetInput();
-    sep = ";";
-    }
-}
-
-//----------------------------------------------------------------------------
 const char *cmTarget::GetProperty(const std::string& prop) const
 {
   return this->GetProperty(prop, this->Makefile);
@@ -2898,7 +2880,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
         }
 
       static std::string output;
-      MakePropertyList(output, this->Internal->IncludeDirectoriesEntries);
+      output = cmJoin(this->Internal->IncludeDirectoriesEntries, ";");
       return output.c_str();
       }
     else if(prop == propCOMPILE_FEATURES)
@@ -2909,7 +2891,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
         }
 
       static std::string output;
-      MakePropertyList(output, this->Internal->CompileFeaturesEntries);
+      output = cmJoin(this->Internal->CompileFeaturesEntries, ";");
       return output.c_str();
       }
     else if(prop == propCOMPILE_OPTIONS)
@@ -2920,7 +2902,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
         }
 
       static std::string output;
-      MakePropertyList(output, this->Internal->CompileOptionsEntries);
+      output = cmJoin(this->Internal->CompileOptionsEntries, ";");
       return output.c_str();
       }
     else if(prop == propCOMPILE_DEFINITIONS)
@@ -2931,7 +2913,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
         }
 
       static std::string output;
-      MakePropertyList(output, this->Internal->CompileDefinitionsEntries);
+      output = cmJoin(this->Internal->CompileDefinitionsEntries, ";");
       return output.c_str();
       }
     else if (prop == propIMPORTED)
@@ -2959,13 +2941,11 @@ const char *cmTarget::GetProperty(const std::string& prop,
 
       std::ostringstream ss;
       const char* sep = "";
-      typedef cmTargetInternals::TargetPropertyEntry
-                                  TargetPropertyEntry;
-      for(std::vector<TargetPropertyEntry*>::const_iterator
+      for(std::vector<std::string>::const_iterator
             i = this->Internal->SourceEntries.begin();
           i != this->Internal->SourceEntries.end(); ++i)
         {
-        std::string entry = (*i)->ge->GetInput();
+        std::string const& entry = *i;
 
         std::vector<std::string> files;
         cmSystemTools::ExpandListArgument(entry, files);
@@ -3064,51 +3044,6 @@ const char *cmTarget::GetProperty(const std::string& prop,
 bool cmTarget::GetPropertyAsBool(const std::string& prop) const
 {
   return cmSystemTools::IsOn(this->GetProperty(prop));
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::ExpandLinkItems(std::string const& prop,
-                               std::string const& value,
-                               std::string const& config,
-                               cmTarget const* headTarget,
-                               bool usage_requirements_only,
-                               std::vector<cmLinkItem>& items,
-                               bool& hadHeadSensitiveCondition) const
-{
-  cmGeneratorExpression ge;
-  cmGeneratorExpressionDAGChecker dagChecker(this->GetName(), prop, 0, 0);
-  // The $<LINK_ONLY> expression may be in a link interface to specify private
-  // link dependencies that are otherwise excluded from usage requirements.
-  if(usage_requirements_only)
-    {
-    dagChecker.SetTransitivePropertiesOnly();
-    }
-  std::vector<std::string> libs;
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
-  cmSystemTools::ExpandListArgument(cge->Evaluate(
-                                      this->Makefile,
-                                      config,
-                                      false,
-                                      headTarget,
-                                      this, &dagChecker), libs);
-  this->LookupLinkItems(libs, items);
-  hadHeadSensitiveCondition = cge->GetHadHeadSensitiveCondition();
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::LookupLinkItems(std::vector<std::string> const& names,
-                               std::vector<cmLinkItem>& items) const
-{
-  for(std::vector<std::string>::const_iterator i = names.begin();
-      i != names.end(); ++i)
-    {
-    std::string name = this->CheckCMP0004(*i);
-    if(name == this->GetName() || name.empty())
-      {
-      continue;
-      }
-    items.push_back(cmLinkItem(name, this->FindTargetToLink(name)));
-    }
 }
 
 //----------------------------------------------------------------------------
@@ -3381,7 +3316,7 @@ bool cmTarget::HaveBuildTreeRPATH(const std::string& config) const
     {
     return false;
     }
-  if(LinkImplementationLibraries const* impl =
+  if(cmLinkImplementationLibraries const* impl =
      this->GetLinkImplementationLibraries(config))
     {
     return !impl->Libraries.empty();
@@ -3665,13 +3600,11 @@ cmTarget::GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const
   // there is no cmGeneratorTarget at configure-time, so search the SOURCES
   // for TARGET_OBJECTS instead for backwards compatibility with OLD
   // behavior of CMP0024 and CMP0026 only.
-  typedef cmTargetInternals::TargetPropertyEntry
-                              TargetPropertyEntry;
-  for(std::vector<TargetPropertyEntry*>::const_iterator
+  for(std::vector<std::string>::const_iterator
         i = this->Internal->SourceEntries.begin();
       i != this->Internal->SourceEntries.end(); ++i)
     {
-    std::string entry = (*i)->ge->GetInput();
+    std::string const& entry = *i;
 
     std::vector<std::string> files;
     cmSystemTools::ExpandListArgument(entry, files);
@@ -4091,398 +4024,11 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
 }
 
 //----------------------------------------------------------------------------
-cmTarget::LinkInterface const* cmTarget::GetLinkInterface(
-                                                  const std::string& config,
-                                                  cmTarget const* head) const
-{
-  // Imported targets have their own link interface.
-  if(this->IsImported())
-    {
-    return this->GetImportLinkInterface(config, head, false);
-    }
-
-  // Link interfaces are not supported for executables that do not
-  // export symbols.
-  if(this->GetType() == cmTarget::EXECUTABLE &&
-     !this->IsExecutableWithExports())
-    {
-    return 0;
-    }
-
-  // Lookup any existing link interface for this configuration.
-  std::string CONFIG = cmSystemTools::UpperCase(config);
-  cmTargetInternals::HeadToLinkInterfaceMap& hm =
-    this->Internal->LinkInterfaceMap[CONFIG];
-
-  // If the link interface does not depend on the head target
-  // then return the one we computed first.
-  if(!hm.empty() && !hm.begin()->second.HadHeadSensitiveCondition)
-    {
-    return &hm.begin()->second;
-    }
-
-  cmTargetInternals::OptionalLinkInterface& iface = hm[head];
-  if(!iface.LibrariesDone)
-    {
-    iface.LibrariesDone = true;
-    this->Internal->ComputeLinkInterfaceLibraries(
-      this, config, iface, head, false);
-    }
-  if(!iface.AllDone)
-    {
-    iface.AllDone = true;
-    if(iface.Exists)
-      {
-      this->Internal->ComputeLinkInterface(this, config, iface, head);
-      }
-    }
-
-  return iface.Exists? &iface : 0;
-}
-
-//----------------------------------------------------------------------------
-cmTarget::LinkInterfaceLibraries const*
-cmTarget::GetLinkInterfaceLibraries(const std::string& config,
-                                    cmTarget const* head,
-                                    bool usage_requirements_only) const
-{
-  // Imported targets have their own link interface.
-  if(this->IsImported())
-    {
-    return this->GetImportLinkInterface(config, head, usage_requirements_only);
-    }
-
-  // Link interfaces are not supported for executables that do not
-  // export symbols.
-  if(this->GetType() == cmTarget::EXECUTABLE &&
-     !this->IsExecutableWithExports())
-    {
-    return 0;
-    }
-
-  // Lookup any existing link interface for this configuration.
-  std::string CONFIG = cmSystemTools::UpperCase(config);
-  cmTargetInternals::HeadToLinkInterfaceMap& hm =
-    (usage_requirements_only ?
-     this->Internal->LinkInterfaceUsageRequirementsOnlyMap[CONFIG] :
-     this->Internal->LinkInterfaceMap[CONFIG]);
-
-  // If the link interface does not depend on the head target
-  // then return the one we computed first.
-  if(!hm.empty() && !hm.begin()->second.HadHeadSensitiveCondition)
-    {
-    return &hm.begin()->second;
-    }
-
-  cmTargetInternals::OptionalLinkInterface& iface = hm[head];
-  if(!iface.LibrariesDone)
-    {
-    iface.LibrariesDone = true;
-    this->Internal->ComputeLinkInterfaceLibraries(
-      this, config, iface, head, usage_requirements_only);
-    }
-
-  return iface.Exists? &iface : 0;
-}
-
-//----------------------------------------------------------------------------
-cmTarget::LinkInterface const*
-cmTarget::GetImportLinkInterface(const std::string& config,
-                                 cmTarget const* headTarget,
-                                 bool usage_requirements_only) const
-{
-  cmTarget::ImportInfo const* info = this->GetImportInfo(config);
-  if(!info)
-    {
-    return 0;
-    }
-
-  std::string CONFIG = cmSystemTools::UpperCase(config);
-  cmTargetInternals::HeadToLinkInterfaceMap& hm =
-    (usage_requirements_only ?
-     this->Internal->LinkInterfaceUsageRequirementsOnlyMap[CONFIG] :
-     this->Internal->LinkInterfaceMap[CONFIG]);
-
-  // If the link interface does not depend on the head target
-  // then return the one we computed first.
-  if(!hm.empty() && !hm.begin()->second.HadHeadSensitiveCondition)
-    {
-    return &hm.begin()->second;
-    }
-
-  cmTargetInternals::OptionalLinkInterface& iface = hm[headTarget];
-  if(!iface.AllDone)
-    {
-    iface.AllDone = true;
-    iface.Multiplicity = info->Multiplicity;
-    cmSystemTools::ExpandListArgument(info->Languages, iface.Languages);
-    this->ExpandLinkItems(info->LibrariesProp, info->Libraries, config,
-                          headTarget, usage_requirements_only,
-                          iface.Libraries,
-                          iface.HadHeadSensitiveCondition);
-    std::vector<std::string> deps;
-    cmSystemTools::ExpandListArgument(info->SharedDeps, deps);
-    this->LookupLinkItems(deps, iface.SharedDeps);
-    }
-
-  return &iface;
-}
-
-//----------------------------------------------------------------------------
-void
-cmTargetInternals::ComputeLinkInterfaceLibraries(
-  cmTarget const* thisTarget,
-  const std::string& config,
-  OptionalLinkInterface& iface,
-  cmTarget const* headTarget,
-  bool usage_requirements_only)
-{
-  // Construct the property name suffix for this configuration.
-  std::string suffix = "_";
-  if(!config.empty())
-    {
-    suffix += cmSystemTools::UpperCase(config);
-    }
-  else
-    {
-    suffix += "NOCONFIG";
-    }
-
-  // An explicit list of interface libraries may be set for shared
-  // libraries and executables that export symbols.
-  const char* explicitLibraries = 0;
-  std::string linkIfaceProp;
-  if(thisTarget->GetPolicyStatusCMP0022() != cmPolicies::OLD &&
-     thisTarget->GetPolicyStatusCMP0022() != cmPolicies::WARN)
-    {
-    // CMP0022 NEW behavior is to use INTERFACE_LINK_LIBRARIES.
-    linkIfaceProp = "INTERFACE_LINK_LIBRARIES";
-    explicitLibraries = thisTarget->GetProperty(linkIfaceProp);
-    }
-  else if(thisTarget->GetType() == cmTarget::SHARED_LIBRARY ||
-          thisTarget->IsExecutableWithExports())
-    {
-    // CMP0022 OLD behavior is to use LINK_INTERFACE_LIBRARIES if set on a
-    // shared lib or executable.
-
-    // Lookup the per-configuration property.
-    linkIfaceProp = "LINK_INTERFACE_LIBRARIES";
-    linkIfaceProp += suffix;
-    explicitLibraries = thisTarget->GetProperty(linkIfaceProp);
-
-    // If not set, try the generic property.
-    if(!explicitLibraries)
-      {
-      linkIfaceProp = "LINK_INTERFACE_LIBRARIES";
-      explicitLibraries = thisTarget->GetProperty(linkIfaceProp);
-      }
-    }
-
-  if(explicitLibraries &&
-     thisTarget->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
-     !this->PolicyWarnedCMP0022)
-    {
-    // Compare the explicitly set old link interface properties to the
-    // preferred new link interface property one and warn if different.
-    const char* newExplicitLibraries =
-      thisTarget->GetProperty("INTERFACE_LINK_LIBRARIES");
-    if (newExplicitLibraries
-        && strcmp(newExplicitLibraries, explicitLibraries) != 0)
-      {
-      std::ostringstream w;
-      w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0022) << "\n"
-        "Target \"" << thisTarget->GetName() << "\" has an "
-        "INTERFACE_LINK_LIBRARIES property which differs from its " <<
-        linkIfaceProp << " properties."
-        "\n"
-        "INTERFACE_LINK_LIBRARIES:\n"
-        "  " << newExplicitLibraries << "\n" <<
-        linkIfaceProp << ":\n"
-        "  " << (explicitLibraries ? explicitLibraries : "(empty)") << "\n";
-      thisTarget->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
-      this->PolicyWarnedCMP0022 = true;
-      }
-    }
-
-  // There is no implicit link interface for executables or modules
-  // so if none was explicitly set then there is no link interface.
-  if(!explicitLibraries &&
-     (thisTarget->GetType() == cmTarget::EXECUTABLE ||
-      (thisTarget->GetType() == cmTarget::MODULE_LIBRARY)))
-    {
-    return;
-    }
-  iface.Exists = true;
-  iface.ExplicitLibraries = explicitLibraries;
-
-  if(explicitLibraries)
-    {
-    // The interface libraries have been explicitly set.
-    thisTarget->ExpandLinkItems(linkIfaceProp, explicitLibraries, config,
-                                headTarget, usage_requirements_only,
-                                iface.Libraries,
-                                iface.HadHeadSensitiveCondition);
-    }
-  else if (thisTarget->GetPolicyStatusCMP0022() == cmPolicies::WARN
-        || thisTarget->GetPolicyStatusCMP0022() == cmPolicies::OLD)
-    // If CMP0022 is NEW then the plain tll signature sets the
-    // INTERFACE_LINK_LIBRARIES, so if we get here then the project
-    // cleared the property explicitly and we should not fall back
-    // to the link implementation.
-    {
-    // The link implementation is the default link interface.
-    cmTarget::LinkImplementationLibraries const* impl =
-      thisTarget->GetLinkImplementationLibrariesInternal(config, headTarget);
-    iface.Libraries.insert(iface.Libraries.end(),
-                           impl->Libraries.begin(), impl->Libraries.end());
-    if(thisTarget->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
-       !this->PolicyWarnedCMP0022 && !usage_requirements_only)
-      {
-      // Compare the link implementation fallback link interface to the
-      // preferred new link interface property and warn if different.
-      std::vector<cmLinkItem> ifaceLibs;
-      static const std::string newProp = "INTERFACE_LINK_LIBRARIES";
-      if(const char* newExplicitLibraries = thisTarget->GetProperty(newProp))
-        {
-        bool hadHeadSensitiveConditionDummy = false;
-        thisTarget->ExpandLinkItems(newProp, newExplicitLibraries, config,
-                                    headTarget, usage_requirements_only,
-                                ifaceLibs, hadHeadSensitiveConditionDummy);
-        }
-      if (ifaceLibs != iface.Libraries)
-        {
-        std::string oldLibraries = cmJoin(impl->Libraries, ";");
-        std::string newLibraries = cmJoin(ifaceLibs, ";");
-        if(oldLibraries.empty())
-          { oldLibraries = "(empty)"; }
-        if(newLibraries.empty())
-          { newLibraries = "(empty)"; }
-
-        std::ostringstream w;
-        w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0022) << "\n"
-          "Target \"" << thisTarget->GetName() << "\" has an "
-          "INTERFACE_LINK_LIBRARIES property.  "
-          "This should be preferred as the source of the link interface "
-          "for this library but because CMP0022 is not set CMake is "
-          "ignoring the property and using the link implementation "
-          "as the link interface instead."
-          "\n"
-          "INTERFACE_LINK_LIBRARIES:\n"
-          "  " << newLibraries << "\n"
-          "Link implementation:\n"
-          "  " << oldLibraries << "\n";
-        thisTarget->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
-        this->PolicyWarnedCMP0022 = true;
-        }
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
-                                             const std::string& config,
-                                             OptionalLinkInterface& iface,
-                                             cmTarget const* headTarget) const
-{
-  if(iface.ExplicitLibraries)
-    {
-    if(thisTarget->GetType() == cmTarget::SHARED_LIBRARY
-        || thisTarget->GetType() == cmTarget::STATIC_LIBRARY
-        || thisTarget->GetType() == cmTarget::INTERFACE_LIBRARY)
-      {
-      // Shared libraries may have runtime implementation dependencies
-      // on other shared libraries that are not in the interface.
-      UNORDERED_SET<std::string> emitted;
-      for(std::vector<cmLinkItem>::const_iterator
-          li = iface.Libraries.begin(); li != iface.Libraries.end(); ++li)
-        {
-        emitted.insert(*li);
-        }
-      if (thisTarget->GetType() != cmTarget::INTERFACE_LIBRARY)
-        {
-        cmTarget::LinkImplementation const* impl =
-            thisTarget->GetLinkImplementation(config);
-        for(std::vector<cmLinkImplItem>::const_iterator
-              li = impl->Libraries.begin(); li != impl->Libraries.end(); ++li)
-          {
-          if(emitted.insert(*li).second)
-            {
-            if(li->Target)
-              {
-              // This is a runtime dependency on another shared library.
-              if(li->Target->GetType() == cmTarget::SHARED_LIBRARY)
-                {
-                iface.SharedDeps.push_back(*li);
-                }
-              }
-            else
-              {
-              // TODO: Recognize shared library file names.  Perhaps this
-              // should be moved to cmComputeLinkInformation, but that creates
-              // a chicken-and-egg problem since this list is needed for its
-              // construction.
-              }
-            }
-          }
-        }
-      }
-    }
-  else if (thisTarget->GetPolicyStatusCMP0022() == cmPolicies::WARN
-        || thisTarget->GetPolicyStatusCMP0022() == cmPolicies::OLD)
-    {
-    // The link implementation is the default link interface.
-    cmTarget::LinkImplementationLibraries const*
-      impl = thisTarget->GetLinkImplementationLibrariesInternal(config,
-                                                                headTarget);
-    iface.ImplementationIsInterface = true;
-    iface.WrongConfigLibraries = impl->WrongConfigLibraries;
-    }
-
-  if(thisTarget->LinkLanguagePropagatesToDependents())
-    {
-    // Targets using this archive need its language runtime libraries.
-    if(cmTarget::LinkImplementation const* impl =
-       thisTarget->GetLinkImplementation(config))
-      {
-      iface.Languages = impl->Languages;
-      }
-    }
-
-  if(thisTarget->GetType() == cmTarget::STATIC_LIBRARY)
-    {
-    // Construct the property name suffix for this configuration.
-    std::string suffix = "_";
-    if(!config.empty())
-      {
-      suffix += cmSystemTools::UpperCase(config);
-      }
-    else
-      {
-      suffix += "NOCONFIG";
-      }
-
-    // How many repetitions are needed if this library has cyclic
-    // dependencies?
-    std::string propName = "LINK_INTERFACE_MULTIPLICITY";
-    propName += suffix;
-    if(const char* config_reps = thisTarget->GetProperty(propName))
-      {
-      sscanf(config_reps, "%u", &iface.Multiplicity);
-      }
-    else if(const char* reps =
-            thisTarget->GetProperty("LINK_INTERFACE_MULTIPLICITY"))
-      {
-      sscanf(reps, "%u", &iface.Multiplicity);
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
 void cmTargetInternals::AddInterfaceEntries(
   cmTarget const* thisTarget, std::string const& config,
   std::string const& prop, std::vector<TargetPropertyEntry*>& entries)
 {
-  if(cmTarget::LinkImplementationLibraries const* impl =
+  if(cmLinkImplementationLibraries const* impl =
      thisTarget->GetLinkImplementationLibraries(config))
     {
     for (std::vector<cmLinkImplItem>::const_iterator
@@ -4532,14 +4078,14 @@ cmTarget::GetLinkImplementation(const std::string& config) const
 }
 
 //----------------------------------------------------------------------------
-cmTarget::LinkImplementationLibraries const*
+cmLinkImplementationLibraries const*
 cmTarget::GetLinkImplementationLibraries(const std::string& config) const
 {
   return this->GetLinkImplementationLibrariesInternal(config, this);
 }
 
 //----------------------------------------------------------------------------
-cmTarget::LinkImplementationLibraries const*
+cmLinkImplementationLibraries const*
 cmTarget::GetLinkImplementationLibrariesInternal(const std::string& config,
                                                  cmTarget const* head) const
 {
@@ -4804,11 +4350,11 @@ cmTargetInternalPointer
 //----------------------------------------------------------------------------
 cmTargetInternalPointer::~cmTargetInternalPointer()
 {
-  cmDeleteAll(this->Pointer->IncludeDirectoriesEntries);
-  cmDeleteAll(this->Pointer->CompileOptionsEntries);
-  cmDeleteAll(this->Pointer->CompileFeaturesEntries);
-  cmDeleteAll(this->Pointer->CompileDefinitionsEntries);
-  cmDeleteAll(this->Pointer->SourceEntries);
+  cmDeleteAll(this->Pointer->IncludeDirectoriesItems);
+  cmDeleteAll(this->Pointer->CompileOptionsItems);
+  cmDeleteAll(this->Pointer->CompileFeaturesItems);
+  cmDeleteAll(this->Pointer->CompileDefinitionsItems);
+  cmDeleteAll(this->Pointer->SourceItems);
   delete this->Pointer;
 }
 
