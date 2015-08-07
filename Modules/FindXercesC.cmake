@@ -61,10 +61,18 @@ find_path(XercesC_INCLUDE_DIR
           DOC "Xerces-C++ include directory")
 mark_as_advanced(XercesC_INCLUDE_DIR)
 
-# Find all XercesC libraries
-find_library(XercesC_LIBRARY NAMES "xerces-c" "xerces-c_3" "xerces-c_2"
-  DOC "Xerces-C++ libraries")
-mark_as_advanced(XercesC_LIBRARY)
+if(NOT XercesC_LIBRARY)
+  # Find all XercesC libraries
+  find_library(XercesC_LIBRARY_RELEASE
+               NAMES "xerces-c" "xerces-c_3"
+               DOC "Xerces-C++ libraries (release)")
+  find_library(XercesC_LIBRARY_DEBUG
+               NAMES "xerces-cd" "xerces-c_3D"
+               DOC "Xerces-C++ libraries (debug)")
+  include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+  select_library_configurations(XercesC)
+  mark_as_advanced(XercesC_LIBRARY_RELEASE XercesC_LIBRARY_DEBUG)
+endif()
 
 if(XercesC_INCLUDE_DIR)
   _XercesC_GET_VERSION("${XercesC_INCLUDE_DIR}/xercesc/util/XercesVersion.hpp")
