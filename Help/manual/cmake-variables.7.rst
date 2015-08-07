@@ -139,6 +139,8 @@ Variables that Change Behavior
    /variable/CMAKE_INSTALL_MESSAGE
    /variable/CMAKE_INSTALL_PREFIX
    /variable/CMAKE_LIBRARY_PATH
+   /variable/CMAKE_LINK_SEARCH_END_STATIC
+   /variable/CMAKE_LINK_SEARCH_START_STATIC
    /variable/CMAKE_MFC_FLAG
    /variable/CMAKE_MODULE_PATH
    /variable/CMAKE_NOT_USING_CONFIG_FLAGS
