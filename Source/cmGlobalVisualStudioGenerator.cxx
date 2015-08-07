@@ -888,7 +888,8 @@ cmGlobalVisualStudioGenerator::OrderedTargetDependSet
   for (TargetSet::const_iterator it = targets.begin();
        it != targets.end(); ++it)
     {
-    cmGeneratorTarget* gt = this->GetGeneratorTarget(*it);
+    cmGeneratorTarget* gt =
+        (*it)->GetMakefile()->GetGlobalGenerator()->GetGeneratorTarget(*it);
     this->insert(gt);
     }
 }
