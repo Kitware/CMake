@@ -431,10 +431,12 @@ private:
     bool HadHeadSensitiveCondition;
     const char* ExplicitLibraries;
   };
-  void ComputeLinkInterface(const std::string& config,
+  void ComputeLinkInterface(cmTarget const* thisTarget,
+                            const std::string& config,
                             OptionalLinkInterface& iface,
                             cmTarget const* head) const;
-  void ComputeLinkInterfaceLibraries(const std::string& config,
+  void ComputeLinkInterfaceLibraries(cmTarget const* thisTarget,
+                                     const std::string& config,
                                      OptionalLinkInterface& iface,
                                      cmTarget const* head,
                                      bool usage_requirements_only) const;
@@ -447,14 +449,6 @@ private:
   mutable LinkInterfaceMapType LinkInterfaceUsageRequirementsOnlyMap;
 
   mutable bool PolicyWarnedCMP0022;
-
-  void ExpandLinkItems(std::string const& prop, std::string const& value,
-                       std::string const& config, cmTarget const* headTarget,
-                       bool usage_requirements_only,
-                       std::vector<cmLinkItem>& items,
-                       bool& hadHeadSensitiveCondition) const;
-  void LookupLinkItems(std::vector<std::string> const& names,
-                       std::vector<cmLinkItem>& items) const;
 
 public:
   std::vector<cmTarget const*> const&

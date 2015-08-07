@@ -3334,51 +3334,6 @@ cmGeneratorTarget::ReportPropertyOrigin(const std::string &p,
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::LookupLinkItems(std::vector<std::string> const& names,
-                               std::vector<cmLinkItem>& items) const
-{
-  for(std::vector<std::string>::const_iterator i = names.begin();
-      i != names.end(); ++i)
-    {
-    std::string name = this->Target->CheckCMP0004(*i);
-    if(name == this->GetName() || name.empty())
-      {
-      continue;
-      }
-    items.push_back(cmLinkItem(name, this->Target->FindTargetToLink(name)));
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
-                               std::string const& value,
-                               std::string const& config,
-                               cmTarget const* headTarget,
-                               bool usage_requirements_only,
-                               std::vector<cmLinkItem>& items,
-                               bool& hadHeadSensitiveCondition) const
-{
-  cmGeneratorExpression ge;
-  cmGeneratorExpressionDAGChecker dagChecker(this->GetName(), prop, 0, 0);
-  // The $<LINK_ONLY> expression may be in a link interface to specify private
-  // link dependencies that are otherwise excluded from usage requirements.
-  if(usage_requirements_only)
-    {
-    dagChecker.SetTransitivePropertiesOnly();
-    }
-  std::vector<std::string> libs;
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
-  cmSystemTools::ExpandListArgument(cge->Evaluate(
-                                      this->Makefile,
-                                      config,
-                                      false,
-                                      headTarget,
-                                      this->Target, &dagChecker), libs);
-  this->LookupLinkItems(libs, items);
-  hadHeadSensitiveCondition = cge->GetHadHeadSensitiveCondition();
-}
-
-//----------------------------------------------------------------------------
 cmGeneratorTarget::LinkInterface const* cmGeneratorTarget::GetLinkInterface(
                                                   const std::string& config,
                                                   cmTarget const* head) const
@@ -3413,14 +3368,14 @@ cmGeneratorTarget::LinkInterface const* cmGeneratorTarget::GetLinkInterface(
     {
     iface.LibrariesDone = true;
     this->ComputeLinkInterfaceLibraries(
-      config, iface, head, false);
+      this->Target, config, iface, head, false);
     }
   if(!iface.AllDone)
     {
     iface.AllDone = true;
     if(iface.Exists)
       {
-      this->ComputeLinkInterface(config, iface, head);
+      this->ComputeLinkInterface(this->Target, config, iface, head);
       }
     }
 
@@ -3466,7 +3421,7 @@ cmGeneratorTarget::GetLinkInterfaceLibraries(const std::string& config,
     {
     iface.LibrariesDone = true;
     this->ComputeLinkInterfaceLibraries(
-      config, iface, head, usage_requirements_only);
+      this->Target, config, iface, head, usage_requirements_only);
     }
 
   return iface.Exists? &iface : 0;
@@ -3503,13 +3458,13 @@ cmGeneratorTarget::GetImportLinkInterface(const std::string& config,
     iface.AllDone = true;
     iface.Multiplicity = info->Multiplicity;
     cmSystemTools::ExpandListArgument(info->Languages, iface.Languages);
-    this->ExpandLinkItems(info->LibrariesProp, info->Libraries, config,
+    this->Target->ExpandLinkItems(info->LibrariesProp, info->Libraries, config,
                           headTarget, usage_requirements_only,
                           iface.Libraries,
                           iface.HadHeadSensitiveCondition);
     std::vector<std::string> deps;
     cmSystemTools::ExpandListArgument(info->SharedDeps, deps);
-    this->LookupLinkItems(deps, iface.SharedDeps);
+    this->Target->LookupLinkItems(deps, iface.SharedDeps);
     }
 
   return &iface;
@@ -3518,6 +3473,7 @@ cmGeneratorTarget::GetImportLinkInterface(const std::string& config,
 //----------------------------------------------------------------------------
 void
 cmGeneratorTarget::ComputeLinkInterfaceLibraries(
+  cmTarget const* thisTarget,
   const std::string& config,
   OptionalLinkInterface& iface,
   cmTarget const* headTarget,
@@ -3538,15 +3494,15 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
   // libraries and executables that export symbols.
   const char* explicitLibraries = 0;
   std::string linkIfaceProp;
-  if(this->Target->GetPolicyStatusCMP0022() != cmPolicies::OLD &&
-     this->Target->GetPolicyStatusCMP0022() != cmPolicies::WARN)
+  if(thisTarget->GetPolicyStatusCMP0022() != cmPolicies::OLD &&
+     thisTarget->GetPolicyStatusCMP0022() != cmPolicies::WARN)
     {
     // CMP0022 NEW behavior is to use INTERFACE_LINK_LIBRARIES.
     linkIfaceProp = "INTERFACE_LINK_LIBRARIES";
-    explicitLibraries = this->Target->GetProperty(linkIfaceProp);
+    explicitLibraries = thisTarget->GetProperty(linkIfaceProp);
     }
-  else if(this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
-          this->Target->IsExecutableWithExports())
+  else if(thisTarget->GetType() == cmTarget::SHARED_LIBRARY ||
+          thisTarget->IsExecutableWithExports())
     {
     // CMP0022 OLD behavior is to use LINK_INTERFACE_LIBRARIES if set on a
     // shared lib or executable.
@@ -3554,30 +3510,30 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     // Lookup the per-configuration property.
     linkIfaceProp = "LINK_INTERFACE_LIBRARIES";
     linkIfaceProp += suffix;
-    explicitLibraries = this->Target->GetProperty(linkIfaceProp);
+    explicitLibraries = thisTarget->GetProperty(linkIfaceProp);
 
     // If not set, try the generic property.
     if(!explicitLibraries)
       {
       linkIfaceProp = "LINK_INTERFACE_LIBRARIES";
-      explicitLibraries = this->Target->GetProperty(linkIfaceProp);
+      explicitLibraries = thisTarget->GetProperty(linkIfaceProp);
       }
     }
 
   if(explicitLibraries &&
-     this->Target->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
+     thisTarget->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
      !this->PolicyWarnedCMP0022)
     {
     // Compare the explicitly set old link interface properties to the
     // preferred new link interface property one and warn if different.
     const char* newExplicitLibraries =
-      this->Target->GetProperty("INTERFACE_LINK_LIBRARIES");
+      thisTarget->GetProperty("INTERFACE_LINK_LIBRARIES");
     if (newExplicitLibraries
         && strcmp(newExplicitLibraries, explicitLibraries) != 0)
       {
       std::ostringstream w;
       w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0022) << "\n"
-        "Target \"" << this->Target->GetName() << "\" has an "
+        "Target \"" << thisTarget->GetName() << "\" has an "
         "INTERFACE_LINK_LIBRARIES property which differs from its " <<
         linkIfaceProp << " properties."
         "\n"
@@ -3585,7 +3541,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
         "  " << newExplicitLibraries << "\n" <<
         linkIfaceProp << ":\n"
         "  " << (explicitLibraries ? explicitLibraries : "(empty)") << "\n";
-      this->Target->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+      thisTarget->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
       this->PolicyWarnedCMP0022 = true;
       }
     }
@@ -3593,8 +3549,8 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
   // There is no implicit link interface for executables or modules
   // so if none was explicitly set then there is no link interface.
   if(!explicitLibraries &&
-     (this->Target->GetType() == cmTarget::EXECUTABLE ||
-      (this->Target->GetType() == cmTarget::MODULE_LIBRARY)))
+     (thisTarget->GetType() == cmTarget::EXECUTABLE ||
+      (thisTarget->GetType() == cmTarget::MODULE_LIBRARY)))
     {
     return;
     }
@@ -3604,13 +3560,13 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
   if(explicitLibraries)
     {
     // The interface libraries have been explicitly set.
-    this->ExpandLinkItems(linkIfaceProp, explicitLibraries, config,
+    thisTarget->ExpandLinkItems(linkIfaceProp, explicitLibraries, config,
                                 headTarget, usage_requirements_only,
                                 iface.Libraries,
                                 iface.HadHeadSensitiveCondition);
     }
-  else if (this->Target->GetPolicyStatusCMP0022() == cmPolicies::WARN
-        || this->Target->GetPolicyStatusCMP0022() == cmPolicies::OLD)
+  else if (thisTarget->GetPolicyStatusCMP0022() == cmPolicies::WARN
+        || thisTarget->GetPolicyStatusCMP0022() == cmPolicies::OLD)
     // If CMP0022 is NEW then the plain tll signature sets the
     // INTERFACE_LINK_LIBRARIES, so if we get here then the project
     // cleared the property explicitly and we should not fall back
@@ -3618,20 +3574,20 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     {
     // The link implementation is the default link interface.
     cmLinkImplementationLibraries const* impl =
-      this->Target->GetLinkImplementationLibrariesInternal(config, headTarget);
+      thisTarget->GetLinkImplementationLibrariesInternal(config, headTarget);
     iface.Libraries.insert(iface.Libraries.end(),
                            impl->Libraries.begin(), impl->Libraries.end());
-    if(this->Target->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
+    if(thisTarget->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
        !this->PolicyWarnedCMP0022 && !usage_requirements_only)
       {
       // Compare the link implementation fallback link interface to the
       // preferred new link interface property and warn if different.
       std::vector<cmLinkItem> ifaceLibs;
       static const std::string newProp = "INTERFACE_LINK_LIBRARIES";
-      if(const char* newExplicitLibraries = this->Target->GetProperty(newProp))
+      if(const char* newExplicitLibraries = thisTarget->GetProperty(newProp))
         {
         bool hadHeadSensitiveConditionDummy = false;
-        this->ExpandLinkItems(newProp, newExplicitLibraries, config,
+        thisTarget->ExpandLinkItems(newProp, newExplicitLibraries, config,
                                     headTarget, usage_requirements_only,
                                 ifaceLibs, hadHeadSensitiveConditionDummy);
         }
@@ -3646,7 +3602,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
 
         std::ostringstream w;
         w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0022) << "\n"
-          "Target \"" << this->Target->GetName() << "\" has an "
+          "Target \"" << thisTarget->GetName() << "\" has an "
           "INTERFACE_LINK_LIBRARIES property.  "
           "This should be preferred as the source of the link interface "
           "for this library but because CMP0022 is not set CMake is "
@@ -3657,7 +3613,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
           "  " << newLibraries << "\n"
           "Link implementation:\n"
           "  " << oldLibraries << "\n";
-        this->Target->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+        thisTarget->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
         this->PolicyWarnedCMP0022 = true;
         }
       }
@@ -3665,15 +3621,16 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
+void cmGeneratorTarget::ComputeLinkInterface(cmTarget const* thisTarget,
+                                             const std::string& config,
                                              OptionalLinkInterface& iface,
                                              cmTarget const* headTarget) const
 {
   if(iface.ExplicitLibraries)
     {
-    if(this->GetType() == cmTarget::SHARED_LIBRARY
-        || this->GetType() == cmTarget::STATIC_LIBRARY
-        || this->GetType() == cmTarget::INTERFACE_LIBRARY)
+    if(thisTarget->GetType() == cmTarget::SHARED_LIBRARY
+        || thisTarget->GetType() == cmTarget::STATIC_LIBRARY
+        || thisTarget->GetType() == cmTarget::INTERFACE_LIBRARY)
       {
       // Shared libraries may have runtime implementation dependencies
       // on other shared libraries that are not in the interface.
@@ -3683,10 +3640,10 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
         {
         emitted.insert(*li);
         }
-      if (this->GetType() != cmTarget::INTERFACE_LIBRARY)
+      if (thisTarget->GetType() != cmTarget::INTERFACE_LIBRARY)
         {
         cmTarget::LinkImplementation const* impl =
-            this->Target->GetLinkImplementation(config);
+            thisTarget->GetLinkImplementation(config);
         for(std::vector<cmLinkImplItem>::const_iterator
               li = impl->Libraries.begin(); li != impl->Libraries.end(); ++li)
           {
@@ -3712,28 +3669,28 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
         }
       }
     }
-  else if (this->Target->GetPolicyStatusCMP0022() == cmPolicies::WARN
-        || this->Target->GetPolicyStatusCMP0022() == cmPolicies::OLD)
+  else if (thisTarget->GetPolicyStatusCMP0022() == cmPolicies::WARN
+        || thisTarget->GetPolicyStatusCMP0022() == cmPolicies::OLD)
     {
     // The link implementation is the default link interface.
     cmLinkImplementationLibraries const*
-      impl = this->Target->GetLinkImplementationLibrariesInternal(config,
+      impl = thisTarget->GetLinkImplementationLibrariesInternal(config,
                                                                 headTarget);
     iface.ImplementationIsInterface = true;
     iface.WrongConfigLibraries = impl->WrongConfigLibraries;
     }
 
-  if(this->Target->LinkLanguagePropagatesToDependents())
+  if(thisTarget->LinkLanguagePropagatesToDependents())
     {
     // Targets using this archive need its language runtime libraries.
     if(cmTarget::LinkImplementation const* impl =
-       this->Target->GetLinkImplementation(config))
+       thisTarget->GetLinkImplementation(config))
       {
       iface.Languages = impl->Languages;
       }
     }
 
-  if(this->GetType() == cmTarget::STATIC_LIBRARY)
+  if(thisTarget->GetType() == cmTarget::STATIC_LIBRARY)
     {
     // Construct the property name suffix for this configuration.
     std::string suffix = "_";
@@ -3750,12 +3707,12 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
     // dependencies?
     std::string propName = "LINK_INTERFACE_MULTIPLICITY";
     propName += suffix;
-    if(const char* config_reps = this->Target->GetProperty(propName))
+    if(const char* config_reps = thisTarget->GetProperty(propName))
       {
       sscanf(config_reps, "%u", &iface.Multiplicity);
       }
     else if(const char* reps =
-            this->Target->GetProperty("LINK_INTERFACE_MULTIPLICITY"))
+            thisTarget->GetProperty("LINK_INTERFACE_MULTIPLICITY"))
       {
       sscanf(reps, "%u", &iface.Multiplicity);
       }
