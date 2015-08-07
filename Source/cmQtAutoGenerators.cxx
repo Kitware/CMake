@@ -313,9 +313,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
     makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
                             mocCppFile.c_str(), false);
 
-    std::vector<std::string> mocCppFiles;
-    mocCppFiles.push_back(mocCppFile);
-    target->AddTracedSources(mocCppFiles);
+    target->AddSource(mocCppFile);
     }
   // create a custom target for running generators at buildtime:
   std::string autogenTargetName = getAutogenTargetName(target);
@@ -739,7 +737,12 @@ void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target)
       }
     }
 
-  const_cast<cmTarget*>(target)->AddTracedSources(newRccFiles);
+  for(std::vector<std::string>::const_iterator fileIt = newRccFiles.begin();
+      fileIt != newRccFiles.end();
+      ++fileIt)
+    {
+    const_cast<cmTarget*>(target)->AddSource(*fileIt);
+    }
 }
 
 void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,

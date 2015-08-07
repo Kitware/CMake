@@ -180,9 +180,7 @@ public:
   std::vector<std::string> CompileDefinitionsEntries;
   std::vector<cmListFileBacktrace> CompileDefinitionsBacktraces;
   std::vector<TargetPropertyEntry*> CompileDefinitionsItems;
-  std::vector<std::string> SourceEntries;
-  std::vector<cmListFileBacktrace> SourceBacktraces;
-  std::vector<TargetPropertyEntry*> SourceItems;
+  std::vector<TargetPropertyEntry*> SourceEntries;
   std::vector<cmValueWithOrigin> LinkImplementationPropertyEntries;
 
   void AddInterfaceEntries(
@@ -444,8 +442,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 void CreatePropertyGeneratorExpressions(
     std::vector<std::string> const& entries,
     std::vector<cmListFileBacktrace> const& backtraces,
-    std::vector<cmTargetInternals::TargetPropertyEntry*>& items,
-    bool evaluateForBuildsystem = false)
+    std::vector<cmTargetInternals::TargetPropertyEntry*>& items)
 {
   std::vector<cmListFileBacktrace>::const_iterator btIt = backtraces.begin();
   for (std::vector<std::string>::const_iterator it = entries.begin();
@@ -453,7 +450,6 @@ void CreatePropertyGeneratorExpressions(
     {
     cmGeneratorExpression ge(*btIt);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*it);
-    cge->SetEvaluateForBuildsystem(evaluateForBuildsystem);
     items.push_back(new cmTargetInternals::TargetPropertyEntry(cge));
     }
 }
@@ -479,11 +475,6 @@ void cmTarget::Compute()
         this->Internal->CompileDefinitionsEntries,
         this->Internal->CompileDefinitionsBacktraces,
         this->Internal->CompileDefinitionsItems);
-
-  CreatePropertyGeneratorExpressions(
-        this->Internal->SourceEntries,
-        this->Internal->SourceBacktraces,
-        this->Internal->SourceItems, true);
 }
 
 //----------------------------------------------------------------------------
@@ -736,11 +727,13 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
     // for TARGET_OBJECTS instead for backwards compatibility with OLD
     // behavior of CMP0024 and CMP0026 only.
 
-    for(std::vector<std::string>::const_iterator
+    typedef cmTargetInternals::TargetPropertyEntry
+                                TargetPropertyEntry;
+    for(std::vector<TargetPropertyEntry*>::const_iterator
           i = this->Internal->SourceEntries.begin();
         i != this->Internal->SourceEntries.end(); ++i)
       {
-      std::string const& entry = *i;
+      std::string entry = (*i)->ge->GetInput();
 
       std::vector<std::string> items;
       cmSystemTools::ExpandListArgument(entry, items);
@@ -782,7 +775,7 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
 
   UNORDERED_SET<std::string> uniqueSrcs;
   bool contextDependentDirectSources = processSources(this,
-                 this->Internal->SourceItems,
+                 this->Internal->SourceEntries,
                  files,
                  uniqueSrcs,
                  &dagChecker,
@@ -919,12 +912,11 @@ void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)
     this->Internal->SourceFilesMap.clear();
     this->LinkImplementationLanguageIsContextDependent = true;
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    this->Internal->SourceEntries.push_back(srcFiles);
-    this->Internal->SourceBacktraces.push_back(lfbt);
     cmGeneratorExpression ge(lfbt);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(srcFiles);
-    this->Internal->SourceItems.push_back(
-          new cmTargetInternals::TargetPropertyEntry(cge));
+    cge->SetEvaluateForBuildsystem(true);
+    this->Internal->SourceEntries.push_back(
+                          new cmTargetInternals::TargetPropertyEntry(cge));
     }
 }
 
@@ -960,8 +952,11 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
     this->Internal->SourceFilesMap.clear();
     this->LinkImplementationLanguageIsContextDependent = true;
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    this->Internal->SourceEntries.push_back(srcFiles);
-    this->Internal->SourceBacktraces.push_back(lfbt);
+    cmGeneratorExpression ge(lfbt);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(srcFiles);
+    cge->SetEvaluateForBuildsystem(true);
+    this->Internal->SourceEntries.push_back(
+                          new cmTargetInternals::TargetPropertyEntry(cge));
     }
 }
 
@@ -1065,10 +1060,10 @@ public:
 
   }
 
-  bool operator()(std::string const& entry)
+  bool operator()(cmTargetInternals::TargetPropertyEntry* entry)
   {
     std::vector<std::string> files;
-    cmSystemTools::ExpandListArgument(entry, files);
+    cmSystemTools::ExpandListArgument(entry->ge->GetInput(), files);
     std::vector<cmSourceFileLocation> locations(files.size());
     std::transform(files.begin(), files.end(), locations.begin(),
                    CreateLocation(this->Needle.GetMakefile()));
@@ -1090,8 +1085,11 @@ cmSourceFile* cmTarget::AddSource(const std::string& src)
     this->Internal->SourceFilesMap.clear();
     this->LinkImplementationLanguageIsContextDependent = true;
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    this->Internal->SourceEntries.push_back(src);
-    this->Internal->SourceBacktraces.push_back(lfbt);
+    cmGeneratorExpression ge(lfbt);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(src);
+    cge->SetEvaluateForBuildsystem(true);
+    this->Internal->SourceEntries.push_back(
+                          new cmTargetInternals::TargetPropertyEntry(cge));
     }
   if (cmGeneratorExpression::Find(src) != std::string::npos)
     {
@@ -1766,11 +1764,11 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       }
     this->Internal->SourceFilesMap.clear();
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-
+    cmGeneratorExpression ge(lfbt);
     this->Internal->SourceEntries.clear();
-    this->Internal->SourceBacktraces.clear();
-    this->Internal->SourceEntries.push_back(value);
-    this->Internal->SourceBacktraces.push_back(lfbt);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
+    this->Internal->SourceEntries.push_back(
+                          new cmTargetInternals::TargetPropertyEntry(cge));
     }
   else
     {
@@ -1851,8 +1849,10 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
       }
       this->Internal->SourceFilesMap.clear();
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-      this->Internal->SourceEntries.push_back(value);
-      this->Internal->SourceBacktraces.push_back(lfbt);
+      cmGeneratorExpression ge(lfbt);
+      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
+      this->Internal->SourceEntries.push_back(
+                            new cmTargetInternals::TargetPropertyEntry(cge));
     }
   else
     {
@@ -2977,11 +2977,13 @@ const char *cmTarget::GetProperty(const std::string& prop,
 
       std::ostringstream ss;
       const char* sep = "";
-      for(std::vector<std::string>::const_iterator
+      typedef cmTargetInternals::TargetPropertyEntry
+                                  TargetPropertyEntry;
+      for(std::vector<TargetPropertyEntry*>::const_iterator
             i = this->Internal->SourceEntries.begin();
           i != this->Internal->SourceEntries.end(); ++i)
         {
-        std::string const& entry = *i;
+        std::string entry = (*i)->ge->GetInput();
 
         std::vector<std::string> files;
         cmSystemTools::ExpandListArgument(entry, files);
@@ -3681,11 +3683,13 @@ cmTarget::GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const
   // there is no cmGeneratorTarget at configure-time, so search the SOURCES
   // for TARGET_OBJECTS instead for backwards compatibility with OLD
   // behavior of CMP0024 and CMP0026 only.
-  for(std::vector<std::string>::const_iterator
+  typedef cmTargetInternals::TargetPropertyEntry
+                              TargetPropertyEntry;
+  for(std::vector<TargetPropertyEntry*>::const_iterator
         i = this->Internal->SourceEntries.begin();
       i != this->Internal->SourceEntries.end(); ++i)
     {
-    std::string const& entry = *i;
+    std::string entry = (*i)->ge->GetInput();
 
     std::vector<std::string> files;
     cmSystemTools::ExpandListArgument(entry, files);
@@ -4822,7 +4826,7 @@ cmTargetInternalPointer::~cmTargetInternalPointer()
   cmDeleteAll(this->Pointer->CompileOptionsItems);
   cmDeleteAll(this->Pointer->CompileFeaturesItems);
   cmDeleteAll(this->Pointer->CompileDefinitionsItems);
-  cmDeleteAll(this->Pointer->SourceItems);
+  cmDeleteAll(this->Pointer->SourceEntries);
   delete this->Pointer;
 }
 
