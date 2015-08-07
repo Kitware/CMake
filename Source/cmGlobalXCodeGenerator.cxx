@@ -463,7 +463,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   cmTarget* allbuild = mf->AddUtilityCommand("ALL_BUILD", true, no_depends,
                         no_working_directory,
                         "echo", "Build all projects");
-  allBuild->Compute();
+  allbuild->Compute();
   cmGeneratorTarget* allBuildGt = new cmGeneratorTarget(allbuild, root);
   mf->AddGeneratorTarget(allbuild, allBuildGt);
 
