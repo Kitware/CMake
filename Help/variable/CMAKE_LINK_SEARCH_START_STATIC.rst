@@ -1,5 +1,5 @@
-LINK_SEARCH_START_STATIC
-------------------------
+CMAKE_LINK_SEARCH_START_STATIC
+------------------------------
 
 Assume the linker looks for static libraries by default.
 
@@ -13,7 +13,7 @@ property switches the assumption to -Bstatic.  It is intended for use
 when linking an executable statically (e.g.  with the GNU -static
 option).
 
-This property is initialized by the value of the variable
-CMAKE_LINK_SEARCH_START_STATIC if it is set when a target is created.
+This variable is used to initialize the target property
+LINK_SEARCH_START_STATIC for all targets.
 
-See also LINK_SEARCH_END_STATIC.
+See also CMAKE_LINK_SEARCH_END_STATIC.

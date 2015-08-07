@@ -1,5 +1,5 @@
-LINK_SEARCH_END_STATIC
-----------------------
+CMAKE_LINK_SEARCH_END_STATIC
+----------------------------
 
 End a link line such that static system libraries are used.
 
@@ -12,7 +12,7 @@ end of the library list (if necessary) to set the linker search type
 back to its starting type.  This property switches the final linker
 search type to -Bstatic regardless of how it started.
 
-This property is initialized by the value of the variable
-CMAKE_LINK_SEARCH_END_STATIC if it is set when a target is created.
+This variable is used to initialize the target property
+LINK_SEARCH_END_STATIC for all targets.
 
-See also LINK_SEARCH_START_STATIC.
+See also CMAKE_LINK_SEARCH_START_STATIC.
