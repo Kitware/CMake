@@ -13,7 +13,6 @@
 #define cmGeneratorTarget_h
 
 #include "cmStandardIncludes.h"
-#include "cmLinkItem.h"
 
 class cmCustomCommand;
 class cmGlobalGenerator;
@@ -107,48 +106,6 @@ public:
   const char *GetLinkInterfaceDependentNumberMaxProperty(const std::string &p,
                          const std::string& config) const;
 
-  /** The link interface specifies transitive library dependencies and
-      other information needed by targets that link to this target.  */
-  struct LinkInterfaceLibraries
-  {
-    // Libraries listed in the interface.
-    std::vector<cmLinkItem> Libraries;
-  };
-
-  struct LinkInterface: public LinkInterfaceLibraries
-  {
-    // Languages whose runtime libraries must be linked.
-    std::vector<std::string> Languages;
-
-    // Shared library dependencies needed for linking on some platforms.
-    std::vector<cmLinkItem> SharedDeps;
-
-    // Number of repetitions of a strongly connected component of two
-    // or more static libraries.
-    int Multiplicity;
-
-    // Libraries listed for other configurations.
-    // Needed only for OLD behavior of CMP0003.
-    std::vector<cmLinkItem> WrongConfigLibraries;
-
-    bool ImplementationIsInterface;
-
-    LinkInterface(): Multiplicity(0), ImplementationIsInterface(false) {}
-  };
-
-  /** Get the link interface for the given configuration.  Returns 0
-      if the target cannot be linked.  */
-  LinkInterface const* GetLinkInterface(const std::string& config,
-                                        cmTarget const* headTarget) const;
-
-  LinkInterface const*
-    GetImportLinkInterface(const std::string& config, cmTarget const* head,
-                           bool usage_requirements_only) const;
-
-  LinkInterfaceLibraries const*
-    GetLinkInterfaceLibraries(const std::string& config,
-                              cmTarget const* headTarget,
-                              bool usage_requirements_only) const;
 
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
@@ -417,38 +374,6 @@ private:
     bool Done;
   };
   mutable std::map<std::string, LinkImplClosure> LinkImplClosureMap;
-
-  // Cache link interface computation from each configuration.
-  struct OptionalLinkInterface: public LinkInterface
-  {
-    OptionalLinkInterface():
-      LibrariesDone(false), AllDone(false),
-      Exists(false), HadHeadSensitiveCondition(false),
-      ExplicitLibraries(0) {}
-    bool LibrariesDone;
-    bool AllDone;
-    bool Exists;
-    bool HadHeadSensitiveCondition;
-    const char* ExplicitLibraries;
-  };
-  void ComputeLinkInterface(cmTarget const* thisTarget,
-                            const std::string& config,
-                            OptionalLinkInterface& iface,
-                            cmTarget const* head) const;
-  void ComputeLinkInterfaceLibraries(cmTarget const* thisTarget,
-                                     const std::string& config,
-                                     OptionalLinkInterface& iface,
-                                     cmTarget const* head,
-                                     bool usage_requirements_only) const;
-
-  struct HeadToLinkInterfaceMap:
-    public std::map<cmTarget const*, OptionalLinkInterface> {};
-  typedef std::map<std::string, HeadToLinkInterfaceMap>
-                                                          LinkInterfaceMapType;
-  mutable LinkInterfaceMapType LinkInterfaceMap;
-  mutable LinkInterfaceMapType LinkInterfaceUsageRequirementsOnlyMap;
-
-  mutable bool PolicyWarnedCMP0022;
 
 public:
   std::vector<cmTarget const*> const&
