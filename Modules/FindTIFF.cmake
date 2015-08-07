@@ -34,7 +34,19 @@
 find_path(TIFF_INCLUDE_DIR tiff.h)
 
 set(TIFF_NAMES ${TIFF_NAMES} tiff libtiff tiff3 libtiff3)
-find_library(TIFF_LIBRARY NAMES ${TIFF_NAMES} )
+foreach(name ${TIFF_NAMES})
+  list(APPEND TIFF_NAMES_DEBUG "${name}d")
+endforeach()
+
+if(NOT TIFF_LIBRARY)
+  find_library(TIFF_LIBRARY_RELEASE NAMES ${TIFF_NAMES})
+  find_library(TIFF_LIBRARY_DEBUG NAMES ${TIFF_NAMES_DEBUG})
+  include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+  select_library_configurations(TIFF)
+  mark_as_advanced(TIFF_LIBRARY_RELEASE TIFF_LIBRARY_DEBUG)
+endif()
+unset(TIFF_NAMES)
+unset(TIFF_NAMES_DEBUG)
 
 if(TIFF_INCLUDE_DIR AND EXISTS "${TIFF_INCLUDE_DIR}/tiffvers.h")
     file(STRINGS "${TIFF_INCLUDE_DIR}/tiffvers.h" tiff_version_str
