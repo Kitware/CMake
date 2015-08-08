@@ -193,16 +193,14 @@ void cmLocalNinjaGenerator::WriteProjectHeader(std::ostream& os)
 void cmLocalNinjaGenerator::WriteNinjaRequiredVersion(std::ostream& os)
 {
   // Default required version
-  // Ninja generator uses 'deps' and 'msvc_deps_prefix' introduced in 1.3
-  std::string requiredVersion = "1.3";
+  std::string requiredVersion =
+      this->GetGlobalNinjaGenerator()->RequiredNinjaVersion();
 
   // Ninja generator uses the 'console' pool if available (>= 1.5)
-  std::string usedVersion = this->GetGlobalNinjaGenerator()->ninjaVersion();
-  if(cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
-                                   usedVersion.c_str(),
-                                   "1.5") ==  false)
+  if(this->GetGlobalNinjaGenerator()->SupportsConsolePool())
     {
-      requiredVersion = "1.5";
+    requiredVersion =
+      this->GetGlobalNinjaGenerator()->RequiredNinjaVersionForConsolePool();
     }
 
   cmGlobalNinjaGenerator::WriteComment(os,

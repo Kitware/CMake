@@ -1256,7 +1256,7 @@ std::string cmGlobalNinjaGenerator::ninjaCmd() const
   return "ninja";
 }
 
-std::string cmGlobalNinjaGenerator::ninjaVersion() const
+std::string cmGlobalNinjaGenerator::CurrentNinjaVersion() const
 {
   std::string version;
   std::string command = ninjaCmd() + " --version";
@@ -1264,13 +1264,14 @@ std::string cmGlobalNinjaGenerator::ninjaVersion() const
                                   &version, 0, 0, 0,
                                   cmSystemTools::OUTPUT_NONE);
 
-  return version;
+  return cmSystemTools::TrimWhitespace(version);
 }
 
 bool cmGlobalNinjaGenerator::SupportsConsolePool() const
 {
   return cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
-                                       ninjaVersion().c_str(), "1.5") == false;
+    CurrentNinjaVersion().c_str(),
+    RequiredNinjaVersionForConsolePool().c_str()) == false;
 }
 
 void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
