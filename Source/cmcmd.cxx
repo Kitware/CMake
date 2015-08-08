@@ -1468,17 +1468,23 @@ bool cmcmd::RunCommand(const char* comment,
   std::string output;
   int retCode =0;
   // use rc command to create .res file
-  cmSystemTools::RunSingleCommand(command,
-                                  &output, &output,
-                                  &retCode, 0, cmSystemTools::OUTPUT_NONE);
+  bool res = cmSystemTools::RunSingleCommand(command,
+                                             &output, &output,
+                                             &retCode, 0,
+                                             cmSystemTools::OUTPUT_NONE);
   // always print the output of the command, unless
   // it is the dumb rc command banner, but if the command
   // returned an error code then print the output anyway as
   // the banner may be mixed with some other important information.
   if(output.find("Resource Compiler Version") == output.npos
-     || retCode !=0)
+     || !res || retCode)
     {
     std::cout << output;
+    }
+  if (!res)
+    {
+    std::cout << comment << " failed to run." << std::endl;
+    return false;
     }
   // if retCodeOut is requested then always return true
   // and set the retCodeOut to retCode
@@ -1593,7 +1599,10 @@ int cmcmd::VisualStudioLinkIncremental(std::vector<std::string>& args,
   mtCommand.push_back(tempManifest);
   //  now run mt.exe to create the final manifest file
   int mtRet =0;
-  cmcmd::RunCommand("MT", mtCommand, verbose, &mtRet);
+  if(!cmcmd::RunCommand("MT", mtCommand, verbose, &mtRet))
+    {
+    return -1;
+    }
   // if mt returns 0, then the manifest was not changed and
   // we do not need to do another link step
   if(mtRet == 0)
