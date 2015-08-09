@@ -547,6 +547,18 @@ void cmGlobalNinjaGenerator
 //   Source/cmake.cxx
 void cmGlobalNinjaGenerator::Generate()
 {
+  // Check minimum Ninja version.
+  if (cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
+                                    CurrentNinjaVersion().c_str(),
+                                    RequiredNinjaVersion().c_str()))
+    {
+    std::ostringstream msg;
+    msg << "The detected version of Ninja (" << this->CurrentNinjaVersion();
+    msg << ") is less than the version of Ninja required by CMake (";
+    msg << this->RequiredNinjaVersion() << ").";
+    this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, msg.str());
+    return;
+    }
   this->OpenBuildFileStream();
   this->OpenRulesFileStream();
 
@@ -1256,7 +1268,7 @@ std::string cmGlobalNinjaGenerator::ninjaCmd() const
   return "ninja";
 }
 
-std::string cmGlobalNinjaGenerator::ninjaVersion() const
+std::string cmGlobalNinjaGenerator::CurrentNinjaVersion() const
 {
   std::string version;
   std::string command = ninjaCmd() + " --version";
@@ -1264,13 +1276,14 @@ std::string cmGlobalNinjaGenerator::ninjaVersion() const
                                   &version, 0, 0, 0,
                                   cmSystemTools::OUTPUT_NONE);
 
-  return version;
+  return cmSystemTools::TrimWhitespace(version);
 }
 
 bool cmGlobalNinjaGenerator::SupportsConsolePool() const
 {
   return cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
-                                       ninjaVersion().c_str(), "1.5") == false;
+    CurrentNinjaVersion().c_str(),
+    RequiredNinjaVersionForConsolePool().c_str()) == false;
 }
 
 void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
