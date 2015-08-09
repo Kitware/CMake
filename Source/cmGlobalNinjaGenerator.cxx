@@ -547,6 +547,18 @@ void cmGlobalNinjaGenerator
 //   Source/cmake.cxx
 void cmGlobalNinjaGenerator::Generate()
 {
+  // Check minimum Ninja version.
+  if (cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
+                                    CurrentNinjaVersion().c_str(),
+                                    RequiredNinjaVersion().c_str()))
+    {
+    std::ostringstream msg;
+    msg << "The detected version of Ninja (" << this->CurrentNinjaVersion();
+    msg << ") is less than the version of Ninja required by CMake (";
+    msg << this->RequiredNinjaVersion() << ").";
+    this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, msg.str());
+    return;
+    }
   this->OpenBuildFileStream();
   this->OpenRulesFileStream();
 
