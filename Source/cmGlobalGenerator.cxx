@@ -1140,42 +1140,6 @@ void cmGlobalGenerator::Configure()
   this->BinaryDirectories.insert(
       this->CMakeInstance->GetHomeOutputDirectory());
 
-  if (const char *numStr =
-      this->GetCMakeInstance()->GetState()
-          ->GetInitializedCacheValue("CMAKE_NUMBER_OF_DEFINITION_STATES"))
-    {
-    int num = atoi(numStr);
-    this->GetCMakeInstance()->GetState()->ReserveDefinitions(num);
-    }
-  if (const char *numStr =
-      this->GetCMakeInstance()->GetState()
-          ->GetInitializedCacheValue("CMAKE_NUMBER_OF_SNAPSHOT_STATES"))
-    {
-    int num = atoi(numStr);
-    this->GetCMakeInstance()->GetState()->ReserveSnapshots(num);
-    }
-  if (const char *numStr =
-      this->GetCMakeInstance()->GetState()
-          ->GetInitializedCacheValue("CMAKE_NUMBER_OF_LISTFILE_STATES"))
-    {
-    int num = atoi(numStr);
-    this->GetCMakeInstance()->GetState()->ReserveListFiles(num);
-    }
-  if (const char *numStr =
-      this->GetCMakeInstance()->GetState()
-          ->GetInitializedCacheValue("CMAKE_NUMBER_OF_LOCAL_GENERATORS"))
-    {
-    int num = atoi(numStr);
-    this->GetCMakeInstance()->GetState()->ReserveDirectories(num);
-    }
-  if (const char *numStr =
-      this->GetCMakeInstance()->GetState()
-          ->GetInitializedCacheValue("CMAKE_NUMBER_OF_POLICY_STATES"))
-    {
-    int num = atoi(numStr);
-    this->GetCMakeInstance()->GetState()->ReservePolicies(num);
-    }
-
   // now do it
   lg->GetMakefile()->Configure();
   lg->GetMakefile()->EnforceDirectoryLevelRules();
@@ -1187,35 +1151,6 @@ void cmGlobalGenerator::Configure()
   this->GetCMakeInstance()->AddCacheEntry
     ("CMAKE_NUMBER_OF_LOCAL_GENERATORS", num,
      "number of local generators", cmState::INTERNAL);
-
-  {
-  std::ostringstream str;
-  str << this->GetCMakeInstance()->GetState()->DefinitionsSize();
-  this->GetCMakeInstance()->AddCacheEntry
-    ("CMAKE_NUMBER_OF_DEFINITION_STATES", str.str().c_str(),
-     "number of definition states", cmState::INTERNAL);
-  }
-  {
-  std::ostringstream str;
-  str << this->GetCMakeInstance()->GetState()->SnapshotsSize();
-  this->GetCMakeInstance()->AddCacheEntry
-    ("CMAKE_NUMBER_OF_SNAPSHOT_STATES", str.str().c_str(),
-     "number of snapshot states", cmState::INTERNAL);
-  }
-  {
-  std::ostringstream str;
-  str << this->GetCMakeInstance()->GetState()->ListFilesSize();
-  this->GetCMakeInstance()->AddCacheEntry
-    ("CMAKE_NUMBER_OF_LISTFILE_STATES", str.str().c_str(),
-     "number of listfile states", cmState::INTERNAL);
-  }
-  {
-  std::ostringstream str;
-  str << this->GetCMakeInstance()->GetState()->PoliciesSize();
-  this->GetCMakeInstance()->AddCacheEntry
-    ("CMAKE_NUMBER_OF_POLICY_STATES", str.str().c_str(),
-     "number of policy states", cmState::INTERNAL);
-  }
 
   // check for link libraries and include directories containing "NOTFOUND"
   // and for infinite loops

@@ -21,8 +21,6 @@
 
 class cmake;
 class cmCommand;
-class cmDefinitions;
-class cmListFileBacktrace;
 
 class cmState
 {
@@ -37,14 +35,12 @@ public:
 
   enum SnapshotType
   {
-    BaseType,
     BuildsystemDirectoryType,
     FunctionCallType,
     MacroCallType,
     CallStackType,
     InlineListFileType,
-    PolicyScopeType,
-    VariableScopeType
+    PolicyScopeType
   };
 
   class Directory;
@@ -53,14 +49,6 @@ public:
   public:
     Snapshot(cmState* state = 0);
     Snapshot(cmState* state, PositionType position);
-
-    const char* GetDefinition(std::string const& name) const;
-    bool IsInitialized(std::string const& name) const;
-    void SetDefinition(std::string const& name, std::string const& value);
-    void RemoveDefinition(std::string const& name);
-    std::vector<std::string> UnusedKeys() const;
-    std::vector<std::string> ClosureKeys() const;
-    bool RaiseScope(std::string const& var, const char* varDef);
 
     void SetListFile(std::string const& listfile);
 
@@ -166,9 +154,6 @@ public:
                                    std::string const& entryPointCommand,
                                    long entryPointLine,
                                    std::string const& fileName);
-  Snapshot CreateVariableScopeSnapshot(Snapshot originSnapshot,
-                                       std::string const& entryPointCommand,
-                                       long entryPointLine);
   Snapshot CreateInlineListFileSnapshot(Snapshot originSnapshot,
                                         const std::string& entryPointCommand,
                                         long entryPointLine,
@@ -270,21 +255,6 @@ public:
   void SetMSYSShell(bool mSYSShell);
   bool UseMSYSShell() const;
 
-  size_t DefinitionsSize() const;
-  void ReserveDefinitions(size_t amount);
-
-  size_t SnapshotsSize() const;
-  void ReserveSnapshots(size_t amount);
-
-  size_t ListFilesSize() const;
-  void ReserveListFiles(size_t amount);
-
-  size_t DirectoriesSize() const;
-  void ReserveDirectories(size_t amount);
-
-  size_t PoliciesSize() const;
-  void ReservePolicies(size_t amount);
-
 private:
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
@@ -298,7 +268,6 @@ private:
 
   cmLinkedTree<PolicyStackEntry> PolicyStack;
   cmLinkedTree<SnapshotDataType> SnapshotData;
-  cmLinkedTree<cmDefinitions> VarTree;
 
   std::vector<std::string> SourceDirectoryComponents;
   std::vector<std::string> BinaryDirectoryComponents;
