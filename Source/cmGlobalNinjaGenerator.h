@@ -299,8 +299,10 @@ public:
 
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 
-  std::string ninjaVersion() const;
-
+  std::string CurrentNinjaVersion() const;
+  // Ninja generator uses 'deps' and 'msvc_deps_prefix' introduced in 1.3
+  static std::string RequiredNinjaVersion() { return "1.3"; }
+  static std::string RequiredNinjaVersionForConsolePool() { return "1.5"; }
   bool SupportsConsolePool() const;
 
 protected:
