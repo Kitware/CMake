@@ -42,6 +42,9 @@ public:
    */
   virtual void EnableLanguage(std::vector<std::string>const& languages,
                               cmMakefile *, bool optional);
+private:
+  void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
+                           const char* envVar) const;
 };
 
 #endif
