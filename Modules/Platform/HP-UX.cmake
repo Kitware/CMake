@@ -33,18 +33,11 @@ list(APPEND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
 # Initialize C and CXX link type selection flags.  These flags are
 # used when building a shared library, shared module, or executable
 # that links to other libraries to select whether to use the static or
-# shared versions of the libraries.  Note that C modules and shared
-# libs are built using ld directly so we leave off the "-Wl," portion.
-foreach(type SHARED_LIBRARY SHARED_MODULE)
-  set(CMAKE_${type}_LINK_STATIC_C_FLAGS "-a archive")
-  set(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-a default")
-endforeach()
-foreach(type EXE)
-  set(CMAKE_${type}_LINK_STATIC_C_FLAGS "-Wl,-a,archive")
-  set(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-Wl,-a,default")
-endforeach()
+# shared versions of the libraries.
 foreach(type SHARED_LIBRARY SHARED_MODULE EXE)
-  set(CMAKE_${type}_LINK_STATIC_CXX_FLAGS "-Wl,-a,archive")
-  set(CMAKE_${type}_LINK_DYNAMIC_CXX_FLAGS "-Wl,-a,default")
+  foreach(lang C CXX)
+    set(CMAKE_${type}_LINK_STATIC_${lang}_FLAGS "-Wl,-a,archive")
+    set(CMAKE_${type}_LINK_DYNAMIC_${lang}_FLAGS "-Wl,-a,default")
+  endforeach()
 endforeach()
 
