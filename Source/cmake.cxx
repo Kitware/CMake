@@ -75,7 +75,9 @@
 # include "cmGlobalWatcomWMakeGenerator.h"
 #endif
 #include "cmGlobalUnixMakefileGenerator3.h"
-#include "cmGlobalNinjaGenerator.h"
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+# include "cmGlobalNinjaGenerator.h"
+#endif
 #include "cmExtraCodeLiteGenerator.h"
 
 #if !defined(CMAKE_BOOT_MINGW)
@@ -1857,8 +1859,10 @@ void cmake::AddDefaultGenerators()
 #endif
   this->Generators.push_back(
     cmGlobalUnixMakefileGenerator3::NewFactory());
+#if defined(CMAKE_BUILD_WITH_CMAKE)
   this->Generators.push_back(
     cmGlobalNinjaGenerator::NewFactory());
+#endif
 #if defined(CMAKE_USE_WMAKE)
   this->Generators.push_back(
     cmGlobalWatcomWMakeGenerator::NewFactory());
