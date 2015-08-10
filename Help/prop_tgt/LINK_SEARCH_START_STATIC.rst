@@ -11,9 +11,4 @@ directories for the platform.  By default the linker search type is
 assumed to be -Bdynamic at the beginning of the library list.  This
 property switches the assumption to -Bstatic.  It is intended for use
 when linking an executable statically (e.g.  with the GNU -static
-option).
-
-This property is initialized by the value of the variable
-CMAKE_LINK_SEARCH_START_STATIC if it is set when a target is created.
-
-See also LINK_SEARCH_END_STATIC.
+option).  See also LINK_SEARCH_END_STATIC.

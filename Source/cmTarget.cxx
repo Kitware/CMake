@@ -306,8 +306,6 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     this->SetPropertyDefault("CXX_STANDARD", 0);
     this->SetPropertyDefault("CXX_STANDARD_REQUIRED", 0);
     this->SetPropertyDefault("CXX_EXTENSIONS", 0);
-    this->SetPropertyDefault("LINK_SEARCH_START_STATIC", 0);
-    this->SetPropertyDefault("LINK_SEARCH_END_STATIC", 0);
     }
 
   // Collect the set of configuration types.
