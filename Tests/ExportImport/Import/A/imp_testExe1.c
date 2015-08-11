@@ -1,5 +1,6 @@
 extern int generated_by_testExe1();
 extern int generated_by_testExe3();
+extern int generated_by_testExe4();
 extern int testLib2();
 extern int testLib3();
 extern int testLib4();
@@ -24,5 +25,5 @@ int main()
   return (testLib2() + generated_by_testExe1() + testLib3() + testLib4()
           + testLib5() + testLib6() + testLib7() + testLibCycleA1()
           + testLibPerConfigDest()
-          + generated_by_testExe3() + testLib4lib() + testLib4libcfg());
+          + generated_by_testExe3() + generated_by_testExe4() + testLib4lib() + testLib4libcfg());
 }
