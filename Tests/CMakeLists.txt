@@ -3032,6 +3032,31 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
           --build-options ${build_options}
           --test-command ${JAVA_RUNTIME} -classpath hello2.jar HelloWorld)
         list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJarSourceList")
+
+        # For next test, java tool must have same architecture as toolchain
+        math(EXPR _object_mode "${CMAKE_SIZEOF_VOID_P} * 8")
+        execute_process(
+          COMMAND "${Java_JAVA_EXECUTABLE}" -d${_object_mode} -version
+          OUTPUT_QUIET ERROR_QUIET RESULT_VARIABLE _result
+          )
+        if(_result EQUAL 0)
+          if(CMAKE_CONFIGURATION_TYPES)
+            set (JAVAH_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaJavah/$<CONFIG>)
+          else()
+            set (JAVAH_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaJavah)
+          endif()
+          add_test(NAME Java.Javah COMMAND ${CMAKE_CTEST_COMMAND}
+            --build-and-test
+            "${CMake_SOURCE_DIR}/Tests/JavaJavah"
+            "${CMake_BINARY_DIR}/Tests/JavaJavah"
+            ${build_generator_args}
+            --build-project helloJavah
+            --build-two-config
+            --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaJavah/"
+            --build-options ${build_options}
+            --test-command ${JAVA_RUNTIME} -Djava.library.path=${JAVAH_LIBRARY_PATH} -classpath hello3.jar HelloWorld2)
+          list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJavah")
+        endif()
       endif()
     endif()
   endif()
