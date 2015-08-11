@@ -66,6 +66,8 @@ struct cmTarget::OutputInfo
   std::string OutDir;
   std::string ImpDir;
   std::string PdbDir;
+  bool empty() const
+    { return OutDir.empty() && ImpDir.empty() && PdbDir.empty(); }
 };
 
 //----------------------------------------------------------------------------
@@ -2609,19 +2611,35 @@ cmTarget::OutputInfo const* cmTarget::GetOutputInfo(
     config_upper = cmSystemTools::UpperCase(config);
     }
   typedef cmTargetInternals::OutputInfoMapType OutputInfoMapType;
-  OutputInfoMapType::const_iterator i =
+  OutputInfoMapType::iterator i =
     this->Internal->OutputInfoMap.find(config_upper);
   if(i == this->Internal->OutputInfoMap.end())
     {
+    // Add empty info in map to detect potential recursion.
     OutputInfo info;
+    OutputInfoMapType::value_type entry(config_upper, info);
+    i = this->Internal->OutputInfoMap.insert(entry).first;
+
+    // Compute output directories.
     this->ComputeOutputDir(config, false, info.OutDir);
     this->ComputeOutputDir(config, true, info.ImpDir);
     if(!this->ComputePDBOutputDir("PDB", config, info.PdbDir))
       {
       info.PdbDir = info.OutDir;
       }
-    OutputInfoMapType::value_type entry(config_upper, info);
-    i = this->Internal->OutputInfoMap.insert(entry).first;
+
+    // Now update the previously-prepared map entry.
+    i->second = info;
+    }
+  else if(i->second.empty())
+    {
+    // An empty map entry indicates we have been called recursively
+    // from the above block.
+    this->Makefile->GetCMakeInstance()->IssueMessage(
+      cmake::FATAL_ERROR,
+      "Target '" + this->GetName() + "' OUTPUT_DIRECTORY depends on itself.",
+      this->GetBacktrace());
+    return 0;
     }
   return &i->second;
 }
