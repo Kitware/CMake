@@ -289,7 +289,7 @@ public:
   const std::vector<cmLocalGenerator*>& GetLocalGenerators() const {
     return LocalGenerators; }
 
-  bool IsExcluded(cmLocalGenerator* root, cmTarget& target) {
+  bool IsExcluded(cmLocalGenerator* root, cmGeneratorTarget* target) {
     return cmGlobalGenerator::IsExcluded(root, target); }
 
   int GetRuleCmdLength(const std::string& name) {

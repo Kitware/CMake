@@ -393,7 +393,7 @@ protected:
   void FillProjectMap();
   void CheckLocalGenerators();
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen) const;
-  bool IsExcluded(cmLocalGenerator* root, cmTarget const& target) const;
+  bool IsExcluded(cmLocalGenerator* root, cmGeneratorTarget* target) const;
   void FillLocalGeneratorToTargetMap();
   void CreateDefaultGlobalTargets(cmTargets* targets);
   cmTarget CreateGlobalTarget(const std::string& name, const char* message,
