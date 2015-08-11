@@ -609,7 +609,7 @@ if(error_code)
 endif()
 
 execute_process(
-  COMMAND \"${hg_EXECUTABLE}\" clone \"${hg_repository}\" \"${src_name}\"
+  COMMAND \"${hg_EXECUTABLE}\" clone -U \"${hg_repository}\" \"${src_name}\"
   WORKING_DIRECTORY \"${work_dir}\"
   RESULT_VARIABLE error_code
   )
