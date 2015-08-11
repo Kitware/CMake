@@ -475,6 +475,8 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
                                 /*byproducts=*/rcc_output, depends,
                                 commandLines, false, autogenComment.c_str());
 
+    autogenTarget->Compute();
+
     cmGeneratorTarget* gt = new cmGeneratorTarget(autogenTarget, lg);
     makefile->AddGeneratorTarget(autogenTarget, gt);
 

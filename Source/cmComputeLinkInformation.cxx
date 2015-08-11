@@ -14,6 +14,7 @@
 #include "cmComputeLinkDepends.h"
 #include "cmOrderDirectories.h"
 
+#include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmState.h"
 #include "cmOutputConverter.h"
@@ -248,7 +249,8 @@ cmComputeLinkInformation
   // Store context information.
   this->Target = target;
   this->Makefile = this->Target->Target->GetMakefile();
-  this->GlobalGenerator = this->Makefile->GetGlobalGenerator();
+  this->GlobalGenerator =
+      this->Target->GetLocalGenerator()->GetGlobalGenerator();
   this->CMakeInstance = this->GlobalGenerator->GetCMakeInstance();
 
   // Check whether to recognize OpenBSD-style library versioned names.
@@ -540,9 +542,7 @@ bool cmComputeLinkInformation::Compute()
         i != wrongItems.end(); ++i)
       {
       cmTarget const* tgt = *i;
-      cmGeneratorTarget *gtgt = tgt->GetMakefile()
-                                   ->GetGlobalGenerator()
-                                   ->GetGeneratorTarget(tgt);
+      cmGeneratorTarget *gtgt = this->GlobalGenerator->GetGeneratorTarget(tgt);
       bool implib =
         (this->UseImportLibrary &&
          (tgt->GetType() == cmTarget::SHARED_LIBRARY));
@@ -646,9 +646,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
 
   if(tgt && tgt->IsLinkable())
     {
-    cmGeneratorTarget *gtgt = tgt->GetMakefile()
-                                 ->GetGlobalGenerator()
-                                 ->GetGeneratorTarget(tgt);
+    cmGeneratorTarget *gtgt = this->GlobalGenerator->GetGeneratorTarget(tgt);
     // This is a CMake target.  Ask the target for its real name.
     if(impexe && this->LoaderFlag)
       {
@@ -762,7 +760,7 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
     return;
     }
 
-  cmGeneratorTarget *gtgt = 0;
+  cmGeneratorTarget *gtgt = this->GlobalGenerator->GetGeneratorTarget(tgt);
 
   // Get a full path to the dependent shared library.
   // Add it to the runtime path computation so that the target being
@@ -1812,9 +1810,7 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath,
 
   // Try to get the soname of the library.  Only files with this name
   // could possibly conflict.
-  cmGeneratorTarget *gtgt = target->GetMakefile()
-                                  ->GetGlobalGenerator()
-                                  ->GetGeneratorTarget(target);
+  cmGeneratorTarget *gtgt = this->GlobalGenerator->GetGeneratorTarget(target);
   std::string soName = gtgt->GetSOName(this->Config);
   const char* soname = soName.empty()? 0 : soName.c_str();
 

@@ -16,6 +16,7 @@
 #include "cmPropertyMap.h"
 #include "cmPolicies.h"
 #include "cmListFileCache.h"
+#include "cmLinkItem.h"
 
 #include <cmsys/auto_ptr.hxx>
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -51,32 +52,6 @@ class cmListFileBacktrace;
 class cmTarget;
 class cmGeneratorTarget;
 class cmTargetTraceDependencies;
-
-// Basic information about each link item.
-class cmLinkItem: public std::string
-{
-  typedef std::string std_string;
-public:
-  cmLinkItem(): std_string(), Target(0) {}
-  cmLinkItem(const std_string& n,
-             cmTarget const* t): std_string(n), Target(t) {}
-  cmLinkItem(cmLinkItem const& r): std_string(r), Target(r.Target) {}
-  cmTarget const* Target;
-};
-class cmLinkImplItem: public cmLinkItem
-{
-public:
-  cmLinkImplItem(): cmLinkItem(), Backtrace(), FromGenex(false) {}
-  cmLinkImplItem(std::string const& n,
-                 cmTarget const* t,
-                 cmListFileBacktrace const& bt,
-                 bool fromGenex):
-    cmLinkItem(n, t), Backtrace(bt), FromGenex(fromGenex) {}
-  cmLinkImplItem(cmLinkImplItem const& r):
-    cmLinkItem(r), Backtrace(r.Backtrace), FromGenex(r.FromGenex) {}
-  cmListFileBacktrace Backtrace;
-  bool FromGenex;
-};
 
 class cmTargetInternals;
 class cmTargetInternalPointer
@@ -156,6 +131,8 @@ public:
     {this->PreLinkCommands.push_back(cmd);}
   void AddPostBuildCommand(cmCustomCommand const &cmd)
     {this->PostBuildCommands.push_back(cmd);}
+
+  void Compute();
 
   /**
    * Get the list of the source files used by this target
@@ -293,18 +270,7 @@ public:
                               cmTarget const* headTarget,
                               bool usage_requirements_only) const;
 
-  /** The link implementation specifies the direct library
-      dependencies needed by the object files of the target.  */
-  struct LinkImplementationLibraries
-  {
-    // Libraries linked directly in this configuration.
-    std::vector<cmLinkImplItem> Libraries;
-
-    // Libraries linked directly in other configurations.
-    // Needed only for OLD behavior of CMP0003.
-    std::vector<cmLinkItem> WrongConfigLibraries;
-  };
-  struct LinkImplementation: public LinkImplementationLibraries
+  struct LinkImplementation: public cmLinkImplementationLibraries
   {
     // Languages whose runtime libraries must be linked.
     std::vector<std::string> Languages;
@@ -312,7 +278,7 @@ public:
   LinkImplementation const*
     GetLinkImplementation(const std::string& config) const;
 
-  LinkImplementationLibraries const*
+  cmLinkImplementationLibraries const*
     GetLinkImplementationLibraries(const std::string& config) const;
 
   cmTarget const* FindTargetToLink(std::string const& name) const;
@@ -631,7 +597,7 @@ private:
     GetImportLinkInterface(const std::string& config, cmTarget const* head,
                            bool usage_requirements_only) const;
 
-  LinkImplementationLibraries const*
+  cmLinkImplementationLibraries const*
     GetLinkImplementationLibrariesInternal(const std::string& config,
                                            cmTarget const* head) const;
 
