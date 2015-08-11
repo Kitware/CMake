@@ -173,6 +173,8 @@ public:
   cmake *GetCMakeInstance() const { return this->CMakeInstance; }
 
   void SetConfiguredFilesPath(cmGlobalGenerator* gen);
+  const std::vector<cmMakefile*>& GetMakefiles() const {
+    return this->Makefiles;}
   const std::vector<cmLocalGenerator *>& GetLocalGenerators() const {
     return this->LocalGenerators;}
 
@@ -184,6 +186,7 @@ public:
   void SetCurrentMakefile(cmMakefile* mf)
   {this->CurrentMakefile = mf;}
 
+  void AddMakefile(cmMakefile *mf);
   void AddLocalGenerator(cmLocalGenerator *lg);
 
   ///! Set an generator for an "external makefile based project"
@@ -253,6 +256,7 @@ public:
       that is a framework. */
   bool NameResolvesToFramework(const std::string& libname) const;
 
+  cmMakefile* FindMakefile(const std::string& start_dir) const;
   ///! Find a local generator by its startdirectory
   cmLocalGenerator* FindLocalGenerator(const std::string& start_dir) const;
 
@@ -404,6 +408,7 @@ protected:
   std::string FindMakeProgramFile;
   std::string ConfiguredFilesPath;
   cmake *CMakeInstance;
+  std::vector<cmMakefile*> Makefiles;
   std::vector<cmLocalGenerator *> LocalGenerators;
   cmMakefile* CurrentMakefile;
   // map from project name to vector of local generators in that project

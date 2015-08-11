@@ -1857,6 +1857,7 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
   // create a new local generator and set its parent
   cmLocalGenerator *lg2 = this->GetGlobalGenerator()
         ->MakeLocalGenerator(newSnapshot, this->LocalGenerator);
+  this->GetGlobalGenerator()->AddMakefile(lg2->GetMakefile());
   this->GetGlobalGenerator()->AddLocalGenerator(lg2);
 
   cmMakefile* subMf = lg2->GetMakefile();
