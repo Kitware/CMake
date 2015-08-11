@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,8 +26,7 @@
 
 #include <curl/curl.h>
 
-#define _MPRINTF_REPLACE
-#include <curl/mprintf.h>
+#include "curl_printf.h"
 #include "urldata.h"
 
 #define MEMDEBUG_NODEFINES /* don't redefine the standard functions */
@@ -113,7 +112,7 @@ void curl_memdebug(const char *logname)
 {
   if(!logfile) {
     if(logname && *logname)
-      logfile = fopen(logname, "w");
+      logfile = fopen(logname, FOPEN_WRITETEXT);
     else
       logfile = stderr;
 #ifdef MEMDEBUG_LOG_SYNC
@@ -343,10 +342,10 @@ curl_socket_t curl_socket(int domain, int type, int protocol,
                           int line, const char *source)
 {
   const char *fmt = (sizeof(curl_socket_t) == sizeof(int)) ?
-                    "FD %s:%d socket() = %d\n" :
-                    (sizeof(curl_socket_t) == sizeof(long)) ?
-                    "FD %s:%d socket() = %ld\n" :
-                    "FD %s:%d socket() = %zd\n" ;
+    "FD %s:%d socket() = %d\n" :
+    (sizeof(curl_socket_t) == sizeof(long)) ?
+    "FD %s:%d socket() = %ld\n" :
+    "FD %s:%d socket() = %zd\n";
 
   curl_socket_t sockfd = socket(domain, type, protocol);
 
@@ -362,10 +361,10 @@ int curl_socketpair(int domain, int type, int protocol,
                     int line, const char *source)
 {
   const char *fmt = (sizeof(curl_socket_t) == sizeof(int)) ?
-                    "FD %s:%d socketpair() = %d %d\n" :
-                    (sizeof(curl_socket_t) == sizeof(long)) ?
-                    "FD %s:%d socketpair() = %ld %ld\n" :
-                    "FD %s:%d socketpair() = %zd %zd\n" ;
+    "FD %s:%d socketpair() = %d %d\n" :
+    (sizeof(curl_socket_t) == sizeof(long)) ?
+    "FD %s:%d socketpair() = %ld %ld\n" :
+    "FD %s:%d socketpair() = %zd %zd\n";
 
   int res = socketpair(domain, type, protocol, socket_vector);
 
@@ -380,10 +379,10 @@ curl_socket_t curl_accept(curl_socket_t s, void *saddr, void *saddrlen,
                           int line, const char *source)
 {
   const char *fmt = (sizeof(curl_socket_t) == sizeof(int)) ?
-                    "FD %s:%d accept() = %d\n" :
-                    (sizeof(curl_socket_t) == sizeof(long)) ?
-                    "FD %s:%d accept() = %ld\n" :
-                    "FD %s:%d accept() = %zd\n" ;
+    "FD %s:%d accept() = %d\n" :
+    (sizeof(curl_socket_t) == sizeof(long)) ?
+    "FD %s:%d accept() = %ld\n" :
+    "FD %s:%d accept() = %zd\n";
 
   struct sockaddr *addr = (struct sockaddr *)saddr;
   curl_socklen_t *addrlen = (curl_socklen_t *)saddrlen;
@@ -400,10 +399,10 @@ curl_socket_t curl_accept(curl_socket_t s, void *saddr, void *saddrlen,
 void curl_mark_sclose(curl_socket_t sockfd, int line, const char *source)
 {
   const char *fmt = (sizeof(curl_socket_t) == sizeof(int)) ?
-                    "FD %s:%d sclose(%d)\n" :
-                    (sizeof(curl_socket_t) == sizeof(long)) ?
-                    "FD %s:%d sclose(%ld)\n" :
-                    "FD %s:%d sclose(%zd)\n" ;
+    "FD %s:%d sclose(%d)\n":
+    (sizeof(curl_socket_t) == sizeof(long)) ?
+    "FD %s:%d sclose(%ld)\n":
+    "FD %s:%d sclose(%zd)\n";
 
   if(source)
     curl_memlog(fmt, source, line, sockfd);

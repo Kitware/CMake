@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -68,9 +68,7 @@
 #include "connect.h"
 #include "select.h"
 #include "progress.h"
-
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
+#include "curl_printf.h"
 
 #  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) && \
      (defined(WIN32) || defined(_WIN32) || defined(__SYMBIAN32__))
@@ -166,7 +164,7 @@ void Curl_resolver_cleanup(void *resolver)
 int Curl_resolver_duphandle(void **to, void *from)
 {
   /* Clone the ares channel for the new handle */
-  if(ARES_SUCCESS != ares_dup((ares_channel*)to,(ares_channel)from))
+  if(ARES_SUCCESS != ares_dup((ares_channel*)to, (ares_channel)from))
     return CURLE_FAILED_INIT;
   return CURLE_OK;
 }
@@ -178,7 +176,7 @@ static void destroy_async_data (struct Curl_async *async);
  */
 void Curl_resolver_cancel(struct connectdata *conn)
 {
-  if(conn && conn->data && conn->data->state.resolver)
+  if(conn->data && conn->data->state.resolver)
     ares_cancel((ares_channel)conn->data->state.resolver);
   destroy_async_data(&conn->async);
 }
@@ -188,8 +186,7 @@ void Curl_resolver_cancel(struct connectdata *conn)
  */
 static void destroy_async_data (struct Curl_async *async)
 {
-  if(async->hostname)
-    free(async->hostname);
+  free(async->hostname);
 
   if(async->os_specific) {
     struct ResolverResults *res = (struct ResolverResults *)async->os_specific;
@@ -315,7 +312,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   struct ResolverResults *res = (struct ResolverResults *)
     conn->async.os_specific;
-  CURLcode rc = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   *dns = NULL;
 
@@ -329,7 +326,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
     if(!conn->async.dns) {
       failf(data, "Could not resolve: %s (%s)",
             conn->async.hostname, ares_strerror(conn->async.status));
-      rc = conn->bits.proxy?CURLE_COULDNT_RESOLVE_PROXY:
+      result = conn->bits.proxy?CURLE_COULDNT_RESOLVE_PROXY:
         CURLE_COULDNT_RESOLVE_HOST;
     }
     else
@@ -338,7 +335,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
     destroy_async_data(&conn->async);
   }
 
-  return rc;
+  return result;
 }
 
 /*
@@ -355,7 +352,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
 CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
                                    struct Curl_dns_entry **entry)
 {
-  CURLcode rc=CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   long timeout;
   struct timeval now = Curl_tvnow();
@@ -388,13 +385,13 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
       timeout_ms = 1000;
 
     waitperform(conn, timeout_ms);
-    Curl_resolver_is_resolved(conn,&temp_entry);
+    Curl_resolver_is_resolved(conn, &temp_entry);
 
     if(conn->async.done)
       break;
 
     if(Curl_pgrsUpdate(conn)) {
-      rc = CURLE_ABORTED_BY_CALLBACK;
+      result = CURLE_ABORTED_BY_CALLBACK;
       timeout = -1; /* trigger the cancel below */
     }
     else {
@@ -403,6 +400,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
       timeout -= timediff?timediff:1; /* always deduct at least 1 */
       now = now2; /* for next loop */
     }
+
     if(timeout < 0) {
       /* our timeout, so we cancel the ares operation */
       ares_cancel((ares_channel)data->state.resolver);
@@ -412,18 +410,17 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
 
   /* Operation complete, if the lookup was successful we now have the entry
      in the cache. */
-
   if(entry)
     *entry = conn->async.dns;
 
-  if(rc)
+  if(result)
     /* close the connection, since we can't return failure here without
        cleaning up this connection properly.
        TODO: remove this action from here, it is not a name resolver decision.
     */
     connclose(conn, "c-ares resolve failed");
 
-  return rc;
+  return result;
 }
 
 /* Connects results to the list */
@@ -536,15 +533,15 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   bufp = strdup(hostname);
   if(bufp) {
     struct ResolverResults *res = NULL;
-    Curl_safefree(conn->async.hostname);
+    free(conn->async.hostname);
     conn->async.hostname = bufp;
     conn->async.port = port;
     conn->async.done = FALSE;   /* not done */
     conn->async.status = 0;     /* clear */
     conn->async.dns = NULL;     /* clear */
-    res = calloc(sizeof(struct ResolverResults),1);
+    res = calloc(sizeof(struct ResolverResults), 1);
     if(!res) {
-      Curl_safefree(conn->async.hostname);
+      free(conn->async.hostname);
       conn->async.hostname = NULL;
       return NULL;
     }
