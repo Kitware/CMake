@@ -37,7 +37,7 @@ list(APPEND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
 foreach(type SHARED_LIBRARY SHARED_MODULE EXE)
   foreach(lang C CXX)
     set(CMAKE_${type}_LINK_STATIC_${lang}_FLAGS "-Wl,-a,archive")
-    set(CMAKE_${type}_LINK_DYNAMIC_${lang}_FLAGS "-Wl,-a,shared")
+    set(CMAKE_${type}_LINK_DYNAMIC_${lang}_FLAGS "-Wl,-a,default")
   endforeach()
 endforeach()
 
