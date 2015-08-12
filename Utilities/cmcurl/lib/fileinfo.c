@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010-2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,10 +24,6 @@
 
 #include "strdup.h"
 #include "fileinfo.h"
-
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"

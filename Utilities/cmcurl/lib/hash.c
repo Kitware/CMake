@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,10 +24,6 @@
 
 #include "hash.h"
 #include "llist.h"
-
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -92,32 +88,6 @@ Curl_hash_init(struct curl_hash *h,
     return 1; /* failure */
   }
 }
-
-struct curl_hash *
-Curl_hash_alloc(int slots,
-                hash_function hfunc,
-                comp_function comparator,
-                curl_hash_dtor dtor)
-{
-  struct curl_hash *h;
-
-  if(!slots || !hfunc || !comparator ||!dtor) {
-    return NULL; /* failure */
-  }
-
-  h = malloc(sizeof(struct curl_hash));
-  if(h) {
-    if(Curl_hash_init(h, slots, hfunc, comparator, dtor)) {
-      /* failure */
-      free(h);
-      h = NULL;
-    }
-  }
-
-  return h;
-}
-
-
 
 static struct curl_hash_element *
 mk_hash_element(const void *key, size_t key_len, const void *p)
@@ -242,8 +212,11 @@ Curl_hash_apply(curl_hash *h, void *user,
 }
 #endif
 
+/* Destroys all the entries in the given hash and resets its attributes,
+ * prepping the given hash for [static|dynamic] deallocation.
+ */
 void
-Curl_hash_clean(struct curl_hash *h)
+Curl_hash_destroy(struct curl_hash *h)
 {
   int i;
 
@@ -257,6 +230,17 @@ Curl_hash_clean(struct curl_hash *h)
   h->slots = 0;
 }
 
+/* Removes all the entries in the given hash.
+ *
+ * @unittest: 1602
+ */
+void
+Curl_hash_clean(struct curl_hash *h)
+{
+  Curl_hash_clean_with_criterium(h, NULL, NULL);
+}
+
+/* Cleans all entries that pass the comp function criteria. */
 void
 Curl_hash_clean_with_criterium(struct curl_hash *h, void *user,
                                int (*comp)(void *, void *))
@@ -276,24 +260,13 @@ Curl_hash_clean_with_criterium(struct curl_hash *h, void *user,
       struct curl_hash_element *he = le->ptr;
       lnext = le->next;
       /* ask the callback function if we shall remove this entry or not */
-      if(comp(user, he->ptr)) {
+      if(comp == NULL || comp(user, he->ptr)) {
         Curl_llist_remove(list, le, (void *) h);
         --h->size; /* one less entry in the hash now */
       }
       le = lnext;
     }
   }
-}
-
-void
-Curl_hash_destroy(struct curl_hash *h)
-{
-  if(!h)
-    return;
-
-  Curl_hash_clean(h);
-
-  free(h);
 }
 
 size_t Curl_hash_str(void* key, size_t key_length, size_t slots_num)
@@ -310,16 +283,11 @@ size_t Curl_hash_str(void* key, size_t key_length, size_t slots_num)
   return (h % slots_num);
 }
 
-size_t Curl_str_key_compare(void*k1, size_t key1_len, void*k2, size_t key2_len)
+size_t Curl_str_key_compare(void *k1, size_t key1_len,
+                            void *k2, size_t key2_len)
 {
-  char *key1 = (char *)k1;
-  char *key2 = (char *)k2;
-
-  if(key1_len == key2_len &&
-      *key1 == *key2 &&
-      memcmp(key1, key2, key1_len) == 0) {
+  if((key1_len == key2_len) && !memcmp(k1, k2, key1_len))
     return 1;
-  }
 
   return 0;
 }

@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -104,13 +104,13 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 #endif
 
 #define socket(domain,type,protocol)\
- curl_socket(domain,type,protocol,__LINE__,__FILE__)
+ curl_socket(domain, type, protocol, __LINE__, __FILE__)
 #undef accept /* for those with accept as a macro */
 #define accept(sock,addr,len)\
- curl_accept(sock,addr,len,__LINE__,__FILE__)
+ curl_accept(sock, addr, len, __LINE__, __FILE__)
 #ifdef HAVE_SOCKETPAIR
 #define socketpair(domain,type,protocol,socket_vector)\
- curl_socketpair(domain,type,protocol,socket_vector,__LINE__,__FILE__)
+ curl_socketpair(domain, type, protocol, socket_vector, __LINE__, __FILE__)
 #endif
 
 #ifdef HAVE_GETADDRINFO
@@ -119,25 +119,25 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
    our macro as for other platforms. Instead, we redefine the new name they
    define getaddrinfo to become! */
 #define ogetaddrinfo(host,serv,hint,res) \
-  curl_dogetaddrinfo(host,serv,hint,res,__LINE__,__FILE__)
+  curl_dogetaddrinfo(host, serv, hint, res, __LINE__, __FILE__)
 #else
 #undef getaddrinfo
 #define getaddrinfo(host,serv,hint,res) \
-  curl_dogetaddrinfo(host,serv,hint,res,__LINE__,__FILE__)
+  curl_dogetaddrinfo(host, serv, hint, res, __LINE__, __FILE__)
 #endif
 #endif /* HAVE_GETADDRINFO */
 
 #ifdef HAVE_GETNAMEINFO
 #undef getnameinfo
 #define getnameinfo(sa,salen,host,hostlen,serv,servlen,flags) \
-  curl_dogetnameinfo(sa,salen,host,hostlen,serv,servlen,flags, __LINE__, \
-  __FILE__)
+  curl_dogetnameinfo(sa, salen, host, hostlen, serv, servlen, flags, \
+                     __LINE__, __FILE__)
 #endif /* HAVE_GETNAMEINFO */
 
 #ifdef HAVE_FREEADDRINFO
 #undef freeaddrinfo
 #define freeaddrinfo(data) \
-  curl_dofreeaddrinfo(data,__LINE__,__FILE__)
+  curl_dofreeaddrinfo(data, __LINE__, __FILE__)
 #endif /* HAVE_FREEADDRINFO */
 
 /* sclose is probably already defined, redefine it! */
@@ -171,6 +171,6 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
  */
 
 #define Curl_safefree(ptr) \
-  do {if((ptr)) {free((ptr)); (ptr) = NULL;}} WHILE_FALSE
+  do { free((ptr)); (ptr) = NULL;} WHILE_FALSE
 
 #endif /* HEADER_CURL_MEMDEBUG_H */

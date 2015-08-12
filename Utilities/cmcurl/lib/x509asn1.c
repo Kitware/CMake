@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,7 +22,8 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_QSOSSL) || defined(USE_GSKIT) || defined(USE_NSS)
+#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) || \
+    defined(USE_CYASSL)
 
 #include <curl/curl.h>
 #include "urldata.h"
@@ -33,10 +34,7 @@
 #include "inet_pton.h"
 #include "curl_base64.h"
 #include "x509asn1.h"
-
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
+#include "curl_printf.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -122,6 +120,7 @@ const char * Curl_getASN1Element(curl_asn1Element * elem,
     return (const char *) NULL;
 
   /* Process header byte. */
+  elem->header = beg;
   b = (unsigned char) *beg++;
   elem->constructed = (b & 0x20) != 0;
   elem->class = (b >> 6) & 3;
@@ -211,7 +210,6 @@ static const char * octet2str(const char * beg, const char * end)
 }
 
 static const char * bit2str(const char * beg, const char * end)
-
 {
   /* Convert an ASN.1 bit string to a printable string.
      Return the dynamically allocated string, or NULL if an error occurs. */
@@ -300,8 +298,10 @@ utf8asn1str(char * * to, int type, const char * from, const char * end)
       case 4:
         wc = (wc << 8) | *(const unsigned char *) from++;
         wc = (wc << 8) | *(const unsigned char *) from++;
+        /* fallthrough */
       case 2:
         wc = (wc << 8) | *(const unsigned char *) from++;
+        /* fallthrough */
       default: /* case 1: */
         wc = (wc << 8) | *(const unsigned char *) from++;
       }
@@ -539,8 +539,6 @@ static const char * UTime2str(const char * beg, const char * end)
 
 const char * Curl_ASN1tostr(curl_asn1Element * elem, int type)
 {
-  static const char zero = '\0';
-
   /* Convert an ASN.1 element to a printable string.
      Return the dynamically allocated string, or NULL if an error occurs. */
 
@@ -561,7 +559,7 @@ const char * Curl_ASN1tostr(curl_asn1Element * elem, int type)
   case CURL_ASN1_OCTET_STRING:
     return octet2str(elem->beg, elem->end);
   case CURL_ASN1_NULL:
-    return strdup(&zero);
+    return strdup("");
   case CURL_ASN1_OBJECT_IDENTIFIER:
     return OID2str(elem->beg, elem->end, TRUE);
   case CURL_ASN1_UTC_TIME:
@@ -682,6 +680,7 @@ void Curl_parseX509(curl_X509certificate * cert,
      Syntax is assumed to have already been checked by the SSL backend.
      See RFC 5280. */
 
+  cert->certificate.header = NULL;
   cert->certificate.beg = beg;
   cert->certificate.end = end;
 
@@ -701,6 +700,7 @@ void Curl_parseX509(curl_X509certificate * cert,
   beg = tbsCertificate.beg;
   end = tbsCertificate.end;
   /* Get optional version, get serialNumber. */
+  cert->version.header = NULL;
   cert->version.beg = &defaultVersion;
   cert->version.end = &defaultVersion + sizeof defaultVersion;;
   beg = Curl_getASN1Element(&elem, beg, end);
@@ -720,15 +720,19 @@ void Curl_parseX509(curl_X509certificate * cert,
   /* Get subject. */
   beg = Curl_getASN1Element(&cert->subject, beg, end);
   /* Get subjectPublicKeyAlgorithm and subjectPublicKey. */
-  beg = Curl_getASN1Element(&elem, beg, end);
+  beg = Curl_getASN1Element(&cert->subjectPublicKeyInfo, beg, end);
   ccp = Curl_getASN1Element(&cert->subjectPublicKeyAlgorithm,
-                            elem.beg, elem.end);
-  Curl_getASN1Element(&cert->subjectPublicKey, ccp, elem.end);
+                            cert->subjectPublicKeyInfo.beg,
+                            cert->subjectPublicKeyInfo.end);
+  Curl_getASN1Element(&cert->subjectPublicKey, ccp,
+                      cert->subjectPublicKeyInfo.end);
   /* Get optional issuerUiqueID, subjectUniqueID and extensions. */
   cert->issuerUniqueID.tag = cert->subjectUniqueID.tag = 0;
   cert->extensions.tag = elem.tag = 0;
+  cert->issuerUniqueID.header = cert->subjectUniqueID.header = NULL;
   cert->issuerUniqueID.beg = cert->issuerUniqueID.end = "";
   cert->subjectUniqueID.beg = cert->subjectUniqueID.end = "";
+  cert->extensions.header = NULL;
   cert->extensions.beg = cert->extensions.end = "";
   if(beg < end)
     beg = Curl_getASN1Element(&elem, beg, end);
@@ -771,6 +775,7 @@ static const char * dumpAlgo(curl_asn1Element * param,
   /* Get algorithm parameters and return algorithm name. */
 
   beg = Curl_getASN1Element(&oid, beg, end);
+  param->header = NULL;
   param->tag = 0;
   param->beg = param->end = end;
   if(beg < end)
@@ -816,7 +821,7 @@ static void do_pubkey(struct SessionHandle * data, int certnum,
     /* Compute key length. */
     for(q = elem.beg; !*q && q < elem.end; q++)
       ;
-    len = (elem.end - q) * 8;
+    len = (unsigned long)((elem.end - q) * 8);
     if(len)
       for(i = *(unsigned char *) q; !(i & 0x80); i <<= 1)
         len--;
@@ -871,7 +876,7 @@ CURLcode Curl_extract_certinfo(struct connectdata * conn,
   char * cp1;
   size_t cl1;
   char * cp2;
-  CURLcode cc;
+  CURLcode result;
   unsigned long version;
   size_t i;
   size_t j;
@@ -985,11 +990,11 @@ CURLcode Curl_extract_certinfo(struct connectdata * conn,
   free((char *) ccp);
 
   /* Generate PEM certificate. */
-  cc = Curl_base64_encode(data, cert.certificate.beg,
-                          cert.certificate.end - cert.certificate.beg,
-                          &cp1, &cl1);
-  if(cc != CURLE_OK)
-    return cc;
+  result = Curl_base64_encode(data, cert.certificate.beg,
+                              cert.certificate.end - cert.certificate.beg,
+                              &cp1, &cl1);
+  if(result)
+    return result;
   /* Compute the number of characters in final certificate string. Format is:
      -----BEGIN CERTIFICATE-----\n
      <max 64 base64 characters>\n
@@ -1019,9 +1024,9 @@ CURLcode Curl_extract_certinfo(struct connectdata * conn,
   return CURLE_OK;
 }
 
-#endif /* USE_QSOSSL or USE_GSKIT or USE_NSS */
+#endif /* USE_GSKIT or USE_NSS or USE_GNUTLS or USE_CYASSL */
 
-#if defined(USE_QSOSSL) || defined(USE_GSKIT)
+#if defined(USE_GSKIT)
 
 static const char * checkOID(const char * beg, const char * end,
                              const char * oid)
@@ -1111,8 +1116,7 @@ CURLcode Curl_verifyhost(struct connectdata * conn,
           if(len > 0)
             if(strlen(dnsname) == (size_t) len)
               i = Curl_cert_hostcheck((const char *) dnsname, conn->host.name);
-          if(dnsname)
-            free(dnsname);
+          free(dnsname);
           if(!i)
             return CURLE_PEER_FAILED_VERIFICATION;
           matched = i;
@@ -1140,6 +1144,7 @@ CURLcode Curl_verifyhost(struct connectdata * conn,
   }
 
   /* Process subject. */
+  name.header = NULL;
   name.beg = name.end = "";
   q = cert.subject.beg;
   /* we have to look to the last occurrence of a commonName in the
@@ -1180,4 +1185,4 @@ CURLcode Curl_verifyhost(struct connectdata * conn,
   return CURLE_PEER_FAILED_VERIFICATION;
 }
 
-#endif /* USE_QSOSSL or USE_GSKIT */
+#endif /* USE_GSKIT */
