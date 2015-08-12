@@ -1,11 +1,10 @@
 
 #include <jni.h>
-#include <iostream>
+#include <stdio.h>
 
 #include "B.h"
 
-JNIEXPORT void JNICALL Java_B_printName
-(JNIEnv *, jobject)
+JNIEXPORT void JNICALL Java_B_printName(JNIEnv *, jobject)
 {
-    std::cout << "B" << std::endl;
+  printf("B\n");
 }
