@@ -35,6 +35,16 @@ add_library(imported_consumer2 imported_consumer.cpp)
 target_link_libraries(imported_consumer2 imported_consumer)
 target_compile_options(imported_consumer2 PRIVATE -Werror=unused-variable)
 
+# add a target which has a relative system include
+add_library(somelib imported_consumer.cpp)
+target_include_directories(somelib SYSTEM PUBLIC "systemlib_header_only")
+target_compile_options(somelib PRIVATE -Werror=unused-variable)
+
+# add a target which consumes a relative system include
+add_library(otherlib upstream.cpp)
+target_link_libraries(otherlib PUBLIC somelib)
+target_compile_options(somelib PRIVATE -Werror=unused-variable)
+
 macro(do_try_compile error_option)
   set(TC_ARGS
     IFACE_TRY_COMPILE_${error_option}
