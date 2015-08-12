@@ -192,9 +192,9 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
     # give out status message telling checked module
     if (NOT ${_is_silent})
       if (_pkg_check_modules_cnt EQUAL 1)
-        message(STATUS "checking for module '${_pkg_check_modules_list}'")
+        message(STATUS "Checking for module '${_pkg_check_modules_list}'")
       else()
-        message(STATUS "checking for modules '${_pkg_check_modules_list}'")
+        message(STATUS "Checking for modules '${_pkg_check_modules_list}'")
       endif()
     endif()
 
@@ -327,7 +327,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
       # evaluate result and tell failures
       if (_pkgconfig_retval)
         if(NOT ${_is_silent})
-          message(STATUS "  package '${_pkg_check_modules_pkg}' not found")
+          message(STATUS "  Package '${_pkg_check_modules_pkg}' not found")
         endif()
 
         set(_pkg_check_modules_failed 1)
@@ -361,7 +361,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
         _pkgconfig_invoke(${_pkg_check_modules_pkg} "${_pkg_check_prefix}" LIBDIR     ""   --variable=libdir )
 
         if (NOT ${_is_silent})
-          message(STATUS "  found ${_pkg_check_modules_pkg}, version ${_pkgconfig_VERSION}")
+          message(STATUS "  Found ${_pkg_check_modules_pkg}, version ${_pkgconfig_VERSION}")
         endif ()
       endforeach()
 
@@ -529,7 +529,7 @@ macro(pkg_search_module _prefix _module0)
     _pkgconfig_parse_options(_pkg_modules_alt _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path "${_module0}" ${ARGN})
 
     if (NOT ${_pkg_is_silent})
-      message(STATUS "checking for one of the modules '${_pkg_modules_alt}'")
+      message(STATUS "Checking for one of the modules '${_pkg_modules_alt}'")
     endif ()
 
     # iterate through all modules and stop at the first working one.
