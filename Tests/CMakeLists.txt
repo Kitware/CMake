@@ -3041,7 +3041,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
           )
         if(_result EQUAL 0)
           if(CMAKE_CONFIGURATION_TYPES)
-            set (JAVAH_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaJavah/$<CONFIG>)
+            set (JAVAH_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaJavah/$<CONFIGURATION>)
           else()
             set (JAVAH_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaJavah)
           endif()
