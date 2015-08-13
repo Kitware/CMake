@@ -2,26 +2,30 @@
 # FindOpenSSL
 # -----------
 #
-# Try to find the OpenSSL encryption library
+# Find the OpenSSL encryption library.
 #
-# Once done this will define
+# Result Variables
+# ^^^^^^^^^^^^^^^^
 #
-# ::
+# This module will set the following variables in your project:
 #
-#   OPENSSL_ROOT_DIR - Set this variable to the root installation of OpenSSL
+# ``OPENSSL_FOUND``
+#   System has the OpenSSL library.
+# ``OPENSSL_INCLUDE_DIR``
+#   The OpenSSL include directory.
+# ``OPENSSL_CRYPTO_LIBRARY``
+#   The OpenSSL crypto library.
+# ``OPENSSL_SSL_LIBRARY``
+#   The OpenSSL SSL library.
+# ``OPENSSL_LIBRARIES``
+#   All OpenSSL libraries.
+# ``OPENSSL_VERSION``
+#   This is set to ``$major.$minor.$revision$patch`` (e.g. ``0.9.8s``).
 #
+# Hints
+# ^^^^^
 #
-#
-# Read-Only variables:
-#
-# ::
-#
-#   OPENSSL_FOUND - System has the OpenSSL library
-#   OPENSSL_INCLUDE_DIR - The OpenSSL include directory
-#   OPENSSL_CRYPTO_LIBRARY - The OpenSSL crypto library
-#   OPENSSL_SSL_LIBRARY - The OpenSSL SSL library
-#   OPENSSL_LIBRARIES - All OpenSSL libraries
-#   OPENSSL_VERSION - This is set to $major.$minor.$revision$patch (eg. 0.9.8s)
+# Set ``OPENSSL_ROOT_DIR`` to the root directory of an OpenSSL installation.
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
