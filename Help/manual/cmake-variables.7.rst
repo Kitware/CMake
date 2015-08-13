@@ -47,6 +47,8 @@ Variables that Provide Information
    /variable/CMAKE_JOB_POOL_COMPILE
    /variable/CMAKE_JOB_POOL_LINK
    /variable/CMAKE_LINK_LIBRARY_SUFFIX
+   /variable/CMAKE_LINK_SEARCH_END_STATIC
+   /variable/CMAKE_LINK_SEARCH_START_STATIC
    /variable/CMAKE_MAJOR_VERSION
    /variable/CMAKE_MAKE_PROGRAM
    /variable/CMAKE_MATCH_COUNT
