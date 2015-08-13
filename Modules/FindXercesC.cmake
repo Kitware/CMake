@@ -67,7 +67,7 @@ if(NOT XercesC_LIBRARY)
                NAMES "xerces-c" "xerces-c_3"
                DOC "Xerces-C++ libraries (release)")
   find_library(XercesC_LIBRARY_DEBUG
-               NAMES "xerces-cd" "xerces-c_3D"
+               NAMES "xerces-cd" "xerces-c_3D" "xerces-c_3_1D"
                DOC "Xerces-C++ libraries (debug)")
   include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
   select_library_configurations(XercesC)
