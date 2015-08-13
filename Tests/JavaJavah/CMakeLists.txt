@@ -12,7 +12,7 @@ find_package(JNI)
 add_jar(hello3 B.java HelloWorld2.java)
 create_javah(TARGET B_javah CLASSES B CLASSPATH hello3)
 
-add_library(B MODULE B.cpp)
+add_library(B SHARED B.cpp)
 add_dependencies(B B_javah)
 
 target_include_directories(B PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
