@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,6 +22,8 @@
  *
  ***************************************************************************/
 
+#include "conncache.h"
+
 struct Curl_message {
   /* the 'CURLMsg' is the part that is visible to the external user */
   struct CURLMsg extmsg;
@@ -35,22 +37,23 @@ typedef enum {
   CURLM_STATE_CONNECT_PEND, /* 1 - no connections, waiting for one */
   CURLM_STATE_CONNECT,      /* 2 - resolve/connect has been sent off */
   CURLM_STATE_WAITRESOLVE,  /* 3 - awaiting the resolve to finalize */
-  CURLM_STATE_WAITCONNECT,  /* 4 - awaiting the connect to finalize */
+  CURLM_STATE_WAITCONNECT,  /* 4 - awaiting the TCP connect to finalize */
   CURLM_STATE_WAITPROXYCONNECT, /* 5 - awaiting proxy CONNECT to finalize */
-  CURLM_STATE_PROTOCONNECT, /* 6 - completing the protocol-specific connect
+  CURLM_STATE_SENDPROTOCONNECT, /* 6 - initiate protocol connect procedure */
+  CURLM_STATE_PROTOCONNECT, /* 7 - completing the protocol-specific connect
                                    phase */
-  CURLM_STATE_WAITDO,       /* 7 - wait for our turn to send the request */
-  CURLM_STATE_DO,           /* 8 - start send off the request (part 1) */
-  CURLM_STATE_DOING,        /* 9 - sending off the request (part 1) */
-  CURLM_STATE_DO_MORE,      /* 10 - send off the request (part 2) */
-  CURLM_STATE_DO_DONE,      /* 11 - done sending off request */
-  CURLM_STATE_WAITPERFORM,  /* 12 - wait for our turn to read the response */
-  CURLM_STATE_PERFORM,      /* 13 - transfer data */
-  CURLM_STATE_TOOFAST,      /* 14 - wait because limit-rate exceeded */
-  CURLM_STATE_DONE,         /* 15 - post data transfer operation */
-  CURLM_STATE_COMPLETED,    /* 16 - operation complete */
-  CURLM_STATE_MSGSENT,      /* 17 - the operation complete message is sent */
-  CURLM_STATE_LAST          /* 18 - not a true state, never use this */
+  CURLM_STATE_WAITDO,       /* 8 - wait for our turn to send the request */
+  CURLM_STATE_DO,           /* 9 - start send off the request (part 1) */
+  CURLM_STATE_DOING,        /* 10 - sending off the request (part 1) */
+  CURLM_STATE_DO_MORE,      /* 11 - send off the request (part 2) */
+  CURLM_STATE_DO_DONE,      /* 12 - done sending off request */
+  CURLM_STATE_WAITPERFORM,  /* 13 - wait for our turn to read the response */
+  CURLM_STATE_PERFORM,      /* 14 - transfer data */
+  CURLM_STATE_TOOFAST,      /* 15 - wait because limit-rate exceeded */
+  CURLM_STATE_DONE,         /* 16 - post data transfer operation */
+  CURLM_STATE_COMPLETED,    /* 17 - operation complete */
+  CURLM_STATE_MSGSENT,      /* 18 - the operation complete message is sent */
+  CURLM_STATE_LAST          /* 19 - not a true state, never use this */
 } CURLMstate;
 
 /* we support N sockets per easy handle. Set the corresponding bit to what
@@ -58,6 +61,8 @@ typedef enum {
 #define MAX_SOCKSPEREASYHANDLE 5
 #define GETSOCK_READABLE (0x00ff)
 #define GETSOCK_WRITABLE (0xff00)
+
+#define CURLPIPE_ANY (CURLPIPE_HTTP1 | CURLPIPE_MULTIPLEX)
 
 /* This is the struct known as CURLM on the outside */
 struct Curl_multi {
@@ -82,8 +87,12 @@ struct Curl_multi {
   curl_socket_callback socket_cb;
   void *socket_userp;
 
+  /* callback function and user data pointer for server push */
+  curl_push_callback push_cb;
+  void *push_userp;
+
   /* Hostname cache */
-  struct curl_hash *hostcache;
+  struct curl_hash hostcache;
 
   /* timetree points to the splay-tree of time nodes to figure out expire
      times of all currently set timers */
@@ -92,13 +101,15 @@ struct Curl_multi {
   /* 'sockhash' is the lookup hash for socket descriptor => easy handles (note
      the pluralis form, there can be more than one easy handle waiting on the
      same actual socket) */
-  struct curl_hash *sockhash;
+  struct curl_hash sockhash;
 
-  /* Whether pipelining is enabled for this multi handle */
-  bool pipelining_enabled;
+  /* pipelining wanted bits (CURLPIPE*) */
+  long pipelining;
+
+  bool recheckstate; /* see Curl_multi_connchanged */
 
   /* Shared connection cache (bundles)*/
-  struct conncache *conn_cache;
+  struct conncache conn_cache;
 
   /* This handle will be used for closing the cached connections in
      curl_multi_cleanup() */
@@ -139,4 +150,3 @@ struct Curl_multi {
 };
 
 #endif /* HEADER_CURL_MULTIHANDLE_H */
-
