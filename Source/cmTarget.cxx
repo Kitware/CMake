@@ -3568,7 +3568,7 @@ bool cmTarget::ComputeOutputDir(const std::string& config,
     {
     bool iosPlatform = this->Makefile->PlatformIsAppleIos();
     std::string suffix =
-      usesDefaultOutputDir && iosPlatform ? "$(EFFECTIVE_PLATFORM_NAME)" : "";
+      usesDefaultOutputDir && iosPlatform ? "${EFFECTIVE_PLATFORM_NAME}" : "";
     this->Makefile->GetGlobalGenerator()->
       AppendDirectoryForConfig("/", conf, suffix, out);
     }
