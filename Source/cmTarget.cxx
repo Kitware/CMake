@@ -66,6 +66,8 @@ struct cmTarget::OutputInfo
   std::string OutDir;
   std::string ImpDir;
   std::string PdbDir;
+  bool empty() const
+    { return OutDir.empty() && ImpDir.empty() && PdbDir.empty(); }
 };
 
 //----------------------------------------------------------------------------
@@ -2604,19 +2606,35 @@ cmTarget::OutputInfo const* cmTarget::GetOutputInfo(
     config_upper = cmSystemTools::UpperCase(config);
     }
   typedef cmTargetInternals::OutputInfoMapType OutputInfoMapType;
-  OutputInfoMapType::const_iterator i =
+  OutputInfoMapType::iterator i =
     this->Internal->OutputInfoMap.find(config_upper);
   if(i == this->Internal->OutputInfoMap.end())
     {
+    // Add empty info in map to detect potential recursion.
     OutputInfo info;
+    OutputInfoMapType::value_type entry(config_upper, info);
+    i = this->Internal->OutputInfoMap.insert(entry).first;
+
+    // Compute output directories.
     this->ComputeOutputDir(config, false, info.OutDir);
     this->ComputeOutputDir(config, true, info.ImpDir);
     if(!this->ComputePDBOutputDir("PDB", config, info.PdbDir))
       {
       info.PdbDir = info.OutDir;
       }
-    OutputInfoMapType::value_type entry(config_upper, info);
-    i = this->Internal->OutputInfoMap.insert(entry).first;
+
+    // Now update the previously-prepared map entry.
+    i->second = info;
+    }
+  else if(i->second.empty())
+    {
+    // An empty map entry indicates we have been called recursively
+    // from the above block.
+    this->Makefile->GetCMakeInstance()->IssueMessage(
+      cmake::FATAL_ERROR,
+      "Target '" + this->GetName() + "' OUTPUT_DIRECTORY depends on itself.",
+      this->GetBacktrace());
+    return 0;
     }
   return &i->second;
 }
@@ -3497,7 +3515,10 @@ bool cmTarget::ComputeOutputDir(const std::string& config,
   if(const char* config_outdir = this->GetProperty(configProp))
     {
     // Use the user-specified per-configuration output directory.
-    out = config_outdir;
+    cmGeneratorExpression ge;
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+      ge.Parse(config_outdir);
+    out = cge->Evaluate(this->Makefile, config);
 
     // Skip per-configuration subdirectory.
     conf = "";
@@ -3505,7 +3526,17 @@ bool cmTarget::ComputeOutputDir(const std::string& config,
   else if(const char* outdir = this->GetProperty(propertyName))
     {
     // Use the user-specified output directory.
-    out = outdir;
+    cmGeneratorExpression ge;
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+      ge.Parse(outdir);
+    out = cge->Evaluate(this->Makefile, config);
+
+    // Skip per-configuration subdirectory if the value contained a
+    // generator expression.
+    if (out != outdir)
+      {
+      conf = "";
+      }
     }
   else if(this->GetType() == cmTarget::EXECUTABLE)
     {
