@@ -13,6 +13,7 @@ back to its starting type.  This property switches the final linker
 search type to -Bstatic regardless of how it started.
 
 This variable is used to initialize the target property
-LINK_SEARCH_END_STATIC for all targets.
+:prop_tgt:`LINK_SEARCH_END_STATIC` for all targets. If set, it's
+value is also used by the :command:`try_compile` command.
 
-See also CMAKE_LINK_SEARCH_START_STATIC.
+See also :variable:`CMAKE_LINK_SEARCH_START_STATIC`.
