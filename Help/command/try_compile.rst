@@ -102,6 +102,10 @@ default values:
 
 * :variable:`CMAKE_LINK_SEARCH_START_STATIC`
 * :variable:`CMAKE_LINK_SEARCH_END_STATIC`
+* :variable:`CMAKE_POSITION_INDEPENDENT_CODE`
+
+If :policy:`CMP0056` is set to ``NEW``, then
+:variable:`CMAKE_EXE_LINKER_FLAGS` is passed in as well.
 
 Set the :variable:`CMAKE_TRY_COMPILE_CONFIGURATION` variable to choose
 a build configuration.
