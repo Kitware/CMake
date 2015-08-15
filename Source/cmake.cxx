@@ -2745,6 +2745,25 @@ int cmake::Build(const std::string& dir,
     }
   std::string cachePath = dir;
   cmSystemTools::ConvertToUnixSlashes(cachePath);
+  std::string cacheFile = cachePath;
+  cacheFile += "/CMakeCache.txt";
+  if(!cmSystemTools::FileExists(cacheFile.c_str()))
+    {
+    // search in parent directories for cache
+    std::string cmakeFiles = cachePath;
+    cmakeFiles += "/CMakeFiles";
+    if(cmSystemTools::FileExists(cmakeFiles.c_str()))
+      {
+      std::string cachePathFound =
+        cmSystemTools::FileExistsInParentDirectories(
+          "CMakeCache.txt", cachePath.c_str(), "/");
+      if(!cachePathFound.empty())
+        {
+        cachePath = cmSystemTools::GetFilenamePath(cachePathFound);
+        }
+      }
+    }
+
   if(!this->LoadCache(cachePath))
     {
     std::cerr << "Error: could not load cache\n";
