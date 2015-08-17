@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,17 +23,14 @@
 /* Base64 encoding/decoding */
 
 #include "curl_setup.h"
-
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
+#include "curl_printf.h"
 #include "urldata.h" /* for the SessionHandle definition */
 #include "warnless.h"
 #include "curl_base64.h"
-#include "curl_memory.h"
 #include "non-ascii.h"
 
-/* include memdebug.h last */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* ---- Base64 Encoding/Decoding Table --- */
@@ -49,10 +46,10 @@ static size_t decodeQuantum(unsigned char *dest, const char *src)
 {
   size_t padding = 0;
   const char *s, *p;
-  unsigned long i, v, x = 0;
+  unsigned long i, x = 0;
 
   for(i = 0, s = src; i < 4; i++, s++) {
-    v = 0;
+    unsigned long v = 0;
 
     if(*s == '=') {
       x = (x << 6);
@@ -107,7 +104,6 @@ CURLcode Curl_base64_decode(const char *src,
   size_t length = 0;
   size_t padding = 0;
   size_t i;
-  size_t result;
   size_t numQuantums;
   size_t rawlen = 0;
   unsigned char *pos;
@@ -151,9 +147,9 @@ CURLcode Curl_base64_decode(const char *src,
 
   /* Decode the quantums */
   for(i = 0; i < numQuantums; i++) {
-    result = decodeQuantum(pos, src);
+    size_t result = decodeQuantum(pos, src);
     if(!result) {
-      Curl_safefree(newstr);
+      free(newstr);
 
       return CURLE_BAD_CONTENT_ENCODING;
     }
@@ -256,8 +252,7 @@ static CURLcode base64_encode(const char *table64,
   *output = '\0';
   *outptr = base64data; /* return pointer to new data, allocated memory */
 
-  if(convbuf)
-    free(convbuf);
+  free(convbuf);
 
   *outlen = strlen(base64data); /* return the length of the new data */
 

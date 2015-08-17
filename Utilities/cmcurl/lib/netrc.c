@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,13 +31,11 @@
 
 #include "strequal.h"
 #include "strtok.h"
-#include "curl_memory.h"
 #include "rawstr.h"
+#include "curl_printf.h"
 
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* Get user and password from .netrc when given a machine name */
@@ -104,16 +102,16 @@ int Curl_parsenetrc(const char *host,
 
     netrcfile = curl_maprintf("%s%s%s", home, DIR_CHAR, NETRC);
     if(home_alloc)
-      Curl_safefree(home);
+      free(home);
     if(!netrcfile) {
       return -1;
     }
     netrc_alloc = TRUE;
   }
 
-  file = fopen(netrcfile, "r");
+  file = fopen(netrcfile, FOPEN_READTEXT);
   if(netrc_alloc)
-    Curl_safefree(netrcfile);
+    free(netrcfile);
   if(file) {
     char *tok;
     char *tok_buf;
@@ -138,6 +136,10 @@ int Curl_parsenetrc(const char *host,
                after this we need to search for 'login' and
                'password'. */
             state=HOSTFOUND;
+          }
+          else if(Curl_raw_equal("default", tok)) {
+            state=HOSTVALID;
+            retcode=0; /* we did find our host */
           }
           break;
         case HOSTFOUND:

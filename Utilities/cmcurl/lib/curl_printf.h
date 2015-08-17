@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_BUNDLES_H
-#define HEADER_CURL_BUNDLES_H
+#ifndef HEADER_CURL_PRINTF_H
+#define HEADER_CURL_PRINTF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012, Linus Nielsen Feltzing, <linus@haxx.se>
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,24 +22,35 @@
  *
  ***************************************************************************/
 
-struct connectbundle {
-  bool server_supports_pipelining; /* TRUE if server supports pipelining,
-                                      set after first response */
-  size_t num_connections;       /* Number of connections in the bundle */
-  struct curl_llist *conn_list; /* The connectdata members of the bundle */
-};
+/*
+ * This header should be included by ALL code in libcurl that uses any
+ * *rintf() functions.
+ */
 
-CURLcode Curl_bundle_create(struct SessionHandle *data,
-                            struct connectbundle **cb_ptr);
+#include <curl/mprintf.h>
 
-void Curl_bundle_destroy(struct connectbundle *cb_ptr);
+# undef printf
+# undef fprintf
+# undef snprintf
+# undef vprintf
+# undef vfprintf
+# undef vsnprintf
+# undef aprintf
+# undef vaprintf
+# define printf curl_mprintf
+# define fprintf curl_mfprintf
+# define snprintf curl_msnprintf
+# define vprintf curl_mvprintf
+# define vfprintf curl_mvfprintf
+# define vsnprintf curl_mvsnprintf
+# define aprintf curl_maprintf
+# define vaprintf curl_mvaprintf
 
-CURLcode Curl_bundle_add_conn(struct connectbundle *cb_ptr,
-                              struct connectdata *conn);
+/* We define away the sprintf functions unconditonally since we don't want
+   internal code to be using them, intentionally or by mistake!*/
+# undef sprintf
+# undef vsprintf
+# define sprintf sprintf_was_used
+# define vsprintf vsprintf_was_used
 
-int Curl_bundle_remove_conn(struct connectbundle *cb_ptr,
-                            struct connectdata *conn);
-
-
-#endif /* HEADER_CURL_BUNDLES_H */
-
+#endif /* HEADER_CURL_PRINTF_H */
