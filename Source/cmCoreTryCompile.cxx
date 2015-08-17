@@ -470,6 +470,16 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       {
       fprintf(fout, "set(CMAKE_POSITION_INDEPENDENT_CODE \"ON\")\n");
       }
+    if (const char *lssDef = this->Makefile->GetDefinition(
+        "CMAKE_LINK_SEARCH_START_STATIC"))
+      {
+      fprintf(fout, "set(CMAKE_LINK_SEARCH_START_STATIC \"%s\")\n", lssDef);
+      }
+    if (const char *lssDef = this->Makefile->GetDefinition(
+        "CMAKE_LINK_SEARCH_END_STATIC"))
+      {
+      fprintf(fout, "set(CMAKE_LINK_SEARCH_END_STATIC \"%s\")\n", lssDef);
+      }
 
     /* Put the executable at a known location (for COPY_FILE).  */
     fprintf(fout, "set(CMAKE_RUNTIME_OUTPUT_DIRECTORY \"%s\")\n",
