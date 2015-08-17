@@ -761,7 +761,7 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
     return;
     }
 
-  cmGeneratorTarget *gtgt = this->GlobalGenerator->GetGeneratorTarget(tgt);
+  cmGeneratorTarget *gtgt = 0;
 
   // Get a full path to the dependent shared library.
   // Add it to the runtime path computation so that the target being
