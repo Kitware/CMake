@@ -11,4 +11,4 @@ always installed without RPATH, even if RPATH is enabled when
 building.  This can be useful for example to allow running tests from
 the build directory with RPATH enabled before the installation step.
 To omit RPATH in both the build and install steps, use
-CMAKE_SKIP_RPATH instead.
+:variable:`CMAKE_SKIP_RPATH` instead.

@@ -12,4 +12,4 @@ value.  Therefore the value of the variable inside a macro or function
 is the file invoking the bottom-most entry on the call stack, not the
 file containing the macro or function definition.
 
-See also CMAKE_PARENT_LIST_FILE.
+See also :variable:`CMAKE_PARENT_LIST_FILE`.
