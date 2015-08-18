@@ -116,13 +116,13 @@ if(WIN32 AND NOT CYGWIN)
     # enable OPENSSL_USE_STATIC to use the static libs located in lib/VC/static
 
     if(OPENSSL_USE_STATIC)
-      set(_OPENSLL_PATH_SUFFIXES
+      set(_OPENSSL_PATH_SUFFIXES
         "lib"
         "VC/static"
         "lib/VC/static"
         )
     else()
-      set(_OPENSLL_PATH_SUFFIXES
+      set(_OPENSSL_PATH_SUFFIXES
         "lib"
         "VC"
         "lib/VC"
