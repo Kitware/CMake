@@ -93,11 +93,23 @@ bool cmGetFilenameComponentCommand
   else if (args[2] == "ABSOLUTE" ||
            args[2] == "REALPATH")
     {
+    // If the path given is relative, evaluate it relative to the
+    // current source directory unless the user passes a different
+    // base directory.
+    std::string baseDir = this->Makefile->GetCurrentSourceDirectory();
+    for(unsigned int i=3; i < args.size(); ++i)
+      {
+      if(args[i] == "BASE_DIR")
+        {
+        ++i;
+        if(i < args.size())
+          {
+          baseDir = args[i];
+          }
+        }
+      }
     // Collapse the path to its simplest form.
-    // If the path given is relative evaluate it relative to the
-    // current source directory.
-    result = cmSystemTools::CollapseFullPath(
-      filename, this->Makefile->GetCurrentSourceDirectory());
+    result = cmSystemTools::CollapseFullPath(filename, baseDir);
     if(args[2] == "REALPATH")
       {
       // Resolve symlinks if possible

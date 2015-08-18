@@ -38,6 +38,39 @@ check("ABSOLUTE .. in windows root" "${test_absolute}" "c:/path/to/filename.ext.
 
 list(APPEND non_cache_vars test_absolute)
 
+# Test finding absolute paths from various base directories.
+
+get_filename_component(test_abs_base "testdir1" ABSOLUTE)
+check("ABSOLUTE .. from default base" "${test_abs_base}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/testdir1")
+
+get_filename_component(test_abs_base "../testdir2" ABSOLUTE
+                       BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dummydir")
+check("ABSOLUTE .. from dummy base to parent" "${test_abs_base}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/testdir2")
+
+get_filename_component(test_abs_base "testdir3" ABSOLUTE
+                       BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dummydir")
+check("ABSOLUTE .. from dummy base to child" "${test_abs_base}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/dummydir/testdir3")
+
+list(APPEND non_cache_vars test_abs_base)
+
+# Test finding absolute paths with CACHE parameter.  (Note that more
+# rigorous testing of the CACHE parameter comes later with PROGRAM).
+
+get_filename_component(test_abs_base_1 "testdir4" ABSOLUTE CACHE)
+check("ABSOLUTE CACHE 1" "${test_abs_base_1}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/testdir4")
+list(APPEND cache_vars test_abs_base_1)
+
+get_filename_component(test_abs_base_2 "testdir5" ABSOLUTE
+                       BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dummydir"
+                       CACHE)
+check("ABSOLUTE CACHE 2" "${test_abs_base_2}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/dummydir/testdir5")
+list(APPEND cache_vars test_abs_base_2)
+
 # Test the PROGRAM component type.
 get_filename_component(test_program_name "/ arg1 arg2" PROGRAM)
 check("PROGRAM with no args output" "${test_program_name}" "/")
