@@ -113,12 +113,21 @@ if(WIN32 AND NOT CYGWIN)
     # We are using the libraries located in the VC subdir instead of the parent directory eventhough :
     # libeay32MD.lib is identical to ../libeay32.lib, and
     # ssleay32MD.lib is identical to ../ssleay32.lib
+    # enable OPENSSL_USE_STATIC to use the static libs located in lib/VC/static
 
-    set(_OPENSSL_PATH_SUFFIXES
-      "lib"
-      "VC"
-      "lib/VC"
-      )
+    if(OPENSSL_USE_STATIC)
+      set(_OPENSLL_PATH_SUFFIXES
+        "lib"
+        "VC/static"
+        "lib/VC/static"
+        )
+    else()
+      set(_OPENSLL_PATH_SUFFIXES
+        "lib"
+        "VC"
+        "lib/VC"
+        )
+    endif ()
 
     find_library(LIB_EAY_DEBUG
       NAMES
