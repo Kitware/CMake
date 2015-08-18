@@ -2529,6 +2529,18 @@ bool cmMakefile::PlatformIs64Bit() const
   return false;
 }
 
+bool cmMakefile::PlatformIsAppleIos() const
+{
+  std::string sdkRoot;
+  sdkRoot = this->GetSafeDefinition("CMAKE_OSX_SYSROOT");
+  sdkRoot = cmSystemTools::LowerCase(sdkRoot);
+
+  return sdkRoot.find("iphoneos") == 0 ||
+         sdkRoot.find("/iphoneos") != std::string::npos ||
+         sdkRoot.find("iphonesimulator") == 0 ||
+         sdkRoot.find("/iphonesimulator") != std::string::npos;
+}
+
 const char* cmMakefile::GetSONameFlag(const std::string& language) const
 {
   std::string name = "CMAKE_SHARED_LIBRARY_SONAME";
