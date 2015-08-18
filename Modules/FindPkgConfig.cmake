@@ -109,7 +109,7 @@ macro(_pkgconfig_parse_options _result _is_req _is_silent _no_cmake_path _no_cma
       set(${_no_cmake_path} 1)
       set(${_no_cmake_environment_path} 1)
     endif()
-  elseif(${CMAKE_MINIMUM_REQUIRED_VERSION} VERSION_LESS 3.1)
+  elseif(CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 3.1)
     set(${_no_cmake_path} 1)
     set(${_no_cmake_environment_path} 1)
   endif()
