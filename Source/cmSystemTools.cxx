@@ -30,7 +30,6 @@
 # include "cmLocale.h"
 # include <cm_libarchive.h>
 #endif
-#include <cmsys/stl/algorithm>
 #include <cmsys/FStream.hxx>
 #include <cmsys/Terminal.h>
 

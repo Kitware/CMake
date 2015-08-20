@@ -18,8 +18,6 @@
 #include "cmake.h"
 #include "cmAlgorithms.h"
 
-#include <cmsys/stl/algorithm>
-
 #include <assert.h>
 
 /*

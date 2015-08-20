@@ -11,7 +11,6 @@
 ============================================================================*/
 #include "cmFindLibraryCommand.h"
 #include <cmsys/Directory.hxx>
-#include <cmsys/stl/algorithm>
 
 cmFindLibraryCommand::cmFindLibraryCommand()
 {

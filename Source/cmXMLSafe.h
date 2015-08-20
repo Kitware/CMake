@@ -12,7 +12,8 @@
 #ifndef cmXMLSafe_h
 #define cmXMLSafe_h
 
-#include <cmsys/stl/string>
+#include <cmsys/Configure.hxx>
+#include <string>
 #include <iosfwd>
 
 /** \class cmXMLSafe
