@@ -3566,10 +3566,9 @@ bool cmTarget::ComputeOutputDir(const std::string& config,
   // The generator may add the configuration's subdirectory.
   if(!conf.empty())
     {
-    const char *platforms = this->Makefile->GetDefinition(
-      "CMAKE_XCODE_EFFECTIVE_PLATFORMS");
+    bool iosPlatform = this->Makefile->PlatformIsAppleIos();
     std::string suffix =
-      usesDefaultOutputDir && platforms ? "$(EFFECTIVE_PLATFORM_NAME)" : "";
+      usesDefaultOutputDir && iosPlatform ? "$(EFFECTIVE_PLATFORM_NAME)" : "";
     this->Makefile->GetGlobalGenerator()->
       AppendDirectoryForConfig("/", conf, suffix, out);
     }
