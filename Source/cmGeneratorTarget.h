@@ -375,6 +375,10 @@ private:
   };
   mutable std::map<std::string, LinkImplClosure> LinkImplClosureMap;
 
+  typedef std::pair<std::string, bool> OutputNameKey;
+  typedef std::map<OutputNameKey, std::string> OutputNameMapType;
+  mutable OutputNameMapType OutputNameMap;
+
 public:
   std::vector<cmTarget const*> const&
     GetLinkImplementationClosure(const std::string& config) const;
