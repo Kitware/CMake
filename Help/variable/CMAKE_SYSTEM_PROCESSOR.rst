@@ -7,4 +7,4 @@ This variable is the same as :variable:`CMAKE_HOST_SYSTEM_PROCESSOR` if
 you build for the host system instead of the target system when
 cross compiling.
 
-* The Green Hills MULTI generator sets this to ``ARM`` by default
+* The :generator:`Green Hills MULTI` generator sets this to ``ARM`` by default.
