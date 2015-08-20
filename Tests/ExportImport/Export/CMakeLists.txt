@@ -127,6 +127,9 @@ target_link_libraries(testLibCycleA testLibCycleB)
 target_link_libraries(testLibCycleB testLibCycleA)
 set_property(TARGET testLibCycleA PROPERTY LINK_INTERFACE_MULTIPLICITY 3)
 
+add_library(testLibNoSONAME SHARED testLibNoSONAME.c)
+set_property(TARGET testLibNoSONAME PROPERTY NO_SONAME 1)
+
 # Test exporting dependent libraries into different exports
 add_library(testLibRequired testLibRequired.c)
 add_library(testLibDepends testLibDepends.c)
@@ -467,6 +470,7 @@ install(
   testExe2lib testLib4lib testLib4libdbg testLib4libopt
   testLib6 testLib7
   testLibCycleA testLibCycleB
+  testLibNoSONAME
   cmp0022NEW cmp0022OLD
   systemlib
   EXPORT exp
@@ -527,6 +531,7 @@ export(TARGETS testExe1 testLib1 testLib2 testLib3
 export(TARGETS testExe2 testLib4 testLib5 testLib6 testLib7 testExe3 testExe4 testExe2lib
   testLib4lib testLib4libdbg testLib4libopt
   testLibCycleA testLibCycleB
+  testLibNoSONAME
   testLibPerConfigDest
   NAMESPACE bld_
   APPEND FILE ExportBuildTree.cmake
