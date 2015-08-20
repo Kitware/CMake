@@ -52,13 +52,8 @@ target_link_libraries(example_mod_1 example_exe)
 
 if(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG AND
     "${CMAKE_C_CREATE_SHARED_MODULE}" MATCHES "SONAME_FLAG")
-  # Add a second plugin that should not have any soname.
-  add_library(example_mod_2 MODULE src/example_mod_1.c)
-  target_link_libraries(example_mod_2 example_exe)
-  set_property(TARGET example_mod_2 PROPERTY NO_SONAME 1)
-
   # Verify that targets export with proper IMPORTED SONAME properties.
-  export(TARGETS example_mod_1 example_mod_2 NAMESPACE exp_
+  export(TARGETS example_mod_1 NAMESPACE exp_
     FILE ${CMAKE_CURRENT_BINARY_DIR}/mods.cmake)
 
   include(ExternalProject)
@@ -68,7 +63,7 @@ if(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG AND
     DOWNLOAD_COMMAND ""
     INSTALL_COMMAND ""
   )
-  add_dependencies(PluginTest example_mod_1 example_mod_2)
+  add_dependencies(PluginTest example_mod_1)
 endif()
 
 # TODO:

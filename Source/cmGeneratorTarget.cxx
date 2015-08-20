@@ -761,8 +761,7 @@ bool cmGeneratorTarget::HasSOName(const std::string& config) const
 {
   // soname is supported only for shared libraries and modules,
   // and then only when the platform supports an soname flag.
-  return ((this->GetType() == cmTarget::SHARED_LIBRARY ||
-           this->GetType() == cmTarget::MODULE_LIBRARY) &&
+  return ((this->GetType() == cmTarget::SHARED_LIBRARY) &&
           !this->GetPropertyAsBool("NO_SONAME") &&
           this->Makefile->GetSONameFlag(this->GetLinkerLanguage(config)));
 }
