@@ -95,6 +95,7 @@ if(NOT CMAKE_C_COMPILER_ID_RUN)
 
   # Try to identify the compiler.
   set(CMAKE_C_COMPILER_ID)
+  set(CMAKE_C_PLATFORM_ID)
   file(READ ${CMAKE_ROOT}/Modules/CMakePlatformId.h.in
     CMAKE_C_COMPILER_ID_PLATFORM_CONTENT)
 
@@ -108,12 +109,12 @@ if(NOT CMAKE_C_COMPILER_ID_RUN)
   CMAKE_DETERMINE_COMPILER_ID(C CFLAGS CMakeCCompilerId.c)
 
   # Set old compiler and platform id variables.
-  if(CMAKE_C_COMPILER_ID MATCHES "GNU")
+  if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_COMPILER_IS_GNUCC 1)
   endif()
-  if("${CMAKE_C_PLATFORM_ID}" MATCHES "MinGW")
+  if(CMAKE_C_PLATFORM_ID MATCHES "MinGW")
     set(CMAKE_COMPILER_IS_MINGW 1)
-  elseif("${CMAKE_C_PLATFORM_ID}" MATCHES "Cygwin")
+  elseif(CMAKE_C_PLATFORM_ID MATCHES "Cygwin")
     set(CMAKE_COMPILER_IS_CYGWIN 1)
   endif()
 endif()
