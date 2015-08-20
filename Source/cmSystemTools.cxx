@@ -1482,7 +1482,7 @@ bool cmSystemTools::CreateTar(const char* outFileName,
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  cmsys::ofstream fout(outFileName, std::ios::out | cmsys_ios_binary);
+  cmsys::ofstream fout(outFileName, std::ios::out | std::ios::binary);
   if(!fout)
     {
     std::string e = "Cannot open output file \"";

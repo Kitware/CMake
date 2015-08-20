@@ -13,8 +13,8 @@
 
 #include "cm_utf8.h"
 
-#include <cmsys/ios/iostream>
-#include <cmsys/ios/sstream>
+#include <iostream>
+#include <sstream>
 
 #include <string.h>
 #include <stdio.h>
@@ -45,13 +45,13 @@ cmXMLSafe& cmXMLSafe::Quotes(bool b)
 //----------------------------------------------------------------------------
 std::string cmXMLSafe::str()
 {
-  cmsys_ios::ostringstream ss;
+  std::ostringstream ss;
   ss << *this;
   return ss.str();
 }
 
 //----------------------------------------------------------------------------
-cmsys_ios::ostream& operator<<(cmsys_ios::ostream& os, cmXMLSafe const& self)
+std::ostream& operator<<(std::ostream& os, cmXMLSafe const& self)
 {
   char const* first = self.Data;
   char const* last = self.Data + self.Size;
