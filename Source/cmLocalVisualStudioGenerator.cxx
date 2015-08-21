@@ -57,7 +57,7 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
     cmSourceFile const* sf = si->first;
     std::string objectNameLower = cmSystemTools::LowerCase(
       cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath()));
-    objectNameLower += ".obj";
+    objectNameLower += this->GlobalGenerator->GetLanguageOutputExtension(*sf);
     counts[objectNameLower] += 1;
     }
 
@@ -70,7 +70,7 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
     cmSourceFile const* sf = si->first;
     std::string objectName =
       cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
-    objectName += ".obj";
+    objectName += this->GlobalGenerator->GetLanguageOutputExtension(*sf);
     if(counts[cmSystemTools::LowerCase(objectName)] > 1)
       {
       const_cast<cmGeneratorTarget*>(gt)->AddExplicitObjectName(sf);
