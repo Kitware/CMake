@@ -558,7 +558,8 @@ endif()
 
 if(WIN32 AND NOT UNIX)
   # We need the rpcrt4 library on Windows.
-  target_link_libraries(CMakeLib rpcrt4)
+  # We need the crypt32 library on Windows for crypto/cert APIs.
+  target_link_libraries(CMakeLib rpcrt4 crypt32)
 endif()
 
 #
