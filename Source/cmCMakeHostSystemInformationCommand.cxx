@@ -11,8 +11,6 @@
 ============================================================================*/
 #include "cmCMakeHostSystemInformationCommand.h"
 
-#include <cmsys/ios/sstream>
-
 // cmCMakeHostSystemInformation
 bool cmCMakeHostSystemInformationCommand
 ::InitialPass(std::vector<std::string> const &args, cmExecutionStatus &)
@@ -107,7 +105,7 @@ bool cmCMakeHostSystemInformationCommand
 std::string cmCMakeHostSystemInformationCommand
 ::ValueToString(size_t value) const
 {
-  cmsys_ios::stringstream tmp;
+  std::stringstream tmp;
   tmp << value;
   return tmp.str();
 }

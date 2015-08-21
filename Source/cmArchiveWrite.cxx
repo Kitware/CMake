@@ -13,7 +13,6 @@
 
 #include "cmSystemTools.h"
 #include "cmLocale.h"
-#include <cmsys/ios/iostream>
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
 #include <cm_libarchive.h>
@@ -67,7 +66,7 @@ struct cmArchiveWrite::Callback
     {
     cmArchiveWrite* self = static_cast<cmArchiveWrite*>(cd);
     if(self->Stream.write(static_cast<const char*>(b),
-                          static_cast<cmsys_ios::streamsize>(n)))
+                          static_cast<std::streamsize>(n)))
       {
       return static_cast<__LA_SSIZE_T>(n);
       }
@@ -313,7 +312,7 @@ bool cmArchiveWrite::AddFile(const char* file,
 //----------------------------------------------------------------------------
 bool cmArchiveWrite::AddData(const char* file, size_t size)
 {
-  cmsys::ifstream fin(file, std::ios::in | cmsys_ios_binary);
+  cmsys::ifstream fin(file, std::ios::in | std::ios::binary);
   if(!fin)
     {
     this->Error = "Error opening \"";
@@ -327,7 +326,7 @@ bool cmArchiveWrite::AddData(const char* file, size_t size)
   size_t nleft = size;
   while(nleft > 0)
     {
-    typedef cmsys_ios::streamsize ssize_type;
+    typedef std::streamsize ssize_type;
     size_t const nnext = nleft > sizeof(buffer)? sizeof(buffer) : nleft;
     ssize_type const nnext_s = static_cast<ssize_type>(nnext);
     fin.read(buffer, nnext_s);
