@@ -105,7 +105,10 @@ default values:
 * :variable:`CMAKE_POSITION_INDEPENDENT_CODE`
 
 If :policy:`CMP0056` is set to ``NEW``, then
-:variable:`CMAKE_EXE_LINKER_FLAGS` is passed in as well.
+:variable:`CMAKE_EXE_LINKER_FLAGS` is passed in.
+
+If :policy:`CMP0065` is set to ``NEW``, then
+CMAKE_SHARED_LIBRARY_LINK_<LANG>_FLAGS is also passed in.
 
 Set the :variable:`CMAKE_TRY_COMPILE_CONFIGURATION` variable to choose
 a build configuration.
