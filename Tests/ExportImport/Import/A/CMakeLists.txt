@@ -90,6 +90,50 @@ add_custom_target(check_testLib1_genex ALL
           -P ${CMAKE_CURRENT_SOURCE_DIR}/check_testLib1_genex.cmake
   )
 
+if(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG AND
+    "${CMAKE_C_CREATE_SHARED_MODULE}" MATCHES "SONAME_FLAG")
+  foreach(ns exp bld)
+    get_property(configs TARGET ${ns}_testLib5 PROPERTY IMPORTED_CONFIGURATIONS)
+    foreach(c ${configs})
+      string(TOUPPER "${c}" CONFIG)
+      get_property(soname TARGET ${ns}_testLib5 PROPERTY IMPORTED_NO_SONAME_${CONFIG})
+      if(soname)
+        message(SEND_ERROR "${ns}_testLib5 has IMPORTED_NO_SONAME_${CONFIG} but should:\n  ${soname}")
+      else()
+        message(STATUS "${ns}_testLib5 does not have IMPORTED_NO_SONAME_${CONFIG} as expected")
+      endif()
+    endforeach()
+
+    get_property(configs TARGET ${ns}_testLibNoSONAME PROPERTY IMPORTED_CONFIGURATIONS)
+    foreach(c ${configs})
+      string(TOUPPER "${c}" CONFIG)
+      get_property(soname TARGET ${ns}_testLibNoSONAME PROPERTY IMPORTED_NO_SONAME_${CONFIG})
+      if(soname)
+        message(STATUS "${ns}_testLibNoSONAME has IMPORTED_NO_SONAME_${CONFIG} as expected")
+      else()
+        message(SEND_ERROR "${ns}_testLibNoSONAME does not have IMPORTED_NO_SONAME_${CONFIG} but should")
+      endif()
+    endforeach()
+
+    # Parse the binary to check for SONAME if possible.
+    if("${CMAKE_EXECUTABLE_FORMAT}" MATCHES "ELF")
+      find_program(READELF_EXE readelf)
+      if(READELF_EXE)
+        add_custom_target(check_${ns}_testLib5_soname ALL COMMAND
+          ${CMAKE_COMMAND} -Dreadelf=${READELF_EXE}
+          -Dlib=$<TARGET_FILE:${ns}_testLib5>
+          -P ${CMAKE_CURRENT_SOURCE_DIR}/check_lib_soname.cmake
+          )
+        add_custom_target(check_${ns}_testLibNoSONAME_soname ALL COMMAND
+          ${CMAKE_COMMAND} -Dreadelf=${READELF_EXE}
+          -Dlib=$<TARGET_FILE:${ns}_testLibNoSONAME>
+          -P ${CMAKE_CURRENT_SOURCE_DIR}/check_lib_nosoname.cmake
+          )
+      endif()
+    endif()
+  endforeach()
+endif()
+
 add_executable(cmp0022OLD_test cmp0022OLD_test_vs6_1.cpp)
 target_link_libraries(cmp0022OLD_test bld_cmp0022OLD)
 add_executable(cmp0022NEW_test cmp0022NEW_test_vs6_1.cpp)
