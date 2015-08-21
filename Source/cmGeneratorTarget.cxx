@@ -270,48 +270,71 @@ const char *cmGeneratorTarget::GetProperty(const std::string& prop) const
 std::string cmGeneratorTarget::GetOutputName(const std::string& config,
                                              bool implib) const
 {
-  std::vector<std::string> props;
-  std::string type = this->Target->GetOutputTargetType(implib);
-  std::string configUpper = cmSystemTools::UpperCase(config);
-  if(!type.empty() && !configUpper.empty())
+  // Lookup/compute/cache the output name for this configuration.
+  OutputNameKey key(config, implib);
+  cmGeneratorTarget::OutputNameMapType::iterator i =
+    this->OutputNameMap.find(key);
+  if(i == this->OutputNameMap.end())
     {
-    // <ARCHIVE|LIBRARY|RUNTIME>_OUTPUT_NAME_<CONFIG>
-    props.push_back(type + "_OUTPUT_NAME_" + configUpper);
-    }
-  if(!type.empty())
-    {
-    // <ARCHIVE|LIBRARY|RUNTIME>_OUTPUT_NAME
-    props.push_back(type + "_OUTPUT_NAME");
-    }
-  if(!configUpper.empty())
-    {
-    // OUTPUT_NAME_<CONFIG>
-    props.push_back("OUTPUT_NAME_" + configUpper);
-    // <CONFIG>_OUTPUT_NAME
-    props.push_back(configUpper + "_OUTPUT_NAME");
-    }
-  // OUTPUT_NAME
-  props.push_back("OUTPUT_NAME");
+    // Add empty name in map to detect potential recursion.
+    OutputNameMapType::value_type entry(key, "");
+    i = this->OutputNameMap.insert(entry).first;
 
-  std::string outName;
-  for(std::vector<std::string>::const_iterator i = props.begin();
-      i != props.end(); ++i)
-    {
-    if (const char* outNameProp = this->Target->GetProperty(*i))
+    // Compute output name.
+    std::vector<std::string> props;
+    std::string type = this->Target->GetOutputTargetType(implib);
+    std::string configUpper = cmSystemTools::UpperCase(config);
+    if(!type.empty() && !configUpper.empty())
       {
-      outName = outNameProp;
-      break;
+      // <ARCHIVE|LIBRARY|RUNTIME>_OUTPUT_NAME_<CONFIG>
+      props.push_back(type + "_OUTPUT_NAME_" + configUpper);
       }
-    }
+    if(!type.empty())
+      {
+      // <ARCHIVE|LIBRARY|RUNTIME>_OUTPUT_NAME
+      props.push_back(type + "_OUTPUT_NAME");
+      }
+    if(!configUpper.empty())
+      {
+      // OUTPUT_NAME_<CONFIG>
+      props.push_back("OUTPUT_NAME_" + configUpper);
+      // <CONFIG>_OUTPUT_NAME
+      props.push_back(configUpper + "_OUTPUT_NAME");
+      }
+    // OUTPUT_NAME
+    props.push_back("OUTPUT_NAME");
 
-  if (outName.empty())
+    std::string outName;
+    for(std::vector<std::string>::const_iterator it = props.begin();
+        it != props.end(); ++it)
+      {
+      if (const char* outNameProp = this->Target->GetProperty(*it))
+        {
+        outName = outNameProp;
+        break;
+        }
+      }
+
+    if(outName.empty())
+      {
+      outName = this->GetName();
+      }
+
+    // Now evaluate genex and update the previously-prepared map entry.
+    cmGeneratorExpression ge;
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(outName);
+    i->second = cge->Evaluate(this->Makefile, config);
+    }
+  else if(i->second.empty())
     {
-    outName = this->GetName();
+    // An empty map entry indicates we have been called recursively
+    // from the above block.
+    this->Makefile->GetCMakeInstance()->IssueMessage(
+      cmake::FATAL_ERROR,
+      "Target '" + this->GetName() + "' OUTPUT_NAME depends on itself.",
+      this->Target->GetBacktrace());
     }
-
-  cmGeneratorExpression ge;
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(outName);
-  return cge->Evaluate(this->Makefile, config);
+  return i->second;
 }
 
 //----------------------------------------------------------------------------
