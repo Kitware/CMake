@@ -1311,7 +1311,7 @@ void cmState::Directory::PrependIncludeDirectoriesEntry(
       this->DirectoryState->IncludeDirectoryBacktraces.begin()
       + std::distance(entryBegin, entryIt);
 
-  this->DirectoryState->IncludeDirectories.insert(rbegin.base(), vec);
+  this->DirectoryState->IncludeDirectories.insert(entryIt, vec);
   this->DirectoryState->IncludeDirectoryBacktraces.insert(btIt, lfbt);
 
   this->Snapshot_.Position->IncludeDirectoryPosition =
