@@ -1,6 +1,6 @@
 CYGWIN
 ------
 
-True for Cygwin.
+``True`` for Cygwin.
 
-Set to true when using Cygwin.
+Set to ``true`` when using Cygwin.

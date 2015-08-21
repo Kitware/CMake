@@ -1,7 +1,7 @@
 CMAKE_<LANG>_IMPLICIT_LINK_LIBRARIES
 ------------------------------------
 
-Implicit link libraries and flags detected for language <LANG>.
+Implicit link libraries and flags detected for language ``<LANG>``.
 
 Compilers typically pass language runtime library names and other
 flags when they invoke a linker.  These flags are implicit link
