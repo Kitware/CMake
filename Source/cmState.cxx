@@ -1296,22 +1296,21 @@ void cmState::Directory::PrependIncludeDirectoriesEntry(
       this->DirectoryState->IncludeDirectories.begin()
       + this->Snapshot_.Position->IncludeDirectoryPosition;
 
-  std::vector<std::string>::const_reverse_iterator rend =
+  std::vector<std::string>::reverse_iterator rend =
       this->DirectoryState->IncludeDirectories.rend();
   std::vector<std::string>::reverse_iterator rbegin =
       cmMakeReverseIterator(entryEnd);
-  std::vector<std::string>::const_reverse_iterator crbegin = rbegin;
-  crbegin = std::find(crbegin, rend, cmPropertySentinal);
+  rbegin = std::find(rbegin, rend, cmPropertySentinal);
 
-  std::vector<std::string>::const_iterator entryIt = crbegin.base();
-  std::vector<std::string>::const_iterator entryBegin =
+  std::vector<std::string>::iterator entryIt = rbegin.base();
+  std::vector<std::string>::iterator entryBegin =
       this->DirectoryState->IncludeDirectories.begin();
 
   std::vector<cmListFileBacktrace>::iterator btIt =
       this->DirectoryState->IncludeDirectoryBacktraces.begin()
       + std::distance(entryBegin, entryIt);
 
-  this->DirectoryState->IncludeDirectories.insert(rbegin.base(), vec);
+  this->DirectoryState->IncludeDirectories.insert(entryIt, vec);
   this->DirectoryState->IncludeDirectoryBacktraces.insert(btIt, lfbt);
 
   this->Snapshot_.Position->IncludeDirectoryPosition =
