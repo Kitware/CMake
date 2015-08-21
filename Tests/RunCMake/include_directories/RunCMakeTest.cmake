@@ -5,6 +5,7 @@ set(RunCMake_TEST_OPTIONS "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/NotDefa
 
 run_cmake(NotFoundContent)
 run_cmake(DebugIncludes)
+run_cmake(DirectoryBefore)
 run_cmake(TID-bad-target)
 run_cmake(ImportedTarget)
 run_cmake(CMP0021)
