@@ -2893,7 +2893,7 @@ void cmVisualStudio10TargetGenerator::WriteWinRTPackageCertificateKeyFile()
       (*this->BuildFileStream) << cmVS10EscapeXML(artifactDir) <<
         "\\</AppxPackageArtifactsDir>\n";
       this->WriteString("<ProjectPriFullPath>"
-        "$(TargetDir)resources.pri</ProjectPriFullPath>", 2);
+        "$(TargetDir)resources.pri</ProjectPriFullPath>\n", 2);
 
       // If we are missing files and we don't have a certificate and
       // aren't targeting WP8.0, add a default certificate
@@ -2911,6 +2911,13 @@ void cmVisualStudio10TargetGenerator::WriteWinRTPackageCertificateKeyFile()
       this->WriteString("<", 2);
       (*this->BuildFileStream) << "PackageCertificateKeyFile>"
         << pfxFile << "</PackageCertificateKeyFile>\n";
+      std::string thumb = cmSystemTools::ComputeCertificateThumbprint(pfxFile);
+      if (!thumb.empty())
+        {
+        this->WriteString("<PackageCertificateThumbprint>", 2);
+        (*this->BuildFileStream) << thumb
+          << "</PackageCertificateThumbprint>\n";
+        }
       this->WriteString("</PropertyGroup>\n", 1);
       }
     else if(!pfxFile.empty())
@@ -2919,6 +2926,13 @@ void cmVisualStudio10TargetGenerator::WriteWinRTPackageCertificateKeyFile()
       this->WriteString("<", 2);
       (*this->BuildFileStream) << "PackageCertificateKeyFile>"
         << pfxFile << "</PackageCertificateKeyFile>\n";
+      std::string thumb = cmSystemTools::ComputeCertificateThumbprint(pfxFile);
+      if (!thumb.empty())
+        {
+        this->WriteString("<PackageCertificateThumbprint>", 2);
+        (*this->BuildFileStream) << thumb
+          << "</PackageCertificateThumbprint>\n";
+        }
       this->WriteString("</PropertyGroup>\n", 1);
       }
     }
