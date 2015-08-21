@@ -5,7 +5,7 @@ enable_language(C)
 
 if(TEST_IOS)
   set(CMAKE_OSX_SYSROOT iphoneos)
-  #set(CMAKE_OSX_ARCHITECTURES "i386")
+  set(CMAKE_OSX_ARCHITECTURES "armv7")
   set(CMAKE_XCODE_EFFECTIVE_PLATFORMS "-iphoneos;-iphonesimulator")
   set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
 endif(TEST_IOS)
