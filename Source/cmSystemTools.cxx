@@ -1705,7 +1705,7 @@ bool extract_tar(const char* outFileName, bool verbose,
   static_cast<void>(localeRAII);
   struct archive* a = archive_read_new();
   struct archive *ext = archive_write_disk_new();
-  archive_read_support_compression_all(a);
+  archive_read_support_filter_all(a);
   archive_read_support_format_all(a);
   struct archive_entry *entry;
   int r = cm_archive_read_open_file(a, outFileName, 10240);
@@ -1792,7 +1792,7 @@ bool extract_tar(const char* outFileName, bool verbose,
     }
   archive_write_free(ext);
   archive_read_close(a);
-  archive_read_finish(a);
+  archive_read_free(a);
   return r == ARCHIVE_EOF || r == ARCHIVE_OK;
 }
 }
