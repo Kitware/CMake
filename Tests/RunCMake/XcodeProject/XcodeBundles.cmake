@@ -8,6 +8,7 @@ if(TEST_IOS)
   set(CMAKE_OSX_ARCHITECTURES "armv7")
   set(CMAKE_XCODE_EFFECTIVE_PLATFORMS "-iphoneos;-iphonesimulator")
   set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
+  set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
 endif(TEST_IOS)
 
 # App Bundle
@@ -20,16 +21,18 @@ add_custom_target(AppBundleTest ALL
 
 add_dependencies(AppBundleTest AppBundle)
 
-# Framework
+# Framework (not supported for iOS on Xcode < 6)
 
-add_library(Framework SHARED main.c)
-set_target_properties(Framework PROPERTIES FRAMEWORK TRUE)
+if(NOT TEST_IOS OR NOT XCODE_VERSION VERSION_LESS 6)
+  add_library(Framework SHARED main.c)
+  set_target_properties(Framework PROPERTIES FRAMEWORK TRUE)
 
-add_custom_target(FrameworkTest ALL
-  COMMAND ${CMAKE_COMMAND} -E copy
-    "$<TARGET_FILE:Framework>" "$<TARGET_FILE:Framework>.old")
+  add_custom_target(FrameworkTest ALL
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_FILE:Framework>" "$<TARGET_FILE:Framework>.old")
 
-add_dependencies(FrameworkTest Framework)
+  add_dependencies(FrameworkTest Framework)
+endif()
 
 # Bundle
 
