@@ -133,7 +133,6 @@ cmake::cmake()
   this->ClearBuildSystem = false;
   this->FileComparison = new cmFileTimeComparison;
 
-  this->Policies = new cmPolicies();
   this->State = new cmState(this);
   this->CurrentSnapshot = this->State->CreateBaseSnapshot();
 
@@ -171,7 +170,6 @@ cmake::cmake()
 cmake::~cmake()
 {
   delete this->CacheManager;
-  delete this->Policies;
   delete this->State;
   if (this->GlobalGenerator)
     {

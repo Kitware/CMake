@@ -27,7 +27,6 @@ class cmVariableWatch;
 class cmFileTimeComparison;
 class cmExternalMakefileProjectGenerator;
 class cmDocumentationSection;
-class cmPolicies;
 class cmTarget;
 class cmGeneratedFileStream;
 
@@ -340,7 +339,6 @@ protected:
   void AddExtraGenerator(const std::string& name,
                          CreateExtraGeneratorFunctionType newFunction);
 
-  cmPolicies *Policies;
   cmGlobalGenerator *GlobalGenerator;
   cmCacheManager *CacheManager;
   std::map<std::string, WarningLevel> WarningLevels;
