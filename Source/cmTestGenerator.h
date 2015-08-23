@@ -15,6 +15,7 @@
 #include "cmScriptGenerator.h"
 
 class cmTest;
+class cmLocalGenerator;
 
 /** \class cmTestGenerator
  * \brief Support class for generating install scripts.
@@ -28,6 +29,8 @@ public:
                   configurations = std::vector<std::string>());
   virtual ~cmTestGenerator();
 
+  void Compute(cmLocalGenerator* lg);
+
 protected:
   virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);
   virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
@@ -38,6 +41,7 @@ protected:
   virtual bool NeedsScriptNoConfig() const;
   void GenerateOldStyle(std::ostream& os, Indent const& indent);
 
+  cmLocalGenerator* LG;
   cmTest* Test;
   bool TestGenerated;
 };
