@@ -1582,3 +1582,9 @@ void cmState::Directory::ClearCompileOptions()
                this->DirectoryState->CompileOptionsBacktraces,
                this->Snapshot_.Position->CompileOptionsPosition);
 }
+
+bool cmState::Snapshot::StrictWeakOrder::operator()(
+    const cmState::Snapshot& lhs, const cmState::Snapshot& rhs) const
+{
+  return lhs.Position.StrictWeakOrdered(rhs.Position);
+}
