@@ -208,7 +208,7 @@ private:
   virtual std::string GetEditCacheCommand() const;
 
   std::map<cmLocalGenerator*, std::set<cmGeneratorTarget const*> >
-                                                    LocalGeneratorToTargetMap;
+                                                    DirectoryTargetsMap;
   virtual void InitializeProgressMarks();
 };
 

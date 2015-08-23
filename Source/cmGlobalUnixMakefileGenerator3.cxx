@@ -921,7 +921,7 @@ cmGlobalUnixMakefileGenerator3
 // generator directory level.
 void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
 {
-  this->LocalGeneratorToTargetMap.clear();
+  this->DirectoryTargetsMap.clear();
   // Loop over all targets in all local generators.
   for(std::vector<cmLocalGenerator*>::const_iterator
         lgi = this->LocalGenerators.begin();
@@ -943,7 +943,7 @@ void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
         {
         // This local generator includes the target.
         std::set<cmGeneratorTarget const*>& targetSet =
-          this->LocalGeneratorToTargetMap[clg];
+          this->DirectoryTargetsMap[clg];
         targetSet.insert(gt);
 
         // Add dependencies of the included target.  An excluded
@@ -992,7 +992,7 @@ cmGlobalUnixMakefileGenerator3
   size_t count = 0;
   std::set<cmGeneratorTarget const*> emitted;
   std::set<cmGeneratorTarget const*> const& targets
-                                        = this->LocalGeneratorToTargetMap[lg];
+                                        = this->DirectoryTargetsMap[lg];
   for(std::set<cmGeneratorTarget const*>::const_iterator t = targets.begin();
       t != targets.end(); ++t)
     {
