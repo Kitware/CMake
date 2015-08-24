@@ -973,9 +973,13 @@ cmGeneratorTarget::GetAppBundleDirectory(const std::string& config,
                                          bool contentOnly) const
 {
   std::string fpath = this->GetFullName(config, false);
-  fpath += ".app/Contents";
-  if(!contentOnly)
-    fpath += "/MacOS";
+  fpath += ".app";
+  if(!this->Makefile->PlatformIsAppleIos())
+    {
+    fpath += "/Contents";
+    if(!contentOnly)
+      fpath += "/MacOS";
+    }
   return fpath;
 }
 
@@ -1007,9 +1011,12 @@ std::string cmGeneratorTarget::GetCFBundleDirectory(const std::string& config,
       }
     }
   fpath += ext;
-  fpath += "/Contents";
-  if(!contentOnly)
-    fpath += "/MacOS";
+  if(!this->Makefile->PlatformIsAppleIos())
+  {
+    fpath += "/Contents";
+    if(!contentOnly)
+      fpath += "/MacOS";
+  }
   return fpath;
 }
 
@@ -1021,7 +1028,7 @@ cmGeneratorTarget::GetFrameworkDirectory(const std::string& config,
   std::string fpath;
   fpath += this->GetOutputName(config, false);
   fpath += ".framework";
-  if(!rootDir)
+  if(!rootDir && !this->Makefile->PlatformIsAppleIos())
     {
     fpath += "/Versions/";
     fpath += this->Target->GetFrameworkVersion();
@@ -2168,9 +2175,12 @@ void cmGeneratorTarget::GetLibraryNames(std::string& name,
   if(this->Target->IsFrameworkOnApple())
     {
     realName = prefix;
-    realName += "Versions/";
-    realName += this->Target->GetFrameworkVersion();
-    realName += "/";
+    if(!this->Makefile->PlatformIsAppleIos())
+      {
+      realName += "Versions/";
+      realName += this->Target->GetFrameworkVersion();
+      realName += "/";
+      }
     realName += base;
     soName = realName;
     }
