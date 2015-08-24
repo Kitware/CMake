@@ -91,6 +91,7 @@ ENDIF()
 IF(POLICY CMP0056)
   CMAKE_POLICY(SET CMP0056 NEW)
 ENDIF()
+SET(CMAKE_LEGACY_CYGWIN_WIN32 0)
 
 #-----------------------------------------------------------------------------
 # If a namespace is not specified, use "kwsys" and enable testing.
@@ -308,6 +309,15 @@ IF(NOT CMAKE_COMPILER_IS_GNUCXX)
         # use new C++ library and improved template support
         SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -AA +hpxstd98")
       ENDIF()
+    ENDIF()
+  ENDIF()
+ENDIF()
+IF(KWSYS_STANDALONE)
+  IF(CMAKE_CXX_COMPILER_ID STREQUAL SunPro)
+    IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.13)
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++03")
+    ELSE()
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -library=stlport4")
     ENDIF()
   ENDIF()
 ENDIF()
@@ -1071,7 +1081,7 @@ IF(KWSYS_ENABLE_C AND KWSYS_C_SRCS)
 
   # Apply user-defined target properties to the library.
   IF(KWSYS_PROPERTIES_C)
-    SET_TARGET_PROPERTIES(${KWSYS_NAMESPACE} PROPERTIES
+    SET_TARGET_PROPERTIES(${KWSYS_NAMESPACE}_c PROPERTIES
       ${KWSYS_PROPERTIES_C}
       )
   ENDIF()
