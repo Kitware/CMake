@@ -1378,7 +1378,7 @@ void cmFindPackageCommand::LoadPackageRegistryDir(std::string const& dir,
       cmFindPackageCommandHoldFile holdFile(fname.c_str());
 
       // Load the file.
-      cmsys::ifstream fin(fname.c_str(), std::ios::in | cmsys_ios_binary);
+      cmsys::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
       std::string fentry;
       if(fin && cmSystemTools::GetLineFromStream(fin, fentry) &&
          this->CheckPackageRegistryEntry(fentry, outPaths))

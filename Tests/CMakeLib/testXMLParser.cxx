@@ -2,7 +2,7 @@
 
 #include "cmXMLParser.h"
 
-#include <cmsys/ios/iostream>
+#include <iostream>
 
 int testXMLParser(int, char*[])
 {
@@ -10,7 +10,7 @@ int testXMLParser(int, char*[])
   cmXMLParser parser;
   if(!parser.ParseFile(SOURCE_DIR "/testXMLParser.xml"))
     {
-    cmsys_ios::cerr << "cmXMLParser failed!" << cmsys_ios::endl;
+    std::cerr << "cmXMLParser failed!" << std::endl;
     return 1;
     }
   return 0;

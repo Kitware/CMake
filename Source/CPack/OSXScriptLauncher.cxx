@@ -11,8 +11,9 @@
 ============================================================================*/
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Process.h>
-#include <cmsys/ios/iostream>
 #include <cmsys/FStream.hxx>
+
+#include <iostream>
 
 #include <CoreFoundation/CoreFoundation.h>
 
@@ -20,8 +21,8 @@
 #include <sys/syslimits.h>
 
 #define DebugError(x) \
-  ofs << x << cmsys_ios::endl; \
-  cmsys_ios::cout << x << cmsys_ios::endl
+  ofs << x << std::endl; \
+  std::cout << x << std::endl
 
 int main(int argc, char* argv[])
 {
@@ -77,7 +78,7 @@ int main(int argc, char* argv[])
 
   std::string scriptDirectory = cmsys::SystemTools::GetFilenamePath(
     fullScriptPath);
-  ofs << fullScriptPath.c_str() << cmsys_ios::endl;
+  ofs << fullScriptPath.c_str() << std::endl;
   std::vector<const char*> args;
   args.push_back(fullScriptPath.c_str());
   int cc;
@@ -109,7 +110,7 @@ int main(int argc, char* argv[])
         data[i] = ' ';
         }
       }
-    cmsys_ios::cout.write(data, length);
+    std::cout.write(data, length);
     }
 
   cmsysProcess_WaitForExit(cp, 0);

@@ -3,7 +3,7 @@
 #include "cmVisualStudioSlnData.h"
 #include "cmVisualStudioSlnParser.h"
 
-#include <cmsys/ios/iostream>
+#include <iostream>
 
 //----------------------------------------------------------------------------
 static bool parsedRight(cmVisualStudioSlnParser& parser,
@@ -27,10 +27,10 @@ static bool parsedRight(cmVisualStudioSlnParser& parser,
       return true;
       }
     }
-  cmsys_ios::cerr << "cmVisualStudioSlnParser mis-parsed " << file
-                  << "." SLN_EXTENSION << "; expected result " << expected
-                  << ", got " << parser.GetParseResult()
-                  << cmsys_ios::endl;
+  std::cerr << "cmVisualStudioSlnParser mis-parsed " << file
+            << "." SLN_EXTENSION << "; expected result " << expected
+            << ", got " << parser.GetParseResult()
+            << std::endl;
   return false;
 }
 
@@ -42,8 +42,8 @@ int testVisualStudioSlnParser(int, char*[])
   // Test clean parser
   if (parser.GetParseResult() != cmVisualStudioSlnParser::ResultOK)
     {
-    cmsys_ios::cerr << "cmVisualStudioSlnParser initialisation failed"
-                    << cmsys_ios::endl;
+    std::cerr << "cmVisualStudioSlnParser initialisation failed"
+              << std::endl;
     return 1;
     }
 
@@ -73,38 +73,38 @@ int testVisualStudioSlnParser(int, char*[])
   const size_t expectedProjectCount = sizeof(names) / sizeof(*names);
   if (projects.size() != expectedProjectCount)
     {
-    cmsys_ios::cerr << "cmVisualStudioSlnParser returned bad number of "
-                    << "projects (" << projects.size() << " instead of "
-                    << expectedProjectCount << ')'
-                    << cmsys_ios::endl;
+    std::cerr << "cmVisualStudioSlnParser returned bad number of "
+              << "projects (" << projects.size() << " instead of "
+              << expectedProjectCount << ')'
+              << std::endl;
     return 1;
     }
   for (size_t idx = 0; idx < expectedProjectCount; ++idx)
     {
     if (projects[idx].GetName() != names[idx])
       {
-      cmsys_ios::cerr << "cmVisualStudioSlnParser returned bad project #"
-                      << idx << "; expected \"" << names[idx] << "\", got \""
-                      << projects[idx].GetName() << '"'
-                      << cmsys_ios::endl;
+      std::cerr << "cmVisualStudioSlnParser returned bad project #"
+                << idx << "; expected \"" << names[idx] << "\", got \""
+                << projects[idx].GetName() << '"'
+                << std::endl;
       return 1;
       }
     }
   if (projects[0].GetRelativePath() != "Utilities\\3rdParty")
     {
-    cmsys_ios::cerr << "cmVisualStudioSlnParser returned bad relative path of "
-                    << "project 3rdParty; expected \"Utilities\\3rdParty\", "
-                    << "got \"" << projects[0].GetRelativePath() << '"'
-                    << cmsys_ios::endl;
+    std::cerr << "cmVisualStudioSlnParser returned bad relative path of "
+              << "project 3rdParty; expected \"Utilities\\3rdParty\", "
+              << "got \"" << projects[0].GetRelativePath() << '"'
+              << std::endl;
     return 1;
     }
   if (projects[2].GetGUID() != "{59BCCCCD-3AD1-4491-B8F4-C5793AC007E2}")
     {
-    cmsys_ios::cerr << "cmVisualStudioSlnParser returned bad relative path of "
-                    << "project CMakeLib; expected "
-                    << "\"{59BCCCCD-3AD1-4491-B8F4-C5793AC007E2}\", "
-                    << "got \"" << projects[2].GetGUID() << '"'
-                    << cmsys_ios::endl;
+    std::cerr << "cmVisualStudioSlnParser returned bad relative path of "
+              << "project CMakeLib; expected "
+              << "\"{59BCCCCD-3AD1-4491-B8F4-C5793AC007E2}\", "
+              << "got \"" << projects[2].GetGUID() << '"'
+              << std::endl;
     return 1;
     }
   }
@@ -119,9 +119,9 @@ int testVisualStudioSlnParser(int, char*[])
     }
   if (!parser.GetParseHadBOM())
     {
-    cmsys_ios::cerr << "cmVisualStudioSlnParser didn't find BOM in bom."
-                    << SLN_EXTENSION
-                    << cmsys_ios::endl;
+    std::cerr << "cmVisualStudioSlnParser didn't find BOM in bom."
+              << SLN_EXTENSION
+              << std::endl;
     return 1;
     }
 
@@ -131,9 +131,9 @@ int testVisualStudioSlnParser(int, char*[])
     }
   if (parser.GetParseHadBOM())
     {
-    cmsys_ios::cerr << "cmVisualStudioSlnParser found BOM in nobom."
-                    << SLN_EXTENSION
-                    << cmsys_ios::endl;
+    std::cerr << "cmVisualStudioSlnParser found BOM in nobom."
+              << SLN_EXTENSION
+              << std::endl;
     return 1;
     }
   }

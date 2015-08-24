@@ -27,8 +27,6 @@
 #include <cmsys/Process.h>
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Glob.hxx>
-#include <cmsys/stl/iterator>
-#include <cmsys/stl/algorithm>
 #include <cmsys/FStream.hxx>
 
 #include <stdlib.h>
