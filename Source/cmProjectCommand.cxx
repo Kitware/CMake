@@ -20,7 +20,7 @@ bool cmProjectCommand
     this->SetError("PROJECT called with incorrect number of arguments");
     return false;
     }
-  this->Makefile->SetProjectName(args[0]);
+  this->Makefile->SetProjectName(args[0].c_str());
 
   std::string bindir = args[0];
   bindir += "_BINARY_DIR";

@@ -115,9 +115,7 @@ void CCONV cmAddCacheDefinition(void *arg, const char* name,
 const char* CCONV cmGetProjectName(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  static std::string name;
-  name = mf->GetProjectName();
-  return name.c_str();
+  return mf->GetProjectName();
 }
 
 const char* CCONV cmGetHomeDirectory(void *arg)
