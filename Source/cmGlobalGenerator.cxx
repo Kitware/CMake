@@ -2112,19 +2112,18 @@ void cmGlobalGenerator::FillProjectMap()
   for(i = 0; i < this->LocalGenerators.size(); ++i)
     {
     // for each local generator add all projects
-    cmState::Snapshot snp = this->LocalGenerators[i]->GetStateSnapshot();
+    cmLocalGenerator *lg = this->LocalGenerators[i];
     std::string name;
     do
       {
-      std::string snpProjName = snp.GetProjectName();
-      if (name != snpProjName)
+      if (name != lg->GetMakefile()->GetProjectName())
         {
-        name = snpProjName;
+        name = lg->GetMakefile()->GetProjectName();
         this->ProjectMap[name].push_back(this->LocalGenerators[i]);
         }
-      snp = snp.GetBuildsystemDirectoryParent();
+      lg = lg->GetParent();
       }
-    while (snp.IsValid());
+    while (lg);
     }
 }
 
