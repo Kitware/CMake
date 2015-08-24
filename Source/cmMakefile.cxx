@@ -2072,7 +2072,8 @@ void cmMakefile::AddGlobalLinkInformation(const std::string& name,
       if(std::find(this->LinkDirectories.begin(),
                    this->LinkDirectories.end(), newdir)
           == this->LinkDirectories.end())
-        {target.AddLinkDirectory(*j);
+        {
+        target.AddLinkDirectory(*j);
         }
       }
     }
