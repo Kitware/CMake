@@ -270,21 +270,6 @@ public:
   void SetMSYSShell(bool mSYSShell);
   bool UseMSYSShell() const;
 
-  size_t DefinitionsSize() const;
-  void ReserveDefinitions(size_t amount);
-
-  size_t SnapshotsSize() const;
-  void ReserveSnapshots(size_t amount);
-
-  size_t ListFilesSize() const;
-  void ReserveListFiles(size_t amount);
-
-  size_t DirectoriesSize() const;
-  void ReserveDirectories(size_t amount);
-
-  size_t PoliciesSize() const;
-  void ReservePolicies(size_t amount);
-
 private:
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
