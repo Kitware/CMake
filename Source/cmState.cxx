@@ -74,6 +74,8 @@ struct cmState::BuildsystemDirectoryStateType
 
   std::vector<std::string> CompileOptions;
   std::vector<cmListFileBacktrace> CompileOptionsBacktraces;
+
+  cmPropertyMap Properties;
 };
 
 cmState::cmState(cmake* cm)
@@ -271,6 +273,7 @@ cmState::Snapshot cmState::Reset()
   it->CompileOptions.clear();
   it->CompileOptionsBacktraces.clear();
   it->DirectoryEnd = pos;
+  it->Properties.clear();
   }
 
   this->PolicyStack.Clear();
@@ -1587,4 +1590,164 @@ bool cmState::Snapshot::StrictWeakOrder::operator()(
     const cmState::Snapshot& lhs, const cmState::Snapshot& rhs) const
 {
   return lhs.Position.StrictWeakOrdered(rhs.Position);
+}
+
+void cmState::Directory::SetProperty(const std::string& prop,
+                                     const char* value,
+                                     cmListFileBacktrace lfbt)
+{
+  if (prop == "INCLUDE_DIRECTORIES")
+    {
+    if (!value)
+      {
+      this->ClearIncludeDirectories();
+      return;
+      }
+    this->SetIncludeDirectories(value, lfbt);
+    return;
+    }
+  if (prop == "COMPILE_OPTIONS")
+    {
+    if (!value)
+      {
+      this->ClearCompileOptions();
+      return;
+      }
+    this->SetCompileOptions(value, lfbt);
+    return;
+    }
+  if (prop == "COMPILE_DEFINITIONS")
+    {
+    if (!value)
+      {
+      this->ClearCompileDefinitions();
+      return;
+      }
+    this->SetCompileDefinitions(value, lfbt);
+    return;
+    }
+
+  this->DirectoryState->Properties.SetProperty(prop, value);
+}
+
+void cmState::Directory::AppendProperty(const std::string& prop,
+                                        const char* value,
+                                        bool asString,
+                                        cmListFileBacktrace lfbt)
+{
+  if (prop == "INCLUDE_DIRECTORIES")
+    {
+    this->AppendIncludeDirectoriesEntry(value, lfbt);
+    return;
+    }
+  if (prop == "COMPILE_OPTIONS")
+    {
+    this->AppendCompileOptionsEntry(value, lfbt);
+    return;
+    }
+  if (prop == "COMPILE_DEFINITIONS")
+    {
+    this->AppendCompileDefinitionsEntry(value, lfbt);
+    return;
+    }
+
+  this->DirectoryState->Properties.AppendProperty(prop, value, asString);
+}
+
+const char*cmState::Directory::GetProperty(const std::string& prop) const
+{
+  const bool chain = this->Snapshot_.State->
+      IsPropertyChained(prop, cmProperty::DIRECTORY);
+  return this->GetProperty(prop, chain);
+}
+
+const char*
+cmState::Directory::GetProperty(const std::string& prop, bool chain) const
+{
+  static std::string output;
+  output = "";
+  if (prop == "PARENT_DIRECTORY")
+    {
+    cmState::Snapshot parent =
+        this->Snapshot_.GetBuildsystemDirectoryParent();
+    if(parent.IsValid())
+      {
+      return parent.GetDirectory().GetCurrentSource();
+      }
+    return "";
+    }
+  else if (prop == "LISTFILE_STACK")
+    {
+    std::vector<std::string> listFiles;
+    cmState::Snapshot snp = this->Snapshot_;
+    while (snp.IsValid())
+      {
+      listFiles.push_back(snp.GetExecutionListFile());
+      snp = snp.GetCallStackParent();
+      }
+    std::reverse(listFiles.begin(), listFiles.end());
+    output = cmJoin(listFiles, ";");
+    return output.c_str();
+    }
+  else if ( prop == "CACHE_VARIABLES" )
+    {
+    output = cmJoin(this->Snapshot_.State->GetCacheEntryKeys(), ";");
+    return output.c_str();
+    }
+  else if (prop == "VARIABLES")
+    {
+    std::vector<std::string> res = this->Snapshot_.ClosureKeys();
+    std::vector<std::string> cacheKeys =
+        this->Snapshot_.State->GetCacheEntryKeys();
+    res.insert(res.end(), cacheKeys.begin(), cacheKeys.end());
+    std::sort(res.begin(), res.end());
+    output = cmJoin(res, ";");
+    return output.c_str();
+    }
+  else if (prop == "INCLUDE_DIRECTORIES")
+    {
+    output = cmJoin(this->GetIncludeDirectoriesEntries(), ";");
+    return output.c_str();
+    }
+  else if (prop == "COMPILE_OPTIONS")
+    {
+    output = cmJoin(this->GetCompileOptionsEntries(), ";");
+    return output.c_str();
+    }
+  else if (prop == "COMPILE_DEFINITIONS")
+    {
+    output = cmJoin(this->GetCompileDefinitionsEntries(), ";");
+    return output.c_str();
+    }
+
+  const char *retVal = this->DirectoryState->Properties.GetPropertyValue(prop);
+  if (!retVal && chain)
+    {
+    Snapshot parentSnapshot = this->Snapshot_.GetBuildsystemDirectoryParent();
+    if (parentSnapshot.IsValid())
+      {
+      return parentSnapshot.GetDirectory().GetProperty(prop, chain);
+      }
+    return this->Snapshot_.State->GetGlobalProperty(prop);
+    }
+
+  return retVal;
+}
+
+bool cmState::Directory::GetPropertyAsBool(const std::string& prop) const
+{
+  return cmSystemTools::IsOn(this->GetProperty(prop));
+}
+
+std::vector<std::string> cmState::Directory::GetPropertyKeys() const
+{
+  std::vector<std::string> keys;
+  keys.reserve(this->DirectoryState->Properties.size());
+  for(cmPropertyMap::const_iterator it =
+      this->DirectoryState->Properties.begin();
+      it != this->DirectoryState->Properties.end(); ++it)
+    {
+    keys.push_back(it->first);
+    }
+  return keys;
 }
