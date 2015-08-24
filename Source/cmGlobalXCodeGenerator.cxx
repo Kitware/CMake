@@ -772,7 +772,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
                       sf->GetProperty("COMPILE_DEFINITIONS"), true);
   if (!flagsBuild.IsEmpty())
     {
-    if (flags.size())
+    if (!flags.empty())
       {
       flags += ' ';
       }
@@ -1874,7 +1874,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     extraLinkOptionsVar = "CMAKE_MODULE_LINKER_FLAGS";
     }
-  if(extraLinkOptionsVar.size())
+  if(!extraLinkOptionsVar.empty())
     {
     this->CurrentLocalGenerator
       ->AddConfigVariableFlags(extraLinkOptions,
@@ -2614,7 +2614,7 @@ std::string cmGlobalXCodeGenerator::AddConfigurations(cmXCodeObject* target,
     config->SetComment(configVector[i].c_str());
     config->AddAttribute("buildSettings", buildSettings);
     }
-  if(configVector.size())
+  if(!configVector.empty())
     {
     configlist->AddAttribute("defaultConfigurationName",
                              this->CreateString(configVector[0].c_str()));

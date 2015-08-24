@@ -22,7 +22,7 @@ cmXCode21Object::cmXCode21Object(PBXType ptype, Type type)
 //----------------------------------------------------------------------------
 void cmXCode21Object::PrintComment(std::ostream& out)
 {
-  if(this->Comment.size() == 0)
+  if(this->Comment.empty())
     {
     cmXCodeObject* n = this->GetObject("name");
     if(n)

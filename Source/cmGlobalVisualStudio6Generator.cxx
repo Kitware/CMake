@@ -255,7 +255,7 @@ void cmGlobalVisualStudio6Generator
 ::OutputDSWFile(cmLocalGenerator* root,
                 std::vector<cmLocalGenerator*>& generators)
 {
-  if(generators.size() == 0)
+  if(generators.empty())
     {
     return;
     }

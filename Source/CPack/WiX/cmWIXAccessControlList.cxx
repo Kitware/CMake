@@ -71,7 +71,7 @@ void cmWIXAccessControlList::CreatePermissionElement(
 
   this->SourceWriter.BeginElement("Permission");
   this->SourceWriter.AddAttribute("User", user);
-  if(domain.size())
+  if(!domain.empty())
     {
     this->SourceWriter.AddAttribute("Domain", domain);
     }
