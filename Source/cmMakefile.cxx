@@ -1525,7 +1525,7 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
                     parent->GetProperty("LINK_DIRECTORIES"));
 
   // the initial project name
-  this->SetProjectName(parent->GetProjectName());
+  this->ProjectName = parent->ProjectName;
 
   // Copy include regular expressions.
   this->ComplainFileRegularExpression = parent->ComplainFileRegularExpression;
@@ -2044,15 +2044,11 @@ void cmMakefile::RemoveCacheDefinition(const std::string& name)
   this->GetState()->RemoveCacheEntry(name);
 }
 
-void cmMakefile::SetProjectName(std::string const& p)
+void cmMakefile::SetProjectName(const char* p)
 {
-  this->StateSnapshot.SetProjectName(p);
+  this->ProjectName = p;
 }
 
-std::string cmMakefile::GetProjectName() const
-{
-  return this->StateSnapshot.GetProjectName();
-}
 
 void cmMakefile::AddGlobalLinkInformation(const std::string& name,
                                           cmTarget& target)
