@@ -659,56 +659,6 @@ bool cmState::UseMSYSShell() const
   return this->MSYSShell;
 }
 
-size_t cmState::DefinitionsSize() const
-{
-  return this->VarTree.Size();
-}
-
-void cmState::ReserveDefinitions(size_t amount)
-{
-  this->VarTree.Reserve(amount);
-}
-
-size_t cmState::SnapshotsSize() const
-{
-  return this->SnapshotData.Size();
-}
-
-void cmState::ReserveSnapshots(size_t amount)
-{
-  this->SnapshotData.Reserve(amount);
-}
-
-size_t cmState::ListFilesSize() const
-{
-  return this->ExecutionListFiles.Size();
-}
-
-void cmState::ReserveListFiles(size_t amount)
-{
-  this->ExecutionListFiles.Reserve(amount);
-}
-
-size_t cmState::DirectoriesSize() const
-{
-  return this->BuildsystemDirectory.Size();
-}
-
-void cmState::ReserveDirectories(size_t amount)
-{
-  this->BuildsystemDirectory.Reserve(amount);
-}
-
-size_t cmState::PoliciesSize() const
-{
-  return this->PolicyStack.Size();
-}
-
-void cmState::ReservePolicies(size_t amount)
-{
-  this->PolicyStack.Reserve(amount);
-}
-
 const char* cmState::GetBinaryDirectory() const
 {
   return this->BinaryDirectory.c_str();
