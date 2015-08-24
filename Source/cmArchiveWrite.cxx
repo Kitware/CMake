@@ -89,49 +89,49 @@ cmArchiveWrite::cmArchiveWrite(
   switch (c)
     {
     case CompressNone:
-      if(archive_write_set_compression_none(this->Archive) != ARCHIVE_OK)
+      if(archive_write_add_filter_none(this->Archive) != ARCHIVE_OK)
         {
-        this->Error = "archive_write_set_compression_none: ";
+        this->Error = "archive_write_add_filter_none: ";
         this->Error += cm_archive_error_string(this->Archive);
         return;
         }
       break;
     case CompressCompress:
-      if(archive_write_set_compression_compress(this->Archive) != ARCHIVE_OK)
+      if(archive_write_add_filter_compress(this->Archive) != ARCHIVE_OK)
         {
-        this->Error = "archive_write_set_compression_compress: ";
+        this->Error = "archive_write_add_filter_compress: ";
         this->Error += cm_archive_error_string(this->Archive);
         return;
         }
       break;
     case CompressGZip:
-      if(archive_write_set_compression_gzip(this->Archive) != ARCHIVE_OK)
+      if(archive_write_add_filter_gzip(this->Archive) != ARCHIVE_OK)
         {
-        this->Error = "archive_write_set_compression_gzip: ";
+        this->Error = "archive_write_add_filter_gzip: ";
         this->Error += cm_archive_error_string(this->Archive);
         return;
         }
       break;
     case CompressBZip2:
-      if(archive_write_set_compression_bzip2(this->Archive) != ARCHIVE_OK)
+      if(archive_write_add_filter_bzip2(this->Archive) != ARCHIVE_OK)
         {
-        this->Error = "archive_write_set_compression_bzip2: ";
+        this->Error = "archive_write_add_filter_bzip2: ";
         this->Error += cm_archive_error_string(this->Archive);
         return;
         }
       break;
     case CompressLZMA:
-      if(archive_write_set_compression_lzma(this->Archive) != ARCHIVE_OK)
+      if(archive_write_add_filter_lzma(this->Archive) != ARCHIVE_OK)
         {
-        this->Error = "archive_write_set_compression_lzma: ";
+        this->Error = "archive_write_add_filter_lzma: ";
         this->Error += cm_archive_error_string(this->Archive);
         return;
         }
       break;
     case CompressXZ:
-      if(archive_write_set_compression_xz(this->Archive) != ARCHIVE_OK)
+      if(archive_write_add_filter_xz(this->Archive) != ARCHIVE_OK)
         {
-        this->Error = "archive_write_set_compression_xz: ";
+        this->Error = "archive_write_add_filter_xz: ";
         this->Error += cm_archive_error_string(this->Archive);
         return;
         }
@@ -176,8 +176,8 @@ cmArchiveWrite::cmArchiveWrite(
 //----------------------------------------------------------------------------
 cmArchiveWrite::~cmArchiveWrite()
 {
-  archive_read_finish(this->Disk);
-  archive_write_finish(this->Archive);
+  archive_read_free(this->Disk);
+  archive_write_free(this->Archive);
 }
 
 //----------------------------------------------------------------------------
