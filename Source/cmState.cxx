@@ -15,11 +15,13 @@
 #include "cmCacheManager.h"
 #include "cmCommand.h"
 #include "cmAlgorithms.h"
+#include "cmDefinitions.h"
 
 #include <assert.h>
 
 struct cmState::SnapshotDataType
 {
+  cmState::PositionType ScopeParent;
   cmState::PositionType DirectoryParent;
   cmLinkedTree<cmState::PolicyStackEntry>::iterator Policies;
   cmLinkedTree<cmState::PolicyStackEntry>::iterator PolicyRoot;
@@ -28,6 +30,9 @@ struct cmState::SnapshotDataType
   cmLinkedTree<std::string>::iterator ExecutionListFile;
   cmLinkedTree<cmState::BuildsystemDirectoryStateType>::iterator
                                                           BuildSystemDirectory;
+  cmLinkedTree<cmDefinitions>::iterator Vars;
+  cmLinkedTree<cmDefinitions>::iterator Root;
+  cmLinkedTree<cmDefinitions>::iterator Parent;
   std::string EntryPointCommand;
   long EntryPointLine;
   std::vector<std::string>::size_type IncludeDirectoryPosition;
@@ -274,6 +279,10 @@ cmState::Snapshot cmState::Reset()
   pos->PolicyScope = this->PolicyStack.Root();
   assert(pos->Policies.IsValid());
   assert(pos->PolicyRoot.IsValid());
+  this->VarTree.Clear();
+  pos->Vars = this->VarTree.Extend(this->VarTree.Root());
+  pos->Parent = this->VarTree.Root();
+  pos->Root = this->VarTree.Root();
 
   this->DefineProperty
     ("RULE_LAUNCH_COMPILE", cmProperty::DIRECTORY,
@@ -736,7 +745,8 @@ cmState::Snapshot cmState::CreateBaseSnapshot()
 {
   PositionType pos = this->SnapshotData.Extend(this->SnapshotData.Root());
   pos->DirectoryParent = this->SnapshotData.Root();
-  pos->SnapshotType = BuildsystemDirectoryType;
+  pos->ScopeParent = this->SnapshotData.Root();
+  pos->SnapshotType = BaseType;
   pos->BuildSystemDirectory =
       this->BuildsystemDirectory.Extend(this->BuildsystemDirectory.Root());
   pos->ExecutionListFile =
@@ -750,6 +760,10 @@ cmState::Snapshot cmState::CreateBaseSnapshot()
   pos->PolicyScope = this->PolicyStack.Root();
   assert(pos->Policies.IsValid());
   assert(pos->PolicyRoot.IsValid());
+  pos->Vars = this->VarTree.Extend(this->VarTree.Root());
+  assert(pos->Vars.IsValid());
+  pos->Parent = this->VarTree.Root();
+  pos->Root = this->VarTree.Root();
   return cmState::Snapshot(this, pos);
 }
 
@@ -763,6 +777,7 @@ cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot,
   pos->EntryPointLine = entryPointLine;
   pos->EntryPointCommand = entryPointCommand;
   pos->DirectoryParent = originSnapshot.Position;
+  pos->ScopeParent = originSnapshot.Position;
   pos->SnapshotType = BuildsystemDirectoryType;
   pos->BuildSystemDirectory =
       this->BuildsystemDirectory.Extend(
@@ -776,6 +791,12 @@ cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot,
   pos->PolicyScope = originSnapshot.Position->Policies;
   assert(pos->Policies.IsValid());
   assert(pos->PolicyRoot.IsValid());
+
+  cmLinkedTree<cmDefinitions>::iterator origin =
+      originSnapshot.Position->Vars;
+  pos->Parent = origin;
+  pos->Root = origin;
+  pos->Vars = this->VarTree.Extend(origin);
   return cmState::Snapshot(this, pos);
 }
 
@@ -787,6 +808,7 @@ cmState::CreateFunctionCallSnapshot(cmState::Snapshot originSnapshot,
 {
   PositionType pos = this->SnapshotData.Extend(originSnapshot.Position,
                                                *originSnapshot.Position);
+  pos->ScopeParent = originSnapshot.Position;
   pos->EntryPointLine = entryPointLine;
   pos->EntryPointCommand = entryPointCommand;
   pos->SnapshotType = FunctionCallType;
@@ -794,6 +816,11 @@ cmState::CreateFunctionCallSnapshot(cmState::Snapshot originSnapshot,
         originSnapshot.Position->ExecutionListFile, fileName);
   pos->BuildSystemDirectory->DirectoryEnd = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
+  assert(originSnapshot.Position->Vars.IsValid());
+  cmLinkedTree<cmDefinitions>::iterator origin =
+      originSnapshot.Position->Vars;
+  pos->Parent = origin;
+  pos->Vars = this->VarTree.Extend(origin);
   return cmState::Snapshot(this, pos);
 }
 
@@ -811,6 +838,7 @@ cmState::CreateMacroCallSnapshot(cmState::Snapshot originSnapshot,
   pos->SnapshotType = MacroCallType;
   pos->ExecutionListFile = this->ExecutionListFiles.Extend(
         originSnapshot.Position->ExecutionListFile, fileName);
+  assert(originSnapshot.Position->Vars.IsValid());
   pos->BuildSystemDirectory->DirectoryEnd = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
   return cmState::Snapshot(this, pos);
@@ -829,8 +857,30 @@ cmState::CreateCallStackSnapshot(cmState::Snapshot originSnapshot,
   pos->SnapshotType = CallStackType;
   pos->ExecutionListFile = this->ExecutionListFiles.Extend(
         originSnapshot.Position->ExecutionListFile, fileName);
+  assert(originSnapshot.Position->Vars.IsValid());
   pos->BuildSystemDirectory->DirectoryEnd = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
+  return cmState::Snapshot(this, pos);
+}
+
+cmState::Snapshot
+cmState::CreateVariableScopeSnapshot(cmState::Snapshot originSnapshot,
+                                     std::string const& entryPointCommand,
+                                     long entryPointLine)
+{
+  PositionType pos = this->SnapshotData.Extend(originSnapshot.Position,
+                                               *originSnapshot.Position);
+  pos->ScopeParent = originSnapshot.Position;
+  pos->EntryPointLine = entryPointLine;
+  pos->EntryPointCommand = entryPointCommand;
+  pos->SnapshotType = VariableScopeType;
+  assert(originSnapshot.Position->Vars.IsValid());
+
+  cmLinkedTree<cmDefinitions>::iterator origin =
+      originSnapshot.Position->Vars;
+  pos->Parent = origin;
+  pos->Vars = this->VarTree.Extend(origin);
+  assert(pos->Vars.IsValid());
   return cmState::Snapshot(this, pos);
 }
 
@@ -1019,7 +1069,8 @@ cmState::Snapshot cmState::Snapshot::GetCallStackParent() const
     {
     ++parentPos;
     }
-  if (parentPos->SnapshotType == cmState::BuildsystemDirectoryType)
+  if (parentPos->SnapshotType == cmState::BuildsystemDirectoryType
+      || parentPos->SnapshotType == cmState::BaseType)
     {
     return snapshot;
     }
@@ -1121,6 +1172,72 @@ bool cmState::Snapshot::HasDefinedPolicyCMP0011()
   return !this->Position->Policies->IsEmpty();
 }
 
+const char* cmState::Snapshot::GetDefinition(std::string const& name) const
+{
+  assert(this->Position->Vars.IsValid());
+  return cmDefinitions::Get(name, this->Position->Vars,
+                    this->Position->Root);
+}
+
+bool cmState::Snapshot::IsInitialized(std::string const& name) const
+{
+  return cmDefinitions::HasKey(name, this->Position->Vars,
+                               this->Position->Root);
+}
+
+void cmState::Snapshot::SetDefinition(std::string const& name,
+                                      std::string const& value)
+{
+  this->Position->Vars->Set(name, value.c_str());
+}
+
+void cmState::Snapshot::RemoveDefinition(std::string const& name)
+{
+  this->Position->Vars->Set(name, 0);
+}
+
+std::vector<std::string> cmState::Snapshot::UnusedKeys() const
+{
+  return this->Position->Vars->UnusedKeys();
+}
+
+std::vector<std::string> cmState::Snapshot::ClosureKeys() const
+{
+  return cmDefinitions::ClosureKeys(this->Position->Vars,
+                                    this->Position->Root);
+}
+
+bool cmState::Snapshot::RaiseScope(std::string const& var, const char* varDef)
+{
+  if(this->Position->ScopeParent == this->Position->DirectoryParent)
+    {
+    Snapshot parentDir = this->GetBuildsystemDirectoryParent();
+    if(!parentDir.IsValid())
+      {
+      return false;
+      }
+    // Update the definition in the parent directory top scope.  This
+    // directory's scope was initialized by the closure of the parent
+    // scope, so we do not need to localize the definition first.
+    if (varDef)
+      {
+      parentDir.SetDefinition(var, varDef);
+      }
+    else
+      {
+      parentDir.RemoveDefinition(var);
+      }
+    return true;
+    }
+  // First localize the definition in the current scope.
+  cmDefinitions::Raise(var, this->Position->Vars,
+                       this->Position->Root);
+
+  // Now update the definition in the parent scope.
+  this->Position->Parent->Set(var, varDef);
+  return true;
+}
+
 static const std::string cmPropertySentinal = std::string();
 
 template<typename T, typename U, typename V>
@@ -1157,6 +1274,11 @@ void InitializeContentFromParent(T& parentContent,
 void cmState::Snapshot::InitializeFromParent()
 {
   PositionType parent = this->Position->DirectoryParent;
+  assert(this->Position->Vars.IsValid());
+  assert(parent->Vars.IsValid());
+
+  *this->Position->Vars =
+      cmDefinitions::MakeClosure(parent->Vars, parent->Root);
 
   InitializeContentFromParent(parent->BuildSystemDirectory->IncludeDirectories,
               this->Position->BuildSystemDirectory->IncludeDirectories,
