@@ -326,7 +326,6 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       fprintf(fout, "set(CMAKE_%s_FLAGS \"${CMAKE_%s_FLAGS}"
               " ${COMPILE_DEFINITIONS}\")\n", li->c_str(), li->c_str());
       }
-
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0056))
       {
       case cmPolicies::WARN:
@@ -362,44 +361,6 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       }
     fprintf(fout, "set(CMAKE_EXE_LINKER_FLAGS \"${CMAKE_EXE_LINKER_FLAGS}"
             " ${EXE_LINKER_FLAGS}\")\n");
-
-    switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0065))
-      {
-      case cmPolicies::WARN:
-        if(this->Makefile->PolicyOptionalWarningEnabled(
-             "CMAKE_POLICY_WARNING_CMP0065"))
-          {
-          std::ostringstream w;
-          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0065) << "\n"
-            "For compatibility with older versions of CMake, try_compile "
-            "is not honoring caller link flags (e.g. "
-            "CMAKE_SHARED_LIBRARY_LINK_<LANG>_FLAGS) in the test project."
-            ;
-          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
-          }
-      case cmPolicies::OLD:
-        // OLD behavior is to do nothing.
-        break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        this->Makefile->IssueMessage(
-          cmake::FATAL_ERROR,
-          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0065)
-          );
-      case cmPolicies::NEW:
-        // NEW behavior is to pass linker flags.
-        {
-        for(std::set<std::string>::iterator li = testLangs.begin();
-            li != testLangs.end(); ++li)
-          {
-          std::string var = "CMAKE_SHARED_LIBRARY_LINK_" + *li + "_FLAGS";
-          const char* val = this->Makefile->GetDefinition(var);
-          fprintf(fout, "set(%s %s)\n", var.c_str(),
-                  cmOutputConverter::EscapeForCMake(val?val:"").c_str());
-          }
-        } break;
-      }
-
     fprintf(fout, "include_directories(${INCLUDE_DIRECTORIES})\n");
     fprintf(fout, "set(CMAKE_SUPPRESS_REGENERATION 1)\n");
     fprintf(fout, "link_directories(${LINK_DIRECTORIES})\n");

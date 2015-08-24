@@ -17,7 +17,6 @@ run_cmake(NonSourceCopyFile)
 run_cmake(NonSourceCompileDefinitions)
 
 run_cmake(CMP0056)
-run_cmake(CMP0065)
 
 if(RunCMake_GENERATOR MATCHES "Make|Ninja")
   # Use a single build tree for a few tests without cleaning.
