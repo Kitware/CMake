@@ -89,11 +89,6 @@ public:
   ///! set/get the parent generator
   cmLocalGenerator* GetParent() const {return this->Parent;}
 
-  ///! set/get the children
-  void AddChild(cmLocalGenerator* g) { this->Children.push_back(g); }
-  std::vector<cmLocalGenerator*>& GetChildren() { return this->Children; }
-
-
   void AddArchitectureFlags(std::string& flags,
                             cmGeneratorTarget const* target,
                             const std::string&lang, const std::string& config);
@@ -349,7 +344,6 @@ protected:
   cmState::Snapshot StateSnapshot;
   cmGlobalGenerator *GlobalGenerator;
   cmLocalGenerator* Parent;
-  std::vector<cmLocalGenerator*> Children;
   std::map<std::string, std::string> UniqueObjectNamesMap;
   std::string::size_type ObjectPathMax;
   std::set<std::string> ObjectMaxPathViolations;

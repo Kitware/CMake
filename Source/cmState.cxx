@@ -76,6 +76,8 @@ struct cmState::BuildsystemDirectoryStateType
   std::vector<cmListFileBacktrace> CompileOptionsBacktraces;
 
   cmPropertyMap Properties;
+
+  std::vector<cmState::Snapshot> Children;
 };
 
 cmState::cmState(cmake* cm)
@@ -274,6 +276,7 @@ cmState::Snapshot cmState::Reset()
   it->CompileOptionsBacktraces.clear();
   it->DirectoryEnd = pos;
   it->Properties.clear();
+  it->Children.clear();
   }
 
   this->PolicyStack.Clear();
@@ -850,7 +853,9 @@ cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot,
   pos->Parent = origin;
   pos->Root = origin;
   pos->Vars = this->VarTree.Extend(origin);
-  return cmState::Snapshot(this, pos);
+  cmState::Snapshot snapshot = cmState::Snapshot(this, pos);
+  originSnapshot.Position->BuildSystemDirectory->Children.push_back(snapshot);
+  return snapshot;
 }
 
 cmState::Snapshot
@@ -986,6 +991,11 @@ cmState::Snapshot::Snapshot(cmState* state)
   : State(state)
   , Position()
 {
+}
+
+std::vector<cmState::Snapshot> cmState::Snapshot::GetChildren()
+{
+  return this->Position->BuildSystemDirectory->Children;
 }
 
 cmState::Snapshot::Snapshot(cmState* state, PositionType position)

@@ -65,6 +65,8 @@ public:
     void SetListFile(std::string const& listfile);
 
     std::string GetExecutionListFile() const;
+
+    std::vector<Snapshot> GetChildren();
     std::string GetEntryPointCommand() const;
     long GetEntryPointLine() const;
 
