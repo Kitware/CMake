@@ -42,7 +42,11 @@ macro(java_append_library_directories _var)
     # 1.6.0_18 + icedtea patches. However, it would be much better to base the
     # guess on the first part of the GNU config.guess platform triplet.
     if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+      if(CMAKE_LIBRARY_ARCHITECTURE STREQUAL "x86_64-linux-gnux32")
+        set(_java_libarch "x32" "amd64" "i386")
+      else()
         set(_java_libarch "amd64" "i386")
+      endif()
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^i.86$")
         set(_java_libarch "i386")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^alpha")
