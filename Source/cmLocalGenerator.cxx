@@ -196,6 +196,7 @@ void cmLocalGenerator::GenerateTestFiles()
   for(std::vector<cmTestGenerator*>::const_iterator gi = testers.begin();
       gi != testers.end(); ++gi)
     {
+    (*gi)->Compute(this);
     (*gi)->Generate(fout, config, configurationTypes);
     }
   if (!this->Children.empty())

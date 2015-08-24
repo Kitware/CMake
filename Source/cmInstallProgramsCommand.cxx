@@ -91,7 +91,7 @@ void cmInstallProgramsCommand::FinalPass()
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(this->Makefile);
   this->Makefile->AddInstallGenerator(
-    new cmInstallFilesGenerator(this->Makefile, this->Files,
+    new cmInstallFilesGenerator(this->Files,
                                 destination.c_str(), true,
                                 no_permissions, no_configurations,
                                 no_component.c_str(), message, no_rename));

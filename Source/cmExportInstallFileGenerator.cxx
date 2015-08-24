@@ -72,8 +72,8 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 
   // Set an _IMPORT_PREFIX variable for import location properties
   // to reference if they are relative to the install prefix.
-  std::string installPrefix =
-    this->IEGen->GetMakefile()->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
+  std::string installPrefix = this->IEGen->GetLocalGenerator()
+      ->GetMakefile()->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
   std::string const& expDest = this->IEGen->GetDestination();
   if(cmSystemTools::FileIsFullPath(expDest))
     {

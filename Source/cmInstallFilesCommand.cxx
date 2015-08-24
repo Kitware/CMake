@@ -128,7 +128,7 @@ void cmInstallFilesCommand::CreateInstallGenerator() const
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(this->Makefile);
   this->Makefile->AddInstallGenerator(
-    new cmInstallFilesGenerator(this->Makefile, this->Files,
+    new cmInstallFilesGenerator(this->Files,
                                 destination.c_str(), false,
                                 no_permissions, no_configurations,
                                 no_component.c_str(), message, no_rename));
