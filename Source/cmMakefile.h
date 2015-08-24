@@ -274,15 +274,12 @@ public:
   /**
    * Specify the name of the project for this build.
    */
-  void SetProjectName(const char*);
+  void SetProjectName(std::string const& name);
 
   /**
    * Get the name of the project for this build.
    */
-  const char* GetProjectName() const
-    {
-      return this->ProjectName.c_str();
-    }
+  std::string GetProjectName() const;
 
   /** Get the configurations to be generated.  */
   std::string GetConfigurations(std::vector<std::string>& configs,
@@ -812,8 +809,6 @@ protected:
   void LogUnused(const char* reason, const std::string& name) const;
 
   mutable std::set<cmListFileContext> CMP0054ReportedIds;
-
-  std::string ProjectName;    // project name
 
   // libraries, classes, and executables
   mutable cmTargets Targets;
