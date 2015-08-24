@@ -126,20 +126,14 @@ void cmCTestScriptHandler::Initialize()
   this->ScriptStartTime = 0;
 
   this->Makefile = 0;
-  if (this->LocalGenerator)
-    {
-    delete this->LocalGenerator;
-    }
+
+  delete this->LocalGenerator;
   this->LocalGenerator = 0;
-  if (this->GlobalGenerator)
-    {
-    delete this->GlobalGenerator;
-    }
+
+  delete this->GlobalGenerator;
   this->GlobalGenerator = 0;
-  if (this->CMake)
-    {
-    delete this->CMake;
-    }
+
+  delete this->CMake;
 }
 
 //----------------------------------------------------------------------
@@ -147,20 +141,9 @@ cmCTestScriptHandler::~cmCTestScriptHandler()
 {
   // local generator owns the makefile
   this->Makefile = 0;
-  if (this->LocalGenerator)
-    {
-    delete this->LocalGenerator;
-    }
-  this->LocalGenerator = 0;
-  if (this->GlobalGenerator)
-    {
-    delete this->GlobalGenerator;
-    }
-  this->GlobalGenerator = 0;
-  if (this->CMake)
-    {
-    delete this->CMake;
-    }
+  delete this->LocalGenerator;
+  delete this->GlobalGenerator;
+  delete this->CMake;
 }
 
 
