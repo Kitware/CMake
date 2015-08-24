@@ -1,0 +1,14 @@
+CMP0065
+-------
+
+Restrict the addition of CMAKE_SHARED_LIBRARY_LINK_<LANG>_FLAGS
+to executable targets only when the :prop_tgt:`ENABLE_EXPORTS`
+target property is turned on.
+
+The ``OLD`` behavior of this policy is to always use the additional link
+flags when linking executables regardless of the value of the
+:prop_tgt:`ENABLE_EXPORTS` target property.
+
+The ``NEW`` behavior of this policy is to only use the additional link
+flags when linking executables if the :prop_tgt:`ENABLE_EXPORTS` target
+property is set to ``True``.
