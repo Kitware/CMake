@@ -4440,7 +4440,7 @@ bool cmGeneratorTarget::GetConfigCommonSourceFiles(
       e << "Target \"" << this->GetName()
         << "\" has source files which vary by "
         "configuration. This is not supported by the \""
-        << this->LocalGenerator->GetGlobalGenerator()->GetName()
+        << this->GlobalGenerator->GetName()
         << "\" generator.\n"
           "Config \"" << firstConfig << "\":\n"
           "  " << firstConfigFiles << "\n"
@@ -4479,7 +4479,7 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
     for (std::vector<cmTarget*>::const_iterator it = objectTargets.begin();
          it != objectTargets.end(); ++it)
       {
-      objectLibraries.push_back(this->LocalGenerator->GetGlobalGenerator()
+      objectLibraries.push_back(this->GlobalGenerator
                                 ->GetGeneratorTarget(*it));
       }
     }
@@ -4492,7 +4492,7 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
       std::string objLib = (*i)->GetObjectLibrary();
       if (cmTarget* tgt = this->Makefile->FindTargetToUse(objLib))
         {
-        objectLibraries.push_back(this->LocalGenerator->GetGlobalGenerator()
+        objectLibraries.push_back(this->GlobalGenerator
                                   ->GetGeneratorTarget(tgt));
         }
       }
