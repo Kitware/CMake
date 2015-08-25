@@ -481,6 +481,16 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       fprintf(fout, "set(CMAKE_LINK_SEARCH_END_STATIC \"%s\")\n", lssDef);
       }
 
+    /* Set the appropriate policy information for ENABLE_EXPORTS */
+    fprintf(fout, "cmake_policy(SET CMP0065 %s)\n",
+       this->Makefile->GetPolicyStatus(cmPolicies::CMP0065) ==
+         cmPolicies::NEW ? "NEW" : "OLD");
+    if(const char *ee = this->Makefile->GetDefinition(
+        "CMAKE_ENABLE_EXPORTS"))
+      {
+      fprintf(fout, "set(CMAKE_ENABLE_EXPORTS %s)\n", ee);
+      }
+
     /* Put the executable at a known location (for COPY_FILE).  */
     fprintf(fout, "set(CMAKE_RUNTIME_OUTPUT_DIRECTORY \"%s\")\n",
             this->BinaryDirectory.c_str());

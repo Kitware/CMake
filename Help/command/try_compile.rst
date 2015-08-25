@@ -100,12 +100,15 @@ If set, the following variables are passed in to the generated
 try_compile CMakeLists.txt to initialize compile target properties with
 default values:
 
+* :variable:`CMAKE_ENABLE_EXPORTS`
 * :variable:`CMAKE_LINK_SEARCH_START_STATIC`
 * :variable:`CMAKE_LINK_SEARCH_END_STATIC`
 * :variable:`CMAKE_POSITION_INDEPENDENT_CODE`
 
 If :policy:`CMP0056` is set to ``NEW``, then
 :variable:`CMAKE_EXE_LINKER_FLAGS` is passed in as well.
+
+The current setting of :policy:`CMP0065` is set in the generated project.
 
 Set the :variable:`CMAKE_TRY_COMPILE_CONFIGURATION` variable to choose
 a build configuration.
