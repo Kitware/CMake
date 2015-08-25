@@ -276,7 +276,7 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 {
   // write language flags for target
   std::set<std::string> languages;
-  this->GeneratorTarget->GetLanguages(languages,
+  this->Target->GetLanguages(languages,
                       this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
   // put the compiler in the rules.make file so that if it changes
   // things rebuild

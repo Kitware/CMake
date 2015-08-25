@@ -1550,6 +1550,7 @@ void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes,
         ti != targets.end(); ++ti)
       {
       cmTarget* t = &ti->second;
+      t->Compute();
       cmGeneratorTarget* gt = new cmGeneratorTarget(t, lg);
       this->GeneratorTargets[t] = gt;
       generatorTargets[t] = gt;
