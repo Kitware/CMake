@@ -146,6 +146,15 @@ public:
                                cmListFileBacktrace const& lfbt);
     void ClearCompileOptions();
 
+    void SetProperty(const std::string& prop, const char *value,
+                     cmListFileBacktrace lfbt);
+    void AppendProperty(const std::string& prop, const char *value,
+                        bool asString, cmListFileBacktrace lfbt);
+    const char *GetProperty(const std::string& prop) const;
+    const char *GetProperty(const std::string& prop, bool chain) const;
+    bool GetPropertyAsBool(const std::string& prop) const;
+    std::vector<std::string> GetPropertyKeys() const;
+
   private:
     void ComputeRelativePathTopSource();
     void ComputeRelativePathTopBinary();

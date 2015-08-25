@@ -4075,148 +4075,28 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
 
 void cmMakefile::SetProperty(const std::string& prop, const char* value)
 {
-  if (prop == "INCLUDE_DIRECTORIES")
-    {
-    if (!value)
-      {
-      this->StateSnapshot.GetDirectory().ClearIncludeDirectories();
-      return;
-      }
-    cmListFileBacktrace lfbt = this->GetBacktrace();
-    this->StateSnapshot.GetDirectory().SetIncludeDirectories(value, lfbt);
-    return;
-    }
-  if (prop == "COMPILE_OPTIONS")
-    {
-    if (!value)
-      {
-      this->StateSnapshot.GetDirectory().ClearCompileOptions();
-      return;
-      }
-    cmListFileBacktrace lfbt = this->GetBacktrace();
-    this->StateSnapshot.GetDirectory().SetCompileOptions(value, lfbt);
-    return;
-    }
-  if (prop == "COMPILE_DEFINITIONS")
-    {
-    if (!value)
-      {
-      this->StateSnapshot.GetDirectory().ClearCompileDefinitions();
-      return;
-      }
-    cmListFileBacktrace lfbt = this->GetBacktrace();
-    this->StateSnapshot.GetDirectory().SetCompileDefinitions(value, lfbt);
-    return;
-    }
-
-  this->Properties.SetProperty(prop, value);
+  cmListFileBacktrace lfbt = this->GetBacktrace();
+  this->StateSnapshot.GetDirectory().SetProperty(prop, value, lfbt);
 }
 
 void cmMakefile::AppendProperty(const std::string& prop,
                                 const char* value,
                                 bool asString)
 {
-  if (prop == "INCLUDE_DIRECTORIES")
-    {
-    cmListFileBacktrace lfbt = this->GetBacktrace();
-    this->StateSnapshot.GetDirectory().AppendIncludeDirectoriesEntry(value,
-                                                                     lfbt);
-    return;
-    }
-  if (prop == "COMPILE_OPTIONS")
-    {
-    cmListFileBacktrace lfbt = this->GetBacktrace();
-    this->StateSnapshot.GetDirectory().AppendCompileOptionsEntry(value, lfbt);
-    return;
-    }
-  if (prop == "COMPILE_DEFINITIONS")
-    {
-    cmListFileBacktrace lfbt = this->GetBacktrace();
-    this->StateSnapshot.GetDirectory().AppendCompileDefinitionsEntry(value,
-                                                                     lfbt);
-    return;
-    }
-
-  this->Properties.AppendProperty(prop, value, asString);
+  cmListFileBacktrace lfbt = this->GetBacktrace();
+  this->StateSnapshot.GetDirectory().AppendProperty(prop, value,
+                                                    asString, lfbt);
 }
 
 const char *cmMakefile::GetProperty(const std::string& prop) const
 {
-  const bool chain = this->GetState()->
-                  IsPropertyChained(prop, cmProperty::DIRECTORY);
-  return this->GetProperty(prop, chain);
+  return this->StateSnapshot.GetDirectory().GetProperty(prop);
 }
 
 const char *cmMakefile::GetProperty(const std::string& prop,
                                     bool chain) const
 {
-  // watch for specific properties
-  static std::string output;
-  output = "";
-  if (prop == "PARENT_DIRECTORY")
-    {
-    cmState::Snapshot parent =
-        this->StateSnapshot.GetBuildsystemDirectoryParent();
-    if(parent.IsValid())
-      {
-      return parent.GetDirectory().GetCurrentSource();
-      }
-    return "";
-    }
-  else if (prop == "LISTFILE_STACK")
-    {
-    std::vector<std::string> listFiles;
-    cmState::Snapshot snp = this->StateSnapshot;
-    while (snp.IsValid())
-      {
-      listFiles.push_back(snp.GetExecutionListFile());
-      snp = snp.GetCallStackParent();
-      }
-    std::reverse(listFiles.begin(), listFiles.end());
-    output = cmJoin(listFiles, ";");
-    return output.c_str();
-    }
-  else if ( prop == "CACHE_VARIABLES" )
-    {
-    output = cmJoin(this->GetState()->GetCacheEntryKeys(), ";");
-    return output.c_str();
-    }
-  else if (prop == "VARIABLES")
-    {
-    output = cmJoin(this->GetDefinitions(), ";");
-    return output.c_str();
-    }
-  else if (prop == "INCLUDE_DIRECTORIES")
-    {
-    output = cmJoin(this->StateSnapshot.GetDirectory()
-                    .GetIncludeDirectoriesEntries(), ";");
-    return output.c_str();
-    }
-  else if (prop == "COMPILE_OPTIONS")
-    {
-    output = cmJoin(this->StateSnapshot.GetDirectory()
-                    .GetCompileOptionsEntries(), ";");
-    return output.c_str();
-    }
-  else if (prop == "COMPILE_DEFINITIONS")
-    {
-    output = cmJoin(this->StateSnapshot.GetDirectory()
-                    .GetCompileDefinitionsEntries(), ";");
-    return output.c_str();
-    }
-
-  const char *retVal = this->Properties.GetPropertyValue(prop);
-  if (!retVal && chain)
-    {
-    if(this->LocalGenerator->GetParent())
-      {
-      return this->LocalGenerator->GetParent()->GetMakefile()->
-        GetProperty(prop, chain);
-      }
-    return this->GetState()->GetGlobalProperty(prop);
-    }
-
-  return retVal;
+  return this->StateSnapshot.GetDirectory().GetProperty(prop, chain);
 }
 
 bool cmMakefile::GetPropertyAsBool(const std::string& prop) const
@@ -4226,14 +4106,7 @@ bool cmMakefile::GetPropertyAsBool(const std::string& prop) const
 
 std::vector<std::string> cmMakefile::GetPropertyKeys() const
 {
-  std::vector<std::string> keys;
-  keys.reserve(this->Properties.size());
-  for(cmPropertyMap::const_iterator it = this->Properties.begin();
-      it != this->Properties.end(); ++it)
-    {
-    keys.push_back(it->first);
-    }
-  return keys;
+  return this->StateSnapshot.GetDirectory().GetPropertyKeys();
 }
 
 cmTarget* cmMakefile::FindTarget(const std::string& name,
