@@ -4440,7 +4440,7 @@ bool cmGeneratorTarget::GetConfigCommonSourceFiles(
       e << "Target \"" << this->GetName()
         << "\" has source files which vary by "
         "configuration. This is not supported by the \""
-        << this->LocalGenerator->GetGlobalGenerator()->GetName()
+        << this->GlobalGenerator->GetName()
         << "\" generator.\n"
           "Config \"" << firstConfig << "\":\n"
           "  " << firstConfigFiles << "\n"
