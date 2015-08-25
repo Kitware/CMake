@@ -403,7 +403,9 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
         )
     {
     std::vector<cmSourceFile*> srcFiles;
-    target->GetConfigCommonSourceFiles(srcFiles);
+    cmGeneratorTarget* gtgt =
+        lg->GetGlobalGenerator()->GetGeneratorTarget(target);
+    gtgt->GetConfigCommonSourceFiles(srcFiles);
     for(std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
         fileIt != srcFiles.end();
         ++fileIt)
@@ -473,8 +475,6 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
                                 workingDirectory.c_str(),
                                 /*byproducts=*/rcc_output, depends,
                                 commandLines, false, autogenComment.c_str());
-
-    autogenTarget->Compute();
 
     cmGeneratorTarget* gt = new cmGeneratorTarget(autogenTarget, lg);
     makefile->AddGeneratorTarget(autogenTarget, gt);
@@ -663,7 +663,10 @@ void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target)
   const char* sepHeaders = "";
 
   std::vector<cmSourceFile*> srcFiles;
-  target->GetConfigCommonSourceFiles(srcFiles);
+  cmGeneratorTarget *gtgt = target->GetMakefile()
+                                  ->GetGlobalGenerator()
+                                  ->GetGeneratorTarget(target);
+  gtgt->GetConfigCommonSourceFiles(srcFiles);
 
   const char *skipMocSep = "";
   const char *skipUicSep = "";
@@ -1048,7 +1051,10 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
   cmMakefile *makefile = target->GetMakefile();
 
   std::vector<cmSourceFile*> srcFiles;
-  target->GetConfigCommonSourceFiles(srcFiles);
+  cmGeneratorTarget *gtgt = target->GetMakefile()
+                                  ->GetGlobalGenerator()
+                                  ->GetGeneratorTarget(target);
+  gtgt->GetConfigCommonSourceFiles(srcFiles);
 
   std::string qrcInputs;
   const char* qrcInputsSep = "";
