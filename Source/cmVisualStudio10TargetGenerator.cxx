@@ -1934,7 +1934,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   clOptions.Parse(flags.c_str());
   clOptions.Parse(defineFlags.c_str());
   std::vector<std::string> targetDefines;
-  this->Target->GetCompileDefinitions(targetDefines,
+  this->GeneratorTarget->GetCompileDefinitions(targetDefines,
                                       configName.c_str(), "CXX");
   clOptions.AddDefines(targetDefines);
   if(this->MSTools)
