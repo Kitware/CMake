@@ -43,19 +43,12 @@
 #include <ctype.h> // for isspace
 #include <assert.h>
 
-class cmMakefile::Internals
-{
-public:
-  bool IsSourceFileTryCompile;
-};
-
 // default is not to be building executables
 cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
-  : Internal(new Internals),
-    LocalGenerator(localGenerator),
+  : LocalGenerator(localGenerator),
     StateSnapshot(localGenerator->GetStateSnapshot())
 {
-  this->Internal->IsSourceFileTryCompile = false;
+  this->IsSourceFileTryCompile = false;
 
   // Initialize these first since AddDefaultDefinitions calls AddDefinition
   this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
@@ -3616,7 +3609,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
                            const std::vector<std::string> *cmakeArgs,
                            std::string& output)
 {
-  this->Internal->IsSourceFileTryCompile = fast;
+  this->IsSourceFileTryCompile = fast;
   // does the binary directory exist ? If not create it...
   if (!cmSystemTools::FileIsDirectory(bindir))
     {
@@ -3641,7 +3634,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
       "Internal CMake error, TryCompile bad GlobalGenerator");
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd);
-    this->Internal->IsSourceFileTryCompile = false;
+    this->IsSourceFileTryCompile = false;
     return 1;
     }
   cm.SetGlobalGenerator(gg);
@@ -3712,7 +3705,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
       "Internal CMake error, TryCompile configure of cmake failed");
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd);
-    this->Internal->IsSourceFileTryCompile = false;
+    this->IsSourceFileTryCompile = false;
     return 1;
     }
 
@@ -3722,7 +3715,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
       "Internal CMake error, TryCompile generation of cmake failed");
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd);
-    this->Internal->IsSourceFileTryCompile = false;
+    this->IsSourceFileTryCompile = false;
     return 1;
     }
 
@@ -3735,13 +3728,13 @@ int cmMakefile::TryCompile(const std::string& srcdir,
                                                    this);
 
   cmSystemTools::ChangeDirectory(cwd);
-  this->Internal->IsSourceFileTryCompile = false;
+  this->IsSourceFileTryCompile = false;
   return ret;
 }
 
 bool cmMakefile::GetIsSourceFileTryCompile() const
 {
-  return this->Internal->IsSourceFileTryCompile;
+  return this->IsSourceFileTryCompile;
 }
 
 cmake *cmMakefile::GetCMakeInstance() const
