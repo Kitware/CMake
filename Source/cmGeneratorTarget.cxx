@@ -1403,7 +1403,7 @@ cmGeneratorTarget::CompileInfo const* cmGeneratorTarget::GetCompileInfo(
     msg += this->GetName();
     msg += " which has type ";
     msg += cmTarget::GetTargetTypeName(this->Target->GetType());
-    this->Makefile->IssueMessage(cmake::INTERNAL_ERROR, msg);
+    this->LocalGenerator->IssueMessage(cmake::INTERNAL_ERROR, msg);
     return 0;
     }
 
@@ -2093,7 +2093,7 @@ cmGeneratorTarget::NormalGetRealName(const std::string& config) const
     {
     std::string msg =  "NormalGetRealName called on imported target: ";
     msg += this->GetName();
-    this->Makefile->IssueMessage(cmake::INTERNAL_ERROR, msg);
+    this->LocalGenerator->IssueMessage(cmake::INTERNAL_ERROR, msg);
     }
 
   if(this->GetType() == cmTarget::EXECUTABLE)
