@@ -614,8 +614,6 @@ private:
 
   void MaybeInvalidatePropertyCache(const std::string& prop);
 
-  void ProcessSourceExpression(std::string const& expr);
-
   // Internal representation details.
   friend class cmTargetInternals;
   friend class cmGeneratorTarget;
