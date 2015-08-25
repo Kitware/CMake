@@ -42,7 +42,7 @@ valid filepaths.
     (recommended).  Not valid in the full signature.
 
   ``FOUND_VAR <result-var>``
-    Obselete.  Specifies either ``<PackageName>_FOUND`` or
+    Obsolete.  Specifies either ``<PackageName>_FOUND`` or
     ``<PACKAGENAME>_FOUND`` as the result variable.  This exists only
     for compatibility with older versions of CMake and is now ignored.
     Result variables of both names are always set for compatibility.
