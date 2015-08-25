@@ -344,7 +344,7 @@ void cmGhsMultiTargetGenerator::WriteIncludes(const std::string &config,
                                               const std::string &language)
 {
   std::vector<std::string> includes =
-    this->Target->GetIncludeDirectories(config, language);
+    this->GeneratorTarget->GetIncludeDirectories(config, language);
   for (std::vector<std::string>::const_iterator includes_i = includes.begin();
        includes_i != includes.end(); ++includes_i)
     {
