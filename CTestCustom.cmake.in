@@ -32,6 +32,7 @@ set(CTEST_CUSTOM_WARNING_EXCEPTION
   "remark: .*LOOP WAS VECTORIZED"
   "warning .980: wrong number of actual arguments to intrinsic function .std::basic_"
   "LINK : warning LNK4089: all references to.*ADVAPI32.dll.*discarded by /OPT:REF"
+  "LINK : warning LNK4089: all references to.*CRYPT32.dll.*discarded by /OPT:REF"
   "LINK : warning LNK4089: all references to.*PSAPI.DLL.*discarded by /OPT:REF"
   "LINK : warning LNK4089: all references to.*RPCRT4.dll.*discarded by /OPT:REF"
   "LINK : warning LNK4089: all references to.*SHELL32.dll.*discarded by /OPT:REF"
