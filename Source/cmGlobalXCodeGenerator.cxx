@@ -1124,7 +1124,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
 
     // organize the sources
     std::vector<cmSourceFile*> classes;
-    if (!cmtarget.GetConfigCommonSourceFiles(classes))
+    if (!gtgt->GetConfigCommonSourceFiles(classes))
       {
       return false;
       }
@@ -1383,8 +1383,8 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmTarget& cmtarget)
   if(llang.empty()) { return; }
 
   // If the language is compiled as a source trust Xcode to link with it.
-  cmTarget::LinkImplementation const* impl =
-    cmtarget.GetLinkImplementation("NOCONFIG");
+  cmLinkImplementation const* impl =
+    gtgt->GetLinkImplementation("NOCONFIG");
   for(std::vector<std::string>::const_iterator li = impl->Languages.begin();
       li != impl->Languages.end(); ++li)
     {
@@ -1505,7 +1505,8 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
     }
 
   std::vector<cmSourceFile*> classes;
-  if (!cmtarget.GetConfigCommonSourceFiles(classes))
+  cmGeneratorTarget* gtgt = this->GetGeneratorTarget(&cmtarget);
+  if (!gtgt->GetConfigCommonSourceFiles(classes))
     {
     return;
     }
@@ -1805,7 +1806,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
 
   // Compute the compilation flags for each language.
   std::set<std::string> languages;
-  target.GetLanguages(languages, configName);
+  cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&target);
+  gtgt->GetLanguages(languages, configName);
   std::map<std::string, std::string> cflags;
   for (std::set<std::string>::iterator li = languages.begin();
        li != languages.end(); ++li)
@@ -1827,7 +1829,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       AddCompileOptions(flags, &target, lang, configName);
     }
 
-  cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&target);
   std::string llang = gtgt->GetLinkerLanguage(configName);
   if(binary && llang.empty())
     {
@@ -1855,7 +1856,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     this->AppendDefines(ppDefs, exportMacro);
     }
   std::vector<std::string> targetDefines;
-  target.GetCompileDefinitions(targetDefines, configName, "C");
+  gtgt->GetCompileDefinitions(targetDefines, configName, "C");
   this->AppendDefines(ppDefs, targetDefines);
   buildSettings->AddAttribute
     ("GCC_PREPROCESSOR_DEFINITIONS", ppDefs.CreateList());
@@ -2557,7 +2558,8 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
   if(cmtarget.GetType() == cmTarget::UTILITY)
     {
     std::vector<cmSourceFile*> sources;
-    if (!cmtarget.GetConfigCommonSourceFiles(sources))
+    cmGeneratorTarget* gtgt = this->GetGeneratorTarget(&cmtarget);
+    if (!gtgt->GetConfigCommonSourceFiles(sources))
       {
       return 0;
       }
@@ -3085,7 +3087,8 @@ bool cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
         }
 
       std::vector<cmSourceFile*> classes;
-      if (!cmtarget.GetConfigCommonSourceFiles(classes))
+      cmGeneratorTarget* gtgt = this->GetGeneratorTarget(&cmtarget);
+      if (!gtgt->GetConfigCommonSourceFiles(classes))
         {
         return false;
         }
