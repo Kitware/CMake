@@ -450,7 +450,7 @@ void cmLocalGenerator::GenerateInstallRules()
 }
 
 //----------------------------------------------------------------------------
-void cmLocalGenerator::GenerateTargetManifest()
+void cmLocalGenerator::ComputeTargetManifest()
 {
   // Collect the set of configuration types.
   std::vector<std::string> configNames;
@@ -478,7 +478,7 @@ void cmLocalGenerator::GenerateTargetManifest()
         ci != configNames.end(); ++ci)
       {
       const char* config = ci->c_str();
-      target.GenerateTargetManifest(config);
+      target.ComputeTargetManifest(config);
       }
     }
 }

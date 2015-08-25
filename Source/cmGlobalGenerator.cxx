@@ -1327,7 +1327,7 @@ void cmGlobalGenerator::Generate()
   // Compute the manifest of main targets generated.
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    this->LocalGenerators[i]->GenerateTargetManifest();
+    this->LocalGenerators[i]->ComputeTargetManifest();
     }
 
   // Compute the inter-target dependencies.
