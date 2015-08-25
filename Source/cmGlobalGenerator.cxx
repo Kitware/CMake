@@ -1669,8 +1669,7 @@ void cmGlobalGenerator::CheckLocalGenerators()
           text += "\n    linked by target \"";
           text += l->second.GetName();
           text += "\" in directory ";
-          text+=this->LocalGenerators[i]->GetMakefile()
-                    ->GetCurrentSourceDirectory();
+          text+=this->Makefiles[i]->GetCurrentSourceDirectory();
           notFoundMap[varName] = text;
           }
         }
