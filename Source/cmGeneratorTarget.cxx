@@ -2554,7 +2554,7 @@ void cmGeneratorTarget::GetCompileDefinitions(std::vector<std::string> &list,
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::GenerateTargetManifest(
+void cmGeneratorTarget::ComputeTargetManifest(
                                               const std::string& config) const
 {
   if (this->Target->IsImported())
