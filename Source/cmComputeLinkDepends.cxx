@@ -12,6 +12,7 @@
 #include "cmComputeLinkDepends.h"
 
 #include "cmComputeComponentGraph.h"
+#include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmTarget.h"
@@ -177,7 +178,8 @@ cmComputeLinkDepends
   // Store context information.
   this->Target = target;
   this->Makefile = this->Target->Target->GetMakefile();
-  this->GlobalGenerator = this->Makefile->GetGlobalGenerator();
+  this->GlobalGenerator =
+      this->Target->GetLocalGenerator()->GetGlobalGenerator();
   this->CMakeInstance = this->GlobalGenerator->GetCMakeInstance();
 
   // The configuration being linked.

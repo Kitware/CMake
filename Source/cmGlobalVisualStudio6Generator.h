@@ -85,8 +85,6 @@ public:
 
   virtual void FindMakeProgram(cmMakefile*);
 
-  virtual bool IsForVS6() const { return true; }
-
 protected:
   virtual void Generate();
   virtual const char* GetIDEVersion() { return "6.0"; }

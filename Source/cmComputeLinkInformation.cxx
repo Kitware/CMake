@@ -769,7 +769,7 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
   std::string lib;
   if(tgt)
     {
-    gtgt = tgt->GetMakefile()->GetGlobalGenerator()->GetGeneratorTarget(tgt);
+    gtgt = this->GlobalGenerator->GetGeneratorTarget(tgt);
 
     lib = gtgt->GetFullPath(this->Config, this->UseImportLibrary);
     this->AddLibraryRuntimeInfo(lib, tgt);

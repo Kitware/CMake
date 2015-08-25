@@ -242,7 +242,7 @@ public:
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   /** Is this the Visual Studio 6 generator?  */
-  virtual bool IsForVS6() const { return false; }
+  bool IsForVS6() const { return this->GetName() == "Visual Studio 6"; }
 #endif
 
   ///! Find a target by name by searching the local generators.
