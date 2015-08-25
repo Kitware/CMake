@@ -13,7 +13,6 @@
 #define cmComputeLinkDepends_h
 
 #include "cmStandardIncludes.h"
-#include "cmGeneratorTarget.h"
 #include "cmTarget.h"
 
 #include "cmGraphAdjacencyList.h"
@@ -23,6 +22,8 @@
 class cmComputeComponentGraph;
 class cmGlobalGenerator;
 class cmMakefile;
+class cmGeneratorTarget;
+class cmTarget;
 class cmake;
 
 /** \class cmComputeLinkDepends
@@ -101,7 +102,7 @@ private:
   std::queue<SharedDepEntry> SharedDepQueue;
   std::set<int> SharedDepFollowed;
   void FollowSharedDeps(int depender_index,
-                        cmGeneratorTarget::LinkInterface const* iface,
+                        cmTarget::LinkInterface const* iface,
                         bool follow_interface = false);
   void QueueSharedDependencies(int depender_index,
                                std::vector<cmLinkItem> const& deps);
