@@ -156,6 +156,9 @@ JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
   /usr/local/jre-1.7.0/lib/{libarch}
   /usr/local/jdk-1.6.0/jre/lib/{libarch}
   /usr/local/jre-1.6.0/lib/{libarch}
+  # SuSE specific paths for default JVM
+  /usr/lib64/jvm/java/jre/lib/{libarch}
+  /usr/lib64/jvm/jre/lib/{libarch}
   )
 
 set(JAVA_JVM_LIBRARY_DIRECTORIES)
@@ -164,6 +167,9 @@ foreach(dir ${JAVA_AWT_LIBRARY_DIRECTORIES})
     "${dir}"
     "${dir}/client"
     "${dir}/server"
+    # IBM SDK, Java Technology Edition, specific paths
+    "${dir}/j9vm"
+    "${dir}/default"
     )
 endforeach()
 
@@ -193,6 +199,8 @@ list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES
   # OpenBSD specific path for default JVM
   /usr/local/jdk-1.7.0/include
   /usr/local/jdk-1.6.0/include
+  # SuSE specific paths for default JVM
+  /usr/lib64/jvm/java/include
   )
 
 foreach(JAVA_PROG "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")
