@@ -498,7 +498,7 @@ int cmCallVisualStudioMacro::CallMacro(
           }
         }
 
-      if(0 == instances.size())
+      if(instances.empty())
         {
         // no instances to call
 

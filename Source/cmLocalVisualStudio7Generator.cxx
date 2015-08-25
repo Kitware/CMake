@@ -2283,7 +2283,7 @@ public:
   virtual void StartElement(const std::string& name, const char** atts)
     {
       // once the GUID is found do nothing
-      if(this->GUID.size())
+      if(!this->GUID.empty())
         {
         return;
         }
@@ -2331,7 +2331,7 @@ void cmLocalVisualStudio7Generator::ReadAndStoreExternalGUID(
   cmVS7XMLParser parser;
   parser.ParseFile(path);
   // if we can not find a GUID then we will generate one later
-  if(parser.GUID.size() == 0)
+  if(parser.GUID.empty())
     {
     return;
     }

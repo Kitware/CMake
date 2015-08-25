@@ -49,7 +49,7 @@ int cmCPackNSISGenerator::PackageFiles()
   // TODO: Fix nsis to force out file name
 
   std::string nsisInFileName = this->FindTemplate("NSIS.template.in");
-  if ( nsisInFileName.size() == 0 )
+  if (nsisInFileName.empty())
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
       "CPack error: Could not find NSIS installer template file."
@@ -58,7 +58,7 @@ int cmCPackNSISGenerator::PackageFiles()
     }
   std::string nsisInInstallOptions
     = this->FindTemplate("NSIS.InstallOptions.ini.in");
-  if ( nsisInInstallOptions.size() == 0 )
+  if (nsisInInstallOptions.empty())
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
       "CPack error: Could not find NSIS installer options file."
@@ -536,7 +536,7 @@ int cmCPackNSISGenerator::InitializeInternal()
         << ".lnk\"" << std::endl;
       // see if CPACK_CREATE_DESKTOP_LINK_ExeName is on
       // if so add a desktop link
-      if(cpackPackageDesktopLinksVector.size() &&
+      if(!cpackPackageDesktopLinksVector.empty() &&
          std::find(cpackPackageDesktopLinksVector.begin(),
                    cpackPackageDesktopLinksVector.end(),
                    execName)

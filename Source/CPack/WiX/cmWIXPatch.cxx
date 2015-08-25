@@ -79,7 +79,7 @@ bool cmWIXPatch::CheckForUnappliedFragments()
     fragmentList += "'";
     }
 
-  if(fragmentList.size())
+  if(!fragmentList.empty())
     {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
         "Some XML patch fragments did not have matching IDs: " <<

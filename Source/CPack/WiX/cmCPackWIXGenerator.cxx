@@ -217,7 +217,7 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
     {
     std::string defaultRef = "WixUI_InstallDir";
 
-    if(this->Components.size())
+    if(!this->Components.empty())
       {
       defaultRef = "WixUI_FeatureTree";
       }
@@ -1005,7 +1005,7 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
           shortcut.workingDirectoryId = directoryId;
           shortcuts.insert(cmWIXShortcuts::START_MENU, id, shortcut);
 
-          if(desktopExecutables.size() &&
+          if(!desktopExecutables.empty() &&
              std::find(desktopExecutables.begin(),
                        desktopExecutables.end(),
                        executableName)

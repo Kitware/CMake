@@ -212,7 +212,7 @@ cmGlobalVisualStudio71Generator
     {
     const char* name = di->c_str();
     std::string guid = this->GetGUID(name);
-    if(guid.size() == 0)
+    if(guid.empty())
       {
       std::string m = "Target: ";
       m += target.GetName();
@@ -250,7 +250,7 @@ void cmGlobalVisualStudio71Generator
     std::set<std::string>::const_iterator it;
     for(it = depends.begin(); it != depends.end(); ++it)
       {
-      if(it->size() > 0)
+      if(!it->empty())
         {
         fout << "\t\t{"
              << this->GetGUID(it->c_str())

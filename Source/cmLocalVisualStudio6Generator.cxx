@@ -984,11 +984,11 @@ void cmLocalVisualStudio6Generator
   std::string libMultiLineDebugOptions;
   std::string libMultiLineOptimizedOptions;
 
-  if(libPath.size())
+  if(!libPath.empty())
     {
     std::string lpath =
       this->ConvertToOutputFormat(libPath.c_str(), SHELL);
-    if(lpath.size() == 0)
+    if(lpath.empty())
       {
       lpath = ".";
       }
@@ -1017,11 +1017,11 @@ void cmLocalVisualStudio6Generator
       libMultiLineOptionsForDebug += " \n";
       }
     }
-  if(exePath.size())
+  if(!exePath.empty())
     {
     std::string lpath =
       this->ConvertToOutputFormat(exePath.c_str(), SHELL);
-    if(lpath.size() == 0)
+    if(lpath.empty())
       {
       lpath = ".";
       }
@@ -1062,7 +1062,7 @@ void cmLocalVisualStudio6Generator
       }
     std::string lpath =
       this->ConvertToOutputFormat(path.c_str(), SHELL);
-    if(lpath.size() == 0)
+    if(lpath.empty())
       {
       lpath = ".";
       }
@@ -1452,7 +1452,7 @@ void cmLocalVisualStudio6Generator
 
 #ifdef CM_USE_OLD_VS6
   // Compute link information for the target.
-  if(extraLinkOptions.size())
+  if(!extraLinkOptions.empty())
     {
     libOptions += " ";
     libOptions += extraLinkOptions;
@@ -1543,7 +1543,7 @@ void cmLocalVisualStudio6Generator
 
   std::string line;
   std::string libnameExports;
-  if(exportSymbol.size())
+  if(!exportSymbol.empty())
     {
     libnameExports = "/D \"";
     libnameExports += exportSymbol;
