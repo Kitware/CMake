@@ -1041,7 +1041,7 @@ std::string cmSystemTools::ComputeCertificateThumbprint(
       certData = new BYTE[fileSize];
       if (certData != NULL)
         {
-        DWORD dwRead = NULL;
+        DWORD dwRead = 0;
         if (ReadFile(certFile, certData, fileSize, &dwRead, NULL))
           {
           cryptBlob.cbData = fileSize;
