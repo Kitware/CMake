@@ -330,8 +330,7 @@ void cmGhsMultiTargetGenerator::WriteCompilerDefinitions(
   const std::string &config, const std::string &language)
 {
   std::vector<std::string> compileDefinitions;
-  this->GeneratorTarget->GetCompileDefinitions(compileDefinitions,
-                                               config, language);
+  this->Target->GetCompileDefinitions(compileDefinitions, config, language);
   for (std::vector<std::string>::const_iterator cdI =
          compileDefinitions.begin();
        cdI != compileDefinitions.end(); ++cdI)
@@ -344,7 +343,7 @@ void cmGhsMultiTargetGenerator::WriteIncludes(const std::string &config,
                                               const std::string &language)
 {
   std::vector<std::string> includes =
-    this->GeneratorTarget->GetIncludeDirectories(config, language);
+    this->Target->GetIncludeDirectories(config, language);
   for (std::vector<std::string>::const_iterator includes_i = includes.begin();
        includes_i != includes.end(); ++includes_i)
     {
@@ -559,7 +558,7 @@ bool cmGhsMultiTargetGenerator::IsNotKernel(std::string const &config,
 {
   bool output;
   std::vector<std::string> options;
-  this->GeneratorTarget->GetCompileOptions(options, config, language);
+  this->Target->GetCompileOptions(options, config, language);
   output =
     options.end() == std::find(options.begin(), options.end(), "-kernel");
   return output;
@@ -588,7 +587,7 @@ bool cmGhsMultiTargetGenerator::DetermineIfDynamicDownload(
 {
   std::vector<std::string> options;
   bool output = false;
-  this->GeneratorTarget->GetCompileOptions(options, config, language);
+  this->Target->GetCompileOptions(options, config, language);
   for (std::vector<std::string>::const_iterator options_i = options.begin();
        options_i != options.end(); ++options_i)
     {
