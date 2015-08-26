@@ -250,6 +250,11 @@ public:
                               cmTarget const* headTarget,
                               bool usage_requirements_only) const;
 
+  cmHeadToLinkInterfaceMap&
+  GetHeadToLinkInterfaceMap(std::string const& config) const;
+  cmHeadToLinkInterfaceMap& GetHeadToLinkInterfaceUsageRequirementsMap(
+      std::string const& config) const;
+
   struct LinkImplementation: public cmLinkImplementationLibraries
   {
     // Languages whose runtime libraries must be linked.

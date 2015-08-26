@@ -4126,9 +4126,7 @@ cmLinkInterface const* cmTarget::GetLinkInterface(const std::string& config,
     }
 
   // Lookup any existing link interface for this configuration.
-  std::string CONFIG = cmSystemTools::UpperCase(config);
-  cmHeadToLinkInterfaceMap& hm =
-    this->Internal->LinkInterfaceMap[CONFIG];
+  cmHeadToLinkInterfaceMap& hm = this->GetHeadToLinkInterfaceMap(config);
 
   // If the link interface does not depend on the head target
   // then return the one we computed first.
@@ -4177,11 +4175,10 @@ cmTarget::GetLinkInterfaceLibraries(const std::string& config,
     }
 
   // Lookup any existing link interface for this configuration.
-  std::string CONFIG = cmSystemTools::UpperCase(config);
   cmHeadToLinkInterfaceMap& hm =
     (usage_requirements_only ?
-     this->Internal->LinkInterfaceUsageRequirementsOnlyMap[CONFIG] :
-     this->Internal->LinkInterfaceMap[CONFIG]);
+     this->GetHeadToLinkInterfaceUsageRequirementsMap(config) :
+     this->GetHeadToLinkInterfaceMap(config));
 
   // If the link interface does not depend on the head target
   // then return the one we computed first.
@@ -4201,6 +4198,21 @@ cmTarget::GetLinkInterfaceLibraries(const std::string& config,
   return iface.Exists? &iface : 0;
 }
 
+cmHeadToLinkInterfaceMap&
+cmTarget::GetHeadToLinkInterfaceMap(const std::string &config) const
+{
+  std::string CONFIG = cmSystemTools::UpperCase(config);
+  return this->Internal->LinkInterfaceMap[CONFIG];
+}
+
+cmHeadToLinkInterfaceMap&
+cmTarget::GetHeadToLinkInterfaceUsageRequirementsMap(
+    const std::string &config) const
+{
+  std::string CONFIG = cmSystemTools::UpperCase(config);
+  return this->Internal->LinkInterfaceUsageRequirementsOnlyMap[CONFIG];
+}
+
 //----------------------------------------------------------------------------
 const cmLinkInterface *
 cmTarget::GetImportLinkInterface(const std::string& config,
@@ -4216,8 +4228,8 @@ cmTarget::GetImportLinkInterface(const std::string& config,
   std::string CONFIG = cmSystemTools::UpperCase(config);
   cmHeadToLinkInterfaceMap& hm =
     (usage_requirements_only ?
-     this->Internal->LinkInterfaceUsageRequirementsOnlyMap[CONFIG] :
-     this->Internal->LinkInterfaceMap[CONFIG]);
+     this->GetHeadToLinkInterfaceUsageRequirementsMap(config) :
+     this->GetHeadToLinkInterfaceMap(config));
 
   // If the link interface does not depend on the head target
   // then return the one we computed first.
