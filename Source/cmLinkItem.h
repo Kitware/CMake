@@ -96,4 +96,9 @@ struct cmOptionalLinkInterface: public cmLinkInterface
   const char* ExplicitLibraries;
 };
 
+struct cmHeadToLinkInterfaceMap:
+    public std::map<cmTarget const*, cmOptionalLinkInterface>
+{
+};
+
 #endif

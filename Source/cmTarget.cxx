@@ -91,9 +91,7 @@ public:
   // The backtrace when the target was created.
   cmListFileBacktrace Backtrace;
 
-  struct HeadToLinkInterfaceMap:
-    public std::map<cmTarget const*, cmOptionalLinkInterface> {};
-  typedef std::map<std::string, HeadToLinkInterfaceMap>
+  typedef std::map<std::string, cmHeadToLinkInterfaceMap>
                                                           LinkInterfaceMapType;
   LinkInterfaceMapType LinkInterfaceMap;
   LinkInterfaceMapType LinkInterfaceUsageRequirementsOnlyMap;
@@ -4129,7 +4127,7 @@ cmLinkInterface const* cmTarget::GetLinkInterface(const std::string& config,
 
   // Lookup any existing link interface for this configuration.
   std::string CONFIG = cmSystemTools::UpperCase(config);
-  cmTargetInternals::HeadToLinkInterfaceMap& hm =
+  cmHeadToLinkInterfaceMap& hm =
     this->Internal->LinkInterfaceMap[CONFIG];
 
   // If the link interface does not depend on the head target
@@ -4180,7 +4178,7 @@ cmTarget::GetLinkInterfaceLibraries(const std::string& config,
 
   // Lookup any existing link interface for this configuration.
   std::string CONFIG = cmSystemTools::UpperCase(config);
-  cmTargetInternals::HeadToLinkInterfaceMap& hm =
+  cmHeadToLinkInterfaceMap& hm =
     (usage_requirements_only ?
      this->Internal->LinkInterfaceUsageRequirementsOnlyMap[CONFIG] :
      this->Internal->LinkInterfaceMap[CONFIG]);
@@ -4216,7 +4214,7 @@ cmTarget::GetImportLinkInterface(const std::string& config,
     }
 
   std::string CONFIG = cmSystemTools::UpperCase(config);
-  cmTargetInternals::HeadToLinkInterfaceMap& hm =
+  cmHeadToLinkInterfaceMap& hm =
     (usage_requirements_only ?
      this->Internal->LinkInterfaceUsageRequirementsOnlyMap[CONFIG] :
      this->Internal->LinkInterfaceMap[CONFIG]);
