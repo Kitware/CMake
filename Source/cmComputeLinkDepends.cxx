@@ -360,9 +360,11 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
   // Follow the item's dependencies.
   if(entry.Target)
     {
+    cmGeneratorTarget* gtgt =
+        this->GlobalGenerator->GetGeneratorTarget(entry.Target);
     // Follow the target dependencies.
     if(cmLinkInterface const* iface =
-       entry.Target->GetLinkInterface(this->Config, this->Target->Target))
+       gtgt->GetLinkInterface(this->Config, this->Target->Target))
       {
       const bool isIface =
                       entry.Target->GetType() == cmTarget::INTERFACE_LIBRARY;
@@ -459,8 +461,10 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
   // Target items may have their own dependencies.
   if(entry.Target)
     {
+    cmGeneratorTarget* gtgt =
+        this->GlobalGenerator->GetGeneratorTarget(entry.Target);
     if(cmLinkInterface const* iface =
-       entry.Target->GetLinkInterface(this->Config, this->Target->Target))
+       gtgt->GetLinkInterface(this->Config, this->Target->Target))
       {
       // Follow public and private dependencies transitively.
       this->FollowSharedDeps(index, iface, true);
@@ -930,8 +934,10 @@ int cmComputeLinkDepends::ComputeComponentCount(NodeList const& nl)
     {
     if(cmTarget const* target = this->EntryList[*ni].Target)
       {
+      cmGeneratorTarget* gtgt =
+          this->GlobalGenerator->GetGeneratorTarget(target);
       if(cmLinkInterface const* iface =
-         target->GetLinkInterface(this->Config, this->Target->Target))
+         gtgt->GetLinkInterface(this->Config, this->Target->Target))
         {
         if(iface->Multiplicity > count)
           {

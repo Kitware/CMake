@@ -12,7 +12,7 @@
 #ifndef cmGeneratorTarget_h
 #define cmGeneratorTarget_h
 
-#include "cmStandardIncludes.h"
+#include "cmLinkItem.h"
 
 class cmCustomCommand;
 class cmGlobalGenerator;
@@ -106,6 +106,8 @@ public:
   const char *GetLinkInterfaceDependentNumberMaxProperty(const std::string &p,
                          const std::string& config) const;
 
+  cmLinkInterface const* GetLinkInterface(const std::string& config,
+                                        cmTarget const* headTarget) const;
 
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */

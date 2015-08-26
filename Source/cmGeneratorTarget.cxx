@@ -1172,9 +1172,11 @@ public:
       {
       return;
       }
-
+    cmGeneratorTarget* gtgt =
+        this->Target->GetLocalGenerator()->GetGlobalGenerator()
+            ->GetGeneratorTarget(item.Target);
     cmLinkInterface const* iface =
-      item.Target->GetLinkInterface(this->Config, this->HeadTarget);
+      gtgt->GetLinkInterface(this->Config, this->HeadTarget);
     if(!iface) { return; }
 
     for(std::vector<std::string>::const_iterator
@@ -3353,4 +3355,53 @@ cmGeneratorTarget::ReportPropertyOrigin(const std::string &p,
   areport += "\"):\n" + report;
 
   this->Makefile->GetCMakeInstance()->IssueMessage(cmake::LOG, areport);
+}
+
+//----------------------------------------------------------------------------
+cmLinkInterface const*
+cmGeneratorTarget::GetLinkInterface(const std::string& config,
+                                    cmTarget const* head) const
+{
+  // Imported targets have their own link interface.
+  if(this->IsImported())
+    {
+    return this->Target->GetImportLinkInterface(config, head, false);
+    }
+
+  // Link interfaces are not supported for executables that do not
+  // export symbols.
+  if(this->GetType() == cmTarget::EXECUTABLE &&
+     !this->Target->IsExecutableWithExports())
+    {
+    return 0;
+    }
+
+  // Lookup any existing link interface for this configuration.
+  cmHeadToLinkInterfaceMap& hm =
+      this->Target->GetHeadToLinkInterfaceMap(config);
+
+  // If the link interface does not depend on the head target
+  // then return the one we computed first.
+  if(!hm.empty() && !hm.begin()->second.HadHeadSensitiveCondition)
+    {
+    return &hm.begin()->second;
+    }
+
+  cmOptionalLinkInterface& iface = hm[head];
+  if(!iface.LibrariesDone)
+    {
+    iface.LibrariesDone = true;
+    this->Target->ComputeLinkInterfaceLibraries(
+      config, iface, head, false);
+    }
+  if(!iface.AllDone)
+    {
+    iface.AllDone = true;
+    if(iface.Exists)
+      {
+      this->Target->ComputeLinkInterface(config, iface, head);
+      }
+    }
+
+  return iface.Exists? &iface : 0;
 }

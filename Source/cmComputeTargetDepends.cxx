@@ -297,7 +297,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
 {
   cmGeneratorTarget const* depender = this->Targets[depender_index];
   if(cmLinkInterface const* iface =
-                                dependee->Target->GetLinkInterface(config,
+                                dependee->GetLinkInterface(config,
                                                            depender->Target))
     {
     for(std::vector<cmLinkItem>::const_iterator

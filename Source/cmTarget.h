@@ -241,10 +241,6 @@ public:
                                      cmTarget const* head,
                                      bool usage_requirements_only) const;
 
-  /** Get the link interface for the given configuration.  Returns 0
-      if the target cannot be linked.  */
-  cmLinkInterface const* GetLinkInterface(const std::string& config,
-                                        cmTarget const* headTarget) const;
   cmLinkInterfaceLibraries const*
     GetLinkInterfaceLibraries(const std::string& config,
                               cmTarget const* headTarget,

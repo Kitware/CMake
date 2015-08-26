@@ -4108,53 +4108,6 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
 }
 
 //----------------------------------------------------------------------------
-cmLinkInterface const* cmTarget::GetLinkInterface(const std::string& config,
-                                                  cmTarget const* head) const
-{
-  // Imported targets have their own link interface.
-  if(this->IsImported())
-    {
-    return this->GetImportLinkInterface(config, head, false);
-    }
-
-  // Link interfaces are not supported for executables that do not
-  // export symbols.
-  if(this->GetType() == cmTarget::EXECUTABLE &&
-     !this->IsExecutableWithExports())
-    {
-    return 0;
-    }
-
-  // Lookup any existing link interface for this configuration.
-  cmHeadToLinkInterfaceMap& hm = this->GetHeadToLinkInterfaceMap(config);
-
-  // If the link interface does not depend on the head target
-  // then return the one we computed first.
-  if(!hm.empty() && !hm.begin()->second.HadHeadSensitiveCondition)
-    {
-    return &hm.begin()->second;
-    }
-
-  cmOptionalLinkInterface& iface = hm[head];
-  if(!iface.LibrariesDone)
-    {
-    iface.LibrariesDone = true;
-    this->ComputeLinkInterfaceLibraries(
-      config, iface, head, false);
-    }
-  if(!iface.AllDone)
-    {
-    iface.AllDone = true;
-    if(iface.Exists)
-      {
-      this->ComputeLinkInterface(config, iface, head);
-      }
-    }
-
-  return iface.Exists? &iface : 0;
-}
-
-//----------------------------------------------------------------------------
 const cmLinkInterfaceLibraries *
 cmTarget::GetLinkInterfaceLibraries(const std::string& config,
                                     cmTarget const* head,
