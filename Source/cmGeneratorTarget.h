@@ -108,6 +108,9 @@ public:
 
   cmLinkInterface const* GetLinkInterface(const std::string& config,
                                         cmTarget const* headTarget) const;
+  void ComputeLinkInterface(const std::string& config,
+                            cmOptionalLinkInterface& iface,
+                            cmTarget const* head) const;
 
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */

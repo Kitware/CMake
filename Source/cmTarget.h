@@ -233,9 +233,6 @@ public:
 
   void GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const;
 
-  void ComputeLinkInterface(const std::string& config,
-                            cmOptionalLinkInterface& iface,
-                            cmTarget const* head) const;
   void ComputeLinkInterfaceLibraries(const std::string& config,
                                      cmOptionalLinkInterface &iface,
                                      cmTarget const* head,
