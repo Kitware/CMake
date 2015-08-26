@@ -117,6 +117,11 @@ public:
                               cmTarget const* headTarget,
                               bool usage_requirements_only) const;
 
+  void ComputeLinkInterfaceLibraries(const std::string& config,
+                                     cmOptionalLinkInterface &iface,
+                                     cmTarget const* head,
+                                     bool usage_requirements_only) const;
+
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
   std::string GetFullPath(const std::string& config="", bool implib = false,
@@ -388,6 +393,7 @@ private:
   typedef std::pair<std::string, bool> OutputNameKey;
   typedef std::map<OutputNameKey, std::string> OutputNameMapType;
   mutable OutputNameMapType OutputNameMap;
+  mutable bool PolicyWarnedCMP0022;
 
 public:
   std::vector<cmTarget const*> const&
