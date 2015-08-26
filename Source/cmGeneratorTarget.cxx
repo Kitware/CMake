@@ -1507,20 +1507,22 @@ void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string> &result,
 void processILibs(const std::string& config,
                   cmTarget const* headTarget,
                   cmLinkItem const& item,
+                  cmGlobalGenerator* gg,
                   std::vector<cmTarget const*>& tgts,
                   std::set<cmTarget const*>& emitted)
 {
   if (item.Target && emitted.insert(item.Target).second)
     {
     tgts.push_back(item.Target);
+    cmGeneratorTarget* gt = gg->GetGeneratorTarget(item.Target);
     if(cmLinkInterfaceLibraries const* iface =
-       item.Target->GetLinkInterfaceLibraries(config, headTarget, true))
+       gt->GetLinkInterfaceLibraries(config, headTarget, true))
       {
       for(std::vector<cmLinkItem>::const_iterator
             it = iface->Libraries.begin();
           it != iface->Libraries.end(); ++it)
         {
-        processILibs(config, headTarget, *it, tgts, emitted);
+        processILibs(config, headTarget, *it, gg, tgts, emitted);
         }
       }
     }
@@ -1545,7 +1547,9 @@ cmGeneratorTarget::GetLinkImplementationClosure(
           it = impl->Libraries.begin();
         it != impl->Libraries.end(); ++it)
       {
-      processILibs(config, this->Target, *it, tgts , emitted);
+      processILibs(config, this->Target, *it,
+                   this->LocalGenerator->GetGlobalGenerator(),
+                   tgts , emitted);
       }
     }
   return tgts;
@@ -3502,4 +3506,50 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
       sscanf(reps, "%u", &iface.Multiplicity);
       }
     }
+}
+
+//----------------------------------------------------------------------------
+const cmLinkInterfaceLibraries *
+cmGeneratorTarget::GetLinkInterfaceLibraries(const std::string& config,
+                                    cmTarget const* head,
+                                    bool usage_requirements_only) const
+{
+  // Imported targets have their own link interface.
+  if(this->IsImported())
+    {
+    return this->Target->GetImportLinkInterface(config, head,
+                                                usage_requirements_only);
+    }
+
+  // Link interfaces are not supported for executables that do not
+  // export symbols.
+  if(this->GetType() == cmTarget::EXECUTABLE &&
+     !this->Target->IsExecutableWithExports())
+    {
+    return 0;
+    }
+
+  // Lookup any existing link interface for this configuration.
+  std::string CONFIG = cmSystemTools::UpperCase(config);
+  cmHeadToLinkInterfaceMap& hm =
+    (usage_requirements_only ?
+     this->Target->GetHeadToLinkInterfaceUsageRequirementsMap(config) :
+     this->Target->GetHeadToLinkInterfaceMap(config));
+
+  // If the link interface does not depend on the head target
+  // then return the one we computed first.
+  if(!hm.empty() && !hm.begin()->second.HadHeadSensitiveCondition)
+    {
+    return &hm.begin()->second;
+    }
+
+  cmOptionalLinkInterface& iface = hm[head];
+  if(!iface.LibrariesDone)
+    {
+    iface.LibrariesDone = true;
+    this->Target->ComputeLinkInterfaceLibraries(
+      config, iface, head, usage_requirements_only);
+    }
+
+  return iface.Exists? &iface : 0;
 }

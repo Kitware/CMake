@@ -112,6 +112,11 @@ public:
                             cmOptionalLinkInterface& iface,
                             cmTarget const* head) const;
 
+  cmLinkInterfaceLibraries const*
+    GetLinkInterfaceLibraries(const std::string& config,
+                              cmTarget const* headTarget,
+                              bool usage_requirements_only) const;
+
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
   std::string GetFullPath(const std::string& config="", bool implib = false,

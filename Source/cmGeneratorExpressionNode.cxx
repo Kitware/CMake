@@ -1109,7 +1109,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     if(isInterfaceProperty)
       {
       if(cmLinkInterfaceLibraries const* iface =
-         target->GetLinkInterfaceLibraries(context->Config, headTarget, true))
+         gtgt->GetLinkInterfaceLibraries(context->Config, headTarget, true))
         {
         linkedTargetsContent =
           getLinkedTargetsContent(iface->Libraries, target,

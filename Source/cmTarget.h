@@ -238,11 +238,6 @@ public:
                                      cmTarget const* head,
                                      bool usage_requirements_only) const;
 
-  cmLinkInterfaceLibraries const*
-    GetLinkInterfaceLibraries(const std::string& config,
-                              cmTarget const* headTarget,
-                              bool usage_requirements_only) const;
-
   cmHeadToLinkInterfaceMap&
   GetHeadToLinkInterfaceMap(std::string const& config) const;
   cmHeadToLinkInterfaceMap& GetHeadToLinkInterfaceUsageRequirementsMap(
