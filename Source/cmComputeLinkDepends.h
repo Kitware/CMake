@@ -102,7 +102,7 @@ private:
   std::queue<SharedDepEntry> SharedDepQueue;
   std::set<int> SharedDepFollowed;
   void FollowSharedDeps(int depender_index,
-                        cmTarget::LinkInterface const* iface,
+                        cmLinkInterface const* iface,
                         bool follow_interface = false);
   void QueueSharedDependencies(int depender_index,
                                std::vector<cmLinkItem> const& deps);

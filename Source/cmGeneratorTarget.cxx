@@ -1173,7 +1173,7 @@ public:
       return;
       }
 
-    cmTarget::LinkInterface const* iface =
+    cmLinkInterface const* iface =
       item.Target->GetLinkInterface(this->Config, this->HeadTarget);
     if(!iface) { return; }
 
@@ -1511,7 +1511,7 @@ void processILibs(const std::string& config,
   if (item.Target && emitted.insert(item.Target).second)
     {
     tgts.push_back(item.Target);
-    if(cmTarget::LinkInterfaceLibraries const* iface =
+    if(cmLinkInterfaceLibraries const* iface =
        item.Target->GetLinkInterfaceLibraries(config, headTarget, true))
       {
       for(std::vector<cmLinkItem>::const_iterator

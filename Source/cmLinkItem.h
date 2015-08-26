@@ -56,4 +56,44 @@ struct cmLinkImplementationLibraries
   std::vector<cmLinkItem> WrongConfigLibraries;
 };
 
+struct cmLinkInterfaceLibraries
+{
+  // Libraries listed in the interface.
+  std::vector<cmLinkItem> Libraries;
+};
+
+struct cmLinkInterface: public cmLinkInterfaceLibraries
+{
+  // Languages whose runtime libraries must be linked.
+  std::vector<std::string> Languages;
+
+  // Shared library dependencies needed for linking on some platforms.
+  std::vector<cmLinkItem> SharedDeps;
+
+  // Number of repetitions of a strongly connected component of two
+  // or more static libraries.
+  int Multiplicity;
+
+  // Libraries listed for other configurations.
+  // Needed only for OLD behavior of CMP0003.
+  std::vector<cmLinkItem> WrongConfigLibraries;
+
+  bool ImplementationIsInterface;
+
+  cmLinkInterface(): Multiplicity(0), ImplementationIsInterface(false) {}
+};
+
+struct cmOptionalLinkInterface: public cmLinkInterface
+{
+  cmOptionalLinkInterface():
+    LibrariesDone(false), AllDone(false),
+    Exists(false), HadHeadSensitiveCondition(false),
+    ExplicitLibraries(0) {}
+  bool LibrariesDone;
+  bool AllDone;
+  bool Exists;
+  bool HadHeadSensitiveCondition;
+  const char* ExplicitLibraries;
+};
+
 #endif

@@ -91,31 +91,18 @@ public:
   // The backtrace when the target was created.
   cmListFileBacktrace Backtrace;
 
-  // Cache link interface computation from each configuration.
-  struct OptionalLinkInterface: public cmTarget::LinkInterface
-  {
-    OptionalLinkInterface():
-      LibrariesDone(false), AllDone(false),
-      Exists(false), HadHeadSensitiveCondition(false),
-      ExplicitLibraries(0) {}
-    bool LibrariesDone;
-    bool AllDone;
-    bool Exists;
-    bool HadHeadSensitiveCondition;
-    const char* ExplicitLibraries;
-  };
   void ComputeLinkInterface(cmTarget const* thisTarget,
                             const std::string& config,
-                            OptionalLinkInterface& iface,
+                            cmOptionalLinkInterface& iface,
                             cmTarget const* head) const;
   void ComputeLinkInterfaceLibraries(cmTarget const* thisTarget,
                                      const std::string& config,
-                                     OptionalLinkInterface& iface,
+                                     cmOptionalLinkInterface &iface,
                                      cmTarget const* head,
                                      bool usage_requirements_only);
 
   struct HeadToLinkInterfaceMap:
-    public std::map<cmTarget const*, OptionalLinkInterface> {};
+    public std::map<cmTarget const*, cmOptionalLinkInterface> {};
   typedef std::map<std::string, HeadToLinkInterfaceMap>
                                                           LinkInterfaceMapType;
   LinkInterfaceMapType LinkInterfaceMap;
@@ -4133,8 +4120,7 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
 }
 
 //----------------------------------------------------------------------------
-cmTarget::LinkInterface const* cmTarget::GetLinkInterface(
-                                                  const std::string& config,
+cmLinkInterface const* cmTarget::GetLinkInterface(const std::string& config,
                                                   cmTarget const* head) const
 {
   // Imported targets have their own link interface.
@@ -4163,7 +4149,7 @@ cmTarget::LinkInterface const* cmTarget::GetLinkInterface(
     return &hm.begin()->second;
     }
 
-  cmTargetInternals::OptionalLinkInterface& iface = hm[head];
+  cmOptionalLinkInterface& iface = hm[head];
   if(!iface.LibrariesDone)
     {
     iface.LibrariesDone = true;
@@ -4183,7 +4169,7 @@ cmTarget::LinkInterface const* cmTarget::GetLinkInterface(
 }
 
 //----------------------------------------------------------------------------
-cmTarget::LinkInterfaceLibraries const*
+const cmLinkInterfaceLibraries *
 cmTarget::GetLinkInterfaceLibraries(const std::string& config,
                                     cmTarget const* head,
                                     bool usage_requirements_only) const
@@ -4216,7 +4202,7 @@ cmTarget::GetLinkInterfaceLibraries(const std::string& config,
     return &hm.begin()->second;
     }
 
-  cmTargetInternals::OptionalLinkInterface& iface = hm[head];
+  cmOptionalLinkInterface& iface = hm[head];
   if(!iface.LibrariesDone)
     {
     iface.LibrariesDone = true;
@@ -4228,7 +4214,7 @@ cmTarget::GetLinkInterfaceLibraries(const std::string& config,
 }
 
 //----------------------------------------------------------------------------
-cmTarget::LinkInterface const*
+const cmLinkInterface *
 cmTarget::GetImportLinkInterface(const std::string& config,
                                  cmTarget const* headTarget,
                                  bool usage_requirements_only) const
@@ -4252,7 +4238,7 @@ cmTarget::GetImportLinkInterface(const std::string& config,
     return &hm.begin()->second;
     }
 
-  cmTargetInternals::OptionalLinkInterface& iface = hm[headTarget];
+  cmOptionalLinkInterface& iface = hm[headTarget];
   if(!iface.AllDone)
     {
     iface.AllDone = true;
@@ -4275,7 +4261,7 @@ void
 cmTargetInternals::ComputeLinkInterfaceLibraries(
   cmTarget const* thisTarget,
   const std::string& config,
-  OptionalLinkInterface& iface,
+  cmOptionalLinkInterface& iface,
   cmTarget const* headTarget,
   bool usage_requirements_only)
 {
@@ -4423,7 +4409,7 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
 //----------------------------------------------------------------------------
 void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
                                              const std::string& config,
-                                             OptionalLinkInterface& iface,
+                                             cmOptionalLinkInterface &iface,
                                              cmTarget const* headTarget) const
 {
   if(iface.ExplicitLibraries)

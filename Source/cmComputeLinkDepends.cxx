@@ -361,7 +361,7 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
   if(entry.Target)
     {
     // Follow the target dependencies.
-    if(cmTarget::LinkInterface const* iface =
+    if(cmLinkInterface const* iface =
        entry.Target->GetLinkInterface(this->Config, this->Target->Target))
       {
       const bool isIface =
@@ -396,7 +396,7 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
 //----------------------------------------------------------------------------
 void
 cmComputeLinkDepends
-::FollowSharedDeps(int depender_index, cmTarget::LinkInterface const* iface,
+::FollowSharedDeps(int depender_index, cmLinkInterface const* iface,
                    bool follow_interface)
 {
   // Follow dependencies if we have not followed them already.
@@ -459,7 +459,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
   // Target items may have their own dependencies.
   if(entry.Target)
     {
-    if(cmTarget::LinkInterface const* iface =
+    if(cmLinkInterface const* iface =
        entry.Target->GetLinkInterface(this->Config, this->Target->Target))
       {
       // Follow public and private dependencies transitively.
@@ -930,7 +930,7 @@ int cmComputeLinkDepends::ComputeComponentCount(NodeList const& nl)
     {
     if(cmTarget const* target = this->EntryList[*ni].Target)
       {
-      if(cmTarget::LinkInterface const* iface =
+      if(cmLinkInterface const* iface =
          target->GetLinkInterface(this->Config, this->Target->Target))
         {
         if(iface->Multiplicity > count)
