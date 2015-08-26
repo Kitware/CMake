@@ -1134,8 +1134,7 @@ bool cmGlobalUnixMakefileGenerator3
 ::NeedRequiresStep(cmTarget const& target)
 {
   std::set<std::string> languages;
-  cmGeneratorTarget* gtgt = this->GetGeneratorTarget(&target);
-  gtgt->GetLanguages(languages,
+  target.GetLanguages(languages,
                 target.GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE"));
   for(std::set<std::string>::const_iterator l = languages.begin();
       l != languages.end(); ++l)

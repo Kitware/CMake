@@ -90,7 +90,7 @@ bool cmGlobalVisualStudioGenerator::Compute()
         AddUtilityCommand("ALL_BUILD", true, no_working_dir,
                           no_depends, no_commands, false,
                           "Build all projects");
-
+      allBuild->Compute();
       cmGeneratorTarget* gt = new cmGeneratorTarget(allBuild, gen[0]);
       allBuild->GetMakefile()->AddGeneratorTarget(allBuild, gt);
 
@@ -836,19 +836,17 @@ void RegisterVisualStudioMacros(const std::string& macrosFile,
 bool
 cmGlobalVisualStudioGenerator::TargetIsFortranOnly(cmTarget const& target)
 {
-  cmGeneratorTarget* gt = this->GetGeneratorTarget(&target);
-
   // check to see if this is a fortran build
   std::set<std::string> languages;
   {
   // Issue diagnostic if the source files depend on the config.
   std::vector<cmSourceFile*> sources;
-  if (!gt->GetConfigCommonSourceFiles(sources))
+  if (!target.GetConfigCommonSourceFiles(sources))
     {
     return false;
     }
   }
-  gt->GetLanguages(languages, "");
+  target.GetLanguages(languages, "");
   if(languages.size() == 1)
     {
     if(*languages.begin() == "Fortran")

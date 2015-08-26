@@ -252,7 +252,8 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
         }
       }
 
-    cmLinkImplementation const* impl = depender->GetLinkImplementation(*it);
+    cmTarget::LinkImplementation const* impl =
+      depender->Target->GetLinkImplementation(*it);
 
     // A target should not depend on itself.
     emitted.insert(depender->GetName());
@@ -295,8 +296,8 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
                                              std::set<std::string> &emitted)
 {
   cmGeneratorTarget const* depender = this->Targets[depender_index];
-  if(cmGeneratorTarget::LinkInterface const* iface =
-                                dependee->GetLinkInterface(config,
+  if(cmTarget::LinkInterface const* iface =
+                                dependee->Target->GetLinkInterface(config,
                                                            depender->Target))
     {
     for(std::vector<cmLinkItem>::const_iterator

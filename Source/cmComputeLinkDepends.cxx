@@ -361,10 +361,8 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
   if(entry.Target)
     {
     // Follow the target dependencies.
-    cmGeneratorTarget* gtgt =
-        this->GlobalGenerator->GetGeneratorTarget(entry.Target);
-    if(cmGeneratorTarget::LinkInterface const* iface =
-       gtgt->GetLinkInterface(this->Config, this->Target->Target))
+    if(cmTarget::LinkInterface const* iface =
+       entry.Target->GetLinkInterface(this->Config, this->Target->Target))
       {
       const bool isIface =
                       entry.Target->GetType() == cmTarget::INTERFACE_LIBRARY;
@@ -398,8 +396,7 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
 //----------------------------------------------------------------------------
 void
 cmComputeLinkDepends
-::FollowSharedDeps(int depender_index,
-                   cmGeneratorTarget::LinkInterface const* iface,
+::FollowSharedDeps(int depender_index, cmTarget::LinkInterface const* iface,
                    bool follow_interface)
 {
   // Follow dependencies if we have not followed them already.
@@ -462,10 +459,8 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
   // Target items may have their own dependencies.
   if(entry.Target)
     {
-    cmGeneratorTarget* gtgt =
-        this->GlobalGenerator->GetGeneratorTarget(entry.Target);
-    if(cmGeneratorTarget::LinkInterface const* iface =
-       gtgt->GetLinkInterface(this->Config, this->Target->Target))
+    if(cmTarget::LinkInterface const* iface =
+       entry.Target->GetLinkInterface(this->Config, this->Target->Target))
       {
       // Follow public and private dependencies transitively.
       this->FollowSharedDeps(index, iface, true);
@@ -555,8 +550,8 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
 void cmComputeLinkDepends::AddDirectLinkEntries()
 {
   // Add direct link dependencies in this configuration.
-  cmLinkImplementation const* impl =
-    this->Target->GetLinkImplementation(this->Config);
+  cmTarget::LinkImplementation const* impl =
+    this->Target->Target->GetLinkImplementation(this->Config);
   this->AddLinkEntries(-1, impl->Libraries);
   for(std::vector<cmLinkItem>::const_iterator
         wi = impl->WrongConfigLibraries.begin();
@@ -935,10 +930,8 @@ int cmComputeLinkDepends::ComputeComponentCount(NodeList const& nl)
     {
     if(cmTarget const* target = this->EntryList[*ni].Target)
       {
-      cmGeneratorTarget* gtgt =
-          this->GlobalGenerator->GetGeneratorTarget(target);
-      if(cmGeneratorTarget::LinkInterface const* iface =
-         gtgt->GetLinkInterface(this->Config, this->Target->Target))
+      if(cmTarget::LinkInterface const* iface =
+         target->GetLinkInterface(this->Config, this->Target->Target))
         {
         if(iface->Multiplicity > count)
           {
