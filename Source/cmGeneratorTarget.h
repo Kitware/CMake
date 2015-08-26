@@ -390,6 +390,20 @@ private:
   };
   mutable std::map<std::string, LinkImplClosure> LinkImplClosureMap;
 
+  typedef std::map<std::string, cmHeadToLinkInterfaceMap>
+                                                          LinkInterfaceMapType;
+  mutable LinkInterfaceMapType LinkInterfaceMap;
+  mutable LinkInterfaceMapType LinkInterfaceUsageRequirementsOnlyMap;
+
+  cmHeadToLinkInterfaceMap&
+  GetHeadToLinkInterfaceMap(std::string const& config) const;
+  cmHeadToLinkInterfaceMap& GetHeadToLinkInterfaceUsageRequirementsMap(
+      std::string const& config) const;
+
+  cmLinkInterface const*
+    GetImportLinkInterface(const std::string& config, cmTarget const* head,
+                           bool usage_requirements_only) const;
+
   typedef std::pair<std::string, bool> OutputNameKey;
   typedef std::map<OutputNameKey, std::string> OutputNameMapType;
   mutable OutputNameMapType OutputNameMap;

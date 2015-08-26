@@ -233,11 +233,6 @@ public:
 
   void GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const;
 
-  cmHeadToLinkInterfaceMap&
-  GetHeadToLinkInterfaceMap(std::string const& config) const;
-  cmHeadToLinkInterfaceMap& GetHeadToLinkInterfaceUsageRequirementsMap(
-      std::string const& config) const;
-
   struct LinkImplementation: public cmLinkImplementationLibraries
   {
     // Languages whose runtime libraries must be linked.
@@ -558,11 +553,6 @@ private:
   ImportInfo const* GetImportInfo(const std::string& config) const;
   void ComputeImportInfo(std::string const& desired_config,
                          ImportInfo& info) const;
-
-
-  cmLinkInterface const*
-    GetImportLinkInterface(const std::string& config, cmTarget const* head,
-                           bool usage_requirements_only) const;
 
   cmLinkImplementationLibraries const*
     GetLinkImplementationLibrariesInternal(const std::string& config,

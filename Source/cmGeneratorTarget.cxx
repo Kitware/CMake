@@ -3370,7 +3370,7 @@ cmGeneratorTarget::GetLinkInterface(const std::string& config,
   // Imported targets have their own link interface.
   if(this->IsImported())
     {
-    return this->Target->GetImportLinkInterface(config, head, false);
+    return this->GetImportLinkInterface(config, head, false);
     }
 
   // Link interfaces are not supported for executables that do not
@@ -3383,7 +3383,7 @@ cmGeneratorTarget::GetLinkInterface(const std::string& config,
 
   // Lookup any existing link interface for this configuration.
   cmHeadToLinkInterfaceMap& hm =
-      this->Target->GetHeadToLinkInterfaceMap(config);
+      this->GetHeadToLinkInterfaceMap(config);
 
   // If the link interface does not depend on the head target
   // then return the one we computed first.
@@ -3518,7 +3518,7 @@ cmGeneratorTarget::GetLinkInterfaceLibraries(const std::string& config,
   // Imported targets have their own link interface.
   if(this->IsImported())
     {
-    return this->Target->GetImportLinkInterface(config, head,
+    return this->GetImportLinkInterface(config, head,
                                                 usage_requirements_only);
     }
 
@@ -3534,8 +3534,8 @@ cmGeneratorTarget::GetLinkInterfaceLibraries(const std::string& config,
   std::string CONFIG = cmSystemTools::UpperCase(config);
   cmHeadToLinkInterfaceMap& hm =
     (usage_requirements_only ?
-     this->Target->GetHeadToLinkInterfaceUsageRequirementsMap(config) :
-     this->Target->GetHeadToLinkInterfaceMap(config));
+     this->GetHeadToLinkInterfaceUsageRequirementsMap(config) :
+     this->GetHeadToLinkInterfaceMap(config));
 
   // If the link interface does not depend on the head target
   // then return the one we computed first.
@@ -3704,4 +3704,63 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
         }
       }
     }
+}
+
+//----------------------------------------------------------------------------
+const cmLinkInterface *
+cmGeneratorTarget::GetImportLinkInterface(const std::string& config,
+                                 cmTarget const* headTarget,
+                                 bool usage_requirements_only) const
+{
+  cmTarget::ImportInfo const* info = this->Target->GetImportInfo(config);
+  if(!info)
+    {
+    return 0;
+    }
+
+  std::string CONFIG = cmSystemTools::UpperCase(config);
+  cmHeadToLinkInterfaceMap& hm =
+    (usage_requirements_only ?
+     this->GetHeadToLinkInterfaceUsageRequirementsMap(config) :
+     this->GetHeadToLinkInterfaceMap(config));
+
+  // If the link interface does not depend on the head target
+  // then return the one we computed first.
+  if(!hm.empty() && !hm.begin()->second.HadHeadSensitiveCondition)
+    {
+    return &hm.begin()->second;
+    }
+
+  cmOptionalLinkInterface& iface = hm[headTarget];
+  if(!iface.AllDone)
+    {
+    iface.AllDone = true;
+    iface.Multiplicity = info->Multiplicity;
+    cmSystemTools::ExpandListArgument(info->Languages, iface.Languages);
+    this->Target->ExpandLinkItems(info->LibrariesProp, info->Libraries,
+                                  config,
+                          headTarget, usage_requirements_only,
+                          iface.Libraries,
+                          iface.HadHeadSensitiveCondition);
+    std::vector<std::string> deps;
+    cmSystemTools::ExpandListArgument(info->SharedDeps, deps);
+    this->Target->LookupLinkItems(deps, iface.SharedDeps);
+    }
+
+  return &iface;
+}
+
+cmHeadToLinkInterfaceMap&
+cmGeneratorTarget::GetHeadToLinkInterfaceMap(const std::string &config) const
+{
+  std::string CONFIG = cmSystemTools::UpperCase(config);
+  return this->LinkInterfaceMap[CONFIG];
+}
+
+cmHeadToLinkInterfaceMap&
+cmGeneratorTarget::GetHeadToLinkInterfaceUsageRequirementsMap(
+    const std::string &config) const
+{
+  std::string CONFIG = cmSystemTools::UpperCase(config);
+  return this->LinkInterfaceUsageRequirementsOnlyMap[CONFIG];
 }

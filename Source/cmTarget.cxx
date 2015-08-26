@@ -89,11 +89,6 @@ public:
   // The backtrace when the target was created.
   cmListFileBacktrace Backtrace;
 
-  typedef std::map<std::string, cmHeadToLinkInterfaceMap>
-                                                          LinkInterfaceMapType;
-  LinkInterfaceMapType LinkInterfaceMap;
-  LinkInterfaceMapType LinkInterfaceUsageRequirementsOnlyMap;
-
   typedef std::map<std::string, cmTarget::OutputInfo> OutputInfoMapType;
   OutputInfoMapType OutputInfoMap;
 
@@ -510,8 +505,6 @@ void cmTarget::ClearLinkMaps()
 {
   this->LinkImplementationLanguageIsContextDependent = true;
   this->Internal->LinkImplMap.clear();
-  this->Internal->LinkInterfaceMap.clear();
-  this->Internal->LinkInterfaceUsageRequirementsOnlyMap.clear();
   this->Internal->SourceFilesMap.clear();
 }
 
@@ -4102,64 +4095,6 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
       sscanf(reps, "%u", &info.Multiplicity);
       }
     }
-}
-
-cmHeadToLinkInterfaceMap&
-cmTarget::GetHeadToLinkInterfaceMap(const std::string &config) const
-{
-  std::string CONFIG = cmSystemTools::UpperCase(config);
-  return this->Internal->LinkInterfaceMap[CONFIG];
-}
-
-cmHeadToLinkInterfaceMap&
-cmTarget::GetHeadToLinkInterfaceUsageRequirementsMap(
-    const std::string &config) const
-{
-  std::string CONFIG = cmSystemTools::UpperCase(config);
-  return this->Internal->LinkInterfaceUsageRequirementsOnlyMap[CONFIG];
-}
-
-//----------------------------------------------------------------------------
-const cmLinkInterface *
-cmTarget::GetImportLinkInterface(const std::string& config,
-                                 cmTarget const* headTarget,
-                                 bool usage_requirements_only) const
-{
-  cmTarget::ImportInfo const* info = this->GetImportInfo(config);
-  if(!info)
-    {
-    return 0;
-    }
-
-  std::string CONFIG = cmSystemTools::UpperCase(config);
-  cmHeadToLinkInterfaceMap& hm =
-    (usage_requirements_only ?
-     this->GetHeadToLinkInterfaceUsageRequirementsMap(config) :
-     this->GetHeadToLinkInterfaceMap(config));
-
-  // If the link interface does not depend on the head target
-  // then return the one we computed first.
-  if(!hm.empty() && !hm.begin()->second.HadHeadSensitiveCondition)
-    {
-    return &hm.begin()->second;
-    }
-
-  cmOptionalLinkInterface& iface = hm[headTarget];
-  if(!iface.AllDone)
-    {
-    iface.AllDone = true;
-    iface.Multiplicity = info->Multiplicity;
-    cmSystemTools::ExpandListArgument(info->Languages, iface.Languages);
-    this->ExpandLinkItems(info->LibrariesProp, info->Libraries, config,
-                          headTarget, usage_requirements_only,
-                          iface.Libraries,
-                          iface.HadHeadSensitiveCondition);
-    std::vector<std::string> deps;
-    cmSystemTools::ExpandListArgument(info->SharedDeps, deps);
-    this->LookupLinkItems(deps, iface.SharedDeps);
-    }
-
-  return &iface;
 }
 
 //----------------------------------------------------------------------------
