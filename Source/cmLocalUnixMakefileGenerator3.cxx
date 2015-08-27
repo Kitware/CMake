@@ -1257,7 +1257,9 @@ cmLocalUnixMakefileGenerator3
     {
     // Get the set of source languages in the target.
     std::set<std::string> languages;
-    target.GetLanguages(languages,
+    cmGeneratorTarget *gtgt =
+        this->GlobalGenerator->GetGeneratorTarget(&target);
+    gtgt->GetLanguages(languages,
                       this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
     fout << "\n"
          << "# Per-language clean rules from dependency scanning.\n"

@@ -1079,7 +1079,8 @@ void cmLocalGenerator::AddCompileDefinitions(std::set<std::string>& defines,
                                              const std::string& lang)
 {
   std::vector<std::string> targetDefines;
-  target->GetCompileDefinitions(targetDefines, config, lang);
+  cmGeneratorTarget* gtgt = this->GlobalGenerator->GetGeneratorTarget(target);
+  gtgt->GetCompileDefinitions(targetDefines, config, lang);
   this->AppendDefines(defines, targetDefines);
 }
 
@@ -1090,6 +1091,10 @@ void cmLocalGenerator::AddCompileOptions(
   )
 {
   std::string langFlagRegexVar = std::string("CMAKE_")+lang+"_FLAG_REGEX";
+
+  cmGeneratorTarget* gtgt =
+      this->GlobalGenerator->GetGeneratorTarget(target);
+
   if(const char* langFlagRegexStr =
      this->Makefile->GetDefinition(langFlagRegexVar))
     {
@@ -1100,7 +1105,7 @@ void cmLocalGenerator::AddCompileOptions(
       {
       cmSystemTools::ParseWindowsCommandLine(targetFlags, opts);
       }
-    target->GetCompileOptions(opts, config, lang);
+    gtgt->GetCompileOptions(opts, config, lang);
     for(std::vector<std::string>::const_iterator i = opts.begin();
         i != opts.end(); ++i)
       {
@@ -1121,7 +1126,7 @@ void cmLocalGenerator::AddCompileOptions(
       this->AppendFlags(flags, targetFlags);
       }
     std::vector<std::string> opts;
-    target->GetCompileOptions(opts, config, lang);
+    gtgt->GetCompileOptions(opts, config, lang);
     for(std::vector<std::string>::const_iterator i = opts.begin();
         i != opts.end(); ++i)
       {
@@ -1130,7 +1135,7 @@ void cmLocalGenerator::AddCompileOptions(
       }
     }
   std::vector<std::string> features;
-  target->GetCompileFeatures(features, config);
+  gtgt->GetCompileFeatures(features, config);
   for(std::vector<std::string>::const_iterator it = features.begin();
       it != features.end(); ++it)
     {

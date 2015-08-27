@@ -12,7 +12,7 @@
 #ifndef cmGeneratorTarget_h
 #define cmGeneratorTarget_h
 
-#include "cmStandardIncludes.h"
+#include "cmLinkItem.h"
 
 class cmCustomCommand;
 class cmGlobalGenerator;
@@ -106,6 +106,21 @@ public:
   const char *GetLinkInterfaceDependentNumberMaxProperty(const std::string &p,
                          const std::string& config) const;
 
+  cmLinkInterface const* GetLinkInterface(const std::string& config,
+                                        cmTarget const* headTarget) const;
+  void ComputeLinkInterface(const std::string& config,
+                            cmOptionalLinkInterface& iface,
+                            cmTarget const* head) const;
+
+  cmLinkInterfaceLibraries const*
+    GetLinkInterfaceLibraries(const std::string& config,
+                              cmTarget const* headTarget,
+                              bool usage_requirements_only) const;
+
+  void ComputeLinkInterfaceLibraries(const std::string& config,
+                                     cmOptionalLinkInterface &iface,
+                                     cmTarget const* head,
+                                     bool usage_requirements_only) const;
 
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
@@ -183,6 +198,25 @@ public:
   LinkClosure const* GetLinkClosure(const std::string& config) const;
   void ComputeLinkClosure(const std::string& config, LinkClosure& lc) const;
 
+  cmLinkImplementation const*
+    GetLinkImplementation(const std::string& config) const;
+
+  void ComputeLinkImplementationLanguages(const std::string& config,
+                                          cmOptionalLinkImplementation& impl
+                                          ) const;
+
+  // Compute the set of languages compiled by the target.  This is
+  // computed every time it is called because the languages can change
+  // when source file properties are changed and we do not have enough
+  // information to forward these property changes to the targets
+  // until we have per-target object file properties.
+  void GetLanguages(std::set<std::string>& languages,
+                    std::string const& config) const;
+
+  bool GetConfigCommonSourceFiles(std::vector<cmSourceFile*>& files) const;
+
+  bool HaveBuildTreeRPATH(const std::string& config) const;
+
   /** Full path with trailing slash to the top-level directory
       holding object files for this target.  Includes the build
       time config name placeholder if needed for the generator.  */
@@ -201,6 +235,17 @@ public:
   /** Get the include directories for this target.  */
   std::vector<std::string> GetIncludeDirectories(
       const std::string& config, const std::string& lang) const;
+
+  void GetCompileOptions(std::vector<std::string> &result,
+                         const std::string& config,
+                         const std::string& language) const;
+
+  void GetCompileFeatures(std::vector<std::string> &features,
+                          const std::string& config) const;
+
+  void GetCompileDefinitions(std::vector<std::string> &result,
+                             const std::string& config,
+                             const std::string& language) const;
 
   bool IsSystemIncludeDirectory(const std::string& dir,
                                 const std::string& config) const;
@@ -317,6 +362,8 @@ public:
                             const std::string &report,
                             const std::string &compatibilityType) const;
 
+  class TargetPropertyEntry;
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
@@ -375,9 +422,41 @@ private:
   };
   mutable std::map<std::string, LinkImplClosure> LinkImplClosureMap;
 
+  typedef std::map<std::string, cmHeadToLinkInterfaceMap>
+                                                          LinkInterfaceMapType;
+  mutable LinkInterfaceMapType LinkInterfaceMap;
+  mutable LinkInterfaceMapType LinkInterfaceUsageRequirementsOnlyMap;
+
+  cmHeadToLinkInterfaceMap&
+  GetHeadToLinkInterfaceMap(std::string const& config) const;
+  cmHeadToLinkInterfaceMap& GetHeadToLinkInterfaceUsageRequirementsMap(
+      std::string const& config) const;
+
+  cmLinkInterface const*
+    GetImportLinkInterface(const std::string& config, cmTarget const* head,
+                           bool usage_requirements_only) const;
+
+  std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
+  std::vector<TargetPropertyEntry*> CompileOptionsEntries;
+  std::vector<TargetPropertyEntry*> CompileFeaturesEntries;
+  std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
+
+  void ExpandLinkItems(std::string const& prop, std::string const& value,
+                       std::string const& config, cmTarget const* headTarget,
+                       bool usage_requirements_only,
+                       std::vector<cmLinkItem>& items,
+                       bool& hadHeadSensitiveCondition) const;
+  void LookupLinkItems(std::vector<std::string> const& names,
+                       std::vector<cmLinkItem>& items) const;
+
   typedef std::pair<std::string, bool> OutputNameKey;
   typedef std::map<OutputNameKey, std::string> OutputNameMapType;
   mutable OutputNameMapType OutputNameMap;
+  mutable bool PolicyWarnedCMP0022;
+  mutable bool DebugIncludesDone;
+  mutable bool DebugCompileOptionsDone;
+  mutable bool DebugCompileFeaturesDone;
+  mutable bool DebugCompileDefinitionsDone;
 
 public:
   std::vector<cmTarget const*> const&

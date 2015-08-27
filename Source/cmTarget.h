@@ -132,15 +132,11 @@ public:
   void AddPostBuildCommand(cmCustomCommand const &cmd)
     {this->PostBuildCommands.push_back(cmd);}
 
-  void Compute();
-
   /**
    * Get the list of the source files used by this target
    */
   void GetSourceFiles(std::vector<cmSourceFile*> &files,
                       const std::string& config) const;
-  bool GetConfigCommonSourceFiles(std::vector<cmSourceFile*>& files) const;
-
   /**
    * Add sources to the target.
    */
@@ -233,53 +229,15 @@ public:
 
   void GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const;
 
-  /** The link interface specifies transitive library dependencies and
-      other information needed by targets that link to this target.  */
-  struct LinkInterfaceLibraries
-  {
-    // Libraries listed in the interface.
-    std::vector<cmLinkItem> Libraries;
-  };
-  struct LinkInterface: public LinkInterfaceLibraries
-  {
-    // Languages whose runtime libraries must be linked.
-    std::vector<std::string> Languages;
-
-    // Shared library dependencies needed for linking on some platforms.
-    std::vector<cmLinkItem> SharedDeps;
-
-    // Number of repetitions of a strongly connected component of two
-    // or more static libraries.
-    int Multiplicity;
-
-    // Libraries listed for other configurations.
-    // Needed only for OLD behavior of CMP0003.
-    std::vector<cmLinkItem> WrongConfigLibraries;
-
-    bool ImplementationIsInterface;
-
-    LinkInterface(): Multiplicity(0), ImplementationIsInterface(false) {}
-  };
-
-  /** Get the link interface for the given configuration.  Returns 0
-      if the target cannot be linked.  */
-  LinkInterface const* GetLinkInterface(const std::string& config,
-                                        cmTarget const* headTarget) const;
-  LinkInterfaceLibraries const*
-    GetLinkInterfaceLibraries(const std::string& config,
-                              cmTarget const* headTarget,
-                              bool usage_requirements_only) const;
-
-  struct LinkImplementation: public cmLinkImplementationLibraries
-  {
-    // Languages whose runtime libraries must be linked.
-    std::vector<std::string> Languages;
-  };
-  LinkImplementation const*
-    GetLinkImplementation(const std::string& config) const;
-
   cmLinkImplementationLibraries const*
     GetLinkImplementationLibraries(const std::string& config) const;
+
+  void ComputeLinkImplementationLibraries(const std::string& config,
+                                          cmOptionalLinkImplementation& impl,
+                                          cmTarget const* head) const;
+
+  cmOptionalLinkImplementation&
+  GetLinkImplMap(std::string const& config) const;
 
   cmTarget const* FindTargetToLink(std::string const& name) const;
 
@@ -331,7 +289,6 @@ public:
   bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
                         const char* newExt = 0) const;
 
-  bool HaveBuildTreeRPATH(const std::string& config) const;
   bool HaveInstallTreeRPATH() const;
 
   // Get the properties
@@ -345,18 +302,6 @@ public:
   /** Get the macro to define when building sources in this target.
       If no macro should be defined null is returned.  */
   const char* GetExportMacro() const;
-
-  void GetCompileDefinitions(std::vector<std::string> &result,
-                             const std::string& config,
-                             const std::string& language) const;
-
-  // Compute the set of languages compiled by the target.  This is
-  // computed every time it is called because the languages can change
-  // when source file properties are changed and we do not have enough
-  // information to forward these property changes to the targets
-  // until we have per-target object file properties.
-  void GetLanguages(std::set<std::string>& languages,
-                    std::string const& config) const;
 
   /** Return whether this target is an executable with symbol exports
       enabled.  */
@@ -401,9 +346,6 @@ public:
   /** @return whether this target have a well defined output file name. */
   bool HaveWellDefinedOutputFiles() const;
 
-  std::vector<std::string> GetIncludeDirectories(
-                     const std::string& config,
-                     const std::string& language) const;
   void InsertInclude(std::string const& entry,
                      cmListFileBacktrace const& bt,
                      bool before = false);
@@ -414,12 +356,6 @@ public:
                                cmListFileBacktrace const& bt);
 
   void AppendBuildInterfaceIncludes();
-
-  void GetCompileOptions(std::vector<std::string> &result,
-                         const std::string& config,
-                         const std::string& language) const;
-  void GetCompileFeatures(std::vector<std::string> &features,
-                          const std::string& config) const;
 
   bool IsNullImpliedByLinkLibraries(const std::string &p) const;
 
@@ -438,6 +374,18 @@ public:
   {
     return this->MaxLanguageStandards;
   }
+
+  cmStringRange GetIncludeDirectoriesEntries() const;
+  cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
+
+  cmStringRange GetCompileOptionsEntries() const;
+  cmBacktraceRange GetCompileOptionsBacktraces() const;
+
+  cmStringRange GetCompileFeaturesEntries() const;
+  cmBacktraceRange GetCompileFeaturesBacktraces() const;
+
+  cmStringRange GetCompileDefinitionsEntries() const;
+  cmBacktraceRange GetCompileDefinitionsBacktraces() const;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   const LinkLibraryVectorType &GetLinkLibrariesForVS6() const {
@@ -553,11 +501,7 @@ private:
   bool IsApple;
   bool IsImportedTarget;
   bool BuildInterfaceIncludesAppended;
-  mutable bool DebugIncludesDone;
-  mutable bool DebugCompileOptionsDone;
-  mutable bool DebugCompileDefinitionsDone;
   mutable bool DebugSourcesDone;
-  mutable bool DebugCompileFeaturesDone;
   mutable bool LinkImplementationLanguageIsContextDependent;
 #if defined(_WIN32) && !defined(__CYGWIN__)
   bool LinkLibrariesForVS6Analyzed;
@@ -591,22 +535,9 @@ private:
   void ComputeImportInfo(std::string const& desired_config,
                          ImportInfo& info) const;
 
-
-  LinkInterface const*
-    GetImportLinkInterface(const std::string& config, cmTarget const* head,
-                           bool usage_requirements_only) const;
-
   cmLinkImplementationLibraries const*
     GetLinkImplementationLibrariesInternal(const std::string& config,
                                            cmTarget const* head) const;
-
-  void ExpandLinkItems(std::string const& prop, std::string const& value,
-                       std::string const& config, cmTarget const* headTarget,
-                       bool usage_requirements_only,
-                       std::vector<cmLinkItem>& items,
-                       bool& hadHeadSensitiveCondition) const;
-  void LookupLinkItems(std::vector<std::string> const& names,
-                       std::vector<cmLinkItem>& items) const;
 
   std::string ProcessSourceItemCMP0049(const std::string& s);
 
