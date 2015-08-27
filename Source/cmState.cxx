@@ -1701,3 +1701,13 @@ std::vector<std::string> cmState::Directory::GetPropertyKeys() const
     }
   return keys;
 }
+
+bool operator==(const cmState::Snapshot& lhs, const cmState::Snapshot& rhs)
+{
+  return lhs.Position == rhs.Position;
+}
+
+bool operator!=(const cmState::Snapshot& lhs, const cmState::Snapshot& rhs)
+{
+  return lhs.Position != rhs.Position;
+}

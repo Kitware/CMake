@@ -2041,24 +2041,37 @@ void cmGlobalGenerator::SetConfiguredFilesPath(cmGlobalGenerator* gen)
     }
 }
 
+bool cmGlobalGenerator::IsExcluded(cmState::Snapshot const& rootSnp,
+                       cmState::Snapshot const& snp_) const
+{
+  cmState::Snapshot snp = snp_;
+  while (snp.IsValid())
+    {
+    if(snp == rootSnp)
+      {
+      // No directory excludes itself.
+      return false;
+      }
+
+    if(snp.GetDirectory().GetPropertyAsBool("EXCLUDE_FROM_ALL"))
+      {
+      // This directory is excluded from its parent.
+      return true;
+      }
+    snp = snp.GetBuildsystemDirectoryParent();
+    }
+  return false;
+}
+
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
                                    cmLocalGenerator* gen) const
 {
-  if(!gen || gen == root)
-    {
-    // No directory excludes itself.
-    return false;
-    }
+  assert(gen);
 
-  if(gen->GetMakefile()->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
-    {
-    // This directory is excluded from its parent.
-    return true;
-    }
+  cmState::Snapshot rootSnp = root->GetStateSnapshot();
+  cmState::Snapshot snp = gen->GetStateSnapshot();
 
-  // This directory is included in its parent.  Check whether the
-  // parent is excluded.
-  return this->IsExcluded(root, gen->GetParent());
+  return this->IsExcluded(rootSnp, snp);
 }
 
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
@@ -2070,12 +2083,9 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
     // This target is excluded from its directory.
     return true;
     }
-  else
-    {
-    // This target is included in its directory.  Check whether the
-    // directory is excluded.
-    return this->IsExcluded(root, target->GetLocalGenerator());
-    }
+  // This target is included in its directory.  Check whether the
+  // directory is excluded.
+  return this->IsExcluded(root, target->GetLocalGenerator());
 }
 
 void
