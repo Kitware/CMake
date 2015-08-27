@@ -75,6 +75,8 @@ struct cmState::BuildsystemDirectoryStateType
   std::vector<std::string> CompileOptions;
   std::vector<cmListFileBacktrace> CompileOptionsBacktraces;
 
+  std::string ProjectName;
+
   cmPropertyMap Properties;
 
   std::vector<cmState::Snapshot> Children;
@@ -1320,6 +1322,16 @@ cmState* cmState::Snapshot::GetState() const
 cmState::Directory cmState::Snapshot::GetDirectory() const
 {
   return Directory(this->Position->BuildSystemDirectory, *this);
+}
+
+void cmState::Snapshot::SetProjectName(const std::string& name)
+{
+  this->Position->BuildSystemDirectory->ProjectName = name;
+}
+
+std::string cmState::Snapshot::GetProjectName() const
+{
+  return this->Position->BuildSystemDirectory->ProjectName;
 }
 
 cmState::Directory::Directory(
