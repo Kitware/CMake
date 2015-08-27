@@ -2331,7 +2331,7 @@ void cmSystemTools::MakefileColorEcho(int color, const char* message,
     assumeTTY = 0;
     }
 
-  if(enabled)
+  if(enabled && color != cmsysTerminal_Color_Normal)
     {
     // Print with color.  Delay the newline until later so that
     // all color restore sequences appear before it.
