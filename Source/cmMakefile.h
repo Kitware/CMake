@@ -62,8 +62,6 @@ class cmGeneratorExpressionEvaluationFile;
  */
 class cmMakefile
 {
-  class Internals;
-  cmsys::auto_ptr<Internals> Internal;
 public:
   /* Mark a variable as used */
   void MarkVariableAsUsed(const std::string& var);
@@ -991,6 +989,7 @@ private:
   bool CheckSystemVars;
   bool CheckCMP0000;
   bool Configured;
+  bool IsSourceFileTryCompile;
   mutable bool SuppressWatches;
 };
 

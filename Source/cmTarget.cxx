@@ -1842,12 +1842,12 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       return;
       }
-      this->Internal->SourceFilesMap.clear();
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-      cmGeneratorExpression ge(lfbt);
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
-      this->Internal->SourceEntries.push_back(
-                            new cmTargetInternals::TargetPropertyEntry(cge));
+    this->Internal->SourceFilesMap.clear();
+    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+    cmGeneratorExpression ge(lfbt);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
+    this->Internal->SourceEntries.push_back(
+                          new cmTargetInternals::TargetPropertyEntry(cge));
     }
   else
     {
