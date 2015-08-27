@@ -16,9 +16,8 @@
 
 //----------------------------------------------------------------------------
 cmLocalXCodeGenerator::cmLocalXCodeGenerator(cmGlobalGenerator* gg,
-                                             cmLocalGenerator* parent,
-                                             cmState::Snapshot snapshot)
-  : cmLocalGenerator(gg, parent, snapshot)
+                                             cmMakefile* mf)
+  : cmLocalGenerator(gg, mf)
 {
   // the global generator does this, so do not
   // put these flags into the language flags

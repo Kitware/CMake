@@ -56,9 +56,8 @@ public:
   cmGlobalGenerator(cmake* cm);
   virtual ~cmGlobalGenerator();
 
-  cmLocalGenerator* MakeLocalGenerator(
-      cmState::Snapshot snapshot = cmState::Snapshot(),
-      cmLocalGenerator* parent = 0);
+  virtual cmLocalGenerator*
+  CreateLocalGenerator(cmMakefile* mf);
 
   ///! Get the name for this generator
   virtual std::string GetName() const { return "Generic"; }
@@ -92,6 +91,7 @@ public:
     ImportedOnly
   };
 
+  void CreateLocalGenerators();
   void CreateGenerationObjects(TargetTypes targetTypes = AllTargets);
 
   /**
@@ -395,7 +395,7 @@ protected:
   // Fill the ProjectMap, this must be called after LocalGenerators
   // has been populated.
   void FillProjectMap();
-  void CheckLocalGenerators();
+  void CheckTargetProperties();
   bool IsExcluded(cmState::Snapshot const& root,
                   cmState::Snapshot const& snp) const;
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen) const;
@@ -441,10 +441,6 @@ protected:
   virtual bool UseFolderProperty();
 
 private:
-  ///! Create a local generator appropriate to this Global Generator
-  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent,
-                                                 cmState::Snapshot snapshot);
-
   cmMakefile* TryCompileOuterMakefile;
   // If you add a new map here, make sure it is copied
   // in EnableLanguagesFromGenerator

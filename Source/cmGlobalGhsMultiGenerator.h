@@ -31,8 +31,7 @@ public:
   { return new cmGlobalGeneratorSimpleFactory<cmGlobalGhsMultiGenerator>(); }
 
   ///! create the correct local generator
-  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent,
-                                                 cmState::Snapshot snapshot);
+  virtual cmLocalGenerator *CreateLocalGenerator(cmMakefile* mf);
 
   /// @return the name of this generator.
   static std::string GetActualName() { return "Green Hills MULTI"; }
