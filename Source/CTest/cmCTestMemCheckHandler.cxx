@@ -80,8 +80,8 @@ public:
       int i = 0;
       for(; atts[i] != 0; i+=2)
         {
-        ostr << "   " << cmXMLSafe(atts[i])
-             << " - " << cmXMLSafe(atts[i+1]) << "\n";
+        ostr << "   " << atts[i]
+             << " - " << atts[i+1] << "\n";
         }
       ostr << "\n";
       this->Log += ostr.str();
@@ -856,7 +856,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckSanitizerOutput(
       defects++;
       ostr << "<b>" <<  this->ResultStrings[idx] << "</b> ";
       }
-    ostr << cmXMLSafe(*i) << std::endl;
+    ostr << *i << std::endl;
     }
   log = ostr.str();
   if(defects)
@@ -908,7 +908,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckPurifyOutput(
       results[failure] ++;
       defects ++;
       }
-    ostr << cmXMLSafe(*i) << std::endl;
+    ostr << *i << std::endl;
     }
 
   log = ostr.str();
@@ -1056,7 +1056,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
         defects ++;
         }
       totalOutputSize += lines[cc].size();
-      ostr << cmXMLSafe(lines[cc]) << std::endl;
+      ostr << lines[cc] << std::endl;
       }
     else
       {
@@ -1070,11 +1070,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
         nonValGrindOutput.begin(); i != nonValGrindOutput.end(); ++i)
     {
     totalOutputSize += lines[*i].size();
-    cmCTestOptionalLog(this->CTest, DEBUG, "before xml safe "
-               << lines[*i] << std::endl, this->Quiet);
-    cmCTestOptionalLog(this->CTest, DEBUG, "after  xml safe "
-               <<  cmXMLSafe(lines[*i]) << std::endl, this->Quiet);
-    ostr << cmXMLSafe(lines[*i]) << std::endl;
+    ostr << lines[*i] << std::endl;
     if(!unlimitedOutput && totalOutputSize >
        static_cast<size_t>(this->CustomMaximumFailedTestOutputSize))
       {
