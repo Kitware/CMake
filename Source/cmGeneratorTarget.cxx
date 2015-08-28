@@ -73,6 +73,7 @@ struct HeaderSourcesTag {};
 struct ExternalObjectsTag {};
 struct IDLSourcesTag {};
 struct ResxTag {};
+struct ReswTag {};
 struct ModuleDefinitionFileTag {};
 struct AppManifestTag{};
 struct CertificatesTag{};
@@ -132,6 +133,10 @@ struct DoAccept<true>
     data.ExpectedXamlHeaders.insert(hFileName);
     data.ExpectedXamlSources.insert(cppFileName);
     data.XamlSources.push_back(f);
+    }
+  static void Do(cmGeneratorTarget::ReswData& data, cmSourceFile* f)
+    {
+    data.ReswSources.push_back(f);
     }
   static void Do(std::string& data, cmSourceFile* f)
     {
@@ -211,6 +216,10 @@ struct TagVisitor
     else if(ext == "resx")
       {
       DoAccept<IsSameTag<Tag, ResxTag>::Result>::Do(this->Data, sf);
+      }
+    else if(ext == "resw")
+      {
+      DoAccept<IsSameTag<Tag, ReswTag>::Result>::Do(this->Data, sf);
       }
     else if (ext == "appxmanifest")
       {
@@ -612,6 +621,16 @@ void cmGeneratorTarget
   ResxData data;
   IMPLEMENT_VISIT_IMPL(Resx, COMMA cmGeneratorTarget::ResxData)
   srcs = data.ResxSources;
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget
+::GetReswSources(std::vector<cmSourceFile const*>& srcs,
+                 const std::string& config) const
+{
+  ReswData data;
+  IMPLEMENT_VISIT_IMPL(Resw, COMMA cmGeneratorTarget::ReswData)
+  srcs = data.ReswSources;
 }
 
 //----------------------------------------------------------------------------

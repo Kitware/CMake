@@ -472,6 +472,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteDotNetReferences();
   this->WriteEmbeddedResourceGroup();
   this->WriteXamlFilesGroup();
+  this->WriteReswGroup();
   this->WriteWinRTReferences();
   this->WriteProjectReferences();
   this->WriteString(
@@ -582,6 +583,23 @@ void cmVisualStudio10TargetGenerator::WriteXamlFilesGroup()
       this->WriteString("</", 2);
       (*this->BuildFileStream) << xamlType << ">\n";
 
+      }
+    this->WriteString("</ItemGroup>\n", 1);
+    }
+}
+
+void cmVisualStudio10TargetGenerator::WriteReswGroup()
+{
+  std::vector<cmSourceFile const*> reswObjs;
+    this->GeneratorTarget->GetReswSources(reswObjs, "");
+  if(!reswObjs.empty())
+    {
+    this->WriteString("<ItemGroup>\n", 1);
+    for(std::vector<cmSourceFile const*>::const_iterator oi = reswObjs.begin();
+        oi != reswObjs.end(); ++oi)
+      {
+      std::string obj = (*oi)->GetFullPath();
+      this->WriteSource("PRIResource", *oi);
       }
     this->WriteString("</ItemGroup>\n", 1);
     }

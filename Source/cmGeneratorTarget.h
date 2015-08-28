@@ -57,6 +57,8 @@ public:
 
   void GetResxSources(std::vector<cmSourceFile const*>&,
                       const std::string& config) const;
+  void GetReswSources(std::vector<cmSourceFile const*>&,
+                      const std::string& config) const;
   void GetIDLSources(std::vector<cmSourceFile const*>&,
                      const std::string& config) const;
   void GetExternalObjects(std::vector<cmSourceFile const*>&,
@@ -349,6 +351,10 @@ public:
   struct ResxData {
     mutable std::set<std::string> ExpectedResxHeaders;
     mutable std::vector<cmSourceFile const*> ResxSources;
+  };
+
+  struct ReswData {
+    mutable std::vector<cmSourceFile const*> ReswSources;
   };
 
   struct XamlData {
