@@ -1127,23 +1127,40 @@ void cmGlobalGenerator::Configure()
   this->FirstTimeProgress = 0.0f;
   this->ClearGeneratorMembers();
 
-  // start with this directory
-  cmLocalGenerator *lg = this->MakeLocalGenerator();
-  this->Makefiles.push_back(lg->GetMakefile());
+  cmMakefile* dirMf =
+      new cmMakefile(this, this->GetCMakeInstance()->GetCurrentSnapshot());
+  this->Makefiles.push_back(dirMf);
+  cmLocalGenerator *lg = this->CreateLocalGenerator(dirMf);
   this->LocalGenerators.push_back(lg);
 
   // set the Start directories
-  lg->GetMakefile()->SetCurrentSourceDirectory
+  dirMf->SetCurrentSourceDirectory
     (this->CMakeInstance->GetHomeDirectory());
-  lg->GetMakefile()->SetCurrentBinaryDirectory
+  dirMf->SetCurrentBinaryDirectory
     (this->CMakeInstance->GetHomeOutputDirectory());
 
   this->BinaryDirectories.insert(
       this->CMakeInstance->GetHomeOutputDirectory());
 
   // now do it
-  lg->GetMakefile()->Configure();
-  lg->GetMakefile()->EnforceDirectoryLevelRules();
+  dirMf->Configure();
+  dirMf->EnforceDirectoryLevelRules();
+
+  // Put a copy of each global target in every directory.
+  cmTargets globalTargets;
+  this->CreateDefaultGlobalTargets(&globalTargets);
+
+  for (unsigned int i = 0; i < this->Makefiles.size(); ++i)
+    {
+    cmMakefile* mf = this->Makefiles[i];
+    cmTargets* targets = &(mf->GetTargets());
+    cmTargets::iterator tit;
+    for ( tit = globalTargets.begin(); tit != globalTargets.end(); ++ tit )
+      {
+      (*targets)[tit->first] = tit->second;
+      (*targets)[tit->first].SetMakefile(mf);
+      }
+    }
 
   // update the cache entry for the number of local generators, this is used
   // for progress
@@ -1155,11 +1172,7 @@ void cmGlobalGenerator::Configure()
 
   // check for link libraries and include directories containing "NOTFOUND"
   // and for infinite loops
-  this->CheckLocalGenerators();
-
-  // at this point this->LocalGenerators has been filled,
-  // so create the map from project name to vector of local generators
-  this->FillProjectMap();
+  this->CheckTargetProperties();
 
   if ( this->CMakeInstance->GetWorkingMode() == cmake::NORMAL_MODE)
     {
@@ -1186,25 +1199,6 @@ void cmGlobalGenerator::Configure()
       }
     this->CMakeInstance->UpdateProgress(msg.str().c_str(), -1);
     }
-
-  unsigned int i;
-
-  // Put a copy of each global target in every directory.
-  cmTargets globalTargets;
-  this->CreateDefaultGlobalTargets(&globalTargets);
-
-  for (i = 0; i < this->Makefiles.size(); ++i)
-    {
-    cmMakefile* mf = this->Makefiles[i];
-    cmTargets* targets = &(mf->GetTargets());
-    cmTargets::iterator tit;
-    for ( tit = globalTargets.begin(); tit != globalTargets.end(); ++ tit )
-      {
-      (*targets)[tit->first] = tit->second;
-      (*targets)[tit->first].SetMakefile(mf);
-      }
-    }
-
 }
 
 void cmGlobalGenerator::CreateGenerationObjects(TargetTypes targetTypes)
@@ -1266,6 +1260,10 @@ bool cmGlobalGenerator::Compute()
   this->FinalizeTargetCompileInfo();
 
   this->CreateGenerationObjects();
+
+  // at this point this->LocalGenerators has been filled,
+  // so create the map from project name to vector of local generators
+  this->FillProjectMap();
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   // Iterate through all targets and set up automoc for those which have
@@ -1600,6 +1598,7 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   cmDeleteAll(this->BuildExportSets);
   this->BuildExportSets.clear();
 
+  cmDeleteAll(this->Makefiles);
   this->Makefiles.clear();
 
   cmDeleteAll(this->LocalGenerators);
@@ -1634,7 +1633,7 @@ void cmGlobalGenerator::ComputeTargetObjectDirectory(cmGeneratorTarget*) const
 {
 }
 
-void cmGlobalGenerator::CheckLocalGenerators()
+void cmGlobalGenerator::CheckTargetProperties()
 {
   std::map<std::string, std::string> notFoundMap;
 //  std::set<std::string> notFoundMap;
@@ -1985,23 +1984,10 @@ void cmGlobalGenerator::EnableInstallTarget()
   this->InstallTargetEnabled = true;
 }
 
-cmLocalGenerator *
-cmGlobalGenerator::MakeLocalGenerator(cmState::Snapshot snapshot,
-                                      cmLocalGenerator *parent)
-{
-  if (!snapshot.IsValid())
-    {
-    snapshot = this->CMakeInstance->GetCurrentSnapshot();
-    }
-
-  return this->CreateLocalGenerator(parent, snapshot);
-}
-
 cmLocalGenerator*
-cmGlobalGenerator::CreateLocalGenerator(cmLocalGenerator* parent,
-                                        cmState::Snapshot snapshot)
+cmGlobalGenerator::CreateLocalGenerator(cmMakefile* mf)
 {
-  return new cmLocalGenerator(this, parent, snapshot);
+  return new cmLocalGenerator(this, mf);
 }
 
 void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen,

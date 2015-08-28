@@ -429,7 +429,9 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
     std::string homeOutputDir = this->GetHomeOutputDirectory();
     this->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());
     this->SetHomeOutputDirectory(cmSystemTools::GetCurrentWorkingDirectory());
-    cmsys::auto_ptr<cmLocalGenerator> lg(gg->MakeLocalGenerator());
+    cmState::Snapshot snapshot = this->GetCurrentSnapshot();
+    cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(gg, snapshot));
+    cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator(mf.get()));
     lg->GetMakefile()->SetCurrentBinaryDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
     lg->GetMakefile()->SetCurrentSourceDirectory
@@ -469,9 +471,10 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
   cmGlobalGenerator *gg = new cmGlobalGenerator(this);
   this->SetGlobalGenerator(gg);
 
+  cmState::Snapshot snapshot = this->GetCurrentSnapshot();
   // read in the list file to fill the cache
-  cmsys::auto_ptr<cmLocalGenerator> lg(gg->MakeLocalGenerator());
-  cmMakefile* mf = lg->GetMakefile();
+  cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(gg, snapshot));
+  cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator(mf.get()));
   mf->SetCurrentBinaryDirectory
     (cmSystemTools::GetCurrentWorkingDirectory());
   mf->SetCurrentSourceDirectory
@@ -2059,8 +2062,8 @@ int cmake::CheckBuildSystem()
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cmGlobalGenerator gg(&cm);
-  cmsys::auto_ptr<cmLocalGenerator> lg(gg.MakeLocalGenerator());
-  cmMakefile* mf = lg->GetMakefile();
+  cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(&gg, cm.GetCurrentSnapshot()));
+  cmsys::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator(mf.get()));
   if(!mf->ReadListFile(this->CheckBuildSystemArgument.c_str()) ||
      cmSystemTools::GetErrorOccuredFlag())
     {
@@ -2089,8 +2092,11 @@ int cmake::CheckBuildSystem()
       ggd(this->CreateGlobalGenerator(genName));
     if(ggd.get())
       {
-      cmsys::auto_ptr<cmLocalGenerator> lgd(ggd->MakeLocalGenerator());
-      lgd->ClearDependencies(mf, verbose);
+      cmsys::auto_ptr<cmMakefile> mfd(new cmMakefile(ggd.get(),
+                                                    cm.GetCurrentSnapshot()));
+      cmsys::auto_ptr<cmLocalGenerator> lgd(
+            ggd->CreateLocalGenerator(mfd.get()));
+      lgd->ClearDependencies(mfd.get(), verbose);
       }
     }
 

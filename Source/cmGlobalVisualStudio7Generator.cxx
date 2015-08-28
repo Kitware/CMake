@@ -279,12 +279,11 @@ void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
 }
 
 ///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *
-cmGlobalVisualStudio7Generator::CreateLocalGenerator(cmLocalGenerator* parent,
-                                                   cmState::Snapshot snapshot)
+cmLocalGenerator *cmGlobalVisualStudio7Generator::CreateLocalGenerator(
+    cmMakefile* mf)
 {
   cmLocalVisualStudio7Generator *lg =
-    new cmLocalVisualStudio7Generator(this, parent, snapshot);
+    new cmLocalVisualStudio7Generator(this, mf);
   return lg;
 }
 

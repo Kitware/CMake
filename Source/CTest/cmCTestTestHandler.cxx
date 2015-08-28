@@ -1592,8 +1592,9 @@ void cmCTestTestHandler::GetListOfTests()
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cmGlobalGenerator gg(&cm);
-  cmsys::auto_ptr<cmLocalGenerator> lg(gg.MakeLocalGenerator());
-  cmMakefile *mf = lg->GetMakefile();
+  cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(&gg, cm.GetCurrentSnapshot()));
+  cmsys::auto_ptr<cmLocalGenerator> lg(
+        gg.CreateLocalGenerator(mf.get()));
   mf->AddDefinition("CTEST_CONFIGURATION_TYPE",
     this->CTest->GetConfigType().c_str());
 
