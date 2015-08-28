@@ -36,7 +36,8 @@ class cmCustomCommandGenerator;
 class cmLocalGenerator : public cmOutputConverter
 {
 public:
-  cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile);
+  cmLocalGenerator(cmGlobalGenerator* gg, cmLocalGenerator* parent,
+                   cmState::Snapshot snapshot);
   virtual ~cmLocalGenerator();
 
   /**
@@ -84,6 +85,9 @@ public:
 
   cmState* GetState() const;
   cmState::Snapshot GetStateSnapshot() const;
+
+  ///! set/get the parent generator
+  cmLocalGenerator* GetParent() const {return this->Parent;}
 
   void AddArchitectureFlags(std::string& flags,
                             cmGeneratorTarget const* target,
@@ -339,6 +343,7 @@ protected:
   cmMakefile *Makefile;
   cmState::Snapshot StateSnapshot;
   cmGlobalGenerator *GlobalGenerator;
+  cmLocalGenerator* Parent;
   std::map<std::string, std::string> UniqueObjectNamesMap;
   std::string::size_type ObjectPathMax;
   std::set<std::string> ObjectMaxPathViolations;

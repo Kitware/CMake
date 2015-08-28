@@ -14,8 +14,9 @@
 #include "cmMakefile.h"
 
 cmLocalCommonGenerator::cmLocalCommonGenerator(cmGlobalGenerator* gg,
-                                               cmMakefile* mf):
-  cmLocalGenerator(gg, mf)
+                                               cmLocalGenerator* parent,
+                                               cmState::Snapshot snapshot):
+  cmLocalGenerator(gg, parent, snapshot)
 {
 }
 

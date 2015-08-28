@@ -48,7 +48,8 @@ public:
   virtual bool Compute();
 
   ///! create the correct local generator
-  virtual cmLocalGenerator *CreateLocalGenerator(cmMakefile* mf);
+  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent,
+                                                 cmState::Snapshot snapshot);
 
   /**
    * Try to determine system information such as shared library

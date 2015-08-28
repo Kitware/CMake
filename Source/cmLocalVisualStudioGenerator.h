@@ -31,7 +31,9 @@ class cmCustomCommandGenerator;
 class cmLocalVisualStudioGenerator : public cmLocalGenerator
 {
 public:
-  cmLocalVisualStudioGenerator(cmGlobalGenerator* gg, cmMakefile* mf);
+  cmLocalVisualStudioGenerator(cmGlobalGenerator* gg,
+                               cmLocalGenerator* parent,
+                               cmState::Snapshot snapshot);
   virtual ~cmLocalVisualStudioGenerator();
 
   /** Construct a script from the given list of command lines.  */

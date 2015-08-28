@@ -59,10 +59,11 @@ void cmGlobalUnixMakefileGenerator3
 }
 
 ///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator* cmGlobalUnixMakefileGenerator3::CreateLocalGenerator(
-    cmMakefile* mf)
+cmLocalGenerator *
+cmGlobalUnixMakefileGenerator3::CreateLocalGenerator(cmLocalGenerator* parent,
+                                                   cmState::Snapshot snapshot)
 {
-  return new cmLocalUnixMakefileGenerator3(this, mf);
+  return new cmLocalUnixMakefileGenerator3(this, parent, snapshot);
 }
 
 //----------------------------------------------------------------------------
@@ -577,20 +578,16 @@ void cmGlobalUnixMakefileGenerator3
                      makeOptions.begin(), makeOptions.end());
   if (!targetName.empty())
     {
-    cmMakefile* mf;
     cmLocalUnixMakefileGenerator3 *lg;
     if (!this->LocalGenerators.empty())
       {
       lg = static_cast<cmLocalUnixMakefileGenerator3 *>
         (this->LocalGenerators[0]);
-      mf = lg->GetMakefile();
       }
     else
       {
-      cmState::Snapshot snapshot = this->CMakeInstance->GetCurrentSnapshot();
-      mf = new cmMakefile(this, snapshot);
       lg = static_cast<cmLocalUnixMakefileGenerator3 *>
-        (this->CreateLocalGenerator(mf));
+        (this->MakeLocalGenerator());
       // set the Start directories
       lg->GetMakefile()->SetCurrentSourceDirectory
         (this->CMakeInstance->GetHomeDirectory());
@@ -609,7 +606,6 @@ void cmGlobalUnixMakefileGenerator3
     if (this->LocalGenerators.empty())
       {
       delete lg;
-      delete mf;
       }
     }
 }

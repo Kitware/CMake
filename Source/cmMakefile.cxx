@@ -16,6 +16,7 @@
 #include "cmSourceFileLocation.h"
 #include "cmSystemTools.h"
 #include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmCommands.h"
 #include "cmState.h"
 #include "cmOutputConverter.h"
@@ -43,10 +44,9 @@
 #include <assert.h>
 
 // default is not to be building executables
-cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
-                       cmState::Snapshot const& snapshot)
-  : GlobalGenerator(globalGenerator),
-    StateSnapshot(snapshot)
+cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
+  : LocalGenerator(localGenerator),
+    StateSnapshot(localGenerator->GetStateSnapshot())
 {
   this->IsSourceFileTryCompile = false;
 
@@ -1753,8 +1753,13 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
                                            this->ContextStack.back()->Name,
                                            this->ContextStack.back()->Line);
 
-  cmMakefile* subMf = new cmMakefile(this->GlobalGenerator, newSnapshot);
-  this->GetGlobalGenerator()->AddMakefile(subMf);
+  // create a new local generator and set its parent
+  cmLocalGenerator *lg2 = this->GetGlobalGenerator()
+        ->MakeLocalGenerator(newSnapshot, this->LocalGenerator);
+  this->GetGlobalGenerator()->AddMakefile(lg2->GetMakefile());
+  this->GetGlobalGenerator()->AddLocalGenerator(lg2);
+
+  cmMakefile* subMf = lg2->GetMakefile();
 
   // set the subdirs start dirs
   subMf->SetCurrentSourceDirectory(srcPath);
@@ -2329,8 +2334,7 @@ void cmMakefile::ExpandVariablesCMP0019()
        l != this->Targets.end(); ++l)
     {
     cmTarget &t = l->second;
-    if (t.GetType() == cmTarget::INTERFACE_LIBRARY
-        || t.GetType() == cmTarget::GLOBAL_TARGET)
+    if (t.GetType() == cmTarget::INTERFACE_LIBRARY)
       {
       continue;
       }
@@ -3740,12 +3744,12 @@ bool cmMakefile::GetIsSourceFileTryCompile() const
 
 cmake *cmMakefile::GetCMakeInstance() const
 {
-  return this->GlobalGenerator->GetCMakeInstance();
+  return this->GetGlobalGenerator()->GetCMakeInstance();
 }
 
 cmGlobalGenerator* cmMakefile::GetGlobalGenerator() const
 {
-  return this->GlobalGenerator;
+  return this->LocalGenerator->GetGlobalGenerator();
 }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE

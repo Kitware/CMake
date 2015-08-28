@@ -1217,9 +1217,7 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   cm.SetHomeDirectory(targetDirectory);
   cmGlobalGenerator gg(&cm);
 
-  cmState::Snapshot snapshot = cm.GetCurrentSnapshot();
-  cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(&gg, snapshot));
-  cmsys::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator(mf.get()));
+  cmLocalGenerator* lg = gg.MakeLocalGenerator();
   lg->GetMakefile()->SetCurrentBinaryDirectory(targetDirectory);
   lg->GetMakefile()->SetCurrentSourceDirectory(targetDirectory);
   gg.SetCurrentMakefile(lg->GetMakefile());
@@ -1236,6 +1234,7 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
 
   this->WriteOldMocDefinitionsFile(targetDirectory);
 
+  delete lg;
   return success;
 }
 

@@ -53,8 +53,10 @@ static void cmConvertToWindowsSlash(std::string& s)
 
 //----------------------------------------------------------------------------
 cmLocalVisualStudio7Generator
-::cmLocalVisualStudio7Generator(cmGlobalGenerator* gg, cmMakefile* mf):
-  cmLocalVisualStudioGenerator(gg, mf)
+::cmLocalVisualStudio7Generator(cmGlobalGenerator* gg,
+                                cmLocalGenerator* parent,
+                                cmState::Snapshot snapshot):
+  cmLocalVisualStudioGenerator(gg, parent, snapshot)
 {
   this->Internal = new cmLocalVisualStudio7GeneratorInternals(this);
 }
