@@ -13,13 +13,8 @@
 #define @KWSYS_NAMESPACE@_Encoding_hxx
 
 #include <@KWSYS_NAMESPACE@/Configure.hxx>
-#include <@KWSYS_NAMESPACE@/stl/string>
-#include <@KWSYS_NAMESPACE@/stl/vector>
-
-/* Define these macros temporarily to keep the code readable.  */
-#if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
-# define kwsys_stl @KWSYS_NAMESPACE@_stl
-#endif
+#include <string>
+#include <vector>
 
 namespace @KWSYS_NAMESPACE@
 {
@@ -65,23 +60,18 @@ public:
   // Convert a narrow string to a wide string.
   // On Windows, UTF-8 is assumed, and on other platforms,
   // the current locale is assumed.
-  static kwsys_stl::wstring ToWide(const kwsys_stl::string& str);
-  static kwsys_stl::wstring ToWide(const char* str);
+  static std::wstring ToWide(const std::string& str);
+  static std::wstring ToWide(const char* str);
 
   // Convert a wide string to a narrow string.
   // On Windows, UTF-8 is assumed, and on other platforms,
   // the current locale is assumed.
-  static kwsys_stl::string ToNarrow(const kwsys_stl::wstring& str);
-  static kwsys_stl::string ToNarrow(const wchar_t* str);
+  static std::string ToNarrow(const std::wstring& str);
+  static std::string ToNarrow(const wchar_t* str);
 
 #endif // @KWSYS_NAMESPACE@_STL_HAS_WSTRING
 
 }; // class Encoding
 } // namespace @KWSYS_NAMESPACE@
-
-/* Undefine temporary macros.  */
-#if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
-# undef kwsys_stl
-#endif
 
 #endif

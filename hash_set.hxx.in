@@ -39,7 +39,7 @@
 
 #include <@KWSYS_NAMESPACE@/hashtable.hxx>
 #include <@KWSYS_NAMESPACE@/hash_fun.hxx>
-#include <@KWSYS_NAMESPACE@/stl/functional> // equal_to
+#include <functional> // equal_to
 
 #if defined(_MSC_VER)
 # pragma warning (push)
@@ -57,7 +57,7 @@ namespace @KWSYS_NAMESPACE@
 
 // identity is an extension: it is not part of the standard.
 template <class _Tp>
-struct _Identity : public @KWSYS_NAMESPACE@_stl::unary_function<_Tp,_Tp>
+struct _Identity : public std::unary_function<_Tp,_Tp>
 {
   const _Tp& operator()(const _Tp& __x) const { return __x; }
 };
@@ -66,8 +66,8 @@ struct _Identity : public @KWSYS_NAMESPACE@_stl::unary_function<_Tp,_Tp>
 
 template <class _Value,
           class _HashFcn  = hash<_Value>,
-          class _EqualKey = @KWSYS_NAMESPACE@_stl::equal_to<_Value>,
-          class _Alloc = @KWSYS_NAMESPACE@_HASH_DEFAULT_ALLOCATOR(char) >
+          class _EqualKey = std::equal_to<_Value>,
+          class _Alloc = std::allocator<char> >
 class hash_set;
 
 template <class _Value, class _HashFcn, class _EqualKey, class _Alloc>
@@ -116,7 +116,6 @@ public:
            const allocator_type& __a = allocator_type())
     : _M_ht(__n, __hf, __eql, __a) {}
 
-#if @KWSYS_NAMESPACE@_CXX_HAS_MEMBER_TEMPLATES
   template <class _InputIterator>
   hash_set(_InputIterator __f, _InputIterator __l)
     : _M_ht(100, hasher(), key_equal(), allocator_type())
@@ -136,40 +135,6 @@ public:
            const allocator_type& __a = allocator_type())
     : _M_ht(__n, __hf, __eql, __a)
     { _M_ht.insert_unique(__f, __l); }
-#else
-
-  hash_set(const value_type* __f, const value_type* __l)
-    : _M_ht(100, hasher(), key_equal(), allocator_type())
-    { _M_ht.insert_unique(__f, __l); }
-  hash_set(const value_type* __f, const value_type* __l, size_type __n)
-    : _M_ht(__n, hasher(), key_equal(), allocator_type())
-    { _M_ht.insert_unique(__f, __l); }
-  hash_set(const value_type* __f, const value_type* __l, size_type __n,
-           const hasher& __hf)
-    : _M_ht(__n, __hf, key_equal(), allocator_type())
-    { _M_ht.insert_unique(__f, __l); }
-  hash_set(const value_type* __f, const value_type* __l, size_type __n,
-           const hasher& __hf, const key_equal& __eql,
-           const allocator_type& __a = allocator_type())
-    : _M_ht(__n, __hf, __eql, __a)
-    { _M_ht.insert_unique(__f, __l); }
-
-  hash_set(const_iterator __f, const_iterator __l)
-    : _M_ht(100, hasher(), key_equal(), allocator_type())
-    { _M_ht.insert_unique(__f, __l); }
-  hash_set(const_iterator __f, const_iterator __l, size_type __n)
-    : _M_ht(__n, hasher(), key_equal(), allocator_type())
-    { _M_ht.insert_unique(__f, __l); }
-  hash_set(const_iterator __f, const_iterator __l, size_type __n,
-           const hasher& __hf)
-    : _M_ht(__n, __hf, key_equal(), allocator_type())
-    { _M_ht.insert_unique(__f, __l); }
-  hash_set(const_iterator __f, const_iterator __l, size_type __n,
-           const hasher& __hf, const key_equal& __eql,
-           const allocator_type& __a = allocator_type())
-    : _M_ht(__n, __hf, __eql, __a)
-    { _M_ht.insert_unique(__f, __l); }
-#endif
 
 public:
   size_type size() const { return _M_ht.size(); }
@@ -177,43 +142,35 @@ public:
   bool empty() const { return _M_ht.empty(); }
   void swap(hash_set& __hs) { _M_ht.swap(__hs._M_ht); }
 
-  friend bool operator==@KWSYS_NAMESPACE@_CXX_NULL_TEMPLATE_ARGS(const hash_set&,
-                                                                 const hash_set&);
+  friend bool operator==<>(const hash_set&,
+                           const hash_set&);
 
   iterator begin() const { return _M_ht.begin(); }
   iterator end() const { return _M_ht.end(); }
 
 public:
-  @KWSYS_NAMESPACE@_stl::pair<iterator, bool> insert(const value_type& __obj)
+  std::pair<iterator, bool> insert(const value_type& __obj)
     {
       typedef typename _Ht::iterator _Ht_iterator;
-      @KWSYS_NAMESPACE@_stl::pair<_Ht_iterator, bool> __p = _M_ht.insert_unique(__obj);
-      return @KWSYS_NAMESPACE@_stl::pair<iterator,bool>(__p.first, __p.second);
+      std::pair<_Ht_iterator, bool> __p = _M_ht.insert_unique(__obj);
+      return std::pair<iterator,bool>(__p.first, __p.second);
     }
-#if @KWSYS_NAMESPACE@_CXX_HAS_MEMBER_TEMPLATES
   template <class _InputIterator>
   void insert(_InputIterator __f, _InputIterator __l)
     { _M_ht.insert_unique(__f,__l); }
-#else
-  void insert(const value_type* __f, const value_type* __l) {
-    _M_ht.insert_unique(__f,__l);
-  }
-  void insert(const_iterator __f, const_iterator __l)
-    {_M_ht.insert_unique(__f, __l); }
-#endif
-  @KWSYS_NAMESPACE@_stl::pair<iterator, bool> insert_noresize(const value_type& __obj)
+  std::pair<iterator, bool> insert_noresize(const value_type& __obj)
   {
     typedef typename _Ht::iterator _Ht_iterator;
-    @KWSYS_NAMESPACE@_stl::pair<_Ht_iterator, bool> __p =
+    std::pair<_Ht_iterator, bool> __p =
       _M_ht.insert_unique_noresize(__obj);
-    return @KWSYS_NAMESPACE@_stl::pair<iterator, bool>(__p.first, __p.second);
+    return std::pair<iterator, bool>(__p.first, __p.second);
   }
 
   iterator find(const key_type& __key) const { return _M_ht.find(__key); }
 
   size_type count(const key_type& __key) const { return _M_ht.count(__key); }
 
-  @KWSYS_NAMESPACE@_stl::pair<iterator, iterator> equal_range(const key_type& __key) const
+  std::pair<iterator, iterator> equal_range(const key_type& __key) const
     { return _M_ht.equal_range(__key); }
 
   size_type erase(const key_type& __key) {return _M_ht.erase(__key); }
@@ -254,8 +211,8 @@ swap(hash_set<_Val,_HashFcn,_EqualKey,_Alloc>& __hs1,
 
 template <class _Value,
           class _HashFcn = hash<_Value>,
-          class _EqualKey = @KWSYS_NAMESPACE@_stl::equal_to<_Value>,
-          class _Alloc = @KWSYS_NAMESPACE@_HASH_DEFAULT_ALLOCATOR(char) >
+          class _EqualKey = std::equal_to<_Value>,
+          class _Alloc = std::allocator<char> >
 class hash_multiset;
 
 template <class _Val, class _HashFcn, class _EqualKey, class _Alloc>
@@ -305,7 +262,6 @@ public:
                 const allocator_type& __a = allocator_type())
     : _M_ht(__n, __hf, __eql, __a) {}
 
-#if @KWSYS_NAMESPACE@_CXX_HAS_MEMBER_TEMPLATES
   template <class _InputIterator>
   hash_multiset(_InputIterator __f, _InputIterator __l)
     : _M_ht(100, hasher(), key_equal(), allocator_type())
@@ -325,40 +281,6 @@ public:
                 const allocator_type& __a = allocator_type())
     : _M_ht(__n, __hf, __eql, __a)
     { _M_ht.insert_equal(__f, __l); }
-#else
-
-  hash_multiset(const value_type* __f, const value_type* __l)
-    : _M_ht(100, hasher(), key_equal(), allocator_type())
-    { _M_ht.insert_equal(__f, __l); }
-  hash_multiset(const value_type* __f, const value_type* __l, size_type __n)
-    : _M_ht(__n, hasher(), key_equal(), allocator_type())
-    { _M_ht.insert_equal(__f, __l); }
-  hash_multiset(const value_type* __f, const value_type* __l, size_type __n,
-                const hasher& __hf)
-    : _M_ht(__n, __hf, key_equal(), allocator_type())
-    { _M_ht.insert_equal(__f, __l); }
-  hash_multiset(const value_type* __f, const value_type* __l, size_type __n,
-                const hasher& __hf, const key_equal& __eql,
-                const allocator_type& __a = allocator_type())
-    : _M_ht(__n, __hf, __eql, __a)
-    { _M_ht.insert_equal(__f, __l); }
-
-  hash_multiset(const_iterator __f, const_iterator __l)
-    : _M_ht(100, hasher(), key_equal(), allocator_type())
-    { _M_ht.insert_equal(__f, __l); }
-  hash_multiset(const_iterator __f, const_iterator __l, size_type __n)
-    : _M_ht(__n, hasher(), key_equal(), allocator_type())
-    { _M_ht.insert_equal(__f, __l); }
-  hash_multiset(const_iterator __f, const_iterator __l, size_type __n,
-                const hasher& __hf)
-    : _M_ht(__n, __hf, key_equal(), allocator_type())
-    { _M_ht.insert_equal(__f, __l); }
-  hash_multiset(const_iterator __f, const_iterator __l, size_type __n,
-                const hasher& __hf, const key_equal& __eql,
-                const allocator_type& __a = allocator_type())
-    : _M_ht(__n, __hf, __eql, __a)
-    { _M_ht.insert_equal(__f, __l); }
-#endif
 
 public:
   size_type size() const { return _M_ht.size(); }
@@ -366,8 +288,8 @@ public:
   bool empty() const { return _M_ht.empty(); }
   void swap(hash_multiset& hs) { _M_ht.swap(hs._M_ht); }
 
-  friend bool operator==@KWSYS_NAMESPACE@_CXX_NULL_TEMPLATE_ARGS(const hash_multiset&,
-                                                                 const hash_multiset&);
+  friend bool operator==<>(const hash_multiset&,
+                           const hash_multiset&);
 
   iterator begin() const { return _M_ht.begin(); }
   iterator end() const { return _M_ht.end(); }
@@ -375,17 +297,9 @@ public:
 public:
   iterator insert(const value_type& __obj)
     { return _M_ht.insert_equal(__obj); }
-#if @KWSYS_NAMESPACE@_CXX_HAS_MEMBER_TEMPLATES
   template <class _InputIterator>
   void insert(_InputIterator __f, _InputIterator __l)
     { _M_ht.insert_equal(__f,__l); }
-#else
-  void insert(const value_type* __f, const value_type* __l) {
-    _M_ht.insert_equal(__f,__l);
-  }
-  void insert(const_iterator __f, const_iterator __l)
-    { _M_ht.insert_equal(__f, __l); }
-#endif
   iterator insert_noresize(const value_type& __obj)
     { return _M_ht.insert_equal_noresize(__obj); }
 
@@ -393,7 +307,7 @@ public:
 
   size_type count(const key_type& __key) const { return _M_ht.count(__key); }
 
-  @KWSYS_NAMESPACE@_stl::pair<iterator, iterator> equal_range(const key_type& __key) const
+  std::pair<iterator, iterator> equal_range(const key_type& __key) const
     { return _M_ht.equal_range(__key); }
 
   size_type erase(const key_type& __key) {return _M_ht.erase(__key); }

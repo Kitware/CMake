@@ -12,14 +12,9 @@
 #ifndef @KWSYS_NAMESPACE@_SystemInformation_h
 #define @KWSYS_NAMESPACE@_SystemInformation_h
 
-
-/* Define these macros temporarily to keep the code readable.  */
-#if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
-# define kwsys_stl @KWSYS_NAMESPACE@_stl
-# define kwsys_ios @KWSYS_NAMESPACE@_ios
-#endif
-#include <@KWSYS_NAMESPACE@/stl/string>
+#include <@KWSYS_NAMESPACE@/Configure.hxx>
 #include <stddef.h> /* size_t */
+#include <string>
 
 namespace @KWSYS_NAMESPACE@
 {
@@ -45,11 +40,11 @@ public:
 
   const char * GetVendorString();
   const char * GetVendorID();
-  kwsys_stl::string GetTypeID();
-  kwsys_stl::string GetFamilyID();
-  kwsys_stl::string GetModelID();
-  kwsys_stl::string GetModelName();
-  kwsys_stl::string GetSteppingCode();
+  std::string GetTypeID();
+  std::string GetFamilyID();
+  std::string GetModelID();
+  std::string GetModelName();
+  std::string GetSteppingCode();
   const char * GetExtendedProcessorName();
   const char * GetProcessorSerialNumber();
   int GetProcessorCacheSize();
@@ -61,10 +56,10 @@ public:
 
   // returns an informative general description of the cpu
   // on this system.
-  kwsys_stl::string GetCPUDescription();
+  std::string GetCPUDescription();
 
   const char * GetHostname();
-  kwsys_stl::string GetFullyQualifiedDomainName();
+  std::string GetFullyQualifiedDomainName();
 
   const char * GetOSName();
   const char * GetOSRelease();
@@ -77,7 +72,7 @@ public:
 
   // returns an informative general description of the os
   // on this system.
-  kwsys_stl::string GetOSDescription();
+  std::string GetOSDescription();
 
   bool Is64Bits();
 
@@ -98,7 +93,7 @@ public:
   // returns an informative general description if the installed and
   // available ram on this system. See the  GetHostMmeoryTotal, and
   // Get{Host,Proc}MemoryAvailable methods for more information.
-  kwsys_stl::string GetMemoryDescription(
+  std::string GetMemoryDescription(
         const char *hostLimitEnvVarName=NULL,
         const char *procLimitEnvVarName=NULL);
 
@@ -144,7 +139,7 @@ public:
   // order to produce an informative stack trace the application
   // should be dynamically linked and compiled with debug symbols.
   static
-  kwsys_stl::string GetProgramStack(int firstFrame, int wholePath);
+  std::string GetProgramStack(int firstFrame, int wholePath);
 
   /** Run the different checks */
   void RunCPUCheck();
@@ -153,11 +148,5 @@ public:
 };
 
 } // namespace @KWSYS_NAMESPACE@
-
-/* Undefine temporary macros.  */
-#if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
-# undef kwsys_stl
-# undef kwsys_ios
-#endif
 
 #endif

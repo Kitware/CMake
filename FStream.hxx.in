@@ -12,8 +12,8 @@
 #ifndef @KWSYS_NAMESPACE@_FStream_hxx
 #define @KWSYS_NAMESPACE@_FStream_hxx
 
-#include <@KWSYS_NAMESPACE@/ios/fstream>
 #include <@KWSYS_NAMESPACE@/Encoding.hxx>
+#include <fstream>
 
 namespace @KWSYS_NAMESPACE@
 {
@@ -167,8 +167,8 @@ class basic_ofstream : public std::basic_ostream<CharType,Traits>
 
 # undef @KWSYS_NAMESPACE@_FStream_NOEXCEPT
 #else
-  using @KWSYS_NAMESPACE@_ios_namespace::ofstream;
-  using @KWSYS_NAMESPACE@_ios_namespace::ifstream;
+  using std::ofstream;
+  using std::ifstream;
 #endif
 
   namespace FStream

@@ -12,7 +12,7 @@
 #ifndef @KWSYS_NAMESPACE@_String_hxx
 #define @KWSYS_NAMESPACE@_String_hxx
 
-#include <@KWSYS_NAMESPACE@/stl/string>
+#include <string>
 
 namespace @KWSYS_NAMESPACE@
 {
@@ -25,10 +25,10 @@ namespace @KWSYS_NAMESPACE@
  * simply a subclass of this type with the same interface so that the
  * name is shorter in debugging symbols and error messages.
  */
-class String: public @KWSYS_NAMESPACE@_stl::string
+class String: public std::string
 {
   /** The original string type.  */
-  typedef @KWSYS_NAMESPACE@_stl::string stl_string;
+  typedef std::string stl_string;
 
 public:
 
@@ -55,8 +55,8 @@ public:
 #if defined(__WATCOMC__)
 inline bool operator<(String const& l, String const& r)
   {
-  return (static_cast<@KWSYS_NAMESPACE@_stl::string const&>(l) <
-          static_cast<@KWSYS_NAMESPACE@_stl::string const&>(r));
+  return (static_cast<std::string const&>(l) <
+          static_cast<std::string const&>(r));
   }
 #endif
 

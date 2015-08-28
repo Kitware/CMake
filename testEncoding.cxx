@@ -17,8 +17,8 @@
 
 #include KWSYS_HEADER(Encoding.hxx)
 #include KWSYS_HEADER(Encoding.h)
-#include KWSYS_HEADER(ios/iostream)
 
+#include <iostream>
 #include <locale.h>
 #include <string.h>
 #include <stdlib.h>
@@ -28,7 +28,6 @@
 #if 0
 # include "Encoding.hxx.in"
 # include "Encoding.h.in"
-# include "kwsys_ios_iostream.h.in"
 #endif
 
 //----------------------------------------------------------------------------
