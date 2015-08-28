@@ -306,10 +306,11 @@ void cmGlobalVisualStudio10Generator::WriteSLNHeader(std::ostream& fout)
 }
 
 ///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator* cmGlobalVisualStudio10Generator::CreateLocalGenerator(
-    cmMakefile* mf)
+cmLocalGenerator *
+cmGlobalVisualStudio10Generator::CreateLocalGenerator(cmLocalGenerator* parent,
+                                                    cmState::Snapshot snapshot)
 {
-  return new cmLocalVisualStudio10Generator(this, mf);
+  return new cmLocalVisualStudio10Generator(this, parent, snapshot);
 }
 
 //----------------------------------------------------------------------------

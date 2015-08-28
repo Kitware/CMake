@@ -43,13 +43,15 @@
 #endif
 
 cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
-                                   cmMakefile* makefile)
-  : cmOutputConverter(makefile->GetStateSnapshot()),
-    StateSnapshot(makefile->GetStateSnapshot())
+                                   cmLocalGenerator* parent,
+                                   cmState::Snapshot snapshot)
+  : cmOutputConverter(snapshot), StateSnapshot(snapshot)
 {
+  assert(snapshot.IsValid());
   this->GlobalGenerator = gg;
+  this->Parent = parent;
 
-  this->Makefile = makefile;
+  this->Makefile = new cmMakefile(this);
 
   this->EmitUniversalBinaryFlags = true;
   this->BackwardsCompatibility = 0;
@@ -58,6 +60,7 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
 
 cmLocalGenerator::~cmLocalGenerator()
 {
+  delete this->Makefile;
 }
 
 void cmLocalGenerator::IssueMessage(cmake::MessageType t,
