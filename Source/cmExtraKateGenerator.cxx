@@ -19,7 +19,6 @@
 #include "cmGeneratedFileStream.h"
 #include "cmTarget.h"
 #include "cmSystemTools.h"
-#include "cmXMLSafe.h"
 
 #include <cmsys/SystemTools.hxx>
 
