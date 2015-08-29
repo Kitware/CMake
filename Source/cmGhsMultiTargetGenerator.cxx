@@ -172,7 +172,7 @@ std::vector<cmSourceFile *> cmGhsMultiTargetGenerator::GetSources() const
 {
   std::vector<cmSourceFile *> output;
   std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  this->Target->GetSourceFiles(output, config);
+  this->GeneratorTarget->GetSourceFiles(output, config);
   return output;
 }
 
@@ -574,7 +574,7 @@ bool cmGhsMultiTargetGenerator::DetermineIfTargetGroup(
   std::vector<cmSourceFile *> sources;
   std::string config =
       target->Target->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  target->Target->GetSourceFiles(sources, config);
+  target->GetSourceFiles(sources, config);
   for (std::vector<cmSourceFile *>::const_iterator sources_i = sources.begin();
        sources.end() != sources_i; ++sources_i)
     {
