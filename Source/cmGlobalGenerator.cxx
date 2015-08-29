@@ -1306,13 +1306,6 @@ bool cmGlobalGenerator::Compute()
       }
     }
 
-  return true;
-}
-
-void cmGlobalGenerator::Generate()
-{
-  unsigned int i;
-
   // Trace the dependencies, after that no custom commands should be added
   // because their dependencies might not be handled correctly
   for (i = 0; i < this->LocalGenerators.size(); ++i)
@@ -1325,28 +1318,33 @@ void cmGlobalGenerator::Generate()
   // Compute the manifest of main targets generated.
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    this->LocalGenerators[i]->GenerateTargetManifest();
+    this->LocalGenerators[i]->ComputeTargetManifest();
     }
-
-  this->ProcessEvaluationFiles();
 
   // Compute the inter-target dependencies.
   if(!this->ComputeTargetDepends())
     {
-    return;
+    return false;
     }
-
-  // Create a map from local generator to the complete set of targets
-  // it builds by default.
-  this->InitializeProgressMarks();
 
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
     this->LocalGenerators[i]->ComputeHomeRelativeOutputPath();
     }
 
+  return true;
+}
+
+void cmGlobalGenerator::Generate()
+{
+  // Create a map from local generator to the complete set of targets
+  // it builds by default.
+  this->InitializeProgressMarks();
+
+  this->ProcessEvaluationFiles();
+
   // Generate project files
-  for (i = 0; i < this->LocalGenerators.size(); ++i)
+  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
     {
     this->SetCurrentMakefile(this->LocalGenerators[i]->GetMakefile());
     this->LocalGenerators[i]->Generate();
@@ -1668,8 +1666,7 @@ void cmGlobalGenerator::CheckTargetProperties()
           text += "\n    linked by target \"";
           text += l->second.GetName();
           text += "\" in directory ";
-          text+=this->LocalGenerators[i]->GetMakefile()
-                    ->GetCurrentSourceDirectory();
+          text+=this->Makefiles[i]->GetCurrentSourceDirectory();
           notFoundMap[varName] = text;
           }
         }

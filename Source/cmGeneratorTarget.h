@@ -251,7 +251,7 @@ public:
                                 const std::string& config) const;
 
   /** Add the target output files to the global generator manifest.  */
-  void GenerateTargetManifest(const std::string& config) const;
+  void ComputeTargetManifest(const std::string& config) const;
 
   /**
    * Trace through the source files in this target and add al source files

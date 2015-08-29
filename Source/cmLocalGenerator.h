@@ -66,7 +66,7 @@ public:
   /**
    * Generate a manifest of target files that will be built.
    */
-  void GenerateTargetManifest();
+  void ComputeTargetManifest();
 
   ///! Get the makefile for this generator
   cmMakefile *GetMakefile() {
