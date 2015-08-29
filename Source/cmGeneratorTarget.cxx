@@ -402,6 +402,16 @@ std::string cmGeneratorTarget::GetOutputName(const std::string& config,
   return i->second;
 }
 
+void cmGeneratorTarget::AddSource(const std::string& src)
+{
+  this->Target->AddSource(src);
+}
+
+void cmGeneratorTarget::AddTracedSources(std::vector<std::string> const& srcs)
+{
+  this->Target->AddTracedSources(srcs);
+}
+
 //----------------------------------------------------------------------------
 std::vector<cmSourceFile*> const*
 cmGeneratorTarget::GetSourceDepends(cmSourceFile const* sf) const
@@ -1755,7 +1765,7 @@ void cmTargetTraceDependencies::Trace()
     }
   this->CurrentEntry = 0;
 
-  this->Target->AddTracedSources(this->NewSources);
+  this->GeneratorTarget->AddTracedSources(this->NewSources);
 }
 
 //----------------------------------------------------------------------------
