@@ -1332,6 +1332,8 @@ bool cmGlobalGenerator::Compute()
 
 void cmGlobalGenerator::Generate()
 {
+  unsigned int i;
+
   // Create a map from local generator to the complete set of targets
   // it builds by default.
   this->InitializeProgressMarks();
