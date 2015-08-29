@@ -768,9 +768,9 @@ void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files,
 //----------------------------------------------------------------------------
 void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)
 {
-  std::string srcFiles = cmJoin(srcs, ";");
-  if (!srcFiles.empty())
+  if (!srcs.empty())
     {
+    std::string srcFiles = cmJoin(srcs, ";");
     this->Internal->SourceFilesMap.clear();
     this->LinkImplementationLanguageIsContextDependent = true;
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
