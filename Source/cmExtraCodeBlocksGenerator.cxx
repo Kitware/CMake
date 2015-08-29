@@ -401,7 +401,9 @@ void cmExtraCodeBlocksGenerator
         case cmTarget::UTILITY: // can have sources since 2.6.3
           {
           std::vector<cmSourceFile*> sources;
-          ti->second.GetSourceFiles(sources,
+          cmGeneratorTarget* gt =
+              this->GlobalGenerator->GetGeneratorTarget(&ti->second);
+          gt->GetSourceFiles(sources,
                             makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
           for (std::vector<cmSourceFile*>::const_iterator si=sources.begin();
                si!=sources.end(); si++)
