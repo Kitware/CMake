@@ -463,7 +463,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   std::string listfile = mf->GetCurrentSourceDirectory();
   listfile += "/";
   listfile += "CMakeLists.txt";
-  allbuild->AddSource(listfile.c_str());
+  allBuildGt->AddSource(listfile.c_str());
 
   // Add XCODE depend helper
   std::string dir = mf->GetCurrentBinaryDirectory();
@@ -553,11 +553,13 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
         allbuild->AddUtility(target.GetName());
         }
 
+      cmGeneratorTarget* targetGT = this->GetGeneratorTarget(&target);
+
       // Refer to the build configuration file for easy editing.
       listfile = lg->GetMakefile()->GetCurrentSourceDirectory();
       listfile += "/";
       listfile += "CMakeLists.txt";
-      target.AddSource(listfile.c_str());
+      targetGT->AddSource(listfile.c_str());
       }
     }
 }
@@ -1401,7 +1403,7 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmTarget& cmtarget)
   if(cmSourceFile* sf = mf->GetOrCreateSource(fname.c_str()))
     {
     sf->SetProperty("LANGUAGE", llang.c_str());
-    cmtarget.AddSource(fname);
+    gtgt->AddSource(fname);
     }
 }
 
@@ -3069,17 +3071,18 @@ bool cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
         continue;
         }
 
+      cmGeneratorTarget* gtgt = this->GetGeneratorTarget(&cmtarget);
+
       // add the soon to be generated Info.plist file as a source for a
       // MACOSX_BUNDLE file
       if(cmtarget.GetPropertyAsBool("MACOSX_BUNDLE"))
         {
         std::string plist = this->ComputeInfoPListLocation(cmtarget);
         mf->GetOrCreateSource(plist, true);
-        cmtarget.AddSource(plist);
+        gtgt->AddSource(plist);
         }
 
       std::vector<cmSourceFile*> classes;
-      cmGeneratorTarget* gtgt = this->GetGeneratorTarget(&cmtarget);
       if (!gtgt->GetConfigCommonSourceFiles(classes))
         {
         return false;
