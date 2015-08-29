@@ -1305,26 +1305,24 @@ bool cmGlobalGenerator::Compute()
     return false;
     }
 
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    this->LocalGenerators[i]->ComputeHomeRelativeOutputPath();
+    }
+
   return true;
 }
 
 void cmGlobalGenerator::Generate()
 {
-  unsigned int i;
-
   // Create a map from local generator to the complete set of targets
   // it builds by default.
   this->InitializeProgressMarks();
 
   this->ProcessEvaluationFiles();
 
-  for (i = 0; i < this->LocalGenerators.size(); ++i)
-    {
-    this->LocalGenerators[i]->ComputeHomeRelativeOutputPath();
-    }
-
   // Generate project files
-  for (i = 0; i < this->LocalGenerators.size(); ++i)
+  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
     {
     this->SetCurrentMakefile(this->LocalGenerators[i]->GetMakefile());
     this->LocalGenerators[i]->Generate();
