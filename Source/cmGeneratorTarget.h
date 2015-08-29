@@ -296,6 +296,9 @@ public:
   // Get the target base name.
   std::string GetOutputName(const std::string& config, bool implib) const;
 
+  void AddSource(const std::string& src);
+  void AddTracedSources(std::vector<std::string> const& srcs);
+
   /**
    * Flags for a given source file as used in this target. Typically assigned
    * via SET_TARGET_PROPERTIES when the property is a list of source files.
