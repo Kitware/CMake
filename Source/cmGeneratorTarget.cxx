@@ -449,7 +449,7 @@ static void handleSystemIncludesDep(cmMakefile *mf, cmTarget const* depTgt,
 #define IMPLEMENT_VISIT_IMPL(DATA, DATATYPE) \
   { \
   std::vector<cmSourceFile*> sourceFiles; \
-  this->Target->GetSourceFiles(sourceFiles, config); \
+  this->GetSourceFiles(sourceFiles, config); \
   TagVisitor<DATA ## Tag DATATYPE> visitor(this, data); \
   for(std::vector<cmSourceFile*>::const_iterator si = sourceFiles.begin(); \
       si != sourceFiles.end(); ++si) \
@@ -1683,7 +1683,7 @@ cmTargetTraceDependencies
         ci != configs.end(); ++ci)
       {
       std::vector<cmSourceFile*> sources;
-      this->Target->GetSourceFiles(sources, *ci);
+      this->GeneratorTarget->GetSourceFiles(sources, *ci);
       for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
           si != sources.end(); ++si)
         {
@@ -4444,12 +4444,12 @@ bool cmGeneratorTarget::GetConfigCommonSourceFiles(
 
   std::vector<std::string>::const_iterator it = configs.begin();
   const std::string& firstConfig = *it;
-  this->Target->GetSourceFiles(files, firstConfig);
+  this->GetSourceFiles(files, firstConfig);
 
   for ( ; it != configs.end(); ++it)
     {
     std::vector<cmSourceFile*> configFiles;
-    this->Target->GetSourceFiles(configFiles, *it);
+    this->GetSourceFiles(configFiles, *it);
     if (configFiles != files)
       {
       std::string firstConfigFiles;

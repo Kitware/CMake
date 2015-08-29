@@ -237,7 +237,7 @@ void cmExtraSublimeTextGenerator::
       cmGeneratorTarget *gtgt = this->GlobalGenerator
                                     ->GetGeneratorTarget(target);
       std::vector<cmSourceFile*> sourceFiles;
-      target->GetSourceFiles(sourceFiles,
+      gtgt->GetSourceFiles(sourceFiles,
                              makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
       std::vector<cmSourceFile*>::const_iterator sourceFilesEnd =
         sourceFiles.end();
