@@ -406,8 +406,8 @@ std::string cmGeneratorTarget::GetOutputName(const std::string& config,
 std::vector<cmSourceFile*> const*
 cmGeneratorTarget::GetSourceDepends(cmSourceFile const* sf) const
 {
-  SourceEntriesType::const_iterator i = this->SourceEntries.find(sf);
-  if(i != this->SourceEntries.end())
+  SourceEntriesType::const_iterator i = this->SourceDepends.find(sf);
+  if(i != this->SourceDepends.end())
     {
     return &i->second.Depends;
     }
@@ -1723,7 +1723,7 @@ void cmTargetTraceDependencies::Trace()
     // Get the next source from the queue.
     cmSourceFile* sf = this->SourceQueue.front();
     this->SourceQueue.pop();
-    this->CurrentEntry = &this->GeneratorTarget->SourceEntries[sf];
+    this->CurrentEntry = &this->GeneratorTarget->SourceDepends[sf];
 
     // Queue dependencies added explicitly by the user.
     if(const char* additionalDeps = sf->GetProperty("OBJECT_DEPENDS"))
