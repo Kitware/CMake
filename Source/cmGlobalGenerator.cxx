@@ -1308,13 +1308,6 @@ bool cmGlobalGenerator::Compute()
       }
     }
 
-  return true;
-}
-
-void cmGlobalGenerator::Generate()
-{
-  unsigned int i;
-
   // Trace the dependencies, after that no custom commands should be added
   // because their dependencies might not be handled correctly
   for (i = 0; i < this->LocalGenerators.size(); ++i)
@@ -1333,9 +1326,14 @@ void cmGlobalGenerator::Generate()
   // Compute the inter-target dependencies.
   if(!this->ComputeTargetDepends())
     {
-    return;
+    return false;
     }
 
+  return true;
+}
+
+void cmGlobalGenerator::Generate()
+{
   // Create a map from local generator to the complete set of targets
   // it builds by default.
   this->InitializeProgressMarks();
