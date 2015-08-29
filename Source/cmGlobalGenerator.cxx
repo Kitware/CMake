@@ -1330,8 +1330,6 @@ void cmGlobalGenerator::Generate()
     this->LocalGenerators[i]->GenerateTargetManifest();
     }
 
-  this->ProcessEvaluationFiles();
-
   // Compute the inter-target dependencies.
   if(!this->ComputeTargetDepends())
     {
@@ -1341,6 +1339,8 @@ void cmGlobalGenerator::Generate()
   // Create a map from local generator to the complete set of targets
   // it builds by default.
   this->InitializeProgressMarks();
+
+  this->ProcessEvaluationFiles();
 
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
