@@ -1306,6 +1306,13 @@ bool cmGlobalGenerator::Compute()
       }
     }
 
+  return true;
+}
+
+void cmGlobalGenerator::Generate()
+{
+  unsigned int i;
+
   // Trace the dependencies, after that no custom commands should be added
   // because their dependencies might not be handled correctly
   for (i = 0; i < this->LocalGenerators.size(); ++i)
@@ -1324,15 +1331,8 @@ bool cmGlobalGenerator::Compute()
   // Compute the inter-target dependencies.
   if(!this->ComputeTargetDepends())
     {
-    return false;
+    return;
     }
-
-  return true;
-}
-
-void cmGlobalGenerator::Generate()
-{
-  unsigned int i;
 
   // Create a map from local generator to the complete set of targets
   // it builds by default.
