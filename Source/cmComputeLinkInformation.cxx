@@ -522,10 +522,9 @@ bool cmComputeLinkInformation::Compute()
   // libraries are found.
   const char* lss =
       this->Target->Target->GetProperty("LINK_SEARCH_END_STATIC");
-  if(lss)
+  if(cmSystemTools::IsOn(lss))
     {
-    this->SetCurrentLinkType(
-      cmSystemTools::IsOn(lss) ? LinkStatic : LinkShared);
+    this->SetCurrentLinkType(LinkStatic);
     }
   else
     {
@@ -863,8 +862,7 @@ void cmComputeLinkInformation::ComputeLinkTypeInfo()
   const char* lss =
       this->Target->Target->GetProperty("LINK_SEARCH_START_STATIC");
   this->StartLinkType = cmSystemTools::IsOn(lss)? LinkStatic : LinkShared;
-  this->CurrentLinkType = LinkUnknown;
-  this->SetCurrentLinkType(this->StartLinkType);
+  this->CurrentLinkType = this->StartLinkType);
 }
 
 //----------------------------------------------------------------------------
