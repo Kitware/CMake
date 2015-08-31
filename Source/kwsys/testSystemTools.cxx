@@ -30,6 +30,17 @@
 #include <testSystemTools.h>
 
 #include <string.h> /* strcmp */
+#if defined(_WIN32) && !defined(__CYGWIN__)
+# include <io.h> /* _umask (MSVC) / umask (Borland) */
+# ifdef _MSC_VER
+#  define umask _umask // Note this is still umask on Borland
+# endif
+#endif
+#include <sys/stat.h> /* umask (POSIX), _S_I* constants (Windows) */
+// Visual C++ does not define mode_t (note that Borland does, however).
+#if defined( _MSC_VER )
+typedef unsigned short mode_t;
+#endif
 
 //----------------------------------------------------------------------------
 static const char* toUnixPaths[][2] =
@@ -170,6 +181,135 @@ static bool CheckFileOperations()
     res = false;
     }
 
+  // Reset umask
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  // NOTE:  Windows doesn't support toggling _S_IREAD.
+  mode_t fullMask = _S_IWRITE;
+#else
+  // On a normal POSIX platform, we can toggle all permissions.
+  mode_t fullMask = S_IRWXU | S_IRWXG | S_IRWXO;
+#endif
+  mode_t orig_umask = umask(fullMask);
+
+  // Test file permissions without umask
+  mode_t origPerm, thisPerm;
+  if (!kwsys::SystemTools::GetPermissions(testNewFile, origPerm))
+    {
+    kwsys_ios::cerr
+      << "Problem with GetPermissions (1) for: "
+      << testNewFile << kwsys_ios::endl;
+    res = false;
+    }
+
+  if (!kwsys::SystemTools::SetPermissions(testNewFile, 0))
+    {
+    kwsys_ios::cerr
+      << "Problem with SetPermissions (1) for: "
+      << testNewFile << kwsys_ios::endl;
+    res = false;
+    }
+
+  if (!kwsys::SystemTools::GetPermissions(testNewFile, thisPerm))
+    {
+    kwsys_ios::cerr
+      << "Problem with GetPermissions (2) for: "
+      << testNewFile << kwsys_ios::endl;
+    res = false;
+    }
+
+  if ((thisPerm & fullMask) != 0)
+    {
+    kwsys_ios::cerr
+      << "SetPermissions failed to set permissions (1) for: "
+      << testNewFile << ": actual = " << thisPerm << "; expected = "
+      << 0 << kwsys_ios::endl;
+    res = false;
+    }
+
+  // While we're at it, check proper TestFileAccess functionality.
+  if (kwsys::SystemTools::TestFileAccess(testNewFile,
+                                         kwsys::TEST_FILE_WRITE))
+    {
+    kwsys_ios::cerr
+      << "TestFileAccess incorrectly indicated that this is a writable file:"
+      << testNewFile << kwsys_ios::endl;
+    res = false;
+    }
+
+  if (!kwsys::SystemTools::TestFileAccess(testNewFile,
+                                          kwsys::TEST_FILE_OK))
+    {
+    kwsys_ios::cerr
+      << "TestFileAccess incorrectly indicated that this file does not exist:"
+      << testNewFile << kwsys_ios::endl;
+    res = false;
+    }
+
+  // Test restoring/setting full permissions.
+  if (!kwsys::SystemTools::SetPermissions(testNewFile, fullMask))
+    {
+    kwsys_ios::cerr
+      << "Problem with SetPermissions (2) for: "
+      << testNewFile << kwsys_ios::endl;
+    res = false;
+    }
+
+  if (!kwsys::SystemTools::GetPermissions(testNewFile, thisPerm))
+    {
+    kwsys_ios::cerr
+      << "Problem with GetPermissions (3) for: "
+      << testNewFile << kwsys_ios::endl;
+    res = false;
+    }
+
+  if ((thisPerm & fullMask) != fullMask)
+    {
+    kwsys_ios::cerr
+      << "SetPermissions failed to set permissions (2) for: "
+      << testNewFile << ": actual = " << thisPerm << "; expected = "
+      << fullMask << kwsys_ios::endl;
+    res = false;
+    }
+
+  // Test setting file permissions while honoring umask
+  if (!kwsys::SystemTools::SetPermissions(testNewFile, fullMask, true))
+    {
+    kwsys_ios::cerr
+      << "Problem with SetPermissions (3) for: "
+      << testNewFile << kwsys_ios::endl;
+    res = false;
+    }
+
+  if (!kwsys::SystemTools::GetPermissions(testNewFile, thisPerm))
+    {
+    kwsys_ios::cerr
+      << "Problem with GetPermissions (4) for: "
+      << testNewFile << kwsys_ios::endl;
+    res = false;
+    }
+
+  if ((thisPerm & fullMask) != 0)
+    {
+    kwsys_ios::cerr
+      << "SetPermissions failed to honor umask for: "
+      << testNewFile << ": actual = " << thisPerm << "; expected = "
+      << 0 << kwsys_ios::endl;
+    res = false;
+    }
+
+  // Restore umask
+  umask(orig_umask);
+
+  // Restore file permissions
+  if (!kwsys::SystemTools::SetPermissions(testNewFile, origPerm))
+    {
+    kwsys_ios::cerr
+      << "Problem with SetPermissions (4) for: "
+      << testNewFile << kwsys_ios::endl;
+    res = false;
+    }
+
+  // Remove the test file
   if (!kwsys::SystemTools::RemoveFile(testNewFile))
     {
     kwsys_ios::cerr
@@ -271,48 +411,48 @@ static bool CheckStringOperations()
     kwsys_ios::cerr
       << "Problem with CapitalizedWords "
       << '"' << test << '"' << kwsys_ios::endl;
-    res = false;    
+    res = false;
     }
 
   test = "Mary Had A Little Lamb.";
-  if (kwsys::SystemTools::UnCapitalizedWords(test) != 
+  if (kwsys::SystemTools::UnCapitalizedWords(test) !=
       "mary had a little lamb.")
     {
     kwsys_ios::cerr
       << "Problem with UnCapitalizedWords "
       << '"' << test << '"' << kwsys_ios::endl;
-    res = false;    
+    res = false;
     }
 
   test = "MaryHadTheLittleLamb.";
-  if (kwsys::SystemTools::AddSpaceBetweenCapitalizedWords(test) != 
+  if (kwsys::SystemTools::AddSpaceBetweenCapitalizedWords(test) !=
       "Mary Had The Little Lamb.")
     {
     kwsys_ios::cerr
       << "Problem with AddSpaceBetweenCapitalizedWords "
       << '"' << test << '"' << kwsys_ios::endl;
-    res = false;    
+    res = false;
     }
 
-  char * cres = 
+  char * cres =
     kwsys::SystemTools::AppendStrings("Mary Had A"," Little Lamb.");
   if (strcmp(cres,"Mary Had A Little Lamb."))
     {
     kwsys_ios::cerr
       << "Problem with AppendStrings "
       << "\"Mary Had A\" \" Little Lamb.\"" << kwsys_ios::endl;
-    res = false;    
+    res = false;
     }
   delete [] cres;
 
-  cres = 
+  cres =
     kwsys::SystemTools::AppendStrings("Mary Had"," A ","Little Lamb.");
   if (strcmp(cres,"Mary Had A Little Lamb."))
     {
     kwsys_ios::cerr
       << "Problem with AppendStrings "
       << "\"Mary Had\" \" A \" \"Little Lamb.\"" << kwsys_ios::endl;
-    res = false;    
+    res = false;
     }
   delete [] cres;
 
@@ -321,28 +461,28 @@ static bool CheckStringOperations()
     kwsys_ios::cerr
       << "Problem with CountChar "
       << "\"Mary Had A Little Lamb.\"" << kwsys_ios::endl;
-    res = false;    
+    res = false;
     }
 
-  cres = 
+  cres =
     kwsys::SystemTools::RemoveChars("Mary Had A Little Lamb.","aeiou");
   if (strcmp(cres,"Mry Hd A Lttl Lmb."))
     {
     kwsys_ios::cerr
       << "Problem with RemoveChars "
       << "\"Mary Had A Little Lamb.\"" << kwsys_ios::endl;
-    res = false;    
+    res = false;
     }
   delete [] cres;
 
-  cres = 
+  cres =
     kwsys::SystemTools::RemoveCharsButUpperHex("Mary Had A Little Lamb.");
   if (strcmp(cres,"A"))
     {
     kwsys_ios::cerr
       << "Problem with RemoveCharsButUpperHex "
       << "\"Mary Had A Little Lamb.\"" << kwsys_ios::endl;
-    res = false;    
+    res = false;
     }
   delete [] cres;
 
@@ -354,7 +494,7 @@ static bool CheckStringOperations()
     kwsys_ios::cerr
       << "Problem with ReplaceChars "
       << "\"Mary Had A Little Lamb.\"" << kwsys_ios::endl;
-    res = false;    
+    res = false;
     }
   delete [] cres2;
 
@@ -364,7 +504,7 @@ static bool CheckStringOperations()
     kwsys_ios::cerr
       << "Problem with StringStartsWith "
       << "\"Mary Had A Little Lamb.\"" << kwsys_ios::endl;
-    res = false;    
+    res = false;
     }
 
   if (!kwsys::SystemTools::StringEndsWith("Mary Had A Little Lamb.",
@@ -373,7 +513,7 @@ static bool CheckStringOperations()
     kwsys_ios::cerr
       << "Problem with StringEndsWith "
       << "\"Mary Had A Little Lamb.\"" << kwsys_ios::endl;
-    res = false;    
+    res = false;
     }
 
   cres = kwsys::SystemTools::DuplicateString("Mary Had A Little Lamb.");
@@ -382,18 +522,18 @@ static bool CheckStringOperations()
     kwsys_ios::cerr
       << "Problem with DuplicateString "
       << "\"Mary Had A Little Lamb.\"" << kwsys_ios::endl;
-    res = false;    
+    res = false;
     }
   delete [] cres;
 
   test = "Mary Had A Little Lamb.";
-  if (kwsys::SystemTools::CropString(test,13) != 
+  if (kwsys::SystemTools::CropString(test,13) !=
       "Mary ...Lamb.")
     {
     kwsys_ios::cerr
       << "Problem with CropString "
       << "\"Mary Had A Little Lamb.\"" << kwsys_ios::endl;
-    res = false;    
+    res = false;
     }
 
   kwsys_stl::vector<kwsys_stl::string> lines;
@@ -515,36 +655,36 @@ static bool CheckStringOperations()
 #endif
 
   if (kwsys::SystemTools::ConvertToWindowsOutputPath
-      ("L://Local Mojo/Hex Power Pack/Iffy Voodoo") != 
+      ("L://Local Mojo/Hex Power Pack/Iffy Voodoo") !=
       "\"L:\\Local Mojo\\Hex Power Pack\\Iffy Voodoo\"")
     {
     kwsys_ios::cerr
       << "Problem with ConvertToWindowsOutputPath "
       << "\"L://Local Mojo/Hex Power Pack/Iffy Voodoo\""
       << kwsys_ios::endl;
-    res = false;    
+    res = false;
     }
-  
+
   if (kwsys::SystemTools::ConvertToWindowsOutputPath
-      ("//grayson/Local Mojo/Hex Power Pack/Iffy Voodoo") != 
+      ("//grayson/Local Mojo/Hex Power Pack/Iffy Voodoo") !=
       "\"\\\\grayson\\Local Mojo\\Hex Power Pack\\Iffy Voodoo\"")
     {
     kwsys_ios::cerr
       << "Problem with ConvertToWindowsOutputPath "
       << "\"//grayson/Local Mojo/Hex Power Pack/Iffy Voodoo\""
       << kwsys_ios::endl;
-    res = false;    
+    res = false;
     }
 
   if (kwsys::SystemTools::ConvertToUnixOutputPath
-      ("//Local Mojo/Hex Power Pack/Iffy Voodoo") != 
+      ("//Local Mojo/Hex Power Pack/Iffy Voodoo") !=
       "//Local\\ Mojo/Hex\\ Power\\ Pack/Iffy\\ Voodoo")
     {
     kwsys_ios::cerr
       << "Problem with ConvertToUnixOutputPath "
       << "\"//Local Mojo/Hex Power Pack/Iffy Voodoo\""
       << kwsys_ios::endl;
-    res = false;    
+    res = false;
     }
 
   return res;
@@ -672,7 +812,7 @@ int testSystemTools(int, char*[])
 
   for (cc = 0; checkEscapeChars[cc][0]; cc ++ )
     {
-    res &= CheckEscapeChars(checkEscapeChars[cc][0], checkEscapeChars[cc][1], 
+    res &= CheckEscapeChars(checkEscapeChars[cc][0], checkEscapeChars[cc][1],
                             *checkEscapeChars[cc][2], checkEscapeChars[cc][3]);
     }
 
