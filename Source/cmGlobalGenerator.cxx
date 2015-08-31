@@ -1325,10 +1325,8 @@ void cmGlobalGenerator::Generate()
   // Compute the manifest of main targets generated.
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    this->LocalGenerators[i]->GenerateTargetManifest();
+    this->LocalGenerators[i]->ComputeTargetManifest();
     }
-
-  this->ProcessEvaluationFiles();
 
   // Compute the inter-target dependencies.
   if(!this->ComputeTargetDepends())
@@ -1339,6 +1337,8 @@ void cmGlobalGenerator::Generate()
   // Create a map from local generator to the complete set of targets
   // it builds by default.
   this->InitializeProgressMarks();
+
+  this->ProcessEvaluationFiles();
 
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
@@ -1668,8 +1668,7 @@ void cmGlobalGenerator::CheckTargetProperties()
           text += "\n    linked by target \"";
           text += l->second.GetName();
           text += "\" in directory ";
-          text+=this->LocalGenerators[i]->GetMakefile()
-                    ->GetCurrentSourceDirectory();
+          text+=this->Makefiles[i]->GetCurrentSourceDirectory();
           notFoundMap[varName] = text;
           }
         }
