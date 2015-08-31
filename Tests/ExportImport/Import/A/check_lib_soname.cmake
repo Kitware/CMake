@@ -1,5 +1,5 @@
 execute_process(COMMAND ${readelf} -d ${lib} OUTPUT_FILE ${lib}.readelf.txt)
-file(STRINGS ${lib}.readelf.txt soname REGEX "\\(SONAME\\)")
+file(STRINGS ${lib}.readelf.txt soname REGEX "SONAME")
 if(soname)
   message(STATUS "${lib} has soname as expected:\n  ${soname}")
 else()
