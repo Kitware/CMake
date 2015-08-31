@@ -2422,7 +2422,17 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     if ( cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.' )
       {
       std::string cfgArg = "-DBUILD_TYPE=";
-      cfgArg += mf->GetDefinition("CMAKE_CFG_INTDIR");
+      bool iosPlatform = mf->PlatformIsAppleIos();
+      if(iosPlatform)
+        {
+        cfgArg += "$(CONFIGURATION)";
+        singleLine.push_back(cfgArg);
+        cfgArg = "-DEFFECTIVE_PLATFORM_NAME=$(EFFECTIVE_PLATFORM_NAME)";
+        }
+      else
+        {
+        cfgArg += mf->GetDefinition("CMAKE_CFG_INTDIR");
+        }
       singleLine.push_back(cfgArg);
       }
     singleLine.push_back("-P");
