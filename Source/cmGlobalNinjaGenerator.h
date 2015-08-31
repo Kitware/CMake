@@ -162,33 +162,24 @@ public:
 public:
   cmGlobalNinjaGenerator(cmake* cm);
 
-  /// Convenience method for creating an instance of this class.
   static cmGlobalGeneratorFactory* NewFactory() {
     return new cmGlobalGeneratorSimpleFactory<cmGlobalNinjaGenerator>(); }
 
-  /// Destructor.
   virtual ~cmGlobalNinjaGenerator() { }
 
-  /// Overloaded methods. @see cmGlobalGenerator::CreateLocalGenerator()
-  virtual cmLocalGenerator* CreateLocalGenerator(cmLocalGenerator* parent,
-                                                 cmState::Snapshot snapshot);
+  virtual cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf);
 
-  /// Overloaded methods. @see cmGlobalGenerator::GetName().
   virtual std::string GetName() const {
     return cmGlobalNinjaGenerator::GetActualName(); }
 
-  /// @return the name of this generator.
   static std::string GetActualName() { return "Ninja"; }
 
-  /// Overloaded methods. @see cmGlobalGenerator::GetDocumentation()
   static void GetDocumentation(cmDocumentationEntry& entry);
 
-  /// Overloaded methods. @see cmGlobalGenerator::EnableLanguage()
   virtual void EnableLanguage(std::vector<std::string>const& languages,
                               cmMakefile* mf,
                               bool optional);
 
-  /// Overloaded methods. @see cmGlobalGenerator::GenerateBuildCommand()
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand,
     const std::string& makeProgram,
@@ -307,11 +298,8 @@ public:
 
 protected:
 
-  /// Overloaded methods. @see cmGlobalGenerator::Generate()
   virtual void Generate();
 
-  /// Overloaded methods.
-  /// @see cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS()
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const { return true; }
 
 

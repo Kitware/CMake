@@ -19,10 +19,8 @@
 
 //----------------------------------------------------------------------------
 cmLocalVisualStudioGenerator
-::cmLocalVisualStudioGenerator(cmGlobalGenerator* gg,
-                               cmLocalGenerator* parent,
-                               cmState::Snapshot snapshot)
-  : cmLocalGenerator(gg, parent, snapshot)
+::cmLocalVisualStudioGenerator(cmGlobalGenerator* gg, cmMakefile* mf)
+  : cmLocalGenerator(gg, mf)
 {
 }
 

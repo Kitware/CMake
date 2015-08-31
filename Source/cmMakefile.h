@@ -42,7 +42,6 @@
 class cmFunctionBlocker;
 class cmCommand;
 class cmInstallGenerator;
-class cmLocalGenerator;
 class cmMakeDepend;
 class cmSourceFile;
 class cmTest;
@@ -71,7 +70,8 @@ public:
   /**
    * Construct an empty makefile.
    */
-  cmMakefile(cmLocalGenerator* localGenerator);
+  cmMakefile(cmGlobalGenerator* globalGenerator,
+             const cmState::Snapshot& snapshot);
 
   /**
    * Destructor.
@@ -856,7 +856,7 @@ protected:
 #endif
 
   std::vector<cmCommand*> FinalPassCommands;
-  cmLocalGenerator* LocalGenerator;
+  cmGlobalGenerator* GlobalGenerator;
   bool IsFunctionBlocked(const cmListFileFunction& lff,
                          cmExecutionStatus &status);
 

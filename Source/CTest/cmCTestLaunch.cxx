@@ -738,8 +738,9 @@ void cmCTestLaunch::LoadConfig()
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cmGlobalGenerator gg(&cm);
-  cmsys::auto_ptr<cmLocalGenerator> lg(gg.MakeLocalGenerator());
-  cmMakefile* mf = lg->GetMakefile();
+  cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(&gg, cm.GetCurrentSnapshot()));
+  cmsys::auto_ptr<cmLocalGenerator> lg(
+        gg.CreateLocalGenerator(mf.get()));
   std::string fname = this->LogDir;
   fname += "CTestLaunchConfig.cmake";
   if(cmSystemTools::FileExists(fname.c_str()) &&

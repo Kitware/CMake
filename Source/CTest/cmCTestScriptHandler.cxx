@@ -125,42 +125,25 @@ void cmCTestScriptHandler::Initialize()
   // what time in seconds did this script start running
   this->ScriptStartTime = 0;
 
+  delete this->Makefile;
   this->Makefile = 0;
-  if (this->LocalGenerator)
-    {
-    delete this->LocalGenerator;
-    }
+
+  delete this->LocalGenerator;
   this->LocalGenerator = 0;
-  if (this->GlobalGenerator)
-    {
-    delete this->GlobalGenerator;
-    }
+
+  delete this->GlobalGenerator;
   this->GlobalGenerator = 0;
-  if (this->CMake)
-    {
-    delete this->CMake;
-    }
+
+  delete this->CMake;
 }
 
 //----------------------------------------------------------------------
 cmCTestScriptHandler::~cmCTestScriptHandler()
 {
-  // local generator owns the makefile
-  this->Makefile = 0;
-  if (this->LocalGenerator)
-    {
-    delete this->LocalGenerator;
-    }
-  this->LocalGenerator = 0;
-  if (this->GlobalGenerator)
-    {
-    delete this->GlobalGenerator;
-    }
-  this->GlobalGenerator = 0;
-  if (this->CMake)
-    {
-    delete this->CMake;
-    }
+  delete this->Makefile;
+  delete this->LocalGenerator;
+  delete this->GlobalGenerator;
+  delete this->CMake;
 }
 
 
@@ -334,6 +317,7 @@ void cmCTestScriptHandler::CreateCMake()
     delete this->CMake;
     delete this->GlobalGenerator;
     delete this->LocalGenerator;
+    delete this->Makefile;
     }
   this->CMake = new cmake;
   this->CMake->SetHomeDirectory("");
@@ -341,8 +325,10 @@ void cmCTestScriptHandler::CreateCMake()
   this->CMake->AddCMakePaths();
   this->GlobalGenerator = new cmGlobalGenerator(this->CMake);
 
-  this->LocalGenerator = this->GlobalGenerator->MakeLocalGenerator();
-  this->Makefile = this->LocalGenerator->GetMakefile();
+  cmState::Snapshot snapshot = this->CMake->GetCurrentSnapshot();
+  this->Makefile = new cmMakefile(this->GlobalGenerator, snapshot);
+  this->LocalGenerator =
+      this->GlobalGenerator->CreateLocalGenerator(this->Makefile);
 
   this->CMake->SetProgressCallback(ctestScriptProgressCallback, this->CTest);
 
