@@ -268,7 +268,7 @@ macro(_DO_SET_MACRO_VALUES TARGET_LIBRARY)
   get_property(type TARGET ${TARGET_LIBRARY} PROPERTY TYPE)
 
   if(NOT ${type} STREQUAL "STATIC_LIBRARY")
-    if(WIN32)
+    if(WIN32 OR CYGWIN)
       set(DEFINE_EXPORT "__declspec(dllexport)")
       set(DEFINE_IMPORT "__declspec(dllimport)")
     elseif(COMPILER_HAS_HIDDEN_VISIBILITY AND USE_COMPILER_HIDDEN_VISIBILITY)
