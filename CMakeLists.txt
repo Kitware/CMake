@@ -144,17 +144,6 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
 
 endmacro()
 
-
-
-
-if(NOT CMake_TEST_EXTERNAL_CMAKE)
-  set(CMAKE_BUILD_ON_VISUAL_STUDIO 0)
-  if(WIN32 AND NOT UNIX AND NOT MINGW)
-    set(CMAKE_BUILD_ON_VISUAL_STUDIO 1)
-  endif()
-endif()
-
-
 #-----------------------------------------------------------------------
 # a macro to determine the generator and ctest executable to use
 # for testing. Simply to improve readability of the main script.

@@ -1012,6 +1012,94 @@ std::string cmSystemTools::ComputeStringMD5(const std::string& input)
 #endif
 }
 
+//----------------------------------------------------------------------------
+std::string cmSystemTools::ComputeCertificateThumbprint(
+  const std::string& source)
+{
+  std::string thumbprint;
+
+#ifdef _WIN32
+  BYTE* certData = NULL;
+  CRYPT_INTEGER_BLOB cryptBlob;
+  HCERTSTORE certStore = NULL;
+  PCCERT_CONTEXT certContext = NULL;
+
+  HANDLE certFile = CreateFile(cmsys::Encoding::ToWide(source.c_str()).c_str(),
+    GENERIC_READ,
+    FILE_SHARE_READ,
+    NULL,
+    OPEN_EXISTING,
+    FILE_ATTRIBUTE_NORMAL,
+    NULL);
+
+  if (certFile != INVALID_HANDLE_VALUE && certFile != NULL)
+    {
+    DWORD fileSize = GetFileSize(certFile, NULL);
+    if (fileSize != INVALID_FILE_SIZE)
+      {
+      certData = new BYTE[fileSize];
+      if (certData != NULL)
+        {
+        DWORD dwRead = 0;
+        if (ReadFile(certFile, certData, fileSize, &dwRead, NULL))
+          {
+          cryptBlob.cbData = fileSize;
+          cryptBlob.pbData = certData;
+
+          // Verify that this is a valid cert
+          if (PFXIsPFXBlob(&cryptBlob))
+            {
+            // Open the certificate as a store
+            certStore = PFXImportCertStore(
+              &cryptBlob, NULL, CRYPT_EXPORTABLE);
+            if (certStore != NULL)
+              {
+              // There should only be 1 cert.
+              certContext = CertEnumCertificatesInStore(certStore,
+                certContext);
+              if (certContext != NULL)
+                {
+                // The hash is 20 bytes
+                BYTE hashData[20];
+                DWORD hashLength = 20;
+
+                // Buffer to print the hash. Each byte takes 2 chars +
+                // terminating character
+                char hashPrint[41];
+                char *pHashPrint = hashPrint;
+                // Get the hash property from the certificate
+                if (CertGetCertificateContextProperty(certContext,
+                  CERT_HASH_PROP_ID, hashData, &hashLength))
+                  {
+                  for (DWORD i = 0; i < hashLength; i++)
+                    {
+                    // Convert each byte to hexadecimal
+                    sprintf(pHashPrint, "%02X", hashData[i]);
+                    pHashPrint += 2;
+                    }
+                  *pHashPrint = '\0';
+                  thumbprint = hashPrint;
+                  }
+                CertFreeCertificateContext(certContext);
+                }
+              CertCloseStore(certStore, 0);
+              }
+            }
+          }
+        delete[] certData;
+        }
+      }
+    CloseHandle(certFile);
+    }
+#else
+  (void)source;
+  cmSystemTools::Message("ComputeCertificateThumbprint is not implemented",
+    "Error");
+#endif
+
+  return thumbprint;
+}
+
 void cmSystemTools::Glob(const std::string& directory,
                          const std::string& regexp,
                          std::vector<std::string>& files)
