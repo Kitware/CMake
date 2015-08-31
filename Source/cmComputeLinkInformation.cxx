@@ -862,7 +862,7 @@ void cmComputeLinkInformation::ComputeLinkTypeInfo()
   const char* lss =
       this->Target->Target->GetProperty("LINK_SEARCH_START_STATIC");
   this->StartLinkType = cmSystemTools::IsOn(lss)? LinkStatic : LinkShared;
-  this->CurrentLinkType = this->StartLinkType);
+  this->CurrentLinkType = this->StartLinkType;
 }
 
 //----------------------------------------------------------------------------
