@@ -3,15 +3,15 @@
 #include <example_exe.h>
 
 #include <kwsys/DynamicLoader.hxx>
-#include <kwsys/ios/iostream>
-#include <kwsys/stl/string>
+#include <iostream>
+#include <string>
 
 #include <stdio.h>
 
 // Implement the ABI used by plugins.
 extern "C" int example_exe_function()
 {
-  kwsys_ios::cout << "hello" << kwsys_ios::endl;
+  std::cout << "hello" << std::endl;
   return 123;
 }
 
@@ -23,7 +23,7 @@ extern "C" int example_exe_function()
 
 int main()
 {
-  kwsys_stl::string libName = EXAMPLE_EXE_PLUGIN_DIR CONFIG_DIR "/";
+  std::string libName = EXAMPLE_EXE_PLUGIN_DIR CONFIG_DIR "/";
   libName += kwsys::DynamicLoader::LibPrefix();
   libName += "example_mod_1";
   libName += kwsys::DynamicLoader::LibExtension();
@@ -31,17 +31,17 @@ int main()
     kwsys::DynamicLoader::OpenLibrary(libName.c_str());
   if(!handle)
     {
-    kwsys_ios::cerr << "Could not open plugin \""
-                    << libName << "\"!" << kwsys_ios::endl;
+    std::cerr << "Could not open plugin \""
+              << libName << "\"!" << std::endl;
     return 1;
     }
   kwsys::DynamicLoader::SymbolPointer sym =
     kwsys::DynamicLoader::GetSymbolAddress(handle, "example_mod_1_function");
   if(!sym)
     {
-    kwsys_ios::cerr
+    std::cerr
       << "Could not get plugin symbol \"example_mod_1_function\"!"
-      << kwsys_ios::endl;
+      << std::endl;
     return 1;
     }
 #ifdef __WATCOMC__
@@ -51,8 +51,8 @@ int main()
 #endif
   if(f(456) != (123+456))
     {
-    kwsys_ios::cerr << "Incorrect return value from plugin!"
-                    << kwsys_ios::endl;
+    std::cerr << "Incorrect return value from plugin!"
+              << std::endl;
     return 1;
     }
   kwsys::DynamicLoader::CloseLibrary(handle);
