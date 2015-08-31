@@ -2177,34 +2177,27 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                 this->CreateString("NO"));
     }
 
-  BuildObjectListOrString dirs(this, this->XcodeVersion >= 30);
-  BuildObjectListOrString fdirs(this, this->XcodeVersion >= 30);
-  std::vector<std::string> includes;
-  this->CurrentLocalGenerator->GetIncludeDirectories(includes, gtgt,
-                                                     "C", configName);
-  std::set<std::string> emitted;
-  emitted.insert("/System/Library/Frameworks");
-  for(std::vector<std::string>::iterator i = includes.begin();
-      i != includes.end(); ++i)
+  for(std::set<std::string>::iterator li = languages.begin();
+      li != languages.end(); ++li)
     {
-    if(this->NameResolvesToFramework(i->c_str()))
+    std::vector<std::string> includes;
+    this->CurrentLocalGenerator->GetIncludeDirectories(includes, gtgt, *li);
+
+    std::string includeFlags = this->CurrentLocalGenerator
+      ->GetIncludeFlags(includes, gtgt, *li, true, false, configName);
+
+    std::string& flags = cflags[*li];
+
+    if (!includeFlags.empty())
       {
-      std::string frameworkDir = *i;
-      frameworkDir += "/../";
-      frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
-      if(emitted.insert(frameworkDir).second)
-        {
-        fdirs.Add(this->XCodeEscapePath(frameworkDir.c_str()).c_str());
-        }
-      }
-    else
-      {
-      std::string incpath =
-        this->XCodeEscapePath(i->c_str());
-      dirs.Add(incpath.c_str());
+      flags += " " + includeFlags;
       }
     }
+
   // Add framework search paths needed for linking.
+  BuildObjectListOrString fdirs(this, this->XcodeVersion >= 30);
+  std::set<std::string> emitted;
+  emitted.insert("/System/Library/Frameworks");
   if(cmComputeLinkInformation* cli = gtgt->GetLinkInformation(configName))
     {
     std::vector<std::string> const& fwDirs = cli->GetFrameworkPaths();
@@ -2221,11 +2214,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     buildSettings->AddAttribute("FRAMEWORK_SEARCH_PATHS",
                                 fdirs.CreateList());
-    }
-  if(!dirs.IsEmpty())
-    {
-    buildSettings->AddAttribute("HEADER_SEARCH_PATHS",
-                                dirs.CreateList());
     }
 
   bool same_gflags = true;
