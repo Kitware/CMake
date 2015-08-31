@@ -21,7 +21,6 @@
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmXMLSafe.h"
 
 #include <cmsys/SystemTools.hxx>
 
