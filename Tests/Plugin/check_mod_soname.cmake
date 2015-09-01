@@ -1,5 +1,5 @@
 execute_process(COMMAND ${readelf} -d ${mod} OUTPUT_FILE ${mod}.readelf.txt)
-file(STRINGS ${mod}.readelf.txt soname REGEX "\\(SONAME\\)")
+file(STRINGS ${mod}.readelf.txt soname REGEX "SONAME")
 if(soname)
   message(FATAL_ERROR "${mod} has soname but should not:\n  ${soname}")
 else()
