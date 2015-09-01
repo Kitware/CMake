@@ -1,7 +1,7 @@
 set(PROCESSORS 4)
 set(CMAKE_RELEASE_DIRECTORY /Users/kitware/CMakeReleaseDirectory)
 # set(USER_OVERRIDE "set(CMAKE_CXX_LINK_EXECUTABLE \\\"gcc  <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> <LINK_LIBRARIES>  -shared-libgcc -lstdc++-static\\\")")
-set(INSTALL_PREFIX /)
+set(BOOTSTRAP_ARGS "--prefix=/ --docdir=doc/cmake")
 set(HOST dashmacmini5)
 set(MAKE_PROGRAM "make")
 set(MAKE "${MAKE_PROGRAM} -j5")
@@ -14,7 +14,6 @@ OPENSSL_CRYPTO_LIBRARY:FILEPATH=/Users/kitware/openssl-1.0.1g-install/lib/libcry
 OPENSSL_INCLUDE_DIR:PATH=/Users/kitware/openssl-1.0.1g-install/include
 OPENSSL_SSL_LIBRARY:FILEPATH=/Users/kitware/openssl-1.0.1g-install/lib/libssl.a
 CMAKE_BUILD_TYPE:STRING=Release
-CMAKE_DOC_DIR:PATH=doc/cmake
 CMAKE_OSX_ARCHITECTURES:STRING=x86_64
 CMAKE_OSX_DEPLOYMENT_TARGET:STRING=10.6
 CMAKE_SKIP_BOOTSTRAP_TEST:STRING=TRUE

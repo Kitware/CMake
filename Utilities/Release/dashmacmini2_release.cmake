@@ -1,7 +1,7 @@
 set(PROCESSORS 2)
 set(CMAKE_RELEASE_DIRECTORY /Users/kitware/CMakeReleaseDirectory)
 set(USER_OVERRIDE "set(CMAKE_CXX_LINK_EXECUTABLE \\\"gcc  <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> <LINK_LIBRARIES>  -shared-libgcc -lstdc++-static\\\")")
-set(INSTALL_PREFIX /)
+set(BOOTSTRAP_ARGS "--prefix=/ --docdir=doc/cmake")
 set(HOST dashmacmini2)
 set(MAKE_PROGRAM "make")
 set(MAKE "${MAKE_PROGRAM} -j2")
@@ -9,7 +9,6 @@ set(CPACK_BINARY_GENERATORS "DragNDrop TGZ TZ")
 set(CPACK_DMG_FORMAT "UDBZ") #build using bzip2 for smaller package size
 set(INITIAL_CACHE "
 CMAKE_BUILD_TYPE:STRING=Release
-CMAKE_DOC_DIR:PATH=doc/cmake
 CMAKE_OSX_ARCHITECTURES:STRING=ppc;i386
 CMAKE_USE_OPENSSL:BOOL=ON
 OPENSSL_CRYPTO_LIBRARY:FILEPATH=/Users/kitware/openssl-1.0.1g-install/lib/libcrypto.a
