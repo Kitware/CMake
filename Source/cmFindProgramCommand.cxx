@@ -85,6 +85,11 @@ struct cmFindProgramHelper
     }
 };
 
+cmFindProgramCommand::cmFindProgramCommand()
+{
+  this->NamesPerDirAllowed = true;
+}
+
 // cmFindProgramCommand
 bool cmFindProgramCommand
 ::InitialPass(std::vector<std::string> const& argsIn, cmExecutionStatus &)
@@ -150,6 +155,42 @@ std::string cmFindProgramCommand::FindProgram()
 
 //----------------------------------------------------------------------------
 std::string cmFindProgramCommand::FindNormalProgram()
+{
+  if(this->NamesPerDir)
+    {
+    return this->FindNormalProgramNamesPerDir();
+    }
+  else
+    {
+    return this->FindNormalProgramDirsPerName();
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string cmFindProgramCommand::FindNormalProgramNamesPerDir()
+{
+  // Search for all names in each directory.
+  cmFindProgramHelper helper;
+  for (std::vector<std::string>::const_iterator ni = this->Names.begin();
+       ni != this->Names.end() ; ++ni)
+    {
+    helper.AddName(*ni);
+    }
+  // Search every directory.
+  for (std::vector<std::string>::const_iterator
+         p = this->SearchPaths.begin(); p != this->SearchPaths.end(); ++p)
+    {
+    if(helper.CheckDirectory(*p))
+      {
+      return helper.BestPath;
+      }
+    }
+  // Couldn't find the program.
+  return "";
+}
+
+//----------------------------------------------------------------------------
+std::string cmFindProgramCommand::FindNormalProgramDirsPerName()
 {
   // Search the entire path for each name.
   cmFindProgramHelper helper;
