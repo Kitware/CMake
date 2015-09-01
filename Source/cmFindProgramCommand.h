@@ -54,6 +54,7 @@ public:
 
 private:
   std::string FindProgram();
+  std::string FindNormalProgram();
   std::string FindAppBundle();
   std::string GetBundleExecutable(std::string bundlePath);
 
