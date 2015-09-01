@@ -1,6 +1,7 @@
 include(RunCMake)
 
 run_cmake(DirsPerName)
+run_cmake(NamesPerDir)
 
 if(CMAKE_SYSTEM_NAME MATCHES "^(Windows|CYGWIN)$")
   run_cmake(WindowsCom)

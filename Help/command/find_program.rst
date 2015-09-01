@@ -2,7 +2,7 @@ find_program
 ------------
 
 .. |FIND_XXX| replace:: find_program
-.. |NAMES| replace:: NAMES name1 [name2 ...]
+.. |NAMES| replace:: NAMES name1 [name2 ...] [NAMES_PER_DIR]
 .. |SEARCH_XXX| replace:: program
 .. |SEARCH_XXX_DESC| replace:: program
 .. |prefix_XXX_SUBDIR| replace:: ``<prefix>/[s]bin``
@@ -26,3 +26,8 @@ find_program
    :variable:`CMAKE_FIND_ROOT_PATH_MODE_PROGRAM`
 
 .. include:: FIND_XXX.txt
+
+When more than one value is given to the ``NAMES`` option this command by
+default will consider one name at a time and search every directory
+for it.  The ``NAMES_PER_DIR`` option tells this command to consider one
+directory at a time and search for all names in it.
