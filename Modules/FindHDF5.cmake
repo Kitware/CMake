@@ -234,7 +234,7 @@ if( NOT HDF5_FOUND )
     set( HDF5_CXX_LIBRARY_NAMES_INIT hdf5_cpp ${HDF5_C_LIBRARY_NAMES_INIT} )
     set( HDF5_Fortran_LIBRARY_NAMES_INIT hdf5_fortran
         ${HDF5_C_LIBRARY_NAMES_INIT} )
-    set( HDF5_Fortran_HL_LIBRARY_NAMES_INIT hdf5hl_fortran
+    set( HDF5_Fortran_HL_LIBRARY_NAMES_INIT hdf5hl_fortran hdf5_hl
         ${HDF5_Fortran_LIBRARY_NAMES_INIT} )
 
     foreach( LANGUAGE ${HDF5_LANGUAGE_BINDINGS} )
