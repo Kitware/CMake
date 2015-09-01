@@ -1024,13 +1024,14 @@ std::string cmSystemTools::ComputeCertificateThumbprint(
   HCERTSTORE certStore = NULL;
   PCCERT_CONTEXT certContext = NULL;
 
-  HANDLE certFile = CreateFile(cmsys::Encoding::ToWide(source.c_str()).c_str(),
-    GENERIC_READ,
-    FILE_SHARE_READ,
-    NULL,
-    OPEN_EXISTING,
-    FILE_ATTRIBUTE_NORMAL,
-    NULL);
+  HANDLE certFile =
+    CreateFileW(cmsys::Encoding::ToWide(source.c_str()).c_str(),
+                GENERIC_READ,
+                FILE_SHARE_READ,
+                NULL,
+                OPEN_EXISTING,
+                FILE_ATTRIBUTE_NORMAL,
+                NULL);
 
   if (certFile != INVALID_HANDLE_VALUE && certFile != NULL)
     {
