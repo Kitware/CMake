@@ -225,6 +225,8 @@ if( NOT HDF5_FOUND )
     _HDF5_invoke_compiler( C HDF5_C_COMPILE_LINE HDF5_C_RETURN_VALUE )
     _HDF5_invoke_compiler( CXX HDF5_CXX_COMPILE_LINE HDF5_CXX_RETURN_VALUE )
     _HDF5_invoke_compiler( Fortran HDF5_Fortran_COMPILE_LINE HDF5_Fortran_RETURN_VALUE )
+    set(HDF5_HL_COMPILE_LINE ${HDF5_C_COMPILE_LINE})
+    set(HDF5_Fortran_HL_COMPILE_LINE ${HDF5_Fortran_COMPILE_LINE})
 
     # seed the initial lists of libraries to find with items we know we need
     set( HDF5_C_LIBRARY_NAMES_INIT hdf5 )
