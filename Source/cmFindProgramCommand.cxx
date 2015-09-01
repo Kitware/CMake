@@ -41,7 +41,7 @@ bool cmFindProgramCommand
     return true;
     }
 
-  std::string result = FindProgram(this->Names);
+  std::string result = FindProgram();
   if(result != "")
     {
     // Save the value in the cache
@@ -59,31 +59,30 @@ bool cmFindProgramCommand
   return true;
 }
 
-std::string cmFindProgramCommand::FindProgram(std::vector<std::string> names)
+std::string cmFindProgramCommand::FindProgram()
 {
   std::string program = "";
 
   if(this->SearchAppBundleFirst || this->SearchAppBundleOnly)
     {
-    program = FindAppBundle(names);
+    program = FindAppBundle();
     }
   if(program.empty() && !this->SearchAppBundleOnly)
     {
-    program = cmSystemTools::FindProgram(names, this->SearchPaths, true);
+    program = cmSystemTools::FindProgram(this->Names, this->SearchPaths, true);
     }
 
   if(program.empty() && this->SearchAppBundleLast)
     {
-    program = this->FindAppBundle(names);
+    program = this->FindAppBundle();
     }
   return program;
 }
 
-std::string cmFindProgramCommand
-::FindAppBundle(std::vector<std::string> names)
+std::string cmFindProgramCommand::FindAppBundle()
 {
-  for(std::vector<std::string>::const_iterator name = names.begin();
-      name != names.end() ; ++name)
+  for(std::vector<std::string>::const_iterator name = this->Names.begin();
+      name != this->Names.end() ; ++name)
     {
 
     std::string appName = *name + std::string(".app");
