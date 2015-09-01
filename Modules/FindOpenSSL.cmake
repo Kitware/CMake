@@ -36,6 +36,7 @@
 # ^^^^^
 #
 # Set ``OPENSSL_ROOT_DIR`` to the root directory of an OpenSSL installation.
+# Set ``OPENSSL_USE_STATIC`` to use static libraries.
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
@@ -56,6 +57,16 @@ if (UNIX)
   find_package(PkgConfig QUIET)
   pkg_check_modules(_OPENSSL QUIET openssl)
 endif ()
+
+# Support preference of static libs by adjusting CMAKE_FIND_LIBRARY_SUFFIXES
+if (OPENSSL_USE_STATIC)
+  set( _openssl_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+  if(WIN32)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+  else()
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .a )
+  endif()
+endif()
 
 if (WIN32)
   # http://www.slproweb.com/products/Win32OpenSSL.html
@@ -422,4 +433,9 @@ if(OPENSSL_FOUND)
         INTERFACE_LINK_LIBRARIES OpenSSL::Crypto)
     endif()
   endif()
+endif()
+
+# Restore the original find library ordering
+if( OPENSSL_USE_STATIC )
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ${_openssl_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
 endif()
