@@ -1,1 +1,1 @@
-println("SwiftOnly")
+dump("SwiftOnly")
