@@ -1533,13 +1533,47 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
     this->Makefile->GetSafeDefinition("CMAKE_LIBRARY_PATH_TERMINATOR");
 
   // Flags to link an executable to shared libraries.
-  std::string linkFlagsVar = "CMAKE_SHARED_LIBRARY_LINK_";
-  linkFlagsVar += linkLanguage;
-  linkFlagsVar += "_FLAGS";
   if( tgt.GetType() == cmTarget::EXECUTABLE )
     {
-    linkLibs = this->Makefile->GetSafeDefinition(linkFlagsVar);
-    linkLibs += " ";
+    bool add_shlib_flags = false;
+    switch(tgt.Target->GetPolicyStatusCMP0065())
+      {
+      case cmPolicies::WARN:
+        if(!tgt.GetPropertyAsBool("ENABLE_EXPORTS") &&
+           this->Makefile->PolicyOptionalWarningEnabled(
+             "CMAKE_POLICY_WARNING_CMP0065"))
+          {
+          std::ostringstream w;
+          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0065) << "\n"
+            "For compatibility with older versions of CMake, "
+            "CMAKE_SHARED_LIBRARY_LINK_<LANG>_FLAGS are being used on all "
+            "executables regardless of thier ENABLE_EXPORTS property.";
+          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+          }
+      case cmPolicies::OLD:
+        // OLD behavior is to always add the flags
+        add_shlib_flags = true;
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        this->Makefile->IssueMessage(
+          cmake::FATAL_ERROR,
+          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0065)
+          );
+      case cmPolicies::NEW:
+        // NEW behavior is to only add the flags if ENABLE_EXPORTS is on
+        add_shlib_flags = tgt.GetPropertyAsBool("ENABLE_EXPORTS");
+        break;
+      }
+
+    if(add_shlib_flags)
+      {
+      std::string linkFlagsVar = "CMAKE_SHARED_LIBRARY_LINK_";
+      linkFlagsVar += linkLanguage;
+      linkFlagsVar += "_FLAGS";
+      linkLibs = this->Makefile->GetSafeDefinition(linkFlagsVar);
+      linkLibs += " ";
+      }
     }
 
   // Append the framework search path flags.
