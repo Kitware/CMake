@@ -11,6 +11,20 @@ endif()
 # Use a single build tree for a few tests without cleaning.
 
 if(NOT XCODE_VERSION VERSION_LESS 5)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeInstallIOS-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_OPTIONS "-DCMAKE_INSTALL_PREFIX:PATH=${RunCMake_BINARY_DIR}/ios_install")
+
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake(XcodeInstallIOS)
+  run_cmake_command(XcodeInstallIOS-install ${CMAKE_COMMAND} --build . --target install)
+
+  unset(RunCMake_TEST_BINARY_DIR)
+  unset(RunCMake_TEST_NO_CLEAN)
+  unset(RunCMake_TEST_OPTIONS)
+
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeBundlesOSX-build)
   set(RunCMake_TEST_NO_CLEAN 1)
   set(RunCMake_TEST_OPTIONS "-DTEST_IOS=OFF")

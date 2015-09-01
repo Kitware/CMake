@@ -3,7 +3,6 @@ project(NavApp3)
 
 set(CMAKE_OSX_SYSROOT iphoneos4.3)
 set(CMAKE_OSX_ARCHITECTURES "armv6;armv7;i386")
-set(CMAKE_XCODE_EFFECTIVE_PLATFORMS "-iphoneos;-iphonesimulator")
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
