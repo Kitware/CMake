@@ -1,5 +1,6 @@
 set(CMAKE_RELEASE_DIRECTORY "c:/cygwin/home/dashboard/CMakeReleaseCygwin")
 set(PROCESSORS 9)
+set(BOOTSTRAP_ARGS "")
 set(MAKE_PROGRAM "make")
 set(MAKE "${MAKE_PROGRAM} -j8")
 set(HOST dash2win64)

@@ -1,4 +1,5 @@
 set(PROCESSORS 4)
+set(BOOTSTRAP_ARGS "--docdir=doc/cmake")
 set(HOST linux64)
 set(MAKE_PROGRAM "make")
 set(CC /opt/gcc-4.9.2/bin/gcc)
