@@ -1,4 +1,4 @@
-project(LinkSearchStatic)
+enable_language(C)
 
 set(CMAKE_LINK_SEARCH_START_STATIC ON)
 add_executable(LinkSearchStartStaticInit1 LinkStatic.c)
