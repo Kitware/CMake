@@ -1019,7 +1019,7 @@ std::string cmSystemTools::ComputeCertificateThumbprint(
 {
   std::string thumbprint;
 
-#ifdef _WIN32
+#if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32)
   BYTE* certData = NULL;
   CRYPT_INTEGER_BLOB cryptBlob;
   HCERTSTORE certStore = NULL;
