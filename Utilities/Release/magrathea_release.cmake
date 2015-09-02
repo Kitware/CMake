@@ -1,5 +1,5 @@
 set(PROCESSORS 1)
-set(BOOTSTRAP_ARGS "")
+set(BOOTSTRAP_ARGS "--docdir=doc/cmake")
 set(HOST magrathea)
 set(MAKE_PROGRAM "make")
 set(CC gcc332s)

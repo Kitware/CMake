@@ -1,7 +1,7 @@
 set(PROCESSORS 2)
 set(CMAKE_RELEASE_DIRECTORY /Users/kitware/CMakeReleaseDirectory)
 set(USER_OVERRIDE "set(CMAKE_CXX_LINK_EXECUTABLE \\\"gcc  <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> <LINK_LIBRARIES>  -shared-libgcc -lstdc++-static\\\")")
-set(BOOTSTRAP_ARGS "--prefix=/")
+set(BOOTSTRAP_ARGS "--prefix=/ --docdir=doc/cmake")
 set(HOST dashmacmini2)
 set(MAKE_PROGRAM "make")
 set(MAKE "${MAKE_PROGRAM} -j2")
