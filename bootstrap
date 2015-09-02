@@ -373,12 +373,6 @@ KWSYS_FILES="\
   SystemTools.hxx \
   Terminal.h"
 
-KWSYS_IOS_FILES="
-  fstream \
-  iosfwd \
-  iostream \
-  sstream"
-
 KWIML_FILES='
   ABI.h
   INT.h
@@ -498,30 +492,7 @@ cmake_kwsys_config_replace_string ()
                 s/@KWSYS_LFS_AVAILABLE@/${KWSYS_LFS_AVAILABLE}/g;
                 s/@KWSYS_LFS_REQUESTED@/${KWSYS_LFS_REQUESTED}/g;
                 s/@KWSYS_NAME_IS_KWSYS@/${KWSYS_NAME_IS_KWSYS}/g;
-                s/@KWSYS_IOS_USE_ANSI@/${KWSYS_IOS_USE_ANSI}/g;
-                s/@KWSYS_IOS_HAVE_STD@/${KWSYS_IOS_HAVE_STD}/g;
-                s/@KWSYS_IOS_USE_SSTREAM@/${KWSYS_IOS_USE_SSTREAM}/g;
-                s/@KWSYS_IOS_USE_STRSTREAM_H@/${KWSYS_IOS_USE_STRSTREAM_H}/g;
-                s/@KWSYS_IOS_USE_STRSTREA_H@/${KWSYS_IOS_USE_STRSTREA_H}/g;
-                s/@KWSYS_IOS_HAVE_BINARY@/${KWSYS_IOS_HAVE_BINARY}/g;
-                s/@KWSYS_STL_HAVE_STD@/${KWSYS_STL_HAVE_STD}/g;
-                s/@KWSYS_STL_STRING_HAVE_ISTREAM@/${KWSYS_STL_STRING_HAVE_ISTREAM}/g;
-                s/@KWSYS_STL_STRING_HAVE_OSTREAM@/${KWSYS_STL_STRING_HAVE_OSTREAM}/g;
-                s/@KWSYS_STL_STRING_HAVE_NEQ_CHAR@/${KWSYS_STL_STRING_HAVE_NEQ_CHAR}/g;
-                s/@KWSYS_STL_HAS_ITERATOR_TRAITS@/${KWSYS_STL_HAS_ITERATOR_TRAITS}/g;
-                s/@KWSYS_STL_HAS_ITERATOR_CATEGORY@/${KWSYS_STL_HAS_ITERATOR_CATEGORY}/g;
-                s/@KWSYS_STL_HAS___ITERATOR_CATEGORY@/${KWSYS_STL_HAS___ITERATOR_CATEGORY}/g;
-                s/@KWSYS_STL_HAS_ALLOCATOR_TEMPLATE@/${KWSYS_STL_HAS_ALLOCATOR_TEMPLATE}/g;
-                s/@KWSYS_STL_HAS_ALLOCATOR_NONTEMPLATE@/${KWSYS_STL_HAS_ALLOCATOR_NONTEMPLATE}/g;
-                s/@KWSYS_STL_HAS_ALLOCATOR_REBIND@/${KWSYS_STL_HAS_ALLOCATOR_REBIND}/g;
-                s/@KWSYS_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT@/${KWSYS_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT}/g;
-                s/@KWSYS_STL_HAS_ALLOCATOR_OBJECTS@/${KWSYS_STL_HAS_ALLOCATOR_OBJECTS}/g;
                 s/@KWSYS_STL_HAS_WSTRING@/${KWSYS_STL_HAS_WSTRING}/g;
-                s/@KWSYS_CXX_HAS_CSTDDEF@/${KWSYS_CXX_HAS_CSTDDEF}/g;
-                s/@KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS@/${KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS}/g;
-                s/@KWSYS_CXX_HAS_MEMBER_TEMPLATES@/${KWSYS_CXX_HAS_MEMBER_TEMPLATES}/g;
-                s/@KWSYS_CXX_HAS_FULL_SPECIALIZATION@/${KWSYS_CXX_HAS_FULL_SPECIALIZATION}/g;
-                s/@KWSYS_CXX_HAS_ARGUMENT_DEPENDENT_LOOKUP@/${KWSYS_CXX_HAS_ARGUMENT_DEPENDENT_LOOKUP}/g;
                 s/@KWSYS_STAT_HAS_ST_MTIM@/${KWSYS_STAT_HAS_ST_MTIM}/g;}" >> "${OUTFILE}${_tmp}"
     if [ -f "${OUTFILE}${_tmp}" ]; then
       if "${_diff}" "${OUTFILE}" "${OUTFILE}${_tmp}" > /dev/null 2> /dev/null ; then
@@ -1202,38 +1173,13 @@ KWSYS_NAME_IS_KWSYS=0
 KWSYS_BUILD_SHARED=0
 KWSYS_LFS_AVAILABLE=0
 KWSYS_LFS_REQUESTED=0
-KWSYS_IOS_USE_STRSTREAM_H=0
-KWSYS_IOS_USE_STRSTREA_H=0
-KWSYS_IOS_HAVE_STD=0
-KWSYS_IOS_USE_SSTREAM=0
-KWSYS_IOS_USE_ANSI=0
-KWSYS_IOS_HAVE_BINARY=0
-KWSYS_STL_HAVE_STD=0
 KWSYS_STAT_HAS_ST_MTIM=0
-KWSYS_STL_STRING_HAVE_NEQ_CHAR=0
-KWSYS_STL_HAS_ITERATOR_TRAITS=0
-KWSYS_STL_HAS_ITERATOR_CATEGORY=0
-KWSYS_STL_HAS___ITERATOR_CATEGORY=0
-KWSYS_STL_HAS_ALLOCATOR_TEMPLATE=0
-KWSYS_STL_HAS_ALLOCATOR_NONTEMPLATE=0
-KWSYS_STL_HAS_ALLOCATOR_REBIND=0
-KWSYS_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT=0
-KWSYS_STL_HAS_ALLOCATOR_OBJECTS=0
 KWSYS_STL_HAS_WSTRING=0
 KWSYS_CXX_HAS_SETENV=0
 KWSYS_CXX_HAS_UNSETENV=0
 KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=0
 KWSYS_CXX_HAS_UTIMENSAT=0
 KWSYS_CXX_HAS_UTIMES=0
-KWSYS_CXX_HAS_CSTDDEF=0
-KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS=0
-KWSYS_CXX_HAS_MEMBER_TEMPLATES=0
-KWSYS_CXX_HAS_FULL_SPECIALIZATION=0
-KWSYS_CXX_HAS_ARGUMENT_DEPENDENT_LOOKUP=0
-
-# Hardcode these kwsys features.  They work on all known UNIX compilers anyway.
-KWSYS_STL_STRING_HAVE_ISTREAM=1
-KWSYS_STL_STRING_HAVE_OSTREAM=1
 
 if cmake_try_run "${cmake_cxx_compiler}" \
   "${cmake_cxx_flags} -DTEST_KWSYS_CXX_HAS_SETENV" \
@@ -1263,201 +1209,12 @@ else
 fi
 
 if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags} -DTEST_KWSYS_STL_HAVE_STD" \
-  "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-  KWSYS_STL_HAVE_STD=1
-  echo "${cmake_cxx_compiler} has STL in std:: namespace"
-else
-  echo "${cmake_cxx_compiler} does not have STL in std:: namespace"
-fi
-
-if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags} -DTEST_KWSYS_IOS_USE_ANSI" \
-  "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-  KWSYS_IOS_USE_ANSI=1
-  echo "${cmake_cxx_compiler} has ANSI streams"
-else
-  echo "${cmake_cxx_compiler} does not have ANSI streams"
-fi
-
-if [ "x$KWSYS_IOS_USE_ANSI" = "x1" ]; then
-  if cmake_try_run "${cmake_cxx_compiler}" \
-    "${cmake_cxx_flags} -DTEST_KWSYS_IOS_HAVE_STD" \
-    "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-    KWSYS_IOS_HAVE_STD=1
-    echo "${cmake_cxx_compiler} has streams in std:: namespace"
-  else
-    echo "${cmake_cxx_compiler} does not have streams in std:: namespace"
-  fi
-  if cmake_try_run "${cmake_cxx_compiler}" \
-    "${cmake_cxx_flags} -DTEST_KWSYS_IOS_USE_SSTREAM" \
-    "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-    KWSYS_IOS_USE_SSTREAM=1
-    echo "${cmake_cxx_compiler} has sstream"
-  else
-    echo "${cmake_cxx_compiler} does not have sstream"
-  fi
-fi
-
-if [ "x$KWSYS_IOS_USE_SSTREAM" = "x0" ]; then
-  if cmake_try_run "${cmake_cxx_compiler}" \
-    "${cmake_cxx_flags} -DTEST_KWSYS_IOS_USE_STRSTREAM_H" \
-    "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-    KWSYS_IOS_USE_STRSTREAM_H=1
-    echo "${cmake_cxx_compiler} has strstream.h"
-  else
-    echo "${cmake_cxx_compiler} does not have strstream.h"
-  fi
-  if [ "x$KWSYS_IOS_USE_STRSTREAM_H" = "x0" ]; then
-    if cmake_try_run "${cmake_cxx_compiler}" \
-      "${cmake_cxx_flags} -DTEST_KWSYS_IOS_USE_STRSTREA_H" \
-      "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-      KWSYS_IOS_USE_STRSTREA_H=1
-      echo "${cmake_cxx_compiler} has strstrea.h"
-    else
-      echo "${cmake_cxx_compiler} does not have strstrea.h"
-    fi
-  fi
-fi
-
-if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags} -DTEST_KWSYS_STL_STRING_HAVE_NEQ_CHAR -DKWSYS_STL_HAVE_STD=${KWSYS_STL_HAVE_STD}" \
-  "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-  KWSYS_STL_STRING_HAVE_NEQ_CHAR=1
-  echo "${cmake_cxx_compiler} has operator!=(string, char*)"
-else
-  echo "${cmake_cxx_compiler} does not have operator!=(string, char*)"
-fi
-
-if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags} -DTEST_KWSYS_STL_HAS_ITERATOR_TRAITS -DKWSYS_STL_HAVE_STD=${KWSYS_STL_HAVE_STD}" \
-  "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-  KWSYS_STL_HAS_ITERATOR_TRAITS=1
-  echo "${cmake_cxx_compiler} has stl iterator_traits"
-else
-  echo "${cmake_cxx_compiler} does not have stl iterator_traits"
-fi
-
-if [ "x${KWSYS_STL_HAS_ITERATOR_TRAITS}" = "x0" ]; then
-  if cmake_try_run "${cmake_cxx_compiler}" \
-    "${cmake_cxx_flags} -DTEST_KWSYS_STL_HAS_ITERATOR_CATEGORY -DKWSYS_STL_HAVE_STD=${KWSYS_STL_HAVE_STD}" \
-    "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-    KWSYS_STL_HAS_ITERATOR_CATEGORY=1
-    echo "${cmake_cxx_compiler} has old iterator_category"
-  else
-    echo "${cmake_cxx_compiler} does not have old iterator_category"
-  fi
-  if [ "x${KWSYS_STL_HAS_ITERATOR_CATEGORY}" = "x0" ]; then
-    if cmake_try_run "${cmake_cxx_compiler}" \
-      "${cmake_cxx_flags} -DTEST_KWSYS_STL_HAS___ITERATOR_CATEGORY -DKWSYS_STL_HAVE_STD=${KWSYS_STL_HAVE_STD}" \
-      "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-      KWSYS_STL_HAS___ITERATOR_CATEGORY=1
-      echo "${cmake_cxx_compiler} has old __iterator_category"
-    else
-      echo "${cmake_cxx_compiler} does not have old __iterator_category"
-    fi
-  fi
-fi
-
-if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags} -DTEST_KWSYS_STL_HAS_ALLOCATOR_TEMPLATE -DKWSYS_STL_HAVE_STD=${KWSYS_STL_HAVE_STD}" \
-  "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-  KWSYS_STL_HAS_ALLOCATOR_TEMPLATE=1
-  echo "${cmake_cxx_compiler} has standard template allocator"
-else
-  echo "${cmake_cxx_compiler} does not have standard template allocator"
-fi
-
-if [ "x${KWSYS_STL_HAS_ALLOCATOR_TEMPLATE}" = "x1" ]; then
-  if cmake_try_run "${cmake_cxx_compiler}" \
-    "${cmake_cxx_flags} -DTEST_KWSYS_STL_HAS_ALLOCATOR_REBIND -DKWSYS_STL_HAVE_STD=${KWSYS_STL_HAVE_STD}" \
-    "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-    KWSYS_STL_HAS_ALLOCATOR_REBIND=1
-    echo "${cmake_cxx_compiler} has allocator<>::rebind<>"
-  else
-    echo "${cmake_cxx_compiler} does not have allocator<>::rebind<>"
-  fi
-
-  if cmake_try_run "${cmake_cxx_compiler}" \
-    "${cmake_cxx_flags} -DTEST_KWSYS_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT -DKWSYS_STL_HAVE_STD=${KWSYS_STL_HAVE_STD}" \
-    "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-    KWSYS_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT=1
-    echo "${cmake_cxx_compiler} has non-standard allocator<>::max_size argument"
-  else
-    echo "${cmake_cxx_compiler} does not have non-standard allocator<>::max_size argument"
-  fi
-else
-  if cmake_try_run "${cmake_cxx_compiler}" \
-    "${cmake_cxx_flags} -DTEST_KWSYS_STL_HAS_ALLOCATOR_NONTEMPLATE -DKWSYS_STL_HAVE_STD=${KWSYS_STL_HAVE_STD}" \
-    "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-    KWSYS_STL_HAS_ALLOCATOR_NONTEMPLATE=1
-    echo "${cmake_cxx_compiler} has old non-template allocator"
-  else
-    echo "${cmake_cxx_compiler} does not have old non-template allocator"
-  fi
-fi
-
-if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags} -DTEST_KWSYS_STL_HAS_ALLOCATOR_OBJECTS -DKWSYS_STL_HAVE_STD=${KWSYS_STL_HAVE_STD}" \
-  "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-  KWSYS_STL_HAS_ALLOCATOR_OBJECTS=1
-  echo "${cmake_cxx_compiler} has stl containers supporting allocator objects"
-else
-  echo "${cmake_cxx_compiler} does not have stl containers supporting allocator objects"
-fi
-
-if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags} -DTEST_KWSYS_STL_HAS_WSTRING -DKWSYS_STL_HAVE_STD=${KWSYS_STL_HAVE_STD}" \
+  "${cmake_cxx_flags} -DTEST_KWSYS_STL_HAS_WSTRING" \
   "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
   KWSYS_STL_HAS_WSTRING=1
   echo "${cmake_cxx_compiler} has stl wstring"
 else
   echo "${cmake_cxx_compiler} does not have stl wstring"
-fi
-
-if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags} -DTEST_KWSYS_CXX_HAS_CSTDDEF" \
-  "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-  KWSYS_CXX_HAS_CSTDDEF=1
-  echo "${cmake_cxx_compiler} has header cstddef"
-else
-  echo "${cmake_cxx_compiler} does not have header cstddef"
-fi
-
-if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags} -DTEST_KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS" \
-  "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-  echo "${cmake_cxx_compiler} does not require template friends to use <>"
-else
-  KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS=1
-  echo "${cmake_cxx_compiler} requires template friends to use <>"
-fi
-
-if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags} -DTEST_KWSYS_CXX_HAS_MEMBER_TEMPLATES" \
-  "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-  KWSYS_CXX_HAS_MEMBER_TEMPLATES=1
-  echo "${cmake_cxx_compiler} supports member templates"
-else
-  echo "${cmake_cxx_compiler} does not support member templates"
-fi
-
-if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags} -DTEST_KWSYS_CXX_HAS_FULL_SPECIALIZATION" \
-  "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-  KWSYS_CXX_HAS_FULL_SPECIALIZATION=1
-  echo "${cmake_cxx_compiler} has standard template specialization syntax"
-else
-  echo "${cmake_cxx_compiler} does not have standard template specialization syntax"
-fi
-
-if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags} -DTEST_KWSYS_CXX_HAS_ARGUMENT_DEPENDENT_LOOKUP" \
-  "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-  KWSYS_CXX_HAS_ARGUMENT_DEPENDENT_LOOKUP=1
-  echo "${cmake_cxx_compiler} has argument dependent lookup"
-else
-  echo "${cmake_cxx_compiler} does not have argument dependent lookup"
 fi
 
 if cmake_try_run "${cmake_cxx_compiler}" \
@@ -1467,15 +1224,6 @@ if cmake_try_run "${cmake_cxx_compiler}" \
   echo "${cmake_cxx_compiler} has struct stat with st_mtim member"
 else
   echo "${cmake_cxx_compiler} does not have struct stat with st_mtim member"
-fi
-
-if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags} -DTEST_KWSYS_IOS_HAVE_BINARY -DKWSYS_IOS_USE_ANSI=${KWSYS_IOS_USE_ANSI} -DKWSYS_IOS_HAVE_STD=${KWSYS_IOS_HAVE_STD}" \
-  "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-  KWSYS_IOS_HAVE_BINARY=1
-  echo "${cmake_cxx_compiler} has ios::binary openmode"
-else
-  echo "${cmake_cxx_compiler} does not have ios::binary openmode"
 fi
 
 # Just to be safe, let us store compiler and flags to the header file
@@ -1547,22 +1295,6 @@ cmake_kwsys_config_replace_string \
 for a in ${KWSYS_FILES}; do
   cmake_replace_string "${cmake_source_dir}/Source/kwsys/${a}.in" \
      "${cmake_bootstrap_dir}/cmsys/${a}" KWSYS_NAMESPACE cmsys
-done
-
-for a in ${KWSYS_IOS_FILES}; do
-  cmake_replace_string "${cmake_source_dir}/Source/kwsys/kwsys_ios_${a}.h.in" \
-     "${cmake_bootstrap_dir}/cmsys/ios/${a}" KWSYS_NAMESPACE cmsys
-done
-
-cmake_replace_string "${cmake_source_dir}/Source/kwsys/kwsys_stl.hxx.in" \
-   "${cmake_bootstrap_dir}/cmsys/stl/stl.hxx_a" KWSYS_STL_HEADER_EXTRA ""
-
-cmake_replace_string "${cmake_bootstrap_dir}/cmsys/stl/stl.hxx_a" \
-   "${cmake_bootstrap_dir}/cmsys/stl/stl.hxx_b" KWSYS_NAMESPACE cmsys
-
-for a in string vector set map algorithm; do
-  cmake_replace_string "${cmake_bootstrap_dir}/cmsys/stl/stl.hxx_b" \
-    "${cmake_bootstrap_dir}/cmsys/stl/${a}" KWSYS_STL_HEADER ${a}
 done
 
 for a in ${KWIML_FILES}; do
