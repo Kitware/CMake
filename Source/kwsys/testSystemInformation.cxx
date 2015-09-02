@@ -11,14 +11,14 @@
 ============================================================================*/
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(SystemInformation.hxx)
-#include KWSYS_HEADER(ios/iostream)
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
 # include "SystemInformation.hxx.in"
-# include "kwsys_ios_iostream.h.in"
 #endif
+
+#include <iostream>
 
 #if defined(KWSYS_USE_LONG_LONG)
 # if defined(KWSYS_IOS_HAS_OSTREAM_LONG_LONG)
@@ -36,18 +36,18 @@
 # error "No Long Long"
 #endif
 
-#define printMethod(info, m) kwsys_ios::cout << #m << ": " \
+#define printMethod(info, m) std::cout << #m << ": " \
 << info.m() << "\n"
 
-#define printMethod2(info, m, unit) kwsys_ios::cout << #m << ": " \
+#define printMethod2(info, m, unit) std::cout << #m << ": " \
 << info.m() << " " << unit << "\n"
 
-#define printMethod3(info, m, unit) kwsys_ios::cout << #m << ": " \
+#define printMethod3(info, m, unit) std::cout << #m << ": " \
 << iostreamLongLong(info.m) << " " << unit << "\n"
 
 int testSystemInformation(int, char*[])
 {
-  kwsys_ios::cout << "CTEST_FULL_OUTPUT\n"; // avoid truncation
+  std::cout << "CTEST_FULL_OUTPUT\n"; // avoid truncation
 
   kwsys::SystemInformation info;
   info.RunCPUCheck();
@@ -93,16 +93,16 @@ int testSystemInformation(int, char*[])
     {
     if (info.DoesCPUSupportFeature(static_cast<long int>(1) << i))
       {
-      kwsys_ios::cout << "CPU feature " << i << "\n";
+      std::cout << "CPU feature " << i << "\n";
       }
     }
 
   /* test stack trace
   */
-  kwsys_ios::cout
-    << "Program Stack:" << kwsys_ios::endl
-    << kwsys::SystemInformation::GetProgramStack(0,0) << kwsys_ios::endl
-    << kwsys_ios::endl;
+  std::cout
+    << "Program Stack:" << std::endl
+    << kwsys::SystemInformation::GetProgramStack(0,0) << std::endl
+    << std::endl;
 
   /* test segv handler
   info.SetStackTraceOnError(1);

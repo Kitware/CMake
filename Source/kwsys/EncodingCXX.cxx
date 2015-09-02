@@ -19,7 +19,6 @@
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(Encoding.hxx)
 #include KWSYS_HEADER(Encoding.h)
-#include KWSYS_HEADER(stl/vector)
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
@@ -28,6 +27,7 @@
 # include "Encoding.h.in"
 #endif
 
+#include <vector>
 #include <stdlib.h>
 #include <string.h>
 
@@ -140,23 +140,23 @@ char const* const* Encoding::CommandLineArguments::argv() const
 
 #if KWSYS_STL_HAS_WSTRING
 
-kwsys_stl::wstring Encoding::ToWide(const kwsys_stl::string& str)
+std::wstring Encoding::ToWide(const std::string& str)
 {
   return ToWide(str.c_str());
 }
 
-kwsys_stl::string Encoding::ToNarrow(const kwsys_stl::wstring& str)
+std::string Encoding::ToNarrow(const std::wstring& str)
 {
   return ToNarrow(str.c_str());
 }
 
-kwsys_stl::wstring Encoding::ToWide(const char* cstr)
+std::wstring Encoding::ToWide(const char* cstr)
 {
-  kwsys_stl::wstring wstr;
+  std::wstring wstr;
   size_t length = kwsysEncoding_mbstowcs(0, cstr, 0) + 1;
   if(length > 0)
     {
-    kwsys_stl::vector<wchar_t> wchars(length);
+    std::vector<wchar_t> wchars(length);
     if(kwsysEncoding_mbstowcs(&wchars[0], cstr, length) > 0)
       {
       wstr = &wchars[0];
@@ -165,9 +165,9 @@ kwsys_stl::wstring Encoding::ToWide(const char* cstr)
   return wstr;
 }
 
-kwsys_stl::string Encoding::ToNarrow(const wchar_t* wcstr)
+std::string Encoding::ToNarrow(const wchar_t* wcstr)
 {
-  kwsys_stl::string str;
+  std::string str;
   size_t length = kwsysEncoding_wcstombs(0, wcstr, 0) + 1;
   if(length > 0)
     {

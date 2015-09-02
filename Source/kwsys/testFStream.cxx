@@ -16,7 +16,6 @@
 #endif
 
 #include KWSYS_HEADER(FStream.hxx)
-#include KWSYS_HEADER(ios/iostream)
 #include <string.h>
 #ifdef __BORLANDC__
 # include <mem.h> /* memcmp */
@@ -26,9 +25,9 @@
 // duplicate the above list of headers.
 #if 0
 # include "FStream.hxx.in"
-# include "kwsys_ios_iostream.h.in"
 #endif
 
+#include <iostream>
 
 //----------------------------------------------------------------------------
 static int testNoFile()
@@ -95,20 +94,20 @@ static int testBOM()
     kwsys::FStream::BOM bom = kwsys::FStream::ReadBOM(in);
     if(bom != expected_bom[i])
       {
-      kwsys_ios::cout << "Unexpected BOM " << i << std::endl;
+      std::cout << "Unexpected BOM " << i << std::endl;
       return 1;
       }
     char data[45];
     in.read(data, file_data[i][0]);
     if(!in.good())
       {
-      kwsys_ios::cout << "Unable to read data " << i << std::endl;
+      std::cout << "Unable to read data " << i << std::endl;
       return 1;
       }
 
     if(memcmp(data, file_data[i]+1, file_data[i][0]) != 0)
       {
-      kwsys_ios::cout << "Incorrect read data " << i << std::endl;
+      std::cout << "Incorrect read data " << i << std::endl;
       return 1;
       }
 
@@ -125,20 +124,20 @@ static int testBOM()
     kwsys::FStream::BOM bom = kwsys::FStream::ReadBOM(in);
     if(bom != kwsys::FStream::BOM_None)
       {
-      kwsys_ios::cout << "Unexpected BOM for none case" << std::endl;
+      std::cout << "Unexpected BOM for none case" << std::endl;
       return 1;
       }
     char data[45];
     in.read(data, file_data[0][0]);
     if(!in.good())
       {
-      kwsys_ios::cout << "Unable to read data for none case" << std::endl;
+      std::cout << "Unable to read data for none case" << std::endl;
       return 1;
       }
 
     if(memcmp(data, file_data[0]+1, file_data[0][0]) != 0)
       {
-      kwsys_ios::cout << "Incorrect read data for none case" << std::endl;
+      std::cout << "Incorrect read data for none case" << std::endl;
       return 1;
       }
   }
@@ -156,20 +155,20 @@ static int testBOM()
     kwsys::FStream::BOM bom = kwsys::FStream::ReadBOM(in);
     if(bom != kwsys::FStream::BOM_UTF8)
       {
-      kwsys_ios::cout << "Unexpected BOM for utf-8 case" << std::endl;
+      std::cout << "Unexpected BOM for utf-8 case" << std::endl;
       return 1;
       }
     char data[45];
     in.read(data, file_data[0][0]);
     if(!in.good())
       {
-      kwsys_ios::cout << "Unable to read data for utf-8 case" << std::endl;
+      std::cout << "Unable to read data for utf-8 case" << std::endl;
       return 1;
       }
 
     if(memcmp(data, file_data[0]+1, file_data[0][0]) != 0)
       {
-      kwsys_ios::cout << "Incorrect read data for utf-8 case" << std::endl;
+      std::cout << "Incorrect read data for utf-8 case" << std::endl;
       return 1;
       }
   }

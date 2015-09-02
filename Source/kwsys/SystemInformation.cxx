@@ -35,14 +35,8 @@
 // http://msdn.microsoft.com/en-us/library/ms683219(VS.85).aspx
 
 #include "kwsysPrivate.h"
-#include KWSYS_HEADER(stl/string)
-#include KWSYS_HEADER(stl/vector)
-#include KWSYS_HEADER(ios/iosfwd)
 #include KWSYS_HEADER(SystemInformation.hxx)
 #include KWSYS_HEADER(Process.h)
-#include KWSYS_HEADER(ios/iostream)
-#include KWSYS_HEADER(ios/sstream)
-#include KWSYS_HEADER(ios/fstream)
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
@@ -50,13 +44,13 @@
 # include "SystemInformation.hxx.in"
 # include "Process.h.in"
 # include "Configure.hxx.in"
-# include "kwsys_stl.hxx.in"
-# include "kwsys_stl_vector.in"
-# include "kwsys_stl_iosfwd.in"
-# include "kwsys_ios_sstream.h.in"
-# include "kwsys_ios_iostream.h.in"
-# include "kwsys_ios_fstream.h.in"
 #endif
+
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <string>
+#include <vector>
 
 #if defined(_WIN32)
 # include <windows.h>
@@ -325,11 +319,11 @@ public:
 
   const char * GetVendorString();
   const char * GetVendorID();
-  kwsys_stl::string GetTypeID();
-  kwsys_stl::string GetFamilyID();
-  kwsys_stl::string GetModelID();
-  kwsys_stl::string GetModelName();
-  kwsys_stl::string GetSteppingCode();
+  std::string GetTypeID();
+  std::string GetFamilyID();
+  std::string GetModelID();
+  std::string GetModelName();
+  std::string GetSteppingCode();
   const char * GetExtendedProcessorName();
   const char * GetProcessorSerialNumber();
   int GetProcessorCacheSize();
@@ -341,7 +335,7 @@ public:
 
   const char * GetOSName();
   const char * GetHostname();
-  int GetFullyQualifiedDomainName(kwsys_stl::string &fqdn);
+  int GetFullyQualifiedDomainName(std::string &fqdn);
   const char * GetOSRelease();
   const char * GetOSVersion();
   const char * GetOSPlatform();
@@ -379,7 +373,7 @@ public:
 
   // get current stack
   static
-  kwsys_stl::string GetProgramStack(int firstFrame, int wholePath);
+  std::string GetProgramStack(int firstFrame, int wholePath);
 
   /** Run the different checks */
   void RunCPUCheck();
@@ -395,10 +389,10 @@ public:
     int Revision;
     int ExtendedFamily;
     int ExtendedModel;
-    kwsys_stl::string ProcessorName;
-    kwsys_stl::string Vendor;
-    kwsys_stl::string SerialNumber;
-    kwsys_stl::string ModelName;
+    std::string ProcessorName;
+    std::string Vendor;
+    std::string SerialNumber;
+    std::string ModelName;
     } ID;
 
   typedef struct tagCPUPowerManagement
@@ -480,7 +474,7 @@ protected:
 
   // For Linux and Cygwin, /proc/cpuinfo formats are slightly different
   bool RetreiveInformationFromCpuInfoFile();
-  kwsys_stl::string ExtractValueFromCpuInfoFile(kwsys_stl::string buffer,
+  std::string ExtractValueFromCpuInfoFile(std::string buffer,
                                           const char* word, size_t init=0);
 
   bool QueryLinuxMemory();
@@ -489,20 +483,20 @@ protected:
   static void Delay (unsigned int);
   static void DelayOverhead (unsigned int);
 
-  void FindManufacturer(const kwsys_stl::string &family = "");
+  void FindManufacturer(const std::string &family = "");
 
   // For Mac
   bool ParseSysCtl();
-  int CallSwVers(const char *arg, kwsys_stl::string &ver);
-  void TrimNewline(kwsys_stl::string&);
-  kwsys_stl::string ExtractValueFromSysCtl(const char* word);
-  kwsys_stl::string SysCtlBuffer;
+  int CallSwVers(const char *arg, std::string &ver);
+  void TrimNewline(std::string&);
+  std::string ExtractValueFromSysCtl(const char* word);
+  std::string SysCtlBuffer;
 
   // For Solaris
   bool QuerySolarisMemory();
   bool QuerySolarisProcessor();
-  kwsys_stl::string ParseValueFromKStat(const char* arguments);
-  kwsys_stl::string RunProcess(kwsys_stl::vector<const char*> args);
+  std::string ParseValueFromKStat(const char* arguments);
+  std::string RunProcess(std::vector<const char*> args);
 
   //For Haiku OS
   bool QueryHaikuInfo();
@@ -540,11 +534,11 @@ protected:
 
   // Operating System information
   bool QueryOSInformation();
-  kwsys_stl::string OSName;
-  kwsys_stl::string Hostname;
-  kwsys_stl::string OSRelease;
-  kwsys_stl::string OSVersion;
-  kwsys_stl::string OSPlatform;
+  std::string OSName;
+  std::string Hostname;
+  std::string OSRelease;
+  std::string OSVersion;
+  std::string OSPlatform;
 };
 
 
@@ -568,27 +562,27 @@ const char * SystemInformation::GetVendorID()
   return this->Implementation->GetVendorID();
 }
 
-kwsys_stl::string SystemInformation::GetTypeID()
+std::string SystemInformation::GetTypeID()
 {
   return this->Implementation->GetTypeID();
 }
 
-kwsys_stl::string SystemInformation::GetFamilyID()
+std::string SystemInformation::GetFamilyID()
 {
   return this->Implementation->GetFamilyID();
 }
 
-kwsys_stl::string SystemInformation::GetModelID()
+std::string SystemInformation::GetModelID()
 {
   return this->Implementation->GetModelID();
 }
 
-kwsys_stl::string SystemInformation::GetModelName()
+std::string SystemInformation::GetModelName()
 {
   return this->Implementation->GetModelName();
 }
 
-kwsys_stl::string SystemInformation::GetSteppingCode()
+std::string SystemInformation::GetSteppingCode()
 {
   return this->Implementation->GetSteppingCode();
 }
@@ -633,9 +627,9 @@ bool SystemInformation::DoesCPUSupportFeature(long int i)
   return this->Implementation->DoesCPUSupportFeature(i);
 }
 
-kwsys_stl::string SystemInformation::GetCPUDescription()
+std::string SystemInformation::GetCPUDescription()
 {
-  kwsys_ios::ostringstream oss;
+  std::ostringstream oss;
   oss
     << this->GetNumberOfPhysicalCPU()
     << " core ";
@@ -654,9 +648,9 @@ kwsys_stl::string SystemInformation::GetCPUDescription()
     }
 
   // remove extra spaces
-  kwsys_stl::string tmp=oss.str();
+  std::string tmp=oss.str();
   size_t pos;
-  while( (pos=tmp.find("  "))!=kwsys_stl::string::npos)
+  while( (pos=tmp.find("  "))!=std::string::npos)
     {
     tmp.replace(pos,2," ");
     }
@@ -674,9 +668,9 @@ const char * SystemInformation::GetHostname()
   return this->Implementation->GetHostname();
 }
 
-kwsys_stl::string SystemInformation::GetFullyQualifiedDomainName()
+std::string SystemInformation::GetFullyQualifiedDomainName()
 {
-  kwsys_stl::string fqdn;
+  std::string fqdn;
   this->Implementation->GetFullyQualifiedDomainName(fqdn);
   return fqdn;
 }
@@ -723,9 +717,9 @@ int SystemInformation::GetOSIsApple()
 #endif
 }
 
-kwsys_stl::string SystemInformation::GetOSDescription()
+std::string SystemInformation::GetOSDescription()
 {
-  kwsys_ios::ostringstream oss;
+  std::ostringstream oss;
   oss
     << this->GetOSName()
     << " "
@@ -777,11 +771,11 @@ size_t SystemInformation::GetAvailablePhysicalMemory()
   return this->Implementation->GetAvailablePhysicalMemory();
 }
 
-kwsys_stl::string SystemInformation::GetMemoryDescription(
+std::string SystemInformation::GetMemoryDescription(
       const char *hostLimitEnvVarName,
       const char *procLimitEnvVarName)
 {
-  kwsys_ios::ostringstream oss;
+  std::ostringstream oss;
   oss
     << "Host Total: "
     << iostreamLongLong(this->GetHostMemoryTotal())
@@ -842,7 +836,7 @@ void SystemInformation::SetStackTraceOnError(int enable)
   SystemInformationImplementation::SetStackTraceOnError(enable);
 }
 
-kwsys_stl::string SystemInformation::GetProgramStack(int firstFrame, int wholePath)
+std::string SystemInformation::GetProgramStack(int firstFrame, int wholePath)
 {
   return SystemInformationImplementation::GetProgramStack(firstFrame, wholePath);
 }
@@ -926,7 +920,7 @@ namespace {
 #if defined(__linux) || defined(__APPLE__)
 int LoadLines(
       FILE *file,
-      kwsys_stl::vector<kwsys_stl::string> &lines)
+      std::vector<std::string> &lines)
 {
   // Load each line in the given file into a the vector.
   int nRead=0;
@@ -963,7 +957,7 @@ int LoadLines(
 // *****************************************************************************
 int LoadLines(
       const char *fileName,
-      kwsys_stl::vector<kwsys_stl::string> &lines)
+      std::vector<std::string> &lines)
 {
   FILE *file=fopen(fileName,"r");
   if (file==0)
@@ -979,18 +973,18 @@ int LoadLines(
 // ****************************************************************************
 template<typename T>
 int NameValue(
-      kwsys_stl::vector<kwsys_stl::string> &lines,
-      kwsys_stl::string name, T &value)
+      std::vector<std::string> &lines,
+      std::string name, T &value)
 {
   size_t nLines=lines.size();
   for (size_t i=0; i<nLines; ++i)
     {
     size_t at=lines[i].find(name);
-    if (at==kwsys_stl::string::npos)
+    if (at==std::string::npos)
       {
       continue;
       }
-    kwsys_ios::istringstream is(lines[i].substr(at+name.size()));
+    std::istringstream is(lines[i].substr(at+name.size()));
     is >> value;
     return 0;
     }
@@ -1006,7 +1000,7 @@ int GetFieldsFromFile(
       const char **fieldNames,
       T *values)
 {
-  kwsys_stl::vector<kwsys_stl::string> fields;
+  std::vector<std::string> fields;
   if (!LoadLines(fileName,fields))
     {
     return -1;
@@ -1056,7 +1050,7 @@ int GetFieldsFromCommand(
     {
     return -1;
     }
-  kwsys_stl::vector<kwsys_stl::string> fields;
+  std::vector<std::string> fields;
   int nl=LoadLines(file,fields);
   pclose(file);
   if (nl==0)
@@ -1085,10 +1079,10 @@ void StacktraceSignalHandler(
       void * /*sigContext*/)
 {
 #if defined(__linux) || defined(__APPLE__)
-  kwsys_ios::ostringstream oss;
+  std::ostringstream oss;
   oss
-     << kwsys_ios::endl
-     << "=========================================================" << kwsys_ios::endl
+     << std::endl
+     << "=========================================================" << std::endl
      << "Process id " << getpid() << " ";
   switch (sigNo)
     {
@@ -1281,11 +1275,11 @@ void StacktraceSignalHandler(
       break;
     }
   oss
-    << kwsys_ios::endl
-    << "Program Stack:" << kwsys_ios::endl
+    << std::endl
+    << "Program Stack:" << std::endl
     << SystemInformationImplementation::GetProgramStack(2,0)
-    << "=========================================================" << kwsys_ios::endl;
-  kwsys_ios::cerr << oss.str() << kwsys_ios::endl;
+    << "=========================================================" << std::endl;
+  std::cerr << oss.str() << std::endl;
 
   // restore the previously registered handlers
   // and abort
@@ -1330,7 +1324,7 @@ public:
   void SetBinary(const char *binary)
     { this->Binary=safes(binary); }
 
-  kwsys_stl::string GetBinary() const;
+  std::string GetBinary() const;
 
   // Description:
   // Set the name of the function that the symbol is found in.
@@ -1338,7 +1332,7 @@ public:
   void SetFunction(const char *function)
     { this->Function=this->Demangle(function); }
 
-  kwsys_stl::string GetFunction() const
+  std::string GetFunction() const
     { return this->Function; }
 
   // Description:
@@ -1347,7 +1341,7 @@ public:
   void SetSourceFile(const char *sourcefile)
     { this->SourceFile=safes(sourcefile); }
 
-  kwsys_stl::string GetSourceFile() const
+  std::string GetSourceFile() const
     { return this->GetFileName(this->SourceFile); }
 
   // Description:
@@ -1365,31 +1359,31 @@ private:
   void *GetRealAddress() const
     { return (void*)((char*)this->Address-(char*)this->BinaryBaseAddress); }
 
-  kwsys_stl::string GetFileName(const kwsys_stl::string &path) const;
-  kwsys_stl::string Demangle(const char *symbol) const;
+  std::string GetFileName(const std::string &path) const;
+  std::string Demangle(const char *symbol) const;
 
 private:
-  kwsys_stl::string Binary;
+  std::string Binary;
   void *BinaryBaseAddress;
   void *Address;
-  kwsys_stl::string SourceFile;
-  kwsys_stl::string Function;
+  std::string SourceFile;
+  std::string Function;
   long LineNumber;
   int ReportPath;
 };
 
 // --------------------------------------------------------------------------
-kwsys_ios::ostream &operator<<(
-      kwsys_ios::ostream &os,
+std::ostream &operator<<(
+      std::ostream &os,
       const SymbolProperties &sp)
 {
 #if defined(KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP)
   os
-    << kwsys_ios::hex << sp.GetAddress() << " : "
+    << std::hex << sp.GetAddress() << " : "
     << sp.GetFunction()
     << " [(" << sp.GetBinary() << ") "
     << sp.GetSourceFile() << ":"
-    << kwsys_ios::dec << sp.GetLineNumber() << "]";
+    << std::dec << sp.GetLineNumber() << "]";
 #elif defined(KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE)
   void *addr = sp.GetAddress();
   char **syminfo = backtrace_symbols(&addr,1);
@@ -1422,28 +1416,28 @@ SymbolProperties::SymbolProperties()
 }
 
 // --------------------------------------------------------------------------
-kwsys_stl::string SymbolProperties::GetFileName(const kwsys_stl::string &path) const
+std::string SymbolProperties::GetFileName(const std::string &path) const
 {
-  kwsys_stl::string file(path);
+  std::string file(path);
   if (!this->ReportPath)
     {
     size_t at = file.rfind("/");
-    if (at!=kwsys_stl::string::npos)
+    if (at!=std::string::npos)
       {
-      file = file.substr(at+1,kwsys_stl::string::npos);
+      file = file.substr(at+1,std::string::npos);
       }
     }
   return file;
 }
 
 // --------------------------------------------------------------------------
-kwsys_stl::string SymbolProperties::GetBinary() const
+std::string SymbolProperties::GetBinary() const
 {
 // only linux has proc fs
 #if defined(__linux__)
   if (this->Binary=="/proc/self/exe")
     {
-    kwsys_stl::string binary;
+    std::string binary;
     char buf[1024]={'\0'};
     ssize_t ll=0;
     if ((ll=readlink("/proc/self/exe",buf,1024))>0)
@@ -1462,9 +1456,9 @@ kwsys_stl::string SymbolProperties::GetBinary() const
 }
 
 // --------------------------------------------------------------------------
-kwsys_stl::string SymbolProperties::Demangle(const char *symbol) const
+std::string SymbolProperties::Demangle(const char *symbol) const
 {
-  kwsys_stl::string result = safes(symbol);
+  std::string result = safes(symbol);
 #if defined(KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE)
   int status = 0;
   size_t bufferLen = 1024;
@@ -1729,7 +1723,7 @@ const char* SystemInformationImplementation::GetHostname()
 
 /** Get the FQDN */
 int SystemInformationImplementation::GetFullyQualifiedDomainName(
-      kwsys_stl::string &fqdn)
+      std::string &fqdn)
 {
   // in the event of absolute failure return localhost.
   fqdn="localhost";
@@ -1820,8 +1814,8 @@ int SystemInformationImplementation::GetFullyQualifiedDomainName(
         continue;
         }
 
-      kwsys_stl::string candidate=host;
-      if ((candidate.find(base)!=kwsys_stl::string::npos) && baseSize<candidate.size())
+      std::string candidate=host;
+      if ((candidate.find(base)!=std::string::npos) && baseSize<candidate.size())
         {
         // success, stop now.
         ierr=0;
@@ -1897,39 +1891,39 @@ const char * SystemInformationImplementation::GetVendorID()
 }
 
 /** Return the type ID of the CPU */
-kwsys_stl::string SystemInformationImplementation::GetTypeID()
+std::string SystemInformationImplementation::GetTypeID()
 {
-  kwsys_ios::ostringstream str;
+  std::ostringstream str;
   str << this->ChipID.Type;
   return str.str();
 }
 
 /** Return the family of the CPU present */
-kwsys_stl::string SystemInformationImplementation::GetFamilyID()
+std::string SystemInformationImplementation::GetFamilyID()
 {
-  kwsys_ios::ostringstream str;
+  std::ostringstream str;
   str << this->ChipID.Family;
   return str.str();
 }
 
 // Return the model of CPU present */
-kwsys_stl::string SystemInformationImplementation::GetModelID()
+std::string SystemInformationImplementation::GetModelID()
 {
-  kwsys_ios::ostringstream str;
+  std::ostringstream str;
   str << this->ChipID.Model;
   return str.str();
 }
 
 // Return the model name of CPU present */
-kwsys_stl::string SystemInformationImplementation::GetModelName()
+std::string SystemInformationImplementation::GetModelName()
 {
   return this->ChipID.ModelName;
 }
 
 /** Return the stepping code of the CPU present. */
-kwsys_stl::string SystemInformationImplementation::GetSteppingCode()
+std::string SystemInformationImplementation::GetSteppingCode()
 {
-  kwsys_ios::ostringstream str;
+  std::ostringstream str;
   str << this->ChipID.Revision;
   return str.str();
 }
@@ -2180,7 +2174,7 @@ bool SystemInformationImplementation::RetrieveCPUFeatures()
 
 
 /** Find the manufacturer given the vendor id */
-void SystemInformationImplementation::FindManufacturer(const kwsys_stl::string& family)
+void SystemInformationImplementation::FindManufacturer(const std::string& family)
 {
   if (this->ChipID.Vendor == "GenuineIntel")       this->ChipManufacturer = Intel;        // Intel Corp.
   else if (this->ChipID.Vendor == "UMC UMC UMC ")  this->ChipManufacturer = UMC;          // United Microelectronics Corp.
@@ -2799,11 +2793,11 @@ bool SystemInformationImplementation::RetrieveCPUPowerManagement()
 
 #if USE_CPUID
 // Used only in USE_CPUID implementation below.
-static void SystemInformationStripLeadingSpace(kwsys_stl::string& str)
+static void SystemInformationStripLeadingSpace(std::string& str)
 {
   // Because some manufacturers have leading white space - we have to post-process the name.
-  kwsys_stl::string::size_type pos = str.find_first_not_of(" ");
-  if(pos != kwsys_stl::string::npos)
+  std::string::size_type pos = str.find_first_not_of(" ");
+  if(pos != std::string::npos)
     {
     str = str.substr(pos);
     }
@@ -3148,7 +3142,7 @@ bool SystemInformationImplementation::RetrieveClassicalCPUIdentity()
 
 
 /** Extract a value from the CPUInfo file */
-kwsys_stl::string SystemInformationImplementation::ExtractValueFromCpuInfoFile(kwsys_stl::string buffer,const char* word,size_t init)
+std::string SystemInformationImplementation::ExtractValueFromCpuInfoFile(std::string buffer,const char* word,size_t init)
 {
   size_t pos = buffer.find(word,init);
   if(pos != buffer.npos)
@@ -3180,12 +3174,12 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
 {
   this->NumberOfLogicalCPU = 0;
   this->NumberOfPhysicalCPU = 0;
-  kwsys_stl::string buffer;
+  std::string buffer;
 
   FILE *fd = fopen("/proc/cpuinfo", "r" );
   if ( !fd )
     {
-    kwsys_ios::cout << "Problem opening /proc/cpuinfo" << kwsys_ios::endl;
+    std::cout << "Problem opening /proc/cpuinfo" << std::endl;
     return false;
     }
 
@@ -3209,7 +3203,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
 #ifdef __linux
   // Find the largest physical id.
   int maxId = -1;
-  kwsys_stl::string idc =
+  std::string idc =
                        this->ExtractValueFromCpuInfoFile(buffer,"physical id");
   while(this->CurrentPositionInFile != buffer.npos)
     {
@@ -3224,7 +3218,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   // Physical ids returned by Linux don't distinguish cores.
   // We want to record the total number of cores in this->NumberOfPhysicalCPU
   // (checking only the first proc)
-  kwsys_stl::string cores =
+  std::string cores =
                         this->ExtractValueFromCpuInfoFile(buffer,"cpu cores");
   int numberOfCoresPerCPU=atoi(cores.c_str());
   if (maxId > 0)
@@ -3242,7 +3236,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
 #else // __CYGWIN__
   // does not have "physical id" entries, neither "cpu cores"
   // this has to be fixed for hyper-threading.
-  kwsys_stl::string cpucount =
+  std::string cpucount =
     this->ExtractValueFromCpuInfoFile(buffer,"cpu count");
   this->NumberOfPhysicalCPU=
     this->NumberOfLogicalCPU = atoi(cpucount.c_str());
@@ -3258,7 +3252,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
       this->NumberOfLogicalCPU/this->NumberOfPhysicalCPU;
 
   // CPU speed (checking only the first processor)
-  kwsys_stl::string CPUSpeed = this->ExtractValueFromCpuInfoFile(buffer,"cpu MHz");
+  std::string CPUSpeed = this->ExtractValueFromCpuInfoFile(buffer,"cpu MHz");
   if(!CPUSpeed.empty())
     {
     this->CPUSpeedInMHz = static_cast<float>(atof(CPUSpeed.c_str()));
@@ -3274,7 +3268,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
 #endif
 
   // Chip family
-  kwsys_stl::string familyStr =
+  std::string familyStr =
     this->ExtractValueFromCpuInfoFile(buffer,"cpu family");
   if(familyStr.empty())
     {
@@ -3304,7 +3298,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
     {
     // Some platforms (e.g. PA-RISC) tell us their CPU name here.
     // Note: x86 does not.
-    kwsys_stl::string cpuname = this->ExtractValueFromCpuInfoFile(buffer,"cpu");
+    std::string cpuname = this->ExtractValueFromCpuInfoFile(buffer,"cpu");
     if(!cpuname.empty())
       {
       this->ChipID.ProcessorName = cpuname;
@@ -3312,7 +3306,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
     }
 
   // Chip revision
-  kwsys_stl::string cpurev = this->ExtractValueFromCpuInfoFile(buffer,"stepping");
+  std::string cpurev = this->ExtractValueFromCpuInfoFile(buffer,"stepping");
   if(cpurev.empty())
     {
     cpurev = this->ExtractValueFromCpuInfoFile(buffer,"CPU revision");
@@ -3325,7 +3319,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   // L1 Cache size
   // Different architectures may show different names for the caches.
   // Sum up everything we find.
-  kwsys_stl::vector<const char*> cachename;
+  std::vector<const char*> cachename;
   cachename.clear();
 
   cachename.push_back("cache size"); // e.g. x86
@@ -3335,7 +3329,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   this->Features.L1CacheSize = 0;
   for (size_t index = 0; index < cachename.size(); index ++)
     {
-    kwsys_stl::string cacheSize = this->ExtractValueFromCpuInfoFile(buffer,cachename[index]);
+    std::string cacheSize = this->ExtractValueFromCpuInfoFile(buffer,cachename[index]);
     if (!cacheSize.empty())
       {
       pos = cacheSize.find(" KB");
@@ -3348,48 +3342,48 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
     }
 
   // processor feature flags (probably x86 specific)
-  kwsys_stl::string cpuflags = this->ExtractValueFromCpuInfoFile(buffer,"flags");
+  std::string cpuflags = this->ExtractValueFromCpuInfoFile(buffer,"flags");
   if(!cpurev.empty())
     {
     // now we can match every flags as space + flag + space
     cpuflags = " " + cpuflags + " ";
-    if ((cpuflags.find(" fpu ")!=kwsys_stl::string::npos))
+    if ((cpuflags.find(" fpu ")!=std::string::npos))
       {
       this->Features.HasFPU = true;
       }
-    if ((cpuflags.find(" tsc ")!=kwsys_stl::string::npos))
+    if ((cpuflags.find(" tsc ")!=std::string::npos))
       {
       this->Features.HasTSC = true;
       }
-    if ((cpuflags.find(" mmx ")!=kwsys_stl::string::npos))
+    if ((cpuflags.find(" mmx ")!=std::string::npos))
       {
       this->Features.HasMMX = true;
       }
-    if ((cpuflags.find(" sse ")!=kwsys_stl::string::npos))
+    if ((cpuflags.find(" sse ")!=std::string::npos))
       {
       this->Features.HasSSE = true;
       }
-    if ((cpuflags.find(" sse2 ")!=kwsys_stl::string::npos))
+    if ((cpuflags.find(" sse2 ")!=std::string::npos))
       {
       this->Features.HasSSE2 = true;
       }
-    if ((cpuflags.find(" apic ")!=kwsys_stl::string::npos))
+    if ((cpuflags.find(" apic ")!=std::string::npos))
       {
       this->Features.HasAPIC = true;
       }
-    if ((cpuflags.find(" cmov ")!=kwsys_stl::string::npos))
+    if ((cpuflags.find(" cmov ")!=std::string::npos))
       {
       this->Features.HasCMOV = true;
       }
-    if ((cpuflags.find(" mtrr ")!=kwsys_stl::string::npos))
+    if ((cpuflags.find(" mtrr ")!=std::string::npos))
       {
       this->Features.HasMTRR = true;
       }
-    if ((cpuflags.find(" acpi ")!=kwsys_stl::string::npos))
+    if ((cpuflags.find(" acpi ")!=std::string::npos))
       {
       this->Features.HasACPI = true;
       }
-    if ((cpuflags.find(" 3dnow ")!=kwsys_stl::string::npos))
+    if ((cpuflags.find(" 3dnow ")!=std::string::npos))
       {
       this->Features.ExtendedFeatures.Has3DNow = true;
       }
@@ -3645,7 +3639,7 @@ SystemInformationImplementation::GetProcMemoryUsed()
 #elif defined(__APPLE__)
   SystemInformation::LongLong memUsed=0;
   pid_t pid=getpid();
-  kwsys_ios::ostringstream oss;
+  std::ostringstream oss;
   oss << "ps -o rss= -p " << pid;
   FILE *file=popen(oss.str().c_str(),"r");
   if (file==0)
@@ -3670,7 +3664,7 @@ SystemInformationImplementation::GetProcMemoryUsed()
     {
     return -2;
     }
-  kwsys_ios::istringstream iss(oss.str());
+  std::istringstream iss(oss.str());
   iss >> memUsed;
   return memUsed;
 #else
@@ -3729,11 +3723,11 @@ SystemInformationImplementation::GetProcessId()
 return current program stack in a string
 demangle cxx symbols if possible.
 */
-kwsys_stl::string SystemInformationImplementation::GetProgramStack(
+std::string SystemInformationImplementation::GetProgramStack(
       int firstFrame,
       int wholePath)
 {
-  kwsys_stl::string programStack = ""
+  std::string programStack = ""
 #if !defined(KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE)
     "WARNING: The stack could not be examined "
     "because backtrace is not supported.\n"
@@ -3752,7 +3746,7 @@ kwsys_stl::string SystemInformationImplementation::GetProgramStack(
 #endif
     ;
 
-  kwsys_ios::ostringstream oss;
+  std::ostringstream oss;
 #if defined(KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE)
   void *stackSymbols[256];
   int nFrames=backtrace(stackSymbols,256);
@@ -3761,7 +3755,7 @@ kwsys_stl::string SystemInformationImplementation::GetProgramStack(
     SymbolProperties symProps;
     symProps.SetReportPath(wholePath);
     symProps.Initialize(stackSymbols[i]);
-    oss << symProps << kwsys_ios::endl;
+    oss << symProps << std::endl;
     }
 #else
   (void)firstFrame;
@@ -3892,7 +3886,7 @@ bool SystemInformationImplementation::QueryLinuxMemory()
   int errorFlag = uname(&unameInfo);
   if( errorFlag!=0 )
     {
-    kwsys_ios::cout << "Problem calling uname(): " << strerror(errno) << kwsys_ios::endl;
+    std::cout << "Problem calling uname(): " << strerror(errno) << std::endl;
     return false;
     }
 
@@ -3916,7 +3910,7 @@ bool SystemInformationImplementation::QueryLinuxMemory()
   FILE *fd = fopen("/proc/meminfo", "r" );
   if ( !fd )
     {
-    kwsys_ios::cout << "Problem opening /proc/meminfo" << kwsys_ios::endl;
+    std::cout << "Problem opening /proc/meminfo" << std::endl;
     return false;
     }
 
@@ -3954,7 +3948,7 @@ bool SystemInformationImplementation::QueryLinuxMemory()
       }
     else
       {
-      kwsys_ios::cout << "Problem parsing /proc/meminfo" << kwsys_ios::endl;
+      std::cout << "Problem parsing /proc/meminfo" << std::endl;
       fclose(fd);
       return false;
       }
@@ -3987,7 +3981,7 @@ bool SystemInformationImplementation::QueryLinuxMemory()
       }
     else
       {
-      kwsys_ios::cout << "Problem parsing /proc/meminfo" << kwsys_ios::endl;
+      std::cout << "Problem parsing /proc/meminfo" << std::endl;
       fclose(fd);
       return false;
       }
@@ -4464,8 +4458,8 @@ bool SystemInformationImplementation::ParseSysCtl()
     ::memset(retBuf, 0, 128);
     len = 32;
     err = sysctlbyname("hw.machine", &retBuf, &len, NULL, 0);
-    kwsys_stl::string machineBuf(retBuf);
-    if (machineBuf.find_first_of("Power") != kwsys_stl::string::npos)
+    std::string machineBuf(retBuf);
+    if (machineBuf.find_first_of("Power") != std::string::npos)
       {
       this->ChipID.Vendor = "IBM";
       len = sizeof(this->ChipID.Family);
@@ -4527,41 +4521,41 @@ bool SystemInformationImplementation::ParseSysCtl()
       {
       // now we can match every flags as space + flag + space
       buf[len + 1] = ' ';
-      kwsys_stl::string cpuflags(buf, len + 2);
+      std::string cpuflags(buf, len + 2);
 
-      if ((cpuflags.find(" FPU ")!=kwsys_stl::string::npos))
+      if ((cpuflags.find(" FPU ")!=std::string::npos))
         {
         this->Features.HasFPU = true;
         }
-      if ((cpuflags.find(" TSC ")!=kwsys_stl::string::npos))
+      if ((cpuflags.find(" TSC ")!=std::string::npos))
         {
         this->Features.HasTSC = true;
         }
-      if ((cpuflags.find(" MMX ")!=kwsys_stl::string::npos))
+      if ((cpuflags.find(" MMX ")!=std::string::npos))
         {
         this->Features.HasMMX = true;
         }
-      if ((cpuflags.find(" SSE ")!=kwsys_stl::string::npos))
+      if ((cpuflags.find(" SSE ")!=std::string::npos))
         {
         this->Features.HasSSE = true;
         }
-      if ((cpuflags.find(" SSE2 ")!=kwsys_stl::string::npos))
+      if ((cpuflags.find(" SSE2 ")!=std::string::npos))
         {
         this->Features.HasSSE2 = true;
         }
-      if ((cpuflags.find(" APIC ")!=kwsys_stl::string::npos))
+      if ((cpuflags.find(" APIC ")!=std::string::npos))
         {
         this->Features.HasAPIC = true;
         }
-      if ((cpuflags.find(" CMOV ")!=kwsys_stl::string::npos))
+      if ((cpuflags.find(" CMOV ")!=std::string::npos))
         {
         this->Features.HasCMOV = true;
         }
-      if ((cpuflags.find(" MTRR ")!=kwsys_stl::string::npos))
+      if ((cpuflags.find(" MTRR ")!=std::string::npos))
         {
         this->Features.HasMTRR = true;
         }
-      if ((cpuflags.find(" ACPI ")!=kwsys_stl::string::npos))
+      if ((cpuflags.find(" ACPI ")!=std::string::npos))
         {
         this->Features.HasACPI = true;
         }
@@ -4595,7 +4589,7 @@ bool SystemInformationImplementation::ParseSysCtl()
 
 
 /** Extract a value from sysctl command */
-kwsys_stl::string SystemInformationImplementation::ExtractValueFromSysCtl(const char* word)
+std::string SystemInformationImplementation::ExtractValueFromSysCtl(const char* word)
 {
   size_t pos = this->SysCtlBuffer.find(word);
   if(pos != this->SysCtlBuffer.npos)
@@ -4612,9 +4606,9 @@ kwsys_stl::string SystemInformationImplementation::ExtractValueFromSysCtl(const 
 
 
 /** Run a given process */
-kwsys_stl::string SystemInformationImplementation::RunProcess(kwsys_stl::vector<const char*> args)
+std::string SystemInformationImplementation::RunProcess(std::vector<const char*> args)
 {
-  kwsys_stl::string buffer = "";
+  std::string buffer = "";
 
   // Run the application
   kwsysProcess* gp = kwsysProcess_New();
@@ -4644,12 +4638,12 @@ kwsys_stl::string SystemInformationImplementation::RunProcess(kwsys_stl::vector<
       } break;
     case kwsysProcess_State_Error:
       {
-      kwsys_ios::cerr << "Error: Could not run " << args[0] << ":\n";
-      kwsys_ios::cerr << kwsysProcess_GetErrorString(gp) << "\n";
+      std::cerr << "Error: Could not run " << args[0] << ":\n";
+      std::cerr << kwsysProcess_GetErrorString(gp) << "\n";
       } break;
     case kwsysProcess_State_Exception:
       {
-      kwsys_ios::cerr << "Error: " << args[0]
+      std::cerr << "Error: " << args[0]
                 << " terminated with an exception: "
                 << kwsysProcess_GetExceptionString(gp) << "\n";
       } break;
@@ -4659,27 +4653,27 @@ kwsys_stl::string SystemInformationImplementation::RunProcess(kwsys_stl::vector<
     case kwsysProcess_State_Killed:
       {
       // Should not get here.
-      kwsys_ios::cerr << "Unexpected ending state after running " << args[0]
-                << kwsys_ios::endl;
+      std::cerr << "Unexpected ending state after running " << args[0]
+                << std::endl;
       } break;
     }
   kwsysProcess_Delete(gp);
   if(result)
     {
-    kwsys_ios::cerr << "Error " << args[0] << " returned :" << result << "\n";
+    std::cerr << "Error " << args[0] << " returned :" << result << "\n";
     }
   return buffer;
 }
 
 
-kwsys_stl::string SystemInformationImplementation::ParseValueFromKStat(const char* arguments)
+std::string SystemInformationImplementation::ParseValueFromKStat(const char* arguments)
 {
-  kwsys_stl::vector<const char*> args;
+  std::vector<const char*> args;
   args.clear();
   args.push_back("kstat");
   args.push_back("-p");
 
-  kwsys_stl::string command = arguments;
+  std::string command = arguments;
   size_t start = command.npos;
   size_t pos = command.find(' ',0);
   while(pos!=command.npos)
@@ -4701,7 +4695,7 @@ kwsys_stl::string SystemInformationImplementation::ParseValueFromKStat(const cha
 
     if(!inQuotes)
       {
-      kwsys_stl::string arg = command.substr(start+1,pos-start-1);
+      std::string arg = command.substr(start+1,pos-start-1);
 
       // Remove the quotes if any
       size_t quotes = arg.find('"');
@@ -4715,14 +4709,14 @@ kwsys_stl::string SystemInformationImplementation::ParseValueFromKStat(const cha
       }
     pos = command.find(' ',pos+1);
     }
-  kwsys_stl::string lastArg = command.substr(start+1,command.size()-start-1);
+  std::string lastArg = command.substr(start+1,command.size()-start-1);
   args.push_back(lastArg.c_str());
 
   args.push_back(0);
 
-  kwsys_stl::string buffer = this->RunProcess(args);
+  std::string buffer = this->RunProcess(args);
 
-  kwsys_stl::string value = "";
+  std::string value = "";
   for(size_t i=buffer.size()-1;i>0;i--)
     {
     if(buffer[i] == ' ' || buffer[i] == '\t')
@@ -4731,7 +4725,7 @@ kwsys_stl::string SystemInformationImplementation::ParseValueFromKStat(const cha
       }
     if(buffer[i] != '\n' && buffer[i] != '\r')
       {
-      kwsys_stl::string val = value;
+      std::string val = value;
       value = buffer[i];
       value += val;
       }
@@ -4885,8 +4879,8 @@ bool SystemInformationImplementation::QueryHaikuInfo()
 bool SystemInformationImplementation::QueryQNXMemory()
 {
 #if defined(__QNX__)
-  kwsys_stl::string buffer;
-  kwsys_stl::vector<const char*> args;
+  std::string buffer;
+  std::vector<const char*> args;
   args.clear();
 
   args.push_back("showmem");
@@ -4943,8 +4937,8 @@ bool SystemInformationImplementation::QueryQNXProcessor()
 #if defined(__QNX__)
   // the output on my QNX 6.4.1 looks like this:
   // Processor1: 686 Pentium II Stepping 3 2175MHz FPU
-  kwsys_stl::string buffer;
-  kwsys_stl::vector<const char*> args;
+  std::string buffer;
+  std::vector<const char*> args;
   args.clear();
 
   args.push_back("pidin");
@@ -5440,10 +5434,10 @@ bool SystemInformationImplementation::QueryOSInformation()
 
 int SystemInformationImplementation::CallSwVers(
       const char *arg,
-      kwsys_stl::string &ver)
+      std::string &ver)
 {
 #ifdef __APPLE__
-  kwsys_stl::vector<const char*> args;
+  std::vector<const char*> args;
   args.push_back("sw_vers");
   args.push_back(arg);
   args.push_back(0);
@@ -5457,18 +5451,18 @@ int SystemInformationImplementation::CallSwVers(
   return 0;
 }
 
-void SystemInformationImplementation::TrimNewline(kwsys_stl::string& output)
+void SystemInformationImplementation::TrimNewline(std::string& output)
 {
   // remove \r
-  kwsys_stl::string::size_type pos=0;
-  while((pos = output.find("\r", pos)) != kwsys_stl::string::npos)
+  std::string::size_type pos=0;
+  while((pos = output.find("\r", pos)) != std::string::npos)
     {
     output.erase(pos);
     }
 
   // remove \n
   pos = 0;
-  while((pos = output.find("\n", pos)) != kwsys_stl::string::npos)
+  while((pos = output.find("\n", pos)) != std::string::npos)
     {
     output.erase(pos);
     }
