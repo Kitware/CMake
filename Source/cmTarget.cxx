@@ -1601,33 +1601,45 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     {
     this->Internal->IncludeDirectoriesEntries.clear();
     this->Internal->IncludeDirectoriesBacktraces.clear();
-    this->Internal->IncludeDirectoriesEntries.push_back(value);
-    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    this->Internal->IncludeDirectoriesBacktraces.push_back(lfbt);
+    if (value)
+      {
+      this->Internal->IncludeDirectoriesEntries.push_back(value);
+      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      this->Internal->IncludeDirectoriesBacktraces.push_back(lfbt);
+      }
     }
   else if(prop == "COMPILE_OPTIONS")
     {
     this->Internal->CompileOptionsEntries.clear();
     this->Internal->CompileOptionsBacktraces.clear();
-    this->Internal->CompileOptionsEntries.push_back(value);
-    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    this->Internal->CompileOptionsBacktraces.push_back(lfbt);
+    if (value)
+      {
+      this->Internal->CompileOptionsEntries.push_back(value);
+      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      this->Internal->CompileOptionsBacktraces.push_back(lfbt);
+      }
     }
   else if(prop == "COMPILE_FEATURES")
     {
     this->Internal->CompileFeaturesEntries.clear();
     this->Internal->CompileFeaturesBacktraces.clear();
-    this->Internal->CompileFeaturesEntries.push_back(value);
-    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    this->Internal->CompileFeaturesBacktraces.push_back(lfbt);
+    if (value)
+      {
+      this->Internal->CompileFeaturesEntries.push_back(value);
+      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      this->Internal->CompileFeaturesBacktraces.push_back(lfbt);
+      }
     }
   else if(prop == "COMPILE_DEFINITIONS")
     {
     this->Internal->CompileDefinitionsEntries.clear();
     this->Internal->CompileDefinitionsBacktraces.clear();
-    this->Internal->CompileDefinitionsEntries.push_back(value);
-    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    this->Internal->CompileDefinitionsBacktraces.push_back(lfbt);
+    if (value)
+      {
+      this->Internal->CompileDefinitionsEntries.push_back(value);
+      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      this->Internal->CompileDefinitionsBacktraces.push_back(lfbt);
+      }
     }
   else if(prop == "EXPORT_NAME" && this->IsImported())
     {
@@ -1693,27 +1705,39 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     }
   else if(prop == "INCLUDE_DIRECTORIES")
     {
-    this->Internal->IncludeDirectoriesEntries.push_back(value);
-    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    this->Internal->IncludeDirectoriesBacktraces.push_back(lfbt);
+    if (value)
+      {
+      this->Internal->IncludeDirectoriesEntries.push_back(value);
+      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      this->Internal->IncludeDirectoriesBacktraces.push_back(lfbt);
+      }
     }
   else if(prop == "COMPILE_OPTIONS")
     {
-    this->Internal->CompileOptionsEntries.push_back(value);
-    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    this->Internal->CompileOptionsBacktraces.push_back(lfbt);
+    if (value)
+      {
+      this->Internal->CompileOptionsEntries.push_back(value);
+      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      this->Internal->CompileOptionsBacktraces.push_back(lfbt);
+      }
     }
   else if(prop == "COMPILE_FEATURES")
     {
-    this->Internal->CompileFeaturesEntries.push_back(value);
-    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    this->Internal->CompileFeaturesBacktraces.push_back(lfbt);
+    if (value)
+      {
+      this->Internal->CompileFeaturesEntries.push_back(value);
+      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      this->Internal->CompileFeaturesBacktraces.push_back(lfbt);
+      }
     }
   else if(prop == "COMPILE_DEFINITIONS")
     {
-    this->Internal->CompileDefinitionsEntries.push_back(value);
-    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    this->Internal->CompileDefinitionsBacktraces.push_back(lfbt);
+    if (value)
+      {
+      this->Internal->CompileDefinitionsEntries.push_back(value);
+      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      this->Internal->CompileDefinitionsBacktraces.push_back(lfbt);
+      }
     }
   else if(prop == "EXPORT_NAME" && this->IsImported())
     {
