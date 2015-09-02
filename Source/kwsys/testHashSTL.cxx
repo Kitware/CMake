@@ -12,7 +12,6 @@
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(hash_map.hxx)
 #include KWSYS_HEADER(hash_set.hxx)
-#include KWSYS_HEADER(ios/iostream)
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
@@ -20,8 +19,9 @@
 # include "hash_map.hxx.in"
 # include "hash_set.hxx.in"
 # include "hashtable.hxx.in"
-# include "kwsys_ios_iostream.h.in"
 #endif
+
+#include <iostream>
 
 #if defined(_MSC_VER)
 # pragma warning (disable:4786)
@@ -44,8 +44,8 @@ static bool test_hash_map()
   int sum = 0;
   for(mtype::iterator mi = m.begin(); mi != m.end(); ++mi)
     {
-    kwsys_ios::cout << "Found entry [" << mi->first << "," << mi->second << "]"
-                    << kwsys_ios::endl;
+    std::cout << "Found entry [" << mi->first << "," << mi->second << "]"
+              << std::endl;
     sum += mi->second;
     }
   return sum == 3;
@@ -60,7 +60,7 @@ static bool test_hash_set()
   int sum = 0;
   for(stype::iterator si = s.begin(); si != s.end(); ++si)
     {
-    kwsys_ios::cout << "Found entry [" << *si << "]" << kwsys_ios::endl;
+    std::cout << "Found entry [" << *si << "]" << std::endl;
     sum += *si;
     }
   return sum == 3;

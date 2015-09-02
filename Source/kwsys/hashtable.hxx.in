@@ -44,13 +44,13 @@
 
 #include <@KWSYS_NAMESPACE@/Configure.hxx>
 
-#include <@KWSYS_NAMESPACE@/cstddef>        // size_t
-#include <@KWSYS_NAMESPACE@/stl/algorithm>  // lower_bound
-#include <@KWSYS_NAMESPACE@/stl/functional> // unary_function
-#include <@KWSYS_NAMESPACE@/stl/iterator>   // iterator_traits
-#include <@KWSYS_NAMESPACE@/stl/memory>     // allocator
-#include <@KWSYS_NAMESPACE@/stl/utility>    // pair
-#include <@KWSYS_NAMESPACE@/stl/vector>     // vector
+#include <stddef.h>   // size_t
+#include <algorithm>  // lower_bound
+#include <functional> // unary_function
+#include <iterator>   // iterator_traits
+#include <memory>     // allocator
+#include <utility>    // pair
+#include <vector>     // vector
 
 #if defined(_MSC_VER)
 # pragma warning (push)
@@ -73,237 +73,8 @@
 # endif
 #endif
 
-#if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_TEMPLATE
-# define @KWSYS_NAMESPACE@_HASH_DEFAULT_ALLOCATOR(T) @KWSYS_NAMESPACE@_stl::allocator< T >
-#elif @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_NONTEMPLATE
-# define @KWSYS_NAMESPACE@_HASH_DEFAULT_ALLOCATOR(T) @KWSYS_NAMESPACE@_stl::allocator
-#else
-# define @KWSYS_NAMESPACE@_HASH_DEFAULT_ALLOCATOR(T) @KWSYS_NAMESPACE@_stl::alloc
-#endif
-
-#if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_OBJECTS
-# define @KWSYS_NAMESPACE@_HASH_BUCKETS_INIT(__a) _M_buckets(__a)
-# define @KWSYS_NAMESPACE@_HASH_BUCKETS_GET_ALLOCATOR(__b) , __b.get_allocator()
-#else
-# define @KWSYS_NAMESPACE@_HASH_BUCKETS_INIT(__a) _M_buckets()
-# define @KWSYS_NAMESPACE@_HASH_BUCKETS_GET_ALLOCATOR(__b)
-#endif
-
 namespace @KWSYS_NAMESPACE@
 {
-
-//----------------------------------------------------------------------------
-// Define an allocator adaptor for platforms that do not provide an
-// allocator with the rebind member.
-#if !@KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_REBIND
-
-// Utility functions to convert item counts.
-inline size_t hash_sizeof(void*) { return sizeof(char); }
-inline size_t hash_sizeof(const void*) { return sizeof(char); }
-template <class TPtr> inline size_t hash_sizeof(TPtr p)
-{
-  static_cast<void>(p);
-  return sizeof(*p);
-}
-template <class POut, class PIn, class TSize>
-inline TSize hash_allocator_n(POut out, PIn in, TSize n)
-{
-  return n*(hash_sizeof(out)/hash_sizeof(in) +
-            (hash_sizeof(out)%hash_sizeof(in)>0));
-}
-
-// Define an allocation method to use the native allocator with
-// the proper signature.  The following signatures of the allocate
-// method are used on various STL implementations:
-//   pointer allocate(size_type, const void* hint)
-//   pointer allocate(size_type)
-//   static pointer allocate(size_type, const void* hint)
-//   static pointer allocate(size_type)
-// Where pointer might be a real type or void*.
-// This set of overloads decodes the signature for a particular STL.
-// The extra three int/long arguments will favor certain signatures
-// over others in the case that multiple are present to avoid
-// ambiguity errors.
-template <class TAlloc, class PIn, class TSize, class THint, class POut>
-inline void hash_allocate(TAlloc* a, PIn (TAlloc::*allocate)(TSize, THint),
-                          TSize n_out, const void* hint, POut& out,
-                          int, int, int)
-{
-  TSize n_in = hash_allocator_n(POut(), PIn(), n_out);
-  void* vout = (a->*allocate)(n_in, const_cast<THint>(hint));
-  out = static_cast<POut>(vout);
-}
-
-template <class TAlloc, class PIn, class TSize, class POut>
-inline void hash_allocate(TAlloc* a, PIn (TAlloc::*allocate)(TSize),
-                          TSize n_out, const void*, POut& out,
-                          int, int, long)
-{
-  TSize n_in = hash_allocator_n(POut(), PIn(), n_out);
-  void* vout = (a->*allocate)(n_in);
-  out = static_cast<POut>(vout);
-}
-
-template <class PIn, class TSize, class THint, class POut>
-inline void hash_allocate(void*, PIn (*allocate)(TSize, THint),
-                          TSize n_out, const void* hint, POut& out,
-                          int, long, long)
-{
-  TSize n_in = hash_allocator_n(POut(), PIn(), n_out);
-  void* vout = allocate(n_in, const_cast<THint>(hint));
-  out = static_cast<POut>(vout);
-}
-
-template <class PIn, class TSize, class POut>
-inline void hash_allocate(void*, PIn (*allocate)(TSize),
-                          TSize n_out, const void*, POut& out,
-                          long, long, long)
-{
-  TSize n_in = hash_allocator_n(POut(), PIn(), n_out);
-  void* vout = allocate(n_in);
-  out = static_cast<POut>(vout);
-}
-
-// Define a deallocation method to use the native allocator with
-// the proper signature.  The following signatures of the deallocate
-// method are used on various STL implementations:
-//   void deallocate(pointer, size_type)
-//   void deallocate(pointer)
-//   static void deallocate(pointer, size_type)
-//   static void deallocate(pointer)
-// Where pointer might be a real type or void*.
-// This set of overloads decodes the signature for a particular STL.
-// The extra three int/long arguments will favor certain signatures
-// over others in the case that multiple are present to avoid
-// ambiguity errors.
-template <class TAlloc, class PIn, class TSize, class PInReal, class POut>
-inline void hash_deallocate(TAlloc* a, void (TAlloc::*deallocate)(PIn, TSize),
-                            PInReal, POut p, TSize n_out, int, int, int)
-{
-  TSize n_in = hash_allocator_n(POut(), PInReal(), n_out);
-  void* vout = p;
-  (a->*deallocate)(static_cast<PIn>(vout), n_in);
-}
-
-template <class TAlloc, class PIn, class TSize, class PInReal, class POut>
-inline void hash_deallocate(TAlloc* a, void (TAlloc::*deallocate)(PIn),
-                            PInReal, POut p, TSize, int, int, long)
-{
-  void* vout = p;
-  (a->*deallocate)(static_cast<PIn>(vout));
-}
-
-template <class PIn, class TSize, class PInReal, class POut>
-inline void hash_deallocate(void*, void (*deallocate)(PIn, TSize),
-                            PInReal, POut p, TSize n_out, int, long, long)
-{
-  TSize n_in = hash_allocator_n(POut(), PInReal(), n_out);
-  void* vout = p;
-  deallocate(static_cast<PIn>(vout), n_in);
-}
-
-template <class PIn, class TSize, class PInReal, class POut>
-inline void hash_deallocate(void*, void (*deallocate)(PIn),
-                            PInReal, POut p, TSize, long, long, long)
-{
-  void* vout = p;
-  deallocate(static_cast<PIn>(vout));
-}
-
-// Use the same four overloads as hash_allocate to decode the type
-// really used for allocation.  This is passed as PInReal to the
-// deallocate functions so that hash_allocator_n has the proper size.
-template <class TAlloc, class PIn, class TSize, class THint>
-inline PIn hash_allocate_type(PIn (TAlloc::*)(TSize, THint),
-                              int, int, int) { return 0; }
-template <class TAlloc, class PIn, class TSize>
-inline PIn hash_allocate_type(PIn (TAlloc::*)(TSize),
-                              int, int, long) { return 0; }
-template <class PIn, class TSize, class THint>
-inline PIn hash_allocate_type(PIn (*)(TSize, THint),
-                              int, long, long) { return 0; }
-template <class PIn, class TSize>
-inline PIn hash_allocate_type(PIn (*)(TSize),
-                              long, long, long) { return 0; }
-
-// Define the comparison operators in terms of a base type to avoid
-// needing templated versions.
-class hash_allocator_base {};
-inline bool operator==(const hash_allocator_base&,
-                const hash_allocator_base&) throw() { return true; }
-inline bool operator!=(const hash_allocator_base&,
-                const hash_allocator_base&) throw() { return false; }
-
-// Define the allocator template.
-template <class T, class Alloc>
-class hash_allocator: public hash_allocator_base
-{
-private:
-  // Store the real allocator privately.
-  typedef Alloc alloc_type;
-  alloc_type alloc_;
-
-public:
-  // Standard allocator interface.
-  typedef size_t size_type;
-  typedef ptrdiff_t difference_type;
-  typedef T* pointer;
-  typedef const T* const_pointer;
-  typedef T& reference;
-  typedef const T& const_reference;
-  typedef T value_type;
-
-  hash_allocator() throw(): alloc_() {}
-  hash_allocator(const hash_allocator_base&) throw() : alloc_() {}
-  hash_allocator(const hash_allocator& a) throw() : alloc_(a.alloc_) {}
-  hash_allocator(const alloc_type& a) throw() : alloc_(a) {}
-  ~hash_allocator() throw() {}
-# if @KWSYS_NAMESPACE@_CXX_HAS_MEMBER_TEMPLATES
-  template <class U>
-  struct rebind { typedef hash_allocator<U, alloc_type> other; };
-# endif
-  pointer address(reference x) const { return &x; }
-  const_pointer address(const_reference x) const { return &x; }
-  typedef void* void_pointer;
-  typedef const void* const_void_pointer;
-  pointer allocate(size_type n=1, const_void_pointer hint = 0)
-    {
-    if(n)
-      {
-      pointer p;
-      hash_allocate(&alloc_, &alloc_type::allocate, n, hint, p, 1, 1, 1);
-      return p;
-      }
-    else
-      {
-      return 0;
-      }
-    }
-  void deallocate(pointer p, size_type n=1)
-    {
-    if(n)
-      {
-      hash_deallocate(&alloc_, &alloc_type::deallocate,
-                      hash_allocate_type(&alloc_type::allocate, 1, 1, 1),
-                      p, n, 1, 1, 1);
-      }
-    }
-#if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT
-  size_type max_size(size_type s) const throw()
-    {
-    return alloc_.max_size(s);
-    }
-#else
-  size_type max_size() const throw()
-    {
-    size_type n = alloc_.max_size() / sizeof(value_type);
-    return n>0? n:1;
-    }
-#endif
-  void construct(pointer p, const value_type& val) { new (p) value_type(val); }
-  void destroy(pointer p) { (void)p; p->~value_type(); }
-};
-#endif
 
 template <class _Val>
 struct _Hashtable_node
@@ -317,7 +88,7 @@ private:
 
 template <class _Val, class _Key, class _HashFcn,
           class _ExtractKey, class _EqualKey,
-          class _Alloc = @KWSYS_NAMESPACE@_HASH_DEFAULT_ALLOCATOR(char) >
+          class _Alloc = std::allocator<char> >
 class hashtable;
 
 template <class _Val, class _Key, class _HashFcn,
@@ -341,7 +112,7 @@ struct _Hashtable_iterator {
           const_iterator;
   typedef _Hashtable_node<_Val> _Node;
 
-  typedef @KWSYS_NAMESPACE@_stl::forward_iterator_tag iterator_category;
+  typedef std::forward_iterator_tag iterator_category;
   typedef _Val value_type;
   typedef ptrdiff_t difference_type;
   typedef size_t size_type;
@@ -378,7 +149,7 @@ struct _Hashtable_const_iterator {
           const_iterator;
   typedef _Hashtable_node<_Val> _Node;
 
-  typedef @KWSYS_NAMESPACE@_stl::forward_iterator_tag iterator_category;
+  typedef std::forward_iterator_tag iterator_category;
   typedef _Val value_type;
   typedef ptrdiff_t difference_type;
   typedef size_t size_type;
@@ -427,7 +198,7 @@ static inline size_t _stl_next_prime(size_t __n)
 {
   const unsigned long* __first = get_stl_prime_list();
   const unsigned long* __last = get_stl_prime_list() + (int)_stl_num_primes;
-  const unsigned long* pos = @KWSYS_NAMESPACE@_stl::lower_bound(__first, __last, __n);
+  const unsigned long* pos = std::lower_bound(__first, __last, __n);
   return pos == __last ? *(__last - 1) : *pos;
 }
 
@@ -470,27 +241,13 @@ public:
 private:
   typedef _Hashtable_node<_Val> _Node;
 
-#if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_REBIND
 public:
   typedef typename _Alloc::template rebind<_Val>::other allocator_type;
   allocator_type get_allocator() const { return _M_node_allocator; }
 private:
   typedef typename _Alloc::template rebind<_Node>::other _M_node_allocator_type;
   typedef typename _Alloc::template rebind<_Node*>::other _M_node_ptr_allocator_type;
-  typedef @KWSYS_NAMESPACE@_stl::vector<_Node*,_M_node_ptr_allocator_type> _M_buckets_type;
-#else
-public:
-  typedef hash_allocator<_Val, _Alloc> allocator_type;
-  allocator_type get_allocator() const { return allocator_type(); }
-private:
-  typedef hash_allocator<_Node, _Alloc> _M_node_allocator_type;
-# if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_OBJECTS
-  typedef hash_allocator<_Node*, _Alloc> _M_node_ptr_allocator_type;
-# else
-  typedef _Alloc _M_node_ptr_allocator_type;
-# endif
-  typedef @KWSYS_NAMESPACE@_stl::vector<_Node*,_M_node_ptr_allocator_type> _M_buckets_type;
-#endif
+  typedef std::vector<_Node*,_M_node_ptr_allocator_type> _M_buckets_type;
 
 private:
   _M_node_allocator_type _M_node_allocator;
@@ -525,7 +282,7 @@ public:
       _M_hash(__hf),
       _M_equals(__eql),
       _M_get_key(__ext),
-      @KWSYS_NAMESPACE@_HASH_BUCKETS_INIT(__a),
+      _M_buckets(__a),
       _M_num_elements(0)
   {
     _M_initialize_buckets(__n);
@@ -539,7 +296,7 @@ public:
       _M_hash(__hf),
       _M_equals(__eql),
       _M_get_key(_ExtractKey()),
-      @KWSYS_NAMESPACE@_HASH_BUCKETS_INIT(__a),
+      _M_buckets(__a),
       _M_num_elements(0)
   {
     _M_initialize_buckets(__n);
@@ -550,7 +307,7 @@ public:
       _M_hash(__ht._M_hash),
       _M_equals(__ht._M_equals),
       _M_get_key(__ht._M_get_key),
-      @KWSYS_NAMESPACE@_HASH_BUCKETS_INIT(__ht.get_allocator()),
+      _M_buckets(__ht.get_allocator()),
       _M_num_elements(0)
   {
     _M_copy_from(__ht);
@@ -576,11 +333,11 @@ public:
 
   void swap(hashtable& __ht)
   {
-    @KWSYS_NAMESPACE@_stl::swap(_M_hash, __ht._M_hash);
-    @KWSYS_NAMESPACE@_stl::swap(_M_equals, __ht._M_equals);
-    @KWSYS_NAMESPACE@_stl::swap(_M_get_key, __ht._M_get_key);
+    std::swap(_M_hash, __ht._M_hash);
+    std::swap(_M_equals, __ht._M_equals);
+    std::swap(_M_get_key, __ht._M_get_key);
     _M_buckets.swap(__ht._M_buckets);
-    @KWSYS_NAMESPACE@_stl::swap(_M_num_elements, __ht._M_num_elements);
+    std::swap(_M_num_elements, __ht._M_num_elements);
   }
 
   iterator begin()
@@ -603,8 +360,8 @@ public:
 
   const_iterator end() const { return const_iterator(0, this); }
 
-  friend bool operator==@KWSYS_NAMESPACE@_CXX_NULL_TEMPLATE_ARGS(const hashtable&,
-                                                                 const hashtable&);
+  friend bool operator==<>(const hashtable&,
+                           const hashtable&);
 
 public:
 
@@ -621,7 +378,7 @@ public:
     return __result;
   }
 
-  @KWSYS_NAMESPACE@_stl::pair<iterator, bool> insert_unique(const value_type& __obj)
+  std::pair<iterator, bool> insert_unique(const value_type& __obj)
   {
     resize(_M_num_elements + 1);
     return insert_unique_noresize(__obj);
@@ -633,38 +390,26 @@ public:
     return insert_equal_noresize(__obj);
   }
 
-  @KWSYS_NAMESPACE@_stl::pair<iterator, bool> insert_unique_noresize(const value_type& __obj);
+  std::pair<iterator, bool> insert_unique_noresize(const value_type& __obj);
   iterator insert_equal_noresize(const value_type& __obj);
 
-#if @KWSYS_NAMESPACE@_STL_HAS_ITERATOR_TRAITS
-# define @KWSYS_NAMESPACE@_HASH_ITERATOR_CATEGORY(T,I) \
-  typename @KWSYS_NAMESPACE@_stl::iterator_traits< T >::iterator_category()
-#elif @KWSYS_NAMESPACE@_STL_HAS_ITERATOR_CATEGORY
-# define @KWSYS_NAMESPACE@_HASH_ITERATOR_CATEGORY(T,I) \
-  @KWSYS_NAMESPACE@_stl::iterator_category( I )
-#elif @KWSYS_NAMESPACE@_STL_HAS___ITERATOR_CATEGORY
-# define @KWSYS_NAMESPACE@_HASH_ITERATOR_CATEGORY(T,I) \
-  @KWSYS_NAMESPACE@_stl::__iterator_category( I )
-#endif
-
-#if @KWSYS_NAMESPACE@_CXX_HAS_MEMBER_TEMPLATES && defined(@KWSYS_NAMESPACE@_HASH_ITERATOR_CATEGORY)
   template <class _InputIterator>
   void insert_unique(_InputIterator __f, _InputIterator __l)
   {
     insert_unique(__f, __l,
-      @KWSYS_NAMESPACE@_HASH_ITERATOR_CATEGORY(_InputIterator, __f));
+      typename std::iterator_traits<_InputIterator>::iterator_category());
   }
 
   template <class _InputIterator>
   void insert_equal(_InputIterator __f, _InputIterator __l)
   {
     insert_equal(__f, __l,
-      @KWSYS_NAMESPACE@_HASH_ITERATOR_CATEGORY(_InputIterator, __f));
+      typename std::iterator_traits<_InputIterator>::iterator_category());
   }
 
   template <class _InputIterator>
   void insert_unique(_InputIterator __f, _InputIterator __l,
-                     @KWSYS_NAMESPACE@_stl::input_iterator_tag)
+                     std::input_iterator_tag)
   {
     for ( ; __f != __l; ++__f)
       insert_unique(*__f);
@@ -672,7 +417,7 @@ public:
 
   template <class _InputIterator>
   void insert_equal(_InputIterator __f, _InputIterator __l,
-                    @KWSYS_NAMESPACE@_stl::input_iterator_tag)
+                    std::input_iterator_tag)
   {
     for ( ; __f != __l; ++__f)
       insert_equal(*__f);
@@ -680,10 +425,10 @@ public:
 
   template <class _ForwardIterator>
   void insert_unique(_ForwardIterator __f, _ForwardIterator __l,
-                     @KWSYS_NAMESPACE@_stl::forward_iterator_tag)
+                     std::forward_iterator_tag)
   {
     size_type __n = 0;
-    @KWSYS_NAMESPACE@_stl::distance(__f, __l, __n);
+    std::distance(__f, __l, __n);
     resize(_M_num_elements + __n);
     for ( ; __n > 0; --__n, ++__f)
       insert_unique_noresize(*__f);
@@ -691,50 +436,14 @@ public:
 
   template <class _ForwardIterator>
   void insert_equal(_ForwardIterator __f, _ForwardIterator __l,
-                    @KWSYS_NAMESPACE@_stl::forward_iterator_tag)
+                    std::forward_iterator_tag)
   {
     size_type __n = 0;
-    @KWSYS_NAMESPACE@_stl::distance(__f, __l, __n);
+    std::distance(__f, __l, __n);
     resize(_M_num_elements + __n);
     for ( ; __n > 0; --__n, ++__f)
       insert_equal_noresize(*__f);
   }
-
-#else
-  void insert_unique(const value_type* __f, const value_type* __l)
-  {
-    size_type __n = __l - __f;
-    resize(_M_num_elements + __n);
-    for ( ; __n > 0; --__n, ++__f)
-      insert_unique_noresize(*__f);
-  }
-
-  void insert_equal(const value_type* __f, const value_type* __l)
-  {
-    size_type __n = __l - __f;
-    resize(_M_num_elements + __n);
-    for ( ; __n > 0; --__n, ++__f)
-      insert_equal_noresize(*__f);
-  }
-
-  void insert_unique(const_iterator __f, const_iterator __l)
-  {
-    size_type __n = 0;
-    @KWSYS_NAMESPACE@_stl::distance(__f, __l, __n);
-    resize(_M_num_elements + __n);
-    for ( ; __n > 0; --__n, ++__f)
-      insert_unique_noresize(*__f);
-  }
-
-  void insert_equal(const_iterator __f, const_iterator __l)
-  {
-    size_type __n = 0;
-    @KWSYS_NAMESPACE@_stl::distance(__f, __l, __n);
-    resize(_M_num_elements + __n);
-    for ( ; __n > 0; --__n, ++__f)
-      insert_equal_noresize(*__f);
-  }
-#endif
 
   reference find_or_insert(const value_type& __obj);
 
@@ -771,10 +480,10 @@ public:
     return __result;
   }
 
-  @KWSYS_NAMESPACE@_stl::pair<iterator, iterator>
+  std::pair<iterator, iterator>
   equal_range(const key_type& __key);
 
-  @KWSYS_NAMESPACE@_stl::pair<const_iterator, const_iterator>
+  std::pair<const_iterator, const_iterator>
   equal_range(const key_type& __key) const;
 
   size_type erase(const key_type& __key);
@@ -936,7 +645,7 @@ inline void swap(hashtable<_Val, _Key, _HF, _Extract, _EqKey, _All>& __ht1,
 }
 
 template <class _Val, class _Key, class _HF, class _Ex, class _Eq, class _All>
-@KWSYS_NAMESPACE@_stl::pair<@KWSYS_NAMESPACE@_CXX_DECL_TYPENAME hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>::iterator, bool>
+std::pair<typename hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>::iterator, bool>
 hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>
   ::insert_unique_noresize(const value_type& __obj)
 {
@@ -945,13 +654,13 @@ hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>
 
   for (_Node* __cur = __first; __cur; __cur = __cur->_M_next)
     if (_M_equals(_M_get_key(__cur->_M_val), _M_get_key(__obj)))
-      return @KWSYS_NAMESPACE@_stl::pair<iterator, bool>(iterator(__cur, this), false);
+      return std::pair<iterator, bool>(iterator(__cur, this), false);
 
   _Node* __tmp = _M_new_node(__obj);
   __tmp->_M_next = __first;
   _M_buckets[__n] = __tmp;
   ++_M_num_elements;
-  return @KWSYS_NAMESPACE@_stl::pair<iterator, bool>(iterator(__tmp, this), true);
+  return std::pair<iterator, bool>(iterator(__tmp, this), true);
 }
 
 template <class _Val, class _Key, class _HF, class _Ex, class _Eq, class _All>
@@ -999,11 +708,11 @@ hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>::find_or_insert(const value_type& __obj)
 }
 
 template <class _Val, class _Key, class _HF, class _Ex, class _Eq, class _All>
-@KWSYS_NAMESPACE@_stl::pair<@KWSYS_NAMESPACE@_CXX_DECL_TYPENAME hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>::iterator,
-     @KWSYS_NAMESPACE@_CXX_DECL_TYPENAME hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>::iterator>
+std::pair<typename hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>::iterator,
+          typename hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>::iterator>
 hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>::equal_range(const key_type& __key)
 {
-  typedef @KWSYS_NAMESPACE@_stl::pair<iterator, iterator> _Pii;
+  typedef std::pair<iterator, iterator> _Pii;
   const size_type __n = _M_bkt_num_key(__key);
 
   for (_Node* __first = _M_buckets[__n]; __first; __first = __first->_M_next)
@@ -1021,12 +730,12 @@ hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>::equal_range(const key_type& __key)
 }
 
 template <class _Val, class _Key, class _HF, class _Ex, class _Eq, class _All>
-@KWSYS_NAMESPACE@_stl::pair<@KWSYS_NAMESPACE@_CXX_DECL_TYPENAME hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>::const_iterator,
-     @KWSYS_NAMESPACE@_CXX_DECL_TYPENAME hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>::const_iterator>
+std::pair<typename hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>::const_iterator,
+          typename hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>::const_iterator>
 hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>
   ::equal_range(const key_type& __key) const
 {
-  typedef @KWSYS_NAMESPACE@_stl::pair<const_iterator, const_iterator> _Pii;
+  typedef std::pair<const_iterator, const_iterator> _Pii;
   const size_type __n = _M_bkt_num_key(__key);
 
   for (const _Node* __first = _M_buckets[__n] ;
@@ -1164,8 +873,8 @@ void hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>
     const size_type __n = _M_next_size(__num_elements_hint);
     if (__n > __old_n) {
       _M_buckets_type __tmp(
-        __n, (_Node*)(0)
-        @KWSYS_NAMESPACE@_HASH_BUCKETS_GET_ALLOCATOR(_M_buckets));
+        __n, (_Node*)(0),
+        _M_buckets.get_allocator());
       try {
         for (size_type __bucket = 0; __bucket < __old_n; ++__bucket) {
           _Node* __first = _M_buckets[__bucket];
@@ -1273,14 +982,6 @@ void hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>
 }
 
 } // namespace @KWSYS_NAMESPACE@
-
-// Normally the comparison operators should be found in the @KWSYS_NAMESPACE@
-// namespace by argument dependent lookup.  For compilers that do not
-// support it we must bring them into the global namespace now.
-#if !@KWSYS_NAMESPACE@_CXX_HAS_ARGUMENT_DEPENDENT_LOOKUP
-using @KWSYS_NAMESPACE@::operator==;
-using @KWSYS_NAMESPACE@::operator!=;
-#endif
 
 // Undo warning suppression.
 #if defined(__clang__) && defined(__has_warning)

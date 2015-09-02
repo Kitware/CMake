@@ -12,12 +12,11 @@
 #ifndef @KWSYS_NAMESPACE@_IOStream_hxx
 #define @KWSYS_NAMESPACE@_IOStream_hxx
 
-#include <@KWSYS_NAMESPACE@/ios/iosfwd>
+#include <iosfwd>
 
 /* Define these macros temporarily to keep the code readable.  */
 #if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
 # define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
-# define kwsys_ios @KWSYS_NAMESPACE@_ios
 #endif
 
 /* Whether istream supports long long.  */
@@ -56,10 +55,8 @@
 /* Input stream operator implementation functions.  */
 namespace @KWSYS_NAMESPACE@
 {
-kwsysEXPORT kwsys_ios::istream& IOStreamScan(kwsys_ios::istream&,
-                                             IOStreamSLL&);
-kwsysEXPORT kwsys_ios::istream& IOStreamScan(kwsys_ios::istream&,
-                                             IOStreamULL&);
+kwsysEXPORT std::istream& IOStreamScan(std::istream&, IOStreamSLL&);
+kwsysEXPORT std::istream& IOStreamScan(std::istream&, IOStreamULL&);
 }
 
 /* Provide input stream operator for long long.  */
@@ -67,8 +64,8 @@ kwsysEXPORT kwsys_ios::istream& IOStreamScan(kwsys_ios::istream&,
       !defined(KWSYS_IOS_ISTREAM_LONG_LONG_DEFINED)
 #   define KWSYS_IOS_ISTREAM_LONG_LONG_DEFINED
 #   define @KWSYS_NAMESPACE@_IOS_ISTREAM_LONG_LONG_DEFINED
-inline kwsys_ios::istream&
-operator>>(kwsys_ios::istream& is, @KWSYS_NAMESPACE@::IOStreamSLL& value)
+inline std::istream&
+operator>>(std::istream& is, @KWSYS_NAMESPACE@::IOStreamSLL& value)
 {
   return @KWSYS_NAMESPACE@::IOStreamScan(is, value);
 }
@@ -79,8 +76,8 @@ operator>>(kwsys_ios::istream& is, @KWSYS_NAMESPACE@::IOStreamSLL& value)
       !defined(KWSYS_IOS_ISTREAM_UNSIGNED_LONG_LONG_DEFINED)
 #   define KWSYS_IOS_ISTREAM_UNSIGNED_LONG_LONG_DEFINED
 #   define @KWSYS_NAMESPACE@_IOS_ISTREAM_UNSIGNED_LONG_LONG_DEFINED
-inline kwsys_ios::istream&
-operator>>(kwsys_ios::istream& is, @KWSYS_NAMESPACE@::IOStreamULL& value)
+inline std::istream&
+operator>>(std::istream& is, @KWSYS_NAMESPACE@::IOStreamULL& value)
 {
   return @KWSYS_NAMESPACE@::IOStreamScan(is, value);
 }
@@ -92,10 +89,8 @@ operator>>(kwsys_ios::istream& is, @KWSYS_NAMESPACE@::IOStreamULL& value)
 /* Output stream operator implementation functions.  */
 namespace @KWSYS_NAMESPACE@
 {
-kwsysEXPORT kwsys_ios::ostream& IOStreamPrint(kwsys_ios::ostream&,
-                                              IOStreamSLL);
-kwsysEXPORT kwsys_ios::ostream& IOStreamPrint(kwsys_ios::ostream&,
-                                              IOStreamULL);
+kwsysEXPORT std::ostream& IOStreamPrint(std::ostream&, IOStreamSLL);
+kwsysEXPORT std::ostream& IOStreamPrint(std::ostream&, IOStreamULL);
 }
 
 /* Provide output stream operator for long long.  */
@@ -103,8 +98,8 @@ kwsysEXPORT kwsys_ios::ostream& IOStreamPrint(kwsys_ios::ostream&,
       !defined(KWSYS_IOS_OSTREAM_LONG_LONG_DEFINED)
 #   define KWSYS_IOS_OSTREAM_LONG_LONG_DEFINED
 #   define @KWSYS_NAMESPACE@_IOS_OSTREAM_LONG_LONG_DEFINED
-inline kwsys_ios::ostream&
-operator<<(kwsys_ios::ostream& os, @KWSYS_NAMESPACE@::IOStreamSLL value)
+inline std::ostream&
+operator<<(std::ostream& os, @KWSYS_NAMESPACE@::IOStreamSLL value)
 {
   return @KWSYS_NAMESPACE@::IOStreamPrint(os, value);
 }
@@ -115,8 +110,8 @@ operator<<(kwsys_ios::ostream& os, @KWSYS_NAMESPACE@::IOStreamSLL value)
       !defined(KWSYS_IOS_OSTREAM_UNSIGNED_LONG_LONG_DEFINED)
 #   define KWSYS_IOS_OSTREAM_UNSIGNED_LONG_LONG_DEFINED
 #   define @KWSYS_NAMESPACE@_IOS_OSTREAM_UNSIGNED_LONG_LONG_DEFINED
-inline kwsys_ios::ostream&
-operator<<(kwsys_ios::ostream& os, @KWSYS_NAMESPACE@::IOStreamULL value)
+inline std::ostream&
+operator<<(std::ostream& os, @KWSYS_NAMESPACE@::IOStreamULL value)
 {
   return @KWSYS_NAMESPACE@::IOStreamPrint(os, value);
 }
@@ -127,7 +122,6 @@ operator<<(kwsys_ios::ostream& os, @KWSYS_NAMESPACE@::IOStreamULL value)
 /* Undefine temporary macros.  */
 #if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
 # undef kwsysEXPORT
-# undef kwsys_ios
 #endif
 
 /* If building a C++ file in kwsys itself, give the source file

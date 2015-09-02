@@ -12,8 +12,8 @@
 #ifndef @KWSYS_NAMESPACE@_DynamicLoader_hxx
 #define @KWSYS_NAMESPACE@_DynamicLoader_hxx
 
-#include <@KWSYS_NAMESPACE@/Configure.h>
-#include <@KWSYS_NAMESPACE@/stl/string>
+#include <@KWSYS_NAMESPACE@/Configure.hxx>
+#include <string>
 
 #if defined(__hpux)
   #include <dl.h>
@@ -26,11 +26,6 @@
   #endif
 #elif defined(__BEOS__)
   #include <be/kernel/image.h>
-#endif
-
-/* Define these macros temporarily to keep the code readable.  */
-#if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
-# define kwsys_stl @KWSYS_NAMESPACE@_stl
 #endif
 
 namespace @KWSYS_NAMESPACE@
@@ -83,14 +78,14 @@ public:
   /** Load a dynamic library into the current process.
    * The returned LibraryHandle can be used to access the symbols in the
    * library. */
-  static LibraryHandle OpenLibrary(const kwsys_stl::string&);
+  static LibraryHandle OpenLibrary(const std::string&);
 
   /** Attempt to detach a dynamic library from the
    * process.  A value of true is returned if it is sucessful. */
   static int CloseLibrary(LibraryHandle);
 
   /** Find the address of the symbol in the given library. */
-  static SymbolPointer GetSymbolAddress(LibraryHandle, const kwsys_stl::string&);
+  static SymbolPointer GetSymbolAddress(LibraryHandle, const std::string&);
 
   /** Return the default module prefix for the current platform.  */
   static const char* LibPrefix() { return "@KWSYS_DynamicLoader_PREFIX@"; }
@@ -103,10 +98,5 @@ public:
 }; // End Class: DynamicLoader
 
 } // namespace @KWSYS_NAMESPACE@
-
-/* Undefine temporary macros.  */
-#if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
-# undef kwsys_stl
-#endif
 
 #endif
