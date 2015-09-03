@@ -1672,6 +1672,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     this->Internal->SourceFilesMap.clear();
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
     cmGeneratorExpression ge(lfbt);
+    cmDeleteAll(this->Internal->SourceEntries);
     this->Internal->SourceEntries.clear();
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
     this->Internal->SourceEntries.push_back(
