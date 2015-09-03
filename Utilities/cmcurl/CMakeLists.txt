@@ -347,7 +347,9 @@ if(BEOS)
   check_library_exists_concat("bnetapi" closesocket HAVE_LIBBNETAPI)
 endif(BEOS)
 
-check_library_exists_concat("network" recv HAVE_LIBNETWORK)
+if(NOT APPLE)
+  check_library_exists_concat("network" recv HAVE_LIBNETWORK)
+endif(NOT APPLE)
 
 if(NOT NOT_NEED_LIBNSL)
   check_library_exists_concat("nsl"    gethostbyname  HAVE_LIBNSL)
