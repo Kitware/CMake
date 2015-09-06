@@ -390,7 +390,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
 
     # Clear wxWidgets multilib libraries.
     foreach(LIB core adv aui html media xrc dbgrid gl qa richtext
-                stc ribbon propgrid)
+                webview stc ribbon propgrid)
       WX_CLEAR_LIB(WX_${LIB}${_DBG})
     endforeach()
   endmacro()
