@@ -452,14 +452,17 @@ void cmGhsMultiTargetGenerator::WriteSources(
       this->Makefile->GetHomeOutputDirectory(), sgPath,
       GhsMultiGpj::SUBPROJECT, this->RelBuildFilePath);
 
-    if ((*si)->GetExtension() == ".int")
+    std::string fullSourcePath((*si)->GetFullPath());
+    if ((*si)->GetExtension() == "int" || (*si)->GetExtension() == "bsp")
       {
-      *this->FolderBuildStreams[sgPath] << "\"" << (*si)->GetFullPath() << "\""
-                                        << std::endl;
+      *this->FolderBuildStreams[sgPath] << fullSourcePath << std::endl;
       }
     else
       {
-      *this->FolderBuildStreams[sgPath] << (*si)->GetFullPath() << std::endl;
+      //WORKAROUND: GHS MULTI needs the path to use backslashes without quotes
+      //  to open files in search as of version 6.1.6
+      cmsys::SystemTools::ReplaceString(fullSourcePath, "/", "\\");
+      *this->FolderBuildStreams[sgPath] << fullSourcePath << std::endl;
       }
 
     if ("ld" != (*si)->GetExtension() && "int" != (*si)->GetExtension() &&
