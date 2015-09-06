@@ -9,6 +9,7 @@ if(GTK2_GTK_FOUND)
     "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Components/gtk"
      ${build_generator_args}
     --build-target gtk-all-libs
+    --build-project gtk
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Components/gtk"
     --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
@@ -22,6 +23,7 @@ if(GTK2_GTKMM_FOUND)
     "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Components/gtkmm"
      ${build_generator_args}
     --build-target gtkmm-all-libs
+    --build-project gtkmm
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Components/gtkmm"
     --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
@@ -310,6 +312,7 @@ if(TARGET GTK2::gtkmm)
     "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/gtkmm"
      ${build_generator_args}
     --build-target gtkmm-target
+    --build-project gtkmm
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/gtkmm"
     --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
