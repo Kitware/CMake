@@ -13,13 +13,35 @@
 #  License text for the above reference.)
 
 #Setup Greenhills MULTI specific compilation information
-find_path(GHS_INT_DIRECTORY INTEGRITY.ld PATHS
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\GreenHillsSoftware6433c345;InstallLocation]" #int1122
-  "C:/ghs/int1122"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\GreenHillsSoftware289b6625;InstallLocation]" #int1104
-  "C:/ghs/int1104"
-  DOC "Path to integrity directory"
-  )
+
+if (NOT GHS_INT_DIRECTORY)
+  #Assume the C:/ghs/int#### directory that is latest is prefered
+  set(GHS_EXPECTED_ROOT "C:/ghs")
+  if (EXISTS ${GHS_EXPECTED_ROOT})
+    FILE(GLOB GHS_CANDIDATE_INT_DIRS RELATIVE
+      ${GHS_EXPECTED_ROOT} ${GHS_EXPECTED_ROOT}/*)
+    string(REGEX MATCHALL  "int[0-9][0-9][0-9][0-9]" GHS_CANDIDATE_INT_DIRS
+      ${GHS_CANDIDATE_INT_DIRS})
+    if (GHS_CANDIDATE_INT_DIRS)
+      list(SORT GHS_CANDIDATE_INT_DIRS)
+      list(GET GHS_CANDIDATE_INT_DIRS -1 GHS_INT_DIRECTORY)
+      string(CONCAT GHS_INT_DIRECTORY ${GHS_EXPECTED_ROOT} "/"
+        ${GHS_INT_DIRECTORY})
+    endif ()
+  endif ()
+
+  #Try to look for known registry values
+  if (NOT GHS_INT_DIRECTORY)
+    find_path(GHS_INT_DIRECTORY INTEGRITY.ld PATHS
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\GreenHillsSoftware6433c345;InstallLocation]" #int1122
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\GreenHillsSoftware289b6625;InstallLocation]" #int1104
+      )
+  endif ()
+
+  set(GHS_INT_DIRECTORY ${GHS_INT_DIRECTORY} CACHE PATH
+    "Path to integrity directory")
+endif ()
+
 set(GHS_OS_DIR ${GHS_INT_DIRECTORY} CACHE PATH "OS directory")
 set(GHS_PRIMARY_TARGET "arm_integrity.tgt" CACHE STRING "target for compilation")
 set(GHS_BSP_NAME "simarm" CACHE STRING "BSP name")
