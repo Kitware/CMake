@@ -151,10 +151,6 @@ void cmGhsMultiTargetGenerator::Generate()
       this->WriteTargetLinkLibraries();
       }
     this->WriteCustomCommands();
-    if (this->DynamicDownload)
-      {
-      *this->GetFolderBuildStreams() << "    " << this->DDOption << std::endl;
-      }
 
     this->WriteSources(objectSources);
     }
@@ -230,9 +226,11 @@ void cmGhsMultiTargetGenerator::WriteTypeSpecifics(const std::string &config,
       }
     if (this->IsTargetGroup())
       {
-      *this->GetFolderBuildStreams() << "    -non_shared" << std::endl;
-      *this->GetFolderBuildStreams() << "    -o \"" << outputDir
-                                     << outputFilename << ".elf\""
+      *this->GetFolderBuildStreams()
+          << "    {optgroup=GhsCommonOptions} -o \"" << outputDir
+          << outputFilename << ".elf\"" << std::endl;
+      *this->GetFolderBuildStreams() << "    :extraOutputFile=\"" << outputDir
+                                     << outputFilename << ".elf.ael\""
                                      << std::endl;
       }
     else
