@@ -857,6 +857,28 @@ else()
   endif()
 endif()
 
+# Check if a specfic version was requested by find_package().
+if(wxWidgets_FOUND)
+  find_file(_filename wx/version.h PATHS ${wxWidgets_INCLUDE_DIRS} NO_DEFAULT_PATH)
+  dbg_msg("_filename:  ${_filename}")
+
+  if(NOT _filename)
+    message(FATAL_ERROR "wxWidgets wx/version.h file not found in ${wxWidgets_INCLUDE_DIRS}.")
+  endif()
+
+  file(READ ${_filename} _wx_version_h)
+
+  string(REGEX REPLACE "^(.*\n)?#define +wxMAJOR_VERSION +([0-9]+).*"
+    "\\2" wxWidgets_VERSION_MAJOR "${_wx_version_h}" )
+  string(REGEX REPLACE "^(.*\n)?#define +wxMINOR_VERSION +([0-9]+).*"
+    "\\2" wxWidgets_VERSION_MINOR "${_wx_version_h}" )
+  string(REGEX REPLACE "^(.*\n)?#define +wxRELEASE_NUMBER +([0-9]+).*"
+    "\\2" wxWidgets_VERSION_PATCH "${_wx_version_h}" )
+  set(wxWidgets_VERSION_STRING
+    "${wxWidgets_VERSION_MAJOR}.${wxWidgets_VERSION_MINOR}.${wxWidgets_VERSION_PATCH}" )
+  dbg_msg("wxWidgets_VERSION_STRING:    ${wxWidgets_VERSION_STRING}")
+endif()
+
 # Debug output:
 DBG_MSG("wxWidgets_FOUND           : ${wxWidgets_FOUND}")
 DBG_MSG("wxWidgets_INCLUDE_DIRS    : ${wxWidgets_INCLUDE_DIRS}")
@@ -867,10 +889,13 @@ DBG_MSG("wxWidgets_USE_FILE        : ${wxWidgets_USE_FILE}")
 
 #=====================================================================
 #=====================================================================
+
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(wxWidgets DEFAULT_MSG wxWidgets_FOUND)
-# Maintain consistency with all other variables.
-set(wxWidgets_FOUND ${WXWIDGETS_FOUND})
+
+find_package_handle_standard_args(wxWidgets
+  REQUIRED_VARS wxWidgets_LIBRARIES wxWidgets_INCLUDE_DIRS
+  VERSION_VAR   wxWidgets_VERSION_STRING
+  )
 
 #=====================================================================
 # Macros for use in wxWidgets apps.
