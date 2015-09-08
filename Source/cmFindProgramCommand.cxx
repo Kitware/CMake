@@ -16,6 +16,80 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
+//----------------------------------------------------------------------------
+struct cmFindProgramHelper
+{
+  cmFindProgramHelper()
+    {
+#if defined (_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+    // Consider platform-specific extensions.
+    this->Extensions.push_back(".com");
+    this->Extensions.push_back(".exe");
+#endif
+    // Consider original name with no extensions.
+    this->Extensions.push_back("");
+    }
+
+  // List of valid extensions.
+  std::vector<std::string> Extensions;
+
+  // Keep track of the best program file found so far.
+  std::string BestPath;
+
+  // Current names under consideration.
+  std::vector<std::string> Names;
+
+  // Current full path under consideration.
+  std::string TestPath;
+
+  void AddName(std::string const& name)
+    {
+    this->Names.push_back(name);
+    }
+  void SetName(std::string const& name)
+    {
+    this->Names.clear();
+    this->AddName(name);
+    }
+  bool CheckDirectory(std::string const& path)
+    {
+    for (std::vector<std::string>::iterator i = this->Names.begin();
+         i != this->Names.end(); ++i)
+      {
+      if (this->CheckDirectoryForName(path, *i))
+        {
+        return true;
+        }
+      }
+    return false;
+    }
+  bool CheckDirectoryForName(std::string const& path, std::string const& name)
+    {
+    for (std::vector<std::string>::iterator ext = this->Extensions.begin();
+         ext != this->Extensions.end(); ++ext)
+      {
+      this->TestPath = path;
+      this->TestPath += name;
+      if (!ext->empty() && cmSystemTools::StringEndsWith(name, ext->c_str()))
+        {
+        continue;
+        }
+      this->TestPath += *ext;
+      if (cmSystemTools::FileExists(this->TestPath, true))
+        {
+        this->BestPath = cmSystemTools::CollapseFullPath(this->TestPath);
+        return true;
+        }
+      }
+    return false;
+    }
+};
+
+cmFindProgramCommand::cmFindProgramCommand()
+{
+  this->NamesPerDirAllowed = true;
+}
+
 // cmFindProgramCommand
 bool cmFindProgramCommand
 ::InitialPass(std::vector<std::string> const& argsIn, cmExecutionStatus &)
@@ -41,7 +115,7 @@ bool cmFindProgramCommand
     return true;
     }
 
-  std::string result = FindProgram(this->Names);
+  std::string result = FindProgram();
   if(result != "")
     {
     // Save the value in the cache
@@ -59,31 +133,92 @@ bool cmFindProgramCommand
   return true;
 }
 
-std::string cmFindProgramCommand::FindProgram(std::vector<std::string> names)
+std::string cmFindProgramCommand::FindProgram()
 {
   std::string program = "";
 
   if(this->SearchAppBundleFirst || this->SearchAppBundleOnly)
     {
-    program = FindAppBundle(names);
+    program = FindAppBundle();
     }
   if(program.empty() && !this->SearchAppBundleOnly)
     {
-    program = cmSystemTools::FindProgram(names, this->SearchPaths, true);
+    program = this->FindNormalProgram();
     }
 
   if(program.empty() && this->SearchAppBundleLast)
     {
-    program = this->FindAppBundle(names);
+    program = this->FindAppBundle();
     }
   return program;
 }
 
-std::string cmFindProgramCommand
-::FindAppBundle(std::vector<std::string> names)
+//----------------------------------------------------------------------------
+std::string cmFindProgramCommand::FindNormalProgram()
 {
-  for(std::vector<std::string>::const_iterator name = names.begin();
-      name != names.end() ; ++name)
+  if(this->NamesPerDir)
+    {
+    return this->FindNormalProgramNamesPerDir();
+    }
+  else
+    {
+    return this->FindNormalProgramDirsPerName();
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string cmFindProgramCommand::FindNormalProgramNamesPerDir()
+{
+  // Search for all names in each directory.
+  cmFindProgramHelper helper;
+  for (std::vector<std::string>::const_iterator ni = this->Names.begin();
+       ni != this->Names.end() ; ++ni)
+    {
+    helper.AddName(*ni);
+    }
+  // Search every directory.
+  for (std::vector<std::string>::const_iterator
+         p = this->SearchPaths.begin(); p != this->SearchPaths.end(); ++p)
+    {
+    if(helper.CheckDirectory(*p))
+      {
+      return helper.BestPath;
+      }
+    }
+  // Couldn't find the program.
+  return "";
+}
+
+//----------------------------------------------------------------------------
+std::string cmFindProgramCommand::FindNormalProgramDirsPerName()
+{
+  // Search the entire path for each name.
+  cmFindProgramHelper helper;
+  for (std::vector<std::string>::const_iterator ni = this->Names.begin();
+       ni != this->Names.end() ; ++ni)
+    {
+    // Switch to searching for this name.
+    helper.SetName(*ni);
+
+    // Search every directory.
+    for (std::vector<std::string>::const_iterator
+           p = this->SearchPaths.begin();
+         p != this->SearchPaths.end(); ++p)
+      {
+      if (helper.CheckDirectory(*p))
+        {
+        return helper.BestPath;
+        }
+      }
+    }
+  // Couldn't find the program.
+  return "";
+}
+
+std::string cmFindProgramCommand::FindAppBundle()
+{
+  for(std::vector<std::string>::const_iterator name = this->Names.begin();
+      name != this->Names.end() ; ++name)
     {
 
     std::string appName = *name + std::string(".app");
