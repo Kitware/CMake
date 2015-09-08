@@ -17,9 +17,6 @@
 #include KWSYS_HEADER(RegularExpression.hxx)
 #include KWSYS_HEADER(SystemTools.hxx)
 #include KWSYS_HEADER(Directory.hxx)
-#include KWSYS_HEADER(stl/string)
-#include KWSYS_HEADER(stl/vector)
-#include KWSYS_HEADER(stl/algorithm)
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
@@ -29,11 +26,11 @@
 # include "Configure.hxx.in"
 # include "RegularExpression.hxx.in"
 # include "SystemTools.hxx.in"
-# include "kwsys_stl.hxx.in"
-# include "kwsys_stl_string.hxx.in"
-# include "kwsys_stl_vector.hxx.in"
-# include "kwsys_stl_algorithm.hxx.in"
 #endif
+
+#include <string>
+#include <vector>
+#include <algorithm>
 
 #include <ctype.h>
 #include <stdio.h>
@@ -54,8 +51,8 @@ namespace KWSYS_NAMESPACE
 class GlobInternals
 {
 public:
-  kwsys_stl::vector<kwsys_stl::string> Files;
-  kwsys_stl::vector<kwsys::RegularExpression> Expressions;
+  std::vector<std::string> Files;
+  std::vector<kwsys::RegularExpression> Expressions;
 };
 
 //----------------------------------------------------------------------------
@@ -82,21 +79,21 @@ Glob::~Glob()
 }
 
 //----------------------------------------------------------------------------
-kwsys_stl::vector<kwsys_stl::string>& Glob::GetFiles()
+std::vector<std::string>& Glob::GetFiles()
 {
   return this->Internals->Files;
 }
 
 //----------------------------------------------------------------------------
-kwsys_stl::string Glob::PatternToRegex(const kwsys_stl::string& pattern,
+std::string Glob::PatternToRegex(const std::string& pattern,
                                        bool require_whole_string,
                                        bool preserve_case)
 {
   // Incrementally build the regular expression from the pattern.
-  kwsys_stl::string regex = require_whole_string? "^" : "";
-  kwsys_stl::string::const_iterator pattern_first = pattern.begin();
-  kwsys_stl::string::const_iterator pattern_last = pattern.end();
-  for(kwsys_stl::string::const_iterator i = pattern_first;
+  std::string regex = require_whole_string? "^" : "";
+  std::string::const_iterator pattern_first = pattern.begin();
+  std::string::const_iterator pattern_last = pattern.end();
+  for(std::string::const_iterator i = pattern_first;
       i != pattern_last; ++i)
     {
     int c = *i;
@@ -120,8 +117,8 @@ kwsys_stl::string Glob::PatternToRegex(const kwsys_stl::string& pattern,
       {
       // Parse out the bracket expression.  It begins just after the
       // opening character.
-      kwsys_stl::string::const_iterator bracket_first = i+1;
-      kwsys_stl::string::const_iterator bracket_last = bracket_first;
+      std::string::const_iterator bracket_first = i+1;
+      std::string::const_iterator bracket_last = bracket_first;
 
       // The first character may be complementation '!' or '^'.
       if(bracket_last != pattern_last &&
@@ -153,7 +150,7 @@ kwsys_stl::string Glob::PatternToRegex(const kwsys_stl::string& pattern,
       else
         {
         // Convert the bracket string to its regex equivalent.
-        kwsys_stl::string::const_iterator k = bracket_first;
+        std::string::const_iterator k = bracket_first;
 
         // Open the regex block.
         regex += "[";
@@ -221,8 +218,8 @@ kwsys_stl::string Glob::PatternToRegex(const kwsys_stl::string& pattern,
 }
 
 //----------------------------------------------------------------------------
-bool Glob::RecurseDirectory(kwsys_stl::string::size_type start,
-  const kwsys_stl::string& dir, GlobMessages* messages)
+bool Glob::RecurseDirectory(std::string::size_type start,
+  const std::string& dir, GlobMessages* messages)
 {
   kwsys::Directory d;
   if ( !d.Load(dir) )
@@ -230,8 +227,8 @@ bool Glob::RecurseDirectory(kwsys_stl::string::size_type start,
     return true;
     }
   unsigned long cc;
-  kwsys_stl::string realname;
-  kwsys_stl::string fname;
+  std::string realname;
+  std::string fname;
   for ( cc = 0; cc < d.GetNumberOfFiles(); cc ++ )
     {
     fname = d.GetFile(cc);
@@ -262,8 +259,8 @@ bool Glob::RecurseDirectory(kwsys_stl::string::size_type start,
       if (isSymLink)
         {
         ++this->FollowedSymlinkCount;
-        kwsys_stl::string realPathErrorMessage;
-        kwsys_stl::string canonicalPath(SystemTools::GetRealPath(dir,
+        std::string realPathErrorMessage;
+        std::string canonicalPath(SystemTools::GetRealPath(dir,
             &realPathErrorMessage));
 
         if(!realPathErrorMessage.empty())
@@ -277,7 +274,7 @@ bool Glob::RecurseDirectory(kwsys_stl::string::size_type start,
           return false;
           }
 
-        if(kwsys_stl::find(this->VisitedSymlinks.begin(),
+        if(std::find(this->VisitedSymlinks.begin(),
             this->VisitedSymlinks.end(),
             canonicalPath) == this->VisitedSymlinks.end())
           {
@@ -299,9 +296,9 @@ bool Glob::RecurseDirectory(kwsys_stl::string::size_type start,
         // else we have already visited this symlink - prevent cyclic recursion
         else if(messages)
           {
-          kwsys_stl::string message;
-          for(kwsys_stl::vector<kwsys_stl::string>::const_iterator
-                pathIt = kwsys_stl::find(this->VisitedSymlinks.begin(),
+          std::string message;
+          for(std::vector<std::string>::const_iterator
+                pathIt = std::find(this->VisitedSymlinks.begin(),
                                          this->VisitedSymlinks.end(),
                                          canonicalPath);
               pathIt != this->VisitedSymlinks.end(); ++pathIt)
@@ -338,10 +335,10 @@ bool Glob::RecurseDirectory(kwsys_stl::string::size_type start,
 }
 
 //----------------------------------------------------------------------------
-void Glob::ProcessDirectory(kwsys_stl::string::size_type start,
-  const kwsys_stl::string& dir, GlobMessages* messages)
+void Glob::ProcessDirectory(std::string::size_type start,
+  const std::string& dir, GlobMessages* messages)
 {
-  //kwsys_ios::cout << "ProcessDirectory: " << dir << kwsys_ios::endl;
+  //std::cout << "ProcessDirectory: " << dir << std::endl;
   bool last = ( start == this->Internals->Expressions.size()-1 );
   if ( last && this->Recurse )
     {
@@ -360,8 +357,8 @@ void Glob::ProcessDirectory(kwsys_stl::string::size_type start,
     return;
     }
   unsigned long cc;
-  kwsys_stl::string realname;
-  kwsys_stl::string fname;
+  std::string realname;
+  std::string fname;
   for ( cc = 0; cc < d.GetNumberOfFiles(); cc ++ )
     {
     fname = d.GetFile(cc);
@@ -384,10 +381,10 @@ void Glob::ProcessDirectory(kwsys_stl::string::size_type start,
     fname = kwsys::SystemTools::LowerCase(fname);
 #endif
 
-    //kwsys_ios::cout << "Look at file: " << fname << kwsys_ios::endl;
-    //kwsys_ios::cout << "Match: "
-    // << this->Internals->TextExpressions[start].c_str() << kwsys_ios::endl;
-    //kwsys_ios::cout << "Real name: " << realname << kwsys_ios::endl;
+    //std::cout << "Look at file: " << fname << std::endl;
+    //std::cout << "Match: "
+    // << this->Internals->TextExpressions[start].c_str() << std::endl;
+    //std::cout << "Real name: " << realname << std::endl;
 
     if( (!last && !kwsys::SystemTools::FileIsDirectory(realname))
       || (!this->ListDirs && last &&
@@ -411,11 +408,11 @@ void Glob::ProcessDirectory(kwsys_stl::string::size_type start,
 }
 
 //----------------------------------------------------------------------------
-bool Glob::FindFiles(const kwsys_stl::string& inexpr, GlobMessages* messages)
+bool Glob::FindFiles(const std::string& inexpr, GlobMessages* messages)
 {
-  kwsys_stl::string cexpr;
-  kwsys_stl::string::size_type cc;
-  kwsys_stl::string expr = inexpr;
+  std::string cexpr;
+  std::string::size_type cc;
+  std::string expr = inexpr;
 
   this->Internals->Expressions.clear();
   this->Internals->Files.clear();
@@ -425,10 +422,10 @@ bool Glob::FindFiles(const kwsys_stl::string& inexpr, GlobMessages* messages)
     expr = kwsys::SystemTools::GetCurrentWorkingDirectory();
     expr += "/" + inexpr;
     }
-  kwsys_stl::string fexpr = expr;
+  std::string fexpr = expr;
 
-  kwsys_stl::string::size_type skip = 0;
-  kwsys_stl::string::size_type last_slash = 0;
+  std::string::size_type skip = 0;
+  std::string::size_type last_slash = 0;
   for ( cc = 0; cc < expr.size(); cc ++ )
     {
     if ( cc > 0 && expr[cc] == '/' && expr[cc-1] != '\\' )
@@ -444,8 +441,8 @@ bool Glob::FindFiles(const kwsys_stl::string& inexpr, GlobMessages* messages)
     }
   if ( last_slash > 0 )
     {
-    //kwsys_ios::cout << "I can skip: " << fexpr.substr(0, last_slash)
-    // << kwsys_ios::endl;
+    //std::cout << "I can skip: " << fexpr.substr(0, last_slash)
+    // << std::endl;
     skip = last_slash;
     }
   if ( skip == 0 )
@@ -517,7 +514,7 @@ bool Glob::FindFiles(const kwsys_stl::string& inexpr, GlobMessages* messages)
 }
 
 //----------------------------------------------------------------------------
-void Glob::AddExpression(const kwsys_stl::string& expr)
+void Glob::AddExpression(const std::string& expr)
 {
   this->Internals->Expressions.push_back(
     kwsys::RegularExpression(
@@ -546,7 +543,7 @@ const char* Glob::GetRelative()
 }
 
 //----------------------------------------------------------------------------
-void Glob::AddFile(kwsys_stl::vector<kwsys_stl::string>& files, const kwsys_stl::string& file)
+void Glob::AddFile(std::vector<std::string>& files, const std::string& file)
 {
   if ( !this->Relative.empty() )
     {

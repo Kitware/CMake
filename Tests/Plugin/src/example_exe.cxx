@@ -32,7 +32,7 @@ int main()
   if(!handle)
     {
     std::cerr << "Could not open plugin \""
-              << libName << "\"!" << std::endl;
+              << libName.c_str() << "\"!" << std::endl;
     return 1;
     }
   kwsys::DynamicLoader::SymbolPointer sym =
