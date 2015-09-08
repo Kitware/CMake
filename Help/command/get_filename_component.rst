@@ -19,7 +19,7 @@ Set ``<VAR>`` to a component of ``<FileName>``, where ``<COMP>`` is one of:
  NAME_WE   = File name without directory or longest extension
  PATH      = Legacy alias for DIRECTORY (use for CMake <= 2.8.11)
 
-Paths are returned with forward slashes and have no trailing slahes.
+Paths are returned with forward slashes and have no trailing slashes.
 The longest file extension is always considered.  If the optional
 ``CACHE`` argument is specified, the result variable is added to the
 cache.
