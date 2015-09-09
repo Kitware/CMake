@@ -31,6 +31,11 @@ public:
   virtual const char* GetToolsVersion() { return "14.0"; }
 protected:
   virtual const char* GetIDEVersion() { return "14.0"; }
+
+  // Used to verify that the Desktop toolset for the current generator is
+  // installed on the machine.
+  virtual bool IsWindowsDesktopToolsetInstalled() const;
+
 private:
   class Factory;
 };
