@@ -1133,6 +1133,10 @@ void cmFindPackageCommand::ComputePrefixes()
       {
       this->FillPrefixesCMakeEnvironment();
       }
+    }
+  this->FillPrefixesUserHints();
+  if(!this->NoDefaultPath)
+    {
     if(!this->NoSystemEnvironmentPath)
       {
       this->FillPrefixesSystemEnvironment();
@@ -1150,7 +1154,6 @@ void cmFindPackageCommand::ComputePrefixes()
       this->FillPrefixesSystemRegistry();
       }
     }
-  this->FillPrefixesUserHints();
   this->FillPrefixesUserGuess();
 
   this->ComputeFinalPaths();
