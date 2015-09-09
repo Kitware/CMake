@@ -1,1 +1,0 @@
--- The Swift compiler identification is Apple

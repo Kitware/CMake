@@ -213,6 +213,29 @@ if(BUILD_TESTING)
         set(CMake_TEST_XCODE_VERSION "${CMAKE_MATCH_1}")
       endif()
     endif()
+    if(CMAKE_OSX_SYSROOT)
+      execute_process(
+        COMMAND xcodebuild -sdk ${CMAKE_OSX_SYSROOT} -version ProductName
+        OUTPUT_VARIABLE _stdout
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_VARIABLE _stderr
+        RESULT_VARIABLE _failed
+        )
+      if(NOT _failed)
+        set(CMAKE_OSX_SDKPRODUCT "${_stdout}")
+      endif()
+
+      execute_process(
+        COMMAND xcodebuild -sdk ${CMAKE_OSX_SYSROOT} -version SDKVersion
+        OUTPUT_VARIABLE _stdout
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_VARIABLE _stderr
+        RESULT_VARIABLE _failed
+        )
+      if(NOT _failed)
+        set(CMAKE_OSX_SDKVERSION "${_stdout}")
+      endif()
+    endif()
   endif()
 
   # Use 1500 or CTEST_TEST_TIMEOUT for long test timeout value,
@@ -258,10 +281,14 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(MissingSourceFile MissingSourceFile)
   set_tests_properties(MissingSourceFile PROPERTIES
     PASS_REGULAR_EXPRESSION "CMake Error at CMakeLists.txt:3 \\(add_executable\\):[ \r\n]*Cannot find source file:[ \r\n]*DoesNotExist/MissingSourceFile.c")
-  if(CMake_TEST_XCODE_VERSION AND NOT CMake_TEST_XCODE_VERSION VERSION_LESS 6.1)
-    if(CMAKE_GENERATOR STREQUAL "Xcode")
-      ADD_TEST_MACRO(SwiftMix SwiftMix)
-      ADD_TEST_MACRO(SwiftOnly SwiftOnly)
+  if(CMake_TEST_XCODE_VERSION AND CMAKE_OSX_SDKVERSION AND CMAKE_OSX_SDKPRODUCT)
+    if((NOT CMake_TEST_XCODE_VERSION VERSION_LESS 6.1) AND
+       ((NOT CMAKE_OSX_SDKPRODUCT STREQUAL "Mac OS X") OR
+        (NOT CMAKE_OSX_SDKVERSION VERSION_LESS 10.10)))
+      if(CMAKE_GENERATOR STREQUAL "Xcode")
+        ADD_TEST_MACRO(SwiftMix SwiftMix)
+        ADD_TEST_MACRO(SwiftOnly SwiftOnly)
+      endif()
     endif()
   endif()
   if(CMAKE_Fortran_COMPILER)
