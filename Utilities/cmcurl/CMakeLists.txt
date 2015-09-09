@@ -43,6 +43,14 @@ if(WIN32)
   set(HAVE_INET_PTON 0 CACHE INTERNAL "Do not use inet_pton")
 endif()
 
+# Starting with OSX 10.11 there is an unrelated libnetwork library which will
+# be picked up during curl configuration. Linking against this library is
+# unnecessary and breaks backward compatibility of the resulting binaries
+# because libnetwork is unavailable on older OSX versions.
+if(APPLE)
+  set(HAVE_LIBNETWORK 0 CACHE INTERNAL "Do not use libnetwork")
+endif(APPLE)
+
 # Disable warnings to avoid changing 3rd party code.
 if(CMAKE_C_COMPILER_ID MATCHES
     "^(GNU|Clang|AppleClang|XL|VisualAge|SunPro|MIPSpro|HP|Intel)$")
@@ -347,9 +355,7 @@ if(BEOS)
   check_library_exists_concat("bnetapi" closesocket HAVE_LIBBNETAPI)
 endif(BEOS)
 
-if(NOT APPLE)
-  check_library_exists_concat("network" recv HAVE_LIBNETWORK)
-endif(NOT APPLE)
+check_library_exists_concat("network" recv HAVE_LIBNETWORK)
 
 if(NOT NOT_NEED_LIBNSL)
   check_library_exists_concat("nsl"    gethostbyname  HAVE_LIBNSL)
