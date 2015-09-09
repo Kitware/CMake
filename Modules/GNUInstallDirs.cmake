@@ -190,11 +190,11 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR OR (_libdir_set
       AND NOT CMAKE_CROSSCOMPILING)
     if (EXISTS "/etc/debian_version") # is this a debian system ?
       if(CMAKE_LIBRARY_ARCHITECTURE)
-        if("${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/?$")
+        if("${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/?")
           set(_LIBDIR_DEFAULT "lib/${CMAKE_LIBRARY_ARCHITECTURE}")
         endif()
         if(DEFINED _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX
-            AND "${_GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/?$")
+            AND "${_GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/?")
           set(__LAST_LIBDIR_DEFAULT "lib/${CMAKE_LIBRARY_ARCHITECTURE}")
         endif()
       endif()
