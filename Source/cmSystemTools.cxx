@@ -228,13 +228,13 @@ std::string cmSystemTools::HelpFileName(std::string name)
 std::string cmSystemTools::TrimWhitespace(const std::string& s)
 {
   std::string::const_iterator start = s.begin();
-  while(start != s.end() && *start <= ' ')
+  while(start != s.end() && isspace(*start))
     ++start;
   if (start == s.end())
     return "";
 
   std::string::const_iterator stop = s.end()-1;
-  while(*stop <= ' ')
+  while(isspace(*stop))
     --stop;
   return std::string(start, stop+1);
 }
