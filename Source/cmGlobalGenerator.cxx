@@ -14,20 +14,6 @@
 #if defined(_MSC_VER) && _MSC_VER >= 1800
 # define KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 #endif
-typedef struct {
-  ULONG  dwOSVersionInfoSize;
-  ULONG  dwMajorVersion;
-  ULONG  dwMinorVersion;
-  ULONG  dwBuildNumber;
-  ULONG  dwPlatformId;
-  WCHAR  szCSDVersion[128];
-  USHORT wServicePackMajor;
-  USHORT wServicePackMinor;
-  USHORT wSuiteMask;
-  UCHAR  wProductType;
-  UCHAR  wReserved;
-} CMRTL_OSVERSIONINFOEXW;
-
 #endif
 
 #include "cmGlobalGenerator.h"
@@ -451,45 +437,23 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
   if (!mf->GetDefinition("CMAKE_SYSTEM"))
     {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-    CMRTL_OSVERSIONINFOEXW osviex;
-    ZeroMemory(&osviex, sizeof(osviex));
-    osviex.dwOSVersionInfoSize = sizeof(osviex);
-
-    typedef LONG (FAR WINAPI *cmRtlGetVersion)(CMRTL_OSVERSIONINFOEXW*);
-    cmRtlGetVersion rtlGetVersion = reinterpret_cast<cmRtlGetVersion>(
-      GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlGetVersion"));
-    if (rtlGetVersion && rtlGetVersion(&osviex) == 0)
-      {
-      std::ostringstream windowsVersionString;
-      windowsVersionString << osviex.dwMajorVersion << "."
-                           << osviex.dwMinorVersion << "."
-                           << osviex.dwBuildNumber;
-      windowsVersionString.str();
-      mf->AddDefinition("CMAKE_HOST_SYSTEM_VERSION",
-                        windowsVersionString.str().c_str());
-      }
-    else
-      {
-      // RtlGetVersion failed, so use the deprecated GetVersionEx function.
-      /* Windows version number data.  */
-      OSVERSIONINFO osvi;
-      ZeroMemory(&osvi, sizeof(osvi));
-      osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+    /* Windows version number data.  */
+    OSVERSIONINFO osvi;
+    ZeroMemory(&osvi, sizeof(osvi));
+    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 #ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 # pragma warning (push)
 # pragma warning (disable:4996)
 #endif
-      GetVersionEx (&osvi);
+    GetVersionEx (&osvi);
 #ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 # pragma warning (pop)
 #endif
-      std::ostringstream windowsVersionString;
-      windowsVersionString << osvi.dwMajorVersion << "."
-                           << osvi.dwMinorVersion;
-      windowsVersionString.str();
-      mf->AddDefinition("CMAKE_HOST_SYSTEM_VERSION",
-                        windowsVersionString.str().c_str());
-      }
+    std::ostringstream windowsVersionString;
+    windowsVersionString << osvi.dwMajorVersion << "." << osvi.dwMinorVersion;
+    windowsVersionString.str();
+    mf->AddDefinition("CMAKE_HOST_SYSTEM_VERSION",
+                      windowsVersionString.str().c_str());
 #endif
     // Read the DetermineSystem file
     std::string systemFile = mf->GetModulesFile("CMakeDetermineSystem.cmake");
