@@ -153,10 +153,12 @@ macro(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   else()
     set(swig_outdir ${CMAKE_CURRENT_BINARY_DIR})
   endif()
-  SWIG_GET_EXTRA_OUTPUT_FILES(${SWIG_MODULE_${name}_LANGUAGE}
-    swig_extra_generated_files
-    "${swig_outdir}"
-    "${swig_source_file_fullname}")
+  if (NOT SWIG_MODULE_${name}_NOPROXY)
+    SWIG_GET_EXTRA_OUTPUT_FILES(${SWIG_MODULE_${name}_LANGUAGE}
+      swig_extra_generated_files
+      "${swig_outdir}"
+      "${swig_source_file_fullname}")
+  endif()
   set(swig_generated_file_fullname
     "${swig_outdir}/${swig_source_file_name_we}")
   # add the language into the name of the file (i.e. TCL_wrap)
