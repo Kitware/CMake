@@ -68,6 +68,11 @@
 # include "cmMachO.h"
 #endif
 
+static bool cm_isspace(char c)
+{
+  return ((c & 0x80) == 0) && isspace(c);
+}
+
 class cmSystemToolsFileTime
 {
 public:
@@ -496,7 +501,7 @@ void cmSystemTools::ParseWindowsCommandLine(const char* command,
       {
       arg.append(backslashes, '\\');
       backslashes = 0;
-      if(((*c & 0x80) == 0 ) && isspace(*c))
+      if (cm_isspace(*c))
         {
         if(in_quotes)
           {
