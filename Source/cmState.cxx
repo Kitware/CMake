@@ -1378,6 +1378,11 @@ template <typename T, typename U, typename V>
 void AppendEntry(T& content, U& backtraces, V& endContentPosition,
     const std::string& value, const cmListFileBacktrace& lfbt)
 {
+  if (value.empty())
+    {
+    return;
+    }
+
   assert(endContentPosition == content.size());
 
   content.push_back(value);
