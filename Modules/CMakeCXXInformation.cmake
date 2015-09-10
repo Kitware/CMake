@@ -266,7 +266,7 @@ endif()
 # Create a static archive incrementally for large object file counts.
 # If CMAKE_CXX_CREATE_STATIC_LIBRARY is set it will override these.
 if(NOT DEFINED CMAKE_CXX_ARCHIVE_CREATE)
-  set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> cq <TARGET> <LINK_FLAGS> <OBJECTS>")
+  set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qc <TARGET> <LINK_FLAGS> <OBJECTS>")
 endif()
 if(NOT DEFINED CMAKE_CXX_ARCHIVE_APPEND)
   set(CMAKE_CXX_ARCHIVE_APPEND "<CMAKE_AR> q  <TARGET> <LINK_FLAGS> <OBJECTS>")
