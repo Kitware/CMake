@@ -1025,25 +1025,13 @@ void cmTarget::ClearDependencyInformation( cmMakefile& mf,
 {
   // Clear the dependencies. The cache variable must exist iff we are
   // recording dependency information for this target.
-  std::string depname = target;
-  depname += "_LIB_DEPENDS";
   if (this->RecordDependencies)
     {
-    mf.AddCacheDefinition(depname, "",
-                          "Dependencies for target", cmState::STATIC);
+    mf.SetLibDepends(target, "");
     }
   else
     {
-    if (mf.GetDefinition( depname ))
-      {
-      std::string message = "Target ";
-      message += target;
-      message += " has dependency information when it shouldn't.\n";
-      message += "Your cache is probably stale. Please remove the entry\n  ";
-      message += depname;
-      message += "\nfrom the cache.";
-      cmSystemTools::Error( message.c_str() );
-      }
+    mf.CheckLibDepends(target);
     }
 }
 
@@ -1176,10 +1164,8 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
   // will be appropriately eliminated at emit time.
   if(this->RecordDependencies)
     {
-    std::string targetEntry = target;
-    targetEntry += "_LIB_DEPENDS";
     std::string dependencies;
-    const char* old_val = mf.GetDefinition( targetEntry );
+    const char* old_val = mf.GetLibDepends(target);
     if( old_val )
       {
       dependencies += old_val;
@@ -1199,9 +1185,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
     dependencies += ";";
     dependencies += lib;
     dependencies += ";";
-    mf.AddCacheDefinition( targetEntry, dependencies.c_str(),
-                           "Dependencies for the target",
-                           cmState::STATIC );
+    mf.SetLibDepends(target, dependencies);
     }
 
 }
@@ -1496,7 +1480,7 @@ void cmTarget::GatherDependenciesForVS6( const cmMakefile& mf,
     return;
     }
 
-  const char* deps = mf.GetDefinition( lib.first+"_LIB_DEPENDS" );
+  const char* deps = mf.GetLibDepends(lib.first);
   if( deps && strcmp(deps,"") != 0 )
     {
     // Make sure this library is in the map, even if it has an empty

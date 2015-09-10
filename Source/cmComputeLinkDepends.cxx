@@ -333,10 +333,8 @@ int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
     }
   else
     {
-    // Look for an old-style <item>_LIB_DEPENDS variable.
-    std::string var = entry.Item;
-    var += "_LIB_DEPENDS";
-    if(const char* val = this->Makefile->GetDefinition(var))
+    // Look for an old-style <item>_LIB_DEPENDS entry.
+    if(const char* val = this->Makefile->GetLibDepends(entry.Item))
       {
       // The item dependencies are known.  Follow them.
       BFSEntry qe = {index, val};
