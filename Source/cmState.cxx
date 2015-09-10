@@ -1376,11 +1376,11 @@ cmBacktraceRange GetPropertyBacktraces(T const& content,
 
 template <typename T, typename U, typename V>
 void AppendEntry(T& content, U& backtraces, V& endContentPosition,
-    const std::string& vec, const cmListFileBacktrace& lfbt)
+    const std::string& value, const cmListFileBacktrace& lfbt)
 {
   assert(endContentPosition == content.size());
 
-  content.push_back(vec);
+  content.push_back(value);
   backtraces.push_back(lfbt);
 
   endContentPosition = content.size();
