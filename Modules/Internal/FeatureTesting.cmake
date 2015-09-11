@@ -5,7 +5,7 @@ macro(record_compiler_features lang compile_flags feature_list)
   string(TOLOWER ${lang} lang_lc)
   file(REMOVE "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.bin")
   file(WRITE "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}" "
-  const char features[] = {\"\"\n")
+  const char features[] = {\"\\n\"\n")
 
   get_property(known_features GLOBAL PROPERTY CMAKE_${lang}_KNOWN_FEATURES)
 
