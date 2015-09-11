@@ -487,7 +487,7 @@ cmState* cmLocalGenerator::GetState() const
 
 cmState::Snapshot cmLocalGenerator::GetStateSnapshot() const
 {
-  return this->StateSnapshot;
+  return this->Makefile->GetStateSnapshot();
 }
 
 // List of variables that are replaced when

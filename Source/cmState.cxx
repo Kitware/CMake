@@ -1067,7 +1067,8 @@ cmState::Snapshot cmState::Snapshot::GetBuildsystemDirectoryParent() const
   PositionType parentPos = this->Position->DirectoryParent;
   if (parentPos != this->State->SnapshotData.Root())
     {
-    snapshot = Snapshot(this->State, parentPos);
+    snapshot = Snapshot(this->State,
+                        parentPos->BuildSystemDirectory->DirectoryEnd);
     }
 
   return snapshot;
