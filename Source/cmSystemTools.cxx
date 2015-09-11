@@ -68,6 +68,11 @@
 # include "cmMachO.h"
 #endif
 
+static bool cm_isspace(char c)
+{
+  return ((c & 0x80) == 0) && isspace(c);
+}
+
 class cmSystemToolsFileTime
 {
 public:
@@ -228,13 +233,13 @@ std::string cmSystemTools::HelpFileName(std::string name)
 std::string cmSystemTools::TrimWhitespace(const std::string& s)
 {
   std::string::const_iterator start = s.begin();
-  while(start != s.end() && *start <= ' ')
+  while (start != s.end() && cm_isspace(*start))
     ++start;
   if (start == s.end())
     return "";
 
   std::string::const_iterator stop = s.end()-1;
-  while(*stop <= ' ')
+  while (cm_isspace(*stop))
     --stop;
   return std::string(start, stop+1);
 }
@@ -496,7 +501,7 @@ void cmSystemTools::ParseWindowsCommandLine(const char* command,
       {
       arg.append(backslashes, '\\');
       backslashes = 0;
-      if(((*c & 0x80) == 0 ) && isspace(*c))
+      if (cm_isspace(*c))
         {
         if(in_quotes)
           {
