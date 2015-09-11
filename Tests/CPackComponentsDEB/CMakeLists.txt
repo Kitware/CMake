@@ -80,6 +80,25 @@ set(CPACK_COMPONENT_HEADERS_DESCRIPTION
 # depend on the libraries component.
 set(CPACK_COMPONENT_HEADERS_DEPENDS libraries)
 
+# creates preinst/prerm scripts with specific permissions. Those permissions
+# (especially executable) should be in the final archive
+find_program(CHMOD_PROG chmod)
+if(CHMOD_PROG)
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/preinst "echo default_preinst")
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/prerm "echo default_prerm")
+
+  # Those should have 755 permission normally. We mess it up to see if
+  # CPACK_DEBIAN_APPLICATIONS_PACKAGE_CONTROL_STRICT_PERMISSION is able to fix
+  # it.
+  execute_process(COMMAND ${CHMOD_PROG} 640 ${CMAKE_CURRENT_BINARY_DIR}/preinst)
+  execute_process(COMMAND ${CHMOD_PROG} 640 ${CMAKE_CURRENT_BINARY_DIR}/prerm)
+
+  set(CPACK_DEBIAN_APPLICATIONS_PACKAGE_CONTROL_EXTRA
+      "${CMAKE_CURRENT_BINARY_DIR}/preinst;${CMAKE_CURRENT_BINARY_DIR}/prerm")
+
+  set(CPACK_DEBIAN_APPLICATIONS_PACKAGE_CONTROL_STRICT_PERMISSION TRUE)
+endif()
+
 # We may use the CPack specific config file in order
 # to tailor CPack behavior on a CPack generator specific way
 # (Behavior would be different for RPM or TGZ or DEB ...)

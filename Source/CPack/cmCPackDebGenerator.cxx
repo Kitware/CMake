@@ -15,6 +15,7 @@
 #include "cmMakefile.h"
 #include "cmGeneratedFileStream.h"
 #include "cmCPackLog.h"
+#include "cmArchiveWrite.h"
 
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
@@ -388,9 +389,9 @@ int cmCPackDebGenerator::createDeb()
     {
       std::string dirName = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
       dirName += '/';
-        for (std::vector<std::string>::const_iterator fileIt =
-              packageFiles.begin();
-              fileIt != packageFiles.end(); ++ fileIt )
+      for (std::vector<std::string>::const_iterator fileIt =
+           packageFiles.begin();
+           fileIt != packageFiles.end(); ++ fileIt )
         {
         totalSize += cmSystemTools::FileLength(*fileIt);
         }
@@ -401,8 +402,9 @@ int cmCPackDebGenerator::createDeb()
     out << std::endl;
     }
 
-  std::string cmd(this->GetOption("GEN_CPACK_DEBIAN_FAKEROOT_EXECUTABLE"));
+  const std::string strGenWDIR(this->GetOption("GEN_WDIR"));
 
+  cmArchiveWrite::Compress tar_compression_type = cmArchiveWrite::CompressGZip;
   const char* debian_compression_type =
       this->GetOption("GEN_CPACK_DEBIAN_COMPRESSION_TYPE");
   if(!debian_compression_type)
@@ -410,102 +412,127 @@ int cmCPackDebGenerator::createDeb()
     debian_compression_type = "gzip";
     }
 
-  std::string cmake_tar = " ", compression_modifier = "a", compression_suffix;
+  std::string compression_suffix;
   if(!strcmp(debian_compression_type, "lzma")) {
       compression_suffix = ".lzma";
+      tar_compression_type = cmArchiveWrite::CompressLZMA;
   } else if(!strcmp(debian_compression_type, "xz")) {
       compression_suffix = ".xz";
+      tar_compression_type = cmArchiveWrite::CompressXZ;
   } else if(!strcmp(debian_compression_type, "bzip2")) {
       compression_suffix = ".bz2";
-      compression_modifier = "j";
-      cmake_tar += "\"" + cmSystemTools::GetCMakeCommand() + "\" -E ";
+      tar_compression_type = cmArchiveWrite::CompressBZip2;
   } else if(!strcmp(debian_compression_type, "gzip")) {
       compression_suffix = ".gz";
-      compression_modifier = "z";
-      cmake_tar += "\"" + cmSystemTools::GetCMakeCommand() + "\" -E ";
+      tar_compression_type = cmArchiveWrite::CompressGZip;
   } else if(!strcmp(debian_compression_type, "none")) {
       compression_suffix = "";
-      compression_modifier = "";
-      cmake_tar += "\"" + cmSystemTools::GetCMakeCommand() + "\" -E ";
+      tar_compression_type = cmArchiveWrite::CompressNone;
   } else {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Error unrecognized compression type: "
                     << debian_compression_type << std::endl);
   }
 
-  cmd += cmake_tar + "tar c" + compression_modifier + "f data.tar"
-      + compression_suffix;
 
-  // now add all directories which have to be compressed
-  // collect all top level install dirs for that
-  // e.g. /opt/bin/foo, /usr/bin/bar and /usr/bin/baz would give /usr and /opt
-    size_t topLevelLength = std::string(this->GetOption("GEN_WDIR")).length();
-    cmCPackLogger(cmCPackLog::LOG_DEBUG, "WDIR: \""
-          << this->GetOption("GEN_WDIR")
-          << "\", length = " << topLevelLength
-          << std::endl);
-  std::set<std::string> installDirs;
-    for (std::vector<std::string>::const_iterator fileIt =
-        packageFiles.begin();
-        fileIt != packageFiles.end(); ++ fileIt )
-    {
-      cmCPackLogger(cmCPackLog::LOG_DEBUG, "FILEIT: \"" << *fileIt << "\""
-          << std::endl);
-    std::string::size_type slashPos = fileIt->find('/', topLevelLength+1);
-    std::string relativeDir = fileIt->substr(topLevelLength,
-                                             slashPos - topLevelLength);
-      cmCPackLogger(cmCPackLog::LOG_DEBUG, "RELATIVEDIR: \"" << relativeDir
-      << "\"" << std::endl);
-    if (installDirs.find(relativeDir) == installDirs.end())
+  std::string filename_data_tar = strGenWDIR
+      + "/data.tar" + compression_suffix;
+
+  // atomic file generation for data.tar
+  {
+    cmGeneratedFileStream fileStream_data_tar;
+    fileStream_data_tar.Open(filename_data_tar.c_str(), false, true);
+    if(!fileStream_data_tar)
       {
-      installDirs.insert(relativeDir);
-      cmd += " .";
-      cmd += relativeDir;
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+          "Error opening the file \"" << filename_data_tar << "\" for writing"
+          << std::endl);
+      return 0;
       }
-    }
+    cmArchiveWrite data_tar(fileStream_data_tar, tar_compression_type, "paxr");
 
-  std::string output;
-    int retval = -1;
-  int res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output, &output,
-      &retval, this->GetOption("GEN_WDIR"), this->GeneratorVerbose, 0);
+    // uid/gid should be the one of the root user, and this root user has
+    // always uid/gid equal to 0.
+    data_tar.SetUIDAndGID(0u, 0u);
+    data_tar.SetUNAMEAndGNAME("root", "root");
 
-    if ( !res || retval )
-    {
-    std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-    tmpFile += "/Deb.log";
-    cmGeneratedFileStream ofs(tmpFile.c_str());
-    ofs << "# Run command: " << cmd << std::endl
-      << "# Working directory: " << toplevel << std::endl
-      << "# Output:" << std::endl
-      << output << std::endl;
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running tar command: "
-      << cmd << std::endl
-      << "Please check " << tmpFile << " for errors" << std::endl);
-    return 0;
-    }
+    // now add all directories which have to be compressed
+    // collect all top level install dirs for that
+    // e.g. /opt/bin/foo, /usr/bin/bar and /usr/bin/baz would
+    // give /usr and /opt
+    size_t topLevelLength = strGenWDIR.length();
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "WDIR: \""
+            << strGenWDIR
+            << "\", length = " << topLevelLength
+            << std::endl);
+    std::set<std::string> orderedFiles;
 
-  std::string md5filename;
-    md5filename = this->GetOption("GEN_WDIR");
-  md5filename += "/md5sums";
+    // we have to reconstruct the parent folders as well
 
-    { // the scope is needed for cmGeneratedFileStream
+    for (std::vector<std::string>::const_iterator fileIt =
+         packageFiles.begin();
+         fileIt != packageFiles.end(); ++ fileIt )
+      {
+      std::string currentPath = *fileIt;
+      while(currentPath != strGenWDIR)
+        {
+        // the last one IS strGenWDIR, but we do not want this one:
+        // XXX/application/usr/bin/myprogram with GEN_WDIR=XXX/application
+        // should not add XXX/application
+        orderedFiles.insert(currentPath);
+        currentPath = cmSystemTools::CollapseCombinedPath(currentPath, "..");
+        }
+      }
+
+
+    for (std::set<std::string>::const_iterator fileIt =
+         orderedFiles.begin();
+         fileIt != orderedFiles.end(); ++ fileIt )
+      {
+      cmCPackLogger(cmCPackLog::LOG_DEBUG, "FILEIT: \"" << *fileIt << "\""
+                    << std::endl);
+      std::string::size_type slashPos = fileIt->find('/', topLevelLength+1);
+      std::string relativeDir = fileIt->substr(topLevelLength,
+                                               slashPos - topLevelLength);
+      cmCPackLogger(cmCPackLog::LOG_DEBUG, "RELATIVEDIR: \"" << relativeDir
+                    << "\"" << std::endl);
+
+      // do not recurse because the loop will do it
+      if(!data_tar.Add(*fileIt, topLevelLength, ".", false))
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+                      "Problem adding file to tar:" << std::endl
+                      << "#top level directory: "
+                      << strGenWDIR << std::endl
+                      << "#file: " << *fileIt << std::endl
+                      << "#error:" << data_tar.GetError() << std::endl);
+        return 0;
+        }
+      }
+  } // scope for file generation
+
+
+  std::string md5filename = strGenWDIR + "/md5sums";
+  {
+    // the scope is needed for cmGeneratedFileStream
     cmGeneratedFileStream out(md5filename.c_str());
-    std::vector<std::string>::const_iterator fileIt;
-//       std::string topLevelWithTrailingSlash = toplevel;
+
     std::string topLevelWithTrailingSlash =
         this->GetOption("CPACK_TEMPORARY_DIRECTORY");
     topLevelWithTrailingSlash += '/';
-      for ( fileIt = packageFiles.begin();
-            fileIt != packageFiles.end(); ++ fileIt )
+    for (std::vector<std::string>::const_iterator fileIt =
+           packageFiles.begin();
+         fileIt != packageFiles.end(); ++ fileIt )
       {
-      cmd = "\"";
+      std::string cmd = "\"";
       cmd += cmSystemTools::GetCMakeCommand();
       cmd += "\" -E md5sum \"";
       cmd += *fileIt;
       cmd += "\"";
-      //std::string output;
-      //int retVal = -1;
-      res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output, &output,
+
+      std::string output;
+      int retval = -1;
+      int res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output, &output,
           &retval, toplevel.c_str(), this->GeneratorVerbose, 0);
       if ( !res || retval )
         {
@@ -521,70 +548,116 @@ int cmCPackDebGenerator::createDeb()
       }
     // each line contains a eol.
     // Do not end the md5sum file with yet another (invalid)
-    }
+  }
 
-    // set md5sum file permissins to RW-R--R-- so that deb lintian doesn't warn
-    // about it
-    cmSystemTools::SetPermissions(md5filename.c_str(),
-        S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
-    cmd = this->GetOption("GEN_CPACK_DEBIAN_FAKEROOT_EXECUTABLE");
-    cmd += cmake_tar + "tar czf control.tar.gz ./control ./md5sums";
+
+  std::string filename_control_tar = strGenWDIR + "/control.tar.gz";
+  // atomic file generation for control.tar
+  {
+    cmGeneratedFileStream fileStream_control_tar;
+    fileStream_control_tar.Open(filename_control_tar.c_str(), false, true);
+    if(!fileStream_control_tar)
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+          "Error opening the file \"" << filename_control_tar
+          << "\" for writing" << std::endl);
+      return 0;
+      }
+    cmArchiveWrite control_tar(fileStream_control_tar,
+                               tar_compression_type,
+                               "paxr");
+
+    // sets permissions and uid/gid for the files
+    control_tar.SetUIDAndGID(0u, 0u);
+    control_tar.SetUNAMEAndGNAME("root", "root");
+
+    /* permissions are set according to
+    https://www.debian.org/doc/debian-policy/ch-files.html#s-permissions-owners
+    and
+    https://lintian.debian.org/tags/control-file-has-bad-permissions.html
+    */
+    const mode_t permission644 = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+    const mode_t permissionExecute = S_IXUSR | S_IXGRP | S_IXOTH;
+    const mode_t permission755 = permission644 | permissionExecute;
+
+    // for md5sum and control (that we have generated here), we use 644
+    // (RW-R--R--)
+    // so that deb lintian doesn't warn about it
+    control_tar.SetPermissions(permission644);
+
+    // adds control and md5sums
+    if(   !control_tar.Add(md5filename, strGenWDIR.length(), ".")
+       || !control_tar.Add(strGenWDIR + "/control", strGenWDIR.length(), "."))
+      {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+            "Error adding file to tar:" << std::endl
+            << "#top level directory: "
+               << strGenWDIR << std::endl
+            << "#file: \"control\" or \"md5sums\"" << std::endl
+            << "#error:" << control_tar.GetError() << std::endl);
+        return 0;
+      }
+
+    // for the other files, we use
+    // -either the original permission on the files
+    // -either a permission strictly defined by the Debian policies
     const char* controlExtra =
       this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA");
-  if( controlExtra )
-    {
-    std::vector<std::string> controlExtraList;
-    cmSystemTools::ExpandListArgument(controlExtra, controlExtraList);
-    for(std::vector<std::string>::iterator i =
-          controlExtraList.begin(); i != controlExtraList.end(); ++i)
+    if( controlExtra )
       {
-      std::string filenamename =
-        cmsys::SystemTools::GetFilenameName(*i);
-      std::string localcopy = this->GetOption("GEN_WDIR");
-      localcopy += "/";
-      localcopy += filenamename;
-      // if we can copy the file, it means it does exist, let's add it:
-      if( cmsys::SystemTools::CopyFileIfDifferent(
-            *i, localcopy) )
+      // permissions are now controlled by the original file permissions
+
+      const bool permissionStrictPolicy =
+        this->IsSet("GEN_CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION");
+
+      static const char* strictFiles[] = {
+        "config", "postinst", "postrm", "preinst", "prerm"
+        };
+      std::set<std::string> setStrictFiles(
+        strictFiles,
+        strictFiles + sizeof(strictFiles)/sizeof(strictFiles[0]));
+
+      // default
+      control_tar.ClearPermissions();
+
+      std::vector<std::string> controlExtraList;
+      cmSystemTools::ExpandListArgument(controlExtra, controlExtraList);
+      for(std::vector<std::string>::iterator i = controlExtraList.begin();
+          i != controlExtraList.end(); ++i)
         {
-        // debian is picky and need relative to ./ path in the tar.*
-        cmd += " ./";
-        cmd += filenamename;
+        std::string filenamename =
+          cmsys::SystemTools::GetFilenameName(*i);
+        std::string localcopy = strGenWDIR + "/" + filenamename;
+
+        if(permissionStrictPolicy)
+          {
+          control_tar.SetPermissions(setStrictFiles.count(filenamename) ?
+            permission755 : permission644);
+          }
+
+        // if we can copy the file, it means it does exist, let's add it:
+        if( cmsys::SystemTools::CopyFileIfDifferent(*i, localcopy) )
+          {
+          control_tar.Add(localcopy, strGenWDIR.length(), ".");
+          }
         }
       }
-    }
-  res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output, &output,
-      &retval, this->GetOption("GEN_WDIR"), this->GeneratorVerbose, 0);
+  }
 
-    if ( !res || retval )
-    {
-    std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-    tmpFile += "/Deb.log";
-    cmGeneratedFileStream ofs(tmpFile.c_str());
-    ofs << "# Run command: " << cmd << std::endl
-      << "# Working directory: " << toplevel << std::endl
-      << "# Output:" << std::endl
-      << output << std::endl;
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running tar command: "
-      << cmd << std::endl
-      << "Please check " << tmpFile << " for errors" << std::endl);
-    return 0;
-    }
 
   // ar -r your-package-name.deb debian-binary control.tar.* data.tar.*
   // since debian packages require BSD ar (most Linux distros and even
   // FreeBSD and NetBSD ship GNU ar) we use a copy of OpenBSD ar here.
   std::vector<std::string> arFiles;
-    std::string topLevelString = this->GetOption("GEN_WDIR");
-  topLevelString += "/";
+  std::string topLevelString = strGenWDIR + "/";
   arFiles.push_back(topLevelString + "debian-binary");
   arFiles.push_back(topLevelString + "control.tar.gz");
   arFiles.push_back(topLevelString + "data.tar" + compression_suffix);
-    std::string outputFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-    outputFileName += "/";
-    outputFileName += this->GetOption("CPACK_OUTPUT_FILE_NAME");
-    res = ar_append(outputFileName.c_str(), arFiles);
+  std::string outputFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+  outputFileName += "/";
+  outputFileName += this->GetOption("CPACK_OUTPUT_FILE_NAME");
+  int res = ar_append(outputFileName.c_str(), arFiles);
   if ( res!=0 )
     {
     std::string tmpFile = this->GetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME");
