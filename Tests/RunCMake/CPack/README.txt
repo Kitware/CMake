@@ -32,14 +32,14 @@ different types of packages. This script is placed into CPack test root
 directory even if it will be used for only one of the generators.
 
 If test will be used for multiple generators but some of them require some
-generator speciffic commands then those commands should be added to a separate
+generator specific commands then those commands should be added to a separate
 file that should be located in '<generator_name>/<test_name>-specifics.cmake'
 in CPack test root directory.
 
 CPack execution phase:
 ----------------------
 
-Only exececutes CPack for content that was generated during CMake execution
+Only executes CPack for content that was generated during CMake execution
 phase.
 
 Verification of generated files:
