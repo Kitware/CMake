@@ -56,10 +56,10 @@ protected:
   // Whether the real file stream was valid when it was closed.
   bool Okay;
 
-  // Whether the destionation file is compressed
+  // Whether the destination file is compressed
   bool Compress;
 
-  // Whether the destionation file is compressed
+  // Whether the destination file is compressed
   bool CompressExtraExtension;
 };
 
