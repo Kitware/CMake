@@ -1,0 +1,4 @@
+cpack-deb-fakeroot-removal
+--------------------------
+
+* :module:`CPackDeb` no longer uses fakeroot and system tar program for packaging.
