@@ -84,7 +84,11 @@ cmArchiveWrite::cmArchiveWrite(
     Archive(archive_write_new()),
     Disk(archive_read_disk_new()),
     Verbose(false),
-    Format(format)
+    Format(format),
+    uid(-1),
+    gid(-1),
+    permissions(-1),
+    permissionsMask(-1)
 {
   switch (c)
     {
@@ -181,7 +185,10 @@ cmArchiveWrite::~cmArchiveWrite()
 }
 
 //----------------------------------------------------------------------------
-bool cmArchiveWrite::Add(std::string path, size_t skip, const char* prefix)
+bool cmArchiveWrite::Add(std::string path,
+                         size_t skip,
+                         const char* prefix,
+                         bool recursive)
 {
   if(this->Okay())
     {
@@ -189,20 +196,21 @@ bool cmArchiveWrite::Add(std::string path, size_t skip, const char* prefix)
       {
       path.erase(path.size()-1);
       }
-    this->AddPath(path.c_str(), skip, prefix);
+    this->AddPath(path.c_str(), skip, prefix, recursive);
     }
   return this->Okay();
 }
 
 //----------------------------------------------------------------------------
 bool cmArchiveWrite::AddPath(const char* path,
-                             size_t skip, const char* prefix)
+                             size_t skip, const char* prefix,
+                             bool recursive)
 {
   if(!this->AddFile(path, skip, prefix))
     {
     return false;
     }
-  if(!cmSystemTools::FileIsDirectory(path) ||
+  if((!cmSystemTools::FileIsDirectory(path) || !recursive) ||
     cmSystemTools::FileIsSymlink(path))
     {
     return true;
@@ -278,6 +286,33 @@ bool cmArchiveWrite::AddFile(const char* file,
       }
     archive_entry_set_mtime(e, t, 0);
     }
+
+  // manages the uid/guid of the entry (if any)
+  if (this->uid > -1 && this->gid > -1)
+    {
+    archive_entry_set_uid(e, this->uid);
+    archive_entry_set_gid(e, this->gid);
+    }
+
+  if (this->uname.size() && this->gname.size())
+    {
+    archive_entry_set_uname(e, this->uname.c_str());
+    archive_entry_set_gname(e, this->gname.c_str());
+    }
+
+
+  // manages the permissions
+  if (this->permissions > -1)
+    {
+    archive_entry_set_perm(e, this->permissions);
+    }
+
+  if (this->permissionsMask > -1)
+    {
+    mode_t perm = archive_entry_perm(e);
+    archive_entry_set_perm(e, perm & this->permissionsMask );
+    }
+
   // Clear acl and xattr fields not useful for distribution.
   archive_entry_acl_clear(e);
   archive_entry_xattr_clear(e);
