@@ -181,7 +181,10 @@ cmArchiveWrite::~cmArchiveWrite()
 }
 
 //----------------------------------------------------------------------------
-bool cmArchiveWrite::Add(std::string path, size_t skip, const char* prefix)
+bool cmArchiveWrite::Add(std::string path,
+                         size_t skip,
+                         const char* prefix,
+                         bool recursive)
 {
   if(this->Okay())
     {
@@ -189,20 +192,21 @@ bool cmArchiveWrite::Add(std::string path, size_t skip, const char* prefix)
       {
       path.erase(path.size()-1);
       }
-    this->AddPath(path.c_str(), skip, prefix);
+    this->AddPath(path.c_str(), skip, prefix, recursive);
     }
   return this->Okay();
 }
 
 //----------------------------------------------------------------------------
 bool cmArchiveWrite::AddPath(const char* path,
-                             size_t skip, const char* prefix)
+                             size_t skip, const char* prefix,
+                             bool recursive)
 {
   if(!this->AddFile(path, skip, prefix))
     {
     return false;
     }
-  if(!cmSystemTools::FileIsDirectory(path) ||
+  if((!cmSystemTools::FileIsDirectory(path) || !recursive) ||
     cmSystemTools::FileIsSymlink(path))
     {
     return true;
@@ -278,6 +282,33 @@ bool cmArchiveWrite::AddFile(const char* file,
       }
     archive_entry_set_mtime(e, t, 0);
     }
+
+  // manages the uid/guid of the entry (if any)
+  if (this->Uid.IsSet() && this->Gid.IsSet())
+    {
+    archive_entry_set_uid(e, this->Uid.Get());
+    archive_entry_set_gid(e, this->Gid.Get());
+    }
+
+  if (this->Uname.size() && this->Gname.size())
+    {
+    archive_entry_set_uname(e, this->Uname.c_str());
+    archive_entry_set_gname(e, this->Gname.c_str());
+    }
+
+
+  // manages the permissions
+  if (this->Permissions.IsSet())
+    {
+    archive_entry_set_perm(e, this->Permissions.Get());
+    }
+
+  if (this->PermissionsMask.IsSet())
+    {
+    mode_t perm = archive_entry_perm(e);
+    archive_entry_set_perm(e, perm & this->PermissionsMask.Get());
+    }
+
   // Clear acl and xattr fields not useful for distribution.
   archive_entry_acl_clear(e);
   archive_entry_xattr_clear(e);
