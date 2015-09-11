@@ -14,7 +14,7 @@ function(verifyDebControl FILE PREFIX VERIFY_FILES)
           ERROR_VARIABLE err_)
 
   if(err_)
-    message(FATAL_ERROR "Debian controll verification failed for file: "
+    message(FATAL_ERROR "Debian control verification failed for file: "
         "'${FILE}'; error output: '${err_}'")
   endif()
 
