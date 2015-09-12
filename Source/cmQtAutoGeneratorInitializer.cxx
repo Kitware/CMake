@@ -885,8 +885,6 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
                                 /*byproducts=*/rcc_output, depends,
                                 commandLines, false, autogenComment.c_str());
 
-    autogenTarget->Compute();
-
     cmGeneratorTarget* gt = new cmGeneratorTarget(autogenTarget, lg);
     makefile->AddGeneratorTarget(autogenTarget, gt);
 

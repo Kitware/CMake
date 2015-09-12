@@ -456,7 +456,6 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
                         no_working_directory,
                         "echo", "Build all projects");
 
-  allbuild->Compute();
   cmGeneratorTarget* allBuildGt = new cmGeneratorTarget(allbuild, root);
   mf->AddGeneratorTarget(allbuild, allBuildGt);
 
@@ -492,7 +491,6 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
                           no_working_directory,
                           "make", "-f", file.c_str());
 
-    check->Compute();
     cmGeneratorTarget* checkGt = new cmGeneratorTarget(check, root);
     mf->AddGeneratorTarget(check, checkGt);
     }
