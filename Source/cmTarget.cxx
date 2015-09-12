@@ -361,10 +361,6 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     }
 }
 
-void cmTarget::Compute()
-{
-}
-
 //----------------------------------------------------------------------------
 void cmTarget::AddUtility(const std::string& u, cmMakefile *makefile)
 {
