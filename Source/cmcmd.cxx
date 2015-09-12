@@ -16,6 +16,9 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmQtAutoGenerators.h"
+#if defined(HAVE_DAEMON_MODE) && HAVE_DAEMON_MODE
+#include "cmServer.h"
+#endif
 #include "cmVersion.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -879,6 +882,24 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       }
       return 0;
     }
+    else if (args[1] == "daemon") {
+#if defined(HAVE_DAEMON_MODE) && HAVE_DAEMON_MODE
+      std::string buildDir;
+      if (args.size() > 3) {
+        return 1;
+      }
+      if (args.size() == 3) {
+        buildDir = args[2];
+        cmSystemTools::ConvertToUnixSlashes(buildDir);
+      }
+      cmMetadataServer server;
+      server.ServeMetadata(buildDir);
+      return 0;
+#else
+      cmSystemTools::Error("CMake was not built with daemon mode enabled");
+      return 1;
+#endif
+    }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
     // Internal CMake Fortran module support.
@@ -1027,7 +1048,11 @@ int cmcmd::ExecuteEchoColor(std::vector<std::string>& args)
       // Enable or disable color based on the switch value.
       std::string value = args[i].substr(9);
       if (!value.empty()) {
-        enabled = cmSystemTools::IsOn(value.c_str());
+        if (cmSystemTools::IsOn(value.c_str())) {
+          enabled = true;
+        } else {
+          enabled = false;
+        }
       }
     } else if (cmHasLiteralPrefix(args[i], "--progress-dir=")) {
       progressDir = args[i].substr(15);
