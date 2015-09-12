@@ -229,17 +229,16 @@ bool cmCursesStringWidget::PrintKeys()
       }
     firstLine[511] = '\0';
     curses_move(y-4,0);
-    printw(firstLine);
+    printw("%s", firstLine);
     curses_move(y-3,0);
-    printw(firstLine);
+    printw("%s", firstLine);
     curses_move(y-2,0);
-    printw(firstLine);
+    printw("%s", firstLine);
     curses_move(y-1,0);
-    printw(firstLine);
+    printw("%s", firstLine);
 
-    sprintf(firstLine,  "Editing option, press [enter] to leave edit.");
     curses_move(y-3,0);
-    printw(firstLine);
+    printw("Editing option, press [enter] to leave edit.");
     return true;
     }
   else
