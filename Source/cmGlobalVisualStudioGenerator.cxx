@@ -86,6 +86,7 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
                           no_depends, no_commands, false,
                           "Build all projects");
 
+      allBuild->Compute();
       cmGeneratorTarget* gt = new cmGeneratorTarget(allBuild, gen[0]);
       allBuild->GetMakefile()->AddGeneratorTarget(allBuild, gt);
 
