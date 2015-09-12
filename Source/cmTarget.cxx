@@ -968,19 +968,12 @@ cmSourceFile* cmTarget::AddSource(const std::string& src)
 
 void cmTarget::AddGenerateTimeSource(const std::string& src)
 {
-  cmSourceFileLocation sfl(this->Makefile, src);
-  if (std::find_if(this->Internal->SourceEntries.begin(),
-                   this->Internal->SourceEntries.end(),
-                   TargetPropertyEntryFinder(sfl))
-                                      == this->Internal->SourceEntries.end())
-    {
-    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(src);
-    cge->SetEvaluateForBuildsystem(true);
-    this->Internal->SourceItems.push_back(
-                          new cmTargetInternals::TargetPropertyEntry(cge));
-    }
+  cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+  cmGeneratorExpression ge(lfbt);
+  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(src);
+  cge->SetEvaluateForBuildsystem(true);
+  this->Internal->SourceItems.push_back(
+                        new cmTargetInternals::TargetPropertyEntry(cge));
   this->AddSource(src);
 }
 
