@@ -133,6 +133,8 @@ public:
   void AddPostBuildCommand(cmCustomCommand const &cmd)
     {this->PostBuildCommands.push_back(cmd);}
 
+  void Compute();
+
   /**
    * Get the list of the source files used by this target
    */
