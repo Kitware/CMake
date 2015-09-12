@@ -960,6 +960,11 @@ cmSourceFile* cmTarget::AddSource(const std::string& src)
   return this->Makefile->GetOrCreateSource(src);
 }
 
+void cmTarget::AddGenerateTimeSource(const std::string& src)
+{
+  this->AddSource(src);
+}
+
 //----------------------------------------------------------------------------
 void cmTarget::MergeLinkLibraries( cmMakefile& mf,
                                    const std::string& selfname,

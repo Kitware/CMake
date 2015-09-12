@@ -404,7 +404,7 @@ std::string cmGeneratorTarget::GetOutputName(const std::string& config,
 
 void cmGeneratorTarget::AddSource(const std::string& src)
 {
-  this->Target->AddSource(src);
+  this->Target->AddGenerateTimeSource(src);
 }
 
 void cmGeneratorTarget::AddTracedSources(std::vector<std::string> const& srcs)
