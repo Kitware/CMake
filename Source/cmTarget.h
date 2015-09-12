@@ -133,8 +133,6 @@ public:
   void AddPostBuildCommand(cmCustomCommand const &cmd)
     {this->PostBuildCommands.push_back(cmd);}
 
-  void Compute();
-
   /**
    * Add sources to the target.
    */
