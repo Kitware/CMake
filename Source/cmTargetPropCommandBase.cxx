@@ -80,6 +80,36 @@ bool cmTargetPropCommandBase::HandleArguments(
   return true;
 }
 
+cmCommand::ParameterContext cmTargetPropCommandBase::GetContextForParameter(
+  std::vector<std::string> const& args, size_t index)
+{
+  if (index == 0)
+    return SingleBinaryTargetParameter;
+  if (index == 1 && args.size() == 1)
+    return KeywordParameter;
+  if (index == args.size() - 1 &&
+      (args[index] == "PRIVATE" || args[index] == "PUBLIC" ||
+       args[index] == "INTERFACE"))
+    return KeywordParameter;
+  return NoContext;
+}
+
+std::vector<std::string> cmTargetPropCommandBase::GetKeywords(
+  std::vector<std::string> const& args, size_t index)
+{
+  (void)args;
+  std::vector<std::string> result;
+  if (index == 0)
+    return result;
+  if (index == 1) {
+    result.push_back("PRIVATE");
+    result.push_back("PUBLIC");
+    result.push_back("INTERFACE");
+    return result;
+  }
+  return result;
+}
+
 bool cmTargetPropCommandBase::ProcessContentArgs(
   std::vector<std::string> const& args, unsigned int& argIndex, bool prepend,
   bool system)

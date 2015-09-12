@@ -14,6 +14,15 @@
 #include "cmVersion.h"
 
 // cmCMakeMinimumRequired
+cmCommand::ParameterContext cmCMakeMinimumRequired::GetContextForParameter(
+  const std::vector<std::string>& args, size_t index)
+{
+  (void)args;
+  if (index == 0)
+    return KeywordParameter;
+  return VersionParameter;
+}
+
 bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args,
                                          cmExecutionStatus&)
 {

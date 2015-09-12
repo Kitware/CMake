@@ -12,6 +12,16 @@
 #include "cmAddExecutableCommand.h"
 
 // cmExecutableCommand
+cmCommand::ParameterContext cmAddExecutableCommand::GetContextForParameter(
+  const std::vector<std::string>& args, size_t index)
+{
+  (void)args;
+  if (index == 0) {
+    return SingleBinaryTargetParameter;
+  }
+  return SourceFilePropertyParameter;
+}
+
 bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
                                          cmExecutionStatus&)
 {

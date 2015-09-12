@@ -27,6 +27,9 @@ public:
    */
   virtual cmCommand* Clone() { return new cmCMakeMinimumRequired; }
 
+  ParameterContext GetContextForParameter(const std::vector<std::string>& args,
+                                          size_t index);
+
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.

@@ -14,6 +14,48 @@
 #include "cmVersion.h"
 
 // cmCMakePolicyCommand
+cmCommand::ParameterContext cmCMakePolicyCommand::GetContextForParameter(
+  const std::vector<std::string>& args, size_t index)
+{
+  if (index == 0) {
+    return cmCommand::KeywordParameter;
+  }
+  if (index == 1) {
+    if (args[0] == "GET" || args[0] == "SET") {
+      return cmCommand::PolicyParameter;
+    }
+    if (args[0] == "VERSION") {
+      return cmCommand::VersionParameter;
+    }
+  }
+  if (index == 2) {
+    if (args[0] == "SET") {
+      return cmCommand::KeywordParameter;
+    }
+  }
+  return NoContext;
+}
+
+std::vector<std::string> cmCMakePolicyCommand::GetKeywords(
+  const std::vector<std::string>&, size_t index)
+{
+  std::vector<std::string> result;
+  if (index == 0) {
+    result.push_back("VERSION");
+    result.push_back("PUSH");
+    result.push_back("POP");
+    result.push_back("GET");
+    result.push_back("SET");
+  }
+
+  if (index == 2) {
+    result.push_back("OLD");
+    result.push_back("NEW");
+  }
+
+  return result;
+}
+
 bool cmCMakePolicyCommand::InitialPass(std::vector<std::string> const& args,
                                        cmExecutionStatus&)
 {

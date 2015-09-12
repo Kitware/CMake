@@ -61,6 +61,50 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->AppendSearchPathGroups();
 }
 
+cmCommand::ParameterContext cmFindPackageCommand::GetContextForParameter(
+  const std::vector<std::string>& args, size_t index)
+{
+  if (index == 0) {
+    return cmCommand::PackageNameParameter;
+  }
+  std::vector<std::string> kwds;
+  kwds.push_back("REQUIRED");
+  kwds.push_back("EXACT");
+  kwds.push_back("QUIET");
+  kwds.push_back("MODULE");
+  kwds.push_back("NO_MODULE");
+  kwds.push_back("CONFIG");
+  kwds.push_back("NO_POLICY_SCOPE");
+
+  if (index == 1 &&
+      (args.size() == 1 ||
+       (args.size() > 1 &&
+        std::find(kwds.begin(), kwds.end(), args[index]) != kwds.end()))) {
+    return cmCommand::KeywordParameter;
+  }
+  return NoContext;
+}
+
+std::vector<std::string> cmFindPackageCommand::GetKeywords(
+  const std::vector<std::string>& args, size_t index)
+{
+  (void)args;
+  std::vector<std::string> result;
+
+  if (index == 1) {
+    result.push_back("REQUIRED");
+    result.push_back("EXACT");
+    result.push_back("QUIET");
+    result.push_back("MODULE");
+    result.push_back("NO_MODULE");
+    result.push_back("CONFIG");
+    result.push_back("NO_POLICY_SCOPE");
+    return result;
+  }
+
+  return result;
+}
+
 void cmFindPackageCommand::AppendSearchPathGroups()
 {
   std::vector<cmFindCommon::PathLabel>* labels;

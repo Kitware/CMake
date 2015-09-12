@@ -164,6 +164,45 @@ bool cmGetPropertyCommand::InitialPass(std::vector<std::string> const& args,
   return true;
 }
 
+cmCommand::ParameterContext cmGetPropertyCommand::GetContextForParameter(
+  const std::vector<std::string>& args, size_t index)
+{
+  if (index == 0)
+    return VariableIdentifierParameter;
+  if (index == 1) {
+    return KeywordParameter;
+  }
+  if (index == 2 &&
+      ((args.size() > 2 && args[1] == "TARGET") || args.size() == 2)) {
+    return SingleBinaryTargetParameter;
+  }
+  if (index == 2 && args[1] == "GLOBAL" &&
+      ((args.size() > index && args[index] == "PROPERTY") || args.size() == 2))
+    return KeywordParameter;
+  if (index == 3 &&
+      ((args.size() > index && args[index] == "PROPERTY") || args.size() == 3))
+    return KeywordParameter;
+
+  if (index == 4 && args.size() >= 4) {
+    if (args[1] == "TARGET") {
+      return TargetPropertyParameter;
+    }
+    if (args[1] == "DIRECTORY") {
+      return DirectoryPropertyParameter;
+    }
+  }
+
+  return NoContext;
+}
+
+std::vector<std::string> cmGetPropertyCommand::GetKeywords(
+  const std::vector<std::string>& args, size_t index)
+{
+  (void)args;
+  (void)index;
+  return std::vector<std::string>();
+}
+
 bool cmGetPropertyCommand::StoreResult(const char* value)
 {
   if (this->InfoType == OutSet) {

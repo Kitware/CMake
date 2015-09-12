@@ -29,6 +29,12 @@ public:
    */
   virtual cmCommand* Clone() { return new cmTargetLinkLibrariesCommand; }
 
+  ParameterContext GetContextForParameter(std::vector<std::string> const& args,
+                                          size_t index);
+
+  std::vector<std::string> GetKeywords(std::vector<std::string> const& args,
+                                       size_t index);
+
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.

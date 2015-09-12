@@ -28,6 +28,12 @@ public:
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus& status);
 
+  ParameterContext GetContextForParameter(const std::vector<std::string>& args,
+                                          size_t index);
+
+  std::vector<std::string> GetKeywords(std::vector<std::string> const& args,
+                                       size_t index);
+
   /**
    * This determines if the command is invoked when in script mode.
    */

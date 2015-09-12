@@ -73,3 +73,29 @@ bool cmGetTargetPropertyCommand::InitialPass(
   this->Makefile->AddDefinition(var, (var + "-NOTFOUND").c_str());
   return true;
 }
+
+cmCommand::ParameterContext cmGetTargetPropertyCommand::GetContextForParameter(
+  std::vector<std::string> const&, size_t index)
+{
+  if (index == 1)
+    return SingleTargetParameter;
+  if (index == 2)
+    return TargetPropertyParameter;
+  return NoContext;
+}
+
+std::vector<std::string> cmGetTargetPropertyCommand::GetKeywords(
+  std::vector<std::string> const& args, size_t index)
+{
+  (void)args;
+  std::vector<std::string> result;
+  if (index == 0)
+    return result;
+  if (index == 1) {
+    result.push_back("PRIVATE");
+    result.push_back("PUBLIC");
+    result.push_back("INTERFACE");
+    return result;
+  }
+  return result;
+}

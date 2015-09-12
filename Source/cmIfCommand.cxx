@@ -211,6 +211,208 @@ bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
   return false;
 }
 
+cmCommand::ParameterContext cmIfCommand::GetContextForParameter(
+  std::vector<std::string> const& args, size_t index)
+{
+  if (index == 0) {
+    if (args.empty() || (args.size() > 0 && (args[index] == "TARGET" ||
+                                             args[index] == "POLICY"))) {
+      return KeywordParameter;
+    }
+  }
+  if (index == 1 && args[0] == "TARGET") {
+    return SingleBinaryTargetParameter;
+  }
+  if (index == 1 && args[0] == "POLICY") {
+    return PolicyParameter;
+  }
+
+  //  if (args.size() <= index)
+  return NoContext;
+
+  //  // Need context for <constant> ?
+  //  size_t exprIndex = 0;
+  //  size_t exprSize = 1; // Compute this
+
+  //  if (args[index] == "(" || args[index] == ")")
+  //    {
+  //    return NoContext; // TODO: Might be
+  //    KeywordOrVariableOrConstantParameter
+  //    // set exprSize = 0;
+  //    }
+
+  //  for ( ; index != 0 && args[index - 1] != "("; --index)
+  //    {
+  //    ++exprIndex;
+  //    }
+
+  //  // In the end, exprIndex is 0, 1, or 2
+
+  //  switch(exprSize)
+  //    {
+  //    case 0:
+  //    case 1:
+  //      return KeywordOrVariableOrConstantParameter;
+  //    case 2: {
+  //      switch(exprIndex)
+  //      {
+  //      case 0:
+  //        return KeywordParameter;
+  //      case 1:
+  //        {
+  //        if (args[0] == "NOT")
+  //          return KeywordOrVariableOrConstantParameter;
+  //        if (args[0] == "COMMAND")
+  //          return CommandNameParameter;
+  //        if (args[0] == "POLICY")
+  //          return PolicyParameter;
+  //        if (args[0] == "TARGET")
+  //          return SingleTargetParameter;
+  //        if (args[0] == "EXISTS")
+  //          return FilePathParameter;
+  //        if (args[0] == "IS_DIRECTORY")
+  //          return FilePathParameter;
+  //        if (args[0] == "IS_SYMLINK")
+  //          return FilePathParameter;
+  //        if (args[0] == "IS_ABSOLUTE")
+  //          return FilePathParameter;
+  //        if (args[0] == "DEFINED")
+  //          return VariableIdentifierParameter;
+  //        return NoContext; // Unreachable?
+  //        }
+  //      }
+  //    }
+  //    case 3:
+  //      {
+  //      switch(exprIndex)
+  //        {
+  //        case 0:
+  //          // Could be NOT or a variable or constant
+  //          return KeywordOrVariableOrConstantParameter;
+  //          // Bah, humbug - do completion ltr only! Or?
+  //        case 1:
+  //          {
+  //          if (args[0] == "NOT")
+  //            return KeywordParameter;
+  //          return KeywordParameter; // Binary keyword
+  //          }
+  //        case 2: {
+  //          if (args[0] == "NOT")
+  //            {
+  //            if (args[1] == "COMMAND")
+  //              return CommandNameParameter;
+  //            if (args[1] == "POLICY")
+  //              return PolicyParameter;
+  //            if (args[1] == "TARGET")
+  //              return SingleTargetParameter;
+  //            if (args[1] == "EXISTS")
+  //              return FilePathParameter;
+  //            if (args[1] == "IS_DIRECTORY")
+  //              return FilePathParameter;
+  //            if (args[1] == "IS_SYMLINK")
+  //              return FilePathParameter;
+  //            if (args[1] == "IS_ABSOLUTE")
+  //              return FilePathParameter;
+  //            if (args[1] == "DEFINED")
+  //              return VariableIdentifierParameter;
+  //            return NoContext; // Unreachable?
+  //            }
+  //          if (args[1] == "AND" || args[1] == "OR")
+  //            return VariableIdentifierParameter;
+  //          if (args[1] == "IS_NEWER_THAN")
+  //              return FilePathParameter;
+  //          if (args[1] == "MATCHES")
+  //              return VariableIdentifierParameter; // ConstantParameter;
+  //          if (args[1] == "LESS")
+  //              return NumberParameter;
+  //          if (args[1] == "GREATER")
+  //              return NumberParameter;
+  //          if (args[1] == "EQUAL")
+  //              return NumberParameter;
+  //          if (args[1] == "STRLESS")
+  //              return NumberParameter; // ?
+  //          if (args[1] == "STRGREATER")
+  //              return NumberParameter; // ?
+  //          if (args[1] == "STREQUAL")
+  //              return NumberParameter; // ?
+  //          if (args[1] == "VERSION_LESS")
+  //              return VersionParameter;
+  //          if (args[1] == "VERSION_GREATER")
+  //              return VersionParameter;
+  //          if (args[1] == "VERSION_EQUAL")
+  //              return VersionParameter;
+  //          return VariableIdentifierParameter;
+  //          }
+  //        }
+  //      }
+  //    }
+  return NoContext;
+}
+
+std::vector<std::string> cmIfCommand::GetKeywords(
+  std::vector<std::string> const& args, size_t index)
+{
+  size_t exprIndex = 0;
+  size_t exprSize = 1; // Compute this
+  for (; index != 0 && args[index - 1] != "("; --index) {
+    ++exprIndex;
+  }
+  std::vector<std::string> keywords;
+  if (exprSize <= 1) {
+    keywords.push_back("NOT");
+    keywords.push_back("COMMAND");
+    keywords.push_back("POLICY");
+    keywords.push_back("TARGET");
+    keywords.push_back("EXISTS");
+    keywords.push_back("IS_DIRECTORY");
+    keywords.push_back("IS_SYMLINK");
+    keywords.push_back("IS_ABSOLUTE");
+    keywords.push_back("DEFINED");
+  } else if (exprSize == 2) {
+    switch (exprIndex) {
+      case 0:
+        keywords.push_back("NOT");
+        break;
+      case 1:
+        keywords.push_back("COMMAND");
+        keywords.push_back("POLICY");
+        keywords.push_back("TARGET");
+        keywords.push_back("EXISTS");
+        keywords.push_back("IS_DIRECTORY");
+        keywords.push_back("IS_SYMLINK");
+        keywords.push_back("IS_ABSOLUTE");
+        keywords.push_back("DEFINED");
+    }
+  } else if (exprSize == 3) {
+    switch (exprIndex) {
+      case 0:
+        keywords.push_back("NOT");
+        break;
+      case 1: {
+        if (args[index - 1] == "NOT") {
+          keywords.push_back("COMMAND");
+          keywords.push_back("POLICY");
+          keywords.push_back("TARGET");
+          keywords.push_back("EXISTS");
+          keywords.push_back("IS_DIRECTORY");
+          keywords.push_back("IS_SYMLINK");
+          keywords.push_back("IS_ABSOLUTE");
+          keywords.push_back("DEFINED");
+        }
+        break;
+      }
+      case 2: {
+        assert(args[index - 2] != "NOT"); // no keywords here.
+                                          //           {
+                                          //
+                                          //           }
+        //         return VariableIdentifierParameter; // ?
+      }
+    }
+  }
+  return keywords;
+}
+
 //=========================================================================
 bool cmIfCommand::InvokeInitialPass(
   const std::vector<cmListFileArgument>& args, cmExecutionStatus&)

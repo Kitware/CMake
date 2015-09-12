@@ -15,6 +15,21 @@
 #include "cmake.h"
 
 // cmLibraryCommand
+cmCommand::ParameterContext cmAddLibraryCommand::GetContextForParameter(
+  const std::vector<std::string>& args, size_t index)
+{
+  if (index == 0) {
+    return SingleBinaryTargetParameter;
+  }
+  if (args.size() > 1 &&
+      ((args[index] == "IMPORTED" || args[index] == "SHARED" ||
+        args[index] == "STATIC" || args[index] == "INTERFACE") ||
+       args.size() == 1)) {
+    return KeywordParameter;
+  }
+  return SourceFilePropertyParameter;
+}
+
 bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args,
                                       cmExecutionStatus&)
 {

@@ -17,7 +17,34 @@ const char* cmTargetLinkLibrariesCommand::LinkLibraryTypeNames[3] = {
   "general", "debug", "optimized"
 };
 
-// cmTargetLinkLibrariesCommand
+cmCommand::ParameterContext
+cmTargetLinkLibrariesCommand::GetContextForParameter(
+  const std::vector<std::string>& args, size_t index)
+{
+  if (index == 1 && ((args.size() > 1 &&
+                      (args[index] == "PRIVATE" || args[index] == "PUBLIC" ||
+                       args[index] == "INTERFACE")))) {
+    return KeywordParameter;
+  }
+  return SingleBinaryTargetParameter;
+}
+
+std::vector<std::string> cmTargetLinkLibrariesCommand::GetKeywords(
+  const std::vector<std::string>& args, size_t index)
+{
+  (void)args;
+  std::vector<std::string> result;
+  if (index == 0)
+    return result;
+  if (index == 1) {
+    result.push_back("PRIVATE");
+    result.push_back("PUBLIC");
+    result.push_back("INTERFACE");
+    return result;
+  }
+  return result;
+}
+
 bool cmTargetLinkLibrariesCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)
 {

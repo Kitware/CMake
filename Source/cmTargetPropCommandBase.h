@@ -23,6 +23,7 @@ public:
   enum ArgumentFlags
   {
     NO_FLAGS = 0,
+    // Note these... Need to refactor
     PROCESS_BEFORE = 1,
     PROCESS_SYSTEM = 2
   };
@@ -30,6 +31,12 @@ public:
   bool HandleArguments(std::vector<std::string> const& args,
                        const std::string& prop,
                        ArgumentFlags flags = NO_FLAGS);
+
+  ParameterContext GetContextForParameter(std::vector<std::string> const& args,
+                                          size_t index);
+
+  std::vector<std::string> GetKeywords(std::vector<std::string> const& args,
+                                       size_t index);
 
   cmTypeMacro(cmTargetPropCommandBase, cmCommand);
 

@@ -56,3 +56,27 @@ bool cmUnsetCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
 }
+
+cmCommand::ParameterContext cmUnsetCommand::GetContextForParameter(
+  std::vector<std::string> const&, size_t index)
+{
+  if (index == 0)
+    return VariableIdentifierParameter;
+  if (index == 1)
+    return KeywordParameter;
+  return NoContext;
+}
+
+std::vector<std::string> cmUnsetCommand::GetKeywords(
+  std::vector<std::string> const& args, size_t index)
+{
+  (void)args;
+  std::vector<std::string> result;
+
+  if (index == 1) {
+    result.push_back("CACHE");
+    result.push_back("PARENT_SCOPE");
+  }
+
+  return result;
+}

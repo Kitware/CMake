@@ -53,6 +53,46 @@ public:
   void SetMakefile(cmMakefile* m) { this->Makefile = m; }
   cmMakefile* GetMakefile() { return this->Makefile; }
 
+  enum ParameterContext
+  {
+    NoContext,
+    SingleTargetParameter,
+    SingleBinaryTargetParameter,
+    VersionParameter,
+    NumberParameter,
+    KeywordParameter,
+    KeywordOrVariableOrConstantParameter,
+    FilePathParameter,
+    ModuleNameParameter,
+    CommandNameParameter,
+    PackageNameParameter,
+    PolicyParameter,
+    CachePropertyParameter,
+    DirectoryPropertyParameter,
+    GlobalPropertyParameter,
+    InstallPropertyParameter,
+    SourceFilePropertyParameter,
+    TestPropertyParameter,
+    TargetPropertyParameter,
+    VariableIdentifierParameter
+  };
+
+  virtual ParameterContext GetContextForParameter(
+    std::vector<std::string> const& args, size_t index)
+  {
+    (void)args;
+    (void)index;
+    return NoContext;
+  }
+
+  virtual std::vector<std::string> GetKeywords(
+    std::vector<std::string> const& args, size_t index)
+  {
+    (void)args;
+    (void)index;
+    return std::vector<std::string>();
+  }
+
   /**
    * This is called by the cmMakefile when the command is first
    * encountered in the CMakeLists.txt file.  It expands the command's

@@ -143,3 +143,14 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
   }
   return true;
 }
+
+cmCommand::ParameterContext cmSetCommand::GetContextForParameter(
+  std::vector<std::string> const& args, size_t index)
+{
+  if (index == 0)
+    return VariableIdentifierParameter;
+  if (index == 2 &&
+      ((args.size() >= 3 && args[index] == "PARENT_SCOPE") || args.empty()))
+    return KeywordParameter;
+  return NoContext;
+}

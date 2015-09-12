@@ -27,6 +27,9 @@ public:
    */
   virtual cmCommand* Clone() { return new cmSetCommand; }
 
+  cmCommand::ParameterContext GetContextForParameter(
+    std::vector<std::string> const& args, size_t index);
+
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.

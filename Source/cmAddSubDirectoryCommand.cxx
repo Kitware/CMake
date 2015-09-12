@@ -107,5 +107,9 @@ bool cmAddSubDirectoryCommand::InitialPass(
   // Add the subdirectory using the computed full paths.
   this->Makefile->AddSubDirectory(srcPath, binPath, excludeFromAll, true);
 
+  auto lfc = this->Makefile->GetExecutionContext();
+  lfc.Line = lfc.CloseParenLine + 1;
+  this->Makefile->CreateArbitrarySnapshot(lfc);
+
   return true;
 }

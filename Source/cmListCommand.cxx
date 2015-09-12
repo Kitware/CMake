@@ -67,6 +67,50 @@ bool cmListCommand::InitialPass(std::vector<std::string> const& args,
   return false;
 }
 
+cmCommand::ParameterContext cmListCommand::GetContextForParameter(
+  std::vector<std::string> const& args, size_t index)
+{
+  if (index == 0 &&
+      ((args.size() > 0 &&
+        (args[0] == "LENGTH" || args[0] == "GET" || args[0] == "APPEND" ||
+         args[0] == "FIND" || args[0] == "INSERT" || args[0] == "REMOVE_AT" ||
+         args[0] == "REMOVE_ITEM" || args[0] == "REMOVE_DUPLICATES" ||
+         args[0] == "SORT" || args[0] == "REVERSE")) ||
+       args.empty()))
+    return KeywordParameter;
+  if (index == 1)
+    return VariableIdentifierParameter;
+  if (args.size() > 1 && args[0] == "GET" && index < args.size() - 1)
+    return NumberParameter;
+  if (args.size() > 2 && args[0] == "INSERT" && index == 2)
+    return NumberParameter;
+  if (args.size() > 2 && args[0] == "REMOVE_AT" && index == 2)
+    return NumberParameter;
+  return NoContext;
+}
+
+std::vector<std::string> cmListCommand::GetKeywords(
+  std::vector<std::string> const& args, size_t index)
+{
+  (void)args;
+  std::vector<std::string> result;
+
+  if (index == 0) {
+    result.push_back("LENGTH");
+    result.push_back("GET");
+    result.push_back("APPEND");
+    result.push_back("FIND");
+    result.push_back("INSERT");
+    result.push_back("REMOVE_ITEM");
+    result.push_back("REMOVE_AT");
+    result.push_back("REMOVE_DUPLICATES");
+    result.push_back("REVERSE");
+    result.push_back("SORT");
+  }
+
+  return result;
+}
+
 bool cmListCommand::GetListString(std::string& listString,
                                   const std::string& var)
 {
