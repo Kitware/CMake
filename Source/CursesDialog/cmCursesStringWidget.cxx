@@ -168,17 +168,16 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
     else if ( key == 127 ||
               key == KEY_BACKSPACE )
       {
-      if ( form->curcol > 0 )
-        {
+        FIELD *cur = current_field(form);
         form_driver(form, REQ_DEL_PREV);
-        }
+        if (current_field(form) != cur)
+          {
+          set_current_field(form, cur);
+          }
       }
     else if ( key == ctrl('d') ||key == KEY_DC )
       {
-      if ( form->curcol >= 0 )
-        {
-        form_driver(form, REQ_DEL_CHAR);
-        }
+      form_driver(form, REQ_DEL_CHAR);
       }
     else
       {
