@@ -135,15 +135,6 @@ public:
 
   void Compute();
 
-  typedef std::map<std::string, std::vector<cmSourceFile*> >
-                                                       SourceFilesMapType;
-
-  SourceFilesMapType& GetSourceFilesMap() const;
-
-  bool GetLinkImplementationLanguageIsContextDependent() const {
-    return this->LinkImplementationLanguageIsContextDependent;
-  }
-
   /**
    * Add sources to the target.
    */
@@ -151,7 +142,6 @@ public:
   void AddTracedSources(std::vector<std::string> const& srcs);
   cmSourceFile* AddSourceCMP0049(const std::string& src);
   cmSourceFile* AddSource(const std::string& src);
-  void AddGenerateTimeSource(const std::string& src);
 
   enum LinkLibraryType {GENERAL, DEBUG, OPTIMIZED};
 
@@ -395,6 +385,9 @@ public:
   cmStringRange GetCompileDefinitionsEntries() const;
   cmBacktraceRange GetCompileDefinitionsBacktraces() const;
 
+  cmStringRange GetSourceEntries() const;
+  cmBacktraceRange GetSourceBacktraces() const;
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
   const LinkLibraryVectorType &GetLinkLibrariesForVS6() const {
   return this->LinkLibrariesForVS6;}
@@ -473,9 +466,6 @@ private:
   std::string ImportedGetFullPath(const std::string& config,
                                   bool implib) const;
 
-
-  void GetSourceFiles(std::vector<std::string> &files,
-                      const std::string& config) const;
 private:
   mutable cmPropertyMap Properties;
   std::set<std::string> SystemIncludeDirectories;
@@ -509,8 +499,6 @@ private:
   bool IsApple;
   bool IsImportedTarget;
   bool BuildInterfaceIncludesAppended;
-  mutable bool DebugSourcesDone;
-  mutable bool LinkImplementationLanguageIsContextDependent;
 #if defined(_WIN32) && !defined(__CYGWIN__)
   bool LinkLibrariesForVS6Analyzed;
 #endif
