@@ -135,11 +135,15 @@ public:
 
   void Compute();
 
-  /**
-   * Get the list of the source files used by this target
-   */
-  void GetSourceFiles(std::vector<cmSourceFile*> &files,
-                      const std::string& config) const;
+  typedef std::map<std::string, std::vector<cmSourceFile*> >
+                                                       SourceFilesMapType;
+
+  SourceFilesMapType& GetSourceFilesMap() const;
+
+  bool GetLinkImplementationLanguageIsContextDependent() const {
+    return this->LinkImplementationLanguageIsContextDependent;
+  }
+
   /**
    * Add sources to the target.
    */
