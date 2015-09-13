@@ -812,6 +812,33 @@ bool cmGeneratorTarget::GetPropertyAsBool(const std::string& prop) const
 }
 
 //----------------------------------------------------------------------------
+static void AddInterfaceEntries(
+  cmGeneratorTarget const* thisTarget, std::string const& config,
+  std::string const& prop,
+  std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries)
+{
+  if(cmLinkImplementationLibraries const* impl =
+     thisTarget->Target->GetLinkImplementationLibraries(config))
+    {
+    for (std::vector<cmLinkImplItem>::const_iterator
+           it = impl->Libraries.begin(), end = impl->Libraries.end();
+         it != end; ++it)
+      {
+      if(it->Target)
+        {
+        std::string genex =
+          "$<TARGET_PROPERTY:" + *it + "," + prop + ">";
+        cmGeneratorExpression ge(it->Backtrace);
+        cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
+        cge->SetEvaluateForBuildsystem(true);
+        entries.push_back(
+          new cmGeneratorTarget::TargetPropertyEntry(cge, *it));
+        }
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*> &files,
                                        const std::string& config) const
 {
@@ -2173,34 +2200,6 @@ static void processIncludeDirectories(cmGeneratorTarget const* tgt,
                             std::string("Used includes for target ")
                             + tgt->GetName() + ":\n"
                             + usedIncludes, (*it)->ge->GetBacktrace());
-      }
-    }
-}
-
-
-//----------------------------------------------------------------------------
-static void AddInterfaceEntries(
-  cmGeneratorTarget const* thisTarget, std::string const& config,
-  std::string const& prop,
-  std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries)
-{
-  if(cmLinkImplementationLibraries const* impl =
-     thisTarget->Target->GetLinkImplementationLibraries(config))
-    {
-    for (std::vector<cmLinkImplItem>::const_iterator
-           it = impl->Libraries.begin(), end = impl->Libraries.end();
-         it != end; ++it)
-      {
-      if(it->Target)
-        {
-        std::string genex =
-          "$<TARGET_PROPERTY:" + *it + "," + prop + ">";
-        cmGeneratorExpression ge(it->Backtrace);
-        cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
-        cge->SetEvaluateForBuildsystem(true);
-        entries.push_back(
-          new cmGeneratorTarget::TargetPropertyEntry(cge, *it));
-        }
       }
     }
 }
