@@ -1099,8 +1099,6 @@ void cmGlobalGenerator::Configure()
   cmMakefile* dirMf =
       new cmMakefile(this, this->GetCMakeInstance()->GetCurrentSnapshot());
   this->Makefiles.push_back(dirMf);
-  cmLocalGenerator *lg = this->CreateLocalGenerator(dirMf);
-  this->LocalGenerators.push_back(lg);
 
   // set the Start directories
   dirMf->SetCurrentSourceDirectory
@@ -1114,6 +1112,8 @@ void cmGlobalGenerator::Configure()
   // now do it
   this->ConfigureDoneCMP0026 = false;
   dirMf->Configure();
+  this->LocalGenerators.insert(this->LocalGenerators.begin(),
+                               this->CreateLocalGenerator(dirMf));
   dirMf->EnforceDirectoryLevelRules();
 
   this->ConfigureDoneCMP0026 = true;
