@@ -464,6 +464,8 @@ private:
 
   virtual void ForceLinkerLanguages();
 
+  void CreateLocalGenerators();
+
   void CheckCompilerIdCompatibility(cmMakefile* mf,
                                     std::string const& lang) const;
 
