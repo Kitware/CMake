@@ -842,7 +842,40 @@ static void AddInterfaceEntries(
 void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*> &files,
                                        const std::string& config) const
 {
-  this->Target->GetSourceFiles(files, config);
+  // Lookup any existing link implementation for this configuration.
+  std::string key = cmSystemTools::UpperCase(config);
+
+  cmTarget::SourceFilesMapType& sfm = this->Target->GetSourceFilesMap();
+  if(!this->Target->GetLinkImplementationLanguageIsContextDependent())
+    {
+    files = sfm.begin()->second;
+    return;
+    }
+
+  cmTarget::SourceFilesMapType::iterator
+    it = sfm.find(key);
+  if(it != sfm.end())
+    {
+    files = it->second;
+    }
+  else
+    {
+    std::vector<std::string> srcs;
+    this->Target->GetSourceFiles(srcs, config);
+
+    std::set<cmSourceFile*> emitted;
+
+    for(std::vector<std::string>::const_iterator i = srcs.begin();
+        i != srcs.end(); ++i)
+      {
+      cmSourceFile* sf = this->Makefile->GetOrCreateSource(*i);
+      if (emitted.insert(sf).second)
+        {
+        files.push_back(sf);
+        }
+      }
+    sfm[key] = files;
+    }
 }
 
 //----------------------------------------------------------------------------

@@ -101,9 +101,7 @@ public:
                    HeadToLinkImplementationMap> LinkImplMapType;
   LinkImplMapType LinkImplMap;
 
-  typedef std::map<std::string, std::vector<cmSourceFile*> >
-                                                       SourceFilesMapType;
-  SourceFilesMapType SourceFilesMap;
+  cmTarget::SourceFilesMapType SourceFilesMap;
 
   std::set<cmLinkItem> UtilityItems;
   bool UtilityItemsDone;
@@ -407,6 +405,11 @@ void cmTarget::Compute()
         this->Internal->SourceEntries,
         this->Internal->SourceBacktraces,
         this->Internal->SourceItems, true);
+}
+
+cmTarget::SourceFilesMapType& cmTarget::GetSourceFilesMap() const
+{
+  return this->Internal->SourceFilesMap;
 }
 
 //----------------------------------------------------------------------------
@@ -733,46 +736,6 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
     }
 
   cmDeleteAll(linkInterfaceSourcesEntries);
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files,
-                              const std::string& config) const
-{
-
-  // Lookup any existing link implementation for this configuration.
-  std::string key = cmSystemTools::UpperCase(config);
-
-  if(!this->LinkImplementationLanguageIsContextDependent)
-    {
-    files = this->Internal->SourceFilesMap.begin()->second;
-    return;
-    }
-
-  cmTargetInternals::SourceFilesMapType::iterator
-    it = this->Internal->SourceFilesMap.find(key);
-  if(it != this->Internal->SourceFilesMap.end())
-    {
-    files = it->second;
-    }
-  else
-    {
-    std::vector<std::string> srcs;
-    this->GetSourceFiles(srcs, config);
-
-    std::set<cmSourceFile*> emitted;
-
-    for(std::vector<std::string>::const_iterator i = srcs.begin();
-        i != srcs.end(); ++i)
-      {
-      cmSourceFile* sf = this->Makefile->GetOrCreateSource(*i);
-      if (emitted.insert(sf).second)
-        {
-        files.push_back(sf);
-        }
-      }
-    this->Internal->SourceFilesMap[key] = files;
-    }
 }
 
 //----------------------------------------------------------------------------
