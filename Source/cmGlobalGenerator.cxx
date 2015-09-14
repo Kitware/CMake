@@ -433,19 +433,22 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     {
 #if defined(_WIN32) && !defined(__CYGWIN__)
     /* Windows version number data.  */
-    OSVERSIONINFO osvi;
-    ZeroMemory(&osvi, sizeof(osvi));
-    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+    OSVERSIONINFOEXW osviex;
+    ZeroMemory(&osviex, sizeof(osviex));
+    osviex.dwOSVersionInfoSize = sizeof(osviex);
+
 #ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 # pragma warning (push)
 # pragma warning (disable:4996)
 #endif
-    GetVersionEx (&osvi);
+    GetVersionExW((OSVERSIONINFOW*)&osviex);
 #ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 # pragma warning (pop)
 #endif
     std::ostringstream windowsVersionString;
-    windowsVersionString << osvi.dwMajorVersion << "." << osvi.dwMinorVersion;
+    windowsVersionString << osviex.dwMajorVersion << "."
+                         << osviex.dwMinorVersion << "."
+                         << osviex.dwBuildNumber;
     windowsVersionString.str();
     mf->AddDefinition("CMAKE_HOST_SYSTEM_VERSION",
                       windowsVersionString.str().c_str());
