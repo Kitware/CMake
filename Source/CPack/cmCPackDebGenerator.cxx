@@ -576,7 +576,7 @@ int cmCPackDebGenerator::createDeb()
     control_tar.SetUNAME("root");
     control_tar.SetGNAME("root");
 
-    // set md5sum file permissins to RW-R--R-- so that deb lintian
+    // set md5sum file permissions to RW-R--R-- so that deb lintian
     // doesn't warn about it
     control_tar.SetPermissions(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
@@ -597,6 +597,8 @@ int cmCPackDebGenerator::createDeb()
       this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA");
     if( controlExtra )
       {
+      // permissions are now controlled by the original file permissions
+      control_tar.SetPermissions(-1);
       std::vector<std::string> controlExtraList;
       cmSystemTools::ExpandListArgument(controlExtra, controlExtraList);
       for(std::vector<std::string>::iterator i = controlExtraList.begin();
