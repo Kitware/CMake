@@ -46,6 +46,7 @@ REGEX MATCH
          <output variable> <input> [<input>...])
 
 Match the regular expression once and store the match in the output variable.
+All ``<input>`` arguments are concatenated before matching.
 
 REGEX MATCHALL
 """"""""""""""
@@ -57,6 +58,7 @@ REGEX MATCHALL
 
 Match the regular expression as many times as possible and store the matches
 in the output variable as a list.
+All ``<input>`` arguments are concatenated before matching.
 
 REGEX REPLACE
 """""""""""""
@@ -69,6 +71,7 @@ REGEX REPLACE
 
 Match the regular expression as many times as possible and substitute the
 replacement expression for the match in the output.
+All ``<input>`` arguments are concatenated before matching.
 
 The replace expression may refer to paren-delimited subexpressions of the
 match using ``\1``, ``\2``, ..., ``\9``.  Note that two backslashes (``\\1``)
