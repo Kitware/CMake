@@ -24,7 +24,9 @@
 // Solaris
 #if defined(__sun)
 # include <ieeefp.h>
-# define isfinite finite
+# if !defined(isfinite)
+#  define isfinite finite
+# endif
 #endif
 
 // AIX
