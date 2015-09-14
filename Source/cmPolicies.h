@@ -222,7 +222,7 @@ class cmPolicy;
     "Support new TEST if() operator.", \
     3, 3, 0, cmPolicies::WARN) \
   SELECT(POLICY, CMP0065, \
-    "Only use CMAKE_SHARED_LIBRARY_LINK_<LANG>_FLAGS on executables with " \
+    "Only use additional flags to export symbols on executables with " \
     "the ENABLE_EXPORTS property.", \
     3, 3, 0, cmPolicies::WARN)
 
