@@ -108,8 +108,7 @@ add_RunCMake_test(CMP0064)
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
 # generators ignore.  The policy will have no effect on those generators.
-if((NOT CMAKE_GENERATOR MATCHES "Visual Studio") AND
-   (NOT CMAKE_GENERATOR MATCHES "Xcode"))
+if(NOT CMAKE_GENERATOR MATCHES "Visual Studio|Xcode")
   add_RunCMake_test(CMP0065)
 endif()
 if(CMAKE_GENERATOR MATCHES "Make")

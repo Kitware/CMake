@@ -1546,7 +1546,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
           std::ostringstream w;
           w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0065) << "\n"
             "For compatibility with older versions of CMake, "
-            "CMAKE_SHARED_LIBRARY_LINK_<LANG>_FLAGS are being used on all "
+            "additional flags may be added to export symbols on all "
             "executables regardless of thier ENABLE_EXPORTS property.";
           this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
           }
