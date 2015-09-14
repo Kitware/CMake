@@ -2300,6 +2300,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       buildSettings->AddAttribute("OTHER_CFLAGS",
                                   this->CreateString(flags.c_str()));
       }
+    else if (*li == "Swift")
+      {
+      buildSettings->AddAttribute("OTHER_SWIFT_FLAGS",
+                                  this->CreateString(flags.c_str()));
+      }
     }
 
   // Add Fortran source format attribute if property is set.
