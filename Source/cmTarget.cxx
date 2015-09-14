@@ -1706,7 +1706,7 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     }
   else if(prop == "INCLUDE_DIRECTORIES")
     {
-    if (value)
+    if (value && *value)
       {
       this->Internal->IncludeDirectoriesEntries.push_back(value);
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
@@ -1715,7 +1715,7 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     }
   else if(prop == "COMPILE_OPTIONS")
     {
-    if (value)
+    if (value && *value)
       {
       this->Internal->CompileOptionsEntries.push_back(value);
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
@@ -1724,7 +1724,7 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     }
   else if(prop == "COMPILE_FEATURES")
     {
-    if (value)
+    if (value && *value)
       {
       this->Internal->CompileFeaturesEntries.push_back(value);
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
@@ -1733,7 +1733,7 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     }
   else if(prop == "COMPILE_DEFINITIONS")
     {
-    if (value)
+    if (value && *value)
       {
       this->Internal->CompileDefinitionsEntries.push_back(value);
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
@@ -1749,7 +1749,7 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     }
   else if (prop == "LINK_LIBRARIES")
     {
-    if (value)
+    if (value && *value)
       {
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       cmValueWithOrigin entry(value, lfbt);
