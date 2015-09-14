@@ -326,6 +326,12 @@
 #
 #   set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
 #       "${CMAKE_CURRENT_SOURCE_DIR/prerm;${CMAKE_CURRENT_SOURCE_DIR}/postrm")
+#
+#  .. note::
+#
+#    The original permissions of the files will be used in the final
+#    package. In particular, the scripts should have the proper executable
+#    flag prior to the generation of the package.
 
 
 #=============================================================================
