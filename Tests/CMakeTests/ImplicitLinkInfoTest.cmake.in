@@ -105,6 +105,13 @@ set(linux64_test2_libs "c;/opt/sun/sunstudio12/prod/lib/amd64/libc_supp.a")
 set(linux64_test2_dirs "/opt/sun/sunstudio12/prod/lib/amd64;/lib64;/usr/lib64")
 list(APPEND platforms linux64_test2)
 
+# -specs=redhat-hardened-ld
+set(linux64_test3_text "COLLECT_GCC_OPTIONS='-specs=/usr/lib/rpm/redhat/redhat-hardened-ld' '-v' '-O2' '-g' '-pipe' '-Wall' '-Werror=format-security' '-fexceptions' '-fstack-protector-strong' '--param' 'ssp-buffer-size=4' '-grecord-gcc-switches' '-specs=/usr/lib/rpm/redhat/redhat-hardened-cc1' '-m64' '-mtune=generic' '-I' '/usr/lib64/gfortran/modules' '-o' 'a.out' '-rdynamic' '-shared-libgcc' '-march=x86-64' '-pie'
+ /usr/libexec/gcc/x86_64-redhat-linux/5.1.1/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/5.1.1/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/5.1.1/lto-wrapper -plugin-opt=-fresolution=/tmp/ccNzxFD8.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z now -pie -o a.out /usr/lib/gcc/x86_64-redhat-linux/5.1.1/../../../../lib64/Scrt1.o /usr/lib/gcc/x86_64-redhat-linux/5.1.1/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/5.1.1/crtbeginS.o -L/usr/lib/gcc/x86_64-redhat-linux/5.1.1 -L/usr/lib/gcc/x86_64-redhat-linux/5.1.1/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/5.1.1/../../.. -z relro dummy.o -lgfortran -lm -lgcc_s -lgcc -lquadmath -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/5.1.1/crtendS.o /usr/lib/gcc/x86_64-redhat-linux/5.1.1/../../../../lib64/crtn.o")
+set(linux64_test3_libs "gfortran;m;quadmath;m;c")
+set(linux64_test3_dirs "/usr/lib/gcc/x86_64-redhat-linux/5.1.1;/usr/lib64;/lib64;/usr/lib")
+list(APPEND platforms linux64_test3)
+
 #-----------------------------------------------------------------------------
 # Mac
 
