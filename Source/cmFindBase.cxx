@@ -207,6 +207,10 @@ void cmFindBase::ExpandPaths()
       {
       this->FillCMakeEnvironmentPath();
       }
+    }
+  this->FillUserHintsPath();
+  if(!this->NoDefaultPath)
+    {
     if(!this->NoSystemEnvironmentPath)
       {
       this->FillSystemEnvironmentPath();
@@ -216,8 +220,6 @@ void cmFindBase::ExpandPaths()
       this->FillCMakeSystemVariablePath();
       }
     }
-
-  this->FillUserHintsPath();
   this->FillUserGuessPath();
 }
 
