@@ -23,8 +23,11 @@ elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.1)
 endif()
 
 if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.0)
-  set(CMAKE_CXX_STANDARD_DEFAULT 98)
+  if (CMAKE_CXX_STANDARD_COMPUTED_DEFAULT)
+    set(CMAKE_CXX_STANDARD_DEFAULT ${CMAKE_CXX_STANDARD_COMPUTED_DEFAULT})
+  endif()
 endif()
+
 
 macro(cmake_record_cxx_compile_features)
   macro(_get_appleclang_features std_version list)
