@@ -26,7 +26,7 @@ char const* qnxnto = "INFO" ":" "qnxnto[]";
 
 const char* info_language_dialect_default = "INFO" ":" "dialect_default["
 #if !defined(__STDC_VERSION__)
-  "89"
+  "90"
 #elif __STDC_VERSION__ >= 201000L
   "11"
 #elif __STDC_VERSION__ >= 199901L
