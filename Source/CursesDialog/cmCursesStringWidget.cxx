@@ -220,6 +220,7 @@ bool cmCursesStringWidget::PrintKeys()
     }
   if (this->InEdit)
     {
+    char fmt_s[] = "%s";
     char firstLine[512];
     // Clean the toolbar
     for(int i=0; i<512; i++)
@@ -228,16 +229,16 @@ bool cmCursesStringWidget::PrintKeys()
       }
     firstLine[511] = '\0';
     curses_move(y-4,0);
-    printw("%s", firstLine);
+    printw(fmt_s, firstLine);
     curses_move(y-3,0);
-    printw("%s", firstLine);
+    printw(fmt_s, firstLine);
     curses_move(y-2,0);
-    printw("%s", firstLine);
+    printw(fmt_s, firstLine);
     curses_move(y-1,0);
-    printw("%s", firstLine);
+    printw(fmt_s, firstLine);
 
     curses_move(y-3,0);
-    printw("Editing option, press [enter] to leave edit.");
+    printw(fmt_s, "Editing option, press [enter] to leave edit.");
     return true;
     }
   else
