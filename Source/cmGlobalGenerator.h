@@ -84,6 +84,7 @@ public:
   virtual void Configure();
 
   virtual bool Compute();
+  virtual void AddExtraIDETargets() {}
 
   enum TargetTypes {
     AllTargets,

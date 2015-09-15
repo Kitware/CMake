@@ -376,17 +376,6 @@ cmGlobalXCodeGenerator::CreateLocalGenerator(cmMakefile* mf)
   return new cmLocalXCodeGenerator(this, mf);
 }
 
-//----------------------------------------------------------------------------
-bool cmGlobalXCodeGenerator::Compute()
-{
-  if (!cmGlobalGenerator::Compute())
-    {
-      return false;
-    }
-  this->AddExtraIDETargets();
-  return true;
-}
-
 void cmGlobalXCodeGenerator::AddExtraIDETargets()
 {
   std::map<std::string, std::vector<cmLocalGenerator*> >::iterator it;

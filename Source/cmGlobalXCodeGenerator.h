@@ -87,8 +87,7 @@ public:
   virtual bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf);
   void AppendFlag(std::string& flags, std::string const& flag);
 protected:
-  virtual bool Compute();
-  void AddExtraIDETargets();
+  virtual void AddExtraIDETargets();
   virtual void Generate();
 private:
   cmXCodeObject* CreateOrGetPBXGroup(cmTarget& cmtarget,

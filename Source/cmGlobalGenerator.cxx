@@ -1282,6 +1282,8 @@ bool cmGlobalGenerator::Compute()
       }
     }
 
+  this->AddExtraIDETargets();
+
   return true;
 }
 
