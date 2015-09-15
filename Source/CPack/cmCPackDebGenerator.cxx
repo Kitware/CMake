@@ -453,8 +453,10 @@ int cmCPackDebGenerator::createDeb()
 
     // uid/gid should be the one of the root user, and this root user has
     // always uid/gid equal to 0.
-    data_tar.SetUIDAndGID(0u, 0u);
-    data_tar.SetUNAMEAndGNAME("root", "root");
+    data_tar.SetUID(0);
+    data_tar.SetGID(0);
+    data_tar.SetUNAME("root");
+    data_tar.SetGNAME("root");
 
     // now add all directories which have to be compressed
     // collect all top level install dirs for that
@@ -569,8 +571,10 @@ int cmCPackDebGenerator::createDeb()
                                "paxr");
 
     // sets permissions and uid/gid for the files
-    control_tar.SetUIDAndGID(0u, 0u);
-    control_tar.SetUNAMEAndGNAME("root", "root");
+    control_tar.SetUID(0);
+    control_tar.SetGID(0);
+    control_tar.SetUNAME("root");
+    control_tar.SetGNAME("root");
 
     /* permissions are set according to
     https://www.debian.org/doc/debian-policy/ch-files.html#s-permissions-owners
@@ -619,7 +623,7 @@ int cmCPackDebGenerator::createDeb()
         strictFiles + sizeof(strictFiles)/sizeof(strictFiles[0]));
 
       // default
-      control_tar.ClearPermissions();
+      control_tar.SetPermissions(-1);
 
       std::vector<std::string> controlExtraList;
       cmSystemTools::ExpandListArgument(controlExtra, controlExtraList);

@@ -18,22 +18,6 @@
 # error "cmArchiveWrite not allowed during bootstrap build!"
 #endif
 
-template<typename T>
-class cmArchiveWriteOptional
-{
-public:
-  cmArchiveWriteOptional() {this->Clear();}
-  explicit cmArchiveWriteOptional(T val) {this->Set(val);}
-
-  void Set(T val) {this->IsValueSet = true; this->Value=val;}
-  void Clear() {this->IsValueSet = false;}
-  bool IsSet() const {return this->IsValueSet;}
-  T Get() const {return Value;}
-private:
-  T Value;
-  bool IsValueSet;
-};
-
 /** \class cmArchiveWrite
  * \brief Wrapper around libarchive for writing.
  *
@@ -90,57 +74,51 @@ public:
   void SetMTime(std::string const& t) { this->MTime = t; }
 
   //! Sets the permissions of the added files/folders
-  void SetPermissions(mode_t permissions_)
+  //! @note set to -1 to use the default permissions
+  long int SetPermissions(long int permissions_)
     {
-    this->Permissions.Set(permissions_);
+    std::swap(this->permissions, permissions_);
+    return permissions_;
     }
-
-  //! Clears permissions - default is used instead
-  void ClearPermissions() { this->Permissions.Clear(); }
 
   //! Sets the permissions mask of files/folders
   //!
   //! The permissions will be copied from the existing file
   //! or folder. The mask will then be applied to unset
   //! some of them
-  void SetPermissionsMask(mode_t permissionsMask_)
+  long int SetPermissionsMask(long int permissionsMask_)
     {
-    this->PermissionsMask.Set(permissionsMask_);
+    std::swap(this->permissionsMask, permissionsMask_);
+    return permissionsMask_;
     }
 
-  //! Clears permissions mask - default is used instead
-  void ClearPermissionsMask()
+  //! Sets the UID to be used in the tar file
+  //! @return the previous UID
+  //! @note set to -1 to disable the UID overriding
+  long int SetUID( long int uid_ )
     {
-    this->PermissionsMask.Clear();
+    std::swap(this->uid, uid_);
+    return uid_;
     }
 
-  //! Sets UID and GID to be used in the tar file
-  void SetUIDAndGID(uid_t uid_, gid_t gid_)
+  std::string SetUNAME(std::string uname_)
     {
-    this->Uid.Set(uid_);
-    this->Gid.Set(gid_);
+    std::swap(this->uname, uname_);
+    return uname_;
     }
 
-  //! Clears UID and GID to be used in the tar file - default is used instead
-  void ClearUIDAndGID()
+  //! Sets the UID to be used in the tar file
+  //! @return the previous UID
+  long int SetGID( long int gid_ )
     {
-    this->Uid.Clear();
-    this->Gid.Clear();
+    std::swap(this->gid, gid_);
+    return gid_;
     }
 
-  //! Sets UNAME and GNAME to be used in the tar file
-  void SetUNAMEAndGNAME(const std::string& uname_, const std::string& gname_)
+  std::string SetGNAME(std::string gname_)
     {
-    this->Uname = uname_;
-    this->Gname = gname_;
-    }
-
-  //! Clears UNAME and GNAME to be used in the tar file
-  //! default is used instead
-  void ClearUNAMEAndGNAME()
-    {
-    this->Uname = "";
-    this->Gname = "";
+    std::swap(this->gname, gname_);
+    return gname_;
     }
 
 private:
@@ -163,21 +141,22 @@ private:
   std::string Error;
   std::string MTime;
 
-  //! UID of the user in the tar file
-  cmArchiveWriteOptional<uid_t> Uid;
+  //! UID of the user in the tar file. Set to -1
+  //! to disable overriding
+  long int uid;
 
   //! GUID of the user in the tar file
-  cmArchiveWriteOptional<gid_t> Gid;
+  long int gid;
 
   //! UNAME/GNAME of the user (does not override UID/GID)
   //!@{
-  std::string Uname;
-  std::string Gname;
+  std::string uname;
+  std::string gname;
   //!@}
 
   //! Permissions on files/folders
-  cmArchiveWriteOptional<mode_t> Permissions;
-  cmArchiveWriteOptional<mode_t> PermissionsMask;
+  long int permissions;
+  long int permissionsMask;
 };
 
 #endif
