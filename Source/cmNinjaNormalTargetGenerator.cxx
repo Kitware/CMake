@@ -579,11 +579,12 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     vars["TARGET_PDB"] = base + suffix + dbg_suffix;
     }
 
+  const std::string objPath = GetTarget()->GetSupportDirectory();
+  vars["OBJECT_DIR"] = ConvertToNinjaPath(objPath);
+  EnsureDirectoryExists(objPath);
+
   if (this->GetGlobalGenerator()->IsGCCOnWindows())
     {
-    const std::string objPath = GetTarget()->GetSupportDirectory();
-    vars["OBJECT_DIR"] = ConvertToNinjaPath(objPath);
-    EnsureDirectoryExists(objPath);
     // ar.exe can't handle backslashes in rsp files (implicitly used by gcc)
     std::string& linkLibraries = vars["LINK_LIBRARIES"];
     std::replace(linkLibraries.begin(), linkLibraries.end(), '\\', '/');
