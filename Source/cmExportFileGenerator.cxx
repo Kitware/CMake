@@ -436,7 +436,9 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
                       ImportPropertyMap &properties,
                       std::vector<std::string> &missingTargets)
 {
-  cmTarget *target = tei->Target;
+  cmGeneratorTarget *target = tei->Target->GetMakefile()
+                                 ->GetGlobalGenerator()
+                                 ->GetGeneratorTarget(tei->Target);
   assert(preprocessRule == cmGeneratorExpression::InstallInterface);
 
   const char *propName = "INTERFACE_INCLUDE_DIRECTORIES";
@@ -450,12 +452,12 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
                                             true);
   this->ReplaceInstallPrefix(dirs);
   cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(dirs);
-  std::string exportDirs = cge->Evaluate(target->GetMakefile(), "",
-                                         false, target);
+  std::string exportDirs = cge->Evaluate(target->Target->GetMakefile(), "",
+                                         false, target->Target);
 
   if (cge->GetHadContextSensitiveCondition())
     {
-    cmMakefile* mf = target->GetMakefile();
+    cmMakefile* mf = target->Target->GetMakefile();
     std::ostringstream e;
     e << "Target \"" << target->GetName() << "\" is installed with "
     "INCLUDES DESTINATION set to a context sensitive path.  Paths which "
@@ -486,10 +488,10 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
                                                          true);
   if (!prepro.empty())
     {
-    this->ResolveTargetsInGeneratorExpressions(prepro, target,
+    this->ResolveTargetsInGeneratorExpressions(prepro, target->Target,
                                                 missingTargets);
 
-    if (!checkInterfaceDirs(prepro, target, propName))
+    if (!checkInterfaceDirs(prepro, target->Target, propName))
       {
       return;
       }
