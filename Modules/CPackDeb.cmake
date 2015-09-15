@@ -330,8 +330,30 @@
 #  .. note::
 #
 #    The original permissions of the files will be used in the final
-#    package. In particular, the scripts should have the proper executable
+#    package unless the variable
+#    :variable:`CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION` is set.
+#    In particular, the scripts should have the proper executable
 #    flag prior to the generation of the package.
+#
+# .. variable:: CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION
+#               CPACK_DEBIAN_<COMPONENT>_PACKAGE_CONTROL_STRICT_PERMISSION
+#
+#  This variable indicates if the Debian policy on control files should be
+#  strictly followed.
+#
+#  * Mandatory : NO
+#  * Default   : FALSE
+#
+#  Usage::
+#
+#   set(CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION TRUE)
+#
+#  .. note::
+#
+#    This overrides the permissions on the original files, following the rules
+#    set by Debian policy
+#    https://www.debian.org/doc/debian-policy/ch-files.html#s-permissions-owners
+#
 
 
 #=============================================================================
@@ -636,7 +658,7 @@ function(cpack_deb_prepare_package_vars)
   # Are we packaging components ?
   if(CPACK_DEB_PACKAGE_COMPONENT)
     # override values with per component version if set
-    foreach(VAR_NAME_ "PACKAGE_CONTROL_EXTRA")
+    foreach(VAR_NAME_ "PACKAGE_CONTROL_EXTRA" "PACKAGE_CONTROL_STRICT_PERMISSION")
       if(CPACK_DEBIAN_${_local_component_name}_${VAR_NAME_})
         set(CPACK_DEBIAN_${VAR_NAME_} "${CPACK_DEBIAN_${_local_component_name}_${VAR_NAME_}}")
       endif()
@@ -658,6 +680,7 @@ function(cpack_deb_prepare_package_vars)
      message("CPackDeb:Debug: CPACK_PACKAGE_FILE_NAME           = ${CPACK_PACKAGE_FILE_NAME}")
      message("CPackDeb:Debug: CPACK_PACKAGE_INSTALL_DIRECTORY   = ${CPACK_PACKAGE_INSTALL_DIRECTORY}")
      message("CPackDeb:Debug: CPACK_TEMPORARY_PACKAGE_FILE_NAME = ${CPACK_TEMPORARY_PACKAGE_FILE_NAME}")
+     message("CPackDeb:Debug: CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION = ${CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION}")
   endif()
 
   # For debian source packages:
@@ -694,6 +717,8 @@ function(cpack_deb_prepare_package_vars)
   set(GEN_CPACK_DEBIAN_PACKAGE_PROVIDES "${CPACK_DEBIAN_PACKAGE_PROVIDES}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_REPLACES "${CPACK_DEBIAN_PACKAGE_REPLACES}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA}" PARENT_SCOPE)
+  set(GEN_CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION
+      "${CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION}" PARENT_SCOPE)
   set(GEN_WDIR "${WDIR}" PARENT_SCOPE)
 endfunction()
 
