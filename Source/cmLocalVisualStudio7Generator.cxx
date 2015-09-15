@@ -972,25 +972,29 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   fout << "\t\t\t\tProxyFileName=\"$(InputName)_p.c\"/>\n";
   // end of <Tool Name=VCMIDLTool
 
-  // Check if we need the FAT32 workaround.
+  // Add manifest tool settings.
   if(targetBuilds && this->GetVersion() >= cmGlobalVisualStudioGenerator::VS8)
     {
+    const char* manifestTool  = "VCManifestTool";
+    if (this->FortranProject)
+      {
+      manifestTool = "VFManifestTool";
+      }
+    fout <<
+      "\t\t\t<Tool\n"
+      "\t\t\t\tName=\"" << manifestTool << "\"";
+
+    // Check if we need the FAT32 workaround.
     // Check the filesystem type where the target will be written.
-    if(cmLVS6G_IsFAT(target.GetDirectory(configName).c_str()))
+    if (cmLVS6G_IsFAT(target.GetDirectory(configName).c_str()))
       {
       // Add a flag telling the manifest tool to use a workaround
       // for FAT32 file systems, which can cause an empty manifest
       // to be embedded into the resulting executable.  See CMake
       // bug #2617.
-      const char* manifestTool  = "VCManifestTool";
-      if(this->FortranProject)
-        {
-        manifestTool = "VFManifestTool";
-        }
-      fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << manifestTool << "\"\n"
-           << "\t\t\t\tUseFAT32Workaround=\"true\"\n"
-           << "\t\t\t/>\n";
+      fout << "\n\t\t\t\tUseFAT32Workaround=\"true\"";
       }
+    fout << "/>\n";
     }
 
   this->OutputTargetRules(fout, configName, target, libName);
