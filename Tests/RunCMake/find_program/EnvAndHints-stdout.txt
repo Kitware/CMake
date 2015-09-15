@@ -1,1 +1,1 @@
--- PROG='[^']*/Tests/RunCMake/find_program/A/test'
+-- PROG='[^']*/Tests/RunCMake/find_program/A/testAandB'
