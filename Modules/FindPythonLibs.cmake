@@ -150,26 +150,41 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
     PATH_SUFFIXES python${_CURRENT_VERSION}/config
   )
 
-  set(PYTHON_FRAMEWORK_INCLUDES)
-  if(Python_FRAMEWORKS AND NOT PYTHON_INCLUDE_DIR)
-    foreach(dir ${Python_FRAMEWORKS})
-      list(APPEND PYTHON_FRAMEWORK_INCLUDES
-           ${dir}/Versions/${_CURRENT_VERSION}/include)
-    endforeach()
-  endif()
+  # Don't search for include dir until library location is known
+  if(PYTHON_LIBRARY)
 
-  find_path(PYTHON_INCLUDE_DIR
-    NAMES Python.h
-    PATHS
-      ${PYTHON_FRAMEWORK_INCLUDES}
-      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
-      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
-    PATH_SUFFIXES
-      python${_CURRENT_VERSION}mu
-      python${_CURRENT_VERSION}m
-      python${_CURRENT_VERSION}u
-      python${_CURRENT_VERSION}
-  )
+    # Use the library's install prefix as a hint
+    set(_INCLUDE_PATH_HINT)
+    get_filename_component(_PREFIX ${PYTHON_LIBRARY} PATH)
+    get_filename_component(_PREFIX ${_PREFIX} PATH)
+    if(_PREFIX)
+      set(_INCLUDE_PATH_HINT ${_PREFIX}/include)
+    endif()
+
+    # Add framework directories to the search paths
+    set(PYTHON_FRAMEWORK_INCLUDES)
+    if(Python_FRAMEWORKS AND NOT PYTHON_INCLUDE_DIR)
+      foreach(dir ${Python_FRAMEWORKS})
+        list(APPEND PYTHON_FRAMEWORK_INCLUDES
+          ${dir}/Versions/${_CURRENT_VERSION}/include)
+      endforeach()
+    endif()
+
+    find_path(PYTHON_INCLUDE_DIR
+      NAMES Python.h
+      HINTS
+        ${_INCLUDE_PATH_HINT}
+      PATHS
+        ${PYTHON_FRAMEWORK_INCLUDES}
+        [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
+        [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
+      PATH_SUFFIXES
+        python${_CURRENT_VERSION}mu
+        python${_CURRENT_VERSION}m
+        python${_CURRENT_VERSION}u
+        python${_CURRENT_VERSION}
+    )
+  endif()
 
   # For backward compatibility, set PYTHON_INCLUDE_PATH.
   set(PYTHON_INCLUDE_PATH "${PYTHON_INCLUDE_DIR}")
