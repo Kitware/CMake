@@ -38,7 +38,12 @@ endif()
 
 # Use most-recent available language dialects with GNU and Clang
 if(NOT DEFINED CMAKE_C_STANDARD AND NOT CMake_NO_C_STANDARD)
-  set(CMAKE_C_STANDARD 11)
+  include(${CMake_SOURCE_DIR}/Source/Checks/cm_c11_thread_local.cmake)
+  if(NOT CMake_C11_THREAD_LOCAL_BROKEN)
+    set(CMAKE_C_STANDARD 11)
+  else()
+    set(CMAKE_C_STANDARD 99)
+  endif()
 endif()
 if(NOT DEFINED CMAKE_CXX_STANDARD AND NOT CMake_NO_CXX_STANDARD)
   include(${CMake_SOURCE_DIR}/Source/Checks/cm_cxx14_cstdio.cmake)
