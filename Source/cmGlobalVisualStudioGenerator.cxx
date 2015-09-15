@@ -64,13 +64,8 @@ std::string cmGlobalVisualStudioGenerator::GetRegistryBase(
 }
 
 //----------------------------------------------------------------------------
-bool cmGlobalVisualStudioGenerator::Compute()
+void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
 {
-  if (!cmGlobalGenerator::Compute())
-    {
-    return false;
-    }
-
   // Add a special target that depends on ALL projects for easy build
   // of one configuration only.
   const char* no_working_dir = 0;
@@ -144,7 +139,6 @@ bool cmGlobalVisualStudioGenerator::Compute()
       static_cast<cmLocalVisualStudioGenerator*>(*lgi);
     lg->AddCMakeListsRules();
     }
-  return true;
 }
 
 //----------------------------------------------------------------------------
