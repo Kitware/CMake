@@ -84,11 +84,7 @@ cmArchiveWrite::cmArchiveWrite(
     Archive(archive_write_new()),
     Disk(archive_read_disk_new()),
     Verbose(false),
-    Format(format),
-    uid(-1),
-    gid(-1),
-    permissions(-1),
-    permissionsMask(-1)
+    Format(format)
 {
   switch (c)
     {
@@ -288,29 +284,29 @@ bool cmArchiveWrite::AddFile(const char* file,
     }
 
   // manages the uid/guid of the entry (if any)
-  if (this->uid > -1 && this->gid > -1)
+  if (this->Uid.IsSet() && this->Gid.IsSet())
     {
-    archive_entry_set_uid(e, this->uid);
-    archive_entry_set_gid(e, this->gid);
+    archive_entry_set_uid(e, this->Uid.Get());
+    archive_entry_set_gid(e, this->Gid.Get());
     }
 
-  if (this->uname.size() && this->gname.size())
+  if (this->Uname.size() && this->Gname.size())
     {
-    archive_entry_set_uname(e, this->uname.c_str());
-    archive_entry_set_gname(e, this->gname.c_str());
+    archive_entry_set_uname(e, this->Uname.c_str());
+    archive_entry_set_gname(e, this->Gname.c_str());
     }
 
 
   // manages the permissions
-  if (this->permissions > -1)
+  if (this->Permissions.IsSet())
     {
-    archive_entry_set_perm(e, this->permissions);
+    archive_entry_set_perm(e, this->Permissions.Get());
     }
 
-  if (this->permissionsMask > -1)
+  if (this->PermissionsMask.IsSet())
     {
     mode_t perm = archive_entry_perm(e);
-    archive_entry_set_perm(e, perm & this->permissionsMask );
+    archive_entry_set_perm(e, perm & this->PermissionsMask.Get());
     }
 
   // Clear acl and xattr fields not useful for distribution.
