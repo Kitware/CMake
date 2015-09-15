@@ -23,6 +23,16 @@ char const* qnxnto = "INFO" ":" "qnxnto[]";
 @CMAKE_CXX_COMPILER_ID_PLATFORM_CONTENT@
 @CMAKE_CXX_COMPILER_ID_ERROR_FOR_TEST@
 
+const char* info_language_dialect_default = "INFO" ":" "dialect_default["
+#if __cplusplus >= 201402L
+  "14"
+#elif __cplusplus >= 201103L
+  "11"
+#else
+  "98"
+#endif
+"]";
+
 /*--------------------------------------------------------------------------*/
 
 int main(int argc, char* argv[])
