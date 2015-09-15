@@ -154,7 +154,7 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
   if(Python_FRAMEWORKS AND NOT PYTHON_INCLUDE_DIR)
     foreach(dir ${Python_FRAMEWORKS})
       list(APPEND PYTHON_FRAMEWORK_INCLUDES
-           ${dir}/Versions/${_CURRENT_VERSION}/include/python${_CURRENT_VERSION})
+           ${dir}/Versions/${_CURRENT_VERSION}/include)
     endforeach()
   endif()
 
