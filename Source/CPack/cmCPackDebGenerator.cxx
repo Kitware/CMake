@@ -576,9 +576,19 @@ int cmCPackDebGenerator::createDeb()
     control_tar.SetUNAME("root");
     control_tar.SetGNAME("root");
 
-    // set md5sum file permissions to RW-R--R-- so that deb lintian
-    // doesn't warn about it
-    control_tar.SetPermissions(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    /* permissions are set according to
+    https://www.debian.org/doc/debian-policy/ch-files.html#s-permissions-owners
+    and
+    https://lintian.debian.org/tags/control-file-has-bad-permissions.html
+    */
+    const mode_t permission644 = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+    const mode_t permissionExecute = S_IXUSR | S_IXGRP | S_IXOTH;
+    const mode_t permission755 = permission644 | permissionExecute;
+
+    // for md5sum and control (that we have generated here), we use 644
+    // (RW-R--R--)
+    // so that deb lintian doesn't warn about it
+    control_tar.SetPermissions(permission644);
 
     // adds control and md5sums
     if(   !control_tar.Add(md5filename, strGenWDIR.length(), ".")
@@ -593,12 +603,28 @@ int cmCPackDebGenerator::createDeb()
         return 0;
       }
 
+    // for the other files, we use
+    // -either the original permission on the files
+    // -either a permission strictly defined by the Debian policies
     const char* controlExtra =
       this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA");
     if( controlExtra )
       {
       // permissions are now controlled by the original file permissions
+
+      const bool permissionStrictPolicy =
+        this->IsSet("GEN_CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION");
+
+      static const char* strictFiles[] = {
+        "config", "postinst", "postrm", "preinst", "prerm"
+        };
+      std::set<std::string> setStrictFiles(
+        strictFiles,
+        strictFiles + sizeof(strictFiles)/sizeof(strictFiles[0]));
+
+      // default
       control_tar.SetPermissions(-1);
+
       std::vector<std::string> controlExtraList;
       cmSystemTools::ExpandListArgument(controlExtra, controlExtraList);
       for(std::vector<std::string>::iterator i = controlExtraList.begin();
@@ -607,6 +633,12 @@ int cmCPackDebGenerator::createDeb()
         std::string filenamename =
           cmsys::SystemTools::GetFilenameName(*i);
         std::string localcopy = strGenWDIR + "/" + filenamename;
+
+        if(permissionStrictPolicy)
+          {
+          control_tar.SetPermissions(setStrictFiles.count(filenamename) ?
+            permission755 : permission644);
+          }
 
         // if we can copy the file, it means it does exist, let's add it:
         if( cmsys::SystemTools::CopyFileIfDifferent(*i, localcopy) )
