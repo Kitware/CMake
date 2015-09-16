@@ -1667,7 +1667,7 @@ public:
   cmTargetCollectLinkLanguages(cmGeneratorTarget const* target,
                                const std::string& config,
                                UNORDERED_SET<std::string>& languages,
-                               cmTarget const* head):
+                               cmGeneratorTarget const* head):
     Config(config), Languages(languages), HeadTarget(head),
     Makefile(target->Target->GetMakefile()), Target(target)
   { this->Visited.insert(target->Target); }
@@ -1719,7 +1719,7 @@ public:
         this->Target->GetLocalGenerator()->GetGlobalGenerator()
             ->GetGeneratorTarget(item.Target);
     cmLinkInterface const* iface =
-      gtgt->GetLinkInterface(this->Config, this->HeadTarget);
+      gtgt->GetLinkInterface(this->Config, this->HeadTarget->Target);
     if(!iface) { return; }
 
     for(std::vector<std::string>::const_iterator
@@ -1737,7 +1737,7 @@ public:
 private:
   std::string Config;
   UNORDERED_SET<std::string>& Languages;
-  cmTarget const* HeadTarget;
+  cmGeneratorTarget const* HeadTarget;
   cmMakefile* Makefile;
   const cmGeneratorTarget* Target;
   std::set<cmTarget const*> Visited;
@@ -1830,7 +1830,7 @@ void cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
     }
 
   // Add interface languages from linked targets.
-  cmTargetCollectLinkLanguages cll(this, config, languages, this->Target);
+  cmTargetCollectLinkLanguages cll(this, config, languages, this);
   for(std::vector<cmLinkImplItem>::const_iterator li = impl->Libraries.begin();
       li != impl->Libraries.end(); ++li)
     {
