@@ -524,7 +524,7 @@ private:
 
   cmLinkImplementationLibraries const*
     GetLinkImplementationLibrariesInternal(const std::string& config,
-                                           cmTarget const* head) const;
+                                          const cmGeneratorTarget* head) const;
   bool
   ComputeOutputDir(const std::string& config,
                    bool implib, std::string& out) const;

@@ -4546,7 +4546,7 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
     // The link implementation is the default link interface.
     cmLinkImplementationLibraries const*
       impl = this->GetLinkImplementationLibrariesInternal(config,
-                                                          headTarget->Target);
+                                                          headTarget);
     iface.ImplementationIsInterface = true;
     iface.WrongConfigLibraries = impl->WrongConfigLibraries;
     }
@@ -4990,7 +4990,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     {
     // The link implementation is the default link interface.
     cmLinkImplementationLibraries const* impl =
-      this->GetLinkImplementationLibrariesInternal(config, headTarget->Target);
+      this->GetLinkImplementationLibrariesInternal(config, headTarget);
     iface.Libraries.insert(iface.Libraries.end(),
                            impl->Libraries.begin(), impl->Libraries.end());
     if(this->Target->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
@@ -5263,13 +5263,13 @@ cmLinkImplementationLibraries const*
 cmGeneratorTarget::GetLinkImplementationLibraries(
     const std::string& config) const
 {
-  return this->GetLinkImplementationLibrariesInternal(config, this->Target);
+  return this->GetLinkImplementationLibrariesInternal(config, this);
 }
 
 //----------------------------------------------------------------------------
 cmLinkImplementationLibraries const*
 cmGeneratorTarget::GetLinkImplementationLibrariesInternal(
-    const std::string& config, cmTarget const* head) const
+    const std::string& config, cmGeneratorTarget const* head) const
 {
   // There is no link implementation for imported targets.
   if(this->IsImported())
@@ -5289,11 +5289,11 @@ cmGeneratorTarget::GetLinkImplementationLibrariesInternal(
     return &hm.begin()->second;
     }
 
-  cmOptionalLinkImplementation& impl = hm[head];
+  cmOptionalLinkImplementation& impl = hm[head->Target];
   if(!impl.LibrariesDone)
     {
     impl.LibrariesDone = true;
-    this->ComputeLinkImplementationLibraries(config, impl, head);
+    this->ComputeLinkImplementationLibraries(config, impl, head->Target);
     }
   return &impl;
 }
