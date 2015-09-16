@@ -149,7 +149,9 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
 
     cmSystemTools::ExpandListArgument(cge->Evaluate(this->LocalGenerator,
                                                     config,
-                                                  false, this->Target, 0, 0),
+                                                    false,
+                                                    this->GeneratorTarget,
+                                                    0, 0),
                                       this->CleanFiles);
     }
 

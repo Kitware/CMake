@@ -78,10 +78,11 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
 
   cmGeneratorTarget* gtgt =
       tgt->GetMakefile()->GetGlobalGenerator()->GetGeneratorTarget(tgt);
+  cmGeneratorTarget gDummyHead(&dummyHead, gtgt->GetLocalGenerator());
 
   std::string result = cge->Evaluate(gtgt->GetLocalGenerator(), this->Config,
-                                     false, &dummyHead,
-                                     gtgt->Target, &dagChecker);
+                                     false, &gDummyHead,
+                                     gtgt, &dagChecker);
 
   const std::set<cmTarget const*> &allTargets = cge->GetAllTargetsSeen();
   for(std::set<cmTarget const*>::const_iterator li = allTargets.begin();

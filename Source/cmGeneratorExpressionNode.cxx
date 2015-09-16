@@ -19,7 +19,8 @@
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
     std::string const& prop, cmLocalGenerator *lg,
     cmGeneratorExpressionContext *context,
-    cmTarget const* headTarget, cmTarget const* currentTarget,
+    cmGeneratorTarget const* headTarget,
+    cmGeneratorTarget const* currentTarget,
     cmGeneratorExpressionDAGChecker *dagChecker)
 {
   cmGeneratorExpression ge(context->Backtrace);
@@ -862,8 +863,8 @@ getLinkedTargetsContent(
         cmGeneratorExpressionNode::EvaluateDependentExpression(depString,
                                         target->GetLocalGenerator(),
                                         context,
-                                        headTarget->Target,
-                                        target->Target, dagChecker);
+                                        headTarget,
+                                        target, dagChecker);
     }
   linkedTargetsContent =
     cmGeneratorExpression::StripEmptyListElements(linkedTargetsContent);
@@ -1215,9 +1216,11 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
     if(!interfacePropertyName.empty())
       {
+      cmGeneratorTarget* gHeadTarget =
+          context->LG->GetGlobalGenerator()->GetGeneratorTarget(headTarget);
       std::string result = this->EvaluateDependentExpression(prop,
                                         context->LG, context,
-                                        headTarget, target, &dagChecker);
+                                        gHeadTarget, gtgt, &dagChecker);
       if (!linkedTargetsContent.empty())
         {
         result += (result.empty() ? "" : ";") + linkedTargetsContent;

@@ -19,14 +19,15 @@
 #include <string>
 
 class cmTarget;
+class cmGeneratorTarget;
 class cmLocalGenerator;
 
 //----------------------------------------------------------------------------
 struct cmGeneratorExpressionContext
 {
   cmGeneratorExpressionContext(cmLocalGenerator* lg, std::string const& config,
-                               bool quiet, cmTarget const* headTarget,
-                               cmTarget const* currentTarget,
+                               bool quiet, const cmGeneratorTarget* headTarget,
+                               cmGeneratorTarget const* currentTarget,
                                bool evaluateForBuildsystem,
                                cmListFileBacktrace const& backtrace,
                                std::string const& language);

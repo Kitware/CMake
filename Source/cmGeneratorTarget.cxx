@@ -524,8 +524,8 @@ static void handleSystemIncludesDep(cmLocalGenerator *lg,
     cmGeneratorExpression ge;
     cmSystemTools::ExpandListArgument(ge.Parse(dirs)
                                       ->Evaluate(lg,
-                                      config, false, headTarget->Target,
-                                      depTgt->Target, dagChecker), result);
+                                      config, false, headTarget,
+                                      depTgt, dagChecker), result);
     }
   if (!depTgt->IsImported() || excludeImported)
     {
@@ -538,8 +538,8 @@ static void handleSystemIncludesDep(cmLocalGenerator *lg,
     cmGeneratorExpression ge;
     cmSystemTools::ExpandListArgument(ge.Parse(dirs)
                                       ->Evaluate(lg,
-                                      config, false, headTarget->Target,
-                                      depTgt->Target, dagChecker), result);
+                                      config, false, headTarget,
+                                      depTgt, dagChecker), result);
     }
 }
 
@@ -880,7 +880,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
       cmGeneratorExpression ge;
       cmSystemTools::ExpandListArgument(ge.Parse(*it)
                                           ->Evaluate(this->LocalGenerator,
-                                          config, false, this->Target,
+                                          config, false, this,
                                           &dagChecker), result);
       }
 
@@ -889,8 +889,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
     for(std::vector<cmGeneratorTarget const*>::const_iterator
           li = deps.begin(), le = deps.end(); li != le; ++li)
       {
-      handleSystemIncludesDep(this->LocalGenerator, *li,
-                              config, this,
+      handleSystemIncludesDep(this->LocalGenerator, *li, config, this,
                               &dagChecker, result, excludeImported);
       }
 
@@ -966,8 +965,8 @@ static bool processSources(cmGeneratorTarget const* tgt,
                                               tgt->GetLocalGenerator(),
                                               config,
                                               false,
-                                              tgt->Target,
-                                              tgt->Target,
+                                              tgt,
+                                              tgt,
                                               dagChecker),
                                     entrySources);
 
@@ -2059,7 +2058,7 @@ void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string> &result,
                                       ->Evaluate(this->LocalGenerator,
                                                 config,
                                                 false,
-                                                this->Target,
+                                                this,
                                                 &dagChecker),
                                   result);
 }
@@ -2544,7 +2543,7 @@ static void processIncludeDirectories(cmGeneratorTarget const* tgt,
                                         tgt->GetLocalGenerator(),
                                               config,
                                               false,
-                                              tgt->Target,
+                                              tgt,
                                               dagChecker, language),
                                     entryIncludes);
 
@@ -2755,7 +2754,7 @@ static void processCompileOptionsInternal(cmGeneratorTarget const* tgt,
                                         tgt->GetLocalGenerator(),
                                               config,
                                               false,
-                                              tgt->Target,
+                                              tgt,
                                               dagChecker,
                                               language),
                                     entryOptions);
@@ -4455,8 +4454,8 @@ void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
                                       this->LocalGenerator,
                                       config,
                                       false,
-                                      headTarget->Target,
-                                      this->Target, &dagChecker), libs);
+                                      headTarget,
+                                      this, &dagChecker), libs);
   this->LookupLinkItems(libs, items);
   hadHeadSensitiveCondition = cge->GetHadHeadSensitiveCondition();
 }
@@ -5347,8 +5346,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     cmsys::auto_ptr<cmCompiledGeneratorExpression> const cge =
       ge.Parse(*le);
     std::string const evaluated =
-      cge->Evaluate(this->LocalGenerator, config, false,
-                    head->Target, &dagChecker);
+      cge->Evaluate(this->LocalGenerator, config, false, head, &dagChecker);
     cmSystemTools::ExpandListArgument(evaluated, llibs);
     if(cge->GetHadHeadSensitiveCondition())
       {
