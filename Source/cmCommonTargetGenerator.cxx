@@ -423,7 +423,7 @@ std::string cmCommonTargetGenerator::GetManifests()
        mi != manifest_srcs.end(); ++mi)
     {
     manifests.push_back(this->Convert((*mi)->GetFullPath(),
-                                      cmOutputConverter::START_OUTPUT,
+                                      this->WorkingDirectory,
                                       cmOutputConverter::SHELL));
     }
 
