@@ -4485,7 +4485,7 @@ cmGeneratorTarget::GetLinkInterface(const std::string& config,
     iface.AllDone = true;
     if(iface.Exists)
       {
-      this->ComputeLinkInterface(config, iface, head->Target);
+      this->ComputeLinkInterface(config, iface, head);
       }
     }
 
@@ -4495,7 +4495,7 @@ cmGeneratorTarget::GetLinkInterface(const std::string& config,
 //----------------------------------------------------------------------------
 void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
                                     cmOptionalLinkInterface &iface,
-                                    cmTarget const* headTarget) const
+                                    cmGeneratorTarget const* headTarget) const
 {
   if(iface.ExplicitLibraries)
     {
@@ -4545,7 +4545,8 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
     {
     // The link implementation is the default link interface.
     cmLinkImplementationLibraries const*
-      impl = this->GetLinkImplementationLibrariesInternal(config, headTarget);
+      impl = this->GetLinkImplementationLibrariesInternal(config,
+                                                          headTarget->Target);
     iface.ImplementationIsInterface = true;
     iface.WrongConfigLibraries = impl->WrongConfigLibraries;
     }

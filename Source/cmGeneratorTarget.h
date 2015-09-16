@@ -112,7 +112,7 @@ public:
                                     const cmGeneratorTarget* headTarget) const;
   void ComputeLinkInterface(const std::string& config,
                             cmOptionalLinkInterface& iface,
-                            cmTarget const* head) const;
+                            const cmGeneratorTarget* head) const;
 
   cmLinkInterfaceLibraries const*
     GetLinkInterfaceLibraries(const std::string& config,
