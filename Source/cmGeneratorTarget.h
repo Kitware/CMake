@@ -507,7 +507,8 @@ private:
   mutable std::set<std::string> LinkImplicitNullProperties;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
-                       std::string const& config, cmTarget const* headTarget,
+                       std::string const& config,
+                       const cmGeneratorTarget* headTarget,
                        bool usage_requirements_only,
                        std::vector<cmLinkItem>& items,
                        bool& hadHeadSensitiveCondition) const;

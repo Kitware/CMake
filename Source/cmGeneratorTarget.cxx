@@ -4418,7 +4418,7 @@ void cmGeneratorTarget::LookupLinkItems(std::vector<std::string> const& names,
 void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
                                std::string const& value,
                                std::string const& config,
-                               cmTarget const* headTarget,
+                               cmGeneratorTarget const* headTarget,
                                bool usage_requirements_only,
                                std::vector<cmLinkItem>& items,
                                bool& hadHeadSensitiveCondition) const
@@ -4437,7 +4437,7 @@ void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
                                       this->Makefile,
                                       config,
                                       false,
-                                      headTarget,
+                                      headTarget->Target,
                                       this->Target, &dagChecker), libs);
   this->LookupLinkItems(libs, items);
   hadHeadSensitiveCondition = cge->GetHadHeadSensitiveCondition();
@@ -4977,7 +4977,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     // The interface libraries have been explicitly set.
     this->ExpandLinkItems(linkIfaceProp, explicitLibraries,
                                   config,
-                                headTarget->Target, usage_requirements_only,
+                                headTarget, usage_requirements_only,
                                 iface.Libraries,
                                 iface.HadHeadSensitiveCondition);
     }
@@ -5004,7 +5004,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
         {
         bool hadHeadSensitiveConditionDummy = false;
         this->ExpandLinkItems(newProp, newExplicitLibraries, config,
-                              headTarget->Target,
+                              headTarget,
                               usage_requirements_only,
                               ifaceLibs, hadHeadSensitiveConditionDummy);
         }
@@ -5070,7 +5070,7 @@ cmGeneratorTarget::GetImportLinkInterface(const std::string& config,
     cmSystemTools::ExpandListArgument(info->Languages, iface.Languages);
     this->ExpandLinkItems(info->LibrariesProp, info->Libraries,
                                   config,
-                          headTarget->Target, usage_requirements_only,
+                          headTarget, usage_requirements_only,
                           iface.Libraries,
                           iface.HadHeadSensitiveCondition);
     std::vector<std::string> deps;
