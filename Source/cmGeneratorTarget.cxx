@@ -1719,7 +1719,7 @@ public:
         this->Target->GetLocalGenerator()->GetGlobalGenerator()
             ->GetGeneratorTarget(item.Target);
     cmLinkInterface const* iface =
-      gtgt->GetLinkInterface(this->Config, this->HeadTarget->Target);
+      gtgt->GetLinkInterface(this->Config, this->HeadTarget);
     if(!iface) { return; }
 
     for(std::vector<std::string>::const_iterator
@@ -4446,12 +4446,12 @@ void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
 //----------------------------------------------------------------------------
 cmLinkInterface const*
 cmGeneratorTarget::GetLinkInterface(const std::string& config,
-                                    cmTarget const* head) const
+                                    cmGeneratorTarget const* head) const
 {
   // Imported targets have their own link interface.
   if(this->IsImported())
     {
-    return this->GetImportLinkInterface(config, head, false);
+    return this->GetImportLinkInterface(config, head->Target, false);
     }
 
   // Link interfaces are not supported for executables that do not
@@ -4473,19 +4473,19 @@ cmGeneratorTarget::GetLinkInterface(const std::string& config,
     return &hm.begin()->second;
     }
 
-  cmOptionalLinkInterface& iface = hm[head];
+  cmOptionalLinkInterface& iface = hm[head->Target];
   if(!iface.LibrariesDone)
     {
     iface.LibrariesDone = true;
     this->ComputeLinkInterfaceLibraries(
-      config, iface, head, false);
+      config, iface, head->Target, false);
     }
   if(!iface.AllDone)
     {
     iface.AllDone = true;
     if(iface.Exists)
       {
-      this->ComputeLinkInterface(config, iface, head);
+      this->ComputeLinkInterface(config, iface, head->Target);
       }
     }
 

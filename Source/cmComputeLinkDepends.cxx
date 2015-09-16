@@ -365,7 +365,7 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
     {
     // Follow the target dependencies.
     if(cmLinkInterface const* iface =
-       entry.Target->GetLinkInterface(this->Config, this->Target->Target))
+       entry.Target->GetLinkInterface(this->Config, this->Target))
       {
       const bool isIface =
                       entry.Target->GetType() == cmTarget::INTERFACE_LIBRARY;
@@ -465,7 +465,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
   if(entry.Target)
     {
     if(cmLinkInterface const* iface =
-       entry.Target->GetLinkInterface(this->Config, this->Target->Target))
+       entry.Target->GetLinkInterface(this->Config, this->Target))
       {
       // Follow public and private dependencies transitively.
       this->FollowSharedDeps(index, iface, true);
@@ -937,7 +937,7 @@ int cmComputeLinkDepends::ComputeComponentCount(NodeList const& nl)
     if(cmGeneratorTarget const* target = this->EntryList[*ni].Target)
       {
       if(cmLinkInterface const* iface =
-         target->GetLinkInterface(this->Config, this->Target->Target))
+         target->GetLinkInterface(this->Config, this->Target))
         {
         if(iface->Multiplicity > count)
           {
