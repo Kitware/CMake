@@ -511,7 +511,7 @@ cmGeneratorTarget::GetSourceDepends(cmSourceFile const* sf) const
 
 static void handleSystemIncludesDep(cmMakefile *mf, cmTarget const* depTgt,
                                   const std::string& config,
-                                  cmTarget *headTarget,
+                                  cmGeneratorTarget const* headTarget,
                                   cmGeneratorExpressionDAGChecker *dagChecker,
                                   std::vector<std::string>& result,
                                   bool excludeImported)
@@ -522,7 +522,7 @@ static void handleSystemIncludesDep(cmMakefile *mf, cmTarget const* depTgt,
     cmGeneratorExpression ge;
     cmSystemTools::ExpandListArgument(ge.Parse(dirs)
                                       ->Evaluate(mf,
-                                      config, false, headTarget,
+                                      config, false, headTarget->Target,
                                       depTgt, dagChecker), result);
     }
   if (!depTgt->IsImported() || excludeImported)
@@ -536,7 +536,7 @@ static void handleSystemIncludesDep(cmMakefile *mf, cmTarget const* depTgt,
     cmGeneratorExpression ge;
     cmSystemTools::ExpandListArgument(ge.Parse(dirs)
                                       ->Evaluate(mf,
-                                      config, false, headTarget,
+                                      config, false, headTarget->Target,
                                       depTgt, dagChecker), result);
     }
 }
@@ -869,7 +869,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
     for(std::vector<cmTarget const*>::const_iterator
           li = deps.begin(), le = deps.end(); li != le; ++li)
       {
-      handleSystemIncludesDep(this->Makefile, *li, config, this->Target,
+      handleSystemIncludesDep(this->Makefile, *li, config, this,
                               &dagChecker, result, excludeImported);
       }
 
