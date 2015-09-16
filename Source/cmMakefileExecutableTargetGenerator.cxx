@@ -353,6 +353,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                           useResponseFileForObjects, buildObjs, depends,
                           useWatcomQuote);
 
+  std::string manifests = this->GetManifests();
+
   cmLocalGenerator::RuleVariables vars;
   vars.RuleLauncher = "RULE_LAUNCH_LINK";
   vars.CMTarget = this->Target;
@@ -391,6 +393,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   vars.LinkLibraries = linkLibs.c_str();
   vars.Flags = flags.c_str();
   vars.LinkFlags = linkFlags.c_str();
+  vars.Manifests = manifests.c_str();
+
   // Expand placeholders in the commands.
   this->LocalGenerator->TargetImplib = targetOutPathImport;
   for(std::vector<std::string>::iterator i = real_link_commands.begin();

@@ -237,6 +237,7 @@ cmNinjaNormalTargetGenerator
 
     vars.Flags = "$FLAGS";
     vars.LinkFlags = "$LINK_FLAGS";
+    vars.Manifests = "$MANIFESTS";
 
     std::string langFlags;
     if (targetType != cmTarget::EXECUTABLE)
@@ -508,6 +509,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   this->AddModuleDefinitionFlag(vars["LINK_FLAGS"]);
   vars["LINK_FLAGS"] = cmGlobalNinjaGenerator
                         ::EncodeLiteral(vars["LINK_FLAGS"]);
+
+  vars["MANIFESTS"] = this->GetManifests();
 
   vars["LINK_PATH"] = frameworkPath + linkPath;
 

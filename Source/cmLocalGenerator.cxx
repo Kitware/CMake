@@ -525,6 +525,13 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       return replaceValues.LinkFlags;
       }
     }
+  if(replaceValues.Manifests)
+    {
+    if(variable == "MANIFESTS")
+      {
+      return replaceValues.Manifests;
+      }
+    }
   if(replaceValues.Flags)
     {
     if(variable == "FLAGS")

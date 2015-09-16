@@ -412,3 +412,20 @@ cmCommonTargetGenerator::GetLinkedTargetDirectories() const
     }
   return dirs;
 }
+
+std::string cmCommonTargetGenerator::GetManifests()
+{
+  std::vector<cmSourceFile const*> manifest_srcs;
+  this->GeneratorTarget->GetManifests(manifest_srcs, this->ConfigName);
+
+  std::vector<std::string> manifests;
+  for (std::vector<cmSourceFile const*>::iterator mi = manifest_srcs.begin();
+       mi != manifest_srcs.end(); ++mi)
+    {
+    manifests.push_back(this->Convert((*mi)->GetFullPath(),
+                                      this->WorkingDirectory,
+                                      cmOutputConverter::SHELL));
+    }
+
+  return cmJoin(manifests, " ");
+}

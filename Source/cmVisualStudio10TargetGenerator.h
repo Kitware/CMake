@@ -111,6 +111,7 @@ private:
   void AddLibraries(cmComputeLinkInformation& cli,
                     std::vector<std::string>& libVec);
   void WriteLibOptions(std::string const& config);
+  void WriteManifestOptions(std::string const& config);
   void WriteEvents(std::string const& configName);
   void WriteEvent(const char* name,
                   std::vector<cmCustomCommand> const& commands,
