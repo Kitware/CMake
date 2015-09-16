@@ -5111,7 +5111,7 @@ cmGeneratorTarget::GetLinkImplementation(const std::string& config) const
   if(!impl.LibrariesDone)
     {
     impl.LibrariesDone = true;
-    this->ComputeLinkImplementationLibraries(config, impl, this->Target);
+    this->ComputeLinkImplementationLibraries(config, impl, this);
     }
   if(!impl.LanguagesDone)
     {
@@ -5293,7 +5293,7 @@ cmGeneratorTarget::GetLinkImplementationLibrariesInternal(
   if(!impl.LibrariesDone)
     {
     impl.LibrariesDone = true;
-    this->ComputeLinkImplementationLibraries(config, impl, head->Target);
+    this->ComputeLinkImplementationLibraries(config, impl, head);
     }
   return &impl;
 }
@@ -5310,7 +5310,7 @@ cmGeneratorTarget::IsNullImpliedByLinkLibraries(const std::string &p) const
 void cmGeneratorTarget::ComputeLinkImplementationLibraries(
   const std::string& config,
   cmOptionalLinkImplementation& impl,
-  cmTarget const* head) const
+  cmGeneratorTarget const* head) const
 {
   cmStringRange entryRange =
       this->Target->GetLinkImplementationEntries();
@@ -5329,7 +5329,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     cmsys::auto_ptr<cmCompiledGeneratorExpression> const cge =
       ge.Parse(*le);
     std::string const evaluated =
-      cge->Evaluate(this->Makefile, config, false, head, &dagChecker);
+      cge->Evaluate(this->Makefile, config, false, head->Target, &dagChecker);
     cmSystemTools::ExpandListArgument(evaluated, llibs);
     if(cge->GetHadHeadSensitiveCondition())
       {

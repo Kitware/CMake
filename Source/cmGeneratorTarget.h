@@ -212,7 +212,7 @@ public:
 
   void ComputeLinkImplementationLibraries(const std::string& config,
                                           cmOptionalLinkImplementation& impl,
-                                          cmTarget const* head) const;
+                                          const cmGeneratorTarget* head) const;
 
   // Compute the set of languages compiled by the target.  This is
   // computed every time it is called because the languages can change
