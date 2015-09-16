@@ -4478,7 +4478,7 @@ cmGeneratorTarget::GetLinkInterface(const std::string& config,
     {
     iface.LibrariesDone = true;
     this->ComputeLinkInterfaceLibraries(
-      config, iface, head->Target, false);
+      config, iface, head, false);
     }
   if(!iface.AllDone)
     {
@@ -4629,7 +4629,7 @@ cmGeneratorTarget::GetLinkInterfaceLibraries(const std::string& config,
     {
     iface.LibrariesDone = true;
     this->ComputeLinkInterfaceLibraries(
-      config, iface, head->Target, usage_requirements_only);
+      config, iface, head, usage_requirements_only);
     }
 
   return iface.Exists? &iface : 0;
@@ -4890,7 +4890,7 @@ void
 cmGeneratorTarget::ComputeLinkInterfaceLibraries(
   const std::string& config,
   cmOptionalLinkInterface& iface,
-  cmTarget const* headTarget,
+  cmGeneratorTarget const* headTarget,
   bool usage_requirements_only) const
 {
   // Construct the property name suffix for this configuration.
@@ -4976,7 +4976,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     // The interface libraries have been explicitly set.
     this->ExpandLinkItems(linkIfaceProp, explicitLibraries,
                                   config,
-                                headTarget, usage_requirements_only,
+                                headTarget->Target, usage_requirements_only,
                                 iface.Libraries,
                                 iface.HadHeadSensitiveCondition);
     }
@@ -4989,7 +4989,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     {
     // The link implementation is the default link interface.
     cmLinkImplementationLibraries const* impl =
-      this->GetLinkImplementationLibrariesInternal(config, headTarget);
+      this->GetLinkImplementationLibrariesInternal(config, headTarget->Target);
     iface.Libraries.insert(iface.Libraries.end(),
                            impl->Libraries.begin(), impl->Libraries.end());
     if(this->Target->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
@@ -5003,8 +5003,9 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
         {
         bool hadHeadSensitiveConditionDummy = false;
         this->ExpandLinkItems(newProp, newExplicitLibraries, config,
-                                    headTarget, usage_requirements_only,
-                                ifaceLibs, hadHeadSensitiveConditionDummy);
+                              headTarget->Target,
+                              usage_requirements_only,
+                              ifaceLibs, hadHeadSensitiveConditionDummy);
         }
       if (ifaceLibs != iface.Libraries)
         {

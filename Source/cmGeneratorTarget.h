@@ -121,7 +121,7 @@ public:
 
   void ComputeLinkInterfaceLibraries(const std::string& config,
                                      cmOptionalLinkInterface &iface,
-                                     cmTarget const* head,
+                                     const cmGeneratorTarget* head,
                                      bool usage_requirements_only) const;
 
   /** Get the full path to the target according to the settings in its
