@@ -4451,7 +4451,7 @@ cmGeneratorTarget::GetLinkInterface(const std::string& config,
   // Imported targets have their own link interface.
   if(this->IsImported())
     {
-    return this->GetImportLinkInterface(config, head->Target, false);
+    return this->GetImportLinkInterface(config, head, false);
     }
 
   // Link interfaces are not supported for executables that do not
@@ -4599,7 +4599,7 @@ cmGeneratorTarget::GetLinkInterfaceLibraries(const std::string& config,
   // Imported targets have their own link interface.
   if(this->IsImported())
     {
-    return this->GetImportLinkInterface(config, head->Target,
+    return this->GetImportLinkInterface(config, head,
                                                 usage_requirements_only);
     }
 
@@ -5040,7 +5040,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
 //----------------------------------------------------------------------------
 const cmLinkInterface *
 cmGeneratorTarget::GetImportLinkInterface(const std::string& config,
-                                 cmTarget const* headTarget,
+                                 cmGeneratorTarget const* headTarget,
                                  bool usage_requirements_only) const
 {
   cmTarget::ImportInfo const* info = this->Target->GetImportInfo(config);
@@ -5062,7 +5062,7 @@ cmGeneratorTarget::GetImportLinkInterface(const std::string& config,
     return &hm.begin()->second;
     }
 
-  cmOptionalLinkInterface& iface = hm[headTarget];
+  cmOptionalLinkInterface& iface = hm[headTarget->Target];
   if(!iface.AllDone)
     {
     iface.AllDone = true;
@@ -5070,7 +5070,7 @@ cmGeneratorTarget::GetImportLinkInterface(const std::string& config,
     cmSystemTools::ExpandListArgument(info->Languages, iface.Languages);
     this->ExpandLinkItems(info->LibrariesProp, info->Libraries,
                                   config,
-                          headTarget, usage_requirements_only,
+                          headTarget->Target, usage_requirements_only,
                           iface.Libraries,
                           iface.HadHeadSensitiveCondition);
     std::vector<std::string> deps;

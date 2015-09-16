@@ -491,7 +491,8 @@ private:
       std::string const& config) const;
 
   cmLinkInterface const*
-    GetImportLinkInterface(const std::string& config, cmTarget const* head,
+    GetImportLinkInterface(const std::string& config,
+                           const cmGeneratorTarget* head,
                            bool usage_requirements_only) const;
 
   typedef std::map<std::string, std::vector<cmSourceFile*> >
