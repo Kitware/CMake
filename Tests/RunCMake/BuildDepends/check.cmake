@@ -1,5 +1,8 @@
 if(EXISTS ${RunCMake_TEST_BINARY_DIR}/check-debug.cmake)
   include(${RunCMake_TEST_BINARY_DIR}/check-debug.cmake)
+  if(RunCMake_TEST_FAILED)
+    return()
+  endif()
   foreach(exe IN LISTS check_exes)
     execute_process(COMMAND ${exe} RESULT_VARIABLE res)
     if(NOT res EQUAL ${check_step})

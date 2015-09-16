@@ -984,6 +984,20 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       "\t\t\t<Tool\n"
       "\t\t\t\tName=\"" << manifestTool << "\"";
 
+    std::vector<cmSourceFile const*> manifest_srcs;
+    gt->GetManifests(manifest_srcs, configName);
+    if (!manifest_srcs.empty())
+      {
+      fout << "\n\t\t\t\tAdditionalManifestFiles=\"";
+      for (std::vector<cmSourceFile const*>::const_iterator
+             mi = manifest_srcs.begin(); mi != manifest_srcs.end(); ++mi)
+        {
+        std::string m = (*mi)->GetFullPath();
+        fout << this->ConvertToXMLOutputPath(m.c_str()) << ";";
+        }
+      fout << "\"";
+      }
+
     // Check if we need the FAT32 workaround.
     // Check the filesystem type where the target will be written.
     if (cmLVS6G_IsFAT(target.GetDirectory(configName).c_str()))

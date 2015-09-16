@@ -2203,6 +2203,33 @@ cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const& config)
     }
 }
 
+void cmVisualStudio10TargetGenerator::WriteManifestOptions(
+  std::string const& config)
+{
+  if (this->Target->GetType() != cmTarget::EXECUTABLE &&
+      this->Target->GetType() != cmTarget::SHARED_LIBRARY &&
+      this->Target->GetType() != cmTarget::MODULE_LIBRARY)
+    {
+    return;
+    }
+
+  std::vector<cmSourceFile const*> manifest_srcs;
+  this->GeneratorTarget->GetManifests(manifest_srcs, config);
+  if (!manifest_srcs.empty())
+    {
+    this->WriteString("<Manifest>\n", 2);
+    this->WriteString("<AdditionalManifestFiles>", 3);
+    for (std::vector<cmSourceFile const*>::const_iterator
+           mi = manifest_srcs.begin(); mi != manifest_srcs.end(); ++mi)
+      {
+      std::string m = this->ConvertPath((*mi)->GetFullPath(), false);
+      this->ConvertToWindowsSlash(m);
+      (*this->BuildFileStream) << m << ";";
+      }
+    (*this->BuildFileStream) << "</AdditionalManifestFiles>\n";
+    this->WriteString("</Manifest>\n", 2);
+    }
+}
 
 //----------------------------------------------------------------------------
 void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
@@ -2740,6 +2767,8 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
     this->WriteLinkOptions(*i);
     //    output lib flags       <Lib></Lib>
     this->WriteLibOptions(*i);
+    //    output manifest flags  <Manifest></Manifest>
+    this->WriteManifestOptions(*i);
     if(this->NsightTegra &&
        this->Target->GetType() == cmTarget::EXECUTABLE &&
        this->Target->GetPropertyAsBool("ANDROID_GUI"))

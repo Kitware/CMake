@@ -209,6 +209,15 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
     result.push_back(this->ConvertToNinjaPath(this->ModuleDefinitionFile));
     }
 
+  // Add a dependency on user-specified manifest files, if any.
+  std::vector<cmSourceFile const*> manifest_srcs;
+  this->GeneratorTarget->GetManifests(manifest_srcs, this->ConfigName);
+  for (std::vector<cmSourceFile const*>::iterator mi = manifest_srcs.begin();
+       mi != manifest_srcs.end(); ++mi)
+    {
+    result.push_back(this->ConvertToNinjaPath((*mi)->GetFullPath()));
+    }
+
   // Add user-specified dependencies.
   if (const char* linkDepends = this->Target->GetProperty("LINK_DEPENDS"))
     {
