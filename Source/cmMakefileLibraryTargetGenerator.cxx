@@ -616,6 +616,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       }
     }
 
+  std::string manifests = this->GetManifests();
+
   cmLocalGenerator::RuleVariables vars;
   vars.TargetPDB = targetOutPathPDB.c_str();
 
@@ -659,6 +661,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     vars.TargetSOName= targetNameSO.c_str();
     }
   vars.LinkFlags = linkFlags.c_str();
+
+  vars.Manifests = manifests.c_str();
 
   // Compute the directory portion of the install_name setting.
   std::string install_name_dir;

@@ -219,6 +219,7 @@ public:
     const char* TargetSOName;
     const char* TargetInstallNameDir;
     const char* LinkFlags;
+    const char* Manifests;
     const char* LanguageCompileFlags;
     const char* Defines;
     const char* Includes;

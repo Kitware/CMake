@@ -1362,6 +1362,7 @@ class cmVSLink
   bool Incremental;
   bool LinkGeneratesManifest;
   std::vector<std::string> LinkCommand;
+  std::vector<std::string> UserManifests;
   std::string LinkerManifestFile;
   std::string ManifestFile;
   std::string ManifestFileRC;
@@ -1480,6 +1481,13 @@ bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
       ++arg;
       break;
       }
+    else if (*arg == "--manifests")
+      {
+      for (++arg; arg != argEnd && !cmHasLiteralPrefix(*arg, "-"); ++arg)
+        {
+        this->UserManifests.push_back(*arg);
+        }
+      }
     else if (cmHasLiteralPrefix(*arg, "--intdir="))
       {
       intDir = arg->substr(9);
@@ -1544,10 +1552,11 @@ bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
     this->ManifestFileRes = intDir + "/manifest.res";
     this->LinkCommand.push_back(this->ManifestFileRes);
     }
-  else
+  else if (this->UserManifests.empty())
     {
-    // CMake places the linker-generated manifest next to the binary (as if it
-    // were not to be embedded) when not linking incrementally.
+    // Prior to support for user-specified manifests CMake placed the
+    // linker-generated manifest next to the binary (as if it were not to be
+    // embedded) when not linking incrementally.  Preserve this behavior.
     this->ManifestFile = this->TargetFile + ".manifest";
     this->LinkerManifestFile = this->ManifestFile;
     }
@@ -1564,7 +1573,7 @@ bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
 int cmVSLink::Link()
 {
   if (this->Incremental &&
-      this->LinkGeneratesManifest)
+      (this->LinkGeneratesManifest || !this->UserManifests.empty()))
     {
     if (this->Verbose)
       {
@@ -1688,7 +1697,7 @@ int cmVSLink::LinkNonIncremental()
     }
 
   // If we have no manifest files we are done.
-  if (!this->LinkGeneratesManifest)
+  if (!this->LinkGeneratesManifest && this->UserManifests.empty())
     {
     return 0;
     }
@@ -1709,6 +1718,8 @@ int cmVSLink::RunMT(std::string const& out, bool notify)
     {
     mtCommand.push_back(this->LinkerManifestFile);
     }
+  mtCommand.insert(mtCommand.end(),
+                   this->UserManifests.begin(), this->UserManifests.end());
   mtCommand.push_back(out);
   if (notify)
     {
