@@ -2047,7 +2047,7 @@ void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string> &result,
 
 //----------------------------------------------------------------------------
 void processILibs(const std::string& config,
-                  cmTarget const* headTarget,
+                  cmGeneratorTarget const* headTarget,
                   cmLinkItem const& item,
                   cmGlobalGenerator* gg,
                   std::vector<cmTarget const*>& tgts,
@@ -2058,7 +2058,7 @@ void processILibs(const std::string& config,
     tgts.push_back(item.Target);
     cmGeneratorTarget* gt = gg->GetGeneratorTarget(item.Target);
     if(cmLinkInterfaceLibraries const* iface =
-       gt->GetLinkInterfaceLibraries(config, headTarget, true))
+       gt->GetLinkInterfaceLibraries(config, headTarget->Target, true))
       {
       for(std::vector<cmLinkItem>::const_iterator
             it = iface->Libraries.begin();
@@ -2089,7 +2089,7 @@ cmGeneratorTarget::GetLinkImplementationClosure(
           it = impl->Libraries.begin();
         it != impl->Libraries.end(); ++it)
       {
-      processILibs(config, this->Target, *it,
+      processILibs(config, this, *it,
                    this->LocalGenerator->GetGlobalGenerator(),
                    tgts , emitted);
       }
