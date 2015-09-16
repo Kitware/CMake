@@ -51,6 +51,7 @@ class cmake;
 class cmMakefileCall;
 class cmCMakePolicyCommand;
 class cmGeneratorExpressionEvaluationFile;
+class cmExportBuildFileGenerator;
 
 /** \class cmMakefile
  * \brief Process the input CMakeLists.txt file.
@@ -789,6 +790,11 @@ public:
                   bool inputIsContent);
   std::vector<cmGeneratorExpressionEvaluationFile*> GetEvaluationFiles() const;
 
+  std::vector<cmExportBuildFileGenerator*>
+  GetExportBuildFileGenerators() const;
+  void RemoveExportBuildFileGeneratorCMP0024(cmExportBuildFileGenerator* gen);
+  void AddExportBuildFileGenerator(cmExportBuildFileGenerator* gen);
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const std::string& name, cmTarget& target);
@@ -882,6 +888,7 @@ private:
   mutable cmsys::RegularExpression cmNamedCurly;
 
   std::vector<cmMakefile*> UnConfiguredDirectories;
+  std::vector<cmExportBuildFileGenerator*> ExportBuildFileGenerators;
 
   std::vector<cmGeneratorExpressionEvaluationFile*> EvaluationFiles;
 

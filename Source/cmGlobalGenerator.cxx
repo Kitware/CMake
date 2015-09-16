@@ -73,7 +73,7 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   this->CurrentMakefile = 0;
   this->TryCompileOuterMakefile = 0;
 
-  this->ConfigureDoneCMP0026 = false;
+  this->ConfigureDoneCMP0026AndCMP0024 = false;
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()
@@ -234,6 +234,16 @@ bool cmGlobalGenerator::GenerateImportFile(const std::string &file)
   if (it != this->BuildExportSets.end())
     {
     bool result = it->second->GenerateImportFile();
+
+    if (!this->ConfigureDoneCMP0026AndCMP0024)
+      {
+      for (std::vector<cmMakefile*>::const_iterator mit =
+           this->Makefiles.begin(); mit != this->Makefiles.end(); ++mit)
+        {
+        (*mit)->RemoveExportBuildFileGeneratorCMP0024(it->second);
+        }
+      }
+
     delete it->second;
     it->second = 0;
     this->BuildExportSets.erase(it);
@@ -1122,11 +1132,11 @@ void cmGlobalGenerator::Configure()
       this->CMakeInstance->GetHomeOutputDirectory());
 
   // now do it
-  this->ConfigureDoneCMP0026 = false;
+  this->ConfigureDoneCMP0026AndCMP0024 = false;
   dirMf->Configure();
   dirMf->EnforceDirectoryLevelRules();
 
-  this->ConfigureDoneCMP0026 = true;
+  this->ConfigureDoneCMP0026AndCMP0024 = true;
 
   // Put a copy of each global target in every directory.
   cmTargets globalTargets;
@@ -1226,6 +1236,20 @@ bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const
   return false;
 }
 
+void cmGlobalGenerator::ComputeBuildFileGenerators()
+{
+  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    std::vector<cmExportBuildFileGenerator*> gens =
+        this->Makefiles[i]->GetExportBuildFileGenerators();
+    for (std::vector<cmExportBuildFileGenerator*>::const_iterator it =
+         gens.begin(); it != gens.end(); ++it)
+      {
+      (*it)->Compute(this->LocalGenerators[i]);
+      }
+    }
+}
+
 bool cmGlobalGenerator::Compute()
 {
   // Some generators track files replaced during the Generate.
@@ -1254,6 +1278,8 @@ bool cmGlobalGenerator::Compute()
   std::vector<cmGeneratorTarget const*> autogenTargets =
       this->CreateQtAutoGeneratorsTargets();
 #endif
+
+  this->ComputeBuildFileGenerators();
 
   unsigned int i;
 

@@ -221,7 +221,7 @@ bool cmExportCommand
     {
     ebfg->SetTargets(targets);
     }
-  ebfg->SetMakefile(this->Makefile);
+  this->Makefile->AddExportBuildFileGenerator(ebfg);
   ebfg->SetExportOld(this->ExportOld.IsEnabled());
 
   // Compute the set of configurations exported.

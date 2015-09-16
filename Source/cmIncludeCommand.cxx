@@ -126,6 +126,7 @@ bool cmIncludeCommand
         }
       }
     gg->CreateGenerationObjects();
+    gg->ComputeBuildFileGenerators();
     gg->GenerateImportFile(fname_abs);
     }
 
