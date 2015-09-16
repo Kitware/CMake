@@ -274,8 +274,8 @@ set (CMAKE_MODULE_LINKER_FLAGS_MINSIZEREL_INIT ${CMAKE_EXE_LINKER_FLAGS_MINSIZER
 macro(__windows_compiler_msvc lang)
   if(NOT MSVC_VERSION LESS 1400)
     # for 2005 make sure the manifest is put in the dll with mt
-    set(_CMAKE_VS_LINK_DLL "<CMAKE_COMMAND> -E vs_link_dll ")
-    set(_CMAKE_VS_LINK_EXE "<CMAKE_COMMAND> -E vs_link_exe ")
+    set(_CMAKE_VS_LINK_DLL "<CMAKE_COMMAND> -E vs_link_dll --intdir=<OBJECT_DIR> ")
+    set(_CMAKE_VS_LINK_EXE "<CMAKE_COMMAND> -E vs_link_exe --intdir=<OBJECT_DIR> ")
   endif()
   set(CMAKE_${lang}_CREATE_SHARED_LIBRARY
     "${_CMAKE_VS_LINK_DLL}<CMAKE_LINKER> ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} /out:<TARGET> /implib:<TARGET_IMPLIB> /pdb:<TARGET_PDB> /dll /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR>${_PLATFORM_LINK_FLAGS} <LINK_FLAGS> <LINK_LIBRARIES> ${CMAKE_END_TEMP_FILE}")
