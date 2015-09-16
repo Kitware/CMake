@@ -64,7 +64,7 @@ set(CMAKE_FIND_FRAMEWORK LAST)
 
 set(_PYTHON1_VERSIONS 1.6 1.5)
 set(_PYTHON2_VERSIONS 2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0)
-set(_PYTHON3_VERSIONS 3.4 3.3 3.2 3.1 3.0)
+set(_PYTHON3_VERSIONS 3.6 3.5 3.4 3.3 3.2 3.1 3.0)
 
 if(PythonLibs_FIND_VERSION)
     if(PythonLibs_FIND_VERSION_COUNT GREATER 1)
@@ -149,13 +149,6 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
     # This is where the static library is usually located
     PATH_SUFFIXES python${_CURRENT_VERSION}/config
   )
-
-  # For backward compatibility, honour value of PYTHON_INCLUDE_PATH, if
-  # PYTHON_INCLUDE_DIR is not set.
-  if(DEFINED PYTHON_INCLUDE_PATH AND NOT DEFINED PYTHON_INCLUDE_DIR)
-    set(PYTHON_INCLUDE_DIR "${PYTHON_INCLUDE_PATH}" CACHE PATH
-      "Path to where Python.h is found" FORCE)
-  endif()
 
   set(PYTHON_FRAMEWORK_INCLUDES)
   if(Python_FRAMEWORKS AND NOT PYTHON_INCLUDE_DIR)
