@@ -116,7 +116,7 @@ public:
 
   cmLinkInterfaceLibraries const*
     GetLinkInterfaceLibraries(const std::string& config,
-                              cmTarget const* headTarget,
+                              const cmGeneratorTarget* headTarget,
                               bool usage_requirements_only) const;
 
   void ComputeLinkInterfaceLibraries(const std::string& config,

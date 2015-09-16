@@ -1109,8 +1109,11 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     if(isInterfaceProperty)
       {
+      cmGeneratorTarget* gHeadTarget =
+          context->Makefile->GetGlobalGenerator()
+          ->GetGeneratorTarget(headTarget);
       if(cmLinkInterfaceLibraries const* iface =
-         gtgt->GetLinkInterfaceLibraries(context->Config, headTarget, true))
+         gtgt->GetLinkInterfaceLibraries(context->Config, gHeadTarget, true))
         {
         linkedTargetsContent =
           getLinkedTargetsContent(iface->Libraries, target,

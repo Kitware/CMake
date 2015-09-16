@@ -2058,7 +2058,7 @@ void processILibs(const std::string& config,
     tgts.push_back(item.Target);
     cmGeneratorTarget* gt = gg->GetGeneratorTarget(item.Target);
     if(cmLinkInterfaceLibraries const* iface =
-       gt->GetLinkInterfaceLibraries(config, headTarget->Target, true))
+       gt->GetLinkInterfaceLibraries(config, headTarget, true))
       {
       for(std::vector<cmLinkItem>::const_iterator
             it = iface->Libraries.begin();
@@ -4592,13 +4592,13 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
 //----------------------------------------------------------------------------
 const cmLinkInterfaceLibraries *
 cmGeneratorTarget::GetLinkInterfaceLibraries(const std::string& config,
-                                    cmTarget const* head,
+                                    cmGeneratorTarget const* head,
                                     bool usage_requirements_only) const
 {
   // Imported targets have their own link interface.
   if(this->IsImported())
     {
-    return this->GetImportLinkInterface(config, head,
+    return this->GetImportLinkInterface(config, head->Target,
                                                 usage_requirements_only);
     }
 
@@ -4624,12 +4624,12 @@ cmGeneratorTarget::GetLinkInterfaceLibraries(const std::string& config,
     return &hm.begin()->second;
     }
 
-  cmOptionalLinkInterface& iface = hm[head];
+  cmOptionalLinkInterface& iface = hm[head->Target];
   if(!iface.LibrariesDone)
     {
     iface.LibrariesDone = true;
     this->ComputeLinkInterfaceLibraries(
-      config, iface, head, usage_requirements_only);
+      config, iface, head->Target, usage_requirements_only);
     }
 
   return iface.Exists? &iface : 0;
