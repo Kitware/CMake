@@ -13,7 +13,6 @@
 #  License text for the above reference.)
 
 set(CMAKE_Swift_OUTPUT_EXTENSION .o)
-set(CMAKE_INCLUDE_FLAG_Swift "-I")
 
 # Load compiler-specific information.
 if(CMAKE_Swift_COMPILER_ID)
