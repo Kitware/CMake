@@ -461,7 +461,7 @@ cmGlobalUnixMakefileGenerator3
   // The directory-level rule should depend on the target-level rules
   // for all targets in the directory.
   std::vector<std::string> depends;
-  cmGeneratorTargetsType targets = lg->GetMakefile()->GetGeneratorTargets();
+  cmGeneratorTargetsType targets = lg->GetGeneratorTargets();
   for(cmGeneratorTargetsType::iterator l = targets.begin();
       l != targets.end(); ++l)
     {
@@ -627,7 +627,7 @@ cmGlobalUnixMakefileGenerator3
     lg = static_cast<cmLocalUnixMakefileGenerator3 *>
       (this->LocalGenerators[i]);
     // for each target Generate the rule files for each target.
-    cmGeneratorTargetsType targets = lg->GetMakefile()->GetGeneratorTargets();
+    cmGeneratorTargetsType targets = lg->GetGeneratorTargets();
     for(cmGeneratorTargetsType::iterator t = targets.begin();
         t != targets.end(); ++t)
       {
@@ -728,7 +728,7 @@ cmGlobalUnixMakefileGenerator3
   depends.push_back("cmake_check_build_system");
 
   // for each target Generate the rule files for each target.
-  cmGeneratorTargetsType targets = lg->GetMakefile()->GetGeneratorTargets();
+  cmGeneratorTargetsType targets = lg->GetGeneratorTargets();
   for(cmGeneratorTargetsType::iterator t = targets.begin();
       t != targets.end(); ++t)
     {

@@ -17,7 +17,6 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmNewLineStyle.h"
-#include "cmGeneratorTarget.h"
 #include "cmExpandedCommandArgument.h"
 #include "cmake.h"
 #include "cmState.h"
@@ -393,17 +392,6 @@ public:
       return this->ImportedTargetsOwned;
     }
 
-  const cmGeneratorTargetsType &GetGeneratorTargets() const
-    {
-      return this->GeneratorTargets;
-    }
-
-  void SetGeneratorTargets(const cmGeneratorTargetsType &targets)
-    {
-      this->GeneratorTargets = targets;
-    }
-  void AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt);
-
   cmTarget* FindTarget(const std::string& name,
                        bool excludeAliases = false) const;
 
@@ -412,7 +400,6 @@ public:
   cmTarget* FindTargetToUse(const std::string& name,
                             bool excludeAliases = false) const;
   bool IsAlias(const std::string& name) const;
-  cmGeneratorTarget* FindGeneratorTargetToUse(const std::string& name) const;
 
   /**
    * Mark include directories as system directories.
@@ -816,7 +803,6 @@ protected:
   typedef std::map<std::string, cmTarget*> TargetMap;
 #endif
   TargetMap AliasTargets;
-  cmGeneratorTargetsType GeneratorTargets;
   std::vector<cmSourceFile*> SourceFiles;
 
   // Tests

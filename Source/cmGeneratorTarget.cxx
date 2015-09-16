@@ -2305,7 +2305,8 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
 
   // Check for a target with this name.
   if(cmGeneratorTarget* t
-                    = this->Makefile->FindGeneratorTargetToUse(util))
+                    = this->GeneratorTarget->
+                    GetLocalGenerator()->FindGeneratorTargetToUse(util))
     {
     // If we find the target and the dep was given as a full path,
     // then make sure it was not a full path to something else, and

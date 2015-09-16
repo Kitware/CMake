@@ -132,7 +132,7 @@ void cmLocalGenerator::TraceDependencies()
     this->GlobalGenerator->CreateEvaluationSourceFiles(*ci);
     }
   // Generate the rule files for each target.
-  cmGeneratorTargetsType targets = this->Makefile->GetGeneratorTargets();
+  cmGeneratorTargetsType targets = this->GetGeneratorTargets();
   for(cmGeneratorTargetsType::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
@@ -448,6 +448,13 @@ void cmLocalGenerator::GenerateInstallRules()
     }
 }
 
+
+void cmLocalGenerator::AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt)
+{
+  this->GeneratorTargets[t] = gt;
+  this->GetGlobalGenerator()->AddGeneratorTarget(t, gt);
+}
+
 //----------------------------------------------------------------------------
 void cmLocalGenerator::ComputeTargetManifest()
 {
@@ -460,7 +467,7 @@ void cmLocalGenerator::ComputeTargetManifest()
     }
 
   // Add our targets to the manifest for each configuration.
-  cmGeneratorTargetsType targets = this->Makefile->GetGeneratorTargets();
+  cmGeneratorTargetsType targets = this->GetGeneratorTargets();
   for(cmGeneratorTargetsType::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
@@ -1767,6 +1774,17 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
 }
 
 //----------------------------------------------------------------------------
+cmGeneratorTarget*
+cmLocalGenerator::FindGeneratorTargetToUse(const std::string& name) const
+{
+  if (cmTarget *t = this->Makefile->FindTargetToUse(name))
+    {
+    return this->GetGlobalGenerator()->GetGeneratorTarget(t);
+    }
+  return 0;
+}
+
+//----------------------------------------------------------------------------
 bool cmLocalGenerator::GetRealDependency(const std::string& inName,
                                          const std::string& config,
                                          std::string& dep)
@@ -1792,7 +1810,7 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
 
   // Look for a CMake target with the given name.
   if(cmGeneratorTarget* target =
-     this->Makefile->FindGeneratorTargetToUse(name))
+     this->FindGeneratorTargetToUse(name))
     {
     // make sure it is not just a coincidence that the target name
     // found is part of the inName

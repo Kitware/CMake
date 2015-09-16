@@ -1812,12 +1812,6 @@ const char* cmMakefile::GetCurrentBinaryDirectory() const
   return this->StateSnapshot.GetDirectory().GetCurrentBinary();
 }
 
-void cmMakefile::AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt)
-{
-  this->GeneratorTargets[t] = gt;
-  this->GetGlobalGenerator()->AddGeneratorTarget(t, gt);
-}
-
 //----------------------------------------------------------------------------
 void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
                                        bool before)
@@ -4318,17 +4312,6 @@ bool cmMakefile::IsAlias(const std::string& name) const
   if (this->AliasTargets.find(name) != this->AliasTargets.end())
     return true;
   return this->GetGlobalGenerator()->IsAlias(name);
-}
-
-//----------------------------------------------------------------------------
-cmGeneratorTarget*
-cmMakefile::FindGeneratorTargetToUse(const std::string& name) const
-{
-  if (cmTarget *t = this->FindTargetToUse(name))
-    {
-    return this->GetGlobalGenerator()->GetGeneratorTarget(t);
-    }
-  return 0;
 }
 
 //----------------------------------------------------------------------------

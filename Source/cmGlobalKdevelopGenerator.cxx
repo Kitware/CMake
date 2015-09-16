@@ -68,8 +68,7 @@ void cmGlobalKdevelopGenerator::Generate()
     for (std::vector<cmLocalGenerator*>::const_iterator lg=lgs.begin();
          lg!=lgs.end(); lg++)
       {
-      cmMakefile* makefile=(*lg)->GetMakefile();
-      cmGeneratorTargetsType const& targets = makefile->GetGeneratorTargets();
+      cmGeneratorTargetsType const& targets = (*lg)->GetGeneratorTargets();
       for (cmGeneratorTargetsType::const_iterator ti = targets.begin();
            ti != targets.end(); ti++)
         {

@@ -42,7 +42,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
         tei = targets.begin();
       tei != targets.end(); ++tei)
     {
-    cmGeneratorTarget *te = this->LG->GetMakefile()
+    cmGeneratorTarget *te = this->LG
                                 ->FindGeneratorTargetToUse(*tei);
     expectedTargets += sep + this->Namespace + te->Target->GetExportName();
     sep = " ";

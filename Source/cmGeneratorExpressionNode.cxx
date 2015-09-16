@@ -1275,7 +1275,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
 
     std::string tgtName = parameters.front();
     cmGeneratorTarget* gt =
-                context->LG->GetMakefile()->FindGeneratorTargetToUse(tgtName);
+                context->LG->FindGeneratorTargetToUse(tgtName);
     if (!gt)
       {
       std::ostringstream e;
@@ -1739,7 +1739,7 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
       return std::string();
       }
     cmGeneratorTarget* target =
-        context->LG->GetMakefile()->FindGeneratorTargetToUse(name);
+        context->LG->FindGeneratorTargetToUse(name);
     if(!target)
       {
       ::reportError(context, content->GetOriginalExpression(),

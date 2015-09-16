@@ -113,7 +113,7 @@ void cmLocalUnixMakefileGenerator3::Generate()
     this->Makefile->IsOn("CMAKE_SKIP_ASSEMBLY_SOURCE_RULES");
 
   // Generate the rule files for each target.
-  cmGeneratorTargetsType targets = this->Makefile->GetGeneratorTargets();
+  cmGeneratorTargetsType targets = this->GetGeneratorTargets();
   cmGlobalUnixMakefileGenerator3* gg =
     static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
   for(cmGeneratorTargetsType::iterator t = targets.begin();
@@ -175,7 +175,7 @@ void cmLocalUnixMakefileGenerator3::
 GetLocalObjectFiles(std::map<std::string, LocalObjectInfo> &localObjectFiles)
 {
   std::set<std::string> emitted;
-  cmGeneratorTargetsType targets = this->Makefile->GetGeneratorTargets();
+  cmGeneratorTargetsType targets = this->GetGeneratorTargets();
   for(cmGeneratorTargetsType::iterator ti = targets.begin();
       ti != targets.end(); ++ti)
     {
@@ -418,7 +418,7 @@ void cmLocalUnixMakefileGenerator3
 
   // for each target we just provide a rule to cd up to the top and do a make
   // on the target
-  cmGeneratorTargetsType targets = this->Makefile->GetGeneratorTargets();
+  cmGeneratorTargetsType targets = this->GetGeneratorTargets();
   std::string localName;
   for(cmGeneratorTargetsType::iterator t = targets.begin();
       t != targets.end(); ++t)

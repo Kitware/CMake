@@ -287,7 +287,7 @@ void cmGlobalGhsMultiGenerator::Generate()
       {
       cmLocalGhsMultiGenerator *lg =
         static_cast<cmLocalGhsMultiGenerator *>(this->LocalGenerators[i]);
-      cmGeneratorTargetsType tgts = lg->GetMakefile()->GetGeneratorTargets();
+      cmGeneratorTargetsType tgts = lg->GetGeneratorTargets();
       this->UpdateBuildFiles(&tgts);
       }
     }

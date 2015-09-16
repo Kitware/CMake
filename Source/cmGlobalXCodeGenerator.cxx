@@ -459,7 +459,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
                         "echo", "Build all projects");
 
   cmGeneratorTarget* allBuildGt = new cmGeneratorTarget(allbuild, root);
-  mf->AddGeneratorTarget(allbuild, allBuildGt);
+  root->AddGeneratorTarget(allbuild, allBuildGt);
 
   // Refer to the main build configuration file for easy editing.
   std::string listfile = root->GetCurrentSourceDirectory();
@@ -494,7 +494,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
                           "make", "-f", file.c_str());
 
     cmGeneratorTarget* checkGt = new cmGeneratorTarget(check, root);
-    mf->AddGeneratorTarget(check, checkGt);
+    root->AddGeneratorTarget(check, checkGt);
     }
 
   // now make the allbuild depend on all the non-utility targets

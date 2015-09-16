@@ -43,7 +43,7 @@ std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
 {
   std::string const& argv0 = this->CC.GetCommandLines()[c][0];
   cmGeneratorTarget* target =
-      this->LG->GetMakefile()->FindGeneratorTargetToUse(argv0);
+      this->LG->FindGeneratorTargetToUse(argv0);
   if(target && target->GetType() == cmTarget::EXECUTABLE &&
      (target->Target->IsImported()
       || !this->LG->GetMakefile()->IsOn("CMAKE_CROSSCOMPILING")))
