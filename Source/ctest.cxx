@@ -46,6 +46,10 @@ static const char * cmDocumentationOptions[][2] =
   {"--debug", "Displaying more verbose internals of CTest."},
   {"--output-on-failure", "Output anything outputted by the test program "
     "if the test should fail."},
+  {"--test-output-size-passed <size>", "Limit the output for passed tests "
+    "to <size> bytes"},
+  {"--test-output-size-failed <size>", "Limit the output for failed tests "
+    "to <size> bytes"},
   {"-F", "Enable failover."},
   {"-j <jobs>, --parallel <jobs>", "Run the tests in parallel using the "
    "given number of jobs."},

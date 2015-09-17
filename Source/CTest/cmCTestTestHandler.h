@@ -65,6 +65,11 @@ public:
   void SetMaxIndex(int n) {this->MaxIndex = n;}
   int GetMaxIndex() {return this->MaxIndex;}
 
+  void SetTestOutputSizePassed(int n)
+    { this->CustomMaximumPassedTestOutputSize = n; }
+  void SetTestOutputSizeFailed(int n)
+    { this->CustomMaximumFailedTestOutputSize = n; }
+
   ///! pass the -I argument down
   void SetTestsToRunInformation(const char*);
 
