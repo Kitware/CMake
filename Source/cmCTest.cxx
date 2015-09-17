@@ -2165,7 +2165,46 @@ bool cmCTest::HandleCommandLineArguments(size_t &i,
     {
     this->OutputTestOutputOnTestFailure = true;
     }
-
+  if (this->CheckArgument(arg, "--test-output-size-passed") &&
+      i < args.size() - 1)
+    {
+    i++;
+    long outputSize;
+    if (cmSystemTools::StringToLong(args[i].c_str(), &outputSize))
+      {
+      if (cmCTestTestHandler *pCTestTestHandler =
+          static_cast<cmCTestTestHandler*>(this->TestingHandlers["test"]))
+        {
+        pCTestTestHandler->SetTestOutputSizePassed(int(outputSize));
+        }
+      }
+    else
+      {
+      cmCTestLog(this, WARNING,
+                 "Invalid value for '--test-output-size-passed': " <<
+                 args[i] << "\n");
+      }
+    }
+  if (this->CheckArgument(arg, "--test-output-size-failed") &&
+      i < args.size() - 1)
+    {
+    i++;
+    long outputSize;
+    if (cmSystemTools::StringToLong(args[i].c_str(), &outputSize))
+      {
+      if (cmCTestTestHandler *pCTestTestHandler =
+          static_cast<cmCTestTestHandler*>(this->TestingHandlers["test"]))
+        {
+        pCTestTestHandler->SetTestOutputSizeFailed(int(outputSize));
+        }
+      }
+    else
+      {
+      cmCTestLog(this, WARNING,
+                 "Invalid value for '--test-output-size-failed': " <<
+                 args[i] << "\n");
+      }
+    }
   if(this->CheckArgument(arg, "-N", "--show-only"))
     {
     this->ShowOnly = true;
