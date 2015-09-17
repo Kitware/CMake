@@ -363,6 +363,8 @@ public:
   cmFileLockPool& GetFileLockPool() { return FileLockPool; }
 #endif
 
+  bool GetConfigureDoneCMP0026() const { return this->ConfigureDoneCMP0026; }
+
   std::string MakeSilentFlag;
 protected:
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
@@ -520,6 +522,7 @@ protected:
   bool ForceUnixPaths;
   bool ToolSupportsColor;
   bool InstallTargetEnabled;
+  bool ConfigureDoneCMP0026;
 };
 
 #endif
