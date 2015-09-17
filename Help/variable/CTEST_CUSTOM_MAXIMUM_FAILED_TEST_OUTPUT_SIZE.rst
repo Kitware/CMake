@@ -1,6 +1,9 @@
 CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE
 --------------------------------------------
 
-Specify the maximum amount of output from a failed test that will
-be collected by the :command:`ctest_test` command.  If not set,
-the default is 300 KiB.
+When saving a failing test's output, this is the maximum size, in bytes, that
+will be collected by the :command:`ctest_test` command. Defaults to 307200
+(300 KiB).
+
+.. |CTEST_CUSTOM_XXX| replace:: CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE
+.. include:: CTEST_CUSTOM_XXX.txt
