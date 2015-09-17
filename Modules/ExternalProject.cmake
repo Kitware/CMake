@@ -1631,20 +1631,6 @@ function(_ep_add_mkdir_command name)
 endfunction()
 
 
-function(_ep_get_git_version git_EXECUTABLE git_version_var)
-  if(git_EXECUTABLE)
-    execute_process(
-      COMMAND "${git_EXECUTABLE}" --version
-      OUTPUT_VARIABLE ov
-      ERROR_VARIABLE ev
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
-    string(REGEX REPLACE "^git version (.+)$" "\\1" version "${ov}")
-    set(${git_version_var} "${version}" PARENT_SCOPE)
-  endif()
-endfunction()
-
-
 function(_ep_is_dir_empty dir empty_var)
   file(GLOB gr "${dir}/*")
   if("${gr}" STREQUAL "")
@@ -1747,8 +1733,7 @@ function(_ep_add_download_command name)
 
     # The git submodule update '--recursive' flag requires git >= v1.6.5
     #
-    _ep_get_git_version("${GIT_EXECUTABLE}" git_version)
-    if(git_version VERSION_LESS 1.6.5)
+    if(GIT_VERSION_STRING VERSION_LESS 1.6.5)
       message(FATAL_ERROR "error: git version 1.6.5 or later required for 'git submodule update --recursive': git_version='${git_version}'")
     endif()
 
