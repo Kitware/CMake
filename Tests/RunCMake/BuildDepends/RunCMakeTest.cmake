@@ -17,7 +17,7 @@ function(run_BuildDepends CASE)
   if(run_BuildDepends_skip_step_2)
     return()
   endif()
-  execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 1) # handle 1s resolution
+  execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 1.125) # handle 1s resolution
   include(${RunCMake_SOURCE_DIR}/${CASE}.step2.cmake OPTIONAL)
   set(check_step 2)
   run_cmake_command(${CASE}-build2 ${CMAKE_COMMAND} --build . --config Debug)
