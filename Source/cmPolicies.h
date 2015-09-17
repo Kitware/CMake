@@ -221,6 +221,10 @@ class cmPolicy;
   SELECT(POLICY, CMP0064, \
     "Support new TEST if() operator.", \
     3, 3, 0, cmPolicies::WARN) \
+  SELECT(POLICY, CMP0065, \
+    "Only use additional flags to export symbols on executables with " \
+    "the ENABLE_EXPORTS property.", \
+    3, 3, 0, cmPolicies::WARN) \
   SELECT(POLICY, CMP0066, \
     "Deprecate _LIB_DEPENDS variables.", \
     3, 4, 0, cmPolicies::WARN)
