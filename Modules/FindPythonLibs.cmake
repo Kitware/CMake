@@ -174,11 +174,11 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
   if(PYTHON_LIBRARY)
 
     # Use the library's install prefix as a hint
-    set(_INCLUDE_PATH_HINT)
+    set(_Python_INCLUDE_PATH_HINT)
     get_filename_component(_PREFIX ${PYTHON_LIBRARY} PATH)
     get_filename_component(_PREFIX ${_PREFIX} PATH)
     if(_PREFIX)
-      set(_INCLUDE_PATH_HINT ${_PREFIX}/include)
+      set(_Python_INCLUDE_PATH_HINT ${_PREFIX}/include)
     endif()
 
     # Add framework directories to the search paths
@@ -193,7 +193,7 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
     find_path(PYTHON_INCLUDE_DIR
       NAMES Python.h
       HINTS
-        ${_INCLUDE_PATH_HINT}
+        ${_Python_INCLUDE_PATH_HINT}
       PATHS
         ${PYTHON_FRAMEWORK_INCLUDES}
         [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
@@ -222,6 +222,7 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
   endif()
 endforeach()
 
+unset(_Python_INCLUDE_PATH_HINT)
 unset(_Python_LIBRARY_PATH_HINT)
 
 mark_as_advanced(
