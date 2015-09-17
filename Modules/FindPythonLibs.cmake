@@ -49,6 +49,23 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+# Use the executable's path as a hint
+set(_Python_LIBRARY_PATH_HINT)
+if(PYTHON_EXECUTABLE)
+  if(WIN32)
+    get_filename_component(_PREFIX ${PYTHON_EXECUTABLE} PATH)
+    if(_PREFIX)
+      set(_Python_LIBRARY_PATH_HINT ${_PREFIX}/libs)
+    endif()
+  else()
+    get_filename_component(_PREFIX ${PYTHON_EXECUTABLE} PATH)
+    get_filename_component(_PREFIX ${_PREFIX} PATH)
+    if(_PREFIX)
+      set(_Python_LIBRARY_PATH_HINT ${_PREFIX}/lib)
+    endif()
+  endif()
+endif()
+
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeFindFrameworks.cmake)
 # Search for the python framework on Apple.
 CMAKE_FIND_FRAMEWORKS(Python)
@@ -112,6 +129,7 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
   if(WIN32)
     find_library(PYTHON_DEBUG_LIBRARY
       NAMES python${_CURRENT_VERSION_NO_DOTS}_d python
+      HINTS ${_Python_LIBRARY_PATH_HINT}
       PATHS
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs/Debug
       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs/Debug
@@ -134,6 +152,8 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
       python${_CURRENT_VERSION}m
       python${_CURRENT_VERSION}u
       python${_CURRENT_VERSION}
+    HINTS
+      ${_Python_LIBRARY_PATH_HINT}
     PATHS
       ${PYTHON_FRAMEWORK_LIBRARIES}
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
@@ -203,6 +223,7 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
 endforeach()
 
 unset(_Python_INCLUDE_PATH_HINT)
+unset(_Python_LIBRARY_PATH_HINT)
 
 mark_as_advanced(
   PYTHON_DEBUG_LIBRARY
