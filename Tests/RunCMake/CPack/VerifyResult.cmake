@@ -28,8 +28,9 @@ if(NOT EXPECTED_FILES_COUNT EQUAL 0)
 
       if(NOT expected_content_list)
         message(FATAL_ERROR
-          "Unexpected file content for file No. '${file_no_}'!"
-          " Content: '${PACKAGE_CONTENT}'"
+          "Unexpected file content for file No. '${file_no_}'!\n"
+          " Content: '${PACKAGE_CONTENT}'\n\n"
+          " Expected: '${EXPECTED_FILE_CONTENT_${file_no_}}'"
           "${output_error_message}")
       endif()
     else()
@@ -56,7 +57,7 @@ if(NOT EXPECTED_FILES_COUNT EQUAL 0)
         "${output_error_message}")
   endif()
 
-  # sanity check that we didn't accidentaly list wrong files with our regular
+  # sanity check that we didn't accidentally list wrong files with our regular
   # expressions
   foreach(expected_ IN LISTS allFoundFiles_)
     list(FIND foundFiles_ "${expected_}" found_)

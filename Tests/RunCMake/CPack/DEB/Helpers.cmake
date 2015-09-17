@@ -14,7 +14,7 @@ function(verifyDebControl FILE PREFIX VERIFY_FILES)
           ERROR_VARIABLE err_)
 
   if(err_)
-    message(FATAL_ERROR "Debian controll verification failed for file: "
+    message(FATAL_ERROR "Debian control verification failed for file: "
         "'${FILE}'; error output: '${err_}'")
   endif()
 
@@ -23,6 +23,19 @@ function(verifyDebControl FILE PREFIX VERIFY_FILES)
     if(NOT content_ MATCHES "${${PREFIX}_${FILE_}}")
       message(FATAL_ERROR "Unexpected content in for '${PREFIX}_${FILE_}'!"
           " Content: '${content_}'")
+    endif()
+
+    execute_process(COMMAND ls -l "${CMAKE_CURRENT_BINARY_DIR}/control_${PREFIX}/${FILE_}"
+          OUTPUT_VARIABLE package_permissions_
+          ERROR_VARIABLE package_permissions_error_
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    if(NOT package_permissions_error_)
+      if(NOT package_permissions_ MATCHES "${${PREFIX}_${FILE_}_permissions_regex}")
+        message(FATAL_ERROR "Unexpected file permissions for ${PREFIX}_${FILE_}: '${package_permissions_}'!")
+      endif()
+    else()
+      message(FATAL_ERROR "Listing file permissions failed (${package_permissions_error_})!")
     endif()
   endforeach()
 endfunction()
