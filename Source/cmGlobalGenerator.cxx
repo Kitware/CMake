@@ -72,6 +72,8 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   this->ExtraGenerator = 0;
   this->CurrentMakefile = 0;
   this->TryCompileOuterMakefile = 0;
+
+  this->ConfigureDoneCMP0026 = false;
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()
@@ -1110,8 +1112,11 @@ void cmGlobalGenerator::Configure()
       this->CMakeInstance->GetHomeOutputDirectory());
 
   // now do it
+  this->ConfigureDoneCMP0026 = false;
   dirMf->Configure();
   dirMf->EnforceDirectoryLevelRules();
+
+  this->ConfigureDoneCMP0026 = true;
 
   // Put a copy of each global target in every directory.
   cmTargets globalTargets;
