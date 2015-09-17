@@ -646,6 +646,11 @@ endfunction()
 
 
 function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_submodules git_repository work_dir)
+  if(NOT GIT_VERSION_STRING VERSION_LESS 1.7.6)
+    set(git_stash_save_options --all --quiet)
+  else()
+    set(git_stash_save_options --quiet)
+  endif()
   file(WRITE ${script_filename}
 "if(\"${git_tag}\" STREQUAL \"\")
   message(FATAL_ERROR \"Tag for git checkout should not be empty.\")
@@ -724,7 +729,7 @@ if(error_code OR is_remote_ref OR NOT (\"\${tag_sha}\" STREQUAL \"\${head_sha}\"
     # perform git pull --rebase
     if(need_stash)
       execute_process(
-        COMMAND \"${git_EXECUTABLE}\" stash save --all --quiet
+        COMMAND \"${git_EXECUTABLE}\" stash save ${git_stash_save_options}
         WORKING_DIRECTORY \"${work_dir}\"
         RESULT_VARIABLE error_code
         )
