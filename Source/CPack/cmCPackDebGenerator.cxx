@@ -524,21 +524,24 @@ int cmCPackDebGenerator::createDeb()
            packageFiles.begin();
          fileIt != packageFiles.end(); ++ fileIt )
       {
-      std::string cmd = "\"";
-      cmd += cmSystemTools::GetCMakeCommand();
-      cmd += "\" -E md5sum \"";
-      cmd += *fileIt;
-      cmd += "\"";
-
-      std::string output;
-      int retval = -1;
-      int res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output, &output,
-          &retval, toplevel.c_str(), this->GeneratorVerbose, 0);
-      if ( !res || retval )
+      // hash only regular files
+      if(   cmSystemTools::FileIsDirectory(*fileIt)
+         || cmSystemTools::FileIsSymlink(*fileIt))
         {
-        cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running cmake -E md5sum "
-                      << cmd << std::endl);
+        continue;
         }
+
+      char md5sum[33];
+      if(!cmSystemTools::ComputeFileMD5(*fileIt, md5sum))
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem computing the md5 of "
+                      << *fileIt << std::endl);
+        }
+
+      md5sum[32] = 0;
+
+      std::string output(md5sum);
+      output += "  " + *fileIt + "\n";
       // debian md5sums entries are like this:
       // 014f3604694729f3bf19263bac599765  usr/bin/ccmake
       // thus strip the full path (with the trailing slash)

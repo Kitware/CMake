@@ -99,6 +99,25 @@ if(CHMOD_PROG)
   set(CPACK_DEBIAN_APPLICATIONS_PACKAGE_CONTROL_STRICT_PERMISSION TRUE)
 endif()
 
+# creates a symbolic link and a directory. Those should not be hashed.
+# warning: relocation of the symlink is not supported (symlinks with relative
+# paths)
+execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink mylibapp symtest)
+install(FILES ${CPackComponentsDEB_BINARY_DIR}/symtest
+        DESTINATION bin
+        COMPONENT applications)
+
+if(EXISTS "./dirtest")
+  execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ./dirtest)
+endif()
+execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ./dirtest)
+# BUG: apparently cannot add an empty directory
+execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../mylibapp ./dirtest/symtest)
+# NOTE: we should not add the trailing "/" to dirtest
+install(DIRECTORY ${CPackComponentsDEB_BINARY_DIR}/dirtest
+        DESTINATION bin/
+        COMPONENT applications)
+
 # We may use the CPack specific config file in order
 # to tailor CPack behavior on a CPack generator specific way
 # (Behavior would be different for RPM or TGZ or DEB ...)

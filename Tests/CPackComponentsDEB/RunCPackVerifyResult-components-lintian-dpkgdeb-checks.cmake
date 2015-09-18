@@ -36,7 +36,7 @@ find_program(LINTIAN_EXECUTABLE lintian)
 if(LINTIAN_EXECUTABLE)
   set(lintian_output_errors_all "")
   foreach(_f IN LISTS actual_output)
-    set(STRINGS_TO_AVOID "E:([^\r\n]*)control-file-has-bad-permissions")
+    set(STRINGS_TO_AVOID "E:([^\r\n]*)control-file-has-bad-permissions" "E:([^\r\n]*)md5sums-lists-nonexistent-file")
     lintian_check_specific_errors(lintian_output_errors
                                   FILENAME "${_f}"
                                   ERROR_REGEX_STRINGS "${STRINGS_TO_AVOID}")
