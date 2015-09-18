@@ -2216,6 +2216,7 @@ static std::string cmSystemToolsCTestCommand;
 static std::string cmSystemToolsCPackCommand;
 static std::string cmSystemToolsCMakeCursesCommand;
 static std::string cmSystemToolsCMakeGUICommand;
+static std::string cmSystemToolsCMClDepsCommand;
 static std::string cmSystemToolsCMakeRoot;
 void cmSystemTools::FindCMakeResources(const char* argv0)
 {
@@ -2308,6 +2309,13 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
     {
     cmSystemToolsCMakeCursesCommand = "";
     }
+  cmSystemToolsCMClDepsCommand = exe_dir;
+  cmSystemToolsCMClDepsCommand += "/cmcldeps";
+  cmSystemToolsCMClDepsCommand += cmSystemTools::GetExecutableExtension();
+  if(!cmSystemTools::FileExists(cmSystemToolsCMClDepsCommand.c_str()))
+    {
+    cmSystemToolsCMClDepsCommand = "";
+    }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   // Install tree has "<prefix>/bin/cmake" and "<prefix><CMAKE_DATA_DIR>".
@@ -2372,6 +2380,12 @@ std::string const& cmSystemTools::GetCMakeCursesCommand()
 std::string const& cmSystemTools::GetCMakeGUICommand()
 {
   return cmSystemToolsCMakeGUICommand;
+}
+
+//----------------------------------------------------------------------------
+std::string const& cmSystemTools::GetCMClDepsCommand()
+{
+  return cmSystemToolsCMClDepsCommand;
 }
 
 //----------------------------------------------------------------------------

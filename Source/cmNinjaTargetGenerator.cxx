@@ -371,7 +371,7 @@ cmNinjaTargetGenerator
                         mf->GetSafeDefinition("CMAKE_C_COMPILER") :
                         mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
       cldeps =  "\"";
-      cldeps += mf->GetSafeDefinition("CMAKE_CMCLDEPS_EXECUTABLE");
+      cldeps += cmSystemTools::GetCMClDepsCommand();
       cldeps += "\" " + lang + " $in \"$DEP_FILE\" $out \"";
       cldeps += mf->GetSafeDefinition("CMAKE_CL_SHOWINCLUDES_PREFIX");
       cldeps += "\" \"" + cl + "\" ";
