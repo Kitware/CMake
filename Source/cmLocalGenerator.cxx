@@ -2884,7 +2884,7 @@ cmIML_INT_uint64_t cmLocalGenerator::GetBackwardsCompatibility()
         }
       }
     this->BackwardsCompatibility = CMake_VERSION_ENCODE(major, minor, patch);
-    this->BackwardsCompatibilityFinal = this->Makefile->IsConfigured();
+    this->BackwardsCompatibilityFinal = true;
     }
 
   return this->BackwardsCompatibility;
