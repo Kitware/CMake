@@ -161,7 +161,7 @@ function(ctest_coverage_collect_gcov)
       message(STATUS "Could not determine source file corresponding to: ${gcov_file}")
     endif()
 
-    foreach(exclude_entry ${CTEST_CUSTOM_COVERAGE_EXCLUDE})
+    foreach(exclude_entry IN LISTS CTEST_CUSTOM_COVERAGE_EXCLUDE)
       if(source_file MATCHES "${exclude_entry}")
         set(is_excluded true)
 

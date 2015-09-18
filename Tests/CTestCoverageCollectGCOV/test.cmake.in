@@ -12,9 +12,9 @@ ctest_build()
 ctest_test()
 
 list(APPEND CTEST_CUSTOM_COVERAGE_EXCLUDE
-	"/foo/something"
-	"/3rdparty/"
-	"/bar/somethingelse"
+  "/foo/something"
+  "/3rdparty/"
+  "/bar/somethingelse"
 )
 
 include(CTestCoverageCollectGCOV)
