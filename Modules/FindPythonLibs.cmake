@@ -49,6 +49,25 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+# Use the executable's path as a hint
+set(_Python_LIBRARY_PATH_HINT)
+if(PYTHON_EXECUTABLE)
+  if(WIN32)
+    get_filename_component(_Python_PREFIX ${PYTHON_EXECUTABLE} PATH)
+    if(_Python_PREFIX)
+      set(_Python_LIBRARY_PATH_HINT ${_Python_PREFIX}/libs)
+    endif()
+    unset(_Python_PREFIX)
+  else()
+    get_filename_component(_Python_PREFIX ${PYTHON_EXECUTABLE} PATH)
+    get_filename_component(_Python_PREFIX ${_Python_PREFIX} PATH)
+    if(_Python_PREFIX)
+      set(_Python_LIBRARY_PATH_HINT ${_Python_PREFIX}/lib)
+    endif()
+    unset(_Python_PREFIX)
+  endif()
+endif()
+
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeFindFrameworks.cmake)
 # Search for the python framework on Apple.
 CMAKE_FIND_FRAMEWORKS(Python)
@@ -112,6 +131,7 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
   if(WIN32)
     find_library(PYTHON_DEBUG_LIBRARY
       NAMES python${_CURRENT_VERSION_NO_DOTS}_d python
+      HINTS ${_Python_LIBRARY_PATH_HINT}
       PATHS
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs/Debug
       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs/Debug
@@ -134,6 +154,8 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
       python${_CURRENT_VERSION}m
       python${_CURRENT_VERSION}u
       python${_CURRENT_VERSION}
+    HINTS
+      ${_Python_LIBRARY_PATH_HINT}
     PATHS
       ${PYTHON_FRAMEWORK_LIBRARIES}
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
@@ -150,26 +172,42 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
     PATH_SUFFIXES python${_CURRENT_VERSION}/config
   )
 
-  set(PYTHON_FRAMEWORK_INCLUDES)
-  if(Python_FRAMEWORKS AND NOT PYTHON_INCLUDE_DIR)
-    foreach(dir ${Python_FRAMEWORKS})
-      list(APPEND PYTHON_FRAMEWORK_INCLUDES
-           ${dir}/Versions/${_CURRENT_VERSION}/include)
-    endforeach()
-  endif()
+  # Don't search for include dir until library location is known
+  if(PYTHON_LIBRARY)
 
-  find_path(PYTHON_INCLUDE_DIR
-    NAMES Python.h
-    PATHS
-      ${PYTHON_FRAMEWORK_INCLUDES}
-      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
-      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
-    PATH_SUFFIXES
-      python${_CURRENT_VERSION}mu
-      python${_CURRENT_VERSION}m
-      python${_CURRENT_VERSION}u
-      python${_CURRENT_VERSION}
-  )
+    # Use the library's install prefix as a hint
+    set(_Python_INCLUDE_PATH_HINT)
+    get_filename_component(_Python_PREFIX ${PYTHON_LIBRARY} PATH)
+    get_filename_component(_Python_PREFIX ${_Python_PREFIX} PATH)
+    if(_Python_PREFIX)
+      set(_Python_INCLUDE_PATH_HINT ${_Python_PREFIX}/include)
+    endif()
+    unset(_Python_PREFIX)
+
+    # Add framework directories to the search paths
+    set(PYTHON_FRAMEWORK_INCLUDES)
+    if(Python_FRAMEWORKS AND NOT PYTHON_INCLUDE_DIR)
+      foreach(dir ${Python_FRAMEWORKS})
+        list(APPEND PYTHON_FRAMEWORK_INCLUDES
+          ${dir}/Versions/${_CURRENT_VERSION}/include)
+      endforeach()
+    endif()
+
+    find_path(PYTHON_INCLUDE_DIR
+      NAMES Python.h
+      HINTS
+        ${_Python_INCLUDE_PATH_HINT}
+      PATHS
+        ${PYTHON_FRAMEWORK_INCLUDES}
+        [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
+        [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
+      PATH_SUFFIXES
+        python${_CURRENT_VERSION}mu
+        python${_CURRENT_VERSION}m
+        python${_CURRENT_VERSION}u
+        python${_CURRENT_VERSION}
+    )
+  endif()
 
   # For backward compatibility, set PYTHON_INCLUDE_PATH.
   set(PYTHON_INCLUDE_PATH "${PYTHON_INCLUDE_DIR}")
@@ -186,6 +224,9 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
     break()
   endif()
 endforeach()
+
+unset(_Python_INCLUDE_PATH_HINT)
+unset(_Python_LIBRARY_PATH_HINT)
 
 mark_as_advanced(
   PYTHON_DEBUG_LIBRARY
