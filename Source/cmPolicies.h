@@ -224,7 +224,10 @@ class cmPolicy;
   SELECT(POLICY, CMP0065, \
     "Only use additional flags to export symbols on executables with " \
     "the ENABLE_EXPORTS property.", \
-    3, 3, 0, cmPolicies::WARN)
+    3, 3, 0, cmPolicies::WARN) \
+  SELECT(POLICY, CMP0066, \
+    "Deprecate _LIB_DEPENDS variables.", \
+    3, 4, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY) \

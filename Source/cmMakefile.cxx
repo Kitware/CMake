@@ -210,6 +210,58 @@ cmBacktraceRange cmMakefile::GetCompileDefinitionsBacktraces() const
       .GetCompileDefinitionsEntryBacktraces();
 }
 
+static std::string target_lib_depends_property(std::string const& target)
+{
+  return "cmake_" + target + "_lib_depends";
+}
+
+const char* cmMakefile::GetLibDepends(std::string const& target) const
+{
+  cmake* cm = this->GetCMakeInstance();
+  return cm->GetProperty(target_lib_depends_property(target));
+}
+
+void cmMakefile::SetLibDepends(std::string const& target,
+                               std::string const& value)
+{
+  cmake* cm = this->GetCMakeInstance();
+  cm->SetProperty(target_lib_depends_property(target), value.c_str());
+
+  switch (this->GetPolicyStatus(cmPolicies::CMP0066))
+    {
+    case cmPolicies::WARN:
+      // No sense in warning about this...the variable is pretty much always
+      // used.
+    case cmPolicies::OLD:
+      // OLD behavior is to set a variable.
+      this->AddCacheDefinition( target + "_LIB_DEPENDS", value.c_str(),
+                                "Dependencies for the target",
+                                cmState::STATIC );
+      break;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::NEW:
+      // NEW behavior is to not set a variable.
+      break;
+    }
+}
+
+bool cmMakefile::CheckLibDepends(std::string const& target) const
+{
+  if (this->GetLibDepends(target))
+    {
+    std::string message = "Target ";
+    message += target;
+    message += " has dependency information when it shouldn't.\n";
+    message += "Your cache is probably stale. Please remove the entry\n  ";
+    message += target_lib_depends_property(target);
+    message += "\nfrom the cache.";
+    cmSystemTools::Error( message.c_str() );
+    return false;
+    }
+  return true;
+}
+
 //----------------------------------------------------------------------------
 cmListFileBacktrace cmMakefile::GetBacktrace() const
 {
