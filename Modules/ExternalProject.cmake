@@ -646,6 +646,11 @@ endfunction()
 
 
 function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_submodules git_repository work_dir)
+  if(NOT GIT_VERSION_STRING VERSION_LESS 1.7.6)
+    set(git_stash_save_options --all --quiet)
+  else()
+    set(git_stash_save_options --quiet)
+  endif()
   file(WRITE ${script_filename}
 "if(\"${git_tag}\" STREQUAL \"\")
   message(FATAL_ERROR \"Tag for git checkout should not be empty.\")
@@ -724,7 +729,7 @@ if(error_code OR is_remote_ref OR NOT (\"\${tag_sha}\" STREQUAL \"\${head_sha}\"
     # perform git pull --rebase
     if(need_stash)
       execute_process(
-        COMMAND \"${git_EXECUTABLE}\" stash save --all --quiet
+        COMMAND \"${git_EXECUTABLE}\" stash save ${git_stash_save_options}
         WORKING_DIRECTORY \"${work_dir}\"
         RESULT_VARIABLE error_code
         )
@@ -1631,20 +1636,6 @@ function(_ep_add_mkdir_command name)
 endfunction()
 
 
-function(_ep_get_git_version git_EXECUTABLE git_version_var)
-  if(git_EXECUTABLE)
-    execute_process(
-      COMMAND "${git_EXECUTABLE}" --version
-      OUTPUT_VARIABLE ov
-      ERROR_VARIABLE ev
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
-    string(REGEX REPLACE "^git version (.+)$" "\\1" version "${ov}")
-    set(${git_version_var} "${version}" PARENT_SCOPE)
-  endif()
-endfunction()
-
-
 function(_ep_is_dir_empty dir empty_var)
   file(GLOB gr "${dir}/*")
   if("${gr}" STREQUAL "")
@@ -1747,8 +1738,7 @@ function(_ep_add_download_command name)
 
     # The git submodule update '--recursive' flag requires git >= v1.6.5
     #
-    _ep_get_git_version("${GIT_EXECUTABLE}" git_version)
-    if(git_version VERSION_LESS 1.6.5)
+    if(GIT_VERSION_STRING VERSION_LESS 1.6.5)
       message(FATAL_ERROR "error: git version 1.6.5 or later required for 'git submodule update --recursive': git_version='${git_version}'")
     endif()
 
