@@ -637,7 +637,7 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
 {
   assert(this->GetType() != INTERFACE_LIBRARY);
 
-  if (!this->Makefile->IsConfigured())
+  if (!this->GetMakefile()->GetGlobalGenerator()->GetConfigureDoneCMP0026())
     {
     // At configure-time, this method can be called as part of getting the
     // LOCATION property or to export() a file to be include()d.  However
@@ -683,7 +683,7 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
                                  "SOURCES")
                         != debugProperties.end();
 
-  if (this->Makefile->IsConfigured())
+  if (this->GetMakefile()->GetGlobalGenerator()->GetConfigureDoneCMP0026())
     {
     this->DebugSourcesDone = true;
     }

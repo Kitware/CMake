@@ -1112,10 +1112,11 @@ void cmGlobalGenerator::Configure()
       this->CMakeInstance->GetHomeOutputDirectory());
 
   // now do it
+  this->ConfigureDoneCMP0026 = false;
   dirMf->Configure();
   dirMf->EnforceDirectoryLevelRules();
 
-  this->ConfigureDoneCMP0026 = false;
+  this->ConfigureDoneCMP0026 = true;
 
   // Put a copy of each global target in every directory.
   cmTargets globalTargets;
