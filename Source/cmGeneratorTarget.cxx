@@ -2218,7 +2218,7 @@ cmGeneratorTarget::GetIncludeDirectories(const std::string& config,
                                  "INCLUDE_DIRECTORIES")
                         != debugProperties.end();
 
-  if (this->GlobalGenerator->GetConfigureDoneCMP0026())
+  if (this->Makefile->IsConfigured())
     {
     this->DebugIncludesDone = true;
     }
@@ -2365,7 +2365,7 @@ void cmGeneratorTarget::GetCompileOptions(std::vector<std::string> &result,
                                  "COMPILE_OPTIONS")
                         != debugProperties.end();
 
-  if (this->GlobalGenerator->GetConfigureDoneCMP0026())
+  if (this->Makefile->IsConfigured())
     {
     this->DebugCompileOptionsDone = true;
     }
@@ -2435,7 +2435,7 @@ void cmGeneratorTarget::GetCompileFeatures(std::vector<std::string> &result,
                                  "COMPILE_FEATURES")
                         != debugProperties.end();
 
-  if (this->GlobalGenerator->GetConfigureDoneCMP0026())
+  if (this->Makefile->IsConfigured())
     {
     this->DebugCompileFeaturesDone = true;
     }
@@ -2503,7 +2503,7 @@ void cmGeneratorTarget::GetCompileDefinitions(std::vector<std::string> &list,
                                 "COMPILE_DEFINITIONS")
                         != debugProperties.end();
 
-  if (this->GlobalGenerator->GetConfigureDoneCMP0026())
+  if (this->Makefile->IsConfigured())
     {
     this->DebugCompileDefinitionsDone = true;
     }
@@ -3937,7 +3937,7 @@ cmGeneratorTarget::ReportPropertyOrigin(const std::string &p,
                                  p)
                         != debugProperties.end();
 
-  if (this->GlobalGenerator->GetConfigureDoneCMP0026())
+  if (this->Target->GetMakefile()->IsConfigured())
     {
     this->DebugCompatiblePropertiesDone[p] = true;
     }
@@ -4504,7 +4504,7 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
 
   std::vector<cmGeneratorTarget*> objectLibraries;
   std::vector<cmSourceFile const*> externalObjects;
-  if (!this->GlobalGenerator->GetConfigureDoneCMP0026())
+  if (!this->Makefile->IsConfigured())
     {
     std::vector<cmTarget*> objectTargets;
     this->Target->GetObjectLibrariesCMP0026(objectTargets);
