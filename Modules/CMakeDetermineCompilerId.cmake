@@ -75,6 +75,12 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     set(CMAKE_EXECUTABLE_FORMAT "Unknown" CACHE INTERNAL "Executable file format")
   endif()
 
+  if(CMAKE_GENERATOR STREQUAL "Ninja" AND MSVC_${lang}_ARCHITECTURE_ID)
+    CMAKE_DETERMINE_MSVC_SHOWINCLUDES_PREFIX(${lang})
+  else()
+    set(CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX "")
+  endif()
+
   # Display the final identification result.
   if(CMAKE_${lang}_COMPILER_ID)
     if(CMAKE_${lang}_COMPILER_VERSION)
@@ -99,6 +105,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   set(CMAKE_${lang}_PLATFORM_ID "${CMAKE_${lang}_PLATFORM_ID}" PARENT_SCOPE)
   set(MSVC_${lang}_ARCHITECTURE_ID "${MSVC_${lang}_ARCHITECTURE_ID}"
     PARENT_SCOPE)
+  set(CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX "${CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_VERSION "${CMAKE_${lang}_COMPILER_VERSION}" PARENT_SCOPE)
   set(CMAKE_${lang}_SIMULATE_ID "${CMAKE_${lang}_SIMULATE_ID}" PARENT_SCOPE)
   set(CMAKE_${lang}_SIMULATE_VERSION "${CMAKE_${lang}_SIMULATE_VERSION}" PARENT_SCOPE)
@@ -637,4 +644,28 @@ function(CMAKE_DETERMINE_COMPILER_ID_VENDOR lang)
        endif()
     endif()
   endforeach()
+endfunction()
+
+function(CMAKE_DETERMINE_MSVC_SHOWINCLUDES_PREFIX lang)
+  # Run this MSVC-compatible compiler to detect what the /showIncludes
+  # option displays.  We can use a C source even with the C++ compiler
+  # because MSVC-compatible compilers handle both and show the same output.
+  set(showdir ${CMAKE_BINARY_DIR}/CMakeFiles/ShowIncludes)
+  file(WRITE ${showdir}/foo.h "\n")
+  file(WRITE ${showdir}/main.c "#include \"foo.h\" \nint main(){}\n")
+  execute_process(
+    COMMAND "${CMAKE_${lang}_COMPILER}"
+            ${CMAKE_${lang}_COMPILER_ID_ARG1}
+            ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
+            /nologo /showIncludes /c main.c
+    WORKING_DIRECTORY ${showdir}
+    OUTPUT_VARIABLE out
+    ERROR_VARIABLE err
+    RESULT_VARIABLE res
+    )
+  if(res EQUAL 0 AND "${out}" MATCHES "\n([^:]*:[^:]*:[ \t]*)")
+    set(CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX "${CMAKE_MATCH_1}" PARENT_SCOPE)
+  else()
+    set(CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX "" PARENT_SCOPE)
+  endif()
 endfunction()
