@@ -9,3 +9,9 @@ if(APPLE)
   run_cmake(FindPkgConfig_CMAKE_FRAMEWORK_PATH)
   run_cmake(FindPkgConfig_CMAKE_APPBUNDLE_PATH)
 endif()
+
+# We need a real pkg-config to run the test for get_variable.
+find_package(PkgConfig)
+if (PKG_CONFIG_FOUND)
+  run_cmake(FindPkgConfig_GET_VARIABLE)
+endif ()

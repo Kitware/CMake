@@ -91,6 +91,26 @@ macro(_pkgconfig_invoke _pkglist _prefix _varname _regexp)
   endif()
 endmacro()
 
+#[========================================[.rst:
+.. command:: pkg_get_variable
+
+ Retrieves the value of a variable from a package. ::
+
+ pkg_get_variable(<RESULT> <MODULE> <VARIABLE>)
+
+ Examples
+
+ .. code-block:: cmake
+
+    pkg_get_variable(GI_GIRDIR gobject-introspection-1.0 girdir)
+#]========================================]
+function (pkg_get_variable result pkg variable)
+  _pkgconfig_invoke("${pkg}" "prefix" "result" "" "--variable=${variable}")
+  set("${result}"
+    "${prefix_result}"
+    PARENT_SCOPE)
+endfunction ()
+
 # Invokes pkgconfig two times; once without '--static' and once with
 # '--static'
 macro(_pkgconfig_invoke_dyn _pkglist _prefix _varname cleanup_regexp)
@@ -356,9 +376,9 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
         endif()
 
         _pkgconfig_invoke(${_pkg_check_modules_pkg} "${_pkg_check_prefix}" VERSION    ""   --modversion )
-        _pkgconfig_invoke(${_pkg_check_modules_pkg} "${_pkg_check_prefix}" PREFIX     ""   --variable=prefix )
-        _pkgconfig_invoke(${_pkg_check_modules_pkg} "${_pkg_check_prefix}" INCLUDEDIR ""   --variable=includedir )
-        _pkgconfig_invoke(${_pkg_check_modules_pkg} "${_pkg_check_prefix}" LIBDIR     ""   --variable=libdir )
+        pkg_get_variable("${_pkg_check_prefix}_PREFIX" ${_pkg_check_modules_pkg} "prefix")
+        pkg_get_variable("${_pkg_check_prefix}_INCLUDEDIR" ${_pkg_check_modules_pkg} "includedir")
+        pkg_get_variable("${_pkg_check_prefix}_LIBDIR" ${_pkg_check_modules_pkg} "libdir")
 
         if (NOT ${_is_silent})
           message(STATUS "  Found ${_pkg_check_modules_pkg}, version ${_pkgconfig_VERSION}")
