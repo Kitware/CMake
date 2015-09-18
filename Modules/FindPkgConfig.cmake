@@ -70,14 +70,14 @@ macro(_pkgconfig_invoke _pkglist _prefix _varname _regexp)
   execute_process(
     COMMAND ${PKG_CONFIG_EXECUTABLE} ${ARGN} ${_pkglist}
     OUTPUT_VARIABLE _pkgconfig_invoke_result
-    RESULT_VARIABLE _pkgconfig_failed)
+    RESULT_VARIABLE _pkgconfig_failed
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
 
   if (_pkgconfig_failed)
     set(_pkgconfig_${_varname} "")
     _pkgconfig_unset(${_prefix}_${_varname})
   else()
     string(REGEX REPLACE "[\r\n]"                  " " _pkgconfig_invoke_result "${_pkgconfig_invoke_result}")
-    string(REGEX REPLACE " +$"                     ""  _pkgconfig_invoke_result "${_pkgconfig_invoke_result}")
 
     if (NOT ${_regexp} STREQUAL "")
       string(REGEX REPLACE "${_regexp}" " " _pkgconfig_invoke_result "${_pkgconfig_invoke_result}")
