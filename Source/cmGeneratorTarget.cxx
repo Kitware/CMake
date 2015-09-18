@@ -75,6 +75,7 @@ struct IDLSourcesTag {};
 struct ResxTag {};
 struct ModuleDefinitionFileTag {};
 struct AppManifestTag{};
+struct ManifestsTag{};
 struct CertificatesTag{};
 struct XamlTag{};
 
@@ -215,6 +216,10 @@ struct TagVisitor
     else if (ext == "appxmanifest")
       {
       DoAccept<IsSameTag<Tag, AppManifestTag>::Result>::Do(this->Data, sf);
+      }
+    else if (ext == "manifest")
+      {
+      DoAccept<IsSameTag<Tag, ManifestsTag>::Result>::Do(this->Data, sf);
       }
     else if (ext == "pfx")
       {
@@ -621,6 +626,15 @@ cmGeneratorTarget
                  const std::string& config) const
 {
   IMPLEMENT_VISIT(AppManifest);
+}
+
+//----------------------------------------------------------------------------
+void
+cmGeneratorTarget
+::GetManifests(std::vector<cmSourceFile const*>& data,
+               const std::string& config) const
+{
+  IMPLEMENT_VISIT(Manifests);
 }
 
 //----------------------------------------------------------------------------

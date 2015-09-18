@@ -237,6 +237,7 @@ cmNinjaNormalTargetGenerator
 
     vars.Flags = "$FLAGS";
     vars.LinkFlags = "$LINK_FLAGS";
+    vars.Manifests = "$MANIFESTS";
 
     std::string langFlags;
     if (targetType != cmTarget::EXECUTABLE)
@@ -509,6 +510,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   vars["LINK_FLAGS"] = cmGlobalNinjaGenerator
                         ::EncodeLiteral(vars["LINK_FLAGS"]);
 
+  vars["MANIFESTS"] = this->GetManifests();
+
   vars["LINK_PATH"] = frameworkPath + linkPath;
 
   // Compute architecture specific link flags.  Yes, these go into a different
@@ -579,11 +582,12 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     vars["TARGET_PDB"] = base + suffix + dbg_suffix;
     }
 
+  const std::string objPath = GetTarget()->GetSupportDirectory();
+  vars["OBJECT_DIR"] = ConvertToNinjaPath(objPath);
+  EnsureDirectoryExists(objPath);
+
   if (this->GetGlobalGenerator()->IsGCCOnWindows())
     {
-    const std::string objPath = GetTarget()->GetSupportDirectory();
-    vars["OBJECT_DIR"] = ConvertToNinjaPath(objPath);
-    EnsureDirectoryExists(objPath);
     // ar.exe can't handle backslashes in rsp files (implicitly used by gcc)
     std::string& linkLibraries = vars["LINK_LIBRARIES"];
     std::replace(linkLibraries.begin(), linkLibraries.end(), '\\', '/');
