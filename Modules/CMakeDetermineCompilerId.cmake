@@ -314,29 +314,17 @@ Id flags: ${testflags}
       endif()
     endif()
   else()
-    if(COMMAND EXECUTE_PROCESS)
-      execute_process(
-        COMMAND "${CMAKE_${lang}_COMPILER}"
-                ${CMAKE_${lang}_COMPILER_ID_ARG1}
-                ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
-                ${testflags}
-                "${src}"
-        WORKING_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}
-        OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
-        ERROR_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
-        RESULT_VARIABLE CMAKE_${lang}_COMPILER_ID_RESULT
-        )
-    else()
-      exec_program(
-        "${CMAKE_${lang}_COMPILER}" ${CMAKE_${lang}_COMPILER_ID_DIR}
-        ARGS ${CMAKE_${lang}_COMPILER_ID_ARG1}
-             ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
-             ${testflags}
-             \"${src}\"
-        OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
-        RETURN_VALUE CMAKE_${lang}_COMPILER_ID_RESULT
-        )
-    endif()
+    execute_process(
+      COMMAND "${CMAKE_${lang}_COMPILER}"
+              ${CMAKE_${lang}_COMPILER_ID_ARG1}
+              ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
+              ${testflags}
+              "${src}"
+      WORKING_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}
+      OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
+      ERROR_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
+      RESULT_VARIABLE CMAKE_${lang}_COMPILER_ID_RESULT
+      )
   endif()
 
   # Check the result of compilation.
