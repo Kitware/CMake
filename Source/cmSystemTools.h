@@ -426,6 +426,7 @@ public:
   static std::string const& GetCMakeCommand();
   static std::string const& GetCMakeGUICommand();
   static std::string const& GetCMakeCursesCommand();
+  static std::string const& GetCMClDepsCommand();
   static std::string const& GetCMakeRoot();
 
   /** Echo a message in color using KWSys's Terminal cprintf.  */

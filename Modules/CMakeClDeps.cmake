@@ -21,7 +21,6 @@
 #
 
 if(CMAKE_GENERATOR MATCHES "Ninja" AND CMAKE_C_COMPILER AND CMAKE_COMMAND)
-  string(REPLACE "cmake.exe" "cmcldeps.exe"  CMAKE_CMCLDEPS_EXECUTABLE ${CMAKE_COMMAND})
   set(showdir ${CMAKE_BINARY_DIR}/CMakeFiles/ShowIncludes)
   file(WRITE ${showdir}/foo.h "\n")
   file(WRITE ${showdir}/main.c "#include \"foo.h\" \nint main(){}\n")
@@ -29,6 +28,5 @@ if(CMAKE_GENERATOR MATCHES "Ninja" AND CMAKE_C_COMPILER AND CMAKE_COMMAND)
                   WORKING_DIRECTORY ${showdir} OUTPUT_VARIABLE outLine)
   string(REGEX MATCH "\n([^:]*:[^:]*:[ \t]*)" tmp "${outLine}")
   set(localizedPrefix "${CMAKE_MATCH_1}")
-  set(SET_CMAKE_CMCLDEPS_EXECUTABLE   "set(CMAKE_CMCLDEPS_EXECUTABLE \"${CMAKE_CMCLDEPS_EXECUTABLE}\")")
   set(SET_CMAKE_CL_SHOWINCLUDES_PREFIX "set(CMAKE_CL_SHOWINCLUDES_PREFIX \"${localizedPrefix}\")")
 endif()
