@@ -152,7 +152,7 @@ endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-add_executable(cmake-gui WIN32 MACOSX_BUNDLE ${SRCS})
+add_executable(cmake-gui WIN32 MACOSX_BUNDLE ${SRCS} ${MANIFEST_FILE})
 target_link_libraries(cmake-gui CMakeLib ${QT_QTMAIN_LIBRARY} ${CMake_QT_LIBRARIES})
 
 if(APPLE)
