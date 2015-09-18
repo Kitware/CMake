@@ -78,9 +78,12 @@ if (Qt5Widgets_FOUND)
     endif()
   endif()
 
-  if(WIN32 AND TARGET Qt5::Core)
+  if(TARGET Qt5::Core)
     get_property(_Qt5_Core_LOCATION TARGET Qt5::Core PROPERTY LOCATION)
     get_filename_component(Qt_BIN_DIR "${_Qt5_Core_LOCATION}" PATH)
+    if(APPLE)
+      get_filename_component(Qt_BIN_DIR "${Qt_BIN_DIR}" PATH)
+    endif()
   endif()
 else()
   set(QT_MIN_VERSION "4.4.0")
@@ -94,12 +97,6 @@ else()
 
   set(CMake_QT_LIBRARIES ${QT_LIBRARIES})
 
-  if(WIN32 AND EXISTS "${QT_QMAKE_EXECUTABLE}")
-    get_filename_component(_Qt_BIN_DIR "${QT_QMAKE_EXECUTABLE}" PATH)
-    if(EXISTS "${_Qt_BIN_DIR}/QtCore4.dll")
-      set(Qt_BIN_DIR ${_Qt_BIN_DIR})
-    endif()
-  endif()
 endif()
 
 set(SRCS
@@ -157,9 +154,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_executable(cmake-gui WIN32 MACOSX_BUNDLE ${SRCS})
 target_link_libraries(cmake-gui CMakeLib ${QT_QTMAIN_LIBRARY} ${CMake_QT_LIBRARIES})
-if(Qt_BIN_DIR)
-  set_property(TARGET cmake-gui PROPERTY Qt_BIN_DIR ${Qt_BIN_DIR})
-endif()
 
 if(APPLE)
   file(STRINGS "${CMake_SOURCE_DIR}/Copyright.txt" copyright_line
@@ -223,7 +217,7 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
   install(CODE "
     include(\"${CMake_SOURCE_DIR}/Modules/BundleUtilities.cmake\")
     set(BU_CHMOD_BUNDLE_ITEMS ON)
-    fixup_bundle(\"${fixup_exe}\" \"${QT_PLUGINS}\" \"${QT_LIBRARY_DIR};${QT_BINARY_DIR}\")
+    fixup_bundle(\"${fixup_exe}\" \"${QT_PLUGINS}\" \"${Qt_BIN_DIR};${QT_LIBRARY_DIR};${QT_BINARY_DIR}\")
   " ${COMPONENT})
 endif()
 
