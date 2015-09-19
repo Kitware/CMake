@@ -1947,12 +1947,6 @@ void cmGlobalGenerator::AddMakefile(cmMakefile *mf)
   this->CMakeInstance->UpdateProgress("Configuring", prog);
 }
 
-//----------------------------------------------------------------------------
-void cmGlobalGenerator::AddLocalGenerator(cmLocalGenerator *lg)
-{
-  this->LocalGenerators.push_back(lg);
-}
-
 void cmGlobalGenerator::AddInstallComponent(const char* component)
 {
   if(component && *component)
