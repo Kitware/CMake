@@ -300,7 +300,6 @@ public:
   void CreateEvaluationFileOutputs(const std::string& config);
   void ProcessEvaluationFiles(std::vector<std::string>& generatedFiles);
 
-  void ComputeObjectMaxPath();
 protected:
   ///! put all the libraries for a target on into the given stream
   void OutputLinkLibraries(std::string& linkLibraries,
@@ -360,6 +359,8 @@ private:
   bool GetShouldUseOldFlags(bool shared, const std::string &lang) const;
   void AddPositionIndependentFlags(std::string& flags, std::string const& l,
                                    int targetType);
+
+  void ComputeObjectMaxPath();
 };
 
 #endif

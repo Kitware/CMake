@@ -54,6 +54,8 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
   this->EmitUniversalBinaryFlags = true;
   this->BackwardsCompatibility = 0;
   this->BackwardsCompatibilityFinal = false;
+
+  this->ComputeObjectMaxPath();
 }
 
 cmLocalGenerator::~cmLocalGenerator()

@@ -1252,11 +1252,6 @@ bool cmGlobalGenerator::Compute()
 
   unsigned int i;
 
-  for (i = 0; i < this->LocalGenerators.size(); ++i)
-    {
-    this->LocalGenerators[i]->ComputeObjectMaxPath();
-    }
-
   // Add generator specific helper commands
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
