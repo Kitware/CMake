@@ -1429,6 +1429,13 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
         {
         continue;
         }
+      if((!ti->second.GetPropertyAsBool("AUTOMOC")
+            && !ti->second.GetPropertyAsBool("AUTOUIC")
+            && !ti->second.GetPropertyAsBool("AUTORCC"))
+          || ti->second.IsImported())
+        {
+        continue;
+        }
       targetNames.push_back(ti->second.GetName());
       }
     for(std::vector<std::string>::iterator ti = targetNames.begin();
@@ -1436,17 +1443,12 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
       {
       cmTarget& target = *this->LocalGenerators[i]
                               ->GetMakefile()->FindTarget(*ti, true);
-      if((target.GetPropertyAsBool("AUTOMOC")
-            || target.GetPropertyAsBool("AUTOUIC")
-            || target.GetPropertyAsBool("AUTORCC"))
-          && !target.IsImported())
+
+      if(cmQtAutoGenerators::InitializeAutogenTarget(
+           this->LocalGenerators[i], &target))
         {
-        if(cmQtAutoGenerators::InitializeAutogenTarget(
-             this->LocalGenerators[i], &target))
-          {
-          cmQtAutoGenerators autogen;
-          autogens.push_back(std::make_pair(autogen, &target));
-          }
+        cmQtAutoGenerators autogen;
+        autogens.push_back(std::make_pair(autogen, &target));
         }
       }
     }
