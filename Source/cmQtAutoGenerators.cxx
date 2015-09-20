@@ -286,8 +286,8 @@ std::string cmQtAutoGenerators::ListQt4RccInputs(cmSourceFile* sf,
   return entriesList;
 }
 
-void cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
-                                                 cmTarget* target)
+
+void cmQtAutoGenerators::InitializeAutogenSources(cmTarget* target)
 {
   cmMakefile* makefile = target->GetMakefile();
 
@@ -304,6 +304,19 @@ void cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
 
     target->AddSource(mocCppFile);
     }
+}
+
+void cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
+                                                 cmTarget* target)
+{
+  cmMakefile* makefile = target->GetMakefile();
+
+  std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
+  if (qtMajorVersion == "")
+    {
+    qtMajorVersion = makefile->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
+    }
+
   // create a custom target for running generators at buildtime:
   std::string autogenTargetName = getAutogenTargetName(target);
 

@@ -1456,6 +1456,7 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
       cmTarget& target = *this->LocalGenerators[i]
                               ->GetMakefile()->FindTarget(*ti, true);
 
+      cmQtAutoGenerators::InitializeAutogenSources(&target);
       cmQtAutoGenerators::InitializeAutogenTarget(
            this->LocalGenerators[i], &target);
       cmQtAutoGenerators autogen;
