@@ -31,7 +31,7 @@ public:
   cmQtAutoGenerators();
   bool Run(const std::string& targetDirectory, const std::string& config);
 
-  static bool InitializeAutogenTarget(cmLocalGenerator* lg, cmTarget* target);
+  static void InitializeAutogenTarget(cmLocalGenerator* lg, cmTarget* target);
   static void SetupAutoGenerateTarget(cmTarget const* target);
 
 private:

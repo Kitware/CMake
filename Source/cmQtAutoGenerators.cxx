@@ -286,20 +286,10 @@ std::string cmQtAutoGenerators::ListQt4RccInputs(cmSourceFile* sf,
   return entriesList;
 }
 
-bool cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
+void cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
                                                  cmTarget* target)
 {
   cmMakefile* makefile = target->GetMakefile();
-  // don't do anything if there is no Qt4 or Qt5Core (which contains moc):
-  std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
-  if (qtMajorVersion == "")
-    {
-    qtMajorVersion = makefile->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
-    }
-  if (qtMajorVersion != "4" && qtMajorVersion != "5")
-    {
-    return false;
-    }
 
   if (target->GetPropertyAsBool("AUTOMOC"))
     {
@@ -499,8 +489,6 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
 
     target->AddUtility(autogenTargetName);
     }
-
-  return true;
 }
 
 static void GetCompileDefinitionsAndDirectories(cmTarget const* target,

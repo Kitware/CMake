@@ -1436,6 +1436,18 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
         {
         continue;
         }
+      // don't do anything if there is no Qt4 or Qt5Core (which contains moc):
+      cmMakefile* mf = ti->second.GetMakefile();
+      std::string qtMajorVersion = mf->GetSafeDefinition("QT_VERSION_MAJOR");
+      if (qtMajorVersion == "")
+        {
+        qtMajorVersion = mf->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
+        }
+      if (qtMajorVersion != "4" && qtMajorVersion != "5")
+        {
+        continue;
+        }
+
       targetNames.push_back(ti->second.GetName());
       }
     for(std::vector<std::string>::iterator ti = targetNames.begin();
@@ -1444,12 +1456,10 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
       cmTarget& target = *this->LocalGenerators[i]
                               ->GetMakefile()->FindTarget(*ti, true);
 
-      if(cmQtAutoGenerators::InitializeAutogenTarget(
-           this->LocalGenerators[i], &target))
-        {
-        cmQtAutoGenerators autogen;
-        autogens.push_back(std::make_pair(autogen, &target));
-        }
+      cmQtAutoGenerators::InitializeAutogenTarget(
+           this->LocalGenerators[i], &target);
+      cmQtAutoGenerators autogen;
+      autogens.push_back(std::make_pair(autogen, &target));
       }
     }
 #else
