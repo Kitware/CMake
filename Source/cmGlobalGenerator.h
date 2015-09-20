@@ -186,6 +186,7 @@ public:
   {this->CurrentMakefile = mf;}
 
   void AddMakefile(cmMakefile *mf);
+  void AddLocalGenerator(cmLocalGenerator *lg);
 
   ///! Set an generator for an "external makefile based project"
   void SetExternalMakefileProjectGenerator(
