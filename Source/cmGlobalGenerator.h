@@ -186,6 +186,7 @@ public:
   {this->CurrentMakefile = mf;}
 
   void AddMakefile(cmMakefile *mf);
+  void AddLocalGenerator(cmLocalGenerator *lg);
 
   ///! Set an generator for an "external makefile based project"
   void SetExternalMakefileProjectGenerator(
@@ -462,8 +463,6 @@ private:
   void FinalizeTargetCompileInfo();
 
   virtual void ForceLinkerLanguages();
-
-  void CreateLocalGenerators();
 
   void CheckCompilerIdCompatibility(cmMakefile* mf,
                                     std::string const& lang) const;
