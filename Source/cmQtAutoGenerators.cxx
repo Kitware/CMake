@@ -184,7 +184,7 @@ std::string cmQtAutoGenerators::ListQt5RccInputs(cmSourceFile* sf,
                                             cmTarget const* target,
                                             std::vector<std::string>& depends)
 {
-  std::string rccCommand = this->GetRccExecutable(target);
+  std::string rccCommand = cmQtAutoGenerators::GetRccExecutable(target);
   std::vector<std::string> qrcEntries;
 
   std::vector<std::string> command;
@@ -434,11 +434,11 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
             {
             if (qtMajorVersion == "5")
               {
-              this->ListQt5RccInputs(sf, target, depends);
+              cmQtAutoGenerators::ListQt5RccInputs(sf, target, depends);
               }
             else
               {
-              this->ListQt4RccInputs(sf, depends);
+              cmQtAutoGenerators::ListQt4RccInputs(sf, depends);
               }
 #if defined(_WIN32) && !defined(__CYGWIN__)
             // Cannot use PRE_BUILD because the resource files themselves
@@ -573,23 +573,24 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
       || target->GetPropertyAsBool("AUTOUIC")
       || target->GetPropertyAsBool("AUTORCC"))
     {
-    this->SetupSourceFiles(target, skipMoc, mocSources, mocHeaders, skipUic);
+    cmQtAutoGenerators::SetupSourceFiles(target, skipMoc,
+                                         mocSources, mocHeaders, skipUic);
     }
   makefile->AddDefinition("_cpp_files",
           cmOutputConverter::EscapeForCMake(cmJoin(mocSources, ";")).c_str());
   if (target->GetPropertyAsBool("AUTOMOC"))
     {
-    this->SetupAutoMocTarget(target, autogenTargetName,
+    cmQtAutoGenerators::SetupAutoMocTarget(target, autogenTargetName,
                              skipMoc, mocHeaders,
                              configIncludes, configDefines);
     }
   if (target->GetPropertyAsBool("AUTOUIC"))
     {
-    this->SetupAutoUicTarget(target, skipUic, configUicOptions);
+    cmQtAutoGenerators::SetupAutoUicTarget(target, skipUic, configUicOptions);
     }
   if (target->GetPropertyAsBool("AUTORCC"))
     {
-    this->SetupAutoRccTarget(target);
+    cmQtAutoGenerators::SetupAutoRccTarget(target);
     }
 
   const char* cmakeRoot = makefile->GetSafeDefinition("CMAKE_ROOT");
@@ -1095,7 +1096,7 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
           {
           std::vector<std::string> optsVec;
           cmSystemTools::ExpandListArgument(prop, optsVec);
-          this->MergeRccOptions(rccOptions, optsVec,
+          cmQtAutoGenerators::MergeRccOptions(rccOptions, optsVec,
                                 strcmp(qtVersion, "5") == 0);
           }
 
@@ -1123,11 +1124,12 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
           {
           if (qtMajorVersion == "5")
             {
-            entriesList = this->ListQt5RccInputs(sf, target, depends);
+            entriesList = cmQtAutoGenerators::ListQt5RccInputs(sf, target,
+                                                               depends);
             }
           else
             {
-            entriesList = this->ListQt4RccInputs(sf, depends);
+            entriesList = cmQtAutoGenerators::ListQt4RccInputs(sf, depends);
             }
           if (entriesList.empty())
             {
@@ -1152,7 +1154,7 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
             cmOutputConverter::EscapeForCMake(rccFileOptions).c_str());
 
   makefile->AddDefinition("_qt_rcc_executable",
-                          this->GetRccExecutable(target).c_str());
+                        cmQtAutoGenerators::GetRccExecutable(target).c_str());
 }
 
 std::string cmQtAutoGenerators::GetRccExecutable(cmTarget const* target)
@@ -2248,7 +2250,8 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
       {
       std::vector<std::string> fileOpts;
       cmSystemTools::ExpandListArgument(optionIt->second, fileOpts);
-      this->MergeUicOptions(opts, fileOpts, this->QtMajorVersion == "5");
+      cmQtAutoGenerators::MergeUicOptions(opts, fileOpts,
+                                          this->QtMajorVersion == "5");
       }
     command.insert(command.end(), opts.begin(), opts.end());
 

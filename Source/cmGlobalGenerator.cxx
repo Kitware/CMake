@@ -1439,10 +1439,10 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
               || target.GetPropertyAsBool("AUTORCC"))
             && !target.IsImported())
           {
-          cmQtAutoGenerators autogen;
-          if(autogen.InitializeAutogenTarget(this->LocalGenerators[i],
-                                             &target))
+          if(cmQtAutoGenerators::InitializeAutogenTarget(
+               this->LocalGenerators[i], &target))
             {
+            cmQtAutoGenerators autogen;
             autogens.push_back(std::make_pair(autogen, &target));
             }
           }

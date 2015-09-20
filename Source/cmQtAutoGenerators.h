@@ -31,26 +31,26 @@ public:
   cmQtAutoGenerators();
   bool Run(const std::string& targetDirectory, const std::string& config);
 
-  bool InitializeAutogenTarget(cmLocalGenerator* lg, cmTarget* target);
-  void SetupAutoGenerateTarget(cmTarget const* target);
+  static bool InitializeAutogenTarget(cmLocalGenerator* lg, cmTarget* target);
+  static void SetupAutoGenerateTarget(cmTarget const* target);
 
 private:
-  void SetupSourceFiles(cmTarget const* target,
+  static void SetupSourceFiles(cmTarget const* target,
                         std::vector<std::string>& skipMoc,
                         std::vector<std::string>& mocSources,
                         std::vector<std::string>& mocHeaders,
                         std::vector<std::string>& skipUic);
 
-  void SetupAutoMocTarget(cmTarget const* target,
+  static void SetupAutoMocTarget(cmTarget const* target,
                           const std::string &autogenTargetName,
                           const std::vector<std::string>& skipMoc,
                           const std::vector<std::string>& mocHeaders,
                           std::map<std::string, std::string> &configIncludes,
                           std::map<std::string, std::string> &configDefines);
-  void SetupAutoUicTarget(cmTarget const* target,
+  static void SetupAutoUicTarget(cmTarget const* target,
                         const std::vector<std::string>& skipUic,
                         std::map<std::string, std::string> &configUicOptions);
-  void SetupAutoRccTarget(cmTarget const* target);
+  static void SetupAutoRccTarget(cmTarget const* target);
 
   bool ReadAutogenInfoFile(cmMakefile* makefile,
                            const std::string& targetDirectory,
@@ -96,18 +96,18 @@ private:
   bool EndsWith(const std::string& str, const std::string& with);
   bool StartsWith(const std::string& str, const std::string& with);
 
-  void MergeUicOptions(std::vector<std::string> &opts,
+  static void MergeUicOptions(std::vector<std::string> &opts,
                        const std::vector<std::string> &fileOpts, bool isQt5);
 
-  void MergeRccOptions(std::vector<std::string> &opts,
+  static void MergeRccOptions(std::vector<std::string> &opts,
                        const std::vector<std::string> &fileOpts, bool isQt5);
 
-  std::string GetRccExecutable(cmTarget const* target);
+  static std::string GetRccExecutable(cmTarget const* target);
 
-  std::string ListQt5RccInputs(cmSourceFile* sf, cmTarget const* target,
+  static std::string ListQt5RccInputs(cmSourceFile* sf, cmTarget const* target,
                                std::vector<std::string>& depends);
 
-  std::string ListQt4RccInputs(cmSourceFile* sf,
+  static std::string ListQt4RccInputs(cmSourceFile* sf,
                                std::vector<std::string>& depends);
 
   bool InputFilesNewerThanQrc(const std::string& qrcFile,
