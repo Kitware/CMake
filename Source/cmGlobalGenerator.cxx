@@ -1123,6 +1123,8 @@ void cmGlobalGenerator::Configure()
   dirMf->Configure();
   dirMf->EnforceDirectoryLevelRules();
 
+  this->CreateLocalGenerators();
+
   // Put a copy of each global target in every directory.
   cmTargets globalTargets;
   this->CreateDefaultGlobalTargets(&globalTargets);
@@ -1180,7 +1182,6 @@ void cmGlobalGenerator::Configure()
 
 void cmGlobalGenerator::CreateGenerationObjects(TargetTypes targetTypes)
 {
-  this->CreateLocalGenerators();
   cmDeleteAll(this->GeneratorTargets);
   this->GeneratorTargets.clear();
   this->CreateGeneratorTargets(targetTypes);
