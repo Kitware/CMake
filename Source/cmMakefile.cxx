@@ -1680,6 +1680,11 @@ void cmMakefile::Configure()
 
   this->AddCMakeDependFilesFromUser();
   this->SetConfigured();
+
+  // create a new local generator and set its parent
+  cmLocalGenerator *lg2 = this->GetGlobalGenerator()
+        ->CreateLocalGenerator(this);
+  this->GetGlobalGenerator()->AddLocalGenerator(lg2);
 }
 
 void cmMakefile::ConfigureSubDirectory(cmMakefile *mf)
