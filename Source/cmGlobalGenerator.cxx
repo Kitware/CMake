@@ -1421,6 +1421,14 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
         {
         continue;
         }
+      if(ti->second.GetType() != cmTarget::EXECUTABLE &&
+         ti->second.GetType() != cmTarget::STATIC_LIBRARY &&
+         ti->second.GetType() != cmTarget::SHARED_LIBRARY &&
+         ti->second.GetType() != cmTarget::MODULE_LIBRARY &&
+         ti->second.GetType() != cmTarget::OBJECT_LIBRARY)
+        {
+        continue;
+        }
       targetNames.push_back(ti->second.GetName());
       }
     for(std::vector<std::string>::iterator ti = targetNames.begin();
@@ -1428,23 +1436,16 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
       {
       cmTarget& target = *this->LocalGenerators[i]
                               ->GetMakefile()->FindTarget(*ti, true);
-      if(target.GetType() == cmTarget::EXECUTABLE ||
-         target.GetType() == cmTarget::STATIC_LIBRARY ||
-         target.GetType() == cmTarget::SHARED_LIBRARY ||
-         target.GetType() == cmTarget::MODULE_LIBRARY ||
-         target.GetType() == cmTarget::OBJECT_LIBRARY)
+      if((target.GetPropertyAsBool("AUTOMOC")
+            || target.GetPropertyAsBool("AUTOUIC")
+            || target.GetPropertyAsBool("AUTORCC"))
+          && !target.IsImported())
         {
-        if((target.GetPropertyAsBool("AUTOMOC")
-              || target.GetPropertyAsBool("AUTOUIC")
-              || target.GetPropertyAsBool("AUTORCC"))
-            && !target.IsImported())
+        if(cmQtAutoGenerators::InitializeAutogenTarget(
+             this->LocalGenerators[i], &target))
           {
-          if(cmQtAutoGenerators::InitializeAutogenTarget(
-               this->LocalGenerators[i], &target))
-            {
-            cmQtAutoGenerators autogen;
-            autogens.push_back(std::make_pair(autogen, &target));
-            }
+          cmQtAutoGenerators autogen;
+          autogens.push_back(std::make_pair(autogen, &target));
           }
         }
       }
