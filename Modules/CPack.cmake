@@ -182,6 +182,17 @@
 #  will be a boolean variable which enables stripping of all files (a list
 #  of files evaluates to TRUE in CMake, so this change is compatible).
 #
+# .. variable:: CPACK_VERBATIM_VARIABLES
+#
+#  If set to TRUE, values of variables prefixed with CPACK_ will be escaped
+#  before being written to the configuration files, so that the cpack program
+#  receives them exactly as they were specified. If not, characters like quotes
+#  and backslashes can cause parsing errors or alter the value received by the
+#  cpack program. Defaults to FALSE for backwards compatibility.
+#
+#  * Mandatory : NO
+#  * Default   : FALSE
+#
 # The following CPack variables are specific to source packages, and
 # will not affect binary packages:
 #
@@ -305,27 +316,39 @@ macro(cpack_set_if_not_set name value)
   _cpack_set_default("${name}" "${value}")
 endmacro()
 
-# cpack_encode_variables - Macro to encode variables for the configuration file
+# cpack_encode_variables - Function to encode variables for the configuration file
 # find any variable that starts with CPACK and create a variable
 # _CPACK_OTHER_VARIABLES_ that contains SET commands for
 # each cpack variable.  _CPACK_OTHER_VARIABLES_ is then
 # used as an @ replacment in configure_file for the CPackConfig.
-macro(cpack_encode_variables)
-  set(_CPACK_OTHER_VARIABLES_)
+function(cpack_encode_variables)
+  set(commands "")
   get_cmake_property(res VARIABLES)
   foreach(var ${res})
     if(var MATCHES "^CPACK")
-      set(_CPACK_OTHER_VARIABLES_
-        "${_CPACK_OTHER_VARIABLES_}\nSET(${var} \"${${var}}\")")
+      if(CPACK_VERBATIM_VARIABLES)
+        _cpack_escape_for_cmake(value "${${var}}")
+      else()
+        set(value "${${var}}")
       endif()
+
+      set(commands "${commands}\nSET(${var} \"${value}\")")
+    endif()
   endforeach()
-endmacro()
+
+  set(_CPACK_OTHER_VARIABLES_ "${commands}" PARENT_SCOPE)
+endfunction()
 
 # Internal use functions
 function(_cpack_set_default name value)
   if(NOT DEFINED "${name}")
     set("${name}" "${value}" PARENT_SCOPE)
   endif()
+endfunction()
+
+function(_cpack_escape_for_cmake var value)
+  string(REGEX REPLACE "([\\\$\"])" "\\\\\\1" escaped "${value}")
+  set("${var}" "${escaped}" PARENT_SCOPE)
 endfunction()
 
 # Set the package name
@@ -608,8 +631,15 @@ _cpack_set_default(CPACK_SOURCE_INSTALLED_DIRECTORIES
 _cpack_set_default(CPACK_SOURCE_TOPLEVEL_TAG "${CPACK_SYSTEM_NAME}-Source")
 _cpack_set_default(CPACK_SOURCE_PACKAGE_FILE_NAME
   "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-Source")
-_cpack_set_default(CPACK_SOURCE_IGNORE_FILES
-  "/CVS/;/\\\\.svn/;/\\\\.bzr/;/\\\\.hg/;/\\\\.git/;\\\\.swp$;\\\\.#;/#")
+
+set(__cpack_source_ignore_files_default
+  "/CVS/;/\\.svn/;/\\.bzr/;/\\.hg/;/\\.git/;\\.swp$;\\.#;/#")
+if(NOT CPACK_VERBATIM_VARIABLES)
+  _cpack_escape_for_cmake(__cpack_source_ignore_files_default
+    "${__cpack_source_ignore_files_default}")
+endif()
+_cpack_set_default(CPACK_SOURCE_IGNORE_FILES "${__cpack_source_ignore_files_default}")
+
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_SOURCE_INSTALL_CMAKE_PROJECTS}")
 set(CPACK_INSTALLED_DIRECTORIES "${CPACK_SOURCE_INSTALLED_DIRECTORIES}")
 set(CPACK_GENERATOR "${CPACK_SOURCE_GENERATOR}")
