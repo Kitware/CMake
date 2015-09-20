@@ -1732,11 +1732,6 @@ void cmMakefile::Configure()
 
   this->AddCMakeDependFilesFromUser();
   this->SetConfigured();
-
-  // create a new local generator and set its parent
-  cmLocalGenerator *lg2 = this->GetGlobalGenerator()
-        ->CreateLocalGenerator(this);
-  this->GetGlobalGenerator()->AddLocalGenerator(lg2);
 }
 
 void cmMakefile::ConfigureSubDirectory(cmMakefile *mf)
@@ -1829,6 +1824,11 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
     {
     this->UnConfiguredDirectories.push_back(subMf);
     }
+
+  // create a new local generator and set its parent
+  cmLocalGenerator *lg2 = this->GetGlobalGenerator()
+        ->CreateLocalGenerator(subMf);
+  this->GetGlobalGenerator()->AddLocalGenerator(lg2);
 }
 
 void cmMakefile::SetCurrentSourceDirectory(const std::string& dir)
