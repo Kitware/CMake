@@ -1,5 +1,5 @@
-ENABLE_EXPORTS
---------------
+CMAKE_ENABLE_EXPORTS
+--------------------
 
 Specify whether an executable exports symbols for loadable modules.
 
@@ -18,5 +18,5 @@ module will "link" to the executable using a flag like
 ignored since the dynamic loader will automatically bind symbols when
 the module is loaded.
 
-This property is initialized by the value of the variable
-:variable:`CMAKE_ENABLE_EXPORTS` if it is set when a target is created.
+This variable is used to initialize the target property
+:prop_tgt:`ENABLE_EXPORTS` for executable targets.

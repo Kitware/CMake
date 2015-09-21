@@ -220,6 +220,10 @@ class cmPolicy;
     3, 3, 0, cmPolicies::WARN) \
   SELECT(POLICY, CMP0064, \
     "Support new TEST if() operator.", \
+    3, 4, 0, cmPolicies::WARN) \
+  SELECT(POLICY, CMP0065, \
+    "Do not add flags to export symbols from executables without " \
+    "the ENABLE_EXPORTS target property.", \
     3, 4, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
