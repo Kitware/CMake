@@ -94,13 +94,13 @@ endmacro()
 #[========================================[.rst:
 .. command:: pkg_get_variable
 
- Retrieves the value of a variable from a package. ::
+  Retrieves the value of a variable from a package::
 
- pkg_get_variable(<RESULT> <MODULE> <VARIABLE>)
+    pkg_get_variable(<RESULT> <MODULE> <VARIABLE>)
 
- Examples
+  For example:
 
- .. code-block:: cmake
+  .. code-block:: cmake
 
     pkg_get_variable(GI_GIRDIR gobject-introspection-1.0 girdir)
 #]========================================]
