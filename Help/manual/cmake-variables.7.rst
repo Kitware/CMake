@@ -245,7 +245,6 @@ Variables that Control the Build
    /variable/CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY_CONFIG
    /variable/CMAKE_CONFIG_POSTFIX
    /variable/CMAKE_DEBUG_POSTFIX
-   /variable/CMAKE_ENABLE_EXPORTS
    /variable/CMAKE_EXE_LINKER_FLAGS_CONFIG
    /variable/CMAKE_EXE_LINKER_FLAGS
    /variable/CMAKE_Fortran_FORMAT
