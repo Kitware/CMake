@@ -1365,6 +1365,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindOpenSSL)
   endif()
 
+  add_subdirectory(FindThreads)
+
   # Matlab module
   if(CMake_TEST_FindMatlab)
     ADD_TEST_MACRO(FindMatlab.basic_checks      ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>)
