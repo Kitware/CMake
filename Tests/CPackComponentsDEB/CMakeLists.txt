@@ -110,9 +110,8 @@ install(FILES ${CPackComponentsDEB_BINARY_DIR}/symtest
 if(EXISTS "./dirtest")
   execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ./dirtest)
 endif()
+# NOTE: directory left empty on purpose
 execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ./dirtest)
-# BUG: apparently cannot add an empty directory
-execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../mylibapp ./dirtest/symtest)
 # NOTE: we should not add the trailing "/" to dirtest
 install(DIRECTORY ${CPackComponentsDEB_BINARY_DIR}/dirtest
         DESTINATION bin/
