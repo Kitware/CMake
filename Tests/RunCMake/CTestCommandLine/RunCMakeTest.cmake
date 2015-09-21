@@ -108,3 +108,20 @@ run_TestLoad(test-load-invalid 'two')
 run_TestLoad(test-load-pass 10)
 
 unset(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING})
+
+function(run_TestOutputSize)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestOutputSize)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+  add_test(PassingTest \"${CMAKE_COMMAND}\" -E echo PassingTestOutput)
+  add_test(FailingTest \"${CMAKE_COMMAND}\" -E no_such_command)
+")
+  run_cmake_command(TestOutputSize
+    ${CMAKE_CTEST_COMMAND} -M Experimental -T Test
+                           --test-output-size-passed 10
+                           --test-output-size-failed 12
+    )
+endfunction()
+run_TestOutputSize()

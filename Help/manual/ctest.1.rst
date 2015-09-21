@@ -302,6 +302,12 @@ Options
 ``--test-command``
  The test to run with the --build-and-test option.
 
+``--test-output-size-passed <size>``
+ Limit the output for passed tests to <size> bytes.
+
+``--test-output-size-failed <size>``
+ Limit the output for failed tests to <size> bytes.
+
 ``--test-timeout``
  The time limit in seconds, internal use only.
 

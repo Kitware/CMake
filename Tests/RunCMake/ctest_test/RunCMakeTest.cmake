@@ -59,3 +59,18 @@ function(run_TestChangeId)
   run_ctest(TestChangeId)
 endfunction()
 run_TestChangeId()
+
+function(run_TestOutputSize)
+  set(CASE_CTEST_TEST_ARGS EXCLUDE RunCMakeVersion)
+  set(CASE_TEST_PREFIX_CODE [[
+set(CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE 10)
+set(CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE 12)
+  ]])
+  set(CASE_CMAKELISTS_SUFFIX_CODE [[
+add_test(NAME PassingTest COMMAND ${CMAKE_COMMAND} -E echo PassingTestOutput)
+add_test(NAME FailingTest COMMAND ${CMAKE_COMMAND} -E no_such_command)
+  ]])
+
+  run_ctest(TestOutputSize)
+endfunction()
+run_TestOutputSize()
