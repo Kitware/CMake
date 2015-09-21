@@ -1,0 +1,4 @@
+cpack-deb-checksum-on-symlinks
+------------------------------
+
+* The :module:`CPackDeb` module now correctly excludes symlinks during package checksum calculation.

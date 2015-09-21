@@ -137,6 +137,8 @@ endfunction()
 
 
 # This function runs dpkg-deb on a .deb and returns its output
+# the default behaviour it to run "--info" on the specified Debian package
+# ACTION is one of the option accepted by dpkg-deb
 function(run_dpkgdeb dpkg_deb_output)
   set(${dpkg_deb_output} "" PARENT_SCOPE)
 
@@ -144,7 +146,7 @@ function(run_dpkgdeb dpkg_deb_output)
   if(DPKGDEB_EXECUTABLE)
 
     set(options "")
-    set(oneValueArgs "FILENAME")
+    set(oneValueArgs "FILENAME" "ACTION")
     set(multiValueArgs "")
     cmake_parse_arguments(run_dpkgdeb_deb "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
@@ -153,8 +155,12 @@ function(run_dpkgdeb dpkg_deb_output)
       message(FATAL_ERROR "error: run_dpkgdeb needs FILENAME to be set")
     endif()
 
-    # run lintian
-    execute_process(COMMAND ${DPKGDEB_EXECUTABLE} -I ${run_dpkgdeb_deb_FILENAME}
+    if(NOT run_dpkgdeb_deb_ACTION)
+      set(run_dpkgdeb_deb_ACTION "--info")
+    endif()
+
+    # run dpkg-deb
+    execute_process(COMMAND ${DPKGDEB_EXECUTABLE} ${run_dpkgdeb_deb_ACTION} ${run_dpkgdeb_deb_FILENAME}
       WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
       OUTPUT_VARIABLE DPKGDEB_OUTPUT
       RESULT_VARIABLE DPKGDEB_RESULT
