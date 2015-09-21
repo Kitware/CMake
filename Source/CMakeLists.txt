@@ -505,7 +505,7 @@ if (WIN32)
 
     # Add a manifest file to executables on Windows to allow for
     # GetVersion to work properly on Windows 8 and above.
-    set(MANIFEST_FILE cmake.version.manifest)
+    set(MANIFEST_FILE ${CMAKE_CURRENT_SOURCE_DIR}/cmake.version.manifest)
   endif()
 endif ()
 
