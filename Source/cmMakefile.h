@@ -750,11 +750,6 @@ public:
   cmStringRange GetCompileDefinitionsEntries() const;
   cmBacktraceRange GetCompileDefinitionsBacktraces() const;
 
-  const char* GetLibDepends(std::string const& target) const;
-  void SetLibDepends(std::string const& target,
-                     std::string const& value);
-  bool CheckLibDepends(std::string const& target) const;
-
   bool IsConfigured() const { return this->Configured; }
   void SetConfigured(){ this->Configured = true; }
 

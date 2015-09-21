@@ -347,7 +347,6 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     {
     this->SetPropertyDefault("ANDROID_GUI", 0);
     this->SetPropertyDefault("CROSSCOMPILING_EMULATOR", 0);
-    this->SetPropertyDefault("ENABLE_EXPORTS", 0);
     }
   if(this->TargetTypeValue == cmTarget::SHARED_LIBRARY
       || this->TargetTypeValue == cmTarget::MODULE_LIBRARY)
@@ -1026,13 +1025,25 @@ void cmTarget::ClearDependencyInformation( cmMakefile& mf,
 {
   // Clear the dependencies. The cache variable must exist iff we are
   // recording dependency information for this target.
+  std::string depname = target;
+  depname += "_LIB_DEPENDS";
   if (this->RecordDependencies)
     {
-    mf.SetLibDepends(target, "");
+    mf.AddCacheDefinition(depname, "",
+                          "Dependencies for target", cmState::STATIC);
     }
   else
     {
-    mf.CheckLibDepends(target);
+    if (mf.GetDefinition( depname ))
+      {
+      std::string message = "Target ";
+      message += target;
+      message += " has dependency information when it shouldn't.\n";
+      message += "Your cache is probably stale. Please remove the entry\n  ";
+      message += depname;
+      message += "\nfrom the cache.";
+      cmSystemTools::Error( message.c_str() );
+      }
     }
 }
 
@@ -1165,8 +1176,10 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
   // will be appropriately eliminated at emit time.
   if(this->RecordDependencies)
     {
+    std::string targetEntry = target;
+    targetEntry += "_LIB_DEPENDS";
     std::string dependencies;
-    const char* old_val = mf.GetLibDepends(target);
+    const char* old_val = mf.GetDefinition( targetEntry );
     if( old_val )
       {
       dependencies += old_val;
@@ -1186,7 +1199,9 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
     dependencies += ";";
     dependencies += lib;
     dependencies += ";";
-    mf.SetLibDepends(target, dependencies);
+    mf.AddCacheDefinition( targetEntry, dependencies.c_str(),
+                           "Dependencies for the target",
+                           cmState::STATIC );
     }
 
 }
@@ -1481,7 +1496,7 @@ void cmTarget::GatherDependenciesForVS6( const cmMakefile& mf,
     return;
     }
 
-  const char* deps = mf.GetLibDepends(lib.first);
+  const char* deps = mf.GetDefinition( lib.first+"_LIB_DEPENDS" );
   if( deps && strcmp(deps,"") != 0 )
     {
     // Make sure this library is in the map, even if it has an empty
