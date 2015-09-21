@@ -171,7 +171,6 @@ endif ()
 
 include(CMakeFindBinUtils)
 if(MSVC_CXX_ARCHITECTURE_ID)
-  include(${CMAKE_ROOT}/Modules/CMakeClDeps.cmake)
   set(SET_MSVC_CXX_ARCHITECTURE_ID
     "set(MSVC_CXX_ARCHITECTURE_ID ${MSVC_CXX_ARCHITECTURE_ID})")
 endif()
