@@ -11,7 +11,6 @@
 ============================================================================*/
 #include "cmExportLibraryDependenciesCommand.h"
 #include "cmGlobalGenerator.h"
-#include "cmLocalGenerator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmake.h"
 #include "cmVersion.h"
@@ -82,15 +81,14 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
   // the project.
   cmake* cm = this->Makefile->GetCMakeInstance();
   cmGlobalGenerator* global = cm->GetGlobalGenerator();
-  const std::vector<cmLocalGenerator *>& locals = global->GetLocalGenerators();
+  const std::vector<cmMakefile*>& locals = global->GetMakefiles();
   std::map<std::string, std::string> libDepsOld;
   std::map<std::string, std::string> libDepsNew;
   std::map<std::string, std::string> libTypes;
-  for(std::vector<cmLocalGenerator *>::const_iterator i = locals.begin();
+  for(std::vector<cmMakefile*>::const_iterator i = locals.begin();
       i != locals.end(); ++i)
     {
-    const cmLocalGenerator* gen = *i;
-    const cmTargets &tgts = gen->GetMakefile()->GetTargets();
+    const cmTargets &tgts = (*i)->GetTargets();
     for(cmTargets::const_iterator l = tgts.begin();
         l != tgts.end(); ++l)
       {

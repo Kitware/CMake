@@ -609,7 +609,7 @@ if(error_code)
 endif()
 
 execute_process(
-  COMMAND \"${hg_EXECUTABLE}\" clone \"${hg_repository}\" \"${src_name}\"
+  COMMAND \"${hg_EXECUTABLE}\" clone -U \"${hg_repository}\" \"${src_name}\"
   WORKING_DIRECTORY \"${work_dir}\"
   RESULT_VARIABLE error_code
   )
@@ -1211,7 +1211,7 @@ function(_ep_get_build_command name step cmd_var)
         if(step STREQUAL "INSTALL")
           set(args install)
         endif()
-        if(step STREQUAL "TEST")
+        if("x${step}x" STREQUAL "xTESTx")
           set(args test)
         endif()
       else()
@@ -1230,7 +1230,7 @@ function(_ep_get_build_command name step cmd_var)
           list(APPEND args --target install)
         endif()
         # But for "TEST" drive the project with corresponding "ctest".
-        if(step STREQUAL "TEST")
+        if("x${step}x" STREQUAL "xTESTx")
           string(REGEX REPLACE "^(.*/)cmake([^/]*)$" "\\1ctest\\2" cmd "${cmd}")
           set(args "")
         endif()
@@ -1246,7 +1246,7 @@ function(_ep_get_build_command name step cmd_var)
       if(step STREQUAL "INSTALL")
         set(args install)
       endif()
-      if(step STREQUAL "TEST")
+      if("x${step}x" STREQUAL "xTESTx")
         set(args test)
       endif()
     endif()

@@ -83,7 +83,8 @@ protected:
                                  std::set<std::string>& importedLocations
                                 );
 
-  std::string InstallNameDir(cmTarget* target, const std::string& config);
+  std::string InstallNameDir(cmGeneratorTarget* target,
+                             const std::string& config);
 
   cmInstallExportGenerator* IEGen;
 

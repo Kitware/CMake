@@ -322,11 +322,6 @@ CMAKE_CXX_SOURCES="\
   cmExprLexer \
   cmExprParser \
   cmExprParserHelper \
-  cmGlobalNinjaGenerator \
-  cmLocalNinjaGenerator \
-  cmNinjaTargetGenerator \
-  cmNinjaNormalTargetGenerator \
-  cmNinjaUtilityTargetGenerator \
 "
 
 if ${cmake_system_mingw}; then

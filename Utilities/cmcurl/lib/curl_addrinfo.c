@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,6 +33,9 @@
 #ifdef HAVE_ARPA_INET_H
 #  include <arpa/inet.h>
 #endif
+#ifdef HAVE_SYS_UN_H
+#  include <sys/un.h>
+#endif
 
 #ifdef __VMS
 #  include <in.h>
@@ -47,14 +50,11 @@
 #include "curl_addrinfo.h"
 #include "inet_pton.h"
 #include "warnless.h"
-
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
+#include "curl_printf.h"
 #include "curl_memory.h"
+
 /* The last #include file should be: */
 #include "memdebug.h"
-
 
 /*
  * Curl_freeaddrinfo()
@@ -80,13 +80,8 @@ Curl_freeaddrinfo(Curl_addrinfo *cahead)
   Curl_addrinfo *ca;
 
   for(ca = cahead; ca != NULL; ca = canext) {
-
-    if(ca->ai_addr)
-      free(ca->ai_addr);
-
-    if(ca->ai_canonname)
-      free(ca->ai_canonname);
-
+    free(ca->ai_addr);
+    free(ca->ai_canonname);
     canext = ca->ai_next;
 
     free(ca);
@@ -354,7 +349,7 @@ Curl_he2ai(const struct hostent *he, int port)
     prevai = ai;
   }
 
-  if(result != CURLE_OK) {
+  if(result) {
     Curl_freeaddrinfo(firstai);
     firstai = NULL;
   }
@@ -476,6 +471,42 @@ Curl_addrinfo *Curl_str2addr(char *address, int port)
 #endif
   return NULL; /* bad input format */
 }
+
+#ifdef USE_UNIX_SOCKETS
+/**
+ * Given a path to a Unix domain socket, return a newly allocated Curl_addrinfo
+ * struct initialized with this path.
+ */
+Curl_addrinfo *Curl_unix2addr(const char *path)
+{
+  Curl_addrinfo *ai;
+  struct sockaddr_un *sa_un;
+  size_t path_len;
+
+  ai = calloc(1, sizeof(Curl_addrinfo));
+  if(!ai)
+    return NULL;
+  if((ai->ai_addr = calloc(1, sizeof(struct sockaddr_un))) == NULL) {
+    free(ai);
+    return NULL;
+  }
+  /* sun_path must be able to store the NUL-terminated path */
+  path_len = strlen(path);
+  if(path_len >= sizeof(sa_un->sun_path)) {
+    free(ai->ai_addr);
+    free(ai);
+    return NULL;
+  }
+
+  ai->ai_family = AF_UNIX;
+  ai->ai_socktype = SOCK_STREAM; /* assume reliable transport for HTTP */
+  ai->ai_addrlen = (curl_socklen_t) sizeof(struct sockaddr_un);
+  sa_un = (void *) ai->ai_addr;
+  sa_un->sun_family = AF_UNIX;
+  memcpy(sa_un->sun_path, path, path_len + 1); /* copy NUL byte */
+  return ai;
+}
+#endif
 
 #if defined(CURLDEBUG) && defined(HAVE_FREEADDRINFO)
 /*

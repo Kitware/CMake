@@ -3198,8 +3198,16 @@ bool SystemTools::FileIsDirectory(const kwsys_stl::string& inName)
 bool SystemTools::FileIsSymlink(const kwsys_stl::string& name)
 {
 #if defined( _WIN32 )
-  (void)name;
-  return false;
+  DWORD attr = GetFileAttributesW(
+    SystemTools::ConvertToWindowsExtendedPath(name).c_str());
+  if (attr != INVALID_FILE_ATTRIBUTES)
+    {
+    return (attr & FILE_ATTRIBUTE_REPARSE_POINT) != 0;
+    }
+  else
+    {
+    return false;
+    }
 #else
   struct stat fs;
   if(lstat(name.c_str(), &fs) == 0)
@@ -4230,6 +4238,11 @@ SystemTools::DetectFileType(const char *filename,
     return SystemTools::FileTypeUnknown;
     }
 
+  if (SystemTools::FileIsDirectory(filename))
+    {
+    return SystemTools::FileTypeUnknown;
+    }
+
   FILE *fp = Fopen(filename, "rb");
   if (!fp)
     {
@@ -4243,6 +4256,7 @@ SystemTools::DetectFileType(const char *filename,
   fclose(fp);
   if (read_length == 0)
     {
+    delete [] buffer;
     return SystemTools::FileTypeUnknown;
     }
 

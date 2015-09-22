@@ -132,7 +132,7 @@ protected:
                                  std::vector<std::string> &missingTargets);
   void PopulateInterfaceProperty(const std::string& propName, cmTarget *target,
                                  ImportPropertyMap &properties);
-  void PopulateCompatibleInterfaceProperties(cmTarget *target,
+  void PopulateCompatibleInterfaceProperties(cmGeneratorTarget *target,
                                  ImportPropertyMap &properties);
   void GenerateInterfaceProperties(cmTarget const* target, std::ostream& os,
                                    const ImportPropertyMap &properties);
@@ -200,7 +200,7 @@ private:
 
   virtual void ReplaceInstallPrefix(std::string &input);
 
-  virtual std::string InstallNameDir(cmTarget* target,
+  virtual std::string InstallNameDir(cmGeneratorTarget* target,
                                      const std::string& config) = 0;
 };
 

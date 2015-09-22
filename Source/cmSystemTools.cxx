@@ -950,8 +950,9 @@ bool cmSystemTools::RenameFile(const char* oldname, const char* newname)
      Try multiple times since we may be racing against another process
      creating/opening the destination file just before our MoveFileEx.  */
   WindowsFileRetry retry = cmSystemTools::GetWindowsFileRetry();
-  while(!MoveFileExW(cmsys::Encoding::ToWide(oldname).c_str(),
-                     cmsys::Encoding::ToWide(newname).c_str(),
+  while(!MoveFileExW(
+      SystemTools::ConvertToWindowsExtendedPath(oldname).c_str(),
+      SystemTools::ConvertToWindowsExtendedPath(newname).c_str(),
                      MOVEFILE_REPLACE_EXISTING) && --retry.Count)
     {
     DWORD last_error = GetLastError();
@@ -962,12 +963,14 @@ bool cmSystemTools::RenameFile(const char* oldname, const char* newname)
       return false;
       }
     DWORD attrs =
-      GetFileAttributesW(cmsys::Encoding::ToWide(newname).c_str());
+      GetFileAttributesW(
+        SystemTools::ConvertToWindowsExtendedPath(newname).c_str());
     if((attrs != INVALID_FILE_ATTRIBUTES) &&
        (attrs & FILE_ATTRIBUTE_READONLY))
       {
       // Remove the read-only attribute from the destination file.
-      SetFileAttributesW(cmsys::Encoding::ToWide(newname).c_str(),
+      SetFileAttributesW(
+        SystemTools::ConvertToWindowsExtendedPath(newname).c_str(),
                          attrs & ~FILE_ATTRIBUTE_READONLY);
       }
     else
@@ -1956,11 +1959,11 @@ bool cmSystemTools::CopyFileTime(const char* fromFile, const char* toFile)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   cmSystemToolsWindowsHandle hFrom =
-    CreateFileW(cmsys::Encoding::ToWide(fromFile).c_str(),
+    CreateFileW(SystemTools::ConvertToWindowsExtendedPath(fromFile).c_str(),
                 GENERIC_READ, FILE_SHARE_READ, 0,
                 OPEN_EXISTING, 0, 0);
   cmSystemToolsWindowsHandle hTo =
-    CreateFileW(cmsys::Encoding::ToWide(toFile).c_str(),
+    CreateFileW(SystemTools::ConvertToWindowsExtendedPath(toFile).c_str(),
                 GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
   if(!hFrom || !hTo)
     {
@@ -2012,7 +2015,7 @@ bool cmSystemTools::FileTimeGet(const char* fname, cmSystemToolsFileTime* t)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   cmSystemToolsWindowsHandle h =
-    CreateFileW(cmsys::Encoding::ToWide(fname).c_str(),
+    CreateFileW(SystemTools::ConvertToWindowsExtendedPath(fname).c_str(),
                 GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
   if(!h)
     {
@@ -2039,7 +2042,7 @@ bool cmSystemTools::FileTimeSet(const char* fname, cmSystemToolsFileTime* t)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   cmSystemToolsWindowsHandle h =
-    CreateFileW(cmsys::Encoding::ToWide(fname).c_str(),
+    CreateFileW(SystemTools::ConvertToWindowsExtendedPath(fname).c_str(),
                 GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
   if(!h)
     {

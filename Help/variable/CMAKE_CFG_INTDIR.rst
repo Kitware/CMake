@@ -4,11 +4,11 @@ CMAKE_CFG_INTDIR
 Build-time reference to per-configuration output subdirectory.
 
 For native build systems supporting multiple configurations in the
-build tree (such as Visual Studio and Xcode), the value is a reference
-to a build-time variable specifying the name of the per-configuration
-output subdirectory.  On Makefile generators this evaluates to "."
-because there is only one configuration in a build tree.  Example
-values:
+build tree (such as :ref:`Visual Studio Generators` and :generator:`Xcode`),
+the value is a reference to a build-time variable specifying the name
+of the per-configuration output subdirectory.  On :ref:`Makefile Generators`
+this evaluates to `.` because there is only one configuration in a build tree.
+Example values:
 
 ::
 
@@ -33,13 +33,14 @@ evaluated at build time.  Example of intended usage:
     )
   add_custom_target(drive ALL DEPENDS out.txt)
 
-Note that CMAKE_CFG_INTDIR is no longer necessary for this purpose but
+Note that ``CMAKE_CFG_INTDIR`` is no longer necessary for this purpose but
 has been left for compatibility with existing projects.  Instead
-add_custom_command() recognizes executable target names in its COMMAND
-option, so "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/mytool"
-can be replaced by just "mytool".
+:command:`add_custom_command` recognizes executable target names in its
+``COMMAND`` option, so
+``${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/mytool`` can be replaced
+by just ``mytool``.
 
 This variable is read-only.  Setting it is undefined behavior.  In
 multi-configuration build systems the value of this variable is passed
-as the value of preprocessor symbol "CMAKE_INTDIR" to the compilation
+as the value of preprocessor symbol ``CMAKE_INTDIR`` to the compilation
 of all source files.

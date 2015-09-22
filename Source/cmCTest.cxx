@@ -1546,9 +1546,8 @@ void cmCTest::StartXML(cmXMLWriter& xml, bool append)
     xml.Attribute("Append", "true");
     }
   xml.Attribute("CompilerName", this->GetCTestConfiguration("Compiler"));
-#ifdef _COMPILER_VERSION
-  xml.Attribute("CompilerVersion", _COMPILER_VERSION);
-#endif
+  xml.Attribute("CompilerVersion",
+    this->GetCTestConfiguration("CompilerVersion"));
   xml.Attribute("OSName", info.GetOSName());
   xml.Attribute("Hostname", info.GetHostname());
   xml.Attribute("OSRelease", info.GetOSRelease());

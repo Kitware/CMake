@@ -40,16 +40,15 @@ cmNinjaNormalTargetGenerator(cmGeneratorTarget* target)
   , TargetNamePDB()
   , TargetLinkLanguage("")
 {
-  this->TargetLinkLanguage = target->Target
-                                   ->GetLinkerLanguage(this->GetConfigName());
+  this->TargetLinkLanguage = target->GetLinkerLanguage(this->GetConfigName());
   if (target->GetType() == cmTarget::EXECUTABLE)
-    target->Target->GetExecutableNames(this->TargetNameOut,
+    this->GetGeneratorTarget()->GetExecutableNames(this->TargetNameOut,
                                this->TargetNameReal,
                                this->TargetNameImport,
                                this->TargetNamePDB,
                                GetLocalGenerator()->GetConfigName());
   else
-    target->Target->GetLibraryNames(this->TargetNameOut,
+    this->GetGeneratorTarget()->GetLibraryNames(this->TargetNameOut,
                             this->TargetNameSO,
                             this->TargetNameReal,
                             this->TargetNameImport,
@@ -531,13 +530,14 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     vars["LANGUAGE_COMPILE_FLAGS"] = t;
     }
 
-  if (target.HasSOName(cfgName))
+  if (this->GetGeneratorTarget()->HasSOName(cfgName))
     {
     vars["SONAME_FLAG"] = mf->GetSONameFlag(this->TargetLinkLanguage);
     vars["SONAME"] = this->TargetNameSO;
     if (targetType == cmTarget::SHARED_LIBRARY)
       {
-      std::string install_dir = target.GetInstallNameDirForBuildTree(cfgName);
+      std::string install_dir =
+          this->GetGeneratorTarget()->GetInstallNameDirForBuildTree(cfgName);
       if (!install_dir.empty())
         {
         vars["INSTALLNAME_DIR"] = localGen.Convert(install_dir,
@@ -546,6 +546,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
         }
       }
     }
+
+  cmNinjaDeps byproducts;
 
   if (!this->TargetNameImport.empty())
     {
@@ -556,7 +558,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     EnsureParentDirectoryExists(impLibPath);
     if(target.HasImportLibrary())
       {
-      outputs.push_back(targetOutputImplib);
+      byproducts.push_back(targetOutputImplib);
       }
     }
 
@@ -567,7 +569,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     std::string prefix;
     std::string base;
     std::string suffix;
-    target.GetFullNameComponents(prefix, base, suffix);
+    this->GetGeneratorTarget()->GetFullNameComponents(prefix, base, suffix);
     std::string dbg_suffix = ".dbg";
     // TODO: Where to document?
     if (mf->GetDefinition("CMAKE_DEBUG_SYMBOL_SUFFIX"))
@@ -602,7 +604,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     &postBuildCmdLines
   };
 
-  cmNinjaDeps byproducts;
   for (unsigned i = 0; i != 3; ++i)
     {
     for (std::vector<cmCustomCommand>::const_iterator

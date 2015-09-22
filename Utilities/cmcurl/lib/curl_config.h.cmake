@@ -47,7 +47,7 @@
 #endif
 
 /* Use Windows LDAP implementation */
-#cmakedefine CURL_LDAP_WIN 1
+#cmakedefine USE_WIN32_LDAP 1
 
 /* when not building a shared library */
 #cmakedefine CURL_STATICLIB 1
@@ -461,6 +461,9 @@
 /* Define to 1 if you have a working POSIX-style strerror_r function. */
 #cmakedefine HAVE_POSIX_STRERROR_R 1
 
+/* Define to 1 if you have the <pthread.h> header file */
+#cmakedefine HAVE_PTHREAD_H 1
+
 /* Define to 1 if you have the <pwd.h> header file. */
 #cmakedefine HAVE_PWD_H 1
 
@@ -873,6 +876,9 @@
 /* Define if you want to enable c-ares support */
 #cmakedefine USE_ARES 1
 
+/* Define if you want to enable POSIX threaded DNS lookup */
+#cmakedefine USE_THREADS_POSIX 1
+
 /* Define to disable non-blocking sockets. */
 #cmakedefine USE_BLOCKING_SOCKETS 1
 
@@ -897,8 +903,8 @@
 /* if OpenSSL is in use */
 #cmakedefine USE_OPENSSL 1
 
-/* if SSL is enabled */
-#cmakedefine USE_SSLEAY 1
+/* if Unix domain sockets are enabled  */
+#cmakedefine USE_UNIX_SOCKETS
 
 /* to enable SSPI support */
 #cmakedefine USE_WINDOWS_SSPI 1

@@ -75,7 +75,9 @@
 # include "cmGlobalWatcomWMakeGenerator.h"
 #endif
 #include "cmGlobalUnixMakefileGenerator3.h"
-#include "cmGlobalNinjaGenerator.h"
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+# include "cmGlobalNinjaGenerator.h"
+#endif
 #include "cmExtraCodeLiteGenerator.h"
 
 #if !defined(CMAKE_BOOT_MINGW)
@@ -1447,7 +1449,7 @@ int cmake::ActualConfigure()
       }
     }
 
-  cmMakefile* mf=this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
+  cmMakefile* mf=this->GlobalGenerator->GetMakefiles()[0];
   if (mf->IsOn("CTEST_USE_LAUNCHERS")
               && !this->State->GetGlobalProperty("RULE_LAUNCH_COMPILE"))
     {
@@ -1607,7 +1609,11 @@ int cmake::Generate()
     {
     return -1;
     }
-  this->GlobalGenerator->DoGenerate();
+  if (!this->GlobalGenerator->Compute())
+    {
+    return -1;
+    }
+  this->GlobalGenerator->Generate();
   if ( !this->GraphVizFile.empty() )
     {
     std::cout << "Generate graphviz: " << this->GraphVizFile << std::endl;
@@ -1696,8 +1702,10 @@ void cmake::AddDefaultGenerators()
 #endif
   this->Generators.push_back(
     cmGlobalUnixMakefileGenerator3::NewFactory());
+#if defined(CMAKE_BUILD_WITH_CMAKE)
   this->Generators.push_back(
     cmGlobalNinjaGenerator::NewFactory());
+#endif
 #if defined(CMAKE_USE_WMAKE)
   this->Generators.push_back(
     cmGlobalWatcomWMakeGenerator::NewFactory());
@@ -2576,6 +2584,25 @@ int cmake::Build(const std::string& dir,
     }
   std::string cachePath = dir;
   cmSystemTools::ConvertToUnixSlashes(cachePath);
+  std::string cacheFile = cachePath;
+  cacheFile += "/CMakeCache.txt";
+  if(!cmSystemTools::FileExists(cacheFile.c_str()))
+    {
+    // search in parent directories for cache
+    std::string cmakeFiles = cachePath;
+    cmakeFiles += "/CMakeFiles";
+    if(cmSystemTools::FileExists(cmakeFiles.c_str()))
+      {
+      std::string cachePathFound =
+        cmSystemTools::FileExistsInParentDirectories(
+          "CMakeCache.txt", cachePath.c_str(), "/");
+      if(!cachePathFound.empty())
+        {
+        cachePath = cmSystemTools::GetFilenamePath(cachePathFound);
+        }
+      }
+    }
+
   if(!this->LoadCache(cachePath))
     {
     std::cerr << "Error: could not load cache\n";

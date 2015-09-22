@@ -280,7 +280,7 @@ bool cmOrderDirectoriesConstraintLibrary::FindConflict(std::string const& dir)
 
 //----------------------------------------------------------------------------
 cmOrderDirectories::cmOrderDirectories(cmGlobalGenerator* gg,
-                                       cmTarget const* target,
+                                       const cmGeneratorTarget* target,
                                        const char* purpose)
 {
   this->GlobalGenerator = gg;
@@ -554,7 +554,8 @@ void cmOrderDirectories::FindImplicitConflicts()
     << text
     << "Some of these libraries may not be found correctly.";
   this->GlobalGenerator->GetCMakeInstance()
-    ->IssueMessage(cmake::WARNING, w.str(), this->Target->GetBacktrace());
+    ->IssueMessage(cmake::WARNING, w.str(),
+                   this->Target->Target->GetBacktrace());
 }
 
 //----------------------------------------------------------------------------
@@ -635,5 +636,6 @@ void cmOrderDirectories::DiagnoseCycle()
     }
   e << "Some of these libraries may not be found correctly.";
   this->GlobalGenerator->GetCMakeInstance()
-    ->IssueMessage(cmake::WARNING, e.str(), this->Target->GetBacktrace());
+    ->IssueMessage(cmake::WARNING, e.str(),
+                   this->Target->Target->GetBacktrace());
 }

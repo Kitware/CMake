@@ -52,6 +52,7 @@ class cmVariableWatch;
 class cmake;
 class cmMakefileCall;
 class cmCMakePolicyCommand;
+class cmGeneratorExpressionEvaluationFile;
 
 /** \class cmMakefile
  * \brief Process the input CMakeLists.txt file.
@@ -112,10 +113,6 @@ public:
                  std::string& output);
 
   bool GetIsSourceFileTryCompile() const;
-
-  ///! Get the current makefile generator.
-  cmLocalGenerator* GetLocalGenerator() const
-    { return this->LocalGenerator;}
 
   /**
    * Help enforce global target name uniqueness.
@@ -194,14 +191,15 @@ public:
    * Add a utility to the build.  A utiltity target is a command that
    * is run every time the target is built.
    */
-  void AddUtilityCommand(const std::string& utilityName, bool excludeFromAll,
-                         const std::vector<std::string>& depends,
-                         const char* workingDirectory,
-                         const char* command,
-                         const char* arg1=0,
-                         const char* arg2=0,
-                         const char* arg3=0,
-                         const char* arg4=0);
+  cmTarget* AddUtilityCommand(const std::string& utilityName,
+                              bool excludeFromAll,
+                              const std::vector<std::string>& depends,
+                              const char* workingDirectory,
+                              const char* command,
+                              const char* arg1=0,
+                              const char* arg2=0,
+                              const char* arg3=0,
+                              const char* arg4=0);
   cmTarget* AddUtilityCommand(const std::string& utilityName,
                               bool excludeFromAll,
                               const char* workingDirectory,
@@ -416,10 +414,7 @@ public:
     {
       this->GeneratorTargets = targets;
     }
-  void AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt)
-  {
-    this->GeneratorTargets[t] = gt;
-  }
+  void AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt);
 
   cmTarget* FindTarget(const std::string& name,
                        bool excludeAliases = false) const;
@@ -801,6 +796,12 @@ public:
 
   void EnforceDirectoryLevelRules() const;
 
+  void AddEvaluationFile(const std::string &inputFile,
+                  cmsys::auto_ptr<cmCompiledGeneratorExpression> outputName,
+                  cmsys::auto_ptr<cmCompiledGeneratorExpression> condition,
+                  bool inputIsContent);
+  std::vector<cmGeneratorExpressionEvaluationFile*> GetEvaluationFiles() const;
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const std::string& name, cmTarget& target);
@@ -897,6 +898,8 @@ private:
 
   std::vector<cmMakefile*> UnConfiguredDirectories;
 
+  std::vector<cmGeneratorExpressionEvaluationFile*> EvaluationFiles;
+
   cmPropertyMap Properties;
 
   std::vector<cmCommandContext const*> ContextStack;
@@ -911,7 +914,6 @@ private:
   void PushPolicy(bool weak = false,
                   cmPolicies::PolicyMap const& pm = cmPolicies::PolicyMap());
   void PopPolicy();
-  void PushPolicyBarrier();
   void PopPolicyBarrier(bool reportError = true);
   friend class cmCMakePolicyCommand;
   class IncludeScope;
@@ -921,18 +923,6 @@ private:
   class BuildsystemFileScope;
   friend class BuildsystemFileScope;
 
-  // stack of policy settings
-  struct PolicyStackEntry: public cmPolicies::PolicyMap
-  {
-    typedef cmPolicies::PolicyMap derived;
-    PolicyStackEntry(bool w = false): derived(), Weak(w) {}
-    PolicyStackEntry(derived const& d, bool w = false): derived(d), Weak(w) {}
-    PolicyStackEntry(PolicyStackEntry const& r): derived(r), Weak(r.Weak) {}
-    bool Weak;
-  };
-  typedef std::vector<PolicyStackEntry> PolicyStackType;
-  PolicyStackType PolicyStack;
-  std::vector<PolicyStackType::size_type> PolicyBarriers;
 
   // CMP0053 == old
   cmake::MessageType ExpandVariablesInStringOld(

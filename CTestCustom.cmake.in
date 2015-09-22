@@ -109,3 +109,7 @@ set(CTEST_CUSTOM_COVERAGE_EXCLUDE
   # Exclude Qt source files from coverage results:
   "[A-Za-z]./[Qq]t/qt-.+-opensource-src"
   )
+
+list(APPEND CTEST_CUSTOM_MEMCHECK_IGNORE
+  kwsys.testProcess-10 # See Source/kwsys/CTestCustom.cmake.in
+  )

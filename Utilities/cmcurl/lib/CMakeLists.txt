@@ -48,25 +48,6 @@ endif()
 # )
 # ENDIF(NOT HAVE_STRTOLL AND NOT HAVE__STRTOI64)
 
-if(HAVE_FEATURES_H)
-  set_source_files_properties(
-    cookie.c
-    easy.c
-    formdata.c
-    getenv.c
-    nonblock.c
-    hash.c
-    http.c
-    if2ip.c
-    mprintf.c
-    multi.c
-    sendf.c
-    telnet.c
-    transfer.c
-    url.c
-    COMPILE_FLAGS -D_BSD_SOURCE)
-endif(HAVE_FEATURES_H)
-
 
 # The rest of the build
 
@@ -76,7 +57,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/..)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-if(CURL_USE_ARES)
+if(USE_ARES)
   include_directories(${CARES_INCLUDE_DIR})
 endif()
 
@@ -129,8 +110,6 @@ endif()
 
 set_target_properties(${LIB_NAME} PROPERTIES COMPILE_DEFINITIONS BUILDING_LIBCURL)
 
-setup_curl_dependencies(${LIB_NAME})
-
 if(0) # This code not needed for building within CMake.
 # Remove the "lib" prefix since the library is already named "libcurl".
 set_target_properties(${LIB_NAME} PROPERTIES PREFIX "")
@@ -143,5 +122,8 @@ if(WIN32)
   endif()
 endif()
 
-install(TARGETS ${LIB_NAME} DESTINATION lib)
+install(TARGETS ${LIB_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
 endif()

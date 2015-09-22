@@ -16,7 +16,8 @@ cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile):
   Makefile(makefile),
   Policy12Status(makefile.GetPolicyStatus(cmPolicies::CMP0012)),
   Policy54Status(makefile.GetPolicyStatus(cmPolicies::CMP0054)),
-  Policy57Status(makefile.GetPolicyStatus(cmPolicies::CMP0057))
+  Policy57Status(makefile.GetPolicyStatus(cmPolicies::CMP0057)),
+  Policy64Status(makefile.GetPolicyStatus(cmPolicies::CMP0064))
 {
 
 }
@@ -492,6 +493,29 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList &newArgs,
         this->HandlePredicate(
           this->Makefile.FindTargetToUse(argP1->GetValue())?true:false,
           reducible, arg, newArgs, argP1, argP2);
+        }
+      // does a test exist
+      if(this->Policy64Status != cmPolicies::OLD &&
+        this->Policy64Status != cmPolicies::WARN)
+        {
+        if (this->IsKeyword("TEST", *arg) && argP1 != newArgs.end())
+          {
+          const cmTest* haveTest = this->Makefile.GetTest(argP1->c_str());
+          this->HandlePredicate(
+            haveTest?true:false,
+            reducible, arg, newArgs, argP1, argP2);
+          }
+        }
+      else if(this->Policy64Status == cmPolicies::WARN &&
+        this->IsKeyword("TEST", *arg))
+        {
+        std::ostringstream e;
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0064) << "\n";
+        e << "TEST will be interpreted as an operator "
+          "when the policy is set to NEW.  "
+          "Since the policy is not set the OLD behavior will be used.";
+
+        this->Makefile.IssueMessage(cmake::AUTHOR_WARNING, e.str());
         }
       // is a variable defined
       if (this->IsKeyword("DEFINED", *arg) && argP1 != newArgs.end())

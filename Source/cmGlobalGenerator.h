@@ -34,7 +34,6 @@
 
 class cmake;
 class cmGeneratorTarget;
-class cmGeneratorExpressionEvaluationFile;
 class cmMakefile;
 class cmLocalGenerator;
 class cmExternalMakefileProjectGenerator;
@@ -86,6 +85,7 @@ public:
    */
   virtual void Configure();
 
+  virtual bool Compute();
 
   enum TargetTypes {
     AllTargets,
@@ -99,7 +99,7 @@ public:
    * basically creates a series of LocalGenerators for each directory and
    * requests that they Generate.
    */
-  void DoGenerate();
+  virtual void Generate();
 
   /**
    * Set/Get and Clear the enabled languages.
@@ -173,6 +173,8 @@ public:
   cmake *GetCMakeInstance() const { return this->CMakeInstance; }
 
   void SetConfiguredFilesPath(cmGlobalGenerator* gen);
+  const std::vector<cmMakefile*>& GetMakefiles() const {
+    return this->Makefiles;}
   const std::vector<cmLocalGenerator *>& GetLocalGenerators() const {
     return this->LocalGenerators;}
 
@@ -184,6 +186,7 @@ public:
   void SetCurrentMakefile(cmMakefile* mf)
   {this->CurrentMakefile = mf;}
 
+  void AddMakefile(cmMakefile *mf);
   void AddLocalGenerator(cmLocalGenerator *lg);
 
   ///! Set an generator for an "external makefile based project"
@@ -200,7 +203,7 @@ public:
   cmExportSetMap& GetExportSets() {return this->ExportSets;}
 
   /** Add a file to the manifest of generated targets for a configuration.  */
-  void AddToManifest(const std::string& config, std::string const& f);
+  void AddToManifest(std::string const& f);
 
   void EnableInstallTarget();
 
@@ -253,6 +256,7 @@ public:
       that is a framework. */
   bool NameResolvesToFramework(const std::string& libname) const;
 
+  cmMakefile* FindMakefile(const std::string& start_dir) const;
   ///! Find a local generator by its startdirectory
   cmLocalGenerator* FindLocalGenerator(const std::string& start_dir) const;
 
@@ -263,11 +267,6 @@ public:
                                         const std::string& config,
                                         const std::string& suffix,
                                         std::string& dir);
-
-  /** Get the manifest of all targets that will be built for each
-      configuration.  This is valid during generation only.  */
-  cmTargetManifest const& GetTargetManifest() const
-    { return this->TargetManifest; }
 
   /** Get the content of a directory.  Directory listings are cached
       and re-loaded from disk only when modified.  During the generation
@@ -338,12 +337,6 @@ public:
 
   static std::string EscapeJSON(const std::string& s);
 
-  void AddEvaluationFile(const std::string &inputFile,
-                  cmsys::auto_ptr<cmCompiledGeneratorExpression> outputName,
-                  cmMakefile *makefile,
-                  cmsys::auto_ptr<cmCompiledGeneratorExpression> condition,
-                  bool inputIsContent);
-
   void ProcessEvaluationFiles();
 
   std::map<std::string, cmExportBuildFileGenerator*>& GetBuildExportSets()
@@ -373,8 +366,6 @@ public:
 
   std::string MakeSilentFlag;
 protected:
-  virtual void Generate();
-
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
   // for a project collect all its targets by following depend
   // information, and also collect all the targets
@@ -387,6 +378,8 @@ protected:
   void SetLanguageEnabledFlag(const std::string& l, cmMakefile* mf);
   void SetLanguageEnabledMaps(const std::string& l, cmMakefile* mf);
   void FillExtensionToLanguageMap(const std::string& l, cmMakefile* mf);
+  virtual void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
+                                   const char* envVar) const;
 
   virtual bool ComputeTargetDepends();
 
@@ -404,7 +397,7 @@ protected:
   void FillProjectMap();
   void CheckLocalGenerators();
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen) const;
-  bool IsExcluded(cmLocalGenerator* root, cmTarget const& target) const;
+  bool IsExcluded(cmLocalGenerator* root, cmGeneratorTarget* target) const;
   void FillLocalGeneratorToTargetMap();
   void CreateDefaultGlobalTargets(cmTargets* targets);
   cmTarget CreateGlobalTarget(const std::string& name, const char* message,
@@ -415,6 +408,7 @@ protected:
   std::string FindMakeProgramFile;
   std::string ConfiguredFilesPath;
   cmake *CMakeInstance;
+  std::vector<cmMakefile*> Makefiles;
   std::vector<cmLocalGenerator *> LocalGenerators;
   cmMakefile* CurrentMakefile;
   // map from project name to vector of local generators in that project
@@ -429,10 +423,6 @@ protected:
   std::map<std::string, cmExportBuildFileGenerator*> BuildExportSets;
   std::map<std::string, cmExportBuildFileGenerator*> BuildExportExportSets;
 
-  // Manifest of all targets that will be built for each configuration.
-  // This is computed just before local generators generate.
-  cmTargetManifest TargetManifest;
-
   // All targets in the entire project.
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #ifdef CMake_HAVE_CXX11_UNORDERED_MAP
@@ -446,7 +436,6 @@ protected:
   TargetMap TotalTargets;
   TargetMap AliasTargets;
   TargetMap ImportedTargets;
-  std::vector<cmGeneratorExpressionEvaluationFile*> EvaluationFiles;
 
   const char* GetPredefinedTargetsFolder();
   virtual bool UseFolderProperty();
@@ -480,8 +469,6 @@ private:
 
   virtual void ForceLinkerLanguages();
 
-  virtual void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
-                                   const char* envVar) const;
   void CheckCompilerIdCompatibility(cmMakefile* mf,
                                     std::string const& lang) const;
 

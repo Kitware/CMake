@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -34,14 +34,12 @@
 #include "progress.h"
 #include "rtsp.h"
 #include "rawstr.h"
-#include "curl_memory.h"
 #include "select.h"
 #include "connect.h"
+#include "curl_printf.h"
 
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /*
@@ -265,11 +263,10 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
    * Since all RTSP requests are included here, there is no need to
    * support custom requests like HTTP.
    **/
-  DEBUGASSERT((rtspreq > RTSPREQ_NONE && rtspreq < RTSPREQ_LAST));
   data->set.opt_no_body = TRUE; /* most requests don't contain a body */
   switch(rtspreq) {
-  case RTSPREQ_NONE:
-    failf(data, "Got invalid RTSP request: RTSPREQ_NONE");
+  default:
+    failf(data, "Got invalid RTSP request");
     return CURLE_BAD_FUNCTION_ARGUMENT;
   case RTSPREQ_OPTIONS:
     p_request = "OPTIONS";
@@ -325,7 +322,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   if(!p_session_id &&
      (rtspreq & ~(RTSPREQ_OPTIONS | RTSPREQ_DESCRIBE | RTSPREQ_SETUP))) {
     failf(data, "Refusing to issue an RTSP request [%s] without a session ID.",
-          p_request ? p_request : "");
+          p_request);
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
@@ -443,8 +440,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
     Curl_add_bufferf(req_buffer,
                      "%s %s RTSP/1.0\r\n" /* Request Stream-URI RTSP/1.0 */
                      "CSeq: %ld\r\n", /* CSeq */
-                     (p_request ? p_request : ""), p_stream_uri,
-                     rtsp->CSeq_sent);
+                     p_request, p_stream_uri, rtsp->CSeq_sent);
   if(result)
     return result;
 
@@ -498,8 +494,8 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
 
     }
     else {
-      postsize = (data->set.postfieldsize != -1)?
-        data->set.postfieldsize:
+      postsize = (data->state.infilesize != -1)?
+        data->state.infilesize:
         (data->set.postfields? (curl_off_t)strlen(data->set.postfields):0);
       data->set.httpreq = HTTPREQ_POST;
     }

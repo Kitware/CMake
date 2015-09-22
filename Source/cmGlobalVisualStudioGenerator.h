@@ -108,7 +108,7 @@ public:
     cmGeneratorTarget*, std::vector<cmCustomCommand>& commands,
     std::string const& configName);
 protected:
-  virtual void Generate();
+  virtual bool Compute();
 
   // Does this VS version link targets to each other if there are
   // dependencies in the SLN file?  This was done for VS versions

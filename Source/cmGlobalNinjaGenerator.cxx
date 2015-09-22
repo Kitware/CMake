@@ -547,6 +547,18 @@ void cmGlobalNinjaGenerator
 //   Source/cmake.cxx
 void cmGlobalNinjaGenerator::Generate()
 {
+  // Check minimum Ninja version.
+  if (cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
+                                    CurrentNinjaVersion().c_str(),
+                                    RequiredNinjaVersion().c_str()))
+    {
+    std::ostringstream msg;
+    msg << "The detected version of Ninja (" << this->CurrentNinjaVersion();
+    msg << ") is less than the version of Ninja required by CMake (";
+    msg << this->RequiredNinjaVersion() << ").";
+    this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, msg.str());
+    return;
+    }
   this->OpenBuildFileStream();
   this->OpenRulesFileStream();
 
@@ -911,9 +923,7 @@ cmGlobalNinjaGenerator
   case cmTarget::STATIC_LIBRARY:
   case cmTarget::MODULE_LIBRARY:
     {
-    cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
-                                    ->GetGlobalGenerator()
-                                    ->GetGeneratorTarget(target);
+    cmGeneratorTarget *gtgt = this->GetGeneratorTarget(target);
     outputs.push_back(ng->ConvertToNinjaPath(
       gtgt->GetFullPath(configName, false, realname)));
     break;
@@ -1055,23 +1065,21 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
       {
       knownDependencies.insert( ng->ConvertToNinjaPath( *j ) );
       }
-    }
-  knownDependencies.insert( "CMakeCache.txt" );
-
-  for(std::vector<cmGeneratorExpressionEvaluationFile*>::const_iterator
-      li = this->EvaluationFiles.begin();
-      li != this->EvaluationFiles.end();
-      ++li)
-    {
-    //get all the files created by generator expressions and convert them
-    //to ninja paths
-    std::vector<std::string> files = (*li)->GetFiles();
-    typedef std::vector<std::string>::const_iterator vect_it;
-    for(vect_it j = files.begin(); j != files.end(); ++j)
+    std::vector<cmGeneratorExpressionEvaluationFile*> const& ef =
+        (*i)->GetMakefile()->GetEvaluationFiles();
+    for(std::vector<cmGeneratorExpressionEvaluationFile*>::const_iterator
+        li = ef.begin(); li != ef.end(); ++li)
       {
-      knownDependencies.insert( ng->ConvertToNinjaPath( *j ) );
+      //get all the files created by generator expressions and convert them
+      //to ninja paths
+      std::vector<std::string> evaluationFiles = (*li)->GetFiles();
+      for(vect_it j = evaluationFiles.begin(); j != evaluationFiles.end(); ++j)
+        {
+        knownDependencies.insert( ng->ConvertToNinjaPath( *j ) );
+        }
       }
     }
+  knownDependencies.insert( "CMakeCache.txt" );
 
   for(TargetAliasMap::const_iterator i= this->TargetAliases.begin();
       i != this->TargetAliases.end();
@@ -1260,7 +1268,7 @@ std::string cmGlobalNinjaGenerator::ninjaCmd() const
   return "ninja";
 }
 
-std::string cmGlobalNinjaGenerator::ninjaVersion() const
+std::string cmGlobalNinjaGenerator::CurrentNinjaVersion() const
 {
   std::string version;
   std::string command = ninjaCmd() + " --version";
@@ -1268,13 +1276,14 @@ std::string cmGlobalNinjaGenerator::ninjaVersion() const
                                   &version, 0, 0, 0,
                                   cmSystemTools::OUTPUT_NONE);
 
-  return version;
+  return cmSystemTools::TrimWhitespace(version);
 }
 
 bool cmGlobalNinjaGenerator::SupportsConsolePool() const
 {
   return cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
-                                       ninjaVersion().c_str(), "1.5") == false;
+    CurrentNinjaVersion().c_str(),
+    RequiredNinjaVersionForConsolePool().c_str()) == false;
 }
 
 void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)

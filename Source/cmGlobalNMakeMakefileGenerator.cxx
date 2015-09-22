@@ -36,18 +36,6 @@ void cmGlobalNMakeMakefileGenerator
   // pick a default
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
-  if(!(cmSystemTools::GetEnv("INCLUDE") &&
-       cmSystemTools::GetEnv("LIB"))
-    )
-    {
-    std::string message = "To use the NMake generator, cmake must be run "
-      "from a shell that can use the compiler cl from the command line. "
-      "This environment does not contain INCLUDE, LIB, or LIBPATH, and "
-      "these must be set for the cl compiler to work. ";
-    mf->IssueMessage(cmake::WARNING,
-                     message);
-    }
-
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 }
 
@@ -57,4 +45,20 @@ void cmGlobalNMakeMakefileGenerator
 {
   entry.Name = cmGlobalNMakeMakefileGenerator::GetActualName();
   entry.Brief = "Generates NMake makefiles.";
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalNMakeMakefileGenerator::PrintCompilerAdvice(std::ostream& os,
+                                                  std::string const& lang,
+                                                  const char* envVar) const
+{
+  if(lang == "CXX" || lang == "C")
+    {
+    os <<
+      "To use the NMake generator with Visual C++, cmake must be run from a "
+      "shell that can use the compiler cl from the command line. This "
+      "environment is unable to invoke the cl compiler. To fix this problem, "
+      "run cmake from the Visual Studio Command Prompt (vcvarsall.bat).\n";
+    }
+  this->cmGlobalUnixMakefileGenerator3::PrintCompilerAdvice(os, lang, envVar);
 }

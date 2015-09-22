@@ -69,6 +69,7 @@ UpdateType: @UPDATE_TYPE@
 
 # Compiler info
 Compiler: @CMAKE_CXX_COMPILER@
+CompilerVersion: @CMAKE_CXX_COMPILER_VERSION@
 
 # Dynamic analysis (MemCheck)
 PurifyCommand: @PURIFYCOMMAND@

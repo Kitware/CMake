@@ -45,6 +45,8 @@ public:
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );
 
+  virtual bool Compute();
+
   ///! create the correct local generator
   virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent,
                                                  cmState::Snapshot snapshot);

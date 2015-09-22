@@ -108,6 +108,10 @@ void cmLocalVisualStudio7Generator::AddCMakeListsRules()
       // Add the rule to targets that need it.
       for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
         {
+        if (l->second.GetType() == cmTarget::GLOBAL_TARGET)
+          {
+          continue;
+          }
         if(l->first != CMAKE_CHECK_BUILD_SYSTEM_TARGET)
           {
           l->second.AddSource(sf->GetFullPath());
@@ -660,6 +664,10 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   const char* configType = "10";
   const char* projectType = 0;
   bool targetBuilds = true;
+
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
+
   switch(target.GetType())
     {
     case cmTarget::OBJECT_LIBRARY:
@@ -692,7 +700,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     {
     const std::string& linkLanguage = (this->FortranProject?
                                        std::string("Fortran"):
-                                target.GetLinkerLanguage(configName));
+                                gt->GetLinkerLanguage(configName));
     if(linkLanguage.empty())
       {
       cmSystemTools::Error
@@ -754,8 +762,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   targetOptions.Parse(flags.c_str());
   targetOptions.Parse(defineFlags.c_str());
   targetOptions.ParseFinish();
-  cmGeneratorTarget* gt =
-    this->GlobalGenerator->GetGeneratorTarget(&target);
   std::vector<std::string> targetDefines;
   target.GetCompileDefinitions(targetDefines, configName, "CXX");
   targetOptions.AddDefines(targetDefines);
@@ -799,7 +805,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   if (this->FortranProject)
     {
     // Intel Fortran >= 15.0 uses TargetName property.
-    std::string targetNameFull = target.GetFullName(configName);
+    std::string targetNameFull = gt->GetFullName(configName);
     std::string targetName =
       cmSystemTools::GetFilenameWithoutLastExtension(targetNameFull);
     std::string targetExt =
@@ -877,7 +883,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   if(target.GetType() <= cmTarget::OBJECT_LIBRARY)
     {
     // Specify the compiler program database file if configured.
-    std::string pdb = target.GetCompilePDBPath(configName);
+    std::string pdb = gt->GetCompilePDBPath(configName);
     if(!pdb.empty())
       {
       fout <<  "\t\t\t\tProgramDataBaseFileName=\""
@@ -1070,6 +1076,9 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       this->ConvertToOutputFormat(this->ModuleDefinitionFile, SHELL);
     linkOptions.AddFlag("ModuleDefinitionFile", defFile.c_str());
     }
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
+
   if (target.GetType() == cmTarget::SHARED_LIBRARY &&
       this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
     {
@@ -1100,7 +1109,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       }
     case cmTarget::STATIC_LIBRARY:
     {
-    std::string targetNameFull = target.GetFullName(configName);
+    std::string targetNameFull = gt->GetFullName(configName);
     std::string libpath = target.GetDirectory(configName);
     libpath += "/";
     libpath += targetNameFull;
@@ -1140,11 +1149,11 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     std::string targetNameFull;
     std::string targetNameImport;
     std::string targetNamePDB;
-    target.GetLibraryNames(targetName, targetNameSO, targetNameFull,
+    gt->GetLibraryNames(targetName, targetNameSO, targetNameFull,
                            targetNameImport, targetNamePDB, configName);
 
     // Compute the link library and directory information.
-    cmComputeLinkInformation* pcli = target.GetLinkInformation(configName);
+    cmComputeLinkInformation* pcli = gt->GetLinkInformation(configName);
     if(!pcli)
       {
       return;
@@ -1237,11 +1246,11 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     std::string targetNameFull;
     std::string targetNameImport;
     std::string targetNamePDB;
-    target.GetExecutableNames(targetName, targetNameFull,
+    gt->GetExecutableNames(targetName, targetNameFull,
                               targetNameImport, targetNamePDB, configName);
 
     // Compute the link library and directory information.
-    cmComputeLinkInformation* pcli = target.GetLinkInformation(configName);
+    cmComputeLinkInformation* pcli = gt->GetLinkInformation(configName);
     if(!pcli)
       {
       return;
@@ -1628,7 +1637,7 @@ cmLocalVisualStudio7GeneratorFCInfo
       lg->GlobalGenerator->GetLanguageFromExtension
       (sf.GetExtension().c_str());
     const std::string& sourceLang = lg->GetSourceFileLanguage(sf);
-    const std::string& linkLanguage = target.GetLinkerLanguage(i->c_str());
+    const std::string& linkLanguage = gt->GetLinkerLanguage(i->c_str());
     bool needForceLang = false;
     // source file does not match its extension language
     if(lang != sourceLang)

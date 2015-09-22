@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,6 +40,8 @@
 #define PORT_IMAPS 993
 #define PORT_POP3 110
 #define PORT_POP3S 995
+#define PORT_SMB 445
+#define PORT_SMBS 445
 #define PORT_SMTP 25
 #define PORT_SMTPS 465 /* sometimes called SSMTP */
 #define PORT_RTSP 554
@@ -64,6 +66,7 @@
 #define PROTO_FAMILY_HTTP (CURLPROTO_HTTP|CURLPROTO_HTTPS)
 #define PROTO_FAMILY_FTP  (CURLPROTO_FTP|CURLPROTO_FTPS)
 #define PROTO_FAMILY_POP3 (CURLPROTO_POP3|CURLPROTO_POP3S)
+#define PROTO_FAMILY_SMB  (CURLPROTO_SMB|CURLPROTO_SMBS)
 #define PROTO_FAMILY_SMTP (CURLPROTO_SMTP|CURLPROTO_SMTPS)
 
 #define DEFAULT_CONNCACHE_SIZE 5
@@ -79,38 +82,12 @@
 #include "cookie.h"
 #include "formdata.h"
 
-#ifdef USE_SSLEAY
 #ifdef USE_OPENSSL
-#include <openssl/rsa.h>
-#include <openssl/crypto.h>
-#include <openssl/x509.h>
-#include <openssl/pem.h>
 #include <openssl/ssl.h>
-#include <openssl/err.h>
 #ifdef HAVE_OPENSSL_ENGINE_H
 #include <openssl/engine.h>
 #endif
-#ifdef HAVE_OPENSSL_PKCS12_H
-#include <openssl/pkcs12.h>
-#endif
-#else /* SSLeay-style includes */
-#include <rsa.h>
-#include <crypto.h>
-#include <x509.h>
-#include <pem.h>
-#include <ssl.h>
-#include <err.h>
-#ifdef HAVE_OPENSSL_ENGINE_H
-#include <engine.h>
-#endif
-#ifdef HAVE_OPENSSL_PKCS12_H
-#include <pkcs12.h>
-#endif
 #endif /* USE_OPENSSL */
-#ifdef USE_GNUTLS
-#error Configuration error; cannot use GnuTLS *and* OpenSSL.
-#endif
-#endif /* USE_SSLEAY */
 
 #ifdef USE_GNUTLS
 #include <gnutls/gnutls.h>
@@ -138,15 +115,12 @@
 #include <pk11pub.h>
 #endif
 
-#ifdef USE_QSOSSL
-#include <qsossl.h>
-#endif
-
 #ifdef USE_GSKIT
 #include <gskssl.h>
 #endif
 
 #ifdef USE_AXTLS
+#include <axTLS/config.h>
 #include <axTLS/ssl.h>
 #undef malloc
 #undef calloc
@@ -195,6 +169,7 @@
 #include "ssh.h"
 #include "http.h"
 #include "rtsp.h"
+#include "smb.h"
 #include "wildcard.h"
 #include "multihandle.h"
 
@@ -223,6 +198,8 @@
 #define HEADERSIZE 256
 
 #define CURLEASY_MAGIC_NUMBER 0xc0dedbadU
+#define GOOD_EASY_HANDLE(x) \
+  ((x) && (((struct SessionHandle *)(x))->magic == CURLEASY_MAGIC_NUMBER))
 
 /* Some convenience macros to get the larger/smaller value out of two given.
    We prefix with CURL to prevent name collisions. */
@@ -288,13 +265,13 @@ struct ssl_connect_data {
      current state of the connection. */
   bool use;
   ssl_connection_state state;
-#ifdef USE_SSLEAY
+#ifdef USE_OPENSSL
   /* these ones requires specific SSL-types */
   SSL_CTX* ctx;
   SSL*     handle;
   X509*    server_cert;
   ssl_connect_state connecting_state;
-#endif /* USE_SSLEAY */
+#endif /* USE_OPENSSL */
 #ifdef USE_GNUTLS
   gnutls_session_t session;
   gnutls_certificate_credentials_t cred;
@@ -328,9 +305,6 @@ struct ssl_connect_data {
   PK11GenericObject *obj_clicert;
   ssl_connect_state connecting_state;
 #endif /* USE_NSS */
-#ifdef USE_QSOSSL
-  SSLHandle *handle;
-#endif /* USE_QSOSSL */
 #ifdef USE_GSKIT
   gsk_handle handle;
   int iocport;
@@ -350,6 +324,9 @@ struct ssl_connect_data {
   size_t encdata_offset, decdata_offset;
   unsigned char *encdata_buffer, *decdata_buffer;
   unsigned long req_flags, ret_flags;
+  CURLcode recv_unrecoverable_err; /* schannel_recv had an unrecoverable err */
+  bool recv_sspi_close_notify; /* true if connection closed by close_notify */
+  bool recv_connection_closed; /* true if connection closed, regardless how */
 #endif /* USE_SCHANNEL */
 #ifdef USE_DARWINSSL
   SSLContextRef ssl_ctx;
@@ -366,6 +343,7 @@ struct ssl_config_data {
 
   bool verifypeer;       /* set TRUE if this is desired */
   bool verifyhost;       /* set TRUE if CN/SAN must match hostname */
+  bool verifystatus;     /* set TRUE if certificate status must be checked */
   char *CApath;          /* certificate dir (doesn't work on windows) */
   char *CAfile;          /* certificate to verify peer against */
   const char *CRLfile;   /* CRL to check certificate revocation */
@@ -378,6 +356,7 @@ struct ssl_config_data {
   void *fsslctxp;        /* parameter for call back */
   bool sessionid;        /* cache session IDs or not */
   bool certinfo;         /* gather lots of certificate info */
+  bool falsestart;
 
 #ifdef USE_TLS_SRP
   char *username; /* TLS username (for, e.g., SRP) */
@@ -398,6 +377,10 @@ struct curl_ssl_session {
 
 /* Struct used for Digest challenge-response authentication */
 struct digestdata {
+#if defined(USE_WINDOWS_SSPI)
+  BYTE *input_token;
+  size_t input_token_len;
+#else
   char *nonce;
   char *cnonce;
   char *realm;
@@ -407,6 +390,7 @@ struct digestdata {
   char *qop;
   char *algorithm;
   int nc; /* nounce count */
+#endif
 };
 
 typedef enum {
@@ -426,8 +410,9 @@ typedef enum {
 #endif
 
 /* Struct used for GSSAPI (Kerberos V5) authentication */
-#if defined(USE_WINDOWS_SSPI)
+#if defined(USE_KERBEROS5)
 struct kerberos5data {
+#if defined(USE_WINDOWS_SSPI)
   CredHandle *credentials;
   CtxtHandle *context;
   TCHAR *spn;
@@ -435,22 +420,26 @@ struct kerberos5data {
   SEC_WINNT_AUTH_IDENTITY *p_identity;
   size_t token_max;
   BYTE *output_token;
+#else
+  gss_ctx_id_t context;
+  gss_name_t spn;
+#endif
 };
 #endif
 
 /* Struct used for NTLM challenge-response authentication */
+#if defined(USE_NTLM)
 struct ntlmdata {
   curlntlm state;
 #ifdef USE_WINDOWS_SSPI
-  CredHandle handle;
-  CtxtHandle c_handle;
+  CredHandle *credentials;
+  CtxtHandle *context;
   SEC_WINNT_AUTH_IDENTITY identity;
   SEC_WINNT_AUTH_IDENTITY *p_identity;
-  size_t max_token_length;
+  size_t token_max;
   BYTE *output_token;
-  int has_handles;
-  void *type_2;
-  unsigned long n_type_2;
+  BYTE *input_token;
+  size_t input_token_len;
 #else
   unsigned int flags;
   unsigned char nonce[8];
@@ -458,6 +447,7 @@ struct ntlmdata {
   unsigned int target_info_len;
 #endif
 };
+#endif
 
 #ifdef USE_SPNEGO
 struct negotiatedata {
@@ -472,12 +462,12 @@ struct negotiatedata {
 #else
 #ifdef USE_WINDOWS_SSPI
   DWORD status;
-  CtxtHandle *context;
   CredHandle *credentials;
+  CtxtHandle *context;
   SEC_WINNT_AUTH_IDENTITY identity;
   SEC_WINNT_AUTH_IDENTITY *p_identity;
   TCHAR *server_name;
-  size_t max_token_length;
+  size_t token_max;
   BYTE *output_token;
   size_t output_token_length;
 #endif
@@ -531,11 +521,6 @@ struct ConnectBits {
                          requests */
   bool netrc;         /* name+password provided by netrc */
   bool userpwd_in_url; /* name+password found in url */
-
-  bool done;          /* set to FALSE when Curl_do() is called and set to TRUE
-                         when Curl_done() is called, to prevent Curl_done() to
-                         get invoked twice when the multi interface is
-                         used. */
   bool stream_was_rewound; /* Indicates that the stream was rewound after a
                               request read past the end of its response byte
                               boundary */
@@ -545,6 +530,7 @@ struct ConnectBits {
   bool bound; /* set true if bind() has already been done on this socket/
                  connection */
   bool type_set;  /* type= was used in the URL */
+  bool multiplex; /* connection is multiplexed */
 };
 
 struct hostname {
@@ -617,12 +603,6 @@ enum upgrade101 {
   UPGR101_WORKING             /* talking upgraded protocol */
 };
 
-enum negotiatenpn {
-  NPN_INIT,                   /* default state */
-  NPN_HTTP1_1,                /* HTTP/1.1 negotiated */
-  NPN_HTTP2                   /* HTTP2 (draft-xx) negotiated */
-};
-
 /*
  * Request specific data in the easy handle (SessionHandle).  Previously,
  * these members were on the connectdata struct but since a conn struct may
@@ -680,7 +660,6 @@ struct SingleRequest {
 #define IDENTITY 0              /* No encoding */
 #define DEFLATE 1               /* zlib deflate [RFC 1950 & 1951] */
 #define GZIP 2                  /* gzip algorithm [RFC 1952] */
-#define COMPRESS 3              /* Not handled, added for completeness */
 
 #ifdef HAVE_LIBZ
   zlibInitState zlib_init;      /* possible zlib init state;
@@ -883,7 +862,7 @@ struct connectdata {
      the ip_addr itself. */
   char ip_addr_str[MAX_IPADR_LEN];
 
-  unsigned int scope;    /* address scope for IPv6 */
+  unsigned int scope_id;  /* Scope id for IPv6 */
 
   int socktype;  /* SOCK_STREAM or SOCK_DGRAM */
 
@@ -974,8 +953,8 @@ struct connectdata {
     char *te; /* TE: request header */
   } allocptr;
 
-  int sec_complete; /* if kerberos is enabled for this connection */
 #ifdef HAVE_GSSAPI
+  int sec_complete; /* if Kerberos is enabled for this connection */
   enum protection_level command_prot;
   enum protection_level data_prot;
   enum protection_level request_data_prot;
@@ -986,7 +965,7 @@ struct connectdata {
   struct sockaddr_in local_addr;
 #endif
 
-#if defined(USE_WINDOWS_SSPI) /* Consider moving some of the above GSS-API */
+#if defined(USE_KERBEROS5)    /* Consider moving some of the above GSS-API */
   struct kerberos5data krb5;  /* variables into the structure definition, */
 #endif                        /* however, some of them are ftp specific. */
 
@@ -1013,21 +992,19 @@ struct connectdata {
 
   /*************** Request - specific items ************/
 
-  /* previously this was in the urldata struct */
-  curl_read_callback fread_func; /* function that reads the input */
-  void *fread_in;           /* pointer to pass to the fread() above */
-
+#if defined(USE_NTLM)
   struct ntlmdata ntlm;     /* NTLM differs from other authentication schemes
                                because it authenticates connections, not
                                single requests! */
   struct ntlmdata proxyntlm; /* NTLM data for proxy */
 
-#if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
+#if defined(NTLM_WB_ENABLED)
   /* used for communication with Samba's winbind daemon helper ntlm_auth */
   curl_socket_t ntlm_auth_hlpr_socket;
   pid_t ntlm_auth_hlpr_pid;
   char* challenge_header;
   char* response_header;
+#endif
 #endif
 
   char syserr_buf [256]; /* buffer for Curl_strerror() */
@@ -1051,6 +1028,7 @@ struct connectdata {
     struct pop3_conn pop3c;
     struct smtp_conn smtpc;
     struct rtsp_conn rtspc;
+    struct smb_conn smbc;
     void *generic; /* RTMP and LDAP use this */
   } proto;
 
@@ -1081,7 +1059,7 @@ struct connectdata {
   } tunnel_state[2]; /* two separate ones to allow FTP */
   struct connectbundle *bundle; /* The bundle we are member of */
 
-  enum negotiatenpn negnpn;
+  int negnpn; /* APLN or NPN TLS negotiated protocol, CURL_HTTP_VERSION* */
 };
 
 /* The end of connectdata. */
@@ -1279,9 +1257,9 @@ struct UrlState {
   void *resolver; /* resolver state, if it is used in the URL state -
                      ares_channel f.e. */
 
-#if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
+#if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_ENGINE_H)
   ENGINE *engine;
-#endif /* USE_SSLEAY */
+#endif /* USE_OPENSSL */
   struct timeval expiretime; /* set this with Curl_expire() only */
   struct Curl_tree timenode; /* for the splay stuff */
   struct curl_llist *timeoutlist; /* list of pending timeouts */
@@ -1325,10 +1303,15 @@ struct UrlState {
   long rtsp_next_server_CSeq; /* the session's next server CSeq */
   long rtsp_CSeq_recv; /* most recent CSeq received */
 
-  /* if true, force SSL connection retry (workaround for certain servers) */
-  bool ssl_connect_retry;
   curl_off_t infilesize; /* size of file to upload, -1 means unknown.
                             Copied from set.filesize at start of operation */
+
+  int drain; /* Increased when this stream has data to read, even if its
+                socket not necessarily is readable. Decreased when
+                checked. */
+  bool done; /* set to FALSE when Curl_do() is called and set to TRUE when
+                Curl_done() is called, to prevent Curl_done() to get invoked
+                twice when the multi interface is used. */
 };
 
 
@@ -1378,13 +1361,13 @@ enum dupstring {
   STRING_KRB_LEVEL,       /* krb security level */
   STRING_NETRC_FILE,      /* if not NULL, use this instead of trying to find
                              $HOME/.netrc */
-  STRING_COPYPOSTFIELDS,  /* if POST, set the fields' values here */
   STRING_PROXY,           /* proxy to use */
   STRING_SET_RANGE,       /* range, if used */
   STRING_SET_REFERER,     /* custom string for the HTTP referer field */
   STRING_SET_URL,         /* what original URL to work on */
   STRING_SSL_CAPATH,      /* CA directory name (doesn't work on windows) */
   STRING_SSL_CAFILE,      /* certificate file to verify peer against */
+  STRING_SSL_PINNEDPUBLICKEY, /* public key file to verify peer against */
   STRING_SSL_CIPHER_LIST, /* list of ciphers to use */
   STRING_SSL_EGDSOCKET,   /* path to file containing the EGD daemon socket */
   STRING_SSL_RANDOM_FILE, /* path to file containing "random" data */
@@ -1408,19 +1391,31 @@ enum dupstring {
   STRING_SSH_KNOWNHOSTS,  /* file name of knownhosts file */
 #endif
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-  STRING_SOCKS5_GSSAPI_SERVICE,  /* GSSAPI service name */
+  STRING_SOCKS5_GSSAPI_SERVICE, /* GSSAPI service name */
+  STRING_PROXY_SERVICE_NAME, /* Proxy service name */
+  STRING_SERVICE_NAME,    /* Service name */
 #endif
   STRING_MAIL_FROM,
   STRING_MAIL_AUTH,
 
 #ifdef USE_TLS_SRP
-  STRING_TLSAUTH_USERNAME,     /* TLS auth <username> */
-  STRING_TLSAUTH_PASSWORD,     /* TLS auth <password> */
+  STRING_TLSAUTH_USERNAME,      /* TLS auth <username> */
+  STRING_TLSAUTH_PASSWORD,      /* TLS auth <password> */
+#endif
+  STRING_BEARER,                /* <bearer>, if used */
+#ifdef USE_UNIX_SOCKETS
+  STRING_UNIX_SOCKET_PATH,      /* path to Unix socket, if used */
 #endif
 
-  STRING_BEARER,          /* <bearer>, if used */
+  /* -- end of zero-terminated strings -- */
 
-  /* -- end of strings -- */
+  STRING_LASTZEROTERMINATED,
+
+  /* -- below this are pointers to binary data that cannot be strdup'ed.
+     Each such pointer must be added manually to Curl_dupset() --- */
+
+  STRING_COPYPOSTFIELDS,  /* if POST, set the fields' values here */
+
   STRING_LAST /* not used, just an end-of-list marker */
 };
 
@@ -1431,8 +1426,8 @@ struct UserDefined {
   long proxyport; /* If non-zero, use this port number by default. If the
                      proxy string features a ":[port]" that one will override
                      this. */
-  void *out;         /* the fetched file goes here */
-  void *in;          /* the uploaded file is read from here */
+  void *out;         /* CURLOPT_WRITEDATA */
+  void *in;          /* CURLOPT_READDATA */
   void *writeheader; /* write the header to this if non-NULL */
   void *rtp_out;     /* write RTP to this if non-NULL */
   long use_port;     /* which port to use (when not using default) */
@@ -1553,7 +1548,7 @@ struct UserDefined {
   bool ftp_list_only;    /* switch FTP command for listing directories */
   bool ftp_use_port;     /* use the FTP PORT command */
   bool hide_progress;    /* don't use the progress meter */
-  bool http_fail_on_error;  /* fail on HTTP error codes >= 300 */
+  bool http_fail_on_error;  /* fail on HTTP error codes >= 400 */
   bool http_follow_location; /* follow HTTP redirects */
   bool http_transfer_encoding; /* request compressed HTTP transfer-encoding */
   bool http_disable_hostname_check_before_authentication;
@@ -1566,7 +1561,7 @@ struct UserDefined {
   enum CURL_NETRC_OPTION
        use_netrc;        /* defined in include/curl.h */
   bool verbose;          /* output verbosity */
-  bool krb;              /* kerberos connection requested */
+  bool krb;              /* Kerberos connection requested */
   bool reuse_forbid;     /* forbidden to be reused, close after use */
   bool reuse_fresh;      /* do not re-use an existing connection  */
   bool ftp_use_epsv;     /* if EPSV is to be attempted or not */
@@ -1586,6 +1581,7 @@ struct UserDefined {
   bool connect_only;     /* make connection, let application use the socket */
   bool ssl_enable_beast; /* especially allow this flaw for interoperability's
                             sake*/
+  bool ssl_no_revoke;    /* disable SSL certificate revocation checks */
   long ssh_auth_types;   /* allowed SSH auth types */
   bool http_te_skip;     /* pass the raw body data to the user, even when
                             transfer-encoded (chunked, compressed) */
@@ -1596,7 +1592,7 @@ struct UserDefined {
   bool proxy_transfer_mode; /* set transfer mode (;type=<a|i>) when doing FTP
                                via an HTTP proxy */
   char *str[STRING_LAST]; /* array of strings, pointing to allocated memory */
-  unsigned int scope;    /* address scope for IPv6 */
+  unsigned int scope_id;  /* Scope id for IPv6 */
   long allowed_protocols;
   long redir_protocols;
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
@@ -1627,7 +1623,9 @@ struct UserDefined {
 
   bool ssl_enable_npn;  /* TLS NPN extension? */
   bool ssl_enable_alpn; /* TLS ALPN extension? */
-
+  bool path_as_is;      /* allow dotdots? */
+  bool pipewait;        /* wait for pipe/multiplex status before starting a
+                           new connection */
   long expect_100_timeout; /* in milliseconds */
 };
 

@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010, DirecTV, Contact: Eric Hu, <ehu@directv.com>.
- * Copyright (C) 2010 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,6 +29,7 @@
 #include "curl_setup.h"
 
 #ifdef USE_AXTLS
+#include <axTLS/config.h>
 #include <axTLS/ssl.h>
 #include "axtls.h"
 
@@ -38,13 +39,13 @@
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-#include "curl_memory.h"
-#include <unistd.h>
-/* The last #include file should be: */
-#include "memdebug.h"
+#include "curl_printf.h"
 #include "hostcheck.h"
+#include <unistd.h>
+
+/* The last #include files should be: */
+#include "curl_memory.h"
+#include "memdebug.h"
 
 
 /* Global axTLS init, called from Curl_ssl_init() */
@@ -463,9 +464,11 @@ Curl_axtls_connect(struct connectdata *conn,
                   int sockindex)
 
 {
+  struct SessionHandle *data = conn->data;
   CURLcode conn_step = connect_prep(conn, sockindex);
   int ssl_fcn_return;
   SSL *ssl = conn->ssl[sockindex].ssl;
+  long timeout_ms;
 
   if(conn_step != CURLE_OK) {
     Curl_axtls_close(conn, sockindex);
@@ -474,14 +477,23 @@ Curl_axtls_connect(struct connectdata *conn,
 
   /* Check to make sure handshake was ok. */
   while(ssl_handshake_status(ssl) != SSL_OK) {
+    /* check allowed time left */
+    timeout_ms = Curl_timeleft(data, NULL, TRUE);
+
+    if(timeout_ms < 0) {
+      /* no need to continue if time already is up */
+      failf(data, "SSL connection timeout");
+      return CURLE_OPERATION_TIMEDOUT;
+    }
+
     ssl_fcn_return = ssl_read(ssl, NULL);
     if(ssl_fcn_return < 0) {
       Curl_axtls_close(conn, sockindex);
       ssl_display_error(ssl_fcn_return); /* goes to stdout. */
       return map_error_to_curl(ssl_fcn_return);
     }
+    /* TODO: avoid polling */
     usleep(10000);
-    /* TODO: check for timeout as this could hang indefinitely otherwise */
   }
   infof (conn->data, "handshake completed successfully\n");
 
@@ -513,12 +525,6 @@ static ssize_t axtls_send(struct connectdata *conn,
 
   *err = CURLE_OK;
   return rc;
-}
-
-void Curl_axtls_close_all(struct SessionHandle *data)
-{
-  (void)data;
-  infof(data, "  Curl_axtls_close_all\n");
 }
 
 void Curl_axtls_close(struct connectdata *conn, int sockindex)
@@ -677,7 +683,7 @@ int Curl_axtls_random(struct SessionHandle *data,
      * race condition is that some global resources will leak. */
     RNG_initialize();
   }
-  get_random(length, entropy);
+  get_random((int)length, entropy);
   return 0;
 }
 

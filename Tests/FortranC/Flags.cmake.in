@@ -12,11 +12,17 @@ configure_file("${src}/test_opt.sh.in" "${bld}/fc.sh" @ONLY)
 set(ID)
 set(COMMAND)
 
+set(make_program "@CMake_TEST_EXPLICIT_MAKE_PROGRAM@")
+if(make_program)
+  set(maybe_make_program "-DCMAKE_MAKE_PROGRAM=${make_program}")
+endif()
+
 execute_process(
   WORKING_DIRECTORY "${bld}"
   COMMAND ${CMAKE_COMMAND} "${src}" -G "@CMAKE_GENERATOR@"
                            -A "@CMAKE_GENERATOR_PLATFORM@"
                            -T "@CMAKE_GENERATOR_TOOLSET@"
+                           ${maybe_make_program}
                            "-DFortranC_TEST_FLAGS=1"
                            "-DCMAKE_C_COMPILER=${bld}/cc.sh"
                            "-DCMAKE_C_FLAGS:STRING=@CMAKE_C_FLAGS@"

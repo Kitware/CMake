@@ -2,26 +2,40 @@
 # FindOpenSSL
 # -----------
 #
-# Try to find the OpenSSL encryption library
+# Find the OpenSSL encryption library.
 #
-# Once done this will define
+# Imported Targets
+# ^^^^^^^^^^^^^^^^
 #
-# ::
+# This module defines the following :prop_tgt:`IMPORTED` targets:
 #
-#   OPENSSL_ROOT_DIR - Set this variable to the root installation of OpenSSL
+# ``OpenSSL::SSL``
+#   The OpenSSL ``ssl`` library, if found.
+# ``OpenSSL::Crypto``
+#   The OpenSSL ``crypto`` library, if found.
 #
+# Result Variables
+# ^^^^^^^^^^^^^^^^
 #
+# This module will set the following variables in your project:
 #
-# Read-Only variables:
+# ``OPENSSL_FOUND``
+#   System has the OpenSSL library.
+# ``OPENSSL_INCLUDE_DIR``
+#   The OpenSSL include directory.
+# ``OPENSSL_CRYPTO_LIBRARY``
+#   The OpenSSL crypto library.
+# ``OPENSSL_SSL_LIBRARY``
+#   The OpenSSL SSL library.
+# ``OPENSSL_LIBRARIES``
+#   All OpenSSL libraries.
+# ``OPENSSL_VERSION``
+#   This is set to ``$major.$minor.$revision$patch`` (e.g. ``0.9.8s``).
 #
-# ::
+# Hints
+# ^^^^^
 #
-#   OPENSSL_FOUND - System has the OpenSSL library
-#   OPENSSL_INCLUDE_DIR - The OpenSSL include directory
-#   OPENSSL_CRYPTO_LIBRARY - The OpenSSL crypto library
-#   OPENSSL_SSL_LIBRARY - The OpenSSL SSL library
-#   OPENSSL_LIBRARIES - All OpenSSL libraries
-#   OPENSSL_VERSION - This is set to $major.$minor.$revision$patch (eg. 0.9.8s)
+# Set ``OPENSSL_ROOT_DIR`` to the root directory of an OpenSSL installation.
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
@@ -99,15 +113,20 @@ if(WIN32 AND NOT CYGWIN)
     # We are using the libraries located in the VC subdir instead of the parent directory eventhough :
     # libeay32MD.lib is identical to ../libeay32.lib, and
     # ssleay32MD.lib is identical to ../ssleay32.lib
+
+    set(_OPENSSL_PATH_SUFFIXES
+      "lib"
+      "VC"
+      "lib/VC"
+      )
+
     find_library(LIB_EAY_DEBUG
       NAMES
         libeay32MDd
         libeay32d
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
-        "lib"
-        "VC"
-        "lib/VC"
+        ${_OPENSSL_PATH_SUFFIXES}
     )
 
     find_library(LIB_EAY_RELEASE
@@ -116,9 +135,7 @@ if(WIN32 AND NOT CYGWIN)
         libeay32
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
-        "lib"
-        "VC"
-        "lib/VC"
+        ${_OPENSSL_PATH_SUFFIXES}
     )
 
     find_library(SSL_EAY_DEBUG
@@ -127,9 +144,7 @@ if(WIN32 AND NOT CYGWIN)
         ssleay32d
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
-        "lib"
-        "VC"
-        "lib/VC"
+        ${_OPENSSL_PATH_SUFFIXES}
     )
 
     find_library(SSL_EAY_RELEASE
@@ -139,9 +154,7 @@ if(WIN32 AND NOT CYGWIN)
         ssl
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
-        "lib"
-        "VC"
-        "lib/VC"
+        ${_OPENSSL_PATH_SUFFIXES}
     )
 
     set(LIB_EAY_LIBRARY_DEBUG "${LIB_EAY_DEBUG}")
@@ -155,9 +168,9 @@ if(WIN32 AND NOT CYGWIN)
 
     mark_as_advanced(LIB_EAY_LIBRARY_DEBUG LIB_EAY_LIBRARY_RELEASE
                      SSL_EAY_LIBRARY_DEBUG SSL_EAY_LIBRARY_RELEASE)
-    set( OPENSSL_SSL_LIBRARY ${SSL_EAY_LIBRARY} )
-    set( OPENSSL_CRYPTO_LIBRARY ${LIB_EAY_LIBRARY} )
-    set( OPENSSL_LIBRARIES ${SSL_EAY_LIBRARY} ${LIB_EAY_LIBRARY} )
+    set(OPENSSL_SSL_LIBRARY ${SSL_EAY_LIBRARY} )
+    set(OPENSSL_CRYPTO_LIBRARY ${LIB_EAY_LIBRARY} )
+    set(OPENSSL_LIBRARIES ${SSL_EAY_LIBRARY} ${LIB_EAY_LIBRARY} )
   elseif(MINGW)
     # same player, for MinGW
     set(LIB_EAY_NAMES libeay32)
@@ -185,9 +198,9 @@ if(WIN32 AND NOT CYGWIN)
     )
 
     mark_as_advanced(SSL_EAY LIB_EAY)
-    set( OPENSSL_SSL_LIBRARY ${SSL_EAY} )
-    set( OPENSSL_CRYPTO_LIBRARY ${LIB_EAY} )
-    set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
+    set(OPENSSL_SSL_LIBRARY ${SSL_EAY} )
+    set(OPENSSL_CRYPTO_LIBRARY ${LIB_EAY} )
+    set(OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
     unset(LIB_EAY_NAMES)
     unset(SSL_EAY_NAMES)
   else()
@@ -213,9 +226,9 @@ if(WIN32 AND NOT CYGWIN)
     )
 
     mark_as_advanced(SSL_EAY LIB_EAY)
-    set( OPENSSL_SSL_LIBRARY ${SSL_EAY} )
-    set( OPENSSL_CRYPTO_LIBRARY ${LIB_EAY} )
-    set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
+    set(OPENSSL_SSL_LIBRARY ${SSL_EAY} )
+    set(OPENSSL_CRYPTO_LIBRARY ${LIB_EAY} )
+    set(OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
   endif()
 else()
 
@@ -338,3 +351,66 @@ else ()
 endif ()
 
 mark_as_advanced(OPENSSL_INCLUDE_DIR OPENSSL_LIBRARIES)
+
+if(OPENSSL_FOUND)
+  if(NOT TARGET OpenSSL::Crypto AND
+      (EXISTS "${OPENSSL_CRYPTO_LIBRARY}" OR
+        EXISTS "${LIB_EAY_LIBRARY_DEBUG}" OR
+        EXISTS "${LIB_EAY_LIBRARY_RELEASE}")
+      )
+    add_library(OpenSSL::Crypto UNKNOWN IMPORTED)
+    set_target_properties(OpenSSL::Crypto PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIR}")
+    if(EXISTS "${OPENSSL_CRYPTO_LIBRARY}")
+      set_target_properties(OpenSSL::Crypto PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+        IMPORTED_LOCATION "${OPENSSL_CRYPTO_LIBRARY}")
+    endif()
+    if(EXISTS "${LIB_EAY_LIBRARY_DEBUG}")
+      set_property(TARGET OpenSSL::Crypto APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS DEBUG)
+      set_target_properties(OpenSSL::Crypto PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
+        IMPORTED_LOCATION_DEBUG "${LIB_EAY_LIBRARY_DEBUG}")
+    endif()
+    if(EXISTS "${LIB_EAY_LIBRARY_RELEASE}")
+      set_property(TARGET OpenSSL::Crypto APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS RELEASE)
+      set_target_properties(OpenSSL::Crypto PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
+        IMPORTED_LOCATION_RELEASE "${LIB_EAY_LIBRARY_RELEASE}")
+    endif()
+  endif()
+  if(NOT TARGET OpenSSL::SSL AND
+      (EXISTS "${OPENSSL_SSL_LIBRARY}" OR
+        EXISTS "${SSL_EAY_LIBRARY_DEBUG}" OR
+        EXISTS "${SSL_EAY_LIBRARY_RELEASE}")
+      )
+    add_library(OpenSSL::SSL UNKNOWN IMPORTED)
+    set_target_properties(OpenSSL::SSL PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIR}")
+    if(EXISTS "${OPENSSL_SSL_LIBRARY}")
+      set_target_properties(OpenSSL::SSL PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+        IMPORTED_LOCATION "${OPENSSL_SSL_LIBRARY}")
+    endif()
+    if(EXISTS "${SSL_EAY_LIBRARY_DEBUG}")
+      set_property(TARGET OpenSSL::SSL APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS DEBUG)
+      set_target_properties(OpenSSL::SSL PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
+        IMPORTED_LOCATION_DEBUG "${SSL_EAY_LIBRARY_DEBUG}")
+    endif()
+    if(EXISTS "${SSL_EAY_LIBRARY_RELEASE}")
+      set_property(TARGET OpenSSL::SSL APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS RELEASE)
+      set_target_properties(OpenSSL::SSL PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
+        IMPORTED_LOCATION_RELEASE "${SSL_EAY_LIBRARY_RELEASE}")
+    endif()
+    if(TARGET OpenSSL::Crypto)
+      set_target_properties(OpenSSL::SSL PROPERTIES
+        INTERFACE_LINK_LIBRARIES OpenSSL::Crypto)
+    endif()
+  endif()
+endif()

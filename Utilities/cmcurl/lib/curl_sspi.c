@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,17 +25,12 @@
 #ifdef USE_WINDOWS_SSPI
 
 #include <curl/curl.h>
-
 #include "curl_sspi.h"
-
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
-#include "curl_memory.h"
 #include "curl_multibyte.h"
 #include "warnless.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* We use our own typedef here since some headers might lack these */
@@ -98,20 +93,25 @@ CURLcode Curl_sspi_global_init(void)
        osver.dwPlatformId == platformId)
       securityDll = TRUE;
 #else
-    ULONGLONG majorVersionMask;
-    ULONGLONG platformIdMask;
+    ULONGLONG cm;
     OSVERSIONINFOEX osver;
 
     memset(&osver, 0, sizeof(osver));
     osver.dwOSVersionInfoSize = sizeof(osver);
     osver.dwMajorVersion = majorVersion;
     osver.dwPlatformId = platformId;
-    majorVersionMask = VerSetConditionMask(0, VER_MAJORVERSION, VER_EQUAL);
-    platformIdMask = VerSetConditionMask(0, VER_PLATFORMID, VER_EQUAL);
+
+    cm = VerSetConditionMask(0, VER_MAJORVERSION, VER_EQUAL);
+    cm = VerSetConditionMask(cm, VER_MINORVERSION, VER_GREATER_EQUAL);
+    cm = VerSetConditionMask(cm, VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL);
+    cm = VerSetConditionMask(cm, VER_SERVICEPACKMINOR, VER_GREATER_EQUAL);
+    cm = VerSetConditionMask(cm, VER_PLATFORMID, VER_EQUAL);
 
     /* Verify the major version number == 4 and platform id == WIN_NT */
-    if(VerifyVersionInfo(&osver, VER_MAJORVERSION, majorVersionMask) &&
-       VerifyVersionInfo(&osver, VER_PLATFORMID, platformIdMask))
+    if(VerifyVersionInfo(&osver, (VER_MAJORVERSION | VER_MINORVERSION |
+                                  VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR |
+                                  VER_PLATFORMID),
+                         cm))
       securityDll = TRUE;
 #endif
 
@@ -224,7 +224,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
 
   Curl_unicodefree(useranddomain.tchar_ptr);
 
-  /* Setup ntlm identity's password and length */
+  /* Setup the identity's password and length */
   passwd.tchar_ptr = Curl_convert_UTF8_to_tchar((char *)passwdp);
   if(!passwd.tchar_ptr)
     return CURLE_OUT_OF_MEMORY;

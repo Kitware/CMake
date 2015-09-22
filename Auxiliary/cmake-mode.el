@@ -198,9 +198,9 @@ the indentation.  Otherwise it retains the same position on the line"
                               ,@(mapcar #'downcase cmake-keywords))
                           symbol-end))
      . font-lock-keyword-face)
-    (,(rx symbol-start (group (+ (or word (syntax symbol)))) ?\()
+    (,(rx symbol-start (group (+ (or word (syntax symbol)))) (* blank) ?\()
      1 font-lock-function-name-face)
-    ("\\${?\\([[:alpha:]_][[:alnum:]_]*\\|[0-9]+\\|[$*_]\\)"
+    (,(rx "${" (group (+(any alnum "-_+/."))) "}")
      1 font-lock-variable-name-face t)
     )
   "Highlighting expressions for CMake mode.")

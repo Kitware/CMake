@@ -154,14 +154,10 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
   const char* stamp_dir = this->TargetDirectory.c_str();
 
   // Get the directory in which module files will be created.
-  const char* mod_dir;
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
-  if(const char* target_mod_dir =
-     mf->GetDefinition("CMAKE_Fortran_TARGET_MODULE_DIR"))
-    {
-    mod_dir = target_mod_dir;
-    }
-  else
+  std::string mod_dir =
+    mf->GetSafeDefinition("CMAKE_Fortran_TARGET_MODULE_DIR");
+  if (mod_dir.empty())
     {
     mod_dir =
       this->LocalGenerator->GetMakefile()->GetCurrentBinaryDirectory();
@@ -356,7 +352,8 @@ bool
 cmDependsFortran
 ::WriteDependenciesReal(const char *obj,
                         cmFortranSourceInfo const& info,
-                        const char* mod_dir, const char* stamp_dir,
+                        std::string const& mod_dir,
+                        const char* stamp_dir,
                         std::ostream& makeDepends,
                         std::ostream& internalDepends)
 {

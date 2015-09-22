@@ -369,7 +369,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   bool usePRE_BUILD = false;
-  cmGlobalGenerator* gg = makefile->GetGlobalGenerator();
+  cmGlobalGenerator* gg = lg->GetGlobalGenerator();
   if(gg->GetName().find("Visual Studio") != std::string::npos)
     {
     cmGlobalVisualStudioGenerator* vsgg =
@@ -396,7 +396,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
 
   std::vector<std::string> rcc_output;
   bool const isNinja =
-    makefile->GetGlobalGenerator()->GetName() == "Ninja";
+    lg->GetGlobalGenerator()->GetName() == "Ninja";
   if(isNinja
 #if defined(_WIN32) && !defined(__CYGWIN__)
         || usePRE_BUILD
@@ -475,8 +475,9 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
                                 /*byproducts=*/rcc_output, depends,
                                 commandLines, false, autogenComment.c_str());
 
+    autogenTarget->Compute();
+
     cmGeneratorTarget* gt = new cmGeneratorTarget(autogenTarget, lg);
-    lg->GetGlobalGenerator()->AddGeneratorTarget(autogenTarget, gt);
     makefile->AddGeneratorTarget(autogenTarget, gt);
 
     // Set target folder
@@ -548,8 +549,11 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
     {
     qtVersion = makefile->GetDefinition("QT_VERSION_MAJOR");
     }
+  cmGeneratorTarget *gtgt = target->GetMakefile()
+                                  ->GetGlobalGenerator()
+                                  ->GetGeneratorTarget(target);
   if (const char *targetQtVersion =
-      target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", ""))
+      gtgt->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", ""))
     {
     qtVersion = targetQtVersion;
     }
@@ -879,8 +883,11 @@ void cmQtAutoGenerators::MergeUicOptions(std::vector<std::string> &opts,
 static void GetUicOpts(cmTarget const* target, const std::string& config,
                        std::string &optString)
 {
+  cmGeneratorTarget *gtgt = target->GetMakefile()
+                                  ->GetGlobalGenerator()
+                                  ->GetGeneratorTarget(target);
   std::vector<std::string> opts;
-  target->GetAutoUicOptions(opts, config);
+  gtgt->GetAutoUicOptions(opts, config);
   optString = cmJoin(opts, ";");
 }
 
@@ -1148,6 +1155,9 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
 
 std::string cmQtAutoGenerators::GetRccExecutable(cmTarget const* target)
 {
+  cmGeneratorTarget *gtgt = target->GetMakefile()
+                                  ->GetGlobalGenerator()
+                                  ->GetGeneratorTarget(target);
   cmMakefile *makefile = target->GetMakefile();
   const char *qtVersion = makefile->GetDefinition("_target_qt_version");
   if (!qtVersion)
@@ -1158,8 +1168,7 @@ std::string cmQtAutoGenerators::GetRccExecutable(cmTarget const* target)
       qtVersion = makefile->GetDefinition("QT_VERSION_MAJOR");
       }
     if (const char *targetQtVersion =
-        target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION",
-                                                        ""))
+        gtgt->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", ""))
       {
       qtVersion = targetQtVersion;
       }

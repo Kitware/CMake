@@ -229,9 +229,14 @@ function(is_file_executable file result_var)
 
     if(file_cmd)
       execute_process(COMMAND "${file_cmd}" "${file_full}"
+        RESULT_VARIABLE file_rv
         OUTPUT_VARIABLE file_ov
+        ERROR_VARIABLE file_ev
         OUTPUT_STRIP_TRAILING_WHITESPACE
         )
+      if(NOT file_rv STREQUAL "0")
+        message(FATAL_ERROR "${file_cmd} failed: ${file_rv}\n${file_ev}")
+      endif()
 
       # Replace the name of the file in the output with a placeholder token
       # (the string " _file_full_ ") so that just in case the path name of
@@ -543,11 +548,21 @@ function(gp_resolved_file_type original_file file exepath dirs type_var)
 
         if(CYGPATH_EXECUTABLE)
           execute_process(COMMAND ${CYGPATH_EXECUTABLE} -W
+                          RESULT_VARIABLE env_rv
                           OUTPUT_VARIABLE env_windir
+                          ERROR_VARIABLE env_ev
                           OUTPUT_STRIP_TRAILING_WHITESPACE)
+          if(NOT env_rv STREQUAL "0")
+            message(FATAL_ERROR "${CYGPATH_EXECUTABLE} -W failed: ${env_rv}\n${env_ev}")
+          endif()
           execute_process(COMMAND ${CYGPATH_EXECUTABLE} -S
+                          RESULT_VARIABLE env_rv
                           OUTPUT_VARIABLE env_sysdir
+                          ERROR_VARIABLE env_ev
                           OUTPUT_STRIP_TRAILING_WHITESPACE)
+          if(NOT env_rv STREQUAL "0")
+            message(FATAL_ERROR "${CYGPATH_EXECUTABLE} -S failed: ${env_rv}\n${env_ev}")
+          endif()
           string(TOLOWER "${env_windir}" windir)
           string(TOLOWER "${env_sysdir}" sysroot)
 
@@ -685,6 +700,8 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     return()
   endif()
 
+  set(gp_cmd_maybe_filter)      # optional command to pre-filter gp_tool results
+
   if(gp_tool STREQUAL "ldd")
     set(gp_cmd_args "")
     set(gp_regex "^[\t ]*[^\t ]+ => ([^\t\(]+) .*${eol_char}$")
@@ -709,6 +726,11 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     set(gp_regex_error "")
     set(gp_regex_fallback "")
     set(gp_regex_cmp_count 1)
+    # objdump generaates copious output so we create a grep filter to pre-filter results
+    find_program(gp_grep_cmd grep)
+    if(gp_grep_cmd)
+      set(gp_cmd_maybe_filter COMMAND ${gp_grep_cmd} "^[[:blank:]]*DLL Name: ")
+    endif()
   else()
     message(STATUS "warning: gp_tool='${gp_tool}' is an unknown tool...")
     message(STATUS "CMake function get_prerequisites needs more code to handle '${gp_tool}'")
@@ -765,8 +787,19 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   #
   execute_process(
     COMMAND ${gp_cmd} ${gp_cmd_args} ${target}
+    ${gp_cmd_maybe_filter}
+    RESULT_VARIABLE gp_rv
     OUTPUT_VARIABLE gp_cmd_ov
+    ERROR_VARIABLE gp_ev
     )
+  if(NOT gp_rv STREQUAL "0")
+    if(gp_tool STREQUAL "dumpbin")
+      # dumpbin error messages seem to go to stdout
+      message(FATAL_ERROR "${gp_cmd} failed: ${gp_rv}\n${gp_ev}\n${gp_cmd_ov}")
+    else()
+      message(FATAL_ERROR "${gp_cmd} failed: ${gp_rv}\n${gp_ev}")
+    endif()
+  endif()
 
   if(gp_tool STREQUAL "ldd")
     set(ENV{LD_LIBRARY_PATH} "${old_ld_env}")
@@ -791,8 +824,13 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   if(gp_tool STREQUAL "otool")
     execute_process(
       COMMAND otool -D ${target}
+      RESULT_VARIABLE otool_rv
       OUTPUT_VARIABLE gp_install_id_ov
+      ERROR_VARIABLE otool_ev
       )
+    if(NOT otool_rv STREQUAL "0")
+      message(FATAL_ERROR "otool -D failed: ${otool_rv}\n${otool_ev}")
+    endif()
     # second line is install name
     string(REGEX REPLACE ".*:\n" "" gp_install_id "${gp_install_id_ov}")
     if(gp_install_id)

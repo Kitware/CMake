@@ -11,7 +11,7 @@ branch, but it is merged into our history.
 Update curl from upstream as follows.  Create a local branch to
 explicitly reference the upstream snapshot branch head:
 
- git branch curl-upstream 3fe5d9bf
+ git branch curl-upstream 70654261
 
 Use a temporary directory to checkout the branch:
 
@@ -24,7 +24,7 @@ Use a temporary directory to checkout the branch:
 Now place the (reduced) curl content in this directory.  See
 instructions shown by
 
- git log 3fe5d9bf
+ git log 70654261
 
 for help extracting the content from the upstream repo.  Then run
 the following commands to commit the new version.  Substitute the
@@ -34,8 +34,8 @@ appropriate date and version number:
 
  GIT_AUTHOR_NAME='Curl Upstream' \
  GIT_AUTHOR_EMAIL='curl-library@cool.haxx.se' \
- GIT_AUTHOR_DATE='Wed Sep 10 08:07:58 2014 +0200' \
- git commit -m 'curl 7.38.0 (reduced)' &&
+ GIT_AUTHOR_DATE='Tue Aug 11 20:13:01 2015 +0200' \
+ git commit -m 'curl 7.44.0 (reduced)' &&
  git commit --amend
 
 Edit the commit message to describe the procedure used to obtain the

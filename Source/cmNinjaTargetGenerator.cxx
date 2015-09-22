@@ -58,7 +58,7 @@ cmNinjaTargetGenerator::New(cmGeneratorTarget* target)
 }
 
 cmNinjaTargetGenerator::cmNinjaTargetGenerator(cmGeneratorTarget* target)
-  : cmCommonTargetGenerator(target),
+  : cmCommonTargetGenerator(cmOutputConverter::HOME_OUTPUT, target),
     MacOSXContentGenerator(0),
     OSXBundleGenerator(0),
     MacContentFolders(),
@@ -195,7 +195,7 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
     return cmNinjaDeps();
 
   cmComputeLinkInformation* cli =
-    this->Target->GetLinkInformation(this->GetConfigName());
+    this->GeneratorTarget->GetLinkInformation(this->GetConfigName());
   if(!cli)
     return cmNinjaDeps();
 
@@ -207,6 +207,15 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
   if(!this->ModuleDefinitionFile.empty())
     {
     result.push_back(this->ConvertToNinjaPath(this->ModuleDefinitionFile));
+    }
+
+  // Add user-specified dependencies.
+  if (const char* linkDepends = this->Target->GetProperty("LINK_DEPENDS"))
+    {
+    std::vector<std::string> linkDeps;
+    cmSystemTools::ExpandListArgument(linkDepends, linkDeps);
+    std::transform(linkDeps.begin(), linkDeps.end(),
+                   std::back_inserter(result), MapToNinjaPath());
     }
 
   return result;
@@ -273,11 +282,12 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
       {
       pdbPath = this->Target->GetPDBDirectory(this->GetConfigName());
       pdbPath += "/";
-      pdbPath += this->Target->GetPDBName(this->GetConfigName());
+      pdbPath += this->GeneratorTarget->GetPDBName(this->GetConfigName());
       }
     if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY)
       {
-      compilePdbPath = this->Target->GetCompilePDBPath(this->GetConfigName());
+      compilePdbPath =
+              this->GeneratorTarget->GetCompilePDBPath(this->GetConfigName());
       if(compilePdbPath.empty())
         {
         compilePdbPath = this->Target->GetSupportDirectory() + "/";
@@ -741,7 +751,7 @@ cmNinjaTargetGenerator::MacOSXContentGeneratorType::operator()(
   cmSourceFile const& source, const char* pkgloc)
 {
   // Skip OS X content when not building a Framework or Bundle.
-  if(!this->Generator->GetTarget()->IsBundleOnApple())
+  if(!this->Generator->GetGeneratorTarget()->IsBundleOnApple())
     {
     return;
     }
