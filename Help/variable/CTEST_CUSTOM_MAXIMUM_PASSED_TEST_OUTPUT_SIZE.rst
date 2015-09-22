@@ -1,6 +1,8 @@
 CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE
 --------------------------------------------
 
-Specify the maximum amount of output from a passed test that will
-be collected by the :command:`ctest_test` command.  If not set,
-the default is 1 KiB.
+When saving a passing test's output, this is the maximum size, in bytes, that
+will be collected by the :command:`ctest_test` command. Defaults to 1024
+(1 KiB).
+
+.. include:: CTEST_CUSTOM_XXX.txt
