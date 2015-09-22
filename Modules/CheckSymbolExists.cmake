@@ -44,10 +44,14 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-
-
 macro(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
-  _CHECK_SYMBOL_EXISTS("${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckSymbolExists.c" "${SYMBOL}" "${FILES}" "${VARIABLE}" )
+  if(CMAKE_C_COMPILER_LOADED)
+    _CHECK_SYMBOL_EXISTS("${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckSymbolExists.c" "${SYMBOL}" "${FILES}" "${VARIABLE}" )
+  elseif(CMAKE_CXX_COMPILER_LOADED)
+    _CHECK_SYMBOL_EXISTS("${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckSymbolExists.cxx" "${SYMBOL}" "${FILES}" "${VARIABLE}" )
+  else()
+    message(FATAL_ERROR "CHECK_SYMBOL_EXISTS needs either C or CXX language enabled")
+  endif()
 endmacro()
 
 macro(_CHECK_SYMBOL_EXISTS SOURCEFILE SYMBOL FILES VARIABLE)
