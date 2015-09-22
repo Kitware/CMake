@@ -217,7 +217,7 @@ void cmGlobalVisualStudio6Generator
   TargetDependSet projectTargets;
   TargetDependSet originalTargets;
   this->GetTargetSets(projectTargets, originalTargets, root, generators);
-  OrderedTargetDependSet orderedProjectTargets(projectTargets);
+  OrderedTargetDependSet orderedProjectTargets(projectTargets, "ALL_BUILD");
 
   for(OrderedTargetDependSet::const_iterator
         tt = orderedProjectTargets.begin();

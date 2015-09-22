@@ -864,28 +864,34 @@ bool
 cmGlobalVisualStudioGenerator::TargetCompare
 ::operator()(cmGeneratorTarget const* l, cmGeneratorTarget const* r) const
 {
-  // Make sure ALL_BUILD is first so it is the default active project.
-  if(r->GetName() == "ALL_BUILD")
+  // Make sure a given named target is ordered first,
+  // e.g. to set ALL_BUILD as the default active project.
+  // When the empty string is named this is a no-op.
+  if (r->GetName() == this->First)
     {
     return false;
     }
-  if(l->GetName() == "ALL_BUILD")
+  if (l->GetName() == this->First)
     {
     return true;
     }
-  return strcmp(l->GetName().c_str(), r->GetName().c_str()) < 0;
+  return l->GetName() < r->GetName();
 }
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::OrderedTargetDependSet
-::OrderedTargetDependSet(TargetDependSet const& targets)
+::OrderedTargetDependSet(TargetDependSet const& targets,
+                         std::string const& first):
+  derived(TargetCompare(first))
 {
   this->insert(targets.begin(), targets.end());
 }
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::OrderedTargetDependSet
-::OrderedTargetDependSet(TargetSet const& targets)
+::OrderedTargetDependSet(TargetSet const& targets,
+                         std::string const& first):
+  derived(TargetCompare(first))
 {
   for (TargetSet::const_iterator it = targets.begin();
        it != targets.end(); ++it)

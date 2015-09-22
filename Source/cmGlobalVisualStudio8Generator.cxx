@@ -449,7 +449,7 @@ void cmGlobalVisualStudio8Generator::WriteProjectDepends(
 {
   cmGeneratorTarget* gt = this->GetGeneratorTarget(&t);
   TargetDependSet const& unordered = this->GetTargetDirectDepends(gt);
-  OrderedTargetDependSet depends(unordered);
+  OrderedTargetDependSet depends(unordered, std::string());
   for(OrderedTargetDependSet::const_iterator i = depends.begin();
       i != depends.end(); ++i)
     {
