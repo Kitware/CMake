@@ -2465,8 +2465,7 @@ public:
   cmInstallTargetGeneratorLocal(cmLocalGenerator* lg, std::string const& t,
                                 const char* dest, bool implib):
     cmInstallTargetGenerator(
-      lg->GetMakefile(), t, dest, implib, "",
-      std::vector<std::string>(), "Unspecified",
+      t, dest, implib, "", std::vector<std::string>(), "Unspecified",
       cmInstallGenerator::SelectMessageLevel(lg->GetMakefile()),
       false)
   {
@@ -2494,7 +2493,7 @@ cmLocalGenerator
     // Include the user-specified pre-install script for this target.
     if(const char* preinstall = l->second.GetProperty("PRE_INSTALL_SCRIPT"))
       {
-      cmInstallScriptGenerator g(this->Makefile, preinstall, false, 0);
+      cmInstallScriptGenerator g(preinstall, false, 0);
       g.Generate(os, config, configurationTypes);
       }
 
@@ -2555,7 +2554,7 @@ cmLocalGenerator
     // Include the user-specified post-install script for this target.
     if(const char* postinstall = l->second.GetProperty("POST_INSTALL_SCRIPT"))
       {
-      cmInstallScriptGenerator g(this->Makefile, postinstall, false, 0);
+      cmInstallScriptGenerator g(postinstall, false, 0);
       g.Generate(os, config, configurationTypes);
       }
     }

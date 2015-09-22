@@ -20,8 +20,7 @@
 class cmInstallDirectoryGenerator: public cmInstallGenerator
 {
 public:
-  cmInstallDirectoryGenerator(cmMakefile* mf,
-                              std::vector<std::string> const& dirs,
+  cmInstallDirectoryGenerator(std::vector<std::string> const& dirs,
                               const char* dest,
                               const char* file_permissions,
                               const char* dir_permissions,

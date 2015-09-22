@@ -26,8 +26,7 @@ class cmMakefile;
 class cmInstallExportGenerator: public cmInstallGenerator
 {
 public:
-  cmInstallExportGenerator(cmMakefile* mf,
-                           cmExportSet* exportSet,
+  cmInstallExportGenerator(cmExportSet* exportSet,
                            const char* dest, const char* file_permissions,
                            const std::vector<std::string>& configurations,
                            const char* component,

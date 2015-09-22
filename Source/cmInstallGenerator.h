@@ -33,8 +33,7 @@ public:
     MessageNever
   };
 
-  cmInstallGenerator(cmMakefile* mf,
-                     const char* destination,
+  cmInstallGenerator(const char* destination,
                      std::vector<std::string> const& configurations,
                      const char* component,
                      MessageLevel message);
@@ -71,7 +70,6 @@ protected:
   std::string CreateComponentTest(const char* component);
 
   // Information shared by most generator types.
-  cmMakefile* Makefile;
   std::string Destination;
   std::string Component;
   MessageLevel Message;
