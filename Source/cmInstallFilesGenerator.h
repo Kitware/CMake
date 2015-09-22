@@ -31,8 +31,6 @@ public:
                           bool optional = false);
   virtual ~cmInstallFilesGenerator();
 
-  void Compute(cmLocalGenerator* lg);
-
 protected:
   virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
   virtual void GenerateScriptForConfig(std::ostream& os,
@@ -41,7 +39,6 @@ protected:
   void AddFilesInstallRule(std::ostream& os, Indent const& indent,
                            std::vector<std::string> const& files);
 
-  cmLocalGenerator* LocalGenerator;
   std::vector<std::string> Files;
   std::string FilePermissions;
   std::string Rename;
