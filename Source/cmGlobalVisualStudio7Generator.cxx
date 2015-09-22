@@ -568,7 +568,7 @@ void cmGlobalVisualStudio7Generator
   TargetDependSet projectTargets;
   TargetDependSet originalTargets;
   this->GetTargetSets(projectTargets, originalTargets, root, generators);
-  OrderedTargetDependSet orderedProjectTargets(projectTargets);
+  OrderedTargetDependSet orderedProjectTargets(projectTargets, "ALL_BUILD");
 
   this->WriteTargetsToSolution(fout, root, orderedProjectTargets);
 
