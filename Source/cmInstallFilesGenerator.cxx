@@ -18,7 +18,8 @@
 
 //----------------------------------------------------------------------------
 cmInstallFilesGenerator
-::cmInstallFilesGenerator(std::vector<std::string> const& files,
+::cmInstallFilesGenerator(cmMakefile* mf,
+                          std::vector<std::string> const& files,
                           const char* dest, bool programs,
                           const char* file_permissions,
                           std::vector<std::string> const& configurations,
@@ -26,7 +27,7 @@ cmInstallFilesGenerator
                           MessageLevel message,
                           const char* rename,
                           bool optional):
-  cmInstallGenerator(dest, configurations, component, message),
+  cmInstallGenerator(mf, dest, configurations, component, message),
   LocalGenerator(0),
   Files(files),
   FilePermissions(file_permissions),

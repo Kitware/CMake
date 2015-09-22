@@ -24,14 +24,15 @@
 
 //----------------------------------------------------------------------------
 cmInstallTargetGenerator
-::cmInstallTargetGenerator(const std::string& targetName,
+::cmInstallTargetGenerator(cmMakefile* mf,
+                           const std::string& targetName,
                            const char* dest, bool implib,
                            const char* file_permissions,
                            std::vector<std::string> const& configurations,
                            const char* component,
                            MessageLevel message,
                            bool optional):
-  cmInstallGenerator(dest, configurations, component, message),
+  cmInstallGenerator(mf, dest, configurations, component, message),
   TargetName(targetName),
   Target(0),
   FilePermissions(file_permissions),

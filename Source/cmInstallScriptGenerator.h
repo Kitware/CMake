@@ -20,7 +20,9 @@
 class cmInstallScriptGenerator: public cmInstallGenerator
 {
 public:
-  cmInstallScriptGenerator(const char* script, bool code,
+  cmInstallScriptGenerator(
+    cmMakefile* mf,
+    const char* script, bool code,
     const char* component);
   virtual ~cmInstallScriptGenerator();
 

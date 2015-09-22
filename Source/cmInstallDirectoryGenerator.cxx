@@ -15,7 +15,8 @@
 
 //----------------------------------------------------------------------------
 cmInstallDirectoryGenerator
-::cmInstallDirectoryGenerator(std::vector<std::string> const& dirs,
+::cmInstallDirectoryGenerator(cmMakefile* mf,
+                              std::vector<std::string> const& dirs,
                               const char* dest,
                               const char* file_permissions,
                               const char* dir_permissions,
@@ -24,7 +25,7 @@ cmInstallDirectoryGenerator
                               MessageLevel message,
                               const char* literal_args,
                               bool optional):
-  cmInstallGenerator(dest, configurations, component, message),
+  cmInstallGenerator(mf, dest, configurations, component, message),
   Directories(dirs),
   FilePermissions(file_permissions), DirPermissions(dir_permissions),
   LiteralArguments(literal_args), Optional(optional)

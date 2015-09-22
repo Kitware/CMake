@@ -20,7 +20,8 @@
 class cmInstallFilesGenerator: public cmInstallGenerator
 {
 public:
-  cmInstallFilesGenerator(std::vector<std::string> const& files,
+  cmInstallFilesGenerator(cmMakefile* mf,
+                          std::vector<std::string> const& files,
                           const char* dest, bool programs,
                           const char* file_permissions,
                           std::vector<std::string> const& configurations,
