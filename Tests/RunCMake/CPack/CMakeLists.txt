@@ -8,5 +8,5 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${GENERATOR_TYPE}/${RunCMake_TEST}-specif
   include("${GENERATOR_TYPE}/${RunCMake_TEST}-specifics.cmake")
 endif()
 
-set(CPACK_GENERATOR "${GENERATOR_TYPE};TGZ")
+set(CPACK_GENERATOR "${GENERATOR_TYPE}")
 include(CPack)
