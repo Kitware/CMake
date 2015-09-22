@@ -60,7 +60,6 @@ class cmake
  public:
   enum MessageType
   { AUTHOR_WARNING,
-    AUTHOR_ERROR,
     FATAL_ERROR,
     INTERNAL_ERROR,
     MESSAGE,
@@ -70,12 +69,6 @@ class cmake
     DEPRECATION_WARNING
   };
 
-  enum WarningLevel
-  {
-    IGNORE_LEVEL,
-    WARNING_LEVEL,
-    ERROR_LEVEL
-  };
 
   /** \brief Describes the working modes of cmake */
   enum WorkingMode
@@ -279,7 +272,6 @@ class cmake
   void SetTrace(bool b) {  this->Trace = b;}
   bool GetTraceExpand() { return this->TraceExpand;}
   void SetTraceExpand(bool b) {  this->TraceExpand = b;}
-  void SetSuppressDevWarnings(bool b);
   bool GetWarnUninitialized() { return this->WarnUninitialized;}
   void SetWarnUninitialized(bool b) {  this->WarnUninitialized = b;}
   bool GetWarnUnused() { return this->WarnUnused;}
@@ -299,6 +291,12 @@ class cmake
     { this->CMakeEditCommand = s; }
   std::string const& GetCMakeEditCommand() const
     { return this->CMakeEditCommand; }
+
+  void SetSuppressDevWarnings(bool v)
+    {
+      this->SuppressDevWarnings = v;
+      this->DoSuppressDevWarnings = true;
+    }
 
   /** Display a message to the user.  */
   void IssueMessage(cmake::MessageType t, std::string const& text,
@@ -343,7 +341,8 @@ protected:
   cmPolicies *Policies;
   cmGlobalGenerator *GlobalGenerator;
   cmCacheManager *CacheManager;
-  std::map<std::string, WarningLevel> WarningLevels;
+  bool SuppressDevWarnings;
+  bool DoSuppressDevWarnings;
   std::string GeneratorPlatform;
   std::string GeneratorToolset;
 
@@ -419,15 +418,7 @@ private:
   {"-T <toolset-name>", "Specify toolset name if supported by generator."}, \
   {"-A <platform-name>", "Specify platform name if supported by generator."}, \
   {"-Wno-dev", "Suppress developer warnings."},\
-  {"-Wdev", "Enable developer warnings."},\
-  {"-Werror=dev", "Make developer warnings errors."},\
-  {"-Wno-error=dev", "Make developer warnings not errors."},\
-  {"-Wdeprecated", "Enable deprecated macro and function warnings."},\
-  {"-Wno-deprecated", "Suppress deprecated macro and function warnings."},\
-  {"-Werror=deprecated", "Make deprecated macro and function warnings " \
-                         "errors."},\
-  {"-Wno-error=deprecated", "Make deprecated macro and function warnings " \
-                            "not errors."}
+  {"-Wdev", "Enable developer warnings."}
 
 #define FOR_EACH_C_FEATURE(F) \
   F(c_function_prototypes) \

@@ -77,49 +77,10 @@
  Suppress developer warnings.
 
  Suppress warnings that are meant for the author of the
- CMakeLists.txt files. By default this will also turn off
- deprecation warnings.
+ CMakeLists.txt files.
 
 ``-Wdev``
  Enable developer warnings.
 
  Enable warnings that are meant for the author of the CMakeLists.txt
- files. By default this will also turn on deprecation warnings.
-
-``-Werror=dev``
- Make developer warnings errors.
-
- Make warnings that are meant for the author of the CMakeLists.txt
- files errors. By default this will also turn on treatment of
- deprecation warnings as errors.
-
-``-Wno-error=dev``
- Make developer warnings not errors.
-
- Make warnings that are meant for the author of the CMakeLists.txt
- files not errors. By default this will also turn off treatment of
- deprecation warnings as errors.
-
-``-Wdeprecated``
- Enable deprecated macro and function warnings.
-
- Enable warnings for usage of deprecated macros and functions, that
- are meant for the author of the CMakeLists.txt files.
-
-``-Wno-deprecated``
- Suppress deprecated macro and function warnings.
-
- Suppress warnings for usage of deprecated macros and functions, that
- are meant for the author of the CMakeLists.txt files.
-
-``-Werror=deprecated``
- Make deprecated macro and function warnings errors.
-
- Make warnings for usage of deprecated macros and functions, that
- are meant for the author of the CMakeLists.txt files, errors.
-
-``-Wno-error=deprecated``
- Make deprecated macro and function warnings not errors.
-
- Make warnings for usage of deprecated macros and functions, that
- are meant for the author of the CMakeLists.txt files, not errors.
+ files.
