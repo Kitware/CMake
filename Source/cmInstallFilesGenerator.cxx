@@ -14,11 +14,11 @@
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
-#include "cmLocalGenerator.h"
 
 //----------------------------------------------------------------------------
 cmInstallFilesGenerator
-::cmInstallFilesGenerator(std::vector<std::string> const& files,
+::cmInstallFilesGenerator(cmMakefile* mf,
+                          std::vector<std::string> const& files,
                           const char* dest, bool programs,
                           const char* file_permissions,
                           std::vector<std::string> const& configurations,
@@ -26,8 +26,7 @@ cmInstallFilesGenerator
                           MessageLevel message,
                           const char* rename,
                           bool optional):
-  cmInstallGenerator(dest, configurations, component, message),
-  LocalGenerator(0),
+  cmInstallGenerator(mf, dest, configurations, component, message),
   Files(files),
   FilePermissions(file_permissions),
   Rename(rename),
@@ -49,11 +48,6 @@ cmInstallFilesGenerator
 cmInstallFilesGenerator
 ::~cmInstallFilesGenerator()
 {
-}
-
-void cmInstallFilesGenerator::Compute(cmLocalGenerator* lg)
-{
-  this->LocalGenerator = lg;
 }
 
 //----------------------------------------------------------------------------
@@ -99,8 +93,8 @@ void cmInstallFilesGenerator::GenerateScriptForConfig(std::ostream& os,
       i != this->Files.end(); ++i)
     {
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*i);
-    cmSystemTools::ExpandListArgument(cge->Evaluate(
-        this->LocalGenerator->GetMakefile(), config), files);
+    cmSystemTools::ExpandListArgument(cge->Evaluate(this->Makefile, config),
+                                      files);
     }
   this->AddFilesInstallRule(os, indent, files);
 }

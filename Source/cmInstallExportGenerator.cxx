@@ -27,6 +27,7 @@
 
 //----------------------------------------------------------------------------
 cmInstallExportGenerator::cmInstallExportGenerator(
+  cmMakefile* mf,
   cmExportSet* exportSet,
   const char* destination,
   const char* file_permissions,
@@ -35,7 +36,7 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   MessageLevel message,
   const char* filename, const char* name_space,
   bool exportOld)
-  :cmInstallGenerator(destination, configurations, component, message)
+  :cmInstallGenerator(mf, destination, configurations, component, message)
   ,ExportSet(exportSet)
   ,FilePermissions(file_permissions)
   ,FileName(filename)

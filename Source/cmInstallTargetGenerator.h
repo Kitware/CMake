@@ -24,6 +24,7 @@ class cmInstallTargetGenerator: public cmInstallGenerator
 {
 public:
   cmInstallTargetGenerator(
+    cmMakefile* mf,
     std::string const& targetName, const char* dest, bool implib,
     const char* file_permissions,
     std::vector<std::string> const& configurations,
