@@ -91,11 +91,18 @@ macro(_check_pthreads_flag)
     # If we did not found -lpthread, -lpthread, or -lthread, look for -pthread
     if(NOT DEFINED THREADS_HAVE_PTHREAD_ARG)
       message(STATUS "Check if compiler accepts -pthread")
+      if(CMAKE_C_COMPILER_LOADED)
+        set(_threads_src ${CMAKE_CURRENT_LIST_DIR}/CheckForPthreads.c)
+      elseif(CMAKE_CXX_COMPILER_LOADED)
+        set(_threads_src ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindThreads/CheckForPthreads.cxx)
+        configure_file(${CMAKE_CURRENT_LIST_DIR}/CheckForPthreads.c "${_threads_src}" COPYONLY)
+      endif()
       try_run(THREADS_PTHREAD_ARG THREADS_HAVE_PTHREAD_ARG
         ${CMAKE_BINARY_DIR}
-        ${CMAKE_CURRENT_LIST_DIR}/CheckForPthreads.c
+        ${_threads_src}
         CMAKE_FLAGS -DLINK_LIBRARIES:STRING=-pthread
         COMPILE_OUTPUT_VARIABLE OUTPUT)
+      unset(_threads_src)
 
       if(THREADS_HAVE_PTHREAD_ARG)
         if(THREADS_PTHREAD_ARG STREQUAL "2")
