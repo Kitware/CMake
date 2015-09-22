@@ -16,13 +16,11 @@
 
 //----------------------------------------------------------------------------
 cmInstallGenerator
-::cmInstallGenerator(cmMakefile* mf,
-                     const char* destination,
+::cmInstallGenerator(const char* destination,
                      std::vector<std::string> const& configurations,
                      const char* component,
                      MessageLevel message):
   cmScriptGenerator("CMAKE_INSTALL_CONFIG_NAME", configurations),
-  Makefile(mf),
   Destination(destination? destination:""),
   Component(component? component:""),
   Message(message)

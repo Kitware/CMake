@@ -13,11 +13,9 @@
 
 //----------------------------------------------------------------------------
 cmInstallScriptGenerator
-::cmInstallScriptGenerator(cmMakefile* mf,
-                           const char* script, bool code,
+::cmInstallScriptGenerator(const char* script, bool code,
                            const char* component) :
-  cmInstallGenerator(mf, 0, std::vector<std::string>(),
-                     component, MessageDefault),
+  cmInstallGenerator(0, std::vector<std::string>(), component, MessageDefault),
   Script(script), Code(code)
 {
 }
