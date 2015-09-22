@@ -895,12 +895,33 @@ std::string cmSystemTools::FileExistsInParentDirectories(const char* fname,
 
 bool cmSystemTools::cmCopyFile(const char* source, const char* destination)
 {
+  // FIXME remove if statement once kwsys SystemTools get support for
+  // source is directory handling in CopyFileAlways function
+  if(cmSystemTools::FileIsDirectory(source))
+    {
+    return Superclass::MakeDirectory(destination);
+    }
+
   return Superclass::CopyFileAlways(source, destination);
 }
 
 bool cmSystemTools::CopyFileIfDifferent(const char* source,
   const char* destination)
 {
+  // FIXME remove if statement once kwsys SystemTools get support for
+  // source is directory handling in CopyFileIfDifferent function
+  if(cmSystemTools::FileIsDirectory(source))
+    {
+    if(SystemTools::FileExists(destination))
+      {
+      return true;
+      }
+    else
+      {
+      return Superclass::MakeDirectory(destination);
+      }
+    }
+
   return Superclass::CopyFileIfDifferent(source, destination);
 }
 

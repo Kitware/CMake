@@ -1,0 +1,4 @@
+cpack-package-empty-dirs
+------------------------
+
+* The :module:`CPack` module learned to package empty directories.
