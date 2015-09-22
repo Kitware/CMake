@@ -57,14 +57,26 @@ macro(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
     else()
       set(CHECK_FUNCTION_EXISTS_ADD_INCLUDES)
     endif()
+
+    if(CMAKE_C_COMPILER_LOADED)
+      set(_cfe_source ${CMAKE_ROOT}/Modules/CheckFunctionExists.c)
+    elseif(CMAKE_CXX_COMPILER_LOADED)
+      set(_cfe_source ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CheckFunctionExists/CheckFunctionExists.cxx)
+      configure_file(${CMAKE_ROOT}/Modules/CheckFunctionExists.c "${_cfe_source}" COPYONLY)
+    else()
+      message(FATAL_ERROR "CHECK_FUNCTION_EXISTS needs either C or CXX language enabled")
+    endif()
+
     try_compile(${VARIABLE}
       ${CMAKE_BINARY_DIR}
-      ${CMAKE_ROOT}/Modules/CheckFunctionExists.c
+      ${_cfe_source}
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
       ${CHECK_FUNCTION_EXISTS_ADD_LIBRARIES}
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
       "${CHECK_FUNCTION_EXISTS_ADD_INCLUDES}"
       OUTPUT_VARIABLE OUTPUT)
+    unset(_cfe_source)
+
     if(${VARIABLE})
       set(${VARIABLE} 1 CACHE INTERNAL "Have function ${FUNCTION}")
       if(NOT CMAKE_REQUIRED_QUIET)
