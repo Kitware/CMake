@@ -77,7 +77,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
   if(this->Target->NeedRelinkBeforeInstall(config))
     {
     fromDirConfig =
-        this->Target->Target->GetMakefile()->GetCurrentBinaryDirectory();
+        this->Makefile->GetCurrentBinaryDirectory();
     fromDirConfig += cmake::GetCMakeFilesDirectory();
     fromDirConfig += "/CMakeRelink.dir/";
     }
@@ -113,7 +113,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
     case cmTarget::UTILITY:
     case cmTarget::GLOBAL_TARGET:
     case cmTarget::UNKNOWN_LIBRARY:
-      this->Target->Target->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR,
+      this->Makefile->IssueMessage(cmake::INTERNAL_ERROR,
         "cmInstallTargetGenerator created with non-installable target.");
       return;
     }
@@ -351,8 +351,7 @@ std::string
 cmInstallTargetGenerator::GetDestination(std::string const& config) const
 {
   cmGeneratorExpression ge;
-  return ge.Parse(this->Destination)
-    ->Evaluate(this->Target->Target->GetMakefile(), config);
+  return ge.Parse(this->Destination)->Evaluate(this->Makefile, config);
 }
 
 //----------------------------------------------------------------------------
@@ -551,7 +550,7 @@ cmInstallTargetGenerator
     }
 
   // Fix the install_name settings in installed binaries.
-  std::string installNameTool = this->Target->Target->GetMakefile()
+  std::string installNameTool = this->Makefile
       ->GetSafeDefinition("CMAKE_INSTALL_NAME_TOOL");
 
   if(installNameTool.empty())
@@ -665,8 +664,7 @@ cmInstallTargetGenerator
     return;
     }
   // Skip if on Apple
-  if(this->Target->Target->GetMakefile()
-     ->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
+  if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
     {
     return;
     }
@@ -711,7 +709,7 @@ cmInstallTargetGenerator
     return;
     }
 
-  cmMakefile* mf = this->Target->Target->GetMakefile();
+  cmMakefile* mf = this->Makefile;
 
   if(mf->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
     {
@@ -823,20 +821,20 @@ cmInstallTargetGenerator::AddStripRule(std::ostream& os,
     }
 
   // Don't handle OSX Bundles.
-  if(this->Target->Target->GetMakefile()->IsOn("APPLE") &&
+  if(this->Makefile->IsOn("APPLE") &&
      this->Target->Target->GetPropertyAsBool("MACOSX_BUNDLE"))
     {
     return;
     }
 
-  if(! this->Target->Target->GetMakefile()->IsSet("CMAKE_STRIP"))
+  if(! this->Makefile->IsSet("CMAKE_STRIP"))
     {
     return;
     }
 
   os << indent << "if(CMAKE_INSTALL_DO_STRIP)\n";
   os << indent << "  execute_process(COMMAND \""
-     << this->Target->Target->GetMakefile()->GetDefinition("CMAKE_STRIP")
+     << this->Makefile->GetDefinition("CMAKE_STRIP")
      << "\" \"" << toDestDirPath << "\")\n";
   os << indent << "endif()\n";
 }
@@ -855,13 +853,13 @@ cmInstallTargetGenerator::AddRanlibRule(std::ostream& os,
 
   // Perform post-installation processing on the file depending
   // on its type.
-  if(!this->Target->Target->GetMakefile()->IsOn("APPLE"))
+  if(!this->Makefile->IsOn("APPLE"))
     {
     return;
     }
 
   std::string ranlib =
-    this->Target->Target->GetMakefile()->GetRequiredDefinition("CMAKE_RANLIB");
+    this->Makefile->GetRequiredDefinition("CMAKE_RANLIB");
   if(ranlib.empty())
     {
     return;
