@@ -34,6 +34,12 @@ cmInstallFilesGenerator
   Programs(programs),
   Optional(optional)
 {
+  // We need per-config actions if the destination has generator expressions.
+  if(cmGeneratorExpression::Find(Destination) != std::string::npos)
+    {
+    this->ActionsPerConfig = true;
+    }
+
   // We need per-config actions if any files have generator expressions.
   for(std::vector<std::string>::const_iterator i = files.begin();
       !this->ActionsPerConfig && i != files.end(); ++i)
@@ -57,14 +63,25 @@ void cmInstallFilesGenerator::Compute(cmLocalGenerator* lg)
 }
 
 //----------------------------------------------------------------------------
+std::string
+cmInstallFilesGenerator::GetDestination(std::string const& config) const
+{
+  cmGeneratorExpression ge;
+  return ge.Parse(this->Destination)
+    ->Evaluate(this->LocalGenerator->GetMakefile(), config);
+}
+
+//----------------------------------------------------------------------------
 void cmInstallFilesGenerator::AddFilesInstallRule(
-  std::ostream& os, Indent const& indent,
+  std::ostream& os,
+  const std::string config,
+  Indent const& indent,
   std::vector<std::string> const& files)
 {
   // Write code to install the files.
   const char* no_dir_permissions = 0;
   this->AddInstallRule(os,
-                       this->Destination,
+                       this->GetDestination(config),
                        (this->Programs
                         ? cmInstallType_PROGRAMS
                         : cmInstallType_FILES),
@@ -84,7 +101,7 @@ void cmInstallFilesGenerator::GenerateScriptActions(std::ostream& os,
     }
   else
     {
-    this->AddFilesInstallRule(os, indent, this->Files);
+    this->AddFilesInstallRule(os, "", indent, this->Files);
     }
 }
 
@@ -102,5 +119,5 @@ void cmInstallFilesGenerator::GenerateScriptForConfig(std::ostream& os,
     cmSystemTools::ExpandListArgument(cge->Evaluate(
         this->LocalGenerator->GetMakefile(), config), files);
     }
-  this->AddFilesInstallRule(os, indent, files);
+  this->AddFilesInstallRule(os, config, indent, files);
 }

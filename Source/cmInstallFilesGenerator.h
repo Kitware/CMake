@@ -32,12 +32,16 @@ public:
 
   void Compute(cmLocalGenerator* lg);
 
+  std::string GetDestination(std::string const& config) const;
+
 protected:
   virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
   virtual void GenerateScriptForConfig(std::ostream& os,
                                        const std::string& config,
                                        Indent const& indent);
-  void AddFilesInstallRule(std::ostream& os, Indent const& indent,
+  void AddFilesInstallRule(std::ostream& os,
+                           const std::string config,
+                           Indent const& indent,
                            std::vector<std::string> const& files);
 
   cmLocalGenerator* LocalGenerator;

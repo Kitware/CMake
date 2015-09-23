@@ -29,14 +29,14 @@ add_custom_command(TARGET testLib1 POST_BUILD
                                    $<TARGET_FILE:testLib1>.genex
   )
 install(FILES $<TARGET_FILE:testLib1>.genex
-  DESTINATION lib
+  DESTINATION $<1:lib>$<0:/wrong>
   )
 set_property(TARGET testLib1 PROPERTY MY_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/testLib1file1.txt
   ${CMAKE_CURRENT_SOURCE_DIR}/testLib1file2.txt
   )
 install(FILES $<TARGET_PROPERTY:testLib1,MY_FILES>
-  DESTINATION doc
+  DESTINATION $<1:doc>$<0:/wrong>
   )
 
 # Test library with empty link interface.  Link it to an implementation
