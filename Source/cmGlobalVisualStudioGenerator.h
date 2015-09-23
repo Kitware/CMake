@@ -89,8 +89,11 @@ public:
   virtual bool TargetsWindowsCE() const { return false; }
 
   class TargetSet: public std::set<cmTarget const*> {};
-  struct TargetCompare
+  class TargetCompare
   {
+    std::string First;
+  public:
+    TargetCompare(std::string const& first): First(first) {}
     bool operator()(cmGeneratorTarget const* l,
                     cmGeneratorTarget const* r) const;
   };
@@ -151,11 +154,14 @@ class cmGlobalVisualStudioGenerator::OrderedTargetDependSet:
   public std::multiset<cmTargetDepend,
                        cmGlobalVisualStudioGenerator::TargetCompare>
 {
+  typedef std::multiset<cmTargetDepend,
+                        cmGlobalVisualStudioGenerator::TargetCompare>
+    derived;
 public:
   typedef cmGlobalGenerator::TargetDependSet TargetDependSet;
   typedef cmGlobalVisualStudioGenerator::TargetSet TargetSet;
-  OrderedTargetDependSet(TargetDependSet const&);
-  OrderedTargetDependSet(TargetSet const&);
+  OrderedTargetDependSet(TargetDependSet const&, std::string const& first);
+  OrderedTargetDependSet(TargetSet const&, std::string const& first);
 };
 
 #endif

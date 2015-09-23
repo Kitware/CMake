@@ -2849,7 +2849,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
     = this->GlobalGenerator->GetTargetDirectDepends(this->GeneratorTarget);
   typedef cmGlobalVisualStudioGenerator::OrderedTargetDependSet
     OrderedTargetDependSet;
-  OrderedTargetDependSet depends(unordered);
+  OrderedTargetDependSet depends(unordered, CMAKE_CHECK_BUILD_SYSTEM_TARGET);
   this->WriteString("<ItemGroup>\n", 1);
   for( OrderedTargetDependSet::const_iterator i = depends.begin();
        i != depends.end(); ++i)
