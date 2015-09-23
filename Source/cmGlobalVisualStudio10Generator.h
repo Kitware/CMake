@@ -105,6 +105,7 @@ public:
 protected:
   virtual void Generate();
   virtual bool InitializeSystem(cmMakefile* mf);
+  virtual bool InitializeWindows(cmMakefile* mf);
   virtual bool InitializeWindowsCE(cmMakefile* mf);
   virtual bool InitializeWindowsPhone(cmMakefile* mf);
   virtual bool InitializeWindowsStore(cmMakefile* mf);
