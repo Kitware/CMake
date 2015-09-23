@@ -368,7 +368,6 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
         "- Install directory: " << top << std::endl);
       gl.RecurseOn();
       gl.SetRecurseListDirs(true);
-//      gl.SetRecurseThroughSymlinks(false);
       if ( !gl.FindFiles(findExpr) )
         {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
