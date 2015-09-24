@@ -363,7 +363,7 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(
   if (ccg.GetNumberOfCommands() > 0) {
     std::string wd = ccg.GetWorkingDirectory();
     if (wd.empty())
-      wd = this->GetMakefile()->GetCurrentBinaryDirectory();
+      wd = this->GetCurrentBinaryDirectory();
 
     std::ostringstream cdCmd;
 #ifdef _WIN32
