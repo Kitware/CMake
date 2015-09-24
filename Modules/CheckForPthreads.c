@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
-#ifdef __cplusplus
-#include <iostream>
-#endif /* C++ */
 
 void* runner(void*);
 
@@ -34,11 +31,7 @@ void* runner(void* args)
   int cc;
   for ( cc = 0; cc < 10; cc ++ )
     {
-#ifdef __cplusplus
-    std::cout << args << cc;
-#else
     printf("%p CC: %d\n", args, cc);
-#endif /* C++ */
     }
   res ++;
   return 0;
