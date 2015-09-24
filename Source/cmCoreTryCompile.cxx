@@ -29,7 +29,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
   const char* sourceDirectory = argv[2].c_str();
   const char* projectName = 0;
   std::string targetName;
-  std::vector<std::string> cmakeFlags;
+  std::vector<std::string> cmakeFlags(1, "CMAKE_FLAGS"); // fake argv[0]
   std::vector<std::string> compileDefs;
   std::string outputVariable;
   std::string copyFile;
@@ -53,10 +53,6 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
     if(argv[i] == "CMAKE_FLAGS")
       {
       doing = DoingCMakeFlags;
-      // CMAKE_FLAGS is the first argument because we need an argv[0] that
-      // is not used, so it matches regular command line parsing which has
-      // the program name as arg 0
-      cmakeFlags.push_back(argv[i]);
       }
     else if(argv[i] == "COMPILE_DEFINITIONS")
       {
