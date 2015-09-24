@@ -551,5 +551,5 @@ install(
   ARCHIVE DESTINATION lib
   INCLUDES DESTINATION include/abs
   )
-install(DIRECTORY include/abs DESTINATION include)
+install(DIRECTORY include/abs DESTINATION $<1:include>$<0:/wrong>)
 install(EXPORT expAbs NAMESPACE expAbs_ DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/expAbs)
