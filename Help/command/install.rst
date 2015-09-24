@@ -192,6 +192,10 @@ The list of ``files...`` given to ``FILES`` or ``PROGRAMS`` may use
 However, if any item begins in a generator expression it must evaluate
 to a full path.
 
+The install destination given to the files install ``DESTINATION`` may
+use "generator expressions" with the syntax ``$<...>``.  See the
+:manual:`cmake-generator-expressions(7)` manual for available expressions.
+
 Installing Directories
 ^^^^^^^^^^^^^^^^^^^^^^
 

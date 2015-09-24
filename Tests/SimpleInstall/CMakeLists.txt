@@ -209,9 +209,9 @@ else()
     ARCHIVE DESTINATION MyTest/lib/static
     OPTIONAL # for coverage...target should always exist
     )
-  install(FILES lib1.h DESTINATION MyTest/include/foo)
+  install(FILES lib1.h DESTINATION MyTest/include/$<1:foo>$<0:/wrong>)
   install(FILES lib2.h
-    DESTINATION MyTest/include/foo
+    DESTINATION $<1:MyTest/include/foo>$<0:/wrong>
     COMPONENT Development
     PERMISSIONS OWNER_READ OWNER_WRITE
     RENAME lib2renamed.h
