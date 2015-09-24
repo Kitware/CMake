@@ -121,7 +121,7 @@ cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
     {
     const cmTargets& targets = (*it)->GetMakefile()->GetTargets();
     cmMakefile* makefile=(*it)->GetMakefile();
-    std::string currentDir = makefile->GetCurrentBinaryDirectory();
+    std::string currentDir = (*it)->GetCurrentBinaryDirectory();
     bool topLevel = (currentDir == (*it)->GetBinaryDirectory());
 
     for(cmTargets::const_iterator ti=targets.begin(); ti!=targets.end(); ++ti)

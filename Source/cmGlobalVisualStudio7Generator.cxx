@@ -363,7 +363,7 @@ void cmGlobalVisualStudio7Generator
     return;
     }
   this->CurrentProject = root->GetProjectName();
-  std::string fname = root->GetMakefile()->GetCurrentBinaryDirectory();
+  std::string fname = root->GetCurrentBinaryDirectory();
   fname += "/";
   fname += root->GetProjectName();
   fname += ".sln";
@@ -468,8 +468,10 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
         target->GetProperty("GENERATOR_FILE_NAME");
       if(vcprojName)
         {
-        cmMakefile* tmf = target->GetMakefile();
-        std::string dir = tmf->GetCurrentBinaryDirectory();
+        cmLocalGenerator* lg =
+            root->GetGlobalGenerator()->GetGeneratorTarget(target)
+            ->GetLocalGenerator();
+        std::string dir = lg->GetCurrentBinaryDirectory();
         dir = root->Convert(dir.c_str(),
                             cmLocalGenerator::START_OUTPUT);
         if(dir == ".")
