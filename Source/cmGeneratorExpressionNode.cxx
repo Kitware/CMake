@@ -13,6 +13,7 @@
 #include "cmGeneratorExpressionNode.h"
 #include "cmGlobalGenerator.h"
 #include "cmAlgorithms.h"
+#include "cmOutputConverter.h"
 
 //----------------------------------------------------------------------------
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
@@ -1792,6 +1793,27 @@ static const
 TargetFilesystemArtifactNodeGroup<ArtifactPdbTag> targetPdbNodeGroup;
 
 //----------------------------------------------------------------------------
+static const struct ShellPathNode : public cmGeneratorExpressionNode
+{
+  ShellPathNode() {}
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    if (!cmSystemTools::FileIsFullPath(parameters.front()))
+      {
+      reportError(context, content->GetOriginalExpression(),
+                  "\"" + parameters.front() + "\" is not an absolute path.");
+      return std::string();
+      }
+    cmOutputConverter converter(context->Makefile->GetStateSnapshot());
+    return converter.ConvertDirectorySeparatorsForShell(parameters.front());
+  }
+} shellPathNode;
+
+//----------------------------------------------------------------------------
 const cmGeneratorExpressionNode*
 cmGeneratorExpressionNode::GetNode(const std::string &identifier)
 {
@@ -1846,6 +1868,7 @@ cmGeneratorExpressionNode::GetNode(const std::string &identifier)
     nodeMap["JOIN"] = &joinNode;
     nodeMap["LINK_ONLY"] = &linkOnlyNode;
     nodeMap["COMPILE_LANGUAGE"] = &languageNode;
+    nodeMap["SHELL_PATH"] = &shellPathNode;
     }
   NodeMap::const_iterator i = nodeMap.find(identifier);
   if (i == nodeMap.end())
