@@ -1091,6 +1091,18 @@ void cmGlobalGenerator::ClearEnabledLanguages()
   return this->CMakeInstance->GetState()->ClearEnabledLanguages();
 }
 
+void cmGlobalGenerator::CreateLocalGenerators()
+{
+  cmDeleteAll(this->LocalGenerators);
+  this->LocalGenerators.clear();
+  this->LocalGenerators.reserve(this->Makefiles.size());
+  for (std::vector<cmMakefile*>::const_iterator it = this->Makefiles.begin();
+       it != this->Makefiles.end(); ++it)
+    {
+    this->LocalGenerators.push_back(this->CreateLocalGenerator(*it));
+    }
+}
+
 void cmGlobalGenerator::Configure()
 {
   this->FirstTimeProgress = 0.0f;
@@ -1099,8 +1111,6 @@ void cmGlobalGenerator::Configure()
   cmMakefile* dirMf =
       new cmMakefile(this, this->GetCMakeInstance()->GetCurrentSnapshot());
   this->Makefiles.push_back(dirMf);
-  cmLocalGenerator *lg = this->CreateLocalGenerator(dirMf);
-  this->LocalGenerators.push_back(lg);
 
   // set the Start directories
   dirMf->SetCurrentSourceDirectory
@@ -1175,6 +1185,7 @@ void cmGlobalGenerator::Configure()
 
 void cmGlobalGenerator::CreateGenerationObjects(TargetTypes targetTypes)
 {
+  this->CreateLocalGenerators();
   cmDeleteAll(this->GeneratorTargets);
   this->GeneratorTargets.clear();
   this->CreateGeneratorTargets(targetTypes);
@@ -1245,11 +1256,6 @@ bool cmGlobalGenerator::Compute()
 #endif
 
   unsigned int i;
-
-  for (i = 0; i < this->LocalGenerators.size(); ++i)
-    {
-    this->LocalGenerators[i]->ComputeObjectMaxPath();
-    }
 
   // Add generator specific helper commands
   for (i = 0; i < this->LocalGenerators.size(); ++i)
@@ -1934,12 +1940,6 @@ void cmGlobalGenerator::AddMakefile(cmMakefile *mf)
     prog = 0.9f;
     }
   this->CMakeInstance->UpdateProgress("Configuring", prog);
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalGenerator::AddLocalGenerator(cmLocalGenerator *lg)
-{
-  this->LocalGenerators.push_back(lg);
 }
 
 void cmGlobalGenerator::AddInstallComponent(const char* component)
