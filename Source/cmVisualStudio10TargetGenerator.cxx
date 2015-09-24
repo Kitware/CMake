@@ -195,7 +195,7 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
   this->BuildFileStream = 0;
   this->IsMissingFiles = false;
   this->DefaultArtifactDir =
-    this->Makefile->GetCurrentBinaryDirectory() + std::string("/") +
+    this->LocalGenerator->GetCurrentBinaryDirectory() + std::string("/") +
     this->LocalGenerator->GetTargetDirectory(*this->Target);
 }
 
@@ -297,8 +297,7 @@ void cmVisualStudio10TargetGenerator::Generate()
       return;
       }
     }
-  cmMakefile* mf = this->Target->GetMakefile();
-  std::string path =  mf->GetCurrentBinaryDirectory();
+  std::string path =  this->LocalGenerator->GetCurrentBinaryDirectory();
   path += "/";
   path += this->Name;
   path += ".vcxproj";
@@ -951,7 +950,7 @@ cmVisualStudio10TargetGenerator::ConvertPath(std::string const& path,
 {
   return forceRelative
     ? cmSystemTools::RelativePath(
-      this->Makefile->GetCurrentBinaryDirectory(), path.c_str())
+      this->LocalGenerator->GetCurrentBinaryDirectory(), path.c_str())
     : path.c_str();
 }
 
@@ -990,7 +989,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   this->AddMissingSourceGroups(groupsUsed, sourceGroups);
 
   // Write out group file
-  std::string path =  this->Makefile->GetCurrentBinaryDirectory();
+  std::string path =  this->LocalGenerator->GetCurrentBinaryDirectory();
   path += "/";
   path += this->Name;
   path += ".vcxproj.filters";
@@ -1448,7 +1447,7 @@ void cmVisualStudio10TargetGenerator::WriteSource(
     std::string sourceRel = this->ConvertPath(sf->GetFullPath(), true);
     size_t const maxLen = 250;
     if(sf->GetCustomCommand() ||
-       ((strlen(this->Makefile->GetCurrentBinaryDirectory()) + 1 +
+       ((strlen(this->LocalGenerator->GetCurrentBinaryDirectory()) + 1 +
          sourceRel.length()) <= maxLen))
       {
       forceRelative = true;
@@ -3313,7 +3312,8 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP80()
   // For WP80, the manifest needs to be in the same folder as the project
   // this can cause an overwrite problem if projects aren't organized in
   // folders
-  std::string manifestFile = this->Makefile->GetCurrentBinaryDirectory() +
+  std::string manifestFile =
+      this->LocalGenerator->GetCurrentBinaryDirectory() +
                              std::string("/WMAppManifest.xml");
   std::string artifactDir =
     this->LocalGenerator->GetTargetDirectory(*this->Target);
