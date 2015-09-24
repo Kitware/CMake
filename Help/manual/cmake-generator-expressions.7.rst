@@ -278,3 +278,7 @@ Available output expressions are:
   object of type ``OBJECT_LIBRARY``.  This expression may only be used in
   the sources of :command:`add_library` and :command:`add_executable`
   commands.
+``$<SHELL_PATH:...>``
+  Content of ``...`` converted to shell path style. For example, slashes are
+  converted to backslashes in Windows shells and drive letters are converted
+  to posix paths in MSYS shells. The ``...`` must be an absolute path.
