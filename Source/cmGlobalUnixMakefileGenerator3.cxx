@@ -603,7 +603,8 @@ void cmGlobalUnixMakefileGenerator3
       {
       tname += "/fast";
       }
-    tname = lg->Convert(tname,cmLocalGenerator::HOME_OUTPUT);
+    cmOutputConverter conv(mf->GetStateSnapshot());
+    tname = conv.Convert(tname,cmOutputConverter::HOME_OUTPUT);
     cmSystemTools::ConvertToOutputSlashes(tname);
     makeCommand.push_back(tname);
     if (this->LocalGenerators.empty())
