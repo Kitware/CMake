@@ -2045,10 +2045,11 @@ bool cmSystemTools::CopyFileTime(const char* fromFile, const char* toFile)
   cmSystemToolsWindowsHandle hFrom =
     CreateFileW(SystemTools::ConvertToWindowsExtendedPath(fromFile).c_str(),
                 GENERIC_READ, FILE_SHARE_READ, 0,
-                OPEN_EXISTING, 0, 0);
+                OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
   cmSystemToolsWindowsHandle hTo =
     CreateFileW(SystemTools::ConvertToWindowsExtendedPath(toFile).c_str(),
-                FILE_WRITE_ATTRIBUTES, 0, 0, OPEN_EXISTING, 0, 0);
+                FILE_WRITE_ATTRIBUTES, 0, 0, OPEN_EXISTING,
+                FILE_FLAG_BACKUP_SEMANTICS, 0);
   if(!hFrom || !hTo)
     {
     return false;
@@ -2100,7 +2101,8 @@ bool cmSystemTools::FileTimeGet(const char* fname, cmSystemToolsFileTime* t)
 #if defined(_WIN32) && !defined(__CYGWIN__)
   cmSystemToolsWindowsHandle h =
     CreateFileW(SystemTools::ConvertToWindowsExtendedPath(fname).c_str(),
-                GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+                GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING,
+                FILE_FLAG_BACKUP_SEMANTICS, 0);
   if(!h)
     {
     return false;
@@ -2127,7 +2129,8 @@ bool cmSystemTools::FileTimeSet(const char* fname, cmSystemToolsFileTime* t)
 #if defined(_WIN32) && !defined(__CYGWIN__)
   cmSystemToolsWindowsHandle h =
     CreateFileW(SystemTools::ConvertToWindowsExtendedPath(fname).c_str(),
-                FILE_WRITE_ATTRIBUTES, 0, 0, OPEN_EXISTING, 0, 0);
+                FILE_WRITE_ATTRIBUTES, 0, 0, OPEN_EXISTING,
+                FILE_FLAG_BACKUP_SEMANTICS, 0);
   if(!h)
     {
     return false;
