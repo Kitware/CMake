@@ -66,7 +66,7 @@ add_custom_target(check-part1 ALL
     -Dtest_colons_4=$<1:C:\\CMake>
     -Dtest_colons_5=$<1:C:/CMake>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part1.cmake
-  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 1 of 3)"
+  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 1 of 4)"
   VERBATIM
   )
 
@@ -137,7 +137,7 @@ add_custom_target(check-part2 ALL
     -Dtest_arbitrary_content_comma_9=$<1:a,,b,,>
     -Dtest_arbitrary_content_comma_10=$<1:,,a,,b,,>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part2.cmake
-  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 2 of 3)"
+  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 2 of 4)"
   VERBATIM
 )
 
@@ -221,7 +221,27 @@ add_custom_target(check-part3 ALL
     -Dequal22=$<EQUAL:10,-012>
     -Dequal23=$<EQUAL:-10,-012>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part3.cmake
-  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 3 of 3)"
+  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 3 of 4)"
+  VERBATIM
+  )
+
+if(WIN32)
+  set(test_shell_path c:/shell/path)
+else()
+  set(test_shell_path /shell/path)
+endif()
+set(path_prefix BYPASS_FURTHER_CONVERSION)
+
+add_custom_target(check-part4 ALL
+  COMMAND ${CMAKE_COMMAND}
+    # Prefix path to bypass its further conversion when being processed by
+    # CMake as command-line argument
+    -Dtest_shell_path=${path_prefix}$<SHELL_PATH:${test_shell_path}>
+    -Dpath_prefix=${path_prefix}
+    -DWIN32=${WIN32}
+    -DCMAKE_GENERATOR=${CMAKE_GENERATOR}
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part4.cmake
+  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 4 of 4)"
   VERBATIM
   )
 
