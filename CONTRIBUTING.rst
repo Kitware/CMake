@@ -14,7 +14,7 @@ Please subscribe and post to the `CMake Developers List`_ to offer
 contributions.  Regular and productive contributors may be invited
 to gain direct push access.
 
-.. _`CMake Developers List`: http://www.cmake.org/mailman/listinfo/cmake-developers
+.. _`CMake Developers List`: https://cmake.org/mailman/listinfo/cmake-developers
 
 Patches
 =======

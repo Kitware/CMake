@@ -14,14 +14,14 @@ if(CPACK_GENERATOR MATCHES "NSIS")
   # tell cpack to create links to the doc files
   set(CPACK_NSIS_MENU_LINKS
     "@CMAKE_DOC_DIR@/html/index.html" "CMake Documentation"
-    "http://www.cmake.org" "CMake Web Site"
+    "https://cmake.org" "CMake Web Site"
     )
   # Use the icon from cmake-gui for add-remove programs
   set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\cmake-gui.exe")
 
   set(CPACK_NSIS_PACKAGE_NAME "@CPACK_NSIS_PACKAGE_NAME@")
   set(CPACK_NSIS_DISPLAY_NAME "@CPACK_NSIS_PACKAGE_NAME@, a cross-platform, open-source build system")
-  set(CPACK_NSIS_HELP_LINK "http://www.cmake.org")
+  set(CPACK_NSIS_HELP_LINK "https://cmake.org")
   set(CPACK_NSIS_URL_INFO_ABOUT "http://www.kitware.com")
   set(CPACK_NSIS_CONTACT @CPACK_PACKAGE_CONTACT@)
   set(CPACK_NSIS_MODIFY_PATH ON)
@@ -35,7 +35,7 @@ if(CPACK_GENERATOR MATCHES "IFW")
 
   # Installer configuration
   set(CPACK_IFW_PACKAGE_TITLE "CMake Build Tool")
-  set(CPACK_IFW_PRODUCT_URL "http://www.cmake.org")
+  set(CPACK_IFW_PRODUCT_URL "https://cmake.org")
   @_CPACK_IFW_PACKAGE_ICON@
   set(CPACK_IFW_PACKAGE_WINDOW_ICON
     "@CMake_SOURCE_DIR@/Source/QtDialog/CMakeSetup128.png")
@@ -204,7 +204,7 @@ if("${CPACK_GENERATOR}" STREQUAL "WIX")
     set(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}.${patch}")
   endif()
 
-  set(CPACK_WIX_PROPERTY_ARPURLINFOABOUT "http://www.cmake.org")
+  set(CPACK_WIX_PROPERTY_ARPURLINFOABOUT "https://cmake.org")
 
   set(CPACK_WIX_PROPERTY_ARPCONTACT "@CPACK_PACKAGE_CONTACT@")
 
