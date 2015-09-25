@@ -5,7 +5,7 @@ project(TargetIncludeDirectories)
 
 macro(create_header _name)
   file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${_name}")
-  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${_name}/${_name}.h" "//${_name}.h\n")
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${_name}/${_name}.h" "/* ${_name}.h */\n")
 endmacro()
 
 create_header(bar)
@@ -88,7 +88,7 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/bad/common.h" "#error Should not be incl
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/good")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/good/common.h" "#include \"othergood.h\"\n")
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/othergood")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/othergood/othergood.h" "// No error\n")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/othergood/othergood.h" "/* No error */\n")
 
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/libothergood.cpp" "// No content \n")
 add_library(libothergood "${CMAKE_CURRENT_BINARY_DIR}/libothergood.cpp")
@@ -149,7 +149,7 @@ target_include_directories(lib5
 )
 
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/prefix_foo/prefix_bar/prefix_bat")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/prefix_foo/prefix_bar/prefix_bat/prefix_foo_bar_bat.h" "// prefix_foo_bar_bat.h\n")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/prefix_foo/prefix_bar/prefix_bat/prefix_foo_bar_bat.h" "/* prefix_foo_bar_bat.h */\n")
 
 target_include_directories(TargetIncludeDirectories PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/prefix_$<JOIN:foo;bar;bat,/prefix_>")
 

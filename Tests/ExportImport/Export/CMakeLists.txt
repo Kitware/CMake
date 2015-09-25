@@ -136,7 +136,7 @@ add_library(testLibDepends testLibDepends.c)
 target_link_libraries(testLibDepends LINK_PUBLIC testLibRequired)
 
 macro(add_include_lib _libName)
-  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${_libName}.c" "// no content\n")
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${_libName}.c" "/* no content */\n")
   add_library(${_libName} "${CMAKE_CURRENT_BINARY_DIR}/${_libName}.c")
   file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${_libName}")
   set_property(TARGET ${_libName} APPEND PROPERTY
@@ -144,7 +144,7 @@ macro(add_include_lib _libName)
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/${_libName}>"
       )
   if (NOT "${ARGV1}" STREQUAL "NO_HEADER")
-      file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${_libName}/${_libName}.h" "// no content\n")
+      file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${_libName}/${_libName}.h" "/* no content */\n")
       install(FILES
         "${CMAKE_CURRENT_BINARY_DIR}/${_libName}/${_libName}.h"
           DESTINATION include/${_libName}
@@ -182,7 +182,7 @@ install(FILES
 )
 add_include_lib(testLibIncludeRequired6)
 
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/testLibIncludeRequired7/testLibIncludeRequired7.h" "// No content\n")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/testLibIncludeRequired7/testLibIncludeRequired7.h" "/* No content */\n")
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/testLibIncludeRequired7/testLibIncludeRequired7.h"
     DESTINATION include/testLibIncludeRequired7
@@ -391,22 +391,22 @@ install(TARGETS
 install(EXPORT RequiredExp NAMESPACE Req:: FILE testLibRequiredTargets.cmake DESTINATION lib/cmake/testLibRequired)
 
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest/installIncludesTest.h" "// No content\n")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest/installIncludesTest.h" "/* No content */\n")
 
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest2")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest2/installIncludesTest2.h" "// No content\n")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest2/installIncludesTest2.h" "/* No content */\n")
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest3/testLibRequired")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest3/testLibRequired/installIncludesTest3.h" "// No content\n")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest3/testLibRequired/installIncludesTest3.h" "/* No content */\n")
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/testLibRequired/installIncludesTest4")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/testLibRequired/installIncludesTest4/installIncludesTest4.h" "// No content\n")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/testLibRequired/installIncludesTest4/installIncludesTest4.h" "/* No content */\n")
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest5")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest5/installIncludesTest5.h" "// No content\n")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest5/installIncludesTest5.h" "/* No content */\n")
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest6")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest6/installIncludesTest6.h" "// No content\n")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest6/installIncludesTest6.h" "/* No content */\n")
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest7")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest7/installIncludesTest7.h" "// No content\n")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest7/installIncludesTest7.h" "/* No content */\n")
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest8")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest8/installIncludesTest8.h" "// No content\n")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest8/installIncludesTest8.h" "/* No content */\n")
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest/installIncludesTest.h"
   DESTINATION installIncludesTest
