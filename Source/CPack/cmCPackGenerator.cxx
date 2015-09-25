@@ -411,33 +411,6 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           symlinkedFiles.push_back(std::pair<std::string,
                                    std::string>(targetFile,inFileRelative));
           }
-        else if(cmSystemTools::FileIsDirectory(inFile))
-          {
-          bool dirExists = cmSystemTools::FileExists(filePath);
-          mode_t perm = 0;
-          bool perms = cmSystemTools::GetPermissions(inFile, perm);
-          mode_t destPerm = 0;
-          bool destPerms = false;
-
-          if(dirExists)
-            {
-            destPerms = cmSystemTools::GetPermissions(filePath, destPerm);
-            }
-
-          // create only if dir doesn't exist or dirs differ
-          if(!dirExists || perms != destPerms || perm != destPerm)
-            {
-            if(!cmSystemTools::MakeDirectory(filePath) ||
-                (perms && !cmSystemTools::SetPermissions(filePath, perm)) ||
-                !cmSystemTools::CopyFileTime(inFile.c_str(), filePath.c_str()))
-              {
-              cmCPackLogger(cmCPackLog::LOG_ERROR,
-                            "Problem creating directory: "
-                            << filePath << std::endl);
-              return 0;
-              }
-            }
-          }
         /* If it is not a symlink then do a plain copy */
         else if (!(
             cmSystemTools::CopyFileIfDifferent(inFile.c_str(),filePath.c_str())
