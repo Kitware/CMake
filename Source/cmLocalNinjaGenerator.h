@@ -50,21 +50,6 @@ public:
   std::string GetHomeRelativeOutputPath() const
   { return this->HomeRelativeOutputPath; }
 
-  std::string ConvertToNinjaPath(const std::string& path);
-
-  struct map_to_ninja_path {
-    cmLocalNinjaGenerator *LocalGenerator;
-    map_to_ninja_path(cmLocalNinjaGenerator *LocalGen)
-      : LocalGenerator(LocalGen) {}
-    std::string operator()(const std::string &path) {
-      return LocalGenerator->ConvertToNinjaPath(path);
-    }
-  };
-
-  map_to_ninja_path MapToNinjaPath() {
-    return map_to_ninja_path(this);
-  }
-
   void ExpandRuleVariables(std::string& string,
                            const RuleVariables& replaceValues) {
     cmLocalGenerator::ExpandRuleVariables(string, replaceValues);
