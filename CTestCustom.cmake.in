@@ -9,7 +9,6 @@
 # resulting memory leaks are not logged by valgrind anyway.  Therefore, we
 # don't have to exclude it.
 
-set(CTEST_CUSTOM_MEMCHECK_IGNORE
-  ${CTEST_CUSTOM_MEMCHECK_IGNORE}
+list(APPEND CTEST_CUSTOM_MEMCHECK_IGNORE
   kwsys.testProcess-10
   )
