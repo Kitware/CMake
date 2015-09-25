@@ -583,7 +583,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     }
 
   const std::string objPath = GetTarget()->GetSupportDirectory();
-  vars["OBJECT_DIR"] = ConvertToNinjaPath(objPath);
+  vars["OBJECT_DIR"] =
+    this->GetLocalGenerator()->ConvertToOutputFormat(
+      this->ConvertToNinjaPath(objPath), cmLocalGenerator::SHELL);
   EnsureDirectoryExists(objPath);
 
   if (this->GetGlobalGenerator()->IsGCCOnWindows())
