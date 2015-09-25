@@ -239,7 +239,7 @@ add_custom_target(check-part4 ALL
     -Dtest_shell_path=${path_prefix}$<SHELL_PATH:${test_shell_path}>
     -Dpath_prefix=${path_prefix}
     -DWIN32=${WIN32}
-    -DMSYS=${MSYS}
+    -DCMAKE_GENERATOR=${CMAKE_GENERATOR}
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part4.cmake
   COMMAND ${CMAKE_COMMAND} -E echo "check done (part 4 of 4)"
   VERBATIM
