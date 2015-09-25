@@ -284,15 +284,6 @@ void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
   os << std::endl;
 }
 
-std::string cmLocalNinjaGenerator::ConvertToNinjaPath(const std::string& path)
-{
-  std::string convPath = this->Convert(path, cmLocalGenerator::HOME_OUTPUT);
-#ifdef _WIN32
-  cmSystemTools::ReplaceString(convPath, "/", "\\");
-#endif
-  return convPath;
-}
-
 void
 cmLocalNinjaGenerator
 ::AppendTargetOutputs(cmTarget* target, cmNinjaDeps& outputs)
@@ -316,7 +307,8 @@ void cmLocalNinjaGenerator::AppendCustomCommandDeps(
        i != deps.end(); ++i) {
     std::string dep;
     if (this->GetRealDependency(*i, this->GetConfigName(), dep))
-      ninjaDeps.push_back(ConvertToNinjaPath(dep));
+      ninjaDeps.push_back(
+        this->GetGlobalNinjaGenerator()->ConvertToNinjaPath(dep));
   }
 }
 
@@ -413,9 +405,11 @@ cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
     at us.  How to know which ExternalProject step actually provides it?
 #endif
   std::transform(outputs.begin(), outputs.end(),
-                 ninjaOutputs.begin(), MapToNinjaPath());
+                 ninjaOutputs.begin(),
+                 this->GetGlobalNinjaGenerator()->MapToNinjaPath());
   std::transform(byproducts.begin(), byproducts.end(),
-                 ninjaOutputs.begin() + outputs.size(), MapToNinjaPath());
+                 ninjaOutputs.begin() + outputs.size(),
+                 this->GetGlobalNinjaGenerator()->MapToNinjaPath());
   this->AppendCustomCommandDeps(ccg, ninjaDeps);
 
   for (cmNinjaDeps::iterator i = ninjaOutputs.begin(); i != ninjaOutputs.end();

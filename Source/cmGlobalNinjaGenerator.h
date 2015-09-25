@@ -220,6 +220,19 @@ public:
   cmGeneratedFileStream* GetRulesFileStream() const {
     return this->RulesFileStream; }
 
+  std::string ConvertToNinjaPath(const std::string& path);
+
+  struct MapToNinjaPathImpl {
+    cmGlobalNinjaGenerator* GG;
+    MapToNinjaPathImpl(cmGlobalNinjaGenerator* gg): GG(gg) {}
+    std::string operator()(std::string const& path) {
+      return this->GG->ConvertToNinjaPath(path);
+    }
+  };
+  MapToNinjaPathImpl MapToNinjaPath() {
+    return MapToNinjaPathImpl(this);
+  }
+
   void AddCXXCompileCommand(const std::string &commandLine,
                             const std::string &sourceFile);
 

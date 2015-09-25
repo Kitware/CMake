@@ -6,3 +6,5 @@ add_subdirectory(${OutOfSource_SOURCE_DIR}/../OutOfBinary
 
 # subdir to a sibling dir
 add_subdirectory(${OutOfSource_SOURCE_DIR}/${KEN}OutOfSourceSubdir OutOfSourceSubdir )
+
+add_library(subdir subdir.c)
