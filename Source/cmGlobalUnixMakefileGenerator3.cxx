@@ -578,23 +578,18 @@ void cmGlobalUnixMakefileGenerator3
   if (!targetName.empty())
     {
     cmMakefile* mf;
-    cmLocalUnixMakefileGenerator3 *lg;
-    if (!this->LocalGenerators.empty())
+    if (!this->Makefiles.empty())
       {
-      lg = static_cast<cmLocalUnixMakefileGenerator3 *>
-        (this->LocalGenerators[0]);
-      mf = lg->GetMakefile();
+      mf = this->Makefiles[0];
       }
     else
       {
       cmState::Snapshot snapshot = this->CMakeInstance->GetCurrentSnapshot();
       mf = new cmMakefile(this, snapshot);
-      lg = static_cast<cmLocalUnixMakefileGenerator3 *>
-        (this->CreateLocalGenerator(mf));
       // set the Start directories
-      lg->GetMakefile()->SetCurrentSourceDirectory
+      mf->SetCurrentSourceDirectory
         (this->CMakeInstance->GetHomeDirectory());
-      lg->GetMakefile()->SetCurrentBinaryDirectory
+      mf->SetCurrentBinaryDirectory
         (this->CMakeInstance->GetHomeOutputDirectory());
       }
 
@@ -603,12 +598,12 @@ void cmGlobalUnixMakefileGenerator3
       {
       tname += "/fast";
       }
-    tname = lg->Convert(tname,cmLocalGenerator::HOME_OUTPUT);
+    cmOutputConverter conv(mf->GetStateSnapshot());
+    tname = conv.Convert(tname,cmOutputConverter::HOME_OUTPUT);
     cmSystemTools::ConvertToOutputSlashes(tname);
     makeCommand.push_back(tname);
-    if (this->LocalGenerators.empty())
+    if (this->Makefiles.empty())
       {
-      delete lg;
       delete mf;
       }
     }
