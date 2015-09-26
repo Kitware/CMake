@@ -15,10 +15,15 @@
 #define cmQtAutoGenerators_h
 
 #include <list>
+#include <vector>
+#include <string>
+#include <map>
 
 class cmGlobalGenerator;
 class cmMakefile;
 class cmLocalGenerator;
+class cmTarget;
+class cmSourceFile;
 
 class cmQtAutoGenerators
 {
