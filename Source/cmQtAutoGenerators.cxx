@@ -12,7 +12,7 @@
 ============================================================================*/
 
 #include "cmGlobalGenerator.h"
-#include "cmLocalGenerator.h"
+#include "cmOutputConverter.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmState.h"
@@ -179,19 +179,18 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
 
   cmState::Snapshot snapshot = cm.GetCurrentSnapshot();
   cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(&gg, snapshot));
-  cmsys::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator(mf.get()));
-  lg->GetMakefile()->SetCurrentBinaryDirectory(targetDirectory);
-  lg->GetMakefile()->SetCurrentSourceDirectory(targetDirectory);
-  gg.SetCurrentMakefile(lg->GetMakefile());
+  mf->SetCurrentBinaryDirectory(targetDirectory);
+  mf->SetCurrentSourceDirectory(targetDirectory);
+  gg.SetCurrentMakefile(mf.get());
 
-  this->ReadAutogenInfoFile(lg->GetMakefile(), targetDirectory, config);
-  this->ReadOldMocDefinitionsFile(lg->GetMakefile(), targetDirectory);
+  this->ReadAutogenInfoFile(mf.get(), targetDirectory, config);
+  this->ReadOldMocDefinitionsFile(mf.get(), targetDirectory);
 
   this->Init();
 
   if (this->QtMajorVersion == "4" || this->QtMajorVersion == "5")
     {
-    success = this->RunAutogen(lg->GetMakefile());
+    success = this->RunAutogen(mf.get());
     }
 
   this->WriteOldMocDefinitionsFile(targetDirectory);
