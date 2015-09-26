@@ -1448,6 +1448,7 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
         continue;
         }
 
+      cmQtAutoGenerators::InitializeAutogenSources(&ti->second);
       targetNames.push_back(ti->second.GetName());
       }
     for(std::vector<std::string>::iterator ti = targetNames.begin();
@@ -1455,8 +1456,6 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
       {
       cmTarget& target = *this->LocalGenerators[i]
                               ->GetMakefile()->FindTarget(*ti, true);
-
-      cmQtAutoGenerators::InitializeAutogenSources(&target);
       cmQtAutoGenerators::InitializeAutogenTarget(
            this->LocalGenerators[i], &target);
       cmQtAutoGenerators autogen;
