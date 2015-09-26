@@ -562,6 +562,9 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
     }
 
   std::vector<std::string> skipUic;
+  std::vector<std::string> skipMoc;
+  std::vector<std::string> mocSources;
+  std::vector<std::string> mocHeaders;
   std::map<std::string, std::string> configIncludes;
   std::map<std::string, std::string> configDefines;
   std::map<std::string, std::string> configUicOptions;
@@ -570,13 +573,14 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
       || target->GetPropertyAsBool("AUTOUIC")
       || target->GetPropertyAsBool("AUTORCC"))
     {
-    this->SetupSourceFiles(target, skipUic);
+    this->SetupSourceFiles(target, skipMoc, mocSources, mocHeaders, skipUic);
     }
   makefile->AddDefinition("_cpp_files",
-          cmOutputConverter::EscapeForCMake(this->Sources).c_str());
+          cmOutputConverter::EscapeForCMake(cmJoin(mocSources, ";")).c_str());
   if (target->GetPropertyAsBool("AUTOMOC"))
     {
     this->SetupAutoMocTarget(target, autogenTargetName,
+                             skipMoc, mocHeaders,
                              configIncludes, configDefines);
     }
   if (target->GetPropertyAsBool("AUTOUIC"))
@@ -657,20 +661,18 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
 }
 
 void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target,
-                                      std::vector<std::string>& skipUic)
+                                   std::vector<std::string>& skipMoc,
+                                   std::vector<std::string>& mocSources,
+                                   std::vector<std::string>& mocHeaders,
+                                   std::vector<std::string>& skipUic)
 {
   cmMakefile* makefile = target->GetMakefile();
-
-  const char* sepFiles = "";
-  const char* sepHeaders = "";
 
   std::vector<cmSourceFile*> srcFiles;
   cmGeneratorTarget *gtgt = target->GetMakefile()
                                   ->GetGlobalGenerator()
                                   ->GetGeneratorTarget(target);
   gtgt->GetConfigCommonSourceFiles(srcFiles);
-
-  const char *skipMocSep = "";
 
   std::vector<std::string> newRccFiles;
 
@@ -715,9 +717,7 @@ void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target,
       {
       if (skipFileForMoc)
         {
-        this->SkipMoc += skipMocSep;
-        this->SkipMoc += absFile;
-        skipMocSep = ";";
+        skipMoc.push_back(absFile);
         }
       else
         {
@@ -725,15 +725,11 @@ void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target,
                                                                 ext.c_str());
         if (fileType == cmSystemTools::CXX_FILE_FORMAT)
           {
-          this->Sources += sepFiles;
-          this->Sources += absFile;
-          sepFiles = ";";
+          mocSources.push_back(absFile);
           }
         else if (fileType == cmSystemTools::HEADER_FILE_FORMAT)
           {
-          this->Headers += sepHeaders;
-          this->Headers += absFile;
-          sepHeaders = ";";
+          mocHeaders.push_back(absFile);
           }
         }
       }
@@ -749,6 +745,8 @@ void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target,
 
 void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
                           const std::string &autogenTargetName,
+                          std::vector<std::string> const& skipMoc,
+                          std::vector<std::string> const& mocHeaders,
                           std::map<std::string, std::string> &configIncludes,
                           std::map<std::string, std::string> &configDefines)
 {
@@ -759,9 +757,9 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
   makefile->AddDefinition("_moc_options",
           cmOutputConverter::EscapeForCMake(_moc_options).c_str());
   makefile->AddDefinition("_skip_moc",
-          cmOutputConverter::EscapeForCMake(this->SkipMoc).c_str());
+          cmOutputConverter::EscapeForCMake(cmJoin(skipMoc, ";")).c_str());
   makefile->AddDefinition("_moc_headers",
-          cmOutputConverter::EscapeForCMake(this->Headers).c_str());
+          cmOutputConverter::EscapeForCMake(cmJoin(mocHeaders, ";")).c_str());
   bool relaxedMode = makefile->IsOn("CMAKE_AUTOMOC_RELAXED_MODE");
   makefile->AddDefinition("_moc_relaxed_mode", relaxedMode ? "TRUE" : "FALSE");
 

@@ -34,11 +34,16 @@ public:
   bool InitializeAutogenTarget(cmLocalGenerator* lg, cmTarget* target);
   void SetupAutoGenerateTarget(cmTarget const* target);
   void SetupSourceFiles(cmTarget const* target,
+                        std::vector<std::string>& skipMoc,
+                        std::vector<std::string>& mocSources,
+                        std::vector<std::string>& mocHeaders,
                         std::vector<std::string>& skipUic);
 
 private:
   void SetupAutoMocTarget(cmTarget const* target,
                           const std::string &autogenTargetName,
+                          const std::vector<std::string>& skipMoc,
+                          const std::vector<std::string>& mocHeaders,
                           std::map<std::string, std::string> &configIncludes,
                           std::map<std::string, std::string> &configDefines);
   void SetupAutoUicTarget(cmTarget const* target,
