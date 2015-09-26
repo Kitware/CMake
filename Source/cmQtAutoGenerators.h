@@ -33,7 +33,8 @@ public:
 
   bool InitializeAutogenTarget(cmLocalGenerator* lg, cmTarget* target);
   void SetupAutoGenerateTarget(cmTarget const* target);
-  void SetupSourceFiles(cmTarget const* target);
+  void SetupSourceFiles(cmTarget const* target,
+                        std::vector<std::string>& skipUic);
 
 private:
   void SetupAutoMocTarget(cmTarget const* target,
@@ -41,6 +42,7 @@ private:
                           std::map<std::string, std::string> &configIncludes,
                           std::map<std::string, std::string> &configDefines);
   void SetupAutoUicTarget(cmTarget const* target,
+                        const std::vector<std::string>& skipUic,
                         std::map<std::string, std::string> &configUicOptions);
   void SetupAutoRccTarget(cmTarget const* target);
 

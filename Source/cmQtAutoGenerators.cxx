@@ -561,6 +561,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
     makefile->AddDefinition("_target_qt_version", qtVersion);
     }
 
+  std::vector<std::string> skipUic;
   std::map<std::string, std::string> configIncludes;
   std::map<std::string, std::string> configDefines;
   std::map<std::string, std::string> configUicOptions;
@@ -569,7 +570,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
       || target->GetPropertyAsBool("AUTOUIC")
       || target->GetPropertyAsBool("AUTORCC"))
     {
-    this->SetupSourceFiles(target);
+    this->SetupSourceFiles(target, skipUic);
     }
   makefile->AddDefinition("_cpp_files",
           cmOutputConverter::EscapeForCMake(this->Sources).c_str());
@@ -580,7 +581,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
     }
   if (target->GetPropertyAsBool("AUTOUIC"))
     {
-    this->SetupAutoUicTarget(target, configUicOptions);
+    this->SetupAutoUicTarget(target, skipUic, configUicOptions);
     }
   if (target->GetPropertyAsBool("AUTORCC"))
     {
@@ -655,7 +656,8 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
     }
 }
 
-void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target)
+void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target,
+                                      std::vector<std::string>& skipUic)
 {
   cmMakefile* makefile = target->GetMakefile();
 
@@ -669,7 +671,6 @@ void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target)
   gtgt->GetConfigCommonSourceFiles(srcFiles);
 
   const char *skipMocSep = "";
-  const char *skipUicSep = "";
 
   std::vector<std::string> newRccFiles;
 
@@ -685,9 +686,7 @@ void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target)
 
     if(cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOUIC")))
       {
-      this->SkipUic += skipUicSep;
-      this->SkipUic += absFile;
-      skipUicSep = ";";
+      skipUic.push_back(absFile);
       }
 
     std::string ext = sf->GetExtension();
@@ -894,17 +893,16 @@ static void GetUicOpts(cmTarget const* target, const std::string& config,
 }
 
 void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
+                          std::vector<std::string> const& skipUic,
                           std::map<std::string, std::string> &configUicOptions)
 {
   cmMakefile *makefile = target->GetMakefile();
 
   std::set<std::string> skipped;
-  std::vector<std::string> skipVec;
-  cmSystemTools::ExpandListArgument(this->SkipUic, skipVec);
-  skipped.insert(skipVec.begin(), skipVec.end());
+  skipped.insert(skipUic.begin(), skipUic.end());
 
   makefile->AddDefinition("_skip_uic",
-          cmOutputConverter::EscapeForCMake(this->SkipUic).c_str());
+          cmOutputConverter::EscapeForCMake(cmJoin(skipUic, ";")).c_str());
 
   std::vector<cmSourceFile*> uiFilesWithOptions
                                         = makefile->GetQtUiFilesWithOptions();
