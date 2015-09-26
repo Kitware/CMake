@@ -30,7 +30,6 @@
 #endif
 
 #include "cmQtAutoGenerators.h"
-#include "cmQtAutoGeneratorInitializer.h"
 
 static bool requiresMocing(const std::string& text, std::string &macroName)
 {
