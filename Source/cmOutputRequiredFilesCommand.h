@@ -23,7 +23,6 @@ public:
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
   virtual std::string GetName() const { return "output_required_files";}
-  virtual bool IsDiscouraged() const { return true; }
 
   void ListDependencies(cmDependInformation const *info,
                         FILE *fout,

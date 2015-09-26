@@ -102,15 +102,6 @@ public:
     }
 
   /**
-   * This determines if usage of the method is discouraged or not.
-   * This is currently only used for generating the documentation.
-   */
-  virtual bool IsDiscouraged() const
-    {
-    return false;
-    }
-
-  /**
    * This is used to avoid including this command
    * in documentation. This is mainly used by
    * cmMacroHelperCommand and cmFunctionHelperCommand

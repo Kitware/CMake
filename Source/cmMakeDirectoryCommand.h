@@ -51,12 +51,6 @@ public:
    */
   virtual bool IsScriptable() const { return true; }
 
-  /** This command is kept for compatibility with older CMake versions. */
-  virtual bool IsDiscouraged() const
-    {
-    return true;
-    }
-
   cmTypeMacro(cmMakeDirectoryCommand, cmCommand);
 };
 

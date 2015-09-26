@@ -23,7 +23,6 @@ public:
                            cmExecutionStatus &status);
   virtual std::string GetName() const {return "build_name";}
   virtual bool IsScriptable() const { return true; }
-  virtual bool IsDiscouraged() const { return true; }
 };
 
 
