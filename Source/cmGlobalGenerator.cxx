@@ -22,7 +22,7 @@
 #include "cmake.h"
 #include "cmState.h"
 #include "cmMakefile.h"
-#include "cmQtAutoGenerators.h"
+#include "cmQtAutoGeneratorInitializer.h"
 #include "cmSourceFile.h"
 #include "cmVersion.h"
 #include "cmTargetExport.h"
@@ -1251,8 +1251,8 @@ bool cmGlobalGenerator::Compute()
 #ifdef CMAKE_BUILD_WITH_CMAKE
   // Iterate through all targets and set up automoc for those which have
   // the AUTOMOC, AUTOUIC or AUTORCC property set
-  AutogensType autogens;
-  this->CreateQtAutoGeneratorsTargets(autogens);
+  std::vector<cmTarget const*> autogenTargets =
+      this->CreateQtAutoGeneratorsTargets();
 #endif
 
   unsigned int i;
@@ -1266,10 +1266,10 @@ bool cmGlobalGenerator::Compute()
   this->InitGeneratorTargets();
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  for (AutogensType::iterator it = autogens.begin(); it != autogens.end();
-       ++it)
+  for (std::vector<cmTarget const*>::iterator it = autogenTargets.begin();
+       it != autogenTargets.end(); ++it)
     {
-    it->first.SetupAutoGenerateTarget(it->second);
+    cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(*it);
     }
 #endif
 
@@ -1405,8 +1405,11 @@ bool cmGlobalGenerator::ComputeTargetDepends()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
+std::vector<const cmTarget*>
+cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
 {
+  std::vector<const cmTarget*> autogenTargets;
+
 #ifdef CMAKE_BUILD_WITH_CMAKE
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
@@ -1421,37 +1424,48 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
         {
         continue;
         }
+      if(ti->second.GetType() != cmTarget::EXECUTABLE &&
+         ti->second.GetType() != cmTarget::STATIC_LIBRARY &&
+         ti->second.GetType() != cmTarget::SHARED_LIBRARY &&
+         ti->second.GetType() != cmTarget::MODULE_LIBRARY &&
+         ti->second.GetType() != cmTarget::OBJECT_LIBRARY)
+        {
+        continue;
+        }
+      if((!ti->second.GetPropertyAsBool("AUTOMOC")
+            && !ti->second.GetPropertyAsBool("AUTOUIC")
+            && !ti->second.GetPropertyAsBool("AUTORCC"))
+          || ti->second.IsImported())
+        {
+        continue;
+        }
+      // don't do anything if there is no Qt4 or Qt5Core (which contains moc):
+      cmMakefile* mf = ti->second.GetMakefile();
+      std::string qtMajorVersion = mf->GetSafeDefinition("QT_VERSION_MAJOR");
+      if (qtMajorVersion == "")
+        {
+        qtMajorVersion = mf->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
+        }
+      if (qtMajorVersion != "4" && qtMajorVersion != "5")
+        {
+        continue;
+        }
+
+      cmQtAutoGeneratorInitializer::InitializeAutogenSources(&ti->second);
       targetNames.push_back(ti->second.GetName());
       }
     for(std::vector<std::string>::iterator ti = targetNames.begin();
         ti != targetNames.end(); ++ti)
       {
-      cmTarget& target = *this->LocalGenerators[i]
+      cmTarget* target = this->LocalGenerators[i]
                               ->GetMakefile()->FindTarget(*ti, true);
-      if(target.GetType() == cmTarget::EXECUTABLE ||
-         target.GetType() == cmTarget::STATIC_LIBRARY ||
-         target.GetType() == cmTarget::SHARED_LIBRARY ||
-         target.GetType() == cmTarget::MODULE_LIBRARY ||
-         target.GetType() == cmTarget::OBJECT_LIBRARY)
-        {
-        if((target.GetPropertyAsBool("AUTOMOC")
-              || target.GetPropertyAsBool("AUTOUIC")
-              || target.GetPropertyAsBool("AUTORCC"))
-            && !target.IsImported())
-          {
-          cmQtAutoGenerators autogen;
-          if(autogen.InitializeAutogenTarget(this->LocalGenerators[i],
-                                             &target))
-            {
-            autogens.push_back(std::make_pair(autogen, &target));
-            }
-          }
-        }
+      cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
+           this->LocalGenerators[i], target);
+      autogenTargets.push_back(target);
       }
     }
-#else
-  (void)autogens;
 #endif
+  return autogenTargets;
 }
 
 //----------------------------------------------------------------------------
