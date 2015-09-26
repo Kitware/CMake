@@ -48,7 +48,7 @@ bool cmSetCommand
       return true;
       }
 
-    // if it will be cleared, then clear it if it isn;t already clear
+    // if it will be cleared, then clear it if it isn't already clear
     if (currValue)
       {
       cmSystemTools::PutEnv(putEnvArg);
