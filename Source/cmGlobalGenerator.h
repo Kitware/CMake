@@ -124,7 +124,7 @@ public:
   /**
    * Try to determine system information, get it from another generator
    */
-  virtual void EnableLanguagesFromGenerator(cmGlobalGenerator *gen,
+  void EnableLanguagesFromGenerator(cmGlobalGenerator *gen,
                                             cmMakefile* mf);
 
   /**
