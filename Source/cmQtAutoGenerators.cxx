@@ -681,7 +681,8 @@ void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target,
     cmSourceFile* sf = *fileIt;
     std::string absFile = cmsys::SystemTools::GetRealPath(
                                                     sf->GetFullPath());
-    bool skipMoc = cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"));
+    bool skipFileForMoc =
+        cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"));
     bool generated = cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"));
 
     if(cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOUIC")))
@@ -712,7 +713,7 @@ void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target,
 
     if (!generated)
       {
-      if (skipMoc)
+      if (skipFileForMoc)
         {
         this->SkipMoc += skipMocSep;
         this->SkipMoc += absFile;
