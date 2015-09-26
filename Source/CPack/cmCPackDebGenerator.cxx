@@ -95,7 +95,6 @@ int cmCPackDebGenerator::PackageOnePack(std::string initialTopLevel,
   std::string findExpr(this->GetOption("GEN_WDIR"));
   findExpr += "/*";
   gl.RecurseOn();
-  gl.SetRecurseListDirs(true);
   if ( !gl.FindFiles(findExpr) )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -223,7 +222,6 @@ int cmCPackDebGenerator::PackageComponentsAllInOne()
   std::string findExpr(this->GetOption("GEN_WDIR"));
   findExpr += "/*";
   gl.RecurseOn();
-  gl.SetRecurseListDirs(true);
   if ( !gl.FindFiles(findExpr) )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
