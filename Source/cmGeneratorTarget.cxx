@@ -275,6 +275,8 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   this->LocalGenerator = lg;
   this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
 
+  this->GlobalGenerator->ComputeTargetObjectDirectory(this);
+
   CreatePropertyGeneratorExpressions(
         t->GetIncludeDirectoriesEntries(),
         t->GetIncludeDirectoriesBacktraces(),
