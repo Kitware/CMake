@@ -21,6 +21,10 @@
 
 #include <cmsys/FStream.hxx>
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
+# include "cmGlobalVisualStudioGenerator.h"
+#endif
+
 std::string cmQtAutoGeneratorInitializer::GetAutogenTargetName(
     cmTarget const* target)
 {
