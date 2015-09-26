@@ -41,7 +41,6 @@ class cmTarget;
 class cmInstallTargetGenerator;
 class cmInstallFilesGenerator;
 class cmExportBuildFileGenerator;
-class cmQtAutoGenerators;
 
 /** \class cmGlobalGenerator
  * \brief Responsible for overseeing the generation process for the entire tree
@@ -385,9 +384,7 @@ protected:
 
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const;
 
-  typedef std::vector<std::pair<cmQtAutoGenerators,
-                                cmTarget const*> > AutogensType;
-  void CreateQtAutoGeneratorsTargets(AutogensType& autogens);
+  std::vector<cmTarget const*> CreateQtAutoGeneratorsTargets();
 
   std::string SelectMakeProgram(const std::string& makeProgram,
                                 const std::string& makeDefault = "") const;
