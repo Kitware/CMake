@@ -180,11 +180,12 @@ static std::string cmQtAutoGeneratorsStripCR(std::string const& line)
   return line;
 }
 
-std::string cmQtAutoGenerators::ListQt5RccInputs(cmSourceFile* sf,
+std::string cmQtAutoGeneratorInitializer::ListQt5RccInputs(cmSourceFile* sf,
                                             cmTarget const* target,
                                             std::vector<std::string>& depends)
 {
-  std::string rccCommand = cmQtAutoGenerators::GetRccExecutable(target);
+  std::string rccCommand
+      = cmQtAutoGeneratorInitializer::GetRccExecutable(target);
   std::vector<std::string> qrcEntries;
 
   std::vector<std::string> command;
@@ -250,7 +251,7 @@ std::string cmQtAutoGenerators::ListQt5RccInputs(cmSourceFile* sf,
   return cmJoin(qrcEntries, "@list_sep@");
 }
 
-std::string cmQtAutoGenerators::ListQt4RccInputs(cmSourceFile* sf,
+std::string cmQtAutoGeneratorInitializer::ListQt4RccInputs(cmSourceFile* sf,
                                             std::vector<std::string>& depends)
 {
   const std::string qrcContents = ReadAll(sf->GetFullPath());
@@ -287,7 +288,7 @@ std::string cmQtAutoGenerators::ListQt4RccInputs(cmSourceFile* sf,
 }
 
 
-void cmQtAutoGenerators::InitializeAutogenSources(cmTarget* target)
+void cmQtAutoGeneratorInitializer::InitializeAutogenSources(cmTarget* target)
 {
   cmMakefile* makefile = target->GetMakefile();
 
@@ -306,7 +307,8 @@ void cmQtAutoGenerators::InitializeAutogenSources(cmTarget* target)
     }
 }
 
-void cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
+void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
+                                                 cmLocalGenerator* lg,
                                                  cmTarget* target)
 {
   cmMakefile* makefile = target->GetMakefile();
@@ -437,11 +439,12 @@ void cmQtAutoGenerators::InitializeAutogenTarget(cmLocalGenerator* lg,
             {
             if (qtMajorVersion == "5")
               {
-              cmQtAutoGenerators::ListQt5RccInputs(sf, target, depends);
+              cmQtAutoGeneratorInitializer::ListQt5RccInputs(sf, target,
+                                                              depends);
               }
             else
               {
-              cmQtAutoGenerators::ListQt4RccInputs(sf, depends);
+              cmQtAutoGeneratorInitializer::ListQt4RccInputs(sf, depends);
               }
 #if defined(_WIN32) && !defined(__CYGWIN__)
             // Cannot use PRE_BUILD because the resource files themselves
@@ -526,7 +529,8 @@ static void GetCompileDefinitionsAndDirectories(cmTarget const* target,
   defs += cmJoin(defines, ";");
 }
 
-void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
+void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
+    cmTarget const* target)
 {
   cmMakefile* makefile = target->GetMakefile();
 
@@ -574,24 +578,25 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
       || target->GetPropertyAsBool("AUTOUIC")
       || target->GetPropertyAsBool("AUTORCC"))
     {
-    cmQtAutoGenerators::SetupSourceFiles(target, skipMoc,
+    cmQtAutoGeneratorInitializer::SetupSourceFiles(target, skipMoc,
                                          mocSources, mocHeaders, skipUic);
     }
   makefile->AddDefinition("_cpp_files",
           cmOutputConverter::EscapeForCMake(cmJoin(mocSources, ";")).c_str());
   if (target->GetPropertyAsBool("AUTOMOC"))
     {
-    cmQtAutoGenerators::SetupAutoMocTarget(target, autogenTargetName,
+    cmQtAutoGeneratorInitializer::SetupAutoMocTarget(target, autogenTargetName,
                              skipMoc, mocHeaders,
                              configIncludes, configDefines);
     }
   if (target->GetPropertyAsBool("AUTOUIC"))
     {
-    cmQtAutoGenerators::SetupAutoUicTarget(target, skipUic, configUicOptions);
+    cmQtAutoGeneratorInitializer::SetupAutoUicTarget(target, skipUic,
+                                                      configUicOptions);
     }
   if (target->GetPropertyAsBool("AUTORCC"))
     {
-    cmQtAutoGenerators::SetupAutoRccTarget(target);
+    cmQtAutoGeneratorInitializer::SetupAutoRccTarget(target);
     }
 
   const char* cmakeRoot = makefile->GetSafeDefinition("CMAKE_ROOT");
@@ -662,7 +667,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
     }
 }
 
-void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target,
+void cmQtAutoGeneratorInitializer::SetupSourceFiles(cmTarget const* target,
                                    std::vector<std::string>& skipMoc,
                                    std::vector<std::string>& mocSources,
                                    std::vector<std::string>& mocHeaders,
@@ -745,7 +750,7 @@ void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target,
     }
 }
 
-void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
+void cmQtAutoGeneratorInitializer::SetupAutoMocTarget(cmTarget const* target,
                           const std::string &autogenTargetName,
                           std::vector<std::string> const& skipMoc,
                           std::vector<std::string> const& mocHeaders,
@@ -893,7 +898,7 @@ static void GetUicOpts(cmTarget const* target, const std::string& config,
   optString = cmJoin(opts, ";");
 }
 
-void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
+void cmQtAutoGeneratorInitializer::SetupAutoUicTarget(cmTarget const* target,
                           std::vector<std::string> const& skipUic,
                           std::map<std::string, std::string> &configUicOptions)
 {
@@ -1000,7 +1005,8 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
     }
 }
 
-void cmQtAutoGenerators::MergeRccOptions(std::vector<std::string> &opts,
+void cmQtAutoGeneratorInitializer::MergeRccOptions(
+                         std::vector<std::string> &opts,
                          const std::vector<std::string> &fileOpts,
                          bool isQt5)
 {
@@ -1043,7 +1049,7 @@ void cmQtAutoGenerators::MergeRccOptions(std::vector<std::string> &opts,
   opts.insert(opts.end(), extraOpts.begin(), extraOpts.end());
 }
 
-void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
+void cmQtAutoGeneratorInitializer::SetupAutoRccTarget(cmTarget const* target)
 {
   std::string _rcc_files;
   const char* sepRccFiles = "";
@@ -1097,7 +1103,7 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
           {
           std::vector<std::string> optsVec;
           cmSystemTools::ExpandListArgument(prop, optsVec);
-          cmQtAutoGenerators::MergeRccOptions(rccOptions, optsVec,
+          cmQtAutoGeneratorInitializer::MergeRccOptions(rccOptions, optsVec,
                                 strcmp(qtVersion, "5") == 0);
           }
 
@@ -1125,12 +1131,14 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
           {
           if (qtMajorVersion == "5")
             {
-            entriesList = cmQtAutoGenerators::ListQt5RccInputs(sf, target,
+            entriesList = cmQtAutoGeneratorInitializer::ListQt5RccInputs(sf,
+                                                               target,
                                                                depends);
             }
           else
             {
-            entriesList = cmQtAutoGenerators::ListQt4RccInputs(sf, depends);
+            entriesList =
+                cmQtAutoGeneratorInitializer::ListQt4RccInputs(sf, depends);
             }
           if (entriesList.empty())
             {
@@ -1155,10 +1163,11 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
             cmOutputConverter::EscapeForCMake(rccFileOptions).c_str());
 
   makefile->AddDefinition("_qt_rcc_executable",
-                        cmQtAutoGenerators::GetRccExecutable(target).c_str());
+              cmQtAutoGeneratorInitializer::GetRccExecutable(target).c_str());
 }
 
-std::string cmQtAutoGenerators::GetRccExecutable(cmTarget const* target)
+std::string cmQtAutoGeneratorInitializer::GetRccExecutable(
+    cmTarget const* target)
 {
   cmGeneratorTarget *gtgt = target->GetMakefile()
                                   ->GetGlobalGenerator()

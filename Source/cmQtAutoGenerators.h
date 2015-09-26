@@ -25,12 +25,9 @@ class cmLocalGenerator;
 class cmTarget;
 class cmSourceFile;
 
-class cmQtAutoGenerators
+class cmQtAutoGeneratorInitializer
 {
 public:
-  cmQtAutoGenerators();
-  bool Run(const std::string& targetDirectory, const std::string& config);
-
   static void InitializeAutogenSources(cmTarget* target);
   static void InitializeAutogenTarget(cmLocalGenerator* lg, cmTarget* target);
   static void SetupAutoGenerateTarget(cmTarget const* target);
@@ -52,6 +49,26 @@ private:
                         const std::vector<std::string>& skipUic,
                         std::map<std::string, std::string> &configUicOptions);
   static void SetupAutoRccTarget(cmTarget const* target);
+
+  static void MergeRccOptions(std::vector<std::string> &opts,
+                       const std::vector<std::string> &fileOpts, bool isQt5);
+
+  static std::string GetRccExecutable(cmTarget const* target);
+
+  static std::string ListQt5RccInputs(cmSourceFile* sf, cmTarget const* target,
+                               std::vector<std::string>& depends);
+
+  static std::string ListQt4RccInputs(cmSourceFile* sf,
+                               std::vector<std::string>& depends);
+};
+
+class cmQtAutoGenerators
+{
+public:
+  cmQtAutoGenerators();
+  bool Run(const std::string& targetDirectory, const std::string& config);
+
+private:
 
   bool ReadAutogenInfoFile(cmMakefile* makefile,
                            const std::string& targetDirectory,
@@ -99,17 +116,6 @@ private:
 
   static void MergeUicOptions(std::vector<std::string> &opts,
                        const std::vector<std::string> &fileOpts, bool isQt5);
-
-  static void MergeRccOptions(std::vector<std::string> &opts,
-                       const std::vector<std::string> &fileOpts, bool isQt5);
-
-  static std::string GetRccExecutable(cmTarget const* target);
-
-  static std::string ListQt5RccInputs(cmSourceFile* sf, cmTarget const* target,
-                               std::vector<std::string>& depends);
-
-  static std::string ListQt4RccInputs(cmSourceFile* sf,
-                               std::vector<std::string>& depends);
 
   bool InputFilesNewerThanQrc(const std::string& qrcFile,
                               const std::string& rccOutput);
