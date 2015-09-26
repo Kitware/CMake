@@ -22,7 +22,7 @@
 #include "cmake.h"
 #include "cmState.h"
 #include "cmMakefile.h"
-#include "cmQtAutoGenerators.h"
+#include "cmQtAutoGeneratorInitializer.h"
 #include "cmSourceFile.h"
 #include "cmVersion.h"
 #include "cmTargetExport.h"
