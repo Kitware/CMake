@@ -14,14 +14,9 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmSourceFile.h"
 #include "cmSystemTools.h"
 #include "cmState.h"
 #include "cmAlgorithms.h"
-
-#if defined(_WIN32) && !defined(__CYGWIN__)
-# include "cmGlobalVisualStudioGenerator.h"
-#endif
 
 #include <sys/stat.h>
 
