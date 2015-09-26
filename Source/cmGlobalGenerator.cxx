@@ -1263,8 +1263,6 @@ bool cmGlobalGenerator::Compute()
     this->LocalGenerators[i]->AddHelperCommands();
     }
 
-  this->InitGeneratorTargets();
-
 #ifdef CMAKE_BUILD_WITH_CMAKE
   for (std::vector<cmTarget const*>::iterator it = autogenTargets.begin();
        it != autogenTargets.end(); ++it)
@@ -1555,19 +1553,6 @@ void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes,
     generatorTargets[*j] = gt;
     }
   mf->SetGeneratorTargets(generatorTargets);
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalGenerator::InitGeneratorTargets()
-{
-  for(cmGeneratorTargetsType::iterator ti =
-      this->GeneratorTargets.begin(); ti != this->GeneratorTargets.end(); ++ti)
-    {
-    if (!ti->second->Target->IsImported())
-      {
-      this->ComputeTargetObjectDirectory(ti->second);
-      }
-    }
 }
 
 //----------------------------------------------------------------------------

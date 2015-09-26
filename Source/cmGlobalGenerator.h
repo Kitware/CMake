@@ -480,7 +480,6 @@ private:
   cmGeneratorTargetsType GeneratorTargets;
   friend class cmake;
   void CreateGeneratorTargets(TargetTypes targetTypes, cmLocalGenerator* lg);
-  void InitGeneratorTargets();
   void CreateGeneratorTargets(TargetTypes targetTypes);
 
   void ClearGeneratorMembers();
