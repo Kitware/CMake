@@ -1,5 +1,5 @@
 # CMake version number components.
 set(CMake_VERSION_MAJOR 3)
 set(CMake_VERSION_MINOR 3)
-set(CMake_VERSION_PATCH 20150925)
+set(CMake_VERSION_PATCH 20150926)
 #set(CMake_VERSION_RC 1)
