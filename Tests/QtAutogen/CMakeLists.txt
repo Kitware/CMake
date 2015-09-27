@@ -101,7 +101,14 @@ add_executable(QtAutogen main.cpp calwidget.cpp second_widget.cpp foo.cpp blub.c
 )
 set_property(TARGET QtAutogen APPEND PROPERTY AUTOGEN_TARGET_DEPENDS generate_moc_input "${CMAKE_CURRENT_BINARY_DIR}/myotherinterface.h")
 
-set_target_properties(QtAutogen codeeditorLib privateSlot PROPERTIES AUTOMOC TRUE)
+add_executable(targetObjectsTest targetObjectsTest.cpp $<TARGET_OBJECTS:privateSlot>)
+target_link_libraries(targetObjectsTest ${QT_LIBRARIES})
+
+set_target_properties(
+  QtAutogen codeeditorLib privateSlot targetObjectsTest
+  PROPERTIES
+  AUTOMOC TRUE
+)
 
 include(GenerateExportHeader)
 # The order is relevant here. B depends on A, and B headers depend on A
