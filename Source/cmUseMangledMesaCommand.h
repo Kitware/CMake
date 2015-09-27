@@ -23,7 +23,6 @@ public:
                            cmExecutionStatus &status);
   virtual std::string GetName() const { return "use_mangled_mesa";}
   virtual bool IsScriptable() const { return true; }
-  virtual bool IsDiscouraged() const { return true; }
 protected:
   void CopyAndFullPathMesaHeader(const char* source,
                                  const char* outdir);

@@ -44,12 +44,6 @@ public:
    */
   virtual std::string GetName() const { return "link_libraries";}
 
-  /** This command is kept for compatibility with older CMake versions. */
-  virtual bool IsDiscouraged() const
-    {
-    return true;
-    }
-
   cmTypeMacro(cmLinkLibrariesCommand, cmCommand);
 };
 

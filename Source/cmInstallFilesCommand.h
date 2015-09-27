@@ -52,12 +52,6 @@ public:
   virtual void FinalPass();
   virtual bool HasFinalPass() const { return !this->IsFilesForm; }
 
-  /** This command is kept for compatibility with older CMake versions. */
-  virtual bool IsDiscouraged() const
-    {
-    return true;
-    }
-
   cmTypeMacro(cmInstallFilesCommand, cmCommand);
 
 protected:
