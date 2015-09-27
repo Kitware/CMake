@@ -192,7 +192,7 @@ void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
   cmMakefile* mf = this->LocalGenerators[0]->GetMakefile();
   std::string dir = this->GetUserMacrosDirectory();
 
-  if (mf != 0 && dir != "")
+  if (dir != "")
     {
     std::string src = mf->GetRequiredDefinition("CMAKE_ROOT");
     src += "/Templates/" CMAKE_VSMACROS_FILENAME;
@@ -233,13 +233,12 @@ cmGlobalVisualStudioGenerator
   std::string dir = this->GetUserMacrosDirectory();
 
   // Only really try to call the macro if:
-  //  - mf is non-NULL
   //  - there is a UserMacrosDirectory
   //  - the CMake vsmacros file exists
   //  - the CMake vsmacros file is registered
   //  - there were .sln/.vcproj files changed during generation
   //
-  if (mf != 0 && dir != "")
+  if (dir != "")
     {
     std::string macrosFile = dir + "/CMakeMacros/" CMAKE_VSMACROS_FILENAME;
     std::string nextSubkeyName;
