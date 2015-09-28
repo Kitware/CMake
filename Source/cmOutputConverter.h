@@ -45,6 +45,8 @@ public:
   std::string Convert(RelativeRoot remote, const std::string& local,
                       OutputFormat output = UNCHANGED,
                       bool optional = false) const;
+  std::string ConvertDirectorySeparatorsForShell(
+                                             const std::string& source) const;
 
   /**
     * Get path for the specified relative root.

@@ -142,26 +142,35 @@ std::string cmOutputConverter::ConvertToOutputFormat(const std::string& source,
     }
   else if(output == SHELL || output == WATCOMQUOTE)
     {
-        // For the MSYS shell convert drive letters to posix paths, so
-    // that c:/some/path becomes /c/some/path.  This is needed to
-    // avoid problems with the shell path translation.
-    if(this->GetState()->UseMSYSShell() && !this->LinkScriptShell)
-      {
-      if(result.size() > 2 && result[1] == ':')
-        {
-        result[1] = result[0];
-        result[0] = '/';
-        }
-      }
-    if(this->GetState()->UseWindowsShell())
-      {
-      std::replace(result.begin(), result.end(), '/', '\\');
-      }
+    result = this->ConvertDirectorySeparatorsForShell(source);
     result = this->EscapeForShell(result, true, false, output == WATCOMQUOTE);
     }
   else if(output == RESPONSE)
     {
     result = this->EscapeForShell(result, false, false, false);
+    }
+  return result;
+}
+
+//----------------------------------------------------------------------------
+std::string cmOutputConverter::ConvertDirectorySeparatorsForShell(
+                                              const std::string& source) const
+{
+  std::string result = source;
+  // For the MSYS shell convert drive letters to posix paths, so
+  // that c:/some/path becomes /c/some/path.  This is needed to
+  // avoid problems with the shell path translation.
+  if(this->GetState()->UseMSYSShell() && !this->LinkScriptShell)
+    {
+    if(result.size() > 2 && result[1] == ':')
+      {
+      result[1] = result[0];
+      result[0] = '/';
+      }
+    }
+  if(this->GetState()->UseWindowsShell())
+    {
+    std::replace(result.begin(), result.end(), '/', '\\');
     }
   return result;
 }
