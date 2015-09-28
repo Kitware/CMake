@@ -408,6 +408,7 @@ class SystemToolsPathCaseMap:
 // adds the elements of the env variable path to the arg passed in
 void SystemTools::GetPath(std::vector<std::string>& path, const char* env)
 {
+  size_t const old_size = path.size();
 #if defined(_WIN32) && !defined(__CYGWIN__)
   const char pathSep = ';';
 #else
@@ -445,7 +446,7 @@ void SystemTools::GetPath(std::vector<std::string>& path, const char* env)
       done = true;
       }
     }
-  for(std::vector<std::string>::iterator i = path.begin();
+  for(std::vector<std::string>::iterator i = path.begin() + old_size;
       i != path.end(); ++i)
     {
     SystemTools::ConvertToUnixSlashes(*i);
