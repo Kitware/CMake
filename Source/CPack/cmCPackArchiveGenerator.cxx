@@ -78,7 +78,7 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(cmArchiveWrite& archive,
     std::string rp = filePrefix + *fileIt;
     cmCPackLogger(cmCPackLog::LOG_DEBUG,"Adding file: "
                   << rp << std::endl);
-    archive.Add(rp);
+    archive.Add(rp, 0, 0, false);
     if (!archive)
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR, "ERROR while packaging files: "
@@ -284,7 +284,7 @@ int cmCPackArchiveGenerator::PackageFiles()
     // Get the relative path to the file
     std::string rp = cmSystemTools::RelativePath(toplevel.c_str(),
                                                  fileIt->c_str());
-    archive.Add(rp);
+    archive.Add(rp, 0, 0, false);
     if(!archive)
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem while adding file< "

@@ -1,0 +1,1 @@
+^CPackRPM: Will use GENERATED spec file: .*/Tests/RunCMake/RPM/CPack/EMPTY_DIR-build/_CPack_Packages/.*/RPM/SPECS/empty_dir.spec$
