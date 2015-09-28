@@ -179,7 +179,7 @@ function(ProcessorCount var)
         ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE
         OUTPUT_VARIABLE psrinfo_output)
-      string(REGEX MATCH "([0-9]+) virtual processors" procs "${psrinfo_output}")
+      string(REGEX MATCH "([0-9]+) virtual processor" procs "${psrinfo_output}")
       set(count "${CMAKE_MATCH_1}")
       #message("ProcessorCount: trying psrinfo -p -v '${ProcessorCount_cmd_prvinfo}'")
     else()
