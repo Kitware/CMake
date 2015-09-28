@@ -9,7 +9,7 @@
 #
 # CPackDeb may be used to create Deb package using CPack.
 # CPackDeb is a CPack generator thus it uses the CPACK_XXX variables
-# used by CPack : http://www.cmake.org/Wiki/CMake:CPackConfiguration.
+# used by CPack : https://cmake.org/Wiki/CMake:CPackConfiguration.
 # CPackDeb generator should work on any linux host but it will produce
 # better deb package when Debian specific tools 'dpkg-xxx' are usable on
 # the build system.
@@ -23,7 +23,7 @@
 # a component GROUP name.
 #
 # You'll find a detailed usage on the wiki:
-# http://www.cmake.org/Wiki/CMake:CPackPackageGenerators#DEB_.28UNIX_only.29 .
+# https://cmake.org/Wiki/CMake:CPackPackageGenerators#DEB_.28UNIX_only.29 .
 # However as a handy reminder here comes the list of specific variables:
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_NAME
@@ -153,7 +153,7 @@
 #    You may need set :variable:`CMAKE_INSTALL_RPATH` to an appropriate value
 #    if you use this feature, because if you don't :code:`dpkg-shlibdeps`
 #    may fail to find your own shared libs.
-#    See http://www.cmake.org/Wiki/CMake_RPATH_handling.
+#    See https://cmake.org/Wiki/CMake_RPATH_handling.
 #
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_DEBUG

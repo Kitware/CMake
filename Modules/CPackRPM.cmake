@@ -9,7 +9,7 @@
 #
 # CPackRPM may be used to create RPM package using CPack.  CPackRPM is a
 # CPack generator thus it uses the CPACK_XXX variables used by CPack :
-# http://www.cmake.org/Wiki/CMake:CPackConfiguration
+# https://cmake.org/Wiki/CMake:CPackConfiguration
 #
 # However CPackRPM has specific features which are controlled by the
 # specifics CPACK_RPM_XXX variables.  CPackRPM is a component aware
@@ -24,7 +24,7 @@
 #
 # ::
 #
-#   http://www.cmake.org/Wiki/CMake:CPackPackageGenerators#RPM_.28Unix_Only.29
+#   https://cmake.org/Wiki/CMake:CPackPackageGenerators#RPM_.28Unix_Only.29
 #
 # However as a handy reminder here comes the list of specific variables:
 #

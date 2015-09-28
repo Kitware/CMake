@@ -263,7 +263,7 @@
 #
 # The site argument is a URL where the archives for downloadable
 # components will reside, e.g.,
-# http://www.cmake.org/files/2.6.1/installer/ All of the archives
+# https://cmake.org/files/2.6.1/installer/ All of the archives
 # produced by CPack should be uploaded to that location.
 #
 # UPLOAD_DIRECTORY is the local directory where CPack will create the
@@ -301,7 +301,7 @@
 if(NOT CPackComponent_CMake_INCLUDED)
 set(CPackComponent_CMake_INCLUDED 1)
 
-# Argument-parsing macro from http://www.cmake.org/Wiki/CMakeMacroParseArguments
+# Argument-parsing macro from https://cmake.org/Wiki/CMakeMacroParseArguments
 macro(cpack_parse_arguments prefix arg_names option_names)
   set(${prefix}_DEFAULT_ARGS)
   foreach(arg_name ${arg_names})

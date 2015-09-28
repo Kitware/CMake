@@ -235,7 +235,7 @@ class cmPolicy;
  * \brief Handles changes in CMake behavior and policies
  *
  * See the cmake wiki section on
- * <a href="http://www.cmake.org/Wiki/CMake/Policies">policies</a>
+ * <a href="https://cmake.org/Wiki/CMake/Policies">policies</a>
  * for an overview of this class's purpose
  */
 class cmPolicies
