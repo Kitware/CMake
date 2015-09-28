@@ -9,6 +9,7 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
+#include "windows.h"
 #include "cmVisualStudio10TargetGenerator.h"
 #include "cmGlobalVisualStudio10Generator.h"
 #include "cmGeneratorTarget.h"
@@ -871,6 +872,9 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile const* source,
         fout << "# generated from CMake\n";
         fout.flush();
         fout.close();
+        // Force given file to have a very old timestamp, thus
+        // preventing dependent rebuilds.
+        this->ForceOld(sourcePath);
         }
       else
         {
@@ -3457,4 +3461,27 @@ cmVisualStudio10TargetGenerator
   this->ConvertToWindowsSlash(keyFile);
   this->WriteString("<None Include=\"", 2);
   (*this->BuildFileStream) << cmVS10EscapeXML(keyFile) << "\" />\n";
+}
+
+bool cmVisualStudio10TargetGenerator::ForceOld(const std::string& source) const
+{
+  HANDLE h = CreateFileW(
+    cmSystemTools::ConvertToWindowsExtendedPath(source).c_str(),
+    FILE_WRITE_ATTRIBUTES,
+    FILE_SHARE_WRITE, 0, OPEN_EXISTING,
+    FILE_FLAG_BACKUP_SEMANTICS, 0);
+  if (!h)
+    {
+    return false;
+    }
+
+  FILETIME const ftime_20010101 = { 3365781504, 29389701 };
+  if (!SetFileTime(h, &ftime_20010101, &ftime_20010101, &ftime_20010101))
+    {
+    CloseHandle(h);
+    return false;
+    }
+
+  CloseHandle(h);
+  return true;
 }
