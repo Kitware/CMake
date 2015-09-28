@@ -1,5 +1,11 @@
 include(RunCMake)
 
+if(RunCMake_GENERATOR STREQUAL "Borland Makefiles")
+  set(fs_delay 3)
+else()
+  set(fs_delay 1.125)
+endif()
+
 function(run_BuildDepends CASE)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${CASE}-build)
@@ -17,7 +23,7 @@ function(run_BuildDepends CASE)
   if(run_BuildDepends_skip_step_2)
     return()
   endif()
-  execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 1.125) # handle 1s resolution
+  execute_process(COMMAND ${CMAKE_COMMAND} -E sleep ${fs_delay}) # handle 1s resolution
   include(${RunCMake_SOURCE_DIR}/${CASE}.step2.cmake OPTIONAL)
   set(check_step 2)
   run_cmake_command(${CASE}-build2 ${CMAKE_COMMAND} --build . --config Debug)
