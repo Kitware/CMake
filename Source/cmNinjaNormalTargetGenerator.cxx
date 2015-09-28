@@ -633,7 +633,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       std::string cmakeCommand =
       this->GetLocalGenerator()->ConvertToOutputFormat(
         cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
-      std::string dllname = targetOutput;
       std::string name_of_def_file
         = target.GetSupportDirectory();
       name_of_def_file += "/" + target.GetName();

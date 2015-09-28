@@ -54,7 +54,6 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
   this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
   this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
 
-  this->Configured = false;
   this->SuppressWatches = false;
 
   // Setup the default include file regular expression (match everything).
@@ -1658,7 +1657,6 @@ void cmMakefile::Configure()
   cmParseFileScope pfs(this);
   if (!listFile.ParseFile(currentStart.c_str(), this->IsRootMakefile(), this))
     {
-    this->SetConfigured();
     return;
     }
   }
@@ -1679,7 +1677,6 @@ void cmMakefile::Configure()
     }
 
   this->AddCMakeDependFilesFromUser();
-  this->SetConfigured();
 }
 
 void cmMakefile::ConfigureSubDirectory(cmMakefile *mf)
@@ -1723,7 +1720,6 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile *mf)
         // NEW behavior prints the error.
         this->IssueMessage(cmake::FATAL_ERROR, e.str());
       }
-    mf->SetConfigured();
     return;
     }
   // finally configure the subdir

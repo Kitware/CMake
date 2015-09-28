@@ -750,9 +750,6 @@ public:
   cmStringRange GetCompileDefinitionsEntries() const;
   cmBacktraceRange GetCompileDefinitionsBacktraces() const;
 
-  bool IsConfigured() const { return this->Configured; }
-  void SetConfigured(){ this->Configured = true; }
-
   void AddQtUiFileWithOptions(cmSourceFile *sf);
   std::vector<cmSourceFile*> GetQtUiFilesWithOptions() const;
 
@@ -988,7 +985,6 @@ private:
   bool WarnUnused;
   bool CheckSystemVars;
   bool CheckCMP0000;
-  bool Configured;
   bool IsSourceFileTryCompile;
   mutable bool SuppressWatches;
 };

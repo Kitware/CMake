@@ -44,12 +44,6 @@ public:
    */
   virtual std::string GetName() const { return "subdirs";}
 
-  /** This command is kept for compatibility with older CMake versions. */
-  virtual bool IsDiscouraged() const
-    {
-    return true;
-    }
-
   cmTypeMacro(cmSubdirCommand, cmCommand);
 };
 

@@ -22,7 +22,6 @@ public:
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
   virtual std::string GetName() const { return "variable_requires";}
-  virtual bool IsDiscouraged() const { return true; }
 };
 
 

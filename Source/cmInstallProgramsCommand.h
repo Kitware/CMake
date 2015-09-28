@@ -53,12 +53,6 @@ public:
 
   virtual bool HasFinalPass() const { return true; }
 
-  /** This command is kept for compatibility with older CMake versions. */
-  virtual bool IsDiscouraged() const
-    {
-    return true;
-    }
-
   cmTypeMacro(cmInstallProgramsCommand, cmCommand);
 
 protected:
