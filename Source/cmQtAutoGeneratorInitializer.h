@@ -14,6 +14,8 @@
 #ifndef cmQtAutoGeneratorInitializer_h
 #define cmQtAutoGeneratorInitializer_h
 
+#include "cmStandardIncludes.h"
+
 #include <string>
 #include <vector>
 #include <map>
