@@ -771,14 +771,14 @@ cmNinjaTargetGenerator::MacOSXContentGeneratorType::operator()(
   // Get the input file location.
   std::string input = source.GetFullPath();
   input =
-    this->Generator->GetLocalGenerator()->ConvertToNinjaPath(input);
+    this->Generator->GetGlobalGenerator()->ConvertToNinjaPath(input);
 
   // Get the output file location.
   std::string output = macdir;
   output += "/";
   output += cmSystemTools::GetFilenameName(input);
   output =
-    this->Generator->GetLocalGenerator()->ConvertToNinjaPath(output);
+    this->Generator->GetGlobalGenerator()->ConvertToNinjaPath(output);
 
   // Write a build statement to copy the content into the bundle.
   this->Generator->GetGlobalGenerator()->WriteMacOSXContentBuild(input,

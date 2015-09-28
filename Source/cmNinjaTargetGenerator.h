@@ -17,11 +17,11 @@
 
 #include "cmStandardIncludes.h"
 #include "cmNinjaTypes.h"
+#include "cmGlobalNinjaGenerator.h"
 #include "cmLocalNinjaGenerator.h"
 #include "cmOSXBundleGenerator.h"
 
 class cmTarget;
-class cmGlobalNinjaGenerator;
 class cmGeneratedFileStream;
 class cmGeneratorTarget;
 class cmMakefile;
@@ -87,10 +87,10 @@ protected:
                              const std::string& language);
 
   std::string ConvertToNinjaPath(const std::string& path) const {
-    return this->GetLocalGenerator()->ConvertToNinjaPath(path);
+    return this->GetGlobalGenerator()->ConvertToNinjaPath(path);
   }
-  cmLocalNinjaGenerator::map_to_ninja_path MapToNinjaPath() const {
-    return this->GetLocalGenerator()->MapToNinjaPath();
+  cmGlobalNinjaGenerator::MapToNinjaPathImpl MapToNinjaPath() const {
+    return this->GetGlobalGenerator()->MapToNinjaPath();
   }
 
   /// @return the list of link dependency for the given target @a target.
