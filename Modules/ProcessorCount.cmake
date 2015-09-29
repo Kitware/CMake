@@ -171,17 +171,30 @@ function(ProcessorCount var)
   endif()
 
   if(NOT count)
-    # Sun (systems where uname -X emits "NumCPU" in its output):
-    find_program(ProcessorCount_cmd_uname uname)
-    mark_as_advanced(ProcessorCount_cmd_uname)
-    if(ProcessorCount_cmd_uname)
-      execute_process(COMMAND ${ProcessorCount_cmd_uname} -X
+    # Sun (systems where psrinfo tool is available)
+    find_program(ProcessorCount_cmd_psrinfo psrinfo PATHS /usr/sbin /sbin)
+    mark_as_advanced(ProcessorCount_cmd_psrinfo)
+    if (ProcessorCount_cmd_psrinfo)
+      execute_process(COMMAND ${ProcessorCount_cmd_psrinfo} -p -v
         ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE
-        OUTPUT_VARIABLE uname_X_output)
-      string(REGEX MATCHALL "NumCPU = ([0-9]+)" procs "${uname_X_output}")
+        OUTPUT_VARIABLE psrinfo_output)
+      string(REGEX MATCH "([0-9]+) virtual processor" procs "${psrinfo_output}")
       set(count "${CMAKE_MATCH_1}")
-      #message("ProcessorCount: trying uname -X '${ProcessorCount_cmd_uname}'")
+      #message("ProcessorCount: trying psrinfo -p -v '${ProcessorCount_cmd_prvinfo}'")
+    else()
+      # Sun (systems where uname -X emits "NumCPU" in its output):
+      find_program(ProcessorCount_cmd_uname uname)
+      mark_as_advanced(ProcessorCount_cmd_uname)
+      if(ProcessorCount_cmd_uname)
+        execute_process(COMMAND ${ProcessorCount_cmd_uname} -X
+          ERROR_QUIET
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+          OUTPUT_VARIABLE uname_X_output)
+        string(REGEX MATCHALL "NumCPU = ([0-9]+)" procs "${uname_X_output}")
+        set(count "${CMAKE_MATCH_1}")
+        #message("ProcessorCount: trying uname -X '${ProcessorCount_cmd_uname}'")
+      endif()
     endif()
   endif()
 
