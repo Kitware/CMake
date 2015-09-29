@@ -28,6 +28,7 @@
 #include <testSystemTools.h>
 
 #include <iostream>
+#include <sstream>
 #include <string.h> /* strcmp */
 #if defined(_WIN32) && !defined(__CYGWIN__)
 # include <io.h> /* _umask (MSVC) / umask (Borland) */
@@ -790,6 +791,66 @@ static bool CheckCollapsePath()
   return res;
 }
 
+static std::string StringVectorToString(const std::vector<std::string>& vec)
+{
+  std::stringstream ss;
+  ss << "vector(";
+  for (std::vector<std::string>::const_iterator i = vec.begin();
+       i != vec.end(); ++i)
+    {
+    if (i != vec.begin())
+      {
+      ss << ", ";
+      }
+    ss << *i;
+    }
+  ss << ")";
+  return ss.str();
+}
+
+static bool CheckGetPath()
+{
+  const char* envName = "S";
+#ifdef _WIN32
+  const char* envValue = "C:\\Somewhere\\something;D:\\Temp";
+#else
+  const char* envValue = "/Somewhere/something:/tmp";
+#endif
+  const char* registryPath = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MyApp; MyKey]";
+
+  std::vector<std::string> originalPathes;
+  originalPathes.push_back(registryPath);
+
+  std::vector<std::string> expectedPathes;
+  expectedPathes.push_back(registryPath);
+#ifdef _WIN32
+  expectedPathes.push_back("C:/Somewhere/something");
+  expectedPathes.push_back("D:/Temp");
+#else
+  expectedPathes.push_back("/Somewhere/something");
+  expectedPathes.push_back("/tmp");
+#endif
+
+  bool res = true;
+  res &= CheckPutEnv(std::string(envName) + "=" + envValue, envName, envValue);
+
+  std::vector<std::string> pathes = originalPathes;
+  kwsys::SystemTools::GetPath(pathes, envName);
+
+  if (pathes != expectedPathes)
+    {
+    std::cerr <<
+      "GetPath(" << StringVectorToString(originalPathes) <<
+      ", " << envName << ")  yielded " << StringVectorToString(pathes) <<
+      " instead of " << StringVectorToString(expectedPathes) <<
+      std::endl;
+    res = false;
+    }
+
+  res &= CheckUnPutEnv(envName, envName);
+  return res;
+}
+
 //----------------------------------------------------------------------------
 int testSystemTools(int, char*[])
 {
@@ -824,6 +885,8 @@ int testSystemTools(int, char*[])
   res &= CheckRelativePaths();
 
   res &= CheckCollapsePath();
+
+  res &= CheckGetPath();
 
   return res ? 0 : 1;
 }
