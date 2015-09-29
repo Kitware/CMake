@@ -1542,7 +1542,9 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
     this->Makefile->GetSafeDefinition("CMAKE_LIBRARY_PATH_TERMINATOR");
 
   // Flags to link an executable to shared libraries.
-  if( tgt.GetType() == cmTarget::EXECUTABLE )
+  if (tgt.GetType() == cmTarget::EXECUTABLE &&
+      this->StateSnapshot.GetState()->
+        GetGlobalPropertyAsBool("TARGET_SUPPORTS_SHARED_LIBS"))
     {
     bool add_shlib_flags = false;
     switch(tgt.Target->GetPolicyStatusCMP0065())
