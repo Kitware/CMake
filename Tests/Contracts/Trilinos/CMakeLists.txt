@@ -27,7 +27,7 @@ endif()
 message(STATUS "HOME='${HOME}'")
 
 if(NOT DEFINED url)
-  set(url "http://www.cmake.org/files/contracts/trilinos-11.4.1.tar.gz")
+  set(url "https://cmake.org/files/contracts/trilinos-11.4.1.tar.gz")
 endif()
 message(STATUS "url='${url}'")
 

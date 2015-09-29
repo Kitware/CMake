@@ -115,7 +115,7 @@
 #
 #   set(CPACK_NSIS_MENU_LINKS
 #       "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cmake.html"
-#       "CMake Help" "http://www.cmake.org" "CMake Web Site")
+#       "CMake Help" "https://cmake.org" "CMake Web Site")
 #
 
 #=============================================================================

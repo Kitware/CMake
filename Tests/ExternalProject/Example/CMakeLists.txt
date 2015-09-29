@@ -5,7 +5,7 @@ include(ExternalProject)
 
 ExternalProject_Add(
   cmake281
-  URL http://www.cmake.org/files/v2.8/cmake-2.8.1.tar.gz
+  URL https://cmake.org/files/v2.8/cmake-2.8.1.tar.gz
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
   BUILD_COMMAND ""
 )

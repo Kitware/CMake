@@ -8,8 +8,8 @@ CMake is a cross-platform, open-source build system generator.
 For full documentation visit the `CMake Home Page`_ and the
 `CMake Documentation Page`_.
 
-.. _`CMake Home Page`: http://www.cmake.org
-.. _`CMake Documentation Page`: http://www.cmake.org/cmake/help/documentation.html
+.. _`CMake Home Page`: https://cmake.org
+.. _`CMake Documentation Page`: https://cmake.org/cmake/help/documentation.html
 
 CMake is maintained and supported by `Kitware`_ and developed in
 collaboration with a productive community of contributors.
@@ -37,7 +37,7 @@ it should not be a major problem to port CMake to this platform.
 Subscribe and post to the `CMake Users List`_ to ask if others have
 had experience with the platform.
 
-.. _`CMake Users List`: http://www.cmake.org/mailman/listinfo/cmake
+.. _`CMake Users List`: https://cmake.org/mailman/listinfo/cmake
 
 Building CMake from Scratch
 ---------------------------
@@ -63,7 +63,7 @@ You need to download and install a binary release of CMake in order to build
 CMake.  You can get these releases from the `CMake Download Page`_ .  Then
 proceed with the instructions below.
 
-.. _`CMake Download Page`: http://www.cmake.org/cmake/resources/software.html
+.. _`CMake Download Page`: https://cmake.org/cmake/resources/software.html
 
 Building CMake with CMake
 -------------------------
@@ -73,7 +73,7 @@ run the installed CMake on the sources of this CMake with your preferred
 options and generators. Then build it and install it.
 For instructions how to do this, see documentation on `Running CMake`_.
 
-.. _`Running CMake`: http://www.cmake.org/cmake/help/runningcmake.html
+.. _`Running CMake`: https://cmake.org/cmake/help/runningcmake.html
 
 Reporting Bugs
 ==============
@@ -89,7 +89,7 @@ If you have found a bug:
 3. Finally, if the issue is not resolved by the above steps, open
    an entry in the `CMake Issue Tracker`_.
 
-.. _`CMake Issue Tracker`: http://www.cmake.org/Bug
+.. _`CMake Issue Tracker`: https://cmake.org/Bug
 
 Contributing
 ============

@@ -1,6 +1,6 @@
 # This file is processed when the IAR compiler is used for a C or C++ file
 # Documentation can be downloaded here: http://www.iar.com/website1/1.0.1.0/675/1/
-# The initial feature request is here: http://www.cmake.org/Bug/view.php?id=10176
+# The initial feature request is here: https://cmake.org/Bug/view.php?id=10176
 # It also contains additional links and information.
 
 if(_IAR_CMAKE_LOADED)
@@ -39,7 +39,7 @@ endif()
 
 if(NOT IAR_TARGET_ARCHITECTURE)
   message(FATAL_ERROR "The IAR compiler for this architecture is not yet supported "
-          " by CMake. Please go to http://www.cmake.org/Bug and enter a feature request there.")
+          " by CMake. Please go to https://cmake.org/Bug and enter a feature request there.")
 endif()
 
 set(CMAKE_LINKER "${CMAKE_IAR_LINKER}" CACHE FILEPATH "The IAR linker" FORCE)
