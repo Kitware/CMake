@@ -28,6 +28,7 @@ public:
 private:
   void ProcessHandshake(const std::string& protocolVersion);
   void ProcessVersion();
+  void ProcessBuildsystem();
 
 private:
   cmMetadataServer* Server;

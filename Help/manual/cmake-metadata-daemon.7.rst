@@ -128,3 +128,113 @@ Response::
     "version":"3.5.0"
   }
   ]== CMake MetaMagic ==]
+
+
+buildsystem
+-----------
+
+Request::
+
+  [== CMake MetaMagic ==[
+  {
+    "type":"buildsystem"
+  }
+  ]== CMake MetaMagic ==]
+
+Response:
+
+The response is a JSON object with a property ``buildsystem``.  The
+``buildsystem`` property is an object with properties ``config``,
+``globalTargets`` and ``targets``.  The ``targets`` property is a
+JSON array of objects.  Each object corresponds to a target in the
+cmake buildsystem.  Each target object has
+
+* A ``backtrace`` property which stops at the first CMakeLists file
+  encountered.
+* A ``name`` property corresponding to the ``<name>`` given to the
+  :command:`add_library`, :command:`add_executable` or
+  :command:`add_custom_target` command.
+* A ``project`` property corresponding to the name specified by
+  the most-recent :command:`project` command.
+* A ``type`` property corresponding to the :prop_tgt:`TYPE` property
+  of the target.
+
+::
+
+  [== CMake MetaMagic ==[
+  {
+    "buildsystem":{
+      "configs":[
+
+      ],
+      "globalTargets":[
+        "install/strip",
+        "edit_cache",
+        "rebuild_cache",
+        "install",
+        "list_install_components",
+        "test",
+        "install/local"
+      ],
+      "targets":[
+        {
+          "backtrace":[
+           {
+              "line":15,
+              "path":"CMakeLists.txt"
+            },
+            {
+              "line":214,
+              "path":"/usr/share/ECM/kde-modules/KDECMakeSettings.cmake"
+            },
+            {
+              "line":54,
+              "path":"/usr/share/ECM/modules/ECMUninstallTarget.cmake"
+            }
+          ],
+          "name":"uninstall",
+          "projectName":"KItemModels",
+          "type":"UTILITY"
+        },
+        {
+          "backtrace":[
+            {
+              "line":12,
+              "path":"src/CMakeLists.txt"
+            }
+          ],
+          "name":"KF5ItemModels",
+          "projectName":"KItemModels",
+          "type":"SHARED_LIBRARY"
+        },
+        {
+          "backtrace":[
+
+          ],
+          "name":"KF5ItemModels_automoc",
+          "projectName":"KItemModels",
+          "type":"UTILITY"
+        },
+        {
+          "backtrace":[
+            {
+              "line":17,
+              "path":"autotests/CMakeLists.txt"
+            },
+            {
+              "line":125,
+              "path":"/usr/share/ECM/modules/ECMAddTests.cmake"
+            },
+            {
+              "line":97,
+              "path":"/usr/share/ECM/modules/ECMAddTests.cmake"
+            }
+          ],
+          "name":"kdescendantsproxymodel_smoketest",
+          "projectName":"KItemModels",
+            "type":"EXECUTABLE"
+        }
+      ]
+    }
+  }
+  ]== CMake MetaMagic ==]
