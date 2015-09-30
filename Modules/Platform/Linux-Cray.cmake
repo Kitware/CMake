@@ -19,4 +19,7 @@ endif()
 set(__LINUX_COMPILER_CRAY 1)
 
 macro(__linux_compiler_cray lang)
+  if(CMAKE_${lang}_COMPILER_LINKS_STATICALLY)
+    set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS FALSE)
+  endif()
 endmacro()
