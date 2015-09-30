@@ -30,11 +30,15 @@ public:
 
   virtual const char* GetToolsVersion() { return "14.0"; }
 protected:
+  virtual bool InitializeWindows(cmMakefile* mf);
   virtual const char* GetIDEVersion() { return "14.0"; }
+  virtual bool SelectWindows10SDK(cmMakefile* mf);
 
   // Used to verify that the Desktop toolset for the current generator is
   // installed on the machine.
   virtual bool IsWindowsDesktopToolsetInstalled() const;
+
+  std::string GetWindows10SDKVersion();
 
 private:
   class Factory;
