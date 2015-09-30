@@ -3475,7 +3475,7 @@ bool cmVisualStudio10TargetGenerator::ForceOld(const std::string& source) const
     return false;
     }
 
-  FILETIME const ftime_20010101 = { 3365781504, 29389701 };
+  FILETIME const ftime_20010101 = { 3365781504u, 29389701u };
   if (!SetFileTime(h, &ftime_20010101, &ftime_20010101, &ftime_20010101))
     {
     CloseHandle(h);
