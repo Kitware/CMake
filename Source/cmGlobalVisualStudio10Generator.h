@@ -74,6 +74,10 @@ public:
   /** Return the CMAKE_SYSTEM_VERSION.  */
   std::string const& GetSystemVersion() const { return this->SystemVersion; }
 
+  /** Return the Windows version targeted on VS 2015 and above.  */
+  std::string const& GetWindowsTargetPlatformVersion() const
+    { return this->WindowsTargetPlatformVersion; }
+
   /** Return true if building for WindowsCE */
   bool TargetsWindowsCE() const
     { return this->SystemIsWindowsCE; }
@@ -120,6 +124,7 @@ protected:
 
   std::string GeneratorToolset;
   std::string DefaultPlatformToolset;
+  std::string WindowsTargetPlatformVersion;
   std::string SystemName;
   std::string SystemVersion;
   std::string NsightTegraVersion;
