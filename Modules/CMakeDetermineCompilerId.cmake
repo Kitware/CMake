@@ -530,7 +530,7 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
       endif()
     endif()
 
-    if(DEFINED ENV{CRAYPE_VERSION})
+    if(UNIX)
       execute_process(COMMAND file "${file}" OUTPUT_VARIABLE out ERROR_VARIABLE out)
       if(out MATCHES "statically linked")
         set(CMAKE_${lang}_COMPILER_LINKS_STATICALLY 1 PARENT_SCOPE)
