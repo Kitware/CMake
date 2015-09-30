@@ -10,47 +10,12 @@ function(run_cpack_test TEST_NAME types build)
     file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
     # execute cmake
-    execute_process(
-      COMMAND "${CMAKE_COMMAND}" -DRunCMake_TEST=${TEST_NAME}
-          -DGENERATOR_TYPE=${TEST_TYPE} "${RunCMake_SOURCE_DIR}"
-      WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}"
-      RESULT_VARIABLE res
-      OUTPUT_FILE "${RunCMake_TEST_BINARY_DIR}/test_output.txt"
-      ERROR_FILE "${RunCMake_TEST_BINARY_DIR}/test_error.txt"
-      )
-
-    if(res)
-      run_cmake_command(
-        ${TEST_TYPE}/${TEST_NAME}
-        "${CMAKE_COMMAND}"
-          -DRunCMake_TEST_STEP=configure
-          -Dreturn_code=${res}
-          "-Dbin_dir=${RunCMake_TEST_BINARY_DIR}"
-          -P "${RunCMake_SOURCE_DIR}/PreTestError.cmake"
-        )
-      return()
-    endif()
+    set(RunCMake_TEST_OPTIONS "-DGENERATOR_TYPE=${TEST_TYPE}")
+    run_cmake(${TEST_NAME})
 
     # execute optional build step
     if(build)
-      execute_process(
-        COMMAND "${CMAKE_COMMAND}" --build "${RunCMake_TEST_BINARY_DIR}"
-        RESULT_VARIABLE res
-        OUTPUT_FILE "${RunCMake_TEST_BINARY_DIR}/test_output.txt"
-        ERROR_FILE "${RunCMake_TEST_BINARY_DIR}/test_error.txt"
-        )
-    endif()
-
-    if(res)
-      run_cmake_command(
-        ${TEST_TYPE}/${TEST_NAME}
-        "${CMAKE_COMMAND}"
-          -DRunCMake_TEST_STEP=build
-          -Dreturn_code=${res}
-          "-Dbin_dir=${RunCMake_TEST_BINARY_DIR}"
-          -P "${RunCMake_SOURCE_DIR}/PreTestError.cmake"
-        )
-      return()
+      run_cmake_command(${TEST_NAME}-Build "${CMAKE_COMMAND}" --build "${RunCMake_TEST_BINARY_DIR}")
     endif()
 
     # execute cpack
