@@ -2777,6 +2777,14 @@ bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
 }
 
 //----------------------------------------------------------------------------
+bool cmSystemTools::VersionCompareGreater(std::string const& lhs,
+                                          std::string const& rhs)
+{
+  return cmSystemTools::VersionCompare(
+    cmSystemTools::CompareOp::OP_GREATER, lhs.c_str(), rhs.c_str());
+}
+
+//----------------------------------------------------------------------------
 bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
                                 bool* removed)
 {
