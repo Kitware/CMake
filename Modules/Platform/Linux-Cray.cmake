@@ -1,6 +1,6 @@
 
 #=============================================================================
-# Copyright 2002-2009 Kitware, Inc.
+# Copyright 2015 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -13,18 +13,12 @@
 #  License text for the above reference.)
 
 # This module is shared by multiple languages; use include blocker.
-if(__LINUX_COMPILER_PGI)
+if(__LINUX_COMPILER_CRAY)
   return()
 endif()
-set(__LINUX_COMPILER_PGI 1)
+set(__LINUX_COMPILER_CRAY 1)
 
-macro(__linux_compiler_pgi lang)
-  # Shared library compile and link flags.
-  set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "-fPIC")
-  set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "")
-  set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "-fPIC")
-  set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-shared")
-
+macro(__linux_compiler_cray lang)
   if(CMAKE_${lang}_COMPILER_LINKS_STATICALLY)
     set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS FALSE)
   endif()
