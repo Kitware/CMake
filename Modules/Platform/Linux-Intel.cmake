@@ -51,8 +51,4 @@ macro(__linux_compiler_intel lang)
   if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 12.0)
     set(CMAKE_${lang}_COMPILE_OPTIONS_VISIBILITY "-fvisibility=")
   endif()
-
-  if(CMAKE_${lang}_COMPILER_LINKS_STATICALLY)
-    set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS FALSE)
-  endif()
 endmacro()

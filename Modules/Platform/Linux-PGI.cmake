@@ -24,8 +24,4 @@ macro(__linux_compiler_pgi lang)
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "")
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "-fPIC")
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-shared")
-
-  if(CMAKE_${lang}_COMPILER_LINKS_STATICALLY)
-    set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS FALSE)
-  endif()
 endmacro()
