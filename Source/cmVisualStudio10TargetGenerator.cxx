@@ -3006,6 +3006,8 @@ IsXamlSource(const std::string& sourceFile)
 
 void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings()
 {
+  cmGlobalVisualStudio10Generator* gg =
+    static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
   bool isAppContainer = false;
   bool const isWindowsPhone = this->GlobalGenerator->TargetsWindowsPhone();
   bool const isWindowsStore = this->GlobalGenerator->TargetsWindowsStore();
@@ -3061,6 +3063,14 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings()
     {
     this->WriteString("<WindowsSDKDesktopARMSupport>true"
                       "</WindowsSDKDesktopARMSupport>\n", 2);
+    }
+  std::string const& targetPlatformVersion =
+    gg->GetWindowsTargetPlatformVersion();
+  if (!targetPlatformVersion.empty())
+    {
+    this->WriteString("<WindowsTargetPlatformVersion>", 2);
+    (*this->BuildFileStream) << cmVS10EscapeXML(targetPlatformVersion) <<
+      "</WindowsTargetPlatformVersion>\n";
     }
 }
 

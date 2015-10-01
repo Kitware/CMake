@@ -111,6 +111,34 @@ cmGlobalVisualStudio14Generator::MatchesGeneratorName(
 }
 
 //----------------------------------------------------------------------------
+bool cmGlobalVisualStudio14Generator::InitializeWindows(cmMakefile* mf)
+{
+  if (cmHasLiteralPrefix(this->SystemVersion, "10.0"))
+    {
+    return this->SelectWindows10SDK(mf);
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf)
+{
+  // Find the default version of the Windows 10 SDK.
+  this->WindowsTargetPlatformVersion = this->GetWindows10SDKVersion();
+  if (this->WindowsTargetPlatformVersion.empty())
+    {
+    std::ostringstream  e;
+    e << "Could not find an appropriate version of the Windows 10 SDK"
+      << " installed on this machine";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return false;
+    }
+  mf->AddDefinition("CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION",
+                    this->WindowsTargetPlatformVersion.c_str());
+  return true;
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio14Generator::WriteSLNHeader(std::ostream& fout)
 {
   // Visual Studio 14 writes .sln format 12.00
@@ -136,4 +164,56 @@ cmGlobalVisualStudio14Generator::IsWindowsDesktopToolsetInstalled() const
   std::vector<std::string> vc14;
   return cmSystemTools::GetRegistrySubKeys(desktop10Key,
     vc14, cmSystemTools::KeyWOW64_32);
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  // This logic is taken from the vcvarsqueryregistry.bat file from VS2015
+  // Try HKLM and then HKCU.
+  std::string win10Root;
+  if (!cmSystemTools::ReadRegistryValue(
+        "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
+        "Windows Kits\\Installed Roots;KitsRoot10", win10Root,
+        cmSystemTools::KeyWOW64_32) &&
+      !cmSystemTools::ReadRegistryValue(
+        "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\"
+        "Windows Kits\\Installed Roots;KitsRoot10", win10Root,
+        cmSystemTools::KeyWOW64_32))
+    {
+    return std::string();
+    }
+
+  std::vector<std::string> sdks;
+  std::string path = win10Root + "Include/*";
+  // Grab the paths of the different SDKs that are installed
+  cmSystemTools::GlobDirs(path, sdks);
+  if (!sdks.empty())
+    {
+    // Only use the filename, which will be the SDK version.
+    for (std::vector<std::string>::iterator i = sdks.begin();
+         i != sdks.end(); ++i)
+      {
+      *i = cmSystemTools::GetFilenameName(*i);
+      }
+
+    // Sort the results to make sure we select the most recent one that
+    // has a version less or equal to our version of the operating system
+    std::sort(sdks.begin(), sdks.end(), cmSystemTools::VersionCompareGreater);
+
+    for (std::vector<std::string>::iterator i = sdks.begin();
+         i != sdks.end(); ++i)
+      {
+      // Find the SDK less or equal to our specified version
+      if (!cmSystemTools::VersionCompareGreater(*i, this->SystemVersion))
+        {
+        // This is the most recent SDK that we can run safely
+        return *i;
+        }
+      }
+    }
+#endif
+  // Return an empty string
+  return std::string();
 }
