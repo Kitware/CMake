@@ -16,6 +16,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmServer.h"
+#include "cmSourceFile.h"
 #include "cmVersionMacros.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -53,6 +54,14 @@ void cmServerProtocol::processRequest(const std::string& json)
     }
     if (value["type"] == "buildsystem") {
       this->ProcessBuildsystem();
+    }
+    if (value["type"] == "target_info") {
+      const char* language = 0;
+      if (value.isMember("language")) {
+        language = value["language"].asCString();
+      }
+      this->ProcessTargetInfo(value["target_name"].asString(),
+                              value["config"].asString(), language);
     }
   }
 }
@@ -206,4 +215,99 @@ void cmServerProtocol::ProcessBuildsystem()
     }
   }
   this->Server->WriteResponse(root);
+}
+
+void cmServerProtocol::ProcessTargetInfo(std::string tgtName,
+                                         std::string config,
+                                         const char* language)
+{
+  Json::Value obj = Json::objectValue;
+  Json::Value& root = obj["target_info"] = Json::objectValue;
+
+  auto tgt =
+    this->CMakeInstance->GetGlobalGenerator()->FindGeneratorTarget(tgtName);
+
+  if (!tgt) {
+    // Error
+    return;
+  }
+
+  root["target_name"] = tgt->GetName();
+
+  if (tgt->GetType() != cmState::GLOBAL_TARGET &&
+      tgt->GetType() != cmState::UTILITY &&
+      tgt->GetType() != cmState::OBJECT_LIBRARY) {
+    root["build_location"] = tgt->GetLocation(config);
+    if (tgt->HasImportLibrary()) {
+      root["build_implib"] = tgt->GetFullPath(config, true);
+    }
+  }
+
+  std::vector<const cmSourceFile*> files;
+
+  tgt->GetObjectSources(files, config);
+
+  Json::Value& object_sources = root["object_sources"] = Json::arrayValue;
+  Json::Value& generated_object_sources = root["generated_object_sources"] =
+    Json::arrayValue;
+  for (auto const& sf : files) {
+    std::string filePath = sf->GetFullPath();
+    if (sf->GetProperty("GENERATED")) {
+      generated_object_sources.append(filePath);
+    } else {
+      object_sources.append(filePath);
+    }
+  }
+
+  files.clear();
+
+  tgt->GetHeaderSources(files, config);
+
+  Json::Value& header_sources = root["header_sources"] = Json::arrayValue;
+  Json::Value& generated_header_sources = root["generated_header_sources"] =
+    Json::arrayValue;
+  for (auto const& sf : files) {
+    std::string filePath = sf->GetFullPath();
+    if (sf->GetProperty("GENERATED")) {
+      generated_header_sources.append(filePath);
+    } else {
+      header_sources.append(filePath);
+    }
+  }
+
+  Json::Value& target_defines = root["compile_definitions"] = Json::arrayValue;
+
+  std::string lang = language ? language : "C";
+
+  std::vector<std::string> cdefs;
+  tgt->GetCompileDefinitions(cdefs, config, lang);
+  for (auto const& cdef : cdefs) {
+    target_defines.append(cdef);
+  }
+
+  Json::Value& target_features = root["compile_features"] = Json::arrayValue;
+
+  std::vector<std::string> features;
+  tgt->GetCompileFeatures(cdefs, config);
+  for (auto const& feature : features) {
+    target_features.append(feature);
+  }
+
+  Json::Value& target_options = root["compile_options"] = Json::arrayValue;
+
+  std::vector<std::string> options;
+  tgt->GetCompileOptions(cdefs, config, lang);
+  for (auto const& option : options) {
+    target_options.append(option);
+  }
+
+  Json::Value& target_includes = root["include_directories"] =
+    Json::arrayValue;
+
+  std::vector<std::string> dirs;
+  tgt->GetLocalGenerator()->GetIncludeDirectories(dirs, tgt, lang, config);
+  for (auto const& dir : dirs) {
+    target_includes.append(dir);
+  }
+  this->Server->WriteResponse(obj);
 }

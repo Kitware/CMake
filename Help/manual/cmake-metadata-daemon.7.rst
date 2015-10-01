@@ -238,3 +238,125 @@ cmake buildsystem.  Each target object has
     }
   }
   ]== CMake MetaMagic ==]
+
+
+target_info
+^^^^^^^^^^^
+
+Request::
+
+  [== CMake MetaMagic ==[
+  {
+    "type":"target_info",
+    "target_name":"KF5ItemModels",
+    "config":""
+  }
+  ]== CMake MetaMagic ==]
+
+Response:
+
+The response is a JSON object with a property ``target_info``.  That
+property is a JSON object with properties:
+
+* ``build_location`` corresponding to the location disk the primary
+  binary is created, if applicable for the target type.
+* ``build_implib`` corresponding to the location disk the primary
+  binary is created, if applicable for the target type and platform.
+* ``compile_definitions`` corresponding to the definitions passed on
+  the command line to the compiler driver when building objects from
+  the sources of the target.  This is the computed result of the
+  :prop_tgt:`COMPILE_DEFINITIONS` target property and content
+  resulting from
+  :ref:`transitive usage requirements <Target Usage Requirements>`.
+  Note that individual source files may have populated
+  :prop_sf:`COMPILE_DEFINITIONS` source file property in addition to
+  the target defines.
+* ``include_directories`` corresponding to the include directories
+  passed on
+  the command line to the compiler driver when building objects from
+  the sources of the target.  This is the computed result of the
+  :prop_tgt:`INCLUDE_DIRECTORIES` target property and content
+  resulting from
+  :ref:`transitive usage requirements <Target Usage Requirements>`.
+* ``compile_options`` corresponding to the options passed on
+  the command line to the compiler driver when building objects from
+  the sources of the target.  This is the computed result of the
+  :prop_tgt:`COMPILE_OPTIONS` target property and content
+  resulting from
+  :ref:`transitive usage requirements <Target Usage Requirements>`.
+  Note that individual source files may have populated
+  :prop_sf:`COMPILE_FLAGS` source file property in addition to
+  the target defines.
+* ``compile_features`` corresponding to the computed result of the
+  :prop_tgt:`COMPILE_FEATURES` target property and content
+  resulting from
+  :ref:`transitive usage requirements <Target Usage Requirements>`.
+* ``object_sources`` corresponding to sources of the target which
+  are used to create object code.
+* ``header_sources`` corresponding to sources of the target which
+  are not used to compile object code, but which are determined to
+  be header files.
+* ``generated_object_sources`` corresponding to generated sources
+  of the target which are used to create object code.
+* ``generated_header_sources`` corresponding to generated sources
+  of the target which are determined to be header files.
+
+::
+
+  [== CMake MetaMagic ==[
+  {
+    "target_info":{
+      "build_location":"/path/to/kitemmodels/build/src/libKF5ItemModels.so",
+      "compile_definitions":[
+        "_GNU_SOURCE",
+        "_LARGEFILE64_SOURCE",
+        "QT_NO_CAST_TO_ASCII",
+        "QT_NO_CAST_FROM_ASCII",
+        "QT_NO_URL_CAST_FROM_STRING",
+        "QT_NO_CAST_FROM_BYTEARRAY",
+        "QT_NO_SIGNALS_SLOTS_KEYWORDS",
+        "QT_USE_FAST_OPERATOR_PLUS",
+        "QT_USE_QSTRINGBUILDER",
+        "QT_CORE_LIB",
+        "QT_NO_DEBUG"
+      ],
+      "compile_features":[
+
+      ],
+      "compile_options":[
+
+      ],
+      "generated_object_sources":[
+        "/path/to/kitemmodels/build/src/KF5ItemModels_automoc.cpp"
+      ],
+      "generated_header_sources":[
+        "/path/to/kitemmodels/build/src/kitemmodels_export.h"
+      ],
+      "include_directories":[
+        "/path/to/kitemmodels/build/src",
+        "/path/to/kitemmodels/src",
+        "/path/to/prefix/qtbase/include",
+        "/path/to/prefix/qtbase/include/QtCore",
+        "/path/to/prefix/qtbase/mkspecs/linux-g++"
+      ],
+      "object_sources":[
+        "/path/to/kitemmodels/src/kbreadcrumbselectionmodel.cpp",
+        "/path/to/kitemmodels/src/kcheckableproxymodel.cpp",
+        "/path/to/kitemmodels/src/kdescendantsproxymodel.cpp",
+        "/path/to/kitemmodels/src/klinkitemselectionmodel.cpp",
+        "/path/to/kitemmodels/src/kmodelindexproxymapper.cpp",
+        "/path/to/kitemmodels/src/krecursivefilterproxymodel.cpp",
+        "/path/to/kitemmodels/src/kselectionproxymodel.cpp"
+      ],
+      "header_sources":[
+         "/path/to/kitemmodels/src/kbreadcrumbselectionmodel.h",
+         "/path/to/kitemmodels/src/kcheckableproxymodel.h",
+         "/path/to/kitemmodels/src/kdescendantsproxymodel.h",
+         "/path/to/kitemmodels/src/klinkitemselectionmodel.h",
+         "/path/to/kitemmodels/src/kmodelindexproxymapper.h",
+         "/path/to/kitemmodels/src/krecursivefilterproxymodel.h",
+         "/path/to/kitemmodels/src/kselectionproxymodel.h"
+      ]
+    }
+  }
+  ]== CMake MetaMagic ==]
