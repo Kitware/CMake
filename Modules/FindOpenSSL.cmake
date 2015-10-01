@@ -37,6 +37,7 @@
 #
 # Set ``OPENSSL_ROOT_DIR`` to the root directory of an OpenSSL installation.
 # Set ``OPENSSL_USE_STATIC_LIBS`` to ``TRUE`` to look for static libraries.
+# Set ``OPENSSL_MSVC_SHARED_RT`` default ``TRUE`` set ``FALSE`` to choose the MT version of the lib.
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
@@ -52,6 +53,10 @@
 #=============================================================================
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
+
+if (NOT DEFINED OPENSSL_MSVC_SHARED_RT)
+  set (OPENSSL_MSVC_SHARED_RT 1)
+endif ()
 
 if (UNIX)
   find_package(PkgConfig QUIET)
@@ -113,7 +118,7 @@ if(WIN32 AND NOT CYGWIN)
     # /MD and /MDd are the standard values - if someone wants to use
     # others, the libnames have to change here too
     # use also ssl and ssleay32 in debug as fallback for openssl < 0.9.8b
-    # TODO: handle /MT and static lib
+    # switch OPENSSL_MSVC_SHARED_RT to get the libs build /MT (Multithreaded no-DLL)
     # In Visual C++ naming convention each of these four kinds of Windows libraries has it's standard suffix:
     #   * MD for dynamic-release
     #   * MDd for dynamic-debug
@@ -125,6 +130,12 @@ if(WIN32 AND NOT CYGWIN)
     # libeay32MD.lib is identical to ../libeay32.lib, and
     # ssleay32MD.lib is identical to ../ssleay32.lib
     # enable OPENSSL_USE_STATIC_LIBS to use the static libs located in lib/VC/static
+    
+    if (OPENSSL_MSVC_SHARED_RT)
+      set(OPENSSL_MSVC_RT_MODE "MD")
+    else ()
+      set(OPENSSL_MSVC_RT_MODE "MT")
+    endif ()
 
     if(OPENSSL_USE_STATIC_LIBS)
       set(_OPENSSL_PATH_SUFFIXES
@@ -142,7 +153,7 @@ if(WIN32 AND NOT CYGWIN)
 
     find_library(LIB_EAY_DEBUG
       NAMES
-        libeay32MDd
+        libeay32${OPENSSL_MSVC_RT_MODE}d
         libeay32d
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
@@ -151,7 +162,7 @@ if(WIN32 AND NOT CYGWIN)
 
     find_library(LIB_EAY_RELEASE
       NAMES
-        libeay32MD
+        libeay32${OPENSSL_MSVC_RT_MODE}
         libeay32
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
@@ -160,7 +171,7 @@ if(WIN32 AND NOT CYGWIN)
 
     find_library(SSL_EAY_DEBUG
       NAMES
-        ssleay32MDd
+        ssleay32${OPENSSL_MSVC_RT_MODE}d
         ssleay32d
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
@@ -169,7 +180,7 @@ if(WIN32 AND NOT CYGWIN)
 
     find_library(SSL_EAY_RELEASE
       NAMES
-        ssleay32MD
+        ssleay32${OPENSSL_MSVC_RT_MODE}
         ssleay32
         ssl
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
