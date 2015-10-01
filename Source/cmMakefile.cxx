@@ -3218,7 +3218,7 @@ void cmMakefile::AddDefaultDefinitions()
 //----------------------------------------------------------------------------
 std::string
 cmMakefile::GetConfigurations(std::vector<std::string>& configs,
-                              bool single) const
+                              bool singleConfig) const
 {
   if(this->GetGlobalGenerator()->IsMultiConfig())
     {
@@ -3232,7 +3232,7 @@ cmMakefile::GetConfigurations(std::vector<std::string>& configs,
   else
     {
     const std::string& buildType = this->GetSafeDefinition("CMAKE_BUILD_TYPE");
-    if(single && !buildType.empty())
+    if(singleConfig && !buildType.empty())
       {
       configs.push_back(buildType);
       }
