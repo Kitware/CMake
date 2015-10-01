@@ -1,3 +1,5 @@
+set(CMAKE_BUILD_WITH_INSTALL_RPATH 1)
+
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test_lib.hpp"
     "int test_lib();\n")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test_lib.cpp"
