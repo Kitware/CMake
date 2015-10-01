@@ -10,14 +10,12 @@ function(run_cpack_test TEST_NAME types build)
     file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
     # execute cmake
-    unset(RunCMake_TEST_COMMAND)
     set(RunCMake_TEST_OPTIONS "-DGENERATOR_TYPE=${TEST_TYPE}")
     run_cmake(${TEST_NAME})
 
     # execute optional build step
     if(build)
-      set(RunCMake_TEST_COMMAND "${CMAKE_COMMAND}" --build "${RunCMake_TEST_BINARY_DIR}")
-      run_cmake(${TEST_NAME})
+      run_cmake_command(${TEST_NAME}-Build "${CMAKE_COMMAND}" --build "${RunCMake_TEST_BINARY_DIR}")
     endif()
 
     # execute cpack
