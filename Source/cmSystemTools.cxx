@@ -2781,7 +2781,7 @@ bool cmSystemTools::VersionCompareGreater(std::string const& lhs,
                                           std::string const& rhs)
 {
   return cmSystemTools::VersionCompare(
-    cmSystemTools::CompareOp::OP_GREATER, lhs.c_str(), rhs.c_str());
+    cmSystemTools::OP_GREATER, lhs.c_str(), rhs.c_str());
 }
 
 //----------------------------------------------------------------------------
