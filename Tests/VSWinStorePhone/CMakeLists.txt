@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.0)
 project(VSWinStorePhone)
-
-if(MSVC_VERSION GREATER 1700)
+if(MSVC_VERSION GREATER 1899)
+  set(COMPILER_VERSION "14")
+elseif(MSVC_VERSION GREATER 1700)
   set(COMPILER_VERSION "12")
 elseif(MSVC_VERSION GREATER 1600)
   set(COMPILER_VERSION "11")
@@ -91,6 +92,7 @@ elseif (NOT "${PLATFORM}" STREQUAL "DESKTOP")
     set(ASSET_FILES ${ASSET_FILES}
     Direct3DApp1/Assets/Logo.png
     Direct3DApp1/Assets/SmallLogo.png
+    Direct3DApp1/Assets/SmallLogo44x44.png
     Direct3DApp1/Assets/SplashScreen.png
     Direct3DApp1/Assets/StoreLogo.png
     )
@@ -124,4 +126,15 @@ source_group("Resource Files" FILES ${RESOURCE_FILES})
 
 add_executable(${EXE_NAME} WIN32 ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
 set_property(TARGET ${EXE_NAME} PROPERTY VS_WINRT_COMPONENT TRUE)
+
+string(SUBSTRING "${CMAKE_SYSTEM_VERSION}" 0, 4, SHORT_VERSION)
+
+if("${SHORT_VERSION}" STREQUAL "10.0")
+  message(STATUS "Targeting Windows 10. Setting Extensions to version ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+  set_property(TARGET ${EXE_NAME} PROPERTY VS_DESKTOP_EXTENSIONS_VERSION "${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+  set_property(TARGET ${EXE_NAME} PROPERTY VS_MOBILE_EXTENSIONS_VERSION "${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+  set_property(TARGET ${EXE_NAME} PROPERTY VS_IOT_EXTENSIONS_VERSION "${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+endif()
+
+
 target_link_libraries(${EXE_NAME} d3d11)
