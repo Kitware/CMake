@@ -1,11 +1,13 @@
+set(CMAKE_BUILD_WITH_INSTALL_RPATH 1)
+
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test_lib.hpp"
-    "int test_lib();")
+    "int test_lib();\n")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test_lib.cpp"
-    "#include \"test_lib.hpp\"\nint test_lib() {return 0;}")
+    "#include \"test_lib.hpp\"\nint test_lib() {return 0;}\n")
 add_library(test_lib SHARED "${CMAKE_CURRENT_BINARY_DIR}/test_lib.cpp")
 
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/main.cpp"
-    "#include \"test_lib.hpp\"\nint main() {return test_lib();}")
+    "#include \"test_lib.hpp\"\nint main() {return test_lib();}\n")
 add_executable(test_prog "${CMAKE_CURRENT_BINARY_DIR}/main.cpp")
 target_link_libraries(test_prog test_lib)
 
