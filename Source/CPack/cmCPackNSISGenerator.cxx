@@ -158,6 +158,24 @@ int cmCPackNSISGenerator::PackageFiles()
                             installerIconCode.c_str());
     }
 
+  if (this->IsSet("CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP"))
+    {
+    std::string installerBitmapCode = "!define MUI_WELCOMEFINISHPAGE_BITMAP \"";
+    installerBitmapCode += this->GetOption("CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP");
+    installerBitmapCode += "\"\n";
+    this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_WELCOMEFINISH_CODE",
+                            installerBitmapCode.c_str());
+    }
+
+  if (this->IsSet("CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP"))
+    {
+    std::string installerBitmapCode = "!define MUI_UNWELCOMEFINISHPAGE_BITMAP \"";
+    installerBitmapCode += this->GetOption("CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP");
+    installerBitmapCode += "\"\n";
+    this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_UNWELCOMEFINISH_CODE",
+                            installerBitmapCode.c_str());
+    }
+
   if(this->IsSet("CPACK_NSIS_MUI_FINISHPAGE_RUN"))
     {
     std::string installerRunCode = "!define MUI_FINISHPAGE_RUN \"$INSTDIR\\";
