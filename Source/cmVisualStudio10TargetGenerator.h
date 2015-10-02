@@ -78,6 +78,13 @@ private:
   void WriteMissingFilesWP81();
   void WriteMissingFilesWS80();
   void WriteMissingFilesWS81();
+  void WriteMissingFilesWS10_0();
+  void WritePlatformExtensions();
+  void WriteSinglePlatformExtension(std::string const& extension,
+                                    std::string const& version);
+  void WriteSDKReferences();
+  void WriteSingleSDKReference(std::string const& extension,
+                               std::string const& version);
   void WriteCommonMissingFiles(const std::string& manifestFile);
   void WriteTargetSpecificReferences();
 

@@ -463,6 +463,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteString("<Import Project=\"" VS10_USER_PROPS "\""
                     " Condition=\"exists('" VS10_USER_PROPS "')\""
                     " Label=\"LocalAppDataPlatform\" />\n", 2);
+  this->WritePlatformExtensions();
   this->WriteString("</ImportGroup>\n", 1);
   this->WriteString("<PropertyGroup Label=\"UserMacros\" />\n", 1);
   this->WriteWinRTPackageCertificateKeyFile();
@@ -475,6 +476,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteXamlFilesGroup();
   this->WriteWinRTReferences();
   this->WriteProjectReferences();
+  this->WriteSDKReferences();
   this->WriteString(
     "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\""
     " />\n", 1);
@@ -1307,6 +1309,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
     {
     tool = "XML";
     }
+
   if(this->NsightTegra)
     {
     // Nsight Tegra needs specific file types to check up-to-dateness.
@@ -2590,7 +2593,8 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
 
     // A Windows Runtime component uses internal .NET metadata,
     // so does not have an import library.
-    if(this->Target->GetPropertyAsBool("VS_WINRT_COMPONENT"))
+    if(this->Target->GetPropertyAsBool("VS_WINRT_COMPONENT") &&
+       this->Target->GetType() != cmTarget::EXECUTABLE)
       {
       linkOptions.AddFlag("GenerateWindowsMetadata", "true");
       }
@@ -2896,6 +2900,101 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
   this->WriteString("</ItemGroup>\n", 1);
 }
 
+void cmVisualStudio10TargetGenerator::WritePlatformExtensions()
+{
+  // This only applies to Windows 10 apps
+  if (this->GlobalGenerator->TargetsWindowsStore() &&
+      cmHasLiteralPrefix(this->GlobalGenerator->GetSystemVersion(), "10.0"))
+    {
+    const char* desktopExtensionsVersion =
+      this->Target->GetProperty("VS_DESKTOP_EXTENSIONS_VERSION");
+    if (desktopExtensionsVersion)
+      {
+      this->WriteSinglePlatformExtension("WindowsDesktop",
+                                         desktopExtensionsVersion);
+      }
+    const char* mobileExtensionsVersion =
+      this->Target->GetProperty("VS_MOBILE_EXTENSIONS_VERSION");
+    if (mobileExtensionsVersion)
+      {
+      this->WriteSinglePlatformExtension("WindowsMobile",
+                                         mobileExtensionsVersion);
+      }
+    }
+}
+
+void cmVisualStudio10TargetGenerator::WriteSinglePlatformExtension(
+  std::string const& extension,
+  std::string const& version
+  )
+{
+  this->WriteString("<Import Project=", 2);
+  (*this->BuildFileStream)
+    << "\"$([Microsoft.Build.Utilities.ToolLocationHelper]"
+    << "::GetPlatformExtensionSDKLocation(`"
+    << extension <<", Version=" << version
+    << "`, $(TargetPlatformIdentifier), $(TargetPlatformVersion), null, "
+    << "$(ExtensionSDKDirectoryRoot), null))"
+    << "\\DesignTime\\CommonConfiguration\\Neutral\\"
+    << extension << ".props\" "
+    << "Condition=\"exists('$("
+    << "[Microsoft.Build.Utilities.ToolLocationHelper]"
+    << "::GetPlatformExtensionSDKLocation(`"
+    << extension << ", Version=" << version
+    << "`, $(TargetPlatformIdentifier), $(TargetPlatformVersion), null, "
+    << "$(ExtensionSDKDirectoryRoot), null))"
+    << "\\DesignTime\\CommonConfiguration\\Neutral\\"
+    << extension << ".props')\" />\n";
+}
+
+void cmVisualStudio10TargetGenerator::WriteSDKReferences()
+{
+  // This only applies to Windows 10 apps
+  if (this->GlobalGenerator->TargetsWindowsStore() &&
+      cmHasLiteralPrefix(this->GlobalGenerator->GetSystemVersion(), "10.0"))
+    {
+    const char* desktopExtensionsVersion =
+      this->Target->GetProperty("VS_DESKTOP_EXTENSIONS_VERSION");
+    const char* mobileExtensionsVersion =
+      this->Target->GetProperty("VS_MOBILE_EXTENSIONS_VERSION");
+    const char* iotExtensionsVersion =
+      this->Target->GetProperty("VS_IOT_EXTENSIONS_VERSION");
+
+    if(desktopExtensionsVersion || mobileExtensionsVersion ||
+       iotExtensionsVersion)
+      {
+      this->WriteString("<ItemGroup>\n", 1);
+      if(desktopExtensionsVersion)
+        {
+        this->WriteSingleSDKReference("WindowsDesktop",
+                                      desktopExtensionsVersion);
+        }
+      if(mobileExtensionsVersion)
+        {
+        this->WriteSingleSDKReference("WindowsMobile",
+                                      mobileExtensionsVersion);
+        }
+      if(iotExtensionsVersion)
+        {
+        this->WriteSingleSDKReference("WindowsIoT",
+                                      iotExtensionsVersion);
+        }
+      this->WriteString("</ItemGroup>\n", 1);
+      }
+    }
+}
+
+void cmVisualStudio10TargetGenerator::WriteSingleSDKReference(
+  std::string const& extension,
+  std::string const& version
+  )
+{
+  this->WriteString("<SDKReference Include=\"", 2);
+  (*this->BuildFileStream) << extension
+    << ", Version=" << version << "\" />\n";
+}
+
+
 void cmVisualStudio10TargetGenerator::WriteWinRTPackageCertificateKeyFile()
 {
   if((this->GlobalGenerator->TargetsWindowsStore() ||
@@ -3018,13 +3117,27 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings()
     (*this->BuildFileStream) << (isWindowsPhone ?
                                  "Windows Phone" : "Windows Store")
                              << "</ApplicationType>\n";
-    this->WriteString("<ApplicationTypeRevision>", 2);
-    (*this->BuildFileStream) << cmVS10EscapeXML(v)
-                             << "</ApplicationTypeRevision>\n";
     this->WriteString("<DefaultLanguage>en-US"
                       "</DefaultLanguage>\n", 2);
-    if(v == "8.1")
+    if (cmHasLiteralPrefix(v, "10.0"))
       {
+      this->WriteString("<ApplicationTypeRevision>", 2);
+      (*this->BuildFileStream) << cmVS10EscapeXML("10.0")
+                               << "</ApplicationTypeRevision>\n";
+      // Visual Studio 14.0 is necessary for building 10.0 apps
+      this->WriteString("<MinimumVisualStudioVersion>14.0"
+        "</MinimumVisualStudioVersion>\n", 2);
+
+      if(this->Target->GetType() < cmTarget::UTILITY)
+        {
+        isAppContainer = true;
+        }
+      }
+    else if(v == "8.1")
+      {
+      this->WriteString("<ApplicationTypeRevision>", 2);
+      (*this->BuildFileStream) << cmVS10EscapeXML(v)
+                               << "</ApplicationTypeRevision>\n";
       // Visual Studio 12.0 is necessary for building 8.1 apps
       this->WriteString("<MinimumVisualStudioVersion>12.0"
                         "</MinimumVisualStudioVersion>\n", 2);
@@ -3036,6 +3149,9 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings()
       }
     else if (v == "8.0")
       {
+      this->WriteString("<ApplicationTypeRevision>", 2);
+      (*this->BuildFileStream) << cmVS10EscapeXML(v)
+                               << "</ApplicationTypeRevision>\n";
       // Visual Studio 11.0 is necessary for building 8.0 apps
       this->WriteString("<MinimumVisualStudioVersion>11.0"
                         "</MinimumVisualStudioVersion>\n", 2);
@@ -3071,6 +3187,30 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings()
     this->WriteString("<WindowsTargetPlatformVersion>", 2);
     (*this->BuildFileStream) << cmVS10EscapeXML(targetPlatformVersion) <<
       "</WindowsTargetPlatformVersion>\n";
+    }
+  const char* targetPlatformMinVersion =
+      this->Target->GetProperty("VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION");
+  if(targetPlatformMinVersion)
+    {
+    this->WriteString("<WindowsTargetPlatformMinVersion>", 2);
+    (*this->BuildFileStream) << cmVS10EscapeXML(targetPlatformMinVersion) <<
+      "</WindowsTargetPlatformMinVersion>\n";
+    }
+  else if (isWindowsStore && cmHasLiteralPrefix(v, "10.0"))
+    {
+    // If the min version is not set, then use the TargetPlatformVersion
+    if (!targetPlatformVersion.empty())
+      {
+      this->WriteString("<WindowsTargetPlatformMinVersion>", 2);
+      (*this->BuildFileStream) << cmVS10EscapeXML(targetPlatformVersion) <<
+        "</WindowsTargetPlatformMinVersion>\n";
+      }
+    }
+
+  // Added IoT Startup Task support
+  if(this->Target->GetPropertyAsBool("VS_IOT_STARTUP_TASK"))
+    {
+    this->WriteString("<ContainsStartupTask>true</ContainsStartupTask>\n", 2);
     }
 }
 
@@ -3124,7 +3264,7 @@ void cmVisualStudio10TargetGenerator::VerifyNecessaryFiles()
             {
             this->IsMissingFiles = true;
             }
-          else if (v == "8.1")
+          else if (v == "8.1" || cmHasLiteralPrefix(v, "10.0"))
             {
             this->IsMissingFiles = true;
             }
@@ -3157,6 +3297,10 @@ void cmVisualStudio10TargetGenerator::WriteMissingFiles()
    else if (v == "8.1")
      {
      this->WriteMissingFilesWS81();
+     }
+   else if (cmHasLiteralPrefix(v, "10.0"))
+     {
+     this->WriteMissingFilesWS10_0();
      }
    }
 }
@@ -3419,6 +3563,64 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS81()
   this->WriteCommonMissingFiles(manifestFile);
 }
 
+void cmVisualStudio10TargetGenerator::WriteMissingFilesWS10_0()
+{
+  std::string manifestFile =
+    this->DefaultArtifactDir + "/package.appxManifest";
+  std::string artifactDir =
+    this->LocalGenerator->GetTargetDirectory(*this->Target);
+  this->ConvertToWindowsSlash(artifactDir);
+  std::string artifactDirXML = cmVS10EscapeXML(artifactDir);
+  std::string targetNameXML = cmVS10EscapeXML(this->Target->GetName());
+
+  cmGeneratedFileStream fout(manifestFile.c_str());
+  fout.SetCopyIfDifferent(true);
+
+  fout <<
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+    "<Package\n\t"
+    "xmlns=\"http://schemas.microsoft.com/appx/manifest/foundation/windows10\""
+    "\txmlns:mp=\"http://schemas.microsoft.com/appx/2014/phone/manifest\"\n"
+    "\txmlns:uap=\"http://schemas.microsoft.com/appx/manifest/uap/windows10\""
+    "\n\tIgnorableNamespaces=\"uap mp\">\n\n"
+    "\t<Identity Name=\"" << this->GUID << "\" Publisher=\"CN=CMake\""
+    " Version=\"1.0.0.0\" />\n"
+    "\t<mp:PhoneIdentity PhoneProductId=\"" << this->GUID <<
+    "\" PhonePublisherId=\"00000000-0000-0000-0000-000000000000\"/>\n"
+    "\t<Properties>\n"
+    "\t\t<DisplayName>" << targetNameXML << "</DisplayName>\n"
+    "\t\t<PublisherDisplayName>CMake</PublisherDisplayName>\n"
+    "\t\t<Logo>" << artifactDirXML << "\\StoreLogo.png</Logo>\n"
+    "\t</Properties>\n"
+    "\t<Dependencies>\n"
+    "\t\t<TargetDeviceFamily Name=\"Windows.Universal\" "
+    "MinVersion=\"10.0.0.0\" MaxVersionTested=\"10.0.0.0\" />\n"
+    "\t</Dependencies>\n"
+
+    "\t<Resources>\n"
+    "\t\t<Resource Language=\"x-generate\" />\n"
+    "\t</Resources>\n"
+    "\t<Applications>\n"
+    "\t\t<Application Id=\"App\""
+    " Executable=\"" << targetNameXML << ".exe\""
+    " EntryPoint=\"" << targetNameXML << ".App\">\n"
+    "\t\t\t<uap:VisualElements\n"
+    "\t\t\t\tDisplayName=\"" << targetNameXML << "\"\n"
+    "\t\t\t\tDescription=\"" << targetNameXML << "\"\n"
+    "\t\t\t\tBackgroundColor=\"#336699\"\n"
+    "\t\t\t\tSquare150x150Logo=\"" << artifactDirXML << "\\Logo.png\"\n"
+    "\t\t\t\tSquare44x44Logo=\"" << artifactDirXML <<
+    "\\SmallLogo44x44.png\">\n"
+    "\t\t\t\t<uap:SplashScreen"
+    " Image=\"" << artifactDirXML << "\\SplashScreen.png\" />\n"
+    "\t\t\t</uap:VisualElements>\n"
+    "\t\t</Application>\n"
+    "\t</Applications>\n"
+    "</Package>\n";
+
+  this->WriteCommonMissingFiles(manifestFile);
+}
+
 void
 cmVisualStudio10TargetGenerator
 ::WriteCommonMissingFiles(const std::string& manifestFile)
@@ -3441,6 +3643,14 @@ cmVisualStudio10TargetGenerator
   this->WriteString("<Image Include=\"", 2);
   (*this->BuildFileStream) << cmVS10EscapeXML(smallLogo) << "\" />\n";
   this->AddedFiles.push_back(smallLogo);
+
+  std::string smallLogo44 = this->DefaultArtifactDir + "/SmallLogo44x44.png";
+  cmSystemTools::CopyAFile(templateFolder + "/SmallLogo44x44.png",
+                           smallLogo44, false);
+  this->ConvertToWindowsSlash(smallLogo44);
+  this->WriteString("<Image Include=\"", 2);
+  (*this->BuildFileStream) << cmVS10EscapeXML(smallLogo44) << "\" />\n";
+  this->AddedFiles.push_back(smallLogo44);
 
   std::string logo = this->DefaultArtifactDir + "/Logo.png";
   cmSystemTools::CopyAFile(templateFolder + "/Logo.png",

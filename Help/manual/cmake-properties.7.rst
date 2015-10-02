@@ -254,17 +254,22 @@ Properties on Targets
    /prop_tgt/TYPE
    /prop_tgt/VERSION
    /prop_tgt/VISIBILITY_INLINES_HIDDEN
+   /prop_tgt/VS_DESKTOP_EXTENSIONS_VERSION
    /prop_tgt/VS_DOTNET_REFERENCES
    /prop_tgt/VS_DOTNET_TARGET_FRAMEWORK_VERSION
    /prop_tgt/VS_GLOBAL_KEYWORD
    /prop_tgt/VS_GLOBAL_PROJECT_TYPES
    /prop_tgt/VS_GLOBAL_ROOTNAMESPACE
    /prop_tgt/VS_GLOBAL_variable
+   /prop_tgt/VS_IOT_EXTENSIONS_VERSION
+   /prop_tgt/VS_IOT_STARTUP_TASK
    /prop_tgt/VS_KEYWORD
+   /prop_tgt/VS_MOBILE_EXTENSIONS_VERSION
    /prop_tgt/VS_SCC_AUXPATH
    /prop_tgt/VS_SCC_LOCALPATH
    /prop_tgt/VS_SCC_PROJECTNAME
    /prop_tgt/VS_SCC_PROVIDER
+   /prop_tgt/VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION
    /prop_tgt/VS_WINRT_COMPONENT
    /prop_tgt/VS_WINRT_EXTENSIONS
    /prop_tgt/VS_WINRT_REFERENCES
