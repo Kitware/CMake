@@ -176,7 +176,14 @@ cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts,
 //----------------------------------------------------------------------------
 bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
 {
-  if (this->SystemName == "WindowsCE")
+  if (this->SystemName == "Windows")
+    {
+    if (!this->InitializeWindows(mf))
+      {
+      return false;
+      }
+    }
+  else if (this->SystemName == "WindowsCE")
     {
     this->SystemIsWindowsCE = true;
     if (!this->InitializeWindowsCE(mf))
@@ -184,7 +191,7 @@ bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
       return false;
       }
     }
-  else if(this->SystemName == "WindowsPhone")
+  else if (this->SystemName == "WindowsPhone")
     {
     this->SystemIsWindowsPhone = true;
     if(!this->InitializeWindowsPhone(mf))
@@ -192,7 +199,7 @@ bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
       return false;
       }
     }
-  else if(this->SystemName == "WindowsStore")
+  else if (this->SystemName == "WindowsStore")
     {
     this->SystemIsWindowsStore = true;
     if(!this->InitializeWindowsStore(mf))
@@ -225,6 +232,12 @@ bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
     mf->AddDefinition("CMAKE_VS_NsightTegra_VERSION", v.c_str());
     }
 
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalVisualStudio10Generator::InitializeWindows(cmMakefile*)
+{
   return true;
 }
 
