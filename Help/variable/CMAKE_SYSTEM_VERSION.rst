@@ -12,6 +12,13 @@ then ``CMAKE_SYSTEM_VERSION`` is by default set to the same value as the
 :variable:`CMAKE_HOST_SYSTEM_VERSION` variable so that the build targets
 the host system version.
 
+In the case of a host build then ``CMAKE_SYSTEM_VERSION`` may be set
+explicitly when first configuring a new build tree in order to enable
+targeting the build for a different version of the host operating system
+than is actually running on the host.  This is allowed and not considered
+cross compiling so long as the binaries built for the specified OS version
+can still run on the host.
+
 System Version for Cross Compiling
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
