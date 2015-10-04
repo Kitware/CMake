@@ -28,7 +28,7 @@ Commands
 --------
 
 * The :command:`find_program` command learned a ``NAMES_PER_DIR``
-  option to consdier all given ``NAMES`` in each directory before
+  option to consider all given ``NAMES`` in each directory before
   moving on to the next directory.
 
 * The :command:`get_filename_component` command learned a new ``BASE_DIR``
