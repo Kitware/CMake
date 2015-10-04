@@ -31,6 +31,8 @@ private:
   void ProcessBuildsystem();
   void ProcessTargetInfo(std::string tgtName, std::string config,
                          const char* language);
+  void ProcessFileInfo(std::string tgtName, std::string config,
+                       std::string file_path);
 
 private:
   cmMetadataServer* Server;

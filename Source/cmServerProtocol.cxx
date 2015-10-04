@@ -63,6 +63,11 @@ void cmServerProtocol::processRequest(const std::string& json)
       this->ProcessTargetInfo(value["target_name"].asString(),
                               value["config"].asString(), language);
     }
+    if (value["type"] == "file_info") {
+      this->ProcessFileInfo(value["target_name"].asString(),
+                            value["config"].asString(),
+                            value["file_path"].asString());
+    }
   }
 }
 
@@ -309,5 +314,85 @@ void cmServerProtocol::ProcessTargetInfo(std::string tgtName,
   for (auto const& dir : dirs) {
     target_includes.append(dir);
   }
+  this->Server->WriteResponse(obj);
+}
+
+void cmServerProtocol::ProcessFileInfo(std::string tgtName, std::string config,
+                                       std::string file_path)
+{
+  auto tgt =
+    this->CMakeInstance->GetGlobalGenerator()->FindGeneratorTarget(tgtName);
+
+  if (!tgt) {
+    // Error
+    return;
+  }
+
+  std::vector<const cmSourceFile*> files;
+  tgt->GetObjectSources(files, config);
+
+  const cmSourceFile* file = 0;
+  for (auto const& sf : files) {
+    if (sf->GetFullPath() == file_path) {
+      file = sf;
+      break;
+    }
+  }
+
+  if (!file) {
+    // Error
+    return;
+  }
+
+  Json::Value obj = Json::objectValue;
+  Json::Value& root = obj["file_info"] = Json::objectValue;
+
+  root["targetName"] = tgtName;
+  root["filePath"] = file_path;
+
+  auto lg = tgt->GetLocalGenerator();
+
+  std::string lang = file->GetLanguage();
+
+  std::vector<std::string> includes;
+  lg->GetIncludeDirectories(includes, tgt, lang, config);
+
+  Json::Value& include_dirs = root["include_directories"] = Json::arrayValue;
+  for (auto const& dir : includes) {
+    include_dirs.append(dir);
+  }
+
+  std::set<std::string> defines;
+  lg->AppendDefines(defines, file->GetProperty("COMPILE_DEFINITIONS"));
+  {
+    std::string defPropName = "COMPILE_DEFINITIONS_";
+    defPropName += cmSystemTools::UpperCase(config);
+    lg->AppendDefines(defines, file->GetProperty(defPropName));
+  }
+
+  // Add the export symbol definition for shared library objects.
+  if (const char* exportMacro = tgt->GetExportMacro()) {
+    lg->AppendDefines(defines, exportMacro);
+  }
+
+  // Add preprocessor definitions for this target and configuration.
+  lg->AddCompileDefinitions(defines, tgt, config, lang);
+
+  Json::Value& compile_defs = root["compile_definitions"] = Json::arrayValue;
+  for (auto const& def : defines) {
+    compile_defs.append(def);
+  }
+
+  std::string flags;
+  lg->AddLanguageFlags(flags, lang, config);
+
+  lg->AddArchitectureFlags(flags, tgt, lang, config);
+
+  lg->AddVisibilityPresetFlags(flags, tgt, lang);
+
+  lg->AddCompileOptions(flags, tgt, lang, config);
+
+  root["compile_flags"] = flags;
+
   this->Server->WriteResponse(obj);
 }
