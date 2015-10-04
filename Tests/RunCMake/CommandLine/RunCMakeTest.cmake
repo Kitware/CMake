@@ -22,6 +22,11 @@ run_cmake_command(G_bad-arg ${CMAKE_COMMAND} -G NoSuchGenerator)
 run_cmake_command(P_no-arg ${CMAKE_COMMAND} -P)
 run_cmake_command(P_no-file ${CMAKE_COMMAND} -P nosuchscriptfile.cmake)
 
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/P_working-dir-build)
+file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+run_cmake_command(P_working-dir ${CMAKE_COMMAND} -DEXPECTED_WORKING_DIR=${RunCMake_TEST_BINARY_DIR} -P ${RunCMake_SOURCE_DIR}/P_working-dir.cmake)
+unset(RunCMake_TEST_BINARY_DIR)
+
 run_cmake_command(build-no-dir
   ${CMAKE_COMMAND} --build)
 run_cmake_command(build-no-cache
