@@ -233,6 +233,113 @@ static void GetUicOpts(cmTarget const* target, const std::string& config,
   optString = cmJoin(opts, ";");
 }
 
+void cmQtAutoGeneratorInitializer::SetupAutoUicTarget(cmTarget const* target,
+                          std::vector<std::string> const& skipUic,
+                          std::map<std::string, std::string> &configUicOptions)
+{
+  cmMakefile *makefile = target->GetMakefile();
+
+  std::set<std::string> skipped;
+  skipped.insert(skipUic.begin(), skipUic.end());
+
+  makefile->AddDefinition("_skip_uic",
+          cmOutputConverter::EscapeForCMake(cmJoin(skipUic, ";")).c_str());
+
+  std::vector<cmSourceFile*> uiFilesWithOptions
+                                        = makefile->GetQtUiFilesWithOptions();
+
+  const char *qtVersion = makefile->GetDefinition("_target_qt_version");
+
+  std::string _uic_opts;
+  std::vector<std::string> configs;
+  const std::string& config = makefile->GetConfigurations(configs);
+  GetUicOpts(target, config, _uic_opts);
+
+  if (!_uic_opts.empty())
+    {
+    _uic_opts = cmOutputConverter::EscapeForCMake(_uic_opts);
+    makefile->AddDefinition("_uic_target_options", _uic_opts.c_str());
+    }
+  for (std::vector<std::string>::const_iterator li = configs.begin();
+       li != configs.end(); ++li)
+    {
+    std::string config_uic_opts;
+    GetUicOpts(target, *li, config_uic_opts);
+    if (config_uic_opts != _uic_opts)
+      {
+      configUicOptions[*li] =
+                    cmOutputConverter::EscapeForCMake(config_uic_opts);
+      if(_uic_opts.empty())
+        {
+        _uic_opts = config_uic_opts;
+        }
+      }
+    }
+
+  std::string uiFileFiles;
+  std::string uiFileOptions;
+  const char* sep = "";
+
+  for(std::vector<cmSourceFile*>::const_iterator fileIt =
+      uiFilesWithOptions.begin();
+      fileIt != uiFilesWithOptions.end();
+      ++fileIt)
+    {
+    cmSourceFile* sf = *fileIt;
+    std::string absFile = cmsys::SystemTools::GetRealPath(
+                                                    sf->GetFullPath());
+
+    if (!skipped.insert(absFile).second)
+      {
+      continue;
+      }
+    uiFileFiles += sep;
+    uiFileFiles += absFile;
+    uiFileOptions += sep;
+    std::string opts = sf->GetProperty("AUTOUIC_OPTIONS");
+    cmSystemTools::ReplaceString(opts, ";", "@list_sep@");
+    uiFileOptions += opts;
+    sep = ";";
+    }
+
+  makefile->AddDefinition("_qt_uic_options_files",
+              cmOutputConverter::EscapeForCMake(uiFileFiles).c_str());
+  makefile->AddDefinition("_qt_uic_options_options",
+            cmOutputConverter::EscapeForCMake(uiFileOptions).c_str());
+
+  std::string targetName = target->GetName();
+  if (strcmp(qtVersion, "5") == 0)
+    {
+    cmTarget *qt5Uic = makefile->FindTargetToUse("Qt5::uic");
+    if (!qt5Uic)
+      {
+      // Project does not use Qt5Widgets, but has AUTOUIC ON anyway
+      }
+    else
+      {
+      makefile->AddDefinition("_qt_uic_executable",
+                              qt5Uic->ImportedGetLocation(""));
+      }
+    }
+  else if (strcmp(qtVersion, "4") == 0)
+    {
+    cmTarget *qt4Uic = makefile->FindTargetToUse("Qt4::uic");
+    if (!qt4Uic)
+      {
+      cmSystemTools::Error("Qt4::uic target not found ",
+                          targetName.c_str());
+      return;
+      }
+    makefile->AddDefinition("_qt_uic_executable",
+                            qt4Uic->ImportedGetLocation(""));
+    }
+  else
+    {
+    cmSystemTools::Error("The CMAKE_AUTOUIC feature supports only Qt 4 and "
+                        "Qt 5 ", targetName.c_str());
+    }
+}
+
 std::string cmQtAutoGeneratorInitializer::GetAutogenTargetName(
     cmTarget const* target)
 {
@@ -751,113 +858,6 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
           " " << it->second << ")\n";
         }
       }
-    }
-}
-
-void cmQtAutoGeneratorInitializer::SetupAutoUicTarget(cmTarget const* target,
-                          std::vector<std::string> const& skipUic,
-                          std::map<std::string, std::string> &configUicOptions)
-{
-  cmMakefile *makefile = target->GetMakefile();
-
-  std::set<std::string> skipped;
-  skipped.insert(skipUic.begin(), skipUic.end());
-
-  makefile->AddDefinition("_skip_uic",
-          cmOutputConverter::EscapeForCMake(cmJoin(skipUic, ";")).c_str());
-
-  std::vector<cmSourceFile*> uiFilesWithOptions
-                                        = makefile->GetQtUiFilesWithOptions();
-
-  const char *qtVersion = makefile->GetDefinition("_target_qt_version");
-
-  std::string _uic_opts;
-  std::vector<std::string> configs;
-  const std::string& config = makefile->GetConfigurations(configs);
-  GetUicOpts(target, config, _uic_opts);
-
-  if (!_uic_opts.empty())
-    {
-    _uic_opts = cmOutputConverter::EscapeForCMake(_uic_opts);
-    makefile->AddDefinition("_uic_target_options", _uic_opts.c_str());
-    }
-  for (std::vector<std::string>::const_iterator li = configs.begin();
-       li != configs.end(); ++li)
-    {
-    std::string config_uic_opts;
-    GetUicOpts(target, *li, config_uic_opts);
-    if (config_uic_opts != _uic_opts)
-      {
-      configUicOptions[*li] =
-                    cmOutputConverter::EscapeForCMake(config_uic_opts);
-      if(_uic_opts.empty())
-        {
-        _uic_opts = config_uic_opts;
-        }
-      }
-    }
-
-  std::string uiFileFiles;
-  std::string uiFileOptions;
-  const char* sep = "";
-
-  for(std::vector<cmSourceFile*>::const_iterator fileIt =
-      uiFilesWithOptions.begin();
-      fileIt != uiFilesWithOptions.end();
-      ++fileIt)
-    {
-    cmSourceFile* sf = *fileIt;
-    std::string absFile = cmsys::SystemTools::GetRealPath(
-                                                    sf->GetFullPath());
-
-    if (!skipped.insert(absFile).second)
-      {
-      continue;
-      }
-    uiFileFiles += sep;
-    uiFileFiles += absFile;
-    uiFileOptions += sep;
-    std::string opts = sf->GetProperty("AUTOUIC_OPTIONS");
-    cmSystemTools::ReplaceString(opts, ";", "@list_sep@");
-    uiFileOptions += opts;
-    sep = ";";
-    }
-
-  makefile->AddDefinition("_qt_uic_options_files",
-              cmOutputConverter::EscapeForCMake(uiFileFiles).c_str());
-  makefile->AddDefinition("_qt_uic_options_options",
-            cmOutputConverter::EscapeForCMake(uiFileOptions).c_str());
-
-  std::string targetName = target->GetName();
-  if (strcmp(qtVersion, "5") == 0)
-    {
-    cmTarget *qt5Uic = makefile->FindTargetToUse("Qt5::uic");
-    if (!qt5Uic)
-      {
-      // Project does not use Qt5Widgets, but has AUTOUIC ON anyway
-      }
-    else
-      {
-      makefile->AddDefinition("_qt_uic_executable",
-                              qt5Uic->ImportedGetLocation(""));
-      }
-    }
-  else if (strcmp(qtVersion, "4") == 0)
-    {
-    cmTarget *qt4Uic = makefile->FindTargetToUse("Qt4::uic");
-    if (!qt4Uic)
-      {
-      cmSystemTools::Error("Qt4::uic target not found ",
-                          targetName.c_str());
-      return;
-      }
-    makefile->AddDefinition("_qt_uic_executable",
-                            qt4Uic->ImportedGetLocation(""));
-    }
-  else
-    {
-    cmSystemTools::Error("The CMAKE_AUTOUIC feature supports only Qt 4 and "
-                        "Qt 5 ", targetName.c_str());
     }
 }
 
