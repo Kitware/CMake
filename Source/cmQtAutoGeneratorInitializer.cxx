@@ -593,6 +593,122 @@ std::string cmQtAutoGeneratorInitializer::ListQt4RccInputs(cmSourceFile* sf,
   return entriesList;
 }
 
+void cmQtAutoGeneratorInitializer::SetupAutoRccTarget(cmTarget const* target)
+{
+  std::string _rcc_files;
+  const char* sepRccFiles = "";
+  cmMakefile *makefile = target->GetMakefile();
+
+  std::vector<cmSourceFile*> srcFiles;
+  cmGeneratorTarget *gtgt = target->GetMakefile()
+                                  ->GetGlobalGenerator()
+                                  ->GetGeneratorTarget(target);
+  gtgt->GetConfigCommonSourceFiles(srcFiles);
+
+  std::string qrcInputs;
+  const char* qrcInputsSep = "";
+
+  std::string rccFileFiles;
+  std::string rccFileOptions;
+  const char *optionSep = "";
+
+  const char *qtVersion = makefile->GetDefinition("_target_qt_version");
+
+  std::vector<std::string> rccOptions;
+  if (const char* opts = target->GetProperty("AUTORCC_OPTIONS"))
+    {
+    cmSystemTools::ExpandListArgument(opts, rccOptions);
+    }
+  std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
+  if (qtMajorVersion == "")
+    {
+    qtMajorVersion = makefile->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
+    }
+
+  for(std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
+      fileIt != srcFiles.end();
+      ++fileIt)
+    {
+    cmSourceFile* sf = *fileIt;
+    std::string ext = sf->GetExtension();
+    if (ext == "qrc")
+      {
+      std::string absFile = cmsys::SystemTools::GetRealPath(
+                                                  sf->GetFullPath());
+      bool skip = cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC"));
+
+      if (!skip)
+        {
+        _rcc_files += sepRccFiles;
+        _rcc_files += absFile;
+        sepRccFiles = ";";
+
+        if (const char *prop = sf->GetProperty("AUTORCC_OPTIONS"))
+          {
+          std::vector<std::string> optsVec;
+          cmSystemTools::ExpandListArgument(prop, optsVec);
+          cmQtAutoGeneratorInitializer::MergeRccOptions(rccOptions, optsVec,
+                                strcmp(qtVersion, "5") == 0);
+          }
+
+        if (!rccOptions.empty())
+          {
+          rccFileFiles += optionSep;
+          rccFileFiles += absFile;
+          rccFileOptions += optionSep;
+          }
+        const char *listSep = "";
+        for(std::vector<std::string>::const_iterator it = rccOptions.begin();
+            it != rccOptions.end();
+            ++it)
+          {
+          rccFileOptions += listSep;
+          rccFileOptions += *it;
+          listSep = "@list_sep@";
+          }
+        optionSep = ";";
+
+        std::vector<std::string> depends;
+
+        std::string entriesList;
+        if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED")))
+          {
+          if (qtMajorVersion == "5")
+            {
+            entriesList = cmQtAutoGeneratorInitializer::ListQt5RccInputs(sf,
+                                                               target,
+                                                               depends);
+            }
+          else
+            {
+            entriesList =
+                cmQtAutoGeneratorInitializer::ListQt4RccInputs(sf, depends);
+            }
+          if (entriesList.empty())
+            {
+            return;
+            }
+          }
+        qrcInputs += qrcInputsSep;
+        qrcInputs += entriesList;
+        qrcInputsSep = ";";
+        }
+      }
+    }
+  makefile->AddDefinition("_qt_rcc_inputs_" + target->GetName(),
+                      cmOutputConverter::EscapeForCMake(qrcInputs).c_str());
+
+  makefile->AddDefinition("_rcc_files",
+          cmOutputConverter::EscapeForCMake(_rcc_files).c_str());
+
+  makefile->AddDefinition("_qt_rcc_options_files",
+              cmOutputConverter::EscapeForCMake(rccFileFiles).c_str());
+  makefile->AddDefinition("_qt_rcc_options_options",
+            cmOutputConverter::EscapeForCMake(rccFileOptions).c_str());
+
+  makefile->AddDefinition("_qt_rcc_executable",
+              cmQtAutoGeneratorInitializer::GetRccExecutable(target).c_str());
+}
 
 void cmQtAutoGeneratorInitializer::InitializeAutogenSources(cmTarget* target)
 {
@@ -954,121 +1070,4 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
         }
       }
     }
-}
-
-void cmQtAutoGeneratorInitializer::SetupAutoRccTarget(cmTarget const* target)
-{
-  std::string _rcc_files;
-  const char* sepRccFiles = "";
-  cmMakefile *makefile = target->GetMakefile();
-
-  std::vector<cmSourceFile*> srcFiles;
-  cmGeneratorTarget *gtgt = target->GetMakefile()
-                                  ->GetGlobalGenerator()
-                                  ->GetGeneratorTarget(target);
-  gtgt->GetConfigCommonSourceFiles(srcFiles);
-
-  std::string qrcInputs;
-  const char* qrcInputsSep = "";
-
-  std::string rccFileFiles;
-  std::string rccFileOptions;
-  const char *optionSep = "";
-
-  const char *qtVersion = makefile->GetDefinition("_target_qt_version");
-
-  std::vector<std::string> rccOptions;
-  if (const char* opts = target->GetProperty("AUTORCC_OPTIONS"))
-    {
-    cmSystemTools::ExpandListArgument(opts, rccOptions);
-    }
-  std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
-  if (qtMajorVersion == "")
-    {
-    qtMajorVersion = makefile->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
-    }
-
-  for(std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
-      fileIt != srcFiles.end();
-      ++fileIt)
-    {
-    cmSourceFile* sf = *fileIt;
-    std::string ext = sf->GetExtension();
-    if (ext == "qrc")
-      {
-      std::string absFile = cmsys::SystemTools::GetRealPath(
-                                                  sf->GetFullPath());
-      bool skip = cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC"));
-
-      if (!skip)
-        {
-        _rcc_files += sepRccFiles;
-        _rcc_files += absFile;
-        sepRccFiles = ";";
-
-        if (const char *prop = sf->GetProperty("AUTORCC_OPTIONS"))
-          {
-          std::vector<std::string> optsVec;
-          cmSystemTools::ExpandListArgument(prop, optsVec);
-          cmQtAutoGeneratorInitializer::MergeRccOptions(rccOptions, optsVec,
-                                strcmp(qtVersion, "5") == 0);
-          }
-
-        if (!rccOptions.empty())
-          {
-          rccFileFiles += optionSep;
-          rccFileFiles += absFile;
-          rccFileOptions += optionSep;
-          }
-        const char *listSep = "";
-        for(std::vector<std::string>::const_iterator it = rccOptions.begin();
-            it != rccOptions.end();
-            ++it)
-          {
-          rccFileOptions += listSep;
-          rccFileOptions += *it;
-          listSep = "@list_sep@";
-          }
-        optionSep = ";";
-
-        std::vector<std::string> depends;
-
-        std::string entriesList;
-        if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED")))
-          {
-          if (qtMajorVersion == "5")
-            {
-            entriesList = cmQtAutoGeneratorInitializer::ListQt5RccInputs(sf,
-                                                               target,
-                                                               depends);
-            }
-          else
-            {
-            entriesList =
-                cmQtAutoGeneratorInitializer::ListQt4RccInputs(sf, depends);
-            }
-          if (entriesList.empty())
-            {
-            return;
-            }
-          }
-        qrcInputs += qrcInputsSep;
-        qrcInputs += entriesList;
-        qrcInputsSep = ";";
-        }
-      }
-    }
-  makefile->AddDefinition("_qt_rcc_inputs_" + target->GetName(),
-                      cmOutputConverter::EscapeForCMake(qrcInputs).c_str());
-
-  makefile->AddDefinition("_rcc_files",
-          cmOutputConverter::EscapeForCMake(_rcc_files).c_str());
-
-  makefile->AddDefinition("_qt_rcc_options_files",
-              cmOutputConverter::EscapeForCMake(rccFileFiles).c_str());
-  makefile->AddDefinition("_qt_rcc_options_options",
-            cmOutputConverter::EscapeForCMake(rccFileOptions).c_str());
-
-  makefile->AddDefinition("_qt_rcc_executable",
-              cmQtAutoGeneratorInitializer::GetRccExecutable(target).c_str());
 }
