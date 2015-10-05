@@ -222,6 +222,17 @@ void cmQtAutoGeneratorInitializer::SetupAutoMocTarget(cmTarget const* target,
     }
 }
 
+static void GetUicOpts(cmTarget const* target, const std::string& config,
+                       std::string &optString)
+{
+  cmGeneratorTarget *gtgt = target->GetMakefile()
+                                  ->GetGlobalGenerator()
+                                  ->GetGeneratorTarget(target);
+  std::vector<std::string> opts;
+  gtgt->GetAutoUicOptions(opts, config);
+  optString = cmJoin(opts, ";");
+}
+
 std::string cmQtAutoGeneratorInitializer::GetAutogenTargetName(
     cmTarget const* target)
 {
@@ -741,17 +752,6 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
         }
       }
     }
-}
-
-static void GetUicOpts(cmTarget const* target, const std::string& config,
-                       std::string &optString)
-{
-  cmGeneratorTarget *gtgt = target->GetMakefile()
-                                  ->GetGlobalGenerator()
-                                  ->GetGeneratorTarget(target);
-  std::vector<std::string> opts;
-  gtgt->GetAutoUicOptions(opts, config);
-  optString = cmJoin(opts, ";");
 }
 
 void cmQtAutoGeneratorInitializer::SetupAutoUicTarget(cmTarget const* target,
