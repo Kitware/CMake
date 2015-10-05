@@ -171,7 +171,7 @@ public:
 
   /** Get the include flags for the current makefile and language.  */
   void GetIncludeDirectories(std::vector<std::string>& dirs,
-                             cmGeneratorTarget* target,
+                             cmGeneratorTarget const* target,
                              const std::string& lang = "C",
                              const std::string& config = "",
                              bool stripImplicitInclDirs = true) const;
