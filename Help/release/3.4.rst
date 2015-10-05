@@ -5,7 +5,7 @@ CMake 3.4 Release Notes
 
   .. contents::
 
-Changes made since CMake 3.4 include the following.
+Changes made since CMake 3.3 include the following.
 
 New Features
 ============
