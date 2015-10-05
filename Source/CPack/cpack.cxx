@@ -204,8 +204,6 @@ int main (int argc, char const* const* argv)
   cmGlobalGenerator cmgg(&cminst);
   cmsys::auto_ptr<cmMakefile> globalMF(
         new cmMakefile(&cmgg, cminst.GetCurrentSnapshot()));
-  cmsys::auto_ptr<cmLocalGenerator> cmlg(
-        cmgg.CreateLocalGenerator(globalMF.get()));
 #if defined(__CYGWIN__)
   globalMF->AddDefinition("CMAKE_LEGACY_CYGWIN_WIN32", "0");
 #endif
