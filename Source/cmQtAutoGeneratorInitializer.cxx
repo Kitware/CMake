@@ -873,7 +873,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
                        workingDirectory.c_str());
     cc.SetEscapeOldStyle(false);
     cc.SetEscapeAllowMakeVars(true);
-    target->AddPreBuildCommand(cc);
+    target->Target->AddPreBuildCommand(cc);
     }
   else
 #endif
