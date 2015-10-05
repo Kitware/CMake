@@ -25,6 +25,89 @@
 # include "cmGlobalVisualStudioGenerator.h"
 #endif
 
+void cmQtAutoGeneratorInitializer::SetupSourceFiles(cmTarget const* target,
+                                   std::vector<std::string>& skipMoc,
+                                   std::vector<std::string>& mocSources,
+                                   std::vector<std::string>& mocHeaders,
+                                   std::vector<std::string>& skipUic)
+{
+  cmMakefile* makefile = target->GetMakefile();
+
+  std::vector<cmSourceFile*> srcFiles;
+  cmGeneratorTarget *gtgt = target->GetMakefile()
+                                  ->GetGlobalGenerator()
+                                  ->GetGeneratorTarget(target);
+  gtgt->GetConfigCommonSourceFiles(srcFiles);
+
+  std::vector<std::string> newRccFiles;
+
+  for(std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
+      fileIt != srcFiles.end();
+      ++fileIt)
+    {
+    cmSourceFile* sf = *fileIt;
+    std::string absFile = cmsys::SystemTools::GetRealPath(
+                                                    sf->GetFullPath());
+    bool skipFileForMoc =
+        cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"));
+    bool generated = cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"));
+
+    if(cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOUIC")))
+      {
+      skipUic.push_back(absFile);
+      }
+
+    std::string ext = sf->GetExtension();
+
+    if (target->GetPropertyAsBool("AUTORCC"))
+      {
+      if (ext == "qrc"
+          && !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC")))
+        {
+        std::string basename = cmsys::SystemTools::
+                                      GetFilenameWithoutLastExtension(absFile);
+
+        std::string rcc_output_dir = target->GetSupportDirectory();
+        cmSystemTools::MakeDirectory(rcc_output_dir.c_str());
+        std::string rcc_output_file = rcc_output_dir;
+        rcc_output_file += "/qrc_" + basename + ".cpp";
+        makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
+                                rcc_output_file.c_str(), false);
+        makefile->GetOrCreateSource(rcc_output_file, true);
+        newRccFiles.push_back(rcc_output_file);
+        }
+      }
+
+    if (!generated)
+      {
+      if (skipFileForMoc)
+        {
+        skipMoc.push_back(absFile);
+        }
+      else
+        {
+        cmSystemTools::FileFormat fileType = cmSystemTools::GetFileFormat(
+                                                                ext.c_str());
+        if (fileType == cmSystemTools::CXX_FILE_FORMAT)
+          {
+          mocSources.push_back(absFile);
+          }
+        else if (fileType == cmSystemTools::HEADER_FILE_FORMAT)
+          {
+          mocHeaders.push_back(absFile);
+          }
+        }
+      }
+    }
+
+  for(std::vector<std::string>::const_iterator fileIt = newRccFiles.begin();
+      fileIt != newRccFiles.end();
+      ++fileIt)
+    {
+    const_cast<cmTarget*>(target)->AddSource(*fileIt);
+    }
+}
+
 std::string cmQtAutoGeneratorInitializer::GetAutogenTargetName(
     cmTarget const* target)
 {
@@ -565,89 +648,6 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
           " " << it->second << ")\n";
         }
       }
-    }
-}
-
-void cmQtAutoGeneratorInitializer::SetupSourceFiles(cmTarget const* target,
-                                   std::vector<std::string>& skipMoc,
-                                   std::vector<std::string>& mocSources,
-                                   std::vector<std::string>& mocHeaders,
-                                   std::vector<std::string>& skipUic)
-{
-  cmMakefile* makefile = target->GetMakefile();
-
-  std::vector<cmSourceFile*> srcFiles;
-  cmGeneratorTarget *gtgt = target->GetMakefile()
-                                  ->GetGlobalGenerator()
-                                  ->GetGeneratorTarget(target);
-  gtgt->GetConfigCommonSourceFiles(srcFiles);
-
-  std::vector<std::string> newRccFiles;
-
-  for(std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
-      fileIt != srcFiles.end();
-      ++fileIt)
-    {
-    cmSourceFile* sf = *fileIt;
-    std::string absFile = cmsys::SystemTools::GetRealPath(
-                                                    sf->GetFullPath());
-    bool skipFileForMoc =
-        cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"));
-    bool generated = cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"));
-
-    if(cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOUIC")))
-      {
-      skipUic.push_back(absFile);
-      }
-
-    std::string ext = sf->GetExtension();
-
-    if (target->GetPropertyAsBool("AUTORCC"))
-      {
-      if (ext == "qrc"
-          && !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC")))
-        {
-        std::string basename = cmsys::SystemTools::
-                                      GetFilenameWithoutLastExtension(absFile);
-
-        std::string rcc_output_dir = target->GetSupportDirectory();
-        cmSystemTools::MakeDirectory(rcc_output_dir.c_str());
-        std::string rcc_output_file = rcc_output_dir;
-        rcc_output_file += "/qrc_" + basename + ".cpp";
-        makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
-                                rcc_output_file.c_str(), false);
-        makefile->GetOrCreateSource(rcc_output_file, true);
-        newRccFiles.push_back(rcc_output_file);
-        }
-      }
-
-    if (!generated)
-      {
-      if (skipFileForMoc)
-        {
-        skipMoc.push_back(absFile);
-        }
-      else
-        {
-        cmSystemTools::FileFormat fileType = cmSystemTools::GetFileFormat(
-                                                                ext.c_str());
-        if (fileType == cmSystemTools::CXX_FILE_FORMAT)
-          {
-          mocSources.push_back(absFile);
-          }
-        else if (fileType == cmSystemTools::HEADER_FILE_FORMAT)
-          {
-          mocHeaders.push_back(absFile);
-          }
-        }
-      }
-    }
-
-  for(std::vector<std::string>::const_iterator fileIt = newRccFiles.begin();
-      fileIt != newRccFiles.end();
-      ++fileIt)
-    {
-    const_cast<cmTarget*>(target)->AddSource(*fileIt);
     }
 }
 
