@@ -130,6 +130,98 @@ static void GetCompileDefinitionsAndDirectories(cmTarget const* target,
   defs += cmJoin(defines, ";");
 }
 
+void cmQtAutoGeneratorInitializer::SetupAutoMocTarget(cmTarget const* target,
+                          const std::string &autogenTargetName,
+                          std::vector<std::string> const& skipMoc,
+                          std::vector<std::string> const& mocHeaders,
+                          std::map<std::string, std::string> &configIncludes,
+                          std::map<std::string, std::string> &configDefines)
+{
+  cmMakefile* makefile = target->GetMakefile();
+
+  const char* tmp = target->GetProperty("AUTOMOC_MOC_OPTIONS");
+  std::string _moc_options = (tmp!=0 ? tmp : "");
+  makefile->AddDefinition("_moc_options",
+          cmOutputConverter::EscapeForCMake(_moc_options).c_str());
+  makefile->AddDefinition("_skip_moc",
+          cmOutputConverter::EscapeForCMake(cmJoin(skipMoc, ";")).c_str());
+  makefile->AddDefinition("_moc_headers",
+          cmOutputConverter::EscapeForCMake(cmJoin(mocHeaders, ";")).c_str());
+  bool relaxedMode = makefile->IsOn("CMAKE_AUTOMOC_RELAXED_MODE");
+  makefile->AddDefinition("_moc_relaxed_mode", relaxedMode ? "TRUE" : "FALSE");
+
+  std::string _moc_incs;
+  std::string _moc_compile_defs;
+  std::vector<std::string> configs;
+  const std::string& config = makefile->GetConfigurations(configs);
+  GetCompileDefinitionsAndDirectories(target, config,
+                                      _moc_incs, _moc_compile_defs);
+
+  makefile->AddDefinition("_moc_incs",
+          cmOutputConverter::EscapeForCMake(_moc_incs).c_str());
+  makefile->AddDefinition("_moc_compile_defs",
+          cmOutputConverter::EscapeForCMake(_moc_compile_defs).c_str());
+
+  for (std::vector<std::string>::const_iterator li = configs.begin();
+       li != configs.end(); ++li)
+    {
+    std::string config_moc_incs;
+    std::string config_moc_compile_defs;
+    GetCompileDefinitionsAndDirectories(target, *li,
+                                        config_moc_incs,
+                                        config_moc_compile_defs);
+    if (config_moc_incs != _moc_incs)
+      {
+      configIncludes[*li] =
+                    cmOutputConverter::EscapeForCMake(config_moc_incs);
+      if(_moc_incs.empty())
+        {
+        _moc_incs = config_moc_incs;
+        }
+      }
+    if (config_moc_compile_defs != _moc_compile_defs)
+      {
+      configDefines[*li] =
+            cmOutputConverter::EscapeForCMake(config_moc_compile_defs);
+      if(_moc_compile_defs.empty())
+        {
+        _moc_compile_defs = config_moc_compile_defs;
+        }
+      }
+    }
+
+  const char *qtVersion = makefile->GetDefinition("_target_qt_version");
+  if (strcmp(qtVersion, "5") == 0)
+    {
+    cmTarget *qt5Moc = makefile->FindTargetToUse("Qt5::moc");
+    if (!qt5Moc)
+      {
+      cmSystemTools::Error("Qt5::moc target not found ",
+                          autogenTargetName.c_str());
+      return;
+      }
+    makefile->AddDefinition("_qt_moc_executable",
+                            qt5Moc->ImportedGetLocation(""));
+    }
+  else if (strcmp(qtVersion, "4") == 0)
+    {
+    cmTarget *qt4Moc = makefile->FindTargetToUse("Qt4::moc");
+    if (!qt4Moc)
+      {
+      cmSystemTools::Error("Qt4::moc target not found ",
+                          autogenTargetName.c_str());
+      return;
+      }
+    makefile->AddDefinition("_qt_moc_executable",
+                            qt4Moc->ImportedGetLocation(""));
+    }
+  else
+    {
+    cmSystemTools::Error("The CMAKE_AUTOMOC feature supports only Qt 4 and "
+                        "Qt 5 ", autogenTargetName.c_str());
+    }
+}
+
 std::string cmQtAutoGeneratorInitializer::GetAutogenTargetName(
     cmTarget const* target)
 {
@@ -648,98 +740,6 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
           " " << it->second << ")\n";
         }
       }
-    }
-}
-
-void cmQtAutoGeneratorInitializer::SetupAutoMocTarget(cmTarget const* target,
-                          const std::string &autogenTargetName,
-                          std::vector<std::string> const& skipMoc,
-                          std::vector<std::string> const& mocHeaders,
-                          std::map<std::string, std::string> &configIncludes,
-                          std::map<std::string, std::string> &configDefines)
-{
-  cmMakefile* makefile = target->GetMakefile();
-
-  const char* tmp = target->GetProperty("AUTOMOC_MOC_OPTIONS");
-  std::string _moc_options = (tmp!=0 ? tmp : "");
-  makefile->AddDefinition("_moc_options",
-          cmOutputConverter::EscapeForCMake(_moc_options).c_str());
-  makefile->AddDefinition("_skip_moc",
-          cmOutputConverter::EscapeForCMake(cmJoin(skipMoc, ";")).c_str());
-  makefile->AddDefinition("_moc_headers",
-          cmOutputConverter::EscapeForCMake(cmJoin(mocHeaders, ";")).c_str());
-  bool relaxedMode = makefile->IsOn("CMAKE_AUTOMOC_RELAXED_MODE");
-  makefile->AddDefinition("_moc_relaxed_mode", relaxedMode ? "TRUE" : "FALSE");
-
-  std::string _moc_incs;
-  std::string _moc_compile_defs;
-  std::vector<std::string> configs;
-  const std::string& config = makefile->GetConfigurations(configs);
-  GetCompileDefinitionsAndDirectories(target, config,
-                                      _moc_incs, _moc_compile_defs);
-
-  makefile->AddDefinition("_moc_incs",
-          cmOutputConverter::EscapeForCMake(_moc_incs).c_str());
-  makefile->AddDefinition("_moc_compile_defs",
-          cmOutputConverter::EscapeForCMake(_moc_compile_defs).c_str());
-
-  for (std::vector<std::string>::const_iterator li = configs.begin();
-       li != configs.end(); ++li)
-    {
-    std::string config_moc_incs;
-    std::string config_moc_compile_defs;
-    GetCompileDefinitionsAndDirectories(target, *li,
-                                        config_moc_incs,
-                                        config_moc_compile_defs);
-    if (config_moc_incs != _moc_incs)
-      {
-      configIncludes[*li] =
-                    cmOutputConverter::EscapeForCMake(config_moc_incs);
-      if(_moc_incs.empty())
-        {
-        _moc_incs = config_moc_incs;
-        }
-      }
-    if (config_moc_compile_defs != _moc_compile_defs)
-      {
-      configDefines[*li] =
-            cmOutputConverter::EscapeForCMake(config_moc_compile_defs);
-      if(_moc_compile_defs.empty())
-        {
-        _moc_compile_defs = config_moc_compile_defs;
-        }
-      }
-    }
-
-  const char *qtVersion = makefile->GetDefinition("_target_qt_version");
-  if (strcmp(qtVersion, "5") == 0)
-    {
-    cmTarget *qt5Moc = makefile->FindTargetToUse("Qt5::moc");
-    if (!qt5Moc)
-      {
-      cmSystemTools::Error("Qt5::moc target not found ",
-                          autogenTargetName.c_str());
-      return;
-      }
-    makefile->AddDefinition("_qt_moc_executable",
-                            qt5Moc->ImportedGetLocation(""));
-    }
-  else if (strcmp(qtVersion, "4") == 0)
-    {
-    cmTarget *qt4Moc = makefile->FindTargetToUse("Qt4::moc");
-    if (!qt4Moc)
-      {
-      cmSystemTools::Error("Qt4::moc target not found ",
-                          autogenTargetName.c_str());
-      return;
-      }
-    makefile->AddDefinition("_qt_moc_executable",
-                            qt4Moc->ImportedGetLocation(""));
-    }
-  else
-    {
-    cmSystemTools::Error("The CMAKE_AUTOMOC feature supports only Qt 4 and "
-                        "Qt 5 ", autogenTargetName.c_str());
     }
 }
 
