@@ -12,7 +12,6 @@
 #include "cmGetCMakePropertyCommand.h"
 
 #include "cmGlobalGenerator.h"
-#include "cmLocalGenerator.h"
 #include "cmake.h"
 #include "cmState.h"
 #include "cmAlgorithms.h"

@@ -11,7 +11,6 @@
 ============================================================================*/
 #include "cmExportCommand.h"
 #include "cmGlobalGenerator.h"
-#include "cmLocalGenerator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmake.h"
 

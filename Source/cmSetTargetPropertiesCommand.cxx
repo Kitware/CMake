@@ -10,7 +10,6 @@
   See the License for more information.
 ============================================================================*/
 #include "cmSetTargetPropertiesCommand.h"
-#include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 
 // cmSetTargetPropertiesCommand

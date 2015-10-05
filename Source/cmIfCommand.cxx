@@ -11,6 +11,7 @@
 ============================================================================*/
 #include "cmIfCommand.h"
 #include "cmStringCommand.h"
+#include "cmOutputConverter.h"
 
 #include "cmConditionEvaluator.h"
 
