@@ -1251,7 +1251,7 @@ bool cmGlobalGenerator::Compute()
 #ifdef CMAKE_BUILD_WITH_CMAKE
   // Iterate through all targets and set up automoc for those which have
   // the AUTOMOC, AUTOUIC or AUTORCC property set
-  std::vector<cmTarget const*> autogenTargets =
+  std::vector<cmGeneratorTarget const*> autogenTargets =
       this->CreateQtAutoGeneratorsTargets();
 #endif
 
@@ -1264,10 +1264,10 @@ bool cmGlobalGenerator::Compute()
     }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  for (std::vector<cmTarget const*>::iterator it = autogenTargets.begin();
-       it != autogenTargets.end(); ++it)
+  for (std::vector<cmGeneratorTarget const*>::iterator it =
+       autogenTargets.begin(); it != autogenTargets.end(); ++it)
     {
-    cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(*it);
+    cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget((*it)->Target);
     }
 #endif
 
@@ -1403,17 +1403,17 @@ bool cmGlobalGenerator::ComputeTargetDepends()
 }
 
 //----------------------------------------------------------------------------
-std::vector<const cmTarget*>
+std::vector<const cmGeneratorTarget*>
 cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
 {
-  std::vector<const cmTarget*> autogenTargets;
+  std::vector<const cmGeneratorTarget*> autogenTargets;
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
     cmTargets& targets =
       this->LocalGenerators[i]->GetMakefile()->GetTargets();
-    std::vector<cmTarget*> filteredTargets;
+    std::vector<cmGeneratorTarget*> filteredTargets;
     filteredTargets.reserve(targets.size());
     for(cmTargets::iterator ti = targets.begin();
         ti != targets.end(); ++ti)
@@ -1449,16 +1449,18 @@ cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
         continue;
         }
 
-      cmQtAutoGeneratorInitializer::InitializeAutogenSources(&ti->second);
-      filteredTargets.push_back(&ti->second);
+      cmGeneratorTarget* gt = this->GetGeneratorTarget(&ti->second);
+
+      cmQtAutoGeneratorInitializer::InitializeAutogenSources(gt->Target);
+      filteredTargets.push_back(gt);
       }
-    for(std::vector<cmTarget*>::iterator ti = filteredTargets.begin();
+    for(std::vector<cmGeneratorTarget*>::iterator ti = filteredTargets.begin();
         ti != filteredTargets.end(); ++ti)
       {
-      cmTarget* target = *ti;
+      cmTarget* target = (*ti)->Target;
       cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
            this->LocalGenerators[i], target);
-      autogenTargets.push_back(target);
+      autogenTargets.push_back(*ti);
       }
     }
 #endif
