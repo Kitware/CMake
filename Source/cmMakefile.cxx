@@ -1784,24 +1784,9 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
     }
 }
 
-void cmMakefile::SetCurrentSourceDirectory(const std::string& dir)
-{
-  this->StateSnapshot.GetDirectory().SetCurrentSource(dir);
-  this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
-                      this->StateSnapshot.GetDirectory().GetCurrentSource());
-}
-
 const char* cmMakefile::GetCurrentSourceDirectory() const
 {
   return this->StateSnapshot.GetDirectory().GetCurrentSource();
-}
-
-void cmMakefile::SetCurrentBinaryDirectory(const std::string& dir)
-{
-  this->StateSnapshot.GetDirectory().SetCurrentBinary(dir);
-  const char* binDir = this->StateSnapshot.GetDirectory().GetCurrentBinary();
-  cmSystemTools::MakeDirectory(binDir);
-  this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", binDir);
 }
 
 const char* cmMakefile::GetCurrentBinaryDirectory() const
