@@ -220,6 +220,23 @@ Windows CE to use.  Currently version 8.0 (Windows Embedded Compact 2013) is
 supported out of the box.  Other versions may require one to set
 :variable:`CMAKE_GENERATOR_TOOLSET` to the correct value.
 
+Cross Compiling for Windows 10 Universal Applications
+-----------------------------------------------------
+
+A toolchain file to configure a Visual Studio generator for a
+Windows 10 Universal Application may look like this:
+
+.. code-block:: cmake
+
+  set(CMAKE_SYSTEM_NAME WindowsStore)
+  set(CMAKE_SYSTEM_VERSION 10.0)
+
+A Windows 10 Universal Application targets both Windows Store and
+Windows Phone.  Specify the :variable:`CMAKE_SYSTEM_VERSION` variable
+to be ``10.0`` to build with the latest available Windows 10 SDK.
+Specify a more specific version (e.g. ``10.0.10240.0`` for RTM)
+to build with the corresponding SDK.
+
 Cross Compiling for Windows Phone
 ---------------------------------
 
