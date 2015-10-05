@@ -1761,8 +1761,6 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
                                            this->ContextStack.back()->Name,
                                            this->ContextStack.back()->Line);
 
-  newSnapshot.InitializeFromParent();
-
   newSnapshot.GetDirectory().SetCurrentSource(srcPath);
   newSnapshot.GetDirectory().SetCurrentBinary(binPath);
 

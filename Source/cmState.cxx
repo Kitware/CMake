@@ -805,8 +805,10 @@ cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot,
   pos->Parent = origin;
   pos->Root = origin;
   pos->Vars = this->VarTree.Extend(origin);
+
   cmState::Snapshot snapshot = cmState::Snapshot(this, pos);
   originSnapshot.Position->BuildSystemDirectory->Children.push_back(snapshot);
+  snapshot.InitializeFromParent();
   return snapshot;
 }
 
