@@ -466,6 +466,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WritePlatformExtensions();
   this->WriteString("</ImportGroup>\n", 1);
   this->WriteString("<PropertyGroup Label=\"UserMacros\" />\n", 1);
+  this->WriteAppxBundleGroup();
   this->WriteWinRTPackageCertificateKeyFile();
   this->WritePathAndIncrementalLinkOptions();
   this->WriteItemDefinitionGroups();
@@ -602,6 +603,25 @@ void cmVisualStudio10TargetGenerator::WriteTargetSpecificReferences()
         "$(MSBuildExtensionsPath)\\Microsoft\\WindowsPhone\\v"
         "$(TargetPlatformVersion)\\Microsoft.Cpp.WindowsPhone."
         "$(TargetPlatformVersion).targets\" />\n", 1);
+      }
+    }
+}
+
+void cmVisualStudio10TargetGenerator::WriteAppxBundleGroup()
+{
+  std::string const& v = this->GlobalGenerator->GetSystemVersion();
+  if((this->GlobalGenerator->TargetsWindowsStore()) &&
+      (this->GlobalGenerator->GetSystemVersion() == "8.1") &&
+      (cmTarget::EXECUTABLE == this->Target->GetType()))
+    {
+    const char* vsAppxBundle = this->Target->GetProperty("VS_APPX_BUNDLE");
+
+    if(vsAppxBundle)
+      {
+        this->WriteString("<PropertyGroup>\n", 1);
+        this->WriteString("<AppxBundle>", 2);
+        (*this->BuildFileStream) << cmVS10EscapeXML(vsAppxBundle) << "</AppxBundle>\n";
+        this->WriteString("</PropertyGroup>\n", 1);
       }
     }
 }
