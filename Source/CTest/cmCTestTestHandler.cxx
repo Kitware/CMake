@@ -24,7 +24,6 @@
 #include <cmsys/FStream.hxx>
 #include "cmMakefile.h"
 #include "cmGlobalGenerator.h"
-#include "cmLocalGenerator.h"
 #include "cmCommand.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
@@ -1593,8 +1592,6 @@ void cmCTestTestHandler::GetListOfTests()
   cm.SetHomeOutputDirectory("");
   cmGlobalGenerator gg(&cm);
   cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(&gg, cm.GetCurrentSnapshot()));
-  cmsys::auto_ptr<cmLocalGenerator> lg(
-        gg.CreateLocalGenerator(mf.get()));
   mf->AddDefinition("CTEST_CONFIGURATION_TYPE",
     this->CTest->GetConfigType().c_str());
 
