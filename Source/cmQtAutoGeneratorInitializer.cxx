@@ -391,6 +391,50 @@ std::string cmQtAutoGeneratorInitializer::GetRccExecutable(
   return std::string();
 }
 
+void cmQtAutoGeneratorInitializer::MergeRccOptions(
+                         std::vector<std::string> &opts,
+                         const std::vector<std::string> &fileOpts,
+                         bool isQt5)
+{
+  static const char* valueOptions[] = {
+    "name",
+    "root",
+    "compress",
+    "threshold"
+  };
+  std::vector<std::string> extraOpts;
+  for(std::vector<std::string>::const_iterator it = fileOpts.begin();
+      it != fileOpts.end(); ++it)
+    {
+    std::vector<std::string>::iterator existingIt
+                                  = std::find(opts.begin(), opts.end(), *it);
+    if (existingIt != opts.end())
+      {
+      const char *o = it->c_str();
+      if (*o == '-')
+        {
+        ++o;
+        }
+      if (isQt5 && *o == '-')
+        {
+        ++o;
+        }
+      if (std::find_if(cmArrayBegin(valueOptions), cmArrayEnd(valueOptions),
+                  cmStrCmp(*it)) != cmArrayEnd(valueOptions))
+        {
+        assert(existingIt + 1 != opts.end());
+        *(existingIt + 1) = *(it + 1);
+        ++it;
+        }
+      }
+    else
+      {
+      extraOpts.push_back(*it);
+      }
+    }
+  opts.insert(opts.end(), extraOpts.begin(), extraOpts.end());
+}
+
 std::string cmQtAutoGeneratorInitializer::GetAutogenTargetName(
     cmTarget const* target)
 {
@@ -910,50 +954,6 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
         }
       }
     }
-}
-
-void cmQtAutoGeneratorInitializer::MergeRccOptions(
-                         std::vector<std::string> &opts,
-                         const std::vector<std::string> &fileOpts,
-                         bool isQt5)
-{
-  static const char* valueOptions[] = {
-    "name",
-    "root",
-    "compress",
-    "threshold"
-  };
-  std::vector<std::string> extraOpts;
-  for(std::vector<std::string>::const_iterator it = fileOpts.begin();
-      it != fileOpts.end(); ++it)
-    {
-    std::vector<std::string>::iterator existingIt
-                                  = std::find(opts.begin(), opts.end(), *it);
-    if (existingIt != opts.end())
-      {
-      const char *o = it->c_str();
-      if (*o == '-')
-        {
-        ++o;
-        }
-      if (isQt5 && *o == '-')
-        {
-        ++o;
-        }
-      if (std::find_if(cmArrayBegin(valueOptions), cmArrayEnd(valueOptions),
-                  cmStrCmp(*it)) != cmArrayEnd(valueOptions))
-        {
-        assert(existingIt + 1 != opts.end());
-        *(existingIt + 1) = *(it + 1);
-        ++it;
-        }
-      }
-    else
-      {
-      extraOpts.push_back(*it);
-      }
-    }
-  opts.insert(opts.end(), extraOpts.begin(), extraOpts.end());
 }
 
 void cmQtAutoGeneratorInitializer::SetupAutoRccTarget(cmTarget const* target)
