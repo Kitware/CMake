@@ -1267,7 +1267,7 @@ bool cmGlobalGenerator::Compute()
   for (std::vector<cmGeneratorTarget const*>::iterator it =
        autogenTargets.begin(); it != autogenTargets.end(); ++it)
     {
-    cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget((*it)->Target);
+    cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(*it);
     }
 #endif
 
@@ -1451,15 +1451,14 @@ cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
 
       cmGeneratorTarget* gt = this->GetGeneratorTarget(&ti->second);
 
-      cmQtAutoGeneratorInitializer::InitializeAutogenSources(gt->Target);
+      cmQtAutoGeneratorInitializer::InitializeAutogenSources(gt);
       filteredTargets.push_back(gt);
       }
     for(std::vector<cmGeneratorTarget*>::iterator ti = filteredTargets.begin();
         ti != filteredTargets.end(); ++ti)
       {
-      cmTarget* target = (*ti)->Target;
       cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
-           this->LocalGenerators[i], target);
+           this->LocalGenerators[i], *ti);
       autogenTargets.push_back(*ti);
       }
     }
