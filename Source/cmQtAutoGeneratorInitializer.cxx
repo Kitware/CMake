@@ -340,6 +340,57 @@ void cmQtAutoGeneratorInitializer::SetupAutoUicTarget(cmTarget const* target,
     }
 }
 
+std::string cmQtAutoGeneratorInitializer::GetRccExecutable(
+    cmTarget const* target)
+{
+  cmGeneratorTarget *gtgt = target->GetMakefile()
+                                  ->GetGlobalGenerator()
+                                  ->GetGeneratorTarget(target);
+  cmMakefile *makefile = target->GetMakefile();
+  const char *qtVersion = makefile->GetDefinition("_target_qt_version");
+  if (!qtVersion)
+    {
+    qtVersion = makefile->GetDefinition("Qt5Core_VERSION_MAJOR");
+    if (!qtVersion)
+      {
+      qtVersion = makefile->GetDefinition("QT_VERSION_MAJOR");
+      }
+    if (const char *targetQtVersion =
+        gtgt->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", ""))
+      {
+      qtVersion = targetQtVersion;
+      }
+    }
+
+  std::string targetName = target->GetName();
+  if (strcmp(qtVersion, "5") == 0)
+    {
+    cmTarget *qt5Rcc = makefile->FindTargetToUse("Qt5::rcc");
+    if (!qt5Rcc)
+      {
+      cmSystemTools::Error("Qt5::rcc target not found ",
+                          targetName.c_str());
+      return std::string();
+      }
+    return qt5Rcc->ImportedGetLocation("");
+    }
+  else if (strcmp(qtVersion, "4") == 0)
+    {
+    cmTarget *qt4Rcc = makefile->FindTargetToUse("Qt4::rcc");
+    if (!qt4Rcc)
+      {
+      cmSystemTools::Error("Qt4::rcc target not found ",
+                          targetName.c_str());
+      return std::string();
+      }
+    return qt4Rcc->ImportedGetLocation("");
+    }
+
+  cmSystemTools::Error("The CMAKE_AUTORCC feature supports only Qt 4 and "
+                      "Qt 5 ", targetName.c_str());
+  return std::string();
+}
+
 std::string cmQtAutoGeneratorInitializer::GetAutogenTargetName(
     cmTarget const* target)
 {
@@ -1020,55 +1071,4 @@ void cmQtAutoGeneratorInitializer::SetupAutoRccTarget(cmTarget const* target)
 
   makefile->AddDefinition("_qt_rcc_executable",
               cmQtAutoGeneratorInitializer::GetRccExecutable(target).c_str());
-}
-
-std::string cmQtAutoGeneratorInitializer::GetRccExecutable(
-    cmTarget const* target)
-{
-  cmGeneratorTarget *gtgt = target->GetMakefile()
-                                  ->GetGlobalGenerator()
-                                  ->GetGeneratorTarget(target);
-  cmMakefile *makefile = target->GetMakefile();
-  const char *qtVersion = makefile->GetDefinition("_target_qt_version");
-  if (!qtVersion)
-    {
-    qtVersion = makefile->GetDefinition("Qt5Core_VERSION_MAJOR");
-    if (!qtVersion)
-      {
-      qtVersion = makefile->GetDefinition("QT_VERSION_MAJOR");
-      }
-    if (const char *targetQtVersion =
-        gtgt->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", ""))
-      {
-      qtVersion = targetQtVersion;
-      }
-    }
-
-  std::string targetName = target->GetName();
-  if (strcmp(qtVersion, "5") == 0)
-    {
-    cmTarget *qt5Rcc = makefile->FindTargetToUse("Qt5::rcc");
-    if (!qt5Rcc)
-      {
-      cmSystemTools::Error("Qt5::rcc target not found ",
-                          targetName.c_str());
-      return std::string();
-      }
-    return qt5Rcc->ImportedGetLocation("");
-    }
-  else if (strcmp(qtVersion, "4") == 0)
-    {
-    cmTarget *qt4Rcc = makefile->FindTargetToUse("Qt4::rcc");
-    if (!qt4Rcc)
-      {
-      cmSystemTools::Error("Qt4::rcc target not found ",
-                          targetName.c_str());
-      return std::string();
-      }
-    return qt4Rcc->ImportedGetLocation("");
-    }
-
-  cmSystemTools::Error("The CMAKE_AUTORCC feature supports only Qt 4 and "
-                      "Qt 5 ", targetName.c_str());
-  return std::string();
 }
