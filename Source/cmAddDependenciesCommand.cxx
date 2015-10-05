@@ -10,7 +10,6 @@
   See the License for more information.
 ============================================================================*/
 #include "cmAddDependenciesCommand.h"
-#include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 
 // cmDependenciesCommand

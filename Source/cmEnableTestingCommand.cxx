@@ -10,7 +10,6 @@
   See the License for more information.
 ============================================================================*/
 #include "cmEnableTestingCommand.h"
-#include "cmLocalGenerator.h"
 
 // we do this in the final pass so that we now the subdirs have all
 // been defined

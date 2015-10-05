@@ -15,7 +15,6 @@
 #include "cmHexFileConverter.h"
 #include "cmInstallType.h"
 #include "cmFileTimeComparison.h"
-#include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmCryptoHash.h"
 #include "cmAlgorithms.h"

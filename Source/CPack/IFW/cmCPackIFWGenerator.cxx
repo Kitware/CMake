@@ -24,7 +24,6 @@
 #include <cmsys/RegularExpression.hxx>
 
 #include <cmGlobalGenerator.h>
-#include <cmLocalGenerator.h>
 #include <cmSystemTools.h>
 #include <cmMakefile.h>
 #include <cmGeneratedFileStream.h>
