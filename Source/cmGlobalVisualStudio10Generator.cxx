@@ -325,19 +325,9 @@ cmLocalGenerator* cmGlobalVisualStudio10Generator::CreateLocalGenerator(
   return new cmLocalVisualStudio10Generator(this, mf);
 }
 
-//----------------------------------------------------------------------------
-bool cmGlobalVisualStudio10Generator::Compute()
-{
-  if (!cmGlobalVisualStudio8Generator::Compute())
-    {
-    return false;
-    }
-  this->LongestSource = LongestSourcePath();
-  return true;
-}
-
 void cmGlobalVisualStudio10Generator::Generate()
 {
+  this->LongestSource = LongestSourcePath();
   this->cmGlobalVisualStudio8Generator::Generate();
   if(this->LongestSource.Length > 0)
     {

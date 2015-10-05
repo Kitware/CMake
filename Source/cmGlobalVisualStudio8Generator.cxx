@@ -348,13 +348,9 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
 }
 
 //----------------------------------------------------------------------------
-bool cmGlobalVisualStudio8Generator::Compute()
+void cmGlobalVisualStudio8Generator::AddExtraIDETargets()
 {
-  if (!cmGlobalVisualStudio7Generator::Compute())
-    {
-    return false;
-    }
-
+  cmGlobalVisualStudio7Generator::AddExtraIDETargets();
   if(this->AddCheckTarget())
     {
     // All targets depend on the build-system check target.
@@ -368,7 +364,6 @@ bool cmGlobalVisualStudio8Generator::Compute()
         }
       }
     }
-  return true;
 }
 
 //----------------------------------------------------------------------------
