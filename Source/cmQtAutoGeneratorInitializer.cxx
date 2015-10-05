@@ -108,6 +108,28 @@ void cmQtAutoGeneratorInitializer::SetupSourceFiles(cmTarget const* target,
     }
 }
 
+static void GetCompileDefinitionsAndDirectories(cmTarget const* target,
+                                                const std::string& config,
+                                                std::string &incs,
+                                                std::string &defs)
+{
+  cmMakefile* makefile = target->GetMakefile();
+  cmGlobalGenerator* globalGen = makefile->GetGlobalGenerator();
+  std::vector<std::string> includeDirs;
+  cmGeneratorTarget *gtgt = globalGen->GetGeneratorTarget(target);
+  cmLocalGenerator *localGen = gtgt->GetLocalGenerator();
+  // Get the include dirs for this target, without stripping the implicit
+  // include dirs off, see http://public.kitware.com/Bug/view.php?id=13667
+  localGen->GetIncludeDirectories(includeDirs, gtgt, "CXX", config, false);
+
+  incs = cmJoin(includeDirs, ";");
+
+  std::set<std::string> defines;
+  localGen->AddCompileDefinitions(defines, target, config, "CXX");
+
+  defs += cmJoin(defines, ";");
+}
+
 std::string cmQtAutoGeneratorInitializer::GetAutogenTargetName(
     cmTarget const* target)
 {
@@ -487,28 +509,6 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
 
     target->AddUtility(autogenTargetName);
     }
-}
-
-static void GetCompileDefinitionsAndDirectories(cmTarget const* target,
-                                                const std::string& config,
-                                                std::string &incs,
-                                                std::string &defs)
-{
-  cmMakefile* makefile = target->GetMakefile();
-  cmGlobalGenerator* globalGen = makefile->GetGlobalGenerator();
-  std::vector<std::string> includeDirs;
-  cmGeneratorTarget *gtgt = globalGen->GetGeneratorTarget(target);
-  cmLocalGenerator *localGen = gtgt->GetLocalGenerator();
-  // Get the include dirs for this target, without stripping the implicit
-  // include dirs off, see http://public.kitware.com/Bug/view.php?id=13667
-  localGen->GetIncludeDirectories(includeDirs, gtgt, "CXX", config, false);
-
-  incs = cmJoin(includeDirs, ";");
-
-  std::set<std::string> defines;
-  localGen->AddCompileDefinitions(defines, target, config, "CXX");
-
-  defs += cmJoin(defines, ";");
 }
 
 void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
