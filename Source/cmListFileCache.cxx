@@ -12,7 +12,7 @@
 #include "cmListFileCache.h"
 
 #include "cmListFileLexer.h"
-#include "cmLocalGenerator.h"
+#include "cmOutputConverter.h"
 #include "cmSystemTools.h"
 #include "cmMakefile.h"
 #include "cmVersion.h"
