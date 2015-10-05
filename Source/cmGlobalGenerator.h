@@ -385,7 +385,7 @@ protected:
 
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const;
 
-  std::vector<cmTarget const*> CreateQtAutoGeneratorsTargets();
+  std::vector<const cmGeneratorTarget*> CreateQtAutoGeneratorsTargets();
 
   std::string SelectMakeProgram(const std::string& makeProgram,
                                 const std::string& makeDefault = "") const;

@@ -1180,7 +1180,7 @@ void cmLocalGenerator::AddCompileOptions(
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
-                                             cmGeneratorTarget* target,
+                                             cmGeneratorTarget const* target,
                                              const std::string& lang,
                                              const std::string& config,
                                              bool stripImplicitInclDirs
