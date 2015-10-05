@@ -1472,8 +1472,6 @@ void cmMakefile::AddLinkLibrary(const std::string& lib)
 
 void cmMakefile::InitializeFromParent(cmMakefile* parent)
 {
-  this->StateSnapshot.InitializeFromParent();
-
   this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
                       this->GetCurrentSourceDirectory());
   this->AddDefinition("CMAKE_CURRENT_BINARY_DIR",
@@ -1755,6 +1753,9 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
   // set the subdirs start dirs
   subMf->SetCurrentSourceDirectory(srcPath);
   subMf->SetCurrentBinaryDirectory(binPath);
+
+  subMf->StateSnapshot.InitializeFromParent();
+
   if(excludeFromAll)
     {
     subMf->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
