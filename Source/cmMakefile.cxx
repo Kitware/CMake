@@ -1517,7 +1517,7 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
                     parent->GetProperty("LINK_DIRECTORIES"));
 
   // the initial project name
-  this->SetProjectName(parent->GetProjectName());
+  this->StateSnapshot.SetProjectName(parent->StateSnapshot.GetProjectName());
 
   // Copy include regular expressions.
   this->ComplainFileRegularExpression = parent->ComplainFileRegularExpression;
