@@ -381,6 +381,7 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
       (cmSystemTools::GetCurrentWorkingDirectory());
     snapshot.GetDirectory().SetCurrentSource
       (cmSystemTools::GetCurrentWorkingDirectory());
+    cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(gg, snapshot));
     if (this->GetWorkingMode() != NORMAL_MODE)
       {
       std::string file(cmSystemTools::CollapseFullPath(path));
