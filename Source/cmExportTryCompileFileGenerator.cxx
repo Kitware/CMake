@@ -76,8 +76,12 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
   dummyHead.SetType(cmTarget::EXECUTABLE, "try_compile_dummy_exe");
   dummyHead.SetMakefile(tgt->GetMakefile());
 
-  std::string result = cge->Evaluate(tgt->GetMakefile(), this->Config,
-                                     false, &dummyHead, tgt, &dagChecker);
+  cmGeneratorTarget* gtgt =
+      tgt->GetMakefile()->GetGlobalGenerator()->GetGeneratorTarget(tgt);
+
+  std::string result = cge->Evaluate(gtgt->Target->GetMakefile(), this->Config,
+                                     false, &dummyHead,
+                                     gtgt->Target, &dagChecker);
 
   const std::set<cmTarget const*> &allTargets = cge->GetAllTargetsSeen();
   for(std::set<cmTarget const*>::const_iterator li = allTargets.begin();
