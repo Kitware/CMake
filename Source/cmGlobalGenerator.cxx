@@ -1282,12 +1282,7 @@ bool cmGlobalGenerator::Compute()
       }
     }
 
-  return true;
-}
-
-void cmGlobalGenerator::Generate()
-{
-  unsigned int i;
+  this->AddExtraIDETargets();
 
   // Trace the dependencies, after that no custom commands should be added
   // because their dependencies might not be handled correctly
@@ -1307,22 +1302,27 @@ void cmGlobalGenerator::Generate()
   // Compute the inter-target dependencies.
   if(!this->ComputeTargetDepends())
     {
-    return;
+    return false;
     }
-
-  // Create a map from local generator to the complete set of targets
-  // it builds by default.
-  this->InitializeProgressMarks();
-
-  this->ProcessEvaluationFiles();
 
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
     this->LocalGenerators[i]->ComputeHomeRelativeOutputPath();
     }
 
+  return true;
+}
+
+void cmGlobalGenerator::Generate()
+{
+  // Create a map from local generator to the complete set of targets
+  // it builds by default.
+  this->InitializeProgressMarks();
+
+  this->ProcessEvaluationFiles();
+
   // Generate project files
-  for (i = 0; i < this->LocalGenerators.size(); ++i)
+  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
     {
     this->SetCurrentMakefile(this->LocalGenerators[i]->GetMakefile());
     this->LocalGenerators[i]->Generate();

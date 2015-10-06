@@ -376,14 +376,8 @@ cmGlobalXCodeGenerator::CreateLocalGenerator(cmMakefile* mf)
   return new cmLocalXCodeGenerator(this, mf);
 }
 
-//----------------------------------------------------------------------------
-bool cmGlobalXCodeGenerator::Compute()
+void cmGlobalXCodeGenerator::AddExtraIDETargets()
 {
-  if (!cmGlobalGenerator::Compute())
-    {
-      return false;
-    }
-
   std::map<std::string, std::vector<cmLocalGenerator*> >::iterator it;
   // make sure extra targets are added before calling
   // the parent generate which will call trace depends
@@ -394,7 +388,6 @@ bool cmGlobalXCodeGenerator::Compute()
     // add ALL_BUILD, INSTALL, etc
     this->AddExtraTargets(root, it->second);
     }
-  return true;
 }
 
 void cmGlobalXCodeGenerator::Generate()
