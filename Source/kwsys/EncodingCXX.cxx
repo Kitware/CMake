@@ -38,6 +38,7 @@
 // Windows API.
 #if defined(_WIN32)
 # include <windows.h>
+# include <shellapi.h>
 #endif
 
 namespace KWSYS_NAMESPACE
