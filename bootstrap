@@ -572,7 +572,7 @@ cmake_try_run ()
     echo "Test produced non-zero return code"
     return 3
   fi
-  echo "Test succeded"
+  echo "Test succeeded"
   return 0
 }
 
