@@ -157,9 +157,8 @@ void cmExtraEclipseCDT4Generator::CreateSourceProjectFile()
   assert(this->HomeDirectory != this->HomeOutputDirectory);
 
   // set up the project name: <project>-Source@<baseSourcePathName>
-  const cmMakefile* mf
-     = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
-  std::string name = this->GenerateProjectName(mf->GetProjectName(), "Source",
+  cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
+  std::string name = this->GenerateProjectName(lg->GetProjectName(), "Source",
                                    this->GetPathBasename(this->HomeDirectory));
 
   const std::string filename = this->HomeDirectory + "/.project";
@@ -259,8 +258,8 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::CreateProjectFile()
 {
-  cmMakefile* mf
-    = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
+  cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
+  cmMakefile* mf = lg->GetMakefile();
 
   const std::string filename = this->HomeOutputDirectory + "/.project";
 
@@ -280,7 +279,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     "<projectDescription>\n"
     "\t<name>" <<
-    this->GenerateProjectName(mf->GetProjectName(),
+    this->GenerateProjectName(lg->GetProjectName(),
                               mf->GetSafeDefinition("CMAKE_BUILD_TYPE"),
                               this->GetPathBasename(this->HomeOutputDirectory))
     << "</name>\n"
@@ -696,8 +695,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 {
   std::set<std::string> emmited;
 
-  const cmMakefile* mf
-    = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
+  cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
+  const cmMakefile* mf = lg->GetMakefile();
 
   const std::string filename = this->HomeOutputDirectory + "/.cproject";
 
@@ -1151,8 +1150,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   fout << "</cconfiguration>\n"
           "</storageModule>\n"
           "<storageModule moduleId=\"cdtBuildSystem\" version=\"4.0.0\">\n"
-          "<project id=\"" << this->EscapeForXML(mf->GetProjectName())
-       << ".null.1\" name=\"" << this->EscapeForXML(mf->GetProjectName())
+          "<project id=\"" << this->EscapeForXML(lg->GetProjectName())
+       << ".null.1\" name=\"" << this->EscapeForXML(lg->GetProjectName())
        << "\"/>\n"
           "</storageModule>\n"
           "</cproject>\n"

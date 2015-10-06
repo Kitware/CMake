@@ -410,7 +410,7 @@ void cmGlobalXCodeGenerator::Generate()
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::SetGenerationRoot(cmLocalGenerator* root)
 {
-  this->CurrentProject = root->GetMakefile()->GetProjectName();
+  this->CurrentProject = root->GetProjectName();
   this->SetCurrentLocalGenerator(root);
   cmSystemTools::SplitPath(this->CurrentMakefile->GetCurrentSourceDirectory(),
                            this->ProjectSourceDirectoryComponents);
@@ -3342,7 +3342,7 @@ bool cmGlobalXCodeGenerator
   this->RootObject->SetComment("Project object");
 
   std::string project_id = "PROJECT_";
-  project_id += root->GetMakefile()->GetProjectName();
+  project_id += root->GetProjectName();
   this->RootObject->SetId(this->GetOrCreateId(
     project_id.c_str(), this->RootObject->GetId()).c_str());
 
@@ -3729,7 +3729,7 @@ cmGlobalXCodeGenerator::OutputXCodeProject(cmLocalGenerator* root,
     }
   std::string xcodeDir = root->GetMakefile()->GetCurrentBinaryDirectory();
   xcodeDir += "/";
-  xcodeDir += root->GetMakefile()->GetProjectName();
+  xcodeDir += root->GetProjectName();
   xcodeDir += ".xcode";
   if(this->XcodeVersion > 20)
     {

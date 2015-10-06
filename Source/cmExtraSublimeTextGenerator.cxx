@@ -79,7 +79,7 @@ void cmExtraSublimeTextGenerator::CreateProjectFile(
 {
   const cmMakefile* mf=lgs[0]->GetMakefile();
   std::string outputDir=mf->GetCurrentBinaryDirectory();
-  std::string projectName=mf->GetProjectName();
+  std::string projectName=lgs[0]->GetProjectName();
 
   const std::string filename =
                      outputDir + "/" + projectName + ".sublime-project";
@@ -302,7 +302,7 @@ void cmExtraSublimeTextGenerator::
     {
     fout << ",\n\t";
     }
-  fout << "\t{\n\t\t\t\"name\": \"" << makefile->GetProjectName() << " - " <<
+  fout << "\t{\n\t\t\t\"name\": \"" << lg->GetProjectName() << " - " <<
           targetName << "\",\n";
   fout << "\t\t\t\"cmd\": [" <<
           this->BuildMakeCommand(make, makefileName.c_str(), targetName) <<

@@ -46,9 +46,9 @@ cmExtraKateGenerator::cmExtraKateGenerator()
 
 void cmExtraKateGenerator::Generate()
 {
-  const cmMakefile* mf
-     = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
-  this->ProjectName = this->GenerateProjectName(mf->GetProjectName(),
+  cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
+  const cmMakefile* mf = lg->GetMakefile();
+  this->ProjectName = this->GenerateProjectName(lg->GetProjectName(),
                           mf->GetSafeDefinition("CMAKE_BUILD_TYPE"),
                           this->GetPathBasename(mf->GetHomeOutputDirectory()));
   this->UseNinja = (this->GlobalGenerator->GetName() == "Ninja");
