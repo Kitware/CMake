@@ -312,10 +312,10 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   cmCustomCommandLine commandLine;
   commandLine.push_back(cmSystemTools::GetCMakeCommand());
   std::string argH = "-H";
-  argH += mf->GetHomeDirectory();
+  argH += lg->GetSourceDirectory();
   commandLine.push_back(argH);
   std::string argB = "-B";
-  argB += mf->GetHomeOutputDirectory();
+  argB += lg->GetBinaryDirectory();
   commandLine.push_back(argB);
   commandLine.push_back("--check-stamp-list");
   commandLine.push_back(stampList.c_str());
