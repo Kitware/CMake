@@ -353,9 +353,7 @@ public:
    */
   void SetArgcArgv(const std::vector<std::string>& args);
 
-  void SetCurrentSourceDirectory(const std::string& dir);
   const char* GetCurrentSourceDirectory() const;
-  void SetCurrentBinaryDirectory(const std::string& dir);
   const char* GetCurrentBinaryDirectory() const;
 
   //@}

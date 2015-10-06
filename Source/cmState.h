@@ -75,8 +75,6 @@ public:
     Snapshot GetCallStackParent() const;
     SnapshotType GetType() const;
 
-    void InitializeFromParent();
-
     void SetPolicy(cmPolicies::PolicyID id, cmPolicies::PolicyStatus status);
     cmPolicies::PolicyStatus GetPolicy(cmPolicies::PolicyID id) const;
     bool HasDefinedPolicyCMP0011();
@@ -105,6 +103,9 @@ public:
     friend class cmState;
     friend class Directory;
     friend struct StrictWeakOrder;
+
+    void InitializeFromParent();
+
     cmState* State;
     cmState::PositionType Position;
   };
