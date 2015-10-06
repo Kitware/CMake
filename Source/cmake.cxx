@@ -378,20 +378,19 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
     this->SetHomeOutputDirectory(cmSystemTools::GetCurrentWorkingDirectory());
     cmState::Snapshot snapshot = this->GetCurrentSnapshot();
     cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(gg, snapshot));
-    cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator(mf.get()));
-    lg->GetMakefile()->SetCurrentBinaryDirectory
+    mf->SetCurrentBinaryDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
-    lg->GetMakefile()->SetCurrentSourceDirectory
+    mf->SetCurrentSourceDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
     if (this->GetWorkingMode() != NORMAL_MODE)
       {
       std::string file(cmSystemTools::CollapseFullPath(path));
       cmSystemTools::ConvertToUnixSlashes(file);
-      lg->GetMakefile()->SetScriptModeFile(file.c_str());
+      mf->SetScriptModeFile(file.c_str());
 
-      lg->GetMakefile()->SetArgcArgv(args);
+      mf->SetArgcArgv(args);
       }
-    if (!lg->GetMakefile()->ReadListFile(path))
+    if (!mf->ReadListFile(path))
       {
       cmSystemTools::Error("Error processing file: ", path);
       }
@@ -1906,7 +1905,6 @@ int cmake::CheckBuildSystem()
   cm.SetHomeOutputDirectory("");
   cmGlobalGenerator gg(&cm);
   cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(&gg, cm.GetCurrentSnapshot()));
-  cmsys::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator(mf.get()));
   if(!mf->ReadListFile(this->CheckBuildSystemArgument.c_str()) ||
      cmSystemTools::GetErrorOccuredFlag())
     {

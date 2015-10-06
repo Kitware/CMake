@@ -12,7 +12,6 @@
 #include "cmCTestStartCommand.h"
 
 #include "cmCTest.h"
-#include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmCTestVC.h"
 #include "cmGeneratedFileStream.h"

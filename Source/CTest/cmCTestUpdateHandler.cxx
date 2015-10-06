@@ -15,7 +15,6 @@
 #include "cmCTest.h"
 #include "cmake.h"
 #include "cmMakefile.h"
-#include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmVersion.h"
 #include "cmGeneratedFileStream.h"

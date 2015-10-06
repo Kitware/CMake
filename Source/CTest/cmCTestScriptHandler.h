@@ -18,7 +18,6 @@
 #include "cmListFileCache.h"
 
 class cmMakefile;
-class cmLocalGenerator;
 class cmGlobalGenerator;
 class cmake;
 class cmCTestCommand;
@@ -166,7 +165,6 @@ private:
   double ScriptStartTime;
 
   cmMakefile *Makefile;
-  cmLocalGenerator *LocalGenerator;
   cmGlobalGenerator *GlobalGenerator;
   cmake *CMake;
 };
