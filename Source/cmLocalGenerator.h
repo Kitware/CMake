@@ -255,6 +255,9 @@ public:
 
   cmake* GetCMakeInstance() const;
 
+  const char* GetSourceDirectory() const;
+  const char* GetBinaryDirectory() const;
+
   /**
    * Generate a Mac OS X application bundle Info.plist file.
    */
