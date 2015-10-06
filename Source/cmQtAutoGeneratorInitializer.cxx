@@ -105,10 +105,11 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
     }
 }
 
-static void GetCompileDefinitionsAndDirectories(cmGeneratorTarget const* target,
-                                                const std::string& config,
-                                                std::string &incs,
-                                                std::string &defs)
+static void GetCompileDefinitionsAndDirectories(
+  cmGeneratorTarget const* target,
+  const std::string& config,
+  std::string &incs,
+  std::string &defs)
 {
   std::vector<std::string> includeDirs;
   cmLocalGenerator *localGen = target->GetLocalGenerator();
