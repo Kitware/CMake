@@ -784,7 +784,7 @@ cmGlobalUnixMakefileGenerator3
       depends.clear();
 
       cmLocalUnixMakefileGenerator3::EchoProgress progress;
-      progress.Dir = lg->GetMakefile()->GetHomeOutputDirectory();
+      progress.Dir = lg->GetBinaryDirectory();
       progress.Dir += cmake::GetCMakeFilesDirectory();
       {
       std::ostringstream progressArg;

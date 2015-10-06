@@ -1095,7 +1095,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   // translation table for the dependency scanning process.
   depCmd << "cd "
          << (this->LocalGenerator->Convert(
-               this->Makefile->GetHomeOutputDirectory(),
+               this->LocalGenerator->GetBinaryDirectory(),
                cmLocalGenerator::FULL, cmLocalGenerator::SHELL))
          << " && ";
 #endif
@@ -1110,13 +1110,13 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   // the state of our local generator sufficiently for its needs.
   depCmd << "$(CMAKE_COMMAND) -E cmake_depends \""
          << this->GlobalGenerator->GetName() << "\" "
-         << this->Convert(this->Makefile->GetHomeDirectory(),
+         << this->Convert(this->LocalGenerator->GetSourceDirectory(),
                           cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
          << " "
          << this->Convert(this->Makefile->GetCurrentSourceDirectory(),
                           cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
          << " "
-         << this->Convert(this->Makefile->GetHomeOutputDirectory(),
+         << this->Convert(this->LocalGenerator->GetBinaryDirectory(),
                           cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
          << " "
          << this->Convert(this->Makefile->GetCurrentBinaryDirectory(),
@@ -1242,7 +1242,7 @@ void
 cmMakefileTargetGenerator
 ::MakeEchoProgress(cmLocalUnixMakefileGenerator3::EchoProgress& progress) const
 {
-  progress.Dir = this->Makefile->GetHomeOutputDirectory();
+  progress.Dir = this->LocalGenerator->GetBinaryDirectory();
   progress.Dir += cmake::GetCMakeFilesDirectory();
   std::ostringstream progressArg;
   progressArg << "$(CMAKE_PROGRESS_" << this->NumberOfProgressActions << ")";

@@ -69,11 +69,11 @@ void cmExtraCodeLiteGenerator::Generate()
     this->ConfigName = GetConfigurationName( mf );
 
     if (strcmp(mf->GetCurrentBinaryDirectory(),
-               mf->GetHomeOutputDirectory()) == 0)
+               it->second[0]->GetBinaryDirectory()) == 0)
       {
       workspaceOutputDir   = mf->GetCurrentBinaryDirectory();
       workspaceProjectName = it->second[0]->GetProjectName();
-      workspaceSourcePath  = mf->GetHomeDirectory();
+      workspaceSourcePath  = it->second[0]->GetSourceDirectory();
       workspaceFileName    = workspaceOutputDir+"/";
       workspaceFileName   += workspaceProjectName + ".workspace";
       this->WorkspacePath = mf->GetCurrentBinaryDirectory();;

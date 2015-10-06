@@ -666,8 +666,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   if (!preLinkCmdLines.empty())
     {
     const std::string homeOutDir = localGen.ConvertToOutputFormat(
-                                              mf->GetHomeOutputDirectory(),
-                                              cmLocalGenerator::SHELL);
+                                            localGen.GetBinaryDirectory(),
+                                            cmLocalGenerator::SHELL);
     preLinkCmdLines.push_back("cd " + homeOutDir);
     }
 

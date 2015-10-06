@@ -273,7 +273,7 @@ void cmExtraCodeBlocksGenerator
         }
 
       const std::string &relative = cmSystemTools::RelativePath(
-                         it->second[0]->GetMakefile()->GetHomeDirectory(),
+                         it->second[0]->GetSourceDirectory(),
                          jt->c_str());
       std::vector<std::string> splitted;
       cmSystemTools::SplitPath(relative, splitted, false);
@@ -297,7 +297,7 @@ void cmExtraCodeBlocksGenerator
   tree.BuildVirtualFolder(virtualFolders);
   // And one for <Unit>
   std::string unitFiles;
-  tree.BuildUnit(unitFiles, std::string(mf->GetHomeDirectory()) + "/");
+  tree.BuildUnit(unitFiles, std::string(lgs[0]->GetSourceDirectory()) + "/");
 
   // figure out the compiler
   std::string compiler = this->GetCBCompilerId(mf);
@@ -332,7 +332,7 @@ void cmExtraCodeBlocksGenerator
           // Only add the global targets from CMAKE_BINARY_DIR,
           // not from the subdirs
           if (strcmp(makefile->GetCurrentBinaryDirectory(),
-                     makefile->GetHomeOutputDirectory())==0)
+                     (*lg)->GetBinaryDirectory())==0)
             {
             this->AppendTarget(fout, ti->first, 0,
                                make.c_str(), *lg, compiler.c_str());
