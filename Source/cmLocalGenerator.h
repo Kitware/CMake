@@ -182,6 +182,8 @@ public:
                              const std::string& config,
                              const std::string& lang);
 
+  std::string GetProjectName() const;
+
   /** Compute the language used to compile the given source file.  */
   std::string GetSourceFileLanguage(const cmSourceFile& source);
 
