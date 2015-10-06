@@ -509,7 +509,8 @@ void cmGlobalGhsMultiGenerator::UpdateBuildFiles(
                                        splitPath.back());
       *this->TargetFolderBuildStreams[folderName] << foldNameRelBuildFile
                                                   << " ";
-      GhsMultiGpj::WriteGpjTag(cmGhsMultiTargetGenerator::GetGpjTag(tgt),
+      GhsMultiGpj::WriteGpjTag(cmGhsMultiTargetGenerator::GetGpjTag(
+                                 tgtsI->second),
                                this->TargetFolderBuildStreams[folderName]);
       }
     }
