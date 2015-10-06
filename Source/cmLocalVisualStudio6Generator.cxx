@@ -112,7 +112,7 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
 {
   // If not an in source build, then create the output directory
   if(strcmp(this->Makefile->GetCurrentBinaryDirectory(),
-            this->Makefile->GetHomeDirectory()) != 0)
+            this->GetSourceDirectory()) != 0)
     {
     if(!cmSystemTools::MakeDirectory
        (this->Makefile->GetCurrentBinaryDirectory()))
@@ -226,10 +226,10 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
   comment += makefileIn;
   std::string args;
   args = "-H";
-  args += this->Makefile->GetHomeDirectory();
+  args += this->GetSourceDirectory();
   commandLine.push_back(args);
   args = "-B";
-  args += this->Makefile->GetHomeOutputDirectory();
+  args += this->GetHomeOutputDirectory();
   commandLine.push_back(args);
 
   std::vector<std::string> const& listFiles = this->Makefile->GetListFiles();

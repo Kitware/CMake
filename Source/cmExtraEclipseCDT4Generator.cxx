@@ -79,8 +79,8 @@ void cmExtraEclipseCDT4Generator
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::Generate()
 {
-  const cmMakefile* mf
-    = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
+  cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
+  const cmMakefile* mf = lg->GetMakefile();
 
   std::string eclipseVersion = mf->GetSafeDefinition("CMAKE_ECLIPSE_VERSION");
   cmsys::RegularExpression regex(".*([0-9]+\\.[0-9]+).*");
@@ -106,8 +106,8 @@ void cmExtraEclipseCDT4Generator::Generate()
     }
 
   // TODO: Decide if these are local or member variables
-  this->HomeDirectory       = mf->GetHomeDirectory();
-  this->HomeOutputDirectory = mf->GetHomeOutputDirectory();
+  this->HomeDirectory       = lg->GetSourceDirectory();
+  this->HomeOutputDirectory = lg->GetBinaryDirectory();
 
   this->GenerateLinkedResources = mf->IsOn(
                                     "CMAKE_ECLIPSE_GENERATE_LINKED_RESOURCES");
@@ -226,7 +226,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
     mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
                            cacheEntryName.c_str(), cmState::STRING,
                            true);
-    mf->GetCMakeInstance()->SaveCache(mf->GetHomeOutputDirectory());
+    mf->GetCMakeInstance()->SaveCache(lg->GetBinaryDirectory());
     }
   else if (envVarValue==0 && cacheValue!=0)
     {
@@ -247,7 +247,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
       mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
                              cacheEntryName.c_str(), cmState::STRING,
                              true);
-      mf->GetCMakeInstance()->SaveCache(mf->GetHomeOutputDirectory());
+      mf->GetCMakeInstance()->SaveCache(lg->GetBinaryDirectory());
       }
     }
 
@@ -1089,7 +1089,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           virtDir += prefix;
           virtDir += ti->first;
           std::string buildArgs = "-C \"";
-          buildArgs += makefile->GetHomeOutputDirectory();
+          buildArgs += (*it)->GetBinaryDirectory();
           buildArgs += "\" ";
           buildArgs += makeArgs;
           this->AppendTarget(fout, "Build", make, buildArgs, virtDir, "",
