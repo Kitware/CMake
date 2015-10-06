@@ -196,8 +196,11 @@ void cmExtraEclipseCDT4Generator::CreateSourceProjectFile()
 
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
-                                            const char* envVar, cmMakefile* mf)
+                                            const char* envVar,
+                                            cmLocalGenerator* lg)
 {
+  cmMakefile* mf = lg->GetMakefile();
+
   // get the variables from the environment and from the cache and then
   // figure out which one to use:
 
@@ -360,17 +363,17 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   //   but not necessarily when eclipse is open
   if (compilerId == "MSVC")
     {
-    AddEnvVar(fout, "PATH", mf);
-    AddEnvVar(fout, "INCLUDE", mf);
-    AddEnvVar(fout, "LIB", mf);
-    AddEnvVar(fout, "LIBPATH", mf);
+    AddEnvVar(fout, "PATH", lg);
+    AddEnvVar(fout, "INCLUDE", lg);
+    AddEnvVar(fout, "LIB", lg);
+    AddEnvVar(fout, "LIBPATH", lg);
     }
   else if (compilerId == "Intel")
     {
     // if the env.var is set, use this one and put it in the cache
     // if the env.var is not set, but the value is in the cache,
     // use it from the cache:
-    AddEnvVar(fout, "INTEL_LICENSE_FILE", mf);
+    AddEnvVar(fout, "INTEL_LICENSE_FILE", lg);
     }
   fout <<
     "</value>\n"
