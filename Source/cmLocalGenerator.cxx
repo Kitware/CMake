@@ -2863,6 +2863,11 @@ cmLocalGenerator
   return source.GetLanguage();
 }
 
+cmake* cmLocalGenerator::GetCMakeInstance() const
+{
+  return this->GlobalGenerator->GetCMakeInstance();
+}
+
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::GetTargetDirectory(cmTarget const&) const
