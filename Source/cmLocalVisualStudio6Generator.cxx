@@ -243,7 +243,8 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
                                            no_working_directory, true);
   if(this->Makefile->GetSource(makefileIn.c_str()))
     {
-    tgt.AddSource(makefileIn);
+    cmGeneratorTarget* gt = this->GlobalGenerator->GetGeneratorTarget(&tgt);
+    gt->AddSource(makefileIn);
     }
   else
     {
@@ -595,7 +596,8 @@ cmLocalVisualStudio6Generator
        origCommand.GetCommandLines(), comment,
        origCommand.GetWorkingDirectory().c_str()))
     {
-    target.AddSource(outsf->GetFullPath());
+    cmGeneratorTarget* gt = this->GlobalGenerator->GetGeneratorTarget(&target);
+    gt->AddSource(outsf->GetFullPath());
     }
 
   // Replace the dependencies with the output of this rule so that the

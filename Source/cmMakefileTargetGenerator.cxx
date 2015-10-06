@@ -1149,7 +1149,7 @@ cmMakefileTargetGenerator
 {
   // Depend on all custom command outputs.
   std::vector<cmSourceFile*> sources;
-  this->Target->GetSourceFiles(sources,
+  this->GeneratorTarget->GetSourceFiles(sources,
                       this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
   for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
       source != sources.end(); ++source)

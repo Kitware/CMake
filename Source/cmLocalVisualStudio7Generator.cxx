@@ -112,7 +112,9 @@ void cmLocalVisualStudio7Generator::AddCMakeListsRules()
           }
         if(l->first != CMAKE_CHECK_BUILD_SYSTEM_TARGET)
           {
-          l->second.AddSource(sf->GetFullPath());
+          cmGeneratorTarget* gt =
+              this->GlobalGenerator->GetGeneratorTarget(&l->second);
+          gt->AddSource(sf->GetFullPath());
           }
         }
       }
@@ -148,7 +150,9 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
            force.c_str(), no_depends, no_main_dependency,
            force_commands, " ", 0, true))
         {
-        tgt.AddSource(file->GetFullPath());
+        cmGeneratorTarget* gt =
+            this->GlobalGenerator->GetGeneratorTarget(&tgt);
+        gt->AddSource(file->GetFullPath());
         }
       }
     }

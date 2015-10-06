@@ -134,11 +134,6 @@ public:
     {this->PostBuildCommands.push_back(cmd);}
 
   /**
-   * Get the list of the source files used by this target
-   */
-  void GetSourceFiles(std::vector<cmSourceFile*> &files,
-                      const std::string& config) const;
-  /**
    * Add sources to the target.
    */
   void AddSources(std::vector<std::string> const& srcs);
@@ -388,6 +383,9 @@ public:
   cmStringRange GetCompileDefinitionsEntries() const;
   cmBacktraceRange GetCompileDefinitionsBacktraces() const;
 
+  cmStringRange GetSourceEntries() const;
+  cmBacktraceRange GetSourceBacktraces() const;
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
   const LinkLibraryVectorType &GetLinkLibrariesForVS6() const {
   return this->LinkLibrariesForVS6;}
@@ -466,9 +464,6 @@ private:
   std::string ImportedGetFullPath(const std::string& config,
                                   bool implib) const;
 
-
-  void GetSourceFiles(std::vector<std::string> &files,
-                      const std::string& config) const;
 private:
   mutable cmPropertyMap Properties;
   std::set<std::string> SystemIncludeDirectories;
@@ -502,8 +497,6 @@ private:
   bool IsApple;
   bool IsImportedTarget;
   bool BuildInterfaceIncludesAppended;
-  mutable bool DebugSourcesDone;
-  mutable bool LinkImplementationLanguageIsContextDependent;
 #if defined(_WIN32) && !defined(__CYGWIN__)
   bool LinkLibrariesForVS6Analyzed;
 #endif
