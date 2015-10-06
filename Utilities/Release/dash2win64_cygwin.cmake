@@ -28,4 +28,6 @@ get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
 # allows us to produce cygwin builds in the short term.
 set(EXTRA_CTEST_ARGS "-E ExternalProject")
 
+set(LOCAL_DIR cygwin)
+
 include(${path}/release_cmake.cmake)
