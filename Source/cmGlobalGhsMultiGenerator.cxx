@@ -521,8 +521,7 @@ bool cmGlobalGhsMultiGenerator::IsTgtForBuild(const cmTarget *tgt)
   const std::string config =
     tgt->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
   std::vector<cmSourceFile *> tgtSources;
-  cmGeneratorTarget* gt =
-      this->GetGlobalGenerator()->GetGeneratorTarget(tgt);
+  cmGeneratorTarget* gt = this->GetGeneratorTarget(tgt);
   gt->GetSourceFiles(tgtSources, config);
   bool tgtInBuild = true;
   char const *excludeFromAll = tgt->GetProperty("EXCLUDE_FROM_ALL");
