@@ -93,7 +93,7 @@ macro(CHECK_C_SOURCE_COMPILES SOURCE VAR)
         message(STATUS "Performing Test ${VAR} - Success")
       endif()
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Performing C SOURCE FILE Test ${VAR} succeded with the following output:\n"
+        "Performing C SOURCE FILE Test ${VAR} succeeded with the following output:\n"
         "${OUTPUT}\n"
         "Source file was:\n${SOURCE}\n")
     else()
