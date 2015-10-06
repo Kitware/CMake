@@ -251,6 +251,8 @@ public:
    */
   bool NeedBackwardsCompatibility_2_4();
 
+  cmake* GetCMakeInstance() const;
+
   /**
    * Generate a Mac OS X application bundle Info.plist file.
    */
