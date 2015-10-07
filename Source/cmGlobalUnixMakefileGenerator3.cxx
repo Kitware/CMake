@@ -495,7 +495,7 @@ cmGlobalUnixMakefileGenerator3
   // The directory-level rule should depend on the directory-level
   // rules of the subdirectories.
   std::vector<cmState::Snapshot> children
-      = lg->GetStateSnapshot().GetChildren();
+      = lg->GetMakefile()->GetStateSnapshot().GetChildren();
   for(std::vector<cmState::Snapshot>::const_iterator
         ci = children.begin(); ci != children.end(); ++ci)
     {
