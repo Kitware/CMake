@@ -1113,7 +1113,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
          << this->Convert(this->LocalGenerator->GetSourceDirectory(),
                           cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
          << " "
-         << this->Convert(this->Makefile->GetCurrentSourceDirectory(),
+         << this->Convert(this->LocalGenerator->GetCurrentSourceDirectory(),
                           cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
          << " "
          << this->Convert(this->LocalGenerator->GetBinaryDirectory(),

@@ -215,7 +215,7 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
   dspname += ".dsp.cmake";
   cmCustomCommandLine commandLine;
   commandLine.push_back(cmSystemTools::GetCMakeCommand());
-  std::string makefileIn = this->Makefile->GetCurrentSourceDirectory();
+  std::string makefileIn = this->GetCurrentSourceDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
   if(!cmSystemTools::FileExists(makefileIn.c_str()))
