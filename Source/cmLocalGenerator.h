@@ -259,6 +259,7 @@ public:
   const char* GetBinaryDirectory() const;
 
   const char* GetCurrentBinaryDirectory() const;
+  const char* GetCurrentSourceDirectory() const;
 
   /**
    * Generate a Mac OS X application bundle Info.plist file.
