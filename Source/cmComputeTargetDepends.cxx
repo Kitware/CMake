@@ -319,22 +319,20 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
                                              std::set<std::string> &emitted)
 {
   cmGeneratorTarget const* depender = this->Targets[depender_index];
-  cmTarget const* dependee = dependee_name.Target;
+  cmGeneratorTarget const* dependee = dependee_name.Target;
   // Skip targets that will not really be linked.  This is probably a
   // name conflict between an external library and an executable
   // within the project.
   if(dependee &&
      dependee->GetType() == cmTarget::EXECUTABLE &&
-     !dependee->IsExecutableWithExports())
+     !dependee->Target->IsExecutableWithExports())
     {
     dependee = 0;
     }
 
   if(dependee)
     {
-    cmGeneratorTarget* gt =
-        this->GlobalGenerator->GetGeneratorTarget(dependee);
-    this->AddInterfaceDepends(depender_index, gt, "", emitted);
+    this->AddInterfaceDepends(depender_index, dependee, "", emitted);
     std::vector<std::string> configs;
     depender->Makefile->GetConfigurations(configs);
     for (std::vector<std::string>::const_iterator it = configs.begin();
@@ -342,7 +340,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
       {
       // A target should not depend on itself.
       emitted.insert(depender->GetName());
-      this->AddInterfaceDepends(depender_index, gt, *it, emitted);
+      this->AddInterfaceDepends(depender_index, dependee, *it, emitted);
       }
     }
 }
@@ -356,7 +354,7 @@ void cmComputeTargetDepends::AddTargetDepend(
   cmGeneratorTarget const* depender = this->Targets[depender_index];
 
   // Check the target's makefile first.
-  cmTarget const* dependee = dependee_name.Target;
+  cmGeneratorTarget const* dependee = dependee_name.Target;
 
   if(!dependee && !linking &&
     (depender->GetType() != cmTarget::GLOBAL_TARGET))
@@ -403,16 +401,14 @@ void cmComputeTargetDepends::AddTargetDepend(
   // within the project.
   if(linking && dependee &&
      dependee->GetType() == cmTarget::EXECUTABLE &&
-     !dependee->IsExecutableWithExports())
+     !dependee->Target->IsExecutableWithExports())
     {
     dependee = 0;
     }
 
   if(dependee)
     {
-    cmGeneratorTarget* gt =
-        this->GlobalGenerator->GetGeneratorTarget(dependee);
-    this->AddTargetDepend(depender_index, gt, linking);
+    this->AddTargetDepend(depender_index, dependee, linking);
     }
 }
 
@@ -430,11 +426,9 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
     for(std::set<cmLinkItem>::const_iterator i = utils.begin();
         i != utils.end(); ++i)
       {
-      if(cmTarget const* transitive_dependee = i->Target)
+      if(cmGeneratorTarget const* transitive_dependee = i->Target)
         {
-        cmGeneratorTarget* gt =
-            this->GlobalGenerator->GetGeneratorTarget(transitive_dependee);
-        this->AddTargetDepend(depender_index, gt, false);
+        this->AddTargetDepend(depender_index, transitive_dependee, false);
         }
       }
     }

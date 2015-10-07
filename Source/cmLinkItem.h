@@ -16,7 +16,6 @@
 #include "cmListFileCache.h"
 
 class cmGeneratorTarget;
-class cmTarget;
 
 // Basic information about each link item.
 class cmLinkItem: public std::string
@@ -25,9 +24,9 @@ class cmLinkItem: public std::string
 public:
   cmLinkItem(): std_string(), Target(0) {}
   cmLinkItem(const std_string& n,
-             cmTarget const* t): std_string(n), Target(t) {}
+             cmGeneratorTarget const* t): std_string(n), Target(t) {}
   cmLinkItem(cmLinkItem const& r): std_string(r), Target(r.Target) {}
-  cmTarget const* Target;
+  cmGeneratorTarget const* Target;
 };
 
 class cmLinkImplItem: public cmLinkItem
@@ -35,7 +34,7 @@ class cmLinkImplItem: public cmLinkItem
 public:
   cmLinkImplItem(): cmLinkItem(), Backtrace(), FromGenex(false) {}
   cmLinkImplItem(std::string const& n,
-                 cmTarget const* t,
+                 cmGeneratorTarget const* t,
                  cmListFileBacktrace const& bt,
                  bool fromGenex):
     cmLinkItem(n, t), Backtrace(bt), FromGenex(fromGenex) {}

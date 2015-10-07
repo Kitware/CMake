@@ -846,7 +846,7 @@ getLinkedTargetsContent(
     // Broken code can have a target in its own link interface.
     // Don't follow such link interface entries so as not to create a
     // self-referencing loop.
-    if (it->Target && it->Target != target)
+    if (it->Target && it->Target->Target != target)
       {
       depString +=
         sep + "$<TARGET_PROPERTY:" +

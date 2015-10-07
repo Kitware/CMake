@@ -320,8 +320,7 @@ int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
   int index = lei->second;
   LinkEntry& entry = this->EntryList[index];
   entry.Item = item;
-  entry.Target =
-      item.Target ? this->GlobalGenerator->GetGeneratorTarget(item.Target) : 0;
+  entry.Target = item.Target;
   entry.IsFlag = (!entry.Target && item[0] == '-' && item[1] != 'l' &&
                   item.substr(0, 10) != "-framework");
 
@@ -443,9 +442,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
     // Initialize the item entry.
     LinkEntry& entry = this->EntryList[lei->second];
     entry.Item = dep.Item;
-    entry.Target =
-        dep.Item.Target ?
-          this->GlobalGenerator->GetGeneratorTarget(dep.Item.Target) : 0;
+    entry.Target = dep.Item.Target;
 
     // This item was added specifically because it is a dependent
     // shared library.  It may get special treatment
@@ -983,7 +980,6 @@ void cmComputeLinkDepends::CheckWrongConfigItem(cmLinkItem const& item)
   // directories.
   if(item.Target && !item.Target->IsImported())
     {
-    this->OldWrongConfigItems.insert(
-            this->GlobalGenerator->GetGeneratorTarget(item.Target));
+    this->OldWrongConfigItems.insert(item.Target);
     }
 }
