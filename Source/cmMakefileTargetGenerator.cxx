@@ -419,7 +419,7 @@ void cmMakefileTargetGenerator
   this->WriteObjectBuildFile(obj, lang, source, depends);
 
   // The object file should be checked for dependency integrity.
-  std::string objFullPath = this->LocalGenerator->GetCurrentBinaryDirectory();
+  std::string objFullPath = this->Makefile->GetCurrentBinaryDirectory();
   objFullPath += "/";
   objFullPath += obj;
   objFullPath =
@@ -642,7 +642,7 @@ cmMakefileTargetGenerator
     this->LocalGenerator->ExpandRuleVariables(compileCommand, vars);
     std::string workingDirectory =
       this->LocalGenerator->Convert(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), cmLocalGenerator::FULL);
+        this->Makefile->GetCurrentBinaryDirectory(), cmLocalGenerator::FULL);
     compileCommand.replace(compileCommand.find(langFlags),
                            langFlags.size(), this->GetFlags(lang));
     std::string langDefines = std::string("$(") + lang + "_DEFINES)";
@@ -698,7 +698,7 @@ cmMakefileTargetGenerator
   // Change the command working directory to the local build tree.
   this->LocalGenerator->CreateCDCommand
     (compileCommands,
-     this->LocalGenerator->GetCurrentBinaryDirectory(),
+     this->Makefile->GetCurrentBinaryDirectory(),
      cmLocalGenerator::HOME_OUTPUT);
   commands.insert(commands.end(),
                   compileCommands.begin(), compileCommands.end());
@@ -771,7 +771,7 @@ cmMakefileTargetGenerator
 
         this->LocalGenerator->CreateCDCommand
           (preprocessCommands,
-           this->LocalGenerator->GetCurrentBinaryDirectory(),
+           this->Makefile->GetCurrentBinaryDirectory(),
            cmLocalGenerator::HOME_OUTPUT);
         commands.insert(commands.end(),
                         preprocessCommands.begin(),
@@ -828,7 +828,7 @@ cmMakefileTargetGenerator
 
         this->LocalGenerator->CreateCDCommand
           (assemblyCommands,
-           this->LocalGenerator->GetCurrentBinaryDirectory(),
+           this->Makefile->GetCurrentBinaryDirectory(),
            cmLocalGenerator::HOME_OUTPUT);
         commands.insert(commands.end(),
                         assemblyCommands.begin(),
@@ -929,7 +929,7 @@ void cmMakefileTargetGenerator::WriteTargetCleanRules()
                                            *this->Target);
   this->LocalGenerator->CreateCDCommand
     (commands,
-     this->LocalGenerator->GetCurrentBinaryDirectory(),
+     this->Makefile->GetCurrentBinaryDirectory(),
      cmLocalGenerator::HOME_OUTPUT);
 
   // Write the rule.
@@ -1119,7 +1119,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
          << this->Convert(this->LocalGenerator->GetBinaryDirectory(),
                           cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
          << " "
-         << this->Convert(this->LocalGenerator->GetCurrentBinaryDirectory(),
+         << this->Convert(this->Makefile->GetCurrentBinaryDirectory(),
                           cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
          << " "
          << this->Convert(this->InfoFileNameFull,

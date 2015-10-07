@@ -208,7 +208,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
 
   std::string cacheEntryName = "CMAKE_ECLIPSE_ENVVAR_";
   cacheEntryName += envVar;
-  const char* cacheValue = lg->GetState()->GetInitializedCacheValue(
+  const char* cacheValue = mf->GetState()->GetInitializedCacheValue(
                                                        cacheEntryName);
 
   // now we have both, decide which one to use
@@ -1034,7 +1034,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
        ++it)
     {
     const cmTargets& targets = (*it)->GetMakefile()->GetTargets();
-    std::string subdir = (*it)->Convert((*it)->GetCurrentBinaryDirectory(),
+    cmMakefile* makefile=(*it)->GetMakefile();
+    std::string subdir = (*it)->Convert(makefile->GetCurrentBinaryDirectory(),
                            cmLocalGenerator::HOME_OUTPUT);
     if (subdir == ".")
       {
@@ -1095,7 +1096,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
                              ti->first.c_str());
 
           std::string cleanArgs = "-E chdir \"";
-          cleanArgs += (*it)->GetCurrentBinaryDirectory();
+          cleanArgs += makefile->GetCurrentBinaryDirectory();
           cleanArgs += "\" \"";
           cleanArgs += cmSystemTools::GetCMakeCommand();
           cleanArgs += "\" -P \"";

@@ -68,15 +68,15 @@ void cmExtraCodeLiteGenerator::Generate()
     const cmMakefile* mf =it->second[0]->GetMakefile();
     this->ConfigName = GetConfigurationName( mf );
 
-    if (strcmp(it->second[0]->GetCurrentBinaryDirectory(),
+    if (strcmp(mf->GetCurrentBinaryDirectory(),
                it->second[0]->GetBinaryDirectory()) == 0)
       {
-      workspaceOutputDir   = it->second[0]->GetCurrentBinaryDirectory();
+      workspaceOutputDir   = mf->GetCurrentBinaryDirectory();
       workspaceProjectName = it->second[0]->GetProjectName();
       workspaceSourcePath  = it->second[0]->GetSourceDirectory();
       workspaceFileName    = workspaceOutputDir+"/";
       workspaceFileName   += workspaceProjectName + ".workspace";
-      this->WorkspacePath = it->second[0]->GetCurrentBinaryDirectory();;
+      this->WorkspacePath = mf->GetCurrentBinaryDirectory();;
 
       fout.Open(workspaceFileName.c_str(), false, false);
       fout << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
@@ -91,7 +91,8 @@ void cmExtraCodeLiteGenerator::Generate()
        ++it)
     {
     // retrive project information
-    std::string outputDir   = it->second[0]->GetCurrentBinaryDirectory();
+    const cmMakefile* mf    = it->second[0]->GetMakefile();
+    std::string outputDir   = mf->GetCurrentBinaryDirectory();
     std::string projectName = it->second[0]->GetProjectName();
     std::string filename    = outputDir + "/" + projectName + ".project";
 
@@ -120,7 +121,8 @@ void cmExtraCodeLiteGenerator::Generate()
 void cmExtraCodeLiteGenerator::CreateProjectFile(
   const std::vector<cmLocalGenerator*>& lgs)
 {
-  std::string outputDir   = lgs[0]->GetCurrentBinaryDirectory();
+  const cmMakefile* mf    = lgs[0]->GetMakefile();
+  std::string outputDir   = mf->GetCurrentBinaryDirectory();
   std::string projectName = lgs[0]->GetProjectName();
   std::string filename    = outputDir + "/";
 

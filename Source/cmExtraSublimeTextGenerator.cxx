@@ -77,7 +77,8 @@ void cmExtraSublimeTextGenerator::Generate()
 void cmExtraSublimeTextGenerator::CreateProjectFile(
                                      const std::vector<cmLocalGenerator*>& lgs)
 {
-  std::string outputDir=lgs[0]->GetCurrentBinaryDirectory();
+  const cmMakefile* mf=lgs[0]->GetMakefile();
+  std::string outputDir=mf->GetCurrentBinaryDirectory();
   std::string projectName=lgs[0]->GetProjectName();
 
   const std::string filename =

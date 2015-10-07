@@ -2878,11 +2878,6 @@ const char* cmLocalGenerator::GetBinaryDirectory() const
   return this->GetCMakeInstance()->GetHomeOutputDirectory();
 }
 
-const char* cmLocalGenerator::GetCurrentBinaryDirectory() const
-{
-  return this->StateSnapshot.GetDirectory().GetCurrentBinary();
-}
-
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::GetTargetDirectory(cmTarget const&) const

@@ -47,7 +47,7 @@ cmExtraKateGenerator::cmExtraKateGenerator()
 void cmExtraKateGenerator::Generate()
 {
   cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
-  cmMakefile* mf = lg->GetMakefile();
+  const cmMakefile* mf = lg->GetMakefile();
   this->ProjectName = this->GenerateProjectName(lg->GetProjectName(),
                           mf->GetSafeDefinition("CMAKE_BUILD_TYPE"),
                           this->GetPathBasename(lg->GetBinaryDirectory()));
@@ -121,7 +121,7 @@ cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
     {
     const cmTargets& targets = (*it)->GetMakefile()->GetTargets();
     cmMakefile* makefile=(*it)->GetMakefile();
-    std::string currentDir = (*it)->GetCurrentBinaryDirectory();
+    std::string currentDir = makefile->GetCurrentBinaryDirectory();
     bool topLevel = (currentDir == (*it)->GetBinaryDirectory());
 
     for(cmTargets::const_iterator ti=targets.begin(); ti!=targets.end(); ++ti)

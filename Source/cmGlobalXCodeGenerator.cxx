@@ -414,11 +414,11 @@ void cmGlobalXCodeGenerator::SetGenerationRoot(cmLocalGenerator* root)
   this->SetCurrentLocalGenerator(root);
   cmSystemTools::SplitPath(this->CurrentMakefile->GetCurrentSourceDirectory(),
                            this->ProjectSourceDirectoryComponents);
-  cmSystemTools::SplitPath(this->LocalGenerators->GetCurrentBinaryDirectory(),
+  cmSystemTools::SplitPath(this->CurrentMakefile->GetCurrentBinaryDirectory(),
                            this->ProjectOutputDirectoryComponents);
 
   this->CurrentXCodeHackMakefile =
-    root->GetCurrentBinaryDirectory();
+    root->GetMakefile()->GetCurrentBinaryDirectory();
   this->CurrentXCodeHackMakefile += "/CMakeScripts";
   cmSystemTools::MakeDirectory(this->CurrentXCodeHackMakefile.c_str());
   this->CurrentXCodeHackMakefile += "/XCODE_DEPEND_HELPER.make";
@@ -466,7 +466,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   allbuild->AddSourceCMP0049(listfile.c_str());
 
   // Add XCODE depend helper
-  std::string dir = root->GetCurrentBinaryDirectory();
+  std::string dir = mf->GetCurrentBinaryDirectory();
   cmCustomCommandLine makeHelper;
   if(this->XcodeVersion < 50)
     {
@@ -580,7 +580,7 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
   std::vector<std::string>::iterator new_end =
     std::unique(lfiles.begin(), lfiles.end());
   lfiles.erase(new_end, lfiles.end());
-  this->CurrentReRunCMakeMakefile = root->GetCurrentBinaryDirectory();
+  this->CurrentReRunCMakeMakefile = mf->GetCurrentBinaryDirectory();
   this->CurrentReRunCMakeMakefile += "/CMakeScripts";
   cmSystemTools::MakeDirectory(this->CurrentReRunCMakeMakefile.c_str());
   this->CurrentReRunCMakeMakefile += "/ReRunCMake.make";
@@ -1031,7 +1031,7 @@ void cmGlobalXCodeGenerator::SetCurrentLocalGenerator(cmLocalGenerator* gen)
   this->CurrentLocalGenerator = gen;
   this->CurrentMakefile = gen->GetMakefile();
   std::string outdir =
-    cmSystemTools::CollapseFullPath(this->CurrentLocalGenerator->
+    cmSystemTools::CollapseFullPath(this->CurrentMakefile->
                                     GetCurrentBinaryDirectory());
   cmSystemTools::SplitPath(outdir.c_str(),
                            this->CurrentOutputDirectoryComponents);
@@ -1387,7 +1387,7 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmTarget& cmtarget)
   // linker language.  This should convince Xcode to choose the proper
   // language.
   cmMakefile* mf = cmtarget.GetMakefile();
-  std::string fname = gtgt->GetLocalGenerator()->GetCurrentBinaryDirectory();
+  std::string fname = mf->GetCurrentBinaryDirectory();
   fname += cmake::GetCMakeFilesDirectory();
   fname += "/";
   fname += cmtarget.GetName();
@@ -1616,7 +1616,7 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
                                                 const & commands,
                                                 const char* name)
 {
-  std::string dir = this->CurrentLocalGenerator->GetCurrentBinaryDirectory();
+  std::string dir = this->CurrentMakefile->GetCurrentBinaryDirectory();
   dir += "/CMakeScripts";
   cmSystemTools::MakeDirectory(dir.c_str());
   std::string makefile = dir;
@@ -1637,7 +1637,7 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
                                     currentConfig->c_str());
     }
 
-  std::string cdir = this->CurrentLocalGenerator->GetCurrentBinaryDirectory();
+  std::string cdir = this->CurrentMakefile->GetCurrentBinaryDirectory();
   cdir = this->ConvertToRelativeForXCode(cdir.c_str());
   std::string makecmd = "make -C ";
   makecmd += cdir;
@@ -1965,7 +1965,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     }
 
   // Set attributes to specify the proper name for the target.
-  std::string pndir = this->CurrentLocalGenerator->GetCurrentBinaryDirectory();
+  std::string pndir = this->CurrentMakefile->GetCurrentBinaryDirectory();
   if(target.GetType() == cmTarget::STATIC_LIBRARY ||
      target.GetType() == cmTarget::SHARED_LIBRARY ||
      target.GetType() == cmTarget::MODULE_LIBRARY ||
@@ -3481,7 +3481,7 @@ bool cmGlobalXCodeGenerator
     }
   }
 
-  std::string symroot = root->GetCurrentBinaryDirectory();
+  std::string symroot = root->GetMakefile()->GetCurrentBinaryDirectory();
   symroot += "/build";
   buildSettings->AddAttribute("SYMROOT", this->CreateString(symroot.c_str()));
 
@@ -3724,7 +3724,7 @@ cmGlobalXCodeGenerator::OutputXCodeProject(cmLocalGenerator* root,
     {
     return;
     }
-  std::string xcodeDir = root->GetCurrentBinaryDirectory();
+  std::string xcodeDir = root->GetMakefile()->GetCurrentBinaryDirectory();
   xcodeDir += "/";
   xcodeDir += root->GetProjectName();
   xcodeDir += ".xcode";
