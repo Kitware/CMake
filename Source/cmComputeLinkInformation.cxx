@@ -471,7 +471,7 @@ std::vector<std::string> const& cmComputeLinkInformation::GetFrameworkPaths()
 }
 
 //----------------------------------------------------------------------------
-std::set<cmTarget const*> const&
+const std::set<const cmGeneratorTarget*>&
 cmComputeLinkInformation::GetSharedLibrariesLinked()
 {
   return this->SharedLibrariesLinked;
@@ -1093,7 +1093,7 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
   // Keep track of shared library targets linked.
   if(target->GetType() == cmTarget::SHARED_LIBRARY)
     {
-    this->SharedLibrariesLinked.insert(target->Target);
+    this->SharedLibrariesLinked.insert(target);
     }
 
   // Handle case of an imported shared library with no soname.

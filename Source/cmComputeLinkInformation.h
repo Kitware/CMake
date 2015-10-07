@@ -19,7 +19,6 @@
 class cmake;
 class cmGlobalGenerator;
 class cmMakefile;
-class cmTarget;
 class cmGeneratorTarget;
 class cmOrderDirectories;
 
@@ -57,7 +56,7 @@ public:
   void GetRPath(std::vector<std::string>& runtimeDirs, bool for_install);
   std::string GetRPathString(bool for_install);
   std::string GetChrpathString();
-  std::set<cmTarget const*> const& GetSharedLibrariesLinked();
+  std::set<cmGeneratorTarget const*> const& GetSharedLibrariesLinked();
 
   std::string const& GetRPathLinkFlag() const { return this->RPathLinkFlag; }
   std::string GetRPathLinkString();
@@ -71,7 +70,7 @@ private:
   std::vector<std::string> Depends;
   std::vector<std::string> FrameworkPaths;
   std::vector<std::string> RuntimeSearchPath;
-  std::set<cmTarget const*> SharedLibrariesLinked;
+  std::set<cmGeneratorTarget const*> SharedLibrariesLinked;
 
   // Context information.
   cmGeneratorTarget const* Target;
