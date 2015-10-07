@@ -70,7 +70,7 @@ cmGhsMultiTargetGenerator::GetAbsPathToRoot(const cmTarget *target)
 {
   cmGeneratorTarget* gt = target->GetMakefile()->GetGlobalGenerator()
       ->GetGeneratorTarget(target);
-  return gt->GetLocalGenerator()->GetHomeOutputDirectory();
+  return gt->GetLocalGenerator()->GetBinaryDirectory();
 }
 
 std::string
@@ -451,7 +451,7 @@ void cmGhsMultiTargetGenerator::WriteSources(
     cmSystemTools::ConvertToUnixSlashes(sgPath);
     cmGlobalGhsMultiGenerator::AddFilesUpToPath(
       this->GetFolderBuildStreams(), &this->FolderBuildStreams,
-      this->LocalGenerator->GetHomeOutputDirectory(), sgPath,
+      this->LocalGenerator->GetBinaryDirectory(), sgPath,
       GhsMultiGpj::SUBPROJECT, this->RelBuildFilePath);
 
     std::string fullSourcePath((*si)->GetFullPath());

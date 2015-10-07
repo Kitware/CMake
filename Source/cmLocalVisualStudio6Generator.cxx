@@ -229,7 +229,7 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
   args += this->GetSourceDirectory();
   commandLine.push_back(args);
   args = "-B";
-  args += this->GetHomeOutputDirectory();
+  args += this->GetBinaryDirectory();
   commandLine.push_back(args);
 
   std::vector<std::string> const& listFiles = this->Makefile->GetListFiles();
