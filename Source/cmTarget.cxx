@@ -67,12 +67,10 @@ public:
   cmTargetInternals()
     : Backtrace()
     {
-    this->UtilityItemsDone = false;
     }
   cmTargetInternals(cmTargetInternals const&)
     : Backtrace()
     {
-    this->UtilityItemsDone = false;
     }
   ~cmTargetInternals();
 
@@ -81,9 +79,6 @@ public:
 
   typedef std::map<std::string, cmTarget::ImportInfo> ImportInfoMapType;
   ImportInfoMapType ImportInfoMap;
-
-  std::set<cmLinkItem> UtilityItems;
-  bool UtilityItemsDone;
 
   std::vector<std::string> IncludeDirectoriesEntries;
   std::vector<cmListFileBacktrace> IncludeDirectoriesBacktraces;
@@ -361,22 +356,6 @@ cmListFileBacktrace const* cmTarget::GetUtilityBacktrace(
   if(i == this->UtilityBacktraces.end()) return 0;
 
   return &i->second;
-}
-
-//----------------------------------------------------------------------------
-std::set<cmLinkItem> const& cmTarget::GetUtilityItems() const
-{
-  if(!this->Internal->UtilityItemsDone)
-    {
-    this->Internal->UtilityItemsDone = true;
-    for(std::set<std::string>::const_iterator i = this->Utilities.begin();
-        i != this->Utilities.end(); ++i)
-      {
-      this->Internal->UtilityItems.insert(
-        cmLinkItem(*i, this->Makefile->FindTargetToUse(*i)));
-      }
-    }
-  return this->Internal->UtilityItems;
 }
 
 //----------------------------------------------------------------------------

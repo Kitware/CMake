@@ -271,7 +271,8 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   DebugCompileFeaturesDone(false),
   DebugCompileDefinitionsDone(false),
   DebugSourcesDone(false),
-  LinkImplementationLanguageIsContextDependent(true)
+  LinkImplementationLanguageIsContextDependent(true),
+  UtilityItemsDone(false)
 {
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = lg;
@@ -760,7 +761,23 @@ cmGeneratorTarget::GetExpectedXamlSources(std::set<std::string>& srcs,
 {
   XamlData data;
   IMPLEMENT_VISIT_IMPL(Xaml, COMMA cmGeneratorTarget::XamlData)
-  srcs = data.ExpectedXamlSources;
+      srcs = data.ExpectedXamlSources;
+}
+
+std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
+{
+  if(!this->UtilityItemsDone)
+    {
+    this->UtilityItemsDone = true;
+    std::set<std::string> const& utilities = this->Target->GetUtilities();
+    for(std::set<std::string>::const_iterator i = utilities.begin();
+        i != utilities.end(); ++i)
+      {
+      this->UtilityItems.insert(
+        cmLinkItem(*i, this->Makefile->FindTargetToUse(*i)));
+      }
+    }
+  return this->UtilityItems;
 }
 
 //----------------------------------------------------------------------------

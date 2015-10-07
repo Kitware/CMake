@@ -82,6 +82,8 @@ public:
   void GetExpectedXamlSources(std::set<std::string>&,
                               const std::string& config) const;
 
+  std::set<cmLinkItem>const& GetUtilityItems() const;
+
   void ComputeObjectMapping();
 
   const char* GetFeature(const std::string& feature,
@@ -537,6 +539,7 @@ private:
   typedef std::pair<std::string, bool> OutputNameKey;
   typedef std::map<OutputNameKey, std::string> OutputNameMapType;
   mutable OutputNameMapType OutputNameMap;
+  mutable std::set<cmLinkItem> UtilityItems;
   mutable bool PolicyWarnedCMP0022;
   mutable bool DebugIncludesDone;
   mutable bool DebugCompileOptionsDone;
@@ -544,6 +547,7 @@ private:
   mutable bool DebugCompileDefinitionsDone;
   mutable bool DebugSourcesDone;
   mutable bool LinkImplementationLanguageIsContextDependent;
+  mutable bool UtilityItemsDone;
 
   bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
                            std::string& out) const;

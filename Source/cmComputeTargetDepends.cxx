@@ -272,7 +272,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
 
   // Loop over all utility dependencies.
   {
-  std::set<cmLinkItem> const& tutils = depender->Target->GetUtilityItems();
+  std::set<cmLinkItem> const& tutils = depender->GetUtilityItems();
   std::set<std::string> emitted;
   // A target should not depend on itself.
   emitted.insert(depender->GetName());
@@ -426,7 +426,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
     {
     // Skip IMPORTED and INTERFACE targets but follow their utility
     // dependencies.
-    std::set<cmLinkItem> const& utils = dependee->Target->GetUtilityItems();
+    std::set<cmLinkItem> const& utils = dependee->GetUtilityItems();
     for(std::set<cmLinkItem>::const_iterator i = utils.begin();
         i != utils.end(); ++i)
       {

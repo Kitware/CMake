@@ -14,6 +14,7 @@
 
 #include "cmStandardIncludes.h"
 #include "cmTarget.h"
+#include "cmLinkItem.h"
 
 #include "cmGraphAdjacencyList.h"
 
