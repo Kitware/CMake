@@ -202,6 +202,43 @@ function(_GTK2_GET_VERSION _OUT_major _OUT_minor _OUT_micro _gtkversion_hdr)
     endif()
 endfunction()
 
+
+#=============================================================
+# _GTK2_SIGCXX_GET_VERSION
+# Internal function to parse the version number in
+# sigc++config.h
+#   _OUT_major = Major version number
+#   _OUT_minor = Minor version number
+#   _OUT_micro = Micro version number
+#   _sigcxxversion_hdr = Header file to parse
+#=============================================================
+
+function(_GTK2_SIGCXX_GET_VERSION _OUT_major _OUT_minor _OUT_micro _sigcxxversion_hdr)
+    file(STRINGS ${_sigcxxversion_hdr} _contents REGEX "#define SIGCXX_M[A-Z]+_VERSION[ \t]+")
+    if(_contents)
+        string(REGEX REPLACE ".*#define SIGCXX_MAJOR_VERSION[ \t]+([0-9]+).*" "\\1" ${_OUT_major} "${_contents}")
+        string(REGEX REPLACE ".*#define SIGCXX_MINOR_VERSION[ \t]+([0-9]+).*" "\\1" ${_OUT_minor} "${_contents}")
+        string(REGEX REPLACE ".*#define SIGCXX_MICRO_VERSION[ \t]+([0-9]+).*" "\\1" ${_OUT_micro} "${_contents}")
+
+        if(NOT ${_OUT_major} MATCHES "[0-9]+")
+            message(FATAL_ERROR "Version parsing failed for SIGCXX_MAJOR_VERSION!")
+        endif()
+        if(NOT ${_OUT_minor} MATCHES "[0-9]+")
+            message(FATAL_ERROR "Version parsing failed for SIGCXX_MINOR_VERSION!")
+        endif()
+        if(NOT ${_OUT_micro} MATCHES "[0-9]+")
+            message(FATAL_ERROR "Version parsing failed for SIGCXX_MICRO_VERSION!")
+        endif()
+
+        set(${_OUT_major} ${${_OUT_major}} PARENT_SCOPE)
+        set(${_OUT_minor} ${${_OUT_minor}} PARENT_SCOPE)
+        set(${_OUT_micro} ${${_OUT_micro}} PARENT_SCOPE)
+    else()
+        message(FATAL_ERROR "Include file ${_gtkversion_hdr} does not exist")
+    endif()
+endfunction()
+
+
 #=============================================================
 # _GTK2_FIND_INCLUDE_DIR
 # Internal function to find the GTK include directories
@@ -734,6 +771,25 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_INCLUDE_DIR(SIGC++CONFIG sigc++config.h)
         _GTK2_FIND_LIBRARY    (SIGC++ sigc true true)
         _GTK2_ADD_TARGET      (SIGC++)
+        # Since sigc++ 2.5.1 c++11 support is required
+        _GTK2_SIGCXX_GET_VERSION(GTK2_SIGC++_VERSION_MAJOR
+                                 GTK2_SIGC++_VERSION_MINOR
+                                 GTK2_SIGC++_VERSION_MICRO
+                                 ${GTK2_SIGC++CONFIG_INCLUDE_DIR}/sigc++config.h)
+        if(NOT ${GTK2_SIGC++_VERSION_MAJOR}.${GTK2_SIGC++_VERSION_MINOR}.${GTK2_SIGC++_VERSION_MICRO} VERSION_LESS 2.5.1)
+            # These are the features needed by clients in order to include the
+            # project headers:
+            set_property(TARGET GTK2::sigc++
+                         PROPERTY INTERFACE_COMPILE_FEATURES cxx_alias_templates
+                                                             cxx_auto_type
+                                                             cxx_decltype
+                                                             cxx_deleted_functions
+                                                             cxx_noexcept
+                                                             cxx_nullptr
+                                                             cxx_right_angle_brackets
+                                                             cxx_rvalue_references
+                                                             cxx_variadic_templates)
+        endif()
 
         _GTK2_FIND_INCLUDE_DIR(GLIBMM glibmm.h)
         _GTK2_FIND_INCLUDE_DIR(GLIBMMCONFIG glibmmconfig.h)
