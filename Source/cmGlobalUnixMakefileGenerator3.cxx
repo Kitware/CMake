@@ -937,7 +937,7 @@ void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
       cmLocalGenerator* tlg = gt->GetLocalGenerator();
 
       if(gt->GetType() == cmTarget::INTERFACE_LIBRARY
-          || gt->Target->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
+          || gt->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
         {
         continue;
         }
