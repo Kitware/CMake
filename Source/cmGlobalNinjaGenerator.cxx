@@ -1198,15 +1198,16 @@ void cmGlobalNinjaGenerator::WriteTargetAll(std::ostream& os)
 void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
 {
   cmLocalGenerator *lg = this->LocalGenerators[0];
+  cmMakefile* mfRoot = lg->GetMakefile();
 
   std::ostringstream cmd;
   cmd << lg->ConvertToOutputFormat(cmSystemTools::GetCMakeCommand(),
                                    cmLocalGenerator::SHELL)
       << " -H"
-      << lg->ConvertToOutputFormat(lg->GetSourceDirectory(),
+      << lg->ConvertToOutputFormat(mfRoot->GetHomeDirectory(),
                                    cmLocalGenerator::SHELL)
       << " -B"
-      << lg->ConvertToOutputFormat(lg->GetBinaryDirectory(),
+      << lg->ConvertToOutputFormat(mfRoot->GetHomeOutputDirectory(),
                                    cmLocalGenerator::SHELL);
   WriteRule(*this->RulesFileStream,
             "RERUN_CMAKE",

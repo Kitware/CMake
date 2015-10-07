@@ -274,6 +274,11 @@ public:
    */
   void SetProjectName(std::string const& name);
 
+  /**
+   * Get the name of the project for this build.
+   */
+  std::string GetProjectName() const;
+
   /** Get the configurations to be generated.  */
   std::string GetConfigurations(std::vector<std::string>& configs,
                                 bool single = true) const;
