@@ -62,8 +62,8 @@ public:
   std::string const& GetRPathLinkFlag() const { return this->RPathLinkFlag; }
   std::string GetRPathLinkString();
 private:
-  void AddItem(std::string const& item, cmTarget const* tgt);
-  void AddSharedDepItem(std::string const& item, cmTarget const* tgt);
+  void AddItem(std::string const& item, const cmGeneratorTarget* tgt);
+  void AddSharedDepItem(std::string const& item, cmGeneratorTarget const* tgt);
 
   // Output information.
   ItemVector Items;

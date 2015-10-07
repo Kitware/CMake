@@ -632,11 +632,11 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
 
 //----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddItem(std::string const& item,
-                                       cmTarget const* tgt)
+                                       cmGeneratorTarget const* tgt)
 {
   // Compute the proper name to use to link this library.
   const std::string& config = this->Config;
-  bool impexe = (tgt && tgt->IsExecutableWithExports());
+  bool impexe = (tgt && tgt->Target->IsExecutableWithExports());
   if(impexe && !this->UseImportLibrary && !this->LoaderFlag)
     {
     // Skip linking to executables on platforms with no import
@@ -644,9 +644,8 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
     return;
     }
 
-  if(tgt && tgt->IsLinkable())
+  if(tgt && tgt->Target->IsLinkable())
     {
-    cmGeneratorTarget *gtgt = this->GlobalGenerator->GetGeneratorTarget(tgt);
     // This is a CMake target.  Ask the target for its real name.
     if(impexe && this->LoaderFlag)
       {
@@ -656,10 +655,10 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       std::string linkItem;
       linkItem = this->LoaderFlag;
 
-      std::string exe = gtgt->GetFullPath(config, this->UseImportLibrary,
+      std::string exe = tgt->GetFullPath(config, this->UseImportLibrary,
                                          true);
       linkItem += exe;
-      this->Items.push_back(Item(linkItem, true, tgt));
+      this->Items.push_back(Item(linkItem, true, tgt->Target));
       this->Depends.push_back(exe);
       }
     else if(tgt->GetType() == cmTarget::INTERFACE_LIBRARY)
@@ -667,7 +666,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       // Add the interface library as an item so it can be considered as part
       // of COMPATIBLE_INTERFACE_ enforcement.  The generators will ignore
       // this for the actual link line.
-      this->Items.push_back(Item(std::string(), true, tgt));
+      this->Items.push_back(Item(std::string(), true, tgt->Target));
       }
     else
       {
@@ -677,15 +676,15 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
          (impexe || tgt->GetType() == cmTarget::SHARED_LIBRARY));
 
       // Pass the full path to the target file.
-      std::string lib = gtgt->GetFullPath(config, implib, true);
+      std::string lib = tgt->GetFullPath(config, implib, true);
       if(!this->LinkDependsNoShared ||
          tgt->GetType() != cmTarget::SHARED_LIBRARY)
         {
         this->Depends.push_back(lib);
         }
 
-      this->AddTargetItem(lib, tgt);
-      this->AddLibraryRuntimeInfo(lib, tgt);
+      this->AddTargetItem(lib, tgt->Target);
+      this->AddLibraryRuntimeInfo(lib, tgt->Target);
       }
     }
   else
@@ -716,7 +715,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
 
 //----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
-                                                cmTarget const* tgt)
+                                                const cmGeneratorTarget* tgt)
 {
   // If dropping shared library dependencies, ignore them.
   if(this->SharedDependencyMode == SharedDepModeNone)
@@ -760,18 +759,14 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
     return;
     }
 
-  cmGeneratorTarget *gtgt = 0;
-
   // Get a full path to the dependent shared library.
   // Add it to the runtime path computation so that the target being
   // linked will be able to find it.
   std::string lib;
   if(tgt)
     {
-    gtgt = this->GlobalGenerator->GetGeneratorTarget(tgt);
-
-    lib = gtgt->GetFullPath(this->Config, this->UseImportLibrary);
-    this->AddLibraryRuntimeInfo(lib, tgt);
+    lib = tgt->GetFullPath(this->Config, this->UseImportLibrary);
+    this->AddLibraryRuntimeInfo(lib, tgt->Target);
     }
   else
     {
@@ -795,9 +790,9 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
     }
   if(order)
     {
-    if(gtgt)
+    if(tgt)
       {
-      std::string soName = gtgt->GetSOName(this->Config);
+      std::string soName = tgt->GetSOName(this->Config);
       const char* soname = soName.empty()? 0 : soName.c_str();
       order->AddRuntimeLibrary(lib, soname);
       }
