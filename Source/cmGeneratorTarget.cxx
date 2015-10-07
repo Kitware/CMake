@@ -419,6 +419,8 @@ void cmGeneratorTarget::AddSource(const std::string& src)
   cge->SetEvaluateForBuildsystem(true);
   this->SourceEntries.push_back(
                         new TargetPropertyEntry(cge));
+  this->SourceFilesMap.clear();
+  this->LinkImplementationLanguageIsContextDependent = true;
 }
 
 void cmGeneratorTarget::AddTracedSources(std::vector<std::string> const& srcs)
