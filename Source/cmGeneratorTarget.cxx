@@ -3980,18 +3980,20 @@ std::string compatibilityAgree(CompatibleType t, bool dominant)
 
 //----------------------------------------------------------------------------
 template<typename PropertyType>
-PropertyType getTypedProperty(cmTarget const* tgt, const std::string& prop);
+PropertyType getTypedProperty(cmGeneratorTarget const* tgt,
+                              const std::string& prop);
 
 //----------------------------------------------------------------------------
 template<>
-bool getTypedProperty<bool>(cmTarget const* tgt, const std::string& prop)
+bool getTypedProperty<bool>(cmGeneratorTarget const* tgt,
+                            const std::string& prop)
 {
   return tgt->GetPropertyAsBool(prop);
 }
 
 //----------------------------------------------------------------------------
 template<>
-const char *getTypedProperty<const char *>(cmTarget const* tgt,
+const char *getTypedProperty<const char *>(cmGeneratorTarget const* tgt,
                                            const std::string& prop)
 {
   return tgt->GetProperty(prop);
@@ -4121,7 +4123,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
                                           CompatibleType t,
                                           PropertyType *)
 {
-  PropertyType propContent = getTypedProperty<PropertyType>(tgt->Target, p);
+  PropertyType propContent = getTypedProperty<PropertyType>(tgt, p);
   const bool explicitlySet = tgt->Target->GetProperties()
                                   .find(p)
                                   != tgt->Target->GetProperties().end();
@@ -4173,7 +4175,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
                             .find(interfaceProperty)
                             != theTarget->Target->GetProperties().end();
     PropertyType ifacePropContent =
-                    getTypedProperty<PropertyType>(theTarget->Target,
+                    getTypedProperty<PropertyType>(theTarget,
                               interfaceProperty);
 
     std::string reportEntry;
