@@ -72,7 +72,7 @@ void cmExtraCodeLiteGenerator::Generate()
                mf->GetHomeOutputDirectory()) == 0)
       {
       workspaceOutputDir   = mf->GetCurrentBinaryDirectory();
-      workspaceProjectName = it->second[0]->GetProjectName();
+      workspaceProjectName = mf->GetProjectName();
       workspaceSourcePath  = mf->GetHomeDirectory();
       workspaceFileName    = workspaceOutputDir+"/";
       workspaceFileName   += workspaceProjectName + ".workspace";
@@ -93,7 +93,7 @@ void cmExtraCodeLiteGenerator::Generate()
     // retrive project information
     const cmMakefile* mf    = it->second[0]->GetMakefile();
     std::string outputDir   = mf->GetCurrentBinaryDirectory();
-    std::string projectName = it->second[0]->GetProjectName();
+    std::string projectName = mf->GetProjectName();
     std::string filename    = outputDir + "/" + projectName + ".project";
 
     // Make the project file relative to the workspace
@@ -123,7 +123,7 @@ void cmExtraCodeLiteGenerator::CreateProjectFile(
 {
   const cmMakefile* mf    = lgs[0]->GetMakefile();
   std::string outputDir   = mf->GetCurrentBinaryDirectory();
-  std::string projectName = lgs[0]->GetProjectName();
+  std::string projectName = mf->GetProjectName();
   std::string filename    = outputDir + "/";
 
   filename += projectName + ".project";
@@ -143,7 +143,7 @@ void cmExtraCodeLiteGenerator
 
   ////////////////////////////////////
   fout << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-       "<CodeLite_Project Name=\"" << lgs[0]->GetProjectName()
+       "<CodeLite_Project Name=\"" << mf->GetProjectName()
        << "\" InternalType=\"\">\n";
 
   // Collect all used source files in the project

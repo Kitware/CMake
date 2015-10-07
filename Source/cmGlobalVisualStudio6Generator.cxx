@@ -260,7 +260,7 @@ void cmGlobalVisualStudio6Generator
     }
   std::string fname = root->GetMakefile()->GetCurrentBinaryDirectory();
   fname += "/";
-  fname += root->GetProjectName();
+  fname += root->GetMakefile()->GetProjectName();
   fname += ".dsw";
   cmsys::ofstream fout(fname.c_str());
   if(!fout)

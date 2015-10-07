@@ -183,7 +183,7 @@ void cmLocalNinjaGenerator::WriteProjectHeader(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
   os
-    << "# Project: " << this->GetProjectName() << std::endl
+    << "# Project: " << this->GetMakefile()->GetProjectName() << std::endl
     << "# Configuration: " << this->ConfigName << std::endl
     ;
   cmGlobalNinjaGenerator::WriteDivider(os);

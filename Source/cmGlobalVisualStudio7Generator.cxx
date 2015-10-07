@@ -362,10 +362,10 @@ void cmGlobalVisualStudio7Generator
     {
     return;
     }
-  this->CurrentProject = root->GetProjectName();
+  this->CurrentProject = root->GetMakefile()->GetProjectName();
   std::string fname = root->GetMakefile()->GetCurrentBinaryDirectory();
   fname += "/";
-  fname += root->GetProjectName();
+  fname += root->GetMakefile()->GetProjectName();
   fname += ".sln";
   cmGeneratedFileStream fout(fname.c_str());
   fout.SetCopyIfDifferent(true);

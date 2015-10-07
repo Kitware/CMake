@@ -78,7 +78,7 @@ void cmExtraCodeBlocksGenerator::CreateProjectFile(
 {
   const cmMakefile* mf=lgs[0]->GetMakefile();
   std::string outputDir=mf->GetCurrentBinaryDirectory();
-  std::string projectName=lgs[0]->GetProjectName();
+  std::string projectName=mf->GetProjectName();
 
   std::string filename=outputDir+"/";
   filename+=projectName+".cbp";
@@ -307,7 +307,7 @@ void cmExtraCodeBlocksGenerator
         "<CodeBlocks_project_file>\n"
         "   <FileVersion major=\"1\" minor=\"6\" />\n"
         "   <Project>\n"
-        "      <Option title=\"" << lgs[0]->GetProjectName()<<"\" />\n"
+        "      <Option title=\"" << mf->GetProjectName()<<"\" />\n"
         "      <Option makefile_is_custom=\"1\" />\n"
         "      <Option compiler=\"" << compiler << "\" />\n"
         "      "<<virtualFolders<<"\n"

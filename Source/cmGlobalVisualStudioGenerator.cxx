@@ -250,7 +250,7 @@ cmGlobalVisualStudioGenerator
         {
         topLevelSlnName = mf->GetCurrentBinaryDirectory();
         topLevelSlnName += "/";
-        topLevelSlnName += this->LocalGenerators[0]->GetProjectName();
+        topLevelSlnName += mf->GetProjectName();
         topLevelSlnName += ".sln";
         }
 

@@ -241,12 +241,12 @@ static bool isSubDirectory(const char* a, const char* b)
 
 //----------------------------------------------------------------------------
 static bool checkInterfaceDirs(const std::string &prepro,
-                      cmGeneratorTarget *target, const std::string& prop)
+                      cmTarget *target, const std::string& prop)
 {
   const char* installDir =
-            target->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
-  const char* topSourceDir = target->Makefile->GetHomeDirectory();
-  const char* topBinaryDir = target->Makefile->GetHomeOutputDirectory();
+            target->GetMakefile()->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
+  const char* topSourceDir = target->GetMakefile()->GetHomeDirectory();
+  const char* topBinaryDir = target->GetMakefile()->GetHomeOutputDirectory();
 
   std::vector<std::string> parts;
   cmGeneratorExpression::Split(prepro, parts);
@@ -269,7 +269,7 @@ static bool checkInterfaceDirs(const std::string &prepro,
       {
       if (prop == "INTERFACE_INCLUDE_DIRECTORIES")
         {
-        switch (target->Target->GetPolicyStatusCMP0041())
+        switch (target->GetPolicyStatusCMP0041())
           {
           case cmPolicies::WARN:
             messageType = cmake::WARNING;
@@ -298,7 +298,7 @@ static bool checkInterfaceDirs(const std::string &prepro,
       e << "Target \"" << target->GetName() << "\" " << prop <<
            " property contains relative path:\n"
            "  \"" << *li << "\"";
-      target->GetLocalGenerator()->IssueMessage(messageType, e.str());
+      target->GetMakefile()->IssueMessage(messageType, e.str());
       }
     bool inBinary = isSubDirectory(li->c_str(), topBinaryDir);
     bool inSource = isSubDirectory(li->c_str(), topSourceDir);
@@ -316,7 +316,7 @@ static bool checkInterfaceDirs(const std::string &prepro,
         {
         if (!shouldContinue)
           {
-          switch(target->Target->GetPolicyStatusCMP0052())
+          switch(target->GetPolicyStatusCMP0052())
             {
             case cmPolicies::WARN:
               {
@@ -329,7 +329,7 @@ static bool checkInterfaceDirs(const std::string &prepro,
                 "a subdirectory of the " << (inBinary ? "build" : "source")
                 << " tree:\n    \"" << (inBinary ? topBinaryDir : topSourceDir)
                 << "\"" << std::endl;
-              target->GetLocalGenerator()->IssueMessage(cmake::AUTHOR_WARNING,
+              target->GetMakefile()->IssueMessage(cmake::AUTHOR_WARNING,
                                                   s.str());
               }
             case cmPolicies::OLD:
@@ -352,7 +352,7 @@ static bool checkInterfaceDirs(const std::string &prepro,
       e << "Target \"" << target->GetName() << "\" " << prop <<
            " property contains path:\n"
            "  \"" << *li << "\"\nwhich is prefixed in the build directory.";
-      target->GetLocalGenerator()->IssueMessage(messageType, e.str());
+      target->GetMakefile()->IssueMessage(messageType, e.str());
       }
     if (!inSourceBuild)
       {
@@ -361,7 +361,7 @@ static bool checkInterfaceDirs(const std::string &prepro,
         e << "Target \"" << target->GetName() << "\" " << prop <<
             " property contains path:\n"
             "  \"" << *li << "\"\nwhich is prefixed in the source directory.";
-        target->GetLocalGenerator()->IssueMessage(messageType, e.str());
+        target->GetMakefile()->IssueMessage(messageType, e.str());
         }
       }
     }
@@ -421,9 +421,7 @@ void cmExportFileGenerator::PopulateSourcesInterface(
     this->ResolveTargetsInGeneratorExpressions(prepro, target,
                                                 missingTargets);
 
-    cmGeneratorTarget* gt = target->GetMakefile()
-        ->GetGlobalGenerator()->GetGeneratorTarget(target);
-    if (!checkInterfaceDirs(prepro, gt, propName))
+    if (!checkInterfaceDirs(prepro, target, propName))
       {
       return;
       }
@@ -493,7 +491,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
     this->ResolveTargetsInGeneratorExpressions(prepro, target->Target,
                                                 missingTargets);
 
-    if (!checkInterfaceDirs(prepro, target, propName))
+    if (!checkInterfaceDirs(prepro, target->Target, propName))
       {
       return;
       }

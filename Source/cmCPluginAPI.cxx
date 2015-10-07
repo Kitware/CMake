@@ -116,7 +116,7 @@ const char* CCONV cmGetProjectName(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   static std::string name;
-  name = mf->GetStateSnapshot().GetProjectName();
+  name = mf->GetProjectName();
   return name.c_str();
 }
 

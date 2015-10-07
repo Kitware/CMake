@@ -2431,11 +2431,6 @@ const char* cmLocalGenerator::GetFeature(const std::string& feature,
   return 0;
 }
 
-std::string cmLocalGenerator::GetProjectName() const
-{
-  return this->StateSnapshot.GetProjectName();
-}
-
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConstructComment(cmCustomCommandGenerator const& ccg,
@@ -2861,11 +2856,6 @@ cmLocalGenerator
 ::GetSourceFileLanguage(const cmSourceFile& source)
 {
   return source.GetLanguage();
-}
-
-cmake* cmLocalGenerator::GetCMakeInstance() const
-{
-  return this->GlobalGenerator->GetCMakeInstance();
 }
 
 //----------------------------------------------------------------------------
