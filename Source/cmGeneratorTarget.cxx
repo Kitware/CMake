@@ -2068,9 +2068,9 @@ void processILibs(const std::string& config,
                   cmLinkItem const& item,
                   cmGlobalGenerator* gg,
                   std::vector<cmGeneratorTarget const*>& tgts,
-                  std::set<cmTarget const*>& emitted)
+                  std::set<cmGeneratorTarget const*>& emitted)
 {
-  if (item.Target && emitted.insert(item.Target->Target).second)
+  if (item.Target && emitted.insert(item.Target).second)
     {
     tgts.push_back(item.Target);
     if(cmLinkInterfaceLibraries const* iface =
@@ -2096,7 +2096,7 @@ cmGeneratorTarget::GetLinkImplementationClosure(
   if(!tgts.Done)
     {
     tgts.Done = true;
-    std::set<cmTarget const*> emitted;
+    std::set<cmGeneratorTarget const*> emitted;
 
     cmLinkImplementationLibraries const* impl
       = this->GetLinkImplementationLibraries(config);
