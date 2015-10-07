@@ -66,8 +66,6 @@ private:
   std::string Config;
   EntryVector FinalLinkEntries;
 
-  typedef cmTarget::LinkLibraryVectorType LinkLibraryVectorType;
-
   std::map<std::string, int>::iterator
   AllocateLinkEntry(std::string const& item);
   int AddLinkEntry(cmLinkItem const& item);
