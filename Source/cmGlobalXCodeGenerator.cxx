@@ -415,8 +415,9 @@ void cmGlobalXCodeGenerator::SetGenerationRoot(cmLocalGenerator* root)
   cmSystemTools::SplitPath(
         this->CurrentLocalGenerator->GetCurrentSourceDirectory(),
         this->ProjectSourceDirectoryComponents);
-  cmSystemTools::SplitPath(this->LocalGenerators->GetCurrentBinaryDirectory(),
-                           this->ProjectOutputDirectoryComponents);
+  cmSystemTools::SplitPath(
+        this->CurrentLocalGenerator->GetCurrentBinaryDirectory(),
+        this->ProjectOutputDirectoryComponents);
 
   this->CurrentXCodeHackMakefile =
     root->GetCurrentBinaryDirectory();
