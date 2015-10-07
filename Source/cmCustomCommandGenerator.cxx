@@ -101,7 +101,7 @@ cmCustomCommandGenerator
       }
     else
       {
-      cmOutputConverter converter(this->LG->GetMakefile()->GetStateSnapshot());
+      cmOutputConverter converter(this->LG->GetStateSnapshot());
       cmd += converter.EscapeForShell(arg, this->MakeVars);
       }
     }
