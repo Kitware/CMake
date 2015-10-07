@@ -166,6 +166,10 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
                      curlWriteMemoryCallback);
   ::curl_easy_setopt(this->Curl, CURLOPT_DEBUGFUNCTION,
                      curlDebugCallback);
+  // Be sure to set Content-Type to satisfy fussy modsecurity rules
+  struct curl_slist *headers = ::curl_slist_append(NULL,
+                                                   "Content-Type: text/xml");
+  ::curl_easy_setopt(this->Curl, CURLOPT_HTTPHEADER, headers);
   std::vector<char> responseData;
   std::vector<char> debugData;
   ::curl_easy_setopt(this->Curl, CURLOPT_FILE, (void *)&responseData);
@@ -174,6 +178,8 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
   // Now run off and do what you've been told!
   ::curl_easy_perform(this->Curl);
   ::fclose(ftpfile);
+  ::curl_easy_setopt(this->Curl, CURLOPT_HTTPHEADER, NULL);
+  ::curl_slist_free_all(headers);
 
   if ( responseData.size() > 0 )
     {
