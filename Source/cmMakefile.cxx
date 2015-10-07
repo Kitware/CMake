@@ -2033,11 +2033,6 @@ void cmMakefile::SetProjectName(std::string const& p)
   this->StateSnapshot.SetProjectName(p);
 }
 
-std::string cmMakefile::GetProjectName() const
-{
-  return this->StateSnapshot.GetProjectName();
-}
-
 void cmMakefile::AddGlobalLinkInformation(const std::string& name,
                                           cmTarget& target)
 {
