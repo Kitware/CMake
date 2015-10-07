@@ -760,7 +760,7 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       }
     if(variable == "TARGET_TYPE")
       {
-      return cmTarget::GetTargetTypeName(replaceValues.CMTarget->GetType());
+      return cmState::GetTargetTypeName(replaceValues.CMTarget->GetType());
       }
     }
   if(replaceValues.Output)
@@ -2134,7 +2134,7 @@ void cmLocalGenerator
     w <<
       cmPolicies::GetPolicyWarning(cmPolicies::CMP0063) << "\n"
       "Target \"" << target->GetName() << "\" of "
-      "type \"" << cmTarget::GetTargetTypeName(target->GetType()) << "\" "
+      "type \"" << cmState::GetTargetTypeName(target->GetType()) << "\" "
       "has the following visibility properties set for " << lang << ":\n" <<
       warnCMP0063 <<
       "For compatibility CMake is not honoring them for this target.";

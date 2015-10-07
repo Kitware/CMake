@@ -107,7 +107,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
             this->Makefile->IssueMessage(cmake::FATAL_ERROR,
               "Only libraries may be used as try_compile or try_run IMPORTED "
               "LINK_LIBRARIES.  Got " + std::string(tgt->GetName()) + " of "
-              "type " + tgt->GetTargetTypeName(tgt->GetType()) + ".");
+              "type " + cmState::GetTargetTypeName(tgt->GetType()) + ".");
             return -1;
           }
         if (tgt->IsImported())

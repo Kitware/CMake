@@ -480,8 +480,7 @@ cmNinjaTargetGenerator
   cmGlobalNinjaGenerator::WriteDivider(this->GetBuildFileStream());
   this->GetBuildFileStream()
     << "# Object build statements for "
-    << cmTarget::GetTargetTypeName(
-         this->GetGeneratorTarget()->GetType())
+    << cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType())
     << " target "
     << this->GetTargetName()
     << "\n\n";

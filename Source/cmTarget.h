@@ -77,7 +77,6 @@ class cmTarget
 {
 public:
   cmTarget();
-  static const char* GetTargetTypeName(cmState::TargetType targetType);
   enum CustomCommandType { PRE_BUILD, PRE_LINK, POST_BUILD };
 
   /**

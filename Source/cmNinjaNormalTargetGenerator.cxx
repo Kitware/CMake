@@ -103,7 +103,7 @@ void cmNinjaNormalTargetGenerator::WriteLanguagesRules()
   cmGlobalNinjaGenerator::WriteDivider(this->GetRulesFileStream());
   this->GetRulesFileStream()
     << "# Rules for each languages for "
-    << cmTarget::GetTargetTypeName(this->GetGeneratorTarget()->GetType())
+    << cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType())
     << " target "
     << this->GetTargetName()
     << "\n\n";
@@ -156,8 +156,7 @@ cmNinjaNormalTargetGenerator
 {
   return this->TargetLinkLanguage
     + "_"
-    + cmTarget::GetTargetTypeName(
-        this->GetGeneratorTarget()->GetType())
+    + cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType())
     + "_LINKER__"
     + cmGlobalNinjaGenerator::EncodeRuleName(this->GetTarget()->GetName())
     ;
@@ -446,7 +445,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   const cmState::TargetType targetType = target.GetType();
   this->GetBuildFileStream()
     << "# Link build statements for "
-    << cmTarget::GetTargetTypeName(targetType)
+    << cmState::GetTargetTypeName(targetType)
     << " target "
     << this->GetTargetName()
     << "\n\n";

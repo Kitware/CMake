@@ -101,6 +101,33 @@ cmState::~cmState()
   cmDeleteAll(this->Commands);
 }
 
+const char* cmState::GetTargetTypeName(cmState::TargetType targetType)
+{
+  switch( targetType )
+    {
+      case cmState::STATIC_LIBRARY:
+        return "STATIC_LIBRARY";
+      case cmState::MODULE_LIBRARY:
+        return "MODULE_LIBRARY";
+      case cmState::SHARED_LIBRARY:
+        return "SHARED_LIBRARY";
+      case cmState::OBJECT_LIBRARY:
+        return "OBJECT_LIBRARY";
+      case cmState::EXECUTABLE:
+        return "EXECUTABLE";
+      case cmState::UTILITY:
+        return "UTILITY";
+      case cmState::GLOBAL_TARGET:
+        return "GLOBAL_TARGET";
+      case cmState::INTERFACE_LIBRARY:
+        return "INTERFACE_LIBRARY";
+      case cmState::UNKNOWN_LIBRARY:
+        return "UNKNOWN_LIBRARY";
+    }
+  assert(0 && "Unexpected target type");
+  return 0;
+}
+
 const char* cmCacheEntryTypes[] =
 { "BOOL",
   "PATH",

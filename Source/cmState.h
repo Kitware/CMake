@@ -187,6 +187,8 @@ public:
                     INTERFACE_LIBRARY,
                     UNKNOWN_LIBRARY};
 
+  static const char* GetTargetTypeName(cmState::TargetType targetType);
+
   Snapshot CreateBaseSnapshot();
   Snapshot
   CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot,
