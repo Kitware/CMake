@@ -139,7 +139,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator *lg)
       {
       std::ostringstream e;
       e << "Evaluation file \"" << this->Input << "\" cannot be read.";
-      lg->GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str());
+      lg->IssueMessage(cmake::FATAL_ERROR, e.str());
       return;
       }
 
