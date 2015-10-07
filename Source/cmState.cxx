@@ -1381,6 +1381,10 @@ void cmState::Snapshot::SetDefaultDefinitions()
 
     this->SetDefinition("CMAKE_FILES_DIRECTORY",
                         cmake::GetCMakeFilesDirectory());
+
+  // Setup the default include file regular expression (match everything).
+  this->Position->BuildSystemDirectory
+      ->Properties.SetProperty("INCLUDE_REGULAR_EXPRESSION", "^.*$");
 }
 
 void cmState::Snapshot::SetDirectoryDefinitions()

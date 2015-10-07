@@ -55,8 +55,6 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
 
   this->SuppressWatches = false;
 
-  // Setup the default include file regular expression (match everything).
-  this->SetProperty("INCLUDE_REGULAR_EXPRESSION", "^.*$");
   // Setup the default include complaint regular expression (match nothing).
   this->ComplainFileRegularExpression = "^$";
   // Source and header file extensions that we can handle
