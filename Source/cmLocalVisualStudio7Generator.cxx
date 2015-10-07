@@ -138,7 +138,7 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       cmCustomCommandLines force_commands;
       force_commands.push_back(force_command);
       std::string no_main_dependency = "";
-      std::string force = this->GetCurrentBinaryDirectory();
+      std::string force = this->Makefile->GetCurrentBinaryDirectory();
       force += cmake::GetCMakeFilesDirectory();
       force += "/";
       force += tgt.GetName();
@@ -160,14 +160,14 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
 void cmLocalVisualStudio7Generator::WriteProjectFiles()
 {
   // If not an in source build, then create the output directory
-  if(strcmp(this->GetCurrentBinaryDirectory(),
-            this->GetSourceDirectory()) != 0)
+  if(strcmp(this->Makefile->GetCurrentBinaryDirectory(),
+            this->Makefile->GetHomeDirectory()) != 0)
     {
     if(!cmSystemTools::MakeDirectory
-       (this->GetCurrentBinaryDirectory()))
+       (this->Makefile->GetCurrentBinaryDirectory()))
       {
       cmSystemTools::Error("Error creating directory ",
-                           this->GetCurrentBinaryDirectory());
+                           this->Makefile->GetCurrentBinaryDirectory());
       }
     }
 
@@ -196,7 +196,7 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
 {
   // Touch a timestamp file used to determine when the project file is
   // out of date.
-  std::string stampName = this->GetCurrentBinaryDirectory();
+  std::string stampName = this->Makefile->GetCurrentBinaryDirectory();
   stampName += cmake::GetCMakeFilesDirectory();
   cmSystemTools::MakeDirectory(stampName.c_str());
   stampName += "/";
@@ -243,7 +243,7 @@ void cmLocalVisualStudio7Generator
   target.SetProperty("GENERATOR_FILE_NAME",lname.c_str());
   // create the dsp.cmake file
   std::string fname;
-  fname = this->GetCurrentBinaryDirectory();
+  fname = this->Makefile->GetCurrentBinaryDirectory();
   fname += "/";
   fname += lname;
   if(this->FortranProject)
@@ -272,13 +272,13 @@ void cmLocalVisualStudio7Generator
 //----------------------------------------------------------------------------
 cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
 {
-  std::string stampName = this->GetCurrentBinaryDirectory();
+  std::string stampName = this->Makefile->GetCurrentBinaryDirectory();
   stampName += "/";
   stampName += cmake::GetCMakeFilesDirectoryPostSlash();
   stampName += "generate.stamp";
   cmCustomCommandLine commandLine;
   commandLine.push_back(cmSystemTools::GetCMakeCommand());
-  std::string makefileIn = this->GetCurrentSourceDirectory();
+  std::string makefileIn = this->Makefile->GetCurrentSourceDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
   makefileIn = cmSystemTools::CollapseFullPath(makefileIn.c_str());
@@ -290,10 +290,10 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   comment += makefileIn;
   std::string args;
   args = "-H";
-  args += this->GetSourceDirectory();
+  args += this->Makefile->GetHomeDirectory();
   commandLine.push_back(args);
   args = "-B";
-  args += this->GetBinaryDirectory();
+  args += this->Makefile->GetHomeOutputDirectory();
   commandLine.push_back(args);
   commandLine.push_back("--check-stamp-file");
   std::string stampFilename = this->Convert(stampName.c_str(), FULL,
@@ -1719,7 +1719,7 @@ cmLocalVisualStudio7Generator
   // files directory for any configuration.  This is used to construct
   // object file names that do not produce paths that are too long.
   std::string dir_max;
-  dir_max += this->GetCurrentBinaryDirectory();
+  dir_max += this->Makefile->GetCurrentBinaryDirectory();
   dir_max += "/";
   dir_max += this->GetTargetDirectory(target);
   dir_max += "/";

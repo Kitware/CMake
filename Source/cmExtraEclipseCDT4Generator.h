@@ -100,7 +100,7 @@ private:
                                    std::set<std::string>& emittedDirs);
 
   static void AddEnvVar(cmGeneratedFileStream& fout, const char* envVar,
-                        cmLocalGenerator* lg);
+                        cmMakefile* mf);
 
   void CreateLinksToSubprojects(cmGeneratedFileStream& fout,
                                 const std::string& baseDir);

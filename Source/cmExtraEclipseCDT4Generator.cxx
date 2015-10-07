@@ -79,8 +79,8 @@ void cmExtraEclipseCDT4Generator
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::Generate()
 {
-  cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
-  const cmMakefile* mf = lg->GetMakefile();
+  const cmMakefile* mf
+    = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
 
   std::string eclipseVersion = mf->GetSafeDefinition("CMAKE_ECLIPSE_VERSION");
   cmsys::RegularExpression regex(".*([0-9]+\\.[0-9]+).*");
@@ -106,8 +106,8 @@ void cmExtraEclipseCDT4Generator::Generate()
     }
 
   // TODO: Decide if these are local or member variables
-  this->HomeDirectory       = lg->GetSourceDirectory();
-  this->HomeOutputDirectory = lg->GetBinaryDirectory();
+  this->HomeDirectory       = mf->GetHomeDirectory();
+  this->HomeOutputDirectory = mf->GetHomeOutputDirectory();
 
   this->GenerateLinkedResources = mf->IsOn(
                                     "CMAKE_ECLIPSE_GENERATE_LINKED_RESOURCES");
@@ -157,8 +157,9 @@ void cmExtraEclipseCDT4Generator::CreateSourceProjectFile()
   assert(this->HomeDirectory != this->HomeOutputDirectory);
 
   // set up the project name: <project>-Source@<baseSourcePathName>
-  cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
-  std::string name = this->GenerateProjectName(lg->GetProjectName(), "Source",
+  const cmMakefile* mf
+     = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
+  std::string name = this->GenerateProjectName(mf->GetProjectName(), "Source",
                                    this->GetPathBasename(this->HomeDirectory));
 
   const std::string filename = this->HomeDirectory + "/.project";
@@ -196,11 +197,8 @@ void cmExtraEclipseCDT4Generator::CreateSourceProjectFile()
 
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
-                                            const char* envVar,
-                                            cmLocalGenerator* lg)
+                                            const char* envVar, cmMakefile* mf)
 {
-  cmMakefile* mf = lg->GetMakefile();
-
   // get the variables from the environment and from the cache and then
   // figure out which one to use:
 
@@ -208,7 +206,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
 
   std::string cacheEntryName = "CMAKE_ECLIPSE_ENVVAR_";
   cacheEntryName += envVar;
-  const char* cacheValue = lg->GetState()->GetInitializedCacheValue(
+  const char* cacheValue = mf->GetState()->GetInitializedCacheValue(
                                                        cacheEntryName);
 
   // now we have both, decide which one to use
@@ -226,7 +224,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
     mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
                            cacheEntryName.c_str(), cmState::STRING,
                            true);
-    mf->GetCMakeInstance()->SaveCache(lg->GetBinaryDirectory());
+    mf->GetCMakeInstance()->SaveCache(mf->GetHomeOutputDirectory());
     }
   else if (envVarValue==0 && cacheValue!=0)
     {
@@ -247,7 +245,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
       mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
                              cacheEntryName.c_str(), cmState::STRING,
                              true);
-      mf->GetCMakeInstance()->SaveCache(lg->GetBinaryDirectory());
+      mf->GetCMakeInstance()->SaveCache(mf->GetHomeOutputDirectory());
       }
     }
 
@@ -261,8 +259,8 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::CreateProjectFile()
 {
-  cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
-  cmMakefile* mf = lg->GetMakefile();
+  cmMakefile* mf
+    = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
 
   const std::string filename = this->HomeOutputDirectory + "/.project";
 
@@ -282,7 +280,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     "<projectDescription>\n"
     "\t<name>" <<
-    this->GenerateProjectName(lg->GetProjectName(),
+    this->GenerateProjectName(mf->GetProjectName(),
                               mf->GetSafeDefinition("CMAKE_BUILD_TYPE"),
                               this->GetPathBasename(this->HomeOutputDirectory))
     << "</name>\n"
@@ -363,17 +361,17 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   //   but not necessarily when eclipse is open
   if (compilerId == "MSVC")
     {
-    AddEnvVar(fout, "PATH", lg);
-    AddEnvVar(fout, "INCLUDE", lg);
-    AddEnvVar(fout, "LIB", lg);
-    AddEnvVar(fout, "LIBPATH", lg);
+    AddEnvVar(fout, "PATH", mf);
+    AddEnvVar(fout, "INCLUDE", mf);
+    AddEnvVar(fout, "LIB", mf);
+    AddEnvVar(fout, "LIBPATH", mf);
     }
   else if (compilerId == "Intel")
     {
     // if the env.var is set, use this one and put it in the cache
     // if the env.var is not set, but the value is in the cache,
     // use it from the cache:
-    AddEnvVar(fout, "INTEL_LICENSE_FILE", lg);
+    AddEnvVar(fout, "INTEL_LICENSE_FILE", mf);
     }
   fout <<
     "</value>\n"
@@ -497,7 +495,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
 
     std::string sourceLinkedResourceName = "[Source directory]";
     std::string linkSourceDirectory = this->GetEclipsePath(
-                                             lg->GetCurrentSourceDirectory());
+                                             mf->GetCurrentSourceDirectory());
     // .project dir can't be subdir of a linked resource dir
     if (!cmSystemTools::IsSubDirectory(this->HomeOutputDirectory,
                                          linkSourceDirectory))
@@ -636,7 +634,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
        ++it)
     {
     std::string linkSourceDirectory = this->GetEclipsePath(
-                   it->second[0]->GetCurrentSourceDirectory());
+                   it->second[0]->GetMakefile()->GetCurrentSourceDirectory());
     // a linked resource must not point to a parent directory of .project or
     // .project itself
     if ((baseDir != linkSourceDirectory) &&
@@ -696,8 +694,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 {
   std::set<std::string> emmited;
 
-  cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
-  const cmMakefile* mf = lg->GetMakefile();
+  const cmMakefile* mf
+    = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
 
   const std::string filename = this->HomeOutputDirectory + "/.cproject";
 
@@ -1034,7 +1032,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
        ++it)
     {
     const cmTargets& targets = (*it)->GetMakefile()->GetTargets();
-    std::string subdir = (*it)->Convert((*it)->GetCurrentBinaryDirectory(),
+    cmMakefile* makefile=(*it)->GetMakefile();
+    std::string subdir = (*it)->Convert(makefile->GetCurrentBinaryDirectory(),
                            cmLocalGenerator::HOME_OUTPUT);
     if (subdir == ".")
       {
@@ -1088,14 +1087,14 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           virtDir += prefix;
           virtDir += ti->first;
           std::string buildArgs = "-C \"";
-          buildArgs += (*it)->GetBinaryDirectory();
+          buildArgs += makefile->GetHomeOutputDirectory();
           buildArgs += "\" ";
           buildArgs += makeArgs;
           this->AppendTarget(fout, "Build", make, buildArgs, virtDir, "",
                              ti->first.c_str());
 
           std::string cleanArgs = "-E chdir \"";
-          cleanArgs += (*it)->GetCurrentBinaryDirectory();
+          cleanArgs += makefile->GetCurrentBinaryDirectory();
           cleanArgs += "\" \"";
           cleanArgs += cmSystemTools::GetCMakeCommand();
           cleanArgs += "\" -P \"";
@@ -1150,8 +1149,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   fout << "</cconfiguration>\n"
           "</storageModule>\n"
           "<storageModule moduleId=\"cdtBuildSystem\" version=\"4.0.0\">\n"
-          "<project id=\"" << this->EscapeForXML(lg->GetProjectName())
-       << ".null.1\" name=\"" << this->EscapeForXML(lg->GetProjectName())
+          "<project id=\"" << this->EscapeForXML(mf->GetProjectName())
+       << ".null.1\" name=\"" << this->EscapeForXML(mf->GetProjectName())
        << "\"/>\n"
           "</storageModule>\n"
           "</cproject>\n"

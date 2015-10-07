@@ -399,7 +399,7 @@ cmLocalUnixMakefileGenerator3
       );
     }
   this->CreateCDCommand(commands,
-                        this->GetBinaryDirectory(),
+                        this->Makefile->GetHomeOutputDirectory(),
                         cmLocalGenerator::START_OUTPUT);
 
   // Write the rule to the makefile.
@@ -449,7 +449,7 @@ void cmLocalUnixMakefileGenerator3
       commands.push_back(this->GetRecursiveMakeCall
                          (makefile2.c_str(),localName));
       this->CreateCDCommand(commands,
-                            this->GetBinaryDirectory(),
+                            this->Makefile->GetHomeOutputDirectory(),
                             cmLocalGenerator::START_OUTPUT);
       this->WriteMakeRule(ruleFileStream, "Convenience name for target.",
                           localName, depends, commands, true);
@@ -478,7 +478,7 @@ void cmLocalUnixMakefileGenerator3
       commands.push_back(this->GetRecursiveMakeCall
                          (makefileName.c_str(), makeTargetName));
       this->CreateCDCommand(commands,
-                            this->GetBinaryDirectory(),
+                            this->Makefile->GetHomeOutputDirectory(),
                             cmLocalGenerator::START_OUTPUT);
       this->WriteMakeRule(ruleFileStream, "fast build rule for target.",
                           localName, depends, commands, true);
@@ -496,7 +496,7 @@ void cmLocalUnixMakefileGenerator3
         commands.push_back(this->GetRecursiveMakeCall
                            (makefile2.c_str(), makeTargetName));
         this->CreateCDCommand(commands,
-                              this->GetBinaryDirectory(),
+                              this->Makefile->GetHomeOutputDirectory(),
                               cmLocalGenerator::START_OUTPUT);
         this->WriteMakeRule(ruleFileStream,
                             "Manual pre-install relink rule for target.",
@@ -750,13 +750,13 @@ cmLocalUnixMakefileGenerator3
   makefileStream
     << "# The top-level source directory on which CMake was run.\n"
     << "CMAKE_SOURCE_DIR = "
-    << this->Convert(this->GetSourceDirectory(), FULL, SHELL)
+    << this->Convert(this->Makefile->GetHomeDirectory(), FULL, SHELL)
     << "\n"
     << "\n";
   makefileStream
     << "# The top-level build directory on which CMake was run.\n"
     << "CMAKE_BINARY_DIR = "
-    << this->Convert(this->GetBinaryDirectory(), FULL, SHELL)
+    << this->Convert(this->Makefile->GetHomeOutputDirectory(), FULL, SHELL)
     << "\n"
     << "\n";
 }
@@ -889,7 +889,7 @@ void cmLocalUnixMakefileGenerator3
   if(!this->GetMakefile()->IsRootMakefile())
     {
     this->CreateCDCommand(commands,
-                          this->GetBinaryDirectory(),
+                          this->Makefile->GetHomeOutputDirectory(),
                           cmLocalGenerator::START_OUTPUT);
     }
   this->WriteMakeRule(makefileStream,
@@ -1838,7 +1838,7 @@ void cmLocalUnixMakefileGenerator3
 
   depends.push_back("cmake_check_build_system");
 
-  std::string progressDir = this->GetBinaryDirectory();
+  std::string progressDir = this->Makefile->GetHomeOutputDirectory();
   progressDir += cmake::GetCMakeFilesDirectory();
     {
     std::ostringstream progCmd;
@@ -1862,7 +1862,7 @@ void cmLocalUnixMakefileGenerator3
   commands.push_back(this->GetRecursiveMakeCall(mf2Dir.c_str(),
                                                 recursiveTarget));
   this->CreateCDCommand(commands,
-                        this->GetBinaryDirectory(),
+                        this->Makefile->GetHomeOutputDirectory(),
                         cmLocalGenerator::START_OUTPUT);
     {
     std::ostringstream progCmd;
@@ -1884,7 +1884,7 @@ void cmLocalUnixMakefileGenerator3
   commands.push_back(this->GetRecursiveMakeCall(mf2Dir.c_str(),
                                                 recursiveTarget));
   this->CreateCDCommand(commands,
-                                this->GetBinaryDirectory(),
+                                this->Makefile->GetHomeOutputDirectory(),
                                 cmLocalGenerator::START_OUTPUT);
   this->WriteMakeRule(ruleFileStream, "The main clean target", "clean",
                       depends, commands, true);
@@ -1914,7 +1914,7 @@ void cmLocalUnixMakefileGenerator3
   commands.push_back
     (this->GetRecursiveMakeCall(mf2Dir.c_str(), recursiveTarget));
   this->CreateCDCommand(commands,
-                        this->GetBinaryDirectory(),
+                        this->Makefile->GetHomeOutputDirectory(),
                         cmLocalGenerator::START_OUTPUT);
   this->WriteMakeRule(ruleFileStream, "Prepare targets for installation.",
                       "preinstall", depends, commands, true);
@@ -1935,7 +1935,7 @@ void cmLocalUnixMakefileGenerator3
   runRule += " 1";
   commands.push_back(runRule);
   this->CreateCDCommand(commands,
-                        this->GetBinaryDirectory(),
+                        this->Makefile->GetHomeOutputDirectory(),
                         cmLocalGenerator::START_OUTPUT);
   this->WriteMakeRule(ruleFileStream, "clear depends",
                       "depend",
