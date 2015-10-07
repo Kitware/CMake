@@ -278,7 +278,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   stampName += "generate.stamp";
   cmCustomCommandLine commandLine;
   commandLine.push_back(cmSystemTools::GetCMakeCommand());
-  std::string makefileIn = this->GetCurrentSourceDirectory();
+  std::string makefileIn = this->Makefile->GetCurrentSourceDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
   makefileIn = cmSystemTools::CollapseFullPath(makefileIn.c_str());

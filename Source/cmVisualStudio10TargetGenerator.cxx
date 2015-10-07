@@ -2243,7 +2243,7 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
 {
   // Look through the sources for AndroidManifest.xml and use
   // its location as the root source directory.
-  std::string rootDir = this->LocalGenerator->GetCurrentSourceDirectory();
+  std::string rootDir = this->Makefile->GetCurrentSourceDirectory();
   {
   std::vector<cmSourceFile const*> extraSources;
   this->GeneratorTarget->GetExtraSources(extraSources, "");

@@ -2883,11 +2883,6 @@ const char* cmLocalGenerator::GetCurrentBinaryDirectory() const
   return this->StateSnapshot.GetDirectory().GetCurrentBinary();
 }
 
-const char* cmLocalGenerator::GetCurrentSourceDirectory() const
-{
-  return this->StateSnapshot.GetDirectory().GetCurrentSource();
-}
-
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::GetTargetDirectory(cmTarget const&) const

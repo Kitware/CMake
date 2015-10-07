@@ -497,7 +497,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
 
     std::string sourceLinkedResourceName = "[Source directory]";
     std::string linkSourceDirectory = this->GetEclipsePath(
-                                             lg->GetCurrentSourceDirectory());
+                                             mf->GetCurrentSourceDirectory());
     // .project dir can't be subdir of a linked resource dir
     if (!cmSystemTools::IsSubDirectory(this->HomeOutputDirectory,
                                          linkSourceDirectory))
@@ -636,7 +636,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
        ++it)
     {
     std::string linkSourceDirectory = this->GetEclipsePath(
-                   it->second[0]->GetCurrentSourceDirectory());
+                   it->second[0]->GetMakefile()->GetCurrentSourceDirectory());
     // a linked resource must not point to a parent directory of .project or
     // .project itself
     if ((baseDir != linkSourceDirectory) &&
