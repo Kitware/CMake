@@ -412,10 +412,12 @@ void cmGlobalXCodeGenerator::SetGenerationRoot(cmLocalGenerator* root)
 {
   this->CurrentProject = root->GetProjectName();
   this->SetCurrentLocalGenerator(root);
-  cmSystemTools::SplitPath(this->CurrentMakefile->GetCurrentSourceDirectory(),
-                           this->ProjectSourceDirectoryComponents);
-  cmSystemTools::SplitPath(this->LocalGenerators->GetCurrentBinaryDirectory(),
-                           this->ProjectOutputDirectoryComponents);
+  cmSystemTools::SplitPath(
+        this->CurrentLocalGenerator->GetCurrentSourceDirectory(),
+        this->ProjectSourceDirectoryComponents);
+  cmSystemTools::SplitPath(
+        this->CurrentLocalGenerator->GetCurrentBinaryDirectory(),
+        this->ProjectOutputDirectoryComponents);
 
   this->CurrentXCodeHackMakefile =
     root->GetCurrentBinaryDirectory();
@@ -460,7 +462,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   mf->AddGeneratorTarget(allbuild, allBuildGt);
 
   // Refer to the main build configuration file for easy editing.
-  std::string listfile = mf->GetCurrentSourceDirectory();
+  std::string listfile = root->GetCurrentSourceDirectory();
   listfile += "/";
   listfile += "CMakeLists.txt";
   allbuild->AddSourceCMP0049(listfile.c_str());
@@ -554,7 +556,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
         }
 
       // Refer to the build configuration file for easy editing.
-      listfile = lg->GetMakefile()->GetCurrentSourceDirectory();
+      listfile = lg->GetCurrentSourceDirectory();
       listfile += "/";
       listfile += "CMakeLists.txt";
       target.AddSourceCMP0049(listfile.c_str());
@@ -3369,7 +3371,7 @@ bool cmGlobalXCodeGenerator
   // Point Xcode at the top of the source tree.
   {
   std::string pdir =
-    this->RelativeToBinary(root->GetMakefile()->GetCurrentSourceDirectory());
+    this->RelativeToBinary(root->GetCurrentSourceDirectory());
   this->RootObject->AddAttribute("projectDirPath",
                                  this->CreateString(pdir.c_str()));
   this->RootObject->AddAttribute("projectRoot", this->CreateString(""));
