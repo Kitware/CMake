@@ -129,7 +129,7 @@ private:
   std::string NoCaseExpression(const char* str);
 
   // Handling of link items.
-  void AddTargetItem(std::string const& item, cmTarget const* target);
+  void AddTargetItem(std::string const& item, const cmGeneratorTarget* target);
   void AddFullItem(std::string const& item);
   bool CheckImplicitDirItem(std::string const& item);
   void AddUserItem(std::string const& item, bool pathNotKnown);
@@ -183,7 +183,7 @@ private:
   bool CMP0060Warn;
 
   void AddLibraryRuntimeInfo(std::string const& fullPath,
-                             cmTarget const* target);
+                             const cmGeneratorTarget* target);
   void AddLibraryRuntimeInfo(std::string const& fullPath);
 
 };
