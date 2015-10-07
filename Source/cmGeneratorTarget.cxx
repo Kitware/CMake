@@ -323,7 +323,7 @@ cmLocalGenerator* cmGeneratorTarget::GetLocalGenerator() const
 }
 
 //----------------------------------------------------------------------------
-int cmGeneratorTarget::GetType() const
+cmState::TargetType cmGeneratorTarget::GetType() const
 {
   return this->Target->GetType();
 }
