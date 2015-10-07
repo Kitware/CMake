@@ -399,7 +399,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
   bool fatalError = false;
 
   mf->AddDefinition("RUN_CONFIGURE", true);
-  std::string rootBin = mf->GetHomeOutputDirectory();
+  std::string rootBin = this->CMakeInstance->GetHomeOutputDirectory();
   rootBin += cmake::GetCMakeFilesDirectory();
 
   // If the configuration files path has been set,
@@ -2105,7 +2105,7 @@ cmGlobalGenerator::FindLocalGenerator(const std::string& start_dir) const
   for(std::vector<cmLocalGenerator*>::const_iterator it =
       this->LocalGenerators.begin(); it != this->LocalGenerators.end(); ++it)
     {
-    std::string sd = (*it)->GetMakefile()->GetCurrentSourceDirectory();
+    std::string sd = (*it)->GetCurrentSourceDirectory();
     if (sd == start_dir)
       {
       return *it;
@@ -2879,10 +2879,8 @@ void cmGlobalGenerator::WriteRuleHashes(std::string const& pfile)
 //----------------------------------------------------------------------------
 void cmGlobalGenerator::WriteSummary()
 {
-  cmMakefile* mf = this->LocalGenerators[0]->GetMakefile();
-
   // Record all target directories in a central location.
-  std::string fname = mf->GetHomeOutputDirectory();
+  std::string fname = this->CMakeInstance->GetHomeOutputDirectory();
   fname += cmake::GetCMakeFilesDirectory();
   fname += "/TargetDirectories.txt";
   cmGeneratedFileStream fout(fname.c_str());

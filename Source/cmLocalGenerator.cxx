@@ -2431,6 +2431,11 @@ const char* cmLocalGenerator::GetFeature(const std::string& feature,
   return 0;
 }
 
+std::string cmLocalGenerator::GetProjectName() const
+{
+  return this->StateSnapshot.GetProjectName();
+}
+
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConstructComment(cmCustomCommandGenerator const& ccg,
@@ -2856,6 +2861,31 @@ cmLocalGenerator
 ::GetSourceFileLanguage(const cmSourceFile& source)
 {
   return source.GetLanguage();
+}
+
+cmake* cmLocalGenerator::GetCMakeInstance() const
+{
+  return this->GlobalGenerator->GetCMakeInstance();
+}
+
+const char* cmLocalGenerator::GetSourceDirectory() const
+{
+  return this->GetCMakeInstance()->GetHomeDirectory();
+}
+
+const char* cmLocalGenerator::GetBinaryDirectory() const
+{
+  return this->GetCMakeInstance()->GetHomeOutputDirectory();
+}
+
+const char* cmLocalGenerator::GetCurrentBinaryDirectory() const
+{
+  return this->StateSnapshot.GetDirectory().GetCurrentBinary();
+}
+
+const char* cmLocalGenerator::GetCurrentSourceDirectory() const
+{
+  return this->StateSnapshot.GetDirectory().GetCurrentSource();
 }
 
 //----------------------------------------------------------------------------

@@ -68,15 +68,15 @@ void cmExtraCodeLiteGenerator::Generate()
     const cmMakefile* mf =it->second[0]->GetMakefile();
     this->ConfigName = GetConfigurationName( mf );
 
-    if (strcmp(mf->GetCurrentBinaryDirectory(),
-               mf->GetHomeOutputDirectory()) == 0)
+    if (strcmp(it->second[0]->GetCurrentBinaryDirectory(),
+               it->second[0]->GetBinaryDirectory()) == 0)
       {
-      workspaceOutputDir   = mf->GetCurrentBinaryDirectory();
-      workspaceProjectName = mf->GetProjectName();
-      workspaceSourcePath  = mf->GetHomeDirectory();
+      workspaceOutputDir   = it->second[0]->GetCurrentBinaryDirectory();
+      workspaceProjectName = it->second[0]->GetProjectName();
+      workspaceSourcePath  = it->second[0]->GetSourceDirectory();
       workspaceFileName    = workspaceOutputDir+"/";
       workspaceFileName   += workspaceProjectName + ".workspace";
-      this->WorkspacePath = mf->GetCurrentBinaryDirectory();;
+      this->WorkspacePath = it->second[0]->GetCurrentBinaryDirectory();;
 
       fout.Open(workspaceFileName.c_str(), false, false);
       fout << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
@@ -91,9 +91,8 @@ void cmExtraCodeLiteGenerator::Generate()
        ++it)
     {
     // retrive project information
-    const cmMakefile* mf    = it->second[0]->GetMakefile();
-    std::string outputDir   = mf->GetCurrentBinaryDirectory();
-    std::string projectName = mf->GetProjectName();
+    std::string outputDir   = it->second[0]->GetCurrentBinaryDirectory();
+    std::string projectName = it->second[0]->GetProjectName();
     std::string filename    = outputDir + "/" + projectName + ".project";
 
     // Make the project file relative to the workspace
@@ -121,9 +120,8 @@ void cmExtraCodeLiteGenerator::Generate()
 void cmExtraCodeLiteGenerator::CreateProjectFile(
   const std::vector<cmLocalGenerator*>& lgs)
 {
-  const cmMakefile* mf    = lgs[0]->GetMakefile();
-  std::string outputDir   = mf->GetCurrentBinaryDirectory();
-  std::string projectName = mf->GetProjectName();
+  std::string outputDir   = lgs[0]->GetCurrentBinaryDirectory();
+  std::string projectName = lgs[0]->GetProjectName();
   std::string filename    = outputDir + "/";
 
   filename += projectName + ".project";
@@ -143,7 +141,7 @@ void cmExtraCodeLiteGenerator
 
   ////////////////////////////////////
   fout << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-       "<CodeLite_Project Name=\"" << mf->GetProjectName()
+       "<CodeLite_Project Name=\"" << lgs[0]->GetProjectName()
        << "\" InternalType=\"\">\n";
 
   // Collect all used source files in the project

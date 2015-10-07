@@ -183,7 +183,7 @@ void cmLocalNinjaGenerator::WriteProjectHeader(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
   os
-    << "# Project: " << this->GetMakefile()->GetProjectName() << std::endl
+    << "# Project: " << this->GetProjectName() << std::endl
     << "# Configuration: " << this->ConfigName << std::endl
     ;
   cmGlobalNinjaGenerator::WriteDivider(os);
@@ -363,7 +363,7 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(
   if (ccg.GetNumberOfCommands() > 0) {
     std::string wd = ccg.GetWorkingDirectory();
     if (wd.empty())
-      wd = this->GetMakefile()->GetCurrentBinaryDirectory();
+      wd = this->GetCurrentBinaryDirectory();
 
     std::ostringstream cdCmd;
 #ifdef _WIN32

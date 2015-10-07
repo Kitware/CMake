@@ -46,21 +46,22 @@ cmExtraKateGenerator::cmExtraKateGenerator()
 
 void cmExtraKateGenerator::Generate()
 {
-  const cmMakefile* mf
-     = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
-  this->ProjectName = this->GenerateProjectName(mf->GetProjectName(),
+  cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
+  cmMakefile* mf = lg->GetMakefile();
+  this->ProjectName = this->GenerateProjectName(lg->GetProjectName(),
                           mf->GetSafeDefinition("CMAKE_BUILD_TYPE"),
-                          this->GetPathBasename(mf->GetHomeOutputDirectory()));
+                          this->GetPathBasename(lg->GetBinaryDirectory()));
   this->UseNinja = (this->GlobalGenerator->GetName() == "Ninja");
 
-  this->CreateKateProjectFile(mf);
-  this->CreateDummyKateProjectFile(mf);
+  this->CreateKateProjectFile(lg);
+  this->CreateDummyKateProjectFile(lg);
 }
 
 
-void cmExtraKateGenerator::CreateKateProjectFile(const cmMakefile* mf) const
+void cmExtraKateGenerator::CreateKateProjectFile(
+    const cmLocalGenerator* lg) const
 {
-  std::string filename = mf->GetHomeOutputDirectory();
+  std::string filename = lg->GetBinaryDirectory();
   filename += "/.kateproject";
   cmGeneratedFileStream fout(filename.c_str());
   if (!fout)
@@ -68,31 +69,29 @@ void cmExtraKateGenerator::CreateKateProjectFile(const cmMakefile* mf) const
     return;
     }
 
-  std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
-  std::string args = mf->GetSafeDefinition("CMAKE_KATE_MAKE_ARGUMENTS");
-
   fout <<
     "{\n"
     "\t\"name\": \"" << this->ProjectName << "\",\n"
-    "\t\"directory\": \"" << mf->GetHomeDirectory() << "\",\n"
-    "\t\"files\": [ { " << this->GenerateFilesString(mf) << "} ],\n";
-  this->WriteTargets(mf, fout);
+    "\t\"directory\": \"" << lg->GetSourceDirectory() << "\",\n"
+    "\t\"files\": [ { " << this->GenerateFilesString(lg) << "} ],\n";
+  this->WriteTargets(lg, fout);
   fout << "}\n";
 }
 
 
 void
-cmExtraKateGenerator::WriteTargets(const cmMakefile* mf,
+cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
                                    cmGeneratedFileStream& fout) const
 {
+  cmMakefile const* mf = lg->GetMakefile();
   const std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   const std::string makeArgs = mf->GetSafeDefinition(
     "CMAKE_KATE_MAKE_ARGUMENTS");
-  const char* homeOutputDir = mf->GetHomeOutputDirectory();
+  const char* homeOutputDir = lg->GetBinaryDirectory();
 
   fout <<
   "\t\"build\": {\n"
-  "\t\t\"directory\": \"" << mf->GetHomeOutputDirectory() << "\",\n"
+  "\t\t\"directory\": \"" << lg->GetBinaryDirectory() << "\",\n"
   "\t\t\"default_target\": \"all\",\n"
   "\t\t\"clean_target\": \"clean\",\n";
 
@@ -122,8 +121,8 @@ cmExtraKateGenerator::WriteTargets(const cmMakefile* mf,
     {
     const cmTargets& targets = (*it)->GetMakefile()->GetTargets();
     cmMakefile* makefile=(*it)->GetMakefile();
-    std::string currentDir = makefile->GetCurrentBinaryDirectory();
-    bool topLevel = (currentDir == makefile->GetHomeOutputDirectory());
+    std::string currentDir = (*it)->GetCurrentBinaryDirectory();
+    bool topLevel = (currentDir == (*it)->GetBinaryDirectory());
 
     for(cmTargets::const_iterator ti=targets.begin(); ti!=targets.end(); ++ti)
       {
@@ -234,9 +233,10 @@ cmExtraKateGenerator::AppendTarget(cmGeneratedFileStream& fout,
 
 
 void
-cmExtraKateGenerator::CreateDummyKateProjectFile(const cmMakefile* mf) const
+cmExtraKateGenerator::CreateDummyKateProjectFile(
+    const cmLocalGenerator* lg) const
 {
-  std::string filename = mf->GetHomeOutputDirectory();
+  std::string filename = lg->GetBinaryDirectory();
   filename += "/";
   filename += this->ProjectName;
   filename += ".kateproject";
@@ -252,23 +252,23 @@ cmExtraKateGenerator::CreateDummyKateProjectFile(const cmMakefile* mf) const
 
 
 std::string
-cmExtraKateGenerator::GenerateFilesString(const cmMakefile* mf) const
+cmExtraKateGenerator::GenerateFilesString(const cmLocalGenerator* lg) const
 {
-  std::string s = mf->GetHomeDirectory();
+  std::string s = lg->GetSourceDirectory();
   s += "/.git";
   if(cmSystemTools::FileExists(s.c_str()))
   {
     return std::string("\"git\": 1 ");
   }
 
-  s = mf->GetHomeDirectory();
+  s = lg->GetSourceDirectory();
   s += "/.svn";
   if(cmSystemTools::FileExists(s.c_str()))
   {
     return std::string("\"svn\": 1 ");
   }
 
-  s = mf->GetHomeDirectory();
+  s = lg->GetSourceDirectory();
   s += "/";
 
   std::set<std::string> files;
