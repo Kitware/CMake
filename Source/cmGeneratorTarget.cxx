@@ -4490,7 +4490,7 @@ cmGeneratorTarget::GetLinkInterface(const std::string& config,
     return &hm.begin()->second;
     }
 
-  cmOptionalLinkInterface& iface = hm[head->Target];
+  cmOptionalLinkInterface& iface = hm[head];
   if(!iface.LibrariesDone)
     {
     iface.LibrariesDone = true;
@@ -4642,7 +4642,7 @@ cmGeneratorTarget::GetLinkInterfaceLibraries(const std::string& config,
     return &hm.begin()->second;
     }
 
-  cmOptionalLinkInterface& iface = hm[head->Target];
+  cmOptionalLinkInterface& iface = hm[head];
   if(!iface.LibrariesDone)
     {
     iface.LibrariesDone = true;
@@ -5079,7 +5079,7 @@ cmGeneratorTarget::GetImportLinkInterface(const std::string& config,
     return &hm.begin()->second;
     }
 
-  cmOptionalLinkInterface& iface = hm[headTarget->Target];
+  cmOptionalLinkInterface& iface = hm[headTarget];
   if(!iface.AllDone)
     {
     iface.AllDone = true;

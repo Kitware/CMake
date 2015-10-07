@@ -15,6 +15,7 @@
 
 #include "cmListFileCache.h"
 
+class cmGeneratorTarget;
 class cmTarget;
 
 // Basic information about each link item.
@@ -97,7 +98,7 @@ struct cmOptionalLinkInterface: public cmLinkInterface
 };
 
 struct cmHeadToLinkInterfaceMap:
-    public std::map<cmTarget const*, cmOptionalLinkInterface>
+    public std::map<cmGeneratorTarget const*, cmOptionalLinkInterface>
 {
 };
 
