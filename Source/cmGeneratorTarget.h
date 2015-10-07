@@ -477,7 +477,7 @@ private:
   cmGeneratorTarget(cmGeneratorTarget const&);
   void operator=(cmGeneratorTarget const&);
 
-  struct LinkImplClosure: public std::vector<cmTarget const*>
+  struct LinkImplClosure: public std::vector<cmGeneratorTarget const*>
   {
     LinkImplClosure(): Done(false) {}
     bool Done;
@@ -555,8 +555,8 @@ private:
                            std::string& out) const;
 
 public:
-  std::vector<cmTarget const*> const&
-    GetLinkImplementationClosure(const std::string& config) const;
+  const std::vector<const cmGeneratorTarget*>&
+  GetLinkImplementationClosure(const std::string& config) const;
 
   mutable std::map<std::string, std::string> MaxLanguageStandards;
   std::map<std::string, std::string> const&

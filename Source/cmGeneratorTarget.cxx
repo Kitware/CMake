@@ -883,12 +883,12 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
                                           &dagChecker), result);
       }
 
-    std::vector<cmTarget const*> const& deps =
+    std::vector<cmGeneratorTarget const*> const& deps =
       this->GetLinkImplementationClosure(config);
-    for(std::vector<cmTarget const*>::const_iterator
+    for(std::vector<cmGeneratorTarget const*>::const_iterator
           li = deps.begin(), le = deps.end(); li != le; ++li)
       {
-      handleSystemIncludesDep(this->Makefile, *li, config, this,
+      handleSystemIncludesDep(this->Makefile, (*li)->Target, config, this,
                               &dagChecker, result, excludeImported);
       }
 
@@ -2066,12 +2066,12 @@ void processILibs(const std::string& config,
                   cmGeneratorTarget const* headTarget,
                   cmLinkItem const& item,
                   cmGlobalGenerator* gg,
-                  std::vector<cmTarget const*>& tgts,
+                  std::vector<cmGeneratorTarget const*>& tgts,
                   std::set<cmTarget const*>& emitted)
 {
   if (item.Target && emitted.insert(item.Target->Target).second)
     {
-    tgts.push_back(item.Target->Target);
+    tgts.push_back(item.Target);
     if(cmLinkInterfaceLibraries const* iface =
        item.Target->GetLinkInterfaceLibraries(config, headTarget, true))
       {
@@ -2086,7 +2086,7 @@ void processILibs(const std::string& config,
 }
 
 //----------------------------------------------------------------------------
-const std::vector<const cmTarget*>&
+const std::vector<const cmGeneratorTarget*>&
 cmGeneratorTarget::GetLinkImplementationClosure(
     const std::string& config) const
 {
@@ -3630,10 +3630,10 @@ cmGeneratorTarget::GetCompatibleInterfaces(std::string const& config) const
     compat.Done = true;
     compat.PropsBool.insert("POSITION_INDEPENDENT_CODE");
     compat.PropsString.insert("AUTOUIC_OPTIONS");
-    std::vector<cmTarget const*> const& deps =
+    std::vector<cmGeneratorTarget const*> const& deps =
       this->GetLinkImplementationClosure(config);
-    for(std::vector<cmTarget const*>::const_iterator li = deps.begin();
-        li != deps.end(); ++li)
+    for(std::vector<cmGeneratorTarget const*>::const_iterator li =
+        deps.begin(); li != deps.end(); ++li)
       {
 #define CM_READ_COMPATIBLE_INTERFACE(X, x) \
       if(const char* prop = (*li)->GetProperty("COMPATIBLE_INTERFACE_" #X)) \
@@ -4129,7 +4129,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
   assert((impliedByUse ^ explicitlySet)
       || (!impliedByUse && !explicitlySet));
 
-  std::vector<cmTarget const*> const& deps =
+  std::vector<cmGeneratorTarget const*> const& deps =
     tgt->GetLinkImplementationClosure(config);
 
   if(deps.empty())
@@ -4156,7 +4156,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
     }
 
   std::string interfaceProperty = "INTERFACE_" + p;
-  for(std::vector<cmTarget const*>::const_iterator li =
+  for(std::vector<cmGeneratorTarget const*>::const_iterator li =
       deps.begin();
       li != deps.end(); ++li)
     {
@@ -4166,13 +4166,13 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
     // target itself has a POSITION_INDEPENDENT_CODE which disagrees
     // with a dependency.
 
-    cmTarget const* theTarget = *li;
+    cmGeneratorTarget const* theTarget = *li;
 
-    const bool ifaceIsSet = theTarget->GetProperties()
+    const bool ifaceIsSet = theTarget->Target->GetProperties()
                             .find(interfaceProperty)
-                            != theTarget->GetProperties().end();
+                            != theTarget->Target->GetProperties().end();
     PropertyType ifacePropContent =
-                    getTypedProperty<PropertyType>(theTarget,
+                    getTypedProperty<PropertyType>(theTarget->Target,
                               interfaceProperty);
 
     std::string reportEntry;
