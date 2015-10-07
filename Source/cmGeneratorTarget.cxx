@@ -155,7 +155,7 @@ struct TagVisitor
     : Data(data), Target(target),
     GlobalGenerator(target->GetLocalGenerator()->GetGlobalGenerator()),
     Header(CM_HEADER_REGEX),
-    IsObjLib(target->GetType() == cmTarget::OBJECT_LIBRARY)
+    IsObjLib(target->GetType() == cmState::OBJECT_LIBRARY)
   {
   }
 
@@ -172,7 +172,7 @@ struct TagVisitor
       {
       DoAccept<IsSameTag<Tag, CustomCommandsTag>::Result>::Do(this->Data, sf);
       }
-    else if(this->Target->GetType() == cmTarget::UTILITY)
+    else if(this->Target->GetType() == cmState::UTILITY)
       {
       DoAccept<IsSameTag<Tag, ExtraSourcesTag>::Result>::Do(this->Data, sf);
       }
@@ -345,7 +345,7 @@ const char* cmGeneratorTarget::GetOutputTargetType(bool implib) const
 {
   switch(this->GetType())
     {
-    case cmTarget::SHARED_LIBRARY:
+    case cmState::SHARED_LIBRARY:
       if(this->Target->IsDLLPlatform())
         {
         if(implib)
@@ -365,10 +365,10 @@ const char* cmGeneratorTarget::GetOutputTargetType(bool implib) const
         // library targets.
         return "LIBRARY";
         }
-    case cmTarget::STATIC_LIBRARY:
+    case cmState::STATIC_LIBRARY:
       // Static libraries are always treated as archive targets.
       return "ARCHIVE";
-    case cmTarget::MODULE_LIBRARY:
+    case cmState::MODULE_LIBRARY:
       if(implib)
         {
         // Module libraries are always treated as library targets.
@@ -379,7 +379,7 @@ const char* cmGeneratorTarget::GetOutputTargetType(bool implib) const
         // Module import libraries are treated as archive targets.
         return "LIBRARY";
         }
-    case cmTarget::EXECUTABLE:
+    case cmState::EXECUTABLE:
       if(implib)
         {
         // Executable import libraries are treated as archive targets.
@@ -852,7 +852,7 @@ const char* cmGeneratorTarget::GetLocationForBuild() const
 bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
                                               const std::string& config) const
 {
-  assert(this->GetType() != cmTarget::INTERFACE_LIBRARY);
+  assert(this->GetType() != cmState::INTERFACE_LIBRARY);
   std::string config_upper;
   if(!config.empty())
     {
@@ -1042,7 +1042,7 @@ static bool processSources(cmGeneratorTarget const* tgt,
 void cmGeneratorTarget::GetSourceFiles(std::vector<std::string> &files,
                               const std::string& config) const
 {
-  assert(this->GetType() != cmTarget::INTERFACE_LIBRARY);
+  assert(this->GetType() != cmState::INTERFACE_LIBRARY);
 
   if (!this->Makefile->GetGlobalGenerator()->GetConfigureDoneCMP0026())
     {
@@ -1221,7 +1221,7 @@ bool cmGeneratorTarget::HasSOName(const std::string& config) const
 {
   // soname is supported only for shared libraries and modules,
   // and then only when the platform supports an soname flag.
-  return ((this->GetType() == cmTarget::SHARED_LIBRARY) &&
+  return ((this->GetType() == cmState::SHARED_LIBRARY) &&
           !this->GetPropertyAsBool("NO_SONAME") &&
           this->Makefile->GetSONameFlag(this->GetLinkerLanguage(config)));
 }
@@ -1232,9 +1232,9 @@ cmGeneratorTarget::NeedRelinkBeforeInstall(const std::string& config) const
 {
   // Only executables and shared libraries can have an rpath and may
   // need relinking.
-  if(this->GetType() != cmTarget::EXECUTABLE &&
-     this->GetType() != cmTarget::SHARED_LIBRARY &&
-     this->GetType() != cmTarget::MODULE_LIBRARY)
+  if(this->GetType() != cmState::EXECUTABLE &&
+     this->GetType() != cmState::SHARED_LIBRARY &&
+     this->GetType() != cmState::MODULE_LIBRARY)
     {
     return false;
     }
@@ -1296,9 +1296,9 @@ cmGeneratorTarget::NeedRelinkBeforeInstall(const std::string& config) const
 bool cmGeneratorTarget::IsChrpathUsed(const std::string& config) const
 {
   // Only certain target types have an rpath.
-  if(!(this->GetType() == cmTarget::SHARED_LIBRARY ||
-       this->GetType() == cmTarget::MODULE_LIBRARY ||
-       this->GetType() == cmTarget::EXECUTABLE))
+  if(!(this->GetType() == cmState::SHARED_LIBRARY ||
+       this->GetType() == cmState::MODULE_LIBRARY ||
+       this->GetType() == cmState::EXECUTABLE))
     {
     return false;
     }
@@ -1363,7 +1363,7 @@ bool cmGeneratorTarget::IsChrpathUsed(const std::string& config) const
 bool cmGeneratorTarget::IsImportedSharedLibWithoutSOName(
                                           const std::string& config) const
 {
-  if(this->IsImported() && this->GetType() == cmTarget::SHARED_LIBRARY)
+  if(this->IsImported() && this->GetType() == cmState::SHARED_LIBRARY)
     {
     if(cmTarget::ImportInfo const* info = this->Target->GetImportInfo(config))
       {
@@ -1382,7 +1382,7 @@ bool cmGeneratorTarget::HasMacOSXRpathInstallNameDir(
 
   if(!this->IsImported())
     {
-    if(this->GetType() != cmTarget::SHARED_LIBRARY)
+    if(this->GetType() != cmState::SHARED_LIBRARY)
       {
       return false;
       }
@@ -1960,12 +1960,12 @@ cmGeneratorTarget::CompileInfo const* cmGeneratorTarget::GetCompileInfo(
     return 0;
     }
 
-  if(this->GetType() > cmTarget::OBJECT_LIBRARY)
+  if(this->GetType() > cmState::OBJECT_LIBRARY)
     {
     std::string msg = "cmTarget::GetCompileInfo called for ";
     msg += this->GetName();
     msg += " which has type ";
-    msg += cmTarget::GetTargetTypeName((cmTarget::TargetType)this->GetType());
+    msg += cmTarget::GetTargetTypeName((cmState::TargetType)this->GetType());
     this->LocalGenerator->IssueMessage(cmake::INTERNAL_ERROR, msg);
     return 0;
     }
@@ -2155,7 +2155,7 @@ cmTargetTraceDependencies
   this->CurrentEntry = 0;
 
   // Queue all the source files already specified for the target.
-  if (target->GetType() != cmTarget::INTERFACE_LIBRARY)
+  if (target->GetType() != cmState::INTERFACE_LIBRARY)
     {
     std::vector<std::string> configs;
     this->Makefile->GetConfigurations(configs);
@@ -2313,8 +2313,8 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
     // the fact that the name matched a target was just a coincidence.
     if(cmSystemTools::FileIsFullPath(dep.c_str()))
       {
-      if(t->GetType() >= cmTarget::EXECUTABLE &&
-         t->GetType() <= cmTarget::MODULE_LIBRARY)
+      if(t->GetType() >= cmState::EXECUTABLE &&
+         t->GetType() <= cmState::MODULE_LIBRARY)
         {
         // This is really only for compatibility so we do not need to
         // worry about configuration names and output names.
@@ -2362,7 +2362,7 @@ cmTargetTraceDependencies
     // Check for a target with this name.
     if(cmTarget* t = this->Makefile->FindTargetToUse(command))
       {
-      if(t->GetType() == cmTarget::EXECUTABLE)
+      if(t->GetType() == cmState::EXECUTABLE)
         {
         // The command refers to an executable target built in
         // this project.  Add the target-level dependency to make
@@ -2450,7 +2450,7 @@ void cmGeneratorTarget::TraceDependencies()
   // would find nothing anyway, but when building CMake itself the "install"
   // target command ends up referencing the "cmake" target but we do not
   // really want the dependency because "install" depend on "all" anyway.
-  if(this->GetType() == cmTarget::GLOBAL_TARGET)
+  if(this->GetType() == cmState::GLOBAL_TARGET)
     {
     return;
     }
@@ -2498,7 +2498,7 @@ cmGeneratorTarget::GetCreateRuleVariable(std::string const& lang,
 {
   switch(this->GetType())
     {
-    case cmTarget::STATIC_LIBRARY:
+    case cmState::STATIC_LIBRARY:
       {
       std::string var = "CMAKE_" + lang + "_CREATE_STATIC_LIBRARY";
       if(this->GetFeatureAsBool(
@@ -2512,11 +2512,11 @@ cmGeneratorTarget::GetCreateRuleVariable(std::string const& lang,
         }
       return var;
       }
-    case cmTarget::SHARED_LIBRARY:
+    case cmState::SHARED_LIBRARY:
       return "CMAKE_" + lang + "_CREATE_SHARED_LIBRARY";
-    case cmTarget::MODULE_LIBRARY:
+    case cmState::MODULE_LIBRARY:
       return "CMAKE_" + lang + "_CREATE_SHARED_MODULE";
-    case cmTarget::EXECUTABLE:
+    case cmState::EXECUTABLE:
       return "CMAKE_" + lang + "_LINK_EXECUTABLE";
     default:
       break;
@@ -3041,13 +3041,13 @@ void cmGeneratorTarget::ComputeTargetManifest(
   std::string realName;
   std::string impName;
   std::string pdbName;
-  if(this->GetType() == cmTarget::EXECUTABLE)
+  if(this->GetType() == cmState::EXECUTABLE)
     {
     this->GetExecutableNames(name, realName, impName, pdbName, config);
     }
-  else if(this->GetType() == cmTarget::STATIC_LIBRARY ||
-          this->GetType() == cmTarget::SHARED_LIBRARY ||
-          this->GetType() == cmTarget::MODULE_LIBRARY)
+  else if(this->GetType() == cmState::STATIC_LIBRARY ||
+          this->GetType() == cmState::SHARED_LIBRARY ||
+          this->GetType() == cmState::MODULE_LIBRARY)
     {
     this->GetLibraryNames(name, soName, realName, impName, pdbName,
                                   config);
@@ -3155,7 +3155,7 @@ cmGeneratorTarget::NormalGetRealName(const std::string& config) const
     this->LocalGenerator->IssueMessage(cmake::INTERNAL_ERROR, msg);
     }
 
-  if(this->GetType() == cmTarget::EXECUTABLE)
+  if(this->GetType() == cmState::EXECUTABLE)
     {
     // Compute the real name that will be built.
     std::string name;
@@ -3255,8 +3255,8 @@ void cmGeneratorTarget::GetLibraryNames(std::string& name,
   }
 
   // The import library name.
-  if(this->GetType() == cmTarget::SHARED_LIBRARY ||
-     this->GetType() == cmTarget::MODULE_LIBRARY)
+  if(this->GetType() == cmState::SHARED_LIBRARY ||
+     this->GetType() == cmState::MODULE_LIBRARY)
     {
     impName = this->GetFullNameInternal(config, true);
     }
@@ -3294,7 +3294,7 @@ void cmGeneratorTarget::GetExecutableNames(std::string& name,
 #else
   // Check for executable version properties.
   const char* version = this->GetProperty("VERSION");
-  if(this->GetType() != cmTarget::EXECUTABLE || this->Makefile->IsOn("XCODE"))
+  if(this->GetType() != cmState::EXECUTABLE || this->Makefile->IsOn("XCODE"))
     {
     version = 0;
     }
@@ -3350,10 +3350,10 @@ void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
                                             std::string& outSuffix) const
 {
   // Use just the target name for non-main target types.
-  if(this->GetType() != cmTarget::STATIC_LIBRARY &&
-     this->GetType() != cmTarget::SHARED_LIBRARY &&
-     this->GetType() != cmTarget::MODULE_LIBRARY &&
-     this->GetType() != cmTarget::EXECUTABLE)
+  if(this->GetType() != cmState::STATIC_LIBRARY &&
+     this->GetType() != cmState::SHARED_LIBRARY &&
+     this->GetType() != cmState::MODULE_LIBRARY &&
+     this->GetType() != cmState::EXECUTABLE)
     {
     outPrefix = "";
     outBase = this->GetName();
@@ -3374,9 +3374,9 @@ void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
 
   // The implib option is only allowed for shared libraries, module
   // libraries, and executables.
-  if(this->GetType() != cmTarget::SHARED_LIBRARY &&
-     this->GetType() != cmTarget::MODULE_LIBRARY &&
-     this->GetType() != cmTarget::EXECUTABLE)
+  if(this->GetType() != cmState::SHARED_LIBRARY &&
+     this->GetType() != cmState::MODULE_LIBRARY &&
+     this->GetType() != cmState::EXECUTABLE)
     {
     implib = false;
     }
@@ -3462,7 +3462,7 @@ void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
   // Name shared libraries with their version number on some platforms.
   if(const char* soversion = this->GetProperty("SOVERSION"))
     {
-    if(this->GetType() == cmTarget::SHARED_LIBRARY && !implib &&
+    if(this->GetType() == cmState::SHARED_LIBRARY && !implib &&
        this->Makefile->IsOn("CMAKE_SHARED_LIBRARY_NAME_WITH_VERSION"))
       {
       outBase += "-";
@@ -3657,8 +3657,8 @@ cmGeneratorTarget::GetCompatibleInterfaces(std::string const& config) const
 bool cmGeneratorTarget::IsLinkInterfaceDependentBoolProperty(
     const std::string &p, const std::string& config) const
 {
-  if (this->GetType() == cmTarget::OBJECT_LIBRARY
-      || this->GetType() == cmTarget::INTERFACE_LIBRARY)
+  if (this->GetType() == cmState::OBJECT_LIBRARY
+      || this->GetType() == cmState::INTERFACE_LIBRARY)
     {
     return false;
     }
@@ -3669,8 +3669,8 @@ bool cmGeneratorTarget::IsLinkInterfaceDependentBoolProperty(
 bool cmGeneratorTarget::IsLinkInterfaceDependentStringProperty(
     const std::string &p, const std::string& config) const
 {
-  if (this->GetType() == cmTarget::OBJECT_LIBRARY
-      || this->GetType() == cmTarget::INTERFACE_LIBRARY)
+  if (this->GetType() == cmState::OBJECT_LIBRARY
+      || this->GetType() == cmState::INTERFACE_LIBRARY)
     {
     return false;
     }
@@ -3681,8 +3681,8 @@ bool cmGeneratorTarget::IsLinkInterfaceDependentStringProperty(
 bool cmGeneratorTarget::IsLinkInterfaceDependentNumberMinProperty(
     const std::string &p, const std::string& config) const
 {
-  if (this->GetType() == cmTarget::OBJECT_LIBRARY
-      || this->GetType() == cmTarget::INTERFACE_LIBRARY)
+  if (this->GetType() == cmState::OBJECT_LIBRARY
+      || this->GetType() == cmState::INTERFACE_LIBRARY)
     {
     return false;
     }
@@ -3693,8 +3693,8 @@ bool cmGeneratorTarget::IsLinkInterfaceDependentNumberMinProperty(
 bool cmGeneratorTarget::IsLinkInterfaceDependentNumberMaxProperty(
     const std::string &p, const std::string& config) const
 {
-  if (this->GetType() == cmTarget::OBJECT_LIBRARY
-      || this->GetType() == cmTarget::INTERFACE_LIBRARY)
+  if (this->GetType() == cmState::OBJECT_LIBRARY
+      || this->GetType() == cmState::INTERFACE_LIBRARY)
     {
     return false;
     }
@@ -4474,7 +4474,7 @@ cmGeneratorTarget::GetLinkInterface(const std::string& config,
 
   // Link interfaces are not supported for executables that do not
   // export symbols.
-  if(this->GetType() == cmTarget::EXECUTABLE &&
+  if(this->GetType() == cmState::EXECUTABLE &&
      !this->Target->IsExecutableWithExports())
     {
     return 0;
@@ -4517,9 +4517,9 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
 {
   if(iface.ExplicitLibraries)
     {
-    if(this->GetType() == cmTarget::SHARED_LIBRARY
-        || this->GetType() == cmTarget::STATIC_LIBRARY
-        || this->GetType() == cmTarget::INTERFACE_LIBRARY)
+    if(this->GetType() == cmState::SHARED_LIBRARY
+        || this->GetType() == cmState::STATIC_LIBRARY
+        || this->GetType() == cmState::INTERFACE_LIBRARY)
       {
       // Shared libraries may have runtime implementation dependencies
       // on other shared libraries that are not in the interface.
@@ -4529,7 +4529,7 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
         {
         emitted.insert(*li);
         }
-      if (this->GetType() != cmTarget::INTERFACE_LIBRARY)
+      if (this->GetType() != cmState::INTERFACE_LIBRARY)
         {
         cmLinkImplementation const* impl =
             this->GetLinkImplementation(config);
@@ -4541,7 +4541,7 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
             if(li->Target)
               {
               // This is a runtime dependency on another shared library.
-              if(li->Target->GetType() == cmTarget::SHARED_LIBRARY)
+              if(li->Target->GetType() == cmState::SHARED_LIBRARY)
                 {
                 iface.SharedDeps.push_back(*li);
                 }
@@ -4579,7 +4579,7 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
       }
     }
 
-  if(this->GetType() == cmTarget::STATIC_LIBRARY)
+  if(this->GetType() == cmState::STATIC_LIBRARY)
     {
     // Construct the property name suffix for this configuration.
     std::string suffix = "_";
@@ -4623,7 +4623,7 @@ cmGeneratorTarget::GetLinkInterfaceLibraries(const std::string& config,
 
   // Link interfaces are not supported for executables that do not
   // export symbols.
-  if(this->GetType() == cmTarget::EXECUTABLE &&
+  if(this->GetType() == cmState::EXECUTABLE &&
      !this->Target->IsExecutableWithExports())
     {
     return 0;
@@ -4697,7 +4697,7 @@ cmGeneratorTarget::OutputInfo const* cmGeneratorTarget::GetOutputInfo(
     std::string msg = "cmGeneratorTarget::GetOutputInfo called for ";
     msg += this->GetName();
     msg += " which has type ";
-    msg += cmTarget::GetTargetTypeName(cmTarget::TargetType(this->GetType()));
+    msg += cmTarget::GetTargetTypeName(cmState::TargetType(this->GetType()));
     this->LocalGenerator->IssueMessage(cmake::INTERNAL_ERROR, msg);
     return 0;
     }
@@ -4797,14 +4797,14 @@ bool cmGeneratorTarget::ComputeOutputDir(const std::string& config,
       conf = "";
       }
     }
-  else if(this->GetType() == cmTarget::EXECUTABLE)
+  else if(this->GetType() == cmState::EXECUTABLE)
     {
     // Lookup the output path for executables.
     out = this->Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
     }
-  else if(this->GetType() == cmTarget::STATIC_LIBRARY ||
-          this->GetType() == cmTarget::SHARED_LIBRARY ||
-          this->GetType() == cmTarget::MODULE_LIBRARY)
+  else if(this->GetType() == cmState::STATIC_LIBRARY ||
+          this->GetType() == cmState::SHARED_LIBRARY ||
+          this->GetType() == cmState::MODULE_LIBRARY)
     {
     // Lookup the output path for libraries.
     out = this->Makefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
@@ -4934,7 +4934,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     linkIfaceProp = "INTERFACE_LINK_LIBRARIES";
     explicitLibraries = this->GetProperty(linkIfaceProp);
     }
-  else if(this->GetType() == cmTarget::SHARED_LIBRARY ||
+  else if(this->GetType() == cmState::SHARED_LIBRARY ||
           this->Target->IsExecutableWithExports())
     {
     // CMP0022 OLD behavior is to use LINK_INTERFACE_LIBRARIES if set on a
@@ -4982,8 +4982,8 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
   // There is no implicit link interface for executables or modules
   // so if none was explicitly set then there is no link interface.
   if(!explicitLibraries &&
-     (this->GetType() == cmTarget::EXECUTABLE ||
-      (this->GetType() == cmTarget::MODULE_LIBRARY)))
+     (this->GetType() == cmState::EXECUTABLE ||
+      (this->GetType() == cmState::MODULE_LIBRARY)))
     {
     return;
     }
@@ -5445,13 +5445,13 @@ cmGeneratorTarget::FindTargetToLink(std::string const& name) const
   // Skip targets that will not really be linked.  This is probably a
   // name conflict between an external library and an executable
   // within the project.
-  if(tgt && tgt->GetType() == cmTarget::EXECUTABLE &&
+  if(tgt && tgt->GetType() == cmState::EXECUTABLE &&
      !tgt->IsExecutableWithExports())
     {
     tgt = 0;
     }
 
-  if(tgt && tgt->GetType() == cmTarget::OBJECT_LIBRARY)
+  if(tgt && tgt->GetType() == cmState::OBJECT_LIBRARY)
     {
     std::ostringstream e;
     e << "Target \"" << this->GetName() << "\" links to "
@@ -5509,7 +5509,7 @@ bool cmGeneratorTarget::GetImplibGNUtoMS(std::string const& gnuName,
 bool cmGeneratorTarget::HasImportLibrary() const
 {
   return (this->Target->IsDLLPlatform() &&
-          (this->GetType() == cmTarget::SHARED_LIBRARY ||
+          (this->GetType() == cmState::SHARED_LIBRARY ||
            this->Target->IsExecutableWithExports()));
 }
 

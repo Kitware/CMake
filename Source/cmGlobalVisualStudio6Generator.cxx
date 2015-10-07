@@ -224,7 +224,7 @@ void cmGlobalVisualStudio6Generator
       tt != orderedProjectTargets.end(); ++tt)
     {
     cmTarget const* target = (*tt)->Target;
-    if(target->GetType() == cmTarget::INTERFACE_LIBRARY)
+    if(target->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }

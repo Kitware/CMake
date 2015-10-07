@@ -93,12 +93,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
         {
         switch(tgt->GetType())
           {
-          case cmTarget::SHARED_LIBRARY:
-          case cmTarget::STATIC_LIBRARY:
-          case cmTarget::INTERFACE_LIBRARY:
-          case cmTarget::UNKNOWN_LIBRARY:
+          case cmState::SHARED_LIBRARY:
+          case cmState::STATIC_LIBRARY:
+          case cmState::INTERFACE_LIBRARY:
+          case cmState::UNKNOWN_LIBRARY:
             break;
-          case cmTarget::EXECUTABLE:
+          case cmState::EXECUTABLE:
             if (tgt->IsExecutableWithExports())
               {
               break;

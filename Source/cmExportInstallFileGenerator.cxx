@@ -134,7 +134,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     cmTarget* te = (*tei)->Target;
 
     requiresConfigFiles = requiresConfigFiles
-                              || te->GetType() != cmTarget::INTERFACE_LIBRARY;
+                              || te->GetType() != cmState::INTERFACE_LIBRARY;
 
     this->GenerateImportTargetCode(os, te);
 
@@ -180,7 +180,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
         require2_8_12 = true;
         }
       }
-    if (te->GetType() == cmTarget::INTERFACE_LIBRARY)
+    if (te->GetType() == cmState::INTERFACE_LIBRARY)
       {
       require3_0_0 = true;
       }
@@ -337,7 +337,7 @@ cmExportInstallFileGenerator
     {
     // Collect import properties for this target.
     cmTargetExport const* te = *tei;
-    if (te->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
+    if (te->Target->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }

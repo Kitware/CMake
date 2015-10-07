@@ -402,7 +402,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
     cmTarget const* target = (*tt)->Target;
-    if(target->GetType() == cmTarget::INTERFACE_LIBRARY)
+    if(target->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
@@ -442,7 +442,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
     cmTarget const* target = (*tt)->Target;
-    if(target->GetType() == cmTarget::INTERFACE_LIBRARY)
+    if(target->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
@@ -536,7 +536,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetDepends(
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
     cmTarget const* target = (*tt)->Target;
-    if(target->GetType() == cmTarget::INTERFACE_LIBRARY)
+    if(target->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
@@ -762,7 +762,7 @@ cmGlobalVisualStudio7Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator
 ::WriteProjectConfigurations(
-  std::ostream& fout, const std::string& name, cmTarget::TargetType,
+  std::ostream& fout, const std::string& name, cmState::TargetType,
   std::vector<std::string> const& configs,
   const std::set<std::string>& configsPartOfDefaultBuild,
   const std::string& platformMapping)
@@ -1002,7 +1002,7 @@ cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
   // if it is a utilitiy target then only make it part of the
   // default build if another target depends on it
   int type = target->GetType();
-  if (type == cmTarget::GLOBAL_TARGET)
+  if (type == cmState::GLOBAL_TARGET)
     {
     // check if INSTALL target is part of default build
     if(target->GetName() == "INSTALL")
@@ -1025,7 +1025,7 @@ cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
       }
     return activeConfigs;
     }
-  if(type == cmTarget::UTILITY && !this->IsDependedOn(projectTargets, target))
+  if(type == cmState::UTILITY && !this->IsDependedOn(projectTargets, target))
     {
     return activeConfigs;
     }

@@ -44,12 +44,12 @@ bool cmTargetPropCommandBase
     this->HandleMissingTarget(args[0]);
     return false;
     }
-  if ((this->Target->GetType() != cmTarget::SHARED_LIBRARY)
-    && (this->Target->GetType() != cmTarget::STATIC_LIBRARY)
-    && (this->Target->GetType() != cmTarget::OBJECT_LIBRARY)
-    && (this->Target->GetType() != cmTarget::MODULE_LIBRARY)
-    && (this->Target->GetType() != cmTarget::INTERFACE_LIBRARY)
-    && (this->Target->GetType() != cmTarget::EXECUTABLE))
+  if ((this->Target->GetType() != cmState::SHARED_LIBRARY)
+    && (this->Target->GetType() != cmState::STATIC_LIBRARY)
+    && (this->Target->GetType() != cmState::OBJECT_LIBRARY)
+    && (this->Target->GetType() != cmState::MODULE_LIBRARY)
+    && (this->Target->GetType() != cmState::INTERFACE_LIBRARY)
+    && (this->Target->GetType() != cmState::EXECUTABLE))
     {
     this->SetError("called with non-compilable target type");
     return false;
@@ -114,7 +114,7 @@ bool cmTargetPropCommandBase
     return false;
     }
 
-  if (this->Target->GetType() == cmTarget::INTERFACE_LIBRARY
+  if (this->Target->GetType() == cmState::INTERFACE_LIBRARY
       && scope != "INTERFACE")
     {
     this->SetError("may only be set INTERFACE properties on INTERFACE "

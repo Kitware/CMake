@@ -207,7 +207,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
 {
   // Get the depender.
   cmGeneratorTarget const* depender = this->Targets[depender_index];
-  if (depender->GetType() == cmTarget::INTERFACE_LIBRARY)
+  if (depender->GetType() == cmState::INTERFACE_LIBRARY)
     {
     return;
     }
@@ -236,10 +236,10 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
       std::string objLib = (*oi)->GetObjectLibrary();
       if (!objLib.empty() && emitted.insert(objLib).second)
         {
-        if(depender->GetType() != cmTarget::EXECUTABLE &&
-            depender->GetType() != cmTarget::STATIC_LIBRARY &&
-            depender->GetType() != cmTarget::SHARED_LIBRARY &&
-            depender->GetType() != cmTarget::MODULE_LIBRARY)
+        if(depender->GetType() != cmState::EXECUTABLE &&
+            depender->GetType() != cmState::STATIC_LIBRARY &&
+            depender->GetType() != cmState::SHARED_LIBRARY &&
+            depender->GetType() != cmState::MODULE_LIBRARY)
           {
           this->GlobalGenerator->GetCMakeInstance()
             ->IssueMessage(cmake::FATAL_ERROR,
@@ -324,7 +324,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
   // name conflict between an external library and an executable
   // within the project.
   if(dependee &&
-     dependee->GetType() == cmTarget::EXECUTABLE &&
+     dependee->GetType() == cmState::EXECUTABLE &&
      !dependee->Target->IsExecutableWithExports())
     {
     dependee = 0;
@@ -357,7 +357,7 @@ void cmComputeTargetDepends::AddTargetDepend(
   cmGeneratorTarget const* dependee = dependee_name.Target;
 
   if(!dependee && !linking &&
-    (depender->GetType() != cmTarget::GLOBAL_TARGET))
+    (depender->GetType() != cmState::GLOBAL_TARGET))
     {
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     bool issueMessage = false;
@@ -400,7 +400,7 @@ void cmComputeTargetDepends::AddTargetDepend(
   // name conflict between an external library and an executable
   // within the project.
   if(linking && dependee &&
-     dependee->GetType() == cmTarget::EXECUTABLE &&
+     dependee->GetType() == cmState::EXECUTABLE &&
      !dependee->Target->IsExecutableWithExports())
     {
     dependee = 0;
@@ -418,7 +418,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
                                              bool linking)
 {
   if(dependee->Target->IsImported() ||
-     dependee->GetType() == cmTarget::INTERFACE_LIBRARY)
+     dependee->GetType() == cmState::INTERFACE_LIBRARY)
     {
     // Skip IMPORTED and INTERFACE targets but follow their utility
     // dependencies.
@@ -523,7 +523,7 @@ cmComputeTargetDepends
     // Make sure the component is all STATIC_LIBRARY targets.
     for(NodeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni)
       {
-      if(this->Targets[*ni]->GetType() != cmTarget::STATIC_LIBRARY)
+      if(this->Targets[*ni]->GetType() != cmState::STATIC_LIBRARY)
         {
         this->ComplainAboutBadComponent(ccg, c);
         return false;
@@ -555,7 +555,7 @@ cmComputeTargetDepends
     // Describe the depender.
     e << "  \"" << depender->GetName() << "\" of type "
       << cmTarget::GetTargetTypeName(
-           (cmTarget::TargetType)depender->GetType()) << "\n";
+           (cmState::TargetType)depender->GetType()) << "\n";
 
     // List its dependencies that are inside the component.
     EdgeList const& nl = this->InitialGraph[i];

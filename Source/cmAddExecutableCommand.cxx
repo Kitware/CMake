@@ -174,8 +174,8 @@ bool cmAddExecutableCommand
       this->SetError(e.str());
       return false;
       }
-    cmTarget::TargetType type = aliasedTarget->GetType();
-    if(type != cmTarget::EXECUTABLE)
+    cmState::TargetType type = aliasedTarget->GetType();
+    if(type != cmState::EXECUTABLE)
       {
       std::ostringstream e;
       e << "cannot create ALIAS target \"" << exename
@@ -210,7 +210,7 @@ bool cmAddExecutableCommand
       }
 
     // Create the imported target.
-    this->Makefile->AddImportedTarget(exename, cmTarget::EXECUTABLE,
+    this->Makefile->AddImportedTarget(exename, cmState::EXECUTABLE,
                                       importGlobal);
     return true;
     }

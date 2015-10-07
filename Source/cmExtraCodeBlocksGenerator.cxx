@@ -326,7 +326,7 @@ void cmExtraCodeBlocksGenerator
       {
       switch(ti->second.GetType())
         {
-        case cmTarget::GLOBAL_TARGET:
+        case cmState::GLOBAL_TARGET:
           {
           // Only add the global targets from CMAKE_BINARY_DIR,
           // not from the subdirs
@@ -338,7 +338,7 @@ void cmExtraCodeBlocksGenerator
             }
           }
           break;
-        case cmTarget::UTILITY:
+        case cmState::UTILITY:
           // Add all utility targets, except the Nightly/Continuous/
           // Experimental-"sub"targets as e.g. NightlyStart
           if (((ti->first.find("Nightly")==0)   &&(ti->first!="Nightly"))
@@ -352,11 +352,11 @@ void cmExtraCodeBlocksGenerator
           this->AppendTarget(fout, ti->first, 0,
                                  make.c_str(), *lg, compiler.c_str());
           break;
-        case cmTarget::EXECUTABLE:
-        case cmTarget::STATIC_LIBRARY:
-        case cmTarget::SHARED_LIBRARY:
-        case cmTarget::MODULE_LIBRARY:
-        case cmTarget::OBJECT_LIBRARY:
+        case cmState::EXECUTABLE:
+        case cmState::STATIC_LIBRARY:
+        case cmState::SHARED_LIBRARY:
+        case cmState::MODULE_LIBRARY:
+        case cmState::OBJECT_LIBRARY:
           {
           this->AppendTarget(fout, ti->first, &ti->second,
                              make.c_str(), *lg, compiler.c_str());
@@ -392,12 +392,12 @@ void cmExtraCodeBlocksGenerator
       {
       switch(ti->second.GetType())
         {
-        case cmTarget::EXECUTABLE:
-        case cmTarget::STATIC_LIBRARY:
-        case cmTarget::SHARED_LIBRARY:
-        case cmTarget::MODULE_LIBRARY:
-        case cmTarget::OBJECT_LIBRARY:
-        case cmTarget::UTILITY: // can have sources since 2.6.3
+        case cmState::EXECUTABLE:
+        case cmState::STATIC_LIBRARY:
+        case cmState::SHARED_LIBRARY:
+        case cmState::MODULE_LIBRARY:
+        case cmState::OBJECT_LIBRARY:
+        case cmState::UTILITY: // can have sources since 2.6.3
           {
           std::vector<cmSourceFile*> sources;
           cmGeneratorTarget* gt =
@@ -561,7 +561,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
     {
     int cbTargetType = this->GetCBTargetType(target);
     std::string workingDir = lg->GetCurrentBinaryDirectory();
-    if ( target->GetType()==cmTarget::EXECUTABLE)
+    if ( target->GetType()==cmState::EXECUTABLE)
       {
       // Determine the directory where the executable target is created, and
       // set the working directory to this dir.
@@ -584,7 +584,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
 
     std::string buildType = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
     std::string location;
-    if ( target->GetType()==cmTarget::OBJECT_LIBRARY)
+    if ( target->GetType()==cmState::OBJECT_LIBRARY)
       {
       location = this->CreateDummyTargetFile(const_cast<cmLocalGenerator*>(lg),
                                              target);
@@ -724,7 +724,7 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
 // Translate the cmake target type into the CodeBlocks target type id
 int cmExtraCodeBlocksGenerator::GetCBTargetType(cmTarget* target)
 {
-  if ( target->GetType()==cmTarget::EXECUTABLE)
+  if ( target->GetType()==cmState::EXECUTABLE)
     {
     if ((target->GetPropertyAsBool("WIN32_EXECUTABLE"))
         || (target->GetPropertyAsBool("MACOSX_BUNDLE")))
@@ -736,13 +736,13 @@ int cmExtraCodeBlocksGenerator::GetCBTargetType(cmTarget* target)
       return 1;
       }
     }
-  else if (( target->GetType()==cmTarget::STATIC_LIBRARY)
-        || (target->GetType()==cmTarget::OBJECT_LIBRARY))
+  else if (( target->GetType()==cmState::STATIC_LIBRARY)
+        || (target->GetType()==cmState::OBJECT_LIBRARY))
     {
     return 2;
     }
-  else if ((target->GetType()==cmTarget::SHARED_LIBRARY)
-           || (target->GetType()==cmTarget::MODULE_LIBRARY))
+  else if ((target->GetType()==cmState::SHARED_LIBRARY)
+           || (target->GetType()==cmState::MODULE_LIBRARY))
     {
     return 3;
     }

@@ -68,16 +68,16 @@ cmMakefileTargetGenerator::New(cmGeneratorTarget *tgt)
 
   switch (tgt->GetType())
     {
-    case cmTarget::EXECUTABLE:
+    case cmState::EXECUTABLE:
       result = new cmMakefileExecutableTargetGenerator(tgt);
       break;
-    case cmTarget::STATIC_LIBRARY:
-    case cmTarget::SHARED_LIBRARY:
-    case cmTarget::MODULE_LIBRARY:
-    case cmTarget::OBJECT_LIBRARY:
+    case cmState::STATIC_LIBRARY:
+    case cmState::SHARED_LIBRARY:
+    case cmState::MODULE_LIBRARY:
+    case cmState::OBJECT_LIBRARY:
       result = new cmMakefileLibraryTargetGenerator(tgt);
       break;
-    case cmTarget::UTILITY:
+    case cmState::UTILITY:
       result = new cmMakefileUtilityTargetGenerator(tgt);
       break;
     default:
@@ -542,10 +542,10 @@ cmMakefileTargetGenerator
   std::string targetFullPathReal;
   std::string targetFullPathPDB;
   std::string targetFullPathCompilePDB;
-  if(this->GeneratorTarget->GetType() == cmTarget::EXECUTABLE ||
-     this->GeneratorTarget->GetType() == cmTarget::STATIC_LIBRARY ||
-     this->GeneratorTarget->GetType() == cmTarget::SHARED_LIBRARY ||
-     this->GeneratorTarget->GetType() == cmTarget::MODULE_LIBRARY)
+  if(this->GeneratorTarget->GetType() == cmState::EXECUTABLE ||
+     this->GeneratorTarget->GetType() == cmState::STATIC_LIBRARY ||
+     this->GeneratorTarget->GetType() == cmState::SHARED_LIBRARY ||
+     this->GeneratorTarget->GetType() == cmState::MODULE_LIBRARY)
     {
     targetFullPathReal =
       this->GeneratorTarget->GetFullPath(this->ConfigName, false, true);
@@ -554,7 +554,7 @@ cmMakefileTargetGenerator
     targetFullPathPDB += "/";
     targetFullPathPDB += this->GeneratorTarget->GetPDBName(this->ConfigName);
     }
-  if(this->GeneratorTarget->GetType() <= cmTarget::OBJECT_LIBRARY)
+  if(this->GeneratorTarget->GetType() <= cmState::OBJECT_LIBRARY)
     {
     targetFullPathCompilePDB =
       this->GeneratorTarget->GetCompilePDBPath(this->ConfigName);
@@ -1445,7 +1445,7 @@ void cmMakefileTargetGenerator
 ::AppendTargetDepends(std::vector<std::string>& depends)
 {
   // Static libraries never depend on anything for linking.
-  if(this->GeneratorTarget->GetType() == cmTarget::STATIC_LIBRARY)
+  if(this->GeneratorTarget->GetType() == cmState::STATIC_LIBRARY)
     {
     return;
     }

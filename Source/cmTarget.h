@@ -77,18 +77,13 @@ class cmTarget
 {
 public:
   cmTarget();
-  enum TargetType { EXECUTABLE, STATIC_LIBRARY,
-                    SHARED_LIBRARY, MODULE_LIBRARY,
-                    OBJECT_LIBRARY, UTILITY, GLOBAL_TARGET,
-                    INTERFACE_LIBRARY,
-                    UNKNOWN_LIBRARY};
-  static const char* GetTargetTypeName(TargetType targetType);
+  static const char* GetTargetTypeName(cmState::TargetType targetType);
   enum CustomCommandType { PRE_BUILD, PRE_LINK, POST_BUILD };
 
   /**
    * Return the type of target.
    */
-  TargetType GetType() const
+  cmState::TargetType GetType() const
     {
     return this->TargetTypeValue;
     }
@@ -96,7 +91,7 @@ public:
   /**
    * Set the target type
    */
-  void SetType(TargetType f, const std::string& name);
+  void SetType(cmState::TargetType f, const std::string& name);
 
   void MarkAsImported();
 
@@ -302,7 +297,7 @@ public:
     { return this->SystemIncludeDirectories; }
 
   bool LinkLanguagePropagatesToDependents() const
-  { return this->TargetTypeValue == STATIC_LIBRARY; }
+  { return this->TargetTypeValue == cmState::STATIC_LIBRARY; }
 
   cmStringRange GetIncludeDirectoriesEntries() const;
   cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
@@ -420,7 +415,7 @@ private:
 #endif
   cmMakefile* Makefile;
   cmTargetInternalPointer Internal;
-  TargetType TargetTypeValue;
+  cmState::TargetType TargetTypeValue;
   bool HaveInstallRule;
   bool RecordDependencies;
   bool DLLPlatform;

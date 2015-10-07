@@ -88,7 +88,7 @@ bool cmTargetLinkLibrariesCommand
     return true;
     }
 
-  if(this->Target->GetType() == cmTarget::OBJECT_LIBRARY)
+  if(this->Target->GetType() == cmState::OBJECT_LIBRARY)
     {
     std::ostringstream e;
     e << "Object library target \"" << args[0] << "\" "
@@ -98,7 +98,7 @@ bool cmTargetLinkLibrariesCommand
     return true;
     }
 
-  if (this->Target->GetType() == cmTarget::UTILITY)
+  if (this->Target->GetType() == cmState::UTILITY)
     {
     std::ostringstream e;
     const char *modal = 0;
@@ -352,7 +352,7 @@ bool
 cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
                                             cmTargetLinkLibraryType llt)
 {
-  if(this->Target->GetType() == cmTarget::INTERFACE_LIBRARY
+  if(this->Target->GetType() == cmState::INTERFACE_LIBRARY
       && this->CurrentProcessingState != ProcessingKeywordLinkInterface)
     {
     this->Makefile->IssueMessage(cmake::FATAL_ERROR,
@@ -428,7 +428,7 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
     else if(this->CurrentProcessingState != ProcessingKeywordPublicInterface
             && this->CurrentProcessingState != ProcessingPlainPublicInterface)
       {
-      if (this->Target->GetType() == cmTarget::STATIC_LIBRARY)
+      if (this->Target->GetType() == cmState::STATIC_LIBRARY)
         {
         std::string configLib = this->Target
                                      ->GetDebugGeneratorExpressions(lib, llt);
@@ -458,7 +458,7 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
     return true;
     }
 
-  if (this->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
+  if (this->Target->GetType() == cmState::INTERFACE_LIBRARY)
     {
     return true;
     }

@@ -395,7 +395,7 @@ void CCONV cmAddLibrary(void *arg, const char *libname, int shared,
     srcs2.push_back(srcs[i]);
     }
   mf->AddLibrary(libname,
-                 (shared? cmTarget::SHARED_LIBRARY : cmTarget::STATIC_LIBRARY),
+                 (shared? cmState::SHARED_LIBRARY : cmState::STATIC_LIBRARY),
                   srcs2);
 }
 

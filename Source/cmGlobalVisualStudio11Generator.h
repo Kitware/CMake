@@ -48,7 +48,7 @@ protected:
   static std::set<std::string> GetInstalledWindowsCESDKs();
 
   /** Return true if the configuration needs to be deployed */
-  virtual bool NeedsDeploy(cmTarget::TargetType type) const;
+  virtual bool NeedsDeploy(cmState::TargetType type) const;
 private:
   class Factory;
   friend class Factory;

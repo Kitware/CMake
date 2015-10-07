@@ -428,12 +428,12 @@ void cmGlobalUnixMakefileGenerator3
     for (cmTargets::iterator l = lg->GetMakefile()->GetTargets().begin();
          l != lg->GetMakefile()->GetTargets().end(); l++)
       {
-      if((l->second.GetType() == cmTarget::EXECUTABLE) ||
-         (l->second.GetType() == cmTarget::STATIC_LIBRARY) ||
-         (l->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-         (l->second.GetType() == cmTarget::MODULE_LIBRARY) ||
-         (l->second.GetType() == cmTarget::OBJECT_LIBRARY) ||
-         (l->second.GetType() == cmTarget::UTILITY))
+      if((l->second.GetType() == cmState::EXECUTABLE) ||
+         (l->second.GetType() == cmState::STATIC_LIBRARY) ||
+         (l->second.GetType() == cmState::SHARED_LIBRARY) ||
+         (l->second.GetType() == cmState::MODULE_LIBRARY) ||
+         (l->second.GetType() == cmState::OBJECT_LIBRARY) ||
+         (l->second.GetType() == cmState::UTILITY))
         {
         std::string tname = lg->GetRelativeTargetDirectory(l->second);
         tname += "/DependInfo.cmake";
@@ -467,12 +467,12 @@ cmGlobalUnixMakefileGenerator3
     {
     cmGeneratorTarget* gtarget = l->second;
     int type = gtarget->GetType();
-    if((type == cmTarget::EXECUTABLE) ||
-       (type == cmTarget::STATIC_LIBRARY) ||
-       (type == cmTarget::SHARED_LIBRARY) ||
-       (type == cmTarget::MODULE_LIBRARY) ||
-       (type == cmTarget::OBJECT_LIBRARY) ||
-       (type == cmTarget::UTILITY))
+    if((type == cmState::EXECUTABLE) ||
+       (type == cmState::STATIC_LIBRARY) ||
+       (type == cmState::SHARED_LIBRARY) ||
+       (type == cmState::MODULE_LIBRARY) ||
+       (type == cmState::OBJECT_LIBRARY) ||
+       (type == cmState::UTILITY))
       {
       if(gtarget->Target->IsImported())
         {
@@ -645,12 +645,12 @@ cmGlobalUnixMakefileGenerator3
          emitted.insert(name).second &&
          // Handle user targets here.  Global targets are handled in
          // the local generator on a per-directory basis.
-         ((type == cmTarget::EXECUTABLE) ||
-          (type == cmTarget::STATIC_LIBRARY) ||
-          (type == cmTarget::SHARED_LIBRARY) ||
-          (type == cmTarget::MODULE_LIBRARY) ||
-          (type == cmTarget::OBJECT_LIBRARY) ||
-          (type == cmTarget::UTILITY)))
+         ((type == cmState::EXECUTABLE) ||
+          (type == cmState::STATIC_LIBRARY) ||
+          (type == cmState::SHARED_LIBRARY) ||
+          (type == cmState::MODULE_LIBRARY) ||
+          (type == cmState::OBJECT_LIBRARY) ||
+          (type == cmState::UTILITY)))
         {
         // Add a rule to build the target by name.
         lg->WriteDivider(ruleFileStream);
@@ -741,12 +741,12 @@ cmGlobalUnixMakefileGenerator3
     int type = gtarget->GetType();
     std::string name = gtarget->GetName();
     if (!name.empty()
-     && (  (type == cmTarget::EXECUTABLE)
-        || (type == cmTarget::STATIC_LIBRARY)
-        || (type == cmTarget::SHARED_LIBRARY)
-        || (type == cmTarget::MODULE_LIBRARY)
-        || (type == cmTarget::OBJECT_LIBRARY)
-        || (type == cmTarget::UTILITY)))
+     && (  (type == cmState::EXECUTABLE)
+        || (type == cmState::STATIC_LIBRARY)
+        || (type == cmState::SHARED_LIBRARY)
+        || (type == cmState::MODULE_LIBRARY)
+        || (type == cmState::OBJECT_LIBRARY)
+        || (type == cmState::UTILITY)))
       {
       std::string makefileName;
       // Add a rule to build the target by name.
@@ -937,7 +937,7 @@ void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
 
       cmLocalGenerator* tlg = gt->GetLocalGenerator();
 
-      if(gt->GetType() == cmTarget::INTERFACE_LIBRARY
+      if(gt->GetType() == cmState::INTERFACE_LIBRARY
           || gt->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
         {
         continue;
@@ -984,7 +984,7 @@ cmGlobalUnixMakefileGenerator3
     for(TargetDependSet::const_iterator di = depends.begin();
         di != depends.end(); ++di)
       {
-      if ((*di)->GetType() == cmTarget::INTERFACE_LIBRARY)
+      if ((*di)->GetType() == cmState::INTERFACE_LIBRARY)
         {
         continue;
         }
@@ -1060,7 +1060,7 @@ cmGlobalUnixMakefileGenerator3
     {
     // Create the target-level dependency.
     cmGeneratorTarget const* dep = *i;
-    if (dep->GetType() == cmTarget::INTERFACE_LIBRARY)
+    if (dep->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
@@ -1105,14 +1105,14 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
       for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
         {
         cmTarget const& target = t->second;
-        cmTarget::TargetType type = target.GetType();
-        if((type == cmTarget::EXECUTABLE) ||
-           (type == cmTarget::STATIC_LIBRARY) ||
-           (type == cmTarget::SHARED_LIBRARY) ||
-           (type == cmTarget::MODULE_LIBRARY) ||
-           (type == cmTarget::OBJECT_LIBRARY) ||
-           (type == cmTarget::GLOBAL_TARGET) ||
-           (type == cmTarget::UTILITY))
+        cmState::TargetType type = target.GetType();
+        if((type == cmState::EXECUTABLE) ||
+           (type == cmState::STATIC_LIBRARY) ||
+           (type == cmState::SHARED_LIBRARY) ||
+           (type == cmState::MODULE_LIBRARY) ||
+           (type == cmState::OBJECT_LIBRARY) ||
+           (type == cmState::GLOBAL_TARGET) ||
+           (type == cmState::UTILITY))
           {
           std::string name = target.GetName();
           if(emittedTargets.insert(name).second)

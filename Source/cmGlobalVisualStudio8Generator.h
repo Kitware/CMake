@@ -77,14 +77,14 @@ protected:
   bool AddCheckTarget();
 
   /** Return true if the configuration needs to be deployed */
-  virtual bool NeedsDeploy(cmTarget::TargetType type) const;
+  virtual bool NeedsDeploy(cmState::TargetType type) const;
 
   static cmIDEFlagTable const* GetExtraFlagTableVS8();
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual void WriteSolutionConfigurations(
     std::ostream& fout, std::vector<std::string> const& configs);
   virtual void WriteProjectConfigurations(
-    std::ostream& fout, const std::string& name, cmTarget::TargetType type,
+    std::ostream& fout, const std::string& name, cmState::TargetType type,
     std::vector<std::string> const& configs,
     const std::set<std::string>& configsPartOfDefaultBuild,
     const std::string& platformMapping = "");

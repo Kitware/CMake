@@ -168,7 +168,7 @@ void cmExtraSublimeTextGenerator::
       {
       switch(ti->second.GetType())
         {
-        case cmTarget::GLOBAL_TARGET:
+        case cmState::GLOBAL_TARGET:
           {
           // Only add the global targets from CMAKE_BINARY_DIR,
           // not from the subdirs
@@ -181,7 +181,7 @@ void cmExtraSublimeTextGenerator::
             }
           }
           break;
-        case cmTarget::UTILITY:
+        case cmState::UTILITY:
           // Add all utility targets, except the Nightly/Continuous/
           // Experimental-"sub"targets as e.g. NightlyStart
           if (((ti->first.find("Nightly")==0)   &&(ti->first!="Nightly"))
@@ -196,11 +196,11 @@ void cmExtraSublimeTextGenerator::
                              make.c_str(), makefile, compiler.c_str(),
                              sourceFileFlags, false);
           break;
-        case cmTarget::EXECUTABLE:
-        case cmTarget::STATIC_LIBRARY:
-        case cmTarget::SHARED_LIBRARY:
-        case cmTarget::MODULE_LIBRARY:
-        case cmTarget::OBJECT_LIBRARY:
+        case cmState::EXECUTABLE:
+        case cmState::STATIC_LIBRARY:
+        case cmState::SHARED_LIBRARY:
+        case cmState::MODULE_LIBRARY:
+        case cmState::OBJECT_LIBRARY:
           {
           this->AppendTarget(fout, ti->first, *lg, &ti->second,
                              make.c_str(), makefile, compiler.c_str(),

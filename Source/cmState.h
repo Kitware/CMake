@@ -181,6 +181,12 @@ public:
     friend class Snapshot;
   };
 
+  enum TargetType { EXECUTABLE, STATIC_LIBRARY,
+                    SHARED_LIBRARY, MODULE_LIBRARY,
+                    OBJECT_LIBRARY, UTILITY, GLOBAL_TARGET,
+                    INTERFACE_LIBRARY,
+                    UNKNOWN_LIBRARY};
+
   Snapshot CreateBaseSnapshot();
   Snapshot
   CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot,
