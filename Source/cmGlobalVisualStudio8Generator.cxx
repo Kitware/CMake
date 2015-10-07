@@ -315,7 +315,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   argH += lg->GetSourceDirectory();
   commandLine.push_back(argH);
   std::string argB = "-B";
-  argB += lg->GetHomeOutputDirectory();
+  argB += lg->GetBinaryDirectory();
   commandLine.push_back(argB);
   commandLine.push_back("--check-stamp-list");
   commandLine.push_back(stampList.c_str());
