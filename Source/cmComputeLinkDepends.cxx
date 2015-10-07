@@ -982,6 +982,7 @@ void cmComputeLinkDepends::CheckWrongConfigItem(cmLinkItem const& item)
   // directories.
   if(item.Target && !item.Target->IsImported())
     {
-    this->OldWrongConfigItems.insert(item.Target);
+    this->OldWrongConfigItems.insert(
+            this->GlobalGenerator->GetGeneratorTarget(item.Target));
     }
 }

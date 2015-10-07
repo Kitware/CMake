@@ -19,7 +19,6 @@
 #include "cmState.h"
 #include "cmOutputConverter.h"
 #include "cmMakefile.h"
-#include "cmTarget.h"
 #include "cmGeneratorTarget.h"
 #include "cmake.h"
 #include "cmAlgorithms.h"
@@ -537,16 +536,16 @@ bool cmComputeLinkInformation::Compute()
     // For CMake 2.4 bug-compatibility we need to consider the output
     // directories of targets linked in another configuration as link
     // directories.
-    std::set<cmTarget const*> const& wrongItems = cld.GetOldWrongConfigItems();
-    for(std::set<cmTarget const*>::const_iterator i = wrongItems.begin();
-        i != wrongItems.end(); ++i)
+    std::set<cmGeneratorTarget const*> const& wrongItems =
+        cld.GetOldWrongConfigItems();
+    for(std::set<cmGeneratorTarget const*>::const_iterator i =
+        wrongItems.begin(); i != wrongItems.end(); ++i)
       {
-      cmTarget const* tgt = *i;
-      cmGeneratorTarget *gtgt = this->GlobalGenerator->GetGeneratorTarget(tgt);
+      cmGeneratorTarget const* tgt = *i;
       bool implib =
         (this->UseImportLibrary &&
          (tgt->GetType() == cmTarget::SHARED_LIBRARY));
-      std::string lib = gtgt->GetFullPath(this->Config , implib, true);
+      std::string lib = tgt->GetFullPath(this->Config , implib, true);
       this->OldLinkDirItems.push_back(lib);
       }
     }
