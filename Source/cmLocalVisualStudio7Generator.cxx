@@ -161,7 +161,7 @@ void cmLocalVisualStudio7Generator::WriteProjectFiles()
 {
   // If not an in source build, then create the output directory
   if(strcmp(this->Makefile->GetCurrentBinaryDirectory(),
-            this->GetSourceDirectory()) != 0)
+            this->Makefile->GetHomeDirectory()) != 0)
     {
     if(!cmSystemTools::MakeDirectory
        (this->Makefile->GetCurrentBinaryDirectory()))
@@ -290,10 +290,10 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   comment += makefileIn;
   std::string args;
   args = "-H";
-  args += this->GetSourceDirectory();
+  args += this->Makefile->GetHomeDirectory();
   commandLine.push_back(args);
   args = "-B";
-  args += this->GetBinaryDirectory();
+  args += this->Makefile->GetHomeOutputDirectory();
   commandLine.push_back(args);
   commandLine.push_back("--check-stamp-file");
   std::string stampFilename = this->Convert(stampName.c_str(), FULL,

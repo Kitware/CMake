@@ -2868,16 +2868,6 @@ cmake* cmLocalGenerator::GetCMakeInstance() const
   return this->GlobalGenerator->GetCMakeInstance();
 }
 
-const char* cmLocalGenerator::GetSourceDirectory() const
-{
-  return this->GetCMakeInstance()->GetHomeDirectory();
-}
-
-const char* cmLocalGenerator::GetBinaryDirectory() const
-{
-  return this->GetCMakeInstance()->GetHomeOutputDirectory();
-}
-
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::GetTargetDirectory(cmTarget const&) const
