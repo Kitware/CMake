@@ -3735,7 +3735,7 @@ const char * getLinkInterfaceDependentProperty(cmGeneratorTarget const* tgt,
 //----------------------------------------------------------------------------
 template<typename PropertyType>
 void checkPropertyConsistency(cmGeneratorTarget const* depender,
-                              cmTarget const* dependee,
+                              cmGeneratorTarget const* dependee,
                               const std::string& propName,
                               std::set<std::string> &emitted,
                               const std::string& config,
@@ -3751,7 +3751,7 @@ void checkPropertyConsistency(cmGeneratorTarget const* depender,
   std::vector<std::string> props;
   cmSystemTools::ExpandListArgument(prop, props);
   std::string pdir =
-    dependee->GetMakefile()->GetRequiredDefinition("CMAKE_ROOT");
+    dependee->Target->GetMakefile()->GetRequiredDefinition("CMAKE_ROOT");
   pdir += "/Help/prop_tgt/";
 
   for(std::vector<std::string>::iterator pi = props.begin();

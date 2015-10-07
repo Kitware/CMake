@@ -658,7 +658,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       std::string exe = tgt->GetFullPath(config, this->UseImportLibrary,
                                          true);
       linkItem += exe;
-      this->Items.push_back(Item(linkItem, true, tgt->Target));
+      this->Items.push_back(Item(linkItem, true, tgt));
       this->Depends.push_back(exe);
       }
     else if(tgt->GetType() == cmTarget::INTERFACE_LIBRARY)
@@ -666,7 +666,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       // Add the interface library as an item so it can be considered as part
       // of COMPATIBLE_INTERFACE_ enforcement.  The generators will ignore
       // this for the actual link line.
-      this->Items.push_back(Item(std::string(), true, tgt->Target));
+      this->Items.push_back(Item(std::string(), true, tgt));
       }
     else
       {
@@ -1120,7 +1120,7 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
     }
 
   // Now add the full path to the library.
-  this->Items.push_back(Item(item, true, target->Target));
+  this->Items.push_back(Item(item, true, target));
 }
 
 //----------------------------------------------------------------------------

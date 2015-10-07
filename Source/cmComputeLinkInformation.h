@@ -39,11 +39,11 @@ public:
     Item(): Value(), IsPath(true), Target(0) {}
     Item(Item const& item):
       Value(item.Value), IsPath(item.IsPath), Target(item.Target) {}
-    Item(std::string const& v, bool p, cmTarget const* target = 0):
+    Item(std::string const& v, bool p, cmGeneratorTarget const* target = 0):
       Value(v), IsPath(p), Target(target) {}
     std::string Value;
     bool IsPath;
-    cmTarget const* Target;
+    cmGeneratorTarget const* Target;
   };
   typedef std::vector<Item> ItemVector;
   ItemVector const& GetItems();

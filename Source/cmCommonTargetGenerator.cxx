@@ -391,21 +391,19 @@ cmCommonTargetGenerator::GetLinkedTargetDirectories() const
     for(cmComputeLinkInformation::ItemVector::const_iterator
           i = items.begin(); i != items.end(); ++i)
       {
-      cmTarget const* linkee = i->Target;
+      cmGeneratorTarget const* linkee = i->Target;
       if(linkee && !linkee->IsImported()
                 // We can ignore the INTERFACE_LIBRARY items because
                 // Target->GetLinkInformation already processed their
                 // link interface and they don't have any output themselves.
                 && linkee->GetType() != cmTarget::INTERFACE_LIBRARY
-                && emitted.insert(linkee).second)
+                && emitted.insert(linkee->Target).second)
         {
-        cmGeneratorTarget* gt =
-          this->GlobalGenerator->GetGeneratorTarget(linkee);
-        cmLocalGenerator* lg = gt->GetLocalGenerator();
-        cmMakefile* mf = linkee->GetMakefile();
+        cmLocalGenerator* lg = linkee->GetLocalGenerator();
+        cmMakefile* mf = linkee->Target->GetMakefile();
         std::string di = mf->GetCurrentBinaryDirectory();
         di += "/";
-        di += lg->GetTargetDirectory(*linkee);
+        di += lg->GetTargetDirectory(*linkee->Target);
         dirs.push_back(di);
         }
       }
