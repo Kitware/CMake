@@ -2105,7 +2105,7 @@ cmGlobalGenerator::FindLocalGenerator(const std::string& start_dir) const
   for(std::vector<cmLocalGenerator*>::const_iterator it =
       this->LocalGenerators.begin(); it != this->LocalGenerators.end(); ++it)
     {
-    std::string sd = (*it)->GetMakefile()->GetCurrentSourceDirectory();
+    std::string sd = (*it)->GetCurrentSourceDirectory();
     if (sd == start_dir)
       {
       return *it;
