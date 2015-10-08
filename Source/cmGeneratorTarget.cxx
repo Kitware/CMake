@@ -402,7 +402,8 @@ std::string cmGeneratorTarget::GetOutputName(const std::string& config,
     {
     // An empty map entry indicates we have been called recursively
     // from the above block.
-    this->Makefile->GetCMakeInstance()->IssueMessage(
+    this->LocalGenerator->GetCMakeInstance()
+          ->IssueMessage(
       cmake::FATAL_ERROR,
       "Target '" + this->GetName() + "' OUTPUT_NAME depends on itself.",
       this->Target->GetBacktrace());
@@ -951,7 +952,7 @@ static bool processSources(cmGeneratorTarget const* tgt,
       }
     if (!usedSources.empty())
       {
-      mf->GetCMakeInstance()->IssueMessage(cmake::LOG,
+      tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(cmake::LOG,
                             std::string("Used sources for target ")
                             + tgt->GetName() + ":\n"
                             + usedSources, (*it)->ge->GetBacktrace());
@@ -1521,7 +1522,7 @@ public:
             << "\" but the target was not found.  Perhaps a find_package() "
             "call is missing for an IMPORTED target, or an ALIAS target is "
             "missing?";
-          this->Makefile->GetCMakeInstance()->IssueMessage(
+          this->Target->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
             messageType, e.str(), this->Target->Target->GetBacktrace());
           }
         }
@@ -2444,7 +2445,7 @@ static void processIncludeDirectories(cmGeneratorTarget const* tgt,
       }
     if (!usedIncludes.empty())
       {
-      mf->GetCMakeInstance()->IssueMessage(cmake::LOG,
+      tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(cmake::LOG,
                             std::string("Used includes for target ")
                             + tgt->GetName() + ":\n"
                             + usedIncludes, (*it)->ge->GetBacktrace());
@@ -2577,7 +2578,7 @@ static void processCompileOptionsInternal(cmGeneratorTarget const* tgt,
       }
     if (!usedOptions.empty())
       {
-      mf->GetCMakeInstance()->IssueMessage(cmake::LOG,
+      tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(cmake::LOG,
                             std::string("Used compile ") + logName
                             + std::string(" for target ")
                             + tgt->GetName() + ":\n"
@@ -4212,7 +4213,7 @@ cmGeneratorTarget::ReportPropertyOrigin(const std::string &p,
   areport += result;
   areport += "\"):\n" + report;
 
-  this->Makefile->GetCMakeInstance()->IssueMessage(cmake::LOG, areport);
+  this->LocalGenerator->GetCMakeInstance()->IssueMessage(cmake::LOG, areport);
 }
 
 //----------------------------------------------------------------------------
