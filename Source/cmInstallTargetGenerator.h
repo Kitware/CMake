@@ -101,6 +101,8 @@ protected:
                     const std::string& toDestDirPath);
   void AddRanlibRule(std::ostream& os, Indent const& indent,
                      const std::string& toDestDirPath);
+  void AddUniversalInstallRule(std::ostream& os, Indent const& indent,
+                               const std::string& toDestDirPath);
 
   std::string TargetName;
   cmGeneratorTarget* Target;

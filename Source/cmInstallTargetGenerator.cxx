@@ -531,6 +531,7 @@ void cmInstallTargetGenerator::PostReplacementTweaks(std::ostream& os,
 {
   this->AddInstallNamePatchRule(os, indent, config, file);
   this->AddChrpathPatchRule(os, indent, config, file);
+  this->AddUniversalInstallRule(os, indent, file);
   this->AddRanlibRule(os, indent, file);
   this->AddStripRule(os, indent, file);
 }
@@ -866,4 +867,47 @@ cmInstallTargetGenerator::AddRanlibRule(std::ostream& os,
 
   os << indent << "execute_process(COMMAND \""
      << ranlib << "\" \"" << toDestDirPath << "\")\n";
+}
+
+//----------------------------------------------------------------------------
+void
+cmInstallTargetGenerator
+::AddUniversalInstallRule(std::ostream& os,
+                          Indent const& indent,
+                          const std::string& toDestDirPath)
+{
+  cmMakefile const* mf = this->Target->Target->GetMakefile();
+
+  if(!mf->PlatformIsAppleIos() || !mf->IsOn("XCODE"))
+    {
+    return;
+    }
+
+  const char* xcodeVersion = mf->GetDefinition("XCODE_VERSION");
+  if(!xcodeVersion || cmSystemTools::VersionCompareGreater("6", xcodeVersion))
+    {
+    return;
+    }
+
+  switch(this->Target->GetType())
+    {
+    case cmState::EXECUTABLE:
+    case cmState::STATIC_LIBRARY:
+    case cmState::SHARED_LIBRARY:
+    case cmState::MODULE_LIBRARY:
+      break;
+
+    default:
+      return;
+    }
+
+  if(!this->Target->Target->GetPropertyAsBool("IOS_INSTALL_COMBINED"))
+   {
+   return;
+   }
+
+  os << indent << "include(CMakeIOSInstallCombined)\n";
+  os << indent << "ios_install_combined("
+               << "\"" << this->Target->Target->GetName() << "\" "
+               << "\"" << toDestDirPath << "\")\n";
 }
