@@ -119,27 +119,34 @@ foreach(gen ${generators})
     set(SUFFIXES ${SUFFIXES} "*.exe")
   endif()
 endforeach()
+
+if(LOCAL_DIR)
+  file(MAKE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${LOCAL_DIR}")
+else()
+  set(LOCAL_DIR .)
+endif()
+
 # copy all the files over from the remote machine
 set(PROJECT_PREFIX cmake-)
 foreach(suffix ${SUFFIXES})
-  message("scp ${HOST}:${FINAL_PATH}/${PROJECT_PREFIX}${suffix} .")
+  message("scp ${HOST}:${FINAL_PATH}/${PROJECT_PREFIX}${suffix} ${LOCAL_DIR}")
   execute_process(COMMAND
-    scp ${HOST}:${FINAL_PATH}/${PROJECT_PREFIX}${suffix} .
+    scp ${HOST}:${FINAL_PATH}/${PROJECT_PREFIX}${suffix} ${LOCAL_DIR}
     RESULT_VARIABLE result)
   if(${result} GREATER 0)
-    message("error getting file back scp ${HOST}:${FINAL_PATH}/${PROJECT_PREFIX}${suffix} .")
+    message("error getting file back scp ${HOST}:${FINAL_PATH}/${PROJECT_PREFIX}${suffix} ${LOCAL_DIR}")
   endif()
 endforeach()
 
 # if there are extra files to copy get them as well
 if(extra_files)
   foreach(f ${extra_files})
-    message("scp ${HOST}:${FINAL_PATH}/${f} .")
+    message("scp ${HOST}:${FINAL_PATH}/${f} ${LOCAL_DIR}")
     execute_process(COMMAND
-      scp ${HOST}:${FINAL_PATH}/${f} .
+      scp ${HOST}:${FINAL_PATH}/${f} ${LOCAL_DIR}
       RESULT_VARIABLE result)
     if(${result} GREATER 0)
-      message("error getting file back scp ${HOST}:${FINAL_PATH}/${f} .")
+      message("error getting file back scp ${HOST}:${FINAL_PATH}/${f} ${LOCAL_DIR}")
     endif()
   endforeach()
 endif()
