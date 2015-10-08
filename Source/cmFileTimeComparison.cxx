@@ -166,6 +166,24 @@ int cmFileTimeComparisonInternal::Compare(cmFileTimeComparison_Type* s1,
     {
     return 1;
     }
+# elif CMake_STAT_HAS_ST_MTIMESPEC
+  // Compare using nanosecond resolution.
+  if(s1->st_mtimespec.tv_sec < s2->st_mtimespec.tv_sec)
+    {
+    return -1;
+    }
+  else if(s1->st_mtimespec.tv_sec > s2->st_mtimespec.tv_sec)
+    {
+    return 1;
+    }
+  else if(s1->st_mtimespec.tv_nsec < s2->st_mtimespec.tv_nsec)
+    {
+    return -1;
+    }
+  else if(s1->st_mtimespec.tv_nsec > s2->st_mtimespec.tv_nsec)
+    {
+    return 1;
+    }
 # else
   // Compare using 1 second resolution.
   if(s1->st_mtime < s2->st_mtime)
@@ -195,6 +213,23 @@ bool cmFileTimeComparisonInternal::TimesDiffer(cmFileTimeComparison_Type* s1,
   long long bil = 1000000000;
   long long t1 = s1->st_mtim.tv_sec * bil + s1->st_mtim.tv_nsec;
   long long t2 = s2->st_mtim.tv_sec * bil + s2->st_mtim.tv_nsec;
+  if(t1 < t2)
+    {
+    return (t2 - t1) >= bil;
+    }
+  else if(t2 < t1)
+    {
+    return (t1 - t2) >= bil;
+    }
+  else
+    {
+    return false;
+    }
+# elif CMake_STAT_HAS_ST_MTIMESPEC
+  // Times are integers in units of 1ns.
+  long long bil = 1000000000;
+  long long t1 = s1->st_mtimespec.tv_sec * bil + s1->st_mtimespec.tv_nsec;
+  long long t2 = s2->st_mtimespec.tv_sec * bil + s2->st_mtimespec.tv_nsec;
   if(t1 < t2)
     {
     return (t2 - t1) >= bil;
