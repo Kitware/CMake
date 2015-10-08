@@ -36,6 +36,12 @@ property is set to ``ON`` automatically.
 A ``SHARED`` library may be marked with the :prop_tgt:`FRAMEWORK`
 target property to create an OS X Framework.
 
+If a library does not export any symbols, it must not be declared as a
+``SHARED`` library.  For example, a Windows resource DLL or a managed C++/CLI
+DLL that exports no unmanaged symbols would need to be a ``MODULE`` library.
+This is because CMake expects a ``SHARED`` library to always have an
+associated import library on Windows.
+
 By default the library file will be created in the build tree directory
 corresponding to the source tree directory in which the command was
 invoked.  See documentation of the :prop_tgt:`ARCHIVE_OUTPUT_DIRECTORY`,
