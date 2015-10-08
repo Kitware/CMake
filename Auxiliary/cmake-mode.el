@@ -177,7 +177,7 @@ the indentation.  Otherwise it retains the same position on the line"
   (interactive)
   (save-excursion
     (goto-char (point-min))
-    (while (re-search-forward "^\\([ \t]*\\)\\(\\w+\\)\\([ \t]*(\\)" nil t)
+    (while (re-search-forward "^\\([ \t]*\\)\\_<\\(\\(?:\\w\\|\\s_\\)+\\)\\_>\\([ \t]*(\\)" nil t)
       (replace-match
        (concat
         (match-string 1)
