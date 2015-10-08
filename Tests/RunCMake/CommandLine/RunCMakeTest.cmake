@@ -115,6 +115,7 @@ run_cmake_command(E_sleep-bad-arg2 ${CMAKE_COMMAND} -E sleep 1 -1)
 run_cmake_command(E_sleep-one-tenth ${CMAKE_COMMAND} -E sleep 0.1)
 
 run_cmake_command(P_directory ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR})
+run_cmake_command(P_working-dir ${CMAKE_COMMAND} -DEXPECTED_WORKING_DIR=${RunCMake_BINARY_DIR}/P_working-dir-build -P ${RunCMake_SOURCE_DIR}/P_working-dir.cmake)
 
 set(RunCMake_TEST_OPTIONS
   "-DFOO=-DBAR:BOOL=BAZ")
