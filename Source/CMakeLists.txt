@@ -550,6 +550,7 @@ endforeach()
 
 foreach(check
     STAT_HAS_ST_MTIM
+    STAT_HAS_ST_MTIMESPEC
     )
   if(KWSYS_CXX_${check}_COMPILED) # abuse KWSys check cache entry
     set(CMake_${check} 1)
