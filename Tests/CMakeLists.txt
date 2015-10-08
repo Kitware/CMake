@@ -689,8 +689,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       dash2win64_release.cmake)
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyOSX
       dashmacmini5_release.cmake)
-    ADD_NIGHTLY_BUILD_TEST(CMakeNightlyLinux
+    ADD_NIGHTLY_BUILD_TEST(CMakeNightlyLinux32
       magrathea_release.cmake)
+    ADD_NIGHTLY_BUILD_TEST(CMakeNightlyLinux64
+      linux64_release.cmake)
   endif()
 
   # add tests with more complex invocations
