@@ -80,10 +80,10 @@ regardless of the library type.  The ``MODULE`` library type is
 dissimilar in that it is generally not linked to -- it is not used in
 the right-hand-side of the :command:`target_link_libraries` command.
 It is a type which is loaded as a plugin using runtime techniques.
-If the library does not export any unmanaged symbols (e.g. Win32
+If the library does not export any unmanaged symbols (e.g. Windows
 resource DLL, C++/CLI DLL), it is required that the library not be a
-``SHARED`` library.  Some generators and compilers assume that
-``SHARED`` libraries export at least one symbol.
+``SHARED`` library because CMake expects ``SHARED`` libraries to export
+at least one symbol.
 
 .. code-block:: cmake
 
