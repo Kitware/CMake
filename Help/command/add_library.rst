@@ -36,6 +36,11 @@ property is set to ``ON`` automatically.
 A ``SHARED`` library may be marked with the :prop_tgt:`FRAMEWORK`
 target property to create an OS X Framework.
 
+If a library does not export any symbols, it must not be declared as a
+``SHARED`` library to avoid breaking incremental builds on some generators
+and compilers.  For example, a Win32 resource DLL or a managed C++/CLI DLL
+that exports no unmanaged symbols would need to be a ``MODULE`` library.
+
 By default the library file will be created in the build tree directory
 corresponding to the source tree directory in which the command was
 invoked.  See documentation of the :prop_tgt:`ARCHIVE_OUTPUT_DIRECTORY`,
