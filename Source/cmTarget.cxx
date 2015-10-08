@@ -61,16 +61,6 @@ const char* cmTarget::GetTargetTypeName(TargetType targetType)
 }
 
 //----------------------------------------------------------------------------
-struct cmTarget::OutputInfo
-{
-  std::string OutDir;
-  std::string ImpDir;
-  std::string PdbDir;
-  bool empty() const
-    { return OutDir.empty() && ImpDir.empty() && PdbDir.empty(); }
-};
-
-//----------------------------------------------------------------------------
 class cmTargetInternals
 {
 public:
