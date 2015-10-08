@@ -101,7 +101,7 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
       fileIt != newRccFiles.end();
       ++fileIt)
     {
-    const_cast<cmTarget*>(target->Target)->AddSource(*fileIt);
+    const_cast<cmGeneratorTarget*>(target)->AddSource(*fileIt);
     }
 }
 
@@ -709,7 +709,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenSources(
     makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
                             mocCppFile.c_str(), false);
 
-    target->Target->AddSource(mocCppFile);
+    target->AddSource(mocCppFile);
     }
 }
 

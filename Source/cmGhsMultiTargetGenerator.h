@@ -36,7 +36,7 @@ public:
   bool IncludeThisTarget();
   std::vector<cmSourceFile *> GetSources() const;
   GhsMultiGpj::Types GetGpjTag() const;
-  static GhsMultiGpj::Types GetGpjTag(const cmTarget *target);
+  static GhsMultiGpj::Types GetGpjTag(const cmGeneratorTarget* target);
   const char *GetAbsBuildFilePath() const
   {
     return this->AbsBuildFilePath.c_str();
@@ -95,7 +95,7 @@ private:
   std::string GetOutputFilename(const std::string &config) const;
 
   bool IsNotKernel(std::string const &config, const std::string &language);
-  static bool DetermineIfTargetGroup(const cmTarget *target);
+  static bool DetermineIfTargetGroup(const cmGeneratorTarget* target);
   bool DetermineIfDynamicDownload(std::string const &config,
                                   const std::string &language);
 

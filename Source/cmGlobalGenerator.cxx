@@ -2949,10 +2949,12 @@ void cmGlobalGenerator::WriteSummary(cmTarget* target)
       {
       configs.push_back("");
       }
+    cmGeneratorTarget* gt =
+        this->GetGeneratorTarget(target);
     for(std::vector<std::string>::const_iterator ci = configs.begin();
         ci != configs.end(); ++ci)
       {
-      target->GetSourceFiles(sources, *ci);
+      gt->GetSourceFiles(sources, *ci);
       }
     std::vector<cmSourceFile*>::const_iterator sourcesEnd
         = cmRemoveDuplicates(sources);
