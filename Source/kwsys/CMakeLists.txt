@@ -342,11 +342,6 @@ ENDIF()
 # capabilities and parent project's request.  Enforce 0/1 as only
 # possible values for configuration into Configure.hxx.
 
-IF(UNIX)
-  KWSYS_PLATFORM_CXX_TEST(KWSYS_STAT_HAS_ST_MTIM
-    "Checking whether struct stat has st_mtim member" DIRECT)
-ENDIF()
-
 # Check existence and uniqueness of long long and __int64.
 KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_LONG_LONG
   "Checking whether C++ compiler has 'long long'" DIRECT)
@@ -511,12 +506,18 @@ IF(KWSYS_USE_SystemTools)
     "Checking whether CXX compiler has utimes" DIRECT)
   KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_UTIMENSAT
     "Checking whether CXX compiler has utimensat" DIRECT)
+  KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_STAT_HAS_ST_MTIM
+    "Checking whether CXX compiler struct stat has st_mtim member" DIRECT)
+  KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_STAT_HAS_ST_MTIMESPEC
+    "Checking whether CXX compiler struct stat has st_mtimespec member" DIRECT)
   SET_PROPERTY(SOURCE SystemTools.cxx APPEND PROPERTY COMPILE_DEFINITIONS
     KWSYS_CXX_HAS_SETENV=${KWSYS_CXX_HAS_SETENV}
     KWSYS_CXX_HAS_UNSETENV=${KWSYS_CXX_HAS_UNSETENV}
     KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=${KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H}
     KWSYS_CXX_HAS_UTIMES=${KWSYS_CXX_HAS_UTIMES}
     KWSYS_CXX_HAS_UTIMENSAT=${KWSYS_CXX_HAS_UTIMENSAT}
+    KWSYS_CXX_STAT_HAS_ST_MTIM=${KWSYS_CXX_STAT_HAS_ST_MTIM}
+    KWSYS_CXX_STAT_HAS_ST_MTIMESPEC=${KWSYS_CXX_STAT_HAS_ST_MTIMESPEC}
     )
 ENDIF()
 

@@ -18,9 +18,6 @@
 /* Whether wstring is available.  */
 #define @KWSYS_NAMESPACE@_STL_HAS_WSTRING @KWSYS_STL_HAS_WSTRING@
 
-/* Whether struct stat has the st_mtim member for high resolution times.  */
-#define @KWSYS_NAMESPACE@_STAT_HAS_ST_MTIM @KWSYS_STAT_HAS_ST_MTIM@
-
 /* If building a C++ file in kwsys itself, give the source file
    access to the macros without a configured namespace.  */
 #if defined(KWSYS_NAMESPACE)
@@ -28,7 +25,6 @@
 #  define kwsys     @KWSYS_NAMESPACE@
 # endif
 # define KWSYS_NAME_IS_KWSYS            @KWSYS_NAMESPACE@_NAME_IS_KWSYS
-# define KWSYS_STAT_HAS_ST_MTIM         @KWSYS_NAMESPACE@_STAT_HAS_ST_MTIM
 # define KWSYS_STL_HAS_WSTRING          @KWSYS_NAMESPACE@_STL_HAS_WSTRING
 #endif
 
