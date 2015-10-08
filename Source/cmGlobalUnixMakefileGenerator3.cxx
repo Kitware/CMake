@@ -585,12 +585,11 @@ void cmGlobalUnixMakefileGenerator3
     else
       {
       cmState::Snapshot snapshot = this->CMakeInstance->GetCurrentSnapshot();
-      mf = new cmMakefile(this, snapshot);
-      // set the Start directories
-      mf->SetCurrentSourceDirectory
+      snapshot.GetDirectory().SetCurrentSource
         (this->CMakeInstance->GetHomeDirectory());
-      mf->SetCurrentBinaryDirectory
+      snapshot.GetDirectory().SetCurrentBinary
         (this->CMakeInstance->GetHomeOutputDirectory());
+      mf = new cmMakefile(this, snapshot);
       }
 
     std::string tname = targetName;

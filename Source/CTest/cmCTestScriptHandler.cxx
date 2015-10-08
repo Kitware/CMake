@@ -318,15 +318,12 @@ void cmCTestScriptHandler::CreateCMake()
   this->GlobalGenerator = new cmGlobalGenerator(this->CMake);
 
   cmState::Snapshot snapshot = this->CMake->GetCurrentSnapshot();
+  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  snapshot.GetDirectory().SetCurrentSource(cwd);
+  snapshot.GetDirectory().SetCurrentBinary(cwd);
   this->Makefile = new cmMakefile(this->GlobalGenerator, snapshot);
 
   this->CMake->SetProgressCallback(ctestScriptProgressCallback, this->CTest);
-
-  // Set CMAKE_CURRENT_SOURCE_DIR and CMAKE_CURRENT_BINARY_DIR.
-  // Also, some commands need Makefile->GetCurrentSourceDirectory().
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  this->Makefile->SetCurrentSourceDirectory(cwd);
-  this->Makefile->SetCurrentBinaryDirectory(cwd);
 
   // remove all cmake commands which are not scriptable, since they can't be
   // used in ctest scripts
