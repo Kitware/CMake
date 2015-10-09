@@ -100,7 +100,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Construct the full path version of the names.
   std::string outpath = this->GeneratorTarget->GetDirectory(this->ConfigName);
-  if(this->Target->IsAppBundleOnApple())
+  if(this->GeneratorTarget->IsAppBundleOnApple())
     {
     this->OSXBundleGenerator->CreateAppBundle(targetName, outpath);
     }

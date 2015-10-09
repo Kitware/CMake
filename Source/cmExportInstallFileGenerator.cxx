@@ -433,7 +433,7 @@ cmExportInstallFileGenerator
     prop += suffix;
 
     // Append the installed file name.
-    if(target->Target->IsAppBundleOnApple())
+    if(target->IsAppBundleOnApple())
       {
       value += itgen->GetInstallFilename(target, config);
       value += ".app/Contents/MacOS/";

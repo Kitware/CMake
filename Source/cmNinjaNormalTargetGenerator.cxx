@@ -412,7 +412,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                      gt.GetFullPath(cfgName,
                                        /*implib=*/true));
 
-  if (target.IsAppBundleOnApple())
+  if (gt.IsAppBundleOnApple())
     {
     // Create the app bundle
     std::string outpath = gt.GetDirectory(cfgName);

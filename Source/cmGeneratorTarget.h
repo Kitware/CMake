@@ -419,6 +419,9 @@ public:
       Apple.  */
   bool IsFrameworkOnApple() const;
 
+  /** Return whether this target is an executable Bundle on Apple.  */
+  bool IsAppBundleOnApple() const;
+
   struct SourceFileFlags
   GetTargetSourceFileFlags(const cmSourceFile* sf) const;
 

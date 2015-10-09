@@ -150,7 +150,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
       std::string to1 = toDir + targetName;
 
       // Handle OSX Bundles.
-      if(this->Target->Target->IsAppBundleOnApple())
+      if(this->Target->IsAppBundleOnApple())
         {
         // Install the whole app bundle directory.
         type = cmInstallType_DIRECTORY;

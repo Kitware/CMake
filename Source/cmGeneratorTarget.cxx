@@ -851,7 +851,7 @@ const char* cmGeneratorTarget::GetLocationForBuild() const
     location += cfgid;
     }
 
-  if(this->Target->IsAppBundleOnApple())
+  if(this->IsAppBundleOnApple())
     {
     std::string macdir = this->BuildMacContentDirectory("", "",
                                                                 false);
@@ -1573,7 +1573,7 @@ cmGeneratorTarget::GetAppBundleDirectory(const std::string& config,
 bool cmGeneratorTarget::IsBundleOnApple() const
 {
   return this->IsFrameworkOnApple()
-      || this->Target->IsAppBundleOnApple()
+      || this->IsAppBundleOnApple()
       || this->Target->IsCFBundleOnApple();
 }
 
@@ -1935,7 +1935,7 @@ cmGeneratorTarget::BuildMacContentDirectory(const std::string& base,
                                             bool contentOnly) const
 {
   std::string fpath = base;
-  if(this->Target->IsAppBundleOnApple())
+  if(this->IsAppBundleOnApple())
     {
     fpath += this->GetAppBundleDirectory(config, contentOnly);
     }
@@ -3143,7 +3143,7 @@ std::string cmGeneratorTarget::NormalGetFullPath(const std::string& config,
 {
   std::string fpath = this->GetDirectory(config, implib);
   fpath += "/";
-  if(this->Target->IsAppBundleOnApple())
+  if(this->IsAppBundleOnApple())
     {
     fpath = this->BuildMacContentDirectory(fpath, config, false);
     fpath += "/";
@@ -3438,8 +3438,7 @@ void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
     configPostfix = this->GetProperty(configProp);
     // Mac application bundles and frameworks have no postfix.
     if(configPostfix &&
-       (this->Target->IsAppBundleOnApple()
-         || this->IsFrameworkOnApple()))
+       (this->IsAppBundleOnApple() || this->IsFrameworkOnApple()))
       {
       configPostfix = 0;
       }
@@ -5954,4 +5953,12 @@ bool cmGeneratorTarget::IsFrameworkOnApple() const
   return (this->GetType() == cmState::SHARED_LIBRARY &&
           this->Makefile->IsOn("APPLE") &&
           this->GetPropertyAsBool("FRAMEWORK"));
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::IsAppBundleOnApple() const
+{
+  return (this->GetType() == cmState::EXECUTABLE &&
+          this->Makefile->IsOn("APPLE") &&
+          this->GetPropertyAsBool("MACOSX_BUNDLE"));
 }

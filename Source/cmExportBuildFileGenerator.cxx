@@ -202,7 +202,7 @@ cmExportBuildFileGenerator
   std::string prop = "IMPORTED_LOCATION";
   prop += suffix;
   std::string value;
-  if(target->Target->IsAppBundleOnApple())
+  if(target->IsAppBundleOnApple())
     {
     value = target->GetFullPath(config, false);
     }

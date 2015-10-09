@@ -1089,7 +1089,7 @@ cmExportFileGenerator
     }
 
   // Mark the imported executable if it is an application bundle.
-  if(target->Target->IsAppBundleOnApple())
+  if(target->IsAppBundleOnApple())
     {
     os << "set_property(TARGET " << targetName
        << " PROPERTY MACOSX_BUNDLE 1)\n";
