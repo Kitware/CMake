@@ -390,6 +390,14 @@ public:
   ///! Return the preferred linker language for this target
   std::string GetLinkerLanguage(const std::string& config = "") const;
 
+  /** Does this target have a GNU implib to convert to MS format?  */
+  bool HasImplibGNUtoMS() const;
+
+  /** Convert the given GNU import library name (.dll.a) to a name with a new
+      extension (.lib or ${CMAKE_IMPORT_LIBRARY_SUFFIX}).  */
+  bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
+                        const char* newExt = 0) const;
+
   struct SourceFileFlags
   GetTargetSourceFileFlags(const cmSourceFile* sf) const;
 

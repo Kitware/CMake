@@ -2199,26 +2199,6 @@ void cmTarget::ComputeVersionedName(std::string& vName,
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::HasImplibGNUtoMS() const
-{
-  return this->HasImportLibrary() && this->GetPropertyAsBool("GNUtoMS");
-}
-
-//----------------------------------------------------------------------------
-bool cmTarget::GetImplibGNUtoMS(std::string const& gnuName,
-                                std::string& out, const char* newExt) const
-{
-  if(this->HasImplibGNUtoMS() &&
-     gnuName.size() > 6 && gnuName.substr(gnuName.size()-6) == ".dll.a")
-    {
-    out = gnuName.substr(0, gnuName.size()-6);
-    out += newExt? newExt : ".lib";
-    return true;
-    }
-  return false;
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::SetPropertyDefault(const std::string& property,
                                   const char* default_value)
 {

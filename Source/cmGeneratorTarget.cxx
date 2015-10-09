@@ -5483,3 +5483,24 @@ cmGeneratorTarget::GetPDBDirectory(const std::string& config) const
     }
   return "";
 }
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::HasImplibGNUtoMS() const
+{
+  return this->Target->HasImportLibrary()
+      && this->GetPropertyAsBool("GNUtoMS");
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::GetImplibGNUtoMS(std::string const& gnuName,
+                                std::string& out, const char* newExt) const
+{
+  if(this->HasImplibGNUtoMS() &&
+     gnuName.size() > 6 && gnuName.substr(gnuName.size()-6) == ".dll.a")
+    {
+    out = gnuName.substr(0, gnuName.size()-6);
+    out += newExt? newExt : ".lib";
+    return true;
+    }
+  return false;
+}

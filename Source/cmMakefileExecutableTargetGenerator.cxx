@@ -259,7 +259,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                                           cmLocalGenerator::START_OUTPUT,
                                           cmLocalGenerator::UNCHANGED));
     std::string implib;
-    if(this->Target->GetImplibGNUtoMS(targetFullPathImport, implib))
+    if(this->GeneratorTarget->GetImplibGNUtoMS(targetFullPathImport, implib))
       {
       exeCleanFiles.push_back(this->Convert(implib,
                                             cmLocalGenerator::START_OUTPUT,

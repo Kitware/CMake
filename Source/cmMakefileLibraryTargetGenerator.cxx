@@ -410,7 +410,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
         cmLocalGenerator::START_OUTPUT,
         cmLocalGenerator::UNCHANGED));
     std::string implib;
-    if(this->Target->GetImplibGNUtoMS(targetFullPathImport, implib))
+    if(this->GeneratorTarget->GetImplibGNUtoMS(targetFullPathImport, implib))
       {
       libCleanFiles.push_back(this->Convert(implib,
                                             cmLocalGenerator::START_OUTPUT,
