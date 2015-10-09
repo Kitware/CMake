@@ -279,13 +279,14 @@ public:
   /**
    * Generate a Mac OS X application bundle Info.plist file.
    */
-  void GenerateAppleInfoPList(cmTarget* target, const std::string& targetName,
+  void GenerateAppleInfoPList(cmGeneratorTarget* target,
+                              const std::string& targetName,
                               const char* fname);
 
   /**
    * Generate a Mac OS X framework Info.plist file.
    */
-  void GenerateFrameworkInfoPList(cmTarget* target,
+  void GenerateFrameworkInfoPList(cmGeneratorTarget* target,
                                   const std::string& targetName,
                                   const char* fname);
   /** Construct a comment for a custom command.  */

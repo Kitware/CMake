@@ -59,7 +59,7 @@ void cmOSXBundleGenerator::CreateAppBundle(const std::string& targetName,
   plist += "/";
   plist += this->GT->GetAppBundleDirectory(this->ConfigName, true);
   plist += "/Info.plist";
-  this->LocalGenerator->GenerateAppleInfoPList(this->GT->Target,
+  this->LocalGenerator->GenerateAppleInfoPList(this->GT,
                                                targetName,
                                                plist.c_str());
   this->Makefile->AddCMakeOutputFile(plist);
@@ -90,7 +90,7 @@ void cmOSXBundleGenerator::CreateFramework(
   std::string plist = newoutpath;
   plist += "/Resources/Info.plist";
   std::string name = cmSystemTools::GetFilenameName(targetName);
-  this->LocalGenerator->GenerateFrameworkInfoPList(this->GT->Target,
+  this->LocalGenerator->GenerateFrameworkInfoPList(this->GT,
                                                    name,
                                                    plist.c_str());
 
@@ -182,7 +182,7 @@ void cmOSXBundleGenerator::CreateCFBundle(const std::string& targetName,
     this->GT->GetCFBundleDirectory(this->ConfigName, true);
   plist += "/Info.plist";
   std::string name = cmSystemTools::GetFilenameName(targetName);
-  this->LocalGenerator->GenerateAppleInfoPList(this->GT->Target,
+  this->LocalGenerator->GenerateAppleInfoPList(this->GT,
                                                name,
                                                plist.c_str());
   this->Makefile->AddCMakeOutputFile(plist);

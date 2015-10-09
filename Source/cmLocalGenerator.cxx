@@ -3012,7 +3012,7 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
 }
 
 //----------------------------------------------------------------------------
-static void cmLGInfoProp(cmMakefile* mf, cmTarget* target,
+static void cmLGInfoProp(cmMakefile* mf, cmGeneratorTarget* target,
     const std::string& prop)
 {
   if(const char* val = target->GetProperty(prop))
@@ -3022,7 +3022,7 @@ static void cmLGInfoProp(cmMakefile* mf, cmTarget* target,
 }
 
 //----------------------------------------------------------------------------
-void cmLocalGenerator::GenerateAppleInfoPList(cmTarget* target,
+void cmLocalGenerator::GenerateAppleInfoPList(cmGeneratorTarget* target,
                                               const std::string& targetName,
                                               const char* fname)
 {
@@ -3066,7 +3066,7 @@ void cmLocalGenerator::GenerateAppleInfoPList(cmTarget* target,
 }
 
 //----------------------------------------------------------------------------
-void cmLocalGenerator::GenerateFrameworkInfoPList(cmTarget* target,
+void cmLocalGenerator::GenerateFrameworkInfoPList(cmGeneratorTarget* target,
                                                 const std::string& targetName,
                                                 const char* fname)
 {

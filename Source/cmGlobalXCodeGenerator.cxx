@@ -2062,7 +2062,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       // a per-configuration Info.plist file. The cfbundle plist
       // is very similar to the application bundle plist
       this->CurrentLocalGenerator
-        ->GenerateAppleInfoPList(&target, "$(EXECUTABLE_NAME)",
+        ->GenerateAppleInfoPList(gtgt, "$(EXECUTABLE_NAME)",
                                  plist.c_str());
       std::string path =
         this->ConvertToRelativeForXCode(plist.c_str());
@@ -2111,7 +2111,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       // so let it replace the framework name. This avoids creating
       // a per-configuration Info.plist file.
       this->CurrentLocalGenerator
-        ->GenerateFrameworkInfoPList(&target, "$(EXECUTABLE_NAME)",
+        ->GenerateFrameworkInfoPList(gtgt, "$(EXECUTABLE_NAME)",
                                      plist.c_str());
       std::string path =
         this->ConvertToRelativeForXCode(plist.c_str());
@@ -2154,7 +2154,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       // so let it replace the executable name.  This avoids creating
       // a per-configuration Info.plist file.
       this->CurrentLocalGenerator
-        ->GenerateAppleInfoPList(&target, "$(EXECUTABLE_NAME)",
+        ->GenerateAppleInfoPList(gtgt, "$(EXECUTABLE_NAME)",
                                  plist.c_str());
       std::string path =
         this->ConvertToRelativeForXCode(plist.c_str());
