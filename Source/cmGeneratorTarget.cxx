@@ -1587,7 +1587,7 @@ std::string cmGeneratorTarget::GetCFBundleDirectory(const std::string& config,
   const char *ext = this->GetProperty("BUNDLE_EXTENSION");
   if (!ext)
     {
-    if (this->Target->IsXCTestOnApple())
+    if (this->IsXCTestOnApple())
       {
       ext = "xctest";
       }
@@ -5961,4 +5961,11 @@ bool cmGeneratorTarget::IsAppBundleOnApple() const
   return (this->GetType() == cmState::EXECUTABLE &&
           this->Makefile->IsOn("APPLE") &&
           this->GetPropertyAsBool("MACOSX_BUNDLE"));
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::IsXCTestOnApple() const
+{
+  return (this->Target->IsCFBundleOnApple() &&
+          this->GetPropertyAsBool("XCTEST"));
 }

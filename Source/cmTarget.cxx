@@ -377,13 +377,6 @@ bool cmTarget::IsCFBundleOnApple() const
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::IsXCTestOnApple() const
-{
-  return (this->IsCFBundleOnApple() &&
-          this->GetPropertyAsBool("XCTEST"));
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)
 {
   if (!srcs.empty())

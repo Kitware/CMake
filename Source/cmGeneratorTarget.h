@@ -422,6 +422,9 @@ public:
   /** Return whether this target is an executable Bundle on Apple.  */
   bool IsAppBundleOnApple() const;
 
+  /** Return whether this target is a XCTest on Apple.  */
+  bool IsXCTestOnApple() const;
+
   struct SourceFileFlags
   GetTargetSourceFileFlags(const cmSourceFile* sf) const;
 

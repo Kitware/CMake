@@ -2651,7 +2651,7 @@ const char* cmGlobalXCodeGenerator::GetTargetFileType(
     case cmState::STATIC_LIBRARY:
       return "archive.ar";
     case cmState::MODULE_LIBRARY:
-      if (target->Target->IsXCTestOnApple())
+      if (target->IsXCTestOnApple())
         return "wrapper.cfbundle";
       else if (target->Target->IsCFBundleOnApple())
         return "wrapper.plug-in";
@@ -2678,7 +2678,7 @@ const char* cmGlobalXCodeGenerator::GetTargetProductType(
     case cmState::STATIC_LIBRARY:
       return "com.apple.product-type.library.static";
     case cmState::MODULE_LIBRARY:
-      if (target->Target->IsXCTestOnApple())
+      if (target->IsXCTestOnApple())
         return "com.apple.product-type.bundle.unit-test";
       else if (target->Target->IsCFBundleOnApple())
         return "com.apple.product-type.bundle";
