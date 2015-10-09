@@ -2129,7 +2129,7 @@ void cmLocalGenerator
     }
 
   if (!warnCMP0063.empty() &&
-      this->WarnCMP0063.insert(target->Target).second)
+      this->WarnCMP0063.insert(target).second)
     {
     std::ostringstream w;
     w <<

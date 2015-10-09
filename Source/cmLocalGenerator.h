@@ -369,7 +369,7 @@ protected:
   std::string::size_type ObjectPathMax;
   std::set<std::string> ObjectMaxPathViolations;
 
-  std::set<cmTarget const*> WarnCMP0063;
+  std::set<cmGeneratorTarget const*> WarnCMP0063;
   cmGeneratorTargetsType GeneratorTargets;
 
   bool EmitUniversalBinaryFlags;
