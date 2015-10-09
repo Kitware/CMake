@@ -53,7 +53,8 @@ public:
    */
   void SetBuildType(BuildType,const std::string& name);
 
-  virtual std::string GetTargetDirectory(cmTarget const&) const;
+  virtual
+  std::string GetTargetDirectory(cmGeneratorTarget const* target) const;
   cmSourceFile* CreateVCProjBuildRule();
   void WriteStampFiles();
   virtual std::string ComputeLongestObjectDirectory(cmTarget&) const;

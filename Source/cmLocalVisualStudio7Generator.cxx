@@ -784,7 +784,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
 
   // The intermediate directory name consists of a directory for the
   // target and a subdirectory for the configuration name.
-  std::string intermediateDir = this->GetTargetDirectory(target);
+  std::string intermediateDir = this->GetTargetDirectory(gt);
   intermediateDir += "/";
   intermediateDir += configName;
 
@@ -1113,7 +1113,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       break;
     case cmTarget::OBJECT_LIBRARY:
       {
-      std::string libpath = this->GetTargetDirectory(target);
+      std::string libpath = this->GetTargetDirectory(gt);
       libpath += "/";
       libpath += configName;
       libpath += "/";
@@ -1725,7 +1725,9 @@ cmLocalVisualStudio7Generator
   std::string dir_max;
   dir_max += this->GetCurrentBinaryDirectory();
   dir_max += "/";
-  dir_max += this->GetTargetDirectory(target);
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
+  dir_max += this->GetTargetDirectory(gt);
   dir_max += "/";
   dir_max += config_max;
   dir_max += "/";
@@ -2369,10 +2371,10 @@ void cmLocalVisualStudio7Generator::ReadAndStoreExternalGUID(
 
 //----------------------------------------------------------------------------
 std::string cmLocalVisualStudio7Generator
-::GetTargetDirectory(cmTarget const& target) const
+::GetTargetDirectory(cmGeneratorTarget const* target) const
 {
   std::string dir;
-  dir += target.GetName();
+  dir += target->GetName();
   dir += ".dir";
   return dir;
 }

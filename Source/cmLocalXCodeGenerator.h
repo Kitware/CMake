@@ -28,7 +28,8 @@ public:
                         cmMakefile* mf);
 
   virtual ~cmLocalXCodeGenerator();
-  virtual std::string GetTargetDirectory(cmTarget const& target) const;
+  virtual
+  std::string GetTargetDirectory(cmGeneratorTarget const* target) const;
   virtual void AppendFlagEscape(std::string& flags,
                                 const std::string& rawFlag);
   virtual void Generate();

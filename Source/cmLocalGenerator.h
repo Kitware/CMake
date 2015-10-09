@@ -247,7 +247,8 @@ public:
    * Get the relative path from the generator output directory to a
    * per-target support directory.
    */
-  virtual std::string GetTargetDirectory(cmTarget const& target) const;
+  virtual std::string
+  GetTargetDirectory(cmGeneratorTarget const* target) const;
 
   /**
    * Get the level of backwards compatibility requested by the project

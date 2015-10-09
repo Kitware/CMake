@@ -114,13 +114,11 @@ void
 cmGlobalUnixMakefileGenerator3
 ::ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const
 {
-  cmTarget* target = gt->Target;
-
   // Compute full path to object file directory for this target.
   std::string dir;
   dir += gt->Makefile->GetCurrentBinaryDirectory();
   dir += "/";
-  dir += gt->LocalGenerator->GetTargetDirectory(*target);
+  dir += gt->LocalGenerator->GetTargetDirectory(gt);
   dir += "/";
   gt->ObjectDirectory = dir;
 }

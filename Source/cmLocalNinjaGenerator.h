@@ -37,7 +37,8 @@ public:
 
   virtual void Generate();
 
-  virtual std::string GetTargetDirectory(cmTarget const& target) const;
+  virtual
+  std::string GetTargetDirectory(cmGeneratorTarget const* target) const;
 
   const cmGlobalNinjaGenerator* GetGlobalNinjaGenerator() const;
   cmGlobalNinjaGenerator* GetGlobalNinjaGenerator();

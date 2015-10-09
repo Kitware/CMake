@@ -191,7 +191,7 @@ GetLocalObjectFiles(std::map<std::string, LocalObjectInfo> &localObjectFiles)
     std::string dir;
     dir += gt->Makefile->GetCurrentBinaryDirectory();
     dir += "/";
-    dir += this->GetTargetDirectory(*gt->Target);
+    dir += this->GetTargetDirectory(gt);
     dir += "/";
     // Compute the name of each object file.
     for(std::vector<cmSourceFile const*>::iterator
@@ -936,7 +936,7 @@ cmLocalUnixMakefileGenerator3
 ::GetRelativeTargetDirectory(cmGeneratorTarget* target)
 {
   std::string dir = this->HomeRelativeOutputPath;
-  dir += this->GetTargetDirectory(*target->Target);
+  dir += this->GetTargetDirectory(target);
   return this->Convert(dir,NONE,UNCHANGED);
 }
 
@@ -1222,7 +1222,7 @@ cmLocalUnixMakefileGenerator3
 {
   std::string cleanfile = this->Makefile->GetCurrentBinaryDirectory();
   cleanfile += "/";
-  cleanfile += this->GetTargetDirectory(target->Target);
+  cleanfile += this->GetTargetDirectory(target);
   cleanfile += "/cmake_clean";
   if(filename)
     {
@@ -1261,7 +1261,7 @@ cmLocalUnixMakefileGenerator3
     fout << "\n"
          << "# Per-language clean rules from dependency scanning.\n"
          << "foreach(lang " << cmJoin(languages, " ") << ")\n"
-         << "  include(" << this->GetTargetDirectory(target->Target)
+         << "  include(" << this->GetTargetDirectory(target)
          << "/cmake_clean_${lang}.cmake OPTIONAL)\n"
          << "endforeach()\n";
     }
@@ -2282,10 +2282,10 @@ cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p,
 //----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3
-::GetTargetDirectory(cmTarget const& target) const
+::GetTargetDirectory(cmGeneratorTarget const* target) const
 {
   std::string dir = cmake::GetCMakeFilesDirectoryPostSlash();
-  dir += target.GetName();
+  dir += target->GetName();
 #if defined(__VMS)
   dir += "_dir";
 #else

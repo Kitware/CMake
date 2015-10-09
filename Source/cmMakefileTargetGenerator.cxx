@@ -92,7 +92,7 @@ void cmMakefileTargetGenerator::CreateRuleFile()
 {
   // Create a directory for this target.
   this->TargetBuildDirectory =
-    this->LocalGenerator->GetTargetDirectory(*this->Target);
+    this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   this->TargetBuildDirectoryFull =
     this->LocalGenerator->ConvertToFullPath(this->TargetBuildDirectory);
   cmSystemTools::MakeDirectory(this->TargetBuildDirectoryFull.c_str());
@@ -378,7 +378,8 @@ void cmMakefileTargetGenerator
   // Get the full path name of the object file.
   std::string const& objectName = this->GeneratorTarget
                                       ->GetObjectName(&source);
-  std::string obj = this->LocalGenerator->GetTargetDirectory(*this->Target);
+  std::string obj =
+      this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   obj += "/";
   obj += objectName;
 
@@ -1024,7 +1025,8 @@ bool cmMakefileTargetGenerator::WriteMakeRule(
 void cmMakefileTargetGenerator::WriteTargetDependRules()
 {
   // must write the targets depend info file
-  std::string dir = this->LocalGenerator->GetTargetDirectory(*this->Target);
+  std::string dir =
+      this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   this->InfoFileNameFull = dir;
   this->InfoFileNameFull += "/DependInfo.cmake";
   this->InfoFileNameFull =
