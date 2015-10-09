@@ -415,6 +415,10 @@ public:
   /** Return whether this target may be used to link another target.  */
   bool IsLinkable() const;
 
+  /** Return whether this target is a shared library Framework on
+      Apple.  */
+  bool IsFrameworkOnApple() const;
+
   struct SourceFileFlags
   GetTargetSourceFileFlags(const cmSourceFile* sf) const;
 

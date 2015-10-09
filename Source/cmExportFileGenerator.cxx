@@ -1082,7 +1082,7 @@ cmExportFileGenerator
     }
 
   // Mark the imported library if it is a framework.
-  if(target->Target->IsFrameworkOnApple())
+  if(target->IsFrameworkOnApple())
     {
     os << "set_property(TARGET " << targetName
        << " PROPERTY FRAMEWORK 1)\n";

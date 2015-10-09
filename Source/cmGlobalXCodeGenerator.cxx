@@ -787,14 +787,16 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
 
   // Is this a resource file in this target? Add it to the resources group...
   //
+
+  cmGeneratorTarget* gtgt = this->GetGeneratorTarget(&cmtarget);
   cmGeneratorTarget::SourceFileFlags tsFlags =
-            this->GetGeneratorTarget(&cmtarget)->GetTargetSourceFileFlags(sf);
+      gtgt->GetTargetSourceFileFlags(sf);
   bool isResource = tsFlags.Type == cmGeneratorTarget::SourceFileTypeResource;
 
   // Is this a "private" or "public" framework header file?
   // Set the ATTRIBUTES attribute appropriately...
   //
-  if(cmtarget.IsFrameworkOnApple())
+  if(gtgt->IsFrameworkOnApple())
     {
     if(tsFlags.Type == cmGeneratorTarget::SourceFileTypePrivateHeader)
       {
@@ -1193,7 +1195,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       }
 
     // some build phases only apply to bundles and/or frameworks
-    bool isFrameworkTarget = cmtarget.IsFrameworkOnApple();
+    bool isFrameworkTarget = gtgt->IsFrameworkOnApple();
     bool isBundleTarget = cmtarget.GetPropertyAsBool("MACOSX_BUNDLE");
     bool isCFBundleTarget = cmtarget.IsCFBundleOnApple();
 
@@ -1289,7 +1291,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         copyFilesBuildPhase->AddAttribute("dstSubfolderSpec",
           this->CreateString("6"));
         std::ostringstream ostr;
-        if (cmtarget.IsFrameworkOnApple())
+        if (gtgt->IsFrameworkOnApple())
           {
           // dstPath in frameworks is relative to Versions/<version>
           ostr << mit->first;
@@ -1467,8 +1469,10 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
   std::vector<cmCustomCommand> postbuild
     = cmtarget.GetPostBuildCommands();
 
+  cmGeneratorTarget* gtgt = this->GetGeneratorTarget(&cmtarget);
+
   if(cmtarget.GetType() == cmState::SHARED_LIBRARY &&
-    !cmtarget.IsFrameworkOnApple())
+    !gtgt->IsFrameworkOnApple())
     {
     cmCustomCommandLines cmd;
     cmd.resize(1);
@@ -1500,7 +1504,6 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
     }
 
   std::vector<cmSourceFile*> classes;
-  cmGeneratorTarget* gtgt = this->GetGeneratorTarget(&cmtarget);
   if (!gtgt->GetConfigCommonSourceFiles(classes))
     {
     return;
@@ -1943,7 +1946,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
 
   const char* version = target.GetProperty("VERSION");
   const char* soversion = target.GetProperty("SOVERSION");
-  if(!gtgt->HasSOName(configName) || target.IsFrameworkOnApple())
+  if(!gtgt->HasSOName(configName) || gtgt->IsFrameworkOnApple())
     {
     version = 0;
     soversion = 0;
@@ -1990,7 +1993,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       pndir = gtgt->GetDirectory(configName);
       }
 
-    if(target.IsFrameworkOnApple() || target.IsCFBundleOnApple())
+    if(gtgt->IsFrameworkOnApple() || target.IsCFBundleOnApple())
       {
       pnprefix = "";
       }

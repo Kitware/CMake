@@ -208,7 +208,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
       // An import library looks like a static library.
       type = cmInstallType_STATIC_LIBRARY;
       }
-    else if(this->Target->Target->IsFrameworkOnApple())
+    else if(this->Target->IsFrameworkOnApple())
       {
       // There is a bug in cmInstallCommand if this fails.
       assert(this->NamelinkMode == NamelinkModeNone);
@@ -605,7 +605,7 @@ cmInstallTargetGenerator
     std::string for_install =
       this->Target->GetInstallNameDirForInstallTree();
 
-    if(this->Target->Target->IsFrameworkOnApple() && for_install.empty())
+    if(this->Target->IsFrameworkOnApple() && for_install.empty())
       {
       // Frameworks seem to have an id corresponding to their own full
       // path.

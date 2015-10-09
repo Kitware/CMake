@@ -281,7 +281,7 @@ cmNinjaNormalTargetGenerator
   }
 
   if (this->TargetNameOut != this->TargetNameReal &&
-    !this->GetTarget()->IsFrameworkOnApple()) {
+    !this->GetGeneratorTarget()->IsFrameworkOnApple()) {
     std::string cmakeCommand =
       this->GetLocalGenerator()->ConvertToOutputFormat(
         cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
@@ -428,7 +428,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     targetOutputReal += this->TargetNameReal;
     targetOutputReal = this->ConvertToNinjaPath(targetOutputReal);
     }
-  else if (target.IsFrameworkOnApple())
+  else if (gt.IsFrameworkOnApple())
     {
     // Create the library framework.
     this->OSXBundleGenerator->CreateFramework(this->TargetNameOut,
@@ -732,7 +732,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                         &usedResponseFile);
   this->WriteLinkRule(usedResponseFile);
 
-  if (targetOutput != targetOutputReal && !target.IsFrameworkOnApple())
+  if (targetOutput != targetOutputReal && !gt.IsFrameworkOnApple())
     {
     if (targetType == cmState::EXECUTABLE)
       {
