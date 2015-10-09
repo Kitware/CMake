@@ -64,16 +64,6 @@ const char* cmTarget::GetTargetTypeName(TargetType targetType)
 class cmTargetInternals
 {
 public:
-  cmTargetInternals()
-    : Backtrace()
-    {
-    }
-  cmTargetInternals(cmTargetInternals const&)
-    : Backtrace()
-    {
-    }
-  ~cmTargetInternals();
-
   // The backtrace when the target was created.
   cmListFileBacktrace Backtrace;
 
@@ -93,11 +83,6 @@ public:
   std::vector<std::string> LinkImplementationPropertyEntries;
   std::vector<cmListFileBacktrace> LinkImplementationPropertyBacktraces;
 };
-
-//----------------------------------------------------------------------------
-cmTargetInternals::~cmTargetInternals()
-{
-}
 
 //----------------------------------------------------------------------------
 cmTarget::cmTarget()
