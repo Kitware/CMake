@@ -1750,12 +1750,12 @@ void cmLocalVisualStudio6Generator
       flagsRelWithDebInfo = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsRelWithDebInfo += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
 
-      this->AddCompileOptions(flags, &target, linkLanguage, "");
-      this->AddCompileOptions(flagsDebug, &target, linkLanguage, "Debug");
-      this->AddCompileOptions(flagsRelease, &target, linkLanguage, "Release");
-      this->AddCompileOptions(flagsMinSizeRel, &target, linkLanguage,
+      this->AddCompileOptions(flags, gt, linkLanguage, "");
+      this->AddCompileOptions(flagsDebug, gt, linkLanguage, "Debug");
+      this->AddCompileOptions(flagsRelease, gt, linkLanguage, "Release");
+      this->AddCompileOptions(flagsMinSizeRel, gt, linkLanguage,
                               "MinSizeRel");
-      this->AddCompileOptions(flagsRelWithDebInfo, &target, linkLanguage,
+      this->AddCompileOptions(flagsRelWithDebInfo, gt, linkLanguage,
                               "RelWithDebInfo");
 
       // if _UNICODE and _SBCS are not found, then add -D_MBCS
@@ -1775,14 +1775,14 @@ void cmLocalVisualStudio6Generator
       std::set<std::string> minsizeDefinesSet;
       std::set<std::string> debugrelDefinesSet;
 
-      this->AddCompileDefinitions(definesSet, &target, "", linkLanguage);
-      this->AddCompileDefinitions(debugDefinesSet, &target,
+      this->AddCompileDefinitions(definesSet, gt, "", linkLanguage);
+      this->AddCompileDefinitions(debugDefinesSet, gt,
                                   "DEBUG", linkLanguage);
-      this->AddCompileDefinitions(releaseDefinesSet, &target,
+      this->AddCompileDefinitions(releaseDefinesSet, gt,
                                   "RELEASE", linkLanguage);
-      this->AddCompileDefinitions(minsizeDefinesSet, &target,
+      this->AddCompileDefinitions(minsizeDefinesSet, gt,
                                   "MINSIZEREL", linkLanguage);
-      this->AddCompileDefinitions(debugrelDefinesSet, &target,
+      this->AddCompileDefinitions(debugrelDefinesSet, gt,
                                   "RELWITHDEBINFO", linkLanguage);
 
       std::string defines = " ";

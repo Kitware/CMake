@@ -1932,7 +1932,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     {
     clOptions.AddFlag("CompileAs", "CompileAsCpp");
     }
-  this->LocalGenerator->AddCompileOptions(flags, this->Target,
+  this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
                                           linkLanguage, configName.c_str());
 
   // Get preprocessor definitions for this directory.
@@ -2189,7 +2189,7 @@ cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const& config)
     }
   std::string libflags;
   this->LocalGenerator->GetStaticLibraryFlags(libflags,
-    cmSystemTools::UpperCase(config), this->Target);
+    cmSystemTools::UpperCase(config), this->GeneratorTarget);
   if(!libflags.empty())
     {
     this->WriteString("<Lib>\n", 2);

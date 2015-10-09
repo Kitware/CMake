@@ -178,7 +178,7 @@ cmNinjaNormalTargetGenerator
   if (!this->GetGlobalGenerator()->HasRule(ruleName)) {
     cmLocalGenerator::RuleVariables vars;
     vars.RuleLauncher = "RULE_LAUNCH_LINK";
-    vars.CMTarget = this->GetTarget();
+    vars.CMTarget = this->GetGeneratorTarget();
     vars.Language = this->TargetLinkLanguage.c_str();
 
     std::string responseFlag;

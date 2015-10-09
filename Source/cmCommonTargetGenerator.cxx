@@ -316,10 +316,11 @@ std::string cmCommonTargetGenerator::GetFlags(const std::string &l)
       this->AddFortranFlags(flags);
       }
 
-    this->LocalGenerator->AddCMP0018Flags(flags, this->Target,
+    this->LocalGenerator->AddCMP0018Flags(flags, this->GeneratorTarget,
                                           lang, this->ConfigName);
 
-    this->LocalGenerator->AddVisibilityPresetFlags(flags, this->Target,
+    this->LocalGenerator->AddVisibilityPresetFlags(flags,
+                                                   this->GeneratorTarget,
                                                    lang);
 
     // Append old-style preprocessor definition flags.
@@ -331,7 +332,7 @@ std::string cmCommonTargetGenerator::GetFlags(const std::string &l)
       AppendFlags(flags,this->GetFrameworkFlags(l));
 
     // Add target-specific flags.
-    this->LocalGenerator->AddCompileOptions(flags, this->Target,
+    this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
                                             lang, this->ConfigName);
 
     ByLanguageMap::value_type entry(l, flags);
@@ -354,7 +355,7 @@ std::string cmCommonTargetGenerator::GetDefines(const std::string &l)
       }
 
     // Add preprocessor definitions for this target and configuration.
-    this->LocalGenerator->AddCompileDefinitions(defines, this->Target,
+    this->LocalGenerator->AddCompileDefinitions(defines, this->GeneratorTarget,
                             this->LocalGenerator->GetConfigName(), l);
 
     std::string definesString;

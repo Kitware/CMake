@@ -182,7 +182,8 @@ protected:
 
 
   // write the depend info
-  void WriteDependLanguageInfo(std::ostream& cmakefileStream, cmTarget &tgt);
+  void WriteDependLanguageInfo(std::ostream& cmakefileStream,
+                               cmGeneratorTarget *tgt);
 
   // write the local help rule
   void WriteHelpRule(std::ostream& ruleFileStream);
@@ -215,12 +216,12 @@ protected:
                           cmCustomCommandGenerator const& cc);
   void AppendCustomCommands(std::vector<std::string>& commands,
                             const std::vector<cmCustomCommand>& ccs,
-                            cmTarget* target,
+                            cmGeneratorTarget* target,
                             cmLocalGenerator::RelativeRoot relative =
                             cmLocalGenerator::HOME_OUTPUT);
   void AppendCustomCommand(std::vector<std::string>& commands,
                            cmCustomCommandGenerator const& ccg,
-                           cmTarget* target,
+                           cmGeneratorTarget* target,
                            bool echo_comment=false,
                            cmLocalGenerator::RelativeRoot relative =
                            cmLocalGenerator::HOME_OUTPUT,
@@ -237,7 +238,7 @@ protected:
 private:
   std::string ConvertShellCommand(std::string const& cmd, RelativeRoot root);
   std::string MakeLauncher(cmCustomCommandGenerator const& ccg,
-                           cmTarget* target, RelativeRoot relative);
+                           cmGeneratorTarget* target, RelativeRoot relative);
 
   virtual void ComputeObjectFilenames(
                         std::map<cmSourceFile const*, std::string>& mapping,

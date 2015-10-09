@@ -20,7 +20,6 @@
 class cmMakefile;
 class cmGlobalGenerator;
 class cmGeneratorTarget;
-class cmTarget;
 class cmTargetManifest;
 class cmSourceFile;
 class cmCustomCommand;
@@ -91,13 +90,15 @@ public:
 
   void AddLanguageFlags(std::string& flags, const std::string& lang,
                         const std::string& config);
-  void AddCMP0018Flags(std::string &flags, cmTarget const* target,
+  void AddCMP0018Flags(std::string &flags, cmGeneratorTarget const* target,
                        std::string const& lang, const std::string& config);
-  void AddVisibilityPresetFlags(std::string &flags, cmTarget const* target,
+  void AddVisibilityPresetFlags(std::string &flags,
+                                cmGeneratorTarget const* target,
                                 const std::string& lang);
   void AddConfigVariableFlags(std::string& flags, const std::string& var,
                               const std::string& config);
-  void AddCompilerRequirementFlag(std::string &flags, cmTarget const* target,
+  void AddCompilerRequirementFlag(std::string &flags,
+                                  cmGeneratorTarget const* target,
                                   const std::string& lang);
   ///! Append flags to a string.
   virtual void AppendFlags(std::string& flags, const std::string& newFlags);
@@ -188,10 +189,10 @@ public:
                              const std::string& lang = "C",
                              const std::string& config = "",
                              bool stripImplicitInclDirs = true) const;
-  void AddCompileOptions(std::string& flags, cmTarget* target,
+  void AddCompileOptions(std::string& flags, cmGeneratorTarget* target,
                          const std::string& lang, const std::string& config);
   void AddCompileDefinitions(std::set<std::string>& defines,
-                             cmTarget const* target,
+                             cmGeneratorTarget const* target,
                              const std::string& config,
                              const std::string& lang);
 
@@ -212,7 +213,7 @@ public:
       {
         memset(this, 0,  sizeof(*this));
       }
-    cmTarget* CMTarget;
+    cmGeneratorTarget* CMTarget;
     const char* TargetPDB;
     const char* TargetCompilePDB;
     const char* TargetVersionMajor;
@@ -298,7 +299,7 @@ public:
   /** Fill out the static linker flags for the given target.  */
   void GetStaticLibraryFlags(std::string& flags,
                              std::string const& config,
-                             cmTarget* target);
+                             cmGeneratorTarget* target);
 
   /** Fill out these strings for the given target.  Libraries to link,
    *  flags, and linkflags. */
@@ -341,8 +342,9 @@ protected:
   std::string ExpandRuleVariable(std::string const& variable,
                                  const RuleVariables& replaceValues);
 
-  const char* GetRuleLauncher(cmTarget* target, const std::string& prop);
-  void InsertRuleLauncher(std::string& s, cmTarget* target,
+  const char* GetRuleLauncher(cmGeneratorTarget* target,
+                              const std::string& prop);
+  void InsertRuleLauncher(std::string& s, cmGeneratorTarget* target,
                           const std::string& prop);
 
   // Handle old-style install rules stored in the targets.

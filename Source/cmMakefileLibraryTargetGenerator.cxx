@@ -115,7 +115,7 @@ void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
   // Add post-build rules.
   this->LocalGenerator->
     AppendCustomCommands(commands, this->Target->GetPostBuildCommands(),
-                         this->Target);
+                         this->GeneratorTarget);
 
   // Depend on the object files.
   this->AppendObjectDepends(depends);
@@ -146,7 +146,7 @@ void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
 
   std::string extraFlags;
   this->LocalGenerator->GetStaticLibraryFlags(extraFlags,
-    cmSystemTools::UpperCase(this->ConfigName), this->Target);
+    cmSystemTools::UpperCase(this->ConfigName), this->GeneratorTarget);
   this->WriteLibraryRules(linkRuleVar, extraFlags, false);
 }
 
@@ -458,10 +458,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     {
     this->LocalGenerator
       ->AppendCustomCommands(commands, this->Target->GetPreBuildCommands(),
-                             this->Target);
+                             this->GeneratorTarget);
     this->LocalGenerator
       ->AppendCustomCommands(commands, this->Target->GetPreLinkCommands(),
-                             this->Target);
+                             this->GeneratorTarget);
     }
 
   // Determine whether a link script will be used.
@@ -640,7 +640,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   vars.TargetVersionMinor = targetVersionMinor.c_str();
 
   vars.RuleLauncher = "RULE_LAUNCH_LINK";
-  vars.CMTarget = this->Target;
+  vars.CMTarget = this->GeneratorTarget;
   vars.Language = linkLanguage.c_str();
   vars.Objects = buildObjs.c_str();
   std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
@@ -811,7 +811,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     {
     this->LocalGenerator->
       AppendCustomCommands(commands, this->Target->GetPostBuildCommands(),
-                           this->Target);
+                           this->GeneratorTarget);
     }
 
   // Compute the list of outputs.

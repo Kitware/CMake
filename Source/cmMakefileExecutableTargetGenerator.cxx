@@ -280,10 +280,10 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     {
     this->LocalGenerator
       ->AppendCustomCommands(commands, this->Target->GetPreBuildCommands(),
-                             this->Target);
+                             this->GeneratorTarget);
     this->LocalGenerator
       ->AppendCustomCommands(commands, this->Target->GetPreLinkCommands(),
-                             this->Target);
+                             this->GeneratorTarget);
     }
 
   // Determine whether a link script will be used.
@@ -358,7 +358,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   cmLocalGenerator::RuleVariables vars;
   vars.RuleLauncher = "RULE_LAUNCH_LINK";
-  vars.CMTarget = this->Target;
+  vars.CMTarget = this->GeneratorTarget;
   vars.Language = linkLanguage.c_str();
   vars.Objects = buildObjs.c_str();
   std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
@@ -449,7 +449,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     {
     this->LocalGenerator->
       AppendCustomCommands(commands, this->Target->GetPostBuildCommands(),
-                           this->Target);
+                           this->GeneratorTarget);
     }
 
   // Write the build rule.

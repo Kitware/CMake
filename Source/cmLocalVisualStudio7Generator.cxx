@@ -733,7 +733,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       }
 
     // Add the target-specific flags.
-    this->AddCompileOptions(flags, &target, linkLanguage, configName);
+    this->AddCompileOptions(flags, gt, linkLanguage, configName);
     }
 
   if(this->FortranProject)
@@ -1152,7 +1152,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
         }
       }
     std::string libflags;
-    this->GetStaticLibraryFlags(libflags, configTypeUpper, &target);
+    this->GetStaticLibraryFlags(libflags, configTypeUpper, gt);
     if(!libflags.empty())
       {
       fout << "\t\t\t\tAdditionalOptions=\"" << libflags << "\"\n";

@@ -335,7 +335,7 @@ cmNinjaTargetGenerator
 {
   cmLocalGenerator::RuleVariables vars;
   vars.RuleLauncher = "RULE_LAUNCH_COMPILE";
-  vars.CMTarget = this->GetTarget();
+  vars.CMTarget = this->GetGeneratorTarget();
   vars.Language = lang.c_str();
   vars.Source = "$in";
   vars.Object = "$out";

@@ -1814,14 +1814,14 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     this->CurrentLocalGenerator->AddLanguageFlags(flags, lang, configName);
 
     // Add shared-library flags if needed.
-    this->CurrentLocalGenerator->AddCMP0018Flags(flags, &target,
+    this->CurrentLocalGenerator->AddCMP0018Flags(flags, gtgt,
                                                  lang, configName);
 
-    this->CurrentLocalGenerator->AddVisibilityPresetFlags(flags, &target,
+    this->CurrentLocalGenerator->AddVisibilityPresetFlags(flags, gtgt,
                                                    lang);
 
     this->CurrentLocalGenerator->
-      AddCompileOptions(flags, &target, lang, configName);
+      AddCompileOptions(flags, gtgt, lang, configName);
     }
 
   std::string llang = gtgt->GetLinkerLanguage(configName);
@@ -1884,7 +1884,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     this->CurrentLocalGenerator
       ->GetStaticLibraryFlags(extraLinkOptions,
                               cmSystemTools::UpperCase(configName),
-                              &target);
+                              gtgt);
     }
   else
     {

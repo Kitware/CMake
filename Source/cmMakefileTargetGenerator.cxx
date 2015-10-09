@@ -589,7 +589,7 @@ cmMakefileTargetGenerator
   }
   cmLocalGenerator::RuleVariables vars;
   vars.RuleLauncher = "RULE_LAUNCH_COMPILE";
-  vars.CMTarget = this->Target;
+  vars.CMTarget = this->GeneratorTarget;
   vars.Language = lang.c_str();
   vars.Target = targetOutPathReal.c_str();
   vars.TargetPDB = targetOutPathPDB.c_str();
@@ -1040,7 +1040,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
     return;
     }
   this->LocalGenerator->
-    WriteDependLanguageInfo(*this->InfoFileStream,*this->Target);
+    WriteDependLanguageInfo(*this->InfoFileStream, this->GeneratorTarget);
 
   // Store multiple output pairs in the depend info file.
   if(!this->MultipleOutputPairs.empty())
@@ -1211,7 +1211,8 @@ void cmMakefileTargetGenerator
 
   // Now append the actual user-specified commands.
   std::ostringstream content;
-  this->LocalGenerator->AppendCustomCommand(commands, ccg, this->Target, false,
+  this->LocalGenerator->AppendCustomCommand(commands, ccg,
+                                            this->GeneratorTarget, false,
                                             cmLocalGenerator::HOME_OUTPUT,
                                             &content);
 
