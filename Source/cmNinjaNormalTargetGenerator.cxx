@@ -139,7 +139,7 @@ const char *cmNinjaNormalTargetGenerator::GetVisibleTypeName() const
     case cmState::SHARED_LIBRARY:
       return "shared library";
     case cmState::MODULE_LIBRARY:
-      if (this->GetTarget()->IsCFBundleOnApple())
+      if (this->GetGeneratorTarget()->IsCFBundleOnApple())
         return "CFBundle shared module";
       else
         return "shared module";
@@ -434,7 +434,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     this->OSXBundleGenerator->CreateFramework(this->TargetNameOut,
                                               gt.GetDirectory(cfgName));
     }
-  else if(target.IsCFBundleOnApple())
+  else if(gt.IsCFBundleOnApple())
     {
     // Create the core foundation bundle.
     this->OSXBundleGenerator->CreateCFBundle(this->TargetNameOut,

@@ -1574,7 +1574,7 @@ bool cmGeneratorTarget::IsBundleOnApple() const
 {
   return this->IsFrameworkOnApple()
       || this->IsAppBundleOnApple()
-      || this->Target->IsCFBundleOnApple();
+      || this->IsCFBundleOnApple();
 }
 
 //----------------------------------------------------------------------------
@@ -1943,7 +1943,7 @@ cmGeneratorTarget::BuildMacContentDirectory(const std::string& base,
     {
     fpath += this->GetFrameworkDirectory(config, contentOnly);
     }
-  if(this->Target->IsCFBundleOnApple())
+  if(this->IsCFBundleOnApple())
     {
     fpath += this->GetCFBundleDirectory(config, contentOnly);
     }
@@ -3483,7 +3483,7 @@ void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
     targetSuffix = 0;
     }
 
-  if(this->Target->IsCFBundleOnApple())
+  if(this->IsCFBundleOnApple())
     {
     fw_prefix = this->GetCFBundleDirectory(config, false);
     fw_prefix += "/";
@@ -5966,6 +5966,14 @@ bool cmGeneratorTarget::IsAppBundleOnApple() const
 //----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsXCTestOnApple() const
 {
-  return (this->Target->IsCFBundleOnApple() &&
+  return (this->IsCFBundleOnApple() &&
           this->GetPropertyAsBool("XCTEST"));
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::IsCFBundleOnApple() const
+{
+  return (this->GetType() == cmState::MODULE_LIBRARY &&
+          this->Makefile->IsOn("APPLE") &&
+          this->GetPropertyAsBool("BUNDLE"));
 }

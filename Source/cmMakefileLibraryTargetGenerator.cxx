@@ -279,7 +279,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     this->OSXBundleGenerator->CreateFramework(targetName, outpath);
     outpath += "/";
     }
-  else if(this->Target->IsCFBundleOnApple())
+  else if(this->GeneratorTarget->IsCFBundleOnApple())
     {
     outpath = this->GeneratorTarget->GetDirectory(this->ConfigName);
     this->OSXBundleGenerator->CreateCFBundle(targetName, outpath);
@@ -360,7 +360,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
         buildEcho += " shared library ";
         break;
       case cmState::MODULE_LIBRARY:
-        if (this->Target->IsCFBundleOnApple())
+        if (this->GeneratorTarget->IsCFBundleOnApple())
             buildEcho += " CFBundle";
         buildEcho += " shared module ";
         break;

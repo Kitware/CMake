@@ -1095,7 +1095,7 @@ cmExportFileGenerator
        << " PROPERTY MACOSX_BUNDLE 1)\n";
     }
 
-  if (target->Target->IsCFBundleOnApple())
+  if (target->IsCFBundleOnApple())
     {
     os << "set_property(TARGET " << targetName
        << " PROPERTY BUNDLE 1)\n";

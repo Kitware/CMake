@@ -226,7 +226,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
       filesFrom.push_back(from1);
       filesTo.push_back(to1);
       }
-    else if(this->Target->Target->IsCFBundleOnApple())
+    else if(this->Target->IsCFBundleOnApple())
       {
       // Install the whole app bundle directory.
       type = cmInstallType_DIRECTORY;

@@ -369,14 +369,6 @@ bool cmTarget::IsAppBundleOnApple() const
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::IsCFBundleOnApple() const
-{
-  return (this->GetType() == cmState::MODULE_LIBRARY &&
-          this->Makefile->IsOn("APPLE") &&
-          this->GetPropertyAsBool("BUNDLE"));
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)
 {
   if (!srcs.empty())

@@ -1197,7 +1197,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
     // some build phases only apply to bundles and/or frameworks
     bool isFrameworkTarget = gtgt->IsFrameworkOnApple();
     bool isBundleTarget = cmtarget.GetPropertyAsBool("MACOSX_BUNDLE");
-    bool isCFBundleTarget = cmtarget.IsCFBundleOnApple();
+    bool isCFBundleTarget = gtgt->IsCFBundleOnApple();
 
     cmXCodeObject* buildFiles = 0;
 
@@ -1993,7 +1993,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       pndir = gtgt->GetDirectory(configName);
       }
 
-    if(gtgt->IsFrameworkOnApple() || target.IsCFBundleOnApple())
+    if(gtgt->IsFrameworkOnApple() || gtgt->IsCFBundleOnApple())
       {
       pnprefix = "";
       }
@@ -2046,7 +2046,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     buildSettings->AddAttribute("LIBRARY_STYLE",
                                 this->CreateString("BUNDLE"));
-    if (target.IsCFBundleOnApple())
+    if (gtgt->IsCFBundleOnApple())
       {
       // It turns out that a BUNDLE is basically the same
       // in many ways as an application bundle, as far as
@@ -2653,7 +2653,7 @@ const char* cmGlobalXCodeGenerator::GetTargetFileType(
     case cmState::MODULE_LIBRARY:
       if (target->IsXCTestOnApple())
         return "wrapper.cfbundle";
-      else if (target->Target->IsCFBundleOnApple())
+      else if (target->IsCFBundleOnApple())
         return "wrapper.plug-in";
       else
         return ((this->XcodeVersion >= 22)?
@@ -2680,7 +2680,7 @@ const char* cmGlobalXCodeGenerator::GetTargetProductType(
     case cmState::MODULE_LIBRARY:
       if (target->IsXCTestOnApple())
         return "com.apple.product-type.bundle.unit-test";
-      else if (target->Target->IsCFBundleOnApple())
+      else if (target->IsCFBundleOnApple())
         return "com.apple.product-type.bundle";
       else
         return ((this->XcodeVersion >= 22)?
