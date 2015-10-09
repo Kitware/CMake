@@ -559,7 +559,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                               cmLocalGenerator::SHELL);
     vars["TARGET_IMPLIB"] = impLibPath;
     EnsureParentDirectoryExists(impLibPath);
-    if(target.HasImportLibrary())
+    if(genTarget.HasImportLibrary())
       {
       byproducts.push_back(targetOutputImplib);
       }

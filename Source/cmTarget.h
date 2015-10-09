@@ -262,9 +262,6 @@ public:
   /** Return whether or not the target is for a DLL platform.  */
   bool IsDLLPlatform() const { return this->DLLPlatform; }
 
-  /** Return whether or not the target has a DLL import library.  */
-  bool HasImportLibrary() const;
-
   /** Return whether this target is a shared library Framework on
       Apple.  */
   bool IsFrameworkOnApple() const;
@@ -462,6 +459,9 @@ private:
   std::string ProcessSourceItemCMP0049(const std::string& s);
 
   void MaybeInvalidatePropertyCache(const std::string& prop);
+
+  /** Return whether or not the target has a DLL import library.  */
+  bool HasImportLibrary() const;
 
   // Internal representation details.
   friend class cmTargetInternals;

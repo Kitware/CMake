@@ -1658,7 +1658,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactLinkerTag>
       return std::string();
       }
     return target->GetFullPath(context->Config,
-                               target->Target->HasImportLibrary());
+                               target->HasImportLibrary());
   }
 };
 

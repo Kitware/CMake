@@ -5487,7 +5487,7 @@ cmGeneratorTarget::GetPDBDirectory(const std::string& config) const
 //----------------------------------------------------------------------------
 bool cmGeneratorTarget::HasImplibGNUtoMS() const
 {
-  return this->Target->HasImportLibrary()
+  return this->HasImportLibrary()
       && this->GetPropertyAsBool("GNUtoMS");
 }
 
@@ -5503,4 +5503,12 @@ bool cmGeneratorTarget::GetImplibGNUtoMS(std::string const& gnuName,
     return true;
     }
   return false;
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::HasImportLibrary() const
+{
+  return (this->Target->IsDLLPlatform() &&
+          (this->GetType() == cmTarget::SHARED_LIBRARY ||
+           this->Target->IsExecutableWithExports()));
 }
