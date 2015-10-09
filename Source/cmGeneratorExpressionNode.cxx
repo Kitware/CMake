@@ -1654,7 +1654,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactLinkerTag>
                             const GeneratorExpressionContent *content)
   {
     // The file used to link to the target (.so, .lib, .a).
-    if(!target->Target->IsLinkable())
+    if(!target->IsLinkable())
       {
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_LINKER_FILE is allowed only for libraries and "

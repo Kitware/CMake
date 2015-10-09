@@ -5936,3 +5936,14 @@ std::string cmGeneratorTarget::GetSupportDirectory() const
 #endif
   return dir;
 }
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::IsLinkable() const
+{
+  return (this->GetType() == cmState::STATIC_LIBRARY ||
+          this->GetType() == cmState::SHARED_LIBRARY ||
+          this->GetType() == cmState::MODULE_LIBRARY ||
+          this->GetType() == cmState::UNKNOWN_LIBRARY ||
+          this->GetType() == cmState::INTERFACE_LIBRARY ||
+          this->Target->IsExecutableWithExports());
+}

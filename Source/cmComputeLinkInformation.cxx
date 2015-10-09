@@ -643,7 +643,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
     return;
     }
 
-  if(tgt && tgt->Target->IsLinkable())
+  if(tgt && tgt->IsLinkable())
     {
     // This is a CMake target.  Ask the target for its real name.
     if(impexe && this->LoaderFlag)

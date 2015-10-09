@@ -228,9 +228,6 @@ public:
       enabled.  */
   bool IsExecutableWithExports() const;
 
-  /** Return whether this target may be used to link another target.  */
-  bool IsLinkable() const;
-
   /** Return whether or not the target is for a DLL platform.  */
   bool IsDLLPlatform() const { return this->DLLPlatform; }
 

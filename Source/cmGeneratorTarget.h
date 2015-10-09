@@ -412,6 +412,9 @@ public:
   /** Get a build-tree directory in which to place target support files.  */
   std::string GetSupportDirectory() const;
 
+  /** Return whether this target may be used to link another target.  */
+  bool IsLinkable() const;
+
   struct SourceFileFlags
   GetTargetSourceFileFlags(const cmSourceFile* sf) const;
 

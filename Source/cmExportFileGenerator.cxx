@@ -210,7 +210,7 @@ bool cmExportFileGenerator::PopulateInterfaceLinkLibrariesProperty(
                       ImportPropertyMap &properties,
                       std::vector<std::string> &missingTargets)
 {
-  if(!target->Target->IsLinkable())
+  if(!target->IsLinkable())
     {
     return false;
     }

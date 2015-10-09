@@ -345,17 +345,6 @@ bool cmTarget::IsExecutableWithExports() const
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::IsLinkable() const
-{
-  return (this->GetType() == cmState::STATIC_LIBRARY ||
-          this->GetType() == cmState::SHARED_LIBRARY ||
-          this->GetType() == cmState::MODULE_LIBRARY ||
-          this->GetType() == cmState::UNKNOWN_LIBRARY ||
-          this->GetType() == cmState::INTERFACE_LIBRARY ||
-          this->IsExecutableWithExports());
-}
-
-//----------------------------------------------------------------------------
 bool cmTarget::HasImportLibrary() const
 {
   return (this->DLLPlatform &&
