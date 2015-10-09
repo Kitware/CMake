@@ -557,7 +557,8 @@ cmMakefileTargetGenerator
       this->GeneratorTarget->GetCompilePDBPath(this->ConfigName);
     if(targetFullPathCompilePDB.empty())
       {
-      targetFullPathCompilePDB = this->Target->GetSupportDirectory() + "/";
+      targetFullPathCompilePDB =
+          this->GeneratorTarget->GetSupportDirectory() + "/";
       }
     }
 
@@ -594,7 +595,7 @@ cmMakefileTargetGenerator
                   cmLocalGenerator::NONE,
                   cmLocalGenerator::SHELL);
   vars.Object = shellObj.c_str();
-  std::string objectDir = this->Target->GetSupportDirectory();
+  std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
   objectDir = this->Convert(objectDir,
                             cmLocalGenerator::START_OUTPUT,
                             cmLocalGenerator::SHELL);

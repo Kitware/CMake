@@ -64,7 +64,7 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
         std::string basename = cmsys::SystemTools::
                                       GetFilenameWithoutLastExtension(absFile);
 
-        std::string rcc_output_dir = target->Target->GetSupportDirectory();
+        std::string rcc_output_dir = target->GetSupportDirectory();
         cmSystemTools::MakeDirectory(rcc_output_dir.c_str());
         std::string rcc_output_file = rcc_output_dir;
         rcc_output_file += "/qrc_" + basename + ".cpp";
@@ -833,7 +833,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
           std::string basename = cmsys::SystemTools::
                                   GetFilenameWithoutLastExtension(absFile);
 
-          std::string rcc_output_dir = target->Target->GetSupportDirectory();
+          std::string rcc_output_dir = target->GetSupportDirectory();
           cmSystemTools::MakeDirectory(rcc_output_dir.c_str());
           std::string rcc_output_file = rcc_output_dir;
           rcc_output_file += "/qrc_" + basename + ".cpp";

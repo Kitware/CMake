@@ -282,9 +282,6 @@ public:
   /** Get a backtrace from the creation of the target.  */
   cmListFileBacktrace const& GetBacktrace() const;
 
-  /** Get a build-tree directory in which to place target support files.  */
-  std::string GetSupportDirectory() const;
-
   /** @return whether this target have a well defined output file name. */
   bool HaveWellDefinedOutputFiles() const;
 

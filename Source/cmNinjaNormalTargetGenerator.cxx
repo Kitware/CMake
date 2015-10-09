@@ -492,9 +492,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     {
     if(target.GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS"))
       {
-      std::string dllname = targetOutput;
       std::string name_of_def_file
-        = target.GetSupportDirectory();
+        = gt.GetSupportDirectory();
       name_of_def_file += "/" + target.GetName();
       name_of_def_file += ".def ";
       vars["LINK_FLAGS"] += " /DEF:";
@@ -582,7 +581,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     vars["TARGET_PDB"] = base + suffix + dbg_suffix;
     }
 
-  const std::string objPath = GetTarget()->GetSupportDirectory();
+  const std::string objPath = GetGeneratorTarget()->GetSupportDirectory();
   vars["OBJECT_DIR"] =
     this->GetLocalGenerator()->ConvertToOutputFormat(
       this->ConvertToNinjaPath(objPath), cmLocalGenerator::SHELL);
@@ -634,7 +633,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       this->GetLocalGenerator()->ConvertToOutputFormat(
         cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
       std::string name_of_def_file
-        = target.GetSupportDirectory();
+        = gt.GetSupportDirectory();
       name_of_def_file += "/" + target.GetName();
       name_of_def_file += ".def";
       std::string cmd = cmakeCommand;

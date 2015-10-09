@@ -5512,3 +5512,18 @@ bool cmGeneratorTarget::HasImportLibrary() const
           (this->GetType() == cmTarget::SHARED_LIBRARY ||
            this->Target->IsExecutableWithExports()));
 }
+
+//----------------------------------------------------------------------------
+std::string cmGeneratorTarget::GetSupportDirectory() const
+{
+  std::string dir = this->Makefile->GetCurrentBinaryDirectory();
+  dir += cmake::GetCMakeFilesDirectory();
+  dir += "/";
+  dir += this->GetName();
+#if defined(__VMS)
+  dir += "_dir";
+#else
+  dir += ".dir";
+#endif
+  return dir;
+}

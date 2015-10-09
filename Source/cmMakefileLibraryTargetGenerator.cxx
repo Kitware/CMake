@@ -572,7 +572,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     if(this->Target->GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS"))
       {
       std::string name_of_def_file =
-        this->Target->GetSupportDirectory();
+        this->GeneratorTarget->GetSupportDirectory();
       name_of_def_file += std::string("/") +
         this->Target->GetName();
       name_of_def_file += ".def";
@@ -643,7 +643,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   vars.CMTarget = this->Target;
   vars.Language = linkLanguage.c_str();
   vars.Objects = buildObjs.c_str();
-  std::string objectDir = this->Target->GetSupportDirectory();
+  std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
   objectDir = this->Convert(objectDir,
                             cmLocalGenerator::START_OUTPUT,
                             cmLocalGenerator::SHELL);

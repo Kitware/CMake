@@ -298,7 +298,7 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
               this->GeneratorTarget->GetCompilePDBPath(this->GetConfigName());
       if(compilePdbPath.empty())
         {
-        compilePdbPath = this->Target->GetSupportDirectory() + "/";
+        compilePdbPath = this->GeneratorTarget->GetSupportDirectory() + "/";
         }
       }
 
@@ -567,7 +567,7 @@ cmNinjaTargetGenerator
   std::string const language = source->GetLanguage();
   std::string const sourceFileName =
     language=="RC" ? source->GetFullPath() : this->GetSourceFilePath(source);
-  std::string const objectDir = this->Target->GetSupportDirectory();
+  std::string const objectDir = this->GeneratorTarget->GetSupportDirectory();
   std::string const objectFileName = this->GetObjectFilePath(source);
   std::string const objectFileDir =
     cmSystemTools::GetFilenamePath(objectFileName);

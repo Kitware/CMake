@@ -401,6 +401,9 @@ public:
   /** Return whether or not the target has a DLL import library.  */
   bool HasImportLibrary() const;
 
+  /** Get a build-tree directory in which to place target support files.  */
+  std::string GetSupportDirectory() const;
+
   struct SourceFileFlags
   GetTargetSourceFileFlags(const cmSourceFile* sf) const;
 
