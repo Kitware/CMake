@@ -82,9 +82,8 @@ struct cmState::BuildsystemDirectoryStateType
   std::vector<cmState::Snapshot> Children;
 };
 
-cmState::cmState(cmake* cm)
-  : CMakeInstance(cm),
-    IsInTryCompile(false),
+cmState::cmState()
+  : IsInTryCompile(false),
     WindowsShell(false),
     WindowsVSIDE(false),
     WatcomWMake(false),
@@ -92,10 +91,12 @@ cmState::cmState(cmake* cm)
     NMake(false),
     MSYSShell(false)
 {
+  this->CacheManager = new cmCacheManager;
 }
 
 cmState::~cmState()
 {
+  delete this->CacheManager;
   cmDeleteAll(this->Commands);
 }
 
@@ -151,26 +152,26 @@ bool cmState::LoadCache(const std::string& path, bool internal,
                         std::set<std::string>& excludes,
                         std::set<std::string>& includes)
 {
-  return this->CMakeInstance->GetCacheManager()->LoadCache(path, internal,
-                                                    excludes, includes);
+  return this->CacheManager->LoadCache(path, internal,
+                                       excludes, includes);
 }
 
 bool cmState::SaveCache(const std::string& path)
 {
-  return this->CMakeInstance->GetCacheManager()->SaveCache(path);
+  return this->CacheManager->SaveCache(path);
 }
 
 bool cmState::DeleteCache(const std::string& path)
 {
-  return this->CMakeInstance->GetCacheManager()->DeleteCache(path);
+  return this->CacheManager->DeleteCache(path);
 }
 
 std::vector<std::string> cmState::GetCacheEntryKeys() const
 {
   std::vector<std::string> definitions;
-  definitions.reserve(this->CMakeInstance->GetCacheManager()->GetSize());
+  definitions.reserve(this->CacheManager->GetSize());
   cmCacheManager::CacheIterator cit =
-    this->CMakeInstance->GetCacheManager()->GetCacheIterator();
+    this->CacheManager->GetCacheIterator();
   for ( cit.Begin(); !cit.IsAtEnd(); cit.Next() )
     {
     definitions.push_back(cit.GetName());
@@ -180,7 +181,7 @@ std::vector<std::string> cmState::GetCacheEntryKeys() const
 
 const char* cmState::GetCacheEntryValue(std::string const& key) const
 {
-  cmCacheManager::CacheEntry* e = this->CMakeInstance->GetCacheManager()
+  cmCacheManager::CacheEntry* e = this->CacheManager
              ->GetCacheEntry(key);
   if (!e)
     {
@@ -192,21 +193,21 @@ const char* cmState::GetCacheEntryValue(std::string const& key) const
 const char*
 cmState::GetInitializedCacheValue(std::string const& key) const
 {
-  return this->CMakeInstance->GetCacheManager()->GetInitializedCacheValue(key);
+  return this->CacheManager->GetInitializedCacheValue(key);
 }
 
 cmState::CacheEntryType
 cmState::GetCacheEntryType(std::string const& key) const
 {
   cmCacheManager::CacheIterator it =
-      this->CMakeInstance->GetCacheManager()->GetCacheIterator(key.c_str());
+      this->CacheManager->GetCacheIterator(key.c_str());
   return it.GetType();
 }
 
 void cmState::SetCacheEntryValue(std::string const& key,
                                          std::string const& value)
 {
-  this->CMakeInstance->GetCacheManager()->SetCacheEntryValue(key, value);
+  this->CacheManager->SetCacheEntryValue(key, value);
 }
 
 void cmState::SetCacheEntryProperty(std::string const& key,
@@ -214,7 +215,7 @@ void cmState::SetCacheEntryProperty(std::string const& key,
                             std::string const& value)
 {
   cmCacheManager::CacheIterator it =
-      this->CMakeInstance->GetCacheManager()->GetCacheIterator(key.c_str());
+      this->CacheManager->GetCacheIterator(key.c_str());
   it.SetProperty(propertyName, value.c_str());
 }
 
@@ -223,14 +224,14 @@ void cmState::SetCacheEntryBoolProperty(std::string const& key,
                             bool value)
 {
   cmCacheManager::CacheIterator it =
-      this->CMakeInstance->GetCacheManager()->GetCacheIterator(key.c_str());
+      this->CacheManager->GetCacheIterator(key.c_str());
   it.SetProperty(propertyName, value);
 }
 
 const char* cmState::GetCacheEntryProperty(std::string const& key,
                                               std::string const& propertyName)
 {
-  cmCacheManager::CacheIterator it = this->CMakeInstance->GetCacheManager()
+  cmCacheManager::CacheIterator it = this->CacheManager
              ->GetCacheIterator(key.c_str());
   if (!it.PropertyExists(propertyName))
     {
@@ -242,7 +243,7 @@ const char* cmState::GetCacheEntryProperty(std::string const& key,
 bool cmState::GetCacheEntryPropertyAsBool(std::string const& key,
                                               std::string const& propertyName)
 {
-  return this->CMakeInstance->GetCacheManager()
+  return this->CacheManager
              ->GetCacheIterator(key.c_str()).GetPropertyAsBool(propertyName);
 }
 
@@ -250,13 +251,13 @@ void cmState::AddCacheEntry(const std::string& key, const char* value,
                                     const char* helpString,
                                     cmState::CacheEntryType type)
 {
-  this->CMakeInstance->GetCacheManager()->AddCacheEntry(key, value,
+  this->CacheManager->AddCacheEntry(key, value,
                                                         helpString, type);
 }
 
 void cmState::RemoveCacheEntry(std::string const& key)
 {
-  this->CMakeInstance->GetCacheManager()->RemoveCacheEntry(key);
+  this->CacheManager->RemoveCacheEntry(key);
 }
 
 void cmState::AppendCacheEntryProperty(const std::string& key,
@@ -264,7 +265,7 @@ void cmState::AppendCacheEntryProperty(const std::string& key,
                                                const std::string& value,
                                                bool asString)
 {
-  this->CMakeInstance->GetCacheManager()
+  this->CacheManager
        ->GetCacheIterator(key.c_str()).AppendProperty(property,
                                                        value.c_str(),
                                                        asString);
@@ -273,7 +274,7 @@ void cmState::AppendCacheEntryProperty(const std::string& key,
 void cmState::RemoveCacheEntryProperty(std::string const& key,
                                               std::string const& propertyName)
 {
-  this->CMakeInstance->GetCacheManager()
+  this->CacheManager
        ->GetCacheIterator(key.c_str()).SetProperty(propertyName, (void*)0);
 }
 
@@ -679,12 +680,12 @@ bool cmState::UseMSYSShell() const
 
 unsigned int cmState::GetCacheMajorVersion() const
 {
-  return this->CMakeInstance->GetCacheManager()->GetCacheMajorVersion();
+  return this->CacheManager->GetCacheMajorVersion();
 }
 
 unsigned int cmState::GetCacheMinorVersion() const
 {
-  return this->CMakeInstance->GetCacheManager()->GetCacheMinorVersion();
+  return this->CacheManager->GetCacheMinorVersion();
 }
 
 const char* cmState::GetBinaryDirectory() const

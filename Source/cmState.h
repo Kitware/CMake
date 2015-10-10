@@ -23,6 +23,7 @@ class cmake;
 class cmCommand;
 class cmDefinitions;
 class cmListFileBacktrace;
+class cmCacheManager;
 
 class cmState
 {
@@ -32,7 +33,7 @@ class cmState
   typedef cmLinkedTree<SnapshotDataType>::iterator PositionType;
   friend class Snapshot;
 public:
-  cmState(cmake* cm);
+  cmState();
   ~cmState();
 
   enum SnapshotType
@@ -320,7 +321,7 @@ private:
   std::vector<std::string> EnabledLanguages;
   std::map<std::string, cmCommand*> Commands;
   cmPropertyMap GlobalProperties;
-  cmake* CMakeInstance;
+  cmCacheManager* CacheManager;
 
   cmLinkedTree<BuildsystemDirectoryStateType> BuildsystemDirectory;
 

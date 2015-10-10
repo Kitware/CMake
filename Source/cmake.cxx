@@ -10,7 +10,6 @@
   See the License for more information.
 ============================================================================*/
 #include "cmake.h"
-#include "cmCacheManager.h"
 #include "cmMakefile.h"
 #include "cmLocalGenerator.h"
 #include "cmExternalMakefileProjectGenerator.h"
@@ -135,7 +134,7 @@ cmake::cmake()
   this->ClearBuildSystem = false;
   this->FileComparison = new cmFileTimeComparison;
 
-  this->State = new cmState(this);
+  this->State = new cmState;
   this->CurrentSnapshot = this->State->CreateBaseSnapshot();
 
 #ifdef __APPLE__
@@ -151,7 +150,6 @@ cmake::cmake()
 #endif
 
   this->Verbose = false;
-  this->CacheManager = new cmCacheManager;
   this->GlobalGenerator = 0;
   this->ProgressCallback = 0;
   this->ProgressCallbackClientData = 0;
@@ -171,7 +169,6 @@ cmake::cmake()
 
 cmake::~cmake()
 {
-  delete this->CacheManager;
   delete this->State;
   if (this->GlobalGenerator)
     {
