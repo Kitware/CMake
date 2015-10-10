@@ -1644,6 +1644,7 @@ void cmake::AddCacheEntry(const std::string& key, const char* value,
   this->State->AddCacheEntry(key, value,
                                     helpString,
                                     cmState::CacheEntryType(type));
+  this->UnwatchUnusedCli(key);
 }
 
 const char* cmake::GetCacheDefinition(const std::string& name) const
