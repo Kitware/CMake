@@ -1908,13 +1908,13 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
         nvalue += files[cc];
         }
 
-      this->GetState()->AddCacheEntry(name, nvalue.c_str(), doc, type);
+      this->GetCMakeInstance()->AddCacheEntry(name, nvalue.c_str(), doc, type);
       val = this->GetState()->GetInitializedCacheValue(name);
       haveVal = true;
       }
 
     }
-  this->GetState()->AddCacheEntry(name, haveVal ? val.c_str() : 0,
+  this->GetCMakeInstance()->AddCacheEntry(name, haveVal ? val.c_str() : 0,
                                           doc, type);
   // if there was a definition then remove it
   this->StateSnapshot.RemoveDefinition(name);
