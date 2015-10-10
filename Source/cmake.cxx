@@ -151,7 +151,7 @@ cmake::cmake()
 #endif
 
   this->Verbose = false;
-  this->CacheManager = new cmCacheManager(this);
+  this->CacheManager = new cmCacheManager;
   this->GlobalGenerator = 0;
   this->ProgressCallback = 0;
   this->ProgressCallbackClientData = 0;
@@ -1760,12 +1760,30 @@ bool cmake::LoadCache(const std::string& path, bool internal,
                 std::set<std::string>& excludes,
                 std::set<std::string>& includes)
 {
-  return this->State->LoadCache(path, internal, excludes, includes);
+  bool result = this->State->LoadCache(path, internal, excludes, includes);
+  static const char* entries[] = {"CMAKE_CACHE_MAJOR_VERSION",
+                                  "CMAKE_CACHE_MINOR_VERSION"};
+  for (const char* const* nameIt = cmArrayBegin(entries);
+       nameIt != cmArrayEnd(entries); ++nameIt)
+    {
+    this->UnwatchUnusedCli(*nameIt);
+    }
+  return result;
 }
 
 bool cmake::SaveCache(const std::string& path)
 {
-  return this->State->SaveCache(path);
+  bool result = this->State->SaveCache(path);
+  static const char* entries[] = {"CMAKE_CACHE_MAJOR_VERSION",
+                                  "CMAKE_CACHE_MINOR_VERSION",
+                                  "CMAKE_CACHE_PATCH_VERSION",
+                                  "CMAKE_CACHEFILE_DIR"};
+  for (const char* const* nameIt = cmArrayBegin(entries);
+       nameIt != cmArrayEnd(entries); ++nameIt)
+    {
+    this->UnwatchUnusedCli(*nameIt);
+    }
+  return result;
 }
 
 bool cmake::DeleteCache(const std::string& path)

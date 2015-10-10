@@ -21,11 +21,10 @@
 #include <cmsys/FStream.hxx>
 #include <cmsys/RegularExpression.hxx>
 
-cmCacheManager::cmCacheManager(cmake* cm)
+cmCacheManager::cmCacheManager()
 {
   this->CacheMajorVersion = 0;
   this->CacheMinorVersion = 0;
-  this->CMakeInstance = cm;
 }
 
 static bool ParseEntryWithoutType(const std::string& entry,
@@ -671,7 +670,6 @@ void cmCacheManager::AddCacheEntry(const std::string& key,
     }
   e.SetProperty("HELPSTRING", helpString? helpString :
                 "(This variable does not exist and should not be used)");
-  this->CMakeInstance->UnwatchUnusedCli(key);
 }
 
 bool cmCacheManager::CacheIterator::IsAtEnd() const

@@ -252,6 +252,7 @@ void cmState::AddCacheEntry(const std::string& key, const char* value,
 {
   this->CMakeInstance->GetCacheManager()->AddCacheEntry(key, value,
                                                         helpString, type);
+  this->CMakeInstance->UnwatchUnusedCli(key);
 }
 
 void cmState::RemoveCacheEntry(std::string const& key)

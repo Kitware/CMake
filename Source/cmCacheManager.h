@@ -17,7 +17,6 @@
 #include "cmState.h"
 
 class cmMarkAsAdvancedCommand;
-class cmake;
 
 /** \class cmCacheManager
  * \brief Control class for cmake's cache
@@ -28,7 +27,7 @@ class cmake;
 class cmCacheManager
 {
 public:
-  cmCacheManager(cmake* cm);
+  cmCacheManager();
   class CacheIterator;
   friend class cmCacheManager::CacheIterator;
 
