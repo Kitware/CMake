@@ -11,8 +11,6 @@
 ============================================================================*/
 #include "cmUtilitySourceCommand.h"
 
-#include "cmCacheManager.h"
-
 // cmUtilitySourceCommand
 bool cmUtilitySourceCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
@@ -54,13 +52,13 @@ bool cmUtilitySourceCommand
     }
   else
     {
-    cmCacheManager *manager =
-        this->Makefile->GetCMakeInstance()->GetCacheManager();
+    cmState *state =
+        this->Makefile->GetState();
     haveCacheValue = (cacheValue &&
      (strstr(cacheValue, "(IntDir)") == 0 ||
       (intDir && strcmp(intDir, "$(IntDir)") == 0)) &&
-     (manager->GetCacheMajorVersion() != 0 &&
-      manager->GetCacheMinorVersion() != 0 ));
+     (state->GetCacheMajorVersion() != 0 &&
+      state->GetCacheMinorVersion() != 0 ));
     }
 
   if(haveCacheValue)

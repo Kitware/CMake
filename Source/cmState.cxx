@@ -677,6 +677,16 @@ bool cmState::UseMSYSShell() const
   return this->MSYSShell;
 }
 
+unsigned int cmState::GetCacheMajorVersion() const
+{
+  return this->CMakeInstance->GetCacheManager()->GetCacheMajorVersion();
+}
+
+unsigned int cmState::GetCacheMinorVersion() const
+{
+  return this->CMakeInstance->GetCacheManager()->GetCacheMinorVersion();
+}
+
 const char* cmState::GetBinaryDirectory() const
 {
   return this->BinaryDirectory.c_str();

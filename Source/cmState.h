@@ -302,6 +302,9 @@ public:
   void SetMSYSShell(bool mSYSShell);
   bool UseMSYSShell() const;
 
+  unsigned int GetCacheMajorVersion() const;
+  unsigned int GetCacheMinorVersion() const;
+
 private:
   friend class cmake;
   void AddCacheEntry(const std::string& key, const char* value,
