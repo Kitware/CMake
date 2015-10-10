@@ -13,7 +13,6 @@
 #include "cmCacheManager.h"
 #include "cmSystemTools.h"
 #include "cmGeneratedFileStream.h"
-#include "cmMakefile.h"
 #include "cmake.h"
 #include "cmVersion.h"
 

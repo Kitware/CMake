@@ -16,7 +16,6 @@
 #include "cmPropertyMap.h"
 #include "cmState.h"
 
-class cmMakefile;
 class cmMarkAsAdvancedCommand;
 class cmake;
 
@@ -241,7 +240,7 @@ private:
   void WritePropertyEntries(std::ostream& os, CacheIterator const& i);
 
   CacheEntryMap Cache;
-  // Only cmake and cmMakefile should be able to add cache values
+  // Only cmake and cmState should be able to add cache values
   // the commands should never use the cmCacheManager directly
   friend class cmState; // allow access to add cache values
   friend class cmake; // allow access to add cache values
