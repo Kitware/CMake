@@ -5416,13 +5416,13 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
                                 this->MaxLanguageStandards);
     }
 
-  cmTarget::LinkLibraryType linkType = this->Target->ComputeLinkType(config);
+  cmTargetLinkLibraryType linkType = this->Target->ComputeLinkType(config);
   cmTarget::LinkLibraryVectorType const& oldllibs =
     this->Target->GetOriginalLinkLibraries();
   for(cmTarget::LinkLibraryVectorType::const_iterator li = oldllibs.begin();
       li != oldllibs.end(); ++li)
     {
-    if(li->second != cmTarget::GENERAL && li->second != linkType)
+    if(li->second != GENERAL_LibraryType && li->second != linkType)
       {
       std::string name = this->Target->CheckCMP0004(li->first);
       if(name == this->GetName() || name.empty())

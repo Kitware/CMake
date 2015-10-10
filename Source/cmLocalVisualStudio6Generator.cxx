@@ -1145,7 +1145,7 @@ void cmLocalVisualStudio6Generator
       libDebug =
         this->ConvertToOutputFormat(libDebug.c_str(), SHELL);
 
-      if (j->second == cmTarget::GENERAL)
+      if (j->second == GENERAL_LibraryType)
         {
         libOptions += " ";
         libOptions += lib;
@@ -1156,7 +1156,7 @@ void cmLocalVisualStudio6Generator
         libMultiLineOptionsForDebug +=  libDebug;
         libMultiLineOptionsForDebug += "\n";
         }
-      if (j->second == cmTarget::DEBUG)
+      if (j->second == DEBUG_LibraryType)
         {
         libDebugOptions += " ";
         libDebugOptions += lib;
@@ -1165,7 +1165,7 @@ void cmLocalVisualStudio6Generator
         libMultiLineDebugOptions += libDebug;
         libMultiLineDebugOptions += "\n";
         }
-      if (j->second == cmTarget::OPTIMIZED)
+      if (j->second == OPTIMIZED_LibraryType)
         {
         libOptimizedOptions += " ";
         libOptimizedOptions += lib;

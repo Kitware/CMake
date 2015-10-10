@@ -120,15 +120,15 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
         std::string ltValue;
         switch(li->second)
           {
-          case cmTarget::GENERAL:
+          case GENERAL_LibraryType:
             valueNew += "general;";
             ltValue = "general";
             break;
-          case cmTarget::DEBUG:
+          case DEBUG_LibraryType:
             valueNew += "debug;";
             ltValue = "debug";
             break;
-          case cmTarget::OPTIMIZED:
+          case OPTIMIZED_LibraryType:
             valueNew += "optimized;";
             ltValue = "optimized";
             break;

@@ -373,13 +373,13 @@ void CCONV cmAddLinkLibraryForTarget(void *arg, const char *tgt,
   switch (libtype)
     {
     case CM_LIBRARY_GENERAL:
-      mf->AddLinkLibraryForTarget(tgt,value, cmTarget::GENERAL);
+      mf->AddLinkLibraryForTarget(tgt,value, GENERAL_LibraryType);
       break;
     case CM_LIBRARY_DEBUG:
-      mf->AddLinkLibraryForTarget(tgt,value, cmTarget::DEBUG);
+      mf->AddLinkLibraryForTarget(tgt,value, DEBUG_LibraryType);
       break;
     case CM_LIBRARY_OPTIMIZED:
-      mf->AddLinkLibraryForTarget(tgt,value, cmTarget::OPTIMIZED);
+      mf->AddLinkLibraryForTarget(tgt,value, OPTIMIZED_LibraryType);
       break;
     }
 }

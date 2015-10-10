@@ -1400,7 +1400,7 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
 }
 
 void cmMakefile::AddLinkLibrary(const std::string& lib,
-                                cmTarget::LinkLibraryType llt)
+                                cmTargetLinkLibraryType llt)
 {
   cmTarget::LibraryID tmp;
   tmp.first = lib;
@@ -1410,7 +1410,7 @@ void cmMakefile::AddLinkLibrary(const std::string& lib,
 
 void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
                                          const std::string& lib,
-                                         cmTarget::LinkLibraryType llt)
+                                         cmTargetLinkLibraryType llt)
 {
   cmTargets::iterator i = this->Targets.find(target);
   if ( i != this->Targets.end())
@@ -1471,7 +1471,7 @@ void cmMakefile::AddLinkDirectoryForTarget(const std::string& target,
 
 void cmMakefile::AddLinkLibrary(const std::string& lib)
 {
-  this->AddLinkLibrary(lib,cmTarget::GENERAL);
+  this->AddLinkLibrary(lib,GENERAL_LibraryType);
 }
 
 void cmMakefile::InitializeFromParent(cmMakefile* parent)
