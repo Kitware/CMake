@@ -1760,17 +1760,17 @@ bool cmake::LoadCache(const std::string& path, bool internal,
                 std::set<std::string>& excludes,
                 std::set<std::string>& includes)
 {
-  return this->CacheManager->LoadCache(path, internal, excludes, includes);
+  return this->State->LoadCache(path, internal, excludes, includes);
 }
 
 bool cmake::SaveCache(const std::string& path)
 {
-  return this->CacheManager->SaveCache(path);
+  return this->State->SaveCache(path);
 }
 
 bool cmake::DeleteCache(const std::string& path)
 {
-  return this->CacheManager->DeleteCache(path);
+  return this->State->DeleteCache(path);
 }
 
 void cmake::SetProgressCallback(ProgressCallbackType f, void *cd)

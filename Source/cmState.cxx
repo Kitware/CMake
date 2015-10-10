@@ -147,6 +147,24 @@ bool cmState::IsCacheEntryType(std::string const& key)
   return false;
 }
 
+bool cmState::LoadCache(const std::string& path, bool internal,
+                        std::set<std::string>& excludes,
+                        std::set<std::string>& includes)
+{
+  return this->CMakeInstance->GetCacheManager()->LoadCache(path, internal,
+                                                    excludes, includes);
+}
+
+bool cmState::SaveCache(const std::string& path)
+{
+  return this->CMakeInstance->GetCacheManager()->SaveCache(path);
+}
+
+bool cmState::DeleteCache(const std::string& path)
+{
+  return this->CMakeInstance->GetCacheManager()->DeleteCache(path);
+}
+
 std::vector<std::string> cmState::GetCacheEntryKeys() const
 {
   std::vector<std::string> definitions;

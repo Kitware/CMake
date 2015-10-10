@@ -208,6 +208,14 @@ public:
   static const char* CacheEntryTypeToString(CacheEntryType);
   static bool IsCacheEntryType(std::string const& key);
 
+  bool LoadCache(const std::string& path, bool internal,
+                 std::set<std::string>& excludes,
+                 std::set<std::string>& includes);
+
+  bool SaveCache(const std::string& path) ;
+
+  bool DeleteCache(const std::string& path);
+
   std::vector<std::string> GetCacheEntryKeys() const;
   const char* GetCacheEntryValue(std::string const& key) const;
   const char* GetInitializedCacheValue(std::string const& key) const;
