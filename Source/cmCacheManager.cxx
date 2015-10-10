@@ -27,90 +27,6 @@ cmCacheManager::cmCacheManager()
   this->CacheMinorVersion = 0;
 }
 
-static bool ParseEntryWithoutType(const std::string& entry,
-                                  std::string& var,
-                                  std::string& value)
-{
-  // input line is:         key=value
-  static cmsys::RegularExpression reg(
-    "^([^=]*)=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
-  // input line is:         "key"=value
-  static cmsys::RegularExpression regQuoted(
-    "^\"([^\"]*)\"=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
-  bool flag = false;
-  if(regQuoted.find(entry))
-    {
-    var = regQuoted.match(1);
-    value = regQuoted.match(2);
-    flag = true;
-    }
-  else if (reg.find(entry))
-    {
-    var = reg.match(1);
-    value = reg.match(2);
-    flag = true;
-    }
-
-  // if value is enclosed in single quotes ('foo') then remove them
-  // it is used to enclose trailing space or tab
-  if (flag &&
-      value.size() >= 2 &&
-      value[0] == '\'' &&
-      value[value.size() - 1] == '\'')
-    {
-    value = value.substr(1,
-                         value.size() - 2);
-    }
-
-  return flag;
-}
-
-bool cmCacheManager::ParseEntry(const std::string& entry,
-                                std::string& var,
-                                std::string& value,
-                                cmState::CacheEntryType& type)
-{
-  // input line is:         key:type=value
-  static cmsys::RegularExpression reg(
-    "^([^=:]*):([^=]*)=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
-  // input line is:         "key":type=value
-  static cmsys::RegularExpression regQuoted(
-    "^\"([^\"]*)\":([^=]*)=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
-  bool flag = false;
-  if(regQuoted.find(entry))
-    {
-    var = regQuoted.match(1);
-    type = cmState::StringToCacheEntryType(regQuoted.match(2).c_str());
-    value = regQuoted.match(3);
-    flag = true;
-    }
-  else if (reg.find(entry))
-    {
-    var = reg.match(1);
-    type = cmState::StringToCacheEntryType(reg.match(2).c_str());
-    value = reg.match(3);
-    flag = true;
-    }
-
-  // if value is enclosed in single quotes ('foo') then remove them
-  // it is used to enclose trailing space or tab
-  if (flag &&
-      value.size() >= 2 &&
-      value[0] == '\'' &&
-      value[value.size() - 1] == '\'')
-    {
-    value = value.substr(1,
-                         value.size() - 2);
-    }
-
-  if (!flag)
-    {
-    return ParseEntryWithoutType(entry, var, value);
-    }
-
-  return flag;
-}
-
 void cmCacheManager::CleanCMakeFiles(const std::string& path)
 {
   std::string glob = path;
@@ -187,7 +103,7 @@ bool cmCacheManager::LoadCache(const std::string& path,
         }
       }
     e.SetProperty("HELPSTRING", helpString.c_str());
-    if(cmCacheManager::ParseEntry(realbuffer, entryKey, e.Value, e.Type))
+    if(cmState::ParseCacheEntry(realbuffer, entryKey, e.Value, e.Type))
       {
       if ( excludes.find(entryKey) == excludes.end() )
         {

@@ -1769,3 +1769,87 @@ bool operator!=(const cmState::Snapshot& lhs, const cmState::Snapshot& rhs)
 {
   return lhs.Position != rhs.Position;
 }
+
+static bool ParseEntryWithoutType(const std::string& entry,
+                                  std::string& var,
+                                  std::string& value)
+{
+  // input line is:         key=value
+  static cmsys::RegularExpression reg(
+    "^([^=]*)=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
+  // input line is:         "key"=value
+  static cmsys::RegularExpression regQuoted(
+    "^\"([^\"]*)\"=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
+  bool flag = false;
+  if(regQuoted.find(entry))
+    {
+    var = regQuoted.match(1);
+    value = regQuoted.match(2);
+    flag = true;
+    }
+  else if (reg.find(entry))
+    {
+    var = reg.match(1);
+    value = reg.match(2);
+    flag = true;
+    }
+
+  // if value is enclosed in single quotes ('foo') then remove them
+  // it is used to enclose trailing space or tab
+  if (flag &&
+      value.size() >= 2 &&
+      value[0] == '\'' &&
+      value[value.size() - 1] == '\'')
+    {
+    value = value.substr(1,
+                         value.size() - 2);
+    }
+
+  return flag;
+}
+
+bool cmState::ParseCacheEntry(const std::string& entry,
+                                std::string& var,
+                                std::string& value,
+                                CacheEntryType& type)
+{
+  // input line is:         key:type=value
+  static cmsys::RegularExpression reg(
+    "^([^=:]*):([^=]*)=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
+  // input line is:         "key":type=value
+  static cmsys::RegularExpression regQuoted(
+    "^\"([^\"]*)\":([^=]*)=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
+  bool flag = false;
+  if(regQuoted.find(entry))
+    {
+    var = regQuoted.match(1);
+    type = cmState::StringToCacheEntryType(regQuoted.match(2).c_str());
+    value = regQuoted.match(3);
+    flag = true;
+    }
+  else if (reg.find(entry))
+    {
+    var = reg.match(1);
+    type = cmState::StringToCacheEntryType(reg.match(2).c_str());
+    value = reg.match(3);
+    flag = true;
+    }
+
+  // if value is enclosed in single quotes ('foo') then remove them
+  // it is used to enclose trailing space or tab
+  if (flag &&
+      value.size() >= 2 &&
+      value[0] == '\'' &&
+      value[value.size() - 1] == '\'')
+    {
+    value = value.substr(1,
+                         value.size() - 2);
+    }
+
+  if (!flag)
+    {
+    return ParseEntryWithoutType(entry, var, value);
+    }
+
+  return flag;
+}

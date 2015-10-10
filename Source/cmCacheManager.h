@@ -121,12 +121,6 @@ public:
   int GetSize() {
     return static_cast<int>(this->Cache.size()); }
 
-  ///! Break up a line like VAR:type="value" into var, type and value
-  static bool ParseEntry(const std::string& entry,
-                         std::string& var,
-                         std::string& value,
-                         cmState::CacheEntryType& type);
-
   ///! Get a value from the cache given a key
   const char* GetInitializedCacheValue(const std::string& key) const;
 

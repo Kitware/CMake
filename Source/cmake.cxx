@@ -216,7 +216,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         }
       std::string var, value;
       cmState::CacheEntryType type = cmState::UNINITIALIZED;
-      if(cmCacheManager::ParseEntry(entry, var, value, type))
+      if(cmState::ParseCacheEntry(entry, var, value, type))
         {
         // The value is transformed if it is a filepath for example, so
         // we can't compare whether the value is already in the cache until
@@ -1722,7 +1722,7 @@ bool cmake::ParseCacheEntry(const std::string& entry,
                             std::string& value,
                             cmState::CacheEntryType& type)
 {
-  return cmCacheManager::ParseEntry(entry, var, value, type);
+  return cmState::ParseCacheEntry(entry, var, value, type);
 }
 
 int cmake::LoadCache()
