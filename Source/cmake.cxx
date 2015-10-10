@@ -232,7 +232,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
             }
           }
 
-        this->State->AddCacheEntry(var, value.c_str(),
+        this->AddCacheEntry(var, value.c_str(),
           "No help, variable specified on the command line.", type);
 
         if(this->WarnUnusedCli)
@@ -848,14 +848,14 @@ void cmake::SetDirectoriesFromFile(const char* arg)
 int cmake::AddCMakePaths()
 {
   // Save the value in the cache
-  this->CacheManager->AddCacheEntry
+  this->AddCacheEntry
     ("CMAKE_COMMAND", cmSystemTools::GetCMakeCommand().c_str(),
      "Path to CMake executable.", cmState::INTERNAL);
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  this->CacheManager->AddCacheEntry
+  this->AddCacheEntry
     ("CMAKE_CTEST_COMMAND", cmSystemTools::GetCTestCommand().c_str(),
      "Path to ctest program executable.", cmState::INTERNAL);
-  this->CacheManager->AddCacheEntry
+  this->AddCacheEntry
     ("CMAKE_CPACK_COMMAND", cmSystemTools::GetCPackCommand().c_str(),
      "Path to cpack program executable.", cmState::INTERNAL);
 #endif
@@ -869,7 +869,7 @@ int cmake::AddCMakePaths()
       cmSystemTools::GetCMakeRoot().c_str());
     return 0;
     }
-  this->CacheManager->AddCacheEntry
+  this->AddCacheEntry
     ("CMAKE_ROOT", cmSystemTools::GetCMakeRoot().c_str(),
      "Path to CMake installation.", cmState::INTERNAL);
 
@@ -1186,7 +1186,7 @@ int cmake::Configure()
     {
     if(this->SuppressDevWarnings)
       {
-      this->CacheManager->
+      this->
         AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "TRUE",
                       "Suppress Warnings that are meant for"
                       " the author of the CMakeLists.txt files.",
@@ -1194,7 +1194,7 @@ int cmake::Configure()
       }
     else
       {
-      this->CacheManager->
+      this->
         AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "FALSE",
                       "Suppress Warnings that are meant for"
                       " the author of the CMakeLists.txt files.",
@@ -1229,7 +1229,7 @@ int cmake::ActualConfigure()
     }
   if ( !res )
     {
-    this->CacheManager->AddCacheEntry
+    this->AddCacheEntry
       ("CMAKE_HOME_DIRECTORY",
        this->GetHomeDirectory(),
        "Source directory with the top level CMakeLists.txt file for this "
@@ -1340,11 +1340,11 @@ int cmake::ActualConfigure()
     }
   if(!this->CacheManager->GetInitializedCacheValue("CMAKE_GENERATOR"))
     {
-    this->CacheManager->AddCacheEntry("CMAKE_GENERATOR",
+    this->AddCacheEntry("CMAKE_GENERATOR",
                                       this->GlobalGenerator->GetName().c_str(),
                                       "Name of generator.",
                                       cmState::INTERNAL);
-    this->CacheManager->AddCacheEntry("CMAKE_EXTRA_GENERATOR",
+    this->AddCacheEntry("CMAKE_EXTRA_GENERATOR",
                         this->GlobalGenerator->GetExtraGeneratorName().c_str(),
                         "Name of external makefile project generator.",
                         cmState::INTERNAL);
@@ -1372,7 +1372,7 @@ int cmake::ActualConfigure()
     }
   else
     {
-    this->CacheManager->AddCacheEntry("CMAKE_GENERATOR_PLATFORM",
+    this->AddCacheEntry("CMAKE_GENERATOR_PLATFORM",
                                       this->GeneratorPlatform.c_str(),
                                       "Name of generator platform.",
                                       cmState::INTERNAL);
@@ -1400,7 +1400,7 @@ int cmake::ActualConfigure()
     }
   else
     {
-    this->CacheManager->AddCacheEntry("CMAKE_GENERATOR_TOOLSET",
+    this->AddCacheEntry("CMAKE_GENERATOR_TOOLSET",
                                       this->GeneratorToolset.c_str(),
                                       "Name of generator toolset.",
                                       cmState::INTERNAL);
@@ -1434,7 +1434,7 @@ int cmake::ActualConfigure()
     {
     if(!this->State->GetInitializedCacheValue("LIBRARY_OUTPUT_PATH"))
       {
-      this->State->AddCacheEntry
+      this->AddCacheEntry
         ("LIBRARY_OUTPUT_PATH", "",
          "Single output directory for building all libraries.",
          cmState::PATH);
@@ -1442,7 +1442,7 @@ int cmake::ActualConfigure()
     if(!this->State
             ->GetInitializedCacheValue("EXECUTABLE_OUTPUT_PATH"))
       {
-      this->State->AddCacheEntry
+      this->AddCacheEntry
         ("EXECUTABLE_OUTPUT_PATH", "",
          "Single output directory for building all executables.",
          cmState::PATH);
