@@ -73,8 +73,8 @@ private:
   void AddDirectLinkEntries();
   template <typename T>
     void AddLinkEntries(int depender_index, std::vector<T> const& libs);
-  cmTarget const* FindTargetToLink(int depender_index,
-                                   const std::string& name);
+  cmGeneratorTarget const* FindTargetToLink(int depender_index,
+                                            const std::string& name);
 
   // One entry for each unique item.
   std::vector<LinkEntry> EntryList;

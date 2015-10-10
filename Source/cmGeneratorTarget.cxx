@@ -4427,7 +4427,7 @@ void cmGeneratorTarget::LookupLinkItems(std::vector<std::string> const& names,
       {
       continue;
       }
-    items.push_back(cmLinkItem(name, this->Target->FindTargetToLink(name)));
+    items.push_back(cmLinkItem(name, this->FindTargetToLink(name)));
     }
 }
 
@@ -5398,7 +5398,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
 
       // The entry is meant for this configuration.
       impl.Libraries.push_back(
-        cmLinkImplItem(name, this->Target->FindTargetToLink(name),
+        cmLinkImplItem(name, this->FindTargetToLink(name),
                        *btIt, evaluated != *le));
       }
 
@@ -5430,9 +5430,45 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         }
       // Support OLD behavior for CMP0003.
       impl.WrongConfigLibraries.push_back(
-        cmLinkItem(name, this->Target->FindTargetToLink(name)));
+        cmLinkItem(name, this->FindTargetToLink(name)));
       }
     }
+}
+
+//----------------------------------------------------------------------------
+cmGeneratorTarget*
+cmGeneratorTarget::FindTargetToLink(std::string const& name) const
+{
+  cmTarget const* tgt = this->Makefile->FindTargetToUse(name);
+
+  // Skip targets that will not really be linked.  This is probably a
+  // name conflict between an external library and an executable
+  // within the project.
+  if(tgt && tgt->GetType() == cmTarget::EXECUTABLE &&
+     !tgt->IsExecutableWithExports())
+    {
+    tgt = 0;
+    }
+
+  if(tgt && tgt->GetType() == cmTarget::OBJECT_LIBRARY)
+    {
+    std::ostringstream e;
+    e << "Target \"" << this->GetName() << "\" links to "
+      "OBJECT library \"" << tgt->GetName() << "\" but this is not "
+      "allowed.  "
+      "One may link only to STATIC or SHARED libraries, or to executables "
+      "with the ENABLE_EXPORTS property set.";
+    cmake* cm = this->Makefile->GetCMakeInstance();
+    cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                     this->Target->GetBacktrace());
+    tgt = 0;
+    }
+
+  if (!tgt)
+    {
+    return 0;
+    }
+  return this->GlobalGenerator->GetGeneratorTarget(tgt);
 }
 
 //----------------------------------------------------------------------------

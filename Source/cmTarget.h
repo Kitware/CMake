@@ -223,8 +223,6 @@ public:
 
   void GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const;
 
-  cmTarget const* FindTargetToLink(std::string const& name) const;
-
   /** Strip off leading and trailing whitespace from an item named in
       the link dependencies of this target.  */
   std::string CheckCMP0004(std::string const& item) const;

@@ -2670,37 +2670,6 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
 }
 
 //----------------------------------------------------------------------------
-cmTarget const* cmTarget::FindTargetToLink(std::string const& name) const
-{
-  cmTarget const* tgt = this->Makefile->FindTargetToUse(name);
-
-  // Skip targets that will not really be linked.  This is probably a
-  // name conflict between an external library and an executable
-  // within the project.
-  if(tgt && tgt->GetType() == cmTarget::EXECUTABLE &&
-     !tgt->IsExecutableWithExports())
-    {
-    tgt = 0;
-    }
-
-  if(tgt && tgt->GetType() == cmTarget::OBJECT_LIBRARY)
-    {
-    std::ostringstream e;
-    e << "Target \"" << this->GetName() << "\" links to "
-      "OBJECT library \"" << tgt->GetName() << "\" but this is not "
-      "allowed.  "
-      "One may link only to STATIC or SHARED libraries, or to executables "
-      "with the ENABLE_EXPORTS property set.";
-    cmake* cm = this->Makefile->GetCMakeInstance();
-    cm->IssueMessage(cmake::FATAL_ERROR, e.str(), this->GetBacktrace());
-    tgt = 0;
-    }
-
-  // Return the target found, if any.
-  return tgt;
-}
-
-//----------------------------------------------------------------------------
 std::string cmTarget::CheckCMP0004(std::string const& item) const
 {
   // Strip whitespace off the library names because we used to do this
