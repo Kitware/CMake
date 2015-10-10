@@ -43,9 +43,11 @@ struct cmGeneratorExpressionContext
   cmLocalGenerator *LG;
   std::string Config;
   std::string Language;
-  cmTarget const* HeadTarget; // The target whose property is being evaluated.
-  cmTarget const* CurrentTarget; // The dependent of HeadTarget which appears
-                                 // directly or indirectly in the property.
+  // The target whose property is being evaluated.
+  cmGeneratorTarget const* HeadTarget;
+  // The dependent of HeadTarget which appears
+  // directly or indirectly in the property.
+  cmGeneratorTarget const* CurrentTarget;
   bool Quiet;
   bool HadError;
   bool HadContextSensitiveCondition;
