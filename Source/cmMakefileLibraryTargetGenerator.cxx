@@ -166,11 +166,11 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 
   std::string extraFlags;
   this->LocalGenerator->AppendFlags
-    (extraFlags, this->Target->GetProperty("LINK_FLAGS"));
+    (extraFlags, this->GeneratorTarget->GetProperty("LINK_FLAGS"));
   std::string linkFlagsConfig = "LINK_FLAGS_";
   linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
   this->LocalGenerator->AppendFlags
-    (extraFlags, this->Target->GetProperty(linkFlagsConfig));
+    (extraFlags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
 
   this->LocalGenerator->AddConfigVariableFlags
     (extraFlags, "CMAKE_SHARED_LINKER_FLAGS", this->ConfigName);
@@ -190,11 +190,11 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 
   std::string extraFlags;
   this->LocalGenerator->AppendFlags(extraFlags,
-                                    this->Target->GetProperty("LINK_FLAGS"));
+                           this->GeneratorTarget->GetProperty("LINK_FLAGS"));
   std::string linkFlagsConfig = "LINK_FLAGS_";
   linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
   this->LocalGenerator->AppendFlags
-    (extraFlags, this->Target->GetProperty(linkFlagsConfig));
+    (extraFlags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
   this->LocalGenerator->AddConfigVariableFlags
     (extraFlags, "CMAKE_MODULE_LINKER_FLAGS", this->ConfigName);
   this->AddModuleDefinitionFlag(extraFlags);
@@ -213,11 +213,11 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
 
   std::string extraFlags;
   this->LocalGenerator->AppendFlags(extraFlags,
-                                    this->Target->GetProperty("LINK_FLAGS"));
+                             this->GeneratorTarget->GetProperty("LINK_FLAGS"));
   std::string linkFlagsConfig = "LINK_FLAGS_";
   linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
   this->LocalGenerator->AppendFlags
-    (extraFlags, this->Target->GetProperty(linkFlagsConfig));
+    (extraFlags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
   this->LocalGenerator->AddConfigVariableFlags
     (extraFlags, "CMAKE_MACOSX_FRAMEWORK_LINKER_FLAGS", this->ConfigName);
 
@@ -569,7 +569,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   if (this->GeneratorTarget->GetType() == cmState::SHARED_LIBRARY &&
       this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
     {
-    if(this->Target->GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS"))
+    if(this->GeneratorTarget->GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS"))
       {
       std::string name_of_def_file =
         this->GeneratorTarget->GetSupportDirectory();

@@ -218,7 +218,8 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
     }
 
   // Add user-specified dependencies.
-  if (const char* linkDepends = this->Target->GetProperty("LINK_DEPENDS"))
+  if (const char* linkDepends =
+      this->GeneratorTarget->GetProperty("LINK_DEPENDS"))
     {
     std::vector<std::string> linkDeps;
     cmSystemTools::ExpandListArgument(linkDepends, linkDeps);
@@ -410,7 +411,7 @@ cmNinjaTargetGenerator
   if (!compileCmds.empty() && (lang == "C" || lang == "CXX"))
     {
     std::string const iwyu_prop = lang + "_INCLUDE_WHAT_YOU_USE";
-    const char *iwyu = this->Target->GetProperty(iwyu_prop);
+    const char *iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
     if (iwyu && *iwyu)
       {
       std::string run_iwyu =
@@ -427,7 +428,7 @@ cmNinjaTargetGenerator
   if (!compileCmds.empty() && (lang == "C" || lang == "CXX"))
     {
     std::string const clauncher_prop = lang + "_COMPILER_LAUNCHER";
-    const char *clauncher = this->Target->GetProperty(clauncher_prop);
+    const char *clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
     if (clauncher && *clauncher)
       {
       std::vector<std::string> launcher_cmd;

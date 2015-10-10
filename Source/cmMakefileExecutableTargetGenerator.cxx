@@ -197,7 +197,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                            this->ConfigName);
 
 
-  if(this->Target->GetPropertyAsBool("WIN32_EXECUTABLE"))
+  if(this->GeneratorTarget->GetPropertyAsBool("WIN32_EXECUTABLE"))
     {
     this->LocalGenerator->AppendFlags
       (linkFlags, this->Makefile->GetDefinition("CMAKE_CREATE_WIN32_EXE"));
@@ -226,11 +226,11 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Add target-specific linker flags.
   this->LocalGenerator->AppendFlags
-    (linkFlags, this->Target->GetProperty("LINK_FLAGS"));
+    (linkFlags, this->GeneratorTarget->GetProperty("LINK_FLAGS"));
   std::string linkFlagsConfig = "LINK_FLAGS_";
   linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
   this->LocalGenerator->AppendFlags
-    (linkFlags, this->Target->GetProperty(linkFlagsConfig));
+    (linkFlags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
 
   this->AddModuleDefinitionFlag(linkFlags);
 

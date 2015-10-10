@@ -109,7 +109,7 @@ std::string cmCommonTargetGenerator::ComputeFortranModuleDirectory() const
 {
   std::string mod_dir;
   const char* target_mod_dir =
-    this->Target->GetProperty("Fortran_MODULE_DIRECTORY");
+    this->GeneratorTarget->GetProperty("Fortran_MODULE_DIRECTORY");
   const char* moddir_flag =
     this->Makefile->GetDefinition("CMAKE_Fortran_MODDIR_FLAG");
   if(target_mod_dir && moddir_flag)
@@ -214,7 +214,7 @@ cmCommonTargetGenerator
     this->LocalGenerator->GetFortranFormat(srcfmt);
   if(format == cmLocalGenerator::FortranFormatNone)
     {
-    const char* tgtfmt = this->Target->GetProperty("Fortran_FORMAT");
+    const char* tgtfmt = this->GeneratorTarget->GetProperty("Fortran_FORMAT");
     format = this->LocalGenerator->GetFortranFormat(tgtfmt);
     }
   const char* var = 0;

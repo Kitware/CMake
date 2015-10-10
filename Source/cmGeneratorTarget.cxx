@@ -4859,7 +4859,7 @@ bool cmGeneratorTarget::ComputeOutputDir(const std::string& config,
     // Skip per-configuration subdirectory.
     conf = "";
     }
-  else if(const char* outdir = this->Target->GetProperty(propertyName))
+  else if(const char* outdir = this->GetProperty(propertyName))
     {
     // Use the user-specified output directory.
     cmGeneratorExpression ge;
