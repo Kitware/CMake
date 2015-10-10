@@ -223,8 +223,6 @@ public:
   void SetCacheEntryValue(std::string const& key, std::string const& value);
   void SetCacheValue(std::string const& key, std::string const& value);
 
-  void AddCacheEntry(const std::string& key, const char* value,
-                     const char* helpString, CacheEntryType type);
   void RemoveCacheEntry(std::string const& key);
 
   void SetCacheEntryProperty(std::string const& key,
@@ -305,6 +303,10 @@ public:
   bool UseMSYSShell() const;
 
 private:
+  friend class cmake;
+  void AddCacheEntry(const std::string& key, const char* value,
+                     const char* helpString, CacheEntryType type);
+
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
   std::map<std::string, cmCommand*> Commands;
