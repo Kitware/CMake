@@ -17,7 +17,6 @@
 #include "cmake.h"
 #include "cmSourceFile.h"
 #include "cmGeneratedFileStream.h"
-#include "cmTarget.h"
 #include "cmSystemTools.h"
 
 #include <cmsys/SystemTools.hxx>

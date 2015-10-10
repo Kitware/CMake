@@ -19,8 +19,6 @@
 
 #include "cmListFileCache.h"
 
-class cmMakefile;
-class cmTarget;
 struct cmGeneratorExpressionEvaluator;
 
 //----------------------------------------------------------------------------

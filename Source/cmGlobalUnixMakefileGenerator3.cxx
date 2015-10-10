@@ -15,7 +15,6 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 #include "cmGeneratedFileStream.h"
-#include "cmSourceFile.h"
 #include "cmGeneratorTarget.h"
 #include "cmAlgorithms.h"
 

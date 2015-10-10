@@ -12,7 +12,6 @@
 
 #include "cmGeneratorExpressionDAGChecker.h"
 
-#include "cmMakefile.h"
 #include "cmLocalGenerator.h"
 #include "cmAlgorithms.h"
 

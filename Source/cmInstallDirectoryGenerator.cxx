@@ -11,7 +11,6 @@
 ============================================================================*/
 #include "cmInstallDirectoryGenerator.h"
 
-#include "cmTarget.h"
 #include "cmGeneratorExpression.h"
 #include "cmLocalGenerator.h"
 

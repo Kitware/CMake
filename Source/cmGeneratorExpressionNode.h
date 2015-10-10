@@ -12,8 +12,6 @@
 #ifndef cmGeneratorExpressionNode_h
 #define cmGeneratorExpressionNode_h
 
-#include "cmMakefile.h"
-
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionParser.h"
 #include "cmGeneratorExpressionDAGChecker.h"

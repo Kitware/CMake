@@ -13,10 +13,8 @@
 
 #include "cmGeneratorExpression.h"
 #include "cmOutputConverter.h"
-#include "cmMakefile.h"
 #include "cmLocalGenerator.h"
 #include "cmSystemTools.h"
-#include "cmTarget.h"
 #include "cmTest.h"
 
 //----------------------------------------------------------------------------

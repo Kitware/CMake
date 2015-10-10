@@ -14,6 +14,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmAlgorithms.h"
 #include "cmOutputConverter.h"
+#include "cmMakefile.h"
 
 //----------------------------------------------------------------------------
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(

@@ -16,8 +16,6 @@
 #include "cmExternalMakefileProjectGenerator.h"
 
 class cmLocalGenerator;
-class cmMakefile;
-class cmTarget;
 class cmGeneratedFileStream;
 
 /** \class cmExtraKateGenerator

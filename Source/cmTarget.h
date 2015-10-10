@@ -30,7 +30,6 @@ class cmake;
 class cmMakefile;
 class cmSourceFile;
 class cmGlobalGenerator;
-class cmComputeLinkInformation;
 class cmListFileBacktrace;
 class cmTarget;
 class cmGeneratorTarget;
