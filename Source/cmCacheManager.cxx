@@ -28,12 +28,6 @@ cmCacheManager::cmCacheManager(cmake* cm)
   this->CMakeInstance = cm;
 }
 
-bool cmCacheManager::LoadCache(const std::string& path)
-{
-  std::set<std::string> emptySet;
-  return this->LoadCache(path, true, emptySet, emptySet);
-}
-
 static bool ParseEntryWithoutType(const std::string& entry,
                                   std::string& var,
                                   std::string& value)

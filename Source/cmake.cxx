@@ -1752,7 +1752,8 @@ int cmake::LoadCache()
 
 bool cmake::LoadCache(const std::string& path)
 {
-  return this->CacheManager->LoadCache(path);
+  std::set<std::string> emptySet;
+  return this->LoadCache(path, true, emptySet, emptySet);
 }
 
 bool cmake::LoadCache(const std::string& path, bool internal,
