@@ -964,7 +964,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         reportError(context, content->GetOriginalExpression(), e.str());
         return std::string();
         }
-      context->AllTargets.insert(target->Target);
+      context->AllTargets.insert(target);
       }
 
     if (target == context->HeadTarget)
@@ -977,7 +977,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
     if (propertyName == "SOURCES")
       {
-      context->SourceSensitiveTargets.insert(target->Target);
+      context->SourceSensitiveTargets.insert(target);
       }
 
     if (propertyName.empty())
@@ -1412,7 +1412,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
               l = standardDefault;
               }
             assert(l);
-            context->MaxLanguageStandard[target->Target][lit->first] = l;
+            context->MaxLanguageStandard[target][lit->first] = l;
             }
           else
             {
@@ -1756,8 +1756,8 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
                     "be used while evaluating link libraries");
       return std::string();
       }
-    context->DependTargets.insert(target->Target);
-    context->AllTargets.insert(target->Target);
+    context->DependTargets.insert(target);
+    context->AllTargets.insert(target);
 
     std::string result =
                 TargetFilesystemArtifactResultCreator<ArtifactT>::Create(

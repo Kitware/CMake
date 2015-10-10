@@ -18,7 +18,6 @@
 #include <map>
 #include <string>
 
-class cmTarget;
 class cmGeneratorTarget;
 class cmLocalGenerator;
 
@@ -34,11 +33,11 @@ struct cmGeneratorExpressionContext
 
 
   cmListFileBacktrace Backtrace;
-  std::set<cmTarget*> DependTargets;
-  std::set<cmTarget const*> AllTargets;
+  std::set<cmGeneratorTarget*> DependTargets;
+  std::set<cmGeneratorTarget const*> AllTargets;
   std::set<std::string> SeenTargetProperties;
-  std::set<cmTarget const*> SourceSensitiveTargets;
-  std::map<cmTarget const*, std::map<std::string, std::string> >
+  std::set<cmGeneratorTarget const*> SourceSensitiveTargets;
+  std::map<cmGeneratorTarget const*, std::map<std::string, std::string> >
                                                           MaxLanguageStandard;
   cmLocalGenerator *LG;
   std::string Config;

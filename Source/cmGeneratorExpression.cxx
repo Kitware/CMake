@@ -11,10 +11,9 @@
 ============================================================================*/
 #include "cmGeneratorExpression.h"
 
-#include "cmMakefile.h"
-#include "cmTarget.h"
 #include "assert.h"
 #include "cmAlgorithms.h"
+#include "cmSystemTools.h"
 
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionLexer.h"
@@ -463,10 +462,11 @@ bool cmGeneratorExpression::IsValidTargetName(const std::string &input)
 
 //----------------------------------------------------------------------------
 void
-cmCompiledGeneratorExpression::GetMaxLanguageStandard(cmTarget const* tgt,
+cmCompiledGeneratorExpression::GetMaxLanguageStandard(
+    const cmGeneratorTarget* tgt,
                   std::map<std::string, std::string>& mapping)
 {
-  typedef std::map<cmTarget const*,
+  typedef std::map<cmGeneratorTarget const*,
                    std::map<std::string, std::string> > MapType;
   MapType::const_iterator it = this->MaxLanguageStandard.find(tgt);
   if (it != this->MaxLanguageStandard.end())

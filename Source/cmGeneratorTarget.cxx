@@ -2173,9 +2173,9 @@ cmTargetTraceDependencies
           si != sources.end(); ++si)
         {
         cmSourceFile* sf = *si;
-        const std::set<cmTarget const*> tgts =
+        const std::set<cmGeneratorTarget const*> tgts =
                           this->GlobalGenerator->GetFilenameTargetDepends(sf);
-        if (tgts.find(this->Target) != tgts.end())
+        if (tgts.find(this->GeneratorTarget) != tgts.end())
           {
           std::ostringstream e;
           e << "Evaluation output file\n  \"" << sf->GetFullPath()
@@ -2353,7 +2353,7 @@ cmTargetTraceDependencies
   cmGeneratorExpression ge(cc.GetBacktrace());
 
   // Add target-level dependencies referenced by generator expressions.
-  std::set<cmTarget*> targets;
+  std::set<cmGeneratorTarget*> targets;
 
   for(cmCustomCommandLines::const_iterator cit = cc.GetCommandLines().begin();
       cit != cc.GetCommandLines().end(); ++cit)
@@ -2379,12 +2379,12 @@ cmTargetTraceDependencies
       const cmsys::auto_ptr<cmCompiledGeneratorExpression> cge
                                                               = ge.Parse(*cli);
       cge->Evaluate(this->GeneratorTarget->GetLocalGenerator(), "", true);
-      std::set<cmTarget*> geTargets = cge->GetTargets();
+      std::set<cmGeneratorTarget*> geTargets = cge->GetTargets();
       targets.insert(geTargets.begin(), geTargets.end());
       }
     }
 
-  for(std::set<cmTarget*>::iterator ti = targets.begin();
+  for(std::set<cmGeneratorTarget*>::iterator ti = targets.begin();
       ti != targets.end(); ++ti)
     {
     this->Target->AddUtility((*ti)->GetName());
@@ -5412,7 +5412,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         this->LinkImplicitNullProperties.insert(*it);
         }
       }
-    cge->GetMaxLanguageStandard(this->Target,
+    cge->GetMaxLanguageStandard(this,
                                 this->MaxLanguageStandards);
     }
 

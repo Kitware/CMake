@@ -19,7 +19,6 @@
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/auto_ptr.hxx>
 
-class cmTarget;
 class cmGeneratorTarget;
 class cmLocalGenerator;
 class cmListFileBacktrace;
@@ -92,13 +91,13 @@ public:
                        std::string const& language = std::string()) const;
 
   /** Get set of targets found during evaluations.  */
-  std::set<cmTarget*> const& GetTargets() const
+  std::set<cmGeneratorTarget*> const& GetTargets() const
     { return this->DependTargets; }
 
   std::set<std::string> const& GetSeenTargetProperties() const
     { return this->SeenTargetProperties; }
 
-  std::set<cmTarget const*> const& GetAllTargetsSeen() const
+  std::set<cmGeneratorTarget const*> const& GetAllTargetsSeen() const
     { return this->AllTargetsSeen; }
 
   ~cmCompiledGeneratorExpression();
@@ -120,7 +119,7 @@ public:
   {
     return this->HadHeadSensitiveCondition;
   }
-  std::set<cmTarget const*> GetSourceSensitiveTargets() const
+  std::set<cmGeneratorTarget const*> GetSourceSensitiveTargets() const
   {
     return this->SourceSensitiveTargets;
   }
@@ -130,7 +129,7 @@ public:
     this->EvaluateForBuildsystem = eval;
   }
 
-  void GetMaxLanguageStandard(cmTarget const* tgt,
+  void GetMaxLanguageStandard(cmGeneratorTarget const* tgt,
                     std::map<std::string, std::string>& mapping);
 
 private:
@@ -150,15 +149,15 @@ private:
   const std::string Input;
   bool NeedsEvaluation;
 
-  mutable std::set<cmTarget*> DependTargets;
-  mutable std::set<cmTarget const*> AllTargetsSeen;
+  mutable std::set<cmGeneratorTarget*> DependTargets;
+  mutable std::set<cmGeneratorTarget const*> AllTargetsSeen;
   mutable std::set<std::string> SeenTargetProperties;
-  mutable std::map<cmTarget const*, std::map<std::string, std::string> >
-                                                          MaxLanguageStandard;
+  mutable std::map<cmGeneratorTarget const*,
+                   std::map<std::string, std::string> > MaxLanguageStandard;
   mutable std::string Output;
   mutable bool HadContextSensitiveCondition;
   mutable bool HadHeadSensitiveCondition;
-  mutable std::set<cmTarget const*>  SourceSensitiveTargets;
+  mutable std::set<cmGeneratorTarget const*>  SourceSensitiveTargets;
   bool EvaluateForBuildsystem;
 };
 
