@@ -471,6 +471,8 @@ private:
                             std::string const& suffix,
                             std::string const& name,
                             const char* version) const;
+
+  cmListFileBacktrace Backtrace;
 };
 
 #ifdef CMAKE_BUILD_WITH_CMAKE

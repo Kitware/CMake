@@ -64,9 +64,6 @@ const char* cmTarget::GetTargetTypeName(TargetType targetType)
 class cmTargetInternals
 {
 public:
-  // The backtrace when the target was created.
-  cmListFileBacktrace Backtrace;
-
   typedef std::map<std::string, cmTarget::ImportInfo> ImportInfoMapType;
   ImportInfoMapType ImportInfoMap;
 
@@ -240,7 +237,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     }
 
   // Save the backtrace of target construction.
-  this->Internal->Backtrace = this->Makefile->GetBacktrace();
+  this->Backtrace = this->Makefile->GetBacktrace();
 
   if (!this->IsImported())
     {
@@ -363,7 +360,7 @@ void cmTarget::FinishConfigure()
 //----------------------------------------------------------------------------
 cmListFileBacktrace const& cmTarget::GetBacktrace() const
 {
-  return this->Internal->Backtrace;
+  return this->Backtrace;
 }
 
 //----------------------------------------------------------------------------
