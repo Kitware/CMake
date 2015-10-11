@@ -54,6 +54,12 @@ public:
     {
     }
 
+    iterator(cmLinkedTree const* tree, PositionType pos)
+      : Tree(const_cast<cmLinkedTree*>(tree))
+      , Position(pos)
+    {
+    }
+
   public:
     iterator()
       : Tree(0)
@@ -177,6 +183,42 @@ public:
   {
     this->UpPositions.clear();
     this->Data.clear();
+  }
+
+  iterator FirstChild(iterator it) const
+  {
+    PositionType pos = it.Position;
+
+    typename std::vector<PositionType>::const_iterator start =
+      this->UpPositions.begin() + it.Position;
+    typename std::vector<PositionType>::const_iterator end =
+      this->UpPositions.end();
+
+    typename std::vector<PositionType>::const_iterator needle =
+      std::find(start, end, pos);
+    if (needle == end) {
+      return iterator();
+    }
+    return iterator(this,
+                    std::distance(this->UpPositions.begin(), needle) + 1);
+  }
+
+  iterator NextSibling(iterator it) const
+  {
+    PositionType pos = this->UpPositions[it.Position - 1];
+
+    typename std::vector<PositionType>::const_iterator start =
+      this->UpPositions.begin() + it.Position;
+    typename std::vector<PositionType>::const_iterator end =
+      this->UpPositions.end();
+
+    typename std::vector<PositionType>::const_iterator needle =
+      std::find(start, end, pos);
+    if (needle == end) {
+      return iterator();
+    }
+    return iterator(this,
+                    std::distance(this->UpPositions.begin(), needle) + 1);
   }
 
 private:
