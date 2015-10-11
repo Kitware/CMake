@@ -40,8 +40,9 @@ public:
     // we must copy when we clone
     newC->Args = this->Args;
     newC->Functions = this->Functions;
-    newC->FilePath = this->FilePath;
     newC->Policies = this->Policies;
+    newC->FunctionContext = this->FunctionContext;
+    newC->FunctionEndLine = this->FunctionEndLine;
     return newC;
   }
 
@@ -72,7 +73,8 @@ public:
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
   cmPolicies::PolicyMap Policies;
-  std::string FilePath;
+  cmListFileContext FunctionContext;
+  long FunctionEndLine;
 };
 
 bool cmMacroHelperCommand::InvokeInitialPass(
@@ -92,8 +94,8 @@ bool cmMacroHelperCommand::InvokeInitialPass(
     return false;
   }
 
-  cmMakefile::MacroPushPop macroScope(this->Makefile, this->FilePath,
-                                      this->Policies);
+  cmMakefile::MacroPushPop macroScope(this->Makefile, this->FunctionContext,
+                                      this->FunctionEndLine, this->Policies);
 
   // set the value of argc
   std::ostringstream argcDefStream;
@@ -193,7 +195,8 @@ bool cmMacroFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       cmMacroHelperCommand* f = new cmMacroHelperCommand();
       f->Args = this->Args;
       f->Functions = this->Functions;
-      f->FilePath = this->GetStartingContext().FilePath;
+      f->FunctionContext = this->GetStartingContext();
+      f->FunctionEndLine = lff.Line;
       mf.RecordPolicies(f->Policies);
       std::string newName = "_" + this->Args[0];
       mf.GetState()->RenameCommand(this->Args[0], newName);

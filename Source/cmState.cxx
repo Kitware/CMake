@@ -38,6 +38,8 @@ struct cmState::SnapshotDataType
   std::vector<std::string>::size_type IncludeDirectoryPosition;
   std::vector<std::string>::size_type CompileDefinitionsPosition;
   std::vector<std::string>::size_type CompileOptionsPosition;
+  cmListFileContext ScopeStartContext;
+  long ScopeEndLine;
 };
 
 struct cmState::PolicyStackEntry : public cmPolicies::PolicyMap
@@ -807,7 +809,8 @@ cmState::Snapshot cmState::CreateBuildsystemDirectorySnapshot(
 }
 
 cmState::Snapshot cmState::CreateFunctionCallSnapshot(
-  cmState::Snapshot originSnapshot, std::string const& fileName)
+  cmState::Snapshot originSnapshot, cmListFileContext const& functionContext,
+  long functionEndLine)
 {
   PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
@@ -815,7 +818,9 @@ cmState::Snapshot cmState::CreateFunctionCallSnapshot(
   pos->SnapshotType = FunctionCallType;
   pos->Keep = false;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
-    originSnapshot.Position->ExecutionListFile, fileName);
+    originSnapshot.Position->ExecutionListFile, functionContext.FilePath);
+  pos->ScopeStartContext = functionContext;
+  pos->ScopeEndLine = functionEndLine;
   pos->BuildSystemDirectory->DirectoryEnd = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
   assert(originSnapshot.Position->Vars.IsValid());
@@ -826,14 +831,17 @@ cmState::Snapshot cmState::CreateFunctionCallSnapshot(
 }
 
 cmState::Snapshot cmState::CreateMacroCallSnapshot(
-  cmState::Snapshot originSnapshot, std::string const& fileName)
+  cmState::Snapshot originSnapshot, cmListFileContext const& macroContext,
+  long macroEndLine)
 {
   PositionType pos =
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
   pos->SnapshotType = MacroCallType;
   pos->Keep = false;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
-    originSnapshot.Position->ExecutionListFile, fileName);
+    originSnapshot.Position->ExecutionListFile, macroContext.FilePath);
+  pos->ScopeStartContext = macroContext;
+  pos->ScopeEndLine = macroEndLine;
   assert(originSnapshot.Position->Vars.IsValid());
   pos->BuildSystemDirectory->DirectoryEnd = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
@@ -849,6 +857,8 @@ cmState::Snapshot cmState::CreateIncludeFileSnapshot(
   pos->Keep = true;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
     originSnapshot.Position->ExecutionListFile, fileName);
+  pos->ScopeStartContext.FilePath = fileName;
+  pos->ScopeStartContext.Line = 0;
   assert(originSnapshot.Position->Vars.IsValid());
   pos->BuildSystemDirectory->DirectoryEnd = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
@@ -882,6 +892,8 @@ cmState::Snapshot cmState::CreateInlineListFileSnapshot(
   pos->Keep = true;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
     originSnapshot.Position->ExecutionListFile, fileName);
+  pos->ScopeStartContext.FilePath = fileName;
+  pos->ScopeStartContext.Line = 0;
   pos->BuildSystemDirectory->DirectoryEnd = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
   return cmState::Snapshot(this, pos);
@@ -990,6 +1002,8 @@ void cmState::Directory::SetCurrentBinary(std::string const& dir)
 void cmState::Snapshot::SetListFile(const std::string& listfile)
 {
   *this->Position->ExecutionListFile = listfile;
+  this->Position->ScopeStartContext.FilePath = listfile;
+  this->Position->ScopeStartContext.Line = 0;
 }
 
 std::vector<std::string> const&

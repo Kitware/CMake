@@ -47,9 +47,12 @@ public:
   {
     return this->StartingContext;
   }
+  long GetEndLine() const { return this->EndLine; }
+  void SetEndLine(long line) { this->EndLine = line; }
 
 private:
   cmListFileContext StartingContext;
+  long EndLine;
 };
 
 #endif

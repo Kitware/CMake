@@ -40,7 +40,8 @@ public:
     newC->Args = this->Args;
     newC->Functions = this->Functions;
     newC->Policies = this->Policies;
-    newC->FilePath = this->FilePath;
+    newC->FunctionContext = this->FunctionContext;
+    newC->FunctionEndLine = this->FunctionEndLine;
     return newC;
   }
 
@@ -71,7 +72,8 @@ public:
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
   cmPolicies::PolicyMap Policies;
-  std::string FilePath;
+  cmListFileContext FunctionContext;
+  long FunctionEndLine;
 };
 
 bool cmFunctionHelperCommand::InvokeInitialPass(
@@ -91,8 +93,9 @@ bool cmFunctionHelperCommand::InvokeInitialPass(
     return false;
   }
 
-  cmMakefile::FunctionPushPop functionScope(this->Makefile, this->FilePath,
-                                            this->Policies);
+  cmMakefile::FunctionPushPop functionScope(
+    this->Makefile, this->FunctionContext, this->FunctionEndLine,
+    this->Policies);
 
   // set the value of argc
   std::ostringstream strStream;
@@ -158,7 +161,8 @@ bool cmFunctionFunctionBlocker::IsFunctionBlocked(
       cmFunctionHelperCommand* f = new cmFunctionHelperCommand();
       f->Args = this->Args;
       f->Functions = this->Functions;
-      f->FilePath = this->GetStartingContext().FilePath;
+      f->FunctionContext = this->GetStartingContext();
+      f->FunctionEndLine = lff.Line;
       mf.RecordPolicies(f->Policies);
 
       std::string newName = "_" + this->Args[0];
