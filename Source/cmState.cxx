@@ -920,17 +920,29 @@ cmState::Snapshot cmState::CreatePolicyScopeSnapshot(
 cmState::Snapshot cmState::Pop(cmState::Snapshot originSnapshot)
 {
   PositionType pos = originSnapshot.Position;
-  PositionType prevPos = pos;
-  ++prevPos;
-  prevPos->IncludeDirectoryPosition =
-    prevPos->BuildSystemDirectory->IncludeDirectories.size();
-  prevPos->CompileDefinitionsPosition =
-    prevPos->BuildSystemDirectory->CompileDefinitions.size();
-  prevPos->CompileOptionsPosition =
-    prevPos->BuildSystemDirectory->CompileOptions.size();
-  prevPos->BuildSystemDirectory->DirectoryEnd = prevPos;
+  while (pos->SnapshotType == cmState::ArbitraryPointType) {
+    ++pos;
+  }
 
-  return Snapshot(this, prevPos);
+  SnapshotType type = pos->SnapshotType;
+
+  ++pos;
+
+  if (type != BaseType && type != FunctionCallType &&
+      type != VariableScopeType && type != PolicyScopeType &&
+      type != BuildsystemDirectoryType) {
+    pos->Vars = originSnapshot.Position->Vars;
+  }
+
+  pos->IncludeDirectoryPosition =
+    pos->BuildSystemDirectory->IncludeDirectories.size();
+  pos->CompileDefinitionsPosition =
+    pos->BuildSystemDirectory->CompileDefinitions.size();
+  pos->CompileOptionsPosition =
+    pos->BuildSystemDirectory->CompileOptions.size();
+  pos->BuildSystemDirectory->DirectoryEnd = pos;
+
+  return Snapshot(this, pos);
 }
 
 void cmState::ClearData(cmState::Snapshot snapshot)
@@ -949,6 +961,25 @@ void cmState::ClearData(cmState::Snapshot snapshot)
     }
     this->SnapshotData.Pop(pos);
   }
+}
+
+cmState::Snapshot cmState::CreateArbitraryPointSnapshot(
+  cmState::Snapshot originSnapshot, const cmListFileContext& context)
+{
+  PositionType pos =
+    this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
+  pos->SnapshotType = ArbitraryPointType;
+  pos->ScopeStartContext.FilePath = context.FilePath;
+  pos->ScopeStartContext.Line = context.Line;
+  // TODO: Version policies.
+  pos->BuildSystemDirectory->DirectoryEnd = pos;
+  assert(originSnapshot.Position->Vars.IsValid());
+
+  cmLinkedTree<cmDefinitions>::iterator origin = originSnapshot.Position->Vars;
+  cmLinkedTree<cmDefinitions>::iterator newVars = this->VarTree.Push(origin);
+  pos->Vars = newVars;
+
+  return cmState::Snapshot(this, pos);
 }
 
 cmState::Snapshot::Snapshot(cmState* state)
@@ -1108,7 +1139,8 @@ cmState::Snapshot cmState::Snapshot::GetCallStackParent() const
   Snapshot snapshot;
   PositionType parentPos = this->Position;
   while (parentPos->SnapshotType == cmState::PolicyScopeType ||
-         parentPos->SnapshotType == cmState::VariableScopeType) {
+         parentPos->SnapshotType == cmState::VariableScopeType ||
+         parentPos->SnapshotType == cmState::ArbitraryPointType) {
     ++parentPos;
   }
   if (parentPos->SnapshotType == cmState::BuildsystemDirectoryType ||
@@ -1118,7 +1150,8 @@ cmState::Snapshot cmState::Snapshot::GetCallStackParent() const
 
   ++parentPos;
   while (parentPos->SnapshotType == cmState::PolicyScopeType ||
-         parentPos->SnapshotType == cmState::VariableScopeType) {
+         parentPos->SnapshotType == cmState::VariableScopeType ||
+         parentPos->SnapshotType == cmState::ArbitraryPointType) {
     ++parentPos;
   }
 

@@ -716,6 +716,8 @@ public:
     cmMakefile* Makefile;
   };
 
+  void CreateArbitrarySnapshot(const cmListFileContext& lfc);
+
   void IssueMessage(cmake::MessageType t, std::string const& text,
                     bool force = false) const;
 
