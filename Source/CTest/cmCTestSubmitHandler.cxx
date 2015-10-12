@@ -338,6 +338,8 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
   CURLcode res;
   FILE* ftpfile;
   char error_buffer[1024];
+  struct curl_slist *headers = ::curl_slist_append(NULL,
+                                                   "Content-Type: text/xml");
 
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
@@ -420,6 +422,9 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
       ::curl_easy_setopt(curl, CURLOPT_PUT, 1);
       ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
 
+      // Be sure to set Content-Type to satisfy fussy modsecurity rules
+      ::curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
       std::string local_file = *file;
       if ( !cmSystemTools::FileExists(local_file.c_str()) )
         {
@@ -477,6 +482,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
         cmCTestLog(this->CTest, ERROR_MESSAGE, "   Cannot find file: "
           << local_file << std::endl);
         ::curl_easy_cleanup(curl);
+        ::curl_slist_free_all(headers);
         ::curl_global_cleanup();
         return false;
         }
@@ -621,6 +627,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
                      << std::endl);
           }
         ::curl_easy_cleanup(curl);
+        ::curl_slist_free_all(headers);
         ::curl_global_cleanup();
         return false;
         }
@@ -630,6 +637,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
         "   Uploaded: " + local_file << std::endl, this->Quiet);
       }
     }
+  ::curl_slist_free_all(headers);
   ::curl_global_cleanup();
   return true;
 }
