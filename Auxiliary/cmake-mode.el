@@ -70,11 +70,11 @@ set the path with these commands:
 (defconst cmake-regex-indented
   (rx-to-string `(and bol (* (group (or (regexp ,cmake-regex-token) (any space ?\n)))))))
 (defconst cmake-regex-block-open
-  (rx-to-string `(and bow (or ,@(append cmake-keywords-block-open
-                                        (mapcar 'downcase cmake-keywords-block-open))) eow)))
+  (rx-to-string `(and symbol-start (or ,@(append cmake-keywords-block-open
+                                        (mapcar 'downcase cmake-keywords-block-open))) symbol-end)))
 (defconst cmake-regex-block-close
-  (rx-to-string `(and bow (or ,@(append cmake-keywords-block-close
-                                        (mapcar 'downcase cmake-keywords-block-close))) eow)))
+  (rx-to-string `(and symbol-start (or ,@(append cmake-keywords-block-close
+                                        (mapcar 'downcase cmake-keywords-block-close))) symbol-end)))
 (defconst cmake-regex-close
   (rx-to-string `(and bol (* space) (regexp ,cmake-regex-block-close)
                       (* space) (regexp ,cmake-regex-paren-left))))
