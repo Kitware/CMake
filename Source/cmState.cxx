@@ -668,6 +668,63 @@ bool cmState::UseMSYSShell() const
   return this->MSYSShell;
 }
 
+std::map<cmListFileContext, std::vector<cmState::Snapshot> > cmState::Traverse(
+  int depth, PositionType it) const
+{
+  std::map<cmListFileContext, std::vector<cmState::Snapshot> > snapshots;
+
+  PositionType fc = this->SnapshotData.FirstChild(it);
+
+  if (!fc.IsValid()) {
+    return snapshots;
+  }
+
+  if (fc->SnapshotType == cmState::ArbitraryPointType &&
+      cmSystemTools::IsSubDirectory(fc->ScopeStartContext.FilePath,
+                                    this->SourceDirectory)) {
+    cmListFileContext lfc = fc->ScopeStartContext;
+    Snapshot snp(const_cast<cmState*>(this), fc);
+    snapshots[lfc].push_back(snp);
+  }
+  std::map<cmListFileContext, std::vector<cmState::Snapshot> > childSnapshots =
+    this->Traverse(depth + 1, fc);
+  for (std::map<cmListFileContext,
+                std::vector<cmState::Snapshot> >::const_iterator cit =
+         childSnapshots.begin();
+       cit != childSnapshots.end(); ++cit) {
+    std::vector<cmState::Snapshot>& vec = snapshots[cit->first];
+    vec.insert(vec.end(), cit->second.begin(), cit->second.end());
+  }
+
+  PositionType ns = this->SnapshotData.NextSibling(fc);
+  while (ns.IsValid()) {
+    if (ns->SnapshotType == cmState::ArbitraryPointType &&
+        ns->ScopeStartContext.FilePath.find(this->SourceDirectory) == 0) {
+      cmListFileContext lfc = ns->ScopeStartContext;
+      Snapshot snp(const_cast<cmState*>(this), ns);
+      snapshots[lfc].push_back(snp);
+    }
+    std::map<cmListFileContext, std::vector<cmState::Snapshot> > newSnapshots =
+      this->Traverse(depth + 1, ns);
+    for (std::map<cmListFileContext,
+                  std::vector<cmState::Snapshot> >::const_iterator cit =
+           newSnapshots.begin();
+         cit != newSnapshots.end(); ++cit) {
+      std::vector<cmState::Snapshot>& vec = snapshots[cit->first];
+      vec.insert(vec.end(), cit->second.begin(), cit->second.end());
+    }
+    ns = this->SnapshotData.NextSibling(ns);
+  }
+
+  return snapshots;
+}
+
+std::map<cmListFileContext, std::vector<cmState::Snapshot> >
+cmState::TraceSnapshots() const
+{
+  return this->Traverse(0, this->SnapshotData.Root());
+}
+
 unsigned int cmState::GetCacheMajorVersion() const
 {
   return this->CacheManager->GetCacheMajorVersion();
@@ -1107,6 +1164,16 @@ void cmState::Directory::SetRelativePathTopBinary(const char* dir)
 std::string cmState::Snapshot::GetExecutionListFile() const
 {
   return *this->Position->ExecutionListFile;
+}
+
+long cmState::Snapshot::GetStartingPoint() const
+{
+  return this->Position->ScopeStartContext.Line;
+}
+
+long cmState::Snapshot::GetEndingPoint() const
+{
+  return this->Position->ScopeEndLine;
 }
 
 bool cmState::Snapshot::IsValid() const
