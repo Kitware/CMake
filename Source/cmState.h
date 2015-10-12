@@ -23,6 +23,7 @@ class cmake;
 class cmCommand;
 class cmDefinitions;
 class cmListFileBacktrace;
+class cmCacheManager;
 
 class cmState
 {
@@ -32,7 +33,7 @@ class cmState
   typedef cmLinkedTree<SnapshotDataType>::iterator PositionType;
   friend class Snapshot;
 public:
-  cmState(cmake* cm);
+  cmState();
   ~cmState();
 
   enum SnapshotType
@@ -208,6 +209,14 @@ public:
   static const char* CacheEntryTypeToString(CacheEntryType);
   static bool IsCacheEntryType(std::string const& key);
 
+  bool LoadCache(const std::string& path, bool internal,
+                 std::set<std::string>& excludes,
+                 std::set<std::string>& includes);
+
+  bool SaveCache(const std::string& path) ;
+
+  bool DeleteCache(const std::string& path);
+
   std::vector<std::string> GetCacheEntryKeys() const;
   const char* GetCacheEntryValue(std::string const& key) const;
   const char* GetInitializedCacheValue(std::string const& key) const;
@@ -215,8 +224,6 @@ public:
   void SetCacheEntryValue(std::string const& key, std::string const& value);
   void SetCacheValue(std::string const& key, std::string const& value);
 
-  void AddCacheEntry(const std::string& key, const char* value,
-                     const char* helpString, CacheEntryType type);
   void RemoveCacheEntry(std::string const& key);
 
   void SetCacheEntryProperty(std::string const& key,
@@ -235,6 +242,12 @@ public:
                                 bool asString = false);
   void RemoveCacheEntryProperty(std::string const& key,
                                 std::string const& propertyName);
+
+  ///! Break up a line like VAR:type="value" into var, type and value
+  static bool ParseCacheEntry(const std::string& entry,
+                              std::string& var,
+                              std::string& value,
+                              CacheEntryType& type);
 
   Snapshot Reset();
   // Define a property
@@ -296,12 +309,19 @@ public:
   void SetMSYSShell(bool mSYSShell);
   bool UseMSYSShell() const;
 
+  unsigned int GetCacheMajorVersion() const;
+  unsigned int GetCacheMinorVersion() const;
+
 private:
+  friend class cmake;
+  void AddCacheEntry(const std::string& key, const char* value,
+                     const char* helpString, CacheEntryType type);
+
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
   std::map<std::string, cmCommand*> Commands;
   cmPropertyMap GlobalProperties;
-  cmake* CMakeInstance;
+  cmCacheManager* CacheManager;
 
   cmLinkedTree<BuildsystemDirectoryStateType> BuildsystemDirectory;
 

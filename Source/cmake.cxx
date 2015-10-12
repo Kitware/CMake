@@ -10,7 +10,6 @@
   See the License for more information.
 ============================================================================*/
 #include "cmake.h"
-#include "cmCacheManager.h"
 #include "cmMakefile.h"
 #include "cmLocalGenerator.h"
 #include "cmExternalMakefileProjectGenerator.h"
@@ -135,7 +134,7 @@ cmake::cmake()
   this->ClearBuildSystem = false;
   this->FileComparison = new cmFileTimeComparison;
 
-  this->State = new cmState(this);
+  this->State = new cmState;
   this->CurrentSnapshot = this->State->CreateBaseSnapshot();
 
 #ifdef __APPLE__
@@ -151,7 +150,6 @@ cmake::cmake()
 #endif
 
   this->Verbose = false;
-  this->CacheManager = new cmCacheManager(this);
   this->GlobalGenerator = 0;
   this->ProgressCallback = 0;
   this->ProgressCallbackClientData = 0;
@@ -171,7 +169,6 @@ cmake::cmake()
 
 cmake::~cmake()
 {
-  delete this->CacheManager;
   delete this->State;
   if (this->GlobalGenerator)
     {
@@ -216,7 +213,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         }
       std::string var, value;
       cmState::CacheEntryType type = cmState::UNINITIALIZED;
-      if(cmCacheManager::ParseEntry(entry, var, value, type))
+      if(cmState::ParseCacheEntry(entry, var, value, type))
         {
         // The value is transformed if it is a filepath for example, so
         // we can't compare whether the value is already in the cache until
@@ -232,7 +229,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
             }
           }
 
-        this->State->AddCacheEntry(var, value.c_str(),
+        this->AddCacheEntry(var, value.c_str(),
           "No help, variable specified on the command line.", type);
 
         if(this->WarnUnusedCli)
@@ -848,14 +845,14 @@ void cmake::SetDirectoriesFromFile(const char* arg)
 int cmake::AddCMakePaths()
 {
   // Save the value in the cache
-  this->CacheManager->AddCacheEntry
+  this->AddCacheEntry
     ("CMAKE_COMMAND", cmSystemTools::GetCMakeCommand().c_str(),
      "Path to CMake executable.", cmState::INTERNAL);
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  this->CacheManager->AddCacheEntry
+  this->AddCacheEntry
     ("CMAKE_CTEST_COMMAND", cmSystemTools::GetCTestCommand().c_str(),
      "Path to ctest program executable.", cmState::INTERNAL);
-  this->CacheManager->AddCacheEntry
+  this->AddCacheEntry
     ("CMAKE_CPACK_COMMAND", cmSystemTools::GetCPackCommand().c_str(),
      "Path to cpack program executable.", cmState::INTERNAL);
 #endif
@@ -869,7 +866,7 @@ int cmake::AddCMakePaths()
       cmSystemTools::GetCMakeRoot().c_str());
     return 0;
     }
-  this->CacheManager->AddCacheEntry
+  this->AddCacheEntry
     ("CMAKE_ROOT", cmSystemTools::GetCMakeRoot().c_str(),
      "Path to CMake installation.", cmState::INTERNAL);
 
@@ -1086,10 +1083,10 @@ int cmake::DoPreConfigureChecks()
     }
 
   // do a sanity check on some values
-  if(this->CacheManager->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY"))
+  if(this->State->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY"))
     {
     std::string cacheStart =
-      this->CacheManager->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY");
+      this->State->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY");
     cacheStart += "/CMakeLists.txt";
     std::string currentStart = this->GetHomeDirectory();
     currentStart += "/CMakeLists.txt";
@@ -1146,12 +1143,12 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
     save.value = *i;
     warning << *i << "\n";
     const char* existingValue =
-        this->CacheManager->GetCacheEntryValue(save.key);
+        this->State->GetCacheEntryValue(save.key);
     if(existingValue)
       {
-      save.type = this->CacheManager->GetCacheEntryType(save.key);
+      save.type = this->State->GetCacheEntryType(save.key);
       if(const char* help =
-            this->CacheManager->GetCacheEntryProperty(save.key, "HELPSTRING"))
+            this->State->GetCacheEntryProperty(save.key, "HELPSTRING"))
         {
         save.help = help;
         }
@@ -1160,7 +1157,7 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
     }
 
   // remove the cache
-  this->CacheManager->DeleteCache(this->GetHomeOutputDirectory());
+  this->DeleteCache(this->GetHomeOutputDirectory());
   // load the empty cache
   this->LoadCache();
   // restore the changed compilers
@@ -1186,7 +1183,7 @@ int cmake::Configure()
     {
     if(this->SuppressDevWarnings)
       {
-      this->CacheManager->
+      this->
         AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "TRUE",
                       "Suppress Warnings that are meant for"
                       " the author of the CMakeLists.txt files.",
@@ -1194,7 +1191,7 @@ int cmake::Configure()
       }
     else
       {
-      this->CacheManager->
+      this->
         AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "FALSE",
                       "Suppress Warnings that are meant for"
                       " the author of the CMakeLists.txt files.",
@@ -1229,7 +1226,7 @@ int cmake::ActualConfigure()
     }
   if ( !res )
     {
-    this->CacheManager->AddCacheEntry
+    this->AddCacheEntry
       ("CMAKE_HOME_DIRECTORY",
        this->GetHomeDirectory(),
        "Source directory with the top level CMakeLists.txt file for this "
@@ -1241,9 +1238,9 @@ int cmake::ActualConfigure()
   if(!this->GlobalGenerator)
     {
     const char* genName =
-      this->CacheManager->GetInitializedCacheValue("CMAKE_GENERATOR");
+      this->State->GetInitializedCacheValue("CMAKE_GENERATOR");
     const char* extraGenName =
-      this->CacheManager->GetInitializedCacheValue("CMAKE_EXTRA_GENERATOR");
+      this->State->GetInitializedCacheValue("CMAKE_EXTRA_GENERATOR");
     if(genName)
       {
       std::string fullName = cmExternalMakefileProjectGenerator::
@@ -1321,7 +1318,7 @@ int cmake::ActualConfigure()
       }
     }
 
-  const char* genName = this->CacheManager
+  const char* genName = this->State
                             ->GetInitializedCacheValue("CMAKE_GENERATOR");
   if(genName)
     {
@@ -1338,20 +1335,20 @@ int cmake::ActualConfigure()
       return -2;
       }
     }
-  if(!this->CacheManager->GetInitializedCacheValue("CMAKE_GENERATOR"))
+  if(!this->State->GetInitializedCacheValue("CMAKE_GENERATOR"))
     {
-    this->CacheManager->AddCacheEntry("CMAKE_GENERATOR",
+    this->AddCacheEntry("CMAKE_GENERATOR",
                                       this->GlobalGenerator->GetName().c_str(),
                                       "Name of generator.",
                                       cmState::INTERNAL);
-    this->CacheManager->AddCacheEntry("CMAKE_EXTRA_GENERATOR",
+    this->AddCacheEntry("CMAKE_EXTRA_GENERATOR",
                         this->GlobalGenerator->GetExtraGeneratorName().c_str(),
                         "Name of external makefile project generator.",
                         cmState::INTERNAL);
     }
 
   if(const char* platformName =
-     this->CacheManager->GetInitializedCacheValue("CMAKE_GENERATOR_PLATFORM"))
+     this->State->GetInitializedCacheValue("CMAKE_GENERATOR_PLATFORM"))
     {
     if(this->GeneratorPlatform.empty())
       {
@@ -1372,14 +1369,14 @@ int cmake::ActualConfigure()
     }
   else
     {
-    this->CacheManager->AddCacheEntry("CMAKE_GENERATOR_PLATFORM",
+    this->AddCacheEntry("CMAKE_GENERATOR_PLATFORM",
                                       this->GeneratorPlatform.c_str(),
                                       "Name of generator platform.",
                                       cmState::INTERNAL);
     }
 
   if(const char* tsName =
-     this->CacheManager->GetInitializedCacheValue("CMAKE_GENERATOR_TOOLSET"))
+     this->State->GetInitializedCacheValue("CMAKE_GENERATOR_TOOLSET"))
     {
     if(this->GeneratorToolset.empty())
       {
@@ -1400,7 +1397,7 @@ int cmake::ActualConfigure()
     }
   else
     {
-    this->CacheManager->AddCacheEntry("CMAKE_GENERATOR_TOOLSET",
+    this->AddCacheEntry("CMAKE_GENERATOR_TOOLSET",
                                       this->GeneratorToolset.c_str(),
                                       "Name of generator toolset.",
                                       cmState::INTERNAL);
@@ -1434,7 +1431,7 @@ int cmake::ActualConfigure()
     {
     if(!this->State->GetInitializedCacheValue("LIBRARY_OUTPUT_PATH"))
       {
-      this->State->AddCacheEntry
+      this->AddCacheEntry
         ("LIBRARY_OUTPUT_PATH", "",
          "Single output directory for building all libraries.",
          cmState::PATH);
@@ -1442,7 +1439,7 @@ int cmake::ActualConfigure()
     if(!this->State
             ->GetInitializedCacheValue("EXECUTABLE_OUTPUT_PATH"))
       {
-      this->State->AddCacheEntry
+      this->AddCacheEntry
         ("EXECUTABLE_OUTPUT_PATH", "",
          "Single output directory for building all executables.",
          cmState::PATH);
@@ -1462,7 +1459,7 @@ int cmake::ActualConfigure()
   // only save the cache if there were no fatal errors
   if ( this->GetWorkingMode() == NORMAL_MODE )
     {
-    this->CacheManager->SaveCache(this->GetHomeOutputDirectory());
+    this->SaveCache(this->GetHomeOutputDirectory());
     }
   if(cmSystemTools::GetErrorOccuredFlag())
     {
@@ -1632,7 +1629,7 @@ int cmake::Generate()
   // for the Visual Studio and Xcode generators.)
   if ( this->GetWorkingMode() == NORMAL_MODE )
     {
-    this->CacheManager->SaveCache(this->GetHomeOutputDirectory());
+    this->SaveCache(this->GetHomeOutputDirectory());
     }
   return 0;
 }
@@ -1641,14 +1638,15 @@ void cmake::AddCacheEntry(const std::string& key, const char* value,
                           const char* helpString,
                           int type)
 {
-  this->CacheManager->AddCacheEntry(key, value,
+  this->State->AddCacheEntry(key, value,
                                     helpString,
                                     cmState::CacheEntryType(type));
+  this->UnwatchUnusedCli(key);
 }
 
 const char* cmake::GetCacheDefinition(const std::string& name) const
 {
-  return this->CacheManager->GetInitializedCacheValue(name);
+  return this->State->GetInitializedCacheValue(name);
 }
 
 void cmake::AddDefaultCommands()
@@ -1721,7 +1719,7 @@ bool cmake::ParseCacheEntry(const std::string& entry,
                             std::string& value,
                             cmState::CacheEntryType& type)
 {
-  return cmCacheManager::ParseEntry(entry, var, value, type);
+  return cmState::ParseCacheEntry(entry, var, value, type);
 }
 
 int cmake::LoadCache()
@@ -1752,24 +1750,43 @@ int cmake::LoadCache()
 
 bool cmake::LoadCache(const std::string& path)
 {
-  return this->CacheManager->LoadCache(path);
+  std::set<std::string> emptySet;
+  return this->LoadCache(path, true, emptySet, emptySet);
 }
 
 bool cmake::LoadCache(const std::string& path, bool internal,
                 std::set<std::string>& excludes,
                 std::set<std::string>& includes)
 {
-  return this->CacheManager->LoadCache(path, internal, excludes, includes);
+  bool result = this->State->LoadCache(path, internal, excludes, includes);
+  static const char* entries[] = {"CMAKE_CACHE_MAJOR_VERSION",
+                                  "CMAKE_CACHE_MINOR_VERSION"};
+  for (const char* const* nameIt = cmArrayBegin(entries);
+       nameIt != cmArrayEnd(entries); ++nameIt)
+    {
+    this->UnwatchUnusedCli(*nameIt);
+    }
+  return result;
 }
 
 bool cmake::SaveCache(const std::string& path)
 {
-  return this->CacheManager->SaveCache(path);
+  bool result = this->State->SaveCache(path);
+  static const char* entries[] = {"CMAKE_CACHE_MAJOR_VERSION",
+                                  "CMAKE_CACHE_MINOR_VERSION",
+                                  "CMAKE_CACHE_PATCH_VERSION",
+                                  "CMAKE_CACHEFILE_DIR"};
+  for (const char* const* nameIt = cmArrayBegin(entries);
+       nameIt != cmArrayEnd(entries); ++nameIt)
+    {
+    this->UnwatchUnusedCli(*nameIt);
+    }
+  return result;
 }
 
 bool cmake::DeleteCache(const std::string& path)
 {
-  return this->CacheManager->DeleteCache(path);
+  return this->State->DeleteCache(path);
 }
 
 void cmake::SetProgressCallback(ProgressCallbackType f, void *cd)
@@ -1834,7 +1851,7 @@ void cmake::UpdateConversionPathTable()
 {
   // Update the path conversion table with any specified file:
   const char* tablepath =
-    this->CacheManager
+    this->State
         ->GetInitializedCacheValue("CMAKE_PATH_TRANSLATION_FILE");
 
   if(tablepath)

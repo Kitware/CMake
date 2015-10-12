@@ -16,9 +16,7 @@
 #include "cmPropertyMap.h"
 #include "cmState.h"
 
-class cmMakefile;
 class cmMarkAsAdvancedCommand;
-class cmake;
 
 /** \class cmCacheManager
  * \brief Control class for cmake's cache
@@ -29,7 +27,7 @@ class cmake;
 class cmCacheManager
 {
 public:
-  cmCacheManager(cmake* cm);
+  cmCacheManager();
   class CacheIterator;
   friend class cmCacheManager::CacheIterator;
 
@@ -100,7 +98,6 @@ public:
     }
 
   ///! Load a cache for given makefile.  Loads from path/CMakeCache.txt.
-  bool LoadCache(const std::string& path);
   bool LoadCache(const std::string& path, bool internal,
                  std::set<std::string>& excludes,
                  std::set<std::string>& includes);
@@ -123,12 +120,6 @@ public:
   ///! Get the number of entries in the cache
   int GetSize() {
     return static_cast<int>(this->Cache.size()); }
-
-  ///! Break up a line like VAR:type="value" into var, type and value
-  static bool ParseEntry(const std::string& entry,
-                         std::string& var,
-                         std::string& value,
-                         cmState::CacheEntryType& type);
 
   ///! Get a value from the cache given a key
   const char* GetInitializedCacheValue(const std::string& key) const;
@@ -241,7 +232,7 @@ private:
   void WritePropertyEntries(std::ostream& os, CacheIterator const& i);
 
   CacheEntryMap Cache;
-  // Only cmake and cmMakefile should be able to add cache values
+  // Only cmake and cmState should be able to add cache values
   // the commands should never use the cmCacheManager directly
   friend class cmState; // allow access to add cache values
   friend class cmake; // allow access to add cache values
