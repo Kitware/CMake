@@ -16,7 +16,7 @@
 #
 #  Will be automatically generated unless explicitly provided.
 #
-#  It should be explicitly set to a constant generated gloabally unique
+#  It should be explicitly set to a constant generated globally unique
 #  identifier (GUID) to allow your installers to replace existing
 #  installations that use the same GUID.
 #
@@ -226,7 +226,7 @@
 #  This variable can be used to provide a value for
 #  the Windows Installer property ``<PROPERTY>``
 #
-#  The follwing list contains some example properties that can be used to
+#  The following list contains some example properties that can be used to
 #  customize information under
 #  "Programs and Features" (also known as "Add or Remove Programs")
 #
