@@ -33,13 +33,30 @@ void cmWIXPatch::ApplyFragment(
   if(i == Fragments.end()) return;
 
   const cmWIXPatchElement& fragment = i->second;
-  for(cmWIXPatchElement::child_list_t::const_iterator
-    j = fragment.children.begin(); j != fragment.children.end(); ++j)
-    {
-    ApplyElement(**j, writer);
-    }
+
+  this->ApplyElementChildren(fragment, writer);
 
   Fragments.erase(i);
+}
+
+void cmWIXPatch::ApplyElementChildren(
+  const cmWIXPatchElement& element, cmWIXSourceWriter& writer)
+{
+  for(cmWIXPatchElement::child_list_t::const_iterator
+    j = element.children.begin(); j != element.children.end(); ++j)
+  {
+  cmWIXPatchNode *node = *j;
+
+  switch(node->type())
+    {
+    case cmWIXPatchNode::ELEMENT:
+      ApplyElement(dynamic_cast<const cmWIXPatchElement&>(*node), writer);
+      break;
+    case cmWIXPatchNode::TEXT:
+      writer.AddTextNode(dynamic_cast<const cmWIXPatchText&>(*node).text);
+      break;
+    }
+  }
 }
 
 void cmWIXPatch::ApplyElement(
@@ -53,15 +70,10 @@ void cmWIXPatch::ApplyElement(
     writer.AddAttribute(i->first, i->second);
     }
 
-  for(cmWIXPatchElement::child_list_t::const_iterator
-    i = element.children.begin(); i != element.children.end(); ++i)
-    {
-    ApplyElement(**i, writer);
-    }
+  this->ApplyElementChildren(element, writer);
 
   writer.EndElement(element.name);
 }
-
 
 bool cmWIXPatch::CheckForUnappliedFragments()
 {

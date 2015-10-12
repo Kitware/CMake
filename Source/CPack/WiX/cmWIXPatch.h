@@ -33,6 +33,9 @@ public:
   bool CheckForUnappliedFragments();
 
 private:
+  void ApplyElementChildren(const cmWIXPatchElement& element,
+    cmWIXSourceWriter& writer);
+
   void ApplyElement(const cmWIXPatchElement& element,
     cmWIXSourceWriter& writer);
 

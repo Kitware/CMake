@@ -102,6 +102,25 @@ void cmWIXSourceWriter::EndElement(std::string const& name)
   State = DEFAULT;
 }
 
+void cmWIXSourceWriter::AddTextNode(std::string const& text)
+{
+  if(State == BEGIN)
+    {
+    File << ">";
+    }
+
+  if(Elements.empty())
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "can not add text without open WiX element in '" <<
+      SourceFilename << "'" << std::endl);
+    return;
+    }
+
+  File << this->EscapeAttributeValue(text);
+  State = DEFAULT;
+}
+
 void cmWIXSourceWriter::AddProcessingInstruction(
   std::string const& target, std::string const& content)
 {

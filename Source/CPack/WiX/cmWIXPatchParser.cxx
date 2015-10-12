@@ -16,6 +16,21 @@
 
 #include <cm_expat.h>
 
+cmWIXPatchNode::Type cmWIXPatchText::type()
+{
+  return cmWIXPatchNode::TEXT;
+}
+
+cmWIXPatchNode::Type cmWIXPatchElement::type()
+{
+  return cmWIXPatchNode::ELEMENT;
+}
+
+cmWIXPatchNode::~cmWIXPatchNode()
+{
+
+}
+
 cmWIXPatchElement::~cmWIXPatchElement()
 {
   for(child_list_t::iterator i = children.begin(); i != children.end(); ++i)
@@ -63,20 +78,20 @@ void cmWIXPatchParser::StartElement(const std::string& name, const char **atts)
     {
       cmWIXPatchElement &parent = *ElementStack.back();
 
-      parent.children.resize(parent.children.size() + 1);
-      cmWIXPatchElement*& currentElement = parent.children.back();
-      currentElement = new cmWIXPatchElement;
-      currentElement->name = name;
+      cmWIXPatchElement *element = new cmWIXPatchElement;
+      parent.children.push_back(element);
+
+      element->name = name;
 
       for(size_t i = 0; atts[i]; i += 2)
         {
         std::string key = atts[i];
         std::string value = atts[i+1];
 
-        currentElement->attributes[key] = value;
+        element->attributes[key] = value;
         }
 
-      ElementStack.push_back(currentElement);
+      ElementStack.push_back(element);
     }
 }
 
@@ -117,8 +132,31 @@ void cmWIXPatchParser::EndElement(const std::string& name)
         }
       else
         {
-          ElementStack.pop_back();
+        ElementStack.pop_back();
         }
+    }
+}
+
+void cmWIXPatchParser::CharacterDataHandler(const char* data, int length)
+{
+  const char* whitespace = "\x20\x09\x0d\x0a";
+
+  if(State == INSIDE_FRAGMENT)
+    {
+    cmWIXPatchElement &parent = *ElementStack.back();
+
+    std::string text(data, length);
+
+    std::string::size_type first = text.find_first_not_of(whitespace);
+    std::string::size_type last = text.find_last_not_of(whitespace);
+
+    if(first != std::string::npos && last != std::string::npos)
+      {
+      cmWIXPatchText *text_node = new cmWIXPatchText;
+      text_node->text = text.substr(first, last - first + 1);
+
+      parent.children.push_back(text_node);
+      }
     }
 }
 
