@@ -100,6 +100,10 @@ elseif("${CMAKE_GENERATOR}" MATCHES Xcode
         "Instead using SDK:\n \"${_CMAKE_OSX_SYSROOT_DEFAULT}\"."
         )
     endif()
+    if(NOT CMAKE_OSX_DEPLOYMENT_TARGET AND _CURRENT_OSX_VERSION VERSION_LESS _CMAKE_OSX_DEPLOYMENT_TARGET)
+      set(CMAKE_OSX_DEPLOYMENT_TARGET ${_CURRENT_OSX_VERSION} CACHE STRING
+        "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value." FORCE)
+    endif()
   else()
     # Assume developer files are in root (such as Xcode 4.5 command-line tools).
     set(_CMAKE_OSX_SYSROOT_DEFAULT "")
