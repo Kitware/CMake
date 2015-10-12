@@ -2033,7 +2033,7 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
                                    cmGeneratorTarget* target) const
 {
   if(target->GetType() == cmTarget::INTERFACE_LIBRARY
-      || target->Target->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
+      || target->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
     {
     // This target is excluded from its directory.
     return true;

@@ -161,9 +161,6 @@ cmMakefile::~cmMakefile()
   cmDeleteAll(this->FinalPassCommands);
   cmDeleteAll(this->FunctionBlockers);
   cmDeleteAll(this->EvaluationFiles);
-  this->EvaluationFiles.clear();
-
-  this->FunctionBlockers.clear();
 }
 
 //----------------------------------------------------------------------------

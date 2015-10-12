@@ -823,7 +823,7 @@ cmInstallTargetGenerator::AddStripRule(std::ostream& os,
 
   // Don't handle OSX Bundles.
   if(this->Target->Target->GetMakefile()->IsOn("APPLE") &&
-     this->Target->Target->GetPropertyAsBool("MACOSX_BUNDLE"))
+     this->Target->GetPropertyAsBool("MACOSX_BUNDLE"))
     {
     return;
     }

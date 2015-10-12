@@ -284,7 +284,7 @@ cmComputeLinkInformation
 
   // Check whether we should skip dependencies on shared library files.
   this->LinkDependsNoShared =
-    this->Target->Target->GetPropertyAsBool("LINK_DEPENDS_NO_SHARED");
+    this->Target->GetPropertyAsBool("LINK_DEPENDS_NO_SHARED");
 
   // On platforms without import libraries there may be a special flag
   // to use when creating a plugin (module) that obtains symbols from
@@ -521,7 +521,7 @@ bool cmComputeLinkInformation::Compute()
   // Restore the target link type so the correct system runtime
   // libraries are found.
   const char* lss =
-      this->Target->Target->GetProperty("LINK_SEARCH_END_STATIC");
+      this->Target->GetProperty("LINK_SEARCH_END_STATIC");
   if(cmSystemTools::IsOn(lss))
     {
     this->SetCurrentLinkType(LinkStatic);
@@ -860,7 +860,7 @@ void cmComputeLinkInformation::ComputeLinkTypeInfo()
 
   // Lookup the starting link type from the target (linked statically?).
   const char* lss =
-      this->Target->Target->GetProperty("LINK_SEARCH_START_STATIC");
+      this->Target->GetProperty("LINK_SEARCH_START_STATIC");
   this->StartLinkType = cmSystemTools::IsOn(lss)? LinkStatic : LinkShared;
   this->CurrentLinkType = this->StartLinkType;
 }
@@ -1918,7 +1918,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
   // build tree.
   bool linking_for_install =
     (for_install ||
-     this->Target->Target->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"));
+     this->Target->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"));
   bool use_install_rpath =
     (outputRuntime && this->Target->Target->HaveInstallTreeRPATH() &&
      linking_for_install);
@@ -1928,14 +1928,14 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
   bool use_link_rpath =
     outputRuntime && linking_for_install &&
     !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH") &&
-    this->Target->Target->GetPropertyAsBool("INSTALL_RPATH_USE_LINK_PATH");
+    this->Target->GetPropertyAsBool("INSTALL_RPATH_USE_LINK_PATH");
 
   // Construct the RPATH.
   std::set<std::string> emitted;
   if(use_install_rpath)
     {
     const char* install_rpath =
-        this->Target->Target->GetProperty("INSTALL_RPATH");
+        this->Target->GetProperty("INSTALL_RPATH");
     cmCLI_ExpandListUnique(install_rpath, runtimeDirs, emitted);
     }
   if(use_build_rpath || use_link_rpath)

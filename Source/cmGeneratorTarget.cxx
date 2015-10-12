@@ -381,7 +381,7 @@ std::string cmGeneratorTarget::GetOutputName(const std::string& config,
     for(std::vector<std::string>::const_iterator it = props.begin();
         it != props.end(); ++it)
       {
-      if (const char* outNameProp = this->Target->GetProperty(*it))
+      if (const char* outNameProp = this->GetProperty(*it))
         {
         outName = outNameProp;
         break;
@@ -555,12 +555,12 @@ const char* cmGeneratorTarget::GetFeature(const std::string& feature,
     std::string featureConfig = feature;
     featureConfig += "_";
     featureConfig += cmSystemTools::UpperCase(config);
-    if(const char* value = this->Target->GetProperty(featureConfig))
+    if(const char* value = this->GetProperty(featureConfig))
       {
       return value;
       }
     }
-  if(const char* value = this->Target->GetProperty(feature))
+  if(const char* value = this->GetProperty(feature))
     {
     return value;
     }
@@ -793,7 +793,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
                                         "SYSTEM_INCLUDE_DIRECTORIES", 0, 0);
 
     bool excludeImported
-                = this->Target->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED");
+                = this->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED");
 
     std::vector<std::string> result;
     for (std::set<std::string>::const_iterator
@@ -1106,13 +1106,13 @@ cmGeneratorTarget::GetCompilePDBName(const std::string& config) const
   std::string configUpper = cmSystemTools::UpperCase(config);
   std::string configProp = "COMPILE_PDB_NAME_";
   configProp += configUpper;
-  const char* config_name = this->Target->GetProperty(configProp);
+  const char* config_name = this->GetProperty(configProp);
   if(config_name && *config_name)
     {
     return prefix + config_name + ".pdb";
     }
 
-  const char* name = this->Target->GetProperty("COMPILE_PDB_NAME");
+  const char* name = this->GetProperty("COMPILE_PDB_NAME");
   if(name && *name)
     {
     return prefix + name + ".pdb";
@@ -1357,7 +1357,7 @@ std::string cmGeneratorTarget::GetCFBundleDirectory(const std::string& config,
   std::string fpath;
   fpath += this->GetOutputName(config, false);
   fpath += ".";
-  const char *ext = this->Target->GetProperty("BUNDLE_EXTENSION");
+  const char *ext = this->GetProperty("BUNDLE_EXTENSION");
   if (!ext)
     {
     if (this->Target->IsXCTestOnApple())
@@ -2278,11 +2278,11 @@ void cmGeneratorTarget::GetAppleArchs(const std::string& config,
     {
     std::string defVarName = "OSX_ARCHITECTURES_";
     defVarName += cmSystemTools::UpperCase(config);
-    archs = this->Target->GetProperty(defVarName);
+    archs = this->GetProperty(defVarName);
     }
   if(!archs)
     {
-    archs = this->Target->GetProperty("OSX_ARCHITECTURES");
+    archs = this->GetProperty("OSX_ARCHITECTURES");
     }
   if(archs)
     {
@@ -2785,7 +2785,7 @@ void cmGeneratorTarget::GetCompileDefinitions(std::vector<std::string> &list,
     {
     std::string configPropName = "COMPILE_DEFINITIONS_"
                                         + cmSystemTools::UpperCase(config);
-    const char *configProp = this->Target->GetProperty(configPropName);
+    const char *configProp = this->GetProperty(configPropName);
     if (configProp)
       {
       switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0043))
@@ -3369,7 +3369,7 @@ void cmGeneratorTarget::ConstructSourceFileFlags() const
   this->SourceFileFlagsConstructed = true;
 
   // Process public headers to mark the source files.
-  if(const char* files = this->Target->GetProperty("PUBLIC_HEADER"))
+  if(const char* files = this->GetProperty("PUBLIC_HEADER"))
     {
     std::vector<std::string> relFiles;
     cmSystemTools::ExpandListArgument(files, relFiles);
@@ -3387,7 +3387,7 @@ void cmGeneratorTarget::ConstructSourceFileFlags() const
 
   // Process private headers after public headers so that they take
   // precedence if a file is listed in both.
-  if(const char* files = this->Target->GetProperty("PRIVATE_HEADER"))
+  if(const char* files = this->GetProperty("PRIVATE_HEADER"))
     {
     std::vector<std::string> relFiles;
     cmSystemTools::ExpandListArgument(files, relFiles);
@@ -3404,7 +3404,7 @@ void cmGeneratorTarget::ConstructSourceFileFlags() const
     }
 
   // Mark sources listed as resources.
-  if(const char* files = this->Target->GetProperty("RESOURCE"))
+  if(const char* files = this->GetProperty("RESOURCE"))
     {
     std::vector<std::string> relFiles;
     cmSystemTools::ExpandListArgument(files, relFiles);
@@ -4813,7 +4813,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLanguages(
 //----------------------------------------------------------------------------
 bool cmGeneratorTarget::HaveBuildTreeRPATH(const std::string& config) const
 {
-  if (this->Target->GetPropertyAsBool("SKIP_BUILD_RPATH"))
+  if (this->GetPropertyAsBool("SKIP_BUILD_RPATH"))
     {
     return false;
     }
