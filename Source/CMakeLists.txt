@@ -548,6 +548,18 @@ foreach(v CURL_CA_BUNDLE CURL_CA_PATH)
   endif()
 endforeach()
 
+foreach(check
+    STAT_HAS_ST_MTIM
+    )
+  if(KWSYS_CXX_${check}_COMPILED) # abuse KWSys check cache entry
+    set(CMake_${check} 1)
+  else()
+    set(CMake_${check} 0)
+  endif()
+  set_property(SOURCE cmFileTimeComparison.cxx APPEND PROPERTY
+    COMPILE_DEFINITIONS CMake_${check}=${CMake_${check}})
+endforeach()
+
 # create a library used by the command line and the GUI
 add_library(CMakeLib ${SRCS})
 target_link_libraries(CMakeLib cmsys

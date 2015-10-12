@@ -148,7 +148,7 @@ int cmFileTimeComparisonInternal::Compare(cmFileTimeComparison_Type* s1,
                                           cmFileTimeComparison_Type* s2)
 {
 #if !defined(_WIN32) || defined(__CYGWIN__)
-# if cmsys_STAT_HAS_ST_MTIM
+# if CMake_STAT_HAS_ST_MTIM
   // Compare using nanosecond resolution.
   if(s1->st_mtim.tv_sec < s2->st_mtim.tv_sec)
     {
@@ -190,7 +190,7 @@ bool cmFileTimeComparisonInternal::TimesDiffer(cmFileTimeComparison_Type* s1,
                                                cmFileTimeComparison_Type* s2)
 {
 #if !defined(_WIN32) || defined(__CYGWIN__)
-# if cmsys_STAT_HAS_ST_MTIM
+# if CMake_STAT_HAS_ST_MTIM
   // Times are integers in units of 1ns.
   long long bil = 1000000000;
   long long t1 = s1->st_mtim.tv_sec * bil + s1->st_mtim.tv_nsec;
