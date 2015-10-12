@@ -1976,9 +1976,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     if(this->XcodeVersion >= 21)
       {
-      if(!target.UsesDefaultOutputDir(configName, false))
+      if(!gtgt->UsesDefaultOutputDir(configName, false))
         {
-        std::string pncdir = target.GetDirectory(configName);
+        std::string pncdir = gtgt->GetDirectory(configName);
         buildSettings->AddAttribute("CONFIGURATION_BUILD_DIR",
                                     this->CreateString(pncdir.c_str()));
         }
@@ -1987,7 +1987,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       {
       buildSettings->AddAttribute("OBJROOT",
                                   this->CreateString(pndir.c_str()));
-      pndir = target.GetDirectory(configName);
+      pndir = gtgt->GetDirectory(configName);
       }
 
     if(target.IsFrameworkOnApple() || target.IsCFBundleOnApple())

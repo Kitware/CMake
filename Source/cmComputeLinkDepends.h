@@ -23,7 +23,6 @@ class cmComputeComponentGraph;
 class cmGlobalGenerator;
 class cmMakefile;
 class cmGeneratorTarget;
-class cmTarget;
 class cmake;
 
 /** \class cmComputeLinkDepends
@@ -40,7 +39,7 @@ public:
   struct LinkEntry
   {
     std::string Item;
-    cmTarget const* Target;
+    cmGeneratorTarget const* Target;
     bool IsSharedDep;
     bool IsFlag;
     LinkEntry(): Item(), Target(0), IsSharedDep(false), IsFlag(false) {}

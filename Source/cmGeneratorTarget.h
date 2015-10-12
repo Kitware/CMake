@@ -109,19 +109,19 @@ public:
                          const std::string& config) const;
 
   cmLinkInterface const* GetLinkInterface(const std::string& config,
-                                        cmTarget const* headTarget) const;
+                                    const cmGeneratorTarget* headTarget) const;
   void ComputeLinkInterface(const std::string& config,
                             cmOptionalLinkInterface& iface,
-                            cmTarget const* head) const;
+                            const cmGeneratorTarget* head) const;
 
   cmLinkInterfaceLibraries const*
     GetLinkInterfaceLibraries(const std::string& config,
-                              cmTarget const* headTarget,
+                              const cmGeneratorTarget* headTarget,
                               bool usage_requirements_only) const;
 
   void ComputeLinkInterfaceLibraries(const std::string& config,
                                      cmOptionalLinkInterface &iface,
-                                     cmTarget const* head,
+                                     const cmGeneratorTarget* head,
                                      bool usage_requirements_only) const;
 
   /** Get the full path to the target according to the settings in its
@@ -207,6 +207,13 @@ public:
                                           cmOptionalLinkImplementation& impl
                                           ) const;
 
+  cmLinkImplementationLibraries const*
+    GetLinkImplementationLibraries(const std::string& config) const;
+
+  void ComputeLinkImplementationLibraries(const std::string& config,
+                                          cmOptionalLinkImplementation& impl,
+                                          const cmGeneratorTarget* head) const;
+
   // Compute the set of languages compiled by the target.  This is
   // computed every time it is called because the languages can change
   // when source file properties are changed and we do not have enough
@@ -261,6 +268,13 @@ public:
    */
   void TraceDependencies();
 
+  /** Get the directory in which this target will be built.  If the
+      configuration name is given then the generator will add its
+      subdirectory for that configuration.  Otherwise just the canonical
+      output directory is given.  */
+  std::string GetDirectory(const std::string& config = "",
+                           bool implib = false) const;
+
   /** Get the directory in which to place the target compiler .pdb file.
       If the configuration name is given then the generator will add its
       subdirectory for that configuration.  Otherwise just the canonical
@@ -270,6 +284,22 @@ public:
   /** Get sources that must be built before the given source.  */
   std::vector<cmSourceFile*> const*
   GetSourceDepends(cmSourceFile const* sf) const;
+
+  /** Return whether this target uses the default value for its output
+      directory.  */
+  bool UsesDefaultOutputDir(const std::string& config, bool implib) const;
+
+  // Cache target output paths for each configuration.
+  struct OutputInfo
+  {
+    std::string OutDir;
+    std::string ImpDir;
+    std::string PdbDir;
+    bool empty() const
+      { return OutDir.empty() && ImpDir.empty() && PdbDir.empty(); }
+  };
+
+  OutputInfo const* GetOutputInfo(const std::string& config) const;
 
   /** Get the name of the pdb file for the target.  */
   std::string GetPDBName(const std::string& config="") const;
@@ -286,6 +316,8 @@ public:
 
   typedef std::map<std::string, CompileInfo> CompileInfoMapType;
   mutable CompileInfoMapType CompileInfoMap;
+
+  bool IsNullImpliedByLinkLibraries(const std::string &p) const;
 
   /** Get the name of the compiler pdb file for the target.  */
   std::string GetCompilePDBName(const std::string& config="") const;
@@ -345,6 +377,12 @@ public:
   /** Return true if builtin chrpath will work for this target */
   bool IsChrpathUsed(const std::string& config) const;
 
+  /** Get the directory in which this targets .pdb files will be placed.
+      If the configuration name is given then the generator will add its
+      subdirectory for that configuration.  Otherwise just the canonical
+      pdb output directory is given.  */
+  std::string GetPDBDirectory(const std::string& config) const;
+
   ///! Return the preferred linker language for this target
   std::string GetLinkerLanguage(const std::string& config = "") const;
 
@@ -369,6 +407,18 @@ public:
 
   class TargetPropertyEntry;
 
+  bool HaveInstallTreeRPATH() const;
+
+  /** Whether this library has \@rpath and platform supports it.  */
+  bool HasMacOSXRpathInstallNameDir(const std::string& config) const;
+
+  /** Whether this library defaults to \@rpath.  */
+  bool MacOSXRpathInstallNameDirDefault() const;
+
+  /** Test for special case of a third-party shared library that has
+      no soname at all.  */
+  bool IsImportedSharedLibWithoutSOName(const std::string& config) const;
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
@@ -392,6 +442,9 @@ private:
 
   typedef std::map<std::string, LinkClosure> LinkClosureMapType;
   mutable LinkClosureMapType LinkClosureMap;
+
+  // Returns ARCHIVE, LIBRARY, or RUNTIME based on platform and type.
+  const char* GetOutputTargetType(bool implib) const;
 
   struct CompatibleInterfacesBase
   {
@@ -438,7 +491,8 @@ private:
       std::string const& config) const;
 
   cmLinkInterface const*
-    GetImportLinkInterface(const std::string& config, cmTarget const* head,
+    GetImportLinkInterface(const std::string& config,
+                           const cmGeneratorTarget* head,
                            bool usage_requirements_only) const;
 
   typedef std::map<std::string, std::vector<cmSourceFile*> >
@@ -450,9 +504,11 @@ private:
   std::vector<TargetPropertyEntry*> CompileFeaturesEntries;
   std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
   std::vector<TargetPropertyEntry*> SourceEntries;
+  mutable std::set<std::string> LinkImplicitNullProperties;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
-                       std::string const& config, cmTarget const* headTarget,
+                       std::string const& config,
+                       const cmGeneratorTarget* headTarget,
                        bool usage_requirements_only,
                        std::vector<cmLinkItem>& items,
                        bool& hadHeadSensitiveCondition) const;
@@ -461,6 +517,22 @@ private:
 
   void GetSourceFiles(std::vector<std::string>& files,
                       const std::string& config) const;
+
+  struct HeadToLinkImplementationMap:
+    public std::map<cmTarget const*, cmOptionalLinkImplementation> {};
+  typedef std::map<std::string,
+                   HeadToLinkImplementationMap> LinkImplMapType;
+  mutable LinkImplMapType LinkImplMap;
+
+  cmLinkImplementationLibraries const*
+    GetLinkImplementationLibrariesInternal(const std::string& config,
+                                          const cmGeneratorTarget* head) const;
+  bool
+  ComputeOutputDir(const std::string& config,
+                   bool implib, std::string& out) const;
+
+  typedef std::map<std::string, OutputInfo> OutputInfoMapType;
+  mutable OutputInfoMapType OutputInfoMap;
 
   typedef std::pair<std::string, bool> OutputNameKey;
   typedef std::map<OutputNameKey, std::string> OutputNameMapType;
@@ -473,10 +545,19 @@ private:
   mutable bool DebugSourcesDone;
   mutable bool LinkImplementationLanguageIsContextDependent;
 
+  bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
+                           std::string& out) const;
+
 public:
   std::vector<cmTarget const*> const&
     GetLinkImplementationClosure(const std::string& config) const;
 
+  mutable std::map<std::string, std::string> MaxLanguageStandards;
+  std::map<std::string, std::string> const&
+  GetMaxLanguageStandards() const
+  {
+    return this->MaxLanguageStandards;
+  }
 };
 
 struct cmStrictTargetComparison {

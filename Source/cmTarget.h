@@ -225,34 +225,11 @@ public:
 
   void GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const;
 
-  cmLinkImplementationLibraries const*
-    GetLinkImplementationLibraries(const std::string& config) const;
-
-  void ComputeLinkImplementationLibraries(const std::string& config,
-                                          cmOptionalLinkImplementation& impl,
-                                          cmTarget const* head) const;
-
-  cmOptionalLinkImplementation&
-  GetLinkImplMap(std::string const& config) const;
-
   cmTarget const* FindTargetToLink(std::string const& name) const;
 
   /** Strip off leading and trailing whitespace from an item named in
       the link dependencies of this target.  */
   std::string CheckCMP0004(std::string const& item) const;
-
-  /** Get the directory in which this target will be built.  If the
-      configuration name is given then the generator will add its
-      subdirectory for that configuration.  Otherwise just the canonical
-      output directory is given.  */
-  std::string GetDirectory(const std::string& config = "",
-                           bool implib = false) const;
-
-  /** Get the directory in which this targets .pdb files will be placed.
-      If the configuration name is given then the generator will add its
-      subdirectory for that configuration.  Otherwise just the canonical
-      pdb output directory is given.  */
-  std::string GetPDBDirectory(const std::string& config) const;
 
   const char* ImportedGetLocation(const std::string& config) const;
 
@@ -267,16 +244,6 @@ public:
   void
   GetTargetVersion(bool soversion, int& major, int& minor, int& patch) const;
 
-  /** Whether this library has \@rpath and platform supports it.  */
-  bool HasMacOSXRpathInstallNameDir(const std::string& config) const;
-
-  /** Whether this library defaults to \@rpath.  */
-  bool MacOSXRpathInstallNameDirDefault() const;
-
-  /** Test for special case of a third-party shared library that has
-      no soname at all.  */
-  bool IsImportedSharedLibWithoutSOName(const std::string& config) const;
-
   /** Does this target have a GNU implib to convert to MS format?  */
   bool HasImplibGNUtoMS() const;
 
@@ -284,8 +251,6 @@ public:
       extension (.lib or ${CMAKE_IMPORT_LIBRARY_SUFFIX}).  */
   bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
                         const char* newExt = 0) const;
-
-  bool HaveInstallTreeRPATH() const;
 
   // Get the properties
   cmPropertyMap &GetProperties() const { return this->Properties; }
@@ -335,10 +300,6 @@ public:
   /** Get a build-tree directory in which to place target support files.  */
   std::string GetSupportDirectory() const;
 
-  /** Return whether this target uses the default value for its output
-      directory.  */
-  bool UsesDefaultOutputDir(const std::string& config, bool implib) const;
-
   /** @return whether this target have a well defined output file name. */
   bool HaveWellDefinedOutputFiles() const;
 
@@ -353,8 +314,6 @@ public:
 
   void AppendBuildInterfaceIncludes();
 
-  bool IsNullImpliedByLinkLibraries(const std::string &p) const;
-
   std::string GetDebugGeneratorExpressions(const std::string &value,
                                   cmTarget::LinkLibraryType llt) const;
 
@@ -364,12 +323,6 @@ public:
 
   bool LinkLanguagePropagatesToDependents() const
   { return this->TargetTypeValue == STATIC_LIBRARY; }
-
-  std::map<std::string, std::string> const&
-  GetMaxLanguageStandards() const
-  {
-    return this->MaxLanguageStandards;
-  }
 
   cmStringRange GetIncludeDirectoriesEntries() const;
   cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
@@ -385,6 +338,9 @@ public:
 
   cmStringRange GetSourceEntries() const;
   cmBacktraceRange GetSourceBacktraces() const;
+  cmStringRange GetLinkImplementationEntries() const;
+  cmBacktraceRange GetLinkImplementationBacktraces() const;
+
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   const LinkLibraryVectorType &GetLinkLibrariesForVS6() const {
@@ -455,9 +411,6 @@ private:
   void SetPropertyDefault(const std::string& property,
                           const char* default_value);
 
-  // Returns ARCHIVE, LIBRARY, or RUNTIME based on platform and type.
-  const char* GetOutputTargetType(bool implib) const;
-
   std::string GetFullNameImported(const std::string& config,
                                   bool implib) const;
 
@@ -469,9 +422,7 @@ private:
   std::set<std::string> SystemIncludeDirectories;
   std::set<std::string> LinkDirectoriesEmmitted;
   std::set<std::string> Utilities;
-  mutable std::set<std::string> LinkImplicitNullProperties;
   std::map<std::string, cmListFileBacktrace> UtilityBacktraces;
-  mutable std::map<std::string, std::string> MaxLanguageStandards;
   cmPolicies::PolicyMap PolicyMap;
   std::string Name;
   std::string InstallPath;
@@ -501,15 +452,6 @@ private:
   bool LinkLibrariesForVS6Analyzed;
 #endif
 
-  // Cache target output paths for each configuration.
-  struct OutputInfo;
-  OutputInfo const* GetOutputInfo(const std::string& config) const;
-  bool
-  ComputeOutputDir(const std::string& config,
-                   bool implib, std::string& out) const;
-  bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
-                           std::string& out) const;
-
   // Cache import information from properties for each configuration.
   struct ImportInfo
   {
@@ -529,13 +471,7 @@ private:
   void ComputeImportInfo(std::string const& desired_config,
                          ImportInfo& info) const;
 
-  cmLinkImplementationLibraries const*
-    GetLinkImplementationLibrariesInternal(const std::string& config,
-                                           cmTarget const* head) const;
-
   std::string ProcessSourceItemCMP0049(const std::string& s);
-
-  void ClearLinkMaps();
 
   void MaybeInvalidatePropertyCache(const std::string& prop);
 

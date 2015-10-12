@@ -1109,8 +1109,11 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     if(isInterfaceProperty)
       {
+      cmGeneratorTarget* gHeadTarget =
+          context->Makefile->GetGlobalGenerator()
+          ->GetGeneratorTarget(headTarget);
       if(cmLinkInterfaceLibraries const* iface =
-         gtgt->GetLinkInterfaceLibraries(context->Config, headTarget, true))
+         gtgt->GetLinkInterfaceLibraries(context->Config, gHeadTarget, true))
         {
         linkedTargetsContent =
           getLinkedTargetsContent(iface->Libraries, target,
@@ -1122,7 +1125,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     else if(!interfacePropertyName.empty())
       {
       if(cmLinkImplementationLibraries const* impl =
-         target->GetLinkImplementationLibraries(context->Config))
+         gtgt->GetLinkImplementationLibraries(context->Config))
         {
         linkedTargetsContent =
           getLinkedTargetsContent(impl->Libraries, target,
@@ -1586,7 +1589,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactSonameTag>
                     "SHARED libraries.");
       return std::string();
       }
-    std::string result = target->Target->GetDirectory(context->Config);
+    std::string result = target->GetDirectory(context->Config);
     result += "/";
     result += target->GetSOName(context->Config);
     return result;
@@ -1631,7 +1634,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
       return std::string();
       }
 
-    std::string result = target->Target->GetPDBDirectory(context->Config);
+    std::string result = target->GetPDBDirectory(context->Config);
     result += "/";
     result += target->GetPDBName(context->Config);
     return result;

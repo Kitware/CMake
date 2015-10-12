@@ -92,8 +92,10 @@ cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmTarget& target,
   if(target.GetType() != cmTarget::EXECUTABLE &&
      !(isFortran && target.GetType() == cmTarget::SHARED_LIBRARY))
     { return pcc; }
-  std::string outDir = target.GetDirectory(config, false);
-  std::string impDir = target.GetDirectory(config, true);
+  cmGeneratorTarget* gt =
+      this->GetGlobalGenerator()->GetGeneratorTarget(&target);
+  std::string outDir = gt->GetDirectory(config, false);
+  std::string impDir = gt->GetDirectory(config, true);
   if(impDir == outDir) { return pcc; }
 
   // Add a pre-build event to create the directory.

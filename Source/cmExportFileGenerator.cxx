@@ -803,7 +803,7 @@ cmExportFileGenerator
 {
   // Add the transitive link dependencies for this configuration.
   cmLinkInterface const* iface = target->GetLinkInterface(config,
-                                                          target->Target);
+                                                          target);
   if (!iface)
     {
     return;
@@ -915,7 +915,7 @@ cmExportFileGenerator
 
   // Add the transitive link dependencies for this configuration.
   if(cmLinkInterface const* iface =
-                            target->GetLinkInterface(config, target->Target))
+                            target->GetLinkInterface(config, target))
     {
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LANGUAGES",

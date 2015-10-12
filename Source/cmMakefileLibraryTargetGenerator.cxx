@@ -275,13 +275,13 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string outpathImp;
   if(this->Target->IsFrameworkOnApple())
     {
-    outpath = this->Target->GetDirectory(this->ConfigName);
+    outpath = this->GeneratorTarget->GetDirectory(this->ConfigName);
     this->OSXBundleGenerator->CreateFramework(targetName, outpath);
     outpath += "/";
     }
   else if(this->Target->IsCFBundleOnApple())
     {
-    outpath = this->Target->GetDirectory(this->ConfigName);
+    outpath = this->GeneratorTarget->GetDirectory(this->ConfigName);
     this->OSXBundleGenerator->CreateCFBundle(targetName, outpath);
     outpath += "/";
     }
@@ -299,12 +299,12 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     }
   else
     {
-    outpath = this->Target->GetDirectory(this->ConfigName);
+    outpath = this->GeneratorTarget->GetDirectory(this->ConfigName);
     cmSystemTools::MakeDirectory(outpath.c_str());
     outpath += "/";
     if(!targetNameImport.empty())
       {
-      outpathImp = this->Target->GetDirectory(this->ConfigName, true);
+      outpathImp = this->GeneratorTarget->GetDirectory(this->ConfigName, true);
       cmSystemTools::MakeDirectory(outpathImp.c_str());
       outpathImp += "/";
       }
@@ -314,7 +314,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     this->GeneratorTarget->GetCompilePDBDirectory(this->ConfigName);
   cmSystemTools::MakeDirectory(compilePdbOutputPath.c_str());
 
-  std::string pdbOutputPath = this->Target->GetPDBDirectory(this->ConfigName);
+  std::string pdbOutputPath =
+      this->GeneratorTarget->GetPDBDirectory(this->ConfigName);
   cmSystemTools::MakeDirectory(pdbOutputPath.c_str());
   pdbOutputPath += "/";
 

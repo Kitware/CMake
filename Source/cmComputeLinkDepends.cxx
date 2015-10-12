@@ -268,7 +268,7 @@ cmComputeLinkDepends::Compute()
     {
     int i = *li;
     LinkEntry const& e = this->EntryList[i];
-    cmTarget const* t = e.Target;
+    cmGeneratorTarget const* t = e.Target;
     // Entries that we know the linker will re-use do not need to be repeated.
     bool uniquify = t && t->GetType() == cmTarget::SHARED_LIBRARY;
     if(!uniquify || emmitted.insert(i).second)
@@ -320,7 +320,8 @@ int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
   int index = lei->second;
   LinkEntry& entry = this->EntryList[index];
   entry.Item = item;
-  entry.Target = item.Target;
+  entry.Target =
+      item.Target ? this->GlobalGenerator->GetGeneratorTarget(item.Target) : 0;
   entry.IsFlag = (!entry.Target && item[0] == '-' && item[1] != 'l' &&
                   item.substr(0, 10) != "-framework");
 
@@ -362,11 +363,9 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
   // Follow the item's dependencies.
   if(entry.Target)
     {
-    cmGeneratorTarget* gtgt =
-        this->GlobalGenerator->GetGeneratorTarget(entry.Target);
     // Follow the target dependencies.
     if(cmLinkInterface const* iface =
-       gtgt->GetLinkInterface(this->Config, this->Target->Target))
+       entry.Target->GetLinkInterface(this->Config, this->Target))
       {
       const bool isIface =
                       entry.Target->GetType() == cmTarget::INTERFACE_LIBRARY;
@@ -444,7 +443,9 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
     // Initialize the item entry.
     LinkEntry& entry = this->EntryList[lei->second];
     entry.Item = dep.Item;
-    entry.Target = dep.Item.Target;
+    entry.Target =
+        dep.Item.Target ?
+          this->GlobalGenerator->GetGeneratorTarget(dep.Item.Target) : 0;
 
     // This item was added specifically because it is a dependent
     // shared library.  It may get special treatment
@@ -463,10 +464,8 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
   // Target items may have their own dependencies.
   if(entry.Target)
     {
-    cmGeneratorTarget* gtgt =
-        this->GlobalGenerator->GetGeneratorTarget(entry.Target);
     if(cmLinkInterface const* iface =
-       gtgt->GetLinkInterface(this->Config, this->Target->Target))
+       entry.Target->GetLinkInterface(this->Config, this->Target))
       {
       // Follow public and private dependencies transitively.
       this->FollowSharedDeps(index, iface, true);
@@ -639,15 +638,16 @@ cmTarget const* cmComputeLinkDepends::FindTargetToLink(int depender_index,
                                                  const std::string& name)
 {
   // Look for a target in the scope of the depender.
-  cmTarget const* from = this->Target->Target;
+  cmGeneratorTarget const* from = this->Target;
   if(depender_index >= 0)
     {
-    if(cmTarget const* depender = this->EntryList[depender_index].Target)
+    if(cmGeneratorTarget const* depender =
+       this->EntryList[depender_index].Target)
       {
       from = depender;
       }
     }
-  return from->FindTargetToLink(name);
+  return from->Target->FindTargetToLink(name);
 }
 
 //----------------------------------------------------------------------------
@@ -934,12 +934,10 @@ int cmComputeLinkDepends::ComputeComponentCount(NodeList const& nl)
   int count = 2;
   for(NodeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni)
     {
-    if(cmTarget const* target = this->EntryList[*ni].Target)
+    if(cmGeneratorTarget const* target = this->EntryList[*ni].Target)
       {
-      cmGeneratorTarget* gtgt =
-          this->GlobalGenerator->GetGeneratorTarget(target);
       if(cmLinkInterface const* iface =
-         gtgt->GetLinkInterface(this->Config, this->Target->Target))
+         target->GetLinkInterface(this->Config, this->Target))
         {
         if(iface->Multiplicity > count)
           {
