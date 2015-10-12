@@ -77,9 +77,8 @@ void cmExtraSublimeTextGenerator::Generate()
 void cmExtraSublimeTextGenerator::CreateProjectFile(
                                      const std::vector<cmLocalGenerator*>& lgs)
 {
-  const cmMakefile* mf=lgs[0]->GetMakefile();
-  std::string outputDir=mf->GetCurrentBinaryDirectory();
-  std::string projectName=mf->GetProjectName();
+  std::string outputDir=lgs[0]->GetCurrentBinaryDirectory();
+  std::string projectName=lgs[0]->GetProjectName();
 
   const std::string filename =
                      outputDir + "/" + projectName + ".sublime-project";
@@ -99,8 +98,8 @@ void cmExtraSublimeTextGenerator
     }
 
   const std::string &sourceRootRelativeToOutput = cmSystemTools::RelativePath(
-                     mf->GetHomeOutputDirectory(),
-                     mf->GetHomeDirectory());
+                     lgs[0]->GetBinaryDirectory(),
+                     lgs[0]->GetSourceDirectory());
   // Write the folder entries to the project file
   fout << "{\n";
   fout << "\t\"folders\":\n\t[\n\t";
@@ -108,8 +107,8 @@ void cmExtraSublimeTextGenerator
     {
       fout << "\t{\n\t\t\t\"path\": \"" << sourceRootRelativeToOutput << "\"";
       const std::string &outputRelativeToSourceRoot =
-        cmSystemTools::RelativePath(mf->GetHomeDirectory(),
-                                    mf->GetHomeOutputDirectory());
+        cmSystemTools::RelativePath(lgs[0]->GetSourceDirectory(),
+                                    lgs[0]->GetBinaryDirectory());
       if ((!outputRelativeToSourceRoot.empty()) &&
         ((outputRelativeToSourceRoot.length() < 3) ||
           (outputRelativeToSourceRoot.substr(0, 3) != "../")))
@@ -173,8 +172,8 @@ void cmExtraSublimeTextGenerator::
           {
           // Only add the global targets from CMAKE_BINARY_DIR,
           // not from the subdirs
-          if (strcmp(makefile->GetCurrentBinaryDirectory(),
-                     makefile->GetHomeOutputDirectory())==0)
+          if (strcmp((*lg)->GetCurrentBinaryDirectory(),
+                     (*lg)->GetBinaryDirectory())==0)
             {
             this->AppendTarget(fout, ti->first, *lg, 0,
                                make.c_str(), makefile, compiler.c_str(),
@@ -302,7 +301,7 @@ void cmExtraSublimeTextGenerator::
     {
     fout << ",\n\t";
     }
-  fout << "\t{\n\t\t\t\"name\": \"" << makefile->GetProjectName() << " - " <<
+  fout << "\t{\n\t\t\t\"name\": \"" << lg->GetProjectName() << " - " <<
           targetName << "\",\n";
   fout << "\t\t\t\"cmd\": [" <<
           this->BuildMakeCommand(make, makefileName.c_str(), targetName) <<

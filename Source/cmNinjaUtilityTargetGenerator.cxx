@@ -103,13 +103,13 @@ void cmNinjaUtilityTargetGenerator::Generate()
       command,
       "$(CMAKE_SOURCE_DIR)",
       this->GetLocalGenerator()->ConvertToOutputFormat(
-        this->GetTarget()->GetMakefile()->GetHomeDirectory(),
+        this->GetLocalGenerator()->GetSourceDirectory(),
         cmLocalGenerator::SHELL).c_str());
     cmSystemTools::ReplaceString(
       command,
       "$(CMAKE_BINARY_DIR)",
       this->GetLocalGenerator()->ConvertToOutputFormat(
-        this->GetTarget()->GetMakefile()->GetHomeOutputDirectory(),
+        this->GetLocalGenerator()->GetBinaryDirectory(),
         cmLocalGenerator::SHELL).c_str());
     cmSystemTools::ReplaceString(command, "$(ARGS)", "");
 

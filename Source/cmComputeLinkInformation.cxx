@@ -1975,8 +1975,9 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
       else if(use_link_rpath)
         {
         // Do not add any path inside the source or build tree.
-        const char* topSourceDir = this->Makefile->GetHomeDirectory();
-        const char* topBinaryDir = this->Makefile->GetHomeOutputDirectory();
+        const char* topSourceDir = this->CMakeInstance->GetHomeDirectory();
+        const char* topBinaryDir =
+            this->CMakeInstance->GetHomeOutputDirectory();
         if(!cmSystemTools::ComparePath(*ri, topSourceDir) &&
            !cmSystemTools::ComparePath(*ri, topBinaryDir) &&
            !cmSystemTools::IsSubDirectory(*ri, topSourceDir) &&
