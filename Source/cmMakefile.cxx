@@ -1647,6 +1647,7 @@ void cmMakefile::Configure()
   std::vector<cmMakefile*>::iterator sdi = subdirs.begin();
   for (; sdi != subdirs.end(); ++sdi)
     {
+    (*sdi)->StateSnapshot.InitializeFromParent_ForSubdirsCommand();
     this->ConfigureSubDirectory(*sdi);
     }
 

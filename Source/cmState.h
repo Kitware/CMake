@@ -90,6 +90,8 @@ public:
     void SetProjectName(std::string const& name);
     std::string GetProjectName() const;
 
+    void InitializeFromParent_ForSubdirsCommand();
+
     struct StrictWeakOrder
     {
       bool operator()(const cmState::Snapshot& lhs,

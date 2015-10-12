@@ -1447,6 +1447,20 @@ std::string cmState::Snapshot::GetProjectName() const
   return this->Position->BuildSystemDirectory->ProjectName;
 }
 
+void cmState::Snapshot::InitializeFromParent_ForSubdirsCommand()
+{
+  std::string currentSrcDir = this->GetDefinition("CMAKE_CURRENT_SOURCE_DIR");
+  std::string currentBinDir = this->GetDefinition("CMAKE_CURRENT_BINARY_DIR");
+  this->InitializeFromParent();
+  this->SetDefinition("CMAKE_SOURCE_DIR",
+                      this->State->GetSourceDirectory());
+  this->SetDefinition("CMAKE_BINARY_DIR",
+                      this->State->GetBinaryDirectory());
+
+  this->SetDefinition("CMAKE_CURRENT_SOURCE_DIR", currentSrcDir.c_str());
+  this->SetDefinition("CMAKE_CURRENT_BINARY_DIR", currentBinDir.c_str());
+}
+
 cmState::Directory::Directory(
     cmLinkedTree<BuildsystemDirectoryStateType>::iterator iter,
     const cmState::Snapshot& snapshot)
