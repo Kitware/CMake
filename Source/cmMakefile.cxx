@@ -50,7 +50,6 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
 {
   this->IsSourceFileTryCompile = false;
 
-  // Initialize these first since AddDefaultDefinitions calls AddDefinition
   this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
   this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
 
@@ -3171,36 +3170,37 @@ void cmMakefile::AddDefaultDefinitions()
   will be reset in CMakeSystemSpecificInformation.cmake before the platform
   files are executed. */
 #if defined(_WIN32)
-  this->AddDefinition("WIN32", "1");
-  this->AddDefinition("CMAKE_HOST_WIN32", "1");
+  this->StateSnapshot.SetDefinition("WIN32", "1");
+  this->StateSnapshot.SetDefinition("CMAKE_HOST_WIN32", "1");
 #else
-  this->AddDefinition("UNIX", "1");
-  this->AddDefinition("CMAKE_HOST_UNIX", "1");
+  this->StateSnapshot.SetDefinition("UNIX", "1");
+  this->StateSnapshot.SetDefinition("CMAKE_HOST_UNIX", "1");
 #endif
 #if defined(__CYGWIN__)
   if(cmSystemTools::IsOn(cmSystemTools::GetEnv("CMAKE_LEGACY_CYGWIN_WIN32")))
     {
-    this->AddDefinition("WIN32", "1");
-    this->AddDefinition("CMAKE_HOST_WIN32", "1");
+    this->StateSnapshot.SetDefinition("WIN32", "1");
+    this->StateSnapshot.SetDefinition("CMAKE_HOST_WIN32", "1");
     }
 #endif
 #if defined(__APPLE__)
-  this->AddDefinition("APPLE", "1");
-  this->AddDefinition("CMAKE_HOST_APPLE", "1");
+  this->StateSnapshot.SetDefinition("APPLE", "1");
+  this->StateSnapshot.SetDefinition("CMAKE_HOST_APPLE", "1");
 #endif
 
   char temp[1024];
   sprintf(temp, "%d", cmVersion::GetMinorVersion());
-  this->AddDefinition("CMAKE_MINOR_VERSION", temp);
+  this->StateSnapshot.SetDefinition("CMAKE_MINOR_VERSION", temp);
   sprintf(temp, "%d", cmVersion::GetMajorVersion());
-  this->AddDefinition("CMAKE_MAJOR_VERSION", temp);
+  this->StateSnapshot.SetDefinition("CMAKE_MAJOR_VERSION", temp);
   sprintf(temp, "%d", cmVersion::GetPatchVersion());
-  this->AddDefinition("CMAKE_PATCH_VERSION", temp);
+  this->StateSnapshot.SetDefinition("CMAKE_PATCH_VERSION", temp);
   sprintf(temp, "%d", cmVersion::GetTweakVersion());
-  this->AddDefinition("CMAKE_TWEAK_VERSION", temp);
-  this->AddDefinition("CMAKE_VERSION", cmVersion::GetCMakeVersion());
+  this->StateSnapshot.SetDefinition("CMAKE_TWEAK_VERSION", temp);
+  this->StateSnapshot.SetDefinition("CMAKE_VERSION",
+                                    cmVersion::GetCMakeVersion());
 
-  this->AddDefinition("CMAKE_FILES_DIRECTORY",
+  this->StateSnapshot.SetDefinition("CMAKE_FILES_DIRECTORY",
                       cmake::GetCMakeFilesDirectory());
 }
 
