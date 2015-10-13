@@ -48,16 +48,20 @@ if(WIN32)
     # GitHub search path for Windows
     set(github_path "$ENV{LOCALAPPDATA}/Github/PortableGit*/bin")
     file(GLOB github_path "${github_path}")
+    # SourceTree search path for Windows
+    set(_git_sourcetree_path "$ENV{LOCALAPPDATA}/Atlassian/SourceTree/git_local/bin")
   endif()
 endif()
 
 find_program(GIT_EXECUTABLE
   NAMES ${git_names}
-  PATHS ${github_path}
+  PATHS ${github_path} ${_git_sourcetree_path}
   PATH_SUFFIXES Git/cmd Git/bin
   DOC "git command line client"
   )
 mark_as_advanced(GIT_EXECUTABLE)
+
+unset(_git_sourcetree_path)
 
 if(GIT_EXECUTABLE)
   execute_process(COMMAND ${GIT_EXECUTABLE} --version
