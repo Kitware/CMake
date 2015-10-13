@@ -120,19 +120,19 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
   this->AddSourceGroup("Object Files", "\\.(lo|o|obj)$");
 #endif
 
-  this->AddDefinition("CMAKE_SOURCE_DIR",
+  this->StateSnapshot.SetDefinition("CMAKE_SOURCE_DIR",
                       this->GetCMakeInstance()->GetHomeDirectory());
-  this->AddDefinition("CMAKE_BINARY_DIR",
+  this->StateSnapshot.SetDefinition("CMAKE_BINARY_DIR",
                       this->GetCMakeInstance()->GetHomeOutputDirectory());
   {
   const char* dir = this->StateSnapshot.GetDirectory().GetCurrentSource();
   if (dir)
     {
-    this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", dir);
+    this->StateSnapshot.SetDefinition("CMAKE_CURRENT_SOURCE_DIR", dir);
     }
   else
     {
-    this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
+    this->StateSnapshot.SetDefinition("CMAKE_CURRENT_SOURCE_DIR",
                         this->GetCMakeInstance()->GetHomeDirectory());
     }
   }
@@ -141,11 +141,11 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
   if (dir)
     {
     cmSystemTools::MakeDirectory(dir);
-    this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", dir);
+    this->StateSnapshot.SetDefinition("CMAKE_CURRENT_BINARY_DIR", dir);
     }
   else
     {
-    this->AddDefinition("CMAKE_CURRENT_BINARY_DIR",
+    this->StateSnapshot.SetDefinition("CMAKE_CURRENT_BINARY_DIR",
                         this->GetCMakeInstance()->GetHomeOutputDirectory());
     }
   }
