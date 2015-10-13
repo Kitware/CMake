@@ -1020,6 +1020,8 @@ void cmState::Directory::SetCurrentSource(std::string const& dir)
       loc,
       this->DirectoryState->CurrentSourceDirectoryComponents);
   this->ComputeRelativePathTopSource();
+
+  this->Snapshot_.SetDefinition("CMAKE_CURRENT_SOURCE_DIR", loc.c_str());
 }
 
 const char* cmState::Directory::GetCurrentBinary() const
@@ -1038,6 +1040,8 @@ void cmState::Directory::SetCurrentBinary(std::string const& dir)
       loc,
       this->DirectoryState->CurrentBinaryDirectoryComponents);
   this->ComputeRelativePathTopBinary();
+
+  this->Snapshot_.SetDefinition("CMAKE_CURRENT_BINARY_DIR", loc.c_str());
 }
 
 void cmState::Snapshot::SetListFile(const std::string& listfile)
@@ -1333,7 +1337,11 @@ void cmState::Snapshot::SetDirectoryDefinitions()
 {
   this->SetDefinition("CMAKE_SOURCE_DIR",
                       this->State->GetSourceDirectory());
+  this->SetDefinition("CMAKE_CURRENT_SOURCE_DIR",
+                      this->State->GetSourceDirectory());
   this->SetDefinition("CMAKE_BINARY_DIR",
+                      this->State->GetBinaryDirectory());
+  this->SetDefinition("CMAKE_CURRENT_BINARY_DIR",
                       this->State->GetBinaryDirectory());
 }
 

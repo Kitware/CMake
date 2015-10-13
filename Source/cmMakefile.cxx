@@ -118,32 +118,6 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
   this->AddSourceGroup("Resources", "\\.plist$");
   this->AddSourceGroup("Object Files", "\\.(lo|o|obj)$");
 #endif
-
-  {
-  const char* dir = this->StateSnapshot.GetDirectory().GetCurrentSource();
-  if (dir)
-    {
-    this->StateSnapshot.SetDefinition("CMAKE_CURRENT_SOURCE_DIR", dir);
-    }
-  else
-    {
-    this->StateSnapshot.SetDefinition("CMAKE_CURRENT_SOURCE_DIR",
-                        this->GetCMakeInstance()->GetHomeDirectory());
-    }
-  }
-  {
-  const char* dir = this->StateSnapshot.GetDirectory().GetCurrentBinary();
-  if (dir)
-    {
-    cmSystemTools::MakeDirectory(dir);
-    this->StateSnapshot.SetDefinition("CMAKE_CURRENT_BINARY_DIR", dir);
-    }
-  else
-    {
-    this->StateSnapshot.SetDefinition("CMAKE_CURRENT_BINARY_DIR",
-                        this->GetCMakeInstance()->GetHomeOutputDirectory());
-    }
-  }
 }
 
 cmMakefile::~cmMakefile()
@@ -1755,6 +1729,8 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
 
   newSnapshot.GetDirectory().SetCurrentSource(srcPath);
   newSnapshot.GetDirectory().SetCurrentBinary(binPath);
+
+  cmSystemTools::MakeDirectory(binPath.c_str());
 
   cmMakefile* subMf = new cmMakefile(this->GlobalGenerator, newSnapshot);
   this->GetGlobalGenerator()->AddMakefile(subMf);
