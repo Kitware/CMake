@@ -175,6 +175,7 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   cmake cm;
   cm.SetHomeOutputDirectory(targetDirectory);
   cm.SetHomeDirectory(targetDirectory);
+  cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
 
   cmState::Snapshot snapshot = cm.GetCurrentSnapshot();

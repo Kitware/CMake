@@ -97,6 +97,7 @@ public:
     };
 
     void SetDirectoryDefinitions();
+    void SetDefaultDefinitions();
 
   private:
     friend bool operator==(const cmState::Snapshot& lhs,

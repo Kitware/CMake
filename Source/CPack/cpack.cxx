@@ -199,6 +199,7 @@ int main (int argc, char const* const* argv)
   cmake cminst;
   cminst.SetHomeDirectory("");
   cminst.SetHomeOutputDirectory("");
+  cminst.GetCurrentSnapshot().SetDefaultDefinitions();
   cminst.GetState()->RemoveUnscriptableCommands();
   cmGlobalGenerator cmgg(&cminst);
   cmsys::auto_ptr<cmMakefile> globalMF(

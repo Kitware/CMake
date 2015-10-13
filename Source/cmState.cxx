@@ -12,6 +12,7 @@
 #include "cmState.h"
 
 #include "cmake.h"
+#include "cmVersion.h"
 #include "cmCacheManager.h"
 #include "cmCommand.h"
 #include "cmAlgorithms.h"
@@ -847,6 +848,7 @@ cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot,
 
   cmState::Snapshot snapshot = cmState::Snapshot(this, pos);
   originSnapshot.Position->BuildSystemDirectory->Children.push_back(snapshot);
+  snapshot.SetDefaultDefinitions();
   snapshot.InitializeFromParent();
   snapshot.SetDirectoryDefinitions();
   return snapshot;
@@ -1331,6 +1333,54 @@ void InitializeContentFromParent(T& parentContent,
   thisBacktraces = std::vector<cmListFileBacktrace>(btIt, btEnd);
 
   contentEndPosition = thisContent.size();
+}
+
+void cmState::Snapshot::SetDefaultDefinitions()
+{
+  /* Up to CMake 2.4 here only WIN32, UNIX and APPLE were set.
+    With CMake must separate between target and host platform. In most cases
+    the tests for WIN32, UNIX and APPLE will be for the target system, so an
+    additional set of variables for the host system is required ->
+    CMAKE_HOST_WIN32, CMAKE_HOST_UNIX, CMAKE_HOST_APPLE.
+    WIN32, UNIX and APPLE are now set in the platform files in
+    Modules/Platforms/.
+    To keep cmake scripts (-P) and custom language and compiler modules
+    working, these variables are still also set here in this place, but they
+    will be reset in CMakeSystemSpecificInformation.cmake before the platform
+    files are executed. */
+  #if defined(_WIN32)
+    this->SetDefinition("WIN32", "1");
+    this->SetDefinition("CMAKE_HOST_WIN32", "1");
+  #else
+    this->SetDefinition("UNIX", "1");
+    this->SetDefinition("CMAKE_HOST_UNIX", "1");
+  #endif
+  #if defined(__CYGWIN__)
+    if(cmSystemTools::IsOn(cmSystemTools::GetEnv("CMAKE_LEGACY_CYGWIN_WIN32")))
+      {
+      this->SetDefinition("WIN32", "1");
+      this->SetDefinition("CMAKE_HOST_WIN32", "1");
+      }
+  #endif
+  #if defined(__APPLE__)
+    this->SetDefinition("APPLE", "1");
+    this->SetDefinition("CMAKE_HOST_APPLE", "1");
+  #endif
+
+    char temp[1024];
+    sprintf(temp, "%d", cmVersion::GetMinorVersion());
+    this->SetDefinition("CMAKE_MINOR_VERSION", temp);
+    sprintf(temp, "%d", cmVersion::GetMajorVersion());
+    this->SetDefinition("CMAKE_MAJOR_VERSION", temp);
+    sprintf(temp, "%d", cmVersion::GetPatchVersion());
+    this->SetDefinition("CMAKE_PATCH_VERSION", temp);
+    sprintf(temp, "%d", cmVersion::GetTweakVersion());
+    this->SetDefinition("CMAKE_TWEAK_VERSION", temp);
+    this->SetDefinition("CMAKE_VERSION",
+                                      cmVersion::GetCMakeVersion());
+
+    this->SetDefinition("CMAKE_FILES_DIRECTORY",
+                        cmake::GetCMakeFilesDirectory());
 }
 
 void cmState::Snapshot::SetDirectoryDefinitions()

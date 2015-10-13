@@ -589,6 +589,7 @@ void cmGlobalUnixMakefileGenerator3
         (this->CMakeInstance->GetHomeDirectory());
       snapshot.GetDirectory().SetCurrentBinary
         (this->CMakeInstance->GetHomeOutputDirectory());
+      snapshot.SetDefaultDefinitions();
       mf = new cmMakefile(this, snapshot);
       }
 
