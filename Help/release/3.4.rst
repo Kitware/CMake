@@ -267,3 +267,7 @@ Other Changes
   created with the :command:`add_library` command.  ``MODULE``
   libraries are meant for explicit dynamic loading at runtime.
   They cannot be linked so ``SONAME`` is not useful.
+
+* The internal :variable:`CMAKE_<LANG>_COMPILE_OBJECT` rule variable now
+  substitutes compiler include flags in a separate ``<INCLUDES>`` placeholder
+  instead of the main ``<FLAGS>`` placeholder.
