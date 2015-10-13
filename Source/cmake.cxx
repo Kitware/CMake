@@ -980,6 +980,10 @@ cmGlobalGenerator* cmake::CreateGlobalGenerator(const std::string& gname)
 void cmake::SetHomeDirectory(const std::string& dir)
 {
   this->State->SetSourceDirectory(dir);
+  if (this->CurrentSnapshot.IsValid())
+    {
+    this->CurrentSnapshot.SetDefinition("CMAKE_SOURCE_DIR", dir);
+    }
 }
 
 const char* cmake::GetHomeDirectory() const
@@ -990,6 +994,10 @@ const char* cmake::GetHomeDirectory() const
 void cmake::SetHomeOutputDirectory(const std::string& dir)
 {
   this->State->SetBinaryDirectory(dir);
+  if (this->CurrentSnapshot.IsValid())
+    {
+    this->CurrentSnapshot.SetDefinition("CMAKE_BINARY_DIR", dir);
+    }
 }
 
 const char* cmake::GetHomeOutputDirectory() const

@@ -306,10 +306,20 @@ cmState::Snapshot cmState::Reset()
   pos->PolicyScope = this->PolicyStack.Root();
   assert(pos->Policies.IsValid());
   assert(pos->PolicyRoot.IsValid());
+
+  {
+  std::string srcDir =
+      cmDefinitions::Get("CMAKE_SOURCE_DIR", pos->Vars, pos->Root);
+  std::string binDir =
+      cmDefinitions::Get("CMAKE_BINARY_DIR", pos->Vars, pos->Root);
   this->VarTree.Clear();
   pos->Vars = this->VarTree.Extend(this->VarTree.Root());
   pos->Parent = this->VarTree.Root();
   pos->Root = this->VarTree.Root();
+
+  pos->Vars->Set("CMAKE_SOURCE_DIR", srcDir.c_str());
+  pos->Vars->Set("CMAKE_BINARY_DIR", binDir.c_str());
+  }
 
   this->DefineProperty
     ("RULE_LAUNCH_COMPILE", cmProperty::DIRECTORY,
@@ -838,6 +848,7 @@ cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot,
   cmState::Snapshot snapshot = cmState::Snapshot(this, pos);
   originSnapshot.Position->BuildSystemDirectory->Children.push_back(snapshot);
   snapshot.InitializeFromParent();
+  snapshot.SetDirectoryDefinitions();
   return snapshot;
 }
 
@@ -1316,6 +1327,14 @@ void InitializeContentFromParent(T& parentContent,
   thisBacktraces = std::vector<cmListFileBacktrace>(btIt, btEnd);
 
   contentEndPosition = thisContent.size();
+}
+
+void cmState::Snapshot::SetDirectoryDefinitions()
+{
+  this->SetDefinition("CMAKE_SOURCE_DIR",
+                      this->State->GetSourceDirectory());
+  this->SetDefinition("CMAKE_BINARY_DIR",
+                      this->State->GetBinaryDirectory());
 }
 
 void cmState::Snapshot::InitializeFromParent()

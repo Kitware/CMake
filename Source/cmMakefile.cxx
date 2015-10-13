@@ -119,10 +119,6 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
   this->AddSourceGroup("Object Files", "\\.(lo|o|obj)$");
 #endif
 
-  this->StateSnapshot.SetDefinition("CMAKE_SOURCE_DIR",
-                      this->GetCMakeInstance()->GetHomeDirectory());
-  this->StateSnapshot.SetDefinition("CMAKE_BINARY_DIR",
-                      this->GetCMakeInstance()->GetHomeOutputDirectory());
   {
   const char* dir = this->StateSnapshot.GetDirectory().GetCurrentSource();
   if (dir)
