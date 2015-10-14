@@ -89,7 +89,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   // be translated.
   std::string exe = command[0];
   cmGeneratorTarget* target =
-      this->LG->GetMakefile()->FindGeneratorTargetToUse(exe);
+      this->LG->FindGeneratorTargetToUse(exe);
   if(target && target->GetType() == cmTarget::EXECUTABLE)
     {
     // Use the target file on disk.
@@ -117,7 +117,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   else
     {
     // Use the command name given.
-    exe = ge.Parse(exe.c_str())->Evaluate(this->LG->GetMakefile(), config);
+    exe = ge.Parse(exe.c_str())->Evaluate(this->LG, config);
     cmSystemTools::ConvertToUnixSlashes(exe);
     }
 
@@ -128,7 +128,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
     {
     os << " " << cmOutputConverter::EscapeForCMake(
                                          ge.Parse(*ci)->Evaluate(
-                                            this->LG->GetMakefile(), config));
+                                            this->LG, config));
     }
 
   // Finish the test command.
@@ -145,7 +145,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
       {
       os << " " << i->first
          << " " << cmOutputConverter::EscapeForCMake(
-           ge.Parse(i->second.GetValue())->Evaluate(this->LG->GetMakefile(),
+           ge.Parse(i->second.GetValue())->Evaluate(this->LG,
                                                     config));
       }
     os << ")" << std::endl;

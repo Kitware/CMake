@@ -43,15 +43,14 @@ std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
 {
   std::string const& argv0 = this->CC.GetCommandLines()[c][0];
   cmGeneratorTarget* target =
-      this->LG->GetMakefile()->FindGeneratorTargetToUse(argv0);
+      this->LG->FindGeneratorTargetToUse(argv0);
   if(target && target->GetType() == cmTarget::EXECUTABLE &&
      (target->Target->IsImported()
       || !this->LG->GetMakefile()->IsOn("CMAKE_CROSSCOMPILING")))
     {
     return target->GetLocation(this->Config);
     }
-  return this->GE->Parse(argv0)->Evaluate(this->LG->GetMakefile(),
-                                          this->Config);
+  return this->GE->Parse(argv0)->Evaluate(this->LG, this->Config);
 }
 
 //----------------------------------------------------------------------------
@@ -92,7 +91,7 @@ cmCustomCommandGenerator
   for(unsigned int j=1;j < commandLine.size(); ++j)
     {
     std::string arg =
-        this->GE->Parse(commandLine[j])->Evaluate(this->LG->GetMakefile(),
+        this->GE->Parse(commandLine[j])->Evaluate(this->LG,
                                                   this->Config);
     cmd += " ";
     if(this->OldStyle)
@@ -146,7 +145,7 @@ std::vector<std::string> const& cmCustomCommandGenerator::GetDepends() const
                                               = this->GE->Parse(*i);
       std::vector<std::string> result;
       cmSystemTools::ExpandListArgument(
-            cge->Evaluate(this->LG->GetMakefile(), this->Config), result);
+            cge->Evaluate(this->LG, this->Config), result);
       for (std::vector<std::string>::iterator it = result.begin();
           it != result.end(); ++it)
         {

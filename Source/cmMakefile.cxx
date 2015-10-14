@@ -667,6 +667,29 @@ cmMakefile::GetEvaluationFiles() const
   return this->EvaluationFiles;
 }
 
+std::vector<cmExportBuildFileGenerator*>
+cmMakefile::GetExportBuildFileGenerators() const
+{
+  return this->ExportBuildFileGenerators;
+}
+
+void cmMakefile::RemoveExportBuildFileGeneratorCMP0024(
+    cmExportBuildFileGenerator* gen)
+{
+  std::vector<cmExportBuildFileGenerator*>::iterator it =
+      std::find(this->ExportBuildFileGenerators.begin(),
+                this->ExportBuildFileGenerators.end(), gen);
+  if(it != this->ExportBuildFileGenerators.end())
+    {
+    this->ExportBuildFileGenerators.erase(it);
+    }
+}
+
+void cmMakefile::AddExportBuildFileGenerator(cmExportBuildFileGenerator* gen)
+{
+  this->ExportBuildFileGenerators.push_back(gen);
+}
+
 namespace
 {
   struct file_not_persistent
@@ -1755,12 +1778,6 @@ const char* cmMakefile::GetCurrentSourceDirectory() const
 const char* cmMakefile::GetCurrentBinaryDirectory() const
 {
   return this->StateSnapshot.GetDirectory().GetCurrentBinary();
-}
-
-void cmMakefile::AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt)
-{
-  this->GeneratorTargets[t] = gt;
-  this->GetGlobalGenerator()->AddGeneratorTarget(t, gt);
 }
 
 //----------------------------------------------------------------------------
@@ -4211,17 +4228,6 @@ bool cmMakefile::IsAlias(const std::string& name) const
   if (this->AliasTargets.find(name) != this->AliasTargets.end())
     return true;
   return this->GetGlobalGenerator()->IsAlias(name);
-}
-
-//----------------------------------------------------------------------------
-cmGeneratorTarget*
-cmMakefile::FindGeneratorTargetToUse(const std::string& name) const
-{
-  if (cmTarget *t = this->FindTargetToUse(name))
-    {
-    return this->GetGlobalGenerator()->GetGeneratorTarget(t);
-    }
-  return 0;
 }
 
 //----------------------------------------------------------------------------

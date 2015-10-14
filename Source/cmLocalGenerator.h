@@ -112,6 +112,19 @@ public:
                               bool forResponseFile = false,
                               const std::string& config = "");
 
+  const cmGeneratorTargetsType &GetGeneratorTargets() const
+    {
+      return this->GeneratorTargets;
+    }
+
+  void SetGeneratorTargets(const cmGeneratorTargetsType &targets)
+    {
+      this->GeneratorTargets = targets;
+    }
+  void AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt);
+
+  cmGeneratorTarget* FindGeneratorTargetToUse(const std::string& name) const;
+
   /**
    * Encode a list of preprocessor definitions for the compiler
    * command line.
@@ -354,6 +367,7 @@ protected:
   std::set<std::string> ObjectMaxPathViolations;
 
   std::set<cmTarget const*> WarnCMP0063;
+  cmGeneratorTargetsType GeneratorTargets;
 
   bool EmitUniversalBinaryFlags;
 

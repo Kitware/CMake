@@ -19,13 +19,15 @@
 #include <string>
 
 class cmTarget;
+class cmGeneratorTarget;
+class cmLocalGenerator;
 
 //----------------------------------------------------------------------------
 struct cmGeneratorExpressionContext
 {
-  cmGeneratorExpressionContext(cmMakefile* mf, std::string const& config,
-                               bool quiet, cmTarget const* headTarget,
-                               cmTarget const* currentTarget,
+  cmGeneratorExpressionContext(cmLocalGenerator* lg, std::string const& config,
+                               bool quiet, const cmGeneratorTarget* headTarget,
+                               cmGeneratorTarget const* currentTarget,
                                bool evaluateForBuildsystem,
                                cmListFileBacktrace const& backtrace,
                                std::string const& language);
@@ -38,7 +40,7 @@ struct cmGeneratorExpressionContext
   std::set<cmTarget const*> SourceSensitiveTargets;
   std::map<cmTarget const*, std::map<std::string, std::string> >
                                                           MaxLanguageStandard;
-  cmMakefile *Makefile;
+  cmLocalGenerator *LG;
   std::string Config;
   std::string Language;
   cmTarget const* HeadTarget; // The target whose property is being evaluated.

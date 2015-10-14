@@ -18,10 +18,15 @@
 
 //----------------------------------------------------------------------------
 cmExportBuildFileGenerator::cmExportBuildFileGenerator()
-  : Backtrace()
 {
-  this->Makefile = 0;
+  this->LG = 0;
   this->ExportSet = 0;
+}
+
+//----------------------------------------------------------------------------
+void cmExportBuildFileGenerator::Compute(cmLocalGenerator* lg)
+{
+  this->LG = lg;
 }
 
 //----------------------------------------------------------------------------
@@ -37,7 +42,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
         tei = targets.begin();
       tei != targets.end(); ++tei)
     {
-    cmGeneratorTarget *te = this->Makefile
+    cmGeneratorTarget *te = this->LG
                                 ->FindGeneratorTargetToUse(*tei);
     expectedTargets += sep + this->Namespace + te->Target->GetExportName();
     sep = " ";
@@ -49,8 +54,9 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
       {
       std::ostringstream e;
       e << "given target \"" << te->GetName() << "\" more than once.";
-      this->Makefile->GetCMakeInstance()
-          ->IssueMessage(cmake::FATAL_ERROR, e.str(), this->Backtrace);
+      this->LG->GetGlobalGenerator()->GetCMakeInstance()
+          ->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                         this->LG->GetMakefile()->GetBacktrace());
       return false;
       }
     if (te->GetType() == cmTarget::INTERFACE_LIBRARY)
@@ -328,8 +334,9 @@ cmExportBuildFileGenerator
   e << "If the required target is not easy to reference in this call, "
     << "consider using the APPEND option with multiple separate calls.";
 
-  this->Makefile->GetCMakeInstance()
-      ->IssueMessage(cmake::FATAL_ERROR, e.str(), this->Backtrace);
+  this->LG->GetGlobalGenerator()->GetCMakeInstance()
+      ->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                     this->LG->GetMakefile()->GetBacktrace());
 }
 
 std::string

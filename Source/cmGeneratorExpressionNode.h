@@ -54,9 +54,10 @@ struct cmGeneratorExpressionNode
                               ) const = 0;
 
   static std::string EvaluateDependentExpression(
-    std::string const& prop, cmMakefile *makefile,
+    std::string const& prop, cmLocalGenerator *lg,
     cmGeneratorExpressionContext *context,
-    cmTarget const* headTarget, cmTarget const* currentTarget,
+    const cmGeneratorTarget* headTarget,
+    const cmGeneratorTarget* currentTarget,
     cmGeneratorExpressionDAGChecker *dagChecker);
 
   static const cmGeneratorExpressionNode* GetNode(

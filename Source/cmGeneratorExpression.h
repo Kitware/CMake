@@ -20,7 +20,8 @@
 #include <cmsys/auto_ptr.hxx>
 
 class cmTarget;
-class cmMakefile;
+class cmGeneratorTarget;
+class cmLocalGenerator;
 class cmListFileBacktrace;
 
 struct cmGeneratorExpressionEvaluator;
@@ -78,15 +79,15 @@ private:
 class cmCompiledGeneratorExpression
 {
 public:
-  const char* Evaluate(cmMakefile* mf, const std::string& config,
+  const char* Evaluate(cmLocalGenerator* lg, const std::string& config,
                        bool quiet = false,
-                       cmTarget const* headTarget = 0,
-                       cmTarget const* currentTarget = 0,
+                       cmGeneratorTarget const* headTarget = 0,
+                       cmGeneratorTarget const* currentTarget = 0,
                        cmGeneratorExpressionDAGChecker *dagChecker = 0,
                        std::string const& language = std::string()) const;
-  const char* Evaluate(cmMakefile* mf, const std::string& config,
+  const char* Evaluate(cmLocalGenerator* lg, const std::string& config,
                        bool quiet,
-                       cmTarget const* headTarget,
+                       cmGeneratorTarget const* headTarget,
                        cmGeneratorExpressionDAGChecker *dagChecker,
                        std::string const& language = std::string()) const;
 

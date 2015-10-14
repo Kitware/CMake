@@ -73,7 +73,7 @@ void cmLocalNinjaGenerator::Generate()
       }
     }
 
-  cmGeneratorTargetsType targets = this->GetMakefile()->GetGeneratorTargets();
+  cmGeneratorTargetsType targets = this->GetGeneratorTargets();
   for(cmGeneratorTargetsType::iterator t = targets.begin();
       t != targets.end(); ++t)
     {

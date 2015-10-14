@@ -886,7 +886,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
                                 commandLines, false, autogenComment.c_str());
 
     cmGeneratorTarget* gt = new cmGeneratorTarget(autogenTarget, lg);
-    makefile->AddGeneratorTarget(autogenTarget, gt);
+    lg->AddGeneratorTarget(autogenTarget, gt);
 
     // Set target folder
     const char* autogenFolder = makefile->GetState()

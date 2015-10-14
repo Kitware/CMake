@@ -18,7 +18,7 @@ void cmCPackPropertiesGenerator::GenerateScriptForConfig(std::ostream& os,
   const std::string& config, Indent const& indent)
 {
   std::string const& expandedFileName =
-      this->InstalledFile.GetNameExpression().Evaluate(this->LG->GetMakefile(),
+      this->InstalledFile.GetNameExpression().Evaluate(this->LG,
                                                        config);
 
   cmInstalledFile::PropertyMapType const& properties =
@@ -38,7 +38,7 @@ void cmCPackPropertiesGenerator::GenerateScriptForConfig(std::ostream& os,
       j = property.ValueExpressions.begin();
       j != property.ValueExpressions.end(); ++j)
       {
-      std::string value = (*j)->Evaluate(LG->GetMakefile(), config);
+      std::string value = (*j)->Evaluate(this->LG, config);
       os << " " << cmOutputConverter::EscapeForCMake(value);
       }
 

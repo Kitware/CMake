@@ -87,7 +87,7 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
                           "Build all projects");
 
       cmGeneratorTarget* gt = new cmGeneratorTarget(allBuild, gen[0]);
-      allBuild->GetMakefile()->AddGeneratorTarget(allBuild, gt);
+      gen[0]->AddGeneratorTarget(allBuild, gt);
 
 #if 0
       // Can't activate this code because we want ALL_BUILD
@@ -108,7 +108,7 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
           i != gen.end(); ++i)
         {
         cmGeneratorTargetsType targets =
-            (*i)->GetMakefile()->GetGeneratorTargets();
+            (*i)->GetGeneratorTargets();
         for(cmGeneratorTargetsType::iterator t = targets.begin();
             t != targets.end(); ++t)
           {

@@ -351,7 +351,7 @@ cmInstallTargetGenerator::GetDestination(std::string const& config) const
 {
   cmGeneratorExpression ge;
   return ge.Parse(this->Destination)
-    ->Evaluate(this->Target->Target->GetMakefile(), config);
+    ->Evaluate(this->Target->GetLocalGenerator(), config);
 }
 
 //----------------------------------------------------------------------------

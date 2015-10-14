@@ -453,7 +453,7 @@ std::string cmGeneratorTarget::GetOutputName(const std::string& config,
     // Now evaluate genex and update the previously-prepared map entry.
     cmGeneratorExpression ge;
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(outName);
-    i->second = cge->Evaluate(this->Makefile, config);
+    i->second = cge->Evaluate(this->LocalGenerator, config);
     }
   else if(i->second.empty())
     {
@@ -510,7 +510,7 @@ cmGeneratorTarget::GetSourceDepends(cmSourceFile const* sf) const
   return 0;
 }
 
-static void handleSystemIncludesDep(cmMakefile *mf,
+static void handleSystemIncludesDep(cmLocalGenerator *lg,
                                   cmGeneratorTarget const* depTgt,
                                   const std::string& config,
                                   cmGeneratorTarget const* headTarget,
@@ -523,9 +523,9 @@ static void handleSystemIncludesDep(cmMakefile *mf,
     {
     cmGeneratorExpression ge;
     cmSystemTools::ExpandListArgument(ge.Parse(dirs)
-                                      ->Evaluate(mf,
-                                      config, false, headTarget->Target,
-                                      depTgt->Target, dagChecker), result);
+                                      ->Evaluate(lg,
+                                      config, false, headTarget,
+                                      depTgt, dagChecker), result);
     }
   if (!depTgt->IsImported() || excludeImported)
     {
@@ -537,9 +537,9 @@ static void handleSystemIncludesDep(cmMakefile *mf,
     {
     cmGeneratorExpression ge;
     cmSystemTools::ExpandListArgument(ge.Parse(dirs)
-                                      ->Evaluate(mf,
-                                      config, false, headTarget->Target,
-                                      depTgt->Target, dagChecker), result);
+                                      ->Evaluate(lg,
+                                      config, false, headTarget,
+                                      depTgt, dagChecker), result);
     }
 }
 
@@ -879,8 +879,8 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
       {
       cmGeneratorExpression ge;
       cmSystemTools::ExpandListArgument(ge.Parse(*it)
-                                          ->Evaluate(this->Makefile,
-                                          config, false, this->Target,
+                                          ->Evaluate(this->LocalGenerator,
+                                          config, false, this,
                                           &dagChecker), result);
       }
 
@@ -889,7 +889,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
     for(std::vector<cmGeneratorTarget const*>::const_iterator
           li = deps.begin(), le = deps.end(); li != le; ++li)
       {
-      handleSystemIncludesDep(this->Makefile, *li, config, this,
+      handleSystemIncludesDep(this->LocalGenerator, *li, config, this,
                               &dagChecker, result, excludeImported);
       }
 
@@ -961,11 +961,12 @@ static bool processSources(cmGeneratorTarget const* tgt,
     cmLinkImplItem const& item = (*it)->LinkImplItem;
     std::string const& targetName = item;
     std::vector<std::string> entrySources;
-    cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(mf,
+    cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(
+                                              tgt->GetLocalGenerator(),
                                               config,
                                               false,
-                                              tgt->Target,
-                                              tgt->Target,
+                                              tgt,
+                                              tgt,
                                               dagChecker),
                                     entrySources);
 
@@ -2054,10 +2055,10 @@ void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string> &result,
                                       this->GetName(),
                                       "AUTOUIC_OPTIONS", 0, 0);
   cmSystemTools::ExpandListArgument(ge.Parse(prop)
-                                      ->Evaluate(this->Makefile,
+                                      ->Evaluate(this->LocalGenerator,
                                                 config,
                                                 false,
-                                                this->Target,
+                                                this,
                                                 &dagChecker),
                                   result);
 }
@@ -2304,7 +2305,8 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
 
   // Check for a target with this name.
   if(cmGeneratorTarget* t
-                    = this->Makefile->FindGeneratorTargetToUse(util))
+                    = this->GeneratorTarget->
+                    GetLocalGenerator()->FindGeneratorTargetToUse(util))
     {
     // If we find the target and the dep was given as a full path,
     // then make sure it was not a full path to something else, and
@@ -2376,7 +2378,7 @@ cmTargetTraceDependencies
       {
       const cmsys::auto_ptr<cmCompiledGeneratorExpression> cge
                                                               = ge.Parse(*cli);
-      cge->Evaluate(this->Makefile, "", true);
+      cge->Evaluate(this->GeneratorTarget->GetLocalGenerator(), "", true);
       std::set<cmTarget*> geTargets = cge->GetTargets();
       targets.insert(geTargets.begin(), geTargets.end());
       }
@@ -2530,8 +2532,6 @@ static void processIncludeDirectories(cmGeneratorTarget const* tgt,
       const std::string& config, bool debugIncludes,
       const std::string& language)
 {
-  cmMakefile *mf = tgt->Target->GetMakefile();
-
   for (std::vector<cmGeneratorTarget::TargetPropertyEntry*>::const_iterator
       it = entries.begin(), end = entries.end(); it != end; ++it)
     {
@@ -2540,10 +2540,11 @@ static void processIncludeDirectories(cmGeneratorTarget const* tgt,
     bool const fromImported = item.Target && item.Target->IsImported();
     bool const checkCMP0027 = item.FromGenex;
     std::vector<std::string> entryIncludes;
-    cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(mf,
+    cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(
+                                        tgt->GetLocalGenerator(),
                                               config,
                                               false,
-                                              tgt->Target,
+                                              tgt,
                                               dagChecker, language),
                                     entryIncludes);
 
@@ -2746,16 +2747,15 @@ static void processCompileOptionsInternal(cmGeneratorTarget const* tgt,
       const std::string& config, bool debugOptions, const char *logName,
       std::string const& language)
 {
-  cmMakefile *mf = tgt->Target->GetMakefile();
-
   for (std::vector<cmGeneratorTarget::TargetPropertyEntry*>::const_iterator
       it = entries.begin(), end = entries.end(); it != end; ++it)
     {
     std::vector<std::string> entryOptions;
-    cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(mf,
+    cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(
+                                        tgt->GetLocalGenerator(),
                                               config,
                                               false,
-                                              tgt->Target,
+                                              tgt,
                                               dagChecker,
                                               language),
                                     entryOptions);
@@ -4452,11 +4452,11 @@ void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
   std::vector<std::string> libs;
   cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
   cmSystemTools::ExpandListArgument(cge->Evaluate(
-                                      this->Makefile,
+                                      this->LocalGenerator,
                                       config,
                                       false,
-                                      headTarget->Target,
-                                      this->Target, &dagChecker), libs);
+                                      headTarget,
+                                      this, &dagChecker), libs);
   this->LookupLinkItems(libs, items);
   hadHeadSensitiveCondition = cge->GetHadHeadSensitiveCondition();
 }
@@ -4777,7 +4777,7 @@ bool cmGeneratorTarget::ComputeOutputDir(const std::string& config,
     cmGeneratorExpression ge;
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
       ge.Parse(config_outdir);
-    out = cge->Evaluate(this->Makefile, config);
+    out = cge->Evaluate(this->LocalGenerator, config);
 
     // Skip per-configuration subdirectory.
     conf = "";
@@ -4788,7 +4788,7 @@ bool cmGeneratorTarget::ComputeOutputDir(const std::string& config,
     cmGeneratorExpression ge;
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
       ge.Parse(outdir);
-    out = cge->Evaluate(this->Makefile, config);
+    out = cge->Evaluate(this->LocalGenerator, config);
 
     // Skip per-configuration subdirectory if the value contained a
     // generator expression.
@@ -5347,7 +5347,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     cmsys::auto_ptr<cmCompiledGeneratorExpression> const cge =
       ge.Parse(*le);
     std::string const evaluated =
-      cge->Evaluate(this->Makefile, config, false, head->Target, &dagChecker);
+      cge->Evaluate(this->LocalGenerator, config, false, head, &dagChecker);
     cmSystemTools::ExpandListArgument(evaluated, llibs);
     if(cge->GetHadHeadSensitiveCondition())
       {

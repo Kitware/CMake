@@ -965,8 +965,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
        it != this->GlobalGenerator->GetLocalGenerators().end();
        ++it)
     {
-    cmGeneratorTargetsType targets = (*it)->GetMakefile()
-                                        ->GetGeneratorTargets();
+    cmGeneratorTargetsType targets = (*it)->GetGeneratorTargets();
     for (cmGeneratorTargetsType::iterator l = targets.begin();
          l != targets.end(); ++l)
       {
