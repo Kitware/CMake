@@ -389,7 +389,7 @@ cmLocalUnixMakefileGenerator3
       t != info.end(); ++t)
     {
     std::string tgtMakefileName =
-      this->GetRelativeTargetDirectory(*(t->Target->Target));
+      this->GetRelativeTargetDirectory(t->Target);
     std::string targetName = tgtMakefileName;
     tgtMakefileName += "/build.make";
     targetName += "/";
@@ -438,7 +438,7 @@ void cmLocalUnixMakefileGenerator3
       emitted.insert(t->second->GetName());
 
       // for subdirs add a rule to build this specific target by name.
-      localName = this->GetRelativeTargetDirectory(*t->second->Target);
+      localName = this->GetRelativeTargetDirectory(t->second);
       localName += "/rule";
       commands.clear();
       depends.clear();
@@ -465,11 +465,11 @@ void cmLocalUnixMakefileGenerator3
 
       // Add a fast rule to build the target
       std::string makefileName =
-                         this->GetRelativeTargetDirectory(*t->second->Target);
+                         this->GetRelativeTargetDirectory(t->second);
       makefileName += "/build.make";
       // make sure the makefile name is suitable for a makefile
       std::string makeTargetName =
-        this->GetRelativeTargetDirectory(*t->second->Target);
+        this->GetRelativeTargetDirectory(t->second);
       makeTargetName += "/build";
       localName = t->second->GetName();
       localName += "/fast";
@@ -487,7 +487,7 @@ void cmLocalUnixMakefileGenerator3
       // installation.
       if(t->second->NeedRelinkBeforeInstall(this->ConfigName))
         {
-        makeTargetName = this->GetRelativeTargetDirectory(*t->second->Target);
+        makeTargetName = this->GetRelativeTargetDirectory(t->second);
         makeTargetName += "/preinstall";
         localName = t->second->GetName();
         localName += "/preinstall";
@@ -933,10 +933,10 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3
-::GetRelativeTargetDirectory(cmTarget const& target)
+::GetRelativeTargetDirectory(cmGeneratorTarget* target)
 {
   std::string dir = this->HomeRelativeOutputPath;
-  dir += this->GetTargetDirectory(target);
+  dir += this->GetTargetDirectory(*target->Target);
   return this->Convert(dir,NONE,UNCHANGED);
 }
 
