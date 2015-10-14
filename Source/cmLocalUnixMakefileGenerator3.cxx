@@ -209,7 +209,7 @@ GetLocalObjectFiles(std::map<std::string, LocalObjectInfo> &localObjectFiles)
         }
       LocalObjectInfo& info = localObjectFiles[objectName];
       info.HasSourceExtension = hasSourceExtension;
-      info.push_back(LocalObjectEntry(gt->Target, sf->GetLanguage()));
+      info.push_back(LocalObjectEntry(gt, sf->GetLanguage()));
       }
     }
 }
@@ -389,7 +389,7 @@ cmLocalUnixMakefileGenerator3
       t != info.end(); ++t)
     {
     std::string tgtMakefileName =
-      this->GetRelativeTargetDirectory(*(t->Target));
+      this->GetRelativeTargetDirectory(*(t->Target->Target));
     std::string targetName = tgtMakefileName;
     tgtMakefileName += "/build.make";
     targetName += "/";

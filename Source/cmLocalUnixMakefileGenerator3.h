@@ -254,10 +254,10 @@ private:
 
   struct LocalObjectEntry
   {
-    cmTarget* Target;
+    cmGeneratorTarget* Target;
     std::string Language;
     LocalObjectEntry(): Target(0), Language() {}
-    LocalObjectEntry(cmTarget* t, const std::string& lang):
+    LocalObjectEntry(cmGeneratorTarget* t, const std::string& lang):
       Target(t), Language(lang) {}
   };
   struct LocalObjectInfo: public std::vector<LocalObjectEntry>
