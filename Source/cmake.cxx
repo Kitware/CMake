@@ -186,6 +186,7 @@ void cmake::CleanupCommandsAndMacros()
 {
   this->CurrentSnapshot = this->State->Reset();
   this->State->RemoveUserDefinedCommands();
+  this->CurrentSnapshot.SetDefaultDefinitions();
 }
 
 // Parse the args
@@ -378,6 +379,7 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
       (cmSystemTools::GetCurrentWorkingDirectory());
     snapshot.GetDirectory().SetCurrentSource
       (cmSystemTools::GetCurrentWorkingDirectory());
+    snapshot.SetDefaultDefinitions();
     cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(gg, snapshot));
     if (this->GetWorkingMode() != NORMAL_MODE)
       {
@@ -420,6 +422,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
   snapshot.GetDirectory().SetCurrentSource
     (cmSystemTools::GetCurrentWorkingDirectory());
   // read in the list file to fill the cache
+  snapshot.SetDefaultDefinitions();
   cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(gg, snapshot));
   cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator(mf.get()));
 
@@ -980,6 +983,10 @@ cmGlobalGenerator* cmake::CreateGlobalGenerator(const std::string& gname)
 void cmake::SetHomeDirectory(const std::string& dir)
 {
   this->State->SetSourceDirectory(dir);
+  if (this->CurrentSnapshot.IsValid())
+    {
+    this->CurrentSnapshot.SetDefinition("CMAKE_SOURCE_DIR", dir);
+    }
 }
 
 const char* cmake::GetHomeDirectory() const
@@ -990,6 +997,10 @@ const char* cmake::GetHomeDirectory() const
 void cmake::SetHomeOutputDirectory(const std::string& dir)
 {
   this->State->SetBinaryDirectory(dir);
+  if (this->CurrentSnapshot.IsValid())
+    {
+    this->CurrentSnapshot.SetDefinition("CMAKE_BINARY_DIR", dir);
+    }
 }
 
 const char* cmake::GetHomeOutputDirectory() const
@@ -1920,6 +1931,7 @@ int cmake::CheckBuildSystem()
   cmake cm;
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
+  cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
   cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(&gg, cm.GetCurrentSnapshot()));
   if(!mf->ReadListFile(this->CheckBuildSystemArgument.c_str()) ||
@@ -1950,6 +1962,7 @@ int cmake::CheckBuildSystem()
       ggd(this->CreateGlobalGenerator(genName));
     if(ggd.get())
       {
+      cm.GetCurrentSnapshot().SetDefaultDefinitions();
       cmsys::auto_ptr<cmMakefile> mfd(new cmMakefile(ggd.get(),
                                                     cm.GetCurrentSnapshot()));
       cmsys::auto_ptr<cmLocalGenerator> lgd(

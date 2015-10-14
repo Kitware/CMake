@@ -314,6 +314,7 @@ void cmCTestScriptHandler::CreateCMake()
   this->CMake = new cmake;
   this->CMake->SetHomeDirectory("");
   this->CMake->SetHomeOutputDirectory("");
+  this->CMake->GetCurrentSnapshot().SetDefaultDefinitions();
   this->CMake->AddCMakePaths();
   this->GlobalGenerator = new cmGlobalGenerator(this->CMake);
 

@@ -1,6 +1,10 @@
 cmake_minimum_required (VERSION 2.6)
 project(SUBDIR)
+
 subdirs(Executable EXCLUDE_FROM_ALL Examples)
+
+set(DEFINED_AFTER_SUBDIRS_COMMAND 42)
+
 write_file(${SUBDIR_BINARY_DIR}/ShouldBeHere "This file should exist.")
 #WATCOM WMAKE does not support + in the name of a file!
 if(WATCOM)

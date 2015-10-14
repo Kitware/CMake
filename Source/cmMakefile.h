@@ -867,7 +867,6 @@ private:
   friend class cmMakeDepend;    // make depend needs direct access
                                 // to the Sources array
 
-  void AddDefaultDefinitions();
   typedef std::vector<cmFunctionBlocker*> FunctionBlockersType;
   FunctionBlockersType FunctionBlockers;
   std::vector<FunctionBlockersType::size_type> FunctionBlockerBarriers;

@@ -50,14 +50,11 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
 {
   this->IsSourceFileTryCompile = false;
 
-  // Initialize these first since AddDefaultDefinitions calls AddDefinition
   this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
   this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
 
   this->SuppressWatches = false;
 
-  // Setup the default include file regular expression (match everything).
-  this->SetProperty("INCLUDE_REGULAR_EXPRESSION", "^.*$");
   // Setup the default include complaint regular expression (match nothing).
   this->ComplainFileRegularExpression = "^$";
   // Source and header file extensions that we can handle
@@ -88,8 +85,6 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
 
   this->DefineFlags = " ";
 
-  this->AddDefaultDefinitions();
-
   this->cmDefineRegex.compile("#cmakedefine[ \t]+([A-Za-z_0-9]*)");
   this->cmDefine01Regex.compile("#cmakedefine01[ \t]+([A-Za-z_0-9]*)");
   this->cmAtVarRegex.compile("(@[A-Za-z_0-9/.+-]+@)");
@@ -119,36 +114,6 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
   this->AddSourceGroup("Resources", "\\.plist$");
   this->AddSourceGroup("Object Files", "\\.(lo|o|obj)$");
 #endif
-
-  this->AddDefinition("CMAKE_SOURCE_DIR",
-                      this->GetCMakeInstance()->GetHomeDirectory());
-  this->AddDefinition("CMAKE_BINARY_DIR",
-                      this->GetCMakeInstance()->GetHomeOutputDirectory());
-  {
-  const char* dir = this->StateSnapshot.GetDirectory().GetCurrentSource();
-  if (dir)
-    {
-    this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", dir);
-    }
-  else
-    {
-    this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
-                        this->GetCMakeInstance()->GetHomeDirectory());
-    }
-  }
-  {
-  const char* dir = this->StateSnapshot.GetDirectory().GetCurrentBinary();
-  if (dir)
-    {
-    cmSystemTools::MakeDirectory(dir);
-    this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", dir);
-    }
-  else
-    {
-    this->AddDefinition("CMAKE_CURRENT_BINARY_DIR",
-                        this->GetCMakeInstance()->GetHomeOutputDirectory());
-    }
-  }
 }
 
 cmMakefile::~cmMakefile()
@@ -1682,6 +1647,7 @@ void cmMakefile::Configure()
   std::vector<cmMakefile*>::iterator sdi = subdirs.begin();
   for (; sdi != subdirs.end(); ++sdi)
     {
+    (*sdi)->StateSnapshot.InitializeFromParent_ForSubdirsCommand();
     this->ConfigureSubDirectory(*sdi);
     }
 
@@ -1760,6 +1726,8 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
 
   newSnapshot.GetDirectory().SetCurrentSource(srcPath);
   newSnapshot.GetDirectory().SetCurrentBinary(binPath);
+
+  cmSystemTools::MakeDirectory(binPath.c_str());
 
   cmMakefile* subMf = new cmMakefile(this->GlobalGenerator, newSnapshot);
   this->GetGlobalGenerator()->AddMakefile(subMf);
@@ -3150,58 +3118,6 @@ void cmMakefile::RemoveVariablesInString(std::string& source,
     {
     source.erase(var2.start(),var2.end() - var2.start());
     }
-}
-
-/**
- * Add the default definitions to the makefile.  These values must not
- * be dependent on anything that isn't known when this cmMakefile instance
- * is constructed.
- */
-void cmMakefile::AddDefaultDefinitions()
-{
-/* Up to CMake 2.4 here only WIN32, UNIX and APPLE were set.
-  With CMake must separate between target and host platform. In most cases
-  the tests for WIN32, UNIX and APPLE will be for the target system, so an
-  additional set of variables for the host system is required ->
-  CMAKE_HOST_WIN32, CMAKE_HOST_UNIX, CMAKE_HOST_APPLE.
-  WIN32, UNIX and APPLE are now set in the platform files in
-  Modules/Platforms/.
-  To keep cmake scripts (-P) and custom language and compiler modules
-  working, these variables are still also set here in this place, but they
-  will be reset in CMakeSystemSpecificInformation.cmake before the platform
-  files are executed. */
-#if defined(_WIN32)
-  this->AddDefinition("WIN32", "1");
-  this->AddDefinition("CMAKE_HOST_WIN32", "1");
-#else
-  this->AddDefinition("UNIX", "1");
-  this->AddDefinition("CMAKE_HOST_UNIX", "1");
-#endif
-#if defined(__CYGWIN__)
-  if(cmSystemTools::IsOn(cmSystemTools::GetEnv("CMAKE_LEGACY_CYGWIN_WIN32")))
-    {
-    this->AddDefinition("WIN32", "1");
-    this->AddDefinition("CMAKE_HOST_WIN32", "1");
-    }
-#endif
-#if defined(__APPLE__)
-  this->AddDefinition("APPLE", "1");
-  this->AddDefinition("CMAKE_HOST_APPLE", "1");
-#endif
-
-  char temp[1024];
-  sprintf(temp, "%d", cmVersion::GetMinorVersion());
-  this->AddDefinition("CMAKE_MINOR_VERSION", temp);
-  sprintf(temp, "%d", cmVersion::GetMajorVersion());
-  this->AddDefinition("CMAKE_MAJOR_VERSION", temp);
-  sprintf(temp, "%d", cmVersion::GetPatchVersion());
-  this->AddDefinition("CMAKE_PATCH_VERSION", temp);
-  sprintf(temp, "%d", cmVersion::GetTweakVersion());
-  this->AddDefinition("CMAKE_TWEAK_VERSION", temp);
-  this->AddDefinition("CMAKE_VERSION", cmVersion::GetCMakeVersion());
-
-  this->AddDefinition("CMAKE_FILES_DIRECTORY",
-                      cmake::GetCMakeFilesDirectory());
 }
 
 //----------------------------------------------------------------------------

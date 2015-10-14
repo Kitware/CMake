@@ -1590,6 +1590,7 @@ void cmCTestTestHandler::GetListOfTests()
   cmake cm;
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
+  cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
   cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(&gg, cm.GetCurrentSnapshot()));
   mf->AddDefinition("CTEST_CONFIGURATION_TYPE",
