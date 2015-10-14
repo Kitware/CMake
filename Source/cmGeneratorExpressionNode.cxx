@@ -1632,7 +1632,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
       return std::string();
       }
 
-    cmTarget::TargetType targetType = target->Target->GetType();
+    cmTarget::TargetType targetType = (cmTarget::TargetType)target->GetType();
 
     if(targetType != cmTarget::SHARED_LIBRARY &&
        targetType != cmTarget::MODULE_LIBRARY &&

@@ -189,8 +189,8 @@ ComputeDefines(cmSourceFile const* source, const std::string& language)
 cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
 {
   // Static libraries never depend on other targets for linking.
-  if (this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
-      this->Target->GetType() == cmTarget::OBJECT_LIBRARY)
+  if (this->GeneratorTarget->GetType() == cmTarget::STATIC_LIBRARY ||
+      this->GeneratorTarget->GetType() == cmTarget::OBJECT_LIBRARY)
     return cmNinjaDeps();
 
   cmComputeLinkInformation* cli =
@@ -283,16 +283,16 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
     {
     std::string pdbPath;
     std::string compilePdbPath;
-    if(this->Target->GetType() == cmTarget::EXECUTABLE ||
-       this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
-       this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
-       this->Target->GetType() == cmTarget::MODULE_LIBRARY)
+    if(this->GeneratorTarget->GetType() == cmTarget::EXECUTABLE ||
+       this->GeneratorTarget->GetType() == cmTarget::STATIC_LIBRARY ||
+       this->GeneratorTarget->GetType() == cmTarget::SHARED_LIBRARY ||
+       this->GeneratorTarget->GetType() == cmTarget::MODULE_LIBRARY)
       {
       pdbPath = this->GeneratorTarget->GetPDBDirectory(this->GetConfigName());
       pdbPath += "/";
       pdbPath += this->GeneratorTarget->GetPDBName(this->GetConfigName());
       }
-    if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY)
+    if(this->GeneratorTarget->GetType() <= cmTarget::OBJECT_LIBRARY)
       {
       compilePdbPath =
               this->GeneratorTarget->GetCompilePDBPath(this->GetConfigName());
@@ -480,7 +480,8 @@ cmNinjaTargetGenerator
   cmGlobalNinjaGenerator::WriteDivider(this->GetBuildFileStream());
   this->GetBuildFileStream()
     << "# Object build statements for "
-    << cmTarget::GetTargetTypeName(this->GetTarget()->GetType())
+    << cmTarget::GetTargetTypeName(
+         (cmTarget::TargetType)this->GetGeneratorTarget()->GetType())
     << " target "
     << this->GetTargetName()
     << "\n\n";

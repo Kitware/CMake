@@ -269,7 +269,7 @@ void cmVisualStudio10TargetGenerator::WriteString(const char* line,
 void cmVisualStudio10TargetGenerator::Generate()
 {
   // do not generate external ms projects
-  if(this->Target->GetType() == cmTarget::INTERFACE_LIBRARY
+  if(this->GeneratorTarget->GetType() == cmTarget::INTERFACE_LIBRARY
       || this->Target->GetProperty("EXTERNAL_MSPROJECT"))
     {
     return;
@@ -278,7 +278,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->Target->SetProperty("GENERATOR_FILE_NAME",this->Name.c_str());
   this->Target->SetProperty("GENERATOR_FILE_NAME_EXT",
                             ".vcxproj");
-  if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY)
+  if(this->GeneratorTarget->GetType() <= cmTarget::OBJECT_LIBRARY)
     {
     if(!this->ComputeClOptions())
       {
@@ -360,7 +360,8 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteString("<ProjectGUID>", 2);
   (*this->BuildFileStream) <<  "{" << this->GUID << "}</ProjectGUID>\n";
 
-  if(this->MSTools && this->Target->GetType() <= cmTarget::GLOBAL_TARGET)
+  if(this->MSTools
+     && this->GeneratorTarget->GetType() <= cmTarget::GLOBAL_TARGET)
     {
     this->WriteApplicationTypeSettings();
     this->VerifyNecessaryFiles();
@@ -666,7 +667,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
                                  i->c_str(),
                                  1, " Label=\"Configuration\"", "\n");
     std::string configType = "<ConfigurationType>";
-    switch(this->Target->GetType())
+    switch(this->GeneratorTarget->GetType())
       {
       case cmTarget::SHARED_LIBRARY:
       case cmTarget::MODULE_LIBRARY:
@@ -743,7 +744,7 @@ void cmVisualStudio10TargetGenerator
   mfcLine += useOfMfcValue + "</UseOfMfc>\n";
   this->WriteString(mfcLine.c_str(), 2);
 
-  if((this->Target->GetType() <= cmTarget::OBJECT_LIBRARY &&
+  if((this->GeneratorTarget->GetType() <= cmTarget::OBJECT_LIBRARY &&
       this->ClOptions[config]->UsingUnicode()) ||
      this->Target->GetPropertyAsBool("VS_WINRT_COMPONENT") ||
      this->GlobalGenerator->TargetsWindowsPhone() ||
@@ -752,7 +753,7 @@ void cmVisualStudio10TargetGenerator
     {
     this->WriteString("<CharacterSet>Unicode</CharacterSet>\n", 2);
     }
-  else if (this->Target->GetType() <= cmTarget::MODULE_LIBRARY &&
+  else if (this->GeneratorTarget->GetType() <= cmTarget::MODULE_LIBRARY &&
            this->ClOptions[config]->UsingSBCS())
     {
     this->WriteString("<CharacterSet>NotSet</CharacterSet>\n", 2);
@@ -1480,7 +1481,7 @@ void cmVisualStudio10TargetGenerator::WriteSources(
 
 void cmVisualStudio10TargetGenerator::WriteAllSources()
 {
-  if(this->Target->GetType() > cmTarget::UTILITY)
+  if(this->GeneratorTarget->GetType() > cmTarget::UTILITY)
     {
     return;
     }
@@ -1742,7 +1743,8 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
 
 void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
 {
-  cmTarget::TargetType ttype = this->Target->GetType();
+  cmTarget::TargetType ttype =
+      (cmTarget::TargetType)this->GeneratorTarget->GetType();
   if(ttype > cmTarget::GLOBAL_TARGET)
     {
     return;
@@ -1827,8 +1829,8 @@ OutputLinkIncremental(std::string const& configName)
     }
   // static libraries and things greater than modules do not need
   // to set this option
-  if(this->Target->GetType() == cmTarget::STATIC_LIBRARY
-     || this->Target->GetType() > cmTarget::MODULE_LIBRARY)
+  if(this->GeneratorTarget->GetType() == cmTarget::STATIC_LIBRARY
+     || this->GeneratorTarget->GetType() > cmTarget::MODULE_LIBRARY)
     {
     return;
     }
@@ -1966,8 +1968,8 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       {
       clOptions.AddFlag("CompileAsWinRT", "true");
       // For WinRT components, add the _WINRT_DLL define to produce a lib
-      if (this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
-          this->Target->GetType() == cmTarget::MODULE_LIBRARY )
+      if (this->GeneratorTarget->GetType() == cmTarget::SHARED_LIBRARY ||
+          this->GeneratorTarget->GetType() == cmTarget::MODULE_LIBRARY )
         {
         clOptions.AddDefine("_WINRT_DLL");
         }
@@ -2175,8 +2177,8 @@ WriteMasmOptions(std::string const& configName,
 void
 cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const& config)
 {
-  if(this->Target->GetType() != cmTarget::STATIC_LIBRARY &&
-     this->Target->GetType() != cmTarget::OBJECT_LIBRARY)
+  if(this->GeneratorTarget->GetType() != cmTarget::STATIC_LIBRARY &&
+     this->GeneratorTarget->GetType() != cmTarget::OBJECT_LIBRARY)
     {
     return;
     }
@@ -2212,9 +2214,9 @@ cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const& config)
 void cmVisualStudio10TargetGenerator::WriteManifestOptions(
   std::string const& config)
 {
-  if (this->Target->GetType() != cmTarget::EXECUTABLE &&
-      this->Target->GetType() != cmTarget::SHARED_LIBRARY &&
-      this->Target->GetType() != cmTarget::MODULE_LIBRARY)
+  if (this->GeneratorTarget->GetType() != cmTarget::EXECUTABLE &&
+      this->GeneratorTarget->GetType() != cmTarget::SHARED_LIBRARY &&
+      this->GeneratorTarget->GetType() != cmTarget::MODULE_LIBRARY)
     {
     return;
     }
@@ -2380,9 +2382,9 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
 //----------------------------------------------------------------------------
 bool cmVisualStudio10TargetGenerator::ComputeLinkOptions()
 {
-  if(this->Target->GetType() == cmTarget::EXECUTABLE ||
-     this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
-     this->Target->GetType() == cmTarget::MODULE_LIBRARY)
+  if(this->GeneratorTarget->GetType() == cmTarget::EXECUTABLE ||
+     this->GeneratorTarget->GetType() == cmTarget::SHARED_LIBRARY ||
+     this->GeneratorTarget->GetType() == cmTarget::MODULE_LIBRARY)
     {
     for(std::vector<std::string>::const_iterator
           i = this->Configurations.begin();
@@ -2419,11 +2421,11 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   std::string CONFIG = cmSystemTools::UpperCase(config);
 
   const char* linkType = "SHARED";
-  if(this->Target->GetType() == cmTarget::MODULE_LIBRARY)
+  if(this->GeneratorTarget->GetType() == cmTarget::MODULE_LIBRARY)
     {
     linkType = "MODULE";
     }
-  if(this->Target->GetType() == cmTarget::EXECUTABLE)
+  if(this->GeneratorTarget->GetType() == cmTarget::EXECUTABLE)
     {
     linkType = "EXE";
     }
@@ -2506,7 +2508,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   std::string targetNameFull;
   std::string targetNameImport;
   std::string targetNamePDB;
-  if(this->Target->GetType() == cmTarget::EXECUTABLE)
+  if(this->GeneratorTarget->GetType() == cmTarget::EXECUTABLE)
     {
     this->GeneratorTarget->GetExecutableNames(targetName, targetNameFull,
                                      targetNameImport, targetNamePDB,
@@ -2529,7 +2531,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
       if (this->GlobalGenerator->TargetsWindowsCE())
         {
         linkOptions.AddFlag("SubSystem", "WindowsCE");
-        if (this->Target->GetType() == cmTarget::EXECUTABLE)
+        if (this->GeneratorTarget->GetType() == cmTarget::EXECUTABLE)
           {
           if (this->ClOptions[config]->UsingUnicode())
             {
@@ -2551,7 +2553,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
       if (this->GlobalGenerator->TargetsWindowsCE())
         {
         linkOptions.AddFlag("SubSystem", "WindowsCE");
-        if (this->Target->GetType() == cmTarget::EXECUTABLE)
+        if (this->GeneratorTarget->GetType() == cmTarget::EXECUTABLE)
           {
           if (this->ClOptions[config]->UsingUnicode())
             {
@@ -2597,7 +2599,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
     // A Windows Runtime component uses internal .NET metadata,
     // so does not have an import library.
     if(this->Target->GetPropertyAsBool("VS_WINRT_COMPONENT") &&
-       this->Target->GetType() != cmTarget::EXECUTABLE)
+       this->GeneratorTarget->GetType() != cmTarget::EXECUTABLE)
       {
       linkOptions.AddFlag("GenerateWindowsMetadata", "true");
       }
@@ -2635,7 +2637,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
                            "%(IgnoreSpecificDefaultLibraries)");
     }
 
-  if (this->Target->GetType() == cmTarget::SHARED_LIBRARY &&
+  if (this->GeneratorTarget->GetType() == cmTarget::SHARED_LIBRARY &&
       this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
     {
     if (this->Target->GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS"))
@@ -2652,8 +2654,8 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
 void
 cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const& config)
 {
-  if(this->Target->GetType() == cmTarget::STATIC_LIBRARY
-     || this->Target->GetType() > cmTarget::MODULE_LIBRARY)
+  if(this->GeneratorTarget->GetType() == cmTarget::STATIC_LIBRARY
+     || this->GeneratorTarget->GetType() > cmTarget::MODULE_LIBRARY)
     {
     return;
     }
@@ -2763,7 +2765,7 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
     this->WritePlatformConfigTag("ItemDefinitionGroup", i->c_str(), 1);
     *this->BuildFileStream << "\n";
     //    output cl compile flags <ClCompile></ClCompile>
-    if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY)
+    if(this->GeneratorTarget->GetType() <= cmTarget::OBJECT_LIBRARY)
       {
       this->WriteClOptions(*i, includes);
       //    output rc compile flags <ResourceCompile></ResourceCompile>
@@ -2781,7 +2783,7 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
     //    output manifest flags  <Manifest></Manifest>
     this->WriteManifestOptions(*i);
     if(this->NsightTegra &&
-       this->Target->GetType() == cmTarget::EXECUTABLE &&
+       this->GeneratorTarget->GetType() == cmTarget::EXECUTABLE &&
        this->Target->GetPropertyAsBool("ANDROID_GUI"))
       {
       this->WriteAntBuildOptions(*i);
@@ -2794,7 +2796,7 @@ void
 cmVisualStudio10TargetGenerator::WriteEvents(std::string const& configName)
 {
   bool addedPrelink = false;
-  if (this->Target->GetType() == cmTarget::SHARED_LIBRARY &&
+  if (this->GeneratorTarget->GetType() == cmTarget::SHARED_LIBRARY &&
       this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
     {
     if (this->Target->GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS"))
@@ -3002,7 +3004,7 @@ void cmVisualStudio10TargetGenerator::WriteWinRTPackageCertificateKeyFile()
 {
   if((this->GlobalGenerator->TargetsWindowsStore() ||
       this->GlobalGenerator->TargetsWindowsPhone())
-      && (cmTarget::EXECUTABLE == this->Target->GetType()))
+      && (cmTarget::EXECUTABLE == this->GeneratorTarget->GetType()))
     {
     std::string pfxFile;
     std::vector<cmSourceFile const*> certificates;
@@ -3131,7 +3133,7 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings()
       this->WriteString("<MinimumVisualStudioVersion>14.0"
         "</MinimumVisualStudioVersion>\n", 2);
 
-      if(this->Target->GetType() < cmTarget::UTILITY)
+      if(this->GeneratorTarget->GetType() < cmTarget::UTILITY)
         {
         isAppContainer = true;
         }
@@ -3145,7 +3147,7 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings()
       this->WriteString("<MinimumVisualStudioVersion>12.0"
                         "</MinimumVisualStudioVersion>\n", 2);
 
-      if (this->Target->GetType() < cmTarget::UTILITY)
+      if (this->GeneratorTarget->GetType() < cmTarget::UTILITY)
         {
         isAppContainer = true;
         }
@@ -3159,12 +3161,13 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings()
       this->WriteString("<MinimumVisualStudioVersion>11.0"
                         "</MinimumVisualStudioVersion>\n", 2);
 
-      if (isWindowsStore && this->Target->GetType() < cmTarget::UTILITY)
+      if (isWindowsStore
+          && this->GeneratorTarget->GetType() < cmTarget::UTILITY)
         {
         isAppContainer = true;
         }
       else if (isWindowsPhone &&
-               this->Target->GetType() == cmTarget::EXECUTABLE)
+               this->GeneratorTarget->GetType() == cmTarget::EXECUTABLE)
         {
         this->WriteString("<XapOutputs>true</XapOutputs>\n", 2);
         this->WriteString("<XapFilename>", 2);
@@ -3221,7 +3224,7 @@ void cmVisualStudio10TargetGenerator::VerifyNecessaryFiles()
 {
   // For Windows and Windows Phone executables, we will assume that if a
   // manifest is not present that we need to add all the necessary files
-  if (this->Target->GetType() == cmTarget::EXECUTABLE)
+  if (this->GeneratorTarget->GetType() == cmTarget::EXECUTABLE)
     {
     std::vector<cmSourceFile const*> manifestSources;
     this->GeneratorTarget->GetAppManifest(manifestSources, "");

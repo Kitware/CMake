@@ -87,7 +87,7 @@ void cmNinjaNormalTargetGenerator::Generate()
   // Write the build statements
   this->WriteObjectBuildStatements();
 
-  if(this->GetTarget()->GetType() == cmTarget::OBJECT_LIBRARY)
+  if(this->GetGeneratorTarget()->GetType() == cmTarget::OBJECT_LIBRARY)
     {
     this->WriteObjectLibStatement();
     }
@@ -103,7 +103,7 @@ void cmNinjaNormalTargetGenerator::WriteLanguagesRules()
   cmGlobalNinjaGenerator::WriteDivider(this->GetRulesFileStream());
   this->GetRulesFileStream()
     << "# Rules for each languages for "
-    << cmTarget::GetTargetTypeName(this->GetTarget()->GetType())
+    << cmTarget::GetTargetTypeName(this->GetGeneratorTarget()->GetType())
     << " target "
     << this->GetTargetName()
     << "\n\n";
@@ -133,7 +133,7 @@ void cmNinjaNormalTargetGenerator::WriteLanguagesRules()
 
 const char *cmNinjaNormalTargetGenerator::GetVisibleTypeName() const
 {
-  switch (this->GetTarget()->GetType()) {
+  switch (this->GetGeneratorTarget()->GetType()) {
     case cmTarget::STATIC_LIBRARY:
       return "static library";
     case cmTarget::SHARED_LIBRARY:
@@ -156,7 +156,8 @@ cmNinjaNormalTargetGenerator
 {
   return this->TargetLinkLanguage
     + "_"
-    + cmTarget::GetTargetTypeName(this->GetTarget()->GetType())
+    + cmTarget::GetTargetTypeName(
+        (cmTarget::TargetType)this->GetGeneratorTarget()->GetType())
     + "_LINKER__"
     + cmGlobalNinjaGenerator::EncodeRuleName(this->GetTarget()->GetName())
     ;
@@ -166,7 +167,8 @@ void
 cmNinjaNormalTargetGenerator
 ::WriteLinkRule(bool useResponseFile)
 {
-  cmTarget::TargetType targetType = this->GetTarget()->GetType();
+  cmTarget::TargetType targetType =
+      (cmTarget::TargetType)this->GetGeneratorTarget()->GetType();
   std::string ruleName = this->LanguageLinkerRule();
 
   // Select whether to use a response file for objects.
@@ -330,7 +332,7 @@ cmNinjaNormalTargetGenerator
     return linkCmds;
     }
   }
-  switch (this->GetTarget()->GetType()) {
+  switch (this->GetGeneratorTarget()->GetType()) {
     case cmTarget::STATIC_LIBRARY: {
       // We have archive link commands set. First, delete the existing archive.
       {

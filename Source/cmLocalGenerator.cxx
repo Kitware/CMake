@@ -137,7 +137,7 @@ void cmLocalGenerator::TraceDependencies()
       t != targets.end(); ++t)
     {
     if (t->second->Target->IsImported()
-        || t->second->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
+        || t->second->GetType() == cmTarget::INTERFACE_LIBRARY)
       {
       continue;
       }
@@ -472,7 +472,7 @@ void cmLocalGenerator::ComputeTargetManifest()
       t != targets.end(); ++t)
     {
     cmGeneratorTarget& target = *t->second;
-    if (target.Target->GetType() == cmTarget::INTERFACE_LIBRARY)
+    if (target.GetType() == cmTarget::INTERFACE_LIBRARY)
       {
       continue;
       }

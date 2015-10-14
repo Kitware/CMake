@@ -290,7 +290,7 @@ cmComputeLinkInformation
   // the program that will load it.
   this->LoaderFlag = 0;
   if(!this->UseImportLibrary &&
-     this->Target->Target->GetType() == cmTarget::MODULE_LIBRARY)
+     this->Target->GetType() == cmTarget::MODULE_LIBRARY)
     {
     std::string loader_flag_var = "CMAKE_SHARED_MODULE_LOADER_";
     loader_flag_var += this->LinkLanguage;
@@ -308,10 +308,10 @@ cmComputeLinkInformation
 
   // Get options needed to specify RPATHs.
   this->RuntimeUseChrpath = false;
-  if(this->Target->Target->GetType() != cmTarget::STATIC_LIBRARY)
+  if(this->Target->GetType() != cmTarget::STATIC_LIBRARY)
     {
     const char* tType =
-      ((this->Target->Target->GetType() == cmTarget::EXECUTABLE)?
+      ((this->Target->GetType() == cmTarget::EXECUTABLE)?
        "EXECUTABLE" : "SHARED_LIBRARY");
     std::string rtVar = "CMAKE_";
     rtVar += tType;

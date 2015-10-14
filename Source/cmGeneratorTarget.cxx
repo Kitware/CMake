@@ -1965,7 +1965,7 @@ cmGeneratorTarget::CompileInfo const* cmGeneratorTarget::GetCompileInfo(
     std::string msg = "cmTarget::GetCompileInfo called for ";
     msg += this->GetName();
     msg += " which has type ";
-    msg += cmTarget::GetTargetTypeName(this->Target->GetType());
+    msg += cmTarget::GetTargetTypeName((cmTarget::TargetType)this->GetType());
     this->LocalGenerator->IssueMessage(cmake::INTERNAL_ERROR, msg);
     return 0;
     }
@@ -2155,7 +2155,7 @@ cmTargetTraceDependencies
   this->CurrentEntry = 0;
 
   // Queue all the source files already specified for the target.
-  if (this->Target->GetType() != cmTarget::INTERFACE_LIBRARY)
+  if (target->GetType() != cmTarget::INTERFACE_LIBRARY)
     {
     std::vector<std::string> configs;
     this->Makefile->GetConfigurations(configs);
@@ -3657,8 +3657,8 @@ cmGeneratorTarget::GetCompatibleInterfaces(std::string const& config) const
 bool cmGeneratorTarget::IsLinkInterfaceDependentBoolProperty(
     const std::string &p, const std::string& config) const
 {
-  if (this->Target->GetType() == cmTarget::OBJECT_LIBRARY
-      || this->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
+  if (this->GetType() == cmTarget::OBJECT_LIBRARY
+      || this->GetType() == cmTarget::INTERFACE_LIBRARY)
     {
     return false;
     }
@@ -3669,8 +3669,8 @@ bool cmGeneratorTarget::IsLinkInterfaceDependentBoolProperty(
 bool cmGeneratorTarget::IsLinkInterfaceDependentStringProperty(
     const std::string &p, const std::string& config) const
 {
-  if (this->Target->GetType() == cmTarget::OBJECT_LIBRARY
-      || this->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
+  if (this->GetType() == cmTarget::OBJECT_LIBRARY
+      || this->GetType() == cmTarget::INTERFACE_LIBRARY)
     {
     return false;
     }
@@ -3681,8 +3681,8 @@ bool cmGeneratorTarget::IsLinkInterfaceDependentStringProperty(
 bool cmGeneratorTarget::IsLinkInterfaceDependentNumberMinProperty(
     const std::string &p, const std::string& config) const
 {
-  if (this->Target->GetType() == cmTarget::OBJECT_LIBRARY
-      || this->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
+  if (this->GetType() == cmTarget::OBJECT_LIBRARY
+      || this->GetType() == cmTarget::INTERFACE_LIBRARY)
     {
     return false;
     }
@@ -3693,8 +3693,8 @@ bool cmGeneratorTarget::IsLinkInterfaceDependentNumberMinProperty(
 bool cmGeneratorTarget::IsLinkInterfaceDependentNumberMaxProperty(
     const std::string &p, const std::string& config) const
 {
-  if (this->Target->GetType() == cmTarget::OBJECT_LIBRARY
-      || this->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
+  if (this->GetType() == cmTarget::OBJECT_LIBRARY
+      || this->GetType() == cmTarget::INTERFACE_LIBRARY)
     {
     return false;
     }

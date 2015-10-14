@@ -148,7 +148,7 @@ void cmGhsMultiTargetGenerator::Generate()
     this->WriteCompilerFlags(config, language);
     this->WriteCompilerDefinitions(config, language);
     this->WriteIncludes(config, language);
-    if (this->Target->GetType() == cmTarget::EXECUTABLE)
+    if (this->GeneratorTarget->GetType() == cmTarget::EXECUTABLE)
       {
       this->WriteTargetLinkLibraries();
       }
@@ -215,13 +215,13 @@ void cmGhsMultiTargetGenerator::WriteTypeSpecifics(const std::string &config,
   std::string outputDir(this->GetOutputDirectory(config));
   std::string outputFilename(this->GetOutputFilename(config));
 
-  if (this->Target->GetType() == cmTarget::STATIC_LIBRARY)
+  if (this->GeneratorTarget->GetType() == cmTarget::STATIC_LIBRARY)
     {
     *this->GetFolderBuildStreams() << "    {optgroup=GhsCommonOptions} -o \""
                                    << outputDir << outputFilename << ".a\""
                                    << std::endl;
     }
-  else if (this->Target->GetType() == cmTarget::EXECUTABLE)
+  else if (this->GeneratorTarget->GetType() == cmTarget::EXECUTABLE)
     {
     if (notKernel && !this->IsTargetGroup())
       {

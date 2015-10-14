@@ -542,10 +542,10 @@ cmMakefileTargetGenerator
   std::string targetFullPathReal;
   std::string targetFullPathPDB;
   std::string targetFullPathCompilePDB;
-  if(this->Target->GetType() == cmTarget::EXECUTABLE ||
-     this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
-     this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
-     this->Target->GetType() == cmTarget::MODULE_LIBRARY)
+  if(this->GeneratorTarget->GetType() == cmTarget::EXECUTABLE ||
+     this->GeneratorTarget->GetType() == cmTarget::STATIC_LIBRARY ||
+     this->GeneratorTarget->GetType() == cmTarget::SHARED_LIBRARY ||
+     this->GeneratorTarget->GetType() == cmTarget::MODULE_LIBRARY)
     {
     targetFullPathReal =
       this->GeneratorTarget->GetFullPath(this->ConfigName, false, true);
@@ -554,7 +554,7 @@ cmMakefileTargetGenerator
     targetFullPathPDB += "/";
     targetFullPathPDB += this->GeneratorTarget->GetPDBName(this->ConfigName);
     }
-  if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY)
+  if(this->GeneratorTarget->GetType() <= cmTarget::OBJECT_LIBRARY)
     {
     targetFullPathCompilePDB =
       this->GeneratorTarget->GetCompilePDBPath(this->ConfigName);
@@ -1445,7 +1445,7 @@ void cmMakefileTargetGenerator
 ::AppendTargetDepends(std::vector<std::string>& depends)
 {
   // Static libraries never depend on anything for linking.
-  if(this->Target->GetType() == cmTarget::STATIC_LIBRARY)
+  if(this->GeneratorTarget->GetType() == cmTarget::STATIC_LIBRARY)
     {
     return;
     }
