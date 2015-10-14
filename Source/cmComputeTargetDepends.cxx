@@ -555,7 +555,7 @@ cmComputeTargetDepends
     // Describe the depender.
     e << "  \"" << depender->GetName() << "\" of type "
       << cmTarget::GetTargetTypeName(
-           (cmState::TargetType)depender->GetType()) << "\n";
+           depender->GetType()) << "\n";
 
     // List its dependencies that are inside the component.
     EdgeList const& nl = this->InitialGraph[i];

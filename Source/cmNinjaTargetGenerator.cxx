@@ -481,7 +481,7 @@ cmNinjaTargetGenerator
   this->GetBuildFileStream()
     << "# Object build statements for "
     << cmTarget::GetTargetTypeName(
-         (cmState::TargetType)this->GetGeneratorTarget()->GetType())
+         this->GetGeneratorTarget()->GetType())
     << " target "
     << this->GetTargetName()
     << "\n\n";

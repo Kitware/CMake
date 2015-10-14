@@ -157,7 +157,7 @@ cmNinjaNormalTargetGenerator
   return this->TargetLinkLanguage
     + "_"
     + cmTarget::GetTargetTypeName(
-        (cmState::TargetType)this->GetGeneratorTarget()->GetType())
+        this->GetGeneratorTarget()->GetType())
     + "_LINKER__"
     + cmGlobalNinjaGenerator::EncodeRuleName(this->GetTarget()->GetName())
     ;
@@ -168,7 +168,7 @@ cmNinjaNormalTargetGenerator
 ::WriteLinkRule(bool useResponseFile)
 {
   cmState::TargetType targetType =
-      (cmState::TargetType)this->GetGeneratorTarget()->GetType();
+      this->GetGeneratorTarget()->GetType();
   std::string ruleName = this->LanguageLinkerRule();
 
   // Select whether to use a response file for objects.

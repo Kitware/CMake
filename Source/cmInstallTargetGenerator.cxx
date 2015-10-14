@@ -94,8 +94,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
   std::vector<std::string> filesFrom;
   std::vector<std::string> filesTo;
   std::string literal_args;
-  cmState::TargetType targetType =
-      static_cast<cmState::TargetType>(this->Target->GetType());
+  cmState::TargetType targetType = this->Target->GetType();
   cmInstallType type = cmInstallType();
   switch(targetType)
     {

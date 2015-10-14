@@ -1743,8 +1743,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
 
 void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
 {
-  cmState::TargetType ttype =
-      (cmState::TargetType)this->GeneratorTarget->GetType();
+  cmState::TargetType ttype = this->GeneratorTarget->GetType();
   if(ttype > cmState::GLOBAL_TARGET)
     {
     return;
