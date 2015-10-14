@@ -79,11 +79,10 @@ private:
    */
   std::string ComputeFlagsForObject(cmSourceFile *source,
                                     cmLocalGenerator* lg,
-                                    cmTarget *target,
                                     cmGeneratorTarget* gtgt);
 
   std::string ComputeDefines(cmSourceFile *source, cmLocalGenerator* lg,
-                             cmTarget *target, cmGeneratorTarget* gtgt);
+                             cmGeneratorTarget* gtgt);
 };
 
 #endif

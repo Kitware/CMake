@@ -320,8 +320,7 @@ int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
   int index = lei->second;
   LinkEntry& entry = this->EntryList[index];
   entry.Item = item;
-  entry.Target =
-      item.Target ? this->GlobalGenerator->GetGeneratorTarget(item.Target) : 0;
+  entry.Target = item.Target;
   entry.IsFlag = (!entry.Target && item[0] == '-' && item[1] != 'l' &&
                   item.substr(0, 10) != "-framework");
 
@@ -443,9 +442,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
     // Initialize the item entry.
     LinkEntry& entry = this->EntryList[lei->second];
     entry.Item = dep.Item;
-    entry.Target =
-        dep.Item.Target ?
-          this->GlobalGenerator->GetGeneratorTarget(dep.Item.Target) : 0;
+    entry.Target = dep.Item.Target;
 
     // This item was added specifically because it is a dependent
     // shared library.  It may get special treatment
@@ -634,8 +631,9 @@ cmComputeLinkDepends::AddLinkEntries(
 }
 
 //----------------------------------------------------------------------------
-cmTarget const* cmComputeLinkDepends::FindTargetToLink(int depender_index,
-                                                 const std::string& name)
+cmGeneratorTarget const*
+cmComputeLinkDepends::FindTargetToLink(int depender_index,
+                                       const std::string& name)
 {
   // Look for a target in the scope of the depender.
   cmGeneratorTarget const* from = this->Target;
@@ -647,7 +645,7 @@ cmTarget const* cmComputeLinkDepends::FindTargetToLink(int depender_index,
       from = depender;
       }
     }
-  return from->Target->FindTargetToLink(name);
+  return from->FindTargetToLink(name);
 }
 
 //----------------------------------------------------------------------------

@@ -82,6 +82,8 @@ public:
   void GetExpectedXamlSources(std::set<std::string>&,
                               const std::string& config) const;
 
+  std::set<cmLinkItem>const& GetUtilityItems() const;
+
   void ComputeObjectMapping();
 
   const char* GetFeature(const std::string& feature,
@@ -213,6 +215,8 @@ public:
   void ComputeLinkImplementationLibraries(const std::string& config,
                                           cmOptionalLinkImplementation& impl,
                                           const cmGeneratorTarget* head) const;
+
+  cmGeneratorTarget* FindTargetToLink(std::string const& name) const;
 
   // Compute the set of languages compiled by the target.  This is
   // computed every time it is called because the languages can change
@@ -386,6 +390,20 @@ public:
   ///! Return the preferred linker language for this target
   std::string GetLinkerLanguage(const std::string& config = "") const;
 
+  /** Does this target have a GNU implib to convert to MS format?  */
+  bool HasImplibGNUtoMS() const;
+
+  /** Convert the given GNU import library name (.dll.a) to a name with a new
+      extension (.lib or ${CMAKE_IMPORT_LIBRARY_SUFFIX}).  */
+  bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
+                        const char* newExt = 0) const;
+
+  /** Return whether or not the target has a DLL import library.  */
+  bool HasImportLibrary() const;
+
+  /** Get a build-tree directory in which to place target support files.  */
+  std::string GetSupportDirectory() const;
+
   struct SourceFileFlags
   GetTargetSourceFileFlags(const cmSourceFile* sf) const;
 
@@ -473,7 +491,7 @@ private:
   cmGeneratorTarget(cmGeneratorTarget const&);
   void operator=(cmGeneratorTarget const&);
 
-  struct LinkImplClosure: public std::vector<cmTarget const*>
+  struct LinkImplClosure: public std::vector<cmGeneratorTarget const*>
   {
     LinkImplClosure(): Done(false) {}
     bool Done;
@@ -537,6 +555,7 @@ private:
   typedef std::pair<std::string, bool> OutputNameKey;
   typedef std::map<OutputNameKey, std::string> OutputNameMapType;
   mutable OutputNameMapType OutputNameMap;
+  mutable std::set<cmLinkItem> UtilityItems;
   mutable bool PolicyWarnedCMP0022;
   mutable bool DebugIncludesDone;
   mutable bool DebugCompileOptionsDone;
@@ -544,13 +563,14 @@ private:
   mutable bool DebugCompileDefinitionsDone;
   mutable bool DebugSourcesDone;
   mutable bool LinkImplementationLanguageIsContextDependent;
+  mutable bool UtilityItemsDone;
 
   bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
                            std::string& out) const;
 
 public:
-  std::vector<cmTarget const*> const&
-    GetLinkImplementationClosure(const std::string& config) const;
+  const std::vector<const cmGeneratorTarget*>&
+  GetLinkImplementationClosure(const std::string& config) const;
 
   mutable std::map<std::string, std::string> MaxLanguageStandards;
   std::map<std::string, std::string> const&

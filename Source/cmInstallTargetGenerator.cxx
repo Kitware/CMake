@@ -135,7 +135,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
       filesFrom.push_back(from1);
       filesTo.push_back(to1);
       std::string targetNameImportLib;
-      if(this->Target->Target->GetImplibGNUtoMS(targetNameImport,
+      if(this->Target->GetImplibGNUtoMS(targetNameImport,
                                         targetNameImportLib))
         {
         filesFrom.push_back(fromDirConfig + targetNameImportLib);
@@ -199,7 +199,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
       filesFrom.push_back(from1);
       filesTo.push_back(to1);
       std::string targetNameImportLib;
-      if(this->Target->Target->GetImplibGNUtoMS(targetNameImport,
+      if(this->Target->GetImplibGNUtoMS(targetNameImport,
                                         targetNameImportLib))
         {
         filesFrom.push_back(fromDirConfig + targetNameImportLib);
@@ -387,7 +387,7 @@ cmInstallTargetGenerator::GetInstallFilename(cmTarget const* target,
     if(nameType == NameImplib)
       {
       // Use the import library name.
-      if(!target->GetImplibGNUtoMS(targetNameImport, fname,
+      if(!gtgt->GetImplibGNUtoMS(targetNameImport, fname,
                                    "${CMAKE_IMPORT_LIBRARY_SUFFIX}"))
         {
         fname = targetNameImport;
@@ -416,7 +416,7 @@ cmInstallTargetGenerator::GetInstallFilename(cmTarget const* target,
     if(nameType == NameImplib)
       {
       // Use the import library name.
-      if(!target->GetImplibGNUtoMS(targetNameImport, fname,
+      if(!gtgt->GetImplibGNUtoMS(targetNameImport, fname,
                                    "${CMAKE_IMPORT_LIBRARY_SUFFIX}"))
         {
         fname = targetNameImport;
@@ -563,12 +563,12 @@ cmInstallTargetGenerator
   std::map<std::string, std::string> install_name_remap;
   if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(config))
     {
-    std::set<cmTarget const*> const& sharedLibs
+    std::set<cmGeneratorTarget const*> const& sharedLibs
                                             = cli->GetSharedLibrariesLinked();
-    for(std::set<cmTarget const*>::const_iterator j = sharedLibs.begin();
-        j != sharedLibs.end(); ++j)
+    for(std::set<cmGeneratorTarget const*>::const_iterator j
+        = sharedLibs.begin(); j != sharedLibs.end(); ++j)
       {
-      cmTarget const* tgt = *j;
+      cmGeneratorTarget const* tgt = *j;
 
       // The install_name of an imported target does not change.
       if(tgt->IsImported())
@@ -576,20 +576,17 @@ cmInstallTargetGenerator
         continue;
         }
 
-      cmGeneratorTarget *gtgt = tgt->GetMakefile()
-                                          ->GetGlobalGenerator()
-                                          ->GetGeneratorTarget(tgt);
       // If the build tree and install tree use different path
       // components of the install_name field then we need to create a
       // mapping to be applied after installation.
-      std::string for_build = gtgt->GetInstallNameDirForBuildTree(config);
-      std::string for_install = gtgt->GetInstallNameDirForInstallTree();
+      std::string for_build = tgt->GetInstallNameDirForBuildTree(config);
+      std::string for_install = tgt->GetInstallNameDirForInstallTree();
       if(for_build != for_install)
         {
         // The directory portions differ.  Append the filename to
         // create the mapping.
         std::string fname =
-          this->GetInstallFilename(tgt, config, NameSO);
+          this->GetInstallFilename(tgt->Target, config, NameSO);
 
         // Map from the build-tree install_name.
         for_build += fname;

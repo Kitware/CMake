@@ -19,7 +19,6 @@
 #include "cmState.h"
 #include "cmOutputConverter.h"
 #include "cmMakefile.h"
-#include "cmTarget.h"
 #include "cmGeneratorTarget.h"
 #include "cmake.h"
 #include "cmAlgorithms.h"
@@ -471,7 +470,7 @@ std::vector<std::string> const& cmComputeLinkInformation::GetFrameworkPaths()
 }
 
 //----------------------------------------------------------------------------
-std::set<cmTarget const*> const&
+const std::set<const cmGeneratorTarget*>&
 cmComputeLinkInformation::GetSharedLibrariesLinked()
 {
   return this->SharedLibrariesLinked;
@@ -537,16 +536,16 @@ bool cmComputeLinkInformation::Compute()
     // For CMake 2.4 bug-compatibility we need to consider the output
     // directories of targets linked in another configuration as link
     // directories.
-    std::set<cmTarget const*> const& wrongItems = cld.GetOldWrongConfigItems();
-    for(std::set<cmTarget const*>::const_iterator i = wrongItems.begin();
-        i != wrongItems.end(); ++i)
+    std::set<cmGeneratorTarget const*> const& wrongItems =
+        cld.GetOldWrongConfigItems();
+    for(std::set<cmGeneratorTarget const*>::const_iterator i =
+        wrongItems.begin(); i != wrongItems.end(); ++i)
       {
-      cmTarget const* tgt = *i;
-      cmGeneratorTarget *gtgt = this->GlobalGenerator->GetGeneratorTarget(tgt);
+      cmGeneratorTarget const* tgt = *i;
       bool implib =
         (this->UseImportLibrary &&
          (tgt->GetType() == cmTarget::SHARED_LIBRARY));
-      std::string lib = gtgt->GetFullPath(this->Config , implib, true);
+      std::string lib = tgt->GetFullPath(this->Config , implib, true);
       this->OldLinkDirItems.push_back(lib);
       }
     }
@@ -658,7 +657,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       std::string exe = tgt->GetFullPath(config, this->UseImportLibrary,
                                          true);
       linkItem += exe;
-      this->Items.push_back(Item(linkItem, true, tgt->Target));
+      this->Items.push_back(Item(linkItem, true, tgt));
       this->Depends.push_back(exe);
       }
     else if(tgt->GetType() == cmTarget::INTERFACE_LIBRARY)
@@ -666,7 +665,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       // Add the interface library as an item so it can be considered as part
       // of COMPATIBLE_INTERFACE_ enforcement.  The generators will ignore
       // this for the actual link line.
-      this->Items.push_back(Item(std::string(), true, tgt->Target));
+      this->Items.push_back(Item(std::string(), true, tgt));
       }
     else
       {
@@ -683,8 +682,8 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
         this->Depends.push_back(lib);
         }
 
-      this->AddTargetItem(lib, tgt->Target);
-      this->AddLibraryRuntimeInfo(lib, tgt->Target);
+      this->AddTargetItem(lib, tgt);
+      this->AddLibraryRuntimeInfo(lib, tgt);
       }
     }
   else
@@ -766,7 +765,7 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
   if(tgt)
     {
     lib = tgt->GetFullPath(this->Config, this->UseImportLibrary);
-    this->AddLibraryRuntimeInfo(lib, tgt->Target);
+    this->AddLibraryRuntimeInfo(lib, tgt);
     }
   else
     {
@@ -1077,7 +1076,7 @@ void cmComputeLinkInformation::SetCurrentLinkType(LinkType lt)
 
 //----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddTargetItem(std::string const& item,
-                                             cmTarget const* target)
+                                             cmGeneratorTarget const* target)
 {
   // This is called to handle a link item that is a full path to a target.
   // If the target is not a static library make sure the link type is
@@ -1096,10 +1095,9 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
     this->SharedLibrariesLinked.insert(target);
     }
 
-  cmGeneratorTarget *gtgt = this->GlobalGenerator->GetGeneratorTarget(target);
   // Handle case of an imported shared library with no soname.
   if(this->NoSONameUsesPath &&
-     gtgt->IsImportedSharedLibWithoutSOName(this->Config))
+     target->IsImportedSharedLibWithoutSOName(this->Config))
     {
     this->AddSharedLibNoSOName(item);
     return;
@@ -1113,7 +1111,7 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
 
   // For compatibility with CMake 2.4 include the item's directory in
   // the linker search path.
-  if(this->OldLinkDirMode && !target->IsFrameworkOnApple() &&
+  if(this->OldLinkDirMode && !target->Target->IsFrameworkOnApple() &&
      this->OldLinkDirMask.find(cmSystemTools::GetFilenamePath(item)) ==
      this->OldLinkDirMask.end())
     {
@@ -1777,15 +1775,14 @@ cmComputeLinkInformation::GetRuntimeSearchPath()
 //----------------------------------------------------------------------------
 void
 cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath,
-                                                cmTarget const* target)
+                                              cmGeneratorTarget const* target)
 {
-  cmGeneratorTarget *gtgt = this->GlobalGenerator->GetGeneratorTarget(target);
   // Ignore targets on Apple where install_name is not @rpath.
   // The dependenty library can be found with other means such as
   // @loader_path or full paths.
   if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
     {
-    if(!gtgt->HasMacOSXRpathInstallNameDir(this->Config))
+    if(!target->HasMacOSXRpathInstallNameDir(this->Config))
       {
       return;
       }
@@ -1807,7 +1804,7 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath,
 
   // Try to get the soname of the library.  Only files with this name
   // could possibly conflict.
-  std::string soName = gtgt->GetSOName(this->Config);
+  std::string soName = target->GetSOName(this->Config);
   const char* soname = soName.empty()? 0 : soName.c_str();
 
   // Include this library in the runtime path ordering.
