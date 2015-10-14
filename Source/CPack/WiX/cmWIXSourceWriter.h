@@ -34,6 +34,8 @@ public:
 
   void EndElement(std::string const& name);
 
+  void AddTextNode(std::string const& text);
+
   void AddProcessingInstruction(
     std::string const& target, std::string const& content);
 
