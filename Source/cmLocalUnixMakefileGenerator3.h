@@ -226,7 +226,7 @@ protected:
                            std::ostream* content = 0);
   void AppendCleanCommand(std::vector<std::string>& commands,
                           const std::vector<std::string>& files,
-                          cmTarget& target, const char* filename =0);
+                          cmGeneratorTarget* target, const char* filename =0);
 
   // Helper methods for dependeny updates.
   bool ScanDependencies(const char* targetDir,

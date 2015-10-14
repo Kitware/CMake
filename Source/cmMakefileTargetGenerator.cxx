@@ -932,7 +932,7 @@ void cmMakefileTargetGenerator::WriteTargetCleanRules()
 
   // Construct the clean command.
   this->LocalGenerator->AppendCleanCommand(commands, this->CleanFiles,
-                                           *this->Target);
+                                           this->GeneratorTarget);
   this->LocalGenerator->CreateCDCommand
     (commands,
      this->LocalGenerator->GetCurrentBinaryDirectory(),

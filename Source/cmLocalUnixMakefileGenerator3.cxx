@@ -1218,11 +1218,11 @@ void
 cmLocalUnixMakefileGenerator3
 ::AppendCleanCommand(std::vector<std::string>& commands,
                      const std::vector<std::string>& files,
-                     cmTarget& target, const char* filename)
+                     cmGeneratorTarget* target, const char* filename)
 {
   std::string cleanfile = this->Makefile->GetCurrentBinaryDirectory();
   cleanfile += "/";
-  cleanfile += this->GetTargetDirectory(target);
+  cleanfile += this->GetTargetDirectory(target->Target);
   cleanfile += "/cmake_clean";
   if(filename)
     {
@@ -1256,14 +1256,12 @@ cmLocalUnixMakefileGenerator3
     {
     // Get the set of source languages in the target.
     std::set<std::string> languages;
-    cmGeneratorTarget *gtgt =
-        this->GlobalGenerator->GetGeneratorTarget(&target);
-    gtgt->GetLanguages(languages,
+    target->GetLanguages(languages,
                       this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
     fout << "\n"
          << "# Per-language clean rules from dependency scanning.\n"
          << "foreach(lang " << cmJoin(languages, " ") << ")\n"
-         << "  include(" << this->GetTargetDirectory(target)
+         << "  include(" << this->GetTargetDirectory(target->Target)
          << "/cmake_clean_${lang}.cmake OPTIONAL)\n"
          << "endforeach()\n";
     }

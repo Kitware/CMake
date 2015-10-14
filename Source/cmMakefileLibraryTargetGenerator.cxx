@@ -444,7 +444,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   if(this->Target->GetType() == cmTarget::STATIC_LIBRARY)
     {
     this->LocalGenerator->AppendCleanCommand(commands1, libCleanFiles,
-                                             *this->Target, "target");
+                                             this->GeneratorTarget, "target");
     this->LocalGenerator->CreateCDCommand
       (commands1,
        this->Makefile->GetCurrentBinaryDirectory(),
