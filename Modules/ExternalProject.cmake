@@ -1739,7 +1739,7 @@ function(_ep_add_download_command name)
     # The git submodule update '--recursive' flag requires git >= v1.6.5
     #
     if(GIT_VERSION_STRING VERSION_LESS 1.6.5)
-      message(FATAL_ERROR "error: git version 1.6.5 or later required for 'git submodule update --recursive': git_version='${git_version}'")
+      message(FATAL_ERROR "error: git version 1.6.5 or later required for 'git submodule update --recursive': GIT_VERSION_STRING='${GIT_VERSION_STRING}'")
     endif()
 
     get_property(git_tag TARGET ${name} PROPERTY _EP_GIT_TAG)
