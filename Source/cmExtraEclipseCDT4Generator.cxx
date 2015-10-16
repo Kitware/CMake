@@ -1100,7 +1100,9 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           cleanArgs += "\" \"";
           cleanArgs += cmSystemTools::GetCMakeCommand();
           cleanArgs += "\" -P \"";
-          cleanArgs += (*it)->GetTargetDirectory(ti->second);
+          cmGeneratorTarget* gt =
+              this->GlobalGenerator->GetGeneratorTarget(&ti->second);
+          cleanArgs += (*it)->GetTargetDirectory(gt);
           cleanArgs += "/cmake_clean.cmake\"";
           this->AppendTarget(fout, "Clean", cmSystemTools::GetCMakeCommand(),
                              cleanArgs, virtDir, "", "");

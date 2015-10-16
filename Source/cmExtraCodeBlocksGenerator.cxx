@@ -358,11 +358,13 @@ void cmExtraCodeBlocksGenerator
         case cmTarget::MODULE_LIBRARY:
         case cmTarget::OBJECT_LIBRARY:
           {
-          this->AppendTarget(fout, ti->first, &ti->second,
+          cmGeneratorTarget* gt =
+              this->GlobalGenerator->GetGeneratorTarget(&ti->second);
+          this->AppendTarget(fout, ti->first, gt,
                              make.c_str(), *lg, compiler.c_str());
           std::string fastTarget = ti->first;
           fastTarget += "/fast";
-          this->AppendTarget(fout, fastTarget, &ti->second,
+          this->AppendTarget(fout, fastTarget, gt,
                              make.c_str(), *lg, compiler.c_str());
           }
           break;
@@ -521,14 +523,14 @@ void cmExtraCodeBlocksGenerator
 // Write a dummy file for OBJECT libraries, so C::B can reference some file
 std::string cmExtraCodeBlocksGenerator::CreateDummyTargetFile(
                                         cmLocalGenerator* lg,
-                                        cmTarget* target) const
+                                        cmGeneratorTarget* target) const
 {
   // this file doesn't seem to be used by C::B in custom makefile mode,
   // but we generate a unique file for each OBJECT library so in case
   // C::B uses it in some way, the targets don't interfere with each other.
   std::string filename = lg->GetCurrentBinaryDirectory();
   filename += "/";
-  filename += lg->GetTargetDirectory(*target);
+  filename += lg->GetTargetDirectory(target);
   filename += "/";
   filename += target->GetName();
   filename += ".objlib";
@@ -547,7 +549,7 @@ std::string cmExtraCodeBlocksGenerator::CreateDummyTargetFile(
 // Generate the xml code for one target.
 void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
                                               const std::string& targetName,
-                                              cmTarget* target,
+                                              cmGeneratorTarget* target,
                                               const char* make,
                                               const cmLocalGenerator* lg,
                                               const char* compiler)
@@ -559,7 +561,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
   fout<<"      <Target title=\"" << targetName << "\">\n";
   if (target!=0)
     {
-    int cbTargetType = this->GetCBTargetType(target);
+    int cbTargetType = this->GetCBTargetType(target->Target);
     std::string workingDir = lg->GetCurrentBinaryDirectory();
     if ( target->GetType()==cmTarget::EXECUTABLE)
       {
@@ -591,9 +593,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
       }
     else
       {
-      cmGeneratorTarget* gt =
-          this->GlobalGenerator->GetGeneratorTarget(target);
-      location = gt->GetLocation(buildType);
+      location = target->GetLocation(buildType);
       }
 
     fout<<"         <Option output=\"" << location
@@ -604,12 +604,9 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
           "         <Option compiler=\"" << compiler << "\" />\n"
           "         <Compiler>\n";
 
-    cmGeneratorTarget *gtgt = this->GlobalGenerator
-                                  ->GetGeneratorTarget(target);
-
     // the compilerdefines for this target
     std::vector<std::string> cdefs;
-    gtgt->GetCompileDefinitions(cdefs, buildType, "C");
+    target->GetCompileDefinitions(cdefs, buildType, "C");
 
     // Expand the list.
     for(std::vector<std::string>::const_iterator di = cdefs.begin();
@@ -623,7 +620,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
     std::set<std::string> uniqIncludeDirs;
 
     std::vector<std::string> includes;
-    lg->GetIncludeDirectories(includes, gtgt, "C", buildType);
+    lg->GetIncludeDirectories(includes, target, "C", buildType);
 
     uniqIncludeDirs.insert(includes.begin(), includes.end());
 

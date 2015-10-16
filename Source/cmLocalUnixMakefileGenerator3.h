@@ -106,7 +106,8 @@ public:
   /** Get whether the makefile is to have color.  */
   bool GetColorMakefile() const { return this->ColorMakefile; }
 
-  virtual std::string GetTargetDirectory(cmTarget const& target) const;
+  virtual
+  std::string GetTargetDirectory(cmGeneratorTarget const* target) const;
 
     // create a command that cds to the start dir then runs the commands
   void CreateCDCommand(std::vector<std::string>& commands,
@@ -131,7 +132,7 @@ public:
   void WriteSpecialTargetsTop(std::ostream& makefileStream);
   void WriteSpecialTargetsBottom(std::ostream& makefileStream);
 
-  std::string GetRelativeTargetDirectory(cmTarget const& target);
+  std::string GetRelativeTargetDirectory(cmGeneratorTarget* target);
 
   // File pairs for implicit dependency scanning.  The key of the map
   // is the depender and the value is the explicit dependee.
@@ -226,7 +227,7 @@ protected:
                            std::ostream* content = 0);
   void AppendCleanCommand(std::vector<std::string>& commands,
                           const std::vector<std::string>& files,
-                          cmTarget& target, const char* filename =0);
+                          cmGeneratorTarget* target, const char* filename =0);
 
   // Helper methods for dependeny updates.
   bool ScanDependencies(const char* targetDir,
@@ -254,10 +255,10 @@ private:
 
   struct LocalObjectEntry
   {
-    cmTarget* Target;
+    cmGeneratorTarget* Target;
     std::string Language;
     LocalObjectEntry(): Target(0), Language() {}
-    LocalObjectEntry(cmTarget* t, const std::string& lang):
+    LocalObjectEntry(cmGeneratorTarget* t, const std::string& lang):
       Target(t), Language(lang) {}
   };
   struct LocalObjectInfo: public std::vector<LocalObjectEntry>

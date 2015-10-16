@@ -1939,7 +1939,7 @@ void cmLocalVisualStudio6Generator
 
 std::string
 cmLocalVisualStudio6Generator
-::GetTargetDirectory(cmTarget const&) const
+::GetTargetDirectory(cmGeneratorTarget const*) const
 {
   // No per-target directory for this generator (yet).
   return "";

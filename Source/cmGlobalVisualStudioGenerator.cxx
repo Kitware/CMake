@@ -147,7 +147,7 @@ void cmGlobalVisualStudioGenerator
 {
   std::string dir = gt->Makefile->GetCurrentBinaryDirectory();
   dir += "/";
-  std::string tgtDir = gt->LocalGenerator->GetTargetDirectory(*gt->Target);
+  std::string tgtDir = gt->LocalGenerator->GetTargetDirectory(gt);
   if(!tgtDir.empty())
     {
     dir += tgtDir;

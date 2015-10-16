@@ -92,7 +92,7 @@ void cmMakefileTargetGenerator::CreateRuleFile()
 {
   // Create a directory for this target.
   this->TargetBuildDirectory =
-    this->LocalGenerator->GetTargetDirectory(*this->Target);
+    this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   this->TargetBuildDirectoryFull =
     this->LocalGenerator->ConvertToFullPath(this->TargetBuildDirectory);
   cmSystemTools::MakeDirectory(this->TargetBuildDirectoryFull.c_str());
@@ -378,7 +378,8 @@ void cmMakefileTargetGenerator
   // Get the full path name of the object file.
   std::string const& objectName = this->GeneratorTarget
                                       ->GetObjectName(&source);
-  std::string obj = this->LocalGenerator->GetTargetDirectory(*this->Target);
+  std::string obj =
+      this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   obj += "/";
   obj += objectName;
 
@@ -870,7 +871,7 @@ cmMakefileTargetGenerator
   temp += ".provides.build";
   std::vector<std::string> r_commands;
   std::string tgtMakefileName =
-    this->LocalGenerator->GetRelativeTargetDirectory(*this->Target);
+    this->LocalGenerator->GetRelativeTargetDirectory(this->GeneratorTarget);
   tgtMakefileName += "/build.make";
   r_commands.push_back
     (this->LocalGenerator->GetRecursiveMakeCall(tgtMakefileName.c_str(),
@@ -898,7 +899,7 @@ void cmMakefileTargetGenerator::WriteTargetRequiresRules()
 
   // Construct the name of the dependency generation target.
   std::string depTarget =
-    this->LocalGenerator->GetRelativeTargetDirectory(*this->Target);
+    this->LocalGenerator->GetRelativeTargetDirectory(this->GeneratorTarget);
   depTarget += "/requires";
 
   // This target drives dependency generation for all object files.
@@ -927,12 +928,12 @@ void cmMakefileTargetGenerator::WriteTargetCleanRules()
 
   // Construct the clean target name.
   std::string cleanTarget =
-    this->LocalGenerator->GetRelativeTargetDirectory(*this->Target);
+    this->LocalGenerator->GetRelativeTargetDirectory(this->GeneratorTarget);
   cleanTarget += "/clean";
 
   // Construct the clean command.
   this->LocalGenerator->AppendCleanCommand(commands, this->CleanFiles,
-                                           *this->Target);
+                                           this->GeneratorTarget);
   this->LocalGenerator->CreateCDCommand
     (commands,
      this->LocalGenerator->GetCurrentBinaryDirectory(),
@@ -1024,7 +1025,8 @@ bool cmMakefileTargetGenerator::WriteMakeRule(
 void cmMakefileTargetGenerator::WriteTargetDependRules()
 {
   // must write the targets depend info file
-  std::string dir = this->LocalGenerator->GetTargetDirectory(*this->Target);
+  std::string dir =
+      this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   this->InfoFileNameFull = dir;
   this->InfoFileNameFull += "/DependInfo.cmake";
   this->InfoFileNameFull =
@@ -1086,7 +1088,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
 
   // Construct the name of the dependency generation target.
   std::string depTarget =
-    this->LocalGenerator->GetRelativeTargetDirectory(*this->Target);
+    this->LocalGenerator->GetRelativeTargetDirectory(this->GeneratorTarget);
   depTarget += "/depend";
 
   // Add a command to call CMake to scan dependencies.  CMake will
@@ -1400,7 +1402,7 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(
 {
   // Compute the name of the driver target.
   std::string dir =
-    this->LocalGenerator->GetRelativeTargetDirectory(*this->Target);
+    this->LocalGenerator->GetRelativeTargetDirectory(this->GeneratorTarget);
   std::string buildTargetRuleName = dir;
   buildTargetRuleName += relink?"/preinstall":"/build";
   buildTargetRuleName = this->Convert(buildTargetRuleName,

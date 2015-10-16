@@ -191,7 +191,7 @@ GetLocalObjectFiles(std::map<std::string, LocalObjectInfo> &localObjectFiles)
     std::string dir;
     dir += gt->Makefile->GetCurrentBinaryDirectory();
     dir += "/";
-    dir += this->GetTargetDirectory(*gt->Target);
+    dir += this->GetTargetDirectory(gt);
     dir += "/";
     // Compute the name of each object file.
     for(std::vector<cmSourceFile const*>::iterator
@@ -209,7 +209,7 @@ GetLocalObjectFiles(std::map<std::string, LocalObjectInfo> &localObjectFiles)
         }
       LocalObjectInfo& info = localObjectFiles[objectName];
       info.HasSourceExtension = hasSourceExtension;
-      info.push_back(LocalObjectEntry(gt->Target, sf->GetLanguage()));
+      info.push_back(LocalObjectEntry(gt, sf->GetLanguage()));
       }
     }
 }
@@ -389,7 +389,7 @@ cmLocalUnixMakefileGenerator3
       t != info.end(); ++t)
     {
     std::string tgtMakefileName =
-      this->GetRelativeTargetDirectory(*(t->Target));
+      this->GetRelativeTargetDirectory(t->Target);
     std::string targetName = tgtMakefileName;
     tgtMakefileName += "/build.make";
     targetName += "/";
@@ -438,7 +438,7 @@ void cmLocalUnixMakefileGenerator3
       emitted.insert(t->second->GetName());
 
       // for subdirs add a rule to build this specific target by name.
-      localName = this->GetRelativeTargetDirectory(*t->second->Target);
+      localName = this->GetRelativeTargetDirectory(t->second);
       localName += "/rule";
       commands.clear();
       depends.clear();
@@ -465,11 +465,11 @@ void cmLocalUnixMakefileGenerator3
 
       // Add a fast rule to build the target
       std::string makefileName =
-                         this->GetRelativeTargetDirectory(*t->second->Target);
+                         this->GetRelativeTargetDirectory(t->second);
       makefileName += "/build.make";
       // make sure the makefile name is suitable for a makefile
       std::string makeTargetName =
-        this->GetRelativeTargetDirectory(*t->second->Target);
+        this->GetRelativeTargetDirectory(t->second);
       makeTargetName += "/build";
       localName = t->second->GetName();
       localName += "/fast";
@@ -487,7 +487,7 @@ void cmLocalUnixMakefileGenerator3
       // installation.
       if(t->second->NeedRelinkBeforeInstall(this->ConfigName))
         {
-        makeTargetName = this->GetRelativeTargetDirectory(*t->second->Target);
+        makeTargetName = this->GetRelativeTargetDirectory(t->second);
         makeTargetName += "/preinstall";
         localName = t->second->GetName();
         localName += "/preinstall";
@@ -933,7 +933,7 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3
-::GetRelativeTargetDirectory(cmTarget const& target)
+::GetRelativeTargetDirectory(cmGeneratorTarget* target)
 {
   std::string dir = this->HomeRelativeOutputPath;
   dir += this->GetTargetDirectory(target);
@@ -1218,7 +1218,7 @@ void
 cmLocalUnixMakefileGenerator3
 ::AppendCleanCommand(std::vector<std::string>& commands,
                      const std::vector<std::string>& files,
-                     cmTarget& target, const char* filename)
+                     cmGeneratorTarget* target, const char* filename)
 {
   std::string cleanfile = this->Makefile->GetCurrentBinaryDirectory();
   cleanfile += "/";
@@ -1256,9 +1256,7 @@ cmLocalUnixMakefileGenerator3
     {
     // Get the set of source languages in the target.
     std::set<std::string> languages;
-    cmGeneratorTarget *gtgt =
-        this->GlobalGenerator->GetGeneratorTarget(&target);
-    gtgt->GetLanguages(languages,
+    target->GetLanguages(languages,
                       this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
     fout << "\n"
          << "# Per-language clean rules from dependency scanning.\n"
@@ -2284,10 +2282,10 @@ cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p,
 //----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3
-::GetTargetDirectory(cmTarget const& target) const
+::GetTargetDirectory(cmGeneratorTarget const* target) const
 {
   std::string dir = cmake::GetCMakeFilesDirectoryPostSlash();
-  dir += target.GetName();
+  dir += target->GetName();
 #if defined(__VMS)
   dir += "_dir";
 #else

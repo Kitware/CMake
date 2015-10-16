@@ -114,13 +114,11 @@ void
 cmGlobalUnixMakefileGenerator3
 ::ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const
 {
-  cmTarget* target = gt->Target;
-
   // Compute full path to object file directory for this target.
   std::string dir;
   dir += gt->Makefile->GetCurrentBinaryDirectory();
   dir += "/";
-  dir += gt->LocalGenerator->GetTargetDirectory(*target);
+  dir += gt->LocalGenerator->GetTargetDirectory(gt);
   dir += "/";
   gt->ObjectDirectory = dir;
 }
@@ -435,7 +433,8 @@ void cmGlobalUnixMakefileGenerator3
          (l->second.GetType() == cmTarget::OBJECT_LIBRARY) ||
          (l->second.GetType() == cmTarget::UTILITY))
         {
-        std::string tname = lg->GetRelativeTargetDirectory(l->second);
+        cmGeneratorTarget* gt = this->GetGeneratorTarget(&l->second);
+        std::string tname = lg->GetRelativeTargetDirectory(gt);
         tname += "/DependInfo.cmake";
         cmSystemTools::ConvertToUnixSlashes(tname);
         cmakefileStream << "  \"" << tname << "\"\n";
@@ -484,7 +483,7 @@ cmGlobalUnixMakefileGenerator3
           gtarget
             ->NeedRelinkBeforeInstall(lg->GetConfigName())))
         {
-        std::string tname = lg->GetRelativeTargetDirectory(*gtarget->Target);
+        std::string tname = lg->GetRelativeTargetDirectory(gtarget);
         tname += "/";
         tname += pass;
         depends.push_back(tname);
@@ -673,7 +672,7 @@ cmGlobalUnixMakefileGenerator3
 
         // Add a fast rule to build the target
         std::string localName =
-                          lg->GetRelativeTargetDirectory(*gtarget->Target);
+                          lg->GetRelativeTargetDirectory(gtarget);
         std::string makefileName;
         makefileName = localName;
         makefileName += "/build.make";
@@ -693,7 +692,7 @@ cmGlobalUnixMakefileGenerator3
         if(gtarget
              ->NeedRelinkBeforeInstall(lg->GetConfigName()))
           {
-          makeTargetName = lg->GetRelativeTargetDirectory(*gtarget->Target);
+          makeTargetName = lg->GetRelativeTargetDirectory(gtarget);
           makeTargetName += "/preinstall";
           localName = name;
           localName += "/preinstall";
@@ -750,7 +749,7 @@ cmGlobalUnixMakefileGenerator3
       {
       std::string makefileName;
       // Add a rule to build the target by name.
-      localName = lg->GetRelativeTargetDirectory(*gtarget->Target);
+      localName = lg->GetRelativeTargetDirectory(gtarget);
       makefileName = localName;
       makefileName += "/build.make";
 
@@ -861,7 +860,7 @@ cmGlobalUnixMakefileGenerator3
       }
       depends.clear();
       depends.push_back("cmake_check_build_system");
-      localName = lg->GetRelativeTargetDirectory(*gtarget->Target);
+      localName = lg->GetRelativeTargetDirectory(gtarget);
       localName += "/rule";
       lg->WriteMakeRule(ruleFileStream,
                         "Build rule for subdir invocation for target.",
@@ -878,7 +877,7 @@ cmGlobalUnixMakefileGenerator3
       if(gtarget
            ->NeedRelinkBeforeInstall(lg->GetConfigName()))
         {
-        localName = lg->GetRelativeTargetDirectory(*gtarget->Target);
+        localName = lg->GetRelativeTargetDirectory(gtarget);
         localName += "/preinstall";
         depends.clear();
         commands.clear();
@@ -899,7 +898,7 @@ cmGlobalUnixMakefileGenerator3
         }
 
       // add the clean rule
-      localName = lg->GetRelativeTargetDirectory(*gtarget->Target);
+      localName = lg->GetRelativeTargetDirectory(gtarget);
       makeTargetName = localName;
       makeTargetName += "/clean";
       depends.clear();
@@ -1066,7 +1065,8 @@ cmGlobalUnixMakefileGenerator3
       }
     cmLocalUnixMakefileGenerator3* lg3 =
       static_cast<cmLocalUnixMakefileGenerator3*>(dep->GetLocalGenerator());
-    std::string tgtName = lg3->GetRelativeTargetDirectory(*(*dep).Target);
+    std::string tgtName =
+        lg3->GetRelativeTargetDirectory(const_cast<cmGeneratorTarget*>(dep));
     tgtName += "/all";
     depends.push_back(tgtName);
     }

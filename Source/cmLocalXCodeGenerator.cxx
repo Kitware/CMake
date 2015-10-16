@@ -31,7 +31,7 @@ cmLocalXCodeGenerator::~cmLocalXCodeGenerator()
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalXCodeGenerator::GetTargetDirectory(cmTarget const&) const
+cmLocalXCodeGenerator::GetTargetDirectory(cmGeneratorTarget const*) const
 {
   // No per-target directory for this generator (yet).
   return "";

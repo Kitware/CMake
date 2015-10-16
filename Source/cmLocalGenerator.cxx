@@ -2908,7 +2908,7 @@ const char* cmLocalGenerator::GetCurrentSourceDirectory() const
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalGenerator::GetTargetDirectory(cmTarget const&) const
+cmLocalGenerator::GetTargetDirectory(const cmGeneratorTarget*) const
 {
   cmSystemTools::Error("GetTargetDirectory"
                        " called on cmLocalGenerator");

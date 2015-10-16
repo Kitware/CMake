@@ -403,7 +403,7 @@ cmCommonTargetGenerator::GetLinkedTargetDirectories() const
         cmMakefile* mf = linkee->Target->GetMakefile();
         std::string di = mf->GetCurrentBinaryDirectory();
         di += "/";
-        di += lg->GetTargetDirectory(*linkee->Target);
+        di += lg->GetTargetDirectory(linkee);
         dirs.push_back(di);
         }
       }
