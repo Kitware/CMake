@@ -382,7 +382,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::ostringstream minorStream;
   int major;
   int minor;
-  this->Target->GetTargetVersion(major, minor);
+  this->GeneratorTarget->GetTargetVersion(major, minor);
   majorStream << major;
   minorStream << minor;
   targetVersionMajor = majorStream.str();

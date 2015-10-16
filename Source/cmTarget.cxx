@@ -1616,44 +1616,6 @@ bool cmTarget::HaveWellDefinedOutputFiles() const
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GetTargetVersion(int& major, int& minor) const
-{
-  int patch;
-  this->GetTargetVersion(false, major, minor, patch);
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::GetTargetVersion(bool soversion,
-                                int& major, int& minor, int& patch) const
-{
-  // Set the default values.
-  major = 0;
-  minor = 0;
-  patch = 0;
-
-  assert(this->GetType() != cmState::INTERFACE_LIBRARY);
-
-  // Look for a VERSION or SOVERSION property.
-  const char* prop = soversion? "SOVERSION" : "VERSION";
-  if(const char* version = this->GetProperty(prop))
-    {
-    // Try to parse the version number and store the results that were
-    // successfully parsed.
-    int parsed_major;
-    int parsed_minor;
-    int parsed_patch;
-    switch(sscanf(version, "%d.%d.%d",
-                  &parsed_major, &parsed_minor, &parsed_patch))
-      {
-      case 3: patch = parsed_patch; // no break!
-      case 2: minor = parsed_minor; // no break!
-      case 1: major = parsed_major; // no break!
-      default: break;
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
 bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
 {
   if (this->IsImported())

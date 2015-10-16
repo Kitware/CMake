@@ -1319,7 +1319,7 @@ void cmLocalVisualStudio6Generator
     {
     int major;
     int minor;
-    target.GetTargetVersion(major, minor);
+    gt->GetTargetVersion(major, minor);
     std::ostringstream targetVersionStream;
     targetVersionStream << "/version:" << major << "." << minor;
     targetVersionFlag = targetVersionStream.str();

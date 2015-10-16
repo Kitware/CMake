@@ -2422,7 +2422,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     int patch;
 
     // VERSION -> current_version
-    target.GetTargetVersion(false, major, minor, patch);
+    gtgt->GetTargetVersion(false, major, minor, patch);
     std::ostringstream v;
 
     // Xcode always wants at least 1.0.0 or nothing
@@ -2434,7 +2434,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                 this->CreateString(v.str().c_str()));
 
     // SOVERSION -> compatibility_version
-    target.GetTargetVersion(true, major, minor, patch);
+    gtgt->GetTargetVersion(true, major, minor, patch);
     std::ostringstream vso;
 
     // Xcode always wants at least 1.0.0 or nothing

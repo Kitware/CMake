@@ -227,7 +227,7 @@ cmNinjaNormalTargetGenerator
     std::ostringstream minorStream;
     int major;
     int minor;
-    this->GetTarget()->GetTargetVersion(major, minor);
+    this->GetGeneratorTarget()->GetTargetVersion(major, minor);
     majorStream << major;
     minorStream << minor;
     targetVersionMajor = majorStream.str();

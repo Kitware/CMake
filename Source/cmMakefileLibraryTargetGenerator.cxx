@@ -630,7 +630,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::ostringstream minorStream;
   int major;
   int minor;
-  this->Target->GetTargetVersion(major, minor);
+  this->GeneratorTarget->GetTargetVersion(major, minor);
   majorStream << major;
   minorStream << minor;
   targetVersionMajor = majorStream.str();
@@ -862,7 +862,7 @@ cmMakefileLibraryTargetGenerator
   int major;
   int minor;
   int patch;
-  this->Target->GetTargetVersion(so, major, minor, patch);
+  this->GeneratorTarget->GetTargetVersion(so, major, minor, patch);
   if(major > 0 || minor > 0 || patch > 0)
     {
     // Append the flag since a non-zero version is specified.
