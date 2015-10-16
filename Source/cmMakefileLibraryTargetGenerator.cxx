@@ -122,11 +122,11 @@ void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
 
   // Write the rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                                      this->Target->GetName(),
+                                      this->GeneratorTarget->GetName(),
                                       depends, commands, true);
 
   // Write the main driver rule to build everything in this target.
-  this->WriteTargetDriverRule(this->Target->GetName(), false);
+  this->WriteTargetDriverRule(this->GeneratorTarget->GetName(), false);
 }
 
 //----------------------------------------------------------------------------
@@ -244,7 +244,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   if(linkLanguage.empty())
     {
     cmSystemTools::Error("Cannot determine link language for target \"",
-                         this->Target->GetName().c_str(), "\".");
+                         this->GeneratorTarget->GetName().c_str(), "\".");
     return;
     }
 
@@ -574,7 +574,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       std::string name_of_def_file =
         this->GeneratorTarget->GetSupportDirectory();
       name_of_def_file += std::string("/") +
-        this->Target->GetName();
+        this->GeneratorTarget->GetName();
       name_of_def_file += ".def";
       std::string cmd = cmSystemTools::GetCMakeCommand();
       cmd = this->Convert(cmd, cmLocalGenerator::NONE,

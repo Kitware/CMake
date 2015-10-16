@@ -92,7 +92,7 @@ std::string cmNinjaTargetGenerator::LanguageCompilerRule(
   const std::string& lang) const
 {
   return lang + "_COMPILER__" +
-    cmGlobalNinjaGenerator::EncodeRuleName(this->Target->GetName());
+    cmGlobalNinjaGenerator::EncodeRuleName(this->GeneratorTarget->GetName());
 }
 
 std::string
@@ -271,7 +271,7 @@ cmNinjaTargetGenerator
 
 std::string cmNinjaTargetGenerator::GetTargetName() const
 {
-  return this->Target->GetName();
+  return this->GeneratorTarget->GetName();
 }
 
 

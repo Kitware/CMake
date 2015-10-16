@@ -168,7 +168,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   if(linkLanguage.empty())
     {
     cmSystemTools::Error("Cannot determine link language for target \"",
-                         this->Target->GetName().c_str(), "\".");
+                         this->GeneratorTarget->GetName().c_str(), "\".");
     return;
     }
 

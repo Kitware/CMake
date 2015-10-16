@@ -1421,7 +1421,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         {
         cmSystemTools::Error
           ("CMake can not determine linker language for target: ",
-           target->Target->GetName().c_str());
+           target->GetName().c_str());
         return;
         }
       this->AddLanguageFlags(flags, linkLanguage, buildType);

@@ -77,7 +77,7 @@ void cmNinjaNormalTargetGenerator::Generate()
   if (this->TargetLinkLanguage.empty()) {
     cmSystemTools::Error("CMake can not determine linker language for "
                          "target: ",
-                         this->GetTarget()->GetName().c_str());
+                         this->GetGeneratorTarget()->GetName().c_str());
     return;
   }
 
@@ -158,7 +158,8 @@ cmNinjaNormalTargetGenerator
     + "_"
     + cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType())
     + "_LINKER__"
-    + cmGlobalNinjaGenerator::EncodeRuleName(this->GetTarget()->GetName())
+    + cmGlobalNinjaGenerator::EncodeRuleName(
+        this->GetGeneratorTarget()->GetName())
     ;
 }
 

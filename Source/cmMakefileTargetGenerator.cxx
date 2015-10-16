@@ -248,7 +248,8 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
     // Write an empty dependency file.
     cmGeneratedFileStream depFileStream(dependFileNameFull.c_str());
     depFileStream
-      << "# Empty dependencies file for " << this->Target->GetName() << ".\n"
+      << "# Empty dependencies file for "
+      << this->GeneratorTarget->GetName() << ".\n"
       << "# This may be replaced when dependencies are built." << std::endl;
     }
 
@@ -394,7 +395,7 @@ void cmMakefileTargetGenerator
     err << "Warning: Source file \""
         << source.GetFullPath()
         << "\" is listed multiple times for target \""
-        << this->Target->GetName()
+        << this->GeneratorTarget->GetName()
         << "\".";
     cmSystemTools::Message(err.str().c_str(), "Warning");
     return;
@@ -1267,10 +1268,10 @@ cmMakefileTargetGenerator
   // Write a make variable assignment that lists all objects for the
   // target.
   variableName =
-    this->LocalGenerator->CreateMakeVariable(this->Target->GetName(),
+    this->LocalGenerator->CreateMakeVariable(this->GeneratorTarget->GetName(),
                                              "_OBJECTS");
   *this->BuildFileStream
-    << "# Object files for target " << this->Target->GetName() << "\n"
+    << "# Object files for target " << this->GeneratorTarget->GetName() << "\n"
     << variableName << " =";
   std::string object;
   const char* lineContinue =
@@ -1292,12 +1293,12 @@ cmMakefileTargetGenerator
   // Write a make variable assignment that lists all external objects
   // for the target.
   variableNameExternal =
-    this->LocalGenerator->CreateMakeVariable(this->Target->GetName(),
+    this->LocalGenerator->CreateMakeVariable(this->GeneratorTarget->GetName(),
                                              "_EXTERNAL_OBJECTS");
   *this->BuildFileStream
     << "\n"
     << "# External object files for target "
-    << this->Target->GetName() << "\n"
+    << this->GeneratorTarget->GetName() << "\n"
     << variableNameExternal << " =";
   for(std::vector<std::string>::const_iterator i =
         this->ExternalObjects.begin();

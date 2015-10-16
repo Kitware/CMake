@@ -274,7 +274,7 @@ void cmExportBuildFileGenerator
           tei = this->ExportSet->GetTargetExports()->begin();
           tei != this->ExportSet->GetTargetExports()->end(); ++tei)
       {
-      targets.push_back((*tei)->Target->GetName());
+      targets.push_back((*tei)->GetName());
       }
     return;
     }
