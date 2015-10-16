@@ -354,8 +354,8 @@ public:
   void CreateEvaluationSourceFiles(std::string const& config) const;
 
   void SetFilenameTargetDepends(cmSourceFile* sf,
-                                std::set<cmTarget const*> tgts);
-  std::set<cmTarget const*> const&
+                                std::set<const cmGeneratorTarget*> tgts);
+  const std::set<const cmGeneratorTarget*>&
   GetFilenameTargetDepends(cmSourceFile* sf) const;
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -508,7 +508,7 @@ private:
   // track targets to issue CMP0042 warning for.
   std::set<std::string> CMP0042WarnTargets;
 
-  mutable std::map<cmSourceFile*, std::set<cmTarget const*> >
+  mutable std::map<cmSourceFile*, std::set<cmGeneratorTarget const*> >
   FilenameTargetDepends;
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
