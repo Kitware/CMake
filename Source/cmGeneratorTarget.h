@@ -537,6 +537,9 @@ private:
                          ImportInfo& info) const;
   ImportInfo const* GetImportInfo(const std::string& config) const;
 
+  /** Strip off leading and trailing whitespace from an item named in
+      the link dependencies of this target.  */
+  std::string CheckCMP0004(std::string const& item) const;
 
   cmLinkInterface const*
     GetImportLinkInterface(const std::string& config,

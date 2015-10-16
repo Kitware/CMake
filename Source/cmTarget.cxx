@@ -2368,63 +2368,6 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::CheckCMP0004(std::string const& item) const
-{
-  // Strip whitespace off the library names because we used to do this
-  // in case variables were expanded at generate time.  We no longer
-  // do the expansion but users link to libraries like " ${VAR} ".
-  std::string lib = item;
-  std::string::size_type pos = lib.find_first_not_of(" \t\r\n");
-  if(pos != lib.npos)
-    {
-    lib = lib.substr(pos, lib.npos);
-    }
-  pos = lib.find_last_not_of(" \t\r\n");
-  if(pos != lib.npos)
-    {
-    lib = lib.substr(0, pos+1);
-    }
-  if(lib != item)
-    {
-    cmake* cm = this->Makefile->GetCMakeInstance();
-    switch(this->GetPolicyStatusCMP0004())
-      {
-      case cmPolicies::WARN:
-        {
-        std::ostringstream w;
-        w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0004) << "\n"
-          << "Target \"" << this->GetName() << "\" links to item \""
-          << item << "\" which has leading or trailing whitespace.";
-        cm->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
-                         this->GetBacktrace());
-        }
-      case cmPolicies::OLD:
-        break;
-      case cmPolicies::NEW:
-        {
-        std::ostringstream e;
-        e << "Target \"" << this->GetName() << "\" links to item \""
-          << item << "\" which has leading or trailing whitespace.  "
-          << "This is now an error according to policy CMP0004.";
-        cm->IssueMessage(cmake::FATAL_ERROR, e.str(), this->GetBacktrace());
-        }
-        break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        {
-        std::ostringstream e;
-        e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0004) << "\n"
-          << "Target \"" << this->GetName() << "\" links to item \""
-          << item << "\" which has leading or trailing whitespace.";
-        cm->IssueMessage(cmake::FATAL_ERROR, e.str(), this->GetBacktrace());
-        }
-        break;
-      }
-    }
-  return lib;
-}
-
-//----------------------------------------------------------------------------
 cmTargetInternalPointer::cmTargetInternalPointer()
 {
   this->Pointer = new cmTargetInternals;

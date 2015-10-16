@@ -213,10 +213,6 @@ public:
 
   bool IsImported() const {return this->IsImportedTarget;}
 
-  /** Strip off leading and trailing whitespace from an item named in
-      the link dependencies of this target.  */
-  std::string CheckCMP0004(std::string const& item) const;
-
   /** Get the target major and minor version numbers interpreted from
       the VERSION property.  Version 0 is returned if the property is
       not set or cannot be parsed.  */

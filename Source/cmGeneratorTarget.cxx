@@ -4445,7 +4445,7 @@ void cmGeneratorTarget::LookupLinkItems(std::vector<std::string> const& names,
   for(std::vector<std::string>::const_iterator i = names.begin();
       i != names.end(); ++i)
     {
-    std::string name = this->Target->CheckCMP0004(*i);
+    std::string name = this->CheckCMP0004(*i);
     if(name == this->GetName() || name.empty())
       {
       continue;
@@ -5476,6 +5476,65 @@ void cmGeneratorTarget::GetObjectLibrariesCMP0026(
 }
 
 //----------------------------------------------------------------------------
+std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
+{
+  // Strip whitespace off the library names because we used to do this
+  // in case variables were expanded at generate time.  We no longer
+  // do the expansion but users link to libraries like " ${VAR} ".
+  std::string lib = item;
+  std::string::size_type pos = lib.find_first_not_of(" \t\r\n");
+  if(pos != lib.npos)
+    {
+    lib = lib.substr(pos, lib.npos);
+    }
+  pos = lib.find_last_not_of(" \t\r\n");
+  if(pos != lib.npos)
+    {
+    lib = lib.substr(0, pos+1);
+    }
+  if(lib != item)
+    {
+    cmake* cm = this->LocalGenerator->GetCMakeInstance();
+    switch(this->Target->GetPolicyStatusCMP0004())
+      {
+      case cmPolicies::WARN:
+        {
+        std::ostringstream w;
+        w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0004) << "\n"
+          << "Target \"" << this->GetName() << "\" links to item \""
+          << item << "\" which has leading or trailing whitespace.";
+        cm->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
+                         this->Target->GetBacktrace());
+        }
+      case cmPolicies::OLD:
+        break;
+      case cmPolicies::NEW:
+        {
+        std::ostringstream e;
+        e << "Target \"" << this->GetName() << "\" links to item \""
+          << item << "\" which has leading or trailing whitespace.  "
+          << "This is now an error according to policy CMP0004.";
+        cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                         this->Target->GetBacktrace());
+        }
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        {
+        std::ostringstream e;
+        e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0004) << "\n"
+          << "Target \"" << this->GetName() << "\" links to item \""
+          << item << "\" which has leading or trailing whitespace.";
+        cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                         this->Target->GetBacktrace());
+        }
+        break;
+      }
+    }
+  return lib;
+}
+
+//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
                             const std::string& config) const
 {
@@ -5636,7 +5695,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         li != llibs.end(); ++li)
       {
       // Skip entries that resolve to the target itself or are empty.
-      std::string name = this->Target->CheckCMP0004(*li);
+      std::string name = this->CheckCMP0004(*li);
       if(name == this->GetName() || name.empty())
         {
         if(name == this->GetName())
@@ -5702,7 +5761,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     {
     if(li->second != GENERAL_LibraryType && li->second != linkType)
       {
-      std::string name = this->Target->CheckCMP0004(li->first);
+      std::string name = this->CheckCMP0004(li->first);
       if(name == this->GetName() || name.empty())
         {
         continue;
