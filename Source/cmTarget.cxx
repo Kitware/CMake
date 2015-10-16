@@ -1316,7 +1316,6 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   else
     {
     this->Properties.SetProperty(prop, value);
-    this->MaybeInvalidatePropertyCache(prop);
     }
 }
 
@@ -1409,7 +1408,6 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
   else
     {
     this->Properties.AppendProperty(prop, value, asString);
-    this->MaybeInvalidatePropertyCache(prop);
     }
 }
 
@@ -1505,16 +1503,6 @@ void cmTarget::InsertCompileDefinition(std::string const& entry,
 {
   this->Internal->CompileDefinitionsEntries.push_back(entry);
   this->Internal->CompileDefinitionsBacktraces.push_back(bt);
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::MaybeInvalidatePropertyCache(const std::string& prop)
-{
-  // Wipe out maps caching information affected by this property.
-  if(this->IsImported() && cmHasLiteralPrefix(prop, "IMPORTED"))
-    {
-    this->ImportInfoMap.clear();
-    }
 }
 
 //----------------------------------------------------------------------------
@@ -2248,53 +2236,6 @@ const char* cmTarget::GetExportMacro() const
     }
 }
 
-//----------------------------------------------------------------------------
-cmTarget::ImportInfo const*
-cmTarget::GetImportInfo(const std::string& config) const
-{
-  // There is no imported information for non-imported targets.
-  if(!this->IsImported())
-    {
-    return 0;
-    }
-
-  // Lookup/compute/cache the import information for this
-  // configuration.
-  std::string config_upper;
-  if(!config.empty())
-    {
-    config_upper = cmSystemTools::UpperCase(config);
-    }
-  else
-    {
-    config_upper = "NOCONFIG";
-    }
-
-  ImportInfoMapType::const_iterator i =
-    this->ImportInfoMap.find(config_upper);
-  if(i == this->ImportInfoMap.end())
-    {
-    ImportInfo info;
-    this->ComputeImportInfo(config_upper, info);
-    ImportInfoMapType::value_type entry(config_upper, info);
-    i = this->ImportInfoMap.insert(entry).first;
-    }
-
-  if(this->GetType() == cmState::INTERFACE_LIBRARY)
-    {
-    return &i->second;
-    }
-  // If the location is empty then the target is not available for
-  // this configuration.
-  if(i->second.Location.empty() && i->second.ImportLibrary.empty())
-    {
-    return 0;
-    }
-
-  // Return the import information.
-  return &i->second;
-}
-
 bool cmTarget::GetMappedConfig(std::string const& desired_config,
                                const char** loc,
                                const char** imp,
@@ -2424,176 +2365,6 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
     }
 
   return true;
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::ComputeImportInfo(std::string const& desired_config,
-                                 ImportInfo& info) const
-{
-  // This method finds information about an imported target from its
-  // properties.  The "IMPORTED_" namespace is reserved for properties
-  // defined by the project exporting the target.
-
-  // Initialize members.
-  info.NoSOName = false;
-
-  const char* loc = 0;
-  const char* imp = 0;
-  std::string suffix;
-  if (!this->GetMappedConfig(desired_config, &loc, &imp, suffix))
-    {
-    return;
-    }
-
-  // Get the link interface.
-  {
-  std::string linkProp = "INTERFACE_LINK_LIBRARIES";
-  const char *propertyLibs = this->GetProperty(linkProp);
-
-  if (this->GetType() != cmState::INTERFACE_LIBRARY)
-    {
-    if(!propertyLibs)
-      {
-      linkProp = "IMPORTED_LINK_INTERFACE_LIBRARIES";
-      linkProp += suffix;
-      propertyLibs = this->GetProperty(linkProp);
-      }
-
-    if(!propertyLibs)
-      {
-      linkProp = "IMPORTED_LINK_INTERFACE_LIBRARIES";
-      propertyLibs = this->GetProperty(linkProp);
-      }
-    }
-  if(propertyLibs)
-    {
-    info.LibrariesProp = linkProp;
-    info.Libraries = propertyLibs;
-    }
-  }
-  if(this->GetType() == cmState::INTERFACE_LIBRARY)
-    {
-    return;
-    }
-
-  // A provided configuration has been chosen.  Load the
-  // configuration's properties.
-
-  // Get the location.
-  if(loc)
-    {
-    info.Location = loc;
-    }
-  else
-    {
-    std::string impProp = "IMPORTED_LOCATION";
-    impProp += suffix;
-    if(const char* config_location = this->GetProperty(impProp))
-      {
-      info.Location = config_location;
-      }
-    else if(const char* location = this->GetProperty("IMPORTED_LOCATION"))
-      {
-      info.Location = location;
-      }
-    }
-
-  // Get the soname.
-  if(this->GetType() == cmState::SHARED_LIBRARY)
-    {
-    std::string soProp = "IMPORTED_SONAME";
-    soProp += suffix;
-    if(const char* config_soname = this->GetProperty(soProp))
-      {
-      info.SOName = config_soname;
-      }
-    else if(const char* soname = this->GetProperty("IMPORTED_SONAME"))
-      {
-      info.SOName = soname;
-      }
-    }
-
-  // Get the "no-soname" mark.
-  if(this->GetType() == cmState::SHARED_LIBRARY)
-    {
-    std::string soProp = "IMPORTED_NO_SONAME";
-    soProp += suffix;
-    if(const char* config_no_soname = this->GetProperty(soProp))
-      {
-      info.NoSOName = cmSystemTools::IsOn(config_no_soname);
-      }
-    else if(const char* no_soname = this->GetProperty("IMPORTED_NO_SONAME"))
-      {
-      info.NoSOName = cmSystemTools::IsOn(no_soname);
-      }
-    }
-
-  // Get the import library.
-  if(imp)
-    {
-    info.ImportLibrary = imp;
-    }
-  else if(this->GetType() == cmState::SHARED_LIBRARY ||
-          this->IsExecutableWithExports())
-    {
-    std::string impProp = "IMPORTED_IMPLIB";
-    impProp += suffix;
-    if(const char* config_implib = this->GetProperty(impProp))
-      {
-      info.ImportLibrary = config_implib;
-      }
-    else if(const char* implib = this->GetProperty("IMPORTED_IMPLIB"))
-      {
-      info.ImportLibrary = implib;
-      }
-    }
-
-  // Get the link dependencies.
-  {
-  std::string linkProp = "IMPORTED_LINK_DEPENDENT_LIBRARIES";
-  linkProp += suffix;
-  if(const char* config_libs = this->GetProperty(linkProp))
-    {
-    info.SharedDeps = config_libs;
-    }
-  else if(const char* libs =
-          this->GetProperty("IMPORTED_LINK_DEPENDENT_LIBRARIES"))
-    {
-    info.SharedDeps = libs;
-    }
-  }
-
-  // Get the link languages.
-  if(this->LinkLanguagePropagatesToDependents())
-    {
-    std::string linkProp = "IMPORTED_LINK_INTERFACE_LANGUAGES";
-    linkProp += suffix;
-    if(const char* config_libs = this->GetProperty(linkProp))
-      {
-      info.Languages = config_libs;
-      }
-    else if(const char* libs =
-            this->GetProperty("IMPORTED_LINK_INTERFACE_LANGUAGES"))
-      {
-      info.Languages = libs;
-      }
-    }
-
-  // Get the cyclic repetition count.
-  if(this->GetType() == cmState::STATIC_LIBRARY)
-    {
-    std::string linkProp = "IMPORTED_LINK_INTERFACE_MULTIPLICITY";
-    linkProp += suffix;
-    if(const char* config_reps = this->GetProperty(linkProp))
-      {
-      sscanf(config_reps, "%u", &info.Multiplicity);
-      }
-    else if(const char* reps =
-            this->GetProperty("IMPORTED_LINK_INTERFACE_MULTIPLICITY"))
-      {
-      sscanf(reps, "%u", &info.Multiplicity);
-      }
-    }
 }
 
 //----------------------------------------------------------------------------

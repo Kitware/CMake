@@ -419,31 +419,7 @@ private:
   bool LinkLibrariesForVS6Analyzed;
 #endif
 
-  // Cache import information from properties for each configuration.
-  struct ImportInfo
-  {
-    ImportInfo(): NoSOName(false), Multiplicity(0) {}
-    bool NoSOName;
-    int Multiplicity;
-    std::string Location;
-    std::string SOName;
-    std::string ImportLibrary;
-    std::string Languages;
-    std::string Libraries;
-    std::string LibrariesProp;
-    std::string SharedDeps;
-  };
-
-  typedef std::map<std::string, ImportInfo> ImportInfoMapType;
-  mutable ImportInfoMapType ImportInfoMap;
-
-  ImportInfo const* GetImportInfo(const std::string& config) const;
-  void ComputeImportInfo(std::string const& desired_config,
-                         ImportInfo& info) const;
-
   std::string ProcessSourceItemCMP0049(const std::string& s);
-
-  void MaybeInvalidatePropertyCache(const std::string& prop);
 
   /** Return whether or not the target has a DLL import library.  */
   bool HasImportLibrary() const;

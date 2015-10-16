@@ -516,6 +516,28 @@ private:
   cmHeadToLinkInterfaceMap& GetHeadToLinkInterfaceUsageRequirementsMap(
       std::string const& config) const;
 
+  // Cache import information from properties for each configuration.
+  struct ImportInfo
+  {
+    ImportInfo(): NoSOName(false), Multiplicity(0) {}
+    bool NoSOName;
+    int Multiplicity;
+    std::string Location;
+    std::string SOName;
+    std::string ImportLibrary;
+    std::string Languages;
+    std::string Libraries;
+    std::string LibrariesProp;
+    std::string SharedDeps;
+  };
+
+  typedef std::map<std::string, ImportInfo> ImportInfoMapType;
+  mutable ImportInfoMapType ImportInfoMap;
+  void ComputeImportInfo(std::string const& desired_config,
+                         ImportInfo& info) const;
+  ImportInfo const* GetImportInfo(const std::string& config) const;
+
+
   cmLinkInterface const*
     GetImportLinkInterface(const std::string& config,
                            const cmGeneratorTarget* head,
