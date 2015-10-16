@@ -217,7 +217,7 @@ void cmGhsMultiTargetGenerator::WriteTypeSpecifics(const std::string &config,
 
   if (this->GeneratorTarget->GetType() == cmState::STATIC_LIBRARY)
     {
-    *this->GetFolderBuildStreams() << "    {optgroup=GhsCommonOptions} -o \""
+    *this->GetFolderBuildStreams() << "    -o \""
                                    << outputDir << outputFilename << ".a\""
                                    << std::endl;
     }
@@ -230,7 +230,7 @@ void cmGhsMultiTargetGenerator::WriteTypeSpecifics(const std::string &config,
     if (this->IsTargetGroup())
       {
       *this->GetFolderBuildStreams()
-          << "    {optgroup=GhsCommonOptions} -o \"" << outputDir
+          << "    -o \"" << outputDir
           << outputFilename << ".elf\"" << std::endl;
       *this->GetFolderBuildStreams() << "    :extraOutputFile=\"" << outputDir
                                      << outputFilename << ".elf.ael\""
@@ -238,7 +238,7 @@ void cmGhsMultiTargetGenerator::WriteTypeSpecifics(const std::string &config,
       }
     else
       {
-      *this->GetFolderBuildStreams() << "    {optgroup=GhsCommonOptions} -o \""
+      *this->GetFolderBuildStreams() << "    -o \""
                                      << outputDir << outputFilename << ".as\""
                                      << std::endl;
       }
