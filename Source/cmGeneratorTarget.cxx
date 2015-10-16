@@ -2004,27 +2004,26 @@ cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs,
 {
   std::vector<cmSourceFile const*> objectFiles;
   this->GetExternalObjects(objectFiles, config);
-  std::vector<cmTarget*> objectLibraries;
+  std::vector<cmGeneratorTarget*> objectLibraries;
   for(std::vector<cmSourceFile const*>::const_iterator
       it = objectFiles.begin(); it != objectFiles.end(); ++it)
     {
     std::string objLib = (*it)->GetObjectLibrary();
-    if (cmTarget* tgt = this->Makefile->FindTargetToUse(objLib))
+    if (cmGeneratorTarget* tgt =
+        this->LocalGenerator->FindGeneratorTargetToUse(objLib))
       {
       objectLibraries.push_back(tgt);
       }
     }
 
-  std::vector<cmTarget*>::const_iterator end
+  std::vector<cmGeneratorTarget*>::const_iterator end
       = cmRemoveDuplicates(objectLibraries);
 
-  for(std::vector<cmTarget*>::const_iterator
+  for(std::vector<cmGeneratorTarget*>::const_iterator
         ti = objectLibraries.begin();
       ti != end; ++ti)
     {
-    cmTarget* objLib = *ti;
-    cmGeneratorTarget* ogt =
-      this->GlobalGenerator->GetGeneratorTarget(objLib);
+    cmGeneratorTarget* ogt = *ti;
     std::vector<cmSourceFile const*> objectSources;
     ogt->GetObjectSources(objectSources, config);
     for(std::vector<cmSourceFile const*>::const_iterator
