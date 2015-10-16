@@ -400,8 +400,7 @@ cmCommonTargetGenerator::GetLinkedTargetDirectories() const
                 && emitted.insert(linkee).second)
         {
         cmLocalGenerator* lg = linkee->GetLocalGenerator();
-        cmMakefile* mf = linkee->Target->GetMakefile();
-        std::string di = mf->GetCurrentBinaryDirectory();
+        std::string di = lg->GetCurrentBinaryDirectory();
         di += "/";
         di += lg->GetTargetDirectory(linkee);
         dirs.push_back(di);

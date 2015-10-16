@@ -985,7 +985,7 @@ static bool processSources(cmGeneratorTarget const* tgt,
         {
         if(!e.empty())
           {
-          cmake* cm = mf->GetCMakeInstance();
+          cmake* cm = tgt->GetLocalGenerator()->GetCMakeInstance();
           cm->IssueMessage(cmake::FATAL_ERROR, e,
                           tgt->Target->GetBacktrace());
           }
@@ -1043,7 +1043,7 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<std::string> &files,
 {
   assert(this->GetType() != cmState::INTERFACE_LIBRARY);
 
-  if (!this->Makefile->GetGlobalGenerator()->GetConfigureDoneCMP0026())
+  if (!this->LocalGenerator->GetGlobalGenerator()->GetConfigureDoneCMP0026())
     {
     // At configure-time, this method can be called as part of getting the
     // LOCATION property or to export() a file to be include()d.  However
@@ -1088,7 +1088,7 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<std::string> &files,
                                  "SOURCES")
                         != debugProperties.end();
 
-  if (this->Makefile->GetGlobalGenerator()->GetConfigureDoneCMP0026())
+  if (this->LocalGenerator->GetGlobalGenerator()->GetConfigureDoneCMP0026())
     {
     this->DebugSourcesDone = true;
     }
@@ -1447,7 +1447,7 @@ bool cmGeneratorTarget::HasMacOSXRpathInstallNameDir(
     w << "  This could be because you are using a Mac OS X version";
     w << " less than 10.5 or because CMake's platform configuration is";
     w << " corrupt.";
-    cmake* cm = this->Makefile->GetCMakeInstance();
+    cmake* cm = this->LocalGenerator->GetCMakeInstance();
     cm->IssueMessage(cmake::FATAL_ERROR, w.str(),
                      this->Target->GetBacktrace());
     }
@@ -1474,7 +1474,7 @@ bool cmGeneratorTarget::MacOSXRpathInstallNameDirDefault() const
 
   if(cmp0042 == cmPolicies::WARN)
     {
-    this->Makefile->GetGlobalGenerator()->
+    this->LocalGenerator->GetGlobalGenerator()->
       AddCMP0042WarnTarget(this->GetName());
     }
 
@@ -1782,14 +1782,12 @@ class cmTargetSelectLinker
 {
   int Preference;
   cmGeneratorTarget const* Target;
-  cmMakefile* Makefile;
   cmGlobalGenerator* GG;
   std::set<std::string> Preferred;
 public:
   cmTargetSelectLinker(cmGeneratorTarget const* target)
       : Preference(0), Target(target)
     {
-    this->Makefile = this->Target->Makefile;
     this->GG = this->Target->GetLocalGenerator()->GetGlobalGenerator();
     }
   void Consider(const char* lang)
@@ -1823,7 +1821,7 @@ public:
         e << "  " << *li << "\n";
         }
       e << "Set the LINKER_LANGUAGE property for this target.";
-      cmake* cm = this->Makefile->GetCMakeInstance();
+      cmake* cm = this->Target->GetLocalGenerator()->GetCMakeInstance();
       cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
                        this->Target->Target->GetBacktrace());
       }
@@ -4823,7 +4821,7 @@ bool cmGeneratorTarget::ComputeOutputDir(const std::string& config,
   // specified as a relative path.  Treat a relative path as
   // relative to the current output directory for this makefile.
   out = (cmSystemTools::CollapseFullPath
-         (out, this->Makefile->GetCurrentBinaryDirectory()));
+         (out, this->LocalGenerator->GetCurrentBinaryDirectory()));
 
   // The generator may add the configuration's subdirectory.
   if(!conf.empty())
@@ -4888,7 +4886,7 @@ bool cmGeneratorTarget::ComputePDBOutputDir(const std::string& kind,
   // specified as a relative path.  Treat a relative path as
   // relative to the current output directory for this makefile.
   out = (cmSystemTools::CollapseFullPath
-         (out, this->Makefile->GetCurrentBinaryDirectory()));
+         (out, this->LocalGenerator->GetCurrentBinaryDirectory()));
 
   // The generator may add the configuration's subdirectory.
   if(!conf.empty())
@@ -5555,7 +5553,7 @@ bool cmGeneratorTarget::HasImportLibrary() const
 //----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetSupportDirectory() const
 {
-  std::string dir = this->Makefile->GetCurrentBinaryDirectory();
+  std::string dir = this->LocalGenerator->GetCurrentBinaryDirectory();
   dir += cmake::GetCMakeFilesDirectory();
   dir += "/";
   dir += this->GetName();
