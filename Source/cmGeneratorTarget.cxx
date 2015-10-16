@@ -5276,10 +5276,10 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
           i = externalObjects.begin(); i != externalObjects.end(); ++i)
       {
       std::string objLib = (*i)->GetObjectLibrary();
-      if (cmTarget* tgt = this->Makefile->FindTargetToUse(objLib))
+      if (cmGeneratorTarget* tgt =
+          this->LocalGenerator->FindGeneratorTargetToUse(objLib))
         {
-        objectLibraries.push_back(this->GlobalGenerator
-                                  ->GetGeneratorTarget(tgt));
+        objectLibraries.push_back(tgt);
         }
       }
     }
