@@ -476,7 +476,7 @@ void cmLocalGenerator::ComputeTargetManifest()
       {
       continue;
       }
-    if (target.Target->IsImported())
+    if (target.IsImported())
       {
       continue;
       }

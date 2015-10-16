@@ -45,7 +45,7 @@ std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
   cmGeneratorTarget* target =
       this->LG->FindGeneratorTargetToUse(argv0);
   if(target && target->GetType() == cmState::EXECUTABLE &&
-     (target->Target->IsImported()
+     (target->IsImported()
       || !this->LG->GetMakefile()->IsOn("CMAKE_CROSSCOMPILING")))
     {
     return target->GetLocation(this->Config);

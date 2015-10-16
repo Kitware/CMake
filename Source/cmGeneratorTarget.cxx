@@ -796,7 +796,7 @@ void cmGeneratorTarget
 const char* cmGeneratorTarget::GetLocation(const std::string& config) const
 {
   static std::string location;
-  if (this->Target->IsImported())
+  if (this->IsImported())
     {
     location = this->Target->ImportedGetFullPath(config, false);
     }
@@ -1491,7 +1491,7 @@ bool cmGeneratorTarget::MacOSXRpathInstallNameDirDefault() const
 //----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetSOName(const std::string& config) const
 {
-  if(this->Target->IsImported())
+  if(this->IsImported())
     {
     // Lookup the imported soname.
     if(cmGeneratorTarget::ImportInfo const* info =
@@ -1606,7 +1606,7 @@ cmGeneratorTarget::GetFrameworkDirectory(const std::string& config,
 std::string
 cmGeneratorTarget::GetFullName(const std::string& config, bool implib) const
 {
-  if(this->Target->IsImported())
+  if(this->IsImported())
     {
     return this->GetFullNameImported(config, implib);
     }
@@ -3033,7 +3033,7 @@ void cmGeneratorTarget::GetCompileDefinitions(std::vector<std::string> &list,
 void cmGeneratorTarget::ComputeTargetManifest(
                                               const std::string& config) const
 {
-  if (this->Target->IsImported())
+  if (this->IsImported())
     {
     return;
     }
@@ -3107,7 +3107,7 @@ void cmGeneratorTarget::ComputeTargetManifest(
 std::string cmGeneratorTarget::GetFullPath(const std::string& config,
                                            bool implib, bool realname) const
 {
-  if(this->Target->IsImported())
+  if(this->IsImported())
     {
     return this->Target->ImportedGetFullPath(config, implib);
     }
@@ -3152,7 +3152,7 @@ cmGeneratorTarget::NormalGetRealName(const std::string& config) const
   // This should not be called for imported targets.
   // TODO: Split cmTarget into a class hierarchy to get compile-time
   // enforcement of the limited imported target API.
-  if(this->Target->IsImported())
+  if(this->IsImported())
     {
     std::string msg =  "NormalGetRealName called on imported target: ";
     msg += this->GetName();
@@ -3194,7 +3194,7 @@ void cmGeneratorTarget::GetLibraryNames(std::string& name,
   // This should not be called for imported targets.
   // TODO: Split cmTarget into a class hierarchy to get compile-time
   // enforcement of the limited imported target API.
-  if(this->Target->IsImported())
+  if(this->IsImported())
     {
     std::string msg =  "GetLibraryNames called on imported target: ";
     msg += this->GetName();
@@ -3283,7 +3283,7 @@ void cmGeneratorTarget::GetExecutableNames(std::string& name,
   // This should not be called for imported targets.
   // TODO: Split cmTarget into a class hierarchy to get compile-time
   // enforcement of the limited imported target API.
-  if(this->Target->IsImported())
+  if(this->IsImported())
     {
     std::string msg =
       "GetExecutableNames called on imported target: ";
@@ -4735,7 +4735,7 @@ cmGeneratorTarget::GetLinkInterfaceLibraries(const std::string& config,
 std::string cmGeneratorTarget::GetDirectory(const std::string& config,
                                    bool implib) const
 {
-  if (this->Target->IsImported())
+  if (this->IsImported())
     {
     // Return the directory from which the target is imported.
     return
@@ -5413,7 +5413,7 @@ const cmLinkImplementation *
 cmGeneratorTarget::GetLinkImplementation(const std::string& config) const
 {
   // There is no link implementation for imported targets.
-  if(this->Target->IsImported())
+  if(this->IsImported())
     {
     return 0;
     }

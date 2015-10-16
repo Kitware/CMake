@@ -32,7 +32,7 @@ void cmLocalGhsMultiGenerator::Generate()
        ++l)
     {
     if (l->second->GetType() == cmState::INTERFACE_LIBRARY
-        || l->second->Target->IsImported())
+        || l->second->IsImported())
       {
       continue;
       }

@@ -417,7 +417,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
                                              const cmGeneratorTarget* dependee,
                                              bool linking)
 {
-  if(dependee->Target->IsImported() ||
+  if(dependee->IsImported() ||
      dependee->GetType() == cmState::INTERFACE_LIBRARY)
     {
     // Skip IMPORTED and INTERFACE targets but follow their utility
