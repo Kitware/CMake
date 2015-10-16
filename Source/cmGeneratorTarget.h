@@ -41,7 +41,7 @@ public:
   cmComputeLinkInformation*
     GetLinkInformation(const std::string& config) const;
 
-  int GetType() const;
+  cmState::TargetType GetType() const;
   std::string GetName() const;
   const char *GetProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;

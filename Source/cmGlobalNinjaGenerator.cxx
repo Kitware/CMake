@@ -924,18 +924,18 @@ cmGlobalNinjaGenerator
   bool realname = target->IsFrameworkOnApple();
 
   switch (target->GetType()) {
-  case cmTarget::EXECUTABLE:
-  case cmTarget::SHARED_LIBRARY:
-  case cmTarget::STATIC_LIBRARY:
-  case cmTarget::MODULE_LIBRARY:
+  case cmState::EXECUTABLE:
+  case cmState::SHARED_LIBRARY:
+  case cmState::STATIC_LIBRARY:
+  case cmState::MODULE_LIBRARY:
     {
     cmGeneratorTarget *gtgt = this->GetGeneratorTarget(target);
     outputs.push_back(this->ConvertToNinjaPath(
       gtgt->GetFullPath(configName, false, realname)));
     break;
     }
-  case cmTarget::OBJECT_LIBRARY:
-  case cmTarget::UTILITY: {
+  case cmState::OBJECT_LIBRARY:
+  case cmState::UTILITY: {
     std::string path = this->ConvertToNinjaPath(
       target->GetMakefile()->GetCurrentBinaryDirectory());
     if (path.empty() || path == ".")
@@ -948,7 +948,7 @@ cmGlobalNinjaGenerator
     break;
   }
 
-  case cmTarget::GLOBAL_TARGET:
+  case cmState::GLOBAL_TARGET:
     // Always use the target in HOME instead of an unused duplicate in a
     // subdirectory.
     outputs.push_back(target->GetName());
@@ -963,7 +963,7 @@ void
 cmGlobalNinjaGenerator
 ::AppendTargetDepends(cmTarget const* target, cmNinjaDeps& outputs)
 {
-  if (target->GetType() == cmTarget::GLOBAL_TARGET) {
+  if (target->GetType() == cmState::GLOBAL_TARGET) {
     // Global targets only depend on other utilities, which may not appear in
     // the TargetDepends set (e.g. "all").
     std::set<std::string> const& utils = target->GetUtilities();
@@ -974,7 +974,7 @@ cmGlobalNinjaGenerator
     for (cmTargetDependSet::const_iterator i = targetDeps.begin();
          i != targetDeps.end(); ++i)
       {
-      if ((*i)->GetType() == cmTarget::INTERFACE_LIBRARY)
+      if ((*i)->GetType() == cmState::INTERFACE_LIBRARY)
         {
         continue;
         }

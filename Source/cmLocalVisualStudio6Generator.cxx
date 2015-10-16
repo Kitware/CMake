@@ -86,8 +86,8 @@ void cmLocalVisualStudio6Generator::AddCMakeListsRules()
   for(cmTargets::iterator l = tgts.begin();
       l != tgts.end(); l++)
     {
-    if (l->second.GetType() == cmTarget::INTERFACE_LIBRARY
-        || l->second.GetType() == cmTarget::GLOBAL_TARGET)
+    if (l->second.GetType() == cmState::INTERFACE_LIBRARY
+        || l->second.GetType() == cmState::GLOBAL_TARGET)
       {
       continue;
       }
@@ -132,22 +132,22 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
     {
     switch(l->second.GetType())
       {
-      case cmTarget::STATIC_LIBRARY:
-      case cmTarget::OBJECT_LIBRARY:
+      case cmState::STATIC_LIBRARY:
+      case cmState::OBJECT_LIBRARY:
         this->SetBuildType(STATIC_LIBRARY, l->first.c_str(), l->second);
         break;
-      case cmTarget::SHARED_LIBRARY:
-      case cmTarget::MODULE_LIBRARY:
+      case cmState::SHARED_LIBRARY:
+      case cmState::MODULE_LIBRARY:
         this->SetBuildType(DLL, l->first.c_str(), l->second);
         break;
-      case cmTarget::EXECUTABLE:
+      case cmState::EXECUTABLE:
         this->SetBuildType(EXECUTABLE,l->first.c_str(), l->second);
         break;
-      case cmTarget::UTILITY:
-      case cmTarget::GLOBAL_TARGET:
+      case cmState::UTILITY:
+      case cmState::GLOBAL_TARGET:
         this->SetBuildType(UTILITY, l->first.c_str(), l->second);
         break;
-      case cmTarget::INTERFACE_LIBRARY:
+      case cmState::INTERFACE_LIBRARY:
         continue;
       default:
         cmSystemTools::Error("Bad target type: ", l->first.c_str());
@@ -263,8 +263,8 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
   // special care for dependencies.  The first rule must depend on all
   // the dependencies of all the rules.  The later rules must each
   // depend only on the previous rule.
-  if ((target.GetType() == cmTarget::UTILITY ||
-      target.GetType() == cmTarget::GLOBAL_TARGET) &&
+  if ((target.GetType() == cmState::UTILITY ||
+      target.GetType() == cmState::GLOBAL_TARGET) &&
       (!target.GetPreBuildCommands().empty() ||
        !target.GetPostBuildCommands().empty()))
     {
@@ -482,8 +482,8 @@ void cmLocalVisualStudio6Generator
       cmSystemTools::ExpandListArgument(dependsValue, depends);
       }
     if (GetVS6TargetName(source) != libName ||
-      target.GetType() == cmTarget::UTILITY ||
-      target.GetType() == cmTarget::GLOBAL_TARGET)
+      target.GetType() == cmState::UTILITY ||
+      target.GetType() == cmState::GLOBAL_TARGET)
       {
       fout << "# Begin Source File\n\n";
 
@@ -804,7 +804,7 @@ cmLocalVisualStudio6Generator::MaybeCreateOutputDir(cmTarget& target,
 
   // VS6 forgets to create the output directory for archives if it
   // differs from the intermediate directory.
-  if(target.GetType() != cmTarget::STATIC_LIBRARY) { return pcc; }
+  if(target.GetType() != cmState::STATIC_LIBRARY) { return pcc; }
 
   cmGeneratorTarget* gt =
     this->GlobalGenerator->GetGeneratorTarget(&target);
@@ -835,7 +835,7 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
                                               const std::string& configName,
                                               const std::string& /* libName */)
 {
-  if (target.GetType() >= cmTarget::UTILITY )
+  if (target.GetType() >= cmState::UTILITY )
     {
     return "";
     }
@@ -948,8 +948,8 @@ void cmLocalVisualStudio6Generator
                  const std::string& libName, cmTarget &target,
                  std::vector<cmSourceGroup> &)
 {
-  bool targetBuilds = (target.GetType() >= cmTarget::EXECUTABLE &&
-                       target.GetType() <= cmTarget::MODULE_LIBRARY);
+  bool targetBuilds = (target.GetType() >= cmState::EXECUTABLE &&
+                       target.GetType() <= cmState::MODULE_LIBRARY);
 #ifdef CM_USE_OLD_VS6
   // Lookup the library and executable output directories.
   std::string libPath;
@@ -1108,12 +1108,12 @@ void cmLocalVisualStudio6Generator
     // add libraries to executables and dlls (but never include
     // a library in a library, bad recursion)
     // NEVER LINK STATIC LIBRARIES TO OTHER STATIC LIBRARIES
-    if ((target.GetType() != cmTarget::SHARED_LIBRARY
-         && target.GetType() != cmTarget::STATIC_LIBRARY
-         && target.GetType() != cmTarget::MODULE_LIBRARY) ||
-        (target.GetType()==cmTarget::SHARED_LIBRARY
+    if ((target.GetType() != cmState::SHARED_LIBRARY
+         && target.GetType() != cmState::STATIC_LIBRARY
+         && target.GetType() != cmState::MODULE_LIBRARY) ||
+        (target.GetType()==cmState::SHARED_LIBRARY
          && libName != GetVS6TargetName(j->first)) ||
-        (target.GetType()==cmTarget::MODULE_LIBRARY
+        (target.GetType()==cmState::MODULE_LIBRARY
          && libName != GetVS6TargetName(j->first)))
       {
       // Compute the proper name to use to link this library.
@@ -1145,7 +1145,7 @@ void cmLocalVisualStudio6Generator
       libDebug =
         this->ConvertToOutputFormat(libDebug.c_str(), SHELL);
 
-      if (j->second == cmTarget::GENERAL)
+      if (j->second == GENERAL_LibraryType)
         {
         libOptions += " ";
         libOptions += lib;
@@ -1156,7 +1156,7 @@ void cmLocalVisualStudio6Generator
         libMultiLineOptionsForDebug +=  libDebug;
         libMultiLineOptionsForDebug += "\n";
         }
-      if (j->second == cmTarget::DEBUG)
+      if (j->second == DEBUG_LibraryType)
         {
         libDebugOptions += " ";
         libDebugOptions += lib;
@@ -1165,7 +1165,7 @@ void cmLocalVisualStudio6Generator
         libMultiLineDebugOptions += libDebug;
         libMultiLineDebugOptions += "\n";
         }
-      if (j->second == cmTarget::OPTIMIZED)
+      if (j->second == OPTIMIZED_LibraryType)
         {
         libOptimizedOptions += " ";
         libOptimizedOptions += lib;
@@ -1195,7 +1195,7 @@ void cmLocalVisualStudio6Generator
   std::string extraLinkOptionsRelease;
   std::string extraLinkOptionsMinSizeRel;
   std::string extraLinkOptionsRelWithDebInfo;
-  if(target.GetType() == cmTarget::EXECUTABLE)
+  if(target.GetType() == cmState::EXECUTABLE)
     {
     extraLinkOptions = this->Makefile->
       GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
@@ -1208,7 +1208,7 @@ void cmLocalVisualStudio6Generator
     extraLinkOptionsRelWithDebInfo = this->Makefile->
       GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO");
     }
-  if(target.GetType() == cmTarget::SHARED_LIBRARY)
+  if(target.GetType() == cmState::SHARED_LIBRARY)
     {
     extraLinkOptions = this->Makefile->
       GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS");
@@ -1221,7 +1221,7 @@ void cmLocalVisualStudio6Generator
     extraLinkOptionsRelWithDebInfo = this->Makefile->
       GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO");
     }
-  if(target.GetType() == cmTarget::MODULE_LIBRARY)
+  if(target.GetType() == cmState::MODULE_LIBRARY)
     {
     extraLinkOptions = this->Makefile->
       GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS");
@@ -1313,9 +1313,9 @@ void cmLocalVisualStudio6Generator
 
   // Compute version number information.
   std::string targetVersionFlag;
-  if(target.GetType() == cmTarget::EXECUTABLE ||
-     target.GetType() == cmTarget::SHARED_LIBRARY ||
-     target.GetType() == cmTarget::MODULE_LIBRARY)
+  if(target.GetType() == cmState::EXECUTABLE ||
+     target.GetType() == cmState::SHARED_LIBRARY ||
+     target.GetType() == cmState::MODULE_LIBRARY)
     {
     int major;
     int minor;
@@ -1332,10 +1332,10 @@ void cmLocalVisualStudio6Generator
   std::string outputNameRelease = outputName;
   std::string outputNameMinSizeRel = outputName;
   std::string outputNameRelWithDebInfo = outputName;
-  if(target.GetType() == cmTarget::EXECUTABLE ||
-     target.GetType() == cmTarget::STATIC_LIBRARY ||
-     target.GetType() == cmTarget::SHARED_LIBRARY ||
-     target.GetType() == cmTarget::MODULE_LIBRARY)
+  if(target.GetType() == cmState::EXECUTABLE ||
+     target.GetType() == cmState::STATIC_LIBRARY ||
+     target.GetType() == cmState::SHARED_LIBRARY ||
+     target.GetType() == cmState::MODULE_LIBRARY)
     {
     outputName = gt->GetFullName();
     outputNameDebug = gt->GetFullName("Debug");
@@ -1343,7 +1343,7 @@ void cmLocalVisualStudio6Generator
     outputNameMinSizeRel = gt->GetFullName("MinSizeRel");
     outputNameRelWithDebInfo = gt->GetFullName("RelWithDebInfo");
     }
-  else if(target.GetType() == cmTarget::OBJECT_LIBRARY)
+  else if(target.GetType() == cmState::OBJECT_LIBRARY)
     {
     outputName = target.GetName();
     outputName += ".lib";
@@ -1359,10 +1359,10 @@ void cmLocalVisualStudio6Generator
   std::string outputDirRelease;
   std::string outputDirMinSizeRel;
   std::string outputDirRelWithDebInfo;
-  if(target.GetType() == cmTarget::EXECUTABLE ||
-     target.GetType() == cmTarget::STATIC_LIBRARY ||
-     target.GetType() == cmTarget::SHARED_LIBRARY ||
-     target.GetType() == cmTarget::MODULE_LIBRARY)
+  if(target.GetType() == cmState::EXECUTABLE ||
+     target.GetType() == cmState::STATIC_LIBRARY ||
+     target.GetType() == cmState::SHARED_LIBRARY ||
+     target.GetType() == cmState::MODULE_LIBRARY)
     {
 #ifdef CM_USE_OLD_VS6
     outputDirOld =
@@ -1382,7 +1382,7 @@ void cmLocalVisualStudio6Generator
         removeQuotes(this->ConvertToOutputFormat(
                  gt->GetDirectory("RelWithDebInfo").c_str(), SHELL));
     }
-  else if(target.GetType() == cmTarget::OBJECT_LIBRARY)
+  else if(target.GetType() == cmState::OBJECT_LIBRARY)
     {
     std::string outputDir = cmake::GetCMakeFilesDirectoryPostSlash();
     outputDirDebug = outputDir + "Debug";
@@ -1396,9 +1396,9 @@ void cmLocalVisualStudio6Generator
   std::string optionsRelease;
   std::string optionsMinSizeRel;
   std::string optionsRelWithDebInfo;
-  if(target.GetType() == cmTarget::EXECUTABLE ||
-     target.GetType() == cmTarget::SHARED_LIBRARY ||
-     target.GetType() == cmTarget::MODULE_LIBRARY)
+  if(target.GetType() == cmState::EXECUTABLE ||
+     target.GetType() == cmState::SHARED_LIBRARY ||
+     target.GetType() == cmState::MODULE_LIBRARY)
     {
     extraLinkOptionsDebug =
       extraLinkOptions + " " + extraLinkOptionsDebug;
@@ -1424,9 +1424,9 @@ void cmLocalVisualStudio6Generator
   std::string targetImplibFlagRelease;
   std::string targetImplibFlagMinSizeRel;
   std::string targetImplibFlagRelWithDebInfo;
-  if(target.GetType() == cmTarget::SHARED_LIBRARY ||
-     target.GetType() == cmTarget::MODULE_LIBRARY ||
-     target.GetType() == cmTarget::EXECUTABLE)
+  if(target.GetType() == cmState::SHARED_LIBRARY ||
+     target.GetType() == cmState::MODULE_LIBRARY ||
+     target.GetType() == cmState::EXECUTABLE)
     {
     std::string fullPathImpDebug = gt->GetDirectory("Debug", true);
     std::string fullPathImpRelease = gt->GetDirectory("Release", true);
@@ -1494,7 +1494,7 @@ void cmLocalVisualStudio6Generator
   std::string staticLibOptionsRelease;
   std::string staticLibOptionsMinSizeRel;
   std::string staticLibOptionsRelWithDebInfo;
-  if(target.GetType() == cmTarget::STATIC_LIBRARY )
+  if(target.GetType() == cmState::STATIC_LIBRARY )
     {
     const char *libflagsGlobal =
       this->Makefile->GetSafeDefinition("CMAKE_STATIC_LINKER_FLAGS");
@@ -1567,8 +1567,8 @@ void cmLocalVisualStudio6Generator
                                  libnameExports.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_MFC_FLAG",
                                  mfcFlag);
-    if(target.GetType() == cmTarget::STATIC_LIBRARY ||
-       target.GetType() == cmTarget::OBJECT_LIBRARY)
+    if(target.GetType() == cmState::STATIC_LIBRARY ||
+       target.GetType() == cmState::OBJECT_LIBRARY)
       {
       cmSystemTools::ReplaceString(line, "CM_STATIC_LIB_ARGS_DEBUG",
                                    staticLibOptionsDebug.c_str());
@@ -1674,7 +1674,7 @@ void cmLocalVisualStudio6Generator
                     (exePath.c_str(), SHELL)).c_str());
 #endif
 
-    if(targetBuilds || target.GetType() == cmTarget::OBJECT_LIBRARY)
+    if(targetBuilds || target.GetType() == cmState::OBJECT_LIBRARY)
       {
       cmSystemTools::ReplaceString(line, "OUTPUT_DIRECTORY_DEBUG",
                                    outputDirDebug.c_str());
@@ -1698,8 +1698,8 @@ void cmLocalVisualStudio6Generator
       = this->Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
     cmSystemTools::ReplaceString(line, "DEBUG_POSTFIX",
                                  debugPostfix?debugPostfix:"");
-    if(target.GetType() >= cmTarget::EXECUTABLE &&
-       target.GetType() <= cmTarget::OBJECT_LIBRARY)
+    if(target.GetType() >= cmState::EXECUTABLE &&
+       target.GetType() <= cmState::OBJECT_LIBRARY)
       {
       // store flags for each configuration
       std::string flags = " ";
@@ -1899,7 +1899,7 @@ void cmLocalVisualStudio6Generator
         this->ConvertToOutputFormat(l->Value.c_str(), SHELL);
       }
     else if (!l->Target
-        || l->Target->GetType() != cmTarget::INTERFACE_LIBRARY)
+        || l->Target->GetType() != cmState::INTERFACE_LIBRARY)
       {
       options += l->Value;
       }

@@ -88,7 +88,7 @@ bool cmTargetLinkLibrariesCommand
     return true;
     }
 
-  if(this->Target->GetType() == cmTarget::OBJECT_LIBRARY)
+  if(this->Target->GetType() == cmState::OBJECT_LIBRARY)
     {
     std::ostringstream e;
     e << "Object library target \"" << args[0] << "\" "
@@ -98,7 +98,7 @@ bool cmTargetLinkLibrariesCommand
     return true;
     }
 
-  if (this->Target->GetType() == cmTarget::UTILITY)
+  if (this->Target->GetType() == cmState::UTILITY)
     {
     std::ostringstream e;
     const char *modal = 0;
@@ -136,7 +136,7 @@ bool cmTargetLinkLibrariesCommand
     }
 
   // Keep track of link configuration specifiers.
-  cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
+  cmTargetLinkLibraryType llt = GENERAL_LibraryType;
   bool haveLLT = false;
 
   // Start with primary linking and switch to link interface
@@ -242,27 +242,27 @@ bool cmTargetLinkLibrariesCommand
       {
       if(haveLLT)
         {
-        this->LinkLibraryTypeSpecifierWarning(llt, cmTarget::DEBUG);
+        this->LinkLibraryTypeSpecifierWarning(llt, DEBUG_LibraryType);
         }
-      llt = cmTarget::DEBUG;
+      llt = DEBUG_LibraryType;
       haveLLT = true;
       }
     else if(args[i] == "optimized")
       {
       if(haveLLT)
         {
-        this->LinkLibraryTypeSpecifierWarning(llt, cmTarget::OPTIMIZED);
+        this->LinkLibraryTypeSpecifierWarning(llt, OPTIMIZED_LibraryType);
         }
-      llt = cmTarget::OPTIMIZED;
+      llt = OPTIMIZED_LibraryType;
       haveLLT = true;
       }
     else if(args[i] == "general")
       {
       if(haveLLT)
         {
-        this->LinkLibraryTypeSpecifierWarning(llt, cmTarget::GENERAL);
+        this->LinkLibraryTypeSpecifierWarning(llt, GENERAL_LibraryType);
         }
-      llt = cmTarget::GENERAL;
+      llt = GENERAL_LibraryType;
       haveLLT = true;
       }
     else if(haveLLT)
@@ -282,7 +282,7 @@ bool cmTargetLinkLibrariesCommand
       // specifed that a library is both debug and optimized.  (this check is
       // only there for backwards compatibility when mixing projects built
       // with old versions of CMake and new)
-      llt = cmTarget::GENERAL;
+      llt = GENERAL_LibraryType;
       std::string linkType = args[0];
       linkType += "_LINK_TYPE";
       const char* linkTypeString =
@@ -291,11 +291,11 @@ bool cmTargetLinkLibrariesCommand
         {
         if(strcmp(linkTypeString, "debug") == 0)
           {
-          llt = cmTarget::DEBUG;
+          llt = DEBUG_LibraryType;
           }
         if(strcmp(linkTypeString, "optimized") == 0)
           {
-          llt = cmTarget::OPTIMIZED;
+          llt = OPTIMIZED_LibraryType;
           }
         }
       if (!this->HandleLibrary(args[i], llt))
@@ -350,9 +350,9 @@ cmTargetLinkLibrariesCommand
 //----------------------------------------------------------------------------
 bool
 cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
-                                            cmTarget::LinkLibraryType llt)
+                                            cmTargetLinkLibraryType llt)
 {
-  if(this->Target->GetType() == cmTarget::INTERFACE_LIBRARY
+  if(this->Target->GetType() == cmState::INTERFACE_LIBRARY
       && this->CurrentProcessingState != ProcessingKeywordLinkInterface)
     {
     this->Makefile->IssueMessage(cmake::FATAL_ERROR,
@@ -428,7 +428,7 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
     else if(this->CurrentProcessingState != ProcessingKeywordPublicInterface
             && this->CurrentProcessingState != ProcessingPlainPublicInterface)
       {
-      if (this->Target->GetType() == cmTarget::STATIC_LIBRARY)
+      if (this->Target->GetType() == cmState::STATIC_LIBRARY)
         {
         std::string configLib = this->Target
                                      ->GetDebugGeneratorExpressions(lib, llt);
@@ -458,7 +458,7 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
     return true;
     }
 
-  if (this->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
+  if (this->Target->GetType() == cmState::INTERFACE_LIBRARY)
     {
     return true;
     }
@@ -469,7 +469,7 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
   std::string prop;
 
   // Include this library in the link interface for the target.
-  if(llt == cmTarget::DEBUG || llt == cmTarget::GENERAL)
+  if(llt == DEBUG_LibraryType || llt == GENERAL_LibraryType)
     {
     // Put in the DEBUG configuration interfaces.
     for(std::vector<std::string>::const_iterator i = debugConfigs.begin();
@@ -480,7 +480,7 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       this->Target->AppendProperty(prop, lib.c_str());
       }
     }
-  if(llt == cmTarget::OPTIMIZED || llt == cmTarget::GENERAL)
+  if(llt == OPTIMIZED_LibraryType || llt == GENERAL_LibraryType)
     {
     // Put in the non-DEBUG configuration interfaces.
     this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES", lib.c_str());

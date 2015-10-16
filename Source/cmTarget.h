@@ -77,18 +77,12 @@ class cmTarget
 {
 public:
   cmTarget();
-  enum TargetType { EXECUTABLE, STATIC_LIBRARY,
-                    SHARED_LIBRARY, MODULE_LIBRARY,
-                    OBJECT_LIBRARY, UTILITY, GLOBAL_TARGET,
-                    INTERFACE_LIBRARY,
-                    UNKNOWN_LIBRARY};
-  static const char* GetTargetTypeName(TargetType targetType);
   enum CustomCommandType { PRE_BUILD, PRE_LINK, POST_BUILD };
 
   /**
    * Return the type of target.
    */
-  TargetType GetType() const
+  cmState::TargetType GetType() const
     {
     return this->TargetTypeValue;
     }
@@ -96,7 +90,7 @@ public:
   /**
    * Set the target type
    */
-  void SetType(TargetType f, const std::string& name);
+  void SetType(cmState::TargetType f, const std::string& name);
 
   void MarkAsImported();
 
@@ -140,17 +134,15 @@ public:
   cmSourceFile* AddSourceCMP0049(const std::string& src);
   cmSourceFile* AddSource(const std::string& src);
 
-  enum LinkLibraryType {GENERAL, DEBUG, OPTIMIZED};
-
   //* how we identify a library, by name and type
-  typedef std::pair<std::string, LinkLibraryType> LibraryID;
+  typedef std::pair<std::string, cmTargetLinkLibraryType> LibraryID;
 
   typedef std::vector<LibraryID > LinkLibraryVectorType;
   const LinkLibraryVectorType &GetOriginalLinkLibraries() const
     {return this->OriginalLinkLibraries;}
 
   /** Compute the link type to use for the given configuration.  */
-  LinkLibraryType ComputeLinkType(const std::string& config) const;
+  cmTargetLinkLibraryType ComputeLinkType(const std::string& config) const;
 
   /**
    * Clear the dependency information recorded for this target, if any.
@@ -161,7 +153,7 @@ public:
   bool NameResolvesToFramework(const std::string& libname) const;
   void AddLinkLibrary(cmMakefile& mf,
                       const std::string& target, const std::string& lib,
-                      LinkLibraryType llt);
+                      cmTargetLinkLibraryType llt);
   enum TLLSignature {
     KeywordTLLSignature,
     PlainTLLSignature
@@ -297,14 +289,14 @@ public:
   void AppendBuildInterfaceIncludes();
 
   std::string GetDebugGeneratorExpressions(const std::string &value,
-                                  cmTarget::LinkLibraryType llt) const;
+                                  cmTargetLinkLibraryType llt) const;
 
   void AddSystemIncludeDirectories(const std::set<std::string> &incs);
   std::set<std::string> const & GetSystemIncludeDirectories() const
     { return this->SystemIncludeDirectories; }
 
   bool LinkLanguagePropagatesToDependents() const
-  { return this->TargetTypeValue == STATIC_LIBRARY; }
+  { return this->TargetTypeValue == cmState::STATIC_LIBRARY; }
 
   cmStringRange GetIncludeDirectoriesEntries() const;
   cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
@@ -422,7 +414,7 @@ private:
 #endif
   cmMakefile* Makefile;
   cmTargetInternalPointer Internal;
-  TargetType TargetTypeValue;
+  cmState::TargetType TargetTypeValue;
   bool HaveInstallRule;
   bool RecordDependencies;
   bool DLLPlatform;
@@ -449,6 +441,9 @@ private:
     std::string SharedDeps;
   };
 
+  typedef std::map<std::string, ImportInfo> ImportInfoMapType;
+  mutable ImportInfoMapType ImportInfoMap;
+
   ImportInfo const* GetImportInfo(const std::string& config) const;
   void ComputeImportInfo(std::string const& desired_config,
                          ImportInfo& info) const;
@@ -471,6 +466,8 @@ private:
                             std::string const& suffix,
                             std::string const& name,
                             const char* version) const;
+
+  cmListFileBacktrace Backtrace;
 };
 
 #ifdef CMAKE_BUILD_WITH_CMAKE

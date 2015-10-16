@@ -1144,7 +1144,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     if (!prop)
       {
       if (target->IsImported()
-          || target->GetType() == cmTarget::INTERFACE_LIBRARY)
+          || target->GetType() == cmState::INTERFACE_LIBRARY)
         {
         return linkedTargetsContent;
         }
@@ -1284,7 +1284,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       reportError(context, content->GetOriginalExpression(), e.str());
       return std::string();
       }
-    if (gt->GetType() != cmTarget::OBJECT_LIBRARY)
+    if (gt->GetType() != cmState::OBJECT_LIBRARY)
       {
       std::ostringstream e;
       e << "Objects of target \"" << tgtName
@@ -1592,7 +1592,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactSonameTag>
                     "for DLL target platforms.");
       return std::string();
       }
-    if(target->GetType() != cmTarget::SHARED_LIBRARY)
+    if(target->GetType() != cmState::SHARED_LIBRARY)
       {
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_SONAME_FILE is allowed only for "
@@ -1632,11 +1632,11 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
       return std::string();
       }
 
-    cmTarget::TargetType targetType = target->Target->GetType();
+    cmState::TargetType targetType = target->GetType();
 
-    if(targetType != cmTarget::SHARED_LIBRARY &&
-       targetType != cmTarget::MODULE_LIBRARY &&
-       targetType != cmTarget::EXECUTABLE)
+    if(targetType != cmState::SHARED_LIBRARY &&
+       targetType != cmState::MODULE_LIBRARY &&
+       targetType != cmState::EXECUTABLE)
       {
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_PDB_FILE is allowed only for "
@@ -1746,8 +1746,8 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
                     "No target \"" + name + "\"");
       return std::string();
       }
-    if(target->GetType() >= cmTarget::OBJECT_LIBRARY &&
-      target->GetType() != cmTarget::UNKNOWN_LIBRARY)
+    if(target->GetType() >= cmState::OBJECT_LIBRARY &&
+      target->GetType() != cmState::UNKNOWN_LIBRARY)
       {
       ::reportError(context, content->GetOriginalExpression(),
                   "Target \"" + name + "\" is not an executable or library.");

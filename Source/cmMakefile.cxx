@@ -759,7 +759,7 @@ void cmMakefile::ConfigureFinalPass()
   for (cmTargets::iterator l = this->Targets.begin();
        l != this->Targets.end(); l++)
     {
-    if (l->second.GetType() == cmTarget::INTERFACE_LIBRARY)
+    if (l->second.GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
@@ -810,7 +810,7 @@ cmMakefile::AddCustomCommandToTarget(const std::string& target,
       return;
     }
 
-  if(ti->second.GetType() == cmTarget::OBJECT_LIBRARY)
+  if(ti->second.GetType() == cmState::OBJECT_LIBRARY)
     {
     std::ostringstream e;
     e << "Target \"" << target << "\" is an OBJECT library "
@@ -818,7 +818,7 @@ cmMakefile::AddCustomCommandToTarget(const std::string& target,
     this->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
     }
-  if(ti->second.GetType() == cmTarget::INTERFACE_LIBRARY)
+  if(ti->second.GetType() == cmState::INTERFACE_LIBRARY)
     {
     std::ostringstream e;
     e << "Target \"" << target << "\" is an INTERFACE library "
@@ -1184,7 +1184,7 @@ cmMakefile::AddUtilityCommand(const std::string& utilityName,
                               bool uses_terminal)
 {
   // Create a target instance for this utility.
-  cmTarget* target = this->AddNewTarget(cmTarget::UTILITY, utilityName);
+  cmTarget* target = this->AddNewTarget(cmState::UTILITY, utilityName);
   if (excludeFromAll)
     {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
@@ -1400,7 +1400,7 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
 }
 
 void cmMakefile::AddLinkLibrary(const std::string& lib,
-                                cmTarget::LinkLibraryType llt)
+                                cmTargetLinkLibraryType llt)
 {
   cmTarget::LibraryID tmp;
   tmp.first = lib;
@@ -1410,7 +1410,7 @@ void cmMakefile::AddLinkLibrary(const std::string& lib,
 
 void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
                                          const std::string& lib,
-                                         cmTarget::LinkLibraryType llt)
+                                         cmTargetLinkLibraryType llt)
 {
   cmTargets::iterator i = this->Targets.find(target);
   if ( i != this->Targets.end())
@@ -1419,14 +1419,14 @@ void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
     if(tgt)
       {
       // if it is not a static or shared library then you can not link to it
-      if(!((tgt->GetType() == cmTarget::STATIC_LIBRARY) ||
-           (tgt->GetType() == cmTarget::SHARED_LIBRARY) ||
-           (tgt->GetType() == cmTarget::INTERFACE_LIBRARY) ||
+      if(!((tgt->GetType() == cmState::STATIC_LIBRARY) ||
+           (tgt->GetType() == cmState::SHARED_LIBRARY) ||
+           (tgt->GetType() == cmState::INTERFACE_LIBRARY) ||
            tgt->IsExecutableWithExports()))
         {
         std::ostringstream e;
         e << "Target \"" << lib << "\" of type "
-          << cmTarget::GetTargetTypeName(tgt->GetType())
+          << cmState::GetTargetTypeName(tgt->GetType())
           << " may not be linked into another target.  "
           << "One may link only to STATIC or SHARED libraries, or "
           << "to executables with the ENABLE_EXPORTS property set.";
@@ -1471,7 +1471,7 @@ void cmMakefile::AddLinkDirectoryForTarget(const std::string& target,
 
 void cmMakefile::AddLinkLibrary(const std::string& lib)
 {
-  this->AddLinkLibrary(lib,cmTarget::GENERAL);
+  this->AddLinkLibrary(lib,GENERAL_LibraryType);
 }
 
 void cmMakefile::InitializeFromParent(cmMakefile* parent)
@@ -2018,9 +2018,9 @@ void cmMakefile::AddGlobalLinkInformation(const std::string& name,
   // for these targets do not add anything
   switch(target.GetType())
     {
-    case cmTarget::UTILITY:
-    case cmTarget::GLOBAL_TARGET:
-    case cmTarget::INTERFACE_LIBRARY:
+    case cmState::UTILITY:
+    case cmState::GLOBAL_TARGET:
+    case cmState::INTERFACE_LIBRARY:
       return;
     default:;
     }
@@ -2057,20 +2057,20 @@ void cmMakefile::AddAlias(const std::string& lname, cmTarget *tgt)
 }
 
 cmTarget* cmMakefile::AddLibrary(const std::string& lname,
-                            cmTarget::TargetType type,
+                            cmState::TargetType type,
                             const std::vector<std::string> &srcs,
                             bool excludeFromAll)
 {
   // wrong type ? default to STATIC
-  if (    (type != cmTarget::STATIC_LIBRARY)
-       && (type != cmTarget::SHARED_LIBRARY)
-       && (type != cmTarget::MODULE_LIBRARY)
-       && (type != cmTarget::OBJECT_LIBRARY)
-       && (type != cmTarget::INTERFACE_LIBRARY))
+  if (    (type != cmState::STATIC_LIBRARY)
+       && (type != cmState::SHARED_LIBRARY)
+       && (type != cmState::MODULE_LIBRARY)
+       && (type != cmState::OBJECT_LIBRARY)
+       && (type != cmState::INTERFACE_LIBRARY))
     {
     this->IssueMessage(cmake::INTERNAL_ERROR,
                        "cmMakefile::AddLibrary given invalid target type.");
-    type = cmTarget::STATIC_LIBRARY;
+    type = cmState::STATIC_LIBRARY;
     }
 
   cmTarget* target = this->AddNewTarget(type, lname);
@@ -2091,7 +2091,7 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
                                     const std::vector<std::string> &srcs,
                                     bool excludeFromAll)
 {
-  cmTarget* target = this->AddNewTarget(cmTarget::EXECUTABLE, exeName);
+  cmTarget* target = this->AddNewTarget(cmState::EXECUTABLE, exeName);
   if(excludeFromAll)
     {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
@@ -2103,7 +2103,7 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
 
 //----------------------------------------------------------------------------
 cmTarget*
-cmMakefile::AddNewTarget(cmTarget::TargetType type, const std::string& name)
+cmMakefile::AddNewTarget(cmState::TargetType type, const std::string& name)
 {
   cmTargets::iterator it =
     this->Targets.insert(cmTargets::value_type(name, cmTarget())).first;
@@ -2299,8 +2299,8 @@ void cmMakefile::ExpandVariablesCMP0019()
        l != this->Targets.end(); ++l)
     {
     cmTarget &t = l->second;
-    if (t.GetType() == cmTarget::INTERFACE_LIBRARY
-        || t.GetType() == cmTarget::GLOBAL_TARGET)
+    if (t.GetType() == cmState::INTERFACE_LIBRARY
+        || t.GetType() == cmState::GLOBAL_TARGET)
       {
       continue;
       }
@@ -4178,7 +4178,7 @@ void cmMakefile::RaiseScope(const std::string& var, const char *varDef)
 //----------------------------------------------------------------------------
 cmTarget*
 cmMakefile::AddImportedTarget(const std::string& name,
-                              cmTarget::TargetType type,
+                              cmState::TargetType type,
                               bool global)
 {
   // Create the target.
@@ -4279,7 +4279,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
       // The conflict is with a non-imported target.
       // Allow this if the user has requested support.
       cmake* cm = this->GetCMakeInstance();
-      if(isCustom && existing->GetType() == cmTarget::UTILITY &&
+      if(isCustom && existing->GetType() == cmState::UTILITY &&
          this != existing->GetMakefile() &&
          cm->GetState()
            ->GetGlobalPropertyAsBool("ALLOW_DUPLICATE_CUSTOM_TARGETS"))
@@ -4295,22 +4295,22 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
         << "The existing target is ";
       switch(existing->GetType())
         {
-        case cmTarget::EXECUTABLE:
+        case cmState::EXECUTABLE:
           e << "an executable ";
           break;
-        case cmTarget::STATIC_LIBRARY:
+        case cmState::STATIC_LIBRARY:
           e << "a static library ";
           break;
-        case cmTarget::SHARED_LIBRARY:
+        case cmState::SHARED_LIBRARY:
           e << "a shared library ";
           break;
-        case cmTarget::MODULE_LIBRARY:
+        case cmState::MODULE_LIBRARY:
           e << "a module library ";
           break;
-        case cmTarget::UTILITY:
+        case cmState::UTILITY:
           e << "a custom target ";
           break;
-        case cmTarget::INTERFACE_LIBRARY:
+        case cmState::INTERFACE_LIBRARY:
           e << "an interface library ";
           break;
         default: break;

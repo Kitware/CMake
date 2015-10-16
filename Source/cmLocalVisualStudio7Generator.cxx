@@ -71,7 +71,7 @@ void cmLocalVisualStudio7Generator::AddHelperCommands()
 
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
     {
-    if(l->second.GetType() == cmTarget::INTERFACE_LIBRARY)
+    if(l->second.GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
@@ -106,7 +106,7 @@ void cmLocalVisualStudio7Generator::AddCMakeListsRules()
       // Add the rule to targets that need it.
       for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
         {
-        if (l->second.GetType() == cmTarget::GLOBAL_TARGET)
+        if (l->second.GetType() == cmState::GLOBAL_TARGET)
           {
           continue;
           }
@@ -131,7 +131,7 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       l != tgts.end(); l++)
     {
     cmTarget& tgt = l->second;
-    if(tgt.GetType() == cmTarget::GLOBAL_TARGET)
+    if(tgt.GetType() == cmState::GLOBAL_TARGET)
       {
       std::vector<std::string> no_depends;
       cmCustomCommandLine force_command;
@@ -182,7 +182,7 @@ void cmLocalVisualStudio7Generator::WriteProjectFiles()
   for(cmTargets::iterator l = tgts.begin();
       l != tgts.end(); l++)
     {
-    if(l->second.GetType() == cmTarget::INTERFACE_LIBRARY)
+    if(l->second.GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
@@ -672,22 +672,22 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
 
   switch(target.GetType())
     {
-    case cmTarget::OBJECT_LIBRARY:
+    case cmState::OBJECT_LIBRARY:
       targetBuilds = false; // no manifest tool for object library
-    case cmTarget::STATIC_LIBRARY:
+    case cmState::STATIC_LIBRARY:
       projectType = "typeStaticLibrary";
       configType = "4";
       break;
-    case cmTarget::SHARED_LIBRARY:
-    case cmTarget::MODULE_LIBRARY:
+    case cmState::SHARED_LIBRARY:
+    case cmState::MODULE_LIBRARY:
       projectType = "typeDynamicLibrary";
       configType = "2";
       break;
-    case cmTarget::EXECUTABLE:
+    case cmState::EXECUTABLE:
       configType = "1";
       break;
-    case cmTarget::UTILITY:
-    case cmTarget::GLOBAL_TARGET:
+    case cmState::UTILITY:
+    case cmState::GLOBAL_TARGET:
       configType = "10";
     default:
       targetBuilds = false;
@@ -788,10 +788,10 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   intermediateDir += "/";
   intermediateDir += configName;
 
-  if (target.GetType() < cmTarget::UTILITY)
+  if (target.GetType() < cmState::UTILITY)
     {
     std::string const& outDir =
-      target.GetType() == cmTarget::OBJECT_LIBRARY?
+      target.GetType() == cmState::OBJECT_LIBRARY?
       intermediateDir : gt->GetDirectory(configName);
     fout << "\t\t\tOutputDirectory=\""
          << this->ConvertToXMLOutputPathSingle(outDir.c_str()) << "\"\n";
@@ -882,7 +882,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   targetOptions.OutputFlagMap(fout, "\t\t\t\t");
   targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "\n", "CXX");
   fout << "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n";
-  if(target.GetType() <= cmTarget::OBJECT_LIBRARY)
+  if(target.GetType() <= cmState::OBJECT_LIBRARY)
     {
     // Specify the compiler program database file if configured.
     std::string pdb = gt->GetCompilePDBPath(configName);
@@ -1045,21 +1045,21 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     static_cast<cmGlobalVisualStudio7Generator*>(this->GlobalGenerator);
   std::string temp;
   std::string extraLinkOptions;
-  if(target.GetType() == cmTarget::EXECUTABLE)
+  if(target.GetType() == cmState::EXECUTABLE)
     {
     extraLinkOptions =
       this->Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS")
       + std::string(" ")
       + GetBuildTypeLinkerFlags("CMAKE_EXE_LINKER_FLAGS", configName);
     }
-  if(target.GetType() == cmTarget::SHARED_LIBRARY)
+  if(target.GetType() == cmState::SHARED_LIBRARY)
     {
     extraLinkOptions =
       this->Makefile->GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS")
       + std::string(" ")
       + GetBuildTypeLinkerFlags("CMAKE_SHARED_LINKER_FLAGS", configName);
     }
-  if(target.GetType() == cmTarget::MODULE_LIBRARY)
+  if(target.GetType() == cmState::MODULE_LIBRARY)
     {
     extraLinkOptions =
       this->Makefile->GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS")
@@ -1099,7 +1099,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
   cmGeneratorTarget* gt =
     this->GlobalGenerator->GetGeneratorTarget(&target);
 
-  if (target.GetType() == cmTarget::SHARED_LIBRARY &&
+  if (target.GetType() == cmState::SHARED_LIBRARY &&
       this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
     {
     if (target.GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS"))
@@ -1109,9 +1109,9 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     }
   switch(target.GetType())
     {
-    case cmTarget::UNKNOWN_LIBRARY:
+    case cmState::UNKNOWN_LIBRARY:
       break;
-    case cmTarget::OBJECT_LIBRARY:
+    case cmState::OBJECT_LIBRARY:
       {
       std::string libpath = this->GetTargetDirectory(gt);
       libpath += "/";
@@ -1127,7 +1127,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
            << this->ConvertToXMLOutputPathSingle(libpath.c_str()) << "\"/>\n";
       break;
       }
-    case cmTarget::STATIC_LIBRARY:
+    case cmState::STATIC_LIBRARY:
     {
     std::string targetNameFull = gt->GetFullName(configName);
     std::string libpath = gt->GetDirectory(configName);
@@ -1161,8 +1161,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
          << this->ConvertToXMLOutputPathSingle(libpath.c_str()) << "\"/>\n";
     break;
     }
-    case cmTarget::SHARED_LIBRARY:
-    case cmTarget::MODULE_LIBRARY:
+    case cmState::SHARED_LIBRARY:
+    case cmState::MODULE_LIBRARY:
     {
     std::string targetName;
     std::string targetNameSO;
@@ -1260,7 +1260,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     fout << "/>\n";
     }
     break;
-    case cmTarget::EXECUTABLE:
+    case cmState::EXECUTABLE:
     {
     std::string targetName;
     std::string targetNameFull;
@@ -1374,9 +1374,9 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
          << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"/>\n";
     break;
     }
-    case cmTarget::UTILITY:
-    case cmTarget::GLOBAL_TARGET:
-    case cmTarget::INTERFACE_LIBRARY:
+    case cmState::UTILITY:
+    case cmState::GLOBAL_TARGET:
+    case cmState::INTERFACE_LIBRARY:
       break;
     }
 }
@@ -1408,7 +1408,7 @@ cmLocalVisualStudio7GeneratorInternals
       fout << lg->ConvertToXMLOutputPath(rel.c_str()) << " ";
       }
     else if (!l->Target
-        || l->Target->GetType() != cmTarget::INTERFACE_LIBRARY)
+        || l->Target->GetType() != cmState::INTERFACE_LIBRARY)
       {
       fout << l->Value << " ";
       }
@@ -1777,8 +1777,8 @@ bool cmLocalVisualStudio7Generator
     std::string source = (*sf)->GetFullPath();
     FCInfo fcinfo(this, target, *(*sf), configs);
 
-    if (source != libName || target.GetType() == cmTarget::UTILITY ||
-      target.GetType() == cmTarget::GLOBAL_TARGET )
+    if (source != libName || target.GetType() == cmState::UTILITY ||
+      target.GetType() == cmState::GLOBAL_TARGET )
       {
       fout << "\t\t\t<File\n";
       std::string d = this->ConvertToXMLOutputPathSingle(source.c_str());
@@ -2028,7 +2028,7 @@ void cmLocalVisualStudio7Generator
                     cmTarget &target,
                     const std::string& /*libName*/)
 {
-  if (target.GetType() > cmTarget::GLOBAL_TARGET)
+  if (target.GetType() > cmState::GLOBAL_TARGET)
     {
     return;
     }
@@ -2045,7 +2045,7 @@ void cmLocalVisualStudio7Generator
   tool = this->FortranProject? "VFPreLinkEventTool":"VCPreLinkEventTool";
   event.Start(tool);
   bool addedPrelink = false;
-  if (target.GetType() == cmTarget::SHARED_LIBRARY &&
+  if (target.GetType() == cmState::SHARED_LIBRARY &&
       this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
     {
     if (target.GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS"))
@@ -2126,30 +2126,30 @@ cmLocalVisualStudio7Generator
   const char* projectType = 0;
   switch(target.GetType())
     {
-    case cmTarget::STATIC_LIBRARY:
+    case cmState::STATIC_LIBRARY:
       projectType = "typeStaticLibrary";
       if(keyword)
         {
         keyword = "Static Library";
         }
       break;
-    case cmTarget::SHARED_LIBRARY:
-    case cmTarget::MODULE_LIBRARY:
+    case cmState::SHARED_LIBRARY:
+    case cmState::MODULE_LIBRARY:
       projectType = "typeDynamicLibrary";
       if(!keyword)
         {
         keyword = "Dll";
         }
       break;
-    case cmTarget::EXECUTABLE:
+    case cmState::EXECUTABLE:
       if(!keyword)
         {
         keyword = "Console Application";
         }
       projectType = 0;
       break;
-    case cmTarget::UTILITY:
-    case cmTarget::GLOBAL_TARGET:
+    case cmState::UTILITY:
+    case cmState::GLOBAL_TARGET:
     default:
       break;
     }

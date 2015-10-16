@@ -1444,15 +1444,15 @@ cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
     for(cmTargets::iterator ti = targets.begin();
         ti != targets.end(); ++ti)
       {
-      if (ti->second.GetType() == cmTarget::GLOBAL_TARGET)
+      if (ti->second.GetType() == cmState::GLOBAL_TARGET)
         {
         continue;
         }
-      if(ti->second.GetType() != cmTarget::EXECUTABLE &&
-         ti->second.GetType() != cmTarget::STATIC_LIBRARY &&
-         ti->second.GetType() != cmTarget::SHARED_LIBRARY &&
-         ti->second.GetType() != cmTarget::MODULE_LIBRARY &&
-         ti->second.GetType() != cmTarget::OBJECT_LIBRARY)
+      if(ti->second.GetType() != cmState::EXECUTABLE &&
+         ti->second.GetType() != cmState::STATIC_LIBRARY &&
+         ti->second.GetType() != cmState::SHARED_LIBRARY &&
+         ti->second.GetType() != cmState::MODULE_LIBRARY &&
+         ti->second.GetType() != cmState::OBJECT_LIBRARY)
         {
         continue;
         }
@@ -1510,14 +1510,14 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
         ti != targets.end(); ++ti)
       {
       cmTarget* t = &ti->second;
-      if (t->GetType() == cmTarget::GLOBAL_TARGET)
+      if (t->GetType() == cmState::GLOBAL_TARGET)
         {
         continue;
         }
 
       t->AppendBuildInterfaceIncludes();
 
-      if (t->GetType() == cmTarget::INTERFACE_LIBRARY)
+      if (t->GetType() == cmState::INTERFACE_LIBRARY)
         {
         continue;
         }
@@ -1650,7 +1650,7 @@ void cmGlobalGenerator::CheckTargetProperties()
     for (cmTargets::iterator l = targets.begin();
          l != targets.end(); l++)
       {
-      if (l->second.GetType() == cmTarget::INTERFACE_LIBRARY)
+      if (l->second.GetType() == cmState::INTERFACE_LIBRARY)
         {
         continue;
         }
@@ -2058,7 +2058,7 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
                                    cmGeneratorTarget* target) const
 {
-  if(target->GetType() == cmTarget::INTERFACE_LIBRARY
+  if(target->GetType() == cmState::INTERFACE_LIBRARY
       || target->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
     {
     // This target is excluded from its directory.
@@ -2519,7 +2519,7 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
 {
   // Package
   cmTarget target;
-  target.SetType(cmTarget::GLOBAL_TARGET, name);
+  target.SetType(cmState::GLOBAL_TARGET, name);
   target.SetProperty("EXCLUDE_FROM_ALL","TRUE");
 
   std::vector<std::string> no_outputs;
@@ -2701,7 +2701,7 @@ void cmGlobalGenerator::GetTargetSets(TargetDependSet& projectTargets,
 //----------------------------------------------------------------------------
 bool cmGlobalGenerator::IsRootOnlyTarget(cmTarget* target) const
 {
-  return (target->GetType() == cmTarget::GLOBAL_TARGET ||
+  return (target->GetType() == cmState::GLOBAL_TARGET ||
           target->GetName() == this->GetAllTargetName());
 }
 
@@ -2915,7 +2915,7 @@ void cmGlobalGenerator::WriteSummary()
   for(TargetMap::const_iterator ti =
         this->TotalTargets.begin(); ti != this->TotalTargets.end(); ++ti)
     {
-    if ((ti->second)->GetType() == cmTarget::INTERFACE_LIBRARY)
+    if ((ti->second)->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }

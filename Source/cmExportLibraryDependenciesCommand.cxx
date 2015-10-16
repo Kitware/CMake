@@ -96,8 +96,8 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
       cmTarget const& target = l->second;
 
       // Skip non-library targets.
-      if(target.GetType() < cmTarget::STATIC_LIBRARY
-         || target.GetType() > cmTarget::MODULE_LIBRARY)
+      if(target.GetType() < cmState::STATIC_LIBRARY
+         || target.GetType() > cmState::MODULE_LIBRARY)
         {
         continue;
         }
@@ -120,15 +120,15 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
         std::string ltValue;
         switch(li->second)
           {
-          case cmTarget::GENERAL:
+          case GENERAL_LibraryType:
             valueNew += "general;";
             ltValue = "general";
             break;
-          case cmTarget::DEBUG:
+          case DEBUG_LibraryType:
             valueNew += "debug;";
             ltValue = "debug";
             break;
-          case cmTarget::OPTIMIZED:
+          case OPTIMIZED_LibraryType:
             valueNew += "optimized;";
             ltValue = "optimized";
             break;

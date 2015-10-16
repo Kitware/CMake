@@ -72,7 +72,7 @@ void cmGlobalKdevelopGenerator::Generate()
       for (cmGeneratorTargetsType::const_iterator ti = targets.begin();
            ti != targets.end(); ti++)
         {
-        if (ti->second->GetType()==cmTarget::EXECUTABLE)
+        if (ti->second->GetType()==cmState::EXECUTABLE)
           {
           executable = ti->second->GetLocation("");
           break;

@@ -597,7 +597,7 @@ void cmExportFileGenerator::PopulateCompatibleInterfaceProperties(
   getPropertyContents(gtarget, "COMPATIBLE_INTERFACE_NUMBER_MAX",
                       ifaceProperties);
 
-  if (target->GetType() != cmTarget::INTERFACE_LIBRARY)
+  if (target->GetType() != cmState::INTERFACE_LIBRARY)
     {
     getCompatibleInterfaceProperties(gtarget, ifaceProperties, "");
 
@@ -885,8 +885,8 @@ cmExportFileGenerator
   cmMakefile* mf = target->Makefile;
 
   // Add the soname for unix shared libraries.
-  if(target->GetType() == cmTarget::SHARED_LIBRARY ||
-     target->GetType() == cmTarget::MODULE_LIBRARY)
+  if(target->GetType() == cmState::SHARED_LIBRARY ||
+     target->GetType() == cmState::MODULE_LIBRARY)
     {
     // Check whether this is a DLL platform.
     bool dll_platform =
@@ -1059,22 +1059,22 @@ cmExportFileGenerator
   os << "# Create imported target " << targetName << "\n";
   switch(target->GetType())
     {
-    case cmTarget::EXECUTABLE:
+    case cmState::EXECUTABLE:
       os << "add_executable(" << targetName << " IMPORTED)\n";
       break;
-    case cmTarget::STATIC_LIBRARY:
+    case cmState::STATIC_LIBRARY:
       os << "add_library(" << targetName << " STATIC IMPORTED)\n";
       break;
-    case cmTarget::SHARED_LIBRARY:
+    case cmState::SHARED_LIBRARY:
       os << "add_library(" << targetName << " SHARED IMPORTED)\n";
       break;
-    case cmTarget::MODULE_LIBRARY:
+    case cmState::MODULE_LIBRARY:
       os << "add_library(" << targetName << " MODULE IMPORTED)\n";
       break;
-    case cmTarget::UNKNOWN_LIBRARY:
+    case cmState::UNKNOWN_LIBRARY:
       os << "add_library(" << targetName << " UNKNOWN IMPORTED)\n";
       break;
-    case cmTarget::INTERFACE_LIBRARY:
+    case cmState::INTERFACE_LIBRARY:
       os << "add_library(" << targetName << " INTERFACE IMPORTED)\n";
       break;
     default:  // should never happen

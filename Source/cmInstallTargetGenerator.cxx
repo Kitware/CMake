@@ -94,29 +94,28 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
   std::vector<std::string> filesFrom;
   std::vector<std::string> filesTo;
   std::string literal_args;
-  cmTarget::TargetType targetType =
-      static_cast<cmTarget::TargetType>(this->Target->GetType());
+  cmState::TargetType targetType = this->Target->GetType();
   cmInstallType type = cmInstallType();
   switch(targetType)
     {
-    case cmTarget::EXECUTABLE: type = cmInstallType_EXECUTABLE; break;
-    case cmTarget::STATIC_LIBRARY: type = cmInstallType_STATIC_LIBRARY; break;
-    case cmTarget::SHARED_LIBRARY: type = cmInstallType_SHARED_LIBRARY; break;
-    case cmTarget::MODULE_LIBRARY: type = cmInstallType_MODULE_LIBRARY; break;
-    case cmTarget::INTERFACE_LIBRARY:
+    case cmState::EXECUTABLE: type = cmInstallType_EXECUTABLE; break;
+    case cmState::STATIC_LIBRARY: type = cmInstallType_STATIC_LIBRARY; break;
+    case cmState::SHARED_LIBRARY: type = cmInstallType_SHARED_LIBRARY; break;
+    case cmState::MODULE_LIBRARY: type = cmInstallType_MODULE_LIBRARY; break;
+    case cmState::INTERFACE_LIBRARY:
       // Not reachable. We never create a cmInstallTargetGenerator for
       // an INTERFACE_LIBRARY.
       assert(0 && "INTERFACE_LIBRARY targets have no installable outputs.");
       break;
-    case cmTarget::OBJECT_LIBRARY:
-    case cmTarget::UTILITY:
-    case cmTarget::GLOBAL_TARGET:
-    case cmTarget::UNKNOWN_LIBRARY:
+    case cmState::OBJECT_LIBRARY:
+    case cmState::UTILITY:
+    case cmState::GLOBAL_TARGET:
+    case cmState::UNKNOWN_LIBRARY:
       this->Target->Target->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR,
         "cmInstallTargetGenerator created with non-installable target.");
       return;
     }
-  if(targetType == cmTarget::EXECUTABLE)
+  if(targetType == cmState::EXECUTABLE)
     {
     // There is a bug in cmInstallCommand if this fails.
     assert(this->NamelinkMode == NamelinkModeNone);
@@ -375,7 +374,7 @@ cmInstallTargetGenerator::GetInstallFilename(cmTarget const* target,
   cmGeneratorTarget *gtgt = target->GetMakefile()
                                   ->GetGlobalGenerator()
                                   ->GetGeneratorTarget(target);
-  if(target->GetType() == cmTarget::EXECUTABLE)
+  if(target->GetType() == cmState::EXECUTABLE)
     {
     std::string targetName;
     std::string targetNameReal;
@@ -542,9 +541,9 @@ cmInstallTargetGenerator
                           std::string const& toDestDirPath)
 {
   if(this->ImportLibrary ||
-     !(this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
-       this->Target->GetType() == cmTarget::MODULE_LIBRARY ||
-       this->Target->GetType() == cmTarget::EXECUTABLE))
+     !(this->Target->GetType() == cmState::SHARED_LIBRARY ||
+       this->Target->GetType() == cmState::MODULE_LIBRARY ||
+       this->Target->GetType() == cmState::EXECUTABLE))
     {
     return;
     }
@@ -602,7 +601,7 @@ cmInstallTargetGenerator
 
   // Edit the install_name of the target itself if necessary.
   std::string new_id;
-  if(this->Target->GetType() == cmTarget::SHARED_LIBRARY)
+  if(this->Target->GetType() == cmState::SHARED_LIBRARY)
     {
     std::string for_build =
       this->Target->GetInstallNameDirForBuildTree(config);
@@ -813,7 +812,7 @@ cmInstallTargetGenerator::AddStripRule(std::ostream& os,
 
   // don't strip static and import libraries, because it removes the only
   // symbol table they have so you can't link to them anymore
-  if(this->Target->GetType()==cmTarget::STATIC_LIBRARY || this->ImportLibrary)
+  if(this->Target->GetType()==cmState::STATIC_LIBRARY || this->ImportLibrary)
     {
     return;
     }
@@ -844,7 +843,7 @@ cmInstallTargetGenerator::AddRanlibRule(std::ostream& os,
                                         const std::string& toDestDirPath)
 {
   // Static libraries need ranlib on this platform.
-  if(this->Target->GetType() != cmTarget::STATIC_LIBRARY)
+  if(this->Target->GetType() != cmState::STATIC_LIBRARY)
     {
     return;
     }

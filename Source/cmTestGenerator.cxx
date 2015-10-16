@@ -90,7 +90,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   std::string exe = command[0];
   cmGeneratorTarget* target =
       this->LG->FindGeneratorTargetToUse(exe);
-  if(target && target->GetType() == cmTarget::EXECUTABLE)
+  if(target && target->GetType() == cmState::EXECUTABLE)
     {
     // Use the target file on disk.
     exe = target->GetFullPath(config);

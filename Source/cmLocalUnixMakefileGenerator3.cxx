@@ -119,7 +119,7 @@ void cmLocalUnixMakefileGenerator3::Generate()
   for(cmGeneratorTargetsType::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-    if (t->second->Target->GetType() == cmTarget::INTERFACE_LIBRARY
+    if (t->second->GetType() == cmState::INTERFACE_LIBRARY
         || t->second->Target->IsImported())
       {
       continue;
@@ -180,7 +180,7 @@ GetLocalObjectFiles(std::map<std::string, LocalObjectInfo> &localObjectFiles)
       ti != targets.end(); ++ti)
     {
     cmGeneratorTarget* gt = ti->second;
-    if (gt->GetType() == cmTarget::INTERFACE_LIBRARY)
+    if (gt->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
@@ -423,12 +423,12 @@ void cmLocalUnixMakefileGenerator3
   for(cmGeneratorTargetsType::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-    if((t->second->GetType() == cmTarget::EXECUTABLE) ||
-       (t->second->GetType() == cmTarget::STATIC_LIBRARY) ||
-       (t->second->GetType() == cmTarget::SHARED_LIBRARY) ||
-       (t->second->GetType() == cmTarget::MODULE_LIBRARY) ||
-       (t->second->GetType() == cmTarget::OBJECT_LIBRARY) ||
-       (t->second->GetType() == cmTarget::UTILITY))
+    if((t->second->GetType() == cmState::EXECUTABLE) ||
+       (t->second->GetType() == cmState::STATIC_LIBRARY) ||
+       (t->second->GetType() == cmState::SHARED_LIBRARY) ||
+       (t->second->GetType() == cmState::MODULE_LIBRARY) ||
+       (t->second->GetType() == cmState::OBJECT_LIBRARY) ||
+       (t->second->GetType() == cmState::UTILITY))
       {
       if (t->second->Target->IsImported())
         {
@@ -1772,7 +1772,7 @@ void cmLocalUnixMakefileGenerator3
   cmTargets::iterator glIt;
   for ( glIt = targets->begin(); glIt != targets->end(); ++ glIt )
     {
-    if ( glIt->second.GetType() == cmTarget::GLOBAL_TARGET )
+    if ( glIt->second.GetType() == cmState::GLOBAL_TARGET )
       {
       std::string targetString = "Special rule for the target " + glIt->first;
       std::vector<std::string> commands;

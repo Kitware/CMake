@@ -123,4 +123,10 @@ static thisClass* SafeDownCast(cmObject *c) \
 } \
 class cmTypeMacro_UseTrailingSemicolon
 
+enum cmTargetLinkLibraryType {
+  GENERAL_LibraryType,
+  DEBUG_LibraryType,
+  OPTIMIZED_LibraryType
+};
+
 #endif

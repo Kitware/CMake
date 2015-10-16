@@ -172,10 +172,10 @@ public:
 
   /** Create a new imported target with the name and type given.  */
   cmTarget* AddImportedTarget(const std::string& name,
-                              cmTarget::TargetType type,
+                              cmState::TargetType type,
                               bool global);
 
-  cmTarget* AddNewTarget(cmTarget::TargetType type, const std::string& name);
+  cmTarget* AddNewTarget(cmState::TargetType type, const std::string& name);
 
   /**
    * Add an executable to the build.
@@ -219,9 +219,9 @@ public:
    * Add a link library to the build.
    */
   void AddLinkLibrary(const std::string&);
-  void AddLinkLibrary(const std::string&, cmTarget::LinkLibraryType type);
+  void AddLinkLibrary(const std::string&, cmTargetLinkLibraryType type);
   void AddLinkLibraryForTarget(const std::string& tgt, const std::string&,
-                               cmTarget::LinkLibraryType type);
+                               cmTargetLinkLibraryType type);
   void AddLinkDirectoryForTarget(const std::string& tgt, const std::string& d);
 
   /**
@@ -281,7 +281,7 @@ public:
   /**
    * Set the name of the library.
    */
-  cmTarget* AddLibrary(const std::string& libname, cmTarget::TargetType type,
+  cmTarget* AddLibrary(const std::string& libname, cmState::TargetType type,
                   const std::vector<std::string> &srcs,
                   bool excludeFromAll = false);
   void AddAlias(const std::string& libname, cmTarget *tgt);

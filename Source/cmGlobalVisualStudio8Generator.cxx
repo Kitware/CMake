@@ -386,7 +386,7 @@ cmGlobalVisualStudio8Generator
 void
 cmGlobalVisualStudio8Generator
 ::WriteProjectConfigurations(
-  std::ostream& fout, const std::string& name, cmTarget::TargetType type,
+  std::ostream& fout, const std::string& name, cmState::TargetType type,
   std::vector<std::string> const& configs,
   const std::set<std::string>& configsPartOfDefaultBuild,
   std::string const& platformMapping)
@@ -423,10 +423,10 @@ cmGlobalVisualStudio8Generator
 
 //----------------------------------------------------------------------------
 bool
-cmGlobalVisualStudio8Generator::NeedsDeploy(cmTarget::TargetType type) const
+cmGlobalVisualStudio8Generator::NeedsDeploy(cmState::TargetType type) const
 {
-  bool needsDeploy = (type == cmTarget::EXECUTABLE ||
-                      type == cmTarget::SHARED_LIBRARY);
+  bool needsDeploy = (type == cmState::EXECUTABLE ||
+                      type == cmState::SHARED_LIBRARY);
   return this->TargetsWindowsCE() && needsDeploy;
 }
 
@@ -448,7 +448,7 @@ void cmGlobalVisualStudio8Generator::WriteProjectDepends(
   for(OrderedTargetDependSet::const_iterator i = depends.begin();
       i != depends.end(); ++i)
     {
-    if((*i)->GetType() == cmTarget::INTERFACE_LIBRARY)
+    if((*i)->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
@@ -468,7 +468,7 @@ bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
     {
     if(cmTarget* depTarget = this->FindTarget(ui->c_str()))
       {
-      if(depTarget->GetType() != cmTarget::INTERFACE_LIBRARY
+      if(depTarget->GetType() != cmState::INTERFACE_LIBRARY
           && depTarget->GetProperty("EXTERNAL_MSPROJECT"))
         {
         // This utility dependency names an external .vcproj target.

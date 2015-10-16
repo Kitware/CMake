@@ -31,17 +31,17 @@ cmNinjaTargetGenerator::New(cmGeneratorTarget* target)
 {
   switch (target->GetType())
     {
-      case cmTarget::EXECUTABLE:
-      case cmTarget::SHARED_LIBRARY:
-      case cmTarget::STATIC_LIBRARY:
-      case cmTarget::MODULE_LIBRARY:
-      case cmTarget::OBJECT_LIBRARY:
+      case cmState::EXECUTABLE:
+      case cmState::SHARED_LIBRARY:
+      case cmState::STATIC_LIBRARY:
+      case cmState::MODULE_LIBRARY:
+      case cmState::OBJECT_LIBRARY:
         return new cmNinjaNormalTargetGenerator(target);
 
-      case cmTarget::UTILITY:
+      case cmState::UTILITY:
         return new cmNinjaUtilityTargetGenerator(target);;
 
-      case cmTarget::GLOBAL_TARGET: {
+      case cmState::GLOBAL_TARGET: {
         // We only want to process global targets that live in the home
         // (i.e. top-level) directory.  CMake creates copies of these targets
         // in every directory, which we don't need.
@@ -189,8 +189,8 @@ ComputeDefines(cmSourceFile const* source, const std::string& language)
 cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
 {
   // Static libraries never depend on other targets for linking.
-  if (this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
-      this->Target->GetType() == cmTarget::OBJECT_LIBRARY)
+  if (this->GeneratorTarget->GetType() == cmState::STATIC_LIBRARY ||
+      this->GeneratorTarget->GetType() == cmState::OBJECT_LIBRARY)
     return cmNinjaDeps();
 
   cmComputeLinkInformation* cli =
@@ -283,16 +283,16 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
     {
     std::string pdbPath;
     std::string compilePdbPath;
-    if(this->Target->GetType() == cmTarget::EXECUTABLE ||
-       this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
-       this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
-       this->Target->GetType() == cmTarget::MODULE_LIBRARY)
+    if(this->GeneratorTarget->GetType() == cmState::EXECUTABLE ||
+       this->GeneratorTarget->GetType() == cmState::STATIC_LIBRARY ||
+       this->GeneratorTarget->GetType() == cmState::SHARED_LIBRARY ||
+       this->GeneratorTarget->GetType() == cmState::MODULE_LIBRARY)
       {
       pdbPath = this->GeneratorTarget->GetPDBDirectory(this->GetConfigName());
       pdbPath += "/";
       pdbPath += this->GeneratorTarget->GetPDBName(this->GetConfigName());
       }
-    if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY)
+    if(this->GeneratorTarget->GetType() <= cmState::OBJECT_LIBRARY)
       {
       compilePdbPath =
               this->GeneratorTarget->GetCompilePDBPath(this->GetConfigName());
@@ -480,7 +480,7 @@ cmNinjaTargetGenerator
   cmGlobalNinjaGenerator::WriteDivider(this->GetBuildFileStream());
   this->GetBuildFileStream()
     << "# Object build statements for "
-    << cmTarget::GetTargetTypeName(this->GetTarget()->GetType())
+    << cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType())
     << " target "
     << this->GetTargetName()
     << "\n\n";

@@ -26,13 +26,13 @@ static const char* getShapeForTarget(const cmTarget* target)
 
   switch ( target->GetType() )
     {
-    case cmTarget::EXECUTABLE:
+    case cmState::EXECUTABLE:
       return "house";
-    case cmTarget::STATIC_LIBRARY:
+    case cmState::STATIC_LIBRARY:
       return "diamond";
-    case cmTarget::SHARED_LIBRARY:
+    case cmState::SHARED_LIBRARY:
       return "polygon";
-    case cmTarget::MODULE_LIBRARY:
+    case cmState::MODULE_LIBRARY:
       return "octagon";
     default:
       break;
@@ -582,18 +582,18 @@ bool cmGraphVizWriter::IgnoreThisTarget(const std::string& name)
 }
 
 
-bool cmGraphVizWriter::GenerateForTargetType(cmTarget::TargetType targetType)
+bool cmGraphVizWriter::GenerateForTargetType(cmState::TargetType targetType)
                                                                           const
 {
   switch (targetType)
   {
-    case cmTarget::EXECUTABLE:
+    case cmState::EXECUTABLE:
       return this->GenerateForExecutables;
-    case cmTarget::STATIC_LIBRARY:
+    case cmState::STATIC_LIBRARY:
       return this->GenerateForStaticLibs;
-    case cmTarget::SHARED_LIBRARY:
+    case cmState::SHARED_LIBRARY:
       return this->GenerateForSharedLibs;
-    case cmTarget::MODULE_LIBRARY:
+    case cmState::MODULE_LIBRARY:
       return this->GenerateForModuleLibs;
     default:
       break;

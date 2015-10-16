@@ -168,7 +168,7 @@ bool cmExportCommand
 
       if(cmTarget* target = gg->FindTarget(*currentTarget))
         {
-        if(target->GetType() == cmTarget::OBJECT_LIBRARY)
+        if(target->GetType() == cmState::OBJECT_LIBRARY)
           {
           std::ostringstream e;
           e << "given OBJECT library \"" << *currentTarget
@@ -176,7 +176,7 @@ bool cmExportCommand
           this->SetError(e.str());
           return false;
           }
-        if (target->GetType() == cmTarget::UTILITY)
+        if (target->GetType() == cmState::UTILITY)
           {
           this->SetError("given custom target \"" + *currentTarget
                          + "\" which may not be exported.");

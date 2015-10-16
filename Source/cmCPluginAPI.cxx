@@ -373,13 +373,13 @@ void CCONV cmAddLinkLibraryForTarget(void *arg, const char *tgt,
   switch (libtype)
     {
     case CM_LIBRARY_GENERAL:
-      mf->AddLinkLibraryForTarget(tgt,value, cmTarget::GENERAL);
+      mf->AddLinkLibraryForTarget(tgt,value, GENERAL_LibraryType);
       break;
     case CM_LIBRARY_DEBUG:
-      mf->AddLinkLibraryForTarget(tgt,value, cmTarget::DEBUG);
+      mf->AddLinkLibraryForTarget(tgt,value, DEBUG_LibraryType);
       break;
     case CM_LIBRARY_OPTIMIZED:
-      mf->AddLinkLibraryForTarget(tgt,value, cmTarget::OPTIMIZED);
+      mf->AddLinkLibraryForTarget(tgt,value, OPTIMIZED_LibraryType);
       break;
     }
 }
@@ -395,7 +395,7 @@ void CCONV cmAddLibrary(void *arg, const char *libname, int shared,
     srcs2.push_back(srcs[i]);
     }
   mf->AddLibrary(libname,
-                 (shared? cmTarget::SHARED_LIBRARY : cmTarget::STATIC_LIBRARY),
+                 (shared? cmState::SHARED_LIBRARY : cmState::STATIC_LIBRARY),
                   srcs2);
 }
 

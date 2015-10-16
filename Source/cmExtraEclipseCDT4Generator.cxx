@@ -544,13 +544,13 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(
       linkName2 += "/";
       switch(ti->second.GetType())
         {
-        case cmTarget::EXECUTABLE:
-        case cmTarget::STATIC_LIBRARY:
-        case cmTarget::SHARED_LIBRARY:
-        case cmTarget::MODULE_LIBRARY:
-        case cmTarget::OBJECT_LIBRARY:
+        case cmState::EXECUTABLE:
+        case cmState::STATIC_LIBRARY:
+        case cmState::SHARED_LIBRARY:
+        case cmState::MODULE_LIBRARY:
+        case cmState::OBJECT_LIBRARY:
           {
-          const char* prefix = (ti->second.GetType()==cmTarget::EXECUTABLE ?
+          const char* prefix = (ti->second.GetType()==cmState::EXECUTABLE ?
                                                           "[exe] " : "[lib] ");
           linkName2 += prefix;
           linkName2 += ti->first;
@@ -1046,7 +1046,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
       {
       switch(ti->second.GetType())
         {
-        case cmTarget::GLOBAL_TARGET:
+        case cmState::GLOBAL_TARGET:
           {
           // Only add the global targets from CMAKE_BINARY_DIR,
           // not from the subdirs
@@ -1056,7 +1056,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
            }
          }
          break;
-       case cmTarget::UTILITY:
+       case cmState::UTILITY:
          // Add all utility targets, except the Nightly/Continuous/
          // Experimental-"sub"targets as e.g. NightlyStart
          if (((ti->first.find("Nightly")==0)   &&(ti->first!="Nightly"))
@@ -1069,13 +1069,13 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 
          this->AppendTarget(fout, ti->first, make, makeArgs, subdir, ": ");
          break;
-       case cmTarget::EXECUTABLE:
-       case cmTarget::STATIC_LIBRARY:
-       case cmTarget::SHARED_LIBRARY:
-       case cmTarget::MODULE_LIBRARY:
-       case cmTarget::OBJECT_LIBRARY:
+       case cmState::EXECUTABLE:
+       case cmState::STATIC_LIBRARY:
+       case cmState::SHARED_LIBRARY:
+       case cmState::MODULE_LIBRARY:
+       case cmState::OBJECT_LIBRARY:
          {
-         const char* prefix = (ti->second.GetType()==cmTarget::EXECUTABLE ?
+         const char* prefix = (ti->second.GetType()==cmState::EXECUTABLE ?
                                                           "[exe] " : "[lib] ");
          this->AppendTarget(fout, ti->first, make, makeArgs, subdir, prefix);
          std::string fastTarget = ti->first;

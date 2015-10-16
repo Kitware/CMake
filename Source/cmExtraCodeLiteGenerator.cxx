@@ -162,22 +162,22 @@ void cmExtraCodeLiteGenerator
 
       switch(ti->second.GetType())
         {
-        case cmTarget::EXECUTABLE:
+        case cmState::EXECUTABLE:
           {
           projectType = "Executable";
           }
         break;
-        case cmTarget::STATIC_LIBRARY:
+        case cmState::STATIC_LIBRARY:
           {
           projectType = "Static Library";
           }
         break;
-        case cmTarget::SHARED_LIBRARY:
+        case cmState::SHARED_LIBRARY:
           {
           projectType = "Dynamic Library";
           }
         break;
-        case cmTarget::MODULE_LIBRARY:
+        case cmState::MODULE_LIBRARY:
           {
           projectType = "Dynamic Library";
           }
@@ -188,10 +188,10 @@ void cmExtraCodeLiteGenerator
 
       switch(ti->second.GetType())
         {
-        case cmTarget::EXECUTABLE:
-        case cmTarget::STATIC_LIBRARY:
-        case cmTarget::SHARED_LIBRARY:
-        case cmTarget::MODULE_LIBRARY:
+        case cmState::EXECUTABLE:
+        case cmState::STATIC_LIBRARY:
+        case cmState::SHARED_LIBRARY:
+        case cmState::MODULE_LIBRARY:
           {
           std::vector<cmSourceFile*> sources;
           cmGeneratorTarget* gt =

@@ -278,10 +278,10 @@ cmGlobalVisualStudio11Generator::GetInstalledWindowsCESDKs()
 
 //----------------------------------------------------------------------------
 bool
-cmGlobalVisualStudio11Generator::NeedsDeploy(cmTarget::TargetType type) const
+cmGlobalVisualStudio11Generator::NeedsDeploy(cmState::TargetType type) const
 {
-  if((type == cmTarget::EXECUTABLE ||
-      type == cmTarget::SHARED_LIBRARY) &&
+  if((type == cmState::EXECUTABLE ||
+      type == cmState::SHARED_LIBRARY) &&
      (this->SystemIsWindowsPhone ||
       this->SystemIsWindowsStore))
     {

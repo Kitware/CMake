@@ -59,7 +59,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
                          this->LG->GetMakefile()->GetBacktrace());
       return false;
       }
-    if (te->GetType() == cmTarget::INTERFACE_LIBRARY)
+    if (te->GetType() == cmState::INTERFACE_LIBRARY)
       {
       this->GenerateRequiredCMakeVersion(os, "3.0.0");
       }
@@ -146,14 +146,14 @@ cmExportBuildFileGenerator
     cmGeneratorTarget* target = *tei;
     ImportPropertyMap properties;
 
-    if (target->GetType() != cmTarget::INTERFACE_LIBRARY)
+    if (target->GetType() != cmState::INTERFACE_LIBRARY)
       {
       this->SetImportLocationProperty(config, suffix, target, properties);
       }
     if(!properties.empty())
       {
       // Get the rest of the target details.
-      if (target->GetType() != cmTarget::INTERFACE_LIBRARY)
+      if (target->GetType() != cmState::INTERFACE_LIBRARY)
         {
         this->SetImportDetailProperties(config, suffix,
                                         target,
@@ -216,7 +216,7 @@ cmExportBuildFileGenerator
 
   // Add the import library for windows DLLs.
   if(dll_platform &&
-     (target->GetType() == cmTarget::SHARED_LIBRARY ||
+     (target->GetType() == cmState::SHARED_LIBRARY ||
       target->Target->IsExecutableWithExports()) &&
      mf->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"))
     {

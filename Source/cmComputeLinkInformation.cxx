@@ -290,7 +290,7 @@ cmComputeLinkInformation
   // the program that will load it.
   this->LoaderFlag = 0;
   if(!this->UseImportLibrary &&
-     this->Target->Target->GetType() == cmTarget::MODULE_LIBRARY)
+     this->Target->GetType() == cmState::MODULE_LIBRARY)
     {
     std::string loader_flag_var = "CMAKE_SHARED_MODULE_LOADER_";
     loader_flag_var += this->LinkLanguage;
@@ -308,10 +308,10 @@ cmComputeLinkInformation
 
   // Get options needed to specify RPATHs.
   this->RuntimeUseChrpath = false;
-  if(this->Target->Target->GetType() != cmTarget::STATIC_LIBRARY)
+  if(this->Target->GetType() != cmState::STATIC_LIBRARY)
     {
     const char* tType =
-      ((this->Target->Target->GetType() == cmTarget::EXECUTABLE)?
+      ((this->Target->GetType() == cmState::EXECUTABLE)?
        "EXECUTABLE" : "SHARED_LIBRARY");
     std::string rtVar = "CMAKE_";
     rtVar += tType;
@@ -480,10 +480,10 @@ cmComputeLinkInformation::GetSharedLibrariesLinked()
 bool cmComputeLinkInformation::Compute()
 {
   // Skip targets that do not link.
-  if(!(this->Target->GetType() == cmTarget::EXECUTABLE ||
-       this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
-       this->Target->GetType() == cmTarget::MODULE_LIBRARY ||
-       this->Target->GetType() == cmTarget::STATIC_LIBRARY))
+  if(!(this->Target->GetType() == cmState::EXECUTABLE ||
+       this->Target->GetType() == cmState::SHARED_LIBRARY ||
+       this->Target->GetType() == cmState::MODULE_LIBRARY ||
+       this->Target->GetType() == cmState::STATIC_LIBRARY))
     {
     return false;
     }
@@ -544,7 +544,7 @@ bool cmComputeLinkInformation::Compute()
       cmGeneratorTarget const* tgt = *i;
       bool implib =
         (this->UseImportLibrary &&
-         (tgt->GetType() == cmTarget::SHARED_LIBRARY));
+         (tgt->GetType() == cmState::SHARED_LIBRARY));
       std::string lib = tgt->GetFullPath(this->Config , implib, true);
       this->OldLinkDirItems.push_back(lib);
       }
@@ -660,7 +660,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       this->Items.push_back(Item(linkItem, true, tgt));
       this->Depends.push_back(exe);
       }
-    else if(tgt->GetType() == cmTarget::INTERFACE_LIBRARY)
+    else if(tgt->GetType() == cmState::INTERFACE_LIBRARY)
       {
       // Add the interface library as an item so it can be considered as part
       // of COMPATIBLE_INTERFACE_ enforcement.  The generators will ignore
@@ -672,12 +672,12 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       // Decide whether to use an import library.
       bool implib =
         (this->UseImportLibrary &&
-         (impexe || tgt->GetType() == cmTarget::SHARED_LIBRARY));
+         (impexe || tgt->GetType() == cmState::SHARED_LIBRARY));
 
       // Pass the full path to the target file.
       std::string lib = tgt->GetFullPath(config, implib, true);
       if(!this->LinkDependsNoShared ||
-         tgt->GetType() != cmTarget::SHARED_LIBRARY)
+         tgt->GetType() != cmState::SHARED_LIBRARY)
         {
         this->Depends.push_back(lib);
         }
@@ -728,7 +728,7 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
     {
     // The target will provide a full path.  Make sure it is a shared
     // library.
-    if(tgt->GetType() != cmTarget::SHARED_LIBRARY)
+    if(tgt->GetType() != cmState::SHARED_LIBRARY)
       {
       return;
       }
@@ -818,9 +818,9 @@ void cmComputeLinkInformation::ComputeLinkTypeInfo()
   const char* target_type_str = 0;
   switch(this->Target->GetType())
     {
-    case cmTarget::EXECUTABLE:     target_type_str = "EXE"; break;
-    case cmTarget::SHARED_LIBRARY: target_type_str = "SHARED_LIBRARY"; break;
-    case cmTarget::MODULE_LIBRARY: target_type_str = "SHARED_MODULE"; break;
+    case cmState::EXECUTABLE:     target_type_str = "EXE"; break;
+    case cmState::SHARED_LIBRARY: target_type_str = "SHARED_LIBRARY"; break;
+    case cmState::MODULE_LIBRARY: target_type_str = "SHARED_MODULE"; break;
     default: break;
     }
   if(target_type_str)
@@ -1084,13 +1084,13 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
   // shared and static libraries but static-mode can handle only
   // static libraries.  If a previous user item changed the link type
   // to static we need to make sure it is back to shared.
-  if(target->GetType() != cmTarget::STATIC_LIBRARY)
+  if(target->GetType() != cmState::STATIC_LIBRARY)
     {
     this->SetCurrentLinkType(LinkShared);
     }
 
   // Keep track of shared library targets linked.
-  if(target->GetType() == cmTarget::SHARED_LIBRARY)
+  if(target->GetType() == cmState::SHARED_LIBRARY)
     {
     this->SharedLibrariesLinked.insert(target);
     }
@@ -1790,14 +1790,14 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath,
 
   // Libraries with unknown type must be handled using just the file
   // on disk.
-  if(target->GetType() == cmTarget::UNKNOWN_LIBRARY)
+  if(target->GetType() == cmState::UNKNOWN_LIBRARY)
     {
     this->AddLibraryRuntimeInfo(fullPath);
     return;
     }
 
   // Skip targets that are not shared libraries (modules cannot be linked).
-  if(target->GetType() != cmTarget::SHARED_LIBRARY)
+  if(target->GetType() != cmState::SHARED_LIBRARY)
     {
     return;
     }

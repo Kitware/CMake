@@ -396,7 +396,7 @@ cmCommonTargetGenerator::GetLinkedTargetDirectories() const
                 // We can ignore the INTERFACE_LIBRARY items because
                 // Target->GetLinkInformation already processed their
                 // link interface and they don't have any output themselves.
-                && linkee->GetType() != cmTarget::INTERFACE_LIBRARY
+                && linkee->GetType() != cmState::INTERFACE_LIBRARY
                 && emitted.insert(linkee).second)
         {
         cmLocalGenerator* lg = linkee->GetLocalGenerator();

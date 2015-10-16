@@ -77,7 +77,7 @@ void cmLocalNinjaGenerator::Generate()
   for(cmGeneratorTargetsType::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-    if (t->second->Target->GetType() == cmTarget::INTERFACE_LIBRARY
+    if (t->second->GetType() == cmState::INTERFACE_LIBRARY
         || t->second->Target->IsImported())
       {
       continue;

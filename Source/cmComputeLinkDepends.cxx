@@ -270,7 +270,7 @@ cmComputeLinkDepends::Compute()
     LinkEntry const& e = this->EntryList[i];
     cmGeneratorTarget const* t = e.Target;
     // Entries that we know the linker will re-use do not need to be repeated.
-    bool uniquify = t && t->GetType() == cmTarget::SHARED_LIBRARY;
+    bool uniquify = t && t->GetType() == cmState::SHARED_LIBRARY;
     if(!uniquify || emmitted.insert(i).second)
       {
       this->FinalLinkEntries.push_back(e);
@@ -367,7 +367,7 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
        entry.Target->GetLinkInterface(this->Config, this->Target))
       {
       const bool isIface =
-                      entry.Target->GetType() == cmTarget::INTERFACE_LIBRARY;
+                      entry.Target->GetType() == cmState::INTERFACE_LIBRARY;
       // This target provides its own link interface information.
       this->AddLinkEntries(depender_index, iface->Libraries);
 
@@ -482,24 +482,24 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
 
   // Look for entries meant for this configuration.
   std::vector<cmLinkItem> actual_libs;
-  cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
+  cmTargetLinkLibraryType llt = GENERAL_LibraryType;
   bool haveLLT = false;
   for(std::vector<std::string>::const_iterator di = deplist.begin();
       di != deplist.end(); ++di)
     {
     if(*di == "debug")
       {
-      llt = cmTarget::DEBUG;
+      llt = DEBUG_LibraryType;
       haveLLT = true;
       }
     else if(*di == "optimized")
       {
-      llt = cmTarget::OPTIMIZED;
+      llt = OPTIMIZED_LibraryType;
       haveLLT = true;
       }
     else if(*di == "general")
       {
-      llt = cmTarget::GENERAL;
+      llt = GENERAL_LibraryType;
       haveLLT = true;
       }
     else if(!di->empty())
@@ -517,17 +517,17 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
           {
           if(strcmp(val, "debug") == 0)
             {
-            llt = cmTarget::DEBUG;
+            llt = DEBUG_LibraryType;
             }
           else if(strcmp(val, "optimized") == 0)
             {
-            llt = cmTarget::OPTIMIZED;
+            llt = OPTIMIZED_LibraryType;
             }
           }
         }
 
       // If the library is meant for this link type then use it.
-      if(llt == cmTarget::GENERAL || llt == this->LinkType)
+      if(llt == GENERAL_LibraryType || llt == this->LinkType)
         {
         cmLinkItem item(*di, this->FindTargetToLink(depender_index, *di));
         actual_libs.push_back(item);
@@ -539,7 +539,7 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
         }
 
       // Reset the link type until another explicit type is given.
-      llt = cmTarget::GENERAL;
+      llt = GENERAL_LibraryType;
       haveLLT = false;
       }
     }

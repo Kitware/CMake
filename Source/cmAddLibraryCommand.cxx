@@ -25,10 +25,10 @@ bool cmAddLibraryCommand
     }
   // Library type defaults to value of BUILD_SHARED_LIBS, if it exists,
   // otherwise it defaults to static library.
-  cmTarget::TargetType type = cmTarget::SHARED_LIBRARY;
+  cmState::TargetType type = cmState::SHARED_LIBRARY;
   if (cmSystemTools::IsOff(this->Makefile->GetDefinition("BUILD_SHARED_LIBS")))
     {
-    type = cmTarget::STATIC_LIBRARY;
+    type = cmState::STATIC_LIBRARY;
     }
   bool excludeFromAll = false;
   bool importTarget = false;
@@ -50,7 +50,7 @@ bool cmAddLibraryCommand
     std::string libType = *s;
     if(libType == "STATIC")
       {
-      if (type == cmTarget::INTERFACE_LIBRARY)
+      if (type == cmState::INTERFACE_LIBRARY)
         {
         std::ostringstream e;
         e << "INTERFACE library specified with conflicting STATIC type.";
@@ -58,12 +58,12 @@ bool cmAddLibraryCommand
         return false;
         }
       ++s;
-      type = cmTarget::STATIC_LIBRARY;
+      type = cmState::STATIC_LIBRARY;
       haveSpecifiedType = true;
       }
     else if(libType == "SHARED")
       {
-      if (type == cmTarget::INTERFACE_LIBRARY)
+      if (type == cmState::INTERFACE_LIBRARY)
         {
         std::ostringstream e;
         e << "INTERFACE library specified with conflicting SHARED type.";
@@ -71,12 +71,12 @@ bool cmAddLibraryCommand
         return false;
         }
       ++s;
-      type = cmTarget::SHARED_LIBRARY;
+      type = cmState::SHARED_LIBRARY;
       haveSpecifiedType = true;
       }
     else if(libType == "MODULE")
       {
-      if (type == cmTarget::INTERFACE_LIBRARY)
+      if (type == cmState::INTERFACE_LIBRARY)
         {
         std::ostringstream e;
         e << "INTERFACE library specified with conflicting MODULE type.";
@@ -84,12 +84,12 @@ bool cmAddLibraryCommand
         return false;
         }
       ++s;
-      type = cmTarget::MODULE_LIBRARY;
+      type = cmState::MODULE_LIBRARY;
       haveSpecifiedType = true;
       }
     else if(libType == "OBJECT")
       {
-      if (type == cmTarget::INTERFACE_LIBRARY)
+      if (type == cmState::INTERFACE_LIBRARY)
         {
         std::ostringstream e;
         e << "INTERFACE library specified with conflicting OBJECT type.";
@@ -97,12 +97,12 @@ bool cmAddLibraryCommand
         return false;
         }
       ++s;
-      type = cmTarget::OBJECT_LIBRARY;
+      type = cmState::OBJECT_LIBRARY;
       haveSpecifiedType = true;
       }
     else if(libType == "UNKNOWN")
       {
-      if (type == cmTarget::INTERFACE_LIBRARY)
+      if (type == cmState::INTERFACE_LIBRARY)
         {
         std::ostringstream e;
         e << "INTERFACE library specified with conflicting UNKNOWN type.";
@@ -110,12 +110,12 @@ bool cmAddLibraryCommand
         return false;
         }
       ++s;
-      type = cmTarget::UNKNOWN_LIBRARY;
+      type = cmState::UNKNOWN_LIBRARY;
       haveSpecifiedType = true;
       }
     else if(libType == "ALIAS")
       {
-      if (type == cmTarget::INTERFACE_LIBRARY)
+      if (type == cmState::INTERFACE_LIBRARY)
         {
         std::ostringstream e;
         e << "INTERFACE library specified with conflicting ALIAS type.";
@@ -149,12 +149,12 @@ bool cmAddLibraryCommand
         return false;
         }
       ++s;
-      type = cmTarget::INTERFACE_LIBRARY;
+      type = cmState::INTERFACE_LIBRARY;
       haveSpecifiedType = true;
       }
     else if(*s == "EXCLUDE_FROM_ALL")
       {
-      if (type == cmTarget::INTERFACE_LIBRARY)
+      if (type == cmState::INTERFACE_LIBRARY)
         {
         std::ostringstream e;
         e << "INTERFACE library may not be used with EXCLUDE_FROM_ALL.";
@@ -174,7 +174,7 @@ bool cmAddLibraryCommand
       ++s;
       importGlobal = true;
       }
-    else if(type == cmTarget::INTERFACE_LIBRARY && *s == "GLOBAL")
+    else if(type == cmState::INTERFACE_LIBRARY && *s == "GLOBAL")
       {
       std::ostringstream e;
       e << "GLOBAL option may only be used with IMPORTED libraries.";
@@ -187,7 +187,7 @@ bool cmAddLibraryCommand
       }
     }
 
-  if (type == cmTarget::INTERFACE_LIBRARY)
+  if (type == cmState::INTERFACE_LIBRARY)
     {
     if (s != args.end())
       {
@@ -220,7 +220,7 @@ bool cmAddLibraryCommand
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0037))
       {
       case cmPolicies::WARN:
-        if(type != cmTarget::INTERFACE_LIBRARY)
+        if(type != cmState::INTERFACE_LIBRARY)
           {
           e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0037) << "\n";
           issueMessage = true;
@@ -293,12 +293,12 @@ bool cmAddLibraryCommand
       this->SetError(e.str());
       return false;
       }
-    cmTarget::TargetType aliasedType = aliasedTarget->GetType();
-    if(aliasedType != cmTarget::SHARED_LIBRARY
-        && aliasedType != cmTarget::STATIC_LIBRARY
-        && aliasedType != cmTarget::MODULE_LIBRARY
-        && aliasedType != cmTarget::OBJECT_LIBRARY
-        && aliasedType != cmTarget::INTERFACE_LIBRARY)
+    cmState::TargetType aliasedType = aliasedTarget->GetType();
+    if(aliasedType != cmState::SHARED_LIBRARY
+        && aliasedType != cmState::STATIC_LIBRARY
+        && aliasedType != cmState::MODULE_LIBRARY
+        && aliasedType != cmState::OBJECT_LIBRARY
+        && aliasedType != cmState::INTERFACE_LIBRARY)
       {
       std::ostringstream e;
       e << "cannot create ALIAS target \"" << libName
@@ -328,19 +328,19 @@ bool cmAddLibraryCommand
     CMAKE_${LANG}_CREATE_SHARED_LIBRARY is defined and if not default to
     STATIC. But at this point we know only the name of the target, but not
     yet its linker language. */
-  if ((type == cmTarget::SHARED_LIBRARY ||
-       type == cmTarget::MODULE_LIBRARY) &&
+  if ((type == cmState::SHARED_LIBRARY ||
+       type == cmState::MODULE_LIBRARY) &&
        (this->Makefile->GetState()->GetGlobalPropertyAsBool(
                                       "TARGET_SUPPORTS_SHARED_LIBS") == false))
     {
     std::ostringstream w;
     w <<
       "ADD_LIBRARY called with " <<
-      (type==cmTarget::SHARED_LIBRARY ? "SHARED" : "MODULE") <<
+      (type==cmState::SHARED_LIBRARY ? "SHARED" : "MODULE") <<
       " option but the target platform does not support dynamic linking. "
       "Building a STATIC library instead. This may lead to problems.";
     this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
-    type = cmTarget::STATIC_LIBRARY;
+    type = cmState::STATIC_LIBRARY;
     }
 
   // Handle imported target creation.
@@ -352,7 +352,7 @@ bool cmAddLibraryCommand
       this->SetError("called with IMPORTED argument but no library type.");
       return false;
       }
-    if(type == cmTarget::OBJECT_LIBRARY)
+    if(type == cmState::OBJECT_LIBRARY)
       {
       this->Makefile->IssueMessage(
         cmake::FATAL_ERROR,
@@ -360,7 +360,7 @@ bool cmAddLibraryCommand
         );
       return true;
       }
-    if(type == cmTarget::INTERFACE_LIBRARY)
+    if(type == cmState::INTERFACE_LIBRARY)
       {
       if (!cmGeneratorExpression::IsValidTargetName(libName))
         {
@@ -387,7 +387,7 @@ bool cmAddLibraryCommand
     }
 
   // A non-imported target may not have UNKNOWN type.
-  if(type == cmTarget::UNKNOWN_LIBRARY)
+  if(type == cmState::UNKNOWN_LIBRARY)
     {
     this->Makefile->IssueMessage(
       cmake::FATAL_ERROR,
@@ -408,7 +408,7 @@ bool cmAddLibraryCommand
 
   std::vector<std::string> srclists;
 
-  if(type == cmTarget::INTERFACE_LIBRARY)
+  if(type == cmState::INTERFACE_LIBRARY)
     {
     if (!cmGeneratorExpression::IsValidTargetName(libName)
         || libName.find("::") != std::string::npos)
