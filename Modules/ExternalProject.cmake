@@ -1731,6 +1731,7 @@ function(_ep_add_download_command name)
       --non-interactive ${svn_trust_cert_args} ${svn_user_pw_args} ${src_name})
     list(APPEND depends ${stamp_dir}/${name}-svninfo.txt)
   elseif(git_repository)
+    unset(CMAKE_MODULE_PATH) # Use CMake builtin find module
     find_package(Git QUIET)
     if(NOT GIT_EXECUTABLE)
       message(FATAL_ERROR "error: could not find git for clone of ${name}")
@@ -1739,7 +1740,7 @@ function(_ep_add_download_command name)
     # The git submodule update '--recursive' flag requires git >= v1.6.5
     #
     if(GIT_VERSION_STRING VERSION_LESS 1.6.5)
-      message(FATAL_ERROR "error: git version 1.6.5 or later required for 'git submodule update --recursive': git_version='${git_version}'")
+      message(FATAL_ERROR "error: git version 1.6.5 or later required for 'git submodule update --recursive': GIT_VERSION_STRING='${GIT_VERSION_STRING}'")
     endif()
 
     get_property(git_tag TARGET ${name} PROPERTY _EP_GIT_TAG)
