@@ -2120,9 +2120,9 @@ public:
   cmTargetTraceDependencies(cmGeneratorTarget* target);
   void Trace();
 private:
-  cmTarget* Target;
   cmGeneratorTarget* GeneratorTarget;
   cmMakefile* Makefile;
+  cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator const* GlobalGenerator;
   typedef cmGeneratorTarget::SourceEntry SourceEntry;
   SourceEntry* CurrentEntry;
@@ -2146,11 +2146,12 @@ private:
 //----------------------------------------------------------------------------
 cmTargetTraceDependencies
 ::cmTargetTraceDependencies(cmGeneratorTarget* target):
-  Target(target->Target), GeneratorTarget(target)
+  GeneratorTarget(target)
 {
   // Convenience.
-  this->Makefile = this->Target->GetMakefile();
-  this->GlobalGenerator = target->GetLocalGenerator()->GetGlobalGenerator();
+  this->Makefile = target->Target->GetMakefile();
+  this->LocalGenerator = target->GetLocalGenerator();
+  this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
   this->CurrentEntry = 0;
 
   // Queue all the source files already specified for the target.
@@ -2193,9 +2194,12 @@ cmTargetTraceDependencies
     }
 
   // Queue pre-build, pre-link, and post-build rule dependencies.
-  this->CheckCustomCommands(this->Target->GetPreBuildCommands());
-  this->CheckCustomCommands(this->Target->GetPreLinkCommands());
-  this->CheckCustomCommands(this->Target->GetPostBuildCommands());
+  this->CheckCustomCommands(
+        this->GeneratorTarget->Target->GetPreBuildCommands());
+  this->CheckCustomCommands(
+        this->GeneratorTarget->Target->GetPreLinkCommands());
+  this->CheckCustomCommands(
+        this->GeneratorTarget->Target->GetPostBuildCommands());
 }
 
 //----------------------------------------------------------------------------
@@ -2324,7 +2328,7 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
         tLocation = cmSystemTools::CollapseFullPath(tLocation);
         if(depLocation == tLocation)
           {
-          this->Target->AddUtility(util);
+          this->GeneratorTarget->Target->AddUtility(util);
           return true;
           }
         }
@@ -2333,7 +2337,7 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
       {
       // The original name of the dependency was not a full path.  It
       // must name a target, so add the target-level dependency.
-      this->Target->AddUtility(util);
+      this->GeneratorTarget->Target->AddUtility(util);
       return true;
       }
     }
@@ -2359,7 +2363,8 @@ cmTargetTraceDependencies
     {
     std::string const& command = *cit->begin();
     // Check for a target with this name.
-    if(cmTarget* t = this->Makefile->FindTargetToUse(command))
+    if(cmGeneratorTarget* t =
+       this->LocalGenerator->FindGeneratorTargetToUse(command))
       {
       if(t->GetType() == cmState::EXECUTABLE)
         {
@@ -2367,7 +2372,7 @@ cmTargetTraceDependencies
         // this project.  Add the target-level dependency to make
         // sure the executable is up to date before this custom
         // command possibly runs.
-        this->Target->AddUtility(command);
+        this->GeneratorTarget->Target->AddUtility(command);
         }
       }
 
@@ -2386,7 +2391,7 @@ cmTargetTraceDependencies
   for(std::set<cmGeneratorTarget*>::iterator ti = targets.begin();
       ti != targets.end(); ++ti)
     {
-    this->Target->AddUtility((*ti)->GetName());
+    this->GeneratorTarget->Target->AddUtility((*ti)->GetName());
     }
 
   // Queue the custom command dependencies.
