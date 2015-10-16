@@ -443,6 +443,8 @@ public:
       no soname at all.  */
   bool IsImportedSharedLibWithoutSOName(const std::string& config) const;
 
+  const char* ImportedGetLocation(const std::string& config) const;
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };

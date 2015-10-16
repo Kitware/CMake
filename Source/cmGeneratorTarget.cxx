@@ -3344,6 +3344,16 @@ std::string cmGeneratorTarget::GetFullNameInternal(const std::string& config,
 }
 
 //----------------------------------------------------------------------------
+const char*
+cmGeneratorTarget::ImportedGetLocation(const std::string& config) const
+{
+  static std::string location;
+  assert(this->IsImported());
+  location = this->Target->ImportedGetFullPath(config, false);
+  return location.c_str();
+}
+
+//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetFullNameImported(const std::string& config,
                                                    bool implib) const
 {

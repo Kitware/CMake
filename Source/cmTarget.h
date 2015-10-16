@@ -217,8 +217,6 @@ public:
       the link dependencies of this target.  */
   std::string CheckCMP0004(std::string const& item) const;
 
-  const char* ImportedGetLocation(const std::string& config) const;
-
   /** Get the target major and minor version numbers interpreted from
       the VERSION property.  Version 0 is returned if the property is
       not set or cannot be parsed.  */

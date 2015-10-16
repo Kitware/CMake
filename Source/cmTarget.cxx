@@ -1628,15 +1628,6 @@ bool cmTarget::HaveWellDefinedOutputFiles() const
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::ImportedGetLocation(const std::string& config) const
-{
-  static std::string location;
-  assert(this->IsImported());
-  location = this->ImportedGetFullPath(config, false);
-  return location.c_str();
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::GetTargetVersion(int& major, int& minor) const
 {
   int patch;
