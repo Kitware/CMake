@@ -774,9 +774,8 @@ std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
     for(std::set<std::string>::const_iterator i = utilities.begin();
         i != utilities.end(); ++i)
       {
-      cmTarget* tgt = this->Makefile->FindTargetToUse(*i);
-      cmGeneratorTarget* gt = tgt ? this->GlobalGenerator
-          ->GetGeneratorTarget(tgt) : 0;
+      cmGeneratorTarget* gt =
+          this->LocalGenerator->FindGeneratorTargetToUse(*i);
       this->UtilityItems.insert(cmLinkItem(*i, gt));
       }
     }
