@@ -5483,13 +5483,14 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
 cmGeneratorTarget*
 cmGeneratorTarget::FindTargetToLink(std::string const& name) const
 {
-  cmTarget const* tgt = this->Makefile->FindTargetToUse(name);
+  cmGeneratorTarget* tgt =
+      this->LocalGenerator->FindGeneratorTargetToUse(name);
 
   // Skip targets that will not really be linked.  This is probably a
   // name conflict between an external library and an executable
   // within the project.
   if(tgt && tgt->GetType() == cmState::EXECUTABLE &&
-     !tgt->IsExecutableWithExports())
+     !tgt->Target->IsExecutableWithExports())
     {
     tgt = 0;
     }
@@ -5502,17 +5503,13 @@ cmGeneratorTarget::FindTargetToLink(std::string const& name) const
       "allowed.  "
       "One may link only to STATIC or SHARED libraries, or to executables "
       "with the ENABLE_EXPORTS property set.";
-    cmake* cm = this->Makefile->GetCMakeInstance();
+    cmake* cm = this->LocalGenerator->GetCMakeInstance();
     cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
                      this->Target->GetBacktrace());
     tgt = 0;
     }
 
-  if (!tgt)
-    {
-    return 0;
-    }
-  return this->GlobalGenerator->GetGeneratorTarget(tgt);
+  return tgt;
 }
 
 //----------------------------------------------------------------------------
