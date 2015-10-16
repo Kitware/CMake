@@ -1605,7 +1605,7 @@ cmGeneratorTarget::GetFullName(const std::string& config, bool implib) const
 {
   if(this->Target->IsImported())
     {
-    return this->Target->GetFullNameImported(config, implib);
+    return this->GetFullNameImported(config, implib);
     }
   else
     {
@@ -3341,6 +3341,14 @@ std::string cmGeneratorTarget::GetFullNameInternal(const std::string& config,
   std::string suffix;
   this->GetFullNameInternal(config, implib, prefix, base, suffix);
   return prefix+base+suffix;
+}
+
+//----------------------------------------------------------------------------
+std::string cmGeneratorTarget::GetFullNameImported(const std::string& config,
+                                                   bool implib) const
+{
+  return cmSystemTools::GetFilenameName(
+    this->Target->ImportedGetFullPath(config, implib));
 }
 
 //----------------------------------------------------------------------------

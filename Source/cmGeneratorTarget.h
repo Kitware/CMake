@@ -229,6 +229,9 @@ public:
   void
   GetObjectLibrariesCMP0026(std::vector<cmGeneratorTarget*>& objlibs) const;
 
+  std::string GetFullNameImported(const std::string& config,
+                                  bool implib) const;
+
   bool GetConfigCommonSourceFiles(std::vector<cmSourceFile*>& files) const;
 
   bool HaveBuildTreeRPATH(const std::string& config) const;

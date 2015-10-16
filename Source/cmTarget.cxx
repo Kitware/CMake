@@ -2100,14 +2100,6 @@ const char* cmTarget::GetPrefixVariableInternal(bool implib) const
 
 //----------------------------------------------------------------------------
 std::string
-cmTarget::GetFullNameImported(const std::string& config, bool implib) const
-{
-  return cmSystemTools::GetFilenameName(
-    this->ImportedGetFullPath(config, implib));
-}
-
-//----------------------------------------------------------------------------
-std::string
 cmTarget::ImportedGetFullPath(const std::string& config, bool implib) const
 {
   std::string result;

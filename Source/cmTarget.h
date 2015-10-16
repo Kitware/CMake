@@ -383,9 +383,6 @@ private:
   void SetPropertyDefault(const std::string& property,
                           const char* default_value);
 
-  std::string GetFullNameImported(const std::string& config,
-                                  bool implib) const;
-
   std::string ImportedGetFullPath(const std::string& config,
                                   bool implib) const;
 
