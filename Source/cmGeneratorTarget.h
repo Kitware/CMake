@@ -483,6 +483,13 @@ private:
   // Returns ARCHIVE, LIBRARY, or RUNTIME based on platform and type.
   const char* GetOutputTargetType(bool implib) const;
 
+  void ComputeVersionedName(std::string& vName,
+                            std::string const& prefix,
+                            std::string const& base,
+                            std::string const& suffix,
+                            std::string const& name,
+                            const char* version) const;
+
   struct CompatibleInterfacesBase
   {
     std::set<std::string> PropsBool;

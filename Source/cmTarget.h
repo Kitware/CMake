@@ -414,13 +414,6 @@ private:
   friend class cmGeneratorTarget;
   friend class cmTargetTraceDependencies;
 
-  void ComputeVersionedName(std::string& vName,
-                            std::string const& prefix,
-                            std::string const& base,
-                            std::string const& suffix,
-                            std::string const& name,
-                            const char* version) const;
-
   cmListFileBacktrace Backtrace;
 };
 

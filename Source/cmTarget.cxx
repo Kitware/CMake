@@ -2119,23 +2119,6 @@ cmTarget::ImportedGetFullPath(const std::string& config, bool pimplib) const
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::ComputeVersionedName(std::string& vName,
-                                    std::string const& prefix,
-                                    std::string const& base,
-                                    std::string const& suffix,
-                                    std::string const& name,
-                                    const char* version) const
-{
-  vName = this->IsApple? (prefix+base) : name;
-  if(version)
-    {
-    vName += ".";
-    vName += version;
-    }
-  vName += this->IsApple? suffix : std::string();
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::SetPropertyDefault(const std::string& property,
                                   const char* default_value)
 {
