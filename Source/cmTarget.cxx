@@ -2091,13 +2091,75 @@ const char* cmTarget::GetPrefixVariableInternal(bool implib) const
 
 //----------------------------------------------------------------------------
 std::string
-cmTarget::ImportedGetFullPath(const std::string& config, bool implib) const
+cmTarget::ImportedGetFullPath(const std::string& config, bool pimplib) const
 {
-  std::string result;
-  if(cmTarget::ImportInfo const* info = this->GetImportInfo(config))
+  assert(this->IsImported());
+
+  // Lookup/compute/cache the import information for this
+  // configuration.
+  std::string config_upper;
+  if(!config.empty())
     {
-    result = implib? info->ImportLibrary : info->Location;
+    config_upper = cmSystemTools::UpperCase(config);
     }
+  else
+    {
+    config_upper = "NOCONFIG";
+    }
+
+  std::string result;
+
+  const char* loc = 0;
+  const char* imp = 0;
+  std::string suffix;
+
+  if(this->GetType() != cmState::INTERFACE_LIBRARY
+     && this->GetMappedConfig(config_upper, &loc, &imp, suffix))
+    {
+    if (!pimplib)
+      {
+      if(loc)
+        {
+        result = loc;
+        }
+      else
+        {
+        std::string impProp = "IMPORTED_LOCATION";
+        impProp += suffix;
+        if(const char* config_location = this->GetProperty(impProp))
+          {
+          result = config_location;
+          }
+        else if(const char* location =
+                this->GetProperty("IMPORTED_LOCATION"))
+          {
+          result = location;
+          }
+        }
+      }
+    else
+      {
+      if(imp)
+        {
+        result = imp;
+        }
+      else if(this->GetType() == cmState::SHARED_LIBRARY ||
+              this->IsExecutableWithExports())
+        {
+        std::string impProp = "IMPORTED_IMPLIB";
+        impProp += suffix;
+        if(const char* config_implib = this->GetProperty(impProp))
+          {
+          result = config_implib;
+          }
+        else if(const char* implib = this->GetProperty("IMPORTED_IMPLIB"))
+          {
+          result = implib;
+          }
+        }
+      }
+    }
+
   if(result.empty())
     {
     result = this->GetName();
