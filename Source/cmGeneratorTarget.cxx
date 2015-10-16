@@ -5201,6 +5201,46 @@ bool cmGeneratorTarget::GetConfigCommonSourceFiles(
 }
 
 //----------------------------------------------------------------------------
+void cmGeneratorTarget::GetObjectLibrariesCMP0026(
+    std::vector<cmGeneratorTarget*>& objlibs) const
+{
+  // At configure-time, this method can be called as part of getting the
+  // LOCATION property or to export() a file to be include()d.  However
+  // there is no cmGeneratorTarget at configure-time, so search the SOURCES
+  // for TARGET_OBJECTS instead for backwards compatibility with OLD
+  // behavior of CMP0024 and CMP0026 only.
+  cmStringRange rng = this->Target->GetSourceEntries();
+  for(std::vector<std::string>::const_iterator
+        i = rng.begin(); i != rng.end(); ++i)
+    {
+    std::string const& entry = *i;
+
+    std::vector<std::string> files;
+    cmSystemTools::ExpandListArgument(entry, files);
+    for (std::vector<std::string>::const_iterator
+        li = files.begin(); li != files.end(); ++li)
+      {
+      if(cmHasLiteralPrefix(*li, "$<TARGET_OBJECTS:") &&
+          (*li)[li->size() - 1] == '>')
+        {
+        std::string objLibName = li->substr(17, li->size()-18);
+
+        if (cmGeneratorExpression::Find(objLibName) != std::string::npos)
+          {
+          continue;
+          }
+        cmGeneratorTarget *objLib =
+            this->LocalGenerator->FindGeneratorTargetToUse(objLibName);
+        if(objLib)
+          {
+          objlibs.push_back(objLib);
+          }
+        }
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
                             const std::string& config) const
 {
@@ -5220,14 +5260,13 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
   std::vector<cmSourceFile const*> externalObjects;
   if (!this->GlobalGenerator->GetConfigureDoneCMP0026())
     {
-    std::vector<cmTarget*> objectTargets;
-    this->Target->GetObjectLibrariesCMP0026(objectTargets);
+    std::vector<cmGeneratorTarget*> objectTargets;
+    this->GetObjectLibrariesCMP0026(objectTargets);
     objectLibraries.reserve(objectTargets.size());
-    for (std::vector<cmTarget*>::const_iterator it = objectTargets.begin();
-         it != objectTargets.end(); ++it)
+    for (std::vector<cmGeneratorTarget*>::const_iterator it =
+         objectTargets.begin(); it != objectTargets.end(); ++it)
       {
-      objectLibraries.push_back(this->GlobalGenerator
-                                ->GetGeneratorTarget(*it));
+      objectLibraries.push_back(*it);
       }
     }
   else

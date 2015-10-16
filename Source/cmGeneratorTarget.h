@@ -226,6 +226,9 @@ public:
   void GetLanguages(std::set<std::string>& languages,
                     std::string const& config) const;
 
+  void
+  GetObjectLibrariesCMP0026(std::vector<cmGeneratorTarget*>& objlibs) const;
+
   bool GetConfigCommonSourceFiles(std::vector<cmSourceFile*>& files) const;
 
   bool HaveBuildTreeRPATH(const std::string& config) const;
