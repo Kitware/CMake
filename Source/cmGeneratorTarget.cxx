@@ -1691,7 +1691,7 @@ public:
                                cmGeneratorTarget const* head):
     Config(config), Languages(languages), HeadTarget(head),
     Makefile(target->Target->GetMakefile()), Target(target)
-  { this->Visited.insert(target->Target); }
+  { this->Visited.insert(target); }
 
   void Visit(cmLinkItem const& item)
     {
@@ -1732,7 +1732,7 @@ public:
         }
       return;
       }
-    if(!this->Visited.insert(item.Target->Target).second)
+    if(!this->Visited.insert(item.Target).second)
       {
       return;
       }
@@ -1758,7 +1758,7 @@ private:
   cmGeneratorTarget const* HeadTarget;
   cmMakefile* Makefile;
   const cmGeneratorTarget* Target;
-  std::set<cmTarget const*> Visited;
+  std::set<cmGeneratorTarget const*> Visited;
 };
 
 //----------------------------------------------------------------------------
