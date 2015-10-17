@@ -78,9 +78,10 @@ protected:
   void GenerateImportTargetCode(std::ostream& os,
                                 cmGeneratorTarget const* target);
   void GenerateImportPropertyCode(std::ostream& os, const std::string& config,
-                                  cmTarget const* target,
+                                  cmGeneratorTarget const* target,
                                   ImportPropertyMap const& properties);
-  void GenerateImportedFileChecksCode(std::ostream& os, cmTarget* target,
+  void GenerateImportedFileChecksCode(std::ostream& os,
+                                      cmGeneratorTarget* target,
                                       ImportPropertyMap const& properties,
                                const std::set<std::string>& importedLocations);
   void GenerateImportedFileCheckLoop(std::ostream& os);

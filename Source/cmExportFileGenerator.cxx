@@ -1108,13 +1108,13 @@ cmExportFileGenerator
 void
 cmExportFileGenerator
 ::GenerateImportPropertyCode(std::ostream& os, const std::string& config,
-                             cmTarget const* target,
+                             cmGeneratorTarget const* target,
                              ImportPropertyMap const& properties)
 {
   // Construct the imported target name.
   std::string targetName = this->Namespace;
 
-  targetName += target->GetExportName();
+  targetName += target->Target->GetExportName();
 
   // Set the import properties.
   os << "# Import target \"" << targetName << "\" for configuration \""
@@ -1228,13 +1228,13 @@ cmExportFileGenerator::GenerateImportedFileCheckLoop(std::ostream& os)
 //----------------------------------------------------------------------------
 void
 cmExportFileGenerator
-::GenerateImportedFileChecksCode(std::ostream& os, cmTarget* target,
+::GenerateImportedFileChecksCode(std::ostream& os, cmGeneratorTarget* target,
                                  ImportPropertyMap const& properties,
                                 const std::set<std::string>& importedLocations)
 {
   // Construct the imported target name.
   std::string targetName = this->Namespace;
-  targetName += target->GetExportName();
+  targetName += target->Target->GetExportName();
 
   os << "list(APPEND _IMPORT_CHECK_TARGETS " << targetName << " )\n"
         "list(APPEND _IMPORT_CHECK_FILES_FOR_" << targetName << " ";

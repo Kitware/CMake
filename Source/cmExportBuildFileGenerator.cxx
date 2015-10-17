@@ -174,7 +174,7 @@ cmExportBuildFileGenerator
       //                              properties);
 
       // Generate code in the export file.
-      this->GenerateImportPropertyCode(os, config, target->Target,
+      this->GenerateImportPropertyCode(os, config, target,
                                        properties);
       }
     }

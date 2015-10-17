@@ -375,8 +375,8 @@ cmExportInstallFileGenerator
       //                              properties);
 
       // Generate code in the export file.
-      this->GenerateImportPropertyCode(os, config, gtgt->Target, properties);
-      this->GenerateImportedFileChecksCode(os, gtgt->Target, properties,
+      this->GenerateImportPropertyCode(os, config, gtgt, properties);
+      this->GenerateImportedFileChecksCode(os, gtgt, properties,
                                            importedLocations);
       }
     }
