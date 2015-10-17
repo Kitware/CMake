@@ -18,7 +18,6 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
-#include "cmTarget.h"
 #include "cmTargetExport.h"
 #include "cmVersion.h"
 #include "cmComputeLinkInformation.h"
@@ -623,7 +622,7 @@ void cmExportFileGenerator::GenerateInterfaceProperties(
   if (!properties.empty())
     {
     std::string targetName = this->Namespace;
-    targetName += target->Target->GetExportName();
+    targetName += target->GetExportName();
     os << "set_target_properties(" << targetName << " PROPERTIES\n";
     for(ImportPropertyMap::const_iterator pi = properties.begin();
         pi != properties.end(); ++pi)
@@ -655,7 +654,7 @@ cmExportFileGenerator::AddTargetNamespace(std::string &input,
     }
   if(this->ExportedTargets.find(tgt) != this->ExportedTargets.end())
     {
-    input = this->Namespace + tgt->Target->GetExportName();
+    input = this->Namespace + tgt->GetExportName();
     }
   else
     {
@@ -1047,7 +1046,7 @@ cmExportFileGenerator
   // Construct the imported target name.
   std::string targetName = this->Namespace;
 
-  targetName += target->Target->GetExportName();
+  targetName += target->GetExportName();
 
   // Create the imported target.
   os << "# Create imported target " << targetName << "\n";
@@ -1114,7 +1113,7 @@ cmExportFileGenerator
   // Construct the imported target name.
   std::string targetName = this->Namespace;
 
-  targetName += target->Target->GetExportName();
+  targetName += target->GetExportName();
 
   // Set the import properties.
   os << "# Import target \"" << targetName << "\" for configuration \""
@@ -1234,7 +1233,7 @@ cmExportFileGenerator
 {
   // Construct the imported target name.
   std::string targetName = this->Namespace;
-  targetName += target->Target->GetExportName();
+  targetName += target->GetExportName();
 
   os << "list(APPEND _IMPORT_CHECK_TARGETS " << targetName << " )\n"
         "list(APPEND _IMPORT_CHECK_FILES_FOR_" << targetName << " ";

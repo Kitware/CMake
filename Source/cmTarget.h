@@ -96,7 +96,6 @@ public:
 
   ///! Set/Get the name of the target
   const std::string& GetName() const {return this->Name;}
-  std::string GetExportName() const;
 
   ///! Set the cmMakefile that owns this target
   void SetMakefile(cmMakefile *mf);

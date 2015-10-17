@@ -335,6 +335,26 @@ std::string cmGeneratorTarget::GetName() const
 }
 
 //----------------------------------------------------------------------------
+std::string cmGeneratorTarget::GetExportName() const
+{
+  const char *exportName = this->GetProperty("EXPORT_NAME");
+
+  if (exportName && *exportName)
+    {
+    if (!cmGeneratorExpression::IsValidTargetName(exportName))
+      {
+      std::ostringstream e;
+      e << "EXPORT_NAME property \"" << exportName << "\" for \""
+        << this->GetName() << "\": is not valid.";
+      cmSystemTools::Error(e.str().c_str());
+      return "";
+      }
+    return exportName;
+    }
+  return this->GetName();
+}
+
+//----------------------------------------------------------------------------
 const char *cmGeneratorTarget::GetProperty(const std::string& prop) const
 {
   return this->Target->GetProperty(prop);

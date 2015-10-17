@@ -1412,26 +1412,6 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetExportName() const
-{
-  const char *exportName = this->GetProperty("EXPORT_NAME");
-
-  if (exportName && *exportName)
-    {
-    if (!cmGeneratorExpression::IsValidTargetName(exportName))
-      {
-      std::ostringstream e;
-      e << "EXPORT_NAME property \"" << exportName << "\" for \""
-        << this->GetName() << "\": is not valid.";
-      cmSystemTools::Error(e.str().c_str());
-      return "";
-      }
-    return exportName;
-    }
-  return this->GetName();
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::AppendBuildInterfaceIncludes()
 {
   if(this->GetType() != cmState::SHARED_LIBRARY &&
