@@ -119,7 +119,6 @@ protected:
    *  export set.  */
   virtual void HandleMissingTarget(std::string& link_libs,
                                    std::vector<std::string>& missingTargets,
-                                   cmMakefile* mf,
                                    cmTarget* depender,
                                    cmTarget* dependee) = 0;
   void PopulateInterfaceProperty(const std::string&,

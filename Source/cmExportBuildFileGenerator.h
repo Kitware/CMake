@@ -54,7 +54,6 @@ protected:
                             std::vector<std::string> &missingTargets);
   virtual void HandleMissingTarget(std::string& link_libs,
                                    std::vector<std::string>& missingTargets,
-                                   cmMakefile* mf,
                                    cmTarget* depender,
                                    cmTarget* dependee);
 
@@ -72,7 +71,7 @@ protected:
                              const std::string& config);
 
   std::vector<std::string>
-  FindNamespaces(cmMakefile* mf, const std::string& name);
+  FindNamespaces(cmGlobalGenerator* gg, const std::string& name);
 
   std::vector<std::string> Targets;
   cmExportSet *ExportSet;

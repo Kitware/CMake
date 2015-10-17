@@ -37,7 +37,6 @@ protected:
                             std::vector<std::string>&) {}
   virtual void HandleMissingTarget(std::string&,
                                    std::vector<std::string>&,
-                                   cmMakefile*,
                                    cmTarget*,
                                    cmTarget*) {}
 

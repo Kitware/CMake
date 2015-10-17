@@ -57,7 +57,6 @@ protected:
                             std::vector<std::string> &missingTargets);
   virtual void HandleMissingTarget(std::string& link_libs,
                                    std::vector<std::string>& missingTargets,
-                                   cmMakefile* mf,
                                    cmTarget* depender,
                                    cmTarget* dependee);
 
@@ -67,7 +66,7 @@ protected:
                                   cmTarget* dependee,
                                   int occurrences);
 
-  std::vector<std::string> FindNamespaces(cmMakefile* mf,
+  std::vector<std::string> FindNamespaces(cmGlobalGenerator* gg,
                                           const std::string& name);
 
 

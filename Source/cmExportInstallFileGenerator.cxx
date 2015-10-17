@@ -455,10 +455,11 @@ cmExportInstallFileGenerator
 void
 cmExportInstallFileGenerator::HandleMissingTarget(
   std::string& link_libs, std::vector<std::string>& missingTargets,
-  cmMakefile* mf, cmTarget* depender, cmTarget* dependee)
+  cmTarget* depender, cmTarget* dependee)
 {
   const std::string name = dependee->GetName();
-  std::vector<std::string> namespaces = this->FindNamespaces(mf, name);
+  cmGlobalGenerator* gg = dependee->GetMakefile()->GetGlobalGenerator();
+  std::vector<std::string> namespaces = this->FindNamespaces(gg, name);
   int targetOccurrences = (int)namespaces.size();
   if (targetOccurrences == 1)
     {
@@ -479,10 +480,9 @@ cmExportInstallFileGenerator::HandleMissingTarget(
 //----------------------------------------------------------------------------
 std::vector<std::string>
 cmExportInstallFileGenerator
-::FindNamespaces(cmMakefile* mf, const std::string& name)
+::FindNamespaces(cmGlobalGenerator* gg, const std::string& name)
 {
   std::vector<std::string> namespaces;
-  cmGlobalGenerator* gg = mf->GetGlobalGenerator();
   const cmExportSetMap& exportSets = gg->GetExportSets();
 
   for(cmExportSetMap::const_iterator expIt = exportSets.begin();
