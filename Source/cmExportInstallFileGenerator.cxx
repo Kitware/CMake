@@ -399,7 +399,7 @@ cmExportInstallFileGenerator
     }
 
   // Get the target to be installed.
-  cmTarget* target = itgen->GetTarget()->Target;
+  cmGeneratorTarget* target = itgen->GetTarget();
 
   // Construct the installed location of the target.
   std::string dest = itgen->GetDestination(config);
@@ -433,7 +433,7 @@ cmExportInstallFileGenerator
     prop += suffix;
 
     // Append the installed file name.
-    if(target->IsAppBundleOnApple())
+    if(target->Target->IsAppBundleOnApple())
       {
       value += itgen->GetInstallFilename(target, config);
       value += ".app/Contents/MacOS/";
