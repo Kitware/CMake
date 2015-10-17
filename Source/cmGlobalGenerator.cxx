@@ -1199,6 +1199,7 @@ void cmGlobalGenerator::CreateGenerationObjects(TargetTypes targetTypes)
   cmDeleteAll(this->GeneratorTargets);
   this->GeneratorTargets.clear();
   this->CreateGeneratorTargets(targetTypes);
+  this->ComputeBuildFileGenerators();
 }
 
 cmExportBuildFileGenerator*
@@ -1278,8 +1279,6 @@ bool cmGlobalGenerator::Compute()
   std::vector<cmGeneratorTarget const*> autogenTargets =
       this->CreateQtAutoGeneratorsTargets();
 #endif
-
-  this->ComputeBuildFileGenerators();
 
   unsigned int i;
 
