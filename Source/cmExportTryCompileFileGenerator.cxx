@@ -14,13 +14,16 @@
 
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 
 //----------------------------------------------------------------------------
 cmExportTryCompileFileGenerator::cmExportTryCompileFileGenerator(
-    cmGlobalGenerator* gg)
+    cmGlobalGenerator* gg,
+    const std::vector<std::string>& targets,
+    cmMakefile* mf)
 {
-  gg->CreateGenerationObjects(cmGlobalGenerator::ImportedOnly);
+  gg->CreateImportedGenerationObjects(mf, targets, this->Exports);
 }
 
 bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)
@@ -29,25 +32,25 @@ bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)
   std::set<cmTarget const*> emittedDeps;
   while(!this->Exports.empty())
     {
-    cmTarget const* te = this->Exports.back();
+    cmGeneratorTarget const* te = this->Exports.back();
     this->Exports.pop_back();
-    if (emitted.insert(te).second)
+    if (emitted.insert(te->Target).second)
       {
-      emittedDeps.insert(te);
-      this->GenerateImportTargetCode(os, te);
+      emittedDeps.insert(te->Target);
+      this->GenerateImportTargetCode(os, te->Target);
 
       ImportPropertyMap properties;
 
 #define FIND_TARGETS(PROPERTY) \
-      this->FindTargets("INTERFACE_" #PROPERTY, te, emittedDeps);
+      this->FindTargets("INTERFACE_" #PROPERTY, te->Target, emittedDeps);
 
       CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(FIND_TARGETS)
 
 #undef FIND_TARGETS
 
-      this->PopulateProperties(te, properties, emittedDeps);
+      this->PopulateProperties(te->Target, properties, emittedDeps);
 
-      this->GenerateInterfaceProperties(te, os, properties);
+      this->GenerateInterfaceProperties(te->Target, os, properties);
       }
     }
   return true;
@@ -91,7 +94,7 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
     {
     if(emitted.insert((*li)->Target).second)
       {
-      this->Exports.push_back((*li)->Target);
+      this->Exports.push_back((*li));
       }
     }
   return result;
@@ -104,6 +107,8 @@ cmExportTryCompileFileGenerator::PopulateProperties(cmTarget const* target,
                                           std::set<cmTarget const*> &emitted)
 {
   cmPropertyMap props = target->GetProperties();
+  cmGeneratorTarget* gt =
+      target->GetMakefile()->GetGlobalGenerator()->GetGeneratorTarget(target);
   for(cmPropertyMap::const_iterator i = props.begin(); i != props.end(); ++i)
     {
     properties[i->first] = i->second.GetValue();
@@ -120,8 +125,9 @@ cmExportTryCompileFileGenerator::PopulateProperties(cmTarget const* target,
       for(std::vector<std::string>::const_iterator li = depends.begin();
           li != depends.end(); ++li)
         {
-        cmTarget *tgt = target->GetMakefile()->FindTargetToUse(*li);
-        if(tgt && emitted.insert(tgt).second)
+        cmGeneratorTarget *tgt =
+            gt->GetLocalGenerator()->FindGeneratorTargetToUse(*li);
+        if(tgt && emitted.insert(tgt->Target).second)
           {
           this->Exports.push_back(tgt);
           }

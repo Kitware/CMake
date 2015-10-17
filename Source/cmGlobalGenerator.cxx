@@ -1202,6 +1202,26 @@ void cmGlobalGenerator::CreateGenerationObjects(TargetTypes targetTypes)
   this->ComputeBuildFileGenerators();
 }
 
+void cmGlobalGenerator::CreateImportedGenerationObjects(cmMakefile* mf,
+    const std::vector<std::string>& targets,
+    std::vector<const cmGeneratorTarget*>& exports)
+{
+  this->CreateGenerationObjects(ImportedOnly);
+  std::vector<cmMakefile*>::iterator mfit =
+      std::find(this->Makefiles.begin(), this->Makefiles.end(), mf);
+  cmLocalGenerator* lg =
+      this->LocalGenerators[std::distance(this->Makefiles.begin(), mfit)];
+  for (std::vector<std::string>::const_iterator it = targets.begin();
+       it != targets.end(); ++it)
+    {
+    cmGeneratorTarget* gt = lg->FindGeneratorTargetToUse(*it);
+    if (gt)
+      {
+      exports.push_back(gt);
+      }
+    }
+}
+
 cmExportBuildFileGenerator*
 cmGlobalGenerator::GetExportedTargetsFile(const std::string &filename) const
 {

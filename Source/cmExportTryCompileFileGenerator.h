@@ -20,11 +20,11 @@ class cmInstallTargetGenerator;
 class cmExportTryCompileFileGenerator: public cmExportFileGenerator
 {
 public:
-  cmExportTryCompileFileGenerator(cmGlobalGenerator* gg);
+  cmExportTryCompileFileGenerator(cmGlobalGenerator* gg,
+                                  std::vector<std::string> const& targets,
+                                  cmMakefile* mf);
 
   /** Set the list of targets to export.  */
-  void SetExports(const std::vector<cmTarget const*> &exports)
-    { this->Exports = exports; }
   void SetConfig(const std::string& config) { this->Config = config; }
 protected:
 
@@ -52,7 +52,7 @@ private:
                    std::set<cmTarget const*> &emitted);
 
 
-  std::vector<cmTarget const*> Exports;
+  std::vector<cmGeneratorTarget const*> Exports;
   std::string Config;
 };
 

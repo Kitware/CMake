@@ -91,6 +91,9 @@ public:
     ImportedOnly
   };
 
+  void CreateImportedGenerationObjects(cmMakefile* mf,
+                             std::vector<std::string> const& targets,
+                             std::vector<cmGeneratorTarget const*>& exports);
   void CreateGenerationObjects(TargetTypes targetTypes = AllTargets);
 
   /**

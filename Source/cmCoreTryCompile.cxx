@@ -34,7 +34,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
   std::string outputVariable;
   std::string copyFile;
   std::string copyFileError;
-  std::vector<cmTarget const*> targets;
+  std::vector<std::string> targets;
   std::string libsToLink = " ";
   bool useOldLinkLibs = true;
   char targetNameBuf[64];
@@ -112,7 +112,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
           }
         if (tgt->IsImported())
           {
-          targets.push_back(tgt);
+          targets.push_back(argv[i]);
           }
         }
       }
@@ -375,9 +375,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
     if (!targets.empty())
       {
       std::string fname = "/" + std::string(targetName) + "Targets.cmake";
-      cmExportTryCompileFileGenerator tcfg(gg);
+      cmExportTryCompileFileGenerator tcfg(gg, targets, this->Makefile);
       tcfg.SetExportFile((this->BinaryDirectory + fname).c_str());
-      tcfg.SetExports(targets);
       tcfg.SetConfig(this->Makefile->GetSafeDefinition(
                                           "CMAKE_TRY_COMPILE_CONFIGURATION"));
 
