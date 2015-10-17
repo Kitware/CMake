@@ -113,6 +113,8 @@ find_path(FLEX_INCLUDE_DIR FlexLexer.h
 
 mark_as_advanced(FL_LIBRARY FLEX_INCLUDE_DIR)
 
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseArguments.cmake)
+
 set(FLEX_INCLUDE_DIRS ${FLEX_INCLUDE_DIR})
 set(FLEX_LIBRARIES ${FL_LIBRARY})
 
@@ -145,31 +147,44 @@ if(FLEX_EXECUTABLE)
   #============================================================
   #
   macro(FLEX_TARGET Name Input Output)
+    set(FLEX_EXECUTABLE_opts "")
+
+    set(FLEX_TARGET_PARAM_OPTIONS)
+    set(FLEX_TARGET_PARAM_ONE_VALUE_KEYWORDS
+      COMPILE_FLAGS
+      )
+    set(FLEX_TARGET_PARAM_MULTI_VALUE_KEYWORDS)
+
+    cmake_parse_arguments(
+      FLEX_TARGET_ARG
+      "${FLEX_TARGET_PARAM_OPTIONS}"
+      "${FLEX_TARGET_PARAM_ONE_VALUE_KEYWORDS}"
+      "${FLEX_TARGET_MULTI_VALUE_KEYWORDS}"
+      ${ARGN}
+      )
+
     set(FLEX_TARGET_usage "FLEX_TARGET(<Name> <Input> <Output> [COMPILE_FLAGS <string>]")
-    if(${ARGC} GREATER 3)
-      if(${ARGC} EQUAL 5)
-        if("${ARGV3}" STREQUAL "COMPILE_FLAGS")
-          set(FLEX_EXECUTABLE_opts  "${ARGV4}")
-          separate_arguments(FLEX_EXECUTABLE_opts)
-        else()
-          message(SEND_ERROR ${FLEX_TARGET_usage})
-        endif()
-      else()
-        message(SEND_ERROR ${FLEX_TARGET_usage})
+
+    if(NOT "${FLEX_TARGET_ARG_UNPARSED_ARGUMENTS}" STREQUAL "")
+      message(SEND_ERROR ${FLEX_TARGET_usage})
+    else()
+      if(NOT "${FLEX_TARGET_ARG_COMPILE_FLAGS}" STREQUAL "")
+        set(FLEX_EXECUTABLE_opts "${FLEX_TARGET_ARG_COMPILE_FLAGS}")
+        separate_arguments(FLEX_EXECUTABLE_opts)
       endif()
+
+      add_custom_command(OUTPUT ${Output}
+        COMMAND ${FLEX_EXECUTABLE}
+        ARGS ${FLEX_EXECUTABLE_opts} -o${Output} ${Input}
+        DEPENDS ${Input}
+        COMMENT "[FLEX][${Name}] Building scanner with flex ${FLEX_VERSION}"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+      set(FLEX_${Name}_DEFINED TRUE)
+      set(FLEX_${Name}_OUTPUTS ${Output})
+      set(FLEX_${Name}_INPUT ${Input})
+      set(FLEX_${Name}_COMPILE_FLAGS ${FLEX_EXECUTABLE_opts})
     endif()
-
-    add_custom_command(OUTPUT ${Output}
-      COMMAND ${FLEX_EXECUTABLE}
-      ARGS ${FLEX_EXECUTABLE_opts} -o${Output} ${Input}
-      DEPENDS ${Input}
-      COMMENT "[FLEX][${Name}] Building scanner with flex ${FLEX_VERSION}"
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-
-    set(FLEX_${Name}_DEFINED TRUE)
-    set(FLEX_${Name}_OUTPUTS ${Output})
-    set(FLEX_${Name}_INPUT ${Input})
-    set(FLEX_${Name}_COMPILE_FLAGS ${FLEX_EXECUTABLE_opts})
   endmacro()
   #============================================================
 
