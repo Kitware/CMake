@@ -2639,23 +2639,24 @@ cmGlobalXCodeGenerator::GetTargetLinkFlagsVar(cmTarget const& cmtarget) const
 }
 
 //----------------------------------------------------------------------------
-const char* cmGlobalXCodeGenerator::GetTargetFileType(cmTarget& cmtarget)
+const char* cmGlobalXCodeGenerator::GetTargetFileType(
+    cmGeneratorTarget* target)
 {
-  switch(cmtarget.GetType())
+  switch(target->GetType())
     {
     case cmState::OBJECT_LIBRARY:
     case cmState::STATIC_LIBRARY:
       return "archive.ar";
     case cmState::MODULE_LIBRARY:
-      if (cmtarget.IsXCTestOnApple())
+      if (target->Target->IsXCTestOnApple())
         return "wrapper.cfbundle";
-      else if (cmtarget.IsCFBundleOnApple())
+      else if (target->Target->IsCFBundleOnApple())
         return "wrapper.plug-in";
       else
         return ((this->XcodeVersion >= 22)?
               "compiled.mach-o.executable" : "compiled.mach-o.dylib");
     case cmState::SHARED_LIBRARY:
-      return (cmtarget.GetPropertyAsBool("FRAMEWORK")?
+      return (target->GetPropertyAsBool("FRAMEWORK")?
               "wrapper.framework" : "compiled.mach-o.dylib");
     case cmState::EXECUTABLE:
       return "compiled.mach-o.executable";
@@ -2665,28 +2666,29 @@ const char* cmGlobalXCodeGenerator::GetTargetFileType(cmTarget& cmtarget)
 }
 
 //----------------------------------------------------------------------------
-const char* cmGlobalXCodeGenerator::GetTargetProductType(cmTarget& cmtarget)
+const char* cmGlobalXCodeGenerator::GetTargetProductType(
+    cmGeneratorTarget* target)
 {
-  switch(cmtarget.GetType())
+  switch(target->GetType())
     {
     case cmState::OBJECT_LIBRARY:
     case cmState::STATIC_LIBRARY:
       return "com.apple.product-type.library.static";
     case cmState::MODULE_LIBRARY:
-      if (cmtarget.IsXCTestOnApple())
+      if (target->Target->IsXCTestOnApple())
         return "com.apple.product-type.bundle.unit-test";
-      else if (cmtarget.IsCFBundleOnApple())
+      else if (target->Target->IsCFBundleOnApple())
         return "com.apple.product-type.bundle";
       else
         return ((this->XcodeVersion >= 22)?
                 "com.apple.product-type.tool" :
                 "com.apple.product-type.library.dynamic");
     case cmState::SHARED_LIBRARY:
-      return (cmtarget.GetPropertyAsBool("FRAMEWORK")?
+      return (target->GetPropertyAsBool("FRAMEWORK")?
               "com.apple.product-type.framework" :
               "com.apple.product-type.library.dynamic");
     case cmState::EXECUTABLE:
-      return (cmtarget.GetPropertyAsBool("MACOSX_BUNDLE")?
+      return (target->GetPropertyAsBool("MACOSX_BUNDLE")?
               "com.apple.product-type.application" :
               "com.apple.product-type.tool");
     default: break;
@@ -2727,9 +2729,11 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
   target->AddAttribute("name", this->CreateString(cmtarget.GetName()));
   target->AddAttribute("productName",this->CreateString(cmtarget.GetName()));
 
+  cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&cmtarget);
+
   cmXCodeObject* fileRef =
     this->CreateObject(cmXCodeObject::PBXFileReference);
-  if(const char* fileType = this->GetTargetFileType(cmtarget))
+  if(const char* fileType = this->GetTargetFileType(gtgt))
     {
     fileRef->AddAttribute("explicitFileType", this->CreateString(fileType));
     }
@@ -2742,7 +2746,6 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
     }
   else
     {
-    cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&cmtarget);
     fullName = gtgt->GetFullName(defConfig.c_str());
     }
   fileRef->AddAttribute("path", this->CreateString(fullName.c_str()));
@@ -2752,7 +2755,7 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
   fileRef->SetComment(cmtarget.GetName().c_str());
   target->AddAttribute("productReference",
                        this->CreateObjectReference(fileRef));
-  if(const char* productType = this->GetTargetProductType(cmtarget))
+  if(const char* productType = this->GetTargetProductType(gtgt))
     {
     target->AddAttribute("productType", this->CreateString(productType));
     }
