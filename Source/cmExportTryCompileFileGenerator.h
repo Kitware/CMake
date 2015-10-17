@@ -41,15 +41,16 @@ protected:
                                    cmTarget*,
                                    cmTarget*) {}
 
-  void PopulateProperties(cmTarget const* target,
+  void PopulateProperties(cmGeneratorTarget const* target,
                           ImportPropertyMap& properties,
-                          std::set<cmTarget const*> &emitted);
+                          std::set<const cmGeneratorTarget*>& emitted);
 
   std::string InstallNameDir(cmGeneratorTarget* target,
                              const std::string& config);
 private:
-  std::string FindTargets(const std::string& prop, cmTarget const* tgt,
-                   std::set<cmTarget const*> &emitted);
+  std::string FindTargets(const std::string& prop,
+                          const cmGeneratorTarget* tgt,
+                          std::set<const cmGeneratorTarget*>& emitted);
 
 
   std::vector<cmGeneratorTarget const*> Exports;

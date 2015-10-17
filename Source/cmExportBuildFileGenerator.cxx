@@ -50,7 +50,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
                                 ->FindGeneratorTargetToUse(*tei);
     expectedTargets += sep + this->Namespace + te->Target->GetExportName();
     sep = " ";
-    if(this->ExportedTargets.insert(te->Target).second)
+    if(this->ExportedTargets.insert(te).second)
       {
       this->Exports.push_back(te);
       }
@@ -80,45 +80,44 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
       tei != this->Exports.end(); ++tei)
     {
     cmGeneratorTarget* gte = *tei;
-    cmTarget* te = gte->Target;
-    this->GenerateImportTargetCode(os, te);
+    this->GenerateImportTargetCode(os, gte);
 
-    te->AppendBuildInterfaceIncludes();
+    gte->Target->AppendBuildInterfaceIncludes();
 
     ImportPropertyMap properties;
 
-    this->PopulateInterfaceProperty("INTERFACE_INCLUDE_DIRECTORIES", te,
+    this->PopulateInterfaceProperty("INTERFACE_INCLUDE_DIRECTORIES", gte,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
-    this->PopulateInterfaceProperty("INTERFACE_SOURCES", te,
+    this->PopulateInterfaceProperty("INTERFACE_SOURCES", gte,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
-    this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS", te,
+    this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS", gte,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
-    this->PopulateInterfaceProperty("INTERFACE_COMPILE_OPTIONS", te,
+    this->PopulateInterfaceProperty("INTERFACE_COMPILE_OPTIONS", gte,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
-    this->PopulateInterfaceProperty("INTERFACE_AUTOUIC_OPTIONS", te,
+    this->PopulateInterfaceProperty("INTERFACE_AUTOUIC_OPTIONS", gte,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
-    this->PopulateInterfaceProperty("INTERFACE_COMPILE_FEATURES", te,
+    this->PopulateInterfaceProperty("INTERFACE_COMPILE_FEATURES", gte,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE",
-                                  te, properties);
+                                  gte, properties);
     const bool newCMP0022Behavior =
-                              te->GetPolicyStatusCMP0022() != cmPolicies::WARN
-                           && te->GetPolicyStatusCMP0022() != cmPolicies::OLD;
+        gte->Target->GetPolicyStatusCMP0022() != cmPolicies::WARN
+        && gte->Target->GetPolicyStatusCMP0022() != cmPolicies::OLD;
     if (newCMP0022Behavior)
       {
-      this->PopulateInterfaceLinkLibrariesProperty(te,
+      this->PopulateInterfaceLinkLibrariesProperty(gte,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
       }
     this->PopulateCompatibleInterfaceProperties(gte, properties);
 
-    this->GenerateInterfaceProperties(te, os, properties);
+    this->GenerateInterfaceProperties(gte, os, properties);
     }
 
   // Generate import file content for each configuration.

@@ -52,7 +52,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
         sep + this->Namespace + (*tei)->Target->Target->GetExportName();
     sep = " ";
     cmTargetExport * te = *tei;
-    if(this->ExportedTargets.insert(te->Target->Target).second)
+    if(this->ExportedTargets.insert(te->Target).second)
       {
       allTargets.push_back(te);
       }
@@ -133,12 +133,11 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
       tei != allTargets.end(); ++tei)
     {
     cmGeneratorTarget* gt = (*tei)->Target;
-    cmTarget* te = gt->Target;
 
     requiresConfigFiles = requiresConfigFiles
-                              || te->GetType() != cmState::INTERFACE_LIBRARY;
+                              || gt->GetType() != cmState::INTERFACE_LIBRARY;
 
-    this->GenerateImportTargetCode(os, te);
+    this->GenerateImportTargetCode(os, gt);
 
     ImportPropertyMap properties;
 
@@ -149,32 +148,32 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
                                   cmGeneratorExpression::InstallInterface,
                                   properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES",
-                                  te,
+                                  gt,
                                   cmGeneratorExpression::InstallInterface,
                                   properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS",
-                                  te,
+                                  gt,
                                   cmGeneratorExpression::InstallInterface,
                                   properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_COMPILE_OPTIONS",
-                                  te,
+                                  gt,
                                   cmGeneratorExpression::InstallInterface,
                                   properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_AUTOUIC_OPTIONS",
-                                  te,
+                                  gt,
                                   cmGeneratorExpression::InstallInterface,
                                   properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_COMPILE_FEATURES",
-                                  te,
+                                  gt,
                                   cmGeneratorExpression::InstallInterface,
                                   properties, missingTargets);
 
     const bool newCMP0022Behavior =
-                              te->GetPolicyStatusCMP0022() != cmPolicies::WARN
-                           && te->GetPolicyStatusCMP0022() != cmPolicies::OLD;
+        gt->Target->GetPolicyStatusCMP0022() != cmPolicies::WARN
+        && gt->Target->GetPolicyStatusCMP0022() != cmPolicies::OLD;
     if (newCMP0022Behavior)
       {
-      if (this->PopulateInterfaceLinkLibrariesProperty(te,
+      if (this->PopulateInterfaceLinkLibrariesProperty(gt,
                                     cmGeneratorExpression::InstallInterface,
                                     properties, missingTargets)
           && !this->ExportOld)
@@ -182,11 +181,11 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
         require2_8_12 = true;
         }
       }
-    if (te->GetType() == cmState::INTERFACE_LIBRARY)
+    if (gt->GetType() == cmState::INTERFACE_LIBRARY)
       {
       require3_0_0 = true;
       }
-    if(te->GetProperty("INTERFACE_SOURCES"))
+    if(gt->GetProperty("INTERFACE_SOURCES"))
       {
       // We can only generate INTERFACE_SOURCES in CMake 3.3, but CMake 3.1
       // can consume them.
@@ -194,11 +193,11 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
       }
 
     this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE",
-                                  te, properties);
+                                  gt, properties);
 
     this->PopulateCompatibleInterfaceProperties(gt, properties);
 
-    this->GenerateInterfaceProperties(gt->Target, os, properties);
+    this->GenerateInterfaceProperties(gt, os, properties);
     }
 
   if (require3_1_0)

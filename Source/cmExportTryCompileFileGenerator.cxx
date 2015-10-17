@@ -28,38 +28,38 @@ cmExportTryCompileFileGenerator::cmExportTryCompileFileGenerator(
 
 bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)
 {
-  std::set<cmTarget const*> emitted;
-  std::set<cmTarget const*> emittedDeps;
+  std::set<cmGeneratorTarget const*> emitted;
+  std::set<cmGeneratorTarget const*> emittedDeps;
   while(!this->Exports.empty())
     {
     cmGeneratorTarget const* te = this->Exports.back();
     this->Exports.pop_back();
-    if (emitted.insert(te->Target).second)
+    if (emitted.insert(te).second)
       {
-      emittedDeps.insert(te->Target);
-      this->GenerateImportTargetCode(os, te->Target);
+      emittedDeps.insert(te);
+      this->GenerateImportTargetCode(os, te);
 
       ImportPropertyMap properties;
 
 #define FIND_TARGETS(PROPERTY) \
-      this->FindTargets("INTERFACE_" #PROPERTY, te->Target, emittedDeps);
+      this->FindTargets("INTERFACE_" #PROPERTY, te, emittedDeps);
 
       CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(FIND_TARGETS)
 
 #undef FIND_TARGETS
 
-      this->PopulateProperties(te->Target, properties, emittedDeps);
+      this->PopulateProperties(te, properties, emittedDeps);
 
-      this->GenerateInterfaceProperties(te->Target, os, properties);
+      this->GenerateInterfaceProperties(te, os, properties);
       }
     }
   return true;
 }
 
 std::string cmExportTryCompileFileGenerator::FindTargets(
-                                          const std::string& propName,
-                                          cmTarget const* tgt,
-                                          std::set<cmTarget const*> &emitted)
+                                  const std::string& propName,
+                                  cmGeneratorTarget const* tgt,
+                                  std::set<cmGeneratorTarget const*> &emitted)
 {
   const char *prop = tgt->GetProperty(propName);
   if(!prop)
@@ -77,24 +77,22 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
 
   cmTarget dummyHead;
   dummyHead.SetType(cmState::EXECUTABLE, "try_compile_dummy_exe");
-  dummyHead.SetMakefile(tgt->GetMakefile());
+  dummyHead.SetMakefile(tgt->Target->GetMakefile());
 
-  cmGeneratorTarget* gtgt =
-      tgt->GetMakefile()->GetGlobalGenerator()->GetGeneratorTarget(tgt);
-  cmGeneratorTarget gDummyHead(&dummyHead, gtgt->GetLocalGenerator());
+  cmGeneratorTarget gDummyHead(&dummyHead, tgt->GetLocalGenerator());
 
-  std::string result = cge->Evaluate(gtgt->GetLocalGenerator(), this->Config,
+  std::string result = cge->Evaluate(tgt->GetLocalGenerator(), this->Config,
                                      false, &gDummyHead,
-                                     gtgt, &dagChecker);
+                                     tgt, &dagChecker);
 
   const std::set<cmGeneratorTarget const*> &allTargets =
       cge->GetAllTargetsSeen();
   for(std::set<cmGeneratorTarget const*>::const_iterator li =
       allTargets.begin(); li != allTargets.end(); ++li)
     {
-    if(emitted.insert((*li)->Target).second)
+    if(emitted.insert(*li).second)
       {
-      this->Exports.push_back((*li));
+      this->Exports.push_back(*li);
       }
     }
   return result;
@@ -102,13 +100,12 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
 
 //----------------------------------------------------------------------------
 void
-cmExportTryCompileFileGenerator::PopulateProperties(cmTarget const* target,
-                                                ImportPropertyMap& properties,
-                                          std::set<cmTarget const*> &emitted)
+cmExportTryCompileFileGenerator::PopulateProperties(
+                                 const cmGeneratorTarget* target,
+                                 ImportPropertyMap& properties,
+                                 std::set<cmGeneratorTarget const*> &emitted)
 {
-  cmPropertyMap props = target->GetProperties();
-  cmGeneratorTarget* gt =
-      target->GetMakefile()->GetGlobalGenerator()->GetGeneratorTarget(target);
+  cmPropertyMap props = target->Target->GetProperties();
   for(cmPropertyMap::const_iterator i = props.begin(); i != props.end(); ++i)
     {
     properties[i->first] = i->second.GetValue();
@@ -126,8 +123,8 @@ cmExportTryCompileFileGenerator::PopulateProperties(cmTarget const* target,
           li != depends.end(); ++li)
         {
         cmGeneratorTarget *tgt =
-            gt->GetLocalGenerator()->FindGeneratorTargetToUse(*li);
-        if(tgt && emitted.insert(tgt->Target).second)
+            target->GetLocalGenerator()->FindGeneratorTargetToUse(*li);
+        if(tgt && emitted.insert(tgt).second)
           {
           this->Exports.push_back(tgt);
           }
