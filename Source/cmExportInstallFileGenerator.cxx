@@ -48,10 +48,11 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
         tei = this->IEGen->GetExportSet()->GetTargetExports()->begin();
       tei != this->IEGen->GetExportSet()->GetTargetExports()->end(); ++tei)
     {
-    expectedTargets += sep + this->Namespace + (*tei)->Target->GetExportName();
+    expectedTargets +=
+        sep + this->Namespace + (*tei)->Target->Target->GetExportName();
     sep = " ";
     cmTargetExport * te = *tei;
-    if(this->ExportedTargets.insert(te->Target).second)
+    if(this->ExportedTargets.insert(te->Target->Target).second)
       {
       allTargets.push_back(te);
       }
@@ -131,7 +132,8 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
         tei = allTargets.begin();
       tei != allTargets.end(); ++tei)
     {
-    cmTarget* te = (*tei)->Target;
+    cmGeneratorTarget* gt = (*tei)->Target;
+    cmTarget* te = gt->Target;
 
     requiresConfigFiles = requiresConfigFiles
                               || te->GetType() != cmState::INTERFACE_LIBRARY;
@@ -193,13 +195,10 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 
     this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE",
                                   te, properties);
-    cmGeneratorTarget *gtgt = te->GetMakefile()
-                                ->GetGlobalGenerator()
-                                ->GetGeneratorTarget(te);
 
-    this->PopulateCompatibleInterfaceProperties(gtgt, properties);
+    this->PopulateCompatibleInterfaceProperties(gt, properties);
 
-    this->GenerateInterfaceProperties(te, os, properties);
+    this->GenerateInterfaceProperties(gt->Target, os, properties);
     }
 
   if (require3_1_0)
@@ -362,8 +361,7 @@ cmExportInstallFileGenerator
     if(!properties.empty())
       {
       // Get the rest of the target details.
-      cmGeneratorTarget *gtgt = te->Target->GetMakefile()
-                    ->GetGlobalGenerator()->GetGeneratorTarget(te->Target);
+      cmGeneratorTarget *gtgt = te->Target;
       this->SetImportDetailProperties(config, suffix,
                                       gtgt, properties, missingTargets);
 
@@ -378,8 +376,8 @@ cmExportInstallFileGenerator
       //                              properties);
 
       // Generate code in the export file.
-      this->GenerateImportPropertyCode(os, config, te->Target, properties);
-      this->GenerateImportedFileChecksCode(os, te->Target, properties,
+      this->GenerateImportPropertyCode(os, config, gtgt->Target, properties);
+      this->GenerateImportedFileChecksCode(os, gtgt->Target, properties,
                                            importedLocations);
       }
     }

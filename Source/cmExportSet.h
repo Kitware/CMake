@@ -15,6 +15,7 @@
 #include "cmSystemTools.h"
 class cmTargetExport;
 class cmInstallExportGenerator;
+class cmLocalGenerator;
 
 /// A set of targets that were installed with the same EXPORT parameter.
 class cmExportSet
@@ -24,6 +25,8 @@ public:
   cmExportSet(const std::string &name) : Name(name) {}
   /// Destructor
   ~cmExportSet();
+
+  void Compute(cmLocalGenerator* lg);
 
   void AddTargetExport(cmTargetExport* tgt);
 

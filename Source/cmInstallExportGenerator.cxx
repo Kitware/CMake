@@ -56,6 +56,7 @@ cmInstallExportGenerator::~cmInstallExportGenerator()
 void cmInstallExportGenerator::Compute(cmLocalGenerator* lg)
 {
   this->LocalGenerator = lg;
+  this->ExportSet->Compute(lg);
 }
 
 //----------------------------------------------------------------------------

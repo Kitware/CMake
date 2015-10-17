@@ -27,6 +27,10 @@ cmExportBuildFileGenerator::cmExportBuildFileGenerator()
 void cmExportBuildFileGenerator::Compute(cmLocalGenerator* lg)
 {
   this->LG = lg;
+  if (this->ExportSet)
+    {
+    this->ExportSet->Compute(lg);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -274,7 +278,7 @@ void cmExportBuildFileGenerator
           tei = this->ExportSet->GetTargetExports()->begin();
           tei != this->ExportSet->GetTargetExports()->end(); ++tei)
       {
-      targets.push_back((*tei)->GetName());
+      targets.push_back((*tei)->TargetName);
       }
     return;
     }

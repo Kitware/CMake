@@ -398,11 +398,11 @@ void cmExportFileGenerator::PopulateSourcesInterface(
                       ImportPropertyMap &properties,
                       std::vector<std::string> &missingTargets)
 {
-  cmTarget *target = tei->Target;
+  cmGeneratorTarget* gt = tei->Target;
   assert(preprocessRule == cmGeneratorExpression::InstallInterface);
 
   const char *propName = "INTERFACE_SOURCES";
-  const char *input = target->GetProperty(propName);
+  const char *input = gt->GetProperty(propName);
 
   if (!input)
     {
@@ -420,11 +420,9 @@ void cmExportFileGenerator::PopulateSourcesInterface(
                                                          true);
   if (!prepro.empty())
     {
-    this->ResolveTargetsInGeneratorExpressions(prepro, target,
+    this->ResolveTargetsInGeneratorExpressions(prepro, gt->Target,
                                                 missingTargets);
 
-    cmGeneratorTarget* gt = target->GetMakefile()
-        ->GetGlobalGenerator()->GetGeneratorTarget(target);
     if (!checkInterfaceDirs(prepro, gt, propName))
       {
       return;
@@ -440,9 +438,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
                       ImportPropertyMap &properties,
                       std::vector<std::string> &missingTargets)
 {
-  cmGeneratorTarget *target = tei->Target->GetMakefile()
-                                 ->GetGlobalGenerator()
-                                 ->GetGeneratorTarget(tei->Target);
+  cmGeneratorTarget *target = tei->Target;
   assert(preprocessRule == cmGeneratorExpression::InstallInterface);
 
   const char *propName = "INTERFACE_INCLUDE_DIRECTORIES";

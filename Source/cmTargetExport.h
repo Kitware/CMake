@@ -14,7 +14,7 @@
 
 #include "cmStandardIncludes.h"
 
-class cmTarget;
+class cmGeneratorTarget;
 class cmInstallTargetGenerator;
 class cmInstallFilesGenerator;
 
@@ -25,7 +25,8 @@ class cmInstallFilesGenerator;
 class cmTargetExport
 {
 public:
-  cmTarget* Target; ///< The target
+  std::string TargetName;
+  cmGeneratorTarget* Target;
 
   ///@name Generators
   ///@{

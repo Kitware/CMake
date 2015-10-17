@@ -773,7 +773,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     if(!exports.GetString().empty() && !namelinkOnly)
       {
       cmTargetExport *te = new cmTargetExport;
-      te->Target = &target;
+      te->TargetName = target.GetName();
       te->ArchiveGenerator = archiveGenerator;
       te->BundleGenerator = bundleGenerator;
       te->FrameworkGenerator = frameworkGenerator;
@@ -1379,16 +1379,17 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
         tei != exportSet->GetTargetExports()->end(); ++tei)
       {
       cmTargetExport const* te = *tei;
+      cmTarget* tgt = this->Makefile->FindTarget(te->TargetName);
       const bool newCMP0022Behavior =
-                      te->Target->GetPolicyStatusCMP0022() != cmPolicies::WARN
-                   && te->Target->GetPolicyStatusCMP0022() != cmPolicies::OLD;
+                      tgt->GetPolicyStatusCMP0022() != cmPolicies::WARN
+                   && tgt->GetPolicyStatusCMP0022() != cmPolicies::OLD;
 
       if(!newCMP0022Behavior)
         {
         std::ostringstream e;
         e << "INSTALL(EXPORT) given keyword \""
           << "EXPORT_LINK_INTERFACE_LIBRARIES" << "\", but target \""
-          << te->Target->GetName()
+          << te->TargetName
           << "\" does not have policy CMP0022 set to NEW.";
         this->SetError(e.str());
         return false;
