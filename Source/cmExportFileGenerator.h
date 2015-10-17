@@ -119,8 +119,8 @@ protected:
    *  export set.  */
   virtual void HandleMissingTarget(std::string& link_libs,
                                    std::vector<std::string>& missingTargets,
-                                   cmTarget* depender,
-                                   cmTarget* dependee) = 0;
+                                   cmGeneratorTarget* depender,
+                                   cmGeneratorTarget* dependee) = 0;
   void PopulateInterfaceProperty(const std::string&,
                                  cmGeneratorTarget *target,
                                  cmGeneratorExpression::PreprocessContext,

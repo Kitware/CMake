@@ -661,7 +661,7 @@ cmExportFileGenerator::AddTargetNamespace(std::string &input,
     {
     std::string namespacedTarget;
     this->HandleMissingTarget(namespacedTarget, missingTargets,
-                              target->Target, tgt->Target);
+                              target, tgt);
     if (!namespacedTarget.empty())
       {
       input = namespacedTarget;

@@ -54,11 +54,11 @@ protected:
                             std::vector<std::string> &missingTargets);
   virtual void HandleMissingTarget(std::string& link_libs,
                                    std::vector<std::string>& missingTargets,
-                                   cmTarget* depender,
-                                   cmTarget* dependee);
+                                   cmGeneratorTarget* depender,
+                                   cmGeneratorTarget* dependee);
 
-  void ComplainAboutMissingTarget(cmTarget* depender,
-                                  cmTarget* dependee,
+  void ComplainAboutMissingTarget(cmGeneratorTarget* depender,
+                                  cmGeneratorTarget* dependee,
                                   int occurrences);
 
   /** Fill in properties indicating built file locations.  */

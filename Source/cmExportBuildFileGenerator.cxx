@@ -237,14 +237,15 @@ void
 cmExportBuildFileGenerator::HandleMissingTarget(
     std::string& link_libs,
     std::vector<std::string>& missingTargets,
-    cmTarget* depender,
-    cmTarget* dependee)
+    cmGeneratorTarget* depender,
+    cmGeneratorTarget* dependee)
 {
   // The target is not in the export.
   if(!this->AppendMode)
     {
     const std::string name = dependee->GetName();
-    cmGlobalGenerator* gg = dependee->GetMakefile()->GetGlobalGenerator();
+    cmGlobalGenerator* gg =
+        dependee->GetLocalGenerator()->GetGlobalGenerator();
     std::vector<std::string> namespaces = this->FindNamespaces(gg, name);
 
     int targetOccurrences = (int)namespaces.size();
@@ -252,7 +253,7 @@ cmExportBuildFileGenerator::HandleMissingTarget(
       {
       std::string missingTarget = namespaces[0];
 
-      missingTarget += dependee->GetExportName();
+      missingTarget += dependee->Target->GetExportName();
       link_libs += missingTarget;
       missingTargets.push_back(missingTarget);
       return;
@@ -267,7 +268,7 @@ cmExportBuildFileGenerator::HandleMissingTarget(
   // Assume the target will be exported by another command.
   // Append it with the export namespace.
   link_libs += this->Namespace;
-  link_libs += dependee->GetExportName();
+  link_libs += dependee->Target->GetExportName();
 }
 
 //----------------------------------------------------------------------------
@@ -315,8 +316,8 @@ cmExportBuildFileGenerator
 //----------------------------------------------------------------------------
 void
 cmExportBuildFileGenerator
-::ComplainAboutMissingTarget(cmTarget* depender,
-                             cmTarget* dependee,
+::ComplainAboutMissingTarget(cmGeneratorTarget* depender,
+                             cmGeneratorTarget* dependee,
                              int occurrences)
 {
   if(cmSystemTools::GetErrorOccuredFlag())

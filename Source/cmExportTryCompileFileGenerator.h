@@ -37,8 +37,8 @@ protected:
                             std::vector<std::string>&) {}
   virtual void HandleMissingTarget(std::string&,
                                    std::vector<std::string>&,
-                                   cmTarget*,
-                                   cmTarget*) {}
+                                   cmGeneratorTarget*,
+                                   cmGeneratorTarget*) {}
 
   void PopulateProperties(cmGeneratorTarget const* target,
                           ImportPropertyMap& properties,

@@ -453,19 +453,19 @@ cmExportInstallFileGenerator
 
 //----------------------------------------------------------------------------
 void
-cmExportInstallFileGenerator::HandleMissingTarget(
-  std::string& link_libs, std::vector<std::string>& missingTargets,
-  cmTarget* depender, cmTarget* dependee)
+cmExportInstallFileGenerator::HandleMissingTarget(std::string& link_libs,
+  std::vector<std::string>& missingTargets,
+  cmGeneratorTarget* depender, cmGeneratorTarget* dependee)
 {
   const std::string name = dependee->GetName();
-  cmGlobalGenerator* gg = dependee->GetMakefile()->GetGlobalGenerator();
+  cmGlobalGenerator* gg = dependee->GetLocalGenerator()->GetGlobalGenerator();
   std::vector<std::string> namespaces = this->FindNamespaces(gg, name);
   int targetOccurrences = (int)namespaces.size();
   if (targetOccurrences == 1)
     {
     std::string missingTarget = namespaces[0];
 
-    missingTarget += dependee->GetExportName();
+    missingTarget += dependee->Target->GetExportName();
     link_libs += missingTarget;
     missingTargets.push_back(missingTarget);
     }
@@ -520,8 +520,8 @@ cmExportInstallFileGenerator
 //----------------------------------------------------------------------------
 void
 cmExportInstallFileGenerator
-::ComplainAboutMissingTarget(cmTarget* depender,
-                             cmTarget* dependee,
+::ComplainAboutMissingTarget(cmGeneratorTarget* depender,
+                             cmGeneratorTarget* dependee,
                              int occurrences)
 {
   std::ostringstream e;
