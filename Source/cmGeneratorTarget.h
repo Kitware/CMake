@@ -406,6 +406,8 @@ public:
   bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
                         const char* newExt = 0) const;
 
+  bool IsExecutableWithExports() const;
+
   /** Return whether or not the target has a DLL import library.  */
   bool HasImportLibrary() const;
 

@@ -635,7 +635,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
 {
   // Compute the proper name to use to link this library.
   const std::string& config = this->Config;
-  bool impexe = (tgt && tgt->Target->IsExecutableWithExports());
+  bool impexe = (tgt && tgt->IsExecutableWithExports());
   if(impexe && !this->UseImportLibrary && !this->LoaderFlag)
     {
     // Skip linking to executables on platforms with no import

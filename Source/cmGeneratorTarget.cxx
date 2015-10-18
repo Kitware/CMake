@@ -4571,7 +4571,7 @@ cmGeneratorTarget::GetLinkInterface(const std::string& config,
   // Link interfaces are not supported for executables that do not
   // export symbols.
   if(this->GetType() == cmState::EXECUTABLE &&
-     !this->Target->IsExecutableWithExports())
+     !this->IsExecutableWithExports())
     {
     return 0;
     }
@@ -4720,7 +4720,7 @@ cmGeneratorTarget::GetLinkInterfaceLibraries(const std::string& config,
   // Link interfaces are not supported for executables that do not
   // export symbols.
   if(this->GetType() == cmState::EXECUTABLE &&
-     !this->Target->IsExecutableWithExports())
+     !this->IsExecutableWithExports())
     {
     return 0;
     }
@@ -5031,7 +5031,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     explicitLibraries = this->GetProperty(linkIfaceProp);
     }
   else if(this->GetType() == cmState::SHARED_LIBRARY ||
-          this->Target->IsExecutableWithExports())
+          this->IsExecutableWithExports())
     {
     // CMP0022 OLD behavior is to use LINK_INTERFACE_LIBRARIES if set on a
     // shared lib or executable.
@@ -5350,7 +5350,7 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
     info.ImportLibrary = imp;
     }
   else if(this->GetType() == cmState::SHARED_LIBRARY ||
-          this->Target->IsExecutableWithExports())
+          this->IsExecutableWithExports())
     {
     std::string impProp = "IMPORTED_IMPLIB";
     impProp += suffix;
@@ -5858,7 +5858,7 @@ cmGeneratorTarget::FindTargetToLink(std::string const& name) const
   // name conflict between an external library and an executable
   // within the project.
   if(tgt && tgt->GetType() == cmState::EXECUTABLE &&
-     !tgt->Target->IsExecutableWithExports())
+     !tgt->IsExecutableWithExports())
     {
     tgt = 0;
     }
@@ -5914,11 +5914,18 @@ bool cmGeneratorTarget::GetImplibGNUtoMS(std::string const& gnuName,
 }
 
 //----------------------------------------------------------------------------
+bool cmGeneratorTarget::IsExecutableWithExports() const
+{
+  return (this->GetType() == cmState::EXECUTABLE &&
+          this->GetPropertyAsBool("ENABLE_EXPORTS"));
+}
+
+//----------------------------------------------------------------------------
 bool cmGeneratorTarget::HasImportLibrary() const
 {
   return (this->Target->IsDLLPlatform() &&
           (this->GetType() == cmState::SHARED_LIBRARY ||
-           this->Target->IsExecutableWithExports()));
+           this->IsExecutableWithExports()));
 }
 
 //----------------------------------------------------------------------------
@@ -5944,7 +5951,7 @@ bool cmGeneratorTarget::IsLinkable() const
           this->GetType() == cmState::MODULE_LIBRARY ||
           this->GetType() == cmState::UNKNOWN_LIBRARY ||
           this->GetType() == cmState::INTERFACE_LIBRARY ||
-          this->Target->IsExecutableWithExports());
+          this->IsExecutableWithExports());
 }
 
 //----------------------------------------------------------------------------

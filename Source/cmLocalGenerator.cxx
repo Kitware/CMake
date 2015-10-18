@@ -1444,7 +1444,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
           this->Makefile->GetSafeDefinition("CMAKE_CREATE_CONSOLE_EXE");
         linkFlags += " ";
         }
-      if (target->Target->IsExecutableWithExports())
+      if (target->IsExecutableWithExports())
         {
         std::string exportFlagVar = "CMAKE_EXE_EXPORTS_";
         exportFlagVar += linkLanguage;
@@ -2106,7 +2106,7 @@ void cmLocalGenerator
   std::string *pWarnCMP0063 = 0;
   if (target->GetType() != cmState::SHARED_LIBRARY &&
       target->GetType() != cmState::MODULE_LIBRARY &&
-      !target->Target->IsExecutableWithExports())
+      !target->IsExecutableWithExports())
     {
     switch (target->Target->GetPolicyStatusCMP0063())
       {

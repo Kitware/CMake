@@ -1075,7 +1075,7 @@ cmExportFileGenerator
     }
 
   // Mark the imported executable if it has exports.
-  if(target->Target->IsExecutableWithExports())
+  if(target->IsExecutableWithExports())
     {
     os << "set_property(TARGET " << targetName
        << " PROPERTY ENABLE_EXPORTS 1)\n";

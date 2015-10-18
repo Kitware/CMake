@@ -220,7 +220,7 @@ cmExportBuildFileGenerator
   // Add the import library for windows DLLs.
   if(dll_platform &&
      (target->GetType() == cmState::SHARED_LIBRARY ||
-      target->Target->IsExecutableWithExports()) &&
+      target->IsExecutableWithExports()) &&
      mf->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"))
     {
     std::string prop = "IMPORTED_IMPLIB";
