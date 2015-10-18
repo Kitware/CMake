@@ -440,8 +440,7 @@ cmInstallTargetGenerator::GetInstallFilename(cmGeneratorTarget const* target,
 
 void cmInstallTargetGenerator::Compute(cmLocalGenerator* lg)
 {
-  this->Target = lg->GetGlobalGenerator()->GetGeneratorTarget(
-        lg->GetMakefile()->FindTarget(this->TargetName));
+  this->Target = lg->FindGeneratorTarget(this->TargetName);
 }
 
 //----------------------------------------------------------------------------

@@ -453,6 +453,13 @@ void cmLocalGenerator::AddGeneratorTarget(cmGeneratorTarget* gt)
   this->GeneratorTargets.push_back(gt);
 }
 
+cmGeneratorTarget* cmLocalGenerator::FindGeneratorTarget(
+    const std::string& name) const
+{
+  return this->GetGlobalGenerator()->GetGeneratorTarget(
+        this->Makefile->FindTarget(name));
+}
+
 //----------------------------------------------------------------------------
 void cmLocalGenerator::ComputeTargetManifest()
 {

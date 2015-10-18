@@ -120,6 +120,7 @@ public:
 
   void AddGeneratorTarget(cmGeneratorTarget* gt);
 
+  cmGeneratorTarget* FindGeneratorTarget(const std::string& name) const;
   cmGeneratorTarget* FindGeneratorTargetToUse(const std::string& name) const;
 
   /**
