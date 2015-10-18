@@ -287,8 +287,8 @@ void cmGlobalGhsMultiGenerator::Generate()
       {
       cmLocalGhsMultiGenerator *lg =
         static_cast<cmLocalGhsMultiGenerator *>(this->LocalGenerators[i]);
-      cmGeneratorTargetsType tgts = lg->GetGeneratorTargets();
-      this->UpdateBuildFiles(&tgts);
+      std::vector<cmGeneratorTarget*> tgts = lg->GetGeneratorTargets();
+      this->UpdateBuildFiles(tgts);
       }
     }
 
@@ -481,15 +481,15 @@ cmGlobalGhsMultiGenerator::GetFileNameFromPath(std::string const &path)
 }
 
 void cmGlobalGhsMultiGenerator::UpdateBuildFiles(
-  cmGeneratorTargetsType *tgts)
+  std::vector<cmGeneratorTarget*> tgts)
 {
-  for (cmGeneratorTargetsType::iterator tgtsI = tgts->begin();
-       tgtsI != tgts->end(); ++tgtsI)
+  for (std::vector<cmGeneratorTarget*>::iterator tgtsI = tgts.begin();
+       tgtsI != tgts.end(); ++tgtsI)
     {
-    const cmTarget *tgt(tgtsI->first);
-    if (IsTgtForBuild(tgt))
+    const cmGeneratorTarget *tgt = *tgtsI;
+    if (IsTgtForBuild(tgt->Target))
       {
-      char const *rawFolderName = tgtsI->first->GetProperty("FOLDER");
+      char const *rawFolderName = tgt->GetProperty("FOLDER");
       if (NULL == rawFolderName)
         {
         rawFolderName = "";
@@ -504,13 +504,13 @@ void cmGlobalGhsMultiGenerator::UpdateBuildFiles(
           GhsMultiGpj::PROJECT);
         }
       std::vector<cmsys::String> splitPath = cmSystemTools::SplitString(
-            cmGhsMultiTargetGenerator::GetRelBuildFileName(tgt));
+            cmGhsMultiTargetGenerator::GetRelBuildFileName(tgt->Target));
       std::string foldNameRelBuildFile(*(splitPath.end() - 2) + "/" +
                                        splitPath.back());
       *this->TargetFolderBuildStreams[folderName] << foldNameRelBuildFile
                                                   << " ";
       GhsMultiGpj::WriteGpjTag(cmGhsMultiTargetGenerator::GetGpjTag(
-                                 tgtsI->second),
+                                 tgt),
                                this->TargetFolderBuildStreams[folderName]);
       }
     }

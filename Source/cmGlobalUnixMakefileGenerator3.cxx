@@ -460,11 +460,11 @@ cmGlobalUnixMakefileGenerator3
   // The directory-level rule should depend on the target-level rules
   // for all targets in the directory.
   std::vector<std::string> depends;
-  cmGeneratorTargetsType targets = lg->GetGeneratorTargets();
-  for(cmGeneratorTargetsType::iterator l = targets.begin();
+  std::vector<cmGeneratorTarget*> targets = lg->GetGeneratorTargets();
+  for(std::vector<cmGeneratorTarget*>::iterator l = targets.begin();
       l != targets.end(); ++l)
     {
-    cmGeneratorTarget* gtarget = l->second;
+    cmGeneratorTarget* gtarget = *l;
     int type = gtarget->GetType();
     if((type == cmState::EXECUTABLE) ||
        (type == cmState::STATIC_LIBRARY) ||
@@ -623,11 +623,11 @@ cmGlobalUnixMakefileGenerator3
     lg = static_cast<cmLocalUnixMakefileGenerator3 *>
       (this->LocalGenerators[i]);
     // for each target Generate the rule files for each target.
-    cmGeneratorTargetsType targets = lg->GetGeneratorTargets();
-    for(cmGeneratorTargetsType::iterator t = targets.begin();
+    std::vector<cmGeneratorTarget*> targets = lg->GetGeneratorTargets();
+    for(std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
         t != targets.end(); ++t)
       {
-      cmGeneratorTarget* gtarget = t->second;
+      cmGeneratorTarget* gtarget = *t;
       // Don't emit the same rule twice (e.g. two targets with the same
       // simple name)
       int type = gtarget->GetType();
@@ -720,11 +720,11 @@ cmGlobalUnixMakefileGenerator3
   depends.push_back("cmake_check_build_system");
 
   // for each target Generate the rule files for each target.
-  cmGeneratorTargetsType targets = lg->GetGeneratorTargets();
-  for(cmGeneratorTargetsType::iterator t = targets.begin();
+  std::vector<cmGeneratorTarget*> targets = lg->GetGeneratorTargets();
+  for(std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-    cmGeneratorTarget* gtarget = t->second;
+    cmGeneratorTarget* gtarget = *t;
     int type = gtarget->GetType();
     std::string name = gtarget->GetName();
     if (!name.empty()

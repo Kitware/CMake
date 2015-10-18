@@ -110,7 +110,7 @@ private:
       std::vector<cmsys::String>::const_iterator end,
       GhsMultiGpj::Types projType);
   static std::string GetFileNameFromPath(std::string const &path);
-  void UpdateBuildFiles(cmGeneratorTargetsType *tgts);
+  void UpdateBuildFiles(std::vector<cmGeneratorTarget*> tgts);
   bool IsTgtForBuild(const cmTarget *tgt);
 
   std::vector<cmGeneratedFileStream *> TargetSubProjects;

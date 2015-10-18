@@ -113,12 +113,12 @@ public:
                               bool forResponseFile = false,
                               const std::string& config = "");
 
-  const cmGeneratorTargetsType &GetGeneratorTargets() const
+  const std::vector<cmGeneratorTarget*> &GetGeneratorTargets() const
     {
       return this->GeneratorTargets;
     }
 
-  void AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt);
+  void AddGeneratorTarget(cmGeneratorTarget* gt);
 
   cmGeneratorTarget* FindGeneratorTargetToUse(const std::string& name) const;
 
@@ -367,7 +367,7 @@ protected:
   std::set<std::string> ObjectMaxPathViolations;
 
   std::set<cmGeneratorTarget const*> WarnCMP0063;
-  cmGeneratorTargetsType GeneratorTargets;
+  std::vector<cmGeneratorTarget*> GeneratorTargets;
 
   bool EmitUniversalBinaryFlags;
 

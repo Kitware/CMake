@@ -965,13 +965,13 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
        it != this->GlobalGenerator->GetLocalGenerators().end();
        ++it)
     {
-    cmGeneratorTargetsType targets = (*it)->GetGeneratorTargets();
-    for (cmGeneratorTargetsType::iterator l = targets.begin();
+    std::vector<cmGeneratorTarget*> targets = (*it)->GetGeneratorTargets();
+    for (std::vector<cmGeneratorTarget*>::iterator l = targets.begin();
          l != targets.end(); ++l)
       {
       std::vector<std::string> includeDirs;
       std::string config = mf->GetSafeDefinition("CMAKE_BUILD_TYPE");
-      (*it)->GetIncludeDirectories(includeDirs, l->second, "C", config);
+      (*it)->GetIncludeDirectories(includeDirs, *l, "C", config);
       this->AppendIncludeDirectories(fout, includeDirs, emmited);
       }
     }

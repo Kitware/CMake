@@ -87,7 +87,7 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
                           "Build all projects");
 
       cmGeneratorTarget* gt = new cmGeneratorTarget(allBuild, gen[0]);
-      gen[0]->AddGeneratorTarget(allBuild, gt);
+      gen[0]->AddGeneratorTarget(gt);
       this->AddGeneratorTarget(allBuild, gt);
 
 #if 0
@@ -108,19 +108,20 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
       for(std::vector<cmLocalGenerator*>::iterator i = gen.begin();
           i != gen.end(); ++i)
         {
-        cmGeneratorTargetsType targets =
+        std::vector<cmGeneratorTarget*> targets =
             (*i)->GetGeneratorTargets();
-        for(cmGeneratorTargetsType::iterator t = targets.begin();
+        for(std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
             t != targets.end(); ++t)
           {
-          if (t->second->GetType() == cmState::GLOBAL_TARGET
-              || t->first->IsImported())
+          cmGeneratorTarget* tgt = *t;
+          if (tgt->GetType() == cmState::GLOBAL_TARGET
+              || tgt->IsImported())
             {
             continue;
             }
-          if(!this->IsExcluded(gen[0], t->second))
+          if(!this->IsExcluded(gen[0], tgt))
             {
-            allBuild->AddUtility(t->second->GetName());
+            allBuild->AddUtility(tgt->GetName());
             }
           }
         }

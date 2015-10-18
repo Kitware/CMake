@@ -132,15 +132,15 @@ void cmLocalGenerator::TraceDependencies()
     this->GlobalGenerator->CreateEvaluationSourceFiles(*ci);
     }
   // Generate the rule files for each target.
-  cmGeneratorTargetsType targets = this->GetGeneratorTargets();
-  for(cmGeneratorTargetsType::iterator t = targets.begin();
+  std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
+  for(std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-    if (t->second->GetType() == cmState::INTERFACE_LIBRARY)
+    if ((*t)->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
-    t->second->TraceDependencies();
+    (*t)->TraceDependencies();
     }
 }
 
@@ -448,9 +448,9 @@ void cmLocalGenerator::GenerateInstallRules()
 }
 
 
-void cmLocalGenerator::AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt)
+void cmLocalGenerator::AddGeneratorTarget(cmGeneratorTarget* gt)
 {
-  this->GeneratorTargets[t] = gt;
+  this->GeneratorTargets.push_back(gt);
 }
 
 //----------------------------------------------------------------------------
@@ -465,12 +465,12 @@ void cmLocalGenerator::ComputeTargetManifest()
     }
 
   // Add our targets to the manifest for each configuration.
-  cmGeneratorTargetsType targets = this->GetGeneratorTargets();
-  for(cmGeneratorTargetsType::iterator t = targets.begin();
+  std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
+  for(std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-    cmGeneratorTarget& target = *t->second;
-    if (target.GetType() == cmState::INTERFACE_LIBRARY)
+    cmGeneratorTarget* target = *t;
+    if (target->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
@@ -478,7 +478,7 @@ void cmLocalGenerator::ComputeTargetManifest()
         ci != configNames.end(); ++ci)
       {
       const char* config = ci->c_str();
-      target.ComputeTargetManifest(config);
+      target->ComputeTargetManifest(config);
       }
     }
 }

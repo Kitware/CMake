@@ -895,7 +895,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
                                 commandLines, false, autogenComment.c_str());
 
     cmGeneratorTarget* gt = new cmGeneratorTarget(autogenTarget, lg);
-    lg->AddGeneratorTarget(autogenTarget, gt);
+    lg->AddGeneratorTarget(gt);
     lg->GetGlobalGenerator()->AddGeneratorTarget(autogenTarget, gt);
 
     // Set target folder
