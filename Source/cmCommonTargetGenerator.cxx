@@ -18,7 +18,6 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
-#include "cmTarget.h"
 
 cmCommonTargetGenerator::cmCommonTargetGenerator(
   cmOutputConverter::RelativeRoot wd,
@@ -26,7 +25,6 @@ cmCommonTargetGenerator::cmCommonTargetGenerator(
   )
   : WorkingDirectory(wd)
   , GeneratorTarget(gt)
-  , Target(gt->Target)
   , Makefile(gt->Makefile)
   , LocalGenerator(static_cast<cmLocalCommonGenerator*>(gt->LocalGenerator))
   , GlobalGenerator(static_cast<cmGlobalCommonGenerator*>(

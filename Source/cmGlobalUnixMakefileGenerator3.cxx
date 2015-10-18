@@ -16,7 +16,6 @@
 #include "cmake.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSourceFile.h"
-#include "cmTarget.h"
 #include "cmGeneratorTarget.h"
 #include "cmAlgorithms.h"
 
@@ -742,7 +741,7 @@ cmGlobalUnixMakefileGenerator3
       makefileName = localName;
       makefileName += "/build.make";
 
-      bool needRequiresStep = this->NeedRequiresStep(*gtarget->Target);
+      bool needRequiresStep = this->NeedRequiresStep(gtarget);
 
       lg->WriteDivider(ruleFileStream);
       ruleFileStream
@@ -1129,19 +1128,19 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
 
 
 bool cmGlobalUnixMakefileGenerator3
-::NeedRequiresStep(cmTarget const& target)
+::NeedRequiresStep(const cmGeneratorTarget* target)
 {
   std::set<std::string> languages;
-  cmGeneratorTarget* gtgt = this->GetGeneratorTarget(&target);
-  gtgt->GetLanguages(languages,
-                target.GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE"));
+  target->GetLanguages(languages,
+                       target->Target->GetMakefile()
+                       ->GetSafeDefinition("CMAKE_BUILD_TYPE"));
   for(std::set<std::string>::const_iterator l = languages.begin();
       l != languages.end(); ++l)
     {
     std::string var = "CMAKE_NEEDS_REQUIRES_STEP_";
     var += *l;
     var += "_FLAG";
-    if(target.GetMakefile()->GetDefinition(var))
+    if(target->Target->GetMakefile()->GetDefinition(var))
       {
       return true;
       }

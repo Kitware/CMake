@@ -1977,7 +1977,7 @@ void cmLocalUnixMakefileGenerator3
                           cmGeneratorTarget* target)
 {
   ImplicitDependLanguageMap const& implicitLangs =
-    this->GetImplicitDepends(*target->Target);
+    this->GetImplicitDepends(target);
 
   // list the languages
   cmakefileStream
@@ -2292,19 +2292,20 @@ cmLocalUnixMakefileGenerator3
 
 //----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator3::ImplicitDependLanguageMap const&
-cmLocalUnixMakefileGenerator3::GetImplicitDepends(cmTarget const& tgt)
+cmLocalUnixMakefileGenerator3::GetImplicitDepends(
+    const cmGeneratorTarget* tgt)
 {
-  return this->ImplicitDepends[tgt.GetName()];
+  return this->ImplicitDepends[tgt->GetName()];
 }
 
 //----------------------------------------------------------------------------
 void
-cmLocalUnixMakefileGenerator3::AddImplicitDepends(cmTarget const& tgt,
+cmLocalUnixMakefileGenerator3::AddImplicitDepends(const cmGeneratorTarget* tgt,
                                                   const std::string& lang,
                                                   const char* obj,
                                                   const char* src)
 {
-  this->ImplicitDepends[tgt.GetName()][lang][obj].push_back(src);
+  this->ImplicitDepends[tgt->GetName()][lang][obj].push_back(src);
 }
 
 //----------------------------------------------------------------------------

@@ -21,7 +21,6 @@ class cmCustomCommand;
 class cmCustomCommandGenerator;
 class cmDepends;
 class cmMakefileTargetGenerator;
-class cmTarget;
 class cmSourceFile;
 
 /** \class cmLocalUnixMakefileGenerator3
@@ -141,9 +140,11 @@ public:
     public std::map<std::string, ImplicitDependFileMap> {};
   struct ImplicitDependTargetMap:
     public std::map<std::string, ImplicitDependLanguageMap> {};
-  ImplicitDependLanguageMap const& GetImplicitDepends(cmTarget const& tgt);
+  ImplicitDependLanguageMap const&
+  GetImplicitDepends(cmGeneratorTarget const* tgt);
 
-  void AddImplicitDepends(cmTarget const& tgt, const std::string& lang,
+  void AddImplicitDepends(cmGeneratorTarget const* tgt,
+                          const std::string& lang,
                           const char* obj, const char* src);
 
   // write the target rules for the local Makefile into the stream
@@ -197,12 +198,12 @@ protected:
                             const std::string& helpTarget);
 
   void WriteTargetDependRule(std::ostream& ruleFileStream,
-                             cmTarget& target);
+                             cmGeneratorTarget* target);
   void WriteTargetCleanRule(std::ostream& ruleFileStream,
-                            cmTarget& target,
+                            cmGeneratorTarget* target,
                             const std::vector<std::string>& files);
   void WriteTargetRequiresRule(std::ostream& ruleFileStream,
-                               cmTarget& target,
+                               cmGeneratorTarget* target,
                                const std::vector<std::string>& objects);
 
   void AppendRuleDepend(std::vector<std::string>& depends,

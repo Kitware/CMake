@@ -16,7 +16,6 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-#include "cmTarget.h"
 #include "cmake.h"
 #include "cmAlgorithms.h"
 
@@ -114,7 +113,8 @@ void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
 
   // Add post-build rules.
   this->LocalGenerator->
-    AppendCustomCommands(commands, this->Target->GetPostBuildCommands(),
+    AppendCustomCommands(commands,
+                         this->GeneratorTarget->Target->GetPostBuildCommands(),
                          this->GeneratorTarget);
 
   // Depend on the object files.
@@ -457,11 +457,13 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   if(!relink)
     {
     this->LocalGenerator
-      ->AppendCustomCommands(commands, this->Target->GetPreBuildCommands(),
-                             this->GeneratorTarget);
+      ->AppendCustomCommands(commands,
+                        this->GeneratorTarget->Target->GetPreBuildCommands(),
+                        this->GeneratorTarget);
     this->LocalGenerator
-      ->AppendCustomCommands(commands, this->Target->GetPreLinkCommands(),
-                             this->GeneratorTarget);
+      ->AppendCustomCommands(commands,
+                        this->GeneratorTarget->Target->GetPreLinkCommands(),
+                        this->GeneratorTarget);
     }
 
   // Determine whether a link script will be used.
@@ -811,8 +813,9 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   if(!relink)
     {
     this->LocalGenerator->
-      AppendCustomCommands(commands, this->Target->GetPostBuildCommands(),
-                           this->GeneratorTarget);
+      AppendCustomCommands(commands,
+                       this->GeneratorTarget->Target->GetPostBuildCommands(),
+                       this->GeneratorTarget);
     }
 
   // Compute the list of outputs.
