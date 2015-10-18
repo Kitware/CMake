@@ -31,8 +31,7 @@ void cmLocalGhsMultiGenerator::Generate()
   for (cmGeneratorTargetsType::iterator l = tgts.begin(); l != tgts.end();
        ++l)
     {
-    if (l->second->GetType() == cmState::INTERFACE_LIBRARY
-        || l->second->IsImported())
+    if (l->second->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }

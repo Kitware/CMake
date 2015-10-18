@@ -473,10 +473,6 @@ cmGlobalUnixMakefileGenerator3
        (type == cmState::OBJECT_LIBRARY) ||
        (type == cmState::UTILITY))
       {
-      if(gtarget->IsImported())
-        {
-        continue;
-        }
       // Add this to the list of depends rules in this directory.
       if((!check_all || !gtarget->GetPropertyAsBool("EXCLUDE_FROM_ALL")) &&
          (!check_relink ||
@@ -632,10 +628,6 @@ cmGlobalUnixMakefileGenerator3
         t != targets.end(); ++t)
       {
       cmGeneratorTarget* gtarget = t->second;
-      if(gtarget->IsImported())
-        {
-        continue;
-        }
       // Don't emit the same rule twice (e.g. two targets with the same
       // simple name)
       int type = gtarget->GetType();
@@ -733,10 +725,6 @@ cmGlobalUnixMakefileGenerator3
       t != targets.end(); ++t)
     {
     cmGeneratorTarget* gtarget = t->second;
-    if(gtarget->IsImported())
-      {
-      continue;
-      }
     int type = gtarget->GetType();
     std::string name = gtarget->GetName();
     if (!name.empty()
