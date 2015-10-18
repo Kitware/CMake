@@ -399,7 +399,6 @@ static int calculateCommandLineLengthLimit(int linkRuleLength)
 
 void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 {
-  cmTarget& target = *this->GetTarget();
   cmGeneratorTarget& gt = *this->GetGeneratorTarget();
   const std::string cfgName = this->GetConfigName();
   std::string targetOutput = ConvertToNinjaPath(
@@ -443,7 +442,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   // Write comments.
   cmGlobalNinjaGenerator::WriteDivider(this->GetBuildFileStream());
-  const cmState::TargetType targetType = target.GetType();
+  const cmState::TargetType targetType = gt.GetType();
   this->GetBuildFileStream()
     << "# Link build statements for "
     << cmState::GetTargetTypeName(targetType)
@@ -490,13 +489,13 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                           &genTarget,
                           useWatcomQuote);
   if(this->GetMakefile()->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")
-     && target.GetType() == cmState::SHARED_LIBRARY)
+     && gt.GetType() == cmState::SHARED_LIBRARY)
     {
-    if(target.GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS"))
+    if(gt.GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS"))
       {
       std::string name_of_def_file
         = gt.GetSupportDirectory();
-      name_of_def_file += "/" + target.GetName();
+      name_of_def_file += "/" + gt.GetName();
       name_of_def_file += ".def ";
       vars["LINK_FLAGS"] += " /DEF:";
       vars["LINK_FLAGS"] += this->GetLocalGenerator()
@@ -505,7 +504,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       }
     }
 
-  this->addPoolNinjaVariable("JOB_POOL_LINK", &target, vars);
+  this->addPoolNinjaVariable("JOB_POOL_LINK", &gt, vars);
 
   this->AddModuleDefinitionFlag(vars["LINK_FLAGS"]);
   vars["LINK_FLAGS"] = cmGlobalNinjaGenerator
@@ -599,9 +598,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     }
 
   const std::vector<cmCustomCommand> *cmdLists[3] = {
-    &target.GetPreBuildCommands(),
-    &target.GetPreLinkCommands(),
-    &target.GetPostBuildCommands()
+    &gt.Target->GetPreBuildCommands(),
+    &gt.Target->GetPreLinkCommands(),
+    &gt.Target->GetPostBuildCommands()
   };
 
   std::vector<std::string> preLinkCmdLines, postBuildCmdLines;
@@ -626,17 +625,17 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     }
 
   // maybe create .def file from list of objects
-  if (target.GetType() == cmState::SHARED_LIBRARY &&
+  if (gt.GetType() == cmState::SHARED_LIBRARY &&
       this->GetMakefile()->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
     {
-    if(target.GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS"))
+    if(gt.GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS"))
       {
       std::string cmakeCommand =
       this->GetLocalGenerator()->ConvertToOutputFormat(
         cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
       std::string name_of_def_file
         = gt.GetSupportDirectory();
-      name_of_def_file += "/" + target.GetName();
+      name_of_def_file += "/" + gt.GetName();
       name_of_def_file += ".def";
       std::string cmd = cmakeCommand;
       cmd += " -E __create_def ";
@@ -699,11 +698,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   const std::string rspfile =
       std::string(cmake::GetCMakeFilesDirectoryPostSlash())
-      + target.GetName() + ".rsp";
+      + gt.GetName() + ".rsp";
 
   // Gather order-only dependencies.
   cmNinjaDeps orderOnlyDeps;
-  this->GetLocalGenerator()->AppendTargetDepends(this->GetTarget(),
+  this->GetLocalGenerator()->AppendTargetDepends(this->GetGeneratorTarget(),
     orderOnlyDeps);
 
   // Ninja should restat after linking if and only if there are byproducts.
@@ -772,8 +771,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     }
 
   // Add aliases for the file name and the target name.
-  globalGen.AddTargetAlias(this->TargetNameOut, &target);
-  globalGen.AddTargetAlias(this->GetTargetName(), &target);
+  globalGen.AddTargetAlias(this->TargetNameOut, &gt);
+  globalGen.AddTargetAlias(this->GetTargetName(), &gt);
 }
 
 //----------------------------------------------------------------------------
@@ -781,7 +780,8 @@ void cmNinjaNormalTargetGenerator::WriteObjectLibStatement()
 {
   // Write a phony output that depends on all object files.
   cmNinjaDeps outputs;
-  this->GetLocalGenerator()->AppendTargetOutputs(this->GetTarget(), outputs);
+  this->GetLocalGenerator()->AppendTargetOutputs(this->GetGeneratorTarget(),
+                                                 outputs);
   cmNinjaDeps depends = this->GetObjects();
   this->GetGlobalGenerator()->WritePhonyBuild(this->GetBuildFileStream(),
                                               "Object library "
@@ -791,5 +791,5 @@ void cmNinjaNormalTargetGenerator::WriteObjectLibStatement()
 
   // Add aliases for the target name.
   this->GetGlobalGenerator()->AddTargetAlias(this->GetTargetName(),
-                                             this->GetTarget());
+                                             this->GetGeneratorTarget());
 }

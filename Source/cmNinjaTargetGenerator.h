@@ -53,9 +53,6 @@ protected:
   cmGeneratedFileStream& GetBuildFileStream() const;
   cmGeneratedFileStream& GetRulesFileStream() const;
 
-  cmTarget* GetTarget() const
-  { return this->Target; }
-
   cmGeneratorTarget* GetGeneratorTarget() const
   { return this->GeneratorTarget; }
 
@@ -152,7 +149,7 @@ protected:
   std::set<std::string> MacContentFolders;
 
   void addPoolNinjaVariable(const std::string& pool_property,
-                            cmTarget* target,
+                            cmGeneratorTarget* target,
                             cmNinjaVars& vars);
 
 private:

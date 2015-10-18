@@ -886,7 +886,7 @@ void cmGlobalNinjaGenerator::WriteDisclaimer(std::ostream& os)
     << cmVersion::GetMinorVersion() << "\n\n";
 }
 
-void cmGlobalNinjaGenerator::AddDependencyToAll(cmTarget* target)
+void cmGlobalNinjaGenerator::AddDependencyToAll(cmGeneratorTarget* target)
 {
   this->AppendTargetOutputs(target, this->AllDependencies);
 }
@@ -912,18 +912,16 @@ void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
 
 void
 cmGlobalNinjaGenerator
-::AppendTargetOutputs(cmTarget const* target, cmNinjaDeps& outputs)
+::AppendTargetOutputs(cmGeneratorTarget const* target, cmNinjaDeps& outputs)
 {
   std::string configName =
-    target->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
-
-  cmGeneratorTarget *gtgt = this->GetGeneratorTarget(target);
+    target->Target->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
 
   // for frameworks, we want the real name, not smple name
   // frameworks always appear versioned, and the build.ninja
   // will always attempt to manage symbolic links instead
   // of letting cmOSXBundleGenerator do it.
-  bool realname = gtgt->IsFrameworkOnApple();
+  bool realname = target->IsFrameworkOnApple();
 
   switch (target->GetType()) {
   case cmState::EXECUTABLE:
@@ -932,7 +930,7 @@ cmGlobalNinjaGenerator
   case cmState::MODULE_LIBRARY:
     {
     outputs.push_back(this->ConvertToNinjaPath(
-      gtgt->GetFullPath(configName, false, realname)));
+      target->GetFullPath(configName, false, realname)));
     break;
     }
   case cmState::OBJECT_LIBRARY:
@@ -962,16 +960,15 @@ cmGlobalNinjaGenerator
 
 void
 cmGlobalNinjaGenerator
-::AppendTargetDepends(cmTarget const* target, cmNinjaDeps& outputs)
+::AppendTargetDepends(cmGeneratorTarget const* target, cmNinjaDeps& outputs)
 {
   if (target->GetType() == cmState::GLOBAL_TARGET) {
     // Global targets only depend on other utilities, which may not appear in
     // the TargetDepends set (e.g. "all").
-    std::set<std::string> const& utils = target->GetUtilities();
+    std::set<std::string> const& utils = target->Target->GetUtilities();
     std::copy(utils.begin(), utils.end(), std::back_inserter(outputs));
   } else {
-    cmGeneratorTarget* gt = this->GetGeneratorTarget(target);
-    cmTargetDependSet const& targetDeps = this->GetTargetDirectDepends(gt);
+    cmTargetDependSet const& targetDeps = this->GetTargetDirectDepends(target);
     for (cmTargetDependSet::const_iterator i = targetDeps.begin();
          i != targetDeps.end(); ++i)
       {
@@ -979,13 +976,13 @@ cmGlobalNinjaGenerator
         {
         continue;
         }
-      this->AppendTargetOutputs((*i)->Target, outputs);
+      this->AppendTargetOutputs(*i, outputs);
     }
   }
 }
 
 void cmGlobalNinjaGenerator::AddTargetAlias(const std::string& alias,
-                                            cmTarget* target) {
+                                            cmGeneratorTarget* target) {
   cmNinjaDeps outputs;
   this->AppendTargetOutputs(target, outputs);
   // Mark the target's outputs as ambiguous to ensure that no other target uses
