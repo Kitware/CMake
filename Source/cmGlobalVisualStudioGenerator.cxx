@@ -88,6 +88,7 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
 
       cmGeneratorTarget* gt = new cmGeneratorTarget(allBuild, gen[0]);
       gen[0]->AddGeneratorTarget(allBuild, gt);
+      this->AddGeneratorTarget(allBuild, gt);
 
 #if 0
       // Can't activate this code because we want ALL_BUILD

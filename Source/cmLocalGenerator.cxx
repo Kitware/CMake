@@ -451,7 +451,6 @@ void cmLocalGenerator::GenerateInstallRules()
 void cmLocalGenerator::AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt)
 {
   this->GeneratorTargets[t] = gt;
-  this->GetGlobalGenerator()->AddGeneratorTarget(t, gt);
 }
 
 //----------------------------------------------------------------------------
