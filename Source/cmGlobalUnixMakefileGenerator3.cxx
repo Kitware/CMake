@@ -423,17 +423,18 @@ void cmGlobalUnixMakefileGenerator3
     {
     lg = static_cast<cmLocalUnixMakefileGenerator3 *>(lGenerators[i]);
     // for all of out targets
-    for (cmTargets::iterator l = lg->GetMakefile()->GetTargets().begin();
-         l != lg->GetMakefile()->GetTargets().end(); l++)
+    std::vector<cmGeneratorTarget*> tgts = lg->GetGeneratorTargets();
+    for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+         l != tgts.end(); l++)
       {
-      if((l->second.GetType() == cmState::EXECUTABLE) ||
-         (l->second.GetType() == cmState::STATIC_LIBRARY) ||
-         (l->second.GetType() == cmState::SHARED_LIBRARY) ||
-         (l->second.GetType() == cmState::MODULE_LIBRARY) ||
-         (l->second.GetType() == cmState::OBJECT_LIBRARY) ||
-         (l->second.GetType() == cmState::UTILITY))
+      if(((*l)->GetType() == cmState::EXECUTABLE) ||
+         ((*l)->GetType() == cmState::STATIC_LIBRARY) ||
+         ((*l)->GetType() == cmState::SHARED_LIBRARY) ||
+         ((*l)->GetType() == cmState::MODULE_LIBRARY) ||
+         ((*l)->GetType() == cmState::OBJECT_LIBRARY) ||
+         ((*l)->GetType() == cmState::UTILITY))
         {
-        cmGeneratorTarget* gt = this->GetGeneratorTarget(&l->second);
+        cmGeneratorTarget* gt = *l;
         std::string tname = lg->GetRelativeTargetDirectory(gt);
         tname += "/DependInfo.cmake";
         cmSystemTools::ConvertToUnixSlashes(tname);
@@ -914,13 +915,11 @@ void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
       lgi != this->LocalGenerators.end(); ++lgi)
     {
     cmLocalGenerator* lg = *lgi;
-    cmMakefile* mf = lg->GetMakefile();
-    cmTargets const& targets = mf->GetTargets();
-    for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
+    std::vector<cmGeneratorTarget*> targets = lg->GetGeneratorTargets();
+    for(std::vector<cmGeneratorTarget*>::const_iterator t = targets.begin();
+        t != targets.end(); ++t)
       {
-      cmTarget const& target = t->second;
-
-      cmGeneratorTarget* gt = this->GetGeneratorTarget(&target);
+      cmGeneratorTarget* gt = *t;
 
       cmLocalGenerator* tlg = gt->GetLocalGenerator();
 
@@ -1089,11 +1088,12 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
     if (lg2 == lg || lg->GetMakefile()->IsRootMakefile())
       {
       // for each target Generate the rule files for each target.
-      cmTargets& targets = lg2->GetMakefile()->GetTargets();
-      for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
+      std::vector<cmGeneratorTarget*> targets = lg2->GetGeneratorTargets();
+      for(std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
+          t != targets.end(); ++t)
         {
-        cmTarget const& target = t->second;
-        cmState::TargetType type = target.GetType();
+        cmGeneratorTarget* target = *t;
+        cmState::TargetType type = target->GetType();
         if((type == cmState::EXECUTABLE) ||
            (type == cmState::STATIC_LIBRARY) ||
            (type == cmState::SHARED_LIBRARY) ||
@@ -1102,7 +1102,7 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
            (type == cmState::GLOBAL_TARGET) ||
            (type == cmState::UTILITY))
           {
-          std::string name = target.GetName();
+          std::string name = target->GetName();
           if(emittedTargets.insert(name).second)
             {
             path = "... ";

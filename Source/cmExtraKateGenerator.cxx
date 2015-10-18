@@ -119,14 +119,16 @@ cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
        it != this->GlobalGenerator->GetLocalGenerators().end();
        ++it)
     {
-    const cmTargets& targets = (*it)->GetMakefile()->GetTargets();
-    cmMakefile* makefile=(*it)->GetMakefile();
+    const std::vector<cmGeneratorTarget*> targets =
+        (*it)->GetGeneratorTargets();
     std::string currentDir = (*it)->GetCurrentBinaryDirectory();
     bool topLevel = (currentDir == (*it)->GetBinaryDirectory());
 
-    for(cmTargets::const_iterator ti=targets.begin(); ti!=targets.end(); ++ti)
+    for(std::vector<cmGeneratorTarget*>::const_iterator ti =
+        targets.begin(); ti!=targets.end(); ++ti)
       {
-      switch(ti->second.GetType())
+      std::string targetName = (*ti)->GetName();
+      switch((*ti)->GetType())
         {
         case cmState::GLOBAL_TARGET:
           {
@@ -138,9 +140,9 @@ cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
             insertTarget = true;
             // only add the "edit_cache" target if it's not ccmake, because
             // this will not work within the IDE
-            if (ti->first == "edit_cache")
+            if (targetName == "edit_cache")
               {
-              const char* editCommand = makefile->GetDefinition
+              const char* editCommand = (*it)->GetMakefile()->GetDefinition
               ("CMAKE_EDIT_COMMAND");
               if (editCommand == 0)
                 {
@@ -154,7 +156,7 @@ cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
             }
           if (insertTarget)
             {
-            this->AppendTarget(fout, ti->first, make, makeArgs,
+            this->AppendTarget(fout, targetName, make, makeArgs,
                                currentDir, homeOutputDir);
             }
         }
@@ -162,15 +164,16 @@ cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
         case cmState::UTILITY:
           // Add all utility targets, except the Nightly/Continuous/
           // Experimental-"sub"targets as e.g. NightlyStart
-          if (((ti->first.find("Nightly")==0)   &&(ti->first!="Nightly"))
-            || ((ti->first.find("Continuous")==0)&&(ti->first!="Continuous"))
-            || ((ti->first.find("Experimental")==0)
-            && (ti->first!="Experimental")))
+          if (((targetName.find("Nightly")==0)   &&(targetName!="Nightly"))
+            || ((targetName.find("Continuous")==0)
+                &&(targetName!="Continuous"))
+            || ((targetName.find("Experimental")==0)
+            && (targetName!="Experimental")))
             {
               break;
             }
 
-            this->AppendTarget(fout, ti->first, make, makeArgs,
+            this->AppendTarget(fout, targetName, make, makeArgs,
                                currentDir, homeOutputDir);
           break;
         case cmState::EXECUTABLE:
@@ -179,9 +182,9 @@ cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
         case cmState::MODULE_LIBRARY:
         case cmState::OBJECT_LIBRARY:
         {
-          this->AppendTarget(fout, ti->first, make, makeArgs,
+          this->AppendTarget(fout, targetName, make, makeArgs,
                              currentDir, homeOutputDir);
-          std::string fastTarget = ti->first;
+          std::string fastTarget = targetName;
           fastTarget += "/fast";
           this->AppendTarget(fout, fastTarget, make, makeArgs,
                              currentDir, homeOutputDir);

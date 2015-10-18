@@ -319,12 +319,12 @@ void cmExtraCodeBlocksGenerator
   for (std::vector<cmLocalGenerator*>::const_iterator lg=lgs.begin();
        lg!=lgs.end(); lg++)
     {
-    cmMakefile* makefile=(*lg)->GetMakefile();
-    cmTargets& targets=makefile->GetTargets();
-    for (cmTargets::iterator ti = targets.begin();
+    std::vector<cmGeneratorTarget*> targets=(*lg)->GetGeneratorTargets();
+    for (std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
          ti != targets.end(); ti++)
       {
-      switch(ti->second.GetType())
+      std::string targetName = (*ti)->GetName();
+      switch((*ti)->GetType())
         {
         case cmState::GLOBAL_TARGET:
           {
@@ -333,7 +333,7 @@ void cmExtraCodeBlocksGenerator
           if (strcmp((*lg)->GetCurrentBinaryDirectory(),
                      (*lg)->GetBinaryDirectory())==0)
             {
-            this->AppendTarget(fout, ti->first, 0,
+            this->AppendTarget(fout, targetName, 0,
                                make.c_str(), *lg, compiler.c_str());
             }
           }
@@ -341,15 +341,16 @@ void cmExtraCodeBlocksGenerator
         case cmState::UTILITY:
           // Add all utility targets, except the Nightly/Continuous/
           // Experimental-"sub"targets as e.g. NightlyStart
-          if (((ti->first.find("Nightly")==0)   &&(ti->first!="Nightly"))
-             || ((ti->first.find("Continuous")==0)&&(ti->first!="Continuous"))
-             || ((ti->first.find("Experimental")==0)
-                                               && (ti->first!="Experimental")))
+          if (((targetName.find("Nightly")==0)   &&(targetName!="Nightly"))
+             || ((targetName.find("Continuous")==0)
+                 &&(targetName!="Continuous"))
+             || ((targetName.find("Experimental")==0)
+                                             && (targetName!="Experimental")))
             {
             break;
             }
 
-          this->AppendTarget(fout, ti->first, 0,
+          this->AppendTarget(fout, targetName, 0,
                                  make.c_str(), *lg, compiler.c_str());
           break;
         case cmState::EXECUTABLE:
@@ -358,11 +359,10 @@ void cmExtraCodeBlocksGenerator
         case cmState::MODULE_LIBRARY:
         case cmState::OBJECT_LIBRARY:
           {
-          cmGeneratorTarget* gt =
-              this->GlobalGenerator->GetGeneratorTarget(&ti->second);
-          this->AppendTarget(fout, ti->first, gt,
+          cmGeneratorTarget* gt = *ti;
+          this->AppendTarget(fout, targetName, gt,
                              make.c_str(), *lg, compiler.c_str());
-          std::string fastTarget = ti->first;
+          std::string fastTarget = targetName;
           fastTarget += "/fast";
           this->AppendTarget(fout, fastTarget, gt,
                              make.c_str(), *lg, compiler.c_str());
@@ -388,11 +388,11 @@ void cmExtraCodeBlocksGenerator
        lg!=lgs.end(); lg++)
     {
     cmMakefile* makefile=(*lg)->GetMakefile();
-    cmTargets& targets=makefile->GetTargets();
-    for (cmTargets::iterator ti = targets.begin();
+    std::vector<cmGeneratorTarget*> targets=(*lg)->GetGeneratorTargets();
+    for (std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
          ti != targets.end(); ti++)
       {
-      switch(ti->second.GetType())
+      switch((*ti)->GetType())
         {
         case cmState::EXECUTABLE:
         case cmState::STATIC_LIBRARY:
@@ -402,8 +402,7 @@ void cmExtraCodeBlocksGenerator
         case cmState::UTILITY: // can have sources since 2.6.3
           {
           std::vector<cmSourceFile*> sources;
-          cmGeneratorTarget* gt =
-              this->GlobalGenerator->GetGeneratorTarget(&ti->second);
+          cmGeneratorTarget* gt = *ti;
           gt->GetSourceFiles(sources,
                             makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
           for (std::vector<cmSourceFile*>::const_iterator si=sources.begin();
@@ -442,7 +441,7 @@ void cmExtraCodeBlocksGenerator
               }
 
             CbpUnit &cbpUnit = allFiles[fullPath];
-            cbpUnit.Targets.push_back(&(ti->second));
+            cbpUnit.Targets.push_back((*ti)->Target);
             }
           }
         default:  // intended fallthrough

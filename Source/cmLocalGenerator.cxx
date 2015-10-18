@@ -2510,28 +2510,29 @@ cmLocalGenerator
 {
   // Convert the old-style install specification from each target to
   // an install generator and run it.
-  cmTargets& tgts = this->Makefile->GetTargets();
-  for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
+  std::vector<cmGeneratorTarget*> tgts = this->GetGeneratorTargets();
+  for(std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+      l != tgts.end(); ++l)
     {
-    if (l->second.GetType() == cmState::INTERFACE_LIBRARY)
+    if ((*l)->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
 
     // Include the user-specified pre-install script for this target.
-    if(const char* preinstall = l->second.GetProperty("PRE_INSTALL_SCRIPT"))
+    if(const char* preinstall = (*l)->GetProperty("PRE_INSTALL_SCRIPT"))
       {
       cmInstallScriptGenerator g(preinstall, false, 0);
       g.Generate(os, config, configurationTypes);
       }
 
     // Install this target if a destination is given.
-    if(l->second.GetInstallPath() != "")
+    if((*l)->Target->GetInstallPath() != "")
       {
       // Compute the full install destination.  Note that converting
       // to unix slashes also removes any trailing slash.
       // We also skip over the leading slash given by the user.
-      std::string destination = l->second.GetInstallPath().substr(1);
+      std::string destination = (*l)->Target->GetInstallPath().substr(1);
       cmSystemTools::ConvertToUnixSlashes(destination);
       if(destination.empty())
         {
@@ -2539,7 +2540,7 @@ cmLocalGenerator
         }
 
       // Generate the proper install generator for this target type.
-      switch(l->second.GetType())
+      switch((*l)->GetType())
         {
         case cmState::EXECUTABLE:
         case cmState::STATIC_LIBRARY:
@@ -2547,7 +2548,7 @@ cmLocalGenerator
           {
           // Use a target install generator.
           cmInstallTargetGeneratorLocal
-            g(this, l->first, destination.c_str(), false);
+            g(this, (*l)->GetName(), destination.c_str(), false);
           g.Generate(os, config, configurationTypes);
           }
           break;
@@ -2558,18 +2559,18 @@ cmLocalGenerator
           // to the normal destination and the DLL to the runtime
           // destination.
           cmInstallTargetGeneratorLocal
-            g1(this, l->first, destination.c_str(), true);
+            g1(this, (*l)->GetName(), destination.c_str(), true);
           g1.Generate(os, config, configurationTypes);
           // We also skip over the leading slash given by the user.
-          destination = l->second.GetRuntimeInstallPath().substr(1);
+          destination = (*l)->Target->GetRuntimeInstallPath().substr(1);
           cmSystemTools::ConvertToUnixSlashes(destination);
           cmInstallTargetGeneratorLocal
-            g2(this, l->first, destination.c_str(), false);
+            g2(this, (*l)->GetName(), destination.c_str(), false);
           g2.Generate(os, config, configurationTypes);
 #else
           // Use a target install generator.
           cmInstallTargetGeneratorLocal
-            g(this, l->first, destination.c_str(), false);
+            g(this, (*l)->GetName(), destination.c_str(), false);
           g.Generate(os, config, configurationTypes);
 #endif
           }
@@ -2580,7 +2581,7 @@ cmLocalGenerator
       }
 
     // Include the user-specified post-install script for this target.
-    if(const char* postinstall = l->second.GetProperty("POST_INSTALL_SCRIPT"))
+    if(const char* postinstall = (*l)->GetProperty("POST_INSTALL_SCRIPT"))
       {
       cmInstallScriptGenerator g(postinstall, false, 0);
       g.Generate(os, config, configurationTypes);

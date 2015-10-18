@@ -74,22 +74,23 @@ cmLocalVisualStudio10Generator::~cmLocalVisualStudio10Generator()
 void cmLocalVisualStudio10Generator::Generate()
 {
 
-  cmTargets &tgts = this->Makefile->GetTargets();
-  for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
+  std::vector<cmGeneratorTarget*> tgts = this->GetGeneratorTargets();
+  for(std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+      l != tgts.end(); ++l)
     {
-    if(l->second.GetType() == cmState::INTERFACE_LIBRARY)
+    if((*l)->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
     if(static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
-       ->TargetIsFortranOnly(l->second))
+       ->TargetIsFortranOnly(*(*l)->Target))
       {
-      this->CreateSingleVCProj(l->first.c_str(),l->second);
+      this->CreateSingleVCProj((*l)->GetName().c_str(), *(*l)->Target);
       }
     else
       {
       cmVisualStudio10TargetGenerator tg(
-        &l->second, static_cast<cmGlobalVisualStudio10Generator*>(
+        (*l)->Target, static_cast<cmGlobalVisualStudio10Generator*>(
           this->GetGlobalGenerator()));
       tg.Generate();
       }

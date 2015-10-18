@@ -67,19 +67,19 @@ cmLocalVisualStudio7Generator::~cmLocalVisualStudio7Generator()
 void cmLocalVisualStudio7Generator::AddHelperCommands()
 {
   // Now create GUIDs for targets
-  cmTargets &tgts = this->Makefile->GetTargets();
-
-  for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
+  std::vector<cmGeneratorTarget*> tgts = this->GetGeneratorTargets();
+  for(std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+      l != tgts.end(); ++l)
     {
-    if(l->second.GetType() == cmState::INTERFACE_LIBRARY)
+    if((*l)->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
-    const char* path = l->second.GetProperty("EXTERNAL_MSPROJECT");
+    const char* path = (*l)->GetProperty("EXTERNAL_MSPROJECT");
     if(path)
       {
       this->ReadAndStoreExternalGUID(
-        l->second.GetName().c_str(), path);
+        (*l)->GetName().c_str(), path);
       }
     }
 
@@ -95,7 +95,6 @@ void cmLocalVisualStudio7Generator::Generate()
 
 void cmLocalVisualStudio7Generator::AddCMakeListsRules()
 {
-  cmTargets &tgts = this->Makefile->GetTargets();
   // Create the regeneration custom rule.
   if(!this->Makefile->IsOn("CMAKE_SUPPRESS_REGENERATION"))
     {
@@ -104,17 +103,17 @@ void cmLocalVisualStudio7Generator::AddCMakeListsRules()
     if(cmSourceFile* sf = this->CreateVCProjBuildRule())
       {
       // Add the rule to targets that need it.
-      for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
+      std::vector<cmGeneratorTarget*> tgts = this->GetGeneratorTargets();
+      for(std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+          l != tgts.end(); ++l)
         {
-        if (l->second.GetType() == cmState::GLOBAL_TARGET)
+        if ((*l)->GetType() == cmState::GLOBAL_TARGET)
           {
           continue;
           }
-        if(l->first != CMAKE_CHECK_BUILD_SYSTEM_TARGET)
+        if((*l)->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET)
           {
-          cmGeneratorTarget* gt =
-              this->GlobalGenerator->GetGeneratorTarget(&l->second);
-          gt->AddSource(sf->GetFullPath());
+          (*l)->AddSource(sf->GetFullPath());
           }
         }
       }
@@ -126,11 +125,11 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
   // Visual Studio .NET 2003 Service Pack 1 will not run post-build
   // commands for targets in which no sources are built.  Add dummy
   // rules to force these targets to build.
-  cmTargets &tgts = this->Makefile->GetTargets();
-  for(cmTargets::iterator l = tgts.begin();
+  std::vector<cmGeneratorTarget*> tgts = this->GetGeneratorTargets();
+  for(std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
       l != tgts.end(); l++)
     {
-    cmTarget& tgt = l->second;
+    cmTarget& tgt = *(*l)->Target;
     if(tgt.GetType() == cmState::GLOBAL_TARGET)
       {
       std::vector<std::string> no_depends;
@@ -150,9 +149,7 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
            force.c_str(), no_depends, no_main_dependency,
            force_commands, " ", 0, true))
         {
-        cmGeneratorTarget* gt =
-            this->GlobalGenerator->GetGeneratorTarget(&tgt);
-        gt->AddSource(file->GetFullPath());
+        (*l)->AddSource(file->GetFullPath());
         }
       }
     }
@@ -176,21 +173,21 @@ void cmLocalVisualStudio7Generator::WriteProjectFiles()
     }
 
   // Get the set of targets in this directory.
-  cmTargets &tgts = this->Makefile->GetTargets();
+  std::vector<cmGeneratorTarget*> tgts = this->GetGeneratorTargets();
 
   // Create the project file for each target.
-  for(cmTargets::iterator l = tgts.begin();
+  for(std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
       l != tgts.end(); l++)
     {
-    if(l->second.GetType() == cmState::INTERFACE_LIBRARY)
+    if((*l)->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
     // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
     // so don't build a projectfile for it
-    if(!l->second.GetProperty("EXTERNAL_MSPROJECT"))
+    if(!(*l)->GetProperty("EXTERNAL_MSPROJECT"))
       {
-      this->CreateSingleVCProj(l->first.c_str(),l->second);
+      this->CreateSingleVCProj((*l)->GetName().c_str(), *(*l)->Target);
       }
     }
 }

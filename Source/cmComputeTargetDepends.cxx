@@ -175,13 +175,12 @@ void cmComputeTargetDepends::CollectTargets()
     this->GlobalGenerator->GetLocalGenerators();
   for(unsigned int i = 0; i < lgens.size(); ++i)
     {
-    const cmTargets& targets = lgens[i]->GetMakefile()->GetTargets();
-    for(cmTargets::const_iterator ti = targets.begin();
+    const std::vector<cmGeneratorTarget*> targets =
+        lgens[i]->GetGeneratorTargets();
+    for(std::vector<cmGeneratorTarget*>::const_iterator ti = targets.begin();
         ti != targets.end(); ++ti)
       {
-      cmTarget const* target = &ti->second;
-      cmGeneratorTarget* gt =
-          this->GlobalGenerator->GetGeneratorTarget(target);
+      cmGeneratorTarget* gt = *ti;
       int index = static_cast<int>(this->Targets.size());
       this->TargetIndex[gt] = index;
       this->Targets.push_back(gt);

@@ -82,12 +82,12 @@ private:
 
 void cmLocalVisualStudio6Generator::AddCMakeListsRules()
 {
-  cmTargets &tgts = this->Makefile->GetTargets();
-  for(cmTargets::iterator l = tgts.begin();
-      l != tgts.end(); l++)
+  std::vector<cmGeneratorTarget*> tgts = this->GetGeneratorTargets();
+  for(std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+      l != tgts.end(); ++l)
     {
-    if (l->second.GetType() == cmState::INTERFACE_LIBRARY
-        || l->second.GetType() == cmState::GLOBAL_TARGET)
+    if ((*l)->GetType() == cmState::INTERFACE_LIBRARY
+        || (*l)->GetType() == cmState::GLOBAL_TARGET)
       {
       continue;
       }
@@ -98,7 +98,7 @@ void cmLocalVisualStudio6Generator::AddCMakeListsRules()
       this->Makefile->GetDefinition("CMAKE_SUPPRESS_REGENERATION");
     if (!cmSystemTools::IsOn(suppRegenRule))
       {
-      this->AddDSPBuildRule(l->second);
+      this->AddDSPBuildRule(*(*l)->Target);
       }
     }
 }
@@ -124,54 +124,56 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
 
   // Create the DSP or set of DSP's for libraries and executables
 
-  cmTargets &tgts = this->Makefile->GetTargets();
-
-  // build any targets
-  for(cmTargets::iterator l = tgts.begin();
-      l != tgts.end(); l++)
+  std::vector<cmGeneratorTarget*> tgts = this->GetGeneratorTargets();
+  for(std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+      l != tgts.end(); ++l)
     {
-    switch(l->second.GetType())
+    switch((*l)->GetType())
       {
       case cmState::STATIC_LIBRARY:
       case cmState::OBJECT_LIBRARY:
-        this->SetBuildType(STATIC_LIBRARY, l->first.c_str(), l->second);
+        this->SetBuildType(STATIC_LIBRARY,
+                           (*l)->GetName().c_str(), *(*l)->Target);
         break;
       case cmState::SHARED_LIBRARY:
       case cmState::MODULE_LIBRARY:
-        this->SetBuildType(DLL, l->first.c_str(), l->second);
+        this->SetBuildType(DLL,
+                           (*l)->GetName().c_str(), *(*l)->Target);
         break;
       case cmState::EXECUTABLE:
-        this->SetBuildType(EXECUTABLE,l->first.c_str(), l->second);
+        this->SetBuildType(EXECUTABLE,
+                           (*l)->GetName().c_str(), *(*l)->Target);
         break;
       case cmState::UTILITY:
       case cmState::GLOBAL_TARGET:
-        this->SetBuildType(UTILITY, l->first.c_str(), l->second);
+        this->SetBuildType(UTILITY,
+                           (*l)->GetName().c_str(), *(*l)->Target);
         break;
       case cmState::INTERFACE_LIBRARY:
         continue;
       default:
-        cmSystemTools::Error("Bad target type: ", l->first.c_str());
+        cmSystemTools::Error("Bad target type: ", (*l)->GetName().c_str());
         break;
       }
     // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
     // so don't build a projectfile for it
     const char* path =
-      l->second.GetProperty("EXTERNAL_MSPROJECT");
+      (*l)->GetProperty("EXTERNAL_MSPROJECT");
     if(!path)
       {
       // check to see if the dsp is going into a sub-directory
-      std::string::size_type pos = l->first.rfind('/');
+      std::string::size_type pos = (*l)->GetName().rfind('/');
       if(pos != std::string::npos)
         {
         std::string dir = this->GetCurrentBinaryDirectory();
         dir += "/";
-        dir += l->first.substr(0, pos);
+        dir += (*l)->GetName().substr(0, pos);
         if(!cmSystemTools::MakeDirectory(dir.c_str()))
           {
           cmSystemTools::Error("Error creating directory: ", dir.c_str());
           }
         }
-      this->CreateSingleDSP(l->first.c_str(),l->second);
+      this->CreateSingleDSP((*l)->GetName().c_str(), *(*l)->Target);
       }
     }
 }

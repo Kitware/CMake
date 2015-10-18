@@ -510,17 +510,20 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
       continue;
       }
 
-    cmTargets& tgts = lg->GetMakefile()->GetTargets();
-    for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
+    std::vector<cmGeneratorTarget*> tgts = lg->GetGeneratorTargets();
+    for(std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+        l != tgts.end(); l++)
       {
-      cmTarget& target = l->second;
+      cmTarget& target = *(*l)->Target;
 
       if (target.GetType() == cmState::GLOBAL_TARGET)
         {
         continue;
         }
 
-      if (regenerate && (l->first != CMAKE_CHECK_BUILD_SYSTEM_TARGET))
+      std::string targetName = target.GetName();
+
+      if (regenerate && (targetName != CMAKE_CHECK_BUILD_SYSTEM_TARGET))
         {
         target.AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
         }
@@ -1085,21 +1088,26 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
                                            targets)
 {
   this->SetCurrentLocalGenerator(gen);
-  cmTargets &tgts = this->CurrentMakefile->GetTargets();
-  typedef std::map<std::string, cmTarget*, cmCompareTargets> cmSortedTargets;
+  std::vector<cmGeneratorTarget*> tgts =
+      this->CurrentLocalGenerator->GetGeneratorTargets();
+  typedef std::map<std::string, cmGeneratorTarget*, cmCompareTargets>
+      cmSortedTargets;
   cmSortedTargets sortedTargets;
-  for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
+  for(std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+      l != tgts.end(); l++)
     {
-    sortedTargets[l->first] = &l->second;
+    sortedTargets[(*l)->GetName()] = *l;
     }
   for(cmSortedTargets::iterator l = sortedTargets.begin();
       l != sortedTargets.end(); l++)
     {
-    cmTarget& cmtarget = *l->second;
-    cmGeneratorTarget* gtgt = this->GetGeneratorTarget(&cmtarget);
+    cmGeneratorTarget* gtgt = l->second;
+    cmTarget& cmtarget = *gtgt->Target;
+
+    std::string targetName = gtgt->GetName();
 
     // make sure ALL_BUILD, INSTALL, etc are only done once
-    if(this->SpecialTargetEmitted(l->first.c_str()))
+    if(this->SpecialTargetEmitted(targetName.c_str()))
       {
       continue;
       }
@@ -3062,10 +3070,11 @@ bool cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
       }
     cmMakefile* mf = (*i)->GetMakefile();
     std::vector<cmSourceGroup> sourceGroups = mf->GetSourceGroups();
-    cmTargets &tgts = mf->GetTargets();
-    for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
+    std::vector<cmGeneratorTarget*> tgts = (*i)->GetGeneratorTargets();
+    for(std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+        l != tgts.end(); l++)
       {
-      cmTarget& cmtarget = l->second;
+      cmTarget& cmtarget = *(*l)->Target;
 
       // Same skipping logic here as in CreateXCodeTargets so that we do not
       // end up with (empty anyhow) ALL_BUILD and XCODE_DEPEND_HELPER source

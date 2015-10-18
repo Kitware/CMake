@@ -375,11 +375,11 @@ bool cmGlobalVisualStudioGenerator::ComputeTargetDepends()
     for(std::vector<cmLocalGenerator*>::iterator i = gen.begin();
         i != gen.end(); ++i)
       {
-      cmTargets& targets = (*i)->GetMakefile()->GetTargets();
-      for(cmTargets::iterator ti = targets.begin();
+      std::vector<cmGeneratorTarget*> targets = (*i)->GetGeneratorTargets();
+      for(std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
           ti != targets.end(); ++ti)
         {
-        this->ComputeVSTargetDepends(ti->second);
+        this->ComputeVSTargetDepends(*(*ti)->Target);
         }
       }
     }

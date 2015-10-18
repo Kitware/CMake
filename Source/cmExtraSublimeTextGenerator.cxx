@@ -162,11 +162,12 @@ void cmExtraSublimeTextGenerator::
        lg!=lgs.end(); lg++)
     {
     cmMakefile* makefile=(*lg)->GetMakefile();
-    cmTargets& targets=makefile->GetTargets();
-    for (cmTargets::iterator ti = targets.begin();
+    std::vector<cmGeneratorTarget*> targets=(*lg)->GetGeneratorTargets();
+    for (std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
          ti != targets.end(); ti++)
       {
-      switch(ti->second.GetType())
+      std::string targetName = (*ti)->GetName();
+      switch((*ti)->GetType())
         {
         case cmState::GLOBAL_TARGET:
           {
@@ -175,7 +176,7 @@ void cmExtraSublimeTextGenerator::
           if (strcmp((*lg)->GetCurrentBinaryDirectory(),
                      (*lg)->GetBinaryDirectory())==0)
             {
-            this->AppendTarget(fout, ti->first, *lg, 0,
+            this->AppendTarget(fout, targetName, *lg, 0,
                                make.c_str(), makefile, compiler.c_str(),
                                sourceFileFlags, false);
             }
@@ -184,15 +185,16 @@ void cmExtraSublimeTextGenerator::
         case cmState::UTILITY:
           // Add all utility targets, except the Nightly/Continuous/
           // Experimental-"sub"targets as e.g. NightlyStart
-          if (((ti->first.find("Nightly")==0)   &&(ti->first!="Nightly"))
-             || ((ti->first.find("Continuous")==0)&&(ti->first!="Continuous"))
-             || ((ti->first.find("Experimental")==0)
-                                               && (ti->first!="Experimental")))
+          if (((targetName.find("Nightly")==0)   &&(targetName!="Nightly"))
+             || ((targetName.find("Continuous")==0)
+                 &&(targetName!="Continuous"))
+             || ((targetName.find("Experimental")==0)
+                 && (targetName!="Experimental")))
             {
             break;
             }
 
-          this->AppendTarget(fout, ti->first, *lg, 0,
+          this->AppendTarget(fout, targetName, *lg, 0,
                              make.c_str(), makefile, compiler.c_str(),
                              sourceFileFlags, false);
           break;
@@ -202,12 +204,12 @@ void cmExtraSublimeTextGenerator::
         case cmState::MODULE_LIBRARY:
         case cmState::OBJECT_LIBRARY:
           {
-          this->AppendTarget(fout, ti->first, *lg, &ti->second,
+          this->AppendTarget(fout, targetName, *lg, (*ti)->Target,
                              make.c_str(), makefile, compiler.c_str(),
                              sourceFileFlags, false);
-          std::string fastTarget = ti->first;
+          std::string fastTarget = targetName;
           fastTarget += "/fast";
-          this->AppendTarget(fout, fastTarget, *lg, &ti->second,
+          this->AppendTarget(fout, fastTarget, *lg, (*ti)->Target,
                              make.c_str(), makefile, compiler.c_str(),
                              sourceFileFlags, false);
           }

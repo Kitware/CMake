@@ -1762,43 +1762,43 @@ void cmLocalUnixMakefileGenerator3
   ruleFileStream
     << "# Targets provided globally by CMake.\n"
     << "\n";
-  cmTargets* targets = &(this->Makefile->GetTargets());
-  cmTargets::iterator glIt;
-  for ( glIt = targets->begin(); glIt != targets->end(); ++ glIt )
+  std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
+  std::vector<cmGeneratorTarget*>::iterator glIt;
+  for ( glIt = targets.begin(); glIt != targets.end(); ++ glIt )
     {
-    if ( glIt->second.GetType() == cmState::GLOBAL_TARGET )
+    if ( (*glIt)->GetType() == cmState::GLOBAL_TARGET )
       {
-      std::string targetString = "Special rule for the target " + glIt->first;
+      std::string targetString = "Special rule for the target " +
+          (*glIt)->GetName();
       std::vector<std::string> commands;
       std::vector<std::string> depends;
 
-      const char* text = glIt->second.GetProperty("EchoString");
+      const char* text = (*glIt)->GetProperty("EchoString");
       if ( !text )
         {
         text = "Running external command ...";
         }
-      depends.insert(depends.end(), glIt->second.GetUtilities().begin(),
-                     glIt->second.GetUtilities().end());
+      depends.insert(depends.end(), (*glIt)->Target->GetUtilities().begin(),
+                     (*glIt)->Target->GetUtilities().end());
       this->AppendEcho(commands, text,
                        cmLocalUnixMakefileGenerator3::EchoGlobal);
 
-      cmGeneratorTarget* gt = this->GlobalGenerator
-          ->GetGeneratorTarget(&glIt->second);
+      cmGeneratorTarget* gt = *glIt;
 
       // Global targets store their rules in pre- and post-build commands.
       this->AppendCustomDepends(depends,
-                                glIt->second.GetPreBuildCommands());
+                                gt->Target->GetPreBuildCommands());
       this->AppendCustomDepends(depends,
-                                glIt->second.GetPostBuildCommands());
+                                gt->Target->GetPostBuildCommands());
       this->AppendCustomCommands(commands,
-                                 glIt->second.GetPreBuildCommands(),
+                                 gt->Target->GetPreBuildCommands(),
                                  gt,
                                  cmLocalGenerator::START_OUTPUT);
       this->AppendCustomCommands(commands,
-                                 glIt->second.GetPostBuildCommands(),
+                                 gt->Target->GetPostBuildCommands(),
                                  gt,
                                  cmLocalGenerator::START_OUTPUT);
-      std::string targetName = glIt->second.GetName();
+      std::string targetName = gt->GetName();
       this->WriteMakeRule(ruleFileStream, targetString.c_str(),
                           targetName, depends, commands, true);
 
