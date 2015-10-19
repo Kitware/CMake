@@ -14,6 +14,7 @@
 #define cmCPackDragNDropGenerator_h
 
 #include "cmCPackGenerator.h"
+#include "cmGeneratedFileStream.h"
 
 /** \class cmCPackDragNDropGenerator
  * \brief A generator for OSX drag-n-drop installs
@@ -42,6 +43,13 @@ protected:
   int CreateDMG(const std::string& src_dir, const std::string& output_file);
 
   std::string InstallPrefix;
+
+private:
+  std::string slaDirectory;
+
+  void WriteLicense(cmGeneratedFileStream& outputStream, int licenseNumber, std::string licenseLanguage, std::string licenseFile = "");
+  void BreakLongLine(std::string line, std::vector<std::string>& lines);
+  void EscapeQuotes(std::string& line);
 };
 
 #endif
