@@ -33,6 +33,14 @@ public:
   bool IsImported() const;
   const char *GetLocation(const std::string& config) const;
 
+#define DECLARE_TARGET_POLICY(POLICY) \
+  cmPolicies::PolicyStatus GetPolicyStatus ## POLICY () const \
+    { return this->PolicyMap.Get(cmPolicies::POLICY); }
+
+  CM_FOR_EACH_TARGET_POLICY(DECLARE_TARGET_POLICY)
+
+#undef DECLARE_TARGET_POLICY
+
   /** Get the location of the target in the build tree with a placeholder
       referencing the configuration in the native build system.  This
       location is suitable for use as the LOCATION target property.  */
@@ -641,6 +649,7 @@ private:
   typedef std::map<OutputNameKey, std::string> OutputNameMapType;
   mutable OutputNameMapType OutputNameMap;
   mutable std::set<cmLinkItem> UtilityItems;
+  cmPolicies::PolicyMap PolicyMap;
   mutable bool PolicyWarnedCMP0022;
   mutable bool DebugIncludesDone;
   mutable bool DebugCompileOptionsDone;
