@@ -166,6 +166,8 @@ public:
     * install tree.  For example: "\@rpath/" or "\@loader_path/". */
   std::string GetInstallNameDirForInstallTree() const;
 
+  cmListFileBacktrace GetBacktrace() const;
+
   /** Get the soname of the target.  Allowed only for a shared library.  */
   std::string GetSOName(const std::string& config) const;
 

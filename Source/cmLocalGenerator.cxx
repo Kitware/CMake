@@ -1982,7 +1982,7 @@ AddCompilerRequirementFlag(std::string &flags,
     std::string e =
       lang + "_STANDARD is set to invalid value '" + standard + "'";
     this->GetGlobalGenerator()->GetCMakeInstance()
-      ->IssueMessage(cmake::FATAL_ERROR, e, target->Target->GetBacktrace());
+      ->IssueMessage(cmake::FATAL_ERROR, e, target->GetBacktrace());
     return;
     }
 
@@ -2141,7 +2141,7 @@ void cmLocalGenerator
       "For compatibility CMake is not honoring them for this target.";
     target->Target->GetMakefile()->GetCMakeInstance()
       ->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
-                     target->Target->GetBacktrace());
+                     target->GetBacktrace());
     }
 }
 

@@ -245,7 +245,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
             ->IssueMessage(cmake::FATAL_ERROR,
                             "Only executables and non-OBJECT libraries may "
                             "reference target objects.",
-                            depender->Target->GetBacktrace());
+                            depender->GetBacktrace());
           return;
           }
         const_cast<cmGeneratorTarget*>(depender)->Target->AddUtility(objLib);

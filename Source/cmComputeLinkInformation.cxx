@@ -571,7 +571,7 @@ bool cmComputeLinkInformation::Compute()
       "name."
       ;
     this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
-                                      this->Target->Target->GetBacktrace());
+                                      this->Target->GetBacktrace());
     }
 
   return true;
@@ -1548,7 +1548,7 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
           << "  " << item << "\n"
           << "which is a full-path but not a valid library file name.";
         this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
-                                        this->Target->Target->GetBacktrace());
+                                        this->Target->GetBacktrace());
         }
       }
     case cmPolicies::OLD:
@@ -1566,7 +1566,7 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
           << "  " << item << "\n"
           << "which is a full-path but not a valid library file name.";
       this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                                        this->Target->Target->GetBacktrace());
+                                        this->Target->GetBacktrace());
       }
       break;
     }
@@ -1594,7 +1594,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
         std::ostringstream w;
         this->PrintLinkPolicyDiagnosis(w);
         this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
-                                        this->Target->Target->GetBacktrace());
+                                        this->Target->GetBacktrace());
         }
     case cmPolicies::OLD:
       // OLD behavior is to add the paths containing libraries with
@@ -1610,7 +1610,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
       e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0003) << "\n";
       this->PrintLinkPolicyDiagnosis(e);
       this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                                        this->Target->Target->GetBacktrace());
+                                        this->Target->GetBacktrace());
       return false;
       }
     }

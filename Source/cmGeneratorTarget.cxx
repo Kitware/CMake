@@ -62,7 +62,7 @@ void reportBadObjLib(std::vector<cmSourceFile*> const& badObjLib,
     e << "but may contain only sources that compile, header files, and "
          "other files that would not affect linking of a normal library.";
     cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                     target->Target->GetBacktrace());
+                     target->GetBacktrace());
     }
 }
 
@@ -483,7 +483,7 @@ std::string cmGeneratorTarget::GetOutputName(const std::string& config,
           ->IssueMessage(
       cmake::FATAL_ERROR,
       "Target '" + this->GetName() + "' OUTPUT_NAME depends on itself.",
-      this->Target->GetBacktrace());
+      this->GetBacktrace());
     }
   return i->second;
 }
@@ -1007,7 +1007,7 @@ static bool processSources(cmGeneratorTarget const* tgt,
           {
           cmake* cm = tgt->GetLocalGenerator()->GetCMakeInstance();
           cm->IssueMessage(cmake::FATAL_ERROR, e,
-                          tgt->Target->GetBacktrace());
+                          tgt->GetBacktrace());
           }
         return contextDependent;
         }
@@ -1471,7 +1471,7 @@ bool cmGeneratorTarget::HasMacOSXRpathInstallNameDir(
     w << " corrupt.";
     cmake* cm = this->LocalGenerator->GetCMakeInstance();
     cm->IssueMessage(cmake::FATAL_ERROR, w.str(),
-                     this->Target->GetBacktrace());
+                     this->GetBacktrace());
     }
 
   return true;
@@ -1703,6 +1703,11 @@ std::string cmGeneratorTarget::GetInstallNameDirForInstallTree() const
     }
 }
 
+cmListFileBacktrace cmGeneratorTarget::GetBacktrace() const
+{
+  return this->Target->GetBacktrace();
+}
+
 //----------------------------------------------------------------------------
 class cmTargetCollectLinkLanguages
 {
@@ -1749,7 +1754,7 @@ public:
             "call is missing for an IMPORTED target, or an ALIAS target is "
             "missing?";
           this->Target->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
-            messageType, e.str(), this->Target->Target->GetBacktrace());
+            messageType, e.str(), this->Target->GetBacktrace());
           }
         }
       return;
@@ -1846,7 +1851,7 @@ public:
       e << "Set the LINKER_LANGUAGE property for this target.";
       cmake* cm = this->Target->GetLocalGenerator()->GetCMakeInstance();
       cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                       this->Target->Target->GetBacktrace());
+                       this->Target->GetBacktrace());
       }
     return *this->Preferred.begin();
     }
@@ -4831,7 +4836,7 @@ cmGeneratorTarget::OutputInfo const* cmGeneratorTarget::GetOutputInfo(
     this->LocalGenerator->GetCMakeInstance()->IssueMessage(
       cmake::FATAL_ERROR,
       "Target '" + this->GetName() + "' OUTPUT_DIRECTORY depends on itself.",
-      this->Target->GetBacktrace());
+      this->GetBacktrace());
     return 0;
     }
   return &i->second;
@@ -5578,7 +5583,7 @@ std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
           << "Target \"" << this->GetName() << "\" links to item \""
           << item << "\" which has leading or trailing whitespace.";
         cm->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
-                         this->Target->GetBacktrace());
+                         this->GetBacktrace());
         }
       case cmPolicies::OLD:
         break;
@@ -5589,7 +5594,7 @@ std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
           << item << "\" which has leading or trailing whitespace.  "
           << "This is now an error according to policy CMP0004.";
         cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                         this->Target->GetBacktrace());
+                         this->GetBacktrace());
         }
         break;
       case cmPolicies::REQUIRED_IF_USED:
@@ -5600,7 +5605,7 @@ std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
           << "Target \"" << this->GetName() << "\" links to item \""
           << item << "\" which has leading or trailing whitespace.";
         cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                         this->Target->GetBacktrace());
+                         this->GetBacktrace());
         }
         break;
       }
@@ -5798,7 +5803,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
             {
             e << "Target \"" << this->GetName() << "\" links to itself.";
             this->LocalGenerator->GetCMakeInstance()->IssueMessage(
-              messageType, e.str(), this->Target->GetBacktrace());
+              messageType, e.str(), this->GetBacktrace());
             if (messageType == cmake::FATAL_ERROR)
               {
               return;
@@ -5873,7 +5878,7 @@ cmGeneratorTarget::FindTargetToLink(std::string const& name) const
       "with the ENABLE_EXPORTS property set.";
     cmake* cm = this->LocalGenerator->GetCMakeInstance();
     cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                     this->Target->GetBacktrace());
+                     this->GetBacktrace());
     tgt = 0;
     }
 
