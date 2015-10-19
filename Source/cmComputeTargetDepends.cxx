@@ -362,7 +362,7 @@ void cmComputeTargetDepends::AddTargetDepend(
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     bool issueMessage = false;
     std::ostringstream e;
-    switch(depender->Target->GetPolicyStatusCMP0046())
+    switch(depender->GetPolicyStatusCMP0046())
       {
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0046) << "\n";

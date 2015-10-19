@@ -407,7 +407,7 @@ cmComputeLinkInformation
   // order to support such projects we need to add the directories
   // containing libraries linked with a full path to the -L path.
   this->OldLinkDirMode =
-    this->Target->Target->GetPolicyStatusCMP0003() != cmPolicies::NEW;
+    this->Target->GetPolicyStatusCMP0003() != cmPolicies::NEW;
   if(this->OldLinkDirMode)
     {
     // Construct a mask to not bother with this behavior for link
@@ -1140,7 +1140,7 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
   // Full path libraries should specify a valid library file name.
   // See documentation of CMP0008.
   std::string generator = this->GlobalGenerator->GetName();
-  if(this->Target->Target->GetPolicyStatusCMP0008() != cmPolicies::NEW &&
+  if(this->Target->GetPolicyStatusCMP0008() != cmPolicies::NEW &&
      (generator.find("Visual Studio") != generator.npos ||
       generator.find("Xcode") != generator.npos))
     {
@@ -1221,7 +1221,7 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
     }
 
   // Check the policy for whether we should use the approach below.
-  switch (this->Target->Target->GetPolicyStatusCMP0060())
+  switch (this->Target->GetPolicyStatusCMP0060())
     {
     case cmPolicies::WARN:
       if (this->CMP0060Warn)
@@ -1531,7 +1531,7 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
   this->OrderLinkerSearchPath->AddLinkLibrary(item);
 
   // Produce any needed message.
-  switch(this->Target->Target->GetPolicyStatusCMP0008())
+  switch(this->Target->GetPolicyStatusCMP0008())
     {
     case cmPolicies::WARN:
       {
@@ -1583,7 +1583,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
     }
 
   // Enforce policy constraints.
-  switch(this->Target->Target->GetPolicyStatusCMP0003())
+  switch(this->Target->GetPolicyStatusCMP0003())
     {
     case cmPolicies::WARN:
       if(!this->CMakeInstance->GetState()

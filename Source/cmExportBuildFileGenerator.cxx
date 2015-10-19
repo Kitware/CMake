@@ -107,8 +107,8 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
     this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE",
                                   gte, properties);
     const bool newCMP0022Behavior =
-        gte->Target->GetPolicyStatusCMP0022() != cmPolicies::WARN
-        && gte->Target->GetPolicyStatusCMP0022() != cmPolicies::OLD;
+        gte->GetPolicyStatusCMP0022() != cmPolicies::WARN
+        && gte->GetPolicyStatusCMP0022() != cmPolicies::OLD;
     if (newCMP0022Behavior)
       {
       this->PopulateInterfaceLinkLibrariesProperty(gte,

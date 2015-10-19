@@ -1551,7 +1551,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
         GetGlobalPropertyAsBool("TARGET_SUPPORTS_SHARED_LIBS"))
     {
     bool add_shlib_flags = false;
-    switch(tgt.Target->GetPolicyStatusCMP0065())
+    switch(tgt.GetPolicyStatusCMP0065())
       {
       case cmPolicies::WARN:
         if(!tgt.GetPropertyAsBool("ENABLE_EXPORTS") &&
@@ -2108,7 +2108,7 @@ void cmLocalGenerator
       target->GetType() != cmState::MODULE_LIBRARY &&
       !target->IsExecutableWithExports())
     {
-    switch (target->Target->GetPolicyStatusCMP0063())
+    switch (target->GetPolicyStatusCMP0063())
       {
       case cmPolicies::OLD:
         return;

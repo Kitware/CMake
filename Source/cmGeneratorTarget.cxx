@@ -1498,7 +1498,7 @@ bool cmGeneratorTarget::MacOSXRpathInstallNameDirDefault() const
     return this->GetPropertyAsBool("MACOSX_RPATH");
     }
 
-  cmPolicies::PolicyStatus cmp0042 = this->Target->GetPolicyStatusCMP0042();
+  cmPolicies::PolicyStatus cmp0042 = this->GetPolicyStatusCMP0042();
 
   if(cmp0042 == cmPolicies::WARN)
     {
@@ -2635,7 +2635,7 @@ static void processIncludeDirectories(cmGeneratorTarget const* tgt,
         cmake::MessageType messageType = cmake::FATAL_ERROR;
         if (checkCMP0027)
           {
-          switch(tgt->Target->GetPolicyStatusCMP0027())
+          switch(tgt->GetPolicyStatusCMP0027())
             {
             case cmPolicies::WARN:
               e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0027) << "\n";
@@ -2674,7 +2674,7 @@ static void processIncludeDirectories(cmGeneratorTarget const* tgt,
           }
         else
           {
-          switch(tgt->Target->GetPolicyStatusCMP0021())
+          switch(tgt->GetPolicyStatusCMP0021())
             {
             case cmPolicies::WARN:
               {
@@ -4706,8 +4706,8 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
         }
       }
     }
-  else if (this->Target->GetPolicyStatusCMP0022() == cmPolicies::WARN
-        || this->Target->GetPolicyStatusCMP0022() == cmPolicies::OLD)
+  else if (this->GetPolicyStatusCMP0022() == cmPolicies::WARN
+        || this->GetPolicyStatusCMP0022() == cmPolicies::OLD)
     {
     // The link implementation is the default link interface.
     cmLinkImplementationLibraries const*
@@ -5075,8 +5075,8 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
   // libraries and executables that export symbols.
   const char* explicitLibraries = 0;
   std::string linkIfaceProp;
-  if(this->Target->GetPolicyStatusCMP0022() != cmPolicies::OLD &&
-     this->Target->GetPolicyStatusCMP0022() != cmPolicies::WARN)
+  if(this->GetPolicyStatusCMP0022() != cmPolicies::OLD &&
+     this->GetPolicyStatusCMP0022() != cmPolicies::WARN)
     {
     // CMP0022 NEW behavior is to use INTERFACE_LINK_LIBRARIES.
     linkIfaceProp = "INTERFACE_LINK_LIBRARIES";
@@ -5102,7 +5102,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     }
 
   if(explicitLibraries &&
-     this->Target->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
+     this->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
      !this->PolicyWarnedCMP0022)
     {
     // Compare the explicitly set old link interface properties to the
@@ -5147,8 +5147,8 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
                                 iface.Libraries,
                                 iface.HadHeadSensitiveCondition);
     }
-  else if (this->Target->GetPolicyStatusCMP0022() == cmPolicies::WARN
-        || this->Target->GetPolicyStatusCMP0022() == cmPolicies::OLD)
+  else if (this->GetPolicyStatusCMP0022() == cmPolicies::WARN
+        || this->GetPolicyStatusCMP0022() == cmPolicies::OLD)
     // If CMP0022 is NEW then the plain tll signature sets the
     // INTERFACE_LINK_LIBRARIES, so if we get here then the project
     // cleared the property explicitly and we should not fall back
@@ -5159,7 +5159,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
       this->GetLinkImplementationLibrariesInternal(config, headTarget);
     iface.Libraries.insert(iface.Libraries.end(),
                            impl->Libraries.begin(), impl->Libraries.end());
-    if(this->Target->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
+    if(this->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
        !this->PolicyWarnedCMP0022 && !usage_requirements_only)
       {
       // Compare the link implementation fallback link interface to the
@@ -5621,7 +5621,7 @@ std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
   if(lib != item)
     {
     cmake* cm = this->LocalGenerator->GetCMakeInstance();
-    switch(this->Target->GetPolicyStatusCMP0004())
+    switch(this->GetPolicyStatusCMP0004())
       {
       case cmPolicies::WARN:
         {
@@ -5829,7 +5829,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
           bool noMessage = false;
           cmake::MessageType messageType = cmake::FATAL_ERROR;
           std::ostringstream e;
-          switch(this->Target->GetPolicyStatusCMP0038())
+          switch(this->GetPolicyStatusCMP0038())
             {
             case cmPolicies::WARN:
               {

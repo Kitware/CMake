@@ -270,7 +270,7 @@ static bool checkInterfaceDirs(const std::string &prepro,
       {
       if (prop == "INTERFACE_INCLUDE_DIRECTORIES")
         {
-        switch (target->Target->GetPolicyStatusCMP0041())
+        switch (target->GetPolicyStatusCMP0041())
           {
           case cmPolicies::WARN:
             messageType = cmake::WARNING;
@@ -317,7 +317,7 @@ static bool checkInterfaceDirs(const std::string &prepro,
         {
         if (!shouldContinue)
           {
-          switch(target->Target->GetPolicyStatusCMP0052())
+          switch(target->GetPolicyStatusCMP0052())
             {
             case cmPolicies::WARN:
               {
@@ -830,10 +830,8 @@ cmExportFileGenerator
     }
 
   const bool newCMP0022Behavior =
-                        target->Target
-                              ->GetPolicyStatusCMP0022() != cmPolicies::WARN
-                     && target->Target
-                              ->GetPolicyStatusCMP0022() != cmPolicies::OLD;
+                        target->GetPolicyStatusCMP0022() != cmPolicies::WARN
+                     && target->GetPolicyStatusCMP0022() != cmPolicies::OLD;
 
   if(newCMP0022Behavior && !this->ExportOld)
     {
