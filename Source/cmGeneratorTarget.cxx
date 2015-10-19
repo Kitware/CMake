@@ -1709,6 +1709,16 @@ cmListFileBacktrace cmGeneratorTarget::GetBacktrace() const
 }
 
 //----------------------------------------------------------------------------
+bool cmGeneratorTarget::HaveWellDefinedOutputFiles() const
+{
+  return
+    this->GetType() == cmState::STATIC_LIBRARY ||
+    this->GetType() == cmState::SHARED_LIBRARY ||
+    this->GetType() == cmState::MODULE_LIBRARY ||
+    this->GetType() == cmState::EXECUTABLE;
+}
+
+//----------------------------------------------------------------------------
 const char* cmGeneratorTarget::GetExportMacro() const
 {
   // Define the symbol for targets that export symbols.
@@ -4819,7 +4829,7 @@ cmGeneratorTarget::OutputInfo const* cmGeneratorTarget::GetOutputInfo(
     }
 
   // Only libraries and executables have well-defined output files.
-  if(!this->Target->HaveWellDefinedOutputFiles())
+  if(!this->HaveWellDefinedOutputFiles())
     {
     std::string msg = "cmGeneratorTarget::GetOutputInfo called for ";
     msg += this->GetName();

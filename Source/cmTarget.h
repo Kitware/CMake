@@ -241,9 +241,6 @@ public:
   /** Get a backtrace from the creation of the target.  */
   cmListFileBacktrace const& GetBacktrace() const;
 
-  /** @return whether this target have a well defined output file name. */
-  bool HaveWellDefinedOutputFiles() const;
-
   void InsertInclude(std::string const& entry,
                      cmListFileBacktrace const& bt,
                      bool before = false);

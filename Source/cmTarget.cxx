@@ -1560,16 +1560,6 @@ void cmTarget::MarkAsImported()
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::HaveWellDefinedOutputFiles() const
-{
-  return
-    this->GetType() == cmState::STATIC_LIBRARY ||
-    this->GetType() == cmState::SHARED_LIBRARY ||
-    this->GetType() == cmState::MODULE_LIBRARY ||
-    this->GetType() == cmState::EXECUTABLE;
-}
-
-//----------------------------------------------------------------------------
 bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
 {
   if (this->IsImported())

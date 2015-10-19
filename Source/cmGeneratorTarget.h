@@ -196,6 +196,9 @@ public:
 
   std::string GetModuleDefinitionFile(const std::string& config) const;
 
+  /** @return whether this target have a well defined output file name. */
+  bool HaveWellDefinedOutputFiles() const;
+
   /** Link information from the transitive closure of the link
       implementation and the interfaces of its dependencies.  */
   struct LinkClosure
