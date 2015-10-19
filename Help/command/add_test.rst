@@ -28,6 +28,13 @@ quotes, or other characters special in CMake syntax.  The options are:
   directory set to the build directory corresponding to the
   current source directory.
 
+The given test command is expected to exit with code ``0`` to pass and
+non-zero to fail, or vice-versa if the :prop_test:`WILL_FAIL` test
+property is set.  Any output written to stdout or stderr will be
+captured by :manual:`ctest(1)` but does not affect the pass/fail status
+unless the :prop_test:`PASS_REGULAR_EXPRESSION` or
+:prop_test:`FAIL_REGULAR_EXPRESSION` test property is used.
+
 The ``COMMAND`` and ``WORKING_DIRECTORY`` options may use "generator
 expressions" with the syntax ``$<...>``.  See the
 :manual:`cmake-generator-expressions(7)` manual for available expressions.
