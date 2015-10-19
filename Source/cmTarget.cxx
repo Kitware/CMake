@@ -611,13 +611,6 @@ void cmTarget::ClearDependencyInformation( cmMakefile& mf,
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::NameResolvesToFramework(const std::string& libname) const
-{
-  return this->Makefile->GetGlobalGenerator()->
-    NameResolvesToFramework(libname);
-}
-
-//----------------------------------------------------------------------------
 std::string cmTarget::GetDebugGeneratorExpressions(const std::string &value,
                                   cmTargetLinkLibraryType llt) const
 {
