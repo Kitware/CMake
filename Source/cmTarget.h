@@ -140,9 +140,6 @@ public:
   const LinkLibraryVectorType &GetOriginalLinkLibraries() const
     {return this->OriginalLinkLibraries;}
 
-  /** Compute the link type to use for the given configuration.  */
-  cmTargetLinkLibraryType ComputeLinkType(const std::string& config) const;
-
   /**
    * Clear the dependency information recorded for this target, if any.
    */

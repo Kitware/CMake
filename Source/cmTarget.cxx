@@ -583,31 +583,6 @@ const std::vector<std::string>& cmTarget::GetLinkDirectories() const
 }
 
 //----------------------------------------------------------------------------
-cmTargetLinkLibraryType cmTarget::ComputeLinkType(
-                                      const std::string& config) const
-{
-  // No configuration is always optimized.
-  if(config.empty())
-    {
-    return OPTIMIZED_LibraryType;
-    }
-
-  // Get the list of configurations considered to be DEBUG.
-  std::vector<std::string> debugConfigs =
-    this->Makefile->GetCMakeInstance()->GetDebugConfigs();
-
-  // Check if any entry in the list matches this configuration.
-  std::string configUpper = cmSystemTools::UpperCase(config);
-  if (std::find(debugConfigs.begin(), debugConfigs.end(), configUpper) !=
-      debugConfigs.end())
-    {
-    return DEBUG_LibraryType;
-    }
-  // The current configuration is not a debug configuration.
-  return OPTIMIZED_LibraryType;
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::ClearDependencyInformation( cmMakefile& mf,
                                            const std::string& target )
 {

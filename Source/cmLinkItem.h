@@ -14,6 +14,7 @@
 #define cmLinkItem_h
 
 #include "cmListFileCache.h"
+#include "cmSystemTools.h"
 
 class cmGeneratorTarget;
 
@@ -117,5 +118,28 @@ struct cmOptionalLinkImplementation: public cmLinkImplementation
   bool LanguagesDone;
   bool HadHeadSensitiveCondition;
 };
+
+/** Compute the link type to use for the given configuration.  */
+inline cmTargetLinkLibraryType
+CMP0003_ComputeLinkType(const std::string& config,
+                        std::vector<std::string> const& debugConfigs)
+{
+  // No configuration is always optimized.
+  if(config.empty())
+    {
+    return OPTIMIZED_LibraryType;
+    }
+
+  // Check if any entry in the list matches this configuration.
+  std::string configUpper = cmSystemTools::UpperCase(config);
+  if (std::find(debugConfigs.begin(), debugConfigs.end(), configUpper) !=
+      debugConfigs.end())
+    {
+    return DEBUG_LibraryType;
+    }
+  // The current configuration is not a debug configuration.
+  return OPTIMIZED_LibraryType;
+}
+
 
 #endif

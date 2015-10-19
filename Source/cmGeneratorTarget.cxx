@@ -5877,7 +5877,12 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
                                 this->MaxLanguageStandards);
     }
 
-  cmTargetLinkLibraryType linkType = this->Target->ComputeLinkType(config);
+  // Get the list of configurations considered to be DEBUG.
+  std::vector<std::string> debugConfigs =
+    this->Makefile->GetCMakeInstance()->GetDebugConfigs();
+
+  cmTargetLinkLibraryType linkType =
+      CMP0003_ComputeLinkType(config, debugConfigs);
   cmTarget::LinkLibraryVectorType const& oldllibs =
     this->Target->GetOriginalLinkLibraries();
   for(cmTarget::LinkLibraryVectorType::const_iterator li = oldllibs.begin();
