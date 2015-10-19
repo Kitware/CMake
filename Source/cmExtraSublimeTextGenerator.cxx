@@ -427,7 +427,7 @@ ComputeDefines(cmSourceFile *source, cmLocalGenerator* lg,
   const std::string& config = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
 
   // Add the export symbol definition for shared library objects.
-  if(const char* exportMacro = target->Target->GetExportMacro())
+  if(const char* exportMacro = target->GetExportMacro())
     {
     lg->AppendDefines(defines, exportMacro);
     }

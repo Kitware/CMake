@@ -168,6 +168,10 @@ public:
 
   cmListFileBacktrace GetBacktrace() const;
 
+  /** Get the macro to define when building sources in this target.
+      If no macro should be defined null is returned.  */
+  const char* GetExportMacro() const;
+
   /** Get the soname of the target.  Allowed only for a shared library.  */
   std::string GetSOName(const std::string& config) const;
 
@@ -486,6 +490,8 @@ private:
   mutable std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
   mutable std::map<std::string, std::vector<std::string> > SystemIncludesCache;
+
+  mutable std::string ExportMacro;
 
   void ConstructSourceFileFlags() const;
   mutable bool SourceFileFlagsConstructed;

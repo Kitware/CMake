@@ -220,10 +220,6 @@ public:
                        const char** imp,
                        std::string& suffix) const;
 
-  /** Get the macro to define when building sources in this target.
-      If no macro should be defined null is returned.  */
-  const char* GetExportMacro() const;
-
   /** Return whether this target is an executable with symbol exports
       enabled.  */
   bool IsExecutableWithExports() const;
@@ -369,7 +365,6 @@ private:
   std::string Name;
   std::string InstallPath;
   std::string RuntimeInstallPath;
-  mutable std::string ExportMacro;
   std::vector<std::string> LinkDirectories;
   std::vector<cmCustomCommand> PreBuildCommands;
   std::vector<cmCustomCommand> PreLinkCommands;

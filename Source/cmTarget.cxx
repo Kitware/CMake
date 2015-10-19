@@ -2109,32 +2109,6 @@ std::string cmTarget::GetFrameworkVersion() const
     }
 }
 
-//----------------------------------------------------------------------------
-const char* cmTarget::GetExportMacro() const
-{
-  // Define the symbol for targets that export symbols.
-  if(this->GetType() == cmState::SHARED_LIBRARY ||
-     this->GetType() == cmState::MODULE_LIBRARY ||
-     this->IsExecutableWithExports())
-    {
-    if(const char* custom_export_name = this->GetProperty("DEFINE_SYMBOL"))
-      {
-      this->ExportMacro = custom_export_name;
-      }
-    else
-      {
-      std::string in = this->GetName();
-      in += "_EXPORTS";
-      this->ExportMacro = cmSystemTools::MakeCindentifier(in);
-      }
-    return this->ExportMacro.c_str();
-    }
-  else
-    {
-    return 0;
-    }
-}
-
 bool cmTarget::GetMappedConfig(std::string const& desired_config,
                                const char** loc,
                                const char** imp,
