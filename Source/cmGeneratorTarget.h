@@ -196,6 +196,9 @@ public:
 
   std::string GetModuleDefinitionFile(const std::string& config) const;
 
+  /** Return whether or not the target is for a DLL platform.  */
+  bool IsDLLPlatform() const;
+
   /** @return whether this target have a well defined output file name. */
   bool HaveWellDefinedOutputFiles() const;
 
@@ -646,6 +649,7 @@ private:
   mutable bool DebugSourcesDone;
   mutable bool LinkImplementationLanguageIsContextDependent;
   mutable bool UtilityItemsDone;
+  bool DLLPlatform;
 
   bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
                            std::string& out) const;

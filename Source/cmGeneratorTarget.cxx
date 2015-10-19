@@ -304,6 +304,10 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
         t->GetSourceEntries(),
         t->GetSourceBacktraces(),
         this->SourceEntries, true);
+
+  this->DLLPlatform = (this->Makefile->IsOn("WIN32") ||
+                       this->Makefile->IsOn("CYGWIN") ||
+                       this->Makefile->IsOn("MINGW"));
 }
 
 cmGeneratorTarget::~cmGeneratorTarget()
@@ -366,7 +370,7 @@ const char* cmGeneratorTarget::GetOutputTargetType(bool implib) const
   switch(this->GetType())
     {
     case cmState::SHARED_LIBRARY:
-      if(this->Target->IsDLLPlatform())
+      if(this->IsDLLPlatform())
         {
         if(implib)
           {
@@ -2056,6 +2060,11 @@ cmGeneratorTarget::GetModuleDefinitionFile(const std::string& config) const
   std::string data;
   IMPLEMENT_VISIT_IMPL(ModuleDefinitionFile, COMMA std::string)
   return data;
+}
+
+bool cmGeneratorTarget::IsDLLPlatform() const
+{
+  return this->DLLPlatform;
 }
 
 //----------------------------------------------------------------------------
@@ -5964,7 +5973,7 @@ bool cmGeneratorTarget::IsExecutableWithExports() const
 //----------------------------------------------------------------------------
 bool cmGeneratorTarget::HasImportLibrary() const
 {
-  return (this->Target->IsDLLPlatform() &&
+  return (this->IsDLLPlatform() &&
           (this->GetType() == cmState::SHARED_LIBRARY ||
            this->IsExecutableWithExports()));
 }

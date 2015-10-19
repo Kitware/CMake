@@ -224,9 +224,6 @@ public:
       enabled.  */
   bool IsExecutableWithExports() const;
 
-  /** Return whether or not the target is for a DLL platform.  */
-  bool IsDLLPlatform() const { return this->DLLPlatform; }
-
   /** Return whether this target is a shared library Framework on
       Apple.  */
   bool IsFrameworkOnApple() const;
