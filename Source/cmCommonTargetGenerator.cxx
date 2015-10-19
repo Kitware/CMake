@@ -265,7 +265,7 @@ std::string cmCommonTargetGenerator::GetFrameworkFlags(std::string const& l)
   for(std::vector<std::string>::iterator i = includes.begin();
       i != includes.end(); ++i)
     {
-    if(this->Target->NameResolvesToFramework(*i))
+    if(this->GlobalGenerator->NameResolvesToFramework(*i))
       {
       std::string frameworkDir = *i;
       frameworkDir += "/../";
