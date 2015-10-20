@@ -311,8 +311,6 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     this->GetOption("CPACK_DMG_DS_STORE")
     ? this->GetOption("CPACK_DMG_DS_STORE") : "";
 
-  slaDirectory = !slaDirectory.empty() ? slaDirectory : "";
-
   const std::string cpack_dmg_languages =
     this->GetOption("CPACK_DMG_LANGUAGES")
       ? this->GetOption("CPACK_DMG_LANGUAGES") : "";
