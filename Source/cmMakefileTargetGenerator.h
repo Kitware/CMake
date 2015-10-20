@@ -18,7 +18,6 @@
 #include "cmOSXBundleGenerator.h"
 
 class cmCustomCommandGenerator;
-class cmDependInformation;
 class cmDepends;
 class cmGeneratorTarget;
 class cmGeneratedFileStream;

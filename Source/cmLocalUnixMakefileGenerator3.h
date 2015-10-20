@@ -19,7 +19,6 @@
 
 class cmCustomCommand;
 class cmCustomCommandGenerator;
-class cmDependInformation;
 class cmDepends;
 class cmMakefileTargetGenerator;
 class cmTarget;
