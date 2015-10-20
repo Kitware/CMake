@@ -48,7 +48,7 @@ private:
   std::string slaDirectory;
 
   void WriteLicense(cmGeneratedFileStream& outputStream, int licenseNumber, std::string licenseLanguage, std::string licenseFile = "");
-  void BreakLongLine(std::string line, std::vector<std::string>& lines);
+  void BreakLongLine(const std::string& line, std::vector<std::string>& lines);
   void EscapeQuotes(std::string& line);
 };
 

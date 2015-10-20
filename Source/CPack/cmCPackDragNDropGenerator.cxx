@@ -843,7 +843,7 @@ cmCPackDragNDropGenerator::WriteLicense(cmGeneratedFileStream& outputStream, int
 }
 
 void
-cmCPackDragNDropGenerator::BreakLongLine(std::string line, std::vector<std::string>& lines)
+cmCPackDragNDropGenerator::BreakLongLine(const std::string& line, std::vector<std::string>& lines)
 {
   const size_t max_line_length = 512;
   for(size_t i = 0; i < line.size(); i += max_line_length)
