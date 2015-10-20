@@ -11,9 +11,14 @@
 ============================================================================*/
 
 #include "cmConditionEvaluator.h"
+#include "cmOutputConverter.h"
 
-cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile):
+cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
+                                           const cmListFileContext &context,
+                                           const cmListFileBacktrace& bt):
   Makefile(makefile),
+  ExecutionContext(context),
+  Backtrace(bt),
   Policy12Status(makefile.GetPolicyStatus(cmPolicies::CMP0012)),
   Policy54Status(makefile.GetPolicyStatus(cmPolicies::CMP0054)),
   Policy57Status(makefile.GetPolicyStatus(cmPolicies::CMP0057)),
@@ -98,6 +103,25 @@ bool cmConditionEvaluator::IsTrue(
     errorString, status, true);
 }
 
+cmListFileContext cmConditionEvaluator::GetConditionContext(
+    cmMakefile* mf,
+    const cmCommandContext& command,
+    const std::string& filePath)
+{
+  cmListFileContext context =
+      cmListFileContext::FromCommandContext(
+        command,
+        filePath);
+
+  if(!mf->GetCMakeInstance()->GetIsInTryCompile())
+    {
+    cmOutputConverter converter(mf->GetStateSnapshot());
+    context.FilePath = converter.Convert(context.FilePath,
+                                         cmOutputConverter::HOME);
+    }
+  return context;
+}
+
 //=========================================================================
 const char* cmConditionEvaluator::GetDefinitionIfUnquoted(
   cmExpandedCommandArgument const& argument) const
@@ -113,7 +137,8 @@ const char* cmConditionEvaluator::GetDefinitionIfUnquoted(
 
   if(def && argument.WasQuoted() && this->Policy54Status == cmPolicies::WARN)
     {
-    if(!this->Makefile.HasCMP0054AlreadyBeenReported())
+    if(!this->Makefile.HasCMP0054AlreadyBeenReported(
+         this->ExecutionContext))
       {
       std::ostringstream e;
       e << (cmPolicies::GetPolicyWarning(cmPolicies::CMP0054)) << "\n";
@@ -122,7 +147,9 @@ const char* cmConditionEvaluator::GetDefinitionIfUnquoted(
         "when the policy is set to NEW.  "
         "Since the policy is not set the OLD behavior will be used.";
 
-      this->Makefile.IssueMessage(cmake::AUTHOR_WARNING, e.str());
+      this->Makefile.GetCMakeInstance()
+          ->IssueMessage(cmake::AUTHOR_WARNING, e.str(),
+                         this->Backtrace);
       }
     }
 
@@ -159,7 +186,8 @@ bool cmConditionEvaluator::IsKeyword(std::string const& keyword,
   if(isKeyword && argument.WasQuoted() &&
     this->Policy54Status == cmPolicies::WARN)
     {
-    if(!this->Makefile.HasCMP0054AlreadyBeenReported())
+    if(!this->Makefile.HasCMP0054AlreadyBeenReported(
+         this->ExecutionContext))
       {
       std::ostringstream e;
       e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0054) << "\n";
@@ -168,7 +196,9 @@ bool cmConditionEvaluator::IsKeyword(std::string const& keyword,
         "when the policy is set to NEW.  "
         "Since the policy is not set the OLD behavior will be used.";
 
-      this->Makefile.IssueMessage(cmake::AUTHOR_WARNING, e.str());
+      this->Makefile.GetCMakeInstance()
+          ->IssueMessage(cmake::AUTHOR_WARNING, e.str(),
+                         this->Backtrace);
       }
     }
 
