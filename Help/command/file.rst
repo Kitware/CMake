@@ -103,7 +103,8 @@ Generate a list of files that match the ``<globbing-expressions>`` and
 store it into the ``<variable>``.  Globbing expressions are similar to
 regular expressions, but much simpler.  If ``RELATIVE`` flag is
 specified, the results will be returned as relative paths to the given
-path.
+path.  No specific order of results is defined.  If order is important then
+sort the list explicitly (e.g. using the :command:`list(SORT)` command).
 
 By default ``GLOB`` lists directories - directories are omited in result if
 ``LIST_DIRECTORIES`` is set to false.
