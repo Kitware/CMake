@@ -13,7 +13,8 @@
 #define cmOutputRequiredFilesCommand_h
 
 #include "cmCommand.h"
-#include "cmMakeDepend.h"
+
+class cmDependInformation;
 
 class cmOutputRequiredFilesCommand : public cmCommand
 {

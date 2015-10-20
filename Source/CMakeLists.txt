@@ -299,7 +299,6 @@ set(SRCS
   cmLocalUnixMakefileGenerator3.cxx
   cmLocale.h
   ${MACH_SRCS}
-  cmMakeDepend.h
   cmMakefile.cxx
   cmMakefile.h
   cmMakefileTargetGenerator.cxx
