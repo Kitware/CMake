@@ -259,7 +259,6 @@ CMAKE_CXX_SOURCES="\
   cmPropertyMap \
   cmPropertyDefinition \
   cmPropertyDefinitionMap \
-  cmMakeDepend \
   cmMakefile \
   cmExportBuildFileGenerator \
   cmExportFileGenerator \
