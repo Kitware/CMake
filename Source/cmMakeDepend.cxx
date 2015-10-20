@@ -51,7 +51,7 @@ void cmMakeDepend::SetMakefile(cmMakefile* makefile)
   this->IncludeFileRegularExpression.compile(
     this->Makefile->GetIncludeRegularExpression());
   this->ComplainFileRegularExpression.compile(
-    this->Makefile->ComplainFileRegularExpression.c_str());
+    this->Makefile->GetComplainRegularExpression());
 
   // Now extract any include paths from the targets
   std::set<std::string> uniqueIncludes;
