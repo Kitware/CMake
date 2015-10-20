@@ -2587,8 +2587,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
      "${CMake_BINARY_DIR}/Testing/DelphiCoverage/DartConfiguration.tcl")
   file(COPY "${CMake_SOURCE_DIR}/Tests/DelphiCoverage/src"
     DESTINATION "${CMake_BINARY_DIR}/Testing/DelphiCoverage")
-  file(COPY "${CMake_SOURCE_DIR}/Tests/DelphiCoverage/UTCovTest(UTCovTest.pas).html"
-    DESTINATION "${CMake_BINARY_DIR}/Testing/DelphiCoverage")
+  configure_file(
+    "${CMake_SOURCE_DIR}/Tests/DelphiCoverage/UTCovTest(UTCovTest.pas).html.in"
+    "${CMake_BINARY_DIR}/Testing/DelphiCoverage/UTCovTest(UTCovTest.pas).html")
   add_test(NAME CTestDelphiCoverage
     COMMAND cmake -E chdir
     ${CMake_BINARY_DIR}/Testing/DelphiCoverage
