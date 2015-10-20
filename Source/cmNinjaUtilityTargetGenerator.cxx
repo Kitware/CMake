@@ -90,7 +90,8 @@ void cmNinjaUtilityTargetGenerator::Generate()
   } else {
     std::string command =
       this->GetLocalGenerator()->BuildCommandLine(commands);
-    const char *echoStr = this->GetTarget()->GetProperty("EchoString");
+    const char *echoStr =
+        this->GetGeneratorTarget()->GetProperty("EchoString");
     std::string desc;
     if (echoStr)
       desc = echoStr;

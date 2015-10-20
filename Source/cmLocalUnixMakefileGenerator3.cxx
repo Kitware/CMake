@@ -1034,7 +1034,7 @@ void
 cmLocalUnixMakefileGenerator3
 ::AppendCustomCommands(std::vector<std::string>& commands,
                        const std::vector<cmCustomCommand>& ccs,
-                       cmTarget* target,
+                       cmGeneratorTarget* target,
                        cmLocalGenerator::RelativeRoot relative)
 {
   for(std::vector<cmCustomCommand>::const_iterator i = ccs.begin();
@@ -1050,7 +1050,7 @@ void
 cmLocalUnixMakefileGenerator3
 ::AppendCustomCommand(std::vector<std::string>& commands,
                       cmCustomCommandGenerator const& ccg,
-                      cmTarget* target,
+                      cmGeneratorTarget* target,
                       bool echo_comment,
                       cmLocalGenerator::RelativeRoot relative,
                       std::ostream* content)
@@ -1181,7 +1181,7 @@ cmLocalUnixMakefileGenerator3
 std::string
 cmLocalUnixMakefileGenerator3::MakeLauncher(
   cmCustomCommandGenerator const& ccg,
-  cmTarget* target, RelativeRoot relative)
+  cmGeneratorTarget* target, RelativeRoot relative)
 {
   // Short-circuit if there is no launcher.
   const char* prop = "RULE_LAUNCH_CUSTOM";
@@ -1788,6 +1788,9 @@ void cmLocalUnixMakefileGenerator3
       this->AppendEcho(commands, text,
                        cmLocalUnixMakefileGenerator3::EchoGlobal);
 
+      cmGeneratorTarget* gt = this->GlobalGenerator
+          ->GetGeneratorTarget(&glIt->second);
+
       // Global targets store their rules in pre- and post-build commands.
       this->AppendCustomDepends(depends,
                                 glIt->second.GetPreBuildCommands());
@@ -1795,11 +1798,11 @@ void cmLocalUnixMakefileGenerator3
                                 glIt->second.GetPostBuildCommands());
       this->AppendCustomCommands(commands,
                                  glIt->second.GetPreBuildCommands(),
-                                 &glIt->second,
+                                 gt,
                                  cmLocalGenerator::START_OUTPUT);
       this->AppendCustomCommands(commands,
                                  glIt->second.GetPostBuildCommands(),
-                                 &glIt->second,
+                                 gt,
                                  cmLocalGenerator::START_OUTPUT);
       std::string targetName = glIt->second.GetName();
       this->WriteMakeRule(ruleFileStream, targetString.c_str(),
@@ -1976,10 +1979,11 @@ void cmLocalUnixMakefileGenerator3::ClearDependencies(cmMakefile* mf,
 
 
 void cmLocalUnixMakefileGenerator3
-::WriteDependLanguageInfo(std::ostream& cmakefileStream, cmTarget &target)
+::WriteDependLanguageInfo(std::ostream& cmakefileStream,
+                          cmGeneratorTarget* target)
 {
   ImplicitDependLanguageMap const& implicitLangs =
-    this->GetImplicitDepends(target);
+    this->GetImplicitDepends(*target->Target);
 
   // list the languages
   cmakefileStream
@@ -2030,7 +2034,7 @@ void cmLocalUnixMakefileGenerator3
 
     // Build a list of preprocessor definitions for the target.
     std::set<std::string> defines;
-    this->AddCompileDefinitions(defines, &target,
+    this->AddCompileDefinitions(defines, target,
                                 this->ConfigName, l->first);
     if(!defines.empty())
       {
@@ -2056,12 +2060,10 @@ void cmLocalUnixMakefileGenerator3
       << "set(CMAKE_" << l->first << "_TARGET_INCLUDE_PATH\n";
     std::vector<std::string> includes;
 
-    cmGeneratorTarget* gt = this->GetGlobalGenerator()
-                                ->GetGeneratorTarget(&target);
 
     const std::string& config =
       this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-    this->GetIncludeDirectories(includes, gt,
+    this->GetIncludeDirectories(includes, target,
                                 l->first, config);
     for(std::vector<std::string>::iterator i = includes.begin();
         i != includes.end(); ++i)
@@ -2084,7 +2086,7 @@ void cmLocalUnixMakefileGenerator3
     cmSystemTools::ExpandListArgument(xform, transformRules);
     }
   if(const char* xform =
-     target.GetProperty("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM"))
+     target->GetProperty("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM"))
     {
     cmSystemTools::ExpandListArgument(xform, transformRules);
     }

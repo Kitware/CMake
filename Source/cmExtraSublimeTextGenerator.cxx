@@ -388,7 +388,7 @@ cmExtraSublimeTextGenerator::ComputeFlagsForObject(cmSourceFile* source,
   //   }
 
   // Add shared-library flags if needed.
-  lg->AddCMP0018Flags(flags, gtgt->Target, language, config);
+  lg->AddCMP0018Flags(flags, gtgt, language, config);
 
   // Add include directory flags.
   {
@@ -403,7 +403,7 @@ cmExtraSublimeTextGenerator::ComputeFlagsForObject(cmSourceFile* source,
   lg->AppendFlags(flags, makefile->GetDefineFlags());
 
   // Add target-specific flags.
-  lg->AddCompileOptions(flags, gtgt->Target, language, config);
+  lg->AddCompileOptions(flags, gtgt, language, config);
 
   // Add source file specific flags.
   lg->AppendFlags(flags, source->GetProperty("COMPILE_FLAGS"));
@@ -433,7 +433,7 @@ ComputeDefines(cmSourceFile *source, cmLocalGenerator* lg,
     }
 
   // Add preprocessor definitions for this target and configuration.
-  lg->AddCompileDefinitions(defines, target->Target, config, language);
+  lg->AddCompileDefinitions(defines, target, config, language);
   lg->AppendDefines(defines, source->GetProperty("COMPILE_DEFINITIONS"));
   {
   std::string defPropName = "COMPILE_DEFINITIONS_";

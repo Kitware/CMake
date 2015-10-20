@@ -109,7 +109,7 @@ std::string cmCommonTargetGenerator::ComputeFortranModuleDirectory() const
 {
   std::string mod_dir;
   const char* target_mod_dir =
-    this->Target->GetProperty("Fortran_MODULE_DIRECTORY");
+    this->GeneratorTarget->GetProperty("Fortran_MODULE_DIRECTORY");
   const char* moddir_flag =
     this->Makefile->GetDefinition("CMAKE_Fortran_MODDIR_FLAG");
   if(target_mod_dir && moddir_flag)
@@ -214,7 +214,7 @@ cmCommonTargetGenerator
     this->LocalGenerator->GetFortranFormat(srcfmt);
   if(format == cmLocalGenerator::FortranFormatNone)
     {
-    const char* tgtfmt = this->Target->GetProperty("Fortran_FORMAT");
+    const char* tgtfmt = this->GeneratorTarget->GetProperty("Fortran_FORMAT");
     format = this->LocalGenerator->GetFortranFormat(tgtfmt);
     }
   const char* var = 0;
@@ -316,10 +316,11 @@ std::string cmCommonTargetGenerator::GetFlags(const std::string &l)
       this->AddFortranFlags(flags);
       }
 
-    this->LocalGenerator->AddCMP0018Flags(flags, this->Target,
+    this->LocalGenerator->AddCMP0018Flags(flags, this->GeneratorTarget,
                                           lang, this->ConfigName);
 
-    this->LocalGenerator->AddVisibilityPresetFlags(flags, this->Target,
+    this->LocalGenerator->AddVisibilityPresetFlags(flags,
+                                                   this->GeneratorTarget,
                                                    lang);
 
     // Append old-style preprocessor definition flags.
@@ -331,7 +332,7 @@ std::string cmCommonTargetGenerator::GetFlags(const std::string &l)
       AppendFlags(flags,this->GetFrameworkFlags(l));
 
     // Add target-specific flags.
-    this->LocalGenerator->AddCompileOptions(flags, this->Target,
+    this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
                                             lang, this->ConfigName);
 
     ByLanguageMap::value_type entry(l, flags);
@@ -354,7 +355,7 @@ std::string cmCommonTargetGenerator::GetDefines(const std::string &l)
       }
 
     // Add preprocessor definitions for this target and configuration.
-    this->LocalGenerator->AddCompileDefinitions(defines, this->Target,
+    this->LocalGenerator->AddCompileDefinitions(defines, this->GeneratorTarget,
                             this->LocalGenerator->GetConfigName(), l);
 
     std::string definesString;
@@ -400,8 +401,7 @@ cmCommonTargetGenerator::GetLinkedTargetDirectories() const
                 && emitted.insert(linkee).second)
         {
         cmLocalGenerator* lg = linkee->GetLocalGenerator();
-        cmMakefile* mf = linkee->Target->GetMakefile();
-        std::string di = mf->GetCurrentBinaryDirectory();
+        std::string di = lg->GetCurrentBinaryDirectory();
         di += "/";
         di += lg->GetTargetDirectory(linkee);
         dirs.push_back(di);

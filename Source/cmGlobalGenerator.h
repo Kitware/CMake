@@ -91,6 +91,9 @@ public:
     ImportedOnly
   };
 
+  void CreateImportedGenerationObjects(cmMakefile* mf,
+                             std::vector<std::string> const& targets,
+                             std::vector<cmGeneratorTarget const*>& exports);
   void CreateGenerationObjects(TargetTypes targetTypes = AllTargets);
 
   /**
@@ -365,8 +368,6 @@ public:
   bool GetConfigureDoneCMP0026() const
   { return this->ConfigureDoneCMP0026AndCMP0024; }
 
-  void ComputeBuildFileGenerators();
-
   std::string MakeSilentFlag;
 protected:
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
@@ -470,6 +471,8 @@ private:
 
   void CheckCompilerIdCompatibility(cmMakefile* mf,
                                     std::string const& lang) const;
+
+  void ComputeBuildFileGenerators();
 
   cmExternalMakefileProjectGenerator* ExtraGenerator;
 

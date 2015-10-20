@@ -27,6 +27,10 @@ cmExportBuildFileGenerator::cmExportBuildFileGenerator()
 void cmExportBuildFileGenerator::Compute(cmLocalGenerator* lg)
 {
   this->LG = lg;
+  if (this->ExportSet)
+    {
+    this->ExportSet->Compute(lg);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -44,9 +48,9 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
     {
     cmGeneratorTarget *te = this->LG
                                 ->FindGeneratorTargetToUse(*tei);
-    expectedTargets += sep + this->Namespace + te->Target->GetExportName();
+    expectedTargets += sep + this->Namespace + te->GetExportName();
     sep = " ";
-    if(this->ExportedTargets.insert(te->Target).second)
+    if(this->ExportedTargets.insert(te).second)
       {
       this->Exports.push_back(te);
       }
@@ -76,45 +80,44 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
       tei != this->Exports.end(); ++tei)
     {
     cmGeneratorTarget* gte = *tei;
-    cmTarget* te = gte->Target;
-    this->GenerateImportTargetCode(os, te);
+    this->GenerateImportTargetCode(os, gte);
 
-    te->AppendBuildInterfaceIncludes();
+    gte->Target->AppendBuildInterfaceIncludes();
 
     ImportPropertyMap properties;
 
-    this->PopulateInterfaceProperty("INTERFACE_INCLUDE_DIRECTORIES", te,
+    this->PopulateInterfaceProperty("INTERFACE_INCLUDE_DIRECTORIES", gte,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
-    this->PopulateInterfaceProperty("INTERFACE_SOURCES", te,
+    this->PopulateInterfaceProperty("INTERFACE_SOURCES", gte,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
-    this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS", te,
+    this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS", gte,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
-    this->PopulateInterfaceProperty("INTERFACE_COMPILE_OPTIONS", te,
+    this->PopulateInterfaceProperty("INTERFACE_COMPILE_OPTIONS", gte,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
-    this->PopulateInterfaceProperty("INTERFACE_AUTOUIC_OPTIONS", te,
+    this->PopulateInterfaceProperty("INTERFACE_AUTOUIC_OPTIONS", gte,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
-    this->PopulateInterfaceProperty("INTERFACE_COMPILE_FEATURES", te,
+    this->PopulateInterfaceProperty("INTERFACE_COMPILE_FEATURES", gte,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE",
-                                  te, properties);
+                                  gte, properties);
     const bool newCMP0022Behavior =
-                              te->GetPolicyStatusCMP0022() != cmPolicies::WARN
-                           && te->GetPolicyStatusCMP0022() != cmPolicies::OLD;
+        gte->Target->GetPolicyStatusCMP0022() != cmPolicies::WARN
+        && gte->Target->GetPolicyStatusCMP0022() != cmPolicies::OLD;
     if (newCMP0022Behavior)
       {
-      this->PopulateInterfaceLinkLibrariesProperty(te,
+      this->PopulateInterfaceLinkLibrariesProperty(gte,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
       }
     this->PopulateCompatibleInterfaceProperties(gte, properties);
 
-    this->GenerateInterfaceProperties(te, os, properties);
+    this->GenerateInterfaceProperties(gte, os, properties);
     }
 
   // Generate import file content for each configuration.
@@ -171,7 +174,7 @@ cmExportBuildFileGenerator
       //                              properties);
 
       // Generate code in the export file.
-      this->GenerateImportPropertyCode(os, config, target->Target,
+      this->GenerateImportPropertyCode(os, config, target,
                                        properties);
       }
     }
@@ -199,7 +202,7 @@ cmExportBuildFileGenerator
   std::string prop = "IMPORTED_LOCATION";
   prop += suffix;
   std::string value;
-  if(target->Target->IsAppBundleOnApple())
+  if(target->IsAppBundleOnApple())
     {
     value = target->GetFullPath(config, false);
     }
@@ -232,14 +235,18 @@ cmExportBuildFileGenerator
 //----------------------------------------------------------------------------
 void
 cmExportBuildFileGenerator::HandleMissingTarget(
-  std::string& link_libs, std::vector<std::string>& missingTargets,
-  cmMakefile* mf, cmTarget* depender, cmTarget* dependee)
+    std::string& link_libs,
+    std::vector<std::string>& missingTargets,
+    cmGeneratorTarget* depender,
+    cmGeneratorTarget* dependee)
 {
   // The target is not in the export.
   if(!this->AppendMode)
     {
     const std::string name = dependee->GetName();
-    std::vector<std::string> namespaces = this->FindNamespaces(mf, name);
+    cmGlobalGenerator* gg =
+        dependee->GetLocalGenerator()->GetGlobalGenerator();
+    std::vector<std::string> namespaces = this->FindNamespaces(gg, name);
 
     int targetOccurrences = (int)namespaces.size();
     if (targetOccurrences == 1)
@@ -274,7 +281,7 @@ void cmExportBuildFileGenerator
           tei = this->ExportSet->GetTargetExports()->begin();
           tei != this->ExportSet->GetTargetExports()->end(); ++tei)
       {
-      targets.push_back((*tei)->Target->GetName());
+      targets.push_back((*tei)->TargetName);
       }
     return;
     }
@@ -284,10 +291,9 @@ void cmExportBuildFileGenerator
 //----------------------------------------------------------------------------
 std::vector<std::string>
 cmExportBuildFileGenerator
-::FindNamespaces(cmMakefile* mf, const std::string& name)
+::FindNamespaces(cmGlobalGenerator* gg, const std::string& name)
 {
   std::vector<std::string> namespaces;
-  cmGlobalGenerator* gg = mf->GetGlobalGenerator();
 
   std::map<std::string, cmExportBuildFileGenerator*>& exportSets
                                                   = gg->GetBuildExportSets();
@@ -310,8 +316,8 @@ cmExportBuildFileGenerator
 //----------------------------------------------------------------------------
 void
 cmExportBuildFileGenerator
-::ComplainAboutMissingTarget(cmTarget* depender,
-                             cmTarget* dependee,
+::ComplainAboutMissingTarget(cmGeneratorTarget* depender,
+                             cmGeneratorTarget* dependee,
                              int occurrences)
 {
   if(cmSystemTools::GetErrorOccuredFlag())

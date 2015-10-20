@@ -385,7 +385,7 @@ bool cmGlobalVisualStudioGenerator::ComputeTargetDepends()
 }
 
 //----------------------------------------------------------------------------
-static bool VSLinkable(cmTarget const* t)
+static bool VSLinkable(cmGeneratorTarget const* t)
 {
   return t->IsLinkable() || t->GetType() == cmState::OBJECT_LIBRARY;
 }
@@ -475,7 +475,8 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(cmTarget& target)
       di != utilDepends.end(); ++di)
     {
     cmTarget const* dep = *di;
-    if(allowLinkable || !VSLinkable(dep) || linked.count(dep))
+    cmGeneratorTarget* dgt = this->GetGeneratorTarget(dep);
+    if(allowLinkable || !VSLinkable(dgt) || linked.count(dep))
       {
       // Direct dependency allowed.
       vsTargetDepend.insert(dep->GetName());

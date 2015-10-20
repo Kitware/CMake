@@ -100,7 +100,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Construct the full path version of the names.
   std::string outpath = this->GeneratorTarget->GetDirectory(this->ConfigName);
-  if(this->Target->IsAppBundleOnApple())
+  if(this->GeneratorTarget->IsAppBundleOnApple())
     {
     this->OSXBundleGenerator->CreateAppBundle(targetName, outpath);
     }
@@ -168,7 +168,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   if(linkLanguage.empty())
     {
     cmSystemTools::Error("Cannot determine link language for target \"",
-                         this->Target->GetName().c_str(), "\".");
+                         this->GeneratorTarget->GetName().c_str(), "\".");
     return;
     }
 
@@ -197,7 +197,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                            this->ConfigName);
 
 
-  if(this->Target->GetPropertyAsBool("WIN32_EXECUTABLE"))
+  if(this->GeneratorTarget->GetPropertyAsBool("WIN32_EXECUTABLE"))
     {
     this->LocalGenerator->AppendFlags
       (linkFlags, this->Makefile->GetDefinition("CMAKE_CREATE_WIN32_EXE"));
@@ -226,11 +226,11 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Add target-specific linker flags.
   this->LocalGenerator->AppendFlags
-    (linkFlags, this->Target->GetProperty("LINK_FLAGS"));
+    (linkFlags, this->GeneratorTarget->GetProperty("LINK_FLAGS"));
   std::string linkFlagsConfig = "LINK_FLAGS_";
   linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
   this->LocalGenerator->AppendFlags
-    (linkFlags, this->Target->GetProperty(linkFlagsConfig));
+    (linkFlags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
 
   this->AddModuleDefinitionFlag(linkFlags);
 
@@ -280,10 +280,10 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     {
     this->LocalGenerator
       ->AppendCustomCommands(commands, this->Target->GetPreBuildCommands(),
-                             this->Target);
+                             this->GeneratorTarget);
     this->LocalGenerator
       ->AppendCustomCommands(commands, this->Target->GetPreLinkCommands(),
-                             this->Target);
+                             this->GeneratorTarget);
     }
 
   // Determine whether a link script will be used.
@@ -358,7 +358,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   cmLocalGenerator::RuleVariables vars;
   vars.RuleLauncher = "RULE_LAUNCH_LINK";
-  vars.CMTarget = this->Target;
+  vars.CMTarget = this->GeneratorTarget;
   vars.Language = linkLanguage.c_str();
   vars.Objects = buildObjs.c_str();
   std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
@@ -382,7 +382,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::ostringstream minorStream;
   int major;
   int minor;
-  this->Target->GetTargetVersion(major, minor);
+  this->GeneratorTarget->GetTargetVersion(major, minor);
   majorStream << major;
   minorStream << minor;
   targetVersionMajor = majorStream.str();
@@ -449,7 +449,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     {
     this->LocalGenerator->
       AppendCustomCommands(commands, this->Target->GetPostBuildCommands(),
-                           this->Target);
+                           this->GeneratorTarget);
     }
 
   // Write the build rule.

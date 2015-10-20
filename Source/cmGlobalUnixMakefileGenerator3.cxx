@@ -473,7 +473,7 @@ cmGlobalUnixMakefileGenerator3
        (type == cmState::OBJECT_LIBRARY) ||
        (type == cmState::UTILITY))
       {
-      if(gtarget->Target->IsImported())
+      if(gtarget->IsImported())
         {
         continue;
         }
@@ -632,7 +632,7 @@ cmGlobalUnixMakefileGenerator3
         t != targets.end(); ++t)
       {
       cmGeneratorTarget* gtarget = t->second;
-      if(gtarget->Target->IsImported())
+      if(gtarget->IsImported())
         {
         continue;
         }
@@ -733,7 +733,7 @@ cmGlobalUnixMakefileGenerator3
       t != targets.end(); ++t)
     {
     cmGeneratorTarget* gtarget = t->second;
-    if(gtarget->Target->IsImported())
+    if(gtarget->IsImported())
       {
       continue;
       }

@@ -733,7 +733,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       }
 
     // Add the target-specific flags.
-    this->AddCompileOptions(flags, &target, linkLanguage, configName);
+    this->AddCompileOptions(flags, gt, linkLanguage, configName);
     }
 
   if(this->FortranProject)
@@ -1152,7 +1152,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
         }
       }
     std::string libflags;
-    this->GetStaticLibraryFlags(libflags, configTypeUpper, &target);
+    this->GetStaticLibraryFlags(libflags, configTypeUpper, gt);
     if(!libflags.empty())
       {
       fout << "\t\t\t\tAdditionalOptions=\"" << libflags << "\"\n";
@@ -1215,7 +1215,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     temp += targetNameFull;
     fout << "\t\t\t\tOutputFile=\""
          << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
-    this->WriteTargetVersionAttribute(fout, target);
+    this->WriteTargetVersionAttribute(fout, gt);
     linkOptions.OutputFlagMap(fout, "\t\t\t\t");
     fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
     this->OutputLibraryDirectories(fout, cli.GetDirectories());
@@ -1314,7 +1314,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     temp += targetNameFull;
     fout << "\t\t\t\tOutputFile=\""
          << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
-    this->WriteTargetVersionAttribute(fout, target);
+    this->WriteTargetVersionAttribute(fout, gt);
     linkOptions.OutputFlagMap(fout, "\t\t\t\t");
     fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
     this->OutputLibraryDirectories(fout, cli.GetDirectories());
@@ -1384,11 +1384,11 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
 //----------------------------------------------------------------------------
 void
 cmLocalVisualStudio7Generator
-::WriteTargetVersionAttribute(std::ostream& fout, cmTarget& target)
+::WriteTargetVersionAttribute(std::ostream& fout, cmGeneratorTarget* gt)
 {
   int major;
   int minor;
-  target.GetTargetVersion(major, minor);
+  gt->GetTargetVersion(major, minor);
   fout << "\t\t\t\tVersion=\"" << major << "." << minor << "\"\n";
 }
 

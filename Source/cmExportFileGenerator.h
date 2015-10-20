@@ -75,11 +75,13 @@ protected:
                                 const std::string& config = "");
   void GenerateImportFooterCode(std::ostream& os);
   void GenerateImportVersionCode(std::ostream& os);
-  void GenerateImportTargetCode(std::ostream& os, cmTarget const* target);
+  void GenerateImportTargetCode(std::ostream& os,
+                                cmGeneratorTarget const* target);
   void GenerateImportPropertyCode(std::ostream& os, const std::string& config,
-                                  cmTarget const* target,
+                                  cmGeneratorTarget const* target,
                                   ImportPropertyMap const& properties);
-  void GenerateImportedFileChecksCode(std::ostream& os, cmTarget* target,
+  void GenerateImportedFileChecksCode(std::ostream& os,
+                                      cmGeneratorTarget* target,
                                       ImportPropertyMap const& properties,
                                const std::set<std::string>& importedLocations);
   void GenerateImportedFileCheckLoop(std::ostream& os);
@@ -118,23 +120,24 @@ protected:
    *  export set.  */
   virtual void HandleMissingTarget(std::string& link_libs,
                                    std::vector<std::string>& missingTargets,
-                                   cmMakefile* mf,
-                                   cmTarget* depender,
-                                   cmTarget* dependee) = 0;
+                                   cmGeneratorTarget* depender,
+                                   cmGeneratorTarget* dependee) = 0;
   void PopulateInterfaceProperty(const std::string&,
-                                 cmTarget *target,
+                                 cmGeneratorTarget *target,
                                  cmGeneratorExpression::PreprocessContext,
                                  ImportPropertyMap &properties,
                                  std::vector<std::string> &missingTargets);
-  bool PopulateInterfaceLinkLibrariesProperty(cmTarget *target,
+  bool PopulateInterfaceLinkLibrariesProperty(cmGeneratorTarget* target,
                                  cmGeneratorExpression::PreprocessContext,
                                  ImportPropertyMap &properties,
                                  std::vector<std::string> &missingTargets);
-  void PopulateInterfaceProperty(const std::string& propName, cmTarget *target,
+  void PopulateInterfaceProperty(const std::string& propName,
+                                 cmGeneratorTarget* target,
                                  ImportPropertyMap &properties);
   void PopulateCompatibleInterfaceProperties(cmGeneratorTarget *target,
                                  ImportPropertyMap &properties);
-  void GenerateInterfaceProperties(cmTarget const* target, std::ostream& os,
+  void GenerateInterfaceProperties(cmGeneratorTarget const* target,
+                                   std::ostream& os,
                                    const ImportPropertyMap &properties);
   void PopulateIncludeDirectoriesInterface(
                       cmTargetExport *target,
@@ -159,7 +162,7 @@ protected:
   };
 
   void ResolveTargetsInGeneratorExpressions(std::string &input,
-                          cmTarget* target,
+                          cmGeneratorTarget* target,
                           std::vector<std::string> &missingTargets,
                           FreeTargetsReplace replace = NoReplaceFreeTargets);
 
@@ -182,20 +185,20 @@ protected:
   bool AppendMode;
 
   // The set of targets included in the export.
-  std::set<cmTarget*> ExportedTargets;
+  std::set<cmGeneratorTarget*> ExportedTargets;
 
 private:
   void PopulateInterfaceProperty(const std::string&, const std::string&,
-                                 cmTarget *target,
+                                 cmGeneratorTarget* target,
                                  cmGeneratorExpression::PreprocessContext,
                                  ImportPropertyMap &properties,
                                  std::vector<std::string> &missingTargets);
 
-  bool AddTargetNamespace(std::string &input, cmTarget* target,
+  bool AddTargetNamespace(std::string &input, cmGeneratorTarget* target,
                           std::vector<std::string> &missingTargets);
 
   void ResolveTargetsInGeneratorExpression(std::string &input,
-                                    cmTarget* target,
+                                    cmGeneratorTarget* target,
                                     std::vector<std::string> &missingTargets);
 
   virtual void ReplaceInstallPrefix(std::string &input);

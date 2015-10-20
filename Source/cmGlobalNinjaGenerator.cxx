@@ -917,11 +917,13 @@ cmGlobalNinjaGenerator
   std::string configName =
     target->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
 
+  cmGeneratorTarget *gtgt = this->GetGeneratorTarget(target);
+
   // for frameworks, we want the real name, not smple name
   // frameworks always appear versioned, and the build.ninja
   // will always attempt to manage symbolic links instead
   // of letting cmOSXBundleGenerator do it.
-  bool realname = target->IsFrameworkOnApple();
+  bool realname = gtgt->IsFrameworkOnApple();
 
   switch (target->GetType()) {
   case cmState::EXECUTABLE:
@@ -929,7 +931,6 @@ cmGlobalNinjaGenerator
   case cmState::STATIC_LIBRARY:
   case cmState::MODULE_LIBRARY:
     {
-    cmGeneratorTarget *gtgt = this->GetGeneratorTarget(target);
     outputs.push_back(this->ConvertToNinjaPath(
       gtgt->GetFullPath(configName, false, realname)));
     break;

@@ -77,7 +77,7 @@ void cmNinjaNormalTargetGenerator::Generate()
   if (this->TargetLinkLanguage.empty()) {
     cmSystemTools::Error("CMake can not determine linker language for "
                          "target: ",
-                         this->GetTarget()->GetName().c_str());
+                         this->GetGeneratorTarget()->GetName().c_str());
     return;
   }
 
@@ -139,7 +139,7 @@ const char *cmNinjaNormalTargetGenerator::GetVisibleTypeName() const
     case cmState::SHARED_LIBRARY:
       return "shared library";
     case cmState::MODULE_LIBRARY:
-      if (this->GetTarget()->IsCFBundleOnApple())
+      if (this->GetGeneratorTarget()->IsCFBundleOnApple())
         return "CFBundle shared module";
       else
         return "shared module";
@@ -158,7 +158,8 @@ cmNinjaNormalTargetGenerator
     + "_"
     + cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType())
     + "_LINKER__"
-    + cmGlobalNinjaGenerator::EncodeRuleName(this->GetTarget()->GetName())
+    + cmGlobalNinjaGenerator::EncodeRuleName(
+        this->GetGeneratorTarget()->GetName())
     ;
 }
 
@@ -177,7 +178,7 @@ cmNinjaNormalTargetGenerator
   if (!this->GetGlobalGenerator()->HasRule(ruleName)) {
     cmLocalGenerator::RuleVariables vars;
     vars.RuleLauncher = "RULE_LAUNCH_LINK";
-    vars.CMTarget = this->GetTarget();
+    vars.CMTarget = this->GetGeneratorTarget();
     vars.Language = this->TargetLinkLanguage.c_str();
 
     std::string responseFlag;
@@ -227,7 +228,7 @@ cmNinjaNormalTargetGenerator
     std::ostringstream minorStream;
     int major;
     int minor;
-    this->GetTarget()->GetTargetVersion(major, minor);
+    this->GetGeneratorTarget()->GetTargetVersion(major, minor);
     majorStream << major;
     minorStream << minor;
     targetVersionMajor = majorStream.str();
@@ -280,7 +281,7 @@ cmNinjaNormalTargetGenerator
   }
 
   if (this->TargetNameOut != this->TargetNameReal &&
-    !this->GetTarget()->IsFrameworkOnApple()) {
+    !this->GetGeneratorTarget()->IsFrameworkOnApple()) {
     std::string cmakeCommand =
       this->GetLocalGenerator()->ConvertToOutputFormat(
         cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
@@ -411,7 +412,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                      gt.GetFullPath(cfgName,
                                        /*implib=*/true));
 
-  if (target.IsAppBundleOnApple())
+  if (gt.IsAppBundleOnApple())
     {
     // Create the app bundle
     std::string outpath = gt.GetDirectory(cfgName);
@@ -427,13 +428,13 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     targetOutputReal += this->TargetNameReal;
     targetOutputReal = this->ConvertToNinjaPath(targetOutputReal);
     }
-  else if (target.IsFrameworkOnApple())
+  else if (gt.IsFrameworkOnApple())
     {
     // Create the library framework.
     this->OSXBundleGenerator->CreateFramework(this->TargetNameOut,
                                               gt.GetDirectory(cfgName));
     }
-  else if(target.IsCFBundleOnApple())
+  else if(gt.IsCFBundleOnApple())
     {
     // Create the core foundation bundle.
     this->OSXBundleGenerator->CreateCFBundle(this->TargetNameOut,
@@ -731,7 +732,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                         &usedResponseFile);
   this->WriteLinkRule(usedResponseFile);
 
-  if (targetOutput != targetOutputReal && !target.IsFrameworkOnApple())
+  if (targetOutput != targetOutputReal && !gt.IsFrameworkOnApple())
     {
     if (targetType == cmState::EXECUTABLE)
       {

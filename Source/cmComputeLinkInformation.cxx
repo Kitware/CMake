@@ -643,7 +643,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
     return;
     }
 
-  if(tgt && tgt->Target->IsLinkable())
+  if(tgt && tgt->IsLinkable())
     {
     // This is a CMake target.  Ask the target for its real name.
     if(impexe && this->LoaderFlag)
@@ -1111,7 +1111,7 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
 
   // For compatibility with CMake 2.4 include the item's directory in
   // the linker search path.
-  if(this->OldLinkDirMode && !target->Target->IsFrameworkOnApple() &&
+  if(this->OldLinkDirMode && !target->IsFrameworkOnApple() &&
      this->OldLinkDirMask.find(cmSystemTools::GetFilenamePath(item)) ==
      this->OldLinkDirMask.end())
     {

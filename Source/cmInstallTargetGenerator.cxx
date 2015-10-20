@@ -150,7 +150,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
       std::string to1 = toDir + targetName;
 
       // Handle OSX Bundles.
-      if(this->Target->Target->IsAppBundleOnApple())
+      if(this->Target->IsAppBundleOnApple())
         {
         // Install the whole app bundle directory.
         type = cmInstallType_DIRECTORY;
@@ -208,7 +208,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
       // An import library looks like a static library.
       type = cmInstallType_STATIC_LIBRARY;
       }
-    else if(this->Target->Target->IsFrameworkOnApple())
+    else if(this->Target->IsFrameworkOnApple())
       {
       // There is a bug in cmInstallCommand if this fails.
       assert(this->NamelinkMode == NamelinkModeNone);
@@ -226,7 +226,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
       filesFrom.push_back(from1);
       filesTo.push_back(to1);
       }
-    else if(this->Target->Target->IsCFBundleOnApple())
+    else if(this->Target->IsCFBundleOnApple())
       {
       // Install the whole app bundle directory.
       type = cmInstallType_DIRECTORY;
@@ -359,34 +359,31 @@ cmInstallTargetGenerator::GetInstallFilename(const std::string& config) const
 {
   NameType nameType = this->ImportLibrary? NameImplib : NameNormal;
   return
-    cmInstallTargetGenerator::GetInstallFilename(this->Target->Target, config,
+    cmInstallTargetGenerator::GetInstallFilename(this->Target, config,
                                                  nameType);
 }
 
 //----------------------------------------------------------------------------
 std::string
-cmInstallTargetGenerator::GetInstallFilename(cmTarget const* target,
+cmInstallTargetGenerator::GetInstallFilename(cmGeneratorTarget const* target,
                                              const std::string& config,
                                              NameType nameType)
 {
   std::string fname;
   // Compute the name of the library.
-  cmGeneratorTarget *gtgt = target->GetMakefile()
-                                  ->GetGlobalGenerator()
-                                  ->GetGeneratorTarget(target);
   if(target->GetType() == cmState::EXECUTABLE)
     {
     std::string targetName;
     std::string targetNameReal;
     std::string targetNameImport;
     std::string targetNamePDB;
-    gtgt->GetExecutableNames(targetName, targetNameReal,
+    target->GetExecutableNames(targetName, targetNameReal,
                                targetNameImport, targetNamePDB,
                                config);
     if(nameType == NameImplib)
       {
       // Use the import library name.
-      if(!gtgt->GetImplibGNUtoMS(targetNameImport, fname,
+      if(!target->GetImplibGNUtoMS(targetNameImport, fname,
                                    "${CMAKE_IMPORT_LIBRARY_SUFFIX}"))
         {
         fname = targetNameImport;
@@ -410,12 +407,12 @@ cmInstallTargetGenerator::GetInstallFilename(cmTarget const* target,
     std::string targetNameReal;
     std::string targetNameImport;
     std::string targetNamePDB;
-    gtgt->GetLibraryNames(targetName, targetNameSO, targetNameReal,
+    target->GetLibraryNames(targetName, targetNameSO, targetNameReal,
                             targetNameImport, targetNamePDB, config);
     if(nameType == NameImplib)
       {
       // Use the import library name.
-      if(!gtgt->GetImplibGNUtoMS(targetNameImport, fname,
+      if(!target->GetImplibGNUtoMS(targetNameImport, fname,
                                    "${CMAKE_IMPORT_LIBRARY_SUFFIX}"))
         {
         fname = targetNameImport;
@@ -585,7 +582,7 @@ cmInstallTargetGenerator
         // The directory portions differ.  Append the filename to
         // create the mapping.
         std::string fname =
-          this->GetInstallFilename(tgt->Target, config, NameSO);
+          this->GetInstallFilename(tgt, config, NameSO);
 
         // Map from the build-tree install_name.
         for_build += fname;
@@ -608,7 +605,7 @@ cmInstallTargetGenerator
     std::string for_install =
       this->Target->GetInstallNameDirForInstallTree();
 
-    if(this->Target->Target->IsFrameworkOnApple() && for_install.empty())
+    if(this->Target->IsFrameworkOnApple() && for_install.empty())
       {
       // Frameworks seem to have an id corresponding to their own full
       // path.
@@ -622,7 +619,7 @@ cmInstallTargetGenerator
       {
       // Prepare to refer to the install-tree install_name.
       new_id = for_install;
-      new_id += this->GetInstallFilename(this->Target->Target, config, NameSO);
+      new_id += this->GetInstallFilename(this->Target, config, NameSO);
       }
     }
 

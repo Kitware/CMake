@@ -106,7 +106,8 @@ private:
                        const char* source,
                        const cmCustomCommand& command,
                        FCInfo& fcinfo);
-  void WriteTargetVersionAttribute(std::ostream& fout, cmTarget& target);
+  void WriteTargetVersionAttribute(std::ostream& fout,
+                                   cmGeneratorTarget* gt);
 
   bool WriteGroup(const cmSourceGroup *sg,
                   cmTarget& target, std::ostream &fout,

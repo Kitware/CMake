@@ -43,6 +43,8 @@ public:
 
   cmState::TargetType GetType() const;
   std::string GetName() const;
+  std::string GetExportName() const;
+
   const char *GetProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   void GetSourceFiles(std::vector<cmSourceFile*>& files,
@@ -226,6 +228,12 @@ public:
   void GetLanguages(std::set<std::string>& languages,
                     std::string const& config) const;
 
+  void
+  GetObjectLibrariesCMP0026(std::vector<cmGeneratorTarget*>& objlibs) const;
+
+  std::string GetFullNameImported(const std::string& config,
+                                  bool implib) const;
+
   bool GetConfigCommonSourceFiles(std::vector<cmSourceFile*>& files) const;
 
   bool HaveBuildTreeRPATH(const std::string& config) const;
@@ -404,6 +412,22 @@ public:
   /** Get a build-tree directory in which to place target support files.  */
   std::string GetSupportDirectory() const;
 
+  /** Return whether this target may be used to link another target.  */
+  bool IsLinkable() const;
+
+  /** Return whether this target is a shared library Framework on
+      Apple.  */
+  bool IsFrameworkOnApple() const;
+
+  /** Return whether this target is an executable Bundle on Apple.  */
+  bool IsAppBundleOnApple() const;
+
+  /** Return whether this target is a XCTest on Apple.  */
+  bool IsXCTestOnApple() const;
+
+  /** Return whether this target is a CFBundle (plugin) on Apple.  */
+  bool IsCFBundleOnApple() const;
+
   struct SourceFileFlags
   GetTargetSourceFileFlags(const cmSourceFile* sf) const;
 
@@ -437,6 +461,19 @@ public:
       no soname at all.  */
   bool IsImportedSharedLibWithoutSOName(const std::string& config) const;
 
+  const char* ImportedGetLocation(const std::string& config) const;
+
+  /** Get the target major and minor version numbers interpreted from
+      the VERSION property.  Version 0 is returned if the property is
+      not set or cannot be parsed.  */
+  void GetTargetVersion(int& major, int& minor) const;
+
+  /** Get the target major, minor, and patch version numbers
+      interpreted from the VERSION or SOVERSION property.  Version 0
+      is returned if the property is not set or cannot be parsed.  */
+  void
+  GetTargetVersion(bool soversion, int& major, int& minor, int& patch) const;
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
@@ -463,6 +500,13 @@ private:
 
   // Returns ARCHIVE, LIBRARY, or RUNTIME based on platform and type.
   const char* GetOutputTargetType(bool implib) const;
+
+  void ComputeVersionedName(std::string& vName,
+                            std::string const& prefix,
+                            std::string const& base,
+                            std::string const& suffix,
+                            std::string const& name,
+                            const char* version) const;
 
   struct CompatibleInterfacesBase
   {
@@ -507,6 +551,31 @@ private:
   GetHeadToLinkInterfaceMap(std::string const& config) const;
   cmHeadToLinkInterfaceMap& GetHeadToLinkInterfaceUsageRequirementsMap(
       std::string const& config) const;
+
+  // Cache import information from properties for each configuration.
+  struct ImportInfo
+  {
+    ImportInfo(): NoSOName(false), Multiplicity(0) {}
+    bool NoSOName;
+    int Multiplicity;
+    std::string Location;
+    std::string SOName;
+    std::string ImportLibrary;
+    std::string Languages;
+    std::string Libraries;
+    std::string LibrariesProp;
+    std::string SharedDeps;
+  };
+
+  typedef std::map<std::string, ImportInfo> ImportInfoMapType;
+  mutable ImportInfoMapType ImportInfoMap;
+  void ComputeImportInfo(std::string const& desired_config,
+                         ImportInfo& info) const;
+  ImportInfo const* GetImportInfo(const std::string& config) const;
+
+  /** Strip off leading and trailing whitespace from an item named in
+      the link dependencies of this target.  */
+  std::string CheckCMP0004(std::string const& item) const;
 
   cmLinkInterface const*
     GetImportLinkInterface(const std::string& config,

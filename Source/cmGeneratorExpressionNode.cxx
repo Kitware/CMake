@@ -1497,11 +1497,11 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
       const char *policy = targetPolicyWhitelist[i];
       if (parameters.front() == policy)
         {
-        cmMakefile *mf = context->HeadTarget->Target->GetMakefile();
+        cmLocalGenerator* lg = context->HeadTarget->GetLocalGenerator();
         switch(statusForTarget(context->HeadTarget, policy))
           {
           case cmPolicies::WARN:
-            mf->IssueMessage(cmake::AUTHOR_WARNING,
+            lg->IssueMessage(cmake::AUTHOR_WARNING,
                         cmPolicies::GetPolicyWarning(policyForString(policy)));
           case cmPolicies::REQUIRED_IF_USED:
           case cmPolicies::REQUIRED_ALWAYS:
@@ -1654,7 +1654,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactLinkerTag>
                             const GeneratorExpressionContent *content)
   {
     // The file used to link to the target (.so, .lib, .a).
-    if(!target->Target->IsLinkable())
+    if(!target->IsLinkable())
       {
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_LINKER_FILE is allowed only for libraries and "

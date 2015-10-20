@@ -265,8 +265,11 @@ void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const &config,
         this->LocalGenerator->AddLanguageFlags(
             flags, lang + std::string("_GHS_KERNEL"), config);
       }
-    this->LocalGenerator->AddCMP0018Flags(flags, this->Target, lang, config);
-    this->LocalGenerator->AddVisibilityPresetFlags(flags, this->Target, lang);
+    this->LocalGenerator->AddCMP0018Flags(flags, this->GeneratorTarget,
+                                          lang, config);
+    this->LocalGenerator->AddVisibilityPresetFlags(flags,
+                                                   this->GeneratorTarget,
+                                                   lang);
 
     // Append old-style preprocessor definition flags.
     if (std::string(" ") != std::string(this->Makefile->GetDefineFlags()))
@@ -276,7 +279,8 @@ void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const &config,
       }
 
     // Add target-specific flags.
-    this->LocalGenerator->AddCompileOptions(flags, this->Target, lang, config);
+    this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
+                                            lang, config);
 
     std::map<std::string, std::string>::value_type entry(language, flags);
     i = this->FlagsByLanguage.insert(entry).first;
@@ -299,7 +303,8 @@ std::string cmGhsMultiTargetGenerator::GetDefines(const std::string &language,
       }
 
     // Add preprocessor definitions for this target and configuration.
-    this->LocalGenerator->AddCompileDefinitions(defines, this->Target, config,
+    this->LocalGenerator->AddCompileDefinitions(defines,
+                                                this->GeneratorTarget, config,
                                                 language);
 
     std::string definesString;

@@ -57,17 +57,16 @@ protected:
                             std::vector<std::string> &missingTargets);
   virtual void HandleMissingTarget(std::string& link_libs,
                                    std::vector<std::string>& missingTargets,
-                                   cmMakefile* mf,
-                                   cmTarget* depender,
-                                   cmTarget* dependee);
+                                   cmGeneratorTarget* depender,
+                                   cmGeneratorTarget* dependee);
 
   virtual void ReplaceInstallPrefix(std::string &input);
 
-  void ComplainAboutMissingTarget(cmTarget* depender,
-                                  cmTarget* dependee,
+  void ComplainAboutMissingTarget(cmGeneratorTarget* depender,
+                                  cmGeneratorTarget* dependee,
                                   int occurrences);
 
-  std::vector<std::string> FindNamespaces(cmMakefile* mf,
+  std::vector<std::string> FindNamespaces(cmGlobalGenerator* gg,
                                           const std::string& name);
 
 

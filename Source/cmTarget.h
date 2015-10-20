@@ -96,7 +96,6 @@ public:
 
   ///! Set/Get the name of the target
   const std::string& GetName() const {return this->Name;}
-  std::string GetExportName() const;
 
   ///! Set the cmMakefile that owns this target
   void SetMakefile(cmMakefile *mf);
@@ -213,25 +212,6 @@ public:
 
   bool IsImported() const {return this->IsImportedTarget;}
 
-  void GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const;
-
-  /** Strip off leading and trailing whitespace from an item named in
-      the link dependencies of this target.  */
-  std::string CheckCMP0004(std::string const& item) const;
-
-  const char* ImportedGetLocation(const std::string& config) const;
-
-  /** Get the target major and minor version numbers interpreted from
-      the VERSION property.  Version 0 is returned if the property is
-      not set or cannot be parsed.  */
-  void GetTargetVersion(int& major, int& minor) const;
-
-  /** Get the target major, minor, and patch version numbers
-      interpreted from the VERSION or SOVERSION property.  Version 0
-      is returned if the property is not set or cannot be parsed.  */
-  void
-  GetTargetVersion(bool soversion, int& major, int& minor, int& patch) const;
-
   // Get the properties
   cmPropertyMap &GetProperties() const { return this->Properties; }
 
@@ -248,21 +228,12 @@ public:
       enabled.  */
   bool IsExecutableWithExports() const;
 
-  /** Return whether this target may be used to link another target.  */
-  bool IsLinkable() const;
-
   /** Return whether or not the target is for a DLL platform.  */
   bool IsDLLPlatform() const { return this->DLLPlatform; }
 
   /** Return whether this target is a shared library Framework on
       Apple.  */
   bool IsFrameworkOnApple() const;
-
-  /** Return whether this target is a CFBundle (plugin) on Apple.  */
-  bool IsCFBundleOnApple() const;
-
-  /** Return whether this target is a XCTest on Apple.  */
-  bool IsXCTestOnApple() const;
 
   /** Return whether this target is an executable Bundle on Apple.  */
   bool IsAppBundleOnApple() const;
@@ -385,9 +356,6 @@ private:
   void SetPropertyDefault(const std::string& property,
                           const char* default_value);
 
-  std::string GetFullNameImported(const std::string& config,
-                                  bool implib) const;
-
   std::string ImportedGetFullPath(const std::string& config,
                                   bool implib) const;
 
@@ -426,31 +394,7 @@ private:
   bool LinkLibrariesForVS6Analyzed;
 #endif
 
-  // Cache import information from properties for each configuration.
-  struct ImportInfo
-  {
-    ImportInfo(): NoSOName(false), Multiplicity(0) {}
-    bool NoSOName;
-    int Multiplicity;
-    std::string Location;
-    std::string SOName;
-    std::string ImportLibrary;
-    std::string Languages;
-    std::string Libraries;
-    std::string LibrariesProp;
-    std::string SharedDeps;
-  };
-
-  typedef std::map<std::string, ImportInfo> ImportInfoMapType;
-  mutable ImportInfoMapType ImportInfoMap;
-
-  ImportInfo const* GetImportInfo(const std::string& config) const;
-  void ComputeImportInfo(std::string const& desired_config,
-                         ImportInfo& info) const;
-
   std::string ProcessSourceItemCMP0049(const std::string& s);
-
-  void MaybeInvalidatePropertyCache(const std::string& prop);
 
   /** Return whether or not the target has a DLL import library.  */
   bool HasImportLibrary() const;
@@ -459,13 +403,6 @@ private:
   friend class cmTargetInternals;
   friend class cmGeneratorTarget;
   friend class cmTargetTraceDependencies;
-
-  void ComputeVersionedName(std::string& vName,
-                            std::string const& prefix,
-                            std::string const& base,
-                            std::string const& suffix,
-                            std::string const& name,
-                            const char* version) const;
 
   cmListFileBacktrace Backtrace;
 };
