@@ -49,7 +49,20 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
       mf.ExpandArguments(this->Args, expandedArguments);
       cmake::MessageType messageType;
 
-      cmConditionEvaluator conditionEvaluator(mf);
+      cmListFileContext execContext = this->GetStartingContext();
+
+      cmCommandContext commandContext;
+      commandContext.Line = execContext.Line;
+      commandContext.Name = execContext.Name;
+
+      cmListFileContext conditionContext =
+          cmConditionEvaluator::GetConditionContext(
+            &mf, commandContext,
+            this->GetStartingContext().FilePath);
+
+      cmConditionEvaluator conditionEvaluator(
+            mf, conditionContext,
+            mf.GetBacktrace(commandContext));
 
       bool isTrue = conditionEvaluator.IsTrue(
         expandedArguments, errorString, messageType);

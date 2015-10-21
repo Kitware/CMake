@@ -22,7 +22,9 @@ class cmConditionEvaluator
 public:
   typedef std::list<cmExpandedCommandArgument> cmArgumentList;
 
-  cmConditionEvaluator(cmMakefile& makefile);
+  cmConditionEvaluator(cmMakefile& makefile,
+                       cmListFileContext const& context,
+                       cmListFileBacktrace const& bt);
 
   // this is a shared function for both If and Else to determine if the
   // arguments were valid, and if so, was the response true. If there is
@@ -30,6 +32,9 @@ public:
   bool IsTrue(const std::vector<cmExpandedCommandArgument> &args,
       std::string &errorString,
       cmake::MessageType &status);
+
+  static cmListFileContext GetConditionContext(cmMakefile* mf,
+      const cmCommandContext& command, std::string const& filePath);
 
 private:
   // Filter the given variable definition based on policy CMP0054.
@@ -91,6 +96,8 @@ private:
       cmake::MessageType &status);
 
   cmMakefile& Makefile;
+  cmListFileContext ExecutionContext;
+  cmListFileBacktrace Backtrace;
   cmPolicies::PolicyStatus Policy12Status;
   cmPolicies::PolicyStatus Policy54Status;
   cmPolicies::PolicyStatus Policy57Status;
