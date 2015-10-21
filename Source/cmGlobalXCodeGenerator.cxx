@@ -1850,7 +1850,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     this->AppendDefines(ppDefs,
       "CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"");
     }
-  if(const char* exportMacro = target.GetExportMacro())
+  if(const char* exportMacro = gtgt->GetExportMacro())
     {
     // Add the export symbol definition for shared library objects.
     this->AppendDefines(ppDefs, exportMacro);

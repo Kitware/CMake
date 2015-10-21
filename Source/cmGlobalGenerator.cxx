@@ -2701,13 +2701,13 @@ void cmGlobalGenerator::GetTargetSets(TargetDependSet& projectTargets,
     for (cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
       {
       cmTarget* target = &l->second;
-      if(this->IsRootOnlyTarget(target) &&
+      cmGeneratorTarget* gt = this->GetGeneratorTarget(target);
+      if(this->IsRootOnlyTarget(gt) &&
          target->GetMakefile() != root->GetMakefile())
         {
         continue;
         }
       // put the target in the set of original targets
-      cmGeneratorTarget* gt = this->GetGeneratorTarget(target);
       originalTargets.insert(gt);
       // Get the set of targets that depend on target
       this->AddTargetDepends(gt, projectTargets);
@@ -2716,7 +2716,7 @@ void cmGlobalGenerator::GetTargetSets(TargetDependSet& projectTargets,
 }
 
 //----------------------------------------------------------------------------
-bool cmGlobalGenerator::IsRootOnlyTarget(cmTarget* target) const
+bool cmGlobalGenerator::IsRootOnlyTarget(cmGeneratorTarget* target) const
 {
   return (target->GetType() == cmState::GLOBAL_TARGET ||
           target->GetName() == this->GetAllTargetName());

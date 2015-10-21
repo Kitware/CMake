@@ -26,23 +26,6 @@
 # endif
 #endif
 
-#define CM_FOR_EACH_TARGET_POLICY(F) \
-  F(CMP0003) \
-  F(CMP0004) \
-  F(CMP0008) \
-  F(CMP0020) \
-  F(CMP0021) \
-  F(CMP0022) \
-  F(CMP0027) \
-  F(CMP0038) \
-  F(CMP0041) \
-  F(CMP0042) \
-  F(CMP0046) \
-  F(CMP0052) \
-  F(CMP0060) \
-  F(CMP0063) \
-  F(CMP0065)
-
 class cmake;
 class cmMakefile;
 class cmSourceFile;
@@ -140,16 +123,11 @@ public:
   const LinkLibraryVectorType &GetOriginalLinkLibraries() const
     {return this->OriginalLinkLibraries;}
 
-  /** Compute the link type to use for the given configuration.  */
-  cmTargetLinkLibraryType ComputeLinkType(const std::string& config) const;
-
   /**
    * Clear the dependency information recorded for this target, if any.
    */
   void ClearDependencyInformation(cmMakefile& mf, const std::string& target);
 
-  // Check to see if a library is a framework and treat it different on Mac
-  bool NameResolvesToFramework(const std::string& libname) const;
   void AddLinkLibrary(cmMakefile& mf,
                       const std::string& target, const std::string& lib,
                       cmTargetLinkLibraryType llt);
@@ -220,16 +198,9 @@ public:
                        const char** imp,
                        std::string& suffix) const;
 
-  /** Get the macro to define when building sources in this target.
-      If no macro should be defined null is returned.  */
-  const char* GetExportMacro() const;
-
   /** Return whether this target is an executable with symbol exports
       enabled.  */
   bool IsExecutableWithExports() const;
-
-  /** Return whether or not the target is for a DLL platform.  */
-  bool IsDLLPlatform() const { return this->DLLPlatform; }
 
   /** Return whether this target is a shared library Framework on
       Apple.  */
@@ -244,9 +215,6 @@ public:
 
   /** Get a backtrace from the creation of the target.  */
   cmListFileBacktrace const& GetBacktrace() const;
-
-  /** @return whether this target have a well defined output file name. */
-  bool HaveWellDefinedOutputFiles() const;
 
   void InsertInclude(std::string const& entry,
                      cmListFileBacktrace const& bt,
@@ -369,7 +337,6 @@ private:
   std::string Name;
   std::string InstallPath;
   std::string RuntimeInstallPath;
-  mutable std::string ExportMacro;
   std::vector<std::string> LinkDirectories;
   std::vector<cmCustomCommand> PreBuildCommands;
   std::vector<cmCustomCommand> PreLinkCommands;

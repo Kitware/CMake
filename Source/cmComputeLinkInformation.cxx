@@ -407,7 +407,7 @@ cmComputeLinkInformation
   // order to support such projects we need to add the directories
   // containing libraries linked with a full path to the -L path.
   this->OldLinkDirMode =
-    this->Target->Target->GetPolicyStatusCMP0003() != cmPolicies::NEW;
+    this->Target->GetPolicyStatusCMP0003() != cmPolicies::NEW;
   if(this->OldLinkDirMode)
     {
     // Construct a mask to not bother with this behavior for link
@@ -571,7 +571,7 @@ bool cmComputeLinkInformation::Compute()
       "name."
       ;
     this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
-                                      this->Target->Target->GetBacktrace());
+                                      this->Target->GetBacktrace());
     }
 
   return true;
@@ -635,7 +635,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
 {
   // Compute the proper name to use to link this library.
   const std::string& config = this->Config;
-  bool impexe = (tgt && tgt->Target->IsExecutableWithExports());
+  bool impexe = (tgt && tgt->IsExecutableWithExports());
   if(impexe && !this->UseImportLibrary && !this->LoaderFlag)
     {
     // Skip linking to executables on platforms with no import
@@ -1140,7 +1140,7 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
   // Full path libraries should specify a valid library file name.
   // See documentation of CMP0008.
   std::string generator = this->GlobalGenerator->GetName();
-  if(this->Target->Target->GetPolicyStatusCMP0008() != cmPolicies::NEW &&
+  if(this->Target->GetPolicyStatusCMP0008() != cmPolicies::NEW &&
      (generator.find("Visual Studio") != generator.npos ||
       generator.find("Xcode") != generator.npos))
     {
@@ -1221,7 +1221,7 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
     }
 
   // Check the policy for whether we should use the approach below.
-  switch (this->Target->Target->GetPolicyStatusCMP0060())
+  switch (this->Target->GetPolicyStatusCMP0060())
     {
     case cmPolicies::WARN:
       if (this->CMP0060Warn)
@@ -1531,7 +1531,7 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
   this->OrderLinkerSearchPath->AddLinkLibrary(item);
 
   // Produce any needed message.
-  switch(this->Target->Target->GetPolicyStatusCMP0008())
+  switch(this->Target->GetPolicyStatusCMP0008())
     {
     case cmPolicies::WARN:
       {
@@ -1548,7 +1548,7 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
           << "  " << item << "\n"
           << "which is a full-path but not a valid library file name.";
         this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
-                                        this->Target->Target->GetBacktrace());
+                                        this->Target->GetBacktrace());
         }
       }
     case cmPolicies::OLD:
@@ -1566,7 +1566,7 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
           << "  " << item << "\n"
           << "which is a full-path but not a valid library file name.";
       this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                                        this->Target->Target->GetBacktrace());
+                                        this->Target->GetBacktrace());
       }
       break;
     }
@@ -1583,7 +1583,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
     }
 
   // Enforce policy constraints.
-  switch(this->Target->Target->GetPolicyStatusCMP0003())
+  switch(this->Target->GetPolicyStatusCMP0003())
     {
     case cmPolicies::WARN:
       if(!this->CMakeInstance->GetState()
@@ -1594,7 +1594,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
         std::ostringstream w;
         this->PrintLinkPolicyDiagnosis(w);
         this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
-                                        this->Target->Target->GetBacktrace());
+                                        this->Target->GetBacktrace());
         }
     case cmPolicies::OLD:
       // OLD behavior is to add the paths containing libraries with
@@ -1610,7 +1610,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
       e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0003) << "\n";
       this->PrintLinkPolicyDiagnosis(e);
       this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                                        this->Target->Target->GetBacktrace());
+                                        this->Target->GetBacktrace());
       return false;
       }
     }

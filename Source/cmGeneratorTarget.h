@@ -33,6 +33,14 @@ public:
   bool IsImported() const;
   const char *GetLocation(const std::string& config) const;
 
+#define DECLARE_TARGET_POLICY(POLICY) \
+  cmPolicies::PolicyStatus GetPolicyStatus ## POLICY () const \
+    { return this->PolicyMap.Get(cmPolicies::POLICY); }
+
+  CM_FOR_EACH_TARGET_POLICY(DECLARE_TARGET_POLICY)
+
+#undef DECLARE_TARGET_POLICY
+
   /** Get the location of the target in the build tree with a placeholder
       referencing the configuration in the native build system.  This
       location is suitable for use as the LOCATION target property.  */
@@ -166,6 +174,12 @@ public:
     * install tree.  For example: "\@rpath/" or "\@loader_path/". */
   std::string GetInstallNameDirForInstallTree() const;
 
+  cmListFileBacktrace GetBacktrace() const;
+
+  /** Get the macro to define when building sources in this target.
+      If no macro should be defined null is returned.  */
+  const char* GetExportMacro() const;
+
   /** Get the soname of the target.  Allowed only for a shared library.  */
   std::string GetSOName(const std::string& config) const;
 
@@ -189,6 +203,12 @@ public:
   cmGlobalGenerator const* GlobalGenerator;
 
   std::string GetModuleDefinitionFile(const std::string& config) const;
+
+  /** Return whether or not the target is for a DLL platform.  */
+  bool IsDLLPlatform() const;
+
+  /** @return whether this target have a well defined output file name. */
+  bool HaveWellDefinedOutputFiles() const;
 
   /** Link information from the transitive closure of the link
       implementation and the interfaces of its dependencies.  */
@@ -406,6 +426,8 @@ public:
   bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
                         const char* newExt = 0) const;
 
+  bool IsExecutableWithExports() const;
+
   /** Return whether or not the target has a DLL import library.  */
   bool HasImportLibrary() const;
 
@@ -482,6 +504,8 @@ private:
   mutable std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
   mutable std::map<std::string, std::vector<std::string> > SystemIncludesCache;
+
+  mutable std::string ExportMacro;
 
   void ConstructSourceFileFlags() const;
   mutable bool SourceFileFlagsConstructed;
@@ -625,6 +649,7 @@ private:
   typedef std::map<OutputNameKey, std::string> OutputNameMapType;
   mutable OutputNameMapType OutputNameMap;
   mutable std::set<cmLinkItem> UtilityItems;
+  cmPolicies::PolicyMap PolicyMap;
   mutable bool PolicyWarnedCMP0022;
   mutable bool DebugIncludesDone;
   mutable bool DebugCompileOptionsDone;
@@ -633,6 +658,7 @@ private:
   mutable bool DebugSourcesDone;
   mutable bool LinkImplementationLanguageIsContextDependent;
   mutable bool UtilityItemsDone;
+  bool DLLPlatform;
 
   bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
                            std::string& out) const;

@@ -185,7 +185,9 @@ cmComputeLinkDepends
   // The configuration being linked.
   this->HasConfig = !config.empty();
   this->Config = (this->HasConfig)? config : std::string();
-  this->LinkType = this->Target->Target->ComputeLinkType(this->Config);
+  std::vector<std::string> debugConfigs =
+    this->Makefile->GetCMakeInstance()->GetDebugConfigs();
+  this->LinkType = CMP0003_ComputeLinkType(this->Config, debugConfigs);
 
   // Enable debug mode if requested.
   this->DebugMode = this->Makefile->IsOn("CMAKE_LINK_DEPENDS_DEBUG_MODE");

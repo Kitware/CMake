@@ -62,7 +62,7 @@ void reportBadObjLib(std::vector<cmSourceFile*> const& badObjLib,
     e << "but may contain only sources that compile, header files, and "
          "other files that would not affect linking of a normal library.";
     cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                     target->Target->GetBacktrace());
+                     target->GetBacktrace());
     }
 }
 
@@ -304,6 +304,12 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
         t->GetSourceEntries(),
         t->GetSourceBacktraces(),
         this->SourceEntries, true);
+
+  this->DLLPlatform = (this->Makefile->IsOn("WIN32") ||
+                       this->Makefile->IsOn("CYGWIN") ||
+                       this->Makefile->IsOn("MINGW"));
+
+  this->PolicyMap = t->PolicyMap;
 }
 
 cmGeneratorTarget::~cmGeneratorTarget()
@@ -366,7 +372,7 @@ const char* cmGeneratorTarget::GetOutputTargetType(bool implib) const
   switch(this->GetType())
     {
     case cmState::SHARED_LIBRARY:
-      if(this->Target->IsDLLPlatform())
+      if(this->IsDLLPlatform())
         {
         if(implib)
           {
@@ -483,7 +489,7 @@ std::string cmGeneratorTarget::GetOutputName(const std::string& config,
           ->IssueMessage(
       cmake::FATAL_ERROR,
       "Target '" + this->GetName() + "' OUTPUT_NAME depends on itself.",
-      this->Target->GetBacktrace());
+      this->GetBacktrace());
     }
   return i->second;
 }
@@ -1007,7 +1013,7 @@ static bool processSources(cmGeneratorTarget const* tgt,
           {
           cmake* cm = tgt->GetLocalGenerator()->GetCMakeInstance();
           cm->IssueMessage(cmake::FATAL_ERROR, e,
-                          tgt->Target->GetBacktrace());
+                          tgt->GetBacktrace());
           }
         return contextDependent;
         }
@@ -1471,7 +1477,7 @@ bool cmGeneratorTarget::HasMacOSXRpathInstallNameDir(
     w << " corrupt.";
     cmake* cm = this->LocalGenerator->GetCMakeInstance();
     cm->IssueMessage(cmake::FATAL_ERROR, w.str(),
-                     this->Target->GetBacktrace());
+                     this->GetBacktrace());
     }
 
   return true;
@@ -1492,7 +1498,7 @@ bool cmGeneratorTarget::MacOSXRpathInstallNameDirDefault() const
     return this->GetPropertyAsBool("MACOSX_RPATH");
     }
 
-  cmPolicies::PolicyStatus cmp0042 = this->Target->GetPolicyStatusCMP0042();
+  cmPolicies::PolicyStatus cmp0042 = this->GetPolicyStatusCMP0042();
 
   if(cmp0042 == cmPolicies::WARN)
     {
@@ -1703,6 +1709,47 @@ std::string cmGeneratorTarget::GetInstallNameDirForInstallTree() const
     }
 }
 
+cmListFileBacktrace cmGeneratorTarget::GetBacktrace() const
+{
+  return this->Target->GetBacktrace();
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::HaveWellDefinedOutputFiles() const
+{
+  return
+    this->GetType() == cmState::STATIC_LIBRARY ||
+    this->GetType() == cmState::SHARED_LIBRARY ||
+    this->GetType() == cmState::MODULE_LIBRARY ||
+    this->GetType() == cmState::EXECUTABLE;
+}
+
+//----------------------------------------------------------------------------
+const char* cmGeneratorTarget::GetExportMacro() const
+{
+  // Define the symbol for targets that export symbols.
+  if(this->GetType() == cmState::SHARED_LIBRARY ||
+     this->GetType() == cmState::MODULE_LIBRARY ||
+     this->IsExecutableWithExports())
+    {
+    if(const char* custom_export_name = this->GetProperty("DEFINE_SYMBOL"))
+      {
+      this->ExportMacro = custom_export_name;
+      }
+    else
+      {
+      std::string in = this->GetName();
+      in += "_EXPORTS";
+      this->ExportMacro = cmSystemTools::MakeCidentifier(in);
+      }
+    return this->ExportMacro.c_str();
+    }
+  else
+    {
+    return 0;
+    }
+}
+
 //----------------------------------------------------------------------------
 class cmTargetCollectLinkLanguages
 {
@@ -1749,7 +1796,7 @@ public:
             "call is missing for an IMPORTED target, or an ALIAS target is "
             "missing?";
           this->Target->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
-            messageType, e.str(), this->Target->Target->GetBacktrace());
+            messageType, e.str(), this->Target->GetBacktrace());
           }
         }
       return;
@@ -1846,7 +1893,7 @@ public:
       e << "Set the LINKER_LANGUAGE property for this target.";
       cmake* cm = this->Target->GetLocalGenerator()->GetCMakeInstance();
       cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                       this->Target->Target->GetBacktrace());
+                       this->Target->GetBacktrace());
       }
     return *this->Preferred.begin();
     }
@@ -2015,6 +2062,11 @@ cmGeneratorTarget::GetModuleDefinitionFile(const std::string& config) const
   std::string data;
   IMPLEMENT_VISIT_IMPL(ModuleDefinitionFile, COMMA std::string)
   return data;
+}
+
+bool cmGeneratorTarget::IsDLLPlatform() const
+{
+  return this->DLLPlatform;
 }
 
 //----------------------------------------------------------------------------
@@ -2583,7 +2635,7 @@ static void processIncludeDirectories(cmGeneratorTarget const* tgt,
         cmake::MessageType messageType = cmake::FATAL_ERROR;
         if (checkCMP0027)
           {
-          switch(tgt->Target->GetPolicyStatusCMP0027())
+          switch(tgt->GetPolicyStatusCMP0027())
             {
             case cmPolicies::WARN:
               e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0027) << "\n";
@@ -2622,7 +2674,7 @@ static void processIncludeDirectories(cmGeneratorTarget const* tgt,
           }
         else
           {
-          switch(tgt->Target->GetPolicyStatusCMP0021())
+          switch(tgt->GetPolicyStatusCMP0021())
             {
             case cmPolicies::WARN:
               {
@@ -4571,7 +4623,7 @@ cmGeneratorTarget::GetLinkInterface(const std::string& config,
   // Link interfaces are not supported for executables that do not
   // export symbols.
   if(this->GetType() == cmState::EXECUTABLE &&
-     !this->Target->IsExecutableWithExports())
+     !this->IsExecutableWithExports())
     {
     return 0;
     }
@@ -4654,8 +4706,8 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
         }
       }
     }
-  else if (this->Target->GetPolicyStatusCMP0022() == cmPolicies::WARN
-        || this->Target->GetPolicyStatusCMP0022() == cmPolicies::OLD)
+  else if (this->GetPolicyStatusCMP0022() == cmPolicies::WARN
+        || this->GetPolicyStatusCMP0022() == cmPolicies::OLD)
     {
     // The link implementation is the default link interface.
     cmLinkImplementationLibraries const*
@@ -4720,7 +4772,7 @@ cmGeneratorTarget::GetLinkInterfaceLibraries(const std::string& config,
   // Link interfaces are not supported for executables that do not
   // export symbols.
   if(this->GetType() == cmState::EXECUTABLE &&
-     !this->Target->IsExecutableWithExports())
+     !this->IsExecutableWithExports())
     {
     return 0;
     }
@@ -4788,7 +4840,7 @@ cmGeneratorTarget::OutputInfo const* cmGeneratorTarget::GetOutputInfo(
     }
 
   // Only libraries and executables have well-defined output files.
-  if(!this->Target->HaveWellDefinedOutputFiles())
+  if(!this->HaveWellDefinedOutputFiles())
     {
     std::string msg = "cmGeneratorTarget::GetOutputInfo called for ";
     msg += this->GetName();
@@ -4831,7 +4883,7 @@ cmGeneratorTarget::OutputInfo const* cmGeneratorTarget::GetOutputInfo(
     this->LocalGenerator->GetCMakeInstance()->IssueMessage(
       cmake::FATAL_ERROR,
       "Target '" + this->GetName() + "' OUTPUT_DIRECTORY depends on itself.",
-      this->Target->GetBacktrace());
+      this->GetBacktrace());
     return 0;
     }
   return &i->second;
@@ -5023,15 +5075,15 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
   // libraries and executables that export symbols.
   const char* explicitLibraries = 0;
   std::string linkIfaceProp;
-  if(this->Target->GetPolicyStatusCMP0022() != cmPolicies::OLD &&
-     this->Target->GetPolicyStatusCMP0022() != cmPolicies::WARN)
+  if(this->GetPolicyStatusCMP0022() != cmPolicies::OLD &&
+     this->GetPolicyStatusCMP0022() != cmPolicies::WARN)
     {
     // CMP0022 NEW behavior is to use INTERFACE_LINK_LIBRARIES.
     linkIfaceProp = "INTERFACE_LINK_LIBRARIES";
     explicitLibraries = this->GetProperty(linkIfaceProp);
     }
   else if(this->GetType() == cmState::SHARED_LIBRARY ||
-          this->Target->IsExecutableWithExports())
+          this->IsExecutableWithExports())
     {
     // CMP0022 OLD behavior is to use LINK_INTERFACE_LIBRARIES if set on a
     // shared lib or executable.
@@ -5050,7 +5102,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     }
 
   if(explicitLibraries &&
-     this->Target->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
+     this->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
      !this->PolicyWarnedCMP0022)
     {
     // Compare the explicitly set old link interface properties to the
@@ -5095,8 +5147,8 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
                                 iface.Libraries,
                                 iface.HadHeadSensitiveCondition);
     }
-  else if (this->Target->GetPolicyStatusCMP0022() == cmPolicies::WARN
-        || this->Target->GetPolicyStatusCMP0022() == cmPolicies::OLD)
+  else if (this->GetPolicyStatusCMP0022() == cmPolicies::WARN
+        || this->GetPolicyStatusCMP0022() == cmPolicies::OLD)
     // If CMP0022 is NEW then the plain tll signature sets the
     // INTERFACE_LINK_LIBRARIES, so if we get here then the project
     // cleared the property explicitly and we should not fall back
@@ -5107,7 +5159,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
       this->GetLinkImplementationLibrariesInternal(config, headTarget);
     iface.Libraries.insert(iface.Libraries.end(),
                            impl->Libraries.begin(), impl->Libraries.end());
-    if(this->Target->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
+    if(this->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
        !this->PolicyWarnedCMP0022 && !usage_requirements_only)
       {
       // Compare the link implementation fallback link interface to the
@@ -5350,7 +5402,7 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
     info.ImportLibrary = imp;
     }
   else if(this->GetType() == cmState::SHARED_LIBRARY ||
-          this->Target->IsExecutableWithExports())
+          this->IsExecutableWithExports())
     {
     std::string impProp = "IMPORTED_IMPLIB";
     impProp += suffix;
@@ -5569,7 +5621,7 @@ std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
   if(lib != item)
     {
     cmake* cm = this->LocalGenerator->GetCMakeInstance();
-    switch(this->Target->GetPolicyStatusCMP0004())
+    switch(this->GetPolicyStatusCMP0004())
       {
       case cmPolicies::WARN:
         {
@@ -5578,7 +5630,7 @@ std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
           << "Target \"" << this->GetName() << "\" links to item \""
           << item << "\" which has leading or trailing whitespace.";
         cm->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
-                         this->Target->GetBacktrace());
+                         this->GetBacktrace());
         }
       case cmPolicies::OLD:
         break;
@@ -5589,7 +5641,7 @@ std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
           << item << "\" which has leading or trailing whitespace.  "
           << "This is now an error according to policy CMP0004.";
         cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                         this->Target->GetBacktrace());
+                         this->GetBacktrace());
         }
         break;
       case cmPolicies::REQUIRED_IF_USED:
@@ -5600,7 +5652,7 @@ std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
           << "Target \"" << this->GetName() << "\" links to item \""
           << item << "\" which has leading or trailing whitespace.";
         cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                         this->Target->GetBacktrace());
+                         this->GetBacktrace());
         }
         break;
       }
@@ -5777,7 +5829,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
           bool noMessage = false;
           cmake::MessageType messageType = cmake::FATAL_ERROR;
           std::ostringstream e;
-          switch(this->Target->GetPolicyStatusCMP0038())
+          switch(this->GetPolicyStatusCMP0038())
             {
             case cmPolicies::WARN:
               {
@@ -5798,7 +5850,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
             {
             e << "Target \"" << this->GetName() << "\" links to itself.";
             this->LocalGenerator->GetCMakeInstance()->IssueMessage(
-              messageType, e.str(), this->Target->GetBacktrace());
+              messageType, e.str(), this->GetBacktrace());
             if (messageType == cmake::FATAL_ERROR)
               {
               return;
@@ -5827,7 +5879,12 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
                                 this->MaxLanguageStandards);
     }
 
-  cmTargetLinkLibraryType linkType = this->Target->ComputeLinkType(config);
+  // Get the list of configurations considered to be DEBUG.
+  std::vector<std::string> debugConfigs =
+    this->Makefile->GetCMakeInstance()->GetDebugConfigs();
+
+  cmTargetLinkLibraryType linkType =
+      CMP0003_ComputeLinkType(config, debugConfigs);
   cmTarget::LinkLibraryVectorType const& oldllibs =
     this->Target->GetOriginalLinkLibraries();
   for(cmTarget::LinkLibraryVectorType::const_iterator li = oldllibs.begin();
@@ -5858,7 +5915,7 @@ cmGeneratorTarget::FindTargetToLink(std::string const& name) const
   // name conflict between an external library and an executable
   // within the project.
   if(tgt && tgt->GetType() == cmState::EXECUTABLE &&
-     !tgt->Target->IsExecutableWithExports())
+     !tgt->IsExecutableWithExports())
     {
     tgt = 0;
     }
@@ -5873,7 +5930,7 @@ cmGeneratorTarget::FindTargetToLink(std::string const& name) const
       "with the ENABLE_EXPORTS property set.";
     cmake* cm = this->LocalGenerator->GetCMakeInstance();
     cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                     this->Target->GetBacktrace());
+                     this->GetBacktrace());
     tgt = 0;
     }
 
@@ -5914,11 +5971,18 @@ bool cmGeneratorTarget::GetImplibGNUtoMS(std::string const& gnuName,
 }
 
 //----------------------------------------------------------------------------
+bool cmGeneratorTarget::IsExecutableWithExports() const
+{
+  return (this->GetType() == cmState::EXECUTABLE &&
+          this->GetPropertyAsBool("ENABLE_EXPORTS"));
+}
+
+//----------------------------------------------------------------------------
 bool cmGeneratorTarget::HasImportLibrary() const
 {
-  return (this->Target->IsDLLPlatform() &&
+  return (this->IsDLLPlatform() &&
           (this->GetType() == cmState::SHARED_LIBRARY ||
-           this->Target->IsExecutableWithExports()));
+           this->IsExecutableWithExports()));
 }
 
 //----------------------------------------------------------------------------
@@ -5944,7 +6008,7 @@ bool cmGeneratorTarget::IsLinkable() const
           this->GetType() == cmState::MODULE_LIBRARY ||
           this->GetType() == cmState::UNKNOWN_LIBRARY ||
           this->GetType() == cmState::INTERFACE_LIBRARY ||
-          this->Target->IsExecutableWithExports());
+          this->IsExecutableWithExports());
 }
 
 //----------------------------------------------------------------------------

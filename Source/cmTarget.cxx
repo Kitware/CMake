@@ -583,31 +583,6 @@ const std::vector<std::string>& cmTarget::GetLinkDirectories() const
 }
 
 //----------------------------------------------------------------------------
-cmTargetLinkLibraryType cmTarget::ComputeLinkType(
-                                      const std::string& config) const
-{
-  // No configuration is always optimized.
-  if(config.empty())
-    {
-    return OPTIMIZED_LibraryType;
-    }
-
-  // Get the list of configurations considered to be DEBUG.
-  std::vector<std::string> debugConfigs =
-    this->Makefile->GetCMakeInstance()->GetDebugConfigs();
-
-  // Check if any entry in the list matches this configuration.
-  std::string configUpper = cmSystemTools::UpperCase(config);
-  if (std::find(debugConfigs.begin(), debugConfigs.end(), configUpper) !=
-      debugConfigs.end())
-    {
-    return DEBUG_LibraryType;
-    }
-  // The current configuration is not a debug configuration.
-  return OPTIMIZED_LibraryType;
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::ClearDependencyInformation( cmMakefile& mf,
                                            const std::string& target )
 {
@@ -633,13 +608,6 @@ void cmTarget::ClearDependencyInformation( cmMakefile& mf,
       cmSystemTools::Error( message.c_str() );
       }
     }
-}
-
-//----------------------------------------------------------------------------
-bool cmTarget::NameResolvesToFramework(const std::string& libname) const
-{
-  return this->Makefile->GetGlobalGenerator()->
-    NameResolvesToFramework(libname);
 }
 
 //----------------------------------------------------------------------------
@@ -1560,16 +1528,6 @@ void cmTarget::MarkAsImported()
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::HaveWellDefinedOutputFiles() const
-{
-  return
-    this->GetType() == cmState::STATIC_LIBRARY ||
-    this->GetType() == cmState::SHARED_LIBRARY ||
-    this->GetType() == cmState::MODULE_LIBRARY ||
-    this->GetType() == cmState::EXECUTABLE;
-}
-
-//----------------------------------------------------------------------------
 bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
 {
   if (this->IsImported())
@@ -2106,32 +2064,6 @@ std::string cmTarget::GetFrameworkVersion() const
   else
     {
     return "A";
-    }
-}
-
-//----------------------------------------------------------------------------
-const char* cmTarget::GetExportMacro() const
-{
-  // Define the symbol for targets that export symbols.
-  if(this->GetType() == cmState::SHARED_LIBRARY ||
-     this->GetType() == cmState::MODULE_LIBRARY ||
-     this->IsExecutableWithExports())
-    {
-    if(const char* custom_export_name = this->GetProperty("DEFINE_SYMBOL"))
-      {
-      this->ExportMacro = custom_export_name;
-      }
-    else
-      {
-      std::string in = this->GetName();
-      in += "_EXPORTS";
-      this->ExportMacro = cmSystemTools::MakeCindentifier(in);
-      }
-    return this->ExportMacro.c_str();
-    }
-  else
-    {
-    return 0;
     }
 }
 

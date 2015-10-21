@@ -230,6 +230,23 @@ class cmPolicy;
 #define CM_FOR_EACH_POLICY_ID(POLICY) \
   CM_FOR_EACH_POLICY_TABLE(POLICY, CM_SELECT_ID)
 
+#define CM_FOR_EACH_TARGET_POLICY(F) \
+  F(CMP0003) \
+  F(CMP0004) \
+  F(CMP0008) \
+  F(CMP0020) \
+  F(CMP0021) \
+  F(CMP0022) \
+  F(CMP0027) \
+  F(CMP0038) \
+  F(CMP0041) \
+  F(CMP0042) \
+  F(CMP0046) \
+  F(CMP0052) \
+  F(CMP0060) \
+  F(CMP0063) \
+  F(CMP0065)
+
 
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies

@@ -297,7 +297,7 @@ std::string cmGhsMultiTargetGenerator::GetDefines(const std::string &language,
     std::set<std::string> defines;
     const char *lang = language.c_str();
     // Add the export symbol definition for shared library objects.
-    if (const char *exportMacro = this->Target->GetExportMacro())
+    if (const char *exportMacro = this->GeneratorTarget->GetExportMacro())
       {
       this->LocalGenerator->AppendDefines(defines, exportMacro);
       }

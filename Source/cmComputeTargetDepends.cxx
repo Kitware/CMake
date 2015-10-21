@@ -245,7 +245,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
             ->IssueMessage(cmake::FATAL_ERROR,
                             "Only executables and non-OBJECT libraries may "
                             "reference target objects.",
-                            depender->Target->GetBacktrace());
+                            depender->GetBacktrace());
           return;
           }
         const_cast<cmGeneratorTarget*>(depender)->Target->AddUtility(objLib);
@@ -325,7 +325,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
   // within the project.
   if(dependee &&
      dependee->GetType() == cmState::EXECUTABLE &&
-     !dependee->Target->IsExecutableWithExports())
+     !dependee->IsExecutableWithExports())
     {
     dependee = 0;
     }
@@ -362,7 +362,7 @@ void cmComputeTargetDepends::AddTargetDepend(
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     bool issueMessage = false;
     std::ostringstream e;
-    switch(depender->Target->GetPolicyStatusCMP0046())
+    switch(depender->GetPolicyStatusCMP0046())
       {
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0046) << "\n";
@@ -401,7 +401,7 @@ void cmComputeTargetDepends::AddTargetDepend(
   // within the project.
   if(linking && dependee &&
      dependee->GetType() == cmState::EXECUTABLE &&
-     !dependee->Target->IsExecutableWithExports())
+     !dependee->IsExecutableWithExports())
     {
     dependee = 0;
     }

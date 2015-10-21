@@ -169,8 +169,8 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
                                   properties, missingTargets);
 
     const bool newCMP0022Behavior =
-        gt->Target->GetPolicyStatusCMP0022() != cmPolicies::WARN
-        && gt->Target->GetPolicyStatusCMP0022() != cmPolicies::OLD;
+        gt->GetPolicyStatusCMP0022() != cmPolicies::WARN
+        && gt->GetPolicyStatusCMP0022() != cmPolicies::OLD;
     if (newCMP0022Behavior)
       {
       if (this->PopulateInterfaceLinkLibrariesProperty(gt,

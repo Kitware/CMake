@@ -1579,7 +1579,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactSonameTag>
                             const GeneratorExpressionContent *content)
   {
     // The target soname file (.so.1).
-    if(target->Target->IsDLLPlatform())
+    if(target->IsDLLPlatform())
       {
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_SONAME_FILE is not allowed "

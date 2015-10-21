@@ -1543,7 +1543,7 @@ void cmLocalVisualStudio6Generator
 
   // Add the export symbol definition for shared library objects.
   std::string exportSymbol;
-  if(const char* exportMacro = target.GetExportMacro())
+  if(const char* exportMacro = gt->GetExportMacro())
     {
     exportSymbol = exportMacro;
     }

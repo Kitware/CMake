@@ -265,7 +265,7 @@ std::string cmCommonTargetGenerator::GetFrameworkFlags(std::string const& l)
   for(std::vector<std::string>::iterator i = includes.begin();
       i != includes.end(); ++i)
     {
-    if(this->Target->NameResolvesToFramework(*i))
+    if(this->GlobalGenerator->NameResolvesToFramework(*i))
       {
       std::string frameworkDir = *i;
       frameworkDir += "/../";
@@ -349,7 +349,8 @@ std::string cmCommonTargetGenerator::GetDefines(const std::string &l)
     std::set<std::string> defines;
     const char *lang = l.c_str();
     // Add the export symbol definition for shared library objects.
-    if(const char* exportMacro = this->Target->GetExportMacro())
+    if(const char* exportMacro =
+       this->GeneratorTarget->GetExportMacro())
       {
       this->LocalGenerator->AppendDefines(defines, exportMacro);
       }

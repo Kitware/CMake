@@ -1961,7 +1961,8 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   configDefine += configName;
   configDefine += "\"";
   clOptions.AddDefine(configDefine);
-  if(const char* exportMacro = this->Target->GetExportMacro())
+  if(const char* exportMacro =
+          this->GeneratorTarget->GetExportMacro())
     {
     clOptions.AddDefine(exportMacro);
     }

@@ -34,7 +34,7 @@ cmOSXBundleGenerator(cmGeneratorTarget* target,
 //----------------------------------------------------------------------------
 bool cmOSXBundleGenerator::MustSkip()
 {
-  return !this->GT->Target->HaveWellDefinedOutputFiles();
+  return !this->GT->HaveWellDefinedOutputFiles();
 }
 
 //----------------------------------------------------------------------------

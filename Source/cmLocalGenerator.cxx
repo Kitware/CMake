@@ -1438,7 +1438,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
           this->Makefile->GetSafeDefinition("CMAKE_CREATE_CONSOLE_EXE");
         linkFlags += " ";
         }
-      if (target->Target->IsExecutableWithExports())
+      if (target->IsExecutableWithExports())
         {
         std::string exportFlagVar = "CMAKE_EXE_EXPORTS_";
         exportFlagVar += linkLanguage;
@@ -1545,7 +1545,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
         GetGlobalPropertyAsBool("TARGET_SUPPORTS_SHARED_LIBS"))
     {
     bool add_shlib_flags = false;
-    switch(tgt.Target->GetPolicyStatusCMP0065())
+    switch(tgt.GetPolicyStatusCMP0065())
       {
       case cmPolicies::WARN:
         if(!tgt.GetPropertyAsBool("ENABLE_EXPORTS") &&
@@ -1976,7 +1976,7 @@ AddCompilerRequirementFlag(std::string &flags,
     std::string e =
       lang + "_STANDARD is set to invalid value '" + standard + "'";
     this->GetGlobalGenerator()->GetCMakeInstance()
-      ->IssueMessage(cmake::FATAL_ERROR, e, target->Target->GetBacktrace());
+      ->IssueMessage(cmake::FATAL_ERROR, e, target->GetBacktrace());
     return;
     }
 
@@ -2100,9 +2100,9 @@ void cmLocalGenerator
   std::string *pWarnCMP0063 = 0;
   if (target->GetType() != cmState::SHARED_LIBRARY &&
       target->GetType() != cmState::MODULE_LIBRARY &&
-      !target->Target->IsExecutableWithExports())
+      !target->IsExecutableWithExports())
     {
-    switch (target->Target->GetPolicyStatusCMP0063())
+    switch (target->GetPolicyStatusCMP0063())
       {
       case cmPolicies::OLD:
         return;
@@ -2135,7 +2135,7 @@ void cmLocalGenerator
       "For compatibility CMake is not honoring them for this target.";
     target->Target->GetMakefile()->GetCMakeInstance()
       ->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
-                     target->Target->GetBacktrace());
+                     target->GetBacktrace());
     }
 }
 
