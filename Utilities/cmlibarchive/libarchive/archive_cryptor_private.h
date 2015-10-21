@@ -31,6 +31,13 @@
 #define ARCHIVE_CRYPTOR_PRIVATE_H_INCLUDED
 
 #ifdef __APPLE__
+# include <AvailabilityMacros.h>
+# if MAC_OS_X_VERSION_MAX_ALLOWED >= 1080
+#  define ARCHIVE_CRYPTOR_USE_Apple_CommonCrypto
+# endif
+#endif
+
+#ifdef ARCHIVE_CRYPTOR_USE_Apple_CommonCrypto
 #include <CommonCrypto/CommonCryptor.h>
 #include <CommonCrypto/CommonKeyDerivation.h>
 #define AES_BLOCK_SIZE	16

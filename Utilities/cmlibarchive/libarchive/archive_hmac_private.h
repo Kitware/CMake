@@ -31,6 +31,13 @@
 #define ARCHIVE_HMAC_PRIVATE_H_INCLUDED
 
 #ifdef __APPLE__
+# include <AvailabilityMacros.h>
+# if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
+#  define ARCHIVE_HMAC_USE_Apple_CommonCrypto
+# endif
+#endif
+
+#ifdef ARCHIVE_HMAC_USE_Apple_CommonCrypto
 #include <CommonCrypto/CommonHMAC.h>
 
 typedef	CCHmacContext archive_hmac_sha1_ctx;

@@ -31,7 +31,7 @@
 #include "archive.h"
 #include "archive_hmac_private.h"
 
-#ifdef __APPLE__
+#ifdef ARCHIVE_HMAC_USE_Apple_CommonCrypto
 
 static int
 __hmac_sha1_init(archive_hmac_sha1_ctx *ctx, const uint8_t *key, size_t key_len)
