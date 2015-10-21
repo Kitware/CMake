@@ -39,7 +39,7 @@ public:
   /** Set/Get the context in which this blocker is created.  */
   void SetStartingContext(cmListFileContext const& lfc)
     { this->StartingContext = lfc; }
-  cmListFileContext const& GetStartingContext()
+  cmListFileContext const& GetStartingContext() const
     { return this->StartingContext; }
 private:
   cmListFileContext StartingContext;
