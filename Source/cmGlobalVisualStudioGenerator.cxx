@@ -147,7 +147,7 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
 void cmGlobalVisualStudioGenerator
 ::ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const
 {
-  std::string dir = gt->Makefile->GetCurrentBinaryDirectory();
+  std::string dir = gt->LocalGenerator->GetCurrentBinaryDirectory();
   dir += "/";
   std::string tgtDir = gt->LocalGenerator->GetTargetDirectory(gt);
   if(!tgtDir.empty())
