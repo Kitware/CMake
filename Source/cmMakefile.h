@@ -41,7 +41,6 @@
 class cmFunctionBlocker;
 class cmCommand;
 class cmInstallGenerator;
-class cmMakeDepend;
 class cmSourceFile;
 class cmTest;
 class cmTestGenerator;
@@ -855,9 +854,6 @@ private:
 
   bool EnforceUniqueDir(const std::string& srcPath,
                         const std::string& binPath) const;
-
-  friend class cmMakeDepend;    // make depend needs direct access
-                                // to the Sources array
 
   typedef std::vector<cmFunctionBlocker*> FunctionBlockersType;
   FunctionBlockersType FunctionBlockers;
