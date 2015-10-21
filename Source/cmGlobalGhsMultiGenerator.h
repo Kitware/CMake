@@ -111,7 +111,7 @@ private:
       GhsMultiGpj::Types projType);
   static std::string GetFileNameFromPath(std::string const &path);
   void UpdateBuildFiles(std::vector<cmGeneratorTarget*> tgts);
-  bool IsTgtForBuild(const cmTarget *tgt);
+  bool IsTgtForBuild(const cmGeneratorTarget *tgt);
 
   std::vector<cmGeneratedFileStream *> TargetSubProjects;
   std::map<std::string, cmGeneratedFileStream *> TargetFolderBuildStreams;

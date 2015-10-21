@@ -487,7 +487,7 @@ void cmGlobalGhsMultiGenerator::UpdateBuildFiles(
        tgtsI != tgts.end(); ++tgtsI)
     {
     const cmGeneratorTarget *tgt = *tgtsI;
-    if (IsTgtForBuild(tgt->Target))
+    if (IsTgtForBuild(tgt))
       {
       char const *rawFolderName = tgt->GetProperty("FOLDER");
       if (NULL == rawFolderName)
@@ -504,7 +504,7 @@ void cmGlobalGhsMultiGenerator::UpdateBuildFiles(
           GhsMultiGpj::PROJECT);
         }
       std::vector<cmsys::String> splitPath = cmSystemTools::SplitString(
-            cmGhsMultiTargetGenerator::GetRelBuildFileName(tgt->Target));
+            cmGhsMultiTargetGenerator::GetRelBuildFileName(tgt));
       std::string foldNameRelBuildFile(*(splitPath.end() - 2) + "/" +
                                        splitPath.back());
       *this->TargetFolderBuildStreams[folderName] << foldNameRelBuildFile
@@ -516,13 +516,12 @@ void cmGlobalGhsMultiGenerator::UpdateBuildFiles(
     }
 }
 
-bool cmGlobalGhsMultiGenerator::IsTgtForBuild(const cmTarget *tgt)
+bool cmGlobalGhsMultiGenerator::IsTgtForBuild(const cmGeneratorTarget *tgt)
 {
   const std::string config =
-    tgt->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
+    tgt->Target->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
   std::vector<cmSourceFile *> tgtSources;
-  cmGeneratorTarget* gt = this->GetGeneratorTarget(tgt);
-  gt->GetSourceFiles(tgtSources, config);
+  tgt->GetSourceFiles(tgtSources, config);
   bool tgtInBuild = true;
   char const *excludeFromAll = tgt->GetProperty("EXCLUDE_FROM_ALL");
   if (NULL != excludeFromAll && '1' == excludeFromAll[0] &&
