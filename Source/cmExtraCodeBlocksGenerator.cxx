@@ -17,7 +17,6 @@
 #include "cmake.h"
 #include "cmSourceFile.h"
 #include "cmGeneratedFileStream.h"
-#include "cmTarget.h"
 #include "cmSystemTools.h"
 #include "cmXMLSafe.h"
 
@@ -441,7 +440,7 @@ void cmExtraCodeBlocksGenerator
               }
 
             CbpUnit &cbpUnit = allFiles[fullPath];
-            cbpUnit.Targets.push_back((*ti)->Target);
+            cbpUnit.Targets.push_back(*ti);
             }
           }
         default:  // intended fallthrough
@@ -501,8 +500,9 @@ void cmExtraCodeBlocksGenerator
 
     fout<<"      <Unit filename=\""<< cmXMLSafe(unitFilename) <<"\">\n";
 
-    for(std::vector<const cmTarget*>::const_iterator ti = unit.Targets.begin();
-      ti != unit.Targets.end(); ++ti)
+    for(std::vector<const cmGeneratorTarget*>::const_iterator ti =
+        unit.Targets.begin();
+        ti != unit.Targets.end(); ++ti)
       {
       std::string const& targetName = (*ti)->GetName();
       fout<<"         <Option target=\""<< cmXMLSafe(targetName) <<"\"/>\n";
@@ -560,7 +560,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
   fout<<"      <Target title=\"" << targetName << "\">\n";
   if (target!=0)
     {
-    int cbTargetType = this->GetCBTargetType(target->Target);
+    int cbTargetType = this->GetCBTargetType(target);
     std::string workingDir = lg->GetCurrentBinaryDirectory();
     if ( target->GetType()==cmState::EXECUTABLE)
       {
@@ -718,7 +718,7 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
 
 
 // Translate the cmake target type into the CodeBlocks target type id
-int cmExtraCodeBlocksGenerator::GetCBTargetType(cmTarget* target)
+int cmExtraCodeBlocksGenerator::GetCBTargetType(cmGeneratorTarget* target)
 {
   if ( target->GetType()==cmState::EXECUTABLE)
     {
