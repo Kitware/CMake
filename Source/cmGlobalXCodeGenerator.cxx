@@ -1368,22 +1368,22 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguages()
   for(TargetMap::const_iterator
         ti = this->TotalTargets.begin(); ti != this->TotalTargets.end(); ++ti)
     {
-    this->ForceLinkerLanguage(*ti->second);
+    cmGeneratorTarget* gt = this->GetGeneratorTarget(ti->second);
+    this->ForceLinkerLanguage(gt);
     }
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmTarget& cmtarget)
+void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmGeneratorTarget* gtgt)
 {
   // This matters only for targets that link.
-  if(cmtarget.GetType() != cmState::EXECUTABLE &&
-     cmtarget.GetType() != cmState::SHARED_LIBRARY &&
-     cmtarget.GetType() != cmState::MODULE_LIBRARY)
+  if(gtgt->GetType() != cmState::EXECUTABLE &&
+     gtgt->GetType() != cmState::SHARED_LIBRARY &&
+     gtgt->GetType() != cmState::MODULE_LIBRARY)
     {
     return;
     }
 
-  cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&cmtarget);
   std::string llang = gtgt->GetLinkerLanguage("NOCONFIG");
   if(llang.empty()) { return; }
 
@@ -1399,11 +1399,11 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmTarget& cmtarget)
   // Add an empty source file to the target that compiles with the
   // linker language.  This should convince Xcode to choose the proper
   // language.
-  cmMakefile* mf = cmtarget.GetMakefile();
+  cmMakefile* mf = gtgt->Target->GetMakefile();
   std::string fname = gtgt->GetLocalGenerator()->GetCurrentBinaryDirectory();
   fname += cmake::GetCMakeFilesDirectory();
   fname += "/";
-  fname += cmtarget.GetName();
+  fname += gtgt->GetName();
   fname += "-CMakeForceLinker";
   fname += ".";
   fname += cmSystemTools::LowerCase(llang);

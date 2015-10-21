@@ -135,7 +135,7 @@ private:
   cmXCodeObject* CreateXCodeTarget(cmTarget& target,
                                    cmXCodeObject* buildPhases);
   void ForceLinkerLanguages();
-  void ForceLinkerLanguage(cmTarget& cmtarget);
+  void ForceLinkerLanguage(cmGeneratorTarget* gtgt);
   const char* GetTargetLinkFlagsVar(cmTarget const& cmtarget) const;
   const char* GetTargetFileType(cmGeneratorTarget* target);
   const char* GetTargetProductType(cmGeneratorTarget* target);
