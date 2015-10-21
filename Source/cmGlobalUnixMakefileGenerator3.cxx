@@ -116,7 +116,7 @@ cmGlobalUnixMakefileGenerator3
 {
   // Compute full path to object file directory for this target.
   std::string dir;
-  dir += gt->Makefile->GetCurrentBinaryDirectory();
+  dir += gt->LocalGenerator->GetCurrentBinaryDirectory();
   dir += "/";
   dir += gt->LocalGenerator->GetTargetDirectory(gt);
   dir += "/";

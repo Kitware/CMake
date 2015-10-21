@@ -188,7 +188,7 @@ GetLocalObjectFiles(std::map<std::string, LocalObjectInfo> &localObjectFiles)
                                     ->GetSafeDefinition("CMAKE_BUILD_TYPE"));
     // Compute full path to object file directory for this target.
     std::string dir;
-    dir += gt->Makefile->GetCurrentBinaryDirectory();
+    dir += gt->LocalGenerator->GetCurrentBinaryDirectory();
     dir += "/";
     dir += this->GetTargetDirectory(gt);
     dir += "/";

@@ -719,7 +719,7 @@ void cmGlobalNinjaGenerator
 {
   // Compute full path to object file directory for this target.
   std::string dir;
-  dir += gt->Makefile->GetCurrentBinaryDirectory();
+  dir += gt->LocalGenerator->GetCurrentBinaryDirectory();
   dir += "/";
   dir += gt->LocalGenerator->GetTargetDirectory(gt);
   dir += "/";
@@ -938,7 +938,7 @@ cmGlobalNinjaGenerator
   case cmState::OBJECT_LIBRARY:
   case cmState::UTILITY: {
     std::string path = this->ConvertToNinjaPath(
-      target->GetMakefile()->GetCurrentBinaryDirectory());
+      target->GetLocalGenerator()->GetCurrentBinaryDirectory());
     if (path.empty() || path == ".")
       outputs.push_back(target->GetName());
     else {

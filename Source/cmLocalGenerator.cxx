@@ -2140,7 +2140,7 @@ void cmLocalGenerator
       "has the following visibility properties set for " << lang << ":\n" <<
       warnCMP0063 <<
       "For compatibility CMake is not honoring them for this target.";
-    target->Target->GetMakefile()->GetCMakeInstance()
+    target->GetLocalGenerator()->GetCMakeInstance()
       ->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
                      target->GetBacktrace());
     }

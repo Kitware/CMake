@@ -123,7 +123,7 @@ std::string cmCommonTargetGenerator::ComputeFortranModuleDirectory() const
     else
       {
       // Interpret relative to the current output directory.
-      mod_dir = this->Makefile->GetCurrentBinaryDirectory();
+      mod_dir = this->LocalGenerator->GetCurrentBinaryDirectory();
       mod_dir += "/";
       mod_dir += target_mod_dir;
       }
