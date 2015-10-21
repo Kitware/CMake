@@ -75,7 +75,7 @@ public:
   }
   static void Indent(int level, std::ostream& out);
   void Print(std::ostream& out);
-  virtual void PrintComment(std::ostream&) {};
+  virtual void PrintComment(std::ostream&) {}
 
   static void PrintList(std::vector<cmXCodeObject*> const&,
                         std::ostream& out);
