@@ -18,6 +18,10 @@
 #include <cm_libarchive.h>
 #include "cm_get_date.h"
 
+#ifndef __LA_SSIZE_T
+# define __LA_SSIZE_T la_ssize_t
+#endif
+
 //----------------------------------------------------------------------------
 static std::string cm_archive_error_string(struct archive* a)
 {
