@@ -673,6 +673,11 @@ public:
   {
     return this->MaxLanguageStandards;
   }
+
+  struct StrictTargetComparison {
+    bool operator()(cmGeneratorTarget const* t1,
+                    cmGeneratorTarget const* t2) const;
+  };
 };
 
 #endif

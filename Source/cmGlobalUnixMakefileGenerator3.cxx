@@ -778,7 +778,7 @@ cmGlobalUnixMakefileGenerator3
       std::ostringstream progressArg;
       const char* sep = "";
       std::vector<unsigned long>& progFiles =
-        this->ProgressMap[gtarget->Target].Marks;
+        this->ProgressMap[gtarget].Marks;
       for (std::vector<unsigned long>::iterator i = progFiles.begin();
            i != progFiles.end(); ++i)
         {
@@ -966,7 +966,7 @@ cmGlobalUnixMakefileGenerator3
   size_t count = 0;
   if(emitted.insert(target).second)
     {
-    count = this->ProgressMap[target->Target].Marks.size();
+    count = this->ProgressMap[target].Marks.size();
     TargetDependSet const& depends = this->GetTargetDirectDepends(target);
     for(TargetDependSet::const_iterator di = depends.begin();
         di != depends.end(); ++di)
@@ -1003,7 +1003,7 @@ void
 cmGlobalUnixMakefileGenerator3::RecordTargetProgress(
   cmMakefileTargetGenerator* tg)
 {
-  TargetProgress& tp = this->ProgressMap[tg->GetTarget()];
+  TargetProgress& tp = this->ProgressMap[tg->GetGeneratorTarget()];
   tp.NumberOfActions = tg->GetNumberOfProgressActions();
   tp.VariableFile = tg->GetProgressFileNameFull();
 }
