@@ -251,9 +251,11 @@ archive_read_disk_entry_from_file(struct archive *_a,
 #endif /* HAVE_READLINK || HAVE_READLINKAT */
 
 	r = setup_acls(a, entry, &fd);
-	r1 = setup_xattrs(a, entry, &fd);
-	if (r1 < r)
-		r = r1;
+	if (!a->suppress_xattr) {
+		r1 = setup_xattrs(a, entry, &fd);
+		if (r1 < r)
+			r = r1;
+	}
 	if (a->enable_copyfile) {
 		r1 = setup_mac_metadata(a, entry, &fd);
 		if (r1 < r)

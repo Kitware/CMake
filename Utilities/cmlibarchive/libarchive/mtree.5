@@ -56,14 +56,6 @@ corresponding character.
 .Pp
 Each line is interpreted independently as one of the following types:
 .Bl -tag -width Cm
-.It Signature
-The first line of any mtree file must begin with
-.Dq #mtree .
-If a file contains any full path entries, the first line should
-begin with
-.Dq #mtree v2.0 ,
-otherwise, the first line should begin with
-.Dq #mtree v1.0 .
 .It Blank
 Blank lines are ignored.
 .It Comment
@@ -302,16 +294,6 @@ The file owner as a symbolic name.
 .Xr find 1 ,
 .Xr mtree 8
 .Sh BUGS
-The
-.Fx
-implementation of mtree does not currently support
-the
-.Nm
-2.0
-format.
-The requirement for a
-.Dq #mtree
-signature line is new and not yet widely implemented.
 .Sh HISTORY
 The
 .Nm

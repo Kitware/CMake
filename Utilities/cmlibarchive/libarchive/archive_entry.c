@@ -418,6 +418,18 @@ archive_entry_gname(struct archive_entry *entry)
 	return (NULL);
 }
 
+const char *
+archive_entry_gname_utf8(struct archive_entry *entry)
+{
+	const char *p;
+	if (archive_mstring_get_utf8(entry->archive, &entry->ae_gname, &p) == 0)
+		return (p);
+	if (errno == ENOMEM)
+		__archive_errx(1, "No memory");
+	return (NULL);
+}
+
+
 const wchar_t *
 archive_entry_gname_w(struct archive_entry *entry)
 {
@@ -443,6 +455,20 @@ archive_entry_hardlink(struct archive_entry *entry)
 	if ((entry->ae_set & AE_SET_HARDLINK) == 0)
 		return (NULL);
 	if (archive_mstring_get_mbs(
+	    entry->archive, &entry->ae_hardlink, &p) == 0)
+		return (p);
+	if (errno == ENOMEM)
+		__archive_errx(1, "No memory");
+	return (NULL);
+}
+
+const char *
+archive_entry_hardlink_utf8(struct archive_entry *entry)
+{
+	const char *p;
+	if ((entry->ae_set & AE_SET_HARDLINK) == 0)
+		return (NULL);
+	if (archive_mstring_get_utf8(
 	    entry->archive, &entry->ae_hardlink, &p) == 0)
 		return (p);
 	if (errno == ENOMEM)
@@ -529,6 +555,18 @@ archive_entry_pathname(struct archive_entry *entry)
 {
 	const char *p;
 	if (archive_mstring_get_mbs(
+	    entry->archive, &entry->ae_pathname, &p) == 0)
+		return (p);
+	if (errno == ENOMEM)
+		__archive_errx(1, "No memory");
+	return (NULL);
+}
+
+const char *
+archive_entry_pathname_utf8(struct archive_entry *entry)
+{
+	const char *p;
+	if (archive_mstring_get_utf8(
 	    entry->archive, &entry->ae_pathname, &p) == 0)
 		return (p);
 	if (errno == ENOMEM)
@@ -637,6 +675,20 @@ archive_entry_symlink(struct archive_entry *entry)
 	return (NULL);
 }
 
+const char *
+archive_entry_symlink_utf8(struct archive_entry *entry)
+{
+	const char *p;
+	if ((entry->ae_set & AE_SET_SYMLINK) == 0)
+		return (NULL);
+	if (archive_mstring_get_utf8(
+	    entry->archive, &entry->ae_symlink, &p) == 0)
+		return (p);
+	if (errno == ENOMEM)
+		__archive_errx(1, "No memory");
+	return (NULL);
+}
+
 const wchar_t *
 archive_entry_symlink_w(struct archive_entry *entry)
 {
@@ -674,6 +726,17 @@ archive_entry_uname(struct archive_entry *entry)
 {
 	const char *p;
 	if (archive_mstring_get_mbs(entry->archive, &entry->ae_uname, &p) == 0)
+		return (p);
+	if (errno == ENOMEM)
+		__archive_errx(1, "No memory");
+	return (NULL);
+}
+
+const char *
+archive_entry_uname_utf8(struct archive_entry *entry)
+{
+	const char *p;
+	if (archive_mstring_get_utf8(entry->archive, &entry->ae_uname, &p) == 0)
 		return (p);
 	if (errno == ENOMEM)
 		__archive_errx(1, "No memory");
@@ -769,6 +832,12 @@ archive_entry_set_gname(struct archive_entry *entry, const char *name)
 }
 
 void
+archive_entry_set_gname_utf8(struct archive_entry *entry, const char *name)
+{
+	archive_mstring_copy_utf8(&entry->ae_gname, name);
+}
+
+void
 archive_entry_copy_gname(struct archive_entry *entry, const char *name)
 {
 	archive_mstring_copy_mbs(&entry->ae_gname, name);
@@ -818,6 +887,16 @@ void
 archive_entry_set_hardlink(struct archive_entry *entry, const char *target)
 {
 	archive_mstring_copy_mbs(&entry->ae_hardlink, target);
+	if (target != NULL)
+		entry->ae_set |= AE_SET_HARDLINK;
+	else
+		entry->ae_set &= ~AE_SET_HARDLINK;
+}
+
+void
+archive_entry_set_hardlink_utf8(struct archive_entry *entry, const char *target)
+{
+	archive_mstring_copy_utf8(&entry->ae_hardlink, target);
 	if (target != NULL)
 		entry->ae_set |= AE_SET_HARDLINK;
 	else
@@ -962,6 +1041,15 @@ archive_entry_set_link(struct archive_entry *entry, const char *target)
 		archive_mstring_copy_mbs(&entry->ae_hardlink, target);
 }
 
+void
+archive_entry_set_link_utf8(struct archive_entry *entry, const char *target)
+{
+	if (entry->ae_set & AE_SET_SYMLINK)
+		archive_mstring_copy_utf8(&entry->ae_symlink, target);
+	else
+		archive_mstring_copy_utf8(&entry->ae_hardlink, target);
+}
+
 /* Set symlink if symlink is already set, else set hardlink. */
 void
 archive_entry_copy_link(struct archive_entry *entry, const char *target)
@@ -1049,6 +1137,12 @@ void
 archive_entry_set_pathname(struct archive_entry *entry, const char *name)
 {
 	archive_mstring_copy_mbs(&entry->ae_pathname, name);
+}
+
+void
+archive_entry_set_pathname_utf8(struct archive_entry *entry, const char *name)
+{
+	archive_mstring_copy_utf8(&entry->ae_pathname, name);
 }
 
 void
@@ -1152,6 +1246,16 @@ archive_entry_set_symlink(struct archive_entry *entry, const char *linkname)
 }
 
 void
+archive_entry_set_symlink_utf8(struct archive_entry *entry, const char *linkname)
+{
+	archive_mstring_copy_utf8(&entry->ae_symlink, linkname);
+	if (linkname != NULL)
+		entry->ae_set |= AE_SET_SYMLINK;
+	else
+		entry->ae_set &= ~AE_SET_SYMLINK;
+}
+
+void
 archive_entry_copy_symlink(struct archive_entry *entry, const char *linkname)
 {
 	archive_mstring_copy_mbs(&entry->ae_symlink, linkname);
@@ -1212,6 +1316,12 @@ void
 archive_entry_set_uname(struct archive_entry *entry, const char *name)
 {
 	archive_mstring_copy_mbs(&entry->ae_uname, name);
+}
+
+void
+archive_entry_set_uname_utf8(struct archive_entry *entry, const char *name)
+{
+	archive_mstring_copy_utf8(&entry->ae_uname, name);
 }
 
 void
@@ -1629,19 +1739,23 @@ ae_strtofflags(const char *s, unsigned long *setp, unsigned long *clrp)
 	while (*start == '\t'  ||  *start == ' '  ||  *start == ',')
 		start++;
 	while (*start != '\0') {
+		size_t length;
 		/* Locate end of token. */
 		end = start;
 		while (*end != '\0'  &&  *end != '\t'  &&
 		    *end != ' '  &&  *end != ',')
 			end++;
+		length = end - start;
 		for (flag = flags; flag->name != NULL; flag++) {
-			if (memcmp(start, flag->name, end - start) == 0) {
+			size_t flag_length = strlen(flag->name);
+			if (length == flag_length
+			    && memcmp(start, flag->name, length) == 0) {
 				/* Matched "noXXXX", so reverse the sense. */
 				clear |= flag->set;
 				set |= flag->clear;
 				break;
-			} else if (memcmp(start, flag->name + 2, end - start)
-			    == 0) {
+			} else if (length == flag_length - 2
+			    && memcmp(start, flag->name + 2, length) == 0) {
 				/* Matched "XXXX", so don't reverse. */
 				set |= flag->set;
 				clear |= flag->clear;
@@ -1693,19 +1807,23 @@ ae_wcstofflags(const wchar_t *s, unsigned long *setp, unsigned long *clrp)
 	while (*start == L'\t'  ||  *start == L' '  ||  *start == L',')
 		start++;
 	while (*start != L'\0') {
+		size_t length;
 		/* Locate end of token. */
 		end = start;
 		while (*end != L'\0'  &&  *end != L'\t'  &&
 		    *end != L' '  &&  *end != L',')
 			end++;
+		length = end - start;
 		for (flag = flags; flag->wname != NULL; flag++) {
-			if (wmemcmp(start, flag->wname, end - start) == 0) {
+			size_t flag_length = wcslen(flag->wname);
+			if (length == flag_length
+			    && wmemcmp(start, flag->wname, length) == 0) {
 				/* Matched "noXXXX", so reverse the sense. */
 				clear |= flag->set;
 				set |= flag->clear;
 				break;
-			} else if (wmemcmp(start, flag->wname + 2, end - start)
-			    == 0) {
+			} else if (length == flag_length - 2
+			    && wmemcmp(start, flag->wname + 2, length) == 0) {
 				/* Matched "XXXX", so don't reverse. */
 				set |= flag->set;
 				clear |= flag->clear;
