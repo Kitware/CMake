@@ -119,8 +119,7 @@ void cmLocalUnixMakefileGenerator3::Generate()
   for(cmGeneratorTargetsType::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-    if (t->second->GetType() == cmState::INTERFACE_LIBRARY
-        || t->second->Target->IsImported())
+    if (t->second->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
@@ -430,11 +429,6 @@ void cmLocalUnixMakefileGenerator3
        (t->second->GetType() == cmState::OBJECT_LIBRARY) ||
        (t->second->GetType() == cmState::UTILITY))
       {
-      if (t->second->Target->IsImported())
-        {
-        continue;
-        }
-
       emitted.insert(t->second->GetName());
 
       // for subdirs add a rule to build this specific target by name.

@@ -1574,7 +1574,6 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
 void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes,
                                                cmLocalGenerator *lg)
 {
-  cmGeneratorTargetsType generatorTargets;
   cmMakefile* mf = lg->GetMakefile();
   if (targetTypes == AllTargets)
     {
@@ -1585,7 +1584,7 @@ void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes,
       cmTarget* t = &ti->second;
       cmGeneratorTarget* gt = new cmGeneratorTarget(t, lg);
       this->GeneratorTargets[t] = gt;
-      generatorTargets[t] = gt;
+      lg->AddGeneratorTarget(t, gt);
       }
     }
 
@@ -1595,9 +1594,7 @@ void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes,
     {
     cmGeneratorTarget* gt = new cmGeneratorTarget(*j, lg);
     this->GeneratorTargets[*j] = gt;
-    generatorTargets[*j] = gt;
     }
-  lg->SetGeneratorTargets(generatorTargets);
 }
 
 //----------------------------------------------------------------------------

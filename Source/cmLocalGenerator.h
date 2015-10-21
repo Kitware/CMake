@@ -118,10 +118,6 @@ public:
       return this->GeneratorTargets;
     }
 
-  void SetGeneratorTargets(const cmGeneratorTargetsType &targets)
-    {
-      this->GeneratorTargets = targets;
-    }
   void AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt);
 
   cmGeneratorTarget* FindGeneratorTargetToUse(const std::string& name) const;

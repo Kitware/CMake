@@ -136,8 +136,7 @@ void cmLocalGenerator::TraceDependencies()
   for(cmGeneratorTargetsType::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-    if (t->second->Target->IsImported()
-        || t->second->GetType() == cmState::INTERFACE_LIBRARY)
+    if (t->second->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
@@ -452,7 +451,6 @@ void cmLocalGenerator::GenerateInstallRules()
 void cmLocalGenerator::AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt)
 {
   this->GeneratorTargets[t] = gt;
-  this->GetGlobalGenerator()->AddGeneratorTarget(t, gt);
 }
 
 //----------------------------------------------------------------------------
@@ -473,10 +471,6 @@ void cmLocalGenerator::ComputeTargetManifest()
     {
     cmGeneratorTarget& target = *t->second;
     if (target.GetType() == cmState::INTERFACE_LIBRARY)
-      {
-      continue;
-      }
-    if (target.IsImported())
       {
       continue;
       }
