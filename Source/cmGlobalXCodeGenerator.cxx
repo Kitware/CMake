@@ -2923,13 +2923,13 @@ void cmGlobalXCodeGenerator
 ::AddDependAndLinkInformation(cmXCodeObject* target)
 {
   cmTarget* cmtarget = target->GetTarget();
-  if(cmtarget->GetType() == cmState::INTERFACE_LIBRARY)
-    {
-    return;
-    }
   if(!cmtarget)
     {
     cmSystemTools::Error("Error no target on xobject\n");
+    return;
+    }
+  if(cmtarget->GetType() == cmState::INTERFACE_LIBRARY)
+    {
     return;
     }
 
