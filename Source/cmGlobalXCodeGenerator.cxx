@@ -514,18 +514,18 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
     for(std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
         l != tgts.end(); l++)
       {
-      cmTarget& target = *(*l)->Target;
+      cmGeneratorTarget* target = *l;
 
-      if (target.GetType() == cmState::GLOBAL_TARGET)
+      if (target->GetType() == cmState::GLOBAL_TARGET)
         {
         continue;
         }
 
-      std::string targetName = target.GetName();
+      std::string targetName = target->GetName();
 
       if (regenerate && (targetName != CMAKE_CHECK_BUILD_SYSTEM_TARGET))
         {
-        target.AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
+        target->Target->AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
         }
 
       // make all exe, shared libs and modules
@@ -533,19 +533,19 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
       // this will make sure that when the next target is built
       // things are up-to-date
       if(!makeHelper.empty() &&
-         (target.GetType() == cmState::EXECUTABLE ||
+         (target->GetType() == cmState::EXECUTABLE ||
 // Nope - no post-build for OBJECT_LIRBRARY
-//          target.GetType() == cmState::OBJECT_LIBRARY ||
-          target.GetType() == cmState::STATIC_LIBRARY ||
-          target.GetType() == cmState::SHARED_LIBRARY ||
-          target.GetType() == cmState::MODULE_LIBRARY))
+//          target->GetType() == cmState::OBJECT_LIBRARY ||
+          target->GetType() == cmState::STATIC_LIBRARY ||
+          target->GetType() == cmState::SHARED_LIBRARY ||
+          target->GetType() == cmState::MODULE_LIBRARY))
         {
         makeHelper[makeHelper.size()-1] = // fill placeholder
-          this->PostBuildMakeTarget(target.GetName(), "$(CONFIGURATION)");
+          this->PostBuildMakeTarget(target->GetName(), "$(CONFIGURATION)");
         cmCustomCommandLines commandLines;
         commandLines.push_back(makeHelper);
         std::vector<std::string> no_byproducts;
-        lg->GetMakefile()->AddCustomCommandToTarget(target.GetName(),
+        lg->GetMakefile()->AddCustomCommandToTarget(target->GetName(),
                                                     no_byproducts,
                                                     no_depends,
                                                     commandLines,
@@ -554,19 +554,17 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
                                                     dir.c_str());
         }
 
-      if(target.GetType() != cmState::INTERFACE_LIBRARY
-          && !target.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
+      if(target->GetType() != cmState::INTERFACE_LIBRARY
+          && !target->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
         {
-        allbuild->AddUtility(target.GetName());
+        allbuild->AddUtility(target->GetName());
         }
-
-      cmGeneratorTarget* targetGT = this->GetGeneratorTarget(&target);
 
       // Refer to the build configuration file for easy editing.
       listfile = lg->GetCurrentSourceDirectory();
       listfile += "/";
       listfile += "CMakeLists.txt";
-      targetGT->AddSource(listfile.c_str());
+      target->AddSource(listfile.c_str());
       }
     }
 }
@@ -3074,28 +3072,26 @@ bool cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
     for(std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
         l != tgts.end(); l++)
       {
-      cmTarget& cmtarget = *(*l)->Target;
+      cmGeneratorTarget* gtgt = *l;
 
       // Same skipping logic here as in CreateXCodeTargets so that we do not
       // end up with (empty anyhow) ALL_BUILD and XCODE_DEPEND_HELPER source
       // groups:
       //
-      if(cmtarget.GetType() == cmState::GLOBAL_TARGET)
+      if(gtgt->GetType() == cmState::GLOBAL_TARGET)
         {
         continue;
         }
-      if(cmtarget.GetType() == cmState::INTERFACE_LIBRARY)
+      if(gtgt->GetType() == cmState::INTERFACE_LIBRARY)
         {
         continue;
         }
-
-      cmGeneratorTarget* gtgt = this->GetGeneratorTarget(&cmtarget);
 
       // add the soon to be generated Info.plist file as a source for a
       // MACOSX_BUNDLE file
-      if(cmtarget.GetPropertyAsBool("MACOSX_BUNDLE"))
+      if(gtgt->GetPropertyAsBool("MACOSX_BUNDLE"))
         {
-        std::string plist = this->ComputeInfoPListLocation(cmtarget);
+        std::string plist = this->ComputeInfoPListLocation(*gtgt->Target);
         mf->GetOrCreateSource(plist, true);
         gtgt->AddSource(plist);
         }
@@ -3115,14 +3111,14 @@ bool cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
         cmSourceGroup* sourceGroup =
           mf->FindSourceGroup(source.c_str(), sourceGroups);
         cmXCodeObject* pbxgroup =
-          this->CreateOrGetPBXGroup(cmtarget, sourceGroup);
-        std::string key = GetGroupMapKey(cmtarget, sf);
+          this->CreateOrGetPBXGroup(*gtgt->Target, sourceGroup);
+        std::string key = GetGroupMapKey(*gtgt->Target, sf);
         this->GroupMap[key] = pbxgroup;
         }
 
       // Put OBJECT_LIBRARY objects in proper groups:
       std::vector<std::string> objs;
-      this->GetGeneratorTarget(&cmtarget)->UseObjectLibraries(objs, "");
+      gtgt->UseObjectLibraries(objs, "");
       for(std::vector<std::string>::const_iterator
             oi = objs.begin(); oi != objs.end(); ++oi)
         {
@@ -3130,8 +3126,8 @@ bool cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
         cmSourceGroup* sourceGroup =
           mf->FindSourceGroup(source.c_str(), sourceGroups);
         cmXCodeObject* pbxgroup =
-          this->CreateOrGetPBXGroup(cmtarget, sourceGroup);
-        std::string key = GetGroupMapKeyFromPath(cmtarget, source);
+          this->CreateOrGetPBXGroup(*gtgt->Target, sourceGroup);
+        std::string key = GetGroupMapKeyFromPath(*gtgt->Target, source);
         this->GroupMap[key] = pbxgroup;
         }
       }
