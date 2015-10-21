@@ -105,7 +105,7 @@ public:
         }
       return 0;
     }
-  // serach the attribute list for an object of the specified type
+  // search the attribute list for an object of the specified type
   cmXCodeObject* GetObject(cmXCodeObject::PBXType t)
     {
       for(std::vector<cmXCodeObject*>::iterator i = this->List.begin();
