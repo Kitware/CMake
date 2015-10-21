@@ -302,6 +302,7 @@ macro(__windows_compiler_msvc lang)
   set(CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /Ob1 /D NDEBUG")
   set(CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "/MD /O1 /Ob1 /D NDEBUG")
   set(CMAKE_${lang}_LINKER_SUPPORTS_PDB ON)
+  set(CMAKE_NINJA_DEPTYPE_${lang} msvc)
 
   if(NOT CMAKE_RC_COMPILER_INIT)
     set(CMAKE_RC_COMPILER_INIT rc)
@@ -311,4 +312,5 @@ macro(__windows_compiler_msvc lang)
   endif()
 
   enable_language(RC)
+  set(CMAKE_NINJA_CMCLDEPS_RC 1)
 endmacro()

@@ -148,17 +148,9 @@ void cmNinjaTargetGenerator::AddIncludeFlags(std::string& languageFlags,
 
 bool cmNinjaTargetGenerator::NeedDepTypeMSVC(const std::string& lang) const
 {
-  if (lang == "C" || lang == "CXX")
-    {
-    cmMakefile* mf = this->GetMakefile();
-    return (
-      strcmp(mf->GetSafeDefinition("CMAKE_C_COMPILER_ID"), "MSVC") == 0 ||
-      strcmp(mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID"), "MSVC") == 0 ||
-      strcmp(mf->GetSafeDefinition("CMAKE_C_SIMULATE_ID"), "MSVC") == 0 ||
-      strcmp(mf->GetSafeDefinition("CMAKE_CXX_SIMULATE_ID"), "MSVC") == 0
-      );
-    }
-  return false;
+  return strcmp(
+    this->GetMakefile()->GetSafeDefinition("CMAKE_NINJA_DEPTYPE_" + lang),
+    "msvc") == 0;
 }
 
 // TODO: Refactor with
@@ -359,7 +351,7 @@ cmNinjaTargetGenerator
     depfile = "";
     flags += " /showIncludes";
     }
-  else if (lang == "RC" && this->NeedDepTypeMSVC("C"))
+  else if (mf->IsOn("CMAKE_NINJA_CMCLDEPS_"+lang))
     {
     // For the MS resource compiler we need cmcldeps, but skip dependencies
     // for source-file try_compile cases because they are always fresh.
