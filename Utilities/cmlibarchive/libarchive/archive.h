@@ -55,13 +55,6 @@
 # include <inttypes.h>
 #endif
 
-/* Borland symbols are case-insensitive.  This workaround only works
-   within CMake because we do not mix compilers.  */
-#if defined(__BORLANDC__)
-# define archive_read_open_FILE archive_read_open_FILE_
-# define archive_write_open_FILE archive_write_open_FILE_
-#endif
-
 /* Get appropriate definitions of 64-bit integer */
 #if !defined(__LA_INT64_T_DEFINED)
 /* Older code relied on the __LA_INT64_T macro; after 4.0 we'll switch to the typedef exclusively. */
