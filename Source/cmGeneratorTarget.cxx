@@ -3607,18 +3607,6 @@ std::string cmGeneratorTarget::GetPDBName(const std::string& config) const
   return prefix+base+".pdb";
 }
 
-bool cmStrictTargetComparison::operator()(cmTarget const* t1,
-                                          cmTarget const* t2) const
-{
-  int nameResult = strcmp(t1->GetName().c_str(), t2->GetName().c_str());
-  if (nameResult == 0)
-    {
-    return strcmp(t1->GetMakefile()->GetCurrentBinaryDirectory(),
-                  t2->GetMakefile()->GetCurrentBinaryDirectory()) < 0;
-    }
-  return nameResult < 0;
-}
-
 //----------------------------------------------------------------------------
 struct cmGeneratorTarget::SourceFileFlags
 cmGeneratorTarget::GetTargetSourceFileFlags(const cmSourceFile* sf) const

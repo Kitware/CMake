@@ -48,6 +48,18 @@
 
 #include <assert.h>
 
+bool cmTarget::StrictTargetComparison::operator()(cmTarget const* t1,
+                                                  cmTarget const* t2) const
+{
+  int nameResult = strcmp(t1->GetName().c_str(), t2->GetName().c_str());
+  if (nameResult == 0)
+    {
+    return strcmp(t1->GetMakefile()->GetCurrentBinaryDirectory(),
+                  t2->GetMakefile()->GetCurrentBinaryDirectory()) < 0;
+    }
+  return nameResult < 0;
+}
+
 cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   : CMakeInstance(cm)
 {

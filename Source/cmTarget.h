@@ -260,6 +260,10 @@ public:
   return this->LinkLibrariesForVS6;}
 #endif
 
+  struct StrictTargetComparison {
+    bool operator()(cmTarget const* t1, cmTarget const* t2) const;
+  };
+
 private:
   bool HandleLocationPropertyPolicy(cmMakefile* context) const;
 

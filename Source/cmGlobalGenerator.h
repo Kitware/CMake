@@ -42,6 +42,10 @@ class cmInstallTargetGenerator;
 class cmInstallFilesGenerator;
 class cmExportBuildFileGenerator;
 
+typedef std::map<cmTarget const*,
+                 cmGeneratorTarget*,
+                 cmTarget::StrictTargetComparison> cmGeneratorTargetsType;
+
 /** \class cmGlobalGenerator
  * \brief Responsible for overseeing the generation process for the entire tree
  *
