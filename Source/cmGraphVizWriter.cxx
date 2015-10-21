@@ -17,7 +17,7 @@
 
 
 
-static const char* getShapeForTarget(const cmTarget* target)
+static const char* getShapeForTarget(const cmGeneratorTarget* target)
 {
   if (!target)
     {
@@ -163,7 +163,7 @@ void cmGraphVizWriter::WriteTargetDependersFiles(const char* fileName)
 
   this->CollectTargetsAndLibs();
 
-  for(std::map<std::string, const cmTarget*>::const_iterator ptrIt =
+  for(std::map<std::string, const cmGeneratorTarget*>::const_iterator ptrIt =
                                                       this->TargetPtrs.begin();
       ptrIt != this->TargetPtrs.end();
       ++ptrIt)
@@ -214,7 +214,7 @@ void cmGraphVizWriter::WritePerTargetFiles(const char* fileName)
 
   this->CollectTargetsAndLibs();
 
-  for(std::map<std::string, const cmTarget*>::const_iterator ptrIt =
+  for(std::map<std::string, const cmGeneratorTarget*>::const_iterator ptrIt =
                                                       this->TargetPtrs.begin();
       ptrIt != this->TargetPtrs.end();
       ++ptrIt)
@@ -268,7 +268,7 @@ void cmGraphVizWriter::WriteGlobalFile(const char* fileName)
   std::set<std::string> insertedConnections;
   std::set<std::string> insertedNodes;
 
-  for(std::map<std::string, const cmTarget*>::const_iterator ptrIt =
+  for(std::map<std::string, const cmGeneratorTarget*>::const_iterator ptrIt =
                                                       this->TargetPtrs.begin();
       ptrIt != this->TargetPtrs.end();
       ++ptrIt)
@@ -308,8 +308,8 @@ void cmGraphVizWriter::WriteConnections(const std::string& targetName,
                                     std::set<std::string>& insertedConnections,
                                     cmGeneratedFileStream& str) const
 {
-  std::map<std::string, const cmTarget* >::const_iterator targetPtrIt =
-                                             this->TargetPtrs.find(targetName);
+  std::map<std::string, const cmGeneratorTarget* >::const_iterator targetPtrIt
+      = this->TargetPtrs.find(targetName);
 
   if (targetPtrIt == this->TargetPtrs.end())  // not found at all
     {
@@ -327,7 +327,7 @@ void cmGraphVizWriter::WriteConnections(const std::string& targetName,
   std::string myNodeName = this->TargetNamesNodes.find(targetName)->second;
 
   const cmTarget::LinkLibraryVectorType* ll =
-                            &(targetPtrIt->second->GetOriginalLinkLibraries());
+      &(targetPtrIt->second->Target->GetOriginalLinkLibraries());
 
   for (cmTarget::LinkLibraryVectorType::const_iterator llit = ll->begin();
        llit != ll->end();
@@ -367,8 +367,8 @@ void cmGraphVizWriter::WriteDependerConnections(const std::string& targetName,
                                     std::set<std::string>& insertedConnections,
                                     cmGeneratedFileStream& str) const
 {
-  std::map<std::string, const cmTarget* >::const_iterator targetPtrIt =
-                                             this->TargetPtrs.find(targetName);
+  std::map<std::string, const cmGeneratorTarget* >::const_iterator targetPtrIt
+      = this->TargetPtrs.find(targetName);
 
   if (targetPtrIt == this->TargetPtrs.end())  // not found at all
     {
@@ -386,8 +386,8 @@ void cmGraphVizWriter::WriteDependerConnections(const std::string& targetName,
   std::string myNodeName = this->TargetNamesNodes.find(targetName)->second;
 
   // now search who links against me
-  for(std::map<std::string, const cmTarget*>::const_iterator dependerIt =
-                                                      this->TargetPtrs.begin();
+  for(std::map<std::string, const cmGeneratorTarget*>::const_iterator
+      dependerIt = this->TargetPtrs.begin();
       dependerIt != this->TargetPtrs.end();
       ++dependerIt)
     {
@@ -404,7 +404,7 @@ void cmGraphVizWriter::WriteDependerConnections(const std::string& targetName,
     // Now we have a target, check whether it links against targetName.
     // If so, draw a connection, and then continue with dependers on that one.
     const cmTarget::LinkLibraryVectorType* ll =
-                            &(dependerIt->second->GetOriginalLinkLibraries());
+        &(dependerIt->second->Target->GetOriginalLinkLibraries());
 
     for (cmTarget::LinkLibraryVectorType::const_iterator llit = ll->begin();
          llit != ll->end();
@@ -448,7 +448,7 @@ void cmGraphVizWriter::WriteDependerConnections(const std::string& targetName,
 
 
 void cmGraphVizWriter::WriteNode(const std::string& targetName,
-                                 const cmTarget* target,
+                                 const cmGeneratorTarget* target,
                                  std::set<std::string>& insertedNodes,
                                  cmGeneratedFileStream& str) const
 {
@@ -488,12 +488,11 @@ int cmGraphVizWriter::CollectAllTargets()
        lit != this->LocalGenerators.end();
        ++ lit )
     {
-    const cmTargets* targets = &((*lit)->GetMakefile()->GetTargets());
-    for ( cmTargets::const_iterator tit = targets->begin();
-          tit != targets->end();
-          ++ tit )
+    std::vector<cmGeneratorTarget*> targets = (*lit)->GetGeneratorTargets();
+    for ( std::vector<cmGeneratorTarget*>::const_iterator it =
+          targets.begin(); it != targets.end(); ++it )
       {
-      const char* realTargetName = tit->first.c_str();
+      const char* realTargetName = (*it)->GetName().c_str();
       if(this->IgnoreThisTarget(realTargetName))
         {
         // Skip ignored targets
@@ -503,7 +502,7 @@ int cmGraphVizWriter::CollectAllTargets()
       std::ostringstream ostr;
       ostr << this->GraphNodePrefix << cnt++;
       this->TargetNamesNodes[realTargetName] = ostr.str();
-      this->TargetPtrs[realTargetName] = &tit->second;
+      this->TargetPtrs[realTargetName] = *it;
       }
     }
 
@@ -519,19 +518,18 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
        lit != this->LocalGenerators.end();
        ++ lit )
     {
-    const cmTargets* targets = &((*lit)->GetMakefile()->GetTargets());
-    for ( cmTargets::const_iterator tit = targets->begin();
-          tit != targets->end();
-          ++ tit )
+    std::vector<cmGeneratorTarget*> targets = (*lit)->GetGeneratorTargets();
+    for ( std::vector<cmGeneratorTarget*>::const_iterator it =
+          targets.begin(); it != targets.end(); ++it )
       {
-      const char* realTargetName = tit->first.c_str();
+      const char* realTargetName = (*it)->GetName().c_str();
       if (this->IgnoreThisTarget(realTargetName))
         {
         // Skip ignored targets
         continue;
         }
       const cmTarget::LinkLibraryVectorType* ll =
-                                     &(tit->second.GetOriginalLinkLibraries());
+          &((*it)->Target->GetOriginalLinkLibraries());
       for (cmTarget::LinkLibraryVectorType::const_iterator llit = ll->begin();
            llit != ll->end();
            ++ llit )
@@ -543,8 +541,8 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
           continue;
           }
 
-        std::map<std::string, const cmTarget*>::const_iterator tarIt =
-                                                this->TargetPtrs.find(libName);
+        std::map<std::string, const cmGeneratorTarget*>::const_iterator tarIt
+            = this->TargetPtrs.find(libName);
         if ( tarIt == this->TargetPtrs.end() )
           {
           std::ostringstream ostr;

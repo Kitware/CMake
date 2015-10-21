@@ -14,9 +14,9 @@
 #include "cmStandardIncludes.h"
 #include "cmLocalGenerator.h"
 #include "cmGeneratedFileStream.h"
-#include "cmTarget.h"
 #include <cmsys/RegularExpression.hxx>
 
+class cmGeneratorTarget;
 
 /** This class implements writing files for graphviz (dot) for graphs
  * representing the dependencies between the targets in the project. */
@@ -54,7 +54,8 @@ protected:
                                 std::set<std::string>& insertedConnections,
                                 cmGeneratedFileStream& str) const;
 
-  void WriteNode(const std::string& targetName, const cmTarget* target,
+  void WriteNode(const std::string& targetName,
+                 const cmGeneratorTarget* target,
                  std::set<std::string>& insertedNodes,
                  cmGeneratedFileStream& str) const;
 
@@ -73,7 +74,7 @@ protected:
 
   const std::vector<cmLocalGenerator*>& LocalGenerators;
 
-  std::map<std::string, const cmTarget*> TargetPtrs;
+  std::map<std::string, const cmGeneratorTarget*> TargetPtrs;
   // maps from the actual target names to node names in dot:
   std::map<std::string, std::string> TargetNamesNodes;
 
