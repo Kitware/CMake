@@ -2719,6 +2719,16 @@ extra_get_record(struct isoent *isoent, int *space, int *off, int *loc)
 			rec->offset = 0;
 			/* Insert `rec` into the tail of isoent->extr_rec_list */
 			rec->next = NULL;
+			/*
+			 * Note: testing isoent->extr_rec_list.last == NULL
+			 * here is really unneeded since it has been already
+			 * initialized at isoent_new function but Clang Static
+			 * Analyzer claims that it is dereference of null
+			 * pointer.
+			 */
+			if (isoent->extr_rec_list.last == NULL)
+				isoent->extr_rec_list.last =
+					&(isoent->extr_rec_list.first);
 			*isoent->extr_rec_list.last = rec;
 			isoent->extr_rec_list.last = &(rec->next);
 		}

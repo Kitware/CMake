@@ -108,6 +108,7 @@ __FBSDID("$FreeBSD$");
 #define kMTime			0x14
 #define kAttributes		0x15
 #define kEncodedHeader		0x17
+#define kDummy			0x19
 
 struct _7z_digests {
 	unsigned char	*defineds;
@@ -330,6 +331,11 @@ struct _7zip {
 	/* Custom value that is non-zero if this archive contains encrypted entries. */
 	int			 has_encrypted_entries;
 };
+
+/* Maximum entry size. This limitation prevents reading intentional
+ * corrupted 7-zip files on assuming there are not so many entries in
+ * the files. */
+#define UMAX_ENTRY	ARCHIVE_LITERAL_ULL(100000000)
 
 static int	archive_read_format_7zip_has_encrypted_entries(struct archive_read *);
 static int	archive_read_support_format_7zip_capabilities(struct archive_read *a);
@@ -640,7 +646,7 @@ archive_read_format_7zip_read_header(struct archive_read *a,
 	}
 	zip_entry = zip->entry;
 
-	if (zip->entries_remaining <= 0)
+	if (zip->entries_remaining <= 0 || zip_entry == NULL)
 		return ARCHIVE_EOF;
 	--zip->entries_remaining;
 
@@ -1663,7 +1669,7 @@ parse_7zip_uint64(struct archive_read *a, uint64_t *val)
 			mask >>= 1;
 			continue;
 		}
-		*val += (avail & (mask -1)) << (8 * i);
+		*val += ((uint64_t)(avail & (mask -1))) << (8 * i);
 		break;
 	}
 	return (0);
@@ -1763,7 +1769,7 @@ read_PackInfo(struct archive_read *a, struct _7z_pack_info *pi)
 		return (-1);
 	if (pi->numPackStreams == 0)
 		return (-1);
-	if (1000000 < pi->numPackStreams)
+	if (UMAX_ENTRY < pi->numPackStreams)
 		return (-1);
 
 	/*
@@ -1892,12 +1898,12 @@ read_Folder(struct archive_read *a, struct _7z_folder *f)
 			if (parse_7zip_uint64(
 			    a, &(f->coders[i].numInStreams)) < 0)
 				return (-1);
-			if (1000000 < f->coders[i].numInStreams)
+			if (UMAX_ENTRY < f->coders[i].numInStreams)
 				return (-1);
 			if (parse_7zip_uint64(
 			    a, &(f->coders[i].numOutStreams)) < 0)
 				return (-1);
-			if (1000000 < f->coders[i].numOutStreams)
+			if (UMAX_ENTRY < f->coders[i].numOutStreams)
 				return (-1);
 		}
 
@@ -1937,11 +1943,11 @@ read_Folder(struct archive_read *a, struct _7z_folder *f)
 	for (i = 0; i < f->numBindPairs; i++) {
 		if (parse_7zip_uint64(a, &(f->bindPairs[i].inIndex)) < 0)
 			return (-1);
-		if (1000000 < f->bindPairs[i].inIndex)
+		if (UMAX_ENTRY < f->bindPairs[i].inIndex)
 			return (-1);
 		if (parse_7zip_uint64(a, &(f->bindPairs[i].outIndex)) < 0)
 			return (-1);
-		if (1000000 < f->bindPairs[i].outIndex)
+		if (UMAX_ENTRY < f->bindPairs[i].outIndex)
 			return (-1);
 	}
 
@@ -1967,7 +1973,7 @@ read_Folder(struct archive_read *a, struct _7z_folder *f)
 		for (i = 0; i < f->numPackedStreams; i++) {
 			if (parse_7zip_uint64(a, &(f->packedStreams[i])) < 0)
 				return (-1);
-			if (1000000 < f->packedStreams[i])
+			if (UMAX_ENTRY < f->packedStreams[i])
 				return (-1);
 		}
 	}
@@ -2009,8 +2015,8 @@ read_CodersInfo(struct archive_read *a, struct _7z_coders_info *ci)
 	 */
 	if (parse_7zip_uint64(a, &(ci->numFolders)) < 0)
 		goto failed;
-	if (1000000 < ci->numFolders)
-			return (-1);
+	if (UMAX_ENTRY < ci->numFolders)
+		return (-1);
 
 	/*
 	 * Read External.
@@ -2031,9 +2037,18 @@ read_CodersInfo(struct archive_read *a, struct _7z_coders_info *ci)
 	case 1:
 		if (parse_7zip_uint64(a, &(ci->dataStreamIndex)) < 0)
 			return (-1);
-		if (1000000 < ci->dataStreamIndex)
+		if (UMAX_ENTRY < ci->dataStreamIndex)
 			return (-1);
+		if (ci->numFolders > 0) {
+			archive_set_error(&a->archive, -1,
+			    "Malformed 7-Zip archive");
+			goto failed;
+		}
 		break;
+	default:
+		archive_set_error(&a->archive, -1,
+		    "Malformed 7-Zip archive");
+		goto failed;
 	}
 
 	if ((p = header_bytes(a, 1)) == NULL)
@@ -2136,7 +2151,7 @@ read_SubStreamsInfo(struct archive_read *a, struct _7z_substream_info *ss,
 		for (i = 0; i < numFolders; i++) {
 			if (parse_7zip_uint64(a, &(f[i].numUnpackStreams)) < 0)
 				return (-1);
-			if (1000000 < f[i].numUnpackStreams)
+			if (UMAX_ENTRY < f[i].numUnpackStreams)
 				return (-1);
 			unpack_streams += (size_t)f[i].numUnpackStreams;
 		}
@@ -2385,8 +2400,8 @@ read_Header(struct archive_read *a, struct _7z_header_info *h,
 
 	if (parse_7zip_uint64(a, &(zip->numFiles)) < 0)
 		return (-1);
-	if (1000000 < zip->numFiles)
-			return (-1);
+	if (UMAX_ENTRY < zip->numFiles)
+		return (-1);
 
 	zip->entries = calloc((size_t)zip->numFiles, sizeof(*zip->entries));
 	if (zip->entries == NULL)
@@ -2545,6 +2560,9 @@ read_Header(struct archive_read *a, struct _7z_header_info *h,
 			}
 			break;
 		}
+		case kDummy:
+			if (ll == 0)
+				break;
 		default:
 			if (header_bytes(a, ll) == NULL)
 				return (-1);
@@ -2684,7 +2702,7 @@ read_Times(struct archive_read *a, struct _7z_header_info *h, int type)
 	if (*p) {
 		if (parse_7zip_uint64(a, &(h->dataIndex)) < 0)
 			goto failed;
-		if (1000000 < h->dataIndex)
+		if (UMAX_ENTRY < h->dataIndex)
 			goto failed;
 	}
 

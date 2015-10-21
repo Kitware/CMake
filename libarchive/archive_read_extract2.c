@@ -42,6 +42,8 @@ __FBSDID("$FreeBSD: src/lib/libarchive/archive_read_extract.c,v 1.61 2008/05/26 
 #include "archive_read_private.h"
 
 static int	copy_data(struct archive *ar, struct archive *aw);
+static int	archive_read_extract_cleanup(struct archive_read *);
+
 
 /* Retrieve an extract object without initialising the associated
  * archive_write_disk object.
@@ -56,8 +58,25 @@ __archive_read_get_extract(struct archive_read *a)
 			return (NULL);
 		}
 		memset(a->extract, 0, sizeof(*a->extract));
+		a->cleanup_archive_extract = archive_read_extract_cleanup;
 	}
 	return (a->extract);
+}
+
+/*
+ * Cleanup function for archive_extract.
+ */
+static int
+archive_read_extract_cleanup(struct archive_read *a)
+{
+	int ret = ARCHIVE_OK;
+
+	if (a->extract->ad != NULL) {
+		ret = archive_write_free(a->extract->ad);
+	}
+	free(a->extract);
+	a->extract = NULL;
+	return (ret);
 }
 
 int
@@ -125,7 +144,7 @@ copy_data(struct archive *ar, struct archive *aw)
 		r = (int)archive_write_data_block(aw, buff, size, offset);
 		if (r < ARCHIVE_WARN)
 			r = ARCHIVE_WARN;
-		if (r != ARCHIVE_OK) {
+		if (r < ARCHIVE_OK) {
 			archive_set_error(ar, archive_errno(aw),
 			    "%s", archive_error_string(aw));
 			return (r);

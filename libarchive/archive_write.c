@@ -444,6 +444,12 @@ archive_write_client_close(struct archive_write_filter *f)
 	/* Clear the close handler myself not to be called again. */
 	f->close = NULL;
 	a->client_data = NULL;
+	/* Clear passphrase. */
+	if (a->passphrase != NULL) {
+		memset(a->passphrase, 0, strlen(a->passphrase));
+		free(a->passphrase);
+		a->passphrase = NULL;
+	}
 	return (ret);
 }
 
@@ -592,6 +598,11 @@ _archive_write_free(struct archive *_a)
 	/* Release various dynamic buffers. */
 	free((void *)(uintptr_t)(const void *)a->nulls);
 	archive_string_free(&a->archive.error_string);
+	if (a->passphrase != NULL) {
+		/* A passphrase should be cleaned. */
+		memset(a->passphrase, 0, strlen(a->passphrase));
+		free(a->passphrase);
+	}
 	a->archive.magic = 0;
 	__archive_clean(&a->archive);
 	free(a);

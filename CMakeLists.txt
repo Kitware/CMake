@@ -1,5 +1,5 @@
 #
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.6 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12 FATAL_ERROR)
 #
 PROJECT(libarchive C)
 #
@@ -35,6 +35,9 @@ ENDIF(NOT "${CMAKE_BUILD_TYPE}"
 # On MacOS, prefer MacPorts libraries to system libraries.
 # I haven't come up with a compelling argument for this to be conditional.
 list(APPEND CMAKE_PREFIX_PATH /opt/local)
+# Enable @rpath in the install name.
+# detail in "cmake  --help-policy CMP0042"
+SET(CMAKE_MACOSX_RPATH ON)
 
 #
 # Version - read from 'version' file.
@@ -85,7 +88,7 @@ SET(CMAKE_REQUIRED_FLAGS)
 # Especially for early development, we want to be a little
 # aggressive about diagnosing build problems; this can get
 # relaxed somewhat in final shipping versions.
-IF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
+IF (CMAKE_C_COMPILER_ID MATCHES "^GNU$")
   SET(CMAKE_REQUIRED_FLAGS "-Wall -Wformat -Wformat-security")
   #################################################################
   # Set compile flags for all build types.
@@ -93,12 +96,14 @@ IF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
   #################################################################
   # Set compile flags for debug build.
   # This is added into CMAKE_C_FLAGS when CMAKE_BUILD_TYPE is "Debug"
-  SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Werror -Wextra -Wunused")
+  SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Werror")
+  SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wextra")
+  SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wunused")
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wshadow")
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wmissing-prototypes")
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wcast-qual")
-ENDIF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
-IF ("CMAKE_C_COMPILER_ID" MATCHES "^Clang$")
+ENDIF (CMAKE_C_COMPILER_ID MATCHES "^GNU$")
+IF (CMAKE_C_COMPILER_ID MATCHES "^Clang$")
   SET(CMAKE_REQUIRED_FLAGS "-Wall -Wformat -Wformat-security")
   #################################################################
   # Set compile flags for all build types.
@@ -107,11 +112,13 @@ IF ("CMAKE_C_COMPILER_ID" MATCHES "^Clang$")
   # Set compile flags for debug build.
   # This is added into CMAKE_C_FLAGS when CMAKE_BUILD_TYPE is "Debug"
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
-  SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Werror -Wextra -Wunused")
+  SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Werror")
+  SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wextra")
+  SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wunused")
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wshadow")
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wmissing-prototypes")
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wcast-qual")
-ENDIF ("CMAKE_C_COMPILER_ID" MATCHES "^Clang$")
+ENDIF (CMAKE_C_COMPILER_ID MATCHES "^Clang$")
 IF (MSVC)
   #################################################################
   # Set compile flags for debug build.
@@ -161,9 +168,12 @@ OPTION(ENABLE_OPENSSL "Enable use of OpenSSL" ON)
 OPTION(ENABLE_LZMA "Enable the use of the system found LZMA library if found" ON)
 OPTION(ENABLE_ZLIB "Enable the use of the system found ZLIB library if found" ON)
 OPTION(ENABLE_BZip2 "Enable the use of the system found BZip2 library if found" ON)
+OPTION(ENABLE_LIBXML2 "Enable the use of the system found libxml2 library if found" ON)
 OPTION(ENABLE_EXPAT "Enable the use of the system found EXPAT library if found" ON)
 OPTION(ENABLE_PCREPOSIX "Enable the use of the system found PCREPOSIX library if found" ON)
 OPTION(ENABLE_LibGCC "Enable the use of the system found LibGCC library if found" ON)
+# CNG is used for encrypt/decrypt Zip archives on Windows.
+OPTION(ENABLE_CNG "Enable the use of CNG(Crypto Next Generation)" ON)
 
 OPTION(ENABLE_TAR "Enable tar building" ON)
 OPTION(ENABLE_TAR_SHARED "Enable dynamic build of tar" FALSE)
@@ -176,6 +186,7 @@ OPTION(ENABLE_ACL "Enable ACL support" ON)
 OPTION(ENABLE_ICONV "Enable iconv support" ON)
 OPTION(ENABLE_TEST "Enable unit and regression tests" ON)
 OPTION(ENABLE_COVERAGE "Enable code coverage (GCC only, automatically sets ENABLE_TEST to ON)" FALSE)
+OPTION(ENABLE_INSTALL "Enable installing of libraries" ON)
 
 SET(POSIX_REGEX_LIB "AUTO" CACHE STRING "Choose what library should provide POSIX regular expression support")
 SET(ENABLE_SAFESEH "AUTO" CACHE STRING "Enable use of /SAFESEH linker flag (MSVC only)")
@@ -466,6 +477,33 @@ IF(LZO2_FOUND)
 ENDIF(LZO2_FOUND)
 MARK_AS_ADVANCED(CLEAR LZO2_INCLUDE_DIR)
 MARK_AS_ADVANCED(CLEAR LZO2_LIBRARY)
+#
+# Find LZ4
+#
+IF (LZ4_INCLUDE_DIR)
+  # Already in cache, be silent
+  SET(LZ4_FIND_QUIETLY TRUE)
+ENDIF (LZ4_INCLUDE_DIR)
+
+FIND_PATH(LZ4_INCLUDE_DIR lz4.h)
+FIND_LIBRARY(LZ4_LIBRARY NAMES lz4 liblz4)
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(LZ4 DEFAULT_MSG LZ4_LIBRARY LZ4_INCLUDE_DIR)
+IF(LZ4_FOUND)
+  SET(HAVE_LIBLZ4 1)
+  SET(HAVE_LZ4_H 1)
+  CMAKE_PUSH_CHECK_STATE()	# Save the state of the variables
+  SET(CMAKE_REQUIRED_INCLUDES ${LZ4_INCLUDE_DIR})
+  CHECK_INCLUDE_FILES("lz4hc.h" HAVE_LZ4HC_H)
+  CMAKE_POP_CHECK_STATE()	# Restore the state of the variables
+  INCLUDE_DIRECTORIES(${LZ4_INCLUDE_DIR})
+  LIST(APPEND ADDITIONAL_LIBS ${LZ4_LIBRARY})
+  #
+  # TODO: test for static library.
+  #
+ENDIF(LZ4_FOUND)
+MARK_AS_ADVANCED(CLEAR LZ4_INCLUDE_DIR)
+MARK_AS_ADVANCED(CLEAR LZ4_LIBRARY)
 
 #
 # Check headers
@@ -511,7 +549,9 @@ LA_CHECK_INCLUDE_FILE("memory.h" HAVE_MEMORY_H)
 LA_CHECK_INCLUDE_FILE("paths.h" HAVE_PATHS_H)
 LA_CHECK_INCLUDE_FILE("poll.h" HAVE_POLL_H)
 LA_CHECK_INCLUDE_FILE("process.h" HAVE_PROCESS_H)
+LA_CHECK_INCLUDE_FILE("pthread.h" HAVE_PTHREAD_H)
 LA_CHECK_INCLUDE_FILE("pwd.h" HAVE_PWD_H)
+LA_CHECK_INCLUDE_FILE("readpassphrase.h" HAVE_READPASSPHRASE_H)
 LA_CHECK_INCLUDE_FILE("regex.h" HAVE_REGEX_H)
 LA_CHECK_INCLUDE_FILE("signal.h" HAVE_SIGNAL_H)
 LA_CHECK_INCLUDE_FILE("spawn.h" HAVE_SPAWN_H)
@@ -542,6 +582,11 @@ LA_CHECK_INCLUDE_FILE("utime.h" HAVE_UTIME_H)
 LA_CHECK_INCLUDE_FILE("wchar.h" HAVE_WCHAR_H)
 LA_CHECK_INCLUDE_FILE("wctype.h" HAVE_WCTYPE_H)
 LA_CHECK_INCLUDE_FILE("windows.h" HAVE_WINDOWS_H)
+IF(ENABLE_CNG)
+  LA_CHECK_INCLUDE_FILE("Bcrypt.h" HAVE_BCRYPT_H)
+ELSE(ENABLE_CNG)
+  UNSET(HAVE_BCRYPT_H CACHE)
+ENDIF(ENABLE_CNG)
 # Following files need windwos.h, so we should test it after windows.h test.
 LA_CHECK_INCLUDE_FILE("wincrypt.h" HAVE_WINCRYPT_H)
 LA_CHECK_INCLUDE_FILE("winioctl.h" HAVE_WINIOCTL_H)
@@ -573,6 +618,7 @@ IF(ENABLE_NETTLE)
     SET(HAVE_NETTLE_SHA_H 1)
     INCLUDE_DIRECTORIES(${NETTLE_INCLUDE_DIR})
     LIST(APPEND ADDITIONAL_LIBS ${NETTLE_LIBRARIES})
+    LA_CHECK_INCLUDE_FILE("nettle/pbkdf2.h" HAVE_NETTLE_PBKDF2_H)
   ENDIF(NETTLE_FOUND)
   MARK_AS_ADVANCED(CLEAR NETTLE_INCLUDE_DIR)
   MARK_AS_ADVANCED(CLEAR NETTLE_LIBRARIES)
@@ -584,6 +630,9 @@ ENDIF(ENABLE_NETTLE)
 #
 IF(ENABLE_OPENSSL AND NOT CMAKE_SYSTEM_NAME MATCHES "Darwin")
   FIND_PACKAGE(OpenSSL)
+  IF(OPENSSL_FOUND)
+    SET(HAVE_LIBCRYPTO 1)
+  ENDIF(OPENSSL_FOUND)
 ELSE()
   SET(OPENSSL_FOUND FALSE) # Override cached value
 ENDIF()
@@ -602,7 +651,7 @@ ENDIF(NOT OPENSSL_FOUND)
 
 #
 # How to prove that CRYPTO functions, which have several names on various
-# platforms, just see if archive_crypto.c can compile and link against
+# platforms, just see if archive_digest.c can compile and link against
 # required libraries.
 #
 MACRO(CHECK_CRYPTO ALGORITHMS IMPLEMENTATION)
@@ -641,7 +690,7 @@ MACRO(CHECK_CRYPTO ALGORITHMS IMPLEMENTATION)
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/confdefs.h)
 	FILE(READ "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/confdefs.h"
 	     CONFDEFS_H)
-	FILE(READ "${CMAKE_CURRENT_SOURCE_DIR}/libarchive/archive_crypto.c"
+	FILE(READ "${CMAKE_CURRENT_SOURCE_DIR}/libarchive/archive_digest.c"
 	     ARCHIVE_CRYPTO_C)
 
 	SET(SOURCE "${CONFDEFS_H}
@@ -791,14 +840,16 @@ ENDMACRO(CHECK_CRYPTO_WIN CRYPTO_LIST)
 MACRO(CHECK_ICONV LIB TRY_ICONV_CONST)
   IF(NOT HAVE_ICONV)
     CMAKE_PUSH_CHECK_STATE()	# Save the state of the variables
-    IF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
+    IF (CMAKE_C_COMPILER_ID MATCHES "^GNU$" OR
+        CMAKE_C_COMPILER_ID MATCHES "^Clang$")
       #
       # During checking iconv proto type, we should use -Werror to avoid the
       # success of iconv detection with a warnig which success is a miss
       # detection. So this needs for all build mode(even it's a release mode).
       #
       SET(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -Werror")
-    ENDIF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
+    ENDIF (CMAKE_C_COMPILER_ID MATCHES "^GNU$" OR
+           CMAKE_C_COMPILER_ID MATCHES "^Clang$")
     IF (MSVC)
       # NOTE: /WX option is the same as gcc's -Werror option.
       SET(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} /WX")
@@ -919,8 +970,12 @@ ENDIF(ENABLE_ICONV)
 
 #
 # Find Libxml2
-FIND_PACKAGE(LibXml2)
 #
+IF(ENABLE_LIBXML2)
+  FIND_PACKAGE(LibXml2)
+ELSE()
+  SET(LIBXML2_FOUND FALSE)
+ENDIF()
 IF(LIBXML2_FOUND)
   CMAKE_PUSH_CHECK_STATE()	# Save the state of the variables
   INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
@@ -945,7 +1000,11 @@ ELSE(LIBXML2_FOUND)
   #
   # Find Expat
   #
-  FIND_PACKAGE(EXPAT)
+  IF(ENABLE_EXPAT)
+    FIND_PACKAGE(EXPAT)
+  ELSE()
+    SET(EXPAT_FOUND FALSE)
+  ENDIF()
   IF(EXPAT_FOUND)
     CMAKE_PUSH_CHECK_STATE()	# Save the state of the variables
     INCLUDE_DIRECTORIES(${EXPAT_INCLUDE_DIR})
@@ -1076,15 +1135,18 @@ ENDIF(NOT FOUND_POSIX_REGEX_LIB AND POSIX_REGEX_LIB MATCHES "^(AUTO|LIBPCREPOSIX
 # Check functions
 #
 CMAKE_PUSH_CHECK_STATE()	# Save the state of the variables
-IF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
+IF (CMAKE_C_COMPILER_ID MATCHES "^GNU$" OR
+    CMAKE_C_COMPILER_ID MATCHES "^Clang$")
   #
   # During checking functions, we should use -fno-builtin to avoid the
   # failure of function detection which failure is an error "conflicting
   # types for built-in function" caused by using -Werror option.
   #
   SET(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -fno-builtin")
-ENDIF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
+ENDIF (CMAKE_C_COMPILER_ID MATCHES "^GNU$" OR
+       CMAKE_C_COMPILER_ID MATCHES "^Clang$")
 CHECK_SYMBOL_EXISTS(_CrtSetReportMode "crtdbg.h" HAVE__CrtSetReportMode)
+CHECK_FUNCTION_EXISTS_GLIBC(arc4random_buf HAVE_ARC4RANDOM_BUF)
 CHECK_FUNCTION_EXISTS_GLIBC(chflags HAVE_CHFLAGS)
 CHECK_FUNCTION_EXISTS_GLIBC(chown HAVE_CHOWN)
 CHECK_FUNCTION_EXISTS_GLIBC(chroot HAVE_CHROOT)
@@ -1132,6 +1194,7 @@ CHECK_FUNCTION_EXISTS_GLIBC(pipe HAVE_PIPE)
 CHECK_FUNCTION_EXISTS_GLIBC(poll HAVE_POLL)
 CHECK_FUNCTION_EXISTS_GLIBC(posix_spawnp HAVE_POSIX_SPAWNP)
 CHECK_FUNCTION_EXISTS_GLIBC(readlink HAVE_READLINK)
+CHECK_FUNCTION_EXISTS_GLIBC(readpassphrase HAVE_READPASSPHRASE)
 CHECK_FUNCTION_EXISTS_GLIBC(select HAVE_SELECT)
 CHECK_FUNCTION_EXISTS_GLIBC(setenv HAVE_SETENV)
 CHECK_FUNCTION_EXISTS_GLIBC(setlocale HAVE_SETLOCALE)
@@ -1170,6 +1233,7 @@ CHECK_FUNCTION_EXISTS(strftime HAVE_STRFTIME)
 CHECK_FUNCTION_EXISTS(vprintf HAVE_VPRINTF)
 CHECK_FUNCTION_EXISTS(wmemcmp HAVE_WMEMCMP)
 CHECK_FUNCTION_EXISTS(wmemcpy HAVE_WMEMCPY)
+CHECK_FUNCTION_EXISTS(wmemmove HAVE_WMEMMOVE)
 
 CMAKE_POP_CHECK_STATE()	# Restore the state of the variables
 
@@ -1537,12 +1601,6 @@ ADD_DEFINITIONS(-DHAVE_CONFIG_H)
 
 # Handle generation of the libarchive.pc file for pkg-config
 INCLUDE(CreatePkgConfigFile)
-
-#
-# Expose ADDITIONAL_LIBS for projects using libarchive as a subdirectory
-# and linking against archive_static.
-#
-set(LIBARCHIVE_ADDITIONAL_LIBS ${ADDITIONAL_LIBS} CACHE INTERNAL "libarchive dependencies")
 
 #
 # Register installation of PDF documents.

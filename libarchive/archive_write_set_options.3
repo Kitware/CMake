@@ -397,6 +397,48 @@ Specifies a filename that should not be compressed when using
 This option can be provided multiple times to suppress compression
 on many files.
 .El
+.It Format zip
+.Bl -tag -compact -width indent
+.It Cm compression
+The value is either
+.Dq store
+or
+.Dq deflate
+to indicate how the following entries should be compressed.
+Note that this setting is ignored for directories, symbolic links,
+and other special entries.
+.It Cm experimental
+This boolean option enables or disables experimental Zip features
+that may not be compatible with other Zip implementations.
+.It Cm fakecrc32
+This boolean option disables CRC calculations.
+All CRC fields are set to zero.
+It should not be used except for testing purposes.
+.It Cm hdrcharset
+This sets the character set used for filenames.
+.It Cm zip64
+Zip64 extensions provide additional file size information
+for entries larger than 4 GiB.
+They also provide extended file offset and archive size information
+when archives exceed 4 GiB.
+By default, the Zip writer selectively enables these extensions only as needed.
+In particular, if the file size is unknown, the Zip writer will
+include Zip64 extensions to guard against the possibility that the
+file might be larger than 4 GiB.
+.Pp
+Setting this boolean option will force the writer to use Zip64 extensions
+even for small files that would not otherwise require them.
+This is primarily useful for testing.
+.Pp
+Disabling this option with
+.Cm !zip64
+will force the Zip writer to avoid Zip64 extensions:
+It will reject files with size greater than 4 GiB,
+it will reject any new entries once the total archive size reaches 4 GiB,
+and it will not use Zip64 extensions for files with unknown size.
+In particular, this can improve compatibility when generating archives
+where the entry sizes are not known in advance.
+.El
 .El
 .Sh EXAMPLES
 The following example creates an archive write handle to

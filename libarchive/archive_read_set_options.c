@@ -76,14 +76,13 @@ archive_set_format_option(struct archive *_a, const char *m, const char *o,
     const char *v)
 {
 	struct archive_read *a = (struct archive_read *)_a;
-	struct archive_format_descriptor *format;
 	size_t i;
 	int r, rv = ARCHIVE_WARN, matched_modules = 0;
 
 	for (i = 0; i < sizeof(a->formats)/sizeof(a->formats[0]); i++) {
-		format = &a->formats[i];
-		if (format == NULL || format->options == NULL ||
-		    format->name == NULL)
+		struct archive_format_descriptor *format = &a->formats[i];
+
+		if (format->options == NULL || format->name == NULL)
 			/* This format does not support option. */
 			continue;
 		if (m != NULL) {
