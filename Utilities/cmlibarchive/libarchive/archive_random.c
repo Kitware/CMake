@@ -62,6 +62,10 @@ static void arc4random_buf(void *, size_t);
 #include <wincrypt.h>
 #endif
 
+#ifndef O_CLOEXEC
+#define O_CLOEXEC	0
+#endif
+
 /*
  * Random number generator function.
  * This simply calls arc4random_buf function if the platform provides it.
