@@ -173,7 +173,6 @@ void cmLocalUnixMakefileGenerator3::ComputeObjectFilenames(
 void cmLocalUnixMakefileGenerator3::
 GetLocalObjectFiles(std::map<std::string, LocalObjectInfo> &localObjectFiles)
 {
-  std::set<std::string> emitted;
   std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
   for(std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
       ti != targets.end(); ++ti)
