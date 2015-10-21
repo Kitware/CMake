@@ -29,6 +29,9 @@
 # include "cmArchiveWrite.h"
 # include "cmLocale.h"
 # include <cm_libarchive.h>
+# ifndef __LA_INT64_T
+#  define __LA_INT64_T la_int64_t
+# endif
 #endif
 #include <cmsys/FStream.hxx>
 #include <cmsys/Terminal.h>
