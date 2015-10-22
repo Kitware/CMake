@@ -15,7 +15,6 @@
 #include "cmLocalVisualStudioGenerator.h"
 #include "cmVisualStudioGeneratorOptions.h"
 
-class cmTarget;
 class cmSourceFile;
 class cmCustomCommand;
 class cmSourceGroup;
@@ -63,7 +62,8 @@ public:
                                         const char* path);
   virtual void AddCMakeListsRules();
 protected:
-  void CreateSingleVCProj(const std::string& lname, cmTarget &tgt);
+  void CreateSingleVCProj(const std::string& lname,
+                          cmGeneratorTarget *tgt);
 private:
   typedef cmVisualStudioGeneratorOptions Options;
   typedef cmLocalVisualStudio7GeneratorFCInfo FCInfo;
@@ -72,30 +72,33 @@ private:
   void FixGlobalTargets();
   void WriteProjectFiles();
   void WriteVCProjHeader(std::ostream& fout, const std::string& libName,
-                         cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
-  void WriteVCProjFooter(std::ostream& fout, cmTarget &target);
+                         cmGeneratorTarget* tgt,
+                         std::vector<cmSourceGroup> &sgs);
+  void WriteVCProjFooter(std::ostream& fout, cmGeneratorTarget* target);
   void WriteVCProjFile(std::ostream& fout, const std::string& libName,
-                       cmTarget &tgt);
+                       cmGeneratorTarget* tgt);
   void WriteConfigurations(std::ostream& fout,
                            std::vector<std::string> const& configs,
-                           const std::string& libName, cmTarget &tgt);
+                           const std::string& libName, cmGeneratorTarget* tgt);
   void WriteConfiguration(std::ostream& fout,
                           const std::string& configName,
-                          const std::string& libName, cmTarget &tgt);
+                          const std::string& libName, cmGeneratorTarget* tgt);
   std::string EscapeForXML(const std::string& s);
   std::string ConvertToXMLOutputPath(const char* path);
   std::string ConvertToXMLOutputPathSingle(const char* path);
   void OutputTargetRules(std::ostream& fout, const std::string& configName,
-                         cmTarget &target, const std::string& libName);
+                         cmGeneratorTarget* target,
+                         const std::string& libName);
   void OutputBuildTool(std::ostream& fout, const std::string& configName,
-                       cmTarget& t, const Options& targetOptions);
+                       cmGeneratorTarget* t, const Options& targetOptions);
   void OutputLibraryDirectories(std::ostream& fout,
                                 std::vector<std::string> const& dirs);
-  void WriteProjectSCC(std::ostream& fout, cmTarget& target);
+  void WriteProjectSCC(std::ostream& fout, cmGeneratorTarget *target);
   void WriteProjectStart(std::ostream& fout, const std::string& libName,
-                         cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
+                         cmGeneratorTarget* tgt,
+                         std::vector<cmSourceGroup> &sgs);
   void WriteProjectStartFortran(std::ostream& fout, const std::string& libName,
-                                cmTarget &tgt);
+                                cmGeneratorTarget* tgt);
   void WriteVCProjBeginGroup(std::ostream& fout,
                           const char* group,
                           const char* filter);
@@ -110,7 +113,7 @@ private:
                                    cmGeneratorTarget* gt);
 
   bool WriteGroup(const cmSourceGroup *sg,
-                  cmTarget& target, std::ostream &fout,
+                  cmGeneratorTarget* target, std::ostream &fout,
                   const std::string& libName,
                   std::vector<std::string> const& configs);
 
