@@ -418,9 +418,9 @@ deconst(const void *c)
 }
 
 static char*
-xmemmem(const char *hay, const size_t hz, const char *ndl, const size_t nz)
+xmemmem(const char *hay, const size_t hz_, const char *ndl, const size_t nz)
 {
-	const char *const eoh = hay + hz;
+	const char *const eoh = hay + hz_;
 	const char *const eon = ndl + nz;
 	const char *hp;
 	const char *np;
@@ -435,7 +435,7 @@ xmemmem(const char *hay, const size_t hz, const char *ndl, const size_t nz)
          * that happens to begin with *NEEDLE) */
 	if (nz == 0UL) {
 		return deconst(hay);
-	} else if ((hay = memchr(hay, *ndl, hz)) == NULL) {
+	} else if ((hay = memchr(hay, *ndl, hz_)) == NULL) {
 		/* trivial */
 		return NULL;
 	}
