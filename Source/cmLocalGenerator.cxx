@@ -2201,7 +2201,7 @@ bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
 
     if (flags && flags != originalFlags)
       {
-      switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0018))
+      switch (this->GetPolicyStatus(cmPolicies::CMP0018))
         {
         case cmPolicies::WARN:
         {
@@ -2949,7 +2949,7 @@ bool cmLocalGenerator::NeedBackwardsCompatibility_2_4()
 {
   // Check the policy to decide whether to pay attention to this
   // variable.
-  switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0001))
+  switch(this->GetPolicyStatus(cmPolicies::CMP0001))
     {
     case cmPolicies::WARN:
       // WARN is just OLD without warning because user code does not
@@ -2974,6 +2974,12 @@ bool cmLocalGenerator::NeedBackwardsCompatibility_2_4()
   cmIML_INT_uint64_t actual_compat = this->GetBackwardsCompatibility();
   return (actual_compat &&
           actual_compat <= CMake_VERSION_ENCODE(2, 4, 255));
+}
+
+cmPolicies::PolicyStatus
+cmLocalGenerator::GetPolicyStatus(cmPolicies::PolicyID id) const
+{
+  return this->Makefile->GetPolicyStatus(id);
 }
 
 //----------------------------------------------------------------------------

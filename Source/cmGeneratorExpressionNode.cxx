@@ -393,7 +393,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
 
     if (cmsysString_strcasecmp(parameters.begin()->c_str(), compilerId) == 0)
       {
-      switch(context->LG->GetMakefile()->GetPolicyStatus(cmPolicies::CMP0044))
+      switch(context->LG->GetPolicyStatus(cmPolicies::CMP0044))
         {
         case cmPolicies::WARN:
           {
@@ -1100,7 +1100,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                            "COMPILE_DEFINITIONS_"))
       {
       cmPolicies::PolicyStatus polSt =
-          context->LG->GetMakefile()->GetPolicyStatus(cmPolicies::CMP0043);
+          context->LG->GetPolicyStatus(cmPolicies::CMP0043);
       if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD)
         {
         interfacePropertyName = "INTERFACE_COMPILE_DEFINITIONS";

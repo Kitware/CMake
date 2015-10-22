@@ -265,6 +265,8 @@ public:
    */
   bool NeedBackwardsCompatibility_2_4();
 
+  cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id) const;
+
   cmake* GetCMakeInstance() const;
 
   const char* GetSourceDirectory() const;
