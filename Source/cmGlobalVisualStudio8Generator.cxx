@@ -464,8 +464,8 @@ bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
 {
   // Look for utility dependencies that magically link.
   for(std::set<std::string>::const_iterator ui =
-        target->Target->GetUtilities().begin();
-      ui != target->Target->GetUtilities().end(); ++ui)
+        target->GetUtilities().begin();
+      ui != target->GetUtilities().end(); ++ui)
     {
     if(cmGeneratorTarget* depTarget =
         target->GetLocalGenerator()->FindGeneratorTargetToUse(ui->c_str()))

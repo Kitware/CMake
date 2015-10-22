@@ -186,6 +186,7 @@ public:
 
   const std::vector<std::string>& GetLinkDirectories() const;
 
+  std::set<std::string>const& GetUtilities() const;
   /** Get the macro to define when building sources in this target.
       If no macro should be defined null is returned.  */
   const char* GetExportMacro() const;

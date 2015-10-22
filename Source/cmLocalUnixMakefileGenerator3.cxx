@@ -1778,8 +1778,8 @@ void cmLocalUnixMakefileGenerator3
         {
         text = "Running external command ...";
         }
-      depends.insert(depends.end(), (*glIt)->Target->GetUtilities().begin(),
-                     (*glIt)->Target->GetUtilities().end());
+      depends.insert(depends.end(), (*glIt)->GetUtilities().begin(),
+                     (*glIt)->GetUtilities().end());
       this->AppendEcho(commands, text,
                        cmLocalUnixMakefileGenerator3::EchoGlobal);
 

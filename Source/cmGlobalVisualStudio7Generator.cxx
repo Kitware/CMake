@@ -459,7 +459,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
                                  project.c_str(),
                                  location.c_str(),
                                  target->GetProperty("VS_PROJECT_TYPE"),
-                                 target->Target->GetUtilities());
+                                 target->GetUtilities());
       written = true;
       }
     else

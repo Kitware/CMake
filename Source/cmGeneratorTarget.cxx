@@ -796,7 +796,7 @@ std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
   if(!this->UtilityItemsDone)
     {
     this->UtilityItemsDone = true;
-    std::set<std::string> const& utilities = this->Target->GetUtilities();
+    std::set<std::string> const& utilities = this->GetUtilities();
     for(std::set<std::string>::const_iterator i = utilities.begin();
         i != utilities.end(); ++i)
       {
@@ -1735,6 +1735,11 @@ cmListFileBacktrace cmGeneratorTarget::GetBacktrace() const
 const std::vector<std::string>&cmGeneratorTarget::GetLinkDirectories() const
 {
   return this->Target->GetLinkDirectories();
+}
+
+const std::set<std::string>& cmGeneratorTarget::GetUtilities() const
+{
+  return this->Target->GetUtilities();
 }
 
 //----------------------------------------------------------------------------
