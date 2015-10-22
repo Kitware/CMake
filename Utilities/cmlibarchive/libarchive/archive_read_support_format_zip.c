@@ -67,10 +67,6 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_read_support_format_zip.c 201102
 #include "archive_crc32.h"
 #endif
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-# define snprintf _snprintf
-#endif
-
 struct zip_entry {
 	struct archive_rb_node	node;
 	struct zip_entry	*next;
