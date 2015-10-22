@@ -67,6 +67,8 @@ public:
    */
   void ComputeTargetManifest();
 
+  bool IsRootMakefile() const;
+
   ///! Get the makefile for this generator
   cmMakefile *GetMakefile() {
     return this->Makefile; }

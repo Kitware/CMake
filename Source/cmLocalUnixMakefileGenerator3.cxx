@@ -254,7 +254,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
     return;
     }
   // always write the top makefile
-  if (!this->GetMakefile()->IsRootMakefile())
+  if (!this->IsRootMakefile())
     {
     ruleFileStream.SetCopyIfDifferent(true);
     }
@@ -265,7 +265,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
   // only write local targets unless at the top Keep track of targets already
   // listed.
   std::set<std::string> emittedTargets;
-  if (!this->GetMakefile()->IsRootMakefile())
+  if (!this->IsRootMakefile())
     {
     // write our targets, and while doing it collect up the object
     // file rules
@@ -880,7 +880,7 @@ void cmLocalUnixMakefileGenerator3
   std::vector<std::string> no_depends;
   std::vector<std::string> commands;
   commands.push_back(runRule);
-  if(!this->GetMakefile()->IsRootMakefile())
+  if(!this->IsRootMakefile())
     {
     this->CreateCDCommand(commands,
                           this->GetBinaryDirectory(),

@@ -490,6 +490,11 @@ void cmLocalGenerator::ComputeTargetManifest()
     }
 }
 
+bool cmLocalGenerator::IsRootMakefile() const
+{
+  return !this->StateSnapshot.GetBuildsystemDirectoryParent().IsValid();
+}
+
 cmState* cmLocalGenerator::GetState() const
 {
   return this->GlobalGenerator->GetCMakeInstance()->GetState();
