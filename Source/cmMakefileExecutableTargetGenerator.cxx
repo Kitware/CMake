@@ -279,11 +279,11 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     {
     this->LocalGenerator
       ->AppendCustomCommands(commands,
-                        this->GeneratorTarget->Target->GetPreBuildCommands(),
+                        this->GeneratorTarget->GetPreBuildCommands(),
                         this->GeneratorTarget);
     this->LocalGenerator
       ->AppendCustomCommands(commands,
-                        this->GeneratorTarget->Target->GetPreLinkCommands(),
+                        this->GeneratorTarget->GetPreLinkCommands(),
                         this->GeneratorTarget);
     }
 
@@ -450,7 +450,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     {
     this->LocalGenerator->
       AppendCustomCommands(commands,
-                       this->GeneratorTarget->Target->GetPostBuildCommands(),
+                       this->GeneratorTarget->GetPostBuildCommands(),
                        this->GeneratorTarget);
     }
 

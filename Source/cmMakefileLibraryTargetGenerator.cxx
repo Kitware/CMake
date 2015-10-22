@@ -114,7 +114,7 @@ void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
   // Add post-build rules.
   this->LocalGenerator->
     AppendCustomCommands(commands,
-                         this->GeneratorTarget->Target->GetPostBuildCommands(),
+                         this->GeneratorTarget->GetPostBuildCommands(),
                          this->GeneratorTarget);
 
   // Depend on the object files.
@@ -458,11 +458,11 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     {
     this->LocalGenerator
       ->AppendCustomCommands(commands,
-                        this->GeneratorTarget->Target->GetPreBuildCommands(),
+                        this->GeneratorTarget->GetPreBuildCommands(),
                         this->GeneratorTarget);
     this->LocalGenerator
       ->AppendCustomCommands(commands,
-                        this->GeneratorTarget->Target->GetPreLinkCommands(),
+                        this->GeneratorTarget->GetPreLinkCommands(),
                         this->GeneratorTarget);
     }
 
@@ -814,7 +814,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     {
     this->LocalGenerator->
       AppendCustomCommands(commands,
-                       this->GeneratorTarget->Target->GetPostBuildCommands(),
+                       this->GeneratorTarget->GetPostBuildCommands(),
                        this->GeneratorTarget);
     }
 

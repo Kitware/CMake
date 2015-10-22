@@ -598,9 +598,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     }
 
   const std::vector<cmCustomCommand> *cmdLists[3] = {
-    &gt.Target->GetPreBuildCommands(),
-    &gt.Target->GetPreLinkCommands(),
-    &gt.Target->GetPostBuildCommands()
+    &gt.GetPreBuildCommands(),
+    &gt.GetPreLinkCommands(),
+    &gt.GetPostBuildCommands()
   };
 
   std::vector<std::string> preLinkCmdLines, postBuildCmdLines;

@@ -2021,7 +2021,7 @@ void cmLocalVisualStudio7Generator
   const char* tool =
     this->FortranProject? "VFPreBuildEventTool":"VCPreBuildEventTool";
   event.Start(tool);
-  event.Write(target->Target->GetPreBuildCommands());
+  event.Write(target->GetPreBuildCommands());
   event.Finish();
 
   // Add pre-link event.
@@ -2035,7 +2035,7 @@ void cmLocalVisualStudio7Generator
       {
       addedPrelink = true;
       std::vector<cmCustomCommand> commands =
-        target->Target->GetPreLinkCommands();
+        target->GetPreLinkCommands();
       cmGlobalVisualStudioGenerator* gg
         = static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator);
       gg->AddSymbolExportCommand(
@@ -2045,7 +2045,7 @@ void cmLocalVisualStudio7Generator
     }
   if (!addedPrelink)
     {
-    event.Write(target->Target->GetPreLinkCommands());
+    event.Write(target->GetPreLinkCommands());
     }
   cmsys::auto_ptr<cmCustomCommand> pcc(
     this->MaybeCreateImplibDir(target,
@@ -2059,7 +2059,7 @@ void cmLocalVisualStudio7Generator
   // Add post-build event.
   tool = this->FortranProject? "VFPostBuildEventTool":"VCPostBuildEventTool";
   event.Start(tool);
-  event.Write(target->Target->GetPostBuildCommands());
+  event.Write(target->GetPostBuildCommands());
   event.Finish();
 }
 

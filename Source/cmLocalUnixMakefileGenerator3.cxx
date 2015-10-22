@@ -1787,15 +1787,15 @@ void cmLocalUnixMakefileGenerator3
 
       // Global targets store their rules in pre- and post-build commands.
       this->AppendCustomDepends(depends,
-                                gt->Target->GetPreBuildCommands());
+                                gt->GetPreBuildCommands());
       this->AppendCustomDepends(depends,
-                                gt->Target->GetPostBuildCommands());
+                                gt->GetPostBuildCommands());
       this->AppendCustomCommands(commands,
-                                 gt->Target->GetPreBuildCommands(),
+                                 gt->GetPreBuildCommands(),
                                  gt,
                                  cmLocalGenerator::START_OUTPUT);
       this->AppendCustomCommands(commands,
-                                 gt->Target->GetPostBuildCommands(),
+                                 gt->GetPostBuildCommands(),
                                  gt,
                                  cmLocalGenerator::START_OUTPUT);
       std::string targetName = gt->GetName();

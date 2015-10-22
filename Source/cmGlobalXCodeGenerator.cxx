@@ -1469,11 +1469,11 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
                                                   cmGeneratorTarget* gtgt)
 {
   std::vector<cmCustomCommand> const & prebuild
-    = gtgt->Target->GetPreBuildCommands();
+    = gtgt->GetPreBuildCommands();
   std::vector<cmCustomCommand> const & prelink
-    = gtgt->Target->GetPreLinkCommands();
+    = gtgt->GetPreLinkCommands();
   std::vector<cmCustomCommand> postbuild
-    = gtgt->Target->GetPostBuildCommands();
+    = gtgt->GetPostBuildCommands();
 
   if(gtgt->GetType() == cmState::SHARED_LIBRARY &&
     !gtgt->IsFrameworkOnApple())

@@ -392,10 +392,10 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries()
 void cmGhsMultiTargetGenerator::WriteCustomCommands()
 {
   WriteCustomCommandsHelper(
-        this->GeneratorTarget->Target->GetPreBuildCommands(),
+        this->GeneratorTarget->GetPreBuildCommands(),
         cmTarget::PRE_BUILD);
   WriteCustomCommandsHelper(
-        this->GeneratorTarget->Target->GetPostBuildCommands(),
+        this->GeneratorTarget->GetPostBuildCommands(),
         cmTarget::POST_BUILD);
 }
 

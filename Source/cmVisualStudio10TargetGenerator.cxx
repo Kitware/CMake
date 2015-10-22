@@ -2814,7 +2814,7 @@ cmVisualStudio10TargetGenerator::WriteEvents(std::string const& configName)
       {
       addedPrelink = true;
       std::vector<cmCustomCommand> commands =
-        this->GeneratorTarget->Target->GetPreLinkCommands();
+        this->GeneratorTarget->GetPreLinkCommands();
       this->GlobalGenerator->AddSymbolExportCommand(
         this->GeneratorTarget, commands, configName);
       this->WriteEvent("PreLinkEvent", commands, configName);
@@ -2823,12 +2823,12 @@ cmVisualStudio10TargetGenerator::WriteEvents(std::string const& configName)
   if (!addedPrelink)
     {
     this->WriteEvent("PreLinkEvent",
-        this->GeneratorTarget->Target->GetPreLinkCommands(), configName);
+        this->GeneratorTarget->GetPreLinkCommands(), configName);
     }
   this->WriteEvent("PreBuildEvent",
-        this->GeneratorTarget->Target->GetPreBuildCommands(), configName);
+        this->GeneratorTarget->GetPreBuildCommands(), configName);
   this->WriteEvent("PostBuildEvent",
-        this->GeneratorTarget->Target->GetPostBuildCommands(), configName);
+        this->GeneratorTarget->GetPostBuildCommands(), configName);
 }
 
 void cmVisualStudio10TargetGenerator::WriteEvent(

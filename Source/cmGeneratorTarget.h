@@ -33,6 +33,10 @@ public:
   bool IsImported() const;
   const char *GetLocation(const std::string& config) const;
 
+  std::vector<cmCustomCommand> const &GetPreBuildCommands() const;
+  std::vector<cmCustomCommand> const &GetPreLinkCommands() const;
+  std::vector<cmCustomCommand> const &GetPostBuildCommands() const;
+
 #define DECLARE_TARGET_POLICY(POLICY) \
   cmPolicies::PolicyStatus GetPolicyStatus ## POLICY () const \
     { return this->PolicyMap.Get(cmPolicies::POLICY); }

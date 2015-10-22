@@ -833,6 +833,24 @@ const char* cmGeneratorTarget::GetLocation(const std::string& config) const
   return location.c_str();
 }
 
+std::vector<cmCustomCommand> const&
+cmGeneratorTarget::GetPreBuildCommands() const
+{
+  return this->Target->GetPreBuildCommands();
+}
+
+std::vector<cmCustomCommand> const&
+cmGeneratorTarget::GetPreLinkCommands() const
+{
+  return this->Target->GetPreLinkCommands();
+}
+
+std::vector<cmCustomCommand> const&
+cmGeneratorTarget::GetPostBuildCommands() const
+{
+  return this->Target->GetPostBuildCommands();
+}
+
 bool cmGeneratorTarget::IsImported() const
 {
   return this->Target->IsImported();
@@ -2267,11 +2285,11 @@ cmTargetTraceDependencies
 
   // Queue pre-build, pre-link, and post-build rule dependencies.
   this->CheckCustomCommands(
-        this->GeneratorTarget->Target->GetPreBuildCommands());
+        this->GeneratorTarget->GetPreBuildCommands());
   this->CheckCustomCommands(
-        this->GeneratorTarget->Target->GetPreLinkCommands());
+        this->GeneratorTarget->GetPreLinkCommands());
   this->CheckCustomCommands(
-        this->GeneratorTarget->Target->GetPostBuildCommands());
+        this->GeneratorTarget->GetPostBuildCommands());
 }
 
 //----------------------------------------------------------------------------
