@@ -184,6 +184,8 @@ public:
 
   cmListFileBacktrace GetBacktrace() const;
 
+  const std::vector<std::string>& GetLinkDirectories() const;
+
   /** Get the macro to define when building sources in this target.
       If no macro should be defined null is returned.  */
   const char* GetExportMacro() const;

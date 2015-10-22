@@ -1052,7 +1052,7 @@ void cmLocalVisualStudio6Generator
     }
   std::vector<std::string>::const_iterator i;
   const std::vector<std::string>& libdirs =
-      target->Target->GetLinkDirectories();
+      target->GetLinkDirectories();
   for(i = libdirs.begin(); i != libdirs.end(); ++i)
     {
     std::string path = *i;

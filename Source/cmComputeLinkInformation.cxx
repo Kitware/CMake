@@ -377,9 +377,9 @@ cmComputeLinkInformation
 
   // Add the search path entries requested by the user to path ordering.
   this->OrderLinkerSearchPath
-    ->AddUserDirectories(this->Target->Target->GetLinkDirectories());
+    ->AddUserDirectories(this->Target->GetLinkDirectories());
   this->OrderRuntimeSearchPath
-    ->AddUserDirectories(this->Target->Target->GetLinkDirectories());
+    ->AddUserDirectories(this->Target->GetLinkDirectories());
 
   // Set up the implicit link directories.
   this->LoadImplicitLinkInfo();
@@ -413,7 +413,7 @@ cmComputeLinkInformation
     // Construct a mask to not bother with this behavior for link
     // directories already specified by the user.
     std::vector<std::string> const& dirs =
-        this->Target->Target->GetLinkDirectories();
+        this->Target->GetLinkDirectories();
     this->OldLinkDirMask.insert(dirs.begin(), dirs.end());
     }
 

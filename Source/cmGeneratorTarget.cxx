@@ -1732,6 +1732,11 @@ cmListFileBacktrace cmGeneratorTarget::GetBacktrace() const
   return this->Target->GetBacktrace();
 }
 
+const std::vector<std::string>&cmGeneratorTarget::GetLinkDirectories() const
+{
+  return this->Target->GetLinkDirectories();
+}
+
 //----------------------------------------------------------------------------
 bool cmGeneratorTarget::HaveWellDefinedOutputFiles() const
 {
