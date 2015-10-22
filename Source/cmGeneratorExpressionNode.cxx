@@ -1442,7 +1442,7 @@ cmPolicies::PolicyStatus statusForTarget(cmGeneratorTarget const* tgt,
 #define RETURN_POLICY(POLICY) \
   if (strcmp(policy, #POLICY) == 0) \
   { \
-    return tgt->Target->GetPolicyStatus ## POLICY (); \
+    return tgt->GetPolicyStatus ## POLICY (); \
   } \
 
   CM_FOR_EACH_TARGET_POLICY(RETURN_POLICY)
