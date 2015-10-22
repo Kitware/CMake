@@ -83,7 +83,7 @@ void cmOSXBundleGenerator::CreateFramework(
   std::string newoutpath = outpath + "/" +
     this->GT->GetFrameworkDirectory(this->ConfigName, false);
 
-  std::string frameworkVersion = this->GT->Target->GetFrameworkVersion();
+  std::string frameworkVersion = this->GT->GetFrameworkVersion();
 
   // Configure the Info.plist file into the Resources directory.
   this->MacContentFolders->insert("Resources");

@@ -209,10 +209,6 @@ public:
   /** Return whether this target is an executable Bundle on Apple.  */
   bool IsAppBundleOnApple() const;
 
-  /** Return the framework version string.  Undefined if
-      IsFrameworkOnApple returns false.  */
-  std::string GetFrameworkVersion() const;
-
   /** Get a backtrace from the creation of the target.  */
   cmListFileBacktrace const& GetBacktrace() const;
 

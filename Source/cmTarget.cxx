@@ -2048,25 +2048,6 @@ void cmTarget::SetPropertyDefault(const std::string& property,
     }
 }
 
-//----------------------------------------------------------------------------
-std::string cmTarget::GetFrameworkVersion() const
-{
-  assert(this->GetType() != cmState::INTERFACE_LIBRARY);
-
-  if(const char* fversion = this->GetProperty("FRAMEWORK_VERSION"))
-    {
-    return fversion;
-    }
-  else if(const char* tversion = this->GetProperty("VERSION"))
-    {
-    return tversion;
-    }
-  else
-    {
-    return "A";
-    }
-}
-
 bool cmTarget::GetMappedConfig(std::string const& desired_config,
                                const char** loc,
                                const char** imp,

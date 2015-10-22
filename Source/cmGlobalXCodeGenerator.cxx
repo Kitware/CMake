@@ -2141,7 +2141,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     {
     if(gtgt->GetPropertyAsBool("FRAMEWORK"))
       {
-      std::string fw_version = gtgt->Target->GetFrameworkVersion();
+      std::string fw_version = gtgt->GetFrameworkVersion();
       buildSettings->AddAttribute("FRAMEWORK_VERSION",
                                   this->CreateString(fw_version.c_str()));
 

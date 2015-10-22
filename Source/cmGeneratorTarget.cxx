@@ -1641,7 +1641,7 @@ cmGeneratorTarget::GetFrameworkDirectory(const std::string& config,
   if(!rootDir && !this->Makefile->PlatformIsAppleIos())
     {
     fpath += "/Versions/";
-    fpath += this->Target->GetFrameworkVersion();
+    fpath += this->GetFrameworkVersion();
     }
   return fpath;
 }
@@ -3331,7 +3331,7 @@ void cmGeneratorTarget::GetLibraryNames(std::string& name,
     if(!this->Makefile->PlatformIsAppleIos())
       {
       realName += "Versions/";
-      realName += this->Target->GetFrameworkVersion();
+      realName += this->GetFrameworkVersion();
       realName += "/";
       }
     realName += base;
@@ -4522,6 +4522,25 @@ void cmGeneratorTarget::GetTargetVersion(bool soversion,
       case 1: major = parsed_major; // no break!
       default: break;
       }
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string cmGeneratorTarget::GetFrameworkVersion() const
+{
+  assert(this->GetType() != cmState::INTERFACE_LIBRARY);
+
+  if(const char* fversion = this->GetProperty("FRAMEWORK_VERSION"))
+    {
+    return fversion;
+    }
+  else if(const char* tversion = this->GetProperty("VERSION"))
+    {
+    return tversion;
+    }
+  else
+    {
+    return "A";
     }
 }
 

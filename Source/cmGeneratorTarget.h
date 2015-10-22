@@ -165,6 +165,10 @@ public:
   std::string GetFrameworkDirectory(const std::string& config,
                                     bool rootDir) const;
 
+  /** Return the framework version string.  Undefined if
+      IsFrameworkOnApple returns false.  */
+  std::string GetFrameworkVersion() const;
+
   /** @return the Mac CFBundle directory without the base */
   std::string GetCFBundleDirectory(const std::string& config,
                                    bool contentOnly) const;
