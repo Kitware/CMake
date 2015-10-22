@@ -137,9 +137,9 @@ archive_random(void *buf, size_t nbytes)
 #endif				/* !__GNUC__ */
 
 struct arc4_stream {
-	u_int8_t i;
-	u_int8_t j;
-	u_int8_t s[256];
+	uint8_t i;
+	uint8_t j;
+	uint8_t s[256];
 };
 
 static pthread_mutex_t	arc4random_mtx = PTHREAD_MUTEX_INITIALIZER;
@@ -159,7 +159,7 @@ static struct arc4_stream rs;
 static pid_t arc4_stir_pid;
 static int arc4_count;
 
-static inline u_int8_t arc4_getbyte(void);
+static inline uint8_t arc4_getbyte(void);
 static void arc4_stir(void);
 
 static inline void
@@ -177,7 +177,7 @@ static inline void
 arc4_addrandom(u_char *dat, int datlen)
 {
 	int     n;
-	u_int8_t si;
+	uint8_t si;
 
 	rs.i--;
 	for (n = 0; n < 256; n++) {
@@ -239,10 +239,10 @@ arc4_stir_if_needed(void)
 	}
 }
 
-static inline u_int8_t
+static inline uint8_t
 arc4_getbyte(void)
 {
-	u_int8_t si, sj;
+	uint8_t si, sj;
 
 	rs.i = (rs.i + 1);
 	si = rs.s[rs.i];
