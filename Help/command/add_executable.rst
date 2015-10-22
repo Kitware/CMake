@@ -14,7 +14,7 @@ files listed in the command invocation.  The ``<name>`` corresponds to the
 logical target name and must be globally unique within a project.  The
 actual file name of the executable built is constructed based on
 conventions of the native platform (such as ``<name>.exe`` or just
-``<name>``.
+``<name>``).
 
 By default the executable file will be created in the build tree
 directory corresponding to the source tree directory in which the
