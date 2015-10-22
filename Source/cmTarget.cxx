@@ -299,7 +299,8 @@ void cmTarget::AddUtility(const std::string& u, cmMakefile *makefile)
 {
   if(this->Utilities.insert(u).second && makefile)
     {
-    UtilityBacktraces.insert(std::make_pair(u, makefile->GetBacktrace()));
+    this->UtilityBacktraces.insert(
+            std::make_pair(u, makefile->GetBacktrace()));
     }
 }
 
