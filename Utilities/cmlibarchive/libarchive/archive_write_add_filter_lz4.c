@@ -54,14 +54,14 @@ __FBSDID("$FreeBSD$");
 
 struct private_data {
 	int		 compression_level;
-	uint8_t		 header_written:1;
-	uint8_t		 version_number:1;
-	uint8_t		 block_independence:1;
-	uint8_t		 block_checksum:1;
-	uint8_t		 stream_size:1;
-	uint8_t		 stream_checksum:1;
-	uint8_t		 preset_dictionary:1;
-	uint8_t		 block_maximum_size:3;
+	unsigned	 header_written:1;
+	unsigned	 version_number:1;
+	unsigned	 block_independence:1;
+	unsigned	 block_checksum:1;
+	unsigned	 stream_size:1;
+	unsigned	 stream_checksum:1;
+	unsigned	 preset_dictionary:1;
+	unsigned	 block_maximum_size:3;
 #if defined(HAVE_LIBLZ4) && LZ4_VERSION_MAJOR >= 1 && LZ4_VERSION_MINOR >= 2
 	int64_t		 total_in;
 	char		*out;
