@@ -90,7 +90,7 @@ void cmLocalVisualStudio10Generator::Generate()
     else
       {
       cmVisualStudio10TargetGenerator tg(
-        (*l)->Target, static_cast<cmGlobalVisualStudio10Generator*>(
+        *l, static_cast<cmGlobalVisualStudio10Generator*>(
           this->GetGlobalGenerator()));
       tg.Generate();
       }
