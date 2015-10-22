@@ -382,7 +382,7 @@ void cmComputeTargetDepends::AddTargetDepend(
         << "\" of target \"" << depender->GetName() << "\" does not exist.";
 
       cmListFileBacktrace const* backtrace =
-        depender->Target->GetUtilityBacktrace(dependee_name);
+        depender->GetUtilityBacktrace(dependee_name);
       if(backtrace)
         {
         cm->IssueMessage(messageType, e.str(), *backtrace);

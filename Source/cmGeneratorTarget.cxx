@@ -1742,6 +1742,12 @@ const std::set<std::string>& cmGeneratorTarget::GetUtilities() const
   return this->Target->GetUtilities();
 }
 
+const cmListFileBacktrace*
+cmGeneratorTarget::GetUtilityBacktrace(const std::string& u) const
+{
+  return this->Target->GetUtilityBacktrace(u);
+}
+
 //----------------------------------------------------------------------------
 bool cmGeneratorTarget::HaveWellDefinedOutputFiles() const
 {
