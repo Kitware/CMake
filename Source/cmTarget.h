@@ -176,9 +176,6 @@ public:
   std::set<std::string>const& GetUtilities() const { return this->Utilities; }
   cmListFileBacktrace const* GetUtilityBacktrace(const std::string& u) const;
 
-  /** Finalize the target at the end of the Configure step.  */
-  void FinishConfigure();
-
   ///! Set/Get a property of this target file
   void SetProperty(const std::string& prop, const char *value);
   void AppendProperty(const std::string&  prop, const char* value,
@@ -250,10 +247,11 @@ public:
   cmStringRange GetLinkImplementationEntries() const;
   cmBacktraceRange GetLinkImplementationBacktraces() const;
 
-
 #if defined(_WIN32) && !defined(__CYGWIN__)
   const LinkLibraryVectorType &GetLinkLibrariesForVS6() const {
   return this->LinkLibrariesForVS6;}
+
+  void AnalyzeLibDependenciesForVS6( const cmMakefile& mf );
 #endif
 
   struct StrictTargetComparison {
@@ -312,8 +310,6 @@ private:
   void GatherDependenciesForVS6( const cmMakefile& mf,
                                  const LibraryID& lib,
                                  DependencyMap& dep_map);
-
-  void AnalyzeLibDependenciesForVS6( const cmMakefile& mf );
 #endif
 
   const char* GetSuffixVariableInternal(bool implib) const;

@@ -756,15 +756,26 @@ void cmMakefile::ConfigureFinalPass()
       "with CMake 2.4 or later. For compatibility with older versions please "
       "use any CMake 2.8.x release or lower.");
     }
-  for (cmTargets::iterator l = this->Targets.begin();
-       l != this->Targets.end(); l++)
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  // Do old-style link dependency analysis only for CM_USE_OLD_VS6.
+  if(this->GetGlobalGenerator()->IsForVS6())
     {
-    if (l->second.GetType() == cmState::INTERFACE_LIBRARY)
+    for (cmTargets::iterator l = this->Targets.begin();
+         l != this->Targets.end(); l++)
       {
-      continue;
+      if (l->second.GetType() == cmState::INTERFACE_LIBRARY)
+        {
+        continue;
+        }
+      // Erase any cached link information that might have been comptued
+      // on-demand during the configuration.  This ensures that build
+      // system generation uses up-to-date information even if other cache
+      // invalidation code in this source file is buggy.
+
+      l->second.AnalyzeLibDependenciesForVS6(*this);
       }
-    l->second.FinishConfigure();
     }
+#endif
 }
 
 //----------------------------------------------------------------------------

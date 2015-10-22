@@ -315,23 +315,6 @@ cmListFileBacktrace const* cmTarget::GetUtilityBacktrace(
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::FinishConfigure()
-{
-  // Erase any cached link information that might have been comptued
-  // on-demand during the configuration.  This ensures that build
-  // system generation uses up-to-date information even if other cache
-  // invalidation code in this source file is buggy.
-
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  // Do old-style link dependency analysis only for CM_USE_OLD_VS6.
-  if(this->Makefile->GetGlobalGenerator()->IsForVS6())
-    {
-    this->AnalyzeLibDependenciesForVS6(*this->Makefile);
-    }
-#endif
-}
-
-//----------------------------------------------------------------------------
 cmListFileBacktrace const& cmTarget::GetBacktrace() const
 {
   return this->Backtrace;
