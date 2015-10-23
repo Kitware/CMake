@@ -146,8 +146,8 @@ private:
 
   class TargetSetMap: public std::map<cmTarget*, TargetSet> {};
   TargetSetMap TargetLinkClosure;
-  void FillLinkClosure(cmTarget const* target, TargetSet& linked);
-  TargetSet const& GetTargetLinkClosure(cmTarget* target);
+  void FillLinkClosure(cmGeneratorTarget const* target, TargetSet& linked);
+  TargetSet const& GetTargetLinkClosure(cmGeneratorTarget *target);
 };
 
 class cmGlobalVisualStudioGenerator::OrderedTargetDependSet:

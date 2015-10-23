@@ -303,19 +303,20 @@ std::string cmGlobalVisualStudioGenerator::GetUserMacrosRegKeyBase()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudioGenerator::FillLinkClosure(cmTarget const* target,
-                                                    TargetSet& linked)
+void cmGlobalVisualStudioGenerator::FillLinkClosure(
+        const cmGeneratorTarget *target,
+        TargetSet& linked)
 {
-  if(linked.insert(target).second)
+  if(linked.insert(target->Target).second)
     {
-    cmGeneratorTarget* gt = this->GetGeneratorTarget(target);
-    TargetDependSet const& depends = this->GetTargetDirectDepends(gt);
+    TargetDependSet const& depends =
+            this->GetTargetDirectDepends(target);
     for(TargetDependSet::const_iterator di = depends.begin();
         di != depends.end(); ++di)
       {
       if(di->IsLink())
         {
-        this->FillLinkClosure((*di)->Target, linked);
+        this->FillLinkClosure(*di, linked);
         }
       }
     }
@@ -323,12 +324,12 @@ void cmGlobalVisualStudioGenerator::FillLinkClosure(cmTarget const* target,
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::TargetSet const&
-cmGlobalVisualStudioGenerator::GetTargetLinkClosure(cmTarget* target)
+cmGlobalVisualStudioGenerator::GetTargetLinkClosure(cmGeneratorTarget* target)
 {
-  TargetSetMap::iterator i = this->TargetLinkClosure.find(target);
+  TargetSetMap::iterator i = this->TargetLinkClosure.find(target->Target);
   if(i == this->TargetLinkClosure.end())
     {
-    TargetSetMap::value_type entry(target, TargetSet());
+    TargetSetMap::value_type entry(target->Target, TargetSet());
     i = this->TargetLinkClosure.insert(entry).first;
     this->FillLinkClosure(target, i->second);
     }
@@ -461,7 +462,7 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(cmTarget& target)
   TargetSet linked;
   if(target.GetType() != cmState::STATIC_LIBRARY)
     {
-    linked = this->GetTargetLinkClosure(&target);
+    linked = this->GetTargetLinkClosure(gt);
     }
 
   // Emit link dependencies.
