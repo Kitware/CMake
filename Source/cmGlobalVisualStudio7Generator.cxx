@@ -692,7 +692,7 @@ void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
   const char* ext = ".vcproj";
   const char* project =
     "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"";
-  if(this->TargetIsFortranOnly(*target->Target))
+  if(this->TargetIsFortranOnly(target))
     {
     ext = ".vfproj";
     project = "Project(\"{6989167D-11E4-40FE-8C1A-2192A86A7E90}\") = \"";

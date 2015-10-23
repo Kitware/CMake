@@ -2886,7 +2886,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
     // skip fortran targets as they can not be processed by MSBuild
     // the only reference will be in the .sln file
     if(static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
-       ->TargetIsFortranOnly(*dt->Target))
+       ->TargetIsFortranOnly(dt))
       {
       continue;
       }

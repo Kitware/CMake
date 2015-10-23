@@ -229,7 +229,7 @@ void cmLocalVisualStudio7Generator
 {
   cmGlobalVisualStudioGenerator* gg
       = static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator);
-  this->FortranProject = gg->TargetIsFortranOnly(*target->Target);
+  this->FortranProject = gg->TargetIsFortranOnly(target);
   this->WindowsCEProject = gg->TargetsWindowsCE();
 
   // Intel Fortran for VS10 uses VS9 format ".vfproj" files.

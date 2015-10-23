@@ -73,7 +73,7 @@ public:
                              const char* vsSolutionFile = 0);
 
   // return true if target is fortran only
-  bool TargetIsFortranOnly(cmTarget const& t);
+  bool TargetIsFortranOnly(const cmGeneratorTarget *gt);
 
   /** Get the top-level registry key for this VS version.  */
   std::string GetRegistryBase();
