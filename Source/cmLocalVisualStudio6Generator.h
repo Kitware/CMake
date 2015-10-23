@@ -50,7 +50,8 @@ public:
 
   virtual
   std::string GetTargetDirectory(cmGeneratorTarget const* target) const;
-  virtual std::string ComputeLongestObjectDirectory(cmTarget&) const;
+  virtual std::string
+  ComputeLongestObjectDirectory(cmGeneratorTarget const*) const;
 private:
   std::string DSPHeaderTemplate;
   std::string DSPFooterTemplate;

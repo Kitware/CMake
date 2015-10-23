@@ -1935,7 +1935,7 @@ cmLocalVisualStudio6Generator
 //----------------------------------------------------------------------------
 std::string
 cmLocalVisualStudio6Generator
-::ComputeLongestObjectDirectory(cmTarget&) const
+::ComputeLongestObjectDirectory(cmGeneratorTarget const*) const
 {
   // Compute the maximum length configuration name.
   std::string config_max;

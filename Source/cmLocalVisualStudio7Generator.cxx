@@ -1689,10 +1689,10 @@ cmLocalVisualStudio7GeneratorFCInfo
 //----------------------------------------------------------------------------
 std::string
 cmLocalVisualStudio7Generator
-::ComputeLongestObjectDirectory(cmTarget& target) const
+::ComputeLongestObjectDirectory(cmGeneratorTarget const* target) const
 {
   std::vector<std::string> configs;
-  target.GetMakefile()->GetConfigurations(configs);
+  target->Target->GetMakefile()->GetConfigurations(configs);
 
   // Compute the maximum length configuration name.
   std::string config_max;
@@ -1711,9 +1711,7 @@ cmLocalVisualStudio7Generator
   std::string dir_max;
   dir_max += this->GetCurrentBinaryDirectory();
   dir_max += "/";
-  cmGeneratorTarget* gt =
-    this->GlobalGenerator->GetGeneratorTarget(&target);
-  dir_max += this->GetTargetDirectory(gt);
+  dir_max += this->GetTargetDirectory(target);
   dir_max += "/";
   dir_max += config_max;
   dir_max += "/";

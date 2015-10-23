@@ -56,7 +56,8 @@ public:
   std::string GetTargetDirectory(cmGeneratorTarget const* target) const;
   cmSourceFile* CreateVCProjBuildRule();
   void WriteStampFiles();
-  virtual std::string ComputeLongestObjectDirectory(cmTarget&) const;
+  virtual std::string
+  ComputeLongestObjectDirectory(cmGeneratorTarget const*) const;
 
   virtual void ReadAndStoreExternalGUID(const std::string& name,
                                         const char* path);

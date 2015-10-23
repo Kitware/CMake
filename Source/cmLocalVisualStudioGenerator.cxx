@@ -43,7 +43,7 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
                         std::map<cmSourceFile const*, std::string>& mapping,
                         cmGeneratorTarget const* gt)
 {
-  std::string dir_max = this->ComputeLongestObjectDirectory(*gt->Target);
+  std::string dir_max = this->ComputeLongestObjectDirectory(gt);
 
   // Count the number of object files with each name.  Note that
   // windows file names are not case sensitive.
