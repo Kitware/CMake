@@ -198,6 +198,10 @@ void cmCTestMultiProcessHandler::UnlockResources(int index)
     {
     this->LockedResources.erase(*i);
     }
+  if (this->Properties[index]->RunSerial)
+    {
+    this->SerialTestRunning = false;
+    }
 }
 
 //---------------------------------------------------------
@@ -451,11 +455,6 @@ bool cmCTestMultiProcessHandler::CheckOutput()
     this->WriteCheckpoint(test);
     this->UnlockResources(test);
     this->RunningCount -= GetProcessorsUsed(test);
-    if (this->Properties[test]->RunSerial)
-      {
-      this->SerialTestRunning = false;
-      }
-
     delete p;
     }
   return true;
