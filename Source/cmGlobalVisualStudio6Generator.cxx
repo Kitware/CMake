@@ -310,7 +310,7 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
     }
   fout << "}}}\n\n";
 
-  UtilityDependsMap::iterator ui = this->UtilityDepends.find(target->Target);
+  UtilityDependsMap::iterator ui = this->UtilityDepends.find(target);
   if(ui != this->UtilityDepends.end())
     {
     const char* uname = ui->second.c_str();

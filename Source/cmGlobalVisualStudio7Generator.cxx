@@ -704,7 +704,7 @@ void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
        << dspname << ext << "\", \"{"
        << this->GetGUID(dspname) << "}\"\nEndProject\n";
 
-  UtilityDependsMap::iterator ui = this->UtilityDepends.find(target->Target);
+  UtilityDependsMap::iterator ui = this->UtilityDepends.find(target);
   if(ui != this->UtilityDepends.end())
     {
     const char* uname = ui->second.c_str();
@@ -748,7 +748,7 @@ cmGlobalVisualStudio7Generator
     depcount++;
     }
 
-  UtilityDependsMap::iterator ui = this->UtilityDepends.find(target->Target);
+  UtilityDependsMap::iterator ui = this->UtilityDepends.find(target);
   if(ui != this->UtilityDepends.end())
     {
     const char* uname = ui->second.c_str();

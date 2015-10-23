@@ -488,7 +488,7 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(
       {
       // Direct dependency on linkable target not allowed.
       // Use an intermediate utility target.
-      vsTargetDepend.insert(this->GetUtilityDepend(dep));
+      vsTargetDepend.insert(this->GetUtilityDepend(dgt));
       }
     }
 }
@@ -508,12 +508,13 @@ void cmGlobalVisualStudioGenerator::FindMakeProgram(cmMakefile* mf)
 
 //----------------------------------------------------------------------------
 std::string
-cmGlobalVisualStudioGenerator::GetUtilityDepend(cmTarget const* target)
+cmGlobalVisualStudioGenerator::GetUtilityDepend(
+        cmGeneratorTarget const* target)
 {
   UtilityDependsMap::iterator i = this->UtilityDepends.find(target);
   if(i == this->UtilityDepends.end())
     {
-    std::string name = this->WriteUtilityDepend(target);
+    std::string name = this->WriteUtilityDepend(target->Target);
     UtilityDependsMap::value_type entry(target, name);
     i = this->UtilityDepends.insert(entry).first;
     }
