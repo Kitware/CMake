@@ -18,6 +18,13 @@
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/FStream.hxx>
 
+#include <iomanip>
+
+#include <CoreFoundation/CFBase.h>
+#include <CoreFoundation/CFString.h>
+#include <CoreFoundation/CFLocale.h>
+#include <Carbon.h>
+
 static const char* SLAHeader =
 "data 'LPic' (5000) {\n"
 "    $\"0002 0011 0003 0001 0000 0000 0002 0000\"\n"
@@ -102,6 +109,64 @@ int cmCPackDragNDropGenerator::InitializeInternal()
     return 0;
     }
   this->SetOptionIfNotSet("CPACK_COMMAND_REZ", rez_path.c_str());
+
+  if(this->IsSet("CPACK_DMG_SLA_DIR"))
+  {
+    slaDirectory = this->GetOption("CPACK_DMG_SLA_DIR");
+    if(!slaDirectory.empty() && this->IsSet("CPACK_RESOURCE_FILE_LICENSE"))
+    {
+      std::string license_file = this->GetOption("CPACK_RESOURCE_FILE_LICENSE");
+      if(!license_file.empty() && (license_file.find("CPack.GenericLicense.txt") == std::string::npos))
+      {
+        cmCPackLogger(cmCPackLog::LOG_WARNING,
+          "Both CPACK_DMG_SLA_DIR and CPACK_RESOURCE_FILE_LICENSE specified, defaulting to CPACK_DMG_SLA_DIR"
+          << std::endl);
+      }
+    }
+    if(!this->IsSet("CPACK_DMG_LANGUAGES"))
+    {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "CPACK_DMG_SLA_DIR set but no languages defined (set CPACK_DMG_LANGUAGES)"
+        << std::endl);
+      return 0;
+    }
+    if(!cmSystemTools::FileExists(slaDirectory, false))
+    {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "CPACK_DMG_SLA_DIR does not exist"
+        << std::endl);
+      return 0;
+    }
+
+    std::vector<std::string> languages;
+    cmSystemTools::ExpandListArgument(this->GetOption("CPACK_DMG_LANGUAGES"), languages);
+    if(languages.empty())
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "CPACK_DMG_LANGUAGES set but empty"
+      << std::endl);
+    return 0;
+    }
+    for(size_t i = 0; i < languages.size(); ++i)
+    {
+      std::string license = slaDirectory + "/" + languages[i] + ".license.txt";
+      if (!cmSystemTools::FileExists(license))
+      {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+          "Missing license file " << languages[i] << ".license.txt"
+          << std::endl);
+        return 0;
+      }
+      std::string menu = slaDirectory + "/" + languages[i] + ".menu.txt";
+      if (!cmSystemTools::FileExists(menu))
+      {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+          "Missing menu file " << languages[i] << ".menu.txt"
+          << std::endl);
+        return 0;
+      }
+    }
+  }
 
   return this->Superclass::InitializeInternal();
 }
@@ -246,9 +311,20 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     this->GetOption("CPACK_DMG_DS_STORE")
     ? this->GetOption("CPACK_DMG_DS_STORE") : "";
 
+  const std::string cpack_dmg_languages =
+    this->GetOption("CPACK_DMG_LANGUAGES")
+      ? this->GetOption("CPACK_DMG_LANGUAGES") : "";
+
   // only put license on dmg if is user provided
   if(!cpack_license_file.empty() &&
       cpack_license_file.find("CPack.GenericLicense.txt") != std::string::npos)
+  {
+    cpack_license_file = "";
+  }
+
+  // use sla_dir if both sla_dir and license_file are set
+  if(!cpack_license_file.empty() &&
+     !slaDirectory.empty())
   {
     cpack_license_file = "";
   }
@@ -418,54 +494,116 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
       }
     }
 
-  if(!cpack_license_file.empty())
+  if(!cpack_license_file.empty() || !slaDirectory.empty())
   {
+    // Use old hardcoded style if sla_dir is not set
+    bool oldStyle = slaDirectory.empty();
     std::string sla_r = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     sla_r += "/sla.r";
 
-    cmsys::ifstream ifs;
-    ifs.open(cpack_license_file.c_str());
-    if(ifs.is_open())
+    std::vector<std::string> languages;
+    if(!oldStyle)
     {
-      cmGeneratedFileStream osf(sla_r.c_str());
-      osf << "#include <CoreServices/CoreServices.r>\n\n";
-      osf << SLAHeader;
-      osf << "\n";
-      osf << "data 'TEXT' (5002, \"English\") {\n";
-      while(ifs.good())
-      {
-        std::string line;
-        std::getline(ifs, line);
-        // escape quotes
-        std::string::size_type pos = line.find('\"');
-        while(pos != std::string::npos)
-        {
-          line.replace(pos, 1, "\\\"");
-          pos = line.find('\"', pos+2);
-        }
-        // break up long lines to avoid Rez errors
-        std::vector<std::string> lines;
-        const size_t max_line_length = 512;
-        for(size_t i=0; i<line.size(); i+= max_line_length)
-          {
-          int line_length = max_line_length;
-          if(i+max_line_length > line.size())
-            line_length = line.size()-i;
-          lines.push_back(line.substr(i, line_length));
-          }
-
-        for(size_t i=0; i<lines.size(); i++)
-          {
-          osf << "        \"" << lines[i] << "\"\n";
-          }
-        osf << "        \"\\n\"\n";
-      }
-      osf << "};\n";
-      osf << "\n";
-      osf << SLASTREnglish;
-      ifs.close();
-      osf.close();
+      cmSystemTools::ExpandListArgument(cpack_dmg_languages, languages);
     }
+
+    cmGeneratedFileStream ofs(sla_r.c_str());
+    ofs << "#include <CoreServices/CoreServices.r>\n\n";
+    if(oldStyle)
+    {
+      ofs << SLAHeader;
+      ofs << "\n";
+    }
+    else
+    {
+      /*
+       * LPic Layout (https://github.com/pypt/dmg-add-license/blob/master/main.c)
+       * as far as I can tell (no official documentation seems to exist):
+       * struct LPic {
+       *  uint16_t default_language; // points to a resid, defaulting to 0, first set language
+       *  uint16_t length;
+       *  struct {
+       *    uint16_t language_code;
+       *    uint16_t resid;
+       *    uint16_t encoding; // Encoding from TextCommon.h, forcing MacRoman (0) for now
+       *                       // Might need to be allow overwrite per license file by user later
+       *  } item[1];
+       * }
+       */
+
+      // Create vector first for readability, then iterate to write to ofs
+      std::vector<std::uint16_t> header_data;
+      header_data.push_back(0);
+      header_data.push_back(languages.size());
+      for(size_t i = 0; i < languages.size(); ++i)
+      {
+        CFStringRef language_cfstring = CFStringCreateWithCString(NULL,
+          languages[i].c_str(), kCFStringEncodingUTF8);
+        CFStringRef iso_language = CFLocaleCreateCanonicalLanguageIdentifierFromString(
+          NULL, language_cfstring);
+        if (!iso_language)
+        {
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+            languages[i] << " is not a recognized language"
+            << std::endl);
+        }
+        char *iso_language_cstr = (char *) malloc(65);
+        CFStringGetCString(iso_language, iso_language_cstr, 64, kCFStringEncodingMacRoman);
+        LangCode lang = 0;
+        RegionCode region = 0;
+        OSStatus err = LocaleStringToLangAndRegionCodes(iso_language_cstr, &lang, &region);
+        if (err != noErr)
+        {
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+            "No language/region code available for " << iso_language_cstr
+            << std::endl);
+          free(iso_language_cstr);
+          return 0;
+        }
+        free(iso_language_cstr);
+        header_data.push_back(region);
+        header_data.push_back(i);
+        header_data.push_back(0);
+      }
+      ofs << "data 'LPic' (5000) {\n";
+      ofs << std::hex << std::uppercase << std::setfill('0');
+
+      for(size_t i = 0; i < header_data.size(); ++i)
+      {
+        if(i % 8 == 0)
+        {
+          ofs << "    $\"";
+        }
+
+        ofs << std::setw(4) << header_data[i];
+
+        if(i % 8 == 7 || i == header_data.size() - 1)
+        {
+          ofs << "\"\n";
+        }
+        else
+        {
+          ofs << " ";
+        }
+      }
+      ofs << "};\n\n";
+      // Reset ofs options
+      ofs << std::dec << std::nouppercase << std::setfill(' ');
+    }
+
+    if(oldStyle)
+    {
+      WriteLicense(ofs, 0, "", cpack_license_file);
+    }
+    else
+    {
+      for(size_t i = 0; i < languages.size(); ++i)
+      {
+        WriteLicense(ofs, i + 5000, languages[i]);
+      }
+    }
+
+    ofs.Close();
 
     // convert to UDCO
     std::string temp_udco = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
@@ -606,4 +744,124 @@ cmCPackDragNDropGenerator::GetComponentInstallDirNameSuffix(
     }
 
   return GetComponentPackageFileName(package_file_name, componentName, false);
+}
+
+void
+cmCPackDragNDropGenerator::WriteLicense(cmGeneratedFileStream& outputStream, int licenseNumber, std::string licenseLanguage, std::string licenseFile)
+{
+  if(!licenseFile.empty())
+  {
+    licenseNumber = 5002;
+    licenseLanguage = "English";
+  }
+
+  // License header
+  outputStream << "data 'TEXT' (" << licenseNumber << ", \""
+    << licenseLanguage << "\") {\n";
+  // License body
+  std::string actual_license = !licenseFile.empty() ? licenseFile : (slaDirectory + "/"
+    + licenseLanguage + ".license.txt");
+  cmsys::ifstream license_ifs;
+  license_ifs.open(actual_license);
+  if(license_ifs.is_open())
+  {
+    while(license_ifs.good())
+    {
+      std::string line;
+      std::getline(license_ifs, line);
+      if(!line.empty())
+      {
+        EscapeQuotes(line);
+        std::vector<std::string> lines;
+        BreakLongLine(line, lines);
+        for(size_t i = 0; i < lines.size(); ++i)
+        {
+          outputStream << "        \"" << lines[i] << "\"\n";
+        }
+      }
+      outputStream << "        \"\\n\"\n";
+    }
+    license_ifs.close();
+  }
+
+  // End of License
+  outputStream << "};\n\n";
+  if(!licenseFile.empty())
+  {
+    outputStream << SLASTREnglish;
+  }
+  else
+  {
+    // Menu header
+    outputStream << "resource 'STR#' (" << licenseNumber << ", \""
+      << licenseLanguage << "\") {\n";
+    outputStream << "    {\n";
+
+    // Menu body
+    cmsys::ifstream menu_ifs;
+    menu_ifs.open(slaDirectory + "/" + licenseLanguage + ".menu.txt");
+    if(menu_ifs.is_open())
+    {
+      size_t lines_written = 0;
+      while(menu_ifs.good())
+      {
+        // Lines written from original file, not from broken up lines
+        std::string line;
+        std::getline(menu_ifs, line);
+        if(!line.empty())
+        {
+          EscapeQuotes(line);
+          std::vector<std::string> lines;
+          BreakLongLine(line, lines);
+          for(size_t i = 0; i < lines.size(); ++i)
+          {
+            std::string comma;
+            // We need a comma after every complete string, but not on the very last line
+            if(lines_written != 8 && i == lines.size() - 1)
+            {
+              comma = ",";
+            }
+            else
+            {
+              comma = "";
+            }
+            outputStream << "        \"" << lines[i] << "\"" << comma << "\n";
+          }
+          ++lines_written;
+        }
+      }
+      menu_ifs.close();
+    }
+
+    //End of menu
+    outputStream << "    }\n";
+    outputStream << "};\n";
+    outputStream << "\n";
+  }
+}
+
+void
+cmCPackDragNDropGenerator::BreakLongLine(const std::string& line, std::vector<std::string>& lines)
+{
+  const size_t max_line_length = 512;
+  for(size_t i = 0; i < line.size(); i += max_line_length)
+  {
+    int line_length = max_line_length;
+    if(i + max_line_length > line.size())
+    {
+      line_length = line.size() - i;
+    }
+    lines.push_back(line.substr(i, line_length));
+  }
+}
+
+void
+cmCPackDragNDropGenerator::EscapeQuotes(std::string& line)
+{
+  std::string::size_type pos = line.find('\"');
+  while(pos != std::string::npos)
+  {
+    line.replace(pos, 1, "\\\"");
+    pos = line.find('\"', pos + 2);
+  }
 }
