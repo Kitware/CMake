@@ -441,7 +441,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
   for(OrderedTargetDependSet::const_iterator tt =
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
-    cmTarget const* target = (*tt)->Target;
+    cmGeneratorTarget const* target = *tt;
     if(target->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
@@ -459,7 +459,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
                                  project.c_str(),
                                  location.c_str(),
                                  target->GetProperty("VS_PROJECT_TYPE"),
-                                 target->GetUtilities());
+                                 target->Target->GetUtilities());
       written = true;
       }
     else
@@ -468,9 +468,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
         target->GetProperty("GENERATOR_FILE_NAME");
       if(vcprojName)
         {
-        cmLocalGenerator* lg =
-            root->GetGlobalGenerator()->GetGeneratorTarget(target)
-            ->GetLocalGenerator();
+        cmLocalGenerator* lg = target->GetLocalGenerator();
         std::string dir = lg->GetCurrentBinaryDirectory();
         dir = root->Convert(dir.c_str(),
                             cmLocalGenerator::START_OUTPUT);
@@ -479,7 +477,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
           dir = ""; // msbuild cannot handle ".\" prefix
           }
         this->WriteProject(fout, vcprojName, dir.c_str(),
-                           *target);
+                           *target->Target);
         written = true;
         }
       }
