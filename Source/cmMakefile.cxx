@@ -2407,10 +2407,23 @@ bool cmMakefile::PlatformIsAppleIos() const
   sdkRoot = this->GetSafeDefinition("CMAKE_OSX_SYSROOT");
   sdkRoot = cmSystemTools::LowerCase(sdkRoot);
 
-  return sdkRoot.find("iphoneos") == 0 ||
-         sdkRoot.find("/iphoneos") != std::string::npos ||
-         sdkRoot.find("iphonesimulator") == 0 ||
-         sdkRoot.find("/iphonesimulator") != std::string::npos;
+  const std::string embedded[] =
+    {
+    "appletvos", "appletvsimulator",
+    "iphoneos", "iphonesimulator",
+    "watchos", "watchsimulator",
+    };
+
+  for(size_t i = 0; i < sizeof(embedded) / sizeof(embedded[0]); ++i)
+    {
+    if(sdkRoot.find(embedded[i]) == 0 ||
+       sdkRoot.find(std::string("/") + embedded[i]) != std::string::npos)
+      {
+      return true;
+      }
+    }
+
+   return false;
 }
 
 const char* cmMakefile::GetSONameFlag(const std::string& language) const

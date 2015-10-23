@@ -10,6 +10,22 @@ if(TEST_IOS)
   set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
 endif(TEST_IOS)
 
+if(TEST_WATCHOS)
+  set(CMAKE_OSX_SYSROOT watchos)
+  set(CMAKE_OSX_ARCHITECTURES "armv7k")
+  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
+  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "")
+  set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE "YES")
+endif()
+
+if(TEST_TVOS)
+  set(CMAKE_OSX_SYSROOT appletvos)
+  set(CMAKE_OSX_ARCHITECTURES "arm64")
+  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
+  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "")
+  set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE "YES")
+endif()
+
 # App Bundle
 
 add_executable(AppBundle MACOSX_BUNDLE main.m)
@@ -35,11 +51,13 @@ endif()
 
 # Bundle
 
-add_library(Bundle MODULE main.c)
-set_target_properties(Bundle PROPERTIES BUNDLE TRUE)
+if(NOT CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE)
+  add_library(Bundle MODULE main.c)
+  set_target_properties(Bundle PROPERTIES BUNDLE TRUE)
 
-add_custom_target(BundleTest ALL
-  COMMAND ${CMAKE_COMMAND} -E copy
-    "$<TARGET_FILE:Bundle>" "$<TARGET_FILE:Bundle>.old")
+  add_custom_target(BundleTest ALL
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_FILE:Bundle>" "$<TARGET_FILE:Bundle>.old")
 
-add_dependencies(BundleTest Bundle)
+  add_dependencies(BundleTest Bundle)
+endif()
