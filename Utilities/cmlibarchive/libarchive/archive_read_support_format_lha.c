@@ -1712,10 +1712,13 @@ lha_crc16(uint16_t crc, const void *pp, size_t len)
 	for (;len >= 8; len -= 8) {
 		/* This if statement expects compiler optimization will
 		 * remove the stament which will not be executed. */
+#ifndef __has_builtin
+#  define __has_builtin(x) 0
+#endif
 #if defined(_MSC_VER) && _MSC_VER >= 1400  /* Visual Studio */
 #  define bswap16(x) _byteswap_ushort(x)
 #elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 8) \
-      || defined(__clang__)
+      || (defined(__clang__) && __has_builtin(__builtin_bswap16))
 #  define bswap16(x) __builtin_bswap16(x)
 #else
 #  define bswap16(x) ((((x) >> 8) & 0xff) | ((x) << 8))
