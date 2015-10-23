@@ -59,7 +59,8 @@ protected:
 
   /** Construct a custom command to make exe import lib dir.  */
   cmsys::auto_ptr<cmCustomCommand>
-  MaybeCreateImplibDir(cmTarget& target, const std::string& config,
+  MaybeCreateImplibDir(cmGeneratorTarget *target,
+                       const std::string& config,
                        bool isFortran);
 };
 
