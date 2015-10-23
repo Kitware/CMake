@@ -2677,7 +2677,7 @@ cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const& config)
 
   this->WriteString("</Link>\n", 2);
   if(!this->GlobalGenerator->NeedLinkLibraryDependencies(
-              *this->GeneratorTarget->Target))
+              this->GeneratorTarget))
     {
     this->WriteString("<ProjectReference>\n", 2);
     this->WriteString(

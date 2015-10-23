@@ -94,7 +94,8 @@ public:
 
   /** Return true if the target project file should have the option
       LinkLibraryDependencies and link to .sln dependencies. */
-  virtual bool NeedLinkLibraryDependencies(cmTarget&) { return false; }
+  virtual bool NeedLinkLibraryDependencies(cmGeneratorTarget*)
+  { return false; }
 
   const char* GetIntelProjectVersion();
 

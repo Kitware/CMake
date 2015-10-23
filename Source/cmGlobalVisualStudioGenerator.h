@@ -88,7 +88,7 @@ public:
   /** Return true if building for Windows CE */
   virtual bool TargetsWindowsCE() const { return false; }
 
-  class TargetSet: public std::set<cmTarget const*> {};
+  class TargetSet: public std::set<cmGeneratorTarget const*> {};
   class TargetCompare
   {
     std::string First;
@@ -126,8 +126,9 @@ protected:
   VSDependMap VSTargetDepends;
   void ComputeVSTargetDepends(cmGeneratorTarget *);
 
-  bool CheckTargetLinks(cmTarget& target, const std::string& name);
-  std::string GetUtilityForTarget(cmTarget& target, const std::string&);
+  bool CheckTargetLinks(cmGeneratorTarget& target, const std::string& name);
+  std::string GetUtilityForTarget(cmGeneratorTarget& target,
+                                  const std::string&);
   virtual std::string WriteUtilityDepend(cmGeneratorTarget const*) = 0;
   std::string GetUtilityDepend(const cmGeneratorTarget *target);
   typedef std::map<cmGeneratorTarget const*, std::string> UtilityDependsMap;
@@ -141,13 +142,14 @@ private:
   void PrintCompilerAdvice(std::ostream&, std::string const&,
                            const char*) const {}
 
-  void FollowLinkDepends(cmTarget const* target,
-                         std::set<cmTarget const*>& linked);
+  void FollowLinkDepends(cmGeneratorTarget const* target,
+                         std::set<cmGeneratorTarget const*>& linked);
 
-  class TargetSetMap: public std::map<cmTarget*, TargetSet> {};
+  class TargetSetMap: public std::map<cmGeneratorTarget*, TargetSet> {};
   TargetSetMap TargetLinkClosure;
-  void FillLinkClosure(cmGeneratorTarget const* target, TargetSet& linked);
-  TargetSet const& GetTargetLinkClosure(cmGeneratorTarget *target);
+  void FillLinkClosure(const cmGeneratorTarget *target,
+                       TargetSet& linked);
+  TargetSet const& GetTargetLinkClosure(cmGeneratorTarget* target);
 };
 
 class cmGlobalVisualStudioGenerator::OrderedTargetDependSet:

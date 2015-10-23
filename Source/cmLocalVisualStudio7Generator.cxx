@@ -1186,7 +1186,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       }
     fout << "\t\t\t<Tool\n"
          << "\t\t\t\tName=\"" << tool << "\"\n";
-    if(!gg->NeedLinkLibraryDependencies(*target->Target))
+    if(!gg->NeedLinkLibraryDependencies(target))
       {
       fout << "\t\t\t\tLinkLibraryDependencies=\"false\"\n";
       }
@@ -1285,7 +1285,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       }
     fout << "\t\t\t<Tool\n"
          << "\t\t\t\tName=\"" << tool << "\"\n";
-    if(!gg->NeedLinkLibraryDependencies(*target->Target))
+    if(!gg->NeedLinkLibraryDependencies(target))
       {
       fout << "\t\t\t\tLinkLibraryDependencies=\"false\"\n";
       }

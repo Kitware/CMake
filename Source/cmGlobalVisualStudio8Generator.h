@@ -60,7 +60,7 @@ public:
 
   /** Return true if the target project file should have the option
       LinkLibraryDependencies and link to .sln dependencies. */
-  virtual bool NeedLinkLibraryDependencies(cmTarget& target);
+  virtual bool NeedLinkLibraryDependencies(cmGeneratorTarget* target);
 
   /** Return true if building for Windows CE */
   virtual bool TargetsWindowsCE() const {
