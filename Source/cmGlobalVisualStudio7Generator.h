@@ -123,7 +123,7 @@ protected:
                             std::vector<cmLocalGenerator*>& generators);
   virtual void WriteProject(std::ostream& fout,
                             const std::string& name, const char* path,
-                            cmTarget const& t);
+                            const cmGeneratorTarget *t);
   virtual void WriteProjectDepends(std::ostream& fout,
                            const std::string& name, const char* path,
                            cmTarget const&t);

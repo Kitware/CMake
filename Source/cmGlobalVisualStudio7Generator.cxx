@@ -477,7 +477,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
           dir = ""; // msbuild cannot handle ".\" prefix
           }
         this->WriteProject(fout, vcprojName, dir.c_str(),
-                           *target->Target);
+                           target);
         written = true;
         }
       }
@@ -685,13 +685,14 @@ cmGlobalVisualStudio7Generator::ConvertToSolutionPath(const char* path)
 // the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
                                const std::string& dspname,
-                               const char* dir, cmTarget const& target)
+                               const char* dir,
+                               cmGeneratorTarget const* target)
 {
    // check to see if this is a fortran build
   const char* ext = ".vcproj";
   const char* project =
     "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"";
-  if(this->TargetIsFortranOnly(target))
+  if(this->TargetIsFortranOnly(*target->Target))
     {
     ext = ".vfproj";
     project = "Project(\"{6989167D-11E4-40FE-8C1A-2192A86A7E90}\") = \"";
@@ -703,7 +704,7 @@ void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
        << dspname << ext << "\", \"{"
        << this->GetGUID(dspname) << "}\"\nEndProject\n";
 
-  UtilityDependsMap::iterator ui = this->UtilityDepends.find(&target);
+  UtilityDependsMap::iterator ui = this->UtilityDepends.find(target->Target);
   if(ui != this->UtilityDepends.end())
     {
     const char* uname = ui->second.c_str();

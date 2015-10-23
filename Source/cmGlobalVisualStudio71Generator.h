@@ -59,7 +59,7 @@ protected:
     std::ostream& fout, std::vector<std::string> const& configs);
   virtual void WriteProject(std::ostream& fout,
                             const std::string& name, const char* path,
-                            cmTarget const& t);
+                            const cmGeneratorTarget *t);
   virtual void WriteProjectDepends(std::ostream& fout,
                            const std::string& name, const char* path,
                            cmTarget const& t);

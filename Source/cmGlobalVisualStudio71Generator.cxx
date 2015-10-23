@@ -152,18 +152,18 @@ void
 cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
                                               const std::string& dspname,
                                               const char* dir,
-                                              cmTarget const& t)
+                                              cmGeneratorTarget const* t)
 {
   // check to see if this is a fortran build
   const char* ext = ".vcproj";
   const char* project =
     "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"";
-  if(this->TargetIsFortranOnly(t))
+  if(this->TargetIsFortranOnly(*t->Target))
     {
     ext = ".vfproj";
     project = "Project(\"{6989167D-11E4-40FE-8C1A-2192A86A7E90}\") = \"";
     }
-  const char* targetExt = t.GetProperty("GENERATOR_FILE_NAME_EXT");
+  const char* targetExt = t->GetProperty("GENERATOR_FILE_NAME_EXT");
   if(targetExt)
     {
     ext = targetExt;
@@ -175,12 +175,12 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
        << this->ConvertToSolutionPath(dir) << (dir[0]? "\\":"")
        << dspname << ext << "\", \"{" << guid << "}\"\n";
   fout << "\tProjectSection(ProjectDependencies) = postProject\n";
-  this->WriteProjectDepends(fout, dspname, dir, t);
+  this->WriteProjectDepends(fout, dspname, dir, *t->Target);
   fout << "\tEndProjectSection\n";
 
   fout <<"EndProject\n";
 
-  UtilityDependsMap::iterator ui = this->UtilityDepends.find(&t);
+  UtilityDependsMap::iterator ui = this->UtilityDepends.find(t->Target);
   if(ui != this->UtilityDepends.end())
     {
     const char* uname = ui->second.c_str();
