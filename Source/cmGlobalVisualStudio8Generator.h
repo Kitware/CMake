@@ -91,7 +91,8 @@ protected:
   virtual bool ComputeTargetDepends();
   virtual void WriteProjectDepends(std::ostream& fout,
                                    const std::string& name,
-                                   const char* path, cmTarget const& t);
+                                   const char* path,
+                                   const cmGeneratorTarget *t);
 
   std::string Name;
   std::string WindowsCEVersion;

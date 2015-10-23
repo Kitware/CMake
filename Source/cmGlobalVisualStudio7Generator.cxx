@@ -533,19 +533,19 @@ void cmGlobalVisualStudio7Generator::WriteTargetDepends(
   for(OrderedTargetDependSet::const_iterator tt =
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
-    cmTarget const* target = (*tt)->Target;
+    cmGeneratorTarget const* target = *tt;
     if(target->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
-    cmMakefile* mf = target->GetMakefile();
     const char *vcprojName =
       target->GetProperty("GENERATOR_FILE_NAME");
     if (vcprojName)
       {
-      std::string dir = mf->GetCurrentSourceDirectory();
+      std::string dir = target->GetLocalGenerator()
+              ->GetCurrentSourceDirectory();
       this->WriteProjectDepends(fout, vcprojName,
-                                dir.c_str(), *target);
+                                dir.c_str(), target);
       }
     }
 }
@@ -726,11 +726,11 @@ void
 cmGlobalVisualStudio7Generator
 ::WriteProjectDepends(std::ostream& fout,
                       const std::string& dspname,
-                      const char*, cmTarget const& target)
+                      const char*, cmGeneratorTarget const* target)
 {
   int depcount = 0;
   std::string dspguid = this->GetGUID(dspname);
-  VSDependSet const& depends = this->VSTargetDepends[&target];
+  VSDependSet const& depends = this->VSTargetDepends[target->Target];
   for(VSDependSet::const_iterator di = depends.begin();
       di != depends.end(); ++di)
     {
@@ -739,7 +739,7 @@ cmGlobalVisualStudio7Generator
     if(guid.empty())
       {
       std::string m = "Target: ";
-      m += target.GetName();
+      m += target->GetName();
       m += " depends on unknown target: ";
       m += name;
       cmSystemTools::Error(m.c_str());
@@ -748,7 +748,7 @@ cmGlobalVisualStudio7Generator
     depcount++;
     }
 
-  UtilityDependsMap::iterator ui = this->UtilityDepends.find(&target);
+  UtilityDependsMap::iterator ui = this->UtilityDepends.find(target->Target);
   if(ui != this->UtilityDepends.end())
     {
     const char* uname = ui->second.c_str();

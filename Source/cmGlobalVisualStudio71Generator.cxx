@@ -175,7 +175,7 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
        << this->ConvertToSolutionPath(dir) << (dir[0]? "\\":"")
        << dspname << ext << "\", \"{" << guid << "}\"\n";
   fout << "\tProjectSection(ProjectDependencies) = postProject\n";
-  this->WriteProjectDepends(fout, dspname, dir, *t->Target);
+  this->WriteProjectDepends(fout, dspname, dir, t);
   fout << "\tEndProjectSection\n";
 
   fout <<"EndProject\n";
@@ -204,9 +204,9 @@ void
 cmGlobalVisualStudio71Generator
 ::WriteProjectDepends(std::ostream& fout,
                       const std::string&,
-                      const char*, cmTarget const& target)
+                      const char*, cmGeneratorTarget const* target)
 {
-  VSDependSet const& depends = this->VSTargetDepends[&target];
+  VSDependSet const& depends = this->VSTargetDepends[target->Target];
   for(VSDependSet::const_iterator di = depends.begin();
       di != depends.end(); ++di)
     {
@@ -215,7 +215,7 @@ cmGlobalVisualStudio71Generator
     if(guid.empty())
       {
       std::string m = "Target: ";
-      m += target.GetName();
+      m += target->GetName();
       m += " depends on unknown target: ";
       m += name;
       cmSystemTools::Error(m.c_str());
