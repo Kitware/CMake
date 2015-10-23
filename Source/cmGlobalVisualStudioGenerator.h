@@ -128,7 +128,7 @@ protected:
 
   bool CheckTargetLinks(cmTarget& target, const std::string& name);
   std::string GetUtilityForTarget(cmTarget& target, const std::string&);
-  virtual std::string WriteUtilityDepend(cmTarget const*) = 0;
+  virtual std::string WriteUtilityDepend(cmGeneratorTarget const*) = 0;
   std::string GetUtilityDepend(const cmGeneratorTarget *target);
   typedef std::map<cmGeneratorTarget const*, std::string> UtilityDependsMap;
   UtilityDependsMap UtilityDepends;

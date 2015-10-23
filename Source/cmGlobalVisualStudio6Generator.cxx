@@ -383,12 +383,14 @@ void cmGlobalVisualStudio6Generator::WriteDSWHeader(std::ostream& fout)
 
 //----------------------------------------------------------------------------
 std::string
-cmGlobalVisualStudio6Generator::WriteUtilityDepend(const cmTarget *target)
+cmGlobalVisualStudio6Generator::WriteUtilityDepend(
+        const cmGeneratorTarget *target)
 {
   std::string pname = target->GetName();
   pname += "_UTILITY";
   pname = GetVS6TargetName(pname.c_str());
-  std::string fname = target->GetMakefile()->GetCurrentBinaryDirectory();
+  std::string fname =
+          target->GetLocalGenerator()->GetCurrentBinaryDirectory();
   fname += "/";
   fname += pname;
   fname += ".dsp";

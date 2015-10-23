@@ -136,7 +136,7 @@ protected:
                                       cmLocalGenerator* root);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
-  virtual std::string WriteUtilityDepend(cmTarget const* target);
+  virtual std::string WriteUtilityDepend(const cmGeneratorTarget *target);
 
   virtual void WriteTargetsToSolution(
     std::ostream& fout,

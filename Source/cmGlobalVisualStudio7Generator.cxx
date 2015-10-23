@@ -888,13 +888,14 @@ void cmGlobalVisualStudio7Generator::WriteSLNHeader(std::ostream& fout)
 
 //----------------------------------------------------------------------------
 std::string
-cmGlobalVisualStudio7Generator::WriteUtilityDepend(cmTarget const* target)
+cmGlobalVisualStudio7Generator::WriteUtilityDepend(
+        cmGeneratorTarget const* target)
 {
   std::vector<std::string> configs;
-  target->GetMakefile()->GetConfigurations(configs);
+  target->Target->GetMakefile()->GetConfigurations(configs);
   std::string pname = target->GetName();
   pname += "_UTILITY";
-  std::string fname = target->GetMakefile()->GetCurrentBinaryDirectory();
+  std::string fname = target->GetLocalGenerator()->GetCurrentBinaryDirectory();
   fname += "/";
   fname += pname;
   fname += ".vcproj";

@@ -97,7 +97,7 @@ private:
                             const std::string& name, const char* path,
                             const std::set<std::string>& dependencies);
   void WriteDSWFooter(std::ostream& fout);
-  virtual std::string WriteUtilityDepend(cmTarget const* target);
+  virtual std::string WriteUtilityDepend(const cmGeneratorTarget *target);
   std::string MSDevCommand;
   bool MSDevCommandInitialized;
   std::string const& GetMSDevCommand();

@@ -514,7 +514,7 @@ cmGlobalVisualStudioGenerator::GetUtilityDepend(
   UtilityDependsMap::iterator i = this->UtilityDepends.find(target);
   if(i == this->UtilityDepends.end())
     {
-    std::string name = this->WriteUtilityDepend(target->Target);
+    std::string name = this->WriteUtilityDepend(target);
     UtilityDependsMap::value_type entry(target, name);
     i = this->UtilityDepends.insert(entry).first;
     }
