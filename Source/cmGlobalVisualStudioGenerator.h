@@ -122,9 +122,9 @@ protected:
 
   virtual bool ComputeTargetDepends();
   class VSDependSet: public std::set<std::string> {};
-  class VSDependMap: public std::map<cmTarget const*, VSDependSet> {};
+  class VSDependMap: public std::map<cmGeneratorTarget const*, VSDependSet> {};
   VSDependMap VSTargetDepends;
-  void ComputeVSTargetDepends(cmTarget&);
+  void ComputeVSTargetDepends(cmGeneratorTarget *);
 
   bool CheckTargetLinks(cmTarget& target, const std::string& name);
   std::string GetUtilityForTarget(cmTarget& target, const std::string&);

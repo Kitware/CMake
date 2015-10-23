@@ -299,7 +299,7 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
   fout << "Package=<5>\n{{{\n}}}\n\n";
   fout << "Package=<4>\n";
   fout << "{{{\n";
-  VSDependSet const& depends = this->VSTargetDepends[target->Target];
+  VSDependSet const& depends = this->VSTargetDepends[target];
   for(VSDependSet::const_iterator di = depends.begin();
       di != depends.end(); ++di)
     {

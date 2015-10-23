@@ -730,7 +730,7 @@ cmGlobalVisualStudio7Generator
 {
   int depcount = 0;
   std::string dspguid = this->GetGUID(dspname);
-  VSDependSet const& depends = this->VSTargetDepends[target->Target];
+  VSDependSet const& depends = this->VSTargetDepends[target];
   for(VSDependSet::const_iterator di = depends.begin();
       di != depends.end(); ++di)
     {

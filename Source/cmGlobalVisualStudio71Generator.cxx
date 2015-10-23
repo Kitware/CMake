@@ -206,7 +206,7 @@ cmGlobalVisualStudio71Generator
                       const std::string&,
                       const char*, cmGeneratorTarget const* target)
 {
-  VSDependSet const& depends = this->VSTargetDepends[target->Target];
+  VSDependSet const& depends = this->VSTargetDepends[target];
   for(VSDependSet::const_iterator di = depends.begin();
       di != depends.end(); ++di)
     {
