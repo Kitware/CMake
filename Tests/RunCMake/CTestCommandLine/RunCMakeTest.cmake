@@ -78,6 +78,21 @@ endfunction()
 
 run_LabelCount()
 
+function(run_SerialFailed)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SerialFailed)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(NoSuchCommand no_such_command)
+set_tests_properties(NoSuchCommand PROPERTIES RUN_SERIAL ON)
+add_test(Echo \"${CMAKE_COMMAND}\" -E echo \"EchoTest\")
+")
+
+  run_cmake_command(SerialFailed ${CMAKE_CTEST_COMMAND} -V)
+endfunction()
+run_SerialFailed()
+
 function(run_TestLoad name load)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestLoad)
   set(RunCMake_TEST_NO_CLEAN 1)
