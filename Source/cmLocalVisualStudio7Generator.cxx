@@ -783,10 +783,10 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   intermediateDir += "/";
   intermediateDir += configName;
 
-  if (target->Target->GetType() < cmState::UTILITY)
+  if (target->GetType() < cmState::UTILITY)
     {
     std::string const& outDir =
-      target->Target->GetType() == cmState::OBJECT_LIBRARY?
+      target->GetType() == cmState::OBJECT_LIBRARY?
       intermediateDir : target->GetDirectory(configName);
     fout << "\t\t\tOutputDirectory=\""
          << this->ConvertToXMLOutputPathSingle(outDir.c_str()) << "\"\n";
@@ -837,7 +837,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   if(this->FortranProject)
     {
     const char* target_mod_dir =
-      target->Target->GetProperty("Fortran_MODULE_DIRECTORY");
+      target->GetProperty("Fortran_MODULE_DIRECTORY");
     std::string modDir;
     if(target_mod_dir)
       {
@@ -877,7 +877,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   targetOptions.OutputFlagMap(fout, "\t\t\t\t");
   targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "\n", "CXX");
   fout << "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n";
-  if(target->Target->GetType() <= cmState::OBJECT_LIBRARY)
+  if(target->GetType() <= cmState::OBJECT_LIBRARY)
     {
     // Specify the compiler program database file if configured.
     std::string pdb = target->GetCompilePDBPath(configName);
