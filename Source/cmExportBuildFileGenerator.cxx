@@ -213,12 +213,8 @@ cmExportBuildFileGenerator
   properties[prop] = value;
   }
 
-  // Check whether this is a DLL platform.
-  bool dll_platform =
-    (mf->IsOn("WIN32") || mf->IsOn("CYGWIN") || mf->IsOn("MINGW"));
-
   // Add the import library for windows DLLs.
-  if(dll_platform &&
+  if(target->IsDLLPlatform() &&
      (target->GetType() == cmState::SHARED_LIBRARY ||
       target->IsExecutableWithExports()) &&
      mf->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"))
