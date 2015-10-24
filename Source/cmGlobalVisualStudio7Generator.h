@@ -163,9 +163,9 @@ protected:
   std::set<std::string>
     IsPartOfDefaultBuild(std::vector<std::string> const& configs,
                          OrderedTargetDependSet const& projectTargets,
-                         cmTarget const* target);
+                         cmGeneratorTarget const* target);
   bool IsDependedOn(OrderedTargetDependSet const& projectTargets,
-                    cmTarget const* target);
+                    cmGeneratorTarget const* target);
   std::map<std::string, std::string> GUIDMap;
 
   virtual void WriteFolders(std::ostream& fout);
