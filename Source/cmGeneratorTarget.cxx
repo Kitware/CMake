@@ -4770,7 +4770,7 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
     iface.WrongConfigLibraries = impl->WrongConfigLibraries;
     }
 
-  if(this->Target->LinkLanguagePropagatesToDependents())
+  if(this->LinkLanguagePropagatesToDependents())
     {
     // Targets using this archive need its language runtime libraries.
     if(cmLinkImplementation const* impl =
@@ -5485,7 +5485,7 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
   }
 
   // Get the link languages.
-  if(this->Target->LinkLanguagePropagatesToDependents())
+  if(this->LinkLanguagePropagatesToDependents())
     {
     std::string linkProp = "IMPORTED_LINK_INTERFACE_LANGUAGES";
     linkProp += suffix;

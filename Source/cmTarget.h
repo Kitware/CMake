@@ -227,9 +227,6 @@ public:
   std::set<std::string> const & GetSystemIncludeDirectories() const
     { return this->SystemIncludeDirectories; }
 
-  bool LinkLanguagePropagatesToDependents() const
-  { return this->TargetTypeValue == cmState::STATIC_LIBRARY; }
-
   cmStringRange GetIncludeDirectoriesEntries() const;
   cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
 

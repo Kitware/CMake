@@ -189,6 +189,9 @@ public:
   std::set<std::string>const& GetUtilities() const;
   cmListFileBacktrace const* GetUtilityBacktrace(const std::string& u) const;
 
+  bool LinkLanguagePropagatesToDependents() const
+  { return this->GetType() == cmState::STATIC_LIBRARY; }
+
   /** Get the macro to define when building sources in this target.
       If no macro should be defined null is returned.  */
   const char* GetExportMacro() const;

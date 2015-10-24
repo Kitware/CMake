@@ -999,7 +999,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     if (propertyName == "LINKER_LANGUAGE")
       {
-      if (target->Target->LinkLanguagePropagatesToDependents() &&
+      if (target->LinkLanguagePropagatesToDependents() &&
           dagCheckerParent && (dagCheckerParent->EvaluatingLinkLibraries()
             || dagCheckerParent->EvaluatingSources()))
         {
