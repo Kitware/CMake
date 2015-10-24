@@ -2033,7 +2033,7 @@ AddCompilerRequirementFlag(std::string &flags,
 }
 
 static void AddVisibilityCompileOption(std::string &flags,
-                                       cmTarget const* target,
+                                       cmGeneratorTarget const* target,
                                        cmLocalGenerator *lg,
                                        const std::string& lang,
                                        std::string* warnCMP0063)
@@ -2073,7 +2073,7 @@ static void AddVisibilityCompileOption(std::string &flags,
 }
 
 static void AddInlineVisibilityCompileOption(std::string &flags,
-                                       cmTarget const* target,
+                                       cmGeneratorTarget const* target,
                                        cmLocalGenerator *lg,
                                        std::string* warnCMP0063)
 {
@@ -2126,12 +2126,11 @@ void cmLocalGenerator
       }
     }
 
-  AddVisibilityCompileOption(flags, target->Target, this, lang, pWarnCMP0063);
+  AddVisibilityCompileOption(flags, target, this, lang, pWarnCMP0063);
 
   if(lang == "CXX")
     {
-    AddInlineVisibilityCompileOption(flags, target->Target,
-                                     this, pWarnCMP0063);
+    AddInlineVisibilityCompileOption(flags, target, this, pWarnCMP0063);
     }
 
   if (!warnCMP0063.empty() &&
