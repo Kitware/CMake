@@ -425,17 +425,6 @@ public:
   cmSourceFile* GetOrCreateSource(const std::string& sourceName,
                                   bool generated = false);
 
-  //@{
-  /**
-   * Return a list of extensions associated with source and header
-   * files
-   */
-  const std::vector<std::string>& GetSourceExtensions() const
-    {return this->SourceFileExtensions;}
-  const std::vector<std::string>& GetHeaderExtensions() const
-    {return this->HeaderFileExtensions;}
-  //@}
-
   /**
    * Given a variable name, return its value (as a string).
    * If the variable is not found in this makefile instance, the
@@ -823,8 +812,6 @@ protected:
   std::vector<cmTestGenerator*> TestGenerators;
 
   std::string ComplainFileRegularExpression;
-  std::vector<std::string> SourceFileExtensions;
-  std::vector<std::string> HeaderFileExtensions;
   std::string DefineFlags;
 
   // Track the value of the computed DEFINITIONS property.

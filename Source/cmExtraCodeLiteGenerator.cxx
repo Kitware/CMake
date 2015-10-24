@@ -149,6 +149,11 @@ void cmExtraCodeLiteGenerator
   // which may have an acompanying header, one for all other files
   std::string projectType;
 
+  std::vector<std::string> srcExts =
+      this->GlobalGenerator->GetCMakeInstance()->GetSourceExtensions();
+  std::vector<std::string> headerExts =
+      this->GlobalGenerator->GetCMakeInstance()->GetHeaderExtensions();
+
   std::map<std::string, cmSourceFile*> cFiles;
   std::set<std::string> otherFiles;
   for (std::vector<cmLocalGenerator*>::const_iterator lg=lgs.begin();
@@ -207,9 +212,7 @@ void cmExtraCodeLiteGenerator
               {
               std::string srcext = (*si)->GetExtension();
               for(std::vector<std::string>::const_iterator
-                  ext = mf->GetSourceExtensions().begin();
-                  ext !=  mf->GetSourceExtensions().end();
-                  ++ext)
+                  ext = srcExts.begin(); ext != srcExts.end(); ++ext)
                 {
                 if (srcext == *ext)
                   {
@@ -253,8 +256,8 @@ void cmExtraCodeLiteGenerator
 
     // check if there's a matching header around
     for(std::vector<std::string>::const_iterator
-        ext = mf->GetHeaderExtensions().begin();
-        ext !=  mf->GetHeaderExtensions().end();
+        ext = headerExts.begin();
+        ext != headerExts.end();
         ++ext)
       {
       std::string hname=headerBasename;

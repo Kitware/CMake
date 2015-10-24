@@ -121,8 +121,10 @@ void cmSourceFileLocation::UpdateExtension(const std::string& name)
   // The global generator checks extensions of enabled languages.
   cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
   cmMakefile const* mf = this->Makefile;
-  const std::vector<std::string>& srcExts = mf->GetSourceExtensions();
-  const std::vector<std::string>& hdrExts = mf->GetHeaderExtensions();
+  const std::vector<std::string>& srcExts =
+      mf->GetCMakeInstance()->GetSourceExtensions();
+  const std::vector<std::string>& hdrExts =
+      mf->GetCMakeInstance()->GetHeaderExtensions();
   if(!gg->GetLanguageFromExtension(ext.c_str()).empty() ||
      std::find(srcExts.begin(), srcExts.end(), ext) != srcExts.end() ||
      std::find(hdrExts.begin(), hdrExts.end(), ext) != hdrExts.end())
@@ -193,12 +195,14 @@ cmSourceFileLocation
   // disk.  One of these must match if loc refers to this source file.
   std::string const& ext = this->Name.substr(loc.Name.size()+1);
   cmMakefile const* mf = this->Makefile;
-  const std::vector<std::string>& srcExts = mf->GetSourceExtensions();
+  const std::vector<std::string>& srcExts =
+      mf->GetCMakeInstance()->GetSourceExtensions();
   if(std::find(srcExts.begin(), srcExts.end(), ext) != srcExts.end())
     {
     return true;
     }
-  const std::vector<std::string>& hdrExts = mf->GetHeaderExtensions();
+  std::vector<std::string> hdrExts =
+      mf->GetCMakeInstance()->GetHeaderExtensions();
   if(std::find(hdrExts.begin(), hdrExts.end(), ext) != hdrExts.end())
     {
     return true;

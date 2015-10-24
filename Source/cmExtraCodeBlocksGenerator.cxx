@@ -383,6 +383,9 @@ void cmExtraCodeBlocksGenerator
   all_files_map_t allFiles;
   std::vector<std::string> cFiles;
 
+  std::vector<std::string> srcExts =
+      this->GlobalGenerator->GetCMakeInstance()->GetSourceExtensions();
+
   for (std::vector<cmLocalGenerator*>::const_iterator lg=lgs.begin();
        lg!=lgs.end(); lg++)
     {
@@ -420,9 +423,7 @@ void cmExtraCodeBlocksGenerator
               {
               std::string srcext = (*si)->GetExtension();
               for(std::vector<std::string>::const_iterator
-                  ext = mf->GetSourceExtensions().begin();
-                  ext !=  mf->GetSourceExtensions().end();
-                  ++ext)
+                  ext = srcExts.begin(); ext != srcExts.end(); ++ext)
                 {
                 if (srcext == *ext)
                   {
@@ -449,6 +450,9 @@ void cmExtraCodeBlocksGenerator
       }
     }
 
+  std::vector<std::string> headerExts =
+      this->GlobalGenerator->GetCMakeInstance()->GetHeaderExtensions();
+
   // The following loop tries to add header files matching to implementation
   // files to the project. It does that by iterating over all
   // C/C++ source files,
@@ -468,8 +472,8 @@ void cmExtraCodeBlocksGenerator
 
     // check if there's a matching header around
     for(std::vector<std::string>::const_iterator
-        ext = mf->GetHeaderExtensions().begin();
-        ext !=  mf->GetHeaderExtensions().end();
+        ext = headerExts.begin();
+        ext != headerExts.end();
         ++ext)
       {
       std::string hname=headerBasename;

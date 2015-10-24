@@ -1420,7 +1420,7 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmGeneratorTarget* gtgt)
 bool cmGlobalXCodeGenerator::IsHeaderFile(cmSourceFile* sf)
 {
   const std::vector<std::string>& hdrExts =
-    this->CurrentMakefile->GetHeaderExtensions();
+    this->CMakeInstance->GetHeaderExtensions();
   return (std::find(hdrExts.begin(), hdrExts.end(), sf->GetExtension()) !=
           hdrExts.end());
 }
