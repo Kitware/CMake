@@ -357,7 +357,6 @@ private:
   bool RecordDependencies;
   bool DLLPlatform;
   bool IsAndroid;
-  bool IsApple;
   bool IsImportedTarget;
   bool BuildInterfaceIncludesAppended;
 #if defined(_WIN32) && !defined(__CYGWIN__)
