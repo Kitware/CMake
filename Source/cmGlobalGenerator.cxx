@@ -1583,10 +1583,12 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes,
-                                               cmLocalGenerator *lg)
+void cmGlobalGenerator::CreateGeneratorTargets(
+    TargetTypes targetTypes,
+    cmMakefile *mf,
+    cmLocalGenerator *lg,
+    std::map<cmTarget*, cmGeneratorTarget*> const& importedMap)
 {
-  cmMakefile* mf = lg->GetMakefile();
   if (targetTypes == AllTargets)
     {
     cmTargets& targets = mf->GetTargets();
@@ -1600,23 +1602,38 @@ void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes,
       }
     }
 
+  std::vector<cmTarget*> itgts = mf->GetImportedTargets();
+
   for(std::vector<cmTarget*>::const_iterator
-        j = mf->GetOwnedImportedTargets().begin();
-      j != mf->GetOwnedImportedTargets().end(); ++j)
+        j = itgts.begin(); j != itgts.end(); ++j)
     {
-    cmGeneratorTarget* gt = new cmGeneratorTarget(*j, lg);
-    this->GeneratorTargets[*j] = gt;
-    lg->AddImportedGeneratorTarget(gt);
+    lg->AddImportedGeneratorTarget(importedMap.find(*j)->second);
     }
 }
 
 //----------------------------------------------------------------------------
 void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes)
 {
+  std::map<cmTarget*, cmGeneratorTarget*> importedMap;
+  for(unsigned int i=0; i < this->Makefiles.size(); ++i)
+    {
+    cmMakefile* mf = this->Makefiles[i];
+    for(std::vector<cmTarget*>::const_iterator
+          j = mf->GetOwnedImportedTargets().begin();
+        j != mf->GetOwnedImportedTargets().end(); ++j)
+      {
+      cmGeneratorTarget* gt =
+          new cmGeneratorTarget(*j, this->LocalGenerators[i]);
+      this->GeneratorTargets[*j] = gt;
+      importedMap[*j] = gt;
+      }
+    }
+
   // Construct per-target generator information.
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
-    this->CreateGeneratorTargets(targetTypes, this->LocalGenerators[i]);
+    this->CreateGeneratorTargets(targetTypes, this->Makefiles[i],
+                                 this->LocalGenerators[i], importedMap);
     }
 }
 
@@ -2240,11 +2257,11 @@ cmGeneratorTarget* cmGlobalGenerator::FindImportedGeneratorTargetImpl(
   for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
     {
     std::vector<cmGeneratorTarget*> tgts =
-        this->LocalGenerators[i]->GetGeneratorTargets();
+        this->LocalGenerators[i]->GetImportedGeneratorTargets();
     for (std::vector<cmGeneratorTarget*>::iterator it = tgts.begin();
          it != tgts.end(); ++it)
       {
-      if ((*it)->GetName() == name && (*it)->IsImportedGloballyVisible())
+      if ((*it)->IsImportedGloballyVisible() && (*it)->GetName() == name)
         {
         return *it;
         }

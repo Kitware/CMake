@@ -485,7 +485,9 @@ private:
   // Per-target generator information.
   cmGeneratorTargetsType GeneratorTargets;
   friend class cmake;
-  void CreateGeneratorTargets(TargetTypes targetTypes, cmLocalGenerator* lg);
+  void CreateGeneratorTargets(TargetTypes targetTypes, cmMakefile* mf,
+                   cmLocalGenerator* lg,
+                   std::map<cmTarget*, cmGeneratorTarget*> const& importedMap);
   void CreateGeneratorTargets(TargetTypes targetTypes);
 
   void ClearGeneratorMembers();
