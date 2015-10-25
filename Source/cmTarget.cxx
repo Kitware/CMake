@@ -1602,7 +1602,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
         // CMake time.
         cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
         gg->CreateGenerationObjects();
-        cmGeneratorTarget* gt = gg->GetGeneratorTarget(this);
+        cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
         this->Properties.SetProperty(propLOCATION,
                                      gt->GetLocationForBuild());
         }
@@ -1627,7 +1627,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
         {
         cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
         gg->CreateGenerationObjects();
-        cmGeneratorTarget* gt = gg->GetGeneratorTarget(this);
+        cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
         this->Properties.SetProperty(
                 prop, gt->GetFullPath(configName, false).c_str());
         }
@@ -1651,7 +1651,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
           {
           cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
           gg->CreateGenerationObjects();
-          cmGeneratorTarget* gt = gg->GetGeneratorTarget(this);
+          cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
           this->Properties.SetProperty(
                   prop, gt->GetFullPath(configName, false).c_str());
           }
