@@ -2207,7 +2207,7 @@ void cmMakefile::AddSourceGroup(const std::string& name,
 {
   std::vector<std::string> nameVector;
   nameVector.push_back(name);
-  AddSourceGroup(nameVector, regex);
+  this->AddSourceGroup(nameVector, regex);
 }
 
 void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
