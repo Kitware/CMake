@@ -57,6 +57,7 @@ public:
   std::string GetName() const;
   std::string GetExportName() const;
 
+  std::vector<std::string> GetPropertyKeys() const;
   const char *GetProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   void GetSourceFiles(std::vector<cmSourceFile*>& files,

@@ -2219,17 +2219,18 @@ void cmLocalVisualStudio7Generator::WriteVCProjFooter(
 {
   fout << "\t<Globals>\n";
 
-  cmPropertyMap const& props = target->Target->GetProperties();
-  for(cmPropertyMap::const_iterator i = props.begin(); i != props.end(); ++i)
+  std::vector<std::string> const& props = target->GetPropertyKeys();
+  for(std::vector<std::string>::const_iterator i = props.begin();
+      i != props.end(); ++i)
     {
-    if(i->first.find("VS_GLOBAL_") == 0)
+    if(i->find("VS_GLOBAL_") == 0)
       {
-      std::string name = i->first.substr(10);
+      std::string name = i->substr(10);
       if(name != "")
         {
         fout << "\t\t<Global\n"
              << "\t\t\tName=\"" << name << "\"\n"
-             << "\t\t\tValue=\"" << i->second.GetValue() << "\"\n"
+             << "\t\t\tValue=\"" << target->GetProperty(*i) << "\"\n"
              << "\t\t/>\n";
         }
       }

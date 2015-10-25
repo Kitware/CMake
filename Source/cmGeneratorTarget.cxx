@@ -4251,9 +4251,11 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
                                           PropertyType *)
 {
   PropertyType propContent = getTypedProperty<PropertyType>(tgt, p);
-  const bool explicitlySet = tgt->Target->GetProperties()
-                                  .find(p)
-                                  != tgt->Target->GetProperties().end();
+  std::vector<std::string> headPropKeys = tgt->GetPropertyKeys();
+  const bool explicitlySet =
+      std::find(headPropKeys.begin(), headPropKeys.end(),
+                p) != headPropKeys.end();
+
   const bool impliedByUse =
           tgt->IsNullImpliedByLinkLibraries(p);
   assert((impliedByUse ^ explicitlySet)
@@ -4298,9 +4300,11 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
 
     cmGeneratorTarget const* theTarget = *li;
 
-    const bool ifaceIsSet = theTarget->Target->GetProperties()
-                            .find(interfaceProperty)
-                            != theTarget->Target->GetProperties().end();
+    std::vector<std::string> propKeys = theTarget->GetPropertyKeys();
+
+    const bool ifaceIsSet =
+        std::find(propKeys.begin(), propKeys.end(),
+                  interfaceProperty) != propKeys.end();
     PropertyType ifacePropContent =
                     getTypedProperty<PropertyType>(theTarget,
                               interfaceProperty);
@@ -4575,6 +4579,19 @@ void cmGeneratorTarget::ComputeVersionedName(std::string& vName,
     vName += version;
     }
   vName += this->Makefile->IsOn("APPLE") ? suffix : std::string();
+}
+
+std::vector<std::string> cmGeneratorTarget::GetPropertyKeys() const
+{
+  cmPropertyMap propsObject = this->Target->GetProperties();
+  std::vector<std::string> props;
+  props.reserve(propsObject.size());
+  for (cmPropertyMap::const_iterator it = propsObject.begin();
+       it != propsObject.end(); ++it)
+    {
+    props.push_back(it->first);
+    }
+  return props;
 }
 
 //----------------------------------------------------------------------------

@@ -2486,13 +2486,13 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   // put this last so it can override existing settings
   // Convert "XCODE_ATTRIBUTE_*" properties directly.
   {
-  cmPropertyMap const& props = gtgt->Target->GetProperties();
-  for(cmPropertyMap::const_iterator i = props.begin();
+  std::vector<std::string> const& props = gtgt->GetPropertyKeys();
+  for(std::vector<std::string>::const_iterator i = props.begin();
       i != props.end(); ++i)
     {
-    if(i->first.find("XCODE_ATTRIBUTE_") == 0)
+    if(i->find("XCODE_ATTRIBUTE_") == 0)
       {
-      std::string attribute = i->first.substr(16);
+      std::string attribute = i->substr(16);
       // Handle [variant=<config>] condition explicitly here.
       std::string::size_type beginVariant =
         attribute.find("[variant=");
@@ -2523,7 +2523,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       if (!attribute.empty())
         {
         cmGeneratorExpression ge;
-        std::string processed = ge.Parse(i->second.GetValue())
+        std::string processed = ge.Parse(gtgt->GetProperty(*i))
           ->Evaluate(this->CurrentLocalGenerator, configName);
         buildSettings->AddAttribute(attribute.c_str(),
                                     this->CreateString(processed));
