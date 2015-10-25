@@ -400,6 +400,11 @@ public:
                             bool excludeAliases = false) const;
   bool IsAlias(const std::string& name) const;
 
+  std::map<std::string, std::string> GetAliasTargets() const
+  {
+    return this->AliasTargets;
+  }
+
   /**
    * Mark include directories as system directories.
    */

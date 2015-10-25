@@ -51,6 +51,8 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
 
   this->Makefile = makefile;
 
+  this->AliasTargets = makefile->GetAliasTargets();
+
   this->EmitUniversalBinaryFlags = true;
   this->BackwardsCompatibility = 0;
   this->BackwardsCompatibilityFinal = false;
@@ -453,11 +455,45 @@ void cmLocalGenerator::AddGeneratorTarget(cmGeneratorTarget* gt)
   this->GeneratorTargets.push_back(gt);
 }
 
+struct NamedGeneratorTargetFinder
+{
+  NamedGeneratorTargetFinder(std::string const& name)
+    : Name(name)
+  {
+
+  }
+
+  bool operator()(cmGeneratorTarget* tgt)
+  {
+    return tgt->GetName() == this->Name;
+  }
+private:
+  std::string Name;
+};
+
 cmGeneratorTarget* cmLocalGenerator::FindGeneratorTarget(
     const std::string& name) const
 {
-  return this->GetGlobalGenerator()->GetGeneratorTarget(
-        this->Makefile->FindTarget(name));
+  std::map<std::string, std::string>::const_iterator i =
+      this->AliasTargets.find(name);
+  if (i != this->AliasTargets.end())
+    {
+    std::vector<cmGeneratorTarget*>::const_iterator ai =
+        std::find_if(this->GeneratorTargets.begin(),
+                     this->GeneratorTargets.end(),
+                     NamedGeneratorTargetFinder(i->second));
+    return *ai;
+    }
+  std::vector<cmGeneratorTarget*>::const_iterator ti =
+      std::find_if(this->GeneratorTargets.begin(),
+                   this->GeneratorTargets.end(),
+                   NamedGeneratorTargetFinder(name));
+  if ( ti != this->GeneratorTargets.end() )
+    {
+    return *ti;
+    }
+
+  return 0;
 }
 
 //----------------------------------------------------------------------------

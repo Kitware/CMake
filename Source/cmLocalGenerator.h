@@ -373,6 +373,7 @@ protected:
 
   std::set<cmGeneratorTarget const*> WarnCMP0063;
   std::vector<cmGeneratorTarget*> GeneratorTargets;
+  std::map<std::string, std::string> AliasTargets;
 
   bool EmitUniversalBinaryFlags;
 
