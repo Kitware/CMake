@@ -1112,15 +1112,14 @@ void cmLocalVisualStudio6Generator
       // Compute the proper name to use to link this library.
       std::string lib;
       std::string libDebug;
-      cmTarget* tgt = this->GlobalGenerator->FindTarget(j->first.c_str());
+      cmGeneratorTarget* tgt =
+          this->GlobalGenerator->FindGeneratorTarget(j->first.c_str());
       if(tgt)
         {
-        cmGeneratorTarget* gt =
-          this->GlobalGenerator->GetGeneratorTarget(tgt);
         lib = cmSystemTools::GetFilenameWithoutExtension
-          (gt->GetFullName().c_str());
+          (tgt->GetFullName().c_str());
         libDebug = cmSystemTools::GetFilenameWithoutExtension
-          (gt->GetFullName("Debug").c_str());
+          (tgt->GetFullName("Debug").c_str());
         lib += ".lib";
         libDebug += ".lib";
         }
