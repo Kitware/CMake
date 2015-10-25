@@ -31,6 +31,7 @@ public:
   cmLocalGenerator* GetLocalGenerator() const;
 
   bool IsImported() const;
+  bool IsImportedGloballyVisible() const;
   const char *GetLocation(const std::string& config) const;
 
   std::vector<cmCustomCommand> const &GetPreBuildCommands() const;

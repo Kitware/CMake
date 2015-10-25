@@ -856,6 +856,11 @@ bool cmGeneratorTarget::IsImported() const
   return this->Target->IsImported();
 }
 
+bool cmGeneratorTarget::IsImportedGloballyVisible() const
+{
+  return this->Target->IsImportedGloballyVisible();
+}
+
 //----------------------------------------------------------------------------
 const char* cmGeneratorTarget::GetLocationForBuild() const
 {
