@@ -314,7 +314,7 @@ bool cmAddLibraryCommand
       this->SetError(e.str());
       return false;
       }
-    this->Makefile->AddAlias(libName, aliasedTarget);
+    this->Makefile->AddAlias(libName, aliasedName);
     return true;
     }
 

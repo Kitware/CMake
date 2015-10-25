@@ -192,7 +192,7 @@ bool cmAddExecutableCommand
       this->SetError(e.str());
       return false;
       }
-    this->Makefile->AddAlias(exename, aliasedTarget);
+    this->Makefile->AddAlias(exename, aliasedName);
     return true;
     }
 

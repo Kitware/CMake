@@ -283,7 +283,7 @@ public:
   cmTarget* AddLibrary(const std::string& libname, cmState::TargetType type,
                   const std::vector<std::string> &srcs,
                   bool excludeFromAll = false);
-  void AddAlias(const std::string& libname, cmTarget *tgt);
+  void AddAlias(const std::string& libname, const std::string& tgt);
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   /**
@@ -790,7 +790,7 @@ protected:
 #else
   typedef std::map<std::string, cmTarget*> TargetMap;
 #endif
-  TargetMap AliasTargets;
+  std::map<std::string, std::string> AliasTargets;
   std::vector<cmSourceFile*> SourceFiles;
 
   // Tests

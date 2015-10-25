@@ -2036,10 +2036,11 @@ void cmMakefile::AddGlobalLinkInformation(const std::string& name,
 }
 
 
-void cmMakefile::AddAlias(const std::string& lname, cmTarget *tgt)
+void cmMakefile::AddAlias(const std::string& lname,
+                          std::string const& tgtName)
 {
-  this->AliasTargets[lname] = tgt;
-  this->GetGlobalGenerator()->AddAlias(lname, tgt);
+  this->AliasTargets[lname] = tgtName;
+  this->GetGlobalGenerator()->AddAlias(lname, tgtName);
 }
 
 cmTarget* cmMakefile::AddLibrary(const std::string& lname,
@@ -4024,10 +4025,12 @@ cmTarget* cmMakefile::FindTarget(const std::string& name,
 {
   if (!excludeAliases)
     {
-    TargetMap::const_iterator i = this->AliasTargets.find(name);
+    std::map<std::string, std::string>::const_iterator i =
+        this->AliasTargets.find(name);
     if (i != this->AliasTargets.end())
       {
-      return i->second;
+      cmTargets::iterator ai = this->Targets.find(i->second);
+      return &ai->second;
       }
     }
   cmTargets::iterator i = this->Targets.find( name );

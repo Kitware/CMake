@@ -2167,9 +2167,10 @@ cmGlobalGenerator::FindLocalGenerator(const std::string& start_dir) const
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::AddAlias(const std::string& name, cmTarget *tgt)
+void cmGlobalGenerator::AddAlias(const std::string& name,
+                                 std::string const& tgtName)
 {
-  this->AliasTargets[name] = tgt;
+  this->AliasTargets[name] = tgtName;
 }
 
 //----------------------------------------------------------------------------
@@ -2220,10 +2221,11 @@ cmGlobalGenerator::FindTarget(const std::string& name,
 {
   if (!excludeAliases)
     {
-    TargetMap::const_iterator ai = this->AliasTargets.find(name);
+    std::map<std::string, std::string>::const_iterator ai =
+        this->AliasTargets.find(name);
     if (ai != this->AliasTargets.end())
       {
-      return ai->second;
+      return this->FindTargetImpl(ai->second);
       }
     }
   if (cmTarget* tgt = this->FindTargetImpl(name))
