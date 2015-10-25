@@ -2174,7 +2174,7 @@ cmMakefile::GetSourceGroup(const std::vector<std::string>&name) const
 {
   cmSourceGroup* sg = 0;
 
-  // first look for source group starting with the same as the one we wants
+  // first look for source group starting with the same as the one we want
   for (std::vector<cmSourceGroup>::const_iterator
       sgIt = this->SourceGroups.begin();
       sgIt != this->SourceGroups.end(); ++sgIt)
