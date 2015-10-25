@@ -5560,7 +5560,7 @@ cmGeneratorTarget::GetLinkImplementation(const std::string& config) const
     }
 
   std::string CONFIG = cmSystemTools::UpperCase(config);
-  cmOptionalLinkImplementation& impl = this->LinkImplMap[CONFIG][this->Target];
+  cmOptionalLinkImplementation& impl = this->LinkImplMap[CONFIG][this];
   if(!impl.LibrariesDone)
     {
     impl.LibrariesDone = true;
@@ -5840,7 +5840,7 @@ cmGeneratorTarget::GetLinkImplementationLibrariesInternal(
     return &hm.begin()->second;
     }
 
-  cmOptionalLinkImplementation& impl = hm[head->Target];
+  cmOptionalLinkImplementation& impl = hm[head];
   if(!impl.LibrariesDone)
     {
     impl.LibrariesDone = true;

@@ -647,7 +647,7 @@ private:
                       const std::string& config) const;
 
   struct HeadToLinkImplementationMap:
-    public std::map<cmTarget const*, cmOptionalLinkImplementation> {};
+    public std::map<cmGeneratorTarget const*, cmOptionalLinkImplementation> {};
   typedef std::map<std::string,
                    HeadToLinkImplementationMap> LinkImplMapType;
   mutable LinkImplMapType LinkImplMap;
