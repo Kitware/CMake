@@ -455,6 +455,11 @@ void cmLocalGenerator::AddGeneratorTarget(cmGeneratorTarget* gt)
   this->GeneratorTargets.push_back(gt);
 }
 
+void cmLocalGenerator::AddImportedGeneratorTarget(cmGeneratorTarget* gt)
+{
+  this->ImportedGeneratorTargets.push_back(gt);
+}
+
 struct NamedGeneratorTargetFinder
 {
   NamedGeneratorTargetFinder(std::string const& name)
