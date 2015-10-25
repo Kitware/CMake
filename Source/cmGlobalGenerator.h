@@ -254,6 +254,8 @@ public:
   cmTarget* FindTarget(const std::string& name,
                        bool excludeAliases = false) const;
 
+  cmGeneratorTarget* FindGeneratorTarget(const std::string& name) const;
+
   void AddAlias(const std::string& name, const std::string& tgtName);
   bool IsAlias(const std::string& name) const;
 
@@ -431,6 +433,10 @@ protected:
 
   cmTarget* FindTargetImpl(std::string const& name) const;
   cmTarget* FindImportedTargetImpl(std::string const& name) const;
+
+  cmGeneratorTarget* FindGeneratorTargetImpl(std::string const& name) const;
+  cmGeneratorTarget*
+  FindImportedGeneratorTargetImpl(std::string const& name) const;
 
   const char* GetPredefinedTargetsFolder();
   virtual bool UseFolderProperty();

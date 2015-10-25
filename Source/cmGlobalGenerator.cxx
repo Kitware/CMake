@@ -2196,6 +2196,25 @@ cmTarget* cmGlobalGenerator::FindTargetImpl(std::string const& name) const
   return 0;
 }
 
+cmGeneratorTarget*
+cmGlobalGenerator::FindGeneratorTargetImpl(std::string const& name) const
+{
+  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    std::vector<cmGeneratorTarget*> tgts =
+        this->LocalGenerators[i]->GetGeneratorTargets();
+    for (std::vector<cmGeneratorTarget*>::iterator it = tgts.begin();
+         it != tgts.end(); ++it)
+      {
+      if ((*it)->GetName() == name)
+        {
+        return *it;
+        }
+      }
+    }
+  return 0;
+}
+
 cmTarget*
 cmGlobalGenerator::FindImportedTargetImpl(std::string const& name) const
 {
@@ -2204,6 +2223,25 @@ cmGlobalGenerator::FindImportedTargetImpl(std::string const& name) const
     std::vector<cmTarget*> tgts =
         this->Makefiles[i]->GetOwnedImportedTargets();
     for (std::vector<cmTarget*>::iterator it = tgts.begin();
+         it != tgts.end(); ++it)
+      {
+      if ((*it)->GetName() == name && (*it)->IsImportedGloballyVisible())
+        {
+        return *it;
+        }
+      }
+    }
+  return 0;
+}
+
+cmGeneratorTarget* cmGlobalGenerator::FindImportedGeneratorTargetImpl(
+    std::string const& name) const
+{
+  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    std::vector<cmGeneratorTarget*> tgts =
+        this->LocalGenerators[i]->GetGeneratorTargets();
+    for (std::vector<cmGeneratorTarget*>::iterator it = tgts.begin();
          it != tgts.end(); ++it)
       {
       if ((*it)->GetName() == name && (*it)->IsImportedGloballyVisible())
@@ -2234,6 +2272,16 @@ cmGlobalGenerator::FindTarget(const std::string& name,
     return tgt;
     }
   return this->FindImportedTargetImpl(name);
+}
+
+cmGeneratorTarget*
+cmGlobalGenerator::FindGeneratorTarget(const std::string& name) const
+{
+  if (cmGeneratorTarget* tgt = this->FindGeneratorTargetImpl(name))
+    {
+    return tgt;
+    }
+  return this->FindImportedGeneratorTargetImpl(name);
 }
 
 //----------------------------------------------------------------------------
