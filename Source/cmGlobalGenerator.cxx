@@ -2244,8 +2244,7 @@ cmGlobalGenerator::NameResolvesToFramework(const std::string& libname) const
 
   if(cmTarget* tgt = this->FindTarget(libname))
     {
-    cmGeneratorTarget* gt = this->GetGeneratorTarget(tgt);
-    if(gt->IsFrameworkOnApple())
+    if(tgt->IsFrameworkOnApple())
        {
        return true;
        }
