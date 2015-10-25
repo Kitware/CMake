@@ -62,6 +62,8 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
 
 cmLocalGenerator::~cmLocalGenerator()
 {
+  cmDeleteAll(this->GeneratorTargets);
+  cmDeleteAll(this->OwnedImportedGeneratorTargets);
 }
 
 void cmLocalGenerator::IssueMessage(cmake::MessageType t,
@@ -458,6 +460,11 @@ void cmLocalGenerator::AddGeneratorTarget(cmGeneratorTarget* gt)
 void cmLocalGenerator::AddImportedGeneratorTarget(cmGeneratorTarget* gt)
 {
   this->ImportedGeneratorTargets.push_back(gt);
+}
+
+void cmLocalGenerator::AddOwnedImportedGeneratorTarget(cmGeneratorTarget* gt)
+{
+  this->OwnedImportedGeneratorTargets.push_back(gt);
 }
 
 struct NamedGeneratorTargetFinder

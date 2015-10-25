@@ -1208,8 +1208,6 @@ void cmGlobalGenerator::Configure()
 void cmGlobalGenerator::CreateGenerationObjects(TargetTypes targetTypes)
 {
   this->CreateLocalGenerators();
-  cmDeleteAll(this->GeneratorTargets);
-  this->GeneratorTargets.clear();
   this->CreateGeneratorTargets(targetTypes);
   this->ComputeBuildFileGenerators();
 }
@@ -1597,7 +1595,6 @@ void cmGlobalGenerator::CreateGeneratorTargets(
       {
       cmTarget* t = &ti->second;
       cmGeneratorTarget* gt = new cmGeneratorTarget(t, lg);
-      this->GeneratorTargets[t] = gt;
       lg->AddGeneratorTarget(gt);
       }
     }
@@ -1622,9 +1619,9 @@ void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes)
           j = mf->GetOwnedImportedTargets().begin();
         j != mf->GetOwnedImportedTargets().end(); ++j)
       {
-      cmGeneratorTarget* gt =
-          new cmGeneratorTarget(*j, this->LocalGenerators[i]);
-      this->GeneratorTargets[*j] = gt;
+      cmLocalGenerator* lg = this->LocalGenerators[i];
+      cmGeneratorTarget* gt = new cmGeneratorTarget(*j, lg);
+      lg->AddOwnedImportedGeneratorTarget(gt);
       importedMap[*j] = gt;
       }
     }
@@ -1641,9 +1638,6 @@ void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes)
 //----------------------------------------------------------------------------
 void cmGlobalGenerator::ClearGeneratorMembers()
 {
-  cmDeleteAll(this->GeneratorTargets);
-  this->GeneratorTargets.clear();
-
   cmDeleteAll(this->BuildExportSets);
   this->BuildExportSets.clear();
 
@@ -1659,20 +1653,6 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->RuleHashes.clear();
   this->DirectoryContentMap.clear();
   this->BinaryDirectories.clear();
-}
-
-//----------------------------------------------------------------------------
-cmGeneratorTarget*
-cmGlobalGenerator::GetGeneratorTarget(cmTarget const* t) const
-{
-  cmGeneratorTargetsType::const_iterator ti = this->GeneratorTargets.find(t);
-  if(ti == this->GeneratorTargets.end())
-    {
-    this->CMakeInstance->IssueMessage(
-      cmake::INTERNAL_ERROR, "Missing cmGeneratorTarget instance!");
-    return 0;
-    }
-  return ti->second;
 }
 
 //----------------------------------------------------------------------------
