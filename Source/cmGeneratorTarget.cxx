@@ -1793,7 +1793,7 @@ public:
                                UNORDERED_SET<std::string>& languages,
                                cmGeneratorTarget const* head):
     Config(config), Languages(languages), HeadTarget(head),
-    Makefile(target->Target->GetMakefile()), Target(target)
+    Target(target)
   { this->Visited.insert(target); }
 
   void Visit(cmLinkItem const& item)
@@ -1805,7 +1805,8 @@ public:
         bool noMessage = false;
         cmake::MessageType messageType = cmake::FATAL_ERROR;
         std::stringstream e;
-        switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0028))
+        switch(this->Target->GetLocalGenerator()
+               ->GetPolicyStatus(cmPolicies::CMP0028))
           {
           case cmPolicies::WARN:
             {
@@ -1859,7 +1860,6 @@ private:
   std::string Config;
   UNORDERED_SET<std::string>& Languages;
   cmGeneratorTarget const* HeadTarget;
-  cmMakefile* Makefile;
   const cmGeneratorTarget* Target;
   std::set<cmGeneratorTarget const*> Visited;
 };
