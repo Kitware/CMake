@@ -1637,8 +1637,6 @@ void cmGlobalGenerator::ClearGeneratorMembers()
 
   this->ExportSets.clear();
   this->TargetDependencies.clear();
-  this->TotalTargets.clear();
-  this->ImportedTargets.clear();
   this->ProjectMap.clear();
   this->RuleHashes.clear();
   this->DirectoryContentMap.clear();
@@ -2180,6 +2178,41 @@ bool cmGlobalGenerator::IsAlias(const std::string& name) const
   return this->AliasTargets.find(name) != this->AliasTargets.end();
 }
 
+cmTarget* cmGlobalGenerator::FindTargetImpl(std::string const& name) const
+{
+  for (unsigned int i = 0; i < this->Makefiles.size(); ++i)
+    {
+    cmTargets& tgts = this->Makefiles[i]->GetTargets();
+    for (cmTargets::iterator it = tgts.begin(); it != tgts.end(); ++it)
+      {
+      if (it->second.GetName() == name)
+        {
+        return &it->second;
+        }
+      }
+    }
+  return 0;
+}
+
+cmTarget*
+cmGlobalGenerator::FindImportedTargetImpl(std::string const& name) const
+{
+  for (unsigned int i = 0; i < this->Makefiles.size(); ++i)
+    {
+    std::vector<cmTarget*> tgts =
+        this->Makefiles[i]->GetOwnedImportedTargets();
+    for (std::vector<cmTarget*>::iterator it = tgts.begin();
+         it != tgts.end(); ++it)
+      {
+      if ((*it)->GetName() == name && (*it)->IsImportedGloballyVisible())
+        {
+        return *it;
+        }
+      }
+    }
+  return 0;
+}
+
 //----------------------------------------------------------------------------
 cmTarget*
 cmGlobalGenerator::FindTarget(const std::string& name,
@@ -2193,17 +2226,11 @@ cmGlobalGenerator::FindTarget(const std::string& name,
       return ai->second;
       }
     }
-  TargetMap::const_iterator i = this->TotalTargets.find ( name );
-  if ( i != this->TotalTargets.end() )
+  if (cmTarget* tgt = this->FindTargetImpl(name))
     {
-    return i->second;
+    return tgt;
     }
-  i = this->ImportedTargets.find(name);
-  if ( i != this->ImportedTargets.end() )
-    {
-    return i->second;
-    }
-  return 0;
+  return this->FindImportedTargetImpl(name);
 }
 
 //----------------------------------------------------------------------------
@@ -2622,18 +2649,6 @@ cmGlobalGenerator::GetTargetDirectDepends(cmGeneratorTarget const* target)
   return this->TargetDependencies[target];
 }
 
-void cmGlobalGenerator::AddTarget(cmTarget* t)
-{
-  if(t->IsImported())
-    {
-    this->ImportedTargets[t->GetName()] = t;
-    }
-  else
-    {
-    this->TotalTargets[t->GetName()] = t;
-    }
-}
-
 bool cmGlobalGenerator::IsReservedTarget(std::string const& name)
 {
   // The following is a list of targets reserved
@@ -2939,17 +2954,20 @@ void cmGlobalGenerator::WriteSummary()
   fname += "/TargetDirectories.txt";
   cmGeneratedFileStream fout(fname.c_str());
 
-  // Generate summary information files for each target.
-  for(TargetMap::const_iterator ti =
-        this->TotalTargets.begin(); ti != this->TotalTargets.end(); ++ti)
+  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    if ((ti->second)->GetType() == cmState::INTERFACE_LIBRARY)
+    std::vector<cmGeneratorTarget*> tgts =
+        this->LocalGenerators[i]->GetGeneratorTargets();
+    for (std::vector<cmGeneratorTarget*>::iterator it = tgts.begin();
+         it != tgts.end(); ++it)
       {
-      continue;
+      if ((*it)->GetType() == cmState::INTERFACE_LIBRARY)
+        {
+        continue;
+        }
+      this->WriteSummary(*it);
+      fout << (*it)->GetSupportDirectory() << "\n";
       }
-    cmGeneratorTarget* gt = this->GetGeneratorTarget(ti->second);
-    this->WriteSummary(gt);
-    fout << gt->GetSupportDirectory() << "\n";
     }
 }
 

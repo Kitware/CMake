@@ -75,7 +75,7 @@ public:
    */
   void SetType(cmState::TargetType f, const std::string& name);
 
-  void MarkAsImported();
+  void MarkAsImported(bool global = false);
 
   ///! Set/Get the name of the target
   const std::string& GetName() const {return this->Name;}
@@ -186,6 +186,8 @@ public:
   void CheckProperty(const std::string& prop, cmMakefile* context) const;
 
   bool IsImported() const {return this->IsImportedTarget;}
+  bool IsImportedGloballyVisible() const
+  { return this->ImportedGloballyVisible; }
 
   // Get the properties
   cmPropertyMap &GetProperties() const { return this->Properties; }
@@ -349,6 +351,7 @@ private:
   bool IsAndroid;
   bool IsApple;
   bool IsImportedTarget;
+  bool ImportedGloballyVisible;
   bool BuildInterfaceIncludesAppended;
 #if defined(_WIN32) && !defined(__CYGWIN__)
   bool LinkLibrariesForVS6Analyzed;

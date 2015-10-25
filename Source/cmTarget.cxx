@@ -63,6 +63,7 @@ cmTarget::cmTarget()
   this->IsAndroid = false;
   this->IsApple = false;
   this->IsImportedTarget = false;
+  this->ImportedGloballyVisible = false;
   this->BuildInterfaceIncludesAppended = false;
 }
 
@@ -1505,9 +1506,10 @@ void cmTarget::CheckProperty(const std::string& prop,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::MarkAsImported()
+void cmTarget::MarkAsImported(bool global)
 {
   this->IsImportedTarget = true;
+  this->ImportedGloballyVisible = global;
 }
 
 //----------------------------------------------------------------------------

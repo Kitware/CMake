@@ -280,8 +280,6 @@ public:
   std::set<std::string> const& GetDirectoryContent(std::string const& dir,
                                                    bool needDisk = true);
 
-  void AddTarget(cmTarget* t);
-
   static bool IsReservedTarget(std::string const& name);
 
   virtual const char* GetAllTargetName()         const { return "ALL_BUILD"; }
@@ -439,9 +437,10 @@ protected:
 #else
   typedef std::map<std::string,cmTarget *> TargetMap;
 #endif
-  TargetMap TotalTargets;
   TargetMap AliasTargets;
-  TargetMap ImportedTargets;
+
+  cmTarget* FindTargetImpl(std::string const& name) const;
+  cmTarget* FindImportedTargetImpl(std::string const& name) const;
 
   const char* GetPredefinedTargetsFolder();
   virtual bool UseFolderProperty();

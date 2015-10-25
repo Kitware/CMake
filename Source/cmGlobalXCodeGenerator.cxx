@@ -1362,12 +1362,17 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::ForceLinkerLanguages()
 {
-  // This makes sure all targets link using the proper language.
-  for(TargetMap::const_iterator
-        ti = this->TotalTargets.begin(); ti != this->TotalTargets.end(); ++ti)
+  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    cmGeneratorTarget* gt = this->GetGeneratorTarget(ti->second);
-    this->ForceLinkerLanguage(gt);
+    std::vector<cmGeneratorTarget*> tgts =
+        this->LocalGenerators[i]->GetGeneratorTargets();
+    // All targets depend on the build-system check target.
+    for(std::vector<cmGeneratorTarget*>::const_iterator ti = tgts.begin();
+        ti != tgts.end(); ++ti)
+      {
+      // This makes sure all targets link using the proper language.
+      this->ForceLinkerLanguage(*ti);
+      }
     }
 }
 
