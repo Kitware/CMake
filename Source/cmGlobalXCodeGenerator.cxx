@@ -1617,6 +1617,39 @@ std::string cmGlobalXCodeGenerator::ExtractFlag(const char* flag,
 }
 
 //----------------------------------------------------------------------------
+// This function removes each matching occurrence of the expression and
+// returns the last one (i.e., the dominant flag in GCC)
+std::string cmGlobalXCodeGenerator::ExtractFlagRegex(const char* exp,
+                                                     int matchIndex,
+                                                     std::string& flags)
+{
+  std::string retFlag;
+
+  cmsys::RegularExpression regex(exp);
+  assert(regex.is_valid());
+  if(!regex.is_valid())
+    {
+    return retFlag;
+    }
+
+  std::string::size_type offset = 0;
+
+  while(regex.find(flags.c_str() + offset))
+    {
+    const std::string::size_type startPos = offset + regex.start(matchIndex);
+    const std::string::size_type endPos = offset + regex.end(matchIndex);
+    const std::string::size_type size = endPos - startPos;
+
+    offset = startPos + 1;
+
+    retFlag.assign(flags, startPos, size);
+    flags.replace(startPos, size, size, ' ');
+    }
+
+  return retFlag;
+}
+
+//----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
                                                 cmTarget& target,
@@ -2232,9 +2265,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   bool same_gflags = true;
   std::map<std::string, std::string> gflags;
   std::string const* last_gflag = 0;
-  char optLevel[2];
-  optLevel[0] = '0';
-  optLevel[1] = 0;
+  std::string optLevel = "0";
 
   // Minimal map of flags to build settings.
   for (std::set<std::string>::iterator li = languages.begin();
@@ -2242,14 +2273,15 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     std::string& flags = cflags[*li];
     std::string& gflag = gflags[*li];
-    std::string oflag = this->ExtractFlag("-O", flags);
-    if(oflag.size() == 3)
-      {
-      optLevel[0] = oflag[2];
-      }
+    std::string oflag =
+      this->ExtractFlagRegex("(^| )(-Ofast|-Os|-O[0-9]*)( |$)", 2, flags);
     if(oflag.size() == 2)
       {
-      optLevel[0] = '1';
+      optLevel = "1";
+      }
+    else if(oflag.size() > 2)
+      {
+      optLevel = oflag.substr(2);
       }
     gflag = this->ExtractFlag("-g", flags);
     // put back gdwarf-2 if used since there is no way

@@ -151,6 +151,8 @@ private:
                            cmXCodeObject* buildSettings,
                            const std::string& buildType);
   std::string ExtractFlag(const char* flag, std::string& flags);
+  std::string ExtractFlagRegex(const char* exp, int matchIndex,
+                               std::string& flags);
   void SortXCodeObjects();
   // delete all objects in the this->XCodeObjects vector.
   void ClearXCodeObjects();
