@@ -16,7 +16,6 @@
 #include "cmGlobalNinjaGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-#include "cmTarget.h"
 #include "cmCustomCommandGenerator.h"
 
 cmNinjaUtilityTargetGenerator::cmNinjaUtilityTargetGenerator(
@@ -34,8 +33,8 @@ void cmNinjaUtilityTargetGenerator::Generate()
   cmNinjaDeps deps, outputs, util_outputs(1, utilCommandName);
 
   const std::vector<cmCustomCommand> *cmdLists[2] = {
-    &this->GetTarget()->GetPreBuildCommands(),
-    &this->GetTarget()->GetPostBuildCommands()
+    &this->GetGeneratorTarget()->Target->GetPreBuildCommands(),
+    &this->GetGeneratorTarget()->Target->GetPostBuildCommands()
   };
 
   bool uses_terminal = false;
@@ -66,7 +65,8 @@ void cmNinjaUtilityTargetGenerator::Generate()
       {
       cmCustomCommandGenerator ccg(*cc, this->GetConfigName(),
                                    this->GetLocalGenerator());
-      this->GetLocalGenerator()->AddCustomCommandTarget(cc, this->GetTarget());
+      this->GetLocalGenerator()->AddCustomCommandTarget(cc,
+          this->GetGeneratorTarget());
 
       // Depend on all custom command outputs.
       const std::vector<std::string>& ccOutputs = ccg.GetOutputs();
@@ -78,8 +78,10 @@ void cmNinjaUtilityTargetGenerator::Generate()
       }
     }
 
-  this->GetLocalGenerator()->AppendTargetOutputs(this->GetTarget(), outputs);
-  this->GetLocalGenerator()->AppendTargetDepends(this->GetTarget(), deps);
+  this->GetLocalGenerator()->AppendTargetOutputs(this->GetGeneratorTarget(),
+                                                 outputs);
+  this->GetLocalGenerator()->AppendTargetDepends(this->GetGeneratorTarget(),
+                                                 deps);
 
   if (commands.empty()) {
     this->GetGlobalGenerator()->WritePhonyBuild(this->GetBuildFileStream(),
@@ -140,5 +142,5 @@ void cmNinjaUtilityTargetGenerator::Generate()
   }
 
   this->GetGlobalGenerator()->AddTargetAlias(this->GetTargetName(),
-                                             this->GetTarget());
+                                             this->GetGeneratorTarget());
 }

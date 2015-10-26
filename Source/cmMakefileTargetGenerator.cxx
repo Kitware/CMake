@@ -18,7 +18,6 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-#include "cmTarget.h"
 #include "cmake.h"
 #include "cmState.h"
 #include "cmComputeLinkInformation.h"
@@ -432,7 +431,7 @@ void cmMakefileTargetGenerator
   std::string srcFullPath =
     this->Convert(source.GetFullPath(), cmLocalGenerator::FULL);
   this->LocalGenerator->
-    AddImplicitDepends(*this->Target, lang,
+    AddImplicitDepends(this->GeneratorTarget, lang,
                        objFullPath.c_str(),
                        srcFullPath.c_str());
 }
@@ -1241,7 +1240,7 @@ void cmMakefileTargetGenerator
     std::string srcFullPath =
       this->Convert(idi->second, cmLocalGenerator::FULL);
     this->LocalGenerator->
-      AddImplicitDepends(*this->Target, idi->first,
+      AddImplicitDepends(this->GeneratorTarget, idi->first,
                          objFullPath.c_str(),
                          srcFullPath.c_str());
     }

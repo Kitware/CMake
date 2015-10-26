@@ -673,14 +673,11 @@ public:
   {
     return this->MaxLanguageStandards;
   }
-};
 
-struct cmStrictTargetComparison {
-  bool operator()(cmTarget const* t1, cmTarget const* t2) const;
+  struct StrictTargetComparison {
+    bool operator()(cmGeneratorTarget const* t1,
+                    cmGeneratorTarget const* t2) const;
+  };
 };
-
-typedef std::map<cmTarget const*,
-                 cmGeneratorTarget*,
-                 cmStrictTargetComparison> cmGeneratorTargetsType;
 
 #endif

@@ -44,7 +44,8 @@ public:
 
   cmGlobalVisualStudioGenerator::VSVersion GetVersion() const;
 
-  virtual std::string ComputeLongestObjectDirectory(cmTarget&) const = 0;
+  virtual std::string
+  ComputeLongestObjectDirectory(cmGeneratorTarget const*) const = 0;
 
   virtual void AddCMakeListsRules() = 0;
 
@@ -58,7 +59,8 @@ protected:
 
   /** Construct a custom command to make exe import lib dir.  */
   cmsys::auto_ptr<cmCustomCommand>
-  MaybeCreateImplibDir(cmTarget& target, const std::string& config,
+  MaybeCreateImplibDir(cmGeneratorTarget *target,
+                       const std::string& config,
                        bool isFortran);
 };
 

@@ -94,7 +94,8 @@ public:
 
   /** Return true if the target project file should have the option
       LinkLibraryDependencies and link to .sln dependencies. */
-  virtual bool NeedLinkLibraryDependencies(cmTarget&) { return false; }
+  virtual bool NeedLinkLibraryDependencies(cmGeneratorTarget*)
+  { return false; }
 
   const char* GetIntelProjectVersion();
 
@@ -123,10 +124,10 @@ protected:
                             std::vector<cmLocalGenerator*>& generators);
   virtual void WriteProject(std::ostream& fout,
                             const std::string& name, const char* path,
-                            cmTarget const& t);
+                            const cmGeneratorTarget *t);
   virtual void WriteProjectDepends(std::ostream& fout,
                            const std::string& name, const char* path,
-                           cmTarget const&t);
+                           cmGeneratorTarget const* t);
   virtual void WriteProjectConfigurations(
     std::ostream& fout, const std::string& name, cmState::TargetType type,
     std::vector<std::string> const& configs,
@@ -136,7 +137,7 @@ protected:
                                       cmLocalGenerator* root);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
-  virtual std::string WriteUtilityDepend(cmTarget const* target);
+  virtual std::string WriteUtilityDepend(const cmGeneratorTarget *target);
 
   virtual void WriteTargetsToSolution(
     std::ostream& fout,

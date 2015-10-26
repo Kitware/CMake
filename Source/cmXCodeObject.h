@@ -13,7 +13,7 @@
 #define cmXCodeObject_h
 
 #include "cmStandardIncludes.h"
-class cmTarget;
+class cmGeneratorTarget;
 
 class cmXCodeObject
 {
@@ -87,11 +87,11 @@ public:
     {
       this->Id = id;
     }
-  cmTarget* GetTarget()
+  cmGeneratorTarget* GetTarget()
     {
       return this->Target;
     }
-  void SetTarget(cmTarget* t)
+  void SetTarget(cmGeneratorTarget* t)
     {
       this->Target = t;
     }
@@ -146,7 +146,7 @@ public:
 protected:
   void PrintString(std::ostream& os) const;
 
-  cmTarget* Target;
+  cmGeneratorTarget* Target;
   Type TypeValue;
   std::string Id;
   PBXType IsA;

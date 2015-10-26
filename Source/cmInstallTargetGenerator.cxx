@@ -76,7 +76,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
   if(this->Target->NeedRelinkBeforeInstall(config))
     {
     fromDirConfig =
-        this->Target->Target->GetMakefile()->GetCurrentBinaryDirectory();
+        this->Target->GetLocalGenerator()->GetCurrentBinaryDirectory();
     fromDirConfig += cmake::GetCMakeFilesDirectory();
     fromDirConfig += "/CMakeRelink.dir/";
     }
@@ -111,7 +111,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
     case cmState::UTILITY:
     case cmState::GLOBAL_TARGET:
     case cmState::UNKNOWN_LIBRARY:
-      this->Target->Target->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR,
+      this->Target->GetLocalGenerator()->IssueMessage(cmake::INTERNAL_ERROR,
         "cmInstallTargetGenerator created with non-installable target.");
       return;
     }
@@ -440,8 +440,7 @@ cmInstallTargetGenerator::GetInstallFilename(cmGeneratorTarget const* target,
 
 void cmInstallTargetGenerator::Compute(cmLocalGenerator* lg)
 {
-  this->Target = lg->GetGlobalGenerator()->GetGeneratorTarget(
-        lg->GetMakefile()->FindTarget(this->TargetName));
+  this->Target = lg->FindGeneratorTarget(this->TargetName);
 }
 
 //----------------------------------------------------------------------------

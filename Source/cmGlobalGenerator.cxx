@@ -48,6 +48,18 @@
 
 #include <assert.h>
 
+bool cmTarget::StrictTargetComparison::operator()(cmTarget const* t1,
+                                                  cmTarget const* t2) const
+{
+  int nameResult = strcmp(t1->GetName().c_str(), t2->GetName().c_str());
+  if (nameResult == 0)
+    {
+    return strcmp(t1->GetMakefile()->GetCurrentBinaryDirectory(),
+                  t2->GetMakefile()->GetCurrentBinaryDirectory()) < 0;
+    }
+  return nameResult < 0;
+}
+
 cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   : CMakeInstance(cm)
 {
@@ -1456,34 +1468,34 @@ cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
 #ifdef CMAKE_BUILD_WITH_CMAKE
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
-    cmTargets& targets =
-      this->LocalGenerators[i]->GetMakefile()->GetTargets();
+    std::vector<cmGeneratorTarget*> targets =
+      this->LocalGenerators[i]->GetGeneratorTargets();
     std::vector<cmGeneratorTarget*> filteredTargets;
     filteredTargets.reserve(targets.size());
-    for(cmTargets::iterator ti = targets.begin();
+    for(std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
         ti != targets.end(); ++ti)
       {
-      if (ti->second.GetType() == cmState::GLOBAL_TARGET)
+      if ((*ti)->GetType() == cmState::GLOBAL_TARGET)
         {
         continue;
         }
-      if(ti->second.GetType() != cmState::EXECUTABLE &&
-         ti->second.GetType() != cmState::STATIC_LIBRARY &&
-         ti->second.GetType() != cmState::SHARED_LIBRARY &&
-         ti->second.GetType() != cmState::MODULE_LIBRARY &&
-         ti->second.GetType() != cmState::OBJECT_LIBRARY)
+      if((*ti)->GetType() != cmState::EXECUTABLE &&
+         (*ti)->GetType() != cmState::STATIC_LIBRARY &&
+         (*ti)->GetType() != cmState::SHARED_LIBRARY &&
+         (*ti)->GetType() != cmState::MODULE_LIBRARY &&
+         (*ti)->GetType() != cmState::OBJECT_LIBRARY)
         {
         continue;
         }
-      if((!ti->second.GetPropertyAsBool("AUTOMOC")
-            && !ti->second.GetPropertyAsBool("AUTOUIC")
-            && !ti->second.GetPropertyAsBool("AUTORCC"))
-          || ti->second.IsImported())
+      if((!(*ti)->GetPropertyAsBool("AUTOMOC")
+            && !(*ti)->GetPropertyAsBool("AUTOUIC")
+            && !(*ti)->GetPropertyAsBool("AUTORCC"))
+          || (*ti)->IsImported())
         {
         continue;
         }
       // don't do anything if there is no Qt4 or Qt5Core (which contains moc):
-      cmMakefile* mf = ti->second.GetMakefile();
+      cmMakefile* mf = (*ti)->Target->GetMakefile();
       std::string qtMajorVersion = mf->GetSafeDefinition("QT_VERSION_MAJOR");
       if (qtMajorVersion == "")
         {
@@ -1494,7 +1506,7 @@ cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
         continue;
         }
 
-      cmGeneratorTarget* gt = this->GetGeneratorTarget(&ti->second);
+      cmGeneratorTarget* gt = *ti;
 
       cmQtAutoGeneratorInitializer::InitializeAutogenSources(gt);
       filteredTargets.push_back(gt);
@@ -1584,7 +1596,7 @@ void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes,
       cmTarget* t = &ti->second;
       cmGeneratorTarget* gt = new cmGeneratorTarget(t, lg);
       this->GeneratorTargets[t] = gt;
-      lg->AddGeneratorTarget(t, gt);
+      lg->AddGeneratorTarget(gt);
       }
     }
 
@@ -2694,23 +2706,22 @@ void cmGlobalGenerator::GetTargetSets(TargetDependSet& projectTargets,
       {
       continue;
       }
-    cmMakefile* mf = (*i)->GetMakefile();
     // Get the targets in the makefile
-    cmTargets &tgts = mf->GetTargets();
+    std::vector<cmGeneratorTarget*> tgts = (*i)->GetGeneratorTargets();
     // loop over all the targets
-    for (cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
+    for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
+         l != tgts.end(); ++l)
       {
-      cmTarget* target = &l->second;
-      cmGeneratorTarget* gt = this->GetGeneratorTarget(target);
-      if(this->IsRootOnlyTarget(gt) &&
-         target->GetMakefile() != root->GetMakefile())
+      cmGeneratorTarget* target = *l;
+      if(this->IsRootOnlyTarget(target) &&
+         target->GetLocalGenerator() != root)
         {
         continue;
         }
       // put the target in the set of original targets
-      originalTargets.insert(gt);
+      originalTargets.insert(target);
       // Get the set of targets that depend on target
-      this->AddTargetDepends(gt, projectTargets);
+      this->AddTargetDepends(target, projectTargets);
       }
     }
 }

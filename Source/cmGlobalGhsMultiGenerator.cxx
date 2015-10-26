@@ -287,8 +287,8 @@ void cmGlobalGhsMultiGenerator::Generate()
       {
       cmLocalGhsMultiGenerator *lg =
         static_cast<cmLocalGhsMultiGenerator *>(this->LocalGenerators[i]);
-      cmGeneratorTargetsType tgts = lg->GetGeneratorTargets();
-      this->UpdateBuildFiles(&tgts);
+      std::vector<cmGeneratorTarget*> tgts = lg->GetGeneratorTargets();
+      this->UpdateBuildFiles(tgts);
       }
     }
 
@@ -481,15 +481,15 @@ cmGlobalGhsMultiGenerator::GetFileNameFromPath(std::string const &path)
 }
 
 void cmGlobalGhsMultiGenerator::UpdateBuildFiles(
-  cmGeneratorTargetsType *tgts)
+  std::vector<cmGeneratorTarget*> tgts)
 {
-  for (cmGeneratorTargetsType::iterator tgtsI = tgts->begin();
-       tgtsI != tgts->end(); ++tgtsI)
+  for (std::vector<cmGeneratorTarget*>::iterator tgtsI = tgts.begin();
+       tgtsI != tgts.end(); ++tgtsI)
     {
-    const cmTarget *tgt(tgtsI->first);
+    const cmGeneratorTarget *tgt = *tgtsI;
     if (IsTgtForBuild(tgt))
       {
-      char const *rawFolderName = tgtsI->first->GetProperty("FOLDER");
+      char const *rawFolderName = tgt->GetProperty("FOLDER");
       if (NULL == rawFolderName)
         {
         rawFolderName = "";
@@ -510,19 +510,18 @@ void cmGlobalGhsMultiGenerator::UpdateBuildFiles(
       *this->TargetFolderBuildStreams[folderName] << foldNameRelBuildFile
                                                   << " ";
       GhsMultiGpj::WriteGpjTag(cmGhsMultiTargetGenerator::GetGpjTag(
-                                 tgtsI->second),
+                                 tgt),
                                this->TargetFolderBuildStreams[folderName]);
       }
     }
 }
 
-bool cmGlobalGhsMultiGenerator::IsTgtForBuild(const cmTarget *tgt)
+bool cmGlobalGhsMultiGenerator::IsTgtForBuild(const cmGeneratorTarget *tgt)
 {
   const std::string config =
-    tgt->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
+    tgt->Target->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
   std::vector<cmSourceFile *> tgtSources;
-  cmGeneratorTarget* gt = this->GetGeneratorTarget(tgt);
-  gt->GetSourceFiles(tgtSources, config);
+  tgt->GetSourceFiles(tgtSources, config);
   bool tgtInBuild = true;
   char const *excludeFromAll = tgt->GetProperty("EXCLUDE_FROM_ALL");
   if (NULL != excludeFromAll && '1' == excludeFromAll[0] &&

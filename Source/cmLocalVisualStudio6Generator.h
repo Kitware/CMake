@@ -14,7 +14,6 @@
 
 #include "cmLocalVisualStudioGenerator.h"
 
-class cmTarget;
 class cmSourceFile;
 class cmSourceGroup;
 class cmCustomCommand;
@@ -47,50 +46,52 @@ public:
   /**
    * Specify the type of the build: static, dll, or executable.
    */
-  void SetBuildType(BuildType, const std::string& libName, cmTarget&);
+  void SetBuildType(BuildType, const std::string& libName, cmGeneratorTarget*);
 
   virtual
   std::string GetTargetDirectory(cmGeneratorTarget const* target) const;
-  virtual std::string ComputeLongestObjectDirectory(cmTarget&) const;
+  virtual std::string
+  ComputeLongestObjectDirectory(cmGeneratorTarget const*) const;
 private:
   std::string DSPHeaderTemplate;
   std::string DSPFooterTemplate;
 
-  void CreateSingleDSP(const std::string& lname, cmTarget &tgt);
+  void CreateSingleDSP(const std::string& lname, cmGeneratorTarget* tgt);
   void WriteDSPFile(std::ostream& fout, const std::string& libName,
-                    cmTarget &tgt);
+                    cmGeneratorTarget* tgt);
   void WriteDSPBeginGroup(std::ostream& fout,
                           const char* group,
                           const char* filter);
   void WriteDSPEndGroup(std::ostream& fout);
 
   void WriteDSPHeader(std::ostream& fout, const std::string& libName,
-                      cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
+                      cmGeneratorTarget* tgt, std::vector<cmSourceGroup> &sgs);
 
   void WriteDSPFooter(std::ostream& fout);
-  void AddDSPBuildRule(cmTarget& tgt);
+  void AddDSPBuildRule(cmGeneratorTarget* tgt);
   void WriteCustomRule(std::ostream& fout,
                        const char* source,
                        const cmCustomCommand& command,
                        const char* flags);
-  void AddUtilityCommandHack(cmTarget& target, int count,
+  void AddUtilityCommandHack(cmGeneratorTarget* target, int count,
                              std::vector<std::string>& depends,
                              const cmCustomCommand& origCommand);
-  void WriteGroup(const cmSourceGroup *sg, cmTarget& target,
+  void WriteGroup(const cmSourceGroup *sg, cmGeneratorTarget* target,
                   std::ostream &fout, const std::string& libName);
   class EventWriter;
   friend class EventWriter;
   cmsys::auto_ptr<cmCustomCommand>
-  MaybeCreateOutputDir(cmTarget& target, const std::string& config);
-  std::string CreateTargetRules(cmTarget &target,
+  MaybeCreateOutputDir(cmGeneratorTarget *target, const std::string& config);
+  std::string CreateTargetRules(cmGeneratorTarget* target,
                                 const std::string& configName,
                                 const std::string& libName);
-  void ComputeLinkOptions(cmTarget& target, const std::string& configName,
+  void ComputeLinkOptions(cmGeneratorTarget* target,
+                          const std::string& configName,
                           const std::string extraOptions,
                           std::string& options);
-  void OutputObjects(cmTarget& target, const char* tool,
+  void OutputObjects(cmGeneratorTarget* target, const char* tool,
                      std::string& options);
-  std::string GetTargetIncludeOptions(cmTarget &target,
+  std::string GetTargetIncludeOptions(cmGeneratorTarget* target,
                                       const std::string& config);
   std::vector<std::string> Configurations;
 

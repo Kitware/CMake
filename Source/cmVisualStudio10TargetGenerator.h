@@ -13,7 +13,6 @@
 #define cmVisualStudioTargetGenerator_h
 #include "cmStandardIncludes.h"
 
-class cmTarget;
 class cmMakefile;
 class cmGeneratorTarget;
 class cmGeneratedFileStream;
@@ -29,7 +28,7 @@ struct cmIDEFlagTable;
 class cmVisualStudio10TargetGenerator
 {
 public:
-  cmVisualStudio10TargetGenerator(cmTarget* target,
+  cmVisualStudio10TargetGenerator(cmGeneratorTarget* target,
                                   cmGlobalVisualStudio10Generator* gg);
   ~cmVisualStudio10TargetGenerator();
   void Generate();
@@ -148,7 +147,6 @@ private:
   OptionsMap LinkOptions;
   std::string PathToVcxproj;
   std::vector<std::string> Configurations;
-  cmTarget* Target;
   cmGeneratorTarget* GeneratorTarget;
   cmMakefile* Makefile;
   std::string Platform;

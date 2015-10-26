@@ -456,13 +456,13 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
 
   if (cge->GetHadContextSensitiveCondition())
     {
-    cmMakefile* mf = target->Target->GetMakefile();
+    cmLocalGenerator* lg = target->GetLocalGenerator();
     std::ostringstream e;
     e << "Target \"" << target->GetName() << "\" is installed with "
     "INCLUDES DESTINATION set to a context sensitive path.  Paths which "
     "depend on the configuration, policy values or the link interface are "
     "not supported.  Consider using target_include_directories instead.";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    lg->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
     }
 
@@ -535,11 +535,11 @@ void getCompatibleInterfaceProperties(cmGeneratorTarget *target,
 
   if (!info)
     {
-    cmMakefile* mf = target->Target->GetMakefile();
+    cmLocalGenerator* lg = target->GetLocalGenerator();
     std::ostringstream e;
     e << "Exporting the target \"" << target->GetName() << "\" is not "
         "allowed since its linker language cannot be determined";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    lg->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
     }
 
@@ -835,13 +835,13 @@ cmExportFileGenerator
 
   if(newCMP0022Behavior && !this->ExportOld)
     {
-    cmMakefile *mf = target->Target->GetMakefile();
+    cmLocalGenerator *lg = target->GetLocalGenerator();
     std::ostringstream e;
     e << "Target \"" << target->GetName() << "\" has policy CMP0022 enabled, "
          "but also has old-style LINK_INTERFACE_LIBRARIES properties "
          "populated, but it was exported without the "
          "EXPORT_LINK_INTERFACE_LIBRARIES to export the old-style properties";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    lg->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
     }
 

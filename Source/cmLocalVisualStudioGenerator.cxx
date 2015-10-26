@@ -43,7 +43,7 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
                         std::map<cmSourceFile const*, std::string>& mapping,
                         cmGeneratorTarget const* gt)
 {
-  std::string dir_max = this->ComputeLongestObjectDirectory(*gt->Target);
+  std::string dir_max = this->ComputeLongestObjectDirectory(gt);
 
   // Count the number of object files with each name.  Note that
   // windows file names are not case sensitive.
@@ -80,7 +80,7 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
 
 //----------------------------------------------------------------------------
 cmsys::auto_ptr<cmCustomCommand>
-cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmTarget& target,
+cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmGeneratorTarget* target,
                                                    const std::string& config,
                                                    bool isFortran)
 {
@@ -89,13 +89,11 @@ cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmTarget& target,
   // If an executable exports symbols then VS wants to create an
   // import library but forgets to create the output directory.
   // The Intel Fortran plugin always forgets to the directory.
-  if(target.GetType() != cmState::EXECUTABLE &&
-     !(isFortran && target.GetType() == cmState::SHARED_LIBRARY))
+  if(target->GetType() != cmState::EXECUTABLE &&
+     !(isFortran && target->GetType() == cmState::SHARED_LIBRARY))
     { return pcc; }
-  cmGeneratorTarget* gt =
-      this->GetGlobalGenerator()->GetGeneratorTarget(&target);
-  std::string outDir = gt->GetDirectory(config, false);
-  std::string impDir = gt->GetDirectory(config, true);
+  std::string outDir = target->GetDirectory(config, false);
+  std::string impDir = target->GetDirectory(config, true);
   if(impDir == outDir) { return pcc; }
 
   // Add a pre-build event to create the directory.

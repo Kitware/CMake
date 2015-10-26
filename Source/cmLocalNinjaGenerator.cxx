@@ -73,23 +73,23 @@ void cmLocalNinjaGenerator::Generate()
       }
     }
 
-  cmGeneratorTargetsType targets = this->GetGeneratorTargets();
-  for(cmGeneratorTargetsType::iterator t = targets.begin();
+  std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
+  for(std::vector<cmGeneratorTarget*>::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-    if (t->second->GetType() == cmState::INTERFACE_LIBRARY)
+    if ((*t)->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
-    cmNinjaTargetGenerator* tg = cmNinjaTargetGenerator::New(t->second);
+    cmNinjaTargetGenerator* tg = cmNinjaTargetGenerator::New(*t);
     if(tg)
       {
       tg->Generate();
       // Add the target to "all" if required.
       if (!this->GetGlobalNinjaGenerator()->IsExcluded(
             this->GetGlobalNinjaGenerator()->GetLocalGenerators()[0],
-            t->second))
-        this->GetGlobalNinjaGenerator()->AddDependencyToAll(t->second->Target);
+            *t))
+        this->GetGlobalNinjaGenerator()->AddDependencyToAll(*t);
       delete tg;
       }
     }
@@ -285,14 +285,14 @@ void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
 
 void
 cmLocalNinjaGenerator
-::AppendTargetOutputs(cmTarget* target, cmNinjaDeps& outputs)
+::AppendTargetOutputs(cmGeneratorTarget* target, cmNinjaDeps& outputs)
 {
   this->GetGlobalNinjaGenerator()->AppendTargetOutputs(target, outputs);
 }
 
 void
 cmLocalNinjaGenerator
-::AppendTargetDepends(cmTarget* target, cmNinjaDeps& outputs)
+::AppendTargetDepends(cmGeneratorTarget* target, cmNinjaDeps& outputs)
 {
   this->GetGlobalNinjaGenerator()->AppendTargetDepends(target, outputs);
 }
@@ -441,7 +441,7 @@ cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
 }
 
 void cmLocalNinjaGenerator::AddCustomCommandTarget(cmCustomCommand const* cc,
-                                                   cmTarget* target)
+                                                   cmGeneratorTarget* target)
 {
   this->CustomCommandTargets[cc].insert(target);
 }
@@ -459,7 +459,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements()
     //
     // FIXME: This won't work in certain obscure scenarios involving indirect
     // dependencies.
-    std::set<cmTarget*>::iterator j = i->second.begin();
+    std::set<cmGeneratorTarget*>::iterator j = i->second.begin();
     assert(j != i->second.end());
     std::vector<std::string> ccTargetDeps;
     this->AppendTargetDepends(*j, ccTargetDeps);

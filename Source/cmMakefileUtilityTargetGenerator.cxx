@@ -16,7 +16,6 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-#include "cmTarget.h"
 
 //----------------------------------------------------------------------------
 cmMakefileUtilityTargetGenerator
@@ -68,19 +67,21 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
 
   // Utility targets store their rules in pre- and post-build commands.
   this->LocalGenerator->AppendCustomDepends
-    (depends, this->Target->GetPreBuildCommands());
+    (depends, this->GeneratorTarget->Target->GetPreBuildCommands());
 
   this->LocalGenerator->AppendCustomDepends
-    (depends, this->Target->GetPostBuildCommands());
+    (depends, this->GeneratorTarget->Target->GetPostBuildCommands());
 
   this->LocalGenerator->AppendCustomCommands
-    (commands, this->Target->GetPreBuildCommands(), this->GeneratorTarget);
+    (commands, this->GeneratorTarget->Target->GetPreBuildCommands(),
+     this->GeneratorTarget);
 
   // Depend on all custom command outputs for sources
   this->DriveCustomCommands(depends);
 
   this->LocalGenerator->AppendCustomCommands
-    (commands, this->Target->GetPostBuildCommands(), this->GeneratorTarget);
+    (commands, this->GeneratorTarget->Target->GetPostBuildCommands(),
+     this->GeneratorTarget);
 
   // Add dependencies on targets that must be built first.
   this->AppendTargetDepends(depends);

@@ -152,7 +152,7 @@ void
 cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
                                               const std::string& dspname,
                                               const char* dir,
-                                              cmTarget const& t)
+                                              cmGeneratorTarget const* t)
 {
   // check to see if this is a fortran build
   const char* ext = ".vcproj";
@@ -163,7 +163,7 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
     ext = ".vfproj";
     project = "Project(\"{6989167D-11E4-40FE-8C1A-2192A86A7E90}\") = \"";
     }
-  const char* targetExt = t.GetProperty("GENERATOR_FILE_NAME_EXT");
+  const char* targetExt = t->GetProperty("GENERATOR_FILE_NAME_EXT");
   if(targetExt)
     {
     ext = targetExt;
@@ -180,7 +180,7 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
 
   fout <<"EndProject\n";
 
-  UtilityDependsMap::iterator ui = this->UtilityDepends.find(&t);
+  UtilityDependsMap::iterator ui = this->UtilityDepends.find(t);
   if(ui != this->UtilityDepends.end())
     {
     const char* uname = ui->second.c_str();
@@ -204,9 +204,9 @@ void
 cmGlobalVisualStudio71Generator
 ::WriteProjectDepends(std::ostream& fout,
                       const std::string&,
-                      const char*, cmTarget const& target)
+                      const char*, cmGeneratorTarget const* target)
 {
-  VSDependSet const& depends = this->VSTargetDepends[&target];
+  VSDependSet const& depends = this->VSTargetDepends[target];
   for(VSDependSet::const_iterator di = depends.begin();
       di != depends.end(); ++di)
     {
@@ -215,7 +215,7 @@ cmGlobalVisualStudio71Generator
     if(guid.empty())
       {
       std::string m = "Target: ";
-      m += target.GetName();
+      m += target->GetName();
       m += " depends on unknown target: ";
       m += name;
       cmSystemTools::Error(m.c_str());

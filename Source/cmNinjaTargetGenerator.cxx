@@ -486,7 +486,8 @@ cmNinjaTargetGenerator
       si != customCommands.end(); ++si)
      {
      cmCustomCommand const* cc = (*si)->GetCustomCommand();
-     this->GetLocalGenerator()->AddCustomCommandTarget(cc, this->GetTarget());
+     this->GetLocalGenerator()->AddCustomCommandTarget(cc,
+         this->GetGeneratorTarget());
      // Record the custom commands for this target. The container is used
      // in WriteObjectBuildStatement when called in a loop below.
      this->CustomCommands.push_back(cc);
@@ -511,7 +512,8 @@ cmNinjaTargetGenerator
     }
 
   cmNinjaDeps orderOnlyDeps;
-  this->GetLocalGenerator()->AppendTargetDepends(this->Target, orderOnlyDeps);
+  this->GetLocalGenerator()->AppendTargetDepends(this->GeneratorTarget,
+                                                 orderOnlyDeps);
 
   // Add order-only dependencies on custom command outputs.
   for(std::vector<cmCustomCommand const*>::const_iterator
@@ -633,7 +635,8 @@ cmNinjaTargetGenerator
                               ConvertToNinjaPath(objectFileDir),
                               cmLocalGenerator::SHELL);
 
-  this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetTarget(), vars);
+  this->addPoolNinjaVariable("JOB_POOL_COMPILE",
+                             this->GetGeneratorTarget(), vars);
 
   this->SetMsvcTargetPdbVariable(vars);
 
@@ -782,7 +785,7 @@ cmNinjaTargetGenerator::MacOSXContentGeneratorType::operator()(
 
 void cmNinjaTargetGenerator::addPoolNinjaVariable(
                                               const std::string& pool_property,
-                                              cmTarget* target,
+                                              cmGeneratorTarget* target,
                                               cmNinjaVars& vars)
 {
     const char* pool = target->GetProperty(pool_property);

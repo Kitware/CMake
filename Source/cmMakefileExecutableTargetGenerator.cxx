@@ -16,7 +16,6 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-#include "cmTarget.h"
 #include "cmake.h"
 
 //----------------------------------------------------------------------------
@@ -279,11 +278,13 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   if(!relink)
     {
     this->LocalGenerator
-      ->AppendCustomCommands(commands, this->Target->GetPreBuildCommands(),
-                             this->GeneratorTarget);
+      ->AppendCustomCommands(commands,
+                        this->GeneratorTarget->Target->GetPreBuildCommands(),
+                        this->GeneratorTarget);
     this->LocalGenerator
-      ->AppendCustomCommands(commands, this->Target->GetPreLinkCommands(),
-                             this->GeneratorTarget);
+      ->AppendCustomCommands(commands,
+                        this->GeneratorTarget->Target->GetPreLinkCommands(),
+                        this->GeneratorTarget);
     }
 
   // Determine whether a link script will be used.
@@ -448,8 +449,9 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   if(!relink)
     {
     this->LocalGenerator->
-      AppendCustomCommands(commands, this->Target->GetPostBuildCommands(),
-                           this->GeneratorTarget);
+      AppendCustomCommands(commands,
+                       this->GeneratorTarget->Target->GetPostBuildCommands(),
+                       this->GeneratorTarget);
     }
 
   // Write the build rule.

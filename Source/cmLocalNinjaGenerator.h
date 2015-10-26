@@ -58,10 +58,11 @@ public:
 
   std::string BuildCommandLine(const std::vector<std::string> &cmdLines);
 
-  void AppendTargetOutputs(cmTarget* target, cmNinjaDeps& outputs);
-  void AppendTargetDepends(cmTarget* target, cmNinjaDeps& outputs);
+  void AppendTargetOutputs(cmGeneratorTarget* target, cmNinjaDeps& outputs);
+  void AppendTargetDepends(cmGeneratorTarget* target, cmNinjaDeps& outputs);
 
-  void AddCustomCommandTarget(cmCustomCommand const* cc, cmTarget* target);
+  void AddCustomCommandTarget(cmCustomCommand const* cc,
+                              cmGeneratorTarget* target);
   void AppendCustomCommandLines(cmCustomCommandGenerator const& ccg,
                                 std::vector<std::string> &cmdLines);
   void AppendCustomCommandDeps(cmCustomCommandGenerator const& ccg,
@@ -102,7 +103,7 @@ private:
 
   std::string HomeRelativeOutputPath;
 
-  typedef std::map<cmCustomCommand const*, std::set<cmTarget*> >
+  typedef std::map<cmCustomCommand const*, std::set<cmGeneratorTarget*> >
     CustomCommandTargetMap;
   CustomCommandTargetMap CustomCommandTargets;
 };

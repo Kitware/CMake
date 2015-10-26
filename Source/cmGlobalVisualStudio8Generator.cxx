@@ -256,7 +256,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
                           noCommandLines);
 
   cmGeneratorTarget* gt = new cmGeneratorTarget(tgt, lg);
-  lg->AddGeneratorTarget(tgt, gt);
+  lg->AddGeneratorTarget(gt);
   this->AddGeneratorTarget(tgt, gt);
 
   // Organize in the "predefined targets" folder:
@@ -441,9 +441,9 @@ bool cmGlobalVisualStudio8Generator::ComputeTargetDepends()
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator::WriteProjectDepends(
-  std::ostream& fout, const std::string&, const char*, cmTarget const& t)
+  std::ostream& fout, const std::string&, const char*,
+        cmGeneratorTarget const* gt)
 {
-  cmGeneratorTarget* gt = this->GetGeneratorTarget(&t);
   TargetDependSet const& unordered = this->GetTargetDirectDepends(gt);
   OrderedTargetDependSet depends(unordered, std::string());
   for(OrderedTargetDependSet::const_iterator i = depends.begin();
@@ -460,14 +460,15 @@ void cmGlobalVisualStudio8Generator::WriteProjectDepends(
 
 //----------------------------------------------------------------------------
 bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
-  cmTarget& target)
+        cmGeneratorTarget *target)
 {
   // Look for utility dependencies that magically link.
   for(std::set<std::string>::const_iterator ui =
-        target.GetUtilities().begin();
-      ui != target.GetUtilities().end(); ++ui)
+        target->Target->GetUtilities().begin();
+      ui != target->Target->GetUtilities().end(); ++ui)
     {
-    if(cmTarget* depTarget = this->FindTarget(ui->c_str()))
+    if(cmGeneratorTarget* depTarget =
+        target->GetLocalGenerator()->FindGeneratorTargetToUse(ui->c_str()))
       {
       if(depTarget->GetType() != cmState::INTERFACE_LIBRARY
           && depTarget->GetProperty("EXTERNAL_MSPROJECT"))

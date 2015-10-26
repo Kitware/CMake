@@ -13,7 +13,6 @@
 #include "cmVisualStudio10TargetGenerator.h"
 #include "cmGlobalVisualStudio10Generator.h"
 #include "cmGeneratorTarget.h"
-#include "cmTarget.h"
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
@@ -167,13 +166,12 @@ static std::string cmVS10EscapeComment(std::string comment)
 }
 
 cmVisualStudio10TargetGenerator::
-cmVisualStudio10TargetGenerator(cmTarget* target,
+cmVisualStudio10TargetGenerator(cmGeneratorTarget* target,
                                 cmGlobalVisualStudio10Generator* gg)
 {
   this->GlobalGenerator = gg;
-  this->Target = target;
-  this->GeneratorTarget = gg->GetGeneratorTarget(target);
-  this->Makefile = target->GetMakefile();
+  this->GeneratorTarget = target;
+  this->Makefile = target->Target->GetMakefile();
   this->Makefile->GetConfigurations(this->Configurations);
   this->LocalGenerator =
     (cmLocalVisualStudio7Generator*)
@@ -275,8 +273,9 @@ void cmVisualStudio10TargetGenerator::Generate()
     return;
     }
   // Tell the global generator the name of the project file
-  this->Target->SetProperty("GENERATOR_FILE_NAME",this->Name.c_str());
-  this->Target->SetProperty("GENERATOR_FILE_NAME_EXT",
+  this->GeneratorTarget->Target
+      ->SetProperty("GENERATOR_FILE_NAME",this->Name.c_str());
+  this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME_EXT",
                             ".vcxproj");
   if(this->GeneratorTarget->GetType() <= cmState::OBJECT_LIBRARY)
     {
@@ -732,7 +731,8 @@ void cmVisualStudio10TargetGenerator
   cmGlobalVisualStudio10Generator* gg =
     static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
   const char* mfcFlag =
-    this->Target->GetMakefile()->GetDefinition("CMAKE_MFC_FLAG");
+    this->GeneratorTarget->
+      Target->GetMakefile()->GetDefinition("CMAKE_MFC_FLAG");
   std::string mfcFlagValue = mfcFlag ? mfcFlag : "0";
 
   std::string useOfMfcValue = "false";
@@ -1462,7 +1462,8 @@ void cmVisualStudio10TargetGenerator::WriteSource(
       }
     else
       {
-      this->GlobalGenerator->PathTooLong(this->Target, sf, sourceRel);
+      this->GlobalGenerator->PathTooLong(this->GeneratorTarget,
+                                         sf, sourceRel);
       }
     }
   this->ConvertToWindowsSlash(sourceFile);
@@ -1915,12 +1916,12 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     std::string baseFlagVar = "CMAKE_";
     baseFlagVar += linkLanguage;
     baseFlagVar += "_FLAGS";
-    flags = this->
+    flags = this->GeneratorTarget->
       Target->GetMakefile()->GetRequiredDefinition(baseFlagVar.c_str());
     std::string flagVar = baseFlagVar + std::string("_") +
       cmSystemTools::UpperCase(configName);
     flags += " ";
-    flags += this->
+    flags += this->GeneratorTarget->
       Target->GetMakefile()->GetRequiredDefinition(flagVar.c_str());
     }
   // set the correct language
@@ -1936,7 +1937,8 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
                                           linkLanguage, configName.c_str());
 
   // Get preprocessor definitions for this directory.
-  std::string defineFlags = this->Target->GetMakefile()->GetDefineFlags();
+  std::string defineFlags =
+      this->GeneratorTarget->Target->GetMakefile()->GetDefineFlags();
   if(this->MSTools)
     {
     clOptions.FixExceptionHandlingDefault();
@@ -2440,11 +2442,11 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   linkFlagVarBase += linkType;
   linkFlagVarBase += "_LINKER_FLAGS";
   flags += " ";
-  flags += this->
+  flags += this->GeneratorTarget->
     Target->GetMakefile()->GetRequiredDefinition(linkFlagVarBase.c_str());
   std::string linkFlagVar = linkFlagVarBase + "_" + CONFIG;
   flags += " ";
-  flags += this->
+  flags += this->GeneratorTarget->
     Target->GetMakefile()->GetRequiredDefinition(linkFlagVar.c_str());
   const char* targetLinkFlags =
       this->GeneratorTarget->GetProperty("LINK_FLAGS");
@@ -2674,7 +2676,8 @@ cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const& config)
   linkOptions.OutputFlagMap(*this->BuildFileStream, "      ");
 
   this->WriteString("</Link>\n", 2);
-  if(!this->GlobalGenerator->NeedLinkLibraryDependencies(*this->Target))
+  if(!this->GlobalGenerator->NeedLinkLibraryDependencies(
+              this->GeneratorTarget))
     {
     this->WriteString("<ProjectReference>\n", 2);
     this->WriteString(
@@ -2811,7 +2814,7 @@ cmVisualStudio10TargetGenerator::WriteEvents(std::string const& configName)
       {
       addedPrelink = true;
       std::vector<cmCustomCommand> commands =
-        this->Target->GetPreLinkCommands();
+        this->GeneratorTarget->Target->GetPreLinkCommands();
       this->GlobalGenerator->AddSymbolExportCommand(
         this->GeneratorTarget, commands, configName);
       this->WriteEvent("PreLinkEvent", commands, configName);
@@ -2820,12 +2823,12 @@ cmVisualStudio10TargetGenerator::WriteEvents(std::string const& configName)
   if (!addedPrelink)
     {
     this->WriteEvent("PreLinkEvent",
-                     this->Target->GetPreLinkCommands(), configName);
+        this->GeneratorTarget->Target->GetPreLinkCommands(), configName);
     }
   this->WriteEvent("PreBuildEvent",
-                   this->Target->GetPreBuildCommands(), configName);
+        this->GeneratorTarget->Target->GetPreBuildCommands(), configName);
   this->WriteEvent("PostBuildEvent",
-                   this->Target->GetPostBuildCommands(), configName);
+        this->GeneratorTarget->Target->GetPostBuildCommands(), configName);
 }
 
 void cmVisualStudio10TargetGenerator::WriteEvent(
@@ -2875,7 +2878,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
   for( OrderedTargetDependSet::const_iterator i = depends.begin();
        i != depends.end(); ++i)
     {
-    cmTarget const* dt = (*i)->Target;
+    cmGeneratorTarget const* dt = *i;
     if(dt->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
@@ -2883,12 +2886,12 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
     // skip fortran targets as they can not be processed by MSBuild
     // the only reference will be in the .sln file
     if(static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
-       ->TargetIsFortranOnly(*dt))
+       ->TargetIsFortranOnly(dt))
       {
       continue;
       }
     this->WriteString("<ProjectReference Include=\"", 2);
-    cmMakefile* mf = dt->GetMakefile();
+    cmLocalGenerator* lg = dt->GetLocalGenerator();
     std::string name = dt->GetName();
     std::string path;
     const char* p = dt->GetProperty("EXTERNAL_MSPROJECT");
@@ -2898,7 +2901,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
       }
     else
       {
-      path =  mf->GetCurrentBinaryDirectory();
+      path =  lg->GetCurrentBinaryDirectory();
       path += "/";
       path += dt->GetName();
       path += ".vcxproj";

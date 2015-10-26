@@ -155,12 +155,12 @@ void cmExtraCodeLiteGenerator
        lg!=lgs.end(); lg++)
     {
     cmMakefile* makefile=(*lg)->GetMakefile();
-    cmTargets& targets=makefile->GetTargets();
-    for (cmTargets::iterator ti = targets.begin();
+    std::vector<cmGeneratorTarget*> targets=(*lg)->GetGeneratorTargets();
+    for (std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
          ti != targets.end(); ti++)
       {
 
-      switch(ti->second.GetType())
+      switch((*ti)->GetType())
         {
         case cmState::EXECUTABLE:
           {
@@ -186,7 +186,7 @@ void cmExtraCodeLiteGenerator
           break;
         }
 
-      switch(ti->second.GetType())
+      switch((*ti)->GetType())
         {
         case cmState::EXECUTABLE:
         case cmState::STATIC_LIBRARY:
@@ -194,8 +194,7 @@ void cmExtraCodeLiteGenerator
         case cmState::MODULE_LIBRARY:
           {
           std::vector<cmSourceFile*> sources;
-          cmGeneratorTarget* gt =
-              this->GlobalGenerator->GetGeneratorTarget(&ti->second);
+          cmGeneratorTarget* gt = *ti;
           gt->GetSourceFiles(sources,
                             makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
           for (std::vector<cmSourceFile*>::const_iterator si=sources.begin();

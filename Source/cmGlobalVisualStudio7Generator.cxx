@@ -441,7 +441,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
   for(OrderedTargetDependSet::const_iterator tt =
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
-    cmTarget const* target = (*tt)->Target;
+    cmGeneratorTarget const* target = *tt;
     if(target->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
@@ -459,7 +459,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
                                  project.c_str(),
                                  location.c_str(),
                                  target->GetProperty("VS_PROJECT_TYPE"),
-                                 target->GetUtilities());
+                                 target->Target->GetUtilities());
       written = true;
       }
     else
@@ -468,9 +468,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
         target->GetProperty("GENERATOR_FILE_NAME");
       if(vcprojName)
         {
-        cmLocalGenerator* lg =
-            root->GetGlobalGenerator()->GetGeneratorTarget(target)
-            ->GetLocalGenerator();
+        cmLocalGenerator* lg = target->GetLocalGenerator();
         std::string dir = lg->GetCurrentBinaryDirectory();
         dir = root->Convert(dir.c_str(),
                             cmLocalGenerator::START_OUTPUT);
@@ -479,7 +477,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
           dir = ""; // msbuild cannot handle ".\" prefix
           }
         this->WriteProject(fout, vcprojName, dir.c_str(),
-                           *target);
+                           target);
         written = true;
         }
       }
@@ -535,19 +533,19 @@ void cmGlobalVisualStudio7Generator::WriteTargetDepends(
   for(OrderedTargetDependSet::const_iterator tt =
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
-    cmTarget const* target = (*tt)->Target;
+    cmGeneratorTarget const* target = *tt;
     if(target->GetType() == cmState::INTERFACE_LIBRARY)
       {
       continue;
       }
-    cmMakefile* mf = target->GetMakefile();
     const char *vcprojName =
       target->GetProperty("GENERATOR_FILE_NAME");
     if (vcprojName)
       {
-      std::string dir = mf->GetCurrentSourceDirectory();
+      std::string dir = target->GetLocalGenerator()
+              ->GetCurrentSourceDirectory();
       this->WriteProjectDepends(fout, vcprojName,
-                                dir.c_str(), *target);
+                                dir.c_str(), target);
       }
     }
 }
@@ -687,7 +685,8 @@ cmGlobalVisualStudio7Generator::ConvertToSolutionPath(const char* path)
 // the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
                                const std::string& dspname,
-                               const char* dir, cmTarget const& target)
+                               const char* dir,
+                               cmGeneratorTarget const* target)
 {
    // check to see if this is a fortran build
   const char* ext = ".vcproj";
@@ -705,7 +704,7 @@ void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
        << dspname << ext << "\", \"{"
        << this->GetGUID(dspname) << "}\"\nEndProject\n";
 
-  UtilityDependsMap::iterator ui = this->UtilityDepends.find(&target);
+  UtilityDependsMap::iterator ui = this->UtilityDepends.find(target);
   if(ui != this->UtilityDepends.end())
     {
     const char* uname = ui->second.c_str();
@@ -727,11 +726,11 @@ void
 cmGlobalVisualStudio7Generator
 ::WriteProjectDepends(std::ostream& fout,
                       const std::string& dspname,
-                      const char*, cmTarget const& target)
+                      const char*, cmGeneratorTarget const* target)
 {
   int depcount = 0;
   std::string dspguid = this->GetGUID(dspname);
-  VSDependSet const& depends = this->VSTargetDepends[&target];
+  VSDependSet const& depends = this->VSTargetDepends[target];
   for(VSDependSet::const_iterator di = depends.begin();
       di != depends.end(); ++di)
     {
@@ -740,7 +739,7 @@ cmGlobalVisualStudio7Generator
     if(guid.empty())
       {
       std::string m = "Target: ";
-      m += target.GetName();
+      m += target->GetName();
       m += " depends on unknown target: ";
       m += name;
       cmSystemTools::Error(m.c_str());
@@ -749,7 +748,7 @@ cmGlobalVisualStudio7Generator
     depcount++;
     }
 
-  UtilityDependsMap::iterator ui = this->UtilityDepends.find(&target);
+  UtilityDependsMap::iterator ui = this->UtilityDepends.find(target);
   if(ui != this->UtilityDepends.end())
     {
     const char* uname = ui->second.c_str();
@@ -889,13 +888,14 @@ void cmGlobalVisualStudio7Generator::WriteSLNHeader(std::ostream& fout)
 
 //----------------------------------------------------------------------------
 std::string
-cmGlobalVisualStudio7Generator::WriteUtilityDepend(cmTarget const* target)
+cmGlobalVisualStudio7Generator::WriteUtilityDepend(
+        cmGeneratorTarget const* target)
 {
   std::vector<std::string> configs;
-  target->GetMakefile()->GetConfigurations(configs);
+  target->Target->GetMakefile()->GetConfigurations(configs);
   std::string pname = target->GetName();
   pname += "_UTILITY";
-  std::string fname = target->GetMakefile()->GetCurrentBinaryDirectory();
+  std::string fname = target->GetLocalGenerator()->GetCurrentBinaryDirectory();
   fname += "/";
   fname += pname;
   fname += ".vcproj";
