@@ -570,7 +570,7 @@ int cmCPackDebGenerator::createDeb()
       return 0;
       }
     cmArchiveWrite control_tar(fileStream_control_tar,
-                               tar_compression_type,
+                               cmArchiveWrite::CompressGZip,
                                "paxr");
 
     // sets permissions and uid/gid for the files
