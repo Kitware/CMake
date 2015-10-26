@@ -1766,6 +1766,18 @@ const char* cmMakefile::GetCurrentBinaryDirectory() const
   return this->StateSnapshot.GetDirectory().GetCurrentBinary();
 }
 
+std::vector<cmTarget*> cmMakefile::GetImportedTargets() const
+{
+  std::vector<cmTarget*> tgts;
+  tgts.reserve(this->ImportedTargets.size());
+  for (TargetMap::const_iterator it = this->ImportedTargets.begin();
+       it != this->ImportedTargets.end(); ++it)
+    {
+    tgts.push_back(it->second);
+    }
+  return tgts;
+}
+
 //----------------------------------------------------------------------------
 void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
                                        bool before)

@@ -390,6 +390,7 @@ public:
     {
       return this->ImportedTargetsOwned;
     }
+  std::vector<cmTarget*> GetImportedTargets() const;
 
   cmTarget* FindTarget(const std::string& name,
                        bool excludeAliases = false) const;
