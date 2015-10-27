@@ -10,9 +10,10 @@ case $1 in
     ;;
   --exists)
     shift
-    echo "Expected: $@"
+    eval last=\${$#}
+    echo "Expected: ${last}"
     echo "Found:    ${PKG_CONFIG_PATH}"
-    [ "$@" = "${PKG_CONFIG_PATH}" ] || exit 1
+    [ "${last}" = "${PKG_CONFIG_PATH}" ] || exit 1
     ;;
   *)
     exit 255
