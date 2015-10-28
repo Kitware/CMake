@@ -51,7 +51,7 @@ __FBSDID("$FreeBSD$");
 #endif
 
 #include "archive.h"
-#include "archive_crypto_private.h"
+#include "archive_digest_private.h"
 #include "archive_endian.h"
 #include "archive_entry.h"
 #include "archive_entry_locale.h"
@@ -1107,20 +1107,23 @@ static time_t
 time_from_tm(struct tm *t)
 {
 #if HAVE_TIMEGM
-	/* Use platform timegm() if available. */
-	return (timegm(t));
+        /* Use platform timegm() if available. */
+        return (timegm(t));
 #elif HAVE__MKGMTIME64
-	return (_mkgmtime64(t));
+        return (_mkgmtime64(t));
 #else
-	/* Else use direct calculation using POSIX assumptions. */
-	/* First, fix up tm_yday based on the year/month/day. */
-	mktime(t);
-	/* Then we can compute timegm() from first principles. */
-	return (t->tm_sec + t->tm_min * 60 + t->tm_hour * 3600
-	    + t->tm_yday * 86400 + (t->tm_year - 70) * 31536000
-	    + ((t->tm_year - 69) / 4) * 86400 -
-	    ((t->tm_year - 1) / 100) * 86400
-	    + ((t->tm_year + 299) / 400) * 86400);
+        /* Else use direct calculation using POSIX assumptions. */
+        /* First, fix up tm_yday based on the year/month/day. */
+        mktime(t);
+        /* Then we can compute timegm() from first principles. */
+        return (t->tm_sec
+            + t->tm_min * 60
+            + t->tm_hour * 3600
+            + t->tm_yday * 86400
+            + (t->tm_year - 70) * 31536000
+            + ((t->tm_year - 69) / 4) * 86400
+            - ((t->tm_year - 1) / 100) * 86400
+            + ((t->tm_year + 299) / 400) * 86400);
 #endif
 }
 
@@ -3189,9 +3192,8 @@ xml2_read_toc(struct archive_read *a)
 		case XML_READER_TYPE_ELEMENT:
 			empty = xmlTextReaderIsEmptyElement(reader);
 			r = xml2_xmlattr_setup(a, &list, reader);
-			if (r != ARCHIVE_OK)
-				return (r);
-			r = xml_start(a, name, &list);
+			if (r == ARCHIVE_OK)
+				r = xml_start(a, name, &list);
 			xmlattr_cleanup(&list);
 			if (r != ARCHIVE_OK)
 				return (r);

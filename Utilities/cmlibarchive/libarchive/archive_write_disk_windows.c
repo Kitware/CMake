@@ -330,8 +330,6 @@ file_information(struct archive_write_disk *a, wchar_t *path,
 				break;
 			case L'C': case L'c':
 				if (((p[2] == L'M' || p[2] == L'm' ) &&
-				    (p[3] == L'D' || p[3] == L'd' )) ||
-				    ((p[2] == L'M' || p[2] == L'm' ) &&
 				    (p[3] == L'D' || p[3] == L'd' )))
 					*mode |= S_IXUSR | S_IXGRP | S_IXOTH;
 				break;
@@ -1011,7 +1009,11 @@ _archive_write_disk_data_block(struct archive *_a,
 		    "Write request too large");
 		return (ARCHIVE_WARN);
 	}
+#if ARCHIVE_VERSION_NUMBER < 3999000
 	return (ARCHIVE_OK);
+#else
+	return (size);
+#endif
 }
 
 static ssize_t

@@ -35,8 +35,6 @@ __FBSDID("$FreeBSD: src/lib/libarchive/archive_read_extract.c,v 1.61 2008/05/26 
 #include "archive_private.h"
 #include "archive_read_private.h"
 
-static int	archive_read_extract_cleanup(struct archive_read *);
-
 int
 archive_read_extract(struct archive *_a, struct archive_entry *entry, int flags)
 {
@@ -55,23 +53,8 @@ archive_read_extract(struct archive *_a, struct archive_entry *entry, int flags)
 			return (ARCHIVE_FATAL);
 		}
 		archive_write_disk_set_standard_lookup(extract->ad);
-		a->cleanup_archive_extract = archive_read_extract_cleanup;
 	}
 
 	archive_write_disk_set_options(extract->ad, flags);
 	return (archive_read_extract2(&a->archive, entry, extract->ad));
-}
-
-/*
- * Cleanup function for archive_extract.
- */
-static int
-archive_read_extract_cleanup(struct archive_read *a)
-{
-	int ret = ARCHIVE_OK;
-
-	ret = archive_write_free(a->extract->ad);
-	free(a->extract);
-	a->extract = NULL;
-	return (ret);
 }

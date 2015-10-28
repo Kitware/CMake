@@ -627,7 +627,7 @@ lzip_tail(struct archive_read_filter *self)
 	f = __archive_read_filter_ahead(self->upstream, tail, &avail_in);
 	if (f == NULL && avail_in < 0)
 		return (ARCHIVE_FATAL);
-	if (avail_in < tail) {
+	if (f == NULL || avail_in < tail) {
 		archive_set_error(&self->archive->archive, ARCHIVE_ERRNO_MISC,
 		    "Lzip: Remaining data is less bytes");
 		return (ARCHIVE_FAILED);

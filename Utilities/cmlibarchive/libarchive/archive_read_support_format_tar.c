@@ -456,6 +456,7 @@ archive_read_format_tar_read_header(struct archive_read *a,
 	static int default_dev;
 	struct tar *tar;
 	const char *p;
+	const wchar_t *wp;
 	int r;
 	size_t l, unconsumed = 0;
 
@@ -506,27 +507,22 @@ archive_read_format_tar_read_header(struct archive_read *a,
 		}
 	}
 
-	if (r == ARCHIVE_OK) {
+	if (r == ARCHIVE_OK && archive_entry_filetype(entry) == AE_IFREG) {
 		/*
 		 * "Regular" entry with trailing '/' is really
 		 * directory: This is needed for certain old tar
 		 * variants and even for some broken newer ones.
 		 */
-		const wchar_t *wp;
-		wp = archive_entry_pathname_w(entry);
-		if (wp != NULL) {
+		if ((wp = archive_entry_pathname_w(entry)) != NULL) {
 			l = wcslen(wp);
-			if (archive_entry_filetype(entry) == AE_IFREG
-			    && wp[l-1] == L'/')
+			if (l > 0 && wp[l - 1] == L'/') {
 				archive_entry_set_filetype(entry, AE_IFDIR);
-		} else {
-			p = archive_entry_pathname(entry);
-			if (p == NULL)
-				return (ARCHIVE_FAILED);
+			}
+		} else if ((p = archive_entry_pathname(entry)) != NULL) {
 			l = strlen(p);
-			if (archive_entry_filetype(entry) == AE_IFREG
-			    && p[l-1] == '/')
+			if (l > 0 && p[l - 1] == '/') {
 				archive_entry_set_filetype(entry, AE_IFDIR);
+			}
 		}
 	}
 	return (r);
@@ -599,13 +595,27 @@ static int
 archive_read_format_tar_skip(struct archive_read *a)
 {
 	int64_t bytes_skipped;
+	int64_t request;
+	struct sparse_block *p;
 	struct tar* tar;
 
 	tar = (struct tar *)(a->format->data);
 
-	bytes_skipped = __archive_read_consume(a,
-	    tar->entry_bytes_remaining + tar->entry_padding +
-	    tar->entry_bytes_unconsumed);
+	/* Do not consume the hole of a sparse file. */
+	request = 0;
+	for (p = tar->sparse_list; p != NULL; p = p->next) {
+		if (!p->hole) {
+			if (p->remaining >= INT64_MAX - request) {
+				return ARCHIVE_FATAL;
+			}
+			request += p->remaining;
+		}
+	}
+	if (request > tar->entry_bytes_remaining)
+		request = tar->entry_bytes_remaining;
+	request += tar->entry_padding + tar->entry_bytes_unconsumed;
+
+	bytes_skipped = __archive_read_consume(a, request);
 	if (bytes_skipped < 0)
 		return (ARCHIVE_FATAL);
 
@@ -2117,6 +2127,10 @@ gnu_add_sparse_entry(struct archive_read *a, struct tar *tar,
 	else
 		tar->sparse_list = p;
 	tar->sparse_last = p;
+	if (remaining < 0 || offset < 0) {
+		archive_set_error(&a->archive, ARCHIVE_ERRNO_MISC, "Malformed sparse map data");
+		return (ARCHIVE_FATAL);
+	}
 	p->offset = offset;
 	p->remaining = remaining;
 	return (ARCHIVE_OK);

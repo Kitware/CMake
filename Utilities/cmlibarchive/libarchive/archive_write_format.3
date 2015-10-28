@@ -34,7 +34,9 @@
 .Nm archive_write_set_format_raw ,
 .Nm archive_write_set_format_shar ,
 .Nm archive_write_set_format_shar_dump ,
-.Nm archive_write_set_format_ustar
+.Nm archive_write_set_format_ustar ,
+.Nm archive_write_set_format_filter_by_ext ,
+.Nm archive_write_set_format_filter_by_ext_def
 .Nd functions for creating archives
 .Sh LIBRARY
 Streaming Archive Library (libarchive, -larchive)
@@ -54,6 +56,10 @@ Streaming Archive Library (libarchive, -larchive)
 .Fn archive_write_set_format_shar_dump "struct archive *"
 .Ft int
 .Fn archive_write_set_format_ustar "struct archive *"
+.Ft int
+.Fn archive_write_set_format_filter_by_ext "struct archive *" "const char *"
+.Ft int
+.Fn archive_write_set_format_filter_by_ext_def "struct archive *" "const char *" "const char *"
 .Sh DESCRIPTION
 These functions set the format that will be used for the archive.
 .Pp
@@ -79,6 +85,14 @@ filenames, linknames, uids, sizes, etc.
 is the library default; this is the same as pax format, but suppresses
 the pax extended header for most normal files.
 In most cases, this will result in ordinary ustar archives.
+.Bl -tag -width indent
+.It Xo
+.Fn archive_write_set_format_filter_by_ext ,
+.Fn archive_write_set_format_filter_by_ext_def
+.Xc
+Format and filter for archive can be set automatically, based on output file name extension.
+The functions are platform dependent.
+Supported extensions: .7z, .zip, .jar, .cpio, .iso, .a, .ar, .tar, .tgz, .tar.gz, .tar.bz2, .tar.xz
 .\"
 .Sh RETURN VALUES
 These functions return

@@ -227,7 +227,9 @@
 #define	S_IRWXG        _S_IRWXG
 #define	S_IXGRP        _S_IXGRP
 #define	S_IWGRP        _S_IWGRP
+#ifndef S_IRGRP
 #define	S_IRGRP        _S_IRGRP
+#endif
 #define	S_IRWXO        _S_IRWXO
 #define	S_IXOTH        _S_IXOTH
 #define	S_IWOTH        _S_IWOTH

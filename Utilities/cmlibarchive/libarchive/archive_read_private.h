@@ -26,7 +26,9 @@
  */
 
 #ifndef __LIBARCHIVE_BUILD
+#ifndef __LIBARCHIVE_TEST
 #error This header is only to be used internally to libarchive.
+#endif
 #endif
 
 #ifndef ARCHIVE_READ_PRIVATE_H_INCLUDED
@@ -141,6 +143,10 @@ struct archive_read_client {
 	int64_t position;
 	struct archive_read_data_node *dataset;
 };
+struct archive_read_passphrase {
+	char	*passphrase;
+	struct archive_read_passphrase *next;
+};
 
 struct archive_read_extract {
 	struct archive *ad; /* archive_write_disk object */
@@ -160,28 +166,11 @@ struct archive_read {
 	int64_t		  skip_file_dev;
 	int64_t		  skip_file_ino;
 
-	/*
-	 * Used by archive_read_data() to track blocks and copy
-	 * data to client buffers, filling gaps with zero bytes.
-	 */
-	const char	 *read_data_block;
-	int64_t		  read_data_offset;
-	int64_t		  read_data_output_offset;
-	size_t		  read_data_remaining;
-
-	/*
-	 * Used by formats/filters to determine the amount of data
-	 * requested from a call to archive_read_data(). This is only
-	 * useful when the format/filter has seek support.
-	 */
-	char		  read_data_is_posix_read;
-	size_t		  read_data_requested;
-
 	/* Callbacks to open/read/write/close client archive streams. */
 	struct archive_read_client client;
 
 	/* Registered filter bidders. */
-	struct archive_read_filter_bidder bidders[14];
+	struct archive_read_filter_bidder bidders[16];
 
 	/* Last filter in chain */
 	struct archive_read_filter *filter;
@@ -225,6 +214,17 @@ struct archive_read {
 	 */
 	struct archive_read_extract		*extract;
 	int			(*cleanup_archive_extract)(struct archive_read *);
+
+	/*
+	 * Decryption passphrase.
+	 */
+	struct {
+		struct archive_read_passphrase *first;
+		struct archive_read_passphrase **last;
+		int candiate;
+		archive_passphrase_callback *callback;
+		void *client_data;
+	}		passphrases;
 };
 
 int	__archive_read_register_format(struct archive_read *a,
@@ -254,4 +254,11 @@ int __archive_read_program(struct archive_read_filter *, const char *);
 void __archive_read_free_filters(struct archive_read *);
 int  __archive_read_close_filters(struct archive_read *);
 struct archive_read_extract *__archive_read_get_extract(struct archive_read *);
+
+
+/*
+ * Get a decryption passphrase.
+ */
+void __archive_read_reset_passphrase(struct archive_read *a);
+const char * __archive_read_next_passphrase(struct archive_read *a);
 #endif

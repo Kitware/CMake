@@ -66,7 +66,7 @@ typedef long long int64_t;
  * Similarly for int32_t
  */
 #if !defined(HAVE_INT32_T) && SIZE_OF_INT == 4
-typedef long int32_t;
+typedef int int32_t;
 #define HAVE_INT32_T
 #endif
 
@@ -331,8 +331,14 @@ typedef uint64_t uintmax_t;
 /* True for systems with POSIX ACL support */
 #cmakedefine HAVE_ACL_USER 1
 
+/* Define to 1 if you have the `arc4random_buf' function. */
+#cmakedefine HAVE_ARC4RANDOM_BUF 1
+
 /* Define to 1 if you have the <attr/xattr.h> header file. */
 #cmakedefine HAVE_ATTR_XATTR_H 1
+
+/* Define to 1 if you have the <Bcrypt.h> header file. */
+#cmakedefine HAVE_BCRYPT_H 1
 
 /* Define to 1 if you have the <bsdxml.h> header file. */
 #cmakedefine HAVE_BSDXML_H 1
@@ -582,11 +588,20 @@ typedef uint64_t uintmax_t;
 /* Define to 1 if you have the `bz2' library (-lbz2). */
 #cmakedefine HAVE_LIBBZ2 1
 
+/* Define to 1 if you have the `charset' library (-lcharset). */
+#cmakedefine HAVE_LIBCHARSET 1
+
+/* Define to 1 if you have the `crypto' library (-lcrypto). */
+#cmakedefine HAVE_LIBCRYPTO 1
+
 /* Define to 1 if you have the `expat' library (-lexpat). */
 #cmakedefine HAVE_LIBEXPAT 1
 
 /* Define to 1 if you have the `gcc' library (-lgcc). */
 #cmakedefine HAVE_LIBGCC 1
+
+/* Define to 1 if you have the `lz4' library (-llz4). */
+#cmakedefine HAVE_LIBLZ4 1
 
 /* Define to 1 if you have the `lzma' library (-llzma). */
 #cmakedefine HAVE_LIBLZMA 1
@@ -682,6 +697,12 @@ typedef uint64_t uintmax_t;
 /* Define to 1 if you have the `lutimes' function. */
 #cmakedefine HAVE_LUTIMES 1
 
+/* Define to 1 if you have the <lz4hc.h> header file. */
+#cmakedefine HAVE_LZ4HC_H 1
+
+/* Define to 1 if you have the <lz4.h> header file. */
+#cmakedefine HAVE_LZ4_H 1
+
 /* Define to 1 if you have the <lzmadec.h> header file. */
 #cmakedefine HAVE_LZMADEC_H 1
 
@@ -721,6 +742,9 @@ typedef uint64_t uintmax_t;
 /* Define to 1 if you have the <nettle/md5.h> header file. */
 #cmakedefine HAVE_NETTLE_MD5_H 1
 
+/* Define to 1 if you have the <nettle/pbkdf2.h> header file. */
+#cmakedefine HAVE_NETTLE_PBKDF2_H 1
+
 /* Define to 1 if you have the <nettle/ripemd160.h> header file. */
 #cmakedefine HAVE_NETTLE_RIPEMD160_H 1
 
@@ -742,6 +766,9 @@ typedef uint64_t uintmax_t;
 /* Define to 1 if you have the `pipe' function. */
 #cmakedefine HAVE_PIPE 1
 
+/* Define to 1 if you have the `PKCS5_PBKDF2_HMAC_SHA1' function. */
+#cmakedefine HAVE_PKCS5_PBKDF2_HMAC_SHA1 1
+
 /* Define to 1 if you have the `poll' function. */
 #cmakedefine HAVE_POLL 1
 
@@ -754,6 +781,9 @@ typedef uint64_t uintmax_t;
 /* Define to 1 if you have the <process.h> header file. */
 #cmakedefine HAVE_PROCESS_H 1
 
+/* Define to 1 if you have the <pthread.h> header file. */
+#cmakedefine HAVE_PTHREAD_H 1
+
 /* Define to 1 if you have the <pwd.h> header file. */
 #cmakedefine HAVE_PWD_H 1
 
@@ -765,6 +795,12 @@ typedef uint64_t uintmax_t;
 
 /* Define to 1 if you have the `readlinkat' function. */
 #cmakedefine HAVE_READLINKAT 1
+
+/* Define to 1 if you have the `readpassphrase' function. */
+#cmakedefine HAVE_READPASSPHRASE 1
+
+/* Define to 1 if you have the <readpassphrase.h> header file. */
+#cmakedefine HAVE_READPASSPHRASE_H 1
 
 /* Define to 1 if you have the <regex.h> header file. */
 #cmakedefine HAVE_REGEX_H 1
@@ -1020,6 +1056,9 @@ typedef uint64_t uintmax_t;
 
 /* Define to 1 if you have the `wmemcpy' function. */
 #cmakedefine HAVE_WMEMCPY 1
+
+/* Define to 1 if you have the `wmemmove' function. */
+#cmakedefine HAVE_WMEMMOVE 1
 
 /* Define to 1 if you have a working EXT2_IOC_GETFLAGS */
 #cmakedefine HAVE_WORKING_EXT2_IOC_GETFLAGS 1
