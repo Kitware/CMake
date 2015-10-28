@@ -2172,7 +2172,7 @@ cmMakefile::GetSourceGroup(const std::vector<std::string>&name) const
 {
   cmSourceGroup* sg = 0;
 
-  // first look for source group starting with the same as the one we wants
+  // first look for source group starting with the same as the one we want
   for (std::vector<cmSourceGroup>::const_iterator
       sgIt = this->SourceGroups.begin();
       sgIt != this->SourceGroups.end(); ++sgIt)
@@ -2205,7 +2205,7 @@ void cmMakefile::AddSourceGroup(const std::string& name,
 {
   std::vector<std::string> nameVector;
   nameVector.push_back(name);
-  AddSourceGroup(nameVector, regex);
+  this->AddSourceGroup(nameVector, regex);
 }
 
 void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,

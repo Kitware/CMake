@@ -36,7 +36,6 @@ void cmExportBuildFileGenerator::Compute(cmLocalGenerator* lg)
 //----------------------------------------------------------------------------
 bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 {
-  std::vector<cmGeneratorTarget*> allTargets;
   {
   std::string expectedTargets;
   std::string sep;

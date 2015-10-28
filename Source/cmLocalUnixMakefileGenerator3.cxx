@@ -144,7 +144,7 @@ void cmLocalUnixMakefileGenerator3::ComputeHomeRelativeOutputPath()
   // Compute the path to use when referencing the current output
   // directory from the top output directory.
   this->HomeRelativeOutputPath =
-    this->Convert(this->Makefile->GetCurrentBinaryDirectory(), HOME_OUTPUT);
+    this->Convert(this->GetCurrentBinaryDirectory(), HOME_OUTPUT);
   if(this->HomeRelativeOutputPath == ".")
     {
     this->HomeRelativeOutputPath = "";
@@ -173,7 +173,6 @@ void cmLocalUnixMakefileGenerator3::ComputeObjectFilenames(
 void cmLocalUnixMakefileGenerator3::
 GetLocalObjectFiles(std::map<std::string, LocalObjectInfo> &localObjectFiles)
 {
-  std::set<std::string> emitted;
   std::vector<cmGeneratorTarget*> targets = this->GetGeneratorTargets();
   for(std::vector<cmGeneratorTarget*>::iterator ti = targets.begin();
       ti != targets.end(); ++ti)
@@ -503,7 +502,7 @@ void cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
 {
-  std::string infoFileName = this->Makefile->GetCurrentBinaryDirectory();
+  std::string infoFileName = this->GetCurrentBinaryDirectory();
   infoFileName += cmake::GetCMakeFilesDirectory();
   infoFileName += "/CMakeDirectoryInformation.cmake";
 
@@ -567,7 +566,7 @@ std::string
 cmLocalUnixMakefileGenerator3
 ::ConvertToFullPath(const std::string& localPath)
 {
-  std::string dir = this->Makefile->GetCurrentBinaryDirectory();
+  std::string dir = this->GetCurrentBinaryDirectory();
   dir += "/";
   dir += localPath;
   return dir;
@@ -1064,7 +1063,7 @@ cmLocalUnixMakefileGenerator3
     }
 
   // if the command specified a working directory use it.
-  std::string dir  = this->Makefile->GetCurrentBinaryDirectory();
+  std::string dir  = this->GetCurrentBinaryDirectory();
   std::string workingDir = ccg.GetWorkingDirectory();
   if(!workingDir.empty())
     {
@@ -1214,7 +1213,7 @@ cmLocalUnixMakefileGenerator3
                      const std::vector<std::string>& files,
                      cmGeneratorTarget* target, const char* filename)
 {
-  std::string cleanfile = this->Makefile->GetCurrentBinaryDirectory();
+  std::string cleanfile = this->GetCurrentBinaryDirectory();
   cleanfile += "/";
   cleanfile += this->GetTargetDirectory(target);
   cleanfile += "/cmake_clean";
@@ -1493,7 +1492,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
   // If the directory information is newer than depend.internal, include dirs
   // may have changed. In this case discard all old dependencies.
   bool needRescanDirInfo = false;
-  std::string dirInfoFile = this->Makefile->GetCurrentBinaryDirectory();
+  std::string dirInfoFile = this->GetCurrentBinaryDirectory();
   dirInfoFile += cmake::GetCMakeFilesDirectory();
   dirInfoFile += "/CMakeDirectoryInformation.cmake";
   {
@@ -1567,7 +1566,7 @@ cmLocalUnixMakefileGenerator3
   // Read the directory information file.
   cmMakefile* mf = this->Makefile;
   bool haveDirectoryInfo = false;
-  std::string dirInfoFile = this->Makefile->GetCurrentBinaryDirectory();
+  std::string dirInfoFile = this->GetCurrentBinaryDirectory();
   dirInfoFile += cmake::GetCMakeFilesDirectory();
   dirInfoFile += "/CMakeDirectoryInformation.cmake";
   if(mf->ReadListFile(dirInfoFile.c_str()) &&
@@ -1828,7 +1827,7 @@ void cmLocalUnixMakefileGenerator3
   std::vector<std::string> commands;
 
   // Write the all rule.
-  std::string recursiveTarget = this->Makefile->GetCurrentBinaryDirectory();
+  std::string recursiveTarget = this->GetCurrentBinaryDirectory();
   recursiveTarget += "/all";
 
   depends.push_back("cmake_check_build_system");
@@ -1872,7 +1871,7 @@ void cmLocalUnixMakefileGenerator3
                       depends, commands, true);
 
   // Write the clean rule.
-  recursiveTarget = this->Makefile->GetCurrentBinaryDirectory();
+  recursiveTarget = this->GetCurrentBinaryDirectory();
   recursiveTarget += "/clean";
   commands.clear();
   depends.clear();
@@ -1890,7 +1889,7 @@ void cmLocalUnixMakefileGenerator3
                       depends, commands, true);
 
   // Write the preinstall rule.
-  recursiveTarget = this->Makefile->GetCurrentBinaryDirectory();
+  recursiveTarget = this->GetCurrentBinaryDirectory();
   recursiveTarget += "/preinstall";
   commands.clear();
   depends.clear();

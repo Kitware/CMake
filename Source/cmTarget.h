@@ -30,7 +30,6 @@ class cmake;
 class cmMakefile;
 class cmSourceFile;
 class cmGlobalGenerator;
-class cmComputeLinkInformation;
 class cmListFileBacktrace;
 class cmTarget;
 class cmGeneratorTarget;
@@ -349,7 +348,6 @@ private:
   bool RecordDependencies;
   bool DLLPlatform;
   bool IsAndroid;
-  bool IsApple;
   bool IsImportedTarget;
   bool ImportedGloballyVisible;
   bool BuildInterfaceIncludesAppended;

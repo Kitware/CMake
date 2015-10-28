@@ -198,7 +198,7 @@ protected:
 
   size_t CountProgressMarksInTarget(cmGeneratorTarget const* target,
                                  std::set<cmGeneratorTarget const*>& emitted);
-  size_t CountProgressMarksInAll(cmLocalUnixMakefileGenerator3* lg);
+  size_t CountProgressMarksInAll(cmLocalGenerator* lg);
 
   cmGeneratedFileStream *CommandDatabase;
 private:

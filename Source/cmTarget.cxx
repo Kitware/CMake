@@ -61,7 +61,6 @@ cmTarget::cmTarget()
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
   this->IsAndroid = false;
-  this->IsApple = false;
   this->IsImportedTarget = false;
   this->ImportedGloballyVisible = false;
   this->BuildInterfaceIncludesAppended = false;
@@ -98,9 +97,6 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->IsAndroid =
     strcmp(this->Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME"),
            "Android") == 0;
-
-  // Check whether we are targeting an Apple platform.
-  this->IsApple = this->Makefile->IsOn("APPLE");
 
   // Setup default property values.
   if (this->GetType() != cmState::INTERFACE_LIBRARY
@@ -300,7 +296,8 @@ void cmTarget::AddUtility(const std::string& u, cmMakefile *makefile)
 {
   if(this->Utilities.insert(u).second && makefile)
     {
-    UtilityBacktraces.insert(std::make_pair(u, makefile->GetBacktrace()));
+    this->UtilityBacktraces.insert(
+            std::make_pair(u, makefile->GetBacktrace()));
     }
 }
 

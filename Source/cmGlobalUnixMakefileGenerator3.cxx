@@ -15,7 +15,6 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 #include "cmGeneratedFileStream.h"
-#include "cmSourceFile.h"
 #include "cmGeneratorTarget.h"
 #include "cmAlgorithms.h"
 
@@ -158,8 +157,7 @@ void cmGlobalUnixMakefileGenerator3::Generate()
     }
   for(unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    cmLocalUnixMakefileGenerator3 *lg =
-      static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
+    cmLocalGenerator *lg = this->LocalGenerators[i];
     std::string markFileName = lg->GetCurrentBinaryDirectory();
     markFileName += "/";
     markFileName += cmake::GetCMakeFilesDirectory();
@@ -982,7 +980,7 @@ cmGlobalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 size_t
 cmGlobalUnixMakefileGenerator3
-::CountProgressMarksInAll(cmLocalUnixMakefileGenerator3* lg)
+::CountProgressMarksInAll(cmLocalGenerator* lg)
 {
   size_t count = 0;
   std::set<cmGeneratorTarget const*> emitted;
