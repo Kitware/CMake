@@ -71,6 +71,7 @@ add_test(NAME PassingTest COMMAND ${CMAKE_COMMAND} -E echo PassingTestOutput)
 add_test(NAME FailingTest COMMAND ${CMAKE_COMMAND} -E no_such_command)
   ]])
 
+  unset(ENV{CTEST_PARALLEL_LEVEL})
   run_ctest(TestOutputSize)
 endfunction()
 run_TestOutputSize()
