@@ -393,7 +393,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
 
     if (cmsysString_strcasecmp(parameters.begin()->c_str(), compilerId) == 0)
       {
-      switch(context->LG->GetMakefile()->GetPolicyStatus(cmPolicies::CMP0044))
+      switch(context->LG->GetPolicyStatus(cmPolicies::CMP0044))
         {
         case cmPolicies::WARN:
           {
@@ -999,7 +999,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     if (propertyName == "LINKER_LANGUAGE")
       {
-      if (target->Target->LinkLanguagePropagatesToDependents() &&
+      if (target->LinkLanguagePropagatesToDependents() &&
           dagCheckerParent && (dagCheckerParent->EvaluatingLinkLibraries()
             || dagCheckerParent->EvaluatingSources()))
         {
@@ -1100,7 +1100,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                            "COMPILE_DEFINITIONS_"))
       {
       cmPolicies::PolicyStatus polSt =
-          context->LG->GetMakefile()->GetPolicyStatus(cmPolicies::CMP0043);
+          context->LG->GetPolicyStatus(cmPolicies::CMP0043);
       if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD)
         {
         interfacePropertyName = "INTERFACE_COMPILE_DEFINITIONS";
@@ -1442,7 +1442,7 @@ cmPolicies::PolicyStatus statusForTarget(cmGeneratorTarget const* tgt,
 #define RETURN_POLICY(POLICY) \
   if (strcmp(policy, #POLICY) == 0) \
   { \
-    return tgt->Target->GetPolicyStatus ## POLICY (); \
+    return tgt->GetPolicyStatus ## POLICY (); \
   } \
 
   CM_FOR_EACH_TARGET_POLICY(RETURN_POLICY)

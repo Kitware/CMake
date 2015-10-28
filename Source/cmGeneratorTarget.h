@@ -31,7 +31,12 @@ public:
   cmLocalGenerator* GetLocalGenerator() const;
 
   bool IsImported() const;
+  bool IsImportedGloballyVisible() const;
   const char *GetLocation(const std::string& config) const;
+
+  std::vector<cmCustomCommand> const &GetPreBuildCommands() const;
+  std::vector<cmCustomCommand> const &GetPreLinkCommands() const;
+  std::vector<cmCustomCommand> const &GetPostBuildCommands() const;
 
 #define DECLARE_TARGET_POLICY(POLICY) \
   cmPolicies::PolicyStatus GetPolicyStatus ## POLICY () const \
@@ -53,6 +58,7 @@ public:
   std::string GetName() const;
   std::string GetExportName() const;
 
+  std::vector<std::string> GetPropertyKeys() const;
   const char *GetProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   void GetSourceFiles(std::vector<cmSourceFile*>& files,
@@ -161,6 +167,10 @@ public:
   std::string GetFrameworkDirectory(const std::string& config,
                                     bool rootDir) const;
 
+  /** Return the framework version string.  Undefined if
+      IsFrameworkOnApple returns false.  */
+  std::string GetFrameworkVersion() const;
+
   /** @return the Mac CFBundle directory without the base */
   std::string GetCFBundleDirectory(const std::string& config,
                                    bool contentOnly) const;
@@ -175,6 +185,14 @@ public:
   std::string GetInstallNameDirForInstallTree() const;
 
   cmListFileBacktrace GetBacktrace() const;
+
+  const std::vector<std::string>& GetLinkDirectories() const;
+
+  std::set<std::string>const& GetUtilities() const;
+  cmListFileBacktrace const* GetUtilityBacktrace(const std::string& u) const;
+
+  bool LinkLanguagePropagatesToDependents() const
+  { return this->GetType() == cmState::STATIC_LIBRARY; }
 
   /** Get the macro to define when building sources in this target.
       If no macro should be defined null is returned.  */
@@ -630,7 +648,7 @@ private:
                       const std::string& config) const;
 
   struct HeadToLinkImplementationMap:
-    public std::map<cmTarget const*, cmOptionalLinkImplementation> {};
+    public std::map<cmGeneratorTarget const*, cmOptionalLinkImplementation> {};
   typedef std::map<std::string,
                    HeadToLinkImplementationMap> LinkImplMapType;
   mutable LinkImplMapType LinkImplMap;

@@ -165,6 +165,30 @@ cmake::cmake()
 
   // Make sure we can capture the build tool output.
   cmSystemTools::EnableVSConsoleOutput();
+
+  // Set up a list of source and header extensions
+  // these are used to find files when the extension
+  // is not given
+  // The "c" extension MUST precede the "C" extension.
+  this->SourceFileExtensions.push_back( "c" );
+  this->SourceFileExtensions.push_back( "C" );
+
+  this->SourceFileExtensions.push_back( "c++" );
+  this->SourceFileExtensions.push_back( "cc" );
+  this->SourceFileExtensions.push_back( "cpp" );
+  this->SourceFileExtensions.push_back( "cxx" );
+  this->SourceFileExtensions.push_back( "m" );
+  this->SourceFileExtensions.push_back( "M" );
+  this->SourceFileExtensions.push_back( "mm" );
+
+  this->HeaderFileExtensions.push_back( "h" );
+  this->HeaderFileExtensions.push_back( "hh" );
+  this->HeaderFileExtensions.push_back( "h++" );
+  this->HeaderFileExtensions.push_back( "hm" );
+  this->HeaderFileExtensions.push_back( "hpp" );
+  this->HeaderFileExtensions.push_back( "hxx" );
+  this->HeaderFileExtensions.push_back( "in" );
+  this->HeaderFileExtensions.push_back( "txx" );
 }
 
 cmake::~cmake()
@@ -423,8 +447,8 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     (cmSystemTools::GetCurrentWorkingDirectory());
   // read in the list file to fill the cache
   snapshot.SetDefaultDefinitions();
-  cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(gg, snapshot));
-  cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator(mf.get()));
+  cmMakefile* mf = new cmMakefile(gg, snapshot);
+  gg->AddMakefile(mf);
 
   mf->SetArgcArgv(args);
 
@@ -457,6 +481,8 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     std::vector<std::string> includeDirs;
     cmSystemTools::ExpandListArgument(includes, includeDirs);
 
+    gg->CreateGenerationObjects();
+    cmLocalGenerator* lg = gg->LocalGenerators[0];
     std::string includeFlags = lg->GetIncludeFlags(includeDirs, 0, language);
 
     std::string definitions = mf->GetSafeDefinition("PACKAGE_DEFINITIONS");
@@ -486,8 +512,9 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     std::string linkPath;
     std::string flags;
     std::string linkFlags;
-    gg->CreateGeneratorTargets(cmGlobalGenerator::AllTargets, lg.get());
-    cmGeneratorTarget *gtgt = gg->GetGeneratorTarget(tgt);
+    gg->CreateGenerationObjects();
+    cmGeneratorTarget *gtgt = gg->FindGeneratorTarget(tgt->GetName());
+    cmLocalGenerator* lg = gtgt->GetLocalGenerator();
     lg->GetTargetFlags(linkLibs, frameworkPath, linkPath, flags, linkFlags,
                        gtgt, false);
     linkLibs = frameworkPath + linkPath + linkLibs;

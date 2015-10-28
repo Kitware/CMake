@@ -523,7 +523,7 @@ cmGlobalUnixMakefileGenerator3
                        cmLocalUnixMakefileGenerator3* lg)
 {
   // Only subdirectories need these rules.
-  if(lg->GetMakefile()->IsRootMakefile())
+  if(lg->IsRootMakefile())
     {
     return;
     }
@@ -1084,7 +1084,7 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
       static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
     // for the passed in makefile or if this is the top Makefile wripte out
     // the targets
-    if (lg2 == lg || lg->GetMakefile()->IsRootMakefile())
+    if (lg2 == lg || lg->IsRootMakefile())
       {
       // for each target Generate the rule files for each target.
       std::vector<cmGeneratorTarget*> targets = lg2->GetGeneratorTargets();

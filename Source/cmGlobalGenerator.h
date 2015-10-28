@@ -42,10 +42,6 @@ class cmInstallTargetGenerator;
 class cmInstallFilesGenerator;
 class cmExportBuildFileGenerator;
 
-typedef std::map<cmTarget const*,
-                 cmGeneratorTarget*,
-                 cmTarget::StrictTargetComparison> cmGeneratorTargetsType;
-
 /** \class cmGlobalGenerator
  * \brief Responsible for overseeing the generation process for the entire tree
  *
@@ -254,7 +250,9 @@ public:
   cmTarget* FindTarget(const std::string& name,
                        bool excludeAliases = false) const;
 
-  void AddAlias(const std::string& name, cmTarget *tgt);
+  cmGeneratorTarget* FindGeneratorTarget(const std::string& name) const;
+
+  void AddAlias(const std::string& name, const std::string& tgtName);
   bool IsAlias(const std::string& name) const;
 
   /** Determine if a name resolves to a framework on disk or a built target
@@ -280,8 +278,6 @@ public:
   std::set<std::string> const& GetDirectoryContent(std::string const& dir,
                                                    bool needDisk = true);
 
-  void AddTarget(cmTarget* t);
-
   static bool IsReservedTarget(std::string const& name);
 
   virtual const char* GetAllTargetName()         const { return "ALL_BUILD"; }
@@ -306,14 +302,6 @@ public:
   // via a target_link_libraries or add_dependencies
   TargetDependSet const& GetTargetDirectDepends(
       const cmGeneratorTarget* target);
-
-  /** Get per-target generator information.  */
-  cmGeneratorTarget* GetGeneratorTarget(cmTarget const*) const;
-
-  void AddGeneratorTarget(cmTarget* t, cmGeneratorTarget* gt)
-  {
-    this->GeneratorTargets[t] = gt;
-  }
 
   const std::map<std::string, std::vector<cmLocalGenerator*> >& GetProjectMap()
                                                const {return this->ProjectMap;}
@@ -429,19 +417,14 @@ protected:
   std::map<std::string, cmExportBuildFileGenerator*> BuildExportSets;
   std::map<std::string, cmExportBuildFileGenerator*> BuildExportExportSets;
 
-  // All targets in the entire project.
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-#ifdef CMake_HAVE_CXX11_UNORDERED_MAP
-  typedef std::unordered_map<std::string, cmTarget*> TargetMap;
-#else
-  typedef cmsys::hash_map<std::string, cmTarget*> TargetMap;
-#endif
-#else
-  typedef std::map<std::string,cmTarget *> TargetMap;
-#endif
-  TargetMap TotalTargets;
-  TargetMap AliasTargets;
-  TargetMap ImportedTargets;
+  std::map<std::string, std::string> AliasTargets;
+
+  cmTarget* FindTargetImpl(std::string const& name) const;
+  cmTarget* FindImportedTargetImpl(std::string const& name) const;
+
+  cmGeneratorTarget* FindGeneratorTargetImpl(std::string const& name) const;
+  cmGeneratorTarget*
+  FindImportedGeneratorTargetImpl(std::string const& name) const;
 
   const char* GetPredefinedTargetsFolder();
   virtual bool UseFolderProperty();
@@ -487,10 +470,10 @@ private:
   typedef std::map<cmGeneratorTarget const*, TargetDependSet> TargetDependMap;
   TargetDependMap TargetDependencies;
 
-  // Per-target generator information.
-  cmGeneratorTargetsType GeneratorTargets;
   friend class cmake;
-  void CreateGeneratorTargets(TargetTypes targetTypes, cmLocalGenerator* lg);
+  void CreateGeneratorTargets(TargetTypes targetTypes, cmMakefile* mf,
+                   cmLocalGenerator* lg,
+                   std::map<cmTarget*, cmGeneratorTarget*> const& importedMap);
   void CreateGeneratorTargets(TargetTypes targetTypes);
 
   void ClearGeneratorMembers();

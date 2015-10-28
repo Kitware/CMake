@@ -57,31 +57,6 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
 
   // Setup the default include complaint regular expression (match nothing).
   this->ComplainFileRegularExpression = "^$";
-  // Source and header file extensions that we can handle
-
-  // Set up a list of source and header extensions
-  // these are used to find files when the extension
-  // is not given
-  // The "c" extension MUST precede the "C" extension.
-  this->SourceFileExtensions.push_back( "c" );
-  this->SourceFileExtensions.push_back( "C" );
-
-  this->SourceFileExtensions.push_back( "c++" );
-  this->SourceFileExtensions.push_back( "cc" );
-  this->SourceFileExtensions.push_back( "cpp" );
-  this->SourceFileExtensions.push_back( "cxx" );
-  this->SourceFileExtensions.push_back( "m" );
-  this->SourceFileExtensions.push_back( "M" );
-  this->SourceFileExtensions.push_back( "mm" );
-
-  this->HeaderFileExtensions.push_back( "h" );
-  this->HeaderFileExtensions.push_back( "hh" );
-  this->HeaderFileExtensions.push_back( "h++" );
-  this->HeaderFileExtensions.push_back( "hm" );
-  this->HeaderFileExtensions.push_back( "hpp" );
-  this->HeaderFileExtensions.push_back( "hxx" );
-  this->HeaderFileExtensions.push_back( "in" );
-  this->HeaderFileExtensions.push_back( "txx" );
 
   this->DefineFlags = " ";
 
@@ -756,15 +731,26 @@ void cmMakefile::ConfigureFinalPass()
       "with CMake 2.4 or later. For compatibility with older versions please "
       "use any CMake 2.8.x release or lower.");
     }
-  for (cmTargets::iterator l = this->Targets.begin();
-       l != this->Targets.end(); l++)
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  // Do old-style link dependency analysis only for CM_USE_OLD_VS6.
+  if(this->GetGlobalGenerator()->IsForVS6())
     {
-    if (l->second.GetType() == cmState::INTERFACE_LIBRARY)
+    for (cmTargets::iterator l = this->Targets.begin();
+         l != this->Targets.end(); l++)
       {
-      continue;
+      if (l->second.GetType() == cmState::INTERFACE_LIBRARY)
+        {
+        continue;
+        }
+      // Erase any cached link information that might have been comptued
+      // on-demand during the configuration.  This ensures that build
+      // system generation uses up-to-date information even if other cache
+      // invalidation code in this source file is buggy.
+
+      l->second.AnalyzeLibDependenciesForVS6(*this);
       }
-    l->second.FinishConfigure();
     }
+#endif
 }
 
 //----------------------------------------------------------------------------
@@ -1780,6 +1766,18 @@ const char* cmMakefile::GetCurrentBinaryDirectory() const
   return this->StateSnapshot.GetDirectory().GetCurrentBinary();
 }
 
+std::vector<cmTarget*> cmMakefile::GetImportedTargets() const
+{
+  std::vector<cmTarget*> tgts;
+  tgts.reserve(this->ImportedTargets.size());
+  for (TargetMap::const_iterator it = this->ImportedTargets.begin();
+       it != this->ImportedTargets.end(); ++it)
+    {
+    tgts.push_back(it->second);
+    }
+  return tgts;
+}
+
 //----------------------------------------------------------------------------
 void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
                                        bool before)
@@ -2050,10 +2048,11 @@ void cmMakefile::AddGlobalLinkInformation(const std::string& name,
 }
 
 
-void cmMakefile::AddAlias(const std::string& lname, cmTarget *tgt)
+void cmMakefile::AddAlias(const std::string& lname,
+                          std::string const& tgtName)
 {
-  this->AliasTargets[lname] = tgt;
-  this->GetGlobalGenerator()->AddAlias(lname, tgt);
+  this->AliasTargets[lname] = tgtName;
+  this->GetGlobalGenerator()->AddAlias(lname, tgtName);
 }
 
 cmTarget* cmMakefile::AddLibrary(const std::string& lname,
@@ -2110,7 +2109,6 @@ cmMakefile::AddNewTarget(cmState::TargetType type, const std::string& name)
   cmTarget& target = it->second;
   target.SetType(type, name);
   target.SetMakefile(this);
-  this->GetGlobalGenerator()->AddTarget(&it->second);
   return &it->second;
 }
 
@@ -4039,10 +4037,12 @@ cmTarget* cmMakefile::FindTarget(const std::string& name,
 {
   if (!excludeAliases)
     {
-    TargetMap::const_iterator i = this->AliasTargets.find(name);
+    std::map<std::string, std::string>::const_iterator i =
+        this->AliasTargets.find(name);
     if (i != this->AliasTargets.end())
       {
-      return i->second;
+      cmTargets::iterator ai = this->Targets.find(i->second);
+      return &ai->second;
       }
     }
   cmTargets::iterator i = this->Targets.find( name );
@@ -4197,15 +4197,11 @@ cmMakefile::AddImportedTarget(const std::string& name,
   // Create the target.
   cmsys::auto_ptr<cmTarget> target(new cmTarget);
   target->SetType(type, name);
-  target->MarkAsImported();
+  target->MarkAsImported(global);
   target->SetMakefile(this);
 
   // Add to the set of available imported targets.
   this->ImportedTargets[name] = target.get();
-  if(global)
-    {
-    this->GetGlobalGenerator()->AddTarget(target.get());
-    }
 
   // Transfer ownership to this cmMakefile object.
   this->ImportedTargetsOwned.push_back(target.get());

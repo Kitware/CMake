@@ -283,7 +283,7 @@ public:
   cmTarget* AddLibrary(const std::string& libname, cmState::TargetType type,
                   const std::vector<std::string> &srcs,
                   bool excludeFromAll = false);
-  void AddAlias(const std::string& libname, cmTarget *tgt);
+  void AddAlias(const std::string& libname, const std::string& tgt);
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   /**
@@ -390,6 +390,7 @@ public:
     {
       return this->ImportedTargetsOwned;
     }
+  std::vector<cmTarget*> GetImportedTargets() const;
 
   cmTarget* FindTarget(const std::string& name,
                        bool excludeAliases = false) const;
@@ -399,6 +400,11 @@ public:
   cmTarget* FindTargetToUse(const std::string& name,
                             bool excludeAliases = false) const;
   bool IsAlias(const std::string& name) const;
+
+  std::map<std::string, std::string> GetAliasTargets() const
+  {
+    return this->AliasTargets;
+  }
 
   /**
    * Mark include directories as system directories.
@@ -424,17 +430,6 @@ public:
    */
   cmSourceFile* GetOrCreateSource(const std::string& sourceName,
                                   bool generated = false);
-
-  //@{
-  /**
-   * Return a list of extensions associated with source and header
-   * files
-   */
-  const std::vector<std::string>& GetSourceExtensions() const
-    {return this->SourceFileExtensions;}
-  const std::vector<std::string>& GetHeaderExtensions() const
-    {return this->HeaderFileExtensions;}
-  //@}
 
   /**
    * Given a variable name, return its value (as a string).
@@ -801,7 +796,7 @@ protected:
 #else
   typedef std::map<std::string, cmTarget*> TargetMap;
 #endif
-  TargetMap AliasTargets;
+  std::map<std::string, std::string> AliasTargets;
   std::vector<cmSourceFile*> SourceFiles;
 
   // Tests
@@ -823,8 +818,6 @@ protected:
   std::vector<cmTestGenerator*> TestGenerators;
 
   std::string ComplainFileRegularExpression;
-  std::vector<std::string> SourceFileExtensions;
-  std::vector<std::string> HeaderFileExtensions;
   std::string DefineFlags;
 
   // Track the value of the computed DEFINITIONS property.

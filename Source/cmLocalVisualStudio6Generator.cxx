@@ -266,21 +266,21 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
   // depend only on the previous rule.
   if ((target->GetType() == cmState::UTILITY ||
       target->GetType() == cmState::GLOBAL_TARGET) &&
-      (!target->Target->GetPreBuildCommands().empty() ||
-       !target->Target->GetPostBuildCommands().empty()))
+      (!target->GetPreBuildCommands().empty() ||
+       !target->GetPostBuildCommands().empty()))
     {
     // Accumulate the dependencies of all the commands.
     std::vector<std::string> depends;
     for (std::vector<cmCustomCommand>::const_iterator cr =
-           target->Target->GetPreBuildCommands().begin();
-         cr != target->Target->GetPreBuildCommands().end(); ++cr)
+           target->GetPreBuildCommands().begin();
+         cr != target->GetPreBuildCommands().end(); ++cr)
       {
       depends.insert(depends.end(),
                      cr->GetDepends().begin(), cr->GetDepends().end());
       }
     for (std::vector<cmCustomCommand>::const_iterator cr =
-           target->Target->GetPostBuildCommands().begin();
-         cr != target->Target->GetPostBuildCommands().end(); ++cr)
+           target->GetPostBuildCommands().begin();
+         cr != target->GetPostBuildCommands().end(); ++cr)
       {
       depends.insert(depends.end(),
                      cr->GetDepends().begin(), cr->GetDepends().end());
@@ -289,14 +289,14 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
     // Add the pre- and post-build commands in order.
     int count = 1;
     for (std::vector<cmCustomCommand>::const_iterator cr =
-           target->Target->GetPreBuildCommands().begin();
-         cr != target->Target->GetPreBuildCommands().end(); ++cr)
+           target->GetPreBuildCommands().begin();
+         cr != target->GetPreBuildCommands().end(); ++cr)
       {
       this->AddUtilityCommandHack(target, count++, depends, *cr);
       }
     for (std::vector<cmCustomCommand>::const_iterator cr =
-           target->Target->GetPostBuildCommands().begin();
-         cr != target->Target->GetPostBuildCommands().end(); ++cr)
+           target->GetPostBuildCommands().begin();
+         cr != target->GetPostBuildCommands().end(); ++cr)
       {
       this->AddUtilityCommandHack(target, count++, depends, *cr);
       }
@@ -838,8 +838,8 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmGeneratorTarget *target,
 
   // Write the pre-build and pre-link together (VS6 does not support both).
   event.Start("PreLink");
-  event.Write(target->Target->GetPreBuildCommands());
-  event.Write(target->Target->GetPreLinkCommands());
+  event.Write(target->GetPreBuildCommands());
+  event.Write(target->GetPreLinkCommands());
   cmsys::auto_ptr<cmCustomCommand> pcc(
     this->MaybeCreateImplibDir(target, configName, false));
   if(pcc.get())
@@ -855,7 +855,7 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmGeneratorTarget *target,
 
   // Write the post-build rules.
   event.Start("PostBuild");
-  event.Write(target->Target->GetPostBuildCommands());
+  event.Write(target->GetPostBuildCommands());
   event.Finish();
 
   customRuleCode += "# End Special Build Tool\n";
@@ -1052,7 +1052,7 @@ void cmLocalVisualStudio6Generator
     }
   std::vector<std::string>::const_iterator i;
   const std::vector<std::string>& libdirs =
-      target->Target->GetLinkDirectories();
+      target->GetLinkDirectories();
   for(i = libdirs.begin(); i != libdirs.end(); ++i)
     {
     std::string path = *i;
@@ -1112,15 +1112,14 @@ void cmLocalVisualStudio6Generator
       // Compute the proper name to use to link this library.
       std::string lib;
       std::string libDebug;
-      cmTarget* tgt = this->GlobalGenerator->FindTarget(j->first.c_str());
+      cmGeneratorTarget* tgt =
+          this->GlobalGenerator->FindGeneratorTarget(j->first.c_str());
       if(tgt)
         {
-        cmGeneratorTarget* gt =
-          this->GlobalGenerator->GetGeneratorTarget(tgt);
         lib = cmSystemTools::GetFilenameWithoutExtension
-          (gt->GetFullName().c_str());
+          (tgt->GetFullName().c_str());
         libDebug = cmSystemTools::GetFilenameWithoutExtension
-          (gt->GetFullName("Debug").c_str());
+          (tgt->GetFullName("Debug").c_str());
         lib += ".lib";
         libDebug += ".lib";
         }

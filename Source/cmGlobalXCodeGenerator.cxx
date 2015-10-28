@@ -460,7 +460,6 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
 
   cmGeneratorTarget* allBuildGt = new cmGeneratorTarget(allbuild, root);
   root->AddGeneratorTarget(allBuildGt);
-  root->GetGlobalGenerator()->AddGeneratorTarget(allbuild, allBuildGt);
 
   // Refer to the main build configuration file for easy editing.
   std::string listfile = root->GetCurrentSourceDirectory();
@@ -496,7 +495,6 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
 
     cmGeneratorTarget* checkGt = new cmGeneratorTarget(check, root);
     root->AddGeneratorTarget(checkGt);
-    root->GetGlobalGenerator()->AddGeneratorTarget(check, checkGt);
     }
 
   // now make the allbuild depend on all the non-utility targets
@@ -1362,12 +1360,17 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::ForceLinkerLanguages()
 {
-  // This makes sure all targets link using the proper language.
-  for(TargetMap::const_iterator
-        ti = this->TotalTargets.begin(); ti != this->TotalTargets.end(); ++ti)
+  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    cmGeneratorTarget* gt = this->GetGeneratorTarget(ti->second);
-    this->ForceLinkerLanguage(gt);
+    std::vector<cmGeneratorTarget*> tgts =
+        this->LocalGenerators[i]->GetGeneratorTargets();
+    // All targets depend on the build-system check target.
+    for(std::vector<cmGeneratorTarget*>::const_iterator ti = tgts.begin();
+        ti != tgts.end(); ++ti)
+      {
+      // This makes sure all targets link using the proper language.
+      this->ForceLinkerLanguage(*ti);
+      }
     }
 }
 
@@ -1420,7 +1423,7 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmGeneratorTarget* gtgt)
 bool cmGlobalXCodeGenerator::IsHeaderFile(cmSourceFile* sf)
 {
   const std::vector<std::string>& hdrExts =
-    this->CurrentMakefile->GetHeaderExtensions();
+    this->CMakeInstance->GetHeaderExtensions();
   return (std::find(hdrExts.begin(), hdrExts.end(), sf->GetExtension()) !=
           hdrExts.end());
 }
@@ -1469,11 +1472,11 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
                                                   cmGeneratorTarget* gtgt)
 {
   std::vector<cmCustomCommand> const & prebuild
-    = gtgt->Target->GetPreBuildCommands();
+    = gtgt->GetPreBuildCommands();
   std::vector<cmCustomCommand> const & prelink
-    = gtgt->Target->GetPreLinkCommands();
+    = gtgt->GetPreLinkCommands();
   std::vector<cmCustomCommand> postbuild
-    = gtgt->Target->GetPostBuildCommands();
+    = gtgt->GetPostBuildCommands();
 
   if(gtgt->GetType() == cmState::SHARED_LIBRARY &&
     !gtgt->IsFrameworkOnApple())
@@ -2141,7 +2144,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     {
     if(gtgt->GetPropertyAsBool("FRAMEWORK"))
       {
-      std::string fw_version = gtgt->Target->GetFrameworkVersion();
+      std::string fw_version = gtgt->GetFrameworkVersion();
       buildSettings->AddAttribute("FRAMEWORK_VERSION",
                                   this->CreateString(fw_version.c_str()));
 
@@ -2486,13 +2489,13 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   // put this last so it can override existing settings
   // Convert "XCODE_ATTRIBUTE_*" properties directly.
   {
-  cmPropertyMap const& props = gtgt->Target->GetProperties();
-  for(cmPropertyMap::const_iterator i = props.begin();
+  std::vector<std::string> const& props = gtgt->GetPropertyKeys();
+  for(std::vector<std::string>::const_iterator i = props.begin();
       i != props.end(); ++i)
     {
-    if(i->first.find("XCODE_ATTRIBUTE_") == 0)
+    if(i->find("XCODE_ATTRIBUTE_") == 0)
       {
-      std::string attribute = i->first.substr(16);
+      std::string attribute = i->substr(16);
       // Handle [variant=<config>] condition explicitly here.
       std::string::size_type beginVariant =
         attribute.find("[variant=");
@@ -2523,7 +2526,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       if (!attribute.empty())
         {
         cmGeneratorExpression ge;
-        std::string processed = ge.Parse(i->second.GetValue())
+        std::string processed = ge.Parse(gtgt->GetProperty(*i))
           ->Evaluate(this->CurrentLocalGenerator, configName);
         buildSettings->AddAttribute(attribute.c_str(),
                                     this->CreateString(processed));

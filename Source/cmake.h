@@ -182,6 +182,11 @@ class cmake
   ///! get the cmCachemManager used by this invocation of cmake
   cmCacheManager *GetCacheManager() { return this->CacheManager; }
 
+  const std::vector<std::string>& GetSourceExtensions() const
+    {return this->SourceFileExtensions;}
+  const std::vector<std::string>& GetHeaderExtensions() const
+    {return this->HeaderFileExtensions;}
+
   /**
    * Given a variable name, return its value (as a string).
    */
@@ -391,6 +396,8 @@ private:
   std::string CheckStampFile;
   std::string CheckStampList;
   std::string VSSolutionFile;
+  std::vector<std::string> SourceFileExtensions;
+  std::vector<std::string> HeaderFileExtensions;
   bool ClearBuildSystem;
   bool DebugTryCompile;
   cmFileTimeComparison* FileComparison;

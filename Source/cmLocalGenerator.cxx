@@ -51,6 +51,8 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
 
   this->Makefile = makefile;
 
+  this->AliasTargets = makefile->GetAliasTargets();
+
   this->EmitUniversalBinaryFlags = true;
   this->BackwardsCompatibility = 0;
   this->BackwardsCompatibilityFinal = false;
@@ -60,6 +62,8 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
 
 cmLocalGenerator::~cmLocalGenerator()
 {
+  cmDeleteAll(this->GeneratorTargets);
+  cmDeleteAll(this->OwnedImportedGeneratorTargets);
 }
 
 void cmLocalGenerator::IssueMessage(cmake::MessageType t,
@@ -453,11 +457,55 @@ void cmLocalGenerator::AddGeneratorTarget(cmGeneratorTarget* gt)
   this->GeneratorTargets.push_back(gt);
 }
 
+void cmLocalGenerator::AddImportedGeneratorTarget(cmGeneratorTarget* gt)
+{
+  this->ImportedGeneratorTargets.push_back(gt);
+}
+
+void cmLocalGenerator::AddOwnedImportedGeneratorTarget(cmGeneratorTarget* gt)
+{
+  this->OwnedImportedGeneratorTargets.push_back(gt);
+}
+
+struct NamedGeneratorTargetFinder
+{
+  NamedGeneratorTargetFinder(std::string const& name)
+    : Name(name)
+  {
+
+  }
+
+  bool operator()(cmGeneratorTarget* tgt)
+  {
+    return tgt->GetName() == this->Name;
+  }
+private:
+  std::string Name;
+};
+
 cmGeneratorTarget* cmLocalGenerator::FindGeneratorTarget(
     const std::string& name) const
 {
-  return this->GetGlobalGenerator()->GetGeneratorTarget(
-        this->Makefile->FindTarget(name));
+  std::map<std::string, std::string>::const_iterator i =
+      this->AliasTargets.find(name);
+  if (i != this->AliasTargets.end())
+    {
+    std::vector<cmGeneratorTarget*>::const_iterator ai =
+        std::find_if(this->GeneratorTargets.begin(),
+                     this->GeneratorTargets.end(),
+                     NamedGeneratorTargetFinder(i->second));
+    return *ai;
+    }
+  std::vector<cmGeneratorTarget*>::const_iterator ti =
+      std::find_if(this->GeneratorTargets.begin(),
+                   this->GeneratorTargets.end(),
+                   NamedGeneratorTargetFinder(name));
+  if ( ti != this->GeneratorTargets.end() )
+    {
+    return *ti;
+    }
+
+  return 0;
 }
 
 //----------------------------------------------------------------------------
@@ -488,6 +536,11 @@ void cmLocalGenerator::ComputeTargetManifest()
       target->ComputeTargetManifest(config);
       }
     }
+}
+
+bool cmLocalGenerator::IsRootMakefile() const
+{
+  return !this->StateSnapshot.GetBuildsystemDirectoryParent().IsValid();
 }
 
 cmState* cmLocalGenerator::GetState() const
@@ -1775,11 +1828,21 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
 cmGeneratorTarget*
 cmLocalGenerator::FindGeneratorTargetToUse(const std::string& name) const
 {
-  if (cmTarget *t = this->Makefile->FindTargetToUse(name))
+  std::vector<cmGeneratorTarget*>::const_iterator
+    imported = std::find_if(this->ImportedGeneratorTargets.begin(),
+                            this->ImportedGeneratorTargets.end(),
+                            NamedGeneratorTargetFinder(name));
+  if(imported != this->ImportedGeneratorTargets.end())
     {
-    return this->GetGlobalGenerator()->GetGeneratorTarget(t);
+    return *imported;
     }
-  return 0;
+
+  if(cmGeneratorTarget* t = this->FindGeneratorTarget(name))
+    {
+    return t;
+    }
+
+  return this->GetGlobalGenerator()->FindGeneratorTarget(name);
 }
 
 //----------------------------------------------------------------------------
@@ -2028,7 +2091,7 @@ AddCompilerRequirementFlag(std::string &flags,
 }
 
 static void AddVisibilityCompileOption(std::string &flags,
-                                       cmTarget const* target,
+                                       cmGeneratorTarget const* target,
                                        cmLocalGenerator *lg,
                                        const std::string& lang,
                                        std::string* warnCMP0063)
@@ -2068,7 +2131,7 @@ static void AddVisibilityCompileOption(std::string &flags,
 }
 
 static void AddInlineVisibilityCompileOption(std::string &flags,
-                                       cmTarget const* target,
+                                       cmGeneratorTarget const* target,
                                        cmLocalGenerator *lg,
                                        std::string* warnCMP0063)
 {
@@ -2121,12 +2184,11 @@ void cmLocalGenerator
       }
     }
 
-  AddVisibilityCompileOption(flags, target->Target, this, lang, pWarnCMP0063);
+  AddVisibilityCompileOption(flags, target, this, lang, pWarnCMP0063);
 
   if(lang == "CXX")
     {
-    AddInlineVisibilityCompileOption(flags, target->Target,
-                                     this, pWarnCMP0063);
+    AddInlineVisibilityCompileOption(flags, target, this, pWarnCMP0063);
     }
 
   if (!warnCMP0063.empty() &&
@@ -2201,7 +2263,7 @@ bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
 
     if (flags && flags != originalFlags)
       {
-      switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0018))
+      switch (this->GetPolicyStatus(cmPolicies::CMP0018))
         {
         case cmPolicies::WARN:
         {
@@ -2949,7 +3011,7 @@ bool cmLocalGenerator::NeedBackwardsCompatibility_2_4()
 {
   // Check the policy to decide whether to pay attention to this
   // variable.
-  switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0001))
+  switch(this->GetPolicyStatus(cmPolicies::CMP0001))
     {
     case cmPolicies::WARN:
       // WARN is just OLD without warning because user code does not
@@ -2974,6 +3036,12 @@ bool cmLocalGenerator::NeedBackwardsCompatibility_2_4()
   cmIML_INT_uint64_t actual_compat = this->GetBackwardsCompatibility();
   return (actual_compat &&
           actual_compat <= CMake_VERSION_ENCODE(2, 4, 255));
+}
+
+cmPolicies::PolicyStatus
+cmLocalGenerator::GetPolicyStatus(cmPolicies::PolicyID id) const
+{
+  return this->Makefile->GetPolicyStatus(id);
 }
 
 //----------------------------------------------------------------------------

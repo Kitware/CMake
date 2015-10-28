@@ -63,6 +63,7 @@ cmTarget::cmTarget()
   this->IsAndroid = false;
   this->IsApple = false;
   this->IsImportedTarget = false;
+  this->ImportedGloballyVisible = false;
   this->BuildInterfaceIncludesAppended = false;
 }
 
@@ -312,23 +313,6 @@ cmListFileBacktrace const* cmTarget::GetUtilityBacktrace(
   if(i == this->UtilityBacktraces.end()) return 0;
 
   return &i->second;
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::FinishConfigure()
-{
-  // Erase any cached link information that might have been comptued
-  // on-demand during the configuration.  This ensures that build
-  // system generation uses up-to-date information even if other cache
-  // invalidation code in this source file is buggy.
-
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  // Do old-style link dependency analysis only for CM_USE_OLD_VS6.
-  if(this->Makefile->GetGlobalGenerator()->IsForVS6())
-    {
-    this->AnalyzeLibDependenciesForVS6(*this->Makefile);
-    }
-#endif
 }
 
 //----------------------------------------------------------------------------
@@ -1522,9 +1506,10 @@ void cmTarget::CheckProperty(const std::string& prop,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::MarkAsImported()
+void cmTarget::MarkAsImported(bool global)
 {
   this->IsImportedTarget = true;
+  this->ImportedGloballyVisible = global;
 }
 
 //----------------------------------------------------------------------------
@@ -1617,7 +1602,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
         // CMake time.
         cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
         gg->CreateGenerationObjects();
-        cmGeneratorTarget* gt = gg->GetGeneratorTarget(this);
+        cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
         this->Properties.SetProperty(propLOCATION,
                                      gt->GetLocationForBuild());
         }
@@ -1642,7 +1627,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
         {
         cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
         gg->CreateGenerationObjects();
-        cmGeneratorTarget* gt = gg->GetGeneratorTarget(this);
+        cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
         this->Properties.SetProperty(
                 prop, gt->GetFullPath(configName, false).c_str());
         }
@@ -1666,7 +1651,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
           {
           cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
           gg->CreateGenerationObjects();
-          cmGeneratorTarget* gt = gg->GetGeneratorTarget(this);
+          cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
           this->Properties.SetProperty(
                   prop, gt->GetFullPath(configName, false).c_str());
           }
@@ -2045,25 +2030,6 @@ void cmTarget::SetPropertyDefault(const std::string& property,
   else if(default_value)
     {
     this->SetProperty(property, default_value);
-    }
-}
-
-//----------------------------------------------------------------------------
-std::string cmTarget::GetFrameworkVersion() const
-{
-  assert(this->GetType() != cmState::INTERFACE_LIBRARY);
-
-  if(const char* fversion = this->GetProperty("FRAMEWORK_VERSION"))
-    {
-    return fversion;
-    }
-  else if(const char* tversion = this->GetProperty("VERSION"))
-    {
-    return tversion;
-    }
-  else
-    {
-    return "A";
     }
 }
 

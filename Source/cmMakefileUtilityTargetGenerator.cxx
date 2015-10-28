@@ -67,20 +67,20 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
 
   // Utility targets store their rules in pre- and post-build commands.
   this->LocalGenerator->AppendCustomDepends
-    (depends, this->GeneratorTarget->Target->GetPreBuildCommands());
+    (depends, this->GeneratorTarget->GetPreBuildCommands());
 
   this->LocalGenerator->AppendCustomDepends
-    (depends, this->GeneratorTarget->Target->GetPostBuildCommands());
+    (depends, this->GeneratorTarget->GetPostBuildCommands());
 
   this->LocalGenerator->AppendCustomCommands
-    (commands, this->GeneratorTarget->Target->GetPreBuildCommands(),
+    (commands, this->GeneratorTarget->GetPreBuildCommands(),
      this->GeneratorTarget);
 
   // Depend on all custom command outputs for sources
   this->DriveCustomCommands(depends);
 
   this->LocalGenerator->AppendCustomCommands
-    (commands, this->GeneratorTarget->Target->GetPostBuildCommands(),
+    (commands, this->GeneratorTarget->GetPostBuildCommands(),
      this->GeneratorTarget);
 
   // Add dependencies on targets that must be built first.

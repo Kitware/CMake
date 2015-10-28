@@ -796,7 +796,7 @@ std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
   if(!this->UtilityItemsDone)
     {
     this->UtilityItemsDone = true;
-    std::set<std::string> const& utilities = this->Target->GetUtilities();
+    std::set<std::string> const& utilities = this->GetUtilities();
     for(std::set<std::string>::const_iterator i = utilities.begin();
         i != utilities.end(); ++i)
       {
@@ -833,9 +833,32 @@ const char* cmGeneratorTarget::GetLocation(const std::string& config) const
   return location.c_str();
 }
 
+std::vector<cmCustomCommand> const&
+cmGeneratorTarget::GetPreBuildCommands() const
+{
+  return this->Target->GetPreBuildCommands();
+}
+
+std::vector<cmCustomCommand> const&
+cmGeneratorTarget::GetPreLinkCommands() const
+{
+  return this->Target->GetPreLinkCommands();
+}
+
+std::vector<cmCustomCommand> const&
+cmGeneratorTarget::GetPostBuildCommands() const
+{
+  return this->Target->GetPostBuildCommands();
+}
+
 bool cmGeneratorTarget::IsImported() const
 {
   return this->Target->IsImported();
+}
+
+bool cmGeneratorTarget::IsImportedGloballyVisible() const
+{
+  return this->Target->IsImportedGloballyVisible();
 }
 
 //----------------------------------------------------------------------------
@@ -1623,7 +1646,7 @@ cmGeneratorTarget::GetFrameworkDirectory(const std::string& config,
   if(!rootDir && !this->Makefile->PlatformIsAppleIos())
     {
     fpath += "/Versions/";
-    fpath += this->Target->GetFrameworkVersion();
+    fpath += this->GetFrameworkVersion();
     }
   return fpath;
 }
@@ -1714,6 +1737,22 @@ cmListFileBacktrace cmGeneratorTarget::GetBacktrace() const
   return this->Target->GetBacktrace();
 }
 
+const std::vector<std::string>&cmGeneratorTarget::GetLinkDirectories() const
+{
+  return this->Target->GetLinkDirectories();
+}
+
+const std::set<std::string>& cmGeneratorTarget::GetUtilities() const
+{
+  return this->Target->GetUtilities();
+}
+
+const cmListFileBacktrace*
+cmGeneratorTarget::GetUtilityBacktrace(const std::string& u) const
+{
+  return this->Target->GetUtilityBacktrace(u);
+}
+
 //----------------------------------------------------------------------------
 bool cmGeneratorTarget::HaveWellDefinedOutputFiles() const
 {
@@ -1759,7 +1798,7 @@ public:
                                UNORDERED_SET<std::string>& languages,
                                cmGeneratorTarget const* head):
     Config(config), Languages(languages), HeadTarget(head),
-    Makefile(target->Target->GetMakefile()), Target(target)
+    Target(target)
   { this->Visited.insert(target); }
 
   void Visit(cmLinkItem const& item)
@@ -1771,7 +1810,8 @@ public:
         bool noMessage = false;
         cmake::MessageType messageType = cmake::FATAL_ERROR;
         std::stringstream e;
-        switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0028))
+        switch(this->Target->GetLocalGenerator()
+               ->GetPolicyStatus(cmPolicies::CMP0028))
           {
           case cmPolicies::WARN:
             {
@@ -1825,7 +1865,6 @@ private:
   std::string Config;
   UNORDERED_SET<std::string>& Languages;
   cmGeneratorTarget const* HeadTarget;
-  cmMakefile* Makefile;
   const cmGeneratorTarget* Target;
   std::set<cmGeneratorTarget const*> Visited;
 };
@@ -2267,11 +2306,11 @@ cmTargetTraceDependencies
 
   // Queue pre-build, pre-link, and post-build rule dependencies.
   this->CheckCustomCommands(
-        this->GeneratorTarget->Target->GetPreBuildCommands());
+        this->GeneratorTarget->GetPreBuildCommands());
   this->CheckCustomCommands(
-        this->GeneratorTarget->Target->GetPreLinkCommands());
+        this->GeneratorTarget->GetPreLinkCommands());
   this->CheckCustomCommands(
-        this->GeneratorTarget->Target->GetPostBuildCommands());
+        this->GeneratorTarget->GetPostBuildCommands());
 }
 
 //----------------------------------------------------------------------------
@@ -3313,7 +3352,7 @@ void cmGeneratorTarget::GetLibraryNames(std::string& name,
     if(!this->Makefile->PlatformIsAppleIos())
       {
       realName += "Versions/";
-      realName += this->Target->GetFrameworkVersion();
+      realName += this->GetFrameworkVersion();
       realName += "/";
       }
     realName += base;
@@ -4217,9 +4256,11 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
                                           PropertyType *)
 {
   PropertyType propContent = getTypedProperty<PropertyType>(tgt, p);
-  const bool explicitlySet = tgt->Target->GetProperties()
-                                  .find(p)
-                                  != tgt->Target->GetProperties().end();
+  std::vector<std::string> headPropKeys = tgt->GetPropertyKeys();
+  const bool explicitlySet =
+      std::find(headPropKeys.begin(), headPropKeys.end(),
+                p) != headPropKeys.end();
+
   const bool impliedByUse =
           tgt->IsNullImpliedByLinkLibraries(p);
   assert((impliedByUse ^ explicitlySet)
@@ -4264,9 +4305,11 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
 
     cmGeneratorTarget const* theTarget = *li;
 
-    const bool ifaceIsSet = theTarget->Target->GetProperties()
-                            .find(interfaceProperty)
-                            != theTarget->Target->GetProperties().end();
+    std::vector<std::string> propKeys = theTarget->GetPropertyKeys();
+
+    const bool ifaceIsSet =
+        std::find(propKeys.begin(), propKeys.end(),
+                  interfaceProperty) != propKeys.end();
     PropertyType ifacePropContent =
                     getTypedProperty<PropertyType>(theTarget,
                               interfaceProperty);
@@ -4508,6 +4551,25 @@ void cmGeneratorTarget::GetTargetVersion(bool soversion,
 }
 
 //----------------------------------------------------------------------------
+std::string cmGeneratorTarget::GetFrameworkVersion() const
+{
+  assert(this->GetType() != cmState::INTERFACE_LIBRARY);
+
+  if(const char* fversion = this->GetProperty("FRAMEWORK_VERSION"))
+    {
+    return fversion;
+    }
+  else if(const char* tversion = this->GetProperty("VERSION"))
+    {
+    return tversion;
+    }
+  else
+    {
+    return "A";
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmGeneratorTarget::ComputeVersionedName(std::string& vName,
                                     std::string const& prefix,
                                     std::string const& base,
@@ -4522,6 +4584,19 @@ void cmGeneratorTarget::ComputeVersionedName(std::string& vName,
     vName += version;
     }
   vName += this->Makefile->IsOn("APPLE") ? suffix : std::string();
+}
+
+std::vector<std::string> cmGeneratorTarget::GetPropertyKeys() const
+{
+  cmPropertyMap propsObject = this->Target->GetProperties();
+  std::vector<std::string> props;
+  props.reserve(propsObject.size());
+  for (cmPropertyMap::const_iterator it = propsObject.begin();
+       it != propsObject.end(); ++it)
+    {
+    props.push_back(it->first);
+    }
+  return props;
 }
 
 //----------------------------------------------------------------------------
@@ -4717,7 +4792,7 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
     iface.WrongConfigLibraries = impl->WrongConfigLibraries;
     }
 
-  if(this->Target->LinkLanguagePropagatesToDependents())
+  if(this->LinkLanguagePropagatesToDependents())
     {
     // Targets using this archive need its language runtime libraries.
     if(cmLinkImplementation const* impl =
@@ -5432,7 +5507,7 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
   }
 
   // Get the link languages.
-  if(this->Target->LinkLanguagePropagatesToDependents())
+  if(this->LinkLanguagePropagatesToDependents())
     {
     std::string linkProp = "IMPORTED_LINK_INTERFACE_LANGUAGES";
     linkProp += suffix;
@@ -5490,7 +5565,7 @@ cmGeneratorTarget::GetLinkImplementation(const std::string& config) const
     }
 
   std::string CONFIG = cmSystemTools::UpperCase(config);
-  cmOptionalLinkImplementation& impl = this->LinkImplMap[CONFIG][this->Target];
+  cmOptionalLinkImplementation& impl = this->LinkImplMap[CONFIG][this];
   if(!impl.LibrariesDone)
     {
     impl.LibrariesDone = true;
@@ -5770,7 +5845,7 @@ cmGeneratorTarget::GetLinkImplementationLibrariesInternal(
     return &hm.begin()->second;
     }
 
-  cmOptionalLinkImplementation& impl = hm[head->Target];
+  cmOptionalLinkImplementation& impl = hm[head];
   if(!impl.LibrariesDone)
     {
     impl.LibrariesDone = true;

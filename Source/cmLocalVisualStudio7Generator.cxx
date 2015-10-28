@@ -783,10 +783,10 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   intermediateDir += "/";
   intermediateDir += configName;
 
-  if (target->Target->GetType() < cmState::UTILITY)
+  if (target->GetType() < cmState::UTILITY)
     {
     std::string const& outDir =
-      target->Target->GetType() == cmState::OBJECT_LIBRARY?
+      target->GetType() == cmState::OBJECT_LIBRARY?
       intermediateDir : target->GetDirectory(configName);
     fout << "\t\t\tOutputDirectory=\""
          << this->ConvertToXMLOutputPathSingle(outDir.c_str()) << "\"\n";
@@ -837,7 +837,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   if(this->FortranProject)
     {
     const char* target_mod_dir =
-      target->Target->GetProperty("Fortran_MODULE_DIRECTORY");
+      target->GetProperty("Fortran_MODULE_DIRECTORY");
     std::string modDir;
     if(target_mod_dir)
       {
@@ -877,7 +877,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   targetOptions.OutputFlagMap(fout, "\t\t\t\t");
   targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "\n", "CXX");
   fout << "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n";
-  if(target->Target->GetType() <= cmState::OBJECT_LIBRARY)
+  if(target->GetType() <= cmState::OBJECT_LIBRARY)
     {
     // Specify the compiler program database file if configured.
     std::string pdb = target->GetCompilePDBPath(configName);
@@ -2021,7 +2021,7 @@ void cmLocalVisualStudio7Generator
   const char* tool =
     this->FortranProject? "VFPreBuildEventTool":"VCPreBuildEventTool";
   event.Start(tool);
-  event.Write(target->Target->GetPreBuildCommands());
+  event.Write(target->GetPreBuildCommands());
   event.Finish();
 
   // Add pre-link event.
@@ -2035,7 +2035,7 @@ void cmLocalVisualStudio7Generator
       {
       addedPrelink = true;
       std::vector<cmCustomCommand> commands =
-        target->Target->GetPreLinkCommands();
+        target->GetPreLinkCommands();
       cmGlobalVisualStudioGenerator* gg
         = static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator);
       gg->AddSymbolExportCommand(
@@ -2045,7 +2045,7 @@ void cmLocalVisualStudio7Generator
     }
   if (!addedPrelink)
     {
-    event.Write(target->Target->GetPreLinkCommands());
+    event.Write(target->GetPreLinkCommands());
     }
   cmsys::auto_ptr<cmCustomCommand> pcc(
     this->MaybeCreateImplibDir(target,
@@ -2059,7 +2059,7 @@ void cmLocalVisualStudio7Generator
   // Add post-build event.
   tool = this->FortranProject? "VFPostBuildEventTool":"VCPostBuildEventTool";
   event.Start(tool);
-  event.Write(target->Target->GetPostBuildCommands());
+  event.Write(target->GetPostBuildCommands());
   event.Finish();
 }
 
@@ -2219,17 +2219,18 @@ void cmLocalVisualStudio7Generator::WriteVCProjFooter(
 {
   fout << "\t<Globals>\n";
 
-  cmPropertyMap const& props = target->Target->GetProperties();
-  for(cmPropertyMap::const_iterator i = props.begin(); i != props.end(); ++i)
+  std::vector<std::string> const& props = target->GetPropertyKeys();
+  for(std::vector<std::string>::const_iterator i = props.begin();
+      i != props.end(); ++i)
     {
-    if(i->first.find("VS_GLOBAL_") == 0)
+    if(i->find("VS_GLOBAL_") == 0)
       {
-      std::string name = i->first.substr(10);
+      std::string name = i->substr(10);
       if(name != "")
         {
         fout << "\t\t<Global\n"
              << "\t\t\tName=\"" << name << "\"\n"
-             << "\t\t\tValue=\"" << i->second.GetValue() << "\"\n"
+             << "\t\t\tValue=\"" << target->GetProperty(*i) << "\"\n"
              << "\t\t/>\n";
         }
       }

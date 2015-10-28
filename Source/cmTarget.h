@@ -75,7 +75,7 @@ public:
    */
   void SetType(cmState::TargetType f, const std::string& name);
 
-  void MarkAsImported();
+  void MarkAsImported(bool global = false);
 
   ///! Set/Get the name of the target
   const std::string& GetName() const {return this->Name;}
@@ -176,9 +176,6 @@ public:
   std::set<std::string>const& GetUtilities() const { return this->Utilities; }
   cmListFileBacktrace const* GetUtilityBacktrace(const std::string& u) const;
 
-  /** Finalize the target at the end of the Configure step.  */
-  void FinishConfigure();
-
   ///! Set/Get a property of this target file
   void SetProperty(const std::string& prop, const char *value);
   void AppendProperty(const std::string&  prop, const char* value,
@@ -189,6 +186,8 @@ public:
   void CheckProperty(const std::string& prop, cmMakefile* context) const;
 
   bool IsImported() const {return this->IsImportedTarget;}
+  bool IsImportedGloballyVisible() const
+  { return this->ImportedGloballyVisible; }
 
   // Get the properties
   cmPropertyMap &GetProperties() const { return this->Properties; }
@@ -208,10 +207,6 @@ public:
 
   /** Return whether this target is an executable Bundle on Apple.  */
   bool IsAppBundleOnApple() const;
-
-  /** Return the framework version string.  Undefined if
-      IsFrameworkOnApple returns false.  */
-  std::string GetFrameworkVersion() const;
 
   /** Get a backtrace from the creation of the target.  */
   cmListFileBacktrace const& GetBacktrace() const;
@@ -234,9 +229,6 @@ public:
   std::set<std::string> const & GetSystemIncludeDirectories() const
     { return this->SystemIncludeDirectories; }
 
-  bool LinkLanguagePropagatesToDependents() const
-  { return this->TargetTypeValue == cmState::STATIC_LIBRARY; }
-
   cmStringRange GetIncludeDirectoriesEntries() const;
   cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
 
@@ -254,10 +246,11 @@ public:
   cmStringRange GetLinkImplementationEntries() const;
   cmBacktraceRange GetLinkImplementationBacktraces() const;
 
-
 #if defined(_WIN32) && !defined(__CYGWIN__)
   const LinkLibraryVectorType &GetLinkLibrariesForVS6() const {
   return this->LinkLibrariesForVS6;}
+
+  void AnalyzeLibDependenciesForVS6( const cmMakefile& mf );
 #endif
 
   struct StrictTargetComparison {
@@ -316,8 +309,6 @@ private:
   void GatherDependenciesForVS6( const cmMakefile& mf,
                                  const LibraryID& lib,
                                  DependencyMap& dep_map);
-
-  void AnalyzeLibDependenciesForVS6( const cmMakefile& mf );
 #endif
 
   const char* GetSuffixVariableInternal(bool implib) const;
@@ -360,6 +351,7 @@ private:
   bool IsAndroid;
   bool IsApple;
   bool IsImportedTarget;
+  bool ImportedGloballyVisible;
   bool BuildInterfaceIncludesAppended;
 #if defined(_WIN32) && !defined(__CYGWIN__)
   bool LinkLibrariesForVS6Analyzed;

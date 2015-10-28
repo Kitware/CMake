@@ -33,8 +33,8 @@ void cmNinjaUtilityTargetGenerator::Generate()
   cmNinjaDeps deps, outputs, util_outputs(1, utilCommandName);
 
   const std::vector<cmCustomCommand> *cmdLists[2] = {
-    &this->GetGeneratorTarget()->Target->GetPreBuildCommands(),
-    &this->GetGeneratorTarget()->Target->GetPostBuildCommands()
+    &this->GetGeneratorTarget()->GetPreBuildCommands(),
+    &this->GetGeneratorTarget()->GetPostBuildCommands()
   };
 
   bool uses_terminal = false;

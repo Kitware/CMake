@@ -235,7 +235,7 @@ void cmGlobalVisualStudio6Generator
       std::string project = target->GetName();
       std::string location = expath;
       this->WriteExternalProject(fout, project.c_str(),
-          location.c_str(), target->Target->GetUtilities());
+          location.c_str(), target->GetUtilities());
       }
     else
       {

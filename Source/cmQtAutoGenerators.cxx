@@ -528,7 +528,7 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
   cmSystemTools::ExpandListArgument(this->Sources, sourceFiles);
 
   const std::vector<std::string>& headerExtensions =
-                                               makefile->GetHeaderExtensions();
+      makefile->GetCMakeInstance()->GetHeaderExtensions();
 
   std::map<std::string, std::vector<std::string> > includedUis;
   std::map<std::string, std::vector<std::string> > skippedUis;

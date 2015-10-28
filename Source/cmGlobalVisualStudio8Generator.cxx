@@ -257,7 +257,6 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
 
   cmGeneratorTarget* gt = new cmGeneratorTarget(tgt, lg);
   lg->AddGeneratorTarget(gt);
-  this->AddGeneratorTarget(tgt, gt);
 
   // Organize in the "predefined targets" folder:
   //
@@ -354,14 +353,18 @@ void cmGlobalVisualStudio8Generator::AddExtraIDETargets()
   cmGlobalVisualStudio7Generator::AddExtraIDETargets();
   if(this->AddCheckTarget())
     {
-    // All targets depend on the build-system check target.
-    for(TargetMap::const_iterator
-          ti = this->TotalTargets.begin();
-        ti != this->TotalTargets.end(); ++ti)
+    for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
       {
-      if(ti->first != CMAKE_CHECK_BUILD_SYSTEM_TARGET)
+      std::vector<cmGeneratorTarget*> tgts =
+          this->LocalGenerators[i]->GetGeneratorTargets();
+      // All targets depend on the build-system check target.
+      for(std::vector<cmGeneratorTarget*>::iterator ti = tgts.begin();
+          ti != tgts.end(); ++ti)
         {
-        ti->second->AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
+        if((*ti)->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET)
+          {
+          (*ti)->Target->AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
+          }
         }
       }
     }
@@ -464,8 +467,8 @@ bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
 {
   // Look for utility dependencies that magically link.
   for(std::set<std::string>::const_iterator ui =
-        target->Target->GetUtilities().begin();
-      ui != target->Target->GetUtilities().end(); ++ui)
+        target->GetUtilities().begin();
+      ui != target->GetUtilities().end(); ++ui)
     {
     if(cmGeneratorTarget* depTarget =
         target->GetLocalGenerator()->FindGeneratorTargetToUse(ui->c_str()))

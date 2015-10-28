@@ -105,16 +105,18 @@ cmExportTryCompileFileGenerator::PopulateProperties(
                                  ImportPropertyMap& properties,
                                  std::set<cmGeneratorTarget const*> &emitted)
 {
-  cmPropertyMap props = target->Target->GetProperties();
-  for(cmPropertyMap::const_iterator i = props.begin(); i != props.end(); ++i)
+  std::vector<std::string> props = target->GetPropertyKeys();
+  for(std::vector<std::string>::const_iterator i = props.begin();
+      i != props.end(); ++i)
     {
-    properties[i->first] = i->second.GetValue();
 
-    if(i->first.find("IMPORTED_LINK_INTERFACE_LIBRARIES") == 0
-        || i->first.find("IMPORTED_LINK_DEPENDENT_LIBRARIES") == 0
-        || i->first.find("INTERFACE_LINK_LIBRARIES") == 0)
+    properties[*i] = target->GetProperty(*i);
+
+    if(i->find("IMPORTED_LINK_INTERFACE_LIBRARIES") == 0
+        || i->find("IMPORTED_LINK_DEPENDENT_LIBRARIES") == 0
+        || i->find("INTERFACE_LINK_LIBRARIES") == 0)
       {
-      std::string evalResult = this->FindTargets(i->first,
+      std::string evalResult = this->FindTargets(*i,
                                                  target, emitted);
 
       std::vector<std::string> depends;

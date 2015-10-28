@@ -879,10 +879,7 @@ cmExportFileGenerator
   if(target->GetType() == cmState::SHARED_LIBRARY ||
      target->GetType() == cmState::MODULE_LIBRARY)
     {
-    // Check whether this is a DLL platform.
-    bool dll_platform =
-      (mf->IsOn("WIN32") || mf->IsOn("CYGWIN") || mf->IsOn("MINGW"));
-    if(!dll_platform)
+    if(!target->IsDLLPlatform())
       {
       std::string prop;
       std::string value;
