@@ -586,7 +586,7 @@ _cpack_set_default(CPACK_WIX_SIZEOF_VOID_P "${CMAKE_SIZEOF_VOID_P}")
 
 # set sysroot so SDK tools can be used
 if(CMAKE_OSX_SYSROOT)
-  _cpack_set_default(CPACK_OSX_SYSROOT "${CMAKE_OSX_SYSROOT}")
+  _cpack_set_default(CPACK_OSX_SYSROOT "${_CMAKE_OSX_SYSROOT_PATH}")
 endif()
 
 if(DEFINED CPACK_COMPONENTS_ALL)
