@@ -490,11 +490,30 @@ static std::string ListQt5RccInputs(cmSourceFile* sf,
 {
   std::string rccCommand
       = GetRccExecutable(target);
+
+  bool hasDashDashList = false;
+  {
+  std::vector<std::string> command;
+  command.push_back(rccCommand);
+  command.push_back("--help");
+  std::string rccStdOut;
+  std::string rccStdErr;
+  int retVal = 0;
+  bool result = cmSystemTools::RunSingleCommand(
+    command, &rccStdOut, &rccStdErr,
+    &retVal, 0, cmSystemTools::OUTPUT_NONE);
+  if (result && retVal == 0 &&
+      rccStdOut.find("--list") != std::string::npos)
+    {
+    hasDashDashList = true;
+    }
+  }
+
   std::vector<std::string> qrcEntries;
 
   std::vector<std::string> command;
   command.push_back(rccCommand);
-  command.push_back("--list");
+  command.push_back(hasDashDashList? "--list" : "-list");
 
   std::string absFile = cmsys::SystemTools::GetRealPath(
                                               sf->GetFullPath());
