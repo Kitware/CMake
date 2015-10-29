@@ -17,7 +17,9 @@
 
 # if defined(_MSC_VER)
         PRINT *, 'INFO:simulate[MSVC]'
-#  if _MSC_VER >= 1800
+#  if _MSC_VER >= 1900
+        PRINT *, 'INFO:simulate_version[019.00]'
+#  elif _MSC_VER >= 1800
         PRINT *, 'INFO:simulate_version[018.00]'
 #  elif _MSC_VER >= 1700
         PRINT *, 'INFO:simulate_version[017.00]'
