@@ -1311,6 +1311,10 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
     {
     tool = "Image";
     }
+  else if(ext == "resw")
+    {
+    tool = "PRIResource";
+    }
   else if(ext == "xml")
     {
     tool = "XML";
