@@ -328,7 +328,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
       if (_pkg_check_modules_pkg_op)
         list(APPEND _pkg_check_modules_exist_query "${_pkg_check_modules_pkg_ver}")
       else()
-        list(APPEND _pkg_check_modules_exist_query --exists)
+        list(APPEND _pkg_check_modules_exist_query --exists --print-errors --short-errors)
       endif()
 
       _pkgconfig_unset(${_prefix}_${_pkg_check_modules_pkg_name}_VERSION)
@@ -342,12 +342,14 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
       # execute the query
       execute_process(
         COMMAND ${PKG_CONFIG_EXECUTABLE} ${_pkg_check_modules_exist_query}
-        RESULT_VARIABLE _pkgconfig_retval)
+        RESULT_VARIABLE _pkgconfig_retval
+        ERROR_VARIABLE _pkgconfig_error
+        ERROR_STRIP_TRAILING_WHITESPACE)
 
       # evaluate result and tell failures
       if (_pkgconfig_retval)
         if(NOT ${_is_silent})
-          message(STATUS "  Package '${_pkg_check_modules_pkg}' not found")
+          message(STATUS "  ${_pkgconfig_error}")
         endif()
 
         set(_pkg_check_modules_failed 1)
