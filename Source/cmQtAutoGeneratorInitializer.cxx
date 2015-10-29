@@ -494,7 +494,7 @@ static std::string ListQt5RccInputs(cmSourceFile* sf,
 
   std::vector<std::string> command;
   command.push_back(rccCommand);
-  command.push_back("-list");
+  command.push_back("--list");
 
   std::string absFile = cmsys::SystemTools::GetRealPath(
                                               sf->GetFullPath());
