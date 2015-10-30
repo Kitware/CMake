@@ -3398,6 +3398,9 @@ bool cmGlobalXCodeGenerator
     group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
     group->AddAttribute("BuildIndependentTargetsInParallel",
                         this->CreateString("YES"));
+    std::ostringstream v;
+    v << std::setfill('0') << std::setw(4) << XcodeVersion * 10;
+    group->AddAttribute("LastUpgradeCheck", this->CreateString(v.str()));
     this->RootObject->AddAttribute("attributes", group);
     if (this->XcodeVersion >= 32)
       this->RootObject->AddAttribute("compatibilityVersion",
