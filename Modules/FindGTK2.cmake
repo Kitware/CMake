@@ -34,6 +34,7 @@
 #    GTK2_FOUND - Were all of your specified components found?
 #    GTK2_INCLUDE_DIRS - All include directories
 #    GTK2_LIBRARIES - All libraries
+#    GTK2_TARGETS - All imported targets
 #    GTK2_DEFINITIONS - Additional compiler flags
 #
 #
@@ -550,6 +551,9 @@ function(_GTK2_ADD_TARGET _var)
 
         add_library(GTK2::${_basename} UNKNOWN IMPORTED)
 
+        set(GTK2_TARGETS ${GTK2_TARGETS} GTK2::${_basename})
+        set(GTK2_TARGETS ${GTK2_TARGETS} PARENT_SCOPE)
+
         if(GTK2_${_var}_LIBRARY_RELEASE)
             set_property(TARGET GTK2::${_basename} APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
             set_property(TARGET GTK2::${_basename}        PROPERTY IMPORTED_LOCATION_RELEASE "${GTK2_${_var}_LIBRARY_RELEASE}" )
@@ -602,6 +606,7 @@ endfunction()
 set(GTK2_FOUND)
 set(GTK2_INCLUDE_DIRS)
 set(GTK2_LIBRARIES)
+set(GTK2_TARGETS)
 set(GTK2_DEFINITIONS)
 
 if(NOT GTK2_FIND_COMPONENTS)
@@ -940,6 +945,11 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
     endif()
 endforeach()
 
+if(GTK2_USE_IMPORTED_TARGETS)
+    set(GTK2_LIBRARIES ${GTK2_TARGETS})
+endif()
+
+
 if(_GTK2_did_we_find_everything AND NOT GTK2_VERSION_CHECK_FAILED)
     set(GTK2_FOUND true)
 else()
@@ -951,6 +961,7 @@ else()
     set(GTK2_VERSION_PATCH)
     set(GTK2_INCLUDE_DIRS)
     set(GTK2_LIBRARIES)
+    set(GTK2_TARGETS)
     set(GTK2_DEFINITIONS)
 endif()
 
