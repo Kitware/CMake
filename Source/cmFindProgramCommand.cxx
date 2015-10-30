@@ -176,6 +176,13 @@ std::string cmFindProgramCommand::FindNormalProgramNamesPerDir()
     {
     helper.AddName(*ni);
     }
+
+  // Check for the names themselves (e.g. absolute paths).
+  if (helper.CheckDirectory(std::string()))
+    {
+    return helper.BestPath;
+    }
+
   // Search every directory.
   for (std::vector<std::string>::const_iterator
          p = this->SearchPaths.begin(); p != this->SearchPaths.end(); ++p)
@@ -199,6 +206,12 @@ std::string cmFindProgramCommand::FindNormalProgramDirsPerName()
     {
     // Switch to searching for this name.
     helper.SetName(*ni);
+
+    // Check for the name by itself (e.g. an absolute path).
+    if (helper.CheckDirectory(std::string()))
+      {
+      return helper.BestPath;
+      }
 
     // Search every directory.
     for (std::vector<std::string>::const_iterator
