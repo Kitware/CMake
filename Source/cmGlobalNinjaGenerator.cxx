@@ -548,11 +548,11 @@ void cmGlobalNinjaGenerator::Generate()
 {
   // Check minimum Ninja version.
   if (cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
-                                    CurrentNinjaVersion().c_str(),
+                                    this->NinjaVersion.c_str(),
                                     RequiredNinjaVersion().c_str()))
     {
     std::ostringstream msg;
-    msg << "The detected version of Ninja (" << this->CurrentNinjaVersion();
+    msg << "The detected version of Ninja (" << this->NinjaVersion;
     msg << ") is less than the version of Ninja required by CMake (";
     msg << this->RequiredNinjaVersion() << ").";
     this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, msg.str());
@@ -591,6 +591,14 @@ void cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
   if (const char* ninjaCommand = mf->GetDefinition("CMAKE_MAKE_PROGRAM"))
     {
     this->NinjaCommand = ninjaCommand;
+    std::vector<std::string> command;
+    command.push_back(this->NinjaCommand);
+    command.push_back("--version");
+    std::string version;
+    cmSystemTools::RunSingleCommand(command,
+                                    &version, 0, 0, 0,
+                                    cmSystemTools::OUTPUT_NONE);
+    this->NinjaVersion = cmSystemTools::TrimWhitespace(version);
     }
 }
 
@@ -1275,21 +1283,10 @@ std::string cmGlobalNinjaGenerator::ninjaCmd() const
   return "ninja";
 }
 
-std::string cmGlobalNinjaGenerator::CurrentNinjaVersion() const
-{
-  std::string version;
-  std::string command = ninjaCmd() + " --version";
-  cmSystemTools::RunSingleCommand(command.c_str(),
-                                  &version, 0, 0, 0,
-                                  cmSystemTools::OUTPUT_NONE);
-
-  return cmSystemTools::TrimWhitespace(version);
-}
-
 bool cmGlobalNinjaGenerator::SupportsConsolePool() const
 {
   return cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
-    CurrentNinjaVersion().c_str(),
+    this->NinjaVersion.c_str(),
     RequiredNinjaVersionForConsolePool().c_str()) == false;
 }
 

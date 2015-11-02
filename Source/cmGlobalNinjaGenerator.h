@@ -305,7 +305,6 @@ public:
 
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 
-  std::string CurrentNinjaVersion() const;
   // Ninja generator uses 'deps' and 'msvc_deps_prefix' introduced in 1.3
   static std::string RequiredNinjaVersion() { return "1.3"; }
   static std::string RequiredNinjaVersionForConsolePool() { return "1.5"; }
@@ -394,6 +393,7 @@ private:
   TargetAliasMap TargetAliases;
 
   std::string NinjaCommand;
+  std::string NinjaVersion;
 };
 
 #endif // ! cmGlobalNinjaGenerator_h
