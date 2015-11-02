@@ -1613,6 +1613,12 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
     (*this->BuildFileStream ) << cmVS10EscapeXML(obj) << "\" />\n";
     }
 
+  if (cmSourceFile const* defsrc =
+      this->GeneratorTarget->GetModuleDefinitionFile(""))
+    {
+    this->WriteSource("None", defsrc);
+    }
+
   if (this->IsMissingFiles)
     {
     this->WriteMissingFiles();
