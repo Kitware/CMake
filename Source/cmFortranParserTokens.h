@@ -48,64 +48,66 @@ extern int cmFortran_yydebug;
     EOSTMT = 258,
     ASSIGNMENT_OP = 259,
     GARBAGE = 260,
-    CPP_INCLUDE = 261,
-    F90PPR_INCLUDE = 262,
-    COCO_INCLUDE = 263,
-    F90PPR_DEFINE = 264,
-    CPP_DEFINE = 265,
-    F90PPR_UNDEF = 266,
-    CPP_UNDEF = 267,
-    CPP_IFDEF = 268,
-    CPP_IFNDEF = 269,
-    CPP_IF = 270,
-    CPP_ELSE = 271,
-    CPP_ELIF = 272,
-    CPP_ENDIF = 273,
-    F90PPR_IFDEF = 274,
-    F90PPR_IFNDEF = 275,
-    F90PPR_IF = 276,
-    F90PPR_ELSE = 277,
-    F90PPR_ELIF = 278,
-    F90PPR_ENDIF = 279,
-    COMMA = 280,
-    DCOLON = 281,
-    CPP_TOENDL = 282,
-    UNTERMINATED_STRING = 283,
-    STRING = 284,
-    WORD = 285,
-    CPP_INCLUDE_ANGLE = 286
+    CPP_LINE_DIRECTIVE = 261,
+    CPP_INCLUDE = 262,
+    F90PPR_INCLUDE = 263,
+    COCO_INCLUDE = 264,
+    F90PPR_DEFINE = 265,
+    CPP_DEFINE = 266,
+    F90PPR_UNDEF = 267,
+    CPP_UNDEF = 268,
+    CPP_IFDEF = 269,
+    CPP_IFNDEF = 270,
+    CPP_IF = 271,
+    CPP_ELSE = 272,
+    CPP_ELIF = 273,
+    CPP_ENDIF = 274,
+    F90PPR_IFDEF = 275,
+    F90PPR_IFNDEF = 276,
+    F90PPR_IF = 277,
+    F90PPR_ELSE = 278,
+    F90PPR_ELIF = 279,
+    F90PPR_ENDIF = 280,
+    COMMA = 281,
+    DCOLON = 282,
+    CPP_TOENDL = 283,
+    UNTERMINATED_STRING = 284,
+    STRING = 285,
+    WORD = 286,
+    CPP_INCLUDE_ANGLE = 287
   };
 #endif
 /* Tokens.  */
 #define EOSTMT 258
 #define ASSIGNMENT_OP 259
 #define GARBAGE 260
-#define CPP_INCLUDE 261
-#define F90PPR_INCLUDE 262
-#define COCO_INCLUDE 263
-#define F90PPR_DEFINE 264
-#define CPP_DEFINE 265
-#define F90PPR_UNDEF 266
-#define CPP_UNDEF 267
-#define CPP_IFDEF 268
-#define CPP_IFNDEF 269
-#define CPP_IF 270
-#define CPP_ELSE 271
-#define CPP_ELIF 272
-#define CPP_ENDIF 273
-#define F90PPR_IFDEF 274
-#define F90PPR_IFNDEF 275
-#define F90PPR_IF 276
-#define F90PPR_ELSE 277
-#define F90PPR_ELIF 278
-#define F90PPR_ENDIF 279
-#define COMMA 280
-#define DCOLON 281
-#define CPP_TOENDL 282
-#define UNTERMINATED_STRING 283
-#define STRING 284
-#define WORD 285
-#define CPP_INCLUDE_ANGLE 286
+#define CPP_LINE_DIRECTIVE 261
+#define CPP_INCLUDE 262
+#define F90PPR_INCLUDE 263
+#define COCO_INCLUDE 264
+#define F90PPR_DEFINE 265
+#define CPP_DEFINE 266
+#define F90PPR_UNDEF 267
+#define CPP_UNDEF 268
+#define CPP_IFDEF 269
+#define CPP_IFNDEF 270
+#define CPP_IF 271
+#define CPP_ELSE 272
+#define CPP_ELIF 273
+#define CPP_ENDIF 274
+#define F90PPR_IFDEF 275
+#define F90PPR_IFNDEF 276
+#define F90PPR_IF 277
+#define F90PPR_ELSE 278
+#define F90PPR_ELIF 279
+#define F90PPR_ENDIF 280
+#define COMMA 281
+#define DCOLON 282
+#define CPP_TOENDL 283
+#define UNTERMINATED_STRING 284
+#define STRING 285
+#define WORD 286
+#define CPP_INCLUDE_ANGLE 287
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -116,7 +118,7 @@ union YYSTYPE
 
   char* string;
 
-#line 120 "cmFortranParserTokens.h" /* yacc.c:1909  */
+#line 122 "cmFortranParserTokens.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
