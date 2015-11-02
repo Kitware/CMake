@@ -573,7 +573,7 @@ static void handleSystemIncludesDep(cmLocalGenerator *lg,
   { \
   std::vector<cmSourceFile*> sourceFiles; \
   this->GetSourceFiles(sourceFiles, config); \
-  TagVisitor<DATA ## Tag DATATYPE> visitor(this, data); \
+  TagVisitor< DATA##Tag DATATYPE > visitor(this, data); \
   for(std::vector<cmSourceFile*>::const_iterator si = sourceFiles.begin(); \
       si != sourceFiles.end(); ++si) \
     { \
