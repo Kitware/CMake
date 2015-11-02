@@ -585,6 +585,15 @@ void cmGlobalNinjaGenerator::Generate()
   this->CloseBuildFileStream();
 }
 
+void cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
+{
+  this->cmGlobalGenerator::FindMakeProgram(mf);
+  if (const char* ninjaCommand = mf->GetDefinition("CMAKE_MAKE_PROGRAM"))
+    {
+    this->NinjaCommand = ninjaCommand;
+    }
+}
+
 void cmGlobalNinjaGenerator
 ::EnableLanguage(std::vector<std::string>const& langs,
                  cmMakefile* mf,
@@ -1260,9 +1269,8 @@ std::string cmGlobalNinjaGenerator::ninjaCmd() const
 {
   cmLocalGenerator* lgen = this->LocalGenerators[0];
   if (lgen) {
-    return lgen->ConvertToOutputFormat(
-             lgen->GetMakefile()->GetRequiredDefinition("CMAKE_MAKE_PROGRAM"),
-                                    cmLocalGenerator::SHELL);
+    return lgen->ConvertToOutputFormat(this->NinjaCommand,
+                                       cmLocalGenerator::SHELL);
   }
   return "ninja";
 }

@@ -320,7 +320,7 @@ protected:
 
 private:
   virtual std::string GetEditCacheCommand() const;
-
+  virtual void FindMakeProgram(cmMakefile* mf);
 
   void OpenBuildFileStream();
   void CloseBuildFileStream();
@@ -392,6 +392,8 @@ private:
 
   typedef std::map<std::string, cmGeneratorTarget*> TargetAliasMap;
   TargetAliasMap TargetAliases;
+
+  std::string NinjaCommand;
 };
 
 #endif // ! cmGlobalNinjaGenerator_h
