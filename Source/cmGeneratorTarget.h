@@ -220,7 +220,7 @@ public:
   cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator const* GlobalGenerator;
 
-  std::string GetModuleDefinitionFile(const std::string& config) const;
+  cmSourceFile const* GetModuleDefinitionFile(const std::string& config) const;
 
   /** Return whether or not the target is for a DLL platform.  */
   bool IsDLLPlatform() const;

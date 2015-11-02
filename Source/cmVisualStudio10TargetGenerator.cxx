@@ -2642,10 +2642,11 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
 
   if(this->MSTools)
     {
-    std::string def = this->GeneratorTarget->GetModuleDefinitionFile("");
-    if(!def.empty())
+    if (cmSourceFile const* defsrc =
+        this->GeneratorTarget->GetModuleDefinitionFile(""))
       {
-      linkOptions.AddFlag("ModuleDefinitionFile", def.c_str());
+      linkOptions.AddFlag("ModuleDefinitionFile",
+                          defsrc->GetFullPath().c_str());
       }
     linkOptions.AppendFlag("IgnoreSpecificDefaultLibraries",
                            "%(IgnoreSpecificDefaultLibraries)");

@@ -81,7 +81,7 @@ void cmCommonTargetGenerator::AddFeatureFlags(
 //----------------------------------------------------------------------------
 void cmCommonTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
 {
-  if(this->ModuleDefinitionFile.empty())
+  if(!this->ModuleDefinitionFile)
     {
     return;
     }
@@ -98,7 +98,7 @@ void cmCommonTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
   // vs6's "cl -link" pass it to the linker.
   std::string flag = defFileFlag;
   flag += (this->LocalGenerator->ConvertToLinkReference(
-             this->ModuleDefinitionFile));
+             this->ModuleDefinitionFile->GetFullPath()));
   this->LocalGenerator->AppendFlags(flags, flag);
 }
 

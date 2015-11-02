@@ -54,7 +54,7 @@ protected:
   std::string ConfigName;
 
   // The windows module definition source file (.def), if any.
-  std::string ModuleDefinitionFile;
+  cmSourceFile const* ModuleDefinitionFile;
 
   // Target-wide Fortran module output directory.
   bool FortranModuleDirectoryComputed;
