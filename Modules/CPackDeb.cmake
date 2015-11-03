@@ -8,7 +8,7 @@
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # CPackDeb may be used to create Deb package using CPack.
-# CPackDeb is a CPack generator thus it uses the CPACK_XXX variables
+# CPackDeb is a CPack generator thus it uses the ``CPACK_XXX`` variables
 # used by CPack : https://cmake.org/Wiki/CMake:CPackConfiguration.
 # CPackDeb generator should work on any linux host but it will produce
 # better deb package when Debian specific tools 'dpkg-xxx' are usable on
@@ -18,7 +18,7 @@
 # :code:`CPACK_DEBIAN_XXX` variables.
 #
 # :code:`CPACK_DEBIAN_<COMPONENT>_XXXX` variables may be used in order to have
-# **component** specific values.  Note however that <COMPONENT> refers to the
+# **component** specific values.  Note however that ``<COMPONENT>`` refers to the
 # **grouping name** written in upper case. It may be either a component name or
 # a component GROUP name.
 #
@@ -570,8 +570,8 @@ function(cpack_deb_prepare_package_vars)
       if(DEFINED ${_component_var})
         set(CPACK_DEBIAN_PACKAGE_${dependency_type_} "${${_component_var}}")
         if(CPACK_DEBIAN_PACKAGE_DEBUG)
-          message("CPackDeb Debug: component '${_local_component_name}' ${dependency_type_}"
-            "dependencies set to '${CPACK_DEBIAN_PACKAGE_${dependency_}}'")
+          message("CPackDeb Debug: component '${_local_component_name}' ${dependency_type_} "
+            "dependencies set to '${CPACK_DEBIAN_PACKAGE_${dependency_type_}}'")
         endif()
       endif()
     endforeach()
@@ -672,15 +672,15 @@ function(cpack_deb_prepare_package_vars)
 
   # Print out some debug information if we were asked for that
   if(CPACK_DEBIAN_PACKAGE_DEBUG)
-     message("CPackDeb:Debug: CPACK_TOPLEVEL_DIRECTORY          = ${CPACK_TOPLEVEL_DIRECTORY}")
-     message("CPackDeb:Debug: CPACK_TOPLEVEL_TAG                = ${CPACK_TOPLEVEL_TAG}")
-     message("CPackDeb:Debug: CPACK_TEMPORARY_DIRECTORY         = ${CPACK_TEMPORARY_DIRECTORY}")
-     message("CPackDeb:Debug: CPACK_OUTPUT_FILE_NAME            = ${CPACK_OUTPUT_FILE_NAME}")
-     message("CPackDeb:Debug: CPACK_OUTPUT_FILE_PATH            = ${CPACK_OUTPUT_FILE_PATH}")
-     message("CPackDeb:Debug: CPACK_PACKAGE_FILE_NAME           = ${CPACK_PACKAGE_FILE_NAME}")
-     message("CPackDeb:Debug: CPACK_PACKAGE_INSTALL_DIRECTORY   = ${CPACK_PACKAGE_INSTALL_DIRECTORY}")
-     message("CPackDeb:Debug: CPACK_TEMPORARY_PACKAGE_FILE_NAME = ${CPACK_TEMPORARY_PACKAGE_FILE_NAME}")
-     message("CPackDeb:Debug: CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION = ${CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION}")
+     message("CPackDeb:Debug: CPACK_TOPLEVEL_DIRECTORY          = '${CPACK_TOPLEVEL_DIRECTORY}'")
+     message("CPackDeb:Debug: CPACK_TOPLEVEL_TAG                = '${CPACK_TOPLEVEL_TAG}'")
+     message("CPackDeb:Debug: CPACK_TEMPORARY_DIRECTORY         = '${CPACK_TEMPORARY_DIRECTORY}'")
+     message("CPackDeb:Debug: CPACK_OUTPUT_FILE_NAME            = '${CPACK_OUTPUT_FILE_NAME}'")
+     message("CPackDeb:Debug: CPACK_OUTPUT_FILE_PATH            = '${CPACK_OUTPUT_FILE_PATH}'")
+     message("CPackDeb:Debug: CPACK_PACKAGE_FILE_NAME           = '${CPACK_PACKAGE_FILE_NAME}'")
+     message("CPackDeb:Debug: CPACK_PACKAGE_INSTALL_DIRECTORY   = '${CPACK_PACKAGE_INSTALL_DIRECTORY}'")
+     message("CPackDeb:Debug: CPACK_TEMPORARY_PACKAGE_FILE_NAME = '${CPACK_TEMPORARY_PACKAGE_FILE_NAME}'")
+     message("CPackDeb:Debug: CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION = '${CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION}'")
   endif()
 
   # For debian source packages:
