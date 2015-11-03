@@ -354,7 +354,28 @@
 #    set by Debian policy
 #    https://www.debian.org/doc/debian-policy/ch-files.html#s-permissions-owners
 #
-
+# .. variable:: CPACK_DEBIAN_PACKAGE_SOURCE
+#               CPACK_DEBIAN_<COMPONENT>_PACKAGE_SOURCE
+#
+#  Sets the ``Source`` field of the binary Debian package.
+#  When the binary package name is not the same as the source package name
+#  (in particular when several components/binaries are generated from one
+#  source) the source from which the binary has been generated should be
+#  indicated with the field ``Source``.
+#
+#  * Mandatory : NO
+#  * Default   :
+#
+#    - An empty string for non-component based installations
+#    - :variable:`CPACK_DEBIAN_PACKAGE_SOURCE` for component-based
+#      installations.
+#
+#  See https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Source
+#
+#  .. note::
+#
+#    This value is not interpreted. It is possible to pass an optional
+#    revision number of the referenced source package as well.
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -554,6 +575,15 @@ function(cpack_deb_prepare_package_vars)
       )
   endif()
 
+  # Source: (optional)
+  # in case several packages are constructed from a unique source
+  # (multipackaging), the source may be indicated as well.
+  # The source might contain a version if the generated package
+  # version is different from the source version
+  if(NOT CPACK_DEBIAN_PACKAGE_SOURCE)
+    set(CPACK_DEBIAN_PACKAGE_SOURCE "")
+  endif()
+
   # have a look at get_property(result GLOBAL PROPERTY ENABLED_FEATURES),
   # this returns the successful find_package() calls, maybe this can help
   # Depends:
@@ -563,7 +593,7 @@ function(cpack_deb_prepare_package_vars)
   # if per-component dependency, overrides the global CPACK_DEBIAN_PACKAGE_${dependency_type_}
   # automatic dependency discovery will be performed afterwards.
   if(CPACK_DEB_PACKAGE_COMPONENT)
-    foreach(dependency_type_ DEPENDS RECOMMENDS SUGGESTS PREDEPENDS ENHANCES BREAKS CONFLICTS PROVIDES REPLACES)
+    foreach(dependency_type_ DEPENDS RECOMMENDS SUGGESTS PREDEPENDS ENHANCES BREAKS CONFLICTS PROVIDES REPLACES SOURCE)
       set(_component_var "CPACK_DEBIAN_${_local_component_name}_PACKAGE_${dependency_type_}")
 
       # if set, overrides the global dependency
@@ -681,6 +711,7 @@ function(cpack_deb_prepare_package_vars)
      message("CPackDeb:Debug: CPACK_PACKAGE_INSTALL_DIRECTORY   = '${CPACK_PACKAGE_INSTALL_DIRECTORY}'")
      message("CPackDeb:Debug: CPACK_TEMPORARY_PACKAGE_FILE_NAME = '${CPACK_TEMPORARY_PACKAGE_FILE_NAME}'")
      message("CPackDeb:Debug: CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION = '${CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION}'")
+     message("CPackDeb:Debug: CPACK_DEBIAN_PACKAGE_SOURCE       = '${CPACK_DEBIAN_PACKAGE_SOURCE}'")
   endif()
 
   # For debian source packages:
@@ -719,6 +750,8 @@ function(cpack_deb_prepare_package_vars)
   set(GEN_CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION
       "${CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION}" PARENT_SCOPE)
+  set(GEN_CPACK_DEBIAN_PACKAGE_SOURCE
+     "${CPACK_DEBIAN_PACKAGE_SOURCE}" PARENT_SCOPE)
   set(GEN_WDIR "${WDIR}" PARENT_SCOPE)
 endfunction()
 

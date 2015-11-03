@@ -339,6 +339,9 @@ int cmCPackDebGenerator::createDeb()
       this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_PROVIDES");
   const char* debian_pkg_replaces =
       this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_REPLACES");
+  const char* debian_pkg_source =
+      this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_SOURCE");
+
 
     { // the scope is needed for cmGeneratedFileStream
     cmGeneratedFileStream out(ctlfilename.c_str());
@@ -347,6 +350,10 @@ int cmCPackDebGenerator::createDeb()
     out << "Section: " << debian_pkg_section << "\n";
     out << "Priority: " << debian_pkg_priority << "\n";
     out << "Architecture: " << debian_pkg_arch << "\n";
+    if(debian_pkg_source && *debian_pkg_source)
+      {
+      out << "Source: " << debian_pkg_source << "\n";
+      }
     if(debian_pkg_dep && *debian_pkg_dep)
       {
       out << "Depends: " << debian_pkg_dep << "\n";
