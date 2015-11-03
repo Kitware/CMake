@@ -86,7 +86,7 @@ function(run_lintian lintian_output)
       message(FATAL_ERROR "error: run_lintian needs FILENAME to be set")
     endif()
 
-    # run lintian
+    # run dpkg-deb
     execute_process(COMMAND ${LINTIAN_EXECUTABLE} ${run_lintian_deb_FILENAME}
       WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
       OUTPUT_VARIABLE LINTIAN_OUTPUT
@@ -166,6 +166,10 @@ function(run_dpkgdeb dpkg_deb_output)
       RESULT_VARIABLE DPKGDEB_RESULT
       ERROR_VARIABLE DPKGDEB_ERROR
       OUTPUT_STRIP_TRAILING_WHITESPACE )
+
+    if(NOT ("${DPKGDEB_RESULT}" EQUAL "0"))
+      message(FATAL_ERROR "Error '${DPKGDEB_RESULT}' returned by dpkg-deb: '${DPKGDEB_ERROR}'")
+    endif()
 
     set(${dpkg_deb_output} "${DPKGDEB_OUTPUT}" PARENT_SCOPE)
   else()
