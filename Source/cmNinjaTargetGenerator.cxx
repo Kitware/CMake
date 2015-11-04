@@ -195,9 +195,10 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
   std::transform(deps.begin(), deps.end(), result.begin(), MapToNinjaPath());
 
   // Add a dependency on the link definitions file, if any.
-  if(!this->ModuleDefinitionFile.empty())
+  if(this->ModuleDefinitionFile)
     {
-    result.push_back(this->ConvertToNinjaPath(this->ModuleDefinitionFile));
+    result.push_back(this->ConvertToNinjaPath(
+        this->ModuleDefinitionFile->GetFullPath()));
     }
 
   // Add a dependency on user-specified manifest files, if any.

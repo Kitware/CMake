@@ -1497,9 +1497,9 @@ void cmMakefileTargetGenerator
   this->AppendTargetDepends(depends);
 
   // Add a dependency on the link definitions file, if any.
-  if(!this->ModuleDefinitionFile.empty())
+  if(this->ModuleDefinitionFile)
     {
-    depends.push_back(this->ModuleDefinitionFile);
+    depends.push_back(this->ModuleDefinitionFile->GetFullPath());
     }
 
   // Add a dependency on user-specified manifest files, if any.

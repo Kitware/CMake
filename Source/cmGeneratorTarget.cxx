@@ -573,7 +573,7 @@ static void handleSystemIncludesDep(cmLocalGenerator *lg,
   { \
   std::vector<cmSourceFile*> sourceFiles; \
   this->GetSourceFiles(sourceFiles, config); \
-  TagVisitor<DATA ## Tag DATATYPE> visitor(this, data); \
+  TagVisitor< DATA##Tag DATATYPE > visitor(this, data); \
   for(std::vector<cmSourceFile*>::const_iterator si = sourceFiles.begin(); \
       si != sourceFiles.end(); ++si) \
     { \
@@ -2095,12 +2095,18 @@ cmGeneratorTarget::CompileInfo const* cmGeneratorTarget::GetCompileInfo(
 }
 
 //----------------------------------------------------------------------------
-std::string
+cmSourceFile const*
 cmGeneratorTarget::GetModuleDefinitionFile(const std::string& config) const
 {
-  std::string data;
-  IMPLEMENT_VISIT_IMPL(ModuleDefinitionFile, COMMA std::string)
-  return data;
+  std::vector<cmSourceFile const*> data;
+  IMPLEMENT_VISIT_IMPL(ModuleDefinitionFile,
+                       COMMA std::vector<cmSourceFile const*>)
+  if(!data.empty())
+    {
+    return data.front();
+    }
+
+  return 0;
 }
 
 bool cmGeneratorTarget::IsDLLPlatform() const
