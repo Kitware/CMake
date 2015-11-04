@@ -11,6 +11,7 @@ include:
   Absoft = Absoft Fortran (absoft.com)
   ADSP = Analog VisualDSP++ (analog.com)
   AppleClang = Apple Clang (apple.com)
+  ARMCC = ARM Compiler (arm.com)
   CCur = Concurrent Fortran (ccur.com)
   Clang = LLVM Clang (clang.llvm.org)
   Cray = Cray Compiler (cray.com)
