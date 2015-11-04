@@ -1035,7 +1035,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
                                      "components-description2"
                                      "components-shlibdeps1"
                                      "components-depend1"
-                                     "components-depend2")
+                                     "components-depend2"
+                                     "compression")
       set(CPackGen "DEB")
       set(CPackRun_CPackGen "-DCPackGen=${CPackGen}")
 
