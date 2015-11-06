@@ -1,7 +1,7 @@
 %{
 /*============================================================================
   CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
+  Copyright 2000-2015 Kitware, Inc., Insight Software Consortium
 
   Distributed under the OSI-approved BSD License (the "License");
   see accompanying file Copyright.txt for details.
@@ -116,6 +116,7 @@ Modify cmFortranLexer.h:
 !.*\n                   { return EOSTMT; } /* Treat comments like */
 <fixed_fmt>^[cC*dD].*\n { return EOSTMT; } /* empty lines */
 
+^[ \t]*#([ \t]*line)?[ \t]*[0-9]+[ \t]* { return CPP_LINE_DIRECTIVE; }
 ^[ \t]*#[ \t]*include[ \t]*<[^>]+> {
   yytext[yyleng-1] = 0;
   yylvalp->string = strdup(strchr(yytext, '<')+1);

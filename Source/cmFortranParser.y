@@ -1,7 +1,7 @@
 %{
 /*============================================================================
   CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
+  Copyright 2000-2015 Kitware, Inc., Insight Software Consortium
 
   Distributed under the OSI-approved BSD License (the "License");
   see accompanying file Copyright.txt for details.
@@ -85,6 +85,7 @@ static bool cmFortranParserIsKeyword(const char* word,
 /*-------------------------------------------------------------------------*/
 /* Tokens */
 %token EOSTMT ASSIGNMENT_OP GARBAGE
+%token CPP_LINE_DIRECTIVE
 %token CPP_INCLUDE F90PPR_INCLUDE COCO_INCLUDE
 %token F90PPR_DEFINE CPP_DEFINE F90PPR_UNDEF CPP_UNDEF
 %token CPP_IFDEF CPP_IFNDEF CPP_IF CPP_ELSE CPP_ELIF CPP_ENDIF
@@ -183,6 +184,13 @@ keyword_stmt:
       cmFortranParser_RuleInclude(parser, $2);
       }
     free($1);
+    free($2);
+    }
+| CPP_LINE_DIRECTIVE STRING other EOSTMT
+    {
+    cmFortranParser* parser =
+      cmFortran_yyget_extra(yyscanner);
+    cmFortranParser_RuleLineDirective(parser, $2);
     free($2);
     }
 | CPP_INCLUDE_ANGLE other EOSTMT

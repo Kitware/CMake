@@ -210,6 +210,32 @@ void cmFortranParser_RuleUse(cmFortranParser* parser,
 }
 
 //----------------------------------------------------------------------------
+void cmFortranParser_RuleLineDirective(cmFortranParser* parser,
+                                       const char* filename)
+{
+  // This is a #line directive naming a file encountered during preprocessing.
+  std::string included = filename;
+
+  // Skip #line directives referencing non-files like
+  // "<built-in>" or "<command-line>".
+  if (included.empty() || included[0] == '<')
+    {
+    return;
+    }
+
+  // Fix windows file path separators since our lexer does not
+  // process escape sequences in string literals.
+  cmSystemTools::ReplaceString(included, "\\\\", "\\");
+  cmSystemTools::ConvertToUnixSlashes(included);
+
+  // Save the named file as included in the source.
+  if (cmSystemTools::FileExists(included))
+    {
+    parser->Info.Includes.insert(included);
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmFortranParser_RuleInclude(cmFortranParser* parser,
                                         const char* name)
 {
