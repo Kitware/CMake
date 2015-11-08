@@ -120,11 +120,15 @@
 #
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_PRIORITY
+#               CPACK_DEBIAN_<COMPONENT>_PACKAGE_PRIORITY
 #
-#  The Debian package priority
+#  Set Priority control field e.g. required, important, standard, optional,
+#  extra
 #
 #  * Mandatory : YES
 #  * Default   : 'optional'
+#
+#  See https://www.debian.org/doc/debian-policy/ch-archive.html#s-priorities
 #
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_HOMEPAGE
@@ -599,7 +603,7 @@ function(cpack_deb_prepare_package_vars)
   # if per-component variable, overrides the global CPACK_DEBIAN_PACKAGE_${variable_type_}
   # automatic dependency discovery will be performed afterwards.
   if(CPACK_DEB_PACKAGE_COMPONENT)
-    foreach(value_type_ DEPENDS RECOMMENDS SUGGESTS PREDEPENDS ENHANCES BREAKS CONFLICTS PROVIDES REPLACES SOURCE SECTION)
+    foreach(value_type_ DEPENDS RECOMMENDS SUGGESTS PREDEPENDS ENHANCES BREAKS CONFLICTS PROVIDES REPLACES SOURCE SECTION PRIORITY)
       set(_component_var "CPACK_DEBIAN_${_local_component_name}_PACKAGE_${value_type_}")
 
       # if set, overrides the global variable
