@@ -311,9 +311,11 @@ class cmake
 
   /** Display a message to the user.  */
   void IssueMessage(cmake::MessageType t, std::string const& text,
-        cmListFileBacktrace const& backtrace = cmListFileBacktrace());
+        cmListFileBacktrace const& backtrace = cmListFileBacktrace(),
+        bool force = false);
   void IssueMessage(cmake::MessageType t, std::string const& text,
-        cmListFileContext const& lfc);
+        cmListFileContext const& lfc,
+        bool force = false);
 
   ///! run the --build option
   int Build(const std::string& dir,
@@ -418,6 +420,12 @@ private:
 
   // Print a list of valid generators to stderr.
   void PrintGeneratorList();
+
+  /*
+   * Check if messages of this type should be output, based on the state of the
+   * warning and error output CMake variables, in the cache.
+   */
+  bool IsMessageTypeVisible(cmake::MessageType t);
 
   bool PrintMessagePreamble(cmake::MessageType t, std::ostream& msg);
 };

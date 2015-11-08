@@ -709,7 +709,8 @@ public:
   };
 
   void IssueMessage(cmake::MessageType t,
-                    std::string const& text) const;
+                    std::string const& text,
+                    bool force = false) const;
 
   /** Set whether or not to report a CMP0000 violation.  */
   void SetCheckCMP0000(bool b) { this->CheckCMP0000 = b; }

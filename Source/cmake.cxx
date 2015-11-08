@@ -2485,6 +2485,45 @@ static bool cmakeCheckStampList(const char* stampList)
   return true;
 }
 
+bool cmake::IsMessageTypeVisible(cmake::MessageType t)
+{
+  bool isVisible = true;
+
+  if(t == cmake::DEPRECATION_ERROR)
+    {
+    // if CMAKE_ERROR_DEPRECATED is on, show the message, otherwise suppress it
+    const char* errorDeprecated = this->State->GetCacheEntryValue(
+                                                "CMAKE_ERROR_DEPRECATED");
+    if(cmSystemTools::IsOff(errorDeprecated))
+      {
+      isVisible = false;
+      }
+    }
+  else if (t == cmake::DEPRECATION_WARNING)
+    {
+    // if CMAKE_WARN_DEPRECATED is on, show the message, otherwise suppress it
+    const char* warnDeprecated = this->State->GetInitializedCacheValue(
+                                            "CMAKE_WARN_DEPRECATED");
+    if(cmSystemTools::IsOff(warnDeprecated))
+      {
+      isVisible = false;
+      }
+    }
+  else if (t == cmake::AUTHOR_WARNING)
+    {
+    // if CMAKE_SUPPRESS_DEVELOPER_WARNINGS is on, suppress the message,
+    // otherwise show it
+    const char* suppressDevWarnings = this->State->GetCacheEntryValue(
+                                          "CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
+    if(cmSystemTools::IsOn(suppressDevWarnings))
+      {
+      isVisible = false;
+      }
+    }
+
+  return isVisible;
+}
+
 bool cmake::PrintMessagePreamble(cmake::MessageType t, std::ostream& msg)
 {
   // Construct the message header.
@@ -2508,20 +2547,13 @@ bool cmake::PrintMessagePreamble(cmake::MessageType t, std::ostream& msg)
     {
     msg << "CMake Deprecation Warning";
     }
+  else if (t == cmake::AUTHOR_WARNING)
+    {
+    msg << "CMake Warning (dev)";
+    }
   else
     {
     msg << "CMake Warning";
-    if(t == cmake::AUTHOR_WARNING)
-      {
-      // Allow suppression of these warnings.
-      const char* suppress = this->State->GetCacheEntryValue(
-                                        "CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
-      if(suppress && cmSystemTools::IsOn(suppress))
-        {
-        return false;
-        }
-      msg << " (dev)";
-      }
     }
   return true;
 }
@@ -2579,9 +2611,15 @@ void displayMessage(cmake::MessageType t, std::ostringstream& msg)
 
 //----------------------------------------------------------------------------
 void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
-                         cmListFileBacktrace const& bt)
+                         cmListFileBacktrace const& bt,
+                         bool force)
 {
   cmListFileBacktrace backtrace = bt;
+
+  if (!force && !this->IsMessageTypeVisible(t))
+    {
+    return;
+    }
 
   std::ostringstream msg;
   if (!this->PrintMessagePreamble(t, msg))
@@ -2602,8 +2640,14 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
 
 //----------------------------------------------------------------------------
 void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
-                         cmListFileContext const& lfc)
+                         cmListFileContext const& lfc,
+                         bool force)
 {
+  if (!force && !this->IsMessageTypeVisible(t))
+    {
+    return;
+    }
+
   std::ostringstream msg;
   if (!this->PrintMessagePreamble(t, msg))
     {

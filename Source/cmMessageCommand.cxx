@@ -43,7 +43,14 @@ bool cmMessageCommand
     }
   else if (*i == "AUTHOR_WARNING")
     {
-    type = cmake::AUTHOR_WARNING;
+    if (this->Makefile->IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS"))
+      {
+      return true;
+      }
+    else
+      {
+      type = cmake::AUTHOR_WARNING;
+      }
     ++i;
     }
   else if (*i == "STATUS")
@@ -73,7 +80,8 @@ bool cmMessageCommand
 
   if (type != cmake::MESSAGE)
     {
-    this->Makefile->IssueMessage(type, message);
+    // we've overriden the message type, above, so force IssueMessage to use it
+    this->Makefile->IssueMessage(type, message, true);
     }
   else
     {
