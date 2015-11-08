@@ -1,8 +1,7 @@
 CMAKE_ERROR_DEPRECATED
 ----------------------
 
-Whether to issue deprecation errors for macros and functions.
+Whether to issue errors for deprecated functionality.
 
-If ``TRUE``, this can be used by macros and functions to issue fatal
-errors when deprecated macros or functions are used.  This variable is
-``FALSE`` by default.
+If ``TRUE``, use of deprecated functionality will issue fatal errors.
+If this variable is not set, CMake behaves as if it were set to ``FALSE``.
