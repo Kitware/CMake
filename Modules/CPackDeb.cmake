@@ -29,10 +29,18 @@
 # .. variable:: CPACK_DEBIAN_PACKAGE_NAME
 #               CPACK_DEBIAN_<COMPONENT>_PACKAGE_NAME
 #
-#  The Debian package summary
+#  Set Package control field (variable is automatically transformed to lower
+#  case).
 #
 #  * Mandatory : YES
-#  * Default   : :variable:`CPACK_PACKAGE_NAME` (lower case)
+#  * Default   :
+#
+#    - :variable:`CPACK_PACKAGE_NAME` for non-component based
+#      installations
+#    - :variable:`CPACK_DEBIAN_PACKAGE_NAME` suffixed with -<COMPONENT>
+#      for component-based installations.
+#
+#  See https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Source
 #
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_VERSION
