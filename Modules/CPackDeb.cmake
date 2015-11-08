@@ -102,8 +102,13 @@
 # .. variable:: CPACK_DEBIAN_PACKAGE_SECTION
 #               CPACK_DEBIAN_<COMPONENT>_PACKAGE_SECTION
 #
+#  Set Section control field e.g. admin, devel, doc, ...
+#
 #  * Mandatory : YES
 #  * Default   : 'devel'
+#
+#  See https://www.debian.org/doc/debian-policy/ch-archive.html#s-subsections
+#
 #
 # .. variable:: CPACK_DEBIAN_COMPRESSION_TYPE
 #
