@@ -133,6 +133,9 @@ set(RunCMake_TEST_OPTIONS -Wno-dev -Wdev)
 run_cmake(Wdev)
 unset(RunCMake_TEST_OPTIONS)
 
+# Dev warnings should be on by default
+run_cmake(Wdev)
+
 set(RunCMake_TEST_OPTIONS --debug-output)
 run_cmake(debug-output)
 unset(RunCMake_TEST_OPTIONS)

@@ -43,7 +43,8 @@ bool cmMessageCommand
     }
   else if (*i == "AUTHOR_WARNING")
     {
-    if (this->Makefile->IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS"))
+    if (this->Makefile->GetCMakeInstance()->GetSuppressDevWarnings(
+        this->Makefile))
       {
       return true;
       }

@@ -1580,6 +1580,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     {
     this->AddCMakePaths();
     }
+
   // Add any cache args
   if ( !this->SetCacheArgs(args) )
     {
@@ -2511,11 +2512,7 @@ bool cmake::IsMessageTypeVisible(cmake::MessageType t)
     }
   else if (t == cmake::AUTHOR_WARNING)
     {
-    // if CMAKE_SUPPRESS_DEVELOPER_WARNINGS is on, suppress the message,
-    // otherwise show it
-    const char* suppressDevWarnings = this->State->GetCacheEntryValue(
-                                          "CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
-    if(cmSystemTools::IsOn(suppressDevWarnings))
+    if (this->GetSuppressDevWarnings())
       {
       isVisible = false;
       }
@@ -2806,4 +2803,22 @@ void cmake::RunCheckForUnusedVariables()
     this->IssueMessage(cmake::WARNING, msg.str());
     }
 #endif
+}
+
+bool cmake::GetSuppressDevWarnings(cmMakefile const* mf)
+{
+  /*
+   * The suppression CMake variable may be set in the CMake configuration file
+   * itself, so we have to check what its set to in the makefile if we can.
+   */
+  if (mf)
+    {
+    return mf->IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
+    }
+  else
+    {
+    const char* cacheEntryValue = this->State->GetCacheEntryValue(
+      "CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
+    return cmSystemTools::IsOn(cacheEntryValue);
+    }
 }

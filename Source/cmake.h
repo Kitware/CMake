@@ -308,6 +308,12 @@ class cmake
       this->SuppressDevWarnings = v;
       this->DoSuppressDevWarnings = true;
     }
+  /*
+   * Get the state of the suppression of developer (author) warnings.
+   * Returns false, by default, if developer warnings should be shown, true
+   * otherwise.
+   */
+  bool GetSuppressDevWarnings(cmMakefile const* mf = NULL);
 
   /** Display a message to the user.  */
   void IssueMessage(cmake::MessageType t, std::string const& text,
