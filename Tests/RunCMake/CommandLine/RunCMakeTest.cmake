@@ -133,6 +133,14 @@ set(RunCMake_TEST_OPTIONS -Wdev)
 run_cmake(Wdev)
 unset(RunCMake_TEST_OPTIONS)
 
+set(RunCMake_TEST_OPTIONS -Wdeprecated)
+run_cmake(Wdeprecated)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS -Wno-deprecated)
+run_cmake(Wno-deprecated)
+unset(RunCMake_TEST_OPTIONS)
+
 # Dev warnings should be on by default
 run_cmake(Wdev)
 

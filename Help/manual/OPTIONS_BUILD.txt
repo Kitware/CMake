@@ -84,3 +84,15 @@
 
  Enable warnings that are meant for the author of the CMakeLists.txt
  files.
+
+``-Wdeprecated``
+ Enable deprecated functionality warnings.
+
+ Enable warnings for usage of deprecated functionality, that are meant
+ for the author of the CMakeLists.txt files.
+
+``-Wno-deprecated``
+ Suppress deprecated functionality warnings.
+
+ Suppress warnings for usage of deprecated functionality, that are meant
+ for the author of the CMakeLists.txt files.

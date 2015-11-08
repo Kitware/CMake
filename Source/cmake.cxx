@@ -1263,6 +1263,26 @@ int cmake::Configure()
 {
   DiagLevel diagLevel;
 
+  if (this->DiagLevels.count("deprecated") == 1)
+    {
+
+    diagLevel = this->DiagLevels["deprecated"];
+    if (diagLevel == DIAG_IGNORE)
+      {
+      this->AddCacheEntry("CMAKE_WARN_DEPRECATED", "FALSE",
+                          "Whether to issue warnings for deprecated "
+                          "functionality.",
+                          cmState::INTERNAL);
+      }
+    else if (diagLevel == DIAG_WARN)
+      {
+      this->AddCacheEntry("CMAKE_WARN_DEPRECATED", "TRUE",
+                          "Whether to issue warnings for deprecated "
+                          "functionality.",
+                          cmState::INTERNAL);
+      }
+    }
+
   if (this->DiagLevels.count("dev") == 1)
     {
 
