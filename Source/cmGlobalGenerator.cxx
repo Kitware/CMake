@@ -2274,6 +2274,12 @@ cmGlobalGenerator::FindTarget(const std::string& name,
 cmGeneratorTarget*
 cmGlobalGenerator::FindGeneratorTarget(const std::string& name) const
 {
+  std::map<std::string, std::string>::const_iterator ai =
+      this->AliasTargets.find(name);
+  if (ai != this->AliasTargets.end())
+    {
+    return this->FindGeneratorTargetImpl(ai->second);
+    }
   if (cmGeneratorTarget* tgt = this->FindGeneratorTargetImpl(name))
     {
     return tgt;

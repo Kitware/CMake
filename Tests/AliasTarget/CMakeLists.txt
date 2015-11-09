@@ -37,7 +37,9 @@ target_include_directories(bat PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 add_executable(targetgenerator targetgenerator.cpp)
 add_executable(Generator::Target ALIAS targetgenerator)
 
-add_custom_target(usealias Generator::Target)
+add_subdirectory(subdir)
+
+add_custom_target(usealias Generator::Target $<TARGET_FILE:Sub::tgt>)
 add_dependencies(bat usealias)
 
 if (NOT TARGET Another::Alias)
