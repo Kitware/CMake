@@ -27,11 +27,20 @@
 # However as a handy reminder here comes the list of specific variables:
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_NAME
+#               CPACK_DEBIAN_<COMPONENT>_PACKAGE_NAME
 #
-#  The Debian package summary
+#  Set Package control field (variable is automatically transformed to lower
+#  case).
 #
 #  * Mandatory : YES
-#  * Default   : :variable:`CPACK_PACKAGE_NAME` (lower case)
+#  * Default   :
+#
+#    - :variable:`CPACK_PACKAGE_NAME` for non-component based
+#      installations
+#    - :variable:`CPACK_DEBIAN_PACKAGE_NAME` suffixed with -<COMPONENT>
+#      for component-based installations.
+#
+#  See https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Source
 #
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_VERSION
@@ -100,9 +109,15 @@
 #
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_SECTION
+#               CPACK_DEBIAN_<COMPONENT>_PACKAGE_SECTION
+#
+#  Set Section control field e.g. admin, devel, doc, ...
 #
 #  * Mandatory : YES
 #  * Default   : 'devel'
+#
+#  See https://www.debian.org/doc/debian-policy/ch-archive.html#s-subsections
+#
 #
 # .. variable:: CPACK_DEBIAN_COMPRESSION_TYPE
 #
@@ -114,11 +129,15 @@
 #
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_PRIORITY
+#               CPACK_DEBIAN_<COMPONENT>_PACKAGE_PRIORITY
 #
-#  The Debian package priority
+#  Set Priority control field e.g. required, important, standard, optional,
+#  extra
 #
 #  * Mandatory : YES
 #  * Default   : 'optional'
+#
+#  See https://www.debian.org/doc/debian-policy/ch-archive.html#s-priorities
 #
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_HOMEPAGE
@@ -590,18 +609,18 @@ function(cpack_deb_prepare_package_vars)
   # You should set: DEBIAN_PACKAGE_DEPENDS
   # TODO: automate 'objdump -p | grep NEEDED'
 
-  # if per-component dependency, overrides the global CPACK_DEBIAN_PACKAGE_${dependency_type_}
+  # if per-component variable, overrides the global CPACK_DEBIAN_PACKAGE_${variable_type_}
   # automatic dependency discovery will be performed afterwards.
   if(CPACK_DEB_PACKAGE_COMPONENT)
-    foreach(dependency_type_ DEPENDS RECOMMENDS SUGGESTS PREDEPENDS ENHANCES BREAKS CONFLICTS PROVIDES REPLACES SOURCE)
-      set(_component_var "CPACK_DEBIAN_${_local_component_name}_PACKAGE_${dependency_type_}")
+    foreach(value_type_ DEPENDS RECOMMENDS SUGGESTS PREDEPENDS ENHANCES BREAKS CONFLICTS PROVIDES REPLACES SOURCE SECTION PRIORITY NAME)
+      set(_component_var "CPACK_DEBIAN_${_local_component_name}_PACKAGE_${value_type_}")
 
-      # if set, overrides the global dependency
+      # if set, overrides the global variable
       if(DEFINED ${_component_var})
-        set(CPACK_DEBIAN_PACKAGE_${dependency_type_} "${${_component_var}}")
+        set(CPACK_DEBIAN_PACKAGE_${value_type_} "${${_component_var}}")
         if(CPACK_DEBIAN_PACKAGE_DEBUG)
-          message("CPackDeb Debug: component '${_local_component_name}' ${dependency_type_} "
-            "dependencies set to '${CPACK_DEBIAN_PACKAGE_${dependency_type_}}'")
+          message("CPackDeb Debug: component '${_local_component_name}' ${value_type_} "
+            "value set to '${CPACK_DEBIAN_PACKAGE_${value_type_}}'")
         endif()
       endif()
     endforeach()
@@ -694,10 +713,11 @@ function(cpack_deb_prepare_package_vars)
       endif()
     endforeach()
 
-    set(CPACK_DEB_PACKAGE_COMPONENT_PART_NAME "-${CPACK_DEB_PACKAGE_COMPONENT}")
-    string(TOLOWER "${CPACK_PACKAGE_NAME}${CPACK_DEB_PACKAGE_COMPONENT_PART_NAME}" CPACK_DEBIAN_PACKAGE_NAME)
-  else()
-    set(CPACK_DEB_PACKAGE_COMPONENT_PART_NAME "")
+    if(CPACK_DEBIAN_${_local_component_name}_PACKAGE_NAME)
+      string(TOLOWER "${CPACK_DEBIAN_${_local_component_name}_PACKAGE_NAME}" CPACK_DEBIAN_PACKAGE_NAME)
+    else()
+      string(TOLOWER "${CPACK_DEBIAN_PACKAGE_NAME}-${CPACK_DEB_PACKAGE_COMPONENT}" CPACK_DEBIAN_PACKAGE_NAME)
+    endif()
   endif()
 
   # Print out some debug information if we were asked for that
