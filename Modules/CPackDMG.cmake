@@ -36,6 +36,19 @@
 #  background image is set. The background image is applied after applying the
 #  custom .DS_Store file.
 #
+# .. variable:: CPACK_DMG_SLA_DIR
+#
+#   Directory where license and menu files for different languages are stored.
+#
+# .. variable:: CPACK_DMG_SLA_LANGUAGES
+#
+#   Languages for which a license agreement is provided when mounting the
+#   generated DMG.
+#
+#   For every language in this list, CPack will try to find files
+#   ``<language>.menu.txt`` and ``<language>.license.txt`` in the directory
+#   specified by the :variable:`CPACK_DMG_SLA_DIR` variable.
+#
 # .. variable:: CPACK_COMMAND_HDIUTIL
 #
 #  Path to the hdiutil(1) command used to operate on disk image files on Mac

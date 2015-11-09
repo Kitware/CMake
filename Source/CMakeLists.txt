@@ -726,6 +726,9 @@ endif()
 # Build CPackLib
 add_library(CPackLib ${CPACK_SRCS})
 target_link_libraries(CPackLib CMakeLib)
+if(APPLE)
+  target_link_libraries(CPackLib "-framework Carbon")
+endif()
 
 if(APPLE)
   add_executable(cmakexbuild cmakexbuild.cxx)
