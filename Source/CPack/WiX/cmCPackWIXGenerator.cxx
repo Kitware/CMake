@@ -482,6 +482,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   featureDefinitions.BeginElement("Feature");
   featureDefinitions.AddAttribute("Id", "ProductFeature");
   featureDefinitions.AddAttribute("Display", "expand");
+  featureDefinitions.AddAttribute("Absent", "disallow");
   featureDefinitions.AddAttribute("ConfigurableDirectory", "INSTALL_ROOT");
 
   std::string cpackPackageName;
