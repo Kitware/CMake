@@ -95,15 +95,18 @@ Apple Frameworks
 """"""""""""""""
 
 A ``SHARED`` library may be marked with the :prop_tgt:`FRAMEWORK`
-target property to create an OS X Framework:
+target property to create an OS X or iOS Framework Bundle.
+The ``MACOSX_FRAMEWORK_IDENTIFIER`` sets ``CFBundleIdentifier`` key
+and it uniquely identifies the bundle.
 
 .. code-block:: cmake
 
   add_library(MyFramework SHARED MyFramework.cpp)
   set_target_properties(MyFramework PROPERTIES
-    FRAMEWORK 1
+    FRAMEWORK TRUE
     FRAMEWORK_VERSION A
-    )
+    MACOSX_FRAMEWORK_IDENTIFIER org.cmake.MyFramework
+  )
 
 .. _`Object Libraries`:
 
