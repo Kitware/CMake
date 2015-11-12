@@ -579,7 +579,7 @@ int cmCTestTestHandler::ProcessHandler()
       }
 
     cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl
-               << static_cast<int>(percent + .5) << "% tests passed, "
+               << static_cast<int>(percent + .5f) << "% tests passed, "
                << failed.size() << " tests failed out of "
                << total << std::endl);
     if(this->CTest->GetLabelSummary())

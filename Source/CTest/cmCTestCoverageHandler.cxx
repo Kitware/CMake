@@ -2287,7 +2287,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
         {
         cper /= 2.0f;
         }
-      percent_coverage += cper;
+      percent_coverage += static_cast<double>(cper);
       float cmet = static_cast<float>(percentFunction + percentBranch);
       if(totalBranches > 0)
         {
