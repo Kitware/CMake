@@ -183,6 +183,13 @@ if("${CPACK_GENERATOR}" STREQUAL "PackageMaker")
   endif()
 endif()
 
+if("${CPACK_GENERATOR}" STREQUAL "DragNDrop")
+  set(CPACK_DMG_BACKGROUND_IMAGE
+      "@CMake_SOURCE_DIR@/Packaging/CMakeDMGBackground.tif")
+  set(CPACK_DMG_DS_STORE_SETUP_SCRIPT
+      "@CMake_SOURCE_DIR@/Packaging/CMakeDMGSetup.scpt")
+endif()
+
 if("${CPACK_GENERATOR}" STREQUAL "WIX")
   # Reset CPACK_PACKAGE_VERSION to deal with WiX restriction.
   # But the file names still use the full CMake_VERSION value:
