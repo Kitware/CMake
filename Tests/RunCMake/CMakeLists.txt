@@ -239,6 +239,12 @@ if(XCODE_VERSION AND NOT "${XCODE_VERSION}" VERSION_LESS 3)
   add_RunCMake_test(XcodeProject -DXCODE_VERSION=${XCODE_VERSION})
 endif()
 
+if(NOT XCODE
+    AND CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
+    AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 6.0)
+  add_RunCMake_test(Framework)
+endif()
+
 add_RunCMake_test(File_Generate)
 add_RunCMake_test(ExportWithoutLanguage)
 add_RunCMake_test(target_link_libraries)

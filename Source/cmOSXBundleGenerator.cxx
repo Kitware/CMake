@@ -85,14 +85,23 @@ void cmOSXBundleGenerator::CreateFramework(
 
   std::string frameworkVersion = this->GT->GetFrameworkVersion();
 
-  // Configure the Info.plist file into the Resources directory.
-  this->MacContentFolders->insert("Resources");
+  // Configure the Info.plist file
   std::string plist = newoutpath;
-  plist += "/Resources/Info.plist";
+  if (!this->Makefile->PlatformIsAppleIos())
+    {
+    // Put the Info.plist file into the Resources directory.
+    this->MacContentFolders->insert("Resources");
+    plist += "/Resources";
+    }
+  plist += "/Info.plist";
   std::string name = cmSystemTools::GetFilenameName(targetName);
   this->LocalGenerator->GenerateFrameworkInfoPList(this->GT,
                                                    name,
                                                    plist.c_str());
+
+  // Generate Versions directory only for MacOSX frameworks
+  if (this->Makefile->PlatformIsAppleIos())
+    return;
 
   // TODO: Use the cmMakefileTargetGenerator::ExtraFiles vector to
   // drive rules to create these files at build time.
