@@ -35,8 +35,7 @@
 
 #include <stdlib.h> // required for atoi
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
-// defined in binexplib.cxx
-bool DumpFile(const char* filename, FILE *fout);
+#include "bindexplib.h"
 #endif
 
 void CMakeCommandUsage(const char* program)
@@ -240,13 +239,16 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         return 1;
         }
       std::string objfile;
+      bindexplib deffile;
       while(cmSystemTools::GetLineFromStream(fin, objfile))
         {
-        if (!DumpFile(objfile.c_str(), fout))
+        if( !deffile.AddObjectFile(objfile.c_str()))
           {
           return 1;
           }
         }
+      deffile.WriteFile(fout);
+      fclose(fout);
       return 0;
       }
 #endif
