@@ -913,16 +913,33 @@ int cmCTestCoverageHandler::HandleJacocoCoverage(
 {
   cmParseJacocoCoverage cov =
    cmParseJacocoCoverage(*cont, this->CTest);
-  cmsys::Glob g;
+
+  // Search in the source directory.
+  cmsys::Glob g1;
   std::vector<std::string> files;
-  g.SetRecurse(true);
+  g1.SetRecurse(true);
 
   std::string SourceDir
     = this->CTest->GetCTestConfiguration("SourceDirectory");
   std::string coverageFile = SourceDir+ "/*jacoco.xml";
 
-  g.FindFiles(coverageFile);
-  files=g.GetFiles();
+  g1.FindFiles(coverageFile);
+  files = g1.GetFiles();
+
+  // ...and in the binary directory.
+  cmsys::Glob g2;
+  std::vector<std::string> binFiles;
+  g2.SetRecurse(true);
+  std::string binaryDir
+    = this->CTest->GetCTestConfiguration("BuildDirectory");
+  std::string binCoverageFile = binaryDir+ "/*jacoco.xml";
+  g2.FindFiles(binCoverageFile);
+  binFiles = g2.GetFiles();
+  if (!binFiles.empty())
+    {
+    files.insert(files.end(), binFiles.begin(), binFiles.end());
+    }
+
   if (!files.empty())
     {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
