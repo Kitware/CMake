@@ -820,11 +820,26 @@ int cmCTestCoverageHandler::HandleCoberturaCoverage(
 {
   cmParseCoberturaCoverage cov(*cont, this->CTest);
 
-  // Assume the coverage.xml is in the source directory
-  std::string coverageXMLFile = this->CTest->GetBinaryDir() + "/coverage.xml";
+  // Assume the coverage.xml is in the binary directory
+  // check for the COBERTURADIR environment variable,
+  // if it doesn't exist or is empty, assume the
+  // binary directory is used.
+  std::string coverageXMLFile;
+  const char* covDir = cmSystemTools::GetEnv("COBERTURADIR");
+  if(covDir && strlen(covDir) != 0)
+    {
+      coverageXMLFile = std::string(covDir);
+    }
+  else
+    {
+      coverageXMLFile = this->CTest->GetBinaryDir();
+    }
+  // build the find file string with the directory from above
+  coverageXMLFile += "/coverage.xml";
 
   if(cmSystemTools::FileExists(coverageXMLFile.c_str()))
     {
+    // If file exists, parse it
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                "Parsing Cobertura XML file: " << coverageXMLFile
                << std::endl, this->Quiet);
@@ -833,7 +848,7 @@ int cmCTestCoverageHandler::HandleCoberturaCoverage(
   else
     {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-               "Cannot find Cobertura XML file: " << coverageXMLFile
+               " Cannot find Cobertura XML file: " << coverageXMLFile
                << std::endl, this->Quiet);
     }
   return static_cast<int>(cont->TotalCoverage.size());
