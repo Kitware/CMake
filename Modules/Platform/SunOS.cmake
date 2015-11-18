@@ -9,12 +9,6 @@ endif()
 
 include(Platform/UnixPaths)
 
-# Add the compiler's implicit link directories.
-if("${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
-  list(APPEND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
-    /opt/SUNWspro/lib /opt/SUNWspro/prod/lib /usr/ccs/lib)
-endif()
-
 # The Sun linker needs to find transitive shared library dependencies
 # in the -L path.
 set(CMAKE_LINK_DEPENDENT_LIBRARY_DIRS 1)
