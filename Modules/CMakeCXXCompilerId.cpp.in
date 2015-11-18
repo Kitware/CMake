@@ -49,6 +49,7 @@ int main(int argc, char* argv[])
 #ifdef SIMULATE_VERSION_MAJOR
   require += info_simulate_version[argc];
 #endif
+  require += info_language_dialect_default[argc];
   (void)argv;
   return require;
 }
