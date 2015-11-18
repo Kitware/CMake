@@ -17,6 +17,8 @@
 #pragma warning ( disable : 4512 )
 #endif
 
+#include <vector>
+
 #include <QObject>
 #include <QString>
 #include <QVariant>
@@ -25,7 +27,7 @@
 #include <QMetaType>
 #include <QAtomicInt>
 
-class cmake;
+#include "cmake.h"
 
 /// struct to represent cmake properties in Qt
 /// Value is of type String or Bool
@@ -73,6 +75,8 @@ public slots:
   void setBinaryDirectory(const QString& dir);
   /// set the desired generator to use
   void setGenerator(const QString& generator);
+  /// set the desired generator to use
+  void setToolset(const QString& toolset);
   /// do the configure step
   void configure();
   /// generate the files
@@ -104,7 +108,7 @@ public:
   /// get the current generator
   QString generator() const;
   /// get the available generators
-  QStringList availableGenerators() const;
+  std::vector<cmake::GeneratorInfo> const& availableGenerators() const;
   /// get whether to do debug output
   bool getDebugOutput() const;
 
@@ -130,6 +134,8 @@ signals:
   void errorMessage(const QString& msg);
   /// signal when debug output changes
   void debugOutputChanged(bool);
+  /// signal when the toolset changes
+  void toolsetChanged(const QString& toolset);
 
 protected:
   cmake* CMakeInstance;
@@ -147,7 +153,8 @@ protected:
   QString SourceDirectory;
   QString BinaryDirectory;
   QString Generator;
-  QStringList AvailableGenerators;
+  QString Toolset;
+  std::vector<cmake::GeneratorInfo> AvailableGenerators;
   QString CMakeExecutable;
   QAtomicInt InterruptFlag;
 };

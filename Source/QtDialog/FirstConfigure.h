@@ -4,6 +4,7 @@
 
 #include <QWizard>
 #include <QWizardPage>
+#include "cmake.h"
 #include "ui_Compilers.h"
 #include "ui_CrossCompiler.h"
 
@@ -27,9 +28,10 @@ class StartCompilerSetup : public QWizardPage
   public:
     StartCompilerSetup(QWidget* p);
     ~StartCompilerSetup();
-    void setGenerators(const QStringList& gens);
+    void setGenerators(std::vector<cmake::GeneratorInfo> const& gens);
     void setCurrentGenerator(const QString& gen);
     QString getGenerator() const;
+    QString getToolset() const;
 
     bool defaultSetup() const;
     bool compilerSetup() const;
@@ -43,10 +45,18 @@ class StartCompilerSetup : public QWizardPage
 
   protected slots:
     void onSelectionChanged(bool);
+    void onGeneratorChanged(QString const& name);
 
   protected:
     QComboBox* GeneratorOptions;
     QRadioButton* CompilerSetupOptions[4];
+    QFrame* ToolsetFrame;
+    QLineEdit* Toolset;
+    QLabel* ToolsetLabel;
+    QStringList GeneratorsSupportingToolset;
+
+  private:
+    QFrame* CreateToolsetWidgets();
 };
 
 //! the page that gives basic options for native compilers
@@ -140,8 +150,9 @@ public:
   FirstConfigure();
   ~FirstConfigure();
 
-  void setGenerators(const QStringList& gens);
+  void setGenerators(std::vector<cmake::GeneratorInfo> const& gens);
   QString getGenerator() const;
+  QString getToolset() const;
 
   bool defaultSetup() const;
   bool compilerSetup() const;

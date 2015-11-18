@@ -88,6 +88,8 @@ public:
       names.push_back("Visual Studio 9 2008 " + *i);
       }
   }
+
+  virtual bool SupportsToolset() const { return false; }
 };
 
 //----------------------------------------------------------------------------

@@ -76,6 +76,8 @@ public:
     names.push_back(vs12generatorName + std::string(" ARM"));
     names.push_back(vs12generatorName + std::string(" Win64"));
     }
+
+  virtual bool SupportsToolset() const { return true; }
 };
 
 //----------------------------------------------------------------------------

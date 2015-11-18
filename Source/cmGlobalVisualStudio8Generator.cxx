@@ -84,6 +84,8 @@ public:
       names.push_back("Visual Studio 8 2005 " + *i);
       }
   }
+
+  virtual bool SupportsToolset() const { return false; }
 };
 
 //----------------------------------------------------------------------------

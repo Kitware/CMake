@@ -38,6 +38,9 @@ public:
 
   /** Get the names of the current registered generators */
   virtual void GetGenerators(std::vector<std::string>& names) const = 0;
+
+  /** Determine whether or not this generator supports toolsets */
+  virtual bool SupportsToolset() const = 0;
 };
 
 template<class T>
@@ -57,6 +60,9 @@ public:
   /** Get the names of the current registered generators */
   virtual void GetGenerators(std::vector<std::string>& names) const {
     names.push_back(T::GetActualName()); }
+
+  /** Determine whether or not this generator supports toolsets */
+  virtual bool SupportsToolset() const { return T::SupportsToolset(); }
 };
 
 #endif

@@ -89,6 +89,13 @@ class cmake
      */
     FIND_PACKAGE_MODE
   };
+
+  struct GeneratorInfo
+    {
+    std::string name;
+    bool supportsToolset;
+    };
+
   typedef std::map<std::string, cmInstalledFile> InstalledFilesMap;
 
   /// Default constructor
@@ -161,7 +168,7 @@ class cmake
   void SetGlobalGenerator(cmGlobalGenerator *);
 
   ///! Get the names of the current registered generators
-  void GetRegisteredGenerators(std::vector<std::string>& names);
+  void GetRegisteredGenerators(std::vector<GeneratorInfo>& generators);
 
   ///! Set the name of the selected generator-specific platform.
   void SetGeneratorPlatform(std::string const& ts)
