@@ -3324,6 +3324,7 @@ void cmGeneratorTarget::GetLibraryNames(std::string& name,
   const char* version = this->GetProperty("VERSION");
   const char* soversion = this->GetProperty("SOVERSION");
   if(!this->HasSOName(config) ||
+     this->Makefile->IsOn("CMAKE_PLATFORM_NO_VERSIONED_SONAME") ||
      this->IsFrameworkOnApple())
     {
     // Versioning is supported only for shared libraries and modules,
