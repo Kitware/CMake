@@ -1555,7 +1555,6 @@ bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
     // pass it to the link command.
     this->ManifestFileRC = intDir + "/manifest.rc";
     this->ManifestFileRes = intDir + "/manifest.res";
-    this->LinkCommand.push_back(this->ManifestFileRes);
     }
   else if (this->UserManifests.empty())
     {
@@ -1662,6 +1661,9 @@ int cmVSLink::LinkIncremental()
     {
     return -1;
     }
+
+  // Tell the linker to use our manifest compiled into a resource.
+  this->LinkCommand.push_back(this->ManifestFileRes);
 
   // Run the link command (possibly generates intermediate manifest).
   if (!RunCommand("LINK Pass 1", this->LinkCommand, this->Verbose))
