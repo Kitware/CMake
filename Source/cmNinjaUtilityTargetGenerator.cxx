@@ -131,6 +131,7 @@ void cmNinjaUtilityTargetGenerator::Generate()
       desc,
       "Utility command for " + this->GetTargetName(),
       uses_terminal,
+      /*restat*/true,
       util_outputs,
       deps);
 

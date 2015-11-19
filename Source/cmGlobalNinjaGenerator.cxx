@@ -284,6 +284,7 @@ cmGlobalNinjaGenerator::WriteCustomCommandBuild(const std::string& command,
                                                 const std::string& description,
                                                 const std::string& comment,
                                                 bool uses_terminal,
+                                                bool restat,
                                                 const cmNinjaDeps& outputs,
                                                 const cmNinjaDeps& deps,
                                                 const cmNinjaDeps& orderOnly)
@@ -300,7 +301,10 @@ cmGlobalNinjaGenerator::WriteCustomCommandBuild(const std::string& command,
   cmNinjaVars vars;
   vars["COMMAND"] = cmd;
   vars["DESC"] = EncodeLiteral(description);
-  vars["restat"] = "1";
+  if (restat)
+    {
+    vars["restat"] = "1";
+    }
   if (uses_terminal && SupportsConsolePool())
     {
     vars["pool"] = "console";
@@ -924,6 +928,7 @@ void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
     WriteCustomCommandBuild(/*command=*/"", /*description=*/"",
                             "Assume dependencies for generated source file.",
                             /*uses_terminal*/false,
+                            /*restat*/true,
                             cmNinjaDeps(1, i->first), deps);
   }
 }
