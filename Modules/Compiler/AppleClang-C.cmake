@@ -18,6 +18,9 @@ if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.0)
       message(FATAL_ERROR "CMAKE_C_STANDARD_COMPUTED_DEFAULT should be set for ${CMAKE_C_COMPILER_ID} (${CMAKE_C_COMPILER}) version ${CMAKE_C_COMPILER_VERSION}")
     endif()
     set(CMAKE_C_STANDARD_DEFAULT ${CMAKE_C_STANDARD_COMPUTED_DEFAULT})
+  elseif(NOT DEFINED CMAKE_C_STANDARD_DEFAULT)
+    # Compiler id was forced so just guess the default standard level.
+    set(CMAKE_C_STANDARD_DEFAULT 99)
   endif()
 endif()
 
