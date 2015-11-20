@@ -28,6 +28,9 @@ if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.0)
       message(FATAL_ERROR "CMAKE_CXX_STANDARD_COMPUTED_DEFAULT should be set for ${CMAKE_CXX_COMPILER_ID} (${CMAKE_CXX_COMPILER}) version ${CMAKE_CXX_COMPILER_VERSION}")
     endif()
     set(CMAKE_CXX_STANDARD_DEFAULT ${CMAKE_CXX_STANDARD_COMPUTED_DEFAULT})
+  elseif(NOT DEFINED CMAKE_CXX_STANDARD_DEFAULT)
+    # Compiler id was forced so just guess the default standard level.
+    set(CMAKE_CXX_STANDARD_DEFAULT 98)
   endif()
 endif()
 
