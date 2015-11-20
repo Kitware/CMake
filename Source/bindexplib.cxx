@@ -425,7 +425,7 @@ DumpFile(const char* filename, FILE *fout)
       if(h->Sig1 == 0x0 && h->Sig2 == 0xffff) {
          DumpSymbols<cmANON_OBJECT_HEADER_BIGOBJ, cmIMAGE_SYMBOL_EX>
            symbolDumper((cmANON_OBJECT_HEADER_BIGOBJ*) lpFileBase, fout,
-                        (dosHeader->e_magic == IMAGE_FILE_MACHINE_AMD64));
+                        (h->Machine == IMAGE_FILE_MACHINE_AMD64));
          symbolDumper.DumpObjFile();
       } else {
          printf("unrecognized file format in '%s'\n", filename);
