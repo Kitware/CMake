@@ -398,6 +398,16 @@ cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
   const std::vector<std::string> &byproducts = ccg.GetByproducts();
   cmNinjaDeps ninjaOutputs(outputs.size()+byproducts.size()), ninjaDeps;
 
+  bool symbolic = false;
+  for (std::vector<std::string>::const_iterator o = outputs.begin();
+       o != outputs.end(); ++o)
+    {
+    if (cmSourceFile* sf = this->Makefile->GetSource(*o))
+      {
+      symbolic = sf->GetPropertyAsBool("SYMBOLIC");
+      }
+    }
+
 #if 0
 #error TODO: Once CC in an ExternalProject target must provide the \
     file of each imported target that has an add_dependencies pointing \
@@ -434,6 +444,7 @@ cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       this->ConstructComment(ccg),
       "Custom command for " + ninjaOutputs[0],
       cc->GetUsesTerminal(),
+      /*restat*/!symbolic,
       ninjaOutputs,
       ninjaDeps,
       orderOnlyDeps);
