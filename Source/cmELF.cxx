@@ -567,8 +567,14 @@ bool cmELFInternalImpl<Types>::LoadDynamicSection()
     return true;
     }
 
-  // Allocate the dynamic section entries.
+  // If there are no entries we are done.
   ELF_Shdr const& sec = this->SectionHeaders[this->DynamicSectionIndex];
+  if(sec.sh_entsize == 0)
+    {
+    return false;
+    }
+
+  // Allocate the dynamic section entries.
   int n = static_cast<int>(sec.sh_size / sec.sh_entsize);
   this->DynamicSectionEntries.resize(n);
 
