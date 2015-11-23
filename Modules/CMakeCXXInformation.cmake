@@ -74,10 +74,6 @@ if(CMAKE_CXX_SIZEOF_DATA_PTR)
   unset(CMAKE_CXX_ABI_FILES)
 endif()
 
-if(CMAKE_CXX_COMPILER_LINKS_STATICALLY)
-  set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS FALSE)
-endif()
-
 # This should be included before the _INIT variables are
 # used to initialize the cache.  Since the rule variables
 # have if blocks on them, users can still define them here.
