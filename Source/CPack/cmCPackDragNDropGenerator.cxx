@@ -137,11 +137,11 @@ int cmCPackDragNDropGenerator::InitializeInternal()
           << std::endl);
         }
       }
-    if(!this->IsSet("CPACK_DMG_LANGUAGES"))
+    if(!this->IsSet("CPACK_DMG_SLA_LANGUAGES"))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
         "CPACK_DMG_SLA_DIR set but no languages defined "
-        "(set CPACK_DMG_LANGUAGES)"
+        "(set CPACK_DMG_SLA_LANGUAGES)"
         << std::endl);
       return 0;
       }
@@ -154,12 +154,12 @@ int cmCPackDragNDropGenerator::InitializeInternal()
       }
 
     std::vector<std::string> languages;
-    cmSystemTools::ExpandListArgument(this->GetOption("CPACK_DMG_LANGUAGES"),
-                                      languages);
+    cmSystemTools::ExpandListArgument(
+      this->GetOption("CPACK_DMG_SLA_LANGUAGES"), languages);
     if(languages.empty())
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-        "CPACK_DMG_LANGUAGES set but empty"
+        "CPACK_DMG_SLA_LANGUAGES set but empty"
         << std::endl);
       return 0;
       }
@@ -350,8 +350,8 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     ? this->GetOption("CPACK_DMG_DS_STORE") : "";
 
   const std::string cpack_dmg_languages =
-    this->GetOption("CPACK_DMG_LANGUAGES")
-      ? this->GetOption("CPACK_DMG_LANGUAGES") : "";
+    this->GetOption("CPACK_DMG_SLA_LANGUAGES")
+      ? this->GetOption("CPACK_DMG_SLA_LANGUAGES") : "";
 
   const std::string cpack_dmg_ds_store_setup_script =
     this->GetOption("CPACK_DMG_DS_STORE_SETUP_SCRIPT")
