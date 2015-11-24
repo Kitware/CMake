@@ -403,6 +403,10 @@ cmListFileBacktrace::cmListFileBacktrace(cmState::Snapshot snapshot,
   : Context(cc)
   , Snapshot(snapshot)
 {
+  if (this->Snapshot.IsValid())
+    {
+    this->Snapshot.Keep();
+    }
 }
 
 cmListFileBacktrace::~cmListFileBacktrace()
