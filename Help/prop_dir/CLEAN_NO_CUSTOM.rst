@@ -1,7 +1,6 @@
 CLEAN_NO_CUSTOM
 ---------------
 
-Should the output of custom commands be left.
-
-If this is true then the outputs of custom commands for this directory
-will not be removed during the "make clean" stage.
+Set to true to tell :ref:`Makefile Generators` not to remove the outputs of
+custom commands for this directory during the ``make clean`` operation.
+This is ignored on other generators because it is not possible to implement.
