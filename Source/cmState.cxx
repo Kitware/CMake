@@ -884,6 +884,7 @@ cmState::CreateVariableScopeSnapshot(cmState::Snapshot originSnapshot,
   pos->EntryPointLine = entryPointLine;
   pos->EntryPointCommand = entryPointCommand;
   pos->SnapshotType = VariableScopeType;
+  pos->PolicyScope = originSnapshot.Position->Policies;
   assert(originSnapshot.Position->Vars.IsValid());
 
   cmLinkedTree<cmDefinitions>::iterator origin =

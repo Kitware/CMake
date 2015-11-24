@@ -4233,9 +4233,7 @@ void cmMakefile::PopScope()
 
   this->CheckForUnusedVariables();
 
-  this->StateSnapshot =
-      this->GetState()->Pop(this->StateSnapshot);
-  assert(this->StateSnapshot.IsValid());
+  this->PopSnapshot();
 }
 
 void cmMakefile::RaiseScope(const std::string& var, const char *varDef)
@@ -4603,8 +4601,6 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
 //----------------------------------------------------------------------------
 cmMakefile::PolicyPushPop::PolicyPushPop(cmMakefile* m): Makefile(m)
 {
-  this->Makefile->StateSnapshot = this->Makefile->StateSnapshot.GetState()
-      ->CreatePolicyScopeSnapshot(this->Makefile->StateSnapshot);
   this->Makefile->PushPolicy();
 }
 
@@ -4612,7 +4608,6 @@ cmMakefile::PolicyPushPop::PolicyPushPop(cmMakefile* m): Makefile(m)
 cmMakefile::PolicyPushPop::~PolicyPushPop()
 {
   this->Makefile->PopPolicy();
-  this->Makefile->PopSnapshot();
 }
 
 //----------------------------------------------------------------------------
