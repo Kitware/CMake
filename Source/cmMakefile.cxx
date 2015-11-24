@@ -4601,20 +4601,18 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
 }
 
 //----------------------------------------------------------------------------
-cmMakefile::PolicyPushPop::PolicyPushPop(cmMakefile* m, bool weak,
-                                         cmPolicies::PolicyMap const& pm):
-  Makefile(m), ReportError(true)
+cmMakefile::PolicyPushPop::PolicyPushPop(cmMakefile* m): Makefile(m)
 {
   this->Makefile->StateSnapshot = this->Makefile->StateSnapshot.GetState()
       ->CreatePolicyScopeSnapshot(this->Makefile->StateSnapshot);
-  this->Makefile->PushPolicy(weak, pm);
+  this->Makefile->PushPolicy();
 }
 
 //----------------------------------------------------------------------------
 cmMakefile::PolicyPushPop::~PolicyPushPop()
 {
   this->Makefile->PopPolicy();
-  this->Makefile->PopSnapshot(this->ReportError);
+  this->Makefile->PopSnapshot();
 }
 
 //----------------------------------------------------------------------------
