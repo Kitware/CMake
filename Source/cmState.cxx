@@ -1124,7 +1124,7 @@ bool cmState::Snapshot::PopPolicy()
     {
     return false;
     }
-  ++pos->Policies;
+  pos->Policies = this->State->PolicyStack.Pop(pos->Policies);
   return true;
 }
 
