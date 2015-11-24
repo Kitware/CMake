@@ -904,7 +904,7 @@ private:
   void PushPolicy(bool weak = false,
                   cmPolicies::PolicyMap const& pm = cmPolicies::PolicyMap());
   void PopPolicy();
-  void PopPolicyBarrier(bool reportError = true);
+  void PopSnapshot(bool reportError = true);
   friend class cmCMakePolicyCommand;
   class IncludeScope;
   friend class IncludeScope;

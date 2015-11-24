@@ -435,7 +435,7 @@ cmMakefile::IncludeScope::~IncludeScope()
       this->EnforceCMP0011();
       }
     }
-  this->Makefile->PopPolicyBarrier(this->ReportError);
+  this->Makefile->PopSnapshot(this->ReportError);
 
   this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
 }
@@ -549,7 +549,7 @@ public:
 
   ~ListFileScope()
   {
-    this->Makefile->PopPolicyBarrier(this->ReportError);
+    this->Makefile->PopSnapshot(this->ReportError);
     this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
   }
 
@@ -1551,7 +1551,7 @@ void cmMakefile::PopFunctionScope(bool reportError)
 {
   this->PopPolicy();
 
-  this->PopPolicyBarrier(reportError);
+  this->PopSnapshot(reportError);
 
   this->PopFunctionBlockerBarrier(reportError);
 
@@ -1582,7 +1582,7 @@ void cmMakefile::PushMacroScope(std::string const& fileName,
 void cmMakefile::PopMacroScope(bool reportError)
 {
   this->PopPolicy();
-  this->PopPolicyBarrier(reportError);
+  this->PopSnapshot(reportError);
 
   this->PopFunctionBlockerBarrier(reportError);
 }
@@ -1619,7 +1619,7 @@ public:
   ~BuildsystemFileScope()
   {
     this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
-    this->Makefile->PopPolicyBarrier(this->ReportError);
+    this->Makefile->PopSnapshot(this->ReportError);
 #if defined(CMAKE_BUILD_WITH_CMAKE)
     this->GG->GetFileLockPool().PopFileScope();
 #endif
@@ -4614,7 +4614,7 @@ cmMakefile::PolicyPushPop::PolicyPushPop(cmMakefile* m, bool weak,
 cmMakefile::PolicyPushPop::~PolicyPushPop()
 {
   this->Makefile->PopPolicy();
-  this->Makefile->PopPolicyBarrier(this->ReportError);
+  this->Makefile->PopSnapshot(this->ReportError);
 }
 
 //----------------------------------------------------------------------------
@@ -4634,8 +4634,11 @@ void cmMakefile::PopPolicy()
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::PopPolicyBarrier(bool reportError)
+void cmMakefile::PopSnapshot(bool reportError)
 {
+  // cmState::Snapshot manages nested policy scopes within it.
+  // Since the scope corresponding to the snapshot is closing,
+  // reject any still-open nested policy scopes with an error.
   while (!this->StateSnapshot.CanPopPolicyScope())
     {
     if(reportError)
