@@ -152,6 +152,27 @@ public:
     return Push_impl(it, t);
   }
 
+  bool IsLast(iterator it)
+    {
+    return it.Position == this->Data.size();
+    }
+
+  iterator Pop(iterator it)
+    {
+    assert(!this->Data.empty());
+    assert(this->UpPositions.size() == this->Data.size());
+    bool const isLast = this->IsLast(it);
+    ++it;
+    // If this is the last entry then no other entry can refer
+    // to it so we can drop its storage.
+    if (isLast)
+      {
+      this->Data.pop_back();
+      this->UpPositions.pop_back();
+      }
+    return it;
+    }
+
   iterator Truncate()
   {
     assert(this->UpPositions.size() > 0);
