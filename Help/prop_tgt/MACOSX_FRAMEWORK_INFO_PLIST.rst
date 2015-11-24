@@ -1,10 +1,10 @@
 MACOSX_FRAMEWORK_INFO_PLIST
 ---------------------------
 
-Specify a custom ``Info.plist`` template for a Mac OS X Framework.
+Specify a custom ``Info.plist`` template for a OS X and iOS Framework.
 
 A library target with :prop_tgt:`FRAMEWORK` enabled will be built as a
-framework on Mac OS X.  By default its ``Info.plist`` file is created by
+framework on OS X.  By default its ``Info.plist`` file is created by
 configuring a template called ``MacOSXFrameworkInfo.plist.in`` located in the
 :variable:`CMAKE_MODULE_PATH`.  This property specifies an alternative template
 file name which may be a full path.
