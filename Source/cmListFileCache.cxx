@@ -398,6 +398,17 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
     }
 }
 
+cmListFileBacktrace::cmListFileBacktrace(cmState::Snapshot snapshot,
+                                         cmCommandContext const& cc)
+  : Context(cc)
+  , Snapshot(snapshot)
+{
+}
+
+cmListFileBacktrace::~cmListFileBacktrace()
+{
+}
+
 void cmListFileBacktrace::PrintTitle(std::ostream& out) const
 {
   if (!this->Snapshot.IsValid())

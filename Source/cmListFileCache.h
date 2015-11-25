@@ -90,10 +90,8 @@ class cmListFileBacktrace
 {
   public:
     cmListFileBacktrace(cmState::Snapshot snapshot = cmState::Snapshot(),
-                        cmCommandContext const& cc = cmCommandContext())
-      : Context(cc), Snapshot(snapshot)
-    {
-    }
+                        cmCommandContext const& cc = cmCommandContext());
+    ~cmListFileBacktrace();
 
     void PrintTitle(std::ostream& out) const;
     void PrintCallStack(std::ostream& out) const;
