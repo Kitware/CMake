@@ -1156,7 +1156,8 @@ cmState::Snapshot cmState::Snapshot::GetCallStackParent() const
 
   Snapshot snapshot;
   PositionType parentPos = this->Position;
-  while(parentPos->SnapshotType == cmState::PolicyScopeType)
+  while (parentPos->SnapshotType == cmState::PolicyScopeType ||
+         parentPos->SnapshotType == cmState::VariableScopeType)
     {
     ++parentPos;
     }
@@ -1167,7 +1168,8 @@ cmState::Snapshot cmState::Snapshot::GetCallStackParent() const
     }
 
   ++parentPos;
-  while(parentPos->SnapshotType == cmState::PolicyScopeType)
+  while (parentPos->SnapshotType == cmState::PolicyScopeType ||
+         parentPos->SnapshotType == cmState::VariableScopeType)
     {
     ++parentPos;
     }
