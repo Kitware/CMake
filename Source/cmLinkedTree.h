@@ -24,7 +24,7 @@
   needs of the cmState.  For example, the Truncate() method is a specific
   requirement of the cmState.
 
-  An empty cmLinkedTree provides a Root() method, and an Extend() method,
+  An empty cmLinkedTree provides a Root() method, and an Push() method,
   each of which return iterators.  A Tree can be built up by extending
   from the root, and then extending from any other iterator.
 
@@ -142,15 +142,36 @@ public:
     return iterator(const_cast<cmLinkedTree*>(this), 0);
   }
 
-  iterator Extend(iterator it)
+  iterator Push(iterator it)
   {
-    return Extend_impl(it, T());
+    return Push_impl(it, T());
   }
 
-  iterator Extend(iterator it, T t)
+  iterator Push(iterator it, T t)
   {
-    return Extend_impl(it, t);
+    return Push_impl(it, t);
   }
+
+  bool IsLast(iterator it)
+    {
+    return it.Position == this->Data.size();
+    }
+
+  iterator Pop(iterator it)
+    {
+    assert(!this->Data.empty());
+    assert(this->UpPositions.size() == this->Data.size());
+    bool const isLast = this->IsLast(it);
+    ++it;
+    // If this is the last entry then no other entry can refer
+    // to it so we can drop its storage.
+    if (isLast)
+      {
+      this->Data.pop_back();
+      this->UpPositions.pop_back();
+      }
+    return it;
+    }
 
   iterator Truncate()
   {
@@ -179,7 +200,7 @@ private:
     return &this->Data[pos];
   }
 
-  iterator Extend_impl(iterator it, T t)
+  iterator Push_impl(iterator it, T t)
   {
     assert(this->UpPositions.size() == this->Data.size());
     assert(it.Position <= this->UpPositions.size());
