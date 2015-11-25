@@ -1,0 +1,4 @@
+^CMake Error at NotClosed.cmake:[0-9]+ \(include\):
+  cmake_policy PUSH without matching POP
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$
