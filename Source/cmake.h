@@ -68,6 +68,11 @@ class cmake
     DEPRECATION_WARNING
   };
 
+  enum DiagLevel
+  {
+    DIAG_IGNORE,
+    DIAG_WARN
+  };
 
   /** \brief Describes the working modes of cmake */
   enum WorkingMode
@@ -303,11 +308,7 @@ class cmake
   std::string const& GetCMakeEditCommand() const
     { return this->CMakeEditCommand; }
 
-  void SetSuppressDevWarnings(bool v)
-    {
-      this->SuppressDevWarnings = v;
-      this->DoSuppressDevWarnings = true;
-    }
+  void SetSuppressDevWarnings(bool v);
   /*
    * Get the state of the suppression of developer (author) warnings.
    * Returns false, by default, if developer warnings should be shown, true
@@ -359,8 +360,7 @@ protected:
 
   cmGlobalGenerator *GlobalGenerator;
   cmCacheManager *CacheManager;
-  bool SuppressDevWarnings;
-  bool DoSuppressDevWarnings;
+  std::map<std::string, DiagLevel> DiagLevels;
   std::string GeneratorPlatform;
   std::string GeneratorToolset;
 

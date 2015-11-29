@@ -127,8 +127,6 @@ cmake::cmake()
   this->WarnUnused = false;
   this->WarnUnusedCli = true;
   this->CheckSystemVars = false;
-  this->SuppressDevWarnings = false;
-  this->DoSuppressDevWarnings = false;
   this->DebugOutput = false;
   this->DebugTryCompile = false;
   this->ClearBuildSystem = false;
@@ -274,15 +272,51 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         return false;
         }
       }
-    else if(arg.find("-Wno-dev",0) == 0)
+    else if(cmHasLiteralPrefix(arg, "-W"))
       {
-      this->SuppressDevWarnings = true;
-      this->DoSuppressDevWarnings = true;
-      }
-    else if(arg.find("-Wdev",0) == 0)
-      {
-      this->SuppressDevWarnings = false;
-      this->DoSuppressDevWarnings = true;
+      std::string entry = arg.substr(2);
+      if (entry.empty())
+        {
+        ++i;
+        if (i < args.size())
+          {
+          entry = args[i];
+          }
+        else
+          {
+          cmSystemTools::Error("-W must be followed with [no-]<name>.");
+          return false;
+          }
+        }
+
+      std::string name;
+      bool foundNo = false;
+      unsigned int nameStartPosition = 0;
+
+      if (entry.find("no-", nameStartPosition) == 0)
+        {
+        foundNo = true;
+        nameStartPosition += 3;
+        }
+
+      name = entry.substr(nameStartPosition);
+      if (name.empty())
+        {
+        cmSystemTools::Error("No warning name provided.");
+        return false;
+        }
+
+      if (!foundNo)
+        {
+        // -W<name>
+        this->DiagLevels[name] = std::max(this->DiagLevels[name],
+                                          DIAG_WARN);
+        }
+      else
+        {
+        // -Wno<name>
+        this->DiagLevels[name] = DIAG_IGNORE;
+        }
       }
     else if(arg.find("-U",0) == 0)
       {
@@ -618,11 +652,7 @@ void cmake::SetArgs(const std::vector<std::string>& args,
       // skip for now
       i++;
       }
-    else if(arg.find("-Wno-dev",0) == 0)
-      {
-      // skip for now
-      }
-    else if(arg.find("-Wdev",0) == 0)
+    else if(arg.find("-W",0) == 0)
       {
       // skip for now
       }
@@ -1231,25 +1261,28 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
 
 int cmake::Configure()
 {
-  if(this->DoSuppressDevWarnings)
+  DiagLevel diagLevel;
+
+  if (this->DiagLevels.count("dev") == 1)
     {
-    if(this->SuppressDevWarnings)
+
+    diagLevel = this->DiagLevels["dev"];
+    if (diagLevel == DIAG_IGNORE)
       {
-      this->
-        AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "TRUE",
-                      "Suppress Warnings that are meant for"
-                      " the author of the CMakeLists.txt files.",
-                      cmState::INTERNAL);
+      this->AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "TRUE",
+                          "Suppress Warnings that are meant for"
+                          " the author of the CMakeLists.txt files.",
+                          cmState::INTERNAL);
       }
-    else
+    else if (diagLevel == DIAG_WARN)
       {
-      this->
-        AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "FALSE",
-                      "Suppress Warnings that are meant for"
-                      " the author of the CMakeLists.txt files.",
-                      cmState::INTERNAL);
+      this->AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "FALSE",
+                          "Suppress Warnings that are meant for"
+                          " the author of the CMakeLists.txt files.",
+                          cmState::INTERNAL);
       }
     }
+
   int ret = this->ActualConfigure();
   const char* delCacheVars = this->State
                     ->GetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_");
@@ -2803,6 +2836,21 @@ void cmake::RunCheckForUnusedVariables()
     this->IssueMessage(cmake::WARNING, msg.str());
     }
 #endif
+}
+
+void cmake::SetSuppressDevWarnings(bool b)
+{
+  // equivalent to -Wno-dev
+  if (b)
+    {
+    this->DiagLevels["dev"] = DIAG_IGNORE;
+    }
+  // equivalent to -Wdev
+  else
+    {
+    this->DiagLevels["dev"] = std::max(this->DiagLevels["dev"],
+                                       DIAG_WARN);
+    }
 }
 
 bool cmake::GetSuppressDevWarnings(cmMakefile const* mf)
