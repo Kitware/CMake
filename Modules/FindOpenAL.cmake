@@ -79,11 +79,17 @@ find_path(OPENAL_INCLUDE_DIR al.h
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Creative\ Labs\\OpenAL\ 1.1\ Software\ Development\ Kit\\1.00.0000;InstallDir]
 )
 
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(OPENAL_ARCH_LOCATION libs/Win64)
+else()
+  set(OPENAL_ARCH_LOCATION libs/Win32)
+endif()
+
 find_library(OPENAL_LIBRARY
   NAMES OpenAL al openal OpenAL32
   HINTS
     ENV OPENALDIR
-  PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64
+  PATH_SUFFIXES lib64 lib libs64 libs ${OPENAL_ARCH_LOCATION}
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
