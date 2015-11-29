@@ -157,6 +157,9 @@ unset(RunCMake_TEST_OPTIONS)
 # Dev warnings should be on by default
 run_cmake(Wdev)
 
+# Deprecated warnings should be on by default
+run_cmake(Wdeprecated)
+
 # Conflicting -W options should honor the last value
 set(RunCMake_TEST_OPTIONS -Wno-dev -Wdev)
 run_cmake(Wdev)

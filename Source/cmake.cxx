@@ -2581,10 +2581,7 @@ bool cmake::IsMessageTypeVisible(cmake::MessageType t)
     }
   else if (t == cmake::DEPRECATION_WARNING)
     {
-    // if CMAKE_WARN_DEPRECATED is on, show the message, otherwise suppress it
-    const char* warnDeprecated = this->State->GetInitializedCacheValue(
-                                            "CMAKE_WARN_DEPRECATED");
-    if(cmSystemTools::IsOff(warnDeprecated))
+    if (this->GetSuppressDeprecatedWarnings())
       {
       isVisible = false;
       }
@@ -2914,5 +2911,24 @@ bool cmake::GetSuppressDevWarnings(cmMakefile const* mf)
     const char* cacheEntryValue = this->State->GetCacheEntryValue(
       "CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
     return cmSystemTools::IsOn(cacheEntryValue);
+    }
+}
+
+bool cmake::GetSuppressDeprecatedWarnings(cmMakefile const* mf)
+{
+  /*
+   * The suppression CMake variable may be set in the CMake configuration file
+   * itself, so we have to check what its set to in the makefile if we can.
+   */
+  if (mf)
+    {
+    return (mf->IsSet("CMAKE_WARN_DEPRECATED") &&
+            !mf->IsOn("CMAKE_WARN_DEPRECATED"));
+    }
+  else
+    {
+    const char* cacheEntryValue = this->State->GetCacheEntryValue(
+      "CMAKE_WARN_DEPRECATED");
+    return cacheEntryValue && cmSystemTools::IsOff(cacheEntryValue);
     }
 }

@@ -6,3 +6,7 @@ cmake-W-options
 
 * The ``-Wdev`` and ``-Wno-dev`` :manual:`cmake(1)` options now also enable
   and suppress the deprecated warnings output by default.
+
+* Warnings about deprecated functionality are now enabled by default.
+  They may be suppressed with ``-Wno-deprecated`` or by setting the
+  :variable:`CMAKE_WARN_DEPRECATED` variable to false.

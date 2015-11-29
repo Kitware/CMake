@@ -66,13 +66,17 @@ bool cmMessageCommand
       fatal = true;
       type = cmake::DEPRECATION_ERROR;
       }
-    else if (this->Makefile->IsOn("CMAKE_WARN_DEPRECATED"))
-      {
-      type = cmake::DEPRECATION_WARNING;
-      }
     else
       {
-      return true;
+      if (this->Makefile->GetCMakeInstance()->GetSuppressDeprecatedWarnings(
+          this->Makefile))
+        {
+        return true;
+        }
+      else
+        {
+        type = cmake::DEPRECATION_WARNING;
+        }
       }
     ++i;
     }

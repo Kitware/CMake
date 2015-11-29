@@ -316,6 +316,13 @@ class cmake
    */
   bool GetSuppressDevWarnings(cmMakefile const* mf = NULL);
 
+  /*
+   * Get the state of the suppression of deprecated warnings.
+   * Returns false, by default, if deprecated warnings should be shown, true
+   * otherwise.
+   */
+  bool GetSuppressDeprecatedWarnings(cmMakefile const* mf = NULL);
+
   /** Display a message to the user.  */
   void IssueMessage(cmake::MessageType t, std::string const& text,
         cmListFileBacktrace const& backtrace = cmListFileBacktrace(),
