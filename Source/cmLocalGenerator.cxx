@@ -3121,7 +3121,7 @@ void cmLocalGenerator::GenerateAppleInfoPList(cmGeneratorTarget* target,
   // override user make variables.  If not the configuration will fall
   // back to the directory-level values set by the user.
   cmMakefile* mf = this->Makefile;
-  mf->PushScope();
+  cmMakefile::ScopePushPop varScope(mf);
   mf->AddDefinition("MACOSX_BUNDLE_EXECUTABLE_NAME", targetName.c_str());
   cmLGInfoProp(mf, target, "MACOSX_BUNDLE_INFO_STRING");
   cmLGInfoProp(mf, target, "MACOSX_BUNDLE_ICON_FILE");
@@ -3132,7 +3132,6 @@ void cmLocalGenerator::GenerateAppleInfoPList(cmGeneratorTarget* target,
   cmLGInfoProp(mf, target, "MACOSX_BUNDLE_BUNDLE_VERSION");
   cmLGInfoProp(mf, target, "MACOSX_BUNDLE_COPYRIGHT");
   mf->ConfigureFile(inFile.c_str(), fname, false, false, false);
-  mf->PopScope();
 }
 
 //----------------------------------------------------------------------------
@@ -3165,12 +3164,11 @@ void cmLocalGenerator::GenerateFrameworkInfoPList(cmGeneratorTarget* target,
   // override user make variables.  If not the configuration will fall
   // back to the directory-level values set by the user.
   cmMakefile* mf = this->Makefile;
-  mf->PushScope();
+  cmMakefile::ScopePushPop varScope(mf);
   mf->AddDefinition("MACOSX_FRAMEWORK_NAME", targetName.c_str());
   cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_ICON_FILE");
   cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_IDENTIFIER");
   cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_SHORT_VERSION_STRING");
   cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_BUNDLE_VERSION");
   mf->ConfigureFile(inFile.c_str(), fname, false, false, false);
-  mf->PopScope();
 }
