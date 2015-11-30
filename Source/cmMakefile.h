@@ -321,14 +321,10 @@ public:
   class PolicyPushPop
   {
   public:
-    PolicyPushPop(cmMakefile* m,
-                  bool weak = false,
-                  cmPolicies::PolicyMap const& pm = cmPolicies::PolicyMap());
+    PolicyPushPop(cmMakefile* m);
     ~PolicyPushPop();
-    void Quiet() { this->ReportError = false; }
   private:
     cmMakefile* Makefile;
-    bool ReportError;
   };
   friend class PolicyPushPop;
 
@@ -904,7 +900,7 @@ private:
   void PushPolicy(bool weak = false,
                   cmPolicies::PolicyMap const& pm = cmPolicies::PolicyMap());
   void PopPolicy();
-  void PopPolicyBarrier(bool reportError = true);
+  void PopSnapshot(bool reportError = true);
   friend class cmCMakePolicyCommand;
   class IncludeScope;
   friend class IncludeScope;
