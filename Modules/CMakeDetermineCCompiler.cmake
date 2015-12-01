@@ -121,6 +121,8 @@ if(NOT CMAKE_C_COMPILER_ID_RUN)
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
   CMAKE_DETERMINE_COMPILER_ID(C CFLAGS CMakeCCompilerId.c)
 
+  unset(CMAKE_C_COMPILER_ID_PLATFORM_CONTENT)
+
   # Set old compiler and platform id variables.
   if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_COMPILER_IS_GNUCC 1)
