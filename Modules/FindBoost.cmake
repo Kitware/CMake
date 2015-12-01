@@ -54,6 +54,33 @@
 #   Boost_<C>_LIBRARY_DEBUG   - Component <C> library debug variant
 #   Boost_<C>_LIBRARY_RELEASE - Component <C> library release variant
 #
+# The following :prop_tgt:`IMPORTED` targets are also defined::
+#
+#   Boost::boost                  - Target for header-only dependencies
+#                                   (Boost include directory)
+#   Boost::<C>                    - Target for specific component dependency
+#                                   (shared or static library); <C> is lower-
+#                                   case
+#   Boost::diagnostic_definitions - interface target to enable diagnostic
+#                                   information about Boost's automatic linking
+#                                   during compilation (adds BOOST_LIB_DIAGNOSTIC)
+#   Boost::disable_autolinking    - interface target to disable automatic
+#                                   linking with MSVC (adds BOOST_ALL_NO_LIB)
+#   Boost::dynamic_linking        - interface target to enable dynamic linking
+#                                   linking with MSVC (adds BOOST_ALL_DYN_LINK)
+#
+# Implicit dependencies such as Boost::filesystem requiring
+# Boost::system will be automatically detected and satisfied, even
+# if system is not specified when using find_package and if
+# Boost::system is not added to target_link_libraries.  If using
+# Boost::thread, then Thread::Thread will also be added automatically.
+#
+# It is important to note that the imported targets behave differently
+# than variables created by this module: multiple calls to
+# find_package(Boost) in the same directory or sub-directories with
+# different options (e.g. static or shared) will not override the
+# values of the targets created by the first call.
+#
 # Users may set these hints or results as cache entries.  Projects
 # should not read these entries directly but instead use the above
 # result variables.  Note that some hint names start in upper-case
@@ -141,6 +168,14 @@
 #     include_directories(${Boost_INCLUDE_DIRS})
 #     add_executable(foo foo.cc)
 #   endif()
+#
+# Example to find Boost libraries and use imported targets::
+#
+#   find_package(Boost 1.56 REQUIRED COMPONENTS
+#                date_time filesystem iostreams)
+#   add_executable(foo foo.cc)
+#   target_link_libraries(foo Boost::date_time Boost::filesystem
+#                             Boost::iostreams)
 #
 # Example to find Boost headers and some *static* libraries::
 #
@@ -822,6 +857,16 @@ if(Boost_DEBUG)
                  "Boost_NO_SYSTEM_PATHS = ${Boost_NO_SYSTEM_PATHS}")
 endif()
 
+# Supply Boost_LIB_DIAGNOSTIC_DEFINITIONS as a convenience target. It
+# will only contain any interface definitions on WIN32, but is created
+# on all platforms to keep end user code free from platform dependent
+# code.  Also provide convenience targets to disable autolinking and
+# enable dynamic linking.
+if(NOT TARGET Boost::diagnostic_definitions)
+  add_library(Boost::diagnostic_definitions INTERFACE IMPORTED)
+  add_library(Boost::disable_autolinking INTERFACE IMPORTED)
+  add_library(Boost::dynamic_linking INTERFACE IMPORTED)
+endif()
 if(WIN32)
   # In windows, automatic linking is performed, so you do not have
   # to specify the libraries.  If you are linking to a dynamic
@@ -841,6 +886,12 @@ if(WIN32)
   # code to emit a #pragma message each time a library is selected
   # for linking.
   set(Boost_LIB_DIAGNOSTIC_DEFINITIONS "-DBOOST_LIB_DIAGNOSTIC")
+  set_target_properties(Boost::diagnostic_definitions PROPERTIES
+    INTERFACE_COMPILE_DEFINITIONS "BOOST_LIB_DIAGNOSTIC")
+  set_target_properties(Boost::disable_autolinking PROPERTIES
+    INTERFACE_COMPILE_DEFINITIONS "BOOST_ALL_NO_LIB")
+  set_target_properties(Boost::dynamic_linking PROPERTIES
+    INTERFACE_COMPILE_DEFINITIONS "BOOST_ALL_DYN_LINK")
 endif()
 
 _Boost_CHECK_SPELLING(Boost_ROOT)
@@ -1243,6 +1294,13 @@ endif()
 # Add any missing components to the list.
 _Boost_MISSING_DEPENDENCIES(Boost_FIND_COMPONENTS)
 
+# If thread is required, get the thread libs as a dependency
+list(FIND Boost_FIND_COMPONENTS thread _Boost_THREAD_DEPENDENCY_LIBS)
+if(NOT _Boost_THREAD_DEPENDENCY_LIBS EQUAL -1)
+  include(CMakeFindDependencyMacro)
+  find_dependency(Threads)
+endif()
+
 # If the user changed any of our control inputs flush previous results.
 if(_Boost_CHANGE_LIBDIR OR _Boost_CHANGE_LIBNAME)
   foreach(COMPONENT ${_Boost_COMPONENTS_SEARCHED})
@@ -1482,6 +1540,70 @@ else()
   foreach(COMPONENT ${Boost_FIND_COMPONENTS})
     string(TOUPPER ${COMPONENT} UPPERCOMPONENT)
     set(Boost_${UPPERCOMPONENT}_FOUND 0)
+  endforeach()
+endif()
+
+# ------------------------------------------------------------------------
+#  Add imported targets
+# ------------------------------------------------------------------------
+
+if(Boost_FOUND AND _Boost_IMPORTED_TARGETS)
+  # For header-only libraries
+  if(NOT TARGET Boost::boost)
+    add_library(Boost::boost INTERFACE IMPORTED)
+    if(Boost_INCLUDE_DIRS)
+      set_target_properties(Boost::boost PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${Boost_INCLUDE_DIRS}")
+    endif()
+  endif()
+
+  foreach(COMPONENT ${Boost_FIND_COMPONENTS})
+    if(NOT TARGET Boost::${COMPONENT})
+      string(TOUPPER ${COMPONENT} UPPERCOMPONENT)
+      if(Boost_${UPPERCOMPONENT}_FOUND)
+        if(Boost_USE_STATIC_LIBS)
+          add_library(Boost::${COMPONENT} STATIC IMPORTED)
+        else()
+          # Even if Boost_USE_STATIC_LIBS is OFF, we might have static
+          # libraries as a result.
+          add_library(Boost::${COMPONENT} UNKNOWN IMPORTED)
+        endif()
+        if(Boost_INCLUDE_DIRS)
+          set_target_properties(Boost::${COMPONENT} PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${Boost_INCLUDE_DIRS}")
+        endif()
+        if(EXISTS "${Boost_${UPPERCOMPONENT}_LIBRARY}")
+          set_target_properties(Boost::${COMPONENT} PROPERTIES
+            IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+            IMPORTED_LOCATION "${Boost_${UPPERCOMPONENT}_LIBRARY}")
+        endif()
+        if(EXISTS "${Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG}")
+          set_property(TARGET Boost::${COMPONENT} APPEND PROPERTY
+            IMPORTED_CONFIGURATIONS DEBUG)
+          set_target_properties(Boost::${COMPONENT} PROPERTIES
+            IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
+            IMPORTED_LOCATION_DEBUG "${Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG}")
+        endif()
+        if(EXISTS "${Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE}")
+          set_property(TARGET Boost::${COMPONENT} APPEND PROPERTY
+            IMPORTED_CONFIGURATIONS RELEASE)
+          set_target_properties(Boost::${COMPONENT} PROPERTIES
+            IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
+            IMPORTED_LOCATION_RELEASE "${Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE}")
+        endif()
+        if(_Boost_${UPPERCOMPONENT}_DEPENDENCIES)
+          unset(_Boost_${UPPERCOMPONENT}_TARGET_DEPENDENCIES)
+          foreach(dep ${_Boost_${UPPERCOMPONENT}_DEPENDENCIES})
+            list(APPEND _Boost_${UPPERCOMPONENT}_TARGET_DEPENDENCIES Boost::${dep})
+          endforeach()
+          if(COMPONENT STREQUAL "thread")
+            list(APPEND _Boost_${UPPERCOMPONENT}_TARGET_DEPENDENCIES Threads::Threads)
+          endif()
+          set_target_properties(Boost::${COMPONENT} PROPERTIES
+            INTERFACE_LINK_LIBRARIES "${_Boost_${UPPERCOMPONENT}_TARGET_DEPENDENCIES}")
+        endif()
+      endif()
+    endif()
   endforeach()
 endif()
 
