@@ -80,6 +80,9 @@ private:
   struct ConflictList: public std::vector<ConflictPair> {};
   std::vector<ConflictList> ConflictGraph;
 
+  // Compare directories after resolving symlinks.
+  bool IsSameDirectory(std::string const& l, std::string const& r);
+
   friend class cmOrderDirectoriesConstraint;
   friend class cmOrderDirectoriesConstraintLibrary;
 };
