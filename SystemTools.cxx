@@ -2970,6 +2970,8 @@ std::string SystemTools::FindProgram(
   bool no_system_path)
 {
   std::vector<std::string> extensions;
+  std::string tryPath;
+
 #if defined (_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
   bool hasExtension = false;
   // check to see if the name already has a .xxx at
@@ -2983,22 +2985,22 @@ std::string SystemTools::FindProgram(
     {
     extensions.push_back(".com");
     extensions.push_back(".exe");
-    }
-#endif
-  std::string tryPath;
 
-  // first try with extensions if the os supports them
-  for(std::vector<std::string>::iterator i =
-        extensions.begin(); i != extensions.end(); ++i)
-    {
-    tryPath = name;
-    tryPath += *i;
-    if(SystemTools::FileExists(tryPath) &&
-        !SystemTools::FileIsDirectory(tryPath))
+    // first try with extensions if the os supports them
+    for(std::vector<std::string>::iterator i =
+          extensions.begin(); i != extensions.end(); ++i)
       {
-      return SystemTools::CollapseFullPath(tryPath);
+      tryPath = name;
+      tryPath += *i;
+      if(SystemTools::FileExists(tryPath) &&
+          !SystemTools::FileIsDirectory(tryPath))
+        {
+        return SystemTools::CollapseFullPath(tryPath);
+        }
       }
     }
+#endif
+
   // now try just the name
   tryPath = name;
   if(SystemTools::FileExists(tryPath) &&
@@ -3048,8 +3050,7 @@ std::string SystemTools::FindProgram(
       tryPath = *p;
       tryPath += name;
       tryPath += *ext;
-      if(SystemTools::FileExists(tryPath) &&
-          !SystemTools::FileIsDirectory(tryPath))
+      if(SystemTools::FileExists(tryPath, true))
         {
         return SystemTools::CollapseFullPath(tryPath);
         }
@@ -3057,8 +3058,7 @@ std::string SystemTools::FindProgram(
     // now try it without them
     tryPath = *p;
     tryPath += name;
-    if(SystemTools::FileExists(tryPath) &&
-       !SystemTools::FileIsDirectory(tryPath))
+    if(SystemTools::FileExists(tryPath, true))
       {
       return SystemTools::CollapseFullPath(tryPath);
       }
@@ -3097,8 +3097,7 @@ std::string SystemTools
               const std::vector<std::string>& userPaths)
 {
   // See if the executable exists as written.
-  if(SystemTools::FileExists(name) &&
-     !SystemTools::FileIsDirectory(name))
+  if(SystemTools::FileExists(name, true))
     {
     return SystemTools::CollapseFullPath(name);
     }
@@ -3144,8 +3143,7 @@ std::string SystemTools
     tryPath = *p;
     tryPath += name;
     tryPath += ".lib";
-    if(SystemTools::FileExists(tryPath)
-       && !SystemTools::FileIsDirectory(tryPath))
+    if(SystemTools::FileExists(tryPath, true))
       {
       return SystemTools::CollapseFullPath(tryPath);
       }
@@ -3154,8 +3152,7 @@ std::string SystemTools
     tryPath += "lib";
     tryPath += name;
     tryPath += ".so";
-    if(SystemTools::FileExists(tryPath)
-       && !SystemTools::FileIsDirectory(tryPath))
+    if(SystemTools::FileExists(tryPath, true))
       {
       return SystemTools::CollapseFullPath(tryPath);
       }
@@ -3163,8 +3160,7 @@ std::string SystemTools
     tryPath += "lib";
     tryPath += name;
     tryPath += ".a";
-    if(SystemTools::FileExists(tryPath)
-       && !SystemTools::FileIsDirectory(tryPath))
+    if(SystemTools::FileExists(tryPath, true))
       {
       return SystemTools::CollapseFullPath(tryPath);
       }
@@ -3172,8 +3168,7 @@ std::string SystemTools
     tryPath += "lib";
     tryPath += name;
     tryPath += ".sl";
-    if(SystemTools::FileExists(tryPath)
-       && !SystemTools::FileIsDirectory(tryPath))
+    if(SystemTools::FileExists(tryPath, true))
       {
       return SystemTools::CollapseFullPath(tryPath);
       }
@@ -3181,8 +3176,7 @@ std::string SystemTools
     tryPath += "lib";
     tryPath += name;
     tryPath += ".dylib";
-    if(SystemTools::FileExists(tryPath)
-       && !SystemTools::FileIsDirectory(tryPath))
+    if(SystemTools::FileExists(tryPath, true))
       {
       return SystemTools::CollapseFullPath(tryPath);
       }
@@ -3190,8 +3184,7 @@ std::string SystemTools
     tryPath += "lib";
     tryPath += name;
     tryPath += ".dll";
-    if(SystemTools::FileExists(tryPath)
-       && !SystemTools::FileIsDirectory(tryPath))
+    if(SystemTools::FileExists(tryPath, true))
       {
       return SystemTools::CollapseFullPath(tryPath);
       }

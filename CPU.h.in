@@ -88,6 +88,10 @@
 #elif defined(__mips) || defined(__mips__) || defined(__MIPS__)
 # define @KWSYS_NAMESPACE@_CPU_ENDIAN_ID @KWSYS_NAMESPACE@_CPU_ENDIAN_ID_BIG
 
+/* NIOS2 */
+#elif defined(__NIOS2__) || defined(__NIOS2) || defined(__nios2__)
+# define @KWSYS_NAMESPACE@_CPU_ENDIAN_ID @KWSYS_NAMESPACE@_CPU_ENDIAN_ID_LITTLE
+
 /* OpenRISC 1000 */
 #elif defined(__or1k__)
 # define @KWSYS_NAMESPACE@_CPU_ENDIAN_ID @KWSYS_NAMESPACE@_CPU_ENDIAN_ID_BIG
