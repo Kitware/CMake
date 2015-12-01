@@ -689,6 +689,45 @@ function(_Boost_COMPONENT_DEPENDENCIES component _ret)
 endfunction()
 
 #
+# Determine if any missing dependencies require adding to the component list.
+#
+# Sets _Boost_${COMPONENT}_DEPENDENCIES for each required component,
+# plus _Boost_IMPORTED_TARGETS (TRUE if imported targets should be
+# defined; FALSE if dependency information is unavailable).
+#
+# componentvar - the component list variable name
+#
+#
+function(_Boost_MISSING_DEPENDENCIES componentvar)
+  # _boost_unprocessed_components - list of components requiring processing
+  # _boost_processed_components - components already processed (or currently being processed)
+  # _boost_new_components - new components discovered for future processing
+  #
+  list(APPEND _boost_unprocessed_components ${${componentvar}})
+
+  while(_boost_unprocessed_components)
+    list(APPEND _boost_processed_components ${_boost_unprocessed_components})
+    foreach(component ${_boost_unprocessed_components})
+      string(TOUPPER ${component} uppercomponent)
+  set(${_ret} ${_Boost_${uppercomponent}_DEPENDENCIES} PARENT_SCOPE)
+      _Boost_COMPONENT_DEPENDENCIES("${component}" _Boost_${uppercomponent}_DEPENDENCIES)
+      set(_Boost_${uppercomponent}_DEPENDENCIES ${_Boost_${uppercomponent}_DEPENDENCIES} PARENT_SCOPE)
+      set(_Boost_IMPORTED_TARGETS ${_Boost_IMPORTED_TARGETS} PARENT_SCOPE)
+      foreach(componentdep ${_Boost_${uppercomponent}_DEPENDENCIES})
+        list(FIND _boost_processed_components "${componentdep}" _boost_component_found)
+        list(FIND _boost_new_components "${componentdep}" _boost_component_new)
+        if (_boost_component_found EQUAL -1 AND _boost_component_new EQUAL -1)
+          list(APPEND _boost_new_components ${componentdep})
+        endif()
+      endforeach()
+    endforeach()
+    set(_boost_unprocessed_components ${_boost_new_components})
+    unset(_boost_new_components)
+  endwhile()
+  set(${componentvar} ${_boost_processed_components} PARENT_SCOPE)
+endfunction()
+
+#
 # End functions/macros
 #
 #-------------------------------------------------------------------------------
@@ -1199,6 +1238,10 @@ if(Boost_VERSION AND Boost_FIND_COMPONENTS)
      list(REMOVE_ITEM Boost_FIND_COMPONENTS system)
    endif()
 endif()
+
+# Additional components may be required via component dependencies.
+# Add any missing components to the list.
+_Boost_MISSING_DEPENDENCIES(Boost_FIND_COMPONENTS)
 
 # If the user changed any of our control inputs flush previous results.
 if(_Boost_CHANGE_LIBDIR OR _Boost_CHANGE_LIBNAME)
