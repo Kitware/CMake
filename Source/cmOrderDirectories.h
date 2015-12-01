@@ -83,6 +83,9 @@ private:
   // Compare directories after resolving symlinks.
   bool IsSameDirectory(std::string const& l, std::string const& r);
 
+  std::string const& GetRealPath(std::string const& dir);
+  std::map<std::string, std::string> RealPaths;
+
   friend class cmOrderDirectoriesConstraint;
   friend class cmOrderDirectoriesConstraintLibrary;
 };

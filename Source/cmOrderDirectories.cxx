@@ -641,6 +641,19 @@ void cmOrderDirectories::DiagnoseCycle()
 bool cmOrderDirectories::IsSameDirectory(std::string const& l,
                                          std::string const& r)
 {
-  return (l == r ||
-          cmSystemTools::GetRealPath(l) == cmSystemTools::GetRealPath(r));
+  return this->GetRealPath(l) == this->GetRealPath(r);
+}
+
+std::string const& cmOrderDirectories::GetRealPath(std::string const& dir)
+{
+  std::map<std::string, std::string>::iterator i =
+    this->RealPaths.lower_bound(dir);
+  if (i == this->RealPaths.end() ||
+      this->RealPaths.key_comp()(dir, i->first))
+    {
+    typedef std::map<std::string, std::string>::value_type value_type;
+    i = this->RealPaths.insert(
+      i, value_type(dir, cmSystemTools::GetRealPath(dir)));
+    }
+  return i->second;
 }
