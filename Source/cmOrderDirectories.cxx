@@ -73,10 +73,8 @@ public:
       {
       // Check if this directory conflicts with the entry.
       std::string const& dir = this->OD->OriginalDirectories[i];
-      if(dir != this->Directory &&
-         cmSystemTools::GetRealPath(dir) !=
-         cmSystemTools::GetRealPath(this->Directory) &&
-         this->FindConflict(dir))
+      if (!this->OD->IsSameDirectory(dir, this->Directory) &&
+          this->FindConflict(dir))
         {
         // The library will be found in this directory but this is not
         // the directory named for it.  Add an entry to make sure the
@@ -638,4 +636,24 @@ void cmOrderDirectories::DiagnoseCycle()
   this->GlobalGenerator->GetCMakeInstance()
     ->IssueMessage(cmake::WARNING, e.str(),
                    this->Target->Target->GetBacktrace());
+}
+
+bool cmOrderDirectories::IsSameDirectory(std::string const& l,
+                                         std::string const& r)
+{
+  return this->GetRealPath(l) == this->GetRealPath(r);
+}
+
+std::string const& cmOrderDirectories::GetRealPath(std::string const& dir)
+{
+  std::map<std::string, std::string>::iterator i =
+    this->RealPaths.lower_bound(dir);
+  if (i == this->RealPaths.end() ||
+      this->RealPaths.key_comp()(dir, i->first))
+    {
+    typedef std::map<std::string, std::string>::value_type value_type;
+    i = this->RealPaths.insert(
+      i, value_type(dir, cmSystemTools::GetRealPath(dir)));
+    }
+  return i->second;
 }
