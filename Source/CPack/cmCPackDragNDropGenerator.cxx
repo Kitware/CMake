@@ -69,6 +69,7 @@ static const char* SLASTREnglish =
 
 //----------------------------------------------------------------------
 cmCPackDragNDropGenerator::cmCPackDragNDropGenerator()
+  : singleLicense(false)
 {
   // default to one package file for components
   this->componentPackageMethod = ONE_PACKAGE;
@@ -131,10 +132,11 @@ int cmCPackDragNDropGenerator::InitializeInternal()
       if(!license_file.empty() &&
          (license_file.find("CPack.GenericLicense.txt") == std::string::npos))
         {
-        cmCPackLogger(cmCPackLog::LOG_WARNING,
+        cmCPackLogger(cmCPackLog::LOG_OUTPUT,
           "Both CPACK_DMG_SLA_DIR and CPACK_RESOURCE_FILE_LICENSE specified, "
-          "defaulting to CPACK_DMG_SLA_DIR"
+          "using CPACK_RESOURCE_FILE_LICENSE as a license for all languages."
           << std::endl);
+        singleLicense = true;
         }
       }
     if(!this->IsSet("CPACK_DMG_SLA_LANGUAGES"))
@@ -166,7 +168,7 @@ int cmCPackDragNDropGenerator::InitializeInternal()
     for(size_t i = 0; i < languages.size(); ++i)
       {
       std::string license = slaDirectory + "/" + languages[i] + ".license.txt";
-      if (!cmSystemTools::FileExists(license))
+      if (!singleLicense && !cmSystemTools::FileExists(license))
         {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
           "Missing license file " << languages[i] << ".license.txt"
@@ -366,7 +368,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
 
   // use sla_dir if both sla_dir and license_file are set
   if(!cpack_license_file.empty() &&
-     !slaDirectory.empty())
+     !slaDirectory.empty() && !singleLicense)
     {
     cpack_license_file = "";
     }
@@ -699,7 +701,14 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
       {
       for(size_t i = 0; i < languages.size(); ++i)
         {
-        WriteLicense(ofs, i + 5000, languages[i]);
+        if(singleLicense)
+          {
+          WriteLicense(ofs, i + 5000, languages[i], cpack_license_file);
+          }
+        else
+          {
+          WriteLicense(ofs, i + 5000, languages[i]);
+          }
         }
       }
 
@@ -850,7 +859,7 @@ void
 cmCPackDragNDropGenerator::WriteLicense(cmGeneratedFileStream& outputStream,
   int licenseNumber, std::string licenseLanguage, std::string licenseFile)
 {
-  if(!licenseFile.empty())
+  if(!licenseFile.empty() && !singleLicense)
     {
     licenseNumber = 5002;
     licenseLanguage = "English";
@@ -887,7 +896,7 @@ cmCPackDragNDropGenerator::WriteLicense(cmGeneratedFileStream& outputStream,
 
   // End of License
   outputStream << "};\n\n";
-  if(!licenseFile.empty())
+  if(!licenseFile.empty() && !singleLicense)
     {
     outputStream << SLASTREnglish;
     }

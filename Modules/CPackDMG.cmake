@@ -49,11 +49,29 @@
 # .. variable:: CPACK_DMG_SLA_DIR
 #
 #   Directory where license and menu files for different languages are stored.
+#   Setting this causes CPack to look for a ``<language>.menu.txt`` and
+#   ``<language>.license.txt`` file for every language defined in
+#   ``CPACK_DMG_SLA_LANGUAGES``. If both this variable and
+#   ``CPACK_RESOURCE_FILE_LICENSE`` are set, CPack will only look for the menu
+#   files and use the same license file for all languages.
 #
 # .. variable:: CPACK_DMG_SLA_LANGUAGES
 #
 #   Languages for which a license agreement is provided when mounting the
-#   generated DMG.
+#   generated DMG. A menu file consists of 9 lines of text. The first line is
+#   is the name of the language itself, uppercase, in English (e.g. German).
+#   The other lines are translations of the following strings:
+#
+#   - Agree
+#   - Disagree
+#   - Print
+#   - Save...
+#   - You agree to the terms of the License Agreement when you click the
+#     "Agree" button.
+#   - Software License Agreement
+#   - This text cannot be saved. The disk may be full or locked, or the file
+#     may be locked.
+#   - Unable to print. Make sure you have selected a printer.
 #
 #   For every language in this list, CPack will try to find files
 #   ``<language>.menu.txt`` and ``<language>.license.txt`` in the directory
