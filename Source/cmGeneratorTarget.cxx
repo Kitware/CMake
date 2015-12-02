@@ -3752,7 +3752,11 @@ void cmGeneratorTarget::ConstructSourceFileFlags() const
       if(cmSourceFile* sf = this->Makefile->GetSource(*it))
         {
         SourceFileFlags& flags = this->SourceFlagsMap[sf];
-        flags.MacFolder = "Resources";
+        flags.MacFolder = "";
+        if(!this->Makefile->PlatformIsAppleIos())
+          {
+          flags.MacFolder = "Resources";
+          }
         flags.Type = cmGeneratorTarget::SourceFileTypeResource;
         }
       }
