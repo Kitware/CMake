@@ -193,10 +193,10 @@ Available commands are:
 ``make_directory <dir>``
   Create a directory.
 
-``md5sum [<file>...]``
+``md5sum <file>...``
   Compute md5sum of files.
 
-``remove [-f] [<file>...]``
+``remove [-f] <file>...``
   Remove the file(s), use ``-f`` to force it.
 
 ``remove_directory <dir>``

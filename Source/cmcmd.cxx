@@ -52,7 +52,7 @@ void CMakeCommandUsage(const char* program)
   // If you add new commands, change here,
   // and in cmakemain.cxx in the options table
   errorStream
-    << "Usage: " << program << " -E [command] [arguments ...]\n"
+    << "Usage: " << program << " -E <command> [arguments...]\n"
     << "Available commands: \n"
     << "  chdir dir cmd [args]...   - run command in a given directory\n"
     << "  compare_files file1 file2 - check if file1 is same as file2\n"
@@ -62,15 +62,15 @@ void CMakeCommandUsage(const char* program)
        "content to directory 'destination'\n"
     << "  copy_if_different in-file out-file  - copy file if input has "
        "changed\n"
-    << "  echo [string]...          - displays arguments as text\n"
-    << "  echo_append [string]...   - displays arguments as text but no new "
+    << "  echo [<string>...]        - displays arguments as text\n"
+    << "  echo_append [<string>...] - displays arguments as text but no new "
        "line\n"
     << "  env [--unset=NAME]... [NAME=VALUE]... COMMAND [ARG]...\n"
     << "                            - run command in a modified environment\n"
     << "  environment               - display the current environment\n"
     << "  make_directory dir        - create a directory\n"
-    << "  md5sum file1 [...]        - compute md5sum of files\n"
-    << "  remove [-f] file1 file2 ... - remove the file(s), use -f to force "
+    << "  md5sum <file>...          - compute md5sum of files\n"
+    << "  remove [-f] <file>...     - remove the file(s), use -f to force "
        "it\n"
     << "  remove_directory dir      - remove a directory and its contents\n"
     << "  rename oldname newname    - rename a file or directory "
@@ -78,7 +78,7 @@ void CMakeCommandUsage(const char* program)
     << "  tar [cxt][vf][zjJ] file.tar [file/dir1 file/dir2 ...]\n"
     << "                            - create or extract a tar or zip archive\n"
     << "  sleep <number>...         - sleep for given number of seconds\n"
-    << "  time command [args] ...   - run command and return elapsed time\n"
+    << "  time command [args...]    - run command and return elapsed time\n"
     << "  touch file                - touch a file.\n"
     << "  touch_nocreate file       - touch a file but do not create it.\n"
 #if defined(_WIN32) && !defined(__CYGWIN__)
