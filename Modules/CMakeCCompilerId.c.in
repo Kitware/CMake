@@ -21,6 +21,10 @@ char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";
 char const* qnxnto = "INFO" ":" "qnxnto[]";
 #endif
 
+#if defined(__CRAYXE) || defined(__CRAYXC)
+char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
+#endif
+
 @CMAKE_C_COMPILER_ID_PLATFORM_CONTENT@
 @CMAKE_C_COMPILER_ID_ERROR_FOR_TEST@
 
@@ -54,6 +58,9 @@ int main(int argc, char* argv[])
 #endif
 #ifdef SIMULATE_VERSION_MAJOR
   require += info_simulate_version[argc];
+#endif
+#if defined(__CRAYXE) || defined(__CRAYXC)
+  require += info_cray[argc];
 #endif
   require += info_language_dialect_default[argc];
   (void)argv;
