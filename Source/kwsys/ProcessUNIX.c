@@ -2241,7 +2241,7 @@ static kwsysProcessTime kwsysProcessTimeAdd(kwsysProcessTime in1, kwsysProcessTi
   kwsysProcessTime out;
   out.tv_sec = in1.tv_sec + in2.tv_sec;
   out.tv_usec = in1.tv_usec + in2.tv_usec;
-  if(out.tv_usec > 1000000)
+  if(out.tv_usec >= 1000000)
     {
     out.tv_usec -= 1000000;
     out.tv_sec += 1;
