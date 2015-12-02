@@ -1,10 +1,10 @@
-^CMake Deprecation Warning at warnmessage.cmake:4 \(message\):
+^CMake Deprecation Warning at defaultmessage.cmake:2 \(message\):
   This is a deprecation warning
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 
 
-CMake Warning \(dev\) at warnmessage.cmake:8 \(message\):
+CMake Warning \(dev\) at defaultmessage.cmake:4 \(message\):
   This is a author warning
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)

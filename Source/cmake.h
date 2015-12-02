@@ -68,6 +68,11 @@ class cmake
     DEPRECATION_WARNING
   };
 
+  enum DiagLevel
+  {
+    DIAG_IGNORE,
+    DIAG_WARN
+  };
 
   /** \brief Describes the working modes of cmake */
   enum WorkingMode
@@ -303,17 +308,28 @@ class cmake
   std::string const& GetCMakeEditCommand() const
     { return this->CMakeEditCommand; }
 
-  void SetSuppressDevWarnings(bool v)
-    {
-      this->SuppressDevWarnings = v;
-      this->DoSuppressDevWarnings = true;
-    }
+  void SetSuppressDevWarnings(bool v);
+  /*
+   * Get the state of the suppression of developer (author) warnings.
+   * Returns false, by default, if developer warnings should be shown, true
+   * otherwise.
+   */
+  bool GetSuppressDevWarnings(cmMakefile const* mf = NULL);
+
+  /*
+   * Get the state of the suppression of deprecated warnings.
+   * Returns false, by default, if deprecated warnings should be shown, true
+   * otherwise.
+   */
+  bool GetSuppressDeprecatedWarnings(cmMakefile const* mf = NULL);
 
   /** Display a message to the user.  */
   void IssueMessage(cmake::MessageType t, std::string const& text,
-        cmListFileBacktrace const& backtrace = cmListFileBacktrace());
+        cmListFileBacktrace const& backtrace = cmListFileBacktrace(),
+        bool force = false);
   void IssueMessage(cmake::MessageType t, std::string const& text,
-        cmListFileContext const& lfc);
+        cmListFileContext const& lfc,
+        bool force = false);
 
   ///! run the --build option
   int Build(const std::string& dir,
@@ -351,8 +367,7 @@ protected:
 
   cmGlobalGenerator *GlobalGenerator;
   cmCacheManager *CacheManager;
-  bool SuppressDevWarnings;
-  bool DoSuppressDevWarnings;
+  std::map<std::string, DiagLevel> DiagLevels;
   std::string GeneratorPlatform;
   std::string GeneratorToolset;
 
@@ -419,6 +434,12 @@ private:
   // Print a list of valid generators to stderr.
   void PrintGeneratorList();
 
+  /*
+   * Check if messages of this type should be output, based on the state of the
+   * warning and error output CMake variables, in the cache.
+   */
+  bool IsMessageTypeVisible(cmake::MessageType t);
+
   bool PrintMessagePreamble(cmake::MessageType t, std::ostream& msg);
 };
 
@@ -430,7 +451,9 @@ private:
   {"-T <toolset-name>", "Specify toolset name if supported by generator."}, \
   {"-A <platform-name>", "Specify platform name if supported by generator."}, \
   {"-Wno-dev", "Suppress developer warnings."},\
-  {"-Wdev", "Enable developer warnings."}
+  {"-Wdev", "Enable developer warnings."},\
+  {"-Wdeprecated", "Enable deprecation warnings."},\
+  {"-Wno-deprecated", "Suppress deprecation warnings."}
 
 #define FOR_EACH_C_FEATURE(F) \
   F(c_function_prototypes) \

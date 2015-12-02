@@ -77,10 +77,23 @@
  Suppress developer warnings.
 
  Suppress warnings that are meant for the author of the
- CMakeLists.txt files.
+ CMakeLists.txt files. By default this will also turn off
+ deprecation warnings.
 
 ``-Wdev``
  Enable developer warnings.
 
  Enable warnings that are meant for the author of the CMakeLists.txt
- files.
+ files. By default this will also turn on deprecation warnings.
+
+``-Wdeprecated``
+ Enable deprecated functionality warnings.
+
+ Enable warnings for usage of deprecated functionality, that are meant
+ for the author of the CMakeLists.txt files.
+
+``-Wno-deprecated``
+ Suppress deprecated functionality warnings.
+
+ Suppress warnings for usage of deprecated functionality, that are meant
+ for the author of the CMakeLists.txt files.

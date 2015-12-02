@@ -1,7 +1,10 @@
 CMAKE_WARN_DEPRECATED
 ---------------------
 
-Whether to issue deprecation warnings for macros and functions.
+Whether to issue warnings for deprecated functionality.
 
-If ``TRUE``, this can be used by macros and functions to issue deprecation
-warnings.  This variable is ``FALSE`` by default.
+If not ``FALSE``, use of deprecated functionality will issue warnings.
+If this variable is not set, CMake behaves as if it were set to ``TRUE``.
+
+When running :manual:`cmake(1)`, this option can be enabled with the
+``-Wdeprecated`` option, or disabled with the ``-Wno-deprecated`` option.

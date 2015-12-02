@@ -129,9 +129,47 @@ set(RunCMake_TEST_OPTIONS -Wno-dev)
 run_cmake(Wno-dev)
 unset(RunCMake_TEST_OPTIONS)
 
+set(RunCMake_TEST_OPTIONS -Wdev)
+run_cmake(Wdev)
+unset(RunCMake_TEST_OPTIONS)
+
+# -Wdev should not override deprecated options if specified
+set(RunCMake_TEST_OPTIONS -Wdev -Wno-deprecated)
+run_cmake(Wno-deprecated)
+unset(RunCMake_TEST_OPTIONS)
+set(RunCMake_TEST_OPTIONS -Wno-deprecated -Wdev)
+run_cmake(Wno-deprecated)
+unset(RunCMake_TEST_OPTIONS)
+
+# -Wdev should enable deprecated warnings as well
+set(RunCMake_TEST_OPTIONS -Wdev)
+run_cmake(Wdeprecated)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS -Wdeprecated)
+run_cmake(Wdeprecated)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS -Wno-deprecated)
+run_cmake(Wno-deprecated)
+unset(RunCMake_TEST_OPTIONS)
+
+# Dev warnings should be on by default
+run_cmake(Wdev)
+
+# Deprecated warnings should be on by default
+run_cmake(Wdeprecated)
+
+# Conflicting -W options should honor the last value
 set(RunCMake_TEST_OPTIONS -Wno-dev -Wdev)
 run_cmake(Wdev)
 unset(RunCMake_TEST_OPTIONS)
+set(RunCMake_TEST_OPTIONS -Wdev -Wno-dev)
+run_cmake(Wno-dev)
+unset(RunCMake_TEST_OPTIONS)
+
+run_cmake_command(W_bad-arg1 ${CMAKE_COMMAND} -W)
+run_cmake_command(W_bad-arg2 ${CMAKE_COMMAND} -Wno-)
 
 set(RunCMake_TEST_OPTIONS --debug-output)
 run_cmake(debug-output)

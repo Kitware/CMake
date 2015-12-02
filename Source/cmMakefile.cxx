@@ -105,7 +105,8 @@ cmMakefile::~cmMakefile()
 
 //----------------------------------------------------------------------------
 void cmMakefile::IssueMessage(cmake::MessageType t,
-                              std::string const& text) const
+                              std::string const& text,
+                              bool force) const
 {
   // Collect context information.
   if(!this->ExecutionStatusStack.empty())
@@ -114,7 +115,8 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
       {
       this->ExecutionStatusStack.back()->SetNestedError(true);
       }
-    this->GetCMakeInstance()->IssueMessage(t, text, this->GetBacktrace());
+    this->GetCMakeInstance()->IssueMessage(t, text, this->GetBacktrace(),
+                                           force);
     }
   else
     {
@@ -129,7 +131,7 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
       lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
       }
     lfc.Line = 0;
-    this->GetCMakeInstance()->IssueMessage(t, text, lfc);
+    this->GetCMakeInstance()->IssueMessage(t, text, lfc, force);
     }
 }
 
