@@ -1367,6 +1367,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindOpenSSL)
   endif()
 
+  if(CMake_TEST_FindTIFF)
+    add_subdirectory(FindTIFF)
+  endif()
+
   if(CMake_TEST_FindXercesC)
     add_subdirectory(FindXercesC)
   endif()
