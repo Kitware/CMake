@@ -101,6 +101,29 @@ if(UNIX)
     )
 endif()
 
+set(in ${RunCMake_SOURCE_DIR}/copy_input)
+set(out ${RunCMake_BINARY_DIR}/copy_output)
+file(REMOVE_RECURSE "${out}")
+file(MAKE_DIRECTORY ${out})
+run_cmake_command(E_copy-one-source-file
+  ${CMAKE_COMMAND} -E copy ${out}/f1.txt)
+run_cmake_command(E_copy-one-source-directory-target-is-directory
+  ${CMAKE_COMMAND} -E copy ${in}/f1.txt ${out})
+run_cmake_command(E_copy-three-source-files-target-is-directory
+  ${CMAKE_COMMAND} -E copy ${in}/f1.txt ${in}/f2.txt ${in}/f3.txt ${out})
+run_cmake_command(E_copy-three-source-files-target-is-file
+  ${CMAKE_COMMAND} -E copy ${in}/f1.txt ${in}/f2.txt ${in}/f3.txt ${out}/f1.txt)
+run_cmake_command(E_copy-two-good-and-one-bad-source-files-target-is-directory
+  ${CMAKE_COMMAND} -E copy ${in}/f1.txt ${in}/not_existing_file.bad ${in}/f3.txt ${out})
+run_cmake_command(E_copy_if_different-one-source-directory-target-is-directory
+  ${CMAKE_COMMAND} -E copy_if_different ${in}/f1.txt ${out})
+run_cmake_command(E_copy_if_different-three-source-files-target-is-directory
+  ${CMAKE_COMMAND} -E copy_if_different ${in}/f1.txt ${in}/f2.txt ${in}/f3.txt ${out})
+run_cmake_command(E_copy_if_different-three-source-files-target-is-file
+  ${CMAKE_COMMAND} -E copy_if_different ${in}/f1.txt ${in}/f2.txt ${in}/f3.txt ${out}/f1.txt)
+unset(in)
+unset(out)
+
 run_cmake_command(E_env-no-command0 ${CMAKE_COMMAND} -E env)
 run_cmake_command(E_env-no-command1 ${CMAKE_COMMAND} -E env TEST_ENV=1)
 run_cmake_command(E_env-bad-arg1 ${CMAKE_COMMAND} -E env -bad-arg1)

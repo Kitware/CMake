@@ -169,14 +169,14 @@ Available commands are:
 ``compare_files <file1> <file2>``
   Check if file1 is same as file2.
 
-``copy <file> <destination>``
-  Copy file to destination (either file or directory).
+``copy <file>... <destination>``
+  Copy files to 'destination' (either file or directory).
 
 ``copy_directory <source> <destination>``
   Copy directory 'source' content to directory 'destination'.
 
-``copy_if_different <in-file> <out-file>``
-  Copy file if input has changed.
+``copy_if_different <file>... <destination>``
+  Copy files if input has changed. Destination could be file or directory.
 
 ``echo [<string>...]``
   Displays arguments as text.
