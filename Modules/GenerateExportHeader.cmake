@@ -230,7 +230,11 @@ macro(_test_compiler_hidden_visibility)
 endmacro()
 
 macro(_test_compiler_has_deprecated)
+  # NOTE:  Some Embarcadero compilers silently compile __declspec(deprecated)
+  # without error, but this is not a documented feature and the attribute does
+  # not actually generate any warnings.
   if(CMAKE_CXX_COMPILER_ID MATCHES Borland
+      OR CMAKE_CXX_COMPILER_ID MATCHES Embarcadero
       OR CMAKE_CXX_COMPILER_ID MATCHES HP
       OR GCC_TOO_OLD
       OR CMAKE_CXX_COMPILER_ID MATCHES PGI

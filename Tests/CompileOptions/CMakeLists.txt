@@ -22,7 +22,7 @@ set_property(TARGET CompileOptions PROPERTY COMPILE_OPTIONS
   ${cxx_tests}
   )
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|Borland")
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|Borland|Embarcadero")
   set_property(TARGET CompileOptions APPEND PROPERTY COMPILE_OPTIONS
     "-DTEST_OCTOTHORPE=\"#\""
     )
