@@ -269,8 +269,7 @@ if(BUILD_TESTING)
     set(TEST_RESOURCES TRUE)
   endif()
   # for borland and watcom there is no resource support
-  if("${CMAKE_GENERATOR}" MATCHES "WMake" OR
-      "${CMAKE_GENERATOR}" MATCHES "Borland")
+  if(WATCOM OR BORLAND)
     set(TEST_RESOURCES FALSE)
   endif()
   if(TEST_RESOURCES)
