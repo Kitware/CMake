@@ -12,3 +12,10 @@ foreach(v
     message(SEND_ERROR "${v} not set!")
   endif()
 endforeach()
+
+# Version numbers may only contain numbers and periods.
+if(NOT CMAKE_Fortran_COMPILER_VERSION MATCHES
+    "^([0-9]+)(\\.([0-9]+))?(\\.([0-9]+))?(\\.([0-9]+))?$"
+    )
+  message(SEND_ERROR "Compiler version is not numeric!")
+endif()
