@@ -444,7 +444,7 @@ function(add_jar _TARGET_NAME)
 
     if (_add_jar_MANIFEST)
         set(_MANIFEST_OPTION m)
-        set(_MANIFEST_VALUE ${_add_jar_MANIFEST})
+        get_filename_component (_MANIFEST_VALUE "${_add_jar_MANIFEST}" ABSOLUTE)
     endif ()
 
     if (LIBRARY_OUTPUT_PATH)
