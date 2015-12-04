@@ -82,6 +82,7 @@ protected slots:
   void doOutputFindNext(bool directionForward = true);
   void doOutputFindPrev();
   void doOutputErrorNext();
+  void doRegexExplorerDialog();
 
 protected:
 

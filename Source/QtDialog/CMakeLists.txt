@@ -113,12 +113,15 @@ set(SRCS
   QCMakeCacheView.h
   QCMakeWidgets.cxx
   QCMakeWidgets.h
+  RegexExplorer.cxx
+  RegexExplorer.h
   )
 QT4_WRAP_UI(UI_SRCS
   CMakeSetupDialog.ui
   Compilers.ui
   CrossCompiler.ui
   AddCacheEntry.ui
+  RegexExplorer.ui
   )
 QT4_WRAP_CPP(MOC_SRCS
   AddCacheEntry.h
@@ -128,6 +131,7 @@ QT4_WRAP_CPP(MOC_SRCS
   QCMake.h
   QCMakeCacheView.h
   QCMakeWidgets.h
+  RegexExplorer.h
   )
 QT4_ADD_RESOURCES(RC_SRCS CMakeSetup.qrc)
 

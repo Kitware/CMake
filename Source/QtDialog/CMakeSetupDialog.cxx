@@ -33,6 +33,7 @@
 #include "QCMakeCacheView.h"
 #include "AddCacheEntry.h"
 #include "FirstConfigure.h"
+#include "RegexExplorer.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 
@@ -124,6 +125,9 @@ CMakeSetupDialog::CMakeSetupDialog()
   QObject::connect(this->InstallForCommandLineAction, SIGNAL(triggered(bool)),
                    this, SLOT(doInstallForCommandLine()));
 #endif
+  ToolsMenu->addSeparator();
+  ToolsMenu->addAction(tr("Regular Expression Explorer..."),
+                       this, SLOT(doRegexExplorerDialog()));
   ToolsMenu->addSeparator();
   ToolsMenu->addAction(tr("&Find in Output..."),
                        this, SLOT(doOutputFindDialog()),
@@ -1270,6 +1274,12 @@ void CMakeSetupDialog::doOutputFindDialog()
       }
     doOutputFindNext();
     }
+}
+
+void CMakeSetupDialog::doRegexExplorerDialog()
+{
+  RegexExplorer dialog(this);
+  dialog.exec();
 }
 
 void CMakeSetupDialog::doOutputFindPrev()
