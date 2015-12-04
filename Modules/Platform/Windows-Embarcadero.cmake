@@ -78,7 +78,11 @@ set (CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO_INIT ${CMAKE_SHARED_LINKER_FLAGS_R
 # invocations within a single working directory.
 if(NOT DEFINED CMAKE_JOB_POOL_LINK)
   set(CMAKE_JOB_POOL_LINK BCC32LinkPool)
-  set_property(GLOBAL APPEND PROPERTY JOB_POOLS BCC32LinkPool=1)
+  get_property(_bccjp GLOBAL PROPERTY JOB_POOLS)
+  if(NOT _bccjp MATCHES "BCC32LinkPool=")
+      set_property(GLOBAL APPEND PROPERTY JOB_POOLS BCC32LinkPool=1)
+  endif()
+  unset(_bccjp)
 endif()
 
 macro(__embarcadero_language lang)
