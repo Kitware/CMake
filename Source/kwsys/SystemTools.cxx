@@ -2402,8 +2402,7 @@ bool SystemTools::CopyFileAlways(const std::string& source, const std::string& d
     // name as the source in that directory.
 
     std::string destination_dir;
-    if(SystemTools::FileExists(destination) &&
-       SystemTools::FileIsDirectory(destination))
+    if(SystemTools::FileIsDirectory(destination))
       {
       destination_dir = real_destination;
       SystemTools::ConvertToUnixSlashes(real_destination);
@@ -2969,19 +2968,14 @@ std::string SystemTools::FindProgram(
   const std::vector<std::string>& userPaths,
   bool no_system_path)
 {
-  std::vector<std::string> extensions;
   std::string tryPath;
 
 #if defined (_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
-  bool hasExtension = false;
+  std::vector<std::string> extensions;
   // check to see if the name already has a .xxx at
   // the end of it
-  if(name.size() > 3 && name[name.size()-4] == '.')
-    {
-    hasExtension = true;
-    }
   // on windows try .com then .exe
-  if(!hasExtension)
+  if(name.size() <= 3 || name[name.size()-4] != '.')
     {
     extensions.push_back(".com");
     extensions.push_back(".exe");
@@ -2992,8 +2986,7 @@ std::string SystemTools::FindProgram(
       {
       tryPath = name;
       tryPath += *i;
-      if(SystemTools::FileExists(tryPath) &&
-          !SystemTools::FileIsDirectory(tryPath))
+      if(SystemTools::FileExists(tryPath, true))
         {
         return SystemTools::CollapseFullPath(tryPath);
         }
@@ -3002,11 +2995,9 @@ std::string SystemTools::FindProgram(
 #endif
 
   // now try just the name
-  tryPath = name;
-  if(SystemTools::FileExists(tryPath) &&
-     !SystemTools::FileIsDirectory(tryPath))
+  if(SystemTools::FileExists(name, true))
     {
-    return SystemTools::CollapseFullPath(tryPath);
+    return SystemTools::CollapseFullPath(name);
     }
   // now construct the path
   std::vector<std::string> path;
@@ -3043,6 +3034,7 @@ std::string SystemTools::FindProgram(
     // Remove double quotes from the path on windows
     SystemTools::ReplaceString(*p, "\"", "");
 #endif
+#if defined (_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
     // first try with extensions
     for(std::vector<std::string>::iterator ext
           = extensions.begin(); ext != extensions.end(); ++ext)
@@ -3055,6 +3047,7 @@ std::string SystemTools::FindProgram(
         return SystemTools::CollapseFullPath(tryPath);
         }
       }
+#endif
     // now try it without them
     tryPath = *p;
     tryPath += name;
@@ -3133,8 +3126,7 @@ std::string SystemTools
     tryPath = *p;
     tryPath += name;
     tryPath += ".framework";
-    if(SystemTools::FileExists(tryPath)
-       && SystemTools::FileIsDirectory(tryPath))
+    if(SystemTools::FileIsDirectory(tryPath))
       {
       return SystemTools::CollapseFullPath(tryPath);
       }
