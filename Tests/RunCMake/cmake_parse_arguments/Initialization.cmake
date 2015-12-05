@@ -1,5 +1,4 @@
 include(${CMAKE_CURRENT_LIST_DIR}/test_utils.cmake)
-include(CMakeParseArguments)
 
 # unparsed arguments
 cmake_parse_arguments(pref "" "" "")
