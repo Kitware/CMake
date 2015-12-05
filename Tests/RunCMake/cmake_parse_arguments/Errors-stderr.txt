@@ -1,0 +1,19 @@
+CMake Error at Errors.cmake:3 \(cmake_parse_arguments\):
+  CMAKE_PARSE_ARGUMENTS Function invoked with incorrect arguments for
+  function named: CMAKE_PARSE_ARGUMENTS
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at Errors.cmake:4 \(cmake_parse_arguments\):
+  CMAKE_PARSE_ARGUMENTS Function invoked with incorrect arguments for
+  function named: CMAKE_PARSE_ARGUMENTS
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at Errors.cmake:5 \(cmake_parse_arguments\):
+  CMAKE_PARSE_ARGUMENTS Function invoked with incorrect arguments for
+  function named: CMAKE_PARSE_ARGUMENTS
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
