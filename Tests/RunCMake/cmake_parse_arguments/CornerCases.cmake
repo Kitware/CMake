@@ -1,5 +1,4 @@
 include(${CMAKE_CURRENT_LIST_DIR}/test_utils.cmake)
-include(CMakeParseArguments)
 
 # example from the documentation
 # OPTIONAL is a keyword and therefore terminates the definition of

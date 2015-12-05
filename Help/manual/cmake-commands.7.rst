@@ -29,6 +29,7 @@ These commands may be used freely in CMake projects.
    /command/build_command
    /command/cmake_host_system_information
    /command/cmake_minimum_required
+   /command/cmake_parse_arguments
    /command/cmake_policy
    /command/configure_file
    /command/continue

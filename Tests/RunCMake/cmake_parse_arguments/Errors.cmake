@@ -1,5 +1,3 @@
-include(CMakeParseArguments)
-
 cmake_parse_arguments()
 cmake_parse_arguments(prefix OPT)
 cmake_parse_arguments(prefix OPT SINGLE)

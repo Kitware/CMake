@@ -1,5 +1,4 @@
 include(${CMAKE_CURRENT_LIST_DIR}/test_utils.cmake)
-include(CMakeParseArguments)
 
 # specify two keywords for each category and set the first keyword of each
 # within ARGN
