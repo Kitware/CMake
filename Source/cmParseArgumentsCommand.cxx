@@ -43,6 +43,10 @@ bool cmParseArgumentsCommand
   // anything else is put into a vector of unparsed strings
   std::vector<std::string> unparsed;
 
+  // remember already defined keywords
+  std::set<std::string> used_keywords;
+  const std::string dup_warning = "keyword defined more than once: ";
+
   // the second argument is a (cmake) list of options without argument
   std::vector<std::string> list;
   cmSystemTools::ExpandListArgument(*argIter++, list);
@@ -50,6 +54,10 @@ bool cmParseArgumentsCommand
                                                 end   = list.end();
                                                 iter != end; ++iter)
     {
+    if (!used_keywords.insert(*iter).second)
+      {
+      this->GetMakefile()->IssueMessage(cmake::WARNING, dup_warning + *iter);
+      }
     options[*iter]; // default initialize
     }
 
@@ -60,6 +68,10 @@ bool cmParseArgumentsCommand
                                                 end   = list.end();
                                                 iter != end; ++iter)
     {
+    if (!used_keywords.insert(*iter).second)
+      {
+      this->GetMakefile()->IssueMessage(cmake::WARNING, dup_warning + *iter);
+      }
     single[*iter]; // default initialize
     }
 
@@ -70,6 +82,10 @@ bool cmParseArgumentsCommand
                                                 end   = list.end();
                                                 iter != end; ++iter)
     {
+    if (!used_keywords.insert(*iter).second)
+      {
+      this->GetMakefile()->IssueMessage(cmake::WARNING, dup_warning + *iter);
+      }
     multi[*iter]; // default initialize
     }
 

@@ -25,6 +25,13 @@ The ``<multi_value_keywords>`` argument contains all keywords for this
 macro which can be followed by more than one value, like e.g. the
 ``TARGETS`` or ``FILES`` keywords of the :command:`install` command.
 
+.. note::
+
+   All keywords shall be unique. I.e. every keyword shall only be specified
+   once in either ``<options>``, ``<one_value_keywords>`` or
+   ``<multi_value_keywords>``. A warning will be emitted if uniqueness is
+   violated.
+
 When done, ``cmake_parse_arguments`` will have defined for each of the
 keywords listed in ``<options>``, ``<one_value_keywords>`` and
 ``<multi_value_keywords>`` a variable composed of the given ``<prefix>``
