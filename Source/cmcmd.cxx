@@ -197,8 +197,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
             args[args.size() - 1].c_str()))
           {
           std::cerr << "Error copying file (if different) from \""
-                     << args[cc] << "\" to \"" << args[args.size() - 1]
-                     << "\".\n";
+                    << args[cc] << "\" to \"" << args[args.size() - 1]
+                    << "\".\n";
           return_value = 1;
           }
         }
