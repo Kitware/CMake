@@ -170,13 +170,18 @@ Available commands are:
   Check if file1 is same as file2.
 
 ``copy <file>... <destination>``
-  Copy files to 'destination' (either file or directory).
+  Copy files to ``<destination>`` (either file or directory).
+  If multiple files are specified, the ``<destination>`` must be
+  directory and it must exist.
 
 ``copy_directory <source> <destination>``
   Copy directory 'source' content to directory 'destination'.
 
 ``copy_if_different <file>... <destination>``
-  Copy files if input has changed. Destination could be file or directory.
+  Copy files to ``<destination>`` (either file or directory) if
+  they have changed.
+  If multiple files are specified, the ``<destination>`` must be
+  directory and it must exist.
 
 ``echo [<string>...]``
   Displays arguments as text.
