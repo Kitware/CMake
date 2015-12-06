@@ -174,8 +174,9 @@ Available commands are:
   If multiple files are specified, the ``<destination>`` must be
   directory and it must exist.
 
-``copy_directory <source> <destination>``
-  Copy directory 'source' content to directory 'destination'.
+``copy_directory <dir>... <destination>``
+  Copy directories to ``<destination>`` directory.
+  If ``<destination>`` directory does not exist it will be created.
 
 ``copy_if_different <file>... <destination>``
   Copy files to ``<destination>`` (either file or directory) if

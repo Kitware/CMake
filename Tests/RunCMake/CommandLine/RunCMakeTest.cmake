@@ -124,6 +124,23 @@ run_cmake_command(E_copy_if_different-three-source-files-target-is-file
 unset(in)
 unset(out)
 
+set(in ${RunCMake_SOURCE_DIR}/copy_input)
+set(out ${RunCMake_BINARY_DIR}/copy_directory_output)
+set(outfile ${out}/file_for_test.txt)
+file(REMOVE_RECURSE "${out}")
+file(MAKE_DIRECTORY ${out})
+file(WRITE ${outfile} "")
+run_cmake_command(E_copy_directory-three-source-files-target-is-directory
+  ${CMAKE_COMMAND} -E copy_directory ${in}/d1 ${in}/d2 ${in}/d3 ${out})
+run_cmake_command(E_copy_directory-three-source-files-target-is-file
+  ${CMAKE_COMMAND} -E copy_directory ${in}/d1 ${in}/d2 ${in}/d3 ${outfile})
+run_cmake_command(E_copy_directory-three-source-files-target-is-not-exist
+  ${CMAKE_COMMAND} -E copy_directory ${in}/d1 ${in}/d2 ${in}/d3 ${out}/not_existing_directory)
+unset(in)
+unset(out)
+unset(outfile)
+
+
 run_cmake_command(E_env-no-command0 ${CMAKE_COMMAND} -E env)
 run_cmake_command(E_env-no-command1 ${CMAKE_COMMAND} -E env TEST_ENV=1)
 run_cmake_command(E_env-bad-arg1 ${CMAKE_COMMAND} -E env -bad-arg1)
