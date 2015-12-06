@@ -2883,17 +2883,23 @@ void cmake::RunCheckForUnusedVariables()
 
 void cmake::SetSuppressDevWarnings(bool b)
 {
+  std::string value;
+
   // equivalent to -Wno-dev
   if (b)
     {
-    this->DiagLevels["dev"] = DIAG_IGNORE;
+    value = "TRUE";
     }
   // equivalent to -Wdev
   else
     {
-    this->DiagLevels["dev"] = std::max(this->DiagLevels["dev"],
-                                       DIAG_WARN);
+    value = "FALSE";
     }
+
+  this->AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", value.c_str(),
+                      "Suppress Warnings that are meant for"
+                      " the author of the CMakeLists.txt files.",
+                      cmState::INTERNAL);
 }
 
 bool cmake::GetSuppressDevWarnings(cmMakefile const* mf)
@@ -2931,4 +2937,25 @@ bool cmake::GetSuppressDeprecatedWarnings(cmMakefile const* mf)
       "CMAKE_WARN_DEPRECATED");
     return cacheEntryValue && cmSystemTools::IsOff(cacheEntryValue);
     }
+}
+
+void cmake::SetSuppressDeprecatedWarnings(bool b)
+{
+  std::string value;
+
+  // equivalent to -Wno-deprecated
+  if (b)
+    {
+    value = "FALSE";
+    }
+  // equivalent to -Wdeprecated
+  else
+    {
+    value = "TRUE";
+    }
+
+  this->AddCacheEntry("CMAKE_WARN_DEPRECATED", value.c_str(),
+                      "Whether to issue warnings for deprecated "
+                      "functionality.",
+                      cmState::INTERNAL);
 }
