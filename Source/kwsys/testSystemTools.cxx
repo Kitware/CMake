@@ -172,12 +172,160 @@ static bool CheckFileOperations()
       << testNewDir << std::endl;
     res = false;
     }
+  // calling it again should just return true
+  if (!kwsys::SystemTools::MakeDirectory(testNewDir))
+    {
+    std::cerr
+      << "Problem with second call to MakeDirectory for: "
+      << testNewDir << std::endl;
+    res = false;
+    }
+  // calling with 0 pointer should return false
+  if (kwsys::SystemTools::MakeDirectory(0))
+    {
+    std::cerr
+      << "Problem with MakeDirectory(0)"
+      << std::endl;
+    res = false;
+    }
+  // calling with an empty string should return false
+  if (kwsys::SystemTools::MakeDirectory(std::string()))
+    {
+    std::cerr
+      << "Problem with MakeDirectory(std::string())"
+      << std::endl;
+    res = false;
+    }
+  // check existence
+  if (!kwsys::SystemTools::FileExists(testNewDir.c_str(), false))
+    {
+    std::cerr
+      << "Problem with FileExists as C string and not file for: "
+      << testNewDir << std::endl;
+    res = false;
+    }
+  // remove it
+  if (!kwsys::SystemTools::RemoveADirectory(testNewDir))
+    {
+    std::cerr
+      << "Problem with RemoveADirectory for: "
+      << testNewDir << std::endl;
+    res = false;
+    }
+  // check existence
+  if (kwsys::SystemTools::FileExists(testNewDir.c_str(), false))
+    {
+    std::cerr
+      << "After RemoveADirectory: "
+      << "Problem with FileExists as C string and not file for: "
+      << testNewDir << std::endl;
+    res = false;
+    }
+  // create it using the char* version
+  if (!kwsys::SystemTools::MakeDirectory(testNewDir.c_str()))
+    {
+    std::cerr
+      << "Problem with second call to MakeDirectory as C string for: "
+      << testNewDir << std::endl;
+    res = false;
+    }
 
   if (!kwsys::SystemTools::Touch(testNewFile.c_str(), true))
     {
     std::cerr
       << "Problem with Touch for: "
       << testNewFile << std::endl;
+    res = false;
+    }
+  // calling MakeDirectory with something that is no file should fail
+  if (kwsys::SystemTools::MakeDirectory(testNewFile))
+    {
+    std::cerr
+      << "Problem with to MakeDirectory for: "
+      << testNewFile << std::endl;
+    res = false;
+    }
+
+  // calling with 0 pointer should return false
+  if (kwsys::SystemTools::FileExists(0))
+    {
+    std::cerr
+      << "Problem with FileExists(0)"
+      << std::endl;
+    res = false;
+    }
+  if (kwsys::SystemTools::FileExists(0, true))
+    {
+    std::cerr
+      << "Problem with FileExists(0) as file"
+      << std::endl;
+    res = false;
+    }
+  // calling with an empty string should return false
+  if (kwsys::SystemTools::FileExists(std::string()))
+    {
+    std::cerr
+      << "Problem with FileExists(std::string())"
+      << std::endl;
+    res = false;
+    }
+  // FileExists(x, true) should return false on a directory
+  if (kwsys::SystemTools::FileExists(testNewDir, true))
+    {
+    std::cerr
+      << "Problem with FileExists as file for: "
+      << testNewDir << std::endl;
+    res = false;
+    }
+  if (kwsys::SystemTools::FileExists(testNewDir.c_str(), true))
+    {
+    std::cerr
+      << "Problem with FileExists as C string and file for: "
+      << testNewDir << std::endl;
+    res = false;
+    }
+  // FileExists(x, false) should return true even on a directory
+  if (!kwsys::SystemTools::FileExists(testNewDir, false))
+    {
+    std::cerr
+      << "Problem with FileExists as not file for: "
+      << testNewDir << std::endl;
+    res = false;
+    }
+  if (!kwsys::SystemTools::FileExists(testNewDir.c_str(), false))
+    {
+    std::cerr
+      << "Problem with FileExists as C string and not file for: "
+      << testNewDir << std::endl;
+    res = false;
+    }
+  // should work, was created as new file before
+  if (!kwsys::SystemTools::FileExists(testNewFile))
+    {
+    std::cerr
+      << "Problem with FileExists for: "
+      << testNewDir << std::endl;
+    res = false;
+    }
+  if (!kwsys::SystemTools::FileExists(testNewFile.c_str()))
+    {
+    std::cerr
+      << "Problem with FileExists as C string for: "
+      << testNewDir << std::endl;
+    res = false;
+    }
+  if (!kwsys::SystemTools::FileExists(testNewFile, true))
+    {
+    std::cerr
+      << "Problem with FileExists as file for: "
+      << testNewDir << std::endl;
+    res = false;
+    }
+  if (!kwsys::SystemTools::FileExists(testNewFile.c_str(), true))
+    {
+    std::cerr
+      << "Problem with FileExists as C string and file for: "
+      << testNewDir << std::endl;
     res = false;
     }
 
@@ -851,6 +999,44 @@ static bool CheckGetPath()
   return res;
 }
 
+static bool CheckFind()
+{
+  bool res = true;
+  const std::string testFindFileName("testFindFile.txt");
+  const std::string testFindFile(TEST_SYSTEMTOOLS_BINARY_DIR "/"
+                                 + testFindFileName);
+
+  if (!kwsys::SystemTools::Touch(testFindFile.c_str(), true))
+    {
+    std::cerr
+      << "Problem with Touch for: "
+      << testFindFile << std::endl;
+    // abort here as the existence of the file only makes the test meaningful
+    return false;
+    }
+
+  std::vector<std::string> searchPaths;
+  searchPaths.push_back(TEST_SYSTEMTOOLS_BINARY_DIR);
+  if (kwsys::SystemTools::FindFile(testFindFileName,
+                                    searchPaths, true).empty())
+    {
+    std::cerr
+      << "Problem with FindFile without system paths for: "
+      << testFindFileName << std::endl;
+    res = false;
+    }
+  if (kwsys::SystemTools::FindFile(testFindFileName,
+                                    searchPaths, false).empty())
+    {
+    std::cerr
+      << "Problem with FindFile with system paths for: "
+      << testFindFileName << std::endl;
+    res = false;
+    }
+
+  return res;
+}
+
 //----------------------------------------------------------------------------
 int testSystemTools(int, char*[])
 {
@@ -887,6 +1073,8 @@ int testSystemTools(int, char*[])
   res &= CheckCollapsePath();
 
   res &= CheckGetPath();
+
+  res &= CheckFind();
 
   return res ? 0 : 1;
 }
