@@ -37,6 +37,7 @@
 #  * Default   : CPACK_PACKAGE_DESCRIPTION_SUMMARY
 #
 # .. variable:: CPACK_RPM_PACKAGE_NAME
+#               CPACK_RPM_<component>_PACKAGE_NAME
 #
 #  The RPM package name.
 #
@@ -81,6 +82,7 @@
 #  * Default   : "unknown"
 #
 # .. variable:: CPACK_RPM_PACKAGE_GROUP
+#               CPACK_RPM_<component>_PACKAGE_GROUP
 #
 #  The RPM package group.
 #
@@ -1106,10 +1108,7 @@ function(cpack_rpm_generate_package)
 
   # Are we packaging components ?
   if(CPACK_RPM_PACKAGE_COMPONENT)
-    set(CPACK_RPM_PACKAGE_COMPONENT_PART_NAME "-${CPACK_RPM_PACKAGE_COMPONENT}")
     string(TOUPPER ${CPACK_RPM_PACKAGE_COMPONENT} CPACK_RPM_PACKAGE_COMPONENT_UPPER)
-  else()
-    set(CPACK_RPM_PACKAGE_COMPONENT_PART_NAME "")
   endif()
 
   set(WDIR "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}")
@@ -1143,8 +1142,17 @@ function(cpack_rpm_generate_package)
   endif()
 
   # CPACK_RPM_PACKAGE_NAME (mandatory)
+
   if(NOT CPACK_RPM_PACKAGE_NAME)
     string(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_RPM_PACKAGE_NAME)
+  endif()
+
+  if(CPACK_RPM_PACKAGE_COMPONENT)
+    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_NAME)
+      set(CPACK_RPM_PACKAGE_NAME ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_NAME})
+    else()
+      set(CPACK_RPM_PACKAGE_NAME ${CPACK_RPM_PACKAGE_NAME}-${CPACK_RPM_PACKAGE_COMPONENT})
+    endif()
   endif()
 
   # CPACK_RPM_PACKAGE_VERSION (mandatory)
@@ -1206,6 +1214,15 @@ function(cpack_rpm_generate_package)
   endif()
 
   # CPACK_RPM_PACKAGE_GROUP
+
+  #Check for component group first.
+  #If not set, it will use regular package group logic.
+  if(CPACK_RPM_PACKAGE_COMPONENT)
+    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_GROUP)
+      set(CPACK_RPM_PACKAGE_GROUP ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_GROUP})
+    endif()
+  endif()
+
   if(NOT CPACK_RPM_PACKAGE_GROUP)
     set(CPACK_RPM_PACKAGE_GROUP "unknown")
   endif()
@@ -1613,7 +1630,7 @@ function(cpack_rpm_generate_package)
     )
 
   # The name of the final spec file to be used by rpmbuild
-  set(CPACK_RPM_BINARY_SPECFILE "${CPACK_RPM_ROOTDIR}/SPECS/${CPACK_RPM_PACKAGE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.spec")
+  set(CPACK_RPM_BINARY_SPECFILE "${CPACK_RPM_ROOTDIR}/SPECS/${CPACK_RPM_PACKAGE_NAME}.spec")
 
   # Print out some debug information if we were asked for that
   if(CPACK_RPM_PACKAGE_DEBUG)
@@ -1645,7 +1662,7 @@ function(cpack_rpm_generate_package)
       "# -*- rpm-spec -*-
 BuildRoot:      \@CPACK_RPM_DIRECTORY\@/\@CPACK_PACKAGE_FILE_NAME\@\@CPACK_RPM_PACKAGE_COMPONENT_PART_PATH\@
 Summary:        \@CPACK_RPM_PACKAGE_SUMMARY\@
-Name:           \@CPACK_RPM_PACKAGE_NAME\@\@CPACK_RPM_PACKAGE_COMPONENT_PART_NAME\@
+Name:           \@CPACK_RPM_PACKAGE_NAME\@
 Version:        \@CPACK_RPM_PACKAGE_VERSION\@
 Release:        \@CPACK_RPM_PACKAGE_RELEASE\@
 License:        \@CPACK_RPM_PACKAGE_LICENSE\@
@@ -1749,15 +1766,15 @@ mv \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot\" $RPM_BUILD_ROOT
               "${CPACK_RPM_BINARY_SPECFILE}"
       WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}"
       RESULT_VARIABLE CPACK_RPMBUILD_EXEC_RESULT
-      ERROR_FILE "${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.err"
-      OUTPUT_FILE "${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.out")
+      ERROR_FILE "${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_NAME}.err"
+      OUTPUT_FILE "${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_NAME}.out")
     if(CPACK_RPM_PACKAGE_DEBUG OR CPACK_RPMBUILD_EXEC_RESULT)
-      file(READ ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.err RPMBUILDERR)
-      file(READ ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.out RPMBUILDOUT)
+      file(READ ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_NAME}.err RPMBUILDERR)
+      file(READ ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_NAME}.out RPMBUILDOUT)
       message("CPackRPM:Debug: You may consult rpmbuild logs in: ")
-      message("CPackRPM:Debug:    - ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.err")
+      message("CPackRPM:Debug:    - ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_NAME}.err")
       message("CPackRPM:Debug: *** ${RPMBUILDERR} ***")
-      message("CPackRPM:Debug:    - ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.out")
+      message("CPackRPM:Debug:    - ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_NAME}.out")
       message("CPackRPM:Debug: *** ${RPMBUILDOUT} ***")
     endif()
   else()
