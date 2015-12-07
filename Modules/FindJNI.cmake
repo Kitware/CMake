@@ -63,7 +63,7 @@ macro(java_append_library_directories _var)
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)64")
         set(_java_libarch "ppc64" "ppc")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)")
-        set(_java_libarch "ppc")
+        set(_java_libarch "ppc" "ppc64")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^sparc")
         # Both flavours can run on the same processor
         set(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}" "sparc" "sparcv9")
@@ -271,7 +271,8 @@ find_path(JAVA_INCLUDE_PATH jni.h
   ${JAVA_AWT_INCLUDE_DIRECTORIES}
 )
 
-find_path(JAVA_INCLUDE_PATH2 jni_md.h
+find_path(JAVA_INCLUDE_PATH2 NAMES jni_md.h jniport.h
+  PATHS
   ${JAVA_INCLUDE_PATH}
   ${JAVA_INCLUDE_PATH}/darwin
   ${JAVA_INCLUDE_PATH}/win32
@@ -281,6 +282,7 @@ find_path(JAVA_INCLUDE_PATH2 jni_md.h
   ${JAVA_INCLUDE_PATH}/solaris
   ${JAVA_INCLUDE_PATH}/hp-ux
   ${JAVA_INCLUDE_PATH}/alpha
+  ${JAVA_INCLUDE_PATH}/aix
 )
 
 find_path(JAVA_AWT_INCLUDE_PATH jawt.h
