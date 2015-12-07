@@ -52,25 +52,25 @@ void CMakeCommandUsage(const char* program)
   // If you add new commands, change here,
   // and in cmakemain.cxx in the options table
   errorStream
-    << "Usage: " << program << " -E [command] [arguments ...]\n"
+    << "Usage: " << program << " -E <command> [arguments...]\n"
     << "Available commands: \n"
     << "  chdir dir cmd [args]...   - run command in a given directory\n"
     << "  compare_files file1 file2 - check if file1 is same as file2\n"
-    << "  copy file destination     - copy file to destination (either file "
-       "or directory)\n"
+    << "  copy <file>... destination  - copy files to destination "
+       "(either file or directory)\n"
     << "  copy_directory source destination   - copy directory 'source' "
        "content to directory 'destination'\n"
-    << "  copy_if_different in-file out-file  - copy file if input has "
+    << "  copy_if_different <file>... destination  - copy files if it has "
        "changed\n"
-    << "  echo [string]...          - displays arguments as text\n"
-    << "  echo_append [string]...   - displays arguments as text but no new "
+    << "  echo [<string>...]        - displays arguments as text\n"
+    << "  echo_append [<string>...] - displays arguments as text but no new "
        "line\n"
     << "  env [--unset=NAME]... [NAME=VALUE]... COMMAND [ARG]...\n"
     << "                            - run command in a modified environment\n"
     << "  environment               - display the current environment\n"
     << "  make_directory dir        - create a directory\n"
-    << "  md5sum file1 [...]        - compute md5sum of files\n"
-    << "  remove [-f] file1 file2 ... - remove the file(s), use -f to force "
+    << "  md5sum <file>...          - compute md5sum of files\n"
+    << "  remove [-f] <file>...     - remove the file(s), use -f to force "
        "it\n"
     << "  remove_directory dir      - remove a directory and its contents\n"
     << "  rename oldname newname    - rename a file or directory "
@@ -78,7 +78,7 @@ void CMakeCommandUsage(const char* program)
     << "  tar [cxt][vf][zjJ] file.tar [file/dir1 file/dir2 ...]\n"
     << "                            - create or extract a tar or zip archive\n"
     << "  sleep <number>...         - sleep for given number of seconds\n"
-    << "  time command [args] ...   - run command and return elapsed time\n"
+    << "  time command [args...]    - run command and return elapsed time\n"
     << "  touch file                - touch a file.\n"
     << "  touch_nocreate file       - touch a file but do not create it.\n"
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -149,29 +149,60 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
   if (args.size() > 1)
     {
     // Copy file
-    if (args[1] == "copy" && args.size() == 4)
+    if (args[1] == "copy" && args.size() > 3)
       {
-      if(!cmSystemTools::cmCopyFile(args[2].c_str(), args[3].c_str()))
+      // If multiple source files specified,
+      // then destination must be directory
+      if ((args.size() > 4) &&
+          (!cmSystemTools::FileIsDirectory(args[args.size() - 1])))
         {
-        std::cerr << "Error copying file \"" << args[2]
-                  << "\" to \"" << args[3] << "\".\n";
+        std::cerr << "Error: Target (for copy command) \""
+                  << args[args.size() - 1]
+                  << "\" is not a directory.\n";
         return 1;
         }
-      return 0;
+      // If error occurs we want to continue copying next files.
+      bool return_value = 0;
+      for (std::string::size_type cc = 2; cc < args.size() - 1; cc ++)
+        {
+        if(!cmSystemTools::cmCopyFile(args[cc].c_str(),
+            args[args.size() - 1].c_str()))
+          {
+          std::cerr << "Error copying file \"" << args[cc]
+                    << "\" to \"" << args[args.size() - 1] << "\".\n";
+          return_value = 1;
+          }
+        }
+      return return_value;
       }
 
     // Copy file if different.
-    if (args[1] == "copy_if_different" && args.size() == 4)
+    if (args[1] == "copy_if_different" && args.size() > 3)
       {
-      if(!cmSystemTools::CopyFileIfDifferent(args[2].c_str(),
-          args[3].c_str()))
+      // If multiple source files specified,
+      // then destination must be directory
+      if ((args.size() > 4) &&
+          (!cmSystemTools::FileIsDirectory(args[args.size() - 1])))
         {
-        std::cerr << "Error copying file (if different) from \""
-                  << args[2] << "\" to \"" << args[3]
-                  << "\".\n";
+        std::cerr << "Error: Target (for copy_if_different command) \""
+                  << args[args.size() - 1]
+                  << "\" is not a directory.\n";
         return 1;
         }
-      return 0;
+      // If error occurs we want to continue copying next files.
+      bool return_value = 0;
+      for (std::string::size_type cc = 2; cc < args.size() - 1; cc ++)
+        {
+        if(!cmSystemTools::CopyFileIfDifferent(args[cc].c_str(),
+            args[args.size() - 1].c_str()))
+          {
+          std::cerr << "Error copying file (if different) from \""
+                     << args[cc] << "\" to \"" << args[args.size() - 1]
+                     << "\".\n";
+          return_value = 1;
+          }
+        }
+      return return_value;
       }
 
     // Copy directory content
