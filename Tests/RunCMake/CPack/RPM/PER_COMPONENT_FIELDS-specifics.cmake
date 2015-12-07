@@ -1,0 +1,5 @@
+set(CPACK_RPM_COMPONENT_INSTALL "ON")
+
+set(CPACK_RPM_PACKAGE_GROUP "default")
+set(CPACK_RPM_pkg_2_PACKAGE_NAME "second")
+set(CPACK_RPM_pkg_2_PACKAGE_GROUP "second_group")

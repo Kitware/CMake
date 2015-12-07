@@ -8,3 +8,12 @@ function(getPackageContent FILE RESULT_VAR)
 
   set(${RESULT_VAR} "${package_content_}" PARENT_SCOPE)
 endfunction()
+
+function(getPackageInfo FILE RESULT_VAR)
+  execute_process(COMMAND ${RPM_EXECUTABLE} -pqi ${FILE}
+          OUTPUT_VARIABLE info_content
+          ERROR_QUIET
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  set(${RESULT_VAR} "${info_content}" PARENT_SCOPE)
+endfunction()
