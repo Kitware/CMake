@@ -6,3 +6,6 @@ cmake-E-multiple-inputs
 
 * The :manual:`cmake(1)` ``-E copy_directory`` command-line
   tool learned to support copying multiple input directories to a directory.
+
+* The :manual:`cmake(1)` ``-E make_directory`` command-line
+  tool learned to support copying multiple input directories to a directory.

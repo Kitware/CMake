@@ -140,6 +140,20 @@ unset(in)
 unset(out)
 unset(outfile)
 
+set(out ${RunCMake_BINARY_DIR}/make_directory_output)
+set(outfile ${out}/file_for_test.txt)
+file(REMOVE_RECURSE "${out}")
+file(MAKE_DIRECTORY ${out})
+file(WRITE ${outfile} "")
+run_cmake_command(E_make_directory-three-directories
+  ${CMAKE_COMMAND} -E make_directory ${out}/d1 ${out}/d2 ${out}/d2)
+run_cmake_command(E_make_directory-directory-with-parent
+  ${CMAKE_COMMAND} -E make_directory ${out}/parent/child)
+run_cmake_command(E_make_directory-three-directories-and-file
+  ${CMAKE_COMMAND} -E make_directory ${out}/d1 ${out}/d2 ${outfile})
+unset(out)
+unset(outfile)
+
 
 run_cmake_command(E_env-no-command0 ${CMAKE_COMMAND} -E env)
 run_cmake_command(E_env-no-command1 ${CMAKE_COMMAND} -E env TEST_ENV=1)
