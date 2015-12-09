@@ -124,7 +124,6 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_USE_FStream 1)
   SET(KWSYS_USE_String 1)
   SET(KWSYS_USE_SystemInformation 1)
-  SET(KWSYS_USE_CPU 1)
 ENDIF()
 
 # Enforce component dependencies.
@@ -424,13 +423,6 @@ IF(KWSYS_USE_FundamentalType)
         "#define ${KWSYS_NAMESPACE}_SIZEOF_${type} ${KWSYS_SIZEOF_${type}}")
     ENDIF()
   ENDFOREACH()
-
-  IF(KWSYS_USE___INT64)
-    KWSYS_PLATFORM_CXX_TEST(KWSYS_CAN_CONVERT_UI64_TO_DOUBLE
-      "Checking whether unsigned __int64 can convert to double" DIRECT)
-  ELSE()
-    SET(KWSYS_CAN_CONVERT_UI64_TO_DOUBLE 1)
-  ENDIF()
 
   # Check signedness of "char" type.
   KWSYS_PLATFORM_CXX_TEST_RUN(KWSYS_CHAR_IS_SIGNED
@@ -749,7 +741,7 @@ ENDFOREACH()
 
 # Add selected C components.
 FOREACH(c
-    Process Base64 Encoding FundamentalType MD5 Terminal System String CPU
+    Process Base64 Encoding FundamentalType MD5 Terminal System String
     )
   IF(KWSYS_USE_${c})
     # Use the corresponding header file.

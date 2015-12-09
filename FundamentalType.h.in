@@ -90,18 +90,12 @@ typedef unsigned long kwsysFundamentalType_UInt32;
 #if @KWSYS_NAMESPACE@_SIZEOF_LONG == 8
 typedef signed long   kwsysFundamentalType_Int64;
 typedef unsigned long kwsysFundamentalType_UInt64;
-/* Whether UInt64 can be converted to double.  */
-# define @KWSYS_NAMESPACE@_CAN_CONVERT_UI64_TO_DOUBLE 1
 #elif @KWSYS_NAMESPACE@_USE_LONG_LONG && @KWSYS_NAMESPACE@_SIZEOF_LONG_LONG == 8
 typedef signed long long   kwsysFundamentalType_Int64;
 typedef unsigned long long kwsysFundamentalType_UInt64;
-/* Whether UInt64 can be converted to double.  */
-# define @KWSYS_NAMESPACE@_CAN_CONVERT_UI64_TO_DOUBLE 1
 #elif @KWSYS_NAMESPACE@_USE___INT64 && @KWSYS_NAMESPACE@_SIZEOF___INT64 == 8
 typedef signed __int64   kwsysFundamentalType_Int64;
 typedef unsigned __int64 kwsysFundamentalType_UInt64;
-/* Whether UInt64 can be converted to double.  */
-# define @KWSYS_NAMESPACE@_CAN_CONVERT_UI64_TO_DOUBLE @KWSYS_CAN_CONVERT_UI64_TO_DOUBLE@
 #else
 # error "No native data type can represent a 64-bit integer."
 #endif
@@ -140,7 +134,6 @@ typedef unsigned __int64 kwsysFundamentalType_UInt64;
 # define KWSYS_USE_LONG_LONG @KWSYS_NAMESPACE@_USE_LONG_LONG
 # define KWSYS_USE___INT64 @KWSYS_NAMESPACE@_USE___INT64
 # define KWSYS_CHAR_IS_SIGNED @KWSYS_NAMESPACE@_CHAR_IS_SIGNED
-# define KWSYS_CAN_CONVERT_UI64_TO_DOUBLE @KWSYS_NAMESPACE@_CAN_CONVERT_UI64_TO_DOUBLE
 #endif
 
 #endif
