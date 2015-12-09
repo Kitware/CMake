@@ -2,12 +2,6 @@
 # needs to be custom.  We use the variables defined through Cray's environment
 # modules to set up the right paths for things.
 
-# Guard against multiple inclusions
-if(__CrayLinuxEnvironment)
-  return()
-endif()
-set(__CrayLinuxEnvironment 1)
-
 set(UNIX 1)
 
 if(DEFINED ENV{CRAYOS_VERSION})
@@ -17,7 +11,12 @@ elseif(DEFINED ENV{XTOS_VERSION})
 else()
   message(FATAL_ERROR "Neither the CRAYOS_VERSION or XTOS_VERSION environment variables are defined.  This platform file should be used inside the Cray Linux Environment for targeting compute nodes (NIDs)")
 endif()
-message(STATUS "Cray Linux Environment ${CMAKE_SYSTEM_VERSION}")
+
+# Guard against multiple messages
+if(NOT __CrayLinuxEnvironment_message)
+  set(__CrayLinuxEnvironment_message 1)
+  message(STATUS "Cray Linux Environment ${CMAKE_SYSTEM_VERSION}")
+endif()
 
 # All cray systems are x86 CPUs and have been for quite some time
 # Note: this may need to change in the future with 64-bit ARM
@@ -29,8 +28,13 @@ set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
 set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
 
 set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
-set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
-set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
+
+# Don't override shared lib support if it's already been set and possibly
+# overridden elsewhere by the CrayPrgEnv module
+if(NOT CMAKE_FIND_LIBRARY_SUFFIXES)
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
+  set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
+endif()
 
 set(CMAKE_DL_LIBS dl)
 
@@ -41,7 +45,6 @@ set(CMAKE_DL_LIBS dl)
 # CMAKE_ROOT is CMAKE_INSTALL_PREFIX/share/cmake, so we need to go two levels up
 get_filename_component(__cmake_install_dir "${CMAKE_ROOT}" PATH)
 get_filename_component(__cmake_install_dir "${__cmake_install_dir}" PATH)
-
 
 # Note: Some Cray's have the SYSROOT_DIR variable defined, pointing to a copy
 # of the NIDs userland.  If so, then we'll use it.  Otherwise, just assume
@@ -78,35 +81,63 @@ list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
   $ENV{SYSROOT_DIR}/usr/lib64
   $ENV{SYSROOT_DIR}/lib64
 )
-
 list(APPEND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
   $ENV{SYSROOT_DIR}/usr/local/lib64
   $ENV{SYSROOT_DIR}/usr/lib64
   $ENV{SYSROOT_DIR}/lib64
 )
-list(APPEND CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES
-  $ENV{SYSROOT_DIR}/usr/include
-)
-list(APPEND CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES
-  $ENV{SYSROOT_DIR}/usr/include
-)
-list(APPEND CMAKE_Fortran_IMPLICIT_INCLUDE_DIRECTORIES
-  $ENV{SYSROOT_DIR}/usr/include
-)
+
+# Compute the intersection of several lists
+function(__cray_list_intersect OUTPUT INPUT0)
+  if(ARGC EQUAL 2)
+    list(APPEND ${OUTPUT} ${${INPUT0}})
+  else()
+    foreach(I IN LISTS ${INPUT0})
+      set(__is_common 1)
+      foreach(L IN LISTS ARGN)
+        list(FIND ${L} "${I}" __idx)
+        if(__idx EQUAL -1)
+          set(__is_common 0)
+          break()
+        endif()
+      endforeach()
+      if(__is_common)
+        list(APPEND ${OUTPUT}  "${I}")
+      endif()
+    endforeach()
+  endif()
+  set(${OUTPUT} ${${OUTPUT}} PARENT_SCOPE)
+endfunction()
+
+macro(__list_clean_dupes var)
+  if(${var})
+    list(REMOVE_DUPLICATES ${var})
+  endif()
+endmacro()
+
+get_property(__langs GLOBAL PROPERTY ENABLED_LANGUAGES)
+set(__cray_inc_path_vars)
+set(__cray_lib_path_vars)
+foreach(__lang IN LISTS __langs)
+  list(APPEND __cray_inc_path_vars CMAKE_${__lang}_IMPLICIT_INCLUDE_DIRECTORIES)
+  list(APPEND __cray_lib_path_vars CMAKE_${__lang}_IMPLICIT_LINK_DIRECTORIES)
+endforeach()
+if(__cray_inc_path_vars)
+  __cray_list_intersect(__cray_implicit_include_dirs ${__cray_inc_path_vars})
+  if(__cray_implicit_include_dirs)
+    list(INSERT CMAKE_SYSTEM_INCLUDE_PATH 0 ${__cray_implicit_include_dirs})
+  endif()
+endif()
+if(__cray_lib_path_vars)
+  __cray_list_intersect(__cray_implicit_library_dirs ${__cray_lib_path_vars})
+  if(__cray_implicit_library_dirs)
+    list(INSERT CMAKE_SYSTEM_LIBRARY_PATH 0 ${__cray_implicit_library_dirs})
+  endif()
+endif()
+__list_clean_dupes(CMAKE_SYSTEM_PREFIX_PATH)
+__list_clean_dupes(CMAKE_SYSTEM_INCLUDE_PATH)
+__list_clean_dupes(CMAKE_SYSTEM_LIBRARY_PATH)
+__list_clean_dupes(CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES)
 
 # Enable use of lib64 search path variants by default.
 set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS TRUE)
-
-# Check to see if we're using the cray compiler wrappers and load accordingly
-# if we are
-if(DEFINED ENV{CRAYPE_DIR})
-  set(_CRAYPE_ROOT "$ENV{CRAYPE_DIR}")
-elseif(DEFINED ENV{ASYNCPE_DIR})
-  set(_CRAYPE_ROOT "$ENV{ASYNCPE_DIR}")
-endif()
-if(_CRAYPE_ROOT AND
-   ((CMAKE_C_COMPILER MATCHES "${_CRAYPE_ROOT}") OR
-    (CMAKE_CXX_COMPILER MATCHES "${_CRAYPE_ROOT}") OR
-    (CMAKE_Fortran_COMPILER MATCHES "${_CRAYPE_ROOT}")))
-  include(Platform/CrayPrgEnv)
-endif()

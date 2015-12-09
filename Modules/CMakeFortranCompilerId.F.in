@@ -110,6 +110,9 @@
 #       endif
         PRINT *, 'INFO:compiler[]'
 #endif
+#if defined(__CRAYXE) || defined(__CRAYXC)
+        PRINT *, 'INFO:compiler_wrapper[CrayPrgEnv]'
+#endif
 
 #if 0
 ! Identify the platform

@@ -12,6 +12,8 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+include(CMakeLanguageInformation)
+
 # This file sets the basic flags for the Fortran language in CMake.
 # It also loads the available platform file for the system-compiler
 # if it exists.
@@ -36,6 +38,12 @@ if (NOT _INCLUDED_FILE)
   include(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME} OPTIONAL
           RESULT_VARIABLE _INCLUDED_FILE)
 endif ()
+
+# load any compiler-wrapper specific information
+if (CMAKE_Fortran_COMPILER_WRAPPER)
+  __cmake_include_compiler_wrapper(Fortran)
+endif ()
+
 # We specify the compiler information in the system file for some
 # platforms, but this language may not have been enabled when the file
 # was first included.  Include it again to get the language info.
