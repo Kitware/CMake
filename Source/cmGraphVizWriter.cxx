@@ -292,7 +292,7 @@ void cmGraphVizWriter::WriteGlobalFile(const char* fileName)
 
 void cmGraphVizWriter::WriteHeader(cmGeneratedFileStream& str) const
 {
-  str << this->GraphType << " " << this->GraphName << " {" << std::endl;
+  str << this->GraphType << " \"" << this->GraphName << "\" {" << std::endl;
   str << this->GraphHeader << std::endl;
 }
 
