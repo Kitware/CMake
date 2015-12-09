@@ -54,12 +54,12 @@ void CMakeCommandUsage(const char* program)
   errorStream
     << "Usage: " << program << " -E <command> [arguments...]\n"
     << "Available commands: \n"
-    << "  chdir dir cmd [args]...   - run command in a given directory\n"
+    << "  chdir dir cmd [args...]   - run command in a given directory\n"
     << "  compare_files file1 file2 - check if file1 is same as file2\n"
     << "  copy <file>... destination  - copy files to destination "
        "(either file or directory)\n"
-    << "  copy_directory source destination   - copy directory 'source' "
-       "content to directory 'destination'\n"
+    << "  copy_directory <dir>... destination   - copy content of <dir>... "
+       "directories to 'destination' directory\n"
     << "  copy_if_different <file>... destination  - copy files if it has "
        "changed\n"
     << "  echo [<string>...]        - displays arguments as text\n"
@@ -197,8 +197,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
             args[args.size() - 1].c_str()))
           {
           std::cerr << "Error copying file (if different) from \""
-                     << args[cc] << "\" to \"" << args[args.size() - 1]
-                     << "\".\n";
+                    << args[cc] << "\" to \"" << args[args.size() - 1]
+                    << "\".\n";
           return_value = 1;
           }
         }
@@ -206,16 +206,22 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       }
 
     // Copy directory content
-    if (args[1] == "copy_directory" && args.size() == 4)
+    if (args[1] == "copy_directory" && args.size() > 3)
       {
-      if(!cmSystemTools::CopyADirectory(args[2], args[3]))
+      // If error occurs we want to continue copying next files.
+      bool return_value = 0;
+      for (std::string::size_type cc = 2; cc < args.size() - 1; cc ++)
         {
-        std::cerr << "Error copying directory from \""
-                  << args[2] << "\" to \"" << args[3]
-                  << "\".\n";
-        return 1;
+        if(!cmSystemTools::CopyADirectory(args[cc].c_str(),
+            args[args.size() - 1].c_str()))
+          {
+          std::cerr << "Error copying directory from \""
+                    << args[cc] << "\" to \"" << args[args.size() - 1]
+                    << "\".\n";
+          return_value = 1;
+          }
         }
-      return 0;
+      return return_value;
       }
 
     // Rename a file or directory
