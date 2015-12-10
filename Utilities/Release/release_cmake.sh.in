@@ -5,6 +5,7 @@ echo ""
 echo  "remove and create working directory @CMAKE_RELEASE_DIRECTORY@"
 rm -rf @CMAKE_RELEASE_DIRECTORY@
 mkdir @CMAKE_RELEASE_DIRECTORY@
+@ENV@
 
 check_exit_value()
 {
