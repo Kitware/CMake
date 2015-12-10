@@ -16,8 +16,7 @@
 #include <cmsys/FStream.hxx>
 
 // Need the native byte order of the running CPU.
-#define cmsys_CPU_UNKNOWN_OKAY // We can decide at runtime if not known.
-#include <cmsys/CPU.h>
+#include <cmIML/ABI.h>
 
 // Include the ELF format information system header.
 #if defined(__OpenBSD__)
@@ -102,9 +101,9 @@ public:
     // In most cases the processor-specific byte order will match that
     // of the target execution environment.  If we choose wrong here
     // it is fixed when the header is read.
-#if cmsys_CPU_ENDIAN_ID == cmsys_CPU_ENDIAN_ID_LITTLE
+#if cmIML_ABI_ENDIAN_ID == cmIML_ABI_ENDIAN_ID_LITTLE
     this->NeedSwap = (this->ByteOrder == ByteOrderMSB);
-#elif cmsys_CPU_ENDIAN_ID == cmsys_CPU_ENDIAN_ID_BIG
+#elif cmIML_ABI_ENDIAN_ID == cmIML_ABI_ENDIAN_ID_BIG
     this->NeedSwap = (this->ByteOrder == ByteOrderLSB);
 #else
     this->NeedSwap = false; // Final decision is at runtime anyway.
