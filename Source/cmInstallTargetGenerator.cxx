@@ -152,13 +152,19 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
       // Handle OSX Bundles.
       if(this->Target->IsAppBundleOnApple())
         {
+        cmMakefile const* mf = this->Target->Target->GetMakefile();
+
         // Install the whole app bundle directory.
         type = cmInstallType_DIRECTORY;
         literal_args += " USE_SOURCE_PERMISSIONS";
         from1 += ".app";
 
         // Tweaks apply to the binary inside the bundle.
-        to1 += ".app/Contents/MacOS/";
+        to1 += ".app/";
+        if(!mf->PlatformIsAppleIos())
+          {
+          to1 += "Contents/MacOS/";
+          }
         to1 += targetName;
         }
       else
