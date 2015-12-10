@@ -120,6 +120,10 @@ foreach(gen ${generators})
   endif()
 endforeach()
 
+if(SUFFIXES)
+  list(REMOVE_DUPLICATES SUFFIXES)
+endif()
+
 if(LOCAL_DIR)
   file(MAKE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${LOCAL_DIR}")
 else()
