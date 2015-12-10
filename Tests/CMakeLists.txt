@@ -1362,6 +1362,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   if(CMake_TEST_FindGSL)
     add_subdirectory(FindGSL)
   endif()
+
+  if(CMake_TEST_FindGTest)
+    add_subdirectory(FindGTest)
+  endif()
+
   if(CMake_TEST_FindJsonCpp)
     add_subdirectory(FindJsonCpp)
   endif()
