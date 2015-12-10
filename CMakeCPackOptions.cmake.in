@@ -194,9 +194,9 @@ if("${CPACK_GENERATOR}" STREQUAL "WIX")
   # Reset CPACK_PACKAGE_VERSION to deal with WiX restriction.
   # But the file names still use the full CMake_VERSION value:
   set(CPACK_PACKAGE_FILE_NAME
-    "${CPACK_PACKAGE_NAME}-@CMake_VERSION@-${CPACK_SYSTEM_NAME}")
+    "cmake-@CMake_VERSION@-${CPACK_SYSTEM_NAME}")
   set(CPACK_SOURCE_PACKAGE_FILE_NAME
-    "${CPACK_PACKAGE_NAME}-@CMake_VERSION@-Source")
+    "cmake-@CMake_VERSION@")
 
   if(NOT CPACK_WIX_SIZEOF_VOID_P)
     set(CPACK_WIX_SIZEOF_VOID_P "@CMAKE_SIZEOF_VOID_P@")
