@@ -685,7 +685,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   endmacro()
   if(CMAKE_BUILD_NIGHTLY_RELEASES)
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyWindows
-      dash2win64_release.cmake)
+      dash3win7_release.cmake)
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyOSX
       dashmacmini5_release.cmake)
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyLinux32
