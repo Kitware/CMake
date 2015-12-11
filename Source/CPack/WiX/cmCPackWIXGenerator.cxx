@@ -817,6 +817,8 @@ bool cmCPackWIXGenerator::CreateShortcutsOfSpecificType(
   fileDefinitions.AddAttribute("Id", componentId);
   fileDefinitions.AddAttribute("Guid", "*");
 
+  this->Patch->ApplyFragment(componentId, fileDefinitions);
+
   std::string registryKey = std::string("Software\\") +
     cpackVendor + "\\" + cpackPackageName;
 
