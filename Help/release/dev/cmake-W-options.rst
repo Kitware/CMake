@@ -10,3 +10,6 @@ cmake-W-options
 * Warnings about deprecated functionality are now enabled by default.
   They may be suppressed with ``-Wno-deprecated`` or by setting the
   :variable:`CMAKE_WARN_DEPRECATED` variable to false.
+
+* Warnings about deprecated functionality can now be controlled in the
+  :manual:`cmake-gui(1)` application.

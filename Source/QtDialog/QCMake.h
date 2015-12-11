@@ -91,8 +91,14 @@ public slots:
   void reloadCache();
   /// set whether to do debug output
   void setDebugOutput(bool);
+  /// get whether to do suppress dev warnings
+  bool getSuppressDevWarnings();
   /// set whether to do suppress dev warnings
   void setSuppressDevWarnings(bool value);
+  /// get whether to do suppress deprecated warnings
+  bool getSuppressDeprecatedWarnings();
+  /// set whether to do suppress deprecated warnings
+  void setSuppressDeprecatedWarnings(bool value);
   /// set whether to run cmake with warnings about uninitialized variables
   void setWarnUninitializedMode(bool value);
   /// set whether to run cmake with warnings about unused variables
@@ -146,7 +152,6 @@ protected:
                               bool&, void* cd);
   static void stdoutCallback(const char* msg, size_t len, void* cd);
   static void stderrCallback(const char* msg, size_t len, void* cd);
-  bool SuppressDevWarnings;
   bool WarnUninitializedMode;
   bool WarnUnusedMode;
   bool WarnUnusedAllMode;

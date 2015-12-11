@@ -115,6 +115,8 @@ set(SRCS
   QCMakeWidgets.h
   RegexExplorer.cxx
   RegexExplorer.h
+  WarningMessagesDialog.cxx
+  WarningMessagesDialog.h
   )
 QT4_WRAP_UI(UI_SRCS
   CMakeSetupDialog.ui
@@ -122,6 +124,7 @@ QT4_WRAP_UI(UI_SRCS
   CrossCompiler.ui
   AddCacheEntry.ui
   RegexExplorer.ui
+  WarningMessagesDialog.ui
   )
 QT4_WRAP_CPP(MOC_SRCS
   AddCacheEntry.h
@@ -132,6 +135,7 @@ QT4_WRAP_CPP(MOC_SRCS
   QCMakeCacheView.h
   QCMakeWidgets.h
   RegexExplorer.h
+  WarningMessagesDialog.h
   )
 QT4_ADD_RESOURCES(RC_SRCS CMakeSetup.qrc)
 

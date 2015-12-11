@@ -1269,17 +1269,11 @@ int cmake::Configure()
     diagLevel = this->DiagLevels["deprecated"];
     if (diagLevel == DIAG_IGNORE)
       {
-      this->AddCacheEntry("CMAKE_WARN_DEPRECATED", "FALSE",
-                          "Whether to issue warnings for deprecated "
-                          "functionality.",
-                          cmState::INTERNAL);
+      this->SetSuppressDeprecatedWarnings(true);
       }
     else if (diagLevel == DIAG_WARN)
       {
-      this->AddCacheEntry("CMAKE_WARN_DEPRECATED", "TRUE",
-                          "Whether to issue warnings for deprecated "
-                          "functionality.",
-                          cmState::INTERNAL);
+      this->SetSuppressDeprecatedWarnings(false);
       }
     }
 
@@ -1299,32 +1293,20 @@ int cmake::Configure()
     diagLevel = this->DiagLevels["dev"];
     if (diagLevel == DIAG_IGNORE)
       {
-      this->AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "TRUE",
-                          "Suppress Warnings that are meant for"
-                          " the author of the CMakeLists.txt files.",
-                          cmState::INTERNAL);
+      this->SetSuppressDevWarnings(true);
 
       if (setDeprecatedVariables)
         {
-        this->AddCacheEntry("CMAKE_WARN_DEPRECATED", "FALSE",
-                            "Whether to issue warnings for deprecated "
-                            "functionality.",
-                            cmState::INTERNAL);
+        this->SetSuppressDeprecatedWarnings(true);
         }
       }
     else if (diagLevel == DIAG_WARN)
       {
-      this->AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "FALSE",
-                          "Suppress Warnings that are meant for"
-                          " the author of the CMakeLists.txt files.",
-                          cmState::INTERNAL);
+      this->SetSuppressDevWarnings(false);
 
       if (setDeprecatedVariables)
         {
-        this->AddCacheEntry("CMAKE_WARN_DEPRECATED", "TRUE",
-                            "Whether to issue warnings for deprecated "
-                            "functionality.",
-                            cmState::INTERNAL);
+        this->SetSuppressDeprecatedWarnings(false);
         }
       }
     }
@@ -2881,21 +2863,6 @@ void cmake::RunCheckForUnusedVariables()
 #endif
 }
 
-void cmake::SetSuppressDevWarnings(bool b)
-{
-  // equivalent to -Wno-dev
-  if (b)
-    {
-    this->DiagLevels["dev"] = DIAG_IGNORE;
-    }
-  // equivalent to -Wdev
-  else
-    {
-    this->DiagLevels["dev"] = std::max(this->DiagLevels["dev"],
-                                       DIAG_WARN);
-    }
-}
-
 bool cmake::GetSuppressDevWarnings(cmMakefile const* mf)
 {
   /*
@@ -2912,6 +2879,27 @@ bool cmake::GetSuppressDevWarnings(cmMakefile const* mf)
       "CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
     return cmSystemTools::IsOn(cacheEntryValue);
     }
+}
+
+void cmake::SetSuppressDevWarnings(bool b)
+{
+  std::string value;
+
+  // equivalent to -Wno-dev
+  if (b)
+    {
+    value = "TRUE";
+    }
+  // equivalent to -Wdev
+  else
+    {
+    value = "FALSE";
+    }
+
+  this->AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", value.c_str(),
+                      "Suppress Warnings that are meant for"
+                      " the author of the CMakeLists.txt files.",
+                      cmState::INTERNAL);
 }
 
 bool cmake::GetSuppressDeprecatedWarnings(cmMakefile const* mf)
@@ -2931,4 +2919,25 @@ bool cmake::GetSuppressDeprecatedWarnings(cmMakefile const* mf)
       "CMAKE_WARN_DEPRECATED");
     return cacheEntryValue && cmSystemTools::IsOff(cacheEntryValue);
     }
+}
+
+void cmake::SetSuppressDeprecatedWarnings(bool b)
+{
+  std::string value;
+
+  // equivalent to -Wno-deprecated
+  if (b)
+    {
+    value = "FALSE";
+    }
+  // equivalent to -Wdeprecated
+  else
+    {
+    value = "TRUE";
+    }
+
+  this->AddCacheEntry("CMAKE_WARN_DEPRECATED", value.c_str(),
+                      "Whether to issue warnings for deprecated "
+                      "functionality.",
+                      cmState::INTERNAL);
 }

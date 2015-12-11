@@ -308,13 +308,16 @@ class cmake
   std::string const& GetCMakeEditCommand() const
     { return this->CMakeEditCommand; }
 
-  void SetSuppressDevWarnings(bool v);
   /*
    * Get the state of the suppression of developer (author) warnings.
    * Returns false, by default, if developer warnings should be shown, true
    * otherwise.
    */
   bool GetSuppressDevWarnings(cmMakefile const* mf = NULL);
+  /*
+   * Set the state of the suppression of developer (author) warnings.
+   */
+  void SetSuppressDevWarnings(bool v);
 
   /*
    * Get the state of the suppression of deprecated warnings.
@@ -322,6 +325,10 @@ class cmake
    * otherwise.
    */
   bool GetSuppressDeprecatedWarnings(cmMakefile const* mf = NULL);
+  /*
+   * Set the state of the suppression of deprecated warnings.
+   */
+  void SetSuppressDeprecatedWarnings(bool v);
 
   /** Display a message to the user.  */
   void IssueMessage(cmake::MessageType t, std::string const& text,
