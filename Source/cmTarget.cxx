@@ -132,6 +132,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", 0);
     this->SetPropertyDefault("GNUtoMS", 0);
     this->SetPropertyDefault("OSX_ARCHITECTURES", 0);
+    this->SetPropertyDefault("IOS_INSTALL_COMBINED", 0);
     this->SetPropertyDefault("AUTOMOC", 0);
     this->SetPropertyDefault("AUTOUIC", 0);
     this->SetPropertyDefault("AUTORCC", 0);
