@@ -41,7 +41,6 @@ run_child(
   COMMAND ${GIT} --bare init
   )
 file(REMOVE_RECURSE ${TOP}/repo.git/hooks)
-set(REPO file://${TOP}/repo.git)
 
 # Create submodule repository.
 message("Creating submodule...")
@@ -51,17 +50,13 @@ run_child(
   COMMAND ${GIT} --bare init
   )
 file(REMOVE_RECURSE ${TOP}/module.git/hooks)
-set(MOD_REPO file://${TOP}/module.git)
-create_content(module)
-run_child(WORKING_DIRECTORY ${TOP}/module
-  COMMAND ${GIT} init
+run_child(WORKING_DIRECTORY ${TOP}
+  COMMAND ${GIT} clone module.git module
   )
 file(REMOVE_RECURSE ${TOP}/module/.git/hooks)
 file(APPEND ${TOP}/module/.git/config "
-[remote \"origin\"]
-\turl = ${MOD_REPO}
-\tfetch = +refs/heads/*:refs/remotes/origin/*
 ${AUTHOR_CONFIG}")
+create_content(module)
 run_child(WORKING_DIRECTORY ${TOP}/module
   COMMAND ${GIT} add .
   )
@@ -75,20 +70,17 @@ run_child(WORKING_DIRECTORY ${TOP}/module
 #-----------------------------------------------------------------------------
 # Import initial content into the repository.
 message("Importing content...")
-create_content(import)
-file(WRITE ${TOP}/import/HEAD "HEAD\n")
-file(WRITE ${TOP}/import/master "master\n")
 
 # Import the content into the repository.
-run_child(WORKING_DIRECTORY ${TOP}/import
-  COMMAND ${GIT} init
+run_child(WORKING_DIRECTORY ${TOP}
+  COMMAND ${GIT} clone repo.git import
   )
 file(REMOVE_RECURSE ${TOP}/import/.git/hooks)
 file(APPEND ${TOP}/import/.git/config "
-[remote \"origin\"]
-\turl = ${REPO}
-\tfetch = +refs/heads/*:refs/remotes/origin/*
 ${AUTHOR_CONFIG}")
+create_content(import)
+file(WRITE ${TOP}/import/HEAD "HEAD\n")
+file(WRITE ${TOP}/import/master "master\n")
 run_child(WORKING_DIRECTORY ${TOP}/import
   COMMAND ${GIT} add .
   )
@@ -96,7 +88,7 @@ run_child(WORKING_DIRECTORY ${TOP}/import
   COMMAND ${GIT} config core.safecrlf false
   )
 run_child(WORKING_DIRECTORY ${TOP}/import
-  COMMAND ${GIT} submodule add ${MOD_REPO} module
+  COMMAND ${GIT} submodule add ../module.git module
   )
 run_child(WORKING_DIRECTORY ${TOP}/import
   COMMAND ${GIT} commit -m "Initial content"
@@ -123,7 +115,7 @@ run_child(WORKING_DIRECTORY ${TOP}/module
 message("Checking out revision 1...")
 run_child(
   WORKING_DIRECTORY ${TOP}
-  COMMAND ${GIT} clone ${REPO} user-source
+  COMMAND ${GIT} clone repo.git user-source
   )
 file(REMOVE_RECURSE ${TOP}/user-source/.git/hooks)
 file(APPEND ${TOP}/user-source/.git/config "${AUTHOR_CONFIG}")
@@ -278,7 +270,7 @@ set(CTEST_GIT_COMMAND \"${GIT}\")
 set(CTEST_GIT_UPDATE_OPTIONS)
 execute_process(
   WORKING_DIRECTORY \"${TOP}\"
-  COMMAND \"${GIT}\" clone \"${REPO}\" dash-source
+  COMMAND \"${GIT}\" clone repo.git dash-source
   )
 
 # Test .git file.
