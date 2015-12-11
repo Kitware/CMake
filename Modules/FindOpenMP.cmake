@@ -50,6 +50,8 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
     " "
     #GNU
     "-fopenmp"
+    #Clang
+    "-fopenmp=libomp"
     #Microsoft Visual Studio
     "/openmp"
     #Intel windows
@@ -67,6 +69,7 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
   )
 
   set(OMP_FLAG_GNU "-fopenmp")
+  set(OMP_FLAG_Clang "-fopenmp=libomp")
   set(OMP_FLAG_HP "+Oopenmp")
   if(WIN32)
     set(OMP_FLAG_Intel "-Qopenmp")
