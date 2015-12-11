@@ -78,21 +78,6 @@ int main()
 }
 #endif
 
-#ifdef TEST_KWSYS_CAN_CONVERT_UI64_TO_DOUBLE
-void function(double& l, unsigned __int64 const& r)
-{
-  l = static_cast<double>(r);
-}
-
-int main()
-{
-  double tTo = 0.0;
-  unsigned __int64 tFrom = 0;
-  function(tTo, tFrom);
-  return 0;
-}
-#endif
-
 #ifdef TEST_KWSYS_IOS_HAS_ISTREAM_LONG_LONG
 # include <iostream>
 int test_istream(std::istream& is, long long& x)
