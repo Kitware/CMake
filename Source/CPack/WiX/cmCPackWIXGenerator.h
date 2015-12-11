@@ -168,6 +168,9 @@ private:
   void AddCustomFlags(
     std::string const& variableName, std::ostream& stream);
 
+  std::string RelativePathWithoutComponentPrefix(
+    std::string const& path);
+
   std::vector<std::string> WixSources;
   id_map_t PathToIdMap;
   ambiguity_map_t IdAmbiguityCounter;

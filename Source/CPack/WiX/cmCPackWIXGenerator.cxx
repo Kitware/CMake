@@ -911,8 +911,9 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
     relativeDirectoryPath = ".";
     }
 
-  cmInstalledFile const* directoryInstalledFile =
-    this->GetInstalledFile(relativeDirectoryPath);
+  cmInstalledFile const* directoryInstalledFile = this->GetInstalledFile(
+      this->RelativePathWithoutComponentPrefix(relativeDirectoryPath)
+  );
 
   bool emptyDirectory = dir.GetNumberOfFiles() == 2;
   bool createDirectory = false;
@@ -980,8 +981,9 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
       }
     else
       {
-      cmInstalledFile const* installedFile =
-        this->GetInstalledFile(relativePath);
+      cmInstalledFile const* installedFile = this->GetInstalledFile(
+        this->RelativePathWithoutComponentPrefix(relativePath)
+      );
 
       if(installedFile)
         {
@@ -1229,4 +1231,17 @@ void cmCPackWIXGenerator::AddCustomFlags(
     {
       stream << " " << QuotePath(*i);
     }
+}
+
+std::string cmCPackWIXGenerator::RelativePathWithoutComponentPrefix(
+  std::string const& path)
+{
+  if(this->Components.empty())
+    {
+    return path;
+    }
+
+  std::string::size_type pos = path.find('/');
+
+  return path.substr(pos + 1);
 }
