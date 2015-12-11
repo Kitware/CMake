@@ -167,7 +167,8 @@ Available commands are:
   Change the current working directory and run a command.
 
 ``compare_files <file1> <file2>``
-  Check if file1 is same as file2.
+  Check if ``<file1>`` is same as ``<file2>``. If files are the same,
+  then returns 0, if not itreturns 1.
 
 ``copy <file>... <destination>``
   Copy files to ``<destination>`` (either file or directory).
@@ -194,10 +195,11 @@ Available commands are:
   Run command in a modified environment.
 
 ``environment``
-  Display the current environment.
+  Display the current environment variables.
 
-``make_directory <dir>``
-  Create a directory.
+``make_directory <dir>...``
+  Create ``<dir>`` directories.  If necessary, create parent
+  directories too.
 
 ``md5sum <file>...``
   Compute md5sum of files.

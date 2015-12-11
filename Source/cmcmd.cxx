@@ -68,7 +68,7 @@ void CMakeCommandUsage(const char* program)
     << "  env [--unset=NAME]... [NAME=VALUE]... COMMAND [ARG]...\n"
     << "                            - run command in a modified environment\n"
     << "  environment               - display the current environment\n"
-    << "  make_directory dir        - create a directory\n"
+    << "  make_directory <dir>...   - create parent and <dir> directories\n"
     << "  md5sum <file>...          - compute md5sum of files\n"
     << "  remove [-f] <file>...     - remove the file(s), use -f to force "
        "it\n"
@@ -447,15 +447,20 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       }
 #endif
 
-    else if (args[1] == "make_directory" && args.size() == 3)
+    else if (args[1] == "make_directory" && args.size() > 2)
       {
-      if(!cmSystemTools::MakeDirectory(args[2].c_str()))
+      // If error occurs we want to continue copying next files.
+      bool return_value = 0;
+      for (std::string::size_type cc = 2; cc < args.size(); cc ++)
         {
-        std::cerr << "Error making directory \"" << args[2]
-                  << "\".\n";
-        return 1;
+        if(!cmSystemTools::MakeDirectory(args[cc].c_str()))
+          {
+          std::cerr << "Error creating directory \""
+                    << args[cc] << "\".\n";
+          return_value = 1;
+          }
         }
-      return 0;
+      return return_value;
       }
 
     else if (args[1] == "remove_directory" && args.size() == 3)
