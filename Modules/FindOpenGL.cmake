@@ -71,9 +71,11 @@ elseif (WIN32)
 
 elseif (APPLE)
 
-  find_library(OPENGL_gl_LIBRARY OpenGL DOC "OpenGL lib for OSX")
-  find_library(OPENGL_glu_LIBRARY AGL DOC "AGL lib for OSX")
-  find_path(OPENGL_INCLUDE_DIR OpenGL/gl.h DOC "Include for OpenGL on OSX")
+  # The OpenGL.framework provides both gl and glu
+  find_library(OPENGL_gl_LIBRARY OpenGL DOC "OpenGL library for OS X")
+  find_library(OPENGL_glu_LIBRARY OpenGL DOC
+    "GLU library for OS X (usually same as OpenGL library)")
+  find_path(OPENGL_INCLUDE_DIR OpenGL/gl.h DOC "Include for OpenGL on OS X")
   list(APPEND _OpenGL_REQUIRED_VARS OPENGL_INCLUDE_DIR)
 
 else()
@@ -149,7 +151,9 @@ if(OPENGL_gl_LIBRARY)
     set( OPENGL_LIBRARIES  ${OPENGL_gl_LIBRARY} ${OPENGL_LIBRARIES})
     if(OPENGL_glu_LIBRARY)
       set( OPENGL_GLU_FOUND "YES" )
-      set( OPENGL_LIBRARIES ${OPENGL_glu_LIBRARY} ${OPENGL_LIBRARIES} )
+      if(NOT "${OPENGL_glu_LIBRARY}" STREQUAL "${OPENGL_gl_LIBRARY}")
+        set( OPENGL_LIBRARIES ${OPENGL_glu_LIBRARY} ${OPENGL_LIBRARIES} )
+      endif()
     else()
       set( OPENGL_GLU_FOUND "NO" )
     endif()
