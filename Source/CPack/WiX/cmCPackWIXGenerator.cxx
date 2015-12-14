@@ -242,7 +242,16 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
   const char* patchFilePath = GetOption("CPACK_WIX_PATCH_FILE");
   if(patchFilePath)
     {
-    this->Patch->LoadFragments(patchFilePath);
+    std::vector<std::string> patchFilePaths;
+    cmSystemTools::ExpandListArgument(patchFilePath, patchFilePaths);
+
+    for(size_t i = 0; i < patchFilePaths.size(); ++i)
+      {
+      if(!this->Patch->LoadFragments(patchFilePaths[i]))
+        {
+        return false;
+        }
+      }
     }
 
   return true;
