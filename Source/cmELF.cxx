@@ -15,9 +15,6 @@
 #include <cmsys/auto_ptr.hxx>
 #include <cmsys/FStream.hxx>
 
-// Need the native byte order of the running CPU.
-#include <cmIML/ABI.h>
-
 // Include the ELF format information system header.
 #if defined(__OpenBSD__)
 # include <stdint.h>
@@ -101,9 +98,9 @@ public:
     // In most cases the processor-specific byte order will match that
     // of the target execution environment.  If we choose wrong here
     // it is fixed when the header is read.
-#if cmIML_ABI_ENDIAN_ID == cmIML_ABI_ENDIAN_ID_LITTLE
+#if KWIML_ABI_ENDIAN_ID == KWIML_ABI_ENDIAN_ID_LITTLE
     this->NeedSwap = (this->ByteOrder == ByteOrderMSB);
-#elif cmIML_ABI_ENDIAN_ID == cmIML_ABI_ENDIAN_ID_BIG
+#elif KWIML_ABI_ENDIAN_ID == KWIML_ABI_ENDIAN_ID_BIG
     this->NeedSwap = (this->ByteOrder == ByteOrderLSB);
 #else
     this->NeedSwap = false; // Final decision is at runtime anyway.
@@ -197,7 +194,7 @@ struct cmELFTypes32
   typedef Elf32_Shdr ELF_Shdr;
   typedef Elf32_Dyn  ELF_Dyn;
   typedef Elf32_Half ELF_Half;
-  typedef cmIML_INT_uint32_t tagtype;
+  typedef KWIML_INT_uint32_t tagtype;
   static const char* GetName() { return "32-bit"; }
 };
 
@@ -208,7 +205,7 @@ struct cmELFTypes64
   typedef Elf64_Shdr ELF_Shdr;
   typedef Elf64_Dyn  ELF_Dyn;
   typedef Elf64_Half ELF_Half;
-  typedef cmIML_INT_uint64_t tagtype;
+  typedef KWIML_INT_uint64_t tagtype;
   static const char* GetName() { return "64-bit"; }
 };
 

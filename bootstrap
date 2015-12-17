@@ -373,11 +373,6 @@ KWSYS_FILES="\
   SystemTools.hxx \
   Terminal.h"
 
-KWIML_FILES='
-  ABI.h
-  INT.h
-'
-
 # Display CMake bootstrap usage
 cmake_usage()
 {
@@ -700,11 +695,6 @@ cd "${cmake_bootstrap_dir}"
 [ -d "cmsys" ] || mkdir "cmsys"
 if [ ! -d "cmsys" ]; then
   cmake_error 4 "Cannot create directory ${cmake_bootstrap_dir}/cmsys"
-fi
-
-[ -d "cmIML" ] || mkdir "cmIML"
-if [ ! -d "cmIML" ]; then
-  cmake_error 12 "Cannot create directory ${cmake_bootstrap_dir}/cmIML"
 fi
 
 # Delete all the bootstrap files
@@ -1280,11 +1270,6 @@ for a in ${KWSYS_FILES}; do
      "${cmake_bootstrap_dir}/cmsys/${a}" KWSYS_NAMESPACE cmsys
 done
 
-for a in ${KWIML_FILES}; do
-  cmake_replace_string "${cmake_source_dir}/Utilities/KWIML/${a}.in" \
-     "${cmake_bootstrap_dir}/cmIML/${a}" KWIML cmIML
-done
-
 # Generate Makefile
 dep="cmConfigure.h cmsys/*.hxx cmsys/*.h `cmake_escape \"${cmake_source_dir}\"`/Source/*.h"
 objs=""
@@ -1326,9 +1311,9 @@ cmake_cxx_flags_SystemTools="
   -DKWSYS_CXX_HAS_UTIMES=${KWSYS_CXX_HAS_UTIMES}
 "
 cmake_c_flags="${cmake_c_flags}-I`cmake_escape \"${cmake_bootstrap_dir}\"` -I`cmake_escape \"${cmake_source_dir}/Source\"` \
-  -I`cmake_escape \"${cmake_bootstrap_dir}\"`"
+  -I`cmake_escape \"${cmake_source_dir}/Utilities\"`"
 cmake_cxx_flags="${cmake_cxx_flags} -I`cmake_escape \"${cmake_bootstrap_dir}\"` -I`cmake_escape \"${cmake_source_dir}/Source\"` \
-  -I`cmake_escape \"${cmake_bootstrap_dir}\"`"
+  -I`cmake_escape \"${cmake_source_dir}/Utilities\"`"
 echo "cmake: ${objs}" > "${cmake_bootstrap_dir}/Makefile"
 echo "	${cmake_cxx_compiler} ${cmake_ld_flags} ${cmake_cxx_flags} ${objs} -o cmake" >> "${cmake_bootstrap_dir}/Makefile"
 for a in ${CMAKE_CXX_SOURCES}; do

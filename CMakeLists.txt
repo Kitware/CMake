@@ -538,9 +538,9 @@ if("x${CMAKE_TESTS_CDASH_SERVER}" STREQUAL "x")
   set(CMAKE_TESTS_CDASH_SERVER "http://open.cdash.org")
 endif()
 
-# Create the KWIML library for CMake.
-set(KWIML cmIML)
-set(KWIML_HEADER_ROOT ${CMake_BINARY_DIR}/Utilities)
+if(BUILD_TESTING)
+  set(KWIML_TEST_ENABLE 1)
+endif()
 add_subdirectory(Utilities/KWIML)
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)

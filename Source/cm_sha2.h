@@ -38,11 +38,11 @@
 
 #include "cm_sha2_mangle.h"
 
-/* CMake modification: use integer types from cmIML.  */
-#include "cmIML/INT.h"
-typedef cmIML_INT_uint8_t cm_sha2_uint8_t;
-typedef cmIML_INT_uint32_t cm_sha2_uint32_t;
-typedef cmIML_INT_uint64_t cm_sha2_uint64_t;
+/* CMake modification: use integer types from KWIML.  */
+#include <cm_kwiml.h>
+typedef KWIML_INT_uint8_t cm_sha2_uint8_t;
+typedef KWIML_INT_uint32_t cm_sha2_uint32_t;
+typedef KWIML_INT_uint64_t cm_sha2_uint64_t;
 
 #ifdef __cplusplus
 extern "C" {
