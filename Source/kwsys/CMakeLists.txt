@@ -118,7 +118,6 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_USE_System 1)
   SET(KWSYS_USE_SystemTools 1)
   SET(KWSYS_USE_CommandLineArguments 1)
-  SET(KWSYS_USE_FundamentalType 1)
   SET(KWSYS_USE_Terminal 1)
   SET(KWSYS_USE_IOStream 1)
   SET(KWSYS_USE_FStream 1)
@@ -372,61 +371,6 @@ IF(KWSYS_CXX_HAS___INT64)
       SET(KWSYS_USE___INT64 1)
     ENDIF()
   ENDIF()
-ENDIF()
-
-IF(KWSYS_USE_FundamentalType)
-  # Look for type size helper macros.
-  KWSYS_PLATFORM_INFO_TEST(C KWSYS_C_TYPE_MACROS
-    "Checking for C type size macros")
-  SET(macro_regex ".*INFO:macro\\[([^]]*)\\].*")
-  FOREACH(info ${KWSYS_C_TYPE_MACROS})
-    IF("${info}" MATCHES "${macro_regex}")
-      STRING(REGEX REPLACE "${macro_regex}" "\\1" macro "${info}")
-      SET(KWSYS_C_HAS_MACRO_${macro} 1)
-    ENDIF()
-  ENDFOREACH()
-
-  # Determine type sizes at preprocessing time if possible, and
-  # otherwise fall back to a try-compile.
-  SET(KWSYS_C_TYPE_NAME_CHAR      "char")
-  SET(KWSYS_C_TYPE_NAME_SHORT     "short")
-  SET(KWSYS_C_TYPE_NAME_INT       "int")
-  SET(KWSYS_C_TYPE_NAME_LONG      "long")
-  SET(KWSYS_C_TYPE_NAME_LONG_LONG "long long")
-  SET(KWSYS_C_TYPE_NAME___INT64   "__int64")
-  FOREACH(type CHAR SHORT INT LONG LONG_LONG __INT64)
-    IF(KWSYS_C_HAS_MACRO___SIZEOF_${type}__)
-      # Use __SIZEOF_${type}__ macro.
-      SET(KWSYS_SIZEOF_${type} TRUE)
-      SET(KWSYS_C_CODE_SIZEOF_${type} "#define ${KWSYS_NAMESPACE}_SIZEOF_${type} __SIZEOF_${type}__")
-    ELSEIF(KWSYS_C_HAS_MACRO___${type}_MAX__)
-      # Use __${type}_MAX__ macro.
-      SET(KWSYS_SIZEOF_${type} TRUE)
-      SET(KWSYS_C_CODE_SIZEOF_${type} "#if __${type}_MAX__ == 0x7f
-# define ${KWSYS_NAMESPACE}_SIZEOF_${type} 1
-#elif __${type}_MAX__ == 0x7fff
-# define ${KWSYS_NAMESPACE}_SIZEOF_${type} 2
-#elif __${type}_MAX__ == 0x7fffffff
-# define ${KWSYS_NAMESPACE}_SIZEOF_${type} 4
-#elif __${type}_MAX__>>32 == 0x7fffffff
-# define ${KWSYS_NAMESPACE}_SIZEOF_${type} 8
-#else
-# error \"Cannot determine sizeof(${KWSYS_C_TYPE_NAME_${type}}).\"
-#endif")
-    ELSE()
-      # Configure a hard-coded type size.
-      CHECK_TYPE_SIZE("${KWSYS_C_TYPE_NAME_${type}}" KWSYS_SIZEOF_${type})
-      IF(NOT KWSYS_SIZEOF_${type})
-        SET(KWSYS_SIZEOF_${type} 0)
-      ENDIF()
-      SET(KWSYS_C_CODE_SIZEOF_${type}
-        "#define ${KWSYS_NAMESPACE}_SIZEOF_${type} ${KWSYS_SIZEOF_${type}}")
-    ENDIF()
-  ENDFOREACH()
-
-  # Check signedness of "char" type.
-  KWSYS_PLATFORM_CXX_TEST_RUN(KWSYS_CHAR_IS_SIGNED
-    "Checking whether char is signed" DIRECT)
 ENDIF()
 
 IF(KWSYS_USE_Encoding)
@@ -741,7 +685,7 @@ ENDFOREACH()
 
 # Add selected C components.
 FOREACH(c
-    Process Base64 Encoding FundamentalType MD5 Terminal System String
+    Process Base64 Encoding MD5 Terminal System String
     )
   IF(KWSYS_USE_${c})
     # Use the corresponding header file.
