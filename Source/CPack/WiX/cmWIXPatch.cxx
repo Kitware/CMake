@@ -20,10 +20,18 @@ cmWIXPatch::cmWIXPatch(cmCPackLog* logger):
 
 }
 
-void cmWIXPatch::LoadFragments(std::string const& patchFilePath)
+bool cmWIXPatch::LoadFragments(std::string const& patchFilePath)
 {
   cmWIXPatchParser parser(Fragments, Logger);
-  parser.ParseFile(patchFilePath.c_str());
+  if(!parser.ParseFile(patchFilePath.c_str()))
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Failed parsing XML patch file: '" <<
+      patchFilePath << "'" << std::endl);
+    return false;
+    }
+
+  return true;
 }
 
 void cmWIXPatch::ApplyFragment(

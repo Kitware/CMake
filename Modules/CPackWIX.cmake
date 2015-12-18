@@ -119,7 +119,8 @@
 #
 # .. variable:: CPACK_WIX_PATCH_FILE
 #
-#  Optional XML file with fragments to be inserted into generated WiX sources
+#  Optional list of XML files with fragments to be inserted into
+#  generated WiX sources
 #
 #  This optional variable can be used to specify an XML file that the
 #  WiX generator will use to inject fragments into its generated

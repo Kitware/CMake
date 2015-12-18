@@ -26,7 +26,7 @@ class cmWIXPatch
 public:
   cmWIXPatch(cmCPackLog* logger);
 
-  void LoadFragments(std::string const& patchFilePath);
+  bool LoadFragments(std::string const& patchFilePath);
 
   void ApplyFragment(std::string const& id, cmWIXSourceWriter& writer);
 

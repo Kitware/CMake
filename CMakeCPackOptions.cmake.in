@@ -234,10 +234,35 @@ if("${CPACK_GENERATOR}" STREQUAL "WIX")
   set(CPACK_WIX_LIGHT_EXTRA_FLAGS "-dcl:high")
 
   set(CPACK_WIX_UI_BANNER
-    "@CMake_SOURCE_DIR@/Utilities/Release/cpack_wix_ui_banner.jpg"
+    "@CMake_SOURCE_DIR@/Utilities/Release/WiX/ui_banner.jpg"
   )
 
   set(CPACK_WIX_UI_DIALOG
-    "@CMake_SOURCE_DIR@/Utilities/Release/cpack_wix_ui_dialog.jpg"
+    "@CMake_SOURCE_DIR@/Utilities/Release/WiX/ui_dialog.jpg"
   )
+
+  set(CPACK_WIX_EXTRA_SOURCES
+    "@CMake_SOURCE_DIR@/Utilities/Release/WiX/install_dir.wxs"
+    "@CMake_SOURCE_DIR@/Utilities/Release/WiX/cmake_extra_dialog.wxs"
+  )
+
+  set(CPACK_WIX_UI_REF "CMakeUI_InstallDir")
+
+  set(CPACK_WIX_PATCH_FILE
+    "@CMake_SOURCE_DIR@/Utilities/Release/WiX/patch_path_env.xml"
+  )
+
+  set(CPACK_WIX_TEMPLATE
+    "@CMake_SOURCE_DIR@/Utilities/Release/WiX/WIX.template.in"
+  )
+
+  set(BUILD_QtDialog "@BUILD_QtDialog@")
+
+  if(BUILD_QtDialog)
+    list(APPEND CPACK_WIX_PATCH_FILE
+      "@CMake_SOURCE_DIR@/Utilities/Release/WiX/patch_desktop_shortcut.xml"
+    )
+
+    set(CPACK_WIX_CANDLE_EXTRA_FLAGS "-dBUILD_QtDialog=1")
+  endif()
 endif()
