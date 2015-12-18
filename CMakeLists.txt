@@ -138,8 +138,13 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
   option(CMAKE_USE_SYSTEM_FORM "Use system-installed libform" "${CMAKE_USE_SYSTEM_LIBRARY_FORM}")
   option(CMAKE_USE_SYSTEM_JSONCPP "Use system-installed jsoncpp" "${CMAKE_USE_SYSTEM_LIBRARY_JSONCPP}")
 
+  # For now use system KWIML only if explicitly requested rather
+  # than activating via the general system libs options.
+  option(CMAKE_USE_SYSTEM_KWIML "Use system-installed KWIML" OFF)
+  mark_as_advanced(CMAKE_USE_SYSTEM_KWIML)
+
   # Mention to the user what system libraries are being used.
-  foreach(util ${UTILITIES})
+  foreach(util ${UTILITIES} KWIML)
     if(CMAKE_USE_SYSTEM_${util})
       message(STATUS "Using system-installed ${util}")
     endif()
@@ -269,6 +274,20 @@ macro (CMAKE_BUILD_UTILITIES)
   # check for the use of system libraries versus builtin ones
   # (a macro defined in this file)
   CMAKE_HANDLE_SYSTEM_LIBRARIES()
+
+  if(CMAKE_USE_SYSTEM_KWIML)
+    find_package(KWIML 1.0)
+    if(NOT KWIML_FOUND)
+      message(FATAL_ERROR "CMAKE_USE_SYSTEM_KWIML is ON but KWIML is not found!")
+    endif()
+    set(CMake_KWIML_LIBRARIES kwiml::kwiml)
+  else()
+    set(CMake_KWIML_LIBRARIES "")
+    if(BUILD_TESTING)
+      set(KWIML_TEST_ENABLE 1)
+    endif()
+    add_subdirectory(Utilities/KWIML)
+  endif()
 
   #---------------------------------------------------------------------
   # Build zlib library for Curl, CMake, and CTest.
@@ -538,10 +557,10 @@ if("x${CMAKE_TESTS_CDASH_SERVER}" STREQUAL "x")
   set(CMAKE_TESTS_CDASH_SERVER "http://open.cdash.org")
 endif()
 
-if(BUILD_TESTING)
+if(CMake_TEST_EXTERNAL_CMAKE)
   set(KWIML_TEST_ENABLE 1)
+  add_subdirectory(Utilities/KWIML)
 endif()
-add_subdirectory(Utilities/KWIML)
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   # build the utilities (a macro defined in this file)

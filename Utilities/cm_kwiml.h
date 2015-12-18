@@ -12,7 +12,14 @@
 #ifndef cm_kwiml_h
 #define cm_kwiml_h
 
-#include "KWIML/include/kwiml/abi.h"
-#include "KWIML/include/kwiml/int.h"
+/* Use the KWIML library configured for CMake.  */
+#include "cmThirdParty.h"
+#ifdef CMAKE_USE_SYSTEM_KWIML
+# include <kwiml/abi.h>
+# include <kwiml/int.h>
+#else
+# include "KWIML/include/kwiml/abi.h"
+# include "KWIML/include/kwiml/int.h"
+#endif
 
 #endif

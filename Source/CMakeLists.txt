@@ -566,6 +566,7 @@ target_link_libraries(CMakeLib cmsys
   ${CMAKE_TAR_LIBRARIES} ${CMAKE_COMPRESS_LIBRARIES}
   ${CMAKE_CURL_LIBRARIES}
   ${CMAKE_JSONCPP_LIBRARIES}
+  ${CMake_KWIML_LIBRARIES}
   )
 
 # On Apple we need CoreFoundation
