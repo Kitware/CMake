@@ -17,7 +17,11 @@ CMAKE_GENERATOR:INTERNAL=Ninja
 BUILD_QtDialog:BOOL:=TRUE
 CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL:BOOL=TRUE
 CMake_INSTALL_DEPENDENCIES:BOOL=ON
+CMAKE_EXE_LINKER_FLAGS:STRING=-machine:x86 -subsystem:console,5.01
 ")
+set(ppflags "-D_WIN32_WINNT=0x501 -D_USING_V110_SDK71_")
+set(CFLAGS "${ppflags}")
+set(CXXFLAGS "${ppflags}")
 set(ENV ". ~/rel/env")
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
 set(GIT_EXTRA "git config core.autocrlf true")
