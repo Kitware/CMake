@@ -54,6 +54,7 @@
 #include "cmFunctionCommand.cxx"
 #include "cmPathLabel.cxx"
 #include "cmSearchPath.cxx"
+#include "cmParseArgumentsCommand.cxx"
 
 void GetBootstrapCommands1(std::vector<cmCommand*>& commands)
 {
@@ -91,4 +92,5 @@ void GetBootstrapCommands1(std::vector<cmCommand*>& commands)
   commands.push_back(new cmFindProgramCommand);
   commands.push_back(new cmForEachCommand);
   commands.push_back(new cmFunctionCommand);
+  commands.push_back(new cmParseArgumentsCommand);
 }
