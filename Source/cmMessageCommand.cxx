@@ -25,6 +25,7 @@ bool cmMessageCommand
   cmake::MessageType type = cmake::MESSAGE;
   bool status = false;
   bool fatal = false;
+  cmake* cm = this->Makefile->GetCMakeInstance();
   if (*i == "SEND_ERROR")
     {
     type = cmake::FATAL_ERROR;
@@ -43,14 +44,18 @@ bool cmMessageCommand
     }
   else if (*i == "AUTHOR_WARNING")
     {
-    if (this->Makefile->GetCMakeInstance()->GetSuppressDevWarnings(
-        this->Makefile))
+    if (cm->GetDevWarningsAsErrors(this->Makefile))
       {
-      return true;
+      fatal = true;
+      type = cmake::AUTHOR_ERROR;
+      }
+    else if (!cm->GetSuppressDevWarnings(this->Makefile))
+      {
+      type = cmake::AUTHOR_WARNING;
       }
     else
       {
-      type = cmake::AUTHOR_WARNING;
+      return true;
       }
     ++i;
     }
@@ -61,22 +66,18 @@ bool cmMessageCommand
     }
   else if (*i == "DEPRECATION")
     {
-    if (this->Makefile->IsOn("CMAKE_ERROR_DEPRECATED"))
+    if (cm->GetDeprecatedWarningsAsErrors(this->Makefile))
       {
       fatal = true;
       type = cmake::DEPRECATION_ERROR;
       }
+    else if (!cm->GetSuppressDeprecatedWarnings(this->Makefile))
+      {
+      type = cmake::DEPRECATION_WARNING;
+      }
     else
       {
-      if (this->Makefile->GetCMakeInstance()->GetSuppressDeprecatedWarnings(
-          this->Makefile))
-        {
-        return true;
-        }
-      else
-        {
-        type = cmake::DEPRECATION_WARNING;
-        }
+      return true;
       }
     ++i;
     }
