@@ -31,7 +31,7 @@
 #endif
 
 // Provide fixed-size integer types.
-#include <cmIML/INT.h>
+#include <cm_kwiml.h>
 
 #include <fstream>
 #include <iostream>

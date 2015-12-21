@@ -1,21 +1,15 @@
-/*============================================================================
-  Kitware Information Macro Library
-  Copyright 2010-2011 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/*
+  Copyright Kitware, Inc.
+  Distributed under the OSI-approved BSD 3-Clause License.
+  See accompanying file Copyright.txt for details.
+*/
 #ifdef __cplusplus
 extern "C" {
 #endif
-extern int test_ABI_C(void);
-extern int test_INT_C(void);
-extern int test_ABI_CXX(void);
-extern int test_INT_CXX(void);
+extern int test_abi_C(void);
+extern int test_int_C(void);
+extern int test_abi_CXX(void);
+extern int test_int_CXX(void);
 extern int test_include_C(void);
 extern int test_include_CXX(void);
 #ifdef __cplusplus
@@ -26,13 +20,13 @@ int main(void)
 {
   int result = 1;
 #ifdef KWIML_LANGUAGE_C
-  result = test_ABI_C() && result;
-  result = test_INT_C() && result;
+  result = test_abi_C() && result;
+  result = test_int_C() && result;
   result = test_include_C() && result;
 #endif
 #ifdef KWIML_LANGUAGE_CXX
-  result = test_ABI_CXX() && result;
-  result = test_INT_CXX() && result;
+  result = test_abi_CXX() && result;
+  result = test_int_CXX() && result;
   result = test_include_CXX() && result;
 #endif
   return result? 0 : 1;

@@ -3,14 +3,17 @@
   Distributed under the OSI-approved BSD 3-Clause License.
   See accompanying file Copyright.txt for details.
 */
-#include <stdio.h>
-
-/* Test KWIML header inclusion after above system headers.  */
 #include "test.h"
 #include "../include/kwiml/abi.h"
-#include "../include/kwiml/int.h"
-
-int test_include_C(void)
+#include "test_abi_endian.h"
+#ifndef KWIML_ABI_VERSION
+# error "KWIML_ABI_VERSION not defined!"
+#endif
+int test_abi_C(void)
 {
+  if(!test_abi_endian())
+    {
+    return 0;
+    }
   return 1;
 }

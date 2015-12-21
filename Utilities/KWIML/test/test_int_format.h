@@ -1,16 +1,15 @@
-/*============================================================================
-  Kitware Information Macro Library
-  Copyright 2010-2011 Kitware, Inc.
-
-  Distributed under the OSI-approved BSD License (the "License");
-  see accompanying file Copyright.txt for details.
-
-  This software is distributed WITHOUT ANY WARRANTY; without even the
-  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the License for more information.
-============================================================================*/
+/*
+  Copyright Kitware, Inc.
+  Distributed under the OSI-approved BSD 3-Clause License.
+  See accompanying file Copyright.txt for details.
+*/
 #include <stdio.h>
 #include <string.h>
+
+#if defined(_MSC_VER)
+# pragma warning (push)
+# pragma warning (disable:4310) /* cast truncates constant value */
+#endif
 
 #ifdef __cplusplus
 # define LANG "C++ "
@@ -25,8 +24,8 @@
   T const x = VALUE(T, U);                                              \
   T y = C(V);                                                           \
   printf(LANG #C ":"                                                    \
-         " expression [%" @KWIML@_INT_PRI##PRI "],"                     \
-         " literal [%" @KWIML@_INT_PRI##PRI "]", x, y);                 \
+         " expression [%" KWIML_INT_PRI##PRI "],"                       \
+         " literal [%" KWIML_INT_PRI##PRI "]", x, y);                   \
   if(x == y)                                                            \
     {                                                                   \
     printf(", PASSED\n");                                               \
@@ -42,8 +41,8 @@
   {                                                                     \
   T const x = VALUE(T, U);                                              \
   char const* str = STR;                                                \
-  sprintf(buf, "%" @KWIML@_INT_PRI##PRI, x);                            \
-  printf(LANG "@KWIML@_INT_PRI" #PRI ":"                                \
+  sprintf(buf, "%" KWIML_INT_PRI##PRI, x);                              \
+  printf(LANG "KWIML_INT_PRI" #PRI ":"                                  \
          " expected [%s], got [%s]", str, buf);                         \
   if(strcmp(str, buf) == 0)                                             \
     {                                                                   \
@@ -62,13 +61,13 @@
   T const x = VALUE(T, U);                                              \
   T y;                                                                  \
   char const* str = STR;                                                \
-  if(sscanf(str, "%" @KWIML@_INT_SCN##SCN, &y) != 1)                    \
+  if(sscanf(str, "%" KWIML_INT_SCN##SCN, &y) != 1)                      \
     {                                                                   \
     y = 0;                                                              \
     }                                                                   \
-  printf(LANG "@KWIML@_INT_SCN" #SCN ":"                                \
-         " expected [%" @KWIML@_INT_PRI##PRI "],"                       \
-         " got [%" @KWIML@_INT_PRI##PRI "]", x, y);                     \
+  printf(LANG "KWIML_INT_SCN" #SCN ":"                                  \
+         " expected [%" KWIML_INT_PRI##PRI "],"                         \
+         " got [%" KWIML_INT_PRI##PRI "]", x, y);                       \
   if(x == y)                                                            \
     {                                                                   \
     printf(", PASSED\n");                                               \
@@ -87,41 +86,41 @@
 
 /* Concatenate T and U now to avoid expanding them.  */
 #define TEST(FMT, T, U, STR) \
-        TEST_(FMT, @KWIML@_INT_##T, @KWIML@_INT_##U, STR)
+        TEST_(FMT, KWIML_INT_##T, KWIML_INT_##U, STR)
 #define TEST2(PRI, SCN, T, U, STR) \
-        TEST2_(PRI, SCN, @KWIML@_INT_##T, @KWIML@_INT_##U, STR)
+        TEST2_(PRI, SCN, KWIML_INT_##T, KWIML_INT_##U, STR)
 #define TEST_C(C, V, PRI, T, U) \
-        TEST_C_(@KWIML@_INT_##C, V, PRI, @KWIML@_INT_##T, @KWIML@_INT_##U)
+        TEST_C_(KWIML_INT_##C, V, PRI, KWIML_INT_##T, KWIML_INT_##U)
 #define TEST_PRI(PRI, T, U, STR) \
-        TEST_PRI_(PRI, @KWIML@_INT_##T, @KWIML@_INT_##U, STR)
+        TEST_PRI_(PRI, KWIML_INT_##T, KWIML_INT_##U, STR)
 #define TEST_SCN(SCN, T, U, STR) \
-        TEST_SCN_(SCN, @KWIML@_INT_##T, @KWIML@_INT_##U, STR)
+        TEST_SCN_(SCN, KWIML_INT_##T, KWIML_INT_##U, STR)
 #define TEST_SCN2(PRI, SCN, T, U, STR) \
-        TEST_SCN2_(PRI, SCN, @KWIML@_INT_##T, @KWIML@_INT_##U, STR)
+        TEST_SCN2_(PRI, SCN, KWIML_INT_##T, KWIML_INT_##U, STR)
 
-static int test_INT_format(void)
+static int test_int_format(void)
 {
   int result = 1;
   char buf[256];
   TEST_PRI(i8, int8_t, uint8_t, "-85")
-#if defined(@KWIML@_INT_SCNi8)
+#if defined(KWIML_INT_SCNi8)
   TEST_SCN(i8, int8_t, uint8_t, "-85")
 #endif
   TEST_PRI(d8, int8_t, uint8_t, "-85")
-#if defined(@KWIML@_INT_SCNd8)
+#if defined(KWIML_INT_SCNd8)
   TEST_SCN(d8, int8_t, uint8_t, "-85")
 #endif
   TEST_PRI(o8, uint8_t, uint8_t, "253")
-#if defined(@KWIML@_INT_SCNo8)
+#if defined(KWIML_INT_SCNo8)
   TEST_SCN(o8, uint8_t, uint8_t, "253")
 #endif
   TEST_PRI(u8, uint8_t, uint8_t, "171")
-#if defined(@KWIML@_INT_SCNu8)
+#if defined(KWIML_INT_SCNu8)
   TEST_SCN(u8, uint8_t, uint8_t, "171")
 #endif
   TEST_PRI(x8, uint8_t, uint8_t, "ab")
   TEST_PRI(X8, uint8_t, uint8_t, "AB")
-#if defined(@KWIML@_INT_SCNx8)
+#if defined(KWIML_INT_SCNx8)
   TEST_SCN(x8, uint8_t, uint8_t, "ab")
   TEST_SCN2(X8, x8, uint8_t, uint8_t, "AB")
 #endif
@@ -141,30 +140,30 @@ static int test_INT_format(void)
   TEST2(X32, x32, uint32_t, uint32_t, "AB000000")
 
   TEST_PRI(i64, int64_t, uint64_t, "-6124895493223874560")
-#if defined(@KWIML@_INT_SCNi64)
+#if defined(KWIML_INT_SCNi64)
   TEST_SCN(i64, int64_t, uint64_t, "-6124895493223874560")
 #endif
   TEST_PRI(d64, int64_t, uint64_t, "-6124895493223874560")
-#if defined(@KWIML@_INT_SCNd64)
+#if defined(KWIML_INT_SCNd64)
   TEST_SCN(d64, int64_t, uint64_t, "-6124895493223874560")
 #endif
   TEST_PRI(o64, uint64_t, uint64_t, "1254000000000000000000")
-#if defined(@KWIML@_INT_SCNo64)
+#if defined(KWIML_INT_SCNo64)
   TEST_SCN(o64, uint64_t, uint64_t, "1254000000000000000000")
 #endif
   TEST_PRI(u64, uint64_t, uint64_t, "12321848580485677056")
-#if defined(@KWIML@_INT_SCNu64)
+#if defined(KWIML_INT_SCNu64)
   TEST_SCN(u64, uint64_t, uint64_t, "12321848580485677056")
 #endif
   TEST_PRI(x64, uint64_t, uint64_t, "ab00000000000000")
   TEST_PRI(X64, uint64_t, uint64_t, "AB00000000000000")
-#if defined(@KWIML@_INT_SCNx64)
+#if defined(KWIML_INT_SCNx64)
   TEST_SCN(x64, uint64_t, uint64_t, "ab00000000000000")
   TEST_SCN2(X64, x64, uint64_t, uint64_t, "AB00000000000000")
 #endif
 
-#if !defined(@KWIML@_INT_NO_INTPTR_T)
-# if @KWIML@_ABI_SIZEOF_DATA_PTR == 4
+#if !defined(KWIML_INT_NO_INTPTR_T)
+# if KWIML_ABI_SIZEOF_DATA_PTR == 4
   TEST(iPTR, intptr_t, uint32_t, "-1426063360")
   TEST(dPTR, intptr_t, uint32_t, "-1426063360")
 # else
@@ -173,8 +172,8 @@ static int test_INT_format(void)
 # endif
 #endif
 
-#if !defined(@KWIML@_INT_NO_UINTPTR_T)
-# if @KWIML@_ABI_SIZEOF_DATA_PTR == 4
+#if !defined(KWIML_INT_NO_UINTPTR_T)
+# if KWIML_ABI_SIZEOF_DATA_PTR == 4
   TEST(oPTR, uintptr_t, uintptr_t, "25300000000")
   TEST(uPTR, uintptr_t, uintptr_t, "2868903936")
   TEST(xPTR, uintptr_t, uintptr_t, "ab000000")
@@ -198,3 +197,7 @@ static int test_INT_format(void)
 
   return result;
 }
+
+#if defined(_MSC_VER)
+# pragma warning (pop)
+#endif

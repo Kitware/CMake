@@ -87,22 +87,21 @@
  * made).
  */
 #if !defined(BYTE_ORDER) || (BYTE_ORDER != LITTLE_ENDIAN && BYTE_ORDER != BIG_ENDIAN)
-/* CMake modification: use byte order from cmIML.  */
-# include "cmIML/ABI.h"
+/* CMake modification: use byte order from KWIML.  */
 # undef BYTE_ORDER
 # undef BIG_ENDIAN
 # undef LITTLE_ENDIAN
-# define BYTE_ORDER    cmIML_ABI_ENDIAN_ID
-# define BIG_ENDIAN    cmIML_ABI_ENDIAN_ID_BIG
-# define LITTLE_ENDIAN cmIML_ABI_ENDIAN_ID_LITTLE
+# define BYTE_ORDER    KWIML_ABI_ENDIAN_ID
+# define BIG_ENDIAN    KWIML_ABI_ENDIAN_ID_BIG
+# define LITTLE_ENDIAN KWIML_ABI_ENDIAN_ID_LITTLE
 #endif
 
 /* CMake modification: use types computed in header.  */
 typedef cm_sha2_uint8_t  sha_byte;	/* Exactly 1 byte */
 typedef cm_sha2_uint32_t sha_word32;	/* Exactly 4 bytes */
 typedef cm_sha2_uint64_t sha_word64;	/* Exactly 8 bytes */
-#define SHA_UINT32_C(x) cmIML_INT_UINT32_C(x)
-#define SHA_UINT64_C(x) cmIML_INT_UINT64_C(x)
+#define SHA_UINT32_C(x) KWIML_INT_UINT32_C(x)
+#define SHA_UINT64_C(x) KWIML_INT_UINT64_C(x)
 #if defined(__clang__)
 # pragma clang diagnostic ignored "-Wcast-align"
 #endif

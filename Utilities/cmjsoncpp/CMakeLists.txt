@@ -23,3 +23,4 @@ include_directories(
   )
 
 add_library(cmjsoncpp ${JSONCPP_SOURCES})
+target_link_libraries(cmjsoncpp ${CMake_KWIML_LIBRARIES})

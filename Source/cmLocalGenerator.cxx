@@ -2980,7 +2980,7 @@ cmLocalGenerator::GetTargetDirectory(const cmGeneratorTarget*) const
 }
 
 //----------------------------------------------------------------------------
-cmIML_INT_uint64_t cmLocalGenerator::GetBackwardsCompatibility()
+KWIML_INT_uint64_t cmLocalGenerator::GetBackwardsCompatibility()
 {
   // The computed version may change until the project is fully
   // configured.
@@ -3033,7 +3033,7 @@ bool cmLocalGenerator::NeedBackwardsCompatibility_2_4()
 
   // Compatibility is needed if CMAKE_BACKWARDS_COMPATIBILITY is set
   // equal to or lower than the given version.
-  cmIML_INT_uint64_t actual_compat = this->GetBackwardsCompatibility();
+  KWIML_INT_uint64_t actual_compat = this->GetBackwardsCompatibility();
   return (actual_compat &&
           actual_compat <= CMake_VERSION_ENCODE(2, 4, 255));
 }

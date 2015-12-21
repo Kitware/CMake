@@ -267,7 +267,7 @@ public:
    *
    * and is monotonically increasing with the CMake version.
    */
-  cmIML_INT_uint64_t GetBackwardsCompatibility();
+  KWIML_INT_uint64_t GetBackwardsCompatibility();
 
   /**
    * Test whether compatibility is set to a given version or lower.
@@ -390,7 +390,7 @@ protected:
   // committed.
   std::string TargetImplib;
 
-  cmIML_INT_uint64_t BackwardsCompatibility;
+  KWIML_INT_uint64_t BackwardsCompatibility;
   bool BackwardsCompatibilityFinal;
 private:
   void AddSharedFlags(std::string& flags, const std::string& lang,

@@ -1,22 +1,11 @@
-#=============================================================================
-# Kitware Information Macro Library
-# Copyright 2010-2011 Kitware, Inc.
 #
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
+# Copyright Kitware, Inc.
+# Distributed under the OSI-approved BSD 3-Clause License.
+# See accompanying file Copyright.txt for details.
 #
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-
-set(test_defs KWIML_NAMESPACE=${KWIML})
-
-# Tell CMake how to follow dependencies of sources in this directory.
-set_property(DIRECTORY
-  PROPERTY IMPLICIT_DEPENDS_INCLUDE_TRANSFORM
-  "KWIML_HEADER(%)=<${KWIML}/%>"
-  )
+if(NOT KWIML_TEST_PREFIX)
+  set(KWIML_TEST_PREFIX kwiml)
+endif()
 
 # Suppress printf/scanf format warnings; we test if the sizes match.
 foreach(lang C CXX)
@@ -33,38 +22,33 @@ endif()
 if(KWIML_LANGUAGE_C)
   list(APPEND test_defs KWIML_LANGUAGE_C)
   list(APPEND test_srcs
-    test_ABI_C.c
-    test_INT_C.c
+    test_abi_C.c
+    test_int_C.c
     test_include_C.c
     )
 endif()
 if(KWIML_LANGUAGE_CXX)
   list(APPEND test_defs KWIML_LANGUAGE_CXX)
   list(APPEND test_srcs
-    test_ABI_CXX.cxx
-    test_INT_CXX.cxx
+    test_abi_CXX.cxx
+    test_int_CXX.cxx
     test_include_CXX.cxx
     )
 endif()
 
-foreach(th test_ABI_endian test_INT_format)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${th}.h.in
-                 ${CMAKE_CURRENT_BINARY_DIR}/${th}.h @ONLY)
-endforeach()
-include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
-add_executable(${KWIML}_test ${test_srcs})
-set_property(TARGET ${KWIML}_test PROPERTY COMPILE_DEFINITIONS ${test_defs})
-set_property(TARGET ${KWIML}_test PROPERTY
+add_executable(kwiml_test ${test_srcs})
+set_property(TARGET kwiml_test PROPERTY COMPILE_DEFINITIONS ${test_defs})
+set_property(TARGET kwiml_test PROPERTY
   RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-add_test(${KWIML}.test ${CMAKE_CURRENT_BINARY_DIR}/${KWIML}_test)
-set_property(TEST ${KWIML}.test PROPERTY LABELS ${KWIML_LABELS_TEST})
+add_test(NAME ${KWIML_TEST_PREFIX}.test COMMAND kwiml_test)
+set_property(TEST ${KWIML_TEST_PREFIX}.test PROPERTY LABELS ${KWIML_TEST_LABELS})
 
 # Xcode 2.x forgets to create the output directory before linking
 # the individual architectures.
 if(CMAKE_OSX_ARCHITECTURES AND XCODE
     AND NOT "${XCODE_VERSION}" MATCHES "^[^12]")
   add_custom_command(
-    TARGET ${KWIML}_test
+    TARGET kwiml_test
     PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CFG_INTDIR}"
     )
 endif()

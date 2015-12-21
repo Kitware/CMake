@@ -130,7 +130,7 @@ private:
   unsigned int VersionFoundPatch;
   unsigned int VersionFoundTweak;
   unsigned int VersionFoundCount;
-  cmIML_INT_uint64_t RequiredCMakeVersion;
+  KWIML_INT_uint64_t RequiredCMakeVersion;
   bool Quiet;
   bool Required;
   bool UseConfigFiles;

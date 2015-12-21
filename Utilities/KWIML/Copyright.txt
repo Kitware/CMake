@@ -1,5 +1,5 @@
 Kitware Information Macro Library
-Copyright 2010-2011 Kitware, Inc.
+Copyright 2010-2015 Kitware, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

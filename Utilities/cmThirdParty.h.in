@@ -15,6 +15,7 @@
 /* Whether CMake is using its own utility libraries.  */
 #cmakedefine CMAKE_USE_SYSTEM_CURL
 #cmakedefine CMAKE_USE_SYSTEM_EXPAT
+#cmakedefine CMAKE_USE_SYSTEM_KWIML
 #cmakedefine CMAKE_USE_SYSTEM_ZLIB
 #cmakedefine CMAKE_USE_SYSTEM_BZIP2
 #cmakedefine CMAKE_USE_SYSTEM_LIBARCHIVE
