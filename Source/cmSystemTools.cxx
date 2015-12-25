@@ -2565,6 +2565,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
     *changed = false;
     }
   int rp_count = 0;
+  bool remove_rpath = true;
   cmSystemToolsRPathInfo rp[2];
   {
   // Parse the ELF binary.
@@ -2622,6 +2623,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
       // If it contains the new rpath instead then it is okay.
       if(cmSystemToolsFindRPath(se[i]->Value, newRPath) != std::string::npos)
         {
+        remove_rpath = false;
         continue;
         }
       if(emsg)
@@ -2642,12 +2644,29 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
     rp[rp_count].Size = se[i]->Size;
     rp[rp_count].Name = se_name[i];
 
+    std::string::size_type prefix_len = pos;
+
+    // If oldRPath was at the end of the file's RPath, and newRPath is empty,
+    // we should remove the unnecessary ':' at the end.
+    if (newRPath.empty() &&
+        pos > 0 &&
+        se[i]->Value[pos - 1] == ':' &&
+        pos + oldRPath.length() == se[i]->Value.length())
+      {
+      prefix_len--;
+      }
+
     // Construct the new value which preserves the part of the path
     // not being changed.
-    rp[rp_count].Value = se[i]->Value.substr(0, pos);
+    rp[rp_count].Value = se[i]->Value.substr(0, prefix_len);
     rp[rp_count].Value += newRPath;
     rp[rp_count].Value += se[i]->Value.substr(pos+oldRPath.length(),
                                               oldRPath.npos);
+
+    if (!rp[rp_count].Value.empty())
+      {
+      remove_rpath = false;
+      }
 
     // Make sure there is enough room to store the new rpath and at
     // least one null terminator.
@@ -2671,6 +2690,12 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
   if(rp_count == 0)
     {
     return true;
+    }
+
+  // If the resulting rpath is empty, just remove the entire entry instead.
+  if (remove_rpath)
+    {
+    return cmSystemTools::RemoveRPath(file, emsg, changed);
     }
 
   {
