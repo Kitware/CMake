@@ -475,6 +475,26 @@ void QCMake::setSuppressDeprecatedWarnings(bool value)
   this->CMakeInstance->SetSuppressDeprecatedWarnings(value);
 }
 
+bool QCMake::getDevWarningsAsErrors()
+{
+  return this->CMakeInstance->GetDevWarningsAsErrors();
+}
+
+void QCMake::setDevWarningsAsErrors(bool value)
+{
+  this->CMakeInstance->SetDevWarningsAsErrors(value);
+}
+
+bool QCMake::getDeprecatedWarningsAsErrors()
+{
+  return this->CMakeInstance->GetDeprecatedWarningsAsErrors();
+}
+
+void QCMake::setDeprecatedWarningsAsErrors(bool value)
+{
+  this->CMakeInstance->SetDeprecatedWarningsAsErrors(value);
+}
+
 void QCMake::setWarnUninitializedMode(bool value)
 {
   this->WarnUninitializedMode = value;

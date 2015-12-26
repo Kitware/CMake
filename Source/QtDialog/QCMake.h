@@ -99,6 +99,14 @@ public slots:
   bool getSuppressDeprecatedWarnings();
   /// set whether to do suppress deprecated warnings
   void setSuppressDeprecatedWarnings(bool value);
+  /// get whether to treat developer (author) warnings as errors
+  bool getDevWarningsAsErrors();
+  /// set whether to treat developer (author) warnings as errors
+  void setDevWarningsAsErrors(bool value);
+  /// get whether to treat deprecated warnings as errors
+  bool getDeprecatedWarningsAsErrors();
+  /// set whether to treat deprecated warnings as errors
+  void setDeprecatedWarningsAsErrors(bool value);
   /// set whether to run cmake with warnings about uninitialized variables
   void setWarnUninitializedMode(bool value);
   /// set whether to run cmake with warnings about unused variables
