@@ -1145,7 +1145,7 @@ void cmState::Snapshot::PushPolicy(cmPolicies::PolicyMap entry, bool weak)
                                                 PolicyStackEntry(entry, weak));
 }
 
-bool cmState::Snapshot::PopPolicy()
+bool cmState::Snapshot::PopAndClearPolicy()
 {
   PositionType pos = this->Position;
   if (pos->Policies == pos->PolicyScope) {

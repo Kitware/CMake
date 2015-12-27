@@ -3895,7 +3895,7 @@ void cmMakefile::PushPolicy(bool weak, cmPolicies::PolicyMap const& pm)
 
 void cmMakefile::PopPolicy()
 {
-  if (!this->StateSnapshot.PopPolicy()) {
+  if (!this->StateSnapshot.PopAndClearPolicy()) {
     this->IssueMessage(cmake::FATAL_ERROR,
                        "cmake_policy POP without matching PUSH");
   }
