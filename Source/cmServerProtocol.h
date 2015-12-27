@@ -50,6 +50,8 @@ private:
   void ProcessContent(std::string filePath, long fileLine,
                       DifferentialFileContent diff, std::string matcher);
   void ProcessParse(std::string file_path, DifferentialFileContent diff);
+  void ProcessContextualHelp(std::string filePath, long fileLine,
+                             long fileColumn, std::string fileContent);
 
 private:
   std::pair<cmState::Snapshot, long> GetSnapshotAndStartLine(
@@ -65,6 +67,12 @@ private:
 
   std::pair<cmState::Snapshot, long> GetSnapshotContext(std::string filePath,
                                                         long fileLine);
+
+  bool WriteContextualHelp(std::string const& context,
+                           std::string const& help_key);
+  bool EmitTypedIdentifier(std::string const& commandName,
+                           std::vector<cmListFileArgument> args,
+                           size_t argIndex);
 
 private:
   cmMetadataServer* Server;

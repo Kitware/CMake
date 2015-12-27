@@ -12,6 +12,7 @@
 
 #include "cmServerProtocol.h"
 
+#include "cmCommand.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -79,6 +80,11 @@ void cmServerProtocol::processRequest(const std::string& json)
     if (value["type"] == "parse") {
       auto diff = cmServerDiff::GetDiff(value);
       this->ProcessParse(value["file_path"].asString(), diff);
+    }
+    if (value["type"] == "contextual_help") {
+      this->ProcessContextualHelp(
+        value["file_path"].asString(), value["file_line"].asInt(),
+        value["file_column"].asInt(), value["file_content"].asString());
     }
   }
 }
@@ -668,4 +674,237 @@ void cmServerProtocol::ProcessParse(std::string file_path,
   getUnreachable(unreachable, diff, nx);
 
   this->Server->WriteResponse(obj);
+}
+
+bool cmServerProtocol::WriteContextualHelp(std::string const& context,
+                                           std::string const& help_key)
+{
+  std::string pdir = cmSystemTools::GetCMakeRoot();
+  pdir += "/Help/" + context + "/";
+
+  std::string relevant = cmSystemTools::HelpFileName(help_key);
+  std::string helpFile = pdir + relevant + ".rst";
+  if (!cmSystemTools::FileExists(helpFile.c_str(), true)) {
+    return false;
+  }
+  Json::Value obj = Json::objectValue;
+
+  Json::Value& contextual_help = obj["contextual_help"] = Json::objectValue;
+
+  contextual_help["context"] = context;
+  contextual_help["help_key"] = relevant;
+
+  this->Server->WriteResponse(obj);
+
+  return true;
+}
+
+bool cmServerProtocol::EmitTypedIdentifier(
+  std::string const& commandName, std::vector<cmListFileArgument> args,
+  size_t argIndex)
+{
+  cmCommand* proto = this->CMakeInstance->GetState()->GetCommand(commandName);
+  if (!proto) {
+    return false;
+  }
+
+  std::vector<std::string> argStrings;
+  for (auto arg : args) {
+    argStrings.push_back(arg.Value);
+  }
+
+  auto contextType = proto->GetContextForParameter(argStrings, argIndex);
+
+  auto value = args[argIndex].Value;
+
+  std::string context;
+  switch (contextType) {
+    case cmCommand::TargetPropertyParameter:
+      context = "prop_tgt";
+      break;
+    case cmCommand::DirectoryPropertyParameter:
+      context = "prop_dir";
+      break;
+    case cmCommand::VariableIdentifierParameter:
+      context = "variable";
+      break;
+    case cmCommand::PolicyParameter:
+      context = "policy";
+      break;
+    case cmCommand::ModuleNameParameter:
+      context = "module";
+      break;
+    case cmCommand::PackageNameParameter:
+      context = "module";
+      value = "Find" + value;
+      break;
+    default:
+      break;
+  }
+
+  if (context.empty()) {
+    return false;
+  }
+
+  return this->WriteContextualHelp(context, value);
+}
+
+void cmServerProtocol::ProcessContextualHelp(std::string filePath,
+                                             long fileLine, long fileColumn,
+                                             std::string fileContent)
+{
+  assert(fileLine > 0);
+
+  std::string content;
+  {
+    std::stringstream ss(fileContent);
+
+    long desiredLines = fileLine;
+    for (std::string line; std::getline(ss, line, '\n') && desiredLines > 0;
+         --desiredLines) {
+      content += line + "\n";
+    }
+  }
+
+  cmListFile listFile;
+
+  if (!listFile.ParseString(
+        content.c_str(), filePath.c_str(),
+        this->CMakeInstance->GetGlobalGenerator()->GetMakefiles()[0])) {
+    // Error
+    return;
+  }
+
+  const size_t numberFunctions = listFile.Functions.size();
+  size_t funcIndex = 0;
+  for (; funcIndex < numberFunctions; ++funcIndex) {
+    if (listFile.Functions[funcIndex].Line > fileLine) {
+      Json::Value obj = Json::objectValue;
+      Json::Value& contextual_help = obj["contextual_help"] =
+        Json::objectValue;
+
+      contextual_help["nocontext"] = true;
+
+      this->Server->WriteResponse(obj);
+      break;
+    }
+
+    const long closeParenLine = listFile.Functions[funcIndex].CloseParenLine;
+
+    if (listFile.Functions[funcIndex].Line <= fileLine &&
+        closeParenLine >= fileLine) {
+      auto args = listFile.Functions[funcIndex].Arguments;
+      const size_t numberArgs = args.size();
+      size_t argIndex = 0;
+
+      for (; argIndex < numberArgs; ++argIndex) {
+        if (args[argIndex].Delim == cmListFileArgument::Bracket) {
+          continue;
+        }
+
+        const bool lastArg = (argIndex == numberArgs - 1);
+
+        if (lastArg || (argIndex != numberArgs &&
+                        (args[argIndex + 1].Line > fileLine ||
+                         args[argIndex + 1].Column > fileColumn))) {
+          if (args[argIndex].Line > fileLine ||
+              args[argIndex].Column > fileColumn) {
+            this->WriteContextualHelp("command",
+                                      listFile.Functions[funcIndex].Name);
+            return;
+          }
+          if (args[argIndex].Delim == cmListFileArgument::Unquoted) {
+            auto endPos = args[argIndex].Column + args[argIndex].Value.size();
+            if (args[argIndex].Line == fileLine &&
+                args[argIndex].Column <= fileColumn &&
+                (long)endPos >= fileColumn) {
+              auto inPos = fileColumn - args[argIndex].Column;
+              auto closePos = args[argIndex].Value.find('}', inPos);
+              auto openPos = args[argIndex].Value.rfind('{', inPos);
+              if (openPos != std::string::npos) {
+                if (openPos > 0 && args[argIndex].Value[openPos - 1] == '$') {
+                  auto endRel = closePos == std::string::npos
+                    ? closePos - openPos - 1
+                    : inPos - openPos - 1;
+                  std::string relevant =
+                    args[argIndex].Value.substr(openPos + 1, endRel);
+                  if (this->WriteContextualHelp("variable", relevant))
+                    return;
+                }
+              }
+              if (this->EmitTypedIdentifier(listFile.Functions[funcIndex].Name,
+                                            args, argIndex)) {
+                return;
+              }
+            }
+            break;
+          }
+
+          long fileLineDiff = fileLine - args[argIndex].Line;
+
+          long fileColumnDiff = fileColumn - args[argIndex].Column;
+
+          bool breakOut = false;
+
+          size_t argPos = 0;
+          while (fileLineDiff != 0) {
+            argPos = args[argIndex].Value.find('\n', argPos);
+            if (argPos == std::string::npos) {
+              breakOut = true;
+              break;
+            }
+            ++argPos;
+            fileColumnDiff = 0;
+            --fileLineDiff;
+          }
+          if (breakOut) {
+            break;
+          }
+
+          assert(fileLineDiff == 0);
+
+          size_t sentinal = args[argIndex].Value.find('\n', argPos);
+          if (sentinal == std::string::npos) {
+            sentinal = args[argIndex].Value.size() - argPos;
+            if ((long)sentinal < fileColumn) {
+              break;
+            }
+            if (this->EmitTypedIdentifier(listFile.Functions[funcIndex].Name,
+                                          args, argIndex)) {
+              return;
+            }
+          }
+
+          if (sentinal < argPos) {
+            // In between args?
+            break;
+          }
+
+          long inPos = fileColumnDiff;
+
+          std::string relevant =
+            args[argIndex].Value.substr(argPos, sentinal - argPos);
+
+          auto closePos = relevant.find('}', inPos);
+          auto openPos = relevant.rfind('{', inPos);
+          if (openPos != std::string::npos) {
+            if (openPos > 0 && relevant[openPos - 1] == '$') {
+              auto endRel = closePos == std::string::npos
+                ? closePos - openPos - 1
+                : inPos - openPos - 1;
+              relevant = relevant.substr(openPos + 1, endRel);
+              if (this->WriteContextualHelp("variable", relevant))
+                return;
+              else
+                break;
+            }
+          }
+          break;
+        }
+      }
+
+      this->WriteContextualHelp("command", listFile.Functions[funcIndex].Name);
+      return;
+    }
+  }
 }
