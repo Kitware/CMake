@@ -87,6 +87,7 @@ public:
     cmPolicies::PolicyStatus GetPolicy(cmPolicies::PolicyID id) const;
     bool HasDefinedPolicyCMP0011();
     void PushPolicy(cmPolicies::PolicyMap entry, bool weak);
+    bool PopPolicy();
     bool PopAndClearPolicy();
     bool CanPopPolicyScope();
 
