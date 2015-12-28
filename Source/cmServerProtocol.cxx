@@ -86,6 +86,12 @@ void cmServerProtocol::processRequest(const std::string& json)
         value["file_path"].asString(), value["file_line"].asInt(),
         value["file_column"].asInt(), value["file_content"].asString());
     }
+    if (value["type"] == "content_diff") {
+      auto diffs = cmServerDiff::GetDiffs(value);
+      this->ProcessContentDiff(
+        value["file_path1"].asString(), value["file_line1"].asInt(),
+        value["file_path2"].asString(), value["file_line2"].asInt(), diffs);
+    }
   }
 }
 
@@ -907,4 +913,96 @@ void cmServerProtocol::ProcessContextualHelp(std::string filePath,
       return;
     }
   }
+}
+
+void cmServerProtocol::ProcessContentDiff(
+  std::string filePath1, long fileLine1, std::string filePath2, long fileLine2,
+  std::pair<DifferentialFileContent, DifferentialFileContent> diffs)
+{
+  assert(fileLine1 > 0);
+  assert(fileLine2 > 0);
+
+  if (this->IsNotExecuted(filePath1, fileLine1) ||
+      this->IsNotExecuted(filePath2, fileLine2)) {
+    Json::Value obj = Json::objectValue;
+
+    obj["content_result"] = "unexecuted";
+    this->Server->WriteResponse(obj);
+    return;
+  }
+
+  auto res1 = GetSnapshotAndStartLine(filePath1, fileLine1, diffs.first);
+  if (res1.second < 0) {
+    Json::Value obj = Json::objectValue;
+    obj["content_result"] = "unexecuted";
+    this->Server->WriteResponse(obj);
+    return;
+  }
+
+  auto res2 = GetSnapshotAndStartLine(filePath2, fileLine2, diffs.second);
+  if (res2.second < 0) {
+    Json::Value obj = Json::objectValue;
+    obj["content_result"] = "unexecuted";
+    this->Server->WriteResponse(obj);
+    return;
+  }
+
+  auto desired1 = GetDesiredSnapshot(diffs.first.EditorLines, res1.second,
+                                     res1.first, fileLine1);
+  cmState::Snapshot contentSnp1 = desired1.first;
+  if (!contentSnp1.IsValid()) {
+    Json::Value obj = Json::objectValue;
+    obj["content_result"] = "unexecuted";
+    this->Server->WriteResponse(obj);
+    return;
+  }
+
+  auto desired2 = GetDesiredSnapshot(diffs.second.EditorLines, res2.second,
+                                     res2.first, fileLine2);
+  cmState::Snapshot contentSnp2 = desired2.first;
+  if (!contentSnp2.IsValid()) {
+    Json::Value obj = Json::objectValue;
+    obj["content_result"] = "unexecuted";
+    this->Server->WriteResponse(obj);
+    return;
+  }
+
+  Json::Value obj = Json::objectValue;
+
+  Json::Value& content = obj["content_diff"] = Json::objectValue;
+
+  std::vector<std::string> keys1 = contentSnp1.ClosureKeys();
+  std::vector<std::string> keys2 = contentSnp2.ClosureKeys();
+
+  auto& addedDefs = content["addedDefs"] = Json::arrayValue;
+  auto& removedDefs = content["removedDefs"] = Json::arrayValue;
+
+  for (auto key : keys2) {
+    auto d1 = contentSnp1.GetDefinition(key);
+    d1 = d1 ? d1 : "";
+    auto d2 = contentSnp2.GetDefinition(key);
+    d2 = d2 ? d2 : "";
+    if (std::find(keys1.begin(), keys1.end(), key) != keys1.end() &&
+        !strcmp(d1, d2))
+      continue;
+    Json::Value def = Json::objectValue;
+    def["key"] = key;
+    def["value"] = contentSnp2.GetDefinition(key);
+    addedDefs.append(def);
+  }
+
+  for (auto key : keys1) {
+    auto d1 = contentSnp1.GetDefinition(key);
+    d1 = d1 ? d1 : "";
+    auto d2 = contentSnp2.GetDefinition(key);
+    d2 = d2 ? d2 : "";
+    if (!strcmp(d1, d2))
+      continue;
+    Json::Value def = Json::objectValue;
+    def["key"] = key;
+    def["value"] = contentSnp1.GetDefinition(key);
+    removedDefs.append(def);
+  }
+
+  this->Server->WriteResponse(obj);
 }

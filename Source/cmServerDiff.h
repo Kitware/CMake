@@ -38,4 +38,7 @@ class cmServerDiff
 {
 public:
   static DifferentialFileContent GetDiff(Json::Value value);
+
+  static std::pair<DifferentialFileContent, DifferentialFileContent> GetDiffs(
+    Json::Value value);
 };

@@ -22,12 +22,14 @@
 
 #include "dtl/dtl.hpp"
 
-DifferentialFileContent cmServerDiff::GetDiff(Json::Value value)
+DifferentialFileContent GetDiffImpl(Json::Value value,
+                                    std::string file_path_key,
+                                    std::string file_content_key)
 {
   DifferentialFileContent diff;
 
   {
-    cmsys::ifstream fin(value["file_path"].asString().c_str());
+    cmsys::ifstream fin(value[file_path_key].asString().c_str());
     if (!fin) {
       return diff;
     }
@@ -37,10 +39,10 @@ DifferentialFileContent cmServerDiff::GetDiff(Json::Value value)
     diff.OrigLines.push_back("");
   }
 
-  if (!value.isMember("file_content")) {
+  if (!value.isMember(file_content_key)) {
     diff.EditorLines = diff.OrigLines;
   } else {
-    auto editorContent = value["file_content"].asString();
+    auto editorContent = value[file_content_key].asString();
 
     std::stringstream ss(editorContent);
 
@@ -127,4 +129,16 @@ DifferentialFileContent cmServerDiff::GetDiff(Json::Value value)
   }
 
   return diff;
+}
+
+std::pair<DifferentialFileContent, DifferentialFileContent>
+cmServerDiff::GetDiffs(Json::Value value)
+{
+  return std::make_pair(GetDiffImpl(value, "file_path1", "file_content1"),
+                        GetDiffImpl(value, "file_path2", "file_content2"));
+}
+
+DifferentialFileContent cmServerDiff::GetDiff(Json::Value value)
+{
+  return GetDiffImpl(value, "file_path", "file_content");
 }

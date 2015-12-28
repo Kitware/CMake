@@ -52,6 +52,10 @@ private:
   void ProcessParse(std::string file_path, DifferentialFileContent diff);
   void ProcessContextualHelp(std::string filePath, long fileLine,
                              long fileColumn, std::string fileContent);
+  void ProcessContentDiff(
+    std::string filePath1, long fileLine1, std::string filePath2,
+    long fileLine2,
+    std::pair<DifferentialFileContent, DifferentialFileContent> diffs);
 
 private:
   std::pair<cmState::Snapshot, long> GetSnapshotAndStartLine(
