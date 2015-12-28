@@ -120,6 +120,12 @@ bool cmMacroHelperCommand::InvokeInitialPass(
     sprintf(argvName, "${ARGV%i}", j);
     argVs.push_back(argvName);
   }
+
+  // TODO: Find a way to put macro arguments into the state.
+  auto lfc = this->FunctionContext;
+  lfc.Line = lfc.CloseParenLine + 1;
+  this->Makefile->CreateArbitrarySnapshot(lfc);
+
   // Invoke all the functions that were collected in the block.
   cmListFileFunction newLFF;
   // for each function
@@ -192,6 +198,10 @@ bool cmMacroFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
   } else if (!cmSystemTools::Strucmp(lff.Name.c_str(), "endmacro")) {
     // if this is the endmacro for this macro then execute
     if (!this->Depth) {
+      auto lfc =
+        cmListFileContext::FromCommandContext(lff, mf.GetExecutionFilePath());
+      mf.CreateArbitrarySnapshot(lfc);
+
       mf.AppendProperty("MACROS", this->Args[0].c_str());
       // create a new command and add it to cmake
       cmMacroHelperCommand* f = new cmMacroHelperCommand();
@@ -246,6 +256,9 @@ bool cmMacroCommand::InitialPass(std::vector<std::string> const& args,
     this->SetError("called with incorrect number of arguments");
     return false;
   }
+
+  auto lfc = this->Makefile->GetExecutionContext();
+  this->Makefile->CreateArbitrarySnapshot(lfc);
 
   // create a function blocker
   cmMacroFunctionBlocker* f = new cmMacroFunctionBlocker();

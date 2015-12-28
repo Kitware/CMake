@@ -88,6 +88,16 @@ void cmFindPackageCommand::AppendSearchPathGroups()
 bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
                                        cmExecutionStatus&)
 {
+  auto res = this->DoInitialPass(args);
+  auto lfc = this->Makefile->GetExecutionContext();
+  lfc.Line = lfc.CloseParenLine + 1;
+  this->Makefile->CreateArbitrarySnapshot(lfc);
+  return res;
+}
+
+//----------------------------------------------------------------------------
+bool cmFindPackageCommand::DoInitialPass(std::vector<std::string> const& args)
+{
   if (args.size() < 1) {
     this->SetError("called with incorrect number of arguments");
     return false;

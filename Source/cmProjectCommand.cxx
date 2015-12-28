@@ -212,5 +212,8 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
       return false;
     }
   }
+  auto lfc = this->Makefile->GetExecutionContext();
+  lfc.Line = lfc.CloseParenLine + 1;
+  this->Makefile->CreateArbitrarySnapshot(lfc);
   return true;
 }

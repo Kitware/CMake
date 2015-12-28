@@ -37,6 +37,7 @@ public:
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus& status);
+  bool DoInitialPass(std::vector<std::string> const& args);
 
   /**
    * This determines if the command is invoked when in script mode.
