@@ -492,6 +492,39 @@ void cmListFileBacktrace::PrintCallStack(std::ostream& out) const
   }
 }
 
+std::vector<cmListFileContext> cmListFileBacktrace::FrameContexts() const
+{
+  std::vector<cmListFileContext> contexts;
+
+  if (!this->Cur) {
+    return contexts;
+  }
+
+  cmOutputConverter converter(this->Bottom);
+  cmListFileContext lfcTitle = *this->Cur;
+  if (!this->Bottom.GetState()->GetIsInTryCompile()) {
+    lfcTitle.FilePath =
+      converter.Convert(lfcTitle.FilePath, cmOutputConverter::HOME);
+  }
+
+  contexts.push_back(lfcTitle);
+
+  if (!this->Cur || !this->Cur->Up) {
+    return contexts;
+  }
+
+  for (Entry* i = this->Cur->Up; i; i = i->Up) {
+    cmListFileContext lfc = *i;
+    if (!this->Bottom.GetState()->GetIsInTryCompile()) {
+      lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
+    }
+    contexts.push_back(lfc);
+  }
+
+  std::reverse(contexts.begin(), contexts.end());
+  return contexts;
+}
+
 std::ostream& operator<<(std::ostream& os, cmListFileContext const& lfc)
 {
   os << lfc.FilePath;

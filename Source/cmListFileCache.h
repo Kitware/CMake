@@ -147,6 +147,8 @@ public:
   // Print the call stack below the top of the backtrace.
   void PrintCallStack(std::ostream& out) const;
 
+  std::vector<cmListFileContext> FrameContexts() const;
+
 private:
   struct Entry;
   cmState::Snapshot Bottom;
