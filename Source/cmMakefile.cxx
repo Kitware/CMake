@@ -261,7 +261,9 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
           this->IssueMessage(cmake::FATAL_ERROR, pcmd->GetError());
         }
         result = false;
-        if (this->GetCMakeInstance()->GetWorkingMode() != cmake::NORMAL_MODE) {
+        if (this->GetCMakeInstance()->GetWorkingMode() != cmake::NORMAL_MODE &&
+            this->GetCMakeInstance()->GetWorkingMode() !=
+              cmake::SNAPSHOT_RECORD_MODE) {
           cmSystemTools::SetFatalErrorOccured();
         }
       } else if (pcmd->HasFinalPass()) {

@@ -97,7 +97,8 @@ public:
      * work too, since they may be used e.g. in exported target files. Started
      * via --find-package.
      */
-    FIND_PACKAGE_MODE
+    FIND_PACKAGE_MODE,
+    SNAPSHOT_RECORD_MODE
   };
 
   struct GeneratorInfo

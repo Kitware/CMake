@@ -78,6 +78,7 @@ void cmServerProtocol::ProcessHandshake(std::string const& protocolVersion)
 
   this->Server->SetState(cmMetadataServer::Initializing);
   this->CMakeInstance = new cmake;
+  this->CMakeInstance->SetWorkingMode(cmake::SNAPSHOT_RECORD_MODE);
   std::set<std::string> emptySet;
   if (!this->CMakeInstance->GetState()->LoadCache(m_buildDir.c_str(), true,
                                                   emptySet, emptySet)) {
