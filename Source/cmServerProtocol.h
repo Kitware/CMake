@@ -49,6 +49,7 @@ private:
                        std::string file_path);
   void ProcessContent(std::string filePath, long fileLine,
                       DifferentialFileContent diff, std::string matcher);
+  void ProcessParse(std::string file_path, DifferentialFileContent diff);
 
 private:
   std::pair<cmState::Snapshot, long> GetSnapshotAndStartLine(

@@ -774,6 +774,8 @@ if (LIBUV_LIBRARY
     cmServer.h
     cmServerDiff.cxx
     cmServerDiff.h
+    cmServerParser.cxx
+    cmServerParser.h
     cmServerProtocol.cxx
     cmServerProtocol.h
   )
