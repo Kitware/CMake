@@ -80,6 +80,8 @@ public:
 bool cmMacroHelperCommand::InvokeInitialPass(
   const std::vector<cmListFileArgument>& args, cmExecutionStatus& inStatus)
 {
+  this->Makefile->GetStateSnapshot().UnmarkNotExecuted(
+    this->FunctionContext.Line + 1);
   // Expand the argument list to the macro.
   std::vector<std::string> expandedArgs;
   this->Makefile->ExpandArguments(args, expandedArgs);
@@ -201,6 +203,8 @@ bool cmMacroFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       std::string newName = "_" + this->Args[0];
       mf.GetState()->RenameCommand(this->Args[0], newName);
       mf.GetState()->AddCommand(f);
+      mf.GetStateSnapshot().MarkNotExecuted(
+        this->GetStartingContext().CloseParenLine + 1, lff.Line);
 
       // remove the function blocker now that the macro is defined
       mf.RemoveFunctionBlocker(this, lff);

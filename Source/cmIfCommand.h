@@ -22,6 +22,9 @@ struct cmListFileFunctionBlock
   std::vector<cmListFileArgument> Condition;
   cmListFileBacktrace Backtrace;
   cmCommandContext CommCon;
+  long ConditionBegin;
+  long BlockBegin;
+  long BlockEnd;
 };
 
 class cmIfFunctionBlocker : public cmFunctionBlocker

@@ -61,6 +61,14 @@ bool cmWhileFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       bool isTrue =
         conditionEvaluator.IsTrue(expandedArguments, errorString, messageType);
 
+      if (!isTrue) {
+        mf.GetStateSnapshot().MarkNotExecuted(execContext.CloseParenLine + 1,
+                                              lff.Line);
+      } else {
+        mf.GetStateSnapshot().UnmarkNotExecuted(execContext.CloseParenLine +
+                                                1);
+      }
+
       while (isTrue) {
         if (!errorString.empty()) {
           std::string err = "had incorrect arguments: ";

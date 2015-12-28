@@ -79,6 +79,9 @@ public:
 bool cmFunctionHelperCommand::InvokeInitialPass(
   const std::vector<cmListFileArgument>& args, cmExecutionStatus& inStatus)
 {
+  this->Makefile->GetStateSnapshot().UnmarkNotExecuted(
+    this->FunctionContext.Line + 1);
+
   // Expand the argument list to the function.
   std::vector<std::string> expandedArgs;
   this->Makefile->ExpandArguments(args, expandedArgs);
@@ -164,6 +167,8 @@ bool cmFunctionFunctionBlocker::IsFunctionBlocked(
       f->FunctionContext = this->GetStartingContext();
       f->FunctionEndLine = lff.Line;
       mf.RecordPolicies(f->Policies);
+      mf.GetStateSnapshot().MarkNotExecuted(
+        this->GetStartingContext().CloseParenLine + 1, lff.Line);
 
       std::string newName = "_" + this->Args[0];
       mf.GetState()->RenameCommand(this->Args[0], newName);

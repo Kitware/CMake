@@ -42,6 +42,12 @@ struct cmState::SnapshotDataType
   long ScopeEndLine;
 };
 
+struct cmState::NotExecutedLines
+{
+  std::set<long> Executed;
+  std::map<long, long> NotExecuted;
+};
+
 struct cmState::PolicyStackEntry : public cmPolicies::PolicyMap
 {
   typedef cmPolicies::PolicyMap derived;
@@ -959,6 +965,29 @@ cmState::Snapshot::Snapshot(cmState* state, PositionType position)
 cmState::SnapshotType cmState::Snapshot::GetType() const
 {
   return this->Position->SnapshotType;
+}
+
+void cmState::Snapshot::UnmarkNotExecuted(long begin)
+{
+  auto& nxData =
+    this->State->NotExectutedLines[*this->Position->ExecutionListFile];
+  nxData.Executed.insert(begin);
+
+  std::map<long, long>::iterator nx = nxData.NotExecuted.find(begin);
+
+  if (nx != nxData.NotExecuted.end()) {
+    nxData.NotExecuted.erase(nx);
+  }
+}
+
+void cmState::Snapshot::MarkNotExecuted(long begin, long end)
+{
+  auto& nxData =
+    this->State->NotExectutedLines[*this->Position->ExecutionListFile];
+  if (nxData.Executed.find(begin) != nxData.Executed.end()) {
+    return;
+  }
+  nxData.NotExecuted.insert(std::make_pair(begin, end));
 }
 
 const char* cmState::Directory::GetCurrentSource() const
