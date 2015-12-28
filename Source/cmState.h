@@ -217,6 +217,7 @@ public:
                                         std::string const& fileName);
   Snapshot CreatePolicyScopeSnapshot(Snapshot originSnapshot);
   Snapshot Pop(Snapshot originSnapshot);
+  void ClearData(Snapshot snapshot);
 
   enum CacheEntryType
   {

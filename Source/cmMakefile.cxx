@@ -3915,7 +3915,9 @@ void cmMakefile::PopSnapshot(bool reportError)
     this->PopPolicy();
   }
 
-  this->StateSnapshot = this->GetState()->Pop(this->StateSnapshot);
+  cmState::Snapshot prevSnp = this->StateSnapshot;
+  this->StateSnapshot = this->GetState()->Pop(prevSnp);
+  this->GetState()->ClearData(prevSnp);
   assert(this->StateSnapshot.IsValid());
 }
 

@@ -930,7 +930,15 @@ cmState::Snapshot cmState::Pop(cmState::Snapshot originSnapshot)
     prevPos->BuildSystemDirectory->CompileOptions.size();
   prevPos->BuildSystemDirectory->DirectoryEnd = prevPos;
 
+  return Snapshot(this, prevPos);
+}
+
+void cmState::ClearData(cmState::Snapshot snapshot)
+{
+  PositionType pos = snapshot.Position;
   if (!pos->Keep && this->SnapshotData.IsLast(pos)) {
+    PositionType prevPos = pos;
+    ++prevPos;
     if (pos->Vars != prevPos->Vars) {
       assert(this->VarTree.IsLast(pos->Vars));
       this->VarTree.Pop(pos->Vars);
@@ -941,8 +949,6 @@ cmState::Snapshot cmState::Pop(cmState::Snapshot originSnapshot)
     }
     this->SnapshotData.Pop(pos);
   }
-
-  return Snapshot(this, prevPos);
 }
 
 cmState::Snapshot::Snapshot(cmState* state)
