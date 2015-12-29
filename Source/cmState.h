@@ -223,6 +223,7 @@ public:
   Snapshot CreateArbitraryPointSnapshot(Snapshot originSnapshot,
                                         cmListFileContext const& context);
   Snapshot Pop(Snapshot originSnapshot);
+  Snapshot PopArbitrary(Snapshot originSnapshot);
   void ClearData(Snapshot snapshot);
 
   enum CacheEntryType
@@ -340,6 +341,8 @@ public:
 
   std::map<cmListFileContext, std::vector<cmState::Snapshot> > TraceSnapshots()
     const;
+
+  std::map<long, long> GetNotExecuted(std::string const& path) const;
 
 private:
   friend class cmake;

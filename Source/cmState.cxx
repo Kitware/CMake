@@ -1002,6 +1002,15 @@ cmState::Snapshot cmState::Pop(cmState::Snapshot originSnapshot)
   return Snapshot(this, pos);
 }
 
+cmState::Snapshot cmState::PopArbitrary(cmState::Snapshot originSnapshot)
+{
+  PositionType pos = originSnapshot.Position;
+
+  ++pos;
+
+  return Snapshot(this, pos);
+}
+
 void cmState::ClearData(cmState::Snapshot snapshot)
 {
   PositionType pos = snapshot.Position;
@@ -1082,6 +1091,21 @@ void cmState::Snapshot::MarkNotExecuted(long begin, long end)
     return;
   }
   nxData.NotExecuted.insert(std::make_pair(begin, end));
+}
+
+std::map<long, long> cmState::GetNotExecuted(std::string const& path) const
+{
+  // Should have some kind of finalize to compress?
+  // Even if it doesn't compress, might have to extend the last state to handle
+  // return, continue, break.  Maybe that doesn't belong in finalize though.
+  // Maybe it belongs directly with the handling of those control flow
+  // elements.
+  auto it = this->NotExectutedLines.find(path);
+  if (it == this->NotExectutedLines.end()) {
+    std::map<long, long> empty;
+    return empty;
+  }
+  return it->second.NotExecuted;
 }
 
 const char* cmState::Directory::GetCurrentSource() const

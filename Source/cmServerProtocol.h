@@ -12,10 +12,24 @@
 
 #pragma once
 
-#include "cmStandardIncludes.h"
+#include "cmListFileCache.h"
+#include "cmState.h"
 
 class cmake;
 class cmMetadataServer;
+
+struct DifferentialFileContent;
+
+struct OrderFileThenLine
+{
+  bool operator()(cmListFileContext const& l, cmListFileContext const& r) const
+  {
+    std::pair<std::string, long> lhs(l.FilePath, l.Line);
+    std::pair<std::string, long> rhs(r.FilePath, r.Line);
+    const bool res = lhs < rhs;
+    return res;
+  }
+};
 
 class cmServerProtocol
 {
@@ -33,9 +47,29 @@ private:
                          const char* language);
   void ProcessFileInfo(std::string tgtName, std::string config,
                        std::string file_path);
+  void ProcessContent(std::string filePath, long fileLine,
+                      DifferentialFileContent diff, std::string matcher);
+
+private:
+  std::pair<cmState::Snapshot, long> GetSnapshotAndStartLine(
+    std::string filePath, long fileLine, DifferentialFileContent diff);
+
+  std::pair<cmState::Snapshot, cmListFileFunction> GetDesiredSnapshot(
+    std::vector<std::string> const& editorLines, long startLine,
+    cmState::Snapshot snp, long fileLine, bool completionMode = false);
+
+  bool IsNotExecuted(std::string filePath, long fileLine);
+
+  void writeContent(cmState::Snapshot snp, std::string matcher);
+
+  std::pair<cmState::Snapshot, long> GetSnapshotContext(std::string filePath,
+                                                        long fileLine);
 
 private:
   cmMetadataServer* Server;
   cmake* CMakeInstance;
   std::string m_buildDir;
+  std::map<cmListFileContext, std::vector<cmState::Snapshot>,
+           OrderFileThenLine>
+    Snapshots;
 };

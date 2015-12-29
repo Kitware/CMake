@@ -16,6 +16,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmServer.h"
+#include "cmServerDiff.h"
 #include "cmSourceFile.h"
 #include "cmVersionMacros.h"
 
@@ -67,6 +68,12 @@ void cmServerProtocol::processRequest(const std::string& json)
       this->ProcessFileInfo(value["target_name"].asString(),
                             value["config"].asString(),
                             value["file_path"].asString());
+    }
+    if (value["type"] == "content") {
+      auto diff = cmServerDiff::GetDiff(value);
+      this->ProcessContent(value["file_path"].asString(),
+                           value["file_line"].asInt(), diff,
+                           value["matcher"].asString());
     }
   }
 }
@@ -134,6 +141,13 @@ void cmServerProtocol::ProcessHandshake(std::string const& protocolVersion)
   obj["progress"] = "computed";
 
   this->Server->WriteResponse(obj);
+
+  cmState* state = this->CMakeInstance->GetState();
+
+  auto snps = state->TraceSnapshots();
+  for (auto is = snps.begin(); is != snps.end(); ++is) {
+    this->Snapshots[is->first] = is->second;
+  }
 
   auto srcDir = this->CMakeInstance->GetState()->GetSourceDirectory();
 
@@ -396,4 +410,203 @@ void cmServerProtocol::ProcessFileInfo(std::string tgtName, std::string config,
   root["compile_flags"] = flags;
 
   this->Server->WriteResponse(obj);
+}
+
+std::pair<cmState::Snapshot, long> cmServerProtocol::GetSnapshotAndStartLine(
+  std::string filePath, long fileLine, DifferentialFileContent diff)
+{
+  assert(fileLine > 0);
+
+  const auto& chunks = diff.Chunks;
+
+  auto it = std::lower_bound(
+    chunks.begin(), chunks.end(), fileLine,
+    [](Chunk const& lhs, long rhs) { return lhs.NewStart < rhs; });
+  if (it == chunks.end() || it->NewStart != fileLine) {
+    --it;
+  }
+  auto theLine = it->NewStart;
+  while (it->NumCommon + it->NumAdded == 0) {
+    ++it;
+  }
+  assert(theLine == it->NewStart);
+
+  // it is the chunk which contains the line request.
+
+  auto searchStart = 0;
+  bool isNotCommon = it->NumAdded != 0 || it->NumRemoved != 0;
+  if (isNotCommon) {
+    if (it != chunks.begin()) {
+      auto it2 = it;
+      --it2;
+      searchStart = it2->OrigStart + it2->NumCommon;
+    } else {
+      searchStart = 1;
+    }
+  } else {
+    auto newLinesDistance = fileLine - it->NewStart;
+    searchStart = it->OrigStart + newLinesDistance;
+  }
+
+  auto ctx = this->GetSnapshotContext(filePath, searchStart);
+
+  auto mostRecentSnapshotLine = ctx.second;
+
+  // We might still have commands we can't execute in the dirty set. We
+  // will skip over them.
+
+  auto itToExecFrom = std::lower_bound(
+    chunks.begin(), chunks.end(), mostRecentSnapshotLine,
+    [](Chunk const& lhs, long rhs) { return lhs.OrigStart < rhs; });
+  if (itToExecFrom == chunks.end() ||
+      itToExecFrom->OrigStart != mostRecentSnapshotLine) {
+    --itToExecFrom;
+  }
+  isNotCommon = itToExecFrom->NumAdded != 0 || itToExecFrom->NumRemoved != 0;
+  long startFrom = 0;
+  if (isNotCommon) {
+    startFrom = -1;
+  } else {
+    auto oldLinesDistance = mostRecentSnapshotLine - itToExecFrom->OrigStart;
+
+    startFrom = itToExecFrom->NewStart + oldLinesDistance;
+  }
+
+  return std::make_pair(ctx.first, startFrom);
+}
+
+std::pair<cmState::Snapshot, cmListFileFunction>
+cmServerProtocol::GetDesiredSnapshot(
+  std::vector<std::string> const& editorLines, long startLine,
+  cmState::Snapshot snp, long fileLine, bool completionMode)
+{
+  auto prParseStart = editorLines.begin() + startLine - 1;
+  assert((long)editorLines.size() >= fileLine);
+  auto prParseEnd = editorLines.begin() + fileLine - 1;
+  if (completionMode) {
+    ++prParseEnd;
+  }
+
+  auto newString = cmJoin(cmMakeRange(prParseStart, prParseEnd), "\n");
+
+  cmGlobalGenerator* gg = this->CMakeInstance->GetGlobalGenerator();
+
+  cmMakefile mf(gg, snp);
+
+  cmListFile listFile;
+
+  if (!listFile.ParseString(newString.c_str(),
+                            snp.GetExecutionListFile().c_str(), &mf)) {
+    std::cout << "STRING PARSE ERROR" << std::endl;
+    return std::make_pair(cmState::Snapshot(), cmListFileFunction());
+  }
+
+  auto newToParse = fileLine - startLine + 1;
+  assert(newToParse >= 0);
+  return mf.ReadCommands(listFile.Functions, newToParse);
+}
+
+void cmServerProtocol::writeContent(cmState::Snapshot snp, std::string matcher)
+{
+  Json::Value obj = Json::objectValue;
+
+  Json::Value& content = obj["content"] = Json::objectValue;
+
+  std::vector<std::string> keys = snp.ClosureKeys();
+  for (const auto& p : keys) {
+    if (p.find(matcher) == 0)
+      content[p] = snp.GetDefinition(p);
+  }
+
+  this->Server->WriteResponse(obj);
+}
+
+bool cmServerProtocol::IsNotExecuted(std::string filePath, long fileLine)
+{
+  auto nx = this->CMakeInstance->GetState()->GetNotExecuted(filePath);
+  for (auto it = nx.begin(); it != nx.end(); ++it) {
+    if (fileLine >= it->first && fileLine < it->second) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void cmServerProtocol::ProcessContent(std::string filePath, long fileLine,
+                                      DifferentialFileContent diff,
+                                      std::string matcher)
+{
+  assert(fileLine > 0);
+  if (this->IsNotExecuted(filePath, fileLine)) {
+    Json::Value obj = Json::objectValue;
+
+    obj["content_result"] = "unexecuted";
+    this->Server->WriteResponse(obj);
+    return;
+  }
+
+  auto res = this->GetSnapshotAndStartLine(filePath, fileLine, diff);
+  if (res.second < 0) {
+    Json::Value obj = Json::objectValue;
+    obj["content_result"] = "unexecuted";
+    this->Server->WriteResponse(obj);
+    return;
+  }
+
+  auto desired = this->GetDesiredSnapshot(diff.EditorLines, res.second,
+                                          res.first, fileLine);
+  cmState::Snapshot contentSnp = desired.first;
+  if (!contentSnp.IsValid()) {
+    Json::Value obj = Json::objectValue;
+    obj["content_result"] = "unexecuted";
+    this->Server->WriteResponse(obj);
+    return;
+  }
+
+  this->writeContent(contentSnp, matcher);
+}
+
+std::pair<cmState::Snapshot, long> cmServerProtocol::GetSnapshotContext(
+  std::string filePath, long fileLine)
+{
+  cmListFileContext lfc;
+  lfc.FilePath = filePath;
+  lfc.Line = fileLine;
+
+  auto it = this->Snapshots.lower_bound(lfc);
+
+  // Do some checks before any of this? ie, if the prev, then popped is
+  // macro or function, then do it, otherwise don't?
+  // Also some logic to know whether to go prev?
+
+  if (it != this->Snapshots.end()) {
+    cmState::Snapshot snp = it->second.back();
+
+    if (snp.GetExecutionListFile() == filePath &&
+        snp.GetStartingPoint() == fileLine) {
+      return std::make_pair(this->CMakeInstance->GetState()->PopArbitrary(snp),
+                            fileLine);
+    }
+  }
+
+  assert(it != this->Snapshots.begin());
+
+  --it;
+  cmState::Snapshot snp = it->second.back();
+
+  {
+    // Do this conditionally, depending on whether we need the state from
+    // inside
+    // a macro or included file.
+    cmListFileContext lfc2;
+    lfc2.FilePath = it->second.front().GetExecutionListFile();
+    lfc2.Line = it->second.front().GetStartingPoint();
+    //  if (lfc2 == it->first)
+    {
+      snp = this->CMakeInstance->GetState()->PopArbitrary(snp);
+    }
+  }
+
+  long startingPoint = it->first.Line;
+  return std::make_pair(snp, startingPoint);
 }
