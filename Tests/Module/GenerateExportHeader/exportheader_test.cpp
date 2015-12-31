@@ -39,6 +39,18 @@ void compare(const char* refName, const char* testName)
     std::string testLine;
     std::getline(ref, refLine);
     std::getline(test, testLine);
+    // Some very old Borland runtimes (C++ Builder 5 WITHOUT Update 1) add a
+    // trailing null to the string that we need to strip before testing for a
+    // trailing space.
+    if (refLine.size() && refLine[refLine.size()-1] == 0)
+      {
+      refLine = refLine.substr(0, refLine.size() - 1);
+      }
+    if (testLine.size() && testLine[testLine.size()-1] == 0)
+      {
+      testLine = testLine.substr(0, testLine.size() - 1);
+      }
+    // The reference files never have trailing spaces:
     if (testLine.size() && testLine[testLine.size()-1] == ' ')
       {
       testLine = testLine.substr(0, testLine.size() - 1);
