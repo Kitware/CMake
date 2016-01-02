@@ -1656,6 +1656,46 @@ std::string cmGlobalXCodeGenerator::ExtractFlagRegex(const char* exp,
   return retFlag;
 }
 
+ //----------------------------------------------------------------------------
+// This function strips off Xcode attributes that do not target the current
+// configuration
+void
+cmGlobalXCodeGenerator
+::FilterConfigurationAttribute(std::string const& configName,
+                               std::string& attribute)
+{
+  // Handle [variant=<config>] condition explicitly here.
+  std::string::size_type beginVariant = attribute.find("[variant=");
+  if (beginVariant == std::string::npos)
+    {
+    // There is no variant in this attribute.
+    return;
+    }
+
+  std::string::size_type endVariant = attribute.find("]", beginVariant+9);
+  if (endVariant == std::string::npos)
+    {
+    // There is no terminating bracket.
+    return;
+    }
+
+  // Compare the variant to the configuration.
+  std::string variant =
+    attribute.substr(beginVariant+9, endVariant-beginVariant-9);
+  if (variant == configName)
+    {
+    // The variant matches the configuration so use this
+    // attribute but drop the [variant=<config>] condition.
+    attribute.erase(beginVariant, endVariant-beginVariant+1);
+    }
+  else
+    {
+    // The variant does not match the configuration so
+    // do not use this attribute.
+    attribute.clear();
+    }
+}
+
 //----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
@@ -2498,33 +2538,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     if(i->find("XCODE_ATTRIBUTE_") == 0)
       {
       std::string attribute = i->substr(16);
-      // Handle [variant=<config>] condition explicitly here.
-      std::string::size_type beginVariant =
-        attribute.find("[variant=");
-      if (beginVariant != std::string::npos)
-        {
-        std::string::size_type endVariant =
-          attribute.find("]", beginVariant+9);
-        if (endVariant != std::string::npos)
-          {
-          // Compare the variant to the configuration.
-          std::string variant =
-            attribute.substr(beginVariant+9, endVariant-beginVariant-9);
-          if (variant == configName)
-            {
-            // The variant matches the configuration so use this
-            // attribute but drop the [variant=<config>] condition.
-            attribute.erase(beginVariant, endVariant-beginVariant+1);
-            }
-          else
-            {
-            // The variant does not match the configuration so
-            // do not use this attribute.
-            attribute.clear();
-            }
-          }
-        }
-
+      this->FilterConfigurationAttribute(configName, attribute);
       if (!attribute.empty())
         {
         cmGeneratorExpression ge;
