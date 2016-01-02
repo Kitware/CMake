@@ -50,11 +50,13 @@ private:
   std::string slaDirectory;
   bool singleLicense;
 
-  void WriteLicense(cmGeneratedFileStream& outputStream, int licenseNumber,
-    std::string licenseLanguage, std::string licenseFile = "");
-  void BreakLongLine(const std::string& line,
-    std::vector<std::string>& lines);
-  void EscapeQuotes(std::string& line);
+  bool WriteLicense(cmGeneratedFileStream& outputStream, int licenseNumber,
+    std::string licenseLanguage, std::string licenseFile,
+    std::string *error);
+  bool BreakLongLine(const std::string& line,
+    std::vector<std::string>& lines,
+    std::string *error);
+  void EscapeQuotesAndBackslashes(std::string& line);
 };
 
 #endif
