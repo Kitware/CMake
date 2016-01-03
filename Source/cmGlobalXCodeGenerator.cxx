@@ -3527,6 +3527,10 @@ bool cmGlobalXCodeGenerator
       this->CreateString(this->GeneratorToolset.c_str()));
     }
 
+  std::string symroot = root->GetCurrentBinaryDirectory();
+  symroot += "/build";
+  buildSettings->AddAttribute("SYMROOT", this->CreateString(symroot.c_str()));
+
   // Put this last so it can override existing settings
   // Convert "CMAKE_XCODE_ATTRIBUTE_*" variables directly.
   {
@@ -3542,10 +3546,6 @@ bool cmGlobalXCodeGenerator
       }
     }
   }
-
-  std::string symroot = root->GetCurrentBinaryDirectory();
-  symroot += "/build";
-  buildSettings->AddAttribute("SYMROOT", this->CreateString(symroot.c_str()));
 
   for( std::vector<cmXCodeObject*>::iterator i = configs.begin();
        i != configs.end(); ++i)
