@@ -3440,18 +3440,19 @@ bool cmGlobalXCodeGenerator
     this->CreateObject(cmXCodeObject::XCConfigurationList);
   cmXCodeObject* buildConfigurations =
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  std::vector<cmXCodeObject*> configs;
+  typedef std::vector<std::pair<std::string, cmXCodeObject*> > Configs;
+  Configs configs;
   const char *defaultConfigName = "Debug";
   if(this->XcodeVersion == 15)
     {
     cmXCodeObject* configDebug =
       this->CreateObject(cmXCodeObject::XCBuildConfiguration);
     configDebug->AddAttribute("name", this->CreateString("Debug"));
-    configs.push_back(configDebug);
+    configs.push_back(std::make_pair("Debug", configDebug));
     cmXCodeObject* configRelease =
       this->CreateObject(cmXCodeObject::XCBuildConfiguration);
     configRelease->AddAttribute("name", this->CreateString("Release"));
-    configs.push_back(configRelease);
+    configs.push_back(std::make_pair("Release", configRelease));
     }
   else
     {
@@ -3465,13 +3466,12 @@ bool cmGlobalXCodeGenerator
       cmXCodeObject* config =
         this->CreateObject(cmXCodeObject::XCBuildConfiguration);
       config->AddAttribute("name", this->CreateString(name));
-      configs.push_back(config);
+      configs.push_back(std::make_pair(name, config));
       }
     }
-  for(std::vector<cmXCodeObject*>::iterator c = configs.begin();
-      c != configs.end(); ++c)
+  for(Configs::iterator c = configs.begin(); c != configs.end(); ++c)
     {
-    buildConfigurations->AddObject(*c);
+    buildConfigurations->AddObject(c->second);
     }
   configlist->AddAttribute("buildConfigurations", buildConfigurations);
 
@@ -3547,10 +3547,9 @@ bool cmGlobalXCodeGenerator
     }
   }
 
-  for( std::vector<cmXCodeObject*>::iterator i = configs.begin();
-       i != configs.end(); ++i)
+  for(Configs::iterator i = configs.begin(); i != configs.end(); ++i)
     {
-    (*i)->AddAttribute("buildSettings", buildSettings);
+    i->second->AddAttribute("buildSettings", buildSettings);
     }
 
   this->RootObject->AddAttribute("buildConfigurationList",
