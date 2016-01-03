@@ -131,6 +131,7 @@ private:
   cmXCodeObject* CreateObject(cmXCodeObject::Type type);
   cmXCodeObject* CreateString(const std::string& s);
   cmXCodeObject* CreateObjectReference(cmXCodeObject*);
+  cmXCodeObject* CreateFlatClone(cmXCodeObject*);
   cmXCodeObject* CreateXCodeTarget(cmGeneratorTarget *gtgt,
                                    cmXCodeObject* buildPhases);
   void ForceLinkerLanguages();

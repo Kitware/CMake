@@ -710,6 +710,15 @@ cmXCodeObject* cmGlobalXCodeGenerator
 }
 
 //----------------------------------------------------------------------------
+cmXCodeObject* cmGlobalXCodeGenerator
+::CreateFlatClone(cmXCodeObject* orig)
+{
+  cmXCodeObject* obj = this->CreateObject(orig->GetType());
+  obj->CopyAttributes(orig);
+  return obj;
+}
+
+//----------------------------------------------------------------------------
 std::string
 GetGroupMapKeyFromPath(cmGeneratorTarget* target, const std::string& fullpath)
 {
@@ -3531,25 +3540,33 @@ bool cmGlobalXCodeGenerator
   symroot += "/build";
   buildSettings->AddAttribute("SYMROOT", this->CreateString(symroot.c_str()));
 
-  // Put this last so it can override existing settings
-  // Convert "CMAKE_XCODE_ATTRIBUTE_*" variables directly.
-  {
-    std::vector<std::string> vars = this->CurrentMakefile->GetDefinitions();
-    for(std::vector<std::string>::const_iterator i = vars.begin();
-        i != vars.end(); ++i)
-    {
-      if(i->find("CMAKE_XCODE_ATTRIBUTE_") == 0)
-      {
-        buildSettings->AddAttribute(i->substr(22).c_str(),
-          this->CreateString(
-            this->CurrentMakefile->GetDefinition(i->c_str())));
-      }
-    }
-  }
-
   for(Configs::iterator i = configs.begin(); i != configs.end(); ++i)
     {
-    i->second->AddAttribute("buildSettings", buildSettings);
+    cmXCodeObject* buildSettingsForCfg = this->CreateFlatClone(buildSettings);
+
+    // Put this last so it can override existing settings
+    // Convert "CMAKE_XCODE_ATTRIBUTE_*" variables directly.
+    std::vector<std::string> vars = this->CurrentMakefile->GetDefinitions();
+    for(std::vector<std::string>::const_iterator d = vars.begin();
+        d != vars.end(); ++d)
+      {
+      if(d->find("CMAKE_XCODE_ATTRIBUTE_") == 0)
+        {
+        std::string attribute = d->substr(22);
+        this->FilterConfigurationAttribute(i->first, attribute);
+        if(!attribute.empty())
+          {
+          cmGeneratorExpression ge;
+          std::string processed =
+            ge.Parse(this->CurrentMakefile->GetDefinition(*d))
+              ->Evaluate(this->CurrentLocalGenerator, i->first);
+          buildSettingsForCfg->AddAttribute(attribute,
+            this->CreateString(processed));
+          }
+        }
+      }
+    // store per-config buildSettings into configuration object
+    i->second->AddAttribute("buildSettings", buildSettingsForCfg);
     }
 
   this->RootObject->AddAttribute("buildConfigurationList",
