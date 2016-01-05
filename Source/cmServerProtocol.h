@@ -56,6 +56,8 @@ private:
     std::string filePath1, long fileLine1, std::string filePath2,
     long fileLine2,
     std::pair<DifferentialFileContent, DifferentialFileContent> diffs);
+  void ProcessCodeComplete(std::string filePath, long fileLine,
+                           long fileColumn, DifferentialFileContent diff);
 
 private:
   std::pair<cmState::Snapshot, long> GetSnapshotAndStartLine(

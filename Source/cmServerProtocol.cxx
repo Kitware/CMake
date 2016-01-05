@@ -17,6 +17,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmServer.h"
+#include "cmServerCompleter.h"
 #include "cmServerDiff.h"
 #include "cmServerParser.h"
 #include "cmSourceFile.h"
@@ -91,6 +92,12 @@ void cmServerProtocol::processRequest(const std::string& json)
       this->ProcessContentDiff(
         value["file_path1"].asString(), value["file_line1"].asInt(),
         value["file_path2"].asString(), value["file_line2"].asInt(), diffs);
+    }
+    if (value["type"] == "code_complete") {
+      auto diff = cmServerDiff::GetDiff(value);
+      this->ProcessCodeComplete(value["file_path"].asString(),
+                                value["file_line"].asInt(),
+                                value["file_column"].asInt(), diff);
     }
   }
 }
@@ -1005,4 +1012,50 @@ void cmServerProtocol::ProcessContentDiff(
   }
 
   this->Server->WriteResponse(obj);
+}
+
+void cmServerProtocol::ProcessCodeComplete(std::string filePath, long fileLine,
+                                           long fileColumn,
+                                           DifferentialFileContent diff)
+{
+  assert(fileLine > 0);
+
+  auto res = GetSnapshotAndStartLine(filePath, fileLine, diff);
+  if (res.second < 0) {
+    Json::Value obj = Json::objectValue;
+    obj["result"] = "no_completions";
+    this->Server->WriteResponse(obj);
+    return;
+  }
+
+  auto desired = GetDesiredSnapshot(diff.EditorLines, res.second, res.first,
+                                    fileLine, true);
+  cmState::Snapshot completionSnp = desired.first;
+  if (!completionSnp.IsValid()) {
+    Json::Value obj = Json::objectValue;
+    obj["result"] = "no_completions";
+    this->Server->WriteResponse(obj);
+    return;
+  }
+
+  auto prParseStart = diff.EditorLines.begin() + res.second - 1;
+  auto prParseEnd = diff.EditorLines.begin() + fileLine - 1;
+  auto newToParse = std::distance(prParseStart, prParseEnd) + 1;
+
+  auto theLine = *prParseEnd;
+
+  std::string completionPrefix;
+
+  auto columnData = theLine.substr(0, fileColumn);
+  auto strt = columnData.find_first_not_of(' ');
+  if (strt != std::string::npos) {
+    completionPrefix = columnData.substr(strt);
+  }
+
+  cmServerCompleter completer(this->CMakeInstance, completionSnp);
+
+  auto result = completer.Complete(completionSnp, desired.second,
+                                   completionPrefix, newToParse, fileColumn);
+
+  this->Server->WriteResponse(result);
 }
