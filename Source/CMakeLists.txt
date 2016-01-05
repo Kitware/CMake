@@ -757,17 +757,23 @@ add_executable(cmake cmakemain.cxx cmcmd.cxx cmcmd.h ${MANIFEST_FILE})
 
 find_library(LIBUV_LIBRARY uv)
 find_path(LIBUV_INCLUDE_DIR uv.h)
+find_path(DTL_INCLUDE_DIR dtl.hpp
+  PATH_SUFFIXES "dtl"
+)
 
 list(FIND CMAKE_CXX_COMPILE_FEATURES cxx_auto_type CMake_HAVE_CXX_AUTO_TYPE)
 list(FIND CMAKE_CXX_COMPILE_FEATURES cxx_range_for CMake_HAVE_CXX_RANGE_FOR)
 
 if (LIBUV_LIBRARY
     AND LIBUV_INCLUDE_DIR
+    AND DTL_INCLUDE_DIR
     AND CMake_HAVE_CXX_AUTO_TYPE
     AND CMake_HAVE_CXX_RANGE_FOR)
   add_library(CMakeServerLib
     cmServer.cxx
     cmServer.h
+    cmServerDiff.cxx
+    cmServerDiff.h
     cmServerProtocol.cxx
     cmServerProtocol.h
   )
@@ -775,6 +781,8 @@ if (LIBUV_LIBRARY
   target_include_directories(CMakeServerLib
     PUBLIC
       ${LIBUV_INCLUDE_DIR}
+    PRIVATE
+      ${DTL_INCLUDE_DIR}
   )
   target_compile_definitions(CMakeServerLib INTERFACE HAVE_DAEMON_MODE=1)
 
