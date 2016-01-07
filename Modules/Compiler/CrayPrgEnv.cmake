@@ -16,13 +16,16 @@ macro(__cray_extract_args cmd tag_regex out_var make_absolute)
 endmacro()
 
 function(__cray_extract_implicit src compiler_cmd link_cmd lang include_dirs_var link_dirs_var link_libs_var)
+  set(BIN "${CMAKE_PLATFORM_INFO_DIR}/CrayExtractImplicit_${lang}.bin")
   execute_process(
-    COMMAND ${CMAKE_${lang}_COMPILER}
-      ${CMAKE_${lang}_VERBOSE_FLAG} -o cray_extract_implicit_${lang} ${src}
+    COMMAND ${CMAKE_${lang}_COMPILER} ${CMAKE_${lang}_VERBOSE_FLAG} -o ${BIN}
     RESULT_VARIABLE result
     OUTPUT_VARIABLE output
     ERROR_VARIABLE error
     )
+  if(EXISTS "${BIN}")
+    file(REMOVE "${BIN}")
+  endif()
   set(include_dirs)
   set(link_dirs)
   set(link_libs)
