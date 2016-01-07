@@ -41,8 +41,13 @@ static int testNoFile()
   return 0;
 }
 
-static kwsys::FStream::BOM expected_bom[5] =
+static const int num_test_files = 7;
+static const int max_test_file_size = 45;
+
+static kwsys::FStream::BOM expected_bom[num_test_files] =
 {
+  kwsys::FStream::BOM_None,
+  kwsys::FStream::BOM_None,
   kwsys::FStream::BOM_UTF8,
   kwsys::FStream::BOM_UTF16LE,
   kwsys::FStream::BOM_UTF16BE,
@@ -50,8 +55,10 @@ static kwsys::FStream::BOM expected_bom[5] =
   kwsys::FStream::BOM_UTF32BE
 };
 
-static unsigned char expected_bom_data[5][5] =
+static unsigned char expected_bom_data[num_test_files][5] =
 {
+    {0},
+    {0},
     {3, 0xEF, 0xBB, 0xBF},
     {2, 0xFF, 0xFE},
     {2, 0xFE, 0xFF},
@@ -59,8 +66,10 @@ static unsigned char expected_bom_data[5][5] =
     {4, 0x00, 0x00, 0xFE, 0xFF},
 };
 
-static unsigned char file_data[5][45] =
+static unsigned char file_data[num_test_files][max_test_file_size] =
 {
+    {1, 'H'},
+    {11, 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'},
     {11, 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'},
     {22, 0x48, 0x00, 0x65, 0x00, 0x6C, 0x00, 0x6C, 0x00, 0x6F, 0x00, 0x20, 0x00,
     0x57, 0x00, 0x6F, 0x00, 0x72, 0x00, 0x6C, 0x00, 0x64, 0x00},
@@ -80,7 +89,7 @@ static unsigned char file_data[5][45] =
 static int testBOM()
 {
   // test various encodings in binary mode
-  for(int i=0; i<5; i++)
+  for(int i=0; i<num_test_files; i++)
     {
       {
       kwsys::ofstream out("bom.txt", kwsys::ofstream::binary);
@@ -97,7 +106,7 @@ static int testBOM()
       std::cout << "Unexpected BOM " << i << std::endl;
       return 1;
       }
-    char data[45];
+    char data[max_test_file_size];
     in.read(data, file_data[i][0]);
     if(!in.good())
       {
@@ -112,66 +121,6 @@ static int testBOM()
       }
 
     }
-
-  // test text file without bom
-  {
-    {
-    kwsys::ofstream out("bom.txt");
-    out << "Hello World";
-    }
-
-    kwsys::ifstream in("bom.txt");
-    kwsys::FStream::BOM bom = kwsys::FStream::ReadBOM(in);
-    if(bom != kwsys::FStream::BOM_None)
-      {
-      std::cout << "Unexpected BOM for none case" << std::endl;
-      return 1;
-      }
-    char data[45];
-    in.read(data, file_data[0][0]);
-    if(!in.good())
-      {
-      std::cout << "Unable to read data for none case" << std::endl;
-      return 1;
-      }
-
-    if(memcmp(data, file_data[0]+1, file_data[0][0]) != 0)
-      {
-      std::cout << "Incorrect read data for none case" << std::endl;
-      return 1;
-      }
-  }
-
-  // test text file with utf-8 bom
-  {
-    {
-    kwsys::ofstream out("bom.txt");
-    out.write(reinterpret_cast<const char*>(expected_bom_data[0]+1),
-              *expected_bom_data[0]);
-    out << "Hello World";
-    }
-
-    kwsys::ifstream in("bom.txt");
-    kwsys::FStream::BOM bom = kwsys::FStream::ReadBOM(in);
-    if(bom != kwsys::FStream::BOM_UTF8)
-      {
-      std::cout << "Unexpected BOM for utf-8 case" << std::endl;
-      return 1;
-      }
-    char data[45];
-    in.read(data, file_data[0][0]);
-    if(!in.good())
-      {
-      std::cout << "Unable to read data for utf-8 case" << std::endl;
-      return 1;
-      }
-
-    if(memcmp(data, file_data[0]+1, file_data[0][0]) != 0)
-      {
-      std::cout << "Incorrect read data for utf-8 case" << std::endl;
-      return 1;
-      }
-  }
 
   return 0;
 }

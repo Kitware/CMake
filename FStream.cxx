@@ -34,6 +34,7 @@ BOM ReadBOM(std::istream& in)
   in.read(reinterpret_cast<char*>(bom), 2);
   if(!in.good())
     {
+    in.clear();
     in.seekg(orig);
     return BOM_None;
     }
@@ -68,6 +69,7 @@ BOM ReadBOM(std::istream& in)
     in.seekg(p);
     return BOM_UTF16LE;
     }
+  in.clear();
   in.seekg(orig);
   return BOM_None;
 }
