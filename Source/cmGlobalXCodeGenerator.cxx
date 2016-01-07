@@ -710,6 +710,15 @@ cmXCodeObject* cmGlobalXCodeGenerator
 }
 
 //----------------------------------------------------------------------------
+cmXCodeObject* cmGlobalXCodeGenerator
+::CreateFlatClone(cmXCodeObject* orig)
+{
+  cmXCodeObject* obj = this->CreateObject(orig->GetType());
+  obj->CopyAttributes(orig);
+  return obj;
+}
+
+//----------------------------------------------------------------------------
 std::string
 GetGroupMapKeyFromPath(cmGeneratorTarget* target, const std::string& fullpath)
 {
@@ -1656,6 +1665,46 @@ std::string cmGlobalXCodeGenerator::ExtractFlagRegex(const char* exp,
   return retFlag;
 }
 
+ //----------------------------------------------------------------------------
+// This function strips off Xcode attributes that do not target the current
+// configuration
+void
+cmGlobalXCodeGenerator
+::FilterConfigurationAttribute(std::string const& configName,
+                               std::string& attribute)
+{
+  // Handle [variant=<config>] condition explicitly here.
+  std::string::size_type beginVariant = attribute.find("[variant=");
+  if (beginVariant == std::string::npos)
+    {
+    // There is no variant in this attribute.
+    return;
+    }
+
+  std::string::size_type endVariant = attribute.find("]", beginVariant+9);
+  if (endVariant == std::string::npos)
+    {
+    // There is no terminating bracket.
+    return;
+    }
+
+  // Compare the variant to the configuration.
+  std::string variant =
+    attribute.substr(beginVariant+9, endVariant-beginVariant-9);
+  if (variant == configName)
+    {
+    // The variant matches the configuration so use this
+    // attribute but drop the [variant=<config>] condition.
+    attribute.erase(beginVariant, endVariant-beginVariant+1);
+    }
+  else
+    {
+    // The variant does not match the configuration so
+    // do not use this attribute.
+    attribute.clear();
+    }
+}
+
 //----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
@@ -2491,33 +2540,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     if(i->find("XCODE_ATTRIBUTE_") == 0)
       {
       std::string attribute = i->substr(16);
-      // Handle [variant=<config>] condition explicitly here.
-      std::string::size_type beginVariant =
-        attribute.find("[variant=");
-      if (beginVariant != std::string::npos)
-        {
-        std::string::size_type endVariant =
-          attribute.find("]", beginVariant+9);
-        if (endVariant != std::string::npos)
-          {
-          // Compare the variant to the configuration.
-          std::string variant =
-            attribute.substr(beginVariant+9, endVariant-beginVariant-9);
-          if (variant == configName)
-            {
-            // The variant matches the configuration so use this
-            // attribute but drop the [variant=<config>] condition.
-            attribute.erase(beginVariant, endVariant-beginVariant+1);
-            }
-          else
-            {
-            // The variant does not match the configuration so
-            // do not use this attribute.
-            attribute.clear();
-            }
-          }
-        }
-
+      this->FilterConfigurationAttribute(configName, attribute);
       if (!attribute.empty())
         {
         cmGeneratorExpression ge;
@@ -3419,18 +3442,19 @@ bool cmGlobalXCodeGenerator
     this->CreateObject(cmXCodeObject::XCConfigurationList);
   cmXCodeObject* buildConfigurations =
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  std::vector<cmXCodeObject*> configs;
+  typedef std::vector<std::pair<std::string, cmXCodeObject*> > Configs;
+  Configs configs;
   const char *defaultConfigName = "Debug";
   if(this->XcodeVersion == 15)
     {
     cmXCodeObject* configDebug =
       this->CreateObject(cmXCodeObject::XCBuildConfiguration);
     configDebug->AddAttribute("name", this->CreateString("Debug"));
-    configs.push_back(configDebug);
+    configs.push_back(std::make_pair("Debug", configDebug));
     cmXCodeObject* configRelease =
       this->CreateObject(cmXCodeObject::XCBuildConfiguration);
     configRelease->AddAttribute("name", this->CreateString("Release"));
-    configs.push_back(configRelease);
+    configs.push_back(std::make_pair("Release", configRelease));
     }
   else
     {
@@ -3444,13 +3468,12 @@ bool cmGlobalXCodeGenerator
       cmXCodeObject* config =
         this->CreateObject(cmXCodeObject::XCBuildConfiguration);
       config->AddAttribute("name", this->CreateString(name));
-      configs.push_back(config);
+      configs.push_back(std::make_pair(name, config));
       }
     }
-  for(std::vector<cmXCodeObject*>::iterator c = configs.begin();
-      c != configs.end(); ++c)
+  for(Configs::iterator c = configs.begin(); c != configs.end(); ++c)
     {
-    buildConfigurations->AddObject(*c);
+    buildConfigurations->AddObject(c->second);
     }
   configlist->AddAttribute("buildConfigurations", buildConfigurations);
 
@@ -3506,30 +3529,37 @@ bool cmGlobalXCodeGenerator
       this->CreateString(this->GeneratorToolset.c_str()));
     }
 
-  // Put this last so it can override existing settings
-  // Convert "CMAKE_XCODE_ATTRIBUTE_*" variables directly.
-  {
-    std::vector<std::string> vars = this->CurrentMakefile->GetDefinitions();
-    for(std::vector<std::string>::const_iterator i = vars.begin();
-        i != vars.end(); ++i)
-    {
-      if(i->find("CMAKE_XCODE_ATTRIBUTE_") == 0)
-      {
-        buildSettings->AddAttribute(i->substr(22).c_str(),
-          this->CreateString(
-            this->CurrentMakefile->GetDefinition(i->c_str())));
-      }
-    }
-  }
-
   std::string symroot = root->GetCurrentBinaryDirectory();
   symroot += "/build";
   buildSettings->AddAttribute("SYMROOT", this->CreateString(symroot.c_str()));
 
-  for( std::vector<cmXCodeObject*>::iterator i = configs.begin();
-       i != configs.end(); ++i)
+  for(Configs::iterator i = configs.begin(); i != configs.end(); ++i)
     {
-    (*i)->AddAttribute("buildSettings", buildSettings);
+    cmXCodeObject* buildSettingsForCfg = this->CreateFlatClone(buildSettings);
+
+    // Put this last so it can override existing settings
+    // Convert "CMAKE_XCODE_ATTRIBUTE_*" variables directly.
+    std::vector<std::string> vars = this->CurrentMakefile->GetDefinitions();
+    for(std::vector<std::string>::const_iterator d = vars.begin();
+        d != vars.end(); ++d)
+      {
+      if(d->find("CMAKE_XCODE_ATTRIBUTE_") == 0)
+        {
+        std::string attribute = d->substr(22);
+        this->FilterConfigurationAttribute(i->first, attribute);
+        if(!attribute.empty())
+          {
+          cmGeneratorExpression ge;
+          std::string processed =
+            ge.Parse(this->CurrentMakefile->GetDefinition(*d))
+              ->Evaluate(this->CurrentLocalGenerator, i->first);
+          buildSettingsForCfg->AddAttribute(attribute,
+            this->CreateString(processed));
+          }
+        }
+      }
+    // store per-config buildSettings into configuration object
+    i->second->AddAttribute("buildSettings", buildSettingsForCfg);
     }
 
   this->RootObject->AddAttribute("buildConfigurationList",
