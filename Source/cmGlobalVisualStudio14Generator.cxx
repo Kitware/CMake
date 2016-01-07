@@ -229,6 +229,16 @@ cmGlobalVisualStudio14Generator::IsWindowsStoreToolsetInstalled() const
     win10SDK, cmSystemTools::KeyWOW64_32);
 }
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
+struct NoWindowsH
+{
+  bool operator()(std::string const& p)
+    {
+    return !cmSystemTools::FileExists(p + "/um/windows.h", true);
+    }
+};
+#endif
+
 //----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
 {
@@ -252,6 +262,12 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
   std::string path = win10Root + "Include/*";
   // Grab the paths of the different SDKs that are installed
   cmSystemTools::GlobDirs(path, sdks);
+
+  // Skip SDKs that do not contain <um/windows.h> because that indicates that
+  // only the UCRT MSIs were installed for them.
+  sdks.erase(std::remove_if(sdks.begin(), sdks.end(), NoWindowsH()),
+             sdks.end());
+
   if (!sdks.empty())
     {
     // Only use the filename, which will be the SDK version.
