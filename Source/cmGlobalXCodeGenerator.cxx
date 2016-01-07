@@ -1686,14 +1686,13 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
     }
 
   std::string cdir = this->CurrentLocalGenerator->GetCurrentBinaryDirectory();
-  cdir = this->ConvertToRelativeForXCode(cdir.c_str());
+  cdir = this->ConvertToRelativeForMake(cdir.c_str());
   std::string makecmd = "make -C ";
   makecmd += cdir;
   makecmd += " -f ";
   makecmd += this->ConvertToRelativeForMake(
                                           (makefile+"$CONFIGURATION").c_str());
   makecmd += " all";
-  cmSystemTools::ReplaceString(makecmd, "\\ ", "\\\\ ");
   buildphase->AddAttribute("shellScript",
                            this->CreateString(makecmd.c_str()));
   buildphase->AddAttribute("showEnvVarsInLog",
@@ -2108,10 +2107,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       this->CurrentLocalGenerator
         ->GenerateAppleInfoPList(gtgt, "$(EXECUTABLE_NAME)",
                                  plist.c_str());
-      std::string path =
-        this->ConvertToRelativeForXCode(plist.c_str());
       buildSettings->AddAttribute("INFOPLIST_FILE",
-                                  this->CreateString(path.c_str()));
+                                  this->CreateString(plist));
       }
     else if(this->XcodeVersion >= 22)
       {
@@ -2157,10 +2154,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       this->CurrentLocalGenerator
         ->GenerateFrameworkInfoPList(gtgt, "$(EXECUTABLE_NAME)",
                                      plist.c_str());
-      std::string path =
-        this->ConvertToRelativeForXCode(plist.c_str());
       buildSettings->AddAttribute("INFOPLIST_FILE",
-                                  this->CreateString(path.c_str()));
+                                  this->CreateString(plist));
       }
     else
       {
@@ -2200,10 +2195,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       this->CurrentLocalGenerator
         ->GenerateAppleInfoPList(gtgt, "$(EXECUTABLE_NAME)",
                                  plist.c_str());
-      std::string path =
-        this->ConvertToRelativeForXCode(plist.c_str());
       buildSettings->AddAttribute("INFOPLIST_FILE",
-                                  this->CreateString(path.c_str()));
+                                  this->CreateString(plist));
 
       }
     }
@@ -3881,12 +3874,6 @@ std::string cmGlobalXCodeGenerator::ConvertToRelativeForMake(const char* p)
 }
 
 //----------------------------------------------------------------------------
-std::string cmGlobalXCodeGenerator::ConvertToRelativeForXCode(const char* p)
-{
-  return cmSystemTools::ConvertToOutputPath(p);
-}
-
-//----------------------------------------------------------------------------
 std::string cmGlobalXCodeGenerator::RelativeToSource(const char* p)
 {
   // We force conversion because Xcode breakpoints do not work unless
@@ -4022,8 +4009,8 @@ void cmGlobalXCodeGenerator::AppendFlag(std::string& flags,
 
   // We escape a flag as follows:
   //   - Place each flag in single quotes ''
-  //   - Escape a single quote as \\'
-  //   - Escape a backslash as \\\\ since it itself is an escape
+  //   - Escape a single quote as \'
+  //   - Escape a backslash as \\ since it itself is an escape
   // Note that in the code below we need one more level of escapes for
   // C string syntax in this source file.
   //
@@ -4043,16 +4030,16 @@ void cmGlobalXCodeGenerator::AppendFlag(std::string& flags,
       {
       if (this->XcodeVersion >= 40)
         {
-        flags += "'\\\\''";
+        flags += "'\\''";
         }
       else
         {
-        flags += "\\\\'";
+        flags += "\\'";
         }
       }
     else if(*c == '\\')
       {
-      flags += "\\\\\\\\";
+      flags += "\\\\";
       }
     else
       {

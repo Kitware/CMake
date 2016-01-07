@@ -255,9 +255,9 @@ void cmXCodeObject::PrintString(std::ostream& os,std::string String)
   for(std::string::const_iterator i = String.begin();
       i != String.end(); ++i)
     {
-    if(*i == '"')
+    if(*i == '"' || *i == '\\')
       {
-      // Escape double-quotes.
+      // Escape double-quotes and backslashes.
       os << '\\';
       }
     os << *i;
