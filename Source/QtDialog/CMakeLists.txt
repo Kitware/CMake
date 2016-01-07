@@ -193,7 +193,7 @@ if(UNIX AND NOT APPLE)
   foreach (size IN ITEMS 32 128)
     install(
       FILES       "${CMAKE_CURRENT_SOURCE_DIR}/CMakeSetup${size}.png"
-      DESTINATION "share/icons/hicolor/${size}x${size}/apps"
+      DESTINATION "${CMAKE_XDGDATA_DIR}/icons/hicolor/${size}x${size}/apps"
       ${COMPONENT}
       RENAME      "CMakeSetup.png")
   endforeach ()
@@ -201,10 +201,10 @@ if(UNIX AND NOT APPLE)
   # install a desktop file so CMake appears in the application start menu
   # with an icon
   install(FILES CMake.desktop
-    DESTINATION share/applications
+    DESTINATION "${CMAKE_XDGDATA_DIR}/applications"
     ${COMPONENT})
   install(FILES cmakecache.xml
-    DESTINATION share/mime/packages
+    DESTINATION "${CMAKE_XDGDATA_DIR}/mime/packages"
     ${COMPONENT})
 endif()
 

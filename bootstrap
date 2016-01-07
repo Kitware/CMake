@@ -63,9 +63,11 @@ cmake_copyright="`grep '^Copyright .* Kitware' "${cmake_source_dir}/Copyright.tx
 cmake_data_dir_keyword="OTHER"
 cmake_doc_dir_keyword="OTHER"
 cmake_man_dir_keyword="OTHER"
+cmake_xdgdata_dir_keyword="OTHER"
 cmake_data_dir=""
 cmake_doc_dir=""
 cmake_man_dir=""
+cmake_xdgdata_dir=""
 cmake_init_file=""
 cmake_bootstrap_system_libs=""
 cmake_bootstrap_qt_gui=""
@@ -214,6 +216,7 @@ fi
 cmake_data_dir_default="`cmake_install_dest_default DATA ${cmake_data_dir_keyword}`"
 cmake_doc_dir_default="`cmake_install_dest_default DOC ${cmake_doc_dir_keyword}`"
 cmake_man_dir_default="`cmake_install_dest_default MAN ${cmake_man_dir_keyword}`"
+cmake_xdgdata_dir_default="`cmake_install_dest_default XDGDATA ${cmake_xdgdata_dir_keyword}`"
 
 CMAKE_KNOWN_C_COMPILERS="cc gcc xlc icc tcc"
 CMAKE_KNOWN_CXX_COMPILERS="aCC xlC CC g++ c++ icc como "
@@ -423,6 +426,8 @@ Directory and file names:
                           ['"${cmake_doc_dir_default}"']
   --mandir=DIR            install man pages files in PREFIX/DIR/manN
                           ['"${cmake_man_dir_default}"']
+  --xdgdatadir=DIR        install XDG specific files in PREFIX/DIR
+                          ['"${cmake_xdgdata_dir_default}"']
 '
   exit 10
 }
@@ -623,6 +628,7 @@ while test $# != 0; do
   --datadir=*) cmake_data_dir=`cmake_arg "$1"` ;;
   --docdir=*) cmake_doc_dir=`cmake_arg "$1"` ;;
   --mandir=*) cmake_man_dir=`cmake_arg "$1"` ;;
+  --xdgdatadir=*) cmake_xdgdata_dir=`cmake_arg "$1"` ;;
   --init=*) cmake_init_file=`cmake_arg "$1"` ;;
   --system-libs) cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARIES=1" ;;
   --no-system-libs) cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARIES=0" ;;
@@ -1367,6 +1373,7 @@ set (CMAKE_INSTALL_PREFIX "'"${cmake_prefix_dir}"'" CACHE PATH "Install path pre
 set (CMAKE_DOC_DIR "'"${cmake_doc_dir}"'" CACHE PATH "Install location for documentation (relative to prefix)." FORCE)
 set (CMAKE_MAN_DIR "'"${cmake_man_dir}"'" CACHE PATH "Install location for man pages (relative to prefix)." FORCE)
 set (CMAKE_DATA_DIR "'"${cmake_data_dir}"'" CACHE PATH "Install location for data (relative to prefix)." FORCE)
+set (CMAKE_XDGDATA_DIR "'"${cmake_xdgdata_dir}"'" CACHE PATH "Install location for XDG specific files (relative to prefix)." FORCE)
 ' > "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 
 # Add configuration settings given as command-line options.
