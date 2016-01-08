@@ -2597,7 +2597,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
       linkOptions.AddFlag("StackReserveSize", stackVal);
       }
 
-    if(linkOptions.IsDebug() || flags.find("/debug") != flags.npos)
+    if(flags.find("/debug") != flags.npos)
       {
       if (this->LocalGenerator->GetVersion() >=
           cmGlobalVisualStudioGenerator::VS14)
