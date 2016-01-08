@@ -693,26 +693,48 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
       ofs << std::dec << std::nouppercase << std::setfill(' ');
       }
 
+    bool have_write_license_error = false;
+    std::string error;
+
     if(oldStyle)
       {
-      WriteLicense(ofs, 0, "", cpack_license_file);
+      if(!this->WriteLicense(ofs, 0, "", cpack_license_file, &error))
+        {
+        have_write_license_error = true;
+        }
       }
     else
       {
-      for(size_t i = 0; i < languages.size(); ++i)
+      for(size_t i = 0; i < languages.size() && !have_write_license_error; ++i)
         {
         if(singleLicense)
           {
-          WriteLicense(ofs, i + 5000, languages[i], cpack_license_file);
+          if(!this->WriteLicense(ofs, i + 5000, languages[i],
+                                 cpack_license_file, &error))
+            {
+            have_write_license_error = true;
+            }
           }
         else
           {
-          WriteLicense(ofs, i + 5000, languages[i]);
+          if(!this->WriteLicense(ofs, i + 5000, languages[i], "", &error))
+            {
+            have_write_license_error = true;
+            }
           }
         }
       }
 
     ofs.Close();
+
+    if(have_write_license_error)
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Error writing license file to SLA." << std::endl
+        << error
+        << std::endl);
+      return 0;
+      }
 
     // convert to UDCO
     std::string temp_udco = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
@@ -724,7 +746,6 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     udco_image_command << " -format UDCO";
     udco_image_command << " -ov -o \"" << temp_udco << "\"";
 
-    std::string error;
     if(!this->RunCommand(udco_image_command, &error))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -855,9 +876,10 @@ cmCPackDragNDropGenerator::GetComponentInstallDirNameSuffix(
   return GetComponentPackageFileName(package_file_name, componentName, false);
 }
 
-void
+bool
 cmCPackDragNDropGenerator::WriteLicense(cmGeneratedFileStream& outputStream,
-  int licenseNumber, std::string licenseLanguage, std::string licenseFile)
+  int licenseNumber, std::string licenseLanguage, std::string licenseFile,
+  std::string *error)
 {
   if(!licenseFile.empty() && !singleLicense)
     {
@@ -881,9 +903,12 @@ cmCPackDragNDropGenerator::WriteLicense(cmGeneratedFileStream& outputStream,
       std::getline(license_ifs, line);
       if(!line.empty())
         {
-        EscapeQuotes(line);
+        EscapeQuotesAndBackslashes(line);
         std::vector<std::string> lines;
-        BreakLongLine(line, lines);
+        if(!this->BreakLongLine(line, lines, error))
+          {
+          return false;
+          }
         for(size_t i = 0; i < lines.size(); ++i)
           {
           outputStream << "        \"" << lines[i] << "\"\n";
@@ -920,9 +945,12 @@ cmCPackDragNDropGenerator::WriteLicense(cmGeneratedFileStream& outputStream,
         std::getline(menu_ifs, line);
         if(!line.empty())
           {
-          EscapeQuotes(line);
+          EscapeQuotesAndBackslashes(line);
           std::vector<std::string> lines;
-          BreakLongLine(line, lines);
+          if(!this->BreakLongLine(line, lines, error))
+            {
+            return false;
+            }
           for(size_t i = 0; i < lines.size(); ++i)
             {
             std::string comma;
@@ -949,31 +977,53 @@ cmCPackDragNDropGenerator::WriteLicense(cmGeneratedFileStream& outputStream,
     outputStream << "};\n";
     outputStream << "\n";
     }
+
+  return true;
 }
 
-void
+bool
 cmCPackDragNDropGenerator::BreakLongLine(const std::string& line,
-  std::vector<std::string>& lines)
+  std::vector<std::string>& lines, std::string *error)
 {
   const size_t max_line_length = 512;
   for(size_t i = 0; i < line.size(); i += max_line_length)
     {
-    int line_length = max_line_length;
-    if(i + max_line_length > line.size())
+    size_t line_length = max_line_length;
+    if(i + line_length > line.size())
       {
       line_length = line.size() - i;
       }
+    else while(line_length > 0 && line[i + line_length - 1] != ' ')
+      {
+      line_length = line_length - 1;
+      }
+
+    if(line_length == 0)
+      {
+      *error = "Please make sure there are no words "
+               "(or character sequences not broken up by spaces or newlines) "
+               "in your license file which are more than 512 characters long.";
+      return false;
+      }
     lines.push_back(line.substr(i, line_length));
     }
+  return true;
 }
 
 void
-cmCPackDragNDropGenerator::EscapeQuotes(std::string& line)
+cmCPackDragNDropGenerator::EscapeQuotesAndBackslashes(std::string& line)
 {
-  std::string::size_type pos = line.find('\"');
-  while(pos != std::string::npos)
+  std::string::size_type backslash_pos = line.find('\\');
+  while(backslash_pos != std::string::npos)
     {
-    line.replace(pos, 1, "\\\"");
-    pos = line.find('\"', pos + 2);
+    line.replace(backslash_pos, 1, "\\\\");
+    backslash_pos = line.find('\\', backslash_pos + 2);
+    }
+
+  std::string::size_type quote_pos = line.find('\"');
+  while(quote_pos != std::string::npos)
+    {
+    line.replace(quote_pos, 1, "\\\"");
+    quote_pos = line.find('\"', quote_pos + 2);
     }
 }
