@@ -448,6 +448,32 @@ void cmVisualStudio10TargetGenerator::Generate()
     (*this->BuildFileStream) << cmVS10EscapeXML(targetFrameworkVersion)
                              << "</TargetFrameworkVersion>\n";
     }
+
+  std::vector<std::string> keys = this->GeneratorTarget->GetPropertyKeys();
+  for(std::vector<std::string>::const_iterator keyIt = keys.begin();
+      keyIt != keys.end(); ++keyIt)
+    {
+    static const char* prefix = "VS_GLOBAL_";
+    if(keyIt->find(prefix) != 0)
+      continue;
+    std::string globalKey = keyIt->substr(strlen(prefix));
+    // Skip invalid or separately-handled properties.
+    if(globalKey == "" ||
+       globalKey == "PROJECT_TYPES" ||
+       globalKey == "ROOTNAMESPACE" ||
+       globalKey == "KEYWORD")
+      {
+      continue;
+      }
+    const char* value = this->GeneratorTarget->GetProperty(keyIt->c_str());
+    if (!value)
+      continue;
+    this->WriteString("<", 2);
+    (*this->BuildFileStream) << globalKey << ">"
+                             << cmVS10EscapeXML(value)
+                             << "</" << globalKey << ">\n";
+    }
+
   this->WriteString("</PropertyGroup>\n", 1);
   this->WriteString("<Import Project="
                     "\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\" />\n",
