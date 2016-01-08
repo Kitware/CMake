@@ -13,6 +13,8 @@
 
 #include "cmSystemTools.h"
 
+#include <cmsys/String.h>
+
 //----------------------------------------------------------------------------
 cmIDEOptions::cmIDEOptions()
 {
@@ -104,7 +106,9 @@ bool cmIDEOptions::CheckFlagTable(cmIDEFlagTable const* table,
       // the entry specifies UserRequired we must match only if a
       // non-empty value is given.
       int n = static_cast<int>(strlen(entry->commandFlag));
-      if(strncmp(flag+1, entry->commandFlag, n) == 0 &&
+      if((strncmp(flag+1, entry->commandFlag, n) == 0 ||
+          (entry->special & cmIDEFlagTable::CaseInsensitive &&
+           cmsysString_strncasecmp(flag+1, entry->commandFlag, n))) &&
          (!(entry->special & cmIDEFlagTable::UserRequired) ||
           static_cast<int>(strlen(flag+1)) > n))
         {
@@ -112,7 +116,9 @@ bool cmIDEOptions::CheckFlagTable(cmIDEFlagTable const* table,
         entry_found = true;
         }
       }
-    else if(strcmp(flag+1, entry->commandFlag) == 0)
+    else if(strcmp(flag+1, entry->commandFlag) == 0 ||
+            (entry->special & cmIDEFlagTable::CaseInsensitive &&
+             cmsysString_strcasecmp(flag+1, entry->commandFlag) == 0))
       {
       if(entry->special & cmIDEFlagTable::UserFollowing)
         {
