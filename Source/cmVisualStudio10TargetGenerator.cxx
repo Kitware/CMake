@@ -2597,30 +2597,16 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
       linkOptions.AddFlag("StackReserveSize", stackVal);
       }
 
-    if(flags.find("/debug") != flags.npos)
+    if (this->LocalGenerator->GetVersion() >=
+        cmGlobalVisualStudioGenerator::VS14)
       {
-      if (this->LocalGenerator->GetVersion() >=
-          cmGlobalVisualStudioGenerator::VS14)
-        {
-        linkOptions.AddFlag("GenerateDebugInformation", "Debug");
-        }
-      else
-        {
-        linkOptions.AddFlag("GenerateDebugInformation", "true");
-        }
+      linkOptions.AddFlag("GenerateDebugInformation", "No");
       }
     else
       {
-      if (this->LocalGenerator->GetVersion() >=
-          cmGlobalVisualStudioGenerator::VS14)
-        {
-        linkOptions.AddFlag("GenerateDebugInformation", "No");
-        }
-      else
-        {
-        linkOptions.AddFlag("GenerateDebugInformation", "false");
-        }
+      linkOptions.AddFlag("GenerateDebugInformation", "false");
       }
+
     std::string pdb = this->GeneratorTarget->GetPDBDirectory(config.c_str());
     pdb += "/";
     pdb += targetNamePDB;
