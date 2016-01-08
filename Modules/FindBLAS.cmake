@@ -494,18 +494,18 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         list(APPEND BLAS_SEARCH_LIBS_WIN_MAIN
           "mkl_blas95${BLAS_mkl_DLL_SUFFIX} mkl_intel_c${BLAS_mkl_DLL_SUFFIX}")
       endif()
-      if (BLA_VENDOR STREQUAL "Intel10_64lp*" OR BLA_VENDOR STREQUAL "All")
+      if (BLA_VENDOR MATCHES "^Intel10_64lp" OR BLA_VENDOR STREQUAL "All")
         list(APPEND BLAS_SEARCH_LIBS_WIN_MAIN
           "mkl_blas95_lp64${BLAS_mkl_DLL_SUFFIX} mkl_intel_lp64${BLAS_mkl_DLL_SUFFIX}")
       endif ()
 
       # Add threading/sequential libs
       set(BLAS_SEARCH_LIBS_WIN_THREAD "")
-      if (BLA_VENDOR STREQUAL "*_seq" OR BLA_VENDOR STREQUAL "All")
+      if (BLA_VENDOR MATCHES "_seq$" OR BLA_VENDOR STREQUAL "All")
         list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
           "mkl_sequential${BLAS_mkl_DLL_SUFFIX}")
       endif()
-      if (NOT BLA_VENDOR STREQUAL "*_seq" OR BLA_VENDOR STREQUAL "All")
+      if (NOT BLA_VENDOR MATCHES "_seq$" OR BLA_VENDOR STREQUAL "All")
         # old version
         list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
           "libguide40 mkl_intel_thread${BLAS_mkl_DLL_SUFFIX}")
@@ -561,14 +561,14 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         list(APPEND BLAS_SEARCH_LIBS_WIN_MAIN
           "mkl_intel_c${BLAS_mkl_DLL_SUFFIX}")
       endif()
-      if (BLA_VENDOR STREQUAL "Intel10_64lp*" OR BLA_VENDOR STREQUAL "All")
+      if (BLA_VENDOR MATCHES "^Intel10_64lp" OR BLA_VENDOR STREQUAL "All")
         list(APPEND BLAS_SEARCH_LIBS_WIN_MAIN
           "mkl_intel_lp64${BLAS_mkl_DLL_SUFFIX}")
       endif ()
 
       # Add threading/sequential libs
       set(BLAS_SEARCH_LIBS_WIN_THREAD "")
-      if (NOT BLA_VENDOR STREQUAL "*_seq" OR BLA_VENDOR STREQUAL "All")
+      if (NOT BLA_VENDOR MATCHES "_seq$" OR BLA_VENDOR STREQUAL "All")
         # old version
         list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
           "libguide40 mkl_intel_thread${BLAS_mkl_DLL_SUFFIX}")
@@ -576,7 +576,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
           "libiomp5md mkl_intel_thread${BLAS_mkl_DLL_SUFFIX}")
       endif()
-      if (BLA_VENDOR STREQUAL "*_seq" OR BLA_VENDOR STREQUAL "All")
+      if (BLA_VENDOR MATCHES "_seq$" OR BLA_VENDOR STREQUAL "All")
         list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
           "mkl_sequential${BLAS_mkl_DLL_SUFFIX}")
       endif()
