@@ -135,18 +135,27 @@ set(_SAVED_DCMTK_DIR ${DCMTK_DIR})
 #
 # Step1: Attempt to find a version of DCMTK providing a DCMTKConfig.cmake file.
 #
-message(STATUS "Trying to find DCMTK expecting DCMTKConfig.cmake")
+if(NOT DCMTK_FIND_QUIETLY)
+  message(STATUS "Trying to find DCMTK expecting DCMTKConfig.cmake")
+endif()
 find_package(DCMTK QUIET NO_MODULE)
 if(DCMTK_FOUND
     AND NOT "x" STREQUAL "x${DCMTK_LIBRARIES}"
     AND NOT "x" STREQUAL "x${DCMTK_INCLUDE_DIRS}")
-  message(STATUS "Trying to find DCMTK expecting DCMTKConfig.cmake - ok")
+
+  if(NOT DCMTK_FIND_QUIETLY)
+    message(STATUS "Trying to find DCMTK expecting DCMTKConfig.cmake - ok")
+  endif()
   return()
 else()
-  message(STATUS "Trying to find DCMTK expecting DCMTKConfig.cmake - failed")
+  if(NOT DCMTK_FIND_QUIETLY)
+    message(STATUS "Trying to find DCMTK expecting DCMTKConfig.cmake - failed")
+  endif()
 endif()
 
-message(STATUS "Trying to find DCMTK relying on FindDCMTK.cmake")
+if(NOT DCMTK_FIND_QUIETLY)
+  message(STATUS "Trying to find DCMTK relying on FindDCMTK.cmake")
+endif()
 
 # Restore the value reset by the previous call to 'find_package(DCMTK QUIET NO_MODULE)'
 set(DCMTK_DIR ${_SAVED_DCMTK_DIR} CACHE PATH ${_dcmtk_dir_description} FORCE)
@@ -340,6 +349,7 @@ if(DCMTK_FOUND AND UNIX AND NOT APPLE)
   set(CMAKE_REQUIRED_DEFINITIONS )
   set(CMAKE_REQUIRED_INCLUDES ${DCMTK_INCLUDE_DIRS})
   set(CMAKE_REQUIRED_LIBRARIES ${DCMTK_LIBRARIES})
+  set(CMAKE_REQUIRED_QUIET ${DCMTK_FIND_QUIETLY})
   check_cxx_source_compiles("#include <dcmtk/config/osconfig.h>\n#include <dcmtk/ofstd/ofstream.h>\nint main(int,char*[]){return 0;}"
     DCMTK_HAVE_CONFIG_H_OPTIONAL
     )
@@ -348,4 +358,6 @@ if(DCMTK_FOUND AND UNIX AND NOT APPLE)
   endif()
 endif()
 
-message(STATUS "Trying to find DCMTK relying on FindDCMTK.cmake - ok")
+if(NOT DCMTK_FIND_QUIETLY)
+  message(STATUS "Trying to find DCMTK relying on FindDCMTK.cmake - ok")
+endif()
