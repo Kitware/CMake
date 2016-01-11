@@ -6,7 +6,7 @@ if(NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
 endif()
 
 cmake_policy(GET CMP0025 appleClangPolicy)
-if(WIN32 OR (APPLE AND NOT appleClangPolicy STREQUAL NEW))
+if(APPLE AND NOT appleClangPolicy STREQUAL NEW)
   return()
 endif()
 
@@ -49,7 +49,7 @@ macro(cmake_record_cxx_compile_features)
   endmacro()
 
   set(_result 0)
-  if (UNIX AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.4)
+  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.4)
     _get_clang_features(${CMAKE_CXX14_STANDARD_COMPILE_OPTION} CMAKE_CXX14_COMPILE_FEATURES)
     if (_result EQUAL 0)
       _get_clang_features(${CMAKE_CXX11_STANDARD_COMPILE_OPTION} CMAKE_CXX11_COMPILE_FEATURES)
