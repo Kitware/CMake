@@ -2599,11 +2599,27 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
 
     if(linkOptions.IsDebug() || flags.find("/debug") != flags.npos)
       {
-      linkOptions.AddFlag("GenerateDebugInformation", "true");
+      if (this->LocalGenerator->GetVersion() >=
+          cmGlobalVisualStudioGenerator::VS14)
+        {
+        linkOptions.AddFlag("GenerateDebugInformation", "Debug");
+        }
+      else
+        {
+        linkOptions.AddFlag("GenerateDebugInformation", "true");
+        }
       }
     else
       {
-      linkOptions.AddFlag("GenerateDebugInformation", "false");
+      if (this->LocalGenerator->GetVersion() >=
+          cmGlobalVisualStudioGenerator::VS14)
+        {
+        linkOptions.AddFlag("GenerateDebugInformation", "No");
+        }
+      else
+        {
+        linkOptions.AddFlag("GenerateDebugInformation", "false");
+        }
       }
     std::string pdb = this->GeneratorTarget->GetPDBDirectory(config.c_str());
     pdb += "/";
