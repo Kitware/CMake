@@ -277,29 +277,21 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
       *i = cmSystemTools::GetFilenameName(*i);
       }
 
-    // Sort the results to make sure we select the most recent one that
-    // has a version less or equal to our version of the operating system
+    // Sort the results to make sure we select the most recent one.
     std::sort(sdks.begin(), sdks.end(), cmSystemTools::VersionCompareGreater);
 
-    // Select a suitable SDK version.
-    if (this->SystemVersion == "10.0")
+    // Look for a SDK exactly matching the requested target version.
+    for (std::vector<std::string>::iterator i = sdks.begin();
+         i != sdks.end(); ++i)
       {
-      // Use the latest Windows 10 SDK since no build version was given.
-      return sdks.at(0);
-      }
-    else
-      {
-      // Find the SDK less or equal to our specified version
-      for (std::vector<std::string>::iterator i = sdks.begin();
-           i != sdks.end(); ++i)
+      if (cmSystemTools::VersionCompareEqual(*i, this->SystemVersion))
         {
-        if (!cmSystemTools::VersionCompareGreater(*i, this->SystemVersion))
-          {
-          // This is the most recent SDK that we can run safely
-          return *i;
-          }
+        return *i;
         }
       }
+
+    // Use the latest Windows 10 SDK since the exact version is not available.
+    return sdks.at(0);
     }
 #endif
   // Return an empty string
