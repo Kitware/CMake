@@ -2780,6 +2780,14 @@ bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
 }
 
 //----------------------------------------------------------------------------
+bool cmSystemTools::VersionCompareEqual(std::string const& lhs,
+                                        std::string const& rhs)
+{
+  return cmSystemTools::VersionCompare(
+    cmSystemTools::OP_EQUAL, lhs.c_str(), rhs.c_str());
+}
+
+//----------------------------------------------------------------------------
 bool cmSystemTools::VersionCompareGreater(std::string const& lhs,
                                           std::string const& rhs)
 {
