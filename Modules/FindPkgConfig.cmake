@@ -263,6 +263,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
         endif()
       endif()
       list(APPEND _lib_dirs "lib/pkgconfig")
+      list(APPEND _lib_dirs "share/pkgconfig")
 
       # Check if directories exist and eventually append them to the
       # pkgconfig path list
