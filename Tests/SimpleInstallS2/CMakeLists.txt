@@ -252,7 +252,7 @@ else()
   file(REMOVE_RECURSE "${CMAKE_INSTALL_PREFIX}/MyTest/share/CVS")
   file(REMOVE_RECURSE "${CMAKE_INSTALL_PREFIX}/MyTest/share/TestSubDir/CVS")
   install(
-    DIRECTORY TestSubDir scripts/ DESTINATION $<1:MyTest/share>$<0:/wrong>
+    DIRECTORY TestSubDir $<1:scripts/>$<0:/wrong> DESTINATION $<1:MyTest/share>$<0:/wrong>
     FILE_PERMISSIONS OWNER_READ OWNER_WRITE
     DIRECTORY_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                           GROUP_READ GROUP_EXECUTE
@@ -263,7 +263,7 @@ else()
 
   # Alternate directory installation for coverage.
   install(
-    DIRECTORY scripts/ DESTINATION $<1:MyTest/share/alt>$<0:/wrong>
+    DIRECTORY $<1:scripts/>$<0:/wrong> DESTINATION $<1:MyTest/share/alt>$<0:/wrong>
     COMPONENT Development
     USE_SOURCE_PERMISSIONS
     PATTERN "CVS" EXCLUDE

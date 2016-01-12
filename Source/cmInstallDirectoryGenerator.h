@@ -42,7 +42,8 @@ protected:
                                        Indent const& indent);
   void AddDirectoryInstallRule(std::ostream& os,
                                const std::string& config,
-                               Indent const& indent);
+                               Indent const& indent,
+                               std::vector<std::string> const& dirs);
   cmLocalGenerator* LocalGenerator;
   std::vector<std::string> Directories;
   std::string FilePermissions;

@@ -271,9 +271,10 @@ will install the ``icons`` directory to ``share/myproj/icons`` and the
 file permissions, the scripts will be given specific permissions, and any
 ``CVS`` directories will be excluded.
 
-The install destination given to the directory install ``DESTINATION`` may
-use "generator expressions" with the syntax ``$<...>``.  See the
-:manual:`cmake-generator-expressions(7)` manual for available expressions.
+The list of ``dirs...`` given to ``DIRECTORY`` and the install destination
+given to the directory install ``DESTINATION`` may use "generator expressions"
+with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
+manual for available expressions.
 
 Custom Installation Logic
 ^^^^^^^^^^^^^^^^^^^^^^^^^
