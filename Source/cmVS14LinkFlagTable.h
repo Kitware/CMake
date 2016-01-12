@@ -177,6 +177,8 @@ static cmVS7FlagTable cmVS14LinkFlagTable[] =
   {"UACUIAccess", "uiAccess='false'", "", "false", 0},
   {"UACUIAccess", "uiAccess='true'", "", "true", 0},
   {"ManifestEmbed", "manifest:embed", "", "true", 0},
+  {"GenerateDebugInformation", "DEBUG:FASTLINK", "", "DebugFastLink",
+   cmVS7FlagTable::CaseInsensitive},
   {"GenerateDebugInformation", "DEBUG", "", "Debug",
    cmVS7FlagTable::CaseInsensitive},
   {"MapExports", "MAPINFO:EXPORTS", "", "true", 0},
