@@ -16,11 +16,11 @@
 # the source (default to /usr)
 #
 #
-# This file is able to find version of DCMTK that do or do not export
+# This file is able to find version of DCMTK that does or does not export
 # a DCMTKConfig.cmake file.
 #
 # IMPORTANT: A set of patches has been contributed to DCMTK
-# maintainers, as soon as:
+# maintainers and merged upstream. As soon as:
 #   (1) it has been integrated upstream so that it is available in
 #   an official release (for example X.Y.Z),
 #   (2) code bases have been updated to build against X.Y.Z
@@ -65,22 +65,17 @@
 #   [X] DCMTKConfig ..: Means that the version of DCMTK exports a DCMTKConfig.cmake file.
 #
 #
-#
-# In CTK commits 52d953 and 74b4b07, the FindDCMTK.cmake module has been updated to be able
-# to find both version of DCMTK ([ ] DCMTKConfig and [X] DCMTKConfig).
-#
-# It is a two steps process:
+# It is a two step process:
 #
 #   * Step 1:  Attempt to find DCMTK version providing a DCMTKConfig.cmake file. This is done
 #              with the help of ''
-#
 #   * Step 2:  If step 1 failed, rely on FindDCMTK.cmake to set DCMTK_* variables details below.
 #
 #
 #
 # Troubleshooting:
 #
-#    What to do if my project find a different version of DCMTK ?
+#    What to do if my project finds a different version of DCMTK?
 #
 #    Remove DCMTK entry from the CMake registry.
 #    Search for "CMake user package registry" on http://www.cmake.org/cmake/help/v2.8.9/cmake.html#command:find_package
