@@ -32,6 +32,7 @@ struct cmIDEFlagTable
                                   // /NODEFAULTLIB: =>
                                   // IgnoreDefaultLibraryNames)
     UserFollowing = (1<<5), // expect value in following argument
+    CaseInsensitive = (1<<6), // flag may be any case
 
     UserValueIgnored  = UserValue | UserIgnored,
     UserValueRequired = UserValue | UserRequired
