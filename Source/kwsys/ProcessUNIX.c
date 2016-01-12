@@ -1595,12 +1595,12 @@ static void kwsysProcessVolatileFree(volatile void* p)
 {
   /* clang has made it impossible to free memory that points to volatile
      without first using special pragmas to disable a warning...  */
-#if defined(__clang__)
+#if defined(__clang__) && !defined(__INTEL_COMPILER)
 # pragma clang diagnostic push
 # pragma clang diagnostic ignored "-Wcast-qual"
 #endif
   free((void*)p); /* The cast will silence most compilers, but not clang.  */
-#if defined(__clang__)
+#if defined(__clang__) && !defined(__INTEL_COMPILER)
 # pragma clang diagnostic pop
 #endif
 }

@@ -4491,36 +4491,27 @@ bool SystemTools::FileIsFullPath(const char* in_name, size_t len)
 bool SystemTools::GetShortPath(const std::string& path, std::string& shortPath)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  const int size = int(path.size()) +1; // size of return
-  char *tempPath = new char[size];  // create a buffer
-  DWORD ret;
+  std::string tempPath = path;  // create a buffer
 
   // if the path passed in has quotes around it, first remove the quotes
   if (!path.empty() && path[0] == '"' && *path.rbegin() == '"')
     {
-    strcpy(tempPath,path.c_str()+1);
-    tempPath[size-2] = '\0';
-    }
-  else
-    {
-    strcpy(tempPath,path.c_str());
+    tempPath = path.substr(1, path.length()-2);
     }
 
   std::wstring wtempPath = Encoding::ToWide(tempPath);
-  std::vector<wchar_t> buffer(wtempPath.size()+1);
-  buffer[0] = 0;
+  DWORD ret = GetShortPathNameW(wtempPath.c_str(), NULL, 0);
+  std::vector<wchar_t> buffer(ret);
   ret = GetShortPathNameW(wtempPath.c_str(),
-    &buffer[0], static_cast<DWORD>(wtempPath.size()));
+                          &buffer[0], static_cast<DWORD>(buffer.size()));
 
-  if(buffer[0] == 0 || ret > wtempPath.size())
+  if (ret == 0)
     {
-    delete [] tempPath;
     return false;
     }
   else
     {
     shortPath = Encoding::ToNarrow(&buffer[0]);
-    delete [] tempPath;
     return true;
     }
 #else

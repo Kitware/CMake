@@ -29,7 +29,7 @@
    it in a single source file instead of a separate header and
    implementation file.  */
 
-#if defined(__clang__)
+#if defined(__clang__) && !defined(__INTEL_COMPILER)
 # pragma clang diagnostic push
 # pragma clang diagnostic ignored "-Wcast-align"
 #endif
@@ -433,7 +433,7 @@ static void md5_finish(md5_state_t *pms, md5_byte_t digest[16])
         digest[i] = (md5_byte_t)(pms->abcd[i >> 2] >> ((i & 3) << 3));
 }
 
-#if defined(__clang__)
+#if defined(__clang__) && !defined(__INTEL_COMPILER)
 # pragma clang diagnostic pop
 #endif
 
