@@ -59,6 +59,7 @@ class cmake
  public:
   enum MessageType
   { AUTHOR_WARNING,
+    AUTHOR_ERROR,
     FATAL_ERROR,
     INTERNAL_ERROR,
     MESSAGE,
@@ -71,7 +72,8 @@ class cmake
   enum DiagLevel
   {
     DIAG_IGNORE,
-    DIAG_WARN
+    DIAG_WARN,
+    DIAG_ERROR
   };
 
   /** \brief Describes the working modes of cmake */
@@ -330,6 +332,28 @@ class cmake
    */
   void SetSuppressDeprecatedWarnings(bool v);
 
+  /*
+   * Get the state of treating developer (author) warnings as errors.
+   * Returns false, by default, if warnings should not be treated as errors,
+   * true otherwise.
+   */
+  bool GetDevWarningsAsErrors(cmMakefile const* mf = NULL);
+  /**
+   * Set the state of treating developer (author) warnings as errors.
+   */
+  void SetDevWarningsAsErrors(bool v);
+
+  /*
+   * Get the state of treating deprecated warnings as errors.
+   * Returns false, by default, if warnings should not be treated as errors,
+   * true otherwise.
+   */
+  bool GetDeprecatedWarningsAsErrors(cmMakefile const* mf = NULL);
+  /**
+   * Set the state of treating developer (author) warnings as errors.
+   */
+  void SetDeprecatedWarningsAsErrors(bool v);
+
   /** Display a message to the user.  */
   void IssueMessage(cmake::MessageType t, std::string const& text,
         cmListFileBacktrace const& backtrace = cmListFileBacktrace(),
@@ -441,6 +465,12 @@ private:
   // Print a list of valid generators to stderr.
   void PrintGeneratorList();
 
+  /**
+   * Convert a message type between a warning and an error, based on the state
+   * of the error output CMake variables, in the cache.
+   */
+  cmake::MessageType ConvertMessageType(cmake::MessageType t);
+
   /*
    * Check if messages of this type should be output, based on the state of the
    * warning and error output CMake variables, in the cache.
@@ -457,10 +487,16 @@ private:
   {"-G <generator-name>", "Specify a build system generator."},\
   {"-T <toolset-name>", "Specify toolset name if supported by generator."}, \
   {"-A <platform-name>", "Specify platform name if supported by generator."}, \
-  {"-Wno-dev", "Suppress developer warnings."},\
   {"-Wdev", "Enable developer warnings."},\
+  {"-Wno-dev", "Suppress developer warnings."},\
+  {"-Werror=dev", "Make developer warnings errors."},\
+  {"-Wno-error=dev", "Make developer warnings not errors."},\
   {"-Wdeprecated", "Enable deprecation warnings."},\
-  {"-Wno-deprecated", "Suppress deprecation warnings."}
+  {"-Wno-deprecated", "Suppress deprecation warnings."},\
+  {"-Werror=deprecated", "Make deprecated macro and function warnings " \
+                         "errors."},\
+  {"-Wno-error=deprecated", "Make deprecated macro and function warnings " \
+                            "not errors."}
 
 #define FOR_EACH_C_FEATURE(F) \
   F(c_function_prototypes) \

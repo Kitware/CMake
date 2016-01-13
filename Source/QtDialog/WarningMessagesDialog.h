@@ -35,6 +35,28 @@ private slots:
    */
   void doAccept();
 
+  /**
+   * Handler for checked state changed event of the suppress developer warnings
+   * checkbox.
+   */
+  void doSuppressDeveloperWarningsChanged(int state);
+  /**
+   * Handler for checked state changed event of the suppress deprecated
+   * warnings checkbox.
+   */
+  void doSuppressDeprecatedWarningsChanged(int state);
+
+  /**
+   * Handler for checked state changed event of the developer warnings as
+   * errors checkbox.
+   */
+  void doDeveloperWarningsAsErrorsChanged(int state);
+  /**
+   * Handler for checked state changed event of the deprecated warnings as
+   * errors checkbox.
+   */
+  void doDeprecatedWarningsAsErrorsChanged(int state);
+
 private:
   QCMake* cmakeInstance;
 

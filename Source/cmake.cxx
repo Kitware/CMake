@@ -291,12 +291,19 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
 
       std::string name;
       bool foundNo = false;
+      bool foundError = false;
       unsigned int nameStartPosition = 0;
 
       if (entry.find("no-", nameStartPosition) == 0)
         {
         foundNo = true;
         nameStartPosition += 3;
+        }
+
+      if (entry.find("error=", nameStartPosition) == 0)
+        {
+        foundError = true;
+        nameStartPosition += 6;
         }
 
       name = entry.substr(nameStartPosition);
@@ -306,16 +313,27 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         return false;
         }
 
-      if (!foundNo)
+      if (!foundNo && !foundError)
         {
         // -W<name>
         this->DiagLevels[name] = std::max(this->DiagLevels[name],
                                           DIAG_WARN);
         }
+      else if (foundNo && !foundError)
+        {
+         // -Wno<name>
+         this->DiagLevels[name] = DIAG_IGNORE;
+        }
+      else if (!foundNo && foundError)
+        {
+        // -Werror=<name>
+        this->DiagLevels[name] = DIAG_ERROR;
+        }
       else
         {
-        // -Wno<name>
-        this->DiagLevels[name] = DIAG_IGNORE;
+        // -Wno-error=<name>
+        this->DiagLevels[name] = std::min(this->DiagLevels[name],
+                                          DIAG_WARN);
         }
       }
     else if(arg.find("-U",0) == 0)
@@ -1270,10 +1288,17 @@ int cmake::Configure()
     if (diagLevel == DIAG_IGNORE)
       {
       this->SetSuppressDeprecatedWarnings(true);
+      this->SetDeprecatedWarningsAsErrors(false);
       }
     else if (diagLevel == DIAG_WARN)
       {
       this->SetSuppressDeprecatedWarnings(false);
+      this->SetDeprecatedWarningsAsErrors(false);
+      }
+    else if (diagLevel == DIAG_ERROR)
+      {
+      this->SetSuppressDeprecatedWarnings(false);
+      this->SetDeprecatedWarningsAsErrors(true);
       }
     }
 
@@ -1283,9 +1308,11 @@ int cmake::Configure()
 
     const char* cachedWarnDeprecated =
            this->State->GetCacheEntryValue("CMAKE_WARN_DEPRECATED");
+    const char* cachedErrorDeprecated =
+           this->State->GetCacheEntryValue("CMAKE_ERROR_DEPRECATED");
 
     // don't overwrite deprecated warning setting from a previous invocation
-    if (!cachedWarnDeprecated)
+    if (!cachedWarnDeprecated && !cachedErrorDeprecated)
       {
       setDeprecatedVariables = true;
       }
@@ -1294,19 +1321,34 @@ int cmake::Configure()
     if (diagLevel == DIAG_IGNORE)
       {
       this->SetSuppressDevWarnings(true);
+      this->SetDevWarningsAsErrors(false);
 
       if (setDeprecatedVariables)
         {
         this->SetSuppressDeprecatedWarnings(true);
+        this->SetDeprecatedWarningsAsErrors(false);
         }
       }
     else if (diagLevel == DIAG_WARN)
       {
       this->SetSuppressDevWarnings(false);
+      this->SetDevWarningsAsErrors(false);
 
       if (setDeprecatedVariables)
         {
         this->SetSuppressDeprecatedWarnings(false);
+        this->SetDeprecatedWarningsAsErrors(false);
+        }
+      }
+    else if (diagLevel == DIAG_ERROR)
+      {
+      this->SetSuppressDevWarnings(false);
+      this->SetDevWarningsAsErrors(true);
+
+      if (setDeprecatedVariables)
+        {
+        this->SetSuppressDeprecatedWarnings(false);
+        this->SetDeprecatedWarningsAsErrors(true);
         }
       }
     }
@@ -2547,16 +2589,45 @@ static bool cmakeCheckStampList(const char* stampList)
   return true;
 }
 
+cmake::MessageType cmake::ConvertMessageType(cmake::MessageType t)
+{
+  bool warningsAsErrors;
+
+  if (t == cmake::AUTHOR_WARNING || t == cmake::AUTHOR_ERROR)
+    {
+    warningsAsErrors = this->GetDevWarningsAsErrors();
+    if (warningsAsErrors && t == cmake::AUTHOR_WARNING)
+      {
+      t = cmake::AUTHOR_ERROR;
+      }
+    else if (!warningsAsErrors && t == cmake::AUTHOR_ERROR)
+      {
+      t = cmake::AUTHOR_WARNING;
+      }
+    }
+  else if (t == cmake::DEPRECATION_WARNING || t == cmake::DEPRECATION_ERROR)
+    {
+    warningsAsErrors = this->GetDeprecatedWarningsAsErrors();
+    if (warningsAsErrors && t == cmake::DEPRECATION_WARNING)
+      {
+      t = cmake::DEPRECATION_ERROR;
+      }
+    else if (!warningsAsErrors && t == cmake::DEPRECATION_ERROR)
+      {
+      t = cmake::DEPRECATION_WARNING;
+      }
+    }
+
+  return t;
+}
+
 bool cmake::IsMessageTypeVisible(cmake::MessageType t)
 {
   bool isVisible = true;
 
   if(t == cmake::DEPRECATION_ERROR)
     {
-    // if CMAKE_ERROR_DEPRECATED is on, show the message, otherwise suppress it
-    const char* errorDeprecated = this->State->GetCacheEntryValue(
-                                                "CMAKE_ERROR_DEPRECATED");
-    if(cmSystemTools::IsOff(errorDeprecated))
+    if(!this->GetDeprecatedWarningsAsErrors())
       {
       isVisible = false;
       }
@@ -2564,6 +2635,13 @@ bool cmake::IsMessageTypeVisible(cmake::MessageType t)
   else if (t == cmake::DEPRECATION_WARNING)
     {
     if (this->GetSuppressDeprecatedWarnings())
+      {
+      isVisible = false;
+      }
+    }
+  else if (t == cmake::AUTHOR_ERROR)
+    {
+    if (!this->GetDevWarningsAsErrors())
       {
       isVisible = false;
       }
@@ -2606,6 +2684,10 @@ bool cmake::PrintMessagePreamble(cmake::MessageType t, std::ostream& msg)
     {
     msg << "CMake Warning (dev)";
     }
+  else if (t == cmake::AUTHOR_ERROR)
+    {
+    msg << "CMake Error (dev)";
+    }
   else
     {
     msg << "CMake Warning";
@@ -2630,6 +2712,12 @@ void displayMessage(cmake::MessageType t, std::ostringstream& msg)
     msg <<
       "This warning is for project developers.  Use -Wno-dev to suppress it.";
     }
+  else if (t == cmake::AUTHOR_ERROR)
+    {
+    msg <<
+      "This error is for project developers. Use -Wno-error=dev to suppress "
+      "it.";
+    }
 
   // Add a terminating blank line.
   msg << "\n";
@@ -2653,7 +2741,8 @@ void displayMessage(cmake::MessageType t, std::ostringstream& msg)
   // Output the message.
   if(t == cmake::FATAL_ERROR
      || t == cmake::INTERNAL_ERROR
-     || t == cmake::DEPRECATION_ERROR)
+     || t == cmake::DEPRECATION_ERROR
+     || t == cmake::AUTHOR_ERROR)
     {
     cmSystemTools::SetErrorOccured();
     cmSystemTools::Message(msg.str().c_str(), "Error");
@@ -2670,6 +2759,17 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
                          bool force)
 {
   cmListFileBacktrace backtrace = bt;
+
+  if (!force)
+    {
+    // override the message type, if needed, for warnings and errors
+    cmake::MessageType override = this->ConvertMessageType(t);
+    if (override != t)
+      {
+      t = override;
+      force = true;
+      }
+    }
 
   if (!force && !this->IsMessageTypeVisible(t))
     {
@@ -2698,6 +2798,17 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
                          cmListFileContext const& lfc,
                          bool force)
 {
+  if (!force)
+    {
+    // override the message type, if needed, for warnings and errors
+    cmake::MessageType override = this->ConvertMessageType(t);
+    if (override != t)
+      {
+      t = override;
+      force = true;
+      }
+    }
+
   if (!force && !this->IsMessageTypeVisible(t))
     {
     return;
@@ -2939,5 +3050,76 @@ void cmake::SetSuppressDeprecatedWarnings(bool b)
   this->AddCacheEntry("CMAKE_WARN_DEPRECATED", value.c_str(),
                       "Whether to issue warnings for deprecated "
                       "functionality.",
+                      cmState::INTERNAL);
+}
+
+bool cmake::GetDevWarningsAsErrors(cmMakefile const* mf)
+{
+  if (mf)
+    {
+    return (mf->IsSet("CMAKE_SUPPRESS_DEVELOPER_ERRORS") &&
+            !mf->IsOn("CMAKE_SUPPRESS_DEVELOPER_ERRORS"));
+    }
+  else
+    {
+    const char* cacheEntryValue = this->State->GetCacheEntryValue(
+      "CMAKE_SUPPRESS_DEVELOPER_ERRORS");
+    return cacheEntryValue && cmSystemTools::IsOff(cacheEntryValue);
+    }
+}
+
+void cmake::SetDevWarningsAsErrors(bool b)
+{
+  std::string value;
+
+  // equivalent to -Werror=dev
+  if (b)
+    {
+    value = "FALSE";
+    }
+  // equivalent to -Wno-error=dev
+  else
+    {
+    value = "TRUE";
+    }
+
+  this->AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_ERRORS", value.c_str(),
+                      "Suppress errors that are meant for"
+                      " the author of the CMakeLists.txt files.",
+                      cmState::INTERNAL);
+}
+
+bool cmake::GetDeprecatedWarningsAsErrors(cmMakefile const* mf)
+{
+  if (mf)
+    {
+    return mf->IsOn("CMAKE_ERROR_DEPRECATED");
+    }
+  else
+    {
+    const char* cacheEntryValue = this->State->GetCacheEntryValue(
+      "CMAKE_ERROR_DEPRECATED");
+    return cmSystemTools::IsOn(cacheEntryValue);
+    }
+}
+
+void cmake::SetDeprecatedWarningsAsErrors(bool b)
+{
+  std::string value;
+
+  // equivalent to -Werror=deprecated
+  if (b)
+    {
+    value = "TRUE";
+    }
+  // equivalent to -Wno-error=deprecated
+  else
+    {
+    value = "FALSE";
+    }
+
+  this->AddCacheEntry("CMAKE_ERROR_DEPRECATED", value.c_str(),
+                      "Whether to issue deprecation errors for macros"
+                      " and functions.",
                       cmState::INTERNAL);
 }
