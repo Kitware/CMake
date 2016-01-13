@@ -74,6 +74,12 @@
 # endif
 #endif
 
+#if defined(__BORLANDC__) && !defined(__cplusplus)
+  /* Code has no effect; raised by winnt.h in C (not C++) when ignoring an
+     unused parameter using "(param)" syntax (i.e. no cast to void).  */
+# pragma warn -8019
+#endif
+
 /*--------------------------------------------------------------------------*/
 
 /* Full path to the directory in which this executable is built.  Do

@@ -115,6 +115,11 @@
 #  pragma warning (disable: 4710) /* function not inlined */
 #  pragma warning (disable: 4786) /* identifier truncated in debug info */
 # endif
+# if defined(__BORLANDC__) && !defined(__cplusplus)
+   /* Code has no effect; raised by winnt.h in C (not C++) when ignoring an
+      unused parameter using "(param)" syntax (i.e. no cast to void).  */
+#  pragma warn -8019
+# endif
 #endif
 
 /* MSVC 6.0 in release mode will warn about code it produces with its
