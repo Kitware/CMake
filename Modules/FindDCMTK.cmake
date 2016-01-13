@@ -1,6 +1,7 @@
 #.rst:
 # FindDCMTK
 # ---------
+#
 # Find DCMTK libraries and applications
 #
 # The module defines the following variables::
@@ -10,32 +11,29 @@
 #  DCMTK_FOUND         - If false, don't try to use DCMTK
 #  DCMTK_DIR           - (optional) Source directory for DCMTK
 #
-# `DCMTK_DIR` can be used to make it simpler to find the various include
-# directories and compiled libraries if you've just compiled it in the
-# source tree. Just set it to the root of the tree where you extracted
-# the source (default to `/usr`)
+# Compatibility
+# ^^^^^^^^^^^^^
+#
+# This module is able to find a version of DCMTK that does or does not export
+# a *DCMTKConfig.cmake* file. It applies a two step process:
+#
+# * Step 1:  Attempt to find DCMTK version providing a *DCMTKConfig.cmake* file.
+# * Step 2:  If step 1 failed, rely on *FindDCMTK.cmake* to set `DCMTK_*` variables details below.
 #
 #
-# This file is able to find version of DCMTK that does or does not export
-# a *DCMTKConfig.cmake* file.
-#
-# .. important::
-#   A set of patches has been contributed to DCMTK
-#   maintainers and merged upstream. As soon as:
-#
-#   1) it has been integrated upstream so that it is available in
-#   an official release (for example X.Y.Z),
-#   2) code bases have been updated to build against X.Y.Z
-#
-#   This file could be removed.
-#
-#   The set of patches is listed here: https://github.com/commontk/DCMTK/compare/79030ba...f461865
+# `Recent DCMTK
+# <http://git.dcmtk.org/web?p=dcmtk.git;a=commit;h=662ae187c493c6b9a73dd5e3875372cebd0c11fe>`_
+# provides a *DCMTKConfig.cmake* :manual:`package configuration file
+# <cmake-packages(7)>`. To exclusively use the package configuration file
+# (recommended when possible), pass the `NO_MODULE` option to
+# :command:`find_package`. For example, `find_package(DCMTK NO_MODULE)`.
+# This requires official DCMTK snapshot *3.6.1_20140617* or newer.
 #
 #
-# Waiting for this to happen, build systems will have to be able
+# Until all clients update to the more recent DCMTK, build systems will need
 # to support different versions of DCMTK.
 #
-# On any given system, the following combination of DCMTK version could be
+# On any given system, the following combinations of DCMTK versions could be
 # considered:
 #
 # +--------+---------------------+-----------------------+-------------------+
@@ -69,34 +67,14 @@
 #   [X] DCMTKConfig ..: Means that the version of DCMTK exports a DCMTKConfig.cmake file.
 #
 #
-# It is a two step process:
-#
-# * Step 1:  Attempt to find DCMTK version providing a DCMTKConfig.cmake file. This is done with the help of `''`
-# * Step 2:  If step 1 failed, rely on FindDCMTK.cmake to set DCMTK_* variables details below.
-#
 # Troubleshooting
 # ^^^^^^^^^^^^^^^
 #
 # What to do if my project finds a different version of DCMTK?
 #
-# Remove DCMTK entry from the CMake registry per :command:`find_package`
+# Remove DCMTK entry from the CMake cache per :command:`find_package`
 # documentation.
-#
-# Details
-# ^^^^^^^
-#
-# At some point, the DCMTK build tree was exported [1][2][3]. Indeed, before the set of
-# patches discussed above has been contributed to upstream DCMTK, an initial implementation of
-# a DCMTK build system exporting its build tree has been implemented and has been tested by some
-# folks. This had the effect of populating the CMake registry.
-#
-# Since Step1 does not exclude the CMake registry, when dealing with case E, the incorrect version of
-# DCMTK could be found.
-#
-# - [1] http://slicer-devel.65872.n3.nabble.com/Packaging-seems-to-work-again-tp4028121p4028134.html
-# - [2] https://www.assembla.com/spaces/slicerrt/tickets/244-dcmtk_dir-vs--dcmtkconfig-cmake?comment=267984263#comment:267984263
-# - [3] http://www.cmake.org/cmake/help/v2.8.11/cmake.html#command:export
-#
+
 #=============================================================================
 # Copyright 2004-2009 Kitware, Inc.
 # Copyright 2009-2010 Mathieu Malaterre <mathieu.malaterre@gmail.com>
