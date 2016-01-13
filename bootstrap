@@ -404,6 +404,8 @@ Configuration:
   --no-system-zlib        use cmake-provided zlib library (default)
   --system-bzip2          use system-installed bzip2 library
   --no-system-bzip2       use cmake-provided bzip2 library (default)
+  --system-liblzma        use system-installed liblzma library
+  --no-system-liblzma     use cmake-provided liblzma library (default)
   --system-libarchive     use system-installed libarchive library
   --no-system-libarchive  use cmake-provided libarchive library (default)
 
@@ -632,10 +634,10 @@ while test $# != 0; do
   --init=*) cmake_init_file=`cmake_arg "$1"` ;;
   --system-libs) cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARIES=1" ;;
   --no-system-libs) cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARIES=0" ;;
-  --system-bzip2|--system-curl|--system-expat|--system-jsoncpp|--system-libarchive|--system-zlib)
+  --system-bzip2|--system-curl|--system-expat|--system-jsoncpp|--system-libarchive|--system-zlib|--system-liblzma)
     lib=`cmake_arg "$1" "--system-"`
     cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARY_`cmake_toupper $lib`=1" ;;
-  --no-system-bzip2|--no-system-curl|--no-system-expat|--no-system-jsoncpp|--no-system-libarchive|--no-system-zlib)
+  --no-system-bzip2|--no-system-curl|--no-system-expat|--no-system-jsoncpp|--no-system-libarchive|--no-system-zlib|--no-system-liblzma)
     lib=`cmake_arg "$1" "--no-system-"`
     cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARY_`cmake_toupper $lib`=0" ;;
   --qt-gui) cmake_bootstrap_qt_gui="1" ;;
