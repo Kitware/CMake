@@ -696,19 +696,17 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
     {
     while((pipe = cmsysProcess_WaitForData(cp, &data, &length, 0)) > 0)
       {
-      if(captureStdOut || captureStdErr || outputflag != OUTPUT_NONE)
+      // Translate NULL characters in the output into valid text.
+      // Visual Studio 7 puts these characters in the output of its
+      // build process.
+      for(int i=0; i < length; ++i)
         {
-        // Translate NULL characters in the output into valid text.
-        // Visual Studio 7 puts these characters in the output of its
-        // build process.
-        for(int i=0; i < length; ++i)
+        if(data[i] == '\0')
           {
-          if(data[i] == '\0')
-            {
-            data[i] = ' ';
-            }
+          data[i] = ' ';
           }
         }
+
       if(pipe == cmsysProcess_Pipe_STDOUT ||
          (pipe == cmsysProcess_Pipe_STDERR &&
           captureStdOut == captureStdErr))
