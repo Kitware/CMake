@@ -36,6 +36,16 @@ cmInstallDirectoryGenerator
     {
     this->ActionsPerConfig = true;
     }
+
+  // We need per-config actions if any directories have generator expressions.
+  for(std::vector<std::string>::const_iterator i = dirs.begin();
+      !this->ActionsPerConfig && i != dirs.end(); ++i)
+    {
+    if(cmGeneratorExpression::Find(*i) != std::string::npos)
+      {
+      this->ActionsPerConfig = true;
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -60,7 +70,7 @@ cmInstallDirectoryGenerator::GenerateScriptActions(std::ostream& os,
     }
   else
     {
-    this->AddDirectoryInstallRule(os, "", indent);
+    this->AddDirectoryInstallRule(os, "", indent, this->Directories);
     }
 }
 
@@ -69,20 +79,30 @@ void cmInstallDirectoryGenerator::GenerateScriptForConfig(
   const std::string& config,
   Indent const& indent)
 {
-  this->AddDirectoryInstallRule(os, config, indent);
+  std::vector<std::string> dirs;
+  cmGeneratorExpression ge;
+  for(std::vector<std::string>::const_iterator i = this->Directories.begin();
+      i != this->Directories.end(); ++i)
+    {
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*i);
+    cmSystemTools::ExpandListArgument(cge->Evaluate(
+        this->LocalGenerator, config), dirs);
+    }
+  this->AddDirectoryInstallRule(os, config, indent, dirs);
 }
 
 void cmInstallDirectoryGenerator::AddDirectoryInstallRule(
   std::ostream& os,
   const std::string& config,
-  Indent const& indent)
+  Indent const& indent,
+  std::vector<std::string> const& dirs)
 {
   // Write code to install the directories.
   const char* no_rename = 0;
   this->AddInstallRule(os,
                        this->GetDestination(config),
                        cmInstallType_DIRECTORY,
-                       this->Directories,
+                       dirs,
                        this->Optional,
                        this->FilePermissions.c_str(),
                        this->DirPermissions.c_str(),
