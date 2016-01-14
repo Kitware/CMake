@@ -660,14 +660,6 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
     argv.push_back(a->c_str());
     }
   argv.push_back(0);
-  if ( captureStdOut )
-    {
-    *captureStdOut = "";
-    }
-  if (captureStdErr && captureStdErr != captureStdOut)
-    {
-    *captureStdErr = "";
-    }
 
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_SetCommand(cp, &*argv.begin());
@@ -745,14 +737,13 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
     }
 
   cmsysProcess_WaitForExit(cp, 0);
-  if ( captureStdOut && tempStdOut.begin() != tempStdOut.end())
+  if (captureStdOut)
     {
-    captureStdOut->append(&*tempStdOut.begin(), tempStdOut.size());
+    captureStdOut->assign(tempStdOut.begin(), tempStdOut.end());
     }
-  if ( captureStdErr && captureStdErr != captureStdOut &&
-       tempStdErr.begin() != tempStdErr.end())
+  if (captureStdErr && captureStdErr != captureStdOut)
     {
-    captureStdErr->append(&*tempStdErr.begin(), tempStdErr.size());
+    captureStdErr->assign(tempStdErr.begin(), tempStdErr.end());
     }
 
   bool result = true;
