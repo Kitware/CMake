@@ -203,7 +203,7 @@ public:
    * Output is controlled with outputflag. If outputflag is OUTPUT_NONE, no
    * user-viewable output from the program being run will be generated.
    * OUTPUT_MERGE is the legacy behaviour where stdout and stderr are merged
-   * into stdout.  OUTPUT_NORMAL passes through the output to stdout/stderr as
+   * into stdout.  OUTPUT_FORWARD copies the output to stdout/stderr as
    * it was received.  OUTPUT_PASSTHROUGH passes through the original handles.
    *
    * If timeout is specified, the command will be terminated after
@@ -223,7 +223,7 @@ public:
    {
      OUTPUT_NONE = 0,
      OUTPUT_MERGE,
-     OUTPUT_NORMAL,
+     OUTPUT_FORWARD,
      OUTPUT_PASSTHROUGH
    };
   static bool RunSingleCommand(const char* command,

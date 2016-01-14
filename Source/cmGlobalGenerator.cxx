@@ -1850,7 +1850,7 @@ int cmGlobalGenerator::Build(
       !makeCommand.empty() && cmSystemTools::LowerCase(
         cmSystemTools::GetFilenameName(makeCommand[0])) == "vcexpress.exe")
     {
-    outputflag = cmSystemTools::OUTPUT_NORMAL;
+    outputflag = cmSystemTools::OUTPUT_FORWARD;
     }
 
   // should we do a clean first?
