@@ -67,8 +67,9 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
   int x, y;
 
   FORM* form = fm->GetForm();
+  // when not in edit mode, edit mode is entered by pressing enter or i (vim binding)
   // 10 == enter
-  if (!this->InEdit && (key != 10 && key != KEY_ENTER)) {
+  if (!this->InEdit && (key != 10 && key != KEY_ENTER && key != 'i')) {
     return false;
   }
 
@@ -97,15 +98,24 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
     }
 
     // If resize occurred during edit, move out of edit mode
-    if (!this->InEdit && (key != 10 && key != KEY_ENTER)) {
+    if (!this->InEdit && (key != 10 && key != KEY_ENTER && key != 'i')) {
       return false;
-    }
-    // 10 == enter
-    if (key == 10 || key == KEY_ENTER) {
+      }
+    // enter edit with return and i (vim binding)
+    if (!this->InEdit && (key == 10 || key == KEY_ENTER || key == 'i'))
+      {
       this->OnReturn(fm, w);
-    } else if (key == KEY_DOWN || key == ctrl('n') || key == KEY_UP ||
-               key == ctrl('p') || key == KEY_NPAGE || key == ctrl('d') ||
-               key == KEY_PPAGE || key == ctrl('u')) {
+      }
+    // leave edit with return (but not i -- not a toggle)
+    else if (this->InEdit && (key == 10 || key == KEY_ENTER))
+      {
+      this->OnReturn(fm, w);
+      }
+    else if (key == KEY_DOWN  || key == ctrl('n') ||
+             key == KEY_UP    || key == ctrl('p') ||
+             key == KEY_NPAGE || key == ctrl('d') ||
+             key == KEY_PPAGE || key == ctrl('u'))
+      {
       this->InEdit = false;
       delete[] this->OriginalString;
       // trick to force forms to update the field buffer
