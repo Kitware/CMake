@@ -17,6 +17,7 @@
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 #ifdef __QNX__
 # include <malloc.h> /* for malloc/free on QNX */
 #endif
@@ -673,7 +674,16 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
     {
     cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDOUT, 1);
     cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDERR, 1);
+    captureStdOut = 0;
+    captureStdErr = 0;
     }
+  else if (outputflag == OUTPUT_MERGE ||
+           (captureStdErr && captureStdErr == captureStdOut))
+    {
+    cmsysProcess_SetOption(cp, cmsysProcess_Option_MergeOutput, 1);
+    captureStdErr = 0;
+    }
+  assert(!captureStdErr || captureStdErr != captureStdOut);
 
   cmsysProcess_SetTimeout(cp, timeout);
   cmsysProcess_Execute(cp);
@@ -699,38 +709,26 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
           }
         }
 
-      if(pipe == cmsysProcess_Pipe_STDOUT ||
-         (pipe == cmsysProcess_Pipe_STDERR &&
-          captureStdOut == captureStdErr))
+      if (pipe == cmsysProcess_Pipe_STDOUT)
         {
+        if (outputflag != OUTPUT_NONE)
+          {
+          cmSystemTools::Stdout(data, length);
+          }
         if (captureStdOut)
           {
           tempStdOut.insert(tempStdOut.end(), data, data+length);
           }
         }
-      else if(pipe == cmsysProcess_Pipe_STDERR)
+      else if (pipe == cmsysProcess_Pipe_STDERR)
         {
+        if (outputflag != OUTPUT_NONE)
+          {
+          cmSystemTools::Stderr(data, length);
+          }
         if (captureStdErr)
           {
           tempStdErr.insert(tempStdErr.end(), data, data+length);
-          }
-        }
-      if(outputflag != OUTPUT_NONE)
-        {
-        if(outputflag == OUTPUT_MERGE)
-          {
-          cmSystemTools::Stdout(data, length);
-          }
-        else
-          {
-          if(pipe == cmsysProcess_Pipe_STDERR)
-            {
-            cmSystemTools::Stderr(data, length);
-            }
-          else if(pipe == cmsysProcess_Pipe_STDOUT)
-            {
-            cmSystemTools::Stdout(data, length);
-            }
           }
         }
       }
@@ -741,7 +739,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
     {
     captureStdOut->assign(tempStdOut.begin(), tempStdOut.end());
     }
-  if (captureStdErr && captureStdErr != captureStdOut)
+  if (captureStdErr)
     {
     captureStdErr->assign(tempStdErr.begin(), tempStdErr.end());
     }
