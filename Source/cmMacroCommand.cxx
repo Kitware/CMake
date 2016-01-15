@@ -146,16 +146,14 @@ bool cmMacroHelperCommand::InvokeInitialPass
         // replace formal arguments
         for (unsigned int j = 0; j < variables.size(); ++j)
           {
-          cmSystemTools::ReplaceString(arg.Value, variables[j].c_str(),
-                                       expandedArgs[j].c_str());
+          cmSystemTools::ReplaceString(arg.Value, variables[j],
+                                       expandedArgs[j]);
           }
         // replace argc
-        cmSystemTools::ReplaceString(arg.Value, "${ARGC}",argcDef.c_str());
+        cmSystemTools::ReplaceString(arg.Value, "${ARGC}", argcDef);
 
-        cmSystemTools::ReplaceString(arg.Value, "${ARGN}",
-                                     expandedArgn.c_str());
-        cmSystemTools::ReplaceString(arg.Value, "${ARGV}",
-                                     expandedArgv.c_str());
+        cmSystemTools::ReplaceString(arg.Value, "${ARGN}", expandedArgn);
+        cmSystemTools::ReplaceString(arg.Value, "${ARGV}", expandedArgv);
 
         // if the current argument of the current function has ${ARGV in it
         // then try replacing ARGV values
@@ -163,8 +161,8 @@ bool cmMacroHelperCommand::InvokeInitialPass
           {
           for (unsigned int t = 0; t < expandedArgs.size(); ++t)
             {
-            cmSystemTools::ReplaceString(arg.Value, argVs[t].c_str(),
-                                         expandedArgs[t].c_str());
+            cmSystemTools::ReplaceString(arg.Value, argVs[t],
+                                         expandedArgs[t]);
             }
           }
         }
