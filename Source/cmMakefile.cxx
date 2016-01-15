@@ -2832,10 +2832,9 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
   const char* last = in;
   std::string result;
   result.reserve(source.size());
-  std::stack<t_lookup> openstack;
+  std::vector<t_lookup> openstack;
   bool error = false;
   bool done = false;
-  openstack.push(t_lookup());
   cmake::MessageType mtype = cmake::LOG;
 
   cmState* state = this->GetCMakeInstance()->GetState();
@@ -2846,10 +2845,10 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
     switch(inc)
       {
       case '}':
-        if(openstack.size() > 1)
+        if(!openstack.empty())
           {
-          t_lookup var = openstack.top();
-          openstack.pop();
+          t_lookup var = openstack.back();
+          openstack.pop_back();
           result.append(last, in - last);
           std::string const& lookup = result.substr(var.loc);
           const char* value = NULL;
@@ -2970,7 +2969,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
             last = start;
             in = start - 1;
             lookup.loc = result.size();
-            openstack.push(lookup);
+            openstack.push_back(lookup);
             }
           break;
           }
@@ -2997,7 +2996,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
             result.append("\r");
             last = next + 1;
             }
-          else if(nextc == ';' && openstack.size() == 1)
+          else if(nextc == ';' && openstack.empty())
             {
             // Handled in ExpandListArgument; pass the backslash literally.
             }
@@ -3065,7 +3064,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
         /* FALLTHROUGH */
       default:
         {
-        if(openstack.size() > 1 &&
+        if(!openstack.empty() &&
            !(isalnum(inc) || inc == '_' ||
              inc == '/' || inc == '.' ||
              inc == '+' || inc == '-'))
@@ -3074,7 +3073,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
           errorstr += inc;
           result.append(last, in - last);
           errorstr += "\') in a variable name: "
-                      "'" + result.substr(openstack.top().loc) + "'";
+                      "'" + result.substr(openstack.back().loc) + "'";
           mtype = cmake::FATAL_ERROR;
           error = true;
           }
@@ -3085,7 +3084,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
     } while(!error && !done && *++in);
 
   // Check for open variable references yet.
-  if(!error && openstack.size() != 1)
+  if(!error && !openstack.empty())
     {
     // There's an open variable reference waiting.  Policy CMP0010 flags
     // whether this is an error or not.  The new parser now enforces
