@@ -335,7 +335,7 @@ cmState::TargetType cmGeneratorTarget::GetType() const
 }
 
 //----------------------------------------------------------------------------
-std::string cmGeneratorTarget::GetName() const
+const std::string& cmGeneratorTarget::GetName() const
 {
   return this->Target->GetName();
 }
