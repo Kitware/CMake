@@ -28,46 +28,32 @@ set(__WINDOWS_PATHS_INCLUDED 1)
 # Windows 64-bit Binary:
 #   ENV{ProgramFiles(x86)} = [C:\Program Files (x86)]
 #   ENV{ProgramFiles} = [C:\Program Files]
-#   ENV{ProgramW6432} = <not set>
-# (executed from cygwin):
-#   ENV{ProgramFiles(x86)} = <not set>
-#   ENV{ProgramFiles} = [C:\Program Files]
-#   ENV{ProgramW6432} = <not set>
+#   ENV{ProgramW6432} = [C:\Program Files] or <not set>
 #
-# Windows 32-bit Binary:
+# Windows 32-bit Binary on 64-bit Windows:
 #   ENV{ProgramFiles(x86)} = [C:\Program Files (x86)]
 #   ENV{ProgramFiles} = [C:\Program Files (x86)]
 #   ENV{ProgramW6432} = [C:\Program Files]
-# (executed from cygwin):
-#   ENV{ProgramFiles(x86)} = <not set>
-#   ENV{ProgramFiles} = [C:\Program Files (x86)]
-#   ENV{ProgramW6432} = [C:\Program Files]
-if(DEFINED "ENV{ProgramW6432}")
-  # 32-bit binary on 64-bit windows.
-  # The 64-bit program files are in ProgramW6432.
-  list(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{ProgramW6432}")
-
-  # The 32-bit program files are in ProgramFiles.
-  if(DEFINED "ENV{ProgramFiles}")
-    list(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{ProgramFiles}")
+set(_programfiles "")
+foreach(v "ProgramW6432" "ProgramFiles" "ProgramFiles(x86)")
+  if(DEFINED "ENV{${v}}")
+    file(TO_CMAKE_PATH "$ENV{${v}}" _env_programfiles)
+    list(APPEND _programfiles "${_env_programfiles}")
+    unset(_env_programfiles)
   endif()
-else()
-  # 64-bit binary, or 32-bit binary on 32-bit windows.
-  if(DEFINED "ENV{ProgramFiles}")
-    list(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{ProgramFiles}")
-  endif()
-  set(programfilesx86 "ProgramFiles(x86)")
-  if(DEFINED "ENV{${programfilesx86}}")
-    # 64-bit binary.  32-bit program files are in ProgramFiles(x86).
-    list(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{${programfilesx86}}")
-  elseif(DEFINED "ENV{SystemDrive}")
-    # Guess the 32-bit program files location.
-    if(EXISTS "$ENV{SystemDrive}/Program Files (x86)")
-      list(APPEND CMAKE_SYSTEM_PREFIX_PATH
-        "$ENV{SystemDrive}/Program Files (x86)")
+endforeach()
+if(DEFINED "ENV{SystemDrive}")
+  foreach(d "Program Files" "Program Files (x86)")
+    if(EXISTS "$ENV{SystemDrive}/${d}")
+      list(APPEND _programfiles "$ENV{SystemDrive}/${d}")
     endif()
-  endif()
+  endforeach()
 endif()
+if(_programfiles)
+  list(REMOVE_DUPLICATES _programfiles)
+  list(APPEND CMAKE_SYSTEM_PREFIX_PATH ${_programfiles})
+endif()
+unset(_programfiles)
 
 # Add the CMake install location.
 get_filename_component(_CMAKE_INSTALL_DIR "${CMAKE_ROOT}" PATH)
