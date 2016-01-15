@@ -130,10 +130,13 @@ set_property(TARGET testLibCycleA PROPERTY LINK_INTERFACE_MULTIPLICITY 3)
 add_library(testLibNoSONAME SHARED testLibNoSONAME.c)
 set_property(TARGET testLibNoSONAME PROPERTY NO_SONAME 1)
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0022 NEW)
 # Test exporting dependent libraries into different exports
 add_library(testLibRequired testLibRequired.c)
 add_library(testLibDepends testLibDepends.c)
 target_link_libraries(testLibDepends LINK_PUBLIC testLibRequired)
+cmake_policy(POP)
 
 macro(add_include_lib _libName)
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${_libName}.c" "/* no content */\n")
