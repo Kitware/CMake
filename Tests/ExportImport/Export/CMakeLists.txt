@@ -270,6 +270,7 @@ install(FILES
     DESTINATION include/testSharedLibRequiredUser
 )
 
+cmake_policy(PUSH)
 cmake_policy(SET CMP0022 NEW)
 add_library(testSharedLibRequiredUser2 SHARED testSharedLibRequiredUser2.cpp)
 generate_export_header(testSharedLibRequiredUser2)
@@ -283,7 +284,7 @@ install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/testsharedlibrequireduser2_export.h"
     DESTINATION include/testSharedLibRequiredUser2
 )
-cmake_policy(SET CMP0022 OLD)
+cmake_policy(POP)
 
 add_library(testSharedLibDepends SHARED testSharedLibDepends.cpp)
 set_property(TARGET testSharedLibDepends APPEND PROPERTY
@@ -311,6 +312,8 @@ target_link_libraries(testSharedLibDepends LINK_PUBLIC renamed_on_export)
 target_link_libraries(testSharedLibDepends LINK_INTERFACE_LIBRARIES
   $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:$<TARGET_NAME:testSharedLibRequired>>)
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0022 OLD)
 add_library(cmp0022OLD SHARED cmp0022_vs6_1.cpp)
 generate_export_header(cmp0022OLD BASE_NAME cmp0022)
 target_include_directories(cmp0022OLD PUBLIC
@@ -324,7 +327,7 @@ target_include_directories(cmp0022NEW PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR}>"
   "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/cmp0022>"
 )
-cmake_policy(SET CMP0022 OLD)
+cmake_policy(POP)
 install(FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/cmp0022.h"
   "${CMAKE_CURRENT_BINARY_DIR}/cmp0022_export.h"
