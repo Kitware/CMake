@@ -1474,6 +1474,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
           -P "${custom_target_script}"
         WORKING_DIRECTORY "${cuda_compile_intermediate_directory}"
         COMMENT "${cuda_build_comment_string}"
+        VERBATIM
         )
 
       # Make sure the build system knows the file is generated.
@@ -1592,6 +1593,7 @@ function(CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS output_file cuda_target options
         COMMAND ${CUDA_NVCC_EXECUTABLE} ${nvcc_flags} -dlink ${object_files} -o ${output_file}
         ${flags}
         COMMENT "Building NVCC intermediate link file ${output_file_relative_path}"
+        VERBATIM
         )
     else()
       get_filename_component(output_file_dir "${output_file}" DIRECTORY)
@@ -1601,6 +1603,7 @@ function(CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS output_file cuda_target options
         COMMAND ${CMAKE_COMMAND} -E echo "Building NVCC intermediate link file ${output_file_relative_path}"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${output_file_dir}"
         COMMAND ${CUDA_NVCC_EXECUTABLE} ${nvcc_flags} ${flags} -dlink ${object_files} -o "${output_file}"
+        VERBATIM
         )
     endif()
  endif()
