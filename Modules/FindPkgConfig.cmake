@@ -401,7 +401,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
 
     if(NOT "${_extra_paths}" STREQUAL "")
       # Restore the environment variable
-      set(ENV{PKG_CONFIG_PATH} ${_pkgconfig_path})
+      set(ENV{PKG_CONFIG_PATH} ${_pkgconfig_path_old})
     endif()
 
     unset(_extra_paths)
