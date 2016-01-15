@@ -136,6 +136,8 @@ cmake_policy(SET CMP0022 NEW)
 add_library(testLibRequired testLibRequired.c)
 add_library(testLibDepends testLibDepends.c)
 target_link_libraries(testLibDepends LINK_PUBLIC testLibRequired)
+add_library(testStaticLibRequiredPrivate testStaticLibRequiredPrivate.c)
+target_link_libraries(testLibDepends PRIVATE testStaticLibRequiredPrivate)
 cmake_policy(POP)
 
 macro(add_include_lib _libName)
@@ -393,6 +395,10 @@ install(TARGETS
         EXPORT RequiredExp DESTINATION lib
         INCLUDES DESTINATION
           $<INSTALL_PREFIX>/include/$<TARGET_PROPERTY:NAME>
+)
+install(TARGETS
+          testStaticLibRequiredPrivate
+        EXPORT RequiredExp DESTINATION lib
 )
 install(EXPORT RequiredExp NAMESPACE Req:: FILE testLibRequiredTargets.cmake DESTINATION lib/cmake/testLibRequired)
 
