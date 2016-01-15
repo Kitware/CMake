@@ -293,7 +293,7 @@ cmGlobalNinjaGenerator::WriteCustomCommandBuild(const std::string& command,
 #ifdef _WIN32
    if (cmd.empty())
       // TODO Shouldn't an empty command be handled by ninja?
-      cmd = "cmd.exe /c";
+      cmd = "cmd.exe /C";
 #endif
 
   this->AddCustomCommandRule();
