@@ -285,7 +285,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
           string(REPLACE ";" ":" _pkgconfig_path "${_pkgconfig_path}")
           string(REPLACE "\\ " " " _pkgconfig_path "${_pkgconfig_path}")
         endif()
-        set(ENV{PKG_CONFIG_PATH} ${_pkgconfig_path})
+        set(ENV{PKG_CONFIG_PATH} "${_pkgconfig_path}")
       endif()
 
       # Unset variables
