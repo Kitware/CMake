@@ -64,12 +64,14 @@ bool cmCacheManager::LoadCache(const std::string& path,
   const char *realbuffer;
   std::string buffer;
   std::string entryKey;
+  unsigned int lineno = 0;
   while(fin)
     {
     // Format is key:type=value
     std::string helpString;
     CacheEntry e;
     cmSystemTools::GetLineFromStream(fin, buffer);
+    lineno++;
     realbuffer = buffer.c_str();
     while(*realbuffer != '0' &&
           (*realbuffer == ' ' ||
@@ -77,6 +79,7 @@ bool cmCacheManager::LoadCache(const std::string& path,
            *realbuffer == '\r' ||
            *realbuffer == '\n'))
       {
+      if (*realbuffer == '\n') lineno++;
       realbuffer++;
       }
     // skip blank lines and comment lines
@@ -96,6 +99,7 @@ bool cmCacheManager::LoadCache(const std::string& path,
         helpString += &realbuffer[2];
         }
       cmSystemTools::GetLineFromStream(fin, buffer);
+      lineno++;
       realbuffer = buffer.c_str();
       if(!fin)
         {
@@ -138,8 +142,10 @@ bool cmCacheManager::LoadCache(const std::string& path,
       }
     else
       {
-      cmSystemTools::Error("Parse error in cache file ", cacheFile.c_str(),
-                           ". Offending entry: ", realbuffer);
+      std::ostringstream error;
+      error << "Parse error in cache file " << cacheFile;
+      error << " on line " << lineno << ". Offending entry: " << realbuffer;
+      cmSystemTools::Error(error.str().c_str());
       }
     }
   this->CacheMajorVersion = 0;

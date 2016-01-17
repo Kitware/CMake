@@ -33,6 +33,11 @@ run_cmake_command(build-bad-dir
 run_cmake_command(build-bad-generator
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-bad-generator)
 
+run_cmake_command(cache-bad-entry
+  ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-bad-entry/)
+run_cmake_command(cache-empty-entry
+  ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-empty-entry/)
+
 function(run_BuildDir)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/BuildDir-build)
