@@ -69,7 +69,8 @@ macro(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
       -DCMAKE_SKIP_RPATH:BOOL=${CMAKE_SKIP_RPATH}
       "${CHECK_CXX_SOURCE_COMPILES_ADD_INCLUDES}"
-      COMPILE_OUTPUT_VARIABLE OUTPUT)
+      COMPILE_OUTPUT_VARIABLE OUTPUT
+      RUN_OUTPUT_VARIABLE RUN_OUTPUT)
 
     # if it did not compile make the return value fail code of 1
     if(NOT ${VAR}_COMPILED)
@@ -85,6 +86,7 @@ macro(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
         "Performing C++ SOURCE FILE Test ${VAR} succeeded with the following output:\n"
         "${OUTPUT}\n"
         "Return value: ${${VAR}}\n"
+        "Run output: ${RUN_OUTPUT}\n"
         "Source file was:\n${SOURCE}\n")
     else()
       if(CMAKE_CROSSCOMPILING AND "${${VAR}_EXITCODE}" MATCHES  "FAILED_TO_RUN")
