@@ -432,8 +432,11 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
         {
         std::string configLib = this->Target
                                      ->GetDebugGeneratorExpressions(lib, llt);
-        if (cmGeneratorExpression::IsValidTargetName(lib)
-            || cmGeneratorExpression::Find(lib) != std::string::npos)
+        if (cmGeneratorExpression::IsValidTargetName(configLib))
+          {
+          configLib = "$<LINK_ONLY:$<TARGET_NAME:" + configLib + ">>";
+          }
+        else if (cmGeneratorExpression::Find(configLib) != std::string::npos)
           {
           configLib = "$<LINK_ONLY:" + configLib + ">";
           }

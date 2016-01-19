@@ -16,5 +16,10 @@
 #endif
 
 extern int testLibRequired(void);
+extern int testStaticLibRequiredPrivate(void);
 
-int testLibDepends(void) { return testLibRequired(); }
+int testLibDepends(void) {
+  return testLibRequired()
+    + testStaticLibRequiredPrivate()
+    ;
+}
