@@ -762,13 +762,16 @@ void cmVisualStudio10TargetGenerator
   std::string mfcFlagValue = mfcFlag ? mfcFlag : "0";
 
   std::string useOfMfcValue = "false";
-  if(mfcFlagValue == "1")
+  if(this->GeneratorTarget->GetType() <= cmState::OBJECT_LIBRARY)
     {
-    useOfMfcValue = "Static";
-    }
-  else if(mfcFlagValue == "2")
-    {
-    useOfMfcValue = "Dynamic";
+    if(mfcFlagValue == "1")
+      {
+      useOfMfcValue = "Static";
+      }
+    else if(mfcFlagValue == "2")
+      {
+      useOfMfcValue = "Dynamic";
+      }
     }
   std::string mfcLine = "<UseOfMfc>";
   mfcLine += useOfMfcValue + "</UseOfMfc>\n";
