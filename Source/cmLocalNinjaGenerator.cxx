@@ -331,7 +331,7 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
     {
     if (li != cmdLines.begin())
       {
-      cmd << " && ";
+      cmd << " & ";
       }
     else if (cmdLines.size() > 1)
       {
