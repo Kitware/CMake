@@ -791,18 +791,10 @@ cmInstallTargetGenerator
       }
 
     // Write a rule to run chrpath to set the install-tree RPATH
-    if(newRpath.empty())
-      {
-      os << indent << "file(RPATH_REMOVE\n"
-         << indent << "     FILE \"" << toDestDirPath << "\")\n";
-      }
-    else
-      {
-      os << indent << "file(RPATH_CHANGE\n"
-         << indent << "     FILE \"" << toDestDirPath << "\"\n"
-         << indent << "     OLD_RPATH \"" << oldRpath << "\"\n"
-         << indent << "     NEW_RPATH \"" << newRpath << "\")\n";
-      }
+    os << indent << "file(RPATH_CHANGE\n"
+       << indent << "     FILE \"" << toDestDirPath << "\"\n"
+       << indent << "     OLD_RPATH \"" << oldRpath << "\"\n"
+       << indent << "     NEW_RPATH \"" << newRpath << "\")\n";
     }
 }
 
