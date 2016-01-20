@@ -5,6 +5,11 @@ class HelloWorld2
         B b;
         b = new B();
         b.printName();
+
+        C c;
+        c = new C();
+        c.printName();
+
         System.out.println("Hello World!");
     }
 }

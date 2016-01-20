@@ -9,10 +9,13 @@ include (UseJava)
 # JNI support
 find_package(JNI)
 
-add_jar(hello3 B.java HelloWorld2.java)
-create_javah(TARGET B_javah CLASSES B CLASSPATH hello3)
+add_jar(B1 B.java)
+add_jar(C1 C.java)
+create_javah(TARGET B_javah CLASSES B C CLASSPATH B1 C1)
 
-add_library(B SHARED B.cpp)
+add_jar(hello3 HelloWorld2.java)
+
+add_library(B SHARED B.cpp C.cpp)
 add_dependencies(B B_javah)
 
 target_include_directories(B PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
