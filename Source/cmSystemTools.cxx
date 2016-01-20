@@ -17,6 +17,7 @@
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 #ifdef __QNX__
 # include <malloc.h> /* for malloc/free on QNX */
 #endif
@@ -660,14 +661,6 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
     argv.push_back(a->c_str());
     }
   argv.push_back(0);
-  if ( captureStdOut )
-    {
-    *captureStdOut = "";
-    }
-  if (captureStdErr && captureStdErr != captureStdOut)
-    {
-    *captureStdErr = "";
-    }
 
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_SetCommand(cp, &*argv.begin());
@@ -681,7 +674,16 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
     {
     cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDOUT, 1);
     cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDERR, 1);
+    captureStdOut = 0;
+    captureStdErr = 0;
     }
+  else if (outputflag == OUTPUT_MERGE ||
+           (captureStdErr && captureStdErr == captureStdOut))
+    {
+    cmsysProcess_SetOption(cp, cmsysProcess_Option_MergeOutput, 1);
+    captureStdErr = 0;
+    }
+  assert(!captureStdErr || captureStdErr != captureStdOut);
 
   cmsysProcess_SetTimeout(cp, timeout);
   cmsysProcess_Execute(cp);
@@ -696,65 +698,50 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
     {
     while((pipe = cmsysProcess_WaitForData(cp, &data, &length, 0)) > 0)
       {
-      if(captureStdOut || captureStdErr || outputflag != OUTPUT_NONE)
+      // Translate NULL characters in the output into valid text.
+      // Visual Studio 7 puts these characters in the output of its
+      // build process.
+      for(int i=0; i < length; ++i)
         {
-        // Translate NULL characters in the output into valid text.
-        // Visual Studio 7 puts these characters in the output of its
-        // build process.
-        for(int i=0; i < length; ++i)
+        if(data[i] == '\0')
           {
-          if(data[i] == '\0')
-            {
-            data[i] = ' ';
-            }
+          data[i] = ' ';
           }
         }
-      if(pipe == cmsysProcess_Pipe_STDOUT ||
-         (pipe == cmsysProcess_Pipe_STDERR &&
-          captureStdOut == captureStdErr))
+
+      if (pipe == cmsysProcess_Pipe_STDOUT)
         {
+        if (outputflag != OUTPUT_NONE)
+          {
+          cmSystemTools::Stdout(data, length);
+          }
         if (captureStdOut)
           {
           tempStdOut.insert(tempStdOut.end(), data, data+length);
           }
         }
-      else if(pipe == cmsysProcess_Pipe_STDERR)
+      else if (pipe == cmsysProcess_Pipe_STDERR)
         {
+        if (outputflag != OUTPUT_NONE)
+          {
+          cmSystemTools::Stderr(data, length);
+          }
         if (captureStdErr)
           {
           tempStdErr.insert(tempStdErr.end(), data, data+length);
-          }
-        }
-      if(outputflag != OUTPUT_NONE)
-        {
-        if(outputflag == OUTPUT_MERGE)
-          {
-          cmSystemTools::Stdout(data, length);
-          }
-        else
-          {
-          if(pipe == cmsysProcess_Pipe_STDERR)
-            {
-            cmSystemTools::Stderr(data, length);
-            }
-          else if(pipe == cmsysProcess_Pipe_STDOUT)
-            {
-            cmSystemTools::Stdout(data, length);
-            }
           }
         }
       }
     }
 
   cmsysProcess_WaitForExit(cp, 0);
-  if ( captureStdOut && tempStdOut.begin() != tempStdOut.end())
+  if (captureStdOut)
     {
-    captureStdOut->append(&*tempStdOut.begin(), tempStdOut.size());
+    captureStdOut->assign(tempStdOut.begin(), tempStdOut.end());
     }
-  if ( captureStdErr && captureStdErr != captureStdOut &&
-       tempStdErr.begin() != tempStdErr.end())
+  if (captureStdErr)
     {
-    captureStdErr->append(&*tempStdErr.begin(), tempStdErr.size());
+    captureStdErr->assign(tempStdErr.begin(), tempStdErr.end());
     }
 
   bool result = true;

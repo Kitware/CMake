@@ -361,11 +361,10 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         }
 
       // Now run the real compiler command and return its result value.
-      if(!cmSystemTools::RunSingleCommand(orig_cmd, 0, &stdErr, &ret, 0,
+      if(!cmSystemTools::RunSingleCommand(orig_cmd, 0, 0, &ret, 0,
                                           cmSystemTools::OUTPUT_PASSTHROUGH))
         {
-        std::cerr << "Error running '" << orig_cmd[0] << "': "
-                  << stdErr << "\n";
+        std::cerr << "Error running '" << orig_cmd[0] << "'\n";
         return 1;
         }
       return ret;
@@ -621,7 +620,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       int retval = 0;
       int timeout = 0;
       if ( cmSystemTools::RunSingleCommand(command.c_str(), 0, 0, &retval,
-             directory.c_str(), cmSystemTools::OUTPUT_NORMAL, timeout) )
+             directory.c_str(), cmSystemTools::OUTPUT_PASSTHROUGH, timeout) )
         {
         return retval;
         }
