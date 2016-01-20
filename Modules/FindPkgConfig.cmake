@@ -382,6 +382,9 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
         pkg_get_variable("${_pkg_check_prefix}_PREFIX" ${_pkg_check_modules_pkg} "prefix")
         pkg_get_variable("${_pkg_check_prefix}_INCLUDEDIR" ${_pkg_check_modules_pkg} "includedir")
         pkg_get_variable("${_pkg_check_prefix}_LIBDIR" ${_pkg_check_modules_pkg} "libdir")
+        foreach (variable IN ITEMS PREFIX INCLUDEDIR LIBDIR)
+          _pkgconfig_set("${_pkg_check_modules_pkg}_${variable}" "${${_pkg_check_modules_pkg}_${variable}}")
+        endforeach ()
 
         if (NOT ${_is_silent})
           message(STATUS "  Found ${_pkg_check_modules_pkg}, version ${_pkgconfig_VERSION}")
