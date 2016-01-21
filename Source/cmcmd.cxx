@@ -554,7 +554,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     // Clock command
     else if (args[1] == "time" && args.size() > 2)
       {
-      std::string command = cmJoin(cmMakeRange(args).advance(2), " ");
+      std::vector<std::string> command(args.begin()+2, args.end());
 
       clock_t clock_start, clock_finish;
       time_t time_start, time_finish;
@@ -562,7 +562,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       time(&time_start);
       clock_start = clock();
       int ret =0;
-      cmSystemTools::RunSingleCommand(command.c_str(), 0, 0, &ret);
+      cmSystemTools::RunSingleCommand(command, 0, 0, &ret);
 
       clock_finish = clock();
       time(&time_finish);
