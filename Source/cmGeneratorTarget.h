@@ -55,7 +55,7 @@ public:
     GetLinkInformation(const std::string& config) const;
 
   cmState::TargetType GetType() const;
-  std::string GetName() const;
+  const std::string& GetName() const;
   std::string GetExportName() const;
 
   std::vector<std::string> GetPropertyKeys() const;

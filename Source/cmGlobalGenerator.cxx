@@ -2198,9 +2198,9 @@ cmGlobalGenerator::FindGeneratorTargetImpl(std::string const& name) const
 {
   for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    std::vector<cmGeneratorTarget*> tgts =
+    const std::vector<cmGeneratorTarget*>& tgts =
         this->LocalGenerators[i]->GetGeneratorTargets();
-    for (std::vector<cmGeneratorTarget*>::iterator it = tgts.begin();
+    for (std::vector<cmGeneratorTarget*>::const_iterator it = tgts.begin();
          it != tgts.end(); ++it)
       {
       if ((*it)->GetName() == name)
@@ -2217,9 +2217,9 @@ cmGlobalGenerator::FindImportedTargetImpl(std::string const& name) const
 {
   for (unsigned int i = 0; i < this->Makefiles.size(); ++i)
     {
-    std::vector<cmTarget*> tgts =
+    const std::vector<cmTarget*>& tgts =
         this->Makefiles[i]->GetOwnedImportedTargets();
-    for (std::vector<cmTarget*>::iterator it = tgts.begin();
+    for (std::vector<cmTarget*>::const_iterator it = tgts.begin();
          it != tgts.end(); ++it)
       {
       if ((*it)->GetName() == name && (*it)->IsImportedGloballyVisible())
@@ -2236,9 +2236,9 @@ cmGeneratorTarget* cmGlobalGenerator::FindImportedGeneratorTargetImpl(
 {
   for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    std::vector<cmGeneratorTarget*> tgts =
+    const std::vector<cmGeneratorTarget*>& tgts =
         this->LocalGenerators[i]->GetImportedGeneratorTargets();
-    for (std::vector<cmGeneratorTarget*>::iterator it = tgts.begin();
+    for (std::vector<cmGeneratorTarget*>::const_iterator it = tgts.begin();
          it != tgts.end(); ++it)
       {
       if ((*it)->IsImportedGloballyVisible() && (*it)->GetName() == name)
