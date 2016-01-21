@@ -39,7 +39,7 @@ protected:
   bool IsWindowsStoreToolsetInstalled() const;
 
   virtual const char* GetIDEVersion() { return "14.0"; }
-  virtual bool SelectWindows10SDK(cmMakefile* mf);
+  virtual bool SelectWindows10SDK(cmMakefile* mf, bool required);
 
   // Used to verify that the Desktop toolset for the current generator is
   // installed on the machine.

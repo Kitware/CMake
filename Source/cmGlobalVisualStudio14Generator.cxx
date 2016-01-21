@@ -115,7 +115,7 @@ bool cmGlobalVisualStudio14Generator::InitializeWindows(cmMakefile* mf)
 {
   if (cmHasLiteralPrefix(this->SystemVersion, "10.0"))
     {
-    return this->SelectWindows10SDK(mf);
+    return this->SelectWindows10SDK(mf, false);
     }
   return true;
 }
@@ -143,17 +143,18 @@ bool cmGlobalVisualStudio14Generator::InitializeWindowsStore(cmMakefile* mf)
     }
   if (cmHasLiteralPrefix(this->SystemVersion, "10.0"))
     {
-    return this->SelectWindows10SDK(mf);
+    return this->SelectWindows10SDK(mf, true);
     }
   return true;
 }
 
 //----------------------------------------------------------------------------
-bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf)
+bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf,
+                                                         bool required)
 {
   // Find the default version of the Windows 10 SDK.
   this->WindowsTargetPlatformVersion = this->GetWindows10SDKVersion();
-  if (this->WindowsTargetPlatformVersion.empty())
+  if (required && this->WindowsTargetPlatformVersion.empty())
     {
     std::ostringstream  e;
     e << "Could not find an appropriate version of the Windows 10 SDK"
