@@ -496,7 +496,7 @@ cmExportInstallFileGenerator
     bool containsTarget = false;
     for(unsigned int i=0; i<targets->size(); i++)
       {
-      if (name == (*targets)[i]->Target->GetName())
+      if (name == (*targets)[i]->TargetName)
         {
         containsTarget = true;
         break;
