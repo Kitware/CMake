@@ -85,16 +85,18 @@ endif ()
 # Since FLTK_FLUID_EXE is supposed to create a .cxx/.h from a .fl/.fld,
 # create an empty one so that the dependencies can be met.
 #
-set (FLTK_SRCS
-  fltk1.fl
-  )
 add_executable(fakefluid fakefluid.cxx)
 set (FLTK_WRAP_UI "On")
 set (FLTK_FLUID_EXECUTABLE fakefluid)
-fltk_wrap_ui (wraplibFLTK ${FLTK_SRCS})
+fltk_wrap_ui (wraplibFLTK fltk1.fl)
 add_library(wraplibFLTK ${wraplibFLTK_FLTK_UI_SRCS})
 add_dependencies(wraplibFLTK fakefluid)
 add_dependencies(fakefluid Wrap)
+fltk_wrap_ui (wrapFLTK fltk2.fl)
+add_executable(wrapFLTK wrapFLTK.c ${wrapFLTK_FLTK_UI_SRCS})
+target_link_libraries(wrapFLTK wraplibFLTK)
+add_dependencies(wrapFLTK fakefluid)
+
 #
 # Mangled Mesa
 #
