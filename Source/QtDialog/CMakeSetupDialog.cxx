@@ -29,6 +29,7 @@
 #include <QStatusBar>
 #include <QToolButton>
 #include <QUrl>
+#include <qdesktopservices>
 
 #include "AddCacheEntry.h"
 #include "FirstConfigure.h"
@@ -227,6 +228,8 @@ void CMakeSetupDialog::initialize()
 
   QObject::connect(this->GenerateButton, SIGNAL(clicked(bool)), this,
                    SLOT(doGenerate()));
+  QObject::connect( this->OpenProjectButton, SIGNAL( clicked( bool ) ),
+                   this, SLOT( doOpenProject() ) );
 
   QObject::connect(this->BrowseSourceDirectoryButton, SIGNAL(clicked(bool)),
                    this, SLOT(doSourceBrowse()));
@@ -499,6 +502,26 @@ void CMakeSetupDialog::doGenerate()
   this->ConfigureNeeded = true;
 }
 
+QString CMakeSetupDialog::getProjectFilename()
+{
+  //TODO check other IDE
+  QStringList nameFilter;
+  nameFilter << "*.sln" << "*.xcodeproj";
+  QDir directory( this->BinaryDirectory->currentText() );
+  QStringList nlnFile = directory.entryList( nameFilter );
+
+  if( nlnFile.count() == 1 )
+    return this->BinaryDirectory->currentText() + "/" + nlnFile.at( 0 );
+
+  return QString();
+
+}
+
+void CMakeSetupDialog::doOpenProject()
+{
+  QDesktopServices::openUrl( QUrl::fromLocalFile( this->getProjectFilename() ) );
+}
+
 void CMakeSetupDialog::closeEvent(QCloseEvent* e)
 {
   // prompt for close if there are unsaved changes, and we're not busy
@@ -617,6 +640,10 @@ void CMakeSetupDialog::updateBinaryDirectory(const QString& dir)
     this->BinaryDirectory->setEditText(dir);
     this->BinaryDirectory->blockSignals(false);
   }
+  if( !this->getProjectFilename().isEmpty() )
+    this->OpenProjectButton->setEnabled( true );
+  else
+    this->OpenProjectButton->setEnabled( false );
 }
 
 void CMakeSetupDialog::doBinaryBrowse()
@@ -1001,22 +1028,29 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
   if (s == Interrupting) {
     this->ConfigureButton->setEnabled(false);
     this->GenerateButton->setEnabled(false);
+    this->OpenProjectButton->setEnabled( false );
   } else if (s == Configuring) {
     this->setEnabledState(false);
     this->GenerateButton->setEnabled(false);
     this->GenerateAction->setEnabled(false);
+    this->OpenProjectButton->setEnabled( false );
     this->ConfigureButton->setText(tr("&Stop"));
   } else if (s == Generating) {
     this->CacheModified = false;
     this->setEnabledState(false);
     this->ConfigureButton->setEnabled(false);
     this->GenerateAction->setEnabled(false);
+    this->OpenProjectButton->setEnabled( false );
     this->GenerateButton->setText(tr("&Stop"));
   } else if (s == ReadyConfigure) {
     this->setEnabledState(true);
     this->GenerateButton->setEnabled(true);
     this->GenerateAction->setEnabled(true);
     this->ConfigureButton->setEnabled(true);
+    if( !this->getProjectFilename().isEmpty() )
+    {
+        this->OpenProjectButton->setEnabled( true );
+    }
     this->ConfigureButton->setText(tr("&Configure"));
     this->GenerateButton->setText(tr("&Generate"));
   } else if (s == ReadyGenerate) {
@@ -1024,6 +1058,10 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
     this->GenerateButton->setEnabled(true);
     this->GenerateAction->setEnabled(true);
     this->ConfigureButton->setEnabled(true);
+    if( !this->getProjectFilename().isEmpty() )
+    {
+        this->OpenProjectButton->setEnabled( true );
+    }
     this->ConfigureButton->setText(tr("&Configure"));
     this->GenerateButton->setText(tr("&Generate"));
   }
