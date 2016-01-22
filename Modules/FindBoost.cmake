@@ -707,7 +707,7 @@ function(_Boost_COMPONENT_DEPENDENCIES component _ret)
     set(_Boost_TIMER_DEPENDENCIES chrono system)
     set(_Boost_WAVE_DEPENDENCIES filesystem system serialization thread chrono date_time atomic)
     set(_Boost_WSERIALIZATION_DEPENDENCIES serialization)
-  elseif(NOT Boost_VERSION VERSION_LESS 106000 AND Boost_VERSION VERSION_LESS 106100)
+  elseif(NOT Boost_VERSION VERSION_LESS 106000 AND Boost_VERSION VERSION_LESS 106200)
     set(_Boost_CHRONO_DEPENDENCIES system)
     set(_Boost_COROUTINE_DEPENDENCIES context system)
     set(_Boost_FILESYSTEM_DEPENDENCIES system)
@@ -821,7 +821,7 @@ else()
   # information in _Boost_COMPONENT_DEPENDENCIES.  See the
   # instructions at the top of _Boost_COMPONENT_DEPENDENCIES.
   set(_Boost_KNOWN_VERSIONS ${Boost_ADDITIONAL_VERSIONS}
-    "1.60.0" "1.60"
+    "1.61.0" "1.61" "1.60.0" "1.60"
     "1.59.0" "1.59" "1.58.0" "1.58" "1.57.0" "1.57" "1.56.0" "1.56" "1.55.0" "1.55"
     "1.54.0" "1.54" "1.53.0" "1.53" "1.52.0" "1.52" "1.51.0" "1.51"
     "1.50.0" "1.50" "1.49.0" "1.49" "1.48.0" "1.48" "1.47.0" "1.47" "1.46.1"
