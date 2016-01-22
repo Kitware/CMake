@@ -238,6 +238,13 @@
            </property>
           </widget>
          </item>
+          <item>
+            <widget class="QPushButton" name="OpenProjectButton">
+              <property name="text">
+                <string>Open &amp;Project</string>
+              </property>
+            </widget>
+          </item>
          <item>
           <widget class="QLabel" name="Generator">
            <property name="text">
