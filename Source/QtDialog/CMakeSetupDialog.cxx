@@ -180,6 +180,7 @@ CMakeSetupDialog::CMakeSetupDialog()
 
   // get the saved binary directories
   QStringList buildPaths = this->loadBuildPaths();
+  buildPaths.sort();
   this->BinaryDirectory->addItems(buildPaths);
 
   this->BinaryDirectory->setCompleter(new QCMakeFileCompleter(this, true));
