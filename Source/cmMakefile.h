@@ -219,6 +219,9 @@ public:
 
   void Configure();
 
+  std::pair<cmState::Snapshot, cmListFileFunction> ReadCommands(
+    std::vector<cmListFileFunction> const& commands, long fileLine);
+
   /**
    * Configure a subdirectory
    */

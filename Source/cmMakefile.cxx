@@ -1463,6 +1463,32 @@ void cmMakefile::Configure()
   this->AddCMakeDependFilesFromUser();
 }
 
+std::pair<cmState::Snapshot, cmListFileFunction> cmMakefile::ReadCommands(
+  std::vector<cmListFileFunction> const& commands, long fileLine)
+{
+  cmState::Snapshot snp = this->StateSnapshot;
+  std::string listFilePath = snp.GetExecutionListFile();
+
+  cmListFileContext lfc;
+  lfc.FilePath = listFilePath;
+  lfc.Line = fileLine; // Should be the snapshot line?
+
+  this->CreateArbitrarySnapshot(lfc);
+
+  const size_t numberFunctions = commands.size();
+  size_t funcIndex = 0;
+  cmListFileFunction fn;
+  for (; funcIndex < numberFunctions; ++funcIndex) {
+    if (commands[funcIndex].Line >= fileLine) {
+      fn = commands[funcIndex];
+      break;
+    }
+    cmExecutionStatus status;
+    this->ExecuteCommand(commands[funcIndex], status);
+  }
+  return std::make_pair(this->StateSnapshot, fn);
+}
+
 void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
 {
   mf->InitializeFromParent(this);
