@@ -226,6 +226,8 @@ public:
   Snapshot PopArbitrary(Snapshot originSnapshot);
   void ClearData(Snapshot snapshot);
 
+  std::vector<Snapshot> GetWriters(Snapshot snp, std::string varName) const;
+
   enum CacheEntryType
   {
     BOOL = 0,

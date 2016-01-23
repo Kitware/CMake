@@ -14,7 +14,7 @@
 class cmServerCompleter
 {
 public:
-  cmServerCompleter(cmake* cm, cmState::Snapshot snp);
+  cmServerCompleter(cmake* cm, cmState::Snapshot snp, bool originMode = false);
 
   Json::Value Complete(cmState::Snapshot snp, cmListFileFunction fn,
                        std::string matcher, long fileLine, long fileColumn);
@@ -30,6 +30,7 @@ private:
                                     long fileColumn);
 
   Json::Value CodeCompleteVariable(cmState::Snapshot snp, std::string matcher);
+  Json::Value VariableMatch(cmState::Snapshot snp, std::string matcher);
 
   Json::Value doComplete(cmCommand::ParameterContext ctx, std::string matcher,
                          cmCommand* cmd, std::vector<std::string> params,
@@ -37,6 +38,7 @@ private:
 
   std::vector<std::string> GetPackageNames(cmState::Snapshot snp) const;
   std::vector<std::string> GetModuleNames(cmState::Snapshot snp) const;
+  bool mOriginMode;
 };
 
 #endif

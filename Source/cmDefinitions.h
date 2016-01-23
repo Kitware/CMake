@@ -54,6 +54,8 @@ public:
 
   static cmDefinitions MakeClosure(StackIter begin, StackIter end);
 
+  static bool IsDefined(std::string key, StackIter begin, StackIter end);
+
 private:
   // String with existence boolean.
   struct Def : public std::string

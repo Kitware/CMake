@@ -1029,6 +1029,35 @@ void cmState::ClearData(cmState::Snapshot snapshot)
   }
 }
 
+std::vector<cmState::Snapshot> cmState::GetWriters(cmState::Snapshot snp,
+                                                   std::string varName) const
+{
+  PositionType pos = snp.Position;
+
+  std::vector<cmState::Snapshot> result;
+
+  if (pos == this->SnapshotData.Root()) {
+    return result;
+  }
+
+  PositionType prevPos = pos;
+  ++prevPos;
+
+  while (prevPos != this->SnapshotData.Root()) {
+    if (prevPos->Vars == this->VarTree.Root()) {
+      break;
+    }
+    bool isDef = cmDefinitions::IsDefined(varName, pos->Vars, prevPos->Vars);
+    if (isDef) {
+      result.push_back(Snapshot(const_cast<cmState*>(this), pos));
+    }
+    ++pos;
+    ++prevPos;
+  }
+
+  return result;
+}
+
 cmState::Snapshot cmState::CreateArbitraryPointSnapshot(
   cmState::Snapshot originSnapshot, const cmListFileContext& context)
 {

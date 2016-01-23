@@ -99,6 +99,13 @@ void cmServerProtocol::processRequest(const std::string& json)
                                 value["file_line"].asInt(),
                                 value["file_column"].asInt(), diff);
     }
+    if (value["type"] == "context_writers") {
+      auto diff = cmServerDiff::GetDiff(value);
+
+      this->ProcessContextWriters(value["file_path"].asString(),
+                                  value["file_line"].asInt(),
+                                  value["file_column"].asInt(), diff);
+    }
   }
 }
 
@@ -1058,4 +1065,103 @@ void cmServerProtocol::ProcessCodeComplete(std::string filePath, long fileLine,
                                    completionPrefix, newToParse, fileColumn);
 
   this->Server->WriteResponse(result);
+}
+
+void cmServerProtocol::ProcessContextWriters(std::string filePath,
+                                             long fileLine, long fileColumn,
+                                             DifferentialFileContent diff)
+{
+  assert(fileLine > 0);
+
+  auto res = GetSnapshotAndStartLine(filePath, fileLine, diff);
+  if (res.second < 0) {
+    Json::Value obj = Json::objectValue;
+    obj["result"] = "no_context";
+    this->Server->WriteResponse(obj);
+    return;
+  }
+
+  auto desired = GetDesiredSnapshot(diff.EditorLines, res.second, res.first,
+                                    fileLine, true);
+  cmState::Snapshot completionSnp = desired.first;
+  if (!completionSnp.IsValid()) {
+    Json::Value obj = Json::objectValue;
+    obj["result"] = "no_context";
+    this->Server->WriteResponse(obj);
+    return;
+  }
+
+  auto prParseStart = diff.EditorLines.begin() + res.second - 1;
+  auto prParseEnd = diff.EditorLines.begin() + fileLine - 1;
+  auto newToParse = std::distance(prParseStart, prParseEnd) + 1;
+
+  auto theLine = *prParseEnd;
+
+  std::string completionPrefix;
+
+  auto columnData = theLine.substr(0, fileColumn);
+
+  auto strt = columnData.find_first_not_of(' ');
+  if (strt != std::string::npos) {
+    completionPrefix = columnData.substr(strt);
+  }
+
+  cmServerCompleter completer(this->CMakeInstance, completionSnp, true);
+
+  auto result = completer.Complete(completionSnp, desired.second,
+                                   completionPrefix, newToParse, fileColumn);
+
+  if (!result.isMember("context_origin")) {
+    Json::Value obj = Json::objectValue;
+    obj["result"] = "no_context";
+    this->Server->WriteResponse(obj);
+    return;
+  }
+
+  if (!result["context_origin"].isMember("matcher")) {
+    Json::Value obj = Json::objectValue;
+    obj["result"] = "no_context";
+    this->Server->WriteResponse(obj);
+    return;
+  }
+
+  auto varName = result["context_origin"]["matcher"].asString();
+
+  auto snps =
+    this->CMakeInstance->GetState()->GetWriters(completionSnp, varName);
+
+  if (snps.empty()) {
+    Json::Value obj = Json::objectValue;
+    obj["result"] = "no_context";
+    this->Server->WriteResponse(obj);
+    return;
+  }
+
+  cmState::Snapshot snp = snps.front();
+
+  cmListFileContext lfc;
+  lfc.FilePath = snp.GetExecutionListFile();
+  lfc.Line = snp.GetStartingPoint();
+  auto it = this->Snapshots.lower_bound(lfc);
+
+  if (it == this->Snapshots.end()) {
+    Json::Value obj = Json::objectValue;
+    obj["result"] = "no_context";
+    this->Server->WriteResponse(obj);
+    return;
+  }
+
+  if (it->second.empty()) {
+    Json::Value obj = Json::objectValue;
+    obj["result"] = "no_context";
+    this->Server->WriteResponse(obj);
+    return;
+  }
+
+  ++it;
+
+  Json::Value obj = Json::objectValue;
+  obj["def_match"] = varName;
+  obj["def_origin"] = (int)it->first.Line - 1;
+  this->Server->WriteResponse(obj);
 }
