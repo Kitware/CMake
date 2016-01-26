@@ -184,7 +184,7 @@
 #                       This is used by install_jni_symlink().
 #    JAR_FILE           The location of the jar file so that you can include
 #                       it.
-#    CLASS_DIR          The directory where the class files can be found. For
+#    CLASSDIR           The directory where the class files can be found. For
 #                       example to use them with javah.
 #
 # ::
