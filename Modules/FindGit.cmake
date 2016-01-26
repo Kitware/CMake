@@ -8,21 +8,21 @@
 #
 # ::
 #
-#    GIT_EXECUTABLE - path to git command line client
-#    GIT_FOUND - true if the command line client was found
-#    GIT_VERSION_STRING - the version of git found (since CMake 2.8.8)
+#    GIT_EXECUTABLE - path to Git command line client
+#    Git_FOUND / GIT_FOUND - true if the Git command line client was found
+#    GIT_VERSION_STRING - the version of Git found
 #
 # Example usage:
 #
 # ::
 #
 #    find_package(Git)
-#    if(GIT_FOUND)
-#      message("git found: ${GIT_EXECUTABLE}")
+#    if(Git_FOUND)
+#      message("Git found: ${GIT_EXECUTABLE}")
 #    endif()
 
 #=============================================================================
-# Copyright 2010 Kitware, Inc.
+# Copyright 2010-2016 Kitware, Inc.
 # Copyright 2012 Rolf Eike Beer <eike@sf-mail.de>
 #
 # Distributed under the OSI-approved BSD License (the "License");
@@ -57,10 +57,11 @@ find_program(GIT_EXECUTABLE
   NAMES ${git_names}
   PATHS ${github_path} ${_git_sourcetree_path}
   PATH_SUFFIXES Git/cmd Git/bin
-  DOC "git command line client"
+  DOC "Git command line client"
   )
 mark_as_advanced(GIT_EXECUTABLE)
 
+unset(git_names)
 unset(_git_sourcetree_path)
 
 if(GIT_EXECUTABLE)
@@ -74,7 +75,7 @@ if(GIT_EXECUTABLE)
   unset(git_version)
 endif()
 
-# Handle the QUIETLY and REQUIRED arguments and set GIT_FOUND to TRUE if
+# Handle the QUIETLY and REQUIRED arguments and set Git_FOUND to TRUE if
 # all listed variables are TRUE
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
