@@ -2,19 +2,18 @@
 # FindGit
 # -------
 #
-#
-#
 # The module defines the following variables:
 #
-# ::
-#
-#    GIT_EXECUTABLE - path to Git command line client
-#    Git_FOUND / GIT_FOUND - true if the Git command line client was found
-#    GIT_VERSION_STRING - the version of Git found
+# ``GIT_EXECUTABLE``
+#   Path to Git command-line client.
+# ``Git_FOUND``, ``GIT_FOUND``
+#   True if the Git command-line client was found.
+# ``GIT_VERSION_STRING``
+#   The version of Git found.
 #
 # Example usage:
 #
-# ::
+# .. code-block:: cmake
 #
 #    find_package(Git)
 #    if(Git_FOUND)
