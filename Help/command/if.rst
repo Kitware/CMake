@@ -80,7 +80,7 @@ Possible expressions are:
  only for full paths.
 
 ``if(file1 IS_NEWER_THAN file2)``
- True if file1 is newer than file2 or if one of the two files doesn't
+ True if ``file1`` is newer than ``file2`` or if one of the two files doesn't
  exist.  Behavior is well-defined only for full paths.  If the file
  time stamps are exactly the same, an ``IS_NEWER_THAN`` comparison returns
  true, so that any dependent build operations will occur in the event
