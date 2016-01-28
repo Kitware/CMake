@@ -67,9 +67,10 @@ Possible expressions are:
  True if the given name is an existing policy (of the form ``CMP<NNNN>``).
 
 ``if(TARGET target-name)``
- True if the given name is an existing logical target name such as those
- created by the :command:`add_executable`, :command:`add_library`, or
- :command:`add_custom_target` commands.
+ True if the given name is an existing logical target name created
+ by a call to the :command:`add_executable`, :command:`add_library`,
+ or :command:`add_custom_target` command that has already been invoked
+ (in any directory).
 
 ``if(TEST test-name)``
  True if the given name is an existing test name created by the
