@@ -115,11 +115,9 @@ cmMakefile::~cmMakefile()
 void cmMakefile::IssueMessage(cmake::MessageType t,
                               std::string const& text) const
 {
-  // Collect context information.
-  if (!this->ExecutionStatusStack.empty()) {
-    if ((t == cmake::FATAL_ERROR) || (t == cmake::INTERNAL_ERROR)) {
-      this->ExecutionStatusStack.back()->SetNestedError(true);
-    }
+  assert(!this->ExecutionStatusStack.empty());
+  if ((t == cmake::FATAL_ERROR) || (t == cmake::INTERNAL_ERROR)) {
+    this->ExecutionStatusStack.back()->SetNestedError(true);
   }
   this->GetCMakeInstance()->IssueMessage(t, text, this->GetBacktrace());
 }
