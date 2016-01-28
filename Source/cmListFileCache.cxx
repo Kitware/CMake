@@ -29,6 +29,7 @@ struct cmListFileParser
                    cmListFileArgument::Delimiter delim);
   cmListFile* ListFile;
   cmMakefile* Makefile;
+  cmListFileBacktrace Backtrace;
   const char* FileName;
   cmListFileLexer* Lexer;
   cmListFileFunction Function;
@@ -44,6 +45,7 @@ cmListFileParser::cmListFileParser(cmListFile* lf, cmMakefile* mf,
                                    const char* filename)
   : ListFile(lf)
   , Makefile(mf)
+  , Backtrace(mf->GetBacktrace())
   , FileName(filename)
   , Lexer(cmListFileLexer_New())
 {
