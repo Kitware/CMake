@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmMessageCommand.h"
 
+#include "cmMessenger.h"
+
 // cmLibraryCommand
 bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
                                    cmExecutionStatus&)
@@ -65,8 +67,8 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
 
   if (type != cmake::MESSAGE) {
     // we've overriden the message type, above, so display it directly
-    cmake* cm = this->Makefile->GetCMakeInstance();
-    cm->DisplayMessage(type, message, this->Makefile->GetBacktrace());
+    cmMessenger* m = this->Makefile->GetMessenger();
+    m->DisplayMessage(type, message, this->Makefile->GetBacktrace());
   } else {
     if (status) {
       this->Makefile->DisplayStatus(message.c_str(), -1);
