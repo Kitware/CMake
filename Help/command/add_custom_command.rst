@@ -178,7 +178,7 @@ target is already built, the command will not execute.
 
 ::
 
-  add_custom_command(TARGET target
+  add_custom_command(TARGET <target>
                      PRE_BUILD | PRE_LINK | POST_BUILD
                      COMMAND command1 [ARGS] [args1...]
                      [COMMAND command2 [ARGS] [args2...] ...]
@@ -188,7 +188,10 @@ target is already built, the command will not execute.
                      [VERBATIM] [USES_TERMINAL])
 
 This defines a new command that will be associated with building the
-specified target.  When the command will happen is determined by which
+specified ``<target>``.  The ``<target>`` must be defined in the current
+directory; targets defined in other directories may not be specified.
+
+When the command will happen is determined by which
 of the following is specified:
 
 ``PRE_BUILD``
