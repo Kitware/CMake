@@ -791,7 +791,24 @@ cmMakefile::AddCustomCommandToTarget(const std::string& target,
 
     if(issueMessage)
       {
-      e << "The target name \"" << target << "\" is unknown in this context.";
+      if (cmTarget const* t = this->FindTargetToUse(target))
+        {
+        if (t->IsImported())
+          {
+          e << "TARGET '" << target
+            << "' is IMPORTED and does not build here.";
+          }
+        else
+          {
+          e << "TARGET '" << target
+            << "' was not created in this directory.";
+          }
+        }
+      else
+        {
+        e << "No TARGET '" << target
+          << "' has been created in this directory.";
+        }
       IssueMessage(messageType, e.str());
       }
 
