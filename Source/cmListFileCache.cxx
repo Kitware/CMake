@@ -118,7 +118,7 @@ bool cmListFileParser::ParseFile()
   return true;
 }
 
-bool cmListFile::ParseFile(const char* filename, bool topLevel, cmMakefile* mf)
+bool cmListFile::ParseFile(const char* filename, cmMakefile* mf)
 {
   if (!cmSystemTools::FileExists(filename) ||
       cmSystemTools::FileIsDirectory(filename)) {
@@ -132,76 +132,6 @@ bool cmListFile::ParseFile(const char* filename, bool topLevel, cmMakefile* mf)
     parseError = !parser.ParseFile();
   }
 
-  // do we need a cmake_policy(VERSION call?
-  if (topLevel) {
-    bool hasVersion = false;
-    // search for the right policy command
-    for (std::vector<cmListFileFunction>::iterator i = this->Functions.begin();
-         i != this->Functions.end(); ++i) {
-      if (cmSystemTools::LowerCase(i->Name) == "cmake_minimum_required") {
-        hasVersion = true;
-        break;
-      }
-    }
-    // if no policy command is found this is an error if they use any
-    // non advanced functions or a lot of functions
-    if (!hasVersion) {
-      bool isProblem = true;
-      if (this->Functions.size() < 30) {
-        // the list of simple commands DO NOT ADD TO THIS LIST!!!!!
-        // these commands must have backwards compatibility forever and
-        // and that is a lot longer than your tiny mind can comprehend mortal
-        std::set<std::string> allowedCommands;
-        allowedCommands.insert("project");
-        allowedCommands.insert("set");
-        allowedCommands.insert("if");
-        allowedCommands.insert("endif");
-        allowedCommands.insert("else");
-        allowedCommands.insert("elseif");
-        allowedCommands.insert("add_executable");
-        allowedCommands.insert("add_library");
-        allowedCommands.insert("target_link_libraries");
-        allowedCommands.insert("option");
-        allowedCommands.insert("message");
-        isProblem = false;
-        for (std::vector<cmListFileFunction>::iterator i =
-               this->Functions.begin();
-             i != this->Functions.end(); ++i) {
-          std::string name = cmSystemTools::LowerCase(i->Name);
-          if (allowedCommands.find(name) == allowedCommands.end()) {
-            isProblem = true;
-            break;
-          }
-        }
-      }
-
-      if (isProblem) {
-        // Tell the top level cmMakefile to diagnose
-        // this violation of CMP0000.
-        mf->SetCheckCMP0000(true);
-
-        // Implicitly set the version for the user.
-        mf->SetPolicyVersion("2.4");
-      }
-    }
-    bool hasProject = false;
-    // search for a project command
-    for (std::vector<cmListFileFunction>::iterator i = this->Functions.begin();
-         i != this->Functions.end(); ++i) {
-      if (cmSystemTools::LowerCase(i->Name) == "project") {
-        hasProject = true;
-        break;
-      }
-    }
-    // if no project command is found, add one
-    if (!hasProject) {
-      cmListFileFunction project;
-      project.Name = "PROJECT";
-      cmListFileArgument prj("Project", cmListFileArgument::Unquoted, 0);
-      project.Arguments.push_back(prj);
-      this->Functions.insert(this->Functions.begin(), project);
-    }
-  }
   return !parseError;
 }
 
