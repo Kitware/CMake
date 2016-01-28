@@ -25,6 +25,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmInstallGenerator.h"
 #include "cmListFileCache.h"
+#include "cmMessenger.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmState.h"
@@ -457,7 +458,8 @@ bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
   IncludeScope incScope(this, filenametoread, noPolicyScope);
 
   cmListFile listFile;
-  if (!listFile.ParseFile(filenametoread.c_str(), this)) {
+  if (!listFile.ParseFile(filenametoread.c_str(), this->GetMessenger(),
+                          this->Backtrace)) {
     return false;
   }
 
@@ -506,7 +508,8 @@ bool cmMakefile::ReadListFile(const char* filename)
   ListFileScope scope(this, filenametoread);
 
   cmListFile listFile;
-  if (!listFile.ParseFile(filenametoread.c_str(), this)) {
+  if (!listFile.ParseFile(filenametoread.c_str(), this->GetMessenger(),
+                          this->Backtrace)) {
     return false;
   }
 
@@ -1452,7 +1455,8 @@ void cmMakefile::Configure()
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentStart.c_str());
 
   cmListFile listFile;
-  if (!listFile.ParseFile(currentStart.c_str(), this)) {
+  if (!listFile.ParseFile(currentStart.c_str(), this->GetMessenger(),
+                          this->Backtrace)) {
     return;
   }
   if (this->IsRootMakefile()) {
@@ -3272,6 +3276,11 @@ bool cmMakefile::GetIsSourceFileTryCompile() const
 cmake* cmMakefile::GetCMakeInstance() const
 {
   return this->GlobalGenerator->GetCMakeInstance();
+}
+
+cmMessenger* cmMakefile::GetMessenger() const
+{
+  return this->GetCMakeInstance()->GetMessenger();
 }
 
 cmGlobalGenerator* cmMakefile::GetGlobalGenerator() const

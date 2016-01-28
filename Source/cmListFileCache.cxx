@@ -12,7 +12,7 @@
 #include "cmListFileCache.h"
 
 #include "cmListFileLexer.h"
-#include "cmMakefile.h"
+#include "cmMessenger.h"
 #include "cmOutputConverter.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
@@ -21,7 +21,8 @@
 
 struct cmListFileParser
 {
-  cmListFileParser(cmListFile* lf, cmMakefile* mf, const char* filename);
+  cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
+                   cmMessenger* messenger, const char* filename);
   ~cmListFileParser();
   void IssueFileOpenError(std::string const& text) const;
   void IssueError(std::string const& text) const;
@@ -30,8 +31,8 @@ struct cmListFileParser
   bool AddArgument(cmListFileLexer_Token* token,
                    cmListFileArgument::Delimiter delim);
   cmListFile* ListFile;
-  cmMakefile* Makefile;
   cmListFileBacktrace Backtrace;
+  cmMessenger* Messenger;
   const char* FileName;
   cmListFileLexer* Lexer;
   cmListFileFunction Function;
@@ -43,11 +44,12 @@ struct cmListFileParser
   } Separation;
 };
 
-cmListFileParser::cmListFileParser(cmListFile* lf, cmMakefile* mf,
+cmListFileParser::cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
+                                   cmMessenger* messenger,
                                    const char* filename)
   : ListFile(lf)
-  , Makefile(mf)
-  , Backtrace(mf->GetBacktrace())
+  , Backtrace(lfbt)
+  , Messenger(messenger)
   , FileName(filename)
   , Lexer(cmListFileLexer_New())
 {
@@ -60,7 +62,7 @@ cmListFileParser::~cmListFileParser()
 
 void cmListFileParser::IssueFileOpenError(const std::string& text) const
 {
-  this->Makefile->IssueMessage(cmake::FATAL_ERROR, text);
+  this->Messenger->IssueMessage(cmake::FATAL_ERROR, text, this->Backtrace);
 }
 
 void cmListFileParser::IssueError(const std::string& text) const
@@ -70,8 +72,7 @@ void cmListFileParser::IssueError(const std::string& text) const
   lfc.Line = cmListFileLexer_GetCurrentLine(this->Lexer);
   cmListFileBacktrace lfbt = this->Backtrace;
   lfbt = lfbt.Push(lfc);
-  this->Makefile->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, text,
-                                                   lfbt);
+  this->Messenger->IssueMessage(cmake::FATAL_ERROR, text, lfbt);
   cmSystemTools::SetFatalErrorOccured();
 }
 
@@ -129,7 +130,8 @@ bool cmListFileParser::ParseFile()
   return true;
 }
 
-bool cmListFile::ParseFile(const char* filename, cmMakefile* mf)
+bool cmListFile::ParseFile(const char* filename, cmMessenger* messenger,
+                           cmListFileBacktrace const& lfbt)
 {
   if (!cmSystemTools::FileExists(filename) ||
       cmSystemTools::FileIsDirectory(filename)) {
@@ -139,7 +141,7 @@ bool cmListFile::ParseFile(const char* filename, cmMakefile* mf)
   bool parseError = false;
 
   {
-    cmListFileParser parser(this, mf, filename);
+    cmListFileParser parser(this, lfbt, messenger, filename);
     parseError = !parser.ParseFile();
   }
 
@@ -242,8 +244,7 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
   lfbt = lfbt.Push(lfc);
   error << "Parse error.  Function missing ending \")\".  "
         << "End of file reached.";
-  this->Makefile->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR,
-                                                   error.str(), lfbt);
+  this->Messenger->IssueMessage(cmake::FATAL_ERROR, error.str(), lfbt);
   return false;
 }
 
@@ -269,10 +270,10 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
     << "Argument not separated from preceding token by whitespace.";
   /* clang-format on */
   if (isError) {
-    this->Makefile->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, m.str(), lfbt);
+    this->Messenger->IssueMessage(cmake::FATAL_ERROR, m.str(), lfbt);
     return false;
   }
-  this->Makefile->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING, m.str(), lfbt);
+  this->Messenger->IssueMessage(cmake::AUTHOR_WARNING, m.str(), lfbt);
   return true;
 }
 

@@ -607,6 +607,7 @@ public:
    * Get the instance
    */
   cmake* GetCMakeInstance() const;
+  cmMessenger* GetMessenger() const;
   cmGlobalGenerator* GetGlobalGenerator() const;
 
   /**
