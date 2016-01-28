@@ -2176,7 +2176,7 @@ static bool cmakeCheckStampList(const char* stampList)
   return true;
 }
 
-cmake::MessageType cmake::ConvertMessageType(cmake::MessageType t)
+cmake::MessageType cmake::ConvertMessageType(cmake::MessageType t) const
 {
   bool warningsAsErrors;
 
@@ -2200,7 +2200,7 @@ cmake::MessageType cmake::ConvertMessageType(cmake::MessageType t)
   return t;
 }
 
-bool cmake::IsMessageTypeVisible(cmake::MessageType t)
+bool cmake::IsMessageTypeVisible(cmake::MessageType t) const
 {
   bool isVisible = true;
 
@@ -2296,7 +2296,8 @@ void displayMessage(cmake::MessageType t, std::ostringstream& msg)
 }
 
 void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
-                         cmListFileBacktrace const& backtrace, bool force)
+                         cmListFileBacktrace const& backtrace,
+                         bool force) const
 {
   if (!force) {
     // override the message type, if needed, for warnings and errors
@@ -2448,7 +2449,7 @@ void cmake::RunCheckForUnusedVariables()
 #endif
 }
 
-bool cmake::GetSuppressDevWarnings(cmMakefile const* mf)
+bool cmake::GetSuppressDevWarnings(cmMakefile const* mf) const
 {
   /*
    * The suppression CMake variable may be set in the CMake configuration file
@@ -2482,7 +2483,7 @@ void cmake::SetSuppressDevWarnings(bool b)
                       cmState::INTERNAL);
 }
 
-bool cmake::GetSuppressDeprecatedWarnings(cmMakefile const* mf)
+bool cmake::GetSuppressDeprecatedWarnings(cmMakefile const* mf) const
 {
   /*
    * The suppression CMake variable may be set in the CMake configuration file
@@ -2517,7 +2518,7 @@ void cmake::SetSuppressDeprecatedWarnings(bool b)
                       cmState::INTERNAL);
 }
 
-bool cmake::GetDevWarningsAsErrors(cmMakefile const* mf)
+bool cmake::GetDevWarningsAsErrors(cmMakefile const* mf) const
 {
   if (mf) {
     return (mf->IsSet("CMAKE_SUPPRESS_DEVELOPER_ERRORS") &&
@@ -2548,7 +2549,7 @@ void cmake::SetDevWarningsAsErrors(bool b)
                       cmState::INTERNAL);
 }
 
-bool cmake::GetDeprecatedWarningsAsErrors(cmMakefile const* mf)
+bool cmake::GetDeprecatedWarningsAsErrors(cmMakefile const* mf) const
 {
   if (mf) {
     return mf->IsOn("CMAKE_ERROR_DEPRECATED");
