@@ -254,9 +254,10 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
         this->PrintCommandTrace(lff);
       }
       // Try invoking the command.
-      if (!pcmd->InvokeInitialPass(lff.Arguments, status) ||
-          status.GetNestedError()) {
-        if (!status.GetNestedError()) {
+      bool invokeSucceeded = pcmd->InvokeInitialPass(lff.Arguments, status);
+      bool hadNestedError = status.GetNestedError();
+      if (!invokeSucceeded || hadNestedError) {
+        if (!hadNestedError) {
           // The command invocation requested that we report an error.
           this->IssueMessage(cmake::FATAL_ERROR, pcmd->GetError());
         }
