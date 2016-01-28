@@ -115,10 +115,6 @@ cmMakefile::~cmMakefile()
 void cmMakefile::IssueMessage(cmake::MessageType t,
                               std::string const& text) const
 {
-  assert(!this->ExecutionStatusStack.empty());
-  if ((t == cmake::FATAL_ERROR) || (t == cmake::INTERNAL_ERROR)) {
-    this->ExecutionStatusStack.back()->SetNestedError(true);
-  }
   this->GetCMakeInstance()->IssueMessage(t, text, this->GetBacktrace());
 }
 
@@ -279,11 +275,19 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
       if (this->GetCMakeInstance()->GetTrace()) {
         this->PrintCommandTrace(lff);
       }
-      // Try invoking the command.
+
+      bool hadPreviousNonFatalError = cmSystemTools::GetErrorOccuredFlag() &&
+        !cmSystemTools::GetFatalErrorOccured();
+      cmSystemTools::ResetErrorOccuredFlag();
+
       bool invokeSucceeded = pcmd->InvokeInitialPass(lff.Arguments, status);
-      bool hadNestedError = status.GetNestedError();
+      bool hadNestedError = cmSystemTools::GetErrorOccuredFlag() &&
+        !cmSystemTools::GetFatalErrorOccured();
+      if (hadPreviousNonFatalError) {
+        cmSystemTools::SetErrorOccured();
+      }
       if (!invokeSucceeded || hadNestedError) {
-        if (!hadNestedError) {
+        if (!hadNestedError && !cmSystemTools::GetFatalErrorOccured()) {
           // The command invocation requested that we report an error.
           this->IssueMessage(cmake::FATAL_ERROR, pcmd->GetError());
         }
