@@ -23,6 +23,7 @@ struct cmListFileParser
 {
   cmListFileParser(cmListFile* lf, cmMakefile* mf, const char* filename);
   ~cmListFileParser();
+  void IssueError(std::string const& text);
   bool ParseFile();
   bool ParseFunction(const char* name, long line);
   bool AddArgument(cmListFileLexer_Token* token,
@@ -56,6 +57,17 @@ cmListFileParser::~cmListFileParser()
   cmListFileLexer_Delete(this->Lexer);
 }
 
+void cmListFileParser::IssueError(const std::string& text)
+{
+  cmListFileContext lfc;
+  lfc.FilePath = this->FileName;
+  lfc.Line = cmListFileLexer_GetCurrentLine(this->Lexer);
+  cmListFileBacktrace lfbt = this->Backtrace.Pop();
+  lfbt = lfbt.Push(lfc);
+  this->Makefile->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, text,
+                                                   lfbt);
+}
+
 bool cmListFileParser::ParseFile()
 {
   // Open the file.
@@ -69,10 +81,8 @@ bool cmListFileParser::ParseFile()
   // Verify the Byte-Order-Mark, if any.
   if (bom != cmListFileLexer_BOM_None && bom != cmListFileLexer_BOM_UTF8) {
     cmListFileLexer_SetFileName(this->Lexer, 0, 0);
-    std::ostringstream m;
-    m << "File\n  " << this->FileName << "\n"
-      << "starts with a Byte-Order-Mark that is not UTF-8.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, m.str());
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+     "File starts with a Byte-Order-Mark that is not UTF-8.");
     return false;
   }
 
@@ -95,22 +105,18 @@ bool cmListFileParser::ParseFile()
         }
       } else {
         std::ostringstream error;
-        error << "Error in cmake code at\n"
-              << this->FileName << ":" << token->line << ":\n"
-              << "Parse error.  Expected a newline, got "
+        error << "Parse error.  Expected a newline, got "
               << cmListFileLexer_GetTypeAsString(this->Lexer, token->type)
               << " with text \"" << token->text << "\".";
-        cmSystemTools::Error(error.str().c_str());
+        this->IssueError(error.str());
         return false;
       }
     } else {
       std::ostringstream error;
-      error << "Error in cmake code at\n"
-            << this->FileName << ":" << token->line << ":\n"
-            << "Parse error.  Expected a command name, got "
+      error << "Parse error.  Expected a command name, got "
             << cmListFileLexer_GetTypeAsString(this->Lexer, token->type)
             << " with text \"" << token->text << "\".";
-      cmSystemTools::Error(error.str().c_str());
+      this->IssueError(error.str());
       return false;
     }
   }
@@ -223,18 +229,15 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
           << cmListFileLexer_GetCurrentLine(this->Lexer) << ":\n"
           << "Parse error.  Function missing opening \"(\".";
     /* clang-format on */
-    cmSystemTools::Error(error.str().c_str());
+    this->IssueError(error.str());
     return false;
   }
   if (token->type != cmListFileLexer_Token_ParenLeft) {
     std::ostringstream error;
-    error << "Error in cmake code at\n"
-          << this->FileName << ":"
-          << cmListFileLexer_GetCurrentLine(this->Lexer) << ":\n"
-          << "Parse error.  Expected \"(\", got "
+    error << "Parse error.  Expected \"(\", got "
           << cmListFileLexer_GetTypeAsString(this->Lexer, token->type)
           << " with text \"" << token->text << "\".";
-    cmSystemTools::Error(error.str().c_str());
+    this->IssueError(error.str());
     return false;
   }
 
@@ -286,25 +289,25 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
     } else {
       // Error.
       std::ostringstream error;
-      error << "Error in cmake code at\n"
-            << this->FileName << ":"
-            << cmListFileLexer_GetCurrentLine(this->Lexer) << ":\n"
-            << "Parse error.  Function missing ending \")\".  "
+      error << "Parse error.  Function missing ending \")\".  "
             << "Instead found "
             << cmListFileLexer_GetTypeAsString(this->Lexer, token->type)
             << " with text \"" << token->text << "\".";
-      cmSystemTools::Error(error.str().c_str());
+      this->IssueError(error.str());
       return false;
     }
   }
 
   std::ostringstream error;
-  error << "Error in cmake code at\n"
-        << this->FileName << ":" << lastLine << ":\n"
-        << "Parse error.  Function missing ending \")\".  "
+  cmListFileContext lfc;
+  lfc.FilePath = this->FileName;
+  lfc.Line = lastLine;
+  cmListFileBacktrace lfbt = this->Backtrace.Pop();
+  lfbt = lfbt.Push(lfc);
+  error << "Parse error.  Function missing ending \")\".  "
         << "End of file reached.";
-  cmSystemTools::Error(error.str().c_str());
-
+  this->Makefile->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR,
+                                                   error.str(), lfbt);
   return false;
 }
 
@@ -319,19 +322,18 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
   bool isError = (this->Separation == SeparationError ||
                   delim == cmListFileArgument::Bracket);
   std::ostringstream m;
-  /* clang-format off */
-  m << "Syntax " << (isError? "Error":"Warning") << " in cmake code at\n"
-    << "  " << this->FileName << ":" << token->line << ":"
-    << token->column << "\n"
+  cmListFileContext lfc;
+  lfc.FilePath = this->FileName;
+  lfc.Line = token->line;
+  cmListFileBacktrace lfbt = this->Backtrace.Pop();
+  lfbt = lfbt.Push(lfc);
+
+  m << "Syntax " << (isError ? "Error" : "Warning") << " in cmake code at "
+    << token->line << ":" << token->column << "\n"
     << "Argument not separated from preceding token by whitespace.";
-  /* clang-format on */
-  if (isError) {
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, m.str());
-    return false;
-  } else {
-    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, m.str());
-    return true;
-  }
+  this->Makefile->GetCMakeInstance()->IssueMessage(
+    isError ? cmake::FATAL_ERROR : cmake::AUTHOR_WARNING, m.str(), lfbt);
+  return !isError;
 }
 
 struct cmListFileBacktrace::Entry : public cmListFileContext
