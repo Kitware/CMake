@@ -13,6 +13,6 @@ the variable ``VAR``.  If the property is not found, ``VAR`` will be set to
 Properties are usually used to control how a target is built, but some
 query the target instead.  This command can get properties for any
 target so far created.  The targets do not need to be in the current
-CMakeLists.txt file.
+``CMakeLists.txt`` file.
 
 See also the more general :command:`get_property` command.
