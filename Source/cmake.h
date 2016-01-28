@@ -500,8 +500,6 @@ private:
    * warning and error output CMake variables, in the cache.
    */
   bool IsMessageTypeVisible(cmake::MessageType t);
-
-  bool PrintMessagePreamble(cmake::MessageType t, std::ostream& msg);
 };
 
 #define CMAKE_STANDARD_OPTIONS_TABLE                                          \
