@@ -718,7 +718,7 @@ same consideration applies to macros, functions and imported targets.
   If False, do not try to use the relevant CMake wrapping command.
 
 ``Xxx_Yy_FOUND``
-  If False, optional Yy part of Xxx sytem is not available.
+  If False, optional Yy part of Xxx system is not available.
 
 ``Xxx_FOUND``
   Set to false, or undefined, if we haven't found, or don't want to use
