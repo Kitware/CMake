@@ -45,9 +45,9 @@ signatures that specify them.  The common options are:
   is associated, such as "runtime" or "development".  During
   component-specific installation only install rules associated with
   the given component name will be executed.  During a full installation
-  all components are installed.  If ``COMPONENT`` is not provided a
-  default component "Unspecified" is created.  The default component
-  name may be controlled with the
+  all components are installed unless marked with EXCLUDE_FROM_ALL.
+  If ``COMPONENT`` is not provided a default component "Unspecified" is
+  created.  The default component name may be controlled with the
   :variable:`CMAKE_INSTALL_DEFAULT_COMPONENT_NAME` variable.
 
 ``RENAME``
@@ -76,7 +76,8 @@ Installing Targets
            [PERMISSIONS permissions...]
            [CONFIGURATIONS [Debug|Release|...]]
            [COMPONENT <component>]
-           [OPTIONAL] [NAMELINK_ONLY|NAMELINK_SKIP]
+           [OPTIONAL] [EXCLUDE_FROM_ALL]
+           [NAMELINK_ONLY|NAMELINK_SKIP]
           ] [...])
 
 The ``TARGETS`` form specifies rules for installing targets from a
