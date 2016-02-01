@@ -7,86 +7,65 @@ CMake 3.5 Release Notes
 
 Changes made since CMake 3.4 include the following.
 
-* Support was added for the ARM Compiler (arm.com) with compiler id ``ARMCC``.
+New Features
+============
 
-* A new platform file for cross-compiling in the Cray Linux Environment to
-  target compute nodes was added.  See
-  :ref:`Cross Compiling for the Cray Linux Environment <Cray Cross-Compile>`
-  for usage details.
+GUI
+---
 
-* The :module:`CPackDMG` module learned new variable to specify AppleScript
-  file run to customize appearance of ``DragNDrop`` installer folder,
-  including background image setting using supplied PNG or multi-resolution
-  TIFF file.  See the :variable:`CPACK_DMG_DS_STORE_SETUP_SCRIPT` and
-  :variable:`CPACK_DMG_BACKGROUND_IMAGE` variables.
-
-* The :manual:`cmake(1)` ``-E copy`` and ``-E copy_if_different`` command-line
-  tools learned to support copying multiple input files to a directory.
-
-* The :manual:`cmake(1)` ``-E copy_directory`` command-line
-  tool learned to support copying multiple input directories to a directory.
-
-* The :manual:`cmake(1)` ``-E make_directory`` command-line
-  tool learned to support copying multiple input directories to a directory.
-
-* The :manual:`cmake(1)` ``-E time`` command now properly passes arguments
-  with spaces or special characters through to the child process.  This
-  may break scripts that worked around the bug with their own extra
-  quoting or escaping.
+* The :manual:`cmake-gui(1)` gained options to control warnings about
+  deprecated functionality.
 
 * The :manual:`cmake-gui(1)` learned an option to set the toolset
   to be used with VS IDE and Xcode generators, much like the
   existing ``-T`` option to :manual:`cmake(1)`.
 
-* The :command:`cmake_parse_arguments` command is now implemented natively.
-  The :module:`CMakeParseArguments` module remains as an empty placeholder
-  for compatibility.
+* The :manual:`cmake-gui(1)` gained a Regular Expression Explorer which
+  may be used to create and evaluate regular expressions in real-time.
+  The explorer window is available via the ``Tools`` menu.
 
-* The :variable:`CMAKE_WARN_DEPRECATED` variable can now be set using the
-  ``-Wdeprecated`` and ``-Wno-deprecated`` :manual:`cmake(1)` options.
+Command-Line
+------------
 
 * The ``-Wdev`` and ``-Wno-dev`` :manual:`cmake(1)` options now also enable
   and suppress the deprecated warnings output by default.
 
-* Warnings about deprecated functionality are now enabled by default.
-  They may be suppressed with ``-Wno-deprecated`` or by setting the
-  :variable:`CMAKE_WARN_DEPRECATED` variable to false.
-
-* Warnings about deprecated functionality can now be controlled in the
-  :manual:`cmake-gui(1)` application.
-
 * The suppression of developer warnings as errors can now be controlled with
   the new ``-Werror=dev`` and ``-Wno-error=dev`` :manual:`cmake(1)` options.
+
+* The :manual:`cmake(1)` ``-E`` command-line tools ``copy``,
+  ``copy_if_different``, ``copy_directory``, and ``make_directory``
+  learned to support multiple input files or directories.
+
+Commands
+--------
+
+* The :command:`cmake_parse_arguments` command is now implemented natively.
+  The :module:`CMakeParseArguments` module remains as an empty placeholder
+  for compatibility.
+
+* The :command:`install(DIRECTORY)` command learned to support
+  :manual:`generator expressions <cmake-generator-expressions(7)>`
+  in the list of directories.
+
+Variables
+---------
 
 * The :variable:`CMAKE_ERROR_DEPRECATED` variable can now be set using the
   ``-Werror=deprecated`` and ``-Wno-error=deprecated`` :manual:`cmake(1)`
   options.
 
-* The :module:`CPackDeb` module learned to set optional config
-  file ``Source`` field - monolithic and per-component variable.
-  See :variable:`CPACK_DEBIAN_PACKAGE_SOURCE`.
+* The :variable:`CMAKE_WARN_DEPRECATED` variable can now be set using the
+  ``-Wdeprecated`` and ``-Wno-deprecated`` :manual:`cmake(1)` options.
 
-* The :module:`CPackDeb` module learned to set Package, Section
-  and Priority control fields per-component.
-  See :variable:`CPACK_DEBIAN_<COMPONENT>_PACKAGE_SECTION`
-  and :variable:`CPACK_DEBIAN_<COMPONENT>_PACKAGE_PRIORITY`.
+Properties
+----------
 
-* The :module:`CPack DragNDrop generator <CPackDMG>` learned to add
-  multi-lingual SLAs to a DMG which is presented to the user when they try to
-  mount the DMG.  See the :variable:`CPACK_DMG_SLA_LANGUAGES` and
-  :variable:`CPACK_DMG_SLA_DIR` variables for details.
+* The :prop_tgt:`VS_GLOBAL_<variable>` target property is now implemented
+  for VS 2010 and above.  Previously it worked only in VS 2008 and below.
 
-* The :module:`CPackNSIS` module learned new variables to add bitmaps to the
-  installer.  See the :variable:`CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP`
-  and :variable:`CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP` variables.
-
-* The :module:`CPackRPM` module learned to set Name and Group
-  control fields per-component.
-  See :variable:`CPACK_RPM_<component>_PACKAGE_NAME`
-  and :variable:`CPACK_RPM_<component>_PACKAGE_GROUP`.
-
-* The :module:`CMakeForceCompiler` module and its macros are now deprecated.
-  See module documentation for an explanation.
+Modules
+-------
 
 * The :module:`ExternalProject` module learned a new ``GIT_REMOTE_NAME``
   option to control the ``git clone --origin`` value.
@@ -105,11 +84,6 @@ Changes made since CMake 3.4 include the following.
   targets instead of the paths to the libraries.  Moreover it now sets
   a new ``GTK2_TARGETS`` variable containing all the targets imported.
 
-* Starting with sigc++ 2.5.1, c++11 must be enabled in order to use
-  sigc++. The GTK2::sigc++ imported target will automatically enable the
-  required build flags in order to build with the version found on the
-  system.
-
 * The :module:`FindOpenMP` module learned to support Clang.
 
 * The :module:`FindOpenSSL` module gained a new
@@ -125,29 +99,84 @@ Changes made since CMake 3.4 include the following.
 
 * The :module:`FindXercesC` module now provides imported targets.
 
-* The :command:`install(DIRECTORY)` command learned to support
-  :manual:`generator expressions <cmake-generator-expressions(7)>`
-  in the list of directories.
+Platforms
+---------
+
+* Support was added for the ARM Compiler (arm.com) with compiler id ``ARMCC``.
+
+* A new platform file for cross-compiling in the Cray Linux Environment to
+  target compute nodes was added.  See
+  :ref:`Cross Compiling for the Cray Linux Environment <Cray Cross-Compile>`
+  for usage details.
+
+* The :manual:`Compile Features <cmake-compile-features(7)>` functionality
+  is now aware of features supported by Clang compilers on Windows (MinGW).
 
 * When building for embedded Apple platforms like iOS CMake learned to build and
   install combined targets which contain both a device and a simulator build.
   This behavior can be enabled by setting the :prop_tgt:`IOS_INSTALL_COMBINED`
   target property.
 
-* The :manual:`Compile Features <cmake-compile-features(7)>` functionality
-  is now aware of features supported by Clang compilers on Windows (MinGW).
+CPack
+-----
 
-* The Qt base CMake GUI got a Regular Expression Explorer which could be used to
-  create and evaluate regular expressions in real-time. The explorer window
-  is available via the ``Tools`` menu.
+* The :module:`CPackDMG` module learned new variable to specify AppleScript
+  file run to customize appearance of ``DragNDrop`` installer folder,
+  including background image setting using supplied PNG or multi-resolution
+  TIFF file.  See the :variable:`CPACK_DMG_DS_STORE_SETUP_SCRIPT` and
+  :variable:`CPACK_DMG_BACKGROUND_IMAGE` variables.
+
+* The :module:`CPackDeb` module learned to set the optional config
+  file ``Source`` field using a monolithic or per-component variable.
+  See :variable:`CPACK_DEBIAN_PACKAGE_SOURCE`.
+
+* The :module:`CPackDeb` module learned to set Package, Section
+  and Priority control fields per-component.
+  See variables :variable:`CPACK_DEBIAN_<COMPONENT>_PACKAGE_SECTION` and
+  :variable:`CPACK_DEBIAN_<COMPONENT>_PACKAGE_PRIORITY`.
+
+* The :module:`CPack DragNDrop generator <CPackDMG>` learned to add
+  multi-lingual SLAs to a DMG which is presented to the user when they try to
+  mount the DMG.  See the :variable:`CPACK_DMG_SLA_LANGUAGES` and
+  :variable:`CPACK_DMG_SLA_DIR` variables for details.
+
+* The :module:`CPackNSIS` module learned new variables to add bitmaps to the
+  installer.  See the :variable:`CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP`
+  and :variable:`CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP` variables.
+
+* The :module:`CPackRPM` module learned to set Name and Group
+  control fields per-component.
+  See :variable:`CPACK_RPM_<component>_PACKAGE_NAME`
+  and :variable:`CPACK_RPM_<component>_PACKAGE_GROUP`.
+
+Other
+-----
+
+* Warnings about deprecated functionality are now enabled by default.
+  They may be suppressed with ``-Wno-deprecated`` or by setting the
+  :variable:`CMAKE_WARN_DEPRECATED` variable to false.
+
+Deprecated and Removed Features
+===============================
+
+* The :module:`CMakeForceCompiler` module and its macros are now deprecated.
+  See module documentation for an explanation.
+
+* The :manual:`cmake(1)` ``-E time`` command now properly passes arguments
+  with spaces or special characters through to the child process.  This
+  may break scripts that worked around the bug with their own extra
+  quoting or escaping.
+
+Other Changes
+=============
+
+* The :generator:`Visual Studio 14 2015` generator learned to map the
+  ``/debug:fastlink`` linker flag to the ``.vcxproj`` file property.
+
+* The :module:`FindGTK2` module now configures the ``GTK2::sigc++`` imported
+  target to enable c++11 on its dependents when using sigc++ 2.5.1 or higher.
 
 * The precompiled Windows binary provided on ``cmake.org`` is now a
   ``.msi`` package instead of an installer executable.  One may need
   to manually uninstall CMake versions lower than 3.5 before installing
   the new package.
-
-* The :generator:`Visual Studio 14 2015` generator learned to map the
-  ``/debug:fastlink`` linker flag to the ``.vcxproj`` file property.
-
-* The :prop_tgt:`VS_GLOBAL_<variable>` target property is now implemented
-  for VS 2010 and above.  Previously it worked only in VS 2008 and below.
