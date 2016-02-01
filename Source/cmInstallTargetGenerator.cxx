@@ -30,8 +30,10 @@ cmInstallTargetGenerator
                            std::vector<std::string> const& configurations,
                            const char* component,
                            MessageLevel message,
+                           bool exclude_from_all,
                            bool optional):
-  cmInstallGenerator(dest, configurations, component, message),
+  cmInstallGenerator(dest, configurations, component, message,
+                     exclude_from_all),
   TargetName(targetName),
   Target(0),
   FilePermissions(file_permissions),
