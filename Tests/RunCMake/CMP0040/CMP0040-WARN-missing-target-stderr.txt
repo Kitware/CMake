@@ -4,7 +4,7 @@ CMake Warning \(dev\) at CMP0040-WARN-missing-target.cmake:2 \(add_custom_comman
   policy details.  Use the cmake_policy command to set the policy and
   suppress this warning.
 +
-  The target name "foobar" is unknown in this context.
+  No TARGET 'foobar' has been created in this directory.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
