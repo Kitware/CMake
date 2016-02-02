@@ -230,7 +230,7 @@ template<typename Range>
 std::string cmJoin(Range const& r, std::string delimiter)
 {
   return cmJoin(r, delimiter.c_str());
-};
+}
 
 template<typename Range>
 typename Range::const_iterator cmRemoveN(Range& r, size_t n)
