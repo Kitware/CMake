@@ -85,6 +85,7 @@ if [ -n "$basehash" ]; then
     # Clear out the working tree
     pushd "$extractdir"
     git ls-files | xargs rm -v
+    find . -type d -empty -delete
     popd
 else
     # Create a repo to hold this package's history
