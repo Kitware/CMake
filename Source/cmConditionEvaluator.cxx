@@ -12,6 +12,7 @@
 
 #include "cmConditionEvaluator.h"
 #include "cmOutputConverter.h"
+#include "cmAlgorithms.h"
 
 cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
                                            const cmListFileContext &context,
@@ -578,6 +579,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
                   cmake::MessageType &status)
 {
   int reducible;
+  std::string def_buf;
   const char *def;
   const char *def2;
   do
@@ -594,6 +596,14 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
         IsKeyword("MATCHES", *argP1))
         {
         def = this->GetVariableOrString(*arg);
+        if (def != arg->c_str() // yes, we compare the pointer value
+            && cmHasLiteralPrefix(arg->GetValue(), "CMAKE_MATCH_"))
+          {
+          // The string to match is owned by our match result variables.
+          // Move it to our own buffer before clearing them.
+          def_buf = def;
+          def = def_buf.c_str();
+          }
         const char* rex = argP2->c_str();
         this->Makefile.ClearMatches();
         cmsys::RegularExpression regEntry;
