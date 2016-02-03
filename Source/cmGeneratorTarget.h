@@ -599,7 +599,7 @@ private:
   {
     ImportInfo(): NoSOName(false), Multiplicity(0) {}
     bool NoSOName;
-    int Multiplicity;
+    unsigned int Multiplicity;
     std::string Location;
     std::string SOName;
     std::string ImportLibrary;
