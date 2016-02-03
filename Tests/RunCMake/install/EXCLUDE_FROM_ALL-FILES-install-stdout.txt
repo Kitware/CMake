@@ -1,3 +1,0 @@
--- Install configuration: "[^"]*"
--- Installing: [^
-]*/Tests/RunCMake/install/EXCLUDE_FROM_ALL-FILES-build/root/src-all/main\.c$

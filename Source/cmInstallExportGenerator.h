@@ -31,7 +31,6 @@ public:
                            const std::vector<std::string>& configurations,
                            const char* component,
                            MessageLevel message,
-                           bool exclude_from_all,
                            const char* filename, const char* name_space,
                            bool exportOld);
   ~cmInstallExportGenerator();

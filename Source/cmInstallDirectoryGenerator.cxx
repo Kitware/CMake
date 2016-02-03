@@ -23,11 +23,9 @@ cmInstallDirectoryGenerator
                               std::vector<std::string> const& configurations,
                               const char* component,
                               MessageLevel message,
-                              bool exclude_from_all,
                               const char* literal_args,
                               bool optional):
-  cmInstallGenerator(dest, configurations, component, message,
-                     exclude_from_all),
+  cmInstallGenerator(dest, configurations, component, message),
   LocalGenerator(0),
   Directories(dirs),
   FilePermissions(file_permissions), DirPermissions(dir_permissions),

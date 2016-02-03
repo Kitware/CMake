@@ -30,7 +30,6 @@ class cmInstallCommandArguments
 
     const std::string& GetDestination() const;
     const std::string& GetComponent() const;
-    bool GetExcludeFromAll() const;
     const std::string& GetRename() const;
     const std::string& GetPermissions() const;
     const std::vector<std::string>& GetConfigurations() const;
@@ -49,7 +48,6 @@ class cmInstallCommandArguments
     cmInstallCommandArguments(); // disabled
     cmCAString Destination;
     cmCAString Component;
-    cmCAEnabler ExcludeFromAll;
     cmCAString Rename;
     cmCAStringVector Permissions;
     cmCAStringVector Configurations;

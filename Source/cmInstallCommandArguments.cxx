@@ -27,15 +27,14 @@ cmInstallCommandArguments::cmInstallCommandArguments(
                                            const std::string& defaultComponent)
 :Parser()
 ,ArgumentGroup()
-,Destination   (&Parser, "DESTINATION"     , &ArgumentGroup)
-,Component     (&Parser, "COMPONENT"       , &ArgumentGroup)
-,ExcludeFromAll(&Parser, "EXCLUDE_FROM_ALL", &ArgumentGroup)
-,Rename        (&Parser, "RENAME"          , &ArgumentGroup)
-,Permissions   (&Parser, "PERMISSIONS"     , &ArgumentGroup)
-,Configurations(&Parser, "CONFIGURATIONS"  , &ArgumentGroup)
-,Optional      (&Parser, "OPTIONAL"        , &ArgumentGroup)
-,NamelinkOnly  (&Parser, "NAMELINK_ONLY"   , &ArgumentGroup)
-,NamelinkSkip  (&Parser, "NAMELINK_SKIP"   , &ArgumentGroup)
+,Destination   (&Parser, "DESTINATION"   , &ArgumentGroup)
+,Component     (&Parser, "COMPONENT"     , &ArgumentGroup)
+,Rename        (&Parser, "RENAME"        , &ArgumentGroup)
+,Permissions   (&Parser, "PERMISSIONS"   , &ArgumentGroup)
+,Configurations(&Parser, "CONFIGURATIONS", &ArgumentGroup)
+,Optional      (&Parser, "OPTIONAL"      , &ArgumentGroup)
+,NamelinkOnly  (&Parser, "NAMELINK_ONLY" , &ArgumentGroup)
+,NamelinkSkip  (&Parser, "NAMELINK_SKIP" , &ArgumentGroup)
 ,GenericArguments(0)
 ,DefaultComponentName(defaultComponent)
 {
@@ -107,19 +106,6 @@ bool cmInstallCommandArguments::GetOptional() const
   if (this->GenericArguments!=0)
     {
     return this->GenericArguments->GetOptional();
-    }
-  return false;
-}
-
-bool cmInstallCommandArguments::GetExcludeFromAll() const
-{
-  if (this->ExcludeFromAll.IsEnabled())
-    {
-    return true;
-    }
-  if (this->GenericArguments!=0)
-    {
-    return this->GenericArguments->GetExcludeFromAll();
     }
   return false;
 }
