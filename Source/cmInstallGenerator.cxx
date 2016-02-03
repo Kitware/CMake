@@ -19,13 +19,11 @@ cmInstallGenerator
 ::cmInstallGenerator(const char* destination,
                      std::vector<std::string> const& configurations,
                      const char* component,
-                     MessageLevel message,
-                     bool exclude_from_all):
+                     MessageLevel message):
   cmScriptGenerator("CMAKE_INSTALL_CONFIG_NAME", configurations),
   Destination(destination? destination:""),
   Component(component? component:""),
-  Message(message),
-  ExcludeFromAll(exclude_from_all)
+  Message(message)
 {
 }
 
@@ -148,16 +146,12 @@ void cmInstallGenerator
 
 //----------------------------------------------------------------------------
 std::string
-cmInstallGenerator::CreateComponentTest(const char* component,
-                                        bool exclude_from_all)
+cmInstallGenerator::CreateComponentTest(const char* component)
 {
-  std::string result = "\"${CMAKE_INSTALL_COMPONENT}\" STREQUAL \"";
+  std::string result = "NOT CMAKE_INSTALL_COMPONENT OR "
+    "\"${CMAKE_INSTALL_COMPONENT}\" STREQUAL \"";
   result += component;
   result += "\"";
-  if(!exclude_from_all)
-    {
-    result += " OR NOT CMAKE_INSTALL_COMPONENT";
-    }
   return result;
 }
 
@@ -169,7 +163,7 @@ void cmInstallGenerator::GenerateScript(std::ostream& os)
 
   // Begin this block of installation.
   std::string component_test =
-    this->CreateComponentTest(this->Component.c_str(),this->ExcludeFromAll);
+    this->CreateComponentTest(this->Component.c_str());
   os << indent << "if(" << component_test << ")\n";
 
   // Generate the script possibly with per-configuration code.

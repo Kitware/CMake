@@ -122,7 +122,6 @@ void cmInstallFilesCommand::CreateInstallGenerator() const
   // Use a file install generator.
   const char* no_permissions = "";
   const char* no_rename = "";
-  bool no_exclude_from_all = false;
   std::string no_component = this->Makefile->GetSafeDefinition(
                                        "CMAKE_INSTALL_DEFAULT_COMPONENT_NAME");
   std::vector<std::string> no_configurations;
@@ -132,8 +131,7 @@ void cmInstallFilesCommand::CreateInstallGenerator() const
     new cmInstallFilesGenerator(this->Files,
                                 destination.c_str(), false,
                                 no_permissions, no_configurations,
-                                no_component.c_str(), message,
-                                no_exclude_from_all, no_rename));
+                                no_component.c_str(), message, no_rename));
 }
 
 

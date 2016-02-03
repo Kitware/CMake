@@ -1,3 +1,0 @@
--- Install configuration: "[^"]*"
--- Installing: [^
-]*/Tests/RunCMake/install/EXCLUDE_FROM_ALL-TARGETS-build/root/bin/myexe(\.exe)?$

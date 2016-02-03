@@ -26,7 +26,6 @@ public:
                           std::vector<std::string> const& configurations,
                           const char* component,
                           MessageLevel message,
-                          bool exclude_from_all,
                           const char* rename,
                           bool optional = false);
   virtual ~cmInstallFilesGenerator();

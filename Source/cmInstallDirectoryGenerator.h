@@ -27,7 +27,6 @@ public:
                               std::vector<std::string> const& configurations,
                               const char* component,
                               MessageLevel message,
-                              bool exclude_from_all,
                               const char* literal_args,
                               bool optional = false);
   virtual ~cmInstallDirectoryGenerator();
