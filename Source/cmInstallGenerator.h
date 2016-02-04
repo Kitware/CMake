@@ -36,7 +36,8 @@ public:
   cmInstallGenerator(const char* destination,
                      std::vector<std::string> const& configurations,
                      const char* component,
-                     MessageLevel message);
+                     MessageLevel message,
+                     bool exclude_from_all);
   virtual ~cmInstallGenerator();
 
   void AddInstallRule(
@@ -67,12 +68,14 @@ public:
 protected:
   virtual void GenerateScript(std::ostream& os);
 
-  std::string CreateComponentTest(const char* component);
+  std::string CreateComponentTest(const char* component,
+                                  bool exclude_from_all);
 
   // Information shared by most generator types.
   std::string Destination;
   std::string Component;
   MessageLevel Message;
+  bool ExcludeFromAll;
 };
 
 #endif

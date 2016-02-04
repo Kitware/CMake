@@ -33,9 +33,11 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   std::vector<std::string> const& configurations,
   const char* component,
   MessageLevel message,
+  bool exclude_from_all,
   const char* filename, const char* name_space,
   bool exportOld)
-  :cmInstallGenerator(destination, configurations, component, message)
+  :cmInstallGenerator(destination, configurations, component, message,
+                      exclude_from_all)
   ,ExportSet(exportSet)
   ,FilePermissions(file_permissions)
   ,FileName(filename)
