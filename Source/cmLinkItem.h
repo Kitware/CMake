@@ -73,7 +73,7 @@ struct cmLinkInterface: public cmLinkInterfaceLibraries
 
   // Number of repetitions of a strongly connected component of two
   // or more static libraries.
-  int Multiplicity;
+  unsigned int Multiplicity;
 
   // Libraries listed for other configurations.
   // Needed only for OLD behavior of CMP0003.

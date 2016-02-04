@@ -931,7 +931,7 @@ cmComputeLinkDepends::MakePendingComponent(unsigned int component)
 //----------------------------------------------------------------------------
 int cmComputeLinkDepends::ComputeComponentCount(NodeList const& nl)
 {
-  int count = 2;
+  unsigned int count = 2;
   for(NodeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni)
     {
     if(cmGeneratorTarget const* target = this->EntryList[*ni].Target)
