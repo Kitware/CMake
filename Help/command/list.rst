@@ -9,6 +9,7 @@ List operations.
   list(GET <list> <element index> [<element index> ...]
        <output variable>)
   list(APPEND <list> [<element> ...])
+  list(FILTER <list> <INCLUDE|EXCLUDE> REGEX <regular_expression>)
   list(FIND <list> <value> <output variable>)
   list(INSERT <list> <element_index> <element> [<element> ...])
   list(REMOVE_ITEM <list> <value> [<value> ...])
@@ -22,6 +23,12 @@ List operations.
 ``GET`` will return list of elements specified by indices from the list.
 
 ``APPEND`` will append elements to the list.
+
+``FILTER`` will include or remove items from the list that match the
+mode's pattern.
+In ``REGEX`` mode, items will be matched against the given regular expression.
+For more information on regular expressions see also the :command:`string`
+command.
 
 ``FIND`` will return the index of the element specified in the list or -1
 if it wasn't found.
@@ -38,9 +45,9 @@ difference is that ``REMOVE_ITEM`` will remove the given items, while
 
 ``SORT`` sorts the list in-place alphabetically.
 
-The list subcommands ``APPEND``, ``INSERT``, ``REMOVE_AT``, ``REMOVE_ITEM``,
-``REMOVE_DUPLICATES``, ``REVERSE`` and ``SORT`` may create new values for
-the list within the current CMake variable scope.  Similar to the
+The list subcommands ``APPEND``, ``INSERT``, ``FILTER``, ``REMOVE_AT``,
+``REMOVE_ITEM``, ``REMOVE_DUPLICATES``, ``REVERSE`` and ``SORT`` may create new
+values for the list within the current CMake variable scope.  Similar to the
 :command:`set` command, the LIST command creates new variable values in the
 current scope, even if the list itself is actually defined in a parent
 scope.  To propagate the results of these operations upwards, use

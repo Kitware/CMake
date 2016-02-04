@@ -14,6 +14,7 @@
 #include <cmsys/SystemTools.hxx>
 #include "cmAlgorithms.h"
 
+#include <algorithm>
 #include <stdlib.h> // required for atoi
 #include <ctype.h>
 #include <assert.h>
@@ -67,6 +68,10 @@ bool cmListCommand
   if(subCommand == "REVERSE")
     {
     return this->HandleReverseCommand(args);
+    }
+  if(subCommand == "FILTER")
+    {
+    return this->HandleFilterCommand(args);
     }
 
   std::string e = "does not recognize sub-command "+subCommand;
@@ -517,3 +522,107 @@ bool cmListCommand::HandleRemoveAtCommand(
   return true;
 }
 
+//----------------------------------------------------------------------------
+bool cmListCommand::HandleFilterCommand(
+  std::vector<std::string> const& args)
+{
+  if(args.size() < 2)
+    {
+    this->SetError("sub-command FILTER requires a list to be specified.");
+    return false;
+    }
+
+  if(args.size() < 3)
+    {
+    this->SetError("sub-command FILTER requires an operator to be specified.");
+    return false;
+    }
+
+  if(args.size() < 4)
+    {
+    this->SetError("sub-command FILTER requires a mode to be specified.");
+    return false;
+    }
+
+  const std::string& listName = args[1];
+  // expand the variable
+  std::vector<std::string> varArgsExpanded;
+  if ( !this->GetList(varArgsExpanded, listName) )
+    {
+    this->SetError("sub-command FILTER requires list to be present.");
+    return false;
+    }
+
+  const std::string& op = args[2];
+  bool includeMatches;
+  if(op == "INCLUDE")
+    {
+    includeMatches = true;
+    }
+  else if(op == "EXCLUDE")
+    {
+    includeMatches = false;
+    }
+  else
+    {
+    this->SetError("sub-command FILTER does not recognize operator " + op);
+    return false;
+    }
+
+  const std::string& mode = args[3];
+  if(mode == "REGEX")
+    {
+    if(args.size() != 5)
+      {
+      this->SetError("sub-command FILTER, mode REGEX "
+          "requires five arguments.");
+      return false;
+      }
+    return this->FilterRegex(args, includeMatches, listName, varArgsExpanded);
+    }
+
+  this->SetError("sub-command FILTER does not recognize mode " + mode);
+  return false;
+}
+
+//----------------------------------------------------------------------------
+class MatchesRegex {
+public:
+  MatchesRegex(cmsys::RegularExpression& in_regex, bool in_includeMatches)
+    : regex(in_regex), includeMatches(in_includeMatches) {}
+
+  bool operator()(const std::string& target) {
+    return regex.find(target) ^ includeMatches;
+  }
+
+private:
+  cmsys::RegularExpression& regex;
+  const bool includeMatches;
+};
+
+bool cmListCommand::FilterRegex(std::vector<std::string> const& args,
+    bool includeMatches,
+    std::string const& listName,
+    std::vector<std::string>& varArgsExpanded)
+{
+  const std::string& pattern = args[4];
+  cmsys::RegularExpression regex(pattern);
+  if(!regex.is_valid())
+    {
+    std::string error = "sub-command FILTER, mode REGEX ";
+    error += "failed to compile regex \"";
+    error += pattern;
+    error += "\".";
+    this->SetError(error);
+    return false;
+    }
+
+  std::vector<std::string>::iterator argsBegin = varArgsExpanded.begin();
+  std::vector<std::string>::iterator argsEnd = varArgsExpanded.end();
+  std::vector<std::string>::iterator newArgsEnd =
+      std::remove_if(argsBegin, argsEnd, MatchesRegex(regex, includeMatches));
+
+  std::string value = cmJoin(cmMakeRange(argsBegin, newArgsEnd), ";");
+  this->Makefile->AddDefinition(listName, value.c_str());
+  return true;
+}
