@@ -67,6 +67,8 @@ if (NOT "${depend_text}" STREQUAL "")
       endif()
     endif()
 
+    # Make sure we check to see if we have a file, before asking if it is not a directory.
+    # if(NOT IS_DIRECTORY "") will return TRUE.
     if(file AND NOT IS_DIRECTORY "${file}")
       # If softlinks start to matter, we should change this to REALPATH.  For now we need
       # to flatten paths, because nvcc can generate stuff like /bin/../include instead of
