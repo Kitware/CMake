@@ -51,6 +51,8 @@ function(run_BuildDir)
   run_cmake(BuildDir)
   run_cmake_command(BuildDir--build ${CMAKE_COMMAND} -E chdir ..
     ${CMAKE_COMMAND} --build BuildDir-build --target CustomTarget)
+  run_cmake_command(BuildDir--build-multiple-targets ${CMAKE_COMMAND} -E chdir ..
+    ${CMAKE_COMMAND} --build BuildDir-build --target CustomTarget2 --target CustomTarget3)
 endfunction()
 run_BuildDir()
 
