@@ -1241,6 +1241,8 @@ function(_ep_get_build_command name step cmd_var)
             # BUILD_COMMAND to change the default command instead, but for
             # compatibility honor the value.
             set(config ${CMAKE_CFG_INTDIR})
+            message(AUTHOR_WARNING "CMAKE_CFG_INTDIR should not be set by project code.\n"
+              "To get a non-default build command, use the BUILD_COMMAND option.")
           else()
             set(config $<CONFIG>)
           endif()
