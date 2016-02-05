@@ -67,7 +67,7 @@ if (NOT "${depend_text}" STREQUAL "")
       endif()
     endif()
 
-    if(NOT IS_DIRECTORY "${file}")
+    if(file AND NOT IS_DIRECTORY "${file}")
       # If softlinks start to matter, we should change this to REALPATH.  For now we need
       # to flatten paths, because nvcc can generate stuff like /bin/../include instead of
       # just /include.
