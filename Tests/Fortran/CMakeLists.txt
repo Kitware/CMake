@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.1)
 project(testf C CXX Fortran)
 if(NOT DEFINED CMake_TEST_NESTED_MAKE_PROGRAM AND NOT CMAKE_GENERATOR MATCHES "Visual Studio")
   set(CMake_TEST_NESTED_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM}")
@@ -119,7 +119,7 @@ endfunction()
 # call the test_fortran_c_interface_module function
 if("${CMAKE_Fortran_COMPILER_ID}:${CMAKE_C_COMPILER_ID}" MATCHES
     "(Intel:MSVC|Absoft:GNU)"
-    OR (CMAKE_Fortran_COMPILER_ID MATCHES CMAKE_C_COMPILER_ID ))
+    OR ("${CMAKE_Fortran_COMPILER_ID}" STREQUAL "${CMAKE_C_COMPILER_ID}" ))
   test_fortran_c_interface_module()
 else()
   message("Fortran does not match c compiler")
