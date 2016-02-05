@@ -64,7 +64,7 @@ Options
    --use-stderr   = Ignored.  Behavior is default in CMake >= 3.0.
    --             = Pass remaining options to the native tool.
 
- Run cmake --build with no options for quick help.
+ Run ``cmake --build`` with no options for quick help.
 
 ``-N``
  View mode only.
