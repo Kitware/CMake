@@ -33,3 +33,7 @@ else()
   # Normal documentation build.
   add_subdirectory(Sphinx)
 endif()
+
+if(WIX_CUSTOM_ACTION_ENABLED)
+  add_subdirectory(Release/WiX)
+endif()
