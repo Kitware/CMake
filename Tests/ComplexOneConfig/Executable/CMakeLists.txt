@@ -146,7 +146,8 @@ add_dependencies(notInAllCustom notInAllExe)
 #
 add_subdirectory(Temp)
 
-if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_INCLUDE_SYSTEM_FLAG_CXX)
+if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_INCLUDE_SYSTEM_FLAG_CXX
+   AND NOT XCODE) # XCODE is excluded due to #15687
   add_executable(testSystemDir testSystemDir.cxx)
   set_target_properties(testSystemDir PROPERTIES COMPILE_FLAGS "-Werror")
 endif()
