@@ -427,7 +427,7 @@ specified will be calculated:
   )
 
   add_library(lib1Version3 SHARED lib1_v3.cpp)
-  set_property(TARGET lib1Version2 PROPERTY INTERFACE_CONTAINER_SIZE_REQUIRED 1000)
+  set_property(TARGET lib1Version3 PROPERTY INTERFACE_CONTAINER_SIZE_REQUIRED 1000)
 
   add_executable(exe1 exe1.cpp)
   # CONTAINER_SIZE_REQUIRED will be "200"
