@@ -2805,7 +2805,10 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmGeneratorTarget* gtgt,
     fullName = gtgt->GetFullName(defConfig.c_str());
     }
   fileRef->AddAttribute("path", this->CreateString(fullName.c_str()));
-  fileRef->AddAttribute("refType", this->CreateString("0"));
+  if(this->XcodeVersion == 15)
+    {
+    fileRef->AddAttribute("refType", this->CreateString("0"));
+    }
   fileRef->AddAttribute("sourceTree",
                         this->CreateString("BUILT_PRODUCTS_DIR"));
   fileRef->SetComment(gtgt->GetName().c_str());
