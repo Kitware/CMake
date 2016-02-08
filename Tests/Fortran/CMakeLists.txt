@@ -223,5 +223,6 @@ if(TEST_MODULE_DEPENDS)
   endif()
 
   add_subdirectory(Library)
+  add_subdirectory(Subdir)
   add_subdirectory(Executable)
 endif()
