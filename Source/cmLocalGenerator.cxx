@@ -455,11 +455,13 @@ void cmLocalGenerator::GenerateInstallRules()
 void cmLocalGenerator::AddGeneratorTarget(cmGeneratorTarget* gt)
 {
   this->GeneratorTargets.push_back(gt);
+  this->GlobalGenerator->IndexGeneratorTarget(gt);
 }
 
 void cmLocalGenerator::AddImportedGeneratorTarget(cmGeneratorTarget* gt)
 {
   this->ImportedGeneratorTargets.push_back(gt);
+  this->GlobalGenerator->IndexGeneratorTarget(gt);
 }
 
 void cmLocalGenerator::AddOwnedImportedGeneratorTarget(cmGeneratorTarget* gt)
