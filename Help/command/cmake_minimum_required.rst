@@ -5,7 +5,7 @@ Set the minimum required version of cmake for a project.
 
 ::
 
-  cmake_minimum_required(VERSION major[.minor[.patch[.tweak]]]
+  cmake_minimum_required(VERSION major.minor[.patch[.tweak]]
                          [FATAL_ERROR])
 
 If the current version of CMake is lower than that required it will
