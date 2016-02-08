@@ -35,6 +35,16 @@
 # This converts a file written in makefile syntax into one that can be included
 # by CMake.
 
+# Input variables
+#
+# verbose:BOOL=<>          OFF: Be as quiet as possible (default)
+#                          ON : Extra output
+#
+# input_file:FILEPATH=<>   Path to dependecy file in makefile format
+#
+# output_file:FILEPATH=<>  Path to file with dependencies in CMake readable variable
+#
+
 file(READ ${input_file} depend_text)
 
 if (NOT "${depend_text}" STREQUAL "")
@@ -62,7 +72,9 @@ if (NOT "${depend_text}" STREQUAL "")
       if (EXISTS "/${file}")
         set(file "/${file}")
       else()
-        message(WARNING " Removing non-existent dependency file: ${file}")
+        if(verbose)
+          message(WARNING " Removing non-existent dependency file: ${file}")
+        endif()
         set(file "")
       endif()
     endif()
