@@ -1649,6 +1649,7 @@ void cmGlobalGenerator::ClearGeneratorMembers()
 
   this->ExportSets.clear();
   this->TargetDependencies.clear();
+  this->TargetSearchIndex.clear();
   this->ProjectMap.clear();
   this->RuleHashes.clear();
   this->DirectoryContentMap.clear();
@@ -2177,18 +2178,20 @@ bool cmGlobalGenerator::IsAlias(const std::string& name) const
   return this->AliasTargets.find(name) != this->AliasTargets.end();
 }
 
+void cmGlobalGenerator::IndexTarget(cmTarget* t)
+{
+  if (!t->IsImported() || t->IsImportedGloballyVisible())
+    {
+    this->TargetSearchIndex[t->GetName()] = t;
+    }
+}
+
 cmTarget* cmGlobalGenerator::FindTargetImpl(std::string const& name) const
 {
-  for (unsigned int i = 0; i < this->Makefiles.size(); ++i)
+  TargetMap::const_iterator i = this->TargetSearchIndex.find(name);
+  if (i != this->TargetSearchIndex.end())
     {
-    cmTargets& tgts = this->Makefiles[i]->GetTargets();
-    for (cmTargets::iterator it = tgts.begin(); it != tgts.end(); ++it)
-      {
-      if (it->second.GetName() == name)
-        {
-        return &it->second;
-        }
-      }
+    return i->second;
     }
   return 0;
 }
@@ -2204,25 +2207,6 @@ cmGlobalGenerator::FindGeneratorTargetImpl(std::string const& name) const
          it != tgts.end(); ++it)
       {
       if ((*it)->GetName() == name)
-        {
-        return *it;
-        }
-      }
-    }
-  return 0;
-}
-
-cmTarget*
-cmGlobalGenerator::FindImportedTargetImpl(std::string const& name) const
-{
-  for (unsigned int i = 0; i < this->Makefiles.size(); ++i)
-    {
-    const std::vector<cmTarget*>& tgts =
-        this->Makefiles[i]->GetOwnedImportedTargets();
-    for (std::vector<cmTarget*>::const_iterator it = tgts.begin();
-         it != tgts.end(); ++it)
-      {
-      if ((*it)->GetName() == name && (*it)->IsImportedGloballyVisible())
         {
         return *it;
         }
@@ -2264,11 +2248,7 @@ cmGlobalGenerator::FindTarget(const std::string& name,
       return this->FindTargetImpl(ai->second);
       }
     }
-  if (cmTarget* tgt = this->FindTargetImpl(name))
-    {
-    return tgt;
-    }
-  return this->FindImportedTargetImpl(name);
+  return this->FindTargetImpl(name);
 }
 
 cmGeneratorTarget*
