@@ -48,7 +48,7 @@
 # Utility functions
 ########################################################################
 git_archive () {
-    git archive --prefix="$name-reduced/" HEAD -- $paths | \
+    git archive --worktree-attributes --prefix="$name-reduced/" HEAD -- $paths | \
         tar -C "$extractdir" -x
 }
 
