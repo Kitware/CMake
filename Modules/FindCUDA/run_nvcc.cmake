@@ -207,6 +207,7 @@ cuda_execute_process(
   COMMAND "${CMAKE_COMMAND}"
   -D "input_file:FILEPATH=${NVCC_generated_dependency_file}"
   -D "output_file:FILEPATH=${cmake_dependency_file}.tmp"
+  -D "verbose=${verbose}"
   -P "${CUDA_make2cmake}"
   )
 
