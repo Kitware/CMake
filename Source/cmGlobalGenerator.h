@@ -279,6 +279,7 @@ public:
                                                    bool needDisk = true);
 
   void IndexTarget(cmTarget* t);
+  void IndexGeneratorTarget(cmGeneratorTarget* gt);
 
   static bool IsReservedTarget(std::string const& name);
 
@@ -435,16 +436,21 @@ private:
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # ifdef CMake_HAVE_CXX11_UNORDERED_MAP
   typedef std::unordered_map<std::string, cmTarget*> TargetMap;
+  typedef std::unordered_map<std::string, cmGeneratorTarget*>
+    GeneratorTargetMap;
 # else
   typedef cmsys::hash_map<std::string, cmTarget*> TargetMap;
+  typedef cmsys::hash_map<std::string, cmGeneratorTarget*> GeneratorTargetMap;
 # endif
 #else
   typedef std::map<std::string,cmTarget *> TargetMap;
+  typedef std::map<std::string,cmGeneratorTarget *> GeneratorTargetMap;
 #endif
   // Map efficiently from target name to cmTarget instance.
   // Do not use this structure for looping over all targets.
   // It contains both normal and globally visible imported targets.
   TargetMap TargetSearchIndex;
+  GeneratorTargetMap GeneratorTargetSearchIndex;
 
   cmMakefile* TryCompileOuterMakefile;
   // If you add a new map here, make sure it is copied

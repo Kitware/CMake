@@ -1650,6 +1650,7 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->ExportSets.clear();
   this->TargetDependencies.clear();
   this->TargetSearchIndex.clear();
+  this->GeneratorTargetSearchIndex.clear();
   this->ProjectMap.clear();
   this->RuleHashes.clear();
   this->DirectoryContentMap.clear();
@@ -2186,6 +2187,14 @@ void cmGlobalGenerator::IndexTarget(cmTarget* t)
     }
 }
 
+void cmGlobalGenerator::IndexGeneratorTarget(cmGeneratorTarget* gt)
+{
+  if (!gt->IsImported() || gt->IsImportedGloballyVisible())
+    {
+    this->GeneratorTargetSearchIndex[gt->GetName()] = gt;
+    }
+}
+
 cmTarget* cmGlobalGenerator::FindTargetImpl(std::string const& name) const
 {
   TargetMap::const_iterator i = this->TargetSearchIndex.find(name);
@@ -2199,37 +2208,11 @@ cmTarget* cmGlobalGenerator::FindTargetImpl(std::string const& name) const
 cmGeneratorTarget*
 cmGlobalGenerator::FindGeneratorTargetImpl(std::string const& name) const
 {
-  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
+  GeneratorTargetMap::const_iterator i =
+    this->GeneratorTargetSearchIndex.find(name);
+  if (i != this->GeneratorTargetSearchIndex.end())
     {
-    const std::vector<cmGeneratorTarget*>& tgts =
-        this->LocalGenerators[i]->GetGeneratorTargets();
-    for (std::vector<cmGeneratorTarget*>::const_iterator it = tgts.begin();
-         it != tgts.end(); ++it)
-      {
-      if ((*it)->GetName() == name)
-        {
-        return *it;
-        }
-      }
-    }
-  return 0;
-}
-
-cmGeneratorTarget* cmGlobalGenerator::FindImportedGeneratorTargetImpl(
-    std::string const& name) const
-{
-  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
-    {
-    const std::vector<cmGeneratorTarget*>& tgts =
-        this->LocalGenerators[i]->GetImportedGeneratorTargets();
-    for (std::vector<cmGeneratorTarget*>::const_iterator it = tgts.begin();
-         it != tgts.end(); ++it)
-      {
-      if ((*it)->IsImportedGloballyVisible() && (*it)->GetName() == name)
-        {
-        return *it;
-        }
-      }
+    return i->second;
     }
   return 0;
 }
@@ -2260,11 +2243,7 @@ cmGlobalGenerator::FindGeneratorTarget(const std::string& name) const
     {
     return this->FindGeneratorTargetImpl(ai->second);
     }
-  if (cmGeneratorTarget* tgt = this->FindGeneratorTargetImpl(name))
-    {
-    return tgt;
-    }
-  return this->FindImportedGeneratorTargetImpl(name);
+  return this->FindGeneratorTargetImpl(name);
 }
 
 //----------------------------------------------------------------------------
