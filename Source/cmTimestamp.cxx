@@ -15,6 +15,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sstream>
 
 //----------------------------------------------------------------------------
 std::string cmTimestamp::CurrentTime(
@@ -84,7 +85,13 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
 
     if(c1 == '%' && c2 != 0)
       {
-      result += AddTimestampComponent(c2, timeStruct);
+        if (c2=='X') // Special case: UNIX time_t numeric value
+        {
+          std::stringstream ss;
+          ss << timeT;
+          result += ss.str();
+        }
+        else  result += AddTimestampComponent(c2, timeStruct);
       ++i;
       }
     else

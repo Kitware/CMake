@@ -16,7 +16,7 @@
 #include <time.h>
 
 /** \class cmTimestamp
- * \brief Utility class to generate sting representation of a timestamp
+ * \brief Utility class to generate string representation of a timestamp
  *
  */
 class cmTimestamp
