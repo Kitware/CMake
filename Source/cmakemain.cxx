@@ -60,6 +60,7 @@ static const char * cmDocumentationUsageNote[][2] =
 #define CMAKE_BUILD_OPTIONS                                             \
   "  <dir>          = Project binary directory to be built.\n"          \
   "  --target <tgt> = Build <tgt> instead of default targets.\n"        \
+  "                   May only be specified once.\n"                    \
   "  --config <cfg> = For multi-configuration tools, choose <cfg>.\n"   \
   "  --clean-first  = Build target 'clean' first, then build.\n"        \
   "                   (To clean only, use --target 'clean'.)\n"         \
@@ -386,6 +387,7 @@ static int do_build(int ac, char const* const* av)
   std::string dir;
   std::vector<std::string> nativeOptions;
   bool clean = false;
+  bool hasTarget = false;
 
   enum Doing { DoingNone, DoingDir, DoingTarget, DoingConfig, DoingNative};
   Doing doing = DoingDir;
@@ -397,7 +399,17 @@ static int do_build(int ac, char const* const* av)
       }
     else if(strcmp(av[i], "--target") == 0)
       {
-      doing = DoingTarget;
+      if (!hasTarget)
+        {
+        doing = DoingTarget;
+        hasTarget = true;
+        }
+      else
+        {
+        std::cerr << "'--target' may not be specified more than once.\n\n";
+        dir = "";
+        break;
+        }
       }
     else if(strcmp(av[i], "--config") == 0)
       {
