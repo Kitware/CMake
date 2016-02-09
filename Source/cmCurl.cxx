@@ -12,6 +12,11 @@
 #include "cmCurl.h"
 #include "cmSystemTools.h"
 
+// curl versions before 7.21.5 did not provide this error code
+#if defined(LIBCURL_VERSION_NUM) && LIBCURL_VERSION_NUM < 0x071505
+# define CURLE_NOT_BUILT_IN 4
+#endif
+
 #define check_curl_result(result, errstr)                               \
   if (result != CURLE_OK && result != CURLE_NOT_BUILT_IN)               \
     {                                                                   \
