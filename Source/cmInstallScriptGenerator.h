@@ -21,7 +21,7 @@ class cmInstallScriptGenerator: public cmInstallGenerator
 {
 public:
   cmInstallScriptGenerator(const char* script, bool code,
-    const char* component);
+    const char* component, bool exclude_from_all);
   virtual ~cmInstallScriptGenerator();
 
 protected:

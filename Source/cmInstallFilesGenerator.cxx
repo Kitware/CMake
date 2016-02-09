@@ -24,9 +24,11 @@ cmInstallFilesGenerator
                           std::vector<std::string> const& configurations,
                           const char* component,
                           MessageLevel message,
+                          bool exclude_from_all,
                           const char* rename,
                           bool optional):
-  cmInstallGenerator(dest, configurations, component, message),
+  cmInstallGenerator(dest, configurations, component, message,
+                     exclude_from_all),
   LocalGenerator(0),
   Files(files),
   FilePermissions(file_permissions),

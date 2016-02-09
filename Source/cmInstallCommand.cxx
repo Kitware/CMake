@@ -33,6 +33,7 @@ static cmInstallTargetGenerator* CreateInstallTargetGenerator(cmTarget& target,
                         impLib, args.GetPermissions().c_str(),
                         args.GetConfigurations(), args.GetComponent().c_str(),
                         message,
+                        args.GetExcludeFromAll(),
                         args.GetOptional() || forceOpt);
 }
 
@@ -48,7 +49,8 @@ static cmInstallFilesGenerator* CreateInstallFilesGenerator(
                         programs, args.GetPermissions().c_str(),
                         args.GetConfigurations(), args.GetComponent().c_str(),
                         message,
-                        args.GetRename().c_str(), args.GetOptional());
+                        args.GetExcludeFromAll(), args.GetRename().c_str(),
+                        args.GetOptional());
 }
 
 
@@ -117,6 +119,7 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
   int componentCount = 0;
   bool doing_script = false;
   bool doing_code = false;
+  bool exclude_from_all = false;
 
   // Scan the args once for COMPONENT. Only allow one.
   //
@@ -128,6 +131,10 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
         ++i;
         component = args[i];
         }
+    if(args[i] == "EXCLUDE_FROM_ALL")
+      {
+      exclude_from_all = true;
+      }
     }
 
   if(componentCount>1)
@@ -175,7 +182,7 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
         }
       this->Makefile->AddInstallGenerator(
         new cmInstallScriptGenerator(script.c_str(), false,
-                                     component.c_str()));
+                                     component.c_str(), exclude_from_all));
       }
     else if(doing_code)
       {
@@ -183,7 +190,7 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
       std::string code = args[i];
       this->Makefile->AddInstallGenerator(
         new cmInstallScriptGenerator(code.c_str(), true,
-                                     component.c_str()));
+                                     component.c_str(), exclude_from_all));
       }
     }
 
@@ -949,6 +956,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
   Doing doing = DoingDirs;
   bool in_match_mode = false;
   bool optional = false;
+  bool exclude_from_all = false;
   bool message_never = false;
   std::vector<std::string> dirs;
   const char* destination = 0;
@@ -1130,6 +1138,19 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       // Switch to setting the component property.
       doing = DoingComponent;
       }
+    else if(args[i] == "EXCLUDE_FROM_ALL")
+      {
+      if(in_match_mode)
+        {
+        std::ostringstream e;
+        e << args[0] << " does not allow \""
+          << args[i] << "\" after PATTERN or REGEX.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      exclude_from_all = true;
+      doing = DoingNone;
+      }
     else if(doing == DoingDirs)
       {
       // Convert this directory to a full path.
@@ -1273,6 +1294,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
                                     configurations,
                                     component.c_str(),
                                     message,
+                                    exclude_from_all,
                                     literal_args.c_str(),
                                     optional));
 
@@ -1403,7 +1425,8 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
       exportSet,
       ica.GetDestination().c_str(),
       ica.GetPermissions().c_str(), ica.GetConfigurations(),
-      ica.GetComponent().c_str(), message, fname.c_str(),
+      ica.GetComponent().c_str(), message,
+      ica.GetExcludeFromAll(), fname.c_str(),
       name_space.GetCString(), exportOld.IsEnabled());
   this->Makefile->AddInstallGenerator(exportGenerator);
 
