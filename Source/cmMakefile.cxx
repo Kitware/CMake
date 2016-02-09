@@ -2128,6 +2128,7 @@ cmMakefile::AddNewTarget(cmState::TargetType type, const std::string& name)
   cmTarget& target = it->second;
   target.SetType(type, name);
   target.SetMakefile(this);
+  this->GetGlobalGenerator()->IndexTarget(&it->second);
   return &it->second;
 }
 
@@ -4218,6 +4219,7 @@ cmMakefile::AddImportedTarget(const std::string& name,
 
   // Add to the set of available imported targets.
   this->ImportedTargets[name] = target.get();
+  this->GetGlobalGenerator()->IndexTarget(target.get());
 
   // Transfer ownership to this cmMakefile object.
   this->ImportedTargetsOwned.push_back(target.get());
