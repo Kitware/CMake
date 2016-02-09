@@ -85,7 +85,7 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
 
     if(c1 == '%' && c2 != 0)
       {
-        if (c2=='X') // Special case: UNIX time_t numeric value
+        if (c2=='s') // Special case: UNIX time_t numeric value
         {
           std::stringstream ss;
           ss << timeT;
