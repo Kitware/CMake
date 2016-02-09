@@ -1,4 +1,4 @@
-
+cmake_policy(VERSION 3.2)
 cmake_policy(SET CMP0062 OLD)
 
 add_library(iface INTERFACE)

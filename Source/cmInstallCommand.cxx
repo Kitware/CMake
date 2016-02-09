@@ -1374,10 +1374,12 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
         tei != exportSet->GetTargetExports()->end(); ++tei)
       {
       cmTargetExport const* te = *tei;
-      cmTarget* tgt = this->Makefile->FindTarget(te->TargetName);
+      cmTarget* tgt =
+        this->Makefile->GetGlobalGenerator()->FindTarget(te->TargetName);
       const bool newCMP0022Behavior =
-                      tgt->GetPolicyStatusCMP0022() != cmPolicies::WARN
-                   && tgt->GetPolicyStatusCMP0022() != cmPolicies::OLD;
+        (tgt &&
+         tgt->GetPolicyStatusCMP0022() != cmPolicies::WARN &&
+         tgt->GetPolicyStatusCMP0022() != cmPolicies::OLD);
 
       if(!newCMP0022Behavior)
         {
