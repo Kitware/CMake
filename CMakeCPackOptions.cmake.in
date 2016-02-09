@@ -246,6 +246,29 @@ if("${CPACK_GENERATOR}" STREQUAL "WIX")
     "@CMake_SOURCE_DIR@/Utilities/Release/WiX/cmake_extra_dialog.wxs"
   )
 
+  set(_WIX_CUSTOM_ACTION_ENABLED "@WIX_CUSTOM_ACTION_ENABLED@")
+  if(_WIX_CUSTOM_ACTION_ENABLED)
+    list(APPEND CPACK_WIX_EXTRA_SOURCES
+      "@CMake_SOURCE_DIR@/Utilities/Release/WiX/cmake_nsis_overwrite_dialog.wxs"
+      )
+    list(APPEND CPACK_WIX_CANDLE_EXTRA_FLAGS -dCHECK_NSIS=1)
+
+    set(_WIX_CUSTOM_ACTION_MULTI_CONFIG "@WIX_CUSTOM_ACTION_MULTI_CONFIG@")
+    if(_WIX_CUSTOM_ACTION_MULTI_CONFIG)
+      if(CPACK_BUILD_CONFIG)
+        set(_WIX_CUSTOM_ACTION_CONFIG "${CPACK_BUILD_CONFIG}")
+      else()
+        set(_WIX_CUSTOM_ACTION_CONFIG "Release")
+      endif()
+
+      list(APPEND CPACK_WIX_EXTRA_SOURCES
+        "@CMake_BINARY_DIR@/Utilities/Release/WiX/custom_action_dll-${_WIX_CUSTOM_ACTION_CONFIG}.wxs")
+    else()
+      list(APPEND CPACK_WIX_EXTRA_SOURCES
+        "@CMake_BINARY_DIR@/Utilities/Release/WiX/custom_action_dll.wxs")
+    endif()
+  endif()
+
   set(CPACK_WIX_UI_REF "CMakeUI_InstallDir")
 
   set(CPACK_WIX_PATCH_FILE
@@ -261,8 +284,7 @@ if("${CPACK_GENERATOR}" STREQUAL "WIX")
   if(BUILD_QtDialog)
     list(APPEND CPACK_WIX_PATCH_FILE
       "@CMake_SOURCE_DIR@/Utilities/Release/WiX/patch_desktop_shortcut.xml"
-    )
-
-    set(CPACK_WIX_CANDLE_EXTRA_FLAGS "-dBUILD_QtDialog=1")
+      )
+    list(APPEND CPACK_WIX_CANDLE_EXTRA_FLAGS -dBUILD_QtDialog=1)
   endif()
 endif()
