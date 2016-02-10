@@ -18,6 +18,58 @@ Variables that indicate if the mangling is found:
 ``FortranCInterface_MODULE_FOUND``
   Module subroutines and functions (declared by "MODULE PROCEDURE").
 
+This module also provides the following variables to specify
+the detected mangling, though a typical use case does not need
+to reference them and can use the `Module Functions`_ below.
+
+``FortranCInterface_GLOBAL_PREFIX``
+  Prefix for a global symbol without an underscore.
+
+``FortranCInterface_GLOBAL_SUFFIX``
+  Suffix for a global symbol without an underscore.
+
+``FortranCInterface_GLOBAL_CASE``
+  The case for a global symbol without an underscore,
+  either ``UPPER`` or ``LOWER``.
+
+``FortranCInterface_GLOBAL__PREFIX``
+  Prefix for a global symbol with an underscore.
+
+``FortranCInterface_GLOBAL__SUFFIX``
+  Suffix for a global symbol with an underscore.
+
+``FortranCInterface_GLOBAL__CASE``
+  The case for a global symbol with an underscore,
+  either ``UPPER`` or ``LOWER``.
+
+``FortranCInterface_MODULE_PREFIX``
+  Prefix for a module symbol without an underscore.
+
+``FortranCInterface_MODULE_MIDDLE``
+  Middle of a module symbol without an underscore that appears
+  between the name of the module and the name of the symbol.
+
+``FortranCInterface_MODULE_SUFFIX``
+  Suffix for a module symbol without an underscore.
+
+``FortranCInterface_MODULE_CASE``
+  The case for a module symbol without an underscore,
+  either ``UPPER`` or ``LOWER``.
+
+``FortranCInterface_MODULE__PREFIX``
+  Prefix for a module symbol with an underscore.
+
+``FortranCInterface_MODULE__MIDDLE``
+  Middle of a module symbol with an underscore that appears
+  between the name of the module and the name of the symbol.
+
+``FortranCInterface_MODULE__SUFFIX``
+  Suffix for a module symbol with an underscore.
+
+``FortranCInterface_MODULE__CASE``
+  The case for a module symbol with an underscore,
+  either ``UPPER`` or ``LOWER``.
+
 Module Functions
 ^^^^^^^^^^^^^^^^
 
