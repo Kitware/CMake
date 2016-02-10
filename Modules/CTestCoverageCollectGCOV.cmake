@@ -46,6 +46,13 @@
 #     is run as ``gcov <options>... -o <gcov-dir> <file>.gcda``.
 #     If not specified, the default option is just ``-b``.
 #
+#   ``GLOB``
+#     Recursively search for .gcda files in build_dir rather than
+#     determining search locations by reading TargetDirectories.txt.
+#
+#   ``DELETE``
+#     Delete coverage files after they've been packaged into the .tar.
+#
 #   ``QUIET``
 #     Suppress non-error messages that otherwise would have been
 #     printed out by this function.
@@ -64,7 +71,7 @@
 #  License text for the above reference.)
 include(CMakeParseArguments)
 function(ctest_coverage_collect_gcov)
-  set(options QUIET)
+  set(options QUIET GLOB DELETE)
   set(oneValueArgs TARBALL SOURCE BUILD GCOV_COMMAND)
   set(multiValueArgs GCOV_OPTIONS)
   cmake_parse_arguments(GCOV  "${options}" "${oneValueArgs}"
@@ -91,22 +98,32 @@ function(ctest_coverage_collect_gcov)
   # run gcov on each gcda file in the binary tree
   set(gcda_files)
   set(label_files)
-  # look for gcda files in the target directories
-  # could do a glob from the top of the binary tree but
-  # this will be faster and only look where the files will be
-  file(STRINGS "${binary_dir}/CMakeFiles/TargetDirectories.txt" target_dirs
-       ENCODING UTF-8)
-  foreach(target_dir ${target_dirs})
-    file(GLOB_RECURSE gfiles RELATIVE ${binary_dir} "${target_dir}/*.gcda")
-    list(LENGTH gfiles len)
-    # if we have gcda files then also grab the labels file for that target
-    if(${len} GREATER 0)
-      file(GLOB_RECURSE lfiles RELATIVE ${binary_dir}
-        "${target_dir}/Labels.json")
-      list(APPEND gcda_files ${gfiles})
-      list(APPEND label_files ${lfiles})
-    endif()
-  endforeach()
+  if (GCOV_GLOB)
+      file(GLOB_RECURSE gfiles RELATIVE ${binary_dir} "*.gcda")
+      list(LENGTH gfiles len)
+      # if we have gcda files then also grab the labels file for that target
+      if(${len} GREATER 0)
+        file(GLOB_RECURSE lfiles RELATIVE ${binary_dir} "Labels.json")
+        list(APPEND gcda_files ${gfiles})
+        list(APPEND label_files ${lfiles})
+      endif()
+  else()
+    # look for gcda files in the target directories
+    # this will be faster and only look where the files will be
+    file(STRINGS "${binary_dir}/CMakeFiles/TargetDirectories.txt" target_dirs
+         ENCODING UTF-8)
+    foreach(target_dir ${target_dirs})
+      file(GLOB_RECURSE gfiles RELATIVE ${binary_dir} "${target_dir}/*.gcda")
+      list(LENGTH gfiles len)
+      # if we have gcda files then also grab the labels file for that target
+      if(${len} GREATER 0)
+        file(GLOB_RECURSE lfiles RELATIVE ${binary_dir}
+          "${target_dir}/Labels.json")
+        list(APPEND gcda_files ${gfiles})
+        list(APPEND label_files ${lfiles})
+      endif()
+    endforeach()
+  endif()
   # return early if no coverage files were found
   list(LENGTH gcda_files len)
   if(len EQUAL 0)
@@ -134,6 +151,11 @@ function(ctest_coverage_collect_gcov)
       OUTPUT_VARIABLE out
       RESULT_VARIABLE res
       WORKING_DIRECTORY ${coverage_dir})
+
+    if (GCOV_DELETE)
+      file(REMOVE ${gcda_file})
+    endif()
+
   endforeach()
   if(NOT "${res}" EQUAL 0)
     if (NOT GCOV_QUIET)
@@ -201,4 +223,12 @@ ${label_files}
     "--format=gnutar"
     --files-from=${coverage_dir}/coverage_file_list.txt
     WORKING_DIRECTORY ${binary_dir})
+
+  if (GCOV_DELETE)
+    string(REPLACE "\n" ";" gcov_files "${gcov_files}")
+    foreach(gcov_file ${gcov_files})
+      file(REMOVE ${binary_dir}/${gcov_file})
+    endforeach()
+  endif()
+
 endfunction()
