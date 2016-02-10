@@ -198,6 +198,17 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
 
   set(CPACK_WIX_UPGRADE_GUID "8ffd1d72-b7f1-11e2-8ee5-00238bca4991")
 
+  if(MSVC AND NOT "$ENV{WIX}" STREQUAL "")
+    set(WIX_CUSTOM_ACTION_ENABLED TRUE)
+    if(CMAKE_CONFIGURATION_TYPES)
+      set(WIX_CUSTOM_ACTION_MULTI_CONFIG TRUE)
+    else()
+      set(WIX_CUSTOM_ACTION_MULTI_CONFIG FALSE)
+    endif()
+  else()
+    set(WIX_CUSTOM_ACTION_ENABLED FALSE)
+  endif()
+
   # Set the options file that needs to be included inside CMakeCPackOptions.cmake
   set(QT_DIALOG_CPACK_OPTIONS_FILE ${CMake_BINARY_DIR}/Source/QtDialog/QtDialogCPack.cmake)
   configure_file("${CMake_SOURCE_DIR}/CMakeCPackOptions.cmake.in"
