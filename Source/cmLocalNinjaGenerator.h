@@ -106,6 +106,7 @@ private:
   typedef std::map<cmCustomCommand const*, std::set<cmGeneratorTarget*> >
     CustomCommandTargetMap;
   CustomCommandTargetMap CustomCommandTargets;
+  std::vector<cmCustomCommand const*> CustomCommands;
 };
 
 #endif // ! cmLocalNinjaGenerator_h
