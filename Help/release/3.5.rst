@@ -167,6 +167,12 @@ Deprecated and Removed Features
   may break scripts that worked around the bug with their own extra
   quoting or escaping.
 
+* The :generator:`Xcode` generator was fixed to escape backslashes in
+  strings consistently with other generators.  Projects that previously
+  worked around the inconsistecy with an extra level of backslashes
+  conditioned on the Xcode generator must be updated to remove the
+  workaround for CMake 3.5 and greater.
+
 Other Changes
 =============
 
