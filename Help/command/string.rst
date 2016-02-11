@@ -277,6 +277,7 @@ specifiers:
    %j        The day of the current year (001-366).
    %m        The month of the current year (01-12).
    %M        The minute of the current hour (00-59).
+   %s        The numeric value of the UNIX time_t timestamp (UTC flag has no effect)
    %S        The second of the current minute.
              60 represents a leap second. (00-60)
    %U        The week number of the current year (00-53).

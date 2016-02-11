@@ -33,7 +33,7 @@ private:
   std::string CreateTimestampFromTimeT(time_t timeT,
       std::string formatString, bool utcFlag);
 
-  std::string AddTimestampComponent(char flag, struct tm& timeStruct);
+  std::string AddTimestampComponent(char flag, struct tm& timeStruct,const time_t timeT);
 };
 
 

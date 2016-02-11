@@ -85,13 +85,7 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
 
     if(c1 == '%' && c2 != 0)
       {
-        if (c2=='s') // Special case: UNIX time_t numeric value
-        {
-          std::stringstream ss;
-          ss << timeT;
-          result += ss.str();
-        }
-        else  result += AddTimestampComponent(c2, timeStruct);
+      result += AddTimestampComponent(c2, timeStruct,timeT);
       ++i;
       }
     else
@@ -105,7 +99,7 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
 
 //----------------------------------------------------------------------------
 std::string cmTimestamp::AddTimestampComponent(
-  char flag, struct tm& timeStruct)
+  char flag, struct tm& timeStruct, const time_t timeT)
 {
   std::string formatString = "%";
   formatString += flag;
@@ -124,6 +118,12 @@ std::string cmTimestamp::AddTimestampComponent(
     case 'y':
     case 'Y':
       break;
+    case 's': // UNIX time_t numeric value, do not use strftime()
+      {
+      std::stringstream ss;
+      ss << timeT;
+      return ss.str();
+      }
     default:
       {
       return formatString;
