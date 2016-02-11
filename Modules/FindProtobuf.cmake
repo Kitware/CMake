@@ -210,32 +210,33 @@ if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   set(_PROTOBUF_ARCH_DIR x64/)
 endif()
 
+include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+
 # Internal function: search for normal library as well as a debug one
 #    if the debug one is specified also include debug/optimized keywords
 #    in *_LIBRARIES variable
 function(_protobuf_find_libraries name filename)
-   find_library(${name}_LIBRARY
-       NAMES ${filename}
-       PATHS ${PROTOBUF_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Release)
-   mark_as_advanced(${name}_LIBRARY)
+  if(${name}_LIBRARIES)
+    # Use result recorded by a previous call.
+    return()
+  elseif(${name}_LIBRARY)
+    # Honor cache entry used by CMake 3.5 and lower.
+    set(${name}_LIBRARIES "${${name}_LIBRARY}" PARENT_SCOPE)
+  else()
+    find_library(${name}_LIBRARY_RELEASE
+      NAMES ${filename}
+      PATHS ${PROTOBUF_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Release)
+    mark_as_advanced(${name}_LIBRARY_RELEASE)
 
-   find_library(${name}_LIBRARY_DEBUG
-       NAMES ${filename}
-       PATHS ${PROTOBUF_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Debug)
-   mark_as_advanced(${name}_LIBRARY_DEBUG)
+    find_library(${name}_LIBRARY_DEBUG
+      NAMES ${filename}
+      PATHS ${PROTOBUF_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Debug)
+    mark_as_advanced(${name}_LIBRARY_DEBUG)
 
-   if(NOT ${name}_LIBRARY_DEBUG)
-      # There is no debug library
-      set(${name}_LIBRARY_DEBUG ${${name}_LIBRARY} PARENT_SCOPE)
-      set(${name}_LIBRARIES     ${${name}_LIBRARY} PARENT_SCOPE)
-   else()
-      # There IS a debug library
-      set(${name}_LIBRARIES
-          optimized ${${name}_LIBRARY}
-          debug     ${${name}_LIBRARY_DEBUG}
-          PARENT_SCOPE
-      )
-   endif()
+    select_library_configurations(${name})
+    set(${name}_LIBRARY "${${name}_LIBRARY}" PARENT_SCOPE)
+    set(${name}_LIBRARIES "${${name}_LIBRARIES}" PARENT_SCOPE)
+  endif()
 endfunction()
 
 # Internal function: find threads library
