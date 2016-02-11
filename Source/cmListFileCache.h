@@ -58,8 +58,9 @@ struct cmListFileArgument
   long Line;
 };
 
-struct cmListFileContext
+class cmListFileContext
 {
+public:
   std::string Name;
   std::string FilePath;
   long Line;
