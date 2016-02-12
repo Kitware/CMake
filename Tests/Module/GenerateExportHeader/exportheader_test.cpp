@@ -136,13 +136,10 @@ int main()
   libstatic_not_exported();
   libstatic_excluded();
 
-#define STRINGIFY_IMPL(A) #A
-#define STRINGIFY(A) STRINGIFY_IMPL(A)
-
-  compare(STRINGIFY(SRC_DIR) "/libshared_export.h",
-          STRINGIFY(BIN_DIR) "/libshared/libshared_export.h");
-  compare(STRINGIFY(SRC_DIR) "/libstatic_export.h",
-          STRINGIFY(BIN_DIR) "/libstatic/libstatic_export.h");
+  compare(SRC_DIR "/libshared_export.h",
+          BIN_DIR "/libshared/libshared_export.h");
+  compare(SRC_DIR "/libstatic_export.h",
+          BIN_DIR "/libstatic/libstatic_export.h");
 
   return 0;
 }
