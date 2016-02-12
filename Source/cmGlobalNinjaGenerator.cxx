@@ -991,6 +991,7 @@ cmGlobalNinjaGenerator
     std::set<std::string> const& utils = target->GetUtilities();
     std::copy(utils.begin(), utils.end(), std::back_inserter(outputs));
   } else {
+    cmNinjaDeps outs;
     cmTargetDependSet const& targetDeps = this->GetTargetDirectDepends(target);
     for (cmTargetDependSet::const_iterator i = targetDeps.begin();
          i != targetDeps.end(); ++i)
@@ -999,8 +1000,10 @@ cmGlobalNinjaGenerator
         {
         continue;
         }
-      this->AppendTargetOutputs(*i, outputs);
+      this->AppendTargetOutputs(*i, outs);
     }
+    std::sort(outs.begin(), outs.end());
+    outputs.insert(outputs.end(), outs.begin(), outs.end());
   }
 }
 
