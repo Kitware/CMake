@@ -13,3 +13,22 @@ cmake_parse_arguments(MY_INSTALL "${options}" "${oneValueArgs}"
 
 TEST(MY_INSTALL_DESTINATION UNDEFINED)
 TEST(MY_INSTALL_OPTIONAL TRUE)
+
+macro(foo)
+  set(_options )
+  set(_oneValueArgs FOO)
+  set(_multiValueArgs )
+  cmake_parse_arguments(_FOO2 "${_options}"
+                              "${_oneValueArgs}"
+                              "${_multiValueArgs}"
+                              "${ARGN}")
+  cmake_parse_arguments(_FOO1 "${_options}"
+                              "${_oneValueArgs}"
+                              "${_multiValueArgs}"
+                              ${ARGN})
+endmacro()
+
+foo(FOO foo)
+
+TEST(_FOO1_FOO foo)
+TEST(_FOO2_FOO foo)
