@@ -86,6 +86,13 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   this->TryCompileOuterMakefile = 0;
 
   this->ConfigureDoneCMP0026AndCMP0024 = false;
+
+  cm->GetState()->SetMinGWMake(false);
+  cm->GetState()->SetMSYSShell(false);
+  cm->GetState()->SetNMake(false);
+  cm->GetState()->SetWatcomWMake(false);
+  cm->GetState()->SetWindowsShell(false);
+  cm->GetState()->SetWindowsVSIDE(false);
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()
