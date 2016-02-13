@@ -97,6 +97,45 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
   return result;
 }
 
+// From timegm() manpage. Used in cmTimestamp::AddTimestampComponent()
+#include <cstdlib> // for geenv()
+time_t my_timegm(struct tm *tm)
+{
+    time_t ret;
+    char *tz;
+
+    tz = getenv("TZ");
+    if (tz)
+        tz = strdup(tz);
+#if defined(_MSC_VER)
+    _putenv_s("TZ", "");
+#else
+    setenv("TZ", "", 1);
+#endif
+    tzset();
+#if defined(_MSC_VER)
+    ret = _mkgmtime(tm);
+#else
+    ret = mktime(tm);
+#endif
+    if (tz) {
+#if defined(_MSC_VER)
+    _putenv_s("TZ", tz);
+#else
+     setenv("TZ", tz, 1);
+#endif
+        free(tz);
+    } else {
+#if defined(_MSC_VER)
+    _putenv_s("TZ", "");
+#else
+     unsetenv("TZ");
+#endif
+    }
+    tzset();
+    return ret;
+}
+
 //----------------------------------------------------------------------------
 std::string cmTimestamp::AddTimestampComponent(
   char flag, struct tm& timeStruct, const time_t timeT)
@@ -118,10 +157,23 @@ std::string cmTimestamp::AddTimestampComponent(
     case 'y':
     case 'Y':
       break;
-    case 's': // UNIX time_t numeric value, do not use strftime()
+    case 's': // Seconds since UNIX epoch (midnight 1-jan-1970)
       {
+      // Build a time_t for UNIX epoch and substract from the input "timeT":
+      tm tm_unix_epoch;
+      tm_unix_epoch.tm_sec = 0;
+      tm_unix_epoch.tm_min = 0;
+      tm_unix_epoch.tm_hour = 0;
+      tm_unix_epoch.tm_mday = 1;
+      tm_unix_epoch.tm_mon = 0;
+      tm_unix_epoch.tm_year = 1970-1900;
+
+      time_t  unix_epoch;
+      // Cross-platform implementation:
+      unix_epoch = my_timegm(&tm_unix_epoch);
+
       std::stringstream ss;
-      ss << timeT;
+      ss << static_cast<long int>(difftime(timeT,unix_epoch));
       return ss.str();
       }
     default:
