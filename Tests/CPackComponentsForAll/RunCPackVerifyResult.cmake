@@ -136,8 +136,8 @@ if(CPackGen MATCHES "RPM")
   endif()
 
   set(CPACK_RPM_PACKAGE_SUMMARY "default summary")
-  set(CPACK_RPM_headers_PACKAGE_SUMMARY "headers summary")
-  set(CPACK_RPM_headers_PACKAGE_DESCRIPTION "headers description")
+  set(CPACK_RPM_HEADERS_PACKAGE_SUMMARY "headers summary")
+  set(CPACK_RPM_HEADERS_PACKAGE_DESCRIPTION "headers description")
   set(CPACK_COMPONENT_APPLICATIONS_DESCRIPTION
     "An extremely useful application that makes use of MyLib")
   set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION
@@ -206,8 +206,8 @@ if(CPackGen MATCHES "RPM")
 /usr/foo/bar/other_relocatable
 /usr/foo/bar/other_relocatable/depth_two$")
       elseif(check_file_headers_match)
-        set(check_file_match_expected_summary ".*${CPACK_RPM_headers_PACKAGE_SUMMARY}.*")
-        set(check_file_match_expected_description ".*${CPACK_RPM_headers_PACKAGE_DESCRIPTION}.*")
+        set(check_file_match_expected_summary ".*${CPACK_RPM_HEADERS_PACKAGE_SUMMARY}.*")
+        set(check_file_match_expected_description ".*${CPACK_RPM_HEADERS_PACKAGE_DESCRIPTION}.*")
         set(check_file_match_expected_relocation_path "Relocations${whitespaces}:${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
         set(check_file_match_expected_architecture "noarch")
         set(spec_regex "*headers*")
