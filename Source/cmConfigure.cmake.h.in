@@ -11,6 +11,7 @@
 ============================================================================*/
 #cmakedefine HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE
 #cmakedefine HAVE_UNSETENV
+#cmakedefine HAVE__MKGMTIME
 #cmakedefine CMAKE_USE_ELF_PARSER
 #cmakedefine CMAKE_USE_MACH_PARSER
 #cmakedefine CMAKE_ENCODING_UTF8

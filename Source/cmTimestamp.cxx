@@ -97,44 +97,36 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
   return result;
 }
 
+#if defined(HAVE__MKGMTIME)
+time_t my_timegm(struct tm *tm)
+{
+	return _mkgmtime(tm);
+}
+#else
 // From timegm() manpage. Used in cmTimestamp::AddTimestampComponent()
 #include <cstdlib> // for geenv()
 time_t my_timegm(struct tm *tm)
 {
     time_t ret;
-    char *tz;
-
-    tz = getenv("TZ");
+    const char * tz = cmSystemTools::GetEnv("TZ");
     if (tz)
         tz = strdup(tz);
-#if defined(_MSC_VER)
-    _putenv_s("TZ", "");
-#else
-    setenv("TZ", "", 1);
-#endif
+    // Standard says that "TZ=" or "TZ=[UNRECOGNIZED_TZ]" means UTC.
+    // It seems that "TZ=" does NOT work, at least under Windows with neither MSVC nor MinGW,
+    // so let's use explicit "TZ=UTC":
+    cmSystemTools::PutEnv(std::string("TZ=UTC"));
     tzset();
-#if defined(_MSC_VER)
-    ret = _mkgmtime(tm);
-#else
     ret = mktime(tm);
-#endif
     if (tz) {
-#if defined(_MSC_VER)
-    _putenv_s("TZ", tz);
-#else
-     setenv("TZ", tz, 1);
-#endif
-        free(tz);
+    cmSystemTools::PutEnv(std::string("TZ=")+std::string(tz));
+    free((void*)tz);
     } else {
-#if defined(_MSC_VER)
-    _putenv_s("TZ", "");
-#else
-     unsetenv("TZ");
-#endif
+    cmSystemTools::UnsetEnv("TZ");
     }
     tzset();
     return ret;
 }
+#endif
 
 //----------------------------------------------------------------------------
 std::string cmTimestamp::AddTimestampComponent(
@@ -161,6 +153,7 @@ std::string cmTimestamp::AddTimestampComponent(
       {
       // Build a time_t for UNIX epoch and substract from the input "timeT":
       tm tm_unix_epoch;
+      ::memset(&tm_unix_epoch,0,sizeof(tm));
       tm_unix_epoch.tm_sec = 0;
       tm_unix_epoch.tm_min = 0;
       tm_unix_epoch.tm_hour = 0;
@@ -168,9 +161,12 @@ std::string cmTimestamp::AddTimestampComponent(
       tm_unix_epoch.tm_mon = 0;
       tm_unix_epoch.tm_year = 1970-1900;
 
-      time_t  unix_epoch;
-      // Cross-platform implementation:
-      unix_epoch = my_timegm(&tm_unix_epoch);
+      // Cross-platform implementation of _MKGMTIME()
+      const time_t unix_epoch = my_timegm(&tm_unix_epoch);
+      if (unix_epoch<0) {
+        cmSystemTools::Error("Error generating UNIX epoch in STRING(TIMESTAMP ...). Please, file a bug report aginst CMake");
+        return std::string();
+      }
 
       std::stringstream ss;
       ss << static_cast<long int>(difftime(timeT,unix_epoch));
