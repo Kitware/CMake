@@ -98,14 +98,14 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
 }
 
 #if defined(HAVE__MKGMTIME)
-time_t my_timegm(struct tm *tm)
+time_t my_mkgmtime(struct tm *tm)
 {
 	return _mkgmtime(tm);
 }
 #else
 // From timegm() manpage. Used in cmTimestamp::AddTimestampComponent()
 #include <cstdlib> // for geenv()
-time_t my_timegm(struct tm *tm)
+time_t my_mkgmtime(struct tm *tm)
 {
     time_t ret;
     const char * tz = cmSystemTools::GetEnv("TZ");
@@ -152,8 +152,7 @@ std::string cmTimestamp::AddTimestampComponent(
     case 's': // Seconds since UNIX epoch (midnight 1-jan-1970)
       {
       // Build a time_t for UNIX epoch and substract from the input "timeT":
-      tm tm_unix_epoch;
-      ::memset(&tm_unix_epoch,0,sizeof(tm));
+      tm tm_unix_epoch = {0};
       tm_unix_epoch.tm_sec = 0;
       tm_unix_epoch.tm_min = 0;
       tm_unix_epoch.tm_hour = 0;
@@ -162,12 +161,11 @@ std::string cmTimestamp::AddTimestampComponent(
       tm_unix_epoch.tm_year = 1970-1900;
 
       // Cross-platform implementation of _MKGMTIME()
-      const time_t unix_epoch = my_timegm(&tm_unix_epoch);
-      if (unix_epoch<0) {
+      const time_t unix_epoch = my_mkgmtime(&tm_unix_epoch);
+      if (unix_epoch==-1) {
         cmSystemTools::Error("Error generating UNIX epoch in STRING(TIMESTAMP ...). Please, file a bug report aginst CMake");
         return std::string();
       }
-
       std::stringstream ss;
       ss << static_cast<long int>(difftime(timeT,unix_epoch));
       return ss.str();
