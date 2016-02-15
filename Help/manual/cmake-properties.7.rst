@@ -141,6 +141,7 @@ Properties on Targets
    /prop_tgt/CXX_STANDARD_REQUIRED
    /prop_tgt/DEBUG_POSTFIX
    /prop_tgt/DEFINE_SYMBOL
+   /prop_tgt/DEPLOYMENT_REMOTE_DIRECTORY
    /prop_tgt/EchoString
    /prop_tgt/ENABLE_EXPORTS
    /prop_tgt/EXCLUDE_FROM_ALL
