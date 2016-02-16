@@ -15,12 +15,16 @@
 # ``PROTOBUF_IMPORT_DIRS``
 #   List of additional directories to be searched for
 #   imported .proto files.
+# ``PROTOBUF_DEBUG``
+#   Show debug messages.
 #
 # Defines the following variables:
 #
 # ``PROTOBUF_FOUND``
 #   Found the Google Protocol Buffers library
 #   (libprotobuf & header files)
+# ``PROTOBUF_VERSION``
+#   Version of package found.
 # ``PROTOBUF_INCLUDE_DIRS``
 #   Include directories for Google Protocol Buffers
 # ``PROTOBUF_LIBRARIES``
@@ -304,10 +308,61 @@ find_program(PROTOBUF_PROTOC_EXECUTABLE
 )
 mark_as_advanced(PROTOBUF_PROTOC_EXECUTABLE)
 
+if(PROTOBUF_DEBUG)
+    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+        "requested version of Google Protobuf is ${Protobuf_FIND_VERSION}")
+endif()
+
+if(PROTOBUF_INCLUDE_DIR)
+  set(_PROTOBUF_COMMON_HEADER ${PROTOBUF_INCLUDE_DIR}/google/protobuf/stubs/common.h)
+
+  if(PROTOBUF_DEBUG)
+    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+                   "location of common.h: ${_PROTOBUF_COMMON_HEADER}")
+  endif()
+
+  set(PROTOBUF_VERSION "")
+  set(PROTOBUF_LIB_VERSION "")
+  file(STRINGS ${_PROTOBUF_COMMON_HEADER} _PROTOBUF_COMMON_H_CONTENTS REGEX "#define[ \t]+GOOGLE_PROTOBUF_VERSION[ \t]+")
+  if(_PROTOBUF_COMMON_H_CONTENTS MATCHES "#define[ \t]+GOOGLE_PROTOBUF_VERSION[ \t]+([0-9]+)")
+      set(PROTOBUF_LIB_VERSION "${CMAKE_MATCH_1}")
+  endif()
+  unset(_PROTOBUF_COMMON_H_CONTENTS)
+
+  math(EXPR _PROTOBUF_MAJOR_VERSION "${PROTOBUF_LIB_VERSION} / 1000000")
+  math(EXPR _PROTOBUF_MINOR_VERSION "${PROTOBUF_LIB_VERSION} / 1000 % 1000")
+  math(EXPR _PROTOBUF_SUBMINOR_VERSION "${PROTOBUF_LIB_VERSION} % 1000")
+  set(PROTOBUF_VERSION "${_PROTOBUF_MAJOR_VERSION}.${_PROTOBUF_MINOR_VERSION}.${_PROTOBUF_SUBMINOR_VERSION}")
+
+  if(PROTOBUF_DEBUG)
+    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+        "${_PROTOBUF_COMMON_HEADER} reveals protobuf ${PROTOBUF_VERSION}")
+  endif()
+
+  # Check Protobuf compiler version to be aligned with libraries version
+  execute_process(COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} --version
+                  OUTPUT_VARIABLE _PROTOBUF_PROTOC_EXECUTABLE_VERSION)
+
+  if("${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}" MATCHES "libprotoc ([0-9.]+)")
+    set(_PROTOBUF_PROTOC_EXECUTABLE_VERSION "${CMAKE_MATCH_1}")
+  endif()
+
+  if(PROTOBUF_DEBUG)
+    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+        "${PROTOBUF_PROTOC_EXECUTABLE} reveals version ${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}")
+  endif()
+
+  if(NOT "${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}" VERSION_EQUAL "${PROTOBUF_VERSION}")
+      message(WARNING "Protobuf compiler version ${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}"
+          " doesn't match library version ${PROTOBUF_VERSION}")
+  endif()
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Protobuf DEFAULT_MSG
-    PROTOBUF_LIBRARY PROTOBUF_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Protobuf
+    REQUIRED_VARS PROTOBUF_LIBRARIES PROTOBUF_INCLUDE_DIR
+    VERSION_VAR PROTOBUF_VERSION
+)
 
 if(PROTOBUF_FOUND)
     set(PROTOBUF_INCLUDE_DIRS ${PROTOBUF_INCLUDE_DIR})
