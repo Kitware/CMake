@@ -12,9 +12,11 @@
 #include "cmTimestamp.h"
 
 #include <cstring>
+#include <cstdlib>
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sstream>
 
 //----------------------------------------------------------------------------
 std::string cmTimestamp::CurrentTime(
@@ -44,7 +46,7 @@ std::string cmTimestamp::FileModificationTime(const char* path,
 
 //----------------------------------------------------------------------------
 std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
-    std::string formatString, bool utcFlag)
+  std::string formatString, bool utcFlag) const
 {
   if(formatString.empty())
     {
@@ -79,12 +81,12 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
   for(std::string::size_type i = 0; i < formatString.size(); ++i)
     {
     char c1 = formatString[i];
-    char c2 = (i+1 < formatString.size()) ?
-      formatString[i+1] : static_cast<char>(0);
+    char c2 = (i + 1 < formatString.size()) ?
+      formatString[i + 1] : static_cast<char>(0);
 
     if(c1 == '%' && c2 != 0)
       {
-      result += AddTimestampComponent(c2, timeStruct);
+      result += AddTimestampComponent(c2, timeStruct, timeT);
       ++i;
       }
     else
@@ -97,8 +99,42 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
 }
 
 //----------------------------------------------------------------------------
+time_t cmTimestamp::CreateUtcTimeTFromTm(struct tm &tm) const
+{
+#if defined(_MSC_VER) && _MSC_VER >= 1400
+  return _mkgmtime(&tm);
+#else
+  // From Linux timegm() manpage.
+
+  const char * tz = cmSystemTools::GetEnv("TZ");
+
+  if (tz)
+    {
+    tz = strdup(tz);
+    }
+
+  // The standard says that "TZ=" or "TZ=[UNRECOGNIZED_TZ]" means UTC.
+  // It seems that "TZ=" does NOT work, at least under Windows
+  // with neither MSVC nor MinGW, so let's use explicit "TZ=UTC"
+
+  cmSystemTools::PutEnv(std::string("TZ=UTC"));
+
+  tzset();
+
+  time_t result = mktime(&tm);
+
+  cmSystemTools::PutEnv(std::string("TZ=") +
+    std::string(tz ? tz : ""));
+
+  tzset();
+
+  return result;
+#endif
+}
+
+//----------------------------------------------------------------------------
 std::string cmTimestamp::AddTimestampComponent(
-  char flag, struct tm& timeStruct)
+  char flag, struct tm& timeStruct, const time_t timeT) const
 {
   std::string formatString = "%";
   formatString += flag;
@@ -117,6 +153,26 @@ std::string cmTimestamp::AddTimestampComponent(
     case 'y':
     case 'Y':
       break;
+    case 's': // Seconds since UNIX epoch (midnight 1-jan-1970)
+      {
+      // Build a time_t for UNIX epoch and substract from the input "timeT":
+      struct tm tmUnixEpoch;
+      memset(&timeStruct, 0, sizeof(tmUnixEpoch));
+      tmUnixEpoch.tm_mday = 1;
+      tmUnixEpoch.tm_year = 1970-1900;
+
+      const time_t unixEpoch = this->CreateUtcTimeTFromTm(tmUnixEpoch);
+      if (unixEpoch == -1)
+        {
+        cmSystemTools::Error("Error generating UNIX epoch in "
+          "STRING(TIMESTAMP ...). Please, file a bug report aginst CMake");
+        return std::string();
+        }
+
+      std::stringstream ss;
+      ss << static_cast<long int>(difftime(timeT, unixEpoch));
+      return ss.str();
+      }
     default:
       {
       return formatString;
