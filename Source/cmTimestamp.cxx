@@ -128,8 +128,8 @@ time_t cmTimestamp::CreateUtcTimeTFromTm(struct tm &tm) const
   tzset();
 
   return result;
-}
 #endif
+}
 
 //----------------------------------------------------------------------------
 std::string cmTimestamp::AddTimestampComponent(
