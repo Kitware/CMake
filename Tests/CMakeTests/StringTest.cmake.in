@@ -36,6 +36,8 @@ set(TIMESTAMP-IncompleteSpecifier-RESULT 0)
 set(TIMESTAMP-IncompleteSpecifier-STDERR "~foobar%~")
 set(TIMESTAMP-AllSpecifiers-RESULT 0)
 set(TIMESTAMP-AllSpecifiers-STDERR "~[0-9]+(;[0-9]+)*~")
+set(TIMESTAMP-UnixTime-RESULT 0)
+set(TIMESTAMP-UnixTime-STDERR "~[1-9][0-9]+~")
 
 include("@CMAKE_CURRENT_SOURCE_DIR@/CheckCMakeTest.cmake")
 check_cmake_test(String
@@ -58,6 +60,7 @@ check_cmake_test(String
   TIMESTAMP-UnknownSpecifier
   TIMESTAMP-IncompleteSpecifier
   TIMESTAMP-AllSpecifiers
+  TIMESTAMP-UnixTime
   )
 
 # Execute each test listed in StringTestScript.cmake:
@@ -68,9 +71,12 @@ set(number_of_tests_expected 70)
 include("@CMAKE_CURRENT_SOURCE_DIR@/ExecuteScriptTests.cmake")
 execute_all_script_tests(${scriptname} number_of_tests_executed)
 
+string(TIMESTAMP timestamp "[%Y-%m-%d %H:%M:%S] UTC %s" UTC)
+
 # And verify that number_of_tests_executed is at least as many as we know
 # about as of this writing...
 #
+message(STATUS "timestamp='${timestamp}'")
 message(STATUS "scriptname='${scriptname}'")
 message(STATUS "number_of_tests_executed='${number_of_tests_executed}'")
 message(STATUS "number_of_tests_expected='${number_of_tests_expected}'")
