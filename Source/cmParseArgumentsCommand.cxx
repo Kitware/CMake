@@ -97,9 +97,17 @@ bool cmParseArgumentsCommand
   } insideValues = NONE;
   std::string currentArgName;
 
-  // now iterate over the remaining arguments
-  // and fill in the values where applicable
+  // Flatten ;-lists in the arguments into a single list as was done
+  // by the original function(CMAKE_PARSE_ARGUMENTS).
+  list.clear();
   for(; argIter != argEnd; ++argIter)
+    {
+    cmSystemTools::ExpandListArgument(*argIter, list);
+    }
+
+  // iterate over the arguments list and fill in the values where applicable
+  for (argIter = list.begin(), argEnd = list.end();
+       argIter != argEnd; ++argIter)
     {
     const options_map::iterator optIter = options.find(*argIter);
     if (optIter != options.end())
