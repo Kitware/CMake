@@ -684,18 +684,38 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
 std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
 {
   // figure out which language to use
-  // for now care only for C and C++
-  std::string compilerIdVar = "CMAKE_CXX_COMPILER_ID";
-  if (this->GlobalGenerator->GetLanguageEnabled("CXX") == false)
+  // for now care only for C, C++, and Fortran
+
+  // projects with C/C++ and Fortran are handled as C/C++ projects
+  bool pureFortran = false;
+  std::string compilerIdVar;
+  if (this->GlobalGenerator->GetLanguageEnabled("CXX") == true)
+    {
+    compilerIdVar = "CMAKE_CXX_COMPILER_ID";
+    }
+  else if (this->GlobalGenerator->GetLanguageEnabled("C") == true)
     {
     compilerIdVar = "CMAKE_C_COMPILER_ID";
     }
+  else if (this->GlobalGenerator->GetLanguageEnabled("Fortran") == true)
+    {
+    compilerIdVar = "CMAKE_Fortran_COMPILER_ID";
+    pureFortran = true;
+    }
+
 
   std::string compilerId = mf->GetSafeDefinition(compilerIdVar);
   std::string compiler = "gcc";  // default to gcc
   if (compilerId == "MSVC")
     {
-    compiler = "msvc8";
+    if( mf->IsDefinitionSet("MSVC10") == true )
+      {
+      compiler = "msvc10";
+      }
+    else
+      {
+      compiler = "msvc8";
+      }
     }
   else if (compilerId == "Borland")
     {
@@ -707,15 +727,44 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
     }
   else if (compilerId == "Intel")
     {
-    compiler = "icc";
+    if (pureFortran && mf->IsDefinitionSet("WIN32"))
+      {
+      compiler = "ifcwin"; // Intel Fortran for Windows (known by cbFortran)
+      }
+    else
+      {
+      compiler = "icc";
+      }
     }
   else if (compilerId == "Watcom" || compilerId == "OpenWatcom")
     {
     compiler = "ow";
     }
+  else if (compilerId == "Clang")
+    {
+    compiler = "clang";
+    }
+  else if (compilerId == "PGI")
+    {
+    if (pureFortran)
+      {
+      compiler = "pgifortran";
+      }
+    else
+      {
+      compiler = "pgi"; // does not exist as default in CodeBlocks 16.01
+      }
+    }
   else if (compilerId == "GNU")
     {
-    compiler = "gcc";
+    if (pureFortran)
+      {
+      compiler = "gfortran";
+      }
+    else
+      {
+      compiler = "gcc";
+      }
     }
   return compiler;
 }
