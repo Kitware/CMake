@@ -7,25 +7,35 @@
 # Variables specific to CPack RPM generator
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
-# CPackRPM may be used to create RPM package using CPack.  CPackRPM is a
-# CPack generator thus it uses the CPACK_XXX variables used by CPack :
-# https://cmake.org/Wiki/CMake:CPackConfiguration
+# CPackRPM may be used to create RPM package using CPack.
+# CPackRPM is a CPack generator thus it uses the ``CPACK_XXX`` variables
+# used by CPack : https://cmake.org/Wiki/CMake:CPackConfiguration.
 #
-# However CPackRPM has specific features which are controlled by the
-# specifics CPACK_RPM_XXX variables.  CPackRPM is a component aware
-# generator so when CPACK_RPM_COMPONENT_INSTALL is ON some more
-# CPACK_RPM_<ComponentName>_XXXX variables may be used in order to have
-# component specific values.  Note however that <componentName> refers
-# to the **grouping name**.  This may be either a component name or a
-# component GROUP name.  Usually those vars correspond to RPM spec file
+# CPackRPM has specific features which are controlled by the specifics
+# :code:`CPACK_RPM_XXX` variables.
+#
+# :code:`CPACK_RPM_<COMPONENT>_XXXX` variables may be used in order to have
+# **component** specific values.  Note however that ``<COMPONENT>`` refers to the
+# **grouping name** written in upper case. It may be either a component name or
+# a component GROUP name. Usually those vars correspond to RPM spec file
 # entities, one may find information about spec files here
-# http://www.rpm.org/wiki/Docs.  You'll find a detailed usage of
-# CPackRPM on the wiki:
+# http://www.rpm.org/wiki/Docs
 #
-# ::
+# .. note::
 #
-#   https://cmake.org/Wiki/CMake:CPackPackageGenerators#RPM_.28Unix_Only.29
+#  `<COMPONENT>` part of variables is prefered to be in upper case (for e.g. if
+#  component is named `foo` then use `CPACK_RPM_FOO_XXXX` variable name format)
+#  as is with other `CPACK_<COMPONENT>_XXXX` variables.
+#  For the purposes of back compatibility (CMake/CPack version 3.5 and lower)
+#  support for same cased component (e.g. `fOo` would be used as
+#  `CPACK_RPM_fOo_XXXX`) is still supported for variables defined in older
+#  versions of CMake/CPack but is not guaranteed for variables that
+#  will be added in the future. For the sake of back compatibility same cased
+#  component variables also override upper cased versions where both are
+#  present.
 #
+# List of CPack/RPM specific variables:
+# https://cmake.org/Wiki/CMake:CPackPackageGenerators#DEB_.28UNIX_only.29 .
 # However as a handy reminder here comes the list of specific variables:
 #
 # .. variable:: CPACK_RPM_PACKAGE_SUMMARY
@@ -557,7 +567,7 @@
 #   invalid location.
 
 #=============================================================================
-# Copyright 2007-2009 Kitware, Inc.
+# Copyright 2007-2016 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -575,6 +585,8 @@ function(cpack_rpm_prepare_relocation_paths)
   # set appropriate prefix, remove possible trailing slash and convert backslashes to slashes
   if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_PREFIX)
     file(TO_CMAKE_PATH "${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_PREFIX}" PATH_PREFIX)
+  elseif(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_PREFIX)
+    file(TO_CMAKE_PATH "${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_PREFIX}" PATH_PREFIX)
   else()
     file(TO_CMAKE_PATH "${CPACK_PACKAGING_INSTALL_PREFIX}" PATH_PREFIX)
   endif()
@@ -585,7 +597,8 @@ function(cpack_rpm_prepare_relocation_paths)
   # set base path prefix
   if(EXISTS "${WDIR}/${PATH_PREFIX}")
     if(NOT CPACK_RPM_NO_INSTALL_PREFIX_RELOCATION AND
-       NOT CPACK_RPM_NO_${CPACK_RPM_PACKAGE_COMPONENT}_INSTALL_PREFIX_RELOCATION)
+       NOT CPACK_RPM_NO_${CPACK_RPM_PACKAGE_COMPONENT}_INSTALL_PREFIX_RELOCATION AND
+       NOT CPACK_RPM_NO_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_INSTALL_PREFIX_RELOCATION)
       set(TMP_RPM_PREFIXES "${TMP_RPM_PREFIXES}Prefix: ${PATH_PREFIX}\n")
       list(APPEND RPM_USED_PACKAGE_PREFIXES "${PATH_PREFIX}")
 
@@ -1044,6 +1057,17 @@ if(NOT UNIX)
   message(FATAL_ERROR "CPackRPM.cmake may only be used under UNIX.")
 endif()
 
+function(cpack_rpm_variable_fallback OUTPUT_VAR_NAME)
+  set(FALLBACK_VAR_NAMES ${ARGN})
+
+  foreach(variable_name IN LISTS FALLBACK_VAR_NAMES)
+    if(${variable_name})
+      set(${OUTPUT_VAR_NAME} "${${variable_name}}" PARENT_SCOPE)
+      break()
+    endif()
+  endforeach()
+endfunction()
+
 function(cpack_rpm_generate_package)
   # rpmbuild is the basic command for building RPM package
   # it may be a simple (symbolic) link to rpm command.
@@ -1124,12 +1148,10 @@ function(cpack_rpm_generate_package)
 
   # CPACK_RPM_PACKAGE_SUMMARY (mandatory)
 
-  #Check for component summary first.
-  #If not set, it will use regular package summary logic.
   if(CPACK_RPM_PACKAGE_COMPONENT)
-    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_SUMMARY)
-      set(CPACK_RPM_PACKAGE_SUMMARY ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_SUMMARY})
-    endif()
+    cpack_rpm_variable_fallback("CPACK_RPM_PACKAGE_SUMMARY"
+      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_SUMMARY"
+      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_SUMMARY")
   endif()
 
   if(NOT CPACK_RPM_PACKAGE_SUMMARY)
@@ -1142,17 +1164,15 @@ function(cpack_rpm_generate_package)
   endif()
 
   # CPACK_RPM_PACKAGE_NAME (mandatory)
-
   if(NOT CPACK_RPM_PACKAGE_NAME)
     string(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_RPM_PACKAGE_NAME)
   endif()
 
   if(CPACK_RPM_PACKAGE_COMPONENT)
-    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_NAME)
-      set(CPACK_RPM_PACKAGE_NAME ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_NAME})
-    else()
-      set(CPACK_RPM_PACKAGE_NAME ${CPACK_RPM_PACKAGE_NAME}-${CPACK_RPM_PACKAGE_COMPONENT})
-    endif()
+    set(CPACK_RPM_PACKAGE_NAME "${CPACK_RPM_PACKAGE_NAME}-${CPACK_RPM_PACKAGE_COMPONENT}")
+    cpack_rpm_variable_fallback("CPACK_RPM_PACKAGE_NAME"
+      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_NAME"
+      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_NAME")
   endif()
 
   # CPACK_RPM_PACKAGE_VERSION (mandatory)
@@ -1179,19 +1199,18 @@ function(cpack_rpm_generate_package)
     endif()
   endif()
 
-  set(_CPACK_RPM_PACKAGE_ARCHITECTURE ${CPACK_RPM_PACKAGE_ARCHITECTURE})
-
-  #prefer component architecture
   if(CPACK_RPM_PACKAGE_COMPONENT)
-    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_ARCHITECTURE)
-      set(_CPACK_RPM_PACKAGE_ARCHITECTURE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_ARCHITECTURE})
-      if(CPACK_RPM_PACKAGE_DEBUG)
-        message("CPackRPM:Debug: using component build arch = ${_CPACK_RPM_PACKAGE_ARCHITECTURE}")
-      endif()
+    cpack_rpm_variable_fallback("CPACK_RPM_PACKAGE_ARCHITECTURE"
+      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_ARCHITECTURE"
+      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_ARCHITECTURE")
+
+    if(CPACK_RPM_PACKAGE_DEBUG)
+      message("CPackRPM:Debug: using component build arch = ${CPACK_RPM_PACKAGE_ARCHITECTURE}")
     endif()
   endif()
-  if(${_CPACK_RPM_PACKAGE_ARCHITECTURE} STREQUAL "noarch")
-    set(TMP_RPM_BUILDARCH "Buildarch: ${_CPACK_RPM_PACKAGE_ARCHITECTURE}")
+
+  if(${CPACK_RPM_PACKAGE_ARCHITECTURE} STREQUAL "noarch")
+    set(TMP_RPM_BUILDARCH "Buildarch: ${CPACK_RPM_PACKAGE_ARCHITECTURE}")
   else()
     set(TMP_RPM_BUILDARCH "")
   endif()
@@ -1214,13 +1233,10 @@ function(cpack_rpm_generate_package)
   endif()
 
   # CPACK_RPM_PACKAGE_GROUP
-
-  #Check for component group first.
-  #If not set, it will use regular package group logic.
   if(CPACK_RPM_PACKAGE_COMPONENT)
-    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_GROUP)
-      set(CPACK_RPM_PACKAGE_GROUP ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_GROUP})
-    endif()
+    cpack_rpm_variable_fallback("CPACK_RPM_PACKAGE_GROUP"
+      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_GROUP"
+      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_GROUP")
   endif()
 
   if(NOT CPACK_RPM_PACKAGE_GROUP)
@@ -1247,14 +1263,11 @@ function(cpack_rpm_generate_package)
   #   - set to a default value
   #
 
-  #Check for a component description first.
-  #If not set, it will use regular package description logic.
   if(CPACK_RPM_PACKAGE_COMPONENT)
-    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_DESCRIPTION)
-      set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_DESCRIPTION})
-    elseif(CPACK_COMPONENT_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DESCRIPTION)
-      set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_COMPONENT_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DESCRIPTION})
-    endif()
+    cpack_rpm_variable_fallback("CPACK_RPM_PACKAGE_DESCRIPTION"
+      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_DESCRIPTION"
+      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_DESCRIPTION"
+      "CPACK_COMPONENT_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DESCRIPTION")
   endif()
 
   if(NOT CPACK_RPM_PACKAGE_DESCRIPTION)
@@ -1306,32 +1319,21 @@ function(cpack_rpm_generate_package)
   # If component specific var is not provided we use the global one
   # for each component
   foreach(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX CONFLICTS AUTOPROV AUTOREQ AUTOREQPROV REQUIRES_PRE REQUIRES_POST REQUIRES_PREUN REQUIRES_POSTUN)
+    if(CPACK_RPM_PACKAGE_DEBUG)
+      message("CPackRPM:Debug: processing ${_RPM_SPEC_HEADER}")
+    endif()
+    if(CPACK_RPM_PACKAGE_COMPONENT)
+      cpack_rpm_variable_fallback("CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}"
+        "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER}"
+        "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_PACKAGE_${_RPM_SPEC_HEADER}")
+    endif()
+
+    if(DEFINED CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER})
       if(CPACK_RPM_PACKAGE_DEBUG)
-        message("CPackRPM:Debug: processing ${_RPM_SPEC_HEADER}")
+        message("CPackRPM:Debug: using CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}")
       endif()
-      if(CPACK_RPM_PACKAGE_COMPONENT)
-          if(DEFINED CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER})
-              if(CPACK_RPM_PACKAGE_DEBUG)
-                message("CPackRPM:Debug: using CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER}")
-              endif()
-              set(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER}})
-          else()
-              if(DEFINED CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER})
-                if(CPACK_RPM_PACKAGE_DEBUG)
-                  message("CPackRPM:Debug: CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER} not defined")
-                  message("CPackRPM:Debug: using CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}")
-                endif()
-                set(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}})
-              endif()
-          endif()
-      else()
-          if(DEFINED CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER})
-            if(CPACK_RPM_PACKAGE_DEBUG)
-              message("CPackRPM:Debug: using CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}")
-            endif()
-            set(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}})
-          endif()
-      endif()
+      set(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}})
+    endif()
 
     # Treat the RPM Spec keyword iff it has been properly defined
     if(DEFINED CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP)
@@ -1373,94 +1375,38 @@ function(cpack_rpm_generate_package)
   # May be used to embed a post (un)installation script in the spec file.
   # The refered script file(s) will be read and directly
   # put after the %post or %postun section
-  if(CPACK_RPM_PACKAGE_COMPONENT)
-    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_POST_INSTALL_SCRIPT_FILE)
-      set(CPACK_RPM_POST_INSTALL_READ_FILE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_POST_INSTALL_SCRIPT_FILE})
-    else()
-      set(CPACK_RPM_POST_INSTALL_READ_FILE ${CPACK_RPM_POST_INSTALL_SCRIPT_FILE})
-    endif()
-    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_POST_UNINSTALL_SCRIPT_FILE)
-      set(CPACK_RPM_POST_UNINSTALL_READ_FILE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_POST_UNINSTALL_SCRIPT_FILE})
-    else()
-      set(CPACK_RPM_POST_UNINSTALL_READ_FILE ${CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE})
-    endif()
-  else()
-    set(CPACK_RPM_POST_INSTALL_READ_FILE ${CPACK_RPM_POST_INSTALL_SCRIPT_FILE})
-    set(CPACK_RPM_POST_UNINSTALL_READ_FILE ${CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE})
-  endif()
-
-  # Handle post-install file if it has been specified
-  if(CPACK_RPM_POST_INSTALL_READ_FILE)
-    if(EXISTS ${CPACK_RPM_POST_INSTALL_READ_FILE})
-      file(READ ${CPACK_RPM_POST_INSTALL_READ_FILE} CPACK_RPM_SPEC_POSTINSTALL)
-    else()
-      message("CPackRPM:Warning: CPACK_RPM_POST_INSTALL_SCRIPT_FILE <${CPACK_RPM_POST_INSTALL_READ_FILE}> does not exists - ignoring")
-    endif()
-  else()
-    # reset SPEC var value if no post install file has been specified
-    # (either globally or component-wise)
-    set(CPACK_RPM_SPEC_POSTINSTALL "")
-  endif()
-
-  # Handle post-uninstall file if it has been specified
-  if(CPACK_RPM_POST_UNINSTALL_READ_FILE)
-    if(EXISTS ${CPACK_RPM_POST_UNINSTALL_READ_FILE})
-      file(READ ${CPACK_RPM_POST_UNINSTALL_READ_FILE} CPACK_RPM_SPEC_POSTUNINSTALL)
-    else()
-      message("CPackRPM:Warning: CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE <${CPACK_RPM_POST_UNINSTALL_READ_FILE}> does not exists - ignoring")
-    endif()
-  else()
-    # reset SPEC var value if no post uninstall file has been specified
-    # (either globally or component-wise)
-    set(CPACK_RPM_SPEC_POSTUNINSTALL "")
-  endif()
-
+  # ----------------------------------------------------------------
   # CPACK_RPM_PRE_INSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_PRE_INSTALL_SCRIPT_FILE)
   # CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_PRE_UNINSTALL_SCRIPT_FILE)
   # May be used to embed a pre (un)installation script in the spec file.
   # The refered script file(s) will be read and directly
   # put after the %pre or %preun section
-  if(CPACK_RPM_PACKAGE_COMPONENT)
-    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PRE_INSTALL_SCRIPT_FILE)
-      set(CPACK_RPM_PRE_INSTALL_READ_FILE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PRE_INSTALL_SCRIPT_FILE})
-    else()
-      set(CPACK_RPM_PRE_INSTALL_READ_FILE ${CPACK_RPM_PRE_INSTALL_SCRIPT_FILE})
-    endif()
-    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PRE_UNINSTALL_SCRIPT_FILE)
-      set(CPACK_RPM_PRE_UNINSTALL_READ_FILE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PRE_UNINSTALL_SCRIPT_FILE})
-    else()
-      set(CPACK_RPM_PRE_UNINSTALL_READ_FILE ${CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE})
-    endif()
-  else()
-    set(CPACK_RPM_PRE_INSTALL_READ_FILE ${CPACK_RPM_PRE_INSTALL_SCRIPT_FILE})
-    set(CPACK_RPM_PRE_UNINSTALL_READ_FILE ${CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE})
-  endif()
+  foreach(RPM_SCRIPT_FILE_TYPE_ "INSTALL" "UNINSTALL")
+    foreach(RPM_SCRIPT_FILE_TIME_ "PRE" "POST")
+      set("CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE"
+        "${CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_SCRIPT_FILE}")
 
-  # Handle pre-install file if it has been specified
-  if(CPACK_RPM_PRE_INSTALL_READ_FILE)
-    if(EXISTS ${CPACK_RPM_PRE_INSTALL_READ_FILE})
-      file(READ ${CPACK_RPM_PRE_INSTALL_READ_FILE} CPACK_RPM_SPEC_PREINSTALL)
-    else()
-      message("CPackRPM:Warning: CPACK_RPM_PRE_INSTALL_SCRIPT_FILE <${CPACK_RPM_PRE_INSTALL_READ_FILE}> does not exists - ignoring")
-    endif()
-  else()
-    # reset SPEC var value if no pre-install file has been specified
-    # (either globally or component-wise)
-    set(CPACK_RPM_SPEC_PREINSTALL "")
-  endif()
+      if(CPACK_RPM_PACKAGE_COMPONENT)
+        cpack_rpm_variable_fallback("CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE"
+          "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_SCRIPT_FILE"
+          "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_SCRIPT_FILE")
+      endif()
 
-  # Handle pre-uninstall file if it has been specified
-  if(CPACK_RPM_PRE_UNINSTALL_READ_FILE)
-    if(EXISTS ${CPACK_RPM_PRE_UNINSTALL_READ_FILE})
-      file(READ ${CPACK_RPM_PRE_UNINSTALL_READ_FILE} CPACK_RPM_SPEC_PREUNINSTALL)
-    else()
-      message("CPackRPM:Warning: CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE <${CPACK_RPM_PRE_UNINSTALL_READ_FILE}> does not exists - ignoring")
-    endif()
-  else()
-    # reset SPEC var value if no pre-uninstall file has been specified
-    # (either globally or component-wise)
-    set(CPACK_RPM_SPEC_PREUNINSTALL "")
-  endif()
+      # Handle file if it has been specified
+      if(CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE)
+        if(EXISTS ${CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE})
+          file(READ ${CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE}
+            "CPACK_RPM_SPEC_${RPM_SCRIPT_FILE_TIME_}${RPM_SCRIPT_FILE_TYPE_}")
+        else()
+          message("CPackRPM:Warning: CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_SCRIPT_FILE <${CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE}> does not exists - ignoring")
+        endif()
+      else()
+        # reset SPEC var value if no file has been specified
+        # (either globally or component-wise)
+        set("CPACK_RPM_SPEC_${RPM_SCRIPT_FILE_TIME_}${RPM_SCRIPT_FILE_TYPE_}" "")
+      endif()
+    endforeach()
+  endforeach()
 
   # CPACK_RPM_CHANGELOG_FILE
   # May be used to embed a changelog in the spec file.
@@ -1495,7 +1441,7 @@ function(cpack_rpm_generate_package)
   file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/SPECS)
   file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/SRPMS)
 
-  #set(CPACK_RPM_FILE_NAME "${CPACK_RPM_PACKAGE_NAME}-${CPACK_RPM_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}-${_CPACK_RPM_PACKAGE_ARCHITECTURE}.rpm")
+  #set(CPACK_RPM_FILE_NAME "${CPACK_RPM_PACKAGE_NAME}-${CPACK_RPM_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}-${CPACK_RPM_PACKAGE_ARCHITECTURE}.rpm")
   set(CPACK_RPM_FILE_NAME "${CPACK_OUTPUT_FILE_NAME}")
   # it seems rpmbuild can't handle spaces in the path
   # neither escaping (as below) nor putting quotes around the path seem to help
@@ -1510,12 +1456,14 @@ function(cpack_rpm_generate_package)
   # This must be done BEFORE the CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL handling
   if(CPACK_RPM_PACKAGE_COMPONENT)
     if(CPACK_ABSOLUTE_DESTINATION_FILES)
-     set(COMPONENT_FILES_TAG "CPACK_ABSOLUTE_DESTINATION_FILES_${CPACK_RPM_PACKAGE_COMPONENT}")
-     set(CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL "${${COMPONENT_FILES_TAG}}")
-     if(CPACK_RPM_PACKAGE_DEBUG)
-       message("CPackRPM:Debug: Handling Absolute Destination Files: <${CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL}>")
-       message("CPackRPM:Debug: in component = ${CPACK_RPM_PACKAGE_COMPONENT}")
-     endif()
+      cpack_rpm_variable_fallback("COMPONENT_FILES_TAG"
+        "CPACK_ABSOLUTE_DESTINATION_FILES_${CPACK_RPM_PACKAGE_COMPONENT}"
+        "CPACK_ABSOLUTE_DESTINATION_FILES_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}")
+      set(CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL "${${COMPONENT_FILES_TAG}}")
+      if(CPACK_RPM_PACKAGE_DEBUG)
+        message("CPackRPM:Debug: Handling Absolute Destination Files: <${CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL}>")
+        message("CPackRPM:Debug: in component = ${CPACK_RPM_PACKAGE_COMPONENT}")
+      endif()
     endif()
   else()
     if(CPACK_ABSOLUTE_DESTINATION_FILES)
@@ -1524,22 +1472,18 @@ function(cpack_rpm_generate_package)
   endif()
 
   # In component case, set CPACK_RPM_USER_FILELIST_INTERNAL with CPACK_RPM_<COMPONENT>_USER_FILELIST.
+  set(CPACK_RPM_USER_FILELIST_INTERNAL "")
   if(CPACK_RPM_PACKAGE_COMPONENT)
-    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_FILELIST)
-      set(CPACK_RPM_USER_FILELIST_INTERNAL ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_FILELIST})
-      if(CPACK_RPM_PACKAGE_DEBUG)
-        message("CPackRPM:Debug: Handling User Filelist: <${CPACK_RPM_USER_FILELIST_INTERNAL}>")
-        message("CPackRPM:Debug: in component = ${CPACK_RPM_PACKAGE_COMPONENT}")
-      endif()
-    else()
-      set(CPACK_RPM_USER_FILELIST_INTERNAL "")
+    cpack_rpm_variable_fallback("CPACK_RPM_USER_FILELIST_INTERNAL"
+      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_FILELIST"
+      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_USER_FILELIST")
+
+    if(CPACK_RPM_PACKAGE_DEBUG AND CPACK_RPM_USER_FILELIST_INTERNAL)
+      message("CPackRPM:Debug: Handling User Filelist: <${CPACK_RPM_USER_FILELIST_INTERNAL}>")
+      message("CPackRPM:Debug: in component = ${CPACK_RPM_PACKAGE_COMPONENT}")
     endif()
-  else()
-    if(CPACK_RPM_USER_FILELIST)
-      set(CPACK_RPM_USER_FILELIST_INTERNAL "${CPACK_RPM_USER_FILELIST}")
-    else()
-      set(CPACK_RPM_USER_FILELIST_INTERNAL "")
-    endif()
+  elseif(CPACK_RPM_USER_FILELIST)
+    set(CPACK_RPM_USER_FILELIST_INTERNAL "${CPACK_RPM_USER_FILELIST}")
   endif()
 
   # Handle user specified file line list in CPACK_RPM_USER_FILELIST_INTERNAL
@@ -1578,7 +1522,6 @@ function(cpack_rpm_generate_package)
       if (CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL)
         list(REMOVE_ITEM CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL ${F_PATH})
       endif()
-
     endforeach()
 
     # Rebuild CPACK_RPM_INSTALL_FILES
@@ -1650,8 +1593,10 @@ function(cpack_rpm_generate_package)
   #
 
   # We can have a component specific spec file.
-  if(CPACK_RPM_PACKAGE_COMPONENT AND CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_BINARY_SPECFILE)
-    set(CPACK_RPM_USER_BINARY_SPECFILE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_BINARY_SPECFILE})
+  if(CPACK_RPM_PACKAGE_COMPONENT)
+    cpack_rpm_variable_fallback("CPACK_RPM_USER_BINARY_SPECFILE"
+      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_BINARY_SPECFILE"
+      "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_USER_BINARY_SPECFILE")
   endif()
 
   # We should generate a USER spec file template:
@@ -1762,7 +1707,7 @@ mv \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot\" $RPM_BUILD_ROOT
       COMMAND "${RPMBUILD_EXECUTABLE}" -bb
               --define "_topdir ${CPACK_RPM_DIRECTORY}"
               --buildroot "${CPACK_RPM_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}"
-              --target "${_CPACK_RPM_PACKAGE_ARCHITECTURE}"
+              --target "${CPACK_RPM_PACKAGE_ARCHITECTURE}"
               "${CPACK_RPM_BINARY_SPECFILE}"
       WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}"
       RESULT_VARIABLE CPACK_RPMBUILD_EXEC_RESULT

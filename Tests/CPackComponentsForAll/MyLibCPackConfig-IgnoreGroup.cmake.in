@@ -14,24 +14,24 @@ if(CPACK_GENERATOR MATCHES "RPM")
   set(CPACK_PACKAGING_INSTALL_PREFIX "/usr/foo/bar")
 
   # test requires
-  set(CPACK_RPM_applications_PACKAGE_REQUIRES "mylib-libraries")
+  set(CPACK_RPM_APPLICATIONS_PACKAGE_REQUIRES "mylib-libraries")
 
   # test a "noarch" rpm
-  set(CPACK_RPM_headers_PACKAGE_ARCHITECTURE "noarch")
+  set(CPACK_RPM_HEADERS_PACKAGE_ARCHITECTURE "noarch")
 
   # test cross-built rpm
-  set(CPACK_RPM_applications_PACKAGE_ARCHITECTURE "armv7hf")
+  set(CPACK_RPM_APPLICATIONS_PACKAGE_ARCHITECTURE "armv7hf")
 
   # test package summary override - headers rpm is generated in the middle
   set(CPACK_RPM_PACKAGE_SUMMARY "default summary")
-  set(CPACK_RPM_headers_PACKAGE_SUMMARY "headers summary")
+  set(CPACK_RPM_HEADERS_PACKAGE_SUMMARY "headers summary")
 
   # test package description override - headers rpm is generated in the middle
-  set(CPACK_RPM_headers_PACKAGE_DESCRIPTION "headers description")
+  set(CPACK_RPM_HEADERS_PACKAGE_DESCRIPTION "headers description")
 
   # test package do not use CPACK_PACKAGING_INSTALL_PREFIX
   # as relocation path
-  set(CPACK_RPM_NO_libraries_INSTALL_PREFIX_RELOCATION true)
+  set(CPACK_RPM_NO_LIBRARIES_INSTALL_PREFIX_RELOCATION true)
 endif()
 
 if(CPACK_GENERATOR MATCHES "DEB")

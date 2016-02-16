@@ -7,7 +7,7 @@ endif()
 
 if(CPACK_GENERATOR MATCHES "RPM")
    set(CPACK_RPM_COMPONENT_INSTALL "ON")
-   set(CPACK_RPM_Development_PACKAGE_REQUIRES "mylib-Runtime")
+   set(CPACK_RPM_DEVELOPMENT_PACKAGE_REQUIRES "mylib-Runtime")
 endif()
 
 if(CPACK_GENERATOR MATCHES "DEB")
