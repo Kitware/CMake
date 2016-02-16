@@ -100,8 +100,8 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
 //----------------------------------------------------------------------------
 time_t cmTimestamp::CreateUtcTimeTFromTm(struct tm &tm) const
 {
-#ifdef _MSC_VER
-  return _mkgmtime(tm);
+#if defined(_MSC_VER) && _MSC_VER >= 1400
+  return _mkgmtime(&tm);
 #else
   // From Linux timegm() manpage.
 
