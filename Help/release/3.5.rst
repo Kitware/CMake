@@ -159,9 +159,6 @@ Other
 Deprecated and Removed Features
 ===============================
 
-* The :module:`CMakeForceCompiler` module and its macros are now deprecated.
-  See module documentation for an explanation.
-
 * The :manual:`cmake(1)` ``-E time`` command now properly passes arguments
   with spaces or special characters through to the child process.  This
   may break scripts that worked around the bug with their own extra
