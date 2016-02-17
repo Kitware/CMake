@@ -57,7 +57,8 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
       }
     }
 
-  struct tm timeStruct = {0};
+  struct tm timeStruct;
+  memset(&timeStruct, 0, sizeof(timeStruct));
 
   struct tm* ptr = (struct tm*) 0;
   if(utcFlag)
@@ -155,12 +156,13 @@ std::string cmTimestamp::AddTimestampComponent(
     case 's': // Seconds since UNIX epoch (midnight 1-jan-1970)
       {
       // Build a time_t for UNIX epoch and substract from the input "timeT":
-      struct tm tm_unix_epoch = {0};
-      tm_unix_epoch.tm_mday = 1;
-      tm_unix_epoch.tm_year = 1970-1900;
+      struct tm tmUnixEpoch;
+      memset(&timeStruct, 0, sizeof(tmUnixEpoch));
+      tmUnixEpoch.tm_mday = 1;
+      tmUnixEpoch.tm_year = 1970-1900;
 
-      const time_t unix_epoch = this->CreateUtcTimeTFromTm(tm_unix_epoch);
-      if (unix_epoch == -1)
+      const time_t unixEpoch = this->CreateUtcTimeTFromTm(tmUnixEpoch);
+      if (unixEpoch == -1)
         {
         cmSystemTools::Error("Error generating UNIX epoch in "
           "STRING(TIMESTAMP ...). Please, file a bug report aginst CMake");
@@ -168,7 +170,7 @@ std::string cmTimestamp::AddTimestampComponent(
         }
 
       std::stringstream ss;
-      ss << static_cast<long int>(difftime(timeT, unix_epoch));
+      ss << static_cast<long int>(difftime(timeT, unixEpoch));
       return ss.str();
       }
     default:
