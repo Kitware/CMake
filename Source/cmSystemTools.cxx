@@ -2184,8 +2184,10 @@ unsigned int cmSystemTools::RandomSeed()
   } seed;
 
   // Try using a real random source.
-  cmsys::ifstream fin("/dev/urandom");
-  if(fin && fin.read(seed.bytes, sizeof(seed)) &&
+  cmsys::ifstream fin;
+  fin.rdbuf()->pubsetbuf(0, 0); // Unbuffered read.
+  fin.open("/dev/urandom");
+  if(fin.good() && fin.read(seed.bytes, sizeof(seed)) &&
      fin.gcount() == sizeof(seed))
     {
     return seed.integer;
