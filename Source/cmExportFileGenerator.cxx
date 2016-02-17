@@ -772,6 +772,27 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
     lastPos = endPos;
     }
 
+  pos = 0;
+  lastPos = pos;
+  while (errorString.empty() &&
+         (pos = input.find("$<LINK_ONLY:", lastPos)) != input.npos)
+    {
+    std::string::size_type nameStartPos = pos + sizeof("$<LINK_ONLY:") - 1;
+    std::string::size_type endPos = input.find(">", nameStartPos);
+    if (endPos == input.npos)
+      {
+      errorString = "$<LINK_ONLY:...> expression incomplete";
+      break;
+      }
+    std::string libName = input.substr(nameStartPos, endPos - nameStartPos);
+    if (cmGeneratorExpression::IsValidTargetName(libName) &&
+        this->AddTargetNamespace(libName, target, missingTargets))
+      {
+      input.replace(nameStartPos, endPos - nameStartPos, libName);
+      }
+    lastPos = nameStartPos + libName.size() + 1;
+    }
+
   this->ReplaceInstallPrefix(input);
 
   if (!errorString.empty())
