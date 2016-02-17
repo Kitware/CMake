@@ -157,7 +157,7 @@ std::string cmTimestamp::AddTimestampComponent(
       {
       // Build a time_t for UNIX epoch and substract from the input "timeT":
       struct tm tmUnixEpoch;
-      memset(&timeStruct, 0, sizeof(tmUnixEpoch));
+      memset(&tmUnixEpoch, 0, sizeof(tmUnixEpoch));
       tmUnixEpoch.tm_mday = 1;
       tmUnixEpoch.tm_year = 1970-1900;
 
