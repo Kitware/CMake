@@ -72,12 +72,13 @@ Installing Targets
           [[ARCHIVE|LIBRARY|RUNTIME|FRAMEWORK|BUNDLE|
             PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE]
            [DESTINATION <dir>]
-           [INCLUDES DESTINATION [<dir> ...]]
            [PERMISSIONS permissions...]
            [CONFIGURATIONS [Debug|Release|...]]
            [COMPONENT <component>]
            [OPTIONAL] [NAMELINK_ONLY|NAMELINK_SKIP]
-          ] [...])
+          ] [...]
+          [INCLUDES DESTINATION [<dir> ...]]
+          )
 
 The ``TARGETS`` form specifies rules for installing targets from a
 project.  There are five kinds of target files that may be installed:
@@ -97,11 +98,7 @@ change the type of target to which the subsequent properties apply.
 If none is given the installation properties apply to all target
 types.  If only one is given then only targets of that type will be
 installed (which can be used to install just a DLL or just an import
-library).  The ``INCLUDES DESTINATION`` specifies a list of directories
-which will be added to the :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`
-target property of the ``<targets>`` when exported by the
-:command:`install(EXPORT)` command.  If a relative path is
-specified, it is treated as relative to the ``$<INSTALL_PREFIX>``.
+library).
 
 The ``PRIVATE_HEADER``, ``PUBLIC_HEADER``, and ``RESOURCE`` arguments
 cause subsequent properties to be applied to installing a ``FRAMEWORK``
@@ -130,6 +127,14 @@ do not have namelinks or when a library is not versioned the
 option installs nothing.  See the :prop_tgt:`VERSION` and
 :prop_tgt:`SOVERSION` target properties for details on creating versioned
 shared libraries.
+
+The ``INCLUDES DESTINATION`` specifies a list of directories
+which will be added to the :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`
+target property of the ``<targets>`` when exported by the
+:command:`install(EXPORT)` command.  If a relative path is
+specified, it is treated as relative to the ``$<INSTALL_PREFIX>``.
+This is independent of the rest of the argument groups and does
+not actually install anything.
 
 One or more groups of properties may be specified in a single call to
 the ``TARGETS`` form of this command.  A target may be installed more than
