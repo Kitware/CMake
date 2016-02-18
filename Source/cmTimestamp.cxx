@@ -106,25 +106,23 @@ time_t cmTimestamp::CreateUtcTimeTFromTm(struct tm &tm) const
 #else
   // From Linux timegm() manpage.
 
-  const char * tz = cmSystemTools::GetEnv("TZ");
-
-  if (tz)
+  std::string tz_old = "TZ=";
+  if (const char* tz = cmSystemTools::GetEnv("TZ"))
     {
-    tz = strdup(tz);
+    tz_old += tz;
     }
 
   // The standard says that "TZ=" or "TZ=[UNRECOGNIZED_TZ]" means UTC.
   // It seems that "TZ=" does NOT work, at least under Windows
   // with neither MSVC nor MinGW, so let's use explicit "TZ=UTC"
 
-  cmSystemTools::PutEnv(std::string("TZ=UTC"));
+  cmSystemTools::PutEnv("TZ=UTC");
 
   tzset();
 
   time_t result = mktime(&tm);
 
-  cmSystemTools::PutEnv(std::string("TZ=") +
-    std::string(tz ? tz : ""));
+  cmSystemTools::PutEnv(tz_old);
 
   tzset();
 
