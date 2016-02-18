@@ -60,8 +60,7 @@
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#  include <fcntl.h>
-#  include "cmCryptoHash.h"
+# include "cmCryptoHash.h"
 #endif
 
 #if defined(CMAKE_USE_ELF_PARSER)
