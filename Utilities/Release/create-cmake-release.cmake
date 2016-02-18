@@ -7,7 +7,7 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/logs)
 
 set(RELEASE_SCRIPTS_BATCH_1
   dash3win7_release.cmake     # Windows
-  dashmacmini5_release.cmake  # OS X x86_64
+  bigmac_release.cmake        # OS X x86_64
   magrathea_release.cmake     # Linux
   linux64_release.cmake       # Linux x86_64
 )
