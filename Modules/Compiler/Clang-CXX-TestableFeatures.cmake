@@ -8,7 +8,6 @@ set(testable_features
   cxx_constexpr
   cxx_contextual_conversions
   cxx_decltype
-  cxx_decltype_incomplete_return_types
   cxx_default_function_template_args
   cxx_defaulted_functions
   cxx_delegating_constructors
@@ -36,6 +35,9 @@ set(testable_features
   cxx_variable_templates
   cxx_variadic_templates
 )
+if(NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
+  list(APPEND testable_features cxx_decltype_incomplete_return_types)
+endif()
 
 foreach(feature ${testable_features})
   set(_cmake_feature_test_${feature} "${_cmake_oldestSupported} && __has_feature(${feature})")
