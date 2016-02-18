@@ -303,6 +303,7 @@ Properties on Tests
    /prop_test/RUN_SERIAL
    /prop_test/SKIP_RETURN_CODE
    /prop_test/TIMEOUT
+   /prop_test/TIMEOUT_AFTER_MATCH
    /prop_test/WILL_FAIL
    /prop_test/WORKING_DIRECTORY
 
