@@ -30,7 +30,7 @@ public:
    * commands, such as TryRun can access the same logic without
    * duplication.
    */
-  int TryCompileCode(std::vector<std::string> const& argv);
+  int TryCompileCode(std::vector<std::string> const& argv, bool isTryRun);
 
   /**
    * This deletes all the files created by TryCompileCode.
@@ -44,8 +44,8 @@ public:
   TryCompileCode. The result is stored in OutputFile. If nothing is found,
   the error message is stored in FindErrorMessage.
    */
-  void FindOutputFile(const std::string& targetName);
-
+  void FindOutputFile(const std::string& targetName,
+                      cmState::TargetType targetType);
 
   cmTypeMacro(cmCoreTryCompile, cmCommand);
 

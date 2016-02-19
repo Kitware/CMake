@@ -135,7 +135,7 @@ bool cmTryRunCommand
   this->CompileResultVariable = argv[1];
 
   // do the try compile
-  int res = this->TryCompileCode(tryCompile);
+  int res = this->TryCompileCode(tryCompile, true);
 
   // now try running the command if it compiled
   if (!res)

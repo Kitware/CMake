@@ -28,7 +28,7 @@ bool cmTryCompileCommand
     return false;
     }
 
-  this->TryCompileCode(argv);
+  this->TryCompileCode(argv, false);
 
   // if They specified clean then we clean up what we can
   if (this->SrcFileSignature)
