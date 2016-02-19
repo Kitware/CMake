@@ -687,7 +687,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyWindows
       dash3win7_release.cmake)
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyOSX
-      dashmacmini5_release.cmake)
+      bigmac_release.cmake)
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyLinux32
       magrathea_release.cmake)
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyLinux64
