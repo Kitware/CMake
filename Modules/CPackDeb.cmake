@@ -504,6 +504,9 @@ function(cpack_deb_prepare_package_vars)
         file(MAKE_DIRECTORY ${CPACK_TEMPORARY_DIRECTORY}/debian)
         file(WRITE ${CPACK_TEMPORARY_DIRECTORY}/debian/control "")
 
+        # Create a DEBIAN directory so that dpkg-shlibdeps can find the package dir when resolving $ORIGIN.
+        file(MAKE_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}/DEBIAN")
+
         # Add --ignore-missing-info if the tool supports it
         execute_process(COMMAND env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --help
           OUTPUT_VARIABLE _TMP_HELP
@@ -544,6 +547,9 @@ function(cpack_deb_prepare_package_vars)
         # Remove blank control file
         # Might not be safe if package actual contain file or directory named debian
         file(REMOVE_RECURSE "${CPACK_TEMPORARY_DIRECTORY}/debian")
+
+        # remove temporary directory that was created only for dpkg-shlibdeps execution
+        file(REMOVE_RECURSE "${CPACK_TEMPORARY_DIRECTORY}/DEBIAN")
       else()
         if(CPACK_DEBIAN_PACKAGE_DEBUG)
           message(AUTHOR_WARNING "CPackDeb Debug: Using only user-provided depends because package does not contain executable files that link to shared libraries.")
