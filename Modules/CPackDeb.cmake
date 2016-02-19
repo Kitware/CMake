@@ -504,6 +504,9 @@ function(cpack_deb_prepare_package_vars)
         file(MAKE_DIRECTORY ${CPACK_TEMPORARY_DIRECTORY}/debian)
         file(WRITE ${CPACK_TEMPORARY_DIRECTORY}/debian/control "")
 
+        # Create a DEBIAN directory so that dpkg-shlibdeps can find the package dir when resolving $ORIGIN.
+        file(MAKE_DIRECTORY ${CPACK_TEMPORARY_DIRECTORY}/DEBIAN)
+
         # Add --ignore-missing-info if the tool supports it
         execute_process(COMMAND env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --help
           OUTPUT_VARIABLE _TMP_HELP
