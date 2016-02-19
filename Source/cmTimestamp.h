@@ -16,7 +16,7 @@
 #include <time.h>
 
 /** \class cmTimestamp
- * \brief Utility class to generate sting representation of a timestamp
+ * \brief Utility class to generate string representation of a timestamp
  *
  */
 class cmTimestamp
@@ -33,7 +33,7 @@ private:
   std::string CreateTimestampFromTimeT(time_t timeT,
       std::string formatString, bool utcFlag);
 
-  std::string AddTimestampComponent(char flag, struct tm& timeStruct);
+  std::string AddTimestampComponent(char flag, struct tm& timeStruct,const time_t timeT);
 };
 
 
