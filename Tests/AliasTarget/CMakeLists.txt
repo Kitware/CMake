@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.8.11)
+cmake_policy(SET CMP0054 NEW)
 project(AliasTarget)
 
 set(CMAKE_CXX_STANDARD 98)
@@ -9,6 +10,12 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL HP AND
     CMAKE_CXX98_STANDARD_COMPILE_OPTION STREQUAL "+hpxstd98")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -AA")
 endif ()
+
+# Clang/C2 in C++98 mode cannot properly handle some of MSVC headers
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
+    CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
+  set(CMAKE_CXX_STANDARD 11)
+endif()
 
 add_library(foo SHARED empty.cpp)
 add_library(PREFIX::Foo ALIAS foo)
