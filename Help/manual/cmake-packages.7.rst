@@ -89,7 +89,7 @@ a package is to set the ``CMAKE_PREFIX_PATH`` cache variable.
 
 Config-file packages are provided by upstream vendors as part of development
 packages, that is, they belong with the header files and any other files
-provided to assist downsteams in using the package.
+provided to assist downstreams in using the package.
 
 A set of variables which provide package status information are also set
 automatically when using a config-file package.  The ``<Package>_FOUND``
@@ -352,7 +352,7 @@ version-specific variables ``<Package>_VERSION``, ``<Package>_VERSION_MAJOR``,
 used to export the targets in the ``ClimbingStatsTargets`` export-set, defined
 previously by the :command:`install(TARGETS)` command. This command generates
 the ``ClimbingStatsTargets.cmake`` file to contain :prop_tgt:`IMPORTED`
-targets, suitable for use by downsteams and arranges to install it to
+targets, suitable for use by downstreams and arranges to install it to
 ``lib/cmake/ClimbingStats``.  The generated ``ClimbingStatsConfigVersion.cmake``
 and a ``cmake/ClimbingStatsConfig.cmake`` are installed to the same location,
 completing the package.
@@ -383,7 +383,7 @@ In this case, when using :command:`install(TARGETS)` the ``INCLUDES DESTINATION`
 was specified.  This causes the ``IMPORTED`` targets to have their
 :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` populated with the ``include``
 directory in the :variable:`CMAKE_INSTALL_PREFIX`.  When the ``IMPORTED``
-target is used by downsteam, it automatically consumes the entries from
+target is used by downstream, it automatically consumes the entries from
 that property.
 
 Creating a Package Configuration File
@@ -412,7 +412,7 @@ This can also be extended to cover dependencies:
   target_link_libraries(ClimbingStats PUBLIC Stats::Types)
 
 As the ``Stats::Types`` target is a ``PUBLIC`` dependency of ``ClimbingStats``,
-downsteams must also find the ``Stats`` package and link to the ``Stats::Types``
+downstreams must also find the ``Stats`` package and link to the ``Stats::Types``
 library.  The ``Stats`` package should be found in the ``ClimbingStatsConfig.cmake``
 file to ensure this.  The ``find_dependency`` macro from the
 :module:`CMakeFindDependencyMacro` helps with this by propagating
@@ -464,7 +464,7 @@ Creating a Package Configuration File for the Build Tree
 
 The :command:`export(EXPORT)` command creates an :prop_tgt:`IMPORTED` targets
 definition file which is specific to the build-tree, and is not relocatable.
-This can similiarly be used with a suitable package configuration file and
+This can similarly be used with a suitable package configuration file and
 package version file to define a package for the build tree which may be used
 without installation.  Consumers of the build tree can simply ensure that the
 :variable:`CMAKE_PREFIX_PATH` contains the build directory, or set the
