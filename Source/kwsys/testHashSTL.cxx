@@ -18,7 +18,6 @@
 #if 0
 # include "hash_map.hxx.in"
 # include "hash_set.hxx.in"
-# include "hashtable.hxx.in"
 #endif
 
 #include <iostream>
