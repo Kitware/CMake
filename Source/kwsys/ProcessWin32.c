@@ -17,7 +17,7 @@
    duplicate the above list of headers.  */
 #if 0
 # include "Process.h.in"
-# include "Encoding_c.h.in"
+# include "Encoding.h.in"
 #endif
 
 /*
@@ -698,6 +698,8 @@ void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout)
     {
     cp->Timeout = 0;
     }
+  // Force recomputation of TimeoutTime.
+  cp->TimeoutTime.QuadPart = -1;
 }
 
 /*--------------------------------------------------------------------------*/
