@@ -23,3 +23,18 @@ endif()
 
 # Determine builtin macros and include dirs:
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeExtraGeneratorDetermineCompilerMacrosAndIncludeDirs.cmake)
+
+# Try to find out how many CPUs we have and set the -j argument for make accordingly
+set(_CMAKE_CODEBLOCKS_INITIAL_MAKE_ARGS "")
+
+include(ProcessorCount)
+processorcount(_CMAKE_CODEBLOCKS_PROCESSOR_COUNT)
+
+# Only set -j if we are under UNIX and if the make-tool used actually has "make" in the name
+# (we may also get here in the future e.g. for ninja)
+if("${_CMAKE_CODEBLOCKS_PROCESSOR_COUNT}" GREATER 1  AND  CMAKE_HOST_UNIX  AND  "${CMAKE_MAKE_PROGRAM}" MATCHES make)
+  set(_CMAKE_CODEBLOCKS_INITIAL_MAKE_ARGS "-j${_CMAKE_CODEBLOCKS_PROCESSOR_COUNT}")
+endif()
+
+# This variable is used by the CodeBlocks generator and appended to the make invocation commands.
+set(CMAKE_CODEBLOCKS_MAKE_ARGUMENTS "${_CMAKE_CODEBLOCKS_INITIAL_MAKE_ARGS}" CACHE STRING "Additional command line arguments when CodeBlocks invokes make. Enter e.g. -j<some_number> to get parallel builds")

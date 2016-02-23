@@ -54,13 +54,16 @@ private:
   std::string GetCBCompilerId(const cmMakefile* mf);
   int GetCBTargetType(cmGeneratorTarget* target);
   std::string BuildMakeCommand(const std::string& make, const char* makefile,
-                               const std::string& target);
+                               const std::string& target,
+                               const std::string& makeFlags);
   void AppendTarget(cmGeneratedFileStream& fout,
                     const std::string& targetName,
                     cmGeneratorTarget* target,
                     const char* make,
                     const cmLocalGenerator* lg,
-                    const char* compiler);
+                    const char* compiler,
+                    const std::string& makeFlags
+                   );
 
 };
 
