@@ -111,102 +111,102 @@ void cmXCodeObject::Print(std::ostream& out)
   for(i = this->ObjectAttributes.begin();
       i != this->ObjectAttributes.end(); ++i)
     {
-    cmXCodeObject* object = i->second;
-    if(i->first != "isa")
-      {
-      cmXCodeObject::Indent(3*indentFactor, out);
-      }
-    else
-      {
+    if(i->first == "isa")
       continue;
-      }
-    if(object->TypeValue == OBJECT_LIST)
+
+    PrintAttribute(out, 3, separator, indentFactor, i->first, i->second, this);
+    }
+  cmXCodeObject::Indent(2*indentFactor, out);
+  out << "};\n";
+}
+
+void cmXCodeObject::PrintAttribute(std::ostream& out, const int level,
+                                   const std::string separator,
+                                   const int factor, const std::string& name,
+                                   const cmXCodeObject* object,
+                                   const cmXCodeObject* parent)
+{
+  cmXCodeObject::Indent(level * factor, out);
+  switch(object->TypeValue)
+    {
+    case OBJECT_LIST:
       {
-      out << i->first << " = (" << separator;
-      for(unsigned int k = 0; k < i->second->List.size(); k++)
+      out << name << " = (";
+      if(parent->TypeValue != ATTRIBUTE_GROUP)
         {
-        cmXCodeObject::Indent(4*indentFactor, out);
-        out << i->second->List[k]->Id;
-        i->second->List[k]->PrintComment(out);
-        out << "," << separator;
+        out << separator;
         }
-      cmXCodeObject::Indent(3*indentFactor, out);
+      for(unsigned int i = 0; i < object->List.size(); ++i)
+        {
+        if(object->List[i]->TypeValue == STRING)
+          {
+          object->List[i]->PrintString(out);
+          if(i+1 < object->List.size())
+            {
+            out << ",";
+            }
+          }
+        else
+          {
+          cmXCodeObject::Indent((level + 1) * factor, out);
+          out << object->List[i]->Id;
+          object->List[i]->PrintComment(out);
+          out << "," << separator;
+          }
+        }
+      if(parent->TypeValue != ATTRIBUTE_GROUP)
+        {
+        cmXCodeObject::Indent(level * factor, out);
+        }
       out << ");" << separator;
       }
-    else if(object->TypeValue == ATTRIBUTE_GROUP)
+      break;
+
+    case ATTRIBUTE_GROUP:
       {
-      std::map<std::string, cmXCodeObject*>::iterator j;
-      out << i->first << " = {";
+      out << name << " = {";
       if(separator == "\n")
         {
         out << separator;
         }
-      for(j = object->ObjectAttributes.begin(); j !=
-            object->ObjectAttributes.end(); ++j)
+      std::map<std::string, cmXCodeObject*>::const_iterator i;
+      for(i = object->ObjectAttributes.begin();
+          i != object->ObjectAttributes.end(); ++i)
         {
-        cmXCodeObject::Indent(4 *indentFactor, out);
-
-        if(j->second->TypeValue == STRING)
-          {
-          cmXCodeObject::PrintString(out,j->first);
-          out << " = ";
-          j->second->PrintString(out);
-          out << ";";
-          }
-        else if(j->second->TypeValue == OBJECT_LIST)
-          {
-          cmXCodeObject::PrintString(out,j->first);
-          out << " = (";
-          for(unsigned int k = 0; k < j->second->List.size(); k++)
-            {
-            if(j->second->List[k]->TypeValue == STRING)
-              {
-              j->second->List[k]->PrintString(out);
-              out << ", ";
-              }
-            else
-              {
-              out << "List_" << k << "_TypeValue_IS_NOT_STRING, ";
-              }
-            }
-          out << ");";
-          }
-        else
-          {
-          cmXCodeObject::PrintString(out,j->first);
-          out << " = error_unexpected_TypeValue_" <<
-            j->second->TypeValue << ";";
-          }
-
-        out << separator;
+        PrintAttribute(out, (level + 1) * factor, separator, factor,
+                       i->first, i->second, object);
         }
-      cmXCodeObject::Indent(3 *indentFactor, out);
+      cmXCodeObject::Indent(level * factor, out);
       out << "};" << separator;
       }
-    else if(object->TypeValue == OBJECT_REF)
+      break;
+
+    case OBJECT_REF:
       {
-      cmXCodeObject::PrintString(out,i->first);
+      cmXCodeObject::PrintString(out, name);
       out << " = " << object->Object->Id;
-      if(object->Object->HasComment() && i->first != "remoteGlobalIDString")
+      if(object->Object->HasComment() && name != "remoteGlobalIDString")
         {
         object->Object->PrintComment(out);
         }
       out << ";" << separator;
       }
-    else if(object->TypeValue == STRING)
+      break;
+
+    case STRING:
       {
-      cmXCodeObject::PrintString(out,i->first);
+      cmXCodeObject::PrintString(out, name);
       out << " = ";
       object->PrintString(out);
       out << ";" << separator;
       }
-    else
+      break;
+
+    default:
       {
-      out << "what is this?? " << i->first << "\n";
+      break;
       }
     }
-  cmXCodeObject::Indent(2*indentFactor, out);
-  out << "};\n";
 }
 
 //----------------------------------------------------------------------------
