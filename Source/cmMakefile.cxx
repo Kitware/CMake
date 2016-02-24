@@ -518,6 +518,11 @@ void cmMakefile::ReadListFile(cmListFile const& listFile,
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
 
+  cmListFileContext lfc;
+  lfc.FilePath = filenametoread;
+  lfc.Line = 1;
+  this->CreateArbitrarySnapshot(lfc);
+
   // Run the parsed commands.
   const size_t numberFunctions = listFile.Functions.size();
   for (size_t i = 0; i < numberFunctions; ++i) {
