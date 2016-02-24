@@ -18,6 +18,12 @@
 #include <vector>
 #include <string.h> /* strlen */
 
+// Work-around CMake dependency scanning limitation.  This must
+// duplicate the above list of headers.
+#if 0
+# include "Configure.hxx.in"
+#endif
+
 int testIOS(int, char*[])
 {
   std::ostringstream ostr;
