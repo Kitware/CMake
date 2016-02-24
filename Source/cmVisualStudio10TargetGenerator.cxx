@@ -2661,6 +2661,33 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
       }
     }
 
+  // Hack to fix flag version selection in a common use case.
+  // FIXME: Select flag table based on toolset instead of VS version.
+  if (this->LocalGenerator->GetVersion() >=
+      cmGlobalVisualStudioGenerator::VS14)
+    {
+    cmGlobalVisualStudio10Generator* gg =
+      static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
+    const char* toolset = gg->GetPlatformToolset();
+    if (toolset &&
+        (cmHasLiteralPrefix(toolset, "v110") ||
+         cmHasLiteralPrefix(toolset, "v120")))
+      {
+      if (const char* debug = linkOptions.GetFlag("GenerateDebugInformation"))
+        {
+        // Convert value from enumeration back to boolean for older toolsets.
+        if (strcmp(debug, "No") == 0)
+          {
+          linkOptions.AddFlag("GenerateDebugInformation", "false");
+          }
+        else if (strcmp(debug, "Debug") == 0)
+          {
+          linkOptions.AddFlag("GenerateDebugInformation", "true");
+          }
+        }
+      }
+    }
+
   this->LinkOptions[config] = pOptions.release();
   return true;
 }
