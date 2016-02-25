@@ -3300,6 +3300,15 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
         << "           status: [" << (int)res << ";\""
           << ::curl_easy_strerror(res) << "\"]" << std::endl
         ;
+
+      if(!statusVar.empty() && res == 0)
+        {
+        std::string status = "1;HASH mismatch: "
+          "expected: " + expectedHash +
+          " actual: " + actualHash;
+        this->Makefile->AddDefinition(statusVar, status.c_str());
+        }
+
       this->SetError(oss.str());
       return false;
       }
