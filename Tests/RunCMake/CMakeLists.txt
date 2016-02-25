@@ -236,6 +236,10 @@ if("${CMAKE_GENERATOR}" MATCHES "Visual Studio [^6]")
   add_RunCMake_test(SolutionGlobalSections)
 endif()
 
+if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([^6789]|[6789][0-9])")
+  add_RunCMake_test(VS10Project)
+endif()
+
 if(XCODE_VERSION AND NOT "${XCODE_VERSION}" VERSION_LESS 3)
   add_RunCMake_test(XcodeProject -DXCODE_VERSION=${XCODE_VERSION})
 endif()
