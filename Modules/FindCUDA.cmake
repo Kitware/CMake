@@ -619,14 +619,6 @@ if(CMAKE_CROSSCOMPILING)
   endif()
 
   # Target CPU architecture: this nvcc option is now obsolete
-  if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
-    set(_cuda_target_cpu_arch_initial "ARM")
-  else()
-    set(_cuda_target_cpu_arch_initial "")
-  endif()
-  set(CUDA_TARGET_CPU_ARCH ${_cuda_target_cpu_arch_initial} CACHE STRING "Specify the name of the class of CPU architecture for which the input files must be compiled.")
-  mark_as_advanced(CUDA_TARGET_CPU_ARCH)
-
   # add known CUDA targetr root path to the set of directories we search for programs, libraries and headers
   set( CMAKE_FIND_ROOT_PATH "${CUDA_TOOLKIT_TARGET_DIR};${CMAKE_FIND_ROOT_PATH}")
 else()
@@ -688,8 +680,7 @@ find_host_program(CUDA_NVCC_EXECUTABLE
 find_program(CUDA_NVCC_EXECUTABLE nvcc)
 mark_as_advanced(CUDA_NVCC_EXECUTABLE)
 
-#MESSAGE("CUDA_TOOLKIT_INCLUDE: ${CUDA_TOOLKIT_INCLUDE} CUDA_VERSION_STRING: ${CUDA_VERSION_STRIN} CUDA_CUDART_LIBRARY: ${CUDA_CUDART_LIBRARY} CUDA_cudart_static_LIBRARY: ${CUDA_cudart_static_LIBRARY}")
-MESSAGE("CUDA_NVCC_EXECUTABLE: ${CUDA_NVCC_EXECUTABLE} CUDA_TOOLKIT_ROOT_DIR: ${CUDA_TOOLKIT_ROOT_DIR} CUDA_TOOLKIT_TARGET_DIR: ${CUDA_TOOLKIT_TARGET_DIR}")
+#MESSAGE("CUDA_NVCC_EXECUTABLE: ${CUDA_NVCC_EXECUTABLE} CUDA_TOOLKIT_ROOT_DIR: ${CUDA_TOOLKIT_ROOT_DIR} CUDA_TOOLKIT_TARGET_DIR: ${CUDA_TOOLKIT_TARGET_DIR}")
 
 
 if(CUDA_NVCC_EXECUTABLE AND NOT CUDA_VERSION)
@@ -817,7 +808,7 @@ if(NOT CUDA_USE_STATIC_CUDA_RUNTIME STREQUAL OFF)
   endif(UNIX AND NOT ANDROID)
 endif(NOT CUDA_USE_STATIC_CUDA_RUNTIME STREQUAL OFF)
 
-MESSAGE("CUDA_TOOLKIT_INCLUDE: ${CUDA_TOOLKIT_INCLUDE} CUDA_VERSION_STRING: ${CUDA_VERSION_STRIN} CUDA_CUDART_LIBRARY: ${CUDA_CUDART_LIBRARY} CUDA_cudart_static_LIBRARY: ${CUDA_cudart_static_LIBRARY}")
+# MESSAGE("CUDA_TOOLKIT_INCLUDE: ${CUDA_TOOLKIT_INCLUDE} CUDA_VERSION_STRING: ${CUDA_VERSION_STRIN} CUDA_CUDART_LIBRARY: ${CUDA_CUDART_LIBRARY} CUDA_cudart_static_LIBRARY: ${CUDA_cudart_static_LIBRARY}")
 
 # CUPTI library showed up in cuda toolkit 4.0
 if(NOT CUDA_VERSION VERSION_LESS "4.0")
@@ -1508,18 +1499,12 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
       endif()
 
       # Build the generated file and dependency file ##########################
-      set(newdepend "")
-      foreach(depend ${CUDA_NVCC_DEPEND})
-        if(NOT ${depend} STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${cuda_target}.dir")
-          set(newdepend "${newdepend};${depend}")
-        endif()
-      endforeach()
-      set(CUDA_NVCC_DEPEND "${newdepend}")
-
       add_custom_command(
         OUTPUT ${generated_file}
+        ${main_dep}
         # These output files depend on the source_file and the contents of cmake_dependency_file
         DEPENDS ${CUDA_NVCC_DEPEND}
+        DEPENDS ${custom_target_script}
         # Make sure the output directory exists before trying to write to it.
         COMMAND ${CMAKE_COMMAND} -E make_directory "${generated_file_path}"
         COMMAND ${CMAKE_COMMAND} ARGS
