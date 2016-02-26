@@ -696,43 +696,51 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
                                  i->c_str(),
                                  1, " Label=\"Configuration\"", "\n");
     std::string configType = "<ConfigurationType>";
-    switch(this->GeneratorTarget->GetType())
+    if (const char* vsConfigurationType =
+        this->GeneratorTarget->GetProperty("VS_CONFIGURATION_TYPE"))
       {
-      case cmState::SHARED_LIBRARY:
-      case cmState::MODULE_LIBRARY:
-        configType += "DynamicLibrary";
-        break;
-      case cmState::OBJECT_LIBRARY:
-      case cmState::STATIC_LIBRARY:
-        configType += "StaticLibrary";
-        break;
-      case cmState::EXECUTABLE:
-        if(this->NsightTegra &&
-           !this->GeneratorTarget->GetPropertyAsBool("ANDROID_GUI"))
-          {
-          // Android executables are .so too.
+      configType += cmVS10EscapeXML(vsConfigurationType);
+      }
+    else
+      {
+      switch(this->GeneratorTarget->GetType())
+        {
+        case cmState::SHARED_LIBRARY:
+        case cmState::MODULE_LIBRARY:
           configType += "DynamicLibrary";
-          }
-        else
-          {
-          configType += "Application";
-          }
-        break;
-      case cmState::UTILITY:
-      case cmState::GLOBAL_TARGET:
-        if(this->NsightTegra)
-          {
-          // Tegra-Android platform does not understand "Utility".
+          break;
+        case cmState::OBJECT_LIBRARY:
+        case cmState::STATIC_LIBRARY:
           configType += "StaticLibrary";
-          }
-        else
-          {
-          configType += "Utility";
-          }
-        break;
-      case cmState::UNKNOWN_LIBRARY:
-      case cmState::INTERFACE_LIBRARY:
-        break;
+          break;
+        case cmState::EXECUTABLE:
+          if(this->NsightTegra &&
+             !this->GeneratorTarget->GetPropertyAsBool("ANDROID_GUI"))
+            {
+            // Android executables are .so too.
+            configType += "DynamicLibrary";
+            }
+          else
+            {
+            configType += "Application";
+            }
+          break;
+        case cmState::UTILITY:
+        case cmState::GLOBAL_TARGET:
+          if(this->NsightTegra)
+            {
+            // Tegra-Android platform does not understand "Utility".
+            configType += "StaticLibrary";
+            }
+          else
+            {
+            configType += "Utility";
+            }
+          break;
+        case cmState::UNKNOWN_LIBRARY:
+        case cmState::INTERFACE_LIBRARY:
+          break;
+        }
       }
     configType += "</ConfigurationType>\n";
     this->WriteString(configType.c_str(), 2);
