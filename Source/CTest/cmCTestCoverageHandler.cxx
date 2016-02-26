@@ -983,7 +983,7 @@ int cmCTestCoverageHandler::HandleDelphiCoverage(
 
   std::string BinDir
     = this->CTest->GetBinaryDir();
-  std::string coverageFile = BinDir+ "/*.html";
+  std::string coverageFile = BinDir+ "/*(*.pas).html";
 
 
   g.FindFiles(coverageFile);
@@ -1017,9 +1017,25 @@ int cmCTestCoverageHandler::HandleBlanketJSCoverage(
   std::string coverageFile = SourceDir+ "/*.json";
   cmsys::Glob g;
   std::vector<std::string> files;
+  std::vector<std::string> blanketFiles;
   g.FindFiles(coverageFile);
   files=g.GetFiles();
-  if (!files.empty())
+  // Ensure that the JSON files found are the result of the
+  // Blanket.js output. Check for the "node-jscoverage"
+  // string on the second line
+  std::string line;
+  for(unsigned int fileEntry=0;fileEntry<files.size();fileEntry++)
+    {
+    cmsys::ifstream in(files[fileEntry].c_str());
+    cmSystemTools::GetLineFromStream(in, line);
+    cmSystemTools::GetLineFromStream(in, line);
+    if (line.find("node-jscoverage") != line.npos)
+      {
+      blanketFiles.push_back(files[fileEntry]);
+      }
+    }
+  //  Take all files with the node-jscoverage string and parse those
+  if (!blanketFiles.empty())
     {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
       "Found BlanketJS output JSON, Performing Coverage" << std::endl,
