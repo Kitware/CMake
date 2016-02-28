@@ -298,3 +298,37 @@ set(CMAKE_RELATIVE_PATH_TOP_BINARY \"${RunCMake_TEST_BINARY_DIR}\")
     )
 endfunction()
 run_cmake_depends()
+
+# test re-generation of project even if CMakeLists.txt files disappeared
+if(UNIX)
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR
+    ${RunCMake_BINARY_DIR}/regenerate-project-build)
+  set(RunCMake_TEST_SOURCE_DIR
+    ${RunCMake_BINARY_DIR}/regenerate-project-source)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(REMOVE_RECURSE "${RunCMake_TEST_SOURCE_DIR}")
+  set(ProjectHeader [=[
+    cmake_minimum_required(VERSION 3.5)
+    project(regenerate-project NONE)
+  ]=])
+
+  file(WRITE "${RunCMake_TEST_SOURCE_DIR}/CMakeLists.txt" "${ProjectHeader}"
+    "add_subdirectory(mysubdir)")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_SOURCE_DIR}/mysubdir")
+  file(WRITE "${RunCMake_TEST_SOURCE_DIR}/mysubdir/CMakeLists.txt" "# empty")
+
+  run_cmake(regenerate-project-create)
+
+  # now we delete the subdirectory and adjust the CMakeLists.txt
+  file(REMOVE_RECURSE "${RunCMake_TEST_SOURCE_DIR}/mysubdir")
+  file(WRITE "${RunCMake_TEST_SOURCE_DIR}/CMakeLists.txt" "${ProjectHeader}")
+
+  run_cmake_command(regenerate-project-should-work
+    ${CMAKE_COMMAND} --build "${RunCMake_TEST_BINARY_DIR}")
+
+  unset(RunCMake_TEST_BINARY_DIR)
+  unset(RunCMake_TEST_SOURCE_DIR)
+  unset(RunCMake_TEST_NO_CLEAN)
+endif()
