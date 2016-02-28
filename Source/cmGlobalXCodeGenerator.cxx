@@ -603,7 +603,8 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
   for(std::vector<std::string>::const_iterator i = lfiles.begin();
       i !=  lfiles.end(); ++i)
     {
-    makefileStream << "\\\n" << this->ConvertToRelativeForMake(i->c_str());
+    makefileStream << "\\\n" << "$(wildcard "
+                   << this->ConvertToRelativeForMake(i->c_str()) << ")";
     }
   makefileStream << "\n\t" <<
     this->ConvertToRelativeForMake(cmSystemTools::GetCMakeCommand().c_str())
