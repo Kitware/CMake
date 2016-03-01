@@ -479,7 +479,7 @@ function(set_bundle_key_values keys_var context item exepath dirs copyflag)
 
     get_item_rpaths("${resolved_item}" item_rpaths)
 
-    if((item NOT MATCHES "\\.dylib$") AND (item MATCHES "[^/]+\\.framework/"))
+    if((NOT item MATCHES "\\.dylib$") AND (item MATCHES "[^/]+\\.framework/"))
       # For frameworks, construct the name under the embedded path from the
       # opening "${item_name}.framework/" to the closing "/${item_name}":
       #
