@@ -6,51 +6,51 @@
 #
 # The following variables can be set and are optional:
 #
-# ``PROTOBUF_SRC_ROOT_FOLDER``
+# ``Protobuf_SRC_ROOT_FOLDER``
 #   When compiling with MSVC, if this cache variable is set
 #   the protobuf-default VS project build locations
 #   (vsprojects/Debug and vsprojects/Release
 #   or vsprojects/x64/Debug and vsprojects/x64/Release)
 #   will be searched for libraries and binaries.
-# ``PROTOBUF_IMPORT_DIRS``
+# ``Protobuf_IMPORT_DIRS``
 #   List of additional directories to be searched for
 #   imported .proto files.
-# ``PROTOBUF_DEBUG``
+# ``Protobuf_DEBUG``
 #   Show debug messages.
 #
 # Defines the following variables:
 #
-# ``PROTOBUF_FOUND``
+# ``Protobuf_FOUND``
 #   Found the Google Protocol Buffers library
 #   (libprotobuf & header files)
-# ``PROTOBUF_VERSION``
+# ``Protobuf_VERSION``
 #   Version of package found.
-# ``PROTOBUF_INCLUDE_DIRS``
+# ``Protobuf_INCLUDE_DIRS``
 #   Include directories for Google Protocol Buffers
-# ``PROTOBUF_LIBRARIES``
+# ``Protobuf_LIBRARIES``
 #   The protobuf libraries
-# ``PROTOBUF_PROTOC_LIBRARIES``
+# ``Protobuf_PROTOC_LIBRARIES``
 #   The protoc libraries
-# ``PROTOBUF_LITE_LIBRARIES``
+# ``Protobuf_LITE_LIBRARIES``
 #   The protobuf-lite libraries
 #
 # The following cache variables are also available to set or use:
 #
-# ``PROTOBUF_LIBRARY``
+# ``Protobuf_LIBRARY``
 #   The protobuf library
-# ``PROTOBUF_PROTOC_LIBRARY``
+# ``Protobuf_PROTOC_LIBRARY``
 #   The protoc library
-# ``PROTOBUF_INCLUDE_DIR``
+# ``Protobuf_INCLUDE_DIR``
 #   The include directory for protocol buffers
-# ``PROTOBUF_PROTOC_EXECUTABLE``
+# ``Protobuf_PROTOC_EXECUTABLE``
 #   The protoc compiler
-# ``PROTOBUF_LIBRARY_DEBUG``
+# ``Protobuf_LIBRARY_DEBUG``
 #   The protobuf library (debug)
-# ``PROTOBUF_PROTOC_LIBRARY_DEBUG``
+# ``Protobuf_PROTOC_LIBRARY_DEBUG``
 #   The protoc library (debug)
-# ``PROTOBUF_LITE_LIBRARY``
+# ``Protobuf_LITE_LIBRARY``
 #   The protobuf lite library
-# ``PROTOBUF_LITE_LIBRARY_DEBUG``
+# ``Protobuf_LITE_LIBRARY_DEBUG``
 #   The protobuf lite library (debug)
 #
 # Example:
@@ -58,12 +58,12 @@
 # .. code-block:: cmake
 #
 #   find_package(Protobuf REQUIRED)
-#   include_directories(${PROTOBUF_INCLUDE_DIRS})
+#   include_directories(${Protobuf_INCLUDE_DIRS})
 #   include_directories(${CMAKE_CURRENT_BINARY_DIR})
 #   protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS foo.proto)
 #   protobuf_generate_python(PROTO_PY foo.proto)
 #   add_executable(bar bar.cc ${PROTO_SRCS} ${PROTO_HDRS})
-#   target_link_libraries(bar ${PROTOBUF_LIBRARIES})
+#   target_link_libraries(bar ${Protobuf_LIBRARIES})
 #
 # .. note::
 #   The ``protobuf_generate_cpp`` and ``protobuf_generate_python``
@@ -129,8 +129,8 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
     set(_protobuf_include_path -I ${CMAKE_CURRENT_SOURCE_DIR})
   endif()
 
-  if(DEFINED PROTOBUF_IMPORT_DIRS)
-    foreach(DIR ${PROTOBUF_IMPORT_DIRS})
+  if(DEFINED Protobuf_IMPORT_DIRS)
+    foreach(DIR ${Protobuf_IMPORT_DIRS})
       get_filename_component(ABS_PATH ${DIR} ABSOLUTE)
       list(FIND _protobuf_include_path ${ABS_PATH} _contains_already)
       if(${_contains_already} EQUAL -1)
@@ -151,9 +151,9 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
     add_custom_command(
       OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc"
              "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.h"
-      COMMAND  ${PROTOBUF_PROTOC_EXECUTABLE}
+      COMMAND  ${Protobuf_PROTOC_EXECUTABLE}
       ARGS --cpp_out  ${CMAKE_CURRENT_BINARY_DIR} ${_protobuf_include_path} ${ABS_FIL}
-      DEPENDS ${ABS_FIL} ${PROTOBUF_PROTOC_EXECUTABLE}
+      DEPENDS ${ABS_FIL} ${Protobuf_PROTOC_EXECUTABLE}
       COMMENT "Running C++ protocol buffer compiler on ${FIL}"
       VERBATIM )
   endforeach()
@@ -183,8 +183,8 @@ function(PROTOBUF_GENERATE_PYTHON SRCS)
     set(_protobuf_include_path -I ${CMAKE_CURRENT_SOURCE_DIR})
   endif()
 
-  if(DEFINED PROTOBUF_IMPORT_DIRS)
-    foreach(DIR ${PROTOBUF_IMPORT_DIRS})
+  if(DEFINED Protobuf_IMPORT_DIRS)
+    foreach(DIR ${Protobuf_IMPORT_DIRS})
       get_filename_component(ABS_PATH ${DIR} ABSOLUTE)
       list(FIND _protobuf_include_path ${ABS_PATH} _contains_already)
       if(${_contains_already} EQUAL -1)
@@ -201,14 +201,37 @@ function(PROTOBUF_GENERATE_PYTHON SRCS)
     list(APPEND ${SRCS} "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}_pb2.py")
     add_custom_command(
       OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}_pb2.py"
-      COMMAND  ${PROTOBUF_PROTOC_EXECUTABLE} --python_out ${CMAKE_CURRENT_BINARY_DIR} ${_protobuf_include_path} ${ABS_FIL}
-      DEPENDS ${ABS_FIL} ${PROTOBUF_PROTOC_EXECUTABLE}
+      COMMAND  ${Protobuf_PROTOC_EXECUTABLE} --python_out ${CMAKE_CURRENT_BINARY_DIR} ${_protobuf_include_path} ${ABS_FIL}
+      DEPENDS ${ABS_FIL} ${Protobuf_PROTOC_EXECUTABLE}
       COMMENT "Running Python protocol buffer compiler on ${FIL}"
       VERBATIM )
   endforeach()
 
   set(${SRCS} ${${SRCS}} PARENT_SCOPE)
 endfunction()
+
+# Backwards compatibility
+# Define camel case versions of input variables
+foreach(UPPER
+    PROTOBUF_SRC_ROOT_FOLDER
+    PROTOBUF_IMPORT_DIRS
+    PROTOBUF_DEBUG
+    PROTOBUF_LIBRARY
+    PROTOBUF_PROTOC_LIBRARY
+    PROTOBUF_INCLUDE_DIR
+    PROTOBUF_PROTOC_EXECUTABLE
+    PROTOBUF_LIBRARY_DEBUG
+    PROTOBUF_PROTOC_LIBRARY_DEBUG
+    PROTOBUF_LITE_LIBRARY
+    PROTOBUF_LITE_LIBRARY_DEBUG
+    )
+    if (DEFINED ${UPPER})
+        string(REPLACE "PROTOBUF_" "Protobuf_" Camel ${UPPER})
+        if (NOT DEFINED ${Camel})
+            set(${Camel} ${${UPPER}})
+        endif()
+    endif()
+endforeach()
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   set(_PROTOBUF_ARCH_DIR x64/)
@@ -229,12 +252,12 @@ function(_protobuf_find_libraries name filename)
   else()
     find_library(${name}_LIBRARY_RELEASE
       NAMES ${filename}
-      PATHS ${PROTOBUF_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Release)
+      PATHS ${Protobuf_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Release)
     mark_as_advanced(${name}_LIBRARY_RELEASE)
 
     find_library(${name}_LIBRARY_DEBUG
       NAMES ${filename}
-      PATHS ${PROTOBUF_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Debug)
+      PATHS ${Protobuf_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Debug)
     mark_as_advanced(${name}_LIBRARY_DEBUG)
 
     select_library_configurations(${name})
@@ -248,8 +271,8 @@ function(_protobuf_find_threads)
     set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
     find_package(Threads)
     if(Threads_FOUND)
-        list(APPEND PROTOBUF_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
-        set(PROTOBUF_LIBRARIES "${PROTOBUF_LIBRARIES}" PARENT_SCOPE)
+        list(APPEND Protobuf_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+        set(Protobuf_LIBRARIES "${Protobuf_LIBRARIES}" PARENT_SCOPE)
     endif()
 endfunction()
 
@@ -267,24 +290,24 @@ endif()
 # Google's provided vcproj files generate libraries with a "lib"
 # prefix on Windows
 if(MSVC)
-    set(PROTOBUF_ORIG_FIND_LIBRARY_PREFIXES "${CMAKE_FIND_LIBRARY_PREFIXES}")
+    set(Protobuf_ORIG_FIND_LIBRARY_PREFIXES "${CMAKE_FIND_LIBRARY_PREFIXES}")
     set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
 
-    find_path(PROTOBUF_SRC_ROOT_FOLDER protobuf.pc.in)
+    find_path(Protobuf_SRC_ROOT_FOLDER protobuf.pc.in)
 endif()
 
 # The Protobuf library
-_protobuf_find_libraries(PROTOBUF protobuf)
+_protobuf_find_libraries(Protobuf protobuf)
 #DOC "The Google Protocol Buffers RELEASE Library"
 
-_protobuf_find_libraries(PROTOBUF_LITE protobuf-lite)
+_protobuf_find_libraries(Protobuf_LITE protobuf-lite)
 
 # The Protobuf Protoc Library
-_protobuf_find_libraries(PROTOBUF_PROTOC protoc)
+_protobuf_find_libraries(Protobuf_PROTOC protoc)
 
 # Restore original find library prefixes
 if(MSVC)
-    set(CMAKE_FIND_LIBRARY_PREFIXES "${PROTOBUF_ORIG_FIND_LIBRARY_PREFIXES}")
+    set(CMAKE_FIND_LIBRARY_PREFIXES "${Protobuf_ORIG_FIND_LIBRARY_PREFIXES}")
 endif()
 
 if(UNIX)
@@ -292,78 +315,101 @@ if(UNIX)
 endif()
 
 # Find the include directory
-find_path(PROTOBUF_INCLUDE_DIR
+find_path(Protobuf_INCLUDE_DIR
     google/protobuf/service.h
-    PATHS ${PROTOBUF_SRC_ROOT_FOLDER}/src
+    PATHS ${Protobuf_SRC_ROOT_FOLDER}/src
 )
-mark_as_advanced(PROTOBUF_INCLUDE_DIR)
+mark_as_advanced(Protobuf_INCLUDE_DIR)
 
 # Find the protoc Executable
-find_program(PROTOBUF_PROTOC_EXECUTABLE
+find_program(Protobuf_PROTOC_EXECUTABLE
     NAMES protoc
     DOC "The Google Protocol Buffers Compiler"
     PATHS
-    ${PROTOBUF_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Release
-    ${PROTOBUF_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Debug
+    ${Protobuf_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Release
+    ${Protobuf_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Debug
 )
-mark_as_advanced(PROTOBUF_PROTOC_EXECUTABLE)
+mark_as_advanced(Protobuf_PROTOC_EXECUTABLE)
 
-if(PROTOBUF_DEBUG)
+if(Protobuf_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
         "requested version of Google Protobuf is ${Protobuf_FIND_VERSION}")
 endif()
 
-if(PROTOBUF_INCLUDE_DIR)
-  set(_PROTOBUF_COMMON_HEADER ${PROTOBUF_INCLUDE_DIR}/google/protobuf/stubs/common.h)
+if(Protobuf_INCLUDE_DIR)
+  set(_PROTOBUF_COMMON_HEADER ${Protobuf_INCLUDE_DIR}/google/protobuf/stubs/common.h)
 
-  if(PROTOBUF_DEBUG)
+  if(Protobuf_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
                    "location of common.h: ${_PROTOBUF_COMMON_HEADER}")
   endif()
 
-  set(PROTOBUF_VERSION "")
-  set(PROTOBUF_LIB_VERSION "")
+  set(Protobuf_VERSION "")
+  set(Protobuf_LIB_VERSION "")
   file(STRINGS ${_PROTOBUF_COMMON_HEADER} _PROTOBUF_COMMON_H_CONTENTS REGEX "#define[ \t]+GOOGLE_PROTOBUF_VERSION[ \t]+")
   if(_PROTOBUF_COMMON_H_CONTENTS MATCHES "#define[ \t]+GOOGLE_PROTOBUF_VERSION[ \t]+([0-9]+)")
-      set(PROTOBUF_LIB_VERSION "${CMAKE_MATCH_1}")
+      set(Protobuf_LIB_VERSION "${CMAKE_MATCH_1}")
   endif()
   unset(_PROTOBUF_COMMON_H_CONTENTS)
 
-  math(EXPR _PROTOBUF_MAJOR_VERSION "${PROTOBUF_LIB_VERSION} / 1000000")
-  math(EXPR _PROTOBUF_MINOR_VERSION "${PROTOBUF_LIB_VERSION} / 1000 % 1000")
-  math(EXPR _PROTOBUF_SUBMINOR_VERSION "${PROTOBUF_LIB_VERSION} % 1000")
-  set(PROTOBUF_VERSION "${_PROTOBUF_MAJOR_VERSION}.${_PROTOBUF_MINOR_VERSION}.${_PROTOBUF_SUBMINOR_VERSION}")
+  math(EXPR _PROTOBUF_MAJOR_VERSION "${Protobuf_LIB_VERSION} / 1000000")
+  math(EXPR _PROTOBUF_MINOR_VERSION "${Protobuf_LIB_VERSION} / 1000 % 1000")
+  math(EXPR _PROTOBUF_SUBMINOR_VERSION "${Protobuf_LIB_VERSION} % 1000")
+  set(Protobuf_VERSION "${_PROTOBUF_MAJOR_VERSION}.${_PROTOBUF_MINOR_VERSION}.${_PROTOBUF_SUBMINOR_VERSION}")
 
-  if(PROTOBUF_DEBUG)
+  if(Protobuf_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-        "${_PROTOBUF_COMMON_HEADER} reveals protobuf ${PROTOBUF_VERSION}")
+        "${_PROTOBUF_COMMON_HEADER} reveals protobuf ${Protobuf_VERSION}")
   endif()
 
   # Check Protobuf compiler version to be aligned with libraries version
-  execute_process(COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} --version
+  execute_process(COMMAND ${Protobuf_PROTOC_EXECUTABLE} --version
                   OUTPUT_VARIABLE _PROTOBUF_PROTOC_EXECUTABLE_VERSION)
 
   if("${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}" MATCHES "libprotoc ([0-9.]+)")
     set(_PROTOBUF_PROTOC_EXECUTABLE_VERSION "${CMAKE_MATCH_1}")
   endif()
 
-  if(PROTOBUF_DEBUG)
+  if(Protobuf_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-        "${PROTOBUF_PROTOC_EXECUTABLE} reveals version ${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}")
+        "${Protobuf_PROTOC_EXECUTABLE} reveals version ${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}")
   endif()
 
-  if(NOT "${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}" VERSION_EQUAL "${PROTOBUF_VERSION}")
+  if(NOT "${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}" VERSION_EQUAL "${Protobuf_VERSION}")
       message(WARNING "Protobuf compiler version ${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}"
-          " doesn't match library version ${PROTOBUF_VERSION}")
+          " doesn't match library version ${Protobuf_VERSION}")
   endif()
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Protobuf
-    REQUIRED_VARS PROTOBUF_LIBRARIES PROTOBUF_INCLUDE_DIR
-    VERSION_VAR PROTOBUF_VERSION
+    REQUIRED_VARS Protobuf_LIBRARIES Protobuf_INCLUDE_DIR
+    VERSION_VAR Protobuf_VERSION
 )
 
-if(PROTOBUF_FOUND)
-    set(PROTOBUF_INCLUDE_DIRS ${PROTOBUF_INCLUDE_DIR})
+if(Protobuf_FOUND)
+    set(Protobuf_INCLUDE_DIRS ${Protobuf_INCLUDE_DIR})
 endif()
+
+# Backwards compatibility
+# Define upper case versions of output variables
+foreach(Camel
+    Protobuf_SRC_ROOT_FOLDER
+    Protobuf_IMPORT_DIRS
+    Protobuf_DEBUG
+    Protobuf_INCLUDE_DIRS
+    Protobuf_LIBRARIES
+    Protobuf_PROTOC_LIBRARIES
+    Protobuf_LITE_LIBRARIES
+    Protobuf_LIBRARY
+    Protobuf_PROTOC_LIBRARY
+    Protobuf_INCLUDE_DIR
+    Protobuf_PROTOC_EXECUTABLE
+    Protobuf_LIBRARY_DEBUG
+    Protobuf_PROTOC_LIBRARY_DEBUG
+    Protobuf_LITE_LIBRARY
+    Protobuf_LITE_LIBRARY_DEBUG
+    )
+    string(TOUPPER ${Camel} UPPER)
+    set(${UPPER} ${${Camel}})
+endforeach()
