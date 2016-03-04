@@ -1,4 +1,3 @@
-#.rst:
 # FindCUDA
 # --------
 #
@@ -439,6 +438,8 @@ endmacro()
 ###############################################################################
 ###############################################################################
 
+option(CUDA_USE_STATIC_CUDA_RUNTIME "Use the static version of the CUDA runtime library if available" ON)
+
 # Allow the user to specify if the device code is supposed to be 32 or 64 bit.
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   set(CUDA_64_BIT_DEVICE_CODE_DEFAULT ON)
@@ -631,6 +632,7 @@ endif (CMAKE_CROSSCOMPILING)
 
 # Search for the cuda distribution.
 if(NOT CUDA_TOOLKIT_ROOT_DIR)
+
   # Search in the CUDA_BIN_PATH first.
   find_path(CUDA_TOOLKIT_ROOT_DIR
     NAMES nvcc nvcc.exe
@@ -708,10 +710,8 @@ find_path(CUDA_TOOLKIT_INCLUDE
   PATH_SUFFIXES include
   NO_DEFAULT_PATH
   )
-
 # Search default search paths, after we search our own set of paths.
 find_path(CUDA_TOOLKIT_INCLUDE device_functions.h)
-
 mark_as_advanced(CUDA_TOOLKIT_INCLUDE)
 
 # Set the user list of include dir to nothing to initialize it.
@@ -753,6 +753,7 @@ macro(find_library_local_first _var _names _doc )
   cuda_find_library_local_first( "${_var}" "${_names}" "${_doc}" "" )
 endmacro()
 
+
 # CUDA_LIBRARIES
 cuda_find_library_local_first(CUDA_CUDART_LIBRARY cudart "\"cudart\" library")
 if(CUDA_VERSION VERSION_EQUAL "3.0")
@@ -762,13 +763,10 @@ if(CUDA_VERSION VERSION_EQUAL "3.0")
     CUDA_CUDARTEMU_LIBRARY
     )
 endif()
-
 if(NOT CUDA_VERSION VERSION_LESS "5.5")
   cuda_find_library_local_first(CUDA_cudart_static_LIBRARY cudart_static "static CUDA runtime library")
   mark_as_advanced(CUDA_cudart_static_LIBRARY)
 endif()
-
-option(CUDA_USE_STATIC_CUDA_RUNTIME "Use the static version of the CUDA runtime library if available" ON)
 
 if(NOT CUDA_USE_STATIC_CUDA_RUNTIME STREQUAL OFF)
   if(CUDA_cudart_static_LIBRARY)
@@ -799,7 +797,7 @@ if(NOT CUDA_USE_STATIC_CUDA_RUNTIME STREQUAL OFF)
       unset(CMAKE_THREAD_PREFER_PTHREAD)
     endif()
     if (CUDA_VERSION VERSION_LESS "7.0" AND NOT APPLE)
-      # Here is librt that has things such as, clock_gettime, shm_open, and shm_unlink.
+      # Before CUDA 7.0, there was librt that has things such as, clock_gettime, shm_open, and shm_unlink.
       find_library(CUDA_rt_LIBRARY rt)
       if (NOT CUDA_rt_LIBRARY)
         message(WARNING "Expecting to find librt for libcudart_static, but didn't find it.")
@@ -981,8 +979,7 @@ set(CUDA_TOOLKIT_TARGET_DIR_INTERNAL "${CUDA_TOOLKIT_TARGET_DIR}" CACHE INTERNAL
 set(CUDA_SDK_ROOT_DIR_INTERNAL "${CUDA_SDK_ROOT_DIR}" CACHE INTERNAL
   "This is the value of the last time CUDA_SDK_ROOT_DIR was set successfully." FORCE)
 
-#include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-include(${CMAKE_ROOT}/Modules/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(CUDA
   REQUIRED_VARS
     CUDA_TOOLKIT_ROOT_DIR
@@ -1014,6 +1011,7 @@ endmacro()
 cuda_find_helper_file(parse_cubin cmake)
 cuda_find_helper_file(make2cmake cmake)
 cuda_find_helper_file(run_nvcc cmake)
+cuda_find_helper_file(select_compute_arch cmake)
 
 ##############################################################################
 # Separate the OPTIONS out from the sources
@@ -1503,6 +1501,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
         OUTPUT ${generated_file}
         ${main_dep}
         # These output files depend on the source_file and the contents of cmake_dependency_file
+        ${main_dep}
         DEPENDS ${CUDA_NVCC_DEPEND}
         DEPENDS ${custom_target_script}
         # Make sure the output directory exists before trying to write to it.
