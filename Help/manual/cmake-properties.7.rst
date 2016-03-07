@@ -255,6 +255,7 @@ Properties on Targets
    /prop_tgt/TYPE
    /prop_tgt/VERSION
    /prop_tgt/VISIBILITY_INLINES_HIDDEN
+   /prop_tgt/VS_CONFIGURATION_TYPE
    /prop_tgt/VS_DESKTOP_EXTENSIONS_VERSION
    /prop_tgt/VS_DOTNET_REFERENCES
    /prop_tgt/VS_DOTNET_TARGET_FRAMEWORK_VERSION
