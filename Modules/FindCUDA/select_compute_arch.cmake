@@ -9,13 +9,11 @@
 # Variables affecting the choice:
 #
 # CUDA_ARCH_NAME: One of ("Fermi" "Kepler" "Kepler-M" "Maxwell" "Maxwell-M" "All" "Manual")
-# ENV{CUDA_ARCH_BIN} : set if CUDA_ARCH_NAME set to "Manual"
+# ENV{CUDA_ARCH_BIN} : Only tested if CUDA_ARCH_NAME set to "Manual"
 #
 
 # Known NVIDIA GPU achitectures
 # This list will be used for CUDA_ARCH_NAME = All option
-
-if (NOT CUDA_arch_select_included)
 
 set(KNOWN_GPU_ARCHITECTURES "2.0 2.1(2.0) 3.0 3.2 3.5 5.0 5.2 5.3")
 
@@ -170,7 +168,3 @@ function(SELECT_NVCC_ARCH_FLAGS out_variable)
   set(${out_variable}          ${__nvcc_flags}          PARENT_SCOPE)
   set(${out_variable}_readable ${__nvcc_archs_readable} PARENT_SCOPE)
 endfunction()
-
-SET(CUDA_arch_select_included ON)
-
-endif (NOT CUDA_arch_select_included)
