@@ -147,6 +147,9 @@ JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
   /usr/lib/jvm/java-6-sun-1.6.0.00/jre/lib/{libarch}       # can this one be removed according to #8821 ? Alex
   /usr/lib/jvm/java-6-openjdk/jre/lib/{libarch}
   /usr/lib/jvm/java-1.6.0-openjdk-1.6.0.0/jre/lib/{libarch}        # fedora
+  /usr/lib/jvm/java-8-openjdk-{libarch}/lib/{libarch}              # ubuntu 15.10
+  /usr/lib/jvm/java-7-openjdk-{libarch}/lib/{libarch}              # ubuntu 15.10
+  /usr/lib/jvm/java-6-openjdk-{libarch}/lib/{libarch}              # ubuntu 15.10
   # Debian specific paths for default JVM
   /usr/lib/jvm/default-java/jre/lib/{libarch}
   /usr/lib/jvm/default-java/jre/lib
@@ -181,6 +184,9 @@ list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/include"
+)
+
+JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_INCLUDE_DIRECTORIES
   /usr/include
   /usr/local/include
   /usr/lib/java/include
@@ -190,6 +196,9 @@ list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES
   /usr/lib/jvm/java-1.5.0-sun/include
   /usr/lib/jvm/java-6-sun-1.6.0.00/include       # can this one be removed according to #8821 ? Alex
   /usr/lib/jvm/java-6-openjdk/include
+  /usr/lib/jvm/java-8-openjdk-{libarch}/include  # ubuntu 15.10
+  /usr/lib/jvm/java-7-openjdk-{libarch}/include  # ubuntu 15.10
+  /usr/lib/jvm/java-6-openjdk-{libarch}/include  # ubuntu 15.10
   /usr/local/share/java/include
   /usr/lib/j2sdk1.4-sun/include
   /usr/lib/j2sdk1.5-sun/include
