@@ -769,11 +769,12 @@ if(NOT CUDA_VERSION VERSION_LESS "5.5")
   mark_as_advanced(CUDA_cudart_static_LIBRARY)
 endif()
 
-if(NOT CUDA_USE_STATIC_CUDA_RUNTIME STREQUAL OFF)
-  if(CUDA_cudart_static_LIBRARY)
-    # Set whether to use the static cuda runtime.
-    set(CUDA_USE_STATIC_CUDA_RUNTIME ON CACHE BOOL "Use the static version of the CUDA runtime library if available")
-  endif()
+if(CUDA_cudart_static_LIBRARY)
+  # Set whether to use the static cuda runtime.
+  set(CUDA_USE_STATIC_CUDA_RUNTIME ON CACHE BOOL "Use the static version of the CUDA runtime library if available")
+endif()
+
+if(CUDA_USE_STATIC_CUDA_RUNTIME)
 
   if(UNIX AND NOT ANDROID)
     # Check for the dependent libraries.  Here we look for pthreads.
@@ -797,7 +798,7 @@ if(NOT CUDA_USE_STATIC_CUDA_RUNTIME STREQUAL OFF)
     else()
       unset(CMAKE_THREAD_PREFER_PTHREAD)
     endif()
-    if (CUDA_VERSION VERSION_LESS "7.0" AND NOT APPLE)
+    if (NOT APPLE)
       # Before CUDA 7.0, there was librt that has things such as, clock_gettime, shm_open, and shm_unlink.
       find_library(CUDA_rt_LIBRARY rt)
       if (NOT CUDA_rt_LIBRARY)
