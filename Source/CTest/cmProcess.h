@@ -32,7 +32,6 @@ public:
   void SetCommandArguments(std::vector<std::string> const& arg);
   void SetWorkingDirectory(const char* dir) { this->WorkingDirectory = dir;}
   void SetTimeout(double t) { this->Timeout = t;}
-  void ChangeTimeout(double t);
   // Return true if the process starts
   bool StartProcess();
 

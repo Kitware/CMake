@@ -64,27 +64,6 @@ bool cmCTestRunTest::CheckOutput()
                  this->GetIndex() << ": " << line << std::endl);
       this->ProcessOutput += line;
       this->ProcessOutput += "\n";
-
-      // Check for TIMEOUT_AFTER_MATCH property.
-      if (!this->TestProperties->TimeoutRegularExpressions.empty())
-        {
-        std::vector<std::pair<cmsys::RegularExpression,
-          std::string> >::iterator regIt;
-        for ( regIt = this->TestProperties->TimeoutRegularExpressions.begin();
-              regIt != this->TestProperties->TimeoutRegularExpressions.end();
-              ++ regIt )
-          {
-          if ( regIt->first.find(this->ProcessOutput.c_str()) )
-            {
-            cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       "Test timeout changed to " <<
-                       this->TestProperties->AlternateTimeout << std::endl);
-            this->TestProcess->ChangeTimeout(
-              this->TestProperties->AlternateTimeout);
-            break;
-            }
-          }
-        }
       }
     else // if(p == cmsysProcess_Pipe_Timeout)
       {

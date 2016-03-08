@@ -104,8 +104,6 @@ public:
                           std::string> > ErrorRegularExpressions;
     std::vector<std::pair<cmsys::RegularExpression,
                           std::string> > RequiredRegularExpressions;
-    std::vector<std::pair<cmsys::RegularExpression,
-                          std::string> > TimeoutRegularExpressions;
     std::map<std::string, std::string> Measurements;
     bool IsInBasedOnREOptions;
     bool WillFail;
@@ -114,7 +112,6 @@ public:
     bool RunSerial;
     double Timeout;
     bool ExplicitTimeout;
-    double AlternateTimeout;
     int Index;
     //Requested number of process slots
     int Processors;
