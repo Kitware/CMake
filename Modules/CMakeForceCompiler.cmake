@@ -2,9 +2,7 @@
 # CMakeForceCompiler
 # ------------------
 #
-# Discouraged.  Avoid using this module if possible.  It will be deprecated
-# by a future version of CMake once alternatives have been provided for all
-# toolchain file use cases.
+# Deprecated.  Do not use.
 #
 # The macros provided by this module were once intended for use by
 # cross-compiling toolchain files when CMake was not able to automatically
@@ -14,11 +12,11 @@
 # CMake detects from a compiler is now too extensive to be provided by
 # toolchain files using these macros.
 #
-# The only known remaining use case for these macros is to write toolchain
-# files for cross-compilers that cannot link binaries without special flags or
-# custom linker scripts.  These macros cause CMake to skip checks it normally
-# performs as part of enabling a language and introspecting the toolchain.
-# However, skipping these checks may limit some generation functionality.
+# One common use case for this module was to skip CMake's checks for a
+# working compiler when using a cross-compiler that cannot link binaries
+# without special flags or custom linker scripts.  This case is now supported
+# by setting the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` variable in the
+# toolchain file instead.
 #
 # -------------------------------------------------------------------------
 #
@@ -78,6 +76,8 @@
 #  License text for the above reference.)
 
 macro(CMAKE_FORCE_C_COMPILER compiler id)
+  message(DEPRECATION "The CMAKE_FORCE_C_COMPILER macro is deprecated.  "
+    "Instead just set CMAKE_C_COMPILER and allow CMake to identify the compiler.")
   set(CMAKE_C_COMPILER "${compiler}")
   set(CMAKE_C_COMPILER_ID_RUN TRUE)
   set(CMAKE_C_COMPILER_ID ${id})
@@ -90,6 +90,8 @@ macro(CMAKE_FORCE_C_COMPILER compiler id)
 endmacro()
 
 macro(CMAKE_FORCE_CXX_COMPILER compiler id)
+  message(DEPRECATION "The CMAKE_FORCE_CXX_COMPILER macro is deprecated.  "
+    "Instead just set CMAKE_CXX_COMPILER and allow CMake to identify the compiler.")
   set(CMAKE_CXX_COMPILER "${compiler}")
   set(CMAKE_CXX_COMPILER_ID_RUN TRUE)
   set(CMAKE_CXX_COMPILER_ID ${id})
@@ -102,6 +104,8 @@ macro(CMAKE_FORCE_CXX_COMPILER compiler id)
 endmacro()
 
 macro(CMAKE_FORCE_Fortran_COMPILER compiler id)
+  message(DEPRECATION "The CMAKE_FORCE_Fortran_COMPILER macro is deprecated.  "
+    "Instead just set CMAKE_Fortran_COMPILER and allow CMake to identify the compiler.")
   set(CMAKE_Fortran_COMPILER "${compiler}")
   set(CMAKE_Fortran_COMPILER_ID_RUN TRUE)
   set(CMAKE_Fortran_COMPILER_ID ${id})
