@@ -2715,7 +2715,8 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
       static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
     const char* toolset = gg->GetPlatformToolset();
     if (toolset &&
-        (cmHasLiteralPrefix(toolset, "v110") ||
+        (cmHasLiteralPrefix(toolset, "v100") ||
+         cmHasLiteralPrefix(toolset, "v110") ||
          cmHasLiteralPrefix(toolset, "v120")))
       {
       if (const char* debug = linkOptions.GetFlag("GenerateDebugInformation"))
