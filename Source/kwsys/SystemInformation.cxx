@@ -176,13 +176,13 @@ typedef struct rlimit ResourceLimitType;
 # if defined(KWSYS_IOS_HAS_OSTREAM_LONG_LONG)
 #  define iostreamLongLong(x) (x)
 # else
-#  define iostreamLongLong(x) ((long)x)
+#  define iostreamLongLong(x) ((long)(x))
 # endif
 #elif defined(KWSYS_USE___INT64)
 # if defined(KWSYS_IOS_HAS_OSTREAM___INT64)
 #  define iostreamLongLong(x) (x)
 # else
-#  define iostreamLongLong(x) ((long)x)
+#  define iostreamLongLong(x) ((long)(x))
 # endif
 #else
 # error "No Long Long"
@@ -200,13 +200,13 @@ typedef struct rlimit ResourceLimitType;
 # endif
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1300) && !defined(_WIN64)
+#if defined(_MSC_VER) && (_MSC_VER >= 1300) && !defined(_WIN64) && !defined(__clang__)
 #define USE_ASM_INSTRUCTIONS 1
 #else
 #define USE_ASM_INSTRUCTIONS 0
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+#if defined(_MSC_VER) && (_MSC_VER >= 1400) && !defined(__clang__)
 #include <intrin.h>
 #define USE_CPUID_INTRINSICS 1
 #else
@@ -860,7 +860,7 @@ void SystemInformation::RunMemoryCheck()
 // --------------------------------------------------------------
 // SystemInformationImplementation starts here
 
-#define STORE_TLBCACHE_INFO(x,y)  x = (x < y) ? y : x
+#define STORE_TLBCACHE_INFO(x,y)  x = (x < (y)) ? (y) : x
 #define TLBCACHE_INFO_UNITS      (15)
 #define CLASSICAL_CPU_FREQ_LOOP    10000000
 #define RDTSC_INSTRUCTION      _asm _emit 0x0f _asm _emit 0x31
@@ -4632,7 +4632,7 @@ std::string SystemInformationImplementation::RunProcess(std::vector<const char*>
   double timeout = 255;
   int pipe; // pipe id as returned by kwsysProcess_WaitForData()
 
-  while( ( pipe = kwsysProcess_WaitForData(gp,&data,&length,&timeout),
+  while( ( static_cast<void>(pipe = kwsysProcess_WaitForData(gp,&data,&length,&timeout)),
            (pipe == kwsysProcess_Pipe_STDOUT || pipe == kwsysProcess_Pipe_STDERR) ) ) // wait for 1s
     {
       buffer.append(data, length);
