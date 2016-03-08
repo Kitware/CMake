@@ -4758,8 +4758,9 @@ bool SystemTools::GetLineFromStream(std::istream& is,
   // been reached.  Clear the fail bit just before reading.
   while(!haveNewline &&
         leftToRead != 0 &&
-        (is.clear(is.rdstate() & ~std::ios::failbit),
-         is.getline(buffer, bufferSize), is.gcount() > 0))
+        (static_cast<void>(is.clear(is.rdstate() & ~std::ios::failbit)),
+         static_cast<void>(is.getline(buffer, bufferSize)),
+         is.gcount() > 0))
     {
     // We have read at least one byte.
     haveData = true;

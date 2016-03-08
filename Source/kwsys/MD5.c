@@ -254,7 +254,7 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
        a = b + ((a + F(b,c,d) + X[k] + T[i]) <<< s). */
 #define F(x, y, z) (((x) & (y)) | (~(x) & (z)))
 #define SET(a, b, c, d, k, s, Ti)\
-  t = a + F(b,c,d) + X[k] + Ti;\
+  t = a + F(b,c,d) + X[k] + (Ti);\
   a = ROTATE_LEFT(t, s) + b
     /* Do the following 16 operations. */
     SET(a, b, c, d,  0,  7,  T1);
@@ -280,7 +280,7 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
           a = b + ((a + G(b,c,d) + X[k] + T[i]) <<< s). */
 #define G(x, y, z) (((x) & (z)) | ((y) & ~(z)))
 #define SET(a, b, c, d, k, s, Ti)\
-  t = a + G(b,c,d) + X[k] + Ti;\
+  t = a + G(b,c,d) + X[k] + (Ti);\
   a = ROTATE_LEFT(t, s) + b
      /* Do the following 16 operations. */
     SET(a, b, c, d,  1,  5, T17);
@@ -306,7 +306,7 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
           a = b + ((a + H(b,c,d) + X[k] + T[i]) <<< s). */
 #define H(x, y, z) ((x) ^ (y) ^ (z))
 #define SET(a, b, c, d, k, s, Ti)\
-  t = a + H(b,c,d) + X[k] + Ti;\
+  t = a + H(b,c,d) + X[k] + (Ti);\
   a = ROTATE_LEFT(t, s) + b
      /* Do the following 16 operations. */
     SET(a, b, c, d,  5,  4, T33);
@@ -332,7 +332,7 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
           a = b + ((a + I(b,c,d) + X[k] + T[i]) <<< s). */
 #define I(x, y, z) ((y) ^ ((x) | ~(z)))
 #define SET(a, b, c, d, k, s, Ti)\
-  t = a + I(b,c,d) + X[k] + Ti;\
+  t = a + I(b,c,d) + X[k] + (Ti);\
   a = ROTATE_LEFT(t, s) + b
      /* Do the following 16 operations. */
     SET(a, b, c, d,  0,  6, T49);

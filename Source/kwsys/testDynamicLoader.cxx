@@ -53,7 +53,7 @@ static std::string GetLibName(const char* lname)
  * r2: should GetSymbolAddress succeed ?
  * r3: should CloseLibrary succeed ?
  */
-int TestDynamicLoader(const char* libname, const char* symbol, int r1, int r2, int r3)
+static int TestDynamicLoader(const char* libname, const char* symbol, int r1, int r2, int r3)
 {
   std::cerr << "Testing: " << libname << std::endl;
   kwsys::DynamicLoader::LibraryHandle l
