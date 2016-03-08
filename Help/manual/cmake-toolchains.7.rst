@@ -138,9 +138,10 @@ a path on the host to install to. The :variable:`CMAKE_INSTALL_PREFIX` is always
 the runtime installation location, even when cross-compiling.
 
 The :variable:`CMAKE_<LANG>_COMPILER` variables may be set to full paths, or to
-names of compilers to search for in standard locations. In cases where CMake does
-not have enough information to extract information from the compiler, the
-:module:`CMakeForceCompiler` module can be used to bypass some of the checks.
+names of compilers to search for in standard locations.   For toolchains that
+do not support linking binaries without custom flags or scripts one may set
+the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` variable to ``STATIC_LIBRARY``
+to tell CMake not to try to link executables during its checks.
 
 CMake ``find_*`` commands will look in the sysroot, and the :variable:`CMAKE_FIND_ROOT_PATH`
 entries by default in all cases, as well as looking in the host system root prefix.
