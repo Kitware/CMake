@@ -500,6 +500,7 @@ function(gp_resolved_file_type original_file file exepath dirs type_var)
   if(NOT IS_ABSOLUTE "${original_file}")
     message(STATUS "warning: gp_resolved_file_type expects absolute full path for first arg original_file")
   endif()
+  get_filename_component(original_file "${original_file}" ABSOLUTE) # canonicalize path
 
   set(is_embedded 0)
   set(is_local 0)
@@ -515,6 +516,7 @@ function(gp_resolved_file_type original_file file exepath dirs type_var)
     if(NOT IS_ABSOLUTE "${file}")
       gp_resolve_item("${original_file}" "${file}" "${exepath}" "${dirs}" resolved_file "${rpaths}")
     endif()
+    get_filename_component(resolved_file "${resolved_file}" ABSOLUTE) # canonicalize path
 
     string(TOLOWER "${original_file}" original_lower)
     string(TOLOWER "${resolved_file}" lower)
