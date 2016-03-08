@@ -200,13 +200,13 @@ typedef struct rlimit ResourceLimitType;
 # endif
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1300) && !defined(_WIN64)
+#if defined(_MSC_VER) && (_MSC_VER >= 1300) && !defined(_WIN64) && !defined(__clang__)
 #define USE_ASM_INSTRUCTIONS 1
 #else
 #define USE_ASM_INSTRUCTIONS 0
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+#if defined(_MSC_VER) && (_MSC_VER >= 1400) && !defined(__clang__)
 #include <intrin.h>
 #define USE_CPUID_INTRINSICS 1
 #else
