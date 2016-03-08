@@ -118,6 +118,7 @@ if(_JAVA_HOME_EXPLICIT)
 endif()
 
 set(JAVA_AWT_LIBRARY_DIRECTORIES)
+
 if(_JAVA_HOME)
   JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
     ${_JAVA_HOME}/jre/lib/{libarch}
@@ -125,16 +126,18 @@ if(_JAVA_HOME)
     ${_JAVA_HOME}/lib/{libarch}
     ${_JAVA_HOME}/lib
     ${_JAVA_HOME}
-    )
+)
 endif()
+
 get_filename_component(java_install_version
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit;CurrentVersion]" NAME)
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit;CurrentVersion]" NAME
+)
 
 list(APPEND JAVA_AWT_LIBRARY_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/lib"
-  )
+)
 JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
   /usr/lib
   /usr/local/lib
@@ -166,7 +169,7 @@ JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
   # SuSE specific paths for default JVM
   /usr/lib64/jvm/java/jre/lib/{libarch}
   /usr/lib64/jvm/jre/lib/{libarch}
-  )
+)
 
 set(JAVA_JVM_LIBRARY_DIRECTORIES)
 foreach(dir ${JAVA_AWT_LIBRARY_DIRECTORIES})
@@ -177,19 +180,19 @@ foreach(dir ${JAVA_AWT_LIBRARY_DIRECTORIES})
     # IBM SDK, Java Technology Edition, specific paths
     "${dir}/j9vm"
     "${dir}/default"
-    )
+  )
 endforeach()
 
 set(JAVA_AWT_INCLUDE_DIRECTORIES)
 if(_JAVA_HOME)
   list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES ${_JAVA_HOME}/include)
 endif()
+
 list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/include"
 )
-
 JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_INCLUDE_DIRECTORIES
   /usr/include
   /usr/local/include
@@ -214,7 +217,7 @@ JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_INCLUDE_DIRECTORIES
   /usr/local/jdk-1.6.0/include
   # SuSE specific paths for default JVM
   /usr/lib64/jvm/java/include
-  )
+)
 
 foreach(JAVA_PROG "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")
   get_filename_component(jpath "${JAVA_PROG}" PATH)
@@ -252,12 +255,12 @@ endif()
 set(_JNI_NORMAL_JVM
   NAMES jvm
   PATHS ${JAVA_JVM_LIBRARY_DIRECTORIES}
-  )
+)
 
 set(_JNI_NORMAL_JAWT
   NAMES jawt
   PATHS ${JAVA_AWT_LIBRARY_DIRECTORIES}
-  )
+)
 
 foreach(search ${_JNI_SEARCHES})
   find_library(JAVA_JVM_LIBRARY ${_JNI_${search}_JVM})
@@ -311,8 +314,12 @@ else()
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(JNI  DEFAULT_MSG  JAVA_AWT_LIBRARY JAVA_JVM_LIBRARY
-                                                    JAVA_INCLUDE_PATH  JAVA_INCLUDE_PATH2 JAVA_AWT_INCLUDE_PATH)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(JNI DEFAULT_MSG JAVA_AWT_LIBRARY
+                                                  JAVA_JVM_LIBRARY
+                                                  JAVA_INCLUDE_PATH
+                                                  JAVA_INCLUDE_PATH2
+                                                  JAVA_AWT_INCLUDE_PATH
+)
 
 mark_as_advanced(
   JAVA_AWT_LIBRARY
@@ -332,4 +339,3 @@ set(JNI_INCLUDE_DIRS
   ${JAVA_INCLUDE_PATH2}
   ${JAVA_AWT_INCLUDE_PATH}
 )
-
