@@ -457,6 +457,7 @@ private:
   // in EnableLanguagesFromGenerator
   std::map<std::string, bool> IgnoreExtensions;
   std::set<std::string> LanguagesReady; // Ready for try_compile
+  std::set<std::string> LanguagesInProgress;
   std::map<std::string, std::string> OutputExtensions;
   std::map<std::string, std::string> LanguageToOutputExtension;
   std::map<std::string, std::string> ExtensionToLanguage;
