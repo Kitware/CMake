@@ -77,6 +77,7 @@
 # define kwsysProcess_WaitForExit               kwsys_ns(Process_WaitForExit)
 # define kwsysProcess_Interrupt                 kwsys_ns(Process_Interrupt)
 # define kwsysProcess_Kill                      kwsys_ns(Process_Kill)
+# define kwsysProcess_ResetStartTime            kwsys_ns(Process_ResetStartTime)
 #endif
 
 #if defined(__cplusplus)
@@ -392,6 +393,11 @@ kwsysEXPORT void kwsysProcess_Interrupt(kwsysProcess* cp);
  */
 kwsysEXPORT void kwsysProcess_Kill(kwsysProcess* cp);
 
+/**
+ * Reset the start time of the child process to the current time.
+ */
+kwsysEXPORT void kwsysProcess_ResetStartTime(kwsysProcess* cp);
+
 #if defined(__cplusplus)
 } /* extern "C" */
 #endif
@@ -456,6 +462,7 @@ kwsysEXPORT void kwsysProcess_Kill(kwsysProcess* cp);
 #  undef kwsysProcess_WaitForExit
 #  undef kwsysProcess_Interrupt
 #  undef kwsysProcess_Kill
+#  undef kwsysProcess_ResetStartTime
 # endif
 #endif
 

@@ -3017,3 +3017,14 @@ static BOOL WINAPI kwsysCtrlHandler(DWORD dwCtrlType)
   /* Continue on to default Ctrl handler (which calls ExitProcess).  */
   return FALSE;
 }
+
+/*--------------------------------------------------------------------------*/
+void kwsysProcess_ResetStartTime(kwsysProcess* cp)
+{
+  if(!cp)
+    {
+    return;
+    }
+  /* Reset start time. */
+  cp->StartTime = kwsysProcessTimeGetCurrent();
+}
