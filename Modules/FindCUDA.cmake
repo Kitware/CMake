@@ -770,9 +770,9 @@ endif()
 
 if(CUDA_USE_STATIC_CUDA_RUNTIME AND CUDA_cudart_static_LIBRARY)
   # Set whether to use the static cuda runtime.
-  option(CUDA_USE_STATIC_CUDA_RUNTIME ON CACHE BOOL "Use the static version of the CUDA runtime library if available")
+  option(CUDA_USE_STATIC_CUDA_RUNTIME "Use the static version of the CUDA runtime library if available" ON)
 else()
-  option(CUDA_USE_STATIC_CUDA_RUNTIME OFF CACHE BOOL "Use the static version of the CUDA runtime library if available")
+  option(CUDA_USE_STATIC_CUDA_RUNTIME "Use the static version of the CUDA runtime library if available" OFF)
 endif()
 
 if(CUDA_USE_STATIC_CUDA_RUNTIME)
