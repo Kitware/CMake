@@ -439,8 +439,6 @@ endmacro()
 ###############################################################################
 ###############################################################################
 
-option(CUDA_USE_STATIC_CUDA_RUNTIME "Use the static version of the CUDA runtime library if available" ON)
-
 # Allow the user to specify if the device code is supposed to be 32 or 64 bit.
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   set(CUDA_64_BIT_DEVICE_CODE_DEFAULT ON)
@@ -769,13 +767,15 @@ if(NOT CUDA_VERSION VERSION_LESS "5.5")
   mark_as_advanced(CUDA_cudart_static_LIBRARY)
 endif()
 
+
+if(CUDA_USE_STATIC_CUDA_RUNTIME AND CUDA_cudart_static_LIBRARY)
+  # Set whether to use the static cuda runtime.
+  option(CUDA_USE_STATIC_CUDA_RUNTIME ON CACHE BOOL "Use the static version of the CUDA runtime library if available")
+else()
+  option(CUDA_USE_STATIC_CUDA_RUNTIME OFF CACHE BOOL "Use the static version of the CUDA runtime library if available")
+endif()
+
 if(CUDA_USE_STATIC_CUDA_RUNTIME)
-
-  if(NOT CUDA_cudart_static_LIBRARY)
-    # Set whether to use the static cuda runtime.
-    set(CUDA_USE_STATIC_CUDA_RUNTIME OFF CACHE BOOL "Use the static version of the CUDA runtime library if available")
-  endif()
-
   if(UNIX AND NOT ANDROID)
     # Check for the dependent libraries.  Here we look for pthreads.
     if (DEFINED CMAKE_THREAD_PREFER_PTHREAD)
@@ -805,10 +805,8 @@ if(CUDA_USE_STATIC_CUDA_RUNTIME)
     if (NOT CUDA_rt_LIBRARY)
       message(WARNING "Expecting to find librt for libcudart_static, but didn't find it.")
     endif()
-  endif()
-endif(NOT CUDA_USE_STATIC_CUDA_RUNTIME STREQUAL OFF)
-
-MESSAGE("CUDA_TOOLKIT_INCLUDE: ${CUDA_TOOLKIT_INCLUDE} CUDA_VERSION_STRING: ${CUDA_VERSION_STRIN} CUDA_CUDART_LIBRARY: ${CUDA_CUDART_LIBRARY} CUDA_cudart_static_LIBRARY: ${CUDA_cudart_static_LIBRARY}")
+  endif(NOT APPLE)
+endif(CUDA_USE_STATIC_CUDA_RUNTIME)
 
 # CUPTI library showed up in cuda toolkit 4.0
 if(NOT CUDA_VERSION VERSION_LESS "4.0")
