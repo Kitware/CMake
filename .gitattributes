@@ -10,7 +10,6 @@ configure        crlf=input
 *.bat           -crlf
 *.bat.in        -crlf
 *.dsp           -crlf
-*.dsptemplate   -crlf
 *.dsw           -crlf
 *.pfx           -crlf
 *.png           -crlf

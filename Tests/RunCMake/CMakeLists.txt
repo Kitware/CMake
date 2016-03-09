@@ -232,12 +232,12 @@ if(PKG_CONFIG_FOUND)
   add_RunCMake_test(FindPkgConfig)
 endif()
 
-if("${CMAKE_GENERATOR}" MATCHES "Visual Studio [^6]")
+if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
   add_RunCMake_test(include_external_msproject)
   add_RunCMake_test(SolutionGlobalSections)
 endif()
 
-if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([^6789]|[6789][0-9])")
+if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([^789]|[789][0-9])")
   add_RunCMake_test(VS10Project)
 endif()
 

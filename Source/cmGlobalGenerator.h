@@ -241,11 +241,6 @@ public:
    */
   virtual void FindMakeProgram(cmMakefile*);
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  /** Is this the Visual Studio 6 generator?  */
-  bool IsForVS6() const { return this->GetName() == "Visual Studio 6"; }
-#endif
-
   ///! Find a target by name by searching the local generators.
   cmTarget* FindTarget(const std::string& name,
                        bool excludeAliases = false) const;

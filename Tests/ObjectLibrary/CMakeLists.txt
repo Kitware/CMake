@@ -16,8 +16,8 @@ add_custom_command(TARGET UseCshared POST_BUILD COMMAND ${CMAKE_COMMAND} -P ${CM
 
 add_executable(UseCinternal main.c c.c $<TARGET_OBJECTS:A> $<TARGET_OBJECTS:B>)
 
-if("${CMAKE_GENERATOR}" MATCHES "^Visual Studio (6|7|7 .NET 2003)$")
-  # VS 6 and 7 generators do not add objects as sources so we need a
+if("${CMAKE_GENERATOR}" MATCHES "^Visual Studio (7|7 .NET 2003)$")
+  # VS 7 generators do not add objects as sources so we need a
   # dummy object to convince the IDE to build the targets below.
   set(dummy dummy.obj) # In MinGW: gcc -c dummy.c -o dummy.obj
 elseif("${CMAKE_GENERATOR}" MATCHES "Xcode")

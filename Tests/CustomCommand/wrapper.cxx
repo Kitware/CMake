@@ -16,18 +16,12 @@ int main(int argc, char *argv[])
   fprintf(fp,"int wrapped_help() { return 5; }\n");
   fclose(fp);
 #ifdef CMAKE_INTDIR
-  /* The VS6 IDE passes a leading ".\\" in its variable expansion.  */
-# if defined(_MSC_VER) && _MSC_VER == 1200
-#  define CFG_DIR ".\\" CMAKE_INTDIR
-# else
-#  define CFG_DIR CMAKE_INTDIR
-# endif
   const char* cfg = (argc >= 4)? argv[3] : "";
-  if(strcmp(cfg, CFG_DIR) != 0)
+  if(strcmp(cfg, CMAKE_INTDIR) != 0)
     {
     fprintf(stderr,
             "Did not receive expected configuration argument:\n"
-            "  expected [" CFG_DIR "]\n"
+            "  expected [" CMAKE_INTDIR "]\n"
             "  received [%s]\n", cfg);
     return 1;
     }

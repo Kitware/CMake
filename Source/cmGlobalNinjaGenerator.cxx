@@ -642,7 +642,6 @@ void cmGlobalNinjaGenerator
 //   cmGlobalUnixMakefileGenerator3
 //   cmGlobalGhsMultiGenerator
 //   cmGlobalVisualStudio10Generator
-//   cmGlobalVisualStudio6Generator
 //   cmGlobalVisualStudio7Generator
 //   cmGlobalXCodeGenerator
 // Called by:
