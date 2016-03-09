@@ -74,11 +74,6 @@ endif()
 #-----------------------------------------------------------------------------
 # Check that PDB files actually appear where expected.
 
-# The PDB_NAME and PDB_OUTPUT_DIRECTORY options do not work in VS 6.
-if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
-  return()
-endif()
-
 set(pdbs "")
 foreach(t ${my_targets})
   get_property(pdb_name TARGET ${t} PROPERTY PDB_NAME)

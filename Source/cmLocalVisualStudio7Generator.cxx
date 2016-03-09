@@ -25,7 +25,7 @@
 
 #include <ctype.h> // for isspace
 
-static bool cmLVS6G_IsFAT(const char* dir);
+static bool cmLVS7G_IsFAT(const char* dir);
 
 class cmLocalVisualStudio7GeneratorInternals
 {
@@ -999,7 +999,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
 
     // Check if we need the FAT32 workaround.
     // Check the filesystem type where the target will be written.
-    if (cmLVS6G_IsFAT(target->GetDirectory(configName).c_str()))
+    if (cmLVS7G_IsFAT(target->GetDirectory(configName).c_str()))
       {
       // Add a flag telling the manifest tool to use a workaround
       // for FAT32 file systems, which can cause an empty manifest
@@ -2365,7 +2365,7 @@ std::string cmLocalVisualStudio7Generator
 
 //----------------------------------------------------------------------------
 #include <windows.h>
-static bool cmLVS6G_IsFAT(const char* dir)
+static bool cmLVS7G_IsFAT(const char* dir)
 {
   if(dir[0] && dir[1] == ':')
     {

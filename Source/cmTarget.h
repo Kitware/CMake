@@ -245,70 +245,12 @@ public:
   cmStringRange GetLinkImplementationEntries() const;
   cmBacktraceRange GetLinkImplementationBacktraces() const;
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  const LinkLibraryVectorType &GetLinkLibrariesForVS6() const {
-  return this->LinkLibrariesForVS6;}
-
-  void AnalyzeLibDependenciesForVS6( const cmMakefile& mf );
-#endif
-
   struct StrictTargetComparison {
     bool operator()(cmTarget const* t1, cmTarget const* t2) const;
   };
 
 private:
   bool HandleLocationPropertyPolicy(cmMakefile* context) const;
-
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  /**
-   * A list of direct dependencies. Use in conjunction with DependencyMap.
-   */
-  typedef std::vector< LibraryID > DependencyList;
-
-  /**
-   * This map holds the dependency graph. map[x] returns a set of
-   * direct dependencies of x. Note that the direct depenencies are
-   * ordered. This is necessary to handle direct dependencies that
-   * themselves have no dependency information.
-   */
-  typedef std::map< LibraryID, DependencyList > DependencyMap;
-
-  /**
-   * Inserts \a dep at the end of the dependency list of \a lib.
-   */
-  void InsertDependencyForVS6( DependencyMap& depMap,
-                               const LibraryID& lib,
-                               const LibraryID& dep);
-
-  /*
-   * Deletes \a dep from the dependency list of \a lib.
-   */
-  void DeleteDependencyForVS6( DependencyMap& depMap,
-                               const LibraryID& lib,
-                               const LibraryID& dep);
-
-  /**
-   * Emits the library \a lib and all its dependencies into link_line.
-   * \a emitted keeps track of the libraries that have been emitted to
-   * avoid duplicates--it is more efficient than searching
-   * link_line. \a visited is used detect cycles. Note that \a
-   * link_line is in reverse order, in that the dependencies of a
-   * library are listed before the library itself.
-   */
-  void EmitForVS6( const LibraryID lib,
-                   const DependencyMap& dep_map,
-                   std::set<LibraryID>& emitted,
-                   std::set<LibraryID>& visited,
-                   DependencyList& link_line);
-
-  /**
-   * Finds the dependencies for \a lib and inserts them into \a
-   * dep_map.
-   */
-  void GatherDependenciesForVS6( const cmMakefile& mf,
-                                 const LibraryID& lib,
-                                 DependencyMap& dep_map);
-#endif
 
   const char* GetSuffixVariableInternal(bool implib) const;
   const char* GetPrefixVariableInternal(bool implib) const;
@@ -338,9 +280,6 @@ private:
   std::vector<std::pair<TLLSignature, cmListFileContext> > TLLCommands;
   LinkLibraryVectorType PrevLinkedLibraries;
   LinkLibraryVectorType OriginalLinkLibraries;
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  LinkLibraryVectorType LinkLibrariesForVS6;
-#endif
   cmMakefile* Makefile;
   cmTargetInternalPointer Internal;
   cmState::TargetType TargetTypeValue;
@@ -351,9 +290,6 @@ private:
   bool IsImportedTarget;
   bool ImportedGloballyVisible;
   bool BuildInterfaceIncludesAppended;
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  bool LinkLibrariesForVS6Analyzed;
-#endif
 
   std::string ProcessSourceItemCMP0049(const std::string& s);
 

@@ -10,9 +10,6 @@ project(Preprocess)
 if("${CMAKE_GENERATOR}" MATCHES "Xcode")
   set(PP_XCODE 1)
 endif()
-if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
-  set(PP_VS6 1)
-endif()
 if("${CMAKE_GENERATOR}" MATCHES "Unix Makefiles")
   set(PP_UMAKE 1)
 endif()
@@ -60,20 +57,15 @@ if(NOT BORLAND AND NOT PP_VS70)
   set(SEMICOLON "\;")
 endif()
 
-if(NOT PP_VS6)
-  # VS 6 IDE: spaces and '"', '$', or ';'
-  # The project parser cannot handle spaces if there are quotes.
-  # Since we test passing in a quoted string, we cannot have spaces.
-  set(STRING_EXTRA "${STRING_EXTRA} ")
+set(STRING_EXTRA "${STRING_EXTRA} ")
 
-  if(NOT PP_BORLAND AND NOT PP_WATCOM)
-    # Borland, WMake: multiple spaces
-    # The make tool seems to remove extra whitespace from inside
-    # quoted strings when passing to the compiler.  It does not have
-    # trouble passing to other tools, and the compiler may be directly
-    # invoked from the command line.
-    set(STRING_EXTRA "${STRING_EXTRA} ")
-  endif()
+if(NOT PP_BORLAND AND NOT PP_WATCOM)
+  # Borland, WMake: multiple spaces
+  # The make tool seems to remove extra whitespace from inside
+  # quoted strings when passing to the compiler.  It does not have
+  # trouble passing to other tools, and the compiler may be directly
+  # invoked from the command line.
+  set(STRING_EXTRA "${STRING_EXTRA} ")
 endif()
 
 if(NOT PP_VS)
@@ -201,13 +193,9 @@ endif()
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DPREPROCESS_DEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DPREPROCESS_DEBUG")
 
-# Inform the test if it built from Xcode or VS6 IDE.
+# Inform the test if it built from Xcode.
 if(PP_XCODE)
   set(PREPROCESS_XCODE 1)
-endif()
-if(PP_VS6)
-  set(PREPROCESS_VS6 1)
-  set(VS6 _vs6)
 endif()
 
 # Test old-style definitions.
@@ -220,7 +208,7 @@ if(NOT "${OLD_DEFS}" STREQUAL "${OLD_DEFS_EXPECTED}")
   message(SEND_ERROR "add_definitions not converted to directory property!")
 endif()
 
-add_executable(Preprocess preprocess.c preprocess${VS6}.cxx)
+add_executable(Preprocess preprocess.c preprocess.cxx)
 
 set(FILE_PATH "${Preprocess_SOURCE_DIR}/file_def.h")
 set(TARGET_PATH "${Preprocess_SOURCE_DIR}/target_def.h")
@@ -236,17 +224,14 @@ foreach(c "" "_DEBUG" "_RELEASE")
     PROPERTY COMPILE_DEFINITIONS${c} "TARGET_DEF${c}"
     )
   set_property(
-    SOURCE preprocess.c preprocess${VS6}.cxx
+    SOURCE preprocess.c preprocess.cxx
     PROPERTY COMPILE_DEFINITIONS${c} "FILE_DEF${c}"
     )
 endforeach()
 
 # Add definitions with values.
-if(NOT PREPROCESS_VS6)
-  # The path might have spaces, which VS6 does not support.
-  set(DEF_TARGET_PATH "TARGET_PATH=\"${TARGET_PATH}\"")
-  set(DEF_FILE_PATH "FILE_PATH=\"${FILE_PATH}\"")
-endif()
+set(DEF_TARGET_PATH "TARGET_PATH=\"${TARGET_PATH}\"")
+set(DEF_FILE_PATH "FILE_PATH=\"${FILE_PATH}\"")
 set_property(
   TARGET Preprocess
   APPEND PROPERTY COMPILE_DEFINITIONS
@@ -255,7 +240,7 @@ set_property(
   ${DEF_TARGET_PATH}
   )
 set_property(
-  SOURCE preprocess.c preprocess${VS6}.cxx
+  SOURCE preprocess.c preprocess.cxx
   APPEND PROPERTY COMPILE_DEFINITIONS
   "FILE_STRING=\"${STRING_VALUE}${SEMICOLON}\""
   "FILE_EXPR=${EXPR}"

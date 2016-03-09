@@ -108,9 +108,7 @@ endif()
 
 # try to compile a file that should compile
 set(_c_flags "${CMAKE_C_FLAGS}")
-if(CMAKE_GENERATOR STREQUAL "Visual Studio 6")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D \"TESTDEF\"")
-elseif(WATCOM)
+if(WATCOM)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -dTESTDEF")
 else()
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \"-DTESTDEF\"")

@@ -12,7 +12,6 @@ Example values:
 
 ::
 
-  $(IntDir)            = Visual Studio 6
   $(ConfigurationName) = Visual Studio 7, 8, 9
   $(Configuration)     = Visual Studio 10
   $(CONFIGURATION)     = Xcode

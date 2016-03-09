@@ -1,11 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 project(CompileDefinitions)
 
-if ("${CMAKE_GENERATOR}" STREQUAL "Visual Studio 6")
-    add_definitions(-DNO_SPACES_IN_DEFINE_VALUES)
-    set(NO_SPACES_IN_DEFINE_VALUES 1)
-endif()
-
 # Use compile flags to tell executables which config is built
 # without depending on the compile definitions functionality.
 foreach(c DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)

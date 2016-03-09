@@ -3,6 +3,3 @@
  ``/Fd`` compiler flag and are not the same as linker-generated
  program database files specified by the ``/pdb`` linker flag.
  Use the |PDB_XXX| property to specify the latter.
-
- This property is not implemented by the :generator:`Visual Studio 6`
- generator.
