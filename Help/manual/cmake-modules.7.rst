@@ -135,6 +135,7 @@ All Modules
    /module/FindLibLZMA
    /module/FindLibXml2
    /module/FindLibXslt
+   /module/FindLTTngUST
    /module/FindLua50
    /module/FindLua51
    /module/FindLua
