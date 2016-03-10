@@ -11,8 +11,7 @@ automatically escape the value correctly for the native build system
 values).
 
 CMake will automatically drop some definitions that are not supported
-by the native build tool.  The VS6 IDE does not support definition
-values with spaces (but NMake does).
+by the native build tool.
 
 .. include:: /include/COMPILE_DEFINITIONS_DISCLAIMER.txt
 

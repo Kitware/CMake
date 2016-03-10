@@ -17,8 +17,7 @@ This property will be initialized in each directory by its value in the
 directory's parent.
 
 CMake will automatically drop some definitions that are not supported
-by the native build tool.  The VS6 IDE does not support definition
-values with spaces (but NMake does).
+by the native build tool.
 
 .. include:: /include/COMPILE_DEFINITIONS_DISCLAIMER.txt
 

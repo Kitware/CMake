@@ -2,12 +2,6 @@
 #define STRING_VALUE "@STRING_VALUE@"
 #define EXPR @EXPR@
 #cmakedefine PREPROCESS_XCODE
-#cmakedefine PREPROCESS_VS6
-
-#ifdef PREPROCESS_VS6
-# define FILE_PATH "@FILE_PATH@"
-# define TARGET_PATH "@TARGET_PATH@"
-#endif
 
 /* Declarations and macros shared by all sources.  */
 #define TO_STRING(x) TO_STRING0(x)

@@ -1,10 +1,6 @@
 Visual Studio 6
 ---------------
 
-Deprected.  Generates Visual Studio 6 project files.
-
-.. note::
-  This generator is deprecated and will be removed
-  in a future version of CMake.  It will still be
-  possible to build with VS 6 tools using the
-  :generator:`NMake Makefiles` generator.
+Removed.  This once generated Visual Studio 6 project files, but the
+generator has been removed since CMake 3.6.  It is still possible to
+build with VS 6 tools using the :generator:`NMake Makefiles` generator.

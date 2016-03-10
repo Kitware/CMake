@@ -6,8 +6,8 @@ file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
 # configure the AutoExport test
 run_cmake(AutoExport)
 unset(RunCMake_TEST_OPTIONS)
-# don't run this test on VS 6 as it is not supported
-if("${RunCMake_GENERATOR}" MATCHES "Visual Studio 6|Watcom WMake|Borland Makefiles")
+# don't run this test on Watcom or Borland make as it is not supported
+if("${RunCMake_GENERATOR}" MATCHES "Watcom WMake|Borland Makefiles")
   return()
 endif()
 # we build debug so the say.exe will be found in Debug/say.exe for
