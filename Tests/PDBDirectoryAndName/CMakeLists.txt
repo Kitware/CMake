@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 2.8)
-cmake_policy(SET CMP0054 NEW)
 project(PDBDirectoryAndName C)
 
 # Make sure the proper compiler is in use.
@@ -62,14 +61,6 @@ set_target_properties(myexe2 PROPERTIES
 list(APPEND my_targets myexe2)
 
 target_link_libraries(myexe2 mylibA mylibD)
-
-
-# Clang/C2 does not produce pdb files for static libraries
-if (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND
-    CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
-  list(REMOVE_ITEM my_targets mylibB mylibD)
-endif()
-
 
 #-----------------------------------------------------------------------------
 # Check that PDB files actually appear where expected.

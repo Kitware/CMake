@@ -1744,9 +1744,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   if(MSVC)
     ADD_TEST_MACRO(ForceInclude foo)
     ADD_TEST_MACRO(PDBDirectoryAndName myexe)
-    if(NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
-      ADD_TEST_MACRO(PrecompiledHeader foo)
-    endif()
+    ADD_TEST_MACRO(PrecompiledHeader foo)
   endif()
   if(MSVC OR
       "${CMAKE_GENERATOR}" MATCHES "(MSYS|MinGW) Makefiles")
