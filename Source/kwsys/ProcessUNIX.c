@@ -3058,3 +3058,14 @@ static void kwsysProcessesSignalHandler(int signum
 
   errno = old_errno;
 }
+
+/*--------------------------------------------------------------------------*/
+void kwsysProcess_ResetStartTime(kwsysProcess* cp)
+{
+  if(!cp)
+    {
+    return;
+    }
+  /* Reset start time. */
+  cp->StartTime = kwsysProcessTimeGetCurrent();
+}
