@@ -2078,7 +2078,18 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
 
   if(this->MSTools)
     {
-    this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
+    cmsys::RegularExpression clangToolset("v[0-9]+_clang_.*");
+    const char* toolset = this->GlobalGenerator->GetPlatformToolset();
+    if (toolset && clangToolset.find(toolset))
+      {
+      this->WriteString("<ObjectFileName>"
+                        "$(IntDir)%(filename).obj"
+                        "</ObjectFileName>\n", 3);
+      }
+    else
+      {
+      this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
+      }
 
     // If not in debug mode, write the DebugInformationFormat field
     // without value so PDBs don't get generated uselessly.
