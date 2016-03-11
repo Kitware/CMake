@@ -82,8 +82,7 @@
 #   ``AUTO`` to find them from executable target
 #
 # However, note that this macro will slow down your tests by running
-# an executable for each test and test fixture.  You will also have to
-# re-run CMake after adding or removing tests or test fixtures.
+# an executable for each test and test fixture.
 #
 # Example usage::
 #
@@ -119,6 +118,7 @@ function(GTEST_ADD_TESTS executable extra_args)
     set(gtest_case_name_regex ".*\\( *([A-Za-z_0-9]+) *, *([A-Za-z_0-9]+) *\\).*")
     set(gtest_test_type_regex "(TYPED_TEST|TEST_?[FP]?)")
     foreach(source ${ARGN})
+        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${source})
         file(READ "${source}" contents)
         string(REGEX MATCHALL "${gtest_test_type_regex} *\\(([A-Za-z_0-9 ,]+)\\)" found_tests ${contents})
         foreach(hit ${found_tests})
