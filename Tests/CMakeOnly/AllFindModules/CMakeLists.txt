@@ -87,10 +87,9 @@ foreach(VTEST ALSA ARMADILLO BZIP2 CUPS CURL EXPAT FREETYPE GETTEXT GIT HG
 endforeach()
 
 foreach(VTEST BISON Boost CUDA DOXYGEN FLEX GIF GTK2
-        HDF5 LibArchive OPENSCENEGRAPH RUBY SWIG)
+        HDF5 LibArchive OPENSCENEGRAPH RUBY SWIG Protobuf)
     check_version_string(${VTEST} ${VTEST}_VERSION)
 endforeach()
 
 check_version_string(PYTHONINTERP PYTHON_VERSION_STRING)
-check_version_string(Protobuf PROTOBUF_VERSION)
 check_version_string(SUBVERSION Subversion_VERSION_SVN)
