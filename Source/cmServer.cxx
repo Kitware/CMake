@@ -115,16 +115,23 @@ void cmMetadataServer::PopOne()
 
 void cmMetadataServer::handleData(const std::string& data)
 {
+#ifdef _WIN32
+#define LINE_SEP "\r\n"
+#else
+#define LINE_SEP "\n"
+#endif
+
   mDataBuffer += data;
 
   for (;;) {
-    auto needle = mDataBuffer.find('\n');
+    auto needle = mDataBuffer.find(LINE_SEP);
 
     if (needle == std::string::npos) {
       return;
     }
     std::string line = mDataBuffer.substr(0, needle);
-    mDataBuffer.erase(mDataBuffer.begin(), mDataBuffer.begin() + needle + 1);
+    mDataBuffer.erase(mDataBuffer.begin(),
+                      mDataBuffer.begin() + needle + sizeof(LINE_SEP) - 1);
     if (line == "[== CMake MetaMagic ==[") {
       mJsonData.clear();
       continue;
