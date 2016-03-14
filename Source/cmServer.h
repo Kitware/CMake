@@ -59,6 +59,8 @@ private:
   uv_loop_t* mLoop;
   uv_pipe_t mStdin_pipe;
   uv_pipe_t mStdout_pipe;
+  uv_tty_t mStdin_tty;
+  uv_tty_t mStdout_tty;
 
   ServerState State;
   bool Writing;

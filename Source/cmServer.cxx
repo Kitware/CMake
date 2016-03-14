@@ -73,13 +73,23 @@ cmMetadataServer::cmMetadataServer()
 {
   mLoop = uv_default_loop();
 
-  uv_pipe_init(mLoop, &mStdin_pipe, 0);
-  uv_pipe_open(&mStdin_pipe, 0);
-  mStdin_pipe.data = this;
+  if (uv_guess_handle(1) == UV_TTY) {
+    uv_tty_init(mLoop, &mStdin_tty, 0, 1);
+    uv_tty_set_mode(&mStdin_tty, UV_TTY_MODE_NORMAL);
+    mStdin_tty.data = this;
 
-  uv_pipe_init(mLoop, &mStdout_pipe, 0);
-  uv_pipe_open(&mStdout_pipe, 1);
-  mStdout_pipe.data = this;
+    uv_tty_init(mLoop, &mStdout_tty, 1, 0);
+    uv_tty_set_mode(&mStdout_tty, UV_TTY_MODE_NORMAL);
+    mStdout_tty.data = this;
+  } else {
+    uv_pipe_init(mLoop, &mStdin_pipe, 0);
+    uv_pipe_open(&mStdin_pipe, 0);
+    mStdin_pipe.data = this;
+
+    uv_pipe_init(mLoop, &mStdout_pipe, 0);
+    uv_pipe_open(&mStdout_pipe, 1);
+    mStdout_pipe.data = this;
+  }
 
   this->State = Uninitialized;
   this->Writing = false;
@@ -142,7 +152,11 @@ void cmMetadataServer::ServeMetadata(const std::string& buildDir)
 
   this->Protocol = new cmServerProtocol(this, buildDir);
 
-  uv_read_start((uv_stream_t*)&mStdin_pipe, alloc_buffer, read_stdin);
+  if (uv_guess_handle(1) == UV_TTY) {
+    uv_read_start((uv_stream_t*)&mStdin_tty, alloc_buffer, read_stdin);
+  } else {
+    uv_read_start((uv_stream_t*)&mStdin_pipe, alloc_buffer, read_stdin);
+  }
 
   uv_run(mLoop, UV_RUN_DEFAULT);
 }
@@ -156,5 +170,9 @@ void cmMetadataServer::WriteResponse(const Json::Value& jsonValue)
   result += "]== CMake MetaMagic ==]\n";
 
   this->Writing = true;
-  write_data((uv_stream_t*)&mStdout_pipe, result, on_stdout_write);
+  if (uv_guess_handle(1) == UV_TTY) {
+    write_data((uv_stream_t*)&mStdout_tty, result, on_stdout_write);
+  } else {
+    write_data((uv_stream_t*)&mStdout_pipe, result, on_stdout_write);
+  }
 }
