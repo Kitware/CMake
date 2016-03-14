@@ -97,6 +97,7 @@ if(NOT XCODE_VERSION VERSION_LESS 7)
 endif()
 
 if(NOT XCODE_VERSION VERSION_LESS 6)
+  # XcodeIOSInstallCombined
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeIOSInstallCombined-build)
   set(RunCMake_TEST_NO_CLEAN 1)
   set(RunCMake_TEST_OPTIONS
@@ -114,6 +115,7 @@ if(NOT XCODE_VERSION VERSION_LESS 6)
   unset(RunCMake_TEST_NO_CLEAN)
   unset(RunCMake_TEST_OPTIONS)
 
+  # XcodeIOSInstallCombinedPrune
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeIOSInstallCombinedPrune-build)
   set(RunCMake_TEST_NO_CLEAN 1)
   set(RunCMake_TEST_OPTIONS
@@ -126,6 +128,24 @@ if(NOT XCODE_VERSION VERSION_LESS 6)
   run_cmake(XcodeIOSInstallCombinedPrune)
   run_cmake_command(XcodeIOSInstallCombinedPrune-build ${CMAKE_COMMAND} --build .)
   run_cmake_command(XcodeIOSInstallCombinedPrune-install ${CMAKE_COMMAND} --build . --target install)
+
+  unset(RunCMake_TEST_BINARY_DIR)
+  unset(RunCMake_TEST_NO_CLEAN)
+  unset(RunCMake_TEST_OPTIONS)
+
+  # XcodeIOSInstallCombinedSingleArch
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeIOSInstallCombinedSingleArch-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_OPTIONS
+    "-DCMAKE_INSTALL_PREFIX:PATH=${RunCMake_TEST_BINARY_DIR}/_install"
+    "-DCMAKE_IOS_INSTALL_COMBINED=YES")
+
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake(XcodeIOSInstallCombinedSingleArch)
+  run_cmake_command(XcodeIOSInstallCombinedSingleArch-build ${CMAKE_COMMAND} --build .)
+  run_cmake_command(XcodeIOSInstallCombinedSingleArch-install ${CMAKE_COMMAND} --build . --target install)
 
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
