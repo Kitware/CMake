@@ -2409,8 +2409,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
 
   // we have to find the module directory, so we can copy the files
   this->AddCMakePaths();
-  std::string modulesPath =
-    this->State->GetInitializedCacheValue("CMAKE_ROOT");
+  std::string modulesPath = cmSystemTools::GetCMakeRoot();
   modulesPath += "/Modules";
   std::string inFile = modulesPath;
   inFile += "/SystemInformation.cmake";

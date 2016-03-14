@@ -1003,8 +1003,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
     SetupAutoRccTarget(target);
     }
 
-  const char* cmakeRoot = makefile->GetSafeDefinition("CMAKE_ROOT");
-  std::string inputFile = cmakeRoot;
+  std::string inputFile = cmSystemTools::GetCMakeRoot();
   inputFile += "/Modules/AutogenInfo.cmake.in";
   std::string outputFile = targetDir;
   outputFile += "/AutogenInfo.cmake";

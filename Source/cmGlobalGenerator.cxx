@@ -820,7 +820,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
   // Now load files that can override any settings on the platform or for
   // the project First load the project compatibility file if it is in
   // cmake
-  std::string projectCompatibility = mf->GetDefinition("CMAKE_ROOT");
+  std::string projectCompatibility = cmSystemTools::GetCMakeRoot();
   projectCompatibility += "/Modules/";
   projectCompatibility += mf->GetSafeDefinition("PROJECT_NAME");
   projectCompatibility += "Compatibility.cmake";
