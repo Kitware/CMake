@@ -3738,17 +3738,13 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
     }
 
   // Always search in the standard modules location.
-  const char* cmakeRoot = this->GetDefinition("CMAKE_ROOT");
-  if(cmakeRoot)
+  moduleInCMakeRoot = cmSystemTools::GetCMakeRoot();
+  moduleInCMakeRoot += "/Modules/";
+  moduleInCMakeRoot += filename;
+  cmSystemTools::ConvertToUnixSlashes(moduleInCMakeRoot);
+  if(!cmSystemTools::FileExists(moduleInCMakeRoot.c_str()))
     {
-    moduleInCMakeRoot = cmakeRoot;
-    moduleInCMakeRoot += "/Modules/";
-    moduleInCMakeRoot += filename;
-    cmSystemTools::ConvertToUnixSlashes(moduleInCMakeRoot);
-    if(!cmSystemTools::FileExists(moduleInCMakeRoot.c_str()))
-      {
-      moduleInCMakeRoot = "";
-      }
+    moduleInCMakeRoot = "";
     }
 
   // Normally, prefer the files found in CMAKE_MODULE_PATH. Only when the file
@@ -3763,7 +3759,7 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
   if (!moduleInCMakeModulePath.empty() && !moduleInCMakeRoot.empty())
     {
     const char* currentFile = this->GetDefinition("CMAKE_CURRENT_LIST_FILE");
-    std::string mods = cmakeRoot + std::string("/Modules/");
+    std::string mods = cmSystemTools::GetCMakeRoot() + "/Modules/";
     if (currentFile && strncmp(currentFile, mods.c_str(), mods.size()) == 0)
       {
       switch (this->GetPolicyStatus(cmPolicies::CMP0017))

@@ -189,7 +189,7 @@ void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
 
   if (dir != "")
     {
-    std::string src = mf->GetRequiredDefinition("CMAKE_ROOT");
+    std::string src = cmSystemTools::GetCMakeRoot();
     src += "/Templates/" CMAKE_VSMACROS_FILENAME;
 
     std::string dst = dir + "/CMakeMacros/" CMAKE_VSMACROS_FILENAME;
