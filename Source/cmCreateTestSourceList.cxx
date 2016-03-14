@@ -78,8 +78,7 @@ bool cmCreateTestSourceList
   driver += *i;
   ++i;
 
-  std::string configFile =
-    this->Makefile->GetRequiredDefinition("CMAKE_ROOT");
+  std::string configFile = cmSystemTools::GetCMakeRoot();
 
   configFile += "/Templates/TestDriver.cxx.in";
   // Create the test driver file
