@@ -52,7 +52,14 @@ function(_ios_install_combined_get_build_setting sdk variable resultvar)
   endif()
 
   if(NOT output MATCHES " ${variable} = ([^\n]*)")
-    message(FATAL_ERROR "${variable} not found.")
+    if("${variable}" STREQUAL "VALID_ARCHS")
+      # VALID_ARCHS may be unset by user for given SDK
+      # (e.g. for build without simulator).
+      set("${resultvar}" "" PARENT_SCOPE)
+      return()
+    else()
+      message(FATAL_ERROR "${variable} not found.")
+    endif()
   endif()
 
   set("${resultvar}" "${CMAKE_MATCH_1}" PARENT_SCOPE)
@@ -71,6 +78,9 @@ function(_ios_install_combined_get_valid_archs sdk resultvar)
   separate_arguments(valid_archs)
   list(REMOVE_ITEM valid_archs "") # remove empty elements
   list(REMOVE_DUPLICATES valid_archs)
+
+  string(REPLACE ";" " " printable "${valid_archs}")
+  _ios_install_combined_message("Architectures (${sdk}): ${printable}")
 
   set("${resultvar}" "${valid_archs}" PARENT_SCOPE)
 endfunction()
