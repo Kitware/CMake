@@ -41,7 +41,7 @@ macro(__compiler_gnu lang)
     # distcc does not transform -o to -MT when invoking the preprocessor
     # internally, as it ought to.  Work around this bug by setting -MT here
     # even though it isn't strictly necessary.
-    set(CMAKE_DEPFILE_FLAGS_${lang} "-MMD -MT <OBJECT> -MF <DEPFILE>")
+    set(CMAKE_DEPFILE_FLAGS_${lang} "-MD -MT <OBJECT> -MF <DEPFILE>")
   endif()
 
   # Initial configuration flags.
