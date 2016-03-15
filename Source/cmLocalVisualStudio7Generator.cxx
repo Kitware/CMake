@@ -1012,6 +1012,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
 
   this->OutputTargetRules(fout, configName, target, libName);
   this->OutputBuildTool(fout, configName, target, targetOptions);
+  this->OutputDeploymentDebuggerTool(fout, configName, target);
   fout << "\t\t</Configuration>\n";
 }
 
@@ -1371,6 +1372,31 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     case cmState::GLOBAL_TARGET:
     case cmState::INTERFACE_LIBRARY:
       break;
+    }
+}
+
+void cmLocalVisualStudio7Generator::OutputDeploymentDebuggerTool(
+  std::ostream& fout, std::string const& config, cmGeneratorTarget* target)
+{
+  if (this->WindowsCEProject)
+    {
+    if (const char* dir = target->GetProperty("DEPLOYMENT_REMOTE_DIRECTORY"))
+      {
+      fout <<
+        "\t\t\t<DeploymentTool\n"
+        "\t\t\t\tForceDirty=\"-1\"\n"
+        "\t\t\t\tRemoteDirectory=\"" << this->EscapeForXML(dir) << "\"\n"
+        "\t\t\t\tRegisterOutput=\"0\"\n"
+        "\t\t\t\tAdditionalFiles=\"\"/>\n"
+        ;
+      std::string const exe = dir + std::string("\\") + target->GetFullName();
+      fout <<
+        "\t\t\t<DebuggerTool\n"
+        "\t\t\t\tRemoteExecutable=\"" << this->EscapeForXML(exe) << "\"\n"
+        "\t\t\t\tArguments=\"\"\n"
+        "\t\t\t/>\n"
+        ;
+      }
     }
 }
 
