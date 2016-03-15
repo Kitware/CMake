@@ -92,6 +92,12 @@ private:
                          const std::string& libName);
   void OutputBuildTool(std::ostream& fout, const std::string& configName,
                        cmGeneratorTarget* t, const Options& targetOptions);
+  /**
+   * functionality to set RemoteDirectory in DeploymentTool and DebuggerTool section in vcproj configuration for VisualStudio
+   * You can set path_to_remote_dir to target property DEPLOYMENT_REMOTE_DIRECTORY in your CMakeList.txt
+   * This functionality is only for WinCE project
+   */  
+  void OutputDeploymentDebuggerTool(std::ostream& fout, cmGeneratorTarget* target);
   void OutputLibraryDirectories(std::ostream& fout,
                                 std::vector<std::string> const& dirs);
   void WriteProjectSCC(std::ostream& fout, cmGeneratorTarget *target);
