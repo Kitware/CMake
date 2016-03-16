@@ -745,9 +745,10 @@ endfunction()
 # defined; FALSE if dependency information is unavailable).
 #
 # componentvar - the component list variable name
+# extravar - the indirect dependency list variable name
 #
 #
-function(_Boost_MISSING_DEPENDENCIES componentvar)
+function(_Boost_MISSING_DEPENDENCIES componentvar extravar)
   # _boost_unprocessed_components - list of components requiring processing
   # _boost_processed_components - components already processed (or currently being processed)
   # _boost_new_components - new components discovered for future processing
@@ -773,7 +774,12 @@ function(_Boost_MISSING_DEPENDENCIES componentvar)
     set(_boost_unprocessed_components ${_boost_new_components})
     unset(_boost_new_components)
   endwhile()
+  set(_boost_extra_components ${_boost_processed_components})
+  if(_boost_extra_components AND ${componentvar})
+    list(REMOVE_ITEM _boost_extra_components ${${componentvar}})
+  endif()
   set(${componentvar} ${_boost_processed_components} PARENT_SCOPE)
+  set(${extravar} ${_boost_extra_components} PARENT_SCOPE)
 endfunction()
 
 #
@@ -1306,7 +1312,7 @@ endif()
 
 # Additional components may be required via component dependencies.
 # Add any missing components to the list.
-_Boost_MISSING_DEPENDENCIES(Boost_FIND_COMPONENTS)
+_Boost_MISSING_DEPENDENCIES(Boost_FIND_COMPONENTS _Boost_EXTRA_FIND_COMPONENTS)
 
 # If thread is required, get the thread libs as a dependency
 list(FIND Boost_FIND_COMPONENTS thread _Boost_THREAD_DEPENDENCY_LIBS)
@@ -1484,6 +1490,10 @@ if(Boost_FOUND)
       list(APPEND _Boost_MISSING_COMPONENTS ${COMPONENT})
     endif()
   endforeach()
+  if(_Boost_MISSING_COMPONENTS AND _Boost_EXTRA_FIND_COMPONENTS)
+    # Optional indirect dependencies are not counted as missing.
+    list(REMOVE_ITEM _Boost_MISSING_COMPONENTS ${_Boost_EXTRA_FIND_COMPONENTS})
+  endif()
 
   if(Boost_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] Boost_FOUND = ${Boost_FOUND}")
