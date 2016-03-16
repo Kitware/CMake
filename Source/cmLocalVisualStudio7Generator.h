@@ -92,6 +92,9 @@ private:
                          const std::string& libName);
   void OutputBuildTool(std::ostream& fout, const std::string& configName,
                        cmGeneratorTarget* t, const Options& targetOptions);
+  void OutputDeploymentDebuggerTool(std::ostream& fout,
+                                    std::string const& config,
+                                    cmGeneratorTarget* target);
   void OutputLibraryDirectories(std::ostream& fout,
                                 std::vector<std::string> const& dirs);
   void WriteProjectSCC(std::ostream& fout, cmGeneratorTarget *target);
