@@ -14,6 +14,7 @@ set(RELEASE_SCRIPTS_BATCH_1
 
 set(RELEASE_SCRIPTS_BATCH_2
   dash2win64_cygwin.cmake     # Cygwin
+  win64_release.cmake         # Windows x64
 )
 
 function(write_batch_shell_script filename)
