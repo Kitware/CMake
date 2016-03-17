@@ -34,7 +34,9 @@
 #endif
 
 #if @DEFINE_NO_DEPRECATED@ /* DEFINE_NO_DEPRECATED */
-# define @NO_DEPRECATED_MACRO_NAME@
+#  ifndef @NO_DEPRECATED_MACRO_NAME@
+#    define @NO_DEPRECATED_MACRO_NAME@
+#  endif
 #endif
 
 #endif
