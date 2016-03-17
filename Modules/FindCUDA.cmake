@@ -1848,5 +1848,3 @@ macro(CUDA_BUILD_CLEAN_TARGET)
   # have been removed.
   set(CUDA_ADDITIONAL_CLEAN_FILES "" CACHE INTERNAL "List of intermediate files that are part of the cuda dependency scanning.")
 endmacro()
-
-include("${CMAKE_CURRENT_LIST_DIR}/FindCUDA/select_compute_arch.cmake")
