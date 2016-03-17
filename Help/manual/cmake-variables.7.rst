@@ -78,7 +78,6 @@ Variables that Provide Information
    /variable/CMAKE_VS_DEVENV_COMMAND
    /variable/CMAKE_VS_INTEL_Fortran_PROJECT_VERSION
    /variable/CMAKE_VS_MSBUILD_COMMAND
-   /variable/CMAKE_VS_MSDEV_COMMAND
    /variable/CMAKE_VS_NsightTegra_VERSION
    /variable/CMAKE_VS_PLATFORM_NAME
    /variable/CMAKE_VS_PLATFORM_TOOLSET
@@ -292,6 +291,7 @@ Variables that Control the Build
    /variable/CMAKE_STATIC_LINKER_FLAGS_CONFIG
    /variable/CMAKE_STATIC_LINKER_FLAGS
    /variable/CMAKE_TRY_COMPILE_CONFIGURATION
+   /variable/CMAKE_TRY_COMPILE_TARGET_TYPE
    /variable/CMAKE_USE_RELATIVE_PATHS
    /variable/CMAKE_VISIBILITY_INLINES_HIDDEN
    /variable/CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD

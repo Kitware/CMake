@@ -1,6 +1,7 @@
 
 
-if(UNIX  AND  "${CMAKE_GENERATOR}" MATCHES "Makefile")
+if(UNIX  AND  "${CMAKE_GENERATOR}" MATCHES "Makefile" AND
+    NOT CMake_TEST_NO_FindPackageModeMakefileTest)
 
   # Test whether the make is GNU make, and only add the test in this case,
   # since the configured makefile in this test uses $(shell ...), which

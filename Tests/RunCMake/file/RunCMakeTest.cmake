@@ -1,5 +1,6 @@
 include(RunCMake)
 
+run_cmake(DOWNLOAD-hash-mismatch)
 run_cmake(INSTALL-DIRECTORY)
 run_cmake(INSTALL-MESSAGE-bad)
 run_cmake(FileOpenFailRead)

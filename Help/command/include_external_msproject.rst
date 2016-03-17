@@ -19,5 +19,4 @@ command to make things depend on the external project.
 ``TYPE``, ``GUID`` and ``PLATFORM`` are optional parameters that allow one to
 specify the type of project, id (GUID) of the project and the name of
 the target platform.  This is useful for projects requiring values
-other than the default (e.g.  WIX projects).  These options are not
-supported by the Visual Studio 6 generator.
+other than the default (e.g.  WIX projects).

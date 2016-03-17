@@ -30,7 +30,7 @@ function(run_BuildDepends CASE)
 endfunction()
 
 run_BuildDepends(C-Exe)
-if(NOT RunCMake_GENERATOR MATCHES "Visual Studio [67]|Xcode")
+if(NOT RunCMake_GENERATOR MATCHES "Visual Studio 7|Xcode")
   if(RunCMake_GENERATOR MATCHES "Visual Studio 10")
     # VS 10 forgets to re-link when a manifest changes
     set(run_BuildDepends_skip_step_2 1)
@@ -40,3 +40,42 @@ if(NOT RunCMake_GENERATOR MATCHES "Visual Studio [67]|Xcode")
 endif()
 
 run_BuildDepends(Custom-Always)
+
+function(run_ReGeneration)
+  # test re-generation of project even if CMakeLists.txt files disappeared
+
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/regenerate-project-build)
+  set(RunCMake_TEST_SOURCE_DIR ${RunCMake_BINARY_DIR}/regenerate-project-source)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(REMOVE_RECURSE "${RunCMake_TEST_SOURCE_DIR}")
+  set(ProjectHeader [=[
+    cmake_minimum_required(VERSION 3.5)
+    project(Regenerate-Project NONE)
+  ]=])
+
+  # create project with subdirectory
+  file(WRITE "${RunCMake_TEST_SOURCE_DIR}/CMakeLists.txt" "${ProjectHeader}"
+    "add_subdirectory(mysubdir)")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_SOURCE_DIR}/mysubdir")
+  file(WRITE "${RunCMake_TEST_SOURCE_DIR}/mysubdir/CMakeLists.txt" "# empty")
+
+  run_cmake(Regenerate-Project)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E sleep ${fs_delay})
+
+  # now we delete the subdirectory and adjust the CMakeLists.txt
+  file(REMOVE_RECURSE "${RunCMake_TEST_SOURCE_DIR}/mysubdir")
+  file(WRITE "${RunCMake_TEST_SOURCE_DIR}/CMakeLists.txt" "${ProjectHeader}")
+
+  run_cmake_command(Regenerate-Project-Directory-Removed
+    ${CMAKE_COMMAND} --build "${RunCMake_TEST_BINARY_DIR}")
+
+  unset(RunCMake_TEST_BINARY_DIR)
+  unset(RunCMake_TEST_SOURCE_DIR)
+  unset(RunCMake_TEST_NO_CLEAN)
+endfunction()
+
+if(RunCMake_GENERATOR STREQUAL "Xcode")
+  run_ReGeneration(regenerate-project)
+endif()

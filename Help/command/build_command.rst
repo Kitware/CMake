@@ -35,7 +35,7 @@ compatibility.  Use the first signature instead.
 It sets the given ``<cachevariable>`` to a command-line string as
 above but without the ``--target`` option.
 The ``<makecommand>`` is ignored but should be the full path to
-msdev, devenv, nmake, make or one of the end user build tools
+devenv, nmake, make or one of the end user build tools
 for legacy invocations.
 
 .. note::

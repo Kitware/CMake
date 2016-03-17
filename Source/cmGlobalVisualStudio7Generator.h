@@ -30,15 +30,6 @@ public:
                                  const std::string& platformName = "");
   ~cmGlobalVisualStudio7Generator();
 
-  static cmGlobalGeneratorFactory* NewFactory() {
-    return new cmGlobalGeneratorSimpleFactory
-      <cmGlobalVisualStudio7Generator>(); }
-
-  ///! Get the name for the generator.
-  virtual std::string GetName() const {
-    return cmGlobalVisualStudio7Generator::GetActualName();}
-  static std::string GetActualName() {return "Visual Studio 7";}
-
   ///! Get the name for the platform.
   std::string const& GetPlatformName() const;
 
@@ -48,9 +39,6 @@ public:
   virtual bool SetSystemName(std::string const& s, cmMakefile* mf);
 
   virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
-
-  /** Get the documentation entry for this generator.  */
-  static void GetDocumentation(cmDocumentationEntry& entry);
 
   /**
    * Utilized by the generator factory to determine if this generator
@@ -117,7 +105,7 @@ public:
 
 protected:
   virtual void Generate();
-  virtual const char* GetIDEVersion() { return "7.0"; }
+  virtual const char* GetIDEVersion() = 0;
 
   std::string const& GetDevEnvCommand();
   virtual std::string FindDevEnvCommand();
@@ -127,22 +115,22 @@ protected:
   virtual void OutputSLNFile(cmLocalGenerator* root,
                              std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
-                            std::vector<cmLocalGenerator*>& generators);
+                            std::vector<cmLocalGenerator*>& generators) = 0;
   virtual void WriteProject(std::ostream& fout,
                             const std::string& name, const char* path,
-                            const cmGeneratorTarget *t);
+                            const cmGeneratorTarget *t) = 0;
   virtual void WriteProjectDepends(std::ostream& fout,
                            const std::string& name, const char* path,
-                           cmGeneratorTarget const* t);
+                           cmGeneratorTarget const* t) = 0;
   virtual void WriteProjectConfigurations(
     std::ostream& fout, const std::string& name, cmState::TargetType type,
     std::vector<std::string> const& configs,
     const std::set<std::string>& configsPartOfDefaultBuild,
-    const std::string& platformMapping = "");
+    const std::string& platformMapping = "") = 0;
   virtual void WriteSLNGlobalSections(std::ostream& fout,
                                       cmLocalGenerator* root);
   virtual void WriteSLNFooter(std::ostream& fout);
-  virtual void WriteSLNHeader(std::ostream& fout);
+  virtual void WriteSLNHeader(std::ostream& fout) = 0;
   virtual std::string WriteUtilityDepend(const cmGeneratorTarget *target);
 
   virtual void WriteTargetsToSolution(
@@ -162,7 +150,7 @@ protected:
                                     const char* path,
                                     const char* typeGuid,
                                     const std::set<std::string>&
-                                    dependencies);
+                                    dependencies) = 0;
 
   std::string ConvertToSolutionPath(const char* path);
 

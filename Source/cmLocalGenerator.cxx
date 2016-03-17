@@ -2455,7 +2455,7 @@ void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
     else
       {
       // Make the definition appear properly on the command line.  Use
-      // -DNAME="value" instead of -D"NAME=value" to help VS6 parser.
+      // -DNAME="value" instead of -D"NAME=value" for historical reasons.
       std::string::size_type eq = defineIt->find("=");
       def += defineIt->substr(0, eq);
       if(eq != defineIt->npos)

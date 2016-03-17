@@ -1104,39 +1104,10 @@ void cmQtAutoGenerators::ParseHeaders(const std::set<std::string>& absHeaders,
         std::cout << "AUTOGEN: Checking " << headerName << std::endl;
         }
 
-      std::string headerDirectory;
-      if (cmsys::SystemTools::IsSubDirectory(headerName,
-                                             this->ProjectSourceDir))
-        {
-        headerDirectory = this->ProjectSourceDir;
-        }
-      else if (cmsys::SystemTools::IsSubDirectory(headerName,
-                                                  this->ProjectBinaryDir))
-        {
-        headerDirectory = this->ProjectBinaryDir;
-        }
-      else
-        {
-        cmsys::SystemTools::SplitPathRootComponent(headerName,
-                                                   &headerDirectory);
-        }
+      const std::string basename = cmsys::SystemTools::
+                                   GetFilenameWithoutLastExtension(headerName);
 
-      std::string baseHeaderName =
-        cmsys::SystemTools::GetFilenameWithoutLastExtension(headerName);
-
-      headerDirectory = cmsys::SystemTools::RelativePath(
-        headerDirectory, cmsys::SystemTools::GetParentDirectory(headerName));
-
-      if (!headerDirectory.empty())
-        {
-        headerDirectory += "/";
-        }
-
-      std::string mocName = headerDirectory + baseHeaderName;
-
-      cmSystemTools::ReplaceString(mocName, "/", "_");
-
-      const std::string currentMoc = "moc_" + mocName + ".cpp";
+      const std::string currentMoc = "moc_" + basename + ".cpp";
       std::string macroName;
       if (requiresMocing(contents, macroName))
         {

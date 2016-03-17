@@ -505,6 +505,8 @@ void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout)
     {
     cp->Timeout = 0;
     }
+  // Force recomputation of TimeoutTime.
+  cp->TimeoutTime.tv_sec = -1;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -3055,4 +3057,15 @@ static void kwsysProcessesSignalHandler(int signum
 #endif
 
   errno = old_errno;
+}
+
+/*--------------------------------------------------------------------------*/
+void kwsysProcess_ResetStartTime(kwsysProcess* cp)
+{
+  if(!cp)
+    {
+    return;
+    }
+  /* Reset start time. */
+  cp->StartTime = kwsysProcessTimeGetCurrent();
 }

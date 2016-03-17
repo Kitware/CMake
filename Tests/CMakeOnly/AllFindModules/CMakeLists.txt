@@ -81,16 +81,15 @@ endmacro()
 # reported.
 
 foreach(VTEST ALSA ARMADILLO BZIP2 CUPS CURL EXPAT FREETYPE GETTEXT GIT HG
-        HSPELL ICOTOOL JASPER LIBLZMA LIBXML2 LIBXSLT PERL PKG_CONFIG
+        HSPELL ICOTOOL JASPER LIBLZMA LIBXML2 LIBXSLT LTTNGUST PERL PKG_CONFIG
         PostgreSQL TIFF ZLIB)
     check_version_string(${VTEST} ${VTEST}_VERSION_STRING)
 endforeach()
 
 foreach(VTEST BISON Boost CUDA DOXYGEN FLEX GIF GTK2
-        HDF5 LibArchive OPENSCENEGRAPH RUBY SWIG)
+        HDF5 LibArchive OPENSCENEGRAPH RUBY SWIG Protobuf)
     check_version_string(${VTEST} ${VTEST}_VERSION)
 endforeach()
 
 check_version_string(PYTHONINTERP PYTHON_VERSION_STRING)
-check_version_string(Protobuf PROTOBUF_VERSION)
 check_version_string(SUBVERSION Subversion_VERSION_SVN)

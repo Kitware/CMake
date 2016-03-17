@@ -13,9 +13,5 @@
 #  License text for the above reference.)
 
 function(PrintTestCompilerStatus LANG MSG)
-  if(CMAKE_GENERATOR MATCHES Make)
-    message(STATUS "Check for working ${LANG} compiler: ${CMAKE_${LANG}_COMPILER}${MSG}")
-  else()
-    message(STATUS "Check for working ${LANG} compiler using: ${CMAKE_GENERATOR}${MSG}")
-  endif()
+  message(STATUS "Check for working ${LANG} compiler: ${CMAKE_${LANG}_COMPILER}${MSG}")
 endfunction()

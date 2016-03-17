@@ -200,16 +200,19 @@ Available commands are:
 
 ``make_directory <dir>...``
   Create ``<dir>`` directories.  If necessary, create parent
-  directories too.
+  directories too.  If a directory already exists it will be
+  silently ignored.
 
 ``md5sum <file>...``
   Compute md5sum of files.
 
 ``remove [-f] <file>...``
-  Remove the file(s), use ``-f`` to force it.
+  Remove the file(s), use ``-f`` to force it.  If a file does
+  not exist it will be silently ignored.
 
 ``remove_directory <dir>``
-  Remove a directory and its contents.
+  Remove a directory and its contents.  If a directory does
+  not exist it will be silently ignored.
 
 ``rename <oldname> <newname>``
   Rename a file or directory (on one volume).
@@ -242,7 +245,8 @@ Available commands are:
   Touch a file.
 
 ``touch_nocreate <file>``
-  Touch a file if it exists but do not create it.
+  Touch a file if it exists but do not create it.  If a file does
+  not exist it will be silently ignored.
 
 UNIX-specific Command-Line Tools
 --------------------------------

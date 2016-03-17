@@ -13,8 +13,7 @@ the name COMPILE_DEFINITIONS_<CONFIG> where <CONFIG> is an upper-case
 name (ex.  "COMPILE_DEFINITIONS_DEBUG").
 
 CMake will automatically drop some definitions that are not supported
-by the native build tool.  The VS6 IDE does not support definition
-values with spaces (but NMake does).  Xcode does not support
-per-configuration definitions on source files.
+by the native build tool.  Xcode does not support per-configuration
+definitions on source files.
 
 .. include:: /include/COMPILE_DEFINITIONS_DISCLAIMER.txt
