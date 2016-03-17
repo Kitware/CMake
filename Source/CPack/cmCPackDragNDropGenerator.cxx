@@ -20,21 +20,12 @@
 
 #include <iomanip>
 
-#include <CoreFoundation/CFBase.h>
-#include <CoreFoundation/CFString.h>
-#include <CoreFoundation/CFLocale.h>
+#include <CoreFoundation/CoreFoundation.h>
 
-// The carbon framework is deprecated, but the Region codes it supplies are
-// needed for the LPic data structure used for generating multi-lingual SLAs.
-// There does not seem to be a replacement API for these region codes.
-#if defined(__clang__)
-# pragma clang diagnostic push
-# pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#endif
-#include <Carbon/Carbon.h>
-#if defined(__clang__)
-# pragma clang diagnostic pop
-#endif
+// For the old LocaleStringToLangAndRegionCodes() function, to convert
+// to the old Script Manager RegionCode values needed for the 'LPic' data
+// structure used for generating multi-lingual SLAs.
+#include <CoreServices/CoreServices.h>
 
 static const char* SLAHeader =
 "data 'LPic' (5000) {\n"
