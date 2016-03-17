@@ -173,6 +173,7 @@ if(APPLE)
     MACOSX_BUNDLE_SHORT_VERSION_STRING "${CMAKE_BUNDLE_VERSION}"
     # TBD: MACOSX_BUNDLE_BUNDLE_VERSION "${CMAKE_BUNDLE_VERSION}"
     MACOSX_BUNDLE_COPYRIGHT "${copyright_line}"
+    MACOSX_BUNDLE_GUI_IDENTIFIER "org.cmake.cmake"
     )
 
   # Create a symlink in the build tree to provide a "cmake-gui" next
