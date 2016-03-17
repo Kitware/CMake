@@ -3909,8 +3909,7 @@ void checkPropertyConsistency(cmGeneratorTarget const* depender,
 
   std::vector<std::string> props;
   cmSystemTools::ExpandListArgument(prop, props);
-  std::string pdir =
-    dependee->Target->GetMakefile()->GetRequiredDefinition("CMAKE_ROOT");
+  std::string pdir = cmSystemTools::GetCMakeRoot();
   pdir += "/Help/prop_tgt/";
 
   for(std::vector<std::string>::iterator pi = props.begin();

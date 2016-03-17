@@ -184,12 +184,11 @@ void RegisterVisualStudioMacros(const std::string& macrosFile,
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
 {
-  cmMakefile* mf = this->LocalGenerators[0]->GetMakefile();
   std::string dir = this->GetUserMacrosDirectory();
 
   if (dir != "")
     {
-    std::string src = mf->GetRequiredDefinition("CMAKE_ROOT");
+    std::string src = cmSystemTools::GetCMakeRoot();
     src += "/Templates/" CMAKE_VSMACROS_FILENAME;
 
     std::string dst = dir + "/CMakeMacros/" CMAKE_VSMACROS_FILENAME;
