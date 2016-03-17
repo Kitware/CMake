@@ -23,18 +23,6 @@ set_property(DIRECTORY PROPERTY EP_STEP_TARGETS configure build test)
 if(NOT DEFINED can_build_tutorial_step5)
   set(can_build_tutorial_step5 1)
 
-  # Tutorial Step5 cannot build correctly using Visual Studio 6
-  # on Windows 98 if the path of its build tree exceeds 72
-  # characters in length... So don't attempt to build it
-  # in a long path on Win98:
-  #
-  if(CMAKE_SYSTEM STREQUAL "Windows-4.10")
-    string(LENGTH "${binary_base}/TutorialStep5-Local" n)
-    if(n GREATER 72)
-      set(can_build_tutorial_step5 0)
-    endif()
-  endif()
-
   # The ExternalProject builds of Tutorial Step5 cannot be built
   # correctly 2nd and later times in an in-source build...
   # (because the CMakeCache.txt from the real in-source build of

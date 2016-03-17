@@ -20,6 +20,7 @@
 #if 0
 # include "CommandLineArguments.hxx.in"
 # include "Configure.hxx.in"
+# include "String.hxx.in"
 #endif
 
 #include <vector>

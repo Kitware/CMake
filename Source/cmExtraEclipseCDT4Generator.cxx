@@ -42,6 +42,8 @@ cmExtraEclipseCDT4Generator
   this->GenerateLinkedResources = true;
   this->SupportsGmakeErrorParser = true;
   this->SupportsMachO64Parser = true;
+  this->CEnabled = false;
+  this->CXXEnabled = false;
 }
 
 //----------------------------------------------------------------------------
@@ -64,10 +66,12 @@ void cmExtraEclipseCDT4Generator
       {
       this->Natures.insert("org.eclipse.cdt.core.ccnature");
       this->Natures.insert("org.eclipse.cdt.core.cnature");
+      this->CXXEnabled = true;
       }
     else if (*lit == "C")
       {
       this->Natures.insert("org.eclipse.cdt.core.cnature");
+      this->CEnabled = true;
       }
     else if (*lit == "Java")
       {
@@ -890,7 +894,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   // add system defined c macros
   const char* cDefs=mf->GetDefinition(
                               "CMAKE_EXTRA_GENERATOR_C_SYSTEM_DEFINED_MACROS");
-  if(cDefs)
+  if(this->CEnabled && cDefs)
     {
     // Expand the list.
     std::vector<std::string> defs;
@@ -925,7 +929,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   // add system defined c++ macros
   const char* cxxDefs = mf->GetDefinition(
                             "CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_DEFINED_MACROS");
-  if(cxxDefs)
+  if(this->CXXEnabled && cxxDefs)
     {
     // Expand the list.
     std::vector<std::string> defs;
@@ -979,7 +983,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   // CMakeSystemSpecificInformation.cmake. This makes Eclipse find the
   // standard headers.
   std::string compiler = mf->GetSafeDefinition("CMAKE_C_COMPILER");
-  if (!compiler.empty())
+  if (this->CEnabled && !compiler.empty())
     {
     std::string systemIncludeDirs = mf->GetSafeDefinition(
                                 "CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
@@ -988,7 +992,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     this->AppendIncludeDirectories(fout, dirs, emmited);
     }
   compiler = mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
-  if (!compiler.empty())
+  if (this->CXXEnabled && !compiler.empty())
     {
     std::string systemIncludeDirs = mf->GetSafeDefinition(
                               "CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_INCLUDE_DIRS");

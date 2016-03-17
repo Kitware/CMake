@@ -17,10 +17,6 @@ if(CMAKE_GENERATOR MATCHES "Visual Studio 7")
   include(CMakeVS7BackwardCompatibility)
   set(CMAKE_SKIP_COMPATIBILITY_TESTS 1)
 endif()
-if(CMAKE_GENERATOR MATCHES "Visual Studio 6")
-  include(CMakeVS6BackwardCompatibility)
-  set(CMAKE_SKIP_COMPATIBILITY_TESTS 1)
-endif()
 
 if(NOT CMAKE_SKIP_COMPATIBILITY_TESTS)
   # Old CMake versions did not support OS X universal binaries anyway,

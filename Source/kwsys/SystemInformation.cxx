@@ -43,7 +43,6 @@
 #if 0
 # include "SystemInformation.hxx.in"
 # include "Process.h.in"
-# include "Configure.hxx.in"
 #endif
 
 #include <iostream>
@@ -177,13 +176,13 @@ typedef struct rlimit ResourceLimitType;
 # if defined(KWSYS_IOS_HAS_OSTREAM_LONG_LONG)
 #  define iostreamLongLong(x) (x)
 # else
-#  define iostreamLongLong(x) ((long)x)
+#  define iostreamLongLong(x) ((long)(x))
 # endif
 #elif defined(KWSYS_USE___INT64)
 # if defined(KWSYS_IOS_HAS_OSTREAM___INT64)
 #  define iostreamLongLong(x) (x)
 # else
-#  define iostreamLongLong(x) ((long)x)
+#  define iostreamLongLong(x) ((long)(x))
 # endif
 #else
 # error "No Long Long"
@@ -201,13 +200,13 @@ typedef struct rlimit ResourceLimitType;
 # endif
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1300) && !defined(_WIN64)
+#if defined(_MSC_VER) && (_MSC_VER >= 1300) && !defined(_WIN64) && !defined(__clang__)
 #define USE_ASM_INSTRUCTIONS 1
 #else
 #define USE_ASM_INSTRUCTIONS 0
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+#if defined(_MSC_VER) && (_MSC_VER >= 1400) && !defined(__clang__)
 #include <intrin.h>
 #define USE_CPUID_INTRINSICS 1
 #else
@@ -861,7 +860,7 @@ void SystemInformation::RunMemoryCheck()
 // --------------------------------------------------------------
 // SystemInformationImplementation starts here
 
-#define STORE_TLBCACHE_INFO(x,y)  x = (x < y) ? y : x
+#define STORE_TLBCACHE_INFO(x,y)  x = (x < (y)) ? (y) : x
 #define TLBCACHE_INFO_UNITS      (15)
 #define CLASSICAL_CPU_FREQ_LOOP    10000000
 #define RDTSC_INSTRUCTION      _asm _emit 0x0f _asm _emit 0x31
@@ -3570,33 +3569,44 @@ SystemInformationImplementation::GetHostMemoryUsed()
   return (statex.ullTotalPhys - statex.ullAvailPhys)/1024;
 # endif
 #elif defined(__linux)
-  const char *names[3]={"MemTotal:","MemFree:",NULL};
-  SystemInformation::LongLong values[2]={SystemInformation::LongLong(0)};
-  int ierr=GetFieldsFromFile("/proc/meminfo",names,values);
+  // First try to use MemAvailable, but it only works on newer kernels
+  const char *names2[3]={"MemTotal:","MemAvailable:",NULL};
+  SystemInformation::LongLong values2[2]={SystemInformation::LongLong(0)};
+  int ierr=GetFieldsFromFile("/proc/meminfo",names2,values2);
   if (ierr)
     {
-    return ierr;
+    const char *names4[5]={"MemTotal:","MemFree:","Buffers:","Cached:",NULL};
+    SystemInformation::LongLong values4[4]={SystemInformation::LongLong(0)};
+    ierr=GetFieldsFromFile("/proc/meminfo",names4,values4);
+    if(ierr)
+      {
+      return ierr;
+      }
+    SystemInformation::LongLong &memTotal=values4[0];
+    SystemInformation::LongLong &memFree=values4[1];
+    SystemInformation::LongLong &memBuffers=values4[2];
+    SystemInformation::LongLong &memCached=values4[3];
+    return memTotal - memFree - memBuffers - memCached;
     }
-  SystemInformation::LongLong &memTotal=values[0];
-  SystemInformation::LongLong &memFree=values[1];
-  return memTotal - memFree;
+  SystemInformation::LongLong &memTotal=values2[0];
+  SystemInformation::LongLong &memAvail=values2[1];
+  return memTotal - memAvail;
 #elif defined(__APPLE__)
   SystemInformation::LongLong psz=getpagesize();
   if (psz<1)
     {
     return -1;
     }
-  const char *names[4]={"Pages active:","Pages inactive:","Pages wired down:",NULL};
-  SystemInformation::LongLong values[3]={SystemInformation::LongLong(0)};
+  const char *names[3]={"Pages wired down:","Pages active:",NULL};
+  SystemInformation::LongLong values[2]={SystemInformation::LongLong(0)};
   int ierr=GetFieldsFromCommand("vm_stat", names, values);
   if (ierr)
     {
     return -1;
     }
-  SystemInformation::LongLong &vmActive=values[0];
-  SystemInformation::LongLong &vmInactive=values[1];
-  SystemInformation::LongLong &vmWired=values[2];
-  return ((vmActive+vmInactive+vmWired)*psz)/1024;
+  SystemInformation::LongLong &vmWired=values[0];
+  SystemInformation::LongLong &vmActive=values[1];
+  return ((vmActive+vmWired)*psz)/1024;
 #else
   return 0;
 #endif
@@ -4622,7 +4632,7 @@ std::string SystemInformationImplementation::RunProcess(std::vector<const char*>
   double timeout = 255;
   int pipe; // pipe id as returned by kwsysProcess_WaitForData()
 
-  while( ( pipe = kwsysProcess_WaitForData(gp,&data,&length,&timeout),
+  while( ( static_cast<void>(pipe = kwsysProcess_WaitForData(gp,&data,&length,&timeout)),
            (pipe == kwsysProcess_Pipe_STDOUT || pipe == kwsysProcess_Pipe_STDERR) ) ) // wait for 1s
     {
       buffer.append(data, length);

@@ -1,13 +1,10 @@
 cmake_minimum_required (VERSION 2.6)
 project(VSExternalInclude)
 
-if(${CMAKE_GENERATOR} MATCHES "Visual Studio 6")
-  set(PROJECT_EXT dsp)
-else()
-  set(PROJECT_EXT vcproj)
-endif()
 if(${CMAKE_GENERATOR} MATCHES "Visual Studio 1[0124]")
   set(PROJECT_EXT vcxproj)
+else()
+  set(PROJECT_EXT vcproj)
 endif()
 
 # make sure directories exists

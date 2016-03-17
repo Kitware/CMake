@@ -300,6 +300,8 @@ void cmExtraCodeBlocksGenerator
   // figure out the compiler
   std::string compiler = this->GetCBCompilerId(mf);
   std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  const std::string makeArgs = mf->GetSafeDefinition(
+                                            "CMAKE_CODEBLOCKS_MAKE_ARGUMENTS");
 
   fout<<"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>\n"
         "<CodeBlocks_project_file>\n"
@@ -311,7 +313,8 @@ void cmExtraCodeBlocksGenerator
         "      "<<virtualFolders<<"\n"
         "      <Build>\n";
 
-  this->AppendTarget(fout, "all", 0, make.c_str(), lgs[0], compiler.c_str());
+  this->AppendTarget(fout, "all", 0, make.c_str(), lgs[0], compiler.c_str(),
+                     makeArgs);
 
   // add all executable and library targets and some of the GLOBAL
   // and UTILITY targets
@@ -333,7 +336,8 @@ void cmExtraCodeBlocksGenerator
                      (*lg)->GetBinaryDirectory())==0)
             {
             this->AppendTarget(fout, targetName, 0,
-                               make.c_str(), *lg, compiler.c_str());
+                               make.c_str(), *lg, compiler.c_str(),
+                               makeArgs);
             }
           }
           break;
@@ -350,7 +354,7 @@ void cmExtraCodeBlocksGenerator
             }
 
           this->AppendTarget(fout, targetName, 0,
-                                 make.c_str(), *lg, compiler.c_str());
+                                 make.c_str(), *lg, compiler.c_str(),makeArgs);
           break;
         case cmState::EXECUTABLE:
         case cmState::STATIC_LIBRARY:
@@ -360,11 +364,11 @@ void cmExtraCodeBlocksGenerator
           {
           cmGeneratorTarget* gt = *ti;
           this->AppendTarget(fout, targetName, gt,
-                             make.c_str(), *lg, compiler.c_str());
+                             make.c_str(), *lg, compiler.c_str(), makeArgs);
           std::string fastTarget = targetName;
           fastTarget += "/fast";
           this->AppendTarget(fout, fastTarget, gt,
-                             make.c_str(), *lg, compiler.c_str());
+                             make.c_str(), *lg, compiler.c_str(), makeArgs);
           }
           break;
         default:
@@ -555,7 +559,8 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
                                               cmGeneratorTarget* target,
                                               const char* make,
                                               const cmLocalGenerator* lg,
-                                              const char* compiler)
+                                              const char* compiler,
+                                              const std::string& makeFlags)
 {
   cmMakefile const* makefile = lg->GetMakefile();
   std::string makefileName = lg->GetCurrentBinaryDirectory();
@@ -663,16 +668,18 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
 
   fout<<"         <MakeCommands>\n"
         "            <Build command=\""
-      << this->BuildMakeCommand(make, makefileName.c_str(), targetName)
+      << this->BuildMakeCommand(make, makefileName.c_str(), targetName,
+                                makeFlags)
       << "\" />\n"
         "            <CompileFile command=\""
-      << this->BuildMakeCommand(make, makefileName.c_str(),"&quot;$file&quot;")
+      << this->BuildMakeCommand(make, makefileName.c_str(),"&quot;$file&quot;",
+                                makeFlags)
       << "\" />\n"
         "            <Clean command=\""
-      << this->BuildMakeCommand(make, makefileName.c_str(), "clean")
+      << this->BuildMakeCommand(make, makefileName.c_str(), "clean", makeFlags)
       << "\" />\n"
         "            <DistClean command=\""
-      << this->BuildMakeCommand(make, makefileName.c_str(), "clean")
+      << this->BuildMakeCommand(make, makefileName.c_str(), "clean", makeFlags)
       << "\" />\n"
         "         </MakeCommands>\n"
         "      </Target>\n";
@@ -802,9 +809,15 @@ int cmExtraCodeBlocksGenerator::GetCBTargetType(cmGeneratorTarget* target)
 // make
 std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
              const std::string& make, const char* makefile,
-             const std::string& target)
+             const std::string& target, const std::string& makeFlags)
 {
   std::string command = make;
+  if (makeFlags.size() > 0)
+    {
+    command += " ";
+    command += makeFlags;
+    }
+
   std::string generator = this->GlobalGenerator->GetName();
   if (generator == "NMake Makefiles")
     {

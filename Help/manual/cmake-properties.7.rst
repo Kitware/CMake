@@ -141,6 +141,7 @@ Properties on Targets
    /prop_tgt/CXX_STANDARD_REQUIRED
    /prop_tgt/DEBUG_POSTFIX
    /prop_tgt/DEFINE_SYMBOL
+   /prop_tgt/DEPLOYMENT_REMOTE_DIRECTORY
    /prop_tgt/EchoString
    /prop_tgt/ENABLE_EXPORTS
    /prop_tgt/EXCLUDE_FROM_ALL
@@ -255,6 +256,7 @@ Properties on Targets
    /prop_tgt/TYPE
    /prop_tgt/VERSION
    /prop_tgt/VISIBILITY_INLINES_HIDDEN
+   /prop_tgt/VS_CONFIGURATION_TYPE
    /prop_tgt/VS_DESKTOP_EXTENSIONS_VERSION
    /prop_tgt/VS_DOTNET_REFERENCES
    /prop_tgt/VS_DOTNET_TARGET_FRAMEWORK_VERSION

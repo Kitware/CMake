@@ -116,6 +116,8 @@ private:
   bool SupportsVirtualFolders;
   bool SupportsGmakeErrorParser;
   bool SupportsMachO64Parser;
+  bool CEnabled;
+  bool CXXEnabled;
 
 };
 

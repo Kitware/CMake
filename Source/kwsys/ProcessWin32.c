@@ -17,7 +17,7 @@
    duplicate the above list of headers.  */
 #if 0
 # include "Process.h.in"
-# include "Encoding_c.h.in"
+# include "Encoding.h.in"
 #endif
 
 /*
@@ -698,6 +698,8 @@ void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout)
     {
     cp->Timeout = 0;
     }
+  // Force recomputation of TimeoutTime.
+  cp->TimeoutTime.QuadPart = -1;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -3014,4 +3016,15 @@ static BOOL WINAPI kwsysCtrlHandler(DWORD dwCtrlType)
 
   /* Continue on to default Ctrl handler (which calls ExitProcess).  */
   return FALSE;
+}
+
+/*--------------------------------------------------------------------------*/
+void kwsysProcess_ResetStartTime(kwsysProcess* cp)
+{
+  if(!cp)
+    {
+    return;
+    }
+  /* Reset start time. */
+  cp->StartTime = kwsysProcessTimeGetCurrent();
 }

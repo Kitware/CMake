@@ -17,14 +17,8 @@ else()
   file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/PCH)
 endif()
 
-# The VS6 IDE does not support renaming .pch files with /Fp.
-if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
-  set(PCH_USE_INCLUDE_DIR 1)
-  set(PCH_FILE)
-else()
-  set(PCH_USE_INCLUDE_DIR 0)
-  set(PCH_FILE "\"/Fp${PCH_DIR}/foo_precompiled.pch\"")
-endif()
+set(PCH_USE_INCLUDE_DIR 0)
+set(PCH_FILE "\"/Fp${PCH_DIR}/foo_precompiled.pch\"")
 
 # Choose between an explicit include path and using /I during
 # precompilation.  The /I form is used to test that the PCH is

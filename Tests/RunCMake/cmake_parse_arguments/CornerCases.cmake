@@ -29,6 +29,26 @@ macro(foo)
 endmacro()
 
 foo(FOO foo)
-
 TEST(_FOO1_FOO foo)
 TEST(_FOO2_FOO foo)
+
+# Make sure a list is split
+foo(FOO "foo;bar")
+TEST(_FOO1_FOO foo)
+TEST(_FOO1_UNPARSED_ARGUMENTS "bar")
+TEST(_FOO2_FOO foo)
+TEST(_FOO2_UNPARSED_ARGUMENTS "bar")
+
+# Do not split if argn is quoted
+foo(FOO "foo\\;bar")
+TEST(_FOO1_FOO foo)
+TEST(_FOO1_UNPARSED_ARGUMENTS "bar")
+TEST(_FOO2_FOO foo;bar)
+TEST(_FOO2_UNPARSED_ARGUMENTS "UNDEFINED")
+
+# Do not split if argn is quoted
+foo(FOO "foo\\\\;bar")
+TEST(_FOO1_FOO foo)
+TEST(_FOO1_UNPARSED_ARGUMENTS "bar")
+TEST(_FOO2_FOO foo;bar)
+TEST(_FOO2_UNPARSED_ARGUMENTS "UNDEFINED")
