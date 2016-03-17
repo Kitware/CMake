@@ -1389,7 +1389,8 @@ void cmLocalVisualStudio7Generator::OutputDeploymentDebuggerTool(
         "\t\t\t\tRegisterOutput=\"0\"\n"
         "\t\t\t\tAdditionalFiles=\"\"/>\n"
         ;
-      std::string const exe = dir + std::string("\\") + target->GetFullName();
+      std::string const exe =
+        dir + std::string("\\") + target->GetFullName(config);
       fout <<
         "\t\t\t<DebuggerTool\n"
         "\t\t\t\tRemoteExecutable=\"" << this->EscapeForXML(exe) << "\"\n"
