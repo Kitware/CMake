@@ -3,6 +3,7 @@ set(CONFIGURE_WITH_CMAKE TRUE)
 set(CMAKE_CONFIGURE_PATH "c:/Program\\ Files\\ \\(x86\\)/CMake/bin/cmake.exe")
 set(PROCESSORS 8)
 set(HOST dash3win7)
+set(SCRIPT_NAME dash3win7x64)
 set(RUN_LAUNCHER ~/rel/run)
 set(CPACK_BINARY_GENERATORS "WIX ZIP")
 set(CPACK_SOURCE_GENERATORS "")
@@ -17,9 +18,9 @@ CMAKE_GENERATOR:INTERNAL=Ninja
 BUILD_QtDialog:BOOL:=TRUE
 CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL:BOOL=TRUE
 CMake_INSTALL_DEPENDENCIES:BOOL=ON
-CMAKE_EXE_LINKER_FLAGS:STRING=-machine:x64 -subsystem:console,5.01
+CMAKE_EXE_LINKER_FLAGS:STRING=-machine:x64 -subsystem:console,5.02
 ")
-set(ppflags "-D_WIN32_WINNT=0x501 -D_USING_V110_SDK71_")
+set(ppflags "-D_WIN32_WINNT=0x502 -D_USING_V110_SDK71_")
 set(CFLAGS "${ppflags}")
 set(CXXFLAGS "${ppflags}")
 set(ENV ". ~/rel/env64")

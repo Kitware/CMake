@@ -13,7 +13,7 @@ set(RELEASE_SCRIPTS_BATCH_1
 )
 
 set(RELEASE_SCRIPTS_BATCH_2
-  dash2win64_cygwin.cmake     # Cygwin
+  cygwin_release.cmake        # Cygwin x86
   win64_release.cmake         # Windows x64
 )
 
