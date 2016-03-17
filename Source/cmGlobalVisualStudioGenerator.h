@@ -106,6 +106,8 @@ public:
 
   void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 
+  std::string GetStartupProjectName(cmLocalGenerator const* root) const;
+
   void AddSymbolExportCommand(
     cmGeneratorTarget*, std::vector<cmCustomCommand>& commands,
     std::string const& configName);
