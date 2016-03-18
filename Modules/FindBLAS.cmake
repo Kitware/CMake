@@ -30,9 +30,9 @@
 #   BLA_F95     if set on tries to find the f95 interfaces for BLAS/LAPACK
 #
 # ######### ## List of vendors (BLA_VENDOR) valid in this module #
-# Goto,ATLAS PhiPACK,CXML,DXML,SunPerf,SCSL,SGIMATH,IBMESSL,Intel10_32
-# (intel mkl v10 32 bit),Intel10_64lp (intel mkl v10 64 bit,lp thread
-# model, lp64 model), # Intel10_64lp_seq (intel mkl v10 64
+# Goto,OpenBLAS,ATLAS PhiPACK,CXML,DXML,SunPerf,SCSL,SGIMATH,IBMESSL,
+# Intel10_32 (intel mkl v10 32 bit),Intel10_64lp (intel mkl v10 64 bit,
+# lp thread model, lp64 model), # Intel10_64lp_seq (intel mkl v10 64
 # bit,sequential code, lp64 model), # Intel( older versions of mkl 32
 # and 64 bit), ACML,ACML_MP,ACML_GPU,Apple, NAS, Generic C/CXX should be
 # enabled to use Intel mkl
@@ -167,6 +167,20 @@ if (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
   sgemm
   ""
   "goto2"
+  ""
+  )
+ endif()
+endif ()
+
+if (BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
+ if(NOT BLAS_LIBRARIES)
+  # OpenBLAS (http://www.openblas.net)
+  check_fortran_libraries(
+  BLAS_LIBRARIES
+  BLAS
+  sgemm
+  ""
+  "openblas"
   ""
   )
  endif()
