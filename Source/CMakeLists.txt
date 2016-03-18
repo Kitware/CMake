@@ -724,7 +724,7 @@ endif()
 add_library(CPackLib ${CPACK_SRCS})
 target_link_libraries(CPackLib CMakeLib)
 if(APPLE)
-  target_link_libraries(CPackLib "-framework Carbon")
+  target_link_libraries(CPackLib "-framework CoreServices")
 endif()
 
 if(APPLE)
