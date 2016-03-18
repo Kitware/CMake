@@ -645,7 +645,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
                            kCFStringEncodingMacRoman);
         LangCode lang = 0;
         RegionCode region = 0;
-#if HAVE_CoreServices
+#ifdef HAVE_CoreServices
         OSStatus err = LocaleStringToLangAndRegionCodes(iso_language_cstr,
                                                         &lang, &region);
         if (err != noErr)
@@ -657,7 +657,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
           free(iso_language_cstr);
           return 0;
           }
-#if HAVE_CoreServices
+#ifdef HAVE_CoreServices
         free(iso_language_cstr);
         header_data.push_back(region);
         header_data.push_back(i);
