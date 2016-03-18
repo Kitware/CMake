@@ -722,6 +722,10 @@ if(APPLE)
     CPack/cmCPackOSXX11Generator.cxx
     CPack/cmCPackPackageMakerGenerator.cxx
     )
+  check_include_file("CoreServices/CoreServices.h" HAVE_CoreServices)
+  if(HAVE_CoreServices)
+    set_property(SOURCE CPack/cmCPackDragNDropGenerator.cxx PROPERTY COMPILE_DEFINITIONS HAVE_CoreServices)
+  endif()
 endif()
 
 # Build CPackLib
