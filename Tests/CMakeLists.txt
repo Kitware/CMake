@@ -684,14 +684,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     endif()
   endmacro()
   if(CMAKE_BUILD_NIGHTLY_RELEASES)
-    ADD_NIGHTLY_BUILD_TEST(CMakeNightlyWindows
-      dash3win7_release.cmake)
+    ADD_NIGHTLY_BUILD_TEST(CMakeNightlyWin32
+      win32_release.cmake)
+    ADD_NIGHTLY_BUILD_TEST(CMakeNightlyWin64
+      win64_release.cmake)
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyOSX
-      bigmac_release.cmake)
+      osx_release.cmake)
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyLinux32
-      magrathea_release.cmake)
+      linux32_release.cmake)
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyLinux64
       linux64_release.cmake)
+    set_property(TEST CMakeNightlyWin64 PROPERTY DEPENDS CMakeNightlyWin32)
   endif()
 
   # add tests with more complex invocations

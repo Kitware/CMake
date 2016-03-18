@@ -17,7 +17,6 @@ CMake_INSTALL_DEPENDENCIES:BOOL=ON
 ")
 set(CXX g++)
 set(CC  gcc)
-set(SCRIPT_NAME dash2win64cygwin)
 set(GIT_EXTRA "git config core.autocrlf false")
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
