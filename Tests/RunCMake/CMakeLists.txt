@@ -235,7 +235,7 @@ endif()
 
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
   add_RunCMake_test(include_external_msproject)
-  add_RunCMake_test(SolutionGlobalSections)
+  add_RunCMake_test(VSSolution)
 endif()
 
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([^789]|[789][0-9])")

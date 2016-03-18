@@ -519,6 +519,32 @@ cmGlobalVisualStudioGenerator::GetUtilityDepend(
 }
 
 //----------------------------------------------------------------------------
+std::string
+cmGlobalVisualStudioGenerator::GetStartupProjectName(
+  cmLocalGenerator const* root) const
+{
+  const char* n = root->GetMakefile()->GetProperty("VS_STARTUP_PROJECT");
+  if (n && *n)
+    {
+    std::string startup = n;
+    if (this->FindTarget(startup))
+      {
+      return startup;
+      }
+    else
+      {
+      root->GetMakefile()->IssueMessage(
+        cmake::AUTHOR_WARNING,
+        "Directory property VS_STARTUP_PROJECT specifies target "
+        "'" + startup + "' that does not exist.  Ignoring.");
+      }
+    }
+
+  // default, if not specified
+  return this->GetAllTargetName();
+}
+
+//----------------------------------------------------------------------------
 #include <windows.h>
 
 //----------------------------------------------------------------------------
