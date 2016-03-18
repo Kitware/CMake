@@ -722,17 +722,17 @@ if(APPLE)
     CPack/cmCPackOSXX11Generator.cxx
     CPack/cmCPackPackageMakerGenerator.cxx
     )
-  check_include_file("CoreServices/CoreServices.h" HAVE_CoreServices)
-  if(HAVE_CoreServices)
-    set_property(SOURCE CPack/cmCPackDragNDropGenerator.cxx PROPERTY COMPILE_DEFINITIONS HAVE_CoreServices)
-  endif()
 endif()
 
 # Build CPackLib
 add_library(CPackLib ${CPACK_SRCS})
 target_link_libraries(CPackLib CMakeLib)
 if(APPLE)
-  target_link_libraries(CPackLib "-framework CoreServices")
+  check_include_file("CoreServices/CoreServices.h" HAVE_CoreServices)
+  if(HAVE_CoreServices)
+    set_property(SOURCE CPack/cmCPackDragNDropGenerator.cxx PROPERTY COMPILE_DEFINITIONS HAVE_CoreServices)
+    target_link_libraries(CPackLib "-framework CoreServices")
+  endif()
 endif()
 
 if(APPLE)
