@@ -365,7 +365,6 @@ macro(CUDA_FIND_HELPER_FILE _name _extension)
   endif()
   # Set this variable as internal, so the user isn't bugged with it.
   set(CUDA_${_name} ${CUDA_${_name}} CACHE INTERNAL "Location of ${_full_name}" FORCE)
-#  include("${CMAKE_CURRENT_LIST_DIR}/FindCUDA/${_full_name}")
 endmacro()
 
 #####################################################################
