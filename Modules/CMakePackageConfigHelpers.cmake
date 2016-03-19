@@ -251,6 +251,11 @@ function(CONFIGURE_PACKAGE_CONFIG_FILE _inputFile _outputFile)
     set(absInstallDir "${installPrefix}/${CCF_INSTALL_DESTINATION}")
   endif()
 
+  # Both absInstallDir and installPrefix may still be relative. Make sure both
+  # paths are absolute.
+  get_filename_component (absInstallDir "${absInstallDir}" ABSOLUTE)
+  get_filename_component (installPrefix "${installPrefix}" ABSOLUTE)
+
   file(RELATIVE_PATH PACKAGE_RELATIVE_PATH "${absInstallDir}" "${installPrefix}" )
 
   foreach(var ${CCF_PATH_VARS})
