@@ -5,6 +5,11 @@
 #if defined(__18CXX)
 # define ID_VOID_MAIN
 #endif
+#if defined(__CLASSIC_C__)
+/* cv-qualifiers did not exist in K&R C */
+# define const
+# define volatile
+#endif
 
 @CMAKE_C_COMPILER_ID_CONTENT@
 
@@ -28,23 +33,27 @@ char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
 @CMAKE_C_COMPILER_ID_PLATFORM_CONTENT@
 @CMAKE_C_COMPILER_ID_ERROR_FOR_TEST@
 
-const char* info_language_dialect_default = "INFO" ":" "dialect_default["
-#if !defined(__STDC_VERSION__)
-  "90"
+#if !defined(__STDC__)
+# define C_DIALECT
 #elif __STDC_VERSION__ >= 201000L
-  "11"
+# define C_DIALECT "11"
 #elif __STDC_VERSION__ >= 199901L
-  "99"
+# define C_DIALECT "99"
 #else
+# define C_DIALECT "90"
 #endif
-"]";
+const char* info_language_dialect_default = "INFO" ":" "dialect_default[" C_DIALECT "]";
 
 /*--------------------------------------------------------------------------*/
 
 #ifdef ID_VOID_MAIN
 void main() {}
 #else
+# if defined(__CLASSIC_C__)
+int main(argc, argv) int argc; char *argv[];
+# else
 int main(int argc, char* argv[])
+# endif
 {
   int require = 0;
   require += info_compiler[argc];

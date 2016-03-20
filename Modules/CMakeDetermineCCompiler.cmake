@@ -82,6 +82,9 @@ else()
   # a valid identification file.
   set(CMAKE_C_COMPILER_ID_TEST_FLAGS_FIRST)
   set(CMAKE_C_COMPILER_ID_TEST_FLAGS
+    # Try compiling K&R-compatible code (needed by Bruce C Compiler).
+    "-D__CLASSIC_C__"
+
     # Try compiling to an object file only.
     "-c"
 
