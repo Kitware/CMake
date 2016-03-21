@@ -31,7 +31,7 @@
 #   BLA_F95     if set on tries to find the f95 interfaces for BLAS/LAPACK
 #
 # ## List of vendors (BLA_VENDOR) valid in this module # Intel(mkl),
-# ACML,Apple, NAS, Generic
+# OpenBLAS, ACML,Apple, NAS, Generic
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -181,6 +181,19 @@ if (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
  endif()
 endif ()
 
+if (BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
+ if(NOT LAPACK_LIBRARIES)
+  check_lapack_libraries(
+  LAPACK_LIBRARIES
+  LAPACK
+  cheev
+  ""
+  "openblas"
+  "${BLAS_LIBRARIES}"
+  ""
+  )
+ endif()
+endif ()
 
 #acml lapack
  if (BLA_VENDOR MATCHES "ACML" OR BLA_VENDOR STREQUAL "All")
