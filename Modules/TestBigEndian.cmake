@@ -104,7 +104,7 @@ macro(TEST_BIG_ENDIAN VARIABLE)
           message(SEND_ERROR "TEST_BIG_ENDIAN found no result!")
         endif()
 
-        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
           "Determining if the system is big endian passed with the following output:\n${OUTPUT}\nTestEndianess.c:\n${TEST_ENDIANESS_FILE_CONTENT}\n\n")
 
       else()
