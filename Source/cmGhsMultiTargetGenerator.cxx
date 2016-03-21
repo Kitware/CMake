@@ -217,8 +217,11 @@ void cmGhsMultiTargetGenerator::WriteTypeSpecifics(const std::string &config,
 
   if (this->GeneratorTarget->GetType() == cmState::STATIC_LIBRARY)
     {
+    std::string const static_library_suffix =
+      this->Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
     *this->GetFolderBuildStreams() << "    -o \""
-                                   << outputDir << outputFilename << ".a\""
+                                   << outputDir << outputFilename
+                                   << static_library_suffix << "\""
                                    << std::endl;
     }
   else if (this->GeneratorTarget->GetType() == cmState::EXECUTABLE)
@@ -238,8 +241,11 @@ void cmGhsMultiTargetGenerator::WriteTypeSpecifics(const std::string &config,
       }
     else
       {
+      std::string const executable_suffix =
+        this->Makefile->GetSafeDefinition("CMAKE_EXECUTABLE_SUFFIX");
       *this->GetFolderBuildStreams() << "    -o \""
-                                     << outputDir << outputFilename << ".as\""
+                                     << outputDir << outputFilename
+                                     << executable_suffix << "\""
                                      << std::endl;
       }
     }
