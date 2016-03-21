@@ -18,6 +18,7 @@
 #include "cmSourceFile.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
+#include "cmXMLWriter.h"
 
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Directory.hxx>
@@ -397,6 +398,7 @@ void cmGlobalKdevelopGenerator
     {
     return;
     }
+  cmXMLWriter xml(fout);
 
   // check for a version control system
   bool hasSvn = cmSystemTools::FileExists((projectDir + "/.svn").c_str());
@@ -411,182 +413,230 @@ void cmGlobalKdevelopGenerator
     primaryLanguage="Fortran77";
     }
 
-  fout<<"<?xml version = '1.0'?>\n"
-        "<kdevelop>\n"
-        "  <general>\n"
-        "  <author></author>\n"
-        "  <email></email>\n"
-        "  <version>$VERSION$</version>\n"
-        "  <projectmanagement>KDevCustomProject</projectmanagement>\n"
-        "  <primarylanguage>" << primaryLanguage << "</primarylanguage>\n"
-        "  <ignoreparts/>\n"
-        "  <projectdirectory>" << projectDir <<
-        "</projectdirectory>\n";   //this one is important
-  fout<<"  <absoluteprojectpath>true</absoluteprojectpath>\n"; //and this one
+  xml.StartDocument();
+  xml.StartElement("kdevelop");
+  xml.StartElement("general");
+
+  xml.Element("author", "");
+  xml.Element("email", "");
+  xml.Element("version", "$VERSION$");
+  xml.Element("projectmanagement", "KDevCustomProject");
+  xml.Element("primarylanguage", primaryLanguage);
+  xml.Element("ignoreparts");
+  xml.Element("projectdirectory", projectDir); // this one is important
+  xml.Element("absoluteprojectpath", "true");  // and this one
 
   // setup additional languages
-  fout<<"  <secondaryLanguages>\n";
+  xml.StartElement("secondaryLanguages");
   if (enableFortran && enableCxx)
     {
-    fout<<"     <language>Fortran</language>\n";
+    xml.Element("language", "Fortran");
     }
   if (enableCxx)
     {
-    fout<<"     <language>C</language>\n";
+    xml.Element("language", "C");
     }
-  fout<<"  </secondaryLanguages>\n";
+  xml.EndElement();
 
   if (hasSvn)
     {
-    fout << "  <versioncontrol>kdevsubversion</versioncontrol>\n";
+    xml.Element("versioncontrol", "kdevsubversion");
     }
   else if (hasCvs)
     {
-    fout << "  <versioncontrol>kdevcvsservice</versioncontrol>\n";
+    xml.Element("versioncontrol", "kdevcvsservice");
     }
 
-  fout<<"  </general>\n"
-        "  <kdevcustomproject>\n"
-        "    <filelistdirectory>" << outputDir <<
-        "</filelistdirectory>\n"
-        "    <run>\n"
-        "      <mainprogram>" << executable << "</mainprogram>\n"
-        "      <directoryradio>custom</directoryradio>\n"
-        "      <customdirectory>"<<outputDir<<"</customdirectory>\n"
-        "      <programargs></programargs>\n"
-        "      <terminal>false</terminal>\n"
-        "      <autocompile>true</autocompile>\n"
-        "      <envvars/>\n"
-        "    </run>\n"
-        "    <build>\n"
-        "      <buildtool>make</buildtool>\n"; //this one is important
-  fout<<"      <builddir>"<<outputDir<<"</builddir>\n";  //and this one
-  fout<<"    </build>\n"
-        "    <make>\n"
-        "      <abortonerror>false</abortonerror>\n"
-        "      <numberofjobs>1</numberofjobs>\n"
-        "      <dontact>false</dontact>\n"
-        "      <makebin>" << this->GlobalGenerator->GetLocalGenerators()[0]->
-            GetMakefile()->GetRequiredDefinition("CMAKE_MAKE_PROGRAM")
-            << " </makebin>\n"
-        "      <selectedenvironment>default</selectedenvironment>\n"
-        "      <environments>\n"
-        "        <default>\n"
-        "          <envvar value=\"1\" name=\"VERBOSE\" />\n"
-        "          <envvar value=\"1\" name=\"CMAKE_NO_VERBOSE\" />\n"
-        "        </default>\n"
-        "      </environments>\n"
-        "    </make>\n";
+  xml.EndElement(); // general
+  xml.StartElement("kdevcustomproject");
 
-  fout<<"    <blacklist>\n";
+  xml.Element("filelistdirectory", outputDir);
+
+  xml.StartElement("run");
+  xml.Element("mainprogram", executable);
+  xml.Element("directoryradio", "custom");
+  xml.Element("customdirectory", outputDir);
+  xml.Element("programargs", "");
+  xml.Element("terminal", "false");
+  xml.Element("autocompile", "true");
+  xml.Element("envvars");
+  xml.EndElement();
+
+  xml.StartElement("build");
+  xml.Element("buildtool", "make");   // this one is important
+  xml.Element("builddir", outputDir); // and this one
+  xml.EndElement();
+
+  xml.StartElement("make");
+  xml.Element("abortonerror", "false");
+  xml.Element("numberofjobs", 1);
+  xml.Element("dontact", "false");
+  xml.Element("makebin", this->GlobalGenerator->GetLocalGenerators()[0]->
+      GetMakefile()->GetRequiredDefinition("CMAKE_MAKE_PROGRAM"));
+  xml.Element("selectedenvironment", "default");
+
+  xml.StartElement("environments");
+  xml.StartElement("default");
+
+  xml.StartElement("envvar");
+  xml.Attribute("value", 1);
+  xml.Attribute("name", "VERBOSE");
+  xml.EndElement();
+
+  xml.StartElement("envvar");
+  xml.Attribute("value", 1);
+  xml.Attribute("name", "CMAKE_NO_VERBOSE");
+  xml.EndElement();
+
+  xml.EndElement(); // default
+  xml.EndElement(); // environments
+  xml.EndElement(); // make
+
+  xml.StartElement("blacklist");
   for(std::vector<std::string>::const_iterator dirIt=this->Blacklist.begin();
       dirIt != this->Blacklist.end();
       ++dirIt)
     {
-    fout<<"      <path>" << *dirIt << "</path>\n";
+    xml.Element("path", *dirIt);
     }
-  fout<<"    </blacklist>\n";
+  xml.EndElement();
 
-  fout<<"  </kdevcustomproject>\n"
-        "  <kdevfilecreate>\n"
-        "    <filetypes/>\n"
-        "    <useglobaltypes>\n"
-        "      <type ext=\"ui\" />\n"
-        "      <type ext=\"cpp\" />\n"
-        "      <type ext=\"h\" />\n"
-        "    </useglobaltypes>\n"
-        "  </kdevfilecreate>\n"
-        "  <kdevdoctreeview>\n"
-        "    <projectdoc>\n"
-        "      <userdocDir>html/</userdocDir>\n"
-        "      <apidocDir>html/</apidocDir>\n"
-        "    </projectdoc>\n"
-        "    <ignoreqt_xml/>\n"
-        "    <ignoredoxygen/>\n"
-        "    <ignorekdocs/>\n"
-        "    <ignoretocs/>\n"
-        "    <ignoredevhelp/>\n"
-        "  </kdevdoctreeview>\n";
+  xml.EndElement(); // kdevcustomproject
+
+  xml.StartElement("kdevfilecreate");
+  xml.Element("filetypes");
+  xml.StartElement("useglobaltypes");
+
+  xml.StartElement("type");
+  xml.Attribute("ext", "ui");
+  xml.EndElement();
+
+  xml.StartElement("type");
+  xml.Attribute("ext", "cpp");
+  xml.EndElement();
+
+  xml.StartElement("type");
+  xml.Attribute("ext", "h");
+  xml.EndElement();
+
+  xml.EndElement(); // useglobaltypes
+  xml.EndElement(); // kdevfilecreate
+
+  xml.StartElement("kdevdoctreeview");
+  xml.StartElement("projectdoc");
+  xml.Element("userdocDir", "html/");
+  xml.Element("apidocDir", "html/");
+  xml.EndElement(); // projectdoc
+  xml.Element("ignoreqt_xml");
+  xml.Element("ignoredoxygen");
+  xml.Element("ignorekdocs");
+  xml.Element("ignoretocs");
+  xml.Element("ignoredevhelp");
+  xml.EndElement(); // kdevdoctreeview;
 
   if (enableCxx)
     {
-    fout<<"  <cppsupportpart>\n"
-          "    <filetemplates>\n"
-          "      <interfacesuffix>.h</interfacesuffix>\n"
-          "      <implementationsuffix>.cpp</implementationsuffix>\n"
-          "    </filetemplates>\n"
-          "  </cppsupportpart>\n"
-          "  <kdevcppsupport>\n"
-          "    <codecompletion>\n"
-          "      <includeGlobalFunctions>true</includeGlobalFunctions>\n"
-          "      <includeTypes>true</includeTypes>\n"
-          "      <includeEnums>true</includeEnums>\n"
-          "      <includeTypedefs>false</includeTypedefs>\n"
-          "      <automaticCodeCompletion>true</automaticCodeCompletion>\n"
-          "      <automaticArgumentsHint>true</automaticArgumentsHint>\n"
-          "      <automaticHeaderCompletion>true</automaticHeaderCompletion>\n"
-          "      <codeCompletionDelay>250</codeCompletionDelay>\n"
-          "      <argumentsHintDelay>400</argumentsHintDelay>\n"
-          "      <headerCompletionDelay>250</headerCompletionDelay>\n"
-          "    </codecompletion>\n"
-          "    <references/>\n"
-          "  </kdevcppsupport>\n";
+    xml.StartElement("cppsupportpart");
+    xml.StartElement("filetemplates");
+    xml.Element("interfacesuffix", ".h");
+    xml.Element("implementationsuffix", ".cpp");
+    xml.EndElement(); // filetemplates
+    xml.EndElement(); // cppsupportpart
+
+    xml.StartElement("kdevcppsupport");
+    xml.StartElement("codecompletion");
+    xml.Element("includeGlobalFunctions", "true");
+    xml.Element("includeTypes", "true");
+    xml.Element("includeEnums", "true");
+    xml.Element("includeTypedefs", "false");
+    xml.Element("automaticCodeCompletion", "true");
+    xml.Element("automaticArgumentsHint", "true");
+    xml.Element("automaticHeaderCompletion", "true");
+    xml.Element("codeCompletionDelay", 250);
+    xml.Element("argumentsHintDelay", 400);
+    xml.Element("headerCompletionDelay", 250);
+    xml.EndElement(); // codecompletion
+    xml.Element("references");
+    xml.EndElement(); // kdevcppsupport;
     }
 
   if (enableFortran)
     {
-    fout<<"  <kdevfortransupport>\n"
-          "    <ftnchek>\n"
-          "      <division>false</division>\n"
-          "      <extern>false</extern>\n"
-          "      <declare>false</declare>\n"
-          "      <pure>false</pure>\n"
-          "      <argumentsall>false</argumentsall>\n"
-          "      <commonall>false</commonall>\n"
-          "      <truncationall>false</truncationall>\n"
-          "      <usageall>false</usageall>\n"
-          "      <f77all>false</f77all>\n"
-          "      <portabilityall>false</portabilityall>\n"
-          "      <argumentsonly/>\n"
-          "      <commononly/>\n"
-          "      <truncationonly/>\n"
-          "      <usageonly/>\n"
-          "      <f77only/>\n"
-          "      <portabilityonly/>\n"
-          "    </ftnchek>\n"
-          "  </kdevfortransupport>\n";
+    xml.StartElement("kdevfortransupport");
+    xml.StartElement("ftnchek");
+    xml.Element("division", "false");
+    xml.Element("extern", "false");
+    xml.Element("declare", "false");
+    xml.Element("pure", "false");
+    xml.Element("argumentsall", "false");
+    xml.Element("commonall", "false");
+    xml.Element("truncationall", "false");
+    xml.Element("usageall", "false");
+    xml.Element("f77all", "false");
+    xml.Element("portabilityall", "false");
+    xml.Element("argumentsonly");
+    xml.Element("commononly");
+    xml.Element("truncationonly");
+    xml.Element("usageonly");
+    xml.Element("f77only");
+    xml.Element("portabilityonly");
+    xml.EndElement(); // ftnchek
+    xml.EndElement(); // kdevfortransupport;
     }
 
   // set up file groups. maybe this can be used with the CMake SOURCE_GROUP()
   // command
-  fout<<"  <kdevfileview>\n"
-        "    <groups>\n"
-        "      <group pattern=\"" << cmakeFilePattern <<
-        "\" name=\"CMake\" />\n";
+  xml.StartElement("kdevfileview");
+  xml.StartElement("groups");
+
+  xml.StartElement("group");
+  xml.Attribute("pattern", cmakeFilePattern);
+  xml.Attribute("name", "CMake");
+  xml.EndElement();
 
   if (enableCxx)
     {
-    fout<<"      <group pattern=\"*.h;*.hxx;*.hpp\" name=\"Header\" />\n"
-          "      <group pattern=\"*.c\" name=\"C Sources\" />\n"
-          "      <group pattern=\"*.cpp;*.C;*.cxx;*.cc\" name=\"C++ Sources\""
-          "/>\n";
+    xml.StartElement("group");
+    xml.Attribute("pattern", "*.h;*.hxx;*.hpp");
+    xml.Attribute("name", "Header");
+    xml.EndElement();
+
+    xml.StartElement("group");
+    xml.Attribute("pattern", "*.c");
+    xml.Attribute("name", "C Sources");
+    xml.EndElement();
+
+    xml.StartElement("group");
+    xml.Attribute("pattern", "*.cpp;*.C;*.cxx;*.cc");
+    xml.Attribute("name", "C++ Sources");
+    xml.EndElement();
     }
 
   if (enableFortran)
     {
-    fout<<"      <group pattern=\"*.f;*.F;*.f77;*.F77;*.f90;*.F90;*.for;*.f95;"
-          "*.F95\" name=\"Fortran Sources\" />\n";
+    xml.StartElement("group");
+    xml.Attribute("pattern",
+        "*.f;*.F;*.f77;*.F77;*.f90;*.F90;*.for;*.f95;*.F95");
+    xml.Attribute("name", "Fortran Sources");
+    xml.EndElement();
     }
 
-  fout<<"      <group pattern=\"*.ui\" name=\"Qt Designer files\" />\n"
-        "      <hidenonprojectfiles>true</hidenonprojectfiles>\n"
-        "    </groups>\n"
-        "    <tree>\n"
-        "      <hidepatterns>*.o,*.lo,CVS,*~,cmake*</hidepatterns>\n"
-        "      <hidenonprojectfiles>true</hidenonprojectfiles>\n"
-        "    </tree>\n"
-        "  </kdevfileview>\n"
-        "</kdevelop>\n";
+  xml.StartElement("group");
+  xml.Attribute("pattern", "*.ui");
+  xml.Attribute("name", "Qt Designer files");
+  xml.EndElement();
+
+  xml.Element("hidenonprojectfiles", "true");
+  xml.EndElement(); // groups
+
+  xml.StartElement("tree");
+  xml.Element("hidepatterns", "*.o,*.lo,CVS,*~,cmake*");
+  xml.Element("hidenonprojectfiles", "true");
+  xml.EndElement(); // tree
+
+  xml.EndElement(); // kdevfileview
+  xml.EndElement(); // kdevelop;
+  xml.EndDocument();
 
   if (sessionFilename.empty())
     {
@@ -600,15 +650,24 @@ void cmGlobalKdevelopGenerator
     {
     return;
     }
-  devses<<"<?xml version = '1.0' encoding = \'UTF-8\'?>\n"
-          "<!DOCTYPE KDevPrjSession>\n"
-          "<KDevPrjSession>\n"
-          " <DocsAndViews NumberOfDocuments=\"1\" >\n"
-          "  <Doc0 NumberOfViews=\"1\" URL=\"file://" << fileToOpen <<
-          "\" >\n"
-          "   <View0 line=\"0\" Type=\"Source\" />\n"
-          "  </Doc0>\n"
-          " </DocsAndViews>\n"
-          "</KDevPrjSession>\n";
-}
+  cmXMLWriter sesxml(devses);
+  sesxml.StartDocument("UTF-8");
+  sesxml.Doctype("KDevPrjSession");
+  sesxml.StartElement("KDevPrjSession");
 
+  sesxml.StartElement("DocsAndViews");
+  sesxml.Attribute("NumberOfDocuments", 1);
+
+  sesxml.StartElement("Doc0");
+  sesxml.Attribute("NumberOfViews", 1);
+  sesxml.Attribute("URL", "file://" + fileToOpen);
+
+  sesxml.StartElement("View0");
+  sesxml.Attribute("line", 0);
+  sesxml.Attribute("Type", "Source");
+  xml.EndElement(); // View0
+
+  xml.EndElement(); // Doc0
+  xml.EndElement(); // DocsAndViews
+  xml.EndElement(); // KDevPrjSession;
+}

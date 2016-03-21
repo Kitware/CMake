@@ -18,7 +18,7 @@
 class cmLocalGenerator;
 class cmMakefile;
 class cmGeneratorTarget;
-class cmGeneratedFileStream;
+class cmXMLWriter;
 
 /** \class cmExtraCodeBlocksGenerator
  * \brief Write CodeBlocks project files for Makefile based projects
@@ -56,7 +56,7 @@ private:
   std::string BuildMakeCommand(const std::string& make, const char* makefile,
                                const std::string& target,
                                const std::string& makeFlags);
-  void AppendTarget(cmGeneratedFileStream& fout,
+  void AppendTarget(cmXMLWriter& xml,
                     const std::string& targetName,
                     cmGeneratorTarget* target,
                     const char* make,

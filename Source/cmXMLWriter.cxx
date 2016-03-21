@@ -67,6 +67,13 @@ void cmXMLWriter::EndElement()
   this->ElementOpen = false;
 }
 
+void cmXMLWriter::Element(const char* name)
+{
+  this->CloseStartElement();
+  this->ConditionalLineBreak(!this->IsContent, this->Elements.size());
+  this->Output << '<' << name << "/>";
+}
+
 void cmXMLWriter::BreakAttributes()
 {
   this->BreakAttrib = true;
@@ -83,6 +90,13 @@ void cmXMLWriter::CData(std::string const& data)
 {
   this->PreContent();
   this->Output << "<![CDATA[" << data << "]]>";
+}
+
+void cmXMLWriter::Doctype(const char* doctype)
+{
+  this->CloseStartElement();
+  this->ConditionalLineBreak(!this->IsContent, this->Elements.size());
+  this->Output << "<!DOCTYPE " << doctype << ">";
 }
 
 void cmXMLWriter::ProcessingInstruction(const char* target, const char* data)
