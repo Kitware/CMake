@@ -1,1 +1,2 @@
-set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT "ZERO_CHECK")
+add_custom_target(TestStartup)
+set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT "TestStartup")
