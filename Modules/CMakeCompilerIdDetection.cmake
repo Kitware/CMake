@@ -79,6 +79,7 @@ function(compiler_id_detection outvar lang)
     if (lang STREQUAL C)
       list(APPEND ordered_compilers
         TinyCC
+        Bruce
       )
     endif()
     list(APPEND ordered_compilers

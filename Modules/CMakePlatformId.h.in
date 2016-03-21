@@ -91,11 +91,11 @@
 #  define PLATFORM_ID "Windows3x"
 
 # else /* unknown platform */
-#  define PLATFORM_ID ""
+#  define PLATFORM_ID
 # endif
 
 #else /* unknown platform */
-# define PLATFORM_ID ""
+# define PLATFORM_ID
 
 #endif
 
@@ -145,7 +145,7 @@
 # endif
 
 #else
-#  define ARCHITECTURE_ID ""
+#  define ARCHITECTURE_ID
 #endif
 
 /* Convert integer to decimal digit literals.  */
