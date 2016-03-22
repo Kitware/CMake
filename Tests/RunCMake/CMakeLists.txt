@@ -217,6 +217,7 @@ add_RunCMake_test(alias_targets)
 add_RunCMake_test(interface_library)
 add_RunCMake_test(no_install_prefix)
 add_RunCMake_test(configure_file)
+add_RunCMake_test(CTestTimeoutAfterMatch)
 
 find_package(Qt4 QUIET)
 find_package(Qt5Core QUIET)

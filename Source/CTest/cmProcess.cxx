@@ -262,6 +262,16 @@ int cmProcess::ReportStatus()
 
 }
 
+void cmProcess::ChangeTimeout(double t)
+{
+  this->Timeout = t;
+  cmsysProcess_SetTimeout(this->Process, this->Timeout);
+}
+
+void cmProcess::ResetStartTime()
+{
+  cmsysProcess_ResetStartTime(this->Process);
+}
 
 int cmProcess::GetExitException()
 {
