@@ -51,13 +51,14 @@ include(CheckCSourceCompiles)
 Check_C_Source_Compiles(
 "
 #include <stdio.h>
-#ifdef __CLASSIC_C__
-int main(){
+#if !defined(__STDC__) || __STDC__ == 0
+int main(ac, av)
   int ac;
   char*av[];
 #else
-int main(int ac, char*av[]){
+int main(int ac, char*av[])
 #endif
+{
   if(ac > 1000){return *av[0];}
   return 0;
 }"

@@ -5,13 +5,14 @@
 void* runner(void*);
 
 int res = 0;
-#ifdef __CLASSIC_C__
-int main(){
+#if !defined(__STDC__) || __STDC__ == 0
+int main(ac, av)
   int ac;
   char*av[];
 #else
-int main(int ac, char*av[]){
+int main(int ac, char*av[])
 #endif
+{
   pthread_t tid[2];
   pthread_create(&tid[0], 0, runner, (void*)1);
   pthread_create(&tid[1], 0, runner, (void*)2);

@@ -87,9 +87,6 @@ else()
 
     # Try enabling ANSI mode on HP.
     "-Aa"
-
-    # Try compiling K&R-compatible code (needed by Bruce C Compiler).
-    "-D__CLASSIC_C__"
     )
 endif()
 
