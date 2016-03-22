@@ -228,6 +228,8 @@ public:
     return this->RulesFileStream; }
 
   std::string ConvertToNinjaPath(const std::string& path);
+  std::string ConvertToNinjaFolderRule(const std::string& path);
+
 
   struct MapToNinjaPathImpl {
     cmGlobalNinjaGenerator* GG;
@@ -342,6 +344,7 @@ private:
   void WriteAssumedSourceDependencies();
 
   void WriteTargetAliases(std::ostream& os);
+  void WriteFolderTargets(std::ostream& os);
   void WriteUnknownExplicitDependencies(std::ostream& os);
 
   void WriteBuiltinTargets(std::ostream& os);
