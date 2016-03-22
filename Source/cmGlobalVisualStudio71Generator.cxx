@@ -97,13 +97,16 @@ void cmGlobalVisualStudio71Generator
   OrderedTargetDependSet orderedProjectTargets(
     projectTargets, this->GetStartupProjectName(root));
 
-  this->WriteTargetsToSolution(fout, root, orderedProjectTargets);
+  std::stringstream targetsSlnString;
+  this->WriteTargetsToSolution(targetsSlnString, root, orderedProjectTargets);
 
   bool useFolderProperty = this->UseFolderProperty();
   if (useFolderProperty)
     {
     this->WriteFolders(fout);
     }
+
+  fout << targetsSlnString.str();
 
   // Write out the configurations information for the solution
   fout << "Global\n";
