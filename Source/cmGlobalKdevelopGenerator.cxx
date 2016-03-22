@@ -665,9 +665,9 @@ void cmGlobalKdevelopGenerator
   sesxml.StartElement("View0");
   sesxml.Attribute("line", 0);
   sesxml.Attribute("Type", "Source");
-  xml.EndElement(); // View0
+  sesxml.EndElement(); // View0
 
-  xml.EndElement(); // Doc0
-  xml.EndElement(); // DocsAndViews
-  xml.EndElement(); // KDevPrjSession;
+  sesxml.EndElement(); // Doc0
+  sesxml.EndElement(); // DocsAndViews
+  sesxml.EndElement(); // KDevPrjSession;
 }
