@@ -2,7 +2,7 @@
 # error "A C++ compiler has been selected for C."
 #endif
 
-#ifdef __CLASSIC_C__
+#if !defined(__STDC__) || __STDC__ == 0
 # define const
 #endif
 
@@ -12,7 +12,7 @@
 
 /*--------------------------------------------------------------------------*/
 
-#ifdef __CLASSIC_C__
+#if !defined(__STDC__) || __STDC__ == 0
 int main(argc, argv) int argc; char *argv[];
 #else
 int main(int argc, char *argv[])

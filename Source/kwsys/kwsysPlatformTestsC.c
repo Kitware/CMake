@@ -25,11 +25,11 @@
       return 0;
     }
 */
-#if defined(__CLASSIC_C__)
+#if !defined(__STDC__) || __STDC__ == 0
 # define KWSYS_PLATFORM_TEST_C_MAIN() \
   main()
 # define KWSYS_PLATFORM_TEST_C_MAIN_ARGS(argc, argv) \
-  main(argc,argv) int argc; char* argv[];
+  main(argc, argv) int argc; char* argv[];
 #else
 # define KWSYS_PLATFORM_TEST_C_MAIN() \
   main(void)
@@ -40,20 +40,29 @@
 /*--------------------------------------------------------------------------*/
 #ifdef TEST_KWSYS_C_HAS_PTRDIFF_T
 #include <stddef.h>
-int f(ptrdiff_t n) { return n > 0; }
+#if !defined(__STDC__) || __STDC__ == 0
+int f(n) ptrdiff_t n;
+#else
+int f(ptrdiff_t n)
+#endif
+{ return n > 0; }
 int KWSYS_PLATFORM_TEST_C_MAIN()
 {
   char* p = 0;
   ptrdiff_t d = p - p;
-  (void)d;
-  return f(p - p);
+  return f(d);
 }
 #endif
 
 /*--------------------------------------------------------------------------*/
 #ifdef TEST_KWSYS_C_HAS_SSIZE_T
 #include <unistd.h>
-int f(ssize_t n) { return (int)n; }
+#if !defined(__STDC__) || __STDC__ == 0
+int f(n) ssize_t n;
+#else
+int f(ssize_t n)
+#endif
+{ return (int)n; }
 int KWSYS_PLATFORM_TEST_C_MAIN()
 {
   ssize_t n = 0;
