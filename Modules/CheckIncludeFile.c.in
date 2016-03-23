@@ -1,13 +1,10 @@
 #include <${CHECK_INCLUDE_FILE_VAR}>
 
-#ifdef __CLASSIC_C__
+#if !defined(__STDC__) || __STDC__ == 0
 int main()
-{
-  return 0;
-}
 #else
 int main(void)
+#endif
 {
   return 0;
 }
-#endif

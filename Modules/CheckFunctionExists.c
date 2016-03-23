@@ -4,13 +4,14 @@
 extern "C"
 #endif
 char CHECK_FUNCTION_EXISTS();
-#ifdef __CLASSIC_C__
-int main(){
+#if !defined(__STDC__) || __STDC__ == 0
+int main(ac, av)
   int ac;
   char*av[];
 #else
-int main(int ac, char*av[]){
+int main(int ac, char*av[])
 #endif
+{
   CHECK_FUNCTION_EXISTS();
   if(ac > 1000)
     {
