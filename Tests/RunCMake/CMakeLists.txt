@@ -234,7 +234,10 @@ endif()
 
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
   add_RunCMake_test(include_external_msproject)
-  add_RunCMake_test(VSSolution)
+  if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([789]|10)" AND NOT CMAKE_VS_DEVENV_COMMAND)
+    set(NO_USE_FOLDERS 1)
+  endif()
+  add_RunCMake_test(VSSolution -DNO_USE_FOLDERS=${NO_USE_FOLDERS})
 endif()
 
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([^789]|[789][0-9])")

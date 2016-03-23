@@ -10,4 +10,7 @@ run_cmake(Override1)
 run_cmake(Override2)
 run_cmake(StartupProject)
 run_cmake(StartupProjectMissing)
-run_cmake(StartupProjectUseFolders)
+
+if(RunCMake_GENERATOR MATCHES "Visual Studio ([^7]|[7][0-9])" AND NOT NO_USE_FOLDERS)
+  run_cmake(StartupProjectUseFolders)
+endif()
