@@ -97,16 +97,30 @@ void cmGlobalVisualStudio71Generator
   OrderedTargetDependSet orderedProjectTargets(
     projectTargets, this->GetStartupProjectName(root));
 
-  std::stringstream targetsSlnString;
+  // Generate the targets specification to a string.  We will put this in
+  // the actual .sln file later.  As a side effect, this method also
+  // populates the set of folders.
+  std::ostringstream targetsSlnString;
   this->WriteTargetsToSolution(targetsSlnString, root, orderedProjectTargets);
 
+  // VS 7 does not support folders specified first.
+  if (this->GetVersion() <= VS71)
+    {
+    fout << targetsSlnString.str();
+    }
+
+  // Generate folder specification.
   bool useFolderProperty = this->UseFolderProperty();
   if (useFolderProperty)
     {
     this->WriteFolders(fout);
     }
 
-  fout << targetsSlnString.str();
+  // Now write the actual target specification content.
+  if (this->GetVersion() > VS71)
+    {
+    fout << targetsSlnString.str();
+    }
 
   // Write out the configurations information for the solution
   fout << "Global\n";
