@@ -42,7 +42,7 @@ public:
   /**
    * This method is called when variable is accessed
    */
-  void VariableAccessed(const std::string& variable, int access_type,
+  bool VariableAccessed(const std::string& variable, int access_type,
     const char* newValue, const cmMakefile* mf) const;
 
   /**
