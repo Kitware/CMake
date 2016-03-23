@@ -14,14 +14,13 @@ static void checkSymbol(void) {
   return @CHECK_PROTOTYPE_DEFINITION_RETURN@;
 }
 
-#if !defined(__STDC__) || __STDC__ == 0
-int main(ac , av)
+#ifdef __CLASSIC_C__
+int main() {
   int ac;
   char*av[];
 #else
-int main(int ac, char *av[])
+int main(int ac, char *av[]) {
 #endif
-{
   checkSymbol();
   if (ac > 1000) {
     return *av[0];

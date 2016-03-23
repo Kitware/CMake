@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#if !defined(__STDC__) || __STDC__ == 0
+#ifdef __CLASSIC_C__
 int main(argc, argv)
   int argc;
   char ** argv;
