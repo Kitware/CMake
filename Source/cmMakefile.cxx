@@ -2531,15 +2531,22 @@ const char* cmMakefile::GetDefinition(const std::string& name) const
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv && !this->SuppressWatches )
     {
-    if ( def )
-      {
-      vv->VariableAccessed(name, cmVariableWatch::VARIABLE_READ_ACCESS,
-        def, this);
-      }
-    else
-      {
+    bool const watch_function_executed =
       vv->VariableAccessed(name,
-          cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS, def, this);
+                           def ? cmVariableWatch::VARIABLE_READ_ACCESS
+                           : cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS,
+                           def, this);
+
+    if (watch_function_executed)
+      {
+      // A callback was executed and may have caused re-allocation of the
+      // variable storage.  Look it up again for now.
+      // FIXME: Refactor variable storage to avoid this problem.
+      def = this->StateSnapshot.GetDefinition(name);
+      if(!def)
+        {
+        def = this->GetState()->GetInitializedCacheValue(name);
+        }
       }
     }
 #endif
