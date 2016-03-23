@@ -59,7 +59,7 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
         "${CMAKE_CONFIGURABLE_FILE_CONTENT}#include <${FILE}>\n")
     endforeach()
     set(CMAKE_CONFIGURABLE_FILE_CONTENT
-      "${CMAKE_CONFIGURABLE_FILE_CONTENT}\n\n#if !defined(__STDC__) || __STDC == 0\nint main()\n#else\n  int main(void)\n#endif\n  {return 0;}\n")
+      "${CMAKE_CONFIGURABLE_FILE_CONTENT}\n\nint main(void){return 0;}\n")
     configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
       "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFiles.c" @ONLY)
 
