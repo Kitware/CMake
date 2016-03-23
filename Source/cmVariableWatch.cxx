@@ -96,7 +96,7 @@ void cmVariableWatch::RemoveWatch(const std::string& variable,
     }
 }
 
-void  cmVariableWatch::VariableAccessed(const std::string& variable,
+bool  cmVariableWatch::VariableAccessed(const std::string& variable,
                                         int access_type,
                                         const char* newValue,
                                         const cmMakefile* mf) const
@@ -112,5 +112,7 @@ void  cmVariableWatch::VariableAccessed(const std::string& variable,
       (*it)->Method(variable, access_type, (*it)->ClientData,
         newValue, mf);
       }
+    return true;
     }
+  return false;
 }
