@@ -92,7 +92,7 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
       //
       // Organize in the "predefined targets" folder:
       //
-      if (this->UseFolderProperty())
+      if (this->UseFolderProperty() && this->GetVersion() > VS71)
         {
         allBuild->SetProperty("FOLDER", this->GetPredefinedTargetsFolder());
         }
