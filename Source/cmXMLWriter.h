@@ -41,6 +41,8 @@ public:
     this->Output << name << "=\"" << SafeAttribute(value) << '"';
     }
 
+  void Element(const char* name);
+
   template <typename T>
   void Element(std::string const& name, T const& value)
     {
@@ -59,6 +61,8 @@ public:
   void Comment(const char* comment);
 
   void CData(std::string const& data);
+
+  void Doctype(const char* doctype);
 
   void ProcessingInstruction(const char* target, const char* data);
 
