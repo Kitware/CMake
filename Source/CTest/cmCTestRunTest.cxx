@@ -77,11 +77,13 @@ bool cmCTestRunTest::CheckOutput()
           if ( regIt->first.find(this->ProcessOutput.c_str()) )
             {
             cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                       this->GetIndex() << ": " <<
                        "Test timeout changed to " <<
                        this->TestProperties->AlternateTimeout << std::endl);
             this->TestProcess->ResetStartTime();
             this->TestProcess->ChangeTimeout(
               this->TestProperties->AlternateTimeout);
+            this->TestProperties->TimeoutRegularExpressions.clear();
             break;
             }
           }
