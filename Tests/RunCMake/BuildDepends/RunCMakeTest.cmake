@@ -41,6 +41,11 @@ endif()
 
 run_BuildDepends(Custom-Always)
 
+if(RunCMake_GENERATOR MATCHES "Make" AND
+   NOT "${RunCMake_BINARY_DIR}" STREQUAL "${RunCMake_SOURCE_DIR}")
+  run_BuildDepends(MakeInProjectOnly)
+endif()
+
 function(run_ReGeneration)
   # test re-generation of project even if CMakeLists.txt files disappeared
 
