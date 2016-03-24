@@ -444,60 +444,60 @@ endmacro()
 
 # Macro that adds a component group to the CPack installer
 macro(cpack_add_component_group grpname)
-  string(TOUPPER ${grpname} CPACK_ADDGRP_UNAME)
-  cpack_parse_arguments(CPACK_COMPONENT_GROUP_${CPACK_ADDGRP_UNAME}
+  string(TOUPPER ${grpname} _CPACK_ADDGRP_UNAME)
+  cpack_parse_arguments(CPACK_COMPONENT_GROUP_${_CPACK_ADDGRP_UNAME}
     "DISPLAY_NAME;DESCRIPTION;PARENT_GROUP"
     "EXPANDED;BOLD_TITLE"
     ${ARGN}
     )
 
-  set(CPACK_ADDGRP_STR "\n# Configuration for component group \"${grpname}\"\n")
+  set(_CPACK_ADDGRP_STR "\n# Configuration for component group \"${grpname}\"\n")
   cpack_append_string_variable_set_command(
-    CPACK_COMPONENT_GROUP_${CPACK_ADDGRP_UNAME}_DISPLAY_NAME
-    CPACK_ADDGRP_STR)
+    CPACK_COMPONENT_GROUP_${_CPACK_ADDGRP_UNAME}_DISPLAY_NAME
+    _CPACK_ADDGRP_STR)
   cpack_append_string_variable_set_command(
-    CPACK_COMPONENT_GROUP_${CPACK_ADDGRP_UNAME}_DESCRIPTION
-    CPACK_ADDGRP_STR)
+    CPACK_COMPONENT_GROUP_${_CPACK_ADDGRP_UNAME}_DESCRIPTION
+    _CPACK_ADDGRP_STR)
   cpack_append_string_variable_set_command(
-    CPACK_COMPONENT_GROUP_${CPACK_ADDGRP_UNAME}_PARENT_GROUP
-    CPACK_ADDGRP_STR)
+    CPACK_COMPONENT_GROUP_${_CPACK_ADDGRP_UNAME}_PARENT_GROUP
+    _CPACK_ADDGRP_STR)
   cpack_append_option_set_command(
-    CPACK_COMPONENT_GROUP_${CPACK_ADDGRP_UNAME}_EXPANDED
-    CPACK_ADDGRP_STR)
+    CPACK_COMPONENT_GROUP_${_CPACK_ADDGRP_UNAME}_EXPANDED
+    _CPACK_ADDGRP_STR)
   cpack_append_option_set_command(
-    CPACK_COMPONENT_GROUP_${CPACK_ADDGRP_UNAME}_BOLD_TITLE
-    CPACK_ADDGRP_STR)
+    CPACK_COMPONENT_GROUP_${_CPACK_ADDGRP_UNAME}_BOLD_TITLE
+    _CPACK_ADDGRP_STR)
   # Backward compatibility issue.
   # Write to config iff the macros is used after CPack.cmake has been
   # included, other it's not necessary because the variables
   # will be encoded by cpack_encode_variables.
   if(CPack_CMake_INCLUDED)
-    file(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${CPACK_ADDGRP_STR}")
+    file(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${_CPACK_ADDGRP_STR}")
   endif()
 endmacro()
 
 # Macro that adds an installation type to the CPack installer
 macro(cpack_add_install_type insttype)
-  string(TOUPPER ${insttype} CPACK_INSTTYPE_UNAME)
-  cpack_parse_arguments(CPACK_INSTALL_TYPE_${CPACK_INSTTYPE_UNAME}
+  string(TOUPPER ${insttype} _CPACK_INSTTYPE_UNAME)
+  cpack_parse_arguments(CPACK_INSTALL_TYPE_${_CPACK_INSTTYPE_UNAME}
     "DISPLAY_NAME"
     ""
     ${ARGN}
     )
 
-  set(CPACK_INSTTYPE_STR
+  set(_CPACK_INSTTYPE_STR
     "\n# Configuration for installation type \"${insttype}\"\n")
-  set(CPACK_INSTTYPE_STR
-    "${CPACK_INSTTYPE_STR}list(APPEND CPACK_ALL_INSTALL_TYPES ${insttype})\n")
+  set(_CPACK_INSTTYPE_STR
+    "${_CPACK_INSTTYPE_STR}list(APPEND CPACK_ALL_INSTALL_TYPES ${insttype})\n")
   cpack_append_string_variable_set_command(
-    CPACK_INSTALL_TYPE_${CPACK_INSTTYPE_UNAME}_DISPLAY_NAME
-    CPACK_INSTTYPE_STR)
+    CPACK_INSTALL_TYPE_${_CPACK_INSTTYPE_UNAME}_DISPLAY_NAME
+    _CPACK_INSTTYPE_STR)
   # Backward compatibility issue.
   # Write to config iff the macros is used after CPack.cmake has been
   # included, other it's not necessary because the variables
   # will be encoded by cpack_encode_variables.
   if(CPack_CMake_INCLUDED)
-    file(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${CPACK_INSTTYPE_STR}")
+    file(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${_CPACK_INSTTYPE_STR}")
   endif()
 endmacro()
 
