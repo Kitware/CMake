@@ -1,4 +1,4 @@
-/*============================================================================
+/*/*===================================================================-*-C++-*-
   CMake - Cross Platform Makefile Generator
   Copyright 2015 Geoffrey Viola <geoffrey.viola@asirobots.com>
 

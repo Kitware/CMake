@@ -1,4 +1,4 @@
-/*============================================================================
+/*/*===================================================================-*-C++-*-
   CMake - Cross Platform Makefile Generator
   Copyright 2004-2011 Kitware, Inc.
   Copyright 2011 Alexander Neundorf (neundorf@kde.org)
