@@ -81,7 +81,8 @@ private:
                          std::string const &config);
 
   void WriteIncludes(const std::string &config, const std::string &language);
-  void WriteTargetLinkLibraries();
+  void WriteTargetLinkLibraries(std::string const& config,
+                                std::string const& language);
   void WriteCustomCommands();
   void
   WriteCustomCommandsHelper(std::vector<cmCustomCommand> const &commandsSet,
