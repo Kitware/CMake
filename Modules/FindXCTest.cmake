@@ -140,6 +140,10 @@ function(xctest_add_bundle target testee)
       set_target_properties(${target} PROPERTIES
         XCODE_ATTRIBUTE_BUNDLE_LOADER "$(TEST_HOST)"
         XCODE_ATTRIBUTE_TEST_HOST "$<TARGET_FILE:${testee}>")
+      if(NOT XCODE_VERSION VERSION_LESS 7.3)
+        set_target_properties(${target} PROPERTIES
+          LIBRARY_OUTPUT_DIRECTORY "$<TARGET_FILE_DIR:${testee}>/../PlugIns")
+      endif()
     else(XCODE)
       target_link_libraries(${target}
         PRIVATE -bundle_loader $<TARGET_FILE:${testee}>)
