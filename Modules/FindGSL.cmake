@@ -45,7 +45,7 @@
 # of GSL installation discovered.  These variables may optionally be set to
 # help this module find the correct files::
 #
-#  GSL_CLBAS_LIBRARY       - Location of the GSL CBLAS library.
+#  GSL_CBLAS_LIBRARY       - Location of the GSL CBLAS library.
 #  GSL_CBLAS_LIBRARY_DEBUG - Location of the debug GSL CBLAS library (if any).
 #  GSL_CONFIG_EXECUTABLE   - Location of the ``gsl-config`` script (if any).
 #  GSL_LIBRARY             - Location of the GSL library.

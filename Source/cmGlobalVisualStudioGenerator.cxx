@@ -89,19 +89,13 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
       cmGeneratorTarget* gt = new cmGeneratorTarget(allBuild, gen[0]);
       gen[0]->AddGeneratorTarget(gt);
 
-#if 0
-      // Can't activate this code because we want ALL_BUILD
-      // selected as the default "startup project" when first
-      // opened in Visual Studio... And if it's nested in a
-      // folder, then that doesn't happen.
       //
       // Organize in the "predefined targets" folder:
       //
-      if (this->UseFolderProperty())
+      if (this->UseFolderProperty() && this->GetVersion() > VS71)
         {
         allBuild->SetProperty("FOLDER", this->GetPredefinedTargetsFolder());
         }
-#endif
 
       // Now make all targets depend on the ALL_BUILD target
       for(std::vector<cmLocalGenerator*>::iterator i = gen.begin();
@@ -184,12 +178,11 @@ void RegisterVisualStudioMacros(const std::string& macrosFile,
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
 {
-  cmMakefile* mf = this->LocalGenerators[0]->GetMakefile();
   std::string dir = this->GetUserMacrosDirectory();
 
   if (dir != "")
     {
-    std::string src = mf->GetRequiredDefinition("CMAKE_ROOT");
+    std::string src = cmSystemTools::GetCMakeRoot();
     src += "/Templates/" CMAKE_VSMACROS_FILENAME;
 
     std::string dst = dir + "/CMakeMacros/" CMAKE_VSMACROS_FILENAME;
@@ -517,6 +510,32 @@ cmGlobalVisualStudioGenerator::GetUtilityDepend(
     i = this->UtilityDepends.insert(entry).first;
     }
   return i->second;
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmGlobalVisualStudioGenerator::GetStartupProjectName(
+  cmLocalGenerator const* root) const
+{
+  const char* n = root->GetMakefile()->GetProperty("VS_STARTUP_PROJECT");
+  if (n && *n)
+    {
+    std::string startup = n;
+    if (this->FindTarget(startup))
+      {
+      return startup;
+      }
+    else
+      {
+      root->GetMakefile()->IssueMessage(
+        cmake::AUTHOR_WARNING,
+        "Directory property VS_STARTUP_PROJECT specifies target "
+        "'" + startup + "' that does not exist.  Ignoring.");
+      }
+    }
+
+  // default, if not specified
+  return this->GetAllTargetName();
 }
 
 //----------------------------------------------------------------------------

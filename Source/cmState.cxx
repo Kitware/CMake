@@ -35,8 +35,6 @@ struct cmState::SnapshotDataType
   cmLinkedTree<cmDefinitions>::iterator Vars;
   cmLinkedTree<cmDefinitions>::iterator Root;
   cmLinkedTree<cmDefinitions>::iterator Parent;
-  std::string EntryPointCommand;
-  long EntryPointLine;
   std::vector<std::string>::size_type IncludeDirectoryPosition;
   std::vector<std::string>::size_type CompileDefinitionsPosition;
   std::vector<std::string>::size_type CompileOptionsPosition;
@@ -845,14 +843,10 @@ cmState::Snapshot cmState::CreateBaseSnapshot()
 }
 
 cmState::Snapshot
-cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot,
-                                    std::string const& entryPointCommand,
-                                    long entryPointLine)
+cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot)
 {
   assert(originSnapshot.IsValid());
   PositionType pos = this->SnapshotData.Push(originSnapshot.Position);
-  pos->EntryPointLine = entryPointLine;
-  pos->EntryPointCommand = entryPointCommand;
   pos->DirectoryParent = originSnapshot.Position;
   pos->ScopeParent = originSnapshot.Position;
   pos->SnapshotType = BuildsystemDirectoryType;
@@ -886,15 +880,11 @@ cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot,
 
 cmState::Snapshot
 cmState::CreateFunctionCallSnapshot(cmState::Snapshot originSnapshot,
-                                    std::string const& entryPointCommand,
-                                    long entryPointLine,
                                     std::string const& fileName)
 {
   PositionType pos = this->SnapshotData.Push(originSnapshot.Position,
                                              *originSnapshot.Position);
   pos->ScopeParent = originSnapshot.Position;
-  pos->EntryPointLine = entryPointLine;
-  pos->EntryPointCommand = entryPointCommand;
   pos->SnapshotType = FunctionCallType;
   pos->Keep = false;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
@@ -912,14 +902,10 @@ cmState::CreateFunctionCallSnapshot(cmState::Snapshot originSnapshot,
 
 cmState::Snapshot
 cmState::CreateMacroCallSnapshot(cmState::Snapshot originSnapshot,
-                                    std::string const& entryPointCommand,
-                                    long entryPointLine,
                                     std::string const& fileName)
 {
   PositionType pos = this->SnapshotData.Push(originSnapshot.Position,
                                              *originSnapshot.Position);
-  pos->EntryPointLine = entryPointLine;
-  pos->EntryPointCommand = entryPointCommand;
   pos->SnapshotType = MacroCallType;
   pos->Keep = false;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
@@ -931,16 +917,12 @@ cmState::CreateMacroCallSnapshot(cmState::Snapshot originSnapshot,
 }
 
 cmState::Snapshot
-cmState::CreateCallStackSnapshot(cmState::Snapshot originSnapshot,
-                                 const std::string& entryPointCommand,
-                                 long entryPointLine,
-                                 const std::string& fileName)
+cmState::CreateIncludeFileSnapshot(cmState::Snapshot originSnapshot,
+                                   const std::string& fileName)
 {
   PositionType pos = this->SnapshotData.Push(originSnapshot.Position,
                                              *originSnapshot.Position);
-  pos->EntryPointLine = entryPointLine;
-  pos->EntryPointCommand = entryPointCommand;
-  pos->SnapshotType = CallStackType;
+  pos->SnapshotType = IncludeFileType;
   pos->Keep = true;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
         originSnapshot.Position->ExecutionListFile, fileName);
@@ -951,15 +933,11 @@ cmState::CreateCallStackSnapshot(cmState::Snapshot originSnapshot,
 }
 
 cmState::Snapshot
-cmState::CreateVariableScopeSnapshot(cmState::Snapshot originSnapshot,
-                                     std::string const& entryPointCommand,
-                                     long entryPointLine)
+cmState::CreateVariableScopeSnapshot(cmState::Snapshot originSnapshot)
 {
   PositionType pos = this->SnapshotData.Push(originSnapshot.Position,
                                              *originSnapshot.Position);
   pos->ScopeParent = originSnapshot.Position;
-  pos->EntryPointLine = entryPointLine;
-  pos->EntryPointCommand = entryPointCommand;
   pos->SnapshotType = VariableScopeType;
   pos->Keep = false;
   pos->PolicyScope = originSnapshot.Position->Policies;
@@ -975,14 +953,10 @@ cmState::CreateVariableScopeSnapshot(cmState::Snapshot originSnapshot,
 
 cmState::Snapshot
 cmState::CreateInlineListFileSnapshot(cmState::Snapshot originSnapshot,
-                                      const std::string& entryPointCommand,
-                                      long entryPointLine,
                                       const std::string& fileName)
 {
   PositionType pos = this->SnapshotData.Push(originSnapshot.Position,
                                              *originSnapshot.Position);
-  pos->EntryPointLine = entryPointLine;
-  pos->EntryPointCommand = entryPointCommand;
   pos->SnapshotType = InlineListFileType;
   pos->Keep = true;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
@@ -1098,11 +1072,6 @@ void cmState::Directory::SetCurrentBinary(std::string const& dir)
   this->Snapshot_.SetDefinition("CMAKE_CURRENT_BINARY_DIR", loc.c_str());
 }
 
-void cmState::Snapshot::Keep()
-{
-  this->Position->Keep = true;
-}
-
 void cmState::Snapshot::SetListFile(const std::string& listfile)
 {
   *this->Position->ExecutionListFile = listfile;
@@ -1143,16 +1112,6 @@ void cmState::Directory::SetRelativePathTopBinary(const char* dir)
 std::string cmState::Snapshot::GetExecutionListFile() const
 {
   return *this->Position->ExecutionListFile;
-}
-
-std::string cmState::Snapshot::GetEntryPointCommand() const
-{
-  return this->Position->EntryPointCommand;
-}
-
-long cmState::Snapshot::GetEntryPointLine() const
-{
-  return this->Position->EntryPointLine;
 }
 
 bool cmState::Snapshot::IsValid() const
@@ -1211,6 +1170,21 @@ cmState::Snapshot cmState::Snapshot::GetCallStackParent() const
 
   snapshot = Snapshot(this->State, parentPos);
   return snapshot;
+}
+
+cmState::Snapshot cmState::Snapshot::GetCallStackBottom() const
+{
+  assert(this->State);
+  assert(this->Position != this->State->SnapshotData.Root());
+
+  PositionType pos = this->Position;
+  while (pos->SnapshotType != cmState::BaseType &&
+         pos->SnapshotType != cmState::BuildsystemDirectoryType &&
+         pos != this->State->SnapshotData.Root())
+    {
+    ++pos;
+    }
+  return Snapshot(this->State, pos);
 }
 
 void cmState::Snapshot::PushPolicy(cmPolicies::PolicyMap entry, bool weak)
@@ -1424,6 +1398,9 @@ void cmState::Snapshot::SetDefaultDefinitions()
   #if defined(__APPLE__)
     this->SetDefinition("APPLE", "1");
     this->SetDefinition("CMAKE_HOST_APPLE", "1");
+  #endif
+  #if defined(__sun__)
+    this->SetDefinition("CMAKE_HOST_SOLARIS", "1");
   #endif
 
     char temp[1024];

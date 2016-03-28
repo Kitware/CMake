@@ -9,7 +9,7 @@ cpack-rpm-upper-cased-components
   Upper cased component name part in variables is compatible
   with convention used for other CPack variables.
   For back compatibility old format of variables is still valid
-  and prefered if both versions of variable are set, but the
+  and preferred if both versions of variable are set, but the
   preferred future use is upper cased component names in variables.
   New variables that will be added to CPackRPM in later versions
   will only support upper cased component variable format.

@@ -294,6 +294,9 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         }
       }
 
+    std::string const tcConfig =
+      this->Makefile->GetSafeDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
+
     // we need to create a directory and CMakeLists file etc...
     // first create the directories
     sourceDirectory = this->BinaryDirectory.c_str();
@@ -350,6 +353,13 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
               cmOutputConverter::EscapeForCMake(flags?flags:"").c_str());
       fprintf(fout, "set(CMAKE_%s_FLAGS \"${CMAKE_%s_FLAGS}"
               " ${COMPILE_DEFINITIONS}\")\n", li->c_str(), li->c_str());
+      static std::string const cfgDefault = "DEBUG";
+      std::string const cfg = !tcConfig.empty()?
+        cmSystemTools::UpperCase(tcConfig) : cfgDefault;
+      std::string const langFlagsCfg = "CMAKE_" + *li + "_FLAGS_" + cfg;
+      const char* flagsCfg = this->Makefile->GetDefinition(langFlagsCfg);
+      fprintf(fout, "set(%s %s)\n", langFlagsCfg.c_str(),
+              cmOutputConverter::EscapeForCMake(flagsCfg?flagsCfg:"").c_str());
       }
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0056))
       {
@@ -406,8 +416,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       std::string fname = "/" + std::string(targetName) + "Targets.cmake";
       cmExportTryCompileFileGenerator tcfg(gg, targets, this->Makefile);
       tcfg.SetExportFile((this->BinaryDirectory + fname).c_str());
-      tcfg.SetConfig(this->Makefile->GetSafeDefinition(
-                                          "CMAKE_TRY_COMPILE_CONFIGURATION"));
+      tcfg.SetConfig(tcConfig);
 
       if(!tcfg.GenerateImportFile())
         {

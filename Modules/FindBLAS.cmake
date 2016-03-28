@@ -30,9 +30,9 @@
 #   BLA_F95     if set on tries to find the f95 interfaces for BLAS/LAPACK
 #
 # ######### ## List of vendors (BLA_VENDOR) valid in this module #
-# Goto,ATLAS PhiPACK,CXML,DXML,SunPerf,SCSL,SGIMATH,IBMESSL,Intel10_32
-# (intel mkl v10 32 bit),Intel10_64lp (intel mkl v10 64 bit,lp thread
-# model, lp64 model), # Intel10_64lp_seq (intel mkl v10 64
+# Goto,OpenBLAS,ATLAS PhiPACK,CXML,DXML,SunPerf,SCSL,SGIMATH,IBMESSL,
+# Intel10_32 (intel mkl v10 32 bit),Intel10_64lp (intel mkl v10 64 bit,
+# lp thread model, lp64 model), # Intel10_64lp_seq (intel mkl v10 64
 # bit,sequential code, lp64 model), # Intel( older versions of mkl 32
 # and 64 bit), ACML,ACML_MP,ACML_GPU,Apple, NAS, Generic C/CXX should be
 # enabled to use Intel mkl
@@ -59,12 +59,7 @@ set(CMAKE_REQUIRED_QUIET ${BLAS_FIND_QUIETLY})
 set(_blas_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
 # Check the language being used
-get_property( _LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES )
-if( _LANGUAGES_ MATCHES Fortran )
-  set( _CHECK_FORTRAN TRUE )
-elseif( (_LANGUAGES_ MATCHES C) OR (_LANGUAGES_ MATCHES CXX) )
-  set( _CHECK_FORTRAN FALSE )
-else()
+if( NOT (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED OR CMAKE_Fortran_COMPILER_LOADED) )
   if(BLAS_FIND_REQUIRED)
     message(FATAL_ERROR "FindBLAS requires Fortran, C, or C++ to be enabled.")
   else()
@@ -132,7 +127,7 @@ if(_libraries_work)
   # Test this combination of libraries.
   set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_thread})
 #  message("DEBUG: CMAKE_REQUIRED_LIBRARIES = ${CMAKE_REQUIRED_LIBRARIES}")
-  if (_CHECK_FORTRAN)
+  if (CMAKE_Fortran_COMPILER_LOADED)
     check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS)
   else()
     check_function_exists("${_name}_" ${_prefix}${_combined_name}_WORKS)
@@ -167,6 +162,20 @@ if (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
   sgemm
   ""
   "goto2"
+  ""
+  )
+ endif()
+endif ()
+
+if (BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
+ if(NOT BLAS_LIBRARIES)
+  # OpenBLAS (http://www.openblas.net)
+  check_fortran_libraries(
+  BLAS_LIBRARIES
+  BLAS
+  sgemm
+  ""
+  "openblas"
   ""
   )
  endif()
@@ -469,7 +478,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
  if (NOT WIN32)
   set(LM "-lm")
  endif ()
- if (_LANGUAGES_ MATCHES C OR _LANGUAGES_ MATCHES CXX)
+ if (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED)
   if(BLAS_FIND_QUIETLY OR NOT BLAS_FIND_REQUIRED)
     find_package(Threads)
   else()

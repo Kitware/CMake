@@ -80,7 +80,7 @@ cmCTestBZR::cmCTestBZR(cmCTest* ct, std::ostream& log):
   cmCTestGlobalVC(ct, log)
 {
   this->PriorRev = this->Unknown;
-  // Even though it is specified in the documention, with bzr 1.13
+  // Even though it is specified in the documentation, with bzr 1.13
   // BZR_PROGRESS_BAR has no effect. In the future this bug might be fixed.
   // Since it doesn't hurt, we specify this environment variable.
   cmSystemTools::PutEnv("BZR_PROGRESS_BAR=none");

@@ -20,20 +20,13 @@
 
 #include <iomanip>
 
-#include <CoreFoundation/CFBase.h>
-#include <CoreFoundation/CFString.h>
-#include <CoreFoundation/CFLocale.h>
+#include <CoreFoundation/CoreFoundation.h>
 
-// The carbon framework is deprecated, but the Region codes it supplies are
-// needed for the LPic data structure used for generating multi-lingual SLAs.
-// There does not seem to be a replacement API for these region codes.
-#if defined(__clang__)
-# pragma clang diagnostic push
-# pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#endif
-#include <Carbon/Carbon.h>
-#if defined(__clang__)
-# pragma clang diagnostic pop
+#ifdef HAVE_CoreServices
+// For the old LocaleStringToLangAndRegionCodes() function, to convert
+// to the old Script Manager RegionCode values needed for the 'LPic' data
+// structure used for generating multi-lingual SLAs.
+#include <CoreServices/CoreServices.h>
 #endif
 
 static const char* SLAHeader =
@@ -652,9 +645,11 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
                            kCFStringEncodingMacRoman);
         LangCode lang = 0;
         RegionCode region = 0;
+#ifdef HAVE_CoreServices
         OSStatus err = LocaleStringToLangAndRegionCodes(iso_language_cstr,
                                                         &lang, &region);
         if (err != noErr)
+#endif
           {
           cmCPackLogger(cmCPackLog::LOG_ERROR,
             "No language/region code available for " << iso_language_cstr
@@ -662,10 +657,12 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
           free(iso_language_cstr);
           return 0;
           }
+#ifdef HAVE_CoreServices
         free(iso_language_cstr);
         header_data.push_back(region);
         header_data.push_back(i);
         header_data.push_back(0);
+#endif
         }
       ofs << "data 'LPic' (5000) {\n";
       ofs << std::hex << std::uppercase << std::setfill('0');

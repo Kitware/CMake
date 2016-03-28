@@ -151,6 +151,7 @@ if(WIN32 AND NOT CYGWIN)
       NAMES
         libeay32${_OPENSSL_MSVC_RT_MODE}d
         libeay32d
+      NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         ${_OPENSSL_PATH_SUFFIXES}
@@ -160,6 +161,7 @@ if(WIN32 AND NOT CYGWIN)
       NAMES
         libeay32${_OPENSSL_MSVC_RT_MODE}
         libeay32
+      NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         ${_OPENSSL_PATH_SUFFIXES}
@@ -169,6 +171,7 @@ if(WIN32 AND NOT CYGWIN)
       NAMES
         ssleay32${_OPENSSL_MSVC_RT_MODE}d
         ssleay32d
+      NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         ${_OPENSSL_PATH_SUFFIXES}
@@ -179,6 +182,7 @@ if(WIN32 AND NOT CYGWIN)
         ssleay32${_OPENSSL_MSVC_RT_MODE}
         ssleay32
         ssl
+      NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         ${_OPENSSL_PATH_SUFFIXES}
@@ -205,6 +209,7 @@ if(WIN32 AND NOT CYGWIN)
     find_library(LIB_EAY
       NAMES
         ${LIB_EAY_NAMES}
+      NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         "lib"
@@ -214,6 +219,7 @@ if(WIN32 AND NOT CYGWIN)
     find_library(SSL_EAY
       NAMES
         ${SSL_EAY_NAMES}
+      NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         "lib"
@@ -231,6 +237,7 @@ if(WIN32 AND NOT CYGWIN)
     find_library(LIB_EAY
       NAMES
         libeay32
+      NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       HINTS
         ${_OPENSSL_LIBDIR}
@@ -241,6 +248,7 @@ if(WIN32 AND NOT CYGWIN)
     find_library(SSL_EAY
       NAMES
         ssleay32
+      NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       HINTS
         ${_OPENSSL_LIBDIR}
@@ -260,6 +268,7 @@ else()
       ssl
       ssleay32
       ssleay32MD
+    NAMES_PER_DIR
     ${_OPENSSL_ROOT_HINTS_AND_PATHS}
     HINTS
       ${_OPENSSL_LIBDIR}
@@ -270,6 +279,7 @@ else()
   find_library(OPENSSL_CRYPTO_LIBRARY
     NAMES
       crypto
+    NAMES_PER_DIR
     ${_OPENSSL_ROOT_HINTS_AND_PATHS}
     HINTS
       ${_OPENSSL_LIBDIR}

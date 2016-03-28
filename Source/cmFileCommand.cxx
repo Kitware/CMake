@@ -1015,7 +1015,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
         else
           {
           this->Makefile->IssueMessage(cmake::FATAL_ERROR,
-            "Error has occured while globbing for '"
+            "Error has occurred while globbing for '"
             + *i + "' - " + it->content);
           shouldExit = true;
           }

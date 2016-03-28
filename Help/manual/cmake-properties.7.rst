@@ -76,6 +76,7 @@ Properties on Directories
    /prop_dir/VARIABLES
    /prop_dir/VS_GLOBAL_SECTION_POST_section
    /prop_dir/VS_GLOBAL_SECTION_PRE_section
+   /prop_dir/VS_STARTUP_PROJECT
 
 .. _`Target Properties`:
 
@@ -196,6 +197,7 @@ Properties on Targets
    /prop_tgt/JOB_POOL_COMPILE
    /prop_tgt/JOB_POOL_LINK
    /prop_tgt/LABELS
+   /prop_tgt/LANG_CLANG_TIDY
    /prop_tgt/LANG_COMPILER_LAUNCHER
    /prop_tgt/LANG_INCLUDE_WHAT_YOU_USE
    /prop_tgt/LANG_VISIBILITY_PRESET
@@ -304,6 +306,7 @@ Properties on Tests
    /prop_test/RUN_SERIAL
    /prop_test/SKIP_RETURN_CODE
    /prop_test/TIMEOUT
+   /prop_test/TIMEOUT_AFTER_MATCH
    /prop_test/WILL_FAIL
    /prop_test/WORKING_DIRECTORY
 

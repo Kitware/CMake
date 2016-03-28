@@ -149,7 +149,7 @@ void cmGhsMultiTargetGenerator::Generate()
     this->WriteIncludes(config, language);
     if (this->GeneratorTarget->GetType() == cmState::EXECUTABLE)
       {
-      this->WriteTargetLinkLibraries();
+      this->WriteTargetLinkLibraries(config, language);
       }
     this->WriteCustomCommands();
 
@@ -217,8 +217,11 @@ void cmGhsMultiTargetGenerator::WriteTypeSpecifics(const std::string &config,
 
   if (this->GeneratorTarget->GetType() == cmState::STATIC_LIBRARY)
     {
+    std::string const static_library_suffix =
+      this->Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
     *this->GetFolderBuildStreams() << "    -o \""
-                                   << outputDir << outputFilename << ".a\""
+                                   << outputDir << outputFilename
+                                   << static_library_suffix << "\""
                                    << std::endl;
     }
   else if (this->GeneratorTarget->GetType() == cmState::EXECUTABLE)
@@ -238,8 +241,11 @@ void cmGhsMultiTargetGenerator::WriteTypeSpecifics(const std::string &config,
       }
     else
       {
+      std::string const executable_suffix =
+        this->Makefile->GetSafeDefinition("CMAKE_EXECUTABLE_SUFFIX");
       *this->GetFolderBuildStreams() << "    -o \""
-                                     << outputDir << outputFilename << ".as\""
+                                     << outputDir << outputFilename
+                                     << executable_suffix << "\""
                                      << std::endl;
       }
     }
@@ -359,7 +365,8 @@ void cmGhsMultiTargetGenerator::WriteIncludes(const std::string &config,
     }
 }
 
-void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries()
+void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries(
+  std::string const& config, std::string const& language)
 {
   // library directories
   cmTargetDependSet tds =
@@ -386,6 +393,35 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries()
       }
     *this->GetFolderBuildStreams() << "    -l\"" << libName << "\""
                                    << std::endl;
+    }
+
+  if (!this->TargetGroup)
+    {
+    std::string linkLibraries;
+    std::string flags;
+    std::string linkFlags;
+    std::string frameworkPath;
+    std::string linkPath;
+    std::string createRule =
+        this->GeneratorTarget->GetCreateRuleVariable(language, config);
+    bool useWatcomQuote =
+        this->Makefile->IsOn(createRule + "_USE_WATCOM_QUOTE");
+    this->LocalGenerator->GetTargetFlags(
+      linkLibraries, flags, linkFlags,
+      frameworkPath, linkPath,
+      this->GeneratorTarget, useWatcomQuote);
+    linkFlags = cmSystemTools::TrimWhitespace(linkFlags);
+
+    if (!linkPath.empty())
+      {
+      linkPath = " " + linkPath.substr(0U, linkPath.size() - 1U);
+      *this->GetFolderBuildStreams() << linkPath;
+      }
+
+    if (!linkFlags.empty())
+      {
+      *this->GetFolderBuildStreams() << "    " << linkFlags << std::endl;
+      }
     }
 }
 

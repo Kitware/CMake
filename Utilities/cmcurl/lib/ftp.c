@@ -3671,7 +3671,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
   }
 
   if(ftpc->state) {
-    /* already in a state so skip the intial commands.
+    /* already in a state so skip the initial commands.
        They are only done to kickstart the do_more state */
     result = ftp_multi_statemach(conn, &complete);
 

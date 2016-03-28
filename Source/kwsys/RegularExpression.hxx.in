@@ -333,7 +333,7 @@ inline RegularExpression::RegularExpression (const std::string& s)
  */
 inline RegularExpression::~RegularExpression () 
 {
-//#ifndef WIN32
+//#ifndef _WIN32
   delete [] this->program;
 //#endif
 }
@@ -396,7 +396,7 @@ inline bool RegularExpression::is_valid () const
 
 inline void RegularExpression::set_invalid () 
 {
-//#ifndef WIN32
+//#ifndef _WIN32
   delete [] this->program;
 //#endif
   this->program = 0;

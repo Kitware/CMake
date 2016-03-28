@@ -185,11 +185,10 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
 
   # Fall back to old is-GNU test.
   if(NOT CMAKE_Fortran_COMPILER_ID)
-    exec_program(${CMAKE_Fortran_COMPILER}
-      ARGS ${CMAKE_Fortran_COMPILER_ID_FLAGS_LIST} -E "\"${CMAKE_ROOT}/Modules/CMakeTestGNU.c\""
-      OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT RETURN_VALUE CMAKE_COMPILER_RETURN)
+    execute_process(COMMAND ${CMAKE_Fortran_COMPILER} ${CMAKE_Fortran_COMPILER_ID_FLAGS_LIST} -E "${CMAKE_ROOT}/Modules/CMakeTestGNU.c"
+      OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT RESULT_VARIABLE CMAKE_COMPILER_RETURN)
     if(NOT CMAKE_COMPILER_RETURN)
-      if("${CMAKE_COMPILER_OUTPUT}" MATCHES "THIS_IS_GNU")
+      if(CMAKE_COMPILER_OUTPUT MATCHES "THIS_IS_GNU")
         set(CMAKE_Fortran_COMPILER_ID "GNU")
         file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
           "Determining if the Fortran compiler is GNU succeeded with "
@@ -200,12 +199,27 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
           "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
       endif()
       if(NOT CMAKE_Fortran_PLATFORM_ID)
-        if("${CMAKE_COMPILER_OUTPUT}" MATCHES "THIS_IS_MINGW")
+        if(CMAKE_COMPILER_OUTPUT MATCHES "THIS_IS_MINGW")
           set(CMAKE_Fortran_PLATFORM_ID "MinGW")
         endif()
-        if("${CMAKE_COMPILER_OUTPUT}" MATCHES "THIS_IS_CYGWIN")
+        if(CMAKE_COMPILER_OUTPUT MATCHES "THIS_IS_CYGWIN")
           set(CMAKE_Fortran_PLATFORM_ID "Cygwin")
         endif()
+      endif()
+    endif()
+  endif()
+
+  # Fall back for GNU MINGW, which is not always detected correctly
+  # (__MINGW32__ is defined for the C language, but perhaps not for Fortran!)
+  if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU" AND NOT CMAKE_Fortran_PLATFORM_ID)
+    execute_process(COMMAND ${CMAKE_Fortran_COMPILER} ${CMAKE_Fortran_COMPILER_ID_FLAGS_LIST} -E "${CMAKE_ROOT}/Modules/CMakeTestGNU.c"
+      OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT RESULT_VARIABLE CMAKE_COMPILER_RETURN)
+    if(NOT CMAKE_COMPILER_RETURN)
+      if(CMAKE_COMPILER_OUTPUT MATCHES "THIS_IS_MINGW")
+        set(CMAKE_Fortran_PLATFORM_ID "MinGW")
+      endif()
+      if(CMAKE_COMPILER_OUTPUT MATCHES "THIS_IS_CYGWIN")
+        set(CMAKE_Fortran_PLATFORM_ID "Cygwin")
       endif()
     endif()
   endif()

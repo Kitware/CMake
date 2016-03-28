@@ -55,6 +55,8 @@ cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "GITUpdateOptions", "CTEST_GIT_UPDATE_OPTIONS", this->Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
+    "GITInitSubmodules", "CTEST_GIT_INIT_SUBMODULES", this->Quiet);
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "GITUpdateCustom", "CTEST_GIT_UPDATE_CUSTOM", this->Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "UpdateVersionOnly", "CTEST_UPDATE_VERSION_ONLY", this->Quiet);

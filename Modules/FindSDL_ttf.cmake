@@ -15,7 +15,7 @@
 #
 #
 #
-# For backward compatiblity the following variables are also set:
+# For backward compatibility the following variables are also set:
 #
 # ::
 #
@@ -102,7 +102,7 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL_ttf
                                   REQUIRED_VARS SDL_TTF_LIBRARIES SDL_TTF_INCLUDE_DIRS
                                   VERSION_VAR SDL_TTF_VERSION_STRING)
 
-# for backward compatiblity
+# for backward compatibility
 set(SDLTTF_LIBRARY ${SDL_TTF_LIBRARIES})
 set(SDLTTF_INCLUDE_DIR ${SDL_TTF_INCLUDE_DIRS})
 set(SDLTTF_FOUND ${SDL_TTF_FOUND})

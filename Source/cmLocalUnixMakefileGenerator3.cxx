@@ -34,6 +34,7 @@
 #include <cmsys/Terminal.h>
 
 #include <queue>
+#include <algorithm>
 
 //----------------------------------------------------------------------------
 // Escape special characters in Makefile dependency lines
@@ -1971,6 +1972,57 @@ void cmLocalUnixMakefileGenerator3::ClearDependencies(cmMakefile* mf,
 }
 
 
+namespace
+{
+  // Helper predicate for removing absolute paths that don't point to the
+  // source or binary directory. It is used when CMAKE_DEPENDS_IN_PROJECT_ONLY
+  // is set ON, to only consider in-project dependencies during the build.
+  class NotInProjectDir
+  {
+  public:
+    // Constructor with the source and binary directory's path
+    NotInProjectDir(const std::string& sourceDir,
+                    const std::string& binaryDir)
+      : SourceDir(sourceDir), BinaryDir(binaryDir) {}
+
+    // Operator evaluating the predicate
+    bool operator()(const std::string& path) const
+      {
+      // Keep all relative paths:
+      if(!cmSystemTools::FileIsFullPath(path))
+        {
+        return false;
+        }
+      // If it's an absolute path, check if it starts with the source
+      // direcotory:
+      return (!(IsInDirectory(SourceDir, path)||
+                IsInDirectory(BinaryDir, path)));
+      }
+
+  private:
+    // Helper function used by the predicate
+    static bool IsInDirectory(const std::string& baseDir,
+                              const std::string& testDir)
+      {
+      // First check if the test directory "starts with" the base directory:
+      if (testDir.find(baseDir) != 0)
+        {
+        return false;
+        }
+      // If it does, then check that it's either the same string, or that the
+      // next character is a slash:
+      return ((testDir.size() == baseDir.size())||
+              (testDir[baseDir.size()] == '/'));
+      }
+
+    // The path to the source directory
+    std::string SourceDir;
+    // The path to the binary directory
+    std::string BinaryDir;
+  };
+}
+
+
 void cmLocalUnixMakefileGenerator3
 ::WriteDependLanguageInfo(std::ostream& cmakefileStream,
                           cmGeneratorTarget* target)
@@ -2058,6 +2110,15 @@ void cmLocalUnixMakefileGenerator3
       this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
     this->GetIncludeDirectories(includes, target,
                                 l->first, config);
+    if(this->Makefile->IsOn("CMAKE_DEPENDS_IN_PROJECT_ONLY"))
+      {
+      const char* sourceDir = this->GetState()->GetSourceDirectory();
+      const char* binaryDir = this->GetState()->GetBinaryDirectory();
+      std::vector<std::string>::iterator itr =
+        std::remove_if(includes.begin(), includes.end(),
+                       ::NotInProjectDir(sourceDir, binaryDir));
+      includes.erase(itr, includes.end());
+      }
     for(std::vector<std::string>::iterator i = includes.begin();
         i != includes.end(); ++i)
       {

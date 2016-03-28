@@ -169,7 +169,7 @@ $[ \t]*endif    { return F90PPR_ENDIF; }
 
 
 [ \t\r,]         /* Ignore */
-\\[ \t]*\n       /* Ignore line-endings preceeded by \ */
+\\[ \t]*\n       /* Ignore line-endings preceded by \ */
 
 . { return *yytext; }
 

@@ -41,8 +41,6 @@
 	<string>@CPACK_APPLE_GUI_BUNDLE_VERSION@</string>
 	<key>CSResourcesFileMapped</key>
 	<true/>
-	<key>LSRequiresCarbon</key>
-	<true/>
 	<key>NSHumanReadableCopyright</key>
 	<string>@CPACK_APPLE_GUI_COPYRIGHT@</string>
 </dict>

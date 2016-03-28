@@ -341,11 +341,25 @@ cmNinjaTargetGenerator
 
   cmMakefile* mf = this->GetMakefile();
 
+  std::string flags = "$FLAGS";
+  std::string rspfile;
+  std::string rspcontent;
+  std::string responseFlag;
+
+  if (this->ForceResponseFile())
+    {
+    rspfile = "$RSP_FILE";
+    responseFlag = "@" + rspfile;
+    rspcontent = " $DEFINES $INCLUDES $FLAGS";
+    flags = responseFlag;
+    vars.Defines = "";
+    vars.Includes = "";
+    }
+
   // Tell ninja dependency format so all deps can be loaded into a database
   std::string deptype;
   std::string depfile;
   std::string cldeps;
-  std::string flags = "$FLAGS";
   if (this->NeedDepTypeMSVC(lang))
     {
     deptype = "msvc";
@@ -405,13 +419,25 @@ cmNinjaTargetGenerator
     {
     std::string const iwyu_prop = lang + "_INCLUDE_WHAT_YOU_USE";
     const char *iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
-    if (iwyu && *iwyu)
+    std::string const tidy_prop = lang + "_CLANG_TIDY";
+    const char *tidy = this->GeneratorTarget->GetProperty(tidy_prop);
+    if ((iwyu && *iwyu) || (tidy && *tidy))
       {
       std::string run_iwyu =
         this->GetLocalGenerator()->ConvertToOutputFormat(
           cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
-      run_iwyu += " -E __run_iwyu --iwyu=";
-      run_iwyu += this->GetLocalGenerator()->EscapeForShell(iwyu);
+      run_iwyu += " -E __run_iwyu";
+      if (iwyu && *iwyu)
+        {
+        run_iwyu += " --iwyu=";
+        run_iwyu += this->GetLocalGenerator()->EscapeForShell(iwyu);
+        }
+      if (tidy && *tidy)
+        {
+        run_iwyu += " --tidy=";
+        run_iwyu += this->GetLocalGenerator()->EscapeForShell(tidy);
+        run_iwyu += " --source=$in";
+        }
       run_iwyu += " -- ";
       compileCmds.front().insert(0, run_iwyu);
       }
@@ -460,8 +486,8 @@ cmNinjaTargetGenerator
                                       comment.str(),
                                       depfile,
                                       deptype,
-                                      /*rspfile*/ "",
-                                      /*rspcontent*/ "",
+                                      rspfile,
+                                      rspcontent,
                                       /*restat*/ "",
                                       /*generator*/ false);
 }
@@ -641,6 +667,9 @@ cmNinjaTargetGenerator
 
   this->SetMsvcTargetPdbVariable(vars);
 
+  int const commandLineLengthLimit = this->ForceResponseFile() ? -1 : 0;
+  std::string const rspfile = objectFileName + ".rsp";
+
   this->GetGlobalGenerator()->WriteBuild(this->GetBuildFileStream(),
                                          comment,
                                          rule,
@@ -648,7 +677,10 @@ cmNinjaTargetGenerator
                                          explicitDeps,
                                          implicitDeps,
                                          orderOnlyDeps,
-                                         vars);
+                                         vars,
+                                         rspfile,
+                                         commandLineLengthLimit);
+
 
   if(const char* objectOutputs = source->GetProperty("OBJECT_OUTPUTS")) {
     std::vector<std::string> outputList;
@@ -794,4 +826,11 @@ void cmNinjaTargetGenerator::addPoolNinjaVariable(
       {
       vars["pool"] = pool;
       }
+}
+
+bool cmNinjaTargetGenerator::ForceResponseFile()
+{
+  static std::string const forceRspFile = "CMAKE_NINJA_FORCE_RESPONSE_FILE";
+  return (this->GetMakefile()->IsDefinitionSet(forceRspFile) ||
+          cmSystemTools::GetEnv(forceRspFile) != 0);
 }

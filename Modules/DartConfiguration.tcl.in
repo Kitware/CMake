@@ -52,6 +52,7 @@ SVNUpdateOptions: @SVN_UPDATE_OPTIONS@
 
 # Git options
 GITCommand: @GITCOMMAND@
+GITInitSubmodules: @CTEST_GIT_INIT_SUBMODULES@
 GITUpdateOptions: @GIT_UPDATE_OPTIONS@
 GITUpdateCustom: @CTEST_GIT_UPDATE_CUSTOM@
 

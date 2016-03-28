@@ -11,7 +11,7 @@
 #   Subversion_SVN_EXECUTABLE - path to svn command line client
 #   Subversion_VERSION_SVN - version of svn command line client
 #   Subversion_FOUND - true if the command line client was found
-#   SUBVERSION_FOUND - same as Subversion_FOUND, set for compatiblity reasons
+#   SUBVERSION_FOUND - same as Subversion_FOUND, set for compatibility reasons
 #
 #
 #

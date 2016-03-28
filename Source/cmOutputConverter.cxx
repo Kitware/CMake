@@ -22,6 +22,7 @@
 cmOutputConverter::cmOutputConverter(cmState::Snapshot snapshot)
   : StateSnapshot(snapshot), LinkScriptShell(false)
 {
+  assert(this->StateSnapshot.IsValid());
 }
 
 //----------------------------------------------------------------------------

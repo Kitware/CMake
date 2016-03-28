@@ -724,7 +724,20 @@ endif()
 add_library(CPackLib ${CPACK_SRCS})
 target_link_libraries(CPackLib CMakeLib)
 if(APPLE)
-  target_link_libraries(CPackLib "-framework Carbon")
+  # Some compilers produce errors in the CoreServices framework headers.
+  # Ideally such errors should be fixed by either the compiler vendor
+  # or the framework source, but we try to workaround it and build anyway.
+  # If it does not work, build with reduced functionality and warn.
+  check_include_file("CoreServices/CoreServices.h" HAVE_CoreServices)
+  if(HAVE_CoreServices)
+    set_property(SOURCE CPack/cmCPackDragNDropGenerator.cxx PROPERTY COMPILE_DEFINITIONS HAVE_CoreServices)
+    target_link_libraries(CPackLib "-framework CoreServices")
+  else()
+    message(WARNING "This compiler does not appear to support\n"
+      "  #include <CoreServices/CoreServices.h>\n"
+      "Some CPack functionality may be limited.\n"
+      "See CMakeFiles/CMakeError.log for details of the failure.")
+  endif()
 endif()
 
 if(APPLE)

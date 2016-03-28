@@ -24,7 +24,7 @@
 #include <cmsys/SystemInformation.hxx>
 #include <cmsys/Directory.hxx>
 #include "cmStandardIncludes.h"
-#include "cmXMLSafe.h"
+#include "cmXMLWriter.h"
 
 //----------------------------------------------------------------------------
 void cmExtraCodeLiteGenerator::GetDocumentation(cmDocumentationEntry& entry,
@@ -54,16 +54,14 @@ void cmExtraCodeLiteGenerator::Generate()
   std::string workspaceOutputDir;
   std::string workspaceFileName;
   std::string workspaceSourcePath;
-  std::string lprjdebug;
 
-  cmGeneratedFileStream fout;
+  const std::map<std::string, std::vector<cmLocalGenerator*> >& projectMap =
+      this->GlobalGenerator->GetProjectMap();
 
   // loop projects and locate the root project.
   // and extract the information for creating the worspace
   for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
-       it = this->GlobalGenerator->GetProjectMap().begin();
-       it!= this->GlobalGenerator->GetProjectMap().end();
-       ++it)
+       it = projectMap.begin(); it!= projectMap.end(); ++it)
     {
     const cmMakefile* mf =it->second[0]->GetMakefile();
     this->ConfigName = GetConfigurationName( mf );
@@ -77,18 +75,20 @@ void cmExtraCodeLiteGenerator::Generate()
       workspaceFileName    = workspaceOutputDir+"/";
       workspaceFileName   += workspaceProjectName + ".workspace";
       this->WorkspacePath = it->second[0]->GetCurrentBinaryDirectory();;
-
-      fout.Open(workspaceFileName.c_str(), false, false);
-      fout << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-           "<CodeLite_Workspace Name=\"" << workspaceProjectName << "\" >\n";
+      break;
       }
     }
 
+  cmGeneratedFileStream fout(workspaceFileName.c_str());
+  cmXMLWriter xml(fout);
+
+  xml.StartDocument("utf-8");
+  xml.StartElement("CodeLite_Workspace");
+  xml.Attribute("Name", workspaceProjectName);
+
   // for each sub project in the workspace create a codelite project
   for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
-       it = this->GlobalGenerator->GetProjectMap().begin();
-       it!= this->GlobalGenerator->GetProjectMap().end();
-       ++it)
+       it = projectMap.begin(); it!= projectMap.end(); ++it)
     {
     // retrive project information
     std::string outputDir   = it->second[0]->GetCurrentBinaryDirectory();
@@ -101,19 +101,33 @@ void cmExtraCodeLiteGenerator::Generate()
 
     // create a project file
     this->CreateProjectFile(it->second);
-    fout << "  <Project Name=\"" << projectName << "\" Path=\""
-    << filename << "\" Active=\"No\"/>\n";
-    lprjdebug += "<Project Name=\"" + projectName
-              + "\" ConfigName=\"" + this->ConfigName + "\"/>\n";
+    xml.StartElement("Project");
+    xml.Attribute("Name", projectName);
+    xml.Attribute("Path", filename);
+    xml.Attribute("Active", "No");
+    xml.EndElement();
     }
 
-  fout << "  <BuildMatrix>\n"
-       "    <WorkspaceConfiguration Name=\""
-       << this->ConfigName << "\" Selected=\"yes\">\n"
-       "      " << lprjdebug << ""
-       "    </WorkspaceConfiguration>\n"
-       "  </BuildMatrix>\n"
-       "</CodeLite_Workspace>\n";
+  xml.StartElement("BuildMatrix");
+  xml.StartElement("WorkspaceConfiguration");
+  xml.Attribute("Name", this->ConfigName);
+  xml.Attribute("Selected", "yes");
+
+  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
+       it = projectMap.begin(); it!= projectMap.end(); ++it)
+    {
+    // retrive project information
+    std::string projectName = it->second[0]->GetProjectName();
+
+    xml.StartElement("Project");
+    xml.Attribute("Name", projectName);
+    xml.Attribute("ConfigName", this->ConfigName);
+    xml.EndElement();
+    }
+
+  xml.EndElement(); // WorkspaceConfiguration
+  xml.EndElement(); // BuildMatrix
+  xml.EndElement(); // CodeLite_Workspace
 }
 
 /* create the project file */
@@ -138,11 +152,13 @@ void cmExtraCodeLiteGenerator
     {
     return;
     }
+  cmXMLWriter xml(fout);
 
   ////////////////////////////////////
-  fout << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-       "<CodeLite_Project Name=\"" << lgs[0]->GetProjectName()
-       << "\" InternalType=\"\">\n";
+  xml.StartDocument("utf-8");
+  xml.StartElement("CodeLite_Project");
+  xml.Attribute("Name", lgs[0]->GetProjectName());
+  xml.Attribute("InternalType", "");
 
   // Collect all used source files in the project
   // Sort them into two containers, one for C/C++ implementation files
@@ -285,7 +301,8 @@ void cmExtraCodeLiteGenerator
   // Create 2 virtual folders: src and include
   // and place all the implementation files into the src
   // folder, the rest goes to the include folder
-  fout<< "  <VirtualDirectory Name=\"src\">\n";
+  xml.StartElement("VirtualDirectory");
+  xml.Attribute("Name", "src");
 
   // insert all source files in the codelite project
   // first the C/C++ implementation files, then all others
@@ -294,22 +311,25 @@ void cmExtraCodeLiteGenerator
        sit!=cFiles.end();
        ++sit)
     {
-    std::string relativePath =
-      cmSystemTools::RelativePath(projectPath.c_str(), sit->first.c_str());
-    fout<< "    <File Name=\"" << relativePath << "\"/>\n";
+    xml.StartElement("File");
+    xml.Attribute("Name",
+      cmSystemTools::RelativePath(projectPath.c_str(), sit->first.c_str()));
+    xml.EndElement();
     }
-  fout<< "  </VirtualDirectory>\n";
-  fout<< "  <VirtualDirectory Name=\"include\">\n";
+  xml.EndElement(); // VirtualDirectory
+  xml.StartElement("VirtualDirectory");
+  xml.Attribute("Name", "include");
   for (std::set<std::string>::const_iterator
        sit=otherFiles.begin();
        sit!=otherFiles.end();
        ++sit)
     {
-    std::string relativePath =
-      cmSystemTools::RelativePath(projectPath.c_str(), sit->c_str());
-    fout << "    <File Name=\"" << relativePath << "\"/>\n";
+    xml.StartElement("File");
+    xml.Attribute("Name",
+      cmSystemTools::RelativePath(projectPath.c_str(), sit->c_str()));
+    xml.EndElement();
     }
-  fout << "  </VirtualDirectory>\n";
+  xml.EndElement(); // VirtualDirectory
 
   // Get the number of CPUs. We use this information for the make -jN
   // command
@@ -319,63 +339,99 @@ void cmExtraCodeLiteGenerator
   this->CpuCount = info.GetNumberOfLogicalCPU() *
                    info.GetNumberOfPhysicalCPU();
 
-  std::string cleanCommand      = GetCleanCommand(mf);
-  std::string buildCommand      = GetBuildCommand(mf);
-  std::string rebuildCommand    = GetRebuildCommand(mf);
-  std::string singleFileCommand = GetSingleFileBuildCommand(mf);
-
   std::string codeliteCompilerName = this->GetCodeLiteCompilerName(mf);
 
-  fout << "\n"
-     "  <Settings Type=\"" << projectType << "\">\n"
-     "    <Configuration Name=\"" << this->ConfigName << "\" CompilerType=\""
-     << codeliteCompilerName << "\" DebuggerType=\"GNU gdb debugger\" "
-     "Type=\""
-     << projectType << "\" BuildCmpWithGlobalSettings=\"append\" "
-     "BuildLnkWithGlobalSettings=\"append\" "
-     "BuildResWithGlobalSettings=\"append\">\n"
-     "      <Compiler Options=\"-g\" "
-     "Required=\"yes\" PreCompiledHeader=\"\">\n"
-     "        <IncludePath Value=\".\"/>\n"
-     "      </Compiler>\n"
-     "      <Linker Options=\"\" Required=\"yes\"/>\n"
-     "      <ResourceCompiler Options=\"\" Required=\"no\"/>\n"
-     "      <General OutputFile=\"$(IntermediateDirectory)/$(ProjectName)\" "
-     "IntermediateDirectory=\"./\" Command=\"./$(ProjectName)\" "
-     "CommandArguments=\"\" WorkingDirectory=\"$(IntermediateDirectory)\" "
-     "PauseExecWhenProcTerminates=\"yes\"/>\n"
-     "      <Debugger IsRemote=\"no\" RemoteHostName=\"\" "
-     "RemoteHostPort=\"\" DebuggerPath=\"\">\n"
-     "        <PostConnectCommands/>\n"
-     "        <StartupCommands/>\n"
-     "      </Debugger>\n"
-     "      <PreBuild/>\n"
-     "      <PostBuild/>\n"
-     "      <CustomBuild Enabled=\"yes\">\n"
-     "        <RebuildCommand>" << rebuildCommand << "</RebuildCommand>\n"
-     "        <CleanCommand>" << cleanCommand << "</CleanCommand>\n"
-     "        <BuildCommand>" << buildCommand << "</BuildCommand>\n"
-     "        <SingleFileCommand>" << singleFileCommand
-     << "</SingleFileCommand>\n"
-     "        <PreprocessFileCommand/>\n"
-     "        <WorkingDirectory>$(WorkspacePath)</WorkingDirectory>\n"
-     "      </CustomBuild>\n"
-     "      <AdditionalRules>\n"
-     "        <CustomPostBuild/>\n"
-     "        <CustomPreBuild/>\n"
-     "      </AdditionalRules>\n"
-     "    </Configuration>\n"
-     "    <GlobalSettings>\n"
-     "      <Compiler Options=\"\">\n"
-     "        <IncludePath Value=\".\"/>\n"
-     "      </Compiler>\n"
-     "      <Linker Options=\"\">\n"
-     "        <LibraryPath Value=\".\"/>\n"
-     "      </Linker>\n"
-     "      <ResourceCompiler Options=\"\"/>\n"
-     "    </GlobalSettings>\n"
-     "  </Settings>\n"
-     "</CodeLite_Project>\n";
+  xml.StartElement("Settings");
+  xml.Attribute("Type", projectType);
+
+  xml.StartElement("Configuration");
+  xml.Attribute("Name", this->ConfigName);
+  xml.Attribute("CompilerType", this->GetCodeLiteCompilerName(mf));
+  xml.Attribute("DebuggerType", "GNU gdb debugger");
+  xml.Attribute("Type", projectType);
+  xml.Attribute("BuildCmpWithGlobalSettings", "append");
+  xml.Attribute("BuildLnkWithGlobalSettings", "append");
+  xml.Attribute("BuildResWithGlobalSettings", "append");
+
+  xml.StartElement("Compiler");
+  xml.Attribute("Options", "-g");
+  xml.Attribute("Required", "yes");
+  xml.Attribute("PreCompiledHeader", "");
+  xml.StartElement("IncludePath");
+  xml.Attribute("Value", ".");
+  xml.EndElement(); // IncludePath
+  xml.EndElement(); // Compiler
+
+  xml.StartElement("Linker");
+  xml.Attribute("Options", "");
+  xml.Attribute("Required", "yes");
+  xml.EndElement(); // Linker
+
+  xml.StartElement("ResourceCompiler");
+  xml.Attribute("Options", "");
+  xml.Attribute("Required", "no");
+  xml.EndElement(); // ResourceCompiler
+
+  xml.StartElement("General");
+  xml.Attribute("OutputFile", "$(IntermediateDirectory)/$(ProjectName)");
+  xml.Attribute("IntermediateDirectory", "./");
+  xml.Attribute("Command", "./$(ProjectName)");
+  xml.Attribute("CommandArguments", "");
+  xml.Attribute("WorkingDirectory", "$(IntermediateDirectory)");
+  xml.Attribute("PauseExecWhenProcTerminates", "yes");
+  xml.EndElement(); // General
+
+  xml.StartElement("Debugger");
+  xml.Attribute("IsRemote", "no");
+  xml.Attribute("RemoteHostName", "");
+  xml.Attribute("RemoteHostPort", "");
+  xml.Attribute("DebuggerPath", "");
+  xml.Element("PostConnectCommands");
+  xml.Element("StartupCommands");
+  xml.EndElement(); // Debugger
+
+  xml.Element("PreBuild");
+  xml.Element("PostBuild");
+
+  xml.StartElement("CustomBuild");
+  xml.Attribute("Enabled", "yes");
+  xml.Element("RebuildCommand", GetRebuildCommand(mf));
+  xml.Element("CleanCommand", GetCleanCommand(mf));
+  xml.Element("BuildCommand", GetBuildCommand(mf));
+  xml.Element("SingleFileCommand", GetSingleFileBuildCommand(mf));
+  xml.Element("PreprocessFileCommand");
+  xml.Element("WorkingDirectory", "$(WorkspacePath)");
+  xml.EndElement(); // CustomBuild
+
+  xml.StartElement("AdditionalRules");
+  xml.Element("CustomPostBuild");
+  xml.Element("CustomPreBuild");
+  xml.EndElement(); // AdditionalRules
+
+  xml.EndElement(); // Configuration
+  xml.StartElement("GlobalSettings");
+
+  xml.StartElement("Compiler");
+  xml.Attribute("Options", "");
+  xml.StartElement("IncludePath");
+  xml.Attribute("Value", ".");
+  xml.EndElement(); // IncludePath
+  xml.EndElement(); // Compiler
+
+  xml.StartElement("Linker");
+  xml.Attribute("Options", "");
+  xml.StartElement("LibraryPath");
+  xml.Attribute("Value", ".");
+  xml.EndElement(); // LibraryPath
+  xml.EndElement(); // Linker
+
+  xml.StartElement("ResourceCompiler");
+  xml.Attribute("Options", "");
+  xml.EndElement(); // ResourceCompiler
+
+  xml.EndElement(); // GlobalSettings
+  xml.EndElement(); // Settings
+  xml.EndElement(); // CodeLite_Project
 }
 
 std::string
@@ -454,7 +510,7 @@ cmExtraCodeLiteGenerator::GetCleanCommand(const cmMakefile* mf) const
 std::string
 cmExtraCodeLiteGenerator::GetRebuildCommand(const cmMakefile* mf) const
 {
-  return GetCleanCommand(mf) + cmXMLSafe(" && ").str() + GetBuildCommand(mf);
+  return GetCleanCommand(mf) + " && " + GetBuildCommand(mf);
 }
 
 std::string

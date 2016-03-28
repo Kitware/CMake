@@ -77,6 +77,9 @@ Create custom targets to build projects in external trees
     Path to a certificate authority file
   ``TIMEOUT <seconds>``
     Time allowed for file download operations
+  ``DOWNLOAD_NO_EXTRACT 1``
+    Just download the file and do not extract it; the full path to the
+    downloaded file is available as ``<DOWNLOADED_FILE>``.
 
   Update/Patch step options are:
 
@@ -113,7 +116,7 @@ Create custom targets to build projects in external trees
   ``CMAKE_CACHE_ARGS <arg>...``
     Initial cache arguments, of the form ``-Dvar:string=on``.
     These arguments are written in a pre-load a script that populates
-    CMake cache, see also :manual:`cmake -C <cmake(1)>`. This allows to
+    CMake cache, see also :manual:`cmake -C <cmake(1)>`. This allows one to
     overcome command line length limits.
     These arguments are :command:`set` using the ``FORCE`` argument,
     and therefore cannot be changed by the user.
@@ -122,7 +125,7 @@ Create custom targets to build projects in external trees
   ``CMAKE_CACHE_DEFAULT_ARGS <arg>...``
     Initial default cache arguments, of the form ``-Dvar:string=on``.
     These arguments are written in a pre-load a script that populates
-    CMake cache, see also :manual:`cmake -C <cmake(1)>`. This allows to
+    CMake cache, see also :manual:`cmake -C <cmake(1)>`. This allows one to
     overcome command line length limits.
     These arguments can be used as default value that will be set if no
     previous value is found in the cache, and that the user can change
@@ -238,7 +241,7 @@ Create custom targets to build projects in external trees
   If ``UPDATE_DISCONNECTED`` is set, the update step is not executed
   automatically when building the main target. The update step can still
   be added as a step target and called manually. This is useful if you
-  want to allow to build the project when you are disconnected from the
+  want to allow one to build the project when you are disconnected from the
   network (you might still need the network for the download step).
   This is disabled by default.
   The directory property ``EP_UPDATE_DISCONNECTED`` can be used to change
@@ -496,7 +499,7 @@ define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED
   "ExternalProject module."
   )
 
-function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name git_submodules src_name work_dir gitclone_infofile gitclone_stampfile)
+function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name git_submodules src_name work_dir gitclone_infofile gitclone_stampfile tls_verify)
   file(WRITE ${script_filename}
 "if(\"${git_tag}\" STREQUAL \"\")
   message(FATAL_ERROR \"Tag for git checkout should not be empty.\")
@@ -521,12 +524,21 @@ if(error_code)
   message(FATAL_ERROR \"Failed to remove directory: '${source_dir}'\")
 endif()
 
+set(git_options)
+
+# disable cert checking if explicitly told not to do it
+set(tls_verify \"${tls_verify}\")
+if(NOT \"x${tls_verify}\" STREQUAL \"x\" AND NOT tls_verify)
+  list(APPEND git_options
+    -c http.sslVerify=false)
+endif()
+
 # try the clone 3 times incase there is an odd git clone issue
 set(error_code 1)
 set(number_of_tries 0)
 while(error_code AND number_of_tries LESS 3)
   execute_process(
-    COMMAND \"${git_EXECUTABLE}\" clone --origin \"${git_remote_name}\" \"${git_repository}\" \"${src_name}\"
+    COMMAND \"${git_EXECUTABLE}\" \${git_options} clone --origin \"${git_remote_name}\" \"${git_repository}\" \"${src_name}\"
     WORKING_DIRECTORY \"${work_dir}\"
     RESULT_VARIABLE error_code
     )
@@ -541,7 +553,7 @@ if(error_code)
 endif()
 
 execute_process(
-  COMMAND \"${git_EXECUTABLE}\" checkout ${git_tag}
+  COMMAND \"${git_EXECUTABLE}\" \${git_options} checkout ${git_tag}
   WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
@@ -550,7 +562,7 @@ if(error_code)
 endif()
 
 execute_process(
-  COMMAND \"${git_EXECUTABLE}\" submodule init ${git_submodules}
+  COMMAND \"${git_EXECUTABLE}\" \${git_options} submodule init ${git_submodules}
   WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
@@ -559,7 +571,7 @@ if(error_code)
 endif()
 
 execute_process(
-  COMMAND \"${git_EXECUTABLE}\" submodule update --recursive ${git_submodules}
+  COMMAND \"${git_EXECUTABLE}\" \${git_options} submodule update --recursive ${git_submodules}
   WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
@@ -847,12 +859,15 @@ function(_ep_write_downloadfile_script script_filename remote local timeout no_p
     set(hash_check "")
   endif()
 
+  set(tls_verify_code "")
+  set(tls_cainfo_code "")
+
   # check for curl globals in the project
   if(DEFINED CMAKE_TLS_VERIFY)
-    set(tls_verify "set(CMAKE_TLS_VERIFY ${CMAKE_TLS_VERIFY})")
+    set(tls_verify_code "set(CMAKE_TLS_VERIFY ${CMAKE_TLS_VERIFY})")
   endif()
   if(DEFINED CMAKE_TLS_CAINFO)
-    set(tls_cainfo "set(CMAKE_TLS_CAINFO \"${CMAKE_TLS_CAINFO}\")")
+    set(tls_cainfo_code "set(CMAKE_TLS_CAINFO \"${CMAKE_TLS_CAINFO}\")")
   endif()
 
   # now check for curl locals so that the local values
@@ -861,12 +876,12 @@ function(_ep_write_downloadfile_script script_filename remote local timeout no_p
   # check for tls_verify argument
   string(LENGTH "${tls_verify}" tls_verify_len)
   if(tls_verify_len GREATER 0)
-    set(tls_verify "set(CMAKE_TLS_VERIFY ${tls_verify})")
+    set(tls_verify_code "set(CMAKE_TLS_VERIFY ${tls_verify})")
   endif()
   # check for tls_cainfo argument
   string(LENGTH "${tls_cainfo}" tls_cainfo_len)
   if(tls_cainfo_len GREATER 0)
-    set(tls_cainfo "set(CMAKE_TLS_CAINFO \"${tls_cainfo}\")")
+    set(tls_cainfo_code "set(CMAKE_TLS_CAINFO \"${tls_cainfo}\")")
   endif()
 
   file(WRITE ${script_filename}
@@ -875,8 +890,8 @@ function(_ep_write_downloadfile_script script_filename remote local timeout no_p
      dst='${local}'
      timeout='${timeout_msg}'\")
 
-${tls_verify}
-${tls_cainfo}
+${tls_verify_code}
+${tls_cainfo_code}
 
 file(DOWNLOAD
   \"${remote}\"
@@ -1107,7 +1122,7 @@ macro(_ep_replace_location_tags target_name)
   set(vars ${ARGN})
   foreach(var ${vars})
     if(${var})
-      foreach(dir SOURCE_DIR BINARY_DIR INSTALL_DIR TMP_DIR)
+      foreach(dir SOURCE_DIR BINARY_DIR INSTALL_DIR TMP_DIR DOWNLOADED_FILE)
         get_property(val TARGET ${target_name} PROPERTY _EP_${dir})
         string(REPLACE "<${dir}>" "${val}" ${var} "${${var}}")
       endforeach()
@@ -1774,6 +1789,11 @@ function(_ep_add_download_command name)
       set(git_remote_name "origin")
     endif()
 
+    get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
+    if("x${tls_verify}" STREQUAL "x" AND DEFINED CMAKE_TLS_VERIFY)
+      set(tls_verify "${CMAKE_TLS_VERIFY}")
+    endif()
+
     # For the download step, and the git clone operation, only the repository
     # should be recorded in a configured RepositoryInfo file. If the repo
     # changes, the clone script should be run again. But if only the tag
@@ -1798,7 +1818,7 @@ function(_ep_add_download_command name)
     #
     _ep_write_gitclone_script(${tmp_dir}/${name}-gitclone.cmake ${source_dir}
       ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${git_remote_name} "${git_submodules}" ${src_name} ${work_dir}
-      ${stamp_dir}/${name}-gitinfo.txt ${stamp_dir}/${name}-gitclone-lastrun.txt
+      ${stamp_dir}/${name}-gitinfo.txt ${stamp_dir}/${name}-gitclone-lastrun.txt "${tls_verify}"
       )
     set(comment "Performing download step (git clone) for '${name}'")
     set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitclone.cmake)
@@ -1875,6 +1895,7 @@ function(_ep_add_download_command name)
       set(cmd   ${CMAKE_COMMAND} -E remove_directory ${source_dir}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${abs_dir} ${source_dir})
     else()
+      get_property(no_extract TARGET "${name}" PROPERTY _EP_DOWNLOAD_NO_EXTRACT SET)
       if("${url}" MATCHES "^[a-z]+://")
         # TODO: Should download and extraction be different steps?
         if("x${fname}" STREQUAL "x")
@@ -1884,7 +1905,9 @@ function(_ep_add_download_command name)
           string(REGEX MATCH "([^/\\?]+(\\.|=)(7z|tar|tar\\.bz2|tar\\.gz|tar\\.xz|tbz2|tgz|txz|zip))/.*$" match_result "${url}")
           set(fname "${CMAKE_MATCH_1}")
         endif()
-        if(NOT "${fname}" MATCHES "(\\.|=)(7z|tar|tar\\.bz2|tar\\.gz|tar\\.xz|tbz2|tgz|txz|zip)$")
+        if (no_extract)
+          get_filename_component(fname "${url}" NAME)
+        elseif(NOT "${fname}" MATCHES "(\\.|=)(7z|tar|tar\\.bz2|tar\\.gz|tar\\.xz|tbz2|tgz|txz|zip)$")
           message(FATAL_ERROR "Could not extract tarball filename from url:\n  ${url}")
         endif()
         string(REPLACE ";" "-" fname "${fname}")
@@ -1898,16 +1921,30 @@ function(_ep_add_download_command name)
         set(cmd ${CMAKE_COMMAND} -P "${download_script}"
           COMMAND)
         set(retries 3)
-        set(comment "Performing download step (download, verify and extract) for '${name}'")
+        if (no_extract)
+          set(steps "download and verify")
+        else ()
+          set(steps "download, verify and extract")
+        endif ()
+        set(comment "Performing download step (${steps}) for '${name}'")
       else()
         set(file "${url}")
-        set(comment "Performing download step (verify and extract) for '${name}'")
+        if (no_extract)
+          set(steps "verify")
+        else ()
+          set(steps "verify and extract")
+        endif ()
+        set(comment "Performing download step (${steps}) for '${name}'")
       endif()
       _ep_write_verifyfile_script("${stamp_dir}/verify-${name}.cmake" "${file}" "${hash}" "${retries}" "${download_script}")
       list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/verify-${name}.cmake
         COMMAND)
-      _ep_write_extractfile_script("${stamp_dir}/extract-${name}.cmake" "${name}" "${file}" "${source_dir}")
-      list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/extract-${name}.cmake)
+      if (NOT no_extract)
+        _ep_write_extractfile_script("${stamp_dir}/extract-${name}.cmake" "${name}" "${file}" "${source_dir}")
+        list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/extract-${name}.cmake)
+      else ()
+        set_property(TARGET ${name} PROPERTY _EP_DOWNLOADED_FILE ${file})
+      endif ()
     endif()
   else()
     _ep_is_dir_empty("${source_dir}" empty)

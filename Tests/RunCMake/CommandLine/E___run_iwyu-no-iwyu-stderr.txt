@@ -1,1 +1,1 @@
-^__run_iwyu missing --iwyu=$
+^__run_iwyu missing --tidy= or --iwyu=$

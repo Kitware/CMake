@@ -358,9 +358,6 @@ class cmake
   void IssueMessage(cmake::MessageType t, std::string const& text,
         cmListFileBacktrace const& backtrace = cmListFileBacktrace(),
         bool force = false);
-  void IssueMessage(cmake::MessageType t, std::string const& text,
-        cmListFileContext const& lfc,
-        bool force = false);
 
   ///! run the --build option
   int Build(const std::string& dir,

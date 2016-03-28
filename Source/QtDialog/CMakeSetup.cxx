@@ -217,6 +217,7 @@ static bool cmOSXInstall(std::string const& dir, std::string const& tool)
       return true;
       }
     }
+  cmSystemTools::MakeDirectory(dir);
   if (symlink(tool.c_str(), link.c_str()) == 0)
     {
     std::cerr << "Linked: '" << link << "' -> '" << tool << "'\n";

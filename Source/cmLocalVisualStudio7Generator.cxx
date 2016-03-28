@@ -378,6 +378,11 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFortranFlagTable[] =
   {"FloatingPointExceptionHandling", "fpe:1", "", "fpe1", 0},
   {"FloatingPointExceptionHandling", "fpe:3", "", "fpe3", 0},
 
+  {"MultiProcessorCompilation", "MP", "", "true",
+   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
+  {"ProcessorNumber", "MP", "Multi-processor Compilation", "",
+   cmVS7FlagTable::UserValueRequired},
+
   {"ModulePath", "module:", "", "",
    cmVS7FlagTable::UserValueRequired},
   {"LoopUnrolling", "Qunroll:", "", "",
@@ -1389,7 +1394,8 @@ void cmLocalVisualStudio7Generator::OutputDeploymentDebuggerTool(
         "\t\t\t\tRegisterOutput=\"0\"\n"
         "\t\t\t\tAdditionalFiles=\"\"/>\n"
         ;
-      std::string const exe = dir + std::string("\\") + target->GetFullName();
+      std::string const exe =
+        dir + std::string("\\") + target->GetFullName(config);
       fout <<
         "\t\t\t<DebuggerTool\n"
         "\t\t\t\tRemoteExecutable=\"" << this->EscapeForXML(exe) << "\"\n"

@@ -50,6 +50,21 @@ macro(parseGlobalSections arg_out_pre arg_out_post testName)
 endmacro()
 
 
+macro(getProjectNames arg_out_projects)
+  set(${arg_out_projects} "")
+  set(sln "${RunCMake_TEST_BINARY_DIR}/${test}.sln")
+  if(NOT EXISTS "${sln}")
+    error("Expected solution file ${sln} does not exist")
+  endif()
+  file(STRINGS "${sln}" project_lines REGEX "^Project\\(")
+  foreach(project_line IN LISTS project_lines)
+    string(REGEX REPLACE ".* = \"" "" project_line "${project_line}")
+    string(REGEX REPLACE "\", .*"  "" project_line "${project_line}")
+    list(APPEND ${arg_out_projects} "${project_line}")
+  endforeach()
+endmacro()
+
+
 macro(testGlobalSection prefix sectionName)
   if(NOT DEFINED ${prefix}_${sectionName})
     error("Section ${sectionName} does not exist")

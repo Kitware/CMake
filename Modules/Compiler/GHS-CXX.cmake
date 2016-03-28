@@ -1,3 +1,5 @@
+include(Compiler/GHS)
+
 set(CMAKE_CXX_VERBOSE_FLAG "-v")
 
 set(CMAKE_CXX_FLAGS_INIT "")

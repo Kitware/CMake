@@ -13,11 +13,11 @@
 #ifndef cmCPackIFWInstaller_h
 #define cmCPackIFWInstaller_h
 
-#include <cmGeneratedFileStream.h>
 #include <cmStandardIncludes.h>
 
 class cmCPackIFWPackage;
 class cmCPackIFWGenerator;
+class cmXMLWriter;
 
 /** \class cmCPackIFWInstaller
  * \brief A binary installer to be created CPack IFW generator
@@ -115,7 +115,7 @@ public: // Internal implementation
   std::string Directory;
 
 protected:
-  void WriteGeneratedByToStrim(cmGeneratedFileStream& xout);
+  void WriteGeneratedByToStrim(cmXMLWriter& xout);
 };
 
 #endif // cmCPackIFWInstaller_h

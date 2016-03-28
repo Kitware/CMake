@@ -80,7 +80,7 @@
 #      --compiler-bindir is already present in the CUDA_NVCC_FLAGS or
 #      CUDA_NVCC_FLAGS_<CONFIG> variables.  For Visual Studio targets
 #      $(VCInstallDir)/bin is a special value that expands out to the path when
-#      the command is run from withing VS.
+#      the command is run from within VS.
 #
 #   CUDA_NVCC_FLAGS
 #   CUDA_NVCC_FLAGS_<CONFIG>
@@ -214,7 +214,7 @@
 #      The arguments passed in after OPTIONS are extra command line options to
 #      give to nvcc.  You can also specify per configuration options by
 #      specifying the name of the configuration followed by the options.  General
-#      options must preceed configuration specific options.  Not all
+#      options must precede configuration specific options.  Not all
 #      configurations need to be specified, only the ones provided will be used.
 #
 #         OPTIONS -DFLAG=2 "-DFLAG_OTHER=space in flag"
@@ -1586,7 +1586,12 @@ function(CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS output_file cuda_target options
     list( FIND nvcc_flags "-ccbin" ccbin_found0 )
     list( FIND nvcc_flags "--compiler-bindir" ccbin_found1 )
     if( ccbin_found0 LESS 0 AND ccbin_found1 LESS 0 AND CUDA_HOST_COMPILER )
-      list(APPEND nvcc_flags -ccbin "\"${CUDA_HOST_COMPILER}\"")
+      # Match VERBATIM check below.
+      if(CUDA_HOST_COMPILER MATCHES "\\$\\(VCInstallDir\\)")
+        list(APPEND nvcc_flags -ccbin "\"${CUDA_HOST_COMPILER}\"")
+      else()
+        list(APPEND nvcc_flags -ccbin "${CUDA_HOST_COMPILER}")
+      endif()
     endif()
 
     # Create a list of flags specified by CUDA_NVCC_FLAGS_${CONFIG} and CMAKE_${CUDA_C_OR_CXX}_FLAGS*

@@ -2409,8 +2409,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
 
   // we have to find the module directory, so we can copy the files
   this->AddCMakePaths();
-  std::string modulesPath =
-    this->State->GetInitializedCacheValue("CMAKE_ROOT");
+  std::string modulesPath = cmSystemTools::GetCMakeRoot();
   modulesPath += "/Modules";
   std::string inFile = modulesPath;
   inFile += "/SystemInformation.cmake";
@@ -2781,41 +2780,6 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
 
   // Add the rest of the context.
   backtrace.PrintCallStack(msg);
-
-  displayMessage(t, msg);
-}
-
-//----------------------------------------------------------------------------
-void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
-                         cmListFileContext const& lfc,
-                         bool force)
-{
-  if (!force)
-    {
-    // override the message type, if needed, for warnings and errors
-    cmake::MessageType override = this->ConvertMessageType(t);
-    if (override != t)
-      {
-      t = override;
-      force = true;
-      }
-    }
-
-  if (!force && !this->IsMessageTypeVisible(t))
-    {
-    return;
-    }
-
-  std::ostringstream msg;
-  if (!this->PrintMessagePreamble(t, msg))
-    {
-    return;
-    }
-
-  // Add the immediate context.
-  msg << (lfc.Line ? " at " : " in ") << lfc;
-
-  printMessageText(msg, text);
 
   displayMessage(t, msg);
 }

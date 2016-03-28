@@ -31,7 +31,7 @@
 #   BLA_F95     if set on tries to find the f95 interfaces for BLAS/LAPACK
 #
 # ## List of vendors (BLA_VENDOR) valid in this module # Intel(mkl),
-# ACML,Apple, NAS, Generic
+# OpenBLAS, ACML,Apple, NAS, Generic
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -48,11 +48,20 @@
 
 set(_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
-get_property(_LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES)
-if (NOT _LANGUAGES_ MATCHES Fortran)
-include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
-else ()
+# Check the language being used
+if( NOT (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED OR CMAKE_Fortran_COMPILER_LOADED) )
+  if(LAPACK_FIND_REQUIRED)
+    message(FATAL_ERROR "FindLAPACK requires Fortran, C, or C++ to be enabled.")
+  else()
+    message(STATUS "Looking for LAPACK... - NOT found (Unsupported languages)")
+    return()
+  endif()
+endif()
+
+if (CMAKE_Fortran_COMPILER_LOADED)
 include(${CMAKE_CURRENT_LIST_DIR}/CheckFortranFunctionExists.cmake)
+else ()
+include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
 endif ()
 include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
 
@@ -125,7 +134,7 @@ if(_libraries_work)
     set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_blas} ${_threads})
   endif()
 #  message("DEBUG: CMAKE_REQUIRED_LIBRARIES = ${CMAKE_REQUIRED_LIBRARIES}")
-  if (NOT _LANGUAGES_ MATCHES Fortran)
+  if (NOT CMAKE_Fortran_COMPILER_LOADED)
     check_function_exists("${_name}_" ${_prefix}${_combined_name}_WORKS)
   else ()
     check_fortran_function_exists(${_name} ${_prefix}${_combined_name}_WORKS)
@@ -181,6 +190,19 @@ if (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
  endif()
 endif ()
 
+if (BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
+ if(NOT LAPACK_LIBRARIES)
+  check_lapack_libraries(
+  LAPACK_LIBRARIES
+  LAPACK
+  cheev
+  ""
+  "openblas"
+  "${BLAS_LIBRARIES}"
+  ""
+  )
+ endif()
+endif ()
 
 #acml lapack
  if (BLA_VENDOR MATCHES "ACML" OR BLA_VENDOR STREQUAL "All")
@@ -237,7 +259,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
   if (NOT WIN32)
     set(LM "-lm")
   endif ()
-  if (_LANGUAGES_ MATCHES C OR _LANGUAGES_ MATCHES CXX)
+  if (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED)
     if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
       find_PACKAGE(Threads)
     else()

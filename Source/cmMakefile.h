@@ -388,8 +388,7 @@ public:
     }
   std::vector<cmTarget*> GetImportedTargets() const;
 
-  cmTarget* FindTarget(const std::string& name,
-                       bool excludeAliases = false) const;
+  cmTarget* FindLocalNonAliasTarget(const std::string& name) const;
 
   /** Find a target to use in place of the given name.  The target
       returned may be imported or built within the project.  */
@@ -836,6 +835,7 @@ private:
   cmMakefile& operator=(const cmMakefile& mf);
 
   cmState::Snapshot StateSnapshot;
+  cmListFileBacktrace Backtrace;
 
   void ReadListFile(cmListFile const& listFile,
                     const std::string& filenametoread);
@@ -863,7 +863,6 @@ private:
 
   std::vector<cmGeneratorExpressionEvaluationFile*> EvaluationFiles;
 
-  std::vector<cmCommandContext const*> ContextStack;
   std::vector<cmExecutionStatus*> ExecutionStatusStack;
   friend class cmMakefileCall;
   friend class cmParseFileScope;
@@ -958,19 +957,6 @@ private:
   bool CheckCMP0000;
   bool IsSourceFileTryCompile;
   mutable bool SuppressWatches;
-};
-
-//----------------------------------------------------------------------------
-// Helper class to make sure the call stack is valid.
-class cmMakefileCall
-{
-public:
-  cmMakefileCall(cmMakefile* mf,
-                 cmCommandContext const& lfc,
-                 cmExecutionStatus& status);
-  ~cmMakefileCall();
-private:
-  cmMakefile* Makefile;
 };
 
 #endif

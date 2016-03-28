@@ -697,10 +697,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   cmGlobalNinjaGenerator& globalGen = *this->GetGlobalGenerator();
 
-  int commandLineLengthLimit = 1;
-  const char* forceRspFile = "CMAKE_NINJA_FORCE_RESPONSE_FILE";
-  if (!mf->IsDefinitionSet(forceRspFile) &&
-      cmSystemTools::GetEnv(forceRspFile) == 0)
+  int commandLineLengthLimit = -1;
+  if (!this->ForceResponseFile())
     {
     commandLineLengthLimit = calculateCommandLineLengthLimit(
                 globalGen.GetRuleCmdLength(this->LanguageLinkerRule()));

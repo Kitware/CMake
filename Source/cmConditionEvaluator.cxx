@@ -14,6 +14,33 @@
 #include "cmOutputConverter.h"
 #include "cmAlgorithms.h"
 
+static std::string const keyAND = "AND";
+static std::string const keyCOMMAND = "COMMAND";
+static std::string const keyDEFINED = "DEFINED";
+static std::string const keyEQUAL = "EQUAL";
+static std::string const keyEXISTS = "EXISTS";
+static std::string const keyGREATER = "GREATER";
+static std::string const keyIN_LIST = "IN_LIST";
+static std::string const keyIS_ABSOLUTE = "IS_ABSOLUTE";
+static std::string const keyIS_DIRECTORY = "IS_DIRECTORY";
+static std::string const keyIS_NEWER_THAN = "IS_NEWER_THAN";
+static std::string const keyIS_SYMLINK = "IS_SYMLINK";
+static std::string const keyLESS = "LESS";
+static std::string const keyMATCHES = "MATCHES";
+static std::string const keyNOT = "NOT";
+static std::string const keyOR = "OR";
+static std::string const keyParenL = "(";
+static std::string const keyParenR = ")";
+static std::string const keyPOLICY = "POLICY";
+static std::string const keySTREQUAL = "STREQUAL";
+static std::string const keySTRGREATER = "STRGREATER";
+static std::string const keySTRLESS = "STRLESS";
+static std::string const keyTARGET = "TARGET";
+static std::string const keyTEST = "TEST";
+static std::string const keyVERSION_EQUAL = "VERSION_EQUAL";
+static std::string const keyVERSION_GREATER = "VERSION_GREATER";
+static std::string const keyVERSION_LESS = "VERSION_LESS";
+
 cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
                                            const cmListFileContext &context,
                                            const cmListFileBacktrace& bt):
@@ -102,25 +129,6 @@ bool cmConditionEvaluator::IsTrue(
 
   return this->GetBooleanValueWithAutoDereference(*(newArgs.begin()),
     errorString, status, true);
-}
-
-cmListFileContext cmConditionEvaluator::GetConditionContext(
-    cmMakefile* mf,
-    const cmCommandContext& command,
-    const std::string& filePath)
-{
-  cmListFileContext context =
-      cmListFileContext::FromCommandContext(
-        command,
-        filePath);
-
-  if(!mf->GetCMakeInstance()->GetIsInTryCompile())
-    {
-    cmOutputConverter converter(mf->GetStateSnapshot());
-    context.FilePath = converter.Convert(context.FilePath,
-                                         cmOutputConverter::HOME);
-    }
-  return context;
 }
 
 //=========================================================================
@@ -400,7 +408,7 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList &newArgs,
     cmArgumentList::iterator arg = newArgs.begin();
     while (arg != newArgs.end())
       {
-      if (IsKeyword("(", *arg))
+      if (IsKeyword(keyParenL, *arg))
         {
         // search for the closing paren for this opening one
         cmArgumentList::iterator argClose;
@@ -409,11 +417,11 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList &newArgs,
         unsigned int depth = 1;
         while (argClose != newArgs.end() && depth)
           {
-          if (this->IsKeyword("(", *argClose))
+          if (this->IsKeyword(keyParenL, *argClose))
             {
               depth++;
             }
-          if (this->IsKeyword(")", *argClose))
+          if (this->IsKeyword(keyParenR, *argClose))
             {
               depth--;
             }
@@ -474,35 +482,35 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList &newArgs,
       argP1 = arg;
       this->IncrementArguments(newArgs,argP1,argP2);
       // does a file exist
-      if (this->IsKeyword("EXISTS", *arg) && argP1 != newArgs.end())
+      if (this->IsKeyword(keyEXISTS, *arg) && argP1 != newArgs.end())
         {
         this->HandlePredicate(
           cmSystemTools::FileExists(argP1->c_str()),
           reducible, arg, newArgs, argP1, argP2);
         }
       // does a directory with this name exist
-      if (this->IsKeyword("IS_DIRECTORY", *arg) && argP1 != newArgs.end())
+      if (this->IsKeyword(keyIS_DIRECTORY, *arg) && argP1 != newArgs.end())
         {
         this->HandlePredicate(
           cmSystemTools::FileIsDirectory(argP1->c_str()),
           reducible, arg, newArgs, argP1, argP2);
         }
       // does a symlink with this name exist
-      if (this->IsKeyword("IS_SYMLINK", *arg) && argP1 != newArgs.end())
+      if (this->IsKeyword(keyIS_SYMLINK, *arg) && argP1 != newArgs.end())
         {
         this->HandlePredicate(
           cmSystemTools::FileIsSymlink(argP1->c_str()),
           reducible, arg, newArgs, argP1, argP2);
         }
       // is the given path an absolute path ?
-      if (this->IsKeyword("IS_ABSOLUTE", *arg) && argP1 != newArgs.end())
+      if (this->IsKeyword(keyIS_ABSOLUTE, *arg) && argP1 != newArgs.end())
         {
         this->HandlePredicate(
           cmSystemTools::FileIsFullPath(argP1->c_str()),
           reducible, arg, newArgs, argP1, argP2);
         }
       // does a command exist
-      if (this->IsKeyword("COMMAND", *arg) && argP1 != newArgs.end())
+      if (this->IsKeyword(keyCOMMAND, *arg) && argP1 != newArgs.end())
         {
         cmCommand* command =
             this->Makefile.GetState()->GetCommand(argP1->c_str());
@@ -511,7 +519,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList &newArgs,
           reducible, arg, newArgs, argP1, argP2);
         }
       // does a policy exist
-      if (this->IsKeyword("POLICY", *arg) && argP1 != newArgs.end())
+      if (this->IsKeyword(keyPOLICY, *arg) && argP1 != newArgs.end())
         {
         cmPolicies::PolicyID pid;
         this->HandlePredicate(
@@ -519,7 +527,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList &newArgs,
             reducible, arg, newArgs, argP1, argP2);
         }
       // does a target exist
-      if (this->IsKeyword("TARGET", *arg) && argP1 != newArgs.end())
+      if (this->IsKeyword(keyTARGET, *arg) && argP1 != newArgs.end())
         {
         this->HandlePredicate(
           this->Makefile.FindTargetToUse(argP1->GetValue())?true:false,
@@ -529,7 +537,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList &newArgs,
       if(this->Policy64Status != cmPolicies::OLD &&
         this->Policy64Status != cmPolicies::WARN)
         {
-        if (this->IsKeyword("TEST", *arg) && argP1 != newArgs.end())
+        if (this->IsKeyword(keyTEST, *arg) && argP1 != newArgs.end())
           {
           const cmTest* haveTest = this->Makefile.GetTest(argP1->c_str());
           this->HandlePredicate(
@@ -538,7 +546,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList &newArgs,
           }
         }
       else if(this->Policy64Status == cmPolicies::WARN &&
-        this->IsKeyword("TEST", *arg))
+        this->IsKeyword(keyTEST, *arg))
         {
         std::ostringstream e;
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0064) << "\n";
@@ -549,7 +557,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList &newArgs,
         this->Makefile.IssueMessage(cmake::AUTHOR_WARNING, e.str());
         }
       // is a variable defined
-      if (this->IsKeyword("DEFINED", *arg) && argP1 != newArgs.end())
+      if (this->IsKeyword(keyDEFINED, *arg) && argP1 != newArgs.end())
         {
         size_t argP1len = argP1->GetValue().size();
         bool bdef = false;
@@ -593,7 +601,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
       argP1 = arg;
       this->IncrementArguments(newArgs,argP1,argP2);
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-        IsKeyword("MATCHES", *argP1))
+        IsKeyword(keyMATCHES, *argP1))
         {
         def = this->GetVariableOrString(*arg);
         if (def != arg->c_str() // yes, we compare the pointer value
@@ -631,7 +639,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
         reducible = 1;
         }
 
-      if (argP1 != newArgs.end() && this->IsKeyword("MATCHES", *arg))
+      if (argP1 != newArgs.end() && this->IsKeyword(keyMATCHES, *arg))
         {
         *arg = cmExpandedCommandArgument("0", true);
         newArgs.erase(argP1);
@@ -641,9 +649,9 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
         }
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-        (this->IsKeyword("LESS", *argP1) ||
-         this->IsKeyword("GREATER", *argP1) ||
-         this->IsKeyword("EQUAL", *argP1)))
+        (this->IsKeyword(keyLESS, *argP1) ||
+         this->IsKeyword(keyGREATER, *argP1) ||
+         this->IsKeyword(keyEQUAL, *argP1)))
         {
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
@@ -655,11 +663,11 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
           {
           result = false;
           }
-        else if (*(argP1) == "LESS")
+        else if (*(argP1) == keyLESS)
           {
           result = (lhs < rhs);
           }
-        else if (*(argP1) == "GREATER")
+        else if (*(argP1) == keyGREATER)
           {
           result = (lhs > rhs);
           }
@@ -672,19 +680,19 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
         }
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-        (this->IsKeyword("STRLESS", *argP1) ||
-         this->IsKeyword("STREQUAL", *argP1) ||
-         this->IsKeyword("STRGREATER", *argP1)))
+        (this->IsKeyword(keySTRLESS, *argP1) ||
+         this->IsKeyword(keySTREQUAL, *argP1) ||
+         this->IsKeyword(keySTRGREATER, *argP1)))
         {
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
         int val = strcmp(def,def2);
         bool result;
-        if (*(argP1) == "STRLESS")
+        if (*(argP1) == keySTRLESS)
           {
           result = (val < 0);
           }
-        else if (*(argP1) == "STRGREATER")
+        else if (*(argP1) == keySTRGREATER)
           {
           result = (val > 0);
           }
@@ -697,18 +705,18 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
         }
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-        (this->IsKeyword("VERSION_LESS", *argP1) ||
-         this->IsKeyword("VERSION_GREATER", *argP1) ||
-         this->IsKeyword("VERSION_EQUAL", *argP1)))
+        (this->IsKeyword(keyVERSION_LESS, *argP1) ||
+         this->IsKeyword(keyVERSION_GREATER, *argP1) ||
+         this->IsKeyword(keyVERSION_EQUAL, *argP1)))
         {
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
         cmSystemTools::CompareOp op = cmSystemTools::OP_EQUAL;
-        if(*argP1 == "VERSION_LESS")
+        if(*argP1 == keyVERSION_LESS)
           {
           op = cmSystemTools::OP_LESS;
           }
-        else if(*argP1 == "VERSION_GREATER")
+        else if(*argP1 == keyVERSION_GREATER)
           {
           op = cmSystemTools::OP_GREATER;
           }
@@ -719,7 +727,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
 
       // is file A newer than file B
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-          this->IsKeyword("IS_NEWER_THAN", *argP1))
+          this->IsKeyword(keyIS_NEWER_THAN, *argP1))
         {
         int fileIsNewer=0;
         bool success=cmSystemTools::FileTimeCompare(arg->GetValue(),
@@ -731,7 +739,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
         }
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-          this->IsKeyword("IN_LIST", *argP1))
+          this->IsKeyword(keyIN_LIST, *argP1))
         {
         if(this->Policy57Status != cmPolicies::OLD &&
           this->Policy57Status != cmPolicies::WARN)
@@ -788,7 +796,7 @@ bool cmConditionEvaluator::HandleLevel3(cmArgumentList &newArgs,
       {
       argP1 = arg;
       IncrementArguments(newArgs,argP1,argP2);
-      if (argP1 != newArgs.end() && IsKeyword("NOT", *arg))
+      if (argP1 != newArgs.end() && IsKeyword(keyNOT, *arg))
         {
         bool rhs = this->GetBooleanValueWithAutoDereference(*argP1,
                                                       errorString,
@@ -821,7 +829,7 @@ bool cmConditionEvaluator::HandleLevel4(cmArgumentList &newArgs,
       {
       argP1 = arg;
       IncrementArguments(newArgs,argP1,argP2);
-      if (argP1 != newArgs.end() && IsKeyword("AND", *argP1) &&
+      if (argP1 != newArgs.end() && IsKeyword(keyAND, *argP1) &&
         argP2 != newArgs.end())
         {
         lhs = this->GetBooleanValueWithAutoDereference(*arg,
@@ -834,7 +842,7 @@ bool cmConditionEvaluator::HandleLevel4(cmArgumentList &newArgs,
           reducible, arg, newArgs, argP1, argP2);
         }
 
-      if (argP1 != newArgs.end() && this->IsKeyword("OR", *argP1) &&
+      if (argP1 != newArgs.end() && this->IsKeyword(keyOR, *argP1) &&
         argP2 != newArgs.end())
         {
         lhs = this->GetBooleanValueWithAutoDereference(*arg,

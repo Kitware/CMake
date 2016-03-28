@@ -140,15 +140,8 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
                                      this->Makefile->GetHomeOutputDirectory()))
         {
         std::ostringstream msg;
-        cmListFileContext lfc;
-        cmOutputConverter converter(this->Makefile->GetStateSnapshot());
-        lfc.FilePath = converter.Convert(this->FileName,
-                                         cmOutputConverter::HOME);
-
-        lfc.Line = this->FileLine;
         msg << "uninitialized variable \'" << var << "\'";
-        this->Makefile->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
-                                                        msg.str(), lfc);
+        this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
         }
       }
     return 0;

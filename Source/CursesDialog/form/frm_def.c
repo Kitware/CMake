@@ -240,7 +240,7 @@ static int Connect_Fields(FORM  * form, FIELD ** fields)
 |                    If there are fields, position to first active field.
 |
 |   Return Values :  E_OK            - success
-|                    any other       - error occured
+|                    any other       - error occurred
 +--------------------------------------------------------------------------*/
 INLINE static int Associate_Fields(FORM  *form, FIELD **fields)
 {
@@ -267,7 +267,7 @@ INLINE static int Associate_Fields(FORM  *form, FIELD **fields)
 |   
 |   Description   :  Create new form with given array of fields.
 |
-|   Return Values :  Pointer to form. NULL if error occured.
+|   Return Values :  Pointer to form. NULL if error occurred.
 +--------------------------------------------------------------------------*/
 FORM *new_form(FIELD ** fields)
 {	
