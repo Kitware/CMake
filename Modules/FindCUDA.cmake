@@ -1,11 +1,11 @@
+#.rst:
 # FindCUDA
 # --------
-#
-# Tools for building CUDA C files: libraries and build dependencies.
 #
 # This script locates the NVIDIA CUDA C tools.  It should work on linux,
 # windows, and mac and should be reasonably up to date with CUDA C
 # releases.
+# The approach follows that taken in Caffe: caffe.berkeleyvision.org/
 #
 # This script makes use of the standard find_package arguments of
 # <VERSION>, REQUIRED and QUIET.  CUDA_FOUND will report if an
@@ -39,6 +39,17 @@
 #      or C files from CUDA code just won't work, because size_t gets defined by
 #      nvcc in the generated source.  If you compile to PTX and then load the
 #      file yourself, you can mix bit sizes between device and host.
+#
+#   CUDA_ARCH_NAME (Default is "Auto" for regular builds and "Manual" for cross-builds)
+#   -- Set to the desired CUDA architecture name, one of CUDA_KNOWN_GPU_ARCH_NAMES list:
+#      "Fermi" "Kepler" "Maxwell" "All" "Common" "Manual" "Auto"
+#       Also, for CUDA version 6.5+: "Kepler+Tegra" "Kepler+Tesla" "Maxwell+Tegra"
+#       Also, for CUDA version  7.5: "Pascal".
+#       More information: https://en.wikipedia.org/wiki/CUDA
+#
+#   ENV{CUDA_ARCH_BIN} (Only tested if CUDA_ARCH_NAME set to "Manual")
+#   -- Set CUDA_ARCH_NAME to "Manual" and
+#      CUDA_ARCH_BIN to desired subset of CUDA_KNOWN_GPU_ARCHITECTURES list below.
 #
 #   CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE (Default ON)
 #   -- Set to ON if you want the custom build rule to be attached to the source
@@ -186,11 +197,8 @@
 #      (e.g. nvcc -Ipath0 -Ipath1 ... ). These paths usually contain other .cu
 #      files.
 #
-#
-#
 #   CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS( output_file_var cuda_target
 #                                            nvcc_flags object_files)
-#
 #   -- Generates the link object required by separable compilation from the given
 #      object files.  This is called automatically for CUDA_ADD_EXECUTABLE and
 #      CUDA_ADD_LIBRARY, but can be called manually when using CUDA_WRAP_SRCS
@@ -199,6 +207,13 @@
 #      argument.  The only nvcc flag added automatically is the bitness flag as
 #      specified by CUDA_64_BIT_DEVICE_CODE.  Note that this is a function
 #      instead of a macro.
+#
+#   CUDA_SELECT_NVCC_ARCH_FLAGS(out_variable)
+#   -- Selects GPU arch flags for nvcc based on CUDA_ARCH_NAME.
+#      Usage: CUDA_SELECT_NVCC_ARCH_FLAGS(NVCC_FLAGS_EXTRA)
+#             LIST(APPEND CUDA_NVCC_FLAGS ${NVCC_FLAGS_EXTRA})
+#      Note that this is a function instead of a macro.
+#
 #
 #   CUDA_WRAP_SRCS ( cuda_target format generated_files file0 file1 ...
 #                    [STATIC | SHARED | MODULE] [OPTIONS ...] )
@@ -307,8 +322,20 @@
 #   CUDA_nvcuvid_LIBRARY  -- CUDA Video Decoder library.
 #                            Only available for CUDA version 3.2+.
 #                            Windows only.
+#   CUDA_KNOWN_GPU_ARCH_NAMES      -- "Fermi" "Kepler" "Maxwell" "All" "Common" "Manual" "Auto"
+#   Also, for CUDA version 6.5+    -- "Kepler+Tegra" "Kepler+Tesla" "Maxwell+Tegra"
+#   Also, for CUDA version  7.5+   -- "Pascal"
+#   "Auto" -- option is the default for non-cross compilation. It determines the GPU(s) installed
+#             on the machine and produces options for that architecture(s) only.
+#   "Manual" -- default for cross-compilaton. CUDA_ARCH_BIN has to be set.
+#   "Common" -- Fallback default when "Auto" fails to determine machine's GPU compute capabilities.
+#               In this case, most common Desktop CUDA compute capabilities are used.
+#   "All"    -- Builds for all CUDA_KNOWN_GPU_ARCH_NAMES and should rarely be used.
+#   CUDA_KNOWN_GPU_ARCHITECTURES   -- "2.0" "2.1(2.0)" "3.0" "3.5" "5.0"
+#   Also, for CUDA version  6.5+   -- "3.2" "3.7" "5.2" "5.3"
+#   Also, for CUDA version  7.5+   -- "6.0" "6.2"
 #
-
+#
 #   James Bigler, NVIDIA Corp (nvidia.com - jbigler)
 #   Abe Stephens, SCI Institute -- http://www.sci.utah.edu/~abe/FindCuda.html
 #
@@ -560,8 +587,7 @@ macro(cuda_unset_include_and_libraries)
   unset(CUDA_npps_LIBRARY CACHE)
   unset(CUDA_nvcuvenc_LIBRARY CACHE)
   unset(CUDA_nvcuvid_LIBRARY CACHE)
-
-  unset(CUDA_USE_STATIC_CUDA_RUNTIME CACHE)
+  unset(CUDA_GPU_DETECT_OUTPUT CACHE)
 endmacro()
 
 # Check to see if the CUDA_TOOLKIT_ROOT_DIR and CUDA_SDK_ROOT_DIR have changed,
@@ -577,60 +603,16 @@ if(NOT "${CUDA_TOOLKIT_TARGET_DIR}" STREQUAL "${CUDA_TOOLKIT_TARGET_DIR_INTERNAL
   cuda_unset_include_and_libraries()
 endif()
 
-if(NOT "${CUDA_SDK_ROOT_DIR}" STREQUAL "${CUDA_SDK_ROOT_DIR_INTERNAL}")
-  # No specific variables to catch.  Use this kind of code before calling
-  # find_package(CUDA) to clean up any variables that may depend on this path.
-
-  #   unset(MY_SPECIAL_CUDA_SDK_INCLUDE_DIR CACHE)
-  #   unset(MY_SPECIAL_CUDA_SDK_LIBRARY CACHE)
-endif()
-
 #
 #  End of unset()
 #
 
 #
 #  Start looking for things
-#  Before we do, find out who we are
 #
 
-if(CMAKE_CROSSCOMPILING)
-  SET (CUDA_TOOLKIT_ROOT $ENV{CUDA_TOOLKIT_ROOT})
-  if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7-a")
-    # Support for NVPACK
-    set (CUDA_TOOLKIT_TARGET_NAME "armv7-linux-androideabi")
-  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
-    # Support for arm cross compilation
-    set(CUDA_TOOLKIT_TARGET_NAME "armv7-linux-gnueabihf")
-  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
-    # Support for aarch64 cross compilation
-    if (ANDROID_ARCH_NAME STREQUAL "arm64")
-      set(CUDA_TOOLKIT_TARGET_NAME "aarch64-linux-androideabi")
-    else()
-      set(CUDA_TOOLKIT_TARGET_NAME "aarch64-linux")
-    endif (ANDROID_ARCH_NAME STREQUAL "arm64")
-  endif()
-
-  if (EXISTS "${CUDA_TOOLKIT_ROOT}/targets/${CUDA_TOOLKIT_TARGET_NAME}")
-    set(CUDA_TOOLKIT_TARGET_DIR "${CUDA_TOOLKIT_ROOT}/targets/${CUDA_TOOLKIT_TARGET_NAME}" CACHE PATH "CUDA Toolkit target location.")
-    SET (CUDA_TOOLKIT_ROOT_DIR ${CUDA_TOOLKIT_ROOT})
-    mark_as_advanced(CUDA_TOOLKIT_TARGET_DIR)
-  endif()
-
-  # Target CPU architecture: this nvcc option is now obsolete
-  # add known CUDA targetr root path to the set of directories we search for programs, libraries and headers
-  set( CMAKE_FIND_ROOT_PATH "${CUDA_TOOLKIT_TARGET_DIR};${CMAKE_FIND_ROOT_PATH}")
-else()
- macro( find_host_program )
-   find_program( ${ARGN} )
- endmacro()
- set(CUDA_TOOLKIT_TARGET_DIR $ENV{CUDA_TOOLKIT_ROOT})
- set(CUDA_TOOLKIT_TARGET_DIR ${CUDA_TOOLKIT_ROOT_DIR})
-endif (CMAKE_CROSSCOMPILING)
-
 # Search for the cuda distribution.
-if(NOT CUDA_TOOLKIT_ROOT_DIR)
-
+if(NOT CUDA_TOOLKIT_ROOT_DIR AND NOT CMAKE_CROSSCOMPILING)
   # Search in the CUDA_BIN_PATH first.
   find_path(CUDA_TOOLKIT_ROOT_DIR
     NAMES nvcc nvcc.exe
@@ -667,8 +649,45 @@ if(NOT CUDA_TOOLKIT_ROOT_DIR)
   endif ()
 endif ()
 
+if(CMAKE_CROSSCOMPILING)
+  SET (CUDA_TOOLKIT_ROOT $ENV{CUDA_TOOLKIT_ROOT})
+  if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7-a")
+    # Support for NVPACK
+    set (CUDA_TOOLKIT_TARGET_NAME "armv7-linux-androideabi")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
+    # Support for arm cross compilation
+    set(CUDA_TOOLKIT_TARGET_NAME "armv7-linux-gnueabihf")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+    # Support for aarch64 cross compilation
+    if (ANDROID_ARCH_NAME STREQUAL "arm64")
+      set(CUDA_TOOLKIT_TARGET_NAME "aarch64-linux-androideabi")
+    else()
+      set(CUDA_TOOLKIT_TARGET_NAME "aarch64-linux")
+    endif (ANDROID_ARCH_NAME STREQUAL "arm64")
+  endif()
+
+  if (EXISTS "${CUDA_TOOLKIT_ROOT}/targets/${CUDA_TOOLKIT_TARGET_NAME}")
+    set(CUDA_TOOLKIT_TARGET_DIR "${CUDA_TOOLKIT_ROOT}/targets/${CUDA_TOOLKIT_TARGET_NAME}" CACHE PATH "CUDA Toolkit target location.")
+    SET (CUDA_TOOLKIT_ROOT_DIR ${CUDA_TOOLKIT_ROOT})
+    mark_as_advanced(CUDA_TOOLKIT_TARGET_DIR)
+  endif()
+
+  # add known CUDA targetr root path to the set of directories we search for programs, libraries and headers
+  set( CMAKE_FIND_ROOT_PATH "${CUDA_TOOLKIT_TARGET_DIR};${CMAKE_FIND_ROOT_PATH}")
+  macro( cuda_find_host_program )
+    find_host_program( ${ARGN} )
+  endmacro()
+else()
+  # for non-cross-compile, find_host_program == find_program and CUDA_TOOLKIT_TARGET_DIR == CUDA_TOOLKIT_ROOT_DIR
+  macro( cuda_find_host_program )
+    find_program( ${ARGN} )
+  endmacro()
+  SET (CUDA_TOOLKIT_TARGET_DIR ${CUDA_TOOLKIT_ROOT_DIR})
+endif()
+
+
 # CUDA_NVCC_EXECUTABLE
-find_host_program(CUDA_NVCC_EXECUTABLE
+cuda_find_host_program(CUDA_NVCC_EXECUTABLE
   NAMES nvcc
   PATHS "${CUDA_TOOLKIT_ROOT_DIR}"
   ENV CUDA_PATH
@@ -677,7 +696,7 @@ find_host_program(CUDA_NVCC_EXECUTABLE
   NO_DEFAULT_PATH
   )
 # Search default search paths, after we search our own set of paths.
-find_program(CUDA_NVCC_EXECUTABLE nvcc)
+cuda_find_host_program(CUDA_NVCC_EXECUTABLE nvcc)
 mark_as_advanced(CUDA_NVCC_EXECUTABLE)
 
 if(CUDA_NVCC_EXECUTABLE AND NOT CUDA_VERSION)
@@ -693,7 +712,6 @@ else()
   string(REGEX REPLACE "([0-9]+)\\.([0-9]+).*" "\\2" CUDA_VERSION_MINOR "${CUDA_VERSION}")
 endif()
 
-MESSAGE("CUDA_NVCC_EXECUTABLE: ${CUDA_NVCC_EXECUTABLE} CUDA_TOOLKIT_ROOT_DIR: ${CUDA_TOOLKIT_ROOT_DIR} CUDA_VERSION: ${CUDA_VERSION}")
 
 # Always set this convenience variable
 set(CUDA_VERSION_STRING "${CUDA_VERSION}")
@@ -739,7 +757,7 @@ macro(cuda_find_library_local_first_with_path_ext _var _names _doc _path_ext )
       PATHS "/usr/lib/nvidia-current"
       DOC ${_doc}
       )
-  endif(NOT CMAKE_CROSSCOMPILING)
+  endif()
 endmacro()
 
 macro(cuda_find_library_local_first _var _names _doc)
@@ -760,13 +778,14 @@ if(CUDA_VERSION VERSION_EQUAL "3.0")
     CUDA_CUDARTEMU_LIBRARY
     )
 endif()
-if(NOT CUDA_VERSION VERSION_LESS "5.5")
+
+if(CUDA_USE_STATIC_CUDA_RUNTIME AND NOT CUDA_VERSION VERSION_LESS "5.5")
   cuda_find_library_local_first(CUDA_cudart_static_LIBRARY cudart_static "static CUDA runtime library")
   mark_as_advanced(CUDA_cudart_static_LIBRARY)
 endif()
 
 
-if(CUDA_USE_STATIC_CUDA_RUNTIME AND CUDA_cudart_static_LIBRARY)
+if(CUDA_cudart_static_LIBRARY)
   # Set whether to use the static cuda runtime.
   option(CUDA_USE_STATIC_CUDA_RUNTIME "Use the static version of the CUDA runtime library if available" ON)
 else()
@@ -796,15 +815,15 @@ if(CUDA_USE_STATIC_CUDA_RUNTIME)
     else()
       unset(CMAKE_THREAD_PREFER_PTHREAD)
     endif()
-  endif(UNIX AND NOT ANDROID)
-  if (NOT APPLE)
+  endif()
+  if (NOT APPLE AND CUDA_VERSION VERSION_LESS "7.0")
     # Before CUDA 7.0, there was librt that has things such as, clock_gettime, shm_open, and shm_unlink.
     find_library(CUDA_rt_LIBRARY rt)
     if (NOT CUDA_rt_LIBRARY)
       message(WARNING "Expecting to find librt for libcudart_static, but didn't find it.")
     endif()
-  endif(NOT APPLE)
-endif(CUDA_USE_STATIC_CUDA_RUNTIME)
+  endif()
+endif()
 
 # CUPTI library showed up in cuda toolkit 4.0
 if(NOT CUDA_VERSION VERSION_LESS "4.0")
@@ -978,7 +997,9 @@ set(CUDA_SDK_ROOT_DIR_INTERNAL "${CUDA_SDK_ROOT_DIR}" CACHE INTERNAL
   "This is the value of the last time CUDA_SDK_ROOT_DIR was set successfully." FORCE)
 
 #include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+#this change is only needed if this file is used standalone. Please revert on PR merge.
 include(${CMAKE_ROOT}/Modules/FindPackageHandleStandardArgs.cmake)
+
 
 find_package_handle_standard_args(CUDA
   REQUIRED_VARS

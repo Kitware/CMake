@@ -1,37 +1,45 @@
-# BorIFrowed from caffe
-# https://github.com/BVLC/caffe/blob/master/cmake/Cuda.cmake
-
 # Synopsis:
 # Function for selecting GPU arch flags for nvcc based on CUDA_ARCH_NAME
 # Usage:
-#   SELECT_NVCC_ARCH_FLAGS(out_variable)
+#   CUDA_SELECT_NVCC_ARCH_FLAGS(out_variable)
 #
 # Variables affecting the choice:
 #
-# CUDA_ARCH_NAME: One of ("Fermi" "Kepler" "Kepler-M" "Maxwell" "Maxwell-M" "All" "Manual")
-# ENV{CUDA_ARCH_BIN} : Only tested if CUDA_ARCH_NAME set to "Manual"
+# CUDA_ARCH_NAME: One of CUDA_KNOWN_GPU_ARCH_NAMES list below.
+# ENV{CUDA_ARCH_BIN} : Only tested if CUDA_ARCH_NAME set to "Manual".
+#                      CUDA_ARCH_BIN entries have to be from CUDA_KNOWN_GPU_ARCHITECTURES list
+#
 #
 
-# Known NVIDIA GPU achitectures
-# This list will be used for CUDA_ARCH_NAME = All option
+# NVIDIA GPU achitectures:
+# https://en.wikipedia.org/wiki/CUDA
 
-set(CUDA_KNOWN_GPU_ARCHITECTURES "2.0 2.1(2.0) 3.0 3.5 5.0")
+set(CUDA_KNOWN_GPU_ARCH_NAMES "Fermi" "Kepler" "Maxwell" "All" "Common" "Manual")
+
+# This list will be used for CUDA_ARCH_NAME = All option
+set(CUDA_KNOWN_GPU_ARCHITECTURES  "2.0" "2.1(2.0)" "3.0" "3.5" "5.0")
+
+# This list will be used for CUDA_ARCH_NAME = Common option (enabled by default)
+set(CUDA_COMMON_GPU_ARCHITECTURES "3.0" "3.5" "5.0")
 
 if (CUDA_VERSION VERSION_GREATER "6.5")
-  set(CUDA_KNOWN_GPU_ARCHITECTURES "3.2 3.7 ${CUDA_KNOWN_GPU_ARCHITECTURES} 5.2")
-  message("CUDA_VERSION VERSION_GREATER 6.5 YES ARCH=${CUDA_KNOWN_GPU_ARCHITECTURES}")
+  list(APPEND CUDA_KNOWN_GPU_ARCHITECTURES "3.2" "3.7" "5.2" "5.3")
+  list(APPEND CUDA_COMMON_GPU_ARCHITECTURES "3.7" "5.2")
+  list(APPEND CUDA_KNOWN_GPU_ARCH_NAMES "Kepler+Tegra" "Kepler+Tesla" "Maxwell+Tegra")
+endif ()
+if (CUDA_VERSION VERSION_GREATER "7.5")
+  list(APPEND CUDA_KNOWN_GPU_ARCHITECTURES "6.0" "6.2")
+  list(APPEND CUDA_COMMON_GPU_ARCHITECTURES "6.0" "6.2")
+  list(APPEND CUDA_KNOWN_GPU_ARCH_NAMES "Pascal")
 endif ()
 
-if (CUDA_VERSION VERSION_GREATER "7.5")
-  set(CUDA_KNOWN_GPU_ARCHITECTURES "${CUDA_KNOWN_GPU_ARCHITECTURES} 6.0 6.2")
-  message("CUDA_VERSION VERSION_GREATER 7.5 YES ARCH=${CUDA_KNOWN_GPU_ARCHITECTURES}")
-endif ()
 
 
 ################################################################################################
-# A function for automatic detection of GPUs installed  (IF autodetection is enabled)
+# A function for automatic detection of GPUs installed  (if autodetection is enabled)
 # Usage:
 #   CUDA_DETECT_INSTALLED_GPUS(OUT_VARIABLE)
+#
 function(CUDA_DETECT_INSTALLED_GPUS OUT_VARIABLE)
   if(NOT CUDA_GPU_DETECT_OUTPUT)
     set(cufile ${PROJECT_BINARY_DIR}/detect_cuda_archs.cu)
@@ -77,21 +85,22 @@ endfunction()
 # Usage:
 #   SELECT_NVCC_ARCH_FLAGS(out_variable)
 function(CUDA_SELECT_NVCC_ARCH_FLAGS out_variable)
-  # List of arch names
-# CUDA_ARCH_NAME: One of:
-  set(archs_names "Fermi" "Kepler" "Kepler-M" "Tesla" "Maxwell" "Maxwell-M" "Pascal" "All" "Manual")
-  set(archs_name_default "All")
+
+  set(archs_names ${CUDA_KNOWN_GPU_ARCH_NAMES})
+
   if(NOT CMAKE_CROSSCOMPILING)
     list(APPEND archs_names "Auto")
     set(archs_name_default "Auto")
+  else()
+    set(archs_name_default "Common")
   endif()
 
   # SET CUDA_ARCH_NAME strings (so it will be seen as dropbox in CMake-Gui)
   set(CUDA_ARCH_NAME ${archs_name_default} CACHE STRING "Select target NVIDIA GPU achitecture.")
-  SET_property( CACHE CUDA_ARCH_NAME PROPERTY STRINGS "" ${archs_names} )
+  set_property( CACHE CUDA_ARCH_NAME PROPERTY STRINGS "" ${archs_names} )
   mark_as_advanced(CUDA_ARCH_NAME)
 
-  # verIFy CUDA_ARCH_NAME value
+  # verify CUDA_ARCH_NAME value
   list(FIND archs_names ${CUDA_ARCH_NAME} arch_found)
 
   if(${arch_found} EQUAL -1)
@@ -103,26 +112,26 @@ function(CUDA_SELECT_NVCC_ARCH_FLAGS out_variable)
     set(CUDA_ARCH_PTX "50"                     CACHE STRING "SpecIFy 'virtual' PTX architectures to build PTX intermediate code for")
     mark_as_advanced(CUDA_ARCH_BIN CUDA_ARCH_PTX)
   else()
-    unSET(CUDA_ARCH_BIN CACHE)
-    unSET(CUDA_ARCH_PTX CACHE)
+    unset(CUDA_ARCH_BIN CACHE)
+    unset(CUDA_ARCH_PTX CACHE)
   endif()
 
   # Allow a user to specify architecture from env
   if($ENV{CUDA_ARCH_BIN})
     set(CUDA_ARCH_NAME "Manual")
     set(CUDA_ARCH_BIN $ENV{CUDA_ARCH_BIN})
-    unSET(CUDA_ARCH_PTX)
+    unset(CUDA_ARCH_PTX)
   endif()
 
   if(${CUDA_ARCH_NAME} STREQUAL "Fermi")
     set(cuda_arch_bin "2.0 2.1(2.0)")
-  elseif(${CUDA_ARCH_NAME} STREQUAL "Kepler-M")
+  elseif(${CUDA_ARCH_NAME} STREQUAL "Kepler+Tegra")
     set(cuda_arch_bin "3.2 3.2")
-  elseif(${CUDA_ARCH_NAME} STREQUAL "Tesla")
+  elseif(${CUDA_ARCH_NAME} STREQUAL "Kepler+Tesla")
     set(cuda_arch_bin "3.7 3.7")
   elseif(${CUDA_ARCH_NAME} STREQUAL "Kepler")
     set(cuda_arch_bin "3.0 3.5")
-  elseif(${CUDA_ARCH_NAME} STREQUAL "Maxwell-M")
+  elseif(${CUDA_ARCH_NAME} STREQUAL "Maxwell+Tegra")
     set(cuda_arch_bin "5.3 5.3")
   elseif(${CUDA_ARCH_NAME} STREQUAL "Maxwell")
     set(cuda_arch_bin "5.0 5.2")
@@ -130,10 +139,14 @@ function(CUDA_SELECT_NVCC_ARCH_FLAGS out_variable)
     set(cuda_arch_bin "6.0 6.2")
   elseif(${CUDA_ARCH_NAME} STREQUAL "All")
     set(cuda_arch_bin ${CUDA_KNOWN_GPU_ARCHITECTURES})
+  elseif(${CUDA_ARCH_NAME} STREQUAL "Common")
+    set(cuda_arch_bin ${CUDA_COMMON_GPU_ARCHITECTURES})
   elseif(${CUDA_ARCH_NAME} STREQUAL "Auto")
     CUDA_DETECT_INSTALLED_GPUS(cuda_arch_bin)
-  else()  # (${CUDA_ARCH_NAME} STREQUAL "Manual")
+  elseif(${CUDA_ARCH_NAME} STREQUAL "Manual")
     set(cuda_arch_bin ${CUDA_ARCH_BIN})
+  else()
+    message(SEND_ERROR "Unknown CUDA_ARCH_NAME (${CUDA_ARCH_NAME})")
   endif()
 
   message(STATUS "Compiling for CUDA architecture: ${cuda_arch_bin}")
