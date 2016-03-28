@@ -1,4 +1,4 @@
-/*============================================================================
+/*/*===================================================================-*-C++-*-
   CMake - Cross Platform Makefile Generator
   Copyright 2015 Matthias Maennich <matthias@maennich.net>
 

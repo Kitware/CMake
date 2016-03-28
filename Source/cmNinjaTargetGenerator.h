@@ -1,4 +1,4 @@
-/*============================================================================
+/*/*===================================================================-*-C++-*-
   CMake - Cross Platform Makefile Generator
   Copyright 2011 Peter Collingbourne <peter@pcc.me.uk>
   Copyright 2011 Nicolas Despres <nicolas.despres@gmail.com>

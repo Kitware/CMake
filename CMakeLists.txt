@@ -28,7 +28,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   set(CMake_BIN_DIR ${CMake_BINARY_DIR}/bin)
 endif()
 
-if("${CMake_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
+if(CMake_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   # Disallow architecture-specific try_run.  It may not run on the host.
   macro(TRY_RUN)
     if(CMAKE_TRY_COMPILE_OSX_ARCHITECTURES)
@@ -41,7 +41,7 @@ endif()
 
 # Use most-recent available language dialects with GNU and Clang
 if(NOT DEFINED CMAKE_C_STANDARD AND NOT CMake_NO_C_STANDARD)
-  include(${CMake_SOURCE_DIR}/Source/Checks/cm_c11_thread_local.cmake)
+  include("${CMake_SOURCE_DIR}/Source/Checks/cm_c11_thread_local.cmake")
   if(NOT CMake_C11_THREAD_LOCAL_BROKEN)
     set(CMAKE_C_STANDARD 11)
   else()
@@ -49,7 +49,7 @@ if(NOT DEFINED CMAKE_C_STANDARD AND NOT CMake_NO_C_STANDARD)
   endif()
 endif()
 if(NOT DEFINED CMAKE_CXX_STANDARD AND NOT CMake_NO_CXX_STANDARD)
-  include(${CMake_SOURCE_DIR}/Source/Checks/cm_cxx14_cstdio.cmake)
+  include("${CMake_SOURCE_DIR}/Source/Checks/cm_cxx14_cstdio.cmake")
   if(NOT CMake_CXX14_CSTDIO_BROKEN)
     set(CMAKE_CXX_STANDARD 14)
   else()
@@ -57,7 +57,7 @@ if(NOT DEFINED CMAKE_CXX_STANDARD AND NOT CMake_NO_CXX_STANDARD)
   endif()
 endif()
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
-  include(${CMake_SOURCE_DIR}/Source/Checks/cm_cxx11_unordered_map.cmake)
+  include("${CMake_SOURCE_DIR}/Source/Checks/cm_cxx11_unordered_map.cmake")
 endif()
 
 # option to set the internal encoding of CMake to UTF-8
@@ -72,7 +72,7 @@ option(CMake_INSTALL_COMPONENTS "Using components when installing" OFF)
 mark_as_advanced(CMake_INSTALL_COMPONENTS)
 macro(CMake_OPTIONAL_COMPONENT NAME)
   if(CMake_INSTALL_COMPONENTS)
-    set(COMPONENT COMPONENT ${NAME})
+    set(COMPONENT COMPONENT "${NAME}")
   else()
     set(COMPONENT)
   endif()
@@ -99,24 +99,24 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
   # defining CMAKE_USE_SYSTEM_LIBRARIES or CMAKE_USE_SYSTEM_LIBRARY_${util}.
   set(UTILITIES BZIP2 CURL EXPAT FORM JSONCPP LIBARCHIVE LIBLZMA ZLIB)
   foreach(util ${UTILITIES})
-    if(NOT DEFINED CMAKE_USE_SYSTEM_LIBRARY_${util}
+    if(NOT DEFINED "CMAKE_USE_SYSTEM_LIBRARY_${util}"
         AND DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
-      set(CMAKE_USE_SYSTEM_LIBRARY_${util} "${CMAKE_USE_SYSTEM_LIBRARIES}")
+      set("CMAKE_USE_SYSTEM_LIBRARY_${util}" "${CMAKE_USE_SYSTEM_LIBRARIES}")
     endif()
-    if(DEFINED CMAKE_USE_SYSTEM_LIBRARY_${util})
-      if(CMAKE_USE_SYSTEM_LIBRARY_${util})
-        set(CMAKE_USE_SYSTEM_LIBRARY_${util} ON)
+    if(DEFINED "CMAKE_USE_SYSTEM_LIBRARY_${util}")
+      if("CMAKE_USE_SYSTEM_LIBRARY_${util}")
+        set("CMAKE_USE_SYSTEM_LIBRARY_${util}" ON)
       else()
-        set(CMAKE_USE_SYSTEM_LIBRARY_${util} OFF)
+        set("CMAKE_USE_SYSTEM_LIBRARY_${util}" OFF)
       endif()
       if(CMAKE_BOOTSTRAP)
-        unset(CMAKE_USE_SYSTEM_LIBRARY_${util} CACHE)
+        unset("CMAKE_USE_SYSTEM_LIBRARY_${util}" CACHE)
       endif()
       string(TOLOWER "${util}" lutil)
-      set(CMAKE_USE_SYSTEM_${util} "${CMAKE_USE_SYSTEM_LIBRARY_${util}}"
+      set("CMAKE_USE_SYSTEM_${util}" "${CMAKE_USE_SYSTEM_LIBRARY_${util}}"
         CACHE BOOL "Use system-installed ${lutil}" FORCE)
     else()
-      set(CMAKE_USE_SYSTEM_LIBRARY_${util} OFF)
+      set("CMAKE_USE_SYSTEM_LIBRARY_${util}" OFF)
     endif()
   endforeach()
   if(CMAKE_BOOTSTRAP)
@@ -151,8 +151,8 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
   endforeach()
 
   # Inform utility library header wrappers whether to use system versions.
-  configure_file(${CMake_SOURCE_DIR}/Utilities/cmThirdParty.h.in
-    ${CMake_BINARY_DIR}/Utilities/cmThirdParty.h
+  configure_file("${CMake_SOURCE_DIR}/Utilities/cmThirdParty.h.in"
+    "${CMake_BINARY_DIR}/Utilities/cmThirdParty.h"
     @ONLY)
 
 endmacro()
@@ -194,15 +194,15 @@ macro(CMAKE_SETUP_TESTING)
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Templates/CTestScript.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/CTestScript.cmake"
     @ONLY)
-  configure_file(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
-    ${CMake_BINARY_DIR}/Tests/.NoDartCoverage)
-  configure_file(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
-    ${CMake_BINARY_DIR}/Modules/.NoDartCoverage)
-  configure_file(${CMake_SOURCE_DIR}/CTestCustom.cmake.in
-    ${CMake_BINARY_DIR}/CTestCustom.cmake @ONLY)
+  configure_file("${CMake_SOURCE_DIR}/Tests/.NoDartCoverage"
+    "${CMake_BINARY_DIR}/Tests/.NoDartCoverage")
+  configure_file("${CMake_SOURCE_DIR}/Tests/.NoDartCoverage"
+    "${CMake_BINARY_DIR}/Modules/.NoDartCoverage")
+  configure_file("${CMake_SOURCE_DIR}/CTestCustom.cmake.in"
+    "${CMake_BINARY_DIR}/CTestCustom.cmake" @ONLY)
   if(BUILD_TESTING AND DART_ROOT)
-    configure_file(${CMake_SOURCE_DIR}/CMakeLogo.gif
-      ${CMake_BINARY_DIR}/Testing/HTML/TestingResults/Icons/Logo.gif COPYONLY)
+    configure_file("${CMake_SOURCE_DIR}/CMakeLogo.gif"
+      "${CMake_BINARY_DIR}/Testing/HTML/TestingResults/Icons/Logo.gif" COPYONLY)
   endif()
   mark_as_advanced(DART_ROOT)
   mark_as_advanced(CURL_TESTING)
@@ -224,7 +224,7 @@ mark_as_advanced(CMAKE_USE_FOLDERS)
 macro(CMAKE_SET_TARGET_FOLDER tgt folder)
   if(CMAKE_USE_FOLDERS)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-    if(MSVC AND TARGET ${tgt})
+    if(MSVC AND TARGET "${tgt}")
       set_property(TARGET "${tgt}" PROPERTY FOLDER "${folder}")
     endif()
   else()
@@ -248,18 +248,18 @@ macro (CMAKE_BUILD_UTILITIES)
   set(KWSYS_USE_MD5 1)
   set(KWSYS_USE_Process 1)
   set(KWSYS_USE_CommandLineArguments 1)
-  set(KWSYS_HEADER_ROOT ${CMake_BINARY_DIR}/Source)
+  set(KWSYS_HEADER_ROOT "${CMake_BINARY_DIR}/Source")
   set(KWSYS_INSTALL_DOC_DIR "${CMAKE_DOC_DIR}")
   add_subdirectory(Source/kwsys)
   set(kwsys_folder "Utilities/KWSys")
-  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE} "${kwsys_folder}")
-  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}_c "${kwsys_folder}")
+  CMAKE_SET_TARGET_FOLDER("${KWSYS_NAMESPACE}" "${kwsys_folder}")
+  CMAKE_SET_TARGET_FOLDER("${KWSYS_NAMESPACE}_c" "${kwsys_folder}")
   if(BUILD_TESTING)
-    CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestDynload "${kwsys_folder}")
-    CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestProcess "${kwsys_folder}")
-    CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestsC "${kwsys_folder}")
-    CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestsCxx "${kwsys_folder}")
-    CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestSharedForward "${kwsys_folder}")
+    CMAKE_SET_TARGET_FOLDER("${KWSYS_NAMESPACE}TestDynload" "${kwsys_folder}")
+    CMAKE_SET_TARGET_FOLDER("${KWSYS_NAMESPACE}TestProcess" "${kwsys_folder}")
+    CMAKE_SET_TARGET_FOLDER("${KWSYS_NAMESPACE}TestsC" "${kwsys_folder}")
+    CMAKE_SET_TARGET_FOLDER("${KWSYS_NAMESPACE}TestsCxx" "${kwsys_folder}")
+    CMAKE_SET_TARGET_FOLDER("${KWSYS_NAMESPACE}TestSharedForward" "${kwsys_folder}")
   endif()
 
   #---------------------------------------------------------------------
@@ -267,8 +267,8 @@ macro (CMAKE_BUILD_UTILITIES)
   # Everything in the tree should be able to include files from the
   # Utilities directory.
   include_directories(
-    ${CMake_BINARY_DIR}/Utilities
-    ${CMake_SOURCE_DIR}/Utilities
+    "${CMake_BINARY_DIR}/Utilities"
+    "${CMake_SOURCE_DIR}/Utilities"
     )
 
   # check for the use of system libraries versus builtin ones
@@ -298,10 +298,10 @@ macro (CMAKE_BUILD_UTILITIES)
       message(FATAL_ERROR
         "CMAKE_USE_SYSTEM_ZLIB is ON but a zlib is not found!")
     endif()
-    set(CMAKE_ZLIB_INCLUDES ${ZLIB_INCLUDE_DIR})
-    set(CMAKE_ZLIB_LIBRARIES ${ZLIB_LIBRARIES})
+    set(CMAKE_ZLIB_INCLUDES "${ZLIB_INCLUDE_DIR}")
+    set(CMAKE_ZLIB_LIBRARIES "${ZLIB_LIBRARIES}")
   else()
-    set(CMAKE_ZLIB_INCLUDES ${CMake_SOURCE_DIR}/Utilities)
+    set(CMAKE_ZLIB_INCLUDES "${CMake_SOURCE_DIR}/Utilities")
     set(CMAKE_ZLIB_LIBRARIES cmzlib)
     add_subdirectory(Utilities/cmzlib)
     CMAKE_SET_TARGET_FOLDER(cmzlib "Utilities/3rdParty")
@@ -315,12 +315,12 @@ macro (CMAKE_BUILD_UTILITIES)
       message(FATAL_ERROR
         "CMAKE_USE_SYSTEM_CURL is ON but a curl is not found!")
     endif()
-    set(CMAKE_CURL_INCLUDES ${CURL_INCLUDE_DIRS})
-    set(CMAKE_CURL_LIBRARIES ${CURL_LIBRARIES})
+    set(CMAKE_CURL_INCLUDES "${CURL_INCLUDE_DIRS}")
+    set(CMAKE_CURL_LIBRARIES "${CURL_LIBRARIES}")
   else()
-    set(CURL_SPECIAL_ZLIB_H ${CMAKE_ZLIB_HEADER})
-    set(CURL_SPECIAL_LIBZ_INCLUDES ${CMAKE_ZLIB_INCLUDES})
-    set(CURL_SPECIAL_LIBZ ${CMAKE_ZLIB_LIBRARIES})
+    set(CURL_SPECIAL_ZLIB_H "${CMAKE_ZLIB_HEADER}")
+    set(CURL_SPECIAL_LIBZ_INCLUDES "${CMAKE_ZLIB_INCLUDES}")
+    set(CURL_SPECIAL_LIBZ "${CMAKE_ZLIB_LIBRARIES}")
     add_definitions(-DCURL_STATICLIB)
     set(CMAKE_CURL_INCLUDES)
     set(CMAKE_CURL_LIBRARIES cmcurl)
@@ -335,7 +335,7 @@ macro (CMAKE_BUILD_UTILITIES)
         set(_CMAKE_USE_OPENSSL_DEFAULT ON)
       endif()
     endif()
-    option(CMAKE_USE_OPENSSL "Use OpenSSL." ${_CMAKE_USE_OPENSSL_DEFAULT})
+    option(CMAKE_USE_OPENSSL "Use OpenSSL." "${_CMAKE_USE_OPENSSL_DEFAULT}")
     mark_as_advanced(CMAKE_USE_OPENSSL)
     if(CMAKE_USE_OPENSSL)
       set(CURL_CA_BUNDLE "" CACHE FILEPATH "Path to SSL CA Certificate Bundle")
@@ -371,8 +371,8 @@ macro (CMAKE_BUILD_UTILITIES)
     if(NOT LIBLZMA_FOUND)
       message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBLZMA is ON but LibLZMA is not found!")
     endif()
-    set(LZMA_INCLUDE_DIR ${LIBLZMA_INCLUDE_DIRS})
-    set(LZMA_LIBRARY ${LIBLZMA_LIBRARIES})
+    set(LZMA_INCLUDE_DIR "${LIBLZMA_INCLUDE_DIRS}")
+    set(LZMA_LIBRARY "${LIBLZMA_LIBRARIES}")
   else()
     add_subdirectory(Utilities/cmliblzma)
     CMAKE_SET_TARGET_FOLDER(cmliblzma "Utilities/3rdParty")
@@ -388,14 +388,14 @@ macro (CMAKE_BUILD_UTILITIES)
     if(NOT LibArchive_FOUND)
       message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBARCHIVE is ON but LibArchive is not found!")
     endif()
-    set(CMAKE_TAR_INCLUDES ${LibArchive_INCLUDE_DIRS})
-    set(CMAKE_TAR_LIBRARIES ${LibArchive_LIBRARIES})
+    set(CMAKE_TAR_INCLUDES "${LibArchive_INCLUDE_DIRS}")
+    set(CMAKE_TAR_LIBRARIES "${LibArchive_LIBRARIES}")
   else()
-    set(ZLIB_INCLUDE_DIR ${CMAKE_ZLIB_INCLUDES})
-    set(ZLIB_LIBRARY ${CMAKE_ZLIB_LIBRARIES})
+    set(ZLIB_INCLUDE_DIR "${CMAKE_ZLIB_INCLUDES}")
+    set(ZLIB_LIBRARY "${CMAKE_ZLIB_LIBRARIES}")
     add_definitions(-DLIBARCHIVE_STATIC)
     set(ENABLE_NETTLE OFF CACHE INTERNAL "Enable use of Nettle")
-    set(ENABLE_OPENSSL ${CMAKE_USE_OPENSSL} CACHE INTERNAL "Enable use of OpenSSL")
+    set(ENABLE_OPENSSL "${CMAKE_USE_OPENSSL}" CACHE INTERNAL "Enable use of OpenSSL")
     set(ENABLE_LZMA ON CACHE INTERNAL "Enable the use of the system found LZMA library if found")
     set(ENABLE_ZLIB ON CACHE INTERNAL "Enable the use of the system found ZLIB library if found")
     set(ENABLE_BZip2 ON CACHE INTERNAL "Enable the use of the system found BZip2 library if found")
@@ -409,7 +409,7 @@ macro (CMAKE_BUILD_UTILITIES)
     set(ENABLE_CNG OFF CACHE INTERNAL "Enable the use of CNG(Crypto Next Generation)")
     add_subdirectory(Utilities/cmlibarchive)
     CMAKE_SET_TARGET_FOLDER(cmlibarchive "Utilities/3rdParty")
-    set(CMAKE_TAR_LIBRARIES cmlibarchive ${BZIP2_LIBRARIES})
+    set(CMAKE_TAR_LIBRARIES cmlibarchive "${BZIP2_LIBRARIES}")
   endif()
 
   #---------------------------------------------------------------------
@@ -420,8 +420,8 @@ macro (CMAKE_BUILD_UTILITIES)
       message(FATAL_ERROR
         "CMAKE_USE_SYSTEM_EXPAT is ON but a expat is not found!")
     endif()
-    set(CMAKE_EXPAT_INCLUDES ${EXPAT_INCLUDE_DIRS})
-    set(CMAKE_EXPAT_LIBRARIES ${EXPAT_LIBRARIES})
+    set(CMAKE_EXPAT_INCLUDES "${EXPAT_INCLUDE_DIRS}")
+    set(CMAKE_EXPAT_LIBRARIES "${EXPAT_LIBRARIES}")
   else()
     set(CMAKE_EXPAT_INCLUDES)
     set(CMAKE_EXPAT_LIBRARIES cmexpat)
@@ -433,7 +433,7 @@ macro (CMAKE_BUILD_UTILITIES)
   # Build jsoncpp library.
   if(CMAKE_USE_SYSTEM_JSONCPP)
     if(NOT CMAKE_VERSION VERSION_LESS 3.0)
-      include(${CMake_SOURCE_DIR}/Source/Modules/FindJsonCpp.cmake)
+      include("${CMake_SOURCE_DIR}/Source/Modules/FindJsonCpp.cmake")
     else()
       message(FATAL_ERROR "CMAKE_USE_SYSTEM_JSONCPP requires CMake >= 3.0")
     endif()
@@ -456,8 +456,8 @@ macro (CMAKE_BUILD_UTILITIES)
       message(FATAL_ERROR
         "CTEST_USE_XMLRPC is ON but xmlrpc is not found!")
     endif()
-    set(CMAKE_XMLRPC_INCLUDES ${XMLRPC_INCLUDE_DIRS})
-    set(CMAKE_XMLRPC_LIBRARIES ${XMLRPC_LIBRARIES})
+    set(CMAKE_XMLRPC_INCLUDES "${XMLRPC_INCLUDE_DIRS}")
+    set(CMAKE_XMLRPC_LIBRARIES "${XMLRPC_LIBRARIES}")
   endif()
 
   #---------------------------------------------------------------------
@@ -491,12 +491,12 @@ endmacro ()
 #-----------------------------------------------------------------------
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   if(CMAKE_CXX_PLATFORM_ID MATCHES "OpenBSD")
-    execute_process(COMMAND ${CMAKE_CXX_COMPILER}
-      ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
+    execute_process(COMMAND "${CMAKE_CXX_COMPILER}"
+      "${CMAKE_CXX_COMPILER_ARG1}" -dumpversion
       OUTPUT_VARIABLE _GXX_VERSION
     )
     string(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
-      _GXX_VERSION_SHORT ${_GXX_VERSION})
+      _GXX_VERSION_SHORT "${_GXX_VERSION}")
     if(_GXX_VERSION_SHORT EQUAL 33)
       message(FATAL_ERROR
         "GXX 3.3 on OpenBSD is known to cause CPack to Crash.\n"
@@ -515,7 +515,7 @@ include(Source/CMakeVersionCompute.cmake)
 
 # Include the standard Dart testing module
 enable_testing()
-include (${CMAKE_ROOT}/Modules/Dart.cmake)
+include ("${CMAKE_ROOT}/Modules/Dart.cmake")
 
 # Set up test-time configuration.
 set_directory_properties(PROPERTIES
@@ -536,7 +536,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   include(Source/CMakeInstallDestinations.cmake)
 
   if(BUILD_TESTING)
-    include(${CMake_SOURCE_DIR}/Tests/CMakeInstall.cmake)
+    include("${CMake_SOURCE_DIR}/Tests/CMakeInstall.cmake")
   endif()
 
   # include special compile flags for some compilers
@@ -650,9 +650,9 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
       )
 
       foreach(FLAG_LANG  C CXX)
-        foreach(FLAG ${${FLAG_LANG}_FLAGS_LIST})
+        foreach(FLAG "${${FLAG_LANG}_FLAGS_LIST}")
           if(NOT " ${CMAKE_${FLAG_LANG}_FLAGS} " MATCHES " ${FLAG} ")
-            set(CMAKE_${FLAG_LANG}_FLAGS "${CMAKE_${FLAG_LANG}_FLAGS} ${FLAG}")
+            set("CMAKE_${FLAG_LANG}_FLAGS" "${CMAKE_${FLAG_LANG}_FLAGS} ${FLAG}")
           endif()
         endforeach()
       endforeach()
@@ -684,12 +684,12 @@ add_test(SystemInformationNew "${CMAKE_CMAKE_COMMAND}"
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   # Install license file as it requires.
-  install(FILES Copyright.txt DESTINATION ${CMAKE_DOC_DIR})
+  install(FILES Copyright.txt DESTINATION "${CMAKE_DOC_DIR}")
 
   # Install script directories.
   install(
     DIRECTORY Help Modules Templates
-    DESTINATION ${CMAKE_DATA_DIR}
+    DESTINATION "${CMAKE_DATA_DIR}"
     FILE_PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
     DIRECTORY_PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
                           GROUP_READ GROUP_EXECUTE
