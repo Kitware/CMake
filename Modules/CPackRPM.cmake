@@ -531,6 +531,54 @@
 #  - /usr/share/doc/.*/man/man.*
 #  - /usr/lib/.*/man/man.*
 #
+# .. variable:: CPACK_RPM_DEFAULT_USER
+#               CPACK_RPM_<compName>_DEFAULT_USER
+#
+#  default user ownership of RPM content
+#
+#  * Mandatory : NO
+#  * Default   : root
+#
+#  Value should be user name and not UID.
+#  Note that <compName> must be in upper-case.
+#
+# .. variable:: CPACK_RPM_DEFAULT_GROUP
+#               CPACK_RPM_<compName>_DEFAULT_GROUP
+#
+#  default group ownership of RPM content
+#
+#  * Mandatory : NO
+#  * Default   : root
+#
+#  Value should be group name and not GID.
+#  Note that <compName> must be in upper-case.
+#
+# .. variable:: CPACK_RPM_DEFAULT_FILE_PERMISSIONS
+#               CPACK_RPM_<compName>_DEFAULT_FILE_PERMISSIONS
+#
+#  default permissions used for packaged files
+#
+#  * Mandatory : NO
+#  * Default   : - (system default)
+#
+#  Accepted values are lists with PERMISSIONS. Valid permissions
+#  are OWNER_READ, OWNER_WRITE, OWNER_EXECUTE, GROUP_READ,
+#  GROUP_WRITE, GROUP_EXECUTE, WORLD_READ, WORLD_WRITE and WORLD_EXECUTE.
+#  Note that <compName> must be in upper-case.
+#
+# .. variable:: CPACK_RPM_DEFAULT_DIR_PERMISSIONS
+#               CPACK_RPM_<compName>_DEFAULT_DIR_PERMISSIONS
+#
+#  default permissions used for packaged directories
+#
+#  * Mandatory : NO
+#  * Default   : - (system default)
+#
+#  Accepted values are lists with PERMISSIONS. Valid permissions
+#  are OWNER_READ, OWNER_WRITE, OWNER_EXECUTE, GROUP_READ,
+#  GROUP_WRITE, GROUP_EXECUTE, WORLD_READ, WORLD_WRITE and WORLD_EXECUTE.
+#  Note that <compName> must be in upper-case.
+#
 # Packaging of Symbolic Links
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
@@ -580,6 +628,35 @@
 #  License text for the above reference.)
 
 # Author: Eric Noulard with the help of Alexander Neundorf.
+
+function(get_unix_permissions_octal_notation PERMISSIONS_VAR RETURN_VAR)
+  set(PERMISSIONS ${${PERMISSIONS_VAR}})
+  list(LENGTH PERMISSIONS PERM_LEN_PRE)
+  list(REMOVE_DUPLICATES PERMISSIONS)
+  list(LENGTH PERMISSIONS PERM_LEN_POST)
+
+  if(NOT ${PERM_LEN_PRE} EQUAL ${PERM_LEN_POST})
+    message(FATAL_ERROR "${PERMISSIONS_VAR} contains duplicate values.")
+  endif()
+
+  foreach(PERMISSION_TYPE "OWNER" "GROUP" "WORLD")
+    set(${PERMISSION_TYPE}_PERMISSIONS 0)
+
+    foreach(PERMISSION ${PERMISSIONS})
+      if("${PERMISSION}" STREQUAL "${PERMISSION_TYPE}_READ")
+        math(EXPR ${PERMISSION_TYPE}_PERMISSIONS "${${PERMISSION_TYPE}_PERMISSIONS} + 4")
+      elseif("${PERMISSION}" STREQUAL "${PERMISSION_TYPE}_WRITE")
+        math(EXPR ${PERMISSION_TYPE}_PERMISSIONS "${${PERMISSION_TYPE}_PERMISSIONS} + 2")
+      elseif("${PERMISSION}" STREQUAL "${PERMISSION_TYPE}_EXECUTE")
+        math(EXPR ${PERMISSION_TYPE}_PERMISSIONS "${${PERMISSION_TYPE}_PERMISSIONS} + 1")
+      elseif(PERMISSION MATCHES "${PERMISSION_TYPE}.*")
+        message(FATAL_ERROR "${PERMISSIONS_VAR} contains invalid values.")
+      endif()
+    endforeach()
+  endforeach()
+
+  set(${RETURN_VAR} "${OWNER_PERMISSIONS}${GROUP_PERMISSIONS}${WORLD_PERMISSIONS}" PARENT_SCOPE)
+endfunction()
 
 function(cpack_rpm_prepare_relocation_paths)
   # set appropriate prefix, remove possible trailing slash and convert backslashes to slashes
@@ -1572,6 +1649,30 @@ function(cpack_rpm_generate_package)
       "${CPACK_RPM_PACKAGE_RELOCATABLE}"
     )
 
+  # set default user and group
+  foreach(_PERM_TYPE "USER" "GROUP")
+    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEFAULT_${_PERM_TYPE})
+      set(TMP_DEFAULT_${_PERM_TYPE} "${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEFAULT_${_PERM_TYPE}}")
+    elseif(CPACK_RPM_DEFAULT_${_PERM_TYPE})
+      set(TMP_DEFAULT_${_PERM_TYPE} "${CPACK_RPM_DEFAULT_${_PERM_TYPE}}")
+    else()
+      set(TMP_DEFAULT_${_PERM_TYPE} "root")
+    endif()
+  endforeach()
+
+  # set default file and dir permissions
+  foreach(_PERM_TYPE "FILE" "DIR")
+    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEFAULT_${_PERM_TYPE}_PERMISSIONS)
+      get_unix_permissions_octal_notation("CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEFAULT_${_PERM_TYPE}_PERMISSIONS" "TMP_DEFAULT_${_PERM_TYPE}_PERMISSIONS")
+      set(_PERMISSIONS_VAR "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEFAULT_${_PERM_TYPE}_PERMISSIONS")
+    elseif(CPACK_RPM_DEFAULT_${_PERM_TYPE}_PERMISSIONS)
+      get_unix_permissions_octal_notation("CPACK_RPM_DEFAULT_${_PERM_TYPE}_PERMISSIONS" "TMP_DEFAULT_${_PERM_TYPE}_PERMISSIONS")
+      set(_PERMISSIONS_VAR "CPACK_RPM_DEFAULT_${_PERM_TYPE}_PERMISSIONS")
+    else()
+      set(TMP_DEFAULT_${_PERM_TYPE}_PERMISSIONS "-")
+    endif()
+  endforeach()
+
   # The name of the final spec file to be used by rpmbuild
   set(CPACK_RPM_BINARY_SPECFILE "${CPACK_RPM_ROOTDIR}/SPECS/${CPACK_RPM_PACKAGE_NAME}.spec")
 
@@ -1671,7 +1772,7 @@ mv \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot\" $RPM_BUILD_ROOT
 \@CPACK_RPM_SPEC_PREUNINSTALL\@
 
 %files
-%defattr(-,root,root,-)
+%defattr(\@TMP_DEFAULT_FILE_PERMISSIONS\@,\@TMP_DEFAULT_USER\@,\@TMP_DEFAULT_GROUP\@,\@TMP_DEFAULT_DIR_PERMISSIONS\@)
 \@CPACK_RPM_INSTALL_FILES\@
 \@CPACK_RPM_ABSOLUTE_INSTALL_FILES\@
 \@CPACK_RPM_USER_INSTALL_FILES\@
