@@ -77,7 +77,7 @@ Create custom targets to build projects in external trees
     Path to a certificate authority file
   ``TIMEOUT <seconds>``
     Time allowed for file download operations
-  ``NO_EXTRACT 1``
+  ``DOWNLOAD_NO_EXTRACT 1``
     Just download the file and do not extract it; the full path to the
     downloaded file is available as ``<DOWNLOADED_FILE>``.
 
@@ -1878,7 +1878,7 @@ function(_ep_add_download_command name)
       set(cmd   ${CMAKE_COMMAND} -E remove_directory ${source_dir}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${abs_dir} ${source_dir})
     else()
-      get_property(no_extract TARGET "${name}" PROPERTY _EP_NO_EXTRACT SET)
+      get_property(no_extract TARGET "${name}" PROPERTY _EP_DOWNLOAD_NO_EXTRACT SET)
       if("${url}" MATCHES "^[a-z]+://")
         # TODO: Should download and extraction be different steps?
         if("x${fname}" STREQUAL "x")
