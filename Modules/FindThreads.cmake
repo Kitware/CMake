@@ -26,7 +26,7 @@
 #
 #   CMAKE_THREAD_PREFER_PTHREAD
 #
-# If the use of the -pthread compiler and linker flag is prefered then the
+# If the use of the -pthread compiler and linker flag is preferred then the
 # caller can set
 #
 # ::

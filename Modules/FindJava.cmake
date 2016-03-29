@@ -26,7 +26,7 @@
 #   Java_JAVA_EXECUTABLE      = the full path to the Java runtime
 #   Java_JAVAC_EXECUTABLE     = the full path to the Java compiler
 #   Java_JAVAH_EXECUTABLE     = the full path to the Java header generator
-#   Java_JAVADOC_EXECUTABLE   = the full path to the Java documention generator
+#   Java_JAVADOC_EXECUTABLE   = the full path to the Java documentation generator
 #   Java_IDLJ_EXECUTABLE      = the full path to the Java idl compiler
 #   Java_JAR_EXECUTABLE       = the full path to the Java archiver
 #   Java_JARSIGNER_EXECUTABLE = the full path to the Java jar signer

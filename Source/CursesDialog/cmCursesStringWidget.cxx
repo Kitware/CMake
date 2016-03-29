@@ -105,7 +105,7 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
         }
       }
 
-    // If resize occured during edit, move out of edit mode
+    // If resize occurred during edit, move out of edit mode
     if (!this->InEdit && ( key != 10 && key != KEY_ENTER ) )
       {
       return false;

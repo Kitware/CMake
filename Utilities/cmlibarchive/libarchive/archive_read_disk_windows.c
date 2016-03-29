@@ -1586,7 +1586,7 @@ tree_reopen(struct tree *t, const wchar_t *path, int restore_time)
 	t->stack->flags = needsFirstVisit;
 	/*
 	 * Debug flag for Direct IO(No buffering) or Async IO.
-	 * Those dependant on environment variable switches
+	 * Those dependent on environment variable switches
 	 * will be removed until next release.
 	 */
 	{

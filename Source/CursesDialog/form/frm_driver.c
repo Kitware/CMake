@@ -1676,7 +1676,7 @@ static int VSC_Generic(FORM *form, int lines)
 |   
 |   Description   :  Performs the generic vertical scrolling routines. 
 |                    This has to check for a multi-line field and to set
-|                    the _NEWTOP flag if scrolling really occured.
+|                    the _NEWTOP flag if scrolling really occurred.
 |
 |   Return Values :  Propagated error code from low-level driver calls
 +--------------------------------------------------------------------------*/
@@ -2159,7 +2159,7 @@ static int Wrapping_Not_Necessary_Or_Wrapping_Ok(FORM * form)
 |   
 |   Description   :  Generic routine for field editing requests. The driver
 |                    routines are only called for editable fields, the
-|                    _WINDOW_MODIFIED flag is set if editing occured.
+|                    _WINDOW_MODIFIED flag is set if editing occurred.
 |                    This is somewhat special due to the overload semantics
 |                    of the NEW_LINE and DEL_PREV requests.
 |

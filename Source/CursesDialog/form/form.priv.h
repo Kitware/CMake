@@ -40,7 +40,7 @@
 
 /* field status values */
 #define _CHANGED         (0x01) /* Field has been changed                 */
-#define _NEWTOP          (0x02) /* Vertical scrolling occured             */
+#define _NEWTOP          (0x02) /* Vertical scrolling occurred             */
 #define _NEWPAGE         (0x04) /* field begins new page of form          */
 #define _MAY_GROW        (0x08) /* dynamic field may still grow           */
 

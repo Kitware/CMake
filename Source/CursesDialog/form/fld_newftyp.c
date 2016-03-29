@@ -63,7 +63,7 @@ const FIELDTYPE* _nc_Default_FieldType = &default_fieldtype;
 |                       E_BAD_ARGUMENT  - invalid arguments
 |                       E_SYSTEM_ERROR  - system error (no memory)
 |
-|   Return Values :  Fieldtype pointer or NULL if error occured
+|   Return Values :  Fieldtype pointer or NULL if error occurred
 +--------------------------------------------------------------------------*/
 FIELDTYPE *new_fieldtype(
  bool (* const field_check)(FIELD *,const void *),

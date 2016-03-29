@@ -113,7 +113,7 @@ Create custom targets to build projects in external trees
   ``CMAKE_CACHE_ARGS <arg>...``
     Initial cache arguments, of the form ``-Dvar:string=on``.
     These arguments are written in a pre-load a script that populates
-    CMake cache, see also :manual:`cmake -C <cmake(1)>`. This allows to
+    CMake cache, see also :manual:`cmake -C <cmake(1)>`. This allows one to
     overcome command line length limits.
     These arguments are :command:`set` using the ``FORCE`` argument,
     and therefore cannot be changed by the user.
@@ -122,7 +122,7 @@ Create custom targets to build projects in external trees
   ``CMAKE_CACHE_DEFAULT_ARGS <arg>...``
     Initial default cache arguments, of the form ``-Dvar:string=on``.
     These arguments are written in a pre-load a script that populates
-    CMake cache, see also :manual:`cmake -C <cmake(1)>`. This allows to
+    CMake cache, see also :manual:`cmake -C <cmake(1)>`. This allows one to
     overcome command line length limits.
     These arguments can be used as default value that will be set if no
     previous value is found in the cache, and that the user can change
@@ -238,7 +238,7 @@ Create custom targets to build projects in external trees
   If ``UPDATE_DISCONNECTED`` is set, the update step is not executed
   automatically when building the main target. The update step can still
   be added as a step target and called manually. This is useful if you
-  want to allow to build the project when you are disconnected from the
+  want to allow one to build the project when you are disconnected from the
   network (you might still need the network for the download step).
   This is disabled by default.
   The directory property ``EP_UPDATE_DISCONNECTED`` can be used to change

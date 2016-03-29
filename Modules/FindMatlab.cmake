@@ -132,7 +132,7 @@
 #   useful for the searching all possible Matlab installation.
 # :command:`matlab_get_mex_suffix`
 #   returns the suffix to be used for the mex files
-#   (platform/architecture dependant)
+#   (platform/architecture dependent)
 # :command:`matlab_get_version_from_matlab_run`
 #   returns the version of Matlab, given the full directory of the Matlab
 #   program.

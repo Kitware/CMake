@@ -1241,7 +1241,7 @@ case 43:
 /* rule 43 can match eol */
 YY_RULE_SETUP
 #line 172 "cmFortranLexer.in.l"
-/* Ignore line-endings preceeded by \ */
+/* Ignore line-endings preceded by \ */
         YY_BREAK
 case 44:
 YY_RULE_SETUP

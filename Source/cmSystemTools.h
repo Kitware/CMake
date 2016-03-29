@@ -116,7 +116,7 @@ public:
       return cmSystemTools::s_FatalErrorOccured || GetInterruptFlag();
     }
 
-  ///! Set the error occured flag and fatal error back to false
+  ///! Set the error occurred flag and fatal error back to false
   static void ResetErrorOccuredFlag()
     {
       cmSystemTools::s_FatalErrorOccured = false;
