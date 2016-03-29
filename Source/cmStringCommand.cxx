@@ -565,7 +565,7 @@ bool cmStringCommand::HandleFindCommand(std::vector<std::string> const&
   // ensure that the user cannot accidentally specify REVERSE as a variable
   if(outvar == "REVERSE")
     {
-    this->SetError("sub-command FIND does not allow to select REVERSE as "
+    this->SetError("sub-command FIND does not allow one to select REVERSE as "
                    "the output variable.  "
                    "Maybe you missed the actual output variable?");
     return false;

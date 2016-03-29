@@ -6,18 +6,18 @@
 #
 # CMakeVerifyManifest.cmake
 #
-# This script is used to verify that embeded manifests and side by side
+# This script is used to verify that embedded manifests and side by side
 # manifests for a project match.  To run this script, cd to a directory
 # and run the script with cmake -P.  On the command line you can pass in
 # versions that are OK even if not found in the .manifest files.  For
 # example, cmake -Dallow_versions=8.0.50608.0
-# -PCmakeVerifyManifest.cmake could be used to allow an embeded manifest
+# -PCmakeVerifyManifest.cmake could be used to allow an embedded manifest
 # of 8.0.50608.0 to be used in a project even if that version was not
 # found in the .manifest file.
 
 # This script first recursively globs *.manifest files from
 # the current directory.  Then globs *.exe and *.dll.  Each
-# .exe and .dll is scanned for embeded manifests and the versions
+# .exe and .dll is scanned for embedded manifests and the versions
 # of CRT are compared to those found in the .manifest files
 # from the first glob.
 
@@ -54,7 +54,7 @@ function(crt_version file list_var)
     endif()
   endforeach()
   if(NOT DEFINED has_match)
-    message("Information: no embeded manifest in: ${file}")
+    message("Information: no embedded manifest in: ${file}")
     return()
   endif()
   list(APPEND version_list ${${list_var}})

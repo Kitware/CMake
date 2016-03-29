@@ -46,7 +46,7 @@ MODULE_ID("$Id$")
 |                       E_BAD_ARGUMENT  - invalid arguments
 |                       E_SYSTEM_ERROR  - system error (no memory)
 |
-|   Return Values :  Fieldtype pointer or NULL if error occured.
+|   Return Values :  Fieldtype pointer or NULL if error occurred.
 +--------------------------------------------------------------------------*/
 FIELDTYPE *link_fieldtype(FIELDTYPE * type1, FIELDTYPE * type2)
 {

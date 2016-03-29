@@ -99,7 +99,7 @@ was expected."
   endif()
 
   if( EXISTS ${FETCH_HEAD_file} )
-    message( FATAL_ERROR "Fetch occured when it was not expected.")
+    message( FATAL_ERROR "Fetch occurred when it was not expected.")
   endif()
 
   # Check the resulting SHA

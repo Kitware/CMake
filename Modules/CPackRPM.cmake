@@ -23,7 +23,7 @@
 #
 # .. note::
 #
-#  `<COMPONENT>` part of variables is prefered to be in upper case (for e.g. if
+#  `<COMPONENT>` part of variables is preferred to be in upper case (for e.g. if
 #  component is named `foo` then use `CPACK_RPM_FOO_XXXX` variable name format)
 #  as is with other `CPACK_<COMPONENT>_XXXX` variables.
 #  For the purposes of back compatibility (CMake/CPack version 3.5 and lower)

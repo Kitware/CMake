@@ -13,7 +13,7 @@ directories for the compiler.
 In addition to accepting values from that command, values may be set
 directly on any directory using the :command:`set_property` command.  A
 directory gets its initial value from its parent directory if it has one.
-The intial value of the :prop_tgt:`INCLUDE_DIRECTORIES` target property
+The initial value of the :prop_tgt:`INCLUDE_DIRECTORIES` target property
 comes from the value of this property.  Both directory and target property
 values are adjusted by calls to the :command:`include_directories` command.
 

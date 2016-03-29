@@ -5,7 +5,7 @@ Ninja only: Pool used for linking.
 
 The number of parallel link processes could be limited by defining
 pools with the global :prop_gbl:`JOB_POOLS`
-property and then specifing here the pool name.
+property and then specifying here the pool name.
 
 For instance:
 

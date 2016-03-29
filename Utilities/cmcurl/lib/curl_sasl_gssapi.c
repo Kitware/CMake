@@ -70,7 +70,7 @@ char *Curl_sasl_build_gssapi_spn(const char *service, const char *host)
  * userp       [in]     - The user name.
  * passdwp     [in]     - The user's password.
  * service     [in]     - The service type such as www, smtp, pop or imap.
- * mutual_auth [in]     - Flag specifing whether or not mutual authentication
+ * mutual_auth [in]     - Flag specifying whether or not mutual authentication
  *                        is enabled.
  * chlg64      [in]     - Pointer to the optional base64 encoded challenge
  *                        message.

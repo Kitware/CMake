@@ -846,7 +846,7 @@ void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm)
  * userp       [in]     - The user name in the format User or Domain\User.
  * passdwp     [in]     - The user's password.
  * service     [in]     - The service type such as www, smtp, pop or imap.
- * mutual_auth [in]     - Flag specifing whether or not mutual authentication
+ * mutual_auth [in]     - Flag specifying whether or not mutual authentication
  *                        is enabled.
  * chlg64      [in]     - The optional base64 encoded challenge message.
  * krb5        [in/out] - The gssapi data struct being used and modified.
