@@ -120,7 +120,7 @@ static int testRobustEncoding()
     ret++;
     }
 
-#ifdef WIN32
+#ifdef _WIN32
   // 16 bit wchar_t - we make an invalid surrogate pair
   wchar_t cwstr[] = {0xD801, 0xDA00, 0};
   // this conversion could fail
