@@ -33,9 +33,6 @@ public:
       std::string &errorString,
       cmake::MessageType &status);
 
-  static cmListFileContext GetConditionContext(cmMakefile* mf,
-      const cmCommandContext& command, std::string const& filePath);
-
 private:
   // Filter the given variable definition based on policy CMP0054.
   const char* GetDefinitionIfUnquoted(

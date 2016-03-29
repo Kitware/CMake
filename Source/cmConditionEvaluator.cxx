@@ -104,18 +104,6 @@ bool cmConditionEvaluator::IsTrue(
     errorString, status, true);
 }
 
-cmListFileContext cmConditionEvaluator::GetConditionContext(
-    cmMakefile*,
-    const cmCommandContext& command,
-    const std::string& filePath)
-{
-  cmListFileContext context =
-      cmListFileContext::FromCommandContext(
-        command,
-        filePath);
-  return context;
-}
-
 //=========================================================================
 const char* cmConditionEvaluator::GetDefinitionIfUnquoted(
   cmExpandedCommandArgument const& argument) const
