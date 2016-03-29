@@ -105,7 +105,7 @@ bool cmConditionEvaluator::IsTrue(
 }
 
 cmListFileContext cmConditionEvaluator::GetConditionContext(
-    cmMakefile* mf,
+    cmMakefile*,
     const cmCommandContext& command,
     const std::string& filePath)
 {
@@ -113,13 +113,6 @@ cmListFileContext cmConditionEvaluator::GetConditionContext(
       cmListFileContext::FromCommandContext(
         command,
         filePath);
-
-  if(!mf->GetCMakeInstance()->GetIsInTryCompile())
-    {
-    cmOutputConverter converter(mf->GetStateSnapshot());
-    context.FilePath = converter.Convert(context.FilePath,
-                                         cmOutputConverter::HOME);
-    }
   return context;
 }
 
