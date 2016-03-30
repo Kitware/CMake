@@ -125,7 +125,6 @@ protected:
           std::string line;
           FileLinesType& curFileLines =
             this->Coverage.TotalCoverage[this->CurFileName];
-          curFileLines.push_back(-1);
           while(cmSystemTools::GetLineFromStream(fin, line))
           {
             curFileLines.push_back(-1);
