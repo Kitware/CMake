@@ -172,6 +172,21 @@ function(ctest_coverage_collect_gcov)
   set(unfiltered_gcov_files)
   file(GLOB_RECURSE unfiltered_gcov_files RELATIVE ${binary_dir} "${coverage_dir}/*.gcov")
 
+  # if CTEST_EXTRA_COVERAGE_GLOB was specified we search for files
+  # that might be uncovered
+  if (DEFINED CTEST_EXTRA_COVERAGE_GLOB)
+    set(uncovered_files)
+    foreach(search_entry IN LISTS CTEST_EXTRA_COVERAGE_GLOB)
+      if(NOT GCOV_QUIET)
+        message("Add coverage glob: ${search_entry}")
+      endif()
+      file(GLOB_RECURSE matching_files "${source_dir}/${search_entry}")
+      if (matching_files)
+        list(APPEND uncovered_files "${matching_files}")
+      endif()
+    endforeach()
+  endif()
+
   set(gcov_files)
   foreach(gcov_file ${unfiltered_gcov_files})
     file(STRINGS ${binary_dir}/${gcov_file} first_line LIMIT_COUNT 1 ENCODING UTF-8)
@@ -195,8 +210,31 @@ function(ctest_coverage_collect_gcov)
       endif()
     endforeach()
 
+    foreach(uncovered_file IN LISTS uncovered_files)
+      if (uncovered_file STREQUAL source_file)
+        list(REMOVE_ITEM uncovered_files "${uncovered_file}")
+      endif()
+    endforeach()
+
     if(NOT is_excluded)
       list(APPEND gcov_files ${gcov_file})
+    endif()
+  endforeach()
+
+  foreach (uncovered_file ${uncovered_files})
+    # Copy from source to binary dir, preserving any intermediate subdirectories.
+    get_filename_component(filename "${uncovered_file}" NAME)
+    get_filename_component(relative_path "${uncovered_file}" DIRECTORY)
+    string(REPLACE "${source_dir}" "" relative_path "${relative_path}")
+    if (relative_path)
+      # Strip leading slash.
+      string(SUBSTRING "${relative_path}" 1 -1 relative_path)
+    endif()
+    file(COPY ${uncovered_file} DESTINATION ${binary_dir}/uncovered/${relative_path})
+    if(relative_path)
+      list(APPEND uncovered_files_for_tar uncovered/${relative_path}/${filename})
+    else()
+      list(APPEND uncovered_files_for_tar uncovered/${filename})
     endif()
   endforeach()
 
@@ -205,10 +243,12 @@ function(ctest_coverage_collect_gcov)
   # stamps
   string(REPLACE ";" "\n" gcov_files "${gcov_files}")
   string(REPLACE ";" "\n" label_files "${label_files}")
+  string(REPLACE ";" "\n" uncovered_files_for_tar "${uncovered_files_for_tar}")
   file(WRITE "${coverage_dir}/coverage_file_list.txt"
     "${gcov_files}
 ${coverage_dir}/data.json
 ${label_files}
+${uncovered_files_for_tar}
 ")
 
   if (GCOV_QUIET)
