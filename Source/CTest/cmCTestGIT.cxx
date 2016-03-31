@@ -273,53 +273,21 @@ bool cmCTestGIT::UpdateImpl()
   std::string top_dir = this->FindTopDir();
   const char* git = this->CommandLineTool.c_str();
   const char* recursive = "--recursive";
-  const char* sync_recursive = "--recursive";
 
-  // Git < 1.6.5 did not support submodule --recursive
+  // Git < 1.6.5.0 did not support --recursive
   if(this->GetGitVersion() < cmCTestGITVersion(1,6,5,0))
     {
     recursive = 0;
-    // No need to require >= 1.6.5 if there are no submodules.
+    // No need to require >= 1.6.5.0 if there are no submodules.
     if(cmSystemTools::FileExists((top_dir + "/.gitmodules").c_str()))
       {
-      this->Log << "Git < 1.6.5 cannot update submodules recursively\n";
+      this->Log << "Git < 1.6.5.0 cannot update submodules recursively\n";
       }
-    }
-
-  // Git < 1.8.1 did not support sync --recursive
-  if(this->GetGitVersion() < cmCTestGITVersion(1,8,1,0))
-    {
-    sync_recursive = 0;
-    // No need to require >= 1.8.1 if there are no submodules.
-    if(cmSystemTools::FileExists((top_dir + "/.gitmodules").c_str()))
-      {
-      this->Log << "Git < 1.8.1 cannot synchronize submodules recursively\n";
-      }
-    }
-
-  OutputLogger submodule_out(this->Log, "submodule-out> ");
-  OutputLogger submodule_err(this->Log, "submodule-err> ");
-
-  char const* git_submodule_init[] = {git, "submodule", "init", 0};
-  bool ret = this->RunChild(git_submodule_init, &submodule_out, &submodule_err,
-                            top_dir.c_str());
-
-  if (!ret)
-    {
-    return false;
-    }
-
-  char const* git_submodule_sync[] = {git, "submodule", "sync",
-                                      sync_recursive, 0};
-  ret = this->RunChild(git_submodule_sync, &submodule_out, &submodule_err,
-                       top_dir.c_str());
-
-  if (!ret)
-    {
-    return false;
     }
 
   char const* git_submodule[] = {git, "submodule", "update", recursive, 0};
+  OutputLogger submodule_out(this->Log, "submodule-out> ");
+  OutputLogger submodule_err(this->Log, "submodule-err> ");
   return this->RunChild(git_submodule, &submodule_out, &submodule_err,
                         top_dir.c_str());
 }
