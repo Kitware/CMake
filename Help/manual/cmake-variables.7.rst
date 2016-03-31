@@ -408,7 +408,7 @@ Variables for CTest
    /variable/CTEST_EXTRA_COVERAGE_GLOB
    /variable/CTEST_GIT_COMMAND
    /variable/CTEST_GIT_INIT_SUBMODULES
-   /variable/CTEST_GIT_UPDATE_OPTIONS
+   /variable/CTEST_GIT_UPDATE_CUSTOM
    /variable/CTEST_GIT_UPDATE_OPTIONS
    /variable/CTEST_HG_COMMAND
    /variable/CTEST_HG_UPDATE_OPTIONS
