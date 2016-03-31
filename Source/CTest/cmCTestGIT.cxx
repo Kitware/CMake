@@ -300,13 +300,20 @@ bool cmCTestGIT::UpdateImpl()
   OutputLogger submodule_out(this->Log, "submodule-out> ");
   OutputLogger submodule_err(this->Log, "submodule-err> ");
 
-  char const* git_submodule_init[] = {git, "submodule", "init", 0};
-  bool ret = this->RunChild(git_submodule_init, &submodule_out, &submodule_err,
-                            top_dir.c_str());
+  bool ret;
 
-  if (!ret)
+  std::string init_submodules =
+    this->CTest->GetCTestConfiguration("GITInitSubmodules");
+  if (cmSystemTools::IsOn(init_submodules))
     {
-    return false;
+    char const* git_submodule_init[] = {git, "submodule", "init", 0};
+    ret = this->RunChild(git_submodule_init, &submodule_out, &submodule_err,
+                         top_dir.c_str());
+
+    if (!ret)
+      {
+      return false;
+      }
     }
 
   char const* git_submodule_sync[] = {git, "submodule", "sync",
