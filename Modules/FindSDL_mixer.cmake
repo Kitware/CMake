@@ -16,7 +16,7 @@
 #
 #
 #
-# For backward compatiblity the following variables are also set:
+# For backward compatibility the following variables are also set:
 #
 # ::
 #
@@ -103,7 +103,7 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL_mixer
                                   REQUIRED_VARS SDL_MIXER_LIBRARIES SDL_MIXER_INCLUDE_DIRS
                                   VERSION_VAR SDL_MIXER_VERSION_STRING)
 
-# for backward compatiblity
+# for backward compatibility
 set(SDLMIXER_LIBRARY ${SDL_MIXER_LIBRARIES})
 set(SDLMIXER_INCLUDE_DIR ${SDL_MIXER_INCLUDE_DIRS})
 set(SDLMIXER_FOUND ${SDL_MIXER_FOUND})

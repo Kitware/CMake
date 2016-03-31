@@ -15,7 +15,7 @@
 #Setup Greenhills MULTI specific compilation information
 
 if (NOT GHS_INT_DIRECTORY)
-  #Assume the C:/ghs/int#### directory that is latest is prefered
+  #Assume the C:/ghs/int#### directory that is latest is preferred
   set(GHS_EXPECTED_ROOT "C:/ghs")
   if (EXISTS ${GHS_EXPECTED_ROOT})
     FILE(GLOB GHS_CANDIDATE_INT_DIRS RELATIVE

@@ -81,7 +81,7 @@
 #      --compiler-bindir is already present in the CUDA_NVCC_FLAGS or
 #      CUDA_NVCC_FLAGS_<CONFIG> variables.  For Visual Studio targets
 #      $(VCInstallDir)/bin is a special value that expands out to the path when
-#      the command is run from withing VS.
+#      the command is run from within VS.
 #
 #   CUDA_NVCC_FLAGS
 #   CUDA_NVCC_FLAGS_<CONFIG>
@@ -215,7 +215,7 @@
 #      The arguments passed in after OPTIONS are extra command line options to
 #      give to nvcc.  You can also specify per configuration options by
 #      specifying the name of the configuration followed by the options.  General
-#      options must preceed configuration specific options.  Not all
+#      options must precede configuration specific options.  Not all
 #      configurations need to be specified, only the ones provided will be used.
 #
 #         OPTIONS -DFLAG=2 "-DFLAG_OTHER=space in flag"

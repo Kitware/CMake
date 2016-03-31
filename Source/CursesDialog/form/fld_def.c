@@ -73,7 +73,7 @@ FIELD *_nc_Default_Field = &default_field;
 |                              int *err )
 |   
 |   Description   :  Create an argument structure for the specified type.
-|                    Use the type-dependant argument list to construct
+|                    Use the type-dependent argument list to construct
 |                    it.
 |
 |   Return Values :  Pointer to argument structure. Maybe NULL.
@@ -193,7 +193,7 @@ _nc_Free_Argument(const FIELDTYPE * typ, TypeArgument * argp)
 |   Description   :  Copy argument structure of field src to field dst
 |
 |   Return Values :  TRUE       - copy worked
-|                    FALSE      - error occured
+|                    FALSE      - error occurred
 +--------------------------------------------------------------------------*/
 bool
 _nc_Copy_Type(FIELD *dst, FIELD const *src)

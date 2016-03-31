@@ -85,7 +85,7 @@ if(ZLIB_FOUND)
     list(APPEND PNG_NAMES_DEBUG png${v}d libpng${v}d)
   endforeach()
   unset(_PNG_VERSION_SUFFIXES)
-  # For compatiblity with versions prior to this multi-config search, honor
+  # For compatibility with versions prior to this multi-config search, honor
   # any PNG_LIBRARY that is already specified and skip the search.
   if(NOT PNG_LIBRARY)
     find_library(PNG_LIBRARY_RELEASE NAMES ${PNG_NAMES})
@@ -104,7 +104,7 @@ if(ZLIB_FOUND)
   if (PNG_LIBRARY AND PNG_PNG_INCLUDE_DIR)
       # png.h includes zlib.h. Sigh.
       set(PNG_INCLUDE_DIRS ${PNG_PNG_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR} )
-      set(PNG_INCLUDE_DIR ${PNG_INCLUDE_DIRS} ) # for backward compatiblity
+      set(PNG_INCLUDE_DIR ${PNG_INCLUDE_DIRS} ) # for backward compatibility
       set(PNG_LIBRARIES ${PNG_LIBRARY} ${ZLIB_LIBRARY})
 
       if (CYGWIN)

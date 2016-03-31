@@ -324,7 +324,7 @@
 # that allow your Java and C code to interact.
 #
 # There are two main signatures for create_javah.  The first signature
-# returns generated files throught variable specified by GENERATED_FILES option:
+# returns generated files through variable specified by GENERATED_FILES option:
 #
 # ::
 #

@@ -65,7 +65,7 @@ Options
 ``-P <package name>``
  override/define CPACK_PACKAGE_NAME
 
- If the package name is not specified on cpack commmand line
+ If the package name is not specified on cpack command line
  thenCPack.cmake defines it as CMAKE_PROJECT_NAME
 
 ``-R <package version>``

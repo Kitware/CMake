@@ -645,7 +645,7 @@ Disabling the Package Registry
 ------------------------------
 
 In some cases using the Package Registries is not desirable. CMake
-allows to disable them using the following variables:
+allows one to disable them using the following variables:
 
  * :variable:`CMAKE_EXPORT_NO_PACKAGE_REGISTRY` disables the
    :command:`export(PACKAGE)` command.
