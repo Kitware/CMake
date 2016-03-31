@@ -599,9 +599,10 @@
 # while determining if symlink should be either created or present in a
 # post install script - depending on relocation paths.
 #
-# Currenty there are a few limitations though:
+# Symbolic links that point to locations outside packaging path produce a
+# warning and are treated as non relocatable permanent symbolic links.
 #
-# * Only symbolic links with relative path can be packaged.
+# Currenty there are a few limitations though:
 #
 # * For component based packaging component interdependency is not checked
 #   when processing symbolic links. Symbolic links pointing to content of
@@ -1068,13 +1069,28 @@ function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXE
           get_filename_component(SYMLINK_POINT_ "${SYMLINK_LOCATION_}/${SYMLINK_POINT_}" ABSOLUTE)
         endif()
 
-        string(SUBSTRING "${SYMLINK_POINT_}" ${WDR_LEN_} -1 SYMLINK_POINT_WD_)
+        # recalculate path length after conversion to canonical form
+        string(LENGTH "${SYMLINK_POINT_}" SYMLINK_POINT_LENGTH_)
 
-        cpack_rpm_symlink_get_relocation_prefixes("${F}" "${PACKAGE_PREFIXES}" "SYMLINK_RELOCATIONS")
-        cpack_rpm_symlink_get_relocation_prefixes("${SYMLINK_POINT_WD_}" "${PACKAGE_PREFIXES}" "POINT_RELOCATIONS")
+        if(SYMLINK_POINT_ MATCHES "${WDIR}/.*")
+          # only symlinks that are pointing inside the packaging structure should be checked for relocation
+          string(SUBSTRING "${SYMLINK_POINT_}" ${WDR_LEN_} -1 SYMLINK_POINT_WD_)
+          cpack_rpm_symlink_get_relocation_prefixes("${F}" "${PACKAGE_PREFIXES}" "SYMLINK_RELOCATIONS")
+          cpack_rpm_symlink_get_relocation_prefixes("${SYMLINK_POINT_WD_}" "${PACKAGE_PREFIXES}" "POINT_RELOCATIONS")
 
-        list(LENGTH SYMLINK_RELOCATIONS SYMLINK_RELOCATIONS_COUNT)
-        list(LENGTH POINT_RELOCATIONS POINT_RELOCATIONS_COUNT)
+          list(LENGTH SYMLINK_RELOCATIONS SYMLINK_RELOCATIONS_COUNT)
+          list(LENGTH POINT_RELOCATIONS POINT_RELOCATIONS_COUNT)
+        else()
+          # location pointed to is ouside WDR so it should be treated as a permanent symlink
+          set(SYMLINK_POINT_WD_ "${SYMLINK_POINT_}")
+
+          unset(SYMLINK_RELOCATIONS)
+          unset(POINT_RELOCATIONS)
+          unset(SYMLINK_RELOCATIONS_COUNT)
+          unset(POINT_RELOCATIONS_COUNT)
+
+          message(AUTHOR_WARNING "CPackRPM:Warning: Symbolic link '${F}' points to location that is outside packaging path! Link will possibly not be relocatable.")
+        endif()
 
         if(SYMLINK_RELOCATIONS_COUNT AND POINT_RELOCATIONS_COUNT)
           # find matching
