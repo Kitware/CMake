@@ -92,6 +92,9 @@ if("${CPACK_GENERATOR}" MATCHES "RPM")
   # test symbolic link to location outside package
   execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ./outside_package symlink_outside_package)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/symlink_outside_package DESTINATION ${CMAKE_INSTALL_LIBDIR}/inside_relocatable_one/depth_two COMPONENT libraries)
+  # test symbolic link to location outside wdr (packaging directory)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink /outside_package_wdr symlink_outside_wdr)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/symlink_outside_wdr DESTINATION ${CMAKE_INSTALL_LIBDIR}/inside_relocatable_one/depth_two COMPONENT libraries)
 endif()
 
 # CPack boilerplate for this project
