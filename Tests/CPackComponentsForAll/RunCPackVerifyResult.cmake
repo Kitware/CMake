@@ -188,6 +188,7 @@ if(CPackGen MATCHES "RPM")
 /usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_one/depth_two/depth_three
 /usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_one/depth_two/depth_three/symlink_parentdir_path
 /usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_one/depth_two/symlink_outside_package
+/usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_one/depth_two/symlink_outside_wdr
 /usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_one/depth_two/symlink_relocatable_subpath
 /usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_one/depth_two/symlink_samedir_path
 /usr/foo/bar/lib${LIB_SUFFIX}/inside_relocatable_one/depth_two/symlink_samedir_path_current_dir
@@ -354,6 +355,8 @@ if(CPackGen MATCHES "RPM")
         string(REGEX MATCH "^.*${whitespaces}->${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}/non_relocatable/depth_two$" check_symlink "${SYMLINK_POINT_}")
       elseif("${symlink_name}" STREQUAL "symlink_outside_package")
         string(REGEX MATCH "^.*${whitespaces}->${whitespaces}outside_package$" check_symlink "${SYMLINK_POINT_}")
+      elseif("${symlink_name}" STREQUAL "symlink_outside_wdr")
+        string(REGEX MATCH "^.*${whitespaces}->${whitespaces}/outside_package_wdr$" check_symlink "${SYMLINK_POINT_}")
       elseif("${symlink_name}" STREQUAL "symlink_other_relocatable_path"
           OR "${symlink_name}" STREQUAL "symlink_from_non_relocatable_path"
           OR "${symlink_name}" STREQUAL "symlink_relocatable_subpath")
