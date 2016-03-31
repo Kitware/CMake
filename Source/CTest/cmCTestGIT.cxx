@@ -285,9 +285,26 @@ bool cmCTestGIT::UpdateImpl()
       }
     }
 
-  char const* git_submodule[] = {git, "submodule", "update", recursive, 0};
   OutputLogger submodule_out(this->Log, "submodule-out> ");
   OutputLogger submodule_err(this->Log, "submodule-err> ");
+
+  bool ret;
+
+  std::string init_submodules =
+    this->CTest->GetCTestConfiguration("GITInitSubmodules");
+  if (cmSystemTools::IsOn(init_submodules.c_str()))
+    {
+    char const* git_submodule_init[] = {git, "submodule", "init", 0};
+    ret = this->RunChild(git_submodule_init, &submodule_out, &submodule_err,
+                         top_dir.c_str());
+
+    if (!ret)
+      {
+      return false;
+      }
+    }
+
+  char const* git_submodule[] = {git, "submodule", "update", recursive, 0};
   return this->RunChild(git_submodule, &submodule_out, &submodule_err,
                         top_dir.c_str());
 }
