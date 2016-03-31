@@ -18,6 +18,7 @@
 
 class cmMakefile;
 class cmXMLWriter;
+class cmSourceGroup;
 
 /** \class cmExtraEclipseCDT4Generator
  * \brief Write Eclipse project files for Makefile based projects
@@ -100,6 +101,8 @@ private:
   static void AddEnvVar(std::ostream& out, const char* envVar,
                         cmLocalGenerator* lg);
 
+  void WriteGroups(std::vector<cmSourceGroup> const& sourceGroups,
+                   std::string& linkName, cmXMLWriter& xml);
   void CreateLinksToSubprojects(cmXMLWriter& xml, const std::string& baseDir);
   void CreateLinksForTargets(cmXMLWriter& xml);
 
