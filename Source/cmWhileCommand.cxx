@@ -56,8 +56,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
       commandContext.Name = execContext.Name;
 
       cmListFileContext conditionContext =
-          cmConditionEvaluator::GetConditionContext(
-            &mf, commandContext,
+          cmListFileContext::FromCommandContext(
+            commandContext,
             this->GetStartingContext().FilePath);
 
       cmConditionEvaluator conditionEvaluator(

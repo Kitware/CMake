@@ -104,25 +104,6 @@ bool cmConditionEvaluator::IsTrue(
     errorString, status, true);
 }
 
-cmListFileContext cmConditionEvaluator::GetConditionContext(
-    cmMakefile* mf,
-    const cmCommandContext& command,
-    const std::string& filePath)
-{
-  cmListFileContext context =
-      cmListFileContext::FromCommandContext(
-        command,
-        filePath);
-
-  if(!mf->GetCMakeInstance()->GetIsInTryCompile())
-    {
-    cmOutputConverter converter(mf->GetStateSnapshot());
-    context.FilePath = converter.Convert(context.FilePath,
-                                         cmOutputConverter::HOME);
-    }
-  return context;
-}
-
 //=========================================================================
 const char* cmConditionEvaluator::GetDefinitionIfUnquoted(
   cmExpandedCommandArgument const& argument) const
