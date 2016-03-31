@@ -1089,7 +1089,7 @@ function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXE
           unset(SYMLINK_RELOCATIONS_COUNT)
           unset(POINT_RELOCATIONS_COUNT)
 
-          message(WARNING "Symbolic link '${F}' points to location that is outside packaging path! Link will not be relocatable.")
+          message(AUTHOR_WARNING "CPackRPM:Warning: Symbolic link '${F}' points to location that is outside packaging path! Link will possibly not be relocatable.")
         endif()
 
         if(SYMLINK_RELOCATIONS_COUNT AND POINT_RELOCATIONS_COUNT)
