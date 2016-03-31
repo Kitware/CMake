@@ -274,14 +274,14 @@ bool cmCTestGIT::UpdateImpl()
   const char* git = this->CommandLineTool.c_str();
   const char* recursive = "--recursive";
 
-  // Git < 1.6.5.0 did not support --recursive
+  // Git < 1.6.5 did not support submodule --recursive
   if(this->GetGitVersion() < cmCTestGITVersion(1,6,5,0))
     {
     recursive = 0;
-    // No need to require >= 1.6.5.0 if there are no submodules.
+    // No need to require >= 1.6.5 if there are no submodules.
     if(cmSystemTools::FileExists((top_dir + "/.gitmodules").c_str()))
       {
-      this->Log << "Git < 1.6.5.0 cannot update submodules recursively\n";
+      this->Log << "Git < 1.6.5 cannot update submodules recursively\n";
       }
     }
 
