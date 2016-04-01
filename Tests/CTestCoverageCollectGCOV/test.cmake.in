@@ -16,6 +16,7 @@ list(APPEND CTEST_CUSTOM_COVERAGE_EXCLUDE
   "/3rdparty/"
   "/bar/somethingelse"
 )
+list(APPEND CTEST_EXTRA_COVERAGE_GLOB "*.cpp")
 
 include(CTestCoverageCollectGCOV)
 set(tar_file ${CTEST_BINARY_DIRECTORY}/gcov.tar)
@@ -41,6 +42,8 @@ set(expected_out
   Testing/CoverageInfo/data.json
   Testing/CoverageInfo/extra.cpp.gcov
   Testing/CoverageInfo/main.cpp.gcov
+  uncovered/extra/uncovered1.cpp
+  uncovered/uncovered2.cpp
 )
 
 if("${out}" STREQUAL "${expected_out}")
