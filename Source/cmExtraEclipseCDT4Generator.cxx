@@ -467,6 +467,49 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   xml.EndElement(); // projectDescription
 }
 
+void cmExtraEclipseCDT4Generator::WriteGroups(
+  std::vector<cmSourceGroup> const& sourceGroups,
+  std::string& linkName, cmXMLWriter& xml)
+{
+  for(std::vector<cmSourceGroup>::const_iterator sgIt = sourceGroups.begin();
+      sgIt != sourceGroups.end(); ++sgIt)
+    {
+    std::string linkName3 = linkName;
+    linkName3 += "/";
+    linkName3 += sgIt->GetFullName();
+
+    size_t pos = 0;
+    while ((pos = linkName3.find("\\", pos)) != std::string::npos)
+      {
+      linkName3.replace(pos, 1, "/");
+      pos++;
+      }
+
+    this->AppendLinkedResource(xml, linkName3, "virtual:/virtual",
+                               VirtualFolder);
+    std::vector<cmSourceGroup> const& children = sgIt->GetGroupChildren();
+    if (!children.empty())
+      {
+      this->WriteGroups(children, linkName, xml);
+      }
+    std::vector<const cmSourceFile*> sFiles = sgIt->GetSourceFiles();
+    for(std::vector<const cmSourceFile*>::const_iterator
+        fileIt = sFiles.begin(); fileIt != sFiles.end(); ++fileIt)
+      {
+      std::string fullPath = (*fileIt)->GetFullPath();
+
+      if (!cmSystemTools::FileIsDirectory(fullPath))
+        {
+        std::string linkName4 = linkName3;
+        linkName4 += "/";
+        linkName4 += cmSystemTools::GetFilenameName(fullPath);
+        this->AppendLinkedResource(xml, linkName4,
+                                   this->GetEclipsePath(fullPath),
+                                   LinkToFile);
+        }
+      }
+    }
+}
 
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
@@ -523,34 +566,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
             sourceGroup->AssignSource(*sfIt);
             }
 
-          for(std::vector<cmSourceGroup>::iterator sgIt = sourceGroups.begin();
-              sgIt != sourceGroups.end();
-              ++sgIt)
-            {
-            std::string linkName3 = linkName2;
-            linkName3 += "/";
-            linkName3 += sgIt->GetFullName();
-            this->AppendLinkedResource(xml, linkName3, "virtual:/virtual",
-                                       VirtualFolder);
-
-            std::vector<const cmSourceFile*> sFiles = sgIt->GetSourceFiles();
-            for(std::vector<const cmSourceFile*>::const_iterator fileIt =
-                                                                sFiles.begin();
-                fileIt != sFiles.end();
-                ++fileIt)
-              {
-              std::string fullPath = (*fileIt)->GetFullPath();
-              if (!cmSystemTools::FileIsDirectory(fullPath))
-                {
-                std::string linkName4 = linkName3;
-                linkName4 += "/";
-                linkName4 += cmSystemTools::GetFilenameName(fullPath);
-                this->AppendLinkedResource(xml, linkName4,
-                                           this->GetEclipsePath(fullPath),
-                                           LinkToFile);
-                }
-              }
-            }
+          this->WriteGroups(sourceGroups, linkName2, xml);
           }
           break;
         // ignore all others:
