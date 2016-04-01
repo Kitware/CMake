@@ -117,7 +117,7 @@ void cmFLTKWrapUICommand::FinalPass()
   // people should add the srcs to the target themselves, but the old command
   // didn't support that, so check and see if they added the files in and if
   // they didn;t then print a warning and add then anyhow
-  cmTarget* target = this->Makefile->FindTarget(this->Target);
+  cmTarget* target = this->Makefile->FindLocalNonAliasTarget(this->Target);
   if(!target)
     {
     std::string msg =

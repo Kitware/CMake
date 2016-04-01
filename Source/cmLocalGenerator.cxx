@@ -485,7 +485,7 @@ private:
   std::string Name;
 };
 
-cmGeneratorTarget* cmLocalGenerator::FindGeneratorTarget(
+cmGeneratorTarget* cmLocalGenerator::FindLocalNonAliasGeneratorTarget(
     const std::string& name) const
 {
   std::vector<cmGeneratorTarget*>::const_iterator ti =
@@ -1828,7 +1828,7 @@ cmLocalGenerator::FindGeneratorTargetToUse(const std::string& name) const
     return *imported;
     }
 
-  if(cmGeneratorTarget* t = this->FindGeneratorTarget(name))
+  if(cmGeneratorTarget* t = this->FindLocalNonAliasGeneratorTarget(name))
     {
     return t;
     }

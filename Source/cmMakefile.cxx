@@ -4058,7 +4058,7 @@ std::vector<std::string> cmMakefile::GetPropertyKeys() const
   return this->StateSnapshot.GetDirectory().GetPropertyKeys();
 }
 
-cmTarget* cmMakefile::FindTarget(const std::string& name) const
+cmTarget* cmMakefile::FindLocalNonAliasTarget(const std::string& name) const
 {
   cmTargets::iterator i = this->Targets.find( name );
   if ( i != this->Targets.end() )
@@ -4235,7 +4235,7 @@ cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
     }
 
   // Look for a target built in this directory.
-  if(cmTarget* t = this->FindTarget(name))
+  if(cmTarget* t = this->FindLocalNonAliasTarget(name))
     {
     return t;
     }
