@@ -4026,25 +4026,13 @@ std::vector<std::string> cmMakefile::GetPropertyKeys() const
   return this->StateSnapshot.GetDirectory().GetPropertyKeys();
 }
 
-cmTarget* cmMakefile::FindTarget(const std::string& name,
-                                 bool excludeAliases) const
+cmTarget* cmMakefile::FindTarget(const std::string& name) const
 {
-  if (!excludeAliases)
-    {
-    std::map<std::string, std::string>::const_iterator i =
-        this->AliasTargets.find(name);
-    if (i != this->AliasTargets.end())
-      {
-      cmTargets::iterator ai = this->Targets.find(i->second);
-      return &ai->second;
-      }
-    }
   cmTargets::iterator i = this->Targets.find( name );
   if ( i != this->Targets.end() )
     {
     return &i->second;
     }
-
   return 0;
 }
 
@@ -4215,7 +4203,7 @@ cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
     }
 
   // Look for a target built in this directory.
-  if(cmTarget* t = this->FindTarget(name, excludeAliases))
+  if(cmTarget* t = this->FindTarget(name))
     {
     return t;
     }
