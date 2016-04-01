@@ -488,16 +488,6 @@ private:
 cmGeneratorTarget* cmLocalGenerator::FindGeneratorTarget(
     const std::string& name) const
 {
-  std::map<std::string, std::string>::const_iterator i =
-      this->AliasTargets.find(name);
-  if (i != this->AliasTargets.end())
-    {
-    std::vector<cmGeneratorTarget*>::const_iterator ai =
-        std::find_if(this->GeneratorTargets.begin(),
-                     this->GeneratorTargets.end(),
-                     NamedGeneratorTargetFinder(i->second));
-    return *ai;
-    }
   std::vector<cmGeneratorTarget*>::const_iterator ti =
       std::find_if(this->GeneratorTargets.begin(),
                    this->GeneratorTargets.end(),
@@ -506,7 +496,6 @@ cmGeneratorTarget* cmLocalGenerator::FindGeneratorTarget(
     {
     return *ti;
     }
-
   return 0;
 }
 
