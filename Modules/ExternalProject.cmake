@@ -499,7 +499,7 @@ define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED
   "ExternalProject module."
   )
 
-function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name git_submodules src_name work_dir gitclone_infofile gitclone_stampfile)
+function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name git_submodules src_name work_dir gitclone_infofile gitclone_stampfile tls_verify)
   file(WRITE ${script_filename}
 "if(\"${git_tag}\" STREQUAL \"\")
   message(FATAL_ERROR \"Tag for git checkout should not be empty.\")
@@ -524,12 +524,18 @@ if(error_code)
   message(FATAL_ERROR \"Failed to remove directory: '${source_dir}'\")
 endif()
 
+set(git_options)
+if(NOT tls_verify)
+  list(APPEND git_options
+    -c http.sslVerify=false)
+endif()
+
 # try the clone 3 times incase there is an odd git clone issue
 set(error_code 1)
 set(number_of_tries 0)
 while(error_code AND number_of_tries LESS 3)
   execute_process(
-    COMMAND \"${git_EXECUTABLE}\" clone --origin \"${git_remote_name}\" \"${git_repository}\" \"${src_name}\"
+    COMMAND \"${git_EXECUTABLE}\" \${git_options} clone --origin \"${git_remote_name}\" \"${git_repository}\" \"${src_name}\"
     WORKING_DIRECTORY \"${work_dir}\"
     RESULT_VARIABLE error_code
     )
@@ -544,7 +550,7 @@ if(error_code)
 endif()
 
 execute_process(
-  COMMAND \"${git_EXECUTABLE}\" checkout ${git_tag}
+  COMMAND \"${git_EXECUTABLE}\" \${git_options} checkout ${git_tag}
   WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
@@ -553,7 +559,7 @@ if(error_code)
 endif()
 
 execute_process(
-  COMMAND \"${git_EXECUTABLE}\" submodule init ${git_submodules}
+  COMMAND \"${git_EXECUTABLE}\" \${git_options} submodule init ${git_submodules}
   WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
@@ -562,7 +568,7 @@ if(error_code)
 endif()
 
 execute_process(
-  COMMAND \"${git_EXECUTABLE}\" submodule update --recursive ${git_submodules}
+  COMMAND \"${git_EXECUTABLE}\" \${git_options} submodule update --recursive ${git_submodules}
   WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
@@ -1777,6 +1783,11 @@ function(_ep_add_download_command name)
       set(git_remote_name "origin")
     endif()
 
+    get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
+    if(NOT tls_verify)
+      set(tls_verify OFF)
+    endif()
+
     # For the download step, and the git clone operation, only the repository
     # should be recorded in a configured RepositoryInfo file. If the repo
     # changes, the clone script should be run again. But if only the tag
@@ -1801,7 +1812,7 @@ function(_ep_add_download_command name)
     #
     _ep_write_gitclone_script(${tmp_dir}/${name}-gitclone.cmake ${source_dir}
       ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${git_remote_name} "${git_submodules}" ${src_name} ${work_dir}
-      ${stamp_dir}/${name}-gitinfo.txt ${stamp_dir}/${name}-gitclone-lastrun.txt
+      ${stamp_dir}/${name}-gitinfo.txt ${stamp_dir}/${name}-gitclone-lastrun.txt ${tls_verify}
       )
     set(comment "Performing download step (git clone) for '${name}'")
     set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitclone.cmake)
