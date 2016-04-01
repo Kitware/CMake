@@ -485,19 +485,9 @@ private:
   std::string Name;
 };
 
-cmGeneratorTarget* cmLocalGenerator::FindGeneratorTarget(
+cmGeneratorTarget* cmLocalGenerator::FindLocalNonAliasGeneratorTarget(
     const std::string& name) const
 {
-  std::map<std::string, std::string>::const_iterator i =
-      this->AliasTargets.find(name);
-  if (i != this->AliasTargets.end())
-    {
-    std::vector<cmGeneratorTarget*>::const_iterator ai =
-        std::find_if(this->GeneratorTargets.begin(),
-                     this->GeneratorTargets.end(),
-                     NamedGeneratorTargetFinder(i->second));
-    return *ai;
-    }
   std::vector<cmGeneratorTarget*>::const_iterator ti =
       std::find_if(this->GeneratorTargets.begin(),
                    this->GeneratorTargets.end(),
@@ -506,7 +496,6 @@ cmGeneratorTarget* cmLocalGenerator::FindGeneratorTarget(
     {
     return *ti;
     }
-
   return 0;
 }
 
@@ -1839,7 +1828,7 @@ cmLocalGenerator::FindGeneratorTargetToUse(const std::string& name) const
     return *imported;
     }
 
-  if(cmGeneratorTarget* t = this->FindGeneratorTarget(name))
+  if(cmGeneratorTarget* t = this->FindLocalNonAliasGeneratorTarget(name))
     {
     return t;
     }
