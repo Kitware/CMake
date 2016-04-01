@@ -388,8 +388,7 @@ public:
     }
   std::vector<cmTarget*> GetImportedTargets() const;
 
-  cmTarget* FindTarget(const std::string& name,
-                       bool excludeAliases = false) const;
+  cmTarget* FindLocalNonAliasTarget(const std::string& name) const;
 
   /** Find a target to use in place of the given name.  The target
       returned may be imported or built within the project.  */

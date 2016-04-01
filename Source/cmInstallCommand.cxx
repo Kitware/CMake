@@ -381,7 +381,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       return false;
       }
     // Lookup this target in the current directory.
-    if(cmTarget* target=this->Makefile->FindTarget(*targetIt))
+    if(cmTarget* target=this->Makefile->FindLocalNonAliasTarget(*targetIt))
       {
       // Found the target.  Check its type.
       if(target->GetType() != cmState::EXECUTABLE &&
