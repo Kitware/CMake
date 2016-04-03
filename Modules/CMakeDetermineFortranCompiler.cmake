@@ -209,6 +209,21 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
     endif()
   endif()
 
+  # Fall back for GNU MINGW, which is not always detected correctly
+  # (__MINGW32__ is defined for the C language, but perhaps not for Fortran!)
+  if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU" AND NOT CMAKE_Fortran_PLATFORM_ID)
+    execute_process(COMMAND ${CMAKE_Fortran_COMPILER} ${CMAKE_Fortran_COMPILER_ID_FLAGS_LIST} -E "${CMAKE_ROOT}/Modules/CMakeTestGNU.c"
+      OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT RESULT_VARIABLE CMAKE_COMPILER_RETURN)
+    if(NOT CMAKE_COMPILER_RETURN)
+      if(CMAKE_COMPILER_OUTPUT MATCHES "THIS_IS_MINGW")
+        set(CMAKE_Fortran_PLATFORM_ID "MinGW")
+      endif()
+      if(CMAKE_COMPILER_OUTPUT MATCHES "THIS_IS_CYGWIN")
+        set(CMAKE_Fortran_PLATFORM_ID "Cygwin")
+      endif()
+    endif()
+  endif()
+
   # Set old compiler and platform id variables.
   if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
     set(CMAKE_COMPILER_IS_GNUG77 1)
