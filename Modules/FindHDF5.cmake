@@ -120,54 +120,137 @@ else()
   set(HDF5_Fortran_COMPILER_NAMES h5fc h5pfc)
 endif()
 
-# try to find the HDF5 wrapper compilers
-find_program( HDF5_C_COMPILER_EXECUTABLE
-    NAMES ${HDF5_C_COMPILER_NAMES} NAMES_PER_DIR
-    HINTS ENV HDF5_ROOT
-    PATH_SUFFIXES bin Bin
-    DOC "HDF5 Wrapper compiler.  Used only to detect HDF5 compile flags." )
-mark_as_advanced( HDF5_C_COMPILER_EXECUTABLE )
+# We may have picked up some duplicates in various lists during the above
+# process for the language bindings (both the C and C++ bindings depend on
+# libz for example).  Remove the duplicates. It appears that the default
+# CMake behavior is to remove duplicates from the end of a list. However,
+# for link lines, this is incorrect since unresolved symbols are searched
+# for down the link line. Therefore, we reverse the list, remove the
+# duplicates, and then reverse it again to get the duplicates removed from
+# the beginning.
+macro(_HDF5_remove_duplicates_from_beginning _list_name)
+  if(${_list_name})
+    list(REVERSE ${_list_name})
+    list(REMOVE_DUPLICATES ${_list_name})
+    list(REVERSE ${_list_name})
+  endif()
+endmacro()
 
-find_program( HDF5_CXX_COMPILER_EXECUTABLE
-    NAMES ${HDF5_CXX_COMPILER_NAMES} NAMES_PER_DIR
-    HINTS ENV HDF5_ROOT
-    PATH_SUFFIXES bin Bin
-    DOC "HDF5 C++ Wrapper compiler.  Used only to detect HDF5 compile flags." )
-mark_as_advanced( HDF5_CXX_COMPILER_EXECUTABLE )
 
-find_program( HDF5_Fortran_COMPILER_EXECUTABLE
-    NAMES ${HDF5_Fortran_COMPILER_NAMES} NAMES_PER_DIR
-    HINTS ENV HDF5_ROOT
-    PATH_SUFFIXES bin Bin
-    DOC "HDF5 Fortran Wrapper compiler.  Used only to detect HDF5 compile flags." )
-mark_as_advanced( HDF5_Fortran_COMPILER_EXECUTABLE )
+# Test first if the current compilers automatically wrap HDF5
 
-unset(HDF5_C_COMPILER_NAMES)
-unset(HDF5_CXX_COMPILER_NAMES)
-unset(HDF5_Fortran_COMPILER_NAMES)
+function(_HDF5_test_regular_compiler_C success version)
+  set(scratch_directory
+    ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/hdf5)
+  if(NOT ${success} OR
+     NOT EXISTS ${scratch_directory}/compiler_has_h5_c)
+    set(test_file ${scratch_directory}/cmake_hdf5_test.c)
+    file(WRITE ${test_file}
+      "#include <hdf5.h>\n"
+      "#include <hdf5_hl.h>\n"
+      "int main(void) {\n"
+      "  char const* info_ver = \"INFO\" \":\" H5_VERSION;\n"
+      "  hid_t fid;\n"
+      "  fid = H5Fcreate(\"foo.h5\",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT);\n"
+      "  return 0;\n"
+      "}")
+    try_compile(${success} ${scratch_directory} ${test_file}
+      COPY_FILE ${scratch_directory}/compiler_has_h5_c
+    )
+  endif()
+  if(${success})
+    file(STRINGS ${scratch_directory}/compiler_has_h5_c INFO_VER
+      REGEX "^INFO:([0-9]+\\.[0-9]+\\.[0-9]+)(-patch([0-9]+))?"
+    )
+    string(REGEX MATCH "^INFO:([0-9]+\\.[0-9]+\\.[0-9]+)(-patch([0-9]+))?"
+      INFO_VER "${INFO_VER}"
+    )
+    set(${version} ${CMAKE_MATCH_1})
+    if(CMAKE_MATCH_3)
+      set(${version} ${HDF5_CXX_VERSION}.${CMAKE_MATCH_3})
+    endif()
+    set(${version} ${${version}} PARENT_SCOPE)
+  endif()
+endfunction()
 
-find_program( HDF5_DIFF_EXECUTABLE
-    NAMES h5diff
-    HINTS ENV HDF5_ROOT
-    PATH_SUFFIXES bin Bin
-    DOC "HDF5 file differencing tool." )
-mark_as_advanced( HDF5_DIFF_EXECUTABLE )
+function(_HDF5_test_regular_compiler_CXX success version)
+  set(scratch_directory ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/hdf5)
+  if(NOT ${success} OR
+     NOT EXISTS ${scratch_directory}/compiler_has_h5_cxx)
+    set(test_file ${scratch_directory}/cmake_hdf5_test.cxx)
+    file(WRITE ${test_file}
+      "#include <H5Cpp.h>\n"
+      "#ifndef H5_NO_NAMESPACE\n"
+      "using namespace H5;\n"
+      "#endif\n"
+      "int main(int argc, char **argv) {\n"
+      "  char const* info_ver = \"INFO\" \":\" H5_VERSION;\n"
+      "  H5File file(\"foo.h5\", H5F_ACC_TRUNC);\n"
+      "  return 0;\n"
+      "}")
+    try_compile(${success} ${scratch_directory} ${test_file}
+      COPY_FILE ${scratch_directory}/compiler_has_h5_cxx
+    )
+  endif()
+  if(${success})
+    file(STRINGS ${scratch_directory}/compiler_has_h5_cxx INFO_VER
+      REGEX "^INFO:([0-9]+\\.[0-9]+\\.[0-9]+)(-patch([0-9]+))?"
+    )
+    string(REGEX MATCH "^INFO:([0-9]+\\.[0-9]+\\.[0-9]+)(-patch([0-9]+))?"
+      INFO_VER "${INFO_VER}"
+    )
+    set(${version} ${CMAKE_MATCH_1})
+    if(CMAKE_MATCH_3)
+      set(${version} ${HDF5_CXX_VERSION}.${CMAKE_MATCH_3})
+    endif()
+    set(${version} ${${version}} PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(_HDF5_test_regular_compiler_Fortran success)
+  if(NOT ${success})
+    set(scratch_directory
+      ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/hdf5)
+    set(test_file ${scratch_directory}/cmake_hdf5_test.f90)
+    file(WRITE ${test_file}
+      "program hdf5_hello\n"
+      "  use hdf5\n"
+      "  use h5lt\n"
+      "  use h5ds\n"
+      "  integer error\n"
+      "  call h5open_f(error)\n"
+      "  call h5close_f(error)\n"
+      "end\n")
+    try_compile(${success} ${scratch_directory} ${test_file})
+  endif()
+endfunction()
 
 # Invoke the HDF5 wrapper compiler.  The compiler return value is stored to the
 # return_value argument, the text output is stored to the output variable.
-macro( _HDF5_invoke_compiler language output return_value )
-    if( HDF5_${language}_COMPILER_EXECUTABLE )
-        exec_program( ${HDF5_${language}_COMPILER_EXECUTABLE}
-            ARGS -show
-            OUTPUT_VARIABLE ${output}
-            RETURN_VALUE ${return_value}
-        )
-        if( ${${return_value}} EQUAL 0 )
-            # do nothing
-        else()
-            message( STATUS
-              "Unable to determine HDF5 ${language} flags from HDF5 wrapper." )
-        endif()
+macro( _HDF5_invoke_compiler language output return_value version)
+    set(${version})
+    exec_program( ${HDF5_${language}_COMPILER_EXECUTABLE}
+        ARGS -show
+        OUTPUT_VARIABLE ${output}
+        RETURN_VALUE ${return_value}
+    )
+    if(NOT ${${return_value}} EQUAL 0)
+        message(STATUS
+          "Unable to determine HDF5 ${language} flags from HDF5 wrapper.")
+    endif()
+    exec_program( ${HDF5_${language}_COMPILER_EXECUTABLE}
+        ARGS -showconfig
+        OUTPUT_VARIABLE config_output
+        RETURN_VALUE config_return
+    )
+    if(NOT ${return_value} EQUAL 0)
+        message( STATUS
+          "Unable to determine HDF5 ${language} version from HDF5 wrapper.")
+    endif()
+    string(REGEX MATCH "HDF5 Version: ([a-zA-Z0-9\\.\\-]*)" version_match "${config_output}")
+    if(version_match)
+        string(REPLACE "HDF5 Version: " "" ${version} "${version_match}")
+        string(REPLACE "-patch" "." ${version} "${${version}}")
     endif()
 endmacro()
 
@@ -242,65 +325,156 @@ if( NOT HDF5_FOUND )
     endif()
 endif()
 
-if( NOT HDF5_FOUND )
-    _HDF5_invoke_compiler( C HDF5_C_COMPILE_LINE HDF5_C_RETURN_VALUE )
-    _HDF5_invoke_compiler( CXX HDF5_CXX_COMPILE_LINE HDF5_CXX_RETURN_VALUE )
-    _HDF5_invoke_compiler( Fortran HDF5_Fortran_COMPILE_LINE HDF5_Fortran_RETURN_VALUE )
-    set(HDF5_HL_COMPILE_LINE ${HDF5_C_COMPILE_LINE})
-    set(HDF5_Fortran_HL_COMPILE_LINE ${HDF5_Fortran_COMPILE_LINE})
+set(_HDF5_NEED_TO_SEARCH False)
+set(HDF5_COMPILER_NO_INTERROGATE True)
+get_property(__langs GLOBAL PROPERTY ENABLED_LANGUAGES)
+if(__langs)
+  # Only search for languages we've enabled
+  foreach(__lang IN LISTS __langs)
+    # First check to see if our regular compiler is one of wrappers
+    if(__lang STREQUAL "C")
+      _HDF5_test_regular_compiler_C(
+        HDF5_${__lang}_COMPILER_NO_INTERROGATE
+        HDF5_${__lang}_VERSION)
+    elseif(__lang STREQUAL "CXX")
+      _HDF5_test_regular_compiler_CXX(
+        HDF5_${__lang}_COMPILER_NO_INTERROGATE
+        HDF5_${__lang}_VERSION)
+    elseif(__lang STREQUAL "Fortran")
+      _HDF5_test_regular_compiler_Fortran(
+        HDF5_${__lang}_COMPILER_NO_INTERROGATE)
+    else()
+      continue()
+    endif()
+    if(HDF5_${__lang}_COMPILER_NO_INTERROGATE)
+      message(STATUS "HDF5: Using hdf5 compiler wrapper for all ${__lang} compiling")
+      set(HDF5_${__lang}_FOUND True)
+      set(HDF5_${__lang}_COMPILER_EXECUTABLE_NO_INTERROGATE "${CMAKE_${__lang}_COMPILER}" CACHE FILEPATH "HDF5 ${__lang} compiler wrapper")
+      set(HDF5_${__lang}_DEFINITIONS)
+      set(HDF5_${__lang}_INCLUDE_DIRS)
+      set(HDF5_${__lang}_LIBRARIES)
+      mark_as_advanced(HDF5_${__lang}_COMPILER_EXECUTABLE_NO_INTERROGATE)
+      mark_as_advanced(HDF5_${__lang}_DEFINITIONS)
+      mark_as_advanced(HDF5_${__lang}_INCLUDE_DIRS)
+      mark_as_advanced(HDF5_${__lang}_LIBRARIES)
+    else()
+      set(HDF5_COMPILER_NO_INTERROGATE False)
+      # If this language isn't using the wrapper, then try to seed the
+      # search options with the wrapper
+      find_program(HDF5_${__lang}_COMPILER_EXECUTABLE
+        NAMES ${HDF5_${__lang}_COMPILER_NAMES} NAMES_PER_DIR
+        HINTS ENV HDF5_ROOT
+        PATH_SUFFIXES bin Bin
+        DOC "HDF5 ${__lang} Wrapper compiler.  Used only to detect HDF5 compile flags."
+      )
+      mark_as_advanced( HDF5_${__lang}_COMPILER_EXECUTABLE )
+      unset(HDF5_${__lang}_COMPILER_NAMES)
 
+      if(HDF5_${__lang}_COMPILER_EXECUTABLE)
+        _HDF5_invoke_compiler(${__lang} HDF5_${__lang}_COMPILE_LINE
+          HDF5_${__lang}_RETURN_VALUE HDF5_${__lang}_VERSION)
+        if(HDF5_${__lang}_RETURN_VALUE EQUAL 0)
+          message(STATUS "HDF5: Using hdf5 compiler wrapper to determine ${__lang} configuration")
+          _HDF5_parse_compile_line( HDF5_${__lang}_COMPILE_LINE
+            HDF5_${__lang}_INCLUDE_DIRS
+            HDF5_${__lang}_DEFINITIONS
+            HDF5_${__lang}_LIBRARY_DIRS
+            HDF5_${__lang}_LIBRARY_NAMES
+          )
+          set(HDF5_${__lang}_LIBRARIES)
+          foreach(L IN LISTS HDF5_${__lang}_LIBRARY_NAMES)
+            find_library(HDF5_${__lang}_LIBRARY_${L} ${L} ${HDF5_${__lang}_LIBRARY_DIRS})
+            if(HDF5_${__lang}_LIBRARY_${L})
+              list(APPEND HDF5_${__lang}_LIBRARIES ${HDF5_${__lang}_LIBRARY_${L}})
+            else()
+              list(APPEND HDF5_${__lang}_LIBRARIES ${L})
+            endif()
+          endforeach()
+          set(HDF5_${__lang}_FOUND True)
+          mark_as_advanced(HDF5_${__lang}_DEFINITIONS)
+          mark_as_advanced(HDF5_${__lang}_INCLUDE_DIRS)
+          mark_as_advanced(HDF5_${__lang}_LIBRARIES)
+          _HDF5_remove_duplicates_from_beginning(HDF5_${__lang}_DEFINITIONS)
+          _HDF5_remove_duplicates_from_beginning(HDF5_${__lang}_INCLUDE_DIRS)
+          _HDF5_remove_duplicates_from_beginning(HDF5_${__lang}_LIBRARIES)
+        else()
+          set(_HDF5_NEED_TO_SEARCH True)
+        endif()
+      else()
+        set(_HDF5_NEED_TO_SEARCH True)
+      endif()
+    endif()
+    if(HDF5_${__lang}_VERSION)
+      if(NOT HDF5_VERSION)
+        set(HDF5_VERSION ${HDF5_${__lang}_VERSION})
+      elseif(NOT HDF5_VERSION VERSION_EQUAL HDF5_${__lang}_VERSION)
+        message(WARNING "HDF5 Version found for language ${__lang}, ${HDF5_${__lang}_VERSION} is different than previously found version ${HDF5_VERSION}")
+      endif()
+    endif()
+  endforeach()
+endif()
+
+if(HDF5_COMPILER_NO_INTERROGATE)
+  # No arguments necessary, all languages can use the compiler wrappers
+  set(HDF5_FOUND True)
+  set(HDF5_METHOD "Included by compiler wrappers")
+  set(HDF5_REQUIRED_VARS HDF5_METHOD)
+elseif(NOT _HDF5_NEED_TO_SEARCH)
+  # Compiler wrappers aren't being used by the build but were found and used
+  # to determine necessary include and library flags
+  set(HDF5_INCLUDE_DIRS)
+  set(HDF5_LIBRARIES)
+  foreach(__lang IN LISTS __langs)
+    if(HDF5_${__lang}_FOUND)
+      if(NOT HDF5_${__lang}_COMPILER_NO_INTERROGATE)
+        list(APPEND HDF5_DEFINITIONS ${HDF5_${__lang}_DEFINITIONS})
+        list(APPEND HDF5_INCLUDE_DIRS ${HDF5_${__lang}_INCLUDE_DIRS})
+        list(APPEND HDF5_LIBRARIES ${HDF5_${__lang}_LIBRARIES})
+      endif()
+    endif()
+  endforeach()
+  _HDF5_remove_duplicates_from_beginning(HDF5_DEFINITIONS)
+  _HDF5_remove_duplicates_from_beginning(HDF5_INCLUDE_DIRS)
+  _HDF5_remove_duplicates_from_beginning(HDF5_LIBRARIES)
+  set(HDF5_FOUND True)
+  set(HDF5_REQUIRED_VARS HDF5_LIBRARIES)
+endif()
+
+find_program( HDF5_DIFF_EXECUTABLE
+    NAMES h5diff
+    HINTS ENV HDF5_ROOT
+    PATH_SUFFIXES bin Bin
+    DOC "HDF5 file differencing tool." )
+mark_as_advanced( HDF5_DIFF_EXECUTABLE )
+
+if( NOT HDF5_FOUND )
     # seed the initial lists of libraries to find with items we know we need
-    set( HDF5_C_LIBRARY_NAMES_INIT hdf5 )
-    set( HDF5_HL_LIBRARY_NAMES_INIT hdf5_hl ${HDF5_C_LIBRARY_NAMES_INIT} )
-    set( HDF5_CXX_LIBRARY_NAMES_INIT hdf5_cpp ${HDF5_C_LIBRARY_NAMES_INIT} )
-    set( HDF5_Fortran_LIBRARY_NAMES_INIT hdf5_fortran
-        ${HDF5_C_LIBRARY_NAMES_INIT} )
-    set( HDF5_Fortran_HL_LIBRARY_NAMES_INIT hdf5hl_fortran hdf5_hl
-        ${HDF5_Fortran_LIBRARY_NAMES_INIT} )
+    set(HDF5_C_LIBRARY_NAMES          hdf5)
+    set(HDF5_C_HL_LIBRARY_NAMES       hdf5_hl ${HDF5_C_LIBRARY_NAMES_INIT})
+
+    set(HDF5_CXX_LIBRARY_NAMES        hdf5_cpp    ${HDF5_C_LIBRARY_NAMES_INIT})
+    set(HDF5_CXX_HL_LIBRARY_NAMES     hdf5_hl_cpp ${HDF5_C_HL_LIBRARY_NAMES_INIT} ${HDF5_CXX_LIBRARY_NAMES_INIT})
+
+    set(HDF5_Fortran_LIBRARY_NAMES    hdf5_fortran   ${HDF5_C_LIBRARY_NAMES_INIT})
+    set(HDF5_Fortran_HL_LIBRARY_NAMES hdf5hl_fortran ${HDF5_C_HL_LIBRARY_NAMES_INIT} ${HDF5_Fortran_LIBRARY_NAMES_INIT})
 
     foreach( LANGUAGE ${HDF5_LANGUAGE_BINDINGS} )
-        if( HDF5_${LANGUAGE}_COMPILE_LINE )
-            _HDF5_parse_compile_line( HDF5_${LANGUAGE}_COMPILE_LINE
-                HDF5_${LANGUAGE}_INCLUDE_FLAGS
-                HDF5_${LANGUAGE}_DEFINITIONS
-                HDF5_${LANGUAGE}_LIBRARY_DIRS
-                HDF5_${LANGUAGE}_LIBRARY_NAMES
-            )
-
-            # take a guess that the includes may be in the 'include' sibling
-            # directory of a library directory.
-            foreach( dir ${HDF5_${LANGUAGE}_LIBRARY_DIRS} )
-                list( APPEND HDF5_${LANGUAGE}_INCLUDE_FLAGS ${dir}/../include )
-            endforeach()
-        endif()
-
-        # set the definitions for the language bindings.
-        list( APPEND HDF5_DEFINITIONS ${HDF5_${LANGUAGE}_DEFINITIONS} )
-
         # find the HDF5 include directories
-        if(${LANGUAGE} MATCHES "Fortran")
+        if(LANGUAGE STREQUAL "Fortran")
             set(HDF5_INCLUDE_FILENAME hdf5.mod)
+        elseif(LANGUAGE STREQUAL "CXX")
+            set(HDF5_INCLUDE_FILENAME H5Cpp.h)
         else()
             set(HDF5_INCLUDE_FILENAME hdf5.h)
         endif()
 
-        find_path( HDF5_${LANGUAGE}_INCLUDE_DIR ${HDF5_INCLUDE_FILENAME}
-            HINTS
-                ${HDF5_${LANGUAGE}_INCLUDE_FLAGS}
-                ENV
-                    HDF5_ROOT
-            PATHS
-                $ENV{HOME}/.local/include
-            PATH_SUFFIXES
-                include
-                Include
+        find_path(HDF5_${LANGUAGE}_INCLUDE_DIR ${HDF5_INCLUDE_FILENAME}
+            HINTS $ENV{HDF5_ROOT}
+            PATHS $ENV{HOME}/.local/include
+            PATH_SUFFIXES include Include
         )
-        mark_as_advanced( HDF5_${LANGUAGE}_INCLUDE_DIR )
+        mark_as_advanced(HDF5_${LANGUAGE}_INCLUDE_DIR)
         list( APPEND HDF5_INCLUDE_DIRS ${HDF5_${LANGUAGE}_INCLUDE_DIR} )
-
-        set( HDF5_${LANGUAGE}_LIBRARY_NAMES
-            ${HDF5_${LANGUAGE}_LIBRARY_NAMES_INIT}
-            ${HDF5_${LANGUAGE}_LIBRARY_NAMES} )
 
         # find the HDF5 libraries
         foreach( LIB ${HDF5_${LANGUAGE}_LIBRARY_NAMES} )
@@ -336,26 +510,8 @@ if( NOT HDF5_FOUND )
         list(APPEND HDF5_LIBRARIES ${HDF5_${LANGUAGE}_LIBRARIES})
     endforeach()
 
-    # We may have picked up some duplicates in various lists during the above
-    # process for the language bindings (both the C and C++ bindings depend on
-    # libz for example).  Remove the duplicates. It appears that the default
-    # CMake behavior is to remove duplicates from the end of a list. However,
-    # for link lines, this is incorrect since unresolved symbols are searched
-    # for down the link line. Therefore, we reverse the list, remove the
-    # duplicates, and then reverse it again to get the duplicates removed from
-    # the beginning.
-    macro( _remove_duplicates_from_beginning _list_name )
-        list( REVERSE ${_list_name} )
-        list( REMOVE_DUPLICATES ${_list_name} )
-        list( REVERSE ${_list_name} )
-    endmacro()
-
-    if( HDF5_INCLUDE_DIRS )
-        _remove_duplicates_from_beginning( HDF5_INCLUDE_DIRS )
-    endif()
-    if( HDF5_LIBRARY_DIRS )
-        _remove_duplicates_from_beginning( HDF5_LIBRARY_DIRS )
-    endif()
+    _HDF5_remove_duplicates_from_beginning(HDF5_INCLUDE_DIRS)
+    _HDF5_remove_duplicates_from_beginning(HDF5_LIBRARY_DIRS)
 
     # If the HDF5 include directory was found, open H5pubconf.h to determine if
     # HDF5 was compiled with parallel IO support
@@ -376,8 +532,11 @@ if( NOT HDF5_FOUND )
                 HDF5_VERSION_DEFINE
                 REGEX "^[ \t]*#[ \t]*define[ \t]+H5_VERSION[ \t]+" )
             if( "${HDF5_VERSION_DEFINE}" MATCHES
-                "H5_VERSION[ \t]+\"([0-9]+\\.[0-9]+\\.[0-9]+).*\"" )
+                "H5_VERSION[ \t]+\"([0-9]+\\.[0-9]+\\.[0-9]+)(-patch([0-9]+))?\"" )
                 set( HDF5_VERSION "${CMAKE_MATCH_1}" )
+                if( CMAKE_MATCH_3 )
+                  set( HDF5_VERSION ${HDF5_VERSION}.${CMAKE_MATCH_3})
+                endif()
             endif()
             unset(HDF5_VERSION_DEFINE)
         endif()
@@ -392,10 +551,10 @@ if( NOT HDF5_FOUND )
     if( HDF5_INCLUDE_DIRS )
         set( HDF5_INCLUDE_DIR "${HDF5_INCLUDE_DIRS}" )
     endif()
-
+    set(HDF5_REQUIRED_VARS HDF5_LIBRARIES HDF5_INCLUDE_DIRS)
 endif()
 
-find_package_handle_standard_args( HDF5
-    REQUIRED_VARS HDF5_LIBRARIES HDF5_INCLUDE_DIRS
+find_package_handle_standard_args(HDF5
+    REQUIRED_VARS ${HDF5_REQUIRED_VARS}
     VERSION_VAR   HDF5_VERSION
 )
