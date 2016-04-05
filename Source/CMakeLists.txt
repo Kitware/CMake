@@ -717,6 +717,7 @@ if(APPLE)
     CPack/cmCPackBundleGenerator.cxx
     CPack/cmCPackDragNDropGenerator.cxx
     CPack/cmCPackOSXX11Generator.cxx
+    CPack/cmCPackPKGGenerator.cxx
     CPack/cmCPackPackageMakerGenerator.cxx
     )
 endif()
