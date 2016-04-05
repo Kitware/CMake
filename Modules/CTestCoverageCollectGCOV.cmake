@@ -227,6 +227,21 @@ function(ctest_coverage_collect_gcov)
   endforeach()
 
   foreach (uncovered_file ${uncovered_files})
+    # Check if this uncovered file should be excluded.
+    set(is_excluded false)
+    foreach(exclude_entry IN LISTS CTEST_CUSTOM_COVERAGE_EXCLUDE)
+      if(uncovered_file MATCHES "${exclude_entry}")
+        set(is_excluded true)
+        if(NOT GCOV_QUIET)
+          message("Excluding coverage for: ${uncovered_file} which matches ${exclude_entry}")
+        endif()
+        break()
+      endif()
+    endforeach()
+    if(is_excluded)
+      continue()
+    endif()
+
     # Copy from source to binary dir, preserving any intermediate subdirectories.
     get_filename_component(filename "${uncovered_file}" NAME)
     get_filename_component(relative_path "${uncovered_file}" DIRECTORY)

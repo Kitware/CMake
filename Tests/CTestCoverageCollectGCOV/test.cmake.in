@@ -15,6 +15,7 @@ list(APPEND CTEST_CUSTOM_COVERAGE_EXCLUDE
   "/foo/something"
   "/3rdparty/"
   "/bar/somethingelse"
+  "/CMakeFiles/"
 )
 list(APPEND CTEST_EXTRA_COVERAGE_GLOB "*.cpp")
 
