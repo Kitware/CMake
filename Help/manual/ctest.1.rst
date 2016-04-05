@@ -589,6 +589,12 @@ Configuration settings to specify the version control tool include:
   * `CTest Script`_ variable: :variable:`CTEST_GIT_COMMAND`
   * :module:`CTest` module variable: ``GITCOMMAND``
 
+``GITInitSubmodules``
+  If set, CTest will update the repository's submodules before updating.
+
+  * `CTest Script`_ variable: :variable:`CTEST_GIT_INIT_SUBMODULES`
+  * :module:`CTest` module variable: ``CTEST_GIT_INIT_SUBMODULES``
+
 ``GITUpdateCustom``
   Specify a custom command line (as a semicolon-separated list) to run
   in the source tree (Git work tree) to update it instead of running
