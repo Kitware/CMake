@@ -229,7 +229,7 @@ void cmFortranParser_RuleLineDirective(cmFortranParser* parser,
   cmSystemTools::ConvertToUnixSlashes(included);
 
   // Save the named file as included in the source.
-  if (cmSystemTools::FileExists(included))
+  if (cmSystemTools::FileExists(included, true))
     {
     parser->Info.Includes.insert(included);
     }
