@@ -129,7 +129,8 @@ public:
   void AddImportedGeneratorTarget(cmGeneratorTarget* gt);
   void AddOwnedImportedGeneratorTarget(cmGeneratorTarget* gt);
 
-  cmGeneratorTarget* FindGeneratorTarget(const std::string& name) const;
+  cmGeneratorTarget*
+    FindLocalNonAliasGeneratorTarget(const std::string& name) const;
   cmGeneratorTarget* FindGeneratorTargetToUse(const std::string& name) const;
 
   /**
