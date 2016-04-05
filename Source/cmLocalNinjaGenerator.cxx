@@ -400,7 +400,7 @@ cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
 
   bool symbolic = false;
   for (std::vector<std::string>::const_iterator o = outputs.begin();
-       o != outputs.end(); ++o)
+       !symbolic && o != outputs.end(); ++o)
     {
     if (cmSourceFile* sf = this->Makefile->GetSource(*o))
       {
