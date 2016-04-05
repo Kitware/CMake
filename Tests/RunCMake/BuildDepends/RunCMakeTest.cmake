@@ -39,4 +39,5 @@ if(NOT RunCMake_GENERATOR MATCHES "Visual Studio [67]|Xcode")
   unset(run_BuildDepends_skip_step_2)
 endif()
 
+run_BuildDepends(Custom-Symbolic-and-Byproduct)
 run_BuildDepends(Custom-Always)

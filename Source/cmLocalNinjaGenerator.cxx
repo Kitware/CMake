@@ -444,7 +444,7 @@ cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       this->ConstructComment(ccg),
       "Custom command for " + ninjaOutputs[0],
       cc->GetUsesTerminal(),
-      /*restat*/!symbolic,
+      /*restat*/!symbolic || !byproducts.empty(),
       ninjaOutputs,
       ninjaDeps,
       orderOnlyDeps);
