@@ -2,7 +2,7 @@ add_custom_command(
   OUTPUT gen-byproduct gen-byproduct-stamp
   BYPRODUCTS byproduct
   COMMAND ${CMAKE_COMMAND} -E touch gen-byproduct-stamp
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different gen-byproduct-stamp byproduct
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/main.c byproduct
   )
 set_property(SOURCE gen-byproduct PROPERTY SYMBOLIC 1)
 add_custom_target(produce DEPENDS gen-byproduct)
