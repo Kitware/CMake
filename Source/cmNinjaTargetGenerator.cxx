@@ -340,12 +340,49 @@ cmNinjaTargetGenerator
   vars.ObjectFileDir = "$OBJECT_FILE_DIR";
 
   cmMakefile* mf = this->GetMakefile();
+  
+  bool useResponseFile = true;
+  std::string rspfile;
+  std::string rspcontent;
+  std::string flags;// = "$FLAGS";
+
+  std::string responseFlag;
+  if (!useResponseFile) {
+    flags = "$FLAGS";
+    // TODO
+    //vars.Objects = "$in";
+    //vars.LinkLibraries = "$LINK_PATH $LINK_LIBRARIES";
+  } else {
+    std::string cmakeVarLang = "CMAKE_";
+    cmakeVarLang += lang;
+
+    // build response file name
+    std::string cmakeLinkVar =  cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
+    const char * flag = GetMakefile()->GetDefinition(cmakeLinkVar);
+    if(flag) {
+      responseFlag = flag;
+    } else {
+      responseFlag = "@";
+    }
+    rspfile = "$RSP_FILE";
+    responseFlag += rspfile;
+
+    // build response file content
+    //if (this->GetGlobalGenerator()->IsGCCOnWindows()) {
+    //  rspcontent = "$in";
+    //} else {
+    //  rspcontent = "$in_newline";
+    //}
+    rspcontent += " $DEFINES $INCLUDES $FLAGS";
+    flags += responseFlag.c_str();
+    vars.Defines = "";
+    vars.Includes = "";
+  }
 
   // Tell ninja dependency format so all deps can be loaded into a database
   std::string deptype;
   std::string depfile;
   std::string cldeps;
-  std::string flags = "$FLAGS";
   if (this->NeedDepTypeMSVC(lang))
     {
     deptype = "msvc";
@@ -460,8 +497,8 @@ cmNinjaTargetGenerator
                                       comment.str(),
                                       depfile,
                                       deptype,
-                                      /*rspfile*/ "",
-                                      /*rspcontent*/ "",
+                                      rspfile,
+                                      rspcontent,
                                       /*restat*/ "",
                                       /*generator*/ false);
 }
@@ -555,6 +592,8 @@ cmNinjaTargetGenerator
   this->GetBuildFileStream() << "\n";
 }
 
+extern int calculateCommandLineLengthLimit(int linkRuleLength);
+
 void
 cmNinjaTargetGenerator
 ::WriteObjectBuildStatement(
@@ -640,7 +679,26 @@ cmNinjaTargetGenerator
                              this->GetGeneratorTarget(), vars);
 
   this->SetMsvcTargetPdbVariable(vars);
+  
+  cmGlobalNinjaGenerator& globalGen = *this->GetGlobalGenerator();
 
+  int commandLineLengthLimit = 1;
+  const char* forceRspFile = "CMAKE_NINJA_FORCE_RESPONSE_FILE";
+  cmMakefile* mf = this->GetMakefile();
+  if (!mf->IsDefinitionSet(forceRspFile) &&
+      cmSystemTools::GetEnv(forceRspFile) == 0)
+    {
+    commandLineLengthLimit = calculateCommandLineLengthLimit(
+                globalGen.GetRuleCmdLength(rule));
+    commandLineLengthLimit = 1; // TODO force it for now
+    }
+
+  cmGeneratorTarget& gt = *this->GetGeneratorTarget();
+  const std::string rspfile =
+      std::string(cmake::GetCMakeFilesDirectoryPostSlash())
+      + gt.GetName() + ".rsp";
+
+  bool usedResponseFile = false;
   this->GetGlobalGenerator()->WriteBuild(this->GetBuildFileStream(),
                                          comment,
                                          rule,
@@ -648,7 +706,11 @@ cmNinjaTargetGenerator
                                          explicitDeps,
                                          implicitDeps,
                                          orderOnlyDeps,
-                                         vars);
+                                         vars,
+                                         rspfile,
+                                         commandLineLengthLimit,
+                                         &usedResponseFile);
+
 
   if(const char* objectOutputs = source->GetProperty("OBJECT_OUTPUTS")) {
     std::vector<std::string> outputList;
