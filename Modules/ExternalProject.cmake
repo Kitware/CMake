@@ -525,7 +525,10 @@ if(error_code)
 endif()
 
 set(git_options)
-if(NOT tls_verify)
+
+# disable cert checking if explicitly told not to do it
+set(tls_verify \"${tls_verify}\")
+if(NOT \"x${tls_verify}\" STREQUAL \"x\" AND NOT tls_verify)
   list(APPEND git_options
     -c http.sslVerify=false)
 endif()
@@ -1784,8 +1787,8 @@ function(_ep_add_download_command name)
     endif()
 
     get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
-    if(NOT tls_verify)
-      set(tls_verify OFF)
+    if("x${tls_verify}" STREQUAL "x" AND DEFINED CMAKE_TLS_VERIFY)
+      set(tls_verify "${CMAKE_TLS_VERIFY}")
     endif()
 
     # For the download step, and the git clone operation, only the repository
@@ -1812,7 +1815,7 @@ function(_ep_add_download_command name)
     #
     _ep_write_gitclone_script(${tmp_dir}/${name}-gitclone.cmake ${source_dir}
       ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${git_remote_name} "${git_submodules}" ${src_name} ${work_dir}
-      ${stamp_dir}/${name}-gitinfo.txt ${stamp_dir}/${name}-gitclone-lastrun.txt ${tls_verify}
+      ${stamp_dir}/${name}-gitinfo.txt ${stamp_dir}/${name}-gitclone-lastrun.txt "${tls_verify}"
       )
     set(comment "Performing download step (git clone) for '${name}'")
     set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitclone.cmake)
