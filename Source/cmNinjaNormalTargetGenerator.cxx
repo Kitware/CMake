@@ -369,7 +369,7 @@ cmNinjaNormalTargetGenerator
 }
 
 
-extern int calculateCommandLineLengthLimit(int linkRuleLength)
+static int calculateCommandLineLengthLimit(int linkRuleLength)
 {
   static int const limits[] = {
 #ifdef _WIN32

@@ -585,8 +585,6 @@ cmNinjaTargetGenerator
   this->GetBuildFileStream() << "\n";
 }
 
-extern int calculateCommandLineLengthLimit(int linkRuleLength);
-
 void
 cmNinjaTargetGenerator
 ::WriteObjectBuildStatement(
