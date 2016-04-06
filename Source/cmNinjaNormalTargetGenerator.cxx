@@ -697,7 +697,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   cmGlobalNinjaGenerator& globalGen = *this->GetGlobalGenerator();
 
-  int commandLineLengthLimit = 1;
+  int commandLineLengthLimit = -1;
   if (!this->ForceResponseFile())
     {
     commandLineLengthLimit = calculateCommandLineLengthLimit(

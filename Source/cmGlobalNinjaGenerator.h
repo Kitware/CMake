@@ -94,7 +94,7 @@ public:
                   const cmNinjaDeps& orderOnlyDeps,
                   const cmNinjaVars& variables,
                   const std::string& rspfile = std::string(),
-                  int cmdLineLimit = -1,
+                  int cmdLineLimit = 0,
                   bool* usedResponseFile = 0);
 
   /**
