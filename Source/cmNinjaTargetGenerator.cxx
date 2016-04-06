@@ -341,18 +341,16 @@ cmNinjaTargetGenerator
 
   cmMakefile* mf = this->GetMakefile();
   
-  bool useResponseFile = true;
+  const char* forceRspFile = "CMAKE_NINJA_FORCE_RESPONSE_FILE";
+  bool useResponseFile = mf->IsDefinitionSet(forceRspFile) ||
+                         cmSystemTools::GetEnv(forceRspFile) != 0;
+
+  std::string flags = "$FLAGS";
   std::string rspfile;
   std::string rspcontent;
-  std::string flags;// = "$FLAGS";
-
   std::string responseFlag;
-  if (!useResponseFile) {
-    flags = "$FLAGS";
-    // TODO
-    //vars.Objects = "$in";
-    //vars.LinkLibraries = "$LINK_PATH $LINK_LIBRARIES";
-  } else {
+
+  if (useResponseFile) {
     std::string cmakeVarLang = "CMAKE_";
     cmakeVarLang += lang;
 
@@ -368,13 +366,8 @@ cmNinjaTargetGenerator
     responseFlag += rspfile;
 
     // build response file content
-    //if (this->GetGlobalGenerator()->IsGCCOnWindows()) {
-    //  rspcontent = "$in";
-    //} else {
-    //  rspcontent = "$in_newline";
-    //}
     rspcontent += " $DEFINES $INCLUDES $FLAGS";
-    flags += responseFlag.c_str();
+    flags = responseFlag.c_str();
     vars.Defines = "";
     vars.Includes = "";
   }
@@ -682,23 +675,17 @@ cmNinjaTargetGenerator
   
   cmGlobalNinjaGenerator& globalGen = *this->GetGlobalGenerator();
 
-  int commandLineLengthLimit = 1;
+  int commandLineLengthLimit = 0;
   const char* forceRspFile = "CMAKE_NINJA_FORCE_RESPONSE_FILE";
   cmMakefile* mf = this->GetMakefile();
   if (!mf->IsDefinitionSet(forceRspFile) &&
       cmSystemTools::GetEnv(forceRspFile) == 0)
     {
-    commandLineLengthLimit = calculateCommandLineLengthLimit(
-                globalGen.GetRuleCmdLength(rule));
-    commandLineLengthLimit = 1; // TODO force it for now
+    commandLineLengthLimit = -1; // always use response files
     }
 
-  cmGeneratorTarget& gt = *this->GetGeneratorTarget();
-  const std::string rspfile =
-      std::string(cmake::GetCMakeFilesDirectoryPostSlash())
-      + gt.GetName() + ".rsp";
+  const std::string rspfile = objectFileName + ".rsp";
 
-  bool usedResponseFile = false;
   this->GetGlobalGenerator()->WriteBuild(this->GetBuildFileStream(),
                                          comment,
                                          rule,
@@ -708,8 +695,7 @@ cmNinjaTargetGenerator
                                          orderOnlyDeps,
                                          vars,
                                          rspfile,
-                                         commandLineLengthLimit,
-                                         &usedResponseFile);
+                                         commandLineLengthLimit);
 
 
   if(const char* objectOutputs = source->GetProperty("OBJECT_OUTPUTS")) {
