@@ -152,6 +152,8 @@ protected:
                             cmGeneratorTarget* target,
                             cmNinjaVars& vars);
 
+  bool ForceResponseFile();
+
 private:
   cmLocalNinjaGenerator* LocalGenerator;
   /// List of object files for this target.
