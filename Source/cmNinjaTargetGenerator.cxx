@@ -340,33 +340,16 @@ cmNinjaTargetGenerator
   vars.ObjectFileDir = "$OBJECT_FILE_DIR";
 
   cmMakefile* mf = this->GetMakefile();
-  
-  const char* forceRspFile = "CMAKE_NINJA_FORCE_RESPONSE_FILE";
-  bool useResponseFile = mf->IsDefinitionSet(forceRspFile) ||
-                         cmSystemTools::GetEnv(forceRspFile) != 0;
 
   std::string flags = "$FLAGS";
   std::string rspfile;
   std::string rspcontent;
   std::string responseFlag;
 
-  if (useResponseFile) {
-    std::string cmakeVarLang = "CMAKE_";
-    cmakeVarLang += lang;
-
-    // build response file name
-    std::string cmakeLinkVar =  cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
-    const char * flag = GetMakefile()->GetDefinition(cmakeLinkVar);
-    if(flag) {
-      responseFlag = flag;
-    } else {
-      responseFlag = "@";
-    }
+  if (this->ForceResponseFile()) {
     rspfile = "$RSP_FILE";
-    responseFlag += rspfile;
-
-    // build response file content
-    rspcontent += " $DEFINES $INCLUDES $FLAGS";
+    responseFlag = "@" + rspfile;
+    rspcontent = " $DEFINES $INCLUDES $FLAGS";
     flags = responseFlag.c_str();
     vars.Defines = "";
     vars.Includes = "";
@@ -673,15 +656,7 @@ cmNinjaTargetGenerator
   
   cmGlobalNinjaGenerator& globalGen = *this->GetGlobalGenerator();
 
-  int commandLineLengthLimit = 0;
-  const char* forceRspFile = "CMAKE_NINJA_FORCE_RESPONSE_FILE";
-  cmMakefile* mf = this->GetMakefile();
-  if (!mf->IsDefinitionSet(forceRspFile) &&
-      cmSystemTools::GetEnv(forceRspFile) == 0)
-    {
-    commandLineLengthLimit = -1; // always use response files
-    }
-
+  int commandLineLengthLimit = this->ForceResponseFile() ? -1 : 0;
   const std::string rspfile = objectFileName + ".rsp";
 
   this->GetGlobalGenerator()->WriteBuild(this->GetBuildFileStream(),
@@ -839,5 +814,11 @@ void cmNinjaTargetGenerator::addPoolNinjaVariable(
     if (pool)
       {
       vars["pool"] = pool;
-      }
+	}
+}
+
+bool cmNinjaTargetGenerator::ForceResponseFile()
+{
+  const char* forceRspFile = "CMAKE_NINJA_FORCE_RESPONSE_FILE";
+  return this->GetMakefile()->IsDefinitionSet(forceRspFile) || cmSystemTools::GetEnv(forceRspFile) != 0;
 }
