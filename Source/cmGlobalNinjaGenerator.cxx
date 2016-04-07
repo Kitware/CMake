@@ -230,7 +230,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
   std::string assignments = variable_assignments.str();
   const std::string& args = arguments;
   bool useResponseFile = false;
-  if (cmdLineLimit > 0
+  if (cmdLineLimit < 0 || cmdLineLimit > 0
       && args.size() + buildstr.size() + assignments.size()
                                                     > (size_t) cmdLineLimit) {
     variable_assignments.str(std::string());

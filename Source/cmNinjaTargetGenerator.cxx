@@ -341,11 +341,24 @@ cmNinjaTargetGenerator
 
   cmMakefile* mf = this->GetMakefile();
 
+  std::string flags = "$FLAGS";
+  std::string rspfile;
+  std::string rspcontent;
+  std::string responseFlag;
+
+  if (this->ForceResponseFile()) {
+    rspfile = "$RSP_FILE";
+    responseFlag = "@" + rspfile;
+    rspcontent = " $DEFINES $INCLUDES $FLAGS";
+    flags = responseFlag.c_str();
+    vars.Defines = "";
+    vars.Includes = "";
+  }
+
   // Tell ninja dependency format so all deps can be loaded into a database
   std::string deptype;
   std::string depfile;
   std::string cldeps;
-  std::string flags = "$FLAGS";
   if (this->NeedDepTypeMSVC(lang))
     {
     deptype = "msvc";
@@ -460,8 +473,8 @@ cmNinjaTargetGenerator
                                       comment.str(),
                                       depfile,
                                       deptype,
-                                      /*rspfile*/ "",
-                                      /*rspcontent*/ "",
+                                      rspfile,
+                                      rspcontent,
                                       /*restat*/ "",
                                       /*generator*/ false);
 }
@@ -640,6 +653,11 @@ cmNinjaTargetGenerator
                              this->GetGeneratorTarget(), vars);
 
   this->SetMsvcTargetPdbVariable(vars);
+  
+  cmGlobalNinjaGenerator& globalGen = *this->GetGlobalGenerator();
+
+  int commandLineLengthLimit = this->ForceResponseFile() ? -1 : 0;
+  const std::string rspfile = objectFileName + ".rsp";
 
   this->GetGlobalGenerator()->WriteBuild(this->GetBuildFileStream(),
                                          comment,
@@ -648,7 +666,10 @@ cmNinjaTargetGenerator
                                          explicitDeps,
                                          implicitDeps,
                                          orderOnlyDeps,
-                                         vars);
+                                         vars,
+                                         rspfile,
+                                         commandLineLengthLimit);
+
 
   if(const char* objectOutputs = source->GetProperty("OBJECT_OUTPUTS")) {
     std::vector<std::string> outputList;
@@ -793,5 +814,11 @@ void cmNinjaTargetGenerator::addPoolNinjaVariable(
     if (pool)
       {
       vars["pool"] = pool;
-      }
+	}
+}
+
+bool cmNinjaTargetGenerator::ForceResponseFile()
+{
+  const char* forceRspFile = "CMAKE_NINJA_FORCE_RESPONSE_FILE";
+  return this->GetMakefile()->IsDefinitionSet(forceRspFile) || cmSystemTools::GetEnv(forceRspFile) != 0;
 }
