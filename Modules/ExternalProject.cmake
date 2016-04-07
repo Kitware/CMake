@@ -525,7 +525,10 @@ if(error_code)
 endif()
 
 set(git_options)
-if(NOT tls_verify)
+
+# disable cert checking if explicitly told not to do it
+set(tls_verify \"${tls_verify}\")
+if(NOT \"x${tls_verify}\" STREQUAL \"x\" AND NOT tls_verify)
   list(APPEND git_options
     -c http.sslVerify=false)
 endif()
@@ -856,12 +859,15 @@ function(_ep_write_downloadfile_script script_filename remote local timeout no_p
     set(hash_check "")
   endif()
 
+  set(tls_verify_code "")
+  set(tls_cainfo_code "")
+
   # check for curl globals in the project
   if(DEFINED CMAKE_TLS_VERIFY)
-    set(tls_verify "set(CMAKE_TLS_VERIFY ${CMAKE_TLS_VERIFY})")
+    set(tls_verify_code "set(CMAKE_TLS_VERIFY ${CMAKE_TLS_VERIFY})")
   endif()
   if(DEFINED CMAKE_TLS_CAINFO)
-    set(tls_cainfo "set(CMAKE_TLS_CAINFO \"${CMAKE_TLS_CAINFO}\")")
+    set(tls_cainfo_code "set(CMAKE_TLS_CAINFO \"${CMAKE_TLS_CAINFO}\")")
   endif()
 
   # now check for curl locals so that the local values
@@ -870,12 +876,12 @@ function(_ep_write_downloadfile_script script_filename remote local timeout no_p
   # check for tls_verify argument
   string(LENGTH "${tls_verify}" tls_verify_len)
   if(tls_verify_len GREATER 0)
-    set(tls_verify "set(CMAKE_TLS_VERIFY ${tls_verify})")
+    set(tls_verify_code "set(CMAKE_TLS_VERIFY ${tls_verify})")
   endif()
   # check for tls_cainfo argument
   string(LENGTH "${tls_cainfo}" tls_cainfo_len)
   if(tls_cainfo_len GREATER 0)
-    set(tls_cainfo "set(CMAKE_TLS_CAINFO \"${tls_cainfo}\")")
+    set(tls_cainfo_code "set(CMAKE_TLS_CAINFO \"${tls_cainfo}\")")
   endif()
 
   file(WRITE ${script_filename}
@@ -884,8 +890,8 @@ function(_ep_write_downloadfile_script script_filename remote local timeout no_p
      dst='${local}'
      timeout='${timeout_msg}'\")
 
-${tls_verify}
-${tls_cainfo}
+${tls_verify_code}
+${tls_cainfo_code}
 
 file(DOWNLOAD
   \"${remote}\"
@@ -1784,8 +1790,8 @@ function(_ep_add_download_command name)
     endif()
 
     get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
-    if(NOT tls_verify)
-      set(tls_verify OFF)
+    if("x${tls_verify}" STREQUAL "x" AND DEFINED CMAKE_TLS_VERIFY)
+      set(tls_verify "${CMAKE_TLS_VERIFY}")
     endif()
 
     # For the download step, and the git clone operation, only the repository
@@ -1812,7 +1818,7 @@ function(_ep_add_download_command name)
     #
     _ep_write_gitclone_script(${tmp_dir}/${name}-gitclone.cmake ${source_dir}
       ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${git_remote_name} "${git_submodules}" ${src_name} ${work_dir}
-      ${stamp_dir}/${name}-gitinfo.txt ${stamp_dir}/${name}-gitclone-lastrun.txt ${tls_verify}
+      ${stamp_dir}/${name}-gitinfo.txt ${stamp_dir}/${name}-gitclone-lastrun.txt "${tls_verify}"
       )
     set(comment "Performing download step (git clone) for '${name}'")
     set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitclone.cmake)
