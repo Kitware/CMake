@@ -346,14 +346,15 @@ cmNinjaTargetGenerator
   std::string rspcontent;
   std::string responseFlag;
 
-  if (this->ForceResponseFile()) {
+  if (this->ForceResponseFile())
+    {
     rspfile = "$RSP_FILE";
     responseFlag = "@" + rspfile;
     rspcontent = " $DEFINES $INCLUDES $FLAGS";
     flags = responseFlag;
     vars.Defines = "";
     vars.Includes = "";
-  }
+    }
 
   // Tell ninja dependency format so all deps can be loaded into a database
   std::string deptype;
