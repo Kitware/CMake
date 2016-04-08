@@ -419,13 +419,25 @@ cmNinjaTargetGenerator
     {
     std::string const iwyu_prop = lang + "_INCLUDE_WHAT_YOU_USE";
     const char *iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
-    if (iwyu && *iwyu)
+    std::string const tidy_prop = lang + "_CLANG_TIDY";
+    const char *tidy = this->GeneratorTarget->GetProperty(tidy_prop);
+    if ((iwyu && *iwyu) || (tidy && *tidy))
       {
       std::string run_iwyu =
         this->GetLocalGenerator()->ConvertToOutputFormat(
           cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
-      run_iwyu += " -E __run_iwyu --iwyu=";
-      run_iwyu += this->GetLocalGenerator()->EscapeForShell(iwyu);
+      run_iwyu += " -E __run_iwyu";
+      if (iwyu && *iwyu)
+        {
+        run_iwyu += " --iwyu=";
+        run_iwyu += this->GetLocalGenerator()->EscapeForShell(iwyu);
+        }
+      if (tidy && *tidy)
+        {
+        run_iwyu += " --tidy=";
+        run_iwyu += this->GetLocalGenerator()->EscapeForShell(tidy);
+        run_iwyu += " --source=$in";
+        }
       run_iwyu += " -- ";
       compileCmds.front().insert(0, run_iwyu);
       }

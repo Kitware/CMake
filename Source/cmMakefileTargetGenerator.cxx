@@ -667,10 +667,23 @@ cmMakefileTargetGenerator
     {
     std::string const iwyu_prop = lang + "_INCLUDE_WHAT_YOU_USE";
     const char *iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
-    if (iwyu && *iwyu)
+    std::string const tidy_prop = lang + "_CLANG_TIDY";
+    const char *tidy = this->GeneratorTarget->GetProperty(tidy_prop);
+    if ((iwyu && *iwyu) || (tidy && *tidy))
       {
-      std::string run_iwyu = "$(CMAKE_COMMAND) -E __run_iwyu --iwyu=";
-      run_iwyu += this->LocalGenerator->EscapeForShell(iwyu);
+      std::string run_iwyu = "$(CMAKE_COMMAND) -E __run_iwyu";
+      if (iwyu && *iwyu)
+        {
+        run_iwyu += " --iwyu=";
+        run_iwyu += this->LocalGenerator->EscapeForShell(iwyu);
+        }
+      if (tidy && *tidy)
+        {
+        run_iwyu += " --tidy=";
+        run_iwyu += this->LocalGenerator->EscapeForShell(tidy);
+        run_iwyu += " --source=";
+        run_iwyu += sourceFile;
+        }
       run_iwyu += " -- ";
       compileCommands.front().insert(0, run_iwyu);
       }
