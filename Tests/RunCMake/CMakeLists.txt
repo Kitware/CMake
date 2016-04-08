@@ -301,7 +301,9 @@ if(CMAKE_OSX_ARCHITECTURES AND XCODE AND NOT "${XCODE_VERSION}" MATCHES "^[^12]"
 endif()
 
 if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
+  add_executable(pseudo_tidy pseudo_tidy.c)
   add_executable(pseudo_iwyu pseudo_iwyu.c)
+  add_RunCMake_test(ClangTidy -DPSEUDO_TIDY=$<TARGET_FILE:pseudo_tidy>)
   add_RunCMake_test(IncludeWhatYouUse -DPSEUDO_IWYU=$<TARGET_FILE:pseudo_iwyu>)
   add_RunCMake_test(CompilerLauncher)
 endif()
