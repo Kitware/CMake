@@ -197,6 +197,7 @@ Properties on Targets
    /prop_tgt/JOB_POOL_COMPILE
    /prop_tgt/JOB_POOL_LINK
    /prop_tgt/LABELS
+   /prop_tgt/LANG_CLANG_TIDY
    /prop_tgt/LANG_COMPILER_LAUNCHER
    /prop_tgt/LANG_INCLUDE_WHAT_YOU_USE
    /prop_tgt/LANG_VISIBILITY_PRESET
