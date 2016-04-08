@@ -663,6 +663,10 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   endif()
 
   set(gp_cmd_paths ${gp_cmd_paths}
+    "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin"
+    "C:/Program Files (x86)/Microsoft Visual Studio 12.0/VC/bin"
+    "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin"
+    "C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/bin"
     "C:/Program Files/Microsoft Visual Studio 9.0/VC/bin"
     "C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/bin"
     "C:/Program Files/Microsoft Visual Studio 8/VC/BIN"
