@@ -2,7 +2,7 @@ add_custom_command(
   OUTPUT gen-byproduct gen-byproduct-stamp
   BYPRODUCTS byproduct
   COMMAND ${CMAKE_COMMAND} -E touch gen-byproduct-stamp
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/main.c byproduct
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different gen-byproduct-stamp byproduct
   )
 set_property(SOURCE gen-byproduct PROPERTY SYMBOLIC 1)
 add_custom_target(produce DEPENDS gen-byproduct)
@@ -10,6 +10,7 @@ add_custom_target(produce DEPENDS gen-byproduct)
 add_custom_command(
   OUTPUT use-byproduct
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/byproduct
+  COMMAND ${CMAKE_COMMAND} -E sleep 1.125 # workaround buggy filesystem timestamps
   COMMAND ${CMAKE_COMMAND} -E touch use-byproduct
   )
 add_custom_target(drive ALL DEPENDS use-byproduct)
