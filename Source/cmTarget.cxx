@@ -142,11 +142,13 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     this->SetPropertyDefault("MACOSX_BUNDLE", 0);
     this->SetPropertyDefault("MACOSX_RPATH", 0);
     this->SetPropertyDefault("NO_SYSTEM_FROM_IMPORTED", 0);
+    this->SetPropertyDefault("C_CLANG_TIDY", 0);
     this->SetPropertyDefault("C_COMPILER_LAUNCHER", 0);
     this->SetPropertyDefault("C_INCLUDE_WHAT_YOU_USE", 0);
     this->SetPropertyDefault("C_STANDARD", 0);
     this->SetPropertyDefault("C_STANDARD_REQUIRED", 0);
     this->SetPropertyDefault("C_EXTENSIONS", 0);
+    this->SetPropertyDefault("CXX_CLANG_TIDY", 0);
     this->SetPropertyDefault("CXX_COMPILER_LAUNCHER", 0);
     this->SetPropertyDefault("CXX_INCLUDE_WHAT_YOU_USE", 0);
     this->SetPropertyDefault("CXX_STANDARD", 0);
