@@ -10,6 +10,7 @@ add_custom_target(produce DEPENDS gen-byproduct)
 add_custom_command(
   OUTPUT use-byproduct
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/byproduct
+  COMMAND ${CMAKE_COMMAND} -E sleep 1.125 # workaround buggy filesystem timestamps
   COMMAND ${CMAKE_COMMAND} -E touch use-byproduct
   )
 add_custom_target(drive ALL DEPENDS use-byproduct)
