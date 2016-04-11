@@ -663,10 +663,21 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   endif()
 
   set(gp_cmd_paths ${gp_cmd_paths}
+    "$ENV{VS140COMNTOOLS}/../../VC/bin"
+    "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin"
+    "$ENV{VS120COMNTOOLS}/../../VC/bin"
+    "C:/Program Files (x86)/Microsoft Visual Studio 12.0/VC/bin"
+    "$ENV{VS110COMNTOOLS}/../../VC/bin"
+    "C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/bin"
+    "$ENV{VS100COMNTOOLS}/../../VC/bin"
+    "C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/bin"
+    "$ENV{VS90COMNTOOLS}/../../VC/bin"
     "C:/Program Files/Microsoft Visual Studio 9.0/VC/bin"
     "C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/bin"
+    "$ENV{VS80COMNTOOLS}/../../VC/bin"
     "C:/Program Files/Microsoft Visual Studio 8/VC/BIN"
     "C:/Program Files (x86)/Microsoft Visual Studio 8/VC/BIN"
+    "$ENV{VS71COMNTOOLS}/../../VC7/bin"
     "C:/Program Files/Microsoft Visual Studio .NET 2003/VC7/BIN"
     "C:/Program Files (x86)/Microsoft Visual Studio .NET 2003/VC7/BIN"
     "/usr/local/bin"
