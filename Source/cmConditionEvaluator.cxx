@@ -663,11 +663,11 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
           {
           result = false;
           }
-        else if (*(argP1) == "LESS")
+        else if (*(argP1) == keyLESS)
           {
           result = (lhs < rhs);
           }
-        else if (*(argP1) == "GREATER")
+        else if (*(argP1) == keyGREATER)
           {
           result = (lhs > rhs);
           }
@@ -688,11 +688,11 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
         def2 = this->GetVariableOrString(*argP2);
         int val = strcmp(def,def2);
         bool result;
-        if (*(argP1) == "STRLESS")
+        if (*(argP1) == keySTRLESS)
           {
           result = (val < 0);
           }
-        else if (*(argP1) == "STRGREATER")
+        else if (*(argP1) == keySTRGREATER)
           {
           result = (val > 0);
           }
