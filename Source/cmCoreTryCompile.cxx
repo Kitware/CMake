@@ -294,6 +294,9 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         }
       }
 
+    std::string const tcConfig =
+      this->Makefile->GetSafeDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
+
     // we need to create a directory and CMakeLists file etc...
     // first create the directories
     sourceDirectory = this->BinaryDirectory.c_str();
@@ -406,8 +409,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       std::string fname = "/" + std::string(targetName) + "Targets.cmake";
       cmExportTryCompileFileGenerator tcfg(gg, targets, this->Makefile);
       tcfg.SetExportFile((this->BinaryDirectory + fname).c_str());
-      tcfg.SetConfig(this->Makefile->GetSafeDefinition(
-                                          "CMAKE_TRY_COMPILE_CONFIGURATION"));
+      tcfg.SetConfig(tcConfig);
 
       if(!tcfg.GenerateImportFile())
         {
