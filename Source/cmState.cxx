@@ -931,16 +931,16 @@ cmState::CreateMacroCallSnapshot(cmState::Snapshot originSnapshot,
 }
 
 cmState::Snapshot
-cmState::CreateCallStackSnapshot(cmState::Snapshot originSnapshot,
-                                 const std::string& entryPointCommand,
-                                 long entryPointLine,
-                                 const std::string& fileName)
+cmState::CreateIncludeFileSnapshot(cmState::Snapshot originSnapshot,
+                                   const std::string& entryPointCommand,
+                                   long entryPointLine,
+                                   const std::string& fileName)
 {
   PositionType pos = this->SnapshotData.Push(originSnapshot.Position,
                                              *originSnapshot.Position);
   pos->EntryPointLine = entryPointLine;
   pos->EntryPointCommand = entryPointCommand;
-  pos->SnapshotType = CallStackType;
+  pos->SnapshotType = IncludeFileType;
   pos->Keep = true;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
         originSnapshot.Position->ExecutionListFile, fileName);
@@ -1096,11 +1096,6 @@ void cmState::Directory::SetCurrentBinary(std::string const& dir)
   this->ComputeRelativePathTopBinary();
 
   this->Snapshot_.SetDefinition("CMAKE_CURRENT_BINARY_DIR", loc.c_str());
-}
-
-void cmState::Snapshot::Keep()
-{
-  this->Position->Keep = true;
 }
 
 void cmState::Snapshot::SetListFile(const std::string& listfile)

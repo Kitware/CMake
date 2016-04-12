@@ -400,12 +400,37 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
 
 cmListFileBacktrace::cmListFileBacktrace(cmState::Snapshot snapshot,
                                          cmCommandContext const& cc)
-  : Context(cc)
-  , Snapshot(snapshot)
+  : Snapshot(snapshot)
 {
-  if (this->Snapshot.IsValid())
+  if (!this->Snapshot.IsValid())
     {
-    this->Snapshot.Keep();
+    return;
+    }
+
+  // Record the entire call stack now so that the `Snapshot` we
+  // save for later refers to a long-lived scope.  This avoids
+  // having to keep short-lived scopes around just to extract
+  // their backtrace information later.
+
+  cmListFileContext lfc =
+    cmListFileContext::FromCommandContext(
+      cc, this->Snapshot.GetExecutionListFile());
+  this->push_back(lfc);
+
+  cmState::Snapshot parent = this->Snapshot.GetCallStackParent();
+  while (parent.IsValid())
+    {
+    lfc.Name = this->Snapshot.GetEntryPointCommand();
+    lfc.Line = this->Snapshot.GetEntryPointLine();
+    lfc.FilePath = parent.GetExecutionListFile();
+    if (lfc.FilePath.empty())
+      {
+      break;
+      }
+    this->push_back(lfc);
+
+    this->Snapshot = parent;
+    parent = parent.GetCallStackParent();
     }
 }
 
@@ -415,48 +440,30 @@ cmListFileBacktrace::~cmListFileBacktrace()
 
 void cmListFileBacktrace::PrintTitle(std::ostream& out) const
 {
-  if (!this->Snapshot.IsValid())
+  if (this->empty())
     {
     return;
     }
   cmOutputConverter converter(this->Snapshot);
-  cmListFileContext lfc =
-      cmListFileContext::FromCommandContext(
-        this->Context, this->Snapshot.GetExecutionListFile());
+  cmListFileContext lfc = this->front();
   lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
   out << (lfc.Line ? " at " : " in ") << lfc;
 }
 
 void cmListFileBacktrace::PrintCallStack(std::ostream& out) const
 {
-  if (!this->Snapshot.IsValid())
+  if (this->size() <= 1)
     {
     return;
     }
-  cmState::Snapshot parent = this->Snapshot.GetCallStackParent();
-  if (!parent.IsValid() || parent.GetExecutionListFile().empty())
-    {
-    return;
-    }
+  out << "Call Stack (most recent call first):\n";
 
   cmOutputConverter converter(this->Snapshot);
-  std::string commandName = this->Snapshot.GetEntryPointCommand();
-  long commandLine = this->Snapshot.GetEntryPointLine();
-
-  out << "Call Stack (most recent call first):\n";
-  while(parent.IsValid())
+  for (const_iterator i = this->begin() + 1; i != this->end(); ++i)
     {
-    cmListFileContext lfc;
-    lfc.Name = commandName;
-    lfc.Line = commandLine;
-
-    lfc.FilePath = converter.Convert(parent.GetExecutionListFile(),
-                                     cmOutputConverter::HOME);
+    cmListFileContext lfc = *i;
+    lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
     out << "  " << lfc << "\n";
-
-    commandName = parent.GetEntryPointCommand();
-    commandLine = parent.GetEntryPointLine();
-    parent = parent.GetCallStackParent();
     }
 }
 
