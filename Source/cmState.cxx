@@ -1098,11 +1098,6 @@ void cmState::Directory::SetCurrentBinary(std::string const& dir)
   this->Snapshot_.SetDefinition("CMAKE_CURRENT_BINARY_DIR", loc.c_str());
 }
 
-void cmState::Snapshot::Keep()
-{
-  this->Position->Keep = true;
-}
-
 void cmState::Snapshot::SetListFile(const std::string& listfile)
 {
   *this->Position->ExecutionListFile = listfile;
