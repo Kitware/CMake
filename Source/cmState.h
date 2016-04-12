@@ -63,7 +63,6 @@ public:
     std::vector<std::string> ClosureKeys() const;
     bool RaiseScope(std::string const& var, const char* varDef);
 
-    void Keep();
     void SetListFile(std::string const& listfile);
 
     std::string GetExecutionListFile() const;
