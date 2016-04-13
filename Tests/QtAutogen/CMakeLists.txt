@@ -110,6 +110,10 @@ set_target_properties(
   AUTOMOC TRUE
 )
 
+# Test AUTOMOC and AUTORCC on source files with the same name
+# but in different subdirectories
+add_subdirectory(same_name)
+
 include(GenerateExportHeader)
 # The order is relevant here. B depends on A, and B headers depend on A
 # headers both subdirectories use CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE and we
