@@ -11,7 +11,8 @@
 # of them have somewhat different include paths, libraries to link
 # against, etc., and this module tries to smooth out those differences.
 #
-# === Variables ===
+# Variables
+# ^^^^^^^^^
 #
 # This module will set the following variables per language in your
 # project, where <lang> is one of C, CXX, or Fortran:
@@ -37,11 +38,12 @@
 #                               before the executable to run.
 #    MPIEXEC_POSTFLAGS          Flags to pass to MPIEXEC after other flags
 #
-# === Usage ===
+# Usage
+# ^^^^^
 #
 # To use this module, simply call FindMPI from a CMakeLists.txt file, or
-# run find_package(MPI), then run CMake.  If you are happy with the
-# auto- detected configuration for your language, then you're done.  If
+# run ``find_package(MPI)``, then run CMake.  If you are happy with the
+# auto-detected configuration for your language, then you're done.  If
 # not, you have two options:
 #
 # ::
@@ -55,24 +57,25 @@
 #       listed above, but these two are required.  This will circumvent
 #       autodetection entirely.
 #
-# When configuration is successful, MPI_<lang>_COMPILER will be set to
-# the compiler wrapper for <lang>, if it was found.  MPI_<lang>_FOUND
+# When configuration is successful, ``MPI_<lang>_COMPILER`` will be set to
+# the compiler wrapper for <lang>, if it was found.  ``MPI_<lang>_FOUND``
 # and other variables above will be set if any MPI implementation was
 # found for <lang>, regardless of whether a compiler was found.
 #
-# When using MPIEXEC to execute MPI applications, you should typically
-# use all of the MPIEXEC flags as follows:
+# When using ``MPIEXEC`` to execute MPI applications, you should typically
+# use all of the ``MPIEXEC`` flags as follows:
 #
 # ::
 #
 #    ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} PROCS
 #      ${MPIEXEC_PREFLAGS} EXECUTABLE ${MPIEXEC_POSTFLAGS} ARGS
 #
-# where PROCS is the number of processors on which to execute the
-# program, EXECUTABLE is the MPI program, and ARGS are the arguments to
+# where ``PROCS`` is the number of processors on which to execute the
+# program, ``EXECUTABLE`` is the MPI program, and ``ARGS`` are the arguments to
 # pass to the MPI program.
 #
-# === Backward Compatibility ===
+# Backward Compatibility
+# ^^^^^^^^^^^^^^^^^^^^^^
 #
 # For backward compatibility with older versions of FindMPI, these
 # variables are set, but deprecated:
@@ -83,7 +86,7 @@
 #    MPI_COMPILE_FLAGS   MPI_INCLUDE_PATH    MPI_EXTRA_LIBRARY
 #    MPI_LINK_FLAGS      MPI_LIBRARIES
 #
-# In new projects, please use the MPI_<lang>_XXX equivalents.
+# In new projects, please use the ``MPI_<lang>_XXX`` equivalents.
 
 #=============================================================================
 # Copyright 2001-2011 Kitware, Inc.
