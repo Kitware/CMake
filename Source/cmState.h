@@ -63,7 +63,6 @@ public:
     std::vector<std::string> ClosureKeys() const;
     bool RaiseScope(std::string const& var, const char* varDef);
 
-    void Keep();
     void SetListFile(std::string const& listfile);
 
     std::string GetExecutionListFile() const;
@@ -75,6 +74,7 @@ public:
     bool IsValid() const;
     Snapshot GetBuildsystemDirectoryParent() const;
     Snapshot GetCallStackParent() const;
+    Snapshot GetCallStackBottom() const;
     SnapshotType GetType() const;
 
     void SetPolicy(cmPolicies::PolicyID id, cmPolicies::PolicyStatus status);
