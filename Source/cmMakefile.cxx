@@ -333,7 +333,7 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
   this->Makefile->PushFunctionBlockerBarrier();
 
   this->Makefile->StateSnapshot =
-      this->Makefile->GetState()->CreateCallStackSnapshot(
+      this->Makefile->GetState()->CreateIncludeFileSnapshot(
         this->Makefile->StateSnapshot,
         this->Makefile->ContextStack.back()->Name,
         this->Makefile->ContextStack.back()->Line,

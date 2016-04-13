@@ -42,7 +42,7 @@ public:
     BuildsystemDirectoryType,
     FunctionCallType,
     MacroCallType,
-    CallStackType,
+    IncludeFileType,
     InlineListFileType,
     PolicyScopeType,
     VariableScopeType
@@ -203,10 +203,10 @@ public:
                                    std::string const& entryPointCommand,
                                    long entryPointLine,
                                    std::string const& fileName);
-  Snapshot CreateCallStackSnapshot(Snapshot originSnapshot,
-                                   std::string const& entryPointCommand,
-                                   long entryPointLine,
-                                   std::string const& fileName);
+  Snapshot CreateIncludeFileSnapshot(Snapshot originSnapshot,
+                                     std::string const& entryPointCommand,
+                                     long entryPointLine,
+                                     std::string const& fileName);
   Snapshot CreateVariableScopeSnapshot(Snapshot originSnapshot,
                                        std::string const& entryPointCommand,
                                        long entryPointLine);
