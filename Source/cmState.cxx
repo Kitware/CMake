@@ -1213,6 +1213,21 @@ cmState::Snapshot cmState::Snapshot::GetCallStackParent() const
   return snapshot;
 }
 
+cmState::Snapshot cmState::Snapshot::GetCallStackBottom() const
+{
+  assert(this->State);
+  assert(this->Position != this->State->SnapshotData.Root());
+
+  PositionType pos = this->Position;
+  while (pos->SnapshotType != cmState::BaseType &&
+         pos->SnapshotType != cmState::BuildsystemDirectoryType &&
+         pos != this->State->SnapshotData.Root())
+    {
+    ++pos;
+    }
+  return Snapshot(this->State, pos);
+}
+
 void cmState::Snapshot::PushPolicy(cmPolicies::PolicyMap entry, bool weak)
 {
   PositionType pos = this->Position;
