@@ -357,10 +357,10 @@ function (interrogate_mpi_compiler lang try_libs)
         endif()
 
         # Extract linker paths from the link command line
-        string(REGEX MATCHALL "(^| |-Wl,)-L([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_PATHS "${MPI_LINK_CMDLINE}")
+        string(REGEX MATCHALL "(^| |-Wl,)(-L|/LIBPATH:)([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_PATHS "${MPI_LINK_CMDLINE}")
         set(MPI_LINK_PATH)
         foreach(LPATH ${MPI_ALL_LINK_PATHS})
-          string(REGEX REPLACE "^(| |-Wl,)-L" "" LPATH ${LPATH})
+          string(REGEX REPLACE "^(| |-Wl,)(-L|/LIBPATH:)" "" LPATH ${LPATH})
           string(REPLACE "//" "/" LPATH ${LPATH})
           list(APPEND MPI_LINK_PATH ${LPATH})
         endforeach()
