@@ -1,4 +1,4 @@
-^CMake Error at PolicyPush/PolicyPushConfigVersion.cmake:1 \(find_package\):
+^CMake Error in PolicyPush/PolicyPushConfigVersion.cmake:
   cmake_policy PUSH without matching POP
 Call Stack \(most recent call first\):
   PolicyPush.cmake:1 \(find_package\)

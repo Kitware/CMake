@@ -845,14 +845,10 @@ cmState::Snapshot cmState::CreateBaseSnapshot()
 }
 
 cmState::Snapshot
-cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot,
-                                    std::string const& entryPointCommand,
-                                    long entryPointLine)
+cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot)
 {
   assert(originSnapshot.IsValid());
   PositionType pos = this->SnapshotData.Push(originSnapshot.Position);
-  pos->EntryPointLine = entryPointLine;
-  pos->EntryPointCommand = entryPointCommand;
   pos->DirectoryParent = originSnapshot.Position;
   pos->ScopeParent = originSnapshot.Position;
   pos->SnapshotType = BuildsystemDirectoryType;
@@ -886,15 +882,11 @@ cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot,
 
 cmState::Snapshot
 cmState::CreateFunctionCallSnapshot(cmState::Snapshot originSnapshot,
-                                    std::string const& entryPointCommand,
-                                    long entryPointLine,
                                     std::string const& fileName)
 {
   PositionType pos = this->SnapshotData.Push(originSnapshot.Position,
                                              *originSnapshot.Position);
   pos->ScopeParent = originSnapshot.Position;
-  pos->EntryPointLine = entryPointLine;
-  pos->EntryPointCommand = entryPointCommand;
   pos->SnapshotType = FunctionCallType;
   pos->Keep = false;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
@@ -912,14 +904,10 @@ cmState::CreateFunctionCallSnapshot(cmState::Snapshot originSnapshot,
 
 cmState::Snapshot
 cmState::CreateMacroCallSnapshot(cmState::Snapshot originSnapshot,
-                                    std::string const& entryPointCommand,
-                                    long entryPointLine,
                                     std::string const& fileName)
 {
   PositionType pos = this->SnapshotData.Push(originSnapshot.Position,
                                              *originSnapshot.Position);
-  pos->EntryPointLine = entryPointLine;
-  pos->EntryPointCommand = entryPointCommand;
   pos->SnapshotType = MacroCallType;
   pos->Keep = false;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
@@ -932,14 +920,10 @@ cmState::CreateMacroCallSnapshot(cmState::Snapshot originSnapshot,
 
 cmState::Snapshot
 cmState::CreateIncludeFileSnapshot(cmState::Snapshot originSnapshot,
-                                   const std::string& entryPointCommand,
-                                   long entryPointLine,
                                    const std::string& fileName)
 {
   PositionType pos = this->SnapshotData.Push(originSnapshot.Position,
                                              *originSnapshot.Position);
-  pos->EntryPointLine = entryPointLine;
-  pos->EntryPointCommand = entryPointCommand;
   pos->SnapshotType = IncludeFileType;
   pos->Keep = true;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
@@ -951,15 +935,11 @@ cmState::CreateIncludeFileSnapshot(cmState::Snapshot originSnapshot,
 }
 
 cmState::Snapshot
-cmState::CreateVariableScopeSnapshot(cmState::Snapshot originSnapshot,
-                                     std::string const& entryPointCommand,
-                                     long entryPointLine)
+cmState::CreateVariableScopeSnapshot(cmState::Snapshot originSnapshot)
 {
   PositionType pos = this->SnapshotData.Push(originSnapshot.Position,
                                              *originSnapshot.Position);
   pos->ScopeParent = originSnapshot.Position;
-  pos->EntryPointLine = entryPointLine;
-  pos->EntryPointCommand = entryPointCommand;
   pos->SnapshotType = VariableScopeType;
   pos->Keep = false;
   pos->PolicyScope = originSnapshot.Position->Policies;
@@ -975,14 +955,10 @@ cmState::CreateVariableScopeSnapshot(cmState::Snapshot originSnapshot,
 
 cmState::Snapshot
 cmState::CreateInlineListFileSnapshot(cmState::Snapshot originSnapshot,
-                                      const std::string& entryPointCommand,
-                                      long entryPointLine,
                                       const std::string& fileName)
 {
   PositionType pos = this->SnapshotData.Push(originSnapshot.Position,
                                              *originSnapshot.Position);
-  pos->EntryPointLine = entryPointLine;
-  pos->EntryPointCommand = entryPointCommand;
   pos->SnapshotType = InlineListFileType;
   pos->Keep = true;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(

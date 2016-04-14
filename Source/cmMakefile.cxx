@@ -46,7 +46,8 @@
 cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
                        cmState::Snapshot const& snapshot)
   : GlobalGenerator(globalGenerator),
-    StateSnapshot(snapshot)
+    StateSnapshot(snapshot),
+    Backtrace(snapshot)
 {
   this->IsSourceFileTryCompile = false;
 
@@ -115,24 +116,8 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
       {
       this->ExecutionStatusStack.back()->SetNestedError(true);
       }
-    this->GetCMakeInstance()->IssueMessage(t, text, this->GetBacktrace(),
-                                           force);
     }
-  else
-    {
-    cmListFileContext lfc;
-    // We are not currently executing a command.  Add whatever context
-    // information we have.
-    lfc.FilePath = this->GetExecutionFilePath();
-
-    if(!this->GetCMakeInstance()->GetIsInTryCompile())
-      {
-      cmOutputConverter converter(this->StateSnapshot);
-      lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
-      }
-    lfc.Line = 0;
-    this->GetCMakeInstance()->IssueMessage(t, text, lfc, force);
-    }
+  this->GetCMakeInstance()->IssueMessage(t, text, this->GetBacktrace(), force);
 }
 
 cmStringRange cmMakefile::GetIncludeDirectoriesEntries() const
@@ -170,29 +155,28 @@ cmBacktraceRange cmMakefile::GetCompileDefinitionsBacktraces() const
 //----------------------------------------------------------------------------
 cmListFileBacktrace cmMakefile::GetBacktrace() const
 {
-  cmListFileBacktrace backtrace;
-  if (!this->ContextStack.empty())
-    {
-    backtrace = cmListFileBacktrace(this->StateSnapshot,
-                                    *this->ContextStack.back());
-    }
-  return backtrace;
+  return this->Backtrace;
 }
 
 //----------------------------------------------------------------------------
-cmListFileBacktrace
-cmMakefile::GetBacktrace(cmCommandContext const& cc) const
+cmListFileBacktrace cmMakefile::GetBacktrace(cmCommandContext const& cc) const
 {
-  cmState::Snapshot snp = this->StateSnapshot;
-  return cmListFileBacktrace(snp, cc);
+  cmListFileContext lfc;
+  lfc.Name = cc.Name;
+  lfc.Line = cc.Line;
+  lfc.FilePath = this->StateSnapshot.GetExecutionListFile();
+  return this->Backtrace.Push(lfc);
 }
 
 //----------------------------------------------------------------------------
 cmListFileContext cmMakefile::GetExecutionContext() const
 {
-  return cmListFileContext::FromCommandContext(
-        *this->ContextStack.back(),
-        this->StateSnapshot.GetExecutionListFile());
+  cmListFileContext const& cur = this->Backtrace.Top();
+  cmListFileContext lfc;
+  lfc.Name = cur.Name;
+  lfc.Line = cur.Line;
+  lfc.FilePath = this->StateSnapshot.GetExecutionListFile();
+  return lfc;
 }
 
 //----------------------------------------------------------------------------
@@ -226,17 +210,20 @@ void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
 class cmMakefileCall
 {
 public:
-  cmMakefileCall(cmMakefile* mf, const cmCommandContext& lfc,
+  cmMakefileCall(cmMakefile* mf, cmCommandContext const& cc,
                  cmExecutionStatus& status): Makefile(mf)
     {
-    this->Makefile->ContextStack.push_back(&lfc);
+    cmListFileContext const& lfc =
+      cmListFileContext::FromCommandContext(
+        cc, this->Makefile->StateSnapshot.GetExecutionListFile());
+    this->Makefile->Backtrace = this->Makefile->Backtrace.Push(lfc);
     this->Makefile->ExecutionStatusStack.push_back(&status);
     }
 
   ~cmMakefileCall()
     {
     this->Makefile->ExecutionStatusStack.pop_back();
-    this->Makefile->ContextStack.pop_back();
+    this->Makefile->Backtrace = this->Makefile->Backtrace.Pop();
     }
 private:
   cmMakefile* Makefile;
@@ -350,13 +337,14 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
   Makefile(mf), NoPolicyScope(noPolicyScope),
   CheckCMP0011(false), ReportError(true)
 {
+  this->Makefile->Backtrace =
+    this->Makefile->Backtrace.Push(filenametoread);
+
   this->Makefile->PushFunctionBlockerBarrier();
 
   this->Makefile->StateSnapshot =
       this->Makefile->GetState()->CreateIncludeFileSnapshot(
         this->Makefile->StateSnapshot,
-        this->Makefile->ContextStack.back()->Name,
-        this->Makefile->ContextStack.back()->Line,
         filenametoread);
   if(!this->NoPolicyScope)
     {
@@ -416,6 +404,8 @@ cmMakefile::IncludeScope::~IncludeScope()
   this->Makefile->PopSnapshot(this->ReportError);
 
   this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
+
+  this->Makefile->Backtrace = this->Makefile->Backtrace.Pop();
 }
 
 //----------------------------------------------------------------------------
@@ -458,25 +448,6 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
     }
 }
 
-class cmParseFileScope
-{
-public:
-  cmParseFileScope(cmMakefile* mf)
-    : Makefile(mf)
-  {
-    this->Makefile->ContextStack.push_back(&this->Context);
-  }
-
-  ~cmParseFileScope()
-  {
-    this->Makefile->ContextStack.pop_back();
-  }
-
-private:
-  cmMakefile* Makefile;
-  cmCommandContext Context;
-};
-
 bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE",
@@ -488,13 +459,10 @@ bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
   IncludeScope incScope(this, filenametoread, noPolicyScope);
 
   cmListFile listFile;
-  {
-  cmParseFileScope pfs(this);
   if (!listFile.ParseFile(filenametoread.c_str(), false, this))
     {
     return false;
     }
-  }
 
   this->ReadListFile(listFile, filenametoread);
   if(cmSystemTools::GetFatalErrorOccured())
@@ -510,16 +478,12 @@ public:
   ListFileScope(cmMakefile* mf, std::string const& filenametoread)
     : Makefile(mf), ReportError(true)
   {
-    long line = 0;
-    std::string name;
-    if (!this->Makefile->ContextStack.empty())
-      {
-      line = this->Makefile->ContextStack.back()->Line;
-      name = this->Makefile->ContextStack.back()->Name;
-      }
+    this->Makefile->Backtrace =
+      this->Makefile->Backtrace.Push(filenametoread);
+
     this->Makefile->StateSnapshot =
         this->Makefile->GetState()->CreateInlineListFileSnapshot(
-          this->Makefile->StateSnapshot, name, line, filenametoread);
+          this->Makefile->StateSnapshot, filenametoread);
     assert(this->Makefile->StateSnapshot.IsValid());
 
     this->Makefile->PushFunctionBlockerBarrier();
@@ -529,6 +493,7 @@ public:
   {
     this->Makefile->PopSnapshot(this->ReportError);
     this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
+    this->Makefile->Backtrace = this->Makefile->Backtrace.Pop();
   }
 
   void Quiet() { this->ReportError = false; }
@@ -546,13 +511,10 @@ bool cmMakefile::ReadListFile(const char* filename)
   ListFileScope scope(this, filenametoread);
 
   cmListFile listFile;
-  {
-  cmParseFileScope pfs(this);
   if (!listFile.ParseFile(filenametoread.c_str(), false, this))
     {
     return false;
     }
-  }
 
   this->ReadListFile(listFile, filenametoread);
   if(cmSystemTools::GetFatalErrorOccured())
@@ -1525,9 +1487,7 @@ void cmMakefile::PushFunctionScope(std::string const& fileName,
 {
   this->StateSnapshot =
       this->GetState()->CreateFunctionCallSnapshot(
-        this->StateSnapshot,
-        this->ContextStack.back()->Name, this->ContextStack.back()->Line,
-        fileName);
+        this->StateSnapshot, fileName);
   assert(this->StateSnapshot.IsValid());
 
   this->PushLoopBlockBarrier();
@@ -1563,9 +1523,7 @@ void cmMakefile::PushMacroScope(std::string const& fileName,
 {
   this->StateSnapshot =
       this->GetState()->CreateMacroCallSnapshot(
-        this->StateSnapshot,
-        this->ContextStack.back()->Name, this->ContextStack.back()->Line,
-        fileName);
+        this->StateSnapshot, fileName);
   assert(this->StateSnapshot.IsValid());
 
   this->PushFunctionBlockerBarrier();
@@ -1633,6 +1591,15 @@ private:
 //----------------------------------------------------------------------------
 void cmMakefile::Configure()
 {
+  std::string currentStart =
+      this->StateSnapshot.GetDirectory().GetCurrentSource();
+  currentStart += "/CMakeLists.txt";
+
+  // Add the bottom of all backtraces within this directory.
+  // We will never pop this scope because it should be available
+  // for messages during the generate step too.
+  this->Backtrace = this->Backtrace.Push(currentStart);
+
   BuildsystemFileScope scope(this);
 
   // make sure the CMakeFiles dir is there
@@ -1640,20 +1607,14 @@ void cmMakefile::Configure()
   filesDir += cmake::GetCMakeFilesDirectory();
   cmSystemTools::MakeDirectory(filesDir.c_str());
 
-  std::string currentStart =
-      this->StateSnapshot.GetDirectory().GetCurrentSource();
-  currentStart += "/CMakeLists.txt";
   assert(cmSystemTools::FileExists(currentStart.c_str(), true));
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentStart.c_str());
 
   cmListFile listFile;
-  {
-  cmParseFileScope pfs(this);
   if (!listFile.ParseFile(currentStart.c_str(), this->IsRootMakefile(), this))
     {
     return;
     }
-  }
   this->ReadListFile(listFile, currentStart);
   if(cmSystemTools::GetFatalErrorOccured())
     {
@@ -1740,9 +1701,7 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
     }
 
   cmState::Snapshot newSnapshot = this->GetState()
-      ->CreateBuildsystemDirectorySnapshot(this->StateSnapshot,
-                                           this->ContextStack.back()->Name,
-                                           this->ContextStack.back()->Line);
+      ->CreateBuildsystemDirectorySnapshot(this->StateSnapshot);
 
   newSnapshot.GetDirectory().SetCurrentSource(srcPath);
   newSnapshot.GetDirectory().SetCurrentBinary(binPath);
@@ -4128,17 +4087,8 @@ std::string cmMakefile::FormatListFileStack() const
 
 void cmMakefile::PushScope()
 {
-  std::string commandName;
-  long line = 0;
-  if (!this->ContextStack.empty())
-    {
-    commandName = this->ContextStack.back()->Name;
-    line = this->ContextStack.back()->Line;
-    }
   this->StateSnapshot = this->GetState()->CreateVariableScopeSnapshot(
-        this->StateSnapshot,
-        commandName,
-        line);
+        this->StateSnapshot);
   this->PushLoopBlockBarrier();
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)

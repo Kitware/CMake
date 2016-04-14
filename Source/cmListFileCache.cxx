@@ -398,73 +398,172 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
     }
 }
 
-cmListFileBacktrace::cmListFileBacktrace(cmState::Snapshot snapshot,
-                                         cmCommandContext const& cc)
-  : Snapshot(snapshot)
+struct cmListFileBacktrace::Entry: public cmListFileContext
 {
-  if (!this->Snapshot.IsValid())
+  Entry(cmListFileContext const& lfc, Entry* up):
+    cmListFileContext(lfc), Up(up), RefCount(0)
     {
-    return;
-    }
-
-  // Record the entire call stack now so that the `Snapshot` we
-  // save for later refers to a long-lived scope.  This avoids
-  // having to keep short-lived scopes around just to extract
-  // their backtrace information later.
-
-  cmListFileContext lfc =
-    cmListFileContext::FromCommandContext(
-      cc, this->Snapshot.GetExecutionListFile());
-  this->push_back(lfc);
-
-  cmState::Snapshot parent = this->Snapshot.GetCallStackParent();
-  while (parent.IsValid())
-    {
-    lfc.Name = this->Snapshot.GetEntryPointCommand();
-    lfc.Line = this->Snapshot.GetEntryPointLine();
-    lfc.FilePath = parent.GetExecutionListFile();
-    if (lfc.FilePath.empty())
+    if (this->Up)
       {
-      break;
+      this->Up->Ref();
       }
-    this->push_back(lfc);
-
-    this->Snapshot = parent;
-    parent = parent.GetCallStackParent();
     }
+  ~Entry()
+    {
+    if (this->Up)
+      {
+      this->Up->Unref();
+      }
+    }
+  void Ref()
+    {
+    ++this->RefCount;
+    }
+  void Unref()
+    {
+    if (--this->RefCount == 0)
+      {
+      delete this;
+      }
+    }
+  Entry* Up;
+  unsigned int RefCount;
+};
 
-  this->Snapshot = this->Snapshot.GetCallStackBottom();
+cmListFileBacktrace::cmListFileBacktrace(cmState::Snapshot bottom,
+                                         Entry* up,
+                                         cmListFileContext const& lfc):
+  Bottom(bottom), Cur(new Entry(lfc, up))
+{
+  assert(this->Bottom.IsValid());
+  this->Cur->Ref();
+}
+
+cmListFileBacktrace::cmListFileBacktrace(cmState::Snapshot bottom, Entry* cur):
+  Bottom(bottom), Cur(cur)
+{
+  if (this->Cur)
+    {
+    assert(this->Bottom.IsValid());
+    this->Cur->Ref();
+    }
+}
+
+cmListFileBacktrace::cmListFileBacktrace(): Bottom(), Cur(0)
+{
+}
+
+cmListFileBacktrace::cmListFileBacktrace(cmState::Snapshot snapshot):
+  Bottom(snapshot.GetCallStackBottom()), Cur(0)
+{
+}
+
+cmListFileBacktrace::cmListFileBacktrace(cmListFileBacktrace const& r):
+  Bottom(r.Bottom), Cur(r.Cur)
+{
+  if (this->Cur)
+    {
+    assert(this->Bottom.IsValid());
+    this->Cur->Ref();
+    }
+}
+
+cmListFileBacktrace&
+cmListFileBacktrace::operator=(cmListFileBacktrace const& r)
+{
+  cmListFileBacktrace tmp(r);
+  std::swap(this->Cur, tmp.Cur);
+  std::swap(this->Bottom, tmp.Bottom);
+  return *this;
 }
 
 cmListFileBacktrace::~cmListFileBacktrace()
 {
+  if (this->Cur)
+    {
+    this->Cur->Unref();
+    }
+}
+
+cmListFileBacktrace
+cmListFileBacktrace::Push(std::string const& file) const
+{
+  // We are entering a file-level scope but have not yet reached
+  // any specific line or command invocation within it.  This context
+  // is useful to print when it is at the top but otherwise can be
+  // skipped during call stack printing.
+  cmListFileContext lfc;
+  lfc.FilePath = file;
+  return cmListFileBacktrace(this->Bottom, this->Cur, lfc);
+}
+
+cmListFileBacktrace
+cmListFileBacktrace::Push(cmListFileContext const& lfc) const
+{
+  return cmListFileBacktrace(this->Bottom, this->Cur, lfc);
+}
+
+cmListFileBacktrace cmListFileBacktrace::Pop() const
+{
+  assert(this->Cur);
+  return cmListFileBacktrace(this->Bottom, this->Cur->Up);
+}
+
+cmListFileContext const& cmListFileBacktrace::Top() const
+{
+  if (this->Cur)
+    {
+    return *this->Cur;
+    }
+  else
+    {
+    static cmListFileContext const empty;
+    return empty;
+    }
 }
 
 void cmListFileBacktrace::PrintTitle(std::ostream& out) const
 {
-  if (this->empty())
+  if (!this->Cur)
     {
     return;
     }
-  cmOutputConverter converter(this->Snapshot);
-  cmListFileContext lfc = this->front();
-  lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
+  cmOutputConverter converter(this->Bottom);
+  cmListFileContext lfc = *this->Cur;
+  if (!this->Bottom.GetState()->GetIsInTryCompile())
+    {
+    lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
+    }
   out << (lfc.Line ? " at " : " in ") << lfc;
 }
 
 void cmListFileBacktrace::PrintCallStack(std::ostream& out) const
 {
-  if (this->size() <= 1)
+  if (!this->Cur || !this->Cur->Up)
     {
     return;
     }
-  out << "Call Stack (most recent call first):\n";
 
-  cmOutputConverter converter(this->Snapshot);
-  for (const_iterator i = this->begin() + 1; i != this->end(); ++i)
+  bool first = true;
+  cmOutputConverter converter(this->Bottom);
+  for (Entry* i = this->Cur->Up; i; i = i->Up)
     {
+    if (i->Name.empty())
+      {
+      // Skip this whole-file scope.  When we get here we already will
+      // have printed a more-specific context within the file.
+      continue;
+      }
+    if (first)
+      {
+      first = false;
+      out << "Call Stack (most recent call first):\n";
+      }
     cmListFileContext lfc = *i;
-    lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
+    if (!this->Bottom.GetState()->GetIsInTryCompile())
+      {
+      lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
+      }
     out << "  " << lfc << "\n";
     }
 }

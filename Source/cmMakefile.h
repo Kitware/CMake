@@ -835,6 +835,7 @@ private:
   cmMakefile& operator=(const cmMakefile& mf);
 
   cmState::Snapshot StateSnapshot;
+  cmListFileBacktrace Backtrace;
 
   void ReadListFile(cmListFile const& listFile,
                     const std::string& filenametoread);
@@ -862,7 +863,6 @@ private:
 
   std::vector<cmGeneratorExpressionEvaluationFile*> EvaluationFiles;
 
-  std::vector<cmCommandContext const*> ContextStack;
   std::vector<cmExecutionStatus*> ExecutionStatusStack;
   friend class cmMakefileCall;
   friend class cmParseFileScope;

@@ -25,7 +25,7 @@ Call Stack \(most recent call first\):
   OriginDebugIDE.cmake:4 \(include\)
   CMakeLists.txt:3 \(include\)
 +
-CMake Debug Log:
+CMake Debug Log in CMakeLists.txt:
   Used sources for target OriginDebug:
 
    * .*CMakeLists.txt
