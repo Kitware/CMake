@@ -1098,6 +1098,11 @@ void cmState::Directory::SetCurrentBinary(std::string const& dir)
   this->Snapshot_.SetDefinition("CMAKE_CURRENT_BINARY_DIR", loc.c_str());
 }
 
+void cmState::Snapshot::Keep()
+{
+  this->Position->Keep = true;
+}
+
 void cmState::Snapshot::SetListFile(const std::string& listfile)
 {
   *this->Position->ExecutionListFile = listfile;
@@ -1206,21 +1211,6 @@ cmState::Snapshot cmState::Snapshot::GetCallStackParent() const
 
   snapshot = Snapshot(this->State, parentPos);
   return snapshot;
-}
-
-cmState::Snapshot cmState::Snapshot::GetCallStackBottom() const
-{
-  assert(this->State);
-  assert(this->Position != this->State->SnapshotData.Root());
-
-  PositionType pos = this->Position;
-  while (pos->SnapshotType != cmState::BaseType &&
-         pos->SnapshotType != cmState::BuildsystemDirectoryType &&
-         pos != this->State->SnapshotData.Root())
-    {
-    ++pos;
-    }
-  return Snapshot(this->State, pos);
 }
 
 void cmState::Snapshot::PushPolicy(cmPolicies::PolicyMap entry, bool weak)
