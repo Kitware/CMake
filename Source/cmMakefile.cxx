@@ -222,6 +222,26 @@ void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
   cmSystemTools::Message(msg.str().c_str());
 }
 
+// Helper class to make sure the call stack is valid.
+class cmMakefileCall
+{
+public:
+  cmMakefileCall(cmMakefile* mf, const cmCommandContext& lfc,
+                 cmExecutionStatus& status): Makefile(mf)
+    {
+    this->Makefile->ContextStack.push_back(&lfc);
+    this->Makefile->ExecutionStatusStack.push_back(&status);
+    }
+
+  ~cmMakefileCall()
+    {
+    this->Makefile->ExecutionStatusStack.pop_back();
+    this->Makefile->ContextStack.pop_back();
+    }
+private:
+  cmMakefile* Makefile;
+};
+
 //----------------------------------------------------------------------------
 bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
                                 cmExecutionStatus &status)
@@ -5147,17 +5167,4 @@ cmMakefile::MacroPushPop::MacroPushPop(cmMakefile* mf,
 cmMakefile::MacroPushPop::~MacroPushPop()
 {
   this->Makefile->PopMacroScope(this->ReportError);
-}
-
-cmMakefileCall::cmMakefileCall(cmMakefile* mf, const cmCommandContext& lfc,
-                               cmExecutionStatus& status): Makefile(mf)
-{
-  this->Makefile->ContextStack.push_back(&lfc);
-  this->Makefile->ExecutionStatusStack.push_back(&status);
-}
-
-cmMakefileCall::~cmMakefileCall()
-{
-  this->Makefile->ExecutionStatusStack.pop_back();
-  this->Makefile->ContextStack.pop_back();
 }
