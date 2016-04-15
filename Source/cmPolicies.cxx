@@ -4,6 +4,7 @@
 #include "cmVersion.h"
 #include "cmVersionMacros.h"
 #include "cmAlgorithms.h"
+#include <ctype.h>
 #include <map>
 #include <set>
 #include <queue>
