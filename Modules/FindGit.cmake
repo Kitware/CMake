@@ -43,7 +43,7 @@ set(git_names git eg)
 #
 if(WIN32)
   if(NOT CMAKE_GENERATOR MATCHES "MSYS")
-    set(git_names git.cmd git eg.cmd eg)
+    set(git_names git.cmd git eg.cmd eg git.exe)
     # GitHub search path for Windows
     set(github_path "$ENV{LOCALAPPDATA}/Github/PortableGit*/bin")
     file(GLOB github_path "${github_path}")
