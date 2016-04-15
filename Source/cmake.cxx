@@ -2785,41 +2785,6 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
 }
 
 //----------------------------------------------------------------------------
-void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
-                         cmListFileContext const& lfc,
-                         bool force)
-{
-  if (!force)
-    {
-    // override the message type, if needed, for warnings and errors
-    cmake::MessageType override = this->ConvertMessageType(t);
-    if (override != t)
-      {
-      t = override;
-      force = true;
-      }
-    }
-
-  if (!force && !this->IsMessageTypeVisible(t))
-    {
-    return;
-    }
-
-  std::ostringstream msg;
-  if (!this->PrintMessagePreamble(t, msg))
-    {
-    return;
-    }
-
-  // Add the immediate context.
-  msg << (lfc.Line ? " at " : " in ") << lfc;
-
-  printMessageText(msg, text);
-
-  displayMessage(t, msg);
-}
-
-//----------------------------------------------------------------------------
 std::vector<std::string> cmake::GetDebugConfigs()
 {
   std::vector<std::string> configs;
