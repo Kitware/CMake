@@ -1961,21 +1961,15 @@ void cmMakefile::LogUnused(const char* reason,
   if (this->WarnUnused)
     {
     std::string path;
-    cmListFileContext lfc;
     if (!this->ExecutionStatusStack.empty())
       {
-      lfc = this->GetExecutionContext();
-      path = lfc.FilePath;
+      path = this->GetExecutionContext().FilePath;
       }
     else
       {
       path = this->GetCurrentSourceDirectory();
       path += "/CMakeLists.txt";
-      lfc.FilePath = path;
-      lfc.Line = 0;
       }
-    cmOutputConverter converter(this->StateSnapshot);
-    lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
 
     if (this->CheckSystemVars ||
         cmSystemTools::IsSubDirectory(path,
@@ -1987,9 +1981,7 @@ void cmMakefile::LogUnused(const char* reason,
       {
       std::ostringstream msg;
       msg << "unused variable (" << reason << ") \'" << name << "\'";
-      this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
-                                             msg.str(),
-                                             lfc);
+      this->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
       }
     }
 }
@@ -2919,14 +2911,8 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
                                              this->GetHomeOutputDirectory()))
                 {
                 std::ostringstream msg;
-                cmListFileContext lfc;
-                cmOutputConverter converter(this->StateSnapshot);
-                lfc.FilePath =
-                    converter.Convert(filename, cmOutputConverter::HOME);
-                lfc.Line = line;
                 msg << "uninitialized variable \'" << lookup << "\'";
-                this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
-                                                       msg.str(), lfc);
+                this->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
                 }
               }
             }
