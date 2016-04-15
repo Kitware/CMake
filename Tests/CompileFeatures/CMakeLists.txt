@@ -226,6 +226,16 @@ if (CMAKE_C_COMPILE_FEATURES)
     list(APPEND expected_defs
       EXPECT_C_STATIC_ASSERT=1
     )
+  elseif (CMAKE_C_COMPILER_ID STREQUAL "Intel")
+    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 15)
+      list(APPEND expected_defs
+        EXPECT_C_STATIC_ASSERT=1
+        )
+    else()
+      list(APPEND expected_defs
+        EXPECT_C_STATIC_ASSERT=0
+        )
+    endif()
   endif()
 
   list(APPEND expected_defs
