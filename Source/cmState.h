@@ -68,8 +68,6 @@ public:
     std::string GetExecutionListFile() const;
 
     std::vector<Snapshot> GetChildren();
-    std::string GetEntryPointCommand() const;
-    long GetEntryPointLine() const;
 
     bool IsValid() const;
     Snapshot GetBuildsystemDirectoryParent() const;

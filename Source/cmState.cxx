@@ -35,8 +35,6 @@ struct cmState::SnapshotDataType
   cmLinkedTree<cmDefinitions>::iterator Vars;
   cmLinkedTree<cmDefinitions>::iterator Root;
   cmLinkedTree<cmDefinitions>::iterator Parent;
-  std::string EntryPointCommand;
-  long EntryPointLine;
   std::vector<std::string>::size_type IncludeDirectoryPosition;
   std::vector<std::string>::size_type CompileDefinitionsPosition;
   std::vector<std::string>::size_type CompileOptionsPosition;
@@ -1114,16 +1112,6 @@ void cmState::Directory::SetRelativePathTopBinary(const char* dir)
 std::string cmState::Snapshot::GetExecutionListFile() const
 {
   return *this->Position->ExecutionListFile;
-}
-
-std::string cmState::Snapshot::GetEntryPointCommand() const
-{
-  return this->Position->EntryPointCommand;
-}
-
-long cmState::Snapshot::GetEntryPointLine() const
-{
-  return this->Position->EntryPointLine;
 }
 
 bool cmState::Snapshot::IsValid() const
