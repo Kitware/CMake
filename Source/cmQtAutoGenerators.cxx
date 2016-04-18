@@ -1067,6 +1067,26 @@ bool cmQtAutoGenerators::GenerateMocFiles(
                     const std::map<std::string, std::string>& includedMocs,
                     const std::map<std::string, std::string>& notIncludedMocs )
 {
+  // look for name collisions
+  {
+    std::multimap<std::string, std::string> collisions;
+    // Test merged map of included and notIncluded
+    std::map<std::string, std::string> mergedMocs ( includedMocs );
+    mergedMocs.insert ( notIncludedMocs.begin(), notIncludedMocs.end() );
+    if( this->NameCollisionTest ( mergedMocs, collisions ) )
+      {
+      std::cerr <<
+        "AUTOGEN: error: "
+        "The same moc file will be generated "
+        "from different sources." << std::endl <<
+        "To avoid this error either" << std::endl <<
+        "- rename the source files or" << std::endl <<
+        "- do not include the (moc_NAME.cpp|NAME.moc) file" << std::endl;
+      this->NameCollisionLog ( collisions );
+      ::exit(EXIT_FAILURE);
+      }
+  }
+
   // generate moc files that are included by source files.
   for(std::map<std::string, std::string>::const_iterator
       it = includedMocs.begin(); it != includedMocs.end(); ++it)
@@ -1440,6 +1460,55 @@ bool cmQtAutoGenerators::GenerateQrc (
       }
     }
   return true;
+}
+
+/**
+ * @brief Collects name collisions as output/input pairs
+ * @return True if there were collisions
+ */
+bool cmQtAutoGenerators::NameCollisionTest(
+                          const std::map<std::string, std::string >& genFiles,
+                          std::multimap<std::string, std::string>& collisions)
+{
+  typedef std::map<std::string, std::string>::const_iterator Iter;
+  typedef std::map<std::string, std::string>::value_type VType;
+  for(Iter ait = genFiles.begin(); ait != genFiles.end(); ++ait )
+    {
+    bool first_match ( true );
+    for (Iter bit = (++Iter(ait)); bit != genFiles.end(); ++bit)
+      {
+      if(ait->second == bit->second)
+        {
+        if (first_match)
+          {
+          if (collisions.find(ait->second) != collisions.end())
+            {
+            // We already know of this collision from before
+            break;
+            }
+          collisions.insert(VType(ait->second, ait->first));
+          first_match = false;
+          }
+        collisions.insert(VType(bit->second, bit->first));
+        }
+      }
+    }
+
+  return !collisions.empty();
+}
+
+void cmQtAutoGenerators::NameCollisionLog(
+  const std::multimap<std::string, std::string>& collisions)
+{
+  typedef std::multimap<std::string, std::string>::const_iterator Iter;
+
+  std::stringstream sbuf;
+  for(Iter it = collisions.begin(); it != collisions.end(); ++it )
+    {
+      sbuf << it->first << " : " << it->second << std::endl;
+    }
+  sbuf.flush();
+  std::cerr << sbuf.str();
 }
 
 void cmQtAutoGenerators::LogCommand(const std::vector<std::string>& command)

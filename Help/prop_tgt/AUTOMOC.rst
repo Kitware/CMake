@@ -13,7 +13,13 @@ source files at build time and invoke moc accordingly.
 
 * If an ``#include`` statement like ``#include "moc_foo.cpp"`` is found,
   the ``Q_OBJECT`` class declaration is expected in the header, and
-  ``moc`` is run on the header file.
+  ``moc`` is run on the header file.  A ``moc_foo.cpp`` file will be
+  generated from the source's header into the
+  :variable:`CMAKE_CURRENT_BINARY_DIR` directory.  This allows the
+  compiler to find the included ``moc_foo.cpp`` file regardless of the
+  location the original source.  However, if multiple source files
+  in different directories do this then their generated moc files would
+  collide.  In this case a diagnostic will be issued.
 
 * If an ``#include`` statement like ``#include "foo.moc"`` is found,
   then a ``Q_OBJECT`` is expected in the current source file and ``moc``
