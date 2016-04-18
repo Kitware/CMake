@@ -1221,13 +1221,38 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
 bool cmQtAutoGenerators::GenerateUiFiles(
       const std::map<std::string, std::vector<std::string> >& includedUis )
 {
+  // single map with input / output names
+  std::map<std::string, std::map<std::string, std::string> > uiGenMap;
   for(std::map<std::string, std::vector<std::string> >::const_iterator
       it = includedUis.begin(); it != includedUis.end(); ++it)
     {
-    for (std::vector<std::string>::const_iterator nit = it->second.begin();
-         nit != it->second.end(); ++nit)
+    // source file path
+    std::string sourcePath = cmsys::SystemTools::GetFilenamePath(it->first);
+    sourcePath += '/';
+    // insert new map for source file an use new reference
+    uiGenMap[it->first] = std::map<std::string, std::string>();
+    std::map<std::string, std::string>& sourceMap = uiGenMap[it->first];
+    for (std::vector<std::string>::const_iterator sit = it->second.begin();
+         sit != it->second.end();
+         ++sit)
       {
-      if (!this->GenerateUi(it->first, *nit) )
+      const std::string & uiFileName = *sit;
+      const std::string uiInputFile = sourcePath + uiFileName + ".ui";
+      const std::string uiOutputFile = "ui_" + uiFileName + ".h";
+      sourceMap[uiInputFile] = uiOutputFile;
+      }
+    }
+
+  // generate ui files
+  for(std::map<std::string, std::map<std::string, std::string> >::
+      const_iterator it = uiGenMap.begin(); it != uiGenMap.end(); ++it)
+    {
+    for(std::map<std::string, std::string>::const_iterator
+        sit = it->second.begin();
+        sit != it->second.end();
+        ++sit)
+      {
+      if (!this->GenerateUi(it->first, sit->first, sit->second) )
         {
         if (this->RunUicFailed)
           {
@@ -1242,27 +1267,24 @@ bool cmQtAutoGenerators::GenerateUiFiles(
 
 
 bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
-                                    const std::string& uiFileName)
+                                    const std::string& uiInputFile,
+                                    const std::string& uiOutputFile)
 {
   if (!cmsys::SystemTools::FileExists(this->Builddir.c_str(), false))
     {
     cmsys::SystemTools::MakeDirectory(this->Builddir.c_str());
     }
 
-  const std::string path = cmsys::SystemTools::GetFilenamePath(
-                                                      realName) + '/';
-
-  std::string ui_output_file = "ui_" + uiFileName + ".h";
-  std::string ui_input_file = path + uiFileName + ".ui";
+  const ::std::string uiBuildFile = this->Builddir + uiOutputFile;
 
   int sourceNewerThanUi = 0;
-  bool success = cmsys::SystemTools::FileTimeCompare(ui_input_file,
-                                    this->Builddir + ui_output_file,
+  bool success = cmsys::SystemTools::FileTimeCompare(uiInputFile,
+                                                     uiBuildFile,
                                                      &sourceNewerThanUi);
   if (this->GenerateAll || !success || sourceNewerThanUi >= 0)
     {
     std::string msg = "Generating ";
-    msg += ui_output_file;
+    msg += uiOutputFile;
     cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue
                                           |cmsysTerminal_Color_ForegroundBold,
                                       msg.c_str(), true, this->ColorOutput);
@@ -1272,7 +1294,7 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
 
     std::vector<std::string> opts = this->UicTargetOptions;
     std::map<std::string, std::string>::const_iterator optionIt
-            = this->UicOptions.find(ui_input_file);
+            = this->UicOptions.find(uiInputFile);
     if (optionIt != this->UicOptions.end())
       {
       std::vector<std::string> fileOpts;
@@ -1283,8 +1305,8 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
     command.insert(command.end(), opts.begin(), opts.end());
 
     command.push_back("-o");
-    command.push_back(this->Builddir + ui_output_file);
-    command.push_back(ui_input_file);
+    command.push_back(uiBuildFile);
+    command.push_back(uiInputFile);
 
     if (this->Verbose)
       {
@@ -1296,11 +1318,11 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
                                                   &retVal);
     if (!result || retVal)
       {
-      std::cerr << "AUTOUIC: error: process for " << ui_output_file <<
+      std::cerr << "AUTOUIC: error: process for " << uiOutputFile <<
                 " needed by\n \"" << realName << "\"\nfailed:\n" << output
                 << std::endl;
       this->RunUicFailed = true;
-      cmSystemTools::RemoveFile(ui_output_file);
+      cmSystemTools::RemoveFile(uiOutputFile);
       return false;
       }
     return true;
