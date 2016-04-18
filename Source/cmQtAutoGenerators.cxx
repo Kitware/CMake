@@ -1403,6 +1403,20 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
       }
     }
 
+  // look for name collisions
+  {
+    std::multimap<std::string, std::string> collisions;
+    if( this->NameCollisionTest ( qrcGenMap, collisions ) )
+      {
+      std::cerr << "AUTOGEN: error: The same qrc_NAME.cpp file"
+                   " will be generated from different sources." << std::endl
+                << "To avoid this error rename the source .qrc files."
+                << std::endl;
+      this->NameCollisionLog ( collisions );
+      ::exit(EXIT_FAILURE);
+      }
+  }
+
   // generate qrc files
   for(std::map<std::string, std::string>::const_iterator
       si = qrcGenMap.begin(); si != qrcGenMap.end(); ++si)
