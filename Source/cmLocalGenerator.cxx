@@ -69,17 +69,7 @@ cmLocalGenerator::~cmLocalGenerator()
 void cmLocalGenerator::IssueMessage(cmake::MessageType t,
                                     std::string const& text) const
 {
-  cmListFileContext lfc;
-  lfc.FilePath = this->StateSnapshot.GetDirectory().GetCurrentSource();
-  lfc.FilePath += "/CMakeLists.txt";
-
-  if(!this->GlobalGenerator->GetCMakeInstance()->GetIsInTryCompile())
-    {
-    cmOutputConverter converter(this->StateSnapshot);
-    lfc.FilePath = converter.Convert(lfc.FilePath, cmLocalGenerator::HOME);
-    }
-  lfc.Line = 0;
-  this->GlobalGenerator->GetCMakeInstance()->IssueMessage(t, text, lfc);
+  this->Makefile->IssueMessage(t, text);
 }
 
 //----------------------------------------------------------------------------
@@ -1608,7 +1598,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
             "For compatibility with older versions of CMake, "
             "additional flags may be added to export symbols on all "
             "executables regardless of thier ENABLE_EXPORTS property.";
-          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+          this->IssueMessage(cmake::AUTHOR_WARNING, w.str());
           }
       case cmPolicies::OLD:
         // OLD behavior is to always add the flags
@@ -1616,7 +1606,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
         break;
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
-        this->Makefile->IssueMessage(
+        this->IssueMessage(
           cmake::FATAL_ERROR,
           cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0065)
           );

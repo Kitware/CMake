@@ -959,17 +959,4 @@ private:
   mutable bool SuppressWatches;
 };
 
-//----------------------------------------------------------------------------
-// Helper class to make sure the call stack is valid.
-class cmMakefileCall
-{
-public:
-  cmMakefileCall(cmMakefile* mf,
-                 cmCommandContext const& lfc,
-                 cmExecutionStatus& status);
-  ~cmMakefileCall();
-private:
-  cmMakefile* Makefile;
-};
-
 #endif

@@ -222,6 +222,26 @@ void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
   cmSystemTools::Message(msg.str().c_str());
 }
 
+// Helper class to make sure the call stack is valid.
+class cmMakefileCall
+{
+public:
+  cmMakefileCall(cmMakefile* mf, const cmCommandContext& lfc,
+                 cmExecutionStatus& status): Makefile(mf)
+    {
+    this->Makefile->ContextStack.push_back(&lfc);
+    this->Makefile->ExecutionStatusStack.push_back(&status);
+    }
+
+  ~cmMakefileCall()
+    {
+    this->Makefile->ExecutionStatusStack.pop_back();
+    this->Makefile->ContextStack.pop_back();
+    }
+private:
+  cmMakefile* Makefile;
+};
+
 //----------------------------------------------------------------------------
 bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
                                 cmExecutionStatus &status)
@@ -1941,21 +1961,15 @@ void cmMakefile::LogUnused(const char* reason,
   if (this->WarnUnused)
     {
     std::string path;
-    cmListFileContext lfc;
     if (!this->ExecutionStatusStack.empty())
       {
-      lfc = this->GetExecutionContext();
-      path = lfc.FilePath;
+      path = this->GetExecutionContext().FilePath;
       }
     else
       {
       path = this->GetCurrentSourceDirectory();
       path += "/CMakeLists.txt";
-      lfc.FilePath = path;
-      lfc.Line = 0;
       }
-    cmOutputConverter converter(this->StateSnapshot);
-    lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
 
     if (this->CheckSystemVars ||
         cmSystemTools::IsSubDirectory(path,
@@ -1967,9 +1981,7 @@ void cmMakefile::LogUnused(const char* reason,
       {
       std::ostringstream msg;
       msg << "unused variable (" << reason << ") \'" << name << "\'";
-      this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
-                                             msg.str(),
-                                             lfc);
+      this->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
       }
     }
 }
@@ -2899,14 +2911,8 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
                                              this->GetHomeOutputDirectory()))
                 {
                 std::ostringstream msg;
-                cmListFileContext lfc;
-                cmOutputConverter converter(this->StateSnapshot);
-                lfc.FilePath =
-                    converter.Convert(filename, cmOutputConverter::HOME);
-                lfc.Line = line;
                 msg << "uninitialized variable \'" << lookup << "\'";
-                this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
-                                                       msg.str(), lfc);
+                this->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
                 }
               }
             }
@@ -5147,17 +5153,4 @@ cmMakefile::MacroPushPop::MacroPushPop(cmMakefile* mf,
 cmMakefile::MacroPushPop::~MacroPushPop()
 {
   this->Makefile->PopMacroScope(this->ReportError);
-}
-
-cmMakefileCall::cmMakefileCall(cmMakefile* mf, const cmCommandContext& lfc,
-                               cmExecutionStatus& status): Makefile(mf)
-{
-  this->Makefile->ContextStack.push_back(&lfc);
-  this->Makefile->ExecutionStatusStack.push_back(&status);
-}
-
-cmMakefileCall::~cmMakefileCall()
-{
-  this->Makefile->ExecutionStatusStack.pop_back();
-  this->Makefile->ContextStack.pop_back();
 }

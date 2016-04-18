@@ -203,15 +203,9 @@ bool cmIfCommand
 
   cmake::MessageType status;
 
-  cmListFileContext execContext = this->Makefile->GetExecutionContext();
-
-  cmCommandContext commandContext;
-  commandContext.Line = execContext.Line;
-  commandContext.Name = execContext.Name;
-
   cmConditionEvaluator conditionEvaluator(
-        *(this->Makefile), cmListFileContext::FromCommandContext(
-          commandContext, execContext.FilePath),
+        *(this->Makefile),
+        this->Makefile->GetExecutionContext(),
         this->Makefile->GetBacktrace());
 
   bool isTrue = conditionEvaluator.IsTrue(
