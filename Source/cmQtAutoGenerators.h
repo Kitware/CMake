@@ -44,6 +44,8 @@ private:
               const std::map<std::string, std::string>& notIncludedMocs);
   bool GenerateMoc(const std::string& sourceFile,
                    const std::string& mocFileName);
+  bool GenerateUiFiles(
+        const std::map<std::string, std::vector<std::string> >& includedUis );
   bool GenerateUi(const std::string& realName, const std::string& uiFileName);
   bool GenerateQrcFiles();
   void ParseCppFile(const std::string& absFilename,

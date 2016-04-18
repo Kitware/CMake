@@ -595,20 +595,10 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
     {
     this->GenerateMocFiles ( includedMocs, notIncludedMocs );
     }
-
-  for(std::map<std::string, std::vector<std::string> >::const_iterator
-      it = includedUis.begin();
-      it != includedUis.end();
-      ++it)
+  if(!this->UicExecutable.empty())
     {
-    for (std::vector<std::string>::const_iterator nit = it->second.begin();
-        nit != it->second.end();
-        ++nit)
-      {
-      this->GenerateUi(it->first, *nit);
-      }
+    this->GenerateUiFiles ( includedUis );
     }
-
   if(!this->RccExecutable.empty())
     {
     this->GenerateQrcFiles();
@@ -1226,6 +1216,30 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
     }
   return false;
 }
+
+
+bool cmQtAutoGenerators::GenerateUiFiles(
+      const std::map<std::string, std::vector<std::string> >& includedUis )
+{
+  for(std::map<std::string, std::vector<std::string> >::const_iterator
+      it = includedUis.begin(); it != includedUis.end(); ++it)
+    {
+    for (std::vector<std::string>::const_iterator nit = it->second.begin();
+         nit != it->second.end(); ++nit)
+      {
+      if (!this->GenerateUi(it->first, *nit) )
+        {
+        if (this->RunUicFailed)
+          {
+          return false;
+          }
+        }
+      }
+    }
+
+  return true;
+}
+
 
 bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
                                     const std::string& uiFileName)
