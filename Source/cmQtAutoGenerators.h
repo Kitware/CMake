@@ -70,8 +70,6 @@ private:
   void Init();
 
   std::string Join(const std::vector<std::string>& lst, char separator);
-  bool EndsWith(const std::string& str, const std::string& with);
-  bool StartsWith(const std::string& str, const std::string& with);
 
   static void MergeUicOptions(std::vector<std::string> &opts,
                        const std::vector<std::string> &fileOpts, bool isQt5);

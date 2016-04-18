@@ -464,7 +464,7 @@ void cmQtAutoGenerators::Init()
       std::list<std::string>::iterator it = this->MocIncludes.begin();
       while (it != this->MocIncludes.end())
         {
-        if (this->StartsWith(*it, binDir))
+        if (cmsys::SystemTools::StringStartsWith(*it, binDir.c_str()))
           {
           sortedMocIncludes.push_back(*it);
           it = this->MocIncludes.erase(it);
@@ -477,7 +477,7 @@ void cmQtAutoGenerators::Init()
       it = this->MocIncludes.begin();
       while (it != this->MocIncludes.end())
         {
-        if (this->StartsWith(*it, srcDir))
+        if (cmsys::SystemTools::StringStartsWith(*it, srcDir.c_str()))
           {
           sortedMocIncludes.push_back(*it);
           it = this->MocIncludes.erase(it);
@@ -1364,22 +1364,4 @@ std::string cmQtAutoGenerators::Join(const std::vector<std::string>& lst,
       }
     result.erase(result.end() - 1);
     return result;
-}
-
-
-bool cmQtAutoGenerators::StartsWith(const std::string& str,
-                                    const std::string& with)
-{
-  return (str.substr(0, with.length()) == with);
-}
-
-
-bool cmQtAutoGenerators::EndsWith(const std::string& str,
-                                  const std::string& with)
-{
-  if (with.length() > (str.length()))
-    {
-    return false;
-    }
-  return (str.substr(str.length() - with.length(), with.length()) == with);
 }
