@@ -1243,6 +1243,7 @@ bool cmQtAutoGenerators::GenerateUiFiles(
 {
   // single map with input / output names
   std::map<std::string, std::map<std::string, std::string> > uiGenMap;
+  std::map<std::string, std::string> testMap;
   for(std::map<std::string, std::vector<std::string> >::const_iterator
       it = includedUis.begin(); it != includedUis.end(); ++it)
     {
@@ -1260,8 +1261,23 @@ bool cmQtAutoGenerators::GenerateUiFiles(
       const std::string uiInputFile = sourcePath + uiFileName + ".ui";
       const std::string uiOutputFile = "ui_" + uiFileName + ".h";
       sourceMap[uiInputFile] = uiOutputFile;
+      testMap[uiInputFile] = uiOutputFile;
       }
     }
+
+  // look for name collisions
+  {
+    std::multimap<std::string, std::string> collisions;
+    if( this->NameCollisionTest ( testMap, collisions ) )
+      {
+      std::cerr << "AUTOGEN: error: The same ui_NAME.h file will be generated "
+                   "from different sources." << std::endl
+                << "To avoid this error rename the source files." << std::endl;
+      this->NameCollisionLog ( collisions );
+      ::exit(EXIT_FAILURE);
+      }
+  }
+  testMap.clear();
 
   // generate ui files
   for(std::map<std::string, std::map<std::string, std::string> >::
