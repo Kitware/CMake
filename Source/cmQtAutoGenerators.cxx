@@ -1351,64 +1351,92 @@ bool cmQtAutoGenerators::InputFilesNewerThanQrc(const std::string& qrcFile,
 
 bool cmQtAutoGenerators::GenerateQrcFiles()
 {
+  // generate single map with input / output names
+  std::map<std::string, std::string> qrcGenMap;
   for(std::vector<std::string>::const_iterator si = this->RccSources.begin();
       si != this->RccSources.end(); ++si)
     {
-    std::string ext = cmsys::SystemTools::GetFilenameLastExtension(*si);
-
-    if (ext != ".qrc")
+    const std::string ext = cmsys::SystemTools::GetFilenameLastExtension(*si);
+    if (ext == ".qrc")
       {
-      continue;
+      std::string basename = cmsys::SystemTools::
+        GetFilenameWithoutLastExtension(*si);
+      std::string qrcOutputFile = "CMakeFiles/" + this->OriginTargetName
+        + ".dir/qrc_" + basename + ".cpp";
+      qrcGenMap[*si] = qrcOutputFile;
       }
+    }
+
+  // generate qrc files
+  for(std::map<std::string, std::string>::const_iterator
+      si = qrcGenMap.begin(); si != qrcGenMap.end(); ++si)
+    {
+    if (!this->GenerateQrc( si->first, si->second))
+      {
+      if (this->RunRccFailed)
+        {
+        return false;
+        }
+      }
+    }
+  return true;
+}
+
+bool cmQtAutoGenerators::GenerateQrc (
+  const std::string& qrcInputFile,
+  const std::string& qrcOutputFile )
+{
+  const std::string basename = cmsys::SystemTools::
+    GetFilenameWithoutLastExtension(qrcInputFile);
+  const ::std::string qrcBuildFile = this->Builddir + qrcOutputFile;
+
+  int sourceNewerThanQrc = 0;
+  bool generateQrc = !cmsys::SystemTools::FileTimeCompare(qrcInputFile,
+                                                          qrcBuildFile,
+                                                          &sourceNewerThanQrc);
+  generateQrc = generateQrc || (sourceNewerThanQrc >= 0);
+  generateQrc = generateQrc || this->InputFilesNewerThanQrc(qrcInputFile,
+                                                            qrcBuildFile);
+
+  if (this->GenerateAll || generateQrc)
+    {
+    std::string msg = "Generating ";
+    msg += qrcOutputFile;
+    cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue
+                                     |cmsysTerminal_Color_ForegroundBold,
+                                     msg.c_str(), true, this->ColorOutput);
+
     std::vector<std::string> command;
     command.push_back(this->RccExecutable);
 
-    std::string basename = cmsys::SystemTools::
-                                  GetFilenameWithoutLastExtension(*si);
-
-    std::string rcc_output_file = this->Builddir
-                                + "CMakeFiles/" + this->OriginTargetName
-                                + ".dir/qrc_" + basename + ".cpp";
-
-    int sourceNewerThanQrc = 0;
-    bool generateQrc = !cmsys::SystemTools::FileTimeCompare(*si,
-                                                      rcc_output_file,
-                                                      &sourceNewerThanQrc);
-    generateQrc = generateQrc || (sourceNewerThanQrc >= 0);
-    generateQrc = generateQrc || this->InputFilesNewerThanQrc(*si,
-                                                          rcc_output_file);
-
-    if (this->GenerateAll || generateQrc)
+    std::map<std::string, std::string>::const_iterator optionIt
+      = this->RccOptions.find(qrcInputFile);
+    if (optionIt != this->RccOptions.end())
       {
-      std::map<std::string, std::string>::const_iterator optionIt
-              = this->RccOptions.find(*si);
-      if (optionIt != this->RccOptions.end())
-        {
-        cmSystemTools::ExpandListArgument(optionIt->second, command);
-        }
+      cmSystemTools::ExpandListArgument(optionIt->second, command);
+      }
 
-      command.push_back("-name");
-      command.push_back(basename);
-      command.push_back("-o");
-      command.push_back(rcc_output_file);
-      command.push_back(*si);
+    command.push_back("-name");
+    command.push_back(basename);
+    command.push_back("-o");
+    command.push_back(qrcBuildFile);
+    command.push_back(qrcInputFile);
 
-      if (this->Verbose)
-        {
-        this->LogCommand(command);
-        }
-      std::string output;
-      int retVal = 0;
-      bool result = cmSystemTools::RunSingleCommand(command, &output, &output,
-                                                    &retVal);
-      if (!result || retVal)
-        {
-        std::cerr << "AUTORCC: error: process for " << rcc_output_file <<
-                  " failed:\n" << output << std::endl;
-        this->RunRccFailed = true;
-        cmSystemTools::RemoveFile(rcc_output_file);
-        return false;
-        }
+    if (this->Verbose)
+      {
+      this->LogCommand(command);
+      }
+    std::string output;
+    int retVal = 0;
+    bool result = cmSystemTools::RunSingleCommand(command, &output, &output,
+                                                  &retVal);
+    if (!result || retVal)
+      {
+      std::cerr << "AUTORCC: error: process for " << qrcOutputFile <<
+        " failed:\n" << output << std::endl;
+      this->RunRccFailed = true;
+      cmSystemTools::RemoveFile(qrcBuildFile);
+      return false;
       }
     }
   return true;

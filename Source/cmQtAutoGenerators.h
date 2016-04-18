@@ -50,6 +50,8 @@ private:
                   const std::string& uiInputFile,
                   const std::string& uiOutputFile );
   bool GenerateQrcFiles();
+  bool GenerateQrc(const std::string& qrcInputFile,
+                   const std::string& qrcOutputFile);
   void ParseCppFile(const std::string& absFilename,
               const std::vector<std::string>& headerExtensions,
               std::map<std::string, std::string>& includedMocs,
