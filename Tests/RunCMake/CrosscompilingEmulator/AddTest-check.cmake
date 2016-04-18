@@ -4,9 +4,25 @@ if(EXISTS "${testfile}")
 else()
   message(FATAL_ERROR "Could not find expected CTestTestfile.cmake.")
 endif()
-if(testfile_contents MATCHES "add_test[(]DoesNotUseEmulator ^(pseudo_emulator)+$")
-  message(SEND_ERROR "Used emulator when it should not be used.")
+
+set(error_details "There is a problem with generated test file: ${testfile}")
+
+if(testfile_contents MATCHES "add_test[(]DoesNotUseEmulator [^\n]+pseudo_emulator[^\n]+\n")
+  message(SEND_ERROR "Used emulator when it should not be used. ${error_details}")
 endif()
-if(NOT testfile_contents MATCHES "add_test[(]UsesEmulator .+pseudo_emulator.+$")
-  message(SEND_ERROR "Did not use emulator when it should be used.")
+
+if(NOT testfile_contents MATCHES "add_test[(]UsesEmulator [^\n]+pseudo_emulator[^\n]+\n")
+  message(SEND_ERROR "Did not use emulator when it should be used. ${error_details}")
+endif()
+
+if(testfile_contents MATCHES "add_test[(]DoesNotUseEmulatorWithGenex [^\n]+pseudo_emulator[^\n]+\n")
+  message(SEND_ERROR "Used emulator when it should not be used. ${error_details}")
+endif()
+
+if(NOT testfile_contents MATCHES "add_test[(]UsesEmulatorWithExecTargetFromSubdirAddedWithoutGenex [^\n]+pseudo_emulator[^\n]+\n")
+  message(SEND_ERROR "Did not use emulator when it should be used. ${error_details}")
+endif()
+
+if(testfile_contents MATCHES "add_test[(]DoesNotUseEmulatorWithExecTargetFromSubdirAddedWithGenex [^\n]+pseudo_emulator[^\n]+\n")
+  message(SEND_ERROR "Used emulator when it should not be used. ${error_details}")
 endif()
