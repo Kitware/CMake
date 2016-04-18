@@ -42,7 +42,7 @@ private:
   bool GenerateMoc(const std::string& sourceFile,
                    const std::string& mocFileName);
   bool GenerateUi(const std::string& realName, const std::string& uiFileName);
-  bool GenerateQrc();
+  bool GenerateQrcFiles();
   void ParseCppFile(const std::string& absFilename,
               const std::vector<std::string>& headerExtensions,
               std::map<std::string, std::string>& includedMocs,

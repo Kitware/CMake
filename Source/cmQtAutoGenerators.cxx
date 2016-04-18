@@ -612,7 +612,7 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 
   if(!this->RccExecutable.empty())
     {
-    this->GenerateQrc();
+    this->GenerateQrcFiles();
     }
 
   std::stringstream outStream;
@@ -1264,7 +1264,7 @@ bool cmQtAutoGenerators::InputFilesNewerThanQrc(const std::string& qrcFile,
   return false;
 }
 
-bool cmQtAutoGenerators::GenerateQrc()
+bool cmQtAutoGenerators::GenerateQrcFiles()
 {
   for(std::vector<std::string>::const_iterator si = this->RccSources.begin();
       si != this->RccSources.end(); ++si)
