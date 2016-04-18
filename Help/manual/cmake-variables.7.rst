@@ -175,6 +175,7 @@ Variables that Describe the System
    /variable/CMAKE_CL_64
    /variable/CMAKE_COMPILER_2005
    /variable/CMAKE_HOST_APPLE
+   /variable/CMAKE_HOST_SOLARIS
    /variable/CMAKE_HOST_SYSTEM_NAME
    /variable/CMAKE_HOST_SYSTEM_PROCESSOR
    /variable/CMAKE_HOST_SYSTEM

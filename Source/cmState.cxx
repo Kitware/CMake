@@ -1425,6 +1425,9 @@ void cmState::Snapshot::SetDefaultDefinitions()
     this->SetDefinition("APPLE", "1");
     this->SetDefinition("CMAKE_HOST_APPLE", "1");
   #endif
+  #if defined(__sun__)
+    this->SetDefinition("CMAKE_HOST_SOLARIS", "1");
+  #endif
 
     char temp[1024];
     sprintf(temp, "%d", cmVersion::GetMinorVersion());
