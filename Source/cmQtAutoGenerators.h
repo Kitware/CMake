@@ -69,7 +69,7 @@ private:
 
   void Init();
 
-  std::string Join(const std::vector<std::string>& lst, char separator);
+  std::string JoinExts(const std::vector<std::string>& lst);
 
   static void MergeUicOptions(std::vector<std::string> &opts,
                        const std::vector<std::string> &fileOpts, bool isQt5);

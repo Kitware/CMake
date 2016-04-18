@@ -762,7 +762,7 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
           std::cerr << "AUTOGEN: error: " << absFilename << ": The file "
                     << "includes the moc file \"" << currentMoc << "\", "
                     << "but could not find header \"" << basename
-                    << '{' << this->Join(headerExtensions, ',') << "}\" ";
+                    << '{' << this->JoinExts(headerExtensions) << "}\" ";
           if (mocSubDir.empty())
             {
             std::cerr << "in " << absPath << "\n" << std::endl;
@@ -937,7 +937,7 @@ void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
           std::cerr << "AUTOGEN: error: " << absFilename << " The file "
                     << "includes the moc file \"" << currentMoc << "\", "
                     << "but could not find header \"" << basename
-                    << '{' << this->Join(headerExtensions, ',') << "}\" ";
+                    << '{' << this->JoinExts(headerExtensions) << "}\" ";
           if (mocSubDir.empty())
             {
             std::cerr << "in " << absPath << "\n" << std::endl;
@@ -1347,8 +1347,7 @@ bool cmQtAutoGenerators::GenerateQrc()
   return true;
 }
 
-std::string cmQtAutoGenerators::Join(const std::vector<std::string>& lst,
-                              char separator)
+std::string cmQtAutoGenerators::JoinExts(const std::vector<std::string>& lst)
 {
     if (lst.empty())
       {
@@ -1356,11 +1355,16 @@ std::string cmQtAutoGenerators::Join(const std::vector<std::string>& lst,
       }
 
     std::string result;
+    std::string separator = ",";
     for (std::vector<std::string>::const_iterator it = lst.begin();
          it != lst.end();
          ++it)
       {
-      result += "." + (*it) + separator;
+      if(it != lst.begin())
+        {
+        result += separator;
+        }
+      result += '.' + (*it);
       }
     result.erase(result.end() - 1);
     return result;
