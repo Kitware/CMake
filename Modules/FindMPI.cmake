@@ -357,10 +357,10 @@ function (interrogate_mpi_compiler lang try_libs)
         endif()
 
         # Extract linker paths from the link command line
-        string(REGEX MATCHALL "(^| |-Wl,)-L([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_PATHS "${MPI_LINK_CMDLINE}")
+        string(REGEX MATCHALL "(^| |-Wl,)(-L|/LIBPATH:)([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_PATHS "${MPI_LINK_CMDLINE}")
         set(MPI_LINK_PATH)
         foreach(LPATH ${MPI_ALL_LINK_PATHS})
-          string(REGEX REPLACE "^(| |-Wl,)-L" "" LPATH ${LPATH})
+          string(REGEX REPLACE "^(| |-Wl,)(-L|/LIBPATH:)" "" LPATH ${LPATH})
           string(REPLACE "//" "/" LPATH ${LPATH})
           list(APPEND MPI_LINK_PATH ${LPATH})
         endforeach()
@@ -385,6 +385,13 @@ function (interrogate_mpi_compiler lang try_libs)
         # Extract the set of libraries to link against from the link command
         # line
         string(REGEX MATCHALL "(^| )-l([^\" ]+|\"[^\"]+\")" MPI_LIBNAMES "${MPI_LINK_CMDLINE}")
+        if(WIN32)
+          # The intel wrappers on windows link against static versions of the MPI libraries.
+          # The static libraries are simply listed on the command line without -l.
+          # For instance: " icl ... impi.lib "
+          string(REGEX MATCHALL "(^| )([^\" ]+)\\.lib" tmp "${MPI_LINK_CMDLINE}")
+          list(APPEND MPI_LIBNAMES ${tmp})
+        endif()
 
         # add the compiler implicit directories because some compilers
         # such as the intel compiler have libraries that show up
@@ -399,6 +406,10 @@ function (interrogate_mpi_compiler lang try_libs)
         # to link against in an MPI program
         foreach(LIB ${MPI_LIBNAMES})
           string(REGEX REPLACE "^ ?-l" "" LIB ${LIB})
+          if(WIN32)
+            string(REGEX REPLACE "\\.lib$" "" LIB ${LIB})
+          endif()
+          string(STRIP ${LIB} LIB)
           # MPI_LIB is cached by find_library, but we don't want that.  Clear it first.
           set(MPI_LIB "MPI_LIB-NOTFOUND" CACHE FILEPATH "Cleared" FORCE)
           find_library(MPI_LIB NAMES ${LIB} HINTS ${MPI_LINK_PATH})
