@@ -1159,13 +1159,7 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
 
     if (this->Verbose)
       {
-      for(std::vector<std::string>::const_iterator cmdIt = command.begin();
-          cmdIt != command.end();
-          ++cmdIt)
-        {
-        std::cout << *cmdIt << " ";
-        }
-      std::cout << std::endl;
+      this->LogCommand(command);
       }
 
     std::string output;
@@ -1231,13 +1225,7 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
 
     if (this->Verbose)
       {
-      for(std::vector<std::string>::const_iterator cmdIt = command.begin();
-          cmdIt != command.end();
-          ++cmdIt)
-        {
-        std::cout << *cmdIt << " ";
-        }
-      std::cout << std::endl;
+      this->LogCommand(command);
       }
     std::string output;
     int retVal = 0;
@@ -1322,13 +1310,7 @@ bool cmQtAutoGenerators::GenerateQrc()
 
       if (this->Verbose)
         {
-        for(std::vector<std::string>::const_iterator cmdIt = command.begin();
-            cmdIt != command.end();
-            ++cmdIt)
-          {
-          std::cout << *cmdIt << " ";
-          }
-        std::cout << std::endl;
+        this->LogCommand(command);
         }
       std::string output;
       int retVal = 0;
@@ -1345,6 +1327,27 @@ bool cmQtAutoGenerators::GenerateQrc()
       }
     }
   return true;
+}
+
+void cmQtAutoGenerators::LogCommand(const std::vector<std::string>& command)
+{
+  std::stringstream sbuf;
+  for(std::vector<std::string>::const_iterator cmdIt = command.begin();
+      cmdIt != command.end();
+      ++cmdIt)
+    {
+    if ( cmdIt != command.begin() )
+      {
+      sbuf << " ";
+      }
+    sbuf << *cmdIt;
+    }
+  sbuf.flush();
+  if ( !sbuf.str().empty() )
+    {
+    std::cout << sbuf.str();
+    std::cout << std::endl;
+    }
 }
 
 std::string cmQtAutoGenerators::JoinExts(const std::vector<std::string>& lst)

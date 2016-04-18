@@ -69,6 +69,7 @@ private:
 
   void Init();
 
+  void LogCommand(const std::vector<std::string>& command);
   std::string JoinExts(const std::vector<std::string>& lst);
 
   static void MergeUicOptions(std::vector<std::string> &opts,
