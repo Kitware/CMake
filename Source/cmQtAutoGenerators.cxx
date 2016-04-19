@@ -410,11 +410,12 @@ cmQtAutoGenerators::WriteOldMocDefinitionsFile(
 
 void cmQtAutoGenerators::Init()
 {
+  this->TargetBuildSubDir = this->TargetName;
+  this->TargetBuildSubDir += ".dir/";
+
   this->OutMocCppFilenameRel = this->TargetName;
   this->OutMocCppFilenameRel += ".cpp";
-
-  this->OutMocCppFilename = this->Builddir;
-  this->OutMocCppFilename += this->OutMocCppFilenameRel;
+  this->OutMocCppFilenameAbs = this->Builddir + this->OutMocCppFilenameRel;
 
   std::vector<std::string> cdefList;
   cmSystemTools::ExpandListArgument(this->MocCompileDefinitionsStr, cdefList);
@@ -507,7 +508,7 @@ static std::string ReadAll(const std::string& filename)
 
 bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 {
-  if (!cmsys::SystemTools::FileExists(this->OutMocCppFilename.c_str())
+  if (!cmsys::SystemTools::FileExists(this->OutMocCppFilenameAbs.c_str())
     || (this->OldCompileSettingsStr != this->CurrentCompileSettingsStr))
     {
     this->GenerateAll = true;
@@ -1047,14 +1048,15 @@ void cmQtAutoGenerators::ParseHeaders(const std::set<std::string>& absHeaders,
         std::cout << "AUTOGEN: Checking " << headerName << std::endl;
         }
 
-      const std::string basename = cmsys::SystemTools::
-                                   GetFilenameWithoutLastExtension(headerName);
-
-      const std::string currentMoc = "moc_" + basename + ".cpp";
       std::string macroName;
       if (requiresMocing(contents, macroName))
         {
         //std::cout << "header contains Q_OBJECT macro";
+        const std::string parentDir = this->TargetBuildSubDir
+          + this->SourceRelativePath ( headerName );
+        const std::string basename = cmsys::SystemTools::
+          GetFilenameWithoutLastExtension(headerName);
+        const std::string currentMoc = parentDir + "moc_" + basename + ".cpp";
         notIncludedMocs[headerName] = currentMoc;
         }
       }
@@ -1145,7 +1147,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
   if (!automocCppChanged)
     {
     // compare contents of the _automoc.cpp file
-    const std::string oldContents = ReadAll(this->OutMocCppFilename);
+    const std::string oldContents = ReadAll(this->OutMocCppFilenameAbs);
     if (oldContents == automocSource)
       {
       // nothing changed: don't touch the _automoc.cpp file
@@ -1168,7 +1170,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
     }
     {
     cmsys::ofstream outfile;
-    outfile.open(this->OutMocCppFilename.c_str(),
+    outfile.open(this->OutMocCppFilenameAbs.c_str(),
                  std::ios::trunc);
     outfile << automocSource;
     outfile.close();
@@ -1490,6 +1492,53 @@ bool cmQtAutoGenerators::GenerateQrc (
       }
     }
   return true;
+}
+
+std::string cmQtAutoGenerators::SourceRelativePath(const std::string& filename)
+{
+  std::string pathRel;
+
+  // Test if the file is child to any of the known directories
+  {
+    std::string fileNameReal = cmsys::SystemTools::GetRealPath( filename );
+    std::string parentDirectory;
+    bool match ( false );
+    {
+      const ::std::string* testDirs[4];
+      testDirs[0] = &(this->Srcdir);
+      testDirs[1] = &(this->Builddir);
+      testDirs[2] = &(this->ProjectSourceDir);
+      testDirs[3] = &(this->ProjectBinaryDir);
+      for(int ii=0; ii != sizeof(testDirs)/sizeof(const ::std::string*); ++ii )
+        {
+        const ::std::string testDir = cmsys::SystemTools::GetRealPath(
+                                                          *(testDirs[ii]));
+        if (cmsys::SystemTools::IsSubDirectory(fileNameReal,
+                                               testDir) )
+          {
+          parentDirectory = testDir;
+          match = true;
+          break;
+          }
+        }
+    }
+    // Use root as fallback parent directory
+    if ( !match )
+      {
+      cmsys::SystemTools::SplitPathRootComponent(fileNameReal,
+                                                 &parentDirectory);
+      }
+    pathRel = cmsys::SystemTools::RelativePath(
+      parentDirectory, cmsys::SystemTools::GetParentDirectory(fileNameReal));
+  }
+
+  // Sanitize relative path
+  if (!pathRel.empty())
+    {
+    pathRel += '/';
+    cmSystemTools::ReplaceString(pathRel, "..", "__");
+    }
+  return pathRel;
 }
 
 /**

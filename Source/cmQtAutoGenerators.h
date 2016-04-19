@@ -78,6 +78,8 @@ private:
 
   void Init();
 
+  std::string SourceRelativePath(const std::string& filename);
+
   bool NameCollisionTest(const std::map<std::string, std::string >& genFiles,
     std::multimap<std::string, std::string>& collisions );
   void NameCollisionLog(
@@ -114,8 +116,9 @@ private:
   std::string CurrentCompileSettingsStr;
   std::string OldCompileSettingsStr;
 
+  std::string TargetBuildSubDir;
   std::string OutMocCppFilenameRel;
-  std::string OutMocCppFilename;
+  std::string OutMocCppFilenameAbs;
   std::list<std::string> MocIncludes;
   std::list<std::string> MocDefinitions;
   std::vector<std::string> MocOptions;
