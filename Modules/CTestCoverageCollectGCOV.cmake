@@ -287,10 +287,14 @@ ${uncovered_files_for_tar}
     WORKING_DIRECTORY ${binary_dir})
 
   if (GCOV_DELETE)
-    string(REPLACE "\n" ";" gcov_files "${gcov_files}")
-    foreach(gcov_file ${gcov_files})
+    foreach(gcov_file ${unfiltered_gcov_files})
       file(REMOVE ${binary_dir}/${gcov_file})
     endforeach()
+    file(REMOVE ${coverage_dir}/coverage_file_list.txt)
+    file(REMOVE ${coverage_dir}/data.json)
+    if (EXISTS ${binary_dir}/uncovered)
+      file(REMOVE ${binary_dir}/uncovered)
+    endif()
   endif()
 
 endfunction()
