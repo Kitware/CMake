@@ -188,10 +188,8 @@
 #      files.
 #
 #
-#
 #   CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS( output_file_var cuda_target
 #                                            nvcc_flags object_files)
-#
 #   -- Generates the link object required by separable compilation from the given
 #      object files.  This is called automatically for CUDA_ADD_EXECUTABLE and
 #      CUDA_ADD_LIBRARY, but can be called manually when using CUDA_WRAP_SRCS
@@ -563,7 +561,6 @@ macro(cuda_unset_include_and_libraries)
   unset(CUDA_npps_LIBRARY CACHE)
   unset(CUDA_nvcuvenc_LIBRARY CACHE)
   unset(CUDA_nvcuvid_LIBRARY CACHE)
-
   unset(CUDA_USE_STATIC_CUDA_RUNTIME CACHE)
 endmacro()
 
@@ -601,6 +598,7 @@ if(NOT CUDA_TOOLKIT_ROOT_DIR)
     DOC "Toolkit location."
     NO_DEFAULT_PATH
     )
+
   # Now search default paths
   find_path(CUDA_TOOLKIT_ROOT_DIR
     NAMES nvcc nvcc.exe
@@ -614,6 +612,7 @@ if(NOT CUDA_TOOLKIT_ROOT_DIR)
     # We need to force this back into the cache.
     set(CUDA_TOOLKIT_ROOT_DIR ${CUDA_TOOLKIT_ROOT_DIR} CACHE PATH "Toolkit location." FORCE)
   endif()
+
   if (NOT EXISTS ${CUDA_TOOLKIT_ROOT_DIR})
     if(CUDA_FIND_REQUIRED)
       message(FATAL_ERROR "Specify CUDA_TOOLKIT_ROOT_DIR")
@@ -742,6 +741,8 @@ if(NOT CUDA_VERSION VERSION_LESS "5.5")
   cuda_find_library_local_first(CUDA_cudart_static_LIBRARY cudart_static "static CUDA runtime library")
   mark_as_advanced(CUDA_cudart_static_LIBRARY)
 endif()
+
+
 if(CUDA_cudart_static_LIBRARY)
   # Set whether to use the static cuda runtime.
   option(CUDA_USE_STATIC_CUDA_RUNTIME "Use the static version of the CUDA runtime library if available" ON)
@@ -955,6 +956,7 @@ set(CUDA_SDK_ROOT_DIR_INTERNAL "${CUDA_SDK_ROOT_DIR}" CACHE INTERNAL
   "This is the value of the last time CUDA_SDK_ROOT_DIR was set successfully." FORCE)
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+
 find_package_handle_standard_args(CUDA
   REQUIRED_VARS
     CUDA_TOOLKIT_ROOT_DIR
