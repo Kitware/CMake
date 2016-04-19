@@ -1399,8 +1399,11 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
       {
       std::string basename = cmsys::SystemTools::
         GetFilenameWithoutLastExtension(*si);
-      std::string qrcOutputFile = "CMakeFiles/" + this->OriginTargetName
-        + ".dir/qrc_" + basename + ".cpp";
+      std::string qrcOutputFile = this->TargetBuildSubDir
+        + this->SourceRelativePath ( *si )
+        + "qrc_" + basename + ".cpp";
+      //std::string qrcOutputFile = "CMakeFiles/" + this->OriginTargetName
+      //                         + ".dir/qrc_" + basename + ".cpp";
       qrcGenMap[*si] = qrcOutputFile;
       }
     }
@@ -1438,8 +1441,10 @@ bool cmQtAutoGenerators::GenerateQrc (
   const std::string& qrcInputFile,
   const std::string& qrcOutputFile )
 {
-  const std::string basename = cmsys::SystemTools::
-    GetFilenameWithoutLastExtension(qrcInputFile);
+  std::string relName = this->SourceRelativePath ( qrcInputFile );
+  cmSystemTools::ReplaceString(relName, "/", "_");
+  relName += cmsys::SystemTools::GetFilenameWithoutLastExtension(qrcInputFile);
+
   const ::std::string qrcBuildFile = this->Builddir + qrcOutputFile;
 
   int sourceNewerThanQrc = 0;
@@ -1469,7 +1474,7 @@ bool cmQtAutoGenerators::GenerateQrc (
       }
 
     command.push_back("-name");
-    command.push_back(basename);
+    command.push_back(relName);
     command.push_back("-o");
     command.push_back(qrcBuildFile);
     command.push_back(qrcInputFile);

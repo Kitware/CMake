@@ -25,6 +25,87 @@
 # include "cmGlobalVisualStudioGenerator.h"
 #endif
 
+static std::string GetAutogenTargetName(
+    cmGeneratorTarget const* target)
+{
+  std::string autogenTargetName = target->GetName();
+  autogenTargetName += "_automoc";
+  return autogenTargetName;
+}
+
+static std::string GetAutogenTargetDir(
+    cmGeneratorTarget const* target)
+{
+  cmMakefile* makefile = target->Target->GetMakefile();
+  std::string targetDir = makefile->GetCurrentBinaryDirectory();
+  targetDir += makefile->GetCMakeInstance()->GetCMakeFilesDirectory();
+  targetDir += "/";
+  targetDir += GetAutogenTargetName(target);
+  targetDir += ".dir/";
+  return targetDir;
+}
+
+static std::string GetAutogenTargetBuildDir(
+    cmGeneratorTarget const* target)
+{
+  cmMakefile* makefile = target->Target->GetMakefile();
+  std::string targetDir = makefile->GetCurrentBinaryDirectory();
+  targetDir += "/";
+  targetDir += GetAutogenTargetName(target);
+  targetDir += ".dir/";
+  return targetDir;
+}
+
+static std::string GetSourceRelativePath(
+    cmGeneratorTarget const* target,
+    const std::string& fileName)
+{
+  std::string pathRel;
+  // Test if the file is child to any of the known directories
+  {
+    const std::string fileNameReal = cmsys::SystemTools::GetRealPath(fileName);
+    std::string parentDirectory;
+    bool match ( false );
+    {
+      std::string testDirs[4];
+      {
+        cmMakefile* makefile = target->Target->GetMakefile();
+        testDirs[0] = makefile->GetCurrentSourceDirectory();
+        testDirs[1] = makefile->GetCurrentBinaryDirectory();
+        testDirs[2] = makefile->GetHomeDirectory();
+        testDirs[3] = makefile->GetHomeOutputDirectory();
+      }
+      for(int ii=0; ii != sizeof(testDirs)/sizeof(std::string); ++ii )
+        {
+        const ::std::string testDir = cmsys::SystemTools::GetRealPath(
+                                                                 testDirs[ii]);
+        if (!testDir.empty()
+            && cmsys::SystemTools::IsSubDirectory(fileNameReal, testDir) )
+          {
+          parentDirectory = testDir;
+          match = true;
+          break;
+          }
+        }
+    }
+    // Use root as fallback parent directory
+    if (!match)
+      {
+      cmsys::SystemTools::SplitPathRootComponent(fileNameReal,
+                                                 &parentDirectory);
+      }
+    pathRel = cmsys::SystemTools::RelativePath(
+      parentDirectory, cmsys::SystemTools::GetParentDirectory(fileNameReal));
+  }
+  // Sanitize relative path
+  if (!pathRel.empty())
+    {
+    pathRel += '/';
+    cmSystemTools::ReplaceString(pathRel, "..", "__");
+    }
+  return pathRel;
+}
+
 static void SetupSourceFiles(cmGeneratorTarget const* target,
                                    std::vector<std::string>& skipMoc,
                                    std::vector<std::string>& mocSources,
@@ -61,13 +142,16 @@ static void SetupSourceFiles(cmGeneratorTarget const* target,
       if (ext == "qrc"
           && !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC")))
         {
+
+        std::string rcc_output_dir = GetAutogenTargetBuildDir(target);
+        rcc_output_dir += GetSourceRelativePath(target,absFile);
+        cmSystemTools::MakeDirectory(rcc_output_dir.c_str());
+
         std::string basename = cmsys::SystemTools::
                                       GetFilenameWithoutLastExtension(absFile);
 
-        std::string rcc_output_dir = target->GetSupportDirectory();
-        cmSystemTools::MakeDirectory(rcc_output_dir.c_str());
         std::string rcc_output_file = rcc_output_dir;
-        rcc_output_file += "/qrc_" + basename + ".cpp";
+        rcc_output_file += "qrc_" + basename + ".cpp";
         makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
                                 rcc_output_file.c_str(), false);
         makefile->GetOrCreateSource(rcc_output_file, true);
@@ -431,26 +515,6 @@ static void MergeRccOptions(std::vector<std::string> &opts,
       }
     }
   opts.insert(opts.end(), extraOpts.begin(), extraOpts.end());
-}
-
-std::string GetAutogenTargetName(
-    cmGeneratorTarget const* target)
-{
-  std::string autogenTargetName = target->GetName();
-  autogenTargetName += "_automoc";
-  return autogenTargetName;
-}
-
-std::string GetAutogenTargetDir(
-    cmGeneratorTarget const* target)
-{
-  cmMakefile* makefile = target->Target->GetMakefile();
-  std::string targetDir = makefile->GetCurrentBinaryDirectory();
-  targetDir += makefile->GetCMakeInstance()->GetCMakeFilesDirectory();
-  targetDir += "/";
-  targetDir += GetAutogenTargetName(target);
-  targetDir += ".dir/";
-  return targetDir;
 }
 
 static void copyTargetProperty(cmTarget* destinationTarget,
@@ -858,14 +922,18 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
         if (ext == "qrc"
             && !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC")))
           {
-          std::string basename = cmsys::SystemTools::
-                                  GetFilenameWithoutLastExtension(absFile);
 
-          std::string rcc_output_dir = target->GetSupportDirectory();
-          cmSystemTools::MakeDirectory(rcc_output_dir.c_str());
-          std::string rcc_output_file = rcc_output_dir;
-          rcc_output_file += "/qrc_" + basename + ".cpp";
-          rcc_output.push_back(rcc_output_file);
+          {
+            std::string rcc_output_dir = GetAutogenTargetBuildDir(target);
+            rcc_output_dir += GetSourceRelativePath(target,absFile);
+            cmSystemTools::MakeDirectory(rcc_output_dir.c_str());
+
+            std::string basename = cmsys::SystemTools::
+                                    GetFilenameWithoutLastExtension(absFile);
+            std::string rcc_output_file = rcc_output_dir;
+            rcc_output_file += "qrc_" + basename + ".cpp";
+            rcc_output.push_back(rcc_output_file);
+          }
 
           if (!cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED")))
             {
