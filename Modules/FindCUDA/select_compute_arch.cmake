@@ -72,8 +72,8 @@ function(CUDA_DETECT_INSTALLED_GPUS OUT_VARIABLE)
   endif()
 
   if(NOT CUDA_GPU_DETECT_OUTPUT)
-    message(STATUS "Automatic GPU detection failed. Building for all known architectures.")
-    set(${OUT_VARIABLE} ${CUDA_KNOWN_GPU_ARCHITECTURES} PARENT_SCOPE)
+    message(STATUS "Automatic GPU detection failed. Building for common architectures.")
+    set(${OUT_VARIABLE} ${CUDA_COMMON_GPU_ARCHITECTURES} PARENT_SCOPE)
   else()
     set(${OUT_VARIABLE} ${CUDA_GPU_DETECT_OUTPUT} PARENT_SCOPE)
   endif()
@@ -92,7 +92,7 @@ function(CUDA_SELECT_NVCC_ARCH_FLAGS out_variable)
     list(APPEND archs_names "Auto")
     set(archs_name_default "Auto")
   else()
-    set(archs_name_default "Common")
+    set(archs_name_default "Manual")
   endif()
 
   # SET CUDA_ARCH_NAME strings (so it will be seen as dropbox in CMake-Gui)
@@ -149,7 +149,7 @@ function(CUDA_SELECT_NVCC_ARCH_FLAGS out_variable)
     message(SEND_ERROR "Unknown CUDA_ARCH_NAME (${CUDA_ARCH_NAME})")
   endif()
 
-  message(STATUS "Compiling for CUDA architecture: ${cuda_arch_bin}")
+  message(STATUS "Compiling for CUDA architecture(s): ${cuda_arch_bin}")
 
   # remove dots and convert to lists
   string(REGEX REPLACE "\\." "" cuda_arch_bin "${cuda_arch_bin}")
