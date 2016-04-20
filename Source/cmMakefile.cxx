@@ -1824,10 +1824,11 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
                                     cmState::CacheEntryType type,
                                     bool force)
 {
-  bool haveVal = value ? true : false;
-  std::string val = haveVal ? value : "";
   const char* existingValue =
     this->GetState()->GetInitializedCacheValue(name);
+  // must be outside the following if() to keep it alive long enough
+  std::string nvalue;
+
   if(existingValue
       && (this->GetState()->GetCacheEntryType(name)
                                             == cmState::UNINITIALIZED))
@@ -1836,15 +1837,16 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
     // if it is a force, then use the value being passed in
     if(!force)
       {
-      val = existingValue;
-      haveVal = true;
+      value = existingValue;
       }
     if ( type == cmState::PATH || type == cmState::FILEPATH )
       {
       std::vector<std::string>::size_type cc;
       std::vector<std::string> files;
-      std::string nvalue = "";
-      cmSystemTools::ExpandListArgument(val, files);
+      nvalue = value ? value : "";
+
+      cmSystemTools::ExpandListArgument(nvalue, files);
+      nvalue = "";
       for ( cc = 0; cc < files.size(); cc ++ )
         {
         if(!cmSystemTools::IsOff(files[cc].c_str()))
@@ -1859,13 +1861,12 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
         }
 
       this->GetCMakeInstance()->AddCacheEntry(name, nvalue.c_str(), doc, type);
-      val = this->GetState()->GetInitializedCacheValue(name);
-      haveVal = true;
+      nvalue = this->GetState()->GetInitializedCacheValue(name);
+      value = nvalue.c_str();
       }
 
     }
-  this->GetCMakeInstance()->AddCacheEntry(name, haveVal ? val.c_str() : 0,
-                                          doc, type);
+  this->GetCMakeInstance()->AddCacheEntry(name, value, doc, type);
   // if there was a definition then remove it
   this->StateSnapshot.RemoveDefinition(name);
 }
