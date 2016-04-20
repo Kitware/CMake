@@ -84,7 +84,7 @@ public:
 
   bool IsEmpty() const { return this->Empty; }
 
-  void Add(const char *newString)
+  void Add(const std::string& newString)
     {
     this->Empty = false;
 
@@ -2285,14 +2285,14 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
       if(emitted.insert(frameworkDir).second)
         {
-        fdirs.Add(this->XCodeEscapePath(frameworkDir.c_str()).c_str());
+        fdirs.Add(this->XCodeEscapePath(frameworkDir.c_str()));
         }
       }
     else
       {
       std::string incpath =
         this->XCodeEscapePath(i->c_str());
-      dirs.Add(incpath.c_str());
+      dirs.Add(incpath);
       }
     }
   // Add framework search paths needed for linking.
@@ -2304,7 +2304,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       {
       if(emitted.insert(*fdi).second)
         {
-        fdirs.Add(this->XCodeEscapePath(fdi->c_str()).c_str());
+        fdirs.Add(this->XCodeEscapePath(fdi->c_str()));
         }
       }
     }
@@ -4025,7 +4025,7 @@ cmGlobalXCodeGenerator::AppendDefines(BuildObjectListOrString& defs,
     // Append the flag with needed escapes.
     std::string tmp;
     this->AppendFlag(tmp, def);
-    defs.Add(tmp.c_str());
+    defs.Add(tmp);
     }
 }
 
