@@ -2282,7 +2282,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       {
       std::string frameworkDir = *i;
       frameworkDir += "/../";
-      frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
+      frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir);
       if(emitted.insert(frameworkDir).second)
         {
         fdirs.Add(this->XCodeEscapePath(frameworkDir));
