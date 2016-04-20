@@ -2285,13 +2285,13 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
       if(emitted.insert(frameworkDir).second)
         {
-        fdirs.Add(this->XCodeEscapePath(frameworkDir.c_str()));
+        fdirs.Add(this->XCodeEscapePath(frameworkDir));
         }
       }
     else
       {
       std::string incpath =
-        this->XCodeEscapePath(i->c_str());
+        this->XCodeEscapePath(*i);
       dirs.Add(incpath);
       }
     }
@@ -2304,7 +2304,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       {
       if(emitted.insert(*fdi).second)
         {
-        fdirs.Add(this->XCodeEscapePath(fdi->c_str()));
+        fdirs.Add(this->XCodeEscapePath(*fdi));
         }
       }
     }
@@ -2444,7 +2444,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       {
       install_name_dir = "";
       extraLinkOptions += " -install_name ";
-      extraLinkOptions += XCodeEscapePath(install_name.c_str());
+      extraLinkOptions += XCodeEscapePath(install_name);
       }
     }
   buildSettings->AddAttribute("INSTALL_PATH",
@@ -2473,7 +2473,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
           {
           search_paths += " ";
           }
-        search_paths += this->XCodeEscapePath(runpath.c_str());
+        search_paths += this->XCodeEscapePath(runpath);
         }
       }
     if(!search_paths.empty())
@@ -3021,7 +3021,7 @@ void cmGlobalXCodeGenerator
         {
         linkObjs += sep;
         sep = " ";
-        linkObjs += this->XCodeEscapePath(oi->c_str());
+        linkObjs += this->XCodeEscapePath(*oi);
         }
       this->AppendBuildSettingAttribute(
         target, this->GetTargetLinkFlagsVar(gt),
@@ -3068,10 +3068,10 @@ void cmGlobalXCodeGenerator
           // $(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME) to it:
           linkDirs += " ";
           linkDirs += this->XCodeEscapePath(
-            (*libDir + "/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)").c_str());
+            *libDir + "/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)");
           }
         linkDirs += " ";
-        linkDirs += this->XCodeEscapePath(libDir->c_str());
+        linkDirs += this->XCodeEscapePath(*libDir);
         }
       }
     this->AppendBuildSettingAttribute(target, "LIBRARY_SEARCH_PATHS",
@@ -3091,7 +3091,7 @@ void cmGlobalXCodeGenerator
       sep = " ";
       if(li->IsPath)
         {
-        linkLibs += this->XCodeEscapePath(li->Value.c_str());
+        linkLibs += this->XCodeEscapePath(li->Value);
         }
       else if (!li->Target
           || li->Target->GetType() != cmState::INTERFACE_LIBRARY)
@@ -3932,17 +3932,16 @@ std::string cmGlobalXCodeGenerator::RelativeToBinary(const char* p)
 }
 
 //----------------------------------------------------------------------------
-std::string cmGlobalXCodeGenerator::XCodeEscapePath(const char* p)
+std::string cmGlobalXCodeGenerator::XCodeEscapePath(const std::string& p)
 {
-  std::string ret = p;
-  if(ret.find(' ') != ret.npos)
+  if(p.find(' ') != p.npos)
     {
-    std::string t = ret;
-    ret = "\"";
-    ret += t;
-    ret += "\"";
+    std::string t = "\"";
+    t += p;
+    t += "\"";
+    return t;
     }
-  return ret;
+  return p;
 }
 
 //----------------------------------------------------------------------------

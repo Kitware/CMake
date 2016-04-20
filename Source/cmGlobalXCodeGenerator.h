@@ -96,7 +96,7 @@ private:
   bool CreateGroups(cmLocalGenerator* root,
                     std::vector<cmLocalGenerator*>&
                     generators);
-  std::string XCodeEscapePath(const char* p);
+  std::string XCodeEscapePath(const std::string& p);
   std::string RelativeToSource(const char* p);
   std::string RelativeToBinary(const char* p);
   std::string ConvertToRelativeForMake(const char* p);
