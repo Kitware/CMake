@@ -109,7 +109,7 @@ public:
       }
     else
       {
-      return this->Generator->CreateString(this->String.c_str());
+      return this->Generator->CreateString(this->String);
       }
     }
 };
@@ -804,7 +804,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
 
   cmXCodeObject* settings =
     this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-  settings->AddAttribute("COMPILER_FLAGS", this->CreateString(flags.c_str()));
+  settings->AddAttribute("COMPILER_FLAGS", this->CreateString(flags));
 
   // Is this a resource file in this target? Add it to the resources group...
   //
@@ -1011,8 +1011,8 @@ cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
   std::string name = cmSystemTools::GetFilenameName(path.c_str());
   const char* sourceTree = (cmSystemTools::FileIsFullPath(path.c_str())?
                             "<absolute>" : "SOURCE_ROOT");
-  fileRef->AddAttribute("name", this->CreateString(name.c_str()));
-  fileRef->AddAttribute("path", this->CreateString(path.c_str()));
+  fileRef->AddAttribute("name", this->CreateString(name));
+  fileRef->AddAttribute("path", this->CreateString(path));
   fileRef->AddAttribute("sourceTree", this->CreateString(sourceTree));
   if(this->XcodeVersion == 15)
     {
@@ -1326,7 +1326,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
           ostr << "../" << mit->first.c_str();
           }
         copyFilesBuildPhase->AddAttribute("dstPath",
-          this->CreateString(ostr.str().c_str()));
+          this->CreateString(ostr.str()));
         copyFilesBuildPhase->AddAttribute(
           "runOnlyForDeploymentPostprocessing", this->CreateString("0"));
         buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
@@ -1752,7 +1752,7 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
                                           (makefile+"$CONFIGURATION").c_str());
   makecmd += " all";
   buildphase->AddAttribute("shellScript",
-                           this->CreateString(makecmd.c_str()));
+                           this->CreateString(makecmd));
   buildphase->AddAttribute("showEnvVarsInLog",
                            this->CreateString("0"));
 }
@@ -2021,7 +2021,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     if(archs.size() == 1)
       {
       buildSettings->AddAttribute("ARCHS",
-                                  this->CreateString(archs[0].c_str()));
+                                  this->CreateString(archs[0]));
       }
     else
       {
@@ -2030,7 +2030,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       for(std::vector<std::string>::iterator i = archs.begin();
           i != archs.end(); i++)
         {
-        archObjects->AddObject(this->CreateString((*i).c_str()));
+        archObjects->AddObject(this->CreateString(*i));
         }
       buildSettings->AddAttribute("ARCHS", archObjects);
       }
@@ -2081,13 +2081,13 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
         {
         std::string pncdir = gtgt->GetDirectory(configName);
         buildSettings->AddAttribute("CONFIGURATION_BUILD_DIR",
-                                    this->CreateString(pncdir.c_str()));
+                                    this->CreateString(pncdir));
         }
       }
     else
       {
       buildSettings->AddAttribute("OBJROOT",
-                                  this->CreateString(pndir.c_str()));
+                                  this->CreateString(pndir));
       pndir = gtgt->GetDirectory(configName);
       }
 
@@ -2097,9 +2097,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       }
 
     buildSettings->AddAttribute("EXECUTABLE_PREFIX",
-                                this->CreateString(pnprefix.c_str()));
+                                this->CreateString(pnprefix));
     buildSettings->AddAttribute("EXECUTABLE_SUFFIX",
-                                this->CreateString(pnsuffix.c_str()));
+                                this->CreateString(pnsuffix));
     }
   else if(gtgt->GetType() == cmState::OBJECT_LIBRARY)
     {
@@ -2112,12 +2112,12 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       std::string pncdir = this->GetObjectsNormalDirectory(
         this->CurrentProject, configName, gtgt);
       buildSettings->AddAttribute("CONFIGURATION_BUILD_DIR",
-                                  this->CreateString(pncdir.c_str()));
+                                  this->CreateString(pncdir));
       }
     else
       {
       buildSettings->AddAttribute("OBJROOT",
-                                  this->CreateString(pndir.c_str()));
+                                  this->CreateString(pndir));
       pndir = this->GetObjectsNormalDirectory(
         this->CurrentProject, configName, gtgt);
       }
@@ -2125,9 +2125,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
 
   // Store the product name for all target types.
   buildSettings->AddAttribute("PRODUCT_NAME",
-                              this->CreateString(realName.c_str()));
+                              this->CreateString(realName));
   buildSettings->AddAttribute("SYMROOT",
-                              this->CreateString(pndir.c_str()));
+                              this->CreateString(pndir));
 
   // Handle settings for each target type.
   switch(gtgt->GetType())
@@ -2203,7 +2203,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       {
       std::string fw_version = gtgt->GetFrameworkVersion();
       buildSettings->AddAttribute("FRAMEWORK_VERSION",
-                                  this->CreateString(fw_version.c_str()));
+                                  this->CreateString(fw_version));
 
       std::string plist = this->ComputeInfoPListLocation(gtgt);
       // Xcode will create the final version of Info.plist at build time,
@@ -2390,17 +2390,17 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     if (*li == "CXX")
       {
       buildSettings->AddAttribute("OTHER_CPLUSPLUSFLAGS",
-                                  this->CreateString(flags.c_str()));
+                                  this->CreateString(flags));
       }
     else if (*li == "Fortran")
       {
       buildSettings->AddAttribute("IFORT_OTHER_FLAGS",
-                                  this->CreateString(flags.c_str()));
+                                  this->CreateString(flags));
       }
     else if (*li == "C")
       {
       buildSettings->AddAttribute("OTHER_CFLAGS",
-                                  this->CreateString(flags.c_str()));
+                                  this->CreateString(flags));
       }
     }
 
@@ -2448,7 +2448,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       }
     }
   buildSettings->AddAttribute("INSTALL_PATH",
-                              this->CreateString(install_name_dir.c_str()));
+                              this->CreateString(install_name_dir));
 
   // Create the LD_RUNPATH_SEARCH_PATHS
   cmComputeLinkInformation* pcli = gtgt->GetLinkInformation(configName);
@@ -2479,12 +2479,12 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     if(!search_paths.empty())
       {
       buildSettings->AddAttribute("LD_RUNPATH_SEARCH_PATHS",
-                                  this->CreateString(search_paths.c_str()));
+                                  this->CreateString(search_paths));
       }
     }
 
   buildSettings->AddAttribute(this->GetTargetLinkFlagsVar(gtgt),
-                              this->CreateString(extraLinkOptions.c_str()));
+                              this->CreateString(extraLinkOptions));
   buildSettings->AddAttribute("OTHER_REZFLAGS",
                               this->CreateString(""));
   buildSettings->AddAttribute("SECTORDER_FLAGS",
@@ -2525,7 +2525,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       v << major << "." << minor << "." << patch;
       }
     buildSettings->AddAttribute("DYLIB_CURRENT_VERSION",
-                                this->CreateString(v.str().c_str()));
+                                this->CreateString(v.str()));
 
     // SOVERSION -> compatibility_version
     gtgt->GetTargetVersion(true, major, minor, patch);
@@ -2537,7 +2537,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       vso << major << "." << minor << "." << patch;
       }
     buildSettings->AddAttribute("DYLIB_COMPATIBILITY_VERSION",
-                                this->CreateString(vso.str().c_str()));
+                                this->CreateString(vso.str()));
     }
   // put this last so it can override existing settings
   // Convert "XCODE_ATTRIBUTE_*" properties directly.
@@ -2674,14 +2674,14 @@ std::string cmGlobalXCodeGenerator::AddConfigurations(cmXCodeObject* target,
       this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
     this->CreateBuildSettings(gtgt, buildSettings,
                               configVector[i].c_str());
-    config->AddAttribute("name", this->CreateString(configVector[i].c_str()));
+    config->AddAttribute("name", this->CreateString(configVector[i]));
     config->SetComment(configVector[i].c_str());
     config->AddAttribute("buildSettings", buildSettings);
     }
   if(!configVector.empty())
     {
     configlist->AddAttribute("defaultConfigurationName",
-                             this->CreateString(configVector[0].c_str()));
+                             this->CreateString(configVector[0]));
     configlist->AddAttribute("defaultConfigurationIsVisible",
                              this->CreateString("0"));
     return configVector[0];
@@ -2813,7 +2813,7 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmGeneratorTarget* gtgt,
     {
     fullName = gtgt->GetFullName(defConfig.c_str());
     }
-  fileRef->AddAttribute("path", this->CreateString(fullName.c_str()));
+  fileRef->AddAttribute("path", this->CreateString(fullName));
   if(this->XcodeVersion == 15)
     {
     fileRef->AddAttribute("refType", this->CreateString("0"));
@@ -3200,7 +3200,7 @@ cmXCodeObject *cmGlobalXCodeGenerator
   cmXCodeObject* group = this->CreateObject(cmXCodeObject::PBXGroup);
   cmXCodeObject* groupChildren =
   this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  group->AddAttribute("name", this->CreateString(name.c_str()));
+  group->AddAttribute("name", this->CreateString(name));
   group->AddAttribute("children", groupChildren);
   if(this->XcodeVersion == 15)
   {
@@ -3447,7 +3447,7 @@ bool cmGlobalXCodeGenerator
   std::string pdir =
     this->RelativeToBinary(root->GetCurrentSourceDirectory());
   this->RootObject->AddAttribute("projectDirPath",
-                                 this->CreateString(pdir.c_str()));
+                                 this->CreateString(pdir));
   this->RootObject->AddAttribute("projectRoot", this->CreateString(""));
   }
   cmXCodeObject* configlist =
@@ -3528,7 +3528,7 @@ bool cmGlobalXCodeGenerator
   else
     {
     // Tell Xcode to use ARCHS (ONLY_ACTIVE_ARCH defaults to NO).
-    buildSettings->AddAttribute("ARCHS", this->CreateString(archs.c_str()));
+    buildSettings->AddAttribute("ARCHS", this->CreateString(archs));
     }
   if(deploymentTarget && *deploymentTarget)
     {
@@ -3538,12 +3538,12 @@ bool cmGlobalXCodeGenerator
   if(!this->GeneratorToolset.empty())
     {
     buildSettings->AddAttribute("GCC_VERSION",
-      this->CreateString(this->GeneratorToolset.c_str()));
+      this->CreateString(this->GeneratorToolset));
     }
 
   std::string symroot = root->GetCurrentBinaryDirectory();
   symroot += "/build";
-  buildSettings->AddAttribute("SYMROOT", this->CreateString(symroot.c_str()));
+  buildSettings->AddAttribute("SYMROOT", this->CreateString(symroot));
 
   for(Configs::iterator i = configs.begin(); i != configs.end(); ++i)
     {
