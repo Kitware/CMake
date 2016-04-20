@@ -1573,7 +1573,7 @@ endif()
 #  Add imported targets
 # ------------------------------------------------------------------------
 
-if(Boost_FOUND AND _Boost_IMPORTED_TARGETS)
+if(Boost_FOUND)
   # For header-only libraries
   if(NOT TARGET Boost::boost)
     add_library(Boost::boost INTERFACE IMPORTED)
@@ -1584,7 +1584,7 @@ if(Boost_FOUND AND _Boost_IMPORTED_TARGETS)
   endif()
 
   foreach(COMPONENT ${Boost_FIND_COMPONENTS})
-    if(NOT TARGET Boost::${COMPONENT})
+    if(_Boost_IMPORTED_TARGETS AND NOT TARGET Boost::${COMPONENT})
       string(TOUPPER ${COMPONENT} UPPERCOMPONENT)
       if(Boost_${UPPERCOMPONENT}_FOUND)
         if(Boost_USE_STATIC_LIBS)
