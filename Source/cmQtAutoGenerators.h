@@ -39,10 +39,19 @@ private:
   std::string MakeCompileSettingsString(cmMakefile* makefile);
 
   bool RunAutogen(cmMakefile* makefile);
+  bool GenerateMocFiles(
+              const std::map<std::string, std::string>& includedMocs,
+              const std::map<std::string, std::string>& notIncludedMocs);
   bool GenerateMoc(const std::string& sourceFile,
                    const std::string& mocFileName);
-  bool GenerateUi(const std::string& realName, const std::string& uiFileName);
-  bool GenerateQrc();
+  bool GenerateUiFiles(
+        const std::map<std::string, std::vector<std::string> >& includedUis );
+  bool GenerateUi(const std::string& realName,
+                  const std::string& uiInputFile,
+                  const std::string& uiOutputFile );
+  bool GenerateQrcFiles();
+  bool GenerateQrc(const std::string& qrcInputFile,
+                   const std::string& qrcOutputFile);
   void ParseCppFile(const std::string& absFilename,
               const std::vector<std::string>& headerExtensions,
               std::map<std::string, std::string>& includedMocs,
@@ -69,9 +78,8 @@ private:
 
   void Init();
 
-  std::string Join(const std::vector<std::string>& lst, char separator);
-  bool EndsWith(const std::string& str, const std::string& with);
-  bool StartsWith(const std::string& str, const std::string& with);
+  void LogCommand(const std::vector<std::string>& command);
+  std::string JoinExts(const std::vector<std::string>& lst);
 
   static void MergeUicOptions(std::vector<std::string> &opts,
                        const std::vector<std::string> &fileOpts, bool isQt5);
@@ -101,6 +109,7 @@ private:
   std::string CurrentCompileSettingsStr;
   std::string OldCompileSettingsStr;
 
+  std::string OutMocCppFilenameRel;
   std::string OutMocCppFilename;
   std::list<std::string> MocIncludes;
   std::list<std::string> MocDefinitions;
