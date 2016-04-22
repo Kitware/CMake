@@ -2,10 +2,11 @@
 # FindCUDA
 # --------
 #
+# Tools for building CUDA C files: libraries and build dependencies.
+#
 # This script locates the NVIDIA CUDA C tools.  It should work on linux,
 # windows, and mac and should be reasonably up to date with CUDA C
 # releases.
-# The approach follows that taken in Caffe: caffe.berkeleyvision.org/
 #
 # This script makes use of the standard find_package arguments of
 # <VERSION>, REQUIRED and QUIET.  CUDA_FOUND will report if an
@@ -41,20 +42,24 @@
 #      file yourself, you can mix bit sizes between device and host.
 #
 #   CUDA_ARCH_NAME (Default is "Auto" for regular builds and "Manual" for cross-builds)
-#   -- Set to the desired CUDA architecture name, one of CUDA_KNOWN_GPU_ARCH_NAMES list:
-#      "Fermi" "Kepler" "Maxwell" "All" "Common" "Manual" "Auto"
-#       Also, for CUDA version 6.5+: "Kepler+Tegra" "Kepler+Tesla" "Maxwell+Tegra"
-#       Also, for CUDA version  7.5: "Pascal".
-#       More information: https://en.wikipedia.org/wiki/CUDA
+#   -- Controls the way CUDA_SELECT_NVCC_ARCH_FLAGS function selects CUDA compute architecture flags.
+#      If you are building for local install, "Auto" should work best as it determines local machine compute arch.
+#      If you are building for distribution, set to "Common" or "All" to cover common subsets of architectures.
+#      "Manual" makes CUDA_SELECT_NVCC_ARCH_FLAGS to get flags directly from ENV{CUDA_ARCH_BIN}
+#      Otherwise, list of GPU architecture names expected (semicolon or space separated).
+#      Names: "Fermi;Kepler;Maxwell;Kepler+Tegra;Kepler+Tesla;Maxwell+Tegra;Pascal".
+#      More information: https://en.wikipedia.org/wiki/CUDA
 #
 #   ENV{CUDA_ARCH_BIN} (Only tested if CUDA_ARCH_NAME set to "Manual")
 #   -- Set CUDA_ARCH_NAME to "Manual" and
 #      CUDA_ARCH_BIN to desired subset of CUDA_KNOWN_GPU_ARCHITECTURES list below.
 #
+#
 #   CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE (Default ON)
 #   -- Set to ON if you want the custom build rule to be attached to the source
 #      file in Visual Studio.  Turn OFF if you add the same cuda file to multiple
 #      targets.
+#
 #
 #      This allows the user to build the target from the CUDA file; however, bad
 #      things can happen if the CUDA source file is added to multiple targets.
@@ -197,6 +202,7 @@
 #      (e.g. nvcc -Ipath0 -Ipath1 ... ). These paths usually contain other .cu
 #      files.
 #
+#
 #   CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS( output_file_var cuda_target
 #                                            nvcc_flags object_files)
 #   -- Generates the link object required by separable compilation from the given
@@ -323,20 +329,13 @@
 #   CUDA_nvcuvid_LIBRARY  -- CUDA Video Decoder library.
 #                            Only available for CUDA version 3.2+.
 #                            Windows only.
-#   CUDA_KNOWN_GPU_ARCH_NAMES      -- "Fermi" "Kepler" "Maxwell" "All" "Common" "Manual" "Auto"
-#   Also, for CUDA version 6.5+    -- "Kepler+Tegra" "Kepler+Tesla" "Maxwell+Tegra"
-#   Also, for CUDA version  7.5+   -- "Pascal"
-#   "Auto" -- option is the default for non-cross compilation. It determines the GPU(s) installed
-#             on the machine and produces options for that architecture(s) only.
-#   "Manual" -- default for cross-compilaton. CUDA_ARCH_BIN has to be set.
-#   "Common" -- Fallback default when "Auto" fails to determine machine's GPU compute capabilities.
-#               In this case, most common Desktop CUDA compute capabilities are used.
-#   "All"    -- Builds for all CUDA_KNOWN_GPU_ARCH_NAMES and should rarely be used.
-#   CUDA_KNOWN_GPU_ARCHITECTURES   -- "2.0" "2.1(2.0)" "3.0" "3.5" "5.0"
-#   Also, for CUDA version  6.5+   -- "3.2" "3.7" "5.2" "5.3"
-#   Also, for CUDA version  7.5+   -- "6.0" "6.2"
+#   CUDA_KNOWN_GPU_ARCH_NAMES     -- list of GPU compute archirtecture
+#                                    names known to the compiler (e.g "Maxwell;Pascal")
+#   CUDA_KNOWN_GPU_ARCHITECTURES  -- list of GPU compute archirtecture
+#                                    version numbers known to the compiler (e.g. "50;52")
 #
 #
+
 #   James Bigler, NVIDIA Corp (nvidia.com - jbigler)
 #   Abe Stephens, SCI Institute -- http://www.sci.utah.edu/~abe/FindCuda.html
 #
