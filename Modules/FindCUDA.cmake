@@ -2,10 +2,11 @@
 # FindCUDA
 # --------
 #
+# Tools for building CUDA C files: libraries and build dependencies.
+#
 # This script locates the NVIDIA CUDA C tools.  It should work on linux,
 # windows, and mac and should be reasonably up to date with CUDA C
 # releases.
-# The approach follows that taken in Caffe: caffe.berkeleyvision.org/
 #
 # This script makes use of the standard find_package arguments of
 # <VERSION>, REQUIRED and QUIET.  CUDA_FOUND will report if an
