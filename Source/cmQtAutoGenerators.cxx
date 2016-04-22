@@ -410,11 +410,12 @@ cmQtAutoGenerators::WriteOldMocDefinitionsFile(
 
 void cmQtAutoGenerators::Init()
 {
+  this->TargetBuildSubDir = this->TargetName;
+  this->TargetBuildSubDir += ".dir/";
+
   this->OutMocCppFilenameRel = this->TargetName;
   this->OutMocCppFilenameRel += ".cpp";
-
-  this->OutMocCppFilename = this->Builddir;
-  this->OutMocCppFilename += this->OutMocCppFilenameRel;
+  this->OutMocCppFilenameAbs = this->Builddir + this->OutMocCppFilenameRel;
 
   std::vector<std::string> cdefList;
   cmSystemTools::ExpandListArgument(this->MocCompileDefinitionsStr, cdefList);
@@ -507,7 +508,7 @@ static std::string ReadAll(const std::string& filename)
 
 bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 {
-  if (!cmsys::SystemTools::FileExists(this->OutMocCppFilename.c_str())
+  if (!cmsys::SystemTools::FileExists(this->OutMocCppFilenameAbs.c_str())
     || (this->OldCompileSettingsStr != this->CurrentCompileSettingsStr))
     {
     this->GenerateAll = true;
@@ -1047,14 +1048,15 @@ void cmQtAutoGenerators::ParseHeaders(const std::set<std::string>& absHeaders,
         std::cout << "AUTOGEN: Checking " << headerName << std::endl;
         }
 
-      const std::string basename = cmsys::SystemTools::
-                                   GetFilenameWithoutLastExtension(headerName);
-
-      const std::string currentMoc = "moc_" + basename + ".cpp";
       std::string macroName;
       if (requiresMocing(contents, macroName))
         {
         //std::cout << "header contains Q_OBJECT macro";
+        const std::string parentDir = this->TargetBuildSubDir
+          + this->SourceRelativePath ( headerName );
+        const std::string basename = cmsys::SystemTools::
+          GetFilenameWithoutLastExtension(headerName);
+        const std::string currentMoc = parentDir + "moc_" + basename + ".cpp";
         notIncludedMocs[headerName] = currentMoc;
         }
       }
@@ -1067,6 +1069,26 @@ bool cmQtAutoGenerators::GenerateMocFiles(
                     const std::map<std::string, std::string>& includedMocs,
                     const std::map<std::string, std::string>& notIncludedMocs )
 {
+  // look for name collisions
+  {
+    std::multimap<std::string, std::string> collisions;
+    // Test merged map of included and notIncluded
+    std::map<std::string, std::string> mergedMocs ( includedMocs );
+    mergedMocs.insert ( notIncludedMocs.begin(), notIncludedMocs.end() );
+    if( this->NameCollisionTest ( mergedMocs, collisions ) )
+      {
+      std::cerr <<
+        "AUTOGEN: error: "
+        "The same moc file will be generated "
+        "from different sources." << std::endl <<
+        "To avoid this error either" << std::endl <<
+        "- rename the source files or" << std::endl <<
+        "- do not include the (moc_NAME.cpp|NAME.moc) file" << std::endl;
+      this->NameCollisionLog ( collisions );
+      ::exit(EXIT_FAILURE);
+      }
+  }
+
   // generate moc files that are included by source files.
   for(std::map<std::string, std::string>::const_iterator
       it = includedMocs.begin(); it != includedMocs.end(); ++it)
@@ -1125,7 +1147,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
   if (!automocCppChanged)
     {
     // compare contents of the _automoc.cpp file
-    const std::string oldContents = ReadAll(this->OutMocCppFilename);
+    const std::string oldContents = ReadAll(this->OutMocCppFilenameAbs);
     if (oldContents == automocSource)
       {
       // nothing changed: don't touch the _automoc.cpp file
@@ -1148,7 +1170,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
     }
     {
     cmsys::ofstream outfile;
-    outfile.open(this->OutMocCppFilename.c_str(),
+    outfile.open(this->OutMocCppFilenameAbs.c_str(),
                  std::ios::trunc);
     outfile << automocSource;
     outfile.close();
@@ -1223,6 +1245,7 @@ bool cmQtAutoGenerators::GenerateUiFiles(
 {
   // single map with input / output names
   std::map<std::string, std::map<std::string, std::string> > uiGenMap;
+  std::map<std::string, std::string> testMap;
   for(std::map<std::string, std::vector<std::string> >::const_iterator
       it = includedUis.begin(); it != includedUis.end(); ++it)
     {
@@ -1240,8 +1263,23 @@ bool cmQtAutoGenerators::GenerateUiFiles(
       const std::string uiInputFile = sourcePath + uiFileName + ".ui";
       const std::string uiOutputFile = "ui_" + uiFileName + ".h";
       sourceMap[uiInputFile] = uiOutputFile;
+      testMap[uiInputFile] = uiOutputFile;
       }
     }
+
+  // look for name collisions
+  {
+    std::multimap<std::string, std::string> collisions;
+    if( this->NameCollisionTest ( testMap, collisions ) )
+      {
+      std::cerr << "AUTOGEN: error: The same ui_NAME.h file will be generated "
+                   "from different sources." << std::endl
+                << "To avoid this error rename the source files." << std::endl;
+      this->NameCollisionLog ( collisions );
+      ::exit(EXIT_FAILURE);
+      }
+  }
+  testMap.clear();
 
   // generate ui files
   for(std::map<std::string, std::map<std::string, std::string> >::
@@ -1361,11 +1399,28 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
       {
       std::string basename = cmsys::SystemTools::
         GetFilenameWithoutLastExtension(*si);
-      std::string qrcOutputFile = "CMakeFiles/" + this->OriginTargetName
-        + ".dir/qrc_" + basename + ".cpp";
+      std::string qrcOutputFile = this->TargetBuildSubDir
+        + this->SourceRelativePath ( *si )
+        + "qrc_" + basename + ".cpp";
+      //std::string qrcOutputFile = "CMakeFiles/" + this->OriginTargetName
+      //                         + ".dir/qrc_" + basename + ".cpp";
       qrcGenMap[*si] = qrcOutputFile;
       }
     }
+
+  // look for name collisions
+  {
+    std::multimap<std::string, std::string> collisions;
+    if( this->NameCollisionTest ( qrcGenMap, collisions ) )
+      {
+      std::cerr << "AUTOGEN: error: The same qrc_NAME.cpp file"
+                   " will be generated from different sources." << std::endl
+                << "To avoid this error rename the source .qrc files."
+                << std::endl;
+      this->NameCollisionLog ( collisions );
+      ::exit(EXIT_FAILURE);
+      }
+  }
 
   // generate qrc files
   for(std::map<std::string, std::string>::const_iterator
@@ -1386,8 +1441,10 @@ bool cmQtAutoGenerators::GenerateQrc (
   const std::string& qrcInputFile,
   const std::string& qrcOutputFile )
 {
-  const std::string basename = cmsys::SystemTools::
-    GetFilenameWithoutLastExtension(qrcInputFile);
+  std::string relName = this->SourceRelativePath ( qrcInputFile );
+  cmSystemTools::ReplaceString(relName, "/", "_");
+  relName += cmsys::SystemTools::GetFilenameWithoutLastExtension(qrcInputFile);
+
   const ::std::string qrcBuildFile = this->Builddir + qrcOutputFile;
 
   int sourceNewerThanQrc = 0;
@@ -1417,7 +1474,7 @@ bool cmQtAutoGenerators::GenerateQrc (
       }
 
     command.push_back("-name");
-    command.push_back(basename);
+    command.push_back(relName);
     command.push_back("-o");
     command.push_back(qrcBuildFile);
     command.push_back(qrcInputFile);
@@ -1440,6 +1497,102 @@ bool cmQtAutoGenerators::GenerateQrc (
       }
     }
   return true;
+}
+
+std::string cmQtAutoGenerators::SourceRelativePath(const std::string& filename)
+{
+  std::string pathRel;
+
+  // Test if the file is child to any of the known directories
+  {
+    std::string fileNameReal = cmsys::SystemTools::GetRealPath( filename );
+    std::string parentDirectory;
+    bool match ( false );
+    {
+      const ::std::string* testDirs[4];
+      testDirs[0] = &(this->Srcdir);
+      testDirs[1] = &(this->Builddir);
+      testDirs[2] = &(this->ProjectSourceDir);
+      testDirs[3] = &(this->ProjectBinaryDir);
+      for(int ii=0; ii != sizeof(testDirs)/sizeof(const ::std::string*); ++ii )
+        {
+        const ::std::string testDir = cmsys::SystemTools::GetRealPath(
+                                                          *(testDirs[ii]));
+        if (cmsys::SystemTools::IsSubDirectory(fileNameReal,
+                                               testDir) )
+          {
+          parentDirectory = testDir;
+          match = true;
+          break;
+          }
+        }
+    }
+    // Use root as fallback parent directory
+    if ( !match )
+      {
+      cmsys::SystemTools::SplitPathRootComponent(fileNameReal,
+                                                 &parentDirectory);
+      }
+    pathRel = cmsys::SystemTools::RelativePath(
+      parentDirectory, cmsys::SystemTools::GetParentDirectory(fileNameReal));
+  }
+
+  // Sanitize relative path
+  if (!pathRel.empty())
+    {
+    pathRel += '/';
+    cmSystemTools::ReplaceString(pathRel, "..", "__");
+    }
+  return pathRel;
+}
+
+/**
+ * @brief Collects name collisions as output/input pairs
+ * @return True if there were collisions
+ */
+bool cmQtAutoGenerators::NameCollisionTest(
+                          const std::map<std::string, std::string >& genFiles,
+                          std::multimap<std::string, std::string>& collisions)
+{
+  typedef std::map<std::string, std::string>::const_iterator Iter;
+  typedef std::map<std::string, std::string>::value_type VType;
+  for(Iter ait = genFiles.begin(); ait != genFiles.end(); ++ait )
+    {
+    bool first_match ( true );
+    for (Iter bit = (++Iter(ait)); bit != genFiles.end(); ++bit)
+      {
+      if(ait->second == bit->second)
+        {
+        if (first_match)
+          {
+          if (collisions.find(ait->second) != collisions.end())
+            {
+            // We already know of this collision from before
+            break;
+            }
+          collisions.insert(VType(ait->second, ait->first));
+          first_match = false;
+          }
+        collisions.insert(VType(bit->second, bit->first));
+        }
+      }
+    }
+
+  return !collisions.empty();
+}
+
+void cmQtAutoGenerators::NameCollisionLog(
+  const std::multimap<std::string, std::string>& collisions)
+{
+  typedef std::multimap<std::string, std::string>::const_iterator Iter;
+
+  std::stringstream sbuf;
+  for(Iter it = collisions.begin(); it != collisions.end(); ++it )
+    {
+      sbuf << it->first << " : " << it->second << std::endl;
+    }
+  sbuf.flush();
+  std::cerr << sbuf.str();
 }
 
 void cmQtAutoGenerators::LogCommand(const std::vector<std::string>& command)
