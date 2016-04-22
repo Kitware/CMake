@@ -125,10 +125,10 @@ if(BISON_EXECUTABLE)
     get_filename_component(BISON_TARGET_output_path "${BisonOutput}" PATH)
     get_filename_component(BISON_TARGET_output_name "${BisonOutput}" NAME_WE)
     add_custom_command(OUTPUT ${filename}
-      COMMAND ${CMAKE_COMMAND}
-      ARGS -E copy
+      COMMAND ${CMAKE_COMMAND} -E copy
       "${BISON_TARGET_output_path}/${BISON_TARGET_output_name}.output"
       "${filename}"
+      VERBATIM
       DEPENDS
       "${BISON_TARGET_output_path}/${BISON_TARGET_output_name}.output"
       COMMENT "[BISON][${Name}] Copying bison verbose table to ${filename}"
@@ -201,8 +201,8 @@ if(BISON_EXECUTABLE)
 
       add_custom_command(OUTPUT ${BISON_TARGET_outputs}
         ${BISON_TARGET_extraoutputs}
-        COMMAND ${BISON_EXECUTABLE}
-        ARGS ${BISON_TARGET_cmdopt} -o ${BisonOutput} ${BisonInput}
+        COMMAND ${BISON_EXECUTABLE} ${BISON_TARGET_cmdopt} -o ${BisonOutput} ${BisonInput}
+        VERBATIM
         DEPENDS ${BisonInput}
         COMMENT "[BISON][${Name}] Building parser with bison ${BISON_VERSION}"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
