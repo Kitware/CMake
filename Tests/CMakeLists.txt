@@ -2103,6 +2103,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     endmacro ()
     add_test_GhsMulti("arm_integrity_simarm" "arm_integrity.tgt" "simarm")
     add_test_GhsMulti("arm64_integrity_simarm" "arm64_integrity.tgt" "simarm")
+    add_test(NAME GhsMulti.duplicate_source_filenames
+        COMMAND ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/GhsMultiDuplicateSourceFilenames"
+        "${CMake_BINARY_DIR}/Tests/GhsMultiDuplicateSourceFilenames"
+        --build-generator "Green Hills MULTI"
+        --build-project ReturnNum
+        --build-config $<CONFIGURATION>
+        --build-options -DGHS_PRIMARY_TARGET="arm_integrity.tgt"
+        -DGHS_BSP_NAME="simarm"
+        )
   endif ()
 
   if(tegra AND NOT "${CMake_SOURCE_DIR};${CMake_BINARY_DIR}" MATCHES " ")
