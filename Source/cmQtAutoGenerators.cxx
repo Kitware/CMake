@@ -549,7 +549,9 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
     const std::string &absFilename = *it;
     if (this->Verbose)
       {
-      std::cout << "AUTOGEN: Checking " << absFilename << std::endl;
+      std::stringstream err;
+      err << "AUTOGEN: Checking " << absFilename << std::endl;
+      this->LogInfo(err.str());
       }
     if (this->RelaxedMode)
       {
@@ -577,7 +579,9 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
       const std::string &absFilename = *it;
       if (this->Verbose)
         {
-        std::cout << "AUTOGEN: Checking " << absFilename << std::endl;
+        std::stringstream err;
+        err << "AUTOGEN: Checking " << absFilename << std::endl;
+        this->LogInfo(err.str());
         }
       this->ParseForUic(absFilename, includedUis);
       }
@@ -607,17 +611,20 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 
   if (this->RunMocFailed)
     {
-    std::cerr << "moc failed..." << std::endl;
+    std::stringstream err; err << "moc failed..." << std::endl;
+    this->LogError(err.str());
     return false;
     }
   if (this->RunUicFailed)
     {
-    std::cerr << "uic failed..." << std::endl;
+    std::stringstream err; err << "uic failed..." << std::endl;
+    this->LogError(err.str());
     return false;
     }
   if (this->RunRccFailed)
     {
-    std::cerr << "rcc failed..." << std::endl;
+    std::stringstream err; err << "rcc failed..." << std::endl;
+    this->LogError(err.str());
     return false;
     }
 
@@ -637,8 +644,10 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
   const std::string contentsString = ReadAll(absFilename);
   if (contentsString.empty())
     {
-    std::cerr << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
-              << std::endl;
+    std::stringstream err;
+    err << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
+        << std::endl;
+    this->LogError(err.str());
     return;
     }
   this->ParseForUic(absFilename, contentsString, includedUis);
@@ -670,7 +679,6 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
     do
       {
       const std::string currentMoc = mocIncludeRegExp.match(1);
-      //std::cout << "found moc include: " << currentMoc << std::endl;
 
       std::string basename = cmsys::SystemTools::
                                    GetFilenameWithoutLastExtension(currentMoc);
@@ -703,20 +711,21 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
           }
         else
           {
-          std::cerr << "AUTOGEN: error: " << absFilename << ": The file "
-                    << "includes the moc file \"" << currentMoc << "\", "
-                    << "but could not find header \"" << basename
-                    << '{' << this->JoinExts(headerExtensions) << "}\" ";
+          std::stringstream err;
+          err << "AUTOGEN: error: " << absFilename << ": The file "
+              << "includes the moc file \"" << currentMoc << "\", "
+              << "but could not find header \"" << basename
+              << '{' << this->JoinExts(headerExtensions) << "}\" ";
           if (mocSubDir.empty())
             {
-            std::cerr << "in " << absPath << "\n" << std::endl;
+            err << "in " << absPath << "\n" << std::endl;
             }
           else
             {
-            std::cerr << "neither in " << absPath
-                      << " nor in " << mocSubDir << "\n" << std::endl;
+            err << "neither in " << absPath
+                << " nor in " << mocSubDir << "\n" << std::endl;
             }
-
+          this->LogError(err.str());
           ::exit(EXIT_FAILURE);
           }
         }
@@ -734,34 +743,40 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
             fileToMoc = headerToMoc;
             if ((requiresMoc==false) &&(basename==scannedFileBasename))
               {
-              std::cerr << "AUTOGEN: warning: " << absFilename << ": The file "
-                            "includes the moc file \"" << currentMoc <<
-                            "\", but does not contain a " << macroName
-                            << " macro. Running moc on "
-                        << "\"" << headerToMoc << "\" ! Include \"moc_"
-                        << basename << ".cpp\" for a compatibility with "
-                           "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n"
-                        << std::endl;
+              std::stringstream err;
+              err << "AUTOGEN: warning: " << absFilename << ": The file "
+                     "includes the moc file \"" << currentMoc <<
+                     "\", but does not contain a " << macroName
+                  << " macro. Running moc on "
+                  << "\"" << headerToMoc << "\" ! Include \"moc_"
+                  << basename << ".cpp\" for a compatibility with "
+                     "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n"
+                  << std::endl;
+              this->LogError(err.str());
               }
             else
               {
-              std::cerr << "AUTOGEN: warning: " << absFilename << ": The file "
-                            "includes the moc file \"" << currentMoc <<
-                            "\" instead of \"moc_" << basename << ".cpp\". "
-                            "Running moc on "
-                        << "\"" << headerToMoc << "\" ! Include \"moc_"
-                        << basename << ".cpp\" for compatibility with "
-                           "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n"
-                        << std::endl;
+              std::stringstream err;
+              err << "AUTOGEN: warning: " << absFilename << ": The file "
+                     "includes the moc file \"" << currentMoc <<
+                     "\" instead of \"moc_" << basename << ".cpp\". "
+                     "Running moc on "
+                  << "\"" << headerToMoc << "\" ! Include \"moc_"
+                  << basename << ".cpp\" for compatibility with "
+                     "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n"
+                  << std::endl;
+              this->LogError(err.str());
               }
             }
           else
             {
-            std::cerr <<"AUTOGEN: error: " << absFilename << ": The file "
-                        "includes the moc file \"" << currentMoc <<
-                        "\", which seems to be the moc file from a different "
-                        "source file. CMake also could not find a matching "
-                        "header.\n" << std::endl;
+            std::stringstream err;
+            err << "AUTOGEN: error: " << absFilename << ": The file "
+                   "includes the moc file \"" << currentMoc <<
+                   "\", which seems to be the moc file from a different "
+                   "source file. CMake also could not find a matching "
+                   "header.\n" << std::endl;
+            this->LogError(err.str());
             ::exit(EXIT_FAILURE);
             }
           }
@@ -785,27 +800,33 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
     if (mocUnderscoreIncluded == true)
       {
       // this is for KDE4 compatibility:
-      std::cerr << "AUTOGEN: warning: " << absFilename << ": The file "
-                << "contains a " << macroName << " macro, but does not "
-                "include "
-                << "\"" << scannedFileBasename << ".moc\", but instead "
-                   "includes "
-                << "\"" << ownMocUnderscoreFile  << "\". Running moc on "
-                << "\"" << absFilename << "\" ! Better include \""
-                << scannedFileBasename << ".moc\" for compatibility with "
-                   "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n"
-                << std::endl;
+      std::stringstream err;
+      err << "AUTOGEN: warning: " << absFilename << ": The file "
+          << "contains a " << macroName << " macro, but does not "
+             "include "
+          << "\"" << scannedFileBasename << ".moc\", but instead "
+             "includes "
+          << "\"" << ownMocUnderscoreFile  << "\". Running moc on "
+          << "\"" << absFilename << "\" ! Better include \""
+          << scannedFileBasename << ".moc\" for compatibility with "
+             "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n"
+          << std::endl;
+      this->LogError(err.str());
+
       includedMocs[absFilename] = ownMocUnderscoreFile;
       includedMocs.erase(ownMocHeaderFile);
       }
     else
       {
       // otherwise always error out since it will not compile:
-      std::cerr << "AUTOGEN: error: " << absFilename << ": The file "
-                << "contains a " << macroName << " macro, but does not "
-                "include "
-                << "\"" << scannedFileBasename << ".moc\" !\n"
-                << std::endl;
+      std::stringstream err;
+      err << "AUTOGEN: error: " << absFilename << ": The file "
+          << "contains a " << macroName << " macro, but does not "
+             "include "
+          << "\"" << scannedFileBasename << ".moc\" !\n"
+          << std::endl;
+      this->LogError(err.str());
+
       ::exit(EXIT_FAILURE);
       }
     }
@@ -825,8 +846,10 @@ void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
   const std::string contentsString = ReadAll(absFilename);
   if (contentsString.empty())
     {
-    std::cerr << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
-              << std::endl;
+    std::stringstream err;
+    err << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
+        << std::endl;
+    this->LogError(err.str());
     return;
     }
   this->ParseForUic(absFilename, contentsString, includedUis);
@@ -878,20 +901,21 @@ void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
           }
         else
           {
-          std::cerr << "AUTOGEN: error: " << absFilename << " The file "
-                    << "includes the moc file \"" << currentMoc << "\", "
-                    << "but could not find header \"" << basename
-                    << '{' << this->JoinExts(headerExtensions) << "}\" ";
+          std::stringstream err;
+          err << "AUTOGEN: error: " << absFilename << " The file "
+              << "includes the moc file \"" << currentMoc << "\", "
+              << "but could not find header \"" << basename
+              << '{' << this->JoinExts(headerExtensions) << "}\" ";
           if (mocSubDir.empty())
             {
-            std::cerr << "in " << absPath << "\n" << std::endl;
+            err << "in " << absPath << "\n" << std::endl;
             }
           else
             {
-            std::cerr << "neither in " << absPath
-                      << " nor in " << mocSubDir << "\n" << std::endl;
+            err << "neither in " << absPath
+                << " nor in " << mocSubDir << "\n" << std::endl;
             }
-
+          this->LogError(err.str());
           ::exit(EXIT_FAILURE);
           }
         }
@@ -899,12 +923,14 @@ void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
         {
         if (basename != scannedFileBasename)
           {
-          std::cerr <<"AUTOGEN: error: " << absFilename << ": The file "
-                      "includes the moc file \"" << currentMoc <<
-                      "\", which seems to be the moc file from a different "
-                      "source file. This is not supported. "
-                      "Include \"" << scannedFileBasename << ".moc\" to run "
-                      "moc on this source file.\n" << std::endl;
+          std::stringstream err;
+          err << "AUTOGEN: error: " << absFilename << ": The file "
+                 "includes the moc file \"" << currentMoc <<
+                 "\", which seems to be the moc file from a different "
+                 "source file. This is not supported. "
+                 "Include \"" << scannedFileBasename << ".moc\" to run "
+                 "moc on this source file.\n" << std::endl;
+          this->LogError(err.str());
           ::exit(EXIT_FAILURE);
           }
         dotMocIncluded = true;
@@ -923,10 +949,12 @@ void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
                                                      macroName)))
     {
     // otherwise always error out since it will not compile:
-    std::cerr << "AUTOGEN: error: " << absFilename << ": The file "
-              << "contains a " << macroName << " macro, but does not include "
-              << "\"" << scannedFileBasename << ".moc\" !\n"
-              << std::endl;
+    std::stringstream err;
+    err << "AUTOGEN: error: " << absFilename << ": The file "
+        << "contains a " << macroName << " macro, but does not include "
+        << "\"" << scannedFileBasename << ".moc\" !\n"
+        << std::endl;
+    this->LogError(err.str());
     ::exit(EXIT_FAILURE);
     }
 
@@ -943,8 +971,10 @@ void cmQtAutoGenerators::ParseForUic(const std::string& absFilename,
   const std::string contentsString = ReadAll(absFilename);
   if (contentsString.empty())
     {
-    std::cerr << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
-              << std::endl;
+    std::stringstream err;
+    err << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
+        << std::endl;
+    this->LogError(err.str());
     return;
     }
   this->ParseForUic(absFilename, contentsString, includedUis);
@@ -1045,13 +1075,14 @@ void cmQtAutoGenerators::ParseHeaders(const std::set<std::string>& absHeaders,
       {
       if (this->Verbose)
         {
-        std::cout << "AUTOGEN: Checking " << headerName << std::endl;
+        std::stringstream err;
+        err << "AUTOGEN: Checking " << headerName << std::endl;
+        this->LogInfo(err.str());
         }
 
       std::string macroName;
       if (requiresMocing(contents, macroName))
         {
-        //std::cout << "header contains Q_OBJECT macro";
         const std::string parentDir = this->TargetBuildSubDir
           + this->SourceRelativePath ( headerName );
         const std::string basename = cmsys::SystemTools::
@@ -1077,14 +1108,15 @@ bool cmQtAutoGenerators::GenerateMocFiles(
     mergedMocs.insert ( notIncludedMocs.begin(), notIncludedMocs.end() );
     if( this->NameCollisionTest ( mergedMocs, collisions ) )
       {
-      std::cerr <<
+      std::stringstream err;
+      err <<
         "AUTOGEN: error: "
         "The same moc file will be generated "
         "from different sources." << std::endl <<
         "To avoid this error either" << std::endl <<
         "- rename the source files or" << std::endl <<
         "- do not include the (moc_NAME.cpp|NAME.moc) file" << std::endl;
-      this->NameCollisionLog ( collisions );
+      this->NameCollisionLog ( err.str(), collisions );
       ::exit(EXIT_FAILURE);
       }
   }
@@ -1153,8 +1185,10 @@ bool cmQtAutoGenerators::GenerateMocFiles(
       // nothing changed: don't touch the _automoc.cpp file
       if (this->Verbose)
         {
-        std::cout << "AUTOGEN: " << this->OutMocCppFilenameRel
-          << " still up to date" << std::endl;
+        std::stringstream err;
+        err << "AUTOGEN: " << this->OutMocCppFilenameRel
+            << " still up to date" << std::endl;
+        this->LogInfo(err.str());
         }
       return true;
       }
@@ -1229,8 +1263,10 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
                                                   &retVal);
     if (!result || retVal)
       {
-      std::cerr << "AUTOGEN: error: process for " << mocFilePath <<" failed:\n"
-                << output << std::endl;
+      std::stringstream err;
+      err << "AUTOGEN: error: process for " << mocFilePath <<" failed:\n"
+          << output << std::endl;
+      this->LogError(err.str());
       this->RunMocFailed = true;
       cmSystemTools::RemoveFile(mocFilePath);
       }
@@ -1272,10 +1308,11 @@ bool cmQtAutoGenerators::GenerateUiFiles(
     std::multimap<std::string, std::string> collisions;
     if( this->NameCollisionTest ( testMap, collisions ) )
       {
-      std::cerr << "AUTOGEN: error: The same ui_NAME.h file will be generated "
-                   "from different sources." << std::endl
-                << "To avoid this error rename the source files." << std::endl;
-      this->NameCollisionLog ( collisions );
+      std::stringstream err;
+      err << "AUTOGEN: error: The same ui_NAME.h file will be generated "
+             "from different sources." << std::endl
+          << "To avoid this error rename the source files." << std::endl;
+      this->NameCollisionLog ( err.str(), collisions );
       ::exit(EXIT_FAILURE);
       }
   }
@@ -1356,9 +1393,11 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
                                                   &retVal);
     if (!result || retVal)
       {
-      std::cerr << "AUTOUIC: error: process for " << uiOutputFile <<
-                " needed by\n \"" << realName << "\"\nfailed:\n" << output
-                << std::endl;
+      std::stringstream err;
+      err << "AUTOUIC: error: process for " << uiOutputFile <<
+             " needed by\n \"" << realName << "\"\nfailed:\n" << output
+          << std::endl;
+      this->LogError(err.str());
       this->RunUicFailed = true;
       cmSystemTools::RemoveFile(uiOutputFile);
       return false;
@@ -1413,11 +1452,12 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
     std::multimap<std::string, std::string> collisions;
     if( this->NameCollisionTest ( qrcGenMap, collisions ) )
       {
-      std::cerr << "AUTOGEN: error: The same qrc_NAME.cpp file"
-                   " will be generated from different sources." << std::endl
-                << "To avoid this error rename the source .qrc files."
-                << std::endl;
-      this->NameCollisionLog ( collisions );
+      std::stringstream err;
+      err << "AUTOGEN: error: The same qrc_NAME.cpp file"
+             " will be generated from different sources." << std::endl
+          << "To avoid this error rename the source .qrc files."
+          << std::endl;
+      this->NameCollisionLog ( err.str(), collisions );
       ::exit(EXIT_FAILURE);
       }
   }
@@ -1489,8 +1529,10 @@ bool cmQtAutoGenerators::GenerateQrc (
                                                   &retVal);
     if (!result || retVal)
       {
-      std::cerr << "AUTORCC: error: process for " << qrcOutputFile <<
-        " failed:\n" << output << std::endl;
+      std::stringstream err;
+      err << "AUTORCC: error: process for " << qrcOutputFile <<
+             " failed:\n" << output << std::endl;
+      this->LogError(err.str());
       this->RunRccFailed = true;
       cmSystemTools::RemoveFile(qrcBuildFile);
       return false;
@@ -1582,17 +1624,30 @@ bool cmQtAutoGenerators::NameCollisionTest(
 }
 
 void cmQtAutoGenerators::NameCollisionLog(
-  const std::multimap<std::string, std::string>& collisions)
+                     const std::string& message,
+                     const std::multimap<std::string, std::string>& collisions)
 {
   typedef std::multimap<std::string, std::string>::const_iterator Iter;
 
-  std::stringstream sbuf;
+  std::stringstream err;
+  // Add message
+  err << message;
+  // Append collision list
   for(Iter it = collisions.begin(); it != collisions.end(); ++it )
     {
-      sbuf << it->first << " : " << it->second << std::endl;
+      err << it->first << " : " << it->second << std::endl;
     }
-  sbuf.flush();
-  std::cerr << sbuf.str();
+  this->LogError(err.str());
+}
+
+void cmQtAutoGenerators::LogInfo(const std::string& message)
+{
+  std::cout << message;
+}
+
+void cmQtAutoGenerators::LogError(const std::string& message)
+{
+  std::cerr << message;
 }
 
 void cmQtAutoGenerators::LogCommand(const std::vector<std::string>& command)
@@ -1608,11 +1663,10 @@ void cmQtAutoGenerators::LogCommand(const std::vector<std::string>& command)
       }
     sbuf << *cmdIt;
     }
-  sbuf.flush();
   if ( !sbuf.str().empty() )
     {
-    std::cout << sbuf.str();
-    std::cout << std::endl;
+    sbuf << std::endl;
+    this->LogInfo ( sbuf.str() );
     }
 }
 

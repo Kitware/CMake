@@ -592,8 +592,10 @@ static std::string ListQt5RccInputs(cmSourceFile* sf,
     &retVal, 0, cmSystemTools::OUTPUT_NONE);
   if (!result || retVal)
     {
-    std::cerr << "AUTOGEN: error: Rcc list process for " << sf->GetFullPath()
-              << " failed:\n" << rccStdOut << "\n" << rccStdErr << std::endl;
+    std::stringstream err;
+    err << "AUTOGEN: error: Rcc list process for " << sf->GetFullPath()
+        << " failed:\n" << rccStdOut << "\n" << rccStdErr << std::endl;
+    std::cerr << err.str();
     return std::string();
     }
 
@@ -623,8 +625,10 @@ static std::string ListQt5RccInputs(cmSourceFile* sf,
       std::string::size_type pos = eline.find(searchString);
       if (pos == std::string::npos)
         {
-        std::cerr << "AUTOGEN: error: Rcc lists unparsable output "
-                  << eline << std::endl;
+        std::stringstream err;
+        err << "AUTOGEN: error: Rcc lists unparsable output "
+            << eline << std::endl;
+        std::cerr << err.str();
         return std::string();
         }
       pos += searchString.length();

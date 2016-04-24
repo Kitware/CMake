@@ -83,8 +83,11 @@ private:
   bool NameCollisionTest(const std::map<std::string, std::string >& genFiles,
     std::multimap<std::string, std::string>& collisions );
   void NameCollisionLog(
-    const std::multimap<std::string, std::string>& collisions );
+                 const std::string& message,
+                 const std::multimap<std::string, std::string>& collisions );
 
+  void LogInfo(const std::string& message);
+  void LogError(const std::string& message);
   void LogCommand(const std::vector<std::string>& command);
   std::string JoinExts(const std::vector<std::string>& lst);
 
