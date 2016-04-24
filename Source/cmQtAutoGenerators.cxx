@@ -1196,7 +1196,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
 
   // actually write _automoc.cpp
     {
-    std::string msg = "Generating ";
+    std::string msg = "Generating moc compilation ";
     msg += this->OutMocCppFilenameRel;
     cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue
                                      |cmsysTerminal_Color_ForegroundBold,
@@ -1231,7 +1231,7 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
       cmsys::SystemTools::MakeDirectory(mocDir.c_str());
       }
 
-    std::string msg = "Generating ";
+    std::string msg = "Generating moc source ";
     msg += mocFileName;
     cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue
                                            |cmsysTerminal_Color_ForegroundBold,
@@ -1358,7 +1358,7 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
                                                      &sourceNewerThanUi);
   if (this->GenerateAll || !success || sourceNewerThanUi >= 0)
     {
-    std::string msg = "Generating ";
+    std::string msg = "Generating ui header ";
     msg += uiOutputFile;
     cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue
                                           |cmsysTerminal_Color_ForegroundBold,
@@ -1497,7 +1497,7 @@ bool cmQtAutoGenerators::GenerateQrc (
 
   if (this->GenerateAll || generateQrc)
     {
-    std::string msg = "Generating ";
+    std::string msg = "Generating qrc source ";
     msg += qrcOutputFile;
     cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue
                                      |cmsysTerminal_Color_ForegroundBold,
