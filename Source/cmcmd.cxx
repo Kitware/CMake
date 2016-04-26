@@ -389,13 +389,17 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         tidy_cmd.push_back("--");
         tidy_cmd.insert(tidy_cmd.end(), orig_cmd.begin()+1, orig_cmd.end());
 
-        // Run the tidy command line.
-        if(!cmSystemTools::RunSingleCommand(tidy_cmd, 0, 0, &ret, 0,
-                                            cmSystemTools::OUTPUT_PASSTHROUGH))
+        // Run the tidy command line.  Capture its stdout and hide its stderr.
+        std::string stdOut;
+        if(!cmSystemTools::RunSingleCommand(tidy_cmd, &stdOut, 0, &ret, 0,
+                                            cmSystemTools::OUTPUT_NONE))
           {
           std::cerr << "Error running '" << tidy_cmd[0] << "'\n";
           return 1;
           }
+
+        // Output the stdout from clang-tidy to stderr
+        std::cerr << stdOut;
         }
 
       // Now run the real compiler command and return its result value.
