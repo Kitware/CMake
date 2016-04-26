@@ -66,6 +66,9 @@ public:
   virtual bool TargetsWindowsCE() const {
     return !this->WindowsCEVersion.empty(); }
 
+  /** Is the installed VS an Express edition?  */
+  bool IsExpressEdition() const { return this->ExpressEdition; }
+
 protected:
   virtual void AddExtraIDETargets();
   virtual const char* GetIDEVersion() { return "8.0"; }
@@ -96,6 +99,7 @@ protected:
 
   std::string Name;
   std::string WindowsCEVersion;
+  bool ExpressEdition;
 
 private:
   class Factory;

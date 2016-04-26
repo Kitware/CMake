@@ -56,9 +56,6 @@ public:
                               cmMakefile *, bool optional);
   virtual void WriteSLNHeader(std::ostream& fout);
 
-  /** Is the installed VS an Express edition?  */
-  bool IsExpressEdition() const { return this->ExpressEdition; }
-
   /** Generating for Nsight Tegra VS plugin?  */
   bool IsNsightTegra() const;
   std::string GetNsightTegraVersion() const;
@@ -129,7 +126,6 @@ protected:
   bool SystemIsWindowsCE;
   bool SystemIsWindowsPhone;
   bool SystemIsWindowsStore;
-  bool ExpressEdition;
 
   bool UseFolderProperty();
 
