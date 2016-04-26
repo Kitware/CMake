@@ -194,6 +194,12 @@ void cmGlobalVisualStudio8Generator::Configure()
 }
 
 //----------------------------------------------------------------------------
+bool cmGlobalVisualStudio8Generator::UseFolderProperty()
+{
+  return IsExpressEdition() ? false : cmGlobalGenerator::UseFolderProperty();
+}
+
+//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio8Generator::GetUserMacrosDirectory()
 {
   // Some VS8 sp0 versions cannot run macros.

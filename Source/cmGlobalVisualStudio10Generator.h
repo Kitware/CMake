@@ -127,8 +127,6 @@ protected:
   bool SystemIsWindowsPhone;
   bool SystemIsWindowsStore;
 
-  bool UseFolderProperty();
-
 private:
   class Factory;
   struct LongestSourcePath

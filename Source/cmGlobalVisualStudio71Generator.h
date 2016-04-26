@@ -75,6 +75,9 @@ protected:
                                     const std::set<std::string>& depends);
   virtual void WriteSLNHeader(std::ostream& fout);
 
+  // Folders are not supported by VS 7.1.
+  virtual bool UseFolderProperty() { return false; }
+
   std::string ProjectConfigurationSectionName;
 };
 #endif

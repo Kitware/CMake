@@ -97,6 +97,8 @@ protected:
                                    const char* path,
                                    const cmGeneratorTarget *t);
 
+  bool UseFolderProperty();
+
   std::string Name;
   std::string WindowsCEVersion;
   bool ExpressEdition;
