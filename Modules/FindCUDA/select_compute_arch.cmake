@@ -1,36 +1,22 @@
 # Synopsis:
-# Function for selecting GPU arch flags for nvcc based on CUDA_ARCH_NAME
-# Usage:
-#   CUDA_SELECT_NVCC_ARCH_FLAGS(out_variable)
+#   CUDA_SELECT_NVCC_ARCH_FLAGS(out_variable [list of target CUDA architectures])
+#   -- Selects GPU arch flags for nvcc based on target CUDA architectures list
+#      More information on CUDA architectures: https://en.wikipedia.org/wiki/CUDA
 #
-# Variables affecting the choice:
-#
-# CUDA_ARCH_NAME: One of CUDA_KNOWN_GPU_ARCH_NAMES list below.
-# ENV{CUDA_ARCH_BIN} : Only tested if CUDA_ARCH_NAME set to "Manual".
-#                      CUDA_ARCH_BIN entries have to be from CUDA_KNOWN_GPU_ARCHITECTURES list
-#
-#
-
-# NVIDIA GPU achitectures:
-# https://en.wikipedia.org/wiki/CUDA
-
-set(CUDA_KNOWN_GPU_ARCH_NAMES "Fermi" "Kepler" "Maxwell" "All" "Common" "Manual")
 
 # This list will be used for CUDA_ARCH_NAME = All option
-set(CUDA_KNOWN_GPU_ARCHITECTURES  "2.0" "2.1(2.0)" "3.0" "3.5" "5.0")
+set(CUDA_KNOWN_GPU_ARCHITECTURES  "Fermi" "Kepler" "Maxwell" "2.0" "2.1(2.0)" "3.0" "3.5" "5.0")
 
 # This list will be used for CUDA_ARCH_NAME = Common option (enabled by default)
 set(CUDA_COMMON_GPU_ARCHITECTURES "3.0" "3.5" "5.0")
 
 if (CUDA_VERSION VERSION_GREATER "6.5")
-  list(APPEND CUDA_KNOWN_GPU_ARCHITECTURES "3.2" "3.7" "5.2" "5.3")
+  list(APPEND CUDA_KNOWN_GPU_ARCHITECTURES "3.2" "3.7" "5.2" "5.3" "Kepler+Tegra" "Kepler+Tesla" "Maxwell+Tegra")
   list(APPEND CUDA_COMMON_GPU_ARCHITECTURES "3.7" "5.2")
-  list(APPEND CUDA_KNOWN_GPU_ARCH_NAMES "Kepler+Tegra" "Kepler+Tesla" "Maxwell+Tegra")
 endif ()
 if (CUDA_VERSION VERSION_GREATER "7.5")
-  list(APPEND CUDA_KNOWN_GPU_ARCHITECTURES "6.0" "6.2")
+  list(APPEND CUDA_KNOWN_GPU_ARCHITECTURES "Pascal" "6.0" "6.2")
   list(APPEND CUDA_COMMON_GPU_ARCHITECTURES "6.0" "6.2")
-  list(APPEND CUDA_KNOWN_GPU_ARCH_NAMES "Pascal")
 endif ()
 
 
@@ -81,69 +67,49 @@ endfunction()
 
 
 ################################################################################################
-# Function for selecting GPU arch flags for nvcc based on CUDA_ARCH_NAME
+# Function for selecting GPU arch flags for nvcc based on CUDA architectures from parameter list
 # Usage:
-#   SELECT_NVCC_ARCH_FLAGS(out_variable)
+#   SELECT_NVCC_ARCH_FLAGS(out_variable [list of CUDA compute archs])
 function(CUDA_SELECT_NVCC_ARCH_FLAGS out_variable)
+  set(CUDA_ARCH_LIST "${ARGN}")
 
-  set(archs_names ${CUDA_KNOWN_GPU_ARCH_NAMES})
-
-  if(NOT CMAKE_CROSSCOMPILING)
-    list(APPEND archs_names "Auto")
-    set(archs_name_default "Auto")
-  else()
-    set(archs_name_default "Manual")
+  if("X${CUDA_ARCH_LIST}" STREQUAL "X" )
+    set(CUDA_ARCH_LIST "Auto")
   endif()
 
-  # SET CUDA_ARCH_NAME strings (so it will be seen as dropbox in CMake-Gui)
-  set(CUDA_ARCH_NAME ${archs_name_default} CACHE STRING "Select target NVIDIA GPU achitecture.")
-  set_property( CACHE CUDA_ARCH_NAME PROPERTY STRINGS "" ${archs_names} )
-  mark_as_advanced(CUDA_ARCH_NAME)
-
-  if("${CUDA_ARCH_NAME}" STREQUAL "Manual")
-    set(CUDA_ARCH_BIN ${CUDA_KNOWN_GPU_ARCHITECTURES} CACHE STRING "Specify 'real' GPU architectures to build binaries for, BIN(PTX) format is supported")
-    set(CUDA_ARCH_PTX "50"                     CACHE STRING "Specify 'virtual' PTX architectures to build PTX intermediate code for")
-    mark_as_advanced(CUDA_ARCH_BIN CUDA_ARCH_PTX)
-    # Allow a user to specify architecture from env
-    if($ENV{CUDA_ARCH_BIN})
-      set(CUDA_ARCH_BIN $ENV{CUDA_ARCH_BIN})
-      unset(CUDA_ARCH_PTX)
-    endif()
+  if("${CUDA_ARCH_LIST}" STREQUAL "All")
+    set(cuda_arch_bin ${CUDA_KNOWN_GPU_ARCHITECTURES})
+  elseif("${CUDA_ARCH_LIST}" STREQUAL "Common")
+    set(cuda_arch_bin ${CUDA_COMMON_GPU_ARCHITECTURES})
+  elseif("${CUDA_ARCH_LIST}" STREQUAL "Auto")
+    CUDA_DETECT_INSTALLED_GPUS(cuda_arch_bin)
   else()
-    unset(CUDA_ARCH_BIN CACHE)
-    unset(CUDA_ARCH_PTX CACHE)
-
-    if("${CUDA_ARCH_NAME}" STREQUAL "All")
-      set(cuda_arch_bin ${CUDA_KNOWN_GPU_ARCHITECTURES})
-    elseif("${CUDA_ARCH_NAME}" STREQUAL "Common")
-      set(cuda_arch_bin ${CUDA_COMMON_GPU_ARCHITECTURES})
-    elseif("${CUDA_ARCH_NAME}" STREQUAL "Auto")
-      CUDA_DETECT_INSTALLED_GPUS(cuda_arch_bin)
-      set(cuda_arch_bin ${CUDA_ARCH_BIN})
-    else()
-      set(cuda_arch_bin "")
-      string(REGEX REPLACE "[ \t]+" ";" CUDA_ARCH_LIST "${CUDA_ARCH_NAME}")
-      list(REMOVE_DUPLICATES CUDA_ARCH_LIST)
-      foreach(arch_name ${CUDA_ARCH_LIST})
-        if(${arch_name} STREQUAL "Fermi")
-          list(APPEND cuda_arch_bin "2.0 2.1(2.0)")
-        elseif(${arch_name} STREQUAL "Kepler+Tegra")
-          list(APPEND cuda_arch_bin "3.2 3.2")
-        elseif(${arch_name} STREQUAL "Kepler+Tesla")
-          list(APPEND cuda_arch_bin "3.7 3.7")
-        elseif(${arch_name} STREQUAL "Kepler")
-          list(APPEND cuda_arch_bin "3.0 3.5")
-        elseif(${arch_name} STREQUAL "Maxwell+Tegra")
-          list(APPEND cuda_arch_bin "5.3 5.3")
-        elseif(${arch_name} STREQUAL "Maxwell")
-          list(APPEND cuda_arch_bin "5.0 5.2")
-        elseif(${arch_name} STREQUAL "Pascal")
-          list(APPEND cuda_arch_bin "6.0 6.2")
-        else()
-          message(SEND_ERROR "Unknown CUDA Architecture Name in (${CUDA_ARCH_NAME})")
-        endif()
-      endforeach()
-    endif()
+    set(cuda_arch_bin "")
+    list(REMOVE_DUPLICATES CUDA_KNOWN_GPU_ARCHITECTURES)
+    string(REGEX REPLACE "[ \t]+" ";" CUDA_ARCH_LIST ${CUDA_ARCH_LIST})
+    list(REMOVE_DUPLICATES CUDA_ARCH_LIST)
+    foreach(arch_name ${CUDA_ARCH_LIST})
+      list(FIND CUDA_KNOWN_GPU_ARCHITECTURES ${arch_name} found_pos)
+      if (${found_pos} EQUAL -1)
+        message(SEND_ERROR "Unknown CUDA Architecture Name ${arch_name} in CUDA_SELECT_NVCC_ARCH_TARGETS)")
+      elseif(${arch_name} STREQUAL "Fermi")
+        list(APPEND cuda_arch_bin "2.0 2.1(2.0)")
+      elseif(${arch_name} STREQUAL "Kepler+Tegra")
+        list(APPEND cuda_arch_bin "3.2")
+      elseif(${arch_name} STREQUAL "Kepler+Tesla")
+        list(APPEND cuda_arch_bin "3.7")
+      elseif(${arch_name} STREQUAL "Kepler")
+        list(APPEND cuda_arch_bin "3.0 3.5")
+      elseif(${arch_name} STREQUAL "Maxwell+Tegra")
+        list(APPEND cuda_arch_bin "5.3")
+      elseif(${arch_name} STREQUAL "Maxwell")
+        list(APPEND cuda_arch_bin "5.0 5.2")
+      elseif(${arch_name} STREQUAL "Pascal")
+        list(APPEND cuda_arch_bin "6.0 6.2")
+      else()
+        list(APPEND cuda_arch_bin ${arch_name})
+      endif()
+    endforeach()
   endif()
 
   message(STATUS "Compiling for CUDA architecture(s): ${cuda_arch_bin}")

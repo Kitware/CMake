@@ -41,20 +41,6 @@
 #      nvcc in the generated source.  If you compile to PTX and then load the
 #      file yourself, you can mix bit sizes between device and host.
 #
-#   CUDA_ARCH_NAME (Default is "Auto" for regular builds and "Manual" for cross-builds)
-#   -- Controls the way CUDA_SELECT_NVCC_ARCH_FLAGS function selects CUDA compute architecture flags.
-#      If you are building for local install, "Auto" should work best as it determines local machine compute arch.
-#      If you are building for distribution, set to "Common" or "All" to cover common subsets of architectures.
-#      "Manual" makes CUDA_SELECT_NVCC_ARCH_FLAGS to get flags directly from ENV{CUDA_ARCH_BIN}
-#      Otherwise, list of GPU architecture names expected (semicolon or space separated).
-#      Names: "Fermi;Kepler;Maxwell;Kepler+Tegra;Kepler+Tesla;Maxwell+Tegra;Pascal".
-#      More information: https://en.wikipedia.org/wiki/CUDA
-#
-#   ENV{CUDA_ARCH_BIN} (Only tested if CUDA_ARCH_NAME set to "Manual")
-#   -- Set CUDA_ARCH_NAME to "Manual" and
-#      CUDA_ARCH_BIN to desired subset of CUDA_KNOWN_GPU_ARCHITECTURES list below.
-#
-#
 #   CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE (Default ON)
 #   -- Set to ON if you want the custom build rule to be attached to the source
 #      file in Visual Studio.  Turn OFF if you add the same cuda file to multiple
@@ -214,12 +200,17 @@
 #      specified by CUDA_64_BIT_DEVICE_CODE.  Note that this is a function
 #      instead of a macro.
 #
-#   CUDA_SELECT_NVCC_ARCH_FLAGS(out_variable)
-#   -- Selects GPU arch flags for nvcc based on CUDA_ARCH_NAME.
-#      Usage: CUDA_SELECT_NVCC_ARCH_FLAGS(NVCC_FLAGS_EXTRA)
-#             LIST(APPEND CUDA_NVCC_FLAGS ${NVCC_FLAGS_EXTRA})
+#   CUDA_SELECT_NVCC_ARCH_FLAGS(out_variable [list of target CUDA architectures])
+#   -- Selects GPU arch flags for nvcc based on target CUDA architectures list
+#      (Default is "Auto" if no list)
+#      Possible list values(semicolon or space separated):
+#       - "Auto" detects local machine GPU compute arch at runtime.
+#       - "Common" and "All" cover common and entire subsets of GPU architectures
+#      The above three cannot be combined in a list, only those below can be:
+#       - Fermi Kepler Maxwell Kepler+Tegra Kepler+Tesla Maxwell+Tegra Pascal
+#       - 2.0 2.1(2.0) 3.0 3.2 3.5 3.7 5.0 5.2 5.3 6.0 6.2
+#      More information on CUDA architectures: https://en.wikipedia.org/wiki/CUDA
 #      Note that this is a function instead of a macro.
-#
 #
 #   CUDA_WRAP_SRCS ( cuda_target format generated_files file0 file1 ...
 #                    [STATIC | SHARED | MODULE] [OPTIONS ...] )
@@ -329,13 +320,9 @@
 #   CUDA_nvcuvid_LIBRARY  -- CUDA Video Decoder library.
 #                            Only available for CUDA version 3.2+.
 #                            Windows only.
-#   CUDA_KNOWN_GPU_ARCH_NAMES     -- list of GPU compute archirtecture
-#                                    names known to the compiler (e.g "Maxwell;Pascal")
-#   CUDA_KNOWN_GPU_ARCHITECTURES  -- list of GPU compute archirtecture
-#                                    version numbers known to the compiler (e.g. "50;52")
-#
 #
 
+#
 #   James Bigler, NVIDIA Corp (nvidia.com - jbigler)
 #   Abe Stephens, SCI Institute -- http://www.sci.utah.edu/~abe/FindCuda.html
 #
