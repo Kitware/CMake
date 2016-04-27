@@ -61,6 +61,10 @@ Create custom targets to build projects in external trees
     The optional name of the remote, default to ``origin``
   ``GIT_SUBMODULES <module>...``
     Git submodules that shall be updated, all if empty
+  ``GIT_SHALLOW 1``
+    Tell Git to clone with ``--depth 1``.   Use when ``GIT_TAG`` is not
+    specified or when it names a branch in order to download only the
+    tip of the branch without the rest of its history.
   ``HG_REPOSITORY <url>``
     URL of mercurial repo
   ``HG_TAG <tag>``
@@ -499,7 +503,12 @@ define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED
   "ExternalProject module."
   )
 
-function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name git_submodules src_name work_dir gitclone_infofile gitclone_stampfile tls_verify)
+function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name git_submodules git_shallow src_name work_dir gitclone_infofile gitclone_stampfile tls_verify)
+  if(NOT GIT_VERSION_STRING VERSION_LESS 1.7.10)
+    set(git_clone_shallow_options "--depth 1 --no-single-branch")
+  else()
+    set(git_clone_shallow_options "--depth 1")
+  endif()
   file(WRITE ${script_filename}
 "if(\"${git_tag}\" STREQUAL \"\")
   message(FATAL_ERROR \"Tag for git checkout should not be empty.\")
@@ -533,12 +542,19 @@ if(NOT \"x${tls_verify}\" STREQUAL \"x\" AND NOT tls_verify)
     -c http.sslVerify=false)
 endif()
 
+set(git_clone_options)
+
+set(git_shallow \"${git_shallow}\")
+if(git_shallow)
+  list(APPEND git_clone_options ${git_clone_shallow_options})
+endif()
+
 # try the clone 3 times incase there is an odd git clone issue
 set(error_code 1)
 set(number_of_tries 0)
 while(error_code AND number_of_tries LESS 3)
   execute_process(
-    COMMAND \"${git_EXECUTABLE}\" \${git_options} clone --origin \"${git_remote_name}\" \"${git_repository}\" \"${src_name}\"
+    COMMAND \"${git_EXECUTABLE}\" \${git_options} clone \${git_clone_options} --origin \"${git_remote_name}\" \"${git_repository}\" \"${src_name}\"
     WORKING_DIRECTORY \"${work_dir}\"
     RESULT_VARIABLE error_code
     )
@@ -1793,6 +1809,7 @@ function(_ep_add_download_command name)
     if("x${tls_verify}" STREQUAL "x" AND DEFINED CMAKE_TLS_VERIFY)
       set(tls_verify "${CMAKE_TLS_VERIFY}")
     endif()
+    get_property(git_shallow TARGET ${name} PROPERTY _EP_GIT_SHALLOW)
 
     # For the download step, and the git clone operation, only the repository
     # should be recorded in a configured RepositoryInfo file. If the repo
@@ -1817,7 +1834,7 @@ function(_ep_add_download_command name)
     # The script will delete the source directory and then call git clone.
     #
     _ep_write_gitclone_script(${tmp_dir}/${name}-gitclone.cmake ${source_dir}
-      ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${git_remote_name} "${git_submodules}" ${src_name} ${work_dir}
+      ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${git_remote_name} "${git_submodules}" "${git_shallow}" ${src_name} ${work_dir}
       ${stamp_dir}/${name}-gitinfo.txt ${stamp_dir}/${name}-gitclone-lastrun.txt "${tls_verify}"
       )
     set(comment "Performing download step (git clone) for '${name}'")
