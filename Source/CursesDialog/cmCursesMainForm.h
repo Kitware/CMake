@@ -13,6 +13,7 @@
 #define cmCursesMainForm_h
 
 #include "../cmStandardIncludes.h"
+#include "../cmState.h"
 #include "cmCursesForm.h"
 #include "cmCursesStandardIncludes.h"
 
