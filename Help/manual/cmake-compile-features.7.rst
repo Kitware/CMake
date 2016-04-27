@@ -309,3 +309,4 @@ versions specified for each:
 * ``GNU``: GNU compiler versions 4.4 through 5.0.
 * ``MSVC``: Microsoft Visual Studio versions 2010 through 2015.
 * ``SunPro``: Oracle SolarisStudio version 12.4.
+* ``Intel``: Intel compiler versions 12.1 through 16.0 on UNIX platforms.
