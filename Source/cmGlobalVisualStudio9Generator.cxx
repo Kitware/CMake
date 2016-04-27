@@ -104,6 +104,10 @@ cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator(cmake* cm,
   : cmGlobalVisualStudio8Generator(cm, name, platformName)
 {
   this->Version = VS9;
+  std::string vc9Express;
+  this->ExpressEdition = cmSystemTools::ReadRegistryValue(
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\9.0\\Setup\\VC;"
+    "ProductDir", vc9Express, cmSystemTools::KeyWOW64_32);
 }
 
 //----------------------------------------------------------------------------

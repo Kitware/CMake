@@ -239,10 +239,10 @@ void cmGlobalVisualStudio11Generator::WriteSLNHeader(std::ostream& fout)
 //----------------------------------------------------------------------------
 bool cmGlobalVisualStudio11Generator::UseFolderProperty()
 {
-  // Intentionally skip over the parent class implementation and call the
-  // grand-parent class's implementation. Folders are not supported by the
-  // Express editions in VS10 and earlier, but they are in VS11 Express.
-  return cmGlobalVisualStudio8Generator::UseFolderProperty();
+  // Intentionally skip up to the top-level class implementation.
+  // Folders are not supported by the Express editions in VS10 and earlier,
+  // but they are in VS11 Express and above.
+  return cmGlobalGenerator::UseFolderProperty();
 }
 
 //----------------------------------------------------------------------------

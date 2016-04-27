@@ -103,6 +103,10 @@ cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(cmake* cm,
   this->Name = name;
   this->ExtraFlagTable = this->GetExtraFlagTableVS8();
   this->Version = VS8;
+  std::string vc8Express;
+  this->ExpressEdition = cmSystemTools::ReadRegistryValue(
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\8.0\\Setup\\VC;"
+    "ProductDir", vc8Express, cmSystemTools::KeyWOW64_32);
 }
 
 //----------------------------------------------------------------------------
@@ -187,6 +191,12 @@ void cmGlobalVisualStudio8Generator
 void cmGlobalVisualStudio8Generator::Configure()
 {
   this->cmGlobalVisualStudio7Generator::Configure();
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalVisualStudio8Generator::UseFolderProperty()
+{
+  return IsExpressEdition() ? false : cmGlobalGenerator::UseFolderProperty();
 }
 
 //----------------------------------------------------------------------------

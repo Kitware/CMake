@@ -609,12 +609,6 @@ void cmGlobalVisualStudio10Generator::PathTooLong(
 }
 
 //----------------------------------------------------------------------------
-bool cmGlobalVisualStudio10Generator::UseFolderProperty()
-{
-  return IsExpressEdition() ? false : cmGlobalGenerator::UseFolderProperty();
-}
-
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio10Generator::IsNsightTegra() const
 {
   return !this->NsightTegraVersion.empty();
