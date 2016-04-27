@@ -481,9 +481,46 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
     }
 }
 
+std::map<const cmSourceFile *, std::string>
+cmGhsMultiTargetGenerator::GetObjectNames(
+    const std::vector<cmSourceFile *> &objectSources)
+{
+  bool found_duplicate = false;
+  std::set<std::string> filenames;
+  for(std::vector<cmSourceFile *>::const_iterator
+      sf = objectSources.begin(); sf != objectSources.end(); ++sf)
+    {
+    const std::string filename =
+        cmSystemTools::GetFilenameName((*sf)->GetFullPath());
+    const std::string lower_filename = cmSystemTools::LowerCase(filename);
+    if (filenames.end() != filenames.find(lower_filename))
+      {
+      found_duplicate = true;
+      }
+    filenames.insert(lower_filename);
+    }
+
+  std::map<const cmSourceFile *, std::string> objectNames;
+  if (found_duplicate)
+    {
+    for(std::vector<cmSourceFile *>::const_iterator
+        sf = objectSources.begin(); sf != objectSources.end(); ++sf)
+      {
+      std::string full_filename = (*sf)->GetFullPath();
+      cmsys::SystemTools::ReplaceString(full_filename, ":/", "_");
+      cmsys::SystemTools::ReplaceString(full_filename, "/", "_");
+      objectNames[*sf] = full_filename;
+      }
+    }
+
+  return objectNames;
+}
+
 void cmGhsMultiTargetGenerator::WriteSources(
   std::vector<cmSourceFile *> const &objectSources)
 {
+  std::map<const cmSourceFile *, std::string> objectNames =
+    cmGhsMultiTargetGenerator::GetObjectNames(objectSources);
   for (std::vector<cmSourceFile *>::const_iterator si = objectSources.begin();
        si != objectSources.end(); ++si)
     {
@@ -515,6 +552,11 @@ void cmGhsMultiTargetGenerator::WriteSources(
         "bsp" != (*si)->GetExtension())
       {
       this->WriteObjectLangOverride(this->FolderBuildStreams[sgPath], (*si));
+      if (objectNames.end() != objectNames.find(*si))
+        {
+        *this->FolderBuildStreams[sgPath] << "    -o \"" <<
+          objectNames.find(*si)->second << ".o\"" << std::endl;
+        }
 
       this->WriteObjectDir(this->FolderBuildStreams[sgPath],
                            this->AbsBuildFilePath + sgPath);

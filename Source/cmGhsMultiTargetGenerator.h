@@ -88,6 +88,8 @@ private:
   WriteCustomCommandsHelper(std::vector<cmCustomCommand> const &commandsSet,
                             cmTarget::CustomCommandType commandType);
   void WriteSources(std::vector<cmSourceFile *> const &objectSources);
+  static std::map<const cmSourceFile *, std::string>
+  GetObjectNames(const std::vector<cmSourceFile *> &objectSources);
   static void WriteObjectLangOverride(cmGeneratedFileStream *fileStream,
                                       cmSourceFile *sourceFile);
   static void WriteObjectDir(cmGeneratedFileStream *fileStream,
