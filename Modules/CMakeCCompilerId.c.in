@@ -34,7 +34,11 @@ char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
 @CMAKE_C_COMPILER_ID_ERROR_FOR_TEST@
 
 #if !defined(__STDC__)
-# define C_DIALECT
+# if defined(_MSC_VER) && !defined(__clang__)
+#  define C_DIALECT "90"
+# else
+#  define C_DIALECT
+# endif
 #elif __STDC_VERSION__ >= 201000L
 # define C_DIALECT "11"
 #elif __STDC_VERSION__ >= 199901L

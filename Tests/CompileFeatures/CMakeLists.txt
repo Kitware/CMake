@@ -119,6 +119,55 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   endif()
 endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16.0)
+    if (CMAKE_CXX_COMIPLER_VERSION VERSION_EQUAL 15.0)
+      list(REMOVE_ITEM CXX_non_features
+        # The cxx_contextual_conversions feature happens to work
+        # (for *this* testcase) with Intel 13/14/15, but they do not
+        # document support until 16.
+        cxx_contextual_conversions
+        )
+
+    elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14.0)
+      list(REMOVE_ITEM CXX_non_features
+        cxx_alignof
+
+        # not supposed to work until 15
+        cxx_attribute_deprecated
+
+        # The cxx_contextual_conversions feature happens to work
+        # (for *this* testcase) with Intel 13/14/15, but they do not
+        # document support until 16.
+        cxx_contextual_conversions
+        )
+
+    elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.1)
+      list(REMOVE_ITEM CXX_non_features
+        # These features happen to work but aren't documented to
+        # do so until 14.0
+        cxx_constexpr
+        cxx_enum_forward_declarations
+        cxx_sizeof_member
+        cxx_strong_enums
+        cxx_unicode_literals
+
+        # not supposed to work until 15
+        cxx_attribute_deprecated
+        cxx_nonstatic_member_init
+
+        # The cxx_contextual_conversions feature happens to work
+        # (for *this* testcase) with Intel 13/14/15, but they do not
+        # document support until 16.
+        cxx_contextual_conversions
+
+        # This is an undocumented feature; it does not work in future versions
+        cxx_aggregate_default_initializers
+        )
+    endif()
+  endif()
+endif()
+
 set(C_ext c)
 set(C_standard_flag 11)
 set(CXX_ext cpp)
@@ -177,6 +226,16 @@ if (CMAKE_C_COMPILE_FEATURES)
     list(APPEND expected_defs
       EXPECT_C_STATIC_ASSERT=1
     )
+  elseif (CMAKE_C_COMPILER_ID STREQUAL "Intel")
+    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 15)
+      list(APPEND expected_defs
+        EXPECT_C_STATIC_ASSERT=1
+        )
+    else()
+      list(APPEND expected_defs
+        EXPECT_C_STATIC_ASSERT=0
+        )
+    endif()
   endif()
 
   list(APPEND expected_defs
@@ -301,6 +360,29 @@ if (CMAKE_CXX_COMPILE_FEATURES)
       -DEXPECT_FINAL=1
       -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=1
     )
+  elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15)
+      add_definitions(
+        -DEXPECT_OVERRIDE_CONTROL=1
+        -DEXPECT_INHERITING_CONSTRUCTORS=1
+        -DEXPECT_FINAL=1
+        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=1
+      )
+    elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14)
+      add_definitions(
+        -DEXPECT_OVERRIDE_CONTROL=1
+        -DEXPECT_INHERITING_CONSTRUCTORS=0
+        -DEXPECT_FINAL=1
+        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
+      )
+    else()
+      add_definitions(
+        -DEXPECT_OVERRIDE_CONTROL=0
+        -DEXPECT_INHERITING_CONSTRUCTORS=0
+        -DEXPECT_FINAL=0
+        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
+      )
+    endif()
   endif()
 
   add_executable(CompileFeaturesGenex genex_test.cpp)
