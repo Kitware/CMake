@@ -9,6 +9,10 @@
 
 set(_cmake_oldestSupported "_MSC_VER >= 1600")
 
+# VS 2015 Update 2 introduces support for variable templates.
+# https://www.visualstudio.com/en-us/news/vs2015-update2-vs.aspx
+set(_cmake_feature_test_cxx_variable_templates "_MSC_FULL_VER >= 190023918")
+
 set(MSVC_2015 "_MSC_VER >= 1900")
 set(_cmake_feature_test_cxx_alignas "${MSVC_2015}")
 set(_cmake_feature_test_cxx_alignof "${MSVC_2015}")
@@ -95,7 +99,6 @@ set(_cmake_feature_test_cxx_variadic_macros "${MSVC_2010}")
 # set(_cmake_feature_test_cxx_relaxed_constexpr )
 # 'NSDMIs for aggregates'
 # set(_cmake_feature_test_cxx_aggregate_default_initializers )
-# set(_cmake_feature_test_cxx_variable_templates )
 
 # In theory decltype incomplete return types was added in 2012
 # but without support for decltype_auto and return type deduction this
