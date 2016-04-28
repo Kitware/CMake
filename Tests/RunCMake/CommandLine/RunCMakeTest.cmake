@@ -72,6 +72,13 @@ if(RunCMake_GENERATOR STREQUAL "Ninja")
   unset(RunCMake_TEST_NO_CLEAN)
 endif()
 
+if(RunCMake_GENERATOR STREQUAL "Visual Studio 7 .NET 2003")
+  set(RunCMake_WARN_VS71 1)
+  run_cmake(DeprecateVS71-WARN-ON)
+  unset(RunCMake_WARN_VS71)
+  run_cmake(DeprecateVS71-WARN-OFF)
+endif()
+
 if(UNIX)
   run_cmake_command(E_create_symlink-no-arg
     ${CMAKE_COMMAND} -E create_symlink

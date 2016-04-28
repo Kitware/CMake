@@ -335,6 +335,23 @@ void cmGlobalVisualStudio7Generator::Generate()
     {
     this->CallVisualStudioMacro(MacroReload);
     }
+
+  if (this->Version == VS71 &&
+      !this->CMakeInstance->GetIsInTryCompile())
+    {
+    const char* cmakeWarnVS71 =
+      this->CMakeInstance->GetState()->GetCacheEntryValue("CMAKE_WARN_VS71");
+    if (!cmakeWarnVS71 || !cmSystemTools::IsOff(cmakeWarnVS71))
+      {
+      this->CMakeInstance->IssueMessage(
+        cmake::WARNING,
+        "The \"Visual Studio 7 .NET 2003\" generator is deprecated "
+        "and will be removed in a future version of CMake."
+        "\n"
+        "Add CMAKE_WARN_VS71=OFF to the cache to disable this warning."
+        );
+      }
+    }
 }
 
 void cmGlobalVisualStudio7Generator
