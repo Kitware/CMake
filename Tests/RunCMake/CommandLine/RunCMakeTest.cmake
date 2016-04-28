@@ -72,13 +72,6 @@ if(RunCMake_GENERATOR STREQUAL "Ninja")
   unset(RunCMake_TEST_NO_CLEAN)
 endif()
 
-if(RunCMake_GENERATOR STREQUAL "Visual Studio 7")
-  set(RunCMake_WARN_VS70 1)
-  run_cmake(DeprecateVS70-WARN-ON)
-  unset(RunCMake_WARN_VS70)
-  run_cmake(DeprecateVS70-WARN-OFF)
-endif()
-
 if(UNIX)
   run_cmake_command(E_create_symlink-no-arg
     ${CMAKE_COMMAND} -E create_symlink
