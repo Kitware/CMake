@@ -11,6 +11,7 @@
 ============================================================================*/
 #ifndef cmVisualStudioTargetGenerator_h
 #define cmVisualStudioTargetGenerator_h
+
 #include "cmStandardIncludes.h"
 
 class cmMakefile;

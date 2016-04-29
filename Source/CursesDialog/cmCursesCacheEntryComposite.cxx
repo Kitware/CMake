@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmCursesCacheEntryComposite.h"
+
 #include "cmCursesOptionsWidget.h"
 #include "cmCursesStringWidget.h"
 #include "cmCursesLabelWidget.h"

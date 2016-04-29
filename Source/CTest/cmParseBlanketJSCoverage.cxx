@@ -9,11 +9,11 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include "cmStandardIncludes.h"
+#include "cmParseBlanketJSCoverage.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "cmSystemTools.h"
-#include "cmParseBlanketJSCoverage.h"
 #include <cmsys/Directory.hxx>
 #include <cmsys/Glob.hxx>
 #include <cmsys/FStream.hxx>

@@ -17,6 +17,7 @@
 #define cmStandardIncludes_h
 
 #include <cmConfigure.h>
+
 #include <cmsys/Configure.hxx>
 
 #ifdef _MSC_VER

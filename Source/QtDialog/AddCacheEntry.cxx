@@ -11,6 +11,7 @@
 ============================================================================*/
 
 #include "AddCacheEntry.h"
+
 #include <QMetaProperty>
 #include <QCompleter>
 

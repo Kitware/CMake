@@ -13,8 +13,8 @@
 #ifndef cmCTestBuildHandler_h
 #define cmCTestBuildHandler_h
 
-
 #include "cmCTestGenericHandler.h"
+
 #include "cmListFileCache.h"
 
 #include <cmsys/RegularExpression.hxx>

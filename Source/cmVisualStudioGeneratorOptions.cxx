@@ -1,4 +1,5 @@
 #include "cmVisualStudioGeneratorOptions.h"
+
 #include "cmOutputConverter.h"
 #include "cmSystemTools.h"
 #include "cmVisualStudio10TargetGenerator.h"

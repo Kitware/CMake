@@ -11,6 +11,7 @@
 ============================================================================*/
 
 #include "CMakeSetupDialog.h"
+
 #include <QFileDialog>
 #include <QProgressBar>
 #include <QMessageBox>

@@ -13,6 +13,7 @@
 #define cmSourceGroup_h
 
 #include "cmStandardIncludes.h"
+
 #include <cmsys/RegularExpression.hxx>
 
 class cmSourceFile;

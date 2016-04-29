@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmCursesBoolWidget.h"
+
 #include "cmCursesMainForm.h"
 
 cmCursesBoolWidget::cmCursesBoolWidget(int width, int height,

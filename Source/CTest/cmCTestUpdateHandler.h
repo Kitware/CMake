@@ -13,8 +13,8 @@
 #ifndef cmCTestUpdateHandler_h
 #define cmCTestUpdateHandler_h
 
-
 #include "cmCTestGenericHandler.h"
+
 #include "cmListFileCache.h"
 
 /** \class cmCTestUpdateHandler

@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmStringCommand.h"
+
 #include "cmCryptoHash.h"
 
 #include <cmsys/RegularExpression.hxx>

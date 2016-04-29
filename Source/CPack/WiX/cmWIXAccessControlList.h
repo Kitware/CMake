@@ -13,10 +13,10 @@
 #ifndef cmWIXAccessControlList_h
 #define cmWIXAccessControlList_h
 
+#include "cmWIXSourceWriter.h"
+
 #include <cmInstalledFile.h>
 #include <CPack/cmCPackLog.h>
-
-#include "cmWIXSourceWriter.h"
 
 class cmWIXAccessControlList
 {

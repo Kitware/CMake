@@ -13,7 +13,6 @@
 #ifndef cmCPackPackageMakerGenerator_h
 #define cmCPackPackageMakerGenerator_h
 
-
 #include "cmCPackGenerator.h"
 
 class cmCPackComponent;

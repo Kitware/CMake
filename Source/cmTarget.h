@@ -12,6 +12,8 @@
 #ifndef cmTarget_h
 #define cmTarget_h
 
+#include "cmStandardIncludes.h"
+
 #include "cmCustomCommand.h"
 #include "cmPropertyMap.h"
 #include "cmPolicies.h"

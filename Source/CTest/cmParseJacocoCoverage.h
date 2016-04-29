@@ -13,7 +13,6 @@
 #ifndef cmParseJacocoCoverage_h
 #define cmParseJacocoCoverage_h
 
-#include "cmStandardIncludes.h"
 #include "cmCTestCoverageHandler.h"
 
 

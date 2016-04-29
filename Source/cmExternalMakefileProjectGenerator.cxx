@@ -9,9 +9,10 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include <assert.h>
 
 #include "cmExternalMakefileProjectGenerator.h"
+
+#include <assert.h>
 
 void cmExternalMakefileProjectGenerator
 ::EnableLanguage(std::vector<std::string> const&,

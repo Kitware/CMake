@@ -13,6 +13,7 @@
 #define cmIDEOptions_h
 
 #include "cmStandardIncludes.h"
+
 #include "cmIDEFlagTable.h"
 
 /** \class cmIDEOptions

@@ -12,6 +12,8 @@
 #ifndef cmLocale_h
 #define cmLocale_h
 
+#include "cmStandardIncludes.h"
+
 #include <locale.h>
 
 class cmLocaleRAII

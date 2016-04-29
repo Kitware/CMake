@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmProperty.h"
+
 #include "cmSystemTools.h"
 
 void cmProperty::Set(const char *value)

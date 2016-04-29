@@ -12,6 +12,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmExtraCodeLiteGenerator.h"
+
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"

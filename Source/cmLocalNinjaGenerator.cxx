@@ -11,6 +11,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmLocalNinjaGenerator.h"
+
 #include "cmCustomCommandGenerator.h"
 #include "cmMakefile.h"
 #include "cmGlobalNinjaGenerator.h"

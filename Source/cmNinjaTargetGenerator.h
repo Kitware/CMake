@@ -15,7 +15,6 @@
 
 #include "cmCommonTargetGenerator.h"
 
-#include "cmStandardIncludes.h"
 #include "cmNinjaTypes.h"
 #include "cmGlobalNinjaGenerator.h"
 #include "cmLocalNinjaGenerator.h"

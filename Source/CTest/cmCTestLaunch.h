@@ -13,6 +13,7 @@
 #define cmCTestLaunch_h
 
 #include "cmStandardIncludes.h"
+
 #include <cmsys/RegularExpression.hxx>
 
 class cmXMLWriter;

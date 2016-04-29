@@ -14,6 +14,7 @@
 #define cmCTestBatchTestHandler_h
 
 #include <cmStandardIncludes.h>
+
 #include <cmCTestTestHandler.h>
 #include <cmCTestMultiProcessHandler.h>
 #include <cmCTestRunTest.h>

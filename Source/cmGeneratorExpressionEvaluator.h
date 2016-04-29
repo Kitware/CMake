@@ -12,8 +12,9 @@
 #ifndef cmGeneratorExpressionEvaluator_h
 #define cmGeneratorExpressionEvaluator_h
 
-#include "cmListFileCache.h"
 #include "cmGeneratorExpressionContext.h"
+
+#include "cmListFileCache.h"
 
 #include <vector>
 #include <string>

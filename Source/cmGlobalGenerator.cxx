@@ -17,6 +17,7 @@
 #endif
 
 #include "cmGlobalGenerator.h"
+
 #include "cmLocalGenerator.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmake.h"

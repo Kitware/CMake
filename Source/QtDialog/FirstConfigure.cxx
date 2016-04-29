@@ -1,5 +1,6 @@
 
 #include "FirstConfigure.h"
+
 #include "Compilers.h"
 
 #include <QSettings>

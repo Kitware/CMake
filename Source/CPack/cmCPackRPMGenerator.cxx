@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmCPackRPMGenerator.h"
+
 #include "cmCPackLog.h"
 #include "cmSystemTools.h"
 

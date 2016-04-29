@@ -11,6 +11,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmNinjaNormalTargetGenerator.h"
+
 #include "cmLocalNinjaGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
 #include "cmSourceFile.h"

@@ -12,8 +12,8 @@
 #ifndef cmCursesForm_h
 #define cmCursesForm_h
 
-#include "../cmStandardIncludes.h"
 #include "cmCursesStandardIncludes.h"
+
 #include <cmsys/FStream.hxx>
 
 class cmCursesForm

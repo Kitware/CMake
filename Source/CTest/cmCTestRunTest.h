@@ -12,8 +12,8 @@
 #ifndef cmCTestRunTest_h
 #define cmCTestRunTest_h
 
-#include <cmStandardIncludes.h>
 #include <cmCTestTestHandler.h>
+
 #include <cmProcess.h>
 
 /** \class cmRunTest

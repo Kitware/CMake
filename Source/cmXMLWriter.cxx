@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmXMLWriter.h"
+
 #include "cmXMLSafe.h"
 
 #include <cassert>

@@ -14,6 +14,7 @@
 #define cmWIXFeaturesSourceWriter_h
 
 #include "cmWIXSourceWriter.h"
+
 #include <CPack/cmCPackGenerator.h>
 
 /** \class cmWIXFeaturesSourceWriter

@@ -13,8 +13,8 @@
 #ifndef cmCTestCoverageHandler_h
 #define cmCTestCoverageHandler_h
 
-
 #include "cmCTestGenericHandler.h"
+
 #include "cmListFileCache.h"
 
 #include <cmsys/RegularExpression.hxx>

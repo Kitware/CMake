@@ -13,7 +13,6 @@
 #ifndef cmParseBlanketJSCoverage_h
 #define cmParseBlanketJSCoverage_h
 
-#include "cmStandardIncludes.h"
 #include "cmCTestCoverageHandler.h"
 
 

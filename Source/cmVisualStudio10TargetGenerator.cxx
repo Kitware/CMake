@@ -9,8 +9,9 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include "windows.h"
 #include "cmVisualStudio10TargetGenerator.h"
+
+#include "windows.h"
 #include "cmGlobalVisualStudio10Generator.h"
 #include "cmGeneratorTarget.h"
 #include "cmComputeLinkInformation.h"

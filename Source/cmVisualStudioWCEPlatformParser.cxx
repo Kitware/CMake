@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmVisualStudioWCEPlatformParser.h"
+
 #include "cmGlobalVisualStudioGenerator.h"
 #include "cmXMLParser.h"
 

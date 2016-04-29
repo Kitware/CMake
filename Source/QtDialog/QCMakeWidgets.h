@@ -16,6 +16,7 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include <QCompleter>
+
 class QToolButton;
 
 // common widgets for Qt based CMake

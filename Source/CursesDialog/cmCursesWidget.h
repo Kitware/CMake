@@ -12,8 +12,9 @@
 #ifndef cmCursesWidget_h
 #define cmCursesWidget_h
 
-#include "../cmState.h"
 #include "cmCursesStandardIncludes.h"
+
+#include "../cmState.h"
 
 class cmCursesMainForm;
 

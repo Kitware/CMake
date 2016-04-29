@@ -12,8 +12,9 @@
 #ifndef cmGhsMultiGenerator_h
 #define cmGhsMultiGenerator_h
 
-#include "cmGlobalGeneratorFactory.h"
 #include "cmGlobalGenerator.h"
+
+#include "cmGlobalGeneratorFactory.h"
 #include "cmGhsMultiGpj.h"
 
 class cmGeneratedFileStream;

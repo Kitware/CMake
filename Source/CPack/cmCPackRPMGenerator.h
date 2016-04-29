@@ -13,7 +13,6 @@
 #ifndef cmCPackRPMGenerator_h
 #define cmCPackRPMGenerator_h
 
-
 #include "cmCPackGenerator.h"
 
 /** \class cmCPackRPMGenerator

@@ -11,7 +11,9 @@
   See the License for more information.
 ============================================================================*/
 #ifndef cmNinjaTypes_h
-#  define cmNinjaTypes_h
+#define cmNinjaTypes_h
+
+#include "cmStandardIncludes.h"
 
 typedef std::vector<std::string> cmNinjaDeps;
 typedef std::map<std::string, std::string> cmNinjaVars;

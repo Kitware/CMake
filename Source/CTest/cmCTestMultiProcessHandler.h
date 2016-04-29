@@ -12,8 +12,8 @@
 #ifndef cmCTestMultiProcessHandler_h
 #define cmCTestMultiProcessHandler_h
 
-#include <cmStandardIncludes.h>
 #include <cmCTestTestHandler.h>
+
 #include <cmCTestRunTest.h>
 
 /** \class cmCTestMultiProcessHandler

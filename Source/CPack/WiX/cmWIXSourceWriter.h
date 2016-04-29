@@ -13,11 +13,12 @@
 #ifndef cmWIXSourceWriter_h
 #define cmWIXSourceWriter_h
 
-#include <vector>
-#include <string>
+#include <CPack/cmCPackLog.h>
+
 #include <cmsys/FStream.hxx>
 
-#include <CPack/cmCPackLog.h>
+#include <vector>
+#include <string>
 
 /** \class cmWIXSourceWriter
  * \brief Helper class to generate XML WiX source files

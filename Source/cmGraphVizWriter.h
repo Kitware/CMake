@@ -1,5 +1,3 @@
-#ifndef CMGRAPHVIZWRITER_H
-#define CMGRAPHVIZWRITER_H
 /*============================================================================
   CMake - Cross Platform Makefile Generator
   Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
@@ -11,7 +9,11 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
+#ifndef CMGRAPHVIZWRITER_H
+#define CMGRAPHVIZWRITER_H
+
 #include "cmStandardIncludes.h"
+
 #include "cmLocalGenerator.h"
 #include "cmGeneratedFileStream.h"
 #include <cmsys/RegularExpression.hxx>

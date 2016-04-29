@@ -1,7 +1,7 @@
-#include "cmStandardIncludes.h"
+#include "cmParseCoberturaCoverage.h"
+
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
-#include "cmParseCoberturaCoverage.h"
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
 

@@ -9,8 +9,9 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include <cmsys/Process.h>
 #include "cmStandardIncludes.h"
+
+#include <cmsys/Process.h>
 #include "cmSystemTools.h"
 
 // This is a wrapper program for xcodebuild

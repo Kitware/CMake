@@ -12,6 +12,8 @@
 #ifndef cmGhsMultiGpj_h
 #define cmGhsMultiGpj_h
 
+#include "cmStandardIncludes.h"
+
 class cmGeneratedFileStream;
 
 class GhsMultiGpj

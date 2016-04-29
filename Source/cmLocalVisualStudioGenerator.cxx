@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmLocalVisualStudioGenerator.h"
+
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"

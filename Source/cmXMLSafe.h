@@ -13,6 +13,7 @@
 #define cmXMLSafe_h
 
 #include <cmsys/Configure.hxx>
+
 #include <string>
 #include <iosfwd>
 

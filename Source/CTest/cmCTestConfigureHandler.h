@@ -13,8 +13,8 @@
 #ifndef cmCTestConfigureHandler_h
 #define cmCTestConfigureHandler_h
 
-
 #include "cmCTestGenericHandler.h"
+
 #include "cmListFileCache.h"
 
 /** \class cmCTestConfigureHandler

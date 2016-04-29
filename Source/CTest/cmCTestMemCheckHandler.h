@@ -13,9 +13,8 @@
 #ifndef cmCTestMemCheckHandler_h
 #define cmCTestMemCheckHandler_h
 
-
 #include "cmCTestTestHandler.h"
-#include "cmStandardIncludes.h"
+
 #include "cmListFileCache.h"
 #include <vector>
 #include <string>

@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmStandardIncludes.h" // to get CMAKE_USE_ELF_PARSER first
+
 #include "cmELF.h"
 
 #include <cmsys/auto_ptr.hxx>

@@ -9,8 +9,8 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-
 #include "cmSearchPath.h"
+
 #include "cmFindCommon.h"
 #include "cmAlgorithms.h"
 

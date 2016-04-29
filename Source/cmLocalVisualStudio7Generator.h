@@ -13,6 +13,7 @@
 #define cmLocalVisualStudio7Generator_h
 
 #include "cmLocalVisualStudioGenerator.h"
+
 #include "cmVisualStudioGeneratorOptions.h"
 
 class cmSourceFile;

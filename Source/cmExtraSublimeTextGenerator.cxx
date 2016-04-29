@@ -11,6 +11,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmExtraSublimeTextGenerator.h"
+
 #include "cmake.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"

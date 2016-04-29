@@ -13,6 +13,7 @@
 #define cmCommand_h
 
 #include "cmObject.h"
+
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmCommandArgumentsHelper.h"

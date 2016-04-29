@@ -11,6 +11,8 @@
   See the License for more information.
 ============================================================================*/
 
+#include "cmQtAutoGenerators.h"
+
 #include "cmGlobalGenerator.h"
 #include "cmOutputConverter.h"
 #include "cmMakefile.h"
@@ -28,8 +30,6 @@
 #if defined(__APPLE__)
 #include <unistd.h>
 #endif
-
-#include "cmQtAutoGenerators.h"
 
 static bool requiresMocing(const std::string& text, std::string &macroName)
 {

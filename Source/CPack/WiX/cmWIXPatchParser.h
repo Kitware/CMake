@@ -13,9 +13,9 @@
 #ifndef cmCPackWIXPatchParser_h
 #define cmCPackWIXPatchParser_h
 
-#include <cmXMLParser.h>
-
 #include <CPack/cmCPackLog.h>
+
+#include <cmXMLParser.h>
 
 #include <map>
 #include <list>

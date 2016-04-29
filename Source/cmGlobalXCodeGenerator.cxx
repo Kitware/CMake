@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmGlobalXCodeGenerator.h"
+
 #include "cmLocalXCodeGenerator.h"
 #include "cmMakefile.h"
 #include "cmXCodeObject.h"

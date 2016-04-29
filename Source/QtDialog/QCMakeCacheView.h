@@ -14,6 +14,7 @@
 #define QCMakeCacheView_h
 
 #include "QCMake.h"
+
 #include <QTreeView>
 #include <QSet>
 #include <QStandardItemModel>

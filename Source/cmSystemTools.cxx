@@ -9,8 +9,8 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-
 #include "cmSystemTools.h"
+
 #include "cmAlgorithms.h"
 #include <ctype.h>
 #include <errno.h>
@@ -39,6 +39,7 @@
 
 #if defined(_WIN32)
 # include <windows.h>
+  // include wincrypt.h after windows.h
 # include <wincrypt.h>
 #else
 # include <sys/time.h>

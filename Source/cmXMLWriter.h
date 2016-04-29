@@ -13,6 +13,7 @@
 #define cmXMLWiter_h
 
 #include "cmStandardIncludes.h"
+
 #include "cmXMLSafe.h"
 
 #include <ostream>

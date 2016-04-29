@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmXMLParser.h"
+
 #include <cmsys/FStream.hxx>
 
 #include <cm_expat.h>

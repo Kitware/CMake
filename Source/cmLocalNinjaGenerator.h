@@ -11,10 +11,11 @@
   See the License for more information.
 ============================================================================*/
 #ifndef cmLocalNinjaGenerator_h
-#  define cmLocalNinjaGenerator_h
+#define cmLocalNinjaGenerator_h
 
-#  include "cmLocalCommonGenerator.h"
-#  include "cmNinjaTypes.h"
+#include "cmLocalCommonGenerator.h"
+
+#include "cmNinjaTypes.h"
 
 class cmCustomCommandGenerator;
 class cmGlobalNinjaGenerator;

@@ -13,7 +13,6 @@
 #ifndef cmParseDelphiCoverage_h
 #define cmParseDelphiCoverage_h
 
-#include "cmStandardIncludes.h"
 #include "cmCTestCoverageHandler.h"
 
 

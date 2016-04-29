@@ -1,9 +1,9 @@
-#include "cmStandardIncludes.h"
+#include "cmParseDelphiCoverage.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
-#include "cmParseDelphiCoverage.h"
 #include <cmsys/Directory.hxx>
 #include <cmsys/Glob.hxx>
 #include <cmsys/FStream.hxx>

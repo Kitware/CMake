@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmGhsMultiTargetGenerator.h"
+
 #include "cmGlobalGhsMultiGenerator.h"
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"

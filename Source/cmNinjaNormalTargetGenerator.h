@@ -11,13 +11,13 @@
   See the License for more information.
 ============================================================================*/
 #ifndef cmNinjaNormalTargetGenerator_h
-#  define cmNinjaNormalTargetGenerator_h
+#define cmNinjaNormalTargetGenerator_h
 
-#  include "cmNinjaTargetGenerator.h"
-#  include "cmNinjaTypes.h"
-#  include "cmStandardIncludes.h"
+#include "cmNinjaTargetGenerator.h"
 
-#  include <set>
+#include "cmNinjaTypes.h"
+
+#include <set>
 
 class cmSourceFile;
 class cmOSXBundleGenerator;

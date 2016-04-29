@@ -9,9 +9,9 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include "cmMakefile.h"
-
 #include "cmGeneratorExpressionEvaluator.h"
+
+#include "cmMakefile.h"
 #include "cmGeneratorExpressionParser.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorExpression.h"

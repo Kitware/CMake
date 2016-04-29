@@ -13,8 +13,8 @@
 #ifndef cmCTestScriptHandler_h
 #define cmCTestScriptHandler_h
 
-
 #include "cmCTestGenericHandler.h"
+
 #include "cmListFileCache.h"
 
 class cmMakefile;

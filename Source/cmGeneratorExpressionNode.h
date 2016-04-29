@@ -12,10 +12,11 @@
 #ifndef cmGeneratorExpressionNode_h
 #define cmGeneratorExpressionNode_h
 
+#include "cmGeneratorExpression.h"
+
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionParser.h"
 #include "cmGeneratorExpressionDAGChecker.h"
-#include "cmGeneratorExpression.h"
 #include "cmLocalGenerator.h"
 #include "cmSourceFile.h"
 

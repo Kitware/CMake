@@ -13,6 +13,7 @@
 #define cmOSXBundleGenerator_h
 
 #include "cmStandardIncludes.h"
+
 #include "cmSourceFile.h"
 
 #include <string>

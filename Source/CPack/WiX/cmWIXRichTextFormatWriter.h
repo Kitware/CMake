@@ -13,6 +13,8 @@
 #ifndef cmWIXRichTextFormatWriter_h
 #define cmWIXRichTextFormatWriter_h
 
+#include "cmStandardIncludes.h"
+
 #include <cmsys/FStream.hxx>
 
 /** \class cmWIXRichtTextFormatWriter

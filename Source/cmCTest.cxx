@@ -12,6 +12,7 @@
 #include "cmCurl.h" // include before anything that includes windows.h
 
 #include "cmCTest.h"
+
 #include "cmake.h"
 #include "cmMakefile.h"
 #include "cmGlobalGenerator.h"

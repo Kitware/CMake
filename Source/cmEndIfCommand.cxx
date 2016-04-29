@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmEndIfCommand.h"
+
 #include <stdlib.h> // required for atof
 bool cmEndIfCommand::InitialPass(std::vector<std::string> const&,
                                  cmExecutionStatus &)

@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmListCommand.h"
+
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/SystemTools.hxx>
 #include "cmAlgorithms.h"

@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmVariableRequiresCommand.h"
+
 #include "cmState.h"
 
 // cmLibraryCommand

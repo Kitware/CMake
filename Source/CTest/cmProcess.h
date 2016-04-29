@@ -12,8 +12,8 @@
 #ifndef cmProcess_h
 #define cmProcess_h
 
-
 #include "cmStandardIncludes.h"
+
 #include <cmsys/Process.h>
 
 

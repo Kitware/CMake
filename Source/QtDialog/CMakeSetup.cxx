@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "QCMake.h"  // include to disable MS warnings
+
 #include <QApplication>
 #include <QDir>
 #include <QTranslator>

@@ -9,10 +9,11 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
+#include "cmCursesMainForm.h"
+
 #include "../cmSystemTools.h"
 #include "../cmVersion.h"
 #include "../cmake.h"
-#include "cmCursesMainForm.h"
 #include "cmCursesStringWidget.h"
 #include "cmCursesLabelWidget.h"
 #include "cmCursesBoolWidget.h"

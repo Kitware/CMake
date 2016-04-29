@@ -13,6 +13,7 @@
 #define cmIfCommand_h
 
 #include "cmCommand.h"
+
 #include "cmFunctionBlocker.h"
 
 class cmIfFunctionBlocker : public cmFunctionBlocker

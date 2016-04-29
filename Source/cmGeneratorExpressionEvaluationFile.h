@@ -12,11 +12,10 @@
 #ifndef cmGeneratorExpressionEvaluationFile_h
 #define cmGeneratorExpressionEvaluationFile_h
 
-#include "cmStandardIncludes.h"
+#include "cmGeneratorExpression.h"
+
 #include <sys/types.h>
 #include <cmsys/auto_ptr.hxx>
-
-#include "cmGeneratorExpression.h"
 
 class cmLocalGenerator;
 

@@ -9,6 +9,8 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
+#include "cmCursesStandardIncludes.h"
+
 #include "../cmSystemTools.h"
 #include "../cmake.h"
 #include "../cmDocumentation.h"
@@ -17,7 +19,6 @@
 #include <sys/ioctl.h>
 
 #include "cmCursesMainForm.h"
-#include "cmCursesStandardIncludes.h"
 #include <cmsys/Encoding.hxx>
 
 #include <form.h>

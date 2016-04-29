@@ -9,8 +9,9 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include "cmGlobalVisualStudio7Generator.h"
 #include "cmLocalVisualStudio7Generator.h"
+
+#include "cmGlobalVisualStudio7Generator.h"
 #include "cmXMLParser.h"
 #include <cm_expat.h>
 #include "cmMakefile.h"

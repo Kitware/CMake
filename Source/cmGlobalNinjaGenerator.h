@@ -11,11 +11,12 @@
   See the License for more information.
 ============================================================================*/
 #ifndef cmGlobalNinjaGenerator_h
-#  define cmGlobalNinjaGenerator_h
+#define cmGlobalNinjaGenerator_h
 
-#  include "cmGlobalCommonGenerator.h"
-#  include "cmGlobalGeneratorFactory.h"
-#  include "cmNinjaTypes.h"
+#include "cmGlobalCommonGenerator.h"
+
+#include "cmGlobalGeneratorFactory.h"
+#include "cmNinjaTypes.h"
 
 //#define NINJA_GEN_VERBOSE_FILES
 

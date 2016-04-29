@@ -13,7 +13,6 @@
 #ifndef cmCPackSTGZGenerator_h
 #define cmCPackSTGZGenerator_h
 
-
 #include "cmCPackTGZGenerator.h"
 
 /** \class cmCPackSTGZGenerator
