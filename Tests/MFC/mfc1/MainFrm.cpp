@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+
 #include "mfc1.h"
 
 #include "MainFrm.h"

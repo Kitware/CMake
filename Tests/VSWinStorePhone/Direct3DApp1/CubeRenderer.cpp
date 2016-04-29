@@ -1,4 +1,5 @@
 #include "pch.h"
+
 #include "CubeRenderer.h"
 
 using namespace DirectX;
