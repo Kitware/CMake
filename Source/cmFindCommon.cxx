@@ -11,8 +11,8 @@
 ============================================================================*/
 #include "cmFindCommon.h"
 
-#include <functional>
 #include <algorithm>
+#include <functional>
 
 //----------------------------------------------------------------------------
 cmFindCommon::PathGroup cmFindCommon::PathGroup::All("ALL");

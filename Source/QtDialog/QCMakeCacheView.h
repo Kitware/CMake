@@ -15,10 +15,10 @@
 
 #include "QCMake.h"
 
-#include <QTreeView>
+#include <QItemDelegate>
 #include <QSet>
 #include <QStandardItemModel>
-#include <QItemDelegate>
+#include <QTreeView>
 
 class QSortFilterProxyModel;
 class QCMakeCacheModel;

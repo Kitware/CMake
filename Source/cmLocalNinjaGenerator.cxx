@@ -13,13 +13,13 @@
 #include "cmLocalNinjaGenerator.h"
 
 #include "cmCustomCommandGenerator.h"
-#include "cmMakefile.h"
-#include "cmGlobalNinjaGenerator.h"
-#include "cmNinjaTargetGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGlobalNinjaGenerator.h"
+#include "cmMakefile.h"
+#include "cmNinjaTargetGenerator.h"
 #include "cmSourceFile.h"
-#include "cmake.h"
 #include "cmState.h"
+#include "cmake.h"
 
 #include <assert.h>
 

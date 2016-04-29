@@ -1,7 +1,7 @@
+#include <noregen.h>
+#include <regen.h>
 #include <stdio.h>
 #include <string.h>
-#include <regen.h>
-#include <noregen.h>
 
 int main(int argc, char** argv)
 {

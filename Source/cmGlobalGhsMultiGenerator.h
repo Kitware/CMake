@@ -14,8 +14,8 @@
 
 #include "cmGlobalGenerator.h"
 
-#include "cmGlobalGeneratorFactory.h"
 #include "cmGhsMultiGpj.h"
+#include "cmGlobalGeneratorFactory.h"
 
 class cmGeneratedFileStream;
 

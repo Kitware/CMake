@@ -16,8 +16,8 @@
 #include <iostream>
 #include <sstream>
 
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 //----------------------------------------------------------------------------
 cmXMLSafe::cmXMLSafe(const char* s):

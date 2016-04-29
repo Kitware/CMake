@@ -12,9 +12,9 @@
 
 #include "cmCTestBatchTestHandler.h"
 
+#include "cmCTest.h"
 #include "cmProcess.h"
 #include "cmStandardIncludes.h"
-#include "cmCTest.h"
 #include "cmSystemTools.h"
 #include <stdlib.h>
 

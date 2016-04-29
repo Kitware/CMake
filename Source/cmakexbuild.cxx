@@ -11,8 +11,8 @@
 ============================================================================*/
 #include "cmStandardIncludes.h"
 
-#include <cmsys/Process.h>
 #include "cmSystemTools.h"
+#include <cmsys/Process.h>
 
 // This is a wrapper program for xcodebuild
 // it calls xcodebuild, and does two things

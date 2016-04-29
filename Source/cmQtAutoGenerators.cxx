@@ -13,18 +13,18 @@
 
 #include "cmQtAutoGenerators.h"
 
-#include "cmGlobalGenerator.h"
-#include "cmOutputConverter.h"
-#include "cmMakefile.h"
-#include "cmSystemTools.h"
-#include "cmState.h"
 #include "cmAlgorithms.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmOutputConverter.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
 
 #include <sys/stat.h>
 
-#include <cmsys/Terminal.h>
-#include <cmsys/FStream.hxx>
 #include <assert.h>
+#include <cmsys/FStream.hxx>
+#include <cmsys/Terminal.h>
 
 #include <string.h>
 #if defined(__APPLE__)

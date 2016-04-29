@@ -11,9 +11,9 @@
 ============================================================================*/
 #include "cmGlobalVisualStudio12Generator.h"
 
+#include "cmAlgorithms.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
-#include "cmAlgorithms.h"
 
 static const char vs12generatorName[] = "Visual Studio 12 2013";
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <wrl/client.h>
 #include <ppl.h>
 #include <ppltasks.h>
+#include <wrl/client.h>
 
 namespace DX
 {

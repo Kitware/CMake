@@ -12,14 +12,14 @@
 
 #include "QCMakeCacheView.h"
 
+#include <QApplication>
+#include <QEvent>
 #include <QHBoxLayout>
 #include <QHeaderView>
-#include <QEvent>
-#include <QStyle>
 #include <QKeyEvent>
-#include <QSortFilterProxyModel>
 #include <QMetaProperty>
-#include <QApplication>
+#include <QSortFilterProxyModel>
+#include <QStyle>
 
 #include "QCMakeWidgets.h"
 

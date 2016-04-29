@@ -12,19 +12,19 @@
 // include these first, otherwise there will be problems on Windows
 // with GetCurrentDirectory() being redefined
 #ifdef CMAKE_BUILD_WITH_CMAKE
-#include "cmDynamicLoader.h"
 #include "cmDocumentation.h"
+#include "cmDynamicLoader.h"
 #endif
 
-#include "cmake.h"
-#include "cmcmd.h"
-#include "cmState.h"
-#include "cmListFileCache.h"
-#include "cmSourceFile.h"
+#include "cmAlgorithms.h"
 #include "cmGlobalGenerator.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmAlgorithms.h"
+#include "cmSourceFile.h"
+#include "cmState.h"
+#include "cmake.h"
+#include "cmcmd.h"
 #include <cmsys/Encoding.hxx>
 
 #ifdef CMAKE_BUILD_WITH_CMAKE

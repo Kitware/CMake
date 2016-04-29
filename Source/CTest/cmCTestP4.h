@@ -14,8 +14,8 @@
 
 #include "cmCTestGlobalVC.h"
 
-#include <vector>
 #include <map>
+#include <vector>
 
 /** \class cmCTestP4
  * \brief Interaction with the Perforce command-line tool

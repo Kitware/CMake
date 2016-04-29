@@ -12,8 +12,8 @@
 
 #include "cmFileLock.h"
 
-#include <windows.h> // CreateFileW
 #include "cmSystemTools.h"
+#include <windows.h> // CreateFileW
 
 cmFileLock::cmFileLock(): File(INVALID_HANDLE_VALUE)
 {

@@ -15,8 +15,8 @@
 #include "cmStandardIncludes.h"
 
 #include "cmCustomCommand.h"
-#include "cmPropertyMap.h"
 #include "cmListFileCache.h"
+#include "cmPropertyMap.h"
 class cmMakefile;
 
 /** \class cmTest

@@ -14,8 +14,8 @@
 
 #include "cmStandardIncludes.h"
 
-#include "cmLocalGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmLocalGenerator.h"
 #include <cmsys/RegularExpression.hxx>
 
 class cmGeneratorTarget;

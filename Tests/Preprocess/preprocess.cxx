@@ -3,8 +3,8 @@
 #include FILE_PATH
 #include TARGET_PATH
 
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 extern "C" int check_defines_C(void);
 

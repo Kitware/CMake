@@ -1,6 +1,6 @@
 // A simple program that builds a sqrt table
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 
 int main (int argc, char *argv[])
 {

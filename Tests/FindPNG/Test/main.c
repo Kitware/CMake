@@ -1,6 +1,6 @@
 #include <assert.h>
-#include <string.h>
 #include <png.h>
+#include <string.h>
 
 int main()
 {

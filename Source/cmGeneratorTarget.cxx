@@ -11,21 +11,21 @@
 ============================================================================*/
 #include "cmGeneratorTarget.h"
 
-#include "cmTarget.h"
-#include "cmMakefile.h"
-#include "cmLocalGenerator.h"
-#include "cmGlobalGenerator.h"
-#include "cmSourceFile.h"
-#include "cmGeneratorExpression.h"
-#include "cmGeneratorExpressionDAGChecker.h"
+#include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommandGenerator.h"
-#include "cmAlgorithms.h"
+#include "cmGeneratorExpression.h"
+#include "cmGeneratorExpressionDAGChecker.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
+#include "cmMakefile.h"
+#include "cmSourceFile.h"
+#include "cmTarget.h"
 
 #include <queue>
 
-#include <errno.h>
 #include "assert.h"
+#include <errno.h>
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include <cmsys/hash_set.hxx>

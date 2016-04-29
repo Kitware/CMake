@@ -41,16 +41,16 @@
 #include <QCoreApplication>
 #include <QTimer>
 
-#include "codeeditor.h"
-#include "calwidget.h"
-#include "foo.h"
-#include "blub.h"
-#include "sub/bar.h"
 #include "abc.h"
-#include "xyz.h"
-#include "yaf.h"
+#include "blub.h"
+#include "calwidget.h"
+#include "codeeditor.h"
+#include "foo.h"
 #include "libC.h"
 #include "resourcetester.h"
+#include "sub/bar.h"
+#include "xyz.h"
+#include "yaf.h"
 #ifdef TEST_DEBUG_CLASS
 #include "debug_class.h"
 #include <iostream>

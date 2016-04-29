@@ -1,7 +1,7 @@
-#include "aaa/item.hpp"
 #include "aaa/bbb/item.hpp"
-#include "bbb/item.hpp"
+#include "aaa/item.hpp"
 #include "bbb/aaa/item.hpp"
+#include "bbb/item.hpp"
 #include "ccc/item.hpp"
 
 int main(int argv, char **args)

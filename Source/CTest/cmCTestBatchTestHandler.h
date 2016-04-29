@@ -15,9 +15,9 @@
 
 #include <cmStandardIncludes.h>
 
-#include <cmCTestTestHandler.h>
 #include <cmCTestMultiProcessHandler.h>
 #include <cmCTestRunTest.h>
+#include <cmCTestTestHandler.h>
 #include <cmsys/FStream.hxx>
 
 /** \class cmCTestBatchTestHandler

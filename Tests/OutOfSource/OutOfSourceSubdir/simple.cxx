@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "testlib.h"
 #include "testdp.h"
+#include "testlib.h"
 
 extern int simple();
 #ifndef NO_DEEPSRC

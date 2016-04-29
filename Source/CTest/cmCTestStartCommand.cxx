@@ -12,9 +12,9 @@
 #include "cmCTestStartCommand.h"
 
 #include "cmCTest.h"
-#include "cmGlobalGenerator.h"
 #include "cmCTestVC.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
 
 cmCTestStartCommand::cmCTestStartCommand()
 {

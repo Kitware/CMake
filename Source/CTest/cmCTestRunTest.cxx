@@ -12,8 +12,8 @@
 
 #include "cmCTestRunTest.h"
 
-#include "cmCTestMemCheckHandler.h"
 #include "cmCTest.h"
+#include "cmCTestMemCheckHandler.h"
 #include "cmSystemTools.h"
 #include "cm_curl.h"
 

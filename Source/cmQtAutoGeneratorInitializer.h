@@ -16,9 +16,9 @@
 
 #include "cmStandardIncludes.h"
 
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 class cmSourceFile;
 class cmGeneratorTarget;

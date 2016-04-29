@@ -11,14 +11,14 @@
 ============================================================================*/
 #include "cmDocumentation.h"
 
+#include "cmAlgorithms.h"
+#include "cmRST.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
-#include "cmRST.h"
-#include "cmAlgorithms.h"
 
 #include <cmsys/Directory.hxx>
-#include <cmsys/Glob.hxx>
 #include <cmsys/FStream.hxx>
+#include <cmsys/Glob.hxx>
 
 #include <ctype.h>
 

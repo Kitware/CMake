@@ -12,8 +12,8 @@
 #include "cmCursesLongMessageForm.h"
 
 #include "../cmSystemTools.h"
-#include "../cmake.h"
 #include "../cmVersion.h"
+#include "../cmake.h"
 #include "cmCursesMainForm.h"
 
 inline int ctrl(int z)

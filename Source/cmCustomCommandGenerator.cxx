@@ -11,11 +11,11 @@
 ============================================================================*/
 #include "cmCustomCommandGenerator.h"
 
-#include "cmMakefile.h"
-#include "cmLocalGenerator.h"
 #include "cmCustomCommand.h"
-#include "cmOutputConverter.h"
 #include "cmGeneratorExpression.h"
+#include "cmLocalGenerator.h"
+#include "cmMakefile.h"
+#include "cmOutputConverter.h"
 
 //----------------------------------------------------------------------------
 cmCustomCommandGenerator::cmCustomCommandGenerator(

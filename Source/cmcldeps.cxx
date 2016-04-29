@@ -22,8 +22,8 @@
 #include <cmSystemTools.h>
 #include <cmsys/Encoding.hxx>
 
-#include <windows.h>
 #include <sstream>
+#include <windows.h>
 
 // We don't want any wildcard expansion.
 // See http://msdn.microsoft.com/en-us/library/zay8tzh6(v=vs.85).aspx

@@ -16,8 +16,8 @@
 
 #include "cmListFileCache.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 struct cmGeneratorExpressionDAGChecker;
 struct cmGeneratorExpressionNode;

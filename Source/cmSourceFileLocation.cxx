@@ -11,10 +11,10 @@
 ============================================================================*/
 #include "cmSourceFileLocation.h"
 
-#include "cmMakefile.h"
-#include "cmGlobalGenerator.h"
-#include "cmSystemTools.h"
 #include "cmAlgorithms.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
 
 #include "assert.h"
 

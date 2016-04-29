@@ -12,22 +12,22 @@
 
 #include "cmCPackGeneratorFactory.h"
 
+#include "IFW/cmCPackIFWGenerator.h"
+#include "cmCPack7zGenerator.h"
 #include "cmCPackGenerator.h"
+#include "cmCPackNSISGenerator.h"
+#include "cmCPackSTGZGenerator.h"
 #include "cmCPackTGZGenerator.h"
 #include "cmCPackTXZGenerator.h"
 #include "cmCPackTarBZip2Generator.h"
 #include "cmCPackTarCompressGenerator.h"
 #include "cmCPackZIPGenerator.h"
-#include "cmCPack7zGenerator.h"
-#include "cmCPackSTGZGenerator.h"
-#include "cmCPackNSISGenerator.h"
-#include "IFW/cmCPackIFWGenerator.h"
 
 #ifdef __APPLE__
-#  include "cmCPackDragNDropGenerator.h"
-#  include "cmCPackBundleGenerator.h"
-#  include "cmCPackPackageMakerGenerator.h"
-#  include "cmCPackOSXX11Generator.h"
+#   include "cmCPackBundleGenerator.h"
+#   include "cmCPackDragNDropGenerator.h"
+#   include "cmCPackOSXX11Generator.h"
+#   include "cmCPackPackageMakerGenerator.h"
 #endif
 
 #ifdef __CYGWIN__
@@ -45,8 +45,8 @@
 #  include "WiX/cmCPackWIXGenerator.h"
 #endif
 
-#include "cmCPackLog.h"
 #include "cmAlgorithms.h"
+#include "cmCPackLog.h"
 
 
 //----------------------------------------------------------------------

@@ -11,28 +11,28 @@
 ============================================================================*/
 #include "cmCTestCoverageHandler.h"
 
-#include "cmParsePHPCoverage.h"
-#include "cmParseCoberturaCoverage.h"
-#include "cmParseGTMCoverage.h"
-#include "cmParseCacheCoverage.h"
-#include "cmParseJacocoCoverage.h"
-#include "cmParseDelphiCoverage.h"
-#include "cmParseBlanketJSCoverage.h"
 #include "cmCTest.h"
-#include "cmake.h"
-#include "cmMakefile.h"
-#include "cmSystemTools.h"
 #include "cmGeneratedFileStream.h"
+#include "cmMakefile.h"
+#include "cmParseBlanketJSCoverage.h"
+#include "cmParseCacheCoverage.h"
+#include "cmParseCoberturaCoverage.h"
+#include "cmParseDelphiCoverage.h"
+#include "cmParseGTMCoverage.h"
+#include "cmParseJacocoCoverage.h"
+#include "cmParsePHPCoverage.h"
+#include "cmSystemTools.h"
 #include "cmXMLWriter.h"
+#include "cmake.h"
 
+#include <cmsys/FStream.hxx>
+#include <cmsys/Glob.hxx>
 #include <cmsys/Process.h>
 #include <cmsys/RegularExpression.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/FStream.hxx>
 
-#include <stdlib.h>
-#include <math.h>
 #include <float.h>
+#include <math.h>
+#include <stdlib.h>
 
 #define SAFEDIV(x,y) (((y)!=0)?((x)/(y)):(0))
 

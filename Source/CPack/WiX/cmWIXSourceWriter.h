@@ -17,8 +17,8 @@
 
 #include <cmsys/FStream.hxx>
 
-#include <vector>
 #include <string>
+#include <vector>
 
 /** \class cmWIXSourceWriter
  * \brief Helper class to generate XML WiX source files

@@ -14,8 +14,8 @@
 
 #include "cmStandardIncludes.h"
 
-#include "cmLinkItem.h"
 #include "cmGraphAdjacencyList.h"
+#include "cmLinkItem.h"
 
 #include <queue>
 

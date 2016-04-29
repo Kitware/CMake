@@ -9,9 +9,9 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include <cmsys/SystemTools.hxx>
-#include <cmsys/Process.h>
 #include <cmsys/FStream.hxx>
+#include <cmsys/Process.h>
+#include <cmsys/SystemTools.hxx>
 
 #include <iostream>
 

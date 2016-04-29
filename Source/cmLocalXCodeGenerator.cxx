@@ -12,8 +12,8 @@
 #include "cmLocalXCodeGenerator.h"
 
 #include "cmGlobalXCodeGenerator.h"
-#include "cmSourceFile.h"
 #include "cmMakefile.h"
+#include "cmSourceFile.h"
 
 //----------------------------------------------------------------------------
 cmLocalXCodeGenerator::cmLocalXCodeGenerator(cmGlobalGenerator* gg,

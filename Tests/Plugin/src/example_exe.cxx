@@ -2,8 +2,8 @@
 
 #include <example_exe.h>
 
-#include <kwsys/DynamicLoader.hxx>
 #include <iostream>
+#include <kwsys/DynamicLoader.hxx>
 #include <string>
 
 #include <stdio.h>

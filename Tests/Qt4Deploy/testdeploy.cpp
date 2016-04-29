@@ -1,7 +1,7 @@
 #include <QCoreApplication>
-#include <QSqlDatabase>
-#include <QLibraryInfo>
 #include <QDebug>
+#include <QLibraryInfo>
+#include <QSqlDatabase>
 #include <QStringList>
 
 int main(int argc, char** argv)

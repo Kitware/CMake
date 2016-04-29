@@ -12,23 +12,23 @@
 
 #include "cmCTestUpdateHandler.h"
 
+#include "cmCLocaleEnvironmentScope.h"
 #include "cmCTest.h"
-#include "cmake.h"
-#include "cmMakefile.h"
-#include "cmGlobalGenerator.h"
-#include "cmVersion.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmVersion.h"
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
-#include "cmCLocaleEnvironmentScope.h"
+#include "cmake.h"
 
-#include "cmCTestVC.h"
-#include "cmCTestCVS.h"
-#include "cmCTestSVN.h"
 #include "cmCTestBZR.h"
+#include "cmCTestCVS.h"
 #include "cmCTestGIT.h"
 #include "cmCTestHG.h"
 #include "cmCTestP4.h"
+#include "cmCTestSVN.h"
+#include "cmCTestVC.h"
 
 #include <cmsys/auto_ptr.hxx>
 
@@ -40,9 +40,9 @@
 #include "windows.h"
 #endif
 
-#include <stdlib.h>
-#include <math.h>
 #include <float.h>
+#include <math.h>
+#include <stdlib.h>
 
 //----------------------------------------------------------------------
 static const char* cmCTestUpdateHandlerUpdateStrings[] =

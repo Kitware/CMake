@@ -11,13 +11,13 @@
 ============================================================================*/
 #include "cmDepends.h"
 
+#include "cmFileTimeComparison.h"
+#include "cmGeneratedFileStream.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
-#include "cmFileTimeComparison.h"
-#include <string.h>
 #include <cmsys/FStream.hxx>
+#include <string.h>
 
 //----------------------------------------------------------------------------
 cmDepends::cmDepends(cmLocalGenerator* lg, const char* targetDir):

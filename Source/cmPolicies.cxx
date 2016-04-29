@@ -1,15 +1,15 @@
 #include "cmPolicies.h"
 
-#include "cmake.h"
+#include "cmAlgorithms.h"
 #include "cmMakefile.h"
 #include "cmVersion.h"
 #include "cmVersionMacros.h"
-#include "cmAlgorithms.h"
+#include "cmake.h"
+#include <assert.h>
 #include <ctype.h>
 #include <map>
-#include <set>
 #include <queue>
-#include <assert.h>
+#include <set>
 
 static bool stringToId(const char* input, cmPolicies::PolicyID& pid)
 {

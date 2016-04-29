@@ -11,11 +11,11 @@
 ============================================================================*/
 #include "cmLocalGhsMultiGenerator.h"
 
-#include "cmGlobalGhsMultiGenerator.h"
-#include "cmGeneratorTarget.h"
-#include "cmMakefile.h"
-#include "cmGhsMultiTargetGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
+#include "cmGhsMultiTargetGenerator.h"
+#include "cmGlobalGhsMultiGenerator.h"
+#include "cmMakefile.h"
 
 cmLocalGhsMultiGenerator::cmLocalGhsMultiGenerator(cmGlobalGenerator* gg,
                                                    cmMakefile* mf)

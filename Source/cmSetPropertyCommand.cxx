@@ -11,9 +11,9 @@
 ============================================================================*/
 #include "cmSetPropertyCommand.h"
 
+#include "cmSetSourceFilesPropertiesCommand.h"
 #include "cmSetTargetPropertiesCommand.h"
 #include "cmSetTestsPropertiesCommand.h"
-#include "cmSetSourceFilesPropertiesCommand.h"
 
 
 //----------------------------------------------------------------------------

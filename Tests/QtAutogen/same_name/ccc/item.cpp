@@ -22,5 +22,5 @@ MocTest::go()
 }
 
 // Include own moc files
-#include "moc_item.cpp"
 #include "item.moc"
+#include "moc_item.cpp"

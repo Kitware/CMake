@@ -15,8 +15,8 @@
 
 #include "cmWIXSourceWriter.h"
 
-#include <cmInstalledFile.h>
 #include <CPack/cmCPackLog.h>
+#include <cmInstalledFile.h>
 
 class cmWIXAccessControlList
 {

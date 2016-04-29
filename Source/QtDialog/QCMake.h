@@ -22,13 +22,13 @@
 
 #include <vector>
 
+#include <QAtomicInt>
+#include <QList>
+#include <QMetaType>
 #include <QObject>
 #include <QString>
-#include <QVariant>
-#include <QList>
 #include <QStringList>
-#include <QMetaType>
-#include <QAtomicInt>
+#include <QVariant>
 
 /// struct to represent cmake properties in Qt
 /// Value is of type String or Bool

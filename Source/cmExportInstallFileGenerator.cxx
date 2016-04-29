@@ -11,15 +11,15 @@
 ============================================================================*/
 #include "cmExportInstallFileGenerator.h"
 
+#include "cmAlgorithms.h"
 #include "cmExportSet.h"
 #include "cmExportSetMap.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
-#include "cmLocalGenerator.h"
 #include "cmInstallExportGenerator.h"
 #include "cmInstallTargetGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmTargetExport.h"
-#include "cmAlgorithms.h"
 
 //----------------------------------------------------------------------------
 cmExportInstallFileGenerator

@@ -1,9 +1,9 @@
 
-#include "common.h"
-#include "publicinclude.h"
-#include "interfaceinclude.h"
-#include "relative_dir.h"
 #include "consumer.h"
+#include "common.h"
+#include "interfaceinclude.h"
+#include "publicinclude.h"
+#include "relative_dir.h"
 #ifdef TEST_LANG_DEFINES
   #include "cxx_only.h"
 #endif

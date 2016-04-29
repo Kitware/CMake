@@ -1,18 +1,18 @@
+#include "Aout.h"
+#include "ExtraSources/file1.h"
 #include "cmTestConfigure.h"
 #include "cmTestConfigureEscape.h"
 #include "cmTestGeneratedHeader.h"
 #include "cmVersion.h"
-#include "ExtraSources/file1.h"
-#include "Aout.h"
 #include "file2.h"
 #include "sharedFile.h"
 extern "C" {
 #include "testConly.h"
 }
-#include <vector>
-#include <string>
 #include <iostream>
 #include <string.h>
+#include <string>
+#include <vector>
 
 #include <stdio.h>
 #include <sys/stat.h>

@@ -1,7 +1,7 @@
 #include <assert.h>
-#include <string.h>
-#include <stdio.h>
 #include <lttng/ust-version.h>
+#include <stdio.h>
+#include <string.h>
 
 #ifdef CMAKE_LTTNGUST_HAS_TRACEF
 #include <lttng/tracef.h>

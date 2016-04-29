@@ -11,8 +11,8 @@
 ============================================================================*/
 #include "cmSetTestsPropertiesCommand.h"
 
-#include "cmake.h"
 #include "cmTest.h"
+#include "cmake.h"
 
 // cmSetTestsPropertiesCommand
 bool cmSetTestsPropertiesCommand

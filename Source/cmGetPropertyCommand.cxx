@@ -11,12 +11,12 @@
 ============================================================================*/
 #include "cmGetPropertyCommand.h"
 
-#include "cmake.h"
+#include "cmGlobalGenerator.h"
+#include "cmPropertyDefinition.h"
+#include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmTest.h"
-#include "cmGlobalGenerator.h"
-#include "cmSourceFile.h"
-#include "cmPropertyDefinition.h"
+#include "cmake.h"
 
 //----------------------------------------------------------------------------
 cmGetPropertyCommand::cmGetPropertyCommand()

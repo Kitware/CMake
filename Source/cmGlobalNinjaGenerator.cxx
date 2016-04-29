@@ -12,13 +12,13 @@
 ============================================================================*/
 #include "cmGlobalNinjaGenerator.h"
 
+#include "cmAlgorithms.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
 #include "cmGeneratorTarget.h"
 #include "cmLocalNinjaGenerator.h"
 #include "cmMakefile.h"
 #include "cmVersion.h"
-#include "cmAlgorithms.h"
 
 #include <algorithm>
 #include <assert.h>

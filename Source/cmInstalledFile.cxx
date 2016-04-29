@@ -11,9 +11,9 @@
 ============================================================================*/
 #include "cmInstalledFile.h"
 
-#include "cmSystemTools.h"
-#include "cmMakefile.h"
 #include "cmAlgorithms.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
 
 //----------------------------------------------------------------------------
 cmInstalledFile::cmInstalledFile():

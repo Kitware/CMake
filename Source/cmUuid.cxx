@@ -13,8 +13,8 @@
 
 #include <string.h>
 
-#include <cmsys/MD5.h>
 #include "cm_sha2.h"
+#include <cmsys/MD5.h>
 
 cmUuid::cmUuid()
 {

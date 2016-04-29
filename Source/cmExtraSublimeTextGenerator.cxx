@@ -12,7 +12,6 @@
 ============================================================================*/
 #include "cmExtraSublimeTextGenerator.h"
 
-#include "cmake.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
@@ -21,6 +20,7 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
 
 #include <cmsys/SystemTools.hxx>
 

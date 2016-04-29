@@ -1,9 +1,9 @@
-#include <qapplication.h>
 #include "qtwrapping.h"
+#include <qapplication.h>
 
 #ifndef _WIN32
-# include <stdlib.h>
 # include <stdio.h>
+# include <stdlib.h>
 #endif
 
 int main(int argc, char *argv[])

@@ -11,14 +11,14 @@
 ============================================================================*/
 #include "cmIfCommand.h"
 
-#include "cmStringCommand.h"
 #include "cmOutputConverter.h"
+#include "cmStringCommand.h"
 
 #include "cmConditionEvaluator.h"
 
-#include <stdlib.h> // required for atof
-#include <list>
 #include <cmsys/RegularExpression.hxx>
+#include <list>
+#include <stdlib.h> // required for atof
 
 
 static std::string cmIfCommandError(

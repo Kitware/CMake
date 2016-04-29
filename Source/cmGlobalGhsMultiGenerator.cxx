@@ -11,13 +11,13 @@
 ============================================================================*/
 #include "cmGlobalGhsMultiGenerator.h"
 
+#include "cmGeneratedFileStream.h"
+#include "cmGhsMultiTargetGenerator.h"
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
 #include "cmVersion.h"
-#include "cmGeneratedFileStream.h"
-#include "cmGhsMultiTargetGenerator.h"
-#include <cmsys/SystemTools.hxx>
 #include <cmAlgorithms.h>
+#include <cmsys/SystemTools.hxx>
 
 const char *cmGlobalGhsMultiGenerator::FILE_EXTENSION = ".gpj";
 const char *cmGlobalGhsMultiGenerator::DEFAULT_MAKE_PROGRAM = "gbuild";

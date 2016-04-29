@@ -11,11 +11,11 @@
 ============================================================================*/
 #include "cmLocalVisualStudioGenerator.h"
 
+#include "cmCustomCommandGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
-#include "cmCustomCommandGenerator.h"
 #include "windows.h"
 
 //----------------------------------------------------------------------------

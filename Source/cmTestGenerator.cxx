@@ -12,8 +12,8 @@
 #include "cmTestGenerator.h"
 
 #include "cmGeneratorExpression.h"
-#include "cmOutputConverter.h"
 #include "cmLocalGenerator.h"
+#include "cmOutputConverter.h"
 #include "cmSystemTools.h"
 #include "cmTest.h"
 

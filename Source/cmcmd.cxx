@@ -11,20 +11,20 @@
 ============================================================================*/
 #include "cmcmd.h"
 
-#include "cmMakefile.h"
-#include "cmLocalGenerator.h"
+#include "cmAlgorithms.h"
 #include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
+#include "cmMakefile.h"
 #include "cmQtAutoGenerators.h"
 #include "cmVersion.h"
-#include "cmAlgorithms.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmDependsFortran.h" // For -E cmake_copy_f90_mod callback.
 #endif
 
 #include <cmsys/Directory.hxx>
-#include <cmsys/Process.h>
 #include <cmsys/FStream.hxx>
+#include <cmsys/Process.h>
 #include <cmsys/Terminal.h>
 
 #if defined(CMAKE_HAVE_VS_GENERATORS)

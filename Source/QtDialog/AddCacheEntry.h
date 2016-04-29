@@ -15,9 +15,9 @@
 
 #include "QCMake.h"
 
-#include <QWidget>
 #include <QCheckBox>
 #include <QStringList>
+#include <QWidget>
 
 #include "ui_AddCacheEntry.h"
 

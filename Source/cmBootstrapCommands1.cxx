@@ -13,7 +13,6 @@
 // that CMake knows about at compile time.
 // This is sort of a boot strapping approach since you would
 // like to have CMake to build CMake.
-#include "cmCommands.h"
 #include "cmAddCustomCommandCommand.cxx"
 #include "cmAddCustomTargetCommand.cxx"
 #include "cmAddDefinitionsCommand.cxx"
@@ -27,6 +26,7 @@
 #include "cmCMakeMinimumRequired.cxx"
 #include "cmCMakePolicyCommand.cxx"
 #include "cmCommandArgumentsHelper.cxx"
+#include "cmCommands.h"
 #include "cmConfigureFileCommand.cxx"
 #include "cmContinueCommand.cxx"
 #include "cmCoreTryCompile.cxx"
@@ -42,9 +42,9 @@
 #include "cmEndWhileCommand.cxx"
 #include "cmExecProgramCommand.cxx"
 #include "cmExecuteProcessCommand.cxx"
+#include "cmFileCommand.cxx"
 #include "cmFindBase.cxx"
 #include "cmFindCommon.cxx"
-#include "cmFileCommand.cxx"
 #include "cmFindFileCommand.cxx"
 #include "cmFindLibraryCommand.cxx"
 #include "cmFindPackageCommand.cxx"
@@ -52,9 +52,9 @@
 #include "cmFindProgramCommand.cxx"
 #include "cmForEachCommand.cxx"
 #include "cmFunctionCommand.cxx"
+#include "cmParseArgumentsCommand.cxx"
 #include "cmPathLabel.cxx"
 #include "cmSearchPath.cxx"
-#include "cmParseArgumentsCommand.cxx"
 
 void GetBootstrapCommands1(std::vector<cmCommand*>& commands)
 {

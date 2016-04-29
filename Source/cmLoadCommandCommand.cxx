@@ -11,8 +11,8 @@
 ============================================================================*/
 #include "cmLoadCommandCommand.h"
 
-#include "cmCPluginAPI.h"
 #include "cmCPluginAPI.cxx"
+#include "cmCPluginAPI.h"
 #include "cmDynamicLoader.h"
 
 #include <cmsys/DynamicLoader.hxx>

@@ -11,16 +11,16 @@
 ============================================================================*/
 #include "cmLocalUnixMakefileGenerator3.h"
 
+#include "cmAlgorithms.h"
+#include "cmCustomCommandGenerator.h"
+#include "cmFileTimeComparison.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmMakefileTargetGenerator.h"
 #include "cmSourceFile.h"
-#include "cmake.h"
 #include "cmVersion.h"
-#include "cmFileTimeComparison.h"
-#include "cmCustomCommandGenerator.h"
-#include "cmAlgorithms.h"
+#include "cmake.h"
 
 // Include dependency scanners for supported languages.  Only the
 // C/C++ scanner is needed for bootstrapping CMake.
@@ -30,11 +30,11 @@
 # include "cmDependsJava.h"
 #endif
 
-#include <cmsys/auto_ptr.hxx>
 #include <cmsys/Terminal.h>
+#include <cmsys/auto_ptr.hxx>
 
-#include <queue>
 #include <algorithm>
+#include <queue>
 
 //----------------------------------------------------------------------------
 // Escape special characters in Makefile dependency lines

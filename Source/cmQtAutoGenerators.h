@@ -17,9 +17,9 @@
 #include "cmStandardIncludes.h"
 
 #include <list>
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
 class cmMakefile;
 

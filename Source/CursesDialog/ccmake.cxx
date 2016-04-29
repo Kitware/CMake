@@ -11,9 +11,9 @@
 ============================================================================*/
 #include "cmCursesStandardIncludes.h"
 
+#include "../cmDocumentation.h"
 #include "../cmSystemTools.h"
 #include "../cmake.h"
-#include "../cmDocumentation.h"
 
 #include <signal.h>
 #include <sys/ioctl.h>

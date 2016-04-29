@@ -16,8 +16,8 @@
 #include "cmCTestTestHandler.h"
 
 #include "cmListFileCache.h"
-#include <vector>
 #include <string>
+#include <vector>
 
 class cmMakefile;
 class cmXMLWriter;

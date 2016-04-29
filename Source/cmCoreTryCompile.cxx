@@ -11,11 +11,11 @@
 ============================================================================*/
 #include "cmCoreTryCompile.h"
 
-#include "cmake.h"
-#include "cmOutputConverter.h"
-#include "cmGlobalGenerator.h"
 #include "cmAlgorithms.h"
 #include "cmExportTryCompileFileGenerator.h"
+#include "cmGlobalGenerator.h"
+#include "cmOutputConverter.h"
+#include "cmake.h"
 #include <cmsys/Directory.hxx>
 
 #include <assert.h>

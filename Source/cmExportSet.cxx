@@ -12,9 +12,9 @@
 
 #include "cmExportSet.h"
 
-#include "cmTargetExport.h"
 #include "cmAlgorithms.h"
 #include "cmLocalGenerator.h"
+#include "cmTargetExport.h"
 
 cmExportSet::~cmExportSet()
 {

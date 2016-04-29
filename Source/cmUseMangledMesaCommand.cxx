@@ -13,8 +13,8 @@
 
 #include "cmSystemTools.h"
 
-#include <cmsys/RegularExpression.hxx>
 #include <cmsys/FStream.hxx>
+#include <cmsys/RegularExpression.hxx>
 
 bool cmUseMangledMesaCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)

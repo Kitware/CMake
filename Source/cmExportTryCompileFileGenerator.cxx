@@ -13,9 +13,9 @@
 #include "cmExportTryCompileFileGenerator.h"
 
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
-#include "cmGeneratorExpressionDAGChecker.h"
 
 //----------------------------------------------------------------------------
 cmExportTryCompileFileGenerator::cmExportTryCompileFileGenerator(

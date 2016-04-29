@@ -15,8 +15,8 @@
 
 #include "cmWIXSourceWriter.h"
 
-#include "cmWIXShortcut.h"
 #include "cmWIXPatch.h"
+#include "cmWIXShortcut.h"
 
 #include <CPack/cmCPackGenerator.h>
 

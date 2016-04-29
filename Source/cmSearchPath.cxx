@@ -11,8 +11,8 @@
 ============================================================================*/
 #include "cmSearchPath.h"
 
-#include "cmFindCommon.h"
 #include "cmAlgorithms.h"
+#include "cmFindCommon.h"
 
 //----------------------------------------------------------------------------
 cmSearchPath::cmSearchPath(cmFindCommon* findCmd)

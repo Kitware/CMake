@@ -12,9 +12,9 @@
 #include "cmListFileCache.h"
 
 #include "cmListFileLexer.h"
+#include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmSystemTools.h"
-#include "cmMakefile.h"
 #include "cmVersion.h"
 
 #include <cmsys/RegularExpression.hxx>

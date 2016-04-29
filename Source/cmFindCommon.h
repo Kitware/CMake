@@ -13,8 +13,8 @@
 #define cmFindCommon_h
 
 #include "cmCommand.h"
-#include "cmSearchPath.h"
 #include "cmPathLabel.h"
+#include "cmSearchPath.h"
 
 /** \class cmFindCommon
  * \brief Base class for FIND_XXX implementations.

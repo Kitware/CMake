@@ -18,8 +18,8 @@
 #include "cmWIXPatch.h"
 #include "cmWIXShortcut.h"
 
-#include <string>
 #include <map>
+#include <string>
 
 class cmWIXSourceWriter;
 class cmWIXDirectoriesSourceWriter;

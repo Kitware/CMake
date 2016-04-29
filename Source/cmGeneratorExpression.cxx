@@ -15,10 +15,10 @@
 #include "cmAlgorithms.h"
 #include "cmSystemTools.h"
 
+#include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionLexer.h"
 #include "cmGeneratorExpressionParser.h"
-#include "cmGeneratorExpressionDAGChecker.h"
 
 //----------------------------------------------------------------------------
 cmGeneratorExpression::cmGeneratorExpression(

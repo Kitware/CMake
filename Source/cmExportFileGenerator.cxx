@@ -11,22 +11,22 @@
 ============================================================================*/
 #include "cmExportFileGenerator.h"
 
+#include "cmAlgorithms.h"
+#include "cmComputeLinkInformation.h"
 #include "cmExportSet.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallExportGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmOutputConverter.h"
 #include "cmSystemTools.h"
 #include "cmTargetExport.h"
 #include "cmVersion.h"
-#include "cmComputeLinkInformation.h"
-#include "cmAlgorithms.h"
-#include "cmOutputConverter.h"
 
-#include <cmsys/auto_ptr.hxx>
-#include <cmsys/FStream.hxx>
 #include <assert.h>
+#include <cmsys/FStream.hxx>
+#include <cmsys/auto_ptr.hxx>
 
 //----------------------------------------------------------------------------
 static std::string cmExportFileGeneratorEscape(std::string const& str)

@@ -11,22 +11,22 @@
 ============================================================================*/
 #include "cmTarget.h"
 
-#include "cmake.h"
-#include "cmMakefile.h"
-#include "cmSourceFile.h"
-#include "cmOutputConverter.h"
-#include "cmGlobalGenerator.h"
+#include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
-#include "cmListFileCache.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
-#include "cmAlgorithms.h"
+#include "cmGlobalGenerator.h"
+#include "cmListFileCache.h"
+#include "cmMakefile.h"
+#include "cmOutputConverter.h"
+#include "cmSourceFile.h"
+#include "cmake.h"
+#include <assert.h>
 #include <cmsys/RegularExpression.hxx>
+#include <errno.h>
 #include <map>
 #include <set>
 #include <stdlib.h> // required for atof
-#include <assert.h>
-#include <errno.h>
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include <cmsys/hash_set.hxx>
 #define UNORDERED_SET cmsys::hash_set

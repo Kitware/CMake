@@ -1,6 +1,6 @@
-#include <string.h>
-#include <stdio.h>
 #include <ctype.h>
+#include <stdio.h>
+#include <string.h>
 
 #ifndef BUILD_CONFIG_NAME
 # error "BUILD_CONFIG_NAME not defined!"

@@ -12,12 +12,12 @@
 
 #include "QCMake.h"
 
-#include <QDir>
 #include <QCoreApplication>
+#include <QDir>
 
+#include "cmExternalMakefileProjectGenerator.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
-#include "cmExternalMakefileProjectGenerator.h"
 
 #ifdef Q_OS_WIN
 #include "qt_windows.h"  // For SetErrorMode

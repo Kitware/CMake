@@ -11,9 +11,9 @@
 ============================================================================*/
 #include "cmCryptoHash.h"
 
-#include <cmsys/MD5.h>
-#include <cmsys/FStream.hxx>
 #include "cm_sha2.h"
+#include <cmsys/FStream.hxx>
+#include <cmsys/MD5.h>
 
 //----------------------------------------------------------------------------
 cmsys::auto_ptr<cmCryptoHash> cmCryptoHash::New(const char* algo)

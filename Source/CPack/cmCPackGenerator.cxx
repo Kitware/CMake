@@ -12,18 +12,18 @@
 
 #include "cmCPackGenerator.h"
 
-#include "cmMakefile.h"
-#include "cmCPackLog.h"
-#include "cmake.h"
-#include "cmGlobalGenerator.h"
-#include "cmGeneratedFileStream.h"
 #include "cmCPackComponentGroup.h"
+#include "cmCPackLog.h"
+#include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
 #include "cmXMLSafe.h"
+#include "cmake.h"
 
-#include <cmsys/SystemTools.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/FStream.hxx>
 #include <algorithm>
+#include <cmsys/FStream.hxx>
+#include <cmsys/Glob.hxx>
+#include <cmsys/SystemTools.hxx>
 #include <list>
 
 #if defined(__HAIKU__)

@@ -12,8 +12,8 @@
 
 #include "cmConditionEvaluator.h"
 
-#include "cmOutputConverter.h"
 #include "cmAlgorithms.h"
+#include "cmOutputConverter.h"
 
 static std::string const keyAND = "AND";
 static std::string const keyCOMMAND = "COMMAND";

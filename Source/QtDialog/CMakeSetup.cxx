@@ -11,19 +11,19 @@
 ============================================================================*/
 #include "QCMake.h"  // include to disable MS warnings
 
+#include "CMakeSetupDialog.h"
+#include "cmAlgorithms.h"
+#include "cmDocumentation.h"
+#include "cmVersion.h"
+#include "cmake.h"
 #include <QApplication>
 #include <QDir>
-#include <QTranslator>
 #include <QLocale>
 #include <QTextCodec>
-#include "CMakeSetupDialog.h"
-#include "cmDocumentation.h"
-#include "cmake.h"
-#include "cmVersion.h"
-#include "cmAlgorithms.h"
+#include <QTranslator>
 #include <cmsys/CommandLineArguments.hxx>
-#include <cmsys/SystemTools.hxx>
 #include <cmsys/Encoding.hxx>
+#include <cmsys/SystemTools.hxx>
 
 //----------------------------------------------------------------------------
 static const char * cmDocumentationName[][2] =

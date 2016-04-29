@@ -1,5 +1,5 @@
-#include <xercesc/util/PlatformUtils.hpp>
 #include <xalanc/XalanTransformer/XalanTransformer.hpp>
+#include <xercesc/util/PlatformUtils.hpp>
 
 int main()
 {

@@ -11,9 +11,9 @@
 ============================================================================*/
 #include "cmCTestConfigureCommand.h"
 
-#include "cmGlobalGenerator.h"
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
+#include "cmGlobalGenerator.h"
 
 cmCTestConfigureCommand::cmCTestConfigureCommand()
 {

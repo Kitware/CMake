@@ -4,8 +4,8 @@
 
 #include "libc_export.h"
 
-#include <QObject>
 #include "libB.h"
+#include <QObject>
 
 class LIBC_EXPORT LibC : public QObject
 {

@@ -14,8 +14,8 @@
 
 #include "cmListFileCache.h"
 
-#include <set>
 #include <map>
+#include <set>
 #include <string>
 
 class cmGeneratorTarget;

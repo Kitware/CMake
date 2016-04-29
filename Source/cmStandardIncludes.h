@@ -35,23 +35,23 @@
 #include <cm_kwiml.h>
 
 #include <fstream>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 
 // we must have stl with the standard include style
-#include <vector>
-#include <string>
-#include <iterator>
 #include <algorithm>
 #include <functional>
+#include <iterator>
 #include <map>
 #include <set>
+#include <string>
+#include <vector>
 
 // include the "c" string header
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #if defined( _MSC_VER )
 typedef unsigned short mode_t;

@@ -13,10 +13,10 @@
 #include "QCMakeWidgets.h"
 
 #include <QDirModel>
-#include <QFileInfo>
 #include <QFileDialog>
-#include <QToolButton>
+#include <QFileInfo>
 #include <QResizeEvent>
+#include <QToolButton>
 
 QCMakeFileEditor::QCMakeFileEditor(QWidget* p, const QString& var)
   : QLineEdit(p), Variable(var)

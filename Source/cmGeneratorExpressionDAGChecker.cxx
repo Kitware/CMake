@@ -12,8 +12,8 @@
 
 #include "cmGeneratorExpressionDAGChecker.h"
 
-#include "cmLocalGenerator.h"
 #include "cmAlgorithms.h"
+#include "cmLocalGenerator.h"
 
 //----------------------------------------------------------------------------
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(

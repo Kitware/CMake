@@ -15,8 +15,8 @@
 #include "cmCommand.h"
 #include "cmGeneratorExpression.h"
 
-#include "cmVersionMacros.h"
 #include "cmVersion.h"
+#include "cmVersionMacros.h"
 
 #define STRINGIFY_HELPER(X) #X
 #define STRINGIFY(X) STRINGIFY_HELPER(X)

@@ -14,8 +14,8 @@
 
 #include <cmsys/Configure.hxx>
 
-#include <string>
 #include <iosfwd>
+#include <string>
 
 /** \class cmXMLSafe
  * \brief Write strings to XML with proper escapes

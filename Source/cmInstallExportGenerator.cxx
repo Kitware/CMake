@@ -13,12 +13,12 @@
 
 #include <stdio.h>
 
-#include "cmake.h"
-#include "cmInstallTargetGenerator.h"
 #include "cmGeneratedFileStream.h"
-#include "cmMakefile.h"
-#include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
+#include "cmInstallTargetGenerator.h"
+#include "cmLocalGenerator.h"
+#include "cmMakefile.h"
+#include "cmake.h"
 
 #include "cmInstallFilesGenerator.h"
 

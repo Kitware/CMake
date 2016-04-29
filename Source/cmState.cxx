@@ -11,12 +11,12 @@
 ============================================================================*/
 #include "cmState.h"
 
-#include "cmake.h"
-#include "cmVersion.h"
+#include "cmAlgorithms.h"
 #include "cmCacheManager.h"
 #include "cmCommand.h"
-#include "cmAlgorithms.h"
 #include "cmDefinitions.h"
+#include "cmVersion.h"
+#include "cmake.h"
 
 #include <assert.h>
 

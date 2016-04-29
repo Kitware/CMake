@@ -11,12 +11,12 @@
 ============================================================================*/
 #include "cmExportCommand.h"
 
-#include "cmGlobalGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
 #include "cmake.h"
 
-#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Encoding.hxx>
+#include <cmsys/RegularExpression.hxx>
 
 #include "cmExportBuildFileGenerator.h"
 

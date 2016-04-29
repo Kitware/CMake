@@ -11,37 +11,37 @@
 ============================================================================*/
 #include "cmMakefile.h"
 
-#include "cmVersion.h"
 #include "cmCommand.h"
+#include "cmCommandArgumentParserHelper.h"
+#include "cmCommands.h"
+#include "cmFunctionBlocker.h"
+#include "cmGeneratorExpression.h"
+#include "cmGeneratorExpressionEvaluationFile.h"
+#include "cmGlobalGenerator.h"
+#include "cmListFileCache.h"
+#include "cmOutputConverter.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
-#include "cmSystemTools.h"
-#include "cmGlobalGenerator.h"
-#include "cmCommands.h"
 #include "cmState.h"
-#include "cmOutputConverter.h"
-#include "cmFunctionBlocker.h"
-#include "cmGeneratorExpressionEvaluationFile.h"
-#include "cmListFileCache.h"
-#include "cmCommandArgumentParserHelper.h"
-#include "cmGeneratorExpression.h"
+#include "cmSystemTools.h"
 #include "cmTest.h"
+#include "cmVersion.h"
 #ifdef CMAKE_BUILD_WITH_CMAKE
 #  include "cmVariableWatch.h"
 #endif
+#include "cmAlgorithms.h"
 #include "cmInstallGenerator.h"
 #include "cmTestGenerator.h"
-#include "cmAlgorithms.h"
 #include "cmake.h"
 #include <stdlib.h> // required for atoi
 
-#include <cmsys/RegularExpression.hxx>
 #include <cmsys/FStream.hxx>
+#include <cmsys/RegularExpression.hxx>
 #include <cmsys/auto_ptr.hxx>
 
-#include <list>
-#include <ctype.h> // for isspace
 #include <assert.h>
+#include <ctype.h> // for isspace
+#include <list>
 
 // default is not to be building executables
 cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,

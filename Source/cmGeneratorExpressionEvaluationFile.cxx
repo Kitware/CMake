@@ -12,11 +12,11 @@
 
 #include "cmGeneratorExpressionEvaluationFile.h"
 
-#include "cmMakefile.h"
-#include "cmLocalGenerator.h"
-#include "cmGlobalGenerator.h"
-#include "cmSourceFile.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
+#include "cmMakefile.h"
+#include "cmSourceFile.h"
 #include <cmsys/FStream.hxx>
 
 #include <assert.h>

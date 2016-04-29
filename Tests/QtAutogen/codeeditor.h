@@ -41,8 +41,8 @@
  #ifndef CODEEDITOR_H
  #define CODEEDITOR_H
 
- #include <QPlainTextEdit>
  #include <QObject>
+ #include <QPlainTextEdit>
 
  class QPaintEvent;
  class QResizeEvent;

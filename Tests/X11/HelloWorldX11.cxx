@@ -19,8 +19,8 @@
 
 /* include the X library headers */
 #include <X11/Xlib.h>
-#include <X11/Xutil.h>
 #include <X11/Xos.h>
+#include <X11/Xutil.h>
 
 class Main {
 

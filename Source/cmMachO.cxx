@@ -16,8 +16,8 @@
 #include <cmsys/FStream.hxx>
 
 // Include the Mach-O format information system header.
-#include <mach-o/loader.h>
 #include <mach-o/fat.h>
+#include <mach-o/loader.h>
 
 /**
 

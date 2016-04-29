@@ -11,8 +11,8 @@
 ============================================================================*/
 #include "cmCTestCurl.h"
 
-#include "cmSystemTools.h"
 #include "cmCTest.h"
+#include "cmSystemTools.h"
 
 cmCTestCurl::cmCTestCurl(cmCTest* ctest)
 {

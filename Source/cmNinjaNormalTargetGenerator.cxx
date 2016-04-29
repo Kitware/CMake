@@ -12,18 +12,18 @@
 ============================================================================*/
 #include "cmNinjaNormalTargetGenerator.h"
 
-#include "cmLocalNinjaGenerator.h"
-#include "cmGlobalNinjaGenerator.h"
-#include "cmSourceFile.h"
+#include "cmAlgorithms.h"
+#include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
+#include "cmGlobalNinjaGenerator.h"
+#include "cmLocalNinjaGenerator.h"
 #include "cmMakefile.h"
 #include "cmOSXBundleGenerator.h"
-#include "cmGeneratorTarget.h"
-#include "cmCustomCommandGenerator.h"
-#include "cmAlgorithms.h"
+#include "cmSourceFile.h"
 
-#include <assert.h>
 #include <algorithm>
+#include <assert.h>
 #include <limits>
 
 #ifndef _WIN32

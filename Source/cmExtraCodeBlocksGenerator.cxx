@@ -12,14 +12,14 @@
 ============================================================================*/
 #include "cmExtraCodeBlocksGenerator.h"
 
+#include "cmGeneratedFileStream.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
-#include "cmake.h"
 #include "cmSourceFile.h"
-#include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
+#include "cmake.h"
 
 #include <cmsys/SystemTools.hxx>
 

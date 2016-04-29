@@ -11,11 +11,11 @@
 ============================================================================*/
 #include "cmDependsC.h"
 
+#include "cmAlgorithms.h"
 #include "cmFileTimeComparison.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
-#include "cmAlgorithms.h"
 #include <cmsys/FStream.hxx>
 
 #include <ctype.h> // isspace

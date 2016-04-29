@@ -16,8 +16,8 @@
 
 #include <assert.h>
 
-#include <string.h> /* strlen */
 #include <ctype.h>  /* isalpha */
+#include <string.h> /* strlen */
 
 cmOutputConverter::cmOutputConverter(cmState::Snapshot snapshot)
   : StateSnapshot(snapshot), LinkScriptShell(false)
