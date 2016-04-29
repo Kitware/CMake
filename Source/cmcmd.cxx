@@ -382,12 +382,14 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       if (!tidy.empty())
         {
         // Construct the clang-tidy command line by taking what was given
-        // and adding all the arguments we give to the compiler.
+        // and adding our compiler command line.  The clang-tidy tool will
+        // automatically skip over the compiler itself and extract the
+        // options.
         std::vector<std::string> tidy_cmd;
         cmSystemTools::ExpandListArgument(tidy, tidy_cmd, true);
         tidy_cmd.push_back(sourceFile);
         tidy_cmd.push_back("--");
-        tidy_cmd.insert(tidy_cmd.end(), orig_cmd.begin()+1, orig_cmd.end());
+        tidy_cmd.insert(tidy_cmd.end(), orig_cmd.begin(), orig_cmd.end());
 
         // Run the tidy command line.  Capture its stdout and hide its stderr.
         std::string stdOut;
