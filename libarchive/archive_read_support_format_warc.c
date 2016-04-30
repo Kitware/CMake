@@ -418,10 +418,11 @@ deconst(const void *c)
 }
 
 static char*
-xmemmem(const char *hay, const size_t hz, const char *ndl, const size_t nz)
+xmemmem(const char *hay, const size_t haysize,
+	const char *needle, const size_t needlesize)
 {
-	const char *const eoh = hay + hz;
-	const char *const eon = ndl + nz;
+	const char *const eoh = hay + haysize;
+	const char *const eon = needle + needlesize;
 	const char *hp;
 	const char *np;
 	const char *cand;
@@ -433,9 +434,9 @@ xmemmem(const char *hay, const size_t hz, const char *ndl, const size_t nz)
          * a 0-sized needle is defined to be found anywhere in haystack
          * then run strchr() to find a candidate in HAYSTACK (i.e. a portion
          * that happens to begin with *NEEDLE) */
-	if (nz == 0UL) {
+	if (needlesize == 0UL) {
 		return deconst(hay);
-	} else if ((hay = memchr(hay, *ndl, hz)) == NULL) {
+	} else if ((hay = memchr(hay, *needle, haysize)) == NULL) {
 		/* trivial */
 		return NULL;
 	}
@@ -444,11 +445,11 @@ xmemmem(const char *hay, const size_t hz, const char *ndl, const size_t nz)
 	 * guaranteed to be at least one character long.  Now computes the sum
 	 * of characters values of needle together with the sum of the first
 	 * needle_len characters of haystack. */
-	for (hp = hay + 1U, np = ndl + 1U, hsum = *hay, nsum = *hay, eqp = 1U;
+	for (hp = hay + 1U, np = needle + 1U, hsum = *hay, nsum = *hay, eqp = 1U;
 	     hp < eoh && np < eon;
 	     hsum ^= *hp, nsum ^= *np, eqp &= *hp == *np, hp++, np++);
 
-	/* HP now references the (NZ + 1)-th character. */
+	/* HP now references the (NEEDLESIZE + 1)-th character. */
 	if (np < eon) {
 		/* haystack is smaller than needle, :O */
 		return NULL;
@@ -464,10 +465,10 @@ xmemmem(const char *hay, const size_t hz, const char *ndl, const size_t nz)
 		hsum ^= *hp;
 
 		/* Since the sum of the characters is already known to be
-		 * equal at that point, it is enough to check just NZ - 1
+		 * equal at that point, it is enough to check just NEEDLESIZE - 1
 		 * characters for equality,
 		 * also CAND is by design < HP, so no need for range checks */
-		if (hsum == nsum && memcmp(cand, ndl, nz - 1U) == 0) {
+		if (hsum == nsum && memcmp(cand, needle, needlesize - 1U) == 0) {
 			return deconst(cand);
 		}
 	}

@@ -34,6 +34,7 @@ SET(libarchive_SOURCES
   archive_entry_strmode.c
   archive_entry_xattr.c
   archive_getdate.c
+  archive_getdate.h
   archive_hmac.c
   archive_hmac_private.h
   archive_match.c

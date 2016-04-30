@@ -1115,7 +1115,7 @@ write_mtree_entry_tree(struct archive_write *a)
 	do {
 		if (mtree->output_global_set) {
 			/*
-			 * Collect attribute infomation to know which value
+			 * Collect attribute information to know which value
 			 * is frequently used among the children.
 			 */
 			attr_counter_set_reset(mtree);

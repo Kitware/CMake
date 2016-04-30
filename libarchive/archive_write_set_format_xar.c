@@ -1877,6 +1877,11 @@ xar_free(struct archive_write *a)
 	struct xar *xar;
 
 	xar = (struct xar *)a->format_data;
+
+	/* Close the temporary file. */
+	if (xar->temp_fd >= 0)
+		close(xar->temp_fd);
+
 	archive_string_free(&(xar->cur_dirstr));
 	archive_string_free(&(xar->tstr));
 	archive_string_free(&(xar->vstr));

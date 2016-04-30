@@ -170,8 +170,6 @@ typedef unsigned char uint8_t;
 /* Define intmax_t and uintmax_t if they are not already defined. */
 #if !defined(HAVE_INTMAX_T)
 typedef int64_t intmax_t;
-#define INTMAX_MIN INT64_MIN
-#define INTMAX_MAX INT64_MAX
 #endif
 
 #if !defined(HAVE_UINTMAX_T)
@@ -364,6 +362,14 @@ typedef uint64_t uintmax_t;
 /* Define to 1 if you have the `cygwin_conv_path' function. */
 #cmakedefine HAVE_CYGWIN_CONV_PATH 1
 
+/* Define to 1 if you have the declaration of `INT32_MAX', and to 0 if you
+   don't. */
+#cmakedefine HAVE_DECL_INT32_MAX 1
+
+/* Define to 1 if you have the declaration of `INT32_MIN', and to 0 if you
+   don't. */
+#cmakedefine HAVE_DECL_INT32_MIN 1
+
 /* Define to 1 if you have the declaration of `INT64_MAX', and to 0 if you
    don't. */
 #cmakedefine HAVE_DECL_INT64_MAX 1
@@ -371,6 +377,14 @@ typedef uint64_t uintmax_t;
 /* Define to 1 if you have the declaration of `INT64_MIN', and to 0 if you
    don't. */
 #cmakedefine HAVE_DECL_INT64_MIN 1
+
+/* Define to 1 if you have the declaration of `INTMAX_MAX', and to 0 if you
+   don't. */
+#cmakedefine HAVE_DECL_INTMAX_MAX 1
+
+/* Define to 1 if you have the declaration of `INTMAX_MIN', and to 0 if you
+   don't. */
+#cmakedefine HAVE_DECL_INTMAX_MIN 1
 
 /* Define to 1 if you have the declaration of `SIZE_MAX', and to 0 if you
    don't. */
@@ -391,6 +405,10 @@ typedef uint64_t uintmax_t;
 /* Define to 1 if you have the declaration of `UINT64_MAX', and to 0 if you
    don't. */
 #cmakedefine HAVE_DECL_UINT64_MAX 1
+
+/* Define to 1 if you have the declaration of `UINTMAX_MAX', and to 0 if you
+   don't. */
+#cmakedefine HAVE_DECL_UINTMAX_MAX 1
 
 /* Define to 1 if you have the <direct.h> header file. */
 #cmakedefine HAVE_DIRECT_H 1
@@ -732,6 +750,12 @@ typedef uint64_t uintmax_t;
 
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 #cmakedefine HAVE_NDIR_H 1
+
+/* Define to 1 if you have the <nettle/aes.h> header file. */
+#cmakedefine HAVE_NETTLE_AES_H 1
+
+/* Define to 1 if you have the <nettle/hmac.h> header file. */
+#cmakedefine HAVE_NETTLE_HMAC_H 1
 
 /* Define to 1 if you have the <nettle/md5.h> header file. */
 #cmakedefine HAVE_NETTLE_MD5_H 1
@@ -1147,7 +1171,11 @@ typedef uint64_t uintmax_t;
 /* Define for large files, on AIX-style hosts. */
 #cmakedefine _LARGE_FILES ${_LARGE_FILES}
 
-/* Define for Windows to use Windows 2000+ APIs. */
+/* Define to control Windows SDK version */
+#ifndef NTDDI_VERSION
+#cmakedefine NTDDI_VERSION ${NTDDI_VERSION}
+#endif // NTDDI_VERSION
+
 #ifndef _WIN32_WINNT
 #cmakedefine _WIN32_WINNT ${_WIN32_WINNT}
 #endif // _WIN32_WINNT

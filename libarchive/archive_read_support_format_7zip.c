@@ -1201,7 +1201,7 @@ init_decompression(struct archive_read *a, struct _7zip *zip,
 			}
 			archive_set_error(&a->archive, err,
 			    "Internal error initializing decompressor: %s",
-			    detail == NULL ? "??" : detail);
+			    detail != NULL ? detail : "??");
 			zip->bzstream_valid = 0;
 			return (ARCHIVE_FAILED);
 		}

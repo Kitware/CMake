@@ -40,6 +40,7 @@ __FBSDID("$FreeBSD$");
 #include "archive.h"
 #include "archive_private.h"
 #include "archive_entry.h"
+#include "archive_getdate.h"
 #include "archive_pathmatch.h"
 #include "archive_rb.h"
 #include "archive_string.h"
@@ -184,7 +185,6 @@ static int	time_excluded(struct archive_match *,
 		    struct archive_entry *);
 static int	validate_time_flag(struct archive *, int, const char *);
 
-time_t __archive_get_date(time_t now, const char *);
 #define get_date __archive_get_date
 
 static const struct archive_rb_tree_ops rb_ops_mbs = {
