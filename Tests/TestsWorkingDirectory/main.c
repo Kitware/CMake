@@ -38,8 +38,8 @@ static const char* Getcwd(char* buf, unsigned int len)
 }
 
 #else
-#include <sys/types.h>
 #include <fcntl.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 static const char* Getcwd(char* buf, unsigned int len)
