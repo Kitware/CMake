@@ -11,8 +11,8 @@
 ============================================================================*/
 #include "cmExprParserHelper.h"
 
-#include "cmSystemTools.h"
 #include "cmMakefile.h"
+#include "cmSystemTools.h"
 
 #include "cmExprLexer.h"
 

@@ -17,8 +17,8 @@
 
 #include <cmXMLParser.h>
 
-#include <map>
 #include <list>
+#include <map>
 
 struct cmWIXPatchNode
 {
