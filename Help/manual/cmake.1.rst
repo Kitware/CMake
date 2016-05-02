@@ -204,7 +204,10 @@ Available commands are:
   silently ignored.
 
 ``md5sum <file>...``
-  Compute md5sum of files.
+  Create MD5 checksum of files in ``md5sum`` compatible format::
+
+     351abe79cd3800b38cdfb25d45015a15  file1.txt
+     052f86c15bbde68af55c7f7b340ab639  file2.txt
 
 ``remove [-f] <file>...``
   Remove the file(s), use ``-f`` to force it.  If a file does

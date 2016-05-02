@@ -70,7 +70,7 @@ void CMakeCommandUsage(const char* program)
     << "                            - run command in a modified environment\n"
     << "  environment               - display the current environment\n"
     << "  make_directory <dir>...   - create parent and <dir> directories\n"
-    << "  md5sum <file>...          - compute md5sum of files\n"
+    << "  md5sum <file>...          - create MD5 checksum of files\n"
     << "  remove [-f] <file>...     - remove the file(s), use -f to force "
        "it\n"
     << "  remove_directory dir      - remove a directory and its contents\n"
