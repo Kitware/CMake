@@ -51,75 +51,117 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
-All Policies
-============
+Policies Introduced by CMake 3.4
+================================
 
 .. toctree::
    :maxdepth: 1
 
-   /policy/CMP0000
-   /policy/CMP0001
-   /policy/CMP0002
-   /policy/CMP0003
-   /policy/CMP0004
-   /policy/CMP0005
-   /policy/CMP0006
-   /policy/CMP0007
-   /policy/CMP0008
-   /policy/CMP0009
-   /policy/CMP0010
-   /policy/CMP0011
-   /policy/CMP0012
-   /policy/CMP0013
-   /policy/CMP0014
-   /policy/CMP0015
-   /policy/CMP0016
-   /policy/CMP0017
-   /policy/CMP0018
-   /policy/CMP0019
-   /policy/CMP0020
-   /policy/CMP0021
-   /policy/CMP0022
-   /policy/CMP0023
-   /policy/CMP0024
-   /policy/CMP0025
-   /policy/CMP0026
-   /policy/CMP0027
-   /policy/CMP0028
-   /policy/CMP0029
-   /policy/CMP0030
-   /policy/CMP0031
-   /policy/CMP0032
-   /policy/CMP0033
-   /policy/CMP0034
-   /policy/CMP0035
-   /policy/CMP0036
-   /policy/CMP0037
-   /policy/CMP0038
-   /policy/CMP0039
-   /policy/CMP0040
-   /policy/CMP0041
-   /policy/CMP0042
-   /policy/CMP0043
-   /policy/CMP0044
-   /policy/CMP0045
-   /policy/CMP0046
-   /policy/CMP0047
-   /policy/CMP0048
-   /policy/CMP0049
-   /policy/CMP0050
-   /policy/CMP0051
-   /policy/CMP0052
-   /policy/CMP0053
-   /policy/CMP0054
-   /policy/CMP0055
-   /policy/CMP0056
-   /policy/CMP0057
-   /policy/CMP0058
-   /policy/CMP0059
-   /policy/CMP0060
-   /policy/CMP0061
-   /policy/CMP0062
-   /policy/CMP0063
-   /policy/CMP0064
    /policy/CMP0065
+   /policy/CMP0064
+
+Policies Introduced by CMake 3.3
+================================
+
+.. toctree::
+   :maxdepth: 1
+
+   /policy/CMP0063
+   /policy/CMP0062
+   /policy/CMP0061
+   /policy/CMP0060
+   /policy/CMP0059
+   /policy/CMP0058
+   /policy/CMP0057
+
+Policies Introduced by CMake 3.2
+================================
+
+.. toctree::
+   :maxdepth: 1
+
+   /policy/CMP0056
+   /policy/CMP0055
+
+Policies Introduced by CMake 3.1
+================================
+
+.. toctree::
+   :maxdepth: 1
+
+   /policy/CMP0054
+   /policy/CMP0053
+   /policy/CMP0052
+   /policy/CMP0051
+
+Policies Introduced by CMake 3.0
+================================
+
+.. toctree::
+   :maxdepth: 1
+
+   /policy/CMP0050
+   /policy/CMP0049
+   /policy/CMP0048
+   /policy/CMP0047
+   /policy/CMP0046
+   /policy/CMP0045
+   /policy/CMP0044
+   /policy/CMP0043
+   /policy/CMP0042
+   /policy/CMP0041
+   /policy/CMP0040
+   /policy/CMP0039
+   /policy/CMP0038
+   /policy/CMP0037
+   /policy/CMP0036
+   /policy/CMP0035
+   /policy/CMP0034
+   /policy/CMP0033
+   /policy/CMP0032
+   /policy/CMP0031
+   /policy/CMP0030
+   /policy/CMP0029
+   /policy/CMP0028
+   /policy/CMP0027
+   /policy/CMP0026
+   /policy/CMP0025
+   /policy/CMP0024
+
+Policies Introduced by CMake 2.8
+================================
+
+.. toctree::
+   :maxdepth: 1
+
+   /policy/CMP0023
+   /policy/CMP0022
+   /policy/CMP0021
+   /policy/CMP0020
+   /policy/CMP0019
+   /policy/CMP0018
+   /policy/CMP0017
+   /policy/CMP0016
+   /policy/CMP0015
+   /policy/CMP0014
+   /policy/CMP0013
+   /policy/CMP0012
+
+Policies Introduced by CMake 2.6
+================================
+
+.. toctree::
+   :maxdepth: 1
+
+   /policy/CMP0011
+   /policy/CMP0010
+   /policy/CMP0009
+   /policy/CMP0008
+   /policy/CMP0007
+   /policy/CMP0006
+   /policy/CMP0005
+   /policy/CMP0004
+   /policy/CMP0003
+   /policy/CMP0002
+   /policy/CMP0001
+   /policy/CMP0000
