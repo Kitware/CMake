@@ -14,8 +14,8 @@
 
 #include "cmGeneratorExpression.h"
 
-#include <sys/types.h>
 #include <cmsys/auto_ptr.hxx>
+#include <sys/types.h>
 
 class cmLocalGenerator;
 
