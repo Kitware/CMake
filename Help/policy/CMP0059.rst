@@ -1,7 +1,7 @@
 CMP0059
 -------
 
-Don't treat ``DEFINITIONS`` as a built-in directory property.
+Do not treat ``DEFINITIONS`` as a built-in directory property.
 
 CMake 3.3 and above no longer make a list of definitions available through
 the :prop_dir:`DEFINITIONS` directory property.  The

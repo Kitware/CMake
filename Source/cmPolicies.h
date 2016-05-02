@@ -204,7 +204,7 @@ class cmPolicy;
     "Ninja requires custom command byproducts to be explicit.", \
     3, 3, 0, cmPolicies::WARN) \
   SELECT(POLICY, CMP0059, \
-    "Do no treat DEFINITIONS as a built-in directory property.", \
+    "Do not treat DEFINITIONS as a built-in directory property.", \
     3, 3, 0, cmPolicies::WARN) \
   SELECT(POLICY, CMP0060, \
     "Link libraries by full path even in implicit directories.", \
