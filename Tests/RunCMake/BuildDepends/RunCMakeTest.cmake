@@ -1,6 +1,7 @@
 include(RunCMake)
 
-if(RunCMake_GENERATOR STREQUAL "Borland Makefiles")
+if(RunCMake_GENERATOR STREQUAL "Borland Makefiles" OR
+   RunCMake_GENERATOR STREQUAL "Watcom WMake")
   set(fs_delay 3)
 else()
   set(fs_delay 1.125)
