@@ -29,8 +29,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 You can contact the author at :
 - xxHash source repository : http://code.google.com/p/xxhash/
 */
+#include <stdlib.h>
+#include <string.h>
 
 #include "archive_platform.h"
+#include "archive_xxhash.h"
+
 #ifdef HAVE_LIBLZ4
 
 /***************************************
@@ -83,11 +87,8 @@ You can contact the author at :
 /***************************************
 ** Includes & Memory related functions
 ****************************************/
-#include "archive_xxhash.h"
-#include <stdlib.h>
 #define XXH_malloc malloc
 #define XXH_free free
-#include <string.h>
 #define XXH_memcpy memcpy
 
 
@@ -497,4 +498,17 @@ struct archive_xxhash __archive_xxhash = {
 	XXH32_update,
 	XXH32_digest
 };
+#else
+
+/*
+ * Define an empty version of the struct if we aren't using the LZ4 library.
+ */
+const
+struct archive_xxhash __archive_xxhash = {
+	NULL,
+	NULL,
+	NULL,
+	NULL
+};
+
 #endif /* HAVE_LIBLZ4 */

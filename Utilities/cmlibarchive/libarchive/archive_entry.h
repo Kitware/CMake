@@ -29,7 +29,7 @@
 #define	ARCHIVE_ENTRY_H_INCLUDED
 
 /* Note: Compiler will complain if this does not match archive.h! */
-#define	ARCHIVE_VERSION_NUMBER 3001002
+#define	ARCHIVE_VERSION_NUMBER 3002000
 
 /*
  * Note: archive_entry.h is for use outside of libarchive; the
@@ -73,6 +73,11 @@ typedef int64_t la_int64_t;
 # define	__LA_MODE_T	unsigned short
 #else
 # define	__LA_MODE_T	mode_t
+#endif
+
+/* Large file support for Android */
+#ifdef __ANDROID__
+#include "android_lf.h"
 #endif
 
 /*

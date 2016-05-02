@@ -737,7 +737,8 @@ archive_string_append_from_wcs_in_codepage(struct archive_string *as,
 			}
 			if (count == 0)
 				ret = -1;
-		} while (0);
+			break;
+		} while (1);
 	}
 	as->length += count;
 	as->s[as->length] = '\0';

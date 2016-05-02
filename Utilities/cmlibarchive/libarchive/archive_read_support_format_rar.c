@@ -828,6 +828,7 @@ archive_read_format_rar_read_header(struct archive_read *a,
   char head_type;
   int ret;
   unsigned flags;
+  unsigned long crc32_expected;
 
   a->archive.archive_format = ARCHIVE_FORMAT_RAR;
   if (a->archive.archive_format_name == NULL)
@@ -940,36 +941,50 @@ archive_read_format_rar_read_header(struct archive_read *a,
       skip = archive_le16dec(p + 5);
       if (skip < 7) {
         archive_set_error(&a->archive, ARCHIVE_ERRNO_FILE_FORMAT,
-          "Invalid header size");
+          "Invalid header size too small");
         return (ARCHIVE_FATAL);
-      }
-      if (skip > 7) {
-        if ((h = __archive_read_ahead(a, skip, NULL)) == NULL)
-          return (ARCHIVE_FATAL);
-        p = h;
       }
       if (flags & HD_ADD_SIZE_PRESENT)
       {
         if (skip < 7 + 4) {
           archive_set_error(&a->archive, ARCHIVE_ERRNO_FILE_FORMAT,
-            "Invalid header size");
+            "Invalid header size too small");
           return (ARCHIVE_FATAL);
         }
-        skip += archive_le32dec(p + 7);
         if ((h = __archive_read_ahead(a, skip, NULL)) == NULL)
           return (ARCHIVE_FATAL);
         p = h;
+        skip += archive_le32dec(p + 7);
       }
 
-      crc32_val = crc32(0, (const unsigned char *)p + 2, (unsigned)skip - 2);
-      if ((crc32_val & 0xffff) != archive_le16dec(p)) {
-        archive_set_error(&a->archive, ARCHIVE_ERRNO_FILE_FORMAT,
-          "Header CRC error");
-        return (ARCHIVE_FATAL);
+      /* Skip over the 2-byte CRC at the beginning of the header. */
+      crc32_expected = archive_le16dec(p);
+      __archive_read_consume(a, 2);
+      skip -= 2;
+
+      /* Skim the entire header and compute the CRC. */
+      crc32_val = 0;
+      while (skip > 0) {
+	      size_t to_read = skip;
+	      ssize_t did_read;
+	      if (to_read > 32 * 1024) {
+		      to_read = 32 * 1024;
+	      }
+	      if ((h = __archive_read_ahead(a, to_read, &did_read)) == NULL) {
+		      return (ARCHIVE_FATAL);
+	      }
+	      p = h;
+	      crc32_val = crc32(crc32_val, (const unsigned char *)p, (unsigned)did_read);
+	      __archive_read_consume(a, did_read);
+	      skip -= did_read;
       }
-      __archive_read_consume(a, skip);
+      if ((crc32_val & 0xffff) != crc32_expected) {
+	      archive_set_error(&a->archive, ARCHIVE_ERRNO_FILE_FORMAT,
+		  "Header CRC error");
+	      return (ARCHIVE_FATAL);
+      }
       if (head_type == ENDARC_HEAD)
-        return (ARCHIVE_EOF);
+	      return (ARCHIVE_EOF);
       break;
 
     case NEWSUB_HEAD:

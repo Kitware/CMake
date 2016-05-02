@@ -38,8 +38,8 @@ __FBSDID("$FreeBSD$");
 #include <string.h>
 #include <time.h>
 
-/* This file defines a single public function. */
-time_t __archive_get_date(time_t now, const char *);
+#define __LIBARCHIVE_BUILD 1
+#include "archive_getdate.h"
 
 /* Basic time units. */
 #define	EPOCH		1970

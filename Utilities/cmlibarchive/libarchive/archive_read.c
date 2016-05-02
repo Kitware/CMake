@@ -547,16 +547,20 @@ archive_read_open1(struct archive *_a)
  * it wants to handle this stream.  Repeat until we've finished
  * building the pipeline.
  */
+
+/* We won't build a filter pipeline with more stages than this. */
+#define MAX_NUMBER_FILTERS 25
+
 static int
 choose_filters(struct archive_read *a)
 {
-	int number_bidders, i, bid, best_bid, n;
+	int number_bidders, i, bid, best_bid, number_filters;
 	struct archive_read_filter_bidder *bidder, *best_bidder;
 	struct archive_read_filter *filter;
 	ssize_t avail;
 	int r;
 
-	for (n = 0; n < 25; ++n) {
+	for (number_filters = 0; number_filters < MAX_NUMBER_FILTERS; ++number_filters) {
 		number_bidders = sizeof(a->bidders) / sizeof(a->bidders[0]);
 
 		best_bid = 0;
