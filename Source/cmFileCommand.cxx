@@ -28,8 +28,10 @@
 #endif
 
 #undef GetCurrentDirectory
-#include <sys/types.h>
 #include <assert.h>
+
+#include <sys/types.h>
+// include sys/stat.h after sys/types.h
 #include <sys/stat.h>
 
 #include <cmsys/Directory.hxx>

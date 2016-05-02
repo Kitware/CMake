@@ -17,6 +17,7 @@
 #include <cmInstalledFile.h>
 
 #include <sys/types.h>
+// include sys/stat.h after sys/types.h
 #include <sys/stat.h>
 
 cmWIXFilesSourceWriter::cmWIXFilesSourceWriter(cmCPackLog* logger,
