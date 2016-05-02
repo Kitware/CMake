@@ -169,7 +169,7 @@ Available commands are:
 
 ``compare_files <file1> <file2>``
   Check if ``<file1>`` is same as ``<file2>``. If files are the same,
-  then returns 0, if not itreturns 1.
+  then returns 0, if not it returns 1.
 
 ``copy <file>... <destination>``
   Copy files to ``<destination>`` (either file or directory).
