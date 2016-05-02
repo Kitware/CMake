@@ -310,10 +310,10 @@ if( NOT HDF5_FOUND )
                 # See https://cmake.org/Bug/view.php?id=1643.  We search
                 # first for the full static library name, but fall back to a
                 # generic search on the name if the static search fails.
-                set( THIS_LIBRARY_SEARCH_DEBUG lib${LIB}d.a ${LIB}d )
+                set( THIS_LIBRARY_SEARCH_DEBUG lib${LIB}d.a ${LIB}d lib${LIB}_debug.a ${LIB}_debug )
                 set( THIS_LIBRARY_SEARCH_RELEASE lib${LIB}.a ${LIB} )
             else()
-                set( THIS_LIBRARY_SEARCH_DEBUG ${LIB}d )
+                set( THIS_LIBRARY_SEARCH_DEBUG ${LIB}d ${LIB}_debug )
                 set( THIS_LIBRARY_SEARCH_RELEASE ${LIB} )
             endif()
             find_library( HDF5_${LIB}_LIBRARY_DEBUG
