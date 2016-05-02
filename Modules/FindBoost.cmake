@@ -982,7 +982,7 @@ if(NOT Boost_INCLUDE_DIR)
   endif()
 
   if( Boost_NO_SYSTEM_PATHS)
-    list(APPEND _boost_INCLUDE_SEARCH_DIRS NO_CMAKE_SYSTEM_PATH)
+    list(APPEND _boost_INCLUDE_SEARCH_DIRS NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
   else()
     list(APPEND _boost_INCLUDE_SEARCH_DIRS PATHS
       C:/boost/include
@@ -1251,7 +1251,7 @@ foreach(c DEBUG RELEASE)
       ${Boost_INCLUDE_DIR}/stage/lib
       )
     if( Boost_NO_SYSTEM_PATHS )
-      list(APPEND _boost_LIBRARY_SEARCH_DIRS_${c} NO_CMAKE_SYSTEM_PATH)
+      list(APPEND _boost_LIBRARY_SEARCH_DIRS_${c} NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
     else()
       list(APPEND _boost_LIBRARY_SEARCH_DIRS_${c} PATHS
         C:/boost/lib
