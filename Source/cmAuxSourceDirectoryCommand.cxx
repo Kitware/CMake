@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmAuxSourceDirectoryCommand.h"
+
 #include "cmSourceFile.h"
 
 #include <cmsys/Directory.hxx>

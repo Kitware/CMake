@@ -11,8 +11,8 @@
 ============================================================================*/
 #include "cmRST.h"
 
-#include "cmSystemTools.h"
 #include "cmAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmVersion.h"
 #include <cmsys/FStream.hxx>
 #include <ctype.h>

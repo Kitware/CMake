@@ -12,19 +12,19 @@
 #include "cmSystemTools.h"
 
 // Need these for documentation support.
-#include "cmake.h"
-#include "cmDocumentation.h"
-#include "cmCPackGeneratorFactory.h"
 #include "cmCPackGenerator.h"
-#include "cmake.h"
+#include "cmCPackGeneratorFactory.h"
+#include "cmDocumentation.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmake.h"
+#include "cmake.h"
 
 #include "cmCPackLog.h"
 
 #include <cmsys/CommandLineArguments.hxx>
-#include <cmsys/SystemTools.hxx>
 #include <cmsys/Encoding.hxx>
+#include <cmsys/SystemTools.hxx>
 
 //----------------------------------------------------------------------------
 static const char * cmDocumentationName[][2] =

@@ -10,25 +10,26 @@
   See the License for more information.
 ============================================================================*/
 #include "cmCTestSubmitHandler.h"
+
+#include "cmCTest.h"
 #include "cmCTestScriptHandler.h"
-#include "cmake.h"
+#include "cmGeneratedFileStream.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
-#include "cmGeneratedFileStream.h"
-#include "cmCTest.h"
 #include "cmXMLParser.h"
-#include "cmState.h"
+#include "cmake.h"
 
-#include <cmsys/Process.h>
 #include <cmsys/Base64.h>
+#include <cmsys/Process.h>
 
 // For XML-RPC submission
 #include "cm_xmlrpc.h"
 
 #include <cm_jsoncpp_reader.h>
 // For curl submission
-#include "cmCurl.h"
 #include "cmCTestCurl.h"
+#include "cmCurl.h"
 
 #include <sys/stat.h>
 

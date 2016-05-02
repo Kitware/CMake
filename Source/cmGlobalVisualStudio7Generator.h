@@ -13,6 +13,7 @@
 #define cmGlobalVisualStudio7Generator_h
 
 #include "cmGlobalVisualStudioGenerator.h"
+
 #include "cmGlobalGeneratorFactory.h"
 
 class cmTarget;

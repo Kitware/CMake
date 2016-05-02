@@ -1,6 +1,6 @@
-#include <stdio.h>
 #include "MathFunctions.h"
 #include "TutorialConfig.h"
+#include <stdio.h>
 
 #include <math.h>
 

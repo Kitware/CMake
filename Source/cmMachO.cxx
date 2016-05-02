@@ -10,13 +10,14 @@
   See the License for more information.
 ============================================================================*/
 #include "cmStandardIncludes.h" // to get CMAKE_USE_MACH_PARSER first
+
 #include "cmMachO.h"
 
 #include <cmsys/FStream.hxx>
 
 // Include the Mach-O format information system header.
-#include <mach-o/loader.h>
 #include <mach-o/fat.h>
+#include <mach-o/loader.h>
 
 /**
 

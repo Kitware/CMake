@@ -13,7 +13,6 @@
 #ifndef cmParseMumpsCoverage_h
 #define cmParseMumpsCoverage_h
 
-#include "cmStandardIncludes.h"
 #include "cmCTestCoverageHandler.h"
 
 /** \class cmParseMumpsCoverage

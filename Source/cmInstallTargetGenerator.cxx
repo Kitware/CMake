@@ -13,12 +13,12 @@
 
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorTarget.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmGeneratorTarget.h"
 #include "cmake.h"
-#include "cmGeneratorTarget.h"
 
 #include <assert.h>
 

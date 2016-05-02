@@ -10,7 +10,9 @@
   See the License for more information.
 ============================================================================*/
 #include "windows.h" // this must be first to define GetCurrentDirectory
+
 #include "cmGlobalVisualStudio9Generator.h"
+
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
 #include "cmVisualStudioWCEPlatformParser.h"

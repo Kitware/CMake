@@ -13,8 +13,9 @@
 #define cmGlobalXCodeGenerator_h
 
 #include "cmGlobalGenerator.h"
-#include "cmXCodeObject.h"
+
 #include "cmCustomCommand.h"
+#include "cmXCodeObject.h"
 class cmGlobalGeneratorFactory;
 class cmSourceFile;
 class cmSourceGroup;

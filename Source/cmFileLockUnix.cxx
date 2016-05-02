@@ -12,11 +12,11 @@
 
 #include "cmFileLock.h"
 
-#include <errno.h> // errno
-#include <stdio.h> // SEEK_SET
-#include <fcntl.h>
-#include <unistd.h>
 #include "cmSystemTools.h"
+#include <errno.h> // errno
+#include <fcntl.h>
+#include <stdio.h> // SEEK_SET
+#include <unistd.h>
 
 cmFileLock::cmFileLock(): File(-1)
 {

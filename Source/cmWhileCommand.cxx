@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmWhileCommand.h"
+
 #include "cmConditionEvaluator.h"
 
 cmWhileFunctionBlocker::cmWhileFunctionBlocker(cmMakefile* mf):

@@ -13,7 +13,6 @@
 #define cmCursesLabelWidget_h
 
 #include "cmCursesWidget.h"
-#include "cmCursesStandardIncludes.h"
 
 class cmCursesMainForm;
 

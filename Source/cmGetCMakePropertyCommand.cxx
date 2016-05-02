@@ -11,10 +11,10 @@
 ============================================================================*/
 #include "cmGetCMakePropertyCommand.h"
 
-#include "cmGlobalGenerator.h"
-#include "cmake.h"
-#include "cmState.h"
 #include "cmAlgorithms.h"
+#include "cmGlobalGenerator.h"
+#include "cmState.h"
+#include "cmake.h"
 
 // cmGetCMakePropertyCommand
 bool cmGetCMakePropertyCommand

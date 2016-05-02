@@ -13,8 +13,8 @@
 #ifndef cmCTestTestHandler_h
 #define cmCTestTestHandler_h
 
-
 #include "cmCTestGenericHandler.h"
+
 #include <cmsys/RegularExpression.hxx>
 
 class cmMakefile;

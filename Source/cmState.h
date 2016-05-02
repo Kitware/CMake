@@ -13,11 +13,12 @@
 #define cmState_h
 
 #include "cmStandardIncludes.h"
+
+#include "cmAlgorithms.h"
+#include "cmLinkedTree.h"
+#include "cmPolicies.h"
 #include "cmPropertyDefinitionMap.h"
 #include "cmPropertyMap.h"
-#include "cmLinkedTree.h"
-#include "cmAlgorithms.h"
-#include "cmPolicies.h"
 
 class cmake;
 class cmCommand;

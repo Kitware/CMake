@@ -9,23 +9,23 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-
 #include "cmSystemTools.h"
+
 #include "cmAlgorithms.h"
+#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
-#include <time.h>
-#include <string.h>
 #include <stdlib.h>
-#include <assert.h>
+#include <string.h>
+#include <time.h>
 #ifdef __QNX__
 # include <malloc.h> /* for malloc/free on QNX */
 #endif
+#include <cmsys/Directory.hxx>
+#include <cmsys/Encoding.hxx>
 #include <cmsys/Glob.hxx>
 #include <cmsys/RegularExpression.hxx>
-#include <cmsys/Directory.hxx>
 #include <cmsys/System.h>
-#include <cmsys/Encoding.hxx>
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmArchiveWrite.h"
 # include "cmLocale.h"
@@ -39,13 +39,14 @@
 
 #if defined(_WIN32)
 # include <windows.h>
+  // include wincrypt.h after windows.h
 # include <wincrypt.h>
 #else
-# include <sys/time.h>
 # include <sys/types.h>
+# include <sys/time.h>
+# include <sys/wait.h>
 # include <unistd.h>
 # include <utime.h>
-# include <sys/wait.h>
 #endif
 
 #if defined(__APPLE__)

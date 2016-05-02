@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmCursesOptionsWidget.h"
+
 #include "cmCursesMainForm.h"
 
 inline int ctrl(int z)

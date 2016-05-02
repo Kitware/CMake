@@ -11,13 +11,13 @@
 ============================================================================*/
 #include "cmComputeLinkDepends.h"
 
+#include "cmAlgorithms.h"
 #include "cmComputeComponentGraph.h"
-#include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmTarget.h"
 #include "cmake.h"
-#include "cmAlgorithms.h"
 
 #include <assert.h>
 

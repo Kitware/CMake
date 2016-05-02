@@ -2,8 +2,9 @@
 //
 
 #include "stdafx.h"
-#include "mfc1.h"
+
 #include "MainFrm.h"
+#include "mfc1.h"
 
 #include "ChildFrm.h"
 #include "mfc1Doc.h"

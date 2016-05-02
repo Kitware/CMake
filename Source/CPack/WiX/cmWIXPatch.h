@@ -13,8 +13,8 @@
 #ifndef cmWIXPatch_h
 #define cmWIXPatch_h
 
-#include "cmWIXSourceWriter.h"
 #include "cmWIXPatchParser.h"
+#include "cmWIXSourceWriter.h"
 
 #include <string>
 

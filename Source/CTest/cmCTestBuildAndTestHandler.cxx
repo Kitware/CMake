@@ -12,12 +12,12 @@
 
 #include "cmCTestBuildAndTestHandler.h"
 
-#include "cmSystemTools.h"
 #include "cmCTest.h"
-#include "cmake.h"
-#include "cmGlobalGenerator.h"
-#include <cmsys/Process.h>
 #include "cmCTestTestHandler.h"
+#include "cmGlobalGenerator.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+#include <cmsys/Process.h>
 
 //----------------------------------------------------------------------
 cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()

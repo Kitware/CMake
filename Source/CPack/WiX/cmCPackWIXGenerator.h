@@ -13,13 +13,13 @@
 #ifndef cmCPackWIXGenerator_h
 #define cmCPackWIXGenerator_h
 
+#include <CPack/cmCPackGenerator.h>
+
 #include "cmWIXPatch.h"
 #include "cmWIXShortcut.h"
 
-#include <CPack/cmCPackGenerator.h>
-
-#include <string>
 #include <map>
+#include <string>
 
 class cmWIXSourceWriter;
 class cmWIXDirectoriesSourceWriter;

@@ -10,13 +10,14 @@
   See the License for more information.
 ============================================================================*/
 #include "cmGlobalUnixMakefileGenerator3.h"
-#include "cmLocalUnixMakefileGenerator3.h"
-#include "cmMakefileTargetGenerator.h"
-#include "cmMakefile.h"
-#include "cmake.h"
+
+#include "cmAlgorithms.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
-#include "cmAlgorithms.h"
+#include "cmLocalUnixMakefileGenerator3.h"
+#include "cmMakefile.h"
+#include "cmMakefileTargetGenerator.h"
+#include "cmake.h"
 
 cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3(cmake* cm)
   : cmGlobalCommonGenerator(cm)

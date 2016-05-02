@@ -13,12 +13,12 @@
 #ifndef cmWIXShortcut_h
 #define cmWIXShortcut_h
 
-#include <string>
+#include <cmInstalledFile.h>
+
 #include <map>
 #include <set>
+#include <string>
 #include <vector>
-
-#include <cmInstalledFile.h>
 
 class cmWIXFilesSourceWriter;
 

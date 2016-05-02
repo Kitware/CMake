@@ -1,7 +1,7 @@
 #include "cmCPackPropertiesGenerator.h"
 
-#include "cmOutputConverter.h"
 #include "cmLocalGenerator.h"
+#include "cmOutputConverter.h"
 
 cmCPackPropertiesGenerator::cmCPackPropertiesGenerator(
   cmLocalGenerator* lg,

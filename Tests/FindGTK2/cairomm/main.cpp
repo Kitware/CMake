@@ -8,11 +8,11 @@
 #define _USE_MATH_DEFINES
 #endif
 
-#include <string>
-#include <iostream>
-#include <cairommconfig.h>
 #include <cairomm/context.h>
 #include <cairomm/surface.h>
+#include <cairommconfig.h>
+#include <iostream>
+#include <string>
 
 #include <cmath>
 

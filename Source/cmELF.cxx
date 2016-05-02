@@ -10,15 +10,16 @@
   See the License for more information.
 ============================================================================*/
 #include "cmStandardIncludes.h" // to get CMAKE_USE_ELF_PARSER first
+
 #include "cmELF.h"
 
-#include <cmsys/auto_ptr.hxx>
 #include <cmsys/FStream.hxx>
+#include <cmsys/auto_ptr.hxx>
 
 // Include the ELF format information system header.
 #if defined(__OpenBSD__)
-# include <stdint.h>
 # include <elf_abi.h>
+# include <stdint.h>
 #elif defined(__HAIKU__)
 # include <elf32.h>
 # include <elf64.h>

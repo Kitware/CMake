@@ -14,14 +14,14 @@
 #include "cmComputeLinkDepends.h"
 #include "cmOrderDirectories.h"
 
-#include "cmLocalGenerator.h"
-#include "cmGlobalGenerator.h"
-#include "cmState.h"
-#include "cmOutputConverter.h"
-#include "cmMakefile.h"
-#include "cmGeneratorTarget.h"
-#include "cmake.h"
 #include "cmAlgorithms.h"
+#include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
+#include "cmMakefile.h"
+#include "cmOutputConverter.h"
+#include "cmState.h"
+#include "cmake.h"
 
 #include <ctype.h>
 

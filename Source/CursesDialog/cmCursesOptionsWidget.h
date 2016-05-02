@@ -13,6 +13,7 @@
 #define cmCursesOptionsWidget_h
 
 #include "cmCursesWidget.h"
+
 class cmCursesMainForm;
 
 class cmCursesOptionsWidget : public cmCursesWidget

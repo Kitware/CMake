@@ -11,22 +11,22 @@
 ============================================================================*/
 #include "cmLocalGenerator.h"
 
+#include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
+#include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmInstallGenerator.h"
-#include "cmInstallFilesGenerator.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
+#include "cmGlobalGenerator.h"
+#include "cmInstallFilesGenerator.h"
+#include "cmInstallGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmTest.h"
 #include "cmTestGenerator.h"
-#include "cmCustomCommandGenerator.h"
 #include "cmVersion.h"
 #include "cmake.h"
-#include "cmAlgorithms.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # define CM_LG_ENCODE_OBJECT_NAMES

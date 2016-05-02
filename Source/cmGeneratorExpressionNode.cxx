@@ -11,10 +11,11 @@
 ============================================================================*/
 
 #include "cmGeneratorExpressionNode.h"
-#include "cmGlobalGenerator.h"
+
 #include "cmAlgorithms.h"
-#include "cmOutputConverter.h"
+#include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmOutputConverter.h"
 
 //----------------------------------------------------------------------------
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(

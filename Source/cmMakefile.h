@@ -12,22 +12,24 @@
 #ifndef cmMakefile_h
 #define cmMakefile_h
 
+#include "cmStandardIncludes.h"
+
+#include "cmAlgorithms.h"
 #include "cmExecutionStatus.h"
+#include "cmExpandedCommandArgument.h"
 #include "cmListFileCache.h"
+#include "cmNewLineStyle.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmNewLineStyle.h"
-#include "cmExpandedCommandArgument.h"
 #include "cmake.h"
-#include "cmState.h"
-#include "cmAlgorithms.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmSourceGroup.h"
 #endif
 
-#include <cmsys/auto_ptr.hxx>
 #include <cmsys/RegularExpression.hxx>
+#include <cmsys/auto_ptr.hxx>
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # ifdef CMake_HAVE_CXX11_UNORDERED_MAP
 #  include <unordered_map>

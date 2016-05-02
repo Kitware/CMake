@@ -11,19 +11,19 @@
 ============================================================================*/
 #include "cmFindPackageCommand.h"
 
-#include <cmsys/Directory.hxx>
-#include <cmsys/RegularExpression.hxx>
-#include <cmsys/Encoding.hxx>
 #include "cmAlgorithms.h"
+#include <cmsys/Directory.hxx>
+#include <cmsys/Encoding.hxx>
+#include <cmsys/RegularExpression.hxx>
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
 #include "cmVariableWatch.h"
 #endif
 
 #if defined(__HAIKU__)
-#include <string.h>
 #include <FindDirectory.h>
 #include <StorageDefs.h>
+#include <string.h>
 #endif
 
 //----------------------------------------------------------------------------

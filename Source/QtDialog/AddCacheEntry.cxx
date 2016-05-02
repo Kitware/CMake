@@ -11,8 +11,9 @@
 ============================================================================*/
 
 #include "AddCacheEntry.h"
-#include <QMetaProperty>
+
 #include <QCompleter>
+#include <QMetaProperty>
 
 static const int NumTypes = 4;
 static const int DefaultTypeIndex = 0;

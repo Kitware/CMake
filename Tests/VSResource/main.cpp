@@ -1,5 +1,5 @@
-#include <windows.h>
 #include <stdio.h>
+#include <windows.h>
 
 extern int lib();
 

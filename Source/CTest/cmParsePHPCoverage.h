@@ -13,7 +13,6 @@
 #ifndef cmParsePHPCoverage_h
 #define cmParsePHPCoverage_h
 
-#include "cmStandardIncludes.h"
 #include "cmCTestCoverageHandler.h"
 
 /** \class cmParsePHPCoverage

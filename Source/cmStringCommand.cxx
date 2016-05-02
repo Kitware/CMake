@@ -10,13 +10,14 @@
   See the License for more information.
 ============================================================================*/
 #include "cmStringCommand.h"
+
 #include "cmCryptoHash.h"
 
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/SystemTools.hxx>
 
-#include <stdlib.h> // required for atoi
 #include <ctype.h>
+#include <stdlib.h> // required for atoi
 #include <time.h>
 
 #include <cmTimestamp.h>

@@ -12,6 +12,9 @@
 
 #ifndef QCMake_h
 #define QCMake_h
+
+#include "cmake.h"
+
 #ifdef _MSC_VER
 #pragma warning ( disable : 4127 )
 #pragma warning ( disable : 4512 )
@@ -19,15 +22,13 @@
 
 #include <vector>
 
+#include <QAtomicInt>
+#include <QList>
+#include <QMetaType>
 #include <QObject>
 #include <QString>
-#include <QVariant>
-#include <QList>
 #include <QStringList>
-#include <QMetaType>
-#include <QAtomicInt>
-
-#include "cmake.h"
+#include <QVariant>
 
 /// struct to represent cmake properties in Qt
 /// Value is of type String or Bool

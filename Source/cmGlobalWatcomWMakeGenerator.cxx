@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmGlobalWatcomWMakeGenerator.h"
+
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 

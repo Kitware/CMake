@@ -16,8 +16,8 @@
 #include <QDialog>
 #include <QWidget>
 
-#include "ui_WarningMessagesDialog.h"
 #include "QCMake.h"
+#include "ui_WarningMessagesDialog.h"
 
 /**
  * Dialog window for setting the warning message related options.

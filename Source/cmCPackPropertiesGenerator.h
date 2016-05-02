@@ -12,8 +12,8 @@
 #ifndef cmCPackPropertiesGenerator_h
 #define cmCPackPropertiesGenerator_h
 
-#include "cmScriptGenerator.h"
 #include "cmInstalledFile.h"
+#include "cmScriptGenerator.h"
 
 class cmLocalGenerator;
 

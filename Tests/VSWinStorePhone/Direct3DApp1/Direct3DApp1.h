@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pch.h"
+
 #include "CubeRenderer.h"
 
 ref class Direct3DApp1 sealed : public Windows::ApplicationModel::Core::IFrameworkView

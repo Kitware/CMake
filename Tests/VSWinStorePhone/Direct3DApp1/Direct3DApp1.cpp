@@ -1,6 +1,7 @@
 #include "pch.h"
-#include "Direct3DApp1.h"
+
 #include "BasicTimer.h"
+#include "Direct3DApp1.h"
 
 using namespace Windows::ApplicationModel;
 using namespace Windows::ApplicationModel::Core;

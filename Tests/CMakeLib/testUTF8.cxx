@@ -11,8 +11,8 @@
 ============================================================================*/
 #include <cm_utf8.h>
 
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 typedef char test_utf8_char[5];
 

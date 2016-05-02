@@ -1,11 +1,11 @@
-#include "cmStandardIncludes.h"
+#include "cmParseGTMCoverage.h"
+
+#include "cmSystemTools.h"
+#include <cmsys/Directory.hxx>
+#include <cmsys/FStream.hxx>
+#include <cmsys/Glob.hxx>
 #include <stdio.h>
 #include <stdlib.h>
-#include "cmSystemTools.h"
-#include "cmParseGTMCoverage.h"
-#include <cmsys/Directory.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/FStream.hxx>
 
 
 cmParseGTMCoverage::cmParseGTMCoverage(cmCTestCoverageHandlerContainer& cont,

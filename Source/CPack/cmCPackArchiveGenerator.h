@@ -13,8 +13,9 @@
 #ifndef cmCPackArchiveGenerator_h
 #define cmCPackArchiveGenerator_h
 
-#include "cmArchiveWrite.h"
 #include "cmCPackGenerator.h"
+
+#include "cmArchiveWrite.h"
 
 
 /** \class cmCPackArchiveGenerator

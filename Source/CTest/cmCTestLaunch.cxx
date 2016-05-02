@@ -16,14 +16,14 @@
 #include "cmXMLWriter.h"
 #include "cmake.h"
 
+#include <cmsys/FStream.hxx>
 #include <cmsys/MD5.h>
 #include <cmsys/Process.h>
 #include <cmsys/RegularExpression.hxx>
-#include <cmsys/FStream.hxx>
 
 #ifdef _WIN32
-#include <io.h> // for _setmode
 #include <fcntl.h> // for _O_BINARY
+#include <io.h>    // for _setmode
 #include <stdio.h> // for std{out,err} and fileno
 #endif
 

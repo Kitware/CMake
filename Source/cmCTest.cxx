@@ -12,24 +12,25 @@
 #include "cmCurl.h" // include before anything that includes windows.h
 
 #include "cmCTest.h"
-#include "cmake.h"
-#include "cmMakefile.h"
-#include "cmGlobalGenerator.h"
-#include <cmsys/Base64.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/SystemInformation.hxx>
-#include <cmsys/FStream.hxx>
-#include "cmDynamicLoader.h"
-#include "cmGeneratedFileStream.h"
-#include "cmVersionMacros.h"
+
+#include "cmAlgorithms.h"
 #include "cmCTestCommand.h"
 #include "cmCTestStartCommand.h"
-#include "cmAlgorithms.h"
+#include "cmDynamicLoader.h"
+#include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
 #include "cmState.h"
+#include "cmVersionMacros.h"
 #include "cmXMLWriter.h"
+#include "cmake.h"
+#include <cmsys/Base64.h>
+#include <cmsys/Directory.hxx>
+#include <cmsys/FStream.hxx>
+#include <cmsys/SystemInformation.hxx>
 
-#include "cmCTestBuildHandler.h"
 #include "cmCTestBuildAndTestHandler.h"
+#include "cmCTestBuildHandler.h"
 #include "cmCTestConfigureHandler.h"
 #include "cmCTestCoverageHandler.h"
 #include "cmCTestMemCheckHandler.h"
@@ -41,14 +42,14 @@
 
 #include "cmVersion.h"
 
-#include <cmsys/RegularExpression.hxx>
-#include <cmsys/Process.h>
 #include <cmsys/Glob.hxx>
+#include <cmsys/Process.h>
+#include <cmsys/RegularExpression.hxx>
 
-#include <stdlib.h>
-#include <math.h>
-#include <float.h>
 #include <ctype.h>
+#include <float.h>
+#include <math.h>
+#include <stdlib.h>
 
 #include <cmsys/auto_ptr.hxx>
 

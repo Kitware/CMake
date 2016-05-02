@@ -11,9 +11,9 @@
 ============================================================================*/
 #include "cmExportBuildFileGenerator.h"
 
-#include "cmLocalGenerator.h"
-#include "cmGlobalGenerator.h"
 #include "cmExportSet.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmTargetExport.h"
 
 //----------------------------------------------------------------------------

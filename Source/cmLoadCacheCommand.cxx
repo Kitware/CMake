@@ -11,8 +11,8 @@
 ============================================================================*/
 #include "cmLoadCacheCommand.h"
 
-#include <cmsys/RegularExpression.hxx>
 #include <cmsys/FStream.hxx>
+#include <cmsys/RegularExpression.hxx>
 
 // cmLoadCacheCommand
 bool cmLoadCacheCommand

@@ -13,6 +13,7 @@
 #define cmGeneratedFileStream_h
 
 #include "cmStandardIncludes.h"
+
 #include <cmsys/FStream.hxx>
 
 // This is the first base class of cmGeneratedFileStream.  It will be

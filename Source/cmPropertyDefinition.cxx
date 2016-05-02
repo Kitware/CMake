@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmPropertyDefinition.h"
+
 #include "cmSystemTools.h"
 
 void cmPropertyDefinition

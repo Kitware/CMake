@@ -38,13 +38,13 @@
  **
  ****************************************************************************/
 
- #include <QComboBox>
- #include <QGridLayout>
- #include <QLabel>
- #include <QGroupBox>
- #include <QCheckBox>
- #include <QDateEdit>
  #include <QCalendarWidget>
+ #include <QCheckBox>
+ #include <QComboBox>
+ #include <QDateEdit>
+ #include <QGridLayout>
+ #include <QGroupBox>
+ #include <QLabel>
  #include <QTextCharFormat>
 
  #include "calwidget.h"

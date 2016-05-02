@@ -13,11 +13,12 @@
 #ifndef AddCacheEntry_h
 #define AddCacheEntry_h
 
-#include <QWidget>
+#include "QCMake.h"
+
 #include <QCheckBox>
 #include <QStringList>
+#include <QWidget>
 
-#include "QCMake.h"
 #include "ui_AddCacheEntry.h"
 
 class AddCacheEntry : public QWidget, public Ui::AddCacheEntry

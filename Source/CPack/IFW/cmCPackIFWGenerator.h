@@ -15,8 +15,8 @@
 
 #include <CPack/cmCPackGenerator.h>
 
-#include "cmCPackIFWPackage.h"
 #include "cmCPackIFWInstaller.h"
+#include "cmCPackIFWPackage.h"
 
 class cmXMLWriter;
 

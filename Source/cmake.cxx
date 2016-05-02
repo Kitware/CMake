@@ -10,17 +10,18 @@
   See the License for more information.
 ============================================================================*/
 #include "cmake.h"
-#include "cmMakefile.h"
-#include "cmLocalGenerator.h"
-#include "cmExternalMakefileProjectGenerator.h"
-#include "cmCommands.h"
-#include "cmCommand.h"
-#include "cmFileTimeComparison.h"
-#include "cmSourceFile.h"
-#include "cmTest.h"
-#include "cmDocumentationFormatter.h"
+
 #include "cmAlgorithms.h"
+#include "cmCommand.h"
+#include "cmCommands.h"
+#include "cmDocumentationFormatter.h"
+#include "cmExternalMakefileProjectGenerator.h"
+#include "cmFileTimeComparison.h"
+#include "cmLocalGenerator.h"
+#include "cmMakefile.h"
+#include "cmSourceFile.h"
 #include "cmState.h"
+#include "cmTest.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmGraphVizWriter.h"
@@ -28,9 +29,9 @@
 # include <cmsys/SystemInformation.hxx>
 #endif
 
+#include <cmsys/FStream.hxx>
 #include <cmsys/Glob.hxx>
 #include <cmsys/RegularExpression.hxx>
-#include <cmsys/FStream.hxx>
 
 // only build kdevelop generator on non-windows platforms
 // when not bootstrapping cmake
@@ -51,17 +52,17 @@
 // include the generator
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #  if !defined(CMAKE_BOOT_MINGW)
-#    include "cmGlobalVisualStudio71Generator.h"
-#    include "cmGlobalVisualStudio8Generator.h"
-#    include "cmGlobalVisualStudio9Generator.h"
+#    include "cmGlobalBorlandMakefileGenerator.h"
+#    include "cmGlobalGhsMultiGenerator.h"
+#    include "cmGlobalJOMMakefileGenerator.h"
+#    include "cmGlobalNMakeMakefileGenerator.h"
 #    include "cmGlobalVisualStudio10Generator.h"
 #    include "cmGlobalVisualStudio11Generator.h"
 #    include "cmGlobalVisualStudio12Generator.h"
 #    include "cmGlobalVisualStudio14Generator.h"
-#    include "cmGlobalBorlandMakefileGenerator.h"
-#    include "cmGlobalNMakeMakefileGenerator.h"
-#    include "cmGlobalJOMMakefileGenerator.h"
-#    include "cmGlobalGhsMultiGenerator.h"
+#    include "cmGlobalVisualStudio71Generator.h"
+#    include "cmGlobalVisualStudio8Generator.h"
+#    include "cmGlobalVisualStudio9Generator.h"
 #    define CMAKE_HAVE_VS_GENERATORS
 #  endif
 #  include "cmGlobalMSYSMakefileGenerator.h"
@@ -80,8 +81,8 @@
 #if !defined(CMAKE_BOOT_MINGW)
 # include "cmExtraCodeBlocksGenerator.h"
 #endif
-#include "cmExtraSublimeTextGenerator.h"
 #include "cmExtraKateGenerator.h"
+#include "cmExtraSublimeTextGenerator.h"
 
 #ifdef CMAKE_USE_KDEVELOP
 # include "cmGlobalKdevelopGenerator.h"
@@ -99,8 +100,8 @@
 #    define CMAKE_USE_XCODE 1
 #  endif
 #  include <sys/types.h>
-#  include <sys/time.h>
 #  include <sys/resource.h>
+#  include <sys/time.h>
 #endif
 
 #include <sys/stat.h> // struct stat

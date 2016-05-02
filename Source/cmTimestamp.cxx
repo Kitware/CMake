@@ -11,12 +11,12 @@
 ============================================================================*/
 #include "cmTimestamp.h"
 
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <sstream>
+#include <sys/stat.h>
 
 //----------------------------------------------------------------------------
 std::string cmTimestamp::CurrentTime(

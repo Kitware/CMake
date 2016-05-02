@@ -10,14 +10,15 @@
   See the License for more information.
 ============================================================================*/
 #include "cmListCommand.h"
+
+#include "cmAlgorithms.h"
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/SystemTools.hxx>
-#include "cmAlgorithms.h"
 
 #include <algorithm>
-#include <stdlib.h> // required for atoi
-#include <ctype.h>
 #include <assert.h>
+#include <ctype.h>
+#include <stdlib.h> // required for atoi
 //----------------------------------------------------------------------------
 bool cmListCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)

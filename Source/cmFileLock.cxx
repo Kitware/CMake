@@ -12,8 +12,8 @@
 
 #include "cmFileLock.h"
 
-#include <assert.h>
 #include "cmFileLockResult.h"
+#include <assert.h>
 
 // Common implementation
 

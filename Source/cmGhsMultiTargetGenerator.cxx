@@ -10,12 +10,13 @@
   See the License for more information.
 ============================================================================*/
 #include "cmGhsMultiTargetGenerator.h"
+
+#include "cmGeneratedFileStream.h"
 #include "cmGlobalGhsMultiGenerator.h"
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
-#include "cmTarget.h"
-#include "cmGeneratedFileStream.h"
 #include "cmSourceFile.h"
+#include "cmTarget.h"
 #include <assert.h>
 #include <cmAlgorithms.h>
 

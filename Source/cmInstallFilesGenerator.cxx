@@ -12,9 +12,9 @@
 #include "cmInstallFilesGenerator.h"
 
 #include "cmGeneratorExpression.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
-#include "cmLocalGenerator.h"
 
 //----------------------------------------------------------------------------
 cmInstallFilesGenerator

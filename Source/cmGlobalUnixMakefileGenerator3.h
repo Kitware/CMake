@@ -13,6 +13,7 @@
 #define cmGlobalUnixMakefileGenerator3_h
 
 #include "cmGlobalCommonGenerator.h"
+
 #include "cmGlobalGeneratorFactory.h"
 
 class cmGeneratedFileStream;

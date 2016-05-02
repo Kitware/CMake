@@ -12,7 +12,6 @@
 #ifndef _cmDocumentationSection_h
 #define _cmDocumentationSection_h
 
-#include "cmStandardIncludes.h"
 #include "cmDocumentationFormatter.h"
 
 // Low-level interface for custom documents:

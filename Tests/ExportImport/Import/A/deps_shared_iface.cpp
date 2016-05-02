@@ -21,8 +21,8 @@
 #endif
 
 #ifdef TEST_SUBDIR_LIB
-#include "subdir.h"
 #include "renamed.h"
+#include "subdir.h"
 #endif
 
 #ifdef DO_GNU_TESTS

@@ -13,8 +13,8 @@
 #ifndef cmCPackNSISGenerator_h
 #define cmCPackNSISGenerator_h
 
-
 #include "cmCPackGenerator.h"
+
 #include <set>
 
 /** \class cmCPackNSISGenerator

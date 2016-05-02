@@ -11,8 +11,8 @@
 ============================================================================*/
 #include "cmGetTestPropertyCommand.h"
 
-#include "cmake.h"
 #include "cmTest.h"
+#include "cmake.h"
 
 // cmGetTestPropertyCommand
 bool cmGetTestPropertyCommand

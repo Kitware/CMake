@@ -10,11 +10,13 @@
   See the License for more information.
 ============================================================================*/
 #include "cmLocalVisualStudio10Generator.h"
+
+#include "cmGlobalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmVisualStudio10TargetGenerator.h"
-#include "cmGlobalVisualStudio10Generator.h"
-#include <cm_expat.h>
 #include "cmXMLParser.h"
+#include <cm_expat.h>
+
 class cmVS10XMLParser : public cmXMLParser
 {
   public:

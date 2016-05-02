@@ -13,6 +13,7 @@
 #define cmCursesBoolWidget_h
 
 #include "cmCursesWidget.h"
+
 class cmCursesMainForm;
 
 class cmCursesBoolWidget : public cmCursesWidget

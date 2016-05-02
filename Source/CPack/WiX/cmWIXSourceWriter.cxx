@@ -10,8 +10,6 @@
   See the License for more information.
 ============================================================================*/
 
-#include "cmStandardIncludes.h"
-
 #include "cmWIXSourceWriter.h"
 
 #include <CPack/cmCPackGenerator.h>

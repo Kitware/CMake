@@ -10,18 +10,19 @@
   See the License for more information.
 ============================================================================*/
 #include "cmGlobalXCodeGenerator.h"
-#include "cmLocalXCodeGenerator.h"
-#include "cmMakefile.h"
-#include "cmXCodeObject.h"
-#include "cmXCode21Object.h"
-#include "cmake.h"
-#include "cmGeneratedFileStream.h"
+
+#include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
-#include "cmSourceFile.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGeneratorFactory.h"
-#include "cmAlgorithms.h"
+#include "cmLocalXCodeGenerator.h"
+#include "cmMakefile.h"
+#include "cmSourceFile.h"
+#include "cmXCode21Object.h"
+#include "cmXCodeObject.h"
+#include "cmake.h"
 
 #include <cmsys/auto_ptr.hxx>
 

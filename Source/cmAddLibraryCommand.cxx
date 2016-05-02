@@ -11,8 +11,8 @@
 ============================================================================*/
 #include "cmAddLibraryCommand.h"
 
-#include "cmake.h"
 #include "cmState.h"
+#include "cmake.h"
 
 // cmLibraryCommand
 bool cmAddLibraryCommand

@@ -12,10 +12,10 @@
 #include "cmCTestBuildCommand.h"
 
 #include "cmCTest.h"
-#include "cmCTestGenericHandler.h"
 #include "cmCTestBuildHandler.h"
-#include "cmake.h"
+#include "cmCTestGenericHandler.h"
 #include "cmGlobalGenerator.h"
+#include "cmake.h"
 
 
 //----------------------------------------------------------------------------

@@ -15,9 +15,9 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
-#include "cmSourceFile.h"
 #include "cmTarget.h"
 #include "cmake.h"
 

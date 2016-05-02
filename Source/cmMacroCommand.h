@@ -13,6 +13,7 @@
 #define cmMacroCommand_h
 
 #include "cmCommand.h"
+
 #include "cmFunctionBlocker.h"
 
 class cmMacroFunctionBlocker : public cmFunctionBlocker

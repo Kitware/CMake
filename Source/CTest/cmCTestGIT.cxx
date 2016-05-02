@@ -11,17 +11,17 @@
 ============================================================================*/
 #include "cmCTestGIT.h"
 
+#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmSystemTools.h"
-#include "cmAlgorithms.h"
 
-#include <cmsys/RegularExpression.hxx>
-#include <cmsys/Process.h>
 #include <cmsys/FStream.hxx>
+#include <cmsys/Process.h>
+#include <cmsys/RegularExpression.hxx>
 
 #include <sys/types.h>
-#include <time.h>
 #include <ctype.h>
+#include <time.h>
 
 //----------------------------------------------------------------------------
 static unsigned int cmCTestGITVersion(unsigned int epic, unsigned int major,

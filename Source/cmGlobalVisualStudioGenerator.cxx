@@ -12,6 +12,7 @@
 ============================================================================*/
 #include "cmGlobalVisualStudioGenerator.h"
 
+#include "cmAlgorithms.h"
 #include "cmCallVisualStudioMacro.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
@@ -20,7 +21,6 @@
 #include "cmSourceFile.h"
 #include "cmTarget.h"
 #include <cmsys/Encoding.hxx>
-#include "cmAlgorithms.h"
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(cmake* cm)

@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmCTestReadCustomFilesCommand.h"
+
 #include "cmCTest.h"
 
 bool cmCTestReadCustomFilesCommand

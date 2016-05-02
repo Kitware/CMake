@@ -9,17 +9,18 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
+
 #include "cmCPackOSXX11Generator.h"
 
-#include "cmake.h"
-#include "cmGlobalGenerator.h"
-#include "cmSystemTools.h"
-#include "cmMakefile.h"
-#include "cmGeneratedFileStream.h"
 #include "cmCPackLog.h"
+#include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
 
-#include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
+#include <cmsys/SystemTools.hxx>
 #include <sys/stat.h>
 
 //----------------------------------------------------------------------

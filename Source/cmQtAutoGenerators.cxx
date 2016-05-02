@@ -11,25 +11,25 @@
   See the License for more information.
 ============================================================================*/
 
-#include "cmGlobalGenerator.h"
-#include "cmOutputConverter.h"
-#include "cmMakefile.h"
-#include "cmSystemTools.h"
-#include "cmState.h"
+#include "cmQtAutoGenerators.h"
+
 #include "cmAlgorithms.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmOutputConverter.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
 
 #include <sys/stat.h>
 
-#include <cmsys/Terminal.h>
-#include <cmsys/FStream.hxx>
 #include <assert.h>
+#include <cmsys/FStream.hxx>
+#include <cmsys/Terminal.h>
 
 #include <string.h>
 #if defined(__APPLE__)
 #include <unistd.h>
 #endif
-
-#include "cmQtAutoGenerators.h"
 
 static bool requiresMocing(const std::string& text, std::string &macroName)
 {

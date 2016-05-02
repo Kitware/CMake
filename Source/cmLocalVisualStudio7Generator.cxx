@@ -9,16 +9,17 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include "cmGlobalVisualStudio7Generator.h"
 #include "cmLocalVisualStudio7Generator.h"
-#include "cmXMLParser.h"
-#include <cm_expat.h>
-#include "cmMakefile.h"
-#include "cmSystemTools.h"
-#include "cmSourceFile.h"
-#include "cmGeneratorTarget.h"
+
 #include "cmCustomCommandGenerator.h"
+#include "cmGeneratorTarget.h"
+#include "cmGlobalVisualStudio7Generator.h"
+#include "cmMakefile.h"
+#include "cmSourceFile.h"
+#include "cmSystemTools.h"
+#include "cmXMLParser.h"
 #include "cmake.h"
+#include <cm_expat.h>
 
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratedFileStream.h"

@@ -11,10 +11,11 @@
   See the License for more information.
 ============================================================================*/
 #ifndef cmNinjaUtilityTargetGenerator_h
-#  define cmNinjaUtilityTargetGenerator_h
+#define cmNinjaUtilityTargetGenerator_h
 
-#  include "cmNinjaTargetGenerator.h"
-#  include "cmNinjaTypes.h"
+#include "cmNinjaTargetGenerator.h"
+
+#include "cmNinjaTypes.h"
 
 class cmSourceFile;
 

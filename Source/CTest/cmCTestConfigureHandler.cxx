@@ -14,8 +14,8 @@
 
 #include "cmCTest.h"
 #include "cmGeneratedFileStream.h"
-#include "cmake.h"
 #include "cmXMLWriter.h"
+#include "cmake.h"
 #include <cmsys/Process.h>
 
 

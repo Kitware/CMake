@@ -13,11 +13,11 @@
 #include "cmSystemTools.h"
 
 // Need these for documentation support.
-#include "cmake.h"
 #include "cmDocumentation.h"
+#include "cmake.h"
 
-#include "CTest/cmCTestScriptHandler.h"
 #include "CTest/cmCTestLaunch.h"
+#include "CTest/cmCTestScriptHandler.h"
 #include "cmsys/Encoding.hxx"
 
 //----------------------------------------------------------------------------

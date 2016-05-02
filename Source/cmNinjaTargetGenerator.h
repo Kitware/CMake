@@ -15,10 +15,9 @@
 
 #include "cmCommonTargetGenerator.h"
 
-#include "cmStandardIncludes.h"
-#include "cmNinjaTypes.h"
 #include "cmGlobalNinjaGenerator.h"
 #include "cmLocalNinjaGenerator.h"
+#include "cmNinjaTypes.h"
 #include "cmOSXBundleGenerator.h"
 
 class cmTarget;

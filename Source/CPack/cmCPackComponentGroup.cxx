@@ -11,9 +11,11 @@
 ============================================================================*/
 
 #include "cmCPackComponentGroup.h"
+
 #include "cmSystemTools.h"
-#include <vector>
+
 #include <string>
+#include <vector>
 
 //----------------------------------------------------------------------
 unsigned long cmCPackComponent::GetInstalledSize(

@@ -12,29 +12,29 @@
 
 #include "cmCTestBuildHandler.h"
 
-#include "cmCTest.h"
-#include "cmake.h"
-#include "cmMakefile.h"
-#include "cmGlobalGenerator.h"
-#include "cmGeneratedFileStream.h"
-#include "cmXMLWriter.h"
-#include "cmFileTimeComparison.h"
 #include "cmAlgorithms.h"
+#include "cmCTest.h"
+#include "cmFileTimeComparison.h"
+#include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmXMLWriter.h"
+#include "cmake.h"
 
 //#include <cmsys/RegularExpression.hxx>
-#include <cmsys/Process.h>
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
+#include <cmsys/Process.h>
 
 // used for sleep
 #ifdef _WIN32
 #include "windows.h"
 #endif
 
+#include <float.h>
+#include <math.h>
 #include <stdlib.h>
 #include <time.h>
-#include <math.h>
-#include <float.h>
 
 
 static const char* cmCTestErrorMatches[] = {

@@ -10,18 +10,19 @@
   See the License for more information.
 ============================================================================*/
 #include "cmCTestMultiProcessHandler.h"
-#include "cmProcess.h"
-#include "cmStandardIncludes.h"
+
 #include "cmCTest.h"
 #include "cmCTestScriptHandler.h"
+#include "cmProcess.h"
+#include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
-#include <stdlib.h>
-#include <stack>
-#include <list>
-#include <float.h>
-#include <math.h>
 #include <cmsys/FStream.hxx>
 #include <cmsys/SystemInformation.hxx>
+#include <float.h>
+#include <list>
+#include <math.h>
+#include <stack>
+#include <stdlib.h>
 
 class TestComparator
 {

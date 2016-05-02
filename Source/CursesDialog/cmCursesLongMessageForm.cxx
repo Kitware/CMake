@@ -9,10 +9,11 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include "../cmSystemTools.h"
-#include "../cmake.h"
-#include "../cmVersion.h"
 #include "cmCursesLongMessageForm.h"
+
+#include "../cmSystemTools.h"
+#include "../cmVersion.h"
+#include "../cmake.h"
 #include "cmCursesMainForm.h"
 
 inline int ctrl(int z)

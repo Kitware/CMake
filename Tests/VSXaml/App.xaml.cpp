@@ -4,6 +4,7 @@
 //
 
 #include "pch.h"
+
 #include "MainPage.xaml.h"
 
 using namespace VSXaml;

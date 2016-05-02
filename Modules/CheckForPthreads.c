@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <pthread.h>
+#include <stdio.h>
 #include <unistd.h>
 
 void* runner(void*);

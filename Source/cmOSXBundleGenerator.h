@@ -13,10 +13,11 @@
 #define cmOSXBundleGenerator_h
 
 #include "cmStandardIncludes.h"
+
 #include "cmSourceFile.h"
 
-#include <string>
 #include <set>
+#include <string>
 
 class cmTarget;
 class cmMakefile;

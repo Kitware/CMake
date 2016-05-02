@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmGetFilenameComponentCommand.h"
+
 #include "cmSystemTools.h"
 
 // cmGetFilenameComponentCommand

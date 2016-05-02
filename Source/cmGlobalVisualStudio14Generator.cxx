@@ -10,9 +10,10 @@
   See the License for more information.
 ============================================================================*/
 #include "cmGlobalVisualStudio14Generator.h"
+
+#include "cmAlgorithms.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
-#include "cmAlgorithms.h"
 
 static const char vs14generatorName[] = "Visual Studio 14 2015";
 

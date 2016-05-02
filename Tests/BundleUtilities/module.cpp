@@ -1,7 +1,7 @@
 
 #include "module.h"
-#include "stdio.h"
 #include "shared2.h"
+#include "stdio.h"
 
 void module()
 {

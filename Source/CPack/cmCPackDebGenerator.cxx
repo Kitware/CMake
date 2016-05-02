@@ -9,16 +9,17 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
+
 #include "cmCPackDebGenerator.h"
 
-#include "cmSystemTools.h"
-#include "cmMakefile.h"
-#include "cmGeneratedFileStream.h"
-#include "cmCPackLog.h"
 #include "cmArchiveWrite.h"
+#include "cmCPackLog.h"
+#include "cmGeneratedFileStream.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
 
-#include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
+#include <cmsys/SystemTools.hxx>
 
 #include <limits.h> // USHRT_MAX
 #include <sys/stat.h>
@@ -763,8 +764,8 @@ std::string cmCPackDebGenerator::GetComponentInstallDirNameSuffix(
 #include <sys/stat.h>
 
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define ARMAG           "!<arch>\n"        /* ar "magic number" */
 #define SARMAG          8                  /* strlen(ARMAG); */

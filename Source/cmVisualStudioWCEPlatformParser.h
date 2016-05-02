@@ -11,6 +11,7 @@
 ============================================================================*/
 #ifndef cmVisualStudioWCEPlatformParser_h
 #define cmVisualStudioWCEPlatformParser_h
+
 #include "cmStandardIncludes.h"
 
 #include "cmXMLParser.h"

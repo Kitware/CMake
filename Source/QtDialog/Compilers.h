@@ -4,6 +4,7 @@
 #define COMPILERS_HPP
 
 #include <QWidget>
+
 #include <ui_Compilers.h>
 
 class Compilers : public QWidget, public Ui::Compilers

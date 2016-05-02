@@ -14,8 +14,8 @@
 
 #include "cmStandardIncludes.h"
 
-#include <cmsys/SystemTools.hxx>
 #include <cmsys/Process.h>
+#include <cmsys/SystemTools.hxx>
 
 class cmSystemToolsFileTime;
 

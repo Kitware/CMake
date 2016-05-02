@@ -11,14 +11,14 @@
 ============================================================================*/
 #include "cmInstallCommand.h"
 
+#include "cmExportSet.h"
+#include "cmInstallCommandArguments.h"
 #include "cmInstallDirectoryGenerator.h"
+#include "cmInstallExportGenerator.h"
 #include "cmInstallFilesGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
-#include "cmInstallExportGenerator.h"
-#include "cmInstallCommandArguments.h"
 #include "cmTargetExport.h"
-#include "cmExportSet.h"
 
 #include <cmsys/Glob.hxx>
 

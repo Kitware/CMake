@@ -10,10 +10,11 @@
   See the License for more information.
 ============================================================================*/
 #include "cmGraphVizWriter.h"
-#include "cmMakefile.h"
-#include "cmLocalGenerator.h"
-#include "cmGlobalGenerator.h"
+
 #include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
+#include "cmMakefile.h"
 
 
 

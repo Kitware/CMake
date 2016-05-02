@@ -11,12 +11,13 @@
 ============================================================================*/
 
 #include "cmCPackDragNDropGenerator.h"
-#include "cmCPackLog.h"
-#include "cmSystemTools.h"
-#include "cmGeneratedFileStream.h"
 
-#include <cmsys/RegularExpression.hxx>
+#include "cmCPackLog.h"
+#include "cmGeneratedFileStream.h"
+#include "cmSystemTools.h"
+
 #include <cmsys/FStream.hxx>
+#include <cmsys/RegularExpression.hxx>
 
 #include <iomanip>
 

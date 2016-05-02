@@ -4,7 +4,9 @@
 
 #include <QWizard>
 #include <QWizardPage>
+
 #include "cmake.h"
+
 #include "ui_Compilers.h"
 #include "ui_CrossCompiler.h"
 

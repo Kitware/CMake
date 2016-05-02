@@ -13,6 +13,7 @@
 #define cmWhileCommand_h
 
 #include "cmCommand.h"
+
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
 

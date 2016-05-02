@@ -1,6 +1,6 @@
+#include <stdio.h>
 #include <zot.hxx>
 #include <zot_custom.hxx>
-#include <stdio.h>
 
 const char* zot_macro_dir_f();
 const char* zot_macro_tgt_f();

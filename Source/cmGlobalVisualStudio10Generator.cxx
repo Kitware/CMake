@@ -10,14 +10,16 @@
   See the License for more information.
 ============================================================================*/
 #include "windows.h" // this must be first to define GetCurrentDirectory
+
 #include "cmGlobalVisualStudio10Generator.h"
+
+#include "cmAlgorithms.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmVisualStudioSlnData.h"
 #include "cmVisualStudioSlnParser.h"
 #include "cmake.h"
-#include "cmAlgorithms.h"
 
 static const char vs10generatorName[] = "Visual Studio 10 2010";
 

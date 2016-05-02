@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include "hello.h"
+#include <stdio.h>
 #ifdef _MSC_VER
 #include "windows.h"
 #else

@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmFindLibraryCommand.h"
+
 #include <cmsys/Directory.hxx>
 
 cmFindLibraryCommand::cmFindLibraryCommand()

@@ -72,11 +72,11 @@
 */
 #include "bindexplib.h"
 #include <cmsys/Encoding.hxx>
-#include <windows.h>
-#include <stdio.h>
-#include <string>
 #include <fstream>
 #include <iostream>
+#include <stdio.h>
+#include <string>
+#include <windows.h>
 
 typedef struct cmANON_OBJECT_HEADER_BIGOBJ {
    /* same as ANON_OBJECT_HEADER_V2 */

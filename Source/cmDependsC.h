@@ -13,6 +13,7 @@
 #define cmDependsC_h
 
 #include "cmDepends.h"
+
 #include <cmsys/RegularExpression.hxx>
 #include <queue>
 

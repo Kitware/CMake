@@ -12,6 +12,8 @@
 #ifndef cmTimestamp_h
 #define cmTimestamp_h
 
+#include "cmStandardIncludes.h"
+
 #include <string>
 #include <time.h>
 

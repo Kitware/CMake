@@ -13,9 +13,10 @@
 #ifndef QCMakeWidgets_h
 #define QCMakeWidgets_h
 
-#include <QLineEdit>
 #include <QComboBox>
 #include <QCompleter>
+#include <QLineEdit>
+
 class QToolButton;
 
 // common widgets for Qt based CMake

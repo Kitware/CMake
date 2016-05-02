@@ -11,18 +11,19 @@
   See the License for more information.
 ============================================================================*/
 #include "cmNinjaTargetGenerator.h"
-#include "cmGlobalNinjaGenerator.h"
-#include "cmLocalNinjaGenerator.h"
+
+#include "cmAlgorithms.h"
+#include "cmComputeLinkInformation.h"
+#include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalNinjaGenerator.h"
+#include "cmLocalNinjaGenerator.h"
+#include "cmMakefile.h"
 #include "cmNinjaNormalTargetGenerator.h"
 #include "cmNinjaUtilityTargetGenerator.h"
-#include "cmSystemTools.h"
-#include "cmMakefile.h"
-#include "cmComputeLinkInformation.h"
 #include "cmSourceFile.h"
-#include "cmCustomCommandGenerator.h"
-#include "cmAlgorithms.h"
+#include "cmSystemTools.h"
 
 #include <algorithm>
 

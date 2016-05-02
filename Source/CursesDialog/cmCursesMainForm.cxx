@@ -9,19 +9,20 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
+#include "cmCursesMainForm.h"
+
 #include "../cmSystemTools.h"
 #include "../cmVersion.h"
 #include "../cmake.h"
-#include "cmCursesMainForm.h"
-#include "cmCursesStringWidget.h"
-#include "cmCursesLabelWidget.h"
-#include "cmCursesBoolWidget.h"
-#include "cmCursesPathWidget.h"
-#include "cmCursesFilePathWidget.h"
-#include "cmCursesDummyWidget.h"
-#include "cmCursesCacheEntryComposite.h"
-#include "cmCursesLongMessageForm.h"
 #include "cmAlgorithms.h"
+#include "cmCursesBoolWidget.h"
+#include "cmCursesCacheEntryComposite.h"
+#include "cmCursesDummyWidget.h"
+#include "cmCursesFilePathWidget.h"
+#include "cmCursesLabelWidget.h"
+#include "cmCursesLongMessageForm.h"
+#include "cmCursesPathWidget.h"
+#include "cmCursesStringWidget.h"
 #include "cmState.h"
 
 

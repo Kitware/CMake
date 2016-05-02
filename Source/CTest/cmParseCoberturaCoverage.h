@@ -13,7 +13,6 @@
 #ifndef cmParseCoberturaCoverage_h
 #define cmParseCoberturaCoverage_h
 
-#include "cmStandardIncludes.h"
 #include "cmCTestCoverageHandler.h"
 
 /** \class cmParsePythonCoverage

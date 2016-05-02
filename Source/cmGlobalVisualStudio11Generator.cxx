@@ -10,9 +10,10 @@
   See the License for more information.
 ============================================================================*/
 #include "cmGlobalVisualStudio11Generator.h"
+
+#include "cmAlgorithms.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
-#include "cmAlgorithms.h"
 
 static const char vs11generatorName[] = "Visual Studio 11 2012";
 

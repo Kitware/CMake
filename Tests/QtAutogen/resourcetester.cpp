@@ -1,8 +1,8 @@
 
 #include "resourcetester.h"
 
-#include <QDebug>
 #include <QApplication>
+#include <QDebug>
 #include <QFile>
 #include <QTimer>
 

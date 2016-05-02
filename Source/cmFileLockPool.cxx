@@ -14,9 +14,9 @@
 
 #include <assert.h>
 
+#include "cmAlgorithms.h"
 #include "cmFileLock.h"
 #include "cmFileLockResult.h"
-#include "cmAlgorithms.h"
 
 cmFileLockPool::cmFileLockPool()
 {

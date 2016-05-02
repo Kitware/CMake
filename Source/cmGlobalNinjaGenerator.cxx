@@ -10,14 +10,15 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
+#include "cmGlobalNinjaGenerator.h"
+
+#include "cmAlgorithms.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
 #include "cmGeneratorTarget.h"
-#include "cmGlobalNinjaGenerator.h"
 #include "cmLocalNinjaGenerator.h"
 #include "cmMakefile.h"
 #include "cmVersion.h"
-#include "cmAlgorithms.h"
 
 #include <algorithm>
 #include <assert.h>

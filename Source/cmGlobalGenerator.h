@@ -15,13 +15,13 @@
 
 #include "cmStandardIncludes.h"
 
-#include "cmTarget.h" // For cmTargets
-#include "cmTargetDepend.h" // For cmTargetDependSet
-#include "cmSystemTools.h" // for cmSystemTools::OutputOption
 #include "cmExportSetMap.h" // For cmExportSetMap
-#include "cmGeneratorTarget.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorTarget.h"
 #include "cmState.h"
+#include "cmSystemTools.h"  // for cmSystemTools::OutputOption
+#include "cmTarget.h"       // For cmTargets
+#include "cmTargetDepend.h" // For cmTargetDependSet
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmFileLockPool.h"

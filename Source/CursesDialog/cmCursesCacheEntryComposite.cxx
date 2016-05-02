@@ -10,16 +10,17 @@
   See the License for more information.
 ============================================================================*/
 #include "cmCursesCacheEntryComposite.h"
-#include "cmCursesOptionsWidget.h"
-#include "cmCursesStringWidget.h"
-#include "cmCursesLabelWidget.h"
-#include "cmCursesBoolWidget.h"
-#include "cmCursesPathWidget.h"
-#include "cmCursesFilePathWidget.h"
-#include "cmCursesDummyWidget.h"
+
+#include "../cmState.h"
 #include "../cmSystemTools.h"
 #include "../cmake.h"
-#include "../cmState.h"
+#include "cmCursesBoolWidget.h"
+#include "cmCursesDummyWidget.h"
+#include "cmCursesFilePathWidget.h"
+#include "cmCursesLabelWidget.h"
+#include "cmCursesOptionsWidget.h"
+#include "cmCursesPathWidget.h"
+#include "cmCursesStringWidget.h"
 
 #include <assert.h>
 

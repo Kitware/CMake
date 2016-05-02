@@ -12,23 +12,23 @@
 
 #include "cmCPackWIXGenerator.h"
 
-#include <cmSystemTools.h>
-#include <cmGeneratedFileStream.h>
-#include <cmCryptoHash.h>
-#include <cmInstalledFile.h>
-#include <CPack/cmCPackLog.h>
 #include <CPack/cmCPackComponentGroup.h>
+#include <CPack/cmCPackLog.h>
+#include <cmCryptoHash.h>
+#include <cmGeneratedFileStream.h>
+#include <cmInstalledFile.h>
+#include <cmSystemTools.h>
 
-#include "cmWIXSourceWriter.h"
 #include "cmWIXDirectoriesSourceWriter.h"
 #include "cmWIXFeaturesSourceWriter.h"
 #include "cmWIXFilesSourceWriter.h"
 #include "cmWIXRichTextFormatWriter.h"
+#include "cmWIXSourceWriter.h"
 
-#include <cmsys/SystemTools.hxx>
 #include <cmsys/Directory.hxx>
 #include <cmsys/Encoding.hxx>
 #include <cmsys/FStream.hxx>
+#include <cmsys/SystemTools.hxx>
 
 #include <rpc.h> // for GUID generation
 

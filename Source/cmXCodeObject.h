@@ -13,6 +13,7 @@
 #define cmXCodeObject_h
 
 #include "cmStandardIncludes.h"
+
 class cmGeneratorTarget;
 
 class cmXCodeObject

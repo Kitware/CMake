@@ -11,28 +11,29 @@
 ============================================================================*/
 
 #include "CMakeSetupDialog.h"
-#include <QFileDialog>
-#include <QProgressBar>
-#include <QMessageBox>
-#include <QStatusBar>
-#include <QToolButton>
-#include <QDialogButtonBox>
+
 #include <QCloseEvent>
 #include <QCoreApplication>
-#include <QSettings>
+#include <QDialogButtonBox>
+#include <QDragEnterEvent>
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QKeySequence>
 #include <QMenu>
 #include <QMenuBar>
-#include <QDragEnterEvent>
+#include <QMessageBox>
 #include <QMimeData>
-#include <QUrl>
+#include <QProgressBar>
+#include <QSettings>
 #include <QShortcut>
-#include <QKeySequence>
-#include <QInputDialog>
+#include <QStatusBar>
+#include <QToolButton>
+#include <QUrl>
 
-#include "QCMake.h"
-#include "QCMakeCacheView.h"
 #include "AddCacheEntry.h"
 #include "FirstConfigure.h"
+#include "QCMake.h"
+#include "QCMakeCacheView.h"
 #include "RegexExplorer.h"
 #include "WarningMessagesDialog.h"
 #include "cmSystemTools.h"

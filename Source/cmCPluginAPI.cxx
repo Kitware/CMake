@@ -14,8 +14,9 @@
    these routines just manipulate arguments and then call the associated
    methods on the CMake classes. */
 
-#include "cmMakefile.h"
 #include "cmCPluginAPI.h"
+
+#include "cmMakefile.h"
 #include "cmVersion.h"
 
 #include "cmSourceFile.h"

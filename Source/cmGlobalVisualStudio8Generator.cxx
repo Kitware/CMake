@@ -10,13 +10,15 @@
   See the License for more information.
 ============================================================================*/
 #include "windows.h" // this must be first to define GetCurrentDirectory
+
 #include "cmGlobalVisualStudio8Generator.h"
+
+#include "cmGeneratedFileStream.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
+#include "cmSourceFile.h"
 #include "cmVisualStudioWCEPlatformParser.h"
 #include "cmake.h"
-#include "cmGeneratedFileStream.h"
-#include "cmSourceFile.h"
 
 static const char vs8generatorName[] = "Visual Studio 8 2005";
 

@@ -12,12 +12,12 @@
 
 #include "cmCPackCygwinSourceGenerator.h"
 
-#include "cmake.h"
-#include "cmGlobalGenerator.h"
-#include "cmSystemTools.h"
-#include "cmMakefile.h"
-#include "cmGeneratedFileStream.h"
 #include "cmCPackLog.h"
+#include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
 
 #include <cmsys/SystemTools.hxx>
 
@@ -25,8 +25,8 @@
 // system tools because it is not implemented robustly enough to move
 // files across directories.
 #ifdef _WIN32
-# include <windows.h>
 # include <sys/stat.h>
+# include <windows.h>
 #endif
 
 //----------------------------------------------------------------------

@@ -13,7 +13,6 @@
 #ifndef cmCPackDebGenerator_h
 #define cmCPackDebGenerator_h
 
-
 #include "cmCPackGenerator.h"
 
 /** \class cmCPackDebGenerator

@@ -10,14 +10,15 @@
   See the License for more information.
 ============================================================================*/
 #include "cmFileCommand.h"
+
+#include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
-#include "cmake.h"
-#include "cmHexFileConverter.h"
-#include "cmInstallType.h"
+#include "cmCryptoHash.h"
 #include "cmFileTimeComparison.h"
 #include "cmGlobalGenerator.h"
-#include "cmCryptoHash.h"
-#include "cmAlgorithms.h"
+#include "cmHexFileConverter.h"
+#include "cmInstallType.h"
+#include "cmake.h"
 
 #include "cmTimestamp.h"
 
@@ -27,16 +28,16 @@
 #endif
 
 #undef GetCurrentDirectory
-#include <assert.h>
 #include <sys/types.h>
+#include <assert.h>
 #include <sys/stat.h>
 
-#include <cmsys/auto_ptr.hxx>
 #include <cmsys/Directory.hxx>
+#include <cmsys/Encoding.hxx>
+#include <cmsys/FStream.hxx>
 #include <cmsys/Glob.hxx>
 #include <cmsys/RegularExpression.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Encoding.hxx>
+#include <cmsys/auto_ptr.hxx>
 
 // Table of permissions flags.
 #if defined(_WIN32) && !defined(__CYGWIN__)

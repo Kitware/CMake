@@ -13,6 +13,7 @@
 #define cmLocalVisualStudioGenerator_h
 
 #include "cmLocalGenerator.h"
+
 #include "cmGlobalVisualStudioGenerator.h"
 
 #include <cmsys/auto_ptr.hxx>
