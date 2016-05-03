@@ -1,9 +1,10 @@
+#include <kwsys/DynamicLoader.hxx>
+
 #include <example.h>
 
 #include <example_exe.h>
 
 #include <iostream>
-#include <kwsys/DynamicLoader.hxx>
 #include <string>
 
 #include <stdio.h>

@@ -761,6 +761,7 @@ std::string cmCPackDebGenerator::GetComponentInstallDirNameSuffix(
  */
 
 #include <sys/types.h>
+// include sys/stat.h after sys/types.h
 #include <sys/stat.h>
 
 #include <stdio.h>

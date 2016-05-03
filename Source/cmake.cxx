@@ -99,11 +99,12 @@
 #    include "cmGlobalXCodeGenerator.h"
 #    define CMAKE_USE_XCODE 1
 #  endif
-#  include <sys/types.h>
 #  include <sys/resource.h>
 #  include <sys/time.h>
 #endif
 
+#include <sys/types.h>
+// include sys/stat.h after sys/types.h
 #include <sys/stat.h> // struct stat
 
 #include <list>

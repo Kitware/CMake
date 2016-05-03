@@ -42,8 +42,8 @@
   // include wincrypt.h after windows.h
 # include <wincrypt.h>
 #else
-# include <sys/types.h>
 # include <sys/time.h>
+# include <sys/types.h>
 # include <sys/wait.h>
 # include <unistd.h>
 # include <utime.h>

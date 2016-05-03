@@ -18,8 +18,10 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-#include <sys/types.h>
 #include <cmsys/FStream.hxx>
+
+#include <sys/types.h>
+// include sys/stat.h after sys/types.h
 #include <sys/stat.h>
 
 //----------------------------------------------------------------------

@@ -13,9 +13,10 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <sstream>
 
 #include <sys/types.h>
-#include <sstream>
+// include sys/stat.h after sys/types.h
 #include <sys/stat.h>
 
 //----------------------------------------------------------------------------
