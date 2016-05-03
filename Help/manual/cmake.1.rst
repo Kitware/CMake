@@ -169,7 +169,7 @@ Available commands are:
 
 ``compare_files <file1> <file2>``
   Check if ``<file1>`` is same as ``<file2>``. If files are the same,
-  then returns 0, if not itreturns 1.
+  then returns 0, if not it returns 1.
 
 ``copy <file>... <destination>``
   Copy files to ``<destination>`` (either file or directory).
@@ -204,7 +204,10 @@ Available commands are:
   silently ignored.
 
 ``md5sum <file>...``
-  Compute md5sum of files.
+  Create MD5 checksum of files in ``md5sum`` compatible format::
+
+     351abe79cd3800b38cdfb25d45015a15  file1.txt
+     052f86c15bbde68af55c7f7b340ab639  file2.txt
 
 ``remove [-f] <file>...``
   Remove the file(s), use ``-f`` to force it.  If a file does
