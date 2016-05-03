@@ -664,8 +664,8 @@ function(CMAKE_DETERMINE_MSVC_SHOWINCLUDES_PREFIX lang)
     ERROR_VARIABLE err
     RESULT_VARIABLE res
     )
-  if(res EQUAL 0 AND "${out}" MATCHES "\n([^:]*:[^:]*:[ \t]*)")
-    set(CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX "${CMAKE_MATCH_1}" PARENT_SCOPE)
+  if(res EQUAL 0 AND "${out}" MATCHES "(^|\n)([^:\n]*:[^:\n]*:[ \t]*)")
+    set(CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX "${CMAKE_MATCH_2}" PARENT_SCOPE)
   else()
     set(CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX "" PARENT_SCOPE)
   endif()
