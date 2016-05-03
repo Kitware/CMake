@@ -587,7 +587,7 @@ if(error_code)
 endif()
 
 execute_process(
-  COMMAND \"${git_EXECUTABLE}\" \${git_options} submodule update --recursive ${git_submodules}
+  COMMAND \"${git_EXECUTABLE}\" \${git_options} submodule update --recursive --init ${git_submodules}
   WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
@@ -833,7 +833,7 @@ if(error_code OR is_remote_ref OR NOT (\"\${tag_sha}\" STREQUAL \"\${head_sha}\"
   endif()
 
   execute_process(
-    COMMAND \"${git_EXECUTABLE}\" submodule update --recursive ${git_submodules}
+    COMMAND \"${git_EXECUTABLE}\" submodule update --recursive --init ${git_submodules}
     WORKING_DIRECTORY \"${work_dir}/${src_name}\"
     RESULT_VARIABLE error_code
     )
