@@ -46,7 +46,8 @@ cmRST::cmRST(std::ostream& os, std::string const& docroot):
             "):`(<*([^`<]|[^` \t]<)*)([ \t]+<[^`]*>)?`"),
   Substitution("(^|[^A-Za-z0-9_])"
                "((\\|[^| \t\r\n]([^|\r\n]*[^| \t\r\n])?\\|)(__|_|))"
-               "([^A-Za-z0-9_]|$)")
+               "([^A-Za-z0-9_]|$)"),
+  TocTreeLink("^.*[ \t]+<([^>]+)>$")
 {
   this->Replace["|release|"] = cmVersion::GetCMakeVersion();
 }
@@ -429,9 +430,18 @@ void cmRST::ProcessDirectiveTocTree()
   for(std::vector<std::string>::iterator i = this->MarkupLines.begin();
       i != this->MarkupLines.end(); ++i)
     {
-    if(!i->empty() && i->find_first_of(":") == i->npos)
+    std::string const& line = *i;
+    if (!line.empty() && line[0] != ':')
       {
-      this->ProcessInclude(*i + ".rst", IncludeTocTree);
+      if (this->TocTreeLink.find(line))
+        {
+        std::string const& link = this->TocTreeLink.match(1);
+        this->ProcessInclude(link + ".rst", IncludeTocTree);
+        }
+      else
+        {
+        this->ProcessInclude(line + ".rst", IncludeTocTree);
+        }
       }
     }
 }

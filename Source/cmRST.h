@@ -89,6 +89,7 @@ private:
   cmsys::RegularExpression ModuleRST;
   cmsys::RegularExpression CMakeRole;
   cmsys::RegularExpression Substitution;
+  cmsys::RegularExpression TocTreeLink;
 
   std::vector<std::string> MarkupLines;
   std::string DocDir;
