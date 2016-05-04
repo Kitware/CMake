@@ -178,7 +178,7 @@ archive_read_open_filename_w(struct archive *a, const wchar_t *wfilename,
 #else
 		/*
 		 * POSIX system does not support a wchar_t interface for
-		 * open() system call, so we have to translate a whcar_t
+		 * open() system call, so we have to translate a wchar_t
 		 * filename to multi-byte one and use it.
 		 */
 		struct archive_string fn;

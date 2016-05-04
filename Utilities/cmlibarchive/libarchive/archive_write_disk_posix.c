@@ -2386,6 +2386,9 @@ check_symlinks(struct archive_write_disk *a)
 		while ((*pn != '\0') && (*p == *pn))
 			++p, ++pn;
 	}
+	/* Skip the root directory if the path is absolute. */
+	if(pn == a->name && pn[0] == '/')
+		++pn;
 	c = pn[0];
 	/* Keep going until we've checked the entire name. */
 	while (pn[0] != '\0' && (pn[0] != '/' || pn[1] != '\0')) {
@@ -2447,6 +2450,9 @@ check_symlinks(struct archive_write_disk *a)
 				return (ARCHIVE_FAILED);
 			}
 		}
+		pn[0] = c;
+		if (pn[0] != '\0')
+			pn++; /* Advance to the next segment. */
 	}
 	pn[0] = c;
 	/* We've checked and/or cleaned the whole path, so remember it. */

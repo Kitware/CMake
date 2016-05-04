@@ -580,10 +580,19 @@ lz4_filter_read_data_block(struct archive_read_filter *self, const void **p)
 				    prefix64k);
 			}
 		}
+#if LZ4_VERSION_MAJOR >= 1 && LZ4_VERSION_MINOR >= 7
+		uncompressed_size = LZ4_decompress_safe_usingDict(
+		    read_buf + 4,
+		    state->out_block + prefix64k, (int)compressed_size,
+		    state->flags.block_maximum_size,
+		    state->out_block,
+		    prefix64k);
+#else
 		uncompressed_size = LZ4_decompress_safe_withPrefix64k(
 		    read_buf + 4,
 		    state->out_block + prefix64k, (int)compressed_size,
 		    state->flags.block_maximum_size);
+#endif
 	}
 
 	/* Check if an error happend in decompression process. */

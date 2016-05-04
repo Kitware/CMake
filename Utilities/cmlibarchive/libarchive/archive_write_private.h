@@ -144,7 +144,7 @@ __archive_write_format_header_ustar(struct archive_write *, char buff[512],
     struct archive_string_conv *);
 
 struct archive_write_program_data;
-struct archive_write_program_data * __archive_write_program_allocate(void);
+struct archive_write_program_data * __archive_write_program_allocate(const char *program_name);
 int	__archive_write_program_free(struct archive_write_program_data *);
 int	__archive_write_program_open(struct archive_write_filter *,
 	    struct archive_write_program_data *, const char *);

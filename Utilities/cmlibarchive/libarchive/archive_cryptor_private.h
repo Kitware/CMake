@@ -30,6 +30,17 @@
 #ifndef ARCHIVE_CRYPTOR_PRIVATE_H_INCLUDED
 #define ARCHIVE_CRYPTOR_PRIVATE_H_INCLUDED
 
+/*
+ * On systems that do not support any recognized crypto libraries,
+ * the archive_cryptor.c file will normally define no usable symbols.
+ *
+ * But some compilers and linkers choke on empty object files, so
+ * define a public symbol that will always exist.  This could
+ * be removed someday if this file gains another always-present
+ * symbol definition.
+ */
+int __libarchive_cryptor_build_hack(void);
+
 #ifdef __APPLE__
 # include <AvailabilityMacros.h>
 # if MAC_OS_X_VERSION_MAX_ALLOWED >= 1080
@@ -72,7 +83,7 @@ typedef struct {
 	unsigned	encr_pos;
 } archive_crypto_ctx;
 
-#elif defined(HAVE_LIBNETTLE)
+#elif defined(HAVE_LIBNETTLE) && defined(HAVE_NETTLE_AES_H)
 #if defined(HAVE_NETTLE_PBKDF2_H)
 #include <nettle/pbkdf2.h>
 #endif
