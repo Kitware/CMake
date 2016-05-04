@@ -76,9 +76,12 @@ The options are:
   The optional ``ARGS`` argument is for backward compatibility and
   will be ignored.
 
-  If ``COMMAND`` specifies an executable target (created by the
+  If ``COMMAND`` specifies an executable target name (created by the
   :command:`add_executable` command) it will automatically be replaced
-  by the location of the executable created at build time.
+  by the location of the executable created at build time. If set, the
+  :prop_tgt:`CROSSCOMPILING_EMULATOR` executable target property will
+  also be prepended to the command to allow the executable to run on
+  the host.
   (Use the ``TARGET_FILE``
   :manual:`generator expression <cmake-generator-expressions(7)>` to
   reference an executable later in the command line.)
