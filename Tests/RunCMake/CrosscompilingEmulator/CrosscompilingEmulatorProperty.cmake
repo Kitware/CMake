@@ -3,7 +3,7 @@
 
 # -DCMAKE_CROSSCOMPILING_EMULATOR=/path/to/pseudo_emulator is passed to this
 # test
-add_executable(target_with_emulator simple_src.cxx)
+add_executable(target_with_emulator simple_src_exiterror.cxx)
 get_property(emulator TARGET target_with_emulator
              PROPERTY CROSSCOMPILING_EMULATOR)
 if(NOT "${emulator}" MATCHES "pseudo_emulator")
@@ -20,7 +20,7 @@ if(NOT "${emulator}" MATCHES "another_emulator")
 endif()
 
 unset(CMAKE_CROSSCOMPILING_EMULATOR CACHE)
-add_executable(target_without_emulator simple_src.cxx)
+add_executable(target_without_emulator simple_src_exiterror.cxx)
 get_property(emulator TARGET target_without_emulator
              PROPERTY CROSSCOMPILING_EMULATOR)
 if(NOT "${emulator}" STREQUAL "")
