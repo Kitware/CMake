@@ -2131,7 +2131,7 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
     }
   }
 
-  // now what sould cmake do? if --build-and-test was specified then
+  // now what should cmake do? if --build-and-test was specified then
   // we run the build and test handler and return
   if (cmakeAndTest) {
     this->Verbose = true;
