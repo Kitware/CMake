@@ -114,7 +114,7 @@ cmGhsMultiTargetGenerator::AddSlashIfNeededToPath(std::string const &input)
 
 void cmGhsMultiTargetGenerator::Generate()
 {
-  const std::vector<cmSourceFile *> objectSources = this->GetSources();
+  std::vector<cmSourceFile *> objectSources = this->GetSources();
   if (!objectSources.empty() && this->IncludeThisTarget())
     {
     if (!cmSystemTools::FileExists(this->AbsBuildFilePath.c_str()))
@@ -154,7 +154,11 @@ void cmGhsMultiTargetGenerator::Generate()
       }
     this->WriteCustomCommands();
 
-    this->WriteSources(objectSources);
+    std::map<const cmSourceFile *, std::string> objectNames =
+        cmGhsMultiTargetGenerator::GetObjectNames(
+            &objectSources, this->LocalGenerator, this->GeneratorTarget);
+
+    this->WriteSources(objectSources, objectNames);
     }
 }
 
@@ -484,44 +488,65 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
 
 std::map<const cmSourceFile *, std::string>
 cmGhsMultiTargetGenerator::GetObjectNames(
-    const std::vector<cmSourceFile *> &objectSources)
+    std::vector<cmSourceFile *> *const objectSources,
+    cmLocalGhsMultiGenerator *const localGhsMultiGenerator,
+    cmGeneratorTarget *const generatorTarget)
 {
-  bool found_duplicate = false;
-  std::set<std::string> filenames;
+  std::map<std::string, std::vector<cmSourceFile *> > filenameToSource;
+  std::map<cmSourceFile *, std::string> sourceToFilename;
   for(std::vector<cmSourceFile *>::const_iterator
-      sf = objectSources.begin(); sf != objectSources.end(); ++sf)
+      sf = objectSources->begin(); sf != objectSources->end(); ++sf)
     {
     const std::string filename =
         cmSystemTools::GetFilenameName((*sf)->GetFullPath());
     const std::string lower_filename = cmSystemTools::LowerCase(filename);
-    if (filenames.end() != filenames.find(lower_filename))
-      {
-      found_duplicate = true;
-      }
-    filenames.insert(lower_filename);
+    filenameToSource[lower_filename].push_back(*sf);
+    sourceToFilename[*sf] = lower_filename;
     }
 
-  std::map<const cmSourceFile *, std::string> objectNames;
-  if (found_duplicate)
+  std::vector<cmSourceFile *> duplicateSources;
+  for (std::map<std::string, std::vector<cmSourceFile *> >::const_iterator
+       msvSourceI = filenameToSource.begin();
+       msvSourceI != filenameToSource.end(); ++msvSourceI)
     {
-    for(std::vector<cmSourceFile *>::const_iterator
-        sf = objectSources.begin(); sf != objectSources.end(); ++sf)
+    if (msvSourceI->second.size() > 1)
       {
-      std::string full_filename = (*sf)->GetFullPath();
-      cmsys::SystemTools::ReplaceString(full_filename, ":/", "_");
-      cmsys::SystemTools::ReplaceString(full_filename, "/", "_");
-      objectNames[*sf] = full_filename;
+      duplicateSources.insert(duplicateSources.end(),
+                              msvSourceI->second.begin(),
+                              msvSourceI->second.end());
       }
     }
 
-  return objectNames;
+  std::map<const cmSourceFile *, std::string> objectNamesCorrected;
+
+  for (std::vector<cmSourceFile *>::const_iterator sf =
+           duplicateSources.begin();
+       sf != duplicateSources.end(); ++sf)
+    {
+    static std::string::size_type const MAX_FULL_PATH_LENGTH = 247;
+    std::string const longestObjectDirectory(
+        cmGhsMultiTargetGenerator::ComputeLongestObjectDirectory(
+    localGhsMultiGenerator, generatorTarget, *sf));
+    std::string fullFilename = (*sf)->GetFullPath();
+    bool const ObjPathFound = cmLocalGeneratorCheckObjectName(
+        fullFilename, longestObjectDirectory.size(), MAX_FULL_PATH_LENGTH);
+    if (!ObjPathFound)
+      {
+      cmSystemTools::Error("Object path \"", fullFilename.c_str(),
+                           "\" too long", "");
+      }
+    cmsys::SystemTools::ReplaceString(fullFilename, ":/", "_");
+    cmsys::SystemTools::ReplaceString(fullFilename, "/", "_");
+    objectNamesCorrected[*sf] = fullFilename;
+    }
+
+  return objectNamesCorrected;
 }
 
 void cmGhsMultiTargetGenerator::WriteSources(
-  std::vector<cmSourceFile *> const &objectSources)
+    std::vector<cmSourceFile *> const &objectSources,
+    std::map<const cmSourceFile *, std::string> const &objectNames)
 {
-  std::map<const cmSourceFile *, std::string> objectNames =
-    cmGhsMultiTargetGenerator::GetObjectNames(objectSources);
   for (std::vector<cmSourceFile *>::const_iterator si = objectSources.begin();
        si != objectSources.end(); ++si)
     {
@@ -644,6 +669,30 @@ cmGhsMultiTargetGenerator::GetOutputFilename(const std::string &config) const
     }
 
   return outputFilename;
+}
+
+std::string cmGhsMultiTargetGenerator::ComputeLongestObjectDirectory(
+    cmLocalGhsMultiGenerator const *localGhsMultiGenerator,
+    cmGeneratorTarget *const generatorTarget, cmSourceFile *const sourceFile)
+{
+  std::string dir_max;
+  dir_max +=
+      localGhsMultiGenerator->GetMakefile()->GetCurrentBinaryDirectory();
+  dir_max += "/";
+  dir_max += generatorTarget->Target->GetName();
+  dir_max += "/";
+  std::vector<cmSourceGroup> sourceGroups(
+      localGhsMultiGenerator->GetMakefile()->GetSourceGroups());
+  char const *const sourceFullPath = sourceFile->GetFullPath().c_str();
+  cmSourceGroup *sourceGroup =
+      localGhsMultiGenerator->GetMakefile()->FindSourceGroup(sourceFullPath,
+                                                             sourceGroups);
+  std::string const sgPath(sourceGroup->GetFullName());
+  dir_max += sgPath;
+  dir_max += "/Objs/libs/";
+  dir_max += generatorTarget->Target->GetName();
+  dir_max += "/";
+  return dir_max;
 }
 
 bool cmGhsMultiTargetGenerator::IsNotKernel(std::string const &config,

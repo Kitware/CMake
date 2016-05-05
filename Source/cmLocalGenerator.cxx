@@ -2667,7 +2667,6 @@ cmLocalGeneratorShortenObjectName(std::string& objName,
     }
 }
 
-static
 bool cmLocalGeneratorCheckObjectName(std::string& objName,
                                      std::string::size_type dir_len,
                                      std::string::size_type max_total_len)
