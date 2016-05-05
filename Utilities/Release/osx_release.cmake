@@ -1,7 +1,7 @@
 set(PROCESSORS 4)
 set(CMAKE_RELEASE_DIRECTORY /Users/kitware/CMakeReleaseDirectory)
 set(BOOTSTRAP_ARGS "--prefix=/ --docdir=doc/cmake")
-set(HOST bigmac)
+set(HOST dragnipur)
 set(MAKE_PROGRAM "make")
 set(MAKE "${MAKE_PROGRAM} -j5")
 set(CPACK_BINARY_GENERATORS "DragNDrop TGZ TZ")
@@ -26,7 +26,7 @@ CMake_NO_CXX_STANDARD:BOOL=TRUE
 CMake_TEST_NO_FindPackageModeMakefileTest:BOOL=TRUE
 ")
 set(ENV [[
-export CMAKE_PREFIX_PATH='/Users/kitware/dashboards/support/Qt-5.5.1'
+export CMAKE_PREFIX_PATH='/Users/kitware/SDKs/qt-5.6.0-clang-x64'
 ]])
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include(${path}/release_cmake.cmake)
