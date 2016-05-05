@@ -233,14 +233,13 @@ Options
  label associated with the tests run.  If there are no labels on the
  tests, nothing extra is printed.
 
-``--build-and-test``
+``--build-and-test <path-to-source> <path-to-build>``
  Configure, build and run a test.
 
  This option tells ctest to configure (i.e.  run cmake on), build,
  and or execute a test.  The configure and test steps are optional.
  The arguments to this command line are the source and binary
- directories.  By default this will run CMake on the Source/Bin
- directories specified unless ``--build-nocmake`` is specified.
+ directories.
  The ``--build-generator`` option *must* be provided to use
  ``--build-and-test``.  If ``--test-command`` is specified then that will be
  run after the build is complete.  Other options that affect this
