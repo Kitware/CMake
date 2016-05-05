@@ -17,7 +17,7 @@
 #ifdef CMAKE_USE_SYSTEM_EXPAT
 # include <expat.h>
 #else
-# include <cmexpat/expat.h>
+# include <cmexpat/lib/expat.h>
 #endif
 
 #endif
