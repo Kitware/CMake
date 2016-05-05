@@ -4,16 +4,6 @@
 project(expat)
 
 cmake_minimum_required(VERSION 2.6)
-set(PACKAGE_BUGREPORT "expat-bugs@libexpat.org")
-set(PACKAGE_NAME "expat")
-set(PACKAGE_VERSION "2.1.1")
-set(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
-set(PACKAGE_TARNAME "${PACKAGE_NAME}")
-
-option(BUILD_tools "build the xmlwf tool for expat library" ON)
-option(BUILD_examples "build the examples for expat library" ON)
-option(BUILD_tests "build the tests for expat library" ON)
-option(BUILD_shared "build a shared expat library" ON)
 
 # configuration options
 set(XML_CONTEXT_BYTES 1024 CACHE STRING "Define to specify how much context to retain around the current parse point")
@@ -30,10 +20,6 @@ if(XML_NS)
 else(XML_NS)
     set(XML_NS 0)
 endif(XML_NS)
-
-if(BUILD_tests)
-    enable_testing()
-endif(BUILD_tests)
 
 include(ConfigureChecks.cmake)
 
@@ -66,56 +52,3 @@ else(BUILD_shared)
 endif(BUILD_shared)
 
 add_library(expat ${_SHARED} ${expat_SRCS})
-
-install(TARGETS expat RUNTIME DESTINATION bin
-                      LIBRARY DESTINATION lib
-                      ARCHIVE DESTINATION lib)
-
-set(prefix ${CMAKE_INSTALL_PREFIX})
-set(exec_prefix "\${prefix}/bin")
-set(libdir "\${prefix}/lib")
-set(includedir "\${prefix}/include")
-configure_file(expat.pc.in ${CMAKE_CURRENT_BINARY_DIR}/expat.pc)
-
-install(FILES lib/expat.h lib/expat_external.h DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/expat.pc DESTINATION lib/pkgconfig)
-
-
-
-if(BUILD_tools AND NOT WINCE)
-    set(xmlwf_SRCS
-        xmlwf/xmlwf.c
-        xmlwf/xmlfile.c
-        xmlwf/codepage.c
-        xmlwf/readfilemap.c
-    )
-
-    add_executable(xmlwf ${xmlwf_SRCS})
-    set_property(TARGET xmlwf PROPERTY RUNTIME_OUTPUT_DIRECTORY xmlwf)
-    target_link_libraries(xmlwf expat)
-    install(TARGETS xmlwf DESTINATION bin)
-    install(FILES doc/xmlwf.1 DESTINATION share/man/man1)
-endif(BUILD_tools AND NOT WINCE)
-
-if(BUILD_examples)
-    add_executable(elements examples/elements.c)
-    set_property(TARGET elements PROPERTY RUNTIME_OUTPUT_DIRECTORY examples)
-    target_link_libraries(elements expat)
-
-    add_executable(outline examples/outline.c)
-    set_property(TARGET outline PROPERTY RUNTIME_OUTPUT_DIRECTORY examples)
-    target_link_libraries(outline expat)
-endif(BUILD_examples)
-
-if(BUILD_tests)
-    ## these are unittests that can be run on any platform
-    add_executable(runtests tests/runtests.c tests/chardata.c tests/minicheck.c)
-    set_property(TARGET runtests PROPERTY RUNTIME_OUTPUT_DIRECTORY tests)
-    target_link_libraries(runtests expat)
-    add_test(runtests tests/runtests)
-
-    add_executable(runtestspp tests/runtestspp.cpp tests/chardata.c tests/minicheck.c)
-    set_property(TARGET runtestspp PROPERTY RUNTIME_OUTPUT_DIRECTORY tests)
-    target_link_libraries(runtestspp expat)
-    add_test(runtestspp tests/runtestspp)
-endif(BUILD_tests)
