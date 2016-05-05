@@ -19,4 +19,9 @@
 
 #include "expat_config.h"
 
+#if defined(_MSC_VER)
+# pragma warning(push,1)
+# pragma warning(disable:4311)   /* pointer truncation */
+#endif
+
 #endif /* ndef WINCONFIG_H */
