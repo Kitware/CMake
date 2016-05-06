@@ -14,7 +14,6 @@
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 
-//----------------------------------------------------------------------------
 cmInstallGenerator
 ::cmInstallGenerator(const char* destination,
                      std::vector<std::string> const& configurations,
@@ -29,13 +28,11 @@ cmInstallGenerator
 {
 }
 
-//----------------------------------------------------------------------------
 cmInstallGenerator
 ::~cmInstallGenerator()
 {
 }
 
-//----------------------------------------------------------------------------
 void cmInstallGenerator
 ::AddInstallRule(
                  std::ostream& os,
@@ -146,7 +143,6 @@ void cmInstallGenerator
   os << ")\n";
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmInstallGenerator::CreateComponentTest(const char* component,
                                         bool exclude_from_all)
@@ -161,7 +157,6 @@ cmInstallGenerator::CreateComponentTest(const char* component,
   return result;
 }
 
-//----------------------------------------------------------------------------
 void cmInstallGenerator::GenerateScript(std::ostream& os)
 {
   // Track indentation.
@@ -179,13 +174,11 @@ void cmInstallGenerator::GenerateScript(std::ostream& os)
   os << indent << "endif()\n\n";
 }
 
-//----------------------------------------------------------------------------
 bool cmInstallGenerator::InstallsForConfig(const std::string& config)
 {
   return this->GeneratesForConfig(config);
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmInstallGenerator::ConvertToAbsoluteDestination(std::string const& dest) const
 {
@@ -199,7 +192,6 @@ cmInstallGenerator::ConvertToAbsoluteDestination(std::string const& dest) const
   return result;
 }
 
-//----------------------------------------------------------------------------
 cmInstallGenerator::MessageLevel
 cmInstallGenerator::SelectMessageLevel(cmMakefile* mf, bool never)
 {

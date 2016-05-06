@@ -206,7 +206,6 @@ bool cmMachOHeaderAndLoadCommands::read_load_commands(uint32_t ncmds,
   return true;
 }
 
-//----------------------------------------------------------------------------
 class cmMachOInternal
 {
 public:
@@ -361,14 +360,12 @@ bool cmMachOInternal::read_mach_o(uint32_t file_offset)
 //============================================================================
 // External class implementation.
 
-//----------------------------------------------------------------------------
 cmMachO::cmMachO(const char* fname): Internal(0)
 {
   this->Internal = new cmMachOInternal(fname);
 
 }
 
-//----------------------------------------------------------------------------
 cmMachO::~cmMachO()
 {
   delete this->Internal;
@@ -379,7 +376,6 @@ std::string const& cmMachO::GetErrorMessage() const
   return this->Internal->ErrorMessage;
 }
 
-//----------------------------------------------------------------------------
 bool cmMachO::Valid() const
 {
   return !this->Internal->MachOList.empty();

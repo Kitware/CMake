@@ -26,7 +26,6 @@
 #include <cmsys/Encoding.hxx>
 #include <cmsys/SystemTools.hxx>
 
-//----------------------------------------------------------------------------
 static const char * cmDocumentationName[][2] =
 {
   {0,
@@ -34,7 +33,6 @@ static const char * cmDocumentationName[][2] =
   {0,0}
 };
 
-//----------------------------------------------------------------------------
 static const char * cmDocumentationUsage[][2] =
 {
   {0,
@@ -42,7 +40,6 @@ static const char * cmDocumentationUsage[][2] =
   {0,0}
 };
 
-//----------------------------------------------------------------------------
 static const char * cmDocumentationOptions[][2] =
 {
     {"-G <generator>", "Use the specified generator to generate package."},
@@ -58,13 +55,11 @@ static const char * cmDocumentationOptions[][2] =
     {0,0}
 };
 
-//----------------------------------------------------------------------------
 int cpackUnknownArgument(const char*, void*)
 {
   return 1;
 }
 
-//----------------------------------------------------------------------------
 struct cpackDefinitions
 {
   typedef std::map<std::string, std::string> MapType;
@@ -72,7 +67,6 @@ struct cpackDefinitions
   cmCPackLog *Log;
 };
 
-//----------------------------------------------------------------------------
 int cpackDefinitionArgument(const char* argument, const char* cValue,
   void* call_data)
 {
@@ -95,7 +89,6 @@ int cpackDefinitionArgument(const char* argument, const char* cValue,
 }
 
 
-//----------------------------------------------------------------------------
 // this is CPack.
 int main (int argc, char const* const* argv)
 {

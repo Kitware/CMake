@@ -218,7 +218,6 @@ bool cmFileCommand
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
   bool append)
 {
@@ -282,7 +281,6 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
 {
   if ( args.size() < 3 )
@@ -399,7 +397,6 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCommand::HandleHashCommand(std::vector<std::string> const& args)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -434,7 +431,6 @@ bool cmFileCommand::HandleHashCommand(std::vector<std::string> const& args)
 #endif
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
 {
   if(args.size() < 3)
@@ -885,7 +881,6 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
   bool recurse)
 {
@@ -1070,7 +1065,6 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCommand::HandleMakeDirectoryCommand(
   std::vector<std::string> const& args)
 {
@@ -1109,7 +1103,6 @@ bool cmFileCommand::HandleMakeDirectoryCommand(
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmFileCommand::HandleDifferentCommand(std::vector<std::string> const& args)
 {
@@ -1170,7 +1163,6 @@ cmFileCommand::HandleDifferentCommand(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 // File installation helper class.
 struct cmFileCopier
 {
@@ -1380,7 +1372,6 @@ protected:
     }
 };
 
-//----------------------------------------------------------------------------
 bool cmFileCopier::Parse(std::vector<std::string> const& args)
 {
   this->Doing = DoingFiles;
@@ -1427,7 +1418,6 @@ bool cmFileCopier::Parse(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCopier::CheckKeyword(std::string const& arg)
 {
   if(arg == "DESTINATION")
@@ -1540,7 +1530,6 @@ bool cmFileCopier::CheckKeyword(std::string const& arg)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCopier::CheckValue(std::string const& arg)
 {
   switch(this->Doing)
@@ -1633,7 +1622,6 @@ bool cmFileCopier::CheckValue(std::string const& arg)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCopier::Run(std::vector<std::string> const& args)
 {
   if(!this->Parse(args))
@@ -1677,7 +1665,6 @@ bool cmFileCopier::Run(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCopier::Install(const char* fromFile, const char* toFile)
 {
   if(!*fromFile)
@@ -1716,7 +1703,6 @@ bool cmFileCopier::Install(const char* fromFile, const char* toFile)
   return this->ReportMissing(fromFile);
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCopier::InstallSymlink(const char* fromFile, const char* toFile)
 {
   // Read the original symlink.
@@ -1767,7 +1753,6 @@ bool cmFileCopier::InstallSymlink(const char* fromFile, const char* toFile)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCopier::InstallFile(const char* fromFile, const char* toFile,
                                MatchProperties const& match_properties)
 {
@@ -1827,7 +1812,6 @@ bool cmFileCopier::InstallFile(const char* fromFile, const char* toFile,
   return this->SetPermissions(toFile, permissions);
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCopier::InstallDirectory(const char* source,
                                     const char* destination,
                                     MatchProperties const& match_properties)
@@ -1911,14 +1895,12 @@ bool cmFileCopier::InstallDirectory(const char* source,
   return this->SetPermissions(destination, permissions_after);
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCommand::HandleCopyCommand(std::vector<std::string> const& args)
 {
   cmFileCopier copier(this);
   return copier.Run(args);
 }
 
-//----------------------------------------------------------------------------
 struct cmFileInstaller: public cmFileCopier
 {
   cmFileInstaller(cmFileCommand* command):
@@ -2031,7 +2013,6 @@ protected:
   bool HandleInstallDestination();
 };
 
-//----------------------------------------------------------------------------
 bool cmFileInstaller::Parse(std::vector<std::string> const& args)
 {
   if(!this->cmFileCopier::Parse(args))
@@ -2074,7 +2055,6 @@ bool cmFileInstaller::Parse(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmFileInstaller::CheckKeyword(std::string const& arg)
 {
   if(arg == "TYPE")
@@ -2201,7 +2181,6 @@ bool cmFileInstaller::CheckKeyword(std::string const& arg)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmFileInstaller::CheckValue(std::string const& arg)
 {
   switch(this->Doing)
@@ -2221,7 +2200,6 @@ bool cmFileInstaller::CheckValue(std::string const& arg)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmFileInstaller
 ::GetTargetTypeFromString(const std::string& stype)
 {
@@ -2263,7 +2241,6 @@ bool cmFileInstaller
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmFileInstaller::HandleInstallDestination()
 {
   std::string& destination = this->Destination;
@@ -2359,7 +2336,6 @@ bool cmFileInstaller::HandleInstallDestination()
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmFileCommand::HandleRPathChangeCommand(std::vector<std::string> const& args)
 {
@@ -2466,7 +2442,6 @@ cmFileCommand::HandleRPathChangeCommand(std::vector<std::string> const& args)
   return success;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmFileCommand::HandleRPathRemoveCommand(std::vector<std::string> const& args)
 {
@@ -2539,7 +2514,6 @@ cmFileCommand::HandleRPathRemoveCommand(std::vector<std::string> const& args)
   return success;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmFileCommand::HandleRPathCheckCommand(std::vector<std::string> const& args)
 {
@@ -2599,14 +2573,12 @@ cmFileCommand::HandleRPathCheckCommand(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
 {
   cmFileInstaller installer(this);
   return installer.Run(args);
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCommand::HandleRelativePathCommand(
   std::vector<std::string> const& args)
 {
@@ -2645,7 +2617,6 @@ bool cmFileCommand::HandleRelativePathCommand(
 }
 
 
-//----------------------------------------------------------------------------
 bool cmFileCommand::HandleRename(std::vector<std::string> const& args)
 {
   if(args.size() != 3)
@@ -2686,7 +2657,6 @@ bool cmFileCommand::HandleRename(std::vector<std::string> const& args)
 }
 
 
-//----------------------------------------------------------------------------
 bool cmFileCommand::HandleRemove(std::vector<std::string> const& args,
                                  bool recurse)
 {
@@ -2717,7 +2687,6 @@ bool cmFileCommand::HandleRemove(std::vector<std::string> const& args,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCommand::HandleCMakePathCommand(std::vector<std::string>
                                            const& args,
                                            bool nativePath)
@@ -3573,7 +3542,6 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
 #endif
 }
 
-//----------------------------------------------------------------------------
 void cmFileCommand::AddEvaluationFile(const std::string &inputName,
                                       const std::string &outputExpr,
                                       const std::string &condition,
@@ -3594,7 +3562,6 @@ void cmFileCommand::AddEvaluationFile(const std::string &inputName,
                                     conditionCge, inputIsContent);
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCommand::HandleGenerateCommand(
   std::vector<std::string> const& args)
 {
@@ -3642,7 +3609,6 @@ bool cmFileCommand::HandleGenerateCommand(
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCommand::HandleLockCommand(
   std::vector<std::string> const& args)
 {
@@ -3841,7 +3807,6 @@ bool cmFileCommand::HandleLockCommand(
 #endif
 }
 
-//----------------------------------------------------------------------------
 bool cmFileCommand::HandleTimestampCommand(
   std::vector<std::string> const& args)
 {

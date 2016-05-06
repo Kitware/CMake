@@ -23,7 +23,6 @@
 #include <cmTimestamp.h>
 #include <cmUuid.h>
 
-//----------------------------------------------------------------------------
 bool cmStringCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
@@ -121,7 +120,6 @@ bool cmStringCommand
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand::HandleHashCommand(std::vector<std::string> const& args)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -149,7 +147,6 @@ bool cmStringCommand::HandleHashCommand(std::vector<std::string> const& args)
 #endif
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand::HandleToUpperLowerCommand(
   std::vector<std::string> const& args, bool toUpper)
 {
@@ -176,7 +173,6 @@ bool cmStringCommand::HandleToUpperLowerCommand(
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand::HandleAsciiCommand(std::vector<std::string> const& args)
 {
   if ( args.size() < 3 )
@@ -208,7 +204,6 @@ bool cmStringCommand::HandleAsciiCommand(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand::HandleConfigureCommand(
   std::vector<std::string> const& args)
 {
@@ -255,7 +250,6 @@ bool cmStringCommand::HandleConfigureCommand(
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand::HandleRegexCommand(std::vector<std::string> const& args)
 {
   if(args.size() < 2)
@@ -300,7 +294,6 @@ bool cmStringCommand::HandleRegexCommand(std::vector<std::string> const& args)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand::RegexMatch(std::vector<std::string> const& args)
 {
   //"STRING(REGEX MATCH <regular_expression> <output variable>
@@ -345,7 +338,6 @@ bool cmStringCommand::RegexMatch(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
 {
   //"STRING(REGEX MATCHALL <regular_expression> <output variable> <input>
@@ -396,7 +388,6 @@ bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
 {
   //"STRING(REGEX REPLACE <regular_expression> <replace_expression>
@@ -533,7 +524,6 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand::HandleFindCommand(std::vector<std::string> const&
                                            args)
 {
@@ -595,7 +585,6 @@ bool cmStringCommand::HandleFindCommand(std::vector<std::string> const&
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand::HandleCompareCommand(std::vector<std::string> const&
                                            args)
 {
@@ -652,7 +641,6 @@ bool cmStringCommand::HandleCompareCommand(std::vector<std::string> const&
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand::HandleReplaceCommand(std::vector<std::string> const&
                                            args)
 {
@@ -675,7 +663,6 @@ bool cmStringCommand::HandleReplaceCommand(std::vector<std::string> const&
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand::HandleSubstringCommand(std::vector<std::string> const&
                                              args)
 {
@@ -713,7 +700,6 @@ bool cmStringCommand::HandleSubstringCommand(std::vector<std::string> const&
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand
 ::HandleLengthCommand(std::vector<std::string> const& args)
 {
@@ -734,7 +720,6 @@ bool cmStringCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand::HandleAppendCommand(std::vector<std::string> const& args)
 {
   if(args.size() < 2)
@@ -762,7 +747,6 @@ bool cmStringCommand::HandleAppendCommand(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand
 ::HandleConcatCommand(std::vector<std::string> const& args)
 {
@@ -779,7 +763,6 @@ bool cmStringCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand
 ::HandleMakeCIdentifierCommand(std::vector<std::string> const& args)
 {
@@ -797,7 +780,6 @@ bool cmStringCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand
 ::HandleGenexStripCommand(std::vector<std::string> const& args)
 {
@@ -818,7 +800,6 @@ bool cmStringCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand::HandleStripCommand(
   std::vector<std::string> const& args)
 {
@@ -867,7 +848,6 @@ bool cmStringCommand::HandleStripCommand(
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand
 ::HandleRandomCommand(std::vector<std::string> const& args)
 {
@@ -950,7 +930,6 @@ bool cmStringCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmStringCommand
 ::HandleTimestampCommand(std::vector<std::string> const& args)
 {

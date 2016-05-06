@@ -127,7 +127,6 @@ bool cmCMakeMinimumRequired
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmCMakeMinimumRequired::EnforceUnknownArguments()
 {
   if(!this->UnknownArguments.empty())

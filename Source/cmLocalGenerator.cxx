@@ -72,7 +72,6 @@ void cmLocalGenerator::IssueMessage(cmake::MessageType t,
   this->Makefile->IssueMessage(t, text);
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::ComputeObjectMaxPath()
 {
   // Choose a maximum object file name length.
@@ -247,7 +246,6 @@ void cmLocalGenerator::ProcessEvaluationFiles(
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::GenerateInstallRules()
 {
   // Compute the install prefix.
@@ -497,7 +495,6 @@ cmGeneratorTarget* cmLocalGenerator::FindLocalNonAliasGeneratorTarget(
   return 0;
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::ComputeTargetManifest()
 {
   // Collect the set of configuration types.
@@ -962,7 +959,6 @@ cmLocalGenerator::ExpandRuleVariables(std::string& s,
   s = expandedInput;
 }
 
-//----------------------------------------------------------------------------
 const char* cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
                                               const std::string& prop)
 {
@@ -976,7 +972,6 @@ const char* cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::InsertRuleLauncher(std::string& s,
                                           cmGeneratorTarget* target,
                                           const std::string& prop)
@@ -989,7 +984,6 @@ void cmLocalGenerator::InsertRuleLauncher(std::string& s,
     }
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConvertToIncludeReference(std::string const& path,
                                             OutputFormat format,
@@ -999,7 +993,6 @@ cmLocalGenerator::ConvertToIncludeReference(std::string const& path,
     path, forceFullPaths? FULL : START_OUTPUT, format);
 }
 
-//----------------------------------------------------------------------------
 std::string cmLocalGenerator::GetIncludeFlags(
                                      const std::vector<std::string> &includes,
                                      cmGeneratorTarget* target,
@@ -1129,7 +1122,6 @@ std::string cmLocalGenerator::GetIncludeFlags(
   return flags;
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::AddCompileDefinitions(std::set<std::string>& defines,
                                              cmGeneratorTarget const* target,
                                              const std::string& config,
@@ -1140,7 +1132,6 @@ void cmLocalGenerator::AddCompileDefinitions(std::set<std::string>& defines,
   this->AppendDefines(defines, targetDefines);
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::AddCompileOptions(
   std::string& flags, cmGeneratorTarget* target,
   const std::string& lang, const std::string& config
@@ -1225,7 +1216,6 @@ void cmLocalGenerator::AddCompileOptions(
   this->AddCompilerRequirementFlag(flags, target, lang);
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
                                              cmGeneratorTarget const* target,
                                              const std::string& lang,
@@ -1745,7 +1735,6 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
 }
 
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
                                             cmGeneratorTarget const* target,
                                             const std::string& lang,
@@ -1803,7 +1792,6 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
 }
 
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::AddLanguageFlags(std::string& flags,
                                         const std::string& lang,
                                         const std::string& config)
@@ -1815,7 +1803,6 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   this->AddConfigVariableFlags(flags, flagsVar, config);
 }
 
-//----------------------------------------------------------------------------
 cmGeneratorTarget*
 cmLocalGenerator::FindGeneratorTargetToUse(const std::string& name) const
 {
@@ -1836,7 +1823,6 @@ cmLocalGenerator::FindGeneratorTargetToUse(const std::string& name) const
   return this->GetGlobalGenerator()->FindGeneratorTarget(name);
 }
 
-//----------------------------------------------------------------------------
 bool cmLocalGenerator::GetRealDependency(const std::string& inName,
                                          const std::string& config,
                                          std::string& dep)
@@ -1937,7 +1923,6 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::AddSharedFlags(std::string& flags,
                                       const std::string& lang,
                                       bool shared)
@@ -1954,7 +1939,6 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::
 AddCompilerRequirementFlag(std::string &flags,
                            cmGeneratorTarget const* target,
@@ -2147,7 +2131,6 @@ static void AddInlineVisibilityCompileOption(std::string &flags,
   lg->AppendFlags(flags, opt);
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator
 ::AddVisibilityPresetFlags(std::string &flags, cmGeneratorTarget const* target,
                             const std::string& lang)
@@ -2201,7 +2184,6 @@ void cmLocalGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::AddCMP0018Flags(std::string &flags,
                                        cmGeneratorTarget const* target,
                                        std::string const& lang,
@@ -2240,7 +2222,6 @@ void cmLocalGenerator::AddCMP0018Flags(std::string &flags,
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
                                             const std::string &lang) const
 {
@@ -2283,7 +2264,6 @@ bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
   return false;
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
                                                    std::string const& lang,
                                                    int targetType)
@@ -2316,7 +2296,6 @@ void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::AddConfigVariableFlags(std::string& flags,
                                               const std::string& var,
                                               const std::string& config)
@@ -2333,7 +2312,6 @@ void cmLocalGenerator::AddConfigVariableFlags(std::string& flags,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::AppendFlags(std::string& flags,
                                    const std::string& newFlags)
 {
@@ -2347,7 +2325,6 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::AppendFlags(std::string& flags,
                                    const char* newFlags)
 {
@@ -2357,14 +2334,12 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::AppendFlagEscape(std::string& flags,
                                         const std::string& rawFlag)
 {
   this->AppendFlags(flags, this->EscapeForShell(rawFlag));
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::AppendDefines(std::set<std::string>& defines,
                                      const char* defines_list)
 {
@@ -2380,7 +2355,6 @@ void cmLocalGenerator::AppendDefines(std::set<std::string>& defines,
   this->AppendDefines(defines, defines_vec);
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::AppendDefines(std::set<std::string>& defines,
                                   const std::vector<std::string> &defines_vec)
 {
@@ -2396,7 +2370,6 @@ void cmLocalGenerator::AppendDefines(std::set<std::string>& defines,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
                                    std::string &definesString,
                                    const std::string& lang)
@@ -2461,7 +2434,6 @@ void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::AppendFeatureOptions(
   std::string& flags, const std::string& lang, const char* feature)
 {
@@ -2481,7 +2453,6 @@ void cmLocalGenerator::AppendFeatureOptions(
     }
 }
 
-//----------------------------------------------------------------------------
 const char* cmLocalGenerator::GetFeature(const std::string& feature,
                                          const std::string& config)
 {
@@ -2510,7 +2481,6 @@ std::string cmLocalGenerator::GetProjectName() const
   return this->StateSnapshot.GetProjectName();
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConstructComment(cmCustomCommandGenerator const& ccg,
                                    const char* default_comment)
@@ -2541,7 +2511,6 @@ cmLocalGenerator::ConstructComment(cmCustomCommandGenerator const& ccg,
   return default_comment;
 }
 
-//----------------------------------------------------------------------------
 class cmInstallTargetGeneratorLocal: public cmInstallTargetGenerator
 {
 public:
@@ -2556,7 +2525,6 @@ public:
   }
 };
 
-//----------------------------------------------------------------------------
 void
 cmLocalGenerator
 ::GenerateTargetInstallRules(
@@ -2708,7 +2676,6 @@ bool cmLocalGeneratorCheckObjectName(std::string& objName,
 }
 #endif
 
-//----------------------------------------------------------------------------
 std::string&
 cmLocalGenerator
 ::CreateSafeUniqueObjectFileName(const std::string& sin,
@@ -2804,7 +2771,6 @@ cmLocalGenerator
   return it->second;
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::ComputeObjectFilenames(
                             std::map<cmSourceFile const*, std::string>&,
                             cmGeneratorTarget const*)
@@ -2832,7 +2798,6 @@ bool cmLocalGenerator::IsNMake() const
   return this->GetState()->UseNMake();
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmLocalGenerator
 ::GetObjectFileNameWithoutTarget(const cmSourceFile& source,
@@ -2931,7 +2896,6 @@ cmLocalGenerator
   return this->CreateSafeUniqueObjectFileName(objectName, dir_max);
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmLocalGenerator
 ::GetSourceFileLanguage(const cmSourceFile& source)
@@ -2964,7 +2928,6 @@ const char* cmLocalGenerator::GetCurrentSourceDirectory() const
   return this->StateSnapshot.GetDirectory().GetCurrentSource();
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::GetTargetDirectory(const cmGeneratorTarget*) const
 {
@@ -2973,7 +2936,6 @@ cmLocalGenerator::GetTargetDirectory(const cmGeneratorTarget*) const
   return "";
 }
 
-//----------------------------------------------------------------------------
 KWIML_INT_uint64_t cmLocalGenerator::GetBackwardsCompatibility()
 {
   // The computed version may change until the project is fully
@@ -3000,7 +2962,6 @@ KWIML_INT_uint64_t cmLocalGenerator::GetBackwardsCompatibility()
   return this->BackwardsCompatibility;
 }
 
-//----------------------------------------------------------------------------
 bool cmLocalGenerator::NeedBackwardsCompatibility_2_4()
 {
   // Check the policy to decide whether to pay attention to this
@@ -3038,7 +2999,6 @@ cmLocalGenerator::GetPolicyStatus(cmPolicies::PolicyID id) const
   return this->Makefile->GetPolicyStatus(id);
 }
 
-//----------------------------------------------------------------------------
 bool cmLocalGenerator::CheckDefinition(std::string const& define) const
 {
   // Many compilers do not support -DNAME(arg)=sdf so we disable it.
@@ -3079,7 +3039,6 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
   return true;
 }
 
-//----------------------------------------------------------------------------
 static void cmLGInfoProp(cmMakefile* mf, cmGeneratorTarget* target,
     const std::string& prop)
 {
@@ -3089,7 +3048,6 @@ static void cmLGInfoProp(cmMakefile* mf, cmGeneratorTarget* target,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::GenerateAppleInfoPList(cmGeneratorTarget* target,
                                               const std::string& targetName,
                                               const char* fname)
@@ -3132,7 +3090,6 @@ void cmLocalGenerator::GenerateAppleInfoPList(cmGeneratorTarget* target,
   mf->ConfigureFile(inFile.c_str(), fname, false, false, false);
 }
 
-//----------------------------------------------------------------------------
 void cmLocalGenerator::GenerateFrameworkInfoPList(cmGeneratorTarget* target,
                                                 const std::string& targetName,
                                                 const char* fname)

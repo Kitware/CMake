@@ -17,7 +17,6 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 
-//----------------------------------------------------------------------------
 cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(cmake* cm,
   const std::string& platformName)
   : cmGlobalVisualStudio7Generator(cm, platformName)
@@ -26,7 +25,6 @@ cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(cmake* cm,
   this->Version = VS71;
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio71Generator::GetUserMacrosDirectory()
 {
   // Macros not supported on Visual Studio 7.1 and earlier because
@@ -65,7 +63,6 @@ std::string cmGlobalVisualStudio71Generator::GetUserMacrosDirectory()
 #endif
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio71Generator::GetUserMacrosRegKeyBase()
 {
   // Macros not supported on Visual Studio 7.1 and earlier because
@@ -79,7 +76,6 @@ std::string cmGlobalVisualStudio71Generator::GetUserMacrosRegKeyBase()
 #endif
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio71Generator
 ::WriteSLNFile(std::ostream& fout,
                cmLocalGenerator* root,
@@ -149,7 +145,6 @@ void cmGlobalVisualStudio71Generator
   this->WriteSLNFooter(fout);
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalVisualStudio71Generator
 ::WriteSolutionConfigurations(std::ostream& fout,
@@ -164,7 +159,6 @@ cmGlobalVisualStudio71Generator
   fout << "\tEndGlobalSection\n";
 }
 
-//----------------------------------------------------------------------------
 // Write a dsp file into the SLN file,
 // Note, that dependencies from executables to
 // the libraries it uses are also done here
@@ -218,7 +212,6 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
     }
 }
 
-//----------------------------------------------------------------------------
 // Write a dsp file into the SLN file,
 // Note, that dependencies from executables to
 // the libraries it uses are also done here
@@ -246,7 +239,6 @@ cmGlobalVisualStudio71Generator
     }
 }
 
-//----------------------------------------------------------------------------
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator
@@ -289,7 +281,6 @@ void cmGlobalVisualStudio71Generator
 
 }
 
-//----------------------------------------------------------------------------
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator
@@ -317,14 +308,12 @@ void cmGlobalVisualStudio71Generator
     }
 }
 
-//----------------------------------------------------------------------------
 // ouput standard header for dsw file
 void cmGlobalVisualStudio71Generator::WriteSLNHeader(std::ostream& fout)
 {
   fout << "Microsoft Visual Studio Solution File, Format Version 8.00\n";
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio71Generator
 ::GetDocumentation(cmDocumentationEntry& entry)
 {

@@ -37,14 +37,12 @@ void cmTargetCompileOptionsCommand
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
 
-//----------------------------------------------------------------------------
 std::string cmTargetCompileOptionsCommand
 ::Join(const std::vector<std::string> &content)
 {
   return cmJoin(content, ";");
 }
 
-//----------------------------------------------------------------------------
 bool cmTargetCompileOptionsCommand
 ::HandleDirectContent(cmTarget *tgt, const std::vector<std::string> &content,
                                    bool, bool)

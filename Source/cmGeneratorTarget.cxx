@@ -46,7 +46,6 @@ public:
 };
 cmLinkImplItem cmGeneratorTarget::TargetPropertyEntry::NoLinkImplItem;
 
-//----------------------------------------------------------------------------
 void reportBadObjLib(std::vector<cmSourceFile*> const& badObjLib,
                      cmGeneratorTarget const* target, cmake *cm)
 {
@@ -140,7 +139,6 @@ struct DoAccept<true>
     }
 };
 
-//----------------------------------------------------------------------------
 template<typename Tag, typename DataType = std::vector<cmSourceFile const*> >
 struct TagVisitor
 {
@@ -261,7 +259,6 @@ void CreatePropertyGeneratorExpressions(
     }
 }
 
-//----------------------------------------------------------------------------
 cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   : Target(t),
   SourceFileFlagsConstructed(false),
@@ -328,19 +325,16 @@ cmLocalGenerator* cmGeneratorTarget::GetLocalGenerator() const
   return this->LocalGenerator;
 }
 
-//----------------------------------------------------------------------------
 cmState::TargetType cmGeneratorTarget::GetType() const
 {
   return this->Target->GetType();
 }
 
-//----------------------------------------------------------------------------
 const std::string& cmGeneratorTarget::GetName() const
 {
   return this->Target->GetName();
 }
 
-//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetExportName() const
 {
   const char *exportName = this->GetProperty("EXPORT_NAME");
@@ -360,13 +354,11 @@ std::string cmGeneratorTarget::GetExportName() const
   return this->GetName();
 }
 
-//----------------------------------------------------------------------------
 const char *cmGeneratorTarget::GetProperty(const std::string& prop) const
 {
   return this->Target->GetProperty(prop);
 }
 
-//----------------------------------------------------------------------------
 const char* cmGeneratorTarget::GetOutputTargetType(bool implib) const
 {
   switch(this->GetType())
@@ -422,7 +414,6 @@ const char* cmGeneratorTarget::GetOutputTargetType(bool implib) const
   return "";
 }
 
-//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetOutputName(const std::string& config,
                                              bool implib) const
 {
@@ -524,7 +515,6 @@ void cmGeneratorTarget::AddTracedSources(std::vector<std::string> const& srcs)
     }
 }
 
-//----------------------------------------------------------------------------
 std::vector<cmSourceFile*> const*
 cmGeneratorTarget::GetSourceDepends(cmSourceFile const* sf) const
 {
@@ -588,7 +578,6 @@ static void handleSystemIncludesDep(cmLocalGenerator *lg,
 #define EMPTY
 #define COMMA ,
 
-//----------------------------------------------------------------------------
 void
 cmGeneratorTarget
 ::GetObjectSources(std::vector<cmSourceFile const*> &data,
@@ -631,7 +620,6 @@ void cmGeneratorTarget::ComputeObjectMapping()
     }
 }
 
-//----------------------------------------------------------------------------
 const char* cmGeneratorTarget::GetFeature(const std::string& feature,
                                           const std::string& config) const
 {
@@ -652,27 +640,23 @@ const char* cmGeneratorTarget::GetFeature(const std::string& feature,
   return this->LocalGenerator->GetFeature(feature, config);
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::GetFeatureAsBool(const std::string& feature,
                                          const std::string& config) const
 {
   return cmSystemTools::IsOn(this->GetFeature(feature, config));
 }
 
-//----------------------------------------------------------------------------
 const std::string& cmGeneratorTarget::GetObjectName(cmSourceFile const* file)
 {
   this->ComputeObjectMapping();
   return this->Objects[file];
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::AddExplicitObjectName(cmSourceFile const* sf)
 {
   this->ExplicitObjectName.insert(sf);
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::HasExplicitObjectName(cmSourceFile const* file) const
 {
   const_cast<cmGeneratorTarget*>(this)->ComputeObjectMapping();
@@ -681,7 +665,6 @@ bool cmGeneratorTarget::HasExplicitObjectName(cmSourceFile const* file) const
   return it != this->ExplicitObjectName.end();
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget
 ::GetIDLSources(std::vector<cmSourceFile const*>& data,
                 const std::string& config) const
@@ -689,7 +672,6 @@ void cmGeneratorTarget
   IMPLEMENT_VISIT(IDLSources);
 }
 
-//----------------------------------------------------------------------------
 void
 cmGeneratorTarget
 ::GetHeaderSources(std::vector<cmSourceFile const*>& data,
@@ -698,7 +680,6 @@ cmGeneratorTarget
   IMPLEMENT_VISIT(HeaderSources);
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget
 ::GetExtraSources(std::vector<cmSourceFile const*>& data,
                   const std::string& config) const
@@ -706,7 +687,6 @@ void cmGeneratorTarget
   IMPLEMENT_VISIT(ExtraSources);
 }
 
-//----------------------------------------------------------------------------
 void
 cmGeneratorTarget
 ::GetCustomCommands(std::vector<cmSourceFile const*>& data,
@@ -715,7 +695,6 @@ cmGeneratorTarget
   IMPLEMENT_VISIT(CustomCommands);
 }
 
-//----------------------------------------------------------------------------
 void
 cmGeneratorTarget
 ::GetExternalObjects(std::vector<cmSourceFile const*>& data,
@@ -724,7 +703,6 @@ cmGeneratorTarget
   IMPLEMENT_VISIT(ExternalObjects);
 }
 
-//----------------------------------------------------------------------------
 void
 cmGeneratorTarget::GetExpectedResxHeaders(std::set<std::string>& srcs,
                                           const std::string& config) const
@@ -734,7 +712,6 @@ cmGeneratorTarget::GetExpectedResxHeaders(std::set<std::string>& srcs,
   srcs = data.ExpectedResxHeaders;
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget
 ::GetResxSources(std::vector<cmSourceFile const*>& srcs,
                  const std::string& config) const
@@ -744,7 +721,6 @@ void cmGeneratorTarget
   srcs = data.ResxSources;
 }
 
-//----------------------------------------------------------------------------
 void
 cmGeneratorTarget
 ::GetAppManifest(std::vector<cmSourceFile const*>& data,
@@ -753,7 +729,6 @@ cmGeneratorTarget
   IMPLEMENT_VISIT(AppManifest);
 }
 
-//----------------------------------------------------------------------------
 void
 cmGeneratorTarget
 ::GetManifests(std::vector<cmSourceFile const*>& data,
@@ -762,7 +737,6 @@ cmGeneratorTarget
   IMPLEMENT_VISIT(Manifests);
 }
 
-//----------------------------------------------------------------------------
 void
 cmGeneratorTarget
 ::GetCertificates(std::vector<cmSourceFile const*>& data,
@@ -771,7 +745,6 @@ cmGeneratorTarget
   IMPLEMENT_VISIT(Certificates);
 }
 
-//----------------------------------------------------------------------------
 void
 cmGeneratorTarget::GetExpectedXamlHeaders(std::set<std::string>& headers,
                                           const std::string& config) const
@@ -781,7 +754,6 @@ cmGeneratorTarget::GetExpectedXamlHeaders(std::set<std::string>& headers,
   headers = data.ExpectedXamlHeaders;
 }
 
-//----------------------------------------------------------------------------
 void
 cmGeneratorTarget::GetExpectedXamlSources(std::set<std::string>& srcs,
                                           const std::string& config) const
@@ -808,7 +780,6 @@ std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
   return this->UtilityItems;
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget
 ::GetXamlSources(std::vector<cmSourceFile const*>& srcs,
                  const std::string& config) const
@@ -818,7 +789,6 @@ void cmGeneratorTarget
   srcs = data.XamlSources;
 }
 
-//----------------------------------------------------------------------------
 const char* cmGeneratorTarget::GetLocation(const std::string& config) const
 {
   static std::string location;
@@ -861,7 +831,6 @@ bool cmGeneratorTarget::IsImportedGloballyVisible() const
   return this->Target->IsImportedGloballyVisible();
 }
 
-//----------------------------------------------------------------------------
 const char* cmGeneratorTarget::GetLocationForBuild() const
 {
   static std::string location;
@@ -896,7 +865,6 @@ const char* cmGeneratorTarget::GetLocationForBuild() const
 }
 
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
                                               const std::string& config) const
 {
@@ -958,13 +926,11 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
   return std::binary_search(iter->second.begin(), iter->second.end(), dir);
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::GetPropertyAsBool(const std::string& prop) const
 {
   return this->Target->GetPropertyAsBool(prop);
 }
 
-//----------------------------------------------------------------------------
 static void AddInterfaceEntries(
   cmGeneratorTarget const* thisTarget, std::string const& config,
   std::string const& prop,
@@ -991,7 +957,6 @@ static void AddInterfaceEntries(
     }
 }
 
-//----------------------------------------------------------------------------
 static bool processSources(cmGeneratorTarget const* tgt,
       const std::vector<cmGeneratorTarget::TargetPropertyEntry*> &entries,
       std::vector<std::string> &srcs,
@@ -1086,7 +1051,6 @@ static bool processSources(cmGeneratorTarget const* tgt,
   return contextDependent;
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetSourceFiles(std::vector<std::string> &files,
                               const std::string& config) const
 {
@@ -1179,7 +1143,6 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<std::string> &files,
   cmDeleteAll(linkInterfaceSourcesEntries);
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*> &files,
                                        const std::string& config) const
 {
@@ -1219,7 +1182,6 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*> &files,
     }
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::GetCompilePDBName(const std::string& config) const
 {
@@ -1247,7 +1209,6 @@ cmGeneratorTarget::GetCompilePDBName(const std::string& config) const
   return "";
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::GetCompilePDBPath(const std::string& config) const
 {
@@ -1264,7 +1225,6 @@ cmGeneratorTarget::GetCompilePDBPath(const std::string& config) const
   return dir + name;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::HasSOName(const std::string& config) const
 {
   // soname is supported only for shared libraries and modules,
@@ -1274,7 +1234,6 @@ bool cmGeneratorTarget::HasSOName(const std::string& config) const
           this->Makefile->GetSONameFlag(this->GetLinkerLanguage(config)));
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGeneratorTarget::NeedRelinkBeforeInstall(const std::string& config) const
 {
@@ -1340,7 +1299,6 @@ cmGeneratorTarget::NeedRelinkBeforeInstall(const std::string& config) const
       || this->HaveInstallTreeRPATH();
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsChrpathUsed(const std::string& config) const
 {
   // Only certain target types have an rpath.
@@ -1407,7 +1365,6 @@ bool cmGeneratorTarget::IsChrpathUsed(const std::string& config) const
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsImportedSharedLibWithoutSOName(
                                           const std::string& config) const
 {
@@ -1422,7 +1379,6 @@ bool cmGeneratorTarget::IsImportedSharedLibWithoutSOName(
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::HasMacOSXRpathInstallNameDir(
     const std::string& config) const
 {
@@ -1506,7 +1462,6 @@ bool cmGeneratorTarget::HasMacOSXRpathInstallNameDir(
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::MacOSXRpathInstallNameDirDefault() const
 {
   // we can't do rpaths when unsupported
@@ -1537,7 +1492,6 @@ bool cmGeneratorTarget::MacOSXRpathInstallNameDirDefault() const
   return false;
 }
 
-//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetSOName(const std::string& config) const
 {
   if(this->IsImported())
@@ -1582,7 +1536,6 @@ std::string cmGeneratorTarget::GetSOName(const std::string& config) const
 }
 
 
-//----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::GetAppBundleDirectory(const std::string& config,
                                          bool contentOnly) const
@@ -1598,7 +1551,6 @@ cmGeneratorTarget::GetAppBundleDirectory(const std::string& config,
   return fpath;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsBundleOnApple() const
 {
   return this->IsFrameworkOnApple()
@@ -1606,7 +1558,6 @@ bool cmGeneratorTarget::IsBundleOnApple() const
       || this->IsCFBundleOnApple();
 }
 
-//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetCFBundleDirectory(const std::string& config,
                                                     bool contentOnly) const
 {
@@ -1635,7 +1586,6 @@ std::string cmGeneratorTarget::GetCFBundleDirectory(const std::string& config,
   return fpath;
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::GetFrameworkDirectory(const std::string& config,
                                          bool rootDir) const
@@ -1651,7 +1601,6 @@ cmGeneratorTarget::GetFrameworkDirectory(const std::string& config,
   return fpath;
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::GetFullName(const std::string& config, bool implib) const
 {
@@ -1665,7 +1614,6 @@ cmGeneratorTarget::GetFullName(const std::string& config, bool implib) const
     }
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::GetInstallNameDirForBuildTree(
                                             const std::string& config) const
@@ -1700,7 +1648,6 @@ cmGeneratorTarget::GetInstallNameDirForBuildTree(
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetInstallNameDirForInstallTree() const
 {
   if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
@@ -1753,7 +1700,6 @@ cmGeneratorTarget::GetUtilityBacktrace(const std::string& u) const
   return this->Target->GetUtilityBacktrace(u);
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::HaveWellDefinedOutputFiles() const
 {
   return
@@ -1763,7 +1709,6 @@ bool cmGeneratorTarget::HaveWellDefinedOutputFiles() const
     this->GetType() == cmState::EXECUTABLE;
 }
 
-//----------------------------------------------------------------------------
 const char* cmGeneratorTarget::GetExportMacro() const
 {
   // Define the symbol for targets that export symbols.
@@ -1789,7 +1734,6 @@ const char* cmGeneratorTarget::GetExportMacro() const
     }
 }
 
-//----------------------------------------------------------------------------
 class cmTargetCollectLinkLanguages
 {
 public:
@@ -1869,7 +1813,6 @@ private:
   std::set<cmGeneratorTarget const*> Visited;
 };
 
-//----------------------------------------------------------------------------
 cmGeneratorTarget::LinkClosure const*
 cmGeneratorTarget::GetLinkClosure(const std::string& config) const
 {
@@ -1886,7 +1829,6 @@ cmGeneratorTarget::GetLinkClosure(const std::string& config) const
   return &i->second;
 }
 
-//----------------------------------------------------------------------------
 class cmTargetSelectLinker
 {
   int Preference;
@@ -1938,7 +1880,6 @@ public:
     }
 };
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
                                            LinkClosure& lc) const
 {
@@ -2004,7 +1945,6 @@ void cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetFullNameComponents(std::string& prefix,
                                               std::string& base,
                                               std::string& suffix,
@@ -2014,7 +1954,6 @@ void cmGeneratorTarget::GetFullNameComponents(std::string& prefix,
   this->GetFullNameInternal(config, implib, prefix, base, suffix);
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::BuildMacContentDirectory(const std::string& base,
                                             const std::string& config,
@@ -2036,7 +1975,6 @@ cmGeneratorTarget::BuildMacContentDirectory(const std::string& base,
   return fpath;
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::GetMacContentDirectory(const std::string& config,
                                           bool implib) const
@@ -2056,7 +1994,6 @@ cmGeneratorTarget::GetMacContentDirectory(const std::string& config,
 }
 
 
-//----------------------------------------------------------------------------
 cmGeneratorTarget::CompileInfo const* cmGeneratorTarget::GetCompileInfo(
                                             const std::string& config) const
 {
@@ -2094,7 +2031,6 @@ cmGeneratorTarget::CompileInfo const* cmGeneratorTarget::GetCompileInfo(
   return &i->second;
 }
 
-//----------------------------------------------------------------------------
 cmSourceFile const*
 cmGeneratorTarget::GetModuleDefinitionFile(const std::string& config) const
 {
@@ -2114,7 +2050,6 @@ bool cmGeneratorTarget::IsDLLPlatform() const
   return this->DLLPlatform;
 }
 
-//----------------------------------------------------------------------------
 void
 cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs,
                                       const std::string &config) const
@@ -2154,7 +2089,6 @@ cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string> &result,
                                  const std::string& config) const
 {
@@ -2179,7 +2113,6 @@ void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string> &result,
                                   result);
 }
 
-//----------------------------------------------------------------------------
 void processILibs(const std::string& config,
                   cmGeneratorTarget const* headTarget,
                   cmLinkItem const& item,
@@ -2203,7 +2136,6 @@ void processILibs(const std::string& config,
     }
 }
 
-//----------------------------------------------------------------------------
 const std::vector<const cmGeneratorTarget*>&
 cmGeneratorTarget::GetLinkImplementationClosure(
     const std::string& config) const
@@ -2230,7 +2162,6 @@ cmGeneratorTarget::GetLinkImplementationClosure(
   return tgts;
 }
 
-//----------------------------------------------------------------------------
 class cmTargetTraceDependencies
 {
 public:
@@ -2260,7 +2191,6 @@ private:
                             std::set<std::string>& emitted);
 };
 
-//----------------------------------------------------------------------------
 cmTargetTraceDependencies
 ::cmTargetTraceDependencies(cmGeneratorTarget* target):
   GeneratorTarget(target)
@@ -2319,7 +2249,6 @@ cmTargetTraceDependencies
         this->GeneratorTarget->GetPostBuildCommands());
 }
 
-//----------------------------------------------------------------------------
 void cmTargetTraceDependencies::Trace()
 {
   // Process one dependency at a time until the queue is empty.
@@ -2363,7 +2292,6 @@ void cmTargetTraceDependencies::Trace()
   this->GeneratorTarget->AddTracedSources(this->NewSources);
 }
 
-//----------------------------------------------------------------------------
 void cmTargetTraceDependencies::QueueSource(cmSourceFile* sf)
 {
   if(this->SourcesQueued.insert(sf).second)
@@ -2375,7 +2303,6 @@ void cmTargetTraceDependencies::QueueSource(cmSourceFile* sf)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmTargetTraceDependencies::FollowName(std::string const& name)
 {
   NameMapType::iterator i = this->NameMap.find(name);
@@ -2397,7 +2324,6 @@ void cmTargetTraceDependencies::FollowName(std::string const& name)
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmTargetTraceDependencies::FollowNames(std::vector<std::string> const& names)
 {
@@ -2408,7 +2334,6 @@ cmTargetTraceDependencies::FollowNames(std::vector<std::string> const& names)
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
 {
   // Dependencies on targets (utilities) are supposed to be named by
@@ -2463,7 +2388,6 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
   return false;
 }
 
-//----------------------------------------------------------------------------
 void
 cmTargetTraceDependencies
 ::CheckCustomCommand(cmCustomCommand const& cc)
@@ -2526,7 +2450,6 @@ cmTargetTraceDependencies
     }
 }
 
-//----------------------------------------------------------------------------
 void cmTargetTraceDependencies::FollowCommandDepends(cmCustomCommand const& cc,
                                               const std::string& config,
                                               std::set<std::string>& emitted)
@@ -2552,7 +2475,6 @@ void cmTargetTraceDependencies::FollowCommandDepends(cmCustomCommand const& cc,
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmTargetTraceDependencies
 ::CheckCustomCommands(const std::vector<cmCustomCommand>& commands)
@@ -2564,7 +2486,6 @@ cmTargetTraceDependencies
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::TraceDependencies()
 {
   // CMake-generated targets have no dependencies to trace.  Normally tracing
@@ -2591,7 +2512,6 @@ cmGeneratorTarget::GetCompilePDBDirectory(const std::string& config) const
   return "";
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetAppleArchs(const std::string& config,
                              std::vector<std::string>& archVec) const
 {
@@ -2612,7 +2532,6 @@ void cmGeneratorTarget::GetAppleArchs(const std::string& config,
     }
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::GetCreateRuleVariable(std::string const& lang,
                                          std::string const& config) const
@@ -2644,7 +2563,6 @@ cmGeneratorTarget::GetCreateRuleVariable(std::string const& lang,
     }
   return "";
 }
-//----------------------------------------------------------------------------
 static void processIncludeDirectories(cmGeneratorTarget const* tgt,
       const std::vector<cmGeneratorTarget::TargetPropertyEntry*> &entries,
       std::vector<std::string> &includes,
@@ -2777,7 +2695,6 @@ static void processIncludeDirectories(cmGeneratorTarget const* tgt,
     }
 }
 
-//----------------------------------------------------------------------------
 std::vector<std::string>
 cmGeneratorTarget::GetIncludeDirectories(const std::string& config,
                                          const std::string& lang) const
@@ -2863,7 +2780,6 @@ cmGeneratorTarget::GetIncludeDirectories(const std::string& config,
   return includes;
 }
 
-//----------------------------------------------------------------------------
 static void processCompileOptionsInternal(cmGeneratorTarget const* tgt,
       const std::vector<cmGeneratorTarget::TargetPropertyEntry*> &entries,
       std::vector<std::string> &options,
@@ -2910,7 +2826,6 @@ static void processCompileOptionsInternal(cmGeneratorTarget const* tgt,
     }
 }
 
-//----------------------------------------------------------------------------
 static void processCompileOptions(cmGeneratorTarget const* tgt,
       const std::vector<cmGeneratorTarget::TargetPropertyEntry*> &entries,
       std::vector<std::string> &options,
@@ -2924,7 +2839,6 @@ static void processCompileOptions(cmGeneratorTarget const* tgt,
                                 language);
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetCompileOptions(std::vector<std::string> &result,
                                  const std::string& config,
                                  const std::string& language) const
@@ -2981,7 +2895,6 @@ void cmGeneratorTarget::GetCompileOptions(std::vector<std::string> &result,
   cmDeleteAll(linkInterfaceCompileOptionsEntries);
 }
 
-//----------------------------------------------------------------------------
 static void processCompileFeatures(cmGeneratorTarget const* tgt,
       const std::vector<cmGeneratorTarget::TargetPropertyEntry*> &entries,
       std::vector<std::string> &options,
@@ -2994,7 +2907,6 @@ static void processCompileFeatures(cmGeneratorTarget const* tgt,
                                 std::string());
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetCompileFeatures(std::vector<std::string> &result,
                                   const std::string& config) const
 {
@@ -3048,7 +2960,6 @@ void cmGeneratorTarget::GetCompileFeatures(std::vector<std::string> &result,
   cmDeleteAll(linkInterfaceCompileFeaturesEntries);
 }
 
-//----------------------------------------------------------------------------
 static void processCompileDefinitions(cmGeneratorTarget const* tgt,
       const std::vector<cmGeneratorTarget::TargetPropertyEntry*> &entries,
       std::vector<std::string> &options,
@@ -3062,7 +2973,6 @@ static void processCompileDefinitions(cmGeneratorTarget const* tgt,
                                 "definitions", language);
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetCompileDefinitions(std::vector<std::string> &list,
                                             const std::string& config,
                                             const std::string& language) const
@@ -3150,7 +3060,6 @@ void cmGeneratorTarget::GetCompileDefinitions(std::vector<std::string> &list,
   cmDeleteAll(linkInterfaceCompileDefinitionsEntries);
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::ComputeTargetManifest(
                                               const std::string& config) const
 {
@@ -3224,7 +3133,6 @@ void cmGeneratorTarget::ComputeTargetManifest(
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetFullPath(const std::string& config,
                                            bool implib, bool realname) const
 {
@@ -3266,7 +3174,6 @@ std::string cmGeneratorTarget::NormalGetFullPath(const std::string& config,
   return fpath;
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::NormalGetRealName(const std::string& config) const
 {
@@ -3304,7 +3211,6 @@ cmGeneratorTarget::NormalGetRealName(const std::string& config) const
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetLibraryNames(std::string& name,
                                std::string& soName,
                                std::string& realName,
@@ -3395,7 +3301,6 @@ void cmGeneratorTarget::GetLibraryNames(std::string& name,
   pdbName = this->GetPDBName(config);
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetExecutableNames(std::string& name,
                                   std::string& realName,
                                   std::string& impName,
@@ -3457,7 +3362,6 @@ void cmGeneratorTarget::GetExecutableNames(std::string& name,
   pdbName = this->GetPDBName(config);
 }
 
-//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetFullNameInternal(const std::string& config,
                                                    bool implib) const
 {
@@ -3468,7 +3372,6 @@ std::string cmGeneratorTarget::GetFullNameInternal(const std::string& config,
   return prefix+base+suffix;
 }
 
-//----------------------------------------------------------------------------
 const char*
 cmGeneratorTarget::ImportedGetLocation(const std::string& config) const
 {
@@ -3478,7 +3381,6 @@ cmGeneratorTarget::ImportedGetLocation(const std::string& config) const
   return location.c_str();
 }
 
-//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetFullNameImported(const std::string& config,
                                                    bool implib) const
 {
@@ -3486,7 +3388,6 @@ std::string cmGeneratorTarget::GetFullNameImported(const std::string& config,
     this->Target->ImportedGetFullPath(config, implib));
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
                                             bool implib,
                                             std::string& outPrefix,
@@ -3618,14 +3519,12 @@ void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
 }
 
 
-//----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::GetLinkerLanguage(const std::string& config) const
 {
   return this->GetLinkClosure(config)->LinkerLanguage;
 }
 
-//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetPDBName(const std::string& config) const
 {
   std::string prefix;
@@ -3669,7 +3568,6 @@ bool cmGeneratorTarget::StrictTargetComparison::operator()(
   return nameResult < 0;
 }
 
-//----------------------------------------------------------------------------
 struct cmGeneratorTarget::SourceFileFlags
 cmGeneratorTarget::GetTargetSourceFileFlags(const cmSourceFile* sf) const
 {
@@ -3701,7 +3599,6 @@ cmGeneratorTarget::GetTargetSourceFileFlags(const cmSourceFile* sf) const
   return flags;
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::ConstructSourceFileFlags() const
 {
   if(this->SourceFileFlagsConstructed)
@@ -3767,7 +3664,6 @@ void cmGeneratorTarget::ConstructSourceFileFlags() const
     }
 }
 
-//----------------------------------------------------------------------------
 const cmGeneratorTarget::CompatibleInterfacesBase&
 cmGeneratorTarget::GetCompatibleInterfaces(std::string const& config) const
 {
@@ -3800,7 +3696,6 @@ cmGeneratorTarget::GetCompatibleInterfaces(std::string const& config) const
   return compat;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsLinkInterfaceDependentBoolProperty(
     const std::string &p, const std::string& config) const
 {
@@ -3812,7 +3707,6 @@ bool cmGeneratorTarget::IsLinkInterfaceDependentBoolProperty(
   return this->GetCompatibleInterfaces(config).PropsBool.count(p) > 0;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsLinkInterfaceDependentStringProperty(
     const std::string &p, const std::string& config) const
 {
@@ -3824,7 +3718,6 @@ bool cmGeneratorTarget::IsLinkInterfaceDependentStringProperty(
   return this->GetCompatibleInterfaces(config).PropsString.count(p) > 0;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsLinkInterfaceDependentNumberMinProperty(
     const std::string &p, const std::string& config) const
 {
@@ -3836,7 +3729,6 @@ bool cmGeneratorTarget::IsLinkInterfaceDependentNumberMinProperty(
   return this->GetCompatibleInterfaces(config).PropsNumberMin.count(p) > 0;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsLinkInterfaceDependentNumberMaxProperty(
     const std::string &p, const std::string& config) const
 {
@@ -3895,7 +3787,6 @@ const char * getLinkInterfaceDependentProperty(cmGeneratorTarget const* tgt,
   return 0;
 }
 
-//----------------------------------------------------------------------------
 template<typename PropertyType>
 void checkPropertyConsistency(cmGeneratorTarget const* depender,
                               cmGeneratorTarget const* dependee,
@@ -3989,7 +3880,6 @@ static std::string intersect(const std::set<std::string> &s1,
   return intersect(s2, s3, s4);
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::CheckPropertyCompatibility(
     cmComputeLinkInformation *info, const std::string& config) const
 {
@@ -4090,7 +3980,6 @@ void cmGeneratorTarget::CheckPropertyCompatibility(
     }
 }
 
-//----------------------------------------------------------------------------
 std::string compatibilityType(CompatibleType t)
 {
   switch(t)
@@ -4108,7 +3997,6 @@ std::string compatibilityType(CompatibleType t)
   return "";
 }
 
-//----------------------------------------------------------------------------
 std::string compatibilityAgree(CompatibleType t, bool dominant)
 {
   switch(t)
@@ -4124,12 +4012,10 @@ std::string compatibilityAgree(CompatibleType t, bool dominant)
   return "";
 }
 
-//----------------------------------------------------------------------------
 template<typename PropertyType>
 PropertyType getTypedProperty(cmGeneratorTarget const* tgt,
                               const std::string& prop);
 
-//----------------------------------------------------------------------------
 template<>
 bool getTypedProperty<bool>(cmGeneratorTarget const* tgt,
                             const std::string& prop)
@@ -4137,7 +4023,6 @@ bool getTypedProperty<bool>(cmGeneratorTarget const* tgt,
   return tgt->GetPropertyAsBool(prop);
 }
 
-//----------------------------------------------------------------------------
 template<>
 const char *getTypedProperty<const char *>(cmGeneratorTarget const* tgt,
                                            const std::string& prop)
@@ -4171,13 +4056,11 @@ const char* impliedValue<const char*>(const char*)
   return "";
 }
 
-//----------------------------------------------------------------------------
 template<typename PropertyType>
 std::pair<bool, PropertyType> consistentProperty(PropertyType lhs,
                                                  PropertyType rhs,
                                                  CompatibleType t);
 
-//----------------------------------------------------------------------------
 template<>
 std::pair<bool, bool> consistentProperty(bool lhs, bool rhs,
                                          CompatibleType)
@@ -4185,7 +4068,6 @@ std::pair<bool, bool> consistentProperty(bool lhs, bool rhs,
   return std::make_pair(lhs == rhs, lhs);
 }
 
-//----------------------------------------------------------------------------
 std::pair<bool, const char*> consistentStringProperty(const char *lhs,
                                                       const char *rhs)
 {
@@ -4193,7 +4075,6 @@ std::pair<bool, const char*> consistentStringProperty(const char *lhs,
   return std::make_pair(b, b ? lhs : 0);
 }
 
-//----------------------------------------------------------------------------
 std::pair<bool, const char*> consistentNumberProperty(const char *lhs,
                                                    const char *rhs,
                                                    CompatibleType t)
@@ -4224,7 +4105,6 @@ std::pair<bool, const char*> consistentNumberProperty(const char *lhs,
     }
 }
 
-//----------------------------------------------------------------------------
 template<>
 std::pair<bool, const char*> consistentProperty(const char *lhs,
                                                 const char *rhs,
@@ -4260,7 +4140,6 @@ std::pair<bool, const char*> consistentProperty(const char *lhs,
   return std::pair<bool, const char*>(false, null_ptr);
 }
 
-//----------------------------------------------------------------------------
 template<typename PropertyType>
 PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
                                           const std::string &p,
@@ -4450,7 +4329,6 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
   return propContent;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::GetLinkInterfaceDependentBoolProperty(
     const std::string &p, const std::string& config) const
 {
@@ -4459,7 +4337,6 @@ bool cmGeneratorTarget::GetLinkInterfaceDependentBoolProperty(
                                                    BoolType, 0);
 }
 
-//----------------------------------------------------------------------------
 const char* cmGeneratorTarget::GetLinkInterfaceDependentStringProperty(
                                               const std::string &p,
                                               const std::string& config) const
@@ -4471,7 +4348,6 @@ const char* cmGeneratorTarget::GetLinkInterfaceDependentStringProperty(
                                                      StringType, 0);
 }
 
-//----------------------------------------------------------------------------
 const char * cmGeneratorTarget::GetLinkInterfaceDependentNumberMinProperty(
                                               const std::string &p,
                                               const std::string& config) const
@@ -4483,7 +4359,6 @@ const char * cmGeneratorTarget::GetLinkInterfaceDependentNumberMinProperty(
                                                    NumberMinType, 0);
 }
 
-//----------------------------------------------------------------------------
 const char * cmGeneratorTarget::GetLinkInterfaceDependentNumberMaxProperty(
                                               const std::string &p,
                                               const std::string& config) const
@@ -4495,7 +4370,6 @@ const char * cmGeneratorTarget::GetLinkInterfaceDependentNumberMaxProperty(
                                                    NumberMaxType, 0);
 }
 
-//----------------------------------------------------------------------------
 cmComputeLinkInformation*
 cmGeneratorTarget::GetLinkInformation(const std::string& config) const
 {
@@ -4526,14 +4400,12 @@ cmGeneratorTarget::GetLinkInformation(const std::string& config) const
   return i->second;
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetTargetVersion(int& major, int& minor) const
 {
   int patch;
   this->GetTargetVersion(false, major, minor, patch);
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetTargetVersion(bool soversion,
                                 int& major, int& minor, int& patch) const
 {
@@ -4564,7 +4436,6 @@ void cmGeneratorTarget::GetTargetVersion(bool soversion,
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetFrameworkVersion() const
 {
   assert(this->GetType() != cmState::INTERFACE_LIBRARY);
@@ -4583,7 +4454,6 @@ std::string cmGeneratorTarget::GetFrameworkVersion() const
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::ComputeVersionedName(std::string& vName,
                                     std::string const& prefix,
                                     std::string const& base,
@@ -4613,7 +4483,6 @@ std::vector<std::string> cmGeneratorTarget::GetPropertyKeys() const
   return props;
 }
 
-//----------------------------------------------------------------------------
 void
 cmGeneratorTarget::ReportPropertyOrigin(const std::string &p,
                                const std::string &result,
@@ -4653,7 +4522,6 @@ cmGeneratorTarget::ReportPropertyOrigin(const std::string &p,
   this->LocalGenerator->GetCMakeInstance()->IssueMessage(cmake::LOG, areport);
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::LookupLinkItems(std::vector<std::string> const& names,
                                std::vector<cmLinkItem>& items) const
 {
@@ -4669,7 +4537,6 @@ void cmGeneratorTarget::LookupLinkItems(std::vector<std::string> const& names,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
                                std::string const& value,
                                std::string const& config,
@@ -4698,7 +4565,6 @@ void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
   hadHeadSensitiveCondition = cge->GetHadHeadSensitiveCondition();
 }
 
-//----------------------------------------------------------------------------
 cmLinkInterface const*
 cmGeneratorTarget::GetLinkInterface(const std::string& config,
                                     cmGeneratorTarget const* head) const
@@ -4747,7 +4613,6 @@ cmGeneratorTarget::GetLinkInterface(const std::string& config,
   return iface.Exists? &iface : 0;
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
                                     cmOptionalLinkInterface &iface,
                                     cmGeneratorTarget const* headTarget) const
@@ -4845,7 +4710,6 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
     }
 }
 
-//----------------------------------------------------------------------------
 const cmLinkInterfaceLibraries *
 cmGeneratorTarget::GetLinkInterfaceLibraries(const std::string& config,
                                     cmGeneratorTarget const* head,
@@ -4891,7 +4755,6 @@ cmGeneratorTarget::GetLinkInterfaceLibraries(const std::string& config,
   return iface.Exists? &iface : 0;
 }
 
-//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetDirectory(const std::string& config,
                                    bool implib) const
 {
@@ -4910,7 +4773,6 @@ std::string cmGeneratorTarget::GetDirectory(const std::string& config,
   return "";
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::UsesDefaultOutputDir(const std::string& config,
                                     bool implib) const
 {
@@ -4918,7 +4780,6 @@ bool cmGeneratorTarget::UsesDefaultOutputDir(const std::string& config,
   return this->ComputeOutputDir(config, implib, dir);
 }
 
-//----------------------------------------------------------------------------
 cmGeneratorTarget::OutputInfo const* cmGeneratorTarget::GetOutputInfo(
     const std::string& config) const
 {
@@ -4978,7 +4839,6 @@ cmGeneratorTarget::OutputInfo const* cmGeneratorTarget::GetOutputInfo(
   return &i->second;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::ComputeOutputDir(const std::string& config,
                                 bool implib, std::string& out) const
 {
@@ -5072,7 +4932,6 @@ bool cmGeneratorTarget::ComputeOutputDir(const std::string& config,
   return usesDefaultOutputDir;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::ComputePDBOutputDir(const std::string& kind,
                                    const std::string& config,
                                    std::string& out) const
@@ -5133,7 +4992,6 @@ bool cmGeneratorTarget::ComputePDBOutputDir(const std::string& kind,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::HaveInstallTreeRPATH() const
 {
   const char* install_rpath = this->GetProperty("INSTALL_RPATH");
@@ -5141,7 +4999,6 @@ bool cmGeneratorTarget::HaveInstallTreeRPATH() const
           !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH");
 }
 
-//----------------------------------------------------------------------------
 void
 cmGeneratorTarget::ComputeLinkInterfaceLibraries(
   const std::string& config,
@@ -5296,7 +5153,6 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     }
 }
 
-//----------------------------------------------------------------------------
 const cmLinkInterface *
 cmGeneratorTarget::GetImportLinkInterface(const std::string& config,
                                  cmGeneratorTarget const* headTarget,
@@ -5340,7 +5196,6 @@ cmGeneratorTarget::GetImportLinkInterface(const std::string& config,
   return &iface;
 }
 
-//----------------------------------------------------------------------------
 cmGeneratorTarget::ImportInfo const*
 cmGeneratorTarget::GetImportInfo(const std::string& config) const
 {
@@ -5387,7 +5242,6 @@ cmGeneratorTarget::GetImportInfo(const std::string& config) const
   return &i->second;
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
                                  ImportInfo& info) const
 {
@@ -5572,7 +5426,6 @@ cmGeneratorTarget::GetHeadToLinkInterfaceUsageRequirementsMap(
   return this->LinkInterfaceUsageRequirementsOnlyMap[CONFIG];
 }
 
-//----------------------------------------------------------------------------
 const cmLinkImplementation *
 cmGeneratorTarget::GetLinkImplementation(const std::string& config) const
 {
@@ -5597,7 +5450,6 @@ cmGeneratorTarget::GetLinkImplementation(const std::string& config) const
   return &impl;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::GetConfigCommonSourceFiles(
     std::vector<cmSourceFile*>& files) const
 {
@@ -5656,7 +5508,6 @@ bool cmGeneratorTarget::GetConfigCommonSourceFiles(
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetObjectLibrariesCMP0026(
     std::vector<cmGeneratorTarget*>& objlibs) const
 {
@@ -5696,7 +5547,6 @@ void cmGeneratorTarget::GetObjectLibrariesCMP0026(
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
 {
   // Strip whitespace off the library names because we used to do this
@@ -5755,7 +5605,6 @@ std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
   return lib;
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
                             const std::string& config) const
 {
@@ -5805,7 +5654,6 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::ComputeLinkImplementationLanguages(
   const std::string& config,
   cmOptionalLinkImplementation& impl) const
@@ -5819,7 +5667,6 @@ void cmGeneratorTarget::ComputeLinkImplementationLanguages(
                         languages.begin(), languages.end());
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::HaveBuildTreeRPATH(const std::string& config) const
 {
   if (this->GetPropertyAsBool("SKIP_BUILD_RPATH"))
@@ -5834,7 +5681,6 @@ bool cmGeneratorTarget::HaveBuildTreeRPATH(const std::string& config) const
   return false;
 }
 
-//----------------------------------------------------------------------------
 cmLinkImplementationLibraries const*
 cmGeneratorTarget::GetLinkImplementationLibraries(
     const std::string& config) const
@@ -5842,7 +5688,6 @@ cmGeneratorTarget::GetLinkImplementationLibraries(
   return this->GetLinkImplementationLibrariesInternal(config, this);
 }
 
-//----------------------------------------------------------------------------
 cmLinkImplementationLibraries const*
 cmGeneratorTarget::GetLinkImplementationLibrariesInternal(
     const std::string& config, cmGeneratorTarget const* head) const
@@ -5874,7 +5719,6 @@ cmGeneratorTarget::GetLinkImplementationLibrariesInternal(
   return &impl;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGeneratorTarget::IsNullImpliedByLinkLibraries(const std::string &p) const
 {
@@ -5882,7 +5726,6 @@ cmGeneratorTarget::IsNullImpliedByLinkLibraries(const std::string &p) const
       != this->LinkImplicitNullProperties.end();
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::ComputeLinkImplementationLibraries(
   const std::string& config,
   cmOptionalLinkImplementation& impl,
@@ -5999,7 +5842,6 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     }
 }
 
-//----------------------------------------------------------------------------
 cmGeneratorTarget*
 cmGeneratorTarget::FindTargetToLink(std::string const& name) const
 {
@@ -6032,7 +5874,6 @@ cmGeneratorTarget::FindTargetToLink(std::string const& name) const
   return tgt;
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::GetPDBDirectory(const std::string& config) const
 {
@@ -6044,14 +5885,12 @@ cmGeneratorTarget::GetPDBDirectory(const std::string& config) const
   return "";
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::HasImplibGNUtoMS() const
 {
   return this->HasImportLibrary()
       && this->GetPropertyAsBool("GNUtoMS");
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::GetImplibGNUtoMS(std::string const& gnuName,
                                 std::string& out, const char* newExt) const
 {
@@ -6065,14 +5904,12 @@ bool cmGeneratorTarget::GetImplibGNUtoMS(std::string const& gnuName,
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsExecutableWithExports() const
 {
   return (this->GetType() == cmState::EXECUTABLE &&
           this->GetPropertyAsBool("ENABLE_EXPORTS"));
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::HasImportLibrary() const
 {
   return (this->IsDLLPlatform() &&
@@ -6080,7 +5917,6 @@ bool cmGeneratorTarget::HasImportLibrary() const
            this->IsExecutableWithExports()));
 }
 
-//----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetSupportDirectory() const
 {
   std::string dir = this->LocalGenerator->GetCurrentBinaryDirectory();
@@ -6095,7 +5931,6 @@ std::string cmGeneratorTarget::GetSupportDirectory() const
   return dir;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsLinkable() const
 {
   return (this->GetType() == cmState::STATIC_LIBRARY ||
@@ -6106,7 +5941,6 @@ bool cmGeneratorTarget::IsLinkable() const
           this->IsExecutableWithExports());
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsFrameworkOnApple() const
 {
   return (this->GetType() == cmState::SHARED_LIBRARY &&
@@ -6114,7 +5948,6 @@ bool cmGeneratorTarget::IsFrameworkOnApple() const
           this->GetPropertyAsBool("FRAMEWORK"));
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsAppBundleOnApple() const
 {
   return (this->GetType() == cmState::EXECUTABLE &&
@@ -6122,14 +5955,12 @@ bool cmGeneratorTarget::IsAppBundleOnApple() const
           this->GetPropertyAsBool("MACOSX_BUNDLE"));
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsXCTestOnApple() const
 {
   return (this->IsCFBundleOnApple() &&
           this->GetPropertyAsBool("XCTEST"));
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsCFBundleOnApple() const
 {
   return (this->GetType() == cmState::MODULE_LIBRARY &&

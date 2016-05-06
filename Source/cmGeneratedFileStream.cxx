@@ -17,13 +17,11 @@
 # include <cm_zlib.h>
 #endif
 
-//----------------------------------------------------------------------------
 cmGeneratedFileStream::cmGeneratedFileStream():
   cmGeneratedFileStreamBase(), Stream()
 {
 }
 
-//----------------------------------------------------------------------------
 cmGeneratedFileStream::cmGeneratedFileStream(const char* name, bool quiet):
   cmGeneratedFileStreamBase(name),
   Stream(TempName.c_str())
@@ -37,7 +35,6 @@ cmGeneratedFileStream::cmGeneratedFileStream(const char* name, bool quiet):
     }
 }
 
-//----------------------------------------------------------------------------
 cmGeneratedFileStream::~cmGeneratedFileStream()
 {
   // This is the first destructor called.  Check the status of the
@@ -48,7 +45,6 @@ cmGeneratedFileStream::~cmGeneratedFileStream()
   this->Okay = (*this)?true:false;
 }
 
-//----------------------------------------------------------------------------
 cmGeneratedFileStream&
 cmGeneratedFileStream::Open(const char* name, bool quiet, bool binaryFlag)
 {
@@ -76,7 +72,6 @@ cmGeneratedFileStream::Open(const char* name, bool quiet, bool binaryFlag)
   return *this;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGeneratedFileStream::Close()
 {
@@ -90,25 +85,21 @@ cmGeneratedFileStream::Close()
   return this->cmGeneratedFileStreamBase::Close();
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratedFileStream::SetCopyIfDifferent(bool copy_if_different)
 {
   this->CopyIfDifferent = copy_if_different;
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratedFileStream::SetCompression(bool compression)
 {
   this->Compress = compression;
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratedFileStream::SetCompressionExtraExtension(bool ext)
 {
   this->CompressExtraExtension = ext;
 }
 
-//----------------------------------------------------------------------------
 cmGeneratedFileStreamBase::cmGeneratedFileStreamBase():
   Name(),
   TempName(),
@@ -119,7 +110,6 @@ cmGeneratedFileStreamBase::cmGeneratedFileStreamBase():
 {
 }
 
-//----------------------------------------------------------------------------
 cmGeneratedFileStreamBase::cmGeneratedFileStreamBase(const char* name):
   Name(),
   TempName(),
@@ -131,13 +121,11 @@ cmGeneratedFileStreamBase::cmGeneratedFileStreamBase(const char* name):
   this->Open(name);
 }
 
-//----------------------------------------------------------------------------
 cmGeneratedFileStreamBase::~cmGeneratedFileStreamBase()
 {
   this->Close();
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratedFileStreamBase::Open(const char* name)
 {
   // Save the original name of the file.
@@ -158,7 +146,6 @@ void cmGeneratedFileStreamBase::Open(const char* name)
   cmSystemTools::MakeDirectory(dir.c_str());
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratedFileStreamBase::Close()
 {
   bool replaced = false;
@@ -203,7 +190,6 @@ bool cmGeneratedFileStreamBase::Close()
   return replaced;
 }
 
-//----------------------------------------------------------------------------
 #ifdef CMAKE_BUILD_WITH_CMAKE
 int cmGeneratedFileStreamBase::CompressFile(const char* oldname,
                                             const char* newname)
@@ -241,14 +227,12 @@ int cmGeneratedFileStreamBase::CompressFile(const char*, const char*)
 }
 #endif
 
-//----------------------------------------------------------------------------
 int cmGeneratedFileStreamBase::RenameFile(const char* oldname,
                                           const char* newname)
 {
   return cmSystemTools::RenameFile(oldname, newname);
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratedFileStream::SetName(const std::string& fname)
 {
   this->Name = fname;

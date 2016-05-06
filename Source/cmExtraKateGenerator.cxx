@@ -22,7 +22,6 @@
 
 #include <cmsys/SystemTools.hxx>
 
-//----------------------------------------------------------------------------
 void cmExtraKateGenerator
 ::GetDocumentation(cmDocumentationEntry& entry, const std::string&) const
 {

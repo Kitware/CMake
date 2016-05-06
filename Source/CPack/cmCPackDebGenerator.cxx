@@ -32,17 +32,14 @@
 // Therefore we provide our own implementation of a BSD-ar:
 static int ar_append(const char*archive,const std::vector<std::string>& files);
 
-//----------------------------------------------------------------------
 cmCPackDebGenerator::cmCPackDebGenerator()
 {
 }
 
-//----------------------------------------------------------------------
 cmCPackDebGenerator::~cmCPackDebGenerator()
 {
 }
 
-//----------------------------------------------------------------------
 int cmCPackDebGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/usr");
@@ -53,7 +50,6 @@ int cmCPackDebGenerator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
-//----------------------------------------------------------------------
 int cmCPackDebGenerator::PackageOnePack(std::string initialTopLevel,
                                         std::string packageName)
   {
@@ -115,7 +111,6 @@ int cmCPackDebGenerator::PackageOnePack(std::string initialTopLevel,
   return retval;
 }
 
-//----------------------------------------------------------------------
 int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
 {
   int retval = 1;
@@ -170,7 +165,6 @@ int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
   return retval;
 }
 
-//----------------------------------------------------------------------
 int cmCPackDebGenerator::PackageComponentsAllInOne()
 {
   int retval = 1;
@@ -243,7 +237,6 @@ int cmCPackDebGenerator::PackageComponentsAllInOne()
   return retval;
 }
 
-//----------------------------------------------------------------------
 int cmCPackDebGenerator::PackageFiles()
 {
   int retval = -1;

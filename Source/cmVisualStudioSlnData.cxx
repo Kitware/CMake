@@ -11,7 +11,6 @@
 ============================================================================*/
 #include "cmVisualStudioSlnData.h"
 
-//----------------------------------------------------------------------------
 const cmSlnProjectEntry*
 cmSlnData::GetProjectByGUID(const std::string& projectGUID) const
 {
@@ -22,7 +21,6 @@ cmSlnData::GetProjectByGUID(const std::string& projectGUID) const
     return NULL;
 }
 
-//----------------------------------------------------------------------------
 const cmSlnProjectEntry*
 cmSlnData::GetProjectByName(const std::string& projectName) const
 {
@@ -33,7 +31,6 @@ cmSlnData::GetProjectByName(const std::string& projectName) const
     return NULL;
 }
 
-//----------------------------------------------------------------------------
 std::vector<cmSlnProjectEntry> cmSlnData::GetProjects() const
 {
   ProjectStringIndex::const_iterator it(this->ProjectNameIndex.begin()),
@@ -44,7 +41,6 @@ std::vector<cmSlnProjectEntry> cmSlnData::GetProjects() const
   return result;
 }
 
-//----------------------------------------------------------------------------
 cmSlnProjectEntry* cmSlnData::AddProject(
   const std::string& projectGUID,
   const std::string& projectName,

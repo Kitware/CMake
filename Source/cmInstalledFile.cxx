@@ -15,14 +15,12 @@
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 
-//----------------------------------------------------------------------------
 cmInstalledFile::cmInstalledFile():
   NameExpression(0)
 {
 
 }
 
-//----------------------------------------------------------------------------
 cmInstalledFile::~cmInstalledFile()
 {
   if(NameExpression)
@@ -41,7 +39,6 @@ cmInstalledFile::Property::~Property()
   cmDeleteAll(this->ValueExpressions);
 }
 
-//----------------------------------------------------------------------------
 void cmInstalledFile::SetName(cmMakefile* mf, const std::string& name)
 {
   cmListFileBacktrace backtrace = mf->GetBacktrace();
@@ -51,25 +48,21 @@ void cmInstalledFile::SetName(cmMakefile* mf, const std::string& name)
   this->NameExpression = ge.Parse(name).release();
 }
 
-//----------------------------------------------------------------------------
 std::string const& cmInstalledFile::GetName() const
 {
   return this->Name;
 }
 
-//----------------------------------------------------------------------------
 cmCompiledGeneratorExpression const& cmInstalledFile::GetNameExpression() const
 {
   return *(this->NameExpression);
 }
 
-//----------------------------------------------------------------------------
 void cmInstalledFile::RemoveProperty(const std::string& prop)
 {
   this->Properties.erase(prop);
 }
 
-//----------------------------------------------------------------------------
 void cmInstalledFile::SetProperty(cmMakefile const* mf,
   const std::string& prop, const char* value)
 {
@@ -77,7 +70,6 @@ void cmInstalledFile::SetProperty(cmMakefile const* mf,
   this->AppendProperty(mf, prop, value);
 }
 
-//----------------------------------------------------------------------------
 void cmInstalledFile::AppendProperty(cmMakefile const* mf,
   const std::string& prop, const char* value, bool /*asString*/)
 {
@@ -88,14 +80,12 @@ void cmInstalledFile::AppendProperty(cmMakefile const* mf,
   property.ValueExpressions.push_back(ge.Parse(value).release());
 }
 
-//----------------------------------------------------------------------------
 bool cmInstalledFile::HasProperty(
   const std::string& prop) const
 {
   return this->Properties.find(prop) != this->Properties.end();
 }
 
-//----------------------------------------------------------------------------
 bool cmInstalledFile::GetProperty(
   const std::string& prop, std::string& value) const
 {
@@ -123,7 +113,6 @@ bool cmInstalledFile::GetProperty(
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmInstalledFile::GetPropertyAsBool(const std::string& prop) const
 {
   std::string value;
@@ -131,7 +120,6 @@ bool cmInstalledFile::GetPropertyAsBool(const std::string& prop) const
   return isSet && cmSystemTools::IsOn(value.c_str());
 }
 
-//----------------------------------------------------------------------------
 void cmInstalledFile::GetPropertyAsList(const std::string& prop,
   std::vector<std::string>& list) const
 {

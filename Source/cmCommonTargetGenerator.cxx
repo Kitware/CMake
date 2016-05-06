@@ -52,19 +52,16 @@ std::string cmCommonTargetGenerator::Convert(
   return this->LocalGenerator->Convert(source, relative, output);
 }
 
-//----------------------------------------------------------------------------
 const char* cmCommonTargetGenerator::GetFeature(const std::string& feature)
 {
   return this->GeneratorTarget->GetFeature(feature, this->ConfigName);
 }
 
-//----------------------------------------------------------------------------
 bool cmCommonTargetGenerator::GetFeatureAsBool(const std::string& feature)
 {
   return this->GeneratorTarget->GetFeatureAsBool(feature, this->ConfigName);
 }
 
-//----------------------------------------------------------------------------
 void cmCommonTargetGenerator::AddFeatureFlags(
   std::string& flags, const std::string& lang
   )
@@ -78,7 +75,6 @@ void cmCommonTargetGenerator::AddFeatureFlags(
     }
 }
 
-//----------------------------------------------------------------------------
 void cmCommonTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
 {
   if(!this->ModuleDefinitionFile)
@@ -102,7 +98,6 @@ void cmCommonTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
   this->LocalGenerator->AppendFlags(flags, flag);
 }
 
-//----------------------------------------------------------------------------
 std::string cmCommonTargetGenerator::ComputeFortranModuleDirectory() const
 {
   std::string mod_dir;
@@ -132,7 +127,6 @@ std::string cmCommonTargetGenerator::ComputeFortranModuleDirectory() const
   return mod_dir;
 }
 
-//----------------------------------------------------------------------------
 std::string cmCommonTargetGenerator::GetFortranModuleDirectory()
 {
   // Compute the module directory.
@@ -146,7 +140,6 @@ std::string cmCommonTargetGenerator::GetFortranModuleDirectory()
   return this->FortranModuleDirectory;
 }
 
-//----------------------------------------------------------------------------
 void cmCommonTargetGenerator::AddFortranFlags(std::string& flags)
 {
   // Enable module output if necessary.
@@ -202,7 +195,6 @@ void cmCommonTargetGenerator::AddFortranFlags(std::string& flags)
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmCommonTargetGenerator
 ::AppendFortranFormatFlags(std::string& flags, cmSourceFile const& source)
@@ -231,7 +223,6 @@ cmCommonTargetGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmCommonTargetGenerator::GetFrameworkFlags(std::string const& l)
 {
  if(!this->Makefile->IsOn("APPLE"))
@@ -293,7 +284,6 @@ std::string cmCommonTargetGenerator::GetFrameworkFlags(std::string const& l)
   return flags;
 }
 
-//----------------------------------------------------------------------------
 std::string cmCommonTargetGenerator::GetFlags(const std::string &l)
 {
   ByLanguageMap::iterator i = this->FlagsByLanguage.find(l);

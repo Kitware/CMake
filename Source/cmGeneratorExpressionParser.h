@@ -21,7 +21,6 @@
 
 struct cmGeneratorExpressionEvaluator;
 
-//----------------------------------------------------------------------------
 struct cmGeneratorExpressionParser
 {
   cmGeneratorExpressionParser(

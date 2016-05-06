@@ -22,7 +22,6 @@
 
 #include <assert.h>
 
-//----------------------------------------------------------------------------
 cmInstallTargetGenerator
 ::cmInstallTargetGenerator(const std::string& targetName,
                            const char* dest, bool implib,
@@ -44,13 +43,11 @@ cmInstallTargetGenerator
   this->NamelinkMode = NamelinkModeNone;
 }
 
-//----------------------------------------------------------------------------
 cmInstallTargetGenerator
 ::~cmInstallTargetGenerator()
 {
 }
 
-//----------------------------------------------------------------------------
 void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
 {
   // Warn if installing an exclude-from-all target.
@@ -68,7 +65,6 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
   this->cmInstallGenerator::GenerateScript(os);
 }
 
-//----------------------------------------------------------------------------
 void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
                                                     const std::string& config,
                                                     Indent const& indent)
@@ -352,7 +348,6 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
                  &cmInstallTargetGenerator::PostReplacementTweaks);
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmInstallTargetGenerator::GetDestination(std::string const& config) const
 {
@@ -361,7 +356,6 @@ cmInstallTargetGenerator::GetDestination(std::string const& config) const
     ->Evaluate(this->Target->GetLocalGenerator(), config);
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmInstallTargetGenerator::GetInstallFilename(const std::string& config) const
 {
@@ -371,7 +365,6 @@ cmInstallTargetGenerator::GetInstallFilename(const std::string& config) const
                                                  nameType);
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmInstallTargetGenerator::GetInstallFilename(cmGeneratorTarget const* target,
                                              const std::string& config,
@@ -451,7 +444,6 @@ void cmInstallTargetGenerator::Compute(cmLocalGenerator* lg)
   this->Target = lg->FindLocalNonAliasGeneratorTarget(this->TargetName);
 }
 
-//----------------------------------------------------------------------------
 void
 cmInstallTargetGenerator
 ::AddTweak(std::ostream& os, Indent const& indent, const std::string& config,
@@ -469,7 +461,6 @@ cmInstallTargetGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmInstallTargetGenerator
 ::AddTweak(std::ostream& os, Indent const& indent, const std::string& config,
@@ -502,7 +493,6 @@ cmInstallTargetGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmInstallTargetGenerator::GetDestDirPath(std::string const& file)
 {
   // Construct the path of the file on disk after installation on
@@ -516,7 +506,6 @@ std::string cmInstallTargetGenerator::GetDestDirPath(std::string const& file)
   return toDestDirPath;
 }
 
-//----------------------------------------------------------------------------
 void cmInstallTargetGenerator::PreReplacementTweaks(std::ostream& os,
                                                     Indent const& indent,
                                                     const std::string& config,
@@ -525,7 +514,6 @@ void cmInstallTargetGenerator::PreReplacementTweaks(std::ostream& os,
   this->AddRPathCheckRule(os, indent, config, file);
 }
 
-//----------------------------------------------------------------------------
 void cmInstallTargetGenerator::PostReplacementTweaks(std::ostream& os,
                                                     Indent const& indent,
                                                     const std::string& config,
@@ -538,7 +526,6 @@ void cmInstallTargetGenerator::PostReplacementTweaks(std::ostream& os,
   this->AddStripRule(os, indent, file);
 }
 
-//----------------------------------------------------------------------------
 void
 cmInstallTargetGenerator
 ::AddInstallNamePatchRule(std::ostream& os, Indent const& indent,
@@ -652,7 +639,6 @@ cmInstallTargetGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmInstallTargetGenerator
 ::AddRPathCheckRule(std::ostream& os, Indent const& indent,
@@ -692,7 +678,6 @@ cmInstallTargetGenerator
   /* clang-format on */
 }
 
-//----------------------------------------------------------------------------
 void
 cmInstallTargetGenerator
 ::AddChrpathPatchRule(std::ostream& os, Indent const& indent,
@@ -802,7 +787,6 @@ cmInstallTargetGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmInstallTargetGenerator::AddStripRule(std::ostream& os,
                                        Indent const& indent,
@@ -835,7 +819,6 @@ cmInstallTargetGenerator::AddStripRule(std::ostream& os,
   os << indent << "endif()\n";
 }
 
-//----------------------------------------------------------------------------
 void
 cmInstallTargetGenerator::AddRanlibRule(std::ostream& os,
                                         Indent const& indent,
@@ -865,7 +848,6 @@ cmInstallTargetGenerator::AddRanlibRule(std::ostream& os,
      << ranlib << "\" \"" << toDestDirPath << "\")\n";
 }
 
-//----------------------------------------------------------------------------
 void
 cmInstallTargetGenerator
 ::AddUniversalInstallRule(std::ostream& os,

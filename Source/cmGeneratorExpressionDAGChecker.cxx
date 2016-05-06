@@ -15,7 +15,6 @@
 #include "cmAlgorithms.h"
 #include "cmLocalGenerator.h"
 
-//----------------------------------------------------------------------------
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
                 const cmListFileBacktrace &backtrace,
                 const std::string &target,
@@ -28,7 +27,6 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   Initialize();
 }
 
-//----------------------------------------------------------------------------
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
                 const std::string &target,
                 const std::string &property,
@@ -40,7 +38,6 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   Initialize();
 }
 
-//----------------------------------------------------------------------------
 void
 cmGeneratorExpressionDAGChecker::Initialize()
 {
@@ -78,14 +75,12 @@ cmGeneratorExpressionDAGChecker::Initialize()
     }
 }
 
-//----------------------------------------------------------------------------
 cmGeneratorExpressionDAGChecker::Result
 cmGeneratorExpressionDAGChecker::Check() const
 {
   return this->CheckResult;
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorExpressionDAGChecker::ReportError(
                   cmGeneratorExpressionContext *context,
                   const std::string &expr)
@@ -144,7 +139,6 @@ void cmGeneratorExpressionDAGChecker::ReportError(
     }
 }
 
-//----------------------------------------------------------------------------
 cmGeneratorExpressionDAGChecker::Result
 cmGeneratorExpressionDAGChecker::CheckGraph() const
 {
@@ -160,7 +154,6 @@ cmGeneratorExpressionDAGChecker::CheckGraph() const
   return DAG;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorExpressionDAGChecker::GetTransitivePropertiesOnly()
 {
   const cmGeneratorExpressionDAGChecker *top = this;
@@ -174,7 +167,6 @@ bool cmGeneratorExpressionDAGChecker::GetTransitivePropertiesOnly()
   return top->TransitivePropertiesOnly;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(const char *tgt)
 {
   const cmGeneratorExpressionDAGChecker *top = this;

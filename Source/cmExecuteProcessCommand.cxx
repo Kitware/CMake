@@ -384,7 +384,6 @@ bool cmExecuteProcessCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmExecuteProcessCommandFixText(std::vector<char>& output,
                                     bool strip_trailing_whitespace)
 {
@@ -418,7 +417,6 @@ void cmExecuteProcessCommandFixText(std::vector<char>& output,
   output.push_back('\0');
 }
 
-//----------------------------------------------------------------------------
 void cmExecuteProcessCommandAppend(std::vector<char>& output,
                                    const char* data, int length)
 {

@@ -18,19 +18,16 @@
 #include "cmSystemTools.h"
 #include "windows.h"
 
-//----------------------------------------------------------------------------
 cmLocalVisualStudioGenerator
 ::cmLocalVisualStudioGenerator(cmGlobalGenerator* gg, cmMakefile* mf)
   : cmLocalGenerator(gg, mf)
 {
 }
 
-//----------------------------------------------------------------------------
 cmLocalVisualStudioGenerator::~cmLocalVisualStudioGenerator()
 {
 }
 
-//----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::VSVersion
 cmLocalVisualStudioGenerator::GetVersion() const
 {
@@ -39,7 +36,6 @@ cmLocalVisualStudioGenerator::GetVersion() const
   return gg->GetVersion();
 }
 
-//----------------------------------------------------------------------------
 void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
                         std::map<cmSourceFile const*, std::string>& mapping,
                         cmGeneratorTarget const* gt)
@@ -79,7 +75,6 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
     }
 }
 
-//----------------------------------------------------------------------------
 cmsys::auto_ptr<cmCustomCommand>
 cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmGeneratorTarget* target,
                                                    const std::string& config,
@@ -115,19 +110,16 @@ cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmGeneratorTarget* target,
   return pcc;
 }
 
-//----------------------------------------------------------------------------
 const char* cmLocalVisualStudioGenerator::ReportErrorLabel() const
 {
   return ":VCReportError";
 }
 
-//----------------------------------------------------------------------------
 const char* cmLocalVisualStudioGenerator::GetReportErrorLabel() const
 {
   return this->ReportErrorLabel();
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmLocalVisualStudioGenerator
 ::ConstructScript(cmCustomCommandGenerator const& ccg,

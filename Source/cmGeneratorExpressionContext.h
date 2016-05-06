@@ -21,7 +21,6 @@
 class cmGeneratorTarget;
 class cmLocalGenerator;
 
-//----------------------------------------------------------------------------
 struct cmGeneratorExpressionContext
 {
   cmGeneratorExpressionContext(cmLocalGenerator* lg, std::string const& config,

@@ -17,7 +17,6 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 
-//----------------------------------------------------------------------------
 cmMakefileUtilityTargetGenerator
 ::cmMakefileUtilityTargetGenerator(cmGeneratorTarget* target):
   cmMakefileTargetGenerator(target)
@@ -28,14 +27,12 @@ cmMakefileUtilityTargetGenerator
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 }
 
-//----------------------------------------------------------------------------
 cmMakefileUtilityTargetGenerator
 ::~cmMakefileUtilityTargetGenerator()
 {
   delete this->OSXBundleGenerator;
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
 {
   this->CreateRuleFile();

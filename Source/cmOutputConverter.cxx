@@ -25,7 +25,6 @@ cmOutputConverter::cmOutputConverter(cmState::Snapshot snapshot)
   assert(this->StateSnapshot.IsValid());
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmOutputConverter::ConvertToOutputForExistingCommon(const std::string& remote,
                                                     std::string const& result,
@@ -48,7 +47,6 @@ cmOutputConverter::ConvertToOutputForExistingCommon(const std::string& remote,
   return result;
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmOutputConverter::ConvertToOutputForExisting(const std::string& remote,
                                               RelativeRoot local,
@@ -63,7 +61,6 @@ cmOutputConverter::ConvertToOutputForExisting(const std::string& remote,
   return this->ConvertToOutputForExistingCommon(remote, result, format);
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmOutputConverter::ConvertToOutputForExisting(RelativeRoot remote,
                                               const std::string& local,
@@ -77,7 +74,6 @@ cmOutputConverter::ConvertToOutputForExisting(RelativeRoot remote,
   return this->ConvertToOutputForExistingCommon(remotePath, result, format);
 }
 
-//----------------------------------------------------------------------------
 const char* cmOutputConverter::GetRelativeRootPath(RelativeRoot relroot) const
 {
   switch (relroot)
@@ -131,7 +127,6 @@ std::string cmOutputConverter::Convert(const std::string& source,
   return this->ConvertToOutputFormat(result, output);
 }
 
-//----------------------------------------------------------------------------
 std::string cmOutputConverter::ConvertToOutputFormat(const std::string& source,
                                                      OutputFormat output) const
 {
@@ -153,7 +148,6 @@ std::string cmOutputConverter::ConvertToOutputFormat(const std::string& source,
   return result;
 }
 
-//----------------------------------------------------------------------------
 std::string cmOutputConverter::ConvertDirectorySeparatorsForShell(
                                               const std::string& source) const
 {
@@ -176,7 +170,6 @@ std::string cmOutputConverter::ConvertDirectorySeparatorsForShell(
   return result;
 }
 
-//----------------------------------------------------------------------------
 std::string cmOutputConverter::Convert(RelativeRoot remote,
                                       const std::string& local,
                                       OutputFormat output,
@@ -198,14 +191,12 @@ std::string cmOutputConverter::Convert(RelativeRoot remote,
   return this->ConvertToOutputFormat(remotePath, output);
 }
 
-//----------------------------------------------------------------------------
 static bool cmOutputConverterNotAbove(const char* a, const char* b)
 {
   return (cmSystemTools::ComparePath(a, b) ||
           cmSystemTools::IsSubDirectory(a, b));
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmOutputConverter::ConvertToRelativePath(const std::vector<std::string>& local,
                                         const std::string& in_remote,
@@ -309,7 +300,6 @@ cmOutputConverter::ConvertToRelativePath(const std::vector<std::string>& local,
   return relative;
 }
 
-//----------------------------------------------------------------------------
 static bool cmOutputConverterIsShellOperator(const std::string& str)
 {
   static std::set<std::string> shellOperators;
@@ -331,7 +321,6 @@ static bool cmOutputConverterIsShellOperator(const std::string& str)
   return shellOperators.count(str) > 0;
 }
 
-//----------------------------------------------------------------------------
 std::string cmOutputConverter::EscapeForShell(const std::string& str,
                                              bool makeVars,
                                              bool forEcho,
@@ -396,7 +385,6 @@ std::string cmOutputConverter::EscapeForShell(const std::string& str,
   return std::string(&arg[0]);
 }
 
-//----------------------------------------------------------------------------
 std::string cmOutputConverter::EscapeForCMake(const std::string& str)
 {
   // Always double-quote the argument to take care of most escapes.
@@ -428,7 +416,6 @@ std::string cmOutputConverter::EscapeForCMake(const std::string& str)
   return result;
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmOutputConverter::EscapeWindowsShellArgument(const char* arg, int shell_flags)
 {
@@ -448,7 +435,6 @@ cmOutputConverter::EscapeWindowsShellArgument(const char* arg, int shell_flags)
   return result;
 }
 
-//----------------------------------------------------------------------------
 cmOutputConverter::FortranFormat
 cmOutputConverter::GetFortranFormat(const char* value)
 {
@@ -483,7 +469,6 @@ cmState* cmOutputConverter::GetState() const
   return this->StateSnapshot.GetState();
 }
 
-//----------------------------------------------------------------------------
 /*
 
 Notes:
@@ -518,13 +503,11 @@ redirection character (for example, ^>, ^<, or ^| ). If you need to
 use the caret character itself (^), use two in a row (^^).
 */
 
-/*--------------------------------------------------------------------------*/
 int cmOutputConverter::Shell__CharIsWhitespace(char c)
 {
   return ((c == ' ') || (c == '\t'));
 }
 
-/*--------------------------------------------------------------------------*/
 int cmOutputConverter::Shell__CharNeedsQuotesOnUnix(char c)
 {
   return ((c == '\'') || (c == '`') || (c == ';') || (c == '#') ||
@@ -533,14 +516,12 @@ int cmOutputConverter::Shell__CharNeedsQuotesOnUnix(char c)
           (c == '*') || (c == '^') || (c == '\\'));
 }
 
-/*--------------------------------------------------------------------------*/
 int cmOutputConverter::Shell__CharNeedsQuotesOnWindows(char c)
 {
   return ((c == '\'') || (c == '#') || (c == '&') ||
           (c == '<') || (c == '>') || (c == '|') || (c == '^'));
 }
 
-/*--------------------------------------------------------------------------*/
 int cmOutputConverter::Shell__CharNeedsQuotes(char c, int isUnix, int flags)
 {
   /* On Windows the built-in command shell echo never needs quotes.  */
@@ -574,13 +555,11 @@ int cmOutputConverter::Shell__CharNeedsQuotes(char c, int isUnix, int flags)
   return 0;
 }
 
-/*--------------------------------------------------------------------------*/
 int cmOutputConverter::Shell__CharIsMakeVariableName(char c)
 {
   return c && (c == '_' || isalpha(((int)c)));
 }
 
-/*--------------------------------------------------------------------------*/
 const char* cmOutputConverter::Shell__SkipMakeVariables(const char* c)
 {
   while(*c == '$' && *(c+1) == '(')
@@ -625,7 +604,6 @@ flag later when we understand applications of this better.
 */
 #define KWSYS_SYSTEM_SHELL_QUOTE_MAKE_VARIABLES 0
 
-/*--------------------------------------------------------------------------*/
 int cmOutputConverter::Shell__ArgumentNeedsQuotes(const char* in,
                                                   int isUnix, int flags)
 {
@@ -684,7 +662,6 @@ int cmOutputConverter::Shell__ArgumentNeedsQuotes(const char* in,
   return 0;
 }
 
-/*--------------------------------------------------------------------------*/
 int cmOutputConverter::Shell__GetArgumentSize(const char* in,
                                               int isUnix, int flags)
 {
@@ -819,7 +796,6 @@ int cmOutputConverter::Shell__GetArgumentSize(const char* in,
   return size;
 }
 
-/*--------------------------------------------------------------------------*/
 char* cmOutputConverter::Shell__GetArgument(const char* in, char* out,
                                             int isUnix, int flags)
 {
@@ -1037,28 +1013,24 @@ char* cmOutputConverter::Shell__GetArgument(const char* in, char* out,
   return out;
 }
 
-/*--------------------------------------------------------------------------*/
 char* cmOutputConverter::Shell_GetArgumentForWindows(const char* in,
                                                      char* out, int flags)
 {
   return Shell__GetArgument(in, out, 0, flags);
 }
 
-/*--------------------------------------------------------------------------*/
 char* cmOutputConverter::Shell_GetArgumentForUnix(const char* in,
                                                   char* out, int flags)
 {
   return Shell__GetArgument(in, out, 1, flags);
 }
 
-/*--------------------------------------------------------------------------*/
 int cmOutputConverter::Shell_GetArgumentSizeForWindows(const char* in,
                                                        int flags)
 {
   return Shell__GetArgumentSize(in, 0, flags);
 }
 
-/*--------------------------------------------------------------------------*/
 int cmOutputConverter::Shell_GetArgumentSizeForUnix(const char* in,
                                                     int flags)
 {

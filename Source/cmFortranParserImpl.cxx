@@ -14,7 +14,6 @@
 #include "cmSystemTools.h"
 #include <assert.h>
 
-//----------------------------------------------------------------------------
 bool cmFortranParser_s::FindIncludeFile(const char* dir,
                                         const char* includeName,
                                         std::string& fileName)
@@ -55,7 +54,6 @@ bool cmFortranParser_s::FindIncludeFile(const char* dir,
   return false;
 }
 
-//----------------------------------------------------------------------------
 cmFortranParser_s
 ::cmFortranParser_s(std::vector<std::string> const& includes,
                     std::set<std::string> const& defines,
@@ -76,13 +74,11 @@ cmFortranParser_s
   cmFortran_yy_switch_to_buffer(buffer, this->Scanner);
 }
 
-//----------------------------------------------------------------------------
 cmFortranParser_s::~cmFortranParser_s()
 {
   cmFortran_yylex_destroy(this->Scanner);
 }
 
-//----------------------------------------------------------------------------
 bool cmFortranParser_FilePush(cmFortranParser* parser,
                                     const char* fname)
 {
@@ -106,7 +102,6 @@ bool cmFortranParser_FilePush(cmFortranParser* parser,
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmFortranParser_FilePop(cmFortranParser* parser)
 {
   // Pop one file off the stack and close it.  Switch the lexer back
@@ -127,7 +122,6 @@ bool cmFortranParser_FilePop(cmFortranParser* parser)
     }
 }
 
-//----------------------------------------------------------------------------
 int cmFortranParser_Input(cmFortranParser* parser,
                                  char* buffer, size_t bufferSize)
 {
@@ -141,26 +135,22 @@ int cmFortranParser_Input(cmFortranParser* parser,
   return 0;
 }
 
-//----------------------------------------------------------------------------
 void cmFortranParser_StringStart(cmFortranParser* parser)
 {
   parser->TokenString = "";
 }
 
-//----------------------------------------------------------------------------
 const char* cmFortranParser_StringEnd(cmFortranParser* parser)
 {
   return parser->TokenString.c_str();
 }
 
-//----------------------------------------------------------------------------
 void cmFortranParser_StringAppend(cmFortranParser* parser,
                                          char c)
 {
   parser->TokenString += c;
 }
 
-//----------------------------------------------------------------------------
 void cmFortranParser_SetInInterface(cmFortranParser* parser,
                                            bool in)
 {
@@ -172,26 +162,22 @@ void cmFortranParser_SetInInterface(cmFortranParser* parser,
   parser->InInterface = in;
 }
 
-//----------------------------------------------------------------------------
 bool cmFortranParser_GetInInterface(cmFortranParser* parser)
 {
   return parser->InInterface;
 }
 
-//----------------------------------------------------------------------------
 void cmFortranParser_SetOldStartcond(cmFortranParser* parser,
                                             int arg)
 {
   parser->OldStartcond = arg;
 }
 
-//----------------------------------------------------------------------------
 int cmFortranParser_GetOldStartcond(cmFortranParser* parser)
 {
   return parser->OldStartcond;
 }
 
-//----------------------------------------------------------------------------
 void cmFortranParser_Error(cmFortranParser*, const char*)
 {
   // If there is a parser error just ignore it.  The source will not
@@ -199,7 +185,6 @@ void cmFortranParser_Error(cmFortranParser*, const char*)
   // to be regenerated anyway.
 }
 
-//----------------------------------------------------------------------------
 void cmFortranParser_RuleUse(cmFortranParser* parser,
                                     const char* name)
 {
@@ -209,7 +194,6 @@ void cmFortranParser_RuleUse(cmFortranParser* parser,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFortranParser_RuleLineDirective(cmFortranParser* parser,
                                        const char* filename)
 {
@@ -235,7 +219,6 @@ void cmFortranParser_RuleLineDirective(cmFortranParser* parser,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFortranParser_RuleInclude(cmFortranParser* parser,
                                         const char* name)
 {
@@ -266,7 +249,6 @@ void cmFortranParser_RuleInclude(cmFortranParser* parser,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFortranParser_RuleModule(cmFortranParser* parser,
                                        const char* name)
 {
@@ -276,7 +258,6 @@ void cmFortranParser_RuleModule(cmFortranParser* parser,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFortranParser_RuleDefine(cmFortranParser* parser,
                                        const char* macro)
 {
@@ -286,7 +267,6 @@ void cmFortranParser_RuleDefine(cmFortranParser* parser,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFortranParser_RuleUndef(cmFortranParser* parser,
                                       const char* macro)
 {
@@ -301,7 +281,6 @@ void cmFortranParser_RuleUndef(cmFortranParser* parser,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFortranParser_RuleIfdef(cmFortranParser* parser,
                                       const char* macro)
 {
@@ -322,7 +301,6 @@ void cmFortranParser_RuleIfdef(cmFortranParser* parser,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFortranParser_RuleIfndef(cmFortranParser* parser,
   const char* macro)
 {
@@ -344,7 +322,6 @@ void cmFortranParser_RuleIfndef(cmFortranParser* parser,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFortranParser_RuleIf(cmFortranParser* parser)
 {
   /* Note: The current parser is _not_ able to get statements like
@@ -378,7 +355,6 @@ void cmFortranParser_RuleIf(cmFortranParser* parser)
   parser->SkipToEnd.push(false);
 }
 
-//----------------------------------------------------------------------------
 void cmFortranParser_RuleElif(cmFortranParser* parser)
 {
   /* Note: There are parser limitations.  See the note at
@@ -395,7 +371,6 @@ void cmFortranParser_RuleElif(cmFortranParser* parser)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFortranParser_RuleElse(cmFortranParser* parser)
 {
   // if the parent branch is false do nothing!
@@ -417,7 +392,6 @@ void cmFortranParser_RuleElse(cmFortranParser* parser)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFortranParser_RuleEndif(cmFortranParser* parser)
 {
   if(!parser->SkipToEnd.empty())

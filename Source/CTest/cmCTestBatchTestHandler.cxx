@@ -22,14 +22,12 @@ cmCTestBatchTestHandler::~cmCTestBatchTestHandler()
 {
 }
 
-//---------------------------------------------------------
 void cmCTestBatchTestHandler::RunTests()
 {
   this->WriteBatchScript();
   this->SubmitBatchScript();
 }
 
-//---------------------------------------------------------
 void cmCTestBatchTestHandler::WriteBatchScript()
 {
   this->Script = this->CTest->GetBinaryDir()
@@ -48,7 +46,6 @@ void cmCTestBatchTestHandler::WriteBatchScript()
   fout.close();
 }
 
-//---------------------------------------------------------
 void cmCTestBatchTestHandler::WriteSrunArgs(int test, cmsys::ofstream& fout)
 {
   cmCTestTestHandler::cmCTestTestProperties* properties =
@@ -79,7 +76,6 @@ void cmCTestBatchTestHandler::WriteSrunArgs(int test, cmsys::ofstream& fout)
     }
 }
 
-//---------------------------------------------------------
 void cmCTestBatchTestHandler::WriteTestCommand(int test, cmsys::ofstream& fout)
 {
   std::vector<std::string> args = this->Properties[test]->Args;
@@ -121,7 +117,6 @@ void cmCTestBatchTestHandler::WriteTestCommand(int test, cmsys::ofstream& fout)
   //this->TestResult.FullCommandLine = this->TestCommand;
 }
 
-//---------------------------------------------------------
 void cmCTestBatchTestHandler::SubmitBatchScript()
 {
   cmProcess sbatch;

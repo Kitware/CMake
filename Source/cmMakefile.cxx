@@ -105,7 +105,6 @@ cmMakefile::~cmMakefile()
   cmDeleteAll(this->EvaluationFiles);
 }
 
-//----------------------------------------------------------------------------
 void cmMakefile::IssueMessage(cmake::MessageType t,
                               std::string const& text,
                               bool force) const
@@ -153,13 +152,11 @@ cmBacktraceRange cmMakefile::GetCompileDefinitionsBacktraces() const
       .GetCompileDefinitionsEntryBacktraces();
 }
 
-//----------------------------------------------------------------------------
 cmListFileBacktrace cmMakefile::GetBacktrace() const
 {
   return this->Backtrace;
 }
 
-//----------------------------------------------------------------------------
 cmListFileBacktrace cmMakefile::GetBacktrace(cmCommandContext const& cc) const
 {
   cmListFileContext lfc;
@@ -169,7 +166,6 @@ cmListFileBacktrace cmMakefile::GetBacktrace(cmCommandContext const& cc) const
   return this->Backtrace.Push(lfc);
 }
 
-//----------------------------------------------------------------------------
 cmListFileContext cmMakefile::GetExecutionContext() const
 {
   cmListFileContext const& cur = this->Backtrace.Top();
@@ -180,7 +176,6 @@ cmListFileContext cmMakefile::GetExecutionContext() const
   return lfc;
 }
 
-//----------------------------------------------------------------------------
 void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
 {
   std::ostringstream msg;
@@ -230,7 +225,6 @@ private:
   cmMakefile* Makefile;
 };
 
-//----------------------------------------------------------------------------
 bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
                                 cmExecutionStatus &status)
 {
@@ -315,7 +309,6 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   return result;
 }
 
-//----------------------------------------------------------------------------
 class cmMakefile::IncludeScope
 {
 public:
@@ -331,7 +324,6 @@ private:
   void EnforceCMP0011();
 };
 
-//----------------------------------------------------------------------------
 cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
                                        std::string const& filenametoread,
                                        bool noPolicyScope):
@@ -377,7 +369,6 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
     }
 }
 
-//----------------------------------------------------------------------------
 cmMakefile::IncludeScope::~IncludeScope()
 {
   if(!this->NoPolicyScope)
@@ -409,7 +400,6 @@ cmMakefile::IncludeScope::~IncludeScope()
   this->Makefile->Backtrace = this->Makefile->Backtrace.Pop();
 }
 
-//----------------------------------------------------------------------------
 void cmMakefile::IncludeScope::EnforceCMP0011()
 {
   // We check the setting of this policy again because the included
@@ -573,7 +563,6 @@ void cmMakefile::ReadListFile(cmListFile const& listFile,
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
 }
 
-//----------------------------------------------------------------------------
 void cmMakefile::EnforceDirectoryLevelRules() const
 {
   // Diagnose a violation of CMP0000 if necessary.
@@ -720,7 +709,6 @@ void cmMakefile::ConfigureFinalPass()
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmMakefile::AddCustomCommandToTarget(const std::string& target,
                                    const std::vector<std::string>& byproducts,
@@ -828,7 +816,6 @@ cmMakefile::AddCustomCommandToTarget(const std::string& target,
     }
 }
 
-//----------------------------------------------------------------------------
 cmSourceFile*
 cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
                                   const std::vector<std::string>& byproducts,
@@ -961,7 +948,6 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
   return file;
 }
 
-//----------------------------------------------------------------------------
 void
 cmMakefile::UpdateOutputToSourceMap(std::vector<std::string> const& outputs,
                                     cmSourceFile* source)
@@ -973,7 +959,6 @@ cmMakefile::UpdateOutputToSourceMap(std::vector<std::string> const& outputs,
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmMakefile::UpdateOutputToSourceMap(std::string const& output,
                                     cmSourceFile* source)
@@ -994,7 +979,6 @@ cmMakefile::UpdateOutputToSourceMap(std::string const& output,
   this->OutputToSource[output] = source;
 }
 
-//----------------------------------------------------------------------------
 cmSourceFile*
 cmMakefile::AddCustomCommandToOutput(const std::string& output,
                                      const std::vector<std::string>& depends,
@@ -1016,7 +1000,6 @@ cmMakefile::AddCustomCommandToOutput(const std::string& output,
                                         uses_terminal);
 }
 
-//----------------------------------------------------------------------------
 void
 cmMakefile::AddCustomCommandOldStyle(const std::string& target,
                                      const std::vector<std::string>& outputs,
@@ -1087,7 +1070,6 @@ cmMakefile::AddCustomCommandOldStyle(const std::string& target,
     }
 }
 
-//----------------------------------------------------------------------------
 cmTarget*
 cmMakefile::AddUtilityCommand(const std::string& utilityName,
                               bool excludeFromAll,
@@ -1126,7 +1108,6 @@ cmMakefile::AddUtilityCommand(const std::string& utilityName,
                                  depends, commandLines);
 }
 
-//----------------------------------------------------------------------------
 cmTarget*
 cmMakefile::AddUtilityCommand(const std::string& utilityName,
                               bool excludeFromAll,
@@ -1142,7 +1123,6 @@ cmMakefile::AddUtilityCommand(const std::string& utilityName,
                                  escapeOldStyle, comment, uses_terminal);
 }
 
-//----------------------------------------------------------------------------
 cmTarget*
 cmMakefile::AddUtilityCommand(const std::string& utilityName,
                               bool excludeFromAll,
@@ -1591,7 +1571,6 @@ private:
   bool ReportError;
 };
 
-//----------------------------------------------------------------------------
 void cmMakefile::Configure()
 {
   std::string currentStart =
@@ -1755,7 +1734,6 @@ std::vector<cmTarget*> cmMakefile::GetImportedTargets() const
   return tgts;
 }
 
-//----------------------------------------------------------------------------
 void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
                                        bool before)
 {
@@ -1786,7 +1764,6 @@ void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmMakefile::AddSystemIncludeDirectories(const std::set<std::string> &incs)
 {
@@ -2070,7 +2047,6 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
   return target;
 }
 
-//----------------------------------------------------------------------------
 cmTarget*
 cmMakefile::AddNewTarget(cmState::TargetType type, const std::string& name)
 {
@@ -3129,7 +3105,6 @@ void cmMakefile::RemoveVariablesInString(std::string& source,
     }
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmMakefile::GetConfigurations(std::vector<std::string>& configs,
                               bool singleConfig) const
@@ -3218,13 +3193,11 @@ bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff,
   return false;
 }
 
-//----------------------------------------------------------------------------
 void cmMakefile::PushFunctionBlockerBarrier()
 {
   this->FunctionBlockerBarriers.push_back(this->FunctionBlockers.size());
 }
 
-//----------------------------------------------------------------------------
 void cmMakefile::PopFunctionBlockerBarrier(bool reportError)
 {
   // Remove any extra entries pushed on the barrier.
@@ -3253,7 +3226,6 @@ void cmMakefile::PopFunctionBlockerBarrier(bool reportError)
   this->FunctionBlockerBarriers.pop_back();
 }
 
-//----------------------------------------------------------------------------
 void cmMakefile::PushLoopBlock()
 {
   assert(!this->LoopBlockCounter.empty());
@@ -3291,7 +3263,6 @@ std::string cmMakefile::GetExecutionFilePath() const
   return this->StateSnapshot.GetExecutionListFile();
 }
 
-//----------------------------------------------------------------------------
 bool cmMakefile::ExpandArguments(
   std::vector<cmListFileArgument> const& inArgs,
   std::vector<std::string>& outArgs, const char* filename) const
@@ -3331,7 +3302,6 @@ bool cmMakefile::ExpandArguments(
   return !cmSystemTools::GetFatalErrorOccured();
 }
 
-//----------------------------------------------------------------------------
 bool cmMakefile::ExpandArguments(
   std::vector<cmListFileArgument> const& inArgs,
   std::vector<cmExpandedCommandArgument>& outArgs, const char* filename) const
@@ -3376,7 +3346,6 @@ bool cmMakefile::ExpandArguments(
   return !cmSystemTools::GetFatalErrorOccured();
 }
 
-//----------------------------------------------------------------------------
 void cmMakefile::AddFunctionBlocker(cmFunctionBlocker* fb)
 {
   if(!this->ExecutionStatusStack.empty())
@@ -3464,7 +3433,6 @@ void cmMakefile::SetArgcArgv(const std::vector<std::string>& args)
   }
 }
 
-//----------------------------------------------------------------------------
 cmSourceFile* cmMakefile::GetSource(const std::string& sourceName) const
 {
   cmSourceFileLocation sfl(this, sourceName);
@@ -3481,7 +3449,6 @@ cmSourceFile* cmMakefile::GetSource(const std::string& sourceName) const
   return 0;
 }
 
-//----------------------------------------------------------------------------
 cmSourceFile* cmMakefile::CreateSource(const std::string& sourceName,
                                        bool generated)
 {
@@ -3494,7 +3461,6 @@ cmSourceFile* cmMakefile::CreateSource(const std::string& sourceName,
   return sf;
 }
 
-//----------------------------------------------------------------------------
 cmSourceFile* cmMakefile::GetOrCreateSource(const std::string& sourceName,
                                             bool generated)
 {
@@ -4025,7 +3991,6 @@ cmTarget* cmMakefile::FindLocalNonAliasTarget(const std::string& name) const
   return 0;
 }
 
-//----------------------------------------------------------------------------
 cmTest* cmMakefile::CreateTest(const std::string& testName)
 {
   cmTest* test = this->GetTest(testName);
@@ -4039,7 +4004,6 @@ cmTest* cmMakefile::CreateTest(const std::string& testName)
   return test;
 }
 
-//----------------------------------------------------------------------------
 cmTest* cmMakefile::GetTest(const std::string& testName) const
 {
   std::map<std::string, cmTest*>::const_iterator
@@ -4148,7 +4112,6 @@ void cmMakefile::RaiseScope(const std::string& var, const char *varDef)
     }
 }
 
-//----------------------------------------------------------------------------
 cmTarget*
 cmMakefile::AddImportedTarget(const std::string& name,
                               cmState::TargetType type,
@@ -4169,7 +4132,6 @@ cmMakefile::AddImportedTarget(const std::string& name,
   return target.release();
 }
 
-//----------------------------------------------------------------------------
 cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
                                       bool excludeAliases) const
 {
@@ -4192,7 +4154,6 @@ cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
   return this->GetGlobalGenerator()->FindTarget(name, excludeAliases);
 }
 
-//----------------------------------------------------------------------------
 bool cmMakefile::IsAlias(const std::string& name) const
 {
   if (this->AliasTargets.find(name) != this->AliasTargets.end())
@@ -4200,7 +4161,6 @@ bool cmMakefile::IsAlias(const std::string& name) const
   return this->GetGlobalGenerator()->IsAlias(name);
 }
 
-//----------------------------------------------------------------------------
 bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
                                    bool isCustom) const
 {
@@ -4295,7 +4255,6 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
                                   const std::string& binPath) const
 {
@@ -4348,13 +4307,11 @@ bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
   return false;
 }
 
-//----------------------------------------------------------------------------
 void cmMakefile::AddQtUiFileWithOptions(cmSourceFile *sf)
 {
   this->QtUiFilesWithOptions.push_back(sf);
 }
 
-//----------------------------------------------------------------------------
 std::vector<cmSourceFile*> cmMakefile::GetQtUiFilesWithOptions() const
 {
   return this->QtUiFilesWithOptions;
@@ -4375,7 +4332,6 @@ static std::string const matchVariables[] = {
 
 static std::string const nMatchesVariable = "CMAKE_MATCH_COUNT";
 
-//----------------------------------------------------------------------------
 void cmMakefile::ClearMatches()
 {
   const char* nMatchesStr = this->GetDefinition(nMatchesVariable);
@@ -4398,7 +4354,6 @@ void cmMakefile::ClearMatches()
   this->MarkVariableAsUsed(nMatchesVariable);
 }
 
-//----------------------------------------------------------------------------
 void cmMakefile::StoreMatches(cmsys::RegularExpression& re)
 {
   char highest = 0;
@@ -4428,14 +4383,12 @@ const char* cmMakefile::GetDefineFlagsCMP0059() const
   return this->DefineFlagsOrig.c_str();
 }
 
-//----------------------------------------------------------------------------
 cmPolicies::PolicyStatus
 cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id) const
 {
   return this->StateSnapshot.GetPolicy(id);
 }
 
-//----------------------------------------------------------------------------
 bool cmMakefile::PolicyOptionalWarningEnabled(std::string const& var)
 {
   // Check for an explicit CMAKE_POLICY_WARNING_CMP<NNNN> setting.
@@ -4466,7 +4419,6 @@ bool cmMakefile::SetPolicy(const char *id,
   return this->SetPolicy(pid,status);
 }
 
-//----------------------------------------------------------------------------
 bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
                            cmPolicies::PolicyStatus status)
 {
@@ -4485,25 +4437,21 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
   return true;
 }
 
-//----------------------------------------------------------------------------
 cmMakefile::PolicyPushPop::PolicyPushPop(cmMakefile* m): Makefile(m)
 {
   this->Makefile->PushPolicy();
 }
 
-//----------------------------------------------------------------------------
 cmMakefile::PolicyPushPop::~PolicyPushPop()
 {
   this->Makefile->PopPolicy();
 }
 
-//----------------------------------------------------------------------------
 void cmMakefile::PushPolicy(bool weak, cmPolicies::PolicyMap const& pm)
 {
   this->StateSnapshot.PushPolicy(pm, weak);
 }
 
-//----------------------------------------------------------------------------
 void cmMakefile::PopPolicy()
 {
   if (!this->StateSnapshot.PopPolicy())
@@ -4513,7 +4461,6 @@ void cmMakefile::PopPolicy()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmMakefile::PopSnapshot(bool reportError)
 {
   // cmState::Snapshot manages nested policy scopes within it.
@@ -4534,20 +4481,17 @@ void cmMakefile::PopSnapshot(bool reportError)
   assert(this->StateSnapshot.IsValid());
 }
 
-//----------------------------------------------------------------------------
 bool cmMakefile::SetPolicyVersion(const char *version)
 {
   return cmPolicies::ApplyPolicyVersion(this,version);
 }
 
-//----------------------------------------------------------------------------
 bool cmMakefile::HasCMP0054AlreadyBeenReported(
     cmListFileContext const& context) const
 {
   return !this->CMP0054ReportedIds.insert(context).second;
 }
 
-//----------------------------------------------------------------------------
 void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm)
 {
   /* Record the setting of every policy.  */
@@ -4559,7 +4503,6 @@ void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm)
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmMakefile::IgnoreErrorsCMP0061() const
 {
   bool ignoreErrors = true;
@@ -4578,7 +4521,6 @@ bool cmMakefile::IgnoreErrorsCMP0061() const
   return ignoreErrors;
 }
 
-//----------------------------------------------------------------------------
 #define FEATURE_STRING(F) , #F
 static const char * const C_FEATURES[] = {
   0
@@ -4602,7 +4544,6 @@ static const char * const CXX_STANDARDS[] = {
   , "14"
 };
 
-//----------------------------------------------------------------------------
 bool cmMakefile::
 AddRequiredTargetFeature(cmTarget *target, const std::string& feature,
                          std::string *error) const
@@ -4648,7 +4589,6 @@ AddRequiredTargetFeature(cmTarget *target, const std::string& feature,
       : this->AddRequiredTargetCxxFeature(target, feature);
 }
 
-//----------------------------------------------------------------------------
 bool cmMakefile::
 CompileFeatureKnown(cmTarget const* target, const std::string& feature,
                     std::string& lang, std::string *error) const
@@ -4693,7 +4633,6 @@ CompileFeatureKnown(cmTarget const* target, const std::string& feature,
   return false;
 }
 
-//----------------------------------------------------------------------------
 const char* cmMakefile::
 CompileFeaturesAvailable(const std::string& lang, std::string *error) const
 {
@@ -4728,7 +4667,6 @@ CompileFeaturesAvailable(const std::string& lang, std::string *error) const
   return featuresKnown;
 }
 
-//----------------------------------------------------------------------------
 bool cmMakefile::HaveStandardAvailable(cmTarget const* target,
                                       std::string const& lang,
                                       const std::string& feature) const
@@ -4738,7 +4676,6 @@ bool cmMakefile::HaveStandardAvailable(cmTarget const* target,
       : this->HaveCxxStandardAvailable(target, feature);
 }
 
-//----------------------------------------------------------------------------
 bool cmMakefile::
 HaveCStandardAvailable(cmTarget const* target,
                        const std::string& feature) const
@@ -4816,7 +4753,6 @@ HaveCStandardAvailable(cmTarget const* target,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmMakefile::IsLaterStandard(std::string const& lang,
                                  std::string const& lhs,
                                  std::string const& rhs)
@@ -4838,7 +4774,6 @@ bool cmMakefile::IsLaterStandard(std::string const& lang,
                       cmStrCmp(lhs)) != cmArrayEnd(CXX_STANDARDS);
 }
 
-//----------------------------------------------------------------------------
 bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
                                          const std::string& feature) const
 {
@@ -4906,7 +4841,6 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmMakefile::CheckNeededCxxLanguage(const std::string& feature,
                                         bool& needCxx98,
                                         bool& needCxx11,
@@ -4935,7 +4869,6 @@ void cmMakefile::CheckNeededCxxLanguage(const std::string& feature,
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmMakefile::
 AddRequiredTargetCxxFeature(cmTarget *target,
                             const std::string& feature) const
@@ -5006,7 +4939,6 @@ AddRequiredTargetCxxFeature(cmTarget *target,
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmMakefile::CheckNeededCLanguage(const std::string& feature,
                                         bool& needC90,
                                         bool& needC99,
@@ -5035,7 +4967,6 @@ void cmMakefile::CheckNeededCLanguage(const std::string& feature,
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmMakefile::
 AddRequiredTargetCFeature(cmTarget *target, const std::string& feature) const
 {

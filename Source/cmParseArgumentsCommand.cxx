@@ -15,7 +15,6 @@
 
 #include "cmAlgorithms.h"
 
-//----------------------------------------------------------------------------
 bool cmParseArgumentsCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {

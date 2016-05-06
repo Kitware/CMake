@@ -15,7 +15,6 @@
 
 #include <assert.h>
 
-//----------------------------------------------------------------------------
 cmComputeComponentGraph::cmComputeComponentGraph(Graph const& input):
   InputGraph(input)
 {
@@ -28,12 +27,10 @@ cmComputeComponentGraph::cmComputeComponentGraph(Graph const& input):
   this->TransferEdges();
 }
 
-//----------------------------------------------------------------------------
 cmComputeComponentGraph::~cmComputeComponentGraph()
 {
 }
 
-//----------------------------------------------------------------------------
 void cmComputeComponentGraph::Tarjan()
 {
   int n = static_cast<int>(this->InputGraph.size());
@@ -58,7 +55,6 @@ void cmComputeComponentGraph::Tarjan()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmComputeComponentGraph::TarjanVisit(int i)
 {
   // We are now visiting this node.
@@ -133,7 +129,6 @@ void cmComputeComponentGraph::TarjanVisit(int i)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmComputeComponentGraph::TransferEdges()
 {
   // Map inter-component edges in the original graph to edges in the

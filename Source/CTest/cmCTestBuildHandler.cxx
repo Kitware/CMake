@@ -174,7 +174,6 @@ cmCTestWarningErrorFileLine[] = {
     { 0, 0, 0 }
 };
 
-//----------------------------------------------------------------------
 cmCTestBuildHandler::cmCTestBuildHandler()
 {
   this->MaxPreContext = 10;
@@ -188,7 +187,6 @@ cmCTestBuildHandler::cmCTestBuildHandler()
   this->UseCTestLaunch = false;
 }
 
-//----------------------------------------------------------------------
 void cmCTestBuildHandler::Initialize()
 {
   this->Superclass::Initialize();
@@ -234,7 +232,6 @@ void cmCTestBuildHandler::Initialize()
   this->UseCTestLaunch = false;
 }
 
-//----------------------------------------------------------------------
 void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile *mf)
 {
   this->CTest->PopulateCustomVector(mf, "CTEST_CUSTOM_ERROR_MATCH",
@@ -281,7 +278,6 @@ void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile *mf)
     }
 }
 
-//----------------------------------------------------------------------
 std::string cmCTestBuildHandler::GetMakeCommand()
 {
   std::string makeCommand
@@ -307,7 +303,6 @@ std::string cmCTestBuildHandler::GetMakeCommand()
   return makeCommand;
 }
 
-//----------------------------------------------------------------------
 //clearly it would be nice if this were broken up into a few smaller
 //functions and commented...
 int cmCTestBuildHandler::ProcessHandler()
@@ -551,7 +546,6 @@ int cmCTestBuildHandler::ProcessHandler()
   return retVal;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestBuildHandler::GenerateXMLHeader(cmXMLWriter& xml)
 {
   this->CTest->StartXML(xml, this->AppendXML);
@@ -562,7 +556,6 @@ void cmCTestBuildHandler::GenerateXMLHeader(cmXMLWriter& xml)
   xml.Element("BuildCommand", this->GetMakeCommand());
 }
 
-//----------------------------------------------------------------------------
 class cmCTestBuildHandler::FragmentCompare
 {
 public:
@@ -587,7 +580,6 @@ private:
   cmFileTimeComparison* FTC;
 };
 
-//----------------------------------------------------------------------------
 void cmCTestBuildHandler::GenerateXMLLaunched(cmXMLWriter& xml)
 {
   if(this->CTestLaunchDir.empty())
@@ -633,7 +625,6 @@ void cmCTestBuildHandler::GenerateXMLLaunched(cmXMLWriter& xml)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmCTestBuildHandler::GenerateXMLLogScraped(cmXMLWriter& xml)
 {
   std::vector<cmCTestBuildErrorWarning>& ew = this->ErrorsAndWarnings;
@@ -730,7 +721,6 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(cmXMLWriter& xml)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmCTestBuildHandler::GenerateXMLFooter(cmXMLWriter& xml,
                                             double elapsed_build_time)
 {
@@ -746,7 +736,6 @@ void cmCTestBuildHandler::GenerateXMLFooter(cmXMLWriter& xml,
   this->CTest->EndXML(xml);
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestBuildHandler::IsLaunchedErrorFile(const char* fname)
 {
   // error-{hash}.xml
@@ -754,7 +743,6 @@ bool cmCTestBuildHandler::IsLaunchedErrorFile(const char* fname)
           strcmp(fname+strlen(fname)-4, ".xml") == 0);
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestBuildHandler::IsLaunchedWarningFile(const char* fname)
 {
   // warning-{hash}.xml
@@ -767,7 +755,6 @@ bool cmCTestBuildHandler::IsLaunchedWarningFile(const char* fname)
 //######################################################################
 //######################################################################
 
-//----------------------------------------------------------------------------
 class cmCTestBuildHandler::LaunchHelper
 {
 public:
@@ -782,7 +769,6 @@ private:
                            std::vector<std::string> const& matchers);
 };
 
-//----------------------------------------------------------------------------
 cmCTestBuildHandler::LaunchHelper::LaunchHelper(cmCTestBuildHandler* handler):
   Handler(handler), CTest(handler->CTest)
 {
@@ -823,7 +809,6 @@ cmCTestBuildHandler::LaunchHelper::LaunchHelper(cmCTestBuildHandler* handler):
     }
 }
 
-//----------------------------------------------------------------------------
 cmCTestBuildHandler::LaunchHelper::~LaunchHelper()
 {
   if(this->Handler->UseCTestLaunch)
@@ -832,7 +817,6 @@ cmCTestBuildHandler::LaunchHelper::~LaunchHelper()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmCTestBuildHandler::LaunchHelper::WriteLauncherConfig()
 {
   this->WriteScrapeMatchers("Warning",
@@ -848,7 +832,6 @@ void cmCTestBuildHandler::LaunchHelper::WriteLauncherConfig()
   fout << "set(CTEST_SOURCE_DIRECTORY \"" << srcdir << "\")\n";
 }
 
-//----------------------------------------------------------------------------
 void
 cmCTestBuildHandler::LaunchHelper
 ::WriteScrapeMatchers(const char* purpose,
@@ -870,7 +853,6 @@ cmCTestBuildHandler::LaunchHelper
     }
 }
 
-//----------------------------------------------------------------------
 int cmCTestBuildHandler::RunMakeCommand(const char* command,
   int* retVal, const char* dir, int timeout, std::ostream& ofs)
 {
@@ -1039,7 +1021,6 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
 //######################################################################
 //######################################################################
 
-//----------------------------------------------------------------------
 void cmCTestBuildHandler::ProcessBuffer(const char* data, int length,
   size_t& tick, size_t tick_len, std::ostream& ofs,
   t_BuildProcessingQueueType* queue)
@@ -1197,7 +1178,6 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, int length,
   ofs << cmCTestLogWrite(data, length);
 }
 
-//----------------------------------------------------------------------
 int cmCTestBuildHandler::ProcessSingleLine(const char* data)
 {
   if(this->UseCTestLaunch)

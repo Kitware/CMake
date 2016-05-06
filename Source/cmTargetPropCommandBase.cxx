@@ -14,7 +14,6 @@
 
 #include "cmGlobalGenerator.h"
 
-//----------------------------------------------------------------------------
 bool cmTargetPropCommandBase
 ::HandleArguments(std::vector<std::string> const& args,
                   const std::string& prop,
@@ -93,7 +92,6 @@ bool cmTargetPropCommandBase
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmTargetPropCommandBase
 ::ProcessContentArgs(std::vector<std::string> const& args,
                      unsigned int &argIndex, bool prepend, bool system)
@@ -139,7 +137,6 @@ bool cmTargetPropCommandBase
   return this->PopulateTargetProperies(scope, content, prepend, system);
 }
 
-//----------------------------------------------------------------------------
 bool cmTargetPropCommandBase
 ::PopulateTargetProperies(const std::string &scope,
                           const std::vector<std::string> &content,
@@ -159,7 +156,6 @@ bool cmTargetPropCommandBase
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmTargetPropCommandBase::HandleInterfaceContent(cmTarget *tgt,
                                   const std::vector<std::string> &content,
                                   bool prepend, bool)

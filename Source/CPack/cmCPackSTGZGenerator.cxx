@@ -24,17 +24,14 @@
 // include sys/stat.h after sys/types.h
 #include <sys/stat.h>
 
-//----------------------------------------------------------------------
 cmCPackSTGZGenerator::cmCPackSTGZGenerator()
 {
 }
 
-//----------------------------------------------------------------------
 cmCPackSTGZGenerator::~cmCPackSTGZGenerator()
 {
 }
 
-//----------------------------------------------------------------------
 int cmCPackSTGZGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", "0");
@@ -52,7 +49,6 @@ int cmCPackSTGZGenerator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
-//----------------------------------------------------------------------
 int cmCPackSTGZGenerator::PackageFiles()
 {
  bool retval = true;
@@ -81,7 +77,6 @@ int cmCPackSTGZGenerator::PackageFiles()
   return retval;
 }
 
-//----------------------------------------------------------------------
 int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Writing header" << std::endl);

@@ -12,14 +12,12 @@
 #include "cmGeneratorExpressionLexer.h"
 
 
-//----------------------------------------------------------------------------
 cmGeneratorExpressionLexer::cmGeneratorExpressionLexer()
   : SawBeginExpression(false), SawGeneratorExpression(false)
 {
 
 }
 
-//----------------------------------------------------------------------------
 static void InsertText(const char *upto, const char *c,
                         std::vector<cmGeneratorExpressionToken> &result)
 {
@@ -30,7 +28,6 @@ static void InsertText(const char *upto, const char *c,
     }
 }
 
-//----------------------------------------------------------------------------
 std::vector<cmGeneratorExpressionToken>
 cmGeneratorExpressionLexer::Tokenize(const std::string& input)
 {

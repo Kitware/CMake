@@ -17,7 +17,6 @@
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 
-//----------------------------------------------------------------------------
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
     std::string const& prop, cmLocalGenerator *lg,
     cmGeneratorExpressionContext *context,
@@ -46,7 +45,6 @@ std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   return result;
 }
 
-//----------------------------------------------------------------------------
 static const struct ZeroNode : public cmGeneratorExpressionNode
 {
   ZeroNode() {}
@@ -64,7 +62,6 @@ static const struct ZeroNode : public cmGeneratorExpressionNode
   }
 } zeroNode;
 
-//----------------------------------------------------------------------------
 static const struct OneNode : public cmGeneratorExpressionNode
 {
   OneNode() {}
@@ -80,13 +77,10 @@ static const struct OneNode : public cmGeneratorExpressionNode
   }
 } oneNode;
 
-//----------------------------------------------------------------------------
 static const struct OneNode buildInterfaceNode;
 
-//----------------------------------------------------------------------------
 static const struct ZeroNode installInterfaceNode;
 
-//----------------------------------------------------------------------------
 #define BOOLEAN_OP_NODE(OPNAME, OP, SUCCESS_VALUE, FAILURE_VALUE) \
 static const struct OP ## Node : public cmGeneratorExpressionNode \
 { \
@@ -122,7 +116,6 @@ BOOLEAN_OP_NODE(orNode, OR, 0, 1)
 
 #undef BOOLEAN_OP_NODE
 
-//----------------------------------------------------------------------------
 static const struct NotNode : public cmGeneratorExpressionNode
 {
   NotNode() {}
@@ -142,7 +135,6 @@ static const struct NotNode : public cmGeneratorExpressionNode
   }
 } notNode;
 
-//----------------------------------------------------------------------------
 static const struct BoolNode : public cmGeneratorExpressionNode
 {
   BoolNode() {}
@@ -158,7 +150,6 @@ static const struct BoolNode : public cmGeneratorExpressionNode
   }
 } boolNode;
 
-//----------------------------------------------------------------------------
 static const struct StrEqualNode : public cmGeneratorExpressionNode
 {
   StrEqualNode() {}
@@ -174,7 +165,6 @@ static const struct StrEqualNode : public cmGeneratorExpressionNode
   }
 } strEqualNode;
 
-//----------------------------------------------------------------------------
 static const struct EqualNode : public cmGeneratorExpressionNode
 {
   EqualNode() {}
@@ -260,7 +250,6 @@ static const struct EqualNode : public cmGeneratorExpressionNode
   }
 } equalNode;
 
-//----------------------------------------------------------------------------
 static const struct LowerCaseNode : public cmGeneratorExpressionNode
 {
   LowerCaseNode() {}
@@ -276,7 +265,6 @@ static const struct LowerCaseNode : public cmGeneratorExpressionNode
   }
 } lowerCaseNode;
 
-//----------------------------------------------------------------------------
 static const struct UpperCaseNode : public cmGeneratorExpressionNode
 {
   UpperCaseNode() {}
@@ -292,7 +280,6 @@ static const struct UpperCaseNode : public cmGeneratorExpressionNode
   }
 } upperCaseNode;
 
-//----------------------------------------------------------------------------
 static const struct MakeCIdentifierNode : public cmGeneratorExpressionNode
 {
   MakeCIdentifierNode() {}
@@ -308,7 +295,6 @@ static const struct MakeCIdentifierNode : public cmGeneratorExpressionNode
   }
 } makeCIdentifierNode;
 
-//----------------------------------------------------------------------------
 static const struct Angle_RNode : public cmGeneratorExpressionNode
 {
   Angle_RNode() {}
@@ -324,7 +310,6 @@ static const struct Angle_RNode : public cmGeneratorExpressionNode
   }
 } angle_rNode;
 
-//----------------------------------------------------------------------------
 static const struct CommaNode : public cmGeneratorExpressionNode
 {
   CommaNode() {}
@@ -340,7 +325,6 @@ static const struct CommaNode : public cmGeneratorExpressionNode
   }
 } commaNode;
 
-//----------------------------------------------------------------------------
 static const struct SemicolonNode : public cmGeneratorExpressionNode
 {
   SemicolonNode() {}
@@ -356,7 +340,6 @@ static const struct SemicolonNode : public cmGeneratorExpressionNode
   }
 } semicolonNode;
 
-//----------------------------------------------------------------------------
 struct CompilerIdNode : public cmGeneratorExpressionNode
 {
   CompilerIdNode() {}
@@ -417,7 +400,6 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
   }
 };
 
-//----------------------------------------------------------------------------
 static const struct CCompilerIdNode : public CompilerIdNode
 {
   CCompilerIdNode() {}
@@ -439,7 +421,6 @@ static const struct CCompilerIdNode : public CompilerIdNode
   }
 } cCompilerIdNode;
 
-//----------------------------------------------------------------------------
 static const struct CXXCompilerIdNode : public CompilerIdNode
 {
   CXXCompilerIdNode() {}
@@ -461,7 +442,6 @@ static const struct CXXCompilerIdNode : public CompilerIdNode
   }
 } cxxCompilerIdNode;
 
-//----------------------------------------------------------------------------
 struct CompilerVersionNode : public cmGeneratorExpressionNode
 {
   CompilerVersionNode() {}
@@ -500,7 +480,6 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
   }
 };
 
-//----------------------------------------------------------------------------
 static const struct CCompilerVersionNode : public CompilerVersionNode
 {
   CCompilerVersionNode() {}
@@ -522,7 +501,6 @@ static const struct CCompilerVersionNode : public CompilerVersionNode
   }
 } cCompilerVersionNode;
 
-//----------------------------------------------------------------------------
 static const struct CxxCompilerVersionNode : public CompilerVersionNode
 {
   CxxCompilerVersionNode() {}
@@ -545,7 +523,6 @@ static const struct CxxCompilerVersionNode : public CompilerVersionNode
 } cxxCompilerVersionNode;
 
 
-//----------------------------------------------------------------------------
 struct PlatformIdNode : public cmGeneratorExpressionNode
 {
   PlatformIdNode() {}
@@ -577,7 +554,6 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
   }
 } platformIdNode;
 
-//----------------------------------------------------------------------------
 static const struct VersionGreaterNode : public cmGeneratorExpressionNode
 {
   VersionGreaterNode() {}
@@ -595,7 +571,6 @@ static const struct VersionGreaterNode : public cmGeneratorExpressionNode
   }
 } versionGreaterNode;
 
-//----------------------------------------------------------------------------
 static const struct VersionLessNode : public cmGeneratorExpressionNode
 {
   VersionLessNode() {}
@@ -613,7 +588,6 @@ static const struct VersionLessNode : public cmGeneratorExpressionNode
   }
 } versionLessNode;
 
-//----------------------------------------------------------------------------
 static const struct VersionEqualNode : public cmGeneratorExpressionNode
 {
   VersionEqualNode() {}
@@ -631,7 +605,6 @@ static const struct VersionEqualNode : public cmGeneratorExpressionNode
   }
 } versionEqualNode;
 
-//----------------------------------------------------------------------------
 static const struct LinkOnlyNode : public cmGeneratorExpressionNode
 {
   LinkOnlyNode() {}
@@ -649,7 +622,6 @@ static const struct LinkOnlyNode : public cmGeneratorExpressionNode
   }
 } linkOnlyNode;
 
-//----------------------------------------------------------------------------
 static const struct ConfigurationNode : public cmGeneratorExpressionNode
 {
   ConfigurationNode() {}
@@ -666,7 +638,6 @@ static const struct ConfigurationNode : public cmGeneratorExpressionNode
   }
 } configurationNode;
 
-//----------------------------------------------------------------------------
 static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 {
   ConfigurationTestNode() {}
@@ -824,7 +795,6 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
 #define TRANSITIVE_PROPERTY_NAME(PROPERTY) \
   , "INTERFACE_" #PROPERTY
 
-//----------------------------------------------------------------------------
 static const char* targetPropertyTransitiveWhitelist[] = {
   0
   CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(TRANSITIVE_PROPERTY_NAME)
@@ -873,7 +843,6 @@ getLinkedTargetsContent(
   return linkedTargetsContent;
 }
 
-//----------------------------------------------------------------------------
 static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 {
   TargetPropertyNode() {}
@@ -1226,7 +1195,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
   }
 } targetPropertyNode;
 
-//----------------------------------------------------------------------------
 static const struct TargetNameNode : public cmGeneratorExpressionNode
 {
   TargetNameNode() {}
@@ -1248,7 +1216,6 @@ static const struct TargetNameNode : public cmGeneratorExpressionNode
 
 } targetNameNode;
 
-//----------------------------------------------------------------------------
 static const struct TargetObjectsNode : public cmGeneratorExpressionNode
 {
   TargetObjectsNode() {}
@@ -1324,7 +1291,6 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
   }
 } targetObjectsNode;
 
-//----------------------------------------------------------------------------
 static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
 {
   CompileFeaturesNode() {}
@@ -1427,7 +1393,6 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
   }
 } compileFeaturesNode;
 
-//----------------------------------------------------------------------------
 static const char* targetPolicyWhitelist[] = {
   0
 #define TARGET_POLICY_STRING(POLICY) \
@@ -1471,7 +1436,6 @@ cmPolicies::PolicyID policyForString(const char *policy_id)
   return cmPolicies::CMP0002;
 }
 
-//----------------------------------------------------------------------------
 static const struct TargetPolicyNode : public cmGeneratorExpressionNode
 {
   TargetPolicyNode() {}
@@ -1533,7 +1497,6 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
 
 } targetPolicyNode;
 
-//----------------------------------------------------------------------------
 static const struct InstallPrefixNode : public cmGeneratorExpressionNode
 {
   InstallPrefixNode() {}
@@ -1554,7 +1517,6 @@ static const struct InstallPrefixNode : public cmGeneratorExpressionNode
 
 } installPrefixNode;
 
-//----------------------------------------------------------------------------
 class ArtifactNameTag;
 class ArtifactLinkerTag;
 class ArtifactSonameTag;
@@ -1563,7 +1525,6 @@ class ArtifactPdbTag;
 class ArtifactPathTag;
 class ArtifactDirTag;
 
-//----------------------------------------------------------------------------
 template<typename ArtifactT>
 struct TargetFilesystemArtifactResultCreator
 {
@@ -1572,7 +1533,6 @@ struct TargetFilesystemArtifactResultCreator
                             const GeneratorExpressionContent *content);
 };
 
-//----------------------------------------------------------------------------
 template<>
 struct TargetFilesystemArtifactResultCreator<ArtifactSonameTag>
 {
@@ -1602,7 +1562,6 @@ struct TargetFilesystemArtifactResultCreator<ArtifactSonameTag>
   }
 };
 
-//----------------------------------------------------------------------------
 template<>
 struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
 {
@@ -1647,7 +1606,6 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
   }
 };
 
-//----------------------------------------------------------------------------
 template<>
 struct TargetFilesystemArtifactResultCreator<ArtifactLinkerTag>
 {
@@ -1668,7 +1626,6 @@ struct TargetFilesystemArtifactResultCreator<ArtifactLinkerTag>
   }
 };
 
-//----------------------------------------------------------------------------
 template<>
 struct TargetFilesystemArtifactResultCreator<ArtifactNameTag>
 {
@@ -1681,14 +1638,12 @@ struct TargetFilesystemArtifactResultCreator<ArtifactNameTag>
 };
 
 
-//----------------------------------------------------------------------------
 template<typename ArtifactT>
 struct TargetFilesystemArtifactResultGetter
 {
   static std::string Get(const std::string &result);
 };
 
-//----------------------------------------------------------------------------
 template<>
 struct TargetFilesystemArtifactResultGetter<ArtifactNameTag>
 {
@@ -1696,7 +1651,6 @@ struct TargetFilesystemArtifactResultGetter<ArtifactNameTag>
   { return cmSystemTools::GetFilenameName(result); }
 };
 
-//----------------------------------------------------------------------------
 template<>
 struct TargetFilesystemArtifactResultGetter<ArtifactDirTag>
 {
@@ -1704,7 +1658,6 @@ struct TargetFilesystemArtifactResultGetter<ArtifactDirTag>
   { return cmSystemTools::GetFilenamePath(result); }
 };
 
-//----------------------------------------------------------------------------
 template<>
 struct TargetFilesystemArtifactResultGetter<ArtifactPathTag>
 {
@@ -1712,7 +1665,6 @@ struct TargetFilesystemArtifactResultGetter<ArtifactPathTag>
   { return result; }
 };
 
-//----------------------------------------------------------------------------
 template<typename ArtifactT, typename ComponentT>
 struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
 {
@@ -1775,7 +1727,6 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
   }
 };
 
-//----------------------------------------------------------------------------
 template<typename ArtifactT>
 struct TargetFilesystemArtifactNodeGroup
 {
@@ -1788,7 +1739,6 @@ struct TargetFilesystemArtifactNodeGroup
   TargetFilesystemArtifact<ArtifactT, ArtifactDirTag> FileDir;
 };
 
-//----------------------------------------------------------------------------
 static const
 TargetFilesystemArtifactNodeGroup<ArtifactNameTag> targetNodeGroup;
 
@@ -1801,7 +1751,6 @@ TargetFilesystemArtifactNodeGroup<ArtifactSonameTag> targetSoNameNodeGroup;
 static const
 TargetFilesystemArtifactNodeGroup<ArtifactPdbTag> targetPdbNodeGroup;
 
-//----------------------------------------------------------------------------
 static const struct ShellPathNode : public cmGeneratorExpressionNode
 {
   ShellPathNode() {}
@@ -1822,7 +1771,6 @@ static const struct ShellPathNode : public cmGeneratorExpressionNode
   }
 } shellPathNode;
 
-//----------------------------------------------------------------------------
 const cmGeneratorExpressionNode*
 cmGeneratorExpressionNode::GetNode(const std::string &identifier)
 {
@@ -1887,7 +1835,6 @@ cmGeneratorExpressionNode::GetNode(const std::string &identifier)
   return i->second;
 }
 
-//----------------------------------------------------------------------------
 void reportError(cmGeneratorExpressionContext *context,
                  const std::string &expr, const std::string &result)
 {

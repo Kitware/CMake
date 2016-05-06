@@ -17,7 +17,6 @@
 #include <string>
 #include <vector>
 
-//----------------------------------------------------------------------
 unsigned long cmCPackComponent::GetInstalledSize(
     const std::string& installDir) const
 {
@@ -38,7 +37,6 @@ unsigned long cmCPackComponent::GetInstalledSize(
   return this->TotalSize;
 }
 
-//----------------------------------------------------------------------
 unsigned long
 cmCPackComponent::GetInstalledSizeInKbytes(const std::string& installDir) const
 {

@@ -240,7 +240,6 @@ because this need be done only for shared libraries without soname-s.
 
 */
 
-//----------------------------------------------------------------------------
 cmComputeLinkInformation
 ::cmComputeLinkInformation(const cmGeneratorTarget* target,
                            const std::string& config)
@@ -422,7 +421,6 @@ cmComputeLinkInformation
       "CMAKE_POLICY_WARNING_CMP0060");
 }
 
-//----------------------------------------------------------------------------
 cmComputeLinkInformation::~cmComputeLinkInformation()
 {
   delete this->OrderLinkerSearchPath;
@@ -430,20 +428,17 @@ cmComputeLinkInformation::~cmComputeLinkInformation()
   delete this->OrderDependentRPath;
 }
 
-//----------------------------------------------------------------------------
 cmComputeLinkInformation::ItemVector const&
 cmComputeLinkInformation::GetItems()
 {
   return this->Items;
 }
 
-//----------------------------------------------------------------------------
 std::vector<std::string> const& cmComputeLinkInformation::GetDirectories()
 {
   return this->OrderLinkerSearchPath->GetOrderedDirectories();
 }
 
-//----------------------------------------------------------------------------
 std::string cmComputeLinkInformation::GetRPathLinkString()
 {
   // If there is no separate linker runtime search flag (-rpath-link)
@@ -457,26 +452,22 @@ std::string cmComputeLinkInformation::GetRPathLinkString()
   return cmJoin(this->OrderDependentRPath->GetOrderedDirectories(), ":");
 }
 
-//----------------------------------------------------------------------------
 std::vector<std::string> const& cmComputeLinkInformation::GetDepends()
 {
   return this->Depends;
 }
 
-//----------------------------------------------------------------------------
 std::vector<std::string> const& cmComputeLinkInformation::GetFrameworkPaths()
 {
   return this->FrameworkPaths;
 }
 
-//----------------------------------------------------------------------------
 const std::set<const cmGeneratorTarget*>&
 cmComputeLinkInformation::GetSharedLibrariesLinked()
 {
   return this->SharedLibrariesLinked;
 }
 
-//----------------------------------------------------------------------------
 bool cmComputeLinkInformation::Compute()
 {
   // Skip targets that do not link.
@@ -579,7 +570,6 @@ bool cmComputeLinkInformation::Compute()
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddImplicitLinkInfo()
 {
   // The link closure lists all languages whose implicit info is needed.
@@ -596,7 +586,6 @@ void cmComputeLinkInformation::AddImplicitLinkInfo()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
 {
   // Add libraries for this language that are not implied by the
@@ -631,7 +620,6 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddItem(std::string const& item,
                                        cmGeneratorTarget const* tgt)
 {
@@ -714,7 +702,6 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
                                                 const cmGeneratorTarget* tgt)
 {
@@ -804,7 +791,6 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::ComputeLinkTypeInfo()
 {
   // Check whether archives may actually be shared libraries.
@@ -861,7 +847,6 @@ void cmComputeLinkInformation::ComputeLinkTypeInfo()
   this->CurrentLinkType = this->StartLinkType;
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::ComputeItemParserInfo()
 {
   // Get possible library name prefixes.
@@ -960,7 +945,6 @@ void cmComputeLinkInformation::ComputeItemParserInfo()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddLinkPrefix(const char* p)
 {
   if(p && *p)
@@ -969,7 +953,6 @@ void cmComputeLinkInformation::AddLinkPrefix(const char* p)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddLinkExtension(const char* e, LinkType type)
 {
   if(e && *e)
@@ -986,7 +969,6 @@ void cmComputeLinkInformation::AddLinkExtension(const char* e, LinkType type)
     }
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmComputeLinkInformation
 ::CreateExtensionRegex(std::vector<std::string> const& exts, LinkType type)
@@ -1027,7 +1009,6 @@ cmComputeLinkInformation
   return libext;
 }
 
-//----------------------------------------------------------------------------
 std::string cmComputeLinkInformation::NoCaseExpression(const char* str)
 {
   std::string ret;
@@ -1050,7 +1031,6 @@ std::string cmComputeLinkInformation::NoCaseExpression(const char* str)
   return ret;
 }
 
-//-------------------------------------------------------------------
 void cmComputeLinkInformation::SetCurrentLinkType(LinkType lt)
 {
   // If we are changing the current link type add the flag to tell the
@@ -1076,7 +1056,6 @@ void cmComputeLinkInformation::SetCurrentLinkType(LinkType lt)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddTargetItem(std::string const& item,
                                              cmGeneratorTarget const* target)
 {
@@ -1124,7 +1103,6 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
   this->Items.push_back(Item(item, true, target));
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddFullItem(std::string const& item)
 {
   // Check for the implicit link directory special case.
@@ -1194,7 +1172,6 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
   this->Items.push_back(Item(item, true));
 }
 
-//----------------------------------------------------------------------------
 bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
 {
   // We only switch to a pathless item if the link type may be
@@ -1258,7 +1235,6 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddUserItem(std::string const& item,
                                            bool pathNotKnown)
 {
@@ -1376,7 +1352,6 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item,
   // specification.
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
 {
   // Try to separate the framework name and path.
@@ -1411,7 +1386,6 @@ void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
   this->Items.push_back(Item(fw, false));
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddDirectoryItem(std::string const& item)
 {
   if(this->Makefile->IsOn("APPLE")
@@ -1425,7 +1399,6 @@ void cmComputeLinkInformation::AddDirectoryItem(std::string const& item)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::DropDirectoryItem(std::string const& item)
 {
   // A full path to a directory was found as a link item.  Warn the
@@ -1438,7 +1411,6 @@ void cmComputeLinkInformation::DropDirectoryItem(std::string const& item)
   cmSystemTools::Message(e.str().c_str());
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::ComputeFrameworkInfo()
 {
   // Avoid adding implicit framework paths.
@@ -1468,7 +1440,6 @@ void cmComputeLinkInformation::ComputeFrameworkInfo()
   this->SplitFramework.compile("(.*)/(.*)\\.framework$");
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddFrameworkPath(std::string const& p)
 {
   if(this->FrameworkPathsEmmitted.insert(p).second)
@@ -1477,7 +1448,6 @@ void cmComputeLinkInformation::AddFrameworkPath(std::string const& p)
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmComputeLinkInformation::CheckSharedLibNoSOName(std::string const& item)
 {
   // This platform will use the path to a library as its soname if the
@@ -1499,7 +1469,6 @@ bool cmComputeLinkInformation::CheckSharedLibNoSOName(std::string const& item)
   return false;
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddSharedLibNoSOName(std::string const& item)
 {
   // We have a full path to a shared library with no soname.  We need
@@ -1514,7 +1483,6 @@ void cmComputeLinkInformation::AddSharedLibNoSOName(std::string const& item)
   this->OrderLinkerSearchPath->AddLinkLibrary(item);
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
                                                  std::string const& file)
 {
@@ -1578,7 +1546,6 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
 {
   // Support broken projects if necessary.
@@ -1631,7 +1598,6 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
 {
   // Tell the user what to do.
@@ -1702,7 +1668,6 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
      << "Run \"cmake --help-policy CMP0003\" for more information.";
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::LoadImplicitLinkInfo()
 {
   std::vector<std::string> implicitDirVec;
@@ -1773,14 +1738,12 @@ void cmComputeLinkInformation::LoadImplicitLinkInfo()
     }
 }
 
-//----------------------------------------------------------------------------
 std::vector<std::string> const&
 cmComputeLinkInformation::GetRuntimeSearchPath()
 {
   return this->OrderRuntimeSearchPath->GetOrderedDirectories();
 }
 
-//----------------------------------------------------------------------------
 void
 cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath,
                                               cmGeneratorTarget const* target)
@@ -1823,7 +1786,6 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath,
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath)
 {
@@ -1891,7 +1853,6 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath)
     }
 }
 
-//----------------------------------------------------------------------------
 static void cmCLI_ExpandListUnique(const char* str,
                                    std::vector<std::string>& out,
                                    std::set<std::string>& emitted)
@@ -1907,7 +1868,6 @@ static void cmCLI_ExpandListUnique(const char* str,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
                                         bool for_install)
 {
@@ -2033,7 +1993,6 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
   cmCLI_ExpandListUnique(this->RuntimeAlways.c_str(), runtimeDirs, emitted);
 }
 
-//----------------------------------------------------------------------------
 std::string cmComputeLinkInformation::GetRPathString(bool for_install)
 {
   // Get the directories to use.
@@ -2065,7 +2024,6 @@ std::string cmComputeLinkInformation::GetRPathString(bool for_install)
   return rpath;
 }
 
-//----------------------------------------------------------------------------
 std::string cmComputeLinkInformation::GetChrpathString()
 {
   if(!this->RuntimeUseChrpath)

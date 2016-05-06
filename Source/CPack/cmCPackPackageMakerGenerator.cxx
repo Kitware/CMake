@@ -32,25 +32,21 @@ unsigned int getVersion(unsigned int major, unsigned int minor)
   return ((major & 0xFF) << 16 | minor);
 }
 
-//----------------------------------------------------------------------
 cmCPackPackageMakerGenerator::cmCPackPackageMakerGenerator()
 {
   this->PackageMakerVersion = 0.0;
   this->PackageCompatibilityVersion = getVersion(10, 4);
 }
 
-//----------------------------------------------------------------------
 cmCPackPackageMakerGenerator::~cmCPackPackageMakerGenerator()
 {
 }
 
-//----------------------------------------------------------------------
 bool cmCPackPackageMakerGenerator::SupportsComponentInstallation() const
 {
   return this->PackageCompatibilityVersion >= getVersion(10, 4);
 }
 
-//----------------------------------------------------------------------
 int cmCPackPackageMakerGenerator::CopyInstallScript(const std::string& resdir,
                                                     const std::string& script,
                                                     const std::string& name)
@@ -67,7 +63,6 @@ int cmCPackPackageMakerGenerator::CopyInstallScript(const std::string& resdir,
   return 1;
 }
 
-//----------------------------------------------------------------------
 int cmCPackPackageMakerGenerator::PackageFiles()
 {
   // TODO: Use toplevel
@@ -403,7 +398,6 @@ int cmCPackPackageMakerGenerator::PackageFiles()
   return 1;
 }
 
-//----------------------------------------------------------------------
 int cmCPackPackageMakerGenerator::InitializeInternal()
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
@@ -567,7 +561,6 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
-//----------------------------------------------------------------------
 bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(
                                             const std::string& name,
                                             const std::string& dirName)
@@ -646,7 +639,6 @@ bool cmCPackPackageMakerGenerator::CopyResourcePlistFile(
   return true;
 }
 
-//----------------------------------------------------------------------
 bool cmCPackPackageMakerGenerator::RunPackageMaker(const char *command,
                                                    const char *packageFile)
 {
@@ -695,7 +687,6 @@ bool cmCPackPackageMakerGenerator::RunPackageMaker(const char *command,
   return true;
 }
 
-//----------------------------------------------------------------------
 std::string
 cmCPackPackageMakerGenerator::GetPackageName(const cmCPackComponent& component)
 {
@@ -714,7 +705,6 @@ cmCPackPackageMakerGenerator::GetPackageName(const cmCPackComponent& component)
     }
 }
 
-//----------------------------------------------------------------------
 bool
 cmCPackPackageMakerGenerator::
 GenerateComponentPackage(const char *packageFile,
@@ -797,7 +787,6 @@ GenerateComponentPackage(const char *packageFile,
   return RunPackageMaker(pkgCmd.str().c_str(), packageFile);
 }
 
-//----------------------------------------------------------------------
 void
 cmCPackPackageMakerGenerator::
 WriteDistributionFile(const char* metapackageFile)
@@ -875,7 +864,6 @@ WriteDistributionFile(const char* metapackageFile)
                       distributionFile.c_str());
 }
 
-//----------------------------------------------------------------------
 void
 cmCPackPackageMakerGenerator::
 CreateChoiceOutline(const cmCPackComponentGroup& group,
@@ -899,7 +887,6 @@ CreateChoiceOutline(const cmCPackComponentGroup& group,
   out << "</line>" << std::endl;
 }
 
-//----------------------------------------------------------------------
 void
 cmCPackPackageMakerGenerator::CreateChoice(const cmCPackComponentGroup& group,
                                            std::ostringstream& out)
@@ -917,7 +904,6 @@ cmCPackPackageMakerGenerator::CreateChoice(const cmCPackComponentGroup& group,
   out << "></choice>" << std::endl;
 }
 
-//----------------------------------------------------------------------
 void
 cmCPackPackageMakerGenerator::CreateChoice(const cmCPackComponent& component,
                                            std::ostringstream& out)
@@ -1001,7 +987,6 @@ cmCPackPackageMakerGenerator::CreateChoice(const cmCPackComponent& component,
   out << "</pkg-ref>" << std::endl;
 }
 
-//----------------------------------------------------------------------
 void
 cmCPackPackageMakerGenerator::
 AddDependencyAttributes(const cmCPackComponent& component,
@@ -1025,7 +1010,6 @@ AddDependencyAttributes(const cmCPackComponent& component,
     }
 }
 
-//----------------------------------------------------------------------
 void
 cmCPackPackageMakerGenerator::
 AddReverseDependencyAttributes(const cmCPackComponent& component,
@@ -1048,7 +1032,6 @@ AddReverseDependencyAttributes(const cmCPackComponent& component,
     }
 }
 
-//----------------------------------------------------------------------
 std::string cmCPackPackageMakerGenerator::EscapeForXML(std::string str)
 {
   cmSystemTools::ReplaceString(str, "&", "&amp;");

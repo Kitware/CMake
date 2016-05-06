@@ -15,7 +15,6 @@
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 
-//----------------------------------------------------------------------
 cmCPackLog::cmCPackLog()
 {
   this->Verbose = false;
@@ -33,13 +32,11 @@ cmCPackLog::cmCPackLog()
   this->LogOutputCleanup = false;
 }
 
-//----------------------------------------------------------------------
 cmCPackLog::~cmCPackLog()
 {
   this->SetLogOutputStream(0);
 }
 
-//----------------------------------------------------------------------
 void cmCPackLog::SetLogOutputStream(std::ostream* os)
 {
   if ( this->LogOutputCleanup && this->LogOutput )
@@ -50,7 +47,6 @@ void cmCPackLog::SetLogOutputStream(std::ostream* os)
   this->LogOutput = os;
 }
 
-//----------------------------------------------------------------------
 bool cmCPackLog::SetLogOutputFile(const char* fname)
 {
   cmGeneratedFileStream *cg = 0;
@@ -72,7 +68,6 @@ bool cmCPackLog::SetLogOutputFile(const char* fname)
   return true;
 }
 
-//----------------------------------------------------------------------
 void cmCPackLog::Log(int tag, const char* file, int line,
   const char* msg, size_t length)
 {

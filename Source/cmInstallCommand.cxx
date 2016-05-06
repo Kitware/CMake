@@ -112,7 +112,6 @@ bool cmInstallCommand::InitialPass(std::vector<std::string> const& args,
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
 {
   std::string component = this->DefaultComponentName;
@@ -221,7 +220,6 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
   cmInstallCommandArguments args;
 };*/
 
-//----------------------------------------------------------------------------
 bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
 {
   // This is the TARGETS mode.
@@ -836,7 +834,6 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
 {
   // This is the FILES mode.
@@ -946,7 +943,6 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
 {
@@ -1306,7 +1302,6 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
 {
   // This is the EXPORT mode.
@@ -1464,7 +1459,6 @@ bool cmInstallCommand::MakeFilesFullPath(const char* modeName,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmInstallCommand::CheckCMP0006(bool& failure)
 {
   switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0006))

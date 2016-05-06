@@ -65,7 +65,6 @@ bool cmFindPathCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 std::string cmFindPathCommand::FindHeader()
 {
   std::string header;
@@ -146,7 +145,6 @@ cmFindPathCommand::FindHeaderInFramework(std::string const& file,
   return "";
 }
 
-//----------------------------------------------------------------------------
 std::string cmFindPathCommand::FindNormalHeader()
 {
   std::string tryPath;
@@ -175,7 +173,6 @@ std::string cmFindPathCommand::FindNormalHeader()
   return "";
 }
 
-//----------------------------------------------------------------------------
 std::string cmFindPathCommand::FindFrameworkHeader()
 {
   for(std::vector<std::string>::const_iterator ni = this->Names.begin();

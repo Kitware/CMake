@@ -17,17 +17,14 @@
 
 #include <cmsys/RegularExpression.hxx>
 
-//----------------------------------------------------------------------
 cmCPackBundleGenerator::cmCPackBundleGenerator()
 {
 }
 
-//----------------------------------------------------------------------
 cmCPackBundleGenerator::~cmCPackBundleGenerator()
 {
 }
 
-//----------------------------------------------------------------------
 int cmCPackBundleGenerator::InitializeInternal()
 {
   const char* name = this->GetOption("CPACK_BUNDLE_NAME");
@@ -58,7 +55,6 @@ int cmCPackBundleGenerator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
-//----------------------------------------------------------------------
 const char* cmCPackBundleGenerator::GetPackagingInstallPrefix()
 {
   this->InstallPrefix = "/";
@@ -68,7 +64,6 @@ const char* cmCPackBundleGenerator::GetPackagingInstallPrefix()
   return this->InstallPrefix.c_str();
 }
 
-//----------------------------------------------------------------------
 int cmCPackBundleGenerator::ConstructBundle()
 {
 
@@ -184,7 +179,6 @@ int cmCPackBundleGenerator::ConstructBundle()
   return 1;
 }
 
-//----------------------------------------------------------------------
 int cmCPackBundleGenerator::PackageFiles()
 {
   if(!this->ConstructBundle())

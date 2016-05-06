@@ -15,7 +15,6 @@
 
 #include <cmsys/String.h>
 
-//----------------------------------------------------------------------------
 cmIDEOptions::cmIDEOptions()
 {
   this->DoingDefine = false;
@@ -28,12 +27,10 @@ cmIDEOptions::cmIDEOptions()
     }
 }
 
-//----------------------------------------------------------------------------
 cmIDEOptions::~cmIDEOptions()
 {
 }
 
-//----------------------------------------------------------------------------
 void cmIDEOptions::HandleFlag(const char* flag)
 {
   // If the last option was -D then this option is the definition.
@@ -92,7 +89,6 @@ void cmIDEOptions::HandleFlag(const char* flag)
   this->StoreUnknownFlag(flag);
 }
 
-//----------------------------------------------------------------------------
 bool cmIDEOptions::CheckFlagTable(cmIDEFlagTable const* table,
                                   const char* flag, bool& flag_handled)
 {
@@ -147,7 +143,6 @@ bool cmIDEOptions::CheckFlagTable(cmIDEFlagTable const* table,
   return false;
 }
 
-//----------------------------------------------------------------------------
 void cmIDEOptions::FlagMapUpdate(cmIDEFlagTable const* entry,
                                  const char* new_value)
 {
@@ -167,13 +162,11 @@ void cmIDEOptions::FlagMapUpdate(cmIDEFlagTable const* entry,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmIDEOptions::AddDefine(const std::string& def)
 {
   this->Defines.push_back(def);
 }
 
-//----------------------------------------------------------------------------
 void cmIDEOptions::AddDefines(const char* defines)
 {
   if(defines)
@@ -182,33 +175,28 @@ void cmIDEOptions::AddDefines(const char* defines)
     cmSystemTools::ExpandListArgument(defines, this->Defines);
     }
 }
-//----------------------------------------------------------------------------
 void cmIDEOptions::AddDefines(const std::vector<std::string> &defines)
 {
   this->Defines.insert(this->Defines.end(), defines.begin(), defines.end());
 }
 
-//----------------------------------------------------------------------------
 void cmIDEOptions::AddFlag(const char* flag, const char* value)
 {
   this->FlagMap[flag] = value;
 }
 
-//----------------------------------------------------------------------------
 void cmIDEOptions::AddFlag(const char* flag,
                            std::vector<std::string> const& value)
 {
   this->FlagMap[flag] = value;
 }
 
-//----------------------------------------------------------------------------
 void cmIDEOptions::AppendFlag(std::string const& flag,
                               std::string const& value)
 {
   this->FlagMap[flag].push_back(value);
 }
 
-//----------------------------------------------------------------------------
 void cmIDEOptions::AppendFlag(std::string const& flag,
                               std::vector<std::string> const& value)
 {
@@ -216,19 +204,16 @@ void cmIDEOptions::AppendFlag(std::string const& flag,
   std::copy(value.begin(), value.end(), std::back_inserter(fv));
 }
 
-//----------------------------------------------------------------------------
 void cmIDEOptions::RemoveFlag(const char* flag)
 {
   this->FlagMap.erase(flag);
 }
 
-//----------------------------------------------------------------------------
 bool cmIDEOptions::HasFlag(std::string const& flag) const
 {
   return this->FlagMap.find(flag) != this->FlagMap.end();
 }
 
-//----------------------------------------------------------------------------
 const char* cmIDEOptions::GetFlag(const char* flag)
 {
   // This method works only for single-valued flags!

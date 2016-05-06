@@ -22,14 +22,12 @@
 # define __LA_SSIZE_T la_ssize_t
 #endif
 
-//----------------------------------------------------------------------------
 static std::string cm_archive_error_string(struct archive* a)
 {
   const char* e = archive_error_string(a);
   return e? e : "unknown error";
 }
 
-//----------------------------------------------------------------------------
 static void cm_archive_entry_copy_pathname(struct archive_entry* e,
   const std::string& dest)
 {
@@ -40,7 +38,6 @@ static void cm_archive_entry_copy_pathname(struct archive_entry* e,
 #endif
 }
 
-//----------------------------------------------------------------------------
 static void cm_archive_entry_copy_sourcepath(struct archive_entry* e,
   const std::string& file)
 {
@@ -51,7 +48,6 @@ static void cm_archive_entry_copy_sourcepath(struct archive_entry* e,
 #endif
 }
 
-//----------------------------------------------------------------------------
 class cmArchiveWrite::Entry
 {
   struct archive_entry* Object;
@@ -61,7 +57,6 @@ public:
   operator struct archive_entry*() { return this->Object; }
 };
 
-//----------------------------------------------------------------------------
 struct cmArchiveWrite::Callback
 {
   // archive_write_callback
@@ -81,7 +76,6 @@ struct cmArchiveWrite::Callback
     }
 };
 
-//----------------------------------------------------------------------------
 cmArchiveWrite::cmArchiveWrite(
   std::ostream& os, Compress c, std::string const& format):
     Stream(os),
@@ -177,14 +171,12 @@ cmArchiveWrite::cmArchiveWrite(
     }
 }
 
-//----------------------------------------------------------------------------
 cmArchiveWrite::~cmArchiveWrite()
 {
   archive_read_free(this->Disk);
   archive_write_free(this->Archive);
 }
 
-//----------------------------------------------------------------------------
 bool cmArchiveWrite::Add(std::string path,
                          size_t skip,
                          const char* prefix,
@@ -201,7 +193,6 @@ bool cmArchiveWrite::Add(std::string path,
   return this->Okay();
 }
 
-//----------------------------------------------------------------------------
 bool cmArchiveWrite::AddPath(const char* path,
                              size_t skip, const char* prefix,
                              bool recursive)
@@ -239,7 +230,6 @@ bool cmArchiveWrite::AddPath(const char* path,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmArchiveWrite::AddFile(const char* file,
                              size_t skip, const char* prefix)
 {
@@ -344,7 +334,6 @@ bool cmArchiveWrite::AddFile(const char* file,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmArchiveWrite::AddData(const char* file, size_t size)
 {
   cmsys::ifstream fin(file, std::ios::in | std::ios::binary);

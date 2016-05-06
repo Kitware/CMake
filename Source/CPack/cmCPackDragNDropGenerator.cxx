@@ -61,7 +61,6 @@ static const char* SLASTREnglish =
 "};\n"
 "\n";
 
-//----------------------------------------------------------------------
 cmCPackDragNDropGenerator::cmCPackDragNDropGenerator()
   : singleLicense(false)
 {
@@ -69,12 +68,10 @@ cmCPackDragNDropGenerator::cmCPackDragNDropGenerator()
   this->componentPackageMethod = ONE_PACKAGE;
 }
 
-//----------------------------------------------------------------------
 cmCPackDragNDropGenerator::~cmCPackDragNDropGenerator()
 {
 }
 
-//----------------------------------------------------------------------
 int cmCPackDragNDropGenerator::InitializeInternal()
 {
   // Starting with Xcode 4.3, look in "/Applications/Xcode.app" first:
@@ -183,13 +180,11 @@ int cmCPackDragNDropGenerator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
-//----------------------------------------------------------------------
 const char* cmCPackDragNDropGenerator::GetOutputExtension()
 {
   return ".dmg";
 }
 
-//----------------------------------------------------------------------
 int cmCPackDragNDropGenerator::PackageFiles()
 {
   // gather which directories to make dmg files for
@@ -245,7 +240,6 @@ int cmCPackDragNDropGenerator::PackageFiles()
   return 1;
 }
 
-//----------------------------------------------------------------------
 bool cmCPackDragNDropGenerator::CopyFile(std::ostringstream& source,
   std::ostringstream& target)
 {
@@ -266,7 +260,6 @@ bool cmCPackDragNDropGenerator::CopyFile(std::ostringstream& source,
   return true;
 }
 
-//----------------------------------------------------------------------
 bool cmCPackDragNDropGenerator::CreateEmptyFile(std::ostringstream& target,
                                                 size_t size)
 {
@@ -288,7 +281,6 @@ bool cmCPackDragNDropGenerator::CreateEmptyFile(std::ostringstream& target,
   return true;
 }
 
-//----------------------------------------------------------------------
 bool cmCPackDragNDropGenerator::RunCommand(std::ostringstream& command,
   std::string* output)
 {
@@ -315,7 +307,6 @@ bool cmCPackDragNDropGenerator::RunCommand(std::ostringstream& command,
   return true;
 }
 
-//----------------------------------------------------------------------
 int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
                                          const std::string& output_file)
 {

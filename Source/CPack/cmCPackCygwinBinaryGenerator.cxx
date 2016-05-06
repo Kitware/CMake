@@ -21,17 +21,14 @@
 
 #include <cmsys/SystemTools.hxx>
 
-//----------------------------------------------------------------------
 cmCPackCygwinBinaryGenerator::cmCPackCygwinBinaryGenerator()
 {
 }
 
-//----------------------------------------------------------------------
 cmCPackCygwinBinaryGenerator::~cmCPackCygwinBinaryGenerator()
 {
 }
 
-//----------------------------------------------------------------------
 int cmCPackCygwinBinaryGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/usr");
@@ -39,7 +36,6 @@ int cmCPackCygwinBinaryGenerator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
-//----------------------------------------------------------------------
 int cmCPackCygwinBinaryGenerator::PackageFiles()
 {
   std::string packageName = this->GetOption("CPACK_PACKAGE_NAME");

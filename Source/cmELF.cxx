@@ -47,7 +47,6 @@
 # include <sys/link.h> // For dynamic section information
 #endif
 
-//----------------------------------------------------------------------------
 // Low-level byte swapping implementation.
 template <size_t s> struct cmELFByteSwapSize {};
 void cmELFByteSwap(char*, cmELFByteSwapSize<1> const&)
@@ -80,7 +79,6 @@ void cmELFByteSwap(T& x)
   cmELFByteSwap(reinterpret_cast<char*>(&x), cmELFByteSwapSize<sizeof(T)>());
 }
 
-//----------------------------------------------------------------------------
 class cmELFInternal
 {
 public:
@@ -187,7 +185,6 @@ protected:
   std::map<unsigned int, StringEntry> DynamicSectionStrings;
 };
 
-//----------------------------------------------------------------------------
 // Configure the implementation template for 32-bit ELF files.
 struct cmELFTypes32
 {
@@ -210,7 +207,6 @@ struct cmELFTypes64
   static const char* GetName() { return "64-bit"; }
 };
 
-//----------------------------------------------------------------------------
 // Parser implementation template.
 template <class Types>
 class cmELFInternalImpl: public cmELFInternal
@@ -479,7 +475,6 @@ private:
   std::vector<ELF_Dyn> DynamicSectionEntries;
 };
 
-//----------------------------------------------------------------------------
 template <class Types>
 cmELFInternalImpl<Types>
 ::cmELFInternalImpl(cmELF* external,
@@ -548,7 +543,6 @@ cmELFInternalImpl<Types>
     }
 }
 
-//----------------------------------------------------------------------------
 template <class Types>
 bool cmELFInternalImpl<Types>::LoadDynamicSection()
 {
@@ -593,7 +587,6 @@ bool cmELFInternalImpl<Types>::LoadDynamicSection()
   return true;
 }
 
-//----------------------------------------------------------------------------
 template <class Types>
 unsigned int cmELFInternalImpl<Types>::GetDynamicEntryCount()
 {
@@ -611,7 +604,6 @@ unsigned int cmELFInternalImpl<Types>::GetDynamicEntryCount()
   return static_cast<unsigned int>(this->DynamicSectionEntries.size());
 }
 
-//----------------------------------------------------------------------------
 template <class Types>
 unsigned long cmELFInternalImpl<Types>::GetDynamicEntryPosition(int j)
 {
@@ -627,7 +619,6 @@ unsigned long cmELFInternalImpl<Types>::GetDynamicEntryPosition(int j)
   return static_cast<unsigned long>(sec.sh_offset + sec.sh_entsize*j);
 }
 
-//----------------------------------------------------------------------------
 template <class Types>
 cmELF::StringEntry const*
 cmELFInternalImpl<Types>::GetDynamicSectionString(unsigned int tag)
@@ -730,7 +721,6 @@ cmELFInternalImpl<Types>::GetDynamicSectionString(unsigned int tag)
 //============================================================================
 // External class implementation.
 
-//----------------------------------------------------------------------------
 cmELF::cmELF(const char* fname): Internal(0)
 {
   // Try to open the file.
@@ -803,19 +793,16 @@ cmELF::cmELF(const char* fname): Internal(0)
     }
 }
 
-//----------------------------------------------------------------------------
 cmELF::~cmELF()
 {
   delete this->Internal;
 }
 
-//----------------------------------------------------------------------------
 bool cmELF::Valid() const
 {
   return this->Internal && this->Internal->GetFileType() != FileTypeInvalid;
 }
 
-//----------------------------------------------------------------------------
 cmELF::FileType cmELF::GetFileType() const
 {
   if(this->Valid())
@@ -828,7 +815,6 @@ cmELF::FileType cmELF::GetFileType() const
     }
 }
 
-//----------------------------------------------------------------------------
 unsigned int cmELF::GetNumberOfSections() const
 {
   if(this->Valid())
@@ -841,7 +827,6 @@ unsigned int cmELF::GetNumberOfSections() const
     }
 }
 
-//----------------------------------------------------------------------------
 unsigned int cmELF::GetDynamicEntryCount() const
 {
   if(this->Valid())
@@ -854,7 +839,6 @@ unsigned int cmELF::GetDynamicEntryCount() const
     }
 }
 
-//----------------------------------------------------------------------------
 unsigned long cmELF::GetDynamicEntryPosition(int index) const
 {
   if(this->Valid())
@@ -867,7 +851,6 @@ unsigned long cmELF::GetDynamicEntryPosition(int index) const
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmELF::ReadBytes(unsigned long pos, unsigned long size, char* buf) const
 {
   if(this->Valid())
@@ -880,7 +863,6 @@ bool cmELF::ReadBytes(unsigned long pos, unsigned long size, char* buf) const
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmELF::GetSOName(std::string& soname)
 {
   if(StringEntry const* se = this->GetSOName())
@@ -894,7 +876,6 @@ bool cmELF::GetSOName(std::string& soname)
     }
 }
 
-//----------------------------------------------------------------------------
 cmELF::StringEntry const* cmELF::GetSOName()
 {
   if(this->Valid() &&
@@ -908,7 +889,6 @@ cmELF::StringEntry const* cmELF::GetSOName()
     }
 }
 
-//----------------------------------------------------------------------------
 cmELF::StringEntry const* cmELF::GetRPath()
 {
   if(this->Valid() &&
@@ -923,7 +903,6 @@ cmELF::StringEntry const* cmELF::GetRPath()
     }
 }
 
-//----------------------------------------------------------------------------
 cmELF::StringEntry const* cmELF::GetRunPath()
 {
   if(this->Valid() &&
@@ -938,7 +917,6 @@ cmELF::StringEntry const* cmELF::GetRunPath()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmELF::PrintInfo(std::ostream& os) const
 {
   if(this->Valid())

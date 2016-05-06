@@ -45,7 +45,6 @@ cmCPackIFWPackage::DependenceStruct::DependenceStruct()
 {
 }
 
-//----------------------------------------------------------------------------
 cmCPackIFWPackage::DependenceStruct::DependenceStruct(
   const std::string &dependence)
 {
@@ -79,7 +78,6 @@ cmCPackIFWPackage::DependenceStruct::DependenceStruct(
   Name = pos == std::string::npos ? dependence : dependence.substr(0, pos);
 }
 
-//----------------------------------------------------------------------------
 std::string cmCPackIFWPackage::DependenceStruct::NameWithCompare() const
 {
   if (Compare.Type == CompareNone) return Name;
@@ -119,38 +117,32 @@ cmCPackIFWPackage::cmCPackIFWPackage() :
 {
 }
 
-//----------------------------------------------------------------------------
 const char *cmCPackIFWPackage::GetOption(const std::string &op) const
 {
   const char *option = Generator ? Generator->GetOption(op) : 0;
   return option && *option ? option : 0;
 }
 
-//----------------------------------------------------------------------------
 bool cmCPackIFWPackage::IsOn(const std::string &op) const
 {
   return Generator ? Generator->IsOn(op) : false;
 }
 
-//----------------------------------------------------------------------------
 bool cmCPackIFWPackage::IsVersionLess(const char *version)
 {
   return Generator ? Generator->IsVersionLess(version) : false;
 }
 
-//----------------------------------------------------------------------------
 bool cmCPackIFWPackage::IsVersionGreater(const char *version)
 {
   return Generator ? Generator->IsVersionGreater(version) : false;
 }
 
-//----------------------------------------------------------------------------
 bool cmCPackIFWPackage::IsVersionEqual(const char *version)
 {
   return Generator ? Generator->IsVersionEqual(version) : false;
 }
 
-//----------------------------------------------------------------------------
 std::string cmCPackIFWPackage::GetComponentName(cmCPackComponent *component)
 {
   if (!component) return "";
@@ -161,7 +153,6 @@ std::string cmCPackIFWPackage::GetComponentName(cmCPackComponent *component)
   return option ? option : component->Name;
 }
 
-//----------------------------------------------------------------------------
 void cmCPackIFWPackage::DefaultConfiguration()
 {
   DisplayName = "";
@@ -176,7 +167,6 @@ void cmCPackIFWPackage::DefaultConfiguration()
   ForcedInstallation = "";
 }
 
-//----------------------------------------------------------------------------
 // Defaul configuration (all in one package)
 int cmCPackIFWPackage::ConfigureFromOptions()
 {
@@ -222,7 +212,6 @@ int cmCPackIFWPackage::ConfigureFromOptions()
   return 1;
 }
 
-//----------------------------------------------------------------------------
 int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent *component)
 {
   if(!component) return 0;
@@ -329,7 +318,6 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent *component)
   return 1;
 }
 
-//----------------------------------------------------------------------------
 int
 cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup *group)
 {
@@ -389,7 +377,6 @@ cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup *group)
   return 1;
 }
 
-//----------------------------------------------------------------------------
 int cmCPackIFWPackage::ConfigureFromGroup(const std::string &groupName)
 {
   // Group configuration
@@ -431,7 +418,6 @@ int cmCPackIFWPackage::ConfigureFromGroup(const std::string &groupName)
   return ConfigureFromGroup(&group);
 }
 
-//----------------------------------------------------------------------------
 void cmCPackIFWPackage::GeneratePackageFile()
 {
   // Lazy directory initialization

@@ -13,14 +13,12 @@
 
 #include "cmSystemTools.h"
 
-//----------------------------------------------------------------------------
 cmXCode21Object::cmXCode21Object(PBXType ptype, Type type)
   :cmXCodeObject(ptype, type)
 {
   this->Version = 21;
 }
 
-//----------------------------------------------------------------------------
 void cmXCode21Object::PrintComment(std::ostream& out)
 {
   if(this->Comment.empty())
@@ -41,7 +39,6 @@ void cmXCode21Object::PrintComment(std::ostream& out)
   out << " */";
 }
 
-//----------------------------------------------------------------------------
 void cmXCode21Object::PrintList(std::vector<cmXCodeObject*> const& v,
                                 std::ostream& out, PBXType t)
 {
@@ -73,7 +70,6 @@ void cmXCode21Object::PrintList(std::vector<cmXCodeObject*> const& v,
   out << "/* End " <<  PBXTypeNames[t] << " section */\n";
 }
 
-//----------------------------------------------------------------------------
 void cmXCode21Object::PrintList(std::vector<cmXCodeObject*> const& v,
                                 std::ostream& out)
 {

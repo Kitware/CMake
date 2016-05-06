@@ -759,7 +759,6 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmVisualStudio10TargetGenerator
 ::WriteMSToolConfigurationValues(std::string const& config)
 {
@@ -819,7 +818,6 @@ void cmVisualStudio10TargetGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void cmVisualStudio10TargetGenerator
 ::WriteNsightTegraConfigurationValues(std::string const&)
 {
@@ -873,7 +871,6 @@ void cmVisualStudio10TargetGenerator::WriteCustomCommands()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmVisualStudio10TargetGenerator
 ::WriteCustomCommand(cmSourceFile const* sf)
 {
@@ -1920,7 +1917,6 @@ OutputLinkIncremental(std::string const& configName)
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudio10TargetGenerator::ComputeClOptions()
 {
   for(std::vector<std::string>::const_iterator
@@ -1935,7 +1931,6 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions()
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   std::string const& configName)
 {
@@ -2051,7 +2046,6 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmVisualStudio10TargetGenerator::WriteClOptions(
   std::string const& configName,
   std::vector<std::string> const& includes)
@@ -2115,7 +2109,6 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   this->WriteString("</ClCompile>\n", 2);
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudio10TargetGenerator::ComputeRcOptions()
 {
   for(std::vector<std::string>::const_iterator
@@ -2130,7 +2123,6 @@ bool cmVisualStudio10TargetGenerator::ComputeRcOptions()
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudio10TargetGenerator::ComputeRcOptions(
   std::string const& configName)
 {
@@ -2176,7 +2168,6 @@ WriteRCOptions(std::string const& configName,
   this->WriteString("</ResourceCompile>\n", 2);
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudio10TargetGenerator::ComputeMasmOptions()
 {
   if(!this->GlobalGenerator->IsMasmEnabled())
@@ -2195,7 +2186,6 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions()
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
   std::string const& configName)
 {
@@ -2306,7 +2296,6 @@ void cmVisualStudio10TargetGenerator::WriteManifestOptions(
     }
 }
 
-//----------------------------------------------------------------------------
 void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
   std::string const& configName)
 {
@@ -2446,7 +2435,6 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
   this->WriteString("</AntBuild>\n", 2);
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudio10TargetGenerator::ComputeLinkOptions()
 {
   if(this->GeneratorTarget->GetType() == cmState::EXECUTABLE ||
@@ -2466,7 +2454,6 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions()
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
 {
@@ -2750,7 +2737,6 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   return true;
 }
 
-//----------------------------------------------------------------------------
 void
 cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const& config)
 {

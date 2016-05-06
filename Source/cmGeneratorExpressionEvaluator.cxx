@@ -27,7 +27,6 @@
 
 #include "cmGeneratorExpressionNode.h"
 
-//----------------------------------------------------------------------------
 GeneratorExpressionContent::GeneratorExpressionContent(
                                                     const char *startContent,
                                                     size_t length)
@@ -36,13 +35,11 @@ GeneratorExpressionContent::GeneratorExpressionContent(
 
 }
 
-//----------------------------------------------------------------------------
 std::string GeneratorExpressionContent::GetOriginalExpression() const
 {
   return std::string(this->StartContent, this->ContentLength);
 }
 
-//----------------------------------------------------------------------------
 std::string GeneratorExpressionContent::ProcessArbitraryContent(
     const cmGeneratorExpressionNode *node,
     const std::string &identifier,
@@ -93,7 +90,6 @@ std::string GeneratorExpressionContent::ProcessArbitraryContent(
   return result;
 }
 
-//----------------------------------------------------------------------------
 std::string GeneratorExpressionContent::Evaluate(
                             cmGeneratorExpressionContext *context,
                             cmGeneratorExpressionDAGChecker *dagChecker) const
@@ -154,7 +150,6 @@ std::string GeneratorExpressionContent::Evaluate(
   return node->Evaluate(parameters, context, this, dagChecker);
 }
 
-//----------------------------------------------------------------------------
 std::string GeneratorExpressionContent::EvaluateParameters(
                                 const cmGeneratorExpressionNode *node,
                                 const std::string &identifier,
@@ -244,7 +239,6 @@ std::string GeneratorExpressionContent::EvaluateParameters(
   return std::string();
 }
 
-//----------------------------------------------------------------------------
 GeneratorExpressionContent::~GeneratorExpressionContent()
 {
   cmDeleteAll(this->IdentifierChildren);

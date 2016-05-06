@@ -204,7 +204,6 @@ bool cmCacheManager::LoadCache(const std::string& path,
   return true;
 }
 
-//----------------------------------------------------------------------------
 const char* cmCacheManager::PersistentProperties[] =
 {
   "ADVANCED",
@@ -213,7 +212,6 @@ const char* cmCacheManager::PersistentProperties[] =
   0
 };
 
-//----------------------------------------------------------------------------
 bool cmCacheManager::ReadPropertyEntry(std::string const& entryKey,
                                        CacheEntry& e)
 {
@@ -250,7 +248,6 @@ bool cmCacheManager::ReadPropertyEntry(std::string const& entryKey,
   return false;
 }
 
-//----------------------------------------------------------------------------
 void cmCacheManager::WritePropertyEntries(std::ostream& os,
                                           CacheIterator const& i)
 {
@@ -640,13 +637,11 @@ void cmCacheManager::CacheIterator::SetValue(const char* value)
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmCacheManager::CacheIterator::GetValueAsBool() const
 {
   return cmSystemTools::IsOn(this->GetEntry().Value.c_str());
 }
 
-//----------------------------------------------------------------------------
 const char*
 cmCacheManager::CacheEntry::GetProperty(const std::string& prop) const
 {
@@ -661,7 +656,6 @@ cmCacheManager::CacheEntry::GetProperty(const std::string& prop) const
   return this->Properties.GetPropertyValue(prop);
 }
 
-//----------------------------------------------------------------------------
 void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,
                                              const char* value)
 {
@@ -679,7 +673,6 @@ void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmCacheManager::CacheEntry::AppendProperty(const std::string& prop,
                                                 const char* value,
                                                 bool asString)
@@ -705,7 +698,6 @@ void cmCacheManager::CacheEntry::AppendProperty(const std::string& prop,
     }
 }
 
-//----------------------------------------------------------------------------
 const char* cmCacheManager::CacheIterator::GetProperty(
     const std::string& prop) const
 {
@@ -716,7 +708,6 @@ const char* cmCacheManager::CacheIterator::GetProperty(
   return 0;
 }
 
-//----------------------------------------------------------------------------
 void cmCacheManager::CacheIterator::SetProperty(const std::string& p,
                                                 const char* v)
 {
@@ -726,7 +717,6 @@ void cmCacheManager::CacheIterator::SetProperty(const std::string& p,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmCacheManager::CacheIterator::AppendProperty(const std::string& p,
                                                    const char* v,
                                                    bool asString)
@@ -737,7 +727,6 @@ void cmCacheManager::CacheIterator::AppendProperty(const std::string& p,
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmCacheManager::CacheIterator::GetPropertyAsBool(
     const std::string& prop) const
 {
@@ -748,13 +737,11 @@ bool cmCacheManager::CacheIterator::GetPropertyAsBool(
   return false;
 }
 
-//----------------------------------------------------------------------------
 void cmCacheManager::CacheIterator::SetProperty(const std::string& p, bool v)
 {
   this->SetProperty(p, v ? "ON" : "OFF");
 }
 
-//----------------------------------------------------------------------------
 bool cmCacheManager::CacheIterator::PropertyExists(
     const std::string& prop) const
 {

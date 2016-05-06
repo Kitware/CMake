@@ -90,13 +90,11 @@ public:
   virtual bool SupportsToolset() const { return false; }
 };
 
-//----------------------------------------------------------------------------
 cmGlobalGeneratorFactory* cmGlobalVisualStudio8Generator::NewFactory()
 {
   return new Factory;
 }
 
-//----------------------------------------------------------------------------
 cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(cmake* cm,
   const std::string& name, const std::string& platformName)
   : cmGlobalVisualStudio71Generator(cm, platformName)
@@ -111,7 +109,6 @@ cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(cmake* cm,
     "ProductDir", vc8Express, cmSystemTools::KeyWOW64_32);
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio8Generator::FindDevEnvCommand()
 {
   // First look for VCExpress.
@@ -131,7 +128,6 @@ std::string cmGlobalVisualStudio8Generator::FindDevEnvCommand()
   return this->cmGlobalVisualStudio71Generator::FindDevEnvCommand();
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator
 ::EnableLanguage(std::vector<std::string>const &  lang,
                  cmMakefile *mf, bool optional)
@@ -148,7 +144,6 @@ void cmGlobalVisualStudio8Generator
   cmGlobalVisualStudio7Generator::EnableLanguage(lang, mf, optional);
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
   if(this->TargetsWindowsCE())
@@ -158,7 +153,6 @@ void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
   }
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio8Generator::SetGeneratorPlatform(std::string const& p,
                                                           cmMakefile* mf)
 {
@@ -173,7 +167,6 @@ bool cmGlobalVisualStudio8Generator::SetGeneratorPlatform(std::string const& p,
     }
 }
 
-//----------------------------------------------------------------------------
 // ouput standard header for dsw file
 void cmGlobalVisualStudio8Generator::WriteSLNHeader(std::ostream& fout)
 {
@@ -181,7 +174,6 @@ void cmGlobalVisualStudio8Generator::WriteSLNHeader(std::ostream& fout)
   fout << "# Visual Studio 2005\n";
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator
 ::GetDocumentation(cmDocumentationEntry& entry)
 {
@@ -189,19 +181,16 @@ void cmGlobalVisualStudio8Generator
   entry.Brief = "Generates Visual Studio 8 2005 project files.";
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator::Configure()
 {
   this->cmGlobalVisualStudio7Generator::Configure();
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio8Generator::UseFolderProperty()
 {
   return IsExpressEdition() ? false : cmGlobalGenerator::UseFolderProperty();
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio8Generator::GetUserMacrosDirectory()
 {
   // Some VS8 sp0 versions cannot run macros.
@@ -239,13 +228,11 @@ std::string cmGlobalVisualStudio8Generator::GetUserMacrosDirectory()
   return path;
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio8Generator::GetUserMacrosRegKeyBase()
 {
   return "Software\\Microsoft\\VisualStudio\\8.0\\vsmacros";
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio8Generator::AddCheckTarget()
 {
   // Add a special target on which all other targets depend that
@@ -361,7 +348,6 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator::AddExtraIDETargets()
 {
   cmGlobalVisualStudio7Generator::AddExtraIDETargets();
@@ -384,7 +370,6 @@ void cmGlobalVisualStudio8Generator::AddExtraIDETargets()
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalVisualStudio8Generator
 ::WriteSolutionConfigurations(std::ostream& fout,
@@ -400,7 +385,6 @@ cmGlobalVisualStudio8Generator
   fout << "\tEndGlobalSection\n";
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalVisualStudio8Generator
 ::WriteProjectConfigurations(
@@ -439,7 +423,6 @@ cmGlobalVisualStudio8Generator
     }
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudio8Generator::NeedsDeploy(cmState::TargetType type) const
 {
@@ -448,7 +431,6 @@ cmGlobalVisualStudio8Generator::NeedsDeploy(cmState::TargetType type) const
   return this->TargetsWindowsCE() && needsDeploy;
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio8Generator::ComputeTargetDepends()
 {
   // Skip over the cmGlobalVisualStudioGenerator implementation!
@@ -456,7 +438,6 @@ bool cmGlobalVisualStudio8Generator::ComputeTargetDepends()
   return this->cmGlobalGenerator::ComputeTargetDepends();
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator::WriteProjectDepends(
   std::ostream& fout, const std::string&, const char*,
         cmGeneratorTarget const* gt)
@@ -475,7 +456,6 @@ void cmGlobalVisualStudio8Generator::WriteProjectDepends(
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
         cmGeneratorTarget *target)
 {
@@ -500,7 +480,6 @@ bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
   return false;
 }
 
-//----------------------------------------------------------------------------
 static cmVS7FlagTable cmVS8ExtraFlagTable[] =
 {
   {"CallingConvention", "Gd", "cdecl", "0", 0 },

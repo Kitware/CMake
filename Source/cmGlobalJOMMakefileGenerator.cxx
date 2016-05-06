@@ -40,7 +40,6 @@ void cmGlobalJOMMakefileGenerator
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalJOMMakefileGenerator
 ::GetDocumentation(cmDocumentationEntry& entry)
 {
@@ -48,7 +47,6 @@ void cmGlobalJOMMakefileGenerator
   entry.Brief = "Generates JOM makefiles.";
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalJOMMakefileGenerator::PrintCompilerAdvice(std::ostream& os,
                                                   std::string const& lang,
                                                   const char* envVar) const

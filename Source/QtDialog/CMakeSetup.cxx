@@ -25,7 +25,6 @@
 #include <cmsys/Encoding.hxx>
 #include <cmsys/SystemTools.hxx>
 
-//----------------------------------------------------------------------------
 static const char * cmDocumentationName[][2] =
 {
   {0,
@@ -33,7 +32,6 @@ static const char * cmDocumentationName[][2] =
   {0,0}
 };
 
-//----------------------------------------------------------------------------
 static const char * cmDocumentationUsage[][2] =
 {
   {0,
@@ -43,7 +41,6 @@ static const char * cmDocumentationUsage[][2] =
   {0,0}
 };
 
-//----------------------------------------------------------------------------
 static const char * cmDocumentationOptions[][2] =
 {
   {0,0}

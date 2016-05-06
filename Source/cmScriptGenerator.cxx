@@ -13,7 +13,6 @@
 
 #include "cmSystemTools.h"
 
-//----------------------------------------------------------------------------
 cmScriptGenerator
 ::cmScriptGenerator(const std::string& config_var,
                     std::vector<std::string> const& configurations):
@@ -25,13 +24,11 @@ cmScriptGenerator
 {
 }
 
-//----------------------------------------------------------------------------
 cmScriptGenerator
 ::~cmScriptGenerator()
 {
 }
 
-//----------------------------------------------------------------------------
 void
 cmScriptGenerator
 ::Generate(std::ostream& os, const std::string& config,
@@ -44,7 +41,6 @@ cmScriptGenerator
   this->ConfigurationTypes = 0;
 }
 
-//----------------------------------------------------------------------------
 static void cmScriptGeneratorEncodeConfig(const std::string& config,
                                           std::string& result)
 {
@@ -71,7 +67,6 @@ static void cmScriptGeneratorEncodeConfig(const std::string& config,
     }
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmScriptGenerator::CreateConfigTest(const std::string& config)
 {
@@ -86,7 +81,6 @@ cmScriptGenerator::CreateConfigTest(const std::string& config)
   return result;
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmScriptGenerator::CreateConfigTest(std::vector<std::string> const& configs)
 {
@@ -105,7 +99,6 @@ cmScriptGenerator::CreateConfigTest(std::vector<std::string> const& configs)
   return result;
 }
 
-//----------------------------------------------------------------------------
 void cmScriptGenerator::GenerateScript(std::ostream& os)
 {
   // Track indentation.
@@ -115,7 +108,6 @@ void cmScriptGenerator::GenerateScript(std::ostream& os)
   this->GenerateScriptConfigs(os, indent);
 }
 
-//----------------------------------------------------------------------------
 void cmScriptGenerator::GenerateScriptConfigs(std::ostream& os,
                                               Indent const& indent)
 {
@@ -129,7 +121,6 @@ void cmScriptGenerator::GenerateScriptConfigs(std::ostream& os,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmScriptGenerator::GenerateScriptActions(std::ostream& os,
                                               Indent const& indent)
 {
@@ -141,7 +132,6 @@ void cmScriptGenerator::GenerateScriptActions(std::ostream& os,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmScriptGenerator::GenerateScriptForConfig(std::ostream&,
                                                 const std::string&,
                                                 Indent const&)
@@ -149,7 +139,6 @@ void cmScriptGenerator::GenerateScriptForConfig(std::ostream&,
   // No actions for this generator.
 }
 
-//----------------------------------------------------------------------------
 bool cmScriptGenerator::GeneratesForConfig(const std::string& config)
 {
   // If this is not a configuration-specific rule then we install.
@@ -173,7 +162,6 @@ bool cmScriptGenerator::GeneratesForConfig(const std::string& config)
   return false;
 }
 
-//----------------------------------------------------------------------------
 void cmScriptGenerator::GenerateScriptActionsOnce(std::ostream& os,
                                                   Indent const& indent)
 {
@@ -192,7 +180,6 @@ void cmScriptGenerator::GenerateScriptActionsOnce(std::ostream& os,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmScriptGenerator::GenerateScriptActionsPerConfig(std::ostream& os,
                                                        Indent const& indent)
 {

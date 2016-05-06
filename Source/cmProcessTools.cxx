@@ -13,7 +13,6 @@
 
 #include <cmsys/Process.h>
 
-//----------------------------------------------------------------------------
 void cmProcessTools::RunProcess(struct cmsysProcess_s* cp,
                                 OutputParser* out, OutputParser* err)
 {
@@ -42,20 +41,17 @@ void cmProcessTools::RunProcess(struct cmsysProcess_s* cp,
 }
 
 
-//----------------------------------------------------------------------------
 cmProcessTools::LineParser::LineParser(char sep, bool ignoreCR):
    Log(0), Prefix(0), Separator(sep), LineEnd('\0'), IgnoreCR(ignoreCR)
 {
 }
 
-//----------------------------------------------------------------------------
 void cmProcessTools::LineParser::SetLog(std::ostream* log, const char* prefix)
 {
   this->Log = log;
   this->Prefix = prefix? prefix : "";
 }
 
-//----------------------------------------------------------------------------
 bool cmProcessTools::LineParser::ProcessChunk(const char* first, int length)
 {
   const char* last = first + length;

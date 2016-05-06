@@ -20,14 +20,12 @@
 #include "cmGeneratorExpressionLexer.h"
 #include "cmGeneratorExpressionParser.h"
 
-//----------------------------------------------------------------------------
 cmGeneratorExpression::cmGeneratorExpression(
     const cmListFileBacktrace& backtrace):
   Backtrace(backtrace)
 {
 }
 
-//----------------------------------------------------------------------------
 cmsys::auto_ptr<cmCompiledGeneratorExpression>
 cmGeneratorExpression::Parse(std::string const& input)
 {
@@ -35,7 +33,6 @@ cmGeneratorExpression::Parse(std::string const& input)
     new cmCompiledGeneratorExpression(this->Backtrace, input));
 }
 
-//----------------------------------------------------------------------------
 cmsys::auto_ptr<cmCompiledGeneratorExpression>
 cmGeneratorExpression::Parse(const char* input)
 {
@@ -46,7 +43,6 @@ cmGeneratorExpression::~cmGeneratorExpression()
 {
 }
 
-//----------------------------------------------------------------------------
 const char *cmCompiledGeneratorExpression::Evaluate(cmLocalGenerator* lg,
   const std::string& config, bool quiet,
   const cmGeneratorTarget* headTarget,
@@ -62,7 +58,6 @@ const char *cmCompiledGeneratorExpression::Evaluate(cmLocalGenerator* lg,
                         language);
 }
 
-//----------------------------------------------------------------------------
 const char *cmCompiledGeneratorExpression::Evaluate(
   cmLocalGenerator* lg, const std::string& config, bool quiet,
   const cmGeneratorTarget* headTarget,
@@ -78,7 +73,6 @@ const char *cmCompiledGeneratorExpression::Evaluate(
   return this->EvaluateWithContext(context, dagChecker);
 }
 
-//----------------------------------------------------------------------------
 const char* cmCompiledGeneratorExpression::EvaluateWithContext(
                             cmGeneratorExpressionContext& context,
                             cmGeneratorExpressionDAGChecker *dagChecker) const
@@ -144,13 +138,11 @@ cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
 }
 
 
-//----------------------------------------------------------------------------
 cmCompiledGeneratorExpression::~cmCompiledGeneratorExpression()
 {
   cmDeleteAll(this->Evaluators);
 }
 
-//----------------------------------------------------------------------------
 std::string cmGeneratorExpression::StripEmptyListElements(
                                                     const std::string &input)
 {
@@ -190,7 +182,6 @@ std::string cmGeneratorExpression::StripEmptyListElements(
   return result;
 }
 
-//----------------------------------------------------------------------------
 static std::string stripAllGeneratorExpressions(const std::string &input)
 {
   std::string result;
@@ -236,7 +227,6 @@ static std::string stripAllGeneratorExpressions(const std::string &input)
   return cmGeneratorExpression::StripEmptyListElements(result);
 }
 
-//----------------------------------------------------------------------------
 static void prefixItems(const std::string &content, std::string &result,
                         const std::string &prefix)
 {
@@ -257,7 +247,6 @@ static void prefixItems(const std::string &content, std::string &result,
     }
 }
 
-//----------------------------------------------------------------------------
 static std::string stripExportInterface(const std::string &input,
                           cmGeneratorExpression::PreprocessContext context,
                           bool resolveRelative)
@@ -351,7 +340,6 @@ static std::string stripExportInterface(const std::string &input,
   return cmGeneratorExpression::StripEmptyListElements(result);
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorExpression::Split(const std::string &input,
                                   std::vector<std::string> &output)
 {
@@ -420,7 +408,6 @@ void cmGeneratorExpression::Split(const std::string &input,
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmGeneratorExpression::Preprocess(const std::string &input,
                                               PreprocessContext context,
                                               bool resolveRelative)
@@ -438,7 +425,6 @@ std::string cmGeneratorExpression::Preprocess(const std::string &input,
   return std::string();
 }
 
-//----------------------------------------------------------------------------
 std::string::size_type cmGeneratorExpression::Find(const std::string &input)
 {
   const std::string::size_type openpos = input.find("$<");
@@ -450,7 +436,6 @@ std::string::size_type cmGeneratorExpression::Find(const std::string &input)
   return std::string::npos;
 }
 
-//----------------------------------------------------------------------------
 bool cmGeneratorExpression::IsValidTargetName(const std::string &input)
 {
   // The ':' is supported to allow use with IMPORTED targets. At least
@@ -460,7 +445,6 @@ bool cmGeneratorExpression::IsValidTargetName(const std::string &input)
   return targetNameValidator.find(input);
 }
 
-//----------------------------------------------------------------------------
 void
 cmCompiledGeneratorExpression::GetMaxLanguageStandard(
     const cmGeneratorTarget* tgt,

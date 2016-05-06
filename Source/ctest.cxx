@@ -20,7 +20,6 @@
 #include "CTest/cmCTestScriptHandler.h"
 #include "cmsys/Encoding.hxx"
 
-//----------------------------------------------------------------------------
 static const char * cmDocumentationName[][2] =
 {
   {0,
@@ -28,7 +27,6 @@ static const char * cmDocumentationName[][2] =
   {0,0}
 };
 
-//----------------------------------------------------------------------------
 static const char * cmDocumentationUsage[][2] =
 {
   {0,
@@ -36,8 +34,6 @@ static const char * cmDocumentationUsage[][2] =
   {0,0}
 };
 
-//----------------------------------------------------------------------------
-//----------------------------------------------------------------------------
 static const char * cmDocumentationOptions[][2] =
 {
   {"-C <cfg>, --build-config <cfg>", "Choose configuration to test."},

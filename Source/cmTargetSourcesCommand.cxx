@@ -13,14 +13,12 @@
 
 #include "cmGeneratorExpression.h"
 
-//----------------------------------------------------------------------------
 bool cmTargetSourcesCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   return this->HandleArguments(args, "SOURCES");
 }
 
-//----------------------------------------------------------------------------
 void cmTargetSourcesCommand
 ::HandleImportedTarget(const std::string &tgt)
 {
@@ -30,7 +28,6 @@ void cmTargetSourcesCommand
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
 
-//----------------------------------------------------------------------------
 void cmTargetSourcesCommand
 ::HandleMissingTarget(const std::string &name)
 {
@@ -40,14 +37,12 @@ void cmTargetSourcesCommand
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
 
-//----------------------------------------------------------------------------
 std::string cmTargetSourcesCommand
 ::Join(const std::vector<std::string> &content)
 {
   return cmJoin(content, ";");
 }
 
-//----------------------------------------------------------------------------
 bool cmTargetSourcesCommand
 ::HandleDirectContent(cmTarget *tgt, const std::vector<std::string> &content,
                       bool, bool)

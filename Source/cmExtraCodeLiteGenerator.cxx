@@ -27,7 +27,6 @@
 #include <cmsys/SystemInformation.hxx>
 #include <cmsys/SystemTools.hxx>
 
-//----------------------------------------------------------------------------
 void cmExtraCodeLiteGenerator::GetDocumentation(cmDocumentationEntry& entry,
                                                 const std::string&) const
 {

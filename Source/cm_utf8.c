@@ -45,7 +45,6 @@ static unsigned int const cm_utf8_min[7] = {
   0, 0, 1u<<7, 1u<<11, 1u<<16, 1u<<21, 1u<<26 /*, 1u<<31 */
 };
 
-/*--------------------------------------------------------------------------*/
 const char* cm_utf8_decode_character(const char* first, const char* last,
                                      unsigned int* pc)
 {

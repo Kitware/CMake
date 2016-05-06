@@ -1105,7 +1105,6 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
   return 1;
 }
 
-//----------------------------------------------------------------------------
 int cmcmd::SymlinkLibrary(std::vector<std::string>& args)
 {
   int result = 0;
@@ -1131,7 +1130,6 @@ int cmcmd::SymlinkLibrary(std::vector<std::string>& args)
   return result;
 }
 
-//----------------------------------------------------------------------------
 int cmcmd::SymlinkExecutable(std::vector<std::string>& args)
 {
   int result = 0;
@@ -1148,7 +1146,6 @@ int cmcmd::SymlinkExecutable(std::vector<std::string>& args)
   return result;
 }
 
-//----------------------------------------------------------------------------
 bool cmcmd::SymlinkInternal(std::string const& file, std::string const& link)
 {
   if(cmSystemTools::FileExists(link.c_str()) ||
@@ -1164,7 +1161,6 @@ bool cmcmd::SymlinkInternal(std::string const& file, std::string const& link)
 #endif
 }
 
-//----------------------------------------------------------------------------
 static void cmcmdProgressReport(std::string const& dir,
                                 std::string const& num)
 {
@@ -1223,7 +1219,6 @@ static void cmcmdProgressReport(std::string const& dir,
     }
 }
 
-//----------------------------------------------------------------------------
 int cmcmd::ExecuteEchoColor(std::vector<std::string>& args)
 {
   // The arguments are
@@ -1323,7 +1318,6 @@ int cmcmd::ExecuteEchoColor(std::vector<std::string>& args)
   return 0;
 }
 
-//----------------------------------------------------------------------------
 int cmcmd::ExecuteLinkScript(std::vector<std::string>& args)
 {
   // The arguments are
@@ -1427,7 +1421,6 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string>& args)
   return result;
 }
 
-//----------------------------------------------------------------------------
 int cmcmd::WindowsCEEnvironment(const char* version, const std::string& name)
 {
 #if defined(CMAKE_HAVE_VS_GENERATORS)

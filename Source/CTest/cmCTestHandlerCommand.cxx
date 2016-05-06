@@ -158,7 +158,6 @@ bool cmCTestHandlerCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestHandlerCommand::CheckArgumentKeyword(std::string const& arg)
 {
   // Look for non-value arguments common to all commands.
@@ -188,7 +187,6 @@ bool cmCTestHandlerCommand::CheckArgumentKeyword(std::string const& arg)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestHandlerCommand::CheckArgumentValue(std::string const& arg)
 {
   if(this->ArgumentDoing == ArgumentDoingKeyword)

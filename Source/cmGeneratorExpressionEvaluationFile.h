@@ -19,7 +19,6 @@
 
 class cmLocalGenerator;
 
-//----------------------------------------------------------------------------
 class cmGeneratorExpressionEvaluationFile
 {
 public:

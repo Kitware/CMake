@@ -12,14 +12,12 @@
 
 #include "cmCPack7zGenerator.h"
 
-//----------------------------------------------------------------------
 cmCPack7zGenerator::cmCPack7zGenerator()
   :cmCPackArchiveGenerator(cmArchiveWrite::CompressNone,
                            "7zip")
 {
 }
 
-//----------------------------------------------------------------------
 cmCPack7zGenerator::~cmCPack7zGenerator()
 {
 }

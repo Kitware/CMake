@@ -20,7 +20,6 @@
 #include <cmsys/RegularExpression.hxx>
 
 
-//----------------------------------------------------------------------------
 struct cmListFileParser
 {
   cmListFileParser(cmListFile* lf, cmMakefile* mf, const char* filename);
@@ -37,7 +36,6 @@ struct cmListFileParser
   enum { SeparationOkay, SeparationWarning, SeparationError} Separation;
 };
 
-//----------------------------------------------------------------------------
 cmListFileParser::cmListFileParser(cmListFile* lf, cmMakefile* mf,
                                    const char* filename):
   ListFile(lf), Makefile(mf), FileName(filename),
@@ -45,13 +43,11 @@ cmListFileParser::cmListFileParser(cmListFile* lf, cmMakefile* mf,
 {
 }
 
-//----------------------------------------------------------------------------
 cmListFileParser::~cmListFileParser()
 {
   cmListFileLexer_Delete(this->Lexer);
 }
 
-//----------------------------------------------------------------------------
 bool cmListFileParser::ParseFile()
 {
   // Open the file.
@@ -134,7 +130,6 @@ bool cmListFileParser::ParseFile()
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmListFile::ParseFile(const char* filename,
                            bool topLevel,
                            cmMakefile *mf)
@@ -246,7 +241,6 @@ bool cmListFile::ParseFile(const char* filename,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmListFileParser::ParseFunction(const char* name, long line)
 {
   // Ininitialize a new function call.
@@ -371,7 +365,6 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
                                    cmListFileArgument::Delimiter delim)
 {
@@ -572,7 +565,6 @@ void cmListFileBacktrace::PrintCallStack(std::ostream& out) const
     }
 }
 
-//----------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream& os, cmListFileContext const& lfc)
 {
   os << lfc.FilePath;

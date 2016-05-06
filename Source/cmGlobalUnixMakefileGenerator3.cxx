@@ -64,7 +64,6 @@ cmLocalGenerator* cmGlobalUnixMakefileGenerator3::CreateLocalGenerator(
   return new cmLocalUnixMakefileGenerator3(this, mf);
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalUnixMakefileGenerator3
 ::GetDocumentation(cmDocumentationEntry& entry)
 {
@@ -72,7 +71,6 @@ void cmGlobalUnixMakefileGenerator3
   entry.Brief = "Generates standard UNIX makefiles.";
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalUnixMakefileGenerator3::GetEditCacheCommand() const
 {
   // If generating for an extra IDE, the edit_cache target cannot
@@ -108,7 +106,6 @@ std::string cmGlobalUnixMakefileGenerator3::GetEditCacheCommand() const
   return edit_cmd? edit_cmd : "";
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalUnixMakefileGenerator3
 ::ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const
@@ -277,7 +274,6 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
 }
 
 
-//----------------------------------------------------------------------------
 void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
 {
   // Open the output file.  This should not be copy-if-different
@@ -443,7 +439,6 @@ void cmGlobalUnixMakefileGenerator3
   cmakefileStream << "  )\n";
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalUnixMakefileGenerator3
 ::WriteDirectoryRule2(std::ostream& ruleFileStream,
@@ -515,7 +510,6 @@ cmGlobalUnixMakefileGenerator3
                     makeTarget, depends, no_commands, true);
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalUnixMakefileGenerator3
 ::WriteDirectoryRules2(std::ostream& ruleFileStream,
@@ -546,7 +540,6 @@ cmGlobalUnixMakefileGenerator3
   this->WriteDirectoryRule2(ruleFileStream, lg, "preinstall", true, true);
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalUnixMakefileGenerator3
 ::GenerateBuildCommand(std::vector<std::string>& makeCommand,
                        const std::string& makeProgram,
@@ -603,7 +596,6 @@ void cmGlobalUnixMakefileGenerator3
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalUnixMakefileGenerator3
 ::WriteConvenienceRules(std::ostream& ruleFileStream,
@@ -701,7 +693,6 @@ cmGlobalUnixMakefileGenerator3
 }
 
 
-//----------------------------------------------------------------------------
 void
 cmGlobalUnixMakefileGenerator3
 ::WriteConvenienceRules2(std::ostream& ruleFileStream,
@@ -954,7 +945,6 @@ void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
     }
 }
 
-//----------------------------------------------------------------------------
 size_t
 cmGlobalUnixMakefileGenerator3
 ::CountProgressMarksInTarget(cmGeneratorTarget const* target,
@@ -978,7 +968,6 @@ cmGlobalUnixMakefileGenerator3
   return count;
 }
 
-//----------------------------------------------------------------------------
 size_t
 cmGlobalUnixMakefileGenerator3
 ::CountProgressMarksInAll(cmLocalGenerator* lg)
@@ -995,7 +984,6 @@ cmGlobalUnixMakefileGenerator3
   return count;
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalUnixMakefileGenerator3::RecordTargetProgress(
   cmMakefileTargetGenerator* tg)
@@ -1005,7 +993,6 @@ cmGlobalUnixMakefileGenerator3::RecordTargetProgress(
   tp.VariableFile = tg->GetProgressFileNameFull();
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalUnixMakefileGenerator3::TargetProgress
 ::WriteProgressVariables(unsigned long total, unsigned long &current)
@@ -1032,7 +1019,6 @@ cmGlobalUnixMakefileGenerator3::TargetProgress
   current += this->NumberOfActions;
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalUnixMakefileGenerator3
 ::AppendGlobalTargetDepends(std::vector<std::string>& depends,
@@ -1057,7 +1043,6 @@ cmGlobalUnixMakefileGenerator3
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalUnixMakefileGenerator3::WriteHelpRule
 (std::ostream& ruleFileStream, cmLocalUnixMakefileGenerator3 *lg)
 {

@@ -38,7 +38,6 @@
 #define CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(F) \
   CM_FOR_EACH_TRANSITIVE_PROPERTY_IMPL(F, CM_SELECT_SECOND)
 
-//----------------------------------------------------------------------------
 struct cmGeneratorExpressionDAGChecker
 {
   cmGeneratorExpressionDAGChecker(const cmListFileBacktrace &backtrace,

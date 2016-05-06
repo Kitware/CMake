@@ -12,7 +12,6 @@
 #include "cmDocumentationSection.h"
 
 
-//----------------------------------------------------------------------------
 void cmDocumentationSection::Append(const char *data[][2])
 {
   int i = 0;
@@ -24,7 +23,6 @@ void cmDocumentationSection::Append(const char *data[][2])
     }
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentationSection::Prepend(const char *data[][2])
 {
   std::vector<cmDocumentationEntry> tmp;
@@ -38,7 +36,6 @@ void cmDocumentationSection::Prepend(const char *data[][2])
   this->Entries.insert(this->Entries.begin(),tmp.begin(),tmp.end());
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentationSection::Append(const char *n, const char *b)
 {
   this->Entries.push_back(cmDocumentationEntry(n,b));

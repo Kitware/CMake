@@ -141,7 +141,6 @@ public:
 
 
 
-//----------------------------------------------------------------------
 cmCTestMemCheckHandler::cmCTestMemCheckHandler()
 {
   this->MemCheck = true;
@@ -150,7 +149,6 @@ cmCTestMemCheckHandler::cmCTestMemCheckHandler()
   this->LogWithPID = false;
 }
 
-//----------------------------------------------------------------------
 void cmCTestMemCheckHandler::Initialize()
 {
   this->Superclass::Initialize();
@@ -164,7 +162,6 @@ void cmCTestMemCheckHandler::Initialize()
   this->MemoryTesterOutputFile = "";
 }
 
-//----------------------------------------------------------------------
 int cmCTestMemCheckHandler::PreProcessHandler()
 {
   if ( !this->InitializeMemoryChecking() )
@@ -181,7 +178,6 @@ int cmCTestMemCheckHandler::PreProcessHandler()
   return 1;
 }
 
-//----------------------------------------------------------------------
 int cmCTestMemCheckHandler::PostProcessHandler()
 {
   if ( !this->ExecuteCommands(this->CustomPostMemCheck) )
@@ -193,7 +189,6 @@ int cmCTestMemCheckHandler::PostProcessHandler()
   return 1;
 }
 
-//----------------------------------------------------------------------
 void cmCTestMemCheckHandler::GenerateTestCommand(
   std::vector<std::string>& args, int test)
 {
@@ -256,7 +251,6 @@ void cmCTestMemCheckHandler::GenerateTestCommand(
     "Memory check command: " << memcheckcommand << std::endl, this->Quiet);
 }
 
-//----------------------------------------------------------------------
 void cmCTestMemCheckHandler::InitializeResultsVectors()
 {
   // fill these members
@@ -300,7 +294,6 @@ void cmCTestMemCheckHandler::InitializeResultsVectors()
     "UMR",
     0
   };
-//----------------------------------------------------------------------
   static const char* cmCTestMemCheckResultLongStrings[] = {
     "Threading Problem",
     "ABW",
@@ -335,7 +328,6 @@ void cmCTestMemCheckHandler::InitializeResultsVectors()
     }
 }
 
-//----------------------------------------------------------------------
 void cmCTestMemCheckHandler::PopulateCustomVectors(cmMakefile *mf)
 {
   this->cmCTestTestHandler::PopulateCustomVectors(mf);
@@ -352,7 +344,6 @@ void cmCTestMemCheckHandler::PopulateCustomVectors(cmMakefile *mf)
     this->Quiet);
 }
 
-//----------------------------------------------------------------------
 void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
 {
   if ( !this->CTest->GetProduceXML() )
@@ -483,7 +474,6 @@ void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
   this->CTest->EndXML(xml);
 }
 
-//----------------------------------------------------------------------
 bool cmCTestMemCheckHandler::InitializeMemoryChecking()
 {
   this->MemoryTesterEnvironmentVariable = "";
@@ -747,7 +737,6 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
   return true;
 }
 
-//----------------------------------------------------------------------
 bool cmCTestMemCheckHandler::
 ProcessMemCheckOutput(const std::string& str,
                       std::string& log, std::vector<int>& results)
@@ -801,7 +790,6 @@ std::vector<int>::size_type cmCTestMemCheckHandler::FindOrAddWarning(
   this->ResultStringsLong.push_back(warning);
   return this->ResultStrings.size()-1;
 }
-//----------------------------------------------------------------------
 bool cmCTestMemCheckHandler::ProcessMemCheckSanitizerOutput(
   const std::string& str, std::string& log,
   std::vector<int>& result)
@@ -866,7 +854,6 @@ bool cmCTestMemCheckHandler::ProcessMemCheckSanitizerOutput(
     }
   return true;
 }
-//----------------------------------------------------------------------
 bool cmCTestMemCheckHandler::ProcessMemCheckPurifyOutput(
   const std::string& str, std::string& log,
   std::vector<int>& results)
@@ -920,7 +907,6 @@ bool cmCTestMemCheckHandler::ProcessMemCheckPurifyOutput(
   return true;
 }
 
-//----------------------------------------------------------------------
 bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
   const std::string& str, std::string& log,
   std::vector<int>& results)
@@ -1095,7 +1081,6 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
 
 
 
-//----------------------------------------------------------------------
 bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(
   const std::string& str, std::string& log,
   std::vector<int>& results)

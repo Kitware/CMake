@@ -19,7 +19,6 @@
 // include sys/stat.h after sys/types.h
 #include <sys/stat.h>
 
-//----------------------------------------------------------------------------
 std::string cmTimestamp::CurrentTime(
   const std::string& formatString, bool utcFlag)
 {
@@ -32,7 +31,6 @@ std::string cmTimestamp::CurrentTime(
   return CreateTimestampFromTimeT(currentTimeT, formatString, utcFlag);
 }
 
-//----------------------------------------------------------------------------
 std::string cmTimestamp::FileModificationTime(const char* path,
   const std::string& formatString, bool utcFlag)
 {
@@ -45,7 +43,6 @@ std::string cmTimestamp::FileModificationTime(const char* path,
   return CreateTimestampFromTimeT(mtime, formatString, utcFlag);
 }
 
-//----------------------------------------------------------------------------
 std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
   std::string formatString, bool utcFlag) const
 {
@@ -99,7 +96,6 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
   return result;
 }
 
-//----------------------------------------------------------------------------
 time_t cmTimestamp::CreateUtcTimeTFromTm(struct tm &tm) const
 {
 #if defined(_MSC_VER) && _MSC_VER >= 1400
@@ -131,7 +127,6 @@ time_t cmTimestamp::CreateUtcTimeTFromTm(struct tm &tm) const
 #endif
 }
 
-//----------------------------------------------------------------------------
 std::string cmTimestamp::AddTimestampComponent(
   char flag, struct tm& timeStruct, const time_t timeT) const
 {

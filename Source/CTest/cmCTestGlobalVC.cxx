@@ -17,25 +17,21 @@
 
 #include <cmsys/RegularExpression.hxx>
 
-//----------------------------------------------------------------------------
 cmCTestGlobalVC::cmCTestGlobalVC(cmCTest* ct, std::ostream& log):
   cmCTestVC(ct, log)
 {
   this->PriorRev = this->Unknown;
 }
 
-//----------------------------------------------------------------------------
 cmCTestGlobalVC::~cmCTestGlobalVC()
 {
 }
 
-//----------------------------------------------------------------------------
 const char* cmCTestGlobalVC::LocalPath(std::string const& path)
 {
   return path.c_str();
 }
 
-//----------------------------------------------------------------------------
 void cmCTestGlobalVC::DoRevision(Revision const& revision,
                                  std::vector<Change> const& changes)
 {
@@ -76,7 +72,6 @@ void cmCTestGlobalVC::DoRevision(Revision const& revision,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmCTestGlobalVC::DoModification(PathStatus status,
                                      std::string const& path)
 {
@@ -92,7 +87,6 @@ void cmCTestGlobalVC::DoModification(PathStatus status,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmCTestGlobalVC::WriteXMLDirectory(cmXMLWriter& xml,
                                         std::string const& path,
                                         Directory const& dir)
@@ -108,7 +102,6 @@ void cmCTestGlobalVC::WriteXMLDirectory(cmXMLWriter& xml,
   xml.EndElement(); // Directory
 }
 
-//----------------------------------------------------------------------------
 void cmCTestGlobalVC::WriteXMLGlobal(cmXMLWriter& xml)
 {
   if(!this->NewRevision.empty())
@@ -121,7 +114,6 @@ void cmCTestGlobalVC::WriteXMLGlobal(cmXMLWriter& xml)
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestGlobalVC::WriteXMLUpdates(cmXMLWriter& xml)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT,

@@ -36,7 +36,6 @@
 
 #include <set>
 
-//----------------------------------------------------------------------
 class cmCTestSubdirCommand : public cmCommand
 {
 public:
@@ -67,7 +66,6 @@ public:
   cmCTestTestHandler* TestHandler;
 };
 
-//----------------------------------------------------------------------
 bool cmCTestSubdirCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
@@ -131,7 +129,6 @@ bool cmCTestSubdirCommand
   return true;
 }
 
-//----------------------------------------------------------------------
 class cmCTestAddSubdirectoryCommand : public cmCommand
 {
 public:
@@ -162,7 +159,6 @@ public:
   cmCTestTestHandler* TestHandler;
 };
 
-//----------------------------------------------------------------------
 bool cmCTestAddSubdirectoryCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
@@ -215,7 +211,6 @@ bool cmCTestAddSubdirectoryCommand
   return true;
 }
 
-//----------------------------------------------------------------------
 class cmCTestAddTestCommand : public cmCommand
 {
 public:
@@ -246,7 +241,6 @@ public:
   cmCTestTestHandler* TestHandler;
 };
 
-//----------------------------------------------------------------------
 bool cmCTestAddTestCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
@@ -258,7 +252,6 @@ bool cmCTestAddTestCommand
   return this->TestHandler->AddTest(args);
 }
 
-//----------------------------------------------------------------------
 class cmCTestSetTestsPropertiesCommand : public cmCommand
 {
 public:
@@ -290,14 +283,12 @@ public:
   cmCTestTestHandler* TestHandler;
 };
 
-//----------------------------------------------------------------------
 bool cmCTestSetTestsPropertiesCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   return this->TestHandler->SetTestsProperties(args);
 }
 
-//----------------------------------------------------------------------
 // get the next number in a string with numbers separated by ,
 // pos is the start of the search and pos2 is the end of the search
 // pos becomes pos2 after a call to GetNextNumber.
@@ -335,7 +326,6 @@ inline int GetNextNumber(std::string const& in,
     }
 }
 
-//----------------------------------------------------------------------
 // get the next number in a string with numbers separated by ,
 // pos is the start of the search and pos2 is the end of the search
 // pos becomes pos2 after a call to GetNextNumber.
@@ -374,7 +364,6 @@ inline int GetNextRealNumber(std::string const& in,
 }
 
 
-//----------------------------------------------------------------------
 cmCTestTestHandler::cmCTestTestHandler()
 {
   this->UseUnion = false;
@@ -400,7 +389,6 @@ cmCTestTestHandler::cmCTestTestHandler()
     "(<DartMeasurement[^<]*</DartMeasurement[a-zA-Z]*>)");
 }
 
-//----------------------------------------------------------------------
 void cmCTestTestHandler::Initialize()
 {
   this->Superclass::Initialize();
@@ -435,7 +423,6 @@ void cmCTestTestHandler::Initialize()
   this->TestList.clear();
 }
 
-//----------------------------------------------------------------------
 void cmCTestTestHandler::PopulateCustomVectors(cmMakefile *mf)
 {
   this->CTest->PopulateCustomVector(mf, "CTEST_CUSTOM_PRE_TEST",
@@ -453,7 +440,6 @@ void cmCTestTestHandler::PopulateCustomVectors(cmMakefile *mf)
                              this->CustomMaximumFailedTestOutputSize);
 }
 
-//----------------------------------------------------------------------
 int cmCTestTestHandler::PreProcessHandler()
 {
   if ( !this->ExecuteCommands(this->CustomPreTest) )
@@ -465,7 +451,6 @@ int cmCTestTestHandler::PreProcessHandler()
   return 1;
 }
 
-//----------------------------------------------------------------------
 int cmCTestTestHandler::PostProcessHandler()
 {
   if ( !this->ExecuteCommands(this->CustomPostTest) )
@@ -477,7 +462,6 @@ int cmCTestTestHandler::PostProcessHandler()
   return 1;
 }
 
-//----------------------------------------------------------------------
 //clearly it would be nice if this were broken up into a few smaller
 //functions and commented...
 int cmCTestTestHandler::ProcessHandler()
@@ -652,7 +636,6 @@ int cmCTestTestHandler::ProcessHandler()
   return 0;
 }
 
-//----------------------------------------------------------------------
 void cmCTestTestHandler::PrintLabelSummary()
 {
   cmCTestTestHandler::ListOfTests::iterator it = this->TestList.begin();
@@ -739,7 +722,6 @@ void cmCTestTestHandler::PrintLabelSummary()
 
 }
 
-//----------------------------------------------------------------------
 void cmCTestTestHandler::CheckLabelFilterInclude(cmCTestTestProperties& it)
 {
   // if not using Labels to filter then return
@@ -773,7 +755,6 @@ void cmCTestTestHandler::CheckLabelFilterInclude(cmCTestTestProperties& it)
 }
 
 
-//----------------------------------------------------------------------
 void cmCTestTestHandler::CheckLabelFilterExclude(cmCTestTestProperties& it)
 {
   // if not using Labels to filter then return
@@ -805,14 +786,12 @@ void cmCTestTestHandler::CheckLabelFilterExclude(cmCTestTestProperties& it)
     }
 }
 
-//----------------------------------------------------------------------
 void cmCTestTestHandler::CheckLabelFilter(cmCTestTestProperties& it)
 {
   this->CheckLabelFilterInclude(it);
   this->CheckLabelFilterExclude(it);
 }
 
-//----------------------------------------------------------------------
 void cmCTestTestHandler::ComputeTestList()
 {
   this->TestList.clear(); // clear list of test
@@ -1060,7 +1039,6 @@ bool cmCTestTestHandler::GetValue(const char* tag,
   return ret;
 }
 
-//---------------------------------------------------------------------
 void cmCTestTestHandler::ProcessDirectory(std::vector<std::string> &passed,
                                          std::vector<std::string> &failed)
 {
@@ -1158,12 +1136,10 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string> &passed,
      << this->CTest->CurrentTime() << std::endl;
 }
 
-//----------------------------------------------------------------------
 void cmCTestTestHandler::GenerateTestCommand(std::vector<std::string>&, int)
 {
 }
 
-//----------------------------------------------------------------------
 void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
 {
   if ( !this->CTest->GetProduceXML() )
@@ -1271,7 +1247,6 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
   this->CTest->EndXML(xml);
 }
 
-//----------------------------------------------------------------------------
 void cmCTestTestHandler::WriteTestResultHeader(cmXMLWriter& xml,
                                                cmCTestTestResult* result)
 {
@@ -1295,7 +1270,6 @@ void cmCTestTestHandler::WriteTestResultHeader(cmXMLWriter& xml,
   xml.Element("FullCommandLine", result->FullCommandLine);
 }
 
-//----------------------------------------------------------------------------
 void cmCTestTestHandler::WriteTestResultFooter(cmXMLWriter& xml,
                                                cmCTestTestResult* result)
 {
@@ -1314,7 +1288,6 @@ void cmCTestTestHandler::WriteTestResultFooter(cmXMLWriter& xml,
   xml.EndElement(); // Test
 }
 
-//----------------------------------------------------------------------
 void cmCTestTestHandler::AttachFiles(cmXMLWriter& xml,
                                      cmCTestTestResult* result)
 {
@@ -1343,7 +1316,6 @@ void cmCTestTestHandler::AttachFiles(cmXMLWriter& xml,
     }
 }
 
-//----------------------------------------------------------------------
 int cmCTestTestHandler::ExecuteCommands(std::vector<std::string>& vec)
 {
   std::vector<std::string>::iterator it;
@@ -1365,7 +1337,6 @@ int cmCTestTestHandler::ExecuteCommands(std::vector<std::string>& vec)
 }
 
 
-//----------------------------------------------------------------------
 // Find the appropriate executable to run for a test
 std::string cmCTestTestHandler::FindTheExecutable(const char *exe)
 {
@@ -1455,7 +1426,6 @@ void cmCTestTestHandler
 }
 
 
-//----------------------------------------------------------------------
 // Find the appropriate executable to run for a test
 std::string cmCTestTestHandler
 ::FindExecutable(cmCTest *ctest,
@@ -1565,7 +1535,6 @@ std::string cmCTestTestHandler
 }
 
 
-//----------------------------------------------------------------------
 void cmCTestTestHandler::GetListOfTests()
 {
   if ( !this->IncludeLabelRegExp.empty() )
@@ -1648,20 +1617,17 @@ void cmCTestTestHandler::GetListOfTests()
     "Done constructing a list of tests" << std::endl, this->Quiet);
 }
 
-//----------------------------------------------------------------------
 void cmCTestTestHandler::UseIncludeRegExp()
 {
   this->UseIncludeRegExpFlag = true;
 }
 
-//----------------------------------------------------------------------
 void cmCTestTestHandler::UseExcludeRegExp()
 {
   this->UseExcludeRegExpFlag = true;
   this->UseExcludeRegExpFirst = this->UseIncludeRegExpFlag ? false : true;
 }
 
-//----------------------------------------------------------------------
 const char* cmCTestTestHandler::GetTestStatus(int status)
 {
   static const char statuses[][100] = {
@@ -1685,7 +1651,6 @@ const char* cmCTestTestHandler::GetTestStatus(int status)
   return statuses[status];
 }
 
-//----------------------------------------------------------------------
 void cmCTestTestHandler::ExpandTestsToRunInformation(size_t numTests)
 {
   if (this->TestsToRunString.empty())
@@ -1841,10 +1806,8 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
     }
 }
 
-//----------------------------------------------------------------------
 // Just for convenience
 #define SPACE_REGEX "[ \t\r\n]"
-//----------------------------------------------------------------------
 void cmCTestTestHandler::GenerateRegressionImages(
   cmXMLWriter& xml, const std::string& dart)
 {
@@ -2031,19 +1994,16 @@ void cmCTestTestHandler::GenerateRegressionImages(
     }
 }
 
-//----------------------------------------------------------------------
 void cmCTestTestHandler::SetIncludeRegExp(const char *arg)
 {
   this->IncludeRegExp = arg;
 }
 
-//----------------------------------------------------------------------
 void cmCTestTestHandler::SetExcludeRegExp(const char *arg)
 {
   this->ExcludeRegExp = arg;
 }
 
-//----------------------------------------------------------------------
 void cmCTestTestHandler::SetTestsToRunInformation(const char* in)
 {
   if ( !in )
@@ -2065,7 +2025,6 @@ void cmCTestTestHandler::SetTestsToRunInformation(const char* in)
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length)
 {
   if(!length || length >= output.size() ||
@@ -2107,7 +2066,6 @@ bool cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length)
   return true;
 }
 
-//----------------------------------------------------------------------
 bool cmCTestTestHandler::SetTestsProperties(
   const std::vector<std::string>& args)
 {
@@ -2287,7 +2245,6 @@ bool cmCTestTestHandler::SetTestsProperties(
   return true;
 }
 
-//----------------------------------------------------------------------
 bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
 {
   const std::string& testname = args[0];

@@ -37,7 +37,6 @@
 
 typedef std::vector<char> cmCTestSubmitHandlerVectorOfChar;
 
-//----------------------------------------------------------------------------
 class cmCTestSubmitHandler::ResponseParser: public cmXMLParser
 {
 public:
@@ -146,13 +145,11 @@ cmCTestSubmitHandlerCurlDebugCallback(CURL *, curl_infotype, char *chPtr,
   return size;
 }
 
-//----------------------------------------------------------------------------
 cmCTestSubmitHandler::cmCTestSubmitHandler() : HTTPProxy(), FTPProxy()
 {
   this->Initialize();
 }
 
-//----------------------------------------------------------------------------
 void cmCTestSubmitHandler::Initialize()
 {
   // We submit all available parts by default.
@@ -174,7 +171,6 @@ void cmCTestSubmitHandler::Initialize()
   this->Files.clear();
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestSubmitHandler::SubmitUsingFTP(const std::string& localprefix,
   const std::set<std::string>& files,
   const std::string& remoteprefix,
@@ -328,7 +324,6 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const std::string& localprefix,
   return true;
 }
 
-//----------------------------------------------------------------------------
 // Uploading files is simpler
 bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
   const std::set<std::string>& files,
@@ -643,7 +638,6 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestSubmitHandler
 ::ParseResponse(cmCTestSubmitHandlerVectorOfChar chunk)
 {
@@ -680,7 +674,6 @@ void cmCTestSubmitHandler
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestSubmitHandler::TriggerUsingHTTP(
   const std::set<std::string>& files,
   const std::string& remoteprefix,
@@ -821,7 +814,6 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestSubmitHandler::SubmitUsingSCP(
   const std::string& scp_command,
   const std::string& localprefix,
@@ -923,7 +915,6 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestSubmitHandler::SubmitUsingCP(
   const std::string& localprefix,
   const std::set<std::string>& files,
@@ -967,7 +958,6 @@ bool cmCTestSubmitHandler::SubmitUsingCP(
 }
 
 
-//----------------------------------------------------------------------------
 #if defined(CTEST_USE_XMLRPC)
 bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const std::string& localprefix,
   const std::set<std::string>& files,
@@ -1238,7 +1228,6 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   return 0;
 }
 
-//----------------------------------------------------------------------------
 int cmCTestSubmitHandler::ProcessHandler()
 {
   const char* cdashUploadFile = this->GetOption("CDashUploadFile");
@@ -1664,7 +1653,6 @@ int cmCTestSubmitHandler::ProcessHandler()
   return -1;
 }
 
-//----------------------------------------------------------------------------
 std::string cmCTestSubmitHandler::GetSubmitResultsPrefix()
 {
   std::string buildname = cmCTest::SafeBuildIdField(
@@ -1676,7 +1664,6 @@ std::string cmCTestSubmitHandler::GetSubmitResultsPrefix()
   return name;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestSubmitHandler::SelectParts(std::set<cmCTest::Part> const& parts)
 {
   // Check whether each part is selected.
@@ -1688,7 +1675,6 @@ void cmCTestSubmitHandler::SelectParts(std::set<cmCTest::Part> const& parts)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmCTestSubmitHandler::SelectFiles(cmCTest::SetOfStrings const& files)
 {
   this->Files.insert(files.begin(), files.end());

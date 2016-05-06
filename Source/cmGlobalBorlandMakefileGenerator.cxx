@@ -56,7 +56,6 @@ cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator(
 }
 
 
-//----------------------------------------------------------------------------
 void cmGlobalBorlandMakefileGenerator
 ::GetDocumentation(cmDocumentationEntry& entry)
 {

@@ -23,7 +23,6 @@
 
 #include <form.h>
 
-//----------------------------------------------------------------------------
 static const char * cmDocumentationName[][2] =
 {
   {0,
@@ -31,7 +30,6 @@ static const char * cmDocumentationName[][2] =
   {0,0}
 };
 
-//----------------------------------------------------------------------------
 static const char * cmDocumentationUsage[][2] =
 {
   {0,
@@ -44,7 +42,6 @@ static const char * cmDocumentationUsage[][2] =
   {0,0}
 };
 
-//----------------------------------------------------------------------------
 static const char * cmDocumentationUsageNote[][2] =
 {
   {0,
@@ -52,7 +49,6 @@ static const char * cmDocumentationUsageNote[][2] =
   {0,0}
 };
 
-//----------------------------------------------------------------------------
 static const char * cmDocumentationOptions[][2] =
 {
   CMAKE_STANDARD_OPTIONS_TABLE,

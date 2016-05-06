@@ -14,17 +14,14 @@
 #include "cmCPackLog.h"
 #include "cmSystemTools.h"
 
-//----------------------------------------------------------------------
 cmCPackRPMGenerator::cmCPackRPMGenerator()
 {
 }
 
-//----------------------------------------------------------------------
 cmCPackRPMGenerator::~cmCPackRPMGenerator()
 {
 }
 
-//----------------------------------------------------------------------
 int cmCPackRPMGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/usr");
@@ -50,7 +47,6 @@ int cmCPackRPMGenerator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
-//----------------------------------------------------------------------
 int cmCPackRPMGenerator::PackageOnePack(std::string initialToplevel,
                                         std::string packageName)
 {
@@ -94,7 +90,6 @@ int cmCPackRPMGenerator::PackageOnePack(std::string initialToplevel,
   return retval;
 }
 
-//----------------------------------------------------------------------
 int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
 {
   int retval = 1;
@@ -147,7 +142,6 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
   return retval;
 }
 
-//----------------------------------------------------------------------
 int cmCPackRPMGenerator::PackageComponentsAllInOne()
 {
   int retval = 1;
@@ -201,7 +195,6 @@ int cmCPackRPMGenerator::PackageComponentsAllInOne()
   return retval;
 }
 
-//----------------------------------------------------------------------
 int cmCPackRPMGenerator::PackageFiles()
 {
   int retval = 1;

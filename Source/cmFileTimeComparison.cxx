@@ -32,7 +32,6 @@
 #  include <windows.h>
 #endif
 
-//----------------------------------------------------------------------------
 class cmFileTimeComparisonInternal
 {
 public:
@@ -74,7 +73,6 @@ private:
                           cmFileTimeComparison_Type* st2);
 };
 
-//----------------------------------------------------------------------------
 bool cmFileTimeComparisonInternal::Stat(const char* fname,
                                         cmFileTimeComparison_Type* st)
 {
@@ -118,32 +116,27 @@ bool cmFileTimeComparisonInternal::Stat(const char* fname,
   return true;
 }
 
-//----------------------------------------------------------------------------
 cmFileTimeComparison::cmFileTimeComparison()
 {
   this->Internals = new cmFileTimeComparisonInternal;
 }
 
-//----------------------------------------------------------------------------
 cmFileTimeComparison::~cmFileTimeComparison()
 {
   delete this->Internals;
 }
 
-//----------------------------------------------------------------------------
 bool cmFileTimeComparison::FileTimeCompare(const char* f1,
                                            const char* f2, int* result)
 {
   return this->Internals->FileTimeCompare(f1, f2, result);
 }
 
-//----------------------------------------------------------------------------
 bool cmFileTimeComparison::FileTimesDiffer(const char* f1, const char* f2)
 {
   return this->Internals->FileTimesDiffer(f1, f2);
 }
 
-//----------------------------------------------------------------------------
 int cmFileTimeComparisonInternal::Compare(cmFileTimeComparison_Type* s1,
                                           cmFileTimeComparison_Type* s2)
 {
@@ -203,7 +196,6 @@ int cmFileTimeComparisonInternal::Compare(cmFileTimeComparison_Type* s1,
 #endif
 }
 
-//----------------------------------------------------------------------------
 bool cmFileTimeComparisonInternal::TimesDiffer(cmFileTimeComparison_Type* s1,
                                                cmFileTimeComparison_Type* s2)
 {
@@ -280,7 +272,6 @@ bool cmFileTimeComparisonInternal::TimesDiffer(cmFileTimeComparison_Type* s1,
 #endif
 }
 
-//----------------------------------------------------------------------------
 bool cmFileTimeComparisonInternal::FileTimeCompare(const char* f1,
                                                    const char* f2,
                                                    int* result)
@@ -303,7 +294,6 @@ bool cmFileTimeComparisonInternal::FileTimeCompare(const char* f1,
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmFileTimeComparisonInternal::FileTimesDiffer(const char* f1,
                                                    const char* f2)
 {

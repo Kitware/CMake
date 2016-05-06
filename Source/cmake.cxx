@@ -814,7 +814,6 @@ void cmake::SetArgs(const std::vector<std::string>& args,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmake::SetDirectoriesFromFile(const char* arg)
 {
   // Check if the argument refers to a CMakeCache.txt or
@@ -1004,7 +1003,6 @@ void cmake::AddDefaultExtraGenerators()
 }
 
 
-//----------------------------------------------------------------------------
 void cmake::GetRegisteredGenerators(std::vector<GeneratorInfo>& generators)
 {
   for (RegisteredGeneratorsVector::const_iterator
@@ -2029,7 +2027,6 @@ void cmake::UpdateConversionPathTable()
     }
 }
 
-//----------------------------------------------------------------------------
 int cmake::CheckBuildSystem()
 {
   // We do not need to rerun CMake.  Check dependency integrity.  Use
@@ -2233,7 +2230,6 @@ int cmake::CheckBuildSystem()
   return 0;
 }
 
-//----------------------------------------------------------------------------
 void cmake::TruncateOutputLog(const char* fname)
 {
   std::string fullPath = this->GetHomeOutputDirectory();
@@ -2481,7 +2477,6 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   return 0;
 }
 
-//----------------------------------------------------------------------------
 static bool cmakeCheckStampFile(const char* stampName)
 {
   // The stamp file does not exist.  Use the stamp dependencies to
@@ -2555,7 +2550,6 @@ static bool cmakeCheckStampFile(const char* stampName)
     }
 }
 
-//----------------------------------------------------------------------------
 static bool cmakeCheckStampList(const char* stampList)
 {
   // If the stamp list does not exist CMake must rerun to generate it.
@@ -2749,7 +2743,6 @@ void displayMessage(cmake::MessageType t, std::ostringstream& msg)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
                          cmListFileBacktrace const& bt,
                          bool force)
@@ -2789,7 +2782,6 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
   displayMessage(t, msg);
 }
 
-//----------------------------------------------------------------------------
 std::vector<std::string> cmake::GetDebugConfigs()
 {
   std::vector<std::string> configs;

@@ -34,7 +34,6 @@
 #define UNORDERED_SET std::set
 #endif
 
-//----------------------------------------------------------------------------
 class cmTargetInternals
 {
 public:
@@ -52,7 +51,6 @@ public:
   std::vector<cmListFileBacktrace> LinkImplementationPropertyBacktraces;
 };
 
-//----------------------------------------------------------------------------
 cmTarget::cmTarget()
 {
   this->Makefile = 0;
@@ -80,7 +78,6 @@ void cmTarget::SetType(cmState::TargetType type, const std::string& name)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::SetMakefile(cmMakefile* mf)
 {
   // Set our makefile.
@@ -293,7 +290,6 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::AddUtility(const std::string& u, cmMakefile *makefile)
 {
   if(this->Utilities.insert(u).second && makefile)
@@ -303,7 +299,6 @@ void cmTarget::AddUtility(const std::string& u, cmMakefile *makefile)
     }
 }
 
-//----------------------------------------------------------------------------
 cmListFileBacktrace const* cmTarget::GetUtilityBacktrace(
     const std::string& u) const
 {
@@ -314,20 +309,17 @@ cmListFileBacktrace const* cmTarget::GetUtilityBacktrace(
   return &i->second;
 }
 
-//----------------------------------------------------------------------------
 cmListFileBacktrace const& cmTarget::GetBacktrace() const
 {
   return this->Backtrace;
 }
 
-//----------------------------------------------------------------------------
 bool cmTarget::IsExecutableWithExports() const
 {
   return (this->GetType() == cmState::EXECUTABLE &&
           this->GetPropertyAsBool("ENABLE_EXPORTS"));
 }
 
-//----------------------------------------------------------------------------
 bool cmTarget::HasImportLibrary() const
 {
   return (this->DLLPlatform &&
@@ -335,7 +327,6 @@ bool cmTarget::HasImportLibrary() const
            this->IsExecutableWithExports()));
 }
 
-//----------------------------------------------------------------------------
 bool cmTarget::IsFrameworkOnApple() const
 {
   return (this->GetType() == cmState::SHARED_LIBRARY &&
@@ -343,7 +334,6 @@ bool cmTarget::IsFrameworkOnApple() const
           this->GetPropertyAsBool("FRAMEWORK"));
 }
 
-//----------------------------------------------------------------------------
 bool cmTarget::IsAppBundleOnApple() const
 {
   return (this->GetType() == cmState::EXECUTABLE &&
@@ -351,7 +341,6 @@ bool cmTarget::IsAppBundleOnApple() const
           this->GetPropertyAsBool("MACOSX_BUNDLE"));
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)
 {
   if (!srcs.empty())
@@ -362,7 +351,6 @@ void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::AddSources(std::vector<std::string> const& srcs)
 {
   std::string srcFiles;
@@ -397,7 +385,6 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmTarget::ProcessSourceItemCMP0049(const std::string& s)
 {
   std::string src = s;
@@ -439,7 +426,6 @@ std::string cmTarget::ProcessSourceItemCMP0049(const std::string& s)
   return src;
 }
 
-//----------------------------------------------------------------------------
 cmSourceFile* cmTarget::AddSourceCMP0049(const std::string& s)
 {
   std::string src = this->ProcessSourceItemCMP0049(s);
@@ -450,7 +436,6 @@ cmSourceFile* cmTarget::AddSourceCMP0049(const std::string& s)
   return this->AddSource(src);
 }
 
-//----------------------------------------------------------------------------
 struct CreateLocation
 {
   cmMakefile const* Makefile;
@@ -467,7 +452,6 @@ struct CreateLocation
   }
 };
 
-//----------------------------------------------------------------------------
 struct LocationMatcher
 {
   const cmSourceFileLocation& Needle;
@@ -485,7 +469,6 @@ struct LocationMatcher
 };
 
 
-//----------------------------------------------------------------------------
 struct TargetPropertyEntryFinder
 {
 private:
@@ -510,7 +493,6 @@ public:
   }
 };
 
-//----------------------------------------------------------------------------
 cmSourceFile* cmTarget::AddSource(const std::string& src)
 {
   cmSourceFileLocation sfl(this->Makefile, src);
@@ -530,7 +512,6 @@ cmSourceFile* cmTarget::AddSource(const std::string& src)
   return this->Makefile->GetOrCreateSource(src);
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::MergeLinkLibraries( cmMakefile& mf,
                                    const std::string& selfname,
                                    const LinkLibraryVectorType& libs )
@@ -549,7 +530,6 @@ void cmTarget::MergeLinkLibraries( cmMakefile& mf,
   this->PrevLinkedLibraries = libs;
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::AddLinkDirectory(const std::string& d)
 {
   // Make sure we don't add unnecessary search directories.
@@ -559,13 +539,11 @@ void cmTarget::AddLinkDirectory(const std::string& d)
     }
 }
 
-//----------------------------------------------------------------------------
 const std::vector<std::string>& cmTarget::GetLinkDirectories() const
 {
   return this->LinkDirectories;
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::ClearDependencyInformation( cmMakefile& mf,
                                            const std::string& target )
 {
@@ -593,7 +571,6 @@ void cmTarget::ClearDependencyInformation( cmMakefile& mf,
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmTarget::GetDebugGeneratorExpressions(const std::string &value,
                                   cmTargetLinkLibraryType llt) const
 {
@@ -625,13 +602,11 @@ std::string cmTarget::GetDebugGeneratorExpressions(const std::string &value,
   return "$<" + configString + ":" + value + ">";
 }
 
-//----------------------------------------------------------------------------
 static std::string targetNameGenex(const std::string& lib)
 {
   return "$<TARGET_NAME:" + lib + ">";
 }
 
-//----------------------------------------------------------------------------
 bool cmTarget::PushTLLCommandTrace(TLLSignature signature,
                                    cmListFileContext const& lfc)
 {
@@ -650,7 +625,6 @@ bool cmTarget::PushTLLCommandTrace(TLLSignature signature,
   return ret;
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::GetTllSignatureTraces(std::ostringstream &s,
                                      TLLSignature sig) const
 {
@@ -671,7 +645,6 @@ void cmTarget::GetTllSignatureTraces(std::ostringstream &s,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::AddLinkLibrary(cmMakefile& mf,
                               const std::string& target,
                               const std::string& lib,
@@ -742,7 +715,6 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
 
 }
 
-//----------------------------------------------------------------------------
 void
 cmTarget::AddSystemIncludeDirectories(const std::set<std::string> &incs)
 {
@@ -809,7 +781,6 @@ cmBacktraceRange cmTarget::GetLinkImplementationBacktraces() const
   return cmMakeRange(this->Internal->LinkImplementationPropertyBacktraces);
 }
 
-//----------------------------------------------------------------------------
 static bool whiteListedInterfaceProperty(const std::string& prop)
 {
   if(cmHasLiteralPrefix(prop, "INTERFACE_"))
@@ -842,7 +813,6 @@ static bool whiteListedInterfaceProperty(const std::string& prop)
   return false;
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::SetProperty(const std::string& prop, const char* value)
 {
   if (this->GetType() == cmState::INTERFACE_LIBRARY
@@ -949,7 +919,6 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::AppendProperty(const std::string& prop, const char* value,
                               bool asString)
 {
@@ -1041,7 +1010,6 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::AppendBuildInterfaceIncludes()
 {
   if(this->GetType() != cmState::SHARED_LIBRARY &&
@@ -1073,7 +1041,6 @@ void cmTarget::AppendBuildInterfaceIncludes()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::InsertInclude(std::string const& entry,
                              cmListFileBacktrace const& bt,
                              bool before)
@@ -1090,7 +1057,6 @@ void cmTarget::InsertInclude(std::string const& entry,
   this->Internal->IncludeDirectoriesBacktraces.insert(btPosition, bt);
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::InsertCompileOption(std::string const& entry,
                                    cmListFileBacktrace const& bt,
                                    bool before)
@@ -1107,7 +1073,6 @@ void cmTarget::InsertCompileOption(std::string const& entry,
   this->Internal->CompileOptionsBacktraces.insert(btPosition, bt);
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::InsertCompileDefinition(std::string const& entry,
                                        cmListFileBacktrace const& bt)
 {
@@ -1115,7 +1080,6 @@ void cmTarget::InsertCompileDefinition(std::string const& entry,
   this->Internal->CompileDefinitionsBacktraces.push_back(bt);
 }
 
-//----------------------------------------------------------------------------
 static void cmTargetCheckLINK_INTERFACE_LIBRARIES(
   const std::string& prop, const char* value, cmMakefile* context,
   bool imported)
@@ -1158,7 +1122,6 @@ static void cmTargetCheckLINK_INTERFACE_LIBRARIES(
   context->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
 
-//----------------------------------------------------------------------------
 static void cmTargetCheckINTERFACE_LINK_LIBRARIES(const char* value,
                                                   cmMakefile* context)
 {
@@ -1181,7 +1144,6 @@ static void cmTargetCheckINTERFACE_LINK_LIBRARIES(const char* value,
   context->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::CheckProperty(const std::string& prop,
                              cmMakefile* context) const
 {
@@ -1209,14 +1171,12 @@ void cmTarget::CheckProperty(const std::string& prop,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::MarkAsImported(bool global)
 {
   this->IsImportedTarget = true;
   this->ImportedGloballyVisible = global;
 }
 
-//----------------------------------------------------------------------------
 bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
 {
   if (this->IsImported())
@@ -1252,13 +1212,11 @@ bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
   return messageType != cmake::FATAL_ERROR;
 }
 
-//----------------------------------------------------------------------------
 const char *cmTarget::GetProperty(const std::string& prop) const
 {
   return this->GetProperty(prop, this->Makefile);
 }
 
-//----------------------------------------------------------------------------
 const char *cmTarget::GetProperty(const std::string& prop,
                                   cmMakefile* context) const
 {
@@ -1577,13 +1535,11 @@ const char *cmTarget::GetProperty(const std::string& prop,
   return retVal;
 }
 
-//----------------------------------------------------------------------------
 bool cmTarget::GetPropertyAsBool(const std::string& prop) const
 {
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }
 
-//----------------------------------------------------------------------------
 const char* cmTarget::GetSuffixVariableInternal(bool implib) const
 {
   switch(this->GetType())
@@ -1612,7 +1568,6 @@ const char* cmTarget::GetSuffixVariableInternal(bool implib) const
 }
 
 
-//----------------------------------------------------------------------------
 const char* cmTarget::GetPrefixVariableInternal(bool implib) const
 {
   switch(this->GetType())
@@ -1640,7 +1595,6 @@ const char* cmTarget::GetPrefixVariableInternal(bool implib) const
   return "";
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmTarget::ImportedGetFullPath(const std::string& config, bool pimplib) const
 {
@@ -1719,7 +1673,6 @@ cmTarget::ImportedGetFullPath(const std::string& config, bool pimplib) const
   return result;
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::SetPropertyDefault(const std::string& property,
                                   const char* default_value)
 {
@@ -1868,13 +1821,11 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   return true;
 }
 
-//----------------------------------------------------------------------------
 cmTargetInternalPointer::cmTargetInternalPointer()
 {
   this->Pointer = new cmTargetInternals;
 }
 
-//----------------------------------------------------------------------------
 cmTargetInternalPointer
 ::cmTargetInternalPointer(cmTargetInternalPointer const& r)
 {
@@ -1884,13 +1835,11 @@ cmTargetInternalPointer
   this->Pointer = new cmTargetInternals(*r.Pointer);
 }
 
-//----------------------------------------------------------------------------
 cmTargetInternalPointer::~cmTargetInternalPointer()
 {
   delete this->Pointer;
 }
 
-//----------------------------------------------------------------------------
 cmTargetInternalPointer&
 cmTargetInternalPointer::operator=(cmTargetInternalPointer const& r)
 {

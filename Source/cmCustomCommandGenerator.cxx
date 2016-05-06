@@ -17,7 +17,6 @@
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 
-//----------------------------------------------------------------------------
 cmCustomCommandGenerator::cmCustomCommandGenerator(
   cmCustomCommand const& cc, const std::string& config, cmLocalGenerator* lg):
   CC(cc), Config(config), LG(lg),
@@ -26,19 +25,16 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(
 {
 }
 
-//----------------------------------------------------------------------------
 cmCustomCommandGenerator::~cmCustomCommandGenerator()
 {
   delete this->GE;
 }
 
-//----------------------------------------------------------------------------
 unsigned int cmCustomCommandGenerator::GetNumberOfCommands() const
 {
   return static_cast<unsigned int>(this->CC.GetCommandLines().size());
 }
 
-//----------------------------------------------------------------------------
 bool cmCustomCommandGenerator::UseCrossCompilingEmulator(unsigned int c) const
 {
   std::string const& argv0 = this->CC.GetCommandLines()[c][0];
@@ -51,7 +47,6 @@ bool cmCustomCommandGenerator::UseCrossCompilingEmulator(unsigned int c) const
   return false;
 }
 
-//----------------------------------------------------------------------------
 std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
 {
   std::string const& argv0 = this->CC.GetCommandLines()[c][0];
@@ -78,7 +73,6 @@ std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
   return exe;
 }
 
-//----------------------------------------------------------------------------
 std::string escapeForShellOldStyle(const std::string& str)
 {
   std::string result;
@@ -107,7 +101,6 @@ std::string escapeForShellOldStyle(const std::string& str)
 #endif
 }
 
-//----------------------------------------------------------------------------
 void
 cmCustomCommandGenerator
 ::AppendArguments(unsigned int c, std::string& cmd) const
@@ -136,31 +129,26 @@ cmCustomCommandGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 const char* cmCustomCommandGenerator::GetComment() const
 {
   return this->CC.GetComment();
 }
 
-//----------------------------------------------------------------------------
 std::string cmCustomCommandGenerator::GetWorkingDirectory() const
 {
   return this->CC.GetWorkingDirectory();
 }
 
-//----------------------------------------------------------------------------
 std::vector<std::string> const& cmCustomCommandGenerator::GetOutputs() const
 {
   return this->CC.GetOutputs();
 }
 
-//----------------------------------------------------------------------------
 std::vector<std::string> const& cmCustomCommandGenerator::GetByproducts() const
 {
   return this->CC.GetByproducts();
 }
 
-//----------------------------------------------------------------------------
 std::vector<std::string> const& cmCustomCommandGenerator::GetDepends() const
 {
   if (!this->DependsDone)
