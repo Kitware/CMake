@@ -1,34 +1,25 @@
-PROJECT(CMEXPAT)
+# Disable warnings to avoid changing 3rd party code.
+IF(CMAKE_C_COMPILER_ID MATCHES
+    "^(GNU|Clang|AppleClang|XL|VisualAge|SunPro|MIPSpro|HP|Intel)$")
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -woffall")
+ENDIF()
 
-SET(expat_SRCS
-  xmlparse.c
-  xmltok.c
-  xmlrole.c
-)
+include(ConfigureChecks.cmake)
+if(WIN32)
+  add_definitions(-DCOMPILING_FOR_WINDOWS)
+endif(WIN32)
 
-INCLUDE(${CMAKE_ROOT}/Modules/TestBigEndian.cmake)
-TEST_BIG_ENDIAN(CMEXPAT_BIGENDIAN)
-
-INCLUDE_DIRECTORIES(
-  "${CMEXPAT_BINARY_DIR}/.."
+include_directories(
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/lib
   )
 
-IF(WIN32)
-  IF(NOT BUILD_SHARED_LIBS)
-    SET (CM_EXPAT_STATIC 1)
-  ENDIF(NOT BUILD_SHARED_LIBS)
-ENDIF(WIN32)
-
-CONFIGURE_FILE(${CMEXPAT_SOURCE_DIR}/expatConfig.h.in
-               ${CMEXPAT_BINARY_DIR}/expatConfig.h)
-CONFIGURE_FILE(${CMEXPAT_SOURCE_DIR}/expatDllConfig.h.in
-               ${CMEXPAT_BINARY_DIR}/expatDllConfig.h)
-CONFIGURE_FILE(${CMEXPAT_SOURCE_DIR}/.NoDartCoverage
-               ${CMEXPAT_BINARY_DIR}/.NoDartCoverage)
-CONFIGURE_FILE(${CMEXPAT_SOURCE_DIR}/cm_expat_mangle.h
-               ${CMEXPAT_BINARY_DIR}/cm_expat_mangle.h)
-CONFIGURE_FILE(${CMEXPAT_SOURCE_DIR}/expat.h
-               ${CMEXPAT_BINARY_DIR}/expat.h)
-
-ADD_LIBRARY(cmexpat ${expat_SRCS})
-INSTALL(FILES COPYING DESTINATION ${CMAKE_DOC_DIR}/cmexpat)
+add_library(cmexpat STATIC
+  lib/xmlparse.c
+  lib/xmlrole.c
+  lib/xmltok.c
+  lib/xmltok_impl.c
+  lib/xmltok_ns.c
+  )
