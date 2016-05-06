@@ -6,7 +6,9 @@ const char info_sizeof_dptr[] =  {
   'I', 'N', 'F', 'O', ':', 's', 'i', 'z', 'e', 'o', 'f', '_', 'd', 'p', 't', 'r', '[',
   ('0' + ((SIZEOF_DPTR / 10)%10)),
   ('0' +  (SIZEOF_DPTR    % 10)),
-  ']','\0'};
+  ']','\0'
+  /* clang-format needs this comment to break after the opening brace */
+};
 
 /*--------------------------------------------------------------------------*/
 

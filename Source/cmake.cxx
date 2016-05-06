@@ -1431,6 +1431,7 @@ int cmake::ActualConfigure()
         const char* GeneratorName;
       };
       VSRegistryEntryName version[] = {
+        /* clang-format needs this comment to break after the opening brace */
         {"7.1", "Visual Studio 7 .NET 2003"},
         {"8.0", "Visual Studio 8 2005"},
         {"9.0", "Visual Studio 9 2008"},

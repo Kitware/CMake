@@ -69,6 +69,7 @@ int testVisualStudioSlnParser(int, char*[])
     "cmsysTestsCxx", "cmsys_c", "cmw9xcom", "cmzlib", "cpack", "ctest",
     "documentation", "memcheck_fail", "pseudo_BC", "pseudo_purify",
     "pseudo_valgrind", "test_clean", "uninstall"
+    /* clang-format needs this comment to break after the opening brace */
     };
   const size_t expectedProjectCount = sizeof(names) / sizeof(*names);
   if (projects.size() != expectedProjectCount)
@@ -160,6 +161,7 @@ int testVisualStudioSlnParser(int, char*[])
     {
     "header", "projectArgs", "topLevel", "projectContents", "projectSection",
     "global", "unclosed", "strayQuote", "strayParen", "strayQuote2"
+    /* clang-format needs this comment to break after the opening brace */
     };
   for (size_t idx = 0; idx < sizeof(files) / sizeof(files[0]); ++idx)
     {
