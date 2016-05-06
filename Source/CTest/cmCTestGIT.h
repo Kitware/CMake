@@ -44,7 +44,9 @@ private:
   void LoadRevisions();
   void LoadModifications();
 
-public: // needed by older Sun compilers
+  // "public" needed by older Sun compilers
+public:
+
   // Parsing helper classes.
   class OneLineParser;
   class DiffParser;

@@ -24,7 +24,8 @@ class cmXMLWriter;
  */
 class cmCPackIFWInstaller
 {
-public: // Types
+public:
+  // Types
 
   typedef std::map<std::string, cmCPackIFWPackage*> PackagesMap;
 
@@ -37,14 +38,16 @@ public: // Types
     std::string DisplayName;
   };
 
-public: // Constructor
+public:
+  // Constructor
 
   /**
    * Construct installer
    */
   cmCPackIFWInstaller();
 
-public: // Configuration
+public:
+  // Configuration
 
   /// Name of the product being installed
   std::string Name;
@@ -94,7 +97,8 @@ public: // Configuration
   /// Filename for a custom installer control script
   std::string ControlScript;
 
-public: // Internal implementation
+public:
+  // Internal implementation
 
   const char* GetOption(const std::string& op) const;
   bool IsOn(const std::string& op) const;

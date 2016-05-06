@@ -26,7 +26,9 @@ class cmXMLWriter;
  */
 class cmCPackIFWPackage
 {
-public: // Types
+public:
+  // Types
+
   enum CompareTypes
   {
     CompareNone           = 0x0,
@@ -61,14 +63,16 @@ public: // Types
       }
   };
 
-public: // [Con|De]structor
+public:
+  // [Con|De]structor
 
   /**
    * Construct package
    */
   cmCPackIFWPackage();
 
-public: // Configuration
+public:
+  // Configuration
 
   /// Human-readable name of the component
   std::string DisplayName;
@@ -103,7 +107,8 @@ public: // Configuration
   /// Determines that the package must always be installed
   std::string ForcedInstallation;
 
-public: // Internal implementation
+public:
+  // Internal implementation
 
   const char* GetOption(const std::string& op) const;
   bool IsOn(const std::string& op) const;
