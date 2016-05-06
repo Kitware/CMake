@@ -562,6 +562,7 @@ bool cmComputeLinkInformation::Compute()
   if (!this->CMP0060WarnItems.empty())
     {
     std::ostringstream w;
+    /* clang-format off */
     w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0060) << "\n"
       "Some library files are in directories implicitly searched by "
       "the linker when invoked for " << this->LinkLanguage << ":\n"
@@ -570,6 +571,7 @@ bool cmComputeLinkInformation::Compute()
       "link line will ask the linker to search for these by library "
       "name."
       ;
+    /* clang-format on */
     this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
                                       this->Target->GetBacktrace());
     }
@@ -1543,10 +1545,12 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
         {
         this->CMakeInstance->GetState()->SetGlobalProperty(wid, "1");
         std::ostringstream w;
+        /* clang-format off */
         w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0008) << "\n"
           << "Target \"" << this->Target->GetName() << "\" links to item\n"
           << "  " << item << "\n"
           << "which is a full-path but not a valid library file name.";
+        /* clang-format on */
         this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
                                         this->Target->GetBacktrace());
         }
@@ -1561,10 +1565,12 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
     case cmPolicies::REQUIRED_ALWAYS:
       {
       std::ostringstream e;
+      /* clang-format off */
       e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0008) << "\n"
           << "Target \"" << this->Target->GetName() << "\" links to item\n"
           << "  " << item << "\n"
           << "which is a full-path but not a valid library file name.";
+      /* clang-format on */
       this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
                                         this->Target->GetBacktrace());
       }
@@ -1629,6 +1635,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
 void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
 {
   // Tell the user what to do.
+  /* clang-format off */
   os << "Policy CMP0003 should be set before this line.  "
      << "Add code such as\n"
      << "  if(COMMAND cmake_policy)\n"
@@ -1636,6 +1643,7 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
      << "  endif(COMMAND cmake_policy)\n"
      << "as early as possible but after the most recent call to "
      << "cmake_minimum_required or cmake_policy(VERSION).  ";
+  /* clang-format on */
 
   // List the items that might need the old-style paths.
   os << "This warning appears because target \""

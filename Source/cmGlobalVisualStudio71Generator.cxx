@@ -204,6 +204,7 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
   if(ui != this->UtilityDepends.end())
     {
     const char* uname = ui->second.c_str();
+    /* clang-format off */
     fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \""
          << uname << "\", \""
          << this->ConvertToSolutionPath(dir) << (dir[0]? "\\":"")
@@ -213,6 +214,7 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
          << "\t\t{" << guid << "} = {" << guid << "}\n"
          << "\tEndProjectSection\n"
          << "EndProject\n";
+    /* clang-format on */
     }
 }
 

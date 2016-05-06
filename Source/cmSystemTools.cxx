@@ -2618,11 +2618,13 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
       if(emsg)
         {
         std::ostringstream e;
+        /* clang-format off */
         e << "The current " << se_name[i] << " is:\n"
           << "  " << se[i]->Value << "\n"
           << "which does not contain:\n"
           << "  " << oldRPath << "\n"
           << "as was expected.";
+        /* clang-format on */
         *emsg = e.str();
         }
       return false;

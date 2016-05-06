@@ -704,6 +704,7 @@ cmGlobalVisualStudio7Generator::WriteUtilityDepend(
   fout.SetCopyIfDifferent(true);
   std::string guid = this->GetGUID(pname.c_str());
 
+  /* clang-format off */
   fout <<
     "<?xml version=\"1.0\" encoding = \""
     << this->Encoding() << "\"?>\n"
@@ -716,9 +717,11 @@ cmGlobalVisualStudio7Generator::WriteUtilityDepend(
     "\t<Platforms><Platform Name=\"Win32\"/></Platforms>\n"
     "\t<Configurations>\n"
     ;
+  /* clang-format on */
   for(std::vector<std::string>::iterator i = configs.begin();
       i != configs.end(); ++i)
     {
+    /* clang-format off */
     fout <<
       "\t\t<Configuration\n"
       "\t\t\tName=\"" << *i << "|Win32\"\n"
@@ -730,13 +733,16 @@ cmGlobalVisualStudio7Generator::WriteUtilityDepend(
       "\t\t\tCharacterSet=\"2\">\n"
       "\t\t</Configuration>\n"
       ;
+    /* clang-format on */
     }
+  /* clang-format off */
   fout <<
     "\t</Configurations>\n"
     "\t<Files></Files>\n"
     "\t<Globals></Globals>\n"
     "</VisualStudioProject>\n"
     ;
+  /* clang-format on */
 
   if(fout.Close())
     {

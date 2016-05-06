@@ -1229,10 +1229,12 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
     }
   std::vector<SaveCacheEntry> saved;
   std::ostringstream warning;
+  /* clang-format off */
   warning
     << "You have changed variables that require your cache to be deleted.\n"
     << "Configure will be re-run and you may have to reset some variables.\n"
     << "The following variables have changed:\n";
+  /* clang-format on */
   for(std::vector<std::string>::iterator i = argsSplit.begin();
       i != argsSplit.end(); ++i)
     {

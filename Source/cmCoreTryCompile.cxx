@@ -307,9 +307,11 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     if (!fout)
       {
       std::ostringstream e;
+      /* clang-format off */
       e << "Failed to open\n"
         << "  " << outFileName << "\n"
         << cmSystemTools::GetLastSystemError();
+      /* clang-format on */
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       return -1;
       }
@@ -369,11 +371,13 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
              "CMAKE_POLICY_WARNING_CMP0056"))
           {
           std::ostringstream w;
+          /* clang-format off */
           w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0056) << "\n"
             "For compatibility with older versions of CMake, try_compile "
             "is not honoring caller link flags (e.g. CMAKE_EXE_LINKER_FLAGS) "
             "in the test project."
             ;
+          /* clang-format on */
           this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
           }
       case cmPolicies::OLD:
@@ -608,10 +612,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
                                         copyFile))
         {
         std::ostringstream emsg;
+        /* clang-format off */
         emsg << "Cannot copy output executable\n"
              << "  '" << this->OutputFile << "'\n"
              << "to destination specified by COPY_FILE:\n"
              << "  '" << copyFile << "'\n";
+        /* clang-format on */
         if(!this->FindErrorMessage.empty())
           {
           emsg << this->FindErrorMessage.c_str();

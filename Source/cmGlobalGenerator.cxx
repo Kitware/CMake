@@ -111,12 +111,14 @@ bool cmGlobalGenerator::SetGeneratorPlatform(std::string const& p,
     }
 
   std::ostringstream e;
+  /* clang-format off */
   e <<
     "Generator\n"
     "  " << this->GetName() << "\n"
     "does not support platform specification, but platform\n"
     "  " << p << "\n"
     "was specified.";
+  /* clang-format on */
   mf->IssueMessage(cmake::FATAL_ERROR, e.str());
   return false;
 }
@@ -129,12 +131,14 @@ bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts,
     return true;
     }
   std::ostringstream e;
+  /* clang-format off */
   e <<
     "Generator\n"
     "  " << this->GetName() << "\n"
     "does not support toolset specification, but toolset\n"
     "  " << ts << "\n"
     "was specified.";
+  /* clang-format on */
   mf->IssueMessage(cmake::FATAL_ERROR, e.str());
   return false;
 }
@@ -696,28 +700,34 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     if(!compilerFile || !*compilerFile ||
        cmSystemTools::IsNOTFOUND(compilerFile))
       {
+      /* clang-format off */
       noCompiler <<
         "No " << compilerName << " could be found.\n"
         ;
+      /* clang-format on */
       }
     else if(strcmp(lang, "RC") != 0 &&
             strcmp(lang, "ASM_MASM") != 0)
       {
       if(!cmSystemTools::FileIsFullPath(compilerFile))
         {
+        /* clang-format off */
         noCompiler <<
           "The " << compilerName << ":\n"
           "  " << compilerFile << "\n"
           "is not a full path and was not found in the PATH.\n"
           ;
+        /* clang-format on */
         }
       else if(!cmSystemTools::FileExists(compilerFile))
         {
+        /* clang-format off */
         noCompiler <<
           "The " << compilerName << ":\n"
           "  " << compilerFile << "\n"
           "is not a full path to an existing compiler tool.\n"
           ;
+        /* clang-format on */
         }
       }
     if(!noCompiler.str().empty())
@@ -889,10 +899,12 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
            mf->PolicyOptionalWarningEnabled("CMAKE_POLICY_WARNING_CMP0025"))
           {
           std::ostringstream w;
+          /* clang-format off */
           w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0025) << "\n"
             "Converting " << lang <<
             " compiler id \"AppleClang\" to \"Clang\" for compatibility."
             ;
+          /* clang-format on */
           mf->IssueMessage(cmake::AUTHOR_WARNING, w.str());
           }
       case cmPolicies::OLD:
@@ -920,10 +932,12 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
            mf->PolicyOptionalWarningEnabled("CMAKE_POLICY_WARNING_CMP0047"))
           {
           std::ostringstream w;
+          /* clang-format off */
           w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0047) << "\n"
             "Converting " << lang <<
             " compiler id \"QCC\" to \"GNU\" for compatibility."
             ;
+          /* clang-format on */
           mf->IssueMessage(cmake::AUTHOR_WARNING, w.str());
           }
       case cmPolicies::OLD:

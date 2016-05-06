@@ -44,14 +44,19 @@ void CMakeCommandUsage(const char* program)
   std::ostringstream errorStream;
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
+  /* clang-format off */
   errorStream
     << "cmake version " << cmVersion::GetCMakeVersion() << "\n";
+  /* clang-format on */
 #else
+  /* clang-format off */
   errorStream
     << "cmake bootstrap\n";
+  /* clang-format on */
 #endif
   // If you add new commands, change here,
   // and in cmakemain.cxx in the options table
+  /* clang-format off */
   errorStream
     << "Usage: " << program << " -E <command> [arguments...]\n"
     << "Available commands: \n"
@@ -95,6 +100,7 @@ void CMakeCommandUsage(const char* program)
     << "  create_symlink old new    - create a symbolic link new -> old\n"
 #endif
     ;
+  /* clang-format on */
 
   cmSystemTools::Error(errorStream.str().c_str());
 }

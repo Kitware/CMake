@@ -96,10 +96,12 @@ bool cmAddExecutableCommand
       }
     if (issueMessage)
       {
+      /* clang-format off */
       e << "The target name \"" << exename <<
           "\" is reserved or not valid for certain "
           "CMake features, such as generator expressions, and may result "
           "in undefined behavior.";
+      /* clang-format on */
       this->Makefile->IssueMessage(messageType, e.str());
 
       if (messageType == cmake::FATAL_ERROR)

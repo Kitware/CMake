@@ -3655,6 +3655,7 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
   makefileStream.SetCopyIfDifferent(true);
   // one more pass for external depend information not handled
   // correctly by xcode
+  /* clang-format off */
   makefileStream << "# DO NOT EDIT\n";
   makefileStream << "# This makefile makes sure all linkable targets are\n";
   makefileStream << "# up-to-date with anything they link to\n"
@@ -3664,6 +3665,7 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
   makefileStream
     << "# For each target create a dummy rule "
     "so the target does not have to exist\n";
+  /* clang-format on */
   std::set<std::string> emitted;
   for(std::vector<cmXCodeObject*>::iterator i = targets.begin();
       i != targets.end(); ++i)
@@ -3688,10 +3690,12 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
   makefileStream << "\n\n";
 
   // Write rules to help Xcode relink things at the right time.
+  /* clang-format off */
   makefileStream <<
     "# Rules to remove targets that are older than anything to which they\n"
     "# link.  This forces Xcode to relink the targets from scratch.  It\n"
     "# does not seem to check these dependencies itself.\n";
+  /* clang-format on */
   for(std::vector<std::string>::const_iterator
         ct = this->CurrentConfigurationTypes.begin();
       ct != this->CurrentConfigurationTypes.end(); ++ct)

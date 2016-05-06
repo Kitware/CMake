@@ -55,11 +55,13 @@ void cmGlobalNMakeMakefileGenerator::PrintCompilerAdvice(std::ostream& os,
 {
   if(lang == "CXX" || lang == "C")
     {
+    /* clang-format off */
     os <<
       "To use the NMake generator with Visual C++, cmake must be run from a "
       "shell that can use the compiler cl from the command line. This "
       "environment is unable to invoke the cl compiler. To fix this problem, "
       "run cmake from the Visual Studio Command Prompt (vcvarsall.bat).\n";
+    /* clang-format on */
     }
   this->cmGlobalUnixMakefileGenerator3::PrintCompilerAdvice(os, lang, envVar);
 }

@@ -35,9 +35,11 @@ bool cmConfigureFileCommand
   if(cmSystemTools::FileIsDirectory(this->InputFile))
     {
     std::ostringstream e;
+    /* clang-format off */
     e << "input location\n"
       << "  " << this->InputFile << "\n"
       << "is a directory but a file was expected.";
+    /* clang-format on */
     this->SetError(e.str());
     return false;
     }

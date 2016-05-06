@@ -881,6 +881,7 @@ CreateComponentDescription(cmCPackComponent *component,
       totalSizeInKbytes = 1;
       }
     std::ostringstream out;
+    /* clang-format off */
     out << "  AddSize " << totalSizeInKbytes << "\n"
         << "  Push \"" << component->ArchiveFile << "\"\n"
         << "  Call DownloadFile\n"
@@ -890,6 +891,7 @@ CreateComponentDescription(cmCPackComponent *component,
                      "  StrCmp $2 \"success\" +2 0\n"
                      "  MessageBox MB_OK \"Failed to unzip $2\"\n"
                      "  Delete $INSTDIR\\$0\n";
+    /* clang-format on */
     componentCode += out.str();
     }
   else

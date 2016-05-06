@@ -349,6 +349,7 @@ void cmLocalGenerator::GenerateInstallRules()
        << std::endl;
 
   // Write support code for generating per-configuration install rules.
+  /* clang-format off */
   fout <<
     "# Set the install configuration name.\n"
     "if(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)\n"
@@ -362,8 +363,10 @@ void cmLocalGenerator::GenerateInstallRules()
     "\\\"${CMAKE_INSTALL_CONFIG_NAME}\\\"\")\n"
     "endif()\n"
     "\n";
+  /* clang-format on */
 
   // Write support code for dealing with component-specific installs.
+  /* clang-format off */
   fout <<
     "# Set the component getting installed.\n"
     "if(NOT CMAKE_INSTALL_COMPONENT)\n"
@@ -375,17 +378,20 @@ void cmLocalGenerator::GenerateInstallRules()
     "  endif()\n"
     "endif()\n"
     "\n";
+  /* clang-format on */
 
   // Copy user-specified install options to the install code.
   if(const char* so_no_exe =
      this->Makefile->GetDefinition("CMAKE_INSTALL_SO_NO_EXE"))
     {
+    /* clang-format off */
     fout <<
       "# Install shared libraries without execute permission?\n"
       "if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)\n"
       "  set(CMAKE_INSTALL_SO_NO_EXE \"" << so_no_exe << "\")\n"
       "endif()\n"
       "\n";
+    /* clang-format on */
     }
 
   // Ask each install generator to write its code.
@@ -426,6 +432,7 @@ void cmLocalGenerator::GenerateInstallRules()
   // Record the install manifest.
   if ( toplevel_install )
     {
+    /* clang-format off */
     fout <<
       "if(CMAKE_INSTALL_COMPONENT)\n"
       "  set(CMAKE_INSTALL_MANIFEST \"install_manifest_"
@@ -438,6 +445,7 @@ void cmLocalGenerator::GenerateInstallRules()
       "       \"${CMAKE_INSTALL_MANIFEST_FILES}\")\n"
       "file(WRITE \"" << homedir << "/${CMAKE_INSTALL_MANIFEST}\"\n"
       "     \"${CMAKE_INSTALL_MANIFEST_CONTENT}\")\n";
+    /* clang-format on */
     }
 }
 
@@ -1594,10 +1602,12 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
              "CMAKE_POLICY_WARNING_CMP0065"))
           {
           std::ostringstream w;
+          /* clang-format off */
           w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0065) << "\n"
             "For compatibility with older versions of CMake, "
             "additional flags may be added to export symbols on all "
             "executables regardless of thier ENABLE_EXPORTS property.";
+          /* clang-format on */
           this->IssueMessage(cmake::AUTHOR_WARNING, w.str());
           }
       case cmPolicies::OLD:
@@ -2176,6 +2186,7 @@ void cmLocalGenerator
       this->WarnCMP0063.insert(target).second)
     {
     std::ostringstream w;
+    /* clang-format off */
     w <<
       cmPolicies::GetPolicyWarning(cmPolicies::CMP0063) << "\n"
       "Target \"" << target->GetName() << "\" of "
@@ -2183,6 +2194,7 @@ void cmLocalGenerator
       "has the following visibility properties set for " << lang << ":\n" <<
       warnCMP0063 <<
       "For compatibility CMake is not honoring them for this target.";
+    /* clang-format on */
     target->GetLocalGenerator()->GetCMakeInstance()
       ->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
                      target->GetBacktrace());
@@ -2764,6 +2776,7 @@ cmLocalGenerator
       if(this->ObjectMaxPathViolations.insert(dir_max).second)
         {
         std::ostringstream m;
+        /* clang-format off */
         m << "The object file directory\n"
           << "  " << dir_max << "\n"
           << "has " << dir_max.size() << " characters.  "
@@ -2774,6 +2787,7 @@ cmLocalGenerator
           << "  " << ssin << "\n"
           << "cannot be safely placed under this directory.  "
           << "The build may not work correctly.";
+        /* clang-format on */
         this->IssueMessage(cmake::WARNING, m.str());
         }
       }
@@ -3034,11 +3048,13 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
     if (define[pos] == '(')
       {
       std::ostringstream e;
+      /* clang-format off */
       e << "WARNING: Function-style preprocessor definitions may not be "
         << "passed on the compiler command line because many compilers "
         << "do not support it.\n"
         << "CMake is dropping a preprocessor definition: " << define << "\n"
         << "Consider defining the macro in a (configured) header file.\n";
+      /* clang-format on */
       cmSystemTools::Message(e.str().c_str());
       return false;
       }
@@ -3048,11 +3064,13 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
   if(define.find_first_of("#") != define.npos)
     {
     std::ostringstream e;
+    /* clang-format off */
     e << "WARNING: Preprocessor definitions containing '#' may not be "
       << "passed on the compiler command line because many compilers "
       << "do not support it.\n"
       << "CMake is dropping a preprocessor definition: " << define << "\n"
       << "Consider defining the macro in a (configured) header file.\n";
+    /* clang-format on */
     cmSystemTools::Message(e.str().c_str());
     return false;
     }

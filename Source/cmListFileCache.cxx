@@ -261,9 +261,11 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
   if(!token)
     {
     std::ostringstream error;
+    /* clang-format off */
     error << "Error in cmake code at\n" << this->FileName << ":"
           << cmListFileLexer_GetCurrentLine(this->Lexer) << ":\n"
           << "Parse error.  Function missing opening \"(\".";
+    /* clang-format on */
     cmSystemTools::Error(error.str().c_str());
     return false;
     }
@@ -382,10 +384,12 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
   bool isError = (this->Separation == SeparationError ||
                   delim == cmListFileArgument::Bracket);
   std::ostringstream m;
+  /* clang-format off */
   m << "Syntax " << (isError? "Error":"Warning") << " in cmake code at\n"
     << "  " << this->FileName << ":" << token->line << ":"
     << token->column << "\n"
     << "Argument not separated from preceding token by whitespace.";
+  /* clang-format on */
   if(isError)
     {
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, m.str());

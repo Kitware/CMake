@@ -433,10 +433,12 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
     case cmPolicies::REQUIRED_ALWAYS:
       {
       std::ostringstream e;
+      /* clang-format off */
       e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0011) << "\n"
         << "The included script\n  "
         << this->Makefile->GetExecutionFilePath() << "\n"
         << "affects policy settings, so it requires this policy to be set.";
+      /* clang-format on */
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       }
       break;
@@ -1652,19 +1654,23 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile *mf)
     {
     // The file is missing.  Check policy CMP0014.
     std::ostringstream e;
+    /* clang-format off */
     e << "The source directory\n"
       << "  " << currentStart << "\n"
       << "does not contain a CMakeLists.txt file.";
+    /* clang-format on */
     switch (this->GetPolicyStatus(cmPolicies::CMP0014))
       {
       case cmPolicies::WARN:
         // Print the warning.
+        /* clang-format off */
         e << "\n"
           << "CMake does not support this case but it used "
           << "to work accidentally and is being allowed for "
           << "compatibility."
           << "\n"
           << cmPolicies::GetPolicyWarning(cmPolicies::CMP0014);
+        /* clang-format on */
         this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
       case cmPolicies::OLD:
         // OLD behavior does not warn.
@@ -2249,10 +2255,12 @@ void cmMakefile::ExpandVariablesCMP0019()
     this->ExpandVariablesInString(dirs, true, true);
     if(pol == cmPolicies::WARN && dirs != includeDirs)
       {
+      /* clang-format off */
       w << "Evaluated directory INCLUDE_DIRECTORIES\n"
         << "  " << includeDirs << "\n"
         << "as\n"
         << "  " << dirs << "\n";
+      /* clang-format on */
       }
     this->SetProperty("INCLUDE_DIRECTORIES", dirs.c_str());
     }
@@ -2274,10 +2282,12 @@ void cmMakefile::ExpandVariablesCMP0019()
       this->ExpandVariablesInString(dirs, true, true);
       if(pol == cmPolicies::WARN && dirs != includeDirs)
         {
+        /* clang-format off */
         w << "Evaluated target " << t.GetName() << " INCLUDE_DIRECTORIES\n"
           << "  " << includeDirs << "\n"
           << "as\n"
           << "  " << dirs << "\n";
+        /* clang-format on */
         }
       t.SetProperty("INCLUDE_DIRECTORIES", dirs.c_str());
       }
@@ -2292,10 +2302,12 @@ void cmMakefile::ExpandVariablesCMP0019()
       this->ExpandVariablesInString(d, true, true);
       if(pol == cmPolicies::WARN && d != orig)
         {
+        /* clang-format off */
         w << "Evaluated link directories\n"
           << "  " << orig << "\n"
           << "as\n"
           << "  " << d << "\n";
+        /* clang-format on */
         }
       }
     }
@@ -2309,10 +2321,12 @@ void cmMakefile::ExpandVariablesCMP0019()
       this->ExpandVariablesInString(l->first, true, true);
       if(pol == cmPolicies::WARN && l->first != orig)
         {
+        /* clang-format off */
         w << "Evaluated link library\n"
           << "  " << orig << "\n"
           << "as\n"
           << "  " << l->first << "\n";
+        /* clang-format on */
         }
       }
     }
@@ -2320,10 +2334,12 @@ void cmMakefile::ExpandVariablesCMP0019()
   if(!w.str().empty())
     {
     std::ostringstream m;
+    /* clang-format off */
     m << cmPolicies::GetPolicyWarning(cmPolicies::CMP0019)
       << "\n"
       << "The following variable evaluations were encountered:\n"
       << w.str();
+    /* clang-format on */
     this->IssueMessage(cmake::AUTHOR_WARNING, m.str());
     }
 }
@@ -3223,9 +3239,11 @@ void cmMakefile::PopFunctionBlockerBarrier(bool reportError)
       // Report the context in which the unclosed block was opened.
       cmListFileContext const& lfc = fb->GetStartingContext();
       std::ostringstream e;
+      /* clang-format off */
       e << "A logical block opening on the line\n"
         << "  " << lfc << "\n"
         << "is not closed.";
+      /* clang-format on */
       this->IssueMessage(cmake::FATAL_ERROR, e.str());
       reportError = false;
       }
@@ -3397,11 +3415,13 @@ cmMakefile::RemoveFunctionBlocker(cmFunctionBlocker* fb,
         cmListFileContext closingContext =
             cmListFileContext::FromCommandContext(lff, lfc.FilePath);
         std::ostringstream e;
+        /* clang-format off */
         e << "A logical block opening on the line\n"
           << "  " << lfc << "\n"
           << "closes on the line\n"
           << "  " << closingContext << "\n"
           << "with mis-matching arguments.";
+        /* clang-format on */
         this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
         }
       cmFunctionBlocker* b = *pos;
@@ -3741,11 +3761,13 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
         case cmPolicies::WARN:
         {
           std::ostringstream e;
+          /* clang-format off */
           e << "File " << currentFile << " includes "
             << moduleInCMakeModulePath
             << " (found via CMAKE_MODULE_PATH) which shadows "
             << moduleInCMakeRoot  << ". This may cause errors later on .\n"
             << cmPolicies::GetPolicyWarning(cmPolicies::CMP0017);
+          /* clang-format on */
 
           this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
            // break;  // fall through to OLD behaviour
@@ -4288,6 +4310,7 @@ bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
     {
     case cmPolicies::WARN:
       // Print the warning.
+      /* clang-format off */
       e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0013)
         << "\n"
         << "The binary directory\n"
@@ -4299,6 +4322,7 @@ bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
         << "CMake does not support this use case but it used "
         << "to work accidentally and is being allowed for "
         << "compatibility.";
+      /* clang-format on */
       this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
     case cmPolicies::OLD:
       // OLD behavior does not warn.
@@ -4309,12 +4333,14 @@ bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
         << "\n";
     case cmPolicies::NEW:
       // NEW behavior prints the error.
+      /* clang-format off */
       e << "The binary directory\n"
         << "  " << binPath << "\n"
         << "is already used to build a source directory.  "
         << "It cannot be used to build source directory\n"
         << "  " << srcPath << "\n"
         << "Specify a unique binary directory name.";
+      /* clang-format on */
       this->IssueMessage(cmake::FATAL_ERROR, e.str());
       break;
     }

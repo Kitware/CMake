@@ -257,10 +257,12 @@ int do_cmake(int ac, char const* const* av)
     {
     if(strcmp(av[i], "-i") == 0)
       {
+      /* clang-format off */
       std::cerr <<
         "The \"cmake -i\" wizard mode is no longer supported.\n"
         "Use the -D option to set cache values on the command line.\n"
         "Use cmake-gui or ccmake for an interactive dialog.\n";
+      /* clang-format on */
       return 1;
       }
     else if(strcmp(av[i], "--system-information") == 0)
@@ -453,11 +455,13 @@ static int do_build(int ac, char const* const* av)
     }
   if(dir.empty())
     {
+    /* clang-format off */
     std::cerr <<
       "Usage: cmake --build <dir> [options] [-- [native-options]]\n"
       "Options:\n"
       CMAKE_BUILD_OPTIONS
       ;
+    /* clang-format on */
     return 1;
     }
 

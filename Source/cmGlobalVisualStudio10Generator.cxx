@@ -337,6 +337,7 @@ void cmGlobalVisualStudio10Generator::Generate()
     {
     cmLocalGenerator* lg = this->LongestSource.Target->GetLocalGenerator();
     std::ostringstream e;
+    /* clang-format off */
     e <<
       "The binary and/or source directory paths may be too long to generate "
       "Visual Studio 10 files for this project.  "
@@ -356,6 +357,7 @@ void cmGlobalVisualStudio10Generator::Generate()
       "the path length is too long for some internal buffer or API.  "
       "To avoid this problem CMake must use a full path for this file "
       "which then triggers the VS 10 property dialog bug.";
+    /* clang-format on */
     lg->IssueMessage(cmake::WARNING, e.str().c_str());
     }
 }
@@ -566,9 +568,11 @@ bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
   else
     {
     std::ostringstream e;
+    /* clang-format off */
     e << "Cannot enable 64-bit tools with Visual Studio 2010 Express.\n"
       << "Install the Microsoft Windows SDK v7.1 to get 64-bit tools:\n"
       << "  http://msdn.microsoft.com/en-us/windows/bb980924.aspx";
+    /* clang-format on */
     mf->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
     cmSystemTools::SetFatalErrorOccured();
     return false;

@@ -820,11 +820,13 @@ void cmGlobalNinjaGenerator::OpenRulesFileStream()
   this->WriteDisclaimer(*this->RulesFileStream);
 
   // Write comment about this file.
+  /* clang-format off */
   *this->RulesFileStream
     << "# This file contains all the rules used to get the outputs files\n"
     << "# built from the input files.\n"
     << "# It is included in the main '" << NINJA_BUILD_FILE << "'.\n\n"
     ;
+  /* clang-format on */
 }
 
 void cmGlobalNinjaGenerator::CloseRulesFileStream()
@@ -891,6 +893,7 @@ void cmGlobalNinjaGenerator::AddCXXCompileCommand(
     }
 
 
+  /* clang-format off */
   *this->CompileCommandsStream << "\n{\n"
      << "  \"directory\": \""
      << cmGlobalGenerator::EscapeJSON(buildFileDir) << "\",\n"
@@ -899,6 +902,7 @@ void cmGlobalNinjaGenerator::AddCXXCompileCommand(
      << "  \"file\": \""
      << cmGlobalGenerator::EscapeJSON(sourceFileName) << "\"\n"
      << "}";
+  /* clang-format on */
 }
 
 void cmGlobalNinjaGenerator::CloseCompileCommandsStream()
@@ -1149,9 +1153,11 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
   //dependencies that we have no rule for
 
   cmGlobalNinjaGenerator::WriteDivider(os);
+  /* clang-format off */
   os << "# Unknown Build Time Dependencies.\n"
      << "# Tell Ninja that they may appear as side effects of build rules\n"
      << "# otherwise ordered by order-only dependencies.\n\n";
+  /* clang-format on */
 
   //get the list of files that cmake itself has generated as a
   //product of configuration.
@@ -1256,6 +1262,7 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
   if (!warnExplicitDepends.empty())
     {
     std::ostringstream w;
+    /* clang-format off */
     w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0058) << "\n"
       "This project specifies custom command DEPENDS on files "
       "in the build tree that are not specified as the OUTPUT or "
@@ -1269,6 +1276,7 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
       "Project authors should add the missing BYPRODUCTS or OUTPUT "
       "options to the custom commands that produce these files."
       ;
+    /* clang-format on */
     this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING, w.str());
     }
 }

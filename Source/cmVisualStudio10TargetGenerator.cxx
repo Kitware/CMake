@@ -3434,6 +3434,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP80()
   cmGeneratedFileStream fout(manifestFile.c_str());
   fout.SetCopyIfDifferent(true);
 
+  /* clang-format off */
   fout <<
     "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
     "<Deployment"
@@ -3469,6 +3470,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP80()
     "\t\t</ScreenResolutions>\n"
     "\t</App>\n"
     "</Deployment>\n";
+  /* clang-format on */
 
   std::string sourceFile = this->ConvertPath(manifestFile, false);
   this->ConvertToWindowsSlash(sourceFile);
@@ -3518,6 +3520,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP81()
   cmGeneratedFileStream fout(manifestFile.c_str());
   fout.SetCopyIfDifferent(true);
 
+  /* clang-format off */
   fout <<
     "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
     "<Package xmlns=\"http://schemas.microsoft.com/appx/2010/manifest\""
@@ -3561,6 +3564,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP81()
     "\t\t</Application>\n"
     "\t</Applications>\n"
     "</Package>\n";
+  /* clang-format on */
 
   this->WriteCommonMissingFiles(manifestFile);
 }
@@ -3579,6 +3583,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS80()
   cmGeneratedFileStream fout(manifestFile.c_str());
   fout.SetCopyIfDifferent(true);
 
+  /* clang-format off */
   fout <<
     "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
     "<Package xmlns=\"http://schemas.microsoft.com/appx/2010/manifest\">\n"
@@ -3614,6 +3619,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS80()
     "\t\t</Application>\n"
     "\t</Applications>\n"
     "</Package>\n";
+  /* clang-format on */
 
   this->WriteCommonMissingFiles(manifestFile);
 }
@@ -3632,6 +3638,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS81()
   cmGeneratedFileStream fout(manifestFile.c_str());
   fout.SetCopyIfDifferent(true);
 
+  /* clang-format off */
   fout <<
     "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
     "<Package xmlns=\"http://schemas.microsoft.com/appx/2010/manifest\""
@@ -3672,6 +3679,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS81()
     "\t\t</Application>\n"
     "\t</Applications>\n"
     "</Package>\n";
+  /* clang-format on */
 
   this->WriteCommonMissingFiles(manifestFile);
 }
@@ -3690,6 +3698,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS10_0()
   cmGeneratedFileStream fout(manifestFile.c_str());
   fout.SetCopyIfDifferent(true);
 
+  /* clang-format off */
   fout <<
     "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
     "<Package\n\t"
@@ -3731,6 +3740,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS10_0()
     "\t\t</Application>\n"
     "\t</Applications>\n"
     "</Package>\n";
+  /* clang-format on */
 
   this->WriteCommonMissingFiles(manifestFile);
 }
