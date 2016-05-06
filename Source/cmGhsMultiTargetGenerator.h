@@ -87,15 +87,22 @@ private:
   void
   WriteCustomCommandsHelper(std::vector<cmCustomCommand> const &commandsSet,
                             cmTarget::CustomCommandType commandType);
-  void WriteSources(std::vector<cmSourceFile *> const &objectSources);
+  void WriteSources(
+      std::vector<cmSourceFile *> const &objectSources,
+      std::map<const cmSourceFile *, std::string> const &objectNames);
   static std::map<const cmSourceFile *, std::string>
-  GetObjectNames(const std::vector<cmSourceFile *> &objectSources);
+  GetObjectNames(std::vector<cmSourceFile *> *objectSources,
+                 cmLocalGhsMultiGenerator *localGhsMultiGenerator,
+                 cmGeneratorTarget *generatorTarget);
   static void WriteObjectLangOverride(cmGeneratedFileStream *fileStream,
                                       cmSourceFile *sourceFile);
   static void WriteObjectDir(cmGeneratedFileStream *fileStream,
                              std::string const &dir);
   std::string GetOutputDirectory(const std::string &config) const;
   std::string GetOutputFilename(const std::string &config) const;
+  static std::string ComputeLongestObjectDirectory(
+      cmLocalGhsMultiGenerator const *localGhsMultiGenerator,
+      cmGeneratorTarget *generatorTarget, cmSourceFile *const sourceFile);
 
   bool IsNotKernel(std::string const &config, const std::string &language);
   static bool DetermineIfTargetGroup(const cmGeneratorTarget* target);
