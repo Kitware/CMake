@@ -2693,6 +2693,7 @@ static void processIncludeDirectories(cmGeneratorTarget const* tgt,
               break;
             }
           }
+        /* clang-format off */
         e << "Imported target \"" << targetName << "\" includes "
              "non-existent path\n  \"" << *li << "\"\nin its "
              "INTERFACE_INCLUDE_DIRECTORIES. Possible reasons include:\n"
@@ -2702,6 +2703,7 @@ static void processIncludeDirectories(cmGeneratorTarget const* tgt,
              "successfully.\n"
              "* The installation package was faulty and references files it "
              "does not provide.\n";
+        /* clang-format on */
         tgt->GetLocalGenerator()->IssueMessage(messageType, e.str());
         return;
         }
@@ -2713,9 +2715,11 @@ static void processIncludeDirectories(cmGeneratorTarget const* tgt,
         cmake::MessageType messageType = cmake::FATAL_ERROR;
         if (!targetName.empty())
           {
+          /* clang-format off */
           e << "Target \"" << targetName << "\" contains relative "
             "path in its INTERFACE_INCLUDE_DIRECTORIES:\n"
             "  \"" << *li << "\"";
+          /* clang-format on */
           }
         else
           {
@@ -5198,6 +5202,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
         && strcmp(newExplicitLibraries, explicitLibraries) != 0)
       {
       std::ostringstream w;
+      /* clang-format off */
       w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0022) << "\n"
         "Target \"" << this->GetName() << "\" has an "
         "INTERFACE_LINK_LIBRARIES property which differs from its " <<
@@ -5207,6 +5212,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
         "  " << newExplicitLibraries << "\n" <<
         linkIfaceProp << ":\n"
         "  " << (explicitLibraries ? explicitLibraries : "(empty)") << "\n";
+      /* clang-format on */
       this->LocalGenerator->IssueMessage(cmake::AUTHOR_WARNING, w.str());
       this->PolicyWarnedCMP0022 = true;
       }
@@ -5269,6 +5275,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
           { newLibraries = "(empty)"; }
 
         std::ostringstream w;
+        /* clang-format off */
         w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0022) << "\n"
           "Target \"" << this->GetName() << "\" has an "
           "INTERFACE_LINK_LIBRARIES property.  "
@@ -5281,6 +5288,7 @@ cmGeneratorTarget::ComputeLinkInterfaceLibraries(
           "  " << newLibraries << "\n"
           "Link implementation:\n"
           "  " << oldLibraries << "\n";
+        /* clang-format on */
         this->LocalGenerator->IssueMessage(cmake::AUTHOR_WARNING, w.str());
         this->PolicyWarnedCMP0022 = true;
         }
@@ -5630,6 +5638,7 @@ bool cmGeneratorTarget::GetConfigCommonSourceFiles(
         sep = "\n  ";
         }
       std::ostringstream e;
+      /* clang-format off */
       e << "Target \"" << this->GetName()
         << "\" has source files which vary by "
         "configuration. This is not supported by the \""
@@ -5639,6 +5648,7 @@ bool cmGeneratorTarget::GetConfigCommonSourceFiles(
           "  " << firstConfigFiles << "\n"
           "Config \"" << *it << "\":\n"
           "  " << thisConfigFiles << "\n";
+      /* clang-format on */
       this->LocalGenerator->IssueMessage(cmake::FATAL_ERROR, e.str());
       return false;
       }

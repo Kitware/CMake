@@ -37,9 +37,11 @@ void cmLinkDirectoriesCommand::AddLinkDir(std::string const& dir)
     {
     bool convertToAbsolute = false;
     std::ostringstream e;
+    /* clang-format off */
     e << "This command specifies the relative path\n"
       << "  " << unixPath << "\n"
       << "as a link directory.\n";
+    /* clang-format on */
     switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0015))
       {
       case cmPolicies::WARN:

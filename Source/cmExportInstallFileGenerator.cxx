@@ -80,10 +80,12 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     {
     // The export file is being installed to an absolute path so the
     // package is not relocatable.  Use the configured install prefix.
+    /* clang-format off */
     os <<
       "# The installation prefix configured by this project.\n"
       "set(_IMPORT_PREFIX \"" << installPrefix << "\")\n"
       "\n";
+    /* clang-format on */
     }
   else
     {
@@ -100,6 +102,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
        cmHasLiteralPrefix(absDestS.c_str(), "/usr/lib64/"))
       {
       // Handle "/usr move" symlinks created by some Linux distros.
+      /* clang-format off */
       os <<
         "# Use original install prefix when loaded through a\n"
         "# cross-prefix symbolic link such as /lib -> /usr/lib.\n"
@@ -110,6 +113,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
         "endif()\n"
         "unset(_realOrig)\n"
         "unset(_realCurr)\n";
+      /* clang-format on */
       }
     std::string dest = expDest;
     while(!dest.empty())
@@ -214,6 +218,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     }
 
   // Now load per-configuration properties for them.
+  /* clang-format off */
   os << "# Load information for each installed configuration.\n"
      << "get_filename_component(_DIR \"${CMAKE_CURRENT_LIST_FILE}\" PATH)\n"
      << "file(GLOB CONFIG_FILES \"${_DIR}/"
@@ -222,11 +227,14 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
      << "  include(${f})\n"
      << "endforeach()\n"
      << "\n";
+  /* clang-format on */
 
   // Cleanup the import prefix variable.
+  /* clang-format off */
   os << "# Cleanup temporary variables.\n"
      << "set(_IMPORT_PREFIX)\n"
      << "\n";
+  /* clang-format on */
   this->GenerateImportedFileCheckLoop(os);
 
   bool result = true;

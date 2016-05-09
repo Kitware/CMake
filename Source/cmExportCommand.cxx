@@ -406,9 +406,11 @@ void cmExportCommand::StorePackageRegistryDir(std::string const& package,
     else
       {
       std::ostringstream e;
+      /* clang-format off */
       e << "Cannot create package registry file:\n"
         << "  " << fname << "\n"
         << cmSystemTools::GetLastSystemError() << "\n";
+      /* clang-format on */
       this->Makefile->IssueMessage(cmake::WARNING, e.str());
       }
     }

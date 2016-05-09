@@ -69,7 +69,8 @@ protected:
   virtual bool WriteXMLUpdates(cmXMLWriter& xml);
 
 #if defined(__SUNPRO_CC) && __SUNPRO_CC <= 0x510
-public: // Sun CC 5.1 needs help to allow cmCTestSVN::Revision to see this
+  // Sun CC 5.1 needs help to allow cmCTestSVN::Revision to see this
+public:
 #endif
   /** Basic information about one revision of a tree or file.  */
   struct Revision

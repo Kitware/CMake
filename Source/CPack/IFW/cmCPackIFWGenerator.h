@@ -61,7 +61,8 @@ public:
    */
   bool IsVersionEqual(const char *version);
 
-protected: // cmCPackGenerator reimplementation
+protected:
+  // cmCPackGenerator reimplementation
 
   /**
    * @brief Initialize generator
@@ -110,7 +111,8 @@ protected: // cmCPackGenerator reimplementation
   virtual bool SupportsAbsoluteDestination() const;
   virtual bool SupportsComponentInstallation() const;
 
-protected: // Methods
+protected:
+  // Methods
 
   bool IsOnePackage() const;
 
@@ -124,7 +126,8 @@ protected: // Methods
 
   void WriteGeneratedByToStrim(cmXMLWriter& xout);
 
-protected: // Data
+protected:
+  // Data
 
   friend class cmCPackIFWPackage;
   friend class cmCPackIFWInstaller;

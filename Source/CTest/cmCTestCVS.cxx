@@ -203,9 +203,11 @@ private:
     if(!this->Rev.Rev.empty())
       {
       // Record this revision.
+      /* clang-format off */
       this->CVS->Log << "Found revision " << this->Rev.Rev << "\n"
                      << "  author = " << this->Rev.Author << "\n"
                      << "  date = " << this->Rev.Date << "\n";
+      /* clang-format on */
       this->Revisions.push_back(this->Rev);
 
       // We only need two revisions.

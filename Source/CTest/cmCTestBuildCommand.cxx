@@ -151,6 +151,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
     else
       {
       std::ostringstream ostr;
+      /* clang-format off */
       ostr << "has no project to build. If this is a "
         "\"built with CMake\" project, verify that CTEST_CMAKE_GENERATOR "
         "and CTEST_PROJECT_NAME are set."
@@ -162,6 +163,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
         "\n"
         "Alternatively, set CTEST_BUILD_COMMAND to build the project "
         "with a custom command line.";
+      /* clang-format on */
       this->SetError(ostr.str());
       return 0;
       }

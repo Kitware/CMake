@@ -933,12 +933,14 @@ bool cmCTestSubmitHandler::SubmitUsingCP(
   if ( localprefix.empty() ||
     files.empty() || remoteprefix.empty() || destination.empty() )
     {
+    /* clang-format off */
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Missing arguments for submit via cp:\n"
                << "\tlocalprefix: " << localprefix << "\n"
                << "\tNumber of files: " << files.size() << "\n"
                << "\tremoteprefix: " << remoteprefix << "\n"
                << "\tdestination: " << destination << std::endl);
+    /* clang-format on */
     return 0;
     }
 

@@ -1898,9 +1898,11 @@ void reportError(cmGeneratorExpressionContext *context,
     }
 
   std::ostringstream e;
+  /* clang-format off */
   e << "Error evaluating generator expression:\n"
     << "  " << expr << "\n"
     << result;
+  /* clang-format on */
   context->LG->GetCMakeInstance()
     ->IssueMessage(cmake::FATAL_ERROR, e.str(),
                     context->Backtrace);

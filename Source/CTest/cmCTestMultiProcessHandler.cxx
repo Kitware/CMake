@@ -382,11 +382,13 @@ void cmCTestMultiProcessHandler::StartNextTests()
       }
     else
       {
+      /* clang-format off */
       cmCTestLog(this->CTest, HANDLER_OUTPUT,
                  "System Load: " << systemLoad << ", "
                  "Max Allowed Load: " << this->TestLoad << ", "
                  "Smallest test " << testWithMinProcessors <<
                  " requires " << minProcessorsRequired);
+      /* clang-format on */
       }
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "*****" << std::endl);
 

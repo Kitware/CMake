@@ -167,6 +167,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   if (this->GetType() != cmState::UTILITY)
     {
     const char* configProps[] = {
+      /* clang-format needs this comment to break after the opening brace */
       "ARCHIVE_OUTPUT_DIRECTORY_",
       "LIBRARY_OUTPUT_DIRECTORY_",
       "RUNTIME_OUTPUT_DIRECTORY_",

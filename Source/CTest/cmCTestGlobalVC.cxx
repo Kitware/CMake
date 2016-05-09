@@ -54,9 +54,11 @@ void cmCTestGlobalVC::DoRevision(Revision const& revision,
 
   // Report this revision.
   Revision const& rev = this->Revisions.back();
+  /* clang-format off */
   this->Log << "Found revision " << rev.Rev << "\n"
             << "  author = " << rev.Author << "\n"
             << "  date = " << rev.Date << "\n";
+  /* clang-format on */
 
   // Update information about revisions of the changed files.
   for(std::vector<Change>::const_iterator ci = changes.begin();

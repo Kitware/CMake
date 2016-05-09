@@ -118,9 +118,11 @@ void cmGeneratorExpressionDAGChecker::ReportError(
 
   {
   std::ostringstream e;
+  /* clang-format off */
   e << "Error evaluating generator expression:\n"
     << "  " << expr << "\n"
     << "Dependency loop found.";
+  /* clang-format on */
   context->LG->GetCMakeInstance()
     ->IssueMessage(cmake::FATAL_ERROR, e.str(),
                     context->Backtrace);

@@ -2436,11 +2436,13 @@ cmFileCommand::HandleRPathChangeCommand(std::vector<std::string> const& args)
   if(!cmSystemTools::ChangeRPath(file, oldRPath, newRPath, &emsg, &changed))
     {
     std::ostringstream e;
+    /* clang-format off */
     e << "RPATH_CHANGE could not write new RPATH:\n"
       << "  " << newRPath << "\n"
       << "to the file:\n"
       << "  " << file << "\n"
       << emsg;
+    /* clang-format on */
     this->SetError(e.str());
     success = false;
     }
@@ -2511,9 +2513,11 @@ cmFileCommand::HandleRPathRemoveCommand(std::vector<std::string> const& args)
   if(!cmSystemTools::RemoveRPath(file, &emsg, &removed))
     {
     std::ostringstream e;
+    /* clang-format off */
     e << "RPATH_REMOVE could not remove RPATH from file:\n"
       << "  " << file << "\n"
       << emsg;
+    /* clang-format on */
     this->SetError(e.str());
     success = false;
     }
@@ -2668,11 +2672,13 @@ bool cmFileCommand::HandleRename(std::vector<std::string> const& args)
     {
     std::string err = cmSystemTools::GetLastSystemError();
     std::ostringstream e;
+    /* clang-format off */
     e << "RENAME failed to rename\n"
       << "  " << oldname << "\n"
       << "to\n"
       << "  " << newname << "\n"
       << "because: " << err << "\n";
+    /* clang-format on */
     this->SetError(e.str());
     return false;
     }

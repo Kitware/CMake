@@ -519,6 +519,7 @@ void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
   this->WriteDisclaimer(infoFileStream);
 
   // Setup relative path conversion tops.
+  /* clang-format off */
   infoFileStream
     << "# Relative path conversion top directories.\n"
     << "set(CMAKE_RELATIVE_PATH_TOP_SOURCE \""
@@ -528,14 +529,17 @@ void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
     << this->StateSnapshot.GetDirectory().GetRelativePathTopBinary()
     << "\")\n"
     << "\n";
+  /* clang-format on */
 
   // Tell the dependency scanner to use unix paths if necessary.
   if(cmSystemTools::GetForceUnixPaths())
     {
+    /* clang-format off */
     infoFileStream
       << "# Force unix paths in dependencies.\n"
       << "set(CMAKE_FORCE_UNIX_PATHS 1)\n"
       << "\n";
+    /* clang-format on */
     }
 
   // Store the include regular expressions for this directory.
@@ -718,13 +722,16 @@ cmLocalUnixMakefileGenerator3
   else
     {
 #if !defined(__VMS)
+    /* clang-format off */
       makefileStream
         << "# The shell in which to execute make rules.\n"
         << "SHELL = /bin/sh\n"
         << "\n";
+    /* clang-format on */
 #endif
     }
 
+  /* clang-format off */
   makefileStream
     << "# The CMake executable.\n"
     << "CMAKE_COMMAND = "
@@ -753,6 +760,7 @@ cmLocalUnixMakefileGenerator3
     << this->Convert(this->GetBinaryDirectory(), FULL, SHELL)
     << "\n"
     << "\n";
+  /* clang-format on */
 }
 
 //----------------------------------------------------------------------------
@@ -793,27 +801,33 @@ cmLocalUnixMakefileGenerator3
     // Switch on WMake feature, if an error or interrupt occurs during
     // makefile processing, the current target being made may be deleted
     // without prompting (the same as command line -e option).
+    /* clang-format off */
     makefileStream <<
       "\n"
       ".ERASE\n"
       "\n"
       ;
+    /* clang-format on */
     }
   if(this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
     {
+    /* clang-format off */
     makefileStream
       << "# Produce verbose output by default.\n"
       << "VERBOSE = 1\n"
       << "\n";
+    /* clang-format on */
     }
   if(this->IsWatcomWMake())
     {
+    /* clang-format off */
     makefileStream <<
       "!ifndef VERBOSE\n"
       ".SILENT\n"
       "!endif\n"
       "\n"
       ;
+    /* clang-format on */
     }
   else
     {
@@ -1252,12 +1266,14 @@ cmLocalUnixMakefileGenerator3
     std::set<std::string> languages;
     target->GetLanguages(languages,
                       this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
+    /* clang-format off */
     fout << "\n"
          << "# Per-language clean rules from dependency scanning.\n"
          << "foreach(lang " << cmJoin(languages, " ") << ")\n"
          << "  include(" << this->GetTargetDirectory(target)
          << "/cmake_clean_${lang}.cmake OPTIONAL)\n"
          << "endforeach()\n";
+    /* clang-format on */
     }
 }
 
@@ -2083,10 +2099,12 @@ void cmLocalUnixMakefileGenerator3
                                 this->ConfigName, l->first);
     if(!defines.empty())
       {
+      /* clang-format off */
       cmakefileStream
         << "\n"
         << "# Preprocessor definitions for this target.\n"
         << "set(CMAKE_TARGET_DEFINITIONS_" << l->first << "\n";
+      /* clang-format on */
       for(std::set<std::string>::const_iterator di = defines.begin();
           di != defines.end(); ++di)
         {

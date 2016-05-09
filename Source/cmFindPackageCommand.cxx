@@ -748,10 +748,12 @@ bool cmFindPackageCommand::HandlePackageMode()
     std::ostringstream aw;
     if (configFileSetFOUNDFalse)
       {
+      /* clang-format off */
       e << "Found package configuration file:\n"
         "  " << this->FileFound << "\n"
         "but it set " << foundVar << " to FALSE so package \"" <<
         this->Name << "\" is considered to be NOT FOUND.";
+      /* clang-format on */
       if (!notFoundMessage.empty())
         {
         e << " Reason given by package: \n" << notFoundMessage << "\n";

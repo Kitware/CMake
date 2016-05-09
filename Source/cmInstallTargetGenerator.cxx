@@ -685,9 +685,11 @@ cmInstallTargetGenerator
   // Write a rule to remove the installed file if its rpath is not the
   // new rpath.  This is needed for existing build/install trees when
   // the installed rpath changes but the file is not rebuilt.
+  /* clang-format off */
   os << indent << "file(RPATH_CHECK\n"
      << indent << "     FILE \"" << toDestDirPath << "\"\n"
      << indent << "     RPATH \"" << newRpath << "\")\n";
+  /* clang-format on */
 }
 
 //----------------------------------------------------------------------------

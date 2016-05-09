@@ -569,10 +569,12 @@ std::string cmExtraCodeBlocksGenerator::CreateDummyTargetFile(
   cmGeneratedFileStream fout(filename.c_str());
   if(fout)
     {
+    /* clang-format off */
     fout << "# This is a dummy file for the OBJECT library "
          << target->GetName()
          << " for the CMake CodeBlocks project generator.\n"
          << "# Don't edit, this file will be overwritten.\n";
+    /* clang-format on */
     }
   return filename;
 }

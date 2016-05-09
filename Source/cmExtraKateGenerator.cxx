@@ -69,11 +69,13 @@ void cmExtraKateGenerator::CreateKateProjectFile(
     return;
     }
 
+  /* clang-format off */
   fout <<
     "{\n"
     "\t\"name\": \"" << this->ProjectName << "\",\n"
     "\t\"directory\": \"" << lg->GetSourceDirectory() << "\",\n"
     "\t\"files\": [ { " << this->GenerateFilesString(lg) << "} ],\n";
+  /* clang-format on */
   this->WriteTargets(lg, fout);
   fout << "}\n";
 }
@@ -89,11 +91,13 @@ cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
     "CMAKE_KATE_MAKE_ARGUMENTS");
   const char* homeOutputDir = lg->GetBinaryDirectory();
 
+  /* clang-format off */
   fout <<
   "\t\"build\": {\n"
   "\t\t\"directory\": \"" << lg->GetBinaryDirectory() << "\",\n"
   "\t\t\"default_target\": \"all\",\n"
   "\t\t\"clean_target\": \"clean\",\n";
+  /* clang-format on */
 
   // build, clean and quick are for the build plugin kate <= 4.12:
   fout << "\t\t\"build\": \"" << make << " -C \\\"" << homeOutputDir

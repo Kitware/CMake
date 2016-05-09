@@ -216,6 +216,7 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
   Indent indentN = indent.Next();
   Indent indentNN = indentN.Next();
   Indent indentNNN = indentNN.Next();
+  /* clang-format off */
   os << indentN << "file(DIFFERENT EXPORT_FILE_CHANGED FILES\n"
      << indentN << "     \"" << installedFile << "\"\n"
      << indentN << "     \"" << this->MainImportFile << "\")\n";
@@ -229,6 +230,7 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
   os << indentNN << "endif()\n";
   os << indentN << "endif()\n";
   os << indent << "endif()\n";
+  /* clang-format on */
 
   // Install the main export file.
   std::vector<std::string> files;
