@@ -17,7 +17,6 @@
 
 class cmTarget;
 
-//----------------------------------------------------------------------------
 class cmTargetPropCommandBase : public cmCommand
 {
 public:

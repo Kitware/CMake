@@ -15,7 +15,6 @@
 
 #include "cmTargetPropCommandBase.h"
 
-//----------------------------------------------------------------------------
 class cmTargetIncludeDirectoriesCommand : public cmTargetPropCommandBase
 {
 public:

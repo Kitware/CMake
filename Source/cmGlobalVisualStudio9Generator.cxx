@@ -94,13 +94,11 @@ public:
   virtual bool SupportsToolset() const { return false; }
 };
 
-//----------------------------------------------------------------------------
 cmGlobalGeneratorFactory* cmGlobalVisualStudio9Generator::NewFactory()
 {
   return new Factory;
 }
 
-//----------------------------------------------------------------------------
 cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator(cmake* cm,
   const std::string& name, const std::string& platformName)
   : cmGlobalVisualStudio8Generator(cm, name, platformName)
@@ -112,14 +110,12 @@ cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator(cmake* cm,
     "ProductDir", vc9Express, cmSystemTools::KeyWOW64_32);
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio9Generator::WriteSLNHeader(std::ostream& fout)
 {
   fout << "Microsoft Visual Studio Solution File, Format Version 10.00\n";
   fout << "# Visual Studio 2008\n";
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio9Generator::GetUserMacrosDirectory()
 {
   std::string base;
@@ -146,7 +142,6 @@ std::string cmGlobalVisualStudio9Generator::GetUserMacrosDirectory()
   return path;
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio9Generator::GetUserMacrosRegKeyBase()
 {
   return "Software\\Microsoft\\VisualStudio\\9.0\\vsmacros";

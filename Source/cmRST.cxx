@@ -17,7 +17,6 @@
 #include <cmsys/FStream.hxx>
 #include <ctype.h>
 
-//----------------------------------------------------------------------------
 cmRST::cmRST(std::ostream& os, std::string const& docroot):
   OS(os),
   DocRoot(docroot),
@@ -52,7 +51,6 @@ cmRST::cmRST(std::ostream& os, std::string const& docroot):
   this->Replace["|release|"] = cmVersion::GetCMakeVersion();
 }
 
-//----------------------------------------------------------------------------
 bool cmRST::ProcessFile(std::string const& fname, bool isModule)
 {
   cmsys::ifstream fin(fname.c_str());
@@ -73,7 +71,6 @@ bool cmRST::ProcessFile(std::string const& fname, bool isModule)
   return false;
 }
 
-//----------------------------------------------------------------------------
 void cmRST::ProcessRST(std::istream& is)
 {
   std::string line;
@@ -84,7 +81,6 @@ void cmRST::ProcessRST(std::istream& is)
   this->Reset();
 }
 
-//----------------------------------------------------------------------------
 void cmRST::ProcessModule(std::istream& is)
 {
   std::string line;
@@ -148,7 +144,6 @@ void cmRST::ProcessModule(std::istream& is)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmRST::Reset()
 {
   if(!this->MarkupLines.empty())
@@ -169,7 +164,6 @@ void cmRST::Reset()
   this->MarkupLines.clear();
 }
 
-//----------------------------------------------------------------------------
 void cmRST::ProcessLine(std::string const& line)
 {
   bool lastLineEndedInColonColon = this->LastLineEndedInColonColon;
@@ -277,14 +271,12 @@ void cmRST::ProcessLine(std::string const& line)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmRST::NormalLine(std::string const& line)
 {
   this->Reset();
   this->OutputLine(line, true);
 }
 
-//----------------------------------------------------------------------------
 void cmRST::OutputLine(std::string const& line_in, bool inlineMarkup)
 {
   if(this->OutputLinePending)
@@ -319,7 +311,6 @@ void cmRST::OutputLine(std::string const& line_in, bool inlineMarkup)
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmRST::ReplaceSubstitutions(std::string const& line)
 {
   std::string out;
@@ -349,7 +340,6 @@ std::string cmRST::ReplaceSubstitutions(std::string const& line)
   return out;
 }
 
-//----------------------------------------------------------------------------
 void cmRST::OutputMarkupLines(bool inlineMarkup)
 {
   for(std::vector<std::string>::iterator i = this->MarkupLines.begin();
@@ -365,7 +355,6 @@ void cmRST::OutputMarkupLines(bool inlineMarkup)
   this->OutputLinePending = true;
 }
 
-//----------------------------------------------------------------------------
 bool cmRST::ProcessInclude(std::string file, IncludeType type)
 {
   bool found = false;
@@ -396,25 +385,21 @@ bool cmRST::ProcessInclude(std::string file, IncludeType type)
   return found;
 }
 
-//----------------------------------------------------------------------------
 void cmRST::ProcessDirectiveParsedLiteral()
 {
   this->OutputMarkupLines(true);
 }
 
-//----------------------------------------------------------------------------
 void cmRST::ProcessDirectiveLiteralBlock()
 {
   this->OutputMarkupLines(false);
 }
 
-//----------------------------------------------------------------------------
 void cmRST::ProcessDirectiveCodeBlock()
 {
   this->OutputMarkupLines(false);
 }
 
-//----------------------------------------------------------------------------
 void cmRST::ProcessDirectiveReplace()
 {
   // Record markup lines as replacement text.
@@ -423,7 +408,6 @@ void cmRST::ProcessDirectiveReplace()
   this->ReplaceName = "";
 }
 
-//----------------------------------------------------------------------------
 void cmRST::ProcessDirectiveTocTree()
 {
   // Process documents referenced by toctree directive.
@@ -446,7 +430,6 @@ void cmRST::ProcessDirectiveTocTree()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmRST::UnindentLines(std::vector<std::string>& lines)
 {
   // Remove the common indentation from the second and later lines.

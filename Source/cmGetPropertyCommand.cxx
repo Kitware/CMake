@@ -18,13 +18,11 @@
 #include "cmTest.h"
 #include "cmake.h"
 
-//----------------------------------------------------------------------------
 cmGetPropertyCommand::cmGetPropertyCommand()
 {
   this->InfoType = OutValue;
 }
 
-//----------------------------------------------------------------------------
 bool cmGetPropertyCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
@@ -202,7 +200,6 @@ bool cmGetPropertyCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmGetPropertyCommand::StoreResult(const char* value)
 {
   if(this->InfoType == OutSet)
@@ -223,7 +220,6 @@ bool cmGetPropertyCommand::StoreResult(const char* value)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmGetPropertyCommand::HandleGlobalMode()
 {
   if(!this->Name.empty())
@@ -238,7 +234,6 @@ bool cmGetPropertyCommand::HandleGlobalMode()
              ->GetGlobalProperty(this->PropertyName));
 }
 
-//----------------------------------------------------------------------------
 bool cmGetPropertyCommand::HandleDirectoryMode()
 {
   // Default to the current directory.
@@ -293,7 +288,6 @@ bool cmGetPropertyCommand::HandleDirectoryMode()
   return this->StoreResult(mf->GetProperty(this->PropertyName));
 }
 
-//----------------------------------------------------------------------------
 bool cmGetPropertyCommand::HandleTargetMode()
 {
   if(this->Name.empty())
@@ -329,7 +323,6 @@ bool cmGetPropertyCommand::HandleTargetMode()
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmGetPropertyCommand::HandleSourceMode()
 {
   if(this->Name.empty())
@@ -355,7 +348,6 @@ bool cmGetPropertyCommand::HandleSourceMode()
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmGetPropertyCommand::HandleTestMode()
 {
   if(this->Name.empty())
@@ -377,7 +369,6 @@ bool cmGetPropertyCommand::HandleTestMode()
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmGetPropertyCommand::HandleVariableMode()
 {
   if(!this->Name.empty())
@@ -390,7 +381,6 @@ bool cmGetPropertyCommand::HandleVariableMode()
     (this->Makefile->GetDefinition(this->PropertyName));
 }
 
-//----------------------------------------------------------------------------
 bool cmGetPropertyCommand::HandleCacheMode()
 {
   if(this->Name.empty())
@@ -409,7 +399,6 @@ bool cmGetPropertyCommand::HandleCacheMode()
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmGetPropertyCommand::HandleInstallMode()
 {
   if(this->Name.empty())

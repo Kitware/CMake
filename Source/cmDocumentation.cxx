@@ -24,7 +24,6 @@
 
 #include <algorithm>
 
-//----------------------------------------------------------------------------
 static const char *cmDocumentationStandardOptions[][2] =
 {
   {"--help,-help,-usage,-h,-H,/?",
@@ -70,7 +69,6 @@ static const char *cmDocumentationStandardOptions[][2] =
   {0,0}
 };
 
-//----------------------------------------------------------------------------
 static const char *cmDocumentationGeneratorsHeader[][2] =
 {
   {0,
@@ -78,20 +76,17 @@ static const char *cmDocumentationGeneratorsHeader[][2] =
   {0,0}
 };
 
-//----------------------------------------------------------------------------
 cmDocumentation::cmDocumentation()
 {
   this->addCommonStandardDocSections();
   this->ShowGenerators = true;
 }
 
-//----------------------------------------------------------------------------
 cmDocumentation::~cmDocumentation()
 {
   cmDeleteAll(this->AllSections);
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintVersion(std::ostream& os)
 {
   /* clang-format off */
@@ -105,7 +100,6 @@ bool cmDocumentation::PrintVersion(std::ostream& os)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
 {
   switch (ht)
@@ -150,7 +144,6 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
 {
   int count = 0;
@@ -233,7 +226,6 @@ void cmDocumentation::WarnFormFromFilename(
     }
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentation::addCommonStandardDocSections()
 {
     cmDocumentationSection *sec;
@@ -243,7 +235,6 @@ void cmDocumentation::addCommonStandardDocSections()
     this->AllSections["Options"] = sec;
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentation::addCMakeStandardDocSections()
 {
     cmDocumentationSection *sec;
@@ -253,7 +244,6 @@ void cmDocumentation::addCMakeStandardDocSections()
     this->AllSections["Generators"] = sec;
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentation::addCTestStandardDocSections()
 {
     // This is currently done for backward compatibility reason
@@ -261,7 +251,6 @@ void cmDocumentation::addCTestStandardDocSections()
     addCMakeStandardDocSections();
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentation::addCPackStandardDocSections()
 {
     cmDocumentationSection *sec;
@@ -271,7 +260,6 @@ void cmDocumentation::addCPackStandardDocSections()
     this->AllSections["Generators"] = sec;
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
                                    const char* exitOpt)
 {
@@ -482,13 +470,11 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
   return result;
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentation::SetName(const std::string& name)
 {
   this->NameString = name;
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentation::SetSection(const char *name,
                                  cmDocumentationSection *section)
 {
@@ -499,7 +485,6 @@ void cmDocumentation::SetSection(const char *name,
   this->AllSections[name] = section;
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentation::SetSection(const char *name,
                                  std::vector<cmDocumentationEntry> &docs)
 {
@@ -510,7 +495,6 @@ void cmDocumentation::SetSection(const char *name,
   this->SetSection(name,sec);
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentation::SetSection(const char *name,
                                  const char *docs[][2])
 {
@@ -521,7 +505,6 @@ void cmDocumentation::SetSection(const char *name,
   this->SetSection(name,sec);
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentation
 ::SetSections(std::map<std::string,cmDocumentationSection *> &sections)
 {
@@ -532,7 +515,6 @@ void cmDocumentation
     }
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentation::PrependSection(const char *name,
                                      const char *docs[][2])
 {
@@ -550,7 +532,6 @@ void cmDocumentation::PrependSection(const char *name,
   sec->Prepend(docs);
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentation::PrependSection(const char *name,
                                      std::vector<cmDocumentationEntry> &docs)
 {
@@ -568,7 +549,6 @@ void cmDocumentation::PrependSection(const char *name,
   sec->Prepend(docs);
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentation::AppendSection(const char *name,
                                     const char *docs[][2])
 {
@@ -586,7 +566,6 @@ void cmDocumentation::AppendSection(const char *name,
   sec->Append(docs);
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentation::AppendSection(const char *name,
                                     std::vector<cmDocumentationEntry> &docs)
 {
@@ -604,7 +583,6 @@ void cmDocumentation::AppendSection(const char *name,
   sec->Append(docs);
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentation::AppendSection(const char *name,
                                     cmDocumentationEntry &docs)
 {
@@ -614,7 +592,6 @@ void cmDocumentation::AppendSection(const char *name,
   this->AppendSection(name,docsVec);
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentation::PrependSection(const char *name,
                                      cmDocumentationEntry &docs)
 {
@@ -624,7 +601,6 @@ void cmDocumentation::PrependSection(const char *name,
   this->PrependSection(name,docsVec);
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentation::GlobHelp(std::vector<std::string>& files,
                                std::string const& pattern)
 {
@@ -637,7 +613,6 @@ void cmDocumentation::GlobHelp(std::vector<std::string>& files,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmDocumentation::PrintNames(std::ostream& os,
                                  std::string const& pattern)
 {
@@ -666,7 +641,6 @@ void cmDocumentation::PrintNames(std::ostream& os,
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintFiles(std::ostream& os,
                                  std::string const& pattern)
 {
@@ -683,13 +657,11 @@ bool cmDocumentation::PrintFiles(std::ostream& os,
   return found;
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintHelpFull(std::ostream& os)
 {
   return this->PrintFiles(os, "index");
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintHelpOneManual(std::ostream& os)
 {
   std::string mname = this->CurrentArgument;
@@ -711,14 +683,12 @@ bool cmDocumentation::PrintHelpOneManual(std::ostream& os)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintHelpListManuals(std::ostream& os)
 {
   this->PrintNames(os, "manual/*");
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintHelpOneCommand(std::ostream& os)
 {
   std::string cname = cmSystemTools::LowerCase(this->CurrentArgument);
@@ -733,14 +703,12 @@ bool cmDocumentation::PrintHelpOneCommand(std::ostream& os)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintHelpListCommands(std::ostream& os)
 {
   this->PrintNames(os, "command/*");
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintHelpOneModule(std::ostream& os)
 {
   std::string mname = this->CurrentArgument;
@@ -754,7 +722,6 @@ bool cmDocumentation::PrintHelpOneModule(std::ostream& os)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintHelpListModules(std::ostream& os)
 {
   std::vector<std::string> files;
@@ -775,7 +742,6 @@ bool cmDocumentation::PrintHelpListModules(std::ostream& os)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintHelpOneProperty(std::ostream& os)
 {
   std::string pname = cmSystemTools::HelpFileName(this->CurrentArgument);
@@ -790,14 +756,12 @@ bool cmDocumentation::PrintHelpOneProperty(std::ostream& os)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintHelpListProperties(std::ostream& os)
 {
   this->PrintNames(os, "prop_*/*");
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintHelpOnePolicy(std::ostream& os)
 {
   std::string pname = this->CurrentArgument;
@@ -813,14 +777,12 @@ bool cmDocumentation::PrintHelpOnePolicy(std::ostream& os)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintHelpListPolicies(std::ostream& os)
 {
   this->PrintNames(os, "policy/*");
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintHelpListGenerators(std::ostream& os)
 {
   std::map<std::string,cmDocumentationSection*>::iterator si;
@@ -833,7 +795,6 @@ bool cmDocumentation::PrintHelpListGenerators(std::ostream& os)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintHelpOneVariable(std::ostream& os)
 {
   std::string vname = cmSystemTools::HelpFileName(this->CurrentArgument);
@@ -848,14 +809,12 @@ bool cmDocumentation::PrintHelpOneVariable(std::ostream& os)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintHelpListVariables(std::ostream& os)
 {
   this->PrintNames(os, "variable/*");
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintUsage(std::ostream& os)
 {
   std::map<std::string,cmDocumentationSection*>::iterator si;
@@ -867,7 +826,6 @@ bool cmDocumentation::PrintUsage(std::ostream& os)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintHelp(std::ostream& os)
 {
   std::map<std::string,cmDocumentationSection*>::iterator si;
@@ -892,7 +850,6 @@ bool cmDocumentation::PrintHelp(std::ostream& os)
   return true;
 }
 
-//----------------------------------------------------------------------------
 const char* cmDocumentation::GetNameString() const
 {
   if(!this->NameString.empty())
@@ -905,14 +862,12 @@ const char* cmDocumentation::GetNameString() const
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::IsOption(const char* arg) const
 {
   return ((arg[0] == '-') || (strcmp(arg, "/V") == 0) ||
           (strcmp(arg, "/?") == 0));
 }
 
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintOldCustomModules(std::ostream& os)
 {
   // CheckOptions abuses the Argument field to give us the file name.

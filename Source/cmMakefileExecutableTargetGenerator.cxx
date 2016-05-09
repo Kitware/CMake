@@ -18,7 +18,6 @@
 #include "cmSourceFile.h"
 #include "cmake.h"
 
-//----------------------------------------------------------------------------
 cmMakefileExecutableTargetGenerator
 ::cmMakefileExecutableTargetGenerator(cmGeneratorTarget* target):
   cmMakefileTargetGenerator(target)
@@ -33,14 +32,12 @@ cmMakefileExecutableTargetGenerator
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 }
 
-//----------------------------------------------------------------------------
 cmMakefileExecutableTargetGenerator
 ::~cmMakefileExecutableTargetGenerator()
 {
   delete this->OSXBundleGenerator;
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
 {
   // create the build.make file and directory, put in the common blocks
@@ -79,7 +76,6 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
 
 
 
-//----------------------------------------------------------------------------
 void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 {
   std::vector<std::string> commands;

@@ -161,7 +161,6 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
   return handler;
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestSubmitCommand::InitialPass(std::vector<std::string> const& args,
                                        cmExecutionStatus& status)
 {
@@ -169,7 +168,6 @@ bool cmCTestSubmitCommand::InitialPass(std::vector<std::string> const& args,
   return this->cmCTestHandlerCommand::InitialPass(args, status);
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestSubmitCommand::CheckArgumentKeyword(std::string const& arg)
 {
   if (this->CDashUpload)
@@ -227,7 +225,6 @@ bool cmCTestSubmitCommand::CheckArgumentKeyword(std::string const& arg)
 }
 
 
-//----------------------------------------------------------------------------
 bool cmCTestSubmitCommand::CheckArgumentValue(std::string const& arg)
 {
   // Handle states specific to this command.

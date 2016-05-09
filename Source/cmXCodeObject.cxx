@@ -15,7 +15,6 @@
 
 #include <CoreFoundation/CoreFoundation.h> // CFUUIDCreate
 
-//----------------------------------------------------------------------------
 const char* cmXCodeObject::PBXTypeNames[] = {
   /* clang-format needs this comment to break after the opening brace */
     "PBXGroup", "PBXBuildStyle", "PBXProject", "PBXHeadersBuildPhase",
@@ -30,13 +29,11 @@ const char* cmXCodeObject::PBXTypeNames[] = {
     "None"
   };
 
-//----------------------------------------------------------------------------
 cmXCodeObject::~cmXCodeObject()
 {
   this->Version = 15;
 }
 
-//----------------------------------------------------------------------------
 cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
 {
   this->Version = 15;
@@ -78,7 +75,6 @@ cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmXCodeObject::Indent(int level, std::ostream& out)
 {
   while(level)
@@ -88,7 +84,6 @@ void cmXCodeObject::Indent(int level, std::ostream& out)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmXCodeObject::Print(std::ostream& out)
 {
   std::string separator = "\n";
@@ -211,7 +206,6 @@ void cmXCodeObject::PrintAttribute(std::ostream& out, const int level,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmXCodeObject::PrintList(std::vector<cmXCodeObject*> const& objs,
                               std::ostream& out)
 {
@@ -228,7 +222,6 @@ void cmXCodeObject::PrintList(std::vector<cmXCodeObject*> const& objs,
   out << "};\n";
 }
 
-//----------------------------------------------------------------------------
 void cmXCodeObject::CopyAttributes(cmXCodeObject* copy)
 {
   this->ObjectAttributes = copy->ObjectAttributes;
@@ -237,7 +230,6 @@ void cmXCodeObject::CopyAttributes(cmXCodeObject* copy)
   this->Object = copy->Object;
 }
 
-//----------------------------------------------------------------------------
 void cmXCodeObject::PrintString(std::ostream& os,std::string String)
 {
   // The string needs to be quoted if it contains any characters
@@ -272,7 +264,6 @@ void cmXCodeObject::PrintString(std::ostream& os) const
   cmXCodeObject::PrintString(os,this->String);
 }
 
-//----------------------------------------------------------------------------
 void cmXCodeObject::SetString(const std::string& s)
 {
   this->String = s;

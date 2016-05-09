@@ -31,7 +31,6 @@ cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
   this->TargetImplib = "$TARGET_IMPLIB";
 }
 
-//----------------------------------------------------------------------------
 // Virtual public methods.
 
 cmLocalNinjaGenerator::~cmLocalNinjaGenerator()
@@ -112,7 +111,6 @@ std::string cmLocalNinjaGenerator
   return dir;
 }
 
-//----------------------------------------------------------------------------
 // Non-virtual public methods.
 
 const cmGlobalNinjaGenerator*
@@ -127,7 +125,6 @@ cmGlobalNinjaGenerator* cmLocalNinjaGenerator::GetGlobalNinjaGenerator()
   return static_cast<cmGlobalNinjaGenerator*>(this->GetGlobalGenerator());
 }
 
-//----------------------------------------------------------------------------
 // Virtual protected methods.
 
 std::string
@@ -145,7 +142,6 @@ cmLocalNinjaGenerator::ConvertToIncludeReference(std::string const& path,
   return this->Convert(path, forceFullPaths? FULL : HOME_OUTPUT, format);
 }
 
-//----------------------------------------------------------------------------
 // Private methods.
 
 cmGeneratedFileStream& cmLocalNinjaGenerator::GetBuildFileStream() const
@@ -257,7 +253,6 @@ void cmLocalNinjaGenerator::WriteNinjaFilesInclusion(std::ostream& os)
   os << "\n";
 }
 
-//----------------------------------------------------------------------------
 void cmLocalNinjaGenerator::ComputeObjectFilenames(
                         std::map<cmSourceFile const*, std::string>& mapping,
                         cmGeneratorTarget const* gt)

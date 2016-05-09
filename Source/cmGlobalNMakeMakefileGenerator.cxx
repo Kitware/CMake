@@ -40,7 +40,6 @@ void cmGlobalNMakeMakefileGenerator
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalNMakeMakefileGenerator
 ::GetDocumentation(cmDocumentationEntry& entry)
 {
@@ -48,7 +47,6 @@ void cmGlobalNMakeMakefileGenerator
   entry.Brief = "Generates NMake makefiles.";
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalNMakeMakefileGenerator::PrintCompilerAdvice(std::ostream& os,
                                                   std::string const& lang,
                                                   const char* envVar) const

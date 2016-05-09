@@ -31,18 +31,15 @@
 # define NSIS_OPT "-"
 #endif
 
-//----------------------------------------------------------------------
 cmCPackNSISGenerator::cmCPackNSISGenerator(bool nsis64)
 {
   Nsis64 = nsis64;
 }
 
-//----------------------------------------------------------------------
 cmCPackNSISGenerator::~cmCPackNSISGenerator()
 {
 }
 
-//----------------------------------------------------------------------
 int cmCPackNSISGenerator::PackageFiles()
 {
   // TODO: Fix nsis to force out file name
@@ -361,7 +358,6 @@ int cmCPackNSISGenerator::PackageFiles()
   return 1;
 }
 
-//----------------------------------------------------------------------
 int cmCPackNSISGenerator::InitializeInternal()
 {
   if ( cmSystemTools::IsOn(this->GetOption(
@@ -585,7 +581,6 @@ int cmCPackNSISGenerator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
-//----------------------------------------------------------------------
 void cmCPackNSISGenerator::CreateMenuLinks( std::ostringstream& str,
                                             std::ostringstream& deleteStr)
 {
@@ -663,7 +658,6 @@ void cmCPackNSISGenerator::CreateMenuLinks( std::ostringstream& str,
     }
 }
 
-//----------------------------------------------------------------------
 bool cmCPackNSISGenerator::GetListOfSubdirectories(const char* topdir,
   std::vector<std::string>& dirs)
 {
@@ -692,26 +686,22 @@ bool cmCPackNSISGenerator::GetListOfSubdirectories(const char* topdir,
   return true;
 }
 
-//----------------------------------------------------------------------
 enum cmCPackGenerator::CPackSetDestdirSupport
 cmCPackNSISGenerator::SupportsSetDestdir() const
 {
   return cmCPackGenerator::SETDESTDIR_SHOULD_NOT_BE_USED;
 }
 
-//----------------------------------------------------------------------
 bool cmCPackNSISGenerator::SupportsAbsoluteDestination() const
 {
         return false;
 }
 
-//----------------------------------------------------------------------
 bool cmCPackNSISGenerator::SupportsComponentInstallation() const
 {
         return true;
 }
 
-//----------------------------------------------------------------------
 std::string
 cmCPackNSISGenerator::
 CreateComponentDescription(cmCPackComponent *component,
@@ -946,7 +936,6 @@ CreateComponentDescription(cmCPackComponent *component,
   return componentCode;
 }
 
-//----------------------------------------------------------------------
 std::string cmCPackNSISGenerator::CreateSelectionDependenciesDescription
               (cmCPackComponent *component,
                std::set<cmCPackComponent *>& visited)
@@ -978,7 +967,6 @@ std::string cmCPackNSISGenerator::CreateSelectionDependenciesDescription
 }
 
 
-//----------------------------------------------------------------------
 std::string cmCPackNSISGenerator::CreateDeselectionDependenciesDescription
               (cmCPackComponent *component,
                    std::set<cmCPackComponent *>& visited)
@@ -1011,7 +999,6 @@ std::string cmCPackNSISGenerator::CreateDeselectionDependenciesDescription
   return out.str();
 }
 
-//----------------------------------------------------------------------
 std::string
 cmCPackNSISGenerator::
 CreateComponentGroupDescription(cmCPackComponentGroup *group,

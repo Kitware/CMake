@@ -783,7 +783,6 @@ cmNinjaTargetGenerator
 }
 
 
-//----------------------------------------------------------------------------
 void
 cmNinjaTargetGenerator::MacOSXContentGeneratorType::operator()(
   cmSourceFile const& source, const char* pkgloc)

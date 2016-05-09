@@ -95,7 +95,6 @@ void cmGlobalMSYSMakefileGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalMSYSMakefileGenerator
 ::GetDocumentation(cmDocumentationEntry& entry)
 {

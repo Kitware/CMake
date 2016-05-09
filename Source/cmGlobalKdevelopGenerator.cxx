@@ -25,7 +25,6 @@
 #include <cmsys/FStream.hxx>
 #include <cmsys/SystemTools.hxx>
 
-//----------------------------------------------------------------------------
 void cmGlobalKdevelopGenerator
 ::GetDocumentation(cmDocumentationEntry& entry, const std::string&) const
 {

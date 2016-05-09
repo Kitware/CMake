@@ -16,14 +16,12 @@
 
 #include "assert.h"
 
-//----------------------------------------------------------------------------
 cmGeneratorExpressionParser::cmGeneratorExpressionParser(
                       const std::vector<cmGeneratorExpressionToken> &tokens)
   : Tokens(tokens), NestingLevel(0)
 {
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorExpressionParser::Parse(
                         std::vector<cmGeneratorExpressionEvaluator*> &result)
 {
@@ -35,7 +33,6 @@ void cmGeneratorExpressionParser::Parse(
     }
 }
 
-//----------------------------------------------------------------------------
 static void extendText(std::vector<cmGeneratorExpressionEvaluator*> &result,
                   std::vector<cmGeneratorExpressionToken>::const_iterator it)
 {
@@ -53,7 +50,6 @@ static void extendText(std::vector<cmGeneratorExpressionEvaluator*> &result,
     }
 }
 
-//----------------------------------------------------------------------------
 static void extendResult(std::vector<cmGeneratorExpressionEvaluator*> &result,
                 const std::vector<cmGeneratorExpressionEvaluator*> &contents)
 {
@@ -73,7 +69,6 @@ static void extendResult(std::vector<cmGeneratorExpressionEvaluator*> &result,
   }
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorExpressionParser::ParseGeneratorExpression(
                         std::vector<cmGeneratorExpressionEvaluator*> &result)
 {
@@ -245,7 +240,6 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
   result.push_back(content);
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorExpressionParser::ParseContent(
                         std::vector<cmGeneratorExpressionEvaluator*> &result)
 {

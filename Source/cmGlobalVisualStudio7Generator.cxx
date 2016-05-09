@@ -22,7 +22,6 @@
 
 #include <assert.h>
 
-//----------------------------------------------------------------------------
 static cmVS7FlagTable cmVS7ExtraFlagTable[] =
 {
   // Precompiled header and related options.  Note that the
@@ -146,7 +145,6 @@ void cmGlobalVisualStudio7Generator
 
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio7Generator::FindMakeProgram(cmMakefile* mf)
 {
   this->cmGlobalVisualStudioGenerator::FindMakeProgram(mf);
@@ -154,7 +152,6 @@ void cmGlobalVisualStudio7Generator::FindMakeProgram(cmMakefile* mf)
                     this->GetDevEnvCommand().c_str());
 }
 
-//----------------------------------------------------------------------------
 std::string const& cmGlobalVisualStudio7Generator::GetDevEnvCommand()
 {
   if(!this->DevEnvCommandInitialized)
@@ -165,7 +162,6 @@ std::string const& cmGlobalVisualStudio7Generator::GetDevEnvCommand()
   return this->DevEnvCommand;
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio7Generator::FindDevEnvCommand()
 {
   std::string vscmd;
@@ -180,7 +176,6 @@ std::string cmGlobalVisualStudio7Generator::FindDevEnvCommand()
   return vscmd;
 }
 
-//----------------------------------------------------------------------------
 const char* cmGlobalVisualStudio7Generator::ExternalProjectType(
   const char* location)
 {
@@ -215,7 +210,6 @@ const char* cmGlobalVisualStudio7Generator::ExternalProjectType(
     }
   return "8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942";
 }
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand,
   const std::string& makeProgram,
@@ -290,7 +284,6 @@ cmLocalGenerator *cmGlobalVisualStudio7Generator::CreateLocalGenerator(
   return lg;
 }
 
-//----------------------------------------------------------------------------
 std::string const& cmGlobalVisualStudio7Generator::GetPlatformName() const
 {
   if(!this->GeneratorPlatform.empty())
@@ -300,7 +293,6 @@ std::string const& cmGlobalVisualStudio7Generator::GetPlatformName() const
   return this->DefaultPlatformName;
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio7Generator::SetSystemName(std::string const& s,
                                                    cmMakefile* mf)
 {
@@ -309,7 +301,6 @@ bool cmGlobalVisualStudio7Generator::SetSystemName(std::string const& s,
   return this->cmGlobalVisualStudioGenerator::SetSystemName(s, mf);
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio7Generator::SetGeneratorPlatform(std::string const& p,
                                                           cmMakefile* mf)
 {
@@ -553,7 +544,6 @@ void cmGlobalVisualStudio7Generator::WriteTargetDepends(
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio7Generator::WriteFolders(std::ostream& fout)
 {
   const char *prefix = "CMAKE_FOLDER_GUID_";
@@ -582,7 +572,6 @@ void cmGlobalVisualStudio7Generator::WriteFolders(std::ostream& fout)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio7Generator::WriteFoldersContent(std::ostream& fout)
 {
   for(std::map<std::string,std::set<std::string> >::iterator iter =
@@ -602,7 +591,6 @@ void cmGlobalVisualStudio7Generator::WriteFoldersContent(std::ostream& fout)
     }
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmGlobalVisualStudio7Generator::ConvertToSolutionPath(const char* path)
 {
@@ -687,7 +675,6 @@ void cmGlobalVisualStudio7Generator::WriteSLNFooter(std::ostream& fout)
   fout << "EndGlobal\n";
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmGlobalVisualStudio7Generator::WriteUtilityDepend(
         cmGeneratorTarget const* target)
@@ -751,7 +738,6 @@ cmGlobalVisualStudio7Generator::WriteUtilityDepend(
   return pname;
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio7Generator::GetGUID(std::string const& name)
 {
   std::string const& guidStoreName = name + "_GUID_CMAKE";
@@ -776,7 +762,6 @@ std::string cmGlobalVisualStudio7Generator::GetGUID(std::string const& name)
   return cmSystemTools::UpperCase(guid);
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalVisualStudio7Generator
 ::AppendDirectoryForConfig(const std::string& prefix,

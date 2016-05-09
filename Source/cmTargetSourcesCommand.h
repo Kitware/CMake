@@ -15,7 +15,6 @@
 
 #include "cmTargetPropCommandBase.h"
 
-//----------------------------------------------------------------------------
 class cmTargetSourcesCommand : public cmTargetPropCommandBase
 {
 public:

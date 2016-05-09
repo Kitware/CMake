@@ -13,7 +13,6 @@
 
 #include "cmGeneratorExpression.h"
 
-//----------------------------------------------------------------------------
 bool cmTargetIncludeDirectoriesCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
@@ -21,7 +20,6 @@ bool cmTargetIncludeDirectoriesCommand
                                ArgumentFlags(PROCESS_BEFORE | PROCESS_SYSTEM));
 }
 
-//----------------------------------------------------------------------------
 void cmTargetIncludeDirectoriesCommand
 ::HandleImportedTarget(const std::string &tgt)
 {
@@ -31,7 +29,6 @@ void cmTargetIncludeDirectoriesCommand
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
 
-//----------------------------------------------------------------------------
 void cmTargetIncludeDirectoriesCommand
 ::HandleMissingTarget(const std::string &name)
 {
@@ -41,7 +38,6 @@ void cmTargetIncludeDirectoriesCommand
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
 
-//----------------------------------------------------------------------------
 std::string cmTargetIncludeDirectoriesCommand
 ::Join(const std::vector<std::string> &content)
 {
@@ -66,7 +62,6 @@ std::string cmTargetIncludeDirectoriesCommand
   return dirs;
 }
 
-//----------------------------------------------------------------------------
 bool cmTargetIncludeDirectoriesCommand
 ::HandleDirectContent(cmTarget *tgt, const std::vector<std::string> &content,
                       bool prepend, bool system)
@@ -96,7 +91,6 @@ bool cmTargetIncludeDirectoriesCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmTargetIncludeDirectoriesCommand
 ::HandleInterfaceContent(cmTarget *tgt,
                          const std::vector<std::string> &content,

@@ -19,18 +19,15 @@
 #include <cmsys/Process.h>
 
 
-//----------------------------------------------------------------------
 cmCTestConfigureHandler::cmCTestConfigureHandler()
 {
 }
 
-//----------------------------------------------------------------------
 void cmCTestConfigureHandler::Initialize()
 {
   this->Superclass::Initialize();
 }
 
-//----------------------------------------------------------------------
 //clearly it would be nice if this were broken up into a few smaller
 //functions and commented...
 int cmCTestConfigureHandler::ProcessHandler()

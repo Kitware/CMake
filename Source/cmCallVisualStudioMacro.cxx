@@ -30,7 +30,6 @@ static bool LogErrorsAsMessages;
 #include <comdef.h>
 
 
-//----------------------------------------------------------------------------
 // Copied from a correct comdef.h to avoid problems with deficient versions
 // of comdef.h that exist in the wild... Fixes issue #7533.
 //
@@ -49,7 +48,6 @@ static bool LogErrorsAsMessages;
 #endif
 
 
-//----------------------------------------------------------------------------
 ///! Use ReportHRESULT to make a cmSystemTools::Message after calling
 ///! a COM method that may have failed.
 #define ReportHRESULT(hr, context) \
@@ -68,7 +66,6 @@ static bool LogErrorsAsMessages;
     }
 
 
-//----------------------------------------------------------------------------
 ///! Using the given instance of Visual Studio, call the named macro
 HRESULT InstanceCallMacro(
   IDispatch* vsIDE,
@@ -161,7 +158,6 @@ HRESULT InstanceCallMacro(
 }
 
 
-//----------------------------------------------------------------------------
 ///! Get the Solution object from the IDE object
 HRESULT GetSolutionObject(
   IDispatch* vsIDE,
@@ -211,7 +207,6 @@ HRESULT GetSolutionObject(
 }
 
 
-//----------------------------------------------------------------------------
 ///! Get the FullName property from the Solution object
 HRESULT GetSolutionFullName(
   IDispatch* vsSolution,
@@ -261,7 +256,6 @@ HRESULT GetSolutionFullName(
 }
 
 
-//----------------------------------------------------------------------------
 ///! Get the FullName property from the Solution object, given the IDE object
 HRESULT GetIDESolutionFullName(
   IDispatch* vsIDE,
@@ -281,7 +275,6 @@ HRESULT GetIDESolutionFullName(
 }
 
 
-//----------------------------------------------------------------------------
 ///! Get all running objects from the Windows running object table.
 ///! Save them in a map by their display names.
 HRESULT GetRunningInstances(std::map<std::string, IUnknownPtr>& mrot)
@@ -347,7 +340,6 @@ HRESULT GetRunningInstances(std::map<std::string, IUnknownPtr>& mrot)
 }
 
 
-//----------------------------------------------------------------------------
 ///! Do the two file names refer to the same Visual Studio solution? Or are
 ///! we perhaps looking for any and all solutions?
 bool FilesSameSolution(
@@ -370,7 +362,6 @@ bool FilesSameSolution(
 }
 
 
-//----------------------------------------------------------------------------
 ///! Find instances of Visual Studio with the given solution file
 ///! open. Pass "ALL" for slnFile to gather all running instances
 ///! of Visual Studio.
@@ -421,7 +412,6 @@ HRESULT FindVisualStudioInstances(
 #endif  //defined(HAVE_COMDEF_H)
 
 
-//----------------------------------------------------------------------------
 int cmCallVisualStudioMacro::GetNumberOfRunningVisualStudioInstances(
   const std::string& slnFile)
 {
@@ -457,7 +447,6 @@ int cmCallVisualStudioMacro::GetNumberOfRunningVisualStudioInstances(
 }
 
 
-//----------------------------------------------------------------------------
 ///! Get all running objects from the Windows running object table.
 ///! Save them in a map by their display names.
 int cmCallVisualStudioMacro::CallMacro(

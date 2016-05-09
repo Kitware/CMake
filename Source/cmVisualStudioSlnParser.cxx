@@ -18,7 +18,6 @@
 #include <cassert>
 #include <stack>
 
-//----------------------------------------------------------------------------
 namespace
 {
   enum LineFormat
@@ -30,7 +29,6 @@ namespace
   };
 }
 
-//----------------------------------------------------------------------------
 class cmVisualStudioSlnParser::ParsedLine
 {
 public:
@@ -64,25 +62,21 @@ private:
   static const std::string Quote;
 };
 
-//----------------------------------------------------------------------------
 const std::string cmVisualStudioSlnParser::ParsedLine::BadString;
 const std::string cmVisualStudioSlnParser::ParsedLine::Quote("\"");
 
-//----------------------------------------------------------------------------
 bool cmVisualStudioSlnParser::ParsedLine::IsComment() const
 {
   assert(!this->Tag.empty());
   return (this->Tag[0]== '#');
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudioSlnParser::ParsedLine::IsKeyValuePair() const
 {
   assert(!this->Tag.empty());
   return this->Arg.first.empty() && this->Values.size() == 1;
 }
 
-//----------------------------------------------------------------------------
 std::string cmVisualStudioSlnParser::ParsedLine::GetArgVerbatim() const
 {
   if (this->Arg.second)
@@ -91,7 +85,6 @@ std::string cmVisualStudioSlnParser::ParsedLine::GetArgVerbatim() const
     return this->Arg.first;
 }
 
-//----------------------------------------------------------------------------
 const std::string&
 cmVisualStudioSlnParser::ParsedLine::GetValue(size_t idxValue) const
 {
@@ -101,7 +94,6 @@ cmVisualStudioSlnParser::ParsedLine::GetValue(size_t idxValue) const
     return BadString;
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmVisualStudioSlnParser::ParsedLine::GetValueVerbatim(size_t idxValue) const
 {
@@ -117,7 +109,6 @@ cmVisualStudioSlnParser::ParsedLine::GetValueVerbatim(size_t idxValue) const
     return BadString;
 }
 
-//----------------------------------------------------------------------------
 class cmVisualStudioSlnParser::State
 {
 public:
@@ -156,7 +147,6 @@ private:
   void IgnoreUntilTag(const std::string& endTag);
 };
 
-//----------------------------------------------------------------------------
 cmVisualStudioSlnParser::State::State(DataGroupSet requestedData) :
   RequestedData(requestedData),
   CurrentLine(0)
@@ -166,7 +156,6 @@ cmVisualStudioSlnParser::State::State(DataGroupSet requestedData) :
   this->Stack.push(FileStateStart);
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudioSlnParser::State::ReadLine(std::istream& input,
                                               std::string& line)
 {
@@ -174,7 +163,6 @@ bool cmVisualStudioSlnParser::State::ReadLine(std::istream& input,
   return !std::getline(input, line).fail();
 }
 
-//----------------------------------------------------------------------------
 LineFormat cmVisualStudioSlnParser::State::NextLineFormat() const
 {
   switch (this->Stack.top())
@@ -195,7 +183,6 @@ LineFormat cmVisualStudioSlnParser::State::NextLineFormat() const
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudioSlnParser::State::Process(
   const cmVisualStudioSlnParser::ParsedLine& line,
   cmSlnData& output, cmVisualStudioSlnParser::ResultData& result)
@@ -379,7 +366,6 @@ bool cmVisualStudioSlnParser::State::Process(
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudioSlnParser::State::Finished(
   cmVisualStudioSlnParser::ResultData& result)
 {
@@ -392,26 +378,22 @@ bool cmVisualStudioSlnParser::State::Finished(
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmVisualStudioSlnParser::State::IgnoreUntilTag(const std::string& endTag)
 {
   this->Stack.push(FileStateIgnore);
   this->EndIgnoreTag = endTag;
 }
 
-//----------------------------------------------------------------------------
 cmVisualStudioSlnParser::ResultData::ResultData()
   : Result(ResultOK)
   , ResultLine(0)
 {}
 
-//----------------------------------------------------------------------------
 void cmVisualStudioSlnParser::ResultData::Clear()
 {
   *this = ResultData();
 }
 
-//----------------------------------------------------------------------------
 void cmVisualStudioSlnParser::ResultData::SetError(ParseResult error,
                                                    size_t line)
 {
@@ -419,7 +401,6 @@ void cmVisualStudioSlnParser::ResultData::SetError(ParseResult error,
   this->ResultLine = line;
 }
 
-//----------------------------------------------------------------------------
 const cmVisualStudioSlnParser::DataGroupSet
 cmVisualStudioSlnParser::DataGroupProjects(
   1 << cmVisualStudioSlnParser::DataGroupProjectsBit);
@@ -447,7 +428,6 @@ cmVisualStudioSlnParser::DataGroupGenericGlobalSections(
 const cmVisualStudioSlnParser::DataGroupSet
 cmVisualStudioSlnParser::DataGroupAll(~0);
 
-//----------------------------------------------------------------------------
 bool cmVisualStudioSlnParser::Parse(std::istream& input,
                                     cmSlnData& output,
                                     DataGroupSet dataGroups)
@@ -462,7 +442,6 @@ bool cmVisualStudioSlnParser::Parse(std::istream& input,
   return this->ParseImpl(input, output, state);
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudioSlnParser::ParseFile(const std::string& file,
                                         cmSlnData& output,
                                         DataGroupSet dataGroups)
@@ -483,26 +462,22 @@ bool cmVisualStudioSlnParser::ParseFile(const std::string& file,
   return this->ParseImpl(f, output, state);
 }
 
-//----------------------------------------------------------------------------
 cmVisualStudioSlnParser::ParseResult
 cmVisualStudioSlnParser::GetParseResult() const
 {
   return this->LastResult.Result;
 }
 
-//----------------------------------------------------------------------------
 size_t cmVisualStudioSlnParser::GetParseResultLine() const
 {
   return this->LastResult.ResultLine;
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudioSlnParser::GetParseHadBOM() const
 {
   return this->LastResult.HadBOM;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmVisualStudioSlnParser::IsDataGroupSetSupported(DataGroupSet dataGroups) const
 {
@@ -510,7 +485,6 @@ cmVisualStudioSlnParser::IsDataGroupSetSupported(DataGroupSet dataGroups) const
     //only supporting DataGroupProjects for now
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudioSlnParser::ParseImpl(std::istream& input,
                                         cmSlnData& output,
                                         State& state)
@@ -552,7 +526,6 @@ bool cmVisualStudioSlnParser::ParseImpl(std::istream& input,
   return state.Finished(this->LastResult);
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudioSlnParser::ParseBOM(std::istream& input,
                                        std::string& line,
                                        State& state)
@@ -575,7 +548,6 @@ bool cmVisualStudioSlnParser::ParseBOM(std::istream& input,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudioSlnParser::ParseMultiValueTag(const std::string& line,
                                                  ParsedLine& parsedLine,
                                                  State& state)
@@ -626,7 +598,6 @@ bool cmVisualStudioSlnParser::ParseMultiValueTag(const std::string& line,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudioSlnParser::ParseSingleValueTag(const std::string& line,
                                                   ParsedLine& parsedLine,
                                                   State& state)
@@ -643,7 +614,6 @@ bool cmVisualStudioSlnParser::ParseSingleValueTag(const std::string& line,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudioSlnParser::ParseKeyValuePair(const std::string& line,
                                                 ParsedLine& parsedLine,
                                                 State& /*state*/)
@@ -661,7 +631,6 @@ bool cmVisualStudioSlnParser::ParseKeyValuePair(const std::string& line,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudioSlnParser::ParseTag(const std::string& fullTag,
                                        ParsedLine& parsedLine,
                                        State& state)
@@ -698,7 +667,6 @@ bool cmVisualStudioSlnParser::ParseTag(const std::string& fullTag,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudioSlnParser::ParseValue(const std::string& value,
                                          ParsedLine& parsedLine)
 {

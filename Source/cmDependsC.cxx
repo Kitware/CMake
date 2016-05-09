@@ -29,13 +29,11 @@
 #define INCLUDE_REGEX_COMPLAIN_MARKER "#IncludeRegexComplain: "
 #define INCLUDE_REGEX_TRANSFORM_MARKER "#IncludeRegexTransform: "
 
-//----------------------------------------------------------------------------
 cmDependsC::cmDependsC()
 : ValidDeps(0)
 {
 }
 
-//----------------------------------------------------------------------------
 cmDependsC::cmDependsC(cmLocalGenerator* lg,
                    const char* targetDir,
                    const std::string& lang,
@@ -87,14 +85,12 @@ cmDependsC::cmDependsC(cmLocalGenerator* lg,
   this->ReadCacheFile();
 }
 
-//----------------------------------------------------------------------------
 cmDependsC::~cmDependsC()
 {
   this->WriteCacheFile();
   cmDeleteAll(this->FileCache);
 }
 
-//----------------------------------------------------------------------------
 bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
                                    const std::string& obj,
                                    std::ostream& makeDepends,
@@ -292,7 +288,6 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmDependsC::ReadCacheFile()
 {
   if(this->CacheFileName.empty())
@@ -381,7 +376,6 @@ void cmDependsC::ReadCacheFile()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmDependsC::WriteCacheFile() const
 {
   if(this->CacheFileName.empty())
@@ -426,7 +420,6 @@ void cmDependsC::WriteCacheFile() const
    }
 }
 
-//----------------------------------------------------------------------------
 void cmDependsC::Scan(std::istream& is, const char* directory,
   const std::string& fullName)
 {
@@ -484,7 +477,6 @@ void cmDependsC::Scan(std::istream& is, const char* directory,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmDependsC::SetupTransforms()
 {
   // Get the transformation rules.
@@ -532,7 +524,6 @@ void cmDependsC::SetupTransforms()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmDependsC::ParseTransform(std::string const& xform)
 {
   // A transform rule is of the form SOME_MACRO(%)=value-with-%
@@ -547,7 +538,6 @@ void cmDependsC::ParseTransform(std::string const& xform)
   this->TransformRules[name] = value;
 }
 
-//----------------------------------------------------------------------------
 void cmDependsC::TransformLine(std::string& line)
 {
   // Check for a transform rule match.  Return if none.

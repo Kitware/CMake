@@ -17,7 +17,6 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
-//----------------------------------------------------------------------------
 struct cmFindProgramHelper
 {
   cmFindProgramHelper()
@@ -154,7 +153,6 @@ std::string cmFindProgramCommand::FindProgram()
   return program;
 }
 
-//----------------------------------------------------------------------------
 std::string cmFindProgramCommand::FindNormalProgram()
 {
   if(this->NamesPerDir)
@@ -167,7 +165,6 @@ std::string cmFindProgramCommand::FindNormalProgram()
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmFindProgramCommand::FindNormalProgramNamesPerDir()
 {
   // Search for all names in each directory.
@@ -197,7 +194,6 @@ std::string cmFindProgramCommand::FindNormalProgramNamesPerDir()
   return "";
 }
 
-//----------------------------------------------------------------------------
 std::string cmFindProgramCommand::FindNormalProgramDirsPerName()
 {
   // Search the entire path for each name.

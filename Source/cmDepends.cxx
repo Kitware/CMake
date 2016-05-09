@@ -19,7 +19,6 @@
 #include <cmsys/FStream.hxx>
 #include <string.h>
 
-//----------------------------------------------------------------------------
 cmDepends::cmDepends(cmLocalGenerator* lg, const char* targetDir):
   CompileDirectory(),
   LocalGenerator(lg),
@@ -32,14 +31,12 @@ cmDepends::cmDepends(cmLocalGenerator* lg, const char* targetDir):
 {
 }
 
-//----------------------------------------------------------------------------
 cmDepends::~cmDepends()
 {
   delete [] this->Dependee;
   delete [] this->Depender;
 }
 
-//----------------------------------------------------------------------------
 bool cmDepends::Write(std::ostream &makeDepends,
                       std::ostream &internalDepends)
 {
@@ -76,14 +73,12 @@ bool cmDepends::Write(std::ostream &makeDepends,
   return this->Finalize(makeDepends, internalDepends);
 }
 
-//----------------------------------------------------------------------------
 bool cmDepends::Finalize(std::ostream&,
                          std::ostream&)
 {
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmDepends::Check(const char *makeFile, const char *internalFile,
                       std::map<std::string, DependencyVector>& validDeps)
 {
@@ -117,7 +112,6 @@ bool cmDepends::Check(const char *makeFile, const char *internalFile,
   return okay;
 }
 
-//----------------------------------------------------------------------------
 void cmDepends::Clear(const char *file)
 {
   // Print verbose output.
@@ -135,7 +129,6 @@ void cmDepends::Clear(const char *file)
     << "# This may be replaced when dependencies are built." << std::endl;
 }
 
-//----------------------------------------------------------------------------
 bool cmDepends::WriteDependencies(
     const std::set<std::string>&, const std::string&,
     std::ostream&, std::ostream&)
@@ -144,7 +137,6 @@ bool cmDepends::WriteDependencies(
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmDepends::CheckDependencies(std::istream& internalDepends,
                                   const char* internalDependsFileName,
                             std::map<std::string, DependencyVector>& validDeps)
@@ -291,7 +283,6 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
   return okay;
 }
 
-//----------------------------------------------------------------------------
 void cmDepends::SetIncludePathFromLanguage(const std::string& lang)
 {
   // Look for the new per "TARGET_" variant first:

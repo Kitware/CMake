@@ -53,7 +53,6 @@ static void cmConvertToWindowsSlash(std::string& s)
     }
 }
 
-//----------------------------------------------------------------------------
 cmLocalVisualStudio7Generator
 ::cmLocalVisualStudio7Generator(cmGlobalGenerator* gg, cmMakefile* mf):
   cmLocalVisualStudioGenerator(gg, mf)
@@ -193,7 +192,6 @@ void cmLocalVisualStudio7Generator::WriteProjectFiles()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalVisualStudio7Generator::WriteStampFiles()
 {
   // Touch a timestamp file used to determine when the project file is
@@ -224,7 +222,6 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalVisualStudio7Generator
 ::CreateSingleVCProj(const std::string& lname, cmGeneratorTarget *target)
 {
@@ -271,7 +268,6 @@ void cmLocalVisualStudio7Generator
   gg->SetVersion(realVersion);
 }
 
-//----------------------------------------------------------------------------
 cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
 {
   std::string stampName = this->GetCurrentBinaryDirectory();
@@ -593,7 +589,6 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFortranLinkFlagTable[] =
   {0,0,0,0,0}
 };
 
-//----------------------------------------------------------------------------
 // Helper class to write build event <Tool .../> elements.
 class cmLocalVisualStudio7Generator::EventWriter
 {
@@ -646,7 +641,6 @@ private:
   bool First;
 };
 
-//----------------------------------------------------------------------------
 void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
                                                 const std::string& configName,
                                                 const std::string& libName,
@@ -1034,7 +1028,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   fout << "\t\t</Configuration>\n";
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmLocalVisualStudio7Generator
 ::GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
@@ -1423,7 +1416,6 @@ void cmLocalVisualStudio7Generator::OutputDeploymentDebuggerTool(
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmLocalVisualStudio7Generator
 ::WriteTargetVersionAttribute(std::ostream& fout, cmGeneratorTarget* gt)
@@ -1434,7 +1426,6 @@ cmLocalVisualStudio7Generator
   fout << "\t\t\t\tVersion=\"" << major << "." << minor << "\"\n";
 }
 
-//----------------------------------------------------------------------------
 void
 cmLocalVisualStudio7GeneratorInternals
 ::OutputLibraries(std::ostream& fout, ItemVector const& libs)
@@ -1457,7 +1448,6 @@ cmLocalVisualStudio7GeneratorInternals
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmLocalVisualStudio7GeneratorInternals
 ::OutputObjects(std::ostream& fout, cmGeneratorTarget* gt, const char* isep)
@@ -1479,7 +1469,6 @@ cmLocalVisualStudio7GeneratorInternals
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmLocalVisualStudio7Generator
 ::OutputLibraryDirectories(std::ostream& fout,
@@ -1735,7 +1724,6 @@ cmLocalVisualStudio7GeneratorFCInfo
     }
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmLocalVisualStudio7Generator
 ::ComputeLongestObjectDirectory(cmGeneratorTarget const* target) const
@@ -2420,7 +2408,6 @@ void cmLocalVisualStudio7Generator::ReadAndStoreExternalGUID(
 }
 
 
-//----------------------------------------------------------------------------
 std::string cmLocalVisualStudio7Generator
 ::GetTargetDirectory(cmGeneratorTarget const* target) const
 {
@@ -2430,7 +2417,6 @@ std::string cmLocalVisualStudio7Generator
   return dir;
 }
 
-//----------------------------------------------------------------------------
 #include <windows.h>
 static bool cmLVS7G_IsFAT(const char* dir)
 {

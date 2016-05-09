@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <string.h>
 
-//----------------------------------------------------------------------------
 cmXMLSafe::cmXMLSafe(const char* s):
   Data(s),
   Size(static_cast<unsigned long>(strlen(s))),
@@ -27,7 +26,6 @@ cmXMLSafe::cmXMLSafe(const char* s):
 {
 }
 
-//----------------------------------------------------------------------------
 cmXMLSafe::cmXMLSafe(std::string const& s):
     Data(s.c_str()),
     Size(static_cast<unsigned long>(s.length())),
@@ -35,14 +33,12 @@ cmXMLSafe::cmXMLSafe(std::string const& s):
 {
 }
 
-//----------------------------------------------------------------------------
 cmXMLSafe& cmXMLSafe::Quotes(bool b)
 {
   this->DoQuotes = b;
   return *this;
 }
 
-//----------------------------------------------------------------------------
 std::string cmXMLSafe::str()
 {
   std::ostringstream ss;
@@ -50,7 +46,6 @@ std::string cmXMLSafe::str()
   return ss.str();
 }
 
-//----------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream& os, cmXMLSafe const& self)
 {
   char const* first = self.Data;

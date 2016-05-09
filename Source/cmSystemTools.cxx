@@ -462,7 +462,6 @@ bool cmSystemTools::IsOff(const char* val)
   return (offValues.count(v) > 0);
 }
 
-//----------------------------------------------------------------------------
 void cmSystemTools::ParseWindowsCommandLine(const char* command,
                                             std::vector<std::string>& args)
 {
@@ -532,7 +531,6 @@ void cmSystemTools::ParseWindowsCommandLine(const char* command,
     }
 }
 
-//----------------------------------------------------------------------------
 class cmSystemToolsArgV
 {
   char** ArgV;
@@ -555,7 +553,6 @@ public:
     }
 };
 
-//----------------------------------------------------------------------------
 void cmSystemTools::ParseUnixCommandLine(const char* command,
                                          std::vector<std::string>& args)
 {
@@ -894,7 +891,6 @@ bool cmSystemTools::CopyFileIfDifferent(const char* source,
   return Superclass::CopyFileIfDifferent(source, destination);
 }
 
-//----------------------------------------------------------------------------
 #ifdef _WIN32
 cmSystemTools::WindowsFileRetry cmSystemTools::GetWindowsFileRetry()
 {
@@ -932,7 +928,6 @@ cmSystemTools::WindowsFileRetry cmSystemTools::GetWindowsFileRetry()
 }
 #endif
 
-//----------------------------------------------------------------------------
 bool cmSystemTools::RenameFile(const char* oldname, const char* newname)
 {
 #ifdef _WIN32
@@ -1007,7 +1002,6 @@ std::string cmSystemTools::ComputeStringMD5(const std::string& input)
 #endif
 }
 
-//----------------------------------------------------------------------------
 std::string cmSystemTools::ComputeCertificateThumbprint(
   const std::string& source)
 {
@@ -1455,7 +1449,6 @@ std::string cmSystemTools::CollapseCombinedPath(std::string const& dir,
 }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-//----------------------------------------------------------------------
 bool cmSystemTools::UnsetEnv(const char* value)
 {
 #if !defined(HAVE_UNSETENV)
@@ -1468,7 +1461,6 @@ bool cmSystemTools::UnsetEnv(const char* value)
 #endif
 }
 
-//----------------------------------------------------------------------
 std::vector<std::string> cmSystemTools::GetEnvironmentVariables()
 {
   std::vector<std::string> env;
@@ -1480,7 +1472,6 @@ std::vector<std::string> cmSystemTools::GetEnvironmentVariables()
   return env;
 }
 
-//----------------------------------------------------------------------
 void cmSystemTools::AppendEnv(std::vector<std::string> const& env)
 {
   for(std::vector<std::string>::const_iterator eit = env.begin();
@@ -1490,13 +1481,11 @@ void cmSystemTools::AppendEnv(std::vector<std::string> const& env)
     }
 }
 
-//----------------------------------------------------------------------
 cmSystemTools::SaveRestoreEnvironment::SaveRestoreEnvironment()
 {
   this->Env = cmSystemTools::GetEnvironmentVariables();
 }
 
-//----------------------------------------------------------------------
 cmSystemTools::SaveRestoreEnvironment::~SaveRestoreEnvironment()
 {
   // First clear everything in the current environment:
@@ -2028,7 +2017,6 @@ void cmSystemTools::DoNotInheritStdPipes()
 #endif
 }
 
-//----------------------------------------------------------------------------
 bool cmSystemTools::CopyFileTime(const char* fromFile, const char* toFile)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -2073,19 +2061,16 @@ bool cmSystemTools::CopyFileTime(const char* fromFile, const char* toFile)
   return true;
 }
 
-//----------------------------------------------------------------------------
 cmSystemToolsFileTime* cmSystemTools::FileTimeNew()
 {
   return new cmSystemToolsFileTime;
 }
 
-//----------------------------------------------------------------------------
 void cmSystemTools::FileTimeDelete(cmSystemToolsFileTime* t)
 {
   delete t;
 }
 
-//----------------------------------------------------------------------------
 bool cmSystemTools::FileTimeGet(const char* fname, cmSystemToolsFileTime* t)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -2113,7 +2098,6 @@ bool cmSystemTools::FileTimeGet(const char* fname, cmSystemToolsFileTime* t)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmSystemTools::FileTimeSet(const char* fname, cmSystemToolsFileTime* t)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -2138,7 +2122,6 @@ bool cmSystemTools::FileTimeSet(const char* fname, cmSystemToolsFileTime* t)
   return true;
 }
 
-//----------------------------------------------------------------------------
 #ifdef _WIN32
 # ifndef CRYPT_SILENT
 #  define CRYPT_SILENT 0x40 /* Not defined by VS 6 version of header.  */
@@ -2157,7 +2140,6 @@ static int WinCryptRandom(void* data, size_t size)
 }
 #endif
 
-//----------------------------------------------------------------------------
 unsigned int cmSystemTools::RandomSeed()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -2205,7 +2187,6 @@ unsigned int cmSystemTools::RandomSeed()
 #endif
 }
 
-//----------------------------------------------------------------------------
 static std::string cmSystemToolsCMakeCommand;
 static std::string cmSystemToolsCTestCommand;
 static std::string cmSystemToolsCPackCommand;
@@ -2347,49 +2328,41 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
 #endif
 }
 
-//----------------------------------------------------------------------------
 std::string const& cmSystemTools::GetCMakeCommand()
 {
   return cmSystemToolsCMakeCommand;
 }
 
-//----------------------------------------------------------------------------
 std::string const& cmSystemTools::GetCTestCommand()
 {
   return cmSystemToolsCTestCommand;
 }
 
-//----------------------------------------------------------------------------
 std::string const& cmSystemTools::GetCPackCommand()
 {
   return cmSystemToolsCPackCommand;
 }
 
-//----------------------------------------------------------------------------
 std::string const& cmSystemTools::GetCMakeCursesCommand()
 {
   return cmSystemToolsCMakeCursesCommand;
 }
 
-//----------------------------------------------------------------------------
 std::string const& cmSystemTools::GetCMakeGUICommand()
 {
   return cmSystemToolsCMakeGUICommand;
 }
 
-//----------------------------------------------------------------------------
 std::string const& cmSystemTools::GetCMClDepsCommand()
 {
   return cmSystemToolsCMClDepsCommand;
 }
 
-//----------------------------------------------------------------------------
 std::string const& cmSystemTools::GetCMakeRoot()
 {
   return cmSystemToolsCMakeRoot;
 }
 
-//----------------------------------------------------------------------------
 void cmSystemTools::MakefileColorEcho(int color, const char* message,
                                       bool newline, bool enabled)
 {
@@ -2426,7 +2399,6 @@ void cmSystemTools::MakefileColorEcho(int color, const char* message,
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
                                        std::string& soname)
 {
@@ -2467,7 +2439,6 @@ bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
                                        std::string& soname)
 {
@@ -2485,7 +2456,6 @@ bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
   return false;
 }
 
-//----------------------------------------------------------------------------
 #if defined(CMAKE_USE_ELF_PARSER)
 std::string::size_type cmSystemToolsFindRPath(std::string const& have,
                                               std::string const& want)
@@ -2541,7 +2511,6 @@ struct cmSystemToolsRPathInfo
 };
 #endif
 
-//----------------------------------------------------------------------------
 bool cmSystemTools::ChangeRPath(std::string const& file,
                                 std::string const& oldRPath,
                                 std::string const& newRPath,
@@ -2755,7 +2724,6 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
 #endif
 }
 
-//----------------------------------------------------------------------------
 bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
                                    const char* lhss, const char* rhss)
 {
@@ -2795,7 +2763,6 @@ bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
   return op == cmSystemTools::OP_EQUAL;
 }
 
-//----------------------------------------------------------------------------
 bool cmSystemTools::VersionCompareEqual(std::string const& lhs,
                                         std::string const& rhs)
 {
@@ -2803,7 +2770,6 @@ bool cmSystemTools::VersionCompareEqual(std::string const& lhs,
     cmSystemTools::OP_EQUAL, lhs.c_str(), rhs.c_str());
 }
 
-//----------------------------------------------------------------------------
 bool cmSystemTools::VersionCompareGreater(std::string const& lhs,
                                           std::string const& rhs)
 {
@@ -2811,7 +2777,6 @@ bool cmSystemTools::VersionCompareGreater(std::string const& lhs,
     cmSystemTools::OP_GREATER, lhs.c_str(), rhs.c_str());
 }
 
-//----------------------------------------------------------------------------
 bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
                                 bool* removed)
 {
@@ -2981,7 +2946,6 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
 #endif
 }
 
-//----------------------------------------------------------------------------
 bool cmSystemTools::CheckRPath(std::string const& file,
                                std::string const& newRPath)
 {
@@ -3020,7 +2984,6 @@ bool cmSystemTools::CheckRPath(std::string const& file,
 #endif
 }
 
-//----------------------------------------------------------------------------
 bool cmSystemTools::RepeatedRemoveDirectory(const char* dir)
 {
   // Windows sometimes locks files temporarily so try a few times.
@@ -3035,7 +2998,6 @@ bool cmSystemTools::RepeatedRemoveDirectory(const char* dir)
   return false;
 }
 
-//----------------------------------------------------------------------------
 std::vector<std::string> cmSystemTools::tokenize(const std::string& str,
                                   const std::string& sep)
 {
@@ -3067,7 +3029,6 @@ std::vector<std::string> cmSystemTools::tokenize(const std::string& str,
   return tokens;
 }
 
-//----------------------------------------------------------------------------
 bool cmSystemTools::StringToLong(const char* str, long* value)
 {
   errno = 0;
@@ -3076,7 +3037,6 @@ bool cmSystemTools::StringToLong(const char* str, long* value)
   return (*endp == '\0') && (endp != str) && (errno == 0);
 }
 
-//----------------------------------------------------------------------------
 bool cmSystemTools::StringToULong(const char* str, unsigned long* value)
 {
   errno = 0;

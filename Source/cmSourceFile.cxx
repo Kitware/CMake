@@ -16,7 +16,6 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-//----------------------------------------------------------------------------
 cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name):
   Location(mf, name)
 {
@@ -26,13 +25,11 @@ cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name):
           cmSystemTools::GetFilenameLastExtension(this->Location.GetName()));
 }
 
-//----------------------------------------------------------------------------
 cmSourceFile::~cmSourceFile()
 {
   this->SetCustomCommand(0);
 }
 
-//----------------------------------------------------------------------------
 std::string const& cmSourceFile::GetExtension() const
 {
   return this->Extension;
@@ -40,19 +37,16 @@ std::string const& cmSourceFile::GetExtension() const
 
 const std::string cmSourceFile::propLANGUAGE = "LANGUAGE";
 
-//----------------------------------------------------------------------------
 void cmSourceFile::SetObjectLibrary(std::string const& objlib)
 {
   this->ObjectLibrary = objlib;
 }
 
-//----------------------------------------------------------------------------
 std::string cmSourceFile::GetObjectLibrary() const
 {
   return this->ObjectLibrary;
 }
 
-//----------------------------------------------------------------------------
 std::string cmSourceFile::GetLanguage()
 {
   // If the language was set explicitly by the user then use it.
@@ -89,7 +83,6 @@ std::string cmSourceFile::GetLanguage()
   return static_cast<cmSourceFile const*>(this)->GetLanguage();
 }
 
-//----------------------------------------------------------------------------
 std::string cmSourceFile::GetLanguage() const
 {
   // If the language was set explicitly by the user then use it.
@@ -108,13 +101,11 @@ std::string cmSourceFile::GetLanguage() const
   return "";
 }
 
-//----------------------------------------------------------------------------
 cmSourceFileLocation const& cmSourceFile::GetLocation() const
 {
     return this->Location;
 }
 
-//----------------------------------------------------------------------------
 std::string const& cmSourceFile::GetFullPath(std::string* error)
 {
   if(this->FullPath.empty())
@@ -127,13 +118,11 @@ std::string const& cmSourceFile::GetFullPath(std::string* error)
   return this->FullPath;
 }
 
-//----------------------------------------------------------------------------
 std::string const& cmSourceFile::GetFullPath() const
 {
   return this->FullPath;
 }
 
-//----------------------------------------------------------------------------
 bool cmSourceFile::FindFullPath(std::string* error)
 {
   // If thie method has already failed once do not try again.
@@ -232,7 +221,6 @@ bool cmSourceFile::FindFullPath(std::string* error)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmSourceFile::TryFullPath(const std::string& path,
                                const std::string& ext)
 {
@@ -250,7 +238,6 @@ bool cmSourceFile::TryFullPath(const std::string& path,
   return false;
 }
 
-//----------------------------------------------------------------------------
 void cmSourceFile::CheckExtension()
 {
   // Compute the extension.
@@ -277,7 +264,6 @@ void cmSourceFile::CheckExtension()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmSourceFile::CheckLanguage(std::string const& ext)
 {
   // Try to identify the source file language from the extension.
@@ -290,13 +276,11 @@ void cmSourceFile::CheckLanguage(std::string const& ext)
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmSourceFile::Matches(cmSourceFileLocation const& loc)
 {
   return this->Location.Matches(loc);
 }
 
-//----------------------------------------------------------------------------
 void cmSourceFile::SetProperty(const std::string& prop, const char* value)
 {
   this->Properties.SetProperty(prop, value);
@@ -311,14 +295,12 @@ void cmSourceFile::SetProperty(const std::string& prop, const char* value)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmSourceFile::AppendProperty(const std::string& prop, const char* value,
                                   bool asString)
 {
   this->Properties.AppendProperty(prop, value, asString);
 }
 
-//----------------------------------------------------------------------------
 const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
 {
   // This method is a consequence of design history and backwards
@@ -345,7 +327,6 @@ const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
   return this->GetProperty(prop);
 }
 
-//----------------------------------------------------------------------------
 const char* cmSourceFile::GetProperty(const std::string& prop) const
 {
   // Check for computed properties.
@@ -376,25 +357,21 @@ const char* cmSourceFile::GetProperty(const std::string& prop) const
   return retVal;
 }
 
-//----------------------------------------------------------------------------
 bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const
 {
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }
 
-//----------------------------------------------------------------------------
 cmCustomCommand* cmSourceFile::GetCustomCommand()
 {
   return this->CustomCommand;
 }
 
-//----------------------------------------------------------------------------
 cmCustomCommand const* cmSourceFile::GetCustomCommand() const
 {
   return this->CustomCommand;
 }
 
-//----------------------------------------------------------------------------
 void cmSourceFile::SetCustomCommand(cmCustomCommand* cc)
 {
   cmCustomCommand* old = this->CustomCommand;

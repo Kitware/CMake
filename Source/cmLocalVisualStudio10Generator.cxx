@@ -61,7 +61,6 @@ class cmVS10XMLParser : public cmXMLParser
 };
 
 
-//----------------------------------------------------------------------------
 cmLocalVisualStudio10Generator
 ::cmLocalVisualStudio10Generator(cmGlobalGenerator* gg, cmMakefile* mf):
   cmLocalVisualStudio7Generator(gg, mf)
@@ -123,7 +122,6 @@ void cmLocalVisualStudio10Generator
                   cmState::INTERNAL);
 }
 
-//----------------------------------------------------------------------------
 const char* cmLocalVisualStudio10Generator::ReportErrorLabel() const
 {
   return ":VCEnd";

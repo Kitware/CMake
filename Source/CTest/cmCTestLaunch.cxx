@@ -27,7 +27,6 @@
 #include <stdio.h> // for std{out,err} and fileno
 #endif
 
-//----------------------------------------------------------------------------
 cmCTestLaunch::cmCTestLaunch(int argc, const char* const* argv)
 {
   this->Passthru = true;
@@ -48,7 +47,6 @@ cmCTestLaunch::cmCTestLaunch(int argc, const char* const* argv)
   this->Process = cmsysProcess_New();
 }
 
-//----------------------------------------------------------------------------
 cmCTestLaunch::~cmCTestLaunch()
 {
   cmsysProcess_Delete(this->Process);
@@ -59,7 +57,6 @@ cmCTestLaunch::~cmCTestLaunch()
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestLaunch::ParseArguments(int argc, const char* const* argv)
 {
   // Launcher options occur first and are separated from the real
@@ -171,7 +168,6 @@ bool cmCTestLaunch::ParseArguments(int argc, const char* const* argv)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmCTestLaunch::HandleRealArg(const char* arg)
 {
 #ifdef _WIN32
@@ -190,7 +186,6 @@ void cmCTestLaunch::HandleRealArg(const char* arg)
   this->RealArgs.push_back(arg);
 }
 
-//----------------------------------------------------------------------------
 void cmCTestLaunch::ComputeFileNames()
 {
   // We just passthru the behavior of the real command unless the
@@ -234,7 +229,6 @@ void cmCTestLaunch::ComputeFileNames()
   this->LogErr += "-err.txt";
 }
 
-//----------------------------------------------------------------------------
 void cmCTestLaunch::RunChild()
 {
   // Ignore noopt make rules
@@ -302,7 +296,6 @@ void cmCTestLaunch::RunChild()
   this->ExitCode = cmsysProcess_GetExitValue(cp);
 }
 
-//----------------------------------------------------------------------------
 int cmCTestLaunch::Run()
 {
   if(!this->Process)
@@ -324,7 +317,6 @@ int cmCTestLaunch::Run()
   return this->ExitCode;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestLaunch::LoadLabels()
 {
   if(this->OptionBuildDir.empty() || this->OptionTargetName.empty())
@@ -379,7 +371,6 @@ void cmCTestLaunch::LoadLabels()
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestLaunch::SourceMatches(std::string const& lhs,
                                   std::string const& rhs)
 {
@@ -390,13 +381,11 @@ bool cmCTestLaunch::SourceMatches(std::string const& lhs,
   return lhs == rhs;
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestLaunch::IsError() const
 {
   return this->ExitCode != 0;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestLaunch::WriteXML()
 {
   // Name the xml file.
@@ -417,7 +406,6 @@ void cmCTestLaunch::WriteXML()
   xml.EndElement(); // Failure
 }
 
-//----------------------------------------------------------------------------
 void cmCTestLaunch::WriteXMLAction(cmXMLWriter& xml)
 {
   xml.Comment("Meta-information about the build action");
@@ -493,7 +481,6 @@ void cmCTestLaunch::WriteXMLAction(cmXMLWriter& xml)
   xml.EndElement(); // Action
 }
 
-//----------------------------------------------------------------------------
 void cmCTestLaunch::WriteXMLCommand(cmXMLWriter& xml)
 {
   xml.Comment("Details of command");
@@ -510,7 +497,6 @@ void cmCTestLaunch::WriteXMLCommand(cmXMLWriter& xml)
   xml.EndElement(); // Command
 }
 
-//----------------------------------------------------------------------------
 void cmCTestLaunch::WriteXMLResult(cmXMLWriter& xml)
 {
   xml.Comment("Result of command");
@@ -556,7 +542,6 @@ void cmCTestLaunch::WriteXMLResult(cmXMLWriter& xml)
   xml.EndElement(); // Result
 }
 
-//----------------------------------------------------------------------------
 void cmCTestLaunch::WriteXMLLabels(cmXMLWriter& xml)
 {
   this->LoadLabels();
@@ -573,7 +558,6 @@ void cmCTestLaunch::WriteXMLLabels(cmXMLWriter& xml)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmCTestLaunch::DumpFileToXML(cmXMLWriter& xml,
                                   std::string const& fname)
 {
@@ -595,7 +579,6 @@ void cmCTestLaunch::DumpFileToXML(cmXMLWriter& xml,
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestLaunch::CheckResults()
 {
   // Skip XML in passthru mode.
@@ -619,7 +602,6 @@ bool cmCTestLaunch::CheckResults()
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestLaunch::LoadScrapeRules()
 {
   if(this->ScrapeRulesLoaded)
@@ -640,7 +622,6 @@ void cmCTestLaunch::LoadScrapeRules()
   this->LoadScrapeRules("WarningSuppress", this->RegexWarningSuppress);
 }
 
-//----------------------------------------------------------------------------
 void
 cmCTestLaunch
 ::LoadScrapeRules(const char* purpose,
@@ -662,7 +643,6 @@ cmCTestLaunch
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestLaunch::ScrapeLog(std::string const& fname)
 {
   this->LoadScrapeRules();
@@ -687,7 +667,6 @@ bool cmCTestLaunch::ScrapeLog(std::string const& fname)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestLaunch::Match(std::string const& line,
                           std::vector<cmsys::RegularExpression>& regexps)
 {
@@ -702,7 +681,6 @@ bool cmCTestLaunch::Match(std::string const& line,
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestLaunch::MatchesFilterPrefix(std::string const& line) const
 {
   if(!this->OptionFilterPrefix.empty() && cmSystemTools::StringStartsWith(
@@ -713,7 +691,6 @@ bool cmCTestLaunch::MatchesFilterPrefix(std::string const& line) const
   return false;
 }
 
-//----------------------------------------------------------------------------
 int cmCTestLaunch::Main(int argc, const char* const argv[])
 {
   if(argc == 2)
@@ -726,7 +703,6 @@ int cmCTestLaunch::Main(int argc, const char* const argv[])
   return self.Run();
 }
 
-//----------------------------------------------------------------------------
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmake.h"

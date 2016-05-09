@@ -154,7 +154,6 @@ bool cmCTestStartCommand
   return this->CTest->InitializeFromCommand(this);
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestStartCommand::InitialCheckout(
   std::ostream& ofs, std::string const& sourceDir)
 {

@@ -23,19 +23,16 @@ struct cmCTestSVN::Revision: public cmCTestVC::Revision
   cmCTestSVN::SVNInfo* SVNInfo;
 };
 
-//----------------------------------------------------------------------------
 cmCTestSVN::cmCTestSVN(cmCTest* ct, std::ostream& log):
   cmCTestGlobalVC(ct, log)
 {
   this->PriorRev = this->Unknown;
 }
 
-//----------------------------------------------------------------------------
 cmCTestSVN::~cmCTestSVN()
 {
 }
 
-//----------------------------------------------------------------------------
 void cmCTestSVN::CleanupImpl()
 {
   std::vector<const char*> svn_cleanup;
@@ -45,7 +42,6 @@ void cmCTestSVN::CleanupImpl()
   this->RunSVNCommand(svn_cleanup, &out, &err);
 }
 
-//----------------------------------------------------------------------------
 class cmCTestSVN::InfoParser: public cmCTestVC::LineParser
 {
 public:
@@ -84,7 +80,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 static bool cmCTestSVNPathStarts(std::string const& p1, std::string const& p2)
 {
   // Does path p1 start with path p2?
@@ -102,7 +97,6 @@ static bool cmCTestSVNPathStarts(std::string const& p1, std::string const& p2)
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmCTestSVN::LoadInfo(SVNInfo& svninfo)
 {
   // Run "svn info" to get the repository info from the work tree.
@@ -116,7 +110,6 @@ std::string cmCTestSVN::LoadInfo(SVNInfo& svninfo)
   return rev;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestSVN::NoteOldRevision()
 {
   // Info for root repository
@@ -145,7 +138,6 @@ void cmCTestSVN::NoteOldRevision()
   this->PriorRev.Rev = this->OldRevision;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestSVN::NoteNewRevision()
 {
   // Get info for the external repositories
@@ -186,7 +178,6 @@ void cmCTestSVN::NoteNewRevision()
   this->NewRevision = this->RootInfo->NewRevision;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestSVN::GuessBase(SVNInfo& svninfo,
                            std::vector<Change> const& changes)
 {
@@ -220,7 +211,6 @@ void cmCTestSVN::GuessBase(SVNInfo& svninfo,
   this->Log << "Guessed Base = " << svninfo.Base << "\n";
 }
 
-//----------------------------------------------------------------------------
 class cmCTestSVN::UpdateParser: public cmCTestVC::LineParser
 {
 public:
@@ -268,7 +258,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 bool cmCTestSVN::UpdateImpl()
 {
   // Get user-specified update options.
@@ -298,7 +287,6 @@ bool cmCTestSVN::UpdateImpl()
   return this->RunSVNCommand(svn_update, &out, &err);
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestSVN::RunSVNCommand(std::vector<char const*> const& parameters,
     OutputParser* out, OutputParser* err)
 {
@@ -334,7 +322,6 @@ bool cmCTestSVN::RunSVNCommand(std::vector<char const*> const& parameters,
     }
 }
 
-//----------------------------------------------------------------------------
 class cmCTestSVN::LogParser: public cmCTestVC::OutputLogger,
                              private cmXMLParser
 {
@@ -423,7 +410,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 void cmCTestSVN::LoadRevisions()
 {
   // Get revisions for all the external repositories
@@ -436,7 +422,6 @@ void cmCTestSVN::LoadRevisions()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmCTestSVN::LoadRevisions(SVNInfo &svninfo)
 {
   // We are interested in every revision included in the update.
@@ -462,7 +447,6 @@ void cmCTestSVN::LoadRevisions(SVNInfo &svninfo)
   this->RunSVNCommand(svn_log, &out, &err);
 }
 
-//----------------------------------------------------------------------------
 void cmCTestSVN::DoRevisionSVN(Revision const& revision,
                                std::vector<Change> const& changes)
 {
@@ -482,7 +466,6 @@ void cmCTestSVN::DoRevisionSVN(Revision const& revision,
   this->cmCTestGlobalVC::DoRevision(revision, changes);
 }
 
-//----------------------------------------------------------------------------
 class cmCTestSVN::StatusParser: public cmCTestVC::LineParser
 {
 public:
@@ -523,7 +506,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 void cmCTestSVN::LoadModifications()
 {
   // Run "svn status" which reports local modifications.
@@ -534,7 +516,6 @@ void cmCTestSVN::LoadModifications()
   this->RunSVNCommand(svn_status, &out, &err);
 }
 
-//----------------------------------------------------------------------------
 void cmCTestSVN::WriteXMLGlobal(cmXMLWriter& xml)
 {
   this->cmCTestGlobalVC::WriteXMLGlobal(xml);
@@ -542,7 +523,6 @@ void cmCTestSVN::WriteXMLGlobal(cmXMLWriter& xml)
   xml.Element("SVNPath", this->RootInfo->Base);
 }
 
-//----------------------------------------------------------------------------
 class cmCTestSVN::ExternalParser: public cmCTestVC::LineParser
 {
 public:
@@ -581,7 +561,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 void cmCTestSVN::LoadExternals()
 {
   // Run "svn status" to get the list of external repositories
@@ -592,7 +571,6 @@ void cmCTestSVN::LoadExternals()
   this->RunSVNCommand(svn_status, &out, &err);
 }
 
-//----------------------------------------------------------------------------
 std::string cmCTestSVN::SVNInfo::BuildLocalPath(std::string const& path) const
 {
   std::string local_path;

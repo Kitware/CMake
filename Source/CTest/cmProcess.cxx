@@ -69,7 +69,6 @@ bool cmProcess::StartProcess()
           == cmsysProcess_State_Executing);
 }
 
-//----------------------------------------------------------------------------
 bool cmProcess::Buffer::GetLine(std::string& line)
 {
   // Scan for the next newline.
@@ -106,7 +105,6 @@ bool cmProcess::Buffer::GetLine(std::string& line)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmProcess::Buffer::GetLast(std::string& line)
 {
   // Return the partial last line, if any.
@@ -120,7 +118,6 @@ bool cmProcess::Buffer::GetLast(std::string& line)
   return false;
 }
 
-//----------------------------------------------------------------------------
 int cmProcess::GetNextOutputLine(std::string& line, double timeout)
 {
   for(;;)

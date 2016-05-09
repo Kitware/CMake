@@ -14,13 +14,11 @@
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
 
-//----------------------------------------------------------------------------
 cmCTestCoverageCommand::cmCTestCoverageCommand()
 {
   this->LabelsMentioned = false;
 }
 
-//----------------------------------------------------------------------------
 cmCTestGenericHandler* cmCTestCoverageCommand::InitializeHandler()
 {
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
@@ -45,7 +43,6 @@ cmCTestGenericHandler* cmCTestCoverageCommand::InitializeHandler()
   return handler;
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestCoverageCommand::CheckArgumentKeyword(std::string const& arg)
 {
   // Look for arguments specific to this command.
@@ -60,7 +57,6 @@ bool cmCTestCoverageCommand::CheckArgumentKeyword(std::string const& arg)
   return this->Superclass::CheckArgumentKeyword(arg);
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestCoverageCommand::CheckArgumentValue(std::string const& arg)
 {
   // Handle states specific to this command.

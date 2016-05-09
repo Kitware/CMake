@@ -43,7 +43,6 @@ cmCTestRunTest::~cmCTestRunTest()
 {
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestRunTest::CheckOutput()
 {
   // Read lines for up to 0.1 seconds of total time.
@@ -98,7 +97,6 @@ bool cmCTestRunTest::CheckOutput()
   return true;
 }
 
-//---------------------------------------------------------
 // Streamed compression of test output.  The compressed data
 // is appended to this->CompressedOutput
 void cmCTestRunTest::CompressOutput()
@@ -161,7 +159,6 @@ void cmCTestRunTest::CompressOutput()
   delete [] out;
 }
 
-//---------------------------------------------------------
 bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
 {
   if ((!this->TestHandler->MemCheck &&
@@ -428,7 +425,6 @@ bool cmCTestRunTest::NeedsToRerun()
     }
   return false;
 }
-//----------------------------------------------------------------------
 void cmCTestRunTest::ComputeWeightedCost()
 {
   double prev = static_cast<double>(this->TestProperties->PreviousRuns);
@@ -443,7 +439,6 @@ void cmCTestRunTest::ComputeWeightedCost()
     }
 }
 
-//----------------------------------------------------------------------
 void cmCTestRunTest::MemCheckPostProcess()
 {
   if(!this->TestHandler->MemCheck)
@@ -460,7 +455,6 @@ void cmCTestRunTest::MemCheckPostProcess()
   handler->PostProcessTest(this->TestResult, this->Index);
 }
 
-//----------------------------------------------------------------------
 // Starts the execution of a test.  Returns once it has started
 bool cmCTestRunTest::StartTest(size_t total)
 {
@@ -556,7 +550,6 @@ bool cmCTestRunTest::StartTest(size_t total)
                            &this->TestProperties->Environment);
 }
 
-//----------------------------------------------------------------------
 void cmCTestRunTest::ComputeArguments()
 {
   this->Arguments.clear(); // reset becaue this might be a rerun
@@ -623,7 +616,6 @@ void cmCTestRunTest::ComputeArguments()
     }
 }
 
-//----------------------------------------------------------------------
 void cmCTestRunTest::DartProcessing()
 {
   if (!this->ProcessOutput.empty() &&
@@ -643,7 +635,6 @@ void cmCTestRunTest::DartProcessing()
     }
 }
 
-//----------------------------------------------------------------------
 double cmCTestRunTest::ResolveTimeout()
 {
   double timeout = this->TestProperties->Timeout;
@@ -708,7 +699,6 @@ double cmCTestRunTest::ResolveTimeout()
     (timeout < stop_timeout ? timeout : stop_timeout);
 }
 
-//----------------------------------------------------------------------
 bool cmCTestRunTest::ForkProcess(double testTimeOut, bool explicitTimeout,
                      std::vector<std::string>* environment)
 {

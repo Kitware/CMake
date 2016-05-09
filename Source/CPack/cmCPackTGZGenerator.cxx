@@ -12,14 +12,12 @@
 
 #include "cmCPackTGZGenerator.h"
 
-//----------------------------------------------------------------------
 cmCPackTGZGenerator::cmCPackTGZGenerator()
   :cmCPackArchiveGenerator(cmArchiveWrite::CompressGZip,
                            "paxr")
 {
 }
 
-//----------------------------------------------------------------------
 cmCPackTGZGenerator::~cmCPackTGZGenerator()
 {
 }

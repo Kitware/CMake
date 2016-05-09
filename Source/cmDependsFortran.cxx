@@ -24,7 +24,6 @@
 // use lower case and some always use upper case.  I do not know if any
 // use the case from the source code.
 
-//----------------------------------------------------------------------------
 class cmDependsFortranInternals
 {
 public:
@@ -55,13 +54,11 @@ public:
     }
 };
 
-//----------------------------------------------------------------------------
 cmDependsFortran::cmDependsFortran():
   Internal(0)
 {
 }
 
-//----------------------------------------------------------------------------
 cmDependsFortran
 ::cmDependsFortran(cmLocalGenerator* lg):
   cmDepends(lg),
@@ -94,13 +91,11 @@ cmDependsFortran
     }
 }
 
-//----------------------------------------------------------------------------
 cmDependsFortran::~cmDependsFortran()
 {
   delete this->Internal;
 }
 
-//----------------------------------------------------------------------------
 bool cmDependsFortran::WriteDependencies(
     const std::set<std::string>& sources, const std::string& obj,
     std::ostream&, std::ostream&)
@@ -143,7 +138,6 @@ bool cmDependsFortran::WriteDependencies(
   return okay;
 }
 
-//----------------------------------------------------------------------------
 bool cmDependsFortran::Finalize(std::ostream& makeDepends,
                                 std::ostream& internalDepends)
 {
@@ -232,7 +226,6 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmDependsFortran::LocateModules()
 {
   // Collect the set of modules provided and required by all sources.
@@ -283,7 +276,6 @@ void cmDependsFortran::LocateModules()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmDependsFortran::MatchLocalModules()
 {
   const char* stampDir = this->TargetDirectory.c_str();
@@ -295,7 +287,6 @@ void cmDependsFortran::MatchLocalModules()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmDependsFortran::MatchRemoteModules(std::istream& fin,
                                           const char* stampDir)
 {
@@ -327,7 +318,6 @@ void cmDependsFortran::MatchRemoteModules(std::istream& fin,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmDependsFortran::ConsiderModule(const char* name,
                                       const char* stampDir)
 {
@@ -347,7 +337,6 @@ void cmDependsFortran::ConsiderModule(const char* name,
     }
 }
 
-//----------------------------------------------------------------------------
 bool
 cmDependsFortran
 ::WriteDependenciesReal(const char *obj,
@@ -516,7 +505,6 @@ cmDependsFortran
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmDependsFortran::FindModule(std::string const& name,
                                   std::string& module)
 {
@@ -554,7 +542,6 @@ bool cmDependsFortran::FindModule(std::string const& name,
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
 {
   // Implements
@@ -620,7 +607,6 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
   return false;
 }
 
-//----------------------------------------------------------------------------
 // Helper function to look for a short sequence in a stream.  If this
 // is later used for longer sequences it should be re-written using an
 // efficient string search algorithm such as Boyer-Moore.
@@ -656,7 +642,6 @@ bool cmFortranStreamContainsSequence(std::istream& ifs,
   return true;
 }
 
-//----------------------------------------------------------------------------
 // Helper function to compare the remaining content in two streams.
 static bool cmFortranStreamsDiffer(std::istream& ifs1,
                                           std::istream& ifs2)
@@ -684,7 +669,6 @@ static bool cmFortranStreamsDiffer(std::istream& ifs1,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmDependsFortran::ModulesDiffer(const char* modFile,
                                      const char* stampFile,
                                      const char* compilerId)

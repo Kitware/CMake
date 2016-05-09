@@ -87,13 +87,11 @@ public:
   virtual bool SupportsToolset() const { return true; }
 };
 
-//----------------------------------------------------------------------------
 cmGlobalGeneratorFactory* cmGlobalVisualStudio10Generator::NewFactory()
 {
   return new Factory;
 }
 
-//----------------------------------------------------------------------------
 cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(cmake* cm,
   const std::string& name, const std::string& platformName)
   : cmGlobalVisualStudio8Generator(cm, name, platformName)
@@ -109,7 +107,6 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(cmake* cm,
   this->Version = VS10;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudio10Generator::MatchesGeneratorName(
                                                const std::string& name) const
@@ -122,7 +119,6 @@ cmGlobalVisualStudio10Generator::MatchesGeneratorName(
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
                                                     cmMakefile* mf)
 {
@@ -135,7 +131,6 @@ bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
   return this->cmGlobalVisualStudio8Generator::SetSystemName(s, mf);
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudio10Generator::SetGeneratorPlatform(std::string const& p,
                                                       cmMakefile* mf)
@@ -154,7 +149,6 @@ cmGlobalVisualStudio10Generator::SetGeneratorPlatform(std::string const& p,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts,
                                                      cmMakefile* mf)
@@ -177,7 +171,6 @@ cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
 {
   if (this->SystemName == "Windows")
@@ -239,13 +232,11 @@ bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio10Generator::InitializeWindows(cmMakefile*)
 {
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile* mf)
 {
   if (this->DefaultPlatformName != "Win32")
@@ -262,7 +253,6 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile* mf)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio10Generator::InitializeWindowsPhone(cmMakefile* mf)
 {
   std::ostringstream e;
@@ -271,7 +261,6 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsPhone(cmMakefile* mf)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio10Generator::InitializeWindowsStore(cmMakefile* mf)
 {
   std::ostringstream e;
@@ -280,7 +269,6 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsStore(cmMakefile* mf)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudio10Generator::SelectWindowsPhoneToolset(
   std::string& toolset) const
@@ -289,7 +277,6 @@ cmGlobalVisualStudio10Generator::SelectWindowsPhoneToolset(
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudio10Generator::SelectWindowsStoreToolset(
   std::string& toolset) const
@@ -298,7 +285,6 @@ cmGlobalVisualStudio10Generator::SelectWindowsStoreToolset(
   return false;
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio10Generator::SelectWindowsCEToolset() const
 {
   if (this->SystemVersion == "8.0")
@@ -308,7 +294,6 @@ std::string cmGlobalVisualStudio10Generator::SelectWindowsCEToolset() const
   return "";
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio10Generator::WriteSLNHeader(std::ostream& fout)
 {
   fout << "Microsoft Visual Studio Solution File, Format Version 11.00\n";
@@ -362,7 +347,6 @@ void cmGlobalVisualStudio10Generator::Generate()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio10Generator
 ::EnableLanguage(std::vector<std::string>const &  lang,
                  cmMakefile *mf, bool optional)
@@ -370,7 +354,6 @@ void cmGlobalVisualStudio10Generator
   cmGlobalVisualStudio8Generator::EnableLanguage(lang, mf, optional);
 }
 
-//----------------------------------------------------------------------------
 const char* cmGlobalVisualStudio10Generator::GetPlatformToolset() const
 {
   if(!this->GeneratorToolset.empty())
@@ -384,7 +367,6 @@ const char* cmGlobalVisualStudio10Generator::GetPlatformToolset() const
   return 0;
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio10Generator::FindMakeProgram(cmMakefile* mf)
 {
   this->cmGlobalVisualStudio8Generator::FindMakeProgram(mf);
@@ -392,7 +374,6 @@ void cmGlobalVisualStudio10Generator::FindMakeProgram(cmMakefile* mf)
                     this->GetMSBuildCommand().c_str());
 }
 
-//----------------------------------------------------------------------------
 std::string const& cmGlobalVisualStudio10Generator::GetMSBuildCommand()
 {
   if(!this->MSBuildCommandInitialized)
@@ -403,7 +384,6 @@ std::string const& cmGlobalVisualStudio10Generator::GetMSBuildCommand()
   return this->MSBuildCommand;
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio10Generator::FindMSBuildCommand()
 {
   std::string msbuild;
@@ -421,7 +401,6 @@ std::string cmGlobalVisualStudio10Generator::FindMSBuildCommand()
   return msbuild;
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio10Generator::FindDevEnvCommand()
 {
   if(this->ExpressEdition)
@@ -436,7 +415,6 @@ std::string cmGlobalVisualStudio10Generator::FindDevEnvCommand()
   return this->cmGlobalVisualStudio71Generator::FindDevEnvCommand();
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand,
   const std::string& makeProgram,
@@ -541,7 +519,6 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
                      makeOptions.begin(), makeOptions.end());
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
 {
   if(this->GetPlatformToolset())
@@ -579,7 +556,6 @@ bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
     }
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmGlobalVisualStudio10Generator
 ::GenerateRuleFile(std::string const& output) const
@@ -597,7 +573,6 @@ cmGlobalVisualStudio10Generator
   return ruleFile;
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio10Generator::PathTooLong(
         cmGeneratorTarget *target, cmSourceFile const* sf,
         std::string const& sfRel)
@@ -614,19 +589,16 @@ void cmGlobalVisualStudio10Generator::PathTooLong(
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio10Generator::IsNsightTegra() const
 {
   return !this->NsightTegraVersion.empty();
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio10Generator::GetNsightTegraVersion() const
 {
   return this->NsightTegraVersion;
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio10Generator::GetInstalledNsightTegraVersion()
 {
   std::string version;

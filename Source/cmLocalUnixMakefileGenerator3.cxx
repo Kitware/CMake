@@ -36,7 +36,6 @@
 #include <algorithm>
 #include <queue>
 
-//----------------------------------------------------------------------------
 // Escape special characters in Makefile dependency lines
 class cmMakeSafe
 {
@@ -60,7 +59,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 // Helper function used below.
 static std::string cmSplitExtension(std::string const& in, std::string& base)
 {
@@ -79,7 +77,6 @@ static std::string cmSplitExtension(std::string const& in, std::string& base)
   return ext;
 }
 
-//----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator3::
 cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg, cmMakefile* mf)
   : cmLocalCommonGenerator(gg, mf)
@@ -92,12 +89,10 @@ cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg, cmMakefile* mf)
   this->BorlandMakeCurlyHack = false;
 }
 
-//----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator3::~cmLocalUnixMakefileGenerator3()
 {
 }
 
-//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::Generate()
 {
   this->SetConfigName();
@@ -156,7 +151,6 @@ void cmLocalUnixMakefileGenerator3::ComputeHomeRelativeOutputPath()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::ComputeObjectFilenames(
                         std::map<cmSourceFile const*, std::string>& mapping,
                         cmGeneratorTarget const* gt)
@@ -170,7 +164,6 @@ void cmLocalUnixMakefileGenerator3::ComputeObjectFilenames(
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::
 GetLocalObjectFiles(std::map<std::string, LocalObjectInfo> &localObjectFiles)
 {
@@ -213,7 +206,6 @@ GetLocalObjectFiles(std::map<std::string, LocalObjectInfo> &localObjectFiles)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::GetIndividualFileTargets
                                             (std::vector<std::string>& targets)
 {
@@ -239,7 +231,6 @@ void cmLocalUnixMakefileGenerator3::GetIndividualFileTargets
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
 {
   // generate the includes
@@ -350,7 +341,6 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
   this->WriteSpecialTargetsBottom(ruleFileStream);
 }
 
-//----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
 ::WriteObjectConvenienceRule(std::ostream& ruleFileStream,
@@ -407,7 +397,6 @@ cmLocalUnixMakefileGenerator3
                       output, no_depends, commands, true, inHelp);
 }
 
-//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3
 ::WriteLocalMakefileTargets(std::ostream& ruleFileStream,
                             std::set<std::string> &emitted)
@@ -500,7 +489,6 @@ void cmLocalUnixMakefileGenerator3
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
 {
   std::string infoFileName = this->GetCurrentBinaryDirectory();
@@ -566,7 +554,6 @@ void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
     "${CMAKE_C_INCLUDE_REGEX_COMPLAIN})\n";
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3
 ::ConvertToFullPath(const std::string& localPath)
@@ -583,7 +570,6 @@ const std::string &cmLocalUnixMakefileGenerator3::GetHomeRelativeOutputPath()
   return this->HomeRelativeOutputPath;
 }
 
-//----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
 ::WriteMakeRule(std::ostream& os,
@@ -672,7 +658,6 @@ cmLocalUnixMakefileGenerator3
     }
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3
 ::ConvertShellCommand(std::string const& cmd, RelativeRoot root)
@@ -693,7 +678,6 @@ cmLocalUnixMakefileGenerator3
   return this->Convert(cmd, root, SHELL);
 }
 
-//----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
 ::WriteMakeVariables(std::ostream& makefileStream)
@@ -763,7 +747,6 @@ cmLocalUnixMakefileGenerator3
   /* clang-format on */
 }
 
-//----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
 ::WriteSpecialTargetsTop(std::ostream& makefileStream)
@@ -870,7 +853,6 @@ cmLocalUnixMakefileGenerator3
   this->WriteMakeVariables(makefileStream);
 }
 
-//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3
 ::WriteSpecialTargetsBottom(std::ostream& makefileStream)
 {
@@ -914,7 +896,6 @@ void cmLocalUnixMakefileGenerator3
 
 
 
-//----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
 ::WriteConvenienceRule(std::ostream& ruleFileStream,
@@ -938,7 +919,6 @@ cmLocalUnixMakefileGenerator3
 }
 
 
-//----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3
 ::GetRelativeTargetDirectory(cmGeneratorTarget* target)
@@ -950,7 +930,6 @@ cmLocalUnixMakefileGenerator3
 
 
 
-//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::AppendFlags(std::string& flags,
                                                 const std::string& newFlags)
 {
@@ -967,14 +946,12 @@ void cmLocalUnixMakefileGenerator3::AppendFlags(std::string& flags,
   this->cmLocalGenerator::AppendFlags(flags, newFlags);
 }
 
-//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::AppendFlags(std::string& flags,
                                                 const char* newFlags)
 {
   this->cmLocalGenerator::AppendFlags(flags, newFlags);
 }
 
-//----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
 ::AppendRuleDepend(std::vector<std::string>& depends,
@@ -990,7 +967,6 @@ cmLocalUnixMakefileGenerator3
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
 ::AppendRuleDepends(std::vector<std::string>& depends,
@@ -1004,7 +980,6 @@ cmLocalUnixMakefileGenerator3
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
 ::AppendCustomDepends(std::vector<std::string>& depends,
@@ -1018,7 +993,6 @@ cmLocalUnixMakefileGenerator3
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
 ::AppendCustomDepend(std::vector<std::string>& depends,
@@ -1037,7 +1011,6 @@ cmLocalUnixMakefileGenerator3
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
 ::AppendCustomCommands(std::vector<std::string>& commands,
@@ -1053,7 +1026,6 @@ cmLocalUnixMakefileGenerator3
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
 ::AppendCustomCommand(std::vector<std::string>& commands,
@@ -1185,7 +1157,6 @@ cmLocalUnixMakefileGenerator3
   commands.insert(commands.end(), commands1.begin(), commands1.end());
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3::MakeLauncher(
   cmCustomCommandGenerator const& ccg,
@@ -1221,7 +1192,6 @@ cmLocalUnixMakefileGenerator3::MakeLauncher(
   return launcher;
 }
 
-//----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
 ::AppendCleanCommand(std::vector<std::string>& commands,
@@ -1277,7 +1247,6 @@ cmLocalUnixMakefileGenerator3
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
                                           std::string const& text,
@@ -1371,7 +1340,6 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
     }
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3
 ::CreateMakeVariable(const std::string& sin, const std::string& s2in)
@@ -1463,7 +1431,6 @@ cmLocalUnixMakefileGenerator3
   return ret;
 }
 
-//----------------------------------------------------------------------------
 bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
                                                        bool verbose,
                                                        bool color)
@@ -1574,7 +1541,6 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmLocalUnixMakefileGenerator3
 ::ScanDependencies(const char* targetDir,
@@ -1697,7 +1663,6 @@ cmLocalUnixMakefileGenerator3
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::CheckMultipleOutputs(bool verbose)
 {
   cmMakefile* mf = this->Makefile;
@@ -1736,7 +1701,6 @@ void cmLocalUnixMakefileGenerator3::CheckMultipleOutputs(bool verbose)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3
 ::WriteLocalAllRules(std::ostream& ruleFileStream)
 {
@@ -1954,7 +1918,6 @@ void cmLocalUnixMakefileGenerator3
 }
 
 
-//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::ClearDependencies(cmMakefile* mf,
                                                       bool verbose)
 {
@@ -2177,7 +2140,6 @@ void cmLocalUnixMakefileGenerator3
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::WriteDisclaimer(std::ostream& os)
 {
   os
@@ -2188,7 +2150,6 @@ void cmLocalUnixMakefileGenerator3::WriteDisclaimer(std::ostream& os)
     << cmVersion::GetMinorVersion() << "\n\n";
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3
 ::GetRecursiveMakeCall(const char *makefile, const std::string& tgt)
@@ -2239,7 +2200,6 @@ cmLocalUnixMakefileGenerator3
   return cmd;
 }
 
-//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::WriteDivider(std::ostream& os)
 {
   os
@@ -2247,7 +2207,6 @@ void cmLocalUnixMakefileGenerator3::WriteDivider(std::ostream& os)
     << "=======================================\n";
 }
 
-//----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
 ::WriteCMakeArgument(std::ostream& os, const char* s)
@@ -2273,7 +2232,6 @@ cmLocalUnixMakefileGenerator3
   os << "\"";
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p,
                                                          bool useWatcomQuote)
@@ -2353,7 +2311,6 @@ cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p,
   return result;
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3
 ::GetTargetDirectory(cmGeneratorTarget const* target) const
@@ -2368,7 +2325,6 @@ cmLocalUnixMakefileGenerator3
   return dir;
 }
 
-//----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator3::ImplicitDependLanguageMap const&
 cmLocalUnixMakefileGenerator3::GetImplicitDepends(
     const cmGeneratorTarget* tgt)
@@ -2376,7 +2332,6 @@ cmLocalUnixMakefileGenerator3::GetImplicitDepends(
   return this->ImplicitDepends[tgt->GetName()];
 }
 
-//----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3::AddImplicitDepends(const cmGeneratorTarget* tgt,
                                                   const std::string& lang,
@@ -2386,7 +2341,6 @@ cmLocalUnixMakefileGenerator3::AddImplicitDepends(const cmGeneratorTarget* tgt,
   this->ImplicitDepends[tgt->GetName()][lang][obj].push_back(src);
 }
 
-//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3
 ::CreateCDCommand(std::vector<std::string>& commands, const char *tgtDir,
                   cmLocalGenerator::RelativeRoot relRetDir)

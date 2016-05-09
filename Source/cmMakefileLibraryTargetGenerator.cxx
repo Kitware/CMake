@@ -19,7 +19,6 @@
 #include "cmSourceFile.h"
 #include "cmake.h"
 
-//----------------------------------------------------------------------------
 cmMakefileLibraryTargetGenerator
 ::cmMakefileLibraryTargetGenerator(cmGeneratorTarget* target):
   cmMakefileTargetGenerator(target)
@@ -37,14 +36,12 @@ cmMakefileLibraryTargetGenerator
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 }
 
-//----------------------------------------------------------------------------
 cmMakefileLibraryTargetGenerator
 ::~cmMakefileLibraryTargetGenerator()
 {
   delete this->OSXBundleGenerator;
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
 {
   // create the build.make file and directory, put in the common blocks
@@ -105,7 +102,6 @@ void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
   this->CloseFileStreams();
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
 {
   std::vector<std::string> commands;
@@ -129,7 +125,6 @@ void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
   this->WriteTargetDriverRule(this->GeneratorTarget->GetName(), false);
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
 {
   std::string linkLanguage =
@@ -150,7 +145,6 @@ void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
   this->WriteLibraryRules(linkRuleVar, extraFlags, false);
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 {
   if(this->GeneratorTarget->IsFrameworkOnApple())
@@ -179,7 +173,6 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   this->WriteLibraryRules(linkRuleVar, extraFlags, relink);
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 {
   std::string linkLanguage =
@@ -202,7 +195,6 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
   this->WriteLibraryRules(linkRuleVar, extraFlags, relink);
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
 {
   std::string linkLanguage =
@@ -224,7 +216,6 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
   this->WriteLibraryRules(linkRuleVar, extraFlags, relink);
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 (const std::string& linkRuleVar, const std::string& extraFlags, bool relink)
 {

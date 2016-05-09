@@ -14,7 +14,6 @@
 #include "cmGeneratorExpression.h"
 #include "cmLocalGenerator.h"
 
-//----------------------------------------------------------------------------
 cmInstallDirectoryGenerator
 ::cmInstallDirectoryGenerator(std::vector<std::string> const& dirs,
                               const char* dest,
@@ -50,7 +49,6 @@ cmInstallDirectoryGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 cmInstallDirectoryGenerator
 ::~cmInstallDirectoryGenerator()
 {
@@ -61,7 +59,6 @@ void cmInstallDirectoryGenerator::Compute(cmLocalGenerator* lg)
   LocalGenerator = lg;
 }
 
-//----------------------------------------------------------------------------
 void
 cmInstallDirectoryGenerator::GenerateScriptActions(std::ostream& os,
                                                    Indent const& indent)
@@ -112,7 +109,6 @@ void cmInstallDirectoryGenerator::AddDirectoryInstallRule(
                        indent);
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmInstallDirectoryGenerator::GetDestination(std::string const& config) const
 {

@@ -26,7 +26,6 @@
 
 #include <cmsys/auto_ptr.hxx>
 
-//----------------------------------------------------------------------------
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmXMLParser.h"
 
@@ -130,7 +129,6 @@ public:
   virtual bool SupportsToolset() const { return true; }
 };
 
-//----------------------------------------------------------------------------
 cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(cmake* cm,
                                                std::string const& version)
   : cmGlobalGenerator(cm)
@@ -151,13 +149,11 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(cmake* cm,
   this->XcodeBuildCommandInitialized = false;
 }
 
-//----------------------------------------------------------------------------
 cmGlobalGeneratorFactory* cmGlobalXCodeGenerator::NewFactory()
 {
   return new Factory;
 }
 
-//----------------------------------------------------------------------------
 cmGlobalGenerator* cmGlobalXCodeGenerator::Factory
 ::CreateGlobalGenerator(const std::string& name, cmake* cm) const
 {
@@ -207,7 +203,6 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory
 #endif
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::FindMakeProgram(cmMakefile* mf)
 {
   // The Xcode generator knows how to lookup its build tool
@@ -220,7 +215,6 @@ void cmGlobalXCodeGenerator::FindMakeProgram(cmMakefile* mf)
     }
 }
 
-//----------------------------------------------------------------------------
 std::string const& cmGlobalXCodeGenerator::GetXcodeBuildCommand()
 {
   if(!this->XcodeBuildCommandInitialized)
@@ -231,7 +225,6 @@ std::string const& cmGlobalXCodeGenerator::GetXcodeBuildCommand()
   return this->XcodeBuildCommand;
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalXCodeGenerator::FindXcodeBuildCommand()
 {
   if (this->XcodeVersion >= 40)
@@ -250,7 +243,6 @@ std::string cmGlobalXCodeGenerator::FindXcodeBuildCommand()
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalXCodeGenerator::SetGeneratorToolset(std::string const& ts,
                                                  cmMakefile* mf)
 {
@@ -270,7 +262,6 @@ bool cmGlobalXCodeGenerator::SetGeneratorToolset(std::string const& ts,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
                                             lang,
                                             cmMakefile * mf, bool optional)
@@ -307,7 +298,6 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand,
@@ -371,7 +361,6 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
                      makeOptions.begin(), makeOptions.end());
 }
 
-//----------------------------------------------------------------------------
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *
 cmGlobalXCodeGenerator::CreateLocalGenerator(cmMakefile* mf)
@@ -410,7 +399,6 @@ void cmGlobalXCodeGenerator::Generate()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::SetGenerationRoot(cmLocalGenerator* root)
 {
   this->CurrentProject = root->GetProjectName();
@@ -429,7 +417,6 @@ void cmGlobalXCodeGenerator::SetGenerationRoot(cmLocalGenerator* root)
   this->CurrentXCodeHackMakefile += "/XCODE_DEPEND_HELPER.make";
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmGlobalXCodeGenerator::PostBuildMakeTarget(std::string const& tName,
                                             std::string const& configName)
@@ -444,10 +431,8 @@ cmGlobalXCodeGenerator::PostBuildMakeTarget(std::string const& tName,
   return out;
 }
 
-//----------------------------------------------------------------------------
 #define CMAKE_CHECK_BUILD_SYSTEM_TARGET "ZERO_CHECK"
 
-//----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
                                         std::vector<cmLocalGenerator*>& gens)
@@ -570,7 +555,6 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
   cmLocalGenerator* root, std::vector<cmLocalGenerator*> const& gens)
 {
@@ -623,21 +607,18 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
                    root->GetBinaryDirectory()) << "\n";
 }
 
-//----------------------------------------------------------------------------
 
 static bool objectIdLessThan(cmXCodeObject* l, cmXCodeObject* r)
 {
   return l->GetId() < r->GetId();
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::SortXCodeObjects()
 {
   std::sort(this->XCodeObjects.begin(), this->XCodeObjects.end(),
             objectIdLessThan);
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::ClearXCodeObjects()
 {
   this->TargetDoneSet.clear();
@@ -654,7 +635,6 @@ void cmGlobalXCodeGenerator::ClearXCodeObjects()
   this->FileRefs.clear();
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::addObject(cmXCodeObject *obj)
 {
   if(obj->GetType() == cmXCodeObject::OBJECT)
@@ -675,7 +655,6 @@ void cmGlobalXCodeGenerator::addObject(cmXCodeObject *obj)
   this->XCodeObjects.push_back(obj);
 }
 
-//----------------------------------------------------------------------------
 cmXCodeObject*
 cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::PBXType ptype)
 {
@@ -692,7 +671,6 @@ cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::PBXType ptype)
   return obj;
 }
 
-//----------------------------------------------------------------------------
 cmXCodeObject*
 cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::Type type)
 {
@@ -701,7 +679,6 @@ cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::Type type)
   return obj;
 }
 
-//----------------------------------------------------------------------------
 cmXCodeObject*
 cmGlobalXCodeGenerator::CreateString(const std::string& s)
 {
@@ -710,7 +687,6 @@ cmGlobalXCodeGenerator::CreateString(const std::string& s)
   return obj;
 }
 
-//----------------------------------------------------------------------------
 cmXCodeObject* cmGlobalXCodeGenerator
 ::CreateObjectReference(cmXCodeObject* ref)
 {
@@ -719,7 +695,6 @@ cmXCodeObject* cmGlobalXCodeGenerator
   return obj;
 }
 
-//----------------------------------------------------------------------------
 cmXCodeObject* cmGlobalXCodeGenerator
 ::CreateFlatClone(cmXCodeObject* orig)
 {
@@ -728,7 +703,6 @@ cmXCodeObject* cmGlobalXCodeGenerator
   return obj;
 }
 
-//----------------------------------------------------------------------------
 std::string
 GetGroupMapKeyFromPath(cmGeneratorTarget* target, const std::string& fullpath)
 {
@@ -738,14 +712,12 @@ GetGroupMapKeyFromPath(cmGeneratorTarget* target, const std::string& fullpath)
   return key;
 }
 
-//----------------------------------------------------------------------------
 std::string
 GetGroupMapKey(cmGeneratorTarget* target, cmSourceFile* sf)
 {
   return GetGroupMapKeyFromPath(target, sf->GetFullPath());
 }
 
-//----------------------------------------------------------------------------
 cmXCodeObject*
 cmGlobalXCodeGenerator::CreateXCodeSourceFileFromPath(
   const std::string &fullpath,
@@ -766,7 +738,6 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFileFromPath(
   return buildFile;
 }
 
-//----------------------------------------------------------------------------
 cmXCodeObject*
 cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
                                               cmSourceFile* sf,
@@ -848,7 +819,6 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   return buildFile;
 }
 
-//----------------------------------------------------------------------------
 std::string
 GetSourcecodeValueFromFileExtension(const std::string& _ext,
                                     const std::string& lang,
@@ -940,7 +910,6 @@ GetSourcecodeValueFromFileExtension(const std::string& _ext,
   return sourcecode;
 }
 
-//----------------------------------------------------------------------------
 cmXCodeObject*
 cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
   const std::string &fullpath,
@@ -1022,7 +991,6 @@ cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
   return fileRef;
 }
 
-//----------------------------------------------------------------------------
 cmXCodeObject*
 cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
                                                  cmGeneratorTarget* target)
@@ -1034,7 +1002,6 @@ cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
     sf->GetFullPath(), target, lang, sf);
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalXCodeGenerator::SpecialTargetEmitted(std::string const& tname)
 {
   if(tname == "ALL_BUILD" || tname == "XCODE_DEPEND_HELPER" ||
@@ -1051,7 +1018,6 @@ bool cmGlobalXCodeGenerator::SpecialTargetEmitted(std::string const& tname)
   return false;
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::SetCurrentLocalGenerator(cmLocalGenerator* gen)
 {
   this->CurrentLocalGenerator = gen;
@@ -1071,7 +1037,6 @@ void cmGlobalXCodeGenerator::SetCurrentLocalGenerator(cmLocalGenerator* gen)
     }
 }
 
-//----------------------------------------------------------------------------
 struct cmSourceFilePathCompare
 {
   bool operator()(cmSourceFile* l, cmSourceFile* r)
@@ -1080,7 +1045,6 @@ struct cmSourceFilePathCompare
   }
 };
 
-//----------------------------------------------------------------------------
 struct cmCompareTargets
 {
   bool operator () (std::string const& a, std::string const& b) const
@@ -1097,7 +1061,6 @@ struct cmCompareTargets
   }
 };
 
-//----------------------------------------------------------------------------
 bool
 cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
                                            std::vector<cmXCodeObject*>&
@@ -1378,7 +1341,6 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::ForceLinkerLanguages()
 {
   for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
@@ -1395,7 +1357,6 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguages()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmGeneratorTarget* gtgt)
 {
   // This matters only for targets that link.
@@ -1440,7 +1401,6 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmGeneratorTarget* gtgt)
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalXCodeGenerator::IsHeaderFile(cmSourceFile* sf)
 {
   const std::vector<std::string>& hdrExts =
@@ -1449,7 +1409,6 @@ bool cmGlobalXCodeGenerator::IsHeaderFile(cmSourceFile* sf)
           hdrExts.end());
 }
 
-//----------------------------------------------------------------------------
 cmXCodeObject*
 cmGlobalXCodeGenerator::CreateBuildPhase(const char* name,
                                          const char* name2,
@@ -1478,7 +1437,6 @@ cmGlobalXCodeGenerator::CreateBuildPhase(const char* name,
   return buildPhase;
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
                                                   cmXCodeObject*
                                                   sourceBuildPhase,
@@ -1608,7 +1566,6 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
     }
 }
 
-//----------------------------------------------------------------------------
 // This function removes each occurrence of the flag and returns the last one
 // (i.e., the dominant flag in GCC)
 std::string cmGlobalXCodeGenerator::ExtractFlag(const char* flag,
@@ -1642,7 +1599,6 @@ std::string cmGlobalXCodeGenerator::ExtractFlag(const char* flag,
   return retFlag;
 }
 
-//----------------------------------------------------------------------------
 // This function removes each matching occurrence of the expression and
 // returns the last one (i.e., the dominant flag in GCC)
 std::string cmGlobalXCodeGenerator::ExtractFlagRegex(const char* exp,
@@ -1715,7 +1671,6 @@ cmGlobalXCodeGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
                                                 cmGeneratorTarget* target,
@@ -1758,7 +1713,6 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
                            this->CreateString("0"));
 }
 
-//----------------------------------------------------------------------------
 void  cmGlobalXCodeGenerator
 ::CreateCustomRulesMakefile(const char* makefileBasename,
                             cmGeneratorTarget* target,
@@ -1884,7 +1838,6 @@ void  cmGlobalXCodeGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
                                                 cmXCodeObject* buildSettings,
                                                 const std::string& configName)
@@ -2564,7 +2517,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   }
 }
 
-//----------------------------------------------------------------------------
 cmXCodeObject*
 cmGlobalXCodeGenerator::CreateUtilityTarget(cmGeneratorTarget* gtgt)
 {
@@ -2643,7 +2595,6 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmGeneratorTarget* gtgt)
   return target;
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalXCodeGenerator::AddConfigurations(cmXCodeObject* target,
                                                       cmGeneratorTarget* gtgt)
 {
@@ -2690,7 +2641,6 @@ std::string cmGlobalXCodeGenerator::AddConfigurations(cmXCodeObject* target,
   return "";
 }
 
-//----------------------------------------------------------------------------
 const char* cmGlobalXCodeGenerator::GetTargetLinkFlagsVar(
     cmGeneratorTarget const* target) const
 {
@@ -2706,7 +2656,6 @@ const char* cmGlobalXCodeGenerator::GetTargetLinkFlagsVar(
     }
 }
 
-//----------------------------------------------------------------------------
 const char* cmGlobalXCodeGenerator::GetTargetFileType(
     cmGeneratorTarget* target)
 {
@@ -2733,7 +2682,6 @@ const char* cmGlobalXCodeGenerator::GetTargetFileType(
   return 0;
 }
 
-//----------------------------------------------------------------------------
 const char* cmGlobalXCodeGenerator::GetTargetProductType(
     cmGeneratorTarget* target)
 {
@@ -2764,7 +2712,6 @@ const char* cmGlobalXCodeGenerator::GetTargetProductType(
   return 0;
 }
 
-//----------------------------------------------------------------------------
 cmXCodeObject*
 cmGlobalXCodeGenerator::CreateXCodeTarget(cmGeneratorTarget* gtgt,
                                           cmXCodeObject* buildPhases)
@@ -2835,7 +2782,6 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmGeneratorTarget* gtgt,
   return target;
 }
 
-//----------------------------------------------------------------------------
 cmXCodeObject*
 cmGlobalXCodeGenerator::FindXCodeTarget(cmGeneratorTarget const* t)
 {
@@ -2853,7 +2799,6 @@ cmGlobalXCodeGenerator::FindXCodeTarget(cmGeneratorTarget const* t)
   return i->second;
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalXCodeGenerator::GetOrCreateId(const std::string& name,
                                                   const std::string& id)
 {
@@ -2873,7 +2818,6 @@ std::string cmGlobalXCodeGenerator::GetOrCreateId(const std::string& name,
   return id;
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::AddDependTarget(cmXCodeObject* target,
                                              cmXCodeObject* dependTarget)
 {
@@ -2910,7 +2854,6 @@ void cmGlobalXCodeGenerator::AddDependTarget(cmXCodeObject* target,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::AppendOrAddBuildSetting(cmXCodeObject* settings,
                                                      const char* attribute,
                                                      const char* value)
@@ -2932,7 +2875,6 @@ void cmGlobalXCodeGenerator::AppendOrAddBuildSetting(cmXCodeObject* settings,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator
 ::AppendBuildSettingAttribute(cmXCodeObject* target,
                               const char* attribute,
@@ -2977,7 +2919,6 @@ void cmGlobalXCodeGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator
 ::AddDependAndLinkInformation(cmXCodeObject* target)
 {
@@ -3111,7 +3052,6 @@ void cmGlobalXCodeGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
                                           std::vector<cmLocalGenerator*>&
                                           generators)
@@ -3213,7 +3153,6 @@ cmXCodeObject *cmGlobalXCodeGenerator
   return group;
 }
 
-//----------------------------------------------------------------------------
 cmXCodeObject* cmGlobalXCodeGenerator
 ::CreateOrGetPBXGroup(cmGeneratorTarget* gtgt, cmSourceGroup* sg)
 {
@@ -3309,7 +3248,6 @@ cmXCodeObject* cmGlobalXCodeGenerator
   return group;
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalXCodeGenerator
 ::CreateXCodeObjects(cmLocalGenerator* root,
                      std::vector<cmLocalGenerator*>&
@@ -3619,7 +3557,6 @@ bool cmGlobalXCodeGenerator
   return true;
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmGlobalXCodeGenerator::GetObjectsNormalDirectory(
   const std::string &projName,
@@ -3639,7 +3576,6 @@ cmGlobalXCodeGenerator::GetObjectsNormalDirectory(
   return dir;
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
   std::vector<cmXCodeObject*>& targets)
@@ -3787,7 +3723,6 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator::OutputXCodeProject(cmLocalGenerator* root,
                                            std::vector<cmLocalGenerator*>&
@@ -3836,7 +3771,6 @@ cmGlobalXCodeGenerator::OutputXCodeProject(cmLocalGenerator* root,
     root->GetBinaryDirectory());
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
                                           cmLocalGenerator* ,
@@ -3876,7 +3810,6 @@ cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
   fout << "}\n";
 }
 
-//----------------------------------------------------------------------------
 const char* cmGlobalXCodeGenerator::GetCMakeCFGIntDir() const
 {
   return this->XcodeVersion >= 21 ?
@@ -3907,20 +3840,17 @@ std::string cmGlobalXCodeGenerator::ExpandCFGIntDir(const std::string& str,
   return tmp;
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::GetDocumentation(cmDocumentationEntry& entry)
 {
   entry.Name = cmGlobalXCodeGenerator::GetActualName();
   entry.Brief = "Generate Xcode project files.";
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalXCodeGenerator::ConvertToRelativeForMake(const char* p)
 {
   return cmSystemTools::ConvertToOutputPath(p);
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalXCodeGenerator::RelativeToSource(const char* p)
 {
   // We force conversion because Xcode breakpoints do not work unless
@@ -3929,14 +3859,12 @@ std::string cmGlobalXCodeGenerator::RelativeToSource(const char* p)
     ConvertToRelativePath(this->ProjectSourceDirectoryComponents, p, true);
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalXCodeGenerator::RelativeToBinary(const char* p)
 {
   return this->CurrentLocalGenerator->
     ConvertToRelativePath(this->ProjectOutputDirectoryComponents, p);
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalXCodeGenerator::XCodeEscapePath(const std::string& p)
 {
   if(p.find(' ') != p.npos)
@@ -3949,7 +3877,6 @@ std::string cmGlobalXCodeGenerator::XCodeEscapePath(const std::string& p)
   return p;
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator
 ::AppendDirectoryForConfig(const std::string& prefix,
@@ -3968,7 +3895,6 @@ cmGlobalXCodeGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalXCodeGenerator::LookupFlags(
                                               const std::string& varNamePrefix,
                                               const std::string& varNameLang,
@@ -3992,7 +3918,6 @@ std::string cmGlobalXCodeGenerator::LookupFlags(
   return default_flags;
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::AppendDefines(BuildObjectListOrString& defs,
                                            const char* defines_list,
                                            bool dflag)
@@ -4011,7 +3936,6 @@ void cmGlobalXCodeGenerator::AppendDefines(BuildObjectListOrString& defs,
   this->AppendDefines(defs, defines, dflag);
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator::AppendDefines(BuildObjectListOrString& defs,
                                       std::vector<std::string> const& defines,
@@ -4033,7 +3957,6 @@ cmGlobalXCodeGenerator::AppendDefines(BuildObjectListOrString& defs,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::AppendFlag(std::string& flags,
                                         std::string const& flag)
 {
@@ -4100,7 +4023,6 @@ void cmGlobalXCodeGenerator::AppendFlag(std::string& flags,
     }
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmGlobalXCodeGenerator::ComputeInfoPListLocation(cmGeneratorTarget* target)
 {
@@ -4113,7 +4035,6 @@ cmGlobalXCodeGenerator::ComputeInfoPListLocation(cmGeneratorTarget* target)
   return plist;
 }
 
-//----------------------------------------------------------------------------
 // Return true if the generated build tree may contain multiple builds.
 // i.e. "Can I build Debug and Release in the same tree?"
 bool cmGlobalXCodeGenerator::IsMultiConfig()
@@ -4128,7 +4049,6 @@ bool cmGlobalXCodeGenerator::IsMultiConfig()
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator
 ::ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const
 {

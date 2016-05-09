@@ -43,7 +43,6 @@ void AppendDictionary(cmXMLWriter& xml, const char* key, T const& value)
   xml.EndElement();
 }
 
-//----------------------------------------------------------------------------
 cmExtraEclipseCDT4Generator
 ::cmExtraEclipseCDT4Generator() : cmExternalMakefileProjectGenerator()
 {
@@ -65,7 +64,6 @@ cmExtraEclipseCDT4Generator
   this->CXXEnabled = false;
 }
 
-//----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator
 ::GetDocumentation(cmDocumentationEntry& entry, const std::string&) const
 {
@@ -73,7 +71,6 @@ void cmExtraEclipseCDT4Generator
   entry.Brief = "Generates Eclipse CDT 4.0 project files.";
 }
 
-//----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator
 ::EnableLanguage(std::vector<std::string> const& languages,
                  cmMakefile *, bool)
@@ -99,7 +96,6 @@ void cmExtraEclipseCDT4Generator
     }
 }
 
-//----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::Generate()
 {
   cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
@@ -213,7 +209,6 @@ void cmExtraEclipseCDT4Generator::CreateSourceProjectFile()
 }
 
 
-//----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
                                             const char* envVar,
                                             cmLocalGenerator* lg)
@@ -277,7 +272,6 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
 }
 
 
-//----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::CreateProjectFile()
 {
   cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
@@ -512,7 +506,6 @@ void cmExtraEclipseCDT4Generator::WriteGroups(
     }
 }
 
-//----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
 {
   std::string linkName = "[Targets]";
@@ -579,7 +572,6 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
 }
 
 
-//----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
                        cmXMLWriter& xml, const std::string& baseDir)
 {
@@ -619,7 +611,6 @@ void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
 }
 
 
-//----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::AppendIncludeDirectories(
                             cmXMLWriter& xml,
                             const std::vector<std::string>& includeDirs,
@@ -657,7 +648,6 @@ void cmExtraEclipseCDT4Generator::AppendIncludeDirectories(
     }
 }
 
-//----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 {
   std::set<std::string> emmited;
@@ -1146,7 +1136,6 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   xml.EndElement(); // cproject
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmExtraEclipseCDT4Generator::GetEclipsePath(const std::string& path)
 {
@@ -1194,9 +1183,7 @@ cmExtraEclipseCDT4Generator::GenerateProjectName(const std::string& name,
   return name + (type.empty() ? "" : "-") + type + "@" + path;
 }
 
-//----------------------------------------------------------------------------
 // Helper functions
-//----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator
 ::AppendStorageScanners(cmXMLWriter& xml,
                         const cmMakefile& makefile)

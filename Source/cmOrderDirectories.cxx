@@ -28,7 +28,6 @@ Directory ordering computation.
     for shared libraries.
 */
 
-//----------------------------------------------------------------------------
 class cmOrderDirectoriesConstraint
 {
 public:
@@ -127,7 +126,6 @@ protected:
   int DirectoryIndex;
 };
 
-//----------------------------------------------------------------------------
 bool cmOrderDirectoriesConstraint::FileMayConflict(std::string const& dir,
                                                    std::string const& name)
 {
@@ -149,7 +147,6 @@ bool cmOrderDirectoriesConstraint::FileMayConflict(std::string const& dir,
   return fi != files.end();
 }
 
-//----------------------------------------------------------------------------
 class cmOrderDirectoriesConstraintSOName: public cmOrderDirectoriesConstraint
 {
 public:
@@ -189,7 +186,6 @@ private:
   std::string SOName;
 };
 
-//----------------------------------------------------------------------------
 bool cmOrderDirectoriesConstraintSOName::FindConflict(std::string const& dir)
 {
   // Determine which type of check to do.
@@ -224,7 +220,6 @@ bool cmOrderDirectoriesConstraintSOName::FindConflict(std::string const& dir)
   return false;
 }
 
-//----------------------------------------------------------------------------
 class cmOrderDirectoriesConstraintLibrary: public cmOrderDirectoriesConstraint
 {
 public:
@@ -242,7 +237,6 @@ public:
   virtual bool FindConflict(std::string const& dir);
 };
 
-//----------------------------------------------------------------------------
 bool cmOrderDirectoriesConstraintLibrary::FindConflict(std::string const& dir)
 {
   // We have the library file name.  Check if it will be found.
@@ -276,7 +270,6 @@ bool cmOrderDirectoriesConstraintLibrary::FindConflict(std::string const& dir)
   return false;
 }
 
-//----------------------------------------------------------------------------
 cmOrderDirectories::cmOrderDirectories(cmGlobalGenerator* gg,
                                        const cmGeneratorTarget* target,
                                        const char* purpose)
@@ -287,14 +280,12 @@ cmOrderDirectories::cmOrderDirectories(cmGlobalGenerator* gg,
   this->Computed = false;
 }
 
-//----------------------------------------------------------------------------
 cmOrderDirectories::~cmOrderDirectories()
 {
   cmDeleteAll(this->ConstraintEntries);
   cmDeleteAll(this->ImplicitDirEntries);
 }
 
-//----------------------------------------------------------------------------
 std::vector<std::string> const& cmOrderDirectories::GetOrderedDirectories()
 {
   if(!this->Computed)
@@ -307,7 +298,6 @@ std::vector<std::string> const& cmOrderDirectories::GetOrderedDirectories()
   return this->OrderedDirectories;
 }
 
-//----------------------------------------------------------------------------
 void cmOrderDirectories::AddRuntimeLibrary(std::string const& fullPath,
                                            const char* soname)
 {
@@ -353,7 +343,6 @@ void cmOrderDirectories::AddRuntimeLibrary(std::string const& fullPath,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmOrderDirectories::AddLinkLibrary(std::string const& fullPath)
 {
   // Link extension info is required for library constraints.
@@ -381,7 +370,6 @@ void cmOrderDirectories::AddLinkLibrary(std::string const& fullPath)
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmOrderDirectories
 ::AddUserDirectories(std::vector<std::string> const& extra)
@@ -390,7 +378,6 @@ cmOrderDirectories
                                extra.begin(), extra.end());
 }
 
-//----------------------------------------------------------------------------
 void
 cmOrderDirectories
 ::AddLanguageDirectories(std::vector<std::string> const& dirs)
@@ -399,7 +386,6 @@ cmOrderDirectories
                                    dirs.begin(), dirs.end());
 }
 
-//----------------------------------------------------------------------------
 void
 cmOrderDirectories
 ::SetImplicitDirectories(std::set<std::string> const& implicitDirs)
@@ -407,7 +393,6 @@ cmOrderDirectories
   this->ImplicitDirectories = implicitDirs;
 }
 
-//----------------------------------------------------------------------------
 void
 cmOrderDirectories
 ::SetLinkExtensionInfo(std::vector<std::string> const& linkExtensions,
@@ -417,7 +402,6 @@ cmOrderDirectories
   this->RemoveLibraryExtension.compile(removeExtRegex.c_str());
 }
 
-//----------------------------------------------------------------------------
 void cmOrderDirectories::CollectOriginalDirectories()
 {
   // Add user directories specified for inclusion.  These should be
@@ -435,7 +419,6 @@ void cmOrderDirectories::CollectOriginalDirectories()
   this->AddOriginalDirectories(this->LanguageDirectories);
 }
 
-//----------------------------------------------------------------------------
 int cmOrderDirectories::AddOriginalDirectory(std::string const& dir)
 {
   // Add the runtime directory with a unique index.
@@ -452,7 +435,6 @@ int cmOrderDirectories::AddOriginalDirectory(std::string const& dir)
   return i->second;
 }
 
-//----------------------------------------------------------------------------
 void
 cmOrderDirectories
 ::AddOriginalDirectories(std::vector<std::string> const& dirs)
@@ -478,7 +460,6 @@ cmOrderDirectories
     }
 }
 
-//----------------------------------------------------------------------------
 struct cmOrderDirectoriesCompare
 {
   typedef std::pair<int, int> ConflictPair;
@@ -493,7 +474,6 @@ struct cmOrderDirectoriesCompare
     }
 };
 
-//----------------------------------------------------------------------------
 void cmOrderDirectories::FindConflicts()
 {
   // Allocate the conflict graph.
@@ -525,7 +505,6 @@ void cmOrderDirectories::FindConflicts()
   this->FindImplicitConflicts();
 }
 
-//----------------------------------------------------------------------------
 void cmOrderDirectories::FindImplicitConflicts()
 {
   // Check for items in implicit link directories that have conflicts
@@ -556,7 +535,6 @@ void cmOrderDirectories::FindImplicitConflicts()
                    this->Target->GetBacktrace());
 }
 
-//----------------------------------------------------------------------------
 void cmOrderDirectories::OrderDirectories()
 {
   // Allow a cycle to be diagnosed once.
@@ -572,7 +550,6 @@ void cmOrderDirectories::OrderDirectories()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmOrderDirectories::VisitDirectory(unsigned int i)
 {
   // Skip nodes already visited.
@@ -603,7 +580,6 @@ void cmOrderDirectories::VisitDirectory(unsigned int i)
   this->OrderedDirectories.push_back(this->OriginalDirectories[i]);
 }
 
-//----------------------------------------------------------------------------
 void cmOrderDirectories::DiagnoseCycle()
 {
   // Report the cycle at most once.

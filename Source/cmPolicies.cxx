@@ -123,7 +123,6 @@ const char* idToShortDescription(cmPolicies::PolicyID id)
   return 0;
 }
 
-//----------------------------------------------------------------------------
 static void DiagnoseAncientPolicies(
     std::vector<cmPolicies::PolicyID> const& ancient,
     unsigned int majorVer,
@@ -148,7 +147,6 @@ static void DiagnoseAncientPolicies(
   mf->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
 
-//----------------------------------------------------------------------------
 static bool GetPolicyDefault(cmMakefile* mf, std::string const& policy,
                              cmPolicies::PolicyStatus* defaultSetting)
 {
@@ -178,7 +176,6 @@ static bool GetPolicyDefault(cmMakefile* mf, std::string const& policy,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
                                     const char *version)
 {
@@ -342,7 +339,6 @@ cmPolicies::GetPolicyStatus(cmPolicies::PolicyID)
   return cmPolicies::WARN;
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmPolicies::GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id)
 {

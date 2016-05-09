@@ -18,17 +18,14 @@
 #include <cmsys/FStream.hxx>
 #include <cmsys/RegularExpression.hxx>
 
-//----------------------------------------------------------------------------
 cmCTestCVS::cmCTestCVS(cmCTest* ct, std::ostream& log): cmCTestVC(ct, log)
 {
 }
 
-//----------------------------------------------------------------------------
 cmCTestCVS::~cmCTestCVS()
 {
 }
 
-//----------------------------------------------------------------------------
 class cmCTestCVS::UpdateParser: public cmCTestVC::LineParser
 {
 public:
@@ -86,7 +83,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 bool cmCTestCVS::UpdateImpl()
 {
   // Get user-specified update options.
@@ -124,7 +120,6 @@ bool cmCTestCVS::UpdateImpl()
   return this->RunUpdateCommand(&cvs_update[0], &out, &err);
 }
 
-//----------------------------------------------------------------------------
 class cmCTestCVS::LogParser: public cmCTestVC::LineParser
 {
 public:
@@ -220,7 +215,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 std::string cmCTestCVS::ComputeBranchFlag(std::string const& dir)
 {
   // Compute the tag file location for this directory.
@@ -250,7 +244,6 @@ std::string cmCTestCVS::ComputeBranchFlag(std::string const& dir)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmCTestCVS::LoadRevisions(std::string const& file,
                                const char* branchFlag,
                                std::vector<Revision>& revisions)
@@ -267,7 +260,6 @@ void cmCTestCVS::LoadRevisions(std::string const& file,
   this->RunChild(cvs_log, &out, &err);
 }
 
-//----------------------------------------------------------------------------
 void cmCTestCVS::WriteXMLDirectory(cmXMLWriter& xml,
                                    std::string const& path,
                                    Directory const& dir)
@@ -303,7 +295,6 @@ void cmCTestCVS::WriteXMLDirectory(cmXMLWriter& xml,
   xml.EndElement(); // Directory
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestCVS::WriteXMLUpdates(cmXMLWriter& xml)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT,

@@ -19,7 +19,6 @@
 #include <assert.h>
 #include <ctype.h>
 #include <stdlib.h> // required for atoi
-//----------------------------------------------------------------------------
 bool cmListCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
@@ -80,7 +79,6 @@ bool cmListCommand
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmListCommand::GetListString(std::string& listString,
                                   const std::string& var)
 {
@@ -95,7 +93,6 @@ bool cmListCommand::GetListString(std::string& listString,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmListCommand::GetList(std::vector<std::string>& list,
                             const std::string& var)
 {
@@ -155,7 +152,6 @@ bool cmListCommand::GetList(std::vector<std::string>& list,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmListCommand::HandleLengthCommand(std::vector<std::string> const& args)
 {
   if(args.size() != 3)
@@ -179,7 +175,6 @@ bool cmListCommand::HandleLengthCommand(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmListCommand::HandleGetCommand(std::vector<std::string> const& args)
 {
   if(args.size() < 4)
@@ -233,7 +228,6 @@ bool cmListCommand::HandleGetCommand(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmListCommand::HandleAppendCommand(std::vector<std::string> const& args)
 {
   assert(args.size() >= 2);
@@ -259,7 +253,6 @@ bool cmListCommand::HandleAppendCommand(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmListCommand::HandleFindCommand(std::vector<std::string> const& args)
 {
   if(args.size() != 4)
@@ -292,7 +285,6 @@ bool cmListCommand::HandleFindCommand(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
 {
   if(args.size() < 4)
@@ -341,7 +333,6 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmListCommand
 ::HandleRemoveItemCommand(std::vector<std::string> const& args)
 {
@@ -374,7 +365,6 @@ bool cmListCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmListCommand
 ::HandleReverseCommand(std::vector<std::string> const& args)
 {
@@ -401,7 +391,6 @@ bool cmListCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmListCommand
 ::HandleRemoveDuplicatesCommand(std::vector<std::string> const& args)
 {
@@ -433,7 +422,6 @@ bool cmListCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmListCommand
 ::HandleSortCommand(std::vector<std::string> const& args)
 {
@@ -461,7 +449,6 @@ bool cmListCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmListCommand::HandleRemoveAtCommand(
   std::vector<std::string> const& args)
 {
@@ -523,7 +510,6 @@ bool cmListCommand::HandleRemoveAtCommand(
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmListCommand::HandleFilterCommand(
   std::vector<std::string> const& args)
 {
@@ -586,7 +572,6 @@ bool cmListCommand::HandleFilterCommand(
   return false;
 }
 
-//----------------------------------------------------------------------------
 class MatchesRegex {
 public:
   MatchesRegex(cmsys::RegularExpression& in_regex, bool in_includeMatches)

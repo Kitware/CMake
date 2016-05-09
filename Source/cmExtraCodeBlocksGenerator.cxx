@@ -36,7 +36,6 @@ Discussion:
 http://forums.codeblocks.org/index.php/topic,6789.0.html
 */
 
-//----------------------------------------------------------------------------
 void cmExtraCodeBlocksGenerator
 ::GetDocumentation(cmDocumentationEntry& entry, const std::string&) const
 {

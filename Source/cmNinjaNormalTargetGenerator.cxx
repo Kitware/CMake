@@ -784,7 +784,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   globalGen.AddTargetAlias(this->GetTargetName(), &gt);
 }
 
-//----------------------------------------------------------------------------
 void cmNinjaNormalTargetGenerator::WriteObjectLibStatement()
 {
   // Write a phony output that depends on all object files.

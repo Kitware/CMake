@@ -15,13 +15,11 @@
 #include "cmVersion.h"
 #include "cmXMLWriter.h"
 
-//----------------------------------------------------------------------------
 cmCTestUploadHandler::cmCTestUploadHandler()
 {
   this->Initialize();
 }
 
-//----------------------------------------------------------------------------
 void cmCTestUploadHandler::Initialize()
 {
   this->Superclass::Initialize();
@@ -33,7 +31,6 @@ void cmCTestUploadHandler::SetFiles(const cmCTest::SetOfStrings& files)
   this->Files = files;
 }
 
-//----------------------------------------------------------------------------
 int cmCTestUploadHandler::ProcessHandler()
 {
   cmGeneratedFileStream ofs;

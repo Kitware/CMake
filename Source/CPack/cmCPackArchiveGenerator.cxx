@@ -24,7 +24,6 @@
 #include <cmsys/Directory.hxx>
 #include <cmsys/SystemTools.hxx>
 
-//----------------------------------------------------------------------
 cmCPackArchiveGenerator::cmCPackArchiveGenerator(cmArchiveWrite::Compress t,
   std::string const& format)
 {
@@ -32,18 +31,15 @@ cmCPackArchiveGenerator::cmCPackArchiveGenerator(cmArchiveWrite::Compress t,
   this->ArchiveFormat = format;
 }
 
-//----------------------------------------------------------------------
 cmCPackArchiveGenerator::~cmCPackArchiveGenerator()
 {
 }
 
-//----------------------------------------------------------------------
 int cmCPackArchiveGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", "1");
   return this->Superclass::InitializeInternal();
 }
-//----------------------------------------------------------------------
 int cmCPackArchiveGenerator::addOneComponentToArchive(cmArchiveWrite& archive,
                              cmCPackComponent* component)
 {
@@ -118,7 +114,6 @@ if (!archive) \
   return 0; \
   }
 
-//----------------------------------------------------------------------
 int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
 {
   packageFileNames.clear();
@@ -220,7 +215,6 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
   return 1;
 }
 
-//----------------------------------------------------------------------
 int cmCPackArchiveGenerator::PackageComponentsAllInOne()
 {
   // reset the package file names
@@ -248,7 +242,6 @@ int cmCPackArchiveGenerator::PackageComponentsAllInOne()
   return 1;
 }
 
-//----------------------------------------------------------------------
 int cmCPackArchiveGenerator::PackageFiles()
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Toplevel: "
@@ -300,7 +293,6 @@ int cmCPackArchiveGenerator::PackageFiles()
   return 1;
 }
 
-//----------------------------------------------------------------------
 int cmCPackArchiveGenerator::GenerateHeader(std::ostream*)
 {
   return 1;

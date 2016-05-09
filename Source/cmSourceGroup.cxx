@@ -17,7 +17,6 @@ public:
   std::vector<cmSourceGroup> GroupChildren;
 };
 
-//----------------------------------------------------------------------------
 cmSourceGroup::cmSourceGroup(const char* name, const char* regex,
                              const char* parentName): Name(name)
 {
@@ -31,13 +30,11 @@ cmSourceGroup::cmSourceGroup(const char* name, const char* regex,
   this->FullName += this->Name;
 }
 
-//----------------------------------------------------------------------------
 cmSourceGroup::~cmSourceGroup()
 {
   delete this->Internal;
 }
 
-//----------------------------------------------------------------------------
 cmSourceGroup::cmSourceGroup(cmSourceGroup const& r)
 {
   this->Name = r.Name;
@@ -48,7 +45,6 @@ cmSourceGroup::cmSourceGroup(cmSourceGroup const& r)
   this->Internal = new cmSourceGroupInternals(*r.Internal);
 }
 
-//----------------------------------------------------------------------------
 cmSourceGroup& cmSourceGroup::operator=(cmSourceGroup const& r)
 {
   this->Name = r.Name;
@@ -59,7 +55,6 @@ cmSourceGroup& cmSourceGroup::operator=(cmSourceGroup const& r)
   return *this;
 }
 
-//----------------------------------------------------------------------------
 void cmSourceGroup::SetGroupRegex(const char* regex)
 {
   if(regex)
@@ -72,31 +67,26 @@ void cmSourceGroup::SetGroupRegex(const char* regex)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmSourceGroup::AddGroupFile(const std::string& name)
 {
   this->GroupFiles.insert(name);
 }
 
-//----------------------------------------------------------------------------
 const char* cmSourceGroup::GetName() const
 {
   return this->Name.c_str();
 }
 
-//----------------------------------------------------------------------------
 const char* cmSourceGroup::GetFullName() const
 {
   return this->FullName.c_str();
 }
 
-//----------------------------------------------------------------------------
 bool cmSourceGroup::MatchesRegex(const char* name)
 {
   return this->GroupRegex.find(name);
 }
 
-//----------------------------------------------------------------------------
 bool cmSourceGroup::MatchesFiles(const char* name)
 {
   std::set<std::string>::const_iterator i = this->GroupFiles.find(name);
@@ -107,25 +97,21 @@ bool cmSourceGroup::MatchesFiles(const char* name)
   return false;
 }
 
-//----------------------------------------------------------------------------
 void cmSourceGroup::AssignSource(const cmSourceFile* sf)
 {
   this->SourceFiles.push_back(sf);
 }
 
-//----------------------------------------------------------------------------
 const std::vector<const cmSourceFile*>& cmSourceGroup::GetSourceFiles() const
 {
   return this->SourceFiles;
 }
 
-//----------------------------------------------------------------------------
 void cmSourceGroup::AddChild(cmSourceGroup child)
 {
   this->Internal->GroupChildren.push_back(child);
 }
 
-//----------------------------------------------------------------------------
 cmSourceGroup *cmSourceGroup::LookupChild(const char* name) const
 {
   // initializing iterators

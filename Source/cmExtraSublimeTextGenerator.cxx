@@ -38,7 +38,6 @@ http://www.sublimetext.com/docs/2/projects.html
 http://sublimetext.info/docs/en/reference/build_systems.html
 */
 
-//----------------------------------------------------------------------------
 void cmExtraSublimeTextGenerator
 ::GetDocumentation(cmDocumentationEntry& entry, const std::string&) const
 {

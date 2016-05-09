@@ -14,17 +14,14 @@
 #include "cmDependsJavaParserHelper.h"
 #include "cmSystemTools.h"
 
-//----------------------------------------------------------------------------
 cmDependsJava::cmDependsJava()
 {
 }
 
-//----------------------------------------------------------------------------
 cmDependsJava::~cmDependsJava()
 {
 }
 
-//----------------------------------------------------------------------------
 bool cmDependsJava::WriteDependencies(const std::set<std::string>& sources,
     const std::string&, std::ostream&, std::ostream&)
 {

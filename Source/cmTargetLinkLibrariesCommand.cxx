@@ -334,7 +334,6 @@ bool cmTargetLinkLibrariesCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 void
 cmTargetLinkLibrariesCommand
 ::LinkLibraryTypeSpecifierWarning(int left, int right)
@@ -347,7 +346,6 @@ cmTargetLinkLibrariesCommand
   this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
 }
 
-//----------------------------------------------------------------------------
 bool
 cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
                                             cmTargetLinkLibraryType llt)

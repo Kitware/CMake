@@ -22,7 +22,6 @@
 struct cmGeneratorExpressionDAGChecker;
 struct cmGeneratorExpressionNode;
 
-//----------------------------------------------------------------------------
 struct cmGeneratorExpressionEvaluator
 {
   cmGeneratorExpressionEvaluator() {}
@@ -78,7 +77,6 @@ private:
   size_t Length;
 };
 
-//----------------------------------------------------------------------------
 struct GeneratorExpressionContent : public cmGeneratorExpressionEvaluator
 {
   GeneratorExpressionContent(const char *startContent, size_t length);

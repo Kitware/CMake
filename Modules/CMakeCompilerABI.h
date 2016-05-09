@@ -1,4 +1,3 @@
-/*--------------------------------------------------------------------------*/
 
 /* Size of a pointer-to-data in bytes.  */
 #define SIZEOF_DPTR (sizeof(void*))
@@ -10,7 +9,6 @@ const char info_sizeof_dptr[] =  {
   /* clang-format needs this comment to break after the opening brace */
 };
 
-/*--------------------------------------------------------------------------*/
 
 /* Application Binary Interface.  */
 #if defined(__sgi) && defined(_ABIO32)

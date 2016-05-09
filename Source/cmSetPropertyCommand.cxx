@@ -16,7 +16,6 @@
 #include "cmSetTestsPropertiesCommand.h"
 
 
-//----------------------------------------------------------------------------
 cmSetPropertyCommand::cmSetPropertyCommand()
 {
   this->AppendMode = false;
@@ -24,7 +23,6 @@ cmSetPropertyCommand::cmSetPropertyCommand()
   this->Remove = true;
 }
 
-//----------------------------------------------------------------------------
 bool cmSetPropertyCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
@@ -149,7 +147,6 @@ bool cmSetPropertyCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmSetPropertyCommand::HandleGlobalMode()
 {
   if(!this->Names.empty())
@@ -178,7 +175,6 @@ bool cmSetPropertyCommand::HandleGlobalMode()
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmSetPropertyCommand::HandleDirectoryMode()
 {
   if(this->Names.size() > 1)
@@ -237,7 +233,6 @@ bool cmSetPropertyCommand::HandleDirectoryMode()
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmSetPropertyCommand::HandleTargetMode()
 {
   for(std::set<std::string>::const_iterator ni = this->Names.begin();
@@ -268,7 +263,6 @@ bool cmSetPropertyCommand::HandleTargetMode()
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmSetPropertyCommand::HandleTarget(cmTarget* target)
 {
   // Set or append the property.
@@ -293,7 +287,6 @@ bool cmSetPropertyCommand::HandleTarget(cmTarget* target)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmSetPropertyCommand::HandleSourceMode()
 {
   for(std::set<std::string>::const_iterator ni = this->Names.begin();
@@ -318,7 +311,6 @@ bool cmSetPropertyCommand::HandleSourceMode()
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmSetPropertyCommand::HandleSource(cmSourceFile* sf)
 {
   // Set or append the property.
@@ -340,7 +332,6 @@ bool cmSetPropertyCommand::HandleSource(cmSourceFile* sf)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmSetPropertyCommand::HandleTestMode()
 {
   // Look for tests with all names given.
@@ -379,7 +370,6 @@ bool cmSetPropertyCommand::HandleTestMode()
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmSetPropertyCommand::HandleTest(cmTest* test)
 {
   // Set or append the property.
@@ -401,7 +391,6 @@ bool cmSetPropertyCommand::HandleTest(cmTest* test)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmSetPropertyCommand::HandleCacheMode()
 {
   if(this->PropertyName == "ADVANCED")
@@ -466,7 +455,6 @@ bool cmSetPropertyCommand::HandleCacheMode()
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmSetPropertyCommand::HandleCacheEntry(std::string const& cacheKey)
 {
   // Set or append the property.
@@ -490,7 +478,6 @@ bool cmSetPropertyCommand::HandleCacheEntry(std::string const& cacheKey)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmSetPropertyCommand::HandleInstallMode()
 {
   cmake* cm = this->Makefile->GetCMakeInstance();
@@ -517,7 +504,6 @@ bool cmSetPropertyCommand::HandleInstallMode()
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmSetPropertyCommand::HandleInstall(cmInstalledFile* file)
 {
   // Set or append the property.

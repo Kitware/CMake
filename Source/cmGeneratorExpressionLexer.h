@@ -16,7 +16,6 @@
 
 #include <vector>
 
-//----------------------------------------------------------------------------
 struct cmGeneratorExpressionToken
 {
   cmGeneratorExpressionToken(unsigned type, const char *c, size_t l)

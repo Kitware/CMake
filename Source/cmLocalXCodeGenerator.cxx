@@ -15,7 +15,6 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 
-//----------------------------------------------------------------------------
 cmLocalXCodeGenerator::cmLocalXCodeGenerator(cmGlobalGenerator* gg,
                                              cmMakefile* mf)
   : cmLocalGenerator(gg, mf)
@@ -25,12 +24,10 @@ cmLocalXCodeGenerator::cmLocalXCodeGenerator(cmGlobalGenerator* gg,
   this->EmitUniversalBinaryFlags = false;
 }
 
-//----------------------------------------------------------------------------
 cmLocalXCodeGenerator::~cmLocalXCodeGenerator()
 {
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmLocalXCodeGenerator::GetTargetDirectory(cmGeneratorTarget const*) const
 {
@@ -38,7 +35,6 @@ cmLocalXCodeGenerator::GetTargetDirectory(cmGeneratorTarget const*) const
   return "";
 }
 
-//----------------------------------------------------------------------------
 void cmLocalXCodeGenerator::AppendFlagEscape(std::string& flags,
                                              const std::string& rawFlag)
 {
@@ -47,7 +43,6 @@ void cmLocalXCodeGenerator::AppendFlagEscape(std::string& flags,
   gg->AppendFlag(flags, rawFlag);
 }
 
-//----------------------------------------------------------------------------
 void cmLocalXCodeGenerator::Generate()
 {
   cmLocalGenerator::Generate();
@@ -60,7 +55,6 @@ void cmLocalXCodeGenerator::Generate()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalXCodeGenerator::GenerateInstallRules()
 {
   cmLocalGenerator::GenerateInstallRules();
@@ -73,7 +67,6 @@ void cmLocalXCodeGenerator::GenerateInstallRules()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmLocalXCodeGenerator::ComputeObjectFilenames(
                         std::map<cmSourceFile const*, std::string>& mapping,
                         cmGeneratorTarget const*)

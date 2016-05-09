@@ -60,7 +60,6 @@ void cmGlobalMinGWMakefileGenerator
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalMinGWMakefileGenerator
 ::GetDocumentation(cmDocumentationEntry& entry)
 {

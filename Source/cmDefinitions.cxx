@@ -13,10 +13,8 @@
 
 #include <assert.h>
 
-//----------------------------------------------------------------------------
 cmDefinitions::Def cmDefinitions::NoDef;
 
-//----------------------------------------------------------------------------
 cmDefinitions::Def const& cmDefinitions::GetInternal(
   const std::string& key, StackIter begin, StackIter end, bool raise)
 {
@@ -41,7 +39,6 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(
   return begin->Map.insert(MapType::value_type(key, def)).first->second;
 }
 
-//----------------------------------------------------------------------------
 const char* cmDefinitions::Get(const std::string& key,
     StackIter begin, StackIter end)
 {
@@ -69,14 +66,12 @@ bool cmDefinitions::HasKey(const std::string& key,
   return false;
 }
 
-//----------------------------------------------------------------------------
 void cmDefinitions::Set(const std::string& key, const char* value)
 {
   Def def(value);
   this->Map[key] = def;
 }
 
-//----------------------------------------------------------------------------
 std::vector<std::string> cmDefinitions::UnusedKeys() const
 {
   std::vector<std::string> keys;
@@ -93,7 +88,6 @@ std::vector<std::string> cmDefinitions::UnusedKeys() const
   return keys;
 }
 
-//----------------------------------------------------------------------------
 cmDefinitions cmDefinitions::MakeClosure(StackIter begin,
                                          StackIter end)
 {
@@ -123,7 +117,6 @@ cmDefinitions cmDefinitions::MakeClosure(StackIter begin,
   return closure;
 }
 
-//----------------------------------------------------------------------------
 std::vector<std::string>
 cmDefinitions::ClosureKeys(StackIter begin, StackIter end)
 {

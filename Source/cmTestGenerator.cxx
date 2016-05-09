@@ -17,7 +17,6 @@
 #include "cmSystemTools.h"
 #include "cmTest.h"
 
-//----------------------------------------------------------------------------
 cmTestGenerator
 ::cmTestGenerator(cmTest* test,
                   std::vector<std::string> const& configurations):
@@ -29,7 +28,6 @@ cmTestGenerator
   this->LG = 0;
 }
 
-//----------------------------------------------------------------------------
 cmTestGenerator
 ::~cmTestGenerator()
 {
@@ -40,7 +38,6 @@ void cmTestGenerator::Compute(cmLocalGenerator* lg)
   this->LG = lg;
 }
 
-//----------------------------------------------------------------------------
 void cmTestGenerator::GenerateScriptConfigs(std::ostream& os,
                                             Indent const& indent)
 {
@@ -48,7 +45,6 @@ void cmTestGenerator::GenerateScriptConfigs(std::ostream& os,
   this->cmScriptGenerator::GenerateScriptConfigs(os, indent);
 }
 
-//----------------------------------------------------------------------------
 void cmTestGenerator::GenerateScriptActions(std::ostream& os,
                                             Indent const& indent)
 {
@@ -67,7 +63,6 @@ void cmTestGenerator::GenerateScriptActions(std::ostream& os,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
                                               const std::string& config,
                                               Indent const& indent)
@@ -150,14 +145,12 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmTestGenerator::GenerateScriptNoConfig(std::ostream& os,
                                              Indent const& indent)
 {
   os << indent << "add_test(" << this->Test->GetName() << " NOT_AVAILABLE)\n";
 }
 
-//----------------------------------------------------------------------------
 bool cmTestGenerator::NeedsScriptNoConfig() const
 {
   return (this->TestGenerated && // test generated for at least one config
@@ -166,7 +159,6 @@ bool cmTestGenerator::NeedsScriptNoConfig() const
           !this->ConfigurationTypes->empty()); // config-dependent command
 }
 
-//----------------------------------------------------------------------------
 void cmTestGenerator::GenerateOldStyle(std::ostream& fout,
                                        Indent const& indent)
 {

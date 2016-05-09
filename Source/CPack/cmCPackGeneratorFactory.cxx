@@ -49,7 +49,6 @@
 #include "cmCPackLog.h"
 
 
-//----------------------------------------------------------------------
 cmCPackGeneratorFactory::cmCPackGeneratorFactory()
 {
   if (cmCPackTGZGenerator::CanGenerate())
@@ -156,13 +155,11 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
 #endif
 }
 
-//----------------------------------------------------------------------
 cmCPackGeneratorFactory::~cmCPackGeneratorFactory()
 {
   cmDeleteAll(this->Generators);
 }
 
-//----------------------------------------------------------------------
 cmCPackGenerator* cmCPackGeneratorFactory::NewGenerator(
                                                 const std::string& name)
 {
@@ -176,7 +173,6 @@ cmCPackGenerator* cmCPackGeneratorFactory::NewGenerator(
   return gen;
 }
 
-//----------------------------------------------------------------------
 cmCPackGenerator* cmCPackGeneratorFactory::NewGeneratorInternal(
   const std::string& name)
 {
@@ -189,7 +185,6 @@ cmCPackGenerator* cmCPackGeneratorFactory::NewGeneratorInternal(
   return (it->second)();
 }
 
-//----------------------------------------------------------------------
 void cmCPackGeneratorFactory::RegisterGenerator(const std::string& name,
   const char* generatorDescription,
   CreateGeneratorCall* createGenerator)

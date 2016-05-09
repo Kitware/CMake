@@ -132,14 +132,11 @@ private:
 };
 
 
-//----------------------------------------------------------------------
 
-//----------------------------------------------------------------------
 cmCTestCoverageHandler::cmCTestCoverageHandler()
 {
 }
 
-//----------------------------------------------------------------------
 void cmCTestCoverageHandler::Initialize()
 {
   this->Superclass::Initialize();
@@ -151,7 +148,6 @@ void cmCTestCoverageHandler::Initialize()
   this->LabelFilter.clear();
 }
 
-//----------------------------------------------------------------------------
 void cmCTestCoverageHandler::CleanCoverageLogFiles(std::ostream& log)
 {
   std::string logGlob = this->CTest->GetCTestConfiguration("BuildDirectory");
@@ -169,7 +165,6 @@ void cmCTestCoverageHandler::CleanCoverageLogFiles(std::ostream& log)
     }
 }
 
-//----------------------------------------------------------------------
 bool cmCTestCoverageHandler::StartCoverageLogFile(
   cmGeneratedFileStream& covLogFile, int logFileCount)
 {
@@ -187,7 +182,6 @@ bool cmCTestCoverageHandler::StartCoverageLogFile(
   return true;
 }
 
-//----------------------------------------------------------------------
 void cmCTestCoverageHandler::EndCoverageLogFile(cmGeneratedFileStream& ostr,
   int logFileCount)
 {
@@ -198,7 +192,6 @@ void cmCTestCoverageHandler::EndCoverageLogFile(cmGeneratedFileStream& ostr,
   ostr.Close();
 }
 
-//----------------------------------------------------------------------
 void cmCTestCoverageHandler::StartCoverageLogXML(cmXMLWriter& xml)
 {
   this->CTest->StartXML(xml, this->AppendXML);
@@ -208,7 +201,6 @@ void cmCTestCoverageHandler::StartCoverageLogXML(cmXMLWriter& xml)
     static_cast<unsigned int>(cmSystemTools::GetTime()));
 }
 
-//----------------------------------------------------------------------
 void cmCTestCoverageHandler::EndCoverageLogXML(cmXMLWriter& xml)
 {
   xml.Element("EndDateTime", this->CTest->CurrentTime());
@@ -217,7 +209,6 @@ void cmCTestCoverageHandler::EndCoverageLogXML(cmXMLWriter& xml)
   this->CTest->EndXML(xml);
 }
 
-//----------------------------------------------------------------------
 bool cmCTestCoverageHandler::ShouldIDoCoverage(const char* file,
   const char* srcDir,
   const char* binDir)
@@ -322,7 +313,6 @@ bool cmCTestCoverageHandler::ShouldIDoCoverage(const char* file,
   return true;
 }
 
-//----------------------------------------------------------------------
 //clearly it would be nice if this were broken up into a few smaller
 //functions and commented...
 int cmCTestCoverageHandler::ProcessHandler()
@@ -747,7 +737,6 @@ int cmCTestCoverageHandler::ProcessHandler()
   return 0;
 }
 
-//----------------------------------------------------------------------
 void cmCTestCoverageHandler::PopulateCustomVectors(cmMakefile *mf)
 {
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -772,7 +761,6 @@ void cmCTestCoverageHandler::PopulateCustomVectors(cmMakefile *mf)
     }
 }
 
-//----------------------------------------------------------------------
 // Fix for issue #4971 where the case of the drive letter component of
 // the filenames might be different when analyzing gcov output.
 //
@@ -784,7 +772,6 @@ void cmCTestCoverageHandler::PopulateCustomVectors(cmMakefile *mf)
 #define fnc(s) s
 #endif
 
-//----------------------------------------------------------------------
 bool IsFileInDir(const std::string &infile, const std::string &indir)
 {
   std::string file = cmSystemTools::CollapseFullPath(infile);
@@ -802,7 +789,6 @@ bool IsFileInDir(const std::string &infile, const std::string &indir)
   return false;
 }
 
-//----------------------------------------------------------------------
 int cmCTestCoverageHandler::HandlePHPCoverage(
   cmCTestCoverageHandlerContainer* cont)
 {
@@ -815,7 +801,6 @@ int cmCTestCoverageHandler::HandlePHPCoverage(
   return static_cast<int>(cont->TotalCoverage.size());
 }
 
-//----------------------------------------------------------------------
 int cmCTestCoverageHandler::HandleCoberturaCoverage(
   cmCTestCoverageHandlerContainer* cont)
 {
@@ -855,7 +840,6 @@ int cmCTestCoverageHandler::HandleCoberturaCoverage(
   return static_cast<int>(cont->TotalCoverage.size());
 }
 
-//----------------------------------------------------------------------
 int cmCTestCoverageHandler::HandleMumpsCoverage(
   cmCTestCoverageHandlerContainer* cont)
 {
@@ -923,7 +907,6 @@ struct cmCTestCoverageHandlerLocale
   std::string lc_all;
 };
 
-//----------------------------------------------------------------------
 int cmCTestCoverageHandler::HandleJacocoCoverage(
   cmCTestCoverageHandlerContainer* cont)
 {
@@ -971,7 +954,6 @@ int cmCTestCoverageHandler::HandleJacocoCoverage(
   return static_cast<int>(cont->TotalCoverage.size());
 }
 
-//----------------------------------------------------------------------
 int cmCTestCoverageHandler::HandleDelphiCoverage(
   cmCTestCoverageHandlerContainer* cont)
 {
@@ -1005,7 +987,6 @@ int cmCTestCoverageHandler::HandleDelphiCoverage(
   return static_cast<int>(cont->TotalCoverage.size());
 }
 
-//----------------------------------------------------------------------
 int cmCTestCoverageHandler::HandleBlanketJSCoverage(
   cmCTestCoverageHandlerContainer* cont)
   {
@@ -1051,7 +1032,6 @@ int cmCTestCoverageHandler::HandleBlanketJSCoverage(
     }
   return static_cast<int>(cont->TotalCoverage.size());
   }
-//----------------------------------------------------------------------
 int cmCTestCoverageHandler::HandleGCovCoverage(
   cmCTestCoverageHandlerContainer* cont)
 {
@@ -1493,7 +1473,6 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
   return file_count;
 }
 
-//----------------------------------------------------------------------
 int cmCTestCoverageHandler::HandleLCovCoverage(
   cmCTestCoverageHandlerContainer* cont)
 {
@@ -1765,7 +1744,6 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
   return file_count;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestCoverageHandler::FindGCovFiles(std::vector<std::string>& files)
 {
   cmsys::Glob gl;
@@ -1796,7 +1774,6 @@ void cmCTestCoverageHandler::FindGCovFiles(std::vector<std::string>& files)
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestCoverageHandler::FindLCovFiles(std::vector<std::string>& files)
 {
   cmsys::Glob gl;
@@ -1840,7 +1817,6 @@ bool cmCTestCoverageHandler::FindLCovFiles(std::vector<std::string>& files)
   return true;
 }
 
-//----------------------------------------------------------------------
 int cmCTestCoverageHandler::HandleTracePyCoverage(
   cmCTestCoverageHandlerContainer* cont)
 {
@@ -1974,7 +1950,6 @@ int cmCTestCoverageHandler::HandleTracePyCoverage(
   return file_count;
 }
 
-//----------------------------------------------------------------------
 std::string cmCTestCoverageHandler::FindFile(
   cmCTestCoverageHandlerContainer* cont,
   std::string fileName)
@@ -2014,7 +1989,6 @@ namespace
    0};
 }
 
-//----------------------------------------------------------------------
 int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
   cmCTestCoverageHandlerContainer* cont,
   std::set<std::string>& coveredFileNames,
@@ -2163,7 +2137,6 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
   return 1;
 }
 
-//----------------------------------------------------------------------
 int cmCTestCoverageHandler::RunBullseyeCommand(
   cmCTestCoverageHandlerContainer* cont,
   const char* cmd,
@@ -2213,7 +2186,6 @@ int cmCTestCoverageHandler::RunBullseyeCommand(
   return 1;
 }
 
-//----------------------------------------------------------------------
 int cmCTestCoverageHandler::RunBullseyeSourceSummary(
   cmCTestCoverageHandlerContainer* cont)
 {
@@ -2390,7 +2362,6 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
                                          coveredFilesFullPath);
 }
 
-//----------------------------------------------------------------------
 int cmCTestCoverageHandler::HandleBullseyeCoverage(
   cmCTestCoverageHandlerContainer* cont)
 {
@@ -2487,7 +2458,6 @@ bool cmCTestCoverageHandler::ParseBullsEyeCovsrcLine(
   return true;
 }
 
-//----------------------------------------------------------------------
 int cmCTestCoverageHandler::GetLabelId(std::string const& label)
 {
   LabelIdMapType::iterator i = this->LabelIdMap.find(label);
@@ -2501,7 +2471,6 @@ int cmCTestCoverageHandler::GetLabelId(std::string const& label)
   return i->second;
 }
 
-//----------------------------------------------------------------------
 void cmCTestCoverageHandler::LoadLabels()
 {
   std::string fileList = this->CTest->GetBinaryDir();
@@ -2517,7 +2486,6 @@ void cmCTestCoverageHandler::LoadLabels()
     }
 }
 
-//----------------------------------------------------------------------
 void cmCTestCoverageHandler::LoadLabels(const char* dir)
 {
   LabelSet& dirLabels = this->TargetDirs[dir];
@@ -2572,7 +2540,6 @@ void cmCTestCoverageHandler::LoadLabels(const char* dir)
     }
 }
 
-//----------------------------------------------------------------------
 void cmCTestCoverageHandler::WriteXMLLabels(cmXMLWriter& xml,
                                             std::string const& source)
 {
@@ -2589,7 +2556,6 @@ void cmCTestCoverageHandler::WriteXMLLabels(cmXMLWriter& xml,
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmCTestCoverageHandler::SetLabelFilter(std::set<std::string> const& labels)
 {
@@ -2601,7 +2567,6 @@ cmCTestCoverageHandler::SetLabelFilter(std::set<std::string> const& labels)
     }
 }
 
-//----------------------------------------------------------------------
 bool cmCTestCoverageHandler::IntersectsFilter(LabelSet const& labels)
 {
   // If there is no label filter then nothing is filtered out.
@@ -2618,7 +2583,6 @@ bool cmCTestCoverageHandler::IntersectsFilter(LabelSet const& labels)
   return !ids.empty();
 }
 
-//----------------------------------------------------------------------
 bool cmCTestCoverageHandler::IsFilteredOut(std::string const& source)
 {
   // If there is no label filter then nothing is filtered out.
@@ -2638,7 +2602,6 @@ bool cmCTestCoverageHandler::IsFilteredOut(std::string const& source)
   return true;
 }
 
-//----------------------------------------------------------------------
 std::set<std::string> cmCTestCoverageHandler::FindUncoveredFiles(
   cmCTestCoverageHandlerContainer* cont)
 {

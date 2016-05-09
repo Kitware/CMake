@@ -21,7 +21,6 @@
 
 #include <assert.h>
 
-//----------------------------------------------------------------------------
 cmGeneratorExpressionEvaluationFile::cmGeneratorExpressionEvaluationFile(
         const std::string &input,
         cmsys::auto_ptr<cmCompiledGeneratorExpression> outputFileExpr,
@@ -34,7 +33,6 @@ cmGeneratorExpressionEvaluationFile::cmGeneratorExpressionEvaluationFile(
 {
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg,
               const std::string& config,
               const std::string& lang,
@@ -99,7 +97,6 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
     cmLocalGenerator *lg, std::string const& config)
 {
@@ -121,7 +118,6 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator *lg)
 {
   mode_t perm = 0;

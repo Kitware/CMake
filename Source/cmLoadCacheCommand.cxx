@@ -89,7 +89,6 @@ bool cmLoadCacheCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmLoadCacheCommand::ReadWithPrefix(std::vector<std::string> const& args)
 {
   // Make sure we have a prefix.
@@ -166,7 +165,6 @@ bool cmLoadCacheCommand::ReadWithPrefix(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmLoadCacheCommand::CheckLine(const char* line)
 {
   // Check one line of the cache file.

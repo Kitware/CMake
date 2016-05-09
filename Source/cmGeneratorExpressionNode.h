@@ -27,7 +27,6 @@
 
 #include "cmListFileCache.h"
 
-//----------------------------------------------------------------------------
 struct cmGeneratorExpressionNode
 {
   enum {
@@ -63,7 +62,6 @@ struct cmGeneratorExpressionNode
                                               const std::string &identifier);
 };
 
-//----------------------------------------------------------------------------
 void reportError(cmGeneratorExpressionContext *context,
                  const std::string &expr, const std::string &result);
 

@@ -19,7 +19,6 @@
 
 #include <cm_expat.h>
 
-//----------------------------------------------------------------------------
 extern "C"
 int cmBZRXMLParserUnknownEncodingHandler(void*,
                                          const XML_Char *name,
@@ -75,7 +74,6 @@ int cmBZRXMLParserUnknownEncodingHandler(void*,
   return 0;
 }
 
-//----------------------------------------------------------------------------
 cmCTestBZR::cmCTestBZR(cmCTest* ct, std::ostream& log):
   cmCTestGlobalVC(ct, log)
 {
@@ -86,12 +84,10 @@ cmCTestBZR::cmCTestBZR(cmCTest* ct, std::ostream& log):
   cmSystemTools::PutEnv("BZR_PROGRESS_BAR=none");
 }
 
-//----------------------------------------------------------------------------
 cmCTestBZR::~cmCTestBZR()
 {
 }
 
-//----------------------------------------------------------------------------
 class cmCTestBZR::InfoParser: public cmCTestVC::LineParser
 {
 public:
@@ -122,7 +118,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 class cmCTestBZR::RevnoParser: public cmCTestVC::LineParser
 {
 public:
@@ -145,7 +140,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 std::string cmCTestBZR::LoadInfo()
 {
   // Run "bzr info" to get the repository info from the work tree.
@@ -174,7 +168,6 @@ void cmCTestBZR::NoteOldRevision()
   this->PriorRev.Rev = this->OldRevision;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestBZR::NoteNewRevision()
 {
   this->NewRevision = this->LoadInfo();
@@ -184,7 +177,6 @@ void cmCTestBZR::NoteNewRevision()
   this->Log << "URL = " << this->URL << "\n";
 }
 
-//----------------------------------------------------------------------------
 class cmCTestBZR::LogParser: public cmCTestVC::OutputLogger,
                              private cmXMLParser
 {
@@ -314,7 +306,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 class cmCTestBZR::UpdateParser: public cmCTestVC::LineParser
 {
 public:
@@ -399,7 +390,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 bool cmCTestBZR::UpdateImpl()
 {
   // Get user-specified update options.
@@ -433,7 +423,6 @@ bool cmCTestBZR::UpdateImpl()
   return this->RunUpdateCommand(&bzr_update[0], &out, &err);
 }
 
-//----------------------------------------------------------------------------
 void cmCTestBZR::LoadRevisions()
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
@@ -465,7 +454,6 @@ void cmCTestBZR::LoadRevisions()
   cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl);
 }
 
-//----------------------------------------------------------------------------
 class cmCTestBZR::StatusParser: public cmCTestVC::LineParser
 {
 public:
@@ -510,7 +498,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 void cmCTestBZR::LoadModifications()
 {
   // Run "bzr status" which reports local modifications.

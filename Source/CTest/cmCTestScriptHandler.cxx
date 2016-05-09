@@ -78,7 +78,6 @@ IsFunctionBlocked(const cmListFileFunction& , cmMakefile &,
   return false;
 }
 
-//----------------------------------------------------------------------
 cmCTestScriptHandler::cmCTestScriptHandler()
 {
   this->Backup = false;
@@ -95,7 +94,6 @@ cmCTestScriptHandler::cmCTestScriptHandler()
   this->ContinuousDuration = -1;
 }
 
-//----------------------------------------------------------------------
 void cmCTestScriptHandler::Initialize()
 {
   this->Superclass::Initialize();
@@ -132,7 +130,6 @@ void cmCTestScriptHandler::Initialize()
   delete this->CMake;
 }
 
-//----------------------------------------------------------------------
 cmCTestScriptHandler::~cmCTestScriptHandler()
 {
   delete this->Makefile;
@@ -141,7 +138,6 @@ cmCTestScriptHandler::~cmCTestScriptHandler()
 }
 
 
-//----------------------------------------------------------------------
 // just adds an argument to the vector
 void cmCTestScriptHandler::AddConfigurationScript(const char *script,
                                                   bool pscope)
@@ -151,7 +147,6 @@ void cmCTestScriptHandler::AddConfigurationScript(const char *script,
 }
 
 
-//----------------------------------------------------------------------
 // the generic entry point for handling scripts, this routine will run all
 // the scripts provides a -S arguments
 int cmCTestScriptHandler::ProcessHandler()
@@ -184,7 +179,6 @@ void cmCTestScriptHandler::UpdateElapsedTime()
     }
 }
 
-//----------------------------------------------------------------------
 void cmCTestScriptHandler::AddCTestCommand(cmCTestCommand* command)
 {
   cmCTestCommand* newCom = command;
@@ -348,7 +342,6 @@ void cmCTestScriptHandler::CreateCMake()
   this->AddCTestCommand(new cmCTestUploadCommand);
 }
 
-//----------------------------------------------------------------------
 // this sets up some variables for the script to use, creates the required
 // cmake instance and generators, and then reads in the script
 int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
@@ -443,7 +436,6 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
 }
 
 
-//----------------------------------------------------------------------
 // extract variabels from the script to set ivars
 int cmCTestScriptHandler::ExtractVariables()
 {
@@ -560,7 +552,6 @@ int cmCTestScriptHandler::ExtractVariables()
   return 0;
 }
 
-//----------------------------------------------------------------------
 void cmCTestScriptHandler::SleepInSeconds(unsigned int secondsToWait)
 {
 #if defined(_WIN32)
@@ -570,7 +561,6 @@ void cmCTestScriptHandler::SleepInSeconds(unsigned int secondsToWait)
 #endif
 }
 
-//----------------------------------------------------------------------
 // run a specific script
 int cmCTestScriptHandler::RunConfigurationScript
 (const std::string& total_script_arg, bool pscope)
@@ -610,7 +600,6 @@ int cmCTestScriptHandler::RunConfigurationScript
   return result;
 }
 
-//----------------------------------------------------------------------
 int cmCTestScriptHandler::RunCurrentScript()
 {
   int result;
@@ -673,7 +662,6 @@ int cmCTestScriptHandler::RunCurrentScript()
   return result;
 }
 
-//----------------------------------------------------------------------
 int cmCTestScriptHandler::CheckOutSourceDir()
 {
   std::string command;
@@ -702,7 +690,6 @@ int cmCTestScriptHandler::CheckOutSourceDir()
   return 0;
 }
 
-//----------------------------------------------------------------------
 int cmCTestScriptHandler::BackupDirectories()
 {
   int retVal;
@@ -743,7 +730,6 @@ int cmCTestScriptHandler::BackupDirectories()
 }
 
 
-//----------------------------------------------------------------------
 int cmCTestScriptHandler::PerformExtraUpdates()
 {
   std::string command;
@@ -786,7 +772,6 @@ int cmCTestScriptHandler::PerformExtraUpdates()
 }
 
 
-//----------------------------------------------------------------------
 // run a single dashboard entry
 int cmCTestScriptHandler::RunConfigurationDashboard()
 {
@@ -977,7 +962,6 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
   return 0;
 }
 
-//-------------------------------------------------------------------------
 bool cmCTestScriptHandler::WriteInitialCache(const char* directory,
                                              const char* text)
 {
@@ -1002,7 +986,6 @@ bool cmCTestScriptHandler::WriteInitialCache(const char* directory,
   return true;
 }
 
-//-------------------------------------------------------------------------
 void cmCTestScriptHandler::RestoreBackupDirectories()
 {
   // if we backed up the dirs and the build failed, then restore
@@ -1074,7 +1057,6 @@ bool cmCTestScriptHandler::EmptyBinaryDirectory(const char *sname)
   return false;
 }
 
-//-------------------------------------------------------------------------
 bool cmCTestScriptHandler::TryToRemoveBinaryDirectoryOnce(
   const std::string& directoryPath)
 {
@@ -1114,7 +1096,6 @@ bool cmCTestScriptHandler::TryToRemoveBinaryDirectoryOnce(
   return cmSystemTools::RemoveADirectory(directoryPath);
 }
 
-//-------------------------------------------------------------------------
 double cmCTestScriptHandler::GetRemainingTimeAllowed()
 {
   if (!this->Makefile)

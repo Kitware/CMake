@@ -86,7 +86,6 @@ cmMakefileTargetGenerator::New(cmGeneratorTarget *tgt)
   return result;
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::CreateRuleFile()
 {
   // Create a directory for this target.
@@ -130,7 +129,6 @@ void cmMakefileTargetGenerator::CreateRuleFile()
   this->LocalGenerator->WriteSpecialTargetsTop(*this->BuildFileStream);
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::WriteTargetBuildRules()
 {
   const std::string& config =
@@ -212,7 +210,6 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::WriteCommonCodeRules()
 {
   const char* root = (this->Makefile->IsOn("CMAKE_MAKE_INCLUDE_FROM_ROOT")?
@@ -310,7 +307,6 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 }
 
 
-//----------------------------------------------------------------------------
 void
 cmMakefileTargetGenerator::MacOSXContentGeneratorType::operator()
   (cmSourceFile const& source, const char* pkgloc)
@@ -362,7 +358,6 @@ cmMakefileTargetGenerator::MacOSXContentGeneratorType::operator()
   this->Generator->ExtraFiles.insert(output);
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator
 ::WriteObjectRuleFiles(cmSourceFile const& source)
 {
@@ -436,7 +431,6 @@ void cmMakefileTargetGenerator
                        srcFullPath.c_str());
 }
 
-//----------------------------------------------------------------------------
 void
 cmMakefileTargetGenerator
 ::WriteObjectBuildFile(std::string &obj,
@@ -904,7 +898,6 @@ cmMakefileTargetGenerator
                                       false);
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::WriteTargetRequiresRules()
 {
   std::vector<std::string> depends;
@@ -933,7 +926,6 @@ void cmMakefileTargetGenerator::WriteTargetRequiresRules()
                                       depends, no_commands, true);
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::WriteTargetCleanRules()
 {
   std::vector<std::string> depends;
@@ -958,7 +950,6 @@ void cmMakefileTargetGenerator::WriteTargetCleanRules()
                                       depends, commands, true);
 }
 
-//----------------------------------------------------------------------------
 bool cmMakefileTargetGenerator::WriteMakeRule(
   std::ostream& os,
   const char* comment,
@@ -1034,7 +1025,6 @@ bool cmMakefileTargetGenerator::WriteMakeRule(
   return symbolic;
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::WriteTargetDependRules()
 {
   // must write the targets depend info file
@@ -1169,7 +1159,6 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
                                       depends, commands, true);
 }
 
-//----------------------------------------------------------------------------
 void
 cmMakefileTargetGenerator
 ::DriveCustomCommands(std::vector<std::string>& depends)
@@ -1191,7 +1180,6 @@ cmMakefileTargetGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator
 ::WriteObjectDependRules(cmSourceFile const& source,
                          std::vector<std::string>& depends)
@@ -1205,7 +1193,6 @@ void cmMakefileTargetGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator
 ::GenerateCustomRuleFile(cmCustomCommandGenerator const& ccg)
 {
@@ -1265,7 +1252,6 @@ void cmMakefileTargetGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmMakefileTargetGenerator
 ::MakeEchoProgress(cmLocalUnixMakefileGenerator3::EchoProgress& progress) const
@@ -1277,7 +1263,6 @@ cmMakefileTargetGenerator
   progress.Arg = progressArg.str();
 }
 
-//----------------------------------------------------------------------------
 void
 cmMakefileTargetGenerator
 ::WriteObjectsVariable(std::string& variableName,
@@ -1336,7 +1321,6 @@ cmMakefileTargetGenerator
   *this->BuildFileStream << "\n" << "\n";
 }
 
-//----------------------------------------------------------------------------
 void
 cmMakefileTargetGenerator
 ::WriteObjectsString(std::string& buildObjs)
@@ -1346,7 +1330,6 @@ cmMakefileTargetGenerator
   buildObjs = objStrings[0];
 }
 
-//----------------------------------------------------------------------------
 class cmMakefileTargetGeneratorObjectStrings
 {
 public:
@@ -1395,7 +1378,6 @@ private:
   const char* Space;
 };
 
-//----------------------------------------------------------------------------
 void
 cmMakefileTargetGenerator
 ::WriteObjectsStrings(std::vector<std::string>& objStrings,
@@ -1417,7 +1399,6 @@ cmMakefileTargetGenerator
   helper.Done();
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::WriteTargetDriverRule(
                                                 const std::string& main_output,
                                                 bool relink)
@@ -1464,7 +1445,6 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(
                                       depends, no_commands, true);
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator
 ::AppendTargetDepends(std::vector<std::string>& depends)
 {
@@ -1484,7 +1464,6 @@ void cmMakefileTargetGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator
 ::AppendObjectDepends(std::vector<std::string>& depends)
 {
@@ -1508,7 +1487,6 @@ void cmMakefileTargetGenerator
                                          this->BuildFileNameFull.c_str());
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator
 ::AppendLinkDepends(std::vector<std::string>& depends)
 {
@@ -1540,7 +1518,6 @@ void cmMakefileTargetGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmMakefileTargetGenerator::GetLinkRule(
                                               const std::string& linkRuleVar)
 {
@@ -1558,7 +1535,6 @@ std::string cmMakefileTargetGenerator::GetLinkRule(
   return linkRule;
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator
 ::CloseFileStreams()
 {
@@ -1621,7 +1597,6 @@ void cmMakefileTargetGenerator::RemoveForbiddenFlags(const char* flagVar,
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmMakefileTargetGenerator
 ::CreateLinkScript(const char* name,
@@ -1656,7 +1631,6 @@ cmMakefileTargetGenerator
   makefile_depends.push_back(linkScriptName);
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmMakefileTargetGenerator
 ::CreateResponseFile(const char* name, std::string const& options,
@@ -1681,7 +1655,6 @@ cmMakefileTargetGenerator
   return responseFileName;
 }
 
-//----------------------------------------------------------------------------
 void
 cmMakefileTargetGenerator
 ::CreateLinkLibs(std::string& linkLibs, bool relink,
@@ -1724,7 +1697,6 @@ cmMakefileTargetGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmMakefileTargetGenerator
 ::CreateObjectLists(bool useLinkScript, bool useArchiveRules,
@@ -1797,7 +1769,6 @@ cmMakefileTargetGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
                                                 const std::string& lang)
 {

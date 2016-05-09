@@ -17,19 +17,16 @@
 
 #include <cmsys/RegularExpression.hxx>
 
-//----------------------------------------------------------------------------
 cmCTestHG::cmCTestHG(cmCTest* ct, std::ostream& log):
   cmCTestGlobalVC(ct, log)
 {
   this->PriorRev = this->Unknown;
 }
 
-//----------------------------------------------------------------------------
 cmCTestHG::~cmCTestHG()
 {
 }
 
-//----------------------------------------------------------------------------
 class cmCTestHG::IdentifyParser: public cmCTestVC::LineParser
 {
 public:
@@ -54,7 +51,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 class cmCTestHG::StatusParser: public cmCTestVC::LineParser
 {
 public:
@@ -94,7 +90,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 std::string cmCTestHG::GetWorkingRevision()
 {
   // Run plumbing "hg identify" to get work tree revision.
@@ -107,7 +102,6 @@ std::string cmCTestHG::GetWorkingRevision()
   return rev;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestHG::NoteOldRevision()
 {
   this->OldRevision = this->GetWorkingRevision();
@@ -116,7 +110,6 @@ void cmCTestHG::NoteOldRevision()
   this->PriorRev.Rev = this->OldRevision;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestHG::NoteNewRevision()
 {
   this->NewRevision = this->GetWorkingRevision();
@@ -124,7 +117,6 @@ void cmCTestHG::NoteNewRevision()
              << this->NewRevision << "\n");
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestHG::UpdateImpl()
 {
   // Use "hg pull" followed by "hg update" to update the working tree.
@@ -164,7 +156,6 @@ bool cmCTestHG::UpdateImpl()
   return this->RunUpdateCommand(&hg_update[0], &out, &err);
 }
 
-//----------------------------------------------------------------------------
 class cmCTestHG::LogParser: public cmCTestVC::OutputLogger,
                             private cmXMLParser
 {
@@ -293,7 +284,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 void cmCTestHG::LoadRevisions()
 {
   // Use 'hg log' to get revisions in a xml format.
@@ -326,7 +316,6 @@ void cmCTestHG::LoadRevisions()
   out.Process("</log>\n");
 }
 
-//----------------------------------------------------------------------------
 void cmCTestHG::LoadModifications()
 {
   // Use 'hg status' to get modified files.

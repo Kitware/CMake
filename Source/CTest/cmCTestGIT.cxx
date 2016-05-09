@@ -23,7 +23,6 @@
 #include <sys/types.h>
 #include <time.h>
 
-//----------------------------------------------------------------------------
 static unsigned int cmCTestGITVersion(unsigned int epic, unsigned int major,
                                       unsigned int minor, unsigned int fix)
 {
@@ -31,7 +30,6 @@ static unsigned int cmCTestGITVersion(unsigned int epic, unsigned int major,
   return fix + minor*1000 + major*100000 + epic*10000000;
 }
 
-//----------------------------------------------------------------------------
 cmCTestGIT::cmCTestGIT(cmCTest* ct, std::ostream& log):
   cmCTestGlobalVC(ct, log)
 {
@@ -39,12 +37,10 @@ cmCTestGIT::cmCTestGIT(cmCTest* ct, std::ostream& log):
   this->CurrentGitVersion = 0;
 }
 
-//----------------------------------------------------------------------------
 cmCTestGIT::~cmCTestGIT()
 {
 }
 
-//----------------------------------------------------------------------------
 class cmCTestGIT::OneLineParser: public cmCTestVC::LineParser
 {
 public:
@@ -63,7 +59,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 std::string cmCTestGIT::GetWorkingRevision()
 {
   // Run plumbing "git rev-list" to get work tree revision.
@@ -76,7 +71,6 @@ std::string cmCTestGIT::GetWorkingRevision()
   return rev;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestGIT::NoteOldRevision()
 {
   this->OldRevision = this->GetWorkingRevision();
@@ -85,7 +79,6 @@ void cmCTestGIT::NoteOldRevision()
   this->PriorRev.Rev = this->OldRevision;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestGIT::NoteNewRevision()
 {
   this->NewRevision = this->GetWorkingRevision();
@@ -93,7 +86,6 @@ void cmCTestGIT::NoteNewRevision()
              << this->NewRevision << "\n");
 }
 
-//----------------------------------------------------------------------------
 std::string cmCTestGIT::FindGitDir()
 {
   std::string git_dir;
@@ -141,7 +133,6 @@ std::string cmCTestGIT::FindGitDir()
   return git_dir;
 }
 
-//----------------------------------------------------------------------------
 std::string cmCTestGIT::FindTopDir()
 {
   std::string top_dir = this->SourceDirectory;
@@ -162,7 +153,6 @@ std::string cmCTestGIT::FindTopDir()
   return top_dir;
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestGIT::UpdateByFetchAndReset()
 {
   const char* git = this->CommandLineTool.c_str();
@@ -233,7 +223,6 @@ bool cmCTestGIT::UpdateByFetchAndReset()
   return this->RunChild(&git_reset[0], &reset_out, &reset_err);
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestGIT::UpdateByCustom(std::string const& custom)
 {
   std::vector<std::string> git_custom_command;
@@ -251,7 +240,6 @@ bool cmCTestGIT::UpdateByCustom(std::string const& custom)
   return this->RunUpdateCommand(&git_custom[0], &custom_out, &custom_err);
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestGIT::UpdateInternal()
 {
   std::string custom = this->CTest->GetCTestConfiguration("GITUpdateCustom");
@@ -262,7 +250,6 @@ bool cmCTestGIT::UpdateInternal()
   return this->UpdateByFetchAndReset();
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestGIT::UpdateImpl()
 {
   if(!this->UpdateInternal())
@@ -331,7 +318,6 @@ bool cmCTestGIT::UpdateImpl()
                         top_dir.c_str());
 }
 
-//----------------------------------------------------------------------------
 unsigned int cmCTestGIT::GetGitVersion()
 {
   if(!this->CurrentGitVersion)
@@ -352,7 +338,6 @@ unsigned int cmCTestGIT::GetGitVersion()
   return this->CurrentGitVersion;
 }
 
-//----------------------------------------------------------------------------
 /* Diff format:
 
    :src-mode dst-mode src-sha1 dst-sha1 status\0
@@ -470,7 +455,6 @@ protected:
     }
 };
 
-//----------------------------------------------------------------------------
 /* Commit format:
 
    commit ...\n
@@ -637,7 +621,6 @@ private:
 char const cmCTestGIT::CommitParser::SectionSep[SectionCount] =
 {'\n', '\n', '\0'};
 
-//----------------------------------------------------------------------------
 void cmCTestGIT::LoadRevisions()
 {
   // Use 'git rev-list ... | git diff-tree ...' to get revisions.
@@ -666,7 +649,6 @@ void cmCTestGIT::LoadRevisions()
   cmsysProcess_Delete(cp);
 }
 
-//----------------------------------------------------------------------------
 void cmCTestGIT::LoadModifications()
 {
   const char* git = this->CommandLineTool.c_str();

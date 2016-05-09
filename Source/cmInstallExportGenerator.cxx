@@ -25,7 +25,6 @@
 #include "cmExportInstallFileGenerator.h"
 #include "cmExportSet.h"
 
-//----------------------------------------------------------------------------
 cmInstallExportGenerator::cmInstallExportGenerator(
   cmExportSet* exportSet,
   const char* destination,
@@ -49,7 +48,6 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   exportSet->AddInstallation(this);
 }
 
-//----------------------------------------------------------------------------
 cmInstallExportGenerator::~cmInstallExportGenerator()
 {
   delete this->EFGen;
@@ -61,7 +59,6 @@ void cmInstallExportGenerator::Compute(cmLocalGenerator* lg)
   this->ExportSet->Compute(lg);
 }
 
-//----------------------------------------------------------------------------
 void cmInstallExportGenerator::ComputeTempDir()
 {
   // Choose a temporary directory in which to generate the import
@@ -123,7 +120,6 @@ void cmInstallExportGenerator::ComputeTempDir()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmInstallExportGenerator::GenerateScript(std::ostream& os)
 {
   // Skip empty sets.
@@ -175,7 +171,6 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
   this->cmInstallGenerator::GenerateScript(os);
 }
 
-//----------------------------------------------------------------------------
 void
 cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
                                                 Indent const& indent)
@@ -202,7 +197,6 @@ cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
                                                      Indent const& indent)
 {

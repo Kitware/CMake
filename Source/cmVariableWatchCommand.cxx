@@ -13,14 +13,12 @@
 
 #include "cmVariableWatch.h"
 
-//----------------------------------------------------------------------------
 struct cmVariableWatchCallbackData
 {
   bool InCallback;
   std::string Command;
 };
 
-//----------------------------------------------------------------------------
 static void cmVariableWatchCommandVariableAccessed(
   const std::string& variable, int access_type, void* client_data,
   const char* newValue, const cmMakefile* mf)
@@ -88,7 +86,6 @@ static void cmVariableWatchCommandVariableAccessed(
   data->InCallback = false;
 }
 
-//----------------------------------------------------------------------------
 static void deleteVariableWatchCallbackData(void* client_data)
 {
   cmVariableWatchCallbackData* data
@@ -96,12 +93,10 @@ static void deleteVariableWatchCallbackData(void* client_data)
   delete data;
 }
 
-//----------------------------------------------------------------------------
 cmVariableWatchCommand::cmVariableWatchCommand()
 {
 }
 
-//----------------------------------------------------------------------------
 cmVariableWatchCommand::~cmVariableWatchCommand()
 {
   std::set<std::string>::const_iterator it;
@@ -114,7 +109,6 @@ cmVariableWatchCommand::~cmVariableWatchCommand()
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmVariableWatchCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {

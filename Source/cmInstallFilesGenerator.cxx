@@ -16,7 +16,6 @@
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 
-//----------------------------------------------------------------------------
 cmInstallFilesGenerator
 ::cmInstallFilesGenerator(std::vector<std::string> const& files,
                           const char* dest, bool programs,
@@ -53,7 +52,6 @@ cmInstallFilesGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 cmInstallFilesGenerator
 ::~cmInstallFilesGenerator()
 {
@@ -64,7 +62,6 @@ void cmInstallFilesGenerator::Compute(cmLocalGenerator* lg)
   this->LocalGenerator = lg;
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmInstallFilesGenerator::GetDestination(std::string const& config) const
 {
@@ -73,7 +70,6 @@ cmInstallFilesGenerator::GetDestination(std::string const& config) const
     ->Evaluate(this->LocalGenerator, config);
 }
 
-//----------------------------------------------------------------------------
 void cmInstallFilesGenerator::AddFilesInstallRule(
   std::ostream& os,
   const std::string config,
@@ -93,7 +89,6 @@ void cmInstallFilesGenerator::AddFilesInstallRule(
                        this->Rename.c_str(), 0, indent);
 }
 
-//----------------------------------------------------------------------------
 void cmInstallFilesGenerator::GenerateScriptActions(std::ostream& os,
                                                     Indent const& indent)
 {
@@ -107,7 +102,6 @@ void cmInstallFilesGenerator::GenerateScriptActions(std::ostream& os,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmInstallFilesGenerator::GenerateScriptForConfig(std::ostream& os,
                                                     const std::string& config,
                                                     Indent const& indent)

@@ -16,7 +16,6 @@
 
 #include "cmCTest.h"
 
-//----------------------------------------------------------------------
 cmCTestGenericHandler::cmCTestGenericHandler()
 {
   this->HandlerVerbose = cmSystemTools::OUTPUT_NONE;
@@ -27,12 +26,10 @@ cmCTestGenericHandler::cmCTestGenericHandler()
   this->TestLoad = 0;
 }
 
-//----------------------------------------------------------------------
 cmCTestGenericHandler::~cmCTestGenericHandler()
 {
 }
 
-//----------------------------------------------------------------------
 void cmCTestGenericHandler::SetOption(const std::string& op, const char* value)
 {
   if ( !value )
@@ -49,7 +46,6 @@ void cmCTestGenericHandler::SetOption(const std::string& op, const char* value)
   this->Options[op] = value;
 }
 
-//----------------------------------------------------------------------
 void cmCTestGenericHandler::SetPersistentOption(const std::string& op,
                                                 const char* value)
 {
@@ -68,7 +64,6 @@ void cmCTestGenericHandler::SetPersistentOption(const std::string& op,
   this->PersistentOptions[op] = value;
 }
 
-//----------------------------------------------------------------------
 void cmCTestGenericHandler::Initialize()
 {
   this->AppendXML = false;
@@ -83,7 +78,6 @@ void cmCTestGenericHandler::Initialize()
     }
 }
 
-//----------------------------------------------------------------------
 const char* cmCTestGenericHandler::GetOption(const std::string& op)
 {
   cmCTestGenericHandler::t_StringToString::iterator remit
@@ -95,7 +89,6 @@ const char* cmCTestGenericHandler::GetOption(const std::string& op)
   return remit->second.c_str();
 }
 
-//----------------------------------------------------------------------
 bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,
                                               const char* name,
                                               cmGeneratedFileStream& xofs)
@@ -136,7 +129,6 @@ bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,
   return true;
 }
 
-//----------------------------------------------------------------------
 bool cmCTestGenericHandler::StartLogFile(const char* name,
   cmGeneratedFileStream& xofs)
 {

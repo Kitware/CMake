@@ -22,7 +22,6 @@
 #include "cmTarget.h"
 #include <cmsys/Encoding.hxx>
 
-//----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(cmake* cm)
   : cmGlobalGenerator(cm)
 {
@@ -30,32 +29,27 @@ cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(cmake* cm)
   cm->GetState()->SetWindowsVSIDE(true);
 }
 
-//----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::~cmGlobalVisualStudioGenerator()
 {
 }
 
-//----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::VSVersion
 cmGlobalVisualStudioGenerator::GetVersion() const
 {
   return this->Version;
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::SetVersion(VSVersion v)
 {
   this->Version = v;
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudioGenerator::GetRegistryBase()
 {
   return cmGlobalVisualStudioGenerator::GetRegistryBase(
     this->GetIDEVersion());
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudioGenerator::GetRegistryBase(
   const char* version)
 {
@@ -63,7 +57,6 @@ std::string cmGlobalVisualStudioGenerator::GetRegistryBase(
   return key + version;
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
 {
   // Add a special target that depends on ALL projects for easy build
@@ -136,7 +129,6 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator
 ::ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const
 {
@@ -157,7 +149,6 @@ void cmGlobalVisualStudioGenerator
   gt->ObjectDirectory = dir;
 }
 
-//----------------------------------------------------------------------------
 bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
   const std::string& regKeyBase,
   std::string& nextAvailableSubKeyName);
@@ -165,7 +156,6 @@ bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
 void RegisterVisualStudioMacros(const std::string& macrosFile,
   const std::string& regKeyBase);
 
-//----------------------------------------------------------------------------
 #define CMAKE_VSMACROS_FILENAME \
   "CMakeVSMacros2.vsmacros"
 
@@ -175,7 +165,6 @@ void RegisterVisualStudioMacros(const std::string& macrosFile,
 #define CMAKE_VSMACROS_STOP_MACRONAME \
   "Macros.CMakeVSMacros2.Macros.StopBuild"
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
 {
   std::string dir = this->GetUserMacrosDirectory();
@@ -209,7 +198,6 @@ void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmGlobalVisualStudioGenerator
 ::CallVisualStudioMacro(MacroName m,
@@ -282,19 +270,16 @@ cmGlobalVisualStudioGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudioGenerator::GetUserMacrosDirectory()
 {
   return "";
 }
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudioGenerator::GetUserMacrosRegKeyBase()
 {
   return "";
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::FillLinkClosure(
         const cmGeneratorTarget *target,
         TargetSet& linked)
@@ -314,7 +299,6 @@ void cmGlobalVisualStudioGenerator::FillLinkClosure(
     }
 }
 
-//----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::TargetSet const&
 cmGlobalVisualStudioGenerator::GetTargetLinkClosure(cmGeneratorTarget* target)
 {
@@ -328,7 +312,6 @@ cmGlobalVisualStudioGenerator::GetTargetLinkClosure(cmGeneratorTarget* target)
   return i->second;
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::FollowLinkDepends(
         const cmGeneratorTarget *target,
         std::set<const cmGeneratorTarget *> &linked)
@@ -354,7 +337,6 @@ void cmGlobalVisualStudioGenerator::FollowLinkDepends(
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudioGenerator::ComputeTargetDepends()
 {
   if(!this->cmGlobalGenerator::ComputeTargetDepends())
@@ -379,13 +361,11 @@ bool cmGlobalVisualStudioGenerator::ComputeTargetDepends()
   return true;
 }
 
-//----------------------------------------------------------------------------
 static bool VSLinkable(cmGeneratorTarget const* t)
 {
   return t->IsLinkable() || t->GetType() == cmState::OBJECT_LIBRARY;
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(
         cmGeneratorTarget* target)
 {
@@ -484,7 +464,6 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(
     }
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::FindMakeProgram(cmMakefile* mf)
 {
   // Visual Studio generators know how to lookup their build tool
@@ -497,7 +476,6 @@ void cmGlobalVisualStudioGenerator::FindMakeProgram(cmMakefile* mf)
     }
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmGlobalVisualStudioGenerator::GetUtilityDepend(
         cmGeneratorTarget const* target)
@@ -512,7 +490,6 @@ cmGlobalVisualStudioGenerator::GetUtilityDepend(
   return i->second;
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmGlobalVisualStudioGenerator::GetStartupProjectName(
   cmLocalGenerator const* root) const
@@ -538,10 +515,8 @@ cmGlobalVisualStudioGenerator::GetStartupProjectName(
   return this->GetAllTargetName();
 }
 
-//----------------------------------------------------------------------------
 #include <windows.h>
 
-//----------------------------------------------------------------------------
 bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
   const std::string& regKeyBase,
   std::string& nextAvailableSubKeyName)
@@ -712,7 +687,6 @@ bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
   return macrosRegistered;
 }
 
-//----------------------------------------------------------------------------
 void WriteVSMacrosFileRegistryEntry(
   const std::string& nextAvailableSubKeyName,
   const std::string& macrosFile,
@@ -785,7 +759,6 @@ void WriteVSMacrosFileRegistryEntry(
     }
 }
 
-//----------------------------------------------------------------------------
 void RegisterVisualStudioMacros(const std::string& macrosFile,
   const std::string& regKeyBase)
 {
@@ -872,7 +845,6 @@ cmGlobalVisualStudioGenerator::TargetIsFortranOnly(cmGeneratorTarget const* gt)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudioGenerator::TargetCompare
 ::operator()(cmGeneratorTarget const* l, cmGeneratorTarget const* r) const
@@ -891,7 +863,6 @@ cmGlobalVisualStudioGenerator::TargetCompare
   return l->GetName() < r->GetName();
 }
 
-//----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::OrderedTargetDependSet
 ::OrderedTargetDependSet(TargetDependSet const& targets,
                          std::string const& first):
@@ -900,7 +871,6 @@ cmGlobalVisualStudioGenerator::OrderedTargetDependSet
   this->insert(targets.begin(), targets.end());
 }
 
-//----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::OrderedTargetDependSet
 ::OrderedTargetDependSet(TargetSet const& targets,
                          std::string const& first):

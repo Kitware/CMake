@@ -18,7 +18,6 @@
 #include "cmake.h"
 
 
-//----------------------------------------------------------------------------
 cmCTestBuildCommand::cmCTestBuildCommand()
 {
   this->GlobalGenerator = 0;
@@ -32,7 +31,6 @@ cmCTestBuildCommand::cmCTestBuildCommand()
   this->Last = ctb_LAST;
 }
 
-//----------------------------------------------------------------------------
 cmCTestBuildCommand::~cmCTestBuildCommand()
 {
   if ( this->GlobalGenerator )
@@ -42,7 +40,6 @@ cmCTestBuildCommand::~cmCTestBuildCommand()
     }
 }
 
-//----------------------------------------------------------------------------
 cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
 {
   cmCTestGenericHandler* handler

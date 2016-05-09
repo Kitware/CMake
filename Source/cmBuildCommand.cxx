@@ -13,7 +13,6 @@
 
 #include "cmGlobalGenerator.h"
 
-//----------------------------------------------------------------------
 bool cmBuildCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
@@ -27,7 +26,6 @@ bool cmBuildCommand
   return this->MainSignature(args);
 }
 
-//----------------------------------------------------------------------
 bool cmBuildCommand
 ::MainSignature(std::vector<std::string> const& args)
 {
@@ -113,7 +111,6 @@ bool cmBuildCommand
   return true;
 }
 
-//----------------------------------------------------------------------
 bool cmBuildCommand
 ::TwoArgsSignature(std::vector<std::string> const& args)
 {

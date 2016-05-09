@@ -37,7 +37,6 @@ void cmTargetCompileDefinitionsCommand
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
 
-//----------------------------------------------------------------------------
 std::string cmTargetCompileDefinitionsCommand
 ::Join(const std::vector<std::string> &content)
 {
@@ -59,7 +58,6 @@ std::string cmTargetCompileDefinitionsCommand
   return defs;
 }
 
-//----------------------------------------------------------------------------
 bool cmTargetCompileDefinitionsCommand
 ::HandleDirectContent(cmTarget *tgt, const std::vector<std::string> &content,
                                    bool, bool)

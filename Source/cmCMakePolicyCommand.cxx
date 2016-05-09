@@ -62,7 +62,6 @@ bool cmCMakePolicyCommand
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmCMakePolicyCommand::HandleSetMode(std::vector<std::string> const& args)
 {
   if(args.size() != 3)
@@ -112,7 +111,6 @@ bool cmCMakePolicyCommand::HandleSetMode(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmCMakePolicyCommand::HandleGetMode(std::vector<std::string> const& args)
 {
   if(args.size() != 3)
@@ -169,7 +167,6 @@ bool cmCMakePolicyCommand::HandleGetMode(std::vector<std::string> const& args)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmCMakePolicyCommand::HandleVersionMode(std::vector<std::string> const& args)
 {

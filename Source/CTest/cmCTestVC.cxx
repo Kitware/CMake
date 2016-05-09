@@ -17,7 +17,6 @@
 
 #include <cmsys/Process.h>
 
-//----------------------------------------------------------------------------
 cmCTestVC::cmCTestVC(cmCTest* ct, std::ostream& log): CTest(ct), Log(log)
 {
   this->PathCount[PathUpdated] = 0;
@@ -28,24 +27,20 @@ cmCTestVC::cmCTestVC(cmCTest* ct, std::ostream& log): CTest(ct), Log(log)
   this->Unknown.Rev = "Unknown";
 }
 
-//----------------------------------------------------------------------------
 cmCTestVC::~cmCTestVC()
 {
 }
 
-//----------------------------------------------------------------------------
 void cmCTestVC::SetCommandLineTool(std::string const& tool)
 {
   this->CommandLineTool = tool;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestVC::SetSourceDirectory(std::string const& dir)
 {
   this->SourceDirectory = dir;
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestVC::InitialCheckout(const char* command)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
@@ -86,7 +81,6 @@ bool cmCTestVC::InitialCheckout(const char* command)
   return result;
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestVC::RunChild(char const* const* cmd, OutputParser* out,
                          OutputParser* err, const char* workDir)
 {
@@ -102,7 +96,6 @@ bool cmCTestVC::RunChild(char const* const* cmd, OutputParser* out,
   return result == 0;
 }
 
-//----------------------------------------------------------------------------
 std::string cmCTestVC::ComputeCommandLine(char const* const* cmd)
 {
   std::ostringstream line;
@@ -115,7 +108,6 @@ std::string cmCTestVC::ComputeCommandLine(char const* const* cmd)
   return line.str();
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestVC::RunUpdateCommand(char const* const* cmd,
                                  OutputParser* out, OutputParser* err)
 {
@@ -131,7 +123,6 @@ bool cmCTestVC::RunUpdateCommand(char const* const* cmd,
   return this->RunChild(cmd, out, err);
 }
 
-//----------------------------------------------------------------------------
 std::string cmCTestVC::GetNightlyTime()
 {
   // Get the nightly start time corresponding to the current dau.
@@ -149,7 +140,6 @@ std::string cmCTestVC::GetNightlyTime()
   return std::string(current_time);
 }
 
-//----------------------------------------------------------------------------
 void cmCTestVC::Cleanup()
 {
   this->Log << "--- Begin Cleanup ---\n";
@@ -157,13 +147,11 @@ void cmCTestVC::Cleanup()
   this->Log << "--- End Cleanup ---\n";
 }
 
-//----------------------------------------------------------------------------
 void cmCTestVC::CleanupImpl()
 {
   // We do no cleanup by default.
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestVC::Update()
 {
   bool result = true;
@@ -181,19 +169,16 @@ bool cmCTestVC::Update()
   return result;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestVC::NoteOldRevision()
 {
   // We do nothing by default.
 }
 
-//----------------------------------------------------------------------------
 void cmCTestVC::NoteNewRevision()
 {
   // We do nothing by default.
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestVC::UpdateImpl()
 {
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -201,7 +186,6 @@ bool cmCTestVC::UpdateImpl()
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestVC::WriteXML(cmXMLWriter& xml)
 {
   this->Log << "--- Begin Revisions ---\n";
@@ -210,7 +194,6 @@ bool cmCTestVC::WriteXML(cmXMLWriter& xml)
   return result;
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestVC::WriteXMLUpdates(cmXMLWriter&)
 {
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -218,7 +201,6 @@ bool cmCTestVC::WriteXMLUpdates(cmXMLWriter&)
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestVC::WriteXMLEntry(cmXMLWriter& xml,
                               std::string const& path,
                               std::string const& name,

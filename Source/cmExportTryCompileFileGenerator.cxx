@@ -17,7 +17,6 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 
-//----------------------------------------------------------------------------
 cmExportTryCompileFileGenerator::cmExportTryCompileFileGenerator(
     cmGlobalGenerator* gg,
     const std::vector<std::string>& targets,
@@ -98,7 +97,6 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
   return result;
 }
 
-//----------------------------------------------------------------------------
 void
 cmExportTryCompileFileGenerator::PopulateProperties(
                                  const cmGeneratorTarget* target,

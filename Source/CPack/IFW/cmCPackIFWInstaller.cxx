@@ -32,44 +32,37 @@
   }                                                                     \
   } while ( 0 )
 
-//----------------------------------------------------------------------------
 cmCPackIFWInstaller::cmCPackIFWInstaller() :
   Generator(0)
 {
 }
 
-//----------------------------------------------------------------------------
 const char *cmCPackIFWInstaller::GetOption(const std::string &op) const
 {
   return Generator ? Generator->GetOption(op) : 0;
 }
 
-//----------------------------------------------------------------------------
 bool cmCPackIFWInstaller::IsOn(const std::string &op) const
 {
   return Generator ? Generator->IsOn(op) : false;
 }
 
-//----------------------------------------------------------------------------
 bool cmCPackIFWInstaller::IsVersionLess(const char *version)
 {
   return Generator ? Generator->IsVersionLess(version) : false;
 }
 
-//----------------------------------------------------------------------------
 bool cmCPackIFWInstaller::IsVersionGreater(const char *version)
 {
   return Generator ? Generator->IsVersionGreater(version) : false;
 }
 
-//----------------------------------------------------------------------------
 bool cmCPackIFWInstaller::IsVersionEqual(const char *version)
 {
   return Generator ? Generator->IsVersionEqual(version) : false;
 }
 
 
-//----------------------------------------------------------------------------
 void cmCPackIFWInstaller::ConfigureFromOptions()
 {
   // Name;
@@ -324,7 +317,6 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmCPackIFWInstaller::GenerateInstallerFile()
 {
   // Lazy directory initialization
@@ -486,7 +478,6 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   xout.EndDocument();
 }
 
-//----------------------------------------------------------------------------
 void cmCPackIFWInstaller::GeneratePackageFiles()
 {
   if (Packages.empty() || Generator->IsOnePackage())

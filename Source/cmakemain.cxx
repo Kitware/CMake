@@ -28,7 +28,6 @@
 #include <cmsys/Encoding.hxx>
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-//----------------------------------------------------------------------------
 static const char * cmDocumentationName[][2] =
 {
   {0,
@@ -36,7 +35,6 @@ static const char * cmDocumentationName[][2] =
   {0,0}
 };
 
-//----------------------------------------------------------------------------
 static const char * cmDocumentationUsage[][2] =
 {
   {0,
@@ -49,7 +47,6 @@ static const char * cmDocumentationUsage[][2] =
   {0,0}
 };
 
-//----------------------------------------------------------------------------
 static const char * cmDocumentationUsageNote[][2] =
 {
   {0,
@@ -67,7 +64,6 @@ static const char * cmDocumentationUsageNote[][2] =
   "  --use-stderr   = Ignored.  Behavior is default in CMake >= 3.0.\n" \
   "  --             = Pass remaining options to the native tool.\n"
 
-//----------------------------------------------------------------------------
 static const char * cmDocumentationOptions[][2] =
 {
   CMAKE_STANDARD_OPTIONS_TABLE,
@@ -377,7 +373,6 @@ int do_cmake(int ac, char const* const* av)
     }
 }
 
-//----------------------------------------------------------------------------
 static int do_build(int ac, char const* const* av)
 {
 #ifndef CMAKE_BUILD_WITH_CMAKE

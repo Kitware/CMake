@@ -28,7 +28,6 @@ bool cmLinkDirectoriesCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmLinkDirectoriesCommand::AddLinkDir(std::string const& dir)
 {
   std::string unixPath = dir;

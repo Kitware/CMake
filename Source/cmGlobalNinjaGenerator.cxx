@@ -531,7 +531,6 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator(cmake* cm)
 }
 
 
-//----------------------------------------------------------------------------
 // Virtual public methods.
 
 cmLocalGenerator*
@@ -685,7 +684,6 @@ void cmGlobalNinjaGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 // Non-virtual public methods.
 
 void cmGlobalNinjaGenerator::AddRule(const std::string& name,
@@ -727,7 +725,6 @@ bool cmGlobalNinjaGenerator::HasRule(const std::string &name)
   return (rule != this->Rules.end());
 }
 
-//----------------------------------------------------------------------------
 // Private virtual overrides
 
 std::string cmGlobalNinjaGenerator::GetEditCacheCommand() const
@@ -737,7 +734,6 @@ std::string cmGlobalNinjaGenerator::GetEditCacheCommand() const
   return cmSystemTools::GetCMakeGUICommand();
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalNinjaGenerator
 ::ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const
 {
@@ -750,7 +746,6 @@ void cmGlobalNinjaGenerator
   gt->ObjectDirectory = dir;
 }
 
-//----------------------------------------------------------------------------
 // Private methods
 
 void cmGlobalNinjaGenerator::OpenBuildFileStream()

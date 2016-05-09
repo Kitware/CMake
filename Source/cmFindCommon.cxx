@@ -14,7 +14,6 @@
 #include <algorithm>
 #include <functional>
 
-//----------------------------------------------------------------------------
 cmFindCommon::PathGroup cmFindCommon::PathGroup::All("ALL");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::CMake("CMAKE");
 cmFindCommon::PathLabel
@@ -25,7 +24,6 @@ cmFindCommon::PathLabel
 cmFindCommon::PathLabel cmFindCommon::PathLabel::CMakeSystem("CMAKE_SYSTEM");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::Guess("GUESS");
 
-//----------------------------------------------------------------------------
 cmFindCommon::cmFindCommon()
 {
   this->FindRootPathMode = RootPathModeBoth;
@@ -52,12 +50,10 @@ cmFindCommon::cmFindCommon()
   this->InitializeSearchPathGroups();
 }
 
-//----------------------------------------------------------------------------
 cmFindCommon::~cmFindCommon()
 {
 }
 
-//----------------------------------------------------------------------------
 void cmFindCommon::InitializeSearchPathGroups()
 {
   std::vector<PathLabel>* labels;
@@ -91,7 +87,6 @@ void cmFindCommon::InitializeSearchPathGroups()
     cmSearchPath(this)));
 }
 
-//----------------------------------------------------------------------------
 void cmFindCommon::SelectDefaultRootPathMode()
 {
   // Check the policy variable for this find command type.
@@ -113,7 +108,6 @@ void cmFindCommon::SelectDefaultRootPathMode()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFindCommon::SelectDefaultMacMode()
 {
   std::string ff = this->Makefile->GetSafeDefinition("CMAKE_FIND_FRAMEWORK");
@@ -169,7 +163,6 @@ void cmFindCommon::SelectDefaultMacMode()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
 {
 #if 0
@@ -258,7 +251,6 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFindCommon::FilterPaths(const std::vector<std::string>& inPaths,
                                const std::set<std::string>& ignore,
                                std::vector<std::string>& outPaths)
@@ -273,7 +265,6 @@ void cmFindCommon::FilterPaths(const std::vector<std::string>& inPaths,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFindCommon::GetIgnoredPaths(std::vector<std::string>& ignore)
 {
   // null-terminated list of paths.
@@ -301,7 +292,6 @@ void cmFindCommon::GetIgnoredPaths(std::vector<std::string>& ignore)
 }
 
 
-//----------------------------------------------------------------------------
 void cmFindCommon::GetIgnoredPaths(std::set<std::string>& ignore)
 {
   std::vector<std::string> ignoreVec;
@@ -309,7 +299,6 @@ void cmFindCommon::GetIgnoredPaths(std::set<std::string>& ignore)
   ignore.insert(ignoreVec.begin(), ignoreVec.end());
 }
 
-//----------------------------------------------------------------------------
 bool cmFindCommon::CheckCommonArgument(std::string const& arg)
 {
   if(arg == "NO_DEFAULT_PATH")
@@ -354,7 +343,6 @@ bool cmFindCommon::CheckCommonArgument(std::string const& arg)
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmFindCommon::AddPathSuffix(std::string const& arg)
 {
   std::string suffix = arg;
@@ -385,7 +373,6 @@ void cmFindCommon::AddPathSuffix(std::string const& arg)
   this->SearchPathSuffixes.push_back(suffix);
 }
 
-//----------------------------------------------------------------------------
 void AddTrailingSlash(std::string& s)
 {
   if(!s.empty() && *s.rbegin() != '/')
@@ -416,7 +403,6 @@ void cmFindCommon::ComputeFinalPaths()
                 &AddTrailingSlash);
 }
 
-//----------------------------------------------------------------------------
 void cmFindCommon::SetMakefile(cmMakefile* makefile)
 {
   cmCommand::SetMakefile(makefile);

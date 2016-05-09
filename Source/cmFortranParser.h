@@ -102,7 +102,6 @@ int cmFortran_yylex(YYSTYPE* yylvalp, yyscan_t yyscanner)
 #if !defined(cmFortranLexer_cxx) && !defined(cmFortranParser_cxx)
 #include <stack>
 
-//----------------------------------------------------------------------------
 // Information about a single source file.
 class cmFortranSourceInfo
 {
@@ -118,7 +117,6 @@ public:
   std::set<std::string> Includes;
 };
 
-//----------------------------------------------------------------------------
 // Parser methods not included in generated interface.
 
 // Get the current buffer processed by the lexer.
@@ -127,7 +125,6 @@ YY_BUFFER_STATE cmFortranLexer_GetCurrentBuffer(yyscan_t yyscanner);
 // The parser entry point.
 int cmFortran_yyparse(yyscan_t);
 
-//----------------------------------------------------------------------------
 // Define parser object internal structure.
 struct cmFortranFile
 {

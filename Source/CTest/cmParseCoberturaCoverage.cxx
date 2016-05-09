@@ -5,7 +5,6 @@
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
 
-//----------------------------------------------------------------------------
 class cmParseCoberturaCoverage::XMLParser: public cmXMLParser
 {
 public:

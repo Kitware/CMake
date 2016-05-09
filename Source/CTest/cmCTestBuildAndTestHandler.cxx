@@ -19,7 +19,6 @@
 #include "cmake.h"
 #include <cmsys/Process.h>
 
-//----------------------------------------------------------------------
 cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
 {
   this->BuildTwoConfig         = false;
@@ -28,19 +27,16 @@ cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
   this->Timeout = 0;
 }
 
-//----------------------------------------------------------------------
 void cmCTestBuildAndTestHandler::Initialize()
 {
   this->BuildTargets.clear();
   this->Superclass::Initialize();
 }
 
-//----------------------------------------------------------------------
 const char* cmCTestBuildAndTestHandler::GetOutput()
 {
   return this->Output.c_str();
 }
-//----------------------------------------------------------------------
 int cmCTestBuildAndTestHandler::ProcessHandler()
 {
   this->Output = "";
@@ -51,7 +47,6 @@ int cmCTestBuildAndTestHandler::ProcessHandler()
   return retv;
 }
 
-//----------------------------------------------------------------------
 int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
   std::ostringstream &out, std::string &cmakeOutString, std::string &cwd,
   cmake *cm)
@@ -144,7 +139,6 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
   return 0;
 }
 
-//----------------------------------------------------------------------
 void CMakeMessageCallback(const char* m, const char*, bool&, void* s)
 {
   std::string* out = (std::string*)s;
@@ -159,14 +153,12 @@ void CMakeProgressCallback(const char*msg, float , void * s)
   *out += "\n";
 }
 
-//----------------------------------------------------------------------
 void CMakeOutputCallback(const char* m, size_t len, void* s)
 {
   std::string* out = (std::string*)s;
   out->append(m, len);
 }
 
-//----------------------------------------------------------------------
 class cmCTestBuildAndTestCaptureRAII
 {
   cmake& CM;
@@ -187,7 +179,6 @@ public:
     }
 };
 
-//----------------------------------------------------------------------
 int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 {
   // if the generator and make program are not specified then it is an error
@@ -436,7 +427,6 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   return retval;
 }
 
-//----------------------------------------------------------------------
 int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
   const std::string& currentArg, size_t& idx,
   const std::vector<std::string>& allArgs)

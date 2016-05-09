@@ -13,7 +13,6 @@
 
 #include "cmExprParserHelper.h"
 
-//----------------------------------------------------------------------------
 bool cmMathCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
@@ -32,7 +31,6 @@ bool cmMathCommand
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmMathCommand::HandleExprCommand(std::vector<std::string> const& args)
 {
   if ( args.size() != 3 )

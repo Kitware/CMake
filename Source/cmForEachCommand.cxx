@@ -216,7 +216,6 @@ bool cmForEachCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
 {
   cmsys::auto_ptr<cmForEachFunctionBlocker>

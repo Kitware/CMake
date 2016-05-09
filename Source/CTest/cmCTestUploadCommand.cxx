@@ -31,7 +31,6 @@ cmCTestGenericHandler* cmCTestUploadCommand::InitializeHandler()
 }
 
 
-//----------------------------------------------------------------------------
 bool cmCTestUploadCommand::CheckArgumentKeyword(std::string const& arg)
 {
   if(arg == "FILES")
@@ -49,7 +48,6 @@ bool cmCTestUploadCommand::CheckArgumentKeyword(std::string const& arg)
 }
 
 
-//----------------------------------------------------------------------------
 bool cmCTestUploadCommand::CheckArgumentValue(std::string const& arg)
 {
   if(this->ArgumentDoing == ArgumentDoingFiles)

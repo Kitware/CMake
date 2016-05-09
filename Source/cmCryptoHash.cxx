@@ -15,7 +15,6 @@
 #include <cmsys/FStream.hxx>
 #include <cmsys/MD5.h>
 
-//----------------------------------------------------------------------------
 cmsys::auto_ptr<cmCryptoHash> cmCryptoHash::New(const char* algo)
 {
   if(strcmp(algo,"MD5") == 0)
@@ -34,7 +33,6 @@ cmsys::auto_ptr<cmCryptoHash> cmCryptoHash::New(const char* algo)
     { return cmsys::auto_ptr<cmCryptoHash>(0); }
 }
 
-//----------------------------------------------------------------------------
 std::string cmCryptoHash::HashString(const std::string& input)
 {
   this->Initialize();
@@ -43,7 +41,6 @@ std::string cmCryptoHash::HashString(const std::string& input)
   return this->Finalize();
 }
 
-//----------------------------------------------------------------------------
 std::string cmCryptoHash::HashFile(const std::string& file)
 {
   cmsys::ifstream fin(file.c_str(), std::ios::in | std::ios::binary);
@@ -79,30 +76,25 @@ std::string cmCryptoHash::HashFile(const std::string& file)
   return "";
 }
 
-//----------------------------------------------------------------------------
 cmCryptoHashMD5::cmCryptoHashMD5(): MD5(cmsysMD5_New())
 {
 }
 
-//----------------------------------------------------------------------------
 cmCryptoHashMD5::~cmCryptoHashMD5()
 {
   cmsysMD5_Delete(this->MD5);
 }
 
-//----------------------------------------------------------------------------
 void cmCryptoHashMD5::Initialize()
 {
   cmsysMD5_Initialize(this->MD5);
 }
 
-//----------------------------------------------------------------------------
 void cmCryptoHashMD5::Append(unsigned char const* buf, int sz)
 {
   cmsysMD5_Append(this->MD5, buf, sz);
 }
 
-//----------------------------------------------------------------------------
 std::string cmCryptoHashMD5::Finalize()
 {
   char md5out[32];

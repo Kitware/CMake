@@ -22,7 +22,6 @@ cmFindBase::cmFindBase()
   this->NamesPerDirAllowed = false;
 }
 
-//----------------------------------------------------------------------------
 bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
 {
   if(argsIn.size() < 2 )
@@ -223,7 +222,6 @@ void cmFindBase::ExpandPaths()
   this->FillUserGuessPath();
 }
 
-//----------------------------------------------------------------------------
 void cmFindBase::FillCMakeEnvironmentPath()
 {
   cmSearchPath &paths = this->LabeledPaths[PathLabel::CMakeEnvironment];
@@ -246,7 +244,6 @@ void cmFindBase::FillCMakeEnvironmentPath()
   paths.AddSuffixes(this->SearchPathSuffixes);
 }
 
-//----------------------------------------------------------------------------
 void cmFindBase::FillCMakeVariablePath()
 {
   cmSearchPath &paths = this->LabeledPaths[PathLabel::CMake];
@@ -271,7 +268,6 @@ void cmFindBase::FillCMakeVariablePath()
   paths.AddSuffixes(this->SearchPathSuffixes);
 }
 
-//----------------------------------------------------------------------------
 void cmFindBase::FillSystemEnvironmentPath()
 {
   cmSearchPath &paths = this->LabeledPaths[PathLabel::SystemEnvironment];
@@ -287,7 +283,6 @@ void cmFindBase::FillSystemEnvironmentPath()
   paths.AddSuffixes(this->SearchPathSuffixes);
 }
 
-//----------------------------------------------------------------------------
 void cmFindBase::FillCMakeSystemVariablePath()
 {
   cmSearchPath &paths = this->LabeledPaths[PathLabel::CMakeSystem];
@@ -309,7 +304,6 @@ void cmFindBase::FillCMakeSystemVariablePath()
   paths.AddSuffixes(this->SearchPathSuffixes);
 }
 
-//----------------------------------------------------------------------------
 void cmFindBase::FillUserHintsPath()
 {
   cmSearchPath &paths = this->LabeledPaths[PathLabel::Hints];
@@ -322,7 +316,6 @@ void cmFindBase::FillUserHintsPath()
   paths.AddSuffixes(this->SearchPathSuffixes);
 }
 
-//----------------------------------------------------------------------------
 void cmFindBase::FillUserGuessPath()
 {
   cmSearchPath &paths = this->LabeledPaths[PathLabel::Guess];
@@ -335,7 +328,6 @@ void cmFindBase::FillUserGuessPath()
   paths.AddSuffixes(this->SearchPathSuffixes);
 }
 
-//----------------------------------------------------------------------------
 void cmFindBase::PrintFindStuff()
 {
   std::cerr << "SearchFrameworkLast: " << this->SearchFrameworkLast << "\n";

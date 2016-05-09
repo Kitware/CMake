@@ -82,7 +82,6 @@ bool cmFindLibraryCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 void cmFindLibraryCommand::AddArchitecturePaths(const char* suffix)
 {
   std::vector<std::string> original;
@@ -94,7 +93,6 @@ void cmFindLibraryCommand::AddArchitecturePaths(const char* suffix)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFindLibraryCommand::AddArchitecturePath(
   std::string const& dir, std::string::size_type start_pos,
   const char* suffix, bool fresh)
@@ -136,7 +134,6 @@ void cmFindLibraryCommand::AddArchitecturePath(
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmFindLibraryCommand::FindLibrary()
 {
   std::string library;
@@ -155,7 +152,6 @@ std::string cmFindLibraryCommand::FindLibrary()
   return library;
 }
 
-//----------------------------------------------------------------------------
 struct cmFindLibraryHelper
 {
   cmFindLibraryHelper(cmMakefile* mf);
@@ -209,7 +205,6 @@ struct cmFindLibraryHelper
   bool CheckDirectoryForName(std::string const& path, Name& name);
 };
 
-//----------------------------------------------------------------------------
 cmFindLibraryHelper::cmFindLibraryHelper(cmMakefile* mf):
   Makefile(mf)
 {
@@ -231,7 +226,6 @@ cmFindLibraryHelper::cmFindLibraryHelper(cmMakefile* mf):
         ->GetGlobalPropertyAsBool("FIND_LIBRARY_USE_OPENBSD_VERSIONING");
 }
 
-//----------------------------------------------------------------------------
 void cmFindLibraryHelper::RegexFromLiteral(std::string& out,
                                            std::string const& in)
 {
@@ -252,7 +246,6 @@ void cmFindLibraryHelper::RegexFromLiteral(std::string& out,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFindLibraryHelper::RegexFromList(std::string& out,
                                         std::vector<std::string> const& in)
 {
@@ -273,7 +266,6 @@ void cmFindLibraryHelper::RegexFromList(std::string& out,
   out += ")";
 }
 
-//----------------------------------------------------------------------------
 bool cmFindLibraryHelper::HasValidSuffix(std::string const& name)
 {
   for(std::vector<std::string>::const_iterator si = this->Suffixes.begin();
@@ -300,7 +292,6 @@ bool cmFindLibraryHelper::HasValidSuffix(std::string const& name)
   return false;
 }
 
-//----------------------------------------------------------------------------
 void cmFindLibraryHelper::AddName(std::string const& name)
 {
   Name entry;
@@ -323,14 +314,12 @@ void cmFindLibraryHelper::AddName(std::string const& name)
   this->Names.push_back(entry);
 }
 
-//----------------------------------------------------------------------------
 void cmFindLibraryHelper::SetName(std::string const& name)
 {
   this->Names.clear();
   this->AddName(name);
 }
 
-//----------------------------------------------------------------------------
 bool cmFindLibraryHelper::CheckDirectory(std::string const& path)
 {
   for(std::vector<Name>::iterator i = this->Names.begin();
@@ -344,7 +333,6 @@ bool cmFindLibraryHelper::CheckDirectory(std::string const& path)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmFindLibraryHelper::CheckDirectoryForName(std::string const& path,
                                                 Name& name)
 {
@@ -423,7 +411,6 @@ bool cmFindLibraryHelper::CheckDirectoryForName(std::string const& path,
   return !this->BestPath.empty();
 }
 
-//----------------------------------------------------------------------------
 std::string cmFindLibraryCommand::FindNormalLibrary()
 {
   if(this->NamesPerDir)
@@ -436,7 +423,6 @@ std::string cmFindLibraryCommand::FindNormalLibrary()
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmFindLibraryCommand::FindNormalLibraryNamesPerDir()
 {
   // Search for all names in each directory.
@@ -459,7 +445,6 @@ std::string cmFindLibraryCommand::FindNormalLibraryNamesPerDir()
   return "";
 }
 
-//----------------------------------------------------------------------------
 std::string cmFindLibraryCommand::FindNormalLibraryDirsPerName()
 {
   // Search the entire path for each name.
@@ -485,7 +470,6 @@ std::string cmFindLibraryCommand::FindNormalLibraryDirsPerName()
   return "";
 }
 
-//----------------------------------------------------------------------------
 std::string cmFindLibraryCommand::FindFrameworkLibrary()
 {
   if(this->NamesPerDir)
@@ -498,7 +482,6 @@ std::string cmFindLibraryCommand::FindFrameworkLibrary()
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmFindLibraryCommand::FindFrameworkLibraryNamesPerDir()
 {
   std::string fwPath;
@@ -523,7 +506,6 @@ std::string cmFindLibraryCommand::FindFrameworkLibraryNamesPerDir()
   return "";
 }
 
-//----------------------------------------------------------------------------
 std::string cmFindLibraryCommand::FindFrameworkLibraryDirsPerName()
 {
   std::string fwPath;

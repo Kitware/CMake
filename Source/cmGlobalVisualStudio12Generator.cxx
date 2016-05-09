@@ -81,13 +81,11 @@ public:
   virtual bool SupportsToolset() const { return true; }
 };
 
-//----------------------------------------------------------------------------
 cmGlobalGeneratorFactory* cmGlobalVisualStudio12Generator::NewFactory()
 {
   return new Factory;
 }
 
-//----------------------------------------------------------------------------
 cmGlobalVisualStudio12Generator::cmGlobalVisualStudio12Generator(cmake* cm,
   const std::string& name, const std::string& platformName)
   : cmGlobalVisualStudio11Generator(cm, name, platformName)
@@ -100,7 +98,6 @@ cmGlobalVisualStudio12Generator::cmGlobalVisualStudio12Generator(cmake* cm,
   this->Version = VS12;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudio12Generator::MatchesGeneratorName(
                                                 const std::string& name) const
@@ -113,7 +110,6 @@ cmGlobalVisualStudio12Generator::MatchesGeneratorName(
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio12Generator::InitializeWindowsPhone(cmMakefile* mf)
 {
   if(!this->SelectWindowsPhoneToolset(this->DefaultPlatformToolset))
@@ -136,7 +132,6 @@ bool cmGlobalVisualStudio12Generator::InitializeWindowsPhone(cmMakefile* mf)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio12Generator::InitializeWindowsStore(cmMakefile* mf)
 {
   if(!this->SelectWindowsStoreToolset(this->DefaultPlatformToolset))
@@ -159,7 +154,6 @@ bool cmGlobalVisualStudio12Generator::InitializeWindowsStore(cmMakefile* mf)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudio12Generator::SelectWindowsPhoneToolset(
   std::string& toolset) const
@@ -181,7 +175,6 @@ cmGlobalVisualStudio12Generator::SelectWindowsPhoneToolset(
     this->cmGlobalVisualStudio11Generator::SelectWindowsPhoneToolset(toolset);
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudio12Generator::SelectWindowsStoreToolset(
   std::string& toolset) const
@@ -203,7 +196,6 @@ cmGlobalVisualStudio12Generator::SelectWindowsStoreToolset(
     this->cmGlobalVisualStudio11Generator::SelectWindowsStoreToolset(toolset);
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio12Generator::WriteSLNHeader(std::ostream& fout)
 {
   fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
@@ -217,7 +209,6 @@ void cmGlobalVisualStudio12Generator::WriteSLNHeader(std::ostream& fout)
     }
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudio12Generator::IsWindowsDesktopToolsetInstalled() const
 {
@@ -231,7 +222,6 @@ cmGlobalVisualStudio12Generator::IsWindowsDesktopToolsetInstalled() const
                                            cmSystemTools::KeyWOW64_32);
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudio12Generator::IsWindowsPhoneToolsetInstalled() const
 {
@@ -246,7 +236,6 @@ cmGlobalVisualStudio12Generator::IsWindowsPhoneToolsetInstalled() const
   return !path.empty();
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudio12Generator::IsWindowsStoreToolsetInstalled() const
 {

@@ -26,7 +26,6 @@
 #include <string.h>
 #endif
 
-//----------------------------------------------------------------------------
 cmFindPackageCommand::PathLabel
   cmFindPackageCommand::PathLabel::UserRegistry("PACKAGE_REGISTRY");
 cmFindPackageCommand::PathLabel
@@ -34,7 +33,6 @@ cmFindPackageCommand::PathLabel
 cmFindPackageCommand::PathLabel
   cmFindPackageCommand::PathLabel::SystemRegistry("SYSTEM_PACKAGE_REGISTRY");
 
-//----------------------------------------------------------------------------
 cmFindPackageCommand::cmFindPackageCommand()
 {
   this->CMakePathName = "PACKAGE";
@@ -63,7 +61,6 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->AppendSearchPathGroups();
 }
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::AppendSearchPathGroups()
 {
   std::vector<cmFindCommon::PathLabel>* labels;
@@ -88,7 +85,6 @@ void cmFindPackageCommand::AppendSearchPathGroups()
     cmSearchPath(this)));
 }
 
-//----------------------------------------------------------------------------
 bool cmFindPackageCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
@@ -525,7 +521,6 @@ bool cmFindPackageCommand
 }
 
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::SetModuleVariables(const std::string& components)
 {
   this->AddFindDefinition("CMAKE_FIND_PACKAGE_NAME", this->Name.c_str());
@@ -578,7 +573,6 @@ void cmFindPackageCommand::SetModuleVariables(const std::string& components)
    }
 }
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::AddFindDefinition(const std::string& var,
                                              const char* val)
 {
@@ -594,7 +588,6 @@ void cmFindPackageCommand::AddFindDefinition(const std::string& var,
   this->Makefile->AddDefinition(var, val);
 }
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::RestoreFindDefinitions()
 {
   for(std::map<std::string, OriginalDef>::iterator
@@ -612,7 +605,6 @@ void cmFindPackageCommand::RestoreFindDefinitions()
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmFindPackageCommand::FindModule(bool& found)
 {
   std::string module = "Find";
@@ -634,7 +626,6 @@ bool cmFindPackageCommand::FindModule(bool& found)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmFindPackageCommand::HandlePackageMode()
 {
   this->ConsideredConfigs.clear();
@@ -892,7 +883,6 @@ bool cmFindPackageCommand::HandlePackageMode()
   return result;
 }
 
-//----------------------------------------------------------------------------
 bool cmFindPackageCommand::FindConfig()
 {
   // Compute the set of search prefixes.
@@ -952,7 +942,6 @@ bool cmFindPackageCommand::FindConfig()
   return found;
 }
 
-//----------------------------------------------------------------------------
 bool cmFindPackageCommand::FindPrefixedConfig()
 {
   std::vector<std::string>& prefixes = this->SearchPaths;
@@ -967,7 +956,6 @@ bool cmFindPackageCommand::FindPrefixedConfig()
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmFindPackageCommand::FindFrameworkConfig()
 {
   std::vector<std::string>& prefixes = this->SearchPaths;
@@ -982,7 +970,6 @@ bool cmFindPackageCommand::FindFrameworkConfig()
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmFindPackageCommand::FindAppBundleConfig()
 {
   std::vector<std::string>& prefixes = this->SearchPaths;
@@ -997,7 +984,6 @@ bool cmFindPackageCommand::FindAppBundleConfig()
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmFindPackageCommand::ReadListFile(const char* f, PolicyScopeRule psr)
 {
   const bool noPolicyScope = !this->PolicyScope || psr == NoPolicyScope;
@@ -1012,7 +998,6 @@ bool cmFindPackageCommand::ReadListFile(const char* f, PolicyScopeRule psr)
   return false;
 }
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::AppendToFoundProperty(bool found)
 {
   std::vector<std::string> foundContents;
@@ -1067,7 +1052,6 @@ void cmFindPackageCommand::AppendToFoundProperty(bool found)
       ->SetGlobalProperty("PACKAGES_NOT_FOUND", tmp.c_str());
 }
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::AppendSuccessInformation()
 {
   {
@@ -1122,7 +1106,6 @@ void cmFindPackageCommand::AppendSuccessInformation()
   this->RestoreFindDefinitions();
 }
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::ComputePrefixes()
 {
   if(!this->NoDefaultPath)
@@ -1161,7 +1144,6 @@ void cmFindPackageCommand::ComputePrefixes()
   this->ComputeFinalPaths();
 }
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::FillPrefixesCMakeEnvironment()
 {
   cmSearchPath &paths = this->LabeledPaths[PathLabel::CMakeEnvironment];
@@ -1176,7 +1158,6 @@ void cmFindPackageCommand::FillPrefixesCMakeEnvironment()
   paths.AddEnvPath("CMAKE_APPBUNDLE_PATH");
 }
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::FillPrefixesCMakeVariable()
 {
   cmSearchPath &paths = this->LabeledPaths[PathLabel::CMake];
@@ -1186,7 +1167,6 @@ void cmFindPackageCommand::FillPrefixesCMakeVariable()
   paths.AddCMakePath("CMAKE_APPBUNDLE_PATH");
 }
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::FillPrefixesSystemEnvironment()
 {
   cmSearchPath &paths = this->LabeledPaths[PathLabel::SystemEnvironment];
@@ -1212,7 +1192,6 @@ void cmFindPackageCommand::FillPrefixesSystemEnvironment()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::FillPrefixesUserRegistry()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -1240,7 +1219,6 @@ void cmFindPackageCommand::FillPrefixesUserRegistry()
 #endif
 }
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::FillPrefixesSystemRegistry()
 {
   if(this->NoSystemRegistry || this->NoDefaultPath)
@@ -1263,7 +1241,6 @@ void cmFindPackageCommand::FillPrefixesSystemRegistry()
 # if !defined(KEY_WOW64_64KEY)
 #  define KEY_WOW64_64KEY 0x0100
 # endif
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::LoadPackageRegistryWinUser()
 {
   // HKEY_CURRENT_USER\\Software shares 32-bit and 64-bit views.
@@ -1271,7 +1248,6 @@ void cmFindPackageCommand::LoadPackageRegistryWinUser()
                                this->LabeledPaths[PathLabel::UserRegistry]);
 }
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::LoadPackageRegistryWinSystem()
 {
   cmSearchPath &paths = this->LabeledPaths[PathLabel::SystemRegistry];
@@ -1290,7 +1266,6 @@ void cmFindPackageCommand::LoadPackageRegistryWinSystem()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::LoadPackageRegistryWin(bool user, unsigned int view,
                                                   cmSearchPath& outPaths)
 {
@@ -1349,7 +1324,6 @@ void cmFindPackageCommand::LoadPackageRegistryWin(bool user, unsigned int view,
     }
 }
 #else
-//----------------------------------------------------------------------------
 class cmFindPackageCommandHoldFile
 {
   const char* File;
@@ -1360,7 +1334,6 @@ public:
   void Release() { this->File = 0; }
 };
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::LoadPackageRegistryDir(std::string const& dir,
                                                   cmSearchPath& outPaths)
 {
@@ -1398,7 +1371,6 @@ void cmFindPackageCommand::LoadPackageRegistryDir(std::string const& dir,
 }
 #endif
 
-//----------------------------------------------------------------------------
 bool cmFindPackageCommand::CheckPackageRegistryEntry(const std::string& fname,
                                                      cmSearchPath& outPaths)
 {
@@ -1437,7 +1409,6 @@ bool cmFindPackageCommand::CheckPackageRegistryEntry(const std::string& fname,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::FillPrefixesCMakeSystemVariable()
 {
   cmSearchPath &paths = this->LabeledPaths[PathLabel::CMakeSystem];
@@ -1447,7 +1418,6 @@ void cmFindPackageCommand::FillPrefixesCMakeSystemVariable()
   paths.AddCMakePath("CMAKE_SYSTEM_APPBUNDLE_PATH");
 }
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::FillPrefixesUserGuess()
 {
   cmSearchPath &paths = this->LabeledPaths[PathLabel::Guess];
@@ -1459,7 +1429,6 @@ void cmFindPackageCommand::FillPrefixesUserGuess()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::FillPrefixesUserHints()
 {
   cmSearchPath &paths = this->LabeledPaths[PathLabel::Hints];
@@ -1471,7 +1440,6 @@ void cmFindPackageCommand::FillPrefixesUserHints()
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmFindPackageCommand::SearchDirectory(std::string const& dir)
 {
   assert(!dir.empty() && dir[dir.size()-1] == '/');
@@ -1495,7 +1463,6 @@ bool cmFindPackageCommand::SearchDirectory(std::string const& dir)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmFindPackageCommand::CheckDirectory(std::string const& dir)
 {
   assert(!dir.empty() && dir[dir.size()-1] == '/');
@@ -1511,7 +1478,6 @@ bool cmFindPackageCommand::CheckDirectory(std::string const& dir)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmFindPackageCommand::FindConfigFile(std::string const& dir,
                                           std::string& file)
 {
@@ -1539,7 +1505,6 @@ bool cmFindPackageCommand::FindConfigFile(std::string const& dir,
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
 {
   bool result = false; // by default, assume the version is not ok.
@@ -1585,7 +1550,6 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
   return result;
 }
 
-//----------------------------------------------------------------------------
 bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file,
                                             std::string& result_version)
 {
@@ -1670,7 +1634,6 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file,
   return suitable;
 }
 
-//----------------------------------------------------------------------------
 void cmFindPackageCommand::StoreVersionFound()
 {
   // Store the whole version string.
@@ -1699,7 +1662,6 @@ void cmFindPackageCommand::StoreVersionFound()
   this->Makefile->AddDefinition(ver+"_COUNT", buf);
 }
 
-//----------------------------------------------------------------------------
 #include <cmsys/Glob.hxx>
 #include <cmsys/String.h>
 #include <cmsys/auto_ptr.hxx>
@@ -2043,7 +2005,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
 {
   assert(!prefix_in.empty() && prefix_in[prefix_in.size()-1] == '/');
@@ -2162,7 +2123,6 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmFindPackageCommand::SearchFrameworkPrefix(std::string const& prefix_in)
 {
   assert(!prefix_in.empty() && prefix_in[prefix_in.size()-1] == '/');
@@ -2233,7 +2193,6 @@ bool cmFindPackageCommand::SearchFrameworkPrefix(std::string const& prefix_in)
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmFindPackageCommand::SearchAppBundlePrefix(std::string const& prefix_in)
 {
   assert(!prefix_in.empty() && prefix_in[prefix_in.size()-1] == '/');

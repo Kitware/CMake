@@ -31,38 +31,32 @@
 #include <cmVersionConfig.h>
 #include <cmXMLWriter.h>
 
-//----------------------------------------------------------------------------
 cmCPackIFWGenerator::cmCPackIFWGenerator()
 {
 }
 
-//----------------------------------------------------------------------------
 cmCPackIFWGenerator::~cmCPackIFWGenerator()
 {
 }
 
-//----------------------------------------------------------------------------
 bool cmCPackIFWGenerator::IsVersionLess(const char *version)
 {
   return cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
     FrameworkVersion.data(), version);
 }
 
-//----------------------------------------------------------------------------
 bool cmCPackIFWGenerator::IsVersionGreater(const char *version)
 {
   return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER,
     FrameworkVersion.data(), version);
 }
 
-//----------------------------------------------------------------------------
 bool cmCPackIFWGenerator::IsVersionEqual(const char *version)
 {
   return cmSystemTools::VersionCompare(cmSystemTools::OP_EQUAL,
     FrameworkVersion.data(), version);
 }
 
-//----------------------------------------------------------------------------
 int cmCPackIFWGenerator::PackageFiles()
 {
   cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- Configuration" << std::endl);
@@ -223,7 +217,6 @@ int cmCPackIFWGenerator::PackageFiles()
   return 1;
 }
 
-//----------------------------------------------------------------------------
 const char *cmCPackIFWGenerator::GetPackagingInstallPrefix()
 {
   const char *defPrefix = cmCPackGenerator::GetPackagingInstallPrefix();
@@ -240,13 +233,11 @@ const char *cmCPackIFWGenerator::GetPackagingInstallPrefix()
   return this->GetOption("CPACK_IFW_PACKAGING_INSTALL_PREFIX");
 }
 
-//----------------------------------------------------------------------------
 const char *cmCPackIFWGenerator::GetOutputExtension()
 {
   return ExecutableSuffix.c_str();
 }
 
-//----------------------------------------------------------------------------
 int cmCPackIFWGenerator::InitializeInternal()
 {
   // Search Qt Installer Framework tools
@@ -367,7 +358,6 @@ int cmCPackIFWGenerator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmCPackIFWGenerator::GetComponentInstallDirNameSuffix(
   const std::string& componentName)
@@ -384,7 +374,6 @@ cmCPackIFWGenerator::GetComponentInstallDirNameSuffix(
     + suffix;
 }
 
-//----------------------------------------------------------------------------
 cmCPackComponent*
 cmCPackIFWGenerator::GetComponent(const std::string &projectName,
                                   const std::string &componentName)
@@ -433,7 +422,6 @@ cmCPackIFWGenerator::GetComponent(const std::string &projectName,
   return component;
 }
 
-//----------------------------------------------------------------------------
 cmCPackComponentGroup*
 cmCPackIFWGenerator::GetComponentGroup(const std::string &projectName,
                                        const std::string &groupName)
@@ -471,32 +459,27 @@ cmCPackIFWGenerator::GetComponentGroup(const std::string &projectName,
   return group;
 }
 
-//----------------------------------------------------------------------------
 enum cmCPackGenerator::CPackSetDestdirSupport
 cmCPackIFWGenerator::SupportsSetDestdir() const
 {
   return cmCPackGenerator::SETDESTDIR_SHOULD_NOT_BE_USED;
 }
 
-//----------------------------------------------------------------------------
 bool cmCPackIFWGenerator::SupportsAbsoluteDestination() const
 {
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmCPackIFWGenerator::SupportsComponentInstallation() const
 {
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmCPackIFWGenerator::IsOnePackage() const
 {
   return componentPackageMethod == ONE_PACKAGE;
 }
 
-//----------------------------------------------------------------------------
 std::string cmCPackIFWGenerator::GetRootPackageName()
 {
   // Default value
@@ -525,7 +508,6 @@ std::string cmCPackIFWGenerator::GetRootPackageName()
   return name;
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmCPackIFWGenerator::GetGroupPackageName(cmCPackComponentGroup *group) const
 {
@@ -556,7 +538,6 @@ cmCPackIFWGenerator::GetGroupPackageName(cmCPackComponentGroup *group) const
   return name;
 }
 
-//----------------------------------------------------------------------------
 std::string cmCPackIFWGenerator::GetComponentPackageName(
   cmCPackComponent *component) const
 {
@@ -592,7 +573,6 @@ std::string cmCPackIFWGenerator::GetComponentPackageName(
   return name;
 }
 
-//----------------------------------------------------------------------------
 cmCPackIFWPackage* cmCPackIFWGenerator::GetGroupPackage(
   cmCPackComponentGroup *group) const
 {
@@ -601,7 +581,6 @@ cmCPackIFWPackage* cmCPackIFWGenerator::GetGroupPackage(
   return pit != GroupPackages.end() ? pit->second : 0;
 }
 
-//----------------------------------------------------------------------------
 cmCPackIFWPackage* cmCPackIFWGenerator::GetComponentPackage(
   cmCPackComponent *component) const
 {
@@ -610,7 +589,6 @@ cmCPackIFWPackage* cmCPackIFWGenerator::GetComponentPackage(
   return pit != ComponentPackages.end() ? pit->second : 0;
 }
 
-//----------------------------------------------------------------------------
 void cmCPackIFWGenerator::WriteGeneratedByToStrim(cmXMLWriter &xout)
 {
   std::stringstream comment;

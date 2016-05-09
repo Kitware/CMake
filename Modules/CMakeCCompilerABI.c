@@ -6,11 +6,9 @@
 # define const
 #endif
 
-/*--------------------------------------------------------------------------*/
 
 #include "CMakeCompilerABI.h"
 
-/*--------------------------------------------------------------------------*/
 
 #ifdef __CLASSIC_C__
 int main(argc, argv) int argc; char *argv[];

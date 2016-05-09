@@ -50,7 +50,6 @@ void cmGlobalWatcomWMakeGenerator
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalWatcomWMakeGenerator
 ::GetDocumentation(cmDocumentationEntry& entry)
 {

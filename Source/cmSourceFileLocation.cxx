@@ -18,14 +18,12 @@
 
 #include "assert.h"
 
-//----------------------------------------------------------------------------
 cmSourceFileLocation::cmSourceFileLocation()
   : Makefile(0), AmbiguousDirectory(true), AmbiguousExtension(true)
 {
 
 }
 
-//----------------------------------------------------------------------------
 cmSourceFileLocation::cmSourceFileLocation(const cmSourceFileLocation& loc)
   : Makefile(loc.Makefile)
 {
@@ -35,7 +33,6 @@ cmSourceFileLocation::cmSourceFileLocation(const cmSourceFileLocation& loc)
   this->Name = loc.Name;
 }
 
-//----------------------------------------------------------------------------
 cmSourceFileLocation&
 cmSourceFileLocation::operator=(const cmSourceFileLocation& loc)
 {
@@ -52,7 +49,6 @@ cmSourceFileLocation::operator=(const cmSourceFileLocation& loc)
   return *this;
 }
 
-//----------------------------------------------------------------------------
 cmSourceFileLocation
 ::cmSourceFileLocation(cmMakefile const* mf, const std::string& name)
   : Makefile(mf)
@@ -69,7 +65,6 @@ cmSourceFileLocation
   this->UpdateExtension(name);
 }
 
-//----------------------------------------------------------------------------
 void cmSourceFileLocation::Update(cmSourceFileLocation const& loc)
 {
   if(this->AmbiguousDirectory && !loc.AmbiguousDirectory)
@@ -84,7 +79,6 @@ void cmSourceFileLocation::Update(cmSourceFileLocation const& loc)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmSourceFileLocation::DirectoryUseSource()
 {
   assert(this->Makefile);
@@ -97,7 +91,6 @@ void cmSourceFileLocation::DirectoryUseSource()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmSourceFileLocation::DirectoryUseBinary()
 {
   assert(this->Makefile);
@@ -110,7 +103,6 @@ void cmSourceFileLocation::DirectoryUseBinary()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmSourceFileLocation::UpdateExtension(const std::string& name)
 {
   assert(this->Makefile);
@@ -168,7 +160,6 @@ void cmSourceFileLocation::UpdateExtension(const std::string& name)
     }
 }
 
-//----------------------------------------------------------------------------
 bool
 cmSourceFileLocation
 ::MatchesAmbiguousExtension(cmSourceFileLocation const& loc) const
@@ -210,7 +201,6 @@ cmSourceFileLocation
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmSourceFileLocation::Matches(cmSourceFileLocation const& loc)
 {
   assert(this->Makefile);

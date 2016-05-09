@@ -29,24 +29,20 @@
 # include <windows.h>
 #endif
 
-//----------------------------------------------------------------------
 cmCPackCygwinSourceGenerator::cmCPackCygwinSourceGenerator()
 {
 }
 
-//----------------------------------------------------------------------
 cmCPackCygwinSourceGenerator::~cmCPackCygwinSourceGenerator()
 {
 }
 
-//----------------------------------------------------------------------
 int cmCPackCygwinSourceGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", "0");
   return this->Superclass::InitializeInternal();
 }
 
-//----------------------------------------------------------------------
 int cmCPackCygwinSourceGenerator::PackageFiles()
 {
   // Create a tar file of the sources

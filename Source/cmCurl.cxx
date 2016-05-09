@@ -26,7 +26,6 @@
     e += ::curl_easy_strerror(result);                                  \
     }
 
-//----------------------------------------------------------------------------
 std::string cmCurlSetCAInfo(::CURL *curl, const char* cafile)
 {
   std::string e;

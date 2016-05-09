@@ -21,19 +21,16 @@
 #include <sys/types.h>
 #include <time.h>
 
-//----------------------------------------------------------------------------
 cmCTestP4::cmCTestP4(cmCTest* ct, std::ostream& log):
   cmCTestGlobalVC(ct, log)
 {
   this->PriorRev = this->Unknown;
 }
 
-//----------------------------------------------------------------------------
 cmCTestP4::~cmCTestP4()
 {
 }
 
-//----------------------------------------------------------------------------
 class cmCTestP4::IdentifyParser: public cmCTestVC::LineParser
 {
 public:
@@ -58,7 +55,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 class cmCTestP4::ChangesParser: public cmCTestVC::LineParser
 {
 public:
@@ -81,7 +77,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 class cmCTestP4::UserParser: public cmCTestVC::LineParser
 {
 public:
@@ -112,7 +107,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 /* Diff format:
 ==== //depot/file#rev - /absolute/path/to/file ====
 (diff data)
@@ -157,7 +151,6 @@ private:
     }
 };
 
-//----------------------------------------------------------------------------
 cmCTestP4::User cmCTestP4::GetUserData(const std::string& username)
 {
   std::map<std::string, cmCTestP4::User>::const_iterator it =
@@ -188,7 +181,6 @@ cmCTestP4::User cmCTestP4::GetUserData(const std::string& username)
   return it->second;
 }
 
-//----------------------------------------------------------------------------
 /* Commit format:
 
 Change 1111111 by user@client on 2013/09/26 11:50:36
@@ -319,7 +311,6 @@ private:
   }
 };
 
-//----------------------------------------------------------------------------
 void cmCTestP4::SetP4Options(std::vector<char const*> &CommandOptions)
 {
   if(P4Options.empty())
@@ -358,7 +349,6 @@ void cmCTestP4::SetP4Options(std::vector<char const*> &CommandOptions)
     }
 }
 
-//----------------------------------------------------------------------------
 std::string cmCTestP4::GetWorkingRevision()
 {
   std::vector<char const*> p4_identify;
@@ -395,7 +385,6 @@ std::string cmCTestP4::GetWorkingRevision()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmCTestP4::NoteOldRevision()
 {
   this->OldRevision = this->GetWorkingRevision();
@@ -405,7 +394,6 @@ void cmCTestP4::NoteOldRevision()
   this->PriorRev.Rev = this->OldRevision;
 }
 
-//----------------------------------------------------------------------------
 void cmCTestP4::NoteNewRevision()
 {
   this->NewRevision = this->GetWorkingRevision();
@@ -414,7 +402,6 @@ void cmCTestP4::NoteNewRevision()
              << this->NewRevision << "\n");
 }
 
-//----------------------------------------------------------------------------
 void cmCTestP4::LoadRevisions()
 {
   std::vector<char const*> p4_changes;
@@ -465,7 +452,6 @@ void cmCTestP4::LoadRevisions()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmCTestP4::LoadModifications()
 {
   std::vector<char const*> p4_diff;
@@ -484,7 +470,6 @@ void cmCTestP4::LoadModifications()
   this->RunChild(&p4_diff[0], &out, &err);
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestP4::UpdateCustom(const std::string& custom)
 {
   std::vector<std::string> p4_custom_command;
@@ -504,7 +489,6 @@ bool cmCTestP4::UpdateCustom(const std::string& custom)
   return this->RunUpdateCommand(&p4_custom[0], &custom_out, &custom_err);
 }
 
-//----------------------------------------------------------------------------
 bool cmCTestP4::UpdateImpl()
 {
   std::string custom = this->CTest->GetCTestConfiguration("P4UpdateCustom");

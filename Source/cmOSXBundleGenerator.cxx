@@ -17,7 +17,6 @@
 
 #include <cassert>
 
-//----------------------------------------------------------------------------
 cmOSXBundleGenerator::
 cmOSXBundleGenerator(cmGeneratorTarget* target,
                      const std::string& configName)
@@ -32,13 +31,11 @@ cmOSXBundleGenerator(cmGeneratorTarget* target,
 
 }
 
-//----------------------------------------------------------------------------
 bool cmOSXBundleGenerator::MustSkip()
 {
   return !this->GT->HaveWellDefinedOutputFiles();
 }
 
-//----------------------------------------------------------------------------
 void cmOSXBundleGenerator::CreateAppBundle(const std::string& targetName,
                                            std::string& outpath)
 {
@@ -67,7 +64,6 @@ void cmOSXBundleGenerator::CreateAppBundle(const std::string& targetName,
   outpath = newoutpath;
 }
 
-//----------------------------------------------------------------------------
 void cmOSXBundleGenerator::CreateFramework(
   const std::string& targetName, const std::string& outpath)
 {
@@ -172,7 +168,6 @@ void cmOSXBundleGenerator::CreateFramework(
     }
 }
 
-//----------------------------------------------------------------------------
 void cmOSXBundleGenerator::CreateCFBundle(const std::string& targetName,
                                           const std::string& root)
 {
@@ -198,7 +193,6 @@ void cmOSXBundleGenerator::CreateCFBundle(const std::string& targetName,
   this->Makefile->AddCMakeOutputFile(plist);
 }
 
-//----------------------------------------------------------------------------
 void
 cmOSXBundleGenerator::
 GenerateMacOSXContentStatements(
@@ -220,7 +214,6 @@ GenerateMacOSXContentStatements(
     }
 }
 
-//----------------------------------------------------------------------------
 std::string
 cmOSXBundleGenerator::InitMacOSXContentDirectory(const char* pkgloc)
 {

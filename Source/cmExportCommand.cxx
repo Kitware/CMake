@@ -250,7 +250,6 @@ bool cmExportCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmExportCommand::HandlePackage(std::vector<std::string> const& args)
 {
   // Parse PACKAGE mode arguments.
@@ -314,7 +313,6 @@ bool cmExportCommand::HandlePackage(std::vector<std::string> const& args)
 #if defined(_WIN32) && !defined(__CYGWIN__)
 # include <windows.h>
 # undef GetCurrentDirectory
-//----------------------------------------------------------------------------
 void cmExportCommand::ReportRegistryError(std::string const& msg,
                                           std::string const& key,
                                           long err)
@@ -334,7 +332,6 @@ void cmExportCommand::ReportRegistryError(std::string const& msg,
   this->Makefile->IssueMessage(cmake::WARNING, e.str());
 }
 
-//----------------------------------------------------------------------------
 void cmExportCommand::StorePackageRegistryWin(std::string const& package,
                                               const char* content,
                                               const char* hash)
@@ -367,7 +364,6 @@ void cmExportCommand::StorePackageRegistryWin(std::string const& package,
     }
 }
 #else
-//----------------------------------------------------------------------------
 void cmExportCommand::StorePackageRegistryDir(std::string const& package,
                                               const char* content,
                                               const char* hash)

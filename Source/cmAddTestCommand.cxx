@@ -65,7 +65,6 @@ bool cmAddTestCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmAddTestCommand::HandleNameMode(std::vector<std::string> const& args)
 {
   std::string name;

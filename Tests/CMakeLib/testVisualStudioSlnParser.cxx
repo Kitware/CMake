@@ -5,7 +5,6 @@
 
 #include <iostream>
 
-//----------------------------------------------------------------------------
 static bool parsedRight(cmVisualStudioSlnParser& parser,
                         const std::string& file, cmSlnData& data,
                         cmVisualStudioSlnParser::ParseResult expected =
@@ -34,7 +33,6 @@ static bool parsedRight(cmVisualStudioSlnParser& parser,
   return false;
 }
 
-//----------------------------------------------------------------------------
 int testVisualStudioSlnParser(int, char*[])
 {
   cmVisualStudioSlnParser parser;

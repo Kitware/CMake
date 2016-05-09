@@ -16,14 +16,12 @@
 #include "cmLocalGenerator.h"
 #include "cmTargetExport.h"
 
-//----------------------------------------------------------------------------
 cmExportBuildFileGenerator::cmExportBuildFileGenerator()
 {
   this->LG = 0;
   this->ExportSet = 0;
 }
 
-//----------------------------------------------------------------------------
 void cmExportBuildFileGenerator::Compute(cmLocalGenerator* lg)
 {
   this->LG = lg;
@@ -33,7 +31,6 @@ void cmExportBuildFileGenerator::Compute(cmLocalGenerator* lg)
     }
 }
 
-//----------------------------------------------------------------------------
 bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 {
   {
@@ -132,7 +129,6 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
   return true;
 }
 
-//----------------------------------------------------------------------------
 void
 cmExportBuildFileGenerator
 ::GenerateImportTargetsConfig(std::ostream& os,
@@ -179,13 +175,11 @@ cmExportBuildFileGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void cmExportBuildFileGenerator::SetExportSet(cmExportSet *exportSet)
 {
   this->ExportSet = exportSet;
 }
 
-//----------------------------------------------------------------------------
 void
 cmExportBuildFileGenerator
 ::SetImportLocationProperty(const std::string& config,
@@ -227,7 +221,6 @@ cmExportBuildFileGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmExportBuildFileGenerator::HandleMissingTarget(
     std::string& link_libs,
@@ -266,7 +259,6 @@ cmExportBuildFileGenerator::HandleMissingTarget(
   link_libs += dependee->GetExportName();
 }
 
-//----------------------------------------------------------------------------
 void cmExportBuildFileGenerator
 ::GetTargets(std::vector<std::string> &targets) const
 {
@@ -283,7 +275,6 @@ void cmExportBuildFileGenerator
   targets = this->Targets;
 }
 
-//----------------------------------------------------------------------------
 std::vector<std::string>
 cmExportBuildFileGenerator
 ::FindNamespaces(cmGlobalGenerator* gg, const std::string& name)
@@ -308,7 +299,6 @@ cmExportBuildFileGenerator
   return namespaces;
 }
 
-//----------------------------------------------------------------------------
 void
 cmExportBuildFileGenerator
 ::ComplainAboutMissingTarget(cmGeneratorTarget* depender,

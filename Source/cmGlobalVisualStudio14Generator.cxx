@@ -81,13 +81,11 @@ public:
   virtual bool SupportsToolset() const { return true; }
 };
 
-//----------------------------------------------------------------------------
 cmGlobalGeneratorFactory* cmGlobalVisualStudio14Generator::NewFactory()
 {
   return new Factory;
 }
 
-//----------------------------------------------------------------------------
 cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(cmake* cm,
   const std::string& name, const std::string& platformName)
   : cmGlobalVisualStudio12Generator(cm, name, platformName)
@@ -100,7 +98,6 @@ cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(cmake* cm,
   this->Version = VS14;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudio14Generator::MatchesGeneratorName(
                                                 const std::string& name) const
@@ -113,7 +110,6 @@ cmGlobalVisualStudio14Generator::MatchesGeneratorName(
   return false;
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio14Generator::InitializeWindows(cmMakefile* mf)
 {
   if (cmHasLiteralPrefix(this->SystemVersion, "10.0"))
@@ -123,7 +119,6 @@ bool cmGlobalVisualStudio14Generator::InitializeWindows(cmMakefile* mf)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio14Generator::InitializeWindowsStore(cmMakefile* mf)
 {
   std::ostringstream  e;
@@ -151,7 +146,6 @@ bool cmGlobalVisualStudio14Generator::InitializeWindowsStore(cmMakefile* mf)
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf,
                                                          bool required)
 {
@@ -170,7 +164,6 @@ bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudio14Generator::SelectWindowsStoreToolset(
   std::string& toolset) const
@@ -192,7 +185,6 @@ cmGlobalVisualStudio14Generator::SelectWindowsStoreToolset(
     this->cmGlobalVisualStudio12Generator::SelectWindowsStoreToolset(toolset);
 }
 
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio14Generator::WriteSLNHeader(std::ostream& fout)
 {
   // Visual Studio 14 writes .sln format 12.00
@@ -207,7 +199,6 @@ void cmGlobalVisualStudio14Generator::WriteSLNHeader(std::ostream& fout)
     }
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudio14Generator::IsWindowsDesktopToolsetInstalled() const
 {
@@ -220,7 +211,6 @@ cmGlobalVisualStudio14Generator::IsWindowsDesktopToolsetInstalled() const
     vc14, cmSystemTools::KeyWOW64_32);
 }
 
-//----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudio14Generator::IsWindowsStoreToolsetInstalled() const
 {
@@ -243,7 +233,6 @@ struct NoWindowsH
 };
 #endif
 
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)

@@ -19,7 +19,6 @@ typedef cmIDEFlagTable cmVS7FlagTable;
 
 class cmVisualStudio10TargetGenerator;
 
-//----------------------------------------------------------------------------
 class cmVisualStudioGeneratorOptions: public cmIDEOptions
 {
 public:

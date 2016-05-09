@@ -94,7 +94,6 @@ void cmCTestMultiProcessHandler::SetTestLoad(unsigned long load)
   this->TestLoad = load;
 }
 
-//---------------------------------------------------------
 void cmCTestMultiProcessHandler::RunTests()
 {
   this->CheckResume();
@@ -121,7 +120,6 @@ void cmCTestMultiProcessHandler::RunTests()
   this->UpdateCostData();
 }
 
-//---------------------------------------------------------
 void cmCTestMultiProcessHandler::StartTestProcess(int test)
 {
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -177,7 +175,6 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   cmSystemTools::ChangeDirectory(current_dir);
 }
 
-//---------------------------------------------------------
 void cmCTestMultiProcessHandler::LockResources(int index)
 {
   this->LockedResources.insert(
@@ -190,7 +187,6 @@ void cmCTestMultiProcessHandler::LockResources(int index)
     }
 }
 
-//---------------------------------------------------------
 void cmCTestMultiProcessHandler::UnlockResources(int index)
 {
   for(std::set<std::string>::iterator i =
@@ -205,7 +201,6 @@ void cmCTestMultiProcessHandler::UnlockResources(int index)
     }
 }
 
-//---------------------------------------------------------
 void cmCTestMultiProcessHandler::EraseTest(int test)
 {
   this->Tests.erase(test);
@@ -213,7 +208,6 @@ void cmCTestMultiProcessHandler::EraseTest(int test)
     std::find(this->SortedTests.begin(), this->SortedTests.end(), test));
 }
 
-//---------------------------------------------------------
 inline size_t cmCTestMultiProcessHandler::GetProcessorsUsed(int test)
 {
   size_t processors =
@@ -232,7 +226,6 @@ std::string cmCTestMultiProcessHandler::GetName(int test)
   return this->Properties[test]->Name;
 }
 
-//---------------------------------------------------------
 bool cmCTestMultiProcessHandler::StartTest(int test)
 {
   //Check for locked resources
@@ -257,7 +250,6 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
   return false;
 }
 
-//---------------------------------------------------------
 void cmCTestMultiProcessHandler::StartNextTests()
 {
   size_t numToStart = 0;
@@ -407,7 +399,6 @@ void cmCTestMultiProcessHandler::StartNextTests()
     }
 }
 
-//---------------------------------------------------------
 bool cmCTestMultiProcessHandler::CheckOutput()
 {
   // no more output we are done
@@ -463,7 +454,6 @@ bool cmCTestMultiProcessHandler::CheckOutput()
   return true;
 }
 
-//---------------------------------------------------------
 void cmCTestMultiProcessHandler::UpdateCostData()
 {
   std::string fname = this->CTest->GetCostDataFile();
@@ -527,7 +517,6 @@ void cmCTestMultiProcessHandler::UpdateCostData()
   cmSystemTools::RenameFile(tmpout.c_str(), fname.c_str());
 }
 
-//---------------------------------------------------------
 void cmCTestMultiProcessHandler::ReadCostData()
 {
   std::string fname = this->CTest->GetCostDataFile();
@@ -579,7 +568,6 @@ void cmCTestMultiProcessHandler::ReadCostData()
     }
 }
 
-//---------------------------------------------------------
 int cmCTestMultiProcessHandler::SearchByName(std::string name)
 {
   int index = -1;
@@ -595,7 +583,6 @@ int cmCTestMultiProcessHandler::SearchByName(std::string name)
   return index;
 }
 
-//---------------------------------------------------------
 void cmCTestMultiProcessHandler::CreateTestCostList()
 {
   if(this->ParallelLevel > 1)
@@ -608,7 +595,6 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
     }
 }
 
-//---------------------------------------------------------
 void cmCTestMultiProcessHandler::CreateParallelTestCostList()
 {
   TestSet alreadySortedTests;
@@ -688,7 +674,6 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
     }
 }
 
-//---------------------------------------------------------
 void cmCTestMultiProcessHandler::GetAllTestDependencies(
     int test, TestList& dependencies)
 {
@@ -701,7 +686,6 @@ void cmCTestMultiProcessHandler::GetAllTestDependencies(
     }
 }
 
-//---------------------------------------------------------
 void cmCTestMultiProcessHandler::CreateSerialTestCostList()
 {
   TestList presortedList;
@@ -747,7 +731,6 @@ void cmCTestMultiProcessHandler::CreateSerialTestCostList()
     }
 }
 
-//---------------------------------------------------------
 void cmCTestMultiProcessHandler::WriteCheckpoint(int index)
 {
   std::string fname = this->CTest->GetBinaryDir()
@@ -758,7 +741,6 @@ void cmCTestMultiProcessHandler::WriteCheckpoint(int index)
   fout.close();
 }
 
-//---------------------------------------------------------
 void cmCTestMultiProcessHandler::MarkFinished()
 {
   std::string fname = this->CTest->GetBinaryDir()
@@ -766,7 +748,6 @@ void cmCTestMultiProcessHandler::MarkFinished()
   cmSystemTools::RemoveFile(fname);
 }
 
-//---------------------------------------------------------
 //For ShowOnly mode
 void cmCTestMultiProcessHandler::PrintTestList()
 {
@@ -858,7 +839,6 @@ void cmCTestMultiProcessHandler::PrintLabels()
     }
 }
 
-//---------------------------------------------------------
 void cmCTestMultiProcessHandler::CheckResume()
 {
   std::string fname = this->CTest->GetBinaryDir()
@@ -889,7 +869,6 @@ void cmCTestMultiProcessHandler::CheckResume()
     }
 }
 
-//---------------------------------------------------------
 void cmCTestMultiProcessHandler::RemoveTest(int index)
 {
   this->EraseTest(index);
@@ -899,7 +878,6 @@ void cmCTestMultiProcessHandler::RemoveTest(int index)
   this->Completed++;
 }
 
-//---------------------------------------------------------
 int cmCTestMultiProcessHandler::FindMaxIndex()
 {
   int max = 0;

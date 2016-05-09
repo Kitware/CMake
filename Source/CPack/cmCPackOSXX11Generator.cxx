@@ -23,17 +23,14 @@
 #include <cmsys/SystemTools.hxx>
 #include <sys/stat.h>
 
-//----------------------------------------------------------------------
 cmCPackOSXX11Generator::cmCPackOSXX11Generator()
 {
 }
 
-//----------------------------------------------------------------------
 cmCPackOSXX11Generator::~cmCPackOSXX11Generator()
 {
 }
 
-//----------------------------------------------------------------------
 int cmCPackOSXX11Generator::PackageFiles()
 {
   // TODO: Use toplevel ?
@@ -206,7 +203,6 @@ int cmCPackOSXX11Generator::PackageFiles()
   return 1;
 }
 
-//----------------------------------------------------------------------
 int cmCPackOSXX11Generator::InitializeInternal()
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
@@ -225,7 +221,6 @@ int cmCPackOSXX11Generator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
-//----------------------------------------------------------------------
 /*
 bool cmCPackOSXX11Generator::CopyCreateResourceFile(const std::string& name)
 {
@@ -270,7 +265,6 @@ bool cmCPackOSXX11Generator::CopyCreateResourceFile(const std::string& name)
 }
 */
 
-//----------------------------------------------------------------------
 bool cmCPackOSXX11Generator::CopyResourcePlistFile(const std::string& name,
   const std::string& dir, const char* outputFileName /* = 0 */,
   bool copyOnly /* = false */)
@@ -301,7 +295,6 @@ bool cmCPackOSXX11Generator::CopyResourcePlistFile(const std::string& name,
   return true;
 }
 
-//----------------------------------------------------------------------
 const char* cmCPackOSXX11Generator::GetPackagingInstallPrefix()
 {
   this->InstallPrefix = "/";

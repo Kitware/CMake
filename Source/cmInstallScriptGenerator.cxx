@@ -11,7 +11,6 @@
 ============================================================================*/
 #include "cmInstallScriptGenerator.h"
 
-//----------------------------------------------------------------------------
 cmInstallScriptGenerator
 ::cmInstallScriptGenerator(const char* script, bool code,
                            const char* component, bool exclude_from_all) :
@@ -21,13 +20,11 @@ cmInstallScriptGenerator
 {
 }
 
-//----------------------------------------------------------------------------
 cmInstallScriptGenerator
 ::~cmInstallScriptGenerator()
 {
 }
 
-//----------------------------------------------------------------------------
 void cmInstallScriptGenerator::GenerateScript(std::ostream& os)
 {
   Indent indent;

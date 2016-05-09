@@ -412,7 +412,6 @@ bool cmAddCustomCommandCommand
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool
 cmAddCustomCommandCommand
 ::CheckOutputs(const std::vector<std::string>& outputs)

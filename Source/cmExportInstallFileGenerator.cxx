@@ -21,14 +21,12 @@
 #include "cmLocalGenerator.h"
 #include "cmTargetExport.h"
 
-//----------------------------------------------------------------------------
 cmExportInstallFileGenerator
 ::cmExportInstallFileGenerator(cmInstallExportGenerator* iegen):
   IEGen(iegen)
 {
 }
 
-//----------------------------------------------------------------------------
 std::string cmExportInstallFileGenerator::GetConfigImportFileGlob()
 {
   std::string glob = this->FileBase;
@@ -37,7 +35,6 @@ std::string cmExportInstallFileGenerator::GetConfigImportFileGlob()
   return glob;
 }
 
-//----------------------------------------------------------------------------
 bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 {
   std::vector<cmTargetExport*> allTargets;
@@ -258,7 +255,6 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
   return result;
 }
 
-//----------------------------------------------------------------------------
 void
 cmExportInstallFileGenerator::ReplaceInstallPrefix(std::string &input)
 {
@@ -273,7 +269,6 @@ cmExportInstallFileGenerator::ReplaceInstallPrefix(std::string &input)
     }
 }
 
-//----------------------------------------------------------------------------
 bool
 cmExportInstallFileGenerator::GenerateImportFileConfig(
                                     const std::string& config,
@@ -328,7 +323,6 @@ cmExportInstallFileGenerator::GenerateImportFileConfig(
   return true;
 }
 
-//----------------------------------------------------------------------------
 void
 cmExportInstallFileGenerator
 ::GenerateImportTargetsConfig(std::ostream& os,
@@ -390,7 +384,6 @@ cmExportInstallFileGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmExportInstallFileGenerator
 ::SetImportLocationProperty(const std::string& config,
@@ -459,7 +452,6 @@ cmExportInstallFileGenerator
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmExportInstallFileGenerator::HandleMissingTarget(std::string& link_libs,
   std::vector<std::string>& missingTargets,
@@ -485,7 +477,6 @@ cmExportInstallFileGenerator::HandleMissingTarget(std::string& link_libs,
     }
 }
 
-//----------------------------------------------------------------------------
 std::vector<std::string>
 cmExportInstallFileGenerator
 ::FindNamespaces(cmGlobalGenerator* gg, const std::string& name)
@@ -525,7 +516,6 @@ cmExportInstallFileGenerator
   return namespaces;
 }
 
-//----------------------------------------------------------------------------
 void
 cmExportInstallFileGenerator
 ::ComplainAboutMissingTarget(cmGeneratorTarget* depender,

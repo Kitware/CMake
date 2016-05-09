@@ -25,7 +25,6 @@ std::string cmVisualStudioGeneratorOptionsEscapeForXML(std::string ret)
   return ret;
 }
 
-//----------------------------------------------------------------------------
 cmVisualStudioGeneratorOptions
 ::cmVisualStudioGeneratorOptions(cmLocalVisualStudioGenerator* lg,
                                  Tool tool,
@@ -45,7 +44,6 @@ cmVisualStudioGeneratorOptions
   this->FortranRuntimeMT = false;
 }
 
-//----------------------------------------------------------------------------
 cmVisualStudioGeneratorOptions
 ::cmVisualStudioGeneratorOptions(cmLocalVisualStudioGenerator* lg,
                                  Tool tool,
@@ -71,7 +69,6 @@ cmVisualStudioGeneratorOptions
   this->FortranRuntimeMT = false;
 }
 
-//----------------------------------------------------------------------------
 void cmVisualStudioGeneratorOptions::AddTable(cmVS7FlagTable const* table)
 {
   if(table)
@@ -87,7 +84,6 @@ void cmVisualStudioGeneratorOptions::AddTable(cmVS7FlagTable const* table)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
 {
   // Exception handling is on by default because the platform file has
@@ -117,7 +113,6 @@ void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmVisualStudioGeneratorOptions::SetVerboseMakefile(bool verbose)
 {
   // If verbose makefiles have been requested and the /nologo option
@@ -142,13 +137,11 @@ bool cmVisualStudioGeneratorOptions::IsDebug() const
   return this->FlagMap.find("DebugInformationFormat") != this->FlagMap.end();
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudioGeneratorOptions::IsWinRt() const
 {
   return this->FlagMap.find("CompileAsWinRT") != this->FlagMap.end();
 }
 
-//----------------------------------------------------------------------------
 bool cmVisualStudioGeneratorOptions::UsingUnicode() const
 {
   // Look for the a _UNICODE definition.
@@ -162,7 +155,6 @@ bool cmVisualStudioGeneratorOptions::UsingUnicode() const
     }
   return false;
 }
-//----------------------------------------------------------------------------
 bool cmVisualStudioGeneratorOptions::UsingSBCS() const
 {
   // Look for the a _SBCS definition.
@@ -177,7 +169,6 @@ bool cmVisualStudioGeneratorOptions::UsingSBCS() const
   return false;
 }
 
-//----------------------------------------------------------------------------
 void cmVisualStudioGeneratorOptions::Parse(const char* flags)
 {
   // Parse the input string as a windows command line since the string
@@ -194,7 +185,6 @@ void cmVisualStudioGeneratorOptions::Parse(const char* flags)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmVisualStudioGeneratorOptions::ParseFinish()
 {
   if(this->CurrentTool == FortranCompiler)
@@ -216,7 +206,6 @@ void cmVisualStudioGeneratorOptions::ParseFinish()
     }
 }
 
-//----------------------------------------------------------------------------
 void cmVisualStudioGeneratorOptions::StoreUnknownFlag(const char* flag)
 {
   // Look for Intel Fortran flags that do not map well in the flag table.
@@ -253,13 +242,11 @@ void cmVisualStudioGeneratorOptions::StoreUnknownFlag(const char* flag)
       cmOutputConverter::Shell_Flag_VSIDE);
 }
 
-//----------------------------------------------------------------------------
 void cmVisualStudioGeneratorOptions::SetConfiguration(const char* config)
 {
   this->Configuration = config;
 }
 
-//----------------------------------------------------------------------------
 void
 cmVisualStudioGeneratorOptions
 ::OutputPreprocessorDefinitions(std::ostream& fout,
@@ -336,7 +323,6 @@ cmVisualStudioGeneratorOptions
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmVisualStudioGeneratorOptions
 ::OutputFlagMap(std::ostream& fout, const char* indent)
@@ -387,7 +373,6 @@ cmVisualStudioGeneratorOptions
     }
 }
 
-//----------------------------------------------------------------------------
 void
 cmVisualStudioGeneratorOptions
 ::OutputAdditionalOptions(std::ostream& fout,

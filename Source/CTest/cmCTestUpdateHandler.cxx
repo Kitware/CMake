@@ -44,7 +44,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-//----------------------------------------------------------------------
 static const char* cmCTestUpdateHandlerUpdateStrings[] =
 {
   "Unknown",
@@ -66,12 +65,10 @@ static const char* cmCTestUpdateHandlerUpdateToString(int type)
   return cmCTestUpdateHandlerUpdateStrings[type];
 }
 
-//----------------------------------------------------------------------
 cmCTestUpdateHandler::cmCTestUpdateHandler()
 {
 }
 
-//----------------------------------------------------------------------
 void cmCTestUpdateHandler::Initialize()
 {
   this->Superclass::Initialize();
@@ -79,7 +76,6 @@ void cmCTestUpdateHandler::Initialize()
   this->UpdateType = e_CVS;
 }
 
-//----------------------------------------------------------------------
 int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)
 {
   cmCTestOptionalLog(this->CTest, DEBUG,
@@ -148,7 +144,6 @@ int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)
   return cmCTestUpdateHandler::e_UNKNOWN;
 }
 
-//----------------------------------------------------------------------
 //clearly it would be nice if this were broken up into a few smaller
 //functions and commented...
 int cmCTestUpdateHandler::ProcessHandler()
@@ -291,7 +286,6 @@ int cmCTestUpdateHandler::ProcessHandler()
   return updated? numUpdated : -1;
 }
 
-//----------------------------------------------------------------------
 int cmCTestUpdateHandler::DetectVCS(const char* dir)
 {
   std::string sourceDirectory = dir;
@@ -341,7 +335,6 @@ int cmCTestUpdateHandler::DetectVCS(const char* dir)
   return cmCTestUpdateHandler::e_UNKNOWN;
 }
 
-//----------------------------------------------------------------------
 bool cmCTestUpdateHandler::SelectVCS()
 {
   // Get update command

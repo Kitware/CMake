@@ -12,7 +12,6 @@
 
 #include "cmPathLabel.h"
 
-//----------------------------------------------------------------------------
 cmPathLabel::cmPathLabel(const std::string& label)
 : Label(label), Hash(0)
 {
@@ -28,13 +27,11 @@ cmPathLabel::cmPathLabel(const std::string& label)
   this->Hash += ((this->Hash & 0x0001FFFF) << 15);
 }
 
-//----------------------------------------------------------------------------
 bool cmPathLabel::operator < (const cmPathLabel& l) const
 {
   return this->Hash < l.Hash;
 }
 
-//----------------------------------------------------------------------------
 bool cmPathLabel::operator == (const cmPathLabel& l) const
 {
   return this->Hash == l.Hash;

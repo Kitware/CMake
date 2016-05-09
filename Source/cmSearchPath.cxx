@@ -14,18 +14,15 @@
 #include "cmAlgorithms.h"
 #include "cmFindCommon.h"
 
-//----------------------------------------------------------------------------
 cmSearchPath::cmSearchPath(cmFindCommon* findCmd)
 : FC(findCmd)
 {
 }
 
-//----------------------------------------------------------------------------
 cmSearchPath::~cmSearchPath()
 {
 }
 
-//----------------------------------------------------------------------------
 
 void cmSearchPath::ExtractWithout(const std::set<std::string>& ignore,
                                   std::vector<std::string>& outPaths,
@@ -45,13 +42,11 @@ void cmSearchPath::ExtractWithout(const std::set<std::string>& ignore,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmSearchPath::AddPath(const std::string& path)
 {
   this->AddPathInternal(path);
 }
 
-//----------------------------------------------------------------------------
 void cmSearchPath::AddUserPath(const std::string& path)
 {
   assert(this->FC != NULL);
@@ -90,7 +85,6 @@ void cmSearchPath::AddUserPath(const std::string& path)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmSearchPath::AddCMakePath(const std::string& variable)
 {
   assert(this->FC != NULL);
@@ -110,7 +104,6 @@ void cmSearchPath::AddCMakePath(const std::string& variable)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmSearchPath::AddEnvPath(const std::string& variable)
 {
   std::vector<std::string> expanded;
@@ -122,7 +115,6 @@ void cmSearchPath::AddEnvPath(const std::string& variable)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmSearchPath::AddCMakePrefixPath(const std::string& variable)
 {
   assert(this->FC != NULL);
@@ -138,7 +130,6 @@ void cmSearchPath::AddCMakePrefixPath(const std::string& variable)
     }
 }
 
-//----------------------------------------------------------------------------
 static std::string cmSearchPathStripBin(std::string const& s)
 {
   // If the path is a PREFIX/bin case then add its parent instead.
@@ -153,7 +144,6 @@ static std::string cmSearchPathStripBin(std::string const& s)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmSearchPath::AddEnvPrefixPath(const std::string& variable, bool stripBin)
 {
   std::vector<std::string> expanded;
@@ -166,7 +156,6 @@ void cmSearchPath::AddEnvPrefixPath(const std::string& variable, bool stripBin)
   this->AddPrefixPaths(expanded);
 }
 
-//----------------------------------------------------------------------------
 void cmSearchPath::AddSuffixes(const std::vector<std::string>& suffixes)
 {
   std::vector<std::string> inPaths;
@@ -199,7 +188,6 @@ void cmSearchPath::AddSuffixes(const std::vector<std::string>& suffixes)
     }
 }
 
-//----------------------------------------------------------------------------
 void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths,
                                   const char *base)
 {
@@ -254,7 +242,6 @@ void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths,
     }
 }
 
-//----------------------------------------------------------------------------
 void cmSearchPath::AddPathInternal(const std::string& path, const char *base)
 {
   assert(this->FC != NULL);
