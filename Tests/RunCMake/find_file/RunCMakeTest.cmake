@@ -1,3 +1,5 @@
 include(RunCMake)
 
-run_cmake(PrefixInPATH)
+if(WIN32 OR CYGWIN)
+  run_cmake(PrefixInPATH)
+endif()

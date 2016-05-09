@@ -14,7 +14,8 @@ find_library
 .. |CMAKE_XXX_PATH| replace:: :variable:`CMAKE_LIBRARY_PATH`
 .. |CMAKE_XXX_MAC_PATH| replace:: :variable:`CMAKE_FRAMEWORK_PATH`
 
-.. |SYSTEM_ENVIRONMENT_PATH_XXX| replace:: Directories in ``LIB``,
+.. |SYSTEM_ENVIRONMENT_PATH_XXX| replace:: Directories in ``LIB``.
+   On Windows hosts:
    ``<prefix>/lib/<arch>`` if :variable:`CMAKE_LIBRARY_ARCHITECTURE` is set,
    and |SYSTEM_ENVIRONMENT_PREFIX_PATH_XXX_SUBDIR|,
    and the directories in ``PATH`` itself.
