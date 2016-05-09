@@ -169,7 +169,7 @@
 #
 # ::
 #
-#    The add_jar() functions sets some target properties. You can get these
+#    The add_jar() function sets some target properties. You can get these
 #    properties with the
 #       get_property(TARGET <target_name> PROPERTY <propery_name>)
 #    command.
