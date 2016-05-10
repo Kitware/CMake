@@ -276,10 +276,16 @@ void cmFindBase::FillSystemEnvironmentPath()
   if(!this->EnvironmentPath.empty())
     {
     paths.AddEnvPath(this->EnvironmentPath);
+#if defined(_WIN32) || defined(__CYGWIN__)
     paths.AddEnvPrefixPath("PATH", true);
+    paths.AddEnvPath("PATH");
+#endif
     }
-  // Add PATH
-  paths.AddEnvPath("PATH");
+  else
+    {
+    // Add PATH
+    paths.AddEnvPath("PATH");
+    }
   paths.AddSuffixes(this->SearchPathSuffixes);
 }
 
