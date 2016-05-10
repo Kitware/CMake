@@ -835,15 +835,6 @@ function(cpack_deb_prepare_package_vars)
     endif()
   endif()
 
-  # Patch package file name to be in corrent form
-  if(CPACK_DEB_PACKAGE_COMPONENT)
-    set(CPACK_OUTPUT_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
-    set(CPACK_TEMPORARY_PACKAGE_FILE_NAME "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_OUTPUT_FILE_NAME}")
-
-    get_filename_component(BINARY_DIR "${CPACK_OUTPUT_FILE_PATH}" DIRECTORY)
-    set(CPACK_OUTPUT_FILE_PATH "${BINARY_DIR}/${CPACK_OUTPUT_FILE_NAME}")
-  endif()
-
   # add ldconfig call in default postrm and postint
   set(CPACK_ADD_LDCONFIG_CALL 0)
   foreach(_FILE ${CPACK_DEB_SHARED_OBJECT_FILES})
@@ -870,6 +861,14 @@ function(cpack_deb_prepare_package_vars)
     set(CPACK_DEBIAN_GENERATE_POSTINST 0)
     set(CPACK_DEBIAN_GENERATE_POSTRM 0)
   endif()
+
+  # Patch package file name to be in corrent debian format:
+  # <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb
+  set(CPACK_OUTPUT_FILE_NAME
+    "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
+  set(CPACK_TEMPORARY_PACKAGE_FILE_NAME "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_OUTPUT_FILE_NAME}")
+  get_filename_component(BINARY_DIR "${CPACK_OUTPUT_FILE_PATH}" DIRECTORY)
+  set(CPACK_OUTPUT_FILE_PATH "${BINARY_DIR}/${CPACK_OUTPUT_FILE_NAME}")
 
   # Print out some debug information if we were asked for that
   if(CPACK_DEBIAN_PACKAGE_DEBUG)

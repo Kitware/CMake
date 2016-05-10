@@ -60,9 +60,10 @@ int cmCPackDebGenerator::PackageOnePack(std::string initialTopLevel,
       cmSystemTools::GetParentDirectory(toplevel)
   );
   std::string outputFileName(
-      std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
-  +"-"+packageName + this->GetOutputExtension()
-  );
+          cmsys::SystemTools::LowerCase(
+              std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME")))
+          +"-"+packageName + this->GetOutputExtension()
+      );
 
   localToplevel += "/"+ packageName;
   /* replace the TEMP DIRECTORY with the component one */
@@ -168,16 +169,15 @@ int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
   return retval;
 }
 
-int cmCPackDebGenerator::PackageComponentsAllInOne()
+//----------------------------------------------------------------------
+int cmCPackDebGenerator::PackageComponentsAllInOne(
+    const std::string& compInstDirName)
 {
   int retval = 1;
-  std::string compInstDirName;
   /* Reset package file name list it will be populated during the
    * component packaging run*/
   packageFileNames.clear();
   std::string initialTopLevel(this->GetOption("CPACK_TEMPORARY_DIRECTORY"));
-
-  compInstDirName = "ALL_COMPONENTS_IN_ONE";
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Packaging all groups in one package..."
@@ -190,7 +190,8 @@ int cmCPackDebGenerator::PackageComponentsAllInOne()
       cmSystemTools::GetParentDirectory(toplevel)
                              );
   std::string outputFileName(
-            std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
+            cmsys::SystemTools::LowerCase(
+                std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME")))
             + this->GetOutputExtension()
                             );
   // all GROUP in one vs all COMPONENT in one
@@ -204,11 +205,15 @@ int cmCPackDebGenerator::PackageComponentsAllInOne()
   /* replace the TEMPORARY package file name */
   this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
       packageFileName.c_str());
-  // Tell CPackDeb.cmake the path where the component is.
-  std::string component_path = "/";
-  component_path += compInstDirName;
-  this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH",
-                  component_path.c_str());
+
+  if(!compInstDirName.empty())
+    {
+    // Tell CPackDeb.cmake the path where the component is.
+    std::string component_path = "/";
+    component_path += compInstDirName;
+    this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH",
+                    component_path.c_str());
+    }
   if (!this->ReadListFile("CPackDeb.cmake"))
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -246,8 +251,6 @@ int cmCPackDebGenerator::PackageComponentsAllInOne()
 
 int cmCPackDebGenerator::PackageFiles()
 {
-  int retval = -1;
-
   /* Are we in the component packaging case */
   if (WantsComponentInstallation()) {
     // CASE 1 : COMPONENT ALL-IN-ONE package
@@ -255,7 +258,7 @@ int cmCPackDebGenerator::PackageFiles()
     // then the package file is unique and should be open here.
     if (componentPackageMethod == ONE_PACKAGE)
       {
-      return PackageComponentsAllInOne();
+      return PackageComponentsAllInOne("ALL_COMPONENTS_IN_ONE");
       }
     // CASE 2 : COMPONENT CLASSICAL package(s) (i.e. not all-in-one)
     // There will be 1 package for each component group
@@ -270,19 +273,8 @@ int cmCPackDebGenerator::PackageFiles()
   // CASE 3 : NON COMPONENT package.
   else
     {
-    if (!this->ReadListFile("CPackDeb.cmake"))
-      {
-      cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Error while execution CPackDeb.cmake" << std::endl);
-      retval = 0;
-      }
-    else
-      {
-      packageFiles = files;
-      return createDeb();
-      }
+    return PackageComponentsAllInOne("");
     }
-  return retval;
 }
 
 int cmCPackDebGenerator::createDeb()
