@@ -87,6 +87,7 @@ function(set_lua_version_vars)
              lua${CMAKE_MATCH_1}${CMAKE_MATCH_2}
              lua${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
              lua-${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
+             lua.${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
         )
     endforeach ()
 
