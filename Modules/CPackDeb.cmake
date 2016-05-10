@@ -50,6 +50,18 @@
 #  * Mandatory : YES
 #  * Default   : :variable:`CPACK_PACKAGE_VERSION`
 #
+# .. variable:: CPACK_DEBIAN_PACKAGE_RELEASE
+#
+#  The Debian package release - Debian revision number.
+#
+#  * Mandatory : YES
+#  * Default   : 1
+#
+#  This is the numbering of the DEB package itself, i.e. the version of the
+#  packaging and not the version of the content (see
+#  :variable:`CPACK_DEBIAN_PACKAGE_VERSION`). One may change the default value
+#  if the previous packaging was buggy and/or you want to put here a fancy Linux
+#  distro specific numbering.
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_ARCHITECTURE
 #               CPACK_DEBIAN_<COMPONENT>_PACKAGE_ARCHITECTURE
@@ -862,10 +874,14 @@ function(cpack_deb_prepare_package_vars)
     set(CPACK_DEBIAN_GENERATE_POSTRM 0)
   endif()
 
+  if(NOT CPACK_DEBIAN_PACKAGE_RELEASE)
+    set(CPACK_DEBIAN_PACKAGE_RELEASE 1)
+  endif()
+
   # Patch package file name to be in corrent debian format:
   # <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb
   set(CPACK_OUTPUT_FILE_NAME
-    "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
+    "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
   set(CPACK_TEMPORARY_PACKAGE_FILE_NAME "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_OUTPUT_FILE_NAME}")
   get_filename_component(BINARY_DIR "${CPACK_OUTPUT_FILE_PATH}" DIRECTORY)
   set(CPACK_OUTPUT_FILE_PATH "${BINARY_DIR}/${CPACK_OUTPUT_FILE_NAME}")
