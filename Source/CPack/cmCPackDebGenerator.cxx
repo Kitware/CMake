@@ -227,6 +227,7 @@ int cmCPackDebGenerator::PackageComponentsAllInOne()
     }
   packageFiles = gl.GetFiles();
 
+
   int res = createDeb();
   if (res != 1)
     {
@@ -281,9 +282,8 @@ int cmCPackDebGenerator::PackageFiles()
 int cmCPackDebGenerator::createDeb()
 {
   // debian-binary file
-  std::string dbfilename;
-    dbfilename += this->GetOption("GEN_WDIR");
-  dbfilename += "/debian-binary";
+  const std::string strGenWDIR(this->GetOption("GEN_WDIR"));
+  const std::string dbfilename = strGenWDIR + "/debian-binary";
     { // the scope is needed for cmGeneratedFileStream
     cmGeneratedFileStream out(dbfilename.c_str());
     out << "2.0";
@@ -291,9 +291,7 @@ int cmCPackDebGenerator::createDeb()
     }
 
   // control file
-  std::string ctlfilename;
-    ctlfilename = this->GetOption("GEN_WDIR");
-  ctlfilename += "/control";
+  std::string ctlfilename = strGenWDIR + "/control";
 
   // debian policy enforce lower case for package name
   // mandatory entries:
@@ -405,7 +403,18 @@ int cmCPackDebGenerator::createDeb()
     out << std::endl;
     }
 
-  const std::string strGenWDIR(this->GetOption("GEN_WDIR"));
+  const std::string shlibsfilename = strGenWDIR + "/shlibs";
+
+  const char* debian_pkg_shlibs = this->GetOption(
+      "GEN_CPACK_DEBIAN_PACKAGE_SHLIBS");
+  const bool gen_shibs = this->IsOn("CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS")
+      && debian_pkg_shlibs && *debian_pkg_shlibs;
+  if( gen_shibs )
+    {
+    cmGeneratedFileStream out(shlibsfilename.c_str());
+    out << debian_pkg_shlibs;
+    out << std::endl;
+    }
 
   cmArchiveWrite::Compress tar_compression_type = cmArchiveWrite::CompressGZip;
   const char* debian_compression_type =
@@ -603,6 +612,21 @@ int cmCPackDebGenerator::createDeb()
             << "#file: \"control\" or \"md5sums\"" << std::endl
             << "#error:" << control_tar.GetError() << std::endl);
         return 0;
+      }
+
+    // adds generated shlibs file
+    if( gen_shibs )
+      {
+      if( !control_tar.Add(shlibsfilename, strGenWDIR.length(), ".") )
+        {
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+              "Error adding file to tar:" << std::endl
+              << "#top level directory: "
+                 << strGenWDIR << std::endl
+              << "#file: \"shlibs\"" << std::endl
+              << "#error:" << control_tar.GetError() << std::endl);
+          return 0;
+        }
       }
 
     // for the other files, we use

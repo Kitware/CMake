@@ -331,6 +331,32 @@
 #  See http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
 #
 #
+# .. variable:: CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS
+#
+#  * Mandatory : NO
+#  * Default   : OFF
+#
+#  Allows to generate shlibs control file automatically. Compatibility is defined by
+#  CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY variable value.
+#
+#  .. note::
+#
+#    Libraries are only considered if they have both library name and version
+#    set. This can be done by setting SOVERSION property with
+#    :command:`set_target_properties` command.
+#
+#
+# .. variable:: CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY
+#
+#  * Mandatory : NO
+#  * Default   : "="
+#
+#  Defines compatibility policy for auto-generated shlibs control file.
+#  Possible values: "=", ">="
+#
+#  See https://www.debian.org/doc/debian-policy/ch-sharedlibs.html#s-sharedlibs-shlibdeps
+#
+#
 # .. variable:: CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
 #               CPACK_DEBIAN_<COMPONENT>_PACKAGE_CONTROL_EXTRA
 #
@@ -399,6 +425,10 @@
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
 # Copyright 2007-2009 Mathieu Malaterre <mathieu.malaterre@gmail.com>
+# Copyright 2014-2016 Alexander Smorkalov <alexander.smorkalov@itseez.com>
+# Copyright 2014-2016 Roman Donchenko <roman.donchenko@itseez.com>
+# Copyright 2014-2016 Roman Kharitonov <roman.kharitonov@itseez.com>
+# Copyright 2014-2016 Ilya Lavrenov <ilya.lavrenov@itseez.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -422,6 +452,27 @@ endif()
 if(NOT UNIX)
   message(FATAL_ERROR "CPackDeb.cmake may only be used under UNIX.")
 endif()
+
+#extract library name and version for given shared object
+function(extract_so_info shared_object libname version)
+  if(READELF_EXECUTABLE)
+    execute_process(COMMAND "${READELF_EXECUTABLE}" -d "${shared_object}"
+      WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+      RESULT_VARIABLE result
+      OUTPUT_VARIABLE output
+      ERROR_QUIET
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(result EQUAL 0)
+      string(REGEX MATCH "\\(SONAME\\)[^\n]*\\[([^\n]+)\\.so\\.([^\n]*)\\]" soname "${output}")
+      set(${libname} "${CMAKE_MATCH_1}" PARENT_SCOPE)
+      set(${version} "${CMAKE_MATCH_2}" PARENT_SCOPE)
+    else()
+      message(WARNING "Error running readelf for \"${shared_object}\"")
+    endif()
+  else()
+    message(FATAL_ERROR "Readelf utility is not available.")
+  endif()
+endfunction()
 
 function(cpack_deb_prepare_package_vars)
   # CPACK_DEBIAN_PACKAGE_SHLIBDEPS
@@ -447,6 +498,39 @@ function(cpack_deb_prepare_package_vars)
     endif()
   endif()
 
+  if(CPACK_DEBIAN_PACKAGE_SHLIBDEPS OR CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS)
+    # Generating binary list - Get type of all install files
+    cmake_policy(PUSH)
+      # Tell file(GLOB_RECURSE) not to follow directory symlinks
+      # even if the project does not set this policy to NEW.
+      cmake_policy(SET CMP0009 NEW)
+      file(GLOB_RECURSE FILE_PATHS_ LIST_DIRECTORIES false RELATIVE "${WDIR}" "${WDIR}/*")
+    cmake_policy(POP)
+
+    # get file info so that we can determine if file is executable or not
+    unset(CPACK_DEB_INSTALL_FILES)
+    foreach(FILE_ IN LISTS FILE_PATHS_)
+      execute_process(COMMAND file "./${FILE_}"
+        WORKING_DIRECTORY "${WDIR}"
+        OUTPUT_VARIABLE INSTALL_FILE_)
+      list(APPEND CPACK_DEB_INSTALL_FILES "${INSTALL_FILE_}")
+    endforeach()
+
+    # Only dynamically linked ELF files are included
+    # Extract only file name infront of ":"
+    foreach(_FILE IN LISTS CPACK_DEB_INSTALL_FILES)
+      if(_FILE MATCHES "ELF.*dynamically linked")
+        string(REGEX MATCH "(^.*):" _FILE_NAME "${_FILE}")
+        list(APPEND CPACK_DEB_BINARY_FILES "${CMAKE_MATCH_1}")
+        set(CONTAINS_EXECUTABLE_FILES_ TRUE)
+      endif()
+      if(_FILE MATCHES "ELF.*shared object")
+        string(REGEX MATCH "(^.*):" _FILE_NAME "${_FILE}")
+        list(APPEND CPACK_DEB_SHARED_OBJECT_FILES "${CMAKE_MATCH_1}")
+      endif()
+    endforeach()
+  endif()
+
   if(CPACK_DEBIAN_PACKAGE_SHLIBDEPS)
     # dpkg-shlibdeps is a Debian utility for generating dependency list
     find_program(SHLIBDEPS_EXECUTABLE dpkg-shlibdeps)
@@ -467,33 +551,6 @@ function(cpack_deb_prepare_package_vars)
         message("CPackDeb Debug: dpkg-shlibdeps --version output is '${_TMP_VERSION}'")
         message("CPackDeb Debug: dpkg-shlibdeps version is <${SHLIBDEPS_EXECUTABLE_VERSION}>")
       endif()
-
-      # Generating binary list - Get type of all install files
-      cmake_policy(PUSH)
-        # Tell file(GLOB_RECURSE) not to follow directory symlinks
-        # even if the project does not set this policy to NEW.
-        cmake_policy(SET CMP0009 NEW)
-        file(GLOB_RECURSE FILE_PATHS_ LIST_DIRECTORIES false RELATIVE "${WDIR}" "${WDIR}/*")
-      cmake_policy(POP)
-
-      # get file info so that we can determine if file is executable or not
-      unset(CPACK_DEB_INSTALL_FILES)
-      foreach(FILE_ IN LISTS FILE_PATHS_)
-        execute_process(COMMAND file "./${FILE_}"
-          WORKING_DIRECTORY "${WDIR}"
-          OUTPUT_VARIABLE INSTALL_FILE_)
-        list(APPEND CPACK_DEB_INSTALL_FILES "${INSTALL_FILE_}")
-      endforeach()
-
-      # Only dynamically linked ELF files are included
-      # Extract only file name infront of ":"
-      foreach(_FILE ${CPACK_DEB_INSTALL_FILES})
-        if( ${_FILE} MATCHES "ELF.*dynamically linked")
-           string(REGEX MATCH "(^.*):" _FILE_NAME "${_FILE}")
-           list(APPEND CPACK_DEB_BINARY_FILES "${CMAKE_MATCH_1}")
-           set(CONTAINS_EXECUTABLE_FILES_ TRUE)
-        endif()
-      endforeach()
 
       if(CONTAINS_EXECUTABLE_FILES_)
         message("CPackDeb: - Generating dependency list")
@@ -726,6 +783,33 @@ function(cpack_deb_prepare_package_vars)
     endif()
   endif()
 
+  set(CPACK_DEBIAN_PACKAGE_SHLIBS_LIST "")
+
+  if (NOT CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY)
+    set(CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY "=")
+  endif()
+
+  find_program(READELF_EXECUTABLE NAMES readelf)
+
+  if(CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS)
+    if(READELF_EXECUTABLE)
+      foreach(_FILE IN LISTS CPACK_DEB_SHARED_OBJECT_FILES)
+        extract_so_info("${_FILE}" libname soversion)
+        if(libname AND soversion)
+          list(APPEND CPACK_DEBIAN_PACKAGE_SHLIBS_LIST
+               "${libname} ${soversion} ${CPACK_DEBIAN_PACKAGE_NAME} (${CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY} ${CPACK_PACKAGE_VERSION})")
+        else()
+          message(AUTHOR_WARNING "Shared library '${_FILE}' is missing soname or soversion. Library will not be added to DEBIAN/shlibs control file.")
+        endif()
+      endforeach()
+      if (CPACK_DEBIAN_PACKAGE_SHLIBS_LIST)
+        string(REPLACE ";" "\n" CPACK_DEBIAN_PACKAGE_SHLIBS_LIST "${CPACK_DEBIAN_PACKAGE_SHLIBS_LIST}")
+      endif()
+    else()
+      message(FATAL_ERROR "Readelf utility is not available. CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS option is not available.")
+    endif()
+  endif()
+
   # Print out some debug information if we were asked for that
   if(CPACK_DEBIAN_PACKAGE_DEBUG)
      message("CPackDeb:Debug: CPACK_TOPLEVEL_DIRECTORY          = '${CPACK_TOPLEVEL_DIRECTORY}'")
@@ -773,6 +857,7 @@ function(cpack_deb_prepare_package_vars)
   set(GEN_CPACK_DEBIAN_PACKAGE_CONFLICTS "${CPACK_DEBIAN_PACKAGE_CONFLICTS}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_PROVIDES "${CPACK_DEBIAN_PACKAGE_PROVIDES}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_REPLACES "${CPACK_DEBIAN_PACKAGE_REPLACES}" PARENT_SCOPE)
+  set(GEN_CPACK_DEBIAN_PACKAGE_SHLIBS "${CPACK_DEBIAN_PACKAGE_SHLIBS_LIST}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION
       "${CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION}" PARENT_SCOPE)
