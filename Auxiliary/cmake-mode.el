@@ -228,7 +228,9 @@ the indentation.  Otherwise it retains the same position on the line"
 ;;
 ;; Indentation increment.
 ;;
-(defvar cmake-tab-width 2)
+(defcustom cmake-tab-width 2
+  "Number of columns to indent cmake blocks"
+  :type 'integer)
 
 ;------------------------------------------------------------------------------
 
