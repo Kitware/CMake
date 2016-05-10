@@ -52,6 +52,7 @@
 #
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_ARCHITECTURE
+#               CPACK_DEBIAN_<COMPONENT>_PACKAGE_ARCHITECTURE
 #
 #  The Debian package architecture
 #
@@ -654,7 +655,9 @@ function(cpack_deb_prepare_package_vars)
   endif()
 
   # Architecture: (mandatory)
-  if(NOT CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
+  if(CPACK_DEB_PACKAGE_COMPONENT AND CPACK_DEBIAN_${_local_component_name}_PACKAGE_ARCHITECTURE)
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${CPACK_DEBIAN_${_local_component_name}_PACKAGE_ARCHITECTURE}")
+  elseif(NOT CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
     # There is no such thing as i686 architecture on debian, you should use i386 instead
     # $ dpkg --print-architecture
     find_program(DPKG_CMD dpkg)
