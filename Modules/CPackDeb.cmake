@@ -810,6 +810,33 @@ function(cpack_deb_prepare_package_vars)
     endif()
   endif()
 
+  # add ldconfig call in default postrm and postint
+  set(CPACK_ADD_LDCONFIG_CALL 0)
+  foreach(_FILE ${CPACK_DEB_SHARED_OBJECT_FILES})
+    get_filename_component(_DIR ${_FILE} DIRECTORY)
+    # all files in CPACK_DEB_SHARED_OBJECT_FILES have dot at the beginning
+    if(_DIR STREQUAL "./lib" OR _DIR STREQUAL "./usr/lib")
+      set(CPACK_ADD_LDCONFIG_CALL 1)
+    endif()
+  endforeach()
+
+  if(CPACK_ADD_LDCONFIG_CALL)
+    set(CPACK_DEBIAN_GENERATE_POSTINST 1)
+    set(CPACK_DEBIAN_GENERATE_POSTRM 1)
+    foreach(f ${PACKAGE_CONTROL_EXTRA})
+      get_filename_component(n "${f}" NAME)
+      if("${n}" STREQUAL "postinst")
+        set(CPACK_DEBIAN_GENERATE_POSTINST 0)
+      endif()
+      if("${n}" STREQUAL "postrm")
+        set(CPACK_DEBIAN_GENERATE_POSTRM 0)
+      endif()
+    endforeach()
+  else()
+    set(CPACK_DEBIAN_GENERATE_POSTINST 0)
+    set(CPACK_DEBIAN_GENERATE_POSTRM 0)
+  endif()
+
   # Print out some debug information if we were asked for that
   if(CPACK_DEBIAN_PACKAGE_DEBUG)
      message("CPackDeb:Debug: CPACK_TOPLEVEL_DIRECTORY          = '${CPACK_TOPLEVEL_DIRECTORY}'")
@@ -863,6 +890,8 @@ function(cpack_deb_prepare_package_vars)
       "${CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_SOURCE
      "${CPACK_DEBIAN_PACKAGE_SOURCE}" PARENT_SCOPE)
+  set(GEN_CPACK_DEBIAN_GENERATE_POSTINST "${CPACK_DEBIAN_GENERATE_POSTINST}" PARENT_SCOPE)
+  set(GEN_CPACK_DEBIAN_GENERATE_POSTRM "${CPACK_DEBIAN_GENERATE_POSTRM}" PARENT_SCOPE)
   set(GEN_WDIR "${WDIR}" PARENT_SCOPE)
 endfunction()
 

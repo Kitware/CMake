@@ -416,6 +416,29 @@ int cmCPackDebGenerator::createDeb()
     out << std::endl;
     }
 
+  const std::string postinst = strGenWDIR + "/postinst";
+  const std::string postrm = strGenWDIR + "/postrm";
+  if(this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTINST"))
+    {
+    cmGeneratedFileStream out(postinst.c_str());
+     out <<
+       "#!/bin/sh\n\n"
+       "set -e\n\n"
+       "if [ \"$1\" = \"configure\" ]; then\n"
+       "\tldconfig\n"
+       "fi\n";
+    }
+  if(this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTRM"))
+    {
+    cmGeneratedFileStream out(postrm.c_str());
+    out <<
+      "#!/bin/sh\n\n"
+      "set -e\n\n"
+      "if [ \"$1\" = \"remove\" ]; then\n"
+      "\tldconfig\n"
+      "fi\n";
+    }
+
   cmArchiveWrite::Compress tar_compression_type = cmArchiveWrite::CompressGZip;
   const char* debian_compression_type =
       this->GetOption("GEN_CPACK_DEBIAN_COMPRESSION_TYPE");
@@ -627,6 +650,39 @@ int cmCPackDebGenerator::createDeb()
               << "#error:" << control_tar.GetError() << std::endl);
           return 0;
         }
+      }
+
+    // adds LDCONFIG related files
+    if(this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTINST"))
+      {
+      control_tar.SetPermissions(permission755);
+      if(!control_tar.Add(postinst, strGenWDIR.length(), "."))
+        {
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+              "Error adding file to tar:" << std::endl
+              << "#top level directory: "
+                 << strGenWDIR << std::endl
+              << "#file: \"postinst\"" << std::endl
+              << "#error:" << control_tar.GetError() << std::endl);
+          return 0;
+        }
+      control_tar.SetPermissions(permission644);
+      }
+
+    if(this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTRM"))
+      {
+      control_tar.SetPermissions(permission755);
+      if(!control_tar.Add(postrm, strGenWDIR.length(), "."))
+        {
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+              "Error adding file to tar:" << std::endl
+              << "#top level directory: "
+                 << strGenWDIR << std::endl
+              << "#file: \"postinst\"" << std::endl
+              << "#error:" << control_tar.GetError() << std::endl);
+          return 0;
+        }
+      control_tar.SetPermissions(permission644);
       }
 
     // for the other files, we use
