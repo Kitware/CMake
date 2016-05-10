@@ -453,6 +453,17 @@ if(NOT UNIX)
   message(FATAL_ERROR "CPackDeb.cmake may only be used under UNIX.")
 endif()
 
+function(get_component_package_name var component)
+  string(TOUPPER "${component}" component_upcase)
+  if(CPACK_DEBIAN_${component_upcase}_PACKAGE_NAME)
+    string(TOLOWER "${CPACK_DEBIAN_${component_upcase}_PACKAGE_NAME}" package_name)
+  else()
+    string(TOLOWER "${CPACK_DEBIAN_PACKAGE_NAME}-${component}" package_name)
+  endif()
+
+  set("${var}" "${package_name}" PARENT_SCOPE)
+endfunction()
+
 #extract library name and version for given shared object
 function(extract_so_info shared_object libname version)
   if(READELF_EXECUTABLE)
@@ -775,12 +786,7 @@ function(cpack_deb_prepare_package_vars)
         set(CPACK_DEBIAN_${VAR_NAME_} "${CPACK_DEBIAN_${_local_component_name}_${VAR_NAME_}}")
       endif()
     endforeach()
-
-    if(CPACK_DEBIAN_${_local_component_name}_PACKAGE_NAME)
-      string(TOLOWER "${CPACK_DEBIAN_${_local_component_name}_PACKAGE_NAME}" CPACK_DEBIAN_PACKAGE_NAME)
-    else()
-      string(TOLOWER "${CPACK_DEBIAN_PACKAGE_NAME}-${CPACK_DEB_PACKAGE_COMPONENT}" CPACK_DEBIAN_PACKAGE_NAME)
-    endif()
+    get_component_package_name(CPACK_DEBIAN_PACKAGE_NAME ${_local_component_name})
   endif()
 
   set(CPACK_DEBIAN_PACKAGE_SHLIBS_LIST "")
@@ -808,6 +814,15 @@ function(cpack_deb_prepare_package_vars)
     else()
       message(FATAL_ERROR "Readelf utility is not available. CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS option is not available.")
     endif()
+  endif()
+
+  # Patch package file name to be in corrent form
+  if(CPACK_DEB_PACKAGE_COMPONENT)
+    set(CPACK_OUTPUT_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
+    set(CPACK_TEMPORARY_PACKAGE_FILE_NAME "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_OUTPUT_FILE_NAME}")
+
+    get_filename_component(BINARY_DIR "${CPACK_OUTPUT_FILE_PATH}" DIRECTORY)
+    set(CPACK_OUTPUT_FILE_PATH "${BINARY_DIR}/${CPACK_OUTPUT_FILE_NAME}")
   endif()
 
   # add ldconfig call in default postrm and postint
@@ -866,6 +881,8 @@ function(cpack_deb_prepare_package_vars)
   #endif()
 
   # move variables to parent scope so that they may be used to create debian package
+  set(GEN_CPACK_OUTPUT_FILE_NAME "${CPACK_OUTPUT_FILE_NAME}" PARENT_SCOPE)
+  set(GEN_CPACK_TEMPORARY_PACKAGE_FILE_NAME "${CPACK_TEMPORARY_PACKAGE_FILE_NAME}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_VERSION "${CPACK_DEBIAN_PACKAGE_VERSION}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_SECTION "${CPACK_DEBIAN_PACKAGE_SECTION}" PARENT_SCOPE)

@@ -107,6 +107,9 @@ int cmCPackDebGenerator::PackageOnePack(std::string initialTopLevel,
     retval = 0;
     }
   // add the generated package to package file names list
+  packageFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+  packageFileName += "/";
+  packageFileName += this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME");
   packageFileNames.push_back(packageFileName);
   return retval;
 }
@@ -234,6 +237,9 @@ int cmCPackDebGenerator::PackageComponentsAllInOne()
     retval = 0;
     }
   // add the generated package to package file names list
+  packageFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+  packageFileName += "/";
+  packageFileName += this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME");
   packageFileNames.push_back(packageFileName);
   return retval;
 }
@@ -742,11 +748,12 @@ int cmCPackDebGenerator::createDeb()
   arFiles.push_back(topLevelString + "data.tar" + compression_suffix);
   std::string outputFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   outputFileName += "/";
-  outputFileName += this->GetOption("CPACK_OUTPUT_FILE_NAME");
+  outputFileName += this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME");
   int res = ar_append(outputFileName.c_str(), arFiles);
   if ( res!=0 )
     {
-    std::string tmpFile = this->GetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME");
+    std::string tmpFile = this->GetOption(
+        "GEN_CPACK_TEMPORARY_PACKAGE_FILE_NAME");
     tmpFile += "/Deb.log";
     cmGeneratedFileStream ofs(tmpFile.c_str());
     ofs << "# Problem creating archive using: " << res << std::endl;
