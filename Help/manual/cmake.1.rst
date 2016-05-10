@@ -82,12 +82,7 @@ Options
  done before the -P argument.
 
 ``--find-package``
- Run in pkg-config like mode.
-
- Search a package using find_package() and print the resulting flags
- to stdout.  This can be used to use cmake instead of pkg-config to
- find installed libraries in plain Makefile-based projects or in
- autoconf-based projects (via share/aclocal/cmake.m4).
+ See `Find-Package Tool Mode`_.
 
 ``--graphviz=[file]``
  Generate graphviz of dependencies, see CMakeGraphVizOptions.cmake for more.
@@ -277,6 +272,24 @@ The following ``cmake -E`` commands are available only on Windows:
 
 ``write_regv <key> <value>``
   Write Windows registry value.
+
+Find-Package Tool Mode
+======================
+
+CMake provides a helper for Makefile-based projects with the signature::
+
+  cmake --find-package <options>...
+
+This runs in a pkg-config like mode.
+
+Search a package using :command:`find_package()` and print the resulting flags
+to stdout.  This can be used to use cmake instead of pkg-config to find
+installed libraries in plain Makefile-based projects or in autoconf-based
+projects (via ``share/aclocal/cmake.m4``).
+
+.. note::
+  This mode is not well-supported due to some technical limitations.
+  It is kept for compatibility but should not be used in new projects.
 
 See Also
 ========
