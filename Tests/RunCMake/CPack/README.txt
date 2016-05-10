@@ -1,6 +1,9 @@
 RunCMake.CPack is a test module that is intended for testing of package
 generators that can be validated from command line.
 
+TODO: all tests should cover all packaging types (single package, grouped and
+      component packaging)
+
 -------------
 Adding a test
 -------------
@@ -19,9 +22,28 @@ run_cpack_test(<test_name> "<generator_name>")
 will be run for all listed generators.
 
 Test consists of
+- test prerequirements phase (optional)
 - CMake execution phase
 - CPack execution phase
 - verification of generated files
+
+test prerequirements phase (optional):
+--------------------------------------
+
+In some cases individual tests for certain generator need additional
+prerequirements met.
+
+In such cases '<generator_name>/<test_name>-Prerequirements.cmake' file
+containing 'function(get_test_prerequirements found_var)' should be created.
+Function should return true if all prerequirements are met.
+
+If prerequirements are not met test will be skipped outputting
+'<test_name> - SKIPPED' string. Note that this doesn't fail the entire test
+group.
+
+TODO: skipped tests should provide expected error string so test should fail
+      if error string is not found in the output of run test (this would add
+      'EXPECTED FAIL' string on success and 'ERROR' on failure).
 
 CMake execution phase:
 ----------------------

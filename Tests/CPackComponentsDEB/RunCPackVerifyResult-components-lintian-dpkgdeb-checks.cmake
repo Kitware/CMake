@@ -5,7 +5,7 @@ endif()
 include(${CPackComponentsDEB_SOURCE_DIR}/RunCPackVerifyResult.cmake)
 
 # TODO: currently debian doens't produce lower cased names
-set(expected_file_mask "${CPackComponentsDEB_BINARY_DIR}/MyLib-*.deb")
+set(expected_file_mask "${CPackComponentsDEB_BINARY_DIR}/mylib-*_1.0.2-1_*.deb")
 set(expected_count 3)
 
 
