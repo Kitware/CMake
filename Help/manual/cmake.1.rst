@@ -10,7 +10,7 @@ Synopsis
 
  cmake [<options>] (<path-to-source> | <path-to-existing-build>)
  cmake [(-D <var>=<value>)...] -P <cmake-script-file>
- cmake --build <dir> [<options>] [-- <build-tool-options>...]
+ cmake --build <dir> [<options>...] [-- <build-tool-options>...]
  cmake -E <command> [<options>...]
  cmake --find-package <options>...
 
@@ -49,23 +49,7 @@ Options
  display help for each variable.
 
 ``--build <dir>``
- Build a CMake-generated project binary tree.
-
- This abstracts a native build tool's command-line interface with the
- following options:
-
- ::
-
-   <dir>          = Project binary directory to be built.
-   --target <tgt> = Build <tgt> instead of default targets.
-                    May only be specified once.
-   --config <cfg> = For multi-configuration tools, choose <cfg>.
-   --clean-first  = Build target 'clean' first, then build.
-                    (To clean only, use --target 'clean'.)
-   --use-stderr   = Ignored.  Behavior is default in CMake >= 3.0.
-   --             = Pass remaining options to the native tool.
-
- Run ``cmake --build`` with no options for quick help.
+ See `Build Tool Mode`_.
 
 ``-N``
  View mode only.
@@ -148,6 +132,38 @@ Options
  warn about other files as well.
 
 .. include:: OPTIONS_HELP.txt
+
+Build Tool Mode
+===============
+
+CMake provides a command-line signature to build an already-generated
+project binary tree::
+
+ cmake --build <dir> [<options>...] [-- <build-tool-options>...]
+
+This abstracts a native build tool's command-line interface with the
+following options:
+
+``--build <dir>``
+  Project binary directory to be built.  This is required and must be first.
+
+``--target <tgt>``
+  Build ``<tgt>`` instead of default targets.  May only be specified once.
+
+``--config <cfg>``
+  For multi-configuration tools, choose configuration ``<cfg>``.
+
+``--clean-first``
+  Build target ``clean`` first, then build.
+  (To clean only, use ``--target clean``.)
+
+``--use-stderr``
+  Ignored.  Behavior is default in CMake >= 3.0.
+
+``--``
+  Pass remaining options to the native tool.
+
+Run ``cmake --build`` with no options for quick help.
 
 Command-Line Tool Mode
 ======================
