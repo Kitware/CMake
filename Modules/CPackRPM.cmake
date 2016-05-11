@@ -80,9 +80,26 @@
 #
 #  This is the numbering of the RPM package itself, i.e. the version of the
 #  packaging and not the version of the content (see
-#  CPACK_RPM_PACKAGE_VERSION). One may change the default value if the
-#  previous packaging was buggy and/or you want to put here a fancy Linux
+#  :variable:`CPACK_RPM_PACKAGE_VERSION`). One may change the default value if
+#  the previous packaging was buggy and/or you want to put here a fancy Linux
 #  distro specific numbering.
+#
+# .. note::
+#
+#  This is the string that goes into the RPM ``Release:`` field. Some distros
+#  (e.g. Fedora, CentOS) require ``1%{?dist}`` format and not just a number.
+#  ``%{?dist}`` part can be added by setting :variable:`CPACK_RPM_PACKAGE_RELEASE_DIST`.
+#
+# .. variable:: CPACK_RPM_PACKAGE_RELEASE_DIST
+#
+#  The dist tag that is added  RPM ``Release:`` field.
+#
+#  * Mandatory : NO
+#  * Default   : OFF
+#
+#  This is the reported ``%{dist}`` tag from the current distribution or empty
+#  ``%{dist}`` if RPM macro is not set. If this variable is set then RPM
+#  ``Release:`` field value is set to ``${CPACK_RPM_PACKAGE_RELEASE}%{?dist}``.
 #
 # .. variable:: CPACK_RPM_PACKAGE_LICENSE
 #
@@ -1317,7 +1334,11 @@ function(cpack_rpm_generate_package)
   # This is the case when the packaging is buggy (not) the software :=)
   # If not set, 1 is a good candidate
   if(NOT CPACK_RPM_PACKAGE_RELEASE)
-    set(CPACK_RPM_PACKAGE_RELEASE 1)
+    set(CPACK_RPM_PACKAGE_RELEASE "1")
+  endif()
+
+  if(CPACK_RPM_PACKAGE_RELEASE_DIST)
+    set(CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}%{?dist}")
   endif()
 
   # CPACK_RPM_PACKAGE_LICENSE
