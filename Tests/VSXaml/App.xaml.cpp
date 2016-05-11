@@ -26,8 +26,9 @@ using namespace Windows::UI::Xaml::Navigation;
 // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234227
 
 /// <summary>
-/// Initializes the singleton application object.  This is the first line of authored code
-/// executed, and as such is the logical equivalent of main() or WinMain().
+/// Initializes the singleton application object.  This is the first line of
+/// authored code executed, and as such is the logical equivalent of main()
+/// or WinMain().
 /// </summary>
 App::App()
 {
@@ -36,8 +37,9 @@ App::App()
 }
 
 /// <summary>
-/// Invoked when the application is launched normally by the end user.	Other entry points
-/// will be used such as when the application is launched to open a specific file.
+/// Invoked when the application is launched normally by the end user.
+/// Other entry points will be used such as when the application is
+/// launched to open a specific file.
 /// </summary>
 /// <param name="e">Details about the launch request and process.</param>
 void App::OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEventArgs^ e)
@@ -101,9 +103,9 @@ void App::OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEvent
 }
 
 /// <summary>
-/// Invoked when application execution is being suspended.	Application state is saved
-/// without knowing whether the application will be terminated or resumed with the contents
-/// of memory still intact.
+/// Invoked when application execution is being suspended.  Application state
+/// is saved without knowing whether the application will be terminated or
+/// resumed with the contents of memory still intact.
 /// </summary>
 /// <param name="sender">The source of the suspend request.</param>
 /// <param name="e">Details about the suspend request.</param>
