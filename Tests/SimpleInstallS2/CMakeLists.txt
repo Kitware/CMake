@@ -364,6 +364,7 @@ endif()
 set(CPACK_PACKAGE_EXECUTABLES "SimpleInstall" "Simple Install")
 set(CMAKE_INSTALL_MFC_LIBRARIES 1)
 set(CMAKE_INSTALL_DEBUG_LIBRARIES 1)
+set(CMAKE_INSTALL_UCRT_LIBRARIES 1)
 include(InstallRequiredSystemLibraries)
 
 if(CTEST_TEST_CPACK)
