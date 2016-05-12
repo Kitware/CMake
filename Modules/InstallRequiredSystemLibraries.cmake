@@ -171,12 +171,12 @@ if(MSVC)
     # Find the runtime library redistribution directory.
     get_filename_component(msvc_install_dir
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\${v}.0;InstallDir]" ABSOLUTE)
+    set(programfilesx86 "ProgramFiles(x86)")
     find_path(MSVC${v}_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC${v}0.CRT
       PATHS
         "${msvc_install_dir}/../../VC/redist"
         "${base_dir}/VC/redist"
         "$ENV{ProgramFiles}/Microsoft Visual Studio ${v}.0/VC/redist"
-        set(programfilesx86 "ProgramFiles(x86)")
         "$ENV{${programfilesx86}}/Microsoft Visual Studio ${v}.0/VC/redist"
       )
     mark_as_advanced(MSVC${v}_REDIST_DIR)
