@@ -102,6 +102,7 @@ static const char* cmCTestErrorExceptions[] = {
   ": warning",
   ": \\(Warning\\)",
   ": note",
+  "Note:",
   "makefile:",
   "Makefile:",
   ":[ \\t]+Where:",
