@@ -94,6 +94,8 @@ int main(int argc, char** argv)
 
   QApplication app(argc, argv);
 
+  setlocale(LC_NUMERIC, "C");
+
 #if defined(CMAKE_ENCODING_UTF8)
   QTextCodec* utf8_codec = QTextCodec::codecForName("UTF-8");
   QTextCodec::setCodecForLocale(utf8_codec);
