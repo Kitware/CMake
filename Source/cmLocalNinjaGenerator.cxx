@@ -123,7 +123,8 @@ cmGlobalNinjaGenerator* cmLocalNinjaGenerator::GetGlobalNinjaGenerator()
 std::string cmLocalNinjaGenerator::ConvertToLinkReference(
   std::string const& lib, OutputFormat format)
 {
-  return this->Convert(lib, HOME_OUTPUT, format);
+  std::string path = this->GetGlobalNinjaGenerator()->ConvertToNinjaPath(lib);
+  return this->ConvertToOutputFormat(path, format);
 }
 
 std::string cmLocalNinjaGenerator::ConvertToIncludeReference(
