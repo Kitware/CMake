@@ -488,6 +488,8 @@ void cmGlobalNinjaGenerator::Generate()
   this->OpenBuildFileStream();
   this->OpenRulesFileStream();
 
+  this->TargetAll = "all";
+
   this->PolicyCMP0058 =
     this->LocalGenerators[0]->GetMakefile()->GetPolicyStatus(
       cmPolicies::CMP0058);
@@ -1059,7 +1061,7 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
   // should all match now.
 
   std::vector<std::string> unknownExplicitDepends;
-  this->CombinedCustomCommandExplicitDependencies.erase("all");
+  this->CombinedCustomCommandExplicitDependencies.erase(this->TargetAll);
 
   std::set_difference(this->CombinedCustomCommandExplicitDependencies.begin(),
                       this->CombinedCustomCommandExplicitDependencies.end(),
@@ -1125,7 +1127,7 @@ void cmGlobalNinjaGenerator::WriteBuiltinTargets(std::ostream& os)
 void cmGlobalNinjaGenerator::WriteTargetAll(std::ostream& os)
 {
   cmNinjaDeps outputs;
-  outputs.push_back("all");
+  outputs.push_back(this->TargetAll);
 
   this->WritePhonyBuild(os, "The main all target.", outputs,
                         this->AllDependencies);
