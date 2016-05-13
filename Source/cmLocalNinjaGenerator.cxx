@@ -225,8 +225,13 @@ void cmLocalNinjaGenerator::WriteNinjaFilesInclusion(std::ostream& os)
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << "# Include auxiliary files.\n"
      << "\n";
-  cmGlobalNinjaGenerator::WriteInclude(
-    os, cmGlobalNinjaGenerator::NINJA_RULES_FILE, "Include rules file.");
+  cmGlobalNinjaGenerator* ng = this->GetGlobalNinjaGenerator();
+  std::string const ninjaRulesFile =
+    ng->NinjaOutputPath(cmGlobalNinjaGenerator::NINJA_RULES_FILE);
+  std::string const rulesFilePath =
+    ng->EncodeIdent(ng->EncodePath(ninjaRulesFile), os);
+  cmGlobalNinjaGenerator::WriteInclude(os, rulesFilePath,
+                                       "Include rules file.");
   os << "\n";
 }
 

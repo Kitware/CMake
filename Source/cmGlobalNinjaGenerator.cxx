@@ -488,8 +488,8 @@ void cmGlobalNinjaGenerator::Generate()
   this->OpenBuildFileStream();
   this->OpenRulesFileStream();
 
-  this->TargetAll = "all";
-  this->CMakeCacheFile = "CMakeCache.txt";
+  this->TargetAll = this->NinjaOutputPath("all");
+  this->CMakeCacheFile = this->NinjaOutputPath("CMakeCache.txt");
 
   this->PolicyCMP0058 =
     this->LocalGenerators[0]->GetMakefile()->GetPolicyStatus(
@@ -722,6 +722,7 @@ std::string cmGlobalNinjaGenerator::ConvertToNinjaPath(const std::string& path)
   cmLocalNinjaGenerator* ng =
     static_cast<cmLocalNinjaGenerator*>(this->LocalGenerators[0]);
   std::string convPath = ng->Convert(path, cmOutputConverter::HOME_OUTPUT);
+  convPath = this->NinjaOutputPath(convPath);
 #ifdef _WIN32
   cmSystemTools::ReplaceString(convPath, "/", "\\");
 #endif
@@ -734,6 +735,7 @@ std::string cmGlobalNinjaGenerator::ConvertToNinjaFolderRule(
   cmLocalNinjaGenerator* ng =
     static_cast<cmLocalNinjaGenerator*>(this->LocalGenerators[0]);
   std::string convPath = ng->Convert(path + "/all", cmOutputConverter::HOME);
+  convPath = this->NinjaOutputPath(convPath);
 #ifdef _WIN32
   cmSystemTools::ReplaceString(convPath, "/", "\\");
 #endif
@@ -849,7 +851,7 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
     case cmState::GLOBAL_TARGET:
       // Always use the target in HOME instead of an unused duplicate in a
       // subdirectory.
-      outputs.push_back(target->GetName());
+      outputs.push_back(this->NinjaOutputPath(target->GetName()));
       break;
 
     default:
@@ -883,6 +885,7 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
 void cmGlobalNinjaGenerator::AddTargetAlias(const std::string& alias,
                                             cmGeneratorTarget* target)
 {
+  std::string buildAlias = this->NinjaOutputPath(alias);
   cmNinjaDeps outputs;
   this->AppendTargetOutputs(target, outputs);
   // Mark the target's outputs as ambiguous to ensure that no other target uses
@@ -893,7 +896,7 @@ void cmGlobalNinjaGenerator::AddTargetAlias(const std::string& alias,
   // Insert the alias into the map.  If the alias was already present in the
   // map and referred to another target, mark it as ambiguous.
   std::pair<TargetAliasMap::iterator, bool> newAlias =
-    TargetAliases.insert(std::make_pair(alias, target));
+    TargetAliases.insert(std::make_pair(buildAlias, target));
   if (newAlias.second && newAlias.first->second != target)
     newAlias.first->second = 0;
 }
@@ -1182,9 +1185,10 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
     variables["pool"] = "console";
   }
 
+  std::string const ninjaBuildFile = this->NinjaOutputPath(NINJA_BUILD_FILE);
   this->WriteBuild(os, "Re-run CMake if any of its inputs changed.",
                    "RERUN_CMAKE",
-                   /*outputs=*/cmNinjaDeps(1, NINJA_BUILD_FILE),
+                   /*outputs=*/cmNinjaDeps(1, ninjaBuildFile),
                    /*explicitDeps=*/cmNinjaDeps(), implicitDeps,
                    /*orderOnlyDeps=*/cmNinjaDeps(), variables);
 
@@ -1221,7 +1225,7 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
             /*restat=*/"",
             /*generator=*/false);
   WriteBuild(os, "Clean all the built files.", "CLEAN",
-             /*outputs=*/cmNinjaDeps(1, "clean"),
+             /*outputs=*/cmNinjaDeps(1, this->NinjaOutputPath("clean")),
              /*explicitDeps=*/cmNinjaDeps(),
              /*implicitDeps=*/cmNinjaDeps(),
              /*orderOnlyDeps=*/cmNinjaDeps(),
@@ -1240,9 +1244,14 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
             /*restat=*/"",
             /*generator=*/false);
   WriteBuild(os, "Print all primary targets available.", "HELP",
-             /*outputs=*/cmNinjaDeps(1, "help"),
+             /*outputs=*/cmNinjaDeps(1, this->NinjaOutputPath("help")),
              /*explicitDeps=*/cmNinjaDeps(),
              /*implicitDeps=*/cmNinjaDeps(),
              /*orderOnlyDeps=*/cmNinjaDeps(),
              /*variables=*/cmNinjaVars());
+}
+
+std::string cmGlobalNinjaGenerator::NinjaOutputPath(std::string const& path)
+{
+  return path;
 }

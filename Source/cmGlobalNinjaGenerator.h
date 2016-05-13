@@ -314,6 +314,8 @@ public:
   static std::string RequiredNinjaVersionForConsolePool() { return "1.5"; }
   bool SupportsConsolePool() const;
 
+  std::string NinjaOutputPath(std::string const& path);
+
 protected:
   virtual void Generate();
 
