@@ -521,8 +521,10 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   std::string const language = source->GetLanguage();
   std::string const sourceFileName =
     language == "RC" ? source->GetFullPath() : this->GetSourceFilePath(source);
-  std::string const objectDir = this->GeneratorTarget->GetSupportDirectory();
-  std::string const objectFileName = this->GetObjectFilePath(source);
+  std::string const objectDir =
+    this->ConvertToNinjaPath(this->GeneratorTarget->GetSupportDirectory());
+  std::string const objectFileName =
+    this->ConvertToNinjaPath(this->GetObjectFilePath(source));
   std::string const objectFileDir =
     cmSystemTools::GetFilenamePath(objectFileName);
 
@@ -582,9 +584,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   EnsureParentDirectoryExists(objectFileName);
 
   vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-    ConvertToNinjaPath(objectDir), cmLocalGenerator::SHELL);
+    objectDir, cmLocalGenerator::SHELL);
   vars["OBJECT_FILE_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-    ConvertToNinjaPath(objectFileDir), cmLocalGenerator::SHELL);
+    objectFileDir, cmLocalGenerator::SHELL);
 
   this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
                              vars);
