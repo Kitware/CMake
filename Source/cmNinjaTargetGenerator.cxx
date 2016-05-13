@@ -669,10 +669,12 @@ void cmNinjaTargetGenerator::EnsureDirectoryExists(
   if (cmSystemTools::FileIsFullPath(path.c_str())) {
     cmSystemTools::MakeDirectory(path.c_str());
   } else {
-    const std::string fullPath = std::string(this->GetGlobalGenerator()
-                                               ->GetCMakeInstance()
-                                               ->GetHomeOutputDirectory()) +
-      "/" + path;
+    cmGlobalNinjaGenerator* gg = this->GetGlobalGenerator();
+    std::string fullPath =
+      std::string(gg->GetCMakeInstance()->GetHomeOutputDirectory());
+    // Also ensures their is a trailing slash.
+    gg->StripNinjaOutputPathPrefixAsSuffix(fullPath);
+    fullPath += path;
     cmSystemTools::MakeDirectory(fullPath.c_str());
   }
 }

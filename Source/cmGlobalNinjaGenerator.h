@@ -315,6 +315,8 @@ public:
   bool SupportsConsolePool() const;
 
   std::string NinjaOutputPath(std::string const& path);
+  bool HasOutputPathPrefix() const { return !this->OutputPathPrefix.empty(); }
+  void StripNinjaOutputPathPrefixAsSuffix(std::string& path);
 
 protected:
   virtual void Generate();
@@ -401,6 +403,9 @@ private:
   std::string NinjaVersion;
 
 private:
+  void InitOutputPathPrefix();
+
+  std::string OutputPathPrefix;
   std::string TargetAll;
   std::string CMakeCacheFile;
 };

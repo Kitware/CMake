@@ -379,4 +379,19 @@ std::reverse_iterator<Iter> cmMakeReverseIterator(Iter it)
   return std::reverse_iterator<Iter>(it);
 }
 
+inline bool cmHasSuffix(const std::string& str, const std::string& suffix)
+{
+  if (str.size() < suffix.size()) {
+    return false;
+  }
+  return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+inline void cmStripSuffixIfExists(std::string& str, const std::string& suffix)
+{
+  if (cmHasSuffix(str, suffix)) {
+    str.resize(str.size() - suffix.size());
+  }
+}
+
 #endif

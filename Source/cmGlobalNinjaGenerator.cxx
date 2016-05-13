@@ -488,6 +488,7 @@ void cmGlobalNinjaGenerator::Generate()
   this->OpenBuildFileStream();
   this->OpenRulesFileStream();
 
+  this->InitOutputPathPrefix();
   this->TargetAll = this->NinjaOutputPath("all");
   this->CMakeCacheFile = this->NinjaOutputPath("CMakeCache.txt");
 
@@ -715,6 +716,23 @@ void cmGlobalNinjaGenerator::CloseRulesFileStream()
   } else {
     cmSystemTools::Error("Rules file stream was not open.");
   }
+}
+
+static void EnsureTrailingSlash(std::string& path)
+{
+  if (path.empty()) {
+    return;
+  }
+  std::string::value_type last = path[path.size() - 1];
+#ifdef _WIN32
+  if (last != '\\') {
+    path += '\\';
+  }
+#else
+  if (last != '/') {
+    path += '/';
+  }
+#endif
 }
 
 std::string cmGlobalNinjaGenerator::ConvertToNinjaPath(const std::string& path)
@@ -1136,8 +1154,10 @@ void cmGlobalNinjaGenerator::WriteTargetAll(std::ostream& os)
   this->WritePhonyBuild(os, "The main all target.", outputs,
                         this->AllDependencies);
 
-  cmGlobalNinjaGenerator::WriteDefault(os, outputs,
-                                       "Make the all target the default.");
+  if (!this->HasOutputPathPrefix()) {
+    cmGlobalNinjaGenerator::WriteDefault(os, outputs,
+                                         "Make the all target the default.");
+  }
 }
 
 void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
@@ -1251,7 +1271,28 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
              /*variables=*/cmNinjaVars());
 }
 
+void cmGlobalNinjaGenerator::InitOutputPathPrefix()
+{
+  this->OutputPathPrefix =
+    this->LocalGenerators[0]->GetMakefile()->GetSafeDefinition(
+      "CMAKE_NINJA_OUTPUT_PATH_PREFIX");
+  EnsureTrailingSlash(this->OutputPathPrefix);
+}
+
 std::string cmGlobalNinjaGenerator::NinjaOutputPath(std::string const& path)
 {
-  return path;
+  if (!this->HasOutputPathPrefix() || cmSystemTools::FileIsFullPath(path)) {
+    return path;
+  }
+  return this->OutputPathPrefix + path;
+}
+
+void cmGlobalNinjaGenerator::StripNinjaOutputPathPrefixAsSuffix(
+  std::string& path)
+{
+  if (path.empty()) {
+    return;
+  }
+  EnsureTrailingSlash(path);
+  cmStripSuffixIfExists(path, this->OutputPathPrefix);
 }
