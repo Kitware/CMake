@@ -264,6 +264,7 @@
 #   CUDA_VERSION_MINOR    -- The minor version.
 #   CUDA_VERSION
 #   CUDA_VERSION_STRING   -- CUDA_VERSION_MAJOR.CUDA_VERSION_MINOR
+#   CUDA_HAS_FP16         -- Whether a short float (float16,fp16) is supported.
 #
 #   CUDA_TOOLKIT_ROOT_DIR -- Path to the CUDA Toolkit (defined if not set).
 #   CUDA_SDK_ROOT_DIR     -- Path to the CUDA SDK.  Use this to find files in the
@@ -682,6 +683,12 @@ find_path(CUDA_TOOLKIT_INCLUDE
 # Search default search paths, after we search our own set of paths.
 find_path(CUDA_TOOLKIT_INCLUDE device_functions.h)
 mark_as_advanced(CUDA_TOOLKIT_INCLUDE)
+
+if (CUDA_VERSION VERSION_GREATER "7.0" OR EXISTS "${CUDA_TOOLKIT_INCLUDE}/cuda_fp16.h")
+  set(CUDA_HAS_FP16 TRUE)
+else()
+  set(CUDA_HAS_FP16 FALSE)
+endif()
 
 # Set the user list of include dir to nothing to initialize it.
 set (CUDA_NVCC_INCLUDE_ARGS_USER "")
