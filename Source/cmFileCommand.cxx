@@ -823,6 +823,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
 
     std::vector<std::string>::size_type cc;
     std::vector<std::string>& files = g.GetFiles();
+    std::sort(files.begin(), files.end());
     for (cc = 0; cc < files.size(); cc++) {
       if (!first) {
         output += ";";
