@@ -401,6 +401,23 @@ void cmExtraCodeBlocksGenerator
 
   xml.EndElement(); // Build
 
+  xml.StartElement("Compiler");
+  // the makefile cxx flags
+  if (const char *cxxFlags = mf->GetDefinition("CMAKE_CXX_FLAGS"))
+    {
+    const std::vector<std::string> globalCxxFlags =
+        cmSystemTools::ParseArguments(cxxFlags);
+
+    for (std::vector<std::string>::const_iterator di = globalCxxFlags.begin();
+         di != globalCxxFlags.end(); ++di)
+      {
+      xml.StartElement("Add");
+      xml.Attribute("option", *di);
+      xml.EndElement();
+      }
+    }
+  xml.EndElement(); // Compiler
+
   // Collect all used source files in the project.
   // Keep a list of C/C++ source files which might have an acompanying header
   // that should be looked for.
@@ -666,6 +683,18 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmXMLWriter& xml,
       {
       xml.StartElement("Add");
       xml.Attribute("option", "-D" + *di);
+      xml.EndElement();
+      }
+
+    // the target compile options
+    std::vector<std::string> targetCxxflags;
+    target->GetCompileOptions(targetCxxflags, buildType, "CXX");
+
+    for (std::vector<std::string>::const_iterator di = targetCxxflags.begin();
+         di != targetCxxflags.end(); ++di)
+      {
+      xml.StartElement("Add");
+      xml.Attribute("option", *di);
       xml.EndElement();
       }
 
