@@ -118,7 +118,7 @@ if(expected_file_mask)
   message(STATUS "expected_file_mask='${expected_file_mask}'")
 
   if(NOT expected_file)
-    message(FATAL_ERROR "error: expected_file=${expected_file} does not exist: CPackComponentsForAll test fails. (CPack_output=${CPack_output}, CPack_error=${CPack_error}")
+    message(FATAL_ERROR "error: expected_file does not exist: CPackComponentsForAll test fails. (CPack_output=${CPack_output}, CPack_error=${CPack_error}")
   endif()
 
   list(LENGTH expected_file actual_count)

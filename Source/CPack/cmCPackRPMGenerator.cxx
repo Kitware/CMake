@@ -47,6 +47,22 @@ int cmCPackRPMGenerator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
+void cmCPackRPMGenerator::AddGeneratedPackageNames()
+{
+  // add the generated packages to package file names list
+  std::string fileNames(this->GetOption("GEN_CPACK_OUTPUT_FILES"));
+  const char sep = ';';
+  std::string::size_type pos1 = 0;
+  std::string::size_type pos2 = fileNames.find(sep, pos1+1);
+  while(pos2 != std::string::npos)
+    {
+    packageFileNames.push_back(fileNames.substr(pos1, pos2-pos1));
+    pos1 = pos2+1;
+    pos2 = fileNames.find(sep, pos1+1);
+    }
+  packageFileNames.push_back(fileNames.substr(pos1, pos2-pos1));
+}
+
 int cmCPackRPMGenerator::PackageOnePack(std::string initialToplevel,
                                         std::string packageName)
 {
@@ -85,8 +101,7 @@ int cmCPackRPMGenerator::PackageOnePack(std::string initialToplevel,
         "Error while execution CPackRPM.cmake" << std::endl);
     retval = 0;
     }
-  // add the generated package to package file names list
-  packageFileNames.push_back(packageFileName);
+
   return retval;
 }
 
@@ -139,19 +154,23 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
       retval &= PackageOnePack(initialTopLevel,compIt->first);
       }
     }
+
+  if(retval)
+    {
+    AddGeneratedPackageNames();
+    }
+
   return retval;
 }
 
-int cmCPackRPMGenerator::PackageComponentsAllInOne()
+int cmCPackRPMGenerator::PackageComponentsAllInOne(
+    const std::string& compInstDirName)
 {
   int retval = 1;
-  std::string compInstDirName;
   /* Reset package file name list it will be populated during the
    * component packaging run*/
   packageFileNames.clear();
   std::string initialTopLevel(this->GetOption("CPACK_TEMPORARY_DIRECTORY"));
-
-  compInstDirName = "ALL_COMPONENTS_IN_ONE";
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Packaging all groups in one package..."
@@ -178,27 +197,32 @@ int cmCPackRPMGenerator::PackageComponentsAllInOne()
   /* replace the TEMPORARY package file name */
   this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
       packageFileName.c_str());
-  // Tell CPackRPM.cmake the path where the component is.
-  std::string component_path = "/";
-  component_path += compInstDirName;
-  this->SetOption("CPACK_RPM_PACKAGE_COMPONENT_PART_PATH",
-                  component_path.c_str());
-  if (!this->ReadListFile("CPackRPM.cmake"))
+
+  if(!compInstDirName.empty())
+    {
+    // Tell CPackRPM.cmake the path where the component is.
+    std::string component_path = "/";
+    component_path += compInstDirName;
+    this->SetOption("CPACK_RPM_PACKAGE_COMPONENT_PART_PATH",
+                    component_path.c_str());
+    }
+
+  if (this->ReadListFile("CPackRPM.cmake"))
+    {
+    AddGeneratedPackageNames();
+    }
+    else
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
         "Error while execution CPackRPM.cmake" << std::endl);
     retval = 0;
     }
-  // add the generated package to package file names list
-  packageFileNames.push_back(packageFileName);
 
   return retval;
 }
 
 int cmCPackRPMGenerator::PackageFiles()
 {
-  int retval = 1;
-
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Toplevel: "
                   << toplevel << std::endl);
 
@@ -209,7 +233,7 @@ int cmCPackRPMGenerator::PackageFiles()
     // then the package file is unique and should be open here.
     if (componentPackageMethod == ONE_PACKAGE)
       {
-      return PackageComponentsAllInOne();
+      return PackageComponentsAllInOne("ALL_COMPONENTS_IN_ONE");
       }
     // CASE 2 : COMPONENT CLASSICAL package(s) (i.e. not all-in-one)
     // There will be 1 package for each component group
@@ -224,20 +248,8 @@ int cmCPackRPMGenerator::PackageFiles()
   // CASE 3 : NON COMPONENT package.
   else
     {
-    if (!this->ReadListFile("CPackRPM.cmake"))
-      {
-      cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Error while execution CPackRPM.cmake" << std::endl);
-      retval = 0;
-      }
+    return PackageComponentsAllInOne("");
     }
-
-  if (!this->IsSet("RPMBUILD_EXECUTABLE"))
-    {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find rpmbuild" << std::endl);
-    retval = 0;
-    }
-  return retval;
 }
 
 bool cmCPackRPMGenerator::SupportsComponentInstallation() const
