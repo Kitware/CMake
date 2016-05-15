@@ -1,6 +1,7 @@
 include(Compiler/GHS)
 
 set(CMAKE_CXX_VERBOSE_FLAG "-v")
+set(CMAKE_CXX_OUTPUT_EXTENSION ".o")
 
 set(CMAKE_CXX_FLAGS_INIT "")
 set(CMAKE_CXX_FLAGS_DEBUG_INIT "-Odebug -g")
