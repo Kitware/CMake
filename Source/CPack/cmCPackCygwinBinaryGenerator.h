@@ -28,6 +28,7 @@ public:
    */
   cmCPackCygwinBinaryGenerator();
   virtual ~cmCPackCygwinBinaryGenerator();
+
 protected:
   virtual int InitializeInternal();
   int PackageFiles();

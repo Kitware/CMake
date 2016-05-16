@@ -30,7 +30,6 @@ public:
 protected:
   cmCursesDummyWidget(const cmCursesDummyWidget& from);
   void operator=(const cmCursesDummyWidget&);
-
 };
 
 #endif // cmCursesDummyWidget_h

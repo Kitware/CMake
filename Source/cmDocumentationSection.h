@@ -24,7 +24,9 @@ class cmDocumentationSection
 public:
   /** Create a cmSection, with a special name for man-output mode. */
   cmDocumentationSection(const char* name, const char*)
-    :Name(name) {}
+    : Name(name)
+  {
+  }
 
   /** Has any content been added to this section or is it empty ? */
   bool IsEmpty() const { return this->Entries.empty(); }
@@ -33,29 +35,35 @@ public:
   void Clear() { this->Entries.clear(); }
 
   /** Return the name of this section. */
-  std::string GetName() const
-  { return this->Name; }
+  std::string GetName() const { return this->Name; }
 
   /** Return a pointer to the first entry of this section. */
-  const std::vector<cmDocumentationEntry> &GetEntries() const
-  { return this->Entries; }
+  const std::vector<cmDocumentationEntry>& GetEntries() const
+  {
+    return this->Entries;
+  }
 
   /** Append an entry to this section. */
   void Append(const cmDocumentationEntry& entry)
-  { this->Entries.push_back(entry); }
-  void Append(const std::vector<cmDocumentationEntry> &entries)
-  { this->Entries.insert(this->Entries.end(),entries.begin(),entries.end()); }
+  {
+    this->Entries.push_back(entry);
+  }
+  void Append(const std::vector<cmDocumentationEntry>& entries)
+  {
+    this->Entries.insert(this->Entries.end(), entries.begin(), entries.end());
+  }
 
   /** Append an entry to this section using NULL terminated chars */
-  void Append(const char *[][2]);
-  void Append(const char *n, const char *b);
+  void Append(const char* [][2]);
+  void Append(const char* n, const char* b);
 
   /** prepend some documentation to this section */
-  void Prepend(const char *[][2]);
-  void Prepend(const std::vector<cmDocumentationEntry> &entries)
-  { this->Entries.insert(this->Entries.begin(),
-                         entries.begin(),entries.end()); }
-
+  void Prepend(const char* [][2]);
+  void Prepend(const std::vector<cmDocumentationEntry>& entries)
+  {
+    this->Entries.insert(this->Entries.begin(), entries.begin(),
+                         entries.end());
+  }
 
 private:
   std::string Name;

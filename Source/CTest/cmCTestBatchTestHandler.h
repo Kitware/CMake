@@ -30,6 +30,7 @@ class cmCTestBatchTestHandler : public cmCTestMultiProcessHandler
 public:
   ~cmCTestBatchTestHandler();
   virtual void RunTests();
+
 protected:
   void WriteBatchScript();
   void WriteSrunArgs(int test, cmsys::ofstream& fout);

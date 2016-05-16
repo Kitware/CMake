@@ -8,7 +8,7 @@ class ResourceTester : public QObject
 {
   Q_OBJECT
 public:
-  explicit ResourceTester(QObject *parent = 0);
+  explicit ResourceTester(QObject* parent = 0);
 
 private slots:
   void doTest();

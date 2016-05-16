@@ -1,5 +1,5 @@
 
-long double operator "" _meters(long double);
+long double operator"" _meters(long double);
 
 void someFunc()
 {

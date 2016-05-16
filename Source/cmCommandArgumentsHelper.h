@@ -41,134 +41,129 @@ For an example see cmExportCommand.cxx.
 */
 class cmCommandArgument
 {
-  public:
-    cmCommandArgument(cmCommandArgumentsHelper* args,
-                      const char* key,
-                      cmCommandArgumentGroup* group=0);
-    virtual ~cmCommandArgument() {}
+public:
+  cmCommandArgument(cmCommandArgumentsHelper* args, const char* key,
+                    cmCommandArgumentGroup* group = 0);
+  virtual ~cmCommandArgument() {}
 
-    /// this argument may follow after arg. 0 means it comes first.
-    void Follows(const cmCommandArgument* arg);
+  /// this argument may follow after arg. 0 means it comes first.
+  void Follows(const cmCommandArgument* arg);
 
-    /// this argument may follow after any of the arguments in the given group
-    void FollowsGroup(const cmCommandArgumentGroup* group);
+  /// this argument may follow after any of the arguments in the given group
+  void FollowsGroup(const cmCommandArgumentGroup* group);
 
-    /// Returns true if the argument was found in the argument list
-    bool WasFound() const                             {return this->WasActive;}
+  /// Returns true if the argument was found in the argument list
+  bool WasFound() const { return this->WasActive; }
 
-    // The following methods are only called from
-    // cmCommandArgumentsHelper::Parse(), but making this a friend would
-    // give it access to everything
+  // The following methods are only called from
+  // cmCommandArgumentsHelper::Parse(), but making this a friend would
+  // give it access to everything
 
-    /// Make the current argument the currently active argument
-    void Activate();
-    /// Consume the current string
-    bool Consume(const std::string& arg);
+  /// Make the current argument the currently active argument
+  void Activate();
+  /// Consume the current string
+  bool Consume(const std::string& arg);
 
-    /// Return true if this argument may follow after the given argument.
-    bool MayFollow(const cmCommandArgument* current) const;
+  /// Return true if this argument may follow after the given argument.
+  bool MayFollow(const cmCommandArgument* current) const;
 
-    /** Returns true if the given key matches the key for this argument.
-    If this argument has an empty key everything matches. */
-    bool KeyMatches(const std::string& key) const;
+  /** Returns true if the given key matches the key for this argument.
+  If this argument has an empty key everything matches. */
+  bool KeyMatches(const std::string& key) const;
 
-    /// Make this argument follow all members of the own group
-    void ApplyOwnGroup();
+  /// Make this argument follow all members of the own group
+  void ApplyOwnGroup();
 
-    /// Reset argument, so it's back to its initial state
-    void Reset();
-  private:
-    const char* Key;
-    std::set<const cmCommandArgument*> ArgumentsBefore;
-    cmCommandArgumentGroup* Group;
-    bool WasActive;
-    bool ArgumentsBeforeEmpty;
-    unsigned int CurrentIndex;
+  /// Reset argument, so it's back to its initial state
+  void Reset();
 
-    virtual bool DoConsume(const std::string& arg, unsigned int index) = 0;
-    virtual void DoReset() = 0;
+private:
+  const char* Key;
+  std::set<const cmCommandArgument*> ArgumentsBefore;
+  cmCommandArgumentGroup* Group;
+  bool WasActive;
+  bool ArgumentsBeforeEmpty;
+  unsigned int CurrentIndex;
+
+  virtual bool DoConsume(const std::string& arg, unsigned int index) = 0;
+  virtual void DoReset() = 0;
 };
 
 /** cmCAStringVector is to be used for arguments which can consist of more
 than one string, e.g. the FILES argument in INSTALL(FILES f1 f2 f3 ...). */
 class cmCAStringVector : public cmCommandArgument
 {
-  public:
-    cmCAStringVector(cmCommandArgumentsHelper* args,
-                     const char* key,
-                     cmCommandArgumentGroup* group=0);
+public:
+  cmCAStringVector(cmCommandArgumentsHelper* args, const char* key,
+                   cmCommandArgumentGroup* group = 0);
 
-    /// Return the vector of strings
-    const std::vector<std::string>& GetVector() const    {return this->Vector;}
+  /// Return the vector of strings
+  const std::vector<std::string>& GetVector() const { return this->Vector; }
 
-    /** Is there a keyword which should be skipped in
-    the arguments (e.g. ARGS for ADD_CUSTOM_COMMAND) ? */
-    void SetIgnore(const char* ignore)                   {this->Ignore=ignore;}
-  private:
-    std::vector<std::string> Vector;
-    unsigned int DataStart;
-    const char* Ignore;
-    cmCAStringVector();
-    virtual bool DoConsume(const std::string& arg, unsigned int index);
-    virtual void DoReset();
+  /** Is there a keyword which should be skipped in
+  the arguments (e.g. ARGS for ADD_CUSTOM_COMMAND) ? */
+  void SetIgnore(const char* ignore) { this->Ignore = ignore; }
+private:
+  std::vector<std::string> Vector;
+  unsigned int DataStart;
+  const char* Ignore;
+  cmCAStringVector();
+  virtual bool DoConsume(const std::string& arg, unsigned int index);
+  virtual void DoReset();
 };
 
 /** cmCAString is to be used for arguments which consist of one value,
 e.g. the executable name in ADD_EXECUTABLE(). */
 class cmCAString : public cmCommandArgument
 {
-  public:
-    cmCAString(cmCommandArgumentsHelper* args,
-               const char* key,
-               cmCommandArgumentGroup* group=0);
+public:
+  cmCAString(cmCommandArgumentsHelper* args, const char* key,
+             cmCommandArgumentGroup* group = 0);
 
-    /// Return the string
-    const std::string& GetString() const                 {return this->String;}
-    const char* GetCString() const               {return this->String.c_str();}
-  private:
-    std::string String;
-    unsigned int DataStart;
-    virtual bool DoConsume(const std::string& arg, unsigned int index);
-    virtual void DoReset();
-    cmCAString();
+  /// Return the string
+  const std::string& GetString() const { return this->String; }
+  const char* GetCString() const { return this->String.c_str(); }
+private:
+  std::string String;
+  unsigned int DataStart;
+  virtual bool DoConsume(const std::string& arg, unsigned int index);
+  virtual void DoReset();
+  cmCAString();
 };
 
 /** cmCAEnabler is to be used for options which are off by default and can be
 enabled using a special argument, e.g. EXCLUDE_FROM_ALL in ADD_EXECUTABLE(). */
 class cmCAEnabler : public cmCommandArgument
 {
-  public:
-    cmCAEnabler(cmCommandArgumentsHelper* args,
-                const char* key,
-                cmCommandArgumentGroup* group=0);
+public:
+  cmCAEnabler(cmCommandArgumentsHelper* args, const char* key,
+              cmCommandArgumentGroup* group = 0);
 
-    /// Has it been enabled ?
-    bool IsEnabled() const                              {return this->Enabled;}
-  private:
-    bool Enabled;
-    virtual bool DoConsume(const std::string& arg, unsigned int index);
-    virtual void DoReset();
-    cmCAEnabler();
+  /// Has it been enabled ?
+  bool IsEnabled() const { return this->Enabled; }
+private:
+  bool Enabled;
+  virtual bool DoConsume(const std::string& arg, unsigned int index);
+  virtual void DoReset();
+  cmCAEnabler();
 };
 
 /** cmCADisable is to be used for options which are on by default and can be
 disabled using a special argument.*/
 class cmCADisabler : public cmCommandArgument
 {
-  public:
-    cmCADisabler(cmCommandArgumentsHelper* args,
-                 const char* key,
-                 cmCommandArgumentGroup* group=0);
+public:
+  cmCADisabler(cmCommandArgumentsHelper* args, const char* key,
+               cmCommandArgumentGroup* group = 0);
 
-    /// Is it still enabled ?
-    bool IsEnabled() const                              {return this->Enabled;}
-  private:
-    bool Enabled;
-    virtual bool DoConsume(const std::string& arg, unsigned int index);
-    virtual void DoReset();
-    cmCADisabler();
+  /// Is it still enabled ?
+  bool IsEnabled() const { return this->Enabled; }
+private:
+  bool Enabled;
+  virtual bool DoConsume(const std::string& arg, unsigned int index);
+  virtual void DoReset();
+  cmCADisabler();
 };
-
 
 /** Group of arguments, needed for ordering. E.g. WIN32, EXCLUDE_FROM_ALL and
 MACSOX_BUNDLE from ADD_EXECUTABLE() are a group.
@@ -176,29 +171,31 @@ MACSOX_BUNDLE from ADD_EXECUTABLE() are a group.
 class cmCommandArgumentGroup
 {
   friend class cmCommandArgument;
-  public:
-    cmCommandArgumentGroup() {}
 
-    /// All members of this group may follow the given argument
-    void Follows(const cmCommandArgument* arg);
+public:
+  cmCommandArgumentGroup() {}
 
-    /// All members of this group may follow all members of the given group
-    void FollowsGroup(const cmCommandArgumentGroup* group);
-  private:
-    std::vector<cmCommandArgument*> ContainedArguments;
+  /// All members of this group may follow the given argument
+  void Follows(const cmCommandArgument* arg);
+
+  /// All members of this group may follow all members of the given group
+  void FollowsGroup(const cmCommandArgumentGroup* group);
+
+private:
+  std::vector<cmCommandArgument*> ContainedArguments;
 };
 
 class cmCommandArgumentsHelper
 {
-  public:
-    /// Parse the argument list
-    void Parse(const std::vector<std::string>* args,
-               std::vector<std::string>* unconsumedArgs);
-    /// Add an argument.
-    void AddArgument(cmCommandArgument* arg);
-  private:
-    std::vector<cmCommandArgument*> Arguments;
-};
+public:
+  /// Parse the argument list
+  void Parse(const std::vector<std::string>* args,
+             std::vector<std::string>* unconsumedArgs);
+  /// Add an argument.
+  void AddArgument(cmCommandArgument* arg);
 
+private:
+  std::vector<cmCommandArgument*> Arguments;
+};
 
 #endif

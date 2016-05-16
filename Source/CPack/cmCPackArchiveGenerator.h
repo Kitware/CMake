@@ -17,7 +17,6 @@
 
 #include "cmArchiveWrite.h"
 
-
 /** \class cmCPackArchiveGenerator
  * \brief A generator base for libarchive generation.
  * The generator itself uses the libarchive wrapper
@@ -25,7 +24,7 @@
  *
  */
 class cmCPackArchiveGenerator : public cmCPackGenerator
-  {
+{
 public:
   cmTypeMacro(cmCPackArchiveGenerator, cmCPackGenerator);
 
@@ -38,6 +37,7 @@ public:
   virtual int GenerateHeader(std::ostream* os);
   // component support
   virtual bool SupportsComponentInstallation() const;
+
 protected:
   virtual int InitializeInternal();
   /**
@@ -70,6 +70,6 @@ protected:
   virtual const char* GetOutputExtension() = 0;
   cmArchiveWrite::Compress Compress;
   std::string ArchiveFormat;
-  };
+};
 
 #endif

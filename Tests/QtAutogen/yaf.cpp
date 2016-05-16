@@ -11,7 +11,6 @@
   See the License for more information.
 ============================================================================*/
 
-
 #include "yaf.h"
 #include "yaf_p.h"
 
@@ -20,7 +19,6 @@
 Yaf::Yaf()
 {
 }
-
 
 void Yaf::doYaf()
 {

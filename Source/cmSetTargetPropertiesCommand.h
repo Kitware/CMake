@@ -17,33 +17,28 @@
 class cmSetTargetPropertiesCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone()
-    {
-      return new cmSetTargetPropertiesCommand;
-    }
+  virtual cmCommand* Clone() { return new cmSetTargetPropertiesCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "set_target_properties";}
+  virtual std::string GetName() const { return "set_target_properties"; }
 
   /**
    *  Used by this command and cmSetPropertiesCommand
    */
   static bool SetOneTarget(const std::string& tname,
-                           std::vector<std::string> &propertyPairs,
-                           cmMakefile *mf);
+                           std::vector<std::string>& propertyPairs,
+                           cmMakefile* mf);
 
   cmTypeMacro(cmSetTargetPropertiesCommand, cmCommand);
 };
-
-
 
 #endif

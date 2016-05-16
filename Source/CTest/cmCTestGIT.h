@@ -18,7 +18,7 @@
  * \brief Interaction with git command-line tool
  *
  */
-class cmCTestGIT: public cmCTestGlobalVC
+class cmCTestGIT : public cmCTestGlobalVC
 {
 public:
   /** Construct with a CTest instance and update log stream.  */
@@ -46,7 +46,6 @@ private:
 
   // "public" needed by older Sun compilers
 public:
-
   // Parsing helper classes.
   class OneLineParser;
   class DiffParser;

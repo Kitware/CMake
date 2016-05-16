@@ -15,9 +15,9 @@
 /* Use the liblzma configured for CMake.  */
 #include "cmThirdParty.h"
 #ifdef CMAKE_USE_SYSTEM_LIBLZMA
-# include <lzma.h>
+#include <lzma.h>
 #else
-# include <cmliblzma/liblzma/api/lzma.h>
+#include <cmliblzma/liblzma/api/lzma.h>
 #endif
 
 #endif

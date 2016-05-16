@@ -20,7 +20,7 @@
  * \brief Base class for handling globally-versioned trees
  *
  */
-class cmCTestGlobalVC: public cmCTestVC
+class cmCTestGlobalVC : public cmCTestVC
 {
 public:
   /** Construct with a CTest instance and update log stream.  */
@@ -37,11 +37,16 @@ protected:
   {
     char Action;
     std::string Path;
-    Change(char a = '?'): Action(a) {}
+    Change(char a = '?')
+      : Action(a)
+    {
+    }
   };
 
   // Update status for files in each directory.
-  class Directory: public std::map<std::string, File> {};
+  class Directory : public std::map<std::string, File>
+  {
+  };
   std::map<std::string, Directory> Dirs;
 
   // Old and new repository revisions.

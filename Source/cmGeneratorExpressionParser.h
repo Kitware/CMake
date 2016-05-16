@@ -24,14 +24,13 @@ struct cmGeneratorExpressionEvaluator;
 struct cmGeneratorExpressionParser
 {
   cmGeneratorExpressionParser(
-                      const std::vector<cmGeneratorExpressionToken> &tokens);
+    const std::vector<cmGeneratorExpressionToken>& tokens);
 
-  void Parse(std::vector<cmGeneratorExpressionEvaluator*> &result);
+  void Parse(std::vector<cmGeneratorExpressionEvaluator*>& result);
 
 private:
-  void ParseContent(std::vector<cmGeneratorExpressionEvaluator*> &);
-  void ParseGeneratorExpression(
-                              std::vector<cmGeneratorExpressionEvaluator*> &);
+  void ParseContent(std::vector<cmGeneratorExpressionEvaluator*>&);
+  void ParseGeneratorExpression(std::vector<cmGeneratorExpressionEvaluator*>&);
 
 private:
   std::vector<cmGeneratorExpressionToken>::const_iterator it;

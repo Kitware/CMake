@@ -32,62 +32,49 @@ int RunXCode(std::vector<const char*>& argv, bool& hitbug)
   std::vector<char> err;
   std::string line;
   int pipe = cmSystemTools::WaitForLine(cp, line, 100.0, out, err);
-  while(pipe != cmsysProcess_Pipe_None)
-    {
-    if(line.find("/bin/sh: bad interpreter: Text file busy")
-       != line.npos)
-      {
+  while (pipe != cmsysProcess_Pipe_None) {
+    if (line.find("/bin/sh: bad interpreter: Text file busy") != line.npos) {
       hitbug = true;
       std::cerr << "Hit xcodebuild bug : " << line << "\n";
-      }
+    }
     // if the bug is hit, no more output should be generated
     // because it may contain bogus errors
     // also remove all output with setenv in it to tone down
     // the verbosity of xcodebuild
-    if(!hitbug && (line.find("setenv") == line.npos))
-      {
-      if(pipe == cmsysProcess_Pipe_STDERR)
-        {
+    if (!hitbug && (line.find("setenv") == line.npos)) {
+      if (pipe == cmsysProcess_Pipe_STDERR) {
         std::cerr << line << "\n";
-        }
-      else if(pipe == cmsysProcess_Pipe_STDOUT)
-        {
+      } else if (pipe == cmsysProcess_Pipe_STDOUT) {
         std::cout << line << "\n";
-        }
       }
+    }
     pipe = cmSystemTools::WaitForLine(cp, line, 100, out, err);
-    }
+  }
   cmsysProcess_WaitForExit(cp, 0);
-  if(cmsysProcess_GetState(cp) == cmsysProcess_State_Exited)
-    {
+  if (cmsysProcess_GetState(cp) == cmsysProcess_State_Exited) {
     return cmsysProcess_GetExitValue(cp);
-    }
-  if(cmsysProcess_GetState(cp) == cmsysProcess_State_Error)
-    {
+  }
+  if (cmsysProcess_GetState(cp) == cmsysProcess_State_Error) {
     return -1;
-    }
+  }
   return -1;
 }
 
-int main(int ac, char*av[])
+int main(int ac, char* av[])
 {
   std::vector<const char*> argv;
   argv.push_back("xcodebuild");
-  for(int i =1; i < ac; i++)
-    {
+  for (int i = 1; i < ac; i++) {
     argv.push_back(av[i]);
-    }
+  }
   argv.push_back(0);
   bool hitbug = true;
   int ret = 0;
-  while(hitbug)
-    {
+  while (hitbug) {
     ret = RunXCode(argv, hitbug);
-    }
-  if(ret < 0)
-    {
+  }
+  if (ret < 0) {
     return 255;
-    }
+  }
   return ret;
 }
-

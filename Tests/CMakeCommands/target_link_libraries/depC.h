@@ -8,5 +8,4 @@ struct DEPC_EXPORT DepC
   int foo();
 
   DepA getA();
-
 };

@@ -19,10 +19,10 @@
 class Xyz : public QObject
 {
   Q_OBJECT
-  public:
-    Xyz();
-  public slots:
-    void doXyz();
+public:
+  Xyz();
+public slots:
+  void doXyz();
 };
 
 #endif

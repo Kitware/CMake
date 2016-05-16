@@ -13,9 +13,8 @@
 
 // cmReturnCommand
 bool cmReturnCommand::InitialPass(std::vector<std::string> const&,
-                                  cmExecutionStatus &status)
+                                  cmExecutionStatus& status)
 {
   status.SetReturnInvoked(true);
   return true;
 }
-

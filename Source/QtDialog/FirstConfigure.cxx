@@ -8,7 +8,6 @@
 #include <QSettings>
 #include <QVBoxLayout>
 
-
 StartCompilerSetup::StartCompilerSetup(QWidget* p)
   : QWizardPage(p)
 {
@@ -23,10 +22,14 @@ StartCompilerSetup::StartCompilerSetup(QWidget* p)
 
   l->addSpacing(6);
 
-  this->CompilerSetupOptions[0] = new QRadioButton(tr("Use default native compilers"), this);
-  this->CompilerSetupOptions[1] = new QRadioButton(tr("Specify native compilers"), this);
-  this->CompilerSetupOptions[2] = new QRadioButton(tr("Specify toolchain file for cross-compiling"), this);
-  this->CompilerSetupOptions[3] = new QRadioButton(tr("Specify options for cross-compiling"), this);
+  this->CompilerSetupOptions[0] =
+    new QRadioButton(tr("Use default native compilers"), this);
+  this->CompilerSetupOptions[1] =
+    new QRadioButton(tr("Specify native compilers"), this);
+  this->CompilerSetupOptions[2] =
+    new QRadioButton(tr("Specify toolchain file for cross-compiling"), this);
+  this->CompilerSetupOptions[3] =
+    new QRadioButton(tr("Specify options for cross-compiling"), this);
   l->addWidget(this->CompilerSetupOptions[0]);
   l->addWidget(this->CompilerSetupOptions[1]);
   l->addWidget(this->CompilerSetupOptions[2]);
@@ -34,17 +37,17 @@ StartCompilerSetup::StartCompilerSetup(QWidget* p)
 
   this->CompilerSetupOptions[0]->setChecked(true);
 
-  QObject::connect(this->CompilerSetupOptions[0], SIGNAL(toggled(bool)),
-                   this, SLOT(onSelectionChanged(bool)));
-  QObject::connect(this->CompilerSetupOptions[1], SIGNAL(toggled(bool)),
-                   this, SLOT(onSelectionChanged(bool)));
-  QObject::connect(this->CompilerSetupOptions[2], SIGNAL(toggled(bool)),
-                   this, SLOT(onSelectionChanged(bool)));
-  QObject::connect(this->CompilerSetupOptions[3], SIGNAL(toggled(bool)),
-                   this, SLOT(onSelectionChanged(bool)));
+  QObject::connect(this->CompilerSetupOptions[0], SIGNAL(toggled(bool)), this,
+                   SLOT(onSelectionChanged(bool)));
+  QObject::connect(this->CompilerSetupOptions[1], SIGNAL(toggled(bool)), this,
+                   SLOT(onSelectionChanged(bool)));
+  QObject::connect(this->CompilerSetupOptions[2], SIGNAL(toggled(bool)), this,
+                   SLOT(onSelectionChanged(bool)));
+  QObject::connect(this->CompilerSetupOptions[3], SIGNAL(toggled(bool)), this,
+                   SLOT(onSelectionChanged(bool)));
   QObject::connect(GeneratorOptions,
-                   SIGNAL(currentIndexChanged(QString const&)),
-                   this, SLOT(onGeneratorChanged(QString const&)));
+                   SIGNAL(currentIndexChanged(QString const&)), this,
+                   SLOT(onGeneratorChanged(QString const&)));
 }
 
 QFrame* StartCompilerSetup::CreateToolsetWidgets()
@@ -74,16 +77,14 @@ void StartCompilerSetup::setGenerators(
   QStringList generator_list;
 
   std::vector<cmake::GeneratorInfo>::const_iterator it;
-  for (it = gens.begin(); it != gens.end(); ++it)
-    {
+  for (it = gens.begin(); it != gens.end(); ++it) {
     generator_list.append(QString::fromLocal8Bit(it->name.c_str()));
 
-    if (it->supportsToolset)
-      {
+    if (it->supportsToolset) {
       this->GeneratorsSupportingToolset.append(
         QString::fromLocal8Bit(it->name.c_str()));
-      }
     }
+  }
 
   this->GeneratorOptions->addItems(generator_list);
 }
@@ -91,8 +92,7 @@ void StartCompilerSetup::setGenerators(
 void StartCompilerSetup::setCurrentGenerator(const QString& gen)
 {
   int idx = this->GeneratorOptions->findText(gen);
-  if(idx != -1)
-  {
+  if (idx != -1) {
     this->GeneratorOptions->setCurrentIndex(idx);
   }
 }
@@ -129,29 +129,26 @@ bool StartCompilerSetup::crossCompilerSetup() const
 
 void StartCompilerSetup::onSelectionChanged(bool on)
 {
-  if(on)
+  if (on)
     selectionChanged();
 }
 
 void StartCompilerSetup::onGeneratorChanged(QString const& name)
 {
-  if (GeneratorsSupportingToolset.contains(name))
-    {
+  if (GeneratorsSupportingToolset.contains(name)) {
     ToolsetFrame->show();
-    }
-  else
-    {
+  } else {
     ToolsetFrame->hide();
-    }
+  }
 }
 
 int StartCompilerSetup::nextId() const
 {
-  if(compilerSetup())
+  if (compilerSetup())
     return NativeSetup;
-  if(crossCompilerSetup())
+  if (crossCompilerSetup())
     return CrossSetup;
-  if(crossCompilerToolChainFile())
+  if (crossCompilerToolChainFile())
     return ToolchainSetup;
   return -1;
 }
@@ -199,7 +196,6 @@ void NativeCompilerSetup::setFortranCompiler(const QString& s)
   this->FortranCompiler->setText(s);
 }
 
-
 CrossCompilerSetup::CrossCompilerSetup(QWidget* p)
   : QWizardPage(p)
 {
@@ -208,7 +204,8 @@ CrossCompilerSetup::CrossCompilerSetup(QWidget* p)
   QWidget::setTabOrder(systemVersion, systemProcessor);
   QWidget::setTabOrder(systemProcessor, CrossCompilers->CCompiler);
   QWidget::setTabOrder(CrossCompilers->CCompiler, CrossCompilers->CXXCompiler);
-  QWidget::setTabOrder(CrossCompilers->CXXCompiler, CrossCompilers->FortranCompiler);
+  QWidget::setTabOrder(CrossCompilers->CXXCompiler,
+                       CrossCompilers->FortranCompiler);
   QWidget::setTabOrder(CrossCompilers->FortranCompiler, crossFindRoot);
   QWidget::setTabOrder(crossFindRoot, crossProgramMode);
   QWidget::setTabOrder(crossProgramMode, crossLibraryMode);
@@ -273,7 +270,6 @@ void CrossCompilerSetup::setSystem(const QString& t)
   this->systemName->setText(t);
 }
 
-
 QString CrossCompilerSetup::getVersion() const
 {
   return this->systemVersion->text();
@@ -283,7 +279,6 @@ void CrossCompilerSetup::setVersion(const QString& t)
 {
   this->systemVersion->setText(t);
 }
-
 
 QString CrossCompilerSetup::getProcessor() const
 {
@@ -358,11 +353,9 @@ void ToolchainCompilerSetup::setToolchainFile(const QString& t)
   this->ToolchainFile->setText(t);
 }
 
-
-
 FirstConfigure::FirstConfigure()
 {
-  //this->setOption(QWizard::HaveFinishButtonOnEarlyPages, true);
+  // this->setOption(QWizard::HaveFinishButtonOnEarlyPages, true);
   this->mStartCompilerSetupPage = new StartCompilerSetup(this);
   this->setPage(Start, this->mStartCompilerSetupPage);
   QObject::connect(this->mStartCompilerSetupPage, SIGNAL(selectionChanged()),
@@ -409,24 +402,38 @@ void FirstConfigure::loadFromSettings()
 
   // restore compiler setup
   settings.beginGroup("Settings/Compiler");
-  this->mNativeCompilerSetupPage->setCCompiler(settings.value("CCompiler").toString());
-  this->mNativeCompilerSetupPage->setCXXCompiler(settings.value("CXXCompiler").toString());
-  this->mNativeCompilerSetupPage->setFortranCompiler(settings.value("FortranCompiler").toString());
+  this->mNativeCompilerSetupPage->setCCompiler(
+    settings.value("CCompiler").toString());
+  this->mNativeCompilerSetupPage->setCXXCompiler(
+    settings.value("CXXCompiler").toString());
+  this->mNativeCompilerSetupPage->setFortranCompiler(
+    settings.value("FortranCompiler").toString());
   settings.endGroup();
 
   // restore cross compiler setup
   settings.beginGroup("Settings/CrossCompiler");
-  this->mCrossCompilerSetupPage->setCCompiler(settings.value("CCompiler").toString());
-  this->mCrossCompilerSetupPage->setCXXCompiler(settings.value("CXXCompiler").toString());
-  this->mCrossCompilerSetupPage->setFortranCompiler(settings.value("FortranCompiler").toString());
-  this->mToolchainCompilerSetupPage->setToolchainFile(settings.value("ToolChainFile").toString());
-  this->mCrossCompilerSetupPage->setSystem(settings.value("SystemName").toString());
-  this->mCrossCompilerSetupPage->setVersion(settings.value("SystemVersion").toString());
-  this->mCrossCompilerSetupPage->setProcessor(settings.value("SystemProcessor").toString());
-  this->mCrossCompilerSetupPage->setFindRoot(settings.value("FindRoot").toString());
-  this->mCrossCompilerSetupPage->setProgramMode(settings.value("ProgramMode", 0).toInt());
-  this->mCrossCompilerSetupPage->setLibraryMode(settings.value("LibraryMode", 0).toInt());
-  this->mCrossCompilerSetupPage->setIncludeMode(settings.value("IncludeMode", 0).toInt());
+  this->mCrossCompilerSetupPage->setCCompiler(
+    settings.value("CCompiler").toString());
+  this->mCrossCompilerSetupPage->setCXXCompiler(
+    settings.value("CXXCompiler").toString());
+  this->mCrossCompilerSetupPage->setFortranCompiler(
+    settings.value("FortranCompiler").toString());
+  this->mToolchainCompilerSetupPage->setToolchainFile(
+    settings.value("ToolChainFile").toString());
+  this->mCrossCompilerSetupPage->setSystem(
+    settings.value("SystemName").toString());
+  this->mCrossCompilerSetupPage->setVersion(
+    settings.value("SystemVersion").toString());
+  this->mCrossCompilerSetupPage->setProcessor(
+    settings.value("SystemProcessor").toString());
+  this->mCrossCompilerSetupPage->setFindRoot(
+    settings.value("FindRoot").toString());
+  this->mCrossCompilerSetupPage->setProgramMode(
+    settings.value("ProgramMode", 0).toInt());
+  this->mCrossCompilerSetupPage->setLibraryMode(
+    settings.value("LibraryMode", 0).toInt());
+  this->mCrossCompilerSetupPage->setIncludeMode(
+    settings.value("IncludeMode", 0).toInt());
   settings.endGroup();
 }
 
@@ -442,24 +449,35 @@ void FirstConfigure::saveToSettings()
 
   // save compiler setup
   settings.beginGroup("Settings/Compiler");
-  settings.setValue("CCompiler", this->mNativeCompilerSetupPage->getCCompiler());
-  settings.setValue("CXXCompiler", this->mNativeCompilerSetupPage->getCXXCompiler());
-  settings.setValue("FortranCompiler", this->mNativeCompilerSetupPage->getFortranCompiler());
+  settings.setValue("CCompiler",
+                    this->mNativeCompilerSetupPage->getCCompiler());
+  settings.setValue("CXXCompiler",
+                    this->mNativeCompilerSetupPage->getCXXCompiler());
+  settings.setValue("FortranCompiler",
+                    this->mNativeCompilerSetupPage->getFortranCompiler());
   settings.endGroup();
 
   // save cross compiler setup
   settings.beginGroup("Settings/CrossCompiler");
-  settings.setValue("CCompiler", this->mCrossCompilerSetupPage->getCCompiler());
-  settings.setValue("CXXCompiler", this->mCrossCompilerSetupPage->getCXXCompiler());
-  settings.setValue("FortranCompiler", this->mCrossCompilerSetupPage->getFortranCompiler());
+  settings.setValue("CCompiler",
+                    this->mCrossCompilerSetupPage->getCCompiler());
+  settings.setValue("CXXCompiler",
+                    this->mCrossCompilerSetupPage->getCXXCompiler());
+  settings.setValue("FortranCompiler",
+                    this->mCrossCompilerSetupPage->getFortranCompiler());
   settings.setValue("ToolChainFile", this->getCrossCompilerToolChainFile());
   settings.setValue("SystemName", this->mCrossCompilerSetupPage->getSystem());
-  settings.setValue("SystemVersion", this->mCrossCompilerSetupPage->getVersion());
-  settings.setValue("SystemProcessor", this->mCrossCompilerSetupPage->getProcessor());
+  settings.setValue("SystemVersion",
+                    this->mCrossCompilerSetupPage->getVersion());
+  settings.setValue("SystemProcessor",
+                    this->mCrossCompilerSetupPage->getProcessor());
   settings.setValue("FindRoot", this->mCrossCompilerSetupPage->getFindRoot());
-  settings.setValue("ProgramMode", this->mCrossCompilerSetupPage->getProgramMode());
-  settings.setValue("LibraryMode", this->mCrossCompilerSetupPage->getLibraryMode());
-  settings.setValue("IncludeMode", this->mCrossCompilerSetupPage->getIncludeMode());
+  settings.setValue("ProgramMode",
+                    this->mCrossCompilerSetupPage->getProgramMode());
+  settings.setValue("LibraryMode",
+                    this->mCrossCompilerSetupPage->getLibraryMode());
+  settings.setValue("IncludeMode",
+                    this->mCrossCompilerSetupPage->getIncludeMode());
   settings.endGroup();
 }
 
@@ -495,43 +513,33 @@ QString FirstConfigure::getSystemName() const
 
 QString FirstConfigure::getCCompiler() const
 {
-  if(this->compilerSetup())
-    {
+  if (this->compilerSetup()) {
     return this->mNativeCompilerSetupPage->getCCompiler();
-    }
-  else if(this->crossCompilerSetup())
-    {
+  } else if (this->crossCompilerSetup()) {
     return this->mCrossCompilerSetupPage->getCCompiler();
-    }
+  }
   return QString();
 }
 
 QString FirstConfigure::getCXXCompiler() const
 {
-  if(this->compilerSetup())
-    {
+  if (this->compilerSetup()) {
     return this->mNativeCompilerSetupPage->getCXXCompiler();
-    }
-  else if(this->crossCompilerSetup())
-    {
+  } else if (this->crossCompilerSetup()) {
     return this->mCrossCompilerSetupPage->getCXXCompiler();
-    }
+  }
   return QString();
 }
 
 QString FirstConfigure::getFortranCompiler() const
 {
-  if(this->compilerSetup())
-    {
+  if (this->compilerSetup()) {
     return this->mNativeCompilerSetupPage->getFortranCompiler();
-    }
-  else if(this->crossCompilerSetup())
-    {
+  } else if (this->crossCompilerSetup()) {
     return this->mCrossCompilerSetupPage->getFortranCompiler();
-    }
+  }
   return QString();
 }
-
 
 QString FirstConfigure::getSystemVersion() const
 {
@@ -548,12 +556,7 @@ QString FirstConfigure::getCrossRoot() const
   return this->mCrossCompilerSetupPage->getFindRoot();
 }
 
-const QString CrossModes[] =
-{
-  "BOTH",
-  "ONLY",
-  "NEVER"
-};
+const QString CrossModes[] = { "BOTH", "ONLY", "NEVER" };
 
 QString FirstConfigure::getCrossProgramMode() const
 {
@@ -569,4 +572,3 @@ QString FirstConfigure::getCrossIncludeMode() const
 {
   return CrossModes[this->mCrossCompilerSetupPage->getIncludeMode()];
 }
-

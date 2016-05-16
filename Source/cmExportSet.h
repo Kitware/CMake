@@ -23,7 +23,10 @@ class cmExportSet
 {
 public:
   /// Construct an empty export set named \a name
-  cmExportSet(const std::string &name) : Name(name) {}
+  cmExportSet(const std::string& name)
+    : Name(name)
+  {
+  }
   /// Destructor
   ~cmExportSet();
 
@@ -36,10 +39,14 @@ public:
   std::string const& GetName() const { return this->Name; }
 
   std::vector<cmTargetExport*> const* GetTargetExports() const
-     { return &this->TargetExports; }
+  {
+    return &this->TargetExports;
+  }
 
   std::vector<cmInstallExportGenerator const*> const* GetInstallations() const
-     { return &this->Installations; }
+  {
+    return &this->Installations;
+  }
 
 private:
   std::vector<cmTargetExport*> TargetExports;

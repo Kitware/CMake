@@ -6,12 +6,11 @@
 #define WINAPI
 #endif
 
-extern "C"
-{
+extern "C" {
 // test __cdecl stuff
-  int WINAPI foo();
+int WINAPI foo();
 // test regular C
-  int bar();
+int bar();
 }
 
 // test c++ functions

@@ -19,17 +19,14 @@ class cmGetPropertyCommand : public cmCommand
 public:
   cmGetPropertyCommand();
 
-  virtual cmCommand* Clone()
-    {
-      return new cmGetPropertyCommand;
-    }
+  virtual cmCommand* Clone() { return new cmGetPropertyCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * This determines if the command is invoked when in script mode.
@@ -39,11 +36,19 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "get_property";}
+  virtual std::string GetName() const { return "get_property"; }
 
   cmTypeMacro(cmGetPropertyCommand, cmCommand);
+
 private:
-  enum OutType { OutValue, OutDefined, OutBriefDoc, OutFullDoc, OutSet };
+  enum OutType
+  {
+    OutValue,
+    OutDefined,
+    OutBriefDoc,
+    OutFullDoc,
+    OutSet
+  };
   std::string Variable;
   std::string Name;
   std::string PropertyName;

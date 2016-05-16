@@ -36,16 +36,13 @@ public:
   /**
    * Returns true if this class is the given class, or a subclass of it.
    */
-  static bool IsTypeOf(const char *type)
-    { return !strcmp("cmObject", type); }
+  static bool IsTypeOf(const char* type) { return !strcmp("cmObject", type); }
 
   /**
    * Returns true if this object is an instance of the given class or
    * a subclass of it.
    */
-  virtual bool IsA(const char *type)
-    { return cmObject::IsTypeOf(type); }
+  virtual bool IsA(const char* type) { return cmObject::IsTypeOf(type); }
 };
 
 #endif
-

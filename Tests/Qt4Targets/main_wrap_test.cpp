@@ -3,7 +3,7 @@
 
 #include "mywrapobject.h"
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   MyWrapObject mwo;
   mwo.objectName();

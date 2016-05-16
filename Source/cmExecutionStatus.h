@@ -24,28 +24,22 @@ class cmExecutionStatus
 public:
   cmExecutionStatus() { this->Clear(); }
 
-  void SetReturnInvoked(bool val)
-  { this->ReturnInvoked = val; }
-  bool GetReturnInvoked()
-  { return this->ReturnInvoked; }
+  void SetReturnInvoked(bool val) { this->ReturnInvoked = val; }
+  bool GetReturnInvoked() { return this->ReturnInvoked; }
 
-  void SetBreakInvoked(bool val)
-  { this->BreakInvoked = val; }
-  bool GetBreakInvoked()
-  { return this->BreakInvoked; }
+  void SetBreakInvoked(bool val) { this->BreakInvoked = val; }
+  bool GetBreakInvoked() { return this->BreakInvoked; }
 
-  void SetContinueInvoked(bool val)
-  { this->ContinueInvoked = val; }
-  bool GetContinueInvoked()
-  { return this->ContinueInvoked; }
+  void SetContinueInvoked(bool val) { this->ContinueInvoked = val; }
+  bool GetContinueInvoked() { return this->ContinueInvoked; }
 
   void Clear()
-    {
+  {
     this->ReturnInvoked = false;
     this->BreakInvoked = false;
     this->ContinueInvoked = false;
     this->NestedError = false;
-    }
+  }
   void SetNestedError(bool val) { this->NestedError = val; }
   bool GetNestedError() { return this->NestedError; }
 

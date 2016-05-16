@@ -1,2 +1,4 @@
-int outlib() { return 456; }
-
+int outlib()
+{
+  return 456;
+}

@@ -7,15 +7,14 @@
 
 #include "MainPage.g.h"
 
-namespace VSXaml
+namespace VSXaml {
+/// <summary>
+/// An empty page that can be used on its own or navigated to within a Frame.
+/// </summary>
+public
+ref class MainPage sealed
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
-    public ref class MainPage sealed
-    {
-    public:
-        MainPage();
-
-    };
+public:
+  MainPage();
+};
 }

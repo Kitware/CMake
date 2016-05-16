@@ -9,15 +9,7 @@ extern int byproduct8(void);
 extern int ExternalLibrary(void);
 int main(void)
 {
-  return (
-    byproduct1() +
-    byproduct2() +
-    byproduct3() +
-    byproduct4() +
-    byproduct5() +
-    byproduct6() +
-    byproduct7() +
-    byproduct8() +
-    ExternalLibrary() +
-    0);
+  return (byproduct1() + byproduct2() + byproduct3() + byproduct4() +
+          byproduct5() + byproduct6() + byproduct7() + byproduct8() +
+          ExternalLibrary() + 0);
 }

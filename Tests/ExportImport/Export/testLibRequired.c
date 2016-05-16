@@ -1,1 +1,4 @@
-int testLibRequired(void) { return 0; }
+int testLibRequired(void)
+{
+  return 0;
+}

@@ -14,23 +14,21 @@
 
 #include "cmGlobalVisualStudio11Generator.h"
 
-
 /** \class cmGlobalVisualStudio12Generator  */
-class cmGlobalVisualStudio12Generator:
-  public cmGlobalVisualStudio11Generator
+class cmGlobalVisualStudio12Generator : public cmGlobalVisualStudio11Generator
 {
 public:
   cmGlobalVisualStudio12Generator(cmake* cm, const std::string& name,
-    const std::string& platformName);
+                                  const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   virtual bool MatchesGeneratorName(const std::string& name) const;
 
   virtual void WriteSLNHeader(std::ostream& fout);
 
-  //in Visual Studio 2013 they detached the MSBuild tools version
-  //from the .Net Framework version and instead made it have it's own
-  //version number
+  // in Visual Studio 2013 they detached the MSBuild tools version
+  // from the .Net Framework version and instead made it have it's own
+  // version number
   virtual const char* GetToolsVersion() { return "12.0"; }
 protected:
   virtual bool InitializeWindowsPhone(cmMakefile* mf);

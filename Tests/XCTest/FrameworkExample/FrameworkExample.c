@@ -2,5 +2,5 @@
 
 int FourtyTwo()
 {
-    return 42;
+  return 42;
 }

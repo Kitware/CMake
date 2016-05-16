@@ -28,7 +28,8 @@
 class cmDependsJavaParserHelper
 {
 public:
-  typedef struct {
+  typedef struct
+  {
     char* str;
   } ParserType;
 
@@ -40,7 +41,7 @@ public:
 
   // For the lexer:
   void AllocateParserType(cmDependsJavaParserHelper::ParserType* pt,
-    const char* str, int len = 0);
+                          const char* str, int len = 0);
 
   int LexInput(char* buf, int maxlen);
   void Error(const char* str);
@@ -69,31 +70,18 @@ private:
   public:
     std::string Name;
     std::vector<CurrentClass>* NestedClasses;
-    CurrentClass()
-      {
-        this->NestedClasses = new std::vector<CurrentClass>;
-      }
-    ~CurrentClass()
-      {
-        delete this->NestedClasses;
-      }
+    CurrentClass() { this->NestedClasses = new std::vector<CurrentClass>; }
+    ~CurrentClass() { delete this->NestedClasses; }
     CurrentClass& operator=(CurrentClass const& c)
-      {
-        this->NestedClasses->clear();
-        this->Name = c.Name;
-        std::copy(
-          c.NestedClasses->begin(),
-          c.NestedClasses->end(),
-          std::back_inserter(
-            *this->NestedClasses)
-          );
-        return *this;
-      }
-    CurrentClass(CurrentClass const& c)
-      {
-        (*this) = c;
-      }
-    void AddFileNamesForPrinting(std::vector<std::string> *files,
+    {
+      this->NestedClasses->clear();
+      this->Name = c.Name;
+      std::copy(c.NestedClasses->begin(), c.NestedClasses->end(),
+                std::back_inserter(*this->NestedClasses));
+      return *this;
+    }
+    CurrentClass(CurrentClass const& c) { (*this) = c; }
+    void AddFileNamesForPrinting(std::vector<std::string>* files,
                                  const char* prefix, const char* sep);
   };
   std::string CurrentPackage;
@@ -117,12 +105,10 @@ private:
   void PrintClasses();
 
   void Print(const char* place, const char* str);
-  void CombineUnions(char** out, const char* in1, char** in2,
-                     const char* sep);
+  void CombineUnions(char** out, const char* in1, char** in2, const char* sep);
   void SafePrintMissing(const char* str, int line, int cnt);
 
   void CleanupParser();
 };
 
 #endif
-

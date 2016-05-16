@@ -2,8 +2,7 @@
 
 namespace ccc {
 
-void
-Item::go ( )
+void Item::go()
 {
 }
 
@@ -11,14 +10,12 @@ class MocTest : public QObject
 {
   Q_OBJECT;
   Q_SLOT
-  void go ( );
+  void go();
 };
 
-void
-MocTest::go()
+void MocTest::go()
 {
 }
-
 }
 
 // Include own moc files

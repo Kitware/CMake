@@ -1,7 +1,7 @@
 #include <gmodule.h>
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-    gboolean b = g_module_supported();
-    return 0;
+  gboolean b = g_module_supported();
+  return 0;
 }

@@ -26,7 +26,7 @@ class cmWIXDirectoriesSourceWriter : public cmWIXSourceWriter
 {
 public:
   cmWIXDirectoriesSourceWriter(cmCPackLog* logger,
-    std::string const& filename);
+                               std::string const& filename);
 
   void EmitStartMenuFolder(std::string const& startMenuFolder);
 
@@ -35,8 +35,8 @@ public:
   void EmitStartupFolder();
 
   size_t BeginInstallationPrefixDirectory(
-      std::string const& programFilesFolderId,
-      std::string const& installRootString);
+    std::string const& programFilesFolderId,
+    std::string const& installRootString);
 
   void EndInstallationPrefixDirectory(size_t size);
 };

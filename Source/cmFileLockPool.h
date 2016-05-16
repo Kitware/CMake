@@ -21,7 +21,7 @@ class cmFileLock;
 
 class cmFileLockPool
 {
- public:
+public:
   cmFileLockPool();
   ~cmFileLockPool();
 
@@ -46,15 +46,12 @@ class cmFileLockPool
     * @brief Lock the file in given scope.
     * @param timeoutSec Lock timeout. If -1 try until success or fatal error.
     */
-  cmFileLockResult LockFunctionScope(
-      const std::string& filename, unsigned long timeoutSec
-  );
-  cmFileLockResult LockFileScope(
-      const std::string& filename, unsigned long timeoutSec
-  );
-  cmFileLockResult LockProcessScope(
-      const std::string& filename, unsigned long timeoutSec
-  );
+  cmFileLockResult LockFunctionScope(const std::string& filename,
+                                     unsigned long timeoutSec);
+  cmFileLockResult LockFileScope(const std::string& filename,
+                                 unsigned long timeoutSec);
+  cmFileLockResult LockProcessScope(const std::string& filename,
+                                    unsigned long timeoutSec);
   //@}
 
   /**
@@ -62,7 +59,7 @@ class cmFileLockPool
     */
   cmFileLockResult Release(const std::string& filename);
 
- private:
+private:
   cmFileLockPool(const cmFileLockPool&);
   cmFileLockPool& operator=(const cmFileLockPool&);
 
@@ -70,17 +67,16 @@ class cmFileLockPool
 
   class ScopePool
   {
-   public:
+  public:
     ScopePool();
     ~ScopePool();
 
-    cmFileLockResult Lock(
-        const std::string& filename, unsigned long timeoutSec
-    );
+    cmFileLockResult Lock(const std::string& filename,
+                          unsigned long timeoutSec);
     cmFileLockResult Release(const std::string& filename);
     bool IsAlreadyLocked(const std::string& filename) const;
 
-   private:
+  private:
     ScopePool(const ScopePool&);
     ScopePool& operator=(const ScopePool&);
 

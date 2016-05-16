@@ -1,1 +1,4 @@
-int mylibB() { return -1; }
+int mylibB()
+{
+  return -1;
+}

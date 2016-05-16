@@ -22,24 +22,29 @@ class cmVisualStudioWCEPlatformParser : public cmXMLParser
 {
 public:
   cmVisualStudioWCEPlatformParser(const char* name = NULL)
-      : RequiredName(name)
-      , FoundRequiredName(false)
-    {
-    }
+    : RequiredName(name)
+    , FoundRequiredName(false)
+  {
+  }
 
   int ParseVersion(const char* version);
 
-  bool Found() const {return this->FoundRequiredName;}
+  bool Found() const { return this->FoundRequiredName; }
   const char* GetArchitectureFamily() const;
   std::string GetOSVersion() const;
-  std::string GetIncludeDirectories() const {
-    return this->FixPaths(this->Include); }
-  std::string GetLibraryDirectories() const {
-    return this->FixPaths(this->Library); }
-  std::string GetPathDirectories() const {
-    return this->FixPaths(this->Path); }
-  const std::vector<std::string>& GetAvailablePlatforms() const {
-    return this->AvailablePlatforms; }
+  std::string GetIncludeDirectories() const
+  {
+    return this->FixPaths(this->Include);
+  }
+  std::string GetLibraryDirectories() const
+  {
+    return this->FixPaths(this->Library);
+  }
+  std::string GetPathDirectories() const { return this->FixPaths(this->Path); }
+  const std::vector<std::string>& GetAvailablePlatforms() const
+  {
+    return this->AvailablePlatforms;
+  }
 
 protected:
   virtual void StartElement(const std::string& name, const char** attributes);

@@ -1,1 +1,4 @@
-__declspec(dllexport) int mylibA() { return 1; }
+__declspec(dllexport) int mylibA()
+{
+  return 1;
+}

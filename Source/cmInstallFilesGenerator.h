@@ -17,17 +17,15 @@
 /** \class cmInstallFilesGenerator
  * \brief Generate file installation rules.
  */
-class cmInstallFilesGenerator: public cmInstallGenerator
+class cmInstallFilesGenerator : public cmInstallGenerator
 {
 public:
   cmInstallFilesGenerator(std::vector<std::string> const& files,
                           const char* dest, bool programs,
                           const char* file_permissions,
                           std::vector<std::string> const& configurations,
-                          const char* component,
-                          MessageLevel message,
-                          bool exclude_from_all,
-                          const char* rename,
+                          const char* component, MessageLevel message,
+                          bool exclude_from_all, const char* rename,
                           bool optional = false);
   virtual ~cmInstallFilesGenerator();
 
@@ -40,8 +38,7 @@ protected:
   virtual void GenerateScriptForConfig(std::ostream& os,
                                        const std::string& config,
                                        Indent const& indent);
-  void AddFilesInstallRule(std::ostream& os,
-                           const std::string config,
+  void AddFilesInstallRule(std::ostream& os, const std::string config,
                            Indent const& indent,
                            std::vector<std::string> const& files);
 

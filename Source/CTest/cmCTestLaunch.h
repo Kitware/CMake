@@ -28,6 +28,7 @@ class cmCTestLaunch
 public:
   /** Entry point from ctest executable main().  */
   static int Main(int argc, const char* const argv[]);
+
 private:
   // Initialize the launcher from its command line.
   cmCTestLaunch(int argc, const char* const* argv);
@@ -78,8 +79,7 @@ private:
   // Labels associated with the build rule.
   std::set<std::string> Labels;
   void LoadLabels();
-  bool SourceMatches(std::string const& lhs,
-                     std::string const& rhs);
+  bool SourceMatches(std::string const& lhs, std::string const& rhs);
 
   // Regular expressions to match warnings and their exceptions.
   bool ScrapeRulesLoaded;

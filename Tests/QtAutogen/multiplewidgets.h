@@ -12,9 +12,10 @@ class Widget1 : public QWidget
 {
   Q_OBJECT
 public:
-  Widget1(QWidget *parent = 0);
+  Widget1(QWidget* parent = 0);
+
 private:
-  Ui::Widget1 *ui;
+  Ui::Widget1* ui;
 };
 
 namespace Ui {
@@ -25,9 +26,10 @@ class Widget2 : public QWidget
 {
   Q_OBJECT
 public:
-  Widget2(QWidget *parent = 0);
+  Widget2(QWidget* parent = 0);
+
 private:
-  Ui::Widget2 *ui;
+  Ui::Widget2* ui;
 };
 
 #endif

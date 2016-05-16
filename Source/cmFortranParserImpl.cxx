@@ -19,46 +19,42 @@ bool cmFortranParser_s::FindIncludeFile(const char* dir,
                                         std::string& fileName)
 {
   // If the file is a full path, include it directly.
-  if(cmSystemTools::FileIsFullPath(includeName))
-    {
+  if (cmSystemTools::FileIsFullPath(includeName)) {
     fileName = includeName;
     return cmSystemTools::FileExists(fileName.c_str(), true);
-    }
-  else
-    {
+  } else {
     // Check for the file in the directory containing the including
     // file.
     std::string fullName = dir;
     fullName += "/";
     fullName += includeName;
-    if(cmSystemTools::FileExists(fullName.c_str(), true))
-      {
+    if (cmSystemTools::FileExists(fullName.c_str(), true)) {
       fileName = fullName;
       return true;
-      }
+    }
 
     // Search the include path for the file.
-    for(std::vector<std::string>::const_iterator i =
-          this->IncludePath.begin(); i != this->IncludePath.end(); ++i)
-      {
+    for (std::vector<std::string>::const_iterator i =
+           this->IncludePath.begin();
+         i != this->IncludePath.end(); ++i) {
       fullName = *i;
       fullName += "/";
       fullName += includeName;
-      if(cmSystemTools::FileExists(fullName.c_str(), true))
-        {
+      if (cmSystemTools::FileExists(fullName.c_str(), true)) {
         fileName = fullName;
         return true;
-        }
       }
     }
+  }
   return false;
 }
 
-cmFortranParser_s
-::cmFortranParser_s(std::vector<std::string> const& includes,
-                    std::set<std::string> const& defines,
-                    cmFortranSourceInfo& info):
-  IncludePath(includes), PPDefinitions(defines), Info(info)
+cmFortranParser_s::cmFortranParser_s(std::vector<std::string> const& includes,
+                                     std::set<std::string> const& defines,
+                                     cmFortranSourceInfo& info)
+  : IncludePath(includes)
+  , PPDefinitions(defines)
+  , Info(info)
 {
   this->InInterface = 0;
   this->InPPFalseBranch = 0;
@@ -69,8 +65,7 @@ cmFortranParser_s
 
   // Create a dummy buffer that is never read but is the fallback
   // buffer when the last file is popped off the stack.
-  YY_BUFFER_STATE buffer =
-    cmFortran_yy_create_buffer(0, 4, this->Scanner);
+  YY_BUFFER_STATE buffer = cmFortran_yy_create_buffer(0, 4, this->Scanner);
   cmFortran_yy_switch_to_buffer(buffer, this->Scanner);
 }
 
@@ -79,15 +74,12 @@ cmFortranParser_s::~cmFortranParser_s()
   cmFortran_yylex_destroy(this->Scanner);
 }
 
-bool cmFortranParser_FilePush(cmFortranParser* parser,
-                                    const char* fname)
+bool cmFortranParser_FilePush(cmFortranParser* parser, const char* fname)
 {
   // Open the new file and push it onto the stack.  Save the old
   // buffer with it on the stack.
-  if(FILE* file = cmsys::SystemTools::Fopen(fname, "rb"))
-    {
-    YY_BUFFER_STATE current =
-      cmFortranLexer_GetCurrentBuffer(parser->Scanner);
+  if (FILE* file = cmsys::SystemTools::Fopen(fname, "rb")) {
+    YY_BUFFER_STATE current = cmFortranLexer_GetCurrentBuffer(parser->Scanner);
     std::string dir = cmSystemTools::GetParentDirectory(fname);
     cmFortranFile f(file, current, dir);
     YY_BUFFER_STATE buffer =
@@ -95,43 +87,37 @@ bool cmFortranParser_FilePush(cmFortranParser* parser,
     cmFortran_yy_switch_to_buffer(buffer, parser->Scanner);
     parser->FileStack.push(f);
     return 1;
-    }
-  else
-    {
+  } else {
     return 0;
-    }
+  }
 }
 
 bool cmFortranParser_FilePop(cmFortranParser* parser)
 {
   // Pop one file off the stack and close it.  Switch the lexer back
   // to the next one on the stack.
-  if(parser->FileStack.empty())
-    {
+  if (parser->FileStack.empty()) {
     return 0;
-    }
-  else
-    {
-    cmFortranFile f = parser->FileStack.top(); parser->FileStack.pop();
+  } else {
+    cmFortranFile f = parser->FileStack.top();
+    parser->FileStack.pop();
     fclose(f.File);
-    YY_BUFFER_STATE current =
-      cmFortranLexer_GetCurrentBuffer(parser->Scanner);
+    YY_BUFFER_STATE current = cmFortranLexer_GetCurrentBuffer(parser->Scanner);
     cmFortran_yy_delete_buffer(current, parser->Scanner);
     cmFortran_yy_switch_to_buffer(f.Buffer, parser->Scanner);
     return 1;
-    }
+  }
 }
 
-int cmFortranParser_Input(cmFortranParser* parser,
-                                 char* buffer, size_t bufferSize)
+int cmFortranParser_Input(cmFortranParser* parser, char* buffer,
+                          size_t bufferSize)
 {
   // Read from the file on top of the stack.  If the stack is empty,
   // the end of the translation unit has been reached.
-  if(!parser->FileStack.empty())
-    {
+  if (!parser->FileStack.empty()) {
     FILE* file = parser->FileStack.top().File;
     return (int)fread(buffer, 1, bufferSize, file);
-    }
+  }
   return 0;
 }
 
@@ -145,19 +131,16 @@ const char* cmFortranParser_StringEnd(cmFortranParser* parser)
   return parser->TokenString.c_str();
 }
 
-void cmFortranParser_StringAppend(cmFortranParser* parser,
-                                         char c)
+void cmFortranParser_StringAppend(cmFortranParser* parser, char c)
 {
   parser->TokenString += c;
 }
 
-void cmFortranParser_SetInInterface(cmFortranParser* parser,
-                                           bool in)
+void cmFortranParser_SetInInterface(cmFortranParser* parser, bool in)
 {
-  if(parser->InPPFalseBranch)
-    {
+  if (parser->InPPFalseBranch) {
     return;
-    }
+  }
 
   parser->InInterface = in;
 }
@@ -167,8 +150,7 @@ bool cmFortranParser_GetInInterface(cmFortranParser* parser)
   return parser->InInterface;
 }
 
-void cmFortranParser_SetOldStartcond(cmFortranParser* parser,
-                                            int arg)
+void cmFortranParser_SetOldStartcond(cmFortranParser* parser, int arg)
 {
   parser->OldStartcond = arg;
 }
@@ -185,13 +167,11 @@ void cmFortranParser_Error(cmFortranParser*, const char*)
   // to be regenerated anyway.
 }
 
-void cmFortranParser_RuleUse(cmFortranParser* parser,
-                                    const char* name)
+void cmFortranParser_RuleUse(cmFortranParser* parser, const char* name)
 {
-  if(!parser->InPPFalseBranch)
-    {
-    parser->Info.Requires.insert(cmSystemTools::LowerCase(name) );
-    }
+  if (!parser->InPPFalseBranch) {
+    parser->Info.Requires.insert(cmSystemTools::LowerCase(name));
+  }
 }
 
 void cmFortranParser_RuleLineDirective(cmFortranParser* parser,
@@ -202,10 +182,9 @@ void cmFortranParser_RuleLineDirective(cmFortranParser* parser,
 
   // Skip #line directives referencing non-files like
   // "<built-in>" or "<command-line>".
-  if (included.empty() || included[0] == '<')
-    {
+  if (included.empty() || included[0] == '<') {
     return;
-    }
+  }
 
   // Fix windows file path separators since our lexer does not
   // process escape sequences in string literals.
@@ -213,19 +192,16 @@ void cmFortranParser_RuleLineDirective(cmFortranParser* parser,
   cmSystemTools::ConvertToUnixSlashes(included);
 
   // Save the named file as included in the source.
-  if (cmSystemTools::FileExists(included, true))
-    {
+  if (cmSystemTools::FileExists(included, true)) {
     parser->Info.Includes.insert(included);
-    }
+  }
 }
 
-void cmFortranParser_RuleInclude(cmFortranParser* parser,
-                                        const char* name)
+void cmFortranParser_RuleInclude(cmFortranParser* parser, const char* name)
 {
-  if(parser->InPPFalseBranch)
-    {
+  if (parser->InPPFalseBranch) {
     return;
-    }
+  }
 
   // If processing an include statement there must be an open file.
   assert(!parser->FileStack.empty());
@@ -239,87 +215,69 @@ void cmFortranParser_RuleInclude(cmFortranParser* parser,
   // problem because either the source will not compile or the user
   // does not care about depending on this included source.
   std::string fullName;
-  if(parser->FindIncludeFile(dir.c_str(), name, fullName))
-    {
+  if (parser->FindIncludeFile(dir.c_str(), name, fullName)) {
     // Found the included file.  Save it in the set of included files.
     parser->Info.Includes.insert(fullName);
 
     // Parse it immediately to translate the source inline.
     cmFortranParser_FilePush(parser, fullName.c_str());
-    }
+  }
 }
 
-void cmFortranParser_RuleModule(cmFortranParser* parser,
-                                       const char* name)
+void cmFortranParser_RuleModule(cmFortranParser* parser, const char* name)
 {
-  if(!parser->InPPFalseBranch && !parser->InInterface)
-    {
+  if (!parser->InPPFalseBranch && !parser->InInterface) {
     parser->Info.Provides.insert(cmSystemTools::LowerCase(name));
-    }
+  }
 }
 
-void cmFortranParser_RuleDefine(cmFortranParser* parser,
-                                       const char* macro)
+void cmFortranParser_RuleDefine(cmFortranParser* parser, const char* macro)
 {
-  if(!parser->InPPFalseBranch)
-    {
+  if (!parser->InPPFalseBranch) {
     parser->PPDefinitions.insert(macro);
-    }
+  }
 }
 
-void cmFortranParser_RuleUndef(cmFortranParser* parser,
-                                      const char* macro)
+void cmFortranParser_RuleUndef(cmFortranParser* parser, const char* macro)
 {
-  if(!parser->InPPFalseBranch)
-    {
+  if (!parser->InPPFalseBranch) {
     std::set<std::string>::iterator match;
     match = parser->PPDefinitions.find(macro);
-    if(match != parser->PPDefinitions.end())
-      {
+    if (match != parser->PPDefinitions.end()) {
       parser->PPDefinitions.erase(match);
-      }
     }
+  }
 }
 
-void cmFortranParser_RuleIfdef(cmFortranParser* parser,
-                                      const char* macro)
+void cmFortranParser_RuleIfdef(cmFortranParser* parser, const char* macro)
 {
   // A new PP branch has been opened
   parser->SkipToEnd.push(false);
 
-  if (parser->InPPFalseBranch)
-    {
+  if (parser->InPPFalseBranch) {
     parser->InPPFalseBranch++;
-    }
-  else if(parser->PPDefinitions.find(macro) == parser->PPDefinitions.end())
-    {
-    parser->InPPFalseBranch=1;
-    }
-  else
-    {
-    parser->SkipToEnd.top() = true;
-    }
-}
-
-void cmFortranParser_RuleIfndef(cmFortranParser* parser,
-  const char* macro)
-{
-  // A new PP branch has been opened
-  parser->SkipToEnd.push(false);
-
-  if (parser->InPPFalseBranch)
-    {
-    parser->InPPFalseBranch++;
-    }
-  else if(parser->PPDefinitions.find(macro) != parser->PPDefinitions.end())
-    {
+  } else if (parser->PPDefinitions.find(macro) ==
+             parser->PPDefinitions.end()) {
     parser->InPPFalseBranch = 1;
-    }
-  else
-    {
+  } else {
+    parser->SkipToEnd.top() = true;
+  }
+}
+
+void cmFortranParser_RuleIfndef(cmFortranParser* parser, const char* macro)
+{
+  // A new PP branch has been opened
+  parser->SkipToEnd.push(false);
+
+  if (parser->InPPFalseBranch) {
+    parser->InPPFalseBranch++;
+  } else if (parser->PPDefinitions.find(macro) !=
+             parser->PPDefinitions.end()) {
+    parser->InPPFalseBranch = 1;
+  } else {
     // ignore other branches
     parser->SkipToEnd.top() = true;
-    }
+  }
 }
 
 void cmFortranParser_RuleIf(cmFortranParser* parser)
@@ -364,45 +322,37 @@ void cmFortranParser_RuleElif(cmFortranParser* parser)
   // Always taken unless an #ifdef or #ifndef-branch has been taken
   // already.  If the second condition isn't meet already
   // (parser->InPPFalseBranch == 0) correct it.
-  if(!parser->SkipToEnd.empty() &&
-     parser->SkipToEnd.top() && !parser->InPPFalseBranch)
-    {
+  if (!parser->SkipToEnd.empty() && parser->SkipToEnd.top() &&
+      !parser->InPPFalseBranch) {
     parser->InPPFalseBranch = 1;
-    }
+  }
 }
 
 void cmFortranParser_RuleElse(cmFortranParser* parser)
 {
   // if the parent branch is false do nothing!
-  if(parser->InPPFalseBranch > 1)
-    {
+  if (parser->InPPFalseBranch > 1) {
     return;
-    }
+  }
 
   // parser->InPPFalseBranch is either 0 or 1.  We change it depending on
   // parser->SkipToEnd.top()
-  if(!parser->SkipToEnd.empty() &&
-     parser->SkipToEnd.top())
-    {
+  if (!parser->SkipToEnd.empty() && parser->SkipToEnd.top()) {
     parser->InPPFalseBranch = 1;
-    }
-  else
-    {
+  } else {
     parser->InPPFalseBranch = 0;
-    }
+  }
 }
 
 void cmFortranParser_RuleEndif(cmFortranParser* parser)
 {
-  if(!parser->SkipToEnd.empty())
-    {
+  if (!parser->SkipToEnd.empty()) {
     parser->SkipToEnd.pop();
-    }
+  }
 
   // #endif doesn't know if there was a "#else" in before, so it
   // always decreases InPPFalseBranch
-  if(parser->InPPFalseBranch)
-    {
+  if (parser->InPPFalseBranch) {
     parser->InPPFalseBranch--;
-    }
+  }
 }

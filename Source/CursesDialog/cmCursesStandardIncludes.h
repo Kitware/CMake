@@ -15,12 +15,12 @@
 #include "../cmStandardIncludes.h"
 
 #if defined(__sun__) && defined(__GNUC__)
- #define _MSE_INT_H
+#define _MSE_INT_H
 #endif
 
 #if defined(__hpux)
-# define _BOOL_DEFINED
-# include <sys/time.h>
+#define _BOOL_DEFINED
+#include <sys/time.h>
 #endif
 
 #include <form.h>
@@ -29,7 +29,7 @@
 // so remove them from the namespace
 inline void curses_move(unsigned int x, unsigned int y)
 {
-  move(x,y);
+  move(x, y);
 }
 
 inline void curses_clear()
@@ -41,6 +41,5 @@ inline void curses_clear()
 #undef move
 #undef erase
 #undef clear
-
 
 #endif // cmCursesStandardIncludes_h

@@ -17,30 +17,26 @@
 class cmDefinePropertyCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone()
-    {
-      return new cmDefinePropertyCommand;
-    }
+  virtual cmCommand* Clone() { return new cmDefinePropertyCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "define_property";}
+  virtual std::string GetName() const { return "define_property"; }
 
   cmTypeMacro(cmDefinePropertyCommand, cmCommand);
+
 private:
   std::string PropertyName;
   std::string BriefDocs;
   std::string FullDocs;
 };
-
-
 
 #endif

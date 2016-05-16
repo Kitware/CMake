@@ -21,15 +21,12 @@ int cmVisualStudioWCEPlatformParser::ParseVersion(const char* version)
   const std::string vckey = registryBase + "\\Setup\\VC;ProductDir";
   const std::string vskey = registryBase + "\\Setup\\VS;ProductDir";
 
-  if(!cmSystemTools::ReadRegistryValue(vckey.c_str(),
-                                       this->VcInstallDir,
-                                       cmSystemTools::KeyWOW64_32) ||
-     !cmSystemTools::ReadRegistryValue(vskey.c_str(),
-                                       this->VsInstallDir,
-                                       cmSystemTools::KeyWOW64_32))
-    {
+  if (!cmSystemTools::ReadRegistryValue(vckey.c_str(), this->VcInstallDir,
+                                        cmSystemTools::KeyWOW64_32) ||
+      !cmSystemTools::ReadRegistryValue(vskey.c_str(), this->VsInstallDir,
+                                        cmSystemTools::KeyWOW64_32)) {
     return 0;
-    }
+  }
   cmSystemTools::ConvertToUnixSlashes(this->VcInstallDir);
   cmSystemTools::ConvertToUnixSlashes(this->VsInstallDir);
   this->VcInstallDir.append("/");
@@ -43,10 +40,9 @@ int cmVisualStudioWCEPlatformParser::ParseVersion(const char* version)
 
 std::string cmVisualStudioWCEPlatformParser::GetOSVersion() const
 {
-  if (this->OSMinorVersion.empty())
-    {
+  if (this->OSMinorVersion.empty()) {
     return OSMajorVersion;
-    }
+  }
 
   return OSMajorVersion + "." + OSMinorVersion;
 }
@@ -55,10 +51,9 @@ const char* cmVisualStudioWCEPlatformParser::GetArchitectureFamily() const
 {
   std::map<std::string, std::string>::const_iterator it =
     this->Macros.find("ARCHFAM");
-  if (it != this->Macros.end())
-    {
+  if (it != this->Macros.end()) {
     return it->second.c_str();
-    }
+  }
 
   return 0;
 }
@@ -66,98 +61,71 @@ const char* cmVisualStudioWCEPlatformParser::GetArchitectureFamily() const
 void cmVisualStudioWCEPlatformParser::StartElement(const std::string& name,
                                                    const char** attributes)
 {
-  if(this->FoundRequiredName)
-    {
+  if (this->FoundRequiredName) {
     return;
-    }
+  }
 
   this->CharacterData = "";
 
-  if(name == "PlatformData")
-    {
+  if (name == "PlatformData") {
     this->PlatformName = "";
     this->OSMajorVersion = "";
     this->OSMinorVersion = "";
     this->Macros.clear();
-    }
+  }
 
-  if(name == "Macro")
-    {
+  if (name == "Macro") {
     std::string macroName;
     std::string macroValue;
 
-    for(const char** attr = attributes; *attr; attr += 2)
-      {
-      if(strcmp(attr[0], "Name") == 0)
-        {
+    for (const char** attr = attributes; *attr; attr += 2) {
+      if (strcmp(attr[0], "Name") == 0) {
         macroName = attr[1];
-        }
-      else if(strcmp(attr[0], "Value") == 0)
-        {
+      } else if (strcmp(attr[0], "Value") == 0) {
         macroValue = attr[1];
-        }
       }
+    }
 
-    if(!macroName.empty())
-      {
+    if (!macroName.empty()) {
       this->Macros[macroName] = macroValue;
-      }
     }
-  else if(name == "Directories")
-    {
-    for(const char** attr = attributes; *attr; attr += 2)
-      {
-      if(strcmp(attr[0], "Include") == 0)
-        {
+  } else if (name == "Directories") {
+    for (const char** attr = attributes; *attr; attr += 2) {
+      if (strcmp(attr[0], "Include") == 0) {
         this->Include = attr[1];
-        }
-      else if(strcmp(attr[0], "Library") == 0)
-        {
+      } else if (strcmp(attr[0], "Library") == 0) {
         this->Library = attr[1];
-        }
-      else if(strcmp(attr[0], "Path") == 0)
-        {
+      } else if (strcmp(attr[0], "Path") == 0) {
         this->Path = attr[1];
-        }
       }
     }
+  }
 }
 
 void cmVisualStudioWCEPlatformParser::EndElement(const std::string& name)
 {
-  if(!this->RequiredName)
-    {
-    if(name == "PlatformName")
-      {
+  if (!this->RequiredName) {
+    if (name == "PlatformName") {
       this->AvailablePlatforms.push_back(this->CharacterData);
-      }
-    return;
     }
-
-  if(this->FoundRequiredName)
-    {
     return;
-    }
+  }
 
-  if(name == "PlatformName")
-    {
+  if (this->FoundRequiredName) {
+    return;
+  }
+
+  if (name == "PlatformName") {
     this->PlatformName = this->CharacterData;
-    }
-  else if(name == "OSMajorVersion")
-    {
+  } else if (name == "OSMajorVersion") {
     this->OSMajorVersion = this->CharacterData;
-    }
-  else if(name == "OSMinorVersion")
-   {
-   this->OSMinorVersion = this->CharacterData;
-   }
-  else if(name == "Platform")
-    {
-    if(this->PlatformName == this->RequiredName)
-      {
+  } else if (name == "OSMinorVersion") {
+    this->OSMinorVersion = this->CharacterData;
+  } else if (name == "Platform") {
+    if (this->PlatformName == this->RequiredName) {
       this->FoundRequiredName = true;
-      }
     }
+  }
 }
 
 void cmVisualStudioWCEPlatformParser::CharacterDataHandler(const char* data,
@@ -167,7 +135,7 @@ void cmVisualStudioWCEPlatformParser::CharacterDataHandler(const char* data,
 }
 
 std::string cmVisualStudioWCEPlatformParser::FixPaths(
-    const std::string& paths) const
+  const std::string& paths) const
 {
   std::string ret = paths;
   cmSystemTools::ReplaceString(ret, "$(PATH)", "%PATH%");

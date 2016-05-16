@@ -1,6 +1,7 @@
 #include <boost/any.hpp>
 
-int main() {
+int main()
+{
   boost::any a;
   a = 5;
   a = std::string("A string");

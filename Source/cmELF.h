@@ -13,7 +13,7 @@
 #define cmELF_h
 
 #if !defined(CMAKE_USE_ELF_PARSER)
-# error "This file may be included only if CMAKE_USE_ELF_PARSER is enabled."
+#error "This file may be included only if CMAKE_USE_ELF_PARSER is enabled."
 #endif
 
 class cmELFInternal;
@@ -31,10 +31,7 @@ public:
   ~cmELF();
 
   /** Get the error message if any.  */
-  std::string const& GetErrorMessage() const
-    {
-    return this->ErrorMessage;
-    }
+  std::string const& GetErrorMessage() const { return this->ErrorMessage; }
 
   /** Boolean conversion.  True if the ELF file is valid.  */
   operator bool() const { return this->Valid(); }

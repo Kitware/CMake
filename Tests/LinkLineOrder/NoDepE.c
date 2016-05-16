@@ -4,7 +4,7 @@ void NoDepF_func();
 void NoDepE_func()
 {
   static int firstcall = 1;
-  if( firstcall ) {
+  if (firstcall) {
     firstcall = 0;
     NoDepF_func();
   }

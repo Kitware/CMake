@@ -20,7 +20,7 @@
  * \brief Interaction with subversion command-line tool
  *
  */
-class cmCTestSVN: public cmCTestGlobalVC
+class cmCTestSVN : public cmCTestGlobalVC
 {
 public:
   /** Construct with a CTest instance and update log stream.  */
@@ -36,12 +36,16 @@ private:
   virtual bool UpdateImpl();
 
   bool RunSVNCommand(std::vector<char const*> const& parameters,
-    OutputParser* out, OutputParser* err);
+                     OutputParser* out, OutputParser* err);
 
   // Information about an SVN repository (root repository or external)
-  struct SVNInfo {
+  struct SVNInfo
+  {
 
-    SVNInfo(const char* path) : LocalPath(path) {}
+    SVNInfo(const char* path)
+      : LocalPath(path)
+    {
+    }
     // Remove base from the filename
     std::string BuildLocalPath(std::string const& path) const;
 
@@ -60,7 +64,6 @@ private:
     // Old and new repository revisions.
     std::string OldRevision;
     std::string NewRevision;
-
   };
 
   // Extended revision structure to include info about external it refers to.
@@ -79,7 +82,7 @@ private:
   void LoadRevisions();
   void LoadRevisions(SVNInfo& svninfo);
 
-  void GuessBase(SVNInfo &svninfo, std::vector<Change> const& changes);
+  void GuessBase(SVNInfo& svninfo, std::vector<Change> const& changes);
 
   void DoRevisionSVN(Revision const& revision,
                      std::vector<Change> const& changes);

@@ -20,29 +20,29 @@
 #include <vector>
 
 #include "cmCPackComponentGroup.h" // cmCPackComponent and friends
-  // Forward declarations are insufficient since we use them in
-  // std::map data members below...
+// Forward declarations are insufficient since we use them in
+// std::map data members below...
 
-#define cmCPackTypeMacro(klass, superclass) \
-  cmTypeMacro(klass, superclass); \
-  static cmCPackGenerator* CreateGenerator() { return new klass; } \
+#define cmCPackTypeMacro(klass, superclass)                                   \
+  cmTypeMacro(klass, superclass);                                             \
+  static cmCPackGenerator* CreateGenerator() { return new klass; }            \
   class cmCPackTypeMacro_UseTrailingSemicolon
 
-#define cmCPackLogger(logType, msg) \
-  do { \
-    std::ostringstream cmCPackLog_msg; \
-    cmCPackLog_msg << msg; \
-    this->Logger->Log(logType, __FILE__, __LINE__,\
-                      cmCPackLog_msg.str().c_str());\
-  } while ( 0 )
+#define cmCPackLogger(logType, msg)                                           \
+  do {                                                                        \
+    std::ostringstream cmCPackLog_msg;                                        \
+    cmCPackLog_msg << msg;                                                    \
+    this->Logger->Log(logType, __FILE__, __LINE__,                            \
+                      cmCPackLog_msg.str().c_str());                          \
+  } while (0)
 
 #ifdef cerr
-#  undef cerr
+#undef cerr
 #endif
 #define cerr no_cerr_use_cmCPack_Log
 
 #ifdef cout
-#  undef cout
+#undef cout
 #endif
 #define cout no_cout_use_cmCPack_Log
 
@@ -62,8 +62,10 @@ public:
    * If verbose then more information is printed out
    */
   void SetVerbose(bool val)
-    { this->GeneratorVerbose = val ?
-      cmSystemTools::OUTPUT_MERGE : cmSystemTools::OUTPUT_NONE; }
+  {
+    this->GeneratorVerbose =
+      val ? cmSystemTools::OUTPUT_MERGE : cmSystemTools::OUTPUT_NONE;
+  }
 
   /**
    * Returns true if the generator may work on this system.
@@ -157,7 +159,7 @@ protected:
    *         default is "componentName"
    */
   virtual std::string GetComponentInstallDirNameSuffix(
-      const std::string& componentName);
+    const std::string& componentName);
 
   /**
    * CPack specific generator may mangle CPACK_PACKAGE_FILE_NAME
@@ -169,9 +171,8 @@ protected:
    *            false otherwise
    */
   virtual std::string GetComponentPackageFileName(
-      const std::string& initialPackageFileName,
-      const std::string& groupOrComponentName,
-      bool isGroupName);
+    const std::string& initialPackageFileName,
+    const std::string& groupOrComponentName, bool isGroupName);
 
   /**
    * Package the list of files and/or components which
@@ -188,10 +189,9 @@ protected:
 
   virtual std::string FindTemplate(const char* name);
   virtual bool ConfigureFile(const char* inName, const char* outName,
-    bool copyOnly = false);
+                             bool copyOnly = false);
   virtual bool ConfigureString(const std::string& input, std::string& output);
   virtual int InitializeInternal();
-
 
   //! Run install commands if specified
   virtual int InstallProjectViaInstallCommands(
@@ -207,7 +207,8 @@ protected:
    * The various level of support of
    * CPACK_SET_DESTDIR used by the generator.
    */
-  enum CPackSetDestdirSupport {
+  enum CPackSetDestdirSupport
+  {
     /* the generator works with or without it */
     SETDESTDIR_SUPPORTED,
     /* the generator works best if automatically handled */
@@ -251,13 +252,11 @@ protected:
    */
   virtual bool WantsComponentInstallation() const;
   virtual cmCPackInstallationType* GetInstallationType(
-                                                const std::string& projectName,
-                                                const std::string& name);
+    const std::string& projectName, const std::string& name);
   virtual cmCPackComponent* GetComponent(const std::string& projectName,
                                          const std::string& name);
   virtual cmCPackComponentGroup* GetComponentGroup(
-                                                const std::string& projectName,
-                                                const std::string& name);
+    const std::string& projectName, const std::string& name);
 
   cmSystemTools::OutputOption GeneratorVerbose;
   std::string Name;
@@ -324,6 +323,7 @@ protected:
   ComponentPackageMethod componentPackageMethod;
 
   cmCPackLog* Logger;
+
 private:
   cmMakefile* MakefileMap;
 };

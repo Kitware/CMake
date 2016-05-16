@@ -19,15 +19,14 @@
 class cmLocaleRAII
 {
   const char* OldLocale;
+
 public:
-  cmLocaleRAII(): OldLocale(setlocale(LC_CTYPE, 0))
-    {
+  cmLocaleRAII()
+    : OldLocale(setlocale(LC_CTYPE, 0))
+  {
     setlocale(LC_CTYPE, "");
-    }
-  ~cmLocaleRAII()
-    {
-    setlocale(LC_CTYPE, this->OldLocale);
-    }
+  }
+  ~cmLocaleRAII() { setlocale(LC_CTYPE, this->OldLocale); }
 };
 
 #endif

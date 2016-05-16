@@ -11,16 +11,14 @@
 ============================================================================*/
 #include "cmCursesDummyWidget.h"
 
-cmCursesDummyWidget::cmCursesDummyWidget(int width, int height,
-                                           int left, int top) :
-  cmCursesWidget(width, height, left, top)
+cmCursesDummyWidget::cmCursesDummyWidget(int width, int height, int left,
+                                         int top)
+  : cmCursesWidget(width, height, left, top)
 {
   this->Type = cmState::INTERNAL;
 }
 
-
-bool cmCursesDummyWidget::HandleInput(int&, cmCursesMainForm*, WINDOW* )
+bool cmCursesDummyWidget::HandleInput(int&, cmCursesMainForm*, WINDOW*)
 {
   return false;
 }
-

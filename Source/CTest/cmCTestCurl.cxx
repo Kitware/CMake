@@ -42,115 +42,95 @@ std::string cmCTestCurl::Escape(std::string const& source)
   return ret;
 }
 
-namespace
-{
-static size_t
-curlWriteMemoryCallback(void *ptr, size_t size, size_t nmemb,
-  void *data)
+namespace {
+static size_t curlWriteMemoryCallback(void* ptr, size_t size, size_t nmemb,
+                                      void* data)
 {
   int realsize = (int)(size * nmemb);
 
-  std::vector<char> *vec
-    = static_cast<std::vector<char>* >(data);
+  std::vector<char>* vec = static_cast<std::vector<char>*>(data);
   const char* chPtr = static_cast<char*>(ptr);
   vec->insert(vec->end(), chPtr, chPtr + realsize);
   return realsize;
 }
 
-static size_t
-curlDebugCallback(CURL *, curl_infotype, char *chPtr,
-  size_t size, void *data)
+static size_t curlDebugCallback(CURL*, curl_infotype, char* chPtr, size_t size,
+                                void* data)
 {
-  std::vector<char> *vec
-    = static_cast<std::vector<char>* >(data);
+  std::vector<char>* vec = static_cast<std::vector<char>*>(data);
   vec->insert(vec->end(), chPtr, chPtr + size);
 
   return size;
 }
-
 }
 
 void cmCTestCurl::SetCurlOptions(std::vector<std::string> const& args)
 {
-  for( std::vector<std::string>::const_iterator i = args.begin();
-       i != args.end(); ++i)
-    {
-    if(*i == "CURLOPT_SSL_VERIFYPEER_OFF")
-      {
+  for (std::vector<std::string>::const_iterator i = args.begin();
+       i != args.end(); ++i) {
+    if (*i == "CURLOPT_SSL_VERIFYPEER_OFF") {
       this->VerifyPeerOff = true;
-      }
-    if(*i == "CURLOPT_SSL_VERIFYHOST_OFF")
-      {
-      this->VerifyHostOff = true;
-      }
     }
+    if (*i == "CURLOPT_SSL_VERIFYHOST_OFF") {
+      this->VerifyHostOff = true;
+    }
+  }
 }
 
 bool cmCTestCurl::InitCurl()
 {
-  if(!this->Curl)
-    {
+  if (!this->Curl) {
     return false;
-    }
-  if(this->VerifyPeerOff)
-    {
+  }
+  if (this->VerifyPeerOff) {
     curl_easy_setopt(this->Curl, CURLOPT_SSL_VERIFYPEER, 0);
-    }
-  if(this->VerifyHostOff)
-    {
+  }
+  if (this->VerifyHostOff) {
     curl_easy_setopt(this->Curl, CURLOPT_SSL_VERIFYHOST, 0);
-    }
-  if(this->HTTPProxy.size())
-    {
+  }
+  if (this->HTTPProxy.size()) {
     curl_easy_setopt(this->Curl, CURLOPT_PROXY, this->HTTPProxy.c_str());
     curl_easy_setopt(this->Curl, CURLOPT_PROXYTYPE, this->HTTPProxyType);
-    if (this->HTTPProxyAuth.size() > 0)
-      {
+    if (this->HTTPProxyAuth.size() > 0) {
       curl_easy_setopt(this->Curl, CURLOPT_PROXYUSERPWD,
                        this->HTTPProxyAuth.c_str());
-      }
     }
-  if(this->UseHttp10)
-    {
+  }
+  if (this->UseHttp10) {
     curl_easy_setopt(this->Curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
-    }
+  }
   // enable HTTP ERROR parsing
   curl_easy_setopt(this->Curl, CURLOPT_FAILONERROR, 1);
   return true;
 }
 
-
 bool cmCTestCurl::UploadFile(std::string const& local_file,
-                             std::string const& url,
-                             std::string const& fields,
+                             std::string const& url, std::string const& fields,
                              std::string& response)
 {
   response = "";
-  if(!this->InitCurl())
-    {
+  if (!this->InitCurl()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Initialization of curl failed");
     return false;
-    }
+  }
   /* enable uploading */
   curl_easy_setopt(this->Curl, CURLOPT_UPLOAD, 1);
   // if there is little to no activity for too long stop submitting
-  if(this->TimeOutSeconds)
-    {
+  if (this->TimeOutSeconds) {
     ::curl_easy_setopt(this->Curl, CURLOPT_LOW_SPEED_LIMIT, 1);
     ::curl_easy_setopt(this->Curl, CURLOPT_LOW_SPEED_TIME,
                        this->TimeOutSeconds);
-    }
+  }
   /* HTTP PUT please */
   ::curl_easy_setopt(this->Curl, CURLOPT_PUT, 1);
   ::curl_easy_setopt(this->Curl, CURLOPT_VERBOSE, 1);
 
   FILE* ftpfile = cmsys::SystemTools::Fopen(local_file, "rb");
-  if(!ftpfile)
-    {
+  if (!ftpfile) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Could not open file for upload: " << local_file << "\n");
     return false;
-    }
+  }
   // set the url
   std::string upload_url = url;
   upload_url += "?";
@@ -164,16 +144,15 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
                      static_cast<long>(filelen));
   ::curl_easy_setopt(this->Curl, CURLOPT_WRITEFUNCTION,
                      curlWriteMemoryCallback);
-  ::curl_easy_setopt(this->Curl, CURLOPT_DEBUGFUNCTION,
-                     curlDebugCallback);
+  ::curl_easy_setopt(this->Curl, CURLOPT_DEBUGFUNCTION, curlDebugCallback);
   // Be sure to set Content-Type to satisfy fussy modsecurity rules
-  struct curl_slist *headers = ::curl_slist_append(NULL,
-                                                   "Content-Type: text/xml");
+  struct curl_slist* headers =
+    ::curl_slist_append(NULL, "Content-Type: text/xml");
   ::curl_easy_setopt(this->Curl, CURLOPT_HTTPHEADER, headers);
   std::vector<char> responseData;
   std::vector<char> debugData;
-  ::curl_easy_setopt(this->Curl, CURLOPT_FILE, (void *)&responseData);
-  ::curl_easy_setopt(this->Curl, CURLOPT_DEBUGDATA, (void *)&debugData);
+  ::curl_easy_setopt(this->Curl, CURLOPT_FILE, (void*)&responseData);
+  ::curl_easy_setopt(this->Curl, CURLOPT_DEBUGDATA, (void*)&debugData);
   ::curl_easy_setopt(this->Curl, CURLOPT_FAILONERROR, 1);
   // Now run off and do what you've been told!
   ::curl_easy_perform(this->Curl);
@@ -181,108 +160,90 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
   ::curl_easy_setopt(this->Curl, CURLOPT_HTTPHEADER, NULL);
   ::curl_slist_free_all(headers);
 
-  if ( responseData.size() > 0 )
-    {
+  if (responseData.size() > 0) {
     response = std::string(responseData.begin(), responseData.end());
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-               "Curl response: [" << response << "]\n");
-    }
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Curl response: ["
+                 << response << "]\n");
+  }
   std::string curlDebug;
-  if ( debugData.size() > 0 )
-    {
+  if (debugData.size() > 0) {
     curlDebug = std::string(debugData.begin(), debugData.end());
     cmCTestLog(this->CTest, DEBUG, "Curl debug: [" << curlDebug << "]\n");
-    }
-  if(response.size() == 0)
-    {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "No response from server.\n" <<
-      curlDebug);
+  }
+  if (response.size() == 0) {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "No response from server.\n"
+                 << curlDebug);
     return false;
-    }
+  }
   return true;
 }
 
 bool cmCTestCurl::HttpRequest(std::string const& url,
-                              std::string const& fields,
-                              std::string& response)
+                              std::string const& fields, std::string& response)
 {
   response = "";
   cmCTestLog(this->CTest, DEBUG, "HttpRequest\n"
-             << "url: " << url << "\n"
-             << "fields " << fields << "\n");
-  if(!this->InitCurl())
-    {
+               << "url: " << url << "\n"
+               << "fields " << fields << "\n");
+  if (!this->InitCurl()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Initialization of curl failed");
     return false;
-    }
+  }
   curl_easy_setopt(this->Curl, CURLOPT_POST, 1);
   curl_easy_setopt(this->Curl, CURLOPT_POSTFIELDS, fields.c_str());
   ::curl_easy_setopt(this->Curl, CURLOPT_URL, url.c_str());
   ::curl_easy_setopt(this->Curl, CURLOPT_FOLLOWLOCATION, 1);
-  //set response options
+  // set response options
   ::curl_easy_setopt(this->Curl, CURLOPT_WRITEFUNCTION,
                      curlWriteMemoryCallback);
-  ::curl_easy_setopt(this->Curl, CURLOPT_DEBUGFUNCTION,
-        curlDebugCallback);
+  ::curl_easy_setopt(this->Curl, CURLOPT_DEBUGFUNCTION, curlDebugCallback);
   std::vector<char> responseData;
   std::vector<char> debugData;
-  ::curl_easy_setopt(this->Curl, CURLOPT_FILE, (void *)&responseData);
-  ::curl_easy_setopt(this->Curl, CURLOPT_DEBUGDATA, (void *)&debugData);
+  ::curl_easy_setopt(this->Curl, CURLOPT_FILE, (void*)&responseData);
+  ::curl_easy_setopt(this->Curl, CURLOPT_DEBUGDATA, (void*)&debugData);
   ::curl_easy_setopt(this->Curl, CURLOPT_FAILONERROR, 1);
 
   CURLcode res = ::curl_easy_perform(this->Curl);
 
-  if ( responseData.size() > 0 )
-    {
+  if (responseData.size() > 0) {
     response = std::string(responseData.begin(), responseData.end());
     cmCTestLog(this->CTest, DEBUG, "Curl response: [" << response << "]\n");
-    }
-  if ( debugData.size() > 0 )
-    {
+  }
+  if (debugData.size() > 0) {
     std::string curlDebug = std::string(debugData.begin(), debugData.end());
     cmCTestLog(this->CTest, DEBUG, "Curl debug: [" << curlDebug << "]\n");
-    }
+  }
   cmCTestLog(this->CTest, DEBUG, "Curl res: " << res << "\n");
   return (res == 0);
 }
 
 void cmCTestCurl::SetProxyType()
 {
-  if ( cmSystemTools::GetEnv("HTTP_PROXY") )
-    {
+  if (cmSystemTools::GetEnv("HTTP_PROXY")) {
     this->HTTPProxy = cmSystemTools::GetEnv("HTTP_PROXY");
-    if ( cmSystemTools::GetEnv("HTTP_PROXY_PORT") )
-      {
+    if (cmSystemTools::GetEnv("HTTP_PROXY_PORT")) {
       this->HTTPProxy += ":";
       this->HTTPProxy += cmSystemTools::GetEnv("HTTP_PROXY_PORT");
-      }
-    if ( cmSystemTools::GetEnv("HTTP_PROXY_TYPE") )
-      {
+    }
+    if (cmSystemTools::GetEnv("HTTP_PROXY_TYPE")) {
       // this is the default
       this->HTTPProxyType = CURLPROXY_HTTP;
       std::string type = cmSystemTools::GetEnv("HTTP_PROXY_TYPE");
       // HTTP/SOCKS4/SOCKS5
-      if ( type == "HTTP" )
-        {
+      if (type == "HTTP") {
         this->HTTPProxyType = CURLPROXY_HTTP;
-        }
-      else if ( type == "SOCKS4" )
-        {
+      } else if (type == "SOCKS4") {
         this->HTTPProxyType = CURLPROXY_SOCKS4;
-        }
-      else if ( type == "SOCKS5" )
-        {
+      } else if (type == "SOCKS5") {
         this->HTTPProxyType = CURLPROXY_SOCKS5;
-        }
-      }
-    if ( cmSystemTools::GetEnv("HTTP_PROXY_USER") )
-      {
-      this->HTTPProxyAuth = cmSystemTools::GetEnv("HTTP_PROXY_USER");
-      }
-    if ( cmSystemTools::GetEnv("HTTP_PROXY_PASSWD") )
-      {
-      this->HTTPProxyAuth += ":";
-      this->HTTPProxyAuth += cmSystemTools::GetEnv("HTTP_PROXY_PASSWD");
       }
     }
+    if (cmSystemTools::GetEnv("HTTP_PROXY_USER")) {
+      this->HTTPProxyAuth = cmSystemTools::GetEnv("HTTP_PROXY_USER");
+    }
+    if (cmSystemTools::GetEnv("HTTP_PROXY_PASSWD")) {
+      this->HTTPProxyAuth += ":";
+      this->HTTPProxyAuth += cmSystemTools::GetEnv("HTTP_PROXY_PASSWD");
+    }
+  }
 }

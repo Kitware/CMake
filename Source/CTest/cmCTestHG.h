@@ -18,7 +18,7 @@
  * \brief Interaction with Mercurial command-line tool
  *
  */
-class cmCTestHG: public cmCTestGlobalVC
+class cmCTestHG : public cmCTestGlobalVC
 {
 public:
   /** Construct with a CTest instance and update log stream.  */

@@ -14,7 +14,7 @@
 
 #include "cmMakefileTargetGenerator.h"
 
-class cmMakefileExecutableTargetGenerator: public cmMakefileTargetGenerator
+class cmMakefileExecutableTargetGenerator : public cmMakefileTargetGenerator
 {
 public:
   cmMakefileExecutableTargetGenerator(cmGeneratorTarget* target);

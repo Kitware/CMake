@@ -35,7 +35,6 @@ public:
 protected:
   cmCursesBoolWidget(const cmCursesBoolWidget& from);
   void operator=(const cmCursesBoolWidget&);
-
 };
 
 #endif // cmCursesBoolWidget_h

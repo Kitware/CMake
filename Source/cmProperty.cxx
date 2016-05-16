@@ -13,27 +13,25 @@
 
 #include "cmSystemTools.h"
 
-void cmProperty::Set(const char *value)
+void cmProperty::Set(const char* value)
 {
   this->Value = value;
   this->ValueHasBeenSet = true;
 }
 
-void cmProperty::Append(const char *value, bool asString)
+void cmProperty::Append(const char* value, bool asString)
 {
-  if(!this->Value.empty() && *value && !asString)
-    {
+  if (!this->Value.empty() && *value && !asString) {
     this->Value += ";";
-    }
+  }
   this->Value += value;
   this->ValueHasBeenSet = true;
 }
 
-const char *cmProperty::GetValue() const
+const char* cmProperty::GetValue() const
 {
-  if (this->ValueHasBeenSet)
-    {
+  if (this->ValueHasBeenSet) {
     return this->Value.c_str();
-    }
+  }
   return 0;
 }

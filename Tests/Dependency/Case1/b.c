@@ -2,5 +2,5 @@ extern int a();
 
 int b()
 {
-   return a()+17;
+  return a() + 17;
 }

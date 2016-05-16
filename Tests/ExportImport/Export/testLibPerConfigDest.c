@@ -1,1 +1,4 @@
-int testLibPerConfigDest(void) { return 0; }
+int testLibPerConfigDest(void)
+{
+  return 0;
+}

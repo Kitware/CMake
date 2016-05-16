@@ -15,32 +15,27 @@
 #include "cmake.h"
 
 // cmGetTestPropertyCommand
-bool cmGetTestPropertyCommand
-::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
+bool cmGetTestPropertyCommand::InitialPass(
+  std::vector<std::string> const& args, cmExecutionStatus&)
 {
-  if(args.size() < 3 )
-    {
+  if (args.size() < 3) {
     this->SetError("called with incorrect number of arguments");
     return false;
-    }
+  }
 
   std::string testName = args[0];
   std::string var = args[2];
-  cmTest *test = this->Makefile->GetTest(testName);
-  if (test)
-    {
-    const char *prop = 0;
-    if (!args[1].empty())
-      {
+  cmTest* test = this->Makefile->GetTest(testName);
+  if (test) {
+    const char* prop = 0;
+    if (!args[1].empty()) {
       prop = test->GetProperty(args[1]);
-      }
-    if (prop)
-      {
+    }
+    if (prop) {
       this->Makefile->AddDefinition(var, prop);
       return true;
-      }
     }
+  }
   this->Makefile->AddDefinition(var, "NOTFOUND");
   return true;
 }
-

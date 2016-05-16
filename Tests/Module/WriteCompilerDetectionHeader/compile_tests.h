@@ -1,8 +1,10 @@
 
-#define JOIN_IMPL(A, B) A ## B
+#define JOIN_IMPL(A, B) A##B
 #define JOIN(A, B) JOIN_IMPL(A, B)
 
-#define CHECK(FEATURE) (JOIN(PREFIX, JOIN(_COMPILER_, FEATURE)) == JOIN(EXPECTED_COMPILER_, FEATURE))
+#define CHECK(FEATURE)                                                        \
+  (JOIN(PREFIX, JOIN(_COMPILER_, FEATURE)) ==                                 \
+   JOIN(EXPECTED_COMPILER_, FEATURE))
 
 #if !CHECK(CXX_DELEGATING_CONSTRUCTORS)
 #error cxx_delegating_constructors expected availability did not match.

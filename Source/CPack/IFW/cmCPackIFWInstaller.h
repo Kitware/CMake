@@ -103,9 +103,9 @@ public:
   const char* GetOption(const std::string& op) const;
   bool IsOn(const std::string& op) const;
 
-  bool IsVersionLess(const char *version);
-  bool IsVersionGreater(const char *version);
-  bool IsVersionEqual(const char *version);
+  bool IsVersionLess(const char* version);
+  bool IsVersionGreater(const char* version);
+  bool IsVersionEqual(const char* version);
 
   void ConfigureFromOptions();
 

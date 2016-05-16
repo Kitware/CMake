@@ -18,14 +18,13 @@
 class cmcmd
 {
 public:
-
   /**
    * Execute commands during the build process. Supports options such
    * as echo, remove file etc.
    */
   static int ExecuteCMakeCommand(std::vector<std::string>&);
-protected:
 
+protected:
   static int SymlinkLibrary(std::vector<std::string>& args);
   static int SymlinkExecutable(std::vector<std::string>& args);
   static bool SymlinkInternal(std::string const& file,

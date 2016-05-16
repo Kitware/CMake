@@ -23,13 +23,17 @@ class cmGlobalNMakeMakefileGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
   cmGlobalNMakeMakefileGenerator(cmake* cm);
-  static cmGlobalGeneratorFactory* NewFactory() {
-    return new cmGlobalGeneratorSimpleFactory
-      <cmGlobalNMakeMakefileGenerator>(); }
+  static cmGlobalGeneratorFactory* NewFactory()
+  {
+    return new cmGlobalGeneratorSimpleFactory<
+      cmGlobalNMakeMakefileGenerator>();
+  }
   ///! Get the name for the generator.
-  virtual std::string GetName() const {
-    return cmGlobalNMakeMakefileGenerator::GetActualName();}
-  static std::string GetActualName() {return "NMake Makefiles";}
+  virtual std::string GetName() const
+  {
+    return cmGlobalNMakeMakefileGenerator::GetActualName();
+  }
+  static std::string GetActualName() { return "NMake Makefiles"; }
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
@@ -38,8 +42,9 @@ public:
    * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
-  virtual void EnableLanguage(std::vector<std::string>const& languages,
-                              cmMakefile *, bool optional);
+  virtual void EnableLanguage(std::vector<std::string> const& languages,
+                              cmMakefile*, bool optional);
+
 private:
   void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
                            const char* envVar) const;

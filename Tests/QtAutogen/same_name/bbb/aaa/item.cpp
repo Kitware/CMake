@@ -3,10 +3,8 @@
 namespace bbb {
 namespace aaa {
 
-void
-Item::go ( )
+void Item::go()
 {
 }
-
 }
 }

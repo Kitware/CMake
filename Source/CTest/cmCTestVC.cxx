@@ -17,7 +17,9 @@
 
 #include <cmsys/Process.h>
 
-cmCTestVC::cmCTestVC(cmCTest* ct, std::ostream& log): CTest(ct), Log(log)
+cmCTestVC::cmCTestVC(cmCTest* ct, std::ostream& log)
+  : CTest(ct)
+  , Log(log)
 {
   this->PathCount[PathUpdated] = 0;
   this->PathCount[PathModified] = 0;
@@ -50,21 +52,19 @@ bool cmCTestVC::InitialCheckout(const char* command)
   std::string parent = cmSystemTools::GetFilenamePath(this->SourceDirectory);
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
              "   Perform checkout in directory: " << parent << "\n");
-  if(!cmSystemTools::MakeDirectory(parent.c_str()))
-    {
+  if (!cmSystemTools::MakeDirectory(parent.c_str())) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot create directory: " << parent << std::endl);
     return false;
-    }
+  }
 
   // Construct the initial checkout command line.
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
   std::vector<char const*> vc_co;
-  for(std::vector<std::string>::const_iterator ai = args.begin();
-      ai != args.end(); ++ai)
-    {
+  for (std::vector<std::string>::const_iterator ai = args.begin();
+       ai != args.end(); ++ai) {
     vc_co.push_back(ai->c_str());
-    }
+  }
   vc_co.push_back(0);
 
   // Run the initial checkout command and log its output.
@@ -73,11 +73,10 @@ bool cmCTestVC::InitialCheckout(const char* command)
   OutputLogger err(this->Log, "co-err> ");
   bool result = this->RunChild(&vc_co[0], &out, &err, parent.c_str());
   this->Log << "--- End Initial Checkout ---\n";
-  if(!result)
-    {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Initial checkout failed!" << std::endl);
-    }
+  if (!result) {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Initial checkout failed!"
+                 << std::endl);
+  }
   return result;
 }
 
@@ -88,7 +87,7 @@ bool cmCTestVC::RunChild(char const* const* cmd, OutputParser* out,
 
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_SetCommand(cp, cmd);
-  workDir = workDir? workDir : this->SourceDirectory.c_str();
+  workDir = workDir ? workDir : this->SourceDirectory.c_str();
   cmsysProcess_SetWorkingDirectory(cp, workDir);
   this->RunProcess(cp, out, err);
   int result = cmsysProcess_GetExitValue(cp);
@@ -100,24 +99,22 @@ std::string cmCTestVC::ComputeCommandLine(char const* const* cmd)
 {
   std::ostringstream line;
   const char* sep = "";
-  for(const char* const* arg = cmd; *arg; ++arg)
-    {
+  for (const char* const* arg = cmd; *arg; ++arg) {
     line << sep << "\"" << *arg << "\"";
     sep = " ";
-    }
+  }
   return line.str();
 }
 
-bool cmCTestVC::RunUpdateCommand(char const* const* cmd,
-                                 OutputParser* out, OutputParser* err)
+bool cmCTestVC::RunUpdateCommand(char const* const* cmd, OutputParser* out,
+                                 OutputParser* err)
 {
   // Report the command line.
   this->UpdateCommandLine = this->ComputeCommandLine(cmd);
-  if(this->CTest->GetShowOnly())
-    {
+  if (this->CTest->GetShowOnly()) {
     this->Log << this->UpdateCommandLine << "\n";
     return true;
-    }
+  }
 
   // Run the command.
   return this->RunChild(cmd, out, err);
@@ -130,13 +127,8 @@ std::string cmCTestVC::GetNightlyTime()
     this->CTest->GetCTestConfiguration("NightlyStartTime"),
     this->CTest->GetTomorrowTag());
   char current_time[1024];
-  sprintf(current_time, "%04d-%02d-%02d %02d:%02d:%02d",
-          t->tm_year + 1900,
-          t->tm_mon + 1,
-          t->tm_mday,
-          t->tm_hour,
-          t->tm_min,
-          t->tm_sec);
+  sprintf(current_time, "%04d-%02d-%02d %02d:%02d:%02d", t->tm_year + 1900,
+          t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
   return std::string(current_time);
 }
 
@@ -157,14 +149,13 @@ bool cmCTestVC::Update()
   bool result = true;
   // if update version only is on then do not actually update,
   // just note the current version and finish
-  if(!cmSystemTools::IsOn(
-       this->CTest->GetCTestConfiguration("UpdateVersionOnly").c_str()))
-    {
+  if (!cmSystemTools::IsOn(
+        this->CTest->GetCTestConfiguration("UpdateVersionOnly").c_str())) {
     this->NoteOldRevision();
     this->Log << "--- Begin Update ---\n";
     result = this->UpdateImpl();
     this->Log << "--- End Update ---\n";
-    }
+  }
   this->NoteNewRevision();
   return result;
 }
@@ -201,15 +192,13 @@ bool cmCTestVC::WriteXMLUpdates(cmXMLWriter&)
   return true;
 }
 
-void cmCTestVC::WriteXMLEntry(cmXMLWriter& xml,
-                              std::string const& path,
-                              std::string const& name,
-                              std::string const& full,
+void cmCTestVC::WriteXMLEntry(cmXMLWriter& xml, std::string const& path,
+                              std::string const& name, std::string const& full,
                               File const& f)
 {
-  static const char* desc[3] = { "Updated", "Modified", "Conflicting"};
-  Revision const& rev = f.Rev? *f.Rev : this->Unknown;
-  std::string prior = f.PriorRev? f.PriorRev->Rev : std::string("Unknown");
+  static const char* desc[3] = { "Updated", "Modified", "Conflicting" };
+  Revision const& rev = f.Rev ? *f.Rev : this->Unknown;
+  std::string prior = f.PriorRev ? f.PriorRev->Rev : std::string("Unknown");
   xml.StartElement(desc[f.Status]);
   xml.Element("File", name);
   xml.Element("Directory", path);

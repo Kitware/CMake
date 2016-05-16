@@ -22,7 +22,7 @@ class cmMakefile;
  * \brief Support class for generating install scripts.
  *
  */
-class cmInstallGenerator: public cmScriptGenerator
+class cmInstallGenerator : public cmScriptGenerator
 {
 public:
   enum MessageLevel
@@ -35,23 +35,17 @@ public:
 
   cmInstallGenerator(const char* destination,
                      std::vector<std::string> const& configurations,
-                     const char* component,
-                     MessageLevel message,
+                     const char* component, MessageLevel message,
                      bool exclude_from_all);
   virtual ~cmInstallGenerator();
 
-  void AddInstallRule(
-    std::ostream& os,
-    std::string const& dest,
-    cmInstallType type,
-    std::vector<std::string> const& files,
-    bool optional = false,
-    const char* permissions_file = 0,
-    const char* permissions_dir = 0,
-    const char* rename = 0,
-    const char* literal_args = 0,
-    Indent const& indent = Indent()
-    );
+  void AddInstallRule(std::ostream& os, std::string const& dest,
+                      cmInstallType type,
+                      std::vector<std::string> const& files,
+                      bool optional = false, const char* permissions_file = 0,
+                      const char* permissions_dir = 0, const char* rename = 0,
+                      const char* literal_args = 0,
+                      Indent const& indent = Indent());
 
   /** Get the install destination as it should appear in the
       installation script.  */

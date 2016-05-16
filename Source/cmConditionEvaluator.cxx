@@ -43,17 +43,16 @@ static std::string const keyVERSION_GREATER = "VERSION_GREATER";
 static std::string const keyVERSION_LESS = "VERSION_LESS";
 
 cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
-                                           const cmListFileContext &context,
-                                           const cmListFileBacktrace& bt):
-  Makefile(makefile),
-  ExecutionContext(context),
-  Backtrace(bt),
-  Policy12Status(makefile.GetPolicyStatus(cmPolicies::CMP0012)),
-  Policy54Status(makefile.GetPolicyStatus(cmPolicies::CMP0054)),
-  Policy57Status(makefile.GetPolicyStatus(cmPolicies::CMP0057)),
-  Policy64Status(makefile.GetPolicyStatus(cmPolicies::CMP0064))
+                                           const cmListFileContext& context,
+                                           const cmListFileBacktrace& bt)
+  : Makefile(makefile)
+  , ExecutionContext(context)
+  , Backtrace(bt)
+  , Policy12Status(makefile.GetPolicyStatus(cmPolicies::CMP0012))
+  , Policy54Status(makefile.GetPolicyStatus(cmPolicies::CMP0054))
+  , Policy57Status(makefile.GetPolicyStatus(cmPolicies::CMP0057))
+  , Policy64Status(makefile.GetPolicyStatus(cmPolicies::CMP0064))
 {
-
 }
 
 //=========================================================================
@@ -73,17 +72,15 @@ cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
 // directly. AND OR take variables or the values 0 or 1.
 
 bool cmConditionEvaluator::IsTrue(
-  const std::vector<cmExpandedCommandArgument> &args,
-  std::string &errorString,
-  cmake::MessageType &status)
+  const std::vector<cmExpandedCommandArgument>& args, std::string& errorString,
+  cmake::MessageType& status)
 {
   errorString = "";
 
   // handle empty invocation
-  if (args.size() < 1)
-    {
+  if (args.size() < 1) {
     return false;
-    }
+  }
 
   // store the reduced args in this vector
   cmArgumentList newArgs;
@@ -94,123 +91,109 @@ bool cmConditionEvaluator::IsTrue(
   // now loop through the arguments and see if we can reduce any of them
   // we do this multiple times. Once for each level of precedence
   // parens
-  if (!this->HandleLevel0(newArgs, errorString, status))
-    {
+  if (!this->HandleLevel0(newArgs, errorString, status)) {
     return false;
-    }
-  //predicates
-  if (!this->HandleLevel1(newArgs, errorString, status))
-    {
+  }
+  // predicates
+  if (!this->HandleLevel1(newArgs, errorString, status)) {
     return false;
-    }
+  }
   // binary ops
-  if (!this->HandleLevel2(newArgs, errorString, status))
-    {
+  if (!this->HandleLevel2(newArgs, errorString, status)) {
     return false;
-    }
+  }
 
   // NOT
-  if (!this->HandleLevel3(newArgs, errorString, status))
-    {
+  if (!this->HandleLevel3(newArgs, errorString, status)) {
     return false;
-    }
+  }
   // AND OR
-  if (!this->HandleLevel4(newArgs, errorString, status))
-    {
+  if (!this->HandleLevel4(newArgs, errorString, status)) {
     return false;
-    }
+  }
 
   // now at the end there should only be one argument left
-  if (newArgs.size() != 1)
-    {
+  if (newArgs.size() != 1) {
     errorString = "Unknown arguments specified";
     status = cmake::FATAL_ERROR;
     return false;
-    }
+  }
 
   return this->GetBooleanValueWithAutoDereference(*(newArgs.begin()),
-    errorString, status, true);
+                                                  errorString, status, true);
 }
 
 //=========================================================================
 const char* cmConditionEvaluator::GetDefinitionIfUnquoted(
   cmExpandedCommandArgument const& argument) const
 {
-  if((this->Policy54Status != cmPolicies::WARN &&
-     this->Policy54Status != cmPolicies::OLD) &&
-     argument.WasQuoted())
-    {
+  if ((this->Policy54Status != cmPolicies::WARN &&
+       this->Policy54Status != cmPolicies::OLD) &&
+      argument.WasQuoted()) {
     return 0;
-    }
+  }
 
   const char* def = this->Makefile.GetDefinition(argument.GetValue());
 
-  if(def && argument.WasQuoted() && this->Policy54Status == cmPolicies::WARN)
-    {
-    if(!this->Makefile.HasCMP0054AlreadyBeenReported(
-         this->ExecutionContext))
-      {
+  if (def && argument.WasQuoted() &&
+      this->Policy54Status == cmPolicies::WARN) {
+    if (!this->Makefile.HasCMP0054AlreadyBeenReported(
+          this->ExecutionContext)) {
       std::ostringstream e;
       e << (cmPolicies::GetPolicyWarning(cmPolicies::CMP0054)) << "\n";
-      e << "Quoted variables like \"" << argument.GetValue() <<
-        "\" will no longer be dereferenced "
-        "when the policy is set to NEW.  "
-        "Since the policy is not set the OLD behavior will be used.";
+      e << "Quoted variables like \"" << argument.GetValue()
+        << "\" will no longer be dereferenced "
+           "when the policy is set to NEW.  "
+           "Since the policy is not set the OLD behavior will be used.";
 
-      this->Makefile.GetCMakeInstance()
-          ->IssueMessage(cmake::AUTHOR_WARNING, e.str(),
-                         this->Backtrace);
-      }
+      this->Makefile.GetCMakeInstance()->IssueMessage(
+        cmake::AUTHOR_WARNING, e.str(), this->Backtrace);
     }
+  }
 
   return def;
 }
 
 //=========================================================================
 const char* cmConditionEvaluator::GetVariableOrString(
-    const cmExpandedCommandArgument& argument) const
+  const cmExpandedCommandArgument& argument) const
 {
   const char* def = this->GetDefinitionIfUnquoted(argument);
 
-  if(!def)
-    {
+  if (!def) {
     def = argument.c_str();
-    }
+  }
 
   return def;
 }
 
 //=========================================================================
 bool cmConditionEvaluator::IsKeyword(std::string const& keyword,
-  cmExpandedCommandArgument& argument) const
+                                     cmExpandedCommandArgument& argument) const
 {
-  if((this->Policy54Status != cmPolicies::WARN &&
-     this->Policy54Status != cmPolicies::OLD) &&
-     argument.WasQuoted())
-    {
+  if ((this->Policy54Status != cmPolicies::WARN &&
+       this->Policy54Status != cmPolicies::OLD) &&
+      argument.WasQuoted()) {
     return false;
-    }
+  }
 
   bool isKeyword = argument.GetValue() == keyword;
 
-  if(isKeyword && argument.WasQuoted() &&
-    this->Policy54Status == cmPolicies::WARN)
-    {
-    if(!this->Makefile.HasCMP0054AlreadyBeenReported(
-         this->ExecutionContext))
-      {
+  if (isKeyword && argument.WasQuoted() &&
+      this->Policy54Status == cmPolicies::WARN) {
+    if (!this->Makefile.HasCMP0054AlreadyBeenReported(
+          this->ExecutionContext)) {
       std::ostringstream e;
       e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0054) << "\n";
-      e << "Quoted keywords like \"" << argument.GetValue() <<
-        "\" will no longer be interpreted as keywords "
-        "when the policy is set to NEW.  "
-        "Since the policy is not set the OLD behavior will be used.";
+      e << "Quoted keywords like \"" << argument.GetValue()
+        << "\" will no longer be interpreted as keywords "
+           "when the policy is set to NEW.  "
+           "Since the policy is not set the OLD behavior will be used.";
 
-      this->Makefile.GetCMakeInstance()
-          ->IssueMessage(cmake::AUTHOR_WARNING, e.str(),
-                         this->Backtrace);
-      }
+      this->Makefile.GetCMakeInstance()->IssueMessage(
+        cmake::AUTHOR_WARNING, e.str(), this->Backtrace);
     }
+  }
 
   return isKeyword;
 }
@@ -220,36 +203,30 @@ bool cmConditionEvaluator::GetBooleanValue(
   cmExpandedCommandArgument& arg) const
 {
   // Check basic constants.
-  if (arg == "0")
-    {
+  if (arg == "0") {
     return false;
-    }
-  if (arg == "1")
-    {
+  }
+  if (arg == "1") {
     return true;
-    }
+  }
 
   // Check named constants.
-  if (cmSystemTools::IsOn(arg.c_str()))
-    {
+  if (cmSystemTools::IsOn(arg.c_str())) {
     return true;
-    }
-  if (cmSystemTools::IsOff(arg.c_str()))
-    {
+  }
+  if (cmSystemTools::IsOff(arg.c_str())) {
     return false;
-    }
+  }
 
   // Check for numbers.
-  if(!arg.empty())
-    {
+  if (!arg.empty()) {
     char* end;
     double d = strtod(arg.c_str(), &end);
-    if(*end == '\0')
-      {
+    if (*end == '\0') {
       // The whole string is a number.  Use C conversion to bool.
-      return d? true:false;
-      }
+      return d ? true : false;
     }
+  }
 
   // Check definition.
   const char* def = this->GetDefinitionIfUnquoted(arg);
@@ -261,179 +238,149 @@ bool cmConditionEvaluator::GetBooleanValue(
 bool cmConditionEvaluator::GetBooleanValueOld(
   cmExpandedCommandArgument const& arg, bool one) const
 {
-  if(one)
-    {
+  if (one) {
     // Old IsTrue behavior for single argument.
-    if(arg == "0")
-      { return false; }
-    else if(arg == "1")
-      { return true; }
-    else
-      {
+    if (arg == "0") {
+      return false;
+    } else if (arg == "1") {
+      return true;
+    } else {
       const char* def = this->GetDefinitionIfUnquoted(arg);
       return !cmSystemTools::IsOff(def);
-      }
     }
-  else
-    {
+  } else {
     // Old GetVariableOrNumber behavior.
     const char* def = this->GetDefinitionIfUnquoted(arg);
-    if(!def && atoi(arg.c_str()))
-      {
+    if (!def && atoi(arg.c_str())) {
       def = arg.c_str();
-      }
-    return !cmSystemTools::IsOff(def);
     }
+    return !cmSystemTools::IsOff(def);
+  }
 }
 
 //=========================================================================
 // returns the resulting boolean value
 bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
-  cmExpandedCommandArgument &newArg,
-  std::string &errorString,
-  cmake::MessageType &status,
-  bool oneArg) const
+  cmExpandedCommandArgument& newArg, std::string& errorString,
+  cmake::MessageType& status, bool oneArg) const
 {
   // Use the policy if it is set.
-  if (this->Policy12Status == cmPolicies::NEW)
-    {
+  if (this->Policy12Status == cmPolicies::NEW) {
     return GetBooleanValue(newArg);
-    }
-  else if (this->Policy12Status == cmPolicies::OLD)
-    {
+  } else if (this->Policy12Status == cmPolicies::OLD) {
     return GetBooleanValueOld(newArg, oneArg);
-    }
+  }
 
   // Check policy only if old and new results differ.
   bool newResult = this->GetBooleanValue(newArg);
   bool oldResult = this->GetBooleanValueOld(newArg, oneArg);
-  if(newResult != oldResult)
-    {
-    switch(this->Policy12Status)
-      {
-      case cmPolicies::WARN:
-        {
-        errorString = "An argument named \"" + newArg.GetValue()
-          + "\" appears in a conditional statement.  "
-          + cmPolicies::GetPolicyWarning(cmPolicies::CMP0012);
+  if (newResult != oldResult) {
+    switch (this->Policy12Status) {
+      case cmPolicies::WARN: {
+        errorString = "An argument named \"" + newArg.GetValue() +
+          "\" appears in a conditional statement.  " +
+          cmPolicies::GetPolicyWarning(cmPolicies::CMP0012);
         status = cmake::AUTHOR_WARNING;
-        }
+      }
       case cmPolicies::OLD:
         return oldResult;
       case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        {
-        errorString = "An argument named \"" + newArg.GetValue()
-          + "\" appears in a conditional statement.  "
-          + cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0012);
+      case cmPolicies::REQUIRED_ALWAYS: {
+        errorString = "An argument named \"" + newArg.GetValue() +
+          "\" appears in a conditional statement.  " +
+          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0012);
         status = cmake::FATAL_ERROR;
-        }
+      }
       case cmPolicies::NEW:
         break;
-      }
     }
+  }
   return newResult;
 }
 
 //=========================================================================
-void cmConditionEvaluator::IncrementArguments(cmArgumentList &newArgs,
-                        cmArgumentList::iterator &argP1,
-                        cmArgumentList::iterator &argP2) const
+void cmConditionEvaluator::IncrementArguments(
+  cmArgumentList& newArgs, cmArgumentList::iterator& argP1,
+  cmArgumentList::iterator& argP2) const
 {
-  if (argP1 != newArgs.end())
-    {
+  if (argP1 != newArgs.end()) {
     argP1++;
     argP2 = argP1;
-    if (argP1 != newArgs.end())
-      {
+    if (argP1 != newArgs.end()) {
       argP2++;
-      }
     }
+  }
 }
 
 //=========================================================================
 // helper function to reduce code duplication
-void cmConditionEvaluator::HandlePredicate(bool value, int &reducible,
-                     cmArgumentList::iterator &arg,
-                     cmArgumentList &newArgs,
-                     cmArgumentList::iterator &argP1,
-                     cmArgumentList::iterator &argP2) const
+void cmConditionEvaluator::HandlePredicate(
+  bool value, int& reducible, cmArgumentList::iterator& arg,
+  cmArgumentList& newArgs, cmArgumentList::iterator& argP1,
+  cmArgumentList::iterator& argP2) const
 {
-  if(value)
-    {
+  if (value) {
     *arg = cmExpandedCommandArgument("1", true);
-    }
-  else
-    {
+  } else {
     *arg = cmExpandedCommandArgument("0", true);
-    }
+  }
   newArgs.erase(argP1);
   argP1 = arg;
-  this->IncrementArguments(newArgs,argP1,argP2);
+  this->IncrementArguments(newArgs, argP1, argP2);
   reducible = 1;
 }
 
 //=========================================================================
 // helper function to reduce code duplication
-void cmConditionEvaluator::HandleBinaryOp(bool value, int &reducible,
-                     cmArgumentList::iterator &arg,
-                     cmArgumentList &newArgs,
-                     cmArgumentList::iterator &argP1,
-                     cmArgumentList::iterator &argP2)
+void cmConditionEvaluator::HandleBinaryOp(bool value, int& reducible,
+                                          cmArgumentList::iterator& arg,
+                                          cmArgumentList& newArgs,
+                                          cmArgumentList::iterator& argP1,
+                                          cmArgumentList::iterator& argP2)
 {
-  if(value)
-    {
+  if (value) {
     *arg = cmExpandedCommandArgument("1", true);
-    }
-  else
-    {
+  } else {
     *arg = cmExpandedCommandArgument("0", true);
-    }
+  }
   newArgs.erase(argP2);
   newArgs.erase(argP1);
   argP1 = arg;
-  this->IncrementArguments(newArgs,argP1,argP2);
+  this->IncrementArguments(newArgs, argP1, argP2);
   reducible = 1;
 }
 
 //=========================================================================
 // level 0 processes parenthetical expressions
-bool cmConditionEvaluator::HandleLevel0(cmArgumentList &newArgs,
-                  std::string &errorString,
-                  cmake::MessageType &status)
+bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
+                                        std::string& errorString,
+                                        cmake::MessageType& status)
 {
   int reducible;
-  do
-    {
+  do {
     reducible = 0;
     cmArgumentList::iterator arg = newArgs.begin();
-    while (arg != newArgs.end())
-      {
-      if (IsKeyword(keyParenL, *arg))
-        {
+    while (arg != newArgs.end()) {
+      if (IsKeyword(keyParenL, *arg)) {
         // search for the closing paren for this opening one
         cmArgumentList::iterator argClose;
         argClose = arg;
         argClose++;
         unsigned int depth = 1;
-        while (argClose != newArgs.end() && depth)
-          {
-          if (this->IsKeyword(keyParenL, *argClose))
-            {
-              depth++;
-            }
-          if (this->IsKeyword(keyParenR, *argClose))
-            {
-              depth--;
-            }
-          argClose++;
+        while (argClose != newArgs.end() && depth) {
+          if (this->IsKeyword(keyParenL, *argClose)) {
+            depth++;
           }
-        if (depth)
-          {
+          if (this->IsKeyword(keyParenR, *argClose)) {
+            depth--;
+          }
+          argClose++;
+        }
+        if (depth) {
           errorString = "mismatched parenthesis in condition";
           status = cmake::FATAL_ERROR;
           return false;
-          }
+        }
         // store the reduced args in this vector
         std::vector<cmExpandedCommandArgument> newArgs2;
 
@@ -444,420 +391,337 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList &newArgs,
         newArgs2.pop_back();
         // now recursively invoke IsTrue to handle the values inside the
         // parenthetical expression
-        bool value =
-          this->IsTrue(newArgs2, errorString, status);
-        if(value)
-          {
+        bool value = this->IsTrue(newArgs2, errorString, status);
+        if (value) {
           *arg = cmExpandedCommandArgument("1", true);
-          }
-        else
-          {
+        } else {
           *arg = cmExpandedCommandArgument("0", true);
-          }
+        }
         argP1 = arg;
         argP1++;
         // remove the now evaluated parenthetical expression
-        newArgs.erase(argP1,argClose);
-        }
-      ++arg;
+        newArgs.erase(argP1, argClose);
       }
+      ++arg;
     }
-  while (reducible);
+  } while (reducible);
   return true;
 }
 
 //=========================================================================
 // level one handles most predicates except for NOT
-bool cmConditionEvaluator::HandleLevel1(cmArgumentList &newArgs,
-                  std::string &, cmake::MessageType &)
+bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
+                                        cmake::MessageType&)
 {
   int reducible;
-  do
-    {
+  do {
     reducible = 0;
     cmArgumentList::iterator arg = newArgs.begin();
     cmArgumentList::iterator argP1;
     cmArgumentList::iterator argP2;
-    while (arg != newArgs.end())
-      {
+    while (arg != newArgs.end()) {
       argP1 = arg;
-      this->IncrementArguments(newArgs,argP1,argP2);
+      this->IncrementArguments(newArgs, argP1, argP2);
       // does a file exist
-      if (this->IsKeyword(keyEXISTS, *arg) && argP1 != newArgs.end())
-        {
-        this->HandlePredicate(
-          cmSystemTools::FileExists(argP1->c_str()),
-          reducible, arg, newArgs, argP1, argP2);
-        }
+      if (this->IsKeyword(keyEXISTS, *arg) && argP1 != newArgs.end()) {
+        this->HandlePredicate(cmSystemTools::FileExists(argP1->c_str()),
+                              reducible, arg, newArgs, argP1, argP2);
+      }
       // does a directory with this name exist
-      if (this->IsKeyword(keyIS_DIRECTORY, *arg) && argP1 != newArgs.end())
-        {
-        this->HandlePredicate(
-          cmSystemTools::FileIsDirectory(argP1->c_str()),
-          reducible, arg, newArgs, argP1, argP2);
-        }
+      if (this->IsKeyword(keyIS_DIRECTORY, *arg) && argP1 != newArgs.end()) {
+        this->HandlePredicate(cmSystemTools::FileIsDirectory(argP1->c_str()),
+                              reducible, arg, newArgs, argP1, argP2);
+      }
       // does a symlink with this name exist
-      if (this->IsKeyword(keyIS_SYMLINK, *arg) && argP1 != newArgs.end())
-        {
-        this->HandlePredicate(
-          cmSystemTools::FileIsSymlink(argP1->c_str()),
-          reducible, arg, newArgs, argP1, argP2);
-        }
+      if (this->IsKeyword(keyIS_SYMLINK, *arg) && argP1 != newArgs.end()) {
+        this->HandlePredicate(cmSystemTools::FileIsSymlink(argP1->c_str()),
+                              reducible, arg, newArgs, argP1, argP2);
+      }
       // is the given path an absolute path ?
-      if (this->IsKeyword(keyIS_ABSOLUTE, *arg) && argP1 != newArgs.end())
-        {
-        this->HandlePredicate(
-          cmSystemTools::FileIsFullPath(argP1->c_str()),
-          reducible, arg, newArgs, argP1, argP2);
-        }
+      if (this->IsKeyword(keyIS_ABSOLUTE, *arg) && argP1 != newArgs.end()) {
+        this->HandlePredicate(cmSystemTools::FileIsFullPath(argP1->c_str()),
+                              reducible, arg, newArgs, argP1, argP2);
+      }
       // does a command exist
-      if (this->IsKeyword(keyCOMMAND, *arg) && argP1 != newArgs.end())
-        {
+      if (this->IsKeyword(keyCOMMAND, *arg) && argP1 != newArgs.end()) {
         cmCommand* command =
-            this->Makefile.GetState()->GetCommand(argP1->c_str());
-        this->HandlePredicate(
-          command ? true : false,
-          reducible, arg, newArgs, argP1, argP2);
-        }
+          this->Makefile.GetState()->GetCommand(argP1->c_str());
+        this->HandlePredicate(command ? true : false, reducible, arg, newArgs,
+                              argP1, argP2);
+      }
       // does a policy exist
-      if (this->IsKeyword(keyPOLICY, *arg) && argP1 != newArgs.end())
-        {
+      if (this->IsKeyword(keyPOLICY, *arg) && argP1 != newArgs.end()) {
         cmPolicies::PolicyID pid;
-        this->HandlePredicate(
-          cmPolicies::GetPolicyID(argP1->c_str(), pid),
-            reducible, arg, newArgs, argP1, argP2);
-        }
+        this->HandlePredicate(cmPolicies::GetPolicyID(argP1->c_str(), pid),
+                              reducible, arg, newArgs, argP1, argP2);
+      }
       // does a target exist
-      if (this->IsKeyword(keyTARGET, *arg) && argP1 != newArgs.end())
-        {
+      if (this->IsKeyword(keyTARGET, *arg) && argP1 != newArgs.end()) {
         this->HandlePredicate(
-          this->Makefile.FindTargetToUse(argP1->GetValue())?true:false,
+          this->Makefile.FindTargetToUse(argP1->GetValue()) ? true : false,
           reducible, arg, newArgs, argP1, argP2);
-        }
+      }
       // does a test exist
-      if(this->Policy64Status != cmPolicies::OLD &&
-        this->Policy64Status != cmPolicies::WARN)
-        {
-        if (this->IsKeyword(keyTEST, *arg) && argP1 != newArgs.end())
-          {
+      if (this->Policy64Status != cmPolicies::OLD &&
+          this->Policy64Status != cmPolicies::WARN) {
+        if (this->IsKeyword(keyTEST, *arg) && argP1 != newArgs.end()) {
           const cmTest* haveTest = this->Makefile.GetTest(argP1->c_str());
-          this->HandlePredicate(
-            haveTest?true:false,
-            reducible, arg, newArgs, argP1, argP2);
-          }
+          this->HandlePredicate(haveTest ? true : false, reducible, arg,
+                                newArgs, argP1, argP2);
         }
-      else if(this->Policy64Status == cmPolicies::WARN &&
-        this->IsKeyword(keyTEST, *arg))
-        {
+      } else if (this->Policy64Status == cmPolicies::WARN &&
+                 this->IsKeyword(keyTEST, *arg)) {
         std::ostringstream e;
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0064) << "\n";
         e << "TEST will be interpreted as an operator "
-          "when the policy is set to NEW.  "
-          "Since the policy is not set the OLD behavior will be used.";
+             "when the policy is set to NEW.  "
+             "Since the policy is not set the OLD behavior will be used.";
 
         this->Makefile.IssueMessage(cmake::AUTHOR_WARNING, e.str());
-        }
+      }
       // is a variable defined
-      if (this->IsKeyword(keyDEFINED, *arg) && argP1 != newArgs.end())
-        {
+      if (this->IsKeyword(keyDEFINED, *arg) && argP1 != newArgs.end()) {
         size_t argP1len = argP1->GetValue().size();
         bool bdef = false;
-        if(argP1len > 4 && argP1->GetValue().substr(0, 4) == "ENV{" &&
-           argP1->GetValue().operator[](argP1len-1) == '}')
-          {
-          std::string env = argP1->GetValue().substr(4, argP1len-5);
-          bdef = cmSystemTools::GetEnv(env.c_str())?true:false;
-          }
-        else
-          {
+        if (argP1len > 4 && argP1->GetValue().substr(0, 4) == "ENV{" &&
+            argP1->GetValue().operator[](argP1len - 1) == '}') {
+          std::string env = argP1->GetValue().substr(4, argP1len - 5);
+          bdef = cmSystemTools::GetEnv(env.c_str()) ? true : false;
+        } else {
           bdef = this->Makefile.IsDefinitionSet(argP1->GetValue());
-          }
-        this->HandlePredicate(bdef, reducible, arg, newArgs, argP1, argP2);
         }
-      ++arg;
+        this->HandlePredicate(bdef, reducible, arg, newArgs, argP1, argP2);
       }
+      ++arg;
     }
-  while (reducible);
+  } while (reducible);
   return true;
 }
 
 //=========================================================================
 // level two handles most binary operations except for AND  OR
-bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
-                  std::string &errorString,
-                  cmake::MessageType &status)
+bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
+                                        std::string& errorString,
+                                        cmake::MessageType& status)
 {
   int reducible;
   std::string def_buf;
-  const char *def;
-  const char *def2;
-  do
-    {
+  const char* def;
+  const char* def2;
+  do {
     reducible = 0;
     cmArgumentList::iterator arg = newArgs.begin();
     cmArgumentList::iterator argP1;
     cmArgumentList::iterator argP2;
-    while (arg != newArgs.end())
-      {
+    while (arg != newArgs.end()) {
       argP1 = arg;
-      this->IncrementArguments(newArgs,argP1,argP2);
+      this->IncrementArguments(newArgs, argP1, argP2);
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-        IsKeyword(keyMATCHES, *argP1))
-        {
+          IsKeyword(keyMATCHES, *argP1)) {
         def = this->GetVariableOrString(*arg);
         if (def != arg->c_str() // yes, we compare the pointer value
-            && cmHasLiteralPrefix(arg->GetValue(), "CMAKE_MATCH_"))
-          {
+            && cmHasLiteralPrefix(arg->GetValue(), "CMAKE_MATCH_")) {
           // The string to match is owned by our match result variables.
           // Move it to our own buffer before clearing them.
           def_buf = def;
           def = def_buf.c_str();
-          }
+        }
         const char* rex = argP2->c_str();
         this->Makefile.ClearMatches();
         cmsys::RegularExpression regEntry;
-        if ( !regEntry.compile(rex) )
-          {
+        if (!regEntry.compile(rex)) {
           std::ostringstream error;
           error << "Regular expression \"" << rex << "\" cannot compile";
           errorString = error.str();
           status = cmake::FATAL_ERROR;
           return false;
-          }
-        if (regEntry.find(def))
-          {
+        }
+        if (regEntry.find(def)) {
           this->Makefile.StoreMatches(regEntry);
           *arg = cmExpandedCommandArgument("1", true);
-          }
-        else
-          {
+        } else {
           *arg = cmExpandedCommandArgument("0", true);
-          }
+        }
         newArgs.erase(argP2);
         newArgs.erase(argP1);
         argP1 = arg;
-        this->IncrementArguments(newArgs,argP1,argP2);
+        this->IncrementArguments(newArgs, argP1, argP2);
         reducible = 1;
-        }
+      }
 
-      if (argP1 != newArgs.end() && this->IsKeyword(keyMATCHES, *arg))
-        {
+      if (argP1 != newArgs.end() && this->IsKeyword(keyMATCHES, *arg)) {
         *arg = cmExpandedCommandArgument("0", true);
         newArgs.erase(argP1);
         argP1 = arg;
-        this->IncrementArguments(newArgs,argP1,argP2);
+        this->IncrementArguments(newArgs, argP1, argP2);
         reducible = 1;
-        }
+      }
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-        (this->IsKeyword(keyLESS, *argP1) ||
-         this->IsKeyword(keyGREATER, *argP1) ||
-         this->IsKeyword(keyEQUAL, *argP1)))
-        {
+          (this->IsKeyword(keyLESS, *argP1) ||
+           this->IsKeyword(keyGREATER, *argP1) ||
+           this->IsKeyword(keyEQUAL, *argP1))) {
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
         double lhs;
         double rhs;
         bool result;
-        if(sscanf(def, "%lg", &lhs) != 1 ||
-           sscanf(def2, "%lg", &rhs) != 1)
-          {
+        if (sscanf(def, "%lg", &lhs) != 1 || sscanf(def2, "%lg", &rhs) != 1) {
           result = false;
-          }
-        else if (*(argP1) == keyLESS)
-          {
+        } else if (*(argP1) == keyLESS) {
           result = (lhs < rhs);
-          }
-        else if (*(argP1) == keyGREATER)
-          {
+        } else if (*(argP1) == keyGREATER) {
           result = (lhs > rhs);
-          }
-        else
-          {
+        } else {
           result = (lhs == rhs);
-          }
-        this->HandleBinaryOp(result,
-          reducible, arg, newArgs, argP1, argP2);
         }
+        this->HandleBinaryOp(result, reducible, arg, newArgs, argP1, argP2);
+      }
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-        (this->IsKeyword(keySTRLESS, *argP1) ||
-         this->IsKeyword(keySTREQUAL, *argP1) ||
-         this->IsKeyword(keySTRGREATER, *argP1)))
-        {
+          (this->IsKeyword(keySTRLESS, *argP1) ||
+           this->IsKeyword(keySTREQUAL, *argP1) ||
+           this->IsKeyword(keySTRGREATER, *argP1))) {
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
-        int val = strcmp(def,def2);
+        int val = strcmp(def, def2);
         bool result;
-        if (*(argP1) == keySTRLESS)
-          {
+        if (*(argP1) == keySTRLESS) {
           result = (val < 0);
-          }
-        else if (*(argP1) == keySTRGREATER)
-          {
+        } else if (*(argP1) == keySTRGREATER) {
           result = (val > 0);
-          }
-        else // strequal
-          {
+        } else // strequal
+        {
           result = (val == 0);
-          }
-        this->HandleBinaryOp(result,
-          reducible, arg, newArgs, argP1, argP2);
         }
+        this->HandleBinaryOp(result, reducible, arg, newArgs, argP1, argP2);
+      }
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-        (this->IsKeyword(keyVERSION_LESS, *argP1) ||
-         this->IsKeyword(keyVERSION_GREATER, *argP1) ||
-         this->IsKeyword(keyVERSION_EQUAL, *argP1)))
-        {
+          (this->IsKeyword(keyVERSION_LESS, *argP1) ||
+           this->IsKeyword(keyVERSION_GREATER, *argP1) ||
+           this->IsKeyword(keyVERSION_EQUAL, *argP1))) {
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
         cmSystemTools::CompareOp op = cmSystemTools::OP_EQUAL;
-        if(*argP1 == keyVERSION_LESS)
-          {
+        if (*argP1 == keyVERSION_LESS) {
           op = cmSystemTools::OP_LESS;
-          }
-        else if(*argP1 == keyVERSION_GREATER)
-          {
+        } else if (*argP1 == keyVERSION_GREATER) {
           op = cmSystemTools::OP_GREATER;
-          }
-        bool result = cmSystemTools::VersionCompare(op, def, def2);
-        this->HandleBinaryOp(result,
-          reducible, arg, newArgs, argP1, argP2);
         }
+        bool result = cmSystemTools::VersionCompare(op, def, def2);
+        this->HandleBinaryOp(result, reducible, arg, newArgs, argP1, argP2);
+      }
 
       // is file A newer than file B
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-          this->IsKeyword(keyIS_NEWER_THAN, *argP1))
-        {
-        int fileIsNewer=0;
-        bool success=cmSystemTools::FileTimeCompare(arg->GetValue(),
-            (argP2)->GetValue(),
-            &fileIsNewer);
+          this->IsKeyword(keyIS_NEWER_THAN, *argP1)) {
+        int fileIsNewer = 0;
+        bool success = cmSystemTools::FileTimeCompare(
+          arg->GetValue(), (argP2)->GetValue(), &fileIsNewer);
         this->HandleBinaryOp(
-          (success==false || fileIsNewer==1 || fileIsNewer==0),
+          (success == false || fileIsNewer == 1 || fileIsNewer == 0),
           reducible, arg, newArgs, argP1, argP2);
-        }
+      }
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-          this->IsKeyword(keyIN_LIST, *argP1))
-        {
-        if(this->Policy57Status != cmPolicies::OLD &&
-          this->Policy57Status != cmPolicies::WARN)
-          {
+          this->IsKeyword(keyIN_LIST, *argP1)) {
+        if (this->Policy57Status != cmPolicies::OLD &&
+            this->Policy57Status != cmPolicies::WARN) {
           bool result = false;
 
           def = this->GetVariableOrString(*arg);
           def2 = this->Makefile.GetDefinition(argP2->GetValue());
 
-          if(def2)
-            {
+          if (def2) {
             std::vector<std::string> list;
             cmSystemTools::ExpandListArgument(def2, list, true);
 
             result = std::find(list.begin(), list.end(), def) != list.end();
-            }
-
-          this->HandleBinaryOp(result,
-            reducible, arg, newArgs, argP1, argP2);
           }
-          else if(this->Policy57Status == cmPolicies::WARN)
-            {
-            std::ostringstream e;
-            e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0057) << "\n";
-            e << "IN_LIST will be interpreted as an operator "
-              "when the policy is set to NEW.  "
-              "Since the policy is not set the OLD behavior will be used.";
 
-            this->Makefile.IssueMessage(cmake::AUTHOR_WARNING, e.str());
-            }
+          this->HandleBinaryOp(result, reducible, arg, newArgs, argP1, argP2);
+        } else if (this->Policy57Status == cmPolicies::WARN) {
+          std::ostringstream e;
+          e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0057) << "\n";
+          e << "IN_LIST will be interpreted as an operator "
+               "when the policy is set to NEW.  "
+               "Since the policy is not set the OLD behavior will be used.";
+
+          this->Makefile.IssueMessage(cmake::AUTHOR_WARNING, e.str());
         }
+      }
 
       ++arg;
-      }
     }
-  while (reducible);
+  } while (reducible);
   return true;
 }
 
 //=========================================================================
 // level 3 handles NOT
-bool cmConditionEvaluator::HandleLevel3(cmArgumentList &newArgs,
-                  std::string &errorString,
-                  cmake::MessageType &status)
+bool cmConditionEvaluator::HandleLevel3(cmArgumentList& newArgs,
+                                        std::string& errorString,
+                                        cmake::MessageType& status)
 {
   int reducible;
-  do
-    {
+  do {
     reducible = 0;
     cmArgumentList::iterator arg = newArgs.begin();
     cmArgumentList::iterator argP1;
     cmArgumentList::iterator argP2;
-    while (arg != newArgs.end())
-      {
+    while (arg != newArgs.end()) {
       argP1 = arg;
-      IncrementArguments(newArgs,argP1,argP2);
-      if (argP1 != newArgs.end() && IsKeyword(keyNOT, *arg))
-        {
-        bool rhs = this->GetBooleanValueWithAutoDereference(*argP1,
-                                                      errorString,
-                                                      status);
+      IncrementArguments(newArgs, argP1, argP2);
+      if (argP1 != newArgs.end() && IsKeyword(keyNOT, *arg)) {
+        bool rhs = this->GetBooleanValueWithAutoDereference(
+          *argP1, errorString, status);
         this->HandlePredicate(!rhs, reducible, arg, newArgs, argP1, argP2);
-        }
-      ++arg;
       }
+      ++arg;
     }
-  while (reducible);
+  } while (reducible);
   return true;
 }
 
 //=========================================================================
 // level 4 handles AND OR
-bool cmConditionEvaluator::HandleLevel4(cmArgumentList &newArgs,
-                  std::string &errorString,
-                  cmake::MessageType &status)
+bool cmConditionEvaluator::HandleLevel4(cmArgumentList& newArgs,
+                                        std::string& errorString,
+                                        cmake::MessageType& status)
 {
   int reducible;
   bool lhs;
   bool rhs;
-  do
-    {
+  do {
     reducible = 0;
     cmArgumentList::iterator arg = newArgs.begin();
     cmArgumentList::iterator argP1;
     cmArgumentList::iterator argP2;
-    while (arg != newArgs.end())
-      {
+    while (arg != newArgs.end()) {
       argP1 = arg;
-      IncrementArguments(newArgs,argP1,argP2);
+      IncrementArguments(newArgs, argP1, argP2);
       if (argP1 != newArgs.end() && IsKeyword(keyAND, *argP1) &&
-        argP2 != newArgs.end())
-        {
-        lhs = this->GetBooleanValueWithAutoDereference(*arg,
-                                                 errorString,
-                                                 status);
-        rhs = this->GetBooleanValueWithAutoDereference(*argP2,
-                                                 errorString,
-                                                 status);
-        this->HandleBinaryOp((lhs && rhs),
-          reducible, arg, newArgs, argP1, argP2);
-        }
+          argP2 != newArgs.end()) {
+        lhs =
+          this->GetBooleanValueWithAutoDereference(*arg, errorString, status);
+        rhs = this->GetBooleanValueWithAutoDereference(*argP2, errorString,
+                                                       status);
+        this->HandleBinaryOp((lhs && rhs), reducible, arg, newArgs, argP1,
+                             argP2);
+      }
 
       if (argP1 != newArgs.end() && this->IsKeyword(keyOR, *argP1) &&
-        argP2 != newArgs.end())
-        {
-        lhs = this->GetBooleanValueWithAutoDereference(*arg,
-                                                 errorString,
-                                                 status);
-        rhs = this->GetBooleanValueWithAutoDereference(*argP2,
-                                                 errorString,
-                                                 status);
-        this->HandleBinaryOp((lhs || rhs),
-          reducible, arg, newArgs, argP1, argP2);
-        }
-      ++arg;
+          argP2 != newArgs.end()) {
+        lhs =
+          this->GetBooleanValueWithAutoDereference(*arg, errorString, status);
+        rhs = this->GetBooleanValueWithAutoDereference(*argP2, errorString,
+                                                       status);
+        this->HandleBinaryOp((lhs || rhs), reducible, arg, newArgs, argP1,
+                             argP2);
       }
+      ++arg;
     }
-  while (reducible);
+  } while (reducible);
   return true;
 }

@@ -1,1 +1,1 @@
-//ting.h
+// ting.h

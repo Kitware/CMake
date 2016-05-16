@@ -26,9 +26,24 @@ public:
   /** Types of help provided.  */
   enum Type
   {
-    None, Version, Usage, Help, Full, ListManuals, ListCommands,
-    ListModules, ListProperties, ListVariables, ListPolicies, ListGenerators,
-    OneManual, OneCommand, OneModule, OneProperty, OneVariable, OnePolicy,
+    None,
+    Version,
+    Usage,
+    Help,
+    Full,
+    ListManuals,
+    ListCommands,
+    ListModules,
+    ListProperties,
+    ListVariables,
+    ListPolicies,
+    ListGenerators,
+    OneManual,
+    OneCommand,
+    OneModule,
+    OneProperty,
+    OneVariable,
+    OnePolicy,
     OldCustomModules
   };
 };
@@ -49,6 +64,7 @@ public:
   virtual void PrintParagraph(std::ostream& os, const char* text);
   void PrintColumn(std::ostream& os, const char* text);
   void SetIndent(const char* indent);
+
 private:
   int TextWidth;
   const char* TextIndent;

@@ -31,29 +31,31 @@ public:
   cmExtraSublimeTextGenerator();
 
   virtual std::string GetName() const
-                        { return cmExtraSublimeTextGenerator::GetActualName();}
-  static std::string GetActualName()
-                        { return "Sublime Text 2";}
+  {
+    return cmExtraSublimeTextGenerator::GetActualName();
+  }
+  static std::string GetActualName() { return "Sublime Text 2"; }
   static cmExternalMakefileProjectGenerator* New()
-                                    { return new cmExtraSublimeTextGenerator; }
+  {
+    return new cmExtraSublimeTextGenerator;
+  }
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry,
                                 const std::string& fullName) const;
 
   virtual void Generate();
-private:
 
+private:
   void CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs);
 
   void CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,
-                                const std::string& filename);
+                            const std::string& filename);
 
   /** Appends all targets as build systems to the project file and get all
    * include directories and compiler definitions used.
    */
   void AppendAllTargets(const std::vector<cmLocalGenerator*>& lgs,
-                        const cmMakefile* mf,
-                        cmGeneratedFileStream& fout,
+                        const cmMakefile* mf, cmGeneratedFileStream& fout,
                         MapSourceFileFlags& sourceFileFlags);
   /** Returns the build command that needs to be executed to build the
    *  specified target.
@@ -63,24 +65,20 @@ private:
   /** Appends the specified target to the generated project file as a Sublime
    *  Text build system.
    */
-  void AppendTarget(cmGeneratedFileStream& fout,
-                    const std::string& targetName,
-                    cmLocalGenerator* lg,
-                    cmGeneratorTarget* target,
-                    const char* make,
-                    const cmMakefile* makefile,
-                    const char* compiler,
-                    MapSourceFileFlags& sourceFileFlags, bool firstTarget);
+  void AppendTarget(cmGeneratedFileStream& fout, const std::string& targetName,
+                    cmLocalGenerator* lg, cmGeneratorTarget* target,
+                    const char* make, const cmMakefile* makefile,
+                    const char* compiler, MapSourceFileFlags& sourceFileFlags,
+                    bool firstTarget);
   /**
    * Compute the flags for compilation of object files for a given @a language.
    * @note Generally it is the value of the variable whose name is computed
    *       by LanguageFlagsVarName().
    */
-  std::string ComputeFlagsForObject(cmSourceFile *source,
-                                    cmLocalGenerator* lg,
+  std::string ComputeFlagsForObject(cmSourceFile* source, cmLocalGenerator* lg,
                                     cmGeneratorTarget* gtgt);
 
-  std::string ComputeDefines(cmSourceFile *source, cmLocalGenerator* lg,
+  std::string ComputeDefines(cmSourceFile* source, cmLocalGenerator* lg,
                              cmGeneratorTarget* gtgt);
 };
 

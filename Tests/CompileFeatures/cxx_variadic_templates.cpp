@@ -3,63 +3,61 @@
 #endif
 
 #ifdef OLD_GNU
-template<int... Is>
+template <int... Is>
 struct Interface;
 #endif
 
-template<int I, int... Is>
+template <int I, int... Is>
 struct Interface
 #ifdef OLD_GNU
-                <I, Is...>
+  <I, Is...>
 #endif
 {
-  static int accumulate()
-  {
-    return I + Interface<Is...>::accumulate();
-  }
+  static int accumulate() { return I + Interface<Is...>::accumulate(); }
 };
 
-template<int I>
+template <int I>
 struct Interface<I>
 {
-  static int accumulate()
-  {
-    return I;
-  }
+  static int accumulate() { return I; }
 };
 
 // Note: split this into a separate test if a
 // cxx_variadic_template_template_parameters feature is added.
 
-template<typename T>
-struct eval {
-  enum {
+template <typename T>
+struct eval
+{
+  enum
+  {
     Matched = 0
   };
 };
 
-template<template<typename...> class T, typename... U>
-struct eval<T<U...> > {
-  enum {
+template <template <typename...> class T, typename... U>
+struct eval<T<U...> >
+{
+  enum
+  {
     Matched = 1
   };
 };
 
-template<typename...>
-struct A {
-
+template <typename...>
+struct A
+{
 };
-template<typename T>
-struct B {
-
+template <typename T>
+struct B
+{
 };
-template<typename T, typename U>
-struct C {
-
+template <typename T, typename U>
+struct C
+{
 };
-template<typename T, typename U, typename...>
-struct D {
-
+template <typename T, typename U, typename...>
+struct D
+{
 };
 
 // Note: This test assumes that a compiler supporting this feature

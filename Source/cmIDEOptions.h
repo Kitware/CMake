@@ -28,7 +28,7 @@ public:
   // Store definitions and flags.
   void AddDefine(const std::string& define);
   void AddDefines(const char* defines);
-  void AddDefines(const std::vector<std::string> &defines);
+  void AddDefines(const std::vector<std::string>& defines);
   void AddFlag(const char* flag, const char* value);
   void AddFlag(const char* flag, std::vector<std::string> const& value);
   void AppendFlag(std::string const& flag, std::string const& value);
@@ -46,23 +46,24 @@ protected:
   // Then parse the command line flags specified in CMAKE_CXX_FLAGS
   // and CMAKE_C_FLAGS
   // and overwrite or add new values to this map
-  class FlagValue: public std::vector<std::string>
+  class FlagValue : public std::vector<std::string>
   {
     typedef std::vector<std::string> derived;
+
   public:
     FlagValue& operator=(std::string const& r)
-      {
+    {
       this->resize(1);
       this->operator[](0) = r;
       return *this;
-      }
+    }
     FlagValue& operator=(std::vector<std::string> const& r)
-      {
+    {
       this->derived::operator=(r);
       return *this;
-      }
+    }
   };
-  std::map<std::string, FlagValue > FlagMap;
+  std::map<std::string, FlagValue> FlagMap;
 
   // Preprocessor definitions.
   std::vector<std::string> Defines;
@@ -74,7 +75,10 @@ protected:
   bool AllowDefine;
   bool AllowSlash;
   cmIDEFlagTable const* DoingFollowing;
-  enum { FlagTableCount = 16 };
+  enum
+  {
+    FlagTableCount = 16
+  };
   cmIDEFlagTable const* FlagTable[FlagTableCount];
   void HandleFlag(const char* flag);
   bool CheckFlagTable(cmIDEFlagTable const* table, const char* flag,

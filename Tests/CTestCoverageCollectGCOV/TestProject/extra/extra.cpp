@@ -1,1 +1,3 @@
-void extra() {}
+void extra()
+{
+}

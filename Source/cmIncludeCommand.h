@@ -26,17 +26,14 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
-    {
-    return new cmIncludeCommand;
-    }
+  virtual cmCommand* Clone() { return new cmIncludeCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * This determines if the command is invoked when in script mode.
@@ -46,11 +43,9 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const {return "include";}
+  virtual std::string GetName() const { return "include"; }
 
   cmTypeMacro(cmIncludeCommand, cmCommand);
 };
-
-
 
 #endif

@@ -1,8 +1,7 @@
 
 #include <QWidget>
 
-namespace Ui
-{
+namespace Ui {
 class DebugClass;
 }
 
@@ -10,11 +9,11 @@ class DebugClass : public QWidget
 {
   Q_OBJECT
 public:
-  explicit DebugClass(QWidget *parent = 0);
+  explicit DebugClass(QWidget* parent = 0);
 
 signals:
   void someSignal();
 
 private:
-  Ui::DebugClass *ui;
+  Ui::DebugClass* ui;
 };

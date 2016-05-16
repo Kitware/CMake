@@ -1,1 +1,4 @@
-int other(void) { return 0; }
+int other(void)
+{
+  return 0;
+}

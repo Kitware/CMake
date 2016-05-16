@@ -24,17 +24,14 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
-    {
-    return new cmListCommand;
-    }
+  virtual cmCommand* Clone() { return new cmListCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * This determines if the command is invoked when in script mode.
@@ -44,9 +41,10 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "list";}
+  virtual std::string GetName() const { return "list"; }
 
   cmTypeMacro(cmListCommand, cmCommand);
+
 protected:
   bool HandleLengthCommand(std::vector<std::string> const& args);
   bool HandleGetCommand(std::vector<std::string> const& args);
@@ -59,16 +57,12 @@ protected:
   bool HandleSortCommand(std::vector<std::string> const& args);
   bool HandleReverseCommand(std::vector<std::string> const& args);
   bool HandleFilterCommand(std::vector<std::string> const& args);
-  bool FilterRegex(std::vector<std::string> const& args,
-      bool includeMatches,
-      std::string const& listName,
-      std::vector<std::string>& varArgsExpanded
-      );
-
+  bool FilterRegex(std::vector<std::string> const& args, bool includeMatches,
+                   std::string const& listName,
+                   std::vector<std::string>& varArgsExpanded);
 
   bool GetList(std::vector<std::string>& list, const std::string& var);
   bool GetListString(std::string& listString, const std::string& var);
 };
-
 
 #endif

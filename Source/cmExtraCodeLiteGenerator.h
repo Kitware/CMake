@@ -27,19 +27,24 @@ protected:
 
 protected:
   std::string GetCodeLiteCompilerName(const cmMakefile* mf) const;
-  std::string GetConfigurationName( const cmMakefile* mf ) const;
+  std::string GetConfigurationName(const cmMakefile* mf) const;
   std::string GetBuildCommand(const cmMakefile* mf) const;
   std::string GetCleanCommand(const cmMakefile* mf) const;
   std::string GetRebuildCommand(const cmMakefile* mf) const;
   std::string GetSingleFileBuildCommand(const cmMakefile* mf) const;
+
 public:
   cmExtraCodeLiteGenerator();
 
   virtual std::string GetName() const
-                          { return cmExtraCodeLiteGenerator::GetActualName();}
-  static std::string GetActualName()                     { return "CodeLite";}
+  {
+    return cmExtraCodeLiteGenerator::GetActualName();
+  }
+  static std::string GetActualName() { return "CodeLite"; }
   static cmExternalMakefileProjectGenerator* New()
-                                      { return new cmExtraCodeLiteGenerator; }
+  {
+    return new cmExtraCodeLiteGenerator;
+  }
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry,
                                 const std::string& fullName) const;
@@ -48,7 +53,7 @@ public:
   void CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs);
 
   void CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,
-                                const std::string& filename);
+                            const std::string& filename);
 };
 
 #endif

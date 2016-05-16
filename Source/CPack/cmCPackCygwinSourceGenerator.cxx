@@ -25,8 +25,8 @@
 // system tools because it is not implemented robustly enough to move
 // files across directories.
 #ifdef _WIN32
-# include <sys/stat.h>
-# include <windows.h>
+#include <sys/stat.h>
+#include <windows.h>
 #endif
 
 cmCPackCygwinSourceGenerator::cmCPackCygwinSourceGenerator()
@@ -46,8 +46,8 @@ int cmCPackCygwinSourceGenerator::InitializeInternal()
 int cmCPackCygwinSourceGenerator::PackageFiles()
 {
   // Create a tar file of the sources
-  std::string packageDirFileName
-    = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
+  std::string packageDirFileName =
+    this->GetOption("CPACK_TEMPORARY_DIRECTORY");
   packageDirFileName += ".tar.bz2";
   packageFileNames[0] = packageDirFileName;
   std::string output;
@@ -55,10 +55,9 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
   // to create tar.bz2 file with the list of source
   // files
   this->Compress = cmArchiveWrite::CompressBZip2;
-  if ( !this->cmCPackTarBZip2Generator::PackageFiles() )
-    {
+  if (!this->cmCPackTarBZip2Generator::PackageFiles()) {
     return 0;
-    }
+  }
   // Now create a tar file that contains the above .tar.bz2 file
   // and the CPACK_CYGWIN_PATCH_FILE and CPACK_TOPLEVEL_DIRECTORY
   // files
@@ -76,47 +75,41 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
   // to the toplevel cpack temp dir
 
   // copy the patch file into place
-  if(!this->GetOption("CPACK_CYGWIN_PATCH_FILE"))
-    {
+  if (!this->GetOption("CPACK_CYGWIN_PATCH_FILE")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "No patch file specified for cygwin sources.");
     return 0;
-    }
-  if(!cmSystemTools::CopyFileAlways(
-       this->GetOption("CPACK_CYGWIN_PATCH_FILE"),
-       this->GetOption("CPACK_TOPLEVEL_DIRECTORY")))
-    {
+  }
+  if (!cmSystemTools::CopyFileAlways(
+        this->GetOption("CPACK_CYGWIN_PATCH_FILE"),
+        this->GetOption("CPACK_TOPLEVEL_DIRECTORY"))) {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "problem copying: ["
-                  << this->GetOption("CPACK_CYGWIN_PATCH_FILE") << "]\nto\n["
-                  << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "]\n");
+                    << this->GetOption("CPACK_CYGWIN_PATCH_FILE") << "]\nto\n["
+                    << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "]\n");
     return 0;
-    }
-  if(!this->GetOption("CPACK_CYGWIN_BUILD_SCRIPT"))
-    {
+  }
+  if (!this->GetOption("CPACK_CYGWIN_BUILD_SCRIPT")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "No build script specified for cygwin sources.");
     return 0;
-    }
+  }
   // copy the build script into place
-  if(!cmSystemTools::CopyFileAlways(
-       this->GetOption("CPACK_CYGWIN_BUILD_SCRIPT"),
-       this->GetOption("CPACK_TOPLEVEL_DIRECTORY")))
-    {
+  if (!cmSystemTools::CopyFileAlways(
+        this->GetOption("CPACK_CYGWIN_BUILD_SCRIPT"),
+        this->GetOption("CPACK_TOPLEVEL_DIRECTORY"))) {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "problem copying: "
-                  << this->GetOption("CPACK_CYGWIN_BUILD_SCRIPT") << "\nto\n"
-                  << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "]\n");
+                    << this->GetOption("CPACK_CYGWIN_BUILD_SCRIPT") << "\nto\n"
+                    << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "]\n");
     return 0;
-    }
-  std::string outerTarFile
-    = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
+  }
+  std::string outerTarFile = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
   outerTarFile += "-";
   const char* patch = this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");
-  if(!patch)
-    {
+  if (!patch) {
     cmCPackLogger(cmCPackLog::LOG_WARNING, "CPACK_CYGWIN_PATCH_NUMBER"
-                  << " not specified, defaulting to 1\n");
+                    << " not specified, defaulting to 1\n");
     patch = "1";
-    }
+  }
   outerTarFile += patch;
   outerTarFile += "-src.tar.bz2";
   std::string tmpDir = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
@@ -126,8 +119,8 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
     this->GetOption("CPACK_CYGWIN_BUILD_SCRIPT"));
   std::string patchFile = tmpDir;
   patchFile += "/";
-  patchFile += cmSystemTools::GetFilenameName(
-    this->GetOption("CPACK_CYGWIN_PATCH_FILE"));
+  patchFile +=
+    cmSystemTools::GetFilenameName(this->GetOption("CPACK_CYGWIN_PATCH_FILE"));
 
   std::string file = cmSystemTools::GetFilenameName(compressOutFile);
   std::string sourceTar = cmSystemTools::GetFilenamePath(compressOutFile);
@@ -146,10 +139,9 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
   packageFileNames[0] = outerTarFile;
   /* update the toplevel dir */
   toplevel = tmpDir;
-  if ( !this->cmCPackTarBZip2Generator::PackageFiles() )
-    {
+  if (!this->cmCPackTarBZip2Generator::PackageFiles()) {
     return 0;
-    }
+  }
   return 1;
 }
 
@@ -164,14 +156,12 @@ const char* cmCPackCygwinSourceGenerator::GetOutputExtension()
 {
   this->OutputExtension = "-";
   const char* patch = this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");
-  if(!patch)
-    {
+  if (!patch) {
     cmCPackLogger(cmCPackLog::LOG_WARNING, "CPACK_CYGWIN_PATCH_NUMBER"
-                  << " not specified, defaulting to 1\n");
+                    << " not specified, defaulting to 1\n");
     patch = "1";
-    }
+  }
   this->OutputExtension += patch;
   this->OutputExtension += "-src.tar.bz2";
   return this->OutputExtension.c_str();
 }
-

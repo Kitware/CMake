@@ -28,9 +28,8 @@ class cmPropertyDefinition
 public:
   /// Define this property
   void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
-                      const char *ShortDescription,
-                      const char *FullDescription,
-                      bool chained);
+                      const char* ShortDescription,
+                      const char* FullDescription, bool chained);
 
   /// Default constructor
   cmPropertyDefinition() { this->Chained = false; }
@@ -39,16 +38,19 @@ public:
   bool IsChained() const { return this->Chained; }
 
   /// Get the scope
-  cmProperty::ScopeType GetScope() const {
-    return this->Scope; }
+  cmProperty::ScopeType GetScope() const { return this->Scope; }
 
   /// Get the documentation (short version)
-  const std::string &GetShortDescription() const {
-    return this->ShortDescription; }
+  const std::string& GetShortDescription() const
+  {
+    return this->ShortDescription;
+  }
 
   /// Get the documentation (full version)
-  const std::string &GetFullDescription() const {
-    return this->FullDescription; }
+  const std::string& GetFullDescription() const
+  {
+    return this->FullDescription;
+  }
 
 protected:
   std::string Name;

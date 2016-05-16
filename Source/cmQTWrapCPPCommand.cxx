@@ -13,13 +13,12 @@
 
 // cmQTWrapCPPCommand
 bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args,
-                                     cmExecutionStatus &)
+                                     cmExecutionStatus&)
 {
-  if(args.size() < 3 )
-    {
+  if (args.size() < 3) {
     this->SetError("called with incorrect number of arguments");
     return false;
-    }
+  }
 
   // Get the moc executable to run in the custom command.
   const char* moc_exe =
@@ -27,56 +26,43 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args,
 
   // Get the variable holding the list of sources.
   std::string const& sourceList = args[1];
-  std::string sourceListValue =
-    this->Makefile->GetSafeDefinition(sourceList);
+  std::string sourceListValue = this->Makefile->GetSafeDefinition(sourceList);
 
   // Create a rule for all sources listed.
-  for(std::vector<std::string>::const_iterator j = (args.begin() + 2);
-      j != args.end(); ++j)
-    {
-    cmSourceFile *curr = this->Makefile->GetSource(*j);
+  for (std::vector<std::string>::const_iterator j = (args.begin() + 2);
+       j != args.end(); ++j) {
+    cmSourceFile* curr = this->Makefile->GetSource(*j);
     // if we should wrap the class
-    if(!(curr && curr->GetPropertyAsBool("WRAP_EXCLUDE")))
-      {
+    if (!(curr && curr->GetPropertyAsBool("WRAP_EXCLUDE"))) {
       // Compute the name of the file to generate.
-      std::string srcName =
-        cmSystemTools::GetFilenameWithoutLastExtension(*j);
+      std::string srcName = cmSystemTools::GetFilenameWithoutLastExtension(*j);
       std::string newName = this->Makefile->GetCurrentBinaryDirectory();
       newName += "/moc_";
       newName += srcName;
       newName += ".cxx";
-      cmSourceFile* sf =
-        this->Makefile->GetOrCreateSource(newName, true);
-      if (curr)
-        {
+      cmSourceFile* sf = this->Makefile->GetOrCreateSource(newName, true);
+      if (curr) {
         sf->SetProperty("ABSTRACT", curr->GetProperty("ABSTRACT"));
-        }
+      }
 
       // Compute the name of the header from which to generate the file.
       std::string hname;
-      if(cmSystemTools::FileIsFullPath(j->c_str()))
-        {
+      if (cmSystemTools::FileIsFullPath(j->c_str())) {
         hname = *j;
-        }
-      else
-        {
-        if(curr && curr->GetPropertyAsBool("GENERATED"))
-          {
+      } else {
+        if (curr && curr->GetPropertyAsBool("GENERATED")) {
           hname = this->Makefile->GetCurrentBinaryDirectory();
-          }
-        else
-          {
+        } else {
           hname = this->Makefile->GetCurrentSourceDirectory();
-          }
+        }
         hname += "/";
         hname += *j;
-        }
+      }
 
       // Append the generated source file to the list.
-      if(!sourceListValue.empty())
-        {
+      if (!sourceListValue.empty()) {
         sourceListValue += ";";
-        }
+      }
       sourceListValue += newName;
 
       // Create the custom command to generate the file.
@@ -95,17 +81,13 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args,
 
       std::string no_main_dependency = "";
       const char* no_working_dir = 0;
-      this->Makefile->AddCustomCommandToOutput(newName,
-                                               depends,
-                                               no_main_dependency,
-                                               commandLines,
-                                               "Qt Wrapped File",
-                                               no_working_dir);
-      }
+      this->Makefile->AddCustomCommandToOutput(
+        newName, depends, no_main_dependency, commandLines, "Qt Wrapped File",
+        no_working_dir);
     }
+  }
 
   // Store the final list of source files.
-  this->Makefile->AddDefinition(sourceList,
-                                sourceListValue.c_str());
+  this->Makefile->AddDefinition(sourceList, sourceListValue.c_str());
   return true;
 }

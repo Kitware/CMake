@@ -22,30 +22,28 @@
 class cmCTestUpdateCommand : public cmCTestHandlerCommand
 {
 public:
-
   cmCTestUpdateCommand() {}
 
   /**
    * This is a virtual constructor for the command.
    */
   virtual cmCommand* Clone()
-    {
+  {
     cmCTestUpdateCommand* ni = new cmCTestUpdateCommand;
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
-    }
+  }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_update";}
+  virtual std::string GetName() const { return "ctest_update"; }
 
   cmTypeMacro(cmCTestUpdateCommand, cmCTestHandlerCommand);
 
 protected:
   cmCTestGenericHandler* InitializeHandler();
 };
-
 
 #endif

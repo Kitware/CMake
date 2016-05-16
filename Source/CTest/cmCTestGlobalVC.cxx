@@ -17,8 +17,8 @@
 
 #include <cmsys/RegularExpression.hxx>
 
-cmCTestGlobalVC::cmCTestGlobalVC(cmCTest* ct, std::ostream& log):
-  cmCTestVC(ct, log)
+cmCTestGlobalVC::cmCTestGlobalVC(cmCTest* ct, std::ostream& log)
+  : cmCTestVC(ct, log)
 {
   this->PriorRev = this->Unknown;
 }
@@ -36,11 +36,10 @@ void cmCTestGlobalVC::DoRevision(Revision const& revision,
                                  std::vector<Change> const& changes)
 {
   // Ignore changes in the old revision.
-  if(revision.Rev == this->OldRevision)
-    {
+  if (revision.Rev == this->OldRevision) {
     this->PriorRev = revision;
     return;
-    }
+  }
 
   // Indicate we found a revision.
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "." << std::flush);
@@ -57,19 +56,18 @@ void cmCTestGlobalVC::DoRevision(Revision const& revision,
   /* clang-format on */
 
   // Update information about revisions of the changed files.
-  for(std::vector<Change>::const_iterator ci = changes.begin();
-      ci != changes.end(); ++ci)
-    {
-    if(const char* local = this->LocalPath(ci->Path))
-      {
+  for (std::vector<Change>::const_iterator ci = changes.begin();
+       ci != changes.end(); ++ci) {
+    if (const char* local = this->LocalPath(ci->Path)) {
       std::string dir = cmSystemTools::GetFilenamePath(local);
       std::string name = cmSystemTools::GetFilenameName(local);
       File& file = this->Dirs[dir][name];
-      file.PriorRev = file.Rev? file.Rev : &this->PriorRev;
+      file.PriorRev = file.Rev ? file.Rev : &this->PriorRev;
       file.Rev = &rev;
-      this->Log << "  " << ci->Action << " " << local << " " << "\n";
-      }
+      this->Log << "  " << ci->Action << " " << local << " "
+                << "\n";
     }
+  }
 }
 
 void cmCTestGlobalVC::DoModification(PathStatus status,
@@ -81,44 +79,41 @@ void cmCTestGlobalVC::DoModification(PathStatus status,
   file.Status = status;
   // For local modifications the current rev is unknown and the
   // prior rev is the latest from svn.
-  if(!file.Rev && !file.PriorRev)
-    {
+  if (!file.Rev && !file.PriorRev) {
     file.PriorRev = &this->PriorRev;
-    }
+  }
 }
 
 void cmCTestGlobalVC::WriteXMLDirectory(cmXMLWriter& xml,
                                         std::string const& path,
                                         Directory const& dir)
 {
-  const char* slash = path.empty()? "":"/";
+  const char* slash = path.empty() ? "" : "/";
   xml.StartElement("Directory");
   xml.Element("Name", path);
-  for(Directory::const_iterator fi = dir.begin(); fi != dir.end(); ++fi)
-    {
+  for (Directory::const_iterator fi = dir.begin(); fi != dir.end(); ++fi) {
     std::string full = path + slash + fi->first;
     this->WriteXMLEntry(xml, path, fi->first, full, fi->second);
-    }
+  }
   xml.EndElement(); // Directory
 }
 
 void cmCTestGlobalVC::WriteXMLGlobal(cmXMLWriter& xml)
 {
-  if(!this->NewRevision.empty())
-    {
+  if (!this->NewRevision.empty()) {
     xml.Element("Revision", this->NewRevision);
-    }
-  if(!this->OldRevision.empty() && this->OldRevision != this->NewRevision)
-    {
+  }
+  if (!this->OldRevision.empty() && this->OldRevision != this->NewRevision) {
     xml.Element("PriorRevision", this->OldRevision);
-    }
+  }
 }
 
 bool cmCTestGlobalVC::WriteXMLUpdates(cmXMLWriter& xml)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
              "   Gathering version information (one . per revision):\n"
-             "    " << std::flush);
+             "    "
+               << std::flush);
   this->LoadRevisions();
   cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl);
 
@@ -126,11 +121,11 @@ bool cmCTestGlobalVC::WriteXMLUpdates(cmXMLWriter& xml)
 
   this->WriteXMLGlobal(xml);
 
-  for(std::map<std::string, Directory>::const_iterator
-        di = this->Dirs.begin(); di != this->Dirs.end(); ++di)
-    {
+  for (std::map<std::string, Directory>::const_iterator di =
+         this->Dirs.begin();
+       di != this->Dirs.end(); ++di) {
     this->WriteXMLDirectory(xml, di->first, di->second);
-    }
+  }
 
   return true;
 }

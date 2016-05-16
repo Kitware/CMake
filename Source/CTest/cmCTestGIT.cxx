@@ -27,11 +27,11 @@ static unsigned int cmCTestGITVersion(unsigned int epic, unsigned int major,
                                       unsigned int minor, unsigned int fix)
 {
   // 1.6.5.0 maps to 10605000
-  return fix + minor*1000 + major*100000 + epic*10000000;
+  return fix + minor * 1000 + major * 100000 + epic * 10000000;
 }
 
-cmCTestGIT::cmCTestGIT(cmCTest* ct, std::ostream& log):
-  cmCTestGlobalVC(ct, log)
+cmCTestGIT::cmCTestGIT(cmCTest* ct, std::ostream& log)
+  : cmCTestGlobalVC(ct, log)
 {
   this->PriorRev = this->Unknown;
   this->CurrentGitVersion = 0;
@@ -41,29 +41,30 @@ cmCTestGIT::~cmCTestGIT()
 {
 }
 
-class cmCTestGIT::OneLineParser: public cmCTestVC::LineParser
+class cmCTestGIT::OneLineParser : public cmCTestVC::LineParser
 {
 public:
-  OneLineParser(cmCTestGIT* git, const char* prefix,
-                std::string& l): Line1(l)
-    {
+  OneLineParser(cmCTestGIT* git, const char* prefix, std::string& l)
+    : Line1(l)
+  {
     this->SetLog(&git->Log, prefix);
-    }
+  }
+
 private:
   std::string& Line1;
   virtual bool ProcessLine()
-    {
+  {
     // Only the first line is of interest.
     this->Line1 = this->Line;
     return false;
-    }
+  }
 };
 
 std::string cmCTestGIT::GetWorkingRevision()
 {
   // Run plumbing "git rev-list" to get work tree revision.
   const char* git = this->CommandLineTool.c_str();
-  const char* git_rev_list[] = {git, "rev-list", "-n", "1", "HEAD", "--", 0};
+  const char* git_rev_list[] = { git, "rev-list", "-n", "1", "HEAD", "--", 0 };
   std::string rev;
   OneLineParser out(this, "rl-out> ", rev);
   OutputLogger err(this->Log, "rl-err> ");
@@ -75,7 +76,7 @@ void cmCTestGIT::NoteOldRevision()
 {
   this->OldRevision = this->GetWorkingRevision();
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Old revision of repository is: "
-             << this->OldRevision << "\n");
+               << this->OldRevision << "\n");
   this->PriorRev.Rev = this->OldRevision;
 }
 
@@ -83,7 +84,7 @@ void cmCTestGIT::NoteNewRevision()
 {
   this->NewRevision = this->GetWorkingRevision();
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "   New revision of repository is: "
-             << this->NewRevision << "\n");
+               << this->NewRevision << "\n");
 }
 
 std::string cmCTestGIT::FindGitDir()
@@ -92,43 +93,38 @@ std::string cmCTestGIT::FindGitDir()
 
   // Run "git rev-parse --git-dir" to locate the real .git directory.
   const char* git = this->CommandLineTool.c_str();
-  char const* git_rev_parse[] = {git, "rev-parse", "--git-dir", 0};
+  char const* git_rev_parse[] = { git, "rev-parse", "--git-dir", 0 };
   std::string git_dir_line;
   OneLineParser rev_parse_out(this, "rev-parse-out> ", git_dir_line);
   OutputLogger rev_parse_err(this->Log, "rev-parse-err> ");
-  if(this->RunChild(git_rev_parse, &rev_parse_out, &rev_parse_err))
-    {
+  if (this->RunChild(git_rev_parse, &rev_parse_out, &rev_parse_err)) {
     git_dir = git_dir_line;
-    }
-  if(git_dir.empty())
-    {
+  }
+  if (git_dir.empty()) {
     git_dir = ".git";
-    }
+  }
 
   // Git reports a relative path only when the .git directory is in
   // the current directory.
-  if(git_dir[0] == '.')
-    {
+  if (git_dir[0] == '.') {
     git_dir = this->SourceDirectory + "/" + git_dir;
-    }
+  }
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  else if(git_dir[0] == '/')
-    {
+  else if (git_dir[0] == '/') {
     // Cygwin Git reports a full path that Cygwin understands, but we
     // are a Windows application.  Run "cygpath" to get Windows path.
     std::string cygpath_exe = cmSystemTools::GetFilenamePath(git);
     cygpath_exe += "/cygpath.exe";
-    if(cmSystemTools::FileExists(cygpath_exe.c_str()))
-      {
-      char const* cygpath[] = {cygpath_exe.c_str(), "-w", git_dir.c_str(), 0};
+    if (cmSystemTools::FileExists(cygpath_exe.c_str())) {
+      char const* cygpath[] = { cygpath_exe.c_str(), "-w", git_dir.c_str(),
+                                0 };
       OneLineParser cygpath_out(this, "cygpath-out> ", git_dir_line);
       OutputLogger cygpath_err(this->Log, "cygpath-err> ");
-      if(this->RunChild(cygpath, &cygpath_out, &cygpath_err))
-        {
+      if (this->RunChild(cygpath, &cygpath_out, &cygpath_err)) {
         git_dir = git_dir_line;
-        }
       }
     }
+  }
 #endif
   return git_dir;
 }
@@ -139,17 +135,16 @@ std::string cmCTestGIT::FindTopDir()
 
   // Run "git rev-parse --show-cdup" to locate the top of the tree.
   const char* git = this->CommandLineTool.c_str();
-  char const* git_rev_parse[] = {git, "rev-parse", "--show-cdup", 0};
+  char const* git_rev_parse[] = { git, "rev-parse", "--show-cdup", 0 };
   std::string cdup;
   OneLineParser rev_parse_out(this, "rev-parse-out> ", cdup);
   OutputLogger rev_parse_err(this->Log, "rev-parse-err> ");
-  if(this->RunChild(git_rev_parse, &rev_parse_out, &rev_parse_err) &&
-     !cdup.empty())
-    {
+  if (this->RunChild(git_rev_parse, &rev_parse_out, &rev_parse_err) &&
+      !cdup.empty()) {
     top_dir += "/";
     top_dir += cdup;
     top_dir = cmSystemTools::CollapseFullPath(top_dir);
-    }
+  }
   return top_dir;
 }
 
@@ -164,16 +159,14 @@ bool cmCTestGIT::UpdateByFetchAndReset()
 
   // Add user-specified update options.
   std::string opts = this->CTest->GetCTestConfiguration("UpdateOptions");
-  if(opts.empty())
-    {
+  if (opts.empty()) {
     opts = this->CTest->GetCTestConfiguration("GITUpdateOptions");
-    }
+  }
   std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
-  for(std::vector<std::string>::const_iterator ai = args.begin();
-      ai != args.end(); ++ai)
-    {
+  for (std::vector<std::string>::const_iterator ai = args.begin();
+       ai != args.end(); ++ai) {
     git_fetch.push_back(ai->c_str());
-    }
+  }
 
   // Sentinel argument.
   git_fetch.push_back(0);
@@ -181,43 +174,37 @@ bool cmCTestGIT::UpdateByFetchAndReset()
   // Fetch upstream refs.
   OutputLogger fetch_out(this->Log, "fetch-out> ");
   OutputLogger fetch_err(this->Log, "fetch-err> ");
-  if(!this->RunUpdateCommand(&git_fetch[0], &fetch_out, &fetch_err))
-    {
+  if (!this->RunUpdateCommand(&git_fetch[0], &fetch_out, &fetch_err)) {
     return false;
-    }
+  }
 
   // Identify the merge head that would be used by "git pull".
   std::string sha1;
   {
-  std::string fetch_head = this->FindGitDir() + "/FETCH_HEAD";
-  cmsys::ifstream fin(fetch_head.c_str(), std::ios::in | std::ios::binary);
-  if(!fin)
-    {
-    this->Log << "Unable to open " << fetch_head << "\n";
-    return false;
+    std::string fetch_head = this->FindGitDir() + "/FETCH_HEAD";
+    cmsys::ifstream fin(fetch_head.c_str(), std::ios::in | std::ios::binary);
+    if (!fin) {
+      this->Log << "Unable to open " << fetch_head << "\n";
+      return false;
     }
-  std::string line;
-  while(sha1.empty() && cmSystemTools::GetLineFromStream(fin, line))
-    {
-    this->Log << "FETCH_HEAD> " << line << "\n";
-    if(line.find("\tnot-for-merge\t") == line.npos)
-      {
-      std::string::size_type pos = line.find('\t');
-      if(pos != line.npos)
-        {
-        sha1 = line.substr(0, pos);
+    std::string line;
+    while (sha1.empty() && cmSystemTools::GetLineFromStream(fin, line)) {
+      this->Log << "FETCH_HEAD> " << line << "\n";
+      if (line.find("\tnot-for-merge\t") == line.npos) {
+        std::string::size_type pos = line.find('\t');
+        if (pos != line.npos) {
+          sha1 = line.substr(0, pos);
         }
       }
     }
-  if(sha1.empty())
-    {
-    this->Log << "FETCH_HEAD has no upstream branch candidate!\n";
-    return false;
+    if (sha1.empty()) {
+      this->Log << "FETCH_HEAD has no upstream branch candidate!\n";
+      return false;
     }
   }
 
   // Reset the local branch to point at that tracked from upstream.
-  char const* git_reset[] = {git, "reset", "--hard", sha1.c_str(), 0};
+  char const* git_reset[] = { git, "reset", "--hard", sha1.c_str(), 0 };
   OutputLogger reset_out(this->Log, "reset-out> ");
   OutputLogger reset_err(this->Log, "reset-err> ");
   return this->RunChild(&git_reset[0], &reset_out, &reset_err);
@@ -228,11 +215,10 @@ bool cmCTestGIT::UpdateByCustom(std::string const& custom)
   std::vector<std::string> git_custom_command;
   cmSystemTools::ExpandListArgument(custom, git_custom_command, true);
   std::vector<char const*> git_custom;
-  for(std::vector<std::string>::const_iterator
-        i = git_custom_command.begin(); i != git_custom_command.end(); ++i)
-    {
+  for (std::vector<std::string>::const_iterator i = git_custom_command.begin();
+       i != git_custom_command.end(); ++i) {
     git_custom.push_back(i->c_str());
-    }
+  }
   git_custom.push_back(0);
 
   OutputLogger custom_out(this->Log, "custom-out> ");
@@ -243,19 +229,17 @@ bool cmCTestGIT::UpdateByCustom(std::string const& custom)
 bool cmCTestGIT::UpdateInternal()
 {
   std::string custom = this->CTest->GetCTestConfiguration("GITUpdateCustom");
-  if(!custom.empty())
-    {
+  if (!custom.empty()) {
     return this->UpdateByCustom(custom);
-    }
+  }
   return this->UpdateByFetchAndReset();
 }
 
 bool cmCTestGIT::UpdateImpl()
 {
-  if(!this->UpdateInternal())
-    {
+  if (!this->UpdateInternal()) {
     return false;
-    }
+  }
 
   std::string top_dir = this->FindTopDir();
   const char* git = this->CommandLineTool.c_str();
@@ -263,26 +247,22 @@ bool cmCTestGIT::UpdateImpl()
   const char* sync_recursive = "--recursive";
 
   // Git < 1.6.5 did not support submodule --recursive
-  if(this->GetGitVersion() < cmCTestGITVersion(1,6,5,0))
-    {
+  if (this->GetGitVersion() < cmCTestGITVersion(1, 6, 5, 0)) {
     recursive = 0;
     // No need to require >= 1.6.5 if there are no submodules.
-    if(cmSystemTools::FileExists((top_dir + "/.gitmodules").c_str()))
-      {
+    if (cmSystemTools::FileExists((top_dir + "/.gitmodules").c_str())) {
       this->Log << "Git < 1.6.5 cannot update submodules recursively\n";
-      }
     }
+  }
 
   // Git < 1.8.1 did not support sync --recursive
-  if(this->GetGitVersion() < cmCTestGITVersion(1,8,1,0))
-    {
+  if (this->GetGitVersion() < cmCTestGITVersion(1, 8, 1, 0)) {
     sync_recursive = 0;
     // No need to require >= 1.8.1 if there are no submodules.
-    if(cmSystemTools::FileExists((top_dir + "/.gitmodules").c_str()))
-      {
+    if (cmSystemTools::FileExists((top_dir + "/.gitmodules").c_str())) {
       this->Log << "Git < 1.8.1 cannot synchronize submodules recursively\n";
-      }
     }
+  }
 
   OutputLogger submodule_out(this->Log, "submodule-out> ");
   OutputLogger submodule_err(this->Log, "submodule-err> ");
@@ -291,50 +271,45 @@ bool cmCTestGIT::UpdateImpl()
 
   std::string init_submodules =
     this->CTest->GetCTestConfiguration("GITInitSubmodules");
-  if (cmSystemTools::IsOn(init_submodules.c_str()))
-    {
-    char const* git_submodule_init[] = {git, "submodule", "init", 0};
+  if (cmSystemTools::IsOn(init_submodules.c_str())) {
+    char const* git_submodule_init[] = { git, "submodule", "init", 0 };
     ret = this->RunChild(git_submodule_init, &submodule_out, &submodule_err,
                          top_dir.c_str());
 
-    if (!ret)
-      {
+    if (!ret) {
       return false;
-      }
     }
+  }
 
-  char const* git_submodule_sync[] = {git, "submodule", "sync",
-                                      sync_recursive, 0};
+  char const* git_submodule_sync[] = { git, "submodule", "sync",
+                                       sync_recursive, 0 };
   ret = this->RunChild(git_submodule_sync, &submodule_out, &submodule_err,
                        top_dir.c_str());
 
-  if (!ret)
-    {
+  if (!ret) {
     return false;
-    }
+  }
 
-  char const* git_submodule[] = {git, "submodule", "update", recursive, 0};
+  char const* git_submodule[] = { git, "submodule", "update", recursive, 0 };
   return this->RunChild(git_submodule, &submodule_out, &submodule_err,
                         top_dir.c_str());
 }
 
 unsigned int cmCTestGIT::GetGitVersion()
 {
-  if(!this->CurrentGitVersion)
-    {
+  if (!this->CurrentGitVersion) {
     const char* git = this->CommandLineTool.c_str();
-    char const* git_version[] = {git, "--version", 0};
+    char const* git_version[] = { git, "--version", 0 };
     std::string version;
     OneLineParser version_out(this, "version-out> ", version);
     OutputLogger version_err(this->Log, "version-err> ");
-    unsigned int v[4] = {0,0,0,0};
-    if(this->RunChild(git_version, &version_out, &version_err) &&
-       sscanf(version.c_str(), "git version %u.%u.%u.%u",
-              &v[0], &v[1], &v[2], &v[3]) >= 3)
-      {
+    unsigned int v[4] = { 0, 0, 0, 0 };
+    if (this->RunChild(git_version, &version_out, &version_err) &&
+        sscanf(version.c_str(), "git version %u.%u.%u.%u", &v[0], &v[1], &v[2],
+               &v[3]) >= 3) {
       this->CurrentGitVersion = cmCTestGITVersion(v[0], v[1], v[2], v[3]);
-      }
     }
+  }
   return this->CurrentGitVersion;
 }
 
@@ -348,76 +323,73 @@ unsigned int cmCTestGIT::GetGitVersion()
    line appears only for lines with status 'C' or 'R'.  See 'git help
    diff-tree' for details.
 */
-class cmCTestGIT::DiffParser: public cmCTestVC::LineParser
+class cmCTestGIT::DiffParser : public cmCTestVC::LineParser
 {
 public:
-  DiffParser(cmCTestGIT* git, const char* prefix):
-    LineParser('\0', false), GIT(git), DiffField(DiffFieldNone)
-    {
+  DiffParser(cmCTestGIT* git, const char* prefix)
+    : LineParser('\0', false)
+    , GIT(git)
+    , DiffField(DiffFieldNone)
+  {
     this->SetLog(&git->Log, prefix);
-    }
+  }
 
   typedef cmCTestGIT::Change Change;
   std::vector<Change> Changes;
+
 protected:
   cmCTestGIT* GIT;
-  enum DiffFieldType { DiffFieldNone, DiffFieldChange,
-                       DiffFieldSrc, DiffFieldDst };
+  enum DiffFieldType
+  {
+    DiffFieldNone,
+    DiffFieldChange,
+    DiffFieldSrc,
+    DiffFieldDst
+  };
   DiffFieldType DiffField;
   Change CurChange;
 
   void DiffReset()
-    {
+  {
     this->DiffField = DiffFieldNone;
     this->Changes.clear();
-    }
+  }
 
   virtual bool ProcessLine()
-    {
-    if(this->Line[0] == ':')
-      {
+  {
+    if (this->Line[0] == ':') {
       this->DiffField = DiffFieldChange;
       this->CurChange = Change();
-      }
-    if(this->DiffField == DiffFieldChange)
-      {
+    }
+    if (this->DiffField == DiffFieldChange) {
       // :src-mode dst-mode src-sha1 dst-sha1 status
-      if(this->Line[0] != ':')
-        {
+      if (this->Line[0] != ':') {
         this->DiffField = DiffFieldNone;
         return true;
-        }
-      const char* src_mode_first = this->Line.c_str()+1;
-      const char* src_mode_last  = this->ConsumeField(src_mode_first);
+      }
+      const char* src_mode_first = this->Line.c_str() + 1;
+      const char* src_mode_last = this->ConsumeField(src_mode_first);
       const char* dst_mode_first = this->ConsumeSpace(src_mode_last);
-      const char* dst_mode_last  = this->ConsumeField(dst_mode_first);
+      const char* dst_mode_last = this->ConsumeField(dst_mode_first);
       const char* src_sha1_first = this->ConsumeSpace(dst_mode_last);
-      const char* src_sha1_last  = this->ConsumeField(src_sha1_first);
+      const char* src_sha1_last = this->ConsumeField(src_sha1_first);
       const char* dst_sha1_first = this->ConsumeSpace(src_sha1_last);
-      const char* dst_sha1_last  = this->ConsumeField(dst_sha1_first);
-      const char* status_first   = this->ConsumeSpace(dst_sha1_last);
-      const char* status_last    = this->ConsumeField(status_first);
-      if(status_first != status_last)
-        {
+      const char* dst_sha1_last = this->ConsumeField(dst_sha1_first);
+      const char* status_first = this->ConsumeSpace(dst_sha1_last);
+      const char* status_last = this->ConsumeField(status_first);
+      if (status_first != status_last) {
         this->CurChange.Action = *status_first;
         this->DiffField = DiffFieldSrc;
-        }
-      else
-        {
+      } else {
         this->DiffField = DiffFieldNone;
-        }
       }
-    else if(this->DiffField == DiffFieldSrc)
-      {
+    } else if (this->DiffField == DiffFieldSrc) {
       // src-path
-      if(this->CurChange.Action == 'C')
-        {
+      if (this->CurChange.Action == 'C') {
         // Convert copy to addition of destination.
         this->CurChange.Action = 'A';
         this->DiffField = DiffFieldDst;
-        }
-      else if(this->CurChange.Action == 'R')
-        {
+      } else if (this->CurChange.Action == 'R') {
         // Convert rename to deletion of source and addition of destination.
         this->CurChange.Action = 'D';
         this->CurChange.Path = this->Line;
@@ -425,34 +397,34 @@ protected:
 
         this->CurChange = Change('A');
         this->DiffField = DiffFieldDst;
-        }
-      else
-        {
+      } else {
         this->CurChange.Path = this->Line;
         this->Changes.push_back(this->CurChange);
         this->DiffField = this->DiffFieldNone;
-        }
       }
-    else if(this->DiffField == DiffFieldDst)
-      {
+    } else if (this->DiffField == DiffFieldDst) {
       // dst-path
       this->CurChange.Path = this->Line;
       this->Changes.push_back(this->CurChange);
       this->DiffField = this->DiffFieldNone;
-      }
-    return true;
     }
+    return true;
+  }
 
   const char* ConsumeSpace(const char* c)
-    {
-    while(*c && isspace(*c)) { ++c; }
-    return c;
+  {
+    while (*c && isspace(*c)) {
+      ++c;
     }
+    return c;
+  }
   const char* ConsumeField(const char* c)
-    {
-    while(*c && !isspace(*c)) { ++c; }
-    return c;
+  {
+    while (*c && !isspace(*c)) {
+      ++c;
     }
+    return c;
+  }
 };
 
 /* Commit format:
@@ -474,18 +446,25 @@ protected:
 
    The header may have more fields.  See 'git help diff-tree'.
 */
-class cmCTestGIT::CommitParser: public cmCTestGIT::DiffParser
+class cmCTestGIT::CommitParser : public cmCTestGIT::DiffParser
 {
 public:
-  CommitParser(cmCTestGIT* git, const char* prefix):
-    DiffParser(git, prefix), Section(SectionHeader)
-    {
+  CommitParser(cmCTestGIT* git, const char* prefix)
+    : DiffParser(git, prefix)
+    , Section(SectionHeader)
+  {
     this->Separator = SectionSep[this->Section];
-    }
+  }
 
 private:
   typedef cmCTestGIT::Revision Revision;
-  enum SectionType { SectionHeader, SectionBody, SectionDiff, SectionCount };
+  enum SectionType
+  {
+    SectionHeader,
+    SectionBody,
+    SectionDiff,
+    SectionCount
+  };
   static char const SectionSep[SectionCount];
   SectionType Section;
   Revision Rev;
@@ -496,141 +475,147 @@ private:
     std::string EMail;
     unsigned long Time;
     long TimeZone;
-    Person(): Name(), EMail(), Time(0), TimeZone(0) {}
+    Person()
+      : Name()
+      , EMail()
+      , Time(0)
+      , TimeZone(0)
+    {
+    }
   };
 
   void ParsePerson(const char* str, Person& person)
-    {
+  {
     // Person Name <person@domain.com> 1234567890 +0000
     const char* c = str;
-    while(*c && isspace(*c)) { ++c; }
+    while (*c && isspace(*c)) {
+      ++c;
+    }
 
     const char* name_first = c;
-    while(*c && *c != '<') { ++c; }
+    while (*c && *c != '<') {
+      ++c;
+    }
     const char* name_last = c;
-    while(name_last != name_first && isspace(*(name_last-1))) { --name_last; }
-    person.Name.assign(name_first, name_last-name_first);
+    while (name_last != name_first && isspace(*(name_last - 1))) {
+      --name_last;
+    }
+    person.Name.assign(name_first, name_last - name_first);
 
-    const char* email_first = *c? ++c : c;
-    while(*c && *c != '>') { ++c; }
-    const char* email_last = *c? c++ : c;
-    person.EMail.assign(email_first, email_last-email_first);
+    const char* email_first = *c ? ++c : c;
+    while (*c && *c != '>') {
+      ++c;
+    }
+    const char* email_last = *c ? c++ : c;
+    person.EMail.assign(email_first, email_last - email_first);
 
     person.Time = strtoul(c, (char**)&c, 10);
     person.TimeZone = strtol(c, (char**)&c, 10);
-    }
+  }
 
   virtual bool ProcessLine()
-    {
-    if(this->Line.empty())
-      {
-      if(this->Section == SectionBody && this->LineEnd == '\0')
-        {
+  {
+    if (this->Line.empty()) {
+      if (this->Section == SectionBody && this->LineEnd == '\0') {
         // Skip SectionDiff
         this->NextSection();
-        }
+      }
       this->NextSection();
+    } else {
+      switch (this->Section) {
+        case SectionHeader:
+          this->DoHeaderLine();
+          break;
+        case SectionBody:
+          this->DoBodyLine();
+          break;
+        case SectionDiff:
+          this->DiffParser::ProcessLine();
+          break;
+        case SectionCount:
+          break; // never happens
       }
-    else
-      {
-      switch(this->Section)
-        {
-        case SectionHeader: this->DoHeaderLine(); break;
-        case SectionBody:   this->DoBodyLine(); break;
-        case SectionDiff:   this->DiffParser::ProcessLine(); break;
-        case SectionCount:  break; // never happens
-        }
-      }
-    return true;
     }
+    return true;
+  }
 
   void NextSection()
-    {
-    this->Section = SectionType((this->Section+1) % SectionCount);
+  {
+    this->Section = SectionType((this->Section + 1) % SectionCount);
     this->Separator = SectionSep[this->Section];
-    if(this->Section == SectionHeader)
-      {
+    if (this->Section == SectionHeader) {
       this->GIT->DoRevision(this->Rev, this->Changes);
       this->Rev = Revision();
       this->DiffReset();
-      }
     }
+  }
 
   void DoHeaderLine()
-    {
+  {
     // Look for header fields that we need.
-    if(cmHasLiteralPrefix(this->Line.c_str(), "commit "))
-      {
-      this->Rev.Rev = this->Line.c_str()+7;
-      }
-    else if(cmHasLiteralPrefix(this->Line.c_str(), "author "))
-      {
+    if (cmHasLiteralPrefix(this->Line.c_str(), "commit ")) {
+      this->Rev.Rev = this->Line.c_str() + 7;
+    } else if (cmHasLiteralPrefix(this->Line.c_str(), "author ")) {
       Person author;
-      this->ParsePerson(this->Line.c_str()+7, author);
+      this->ParsePerson(this->Line.c_str() + 7, author);
       this->Rev.Author = author.Name;
       this->Rev.EMail = author.EMail;
       this->Rev.Date = this->FormatDateTime(author);
-      }
-    else if(cmHasLiteralPrefix(this->Line.c_str(), "committer "))
-      {
+    } else if (cmHasLiteralPrefix(this->Line.c_str(), "committer ")) {
       Person committer;
-      this->ParsePerson(this->Line.c_str()+10, committer);
+      this->ParsePerson(this->Line.c_str() + 10, committer);
       this->Rev.Committer = committer.Name;
       this->Rev.CommitterEMail = committer.EMail;
       this->Rev.CommitDate = this->FormatDateTime(committer);
-      }
     }
+  }
 
   void DoBodyLine()
-    {
+  {
     // Commit log lines are indented by 4 spaces.
-    if(this->Line.size() >= 4)
-      {
+    if (this->Line.size() >= 4) {
       this->Rev.Log += this->Line.substr(4);
-      }
-    this->Rev.Log += "\n";
     }
+    this->Rev.Log += "\n";
+  }
 
   std::string FormatDateTime(Person const& person)
-    {
+  {
     // Convert the time to a human-readable format that is also easy
     // to machine-parse: "CCYY-MM-DD hh:mm:ss".
     time_t seconds = static_cast<time_t>(person.Time);
     struct tm* t = gmtime(&seconds);
     char dt[1024];
-    sprintf(dt, "%04d-%02d-%02d %02d:%02d:%02d",
-            t->tm_year+1900, t->tm_mon+1, t->tm_mday,
-            t->tm_hour, t->tm_min, t->tm_sec);
+    sprintf(dt, "%04d-%02d-%02d %02d:%02d:%02d", t->tm_year + 1900,
+            t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
     std::string out = dt;
 
     // Add the time-zone field "+zone" or "-zone".
     char tz[32];
-    if(person.TimeZone >= 0)
-      {
+    if (person.TimeZone >= 0) {
       sprintf(tz, " +%04ld", person.TimeZone);
-      }
-    else
-      {
+    } else {
       sprintf(tz, " -%04ld", -person.TimeZone);
-      }
+    }
     out += tz;
     return out;
-    }
+  }
 };
 
-char const cmCTestGIT::CommitParser::SectionSep[SectionCount] =
-{'\n', '\n', '\0'};
+char const cmCTestGIT::CommitParser::SectionSep[SectionCount] = { '\n', '\n',
+                                                                  '\0' };
 
 void cmCTestGIT::LoadRevisions()
 {
   // Use 'git rev-list ... | git diff-tree ...' to get revisions.
   std::string range = this->OldRevision + ".." + this->NewRevision;
   const char* git = this->CommandLineTool.c_str();
-  const char* git_rev_list[] =
-    {git, "rev-list", "--reverse", range.c_str(), "--", 0};
-  const char* git_diff_tree[] =
-    {git, "diff-tree", "--stdin", "--always", "-z", "-r", "--pretty=raw",
-     "--encoding=utf-8", 0};
+  const char* git_rev_list[] = { git,           "rev-list", "--reverse",
+                                 range.c_str(), "--",       0 };
+  const char* git_diff_tree[] = {
+    git,  "diff-tree",    "--stdin",          "--always", "-z",
+    "-r", "--pretty=raw", "--encoding=utf-8", 0
+  };
   this->Log << this->ComputeCommandLine(git_rev_list) << " | "
             << this->ComputeCommandLine(git_diff_tree) << "\n";
 
@@ -654,20 +639,19 @@ void cmCTestGIT::LoadModifications()
   const char* git = this->CommandLineTool.c_str();
 
   // Use 'git update-index' to refresh the index w.r.t. the work tree.
-  const char* git_update_index[] = {git, "update-index", "--refresh", 0};
+  const char* git_update_index[] = { git, "update-index", "--refresh", 0 };
   OutputLogger ui_out(this->Log, "ui-out> ");
   OutputLogger ui_err(this->Log, "ui-err> ");
   this->RunChild(git_update_index, &ui_out, &ui_err);
 
   // Use 'git diff-index' to get modified files.
-  const char* git_diff_index[] = {git, "diff-index", "-z", "HEAD", "--", 0};
+  const char* git_diff_index[] = { git, "diff-index", "-z", "HEAD", "--", 0 };
   DiffParser out(this, "di-out> ");
   OutputLogger err(this->Log, "di-err> ");
   this->RunChild(git_diff_index, &out, &err);
 
-  for(std::vector<Change>::const_iterator ci = out.Changes.begin();
-      ci != out.Changes.end(); ++ci)
-    {
+  for (std::vector<Change>::const_iterator ci = out.Changes.begin();
+       ci != out.Changes.end(); ++ci) {
     this->DoModification(PathModified, ci->Path);
-    }
+  }
 }

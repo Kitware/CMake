@@ -12,20 +12,17 @@
 #include "cmRemoveDefinitionsCommand.h"
 
 // cmRemoveDefinitionsCommand
-bool cmRemoveDefinitionsCommand
-::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
+bool cmRemoveDefinitionsCommand::InitialPass(
+  std::vector<std::string> const& args, cmExecutionStatus&)
 {
   // it is OK to have no arguments
-  if(args.size() < 1 )
-    {
+  if (args.size() < 1) {
     return true;
-    }
+  }
 
-  for(std::vector<std::string>::const_iterator i = args.begin();
-      i != args.end(); ++i)
-    {
+  for (std::vector<std::string>::const_iterator i = args.begin();
+       i != args.end(); ++i) {
     this->Makefile->RemoveDefineFlag(i->c_str());
-    }
+  }
   return true;
 }
-

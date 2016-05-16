@@ -37,14 +37,16 @@ public:
   typedef cmCPackGenerator* CreateGeneratorCall();
 
   void RegisterGenerator(const std::string& name,
-    const char* generatorDescription,
-    CreateGeneratorCall* createGenerator);
+                         const char* generatorDescription,
+                         CreateGeneratorCall* createGenerator);
 
   void SetLogger(cmCPackLog* logger) { this->Logger = logger; }
 
   typedef std::map<std::string, std::string> DescriptionsMap;
   const DescriptionsMap& GetGeneratorsList() const
-    { return this->GeneratorDescriptions; }
+  {
+    return this->GeneratorDescriptions;
+  }
 
 private:
   cmCPackGenerator* NewGeneratorInternal(const std::string& name);

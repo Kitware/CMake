@@ -20,8 +20,7 @@
 
 #include <ctype.h> // isspace
 
-
-#define INCLUDE_REGEX_LINE \
+#define INCLUDE_REGEX_LINE                                                    \
   "^[ \t]*#[ \t]*(include|import)[ \t]*[<\"]([^\">]+)([\">])"
 
 #define INCLUDE_REGEX_LINE_MARKER "#IncludeRegexLine: "
@@ -30,16 +29,15 @@
 #define INCLUDE_REGEX_TRANSFORM_MARKER "#IncludeRegexTransform: "
 
 cmDependsC::cmDependsC()
-: ValidDeps(0)
+  : ValidDeps(0)
 {
 }
 
-cmDependsC::cmDependsC(cmLocalGenerator* lg,
-                   const char* targetDir,
-                   const std::string& lang,
-                   const std::map<std::string, DependencyVector>* validDeps)
-: cmDepends(lg, targetDir)
-, ValidDeps(validDeps)
+cmDependsC::cmDependsC(
+  cmLocalGenerator* lg, const char* targetDir, const std::string& lang,
+  const std::map<std::string, DependencyVector>* validDeps)
+  : cmDepends(lg, targetDir)
+  , ValidDeps(validDeps)
 {
   cmMakefile* mf = lg->GetMakefile();
 
@@ -50,19 +48,17 @@ cmDependsC::cmDependsC(cmLocalGenerator* lg,
   std::string scanRegex = "^.*$";
   std::string complainRegex = "^$";
   {
-  std::string scanRegexVar = "CMAKE_";
-  scanRegexVar += lang;
-  scanRegexVar += "_INCLUDE_REGEX_SCAN";
-  if(const char* sr = mf->GetDefinition(scanRegexVar))
-    {
-    scanRegex = sr;
+    std::string scanRegexVar = "CMAKE_";
+    scanRegexVar += lang;
+    scanRegexVar += "_INCLUDE_REGEX_SCAN";
+    if (const char* sr = mf->GetDefinition(scanRegexVar)) {
+      scanRegex = sr;
     }
-  std::string complainRegexVar = "CMAKE_";
-  complainRegexVar += lang;
-  complainRegexVar += "_INCLUDE_REGEX_COMPLAIN";
-  if(const char* cr = mf->GetDefinition(complainRegexVar))
-    {
-    complainRegex = cr;
+    std::string complainRegexVar = "CMAKE_";
+    complainRegexVar += lang;
+    complainRegexVar += "_INCLUDE_REGEX_COMPLAIN";
+    if (const char* cr = mf->GetDefinition(complainRegexVar)) {
+      complainRegex = cr;
     }
   }
 
@@ -97,151 +93,128 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
                                    std::ostream& internalDepends)
 {
   // Make sure this is a scanning instance.
-  if(sources.empty() || sources.begin()->empty())
-    {
+  if (sources.empty() || sources.begin()->empty()) {
     cmSystemTools::Error("Cannot scan dependencies without a source file.");
     return false;
-    }
-  if(obj.empty())
-    {
+  }
+  if (obj.empty()) {
     cmSystemTools::Error("Cannot scan dependencies without an object file.");
     return false;
-    }
+  }
 
   std::set<std::string> dependencies;
   bool haveDeps = false;
 
-  if (this->ValidDeps != 0)
-    {
+  if (this->ValidDeps != 0) {
     std::map<std::string, DependencyVector>::const_iterator tmpIt =
-                                                    this->ValidDeps->find(obj);
-    if (tmpIt!= this->ValidDeps->end())
-      {
+      this->ValidDeps->find(obj);
+    if (tmpIt != this->ValidDeps->end()) {
       dependencies.insert(tmpIt->second.begin(), tmpIt->second.end());
       haveDeps = true;
-      }
     }
+  }
 
-  if (!haveDeps)
-    {
+  if (!haveDeps) {
     // Walk the dependency graph starting with the source file.
     int srcFiles = (int)sources.size();
     this->Encountered.clear();
 
-    for(std::set<std::string>::const_iterator srcIt = sources.begin();
-        srcIt != sources.end(); ++srcIt)
-      {
+    for (std::set<std::string>::const_iterator srcIt = sources.begin();
+         srcIt != sources.end(); ++srcIt) {
       UnscannedEntry root;
       root.FileName = *srcIt;
       this->Unscanned.push(root);
       this->Encountered.insert(*srcIt);
-      }
+    }
 
     std::set<std::string> scanned;
 
     // Use reserve to allocate enough memory for tempPathStr
     // so that during the loops no memory is allocated or freed
     std::string tempPathStr;
-    tempPathStr.reserve(4*1024);
+    tempPathStr.reserve(4 * 1024);
 
-    while(!this->Unscanned.empty())
-      {
+    while (!this->Unscanned.empty()) {
       // Get the next file to scan.
       UnscannedEntry current = this->Unscanned.front();
       this->Unscanned.pop();
 
       // If not a full path, find the file in the include path.
       std::string fullName;
-      if((srcFiles>0)
-         || cmSystemTools::FileIsFullPath(current.FileName.c_str()))
-        {
-        if(cmSystemTools::FileExists(current.FileName.c_str(), true))
-          {
+      if ((srcFiles > 0) ||
+          cmSystemTools::FileIsFullPath(current.FileName.c_str())) {
+        if (cmSystemTools::FileExists(current.FileName.c_str(), true)) {
           fullName = current.FileName;
-          }
         }
-      else if(!current.QuotedLocation.empty() &&
-              cmSystemTools::FileExists(current.QuotedLocation.c_str(), true))
-        {
+      } else if (!current.QuotedLocation.empty() &&
+                 cmSystemTools::FileExists(current.QuotedLocation.c_str(),
+                                           true)) {
         // The include statement producing this entry was a double-quote
         // include and the included file is present in the directory of
         // the source containing the include statement.
         fullName = current.QuotedLocation;
-        }
-      else
-        {
-        std::map<std::string, std::string>::iterator
-          headerLocationIt=this->HeaderLocationCache.find(current.FileName);
-        if (headerLocationIt!=this->HeaderLocationCache.end())
-          {
-          fullName=headerLocationIt->second;
-          }
-        else for(std::vector<std::string>::const_iterator i =
-              this->IncludePath.begin(); i != this->IncludePath.end(); ++i)
-          {
-          // Construct the name of the file as if it were in the current
-          // include directory.  Avoid using a leading "./".
+      } else {
+        std::map<std::string, std::string>::iterator headerLocationIt =
+          this->HeaderLocationCache.find(current.FileName);
+        if (headerLocationIt != this->HeaderLocationCache.end()) {
+          fullName = headerLocationIt->second;
+        } else
+          for (std::vector<std::string>::const_iterator i =
+                 this->IncludePath.begin();
+               i != this->IncludePath.end(); ++i) {
+            // Construct the name of the file as if it were in the current
+            // include directory.  Avoid using a leading "./".
 
-          tempPathStr =
-            cmSystemTools::CollapseCombinedPath(*i, current.FileName);
+            tempPathStr =
+              cmSystemTools::CollapseCombinedPath(*i, current.FileName);
 
-          // Look for the file in this location.
-          if(cmSystemTools::FileExists(tempPathStr.c_str(), true))
-            {
-            fullName = tempPathStr;
-            HeaderLocationCache[current.FileName]=fullName;
-            break;
+            // Look for the file in this location.
+            if (cmSystemTools::FileExists(tempPathStr.c_str(), true)) {
+              fullName = tempPathStr;
+              HeaderLocationCache[current.FileName] = fullName;
+              break;
             }
           }
-        }
+      }
 
       // Complain if the file cannot be found and matches the complain
       // regex.
-      if(fullName.empty() &&
-        this->IncludeRegexComplain.find(current.FileName.c_str()))
-        {
-        cmSystemTools::Error("Cannot find file \"",
-                            current.FileName.c_str(), "\".");
+      if (fullName.empty() &&
+          this->IncludeRegexComplain.find(current.FileName.c_str())) {
+        cmSystemTools::Error("Cannot find file \"", current.FileName.c_str(),
+                             "\".");
         return false;
-        }
+      }
 
       // Scan the file if it was found and has not been scanned already.
-      if(!fullName.empty() && (scanned.find(fullName) == scanned.end()))
-        {
+      if (!fullName.empty() && (scanned.find(fullName) == scanned.end())) {
         // Record scanned files.
         scanned.insert(fullName);
 
         // Check whether this file is already in the cache
-        std::map<std::string, cmIncludeLines*>::iterator fileIt=
+        std::map<std::string, cmIncludeLines*>::iterator fileIt =
           this->FileCache.find(fullName);
-        if (fileIt!=this->FileCache.end())
-          {
-          fileIt->second->Used=true;
+        if (fileIt != this->FileCache.end()) {
+          fileIt->second->Used = true;
           dependencies.insert(fullName);
-          for (std::vector<UnscannedEntry>::const_iterator incIt=
-                fileIt->second->UnscannedEntries.begin();
-              incIt!=fileIt->second->UnscannedEntries.end(); ++incIt)
-            {
+          for (std::vector<UnscannedEntry>::const_iterator incIt =
+                 fileIt->second->UnscannedEntries.begin();
+               incIt != fileIt->second->UnscannedEntries.end(); ++incIt) {
             if (this->Encountered.find(incIt->FileName) ==
-                this->Encountered.end())
-              {
+                this->Encountered.end()) {
               this->Encountered.insert(incIt->FileName);
               this->Unscanned.push(*incIt);
-              }
             }
           }
-        else
-          {
+        } else {
 
           // Try to scan the file.  Just leave it out if we cannot find
           // it.
           cmsys::ifstream fin(fullName.c_str());
-          if(fin)
-            {
+          if (fin) {
             cmsys::FStream::BOM bom = cmsys::FStream::ReadBOM(fin);
-            if(bom == cmsys::FStream::BOM_None ||
-               bom == cmsys::FStream::BOM_UTF8)
-              {
+            if (bom == cmsys::FStream::BOM_None ||
+                bom == cmsys::FStream::BOM_UTF8) {
               // Add this file as a dependency.
               dependencies.insert(fullName);
 
@@ -249,18 +222,16 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
               // containing the file to handle double-quote includes.
               std::string dir = cmSystemTools::GetFilenamePath(fullName);
               this->Scan(fin, dir.c_str(), fullName);
-              }
-            else
-              {
+            } else {
               // Skip file with encoding we do not implement.
-              }
             }
           }
         }
+      }
 
       srcFiles--;
-      }
     }
+  }
 
   // Write the dependencies to the output stream.  Makefile rules
   // written by the original local generator for this directory
@@ -268,21 +239,19 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   // directory.  We must do the same here.
   std::string obj_i =
     this->LocalGenerator->Convert(obj, cmLocalGenerator::HOME_OUTPUT);
-  std::string obj_m =
-    this->LocalGenerator->ConvertToOutputFormat(obj_i,
-                                                cmLocalGenerator::MAKERULE);
+  std::string obj_m = this->LocalGenerator->ConvertToOutputFormat(
+    obj_i, cmLocalGenerator::MAKERULE);
   internalDepends << obj_i << std::endl;
 
-  for(std::set<std::string>::const_iterator i=dependencies.begin();
-      i != dependencies.end(); ++i)
-    {
-    makeDepends << obj_m << ": " <<
-      this->LocalGenerator->Convert(*i,
-                                    cmLocalGenerator::HOME_OUTPUT,
-                                    cmLocalGenerator::MAKERULE)
+  for (std::set<std::string>::const_iterator i = dependencies.begin();
+       i != dependencies.end(); ++i) {
+    makeDepends << obj_m << ": "
+                << this->LocalGenerator->Convert(*i,
+                                                 cmLocalGenerator::HOME_OUTPUT,
+                                                 cmLocalGenerator::MAKERULE)
                 << std::endl;
     internalDepends << " " << *i << std::endl;
-    }
+  }
   makeDepends << std::endl;
 
   return true;
@@ -290,169 +259,136 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
 
 void cmDependsC::ReadCacheFile()
 {
-  if(this->CacheFileName.empty())
-    {
+  if (this->CacheFileName.empty()) {
     return;
-    }
+  }
   cmsys::ifstream fin(this->CacheFileName.c_str());
-  if(!fin)
-    {
+  if (!fin) {
     return;
-    }
+  }
 
   std::string line;
-  cmIncludeLines* cacheEntry=0;
-  bool haveFileName=false;
+  cmIncludeLines* cacheEntry = 0;
+  bool haveFileName = false;
 
-  while(cmSystemTools::GetLineFromStream(fin, line))
-    {
-    if (line.empty())
-      {
-      cacheEntry=0;
-      haveFileName=false;
+  while (cmSystemTools::GetLineFromStream(fin, line)) {
+    if (line.empty()) {
+      cacheEntry = 0;
+      haveFileName = false;
       continue;
-      }
-    //the first line after an empty line is the name of the parsed file
-    if (haveFileName==false)
-      {
-      haveFileName=true;
-      int newer=0;
+    }
+    // the first line after an empty line is the name of the parsed file
+    if (haveFileName == false) {
+      haveFileName = true;
+      int newer = 0;
       cmFileTimeComparison comp;
-      bool res=comp.FileTimeCompare(this->CacheFileName.c_str(),
-                                    line.c_str(), &newer);
+      bool res = comp.FileTimeCompare(this->CacheFileName.c_str(),
+                                      line.c_str(), &newer);
 
-      if ((res==true) && (newer==1)) //cache is newer than the parsed file
-        {
-        cacheEntry=new cmIncludeLines;
-        this->FileCache[line]=cacheEntry;
-        }
+      if ((res == true) && (newer == 1)) // cache is newer than the parsed file
+      {
+        cacheEntry = new cmIncludeLines;
+        this->FileCache[line] = cacheEntry;
+      }
       // file doesn't exist, check that the regular expressions
       // haven't changed
-      else if (res==false)
-        {
-        if (line.find(INCLUDE_REGEX_LINE_MARKER) == 0)
-          {
-          if (line != this->IncludeRegexLineString)
-            {
+      else if (res == false) {
+        if (line.find(INCLUDE_REGEX_LINE_MARKER) == 0) {
+          if (line != this->IncludeRegexLineString) {
             return;
-            }
           }
-        else if (line.find(INCLUDE_REGEX_SCAN_MARKER) == 0)
-          {
-          if (line != this->IncludeRegexScanString)
-            {
+        } else if (line.find(INCLUDE_REGEX_SCAN_MARKER) == 0) {
+          if (line != this->IncludeRegexScanString) {
             return;
-            }
           }
-        else if (line.find(INCLUDE_REGEX_COMPLAIN_MARKER) == 0)
-          {
-          if (line != this->IncludeRegexComplainString)
-            {
+        } else if (line.find(INCLUDE_REGEX_COMPLAIN_MARKER) == 0) {
+          if (line != this->IncludeRegexComplainString) {
             return;
-            }
           }
-        else if (line.find(INCLUDE_REGEX_TRANSFORM_MARKER) == 0)
-          {
-          if (line != this->IncludeRegexTransformString)
-            {
+        } else if (line.find(INCLUDE_REGEX_TRANSFORM_MARKER) == 0) {
+          if (line != this->IncludeRegexTransformString) {
             return;
-            }
           }
         }
       }
-    else if (cacheEntry!=0)
-      {
+    } else if (cacheEntry != 0) {
       UnscannedEntry entry;
       entry.FileName = line;
-      if (cmSystemTools::GetLineFromStream(fin, line))
-        {
-        if (line!="-")
-          {
-          entry.QuotedLocation=line;
-          }
-        cacheEntry->UnscannedEntries.push_back(entry);
+      if (cmSystemTools::GetLineFromStream(fin, line)) {
+        if (line != "-") {
+          entry.QuotedLocation = line;
         }
+        cacheEntry->UnscannedEntries.push_back(entry);
       }
     }
+  }
 }
 
 void cmDependsC::WriteCacheFile() const
 {
-  if(this->CacheFileName.empty())
-    {
+  if (this->CacheFileName.empty()) {
     return;
-    }
+  }
   cmsys::ofstream cacheOut(this->CacheFileName.c_str());
-  if(!cacheOut)
-    {
+  if (!cacheOut) {
     return;
-    }
+  }
 
   cacheOut << this->IncludeRegexLineString << "\n\n";
   cacheOut << this->IncludeRegexScanString << "\n\n";
   cacheOut << this->IncludeRegexComplainString << "\n\n";
   cacheOut << this->IncludeRegexTransformString << "\n\n";
 
-  for (std::map<std::string, cmIncludeLines*>::const_iterator fileIt=
+  for (std::map<std::string, cmIncludeLines*>::const_iterator fileIt =
          this->FileCache.begin();
-       fileIt!=this->FileCache.end(); ++fileIt)
-    {
-    if (fileIt->second->Used)
-      {
-      cacheOut<<fileIt->first.c_str()<<std::endl;
+       fileIt != this->FileCache.end(); ++fileIt) {
+    if (fileIt->second->Used) {
+      cacheOut << fileIt->first.c_str() << std::endl;
 
-      for (std::vector<UnscannedEntry>::const_iterator
-             incIt=fileIt->second->UnscannedEntries.begin();
-           incIt!=fileIt->second->UnscannedEntries.end(); ++incIt)
-        {
-        cacheOut<<incIt->FileName.c_str()<<std::endl;
-        if (incIt->QuotedLocation.empty())
-          {
-          cacheOut<<"-"<<std::endl;
-          }
-        else
-          {
-          cacheOut<<incIt->QuotedLocation.c_str()<<std::endl;
-          }
+      for (std::vector<UnscannedEntry>::const_iterator incIt =
+             fileIt->second->UnscannedEntries.begin();
+           incIt != fileIt->second->UnscannedEntries.end(); ++incIt) {
+        cacheOut << incIt->FileName.c_str() << std::endl;
+        if (incIt->QuotedLocation.empty()) {
+          cacheOut << "-" << std::endl;
+        } else {
+          cacheOut << incIt->QuotedLocation.c_str() << std::endl;
         }
-      cacheOut<<std::endl;
       }
-   }
+      cacheOut << std::endl;
+    }
+  }
 }
 
 void cmDependsC::Scan(std::istream& is, const char* directory,
-  const std::string& fullName)
+                      const std::string& fullName)
 {
-  cmIncludeLines* newCacheEntry=new cmIncludeLines;
-  newCacheEntry->Used=true;
-  this->FileCache[fullName]=newCacheEntry;
+  cmIncludeLines* newCacheEntry = new cmIncludeLines;
+  newCacheEntry->Used = true;
+  this->FileCache[fullName] = newCacheEntry;
 
   // Read one line at a time.
   std::string line;
-  while(cmSystemTools::GetLineFromStream(is, line))
-    {
+  while (cmSystemTools::GetLineFromStream(is, line)) {
     // Transform the line content first.
-    if(!this->TransformRules.empty())
-      {
+    if (!this->TransformRules.empty()) {
       this->TransformLine(line);
-      }
+    }
 
     // Match include directives.
-    if(this->IncludeRegexLine.find(line.c_str()))
-      {
+    if (this->IncludeRegexLine.find(line.c_str())) {
       // Get the file being included.
       UnscannedEntry entry;
       entry.FileName = this->IncludeRegexLine.match(2);
       cmSystemTools::ConvertToUnixSlashes(entry.FileName);
-      if(this->IncludeRegexLine.match(3) == "\"" &&
-         !cmSystemTools::FileIsFullPath(entry.FileName.c_str()))
-        {
+      if (this->IncludeRegexLine.match(3) == "\"" &&
+          !cmSystemTools::FileIsFullPath(entry.FileName.c_str())) {
         // This was a double-quoted include with a relative path.  We
         // must check for the file in the directory containing the
         // file we are scanning.
         entry.QuotedLocation =
           cmSystemTools::CollapseCombinedPath(directory, entry.FileName);
-        }
+      }
 
       // Queue the file if it has not yet been encountered and it
       // matches the regular expression for recursive scanning.  Note
@@ -464,17 +400,16 @@ void cmDependsC::Scan(std::istream& is, const char* directory,
       // file their own directory by simply using "filename.h" (#12619)
       // This kind of problem will be fixed when a more
       // preprocessor-like implementation of this scanner is created.
-      if (this->IncludeRegexScan.find(entry.FileName.c_str()))
-        {
+      if (this->IncludeRegexScan.find(entry.FileName.c_str())) {
         newCacheEntry->UnscannedEntries.push_back(entry);
-        if(this->Encountered.find(entry.FileName) == this->Encountered.end())
-          {
+        if (this->Encountered.find(entry.FileName) ==
+            this->Encountered.end()) {
           this->Encountered.insert(entry.FileName);
           this->Unscanned.push(entry);
-          }
         }
       }
     }
+  }
 }
 
 void cmDependsC::SetupTransforms()
@@ -482,46 +417,40 @@ void cmDependsC::SetupTransforms()
   // Get the transformation rules.
   std::vector<std::string> transformRules;
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
-  if(const char* xform =
-     mf->GetDefinition("CMAKE_INCLUDE_TRANSFORMS"))
-    {
+  if (const char* xform = mf->GetDefinition("CMAKE_INCLUDE_TRANSFORMS")) {
     cmSystemTools::ExpandListArgument(xform, transformRules, true);
-    }
-  for(std::vector<std::string>::const_iterator tri = transformRules.begin();
-      tri != transformRules.end(); ++tri)
-    {
+  }
+  for (std::vector<std::string>::const_iterator tri = transformRules.begin();
+       tri != transformRules.end(); ++tri) {
     this->ParseTransform(*tri);
-    }
+  }
 
   this->IncludeRegexTransformString = INCLUDE_REGEX_TRANSFORM_MARKER;
-  if(!this->TransformRules.empty())
-    {
+  if (!this->TransformRules.empty()) {
     // Construct the regular expression to match lines to be
     // transformed.
     std::string xform = "^([ \t]*#[ \t]*(include|import)[ \t]*)(";
     const char* sep = "";
-    for(TransformRulesType::const_iterator tri = this->TransformRules.begin();
-        tri != this->TransformRules.end(); ++tri)
-      {
+    for (TransformRulesType::const_iterator tri = this->TransformRules.begin();
+         tri != this->TransformRules.end(); ++tri) {
       xform += sep;
       xform += tri->first;
       sep = "|";
-      }
+    }
     xform += ")[ \t]*\\(([^),]*)\\)";
     this->IncludeRegexTransform.compile(xform.c_str());
 
     // Build a string that encodes all transformation rules and will
     // change when rules are changed.
     this->IncludeRegexTransformString += xform;
-    for(TransformRulesType::const_iterator tri = this->TransformRules.begin();
-        tri != this->TransformRules.end(); ++tri)
-      {
+    for (TransformRulesType::const_iterator tri = this->TransformRules.begin();
+         tri != this->TransformRules.end(); ++tri) {
       this->IncludeRegexTransformString += " ";
       this->IncludeRegexTransformString += tri->first;
       this->IncludeRegexTransformString += "(%)=";
       this->IncludeRegexTransformString += tri->second;
-      }
     }
+  }
 }
 
 void cmDependsC::ParseTransform(std::string const& xform)
@@ -529,43 +458,36 @@ void cmDependsC::ParseTransform(std::string const& xform)
   // A transform rule is of the form SOME_MACRO(%)=value-with-%
   // We can simply separate with "(%)=".
   std::string::size_type pos = xform.find("(%)=");
-  if(pos == xform.npos || pos == 0)
-    {
+  if (pos == xform.npos || pos == 0) {
     return;
-    }
+  }
   std::string name = xform.substr(0, pos);
-  std::string value = xform.substr(pos+4, xform.npos);
+  std::string value = xform.substr(pos + 4, xform.npos);
   this->TransformRules[name] = value;
 }
 
 void cmDependsC::TransformLine(std::string& line)
 {
   // Check for a transform rule match.  Return if none.
-  if(!this->IncludeRegexTransform.find(line.c_str()))
-    {
+  if (!this->IncludeRegexTransform.find(line.c_str())) {
     return;
-    }
+  }
   TransformRulesType::const_iterator tri =
     this->TransformRules.find(this->IncludeRegexTransform.match(3));
-  if(tri == this->TransformRules.end())
-    {
+  if (tri == this->TransformRules.end()) {
     return;
-    }
+  }
 
   // Construct the transformed line.
   std::string newline = this->IncludeRegexTransform.match(1);
   std::string arg = this->IncludeRegexTransform.match(4);
-  for(const char* c = tri->second.c_str(); *c; ++c)
-    {
-    if(*c == '%')
-      {
+  for (const char* c = tri->second.c_str(); *c; ++c) {
+    if (*c == '%') {
       newline += arg;
-      }
-    else
-      {
+    } else {
       newline += *c;
-      }
     }
+  }
 
   // Return the transformed line.
   line = newline;

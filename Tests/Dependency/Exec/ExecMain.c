@@ -5,7 +5,7 @@ void NoDepCFunction();
 void SixAFunction();
 void SixBFunction();
 
-int main( )
+int main()
 {
   SixAFunction();
   SixBFunction();

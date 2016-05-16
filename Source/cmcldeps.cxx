@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 // Wrapper around cl that adds /showIncludes to command line, and uses that to
 // generate .d files that match the style from gcc -MD.
 //
@@ -27,9 +26,12 @@
 
 // We don't want any wildcard expansion.
 // See http://msdn.microsoft.com/en-us/library/zay8tzh6(v=vs.85).aspx
-void _setargv() {}
+void _setargv()
+{
+}
 
-static void Fatal(const char* msg, ...) {
+static void Fatal(const char* msg, ...)
+{
   va_list ap;
   fprintf(stderr, "ninja: FATAL: ");
   va_start(ap, msg);
@@ -43,20 +45,23 @@ static void Fatal(const char* msg, ...) {
   ExitProcess(1);
 }
 
-static void usage(const char* msg) {
+static void usage(const char* msg)
+{
   Fatal("%s\n\nusage:\n    "
-          "cmcldeps "
-          "<language C, CXX or RC>  "
-          "<source file path>  "
-          "<output path for *.d file>  "
-          "<output path for *.obj file>  "
-          "<prefix of /showIncludes>  "
-          "<path to cl.exe>  "
-          "<path to tool (cl or rc)>  "
-          "<rest of command ...>\n", msg);
+        "cmcldeps "
+        "<language C, CXX or RC>  "
+        "<source file path>  "
+        "<output path for *.d file>  "
+        "<output path for *.obj file>  "
+        "<prefix of /showIncludes>  "
+        "<path to cl.exe>  "
+        "<path to tool (cl or rc)>  "
+        "<rest of command ...>\n",
+        msg);
 }
 
-static std::string trimLeadingSpace(const std::string& cmdline) {
+static std::string trimLeadingSpace(const std::string& cmdline)
+{
   int i = 0;
   for (; cmdline[i] == ' '; ++i)
     ;
@@ -64,7 +69,8 @@ static std::string trimLeadingSpace(const std::string& cmdline) {
 }
 
 static void replaceAll(std::string& str, const std::string& search,
-                                         const std::string& repl) {
+                       const std::string& repl)
+{
   std::string::size_type pos = 0;
   while ((pos = str.find(search, pos)) != std::string::npos) {
     str.replace(pos, search.size(), repl);
@@ -72,13 +78,15 @@ static void replaceAll(std::string& str, const std::string& search,
   }
 }
 
-bool startsWith(const std::string& str, const std::string& what) {
+bool startsWith(const std::string& str, const std::string& what)
+{
   return str.compare(0, what.size(), what) == 0;
 }
 
 // Strips one argument from the cmdline and returns it. "surrounding quotes"
 // are removed from the argument if there were any.
-static std::string getArg(std::string& cmdline) {
+static std::string getArg(std::string& cmdline)
+{
   std::string ret;
   bool in_quoted = false;
   unsigned int i = 0;
@@ -101,15 +109,12 @@ static std::string getArg(std::string& cmdline) {
   return ret;
 }
 
-static void parseCommandLine(LPWSTR wincmdline,
-                             std::string& lang,
-                             std::string& srcfile,
-                             std::string& dfile,
-                             std::string& objfile,
-                             std::string& prefix,
-                             std::string& clpath,
-                             std::string& binpath,
-                             std::string& rest) {
+static void parseCommandLine(LPWSTR wincmdline, std::string& lang,
+                             std::string& srcfile, std::string& dfile,
+                             std::string& objfile, std::string& prefix,
+                             std::string& clpath, std::string& binpath,
+                             std::string& rest)
+{
   std::string cmdline = cmsys::Encoding::ToNarrow(wincmdline);
   /* self */ getArg(cmdline);
   lang = getArg(cmdline);
@@ -124,13 +129,15 @@ static void parseCommandLine(LPWSTR wincmdline,
 
 // Not all backslashes need to be escaped in a depfile, but it's easier that
 // way.  See the re2c grammar in ninja's source code for more info.
-static void escapePath(std::string &path) {
+static void escapePath(std::string& path)
+{
   replaceAll(path, "\\", "\\\\");
   replaceAll(path, " ", "\\ ");
 }
 
 static void outputDepFile(const std::string& dfile, const std::string& objfile,
-        std::vector<std::string>& incs) {
+                          std::vector<std::string>& incs)
+{
 
   if (dfile.empty())
     return;
@@ -169,13 +176,14 @@ static void outputDepFile(const std::string& dfile, const std::string& objfile,
   fclose(out);
 }
 
-
-bool contains(const std::string& str, const std::string& what) {
+bool contains(const std::string& str, const std::string& what)
+{
   return str.find(what) != std::string::npos;
 }
 
 std::string replace(const std::string& str, const std::string& what,
-                    const std::string& replacement) {
+                    const std::string& replacement)
+{
   size_t pos = str.find(what);
   if (pos == std::string::npos)
     return str;
@@ -183,15 +191,10 @@ std::string replace(const std::string& str, const std::string& what,
   return replaced.replace(pos, what.size(), replacement);
 }
 
-
-
-static int process( const std::string& srcfilename,
-                    const std::string& dfile,
-                    const std::string& objfile,
-                    const std::string& prefix,
-                    const std::string& cmd,
-                    const std::string& dir = "",
-                    bool quiet = false)
+static int process(const std::string& srcfilename, const std::string& dfile,
+                   const std::string& objfile, const std::string& prefix,
+                   const std::string& cmd, const std::string& dir = "",
+                   bool quiet = false)
 {
   std::string output;
   // break up command line into a vector
@@ -199,16 +202,15 @@ static int process( const std::string& srcfilename,
   cmSystemTools::ParseWindowsCommandLine(cmd.c_str(), args);
   // convert to correct vector type for RunSingleCommand
   std::vector<std::string> command;
-  for(std::vector<std::string>::iterator i = args.begin();
-      i != args.end(); ++i)
-    {
+  for (std::vector<std::string>::iterator i = args.begin(); i != args.end();
+       ++i) {
     command.push_back(i->c_str());
-    }
+  }
   // run the command
   int exit_code = 0;
-  bool run = cmSystemTools::RunSingleCommand(command, &output, &output,
-                                             &exit_code, dir.c_str(),
-                                             cmSystemTools::OUTPUT_NONE);
+  bool run =
+    cmSystemTools::RunSingleCommand(command, &output, &output, &exit_code,
+                                    dir.c_str(), cmSystemTools::OUTPUT_NONE);
 
   // process the include directives and output everything else
   std::stringstream ss(output);
@@ -239,8 +241,8 @@ static int process( const std::string& srcfilename,
   return exit_code;
 }
 
-
-int main() {
+int main()
+{
 
   // Use the Win32 API instead of argc/argv so we can avoid interpreting the
   // rest of command line after the .d and .obj. Custom parsing seemed
@@ -249,18 +251,18 @@ int main() {
   // the same command line verbatim.
 
   std::string lang, srcfile, dfile, objfile, prefix, cl, binpath, rest;
-  parseCommandLine(GetCommandLineW(), lang, srcfile, dfile, objfile,
-                                     prefix, cl, binpath, rest);
+  parseCommandLine(GetCommandLineW(), lang, srcfile, dfile, objfile, prefix,
+                   cl, binpath, rest);
 
   // needed to suppress filename output of msvc tools
   std::string srcfilename;
   {
-  std::string::size_type pos = srcfile.rfind("\\");
-  if (pos == std::string::npos) {
-    srcfilename = srcfile;
-  } else {
-    srcfilename = srcfile.substr(pos + 1);
-  }
+    std::string::size_type pos = srcfile.rfind("\\");
+    if (pos == std::string::npos) {
+      srcfilename = srcfile;
+    } else {
+      srcfilename = srcfile.substr(pos + 1);
+    }
   }
 
   std::string nol = " /nologo ";
@@ -286,21 +288,21 @@ int main() {
     // call cl in object dir so the .i is generated there
     std::string objdir;
     {
-    std::string::size_type pos = objfile.rfind("\\");
-    if (pos != std::string::npos) {
-      objdir = objfile.substr(0, pos);
-    }
+      std::string::size_type pos = objfile.rfind("\\");
+      if (pos != std::string::npos) {
+        objdir = objfile.substr(0, pos);
+      }
     }
 
     // extract dependencies with cl.exe
-    int exit_code = process(srcfilename, dfile, objfile,
-                            prefix, cl + nol + show + clrest, objdir, true);
+    int exit_code = process(srcfilename, dfile, objfile, prefix,
+                            cl + nol + show + clrest, objdir, true);
 
     if (exit_code != 0)
       return exit_code;
 
     // compile rc file with rc.exe
-    return process(srcfilename, "" , objfile, prefix, binpath + " " + rest);
+    return process(srcfilename, "", objfile, prefix, binpath + " " + rest);
   }
 
   usage("Invalid language specified.");

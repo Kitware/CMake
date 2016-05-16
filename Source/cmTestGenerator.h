@@ -21,12 +21,12 @@ class cmLocalGenerator;
  * \brief Support class for generating install scripts.
  *
  */
-class cmTestGenerator: public cmScriptGenerator
+class cmTestGenerator : public cmScriptGenerator
 {
 public:
   cmTestGenerator(cmTest* test,
-                  std::vector<std::string> const&
-                  configurations = std::vector<std::string>());
+                  std::vector<std::string> const& configurations =
+                    std::vector<std::string>());
   virtual ~cmTestGenerator();
 
   void Compute(cmLocalGenerator* lg);

@@ -2,6 +2,6 @@
 
 int main(int, char**)
 {
-    Glib::init();
-    return 0;
+  Glib::init();
+  return 0;
 }

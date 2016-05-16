@@ -13,22 +13,19 @@
 
 #include "cmSystemTools.h"
 
-void cmPropertyDefinition
-::DefineProperty(const std::string& name, cmProperty::ScopeType scope,
-                 const char *shortDescription,
-                 const char *fullDescription,
-                 bool chain)
+void cmPropertyDefinition::DefineProperty(const std::string& name,
+                                          cmProperty::ScopeType scope,
+                                          const char* shortDescription,
+                                          const char* fullDescription,
+                                          bool chain)
 {
   this->Name = name;
   this->Scope = scope;
   this->Chained = chain;
-  if (shortDescription)
-    {
+  if (shortDescription) {
     this->ShortDescription = shortDescription;
-    }
-  if (fullDescription)
-    {
+  }
+  if (fullDescription) {
     this->FullDescription = fullDescription;
-    }
+  }
 }
-

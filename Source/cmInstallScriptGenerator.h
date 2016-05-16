@@ -17,11 +17,11 @@
 /** \class cmInstallScriptGenerator
  * \brief Generate target installation rules.
  */
-class cmInstallScriptGenerator: public cmInstallGenerator
+class cmInstallScriptGenerator : public cmInstallGenerator
 {
 public:
   cmInstallScriptGenerator(const char* script, bool code,
-    const char* component, bool exclude_from_all);
+                           const char* component, bool exclude_from_all);
   virtual ~cmInstallScriptGenerator();
 
 protected:

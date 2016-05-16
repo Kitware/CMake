@@ -17,8 +17,8 @@
 #define YYSTYPE cmCommandArgumentParserHelper::ParserType
 #define YYSTYPE_IS_DECLARED
 #define YY_EXTRA_TYPE cmCommandArgumentParserHelper*
-#define YY_DECL int cmCommandArgument_yylex(YYSTYPE* yylvalp,\
-  yyscan_t yyscanner)
+#define YY_DECL                                                               \
+  int cmCommandArgument_yylex(YYSTYPE* yylvalp, yyscan_t yyscanner)
 
 /** \class cmCommandArgumentParserHelper
  * \brief Helper class for parsing java source files
@@ -31,7 +31,8 @@ class cmMakefile;
 class cmCommandArgumentParserHelper
 {
 public:
-  typedef struct {
+  typedef struct
+  {
     char* str;
   } ParserType;
 
@@ -42,9 +43,9 @@ public:
 
   // For the lexer:
   void AllocateParserType(cmCommandArgumentParserHelper::ParserType* pt,
-    const char* str, int len = 0);
+                          const char* str, int len = 0);
   bool HandleEscapeSymbol(cmCommandArgumentParserHelper::ParserType* pt,
-    char symbol);
+                          char symbol);
 
   int LexInput(char* buf, int maxlen);
   void Error(const char* str);
@@ -106,5 +107,3 @@ private:
 };
 
 #endif
-
-

@@ -1,5 +1,4 @@
 
 void someFunc(int&&)
 {
-
 }

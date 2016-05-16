@@ -1,8 +1,7 @@
 
 #include <QWidget>
 
-namespace Ui
-{
+namespace Ui {
 class SecondWidget;
 }
 
@@ -10,7 +9,7 @@ class SecondWidget : public QWidget
 {
   Q_OBJECT
 public:
-  explicit SecondWidget(QWidget *parent = 0);
+  explicit SecondWidget(QWidget* parent = 0);
 
   ~SecondWidget();
 

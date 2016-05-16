@@ -21,12 +21,11 @@ cmCursesForm::cmCursesForm()
 
 cmCursesForm::~cmCursesForm()
 {
-  if (this->Form)
-    {
+  if (this->Form) {
     unpost_form(this->Form);
     free_form(this->Form);
     this->Form = 0;
-    }
+  }
 }
 
 void cmCursesForm::DebugStart()
@@ -37,10 +36,9 @@ void cmCursesForm::DebugStart()
 
 void cmCursesForm::DebugEnd()
 {
-  if (!cmCursesForm::Debug)
-    {
+  if (!cmCursesForm::Debug) {
     return;
-    }
+  }
 
   cmCursesForm::Debug = false;
   cmCursesForm::DebugFile.close();
@@ -48,10 +46,9 @@ void cmCursesForm::DebugEnd()
 
 void cmCursesForm::LogMessage(const char* msg)
 {
-  if (!cmCursesForm::Debug)
-    {
+  if (!cmCursesForm::Debug) {
     return;
-    }
+  }
 
   cmCursesForm::DebugFile << msg << std::endl;
 }

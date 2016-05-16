@@ -1,2 +1,5 @@
 #include "b.h"
-EXPORT_B int b1(void) { return 0; }
+EXPORT_B int b1(void)
+{
+  return 0;
+}

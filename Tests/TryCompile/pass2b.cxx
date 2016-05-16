@@ -1,1 +1,4 @@
-extern "C" int pass2b(void) { return 0; }
+extern "C" int pass2b(void)
+{
+  return 0;
+}

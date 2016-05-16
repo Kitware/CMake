@@ -30,7 +30,8 @@ class cmMakefile;
 class cmExprParserHelper
 {
 public:
-  typedef struct {
+  typedef struct
+  {
     int Number;
   } ParserType;
 
@@ -66,6 +67,3 @@ private:
 };
 
 #endif
-
-
-

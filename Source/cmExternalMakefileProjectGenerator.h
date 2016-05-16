@@ -33,7 +33,6 @@ class cmGlobalGenerator;
 class cmExternalMakefileProjectGenerator
 {
 public:
-
   virtual ~cmExternalMakefileProjectGenerator() {}
 
   ///! Get the name for this generator.
@@ -42,15 +41,19 @@ public:
   virtual void GetDocumentation(cmDocumentationEntry& entry,
                                 const std::string& fullName) const = 0;
   virtual void EnableLanguage(std::vector<std::string> const& languages,
-                              cmMakefile *, bool optional);
+                              cmMakefile*, bool optional);
 
   ///! set the global generator which will generate the makefiles
   virtual void SetGlobalGenerator(cmGlobalGenerator* generator)
-                                           {this->GlobalGenerator = generator;}
+  {
+    this->GlobalGenerator = generator;
+  }
 
   ///! Return the list of global generators supported by this extra generator
   const std::vector<std::string>& GetSupportedGlobalGenerators() const
-                                      {return this->SupportedGlobalGenerators;}
+  {
+    return this->SupportedGlobalGenerators;
+  }
 
   ///! Get the name of the global generator for the given full name
   std::string GetGlobalGeneratorName(const std::string& fullName);
@@ -58,11 +61,11 @@ public:
    * extra generator name
    */
   static std::string CreateFullGeneratorName(
-                                            const std::string& globalGenerator,
-                                            const std::string& extraGenerator);
+    const std::string& globalGenerator, const std::string& extraGenerator);
 
   ///! Generate the project files, the Makefiles have already been generated
   virtual void Generate() = 0;
+
 protected:
   ///! Contains the names of the global generators support by this generator.
   std::vector<std::string> SupportedGlobalGenerators;

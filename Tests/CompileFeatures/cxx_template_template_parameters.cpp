@@ -1,14 +1,12 @@
 
-template<template <typename> class T, typename U>
+template <template <typename> class T, typename U>
 void someFunc(T<U>)
 {
-
 }
 
-template<typename T>
+template <typename T>
 struct A
 {
-
 };
 
 void otherFunc()

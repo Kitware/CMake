@@ -18,14 +18,14 @@
 
 class Foo
 #ifdef FOO
-          : public QObject
+  : public QObject
 #endif
 {
   Q_OBJECT
-  public:
-    Foo();
-  public slots:
-    void doFoo();
+public:
+  Foo();
+public slots:
+  void doFoo();
 };
 
 #endif

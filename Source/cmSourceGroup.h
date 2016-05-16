@@ -34,7 +34,7 @@ class cmSourceGroup
 {
 public:
   cmSourceGroup(const char* name, const char* regex,
-                const char* parentName=0);
+                const char* parentName = 0);
   cmSourceGroup(cmSourceGroup const& r);
   ~cmSourceGroup();
   cmSourceGroup& operator=(cmSourceGroup const&);
@@ -57,7 +57,7 @@ public:
   /**
    * Looks up child and returns it
    */
-  cmSourceGroup *LookupChild(const char *name) const;
+  cmSourceGroup* LookupChild(const char* name) const;
 
   /**
    * Get the name of this group.
@@ -83,12 +83,12 @@ public:
    * Check if the given name matches this group's explicit file list
    * in children.
    */
-  cmSourceGroup *MatchChildrenFiles(const char *name);
+  cmSourceGroup* MatchChildrenFiles(const char* name);
 
   /**
    * Check if the given name matches this group's regex in children.
    */
-  cmSourceGroup *MatchChildrenRegex(const char *name);
+  cmSourceGroup* MatchChildrenRegex(const char* name);
 
   /**
    * Assign the given source file to this group.  Used only by
@@ -103,6 +103,7 @@ public:
   const std::vector<const cmSourceFile*>& GetSourceFiles() const;
 
   std::vector<cmSourceGroup> const& GetGroupChildren() const;
+
 private:
   /**
    * The name of the source group.

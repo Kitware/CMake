@@ -1,2 +1,4 @@
 
-struct A final {};
+struct A final
+{
+};

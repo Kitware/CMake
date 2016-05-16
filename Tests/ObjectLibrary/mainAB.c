@@ -11,10 +11,7 @@ int main(void)
 {
   return 0
 #ifndef NO_A
-    + a1()
-    + a2()
+    + a1() + a2()
 #endif
-    + b1()
-    + b2()
-    ;
+    + b1() + b2();
 }

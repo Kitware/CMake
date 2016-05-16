@@ -21,17 +21,17 @@ class cmLocalGenerator;
  * \brief Support class for generating CPackProperties.cmake.
  *
  */
-class cmCPackPropertiesGenerator: public cmScriptGenerator
+class cmCPackPropertiesGenerator : public cmScriptGenerator
 {
 public:
-  cmCPackPropertiesGenerator(
-     cmLocalGenerator* lg,
-     cmInstalledFile const& installedFile,
-     std::vector<std::string> const& configurations);
+  cmCPackPropertiesGenerator(cmLocalGenerator* lg,
+                             cmInstalledFile const& installedFile,
+                             std::vector<std::string> const& configurations);
 
 protected:
   virtual void GenerateScriptForConfig(std::ostream& os,
-    const std::string& config, Indent const& indent);
+                                       const std::string& config,
+                                       Indent const& indent);
 
   cmLocalGenerator* LG;
   cmInstalledFile const& InstalledFile;

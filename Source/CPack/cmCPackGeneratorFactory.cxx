@@ -24,134 +24,115 @@
 #include "cmCPackZIPGenerator.h"
 
 #ifdef __APPLE__
-#   include "cmCPackBundleGenerator.h"
-#   include "cmCPackDragNDropGenerator.h"
-#   include "cmCPackOSXX11Generator.h"
-#   include "cmCPackPackageMakerGenerator.h"
+#include "cmCPackBundleGenerator.h"
+#include "cmCPackDragNDropGenerator.h"
+#include "cmCPackOSXX11Generator.h"
+#include "cmCPackPackageMakerGenerator.h"
 #endif
 
 #ifdef __CYGWIN__
-#  include "cmCPackCygwinBinaryGenerator.h"
-#  include "cmCPackCygwinSourceGenerator.h"
+#include "cmCPackCygwinBinaryGenerator.h"
+#include "cmCPackCygwinSourceGenerator.h"
 #endif
 
-#if !defined(_WIN32) \
- && !defined(__QNXNTO__) && !defined(__BEOS__) && !defined(__HAIKU__)
-#  include "cmCPackDebGenerator.h"
-#  include "cmCPackRPMGenerator.h"
+#if !defined(_WIN32) && !defined(__QNXNTO__) && !defined(__BEOS__) &&         \
+  !defined(__HAIKU__)
+#include "cmCPackDebGenerator.h"
+#include "cmCPackRPMGenerator.h"
 #endif
 
 #ifdef _WIN32
-#  include "WiX/cmCPackWIXGenerator.h"
+#include "WiX/cmCPackWIXGenerator.h"
 #endif
 
 #include "cmAlgorithms.h"
 #include "cmCPackLog.h"
 
-
 cmCPackGeneratorFactory::cmCPackGeneratorFactory()
 {
-  if (cmCPackTGZGenerator::CanGenerate())
-    {
+  if (cmCPackTGZGenerator::CanGenerate()) {
     this->RegisterGenerator("TGZ", "Tar GZip compression",
-      cmCPackTGZGenerator::CreateGenerator);
-    }
-  if (cmCPackTXZGenerator::CanGenerate())
-    {
+                            cmCPackTGZGenerator::CreateGenerator);
+  }
+  if (cmCPackTXZGenerator::CanGenerate()) {
     this->RegisterGenerator("TXZ", "Tar XZ compression",
-      cmCPackTXZGenerator::CreateGenerator);
-    }
-  if (cmCPackSTGZGenerator::CanGenerate())
-    {
+                            cmCPackTXZGenerator::CreateGenerator);
+  }
+  if (cmCPackSTGZGenerator::CanGenerate()) {
     this->RegisterGenerator("STGZ", "Self extracting Tar GZip compression",
-      cmCPackSTGZGenerator::CreateGenerator);
-    }
-  if (cmCPackNSISGenerator::CanGenerate())
-    {
+                            cmCPackSTGZGenerator::CreateGenerator);
+  }
+  if (cmCPackNSISGenerator::CanGenerate()) {
     this->RegisterGenerator("NSIS", "Null Soft Installer",
-      cmCPackNSISGenerator::CreateGenerator);
+                            cmCPackNSISGenerator::CreateGenerator);
     this->RegisterGenerator("NSIS64", "Null Soft Installer (64-bit)",
-      cmCPackNSISGenerator::CreateGenerator64);
-    }
-  if (cmCPackIFWGenerator::CanGenerate())
-    {
+                            cmCPackNSISGenerator::CreateGenerator64);
+  }
+  if (cmCPackIFWGenerator::CanGenerate()) {
     this->RegisterGenerator("IFW", "Qt Installer Framework",
-      cmCPackIFWGenerator::CreateGenerator);
-    }
+                            cmCPackIFWGenerator::CreateGenerator);
+  }
 #ifdef __CYGWIN__
-  if (cmCPackCygwinBinaryGenerator::CanGenerate())
-    {
+  if (cmCPackCygwinBinaryGenerator::CanGenerate()) {
     this->RegisterGenerator("CygwinBinary", "Cygwin Binary Installer",
                             cmCPackCygwinBinaryGenerator::CreateGenerator);
-    }
-  if (cmCPackCygwinSourceGenerator::CanGenerate())
-    {
+  }
+  if (cmCPackCygwinSourceGenerator::CanGenerate()) {
     this->RegisterGenerator("CygwinSource", "Cygwin Source Installer",
                             cmCPackCygwinSourceGenerator::CreateGenerator);
-    }
+  }
 #endif
 
-  if (cmCPackZIPGenerator::CanGenerate())
-    {
+  if (cmCPackZIPGenerator::CanGenerate()) {
     this->RegisterGenerator("ZIP", "ZIP file format",
-      cmCPackZIPGenerator::CreateGenerator);
-    }
-  if (cmCPack7zGenerator::CanGenerate())
-    {
+                            cmCPackZIPGenerator::CreateGenerator);
+  }
+  if (cmCPack7zGenerator::CanGenerate()) {
     this->RegisterGenerator("7Z", "7-Zip file format",
-      cmCPack7zGenerator::CreateGenerator);
-    }
+                            cmCPack7zGenerator::CreateGenerator);
+  }
 #ifdef _WIN32
-  if (cmCPackWIXGenerator::CanGenerate())
-    {
+  if (cmCPackWIXGenerator::CanGenerate()) {
     this->RegisterGenerator("WIX", "MSI file format via WiX tools",
-      cmCPackWIXGenerator::CreateGenerator);
-    }
+                            cmCPackWIXGenerator::CreateGenerator);
+  }
 #endif
-  if (cmCPackTarBZip2Generator::CanGenerate())
-    {
+  if (cmCPackTarBZip2Generator::CanGenerate()) {
     this->RegisterGenerator("TBZ2", "Tar BZip2 compression",
-      cmCPackTarBZip2Generator::CreateGenerator);
-    }
-  if (cmCPackTarCompressGenerator::CanGenerate())
-    {
+                            cmCPackTarBZip2Generator::CreateGenerator);
+  }
+  if (cmCPackTarCompressGenerator::CanGenerate()) {
     this->RegisterGenerator("TZ", "Tar Compress compression",
-      cmCPackTarCompressGenerator::CreateGenerator);
-    }
+                            cmCPackTarCompressGenerator::CreateGenerator);
+  }
 #ifdef __APPLE__
-  if (cmCPackDragNDropGenerator::CanGenerate())
-    {
+  if (cmCPackDragNDropGenerator::CanGenerate()) {
     this->RegisterGenerator("DragNDrop", "Mac OSX Drag And Drop",
-      cmCPackDragNDropGenerator::CreateGenerator);
-    }
-  if (cmCPackBundleGenerator::CanGenerate())
-    {
+                            cmCPackDragNDropGenerator::CreateGenerator);
+  }
+  if (cmCPackBundleGenerator::CanGenerate()) {
     this->RegisterGenerator("Bundle", "Mac OSX bundle",
-      cmCPackBundleGenerator::CreateGenerator);
-    }
-  if (cmCPackPackageMakerGenerator::CanGenerate())
-    {
+                            cmCPackBundleGenerator::CreateGenerator);
+  }
+  if (cmCPackPackageMakerGenerator::CanGenerate()) {
     this->RegisterGenerator("PackageMaker", "Mac OSX Package Maker installer",
-      cmCPackPackageMakerGenerator::CreateGenerator);
-    }
-  if (cmCPackOSXX11Generator::CanGenerate())
-    {
+                            cmCPackPackageMakerGenerator::CreateGenerator);
+  }
+  if (cmCPackOSXX11Generator::CanGenerate()) {
     this->RegisterGenerator("OSXX11", "Mac OSX X11 bundle",
-      cmCPackOSXX11Generator::CreateGenerator);
-    }
+                            cmCPackOSXX11Generator::CreateGenerator);
+  }
 #endif
-#if !defined(_WIN32) \
-  && !defined(__QNXNTO__) && !defined(__BEOS__) && !defined(__HAIKU__)
-  if (cmCPackDebGenerator::CanGenerate())
-    {
+#if !defined(_WIN32) && !defined(__QNXNTO__) && !defined(__BEOS__) &&         \
+  !defined(__HAIKU__)
+  if (cmCPackDebGenerator::CanGenerate()) {
     this->RegisterGenerator("DEB", "Debian packages",
-      cmCPackDebGenerator::CreateGenerator);
-    }
-  if (cmCPackRPMGenerator::CanGenerate())
-    {
+                            cmCPackDebGenerator::CreateGenerator);
+  }
+  if (cmCPackRPMGenerator::CanGenerate()) {
     this->RegisterGenerator("RPM", "RPM packages",
-      cmCPackRPMGenerator::CreateGenerator);
-    }
+                            cmCPackRPMGenerator::CreateGenerator);
+  }
 #endif
 }
 
@@ -161,13 +142,12 @@ cmCPackGeneratorFactory::~cmCPackGeneratorFactory()
 }
 
 cmCPackGenerator* cmCPackGeneratorFactory::NewGenerator(
-                                                const std::string& name)
+  const std::string& name)
 {
   cmCPackGenerator* gen = this->NewGeneratorInternal(name);
-  if ( !gen )
-    {
+  if (!gen) {
     return 0;
-    }
+  }
   this->Generators.push_back(gen);
   gen->SetLogger(this->Logger);
   return gen;
@@ -176,25 +156,23 @@ cmCPackGenerator* cmCPackGeneratorFactory::NewGenerator(
 cmCPackGenerator* cmCPackGeneratorFactory::NewGeneratorInternal(
   const std::string& name)
 {
-  cmCPackGeneratorFactory::t_GeneratorCreatorsMap::iterator it
-    = this->GeneratorCreators.find(name);
-  if ( it == this->GeneratorCreators.end() )
-    {
+  cmCPackGeneratorFactory::t_GeneratorCreatorsMap::iterator it =
+    this->GeneratorCreators.find(name);
+  if (it == this->GeneratorCreators.end()) {
     return 0;
-    }
+  }
   return (it->second)();
 }
 
-void cmCPackGeneratorFactory::RegisterGenerator(const std::string& name,
-  const char* generatorDescription,
+void cmCPackGeneratorFactory::RegisterGenerator(
+  const std::string& name, const char* generatorDescription,
   CreateGeneratorCall* createGenerator)
 {
-  if ( !createGenerator )
-    {
+  if (!createGenerator) {
     cmCPack_Log(this->Logger, cmCPackLog::LOG_ERROR,
-      "Cannot register generator" << std::endl);
+                "Cannot register generator" << std::endl);
     return;
-    }
+  }
   this->GeneratorCreators[name] = createGenerator;
   this->GeneratorDescriptions[name] = generatorDescription;
 }

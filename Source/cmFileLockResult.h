@@ -16,7 +16,7 @@
 #include "cmStandardIncludes.h"
 
 #if defined(_WIN32)
-# include <windows.h> // DWORD
+#include <windows.h> // DWORD
 #endif
 
 /**
@@ -25,7 +25,7 @@
   */
 class cmFileLockResult
 {
- public:
+public:
 #if defined(_WIN32)
   typedef DWORD Error;
 #else
@@ -65,7 +65,7 @@ class cmFileLockResult
   bool IsOk() const;
   std::string GetOutputMessage() const;
 
- private:
+private:
   enum ErrorType
   {
     OK,

@@ -39,6 +39,7 @@ public:
                             std::string const& removeExtRegex);
 
   std::vector<std::string> const& GetOrderedDirectories();
+
 private:
   cmGlobalGenerator* GlobalGenerator;
   cmGeneratorTarget const* Target;
@@ -77,7 +78,9 @@ private:
   // element is the index of the runtime library that added the
   // constraint.
   typedef std::pair<int, int> ConflictPair;
-  struct ConflictList: public std::vector<ConflictPair> {};
+  struct ConflictList : public std::vector<ConflictPair>
+  {
+  };
   std::vector<ConflictList> ConflictGraph;
 
   // Compare directories after resolving symlinks.

@@ -37,8 +37,7 @@ public:
   virtual bool SupportsComponentInstallation() const;
 
 protected:
-  int CopyInstallScript(const std::string& resdir,
-                        const std::string& script,
+  int CopyInstallScript(const std::string& resdir, const std::string& script,
                         const std::string& name);
   virtual int InitializeInternal();
   int PackageFiles();
@@ -57,7 +56,7 @@ protected:
   // Run PackageMaker with the given command line, which will (if
   // successful) produce the given package file. Returns true if
   // PackageMaker succeeds, false otherwise.
-  bool RunPackageMaker(const char *command, const char *packageFile);
+  bool RunPackageMaker(const char* command, const char* packageFile);
 
   // Retrieve the name of package file that will be generated for this
   // component. The name is just the file name with extension, and
@@ -68,8 +67,8 @@ protected:
   // component.  All of the files within this component are stored in
   // the directory packageDir. Returns true if successful, false
   // otherwise.
-  bool GenerateComponentPackage(const char *packageFile,
-                                const char *packageDir,
+  bool GenerateComponentPackage(const char* packageFile,
+                                const char* packageDir,
                                 const cmCPackComponent& component);
 
   // Writes a distribution.dist file, which turns a metapackage into a
@@ -82,15 +81,14 @@ protected:
   // Subroutine of WriteDistributionFile that writes out the
   // dependency attributes for inter-component dependencies.
   void AddDependencyAttributes(const cmCPackComponent& component,
-                               std::set<const cmCPackComponent *>& visited,
+                               std::set<const cmCPackComponent*>& visited,
                                std::ostringstream& out);
 
   // Subroutine of WriteDistributionFile that writes out the
   // reverse dependency attributes for inter-component dependencies.
-  void
-  AddReverseDependencyAttributes(const cmCPackComponent& component,
-                                 std::set<const cmCPackComponent *>& visited,
-                                 std::ostringstream& out);
+  void AddReverseDependencyAttributes(
+    const cmCPackComponent& component,
+    std::set<const cmCPackComponent*>& visited, std::ostringstream& out);
 
   // Generates XML that encodes the hierarchy of component groups and
   // their components in a form that can be used by distribution

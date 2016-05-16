@@ -7,5 +7,5 @@ struct A
 };
 
 using B = A<int, char>;
-template<typename T>
+template <typename T>
 using C = A<int, T>;

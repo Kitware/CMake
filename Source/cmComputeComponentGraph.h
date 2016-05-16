@@ -40,20 +40,24 @@ public:
   ~cmComputeComponentGraph();
 
   /** Get the adjacency list of the component graph.  */
-  Graph const& GetComponentGraph() const
-    { return this->ComponentGraph; }
+  Graph const& GetComponentGraph() const { return this->ComponentGraph; }
   EdgeList const& GetComponentGraphEdges(int c) const
-    { return this->ComponentGraph[c]; }
+  {
+    return this->ComponentGraph[c];
+  }
 
   /** Get map from component index to original node indices.  */
   std::vector<NodeList> const& GetComponents() const
-    { return this->Components; }
-  NodeList const& GetComponent(int c) const
-    { return this->Components[c]; }
+  {
+    return this->Components;
+  }
+  NodeList const& GetComponent(int c) const { return this->Components[c]; }
 
   /** Get map from original node index to component index.  */
   std::vector<int> const& GetComponentMap() const
-    { return this->TarjanComponents; }
+  {
+    return this->TarjanComponents;
+  }
 
 private:
   void TransferEdges();

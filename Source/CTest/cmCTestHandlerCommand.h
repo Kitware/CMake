@@ -31,19 +31,19 @@ public:
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   cmTypeMacro(cmCTestHandlerCommand, cmCTestCommand);
 
   enum
-    {
+  {
     ct_NONE,
     ct_RETURN_VALUE,
     ct_BUILD,
     ct_SOURCE,
     ct_SUBMIT_INDEX,
     ct_LAST
-    };
+  };
 
 protected:
   virtual cmCTestGenericHandler* InitializeHandler() = 0;
@@ -70,9 +70,9 @@ protected:
   size_t Last;
 };
 
-#define CTEST_COMMAND_APPEND_OPTION_DOCS \
-  "The APPEND option marks results for append to those previously " \
-  "submitted to a dashboard server since the last ctest_start.  " \
+#define CTEST_COMMAND_APPEND_OPTION_DOCS                                      \
+  "The APPEND option marks results for append to those previously "           \
+  "submitted to a dashboard server since the last ctest_start.  "             \
   "Append semantics are defined by the dashboard server in use."
 
 #endif

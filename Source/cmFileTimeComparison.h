@@ -42,10 +42,7 @@ public:
   bool FileTimesDiffer(const char* f1, const char* f2);
 
 protected:
-
   cmFileTimeComparisonInternal* Internals;
 };
 
-
 #endif
-

@@ -19,22 +19,19 @@ class cmConfigureFileCommand : public cmCommand
 public:
   cmTypeMacro(cmConfigureFileCommand, cmCommand);
 
-  virtual cmCommand* Clone()
-    {
-      return new cmConfigureFileCommand;
-    }
+  virtual cmCommand* Clone() { return new cmConfigureFileCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "configure_file";}
+  virtual std::string GetName() const { return "configure_file"; }
 
   /**
    * This determines if the command is invoked when in script mode.
@@ -52,7 +49,5 @@ private:
   bool EscapeQuotes;
   bool AtOnly;
 };
-
-
 
 #endif

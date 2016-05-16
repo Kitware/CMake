@@ -17,7 +17,7 @@
 #error Expected C_EXECUTABLE_LINK_LANGUAGE_IS_C define
 #endif
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   return 0;
 }

@@ -29,17 +29,14 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
-    {
-    return new cmFindPackageCommand;
-    }
+  virtual cmCommand* Clone() { return new cmFindPackageCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * This determines if the command is invoked when in script mode.
@@ -49,16 +46,21 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "find_package";}
+  virtual std::string GetName() const { return "find_package"; }
 
   cmTypeMacro(cmFindPackageCommand, cmFindCommon);
+
 private:
   class PathLabel : public cmFindCommon::PathLabel
   {
   protected:
     PathLabel();
+
   public:
-    PathLabel(const std::string& label) : cmFindCommon::PathLabel(label) { }
+    PathLabel(const std::string& label)
+      : cmFindCommon::PathLabel(label)
+    {
+    }
     static PathLabel UserRegistry;
     static PathLabel Builds;
     static PathLabel SystemRegistry;
@@ -79,7 +81,11 @@ private:
   bool FindPrefixedConfig();
   bool FindFrameworkConfig();
   bool FindAppBundleConfig();
-  enum PolicyScopeRule { NoPolicyScope, DoPolicyScope };
+  enum PolicyScopeRule
+  {
+    NoPolicyScope,
+    DoPolicyScope
+  };
   bool ReadListFile(const char* f, PolicyScopeRule psr);
   void StoreVersionFound();
 
@@ -111,7 +117,11 @@ private:
 
   friend class cmFindPackageFileList;
 
-  struct OriginalDef { bool exists; std::string value; };
+  struct OriginalDef
+  {
+    bool exists;
+    std::string value;
+  };
   std::map<std::string, OriginalDef> OriginalDefs;
 
   std::string Name;
@@ -145,7 +155,11 @@ private:
   std::vector<std::string> Configs;
   std::set<std::string> IgnoredPaths;
 
-  struct ConfigFileInfo { std::string filename; std::string version; };
+  struct ConfigFileInfo
+  {
+    std::string filename;
+    std::string version;
+  };
   std::vector<ConfigFileInfo> ConsideredConfigs;
 };
 

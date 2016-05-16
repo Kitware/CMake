@@ -30,22 +30,19 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
-    {
-    return new cmExportCommand;
-    }
+  virtual cmCommand* Clone() { return new cmExportCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "export";}
+  virtual std::string GetName() const { return "export"; }
 
   cmTypeMacro(cmExportCommand, cmCommand);
 
@@ -58,19 +55,18 @@ private:
   cmCAString Filename;
   cmCAEnabler ExportOld;
 
-  cmExportSet *ExportSet;
+  cmExportSet* ExportSet;
 
   friend class cmExportBuildFileGenerator;
   std::string ErrorMessage;
 
   bool HandlePackage(std::vector<std::string> const& args);
-  void StorePackageRegistryWin(std::string const& package,
-                               const char* content, const char* hash);
-  void StorePackageRegistryDir(std::string const& package,
-                               const char* content, const char* hash);
+  void StorePackageRegistryWin(std::string const& package, const char* content,
+                               const char* hash);
+  void StorePackageRegistryDir(std::string const& package, const char* content,
+                               const char* hash);
   void ReportRegistryError(std::string const& msg, std::string const& key,
                            long err);
 };
-
 
 #endif

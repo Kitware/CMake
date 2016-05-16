@@ -20,8 +20,8 @@ class cmTarget;
 class cmTargetPropCommandBase : public cmCommand
 {
 public:
-
-  enum ArgumentFlags {
+  enum ArgumentFlags
+  {
     NO_FLAGS = 0,
     PROCESS_BEFORE = 1,
     PROCESS_SYSTEM = 2
@@ -32,27 +32,29 @@ public:
                        ArgumentFlags flags = NO_FLAGS);
 
   cmTypeMacro(cmTargetPropCommandBase, cmCommand);
+
 protected:
   std::string Property;
-  cmTarget *Target;
+  cmTarget* Target;
 
-  virtual void HandleInterfaceContent(cmTarget *tgt,
-                                   const std::vector<std::string> &content,
-                                   bool prepend, bool system);
+  virtual void HandleInterfaceContent(cmTarget* tgt,
+                                      const std::vector<std::string>& content,
+                                      bool prepend, bool system);
+
 private:
-  virtual void HandleImportedTarget(const std::string &tgt) = 0;
-  virtual void HandleMissingTarget(const std::string &name) = 0;
+  virtual void HandleImportedTarget(const std::string& tgt) = 0;
+  virtual void HandleMissingTarget(const std::string& name) = 0;
 
-  virtual bool HandleDirectContent(cmTarget *tgt,
-                                   const std::vector<std::string> &content,
+  virtual bool HandleDirectContent(cmTarget* tgt,
+                                   const std::vector<std::string>& content,
                                    bool prepend, bool system) = 0;
 
-  virtual std::string Join(const std::vector<std::string> &content) = 0;
+  virtual std::string Join(const std::vector<std::string>& content) = 0;
 
   bool ProcessContentArgs(std::vector<std::string> const& args,
-                          unsigned int &argIndex, bool prepend, bool system);
-  bool PopulateTargetProperies(const std::string &scope,
-                               const std::vector<std::string> &content,
+                          unsigned int& argIndex, bool prepend, bool system);
+  bool PopulateTargetProperies(const std::string& scope,
+                               const std::vector<std::string>& content,
                                bool prepend, bool system);
 };
 

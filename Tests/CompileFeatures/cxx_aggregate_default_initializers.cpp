@@ -1,5 +1,8 @@
 
-struct X { int i, j, k = 42; };
+struct X
+{
+  int i, j, k = 42;
+};
 
 int someFunc()
 {

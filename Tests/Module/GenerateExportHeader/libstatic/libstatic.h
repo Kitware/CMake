@@ -4,7 +4,8 @@
 
 #include "libstatic_export.h"
 
-class LIBSTATIC_EXPORT Libstatic {
+class LIBSTATIC_EXPORT Libstatic
+{
 public:
   int libstatic() const;
 
@@ -17,7 +18,8 @@ public:
   int LIBSTATIC_NO_EXPORT libstatic_excluded() const;
 };
 
-class LibstaticNotExported {
+class LibstaticNotExported
+{
 public:
   int libstatic() const;
 
@@ -30,7 +32,8 @@ public:
   int LIBSTATIC_NO_EXPORT libstatic_excluded() const;
 };
 
-class LIBSTATIC_NO_EXPORT LibstaticExcluded {
+class LIBSTATIC_NO_EXPORT LibstaticExcluded
+{
 public:
   int libstatic() const;
 

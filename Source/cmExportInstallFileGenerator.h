@@ -31,7 +31,7 @@ class cmInstallTargetGenerator;
  *
  * This is used to implement the INSTALL(EXPORT) command.
  */
-class cmExportInstallFileGenerator: public cmExportFileGenerator
+class cmExportInstallFileGenerator : public cmExportFileGenerator
 {
 public:
   /** Construct with the export installer that will install the
@@ -42,25 +42,26 @@ public:
       maps from the configuration name to the file temporary location
       for installation.  */
   std::map<std::string, std::string> const& GetConfigImportFiles()
-    { return this->ConfigImportFiles; }
+  {
+    return this->ConfigImportFiles;
+  }
 
   /** Compute the globbing expression used to load per-config import
       files from the main file.  */
   std::string GetConfigImportFileGlob();
-protected:
 
+protected:
   // Implement virtual methods from the superclass.
   virtual bool GenerateMainFile(std::ostream& os);
-  virtual void GenerateImportTargetsConfig(std::ostream& os,
-                                           const std::string& config,
-                                           std::string const& suffix,
-                            std::vector<std::string> &missingTargets);
+  virtual void GenerateImportTargetsConfig(
+    std::ostream& os, const std::string& config, std::string const& suffix,
+    std::vector<std::string>& missingTargets);
   virtual void HandleMissingTarget(std::string& link_libs,
                                    std::vector<std::string>& missingTargets,
                                    cmGeneratorTarget* depender,
                                    cmGeneratorTarget* dependee);
 
-  virtual void ReplaceInstallPrefix(std::string &input);
+  virtual void ReplaceInstallPrefix(std::string& input);
 
   void ComplainAboutMissingTarget(cmGeneratorTarget* depender,
                                   cmGeneratorTarget* dependee,
@@ -69,18 +70,16 @@ protected:
   std::vector<std::string> FindNamespaces(cmGlobalGenerator* gg,
                                           const std::string& name);
 
-
   /** Generate a per-configuration file for the targets.  */
   bool GenerateImportFileConfig(const std::string& config,
-                            std::vector<std::string> &missingTargets);
+                                std::vector<std::string>& missingTargets);
 
   /** Fill in properties indicating installed file locations.  */
   void SetImportLocationProperty(const std::string& config,
                                  std::string const& suffix,
                                  cmInstallTargetGenerator* itgen,
                                  ImportPropertyMap& properties,
-                                 std::set<std::string>& importedLocations
-                                );
+                                 std::set<std::string>& importedLocations);
 
   std::string InstallNameDir(cmGeneratorTarget* target,
                              const std::string& config);

@@ -42,10 +42,20 @@ public:
     cmGeneratorTarget const* Target;
     bool IsSharedDep;
     bool IsFlag;
-    LinkEntry(): Item(), Target(0), IsSharedDep(false), IsFlag(false) {}
-    LinkEntry(LinkEntry const& r):
-      Item(r.Item), Target(r.Target), IsSharedDep(r.IsSharedDep),
-      IsFlag(r.IsFlag) {}
+    LinkEntry()
+      : Item()
+      , Target(0)
+      , IsSharedDep(false)
+      , IsFlag(false)
+    {
+    }
+    LinkEntry(LinkEntry const& r)
+      : Item(r.Item)
+      , Target(r.Target)
+      , IsSharedDep(r.IsSharedDep)
+      , IsFlag(r.IsFlag)
+    {
+    }
   };
 
   typedef std::vector<LinkEntry> EntryVector;
@@ -53,10 +63,11 @@ public:
 
   void SetOldLinkDirMode(bool b);
   std::set<cmGeneratorTarget const*> const& GetOldWrongConfigItems() const
-    { return this->OldWrongConfigItems; }
+  {
+    return this->OldWrongConfigItems;
+  }
 
 private:
-
   // Context information.
   cmGeneratorTarget const* Target;
   cmMakefile* Makefile;
@@ -65,13 +76,13 @@ private:
   std::string Config;
   EntryVector FinalLinkEntries;
 
-  std::map<std::string, int>::iterator
-  AllocateLinkEntry(std::string const& item);
+  std::map<std::string, int>::iterator AllocateLinkEntry(
+    std::string const& item);
   int AddLinkEntry(cmLinkItem const& item);
   void AddVarLinkEntries(int depender_index, const char* value);
   void AddDirectLinkEntries();
   template <typename T>
-    void AddLinkEntries(int depender_index, std::vector<T> const& libs);
+  void AddLinkEntries(int depender_index, std::vector<T> const& libs);
   cmGeneratorTarget const* FindTargetToLink(int depender_index,
                                             const std::string& name);
 
@@ -98,16 +109,19 @@ private:
   };
   std::queue<SharedDepEntry> SharedDepQueue;
   std::set<int> SharedDepFollowed;
-  void FollowSharedDeps(int depender_index,
-                        cmLinkInterface const* iface,
+  void FollowSharedDeps(int depender_index, cmLinkInterface const* iface,
                         bool follow_interface = false);
   void QueueSharedDependencies(int depender_index,
                                std::vector<cmLinkItem> const& deps);
   void HandleSharedDependency(SharedDepEntry const& dep);
 
   // Dependency inferral for each link item.
-  struct DependSet: public std::set<int> {};
-  struct DependSetList: public std::vector<DependSet> {};
+  struct DependSet : public std::set<int>
+  {
+  };
+  struct DependSetList : public std::vector<DependSet>
+  {
+  };
   std::vector<DependSetList*> InferredDependSets;
   void InferDependencies();
 

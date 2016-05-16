@@ -27,6 +27,7 @@ public:
    */
   cmCPackTarBZip2Generator();
   virtual ~cmCPackTarBZip2Generator();
+
 protected:
   virtual const char* GetOutputExtension() { return ".tar.bz2"; }
 };

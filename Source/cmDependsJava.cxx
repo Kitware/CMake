@@ -23,20 +23,20 @@ cmDependsJava::~cmDependsJava()
 }
 
 bool cmDependsJava::WriteDependencies(const std::set<std::string>& sources,
-    const std::string&, std::ostream&, std::ostream&)
+                                      const std::string&, std::ostream&,
+                                      std::ostream&)
 {
   // Make sure this is a scanning instance.
-  if(sources.empty() || sources.begin()->empty())
-    {
+  if (sources.empty() || sources.begin()->empty()) {
     cmSystemTools::Error("Cannot scan dependencies without an source file.");
     return false;
-    }
+  }
 
   return true;
 }
 
 bool cmDependsJava::CheckDependencies(std::istream&, const char*,
-                             std::map<std::string, DependencyVector >&)
+                                      std::map<std::string, DependencyVector>&)
 {
   return true;
 }

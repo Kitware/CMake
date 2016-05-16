@@ -12,24 +12,21 @@
 #include "cmRemoveCommand.h"
 
 // cmRemoveCommand
-bool cmRemoveCommand
-::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
+bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args,
+                                  cmExecutionStatus&)
 {
-  if(args.size() < 1)
-    {
+  if (args.size() < 1) {
     return true;
-    }
+  }
 
   const char* variable = args[0].c_str(); // VAR is always first
   // get the old value
-  const char* cacheValue
-    = this->Makefile->GetDefinition(variable);
+  const char* cacheValue = this->Makefile->GetDefinition(variable);
 
   // if there is no old value then return
-  if (!cacheValue)
-    {
+  if (!cacheValue) {
     return true;
-    }
+  }
 
   // expand the variable
   std::vector<std::string> varArgsExpanded;
@@ -44,30 +41,24 @@ bool cmRemoveCommand
 
   // now create the new value
   std::string value;
-  for(unsigned int j = 0; j < varArgsExpanded.size(); ++j)
-    {
+  for (unsigned int j = 0; j < varArgsExpanded.size(); ++j) {
     int found = 0;
-    for(unsigned int k = 0; k < argsExpanded.size(); ++k)
-      {
-      if (varArgsExpanded[j] == argsExpanded[k])
-        {
+    for (unsigned int k = 0; k < argsExpanded.size(); ++k) {
+      if (varArgsExpanded[j] == argsExpanded[k]) {
         found = 1;
         break;
-        }
-      }
-    if (!found)
-      {
-      if (!value.empty())
-        {
-        value += ";";
-        }
-      value += varArgsExpanded[j];
       }
     }
+    if (!found) {
+      if (!value.empty()) {
+        value += ";";
+      }
+      value += varArgsExpanded[j];
+    }
+  }
 
   // add the definition
   this->Makefile->AddDefinition(variable, value.c_str());
 
   return true;
 }
-

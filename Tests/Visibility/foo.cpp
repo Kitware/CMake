@@ -1,11 +1,11 @@
 class Foo
 {
 public:
-    void bar() {}
+  void bar() {}
 };
 
 void baz()
 {
-	Foo foo;
-	foo.bar();
+  Foo foo;
+  foo.bar();
 }

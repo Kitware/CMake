@@ -17,7 +17,7 @@
 class cmInstallExportGenerator;
 class cmInstallTargetGenerator;
 
-class cmExportTryCompileFileGenerator: public cmExportFileGenerator
+class cmExportTryCompileFileGenerator : public cmExportFileGenerator
 {
 public:
   cmExportTryCompileFileGenerator(cmGlobalGenerator* gg,
@@ -27,18 +27,18 @@ public:
   /** Set the list of targets to export.  */
   void SetConfig(const std::string& config) { this->Config = config; }
 protected:
-
   // Implement virtual methods from the superclass.
   virtual bool GenerateMainFile(std::ostream& os);
 
-  virtual void GenerateImportTargetsConfig(std::ostream&,
-                                           const std::string&,
+  virtual void GenerateImportTargetsConfig(std::ostream&, const std::string&,
                                            std::string const&,
-                            std::vector<std::string>&) {}
-  virtual void HandleMissingTarget(std::string&,
-                                   std::vector<std::string>&,
-                                   cmGeneratorTarget*,
-                                   cmGeneratorTarget*) {}
+                                           std::vector<std::string>&)
+  {
+  }
+  virtual void HandleMissingTarget(std::string&, std::vector<std::string>&,
+                                   cmGeneratorTarget*, cmGeneratorTarget*)
+  {
+  }
 
   void PopulateProperties(cmGeneratorTarget const* target,
                           ImportPropertyMap& properties,
@@ -46,11 +46,11 @@ protected:
 
   std::string InstallNameDir(cmGeneratorTarget* target,
                              const std::string& config);
+
 private:
   std::string FindTargets(const std::string& prop,
                           const cmGeneratorTarget* tgt,
                           std::set<const cmGeneratorTarget*>& emitted);
-
 
   std::vector<cmGeneratorTarget const*> Exports;
   std::string Config;

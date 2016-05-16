@@ -4,4 +4,4 @@
 #ifdef _WIN32
 __declspec(dllexport)
 #endif
-OnlyPlainLib1 onlyPlainLib2();
+  OnlyPlainLib1 onlyPlainLib2();

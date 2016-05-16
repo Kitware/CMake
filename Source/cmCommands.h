@@ -28,5 +28,4 @@ void GetBootstrapCommands1(std::vector<cmCommand*>& commands);
 void GetBootstrapCommands2(std::vector<cmCommand*>& commands);
 void GetPredefinedCommands(std::vector<cmCommand*>& commands);
 
-
 #endif

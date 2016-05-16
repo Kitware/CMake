@@ -1,1 +1,4 @@
-int sub() { return 0; }
+int sub()
+{
+  return 0;
+}

@@ -1,4 +1,7 @@
 
 #include "upstream.h"
 
-int upstream() { return systemlib(); }
+int upstream()
+{
+  return systemlib();
+}

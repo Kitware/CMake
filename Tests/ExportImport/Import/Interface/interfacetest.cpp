@@ -13,7 +13,7 @@
 #error Expected DEFINE_IFACE_DEFINE
 #endif
 
-int main(int,char**)
+int main(int, char**)
 {
   SharedLibObject slo;
   return slo.foo();

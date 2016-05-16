@@ -1,1 +1,4 @@
-int dummy(void) {return 0;}
+int dummy(void)
+{
+  return 0;
+}

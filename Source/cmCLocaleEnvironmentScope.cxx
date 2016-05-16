@@ -23,11 +23,10 @@ cmCLocaleEnvironmentScope::cmCLocaleEnvironmentScope()
 
   std::string lcAll = this->GetEnv("LC_ALL");
 
-  if(!lcAll.empty())
-    {
+  if (!lcAll.empty()) {
     this->SetEnv("LC_ALL", "");
     this->SetEnv("LC_CTYPE", lcAll);
-    }
+  }
 }
 
 std::string cmCLocaleEnvironmentScope::GetEnv(std::string const& key)
@@ -36,32 +35,28 @@ std::string cmCLocaleEnvironmentScope::GetEnv(std::string const& key)
   return value ? value : std::string();
 }
 
-void cmCLocaleEnvironmentScope::SetEnv(
-  std::string const& key, std::string const& value)
+void cmCLocaleEnvironmentScope::SetEnv(std::string const& key,
+                                       std::string const& value)
 {
   std::string oldValue = this->GetEnv(key);
 
   this->EnvironmentBackup.insert(std::make_pair(key, oldValue));
 
-  if(value.empty())
-    {
+  if (value.empty()) {
     cmSystemTools::UnsetEnv(key.c_str());
-    }
-  else
-    {
+  } else {
     std::stringstream tmp;
     tmp << key << "=" << value;
     cmSystemTools::PutEnv(tmp.str());
-    }
+  }
 }
 
 cmCLocaleEnvironmentScope::~cmCLocaleEnvironmentScope()
 {
-  for(backup_map_t::const_iterator i = this->EnvironmentBackup.begin();
-    i != this->EnvironmentBackup.end(); ++i)
-    {
+  for (backup_map_t::const_iterator i = this->EnvironmentBackup.begin();
+       i != this->EnvironmentBackup.end(); ++i) {
     std::stringstream tmp;
     tmp << i->first << "=" << i->second;
     cmSystemTools::PutEnv(tmp.str());
-    }
+  }
 }

@@ -4,7 +4,7 @@
 #include "bbb/item.hpp"
 #include "ccc/item.hpp"
 
-int main(int argv, char **args)
+int main(int argv, char** args)
 {
   // Object instances
   ::aaa::Item aaa_item;

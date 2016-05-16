@@ -14,47 +14,31 @@
 #include "cmState.h"
 #include "cmake.h"
 
-bool cmDefinePropertyCommand
-::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
+bool cmDefinePropertyCommand::InitialPass(std::vector<std::string> const& args,
+                                          cmExecutionStatus&)
 {
-  if(args.size() < 1)
-    {
+  if (args.size() < 1) {
     this->SetError("called with incorrect number of arguments");
     return false;
-    }
+  }
 
   // Get the scope in which to define the property.
   cmProperty::ScopeType scope;
-  if(args[0] == "GLOBAL")
-    {
+  if (args[0] == "GLOBAL") {
     scope = cmProperty::GLOBAL;
-    }
-  else if(args[0] == "DIRECTORY")
-    {
+  } else if (args[0] == "DIRECTORY") {
     scope = cmProperty::DIRECTORY;
-    }
-  else if(args[0] == "TARGET")
-    {
+  } else if (args[0] == "TARGET") {
     scope = cmProperty::TARGET;
-    }
-  else if(args[0] == "SOURCE")
-    {
+  } else if (args[0] == "SOURCE") {
     scope = cmProperty::SOURCE_FILE;
-    }
-  else if(args[0] == "TEST")
-    {
+  } else if (args[0] == "TEST") {
     scope = cmProperty::TEST;
-    }
-  else if(args[0] == "VARIABLE")
-    {
+  } else if (args[0] == "VARIABLE") {
     scope = cmProperty::VARIABLE;
-    }
-  else if (args[0] == "CACHED_VARIABLE")
-    {
+  } else if (args[0] == "CACHED_VARIABLE") {
     scope = cmProperty::CACHED_VARIABLE;
-    }
-  else
-    {
+  } else {
     std::ostringstream e;
     e << "given invalid scope " << args[0] << ".  "
       << "Valid scopes are "
@@ -62,77 +46,63 @@ bool cmDefinePropertyCommand
       << "TEST, VARIABLE, CACHED_VARIABLE.";
     this->SetError(e.str());
     return false;
-    }
+  }
 
   // Parse remaining arguments.
   bool inherited = false;
-  enum Doing { DoingNone, DoingProperty, DoingBrief, DoingFull };
+  enum Doing
+  {
+    DoingNone,
+    DoingProperty,
+    DoingBrief,
+    DoingFull
+  };
   Doing doing = DoingNone;
-  for(unsigned int i=1; i < args.size(); ++i)
-    {
-    if(args[i] == "PROPERTY")
-      {
+  for (unsigned int i = 1; i < args.size(); ++i) {
+    if (args[i] == "PROPERTY") {
       doing = DoingProperty;
-      }
-    else if(args[i] == "BRIEF_DOCS")
-      {
+    } else if (args[i] == "BRIEF_DOCS") {
       doing = DoingBrief;
-      }
-    else if(args[i] == "FULL_DOCS")
-      {
+    } else if (args[i] == "FULL_DOCS") {
       doing = DoingFull;
-      }
-    else if(args[i] == "INHERITED")
-      {
+    } else if (args[i] == "INHERITED") {
       doing = DoingNone;
       inherited = true;
-      }
-    else if(doing == DoingProperty)
-      {
+    } else if (doing == DoingProperty) {
       doing = DoingNone;
       this->PropertyName = args[i];
-      }
-    else if(doing == DoingBrief)
-      {
+    } else if (doing == DoingBrief) {
       this->BriefDocs += args[i];
-      }
-    else if(doing == DoingFull)
-      {
+    } else if (doing == DoingFull) {
       this->FullDocs += args[i];
-      }
-    else
-      {
+    } else {
       std::ostringstream e;
       e << "given invalid argument \"" << args[i] << "\".";
       this->SetError(e.str());
       return false;
-      }
     }
+  }
 
   // Make sure a property name was found.
-  if(this->PropertyName.empty())
-    {
+  if (this->PropertyName.empty()) {
     this->SetError("not given a PROPERTY <name> argument.");
     return false;
-    }
+  }
 
   // Make sure documentation was given.
-  if(this->BriefDocs.empty())
-    {
+  if (this->BriefDocs.empty()) {
     this->SetError("not given a BRIEF_DOCS <brief-doc> argument.");
     return false;
-    }
-  if(this->FullDocs.empty())
-    {
+  }
+  if (this->FullDocs.empty()) {
     this->SetError("not given a FULL_DOCS <full-doc> argument.");
     return false;
-    }
+  }
 
   // Actually define the property.
-  this->Makefile->GetState()->DefineProperty
-    (this->PropertyName, scope,
-     this->BriefDocs.c_str(), this->FullDocs.c_str(), inherited);
+  this->Makefile->GetState()->DefineProperty(
+    this->PropertyName, scope, this->BriefDocs.c_str(), this->FullDocs.c_str(),
+    inherited);
 
   return true;
 }
-

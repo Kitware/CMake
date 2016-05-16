@@ -29,15 +29,20 @@ public:
   cmExtraCodeBlocksGenerator();
 
   virtual std::string GetName() const
-                         { return cmExtraCodeBlocksGenerator::GetActualName();}
-  static std::string GetActualName()                    { return "CodeBlocks";}
+  {
+    return cmExtraCodeBlocksGenerator::GetActualName();
+  }
+  static std::string GetActualName() { return "CodeBlocks"; }
   static cmExternalMakefileProjectGenerator* New()
-                                     { return new cmExtraCodeBlocksGenerator; }
+  {
+    return new cmExtraCodeBlocksGenerator;
+  }
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry,
                                 const std::string& fullName) const;
 
   virtual void Generate();
+
 private:
   struct CbpUnit
   {
@@ -47,7 +52,7 @@ private:
   void CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs);
 
   void CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,
-                                const std::string& filename);
+                            const std::string& filename);
   std::string CreateDummyTargetFile(cmLocalGenerator* lg,
                                     cmGeneratorTarget* target) const;
 
@@ -56,15 +61,10 @@ private:
   std::string BuildMakeCommand(const std::string& make, const char* makefile,
                                const std::string& target,
                                const std::string& makeFlags);
-  void AppendTarget(cmXMLWriter& xml,
-                    const std::string& targetName,
-                    cmGeneratorTarget* target,
-                    const char* make,
-                    const cmLocalGenerator* lg,
-                    const char* compiler,
-                    const std::string& makeFlags
-                   );
-
+  void AppendTarget(cmXMLWriter& xml, const std::string& targetName,
+                    cmGeneratorTarget* target, const char* make,
+                    const cmLocalGenerator* lg, const char* compiler,
+                    const std::string& makeFlags);
 };
 
 #endif

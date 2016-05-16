@@ -1,2 +1,5 @@
 #include "a.h"
-int a2(void) { return 0; }
+int a2(void)
+{
+  return 0;
+}

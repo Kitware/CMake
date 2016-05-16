@@ -32,12 +32,13 @@
   forward-only-iterated toward the root.  Extending the tree never
   invalidates existing iterators.
  */
-template<typename T>
+template <typename T>
 class cmLinkedTree
 {
   typedef typename std::vector<T>::size_type PositionType;
   typedef T* PointerType;
   typedef T& ReferenceType;
+
 public:
   class iterator : public std::iterator<std::forward_iterator_tag, T>
   {
@@ -48,16 +49,16 @@ public:
     PositionType Position;
 
     iterator(cmLinkedTree* tree, PositionType pos)
-      : Tree(tree), Position(pos)
+      : Tree(tree)
+      , Position(pos)
     {
-
     }
 
   public:
     iterator()
-      : Tree(0), Position(0)
+      : Tree(0)
+      , Position(0)
     {
-
     }
 
     void operator++()
@@ -122,10 +123,9 @@ public:
 
     bool IsValid() const
     {
-      if (!this->Tree)
-        {
+      if (!this->Tree) {
         return false;
-        }
+      }
       return this->Position <= this->Tree->Data.size();
     }
 
@@ -142,36 +142,26 @@ public:
     return iterator(const_cast<cmLinkedTree*>(this), 0);
   }
 
-  iterator Push(iterator it)
-  {
-    return Push_impl(it, T());
-  }
+  iterator Push(iterator it) { return Push_impl(it, T()); }
 
-  iterator Push(iterator it, T t)
-  {
-    return Push_impl(it, t);
-  }
+  iterator Push(iterator it, T t) { return Push_impl(it, t); }
 
-  bool IsLast(iterator it)
-    {
-    return it.Position == this->Data.size();
-    }
+  bool IsLast(iterator it) { return it.Position == this->Data.size(); }
 
   iterator Pop(iterator it)
-    {
+  {
     assert(!this->Data.empty());
     assert(this->UpPositions.size() == this->Data.size());
     bool const isLast = this->IsLast(it);
     ++it;
     // If this is the last entry then no other entry can refer
     // to it so we can drop its storage.
-    if (isLast)
-      {
+    if (isLast) {
       this->Data.pop_back();
       this->UpPositions.pop_back();
-      }
-    return it;
     }
+    return it;
+  }
 
   iterator Truncate()
   {
@@ -190,15 +180,9 @@ public:
   }
 
 private:
-  T& GetReference(PositionType pos)
-  {
-    return this->Data[pos];
-  }
+  T& GetReference(PositionType pos) { return this->Data[pos]; }
 
-  T* GetPointer(PositionType pos)
-  {
-    return &this->Data[pos];
-  }
+  T* GetPointer(PositionType pos) { return &this->Data[pos]; }
 
   iterator Push_impl(iterator it, T t)
   {

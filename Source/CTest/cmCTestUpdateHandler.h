@@ -33,7 +33,8 @@ public:
 
   cmCTestUpdateHandler();
 
-  enum {
+  enum
+  {
     e_UNKNOWN = 0,
     e_CVS,
     e_SVN,
@@ -51,9 +52,12 @@ public:
 
 private:
   // Some structures needed for update
-  struct StringPair :
-    public std::pair<std::string, std::string>{};
-  struct UpdateFiles : public std::vector<StringPair>{};
+  struct StringPair : public std::pair<std::string, std::string>
+  {
+  };
+  struct UpdateFiles : public std::vector<StringPair>
+  {
+  };
 
   // Determine the type of version control
   int DetermineType(const char* cmd, const char* type);

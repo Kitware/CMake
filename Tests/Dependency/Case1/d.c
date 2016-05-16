@@ -2,6 +2,5 @@ extern int c2();
 
 int d()
 {
-   return c2()+2;
+  return c2() + 2;
 }
-

@@ -29,30 +29,44 @@ struct cmCommandContext
 {
   std::string Name;
   long Line;
-  cmCommandContext(): Name(), Line(0) {}
+  cmCommandContext()
+    : Name()
+    , Line(0)
+  {
+  }
 };
 
 struct cmListFileArgument
 {
   enum Delimiter
-    {
+  {
     Unquoted,
     Quoted,
     Bracket
-    };
-  cmListFileArgument(): Value(), Delim(Unquoted), Line(0) {}
+  };
+  cmListFileArgument()
+    : Value()
+    , Delim(Unquoted)
+    , Line(0)
+  {
+  }
   cmListFileArgument(const cmListFileArgument& r)
-    : Value(r.Value), Delim(r.Delim), Line(r.Line) {}
+    : Value(r.Value)
+    , Delim(r.Delim)
+    , Line(r.Line)
+  {
+  }
   cmListFileArgument(const std::string& v, Delimiter d, long line)
-    : Value(v), Delim(d), Line(line) {}
-  bool operator == (const cmListFileArgument& r) const
-    {
+    : Value(v)
+    , Delim(d)
+    , Line(line)
+  {
+  }
+  bool operator==(const cmListFileArgument& r) const
+  {
     return (this->Value == r.Value) && (this->Delim == r.Delim);
-    }
-  bool operator != (const cmListFileArgument& r) const
-    {
-    return !(*this == r);
-    }
+  }
+  bool operator!=(const cmListFileArgument& r) const { return !(*this == r); }
   std::string Value;
   Delimiter Delim;
   long Line;
@@ -64,7 +78,12 @@ public:
   std::string Name;
   std::string FilePath;
   long Line;
-  cmListFileContext(): Name(), FilePath(), Line(0) {}
+  cmListFileContext()
+    : Name()
+    , FilePath()
+    , Line(0)
+  {
+  }
 
   static cmListFileContext FromCommandContext(cmCommandContext const& lfcc,
                                               std::string const& fileName)
@@ -82,7 +101,7 @@ bool operator<(const cmListFileContext& lhs, const cmListFileContext& rhs);
 bool operator==(cmListFileContext const& lhs, cmListFileContext const& rhs);
 bool operator!=(cmListFileContext const& lhs, cmListFileContext const& rhs);
 
-struct cmListFileFunction: public cmCommandContext
+struct cmListFileFunction : public cmCommandContext
 {
   std::vector<cmListFileArgument> Arguments;
 };
@@ -127,6 +146,7 @@ public:
 
   // Print the call stack below the top of the backtrace.
   void PrintCallStack(std::ostream& out) const;
+
 private:
   struct Entry;
   cmState::Snapshot Bottom;
@@ -138,9 +158,7 @@ private:
 
 struct cmListFile
 {
-  bool ParseFile(const char* path,
-                 bool topLevel,
-                 cmMakefile *mf);
+  bool ParseFile(const char* path, bool topLevel, cmMakefile* mf);
 
   std::vector<cmListFileFunction> Functions;
 };

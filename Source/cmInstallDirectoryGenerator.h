@@ -17,18 +17,15 @@
 /** \class cmInstallDirectoryGenerator
  * \brief Generate directory installation rules.
  */
-class cmInstallDirectoryGenerator: public cmInstallGenerator
+class cmInstallDirectoryGenerator : public cmInstallGenerator
 {
 public:
   cmInstallDirectoryGenerator(std::vector<std::string> const& dirs,
-                              const char* dest,
-                              const char* file_permissions,
+                              const char* dest, const char* file_permissions,
                               const char* dir_permissions,
                               std::vector<std::string> const& configurations,
-                              const char* component,
-                              MessageLevel message,
-                              bool exclude_from_all,
-                              const char* literal_args,
+                              const char* component, MessageLevel message,
+                              bool exclude_from_all, const char* literal_args,
                               bool optional = false);
   virtual ~cmInstallDirectoryGenerator();
 
@@ -41,8 +38,7 @@ protected:
   virtual void GenerateScriptForConfig(std::ostream& os,
                                        const std::string& config,
                                        Indent const& indent);
-  void AddDirectoryInstallRule(std::ostream& os,
-                               const std::string& config,
+  void AddDirectoryInstallRule(std::ostream& os, const std::string& config,
                                Indent const& indent,
                                std::vector<std::string> const& dirs);
   cmLocalGenerator* LocalGenerator;

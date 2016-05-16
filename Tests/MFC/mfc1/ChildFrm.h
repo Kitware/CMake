@@ -1,34 +1,30 @@
 // ChildFrm.h : interface of the CChildFrame class
 //
 
-
 #pragma once
-
 
 class CChildFrame : public CMDIChildWnd
 {
-	DECLARE_DYNCREATE(CChildFrame)
+  DECLARE_DYNCREATE(CChildFrame)
 public:
-	CChildFrame();
+  CChildFrame();
 
-// Attributes
+  // Attributes
 public:
-
-// Operations
+  // Operations
 public:
+  // Overrides
+  virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 
-// Overrides
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-
-// Implementation
+  // Implementation
 public:
-	virtual ~CChildFrame();
+  virtual ~CChildFrame();
 #ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
+  virtual void AssertValid() const;
+  virtual void Dump(CDumpContext& dc) const;
 #endif
 
-// Generated message map functions
+  // Generated message map functions
 protected:
-	DECLARE_MESSAGE_MAP()
+  DECLARE_MESSAGE_MAP()
 };

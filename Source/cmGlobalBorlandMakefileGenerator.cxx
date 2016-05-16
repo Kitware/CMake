@@ -30,11 +30,8 @@ cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator(cmake* cm)
   this->UnixCD = false;
 }
 
-
-void cmGlobalBorlandMakefileGenerator
-::EnableLanguage(std::vector<std::string>const& l,
-                 cmMakefile *mf,
-                 bool optional)
+void cmGlobalBorlandMakefileGenerator::EnableLanguage(
+  std::vector<std::string> const& l, cmMakefile* mf, bool optional)
 {
   std::string outdir = this->CMakeInstance->GetHomeOutputDirectory();
   mf->AddDefinition("BORLAND", "1");
@@ -44,20 +41,19 @@ void cmGlobalBorlandMakefileGenerator
 }
 
 ///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator(
-    cmMakefile *mf)
+cmLocalGenerator* cmGlobalBorlandMakefileGenerator::CreateLocalGenerator(
+  cmMakefile* mf)
 {
   cmLocalUnixMakefileGenerator3* lg =
-      new cmLocalUnixMakefileGenerator3(this, mf);
+    new cmLocalUnixMakefileGenerator3(this, mf);
   lg->SetMakefileVariableSize(32);
   lg->SetMakeCommandEscapeTargetTwice(true);
   lg->SetBorlandMakeCurlyHack(true);
   return lg;
 }
 
-
-void cmGlobalBorlandMakefileGenerator
-::GetDocumentation(cmDocumentationEntry& entry)
+void cmGlobalBorlandMakefileGenerator::GetDocumentation(
+  cmDocumentationEntry& entry)
 {
   entry.Name = cmGlobalBorlandMakefileGenerator::GetActualName();
   entry.Brief = "Generates Borland makefiles.";

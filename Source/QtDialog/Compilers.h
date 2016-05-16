@@ -11,12 +11,11 @@ class Compilers : public QWidget, public Ui::Compilers
 {
   Q_OBJECT
 public:
-  Compilers(QWidget* p=NULL) :
-    QWidget(p)
+  Compilers(QWidget* p = NULL)
+    : QWidget(p)
   {
     this->setupUi(this);
   }
 };
 
 #endif
-

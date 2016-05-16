@@ -18,7 +18,7 @@
 extern int obj();
 extern int sub();
 
-int main(int,char**)
+int main(int, char**)
 {
   return obj() + sub();
 }

@@ -15,40 +15,32 @@
 #include "cmSystemTools.h"
 #include <windows.h> // CreateFileW
 
-cmFileLock::cmFileLock(): File(INVALID_HANDLE_VALUE)
+cmFileLock::cmFileLock()
+  : File(INVALID_HANDLE_VALUE)
 {
 }
 
 cmFileLockResult cmFileLock::Release()
 {
-  if (this->Filename.empty())
-    {
+  if (this->Filename.empty()) {
     return cmFileLockResult::MakeOk();
-    }
+  }
   const unsigned long len = static_cast<unsigned long>(-1);
   static OVERLAPPED overlapped;
   const DWORD reserved = 0;
-  const BOOL unlockResult = UnlockFileEx(
-      File,
-      reserved,
-      len,
-      len,
-      &overlapped
-  );
+  const BOOL unlockResult =
+    UnlockFileEx(File, reserved, len, len, &overlapped);
 
   this->Filename = "";
 
   CloseHandle(this->File);
   this->File = INVALID_HANDLE_VALUE;
 
-  if (unlockResult)
-    {
+  if (unlockResult) {
     return cmFileLockResult::MakeOk();
-    }
-  else
-    {
+  } else {
     return cmFileLockResult::MakeSystem();
-    }
+  }
 }
 
 cmFileLockResult cmFileLock::OpenFile()
@@ -59,58 +51,42 @@ cmFileLockResult cmFileLock::OpenFile()
   const DWORD attr = 0;
   const HANDLE templ = NULL;
   this->File = CreateFileW(
-      cmSystemTools::ConvertToWindowsExtendedPath(this->Filename).c_str(),
-      access,
-      shareMode,
-      security,
-      OPEN_EXISTING,
-      attr,
-      templ
-  );
-  if (this->File == INVALID_HANDLE_VALUE)
-    {
+    cmSystemTools::ConvertToWindowsExtendedPath(this->Filename).c_str(),
+    access, shareMode, security, OPEN_EXISTING, attr, templ);
+  if (this->File == INVALID_HANDLE_VALUE) {
     return cmFileLockResult::MakeSystem();
-    }
-  else
-    {
+  } else {
     return cmFileLockResult::MakeOk();
-    }
+  }
 }
 
 cmFileLockResult cmFileLock::LockWithoutTimeout()
 {
-  if (!this->LockFile(LOCKFILE_EXCLUSIVE_LOCK))
-    {
+  if (!this->LockFile(LOCKFILE_EXCLUSIVE_LOCK)) {
     return cmFileLockResult::MakeSystem();
-    }
-  else
-    {
+  } else {
     return cmFileLockResult::MakeOk();
-    }
+  }
 }
 
 cmFileLockResult cmFileLock::LockWithTimeout(unsigned long seconds)
 {
   const DWORD flags = LOCKFILE_EXCLUSIVE_LOCK | LOCKFILE_FAIL_IMMEDIATELY;
-  while (true)
-    {
+  while (true) {
     const BOOL result = this->LockFile(flags);
-    if (result)
-      {
+    if (result) {
       return cmFileLockResult::MakeOk();
-      }
+    }
     const DWORD error = GetLastError();
-    if (error != ERROR_LOCK_VIOLATION)
-      {
+    if (error != ERROR_LOCK_VIOLATION) {
       return cmFileLockResult::MakeSystem();
-      }
-    if (seconds == 0)
-      {
+    }
+    if (seconds == 0) {
       return cmFileLockResult::MakeTimeout();
-      }
+    }
     --seconds;
     cmSystemTools::Delay(1000);
-    }
+  }
 }
 
 BOOL cmFileLock::LockFile(DWORD flags)
@@ -118,12 +94,5 @@ BOOL cmFileLock::LockFile(DWORD flags)
   const DWORD reserved = 0;
   const unsigned long len = static_cast<unsigned long>(-1);
   static OVERLAPPED overlapped;
-  return LockFileEx(
-      this->File,
-      flags,
-      reserved,
-      len,
-      len,
-      &overlapped
-  );
+  return LockFileEx(this->File, flags, reserved, len, len, &overlapped);
 }

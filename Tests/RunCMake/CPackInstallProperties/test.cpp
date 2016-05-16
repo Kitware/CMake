@@ -1,1 +1,3 @@
-int main() {}
+int main()
+{
+}

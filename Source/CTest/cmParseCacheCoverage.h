@@ -24,8 +24,8 @@
 class cmParseCacheCoverage : public cmParseMumpsCoverage
 {
 public:
-  cmParseCacheCoverage(cmCTestCoverageHandlerContainer& cont,
-    cmCTest* ctest);
+  cmParseCacheCoverage(cmCTestCoverageHandlerContainer& cont, cmCTest* ctest);
+
 protected:
   // implement virtual from parent
   bool LoadCoverageData(const char* dir);
@@ -34,9 +34,7 @@ protected:
   // Read a single mcov file
   bool ReadCMCovFile(const char* f);
   // split a string based on ,
-  bool SplitString(std::vector<std::string>& args,
-                   std::string const& line);
+  bool SplitString(std::vector<std::string>& args, std::string const& line);
 };
-
 
 #endif

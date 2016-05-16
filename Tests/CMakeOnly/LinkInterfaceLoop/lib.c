@@ -1,1 +1,4 @@
-int lib(void) { return 0; }
+int lib(void)
+{
+  return 0;
+}

@@ -26,24 +26,36 @@ class cmTargetDepend
   // mutable members to acheive a map with set syntax.
   mutable bool Link;
   mutable bool Util;
+
 public:
   cmTargetDepend(cmGeneratorTarget const* t)
-    : Target(t), Link(false), Util(false) {}
+    : Target(t)
+    , Link(false)
+    , Util(false)
+  {
+  }
   operator cmGeneratorTarget const*() const { return this->Target; }
   cmGeneratorTarget const* operator->() const { return this->Target; }
   cmGeneratorTarget const& operator*() const { return *this->Target; }
-  friend bool operator < (cmTargetDepend const& l, cmTargetDepend const& r)
-    { return l.Target < r.Target; }
+  friend bool operator<(cmTargetDepend const& l, cmTargetDepend const& r)
+  {
+    return l.Target < r.Target;
+  }
   void SetType(bool strong) const
-    {
-    if(strong) { this->Util = true; }
-    else { this->Link = true; }
+  {
+    if (strong) {
+      this->Util = true;
+    } else {
+      this->Link = true;
     }
+  }
   bool IsLink() const { return this->Link; }
   bool IsUtil() const { return this->Util; }
 };
 
 /** Unordered set of (direct) dependencies of a target. */
-class cmTargetDependSet: public std::set<cmTargetDepend> {};
+class cmTargetDependSet : public std::set<cmTargetDepend>
+{
+};
 
 #endif

@@ -1,5 +1,6 @@
 
-struct A {
+struct A
+{
   A() = default;
 };
 

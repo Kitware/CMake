@@ -21,10 +21,10 @@
 class AbcP : public QObject
 {
   Q_OBJECT
-  public:
-    AbcP() {}
-  public slots:
-    void doAbcP() { printf("I am private abc !\n"); }
+public:
+  AbcP() {}
+public slots:
+  void doAbcP() { printf("I am private abc !\n"); }
 };
 
 #endif

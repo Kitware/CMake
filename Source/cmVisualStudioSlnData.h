@@ -18,11 +18,13 @@ class cmSlnProjectEntry
 {
 public:
   cmSlnProjectEntry() {}
-  cmSlnProjectEntry(const std::string& guid,
-                    const std::string& name,
+  cmSlnProjectEntry(const std::string& guid, const std::string& name,
                     const std::string& relativePath)
-    : Guid(guid), Name(name), RelativePath(relativePath)
-  {}
+    : Guid(guid)
+    , Name(name)
+    , RelativePath(relativePath)
+  {
+  }
 
   std::string GetGUID() const { return Guid; }
   std::string GetName() const { return Name; }
@@ -32,15 +34,14 @@ private:
   std::string Guid, Name, RelativePath;
 };
 
-
 class cmSlnData
 {
 public:
-  const cmSlnProjectEntry*
-  GetProjectByGUID(const std::string& projectGUID) const;
+  const cmSlnProjectEntry* GetProjectByGUID(
+    const std::string& projectGUID) const;
 
-  const cmSlnProjectEntry*
-  GetProjectByName(const std::string& projectName) const;
+  const cmSlnProjectEntry* GetProjectByName(
+    const std::string& projectName) const;
 
   std::vector<cmSlnProjectEntry> GetProjects() const;
 

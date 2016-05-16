@@ -3,7 +3,7 @@
 
 #include "object.h"
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   std::fstream fout;
   fout.open("commandoutput.h", std::ios::out);

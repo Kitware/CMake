@@ -1,5 +1,5 @@
 
-template<typename T>
+template <typename T>
 void someFunc()
 {
 }

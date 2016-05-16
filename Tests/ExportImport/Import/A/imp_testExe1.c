@@ -14,16 +14,16 @@ extern int testLibPerConfigDest();
 /* Switch a symbol between debug and optimized builds to make sure the
    proper library is found from the testLib4 link interface.  */
 #ifdef EXE_DBG
-# define testLib4libcfg testLib4libdbg
+#define testLib4libcfg testLib4libdbg
 #else
-# define testLib4libcfg testLib4libopt
+#define testLib4libcfg testLib4libopt
 #endif
 extern testLib4libcfg(void);
 
 int main()
 {
-  return (testLib2() + generated_by_testExe1() + testLib3() + testLib4()
-          + testLib5() + testLib6() + testLib7() + testLibCycleA1()
-          + testLibPerConfigDest()
-          + generated_by_testExe3() + generated_by_testExe4() + testLib4lib() + testLib4libcfg());
+  return (testLib2() + generated_by_testExe1() + testLib3() + testLib4() +
+          testLib5() + testLib6() + testLib7() + testLibCycleA1() +
+          testLibPerConfigDest() + generated_by_testExe3() +
+          generated_by_testExe4() + testLib4lib() + testLib4libcfg());
 }

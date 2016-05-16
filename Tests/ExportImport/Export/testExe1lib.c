@@ -1,1 +1,4 @@
-int testExe1lib(void) { return 0; }
+int testExe1lib(void)
+{
+  return 0;
+}

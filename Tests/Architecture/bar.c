@@ -1,2 +1,5 @@
 extern int foo(void);
-int main() { return foo(); }
+int main()
+{
+  return foo();
+}

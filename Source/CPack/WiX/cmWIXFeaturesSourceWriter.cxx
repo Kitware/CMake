@@ -12,16 +12,14 @@
 
 #include "cmWIXFeaturesSourceWriter.h"
 
-cmWIXFeaturesSourceWriter::cmWIXFeaturesSourceWriter(cmCPackLog* logger,
-  std::string const& filename):
-    cmWIXSourceWriter(logger, filename)
+cmWIXFeaturesSourceWriter::cmWIXFeaturesSourceWriter(
+  cmCPackLog* logger, std::string const& filename)
+  : cmWIXSourceWriter(logger, filename)
 {
-
 }
 
 void cmWIXFeaturesSourceWriter::CreateCMakePackageRegistryEntry(
-    std::string const& package,
-    std::string const& upgradeGuid)
+  std::string const& package, std::string const& upgradeGuid)
 {
   BeginElement("Component");
   AddAttribute("Id", "CM_PACKAGE_REGISTRY");
@@ -29,7 +27,7 @@ void cmWIXFeaturesSourceWriter::CreateCMakePackageRegistryEntry(
   AddAttribute("Guid", "*");
 
   std::string registryKey =
-      std::string("Software\\Kitware\\CMake\\Packages\\") + package;
+    std::string("Software\\Kitware\\CMake\\Packages\\") + package;
 
   BeginElement("RegistryValue");
   AddAttribute("Root", "HKLM");
@@ -49,25 +47,24 @@ void cmWIXFeaturesSourceWriter::EmitFeatureForComponentGroup(
   BeginElement("Feature");
   AddAttribute("Id", "CM_G_" + group.Name);
 
-  if(group.IsExpandedByDefault)
-    {
+  if (group.IsExpandedByDefault) {
     AddAttribute("Display", "expand");
-    }
+  }
 
   AddAttributeUnlessEmpty("Title", group.DisplayName);
   AddAttributeUnlessEmpty("Description", group.Description);
 
-  for(std::vector<cmCPackComponentGroup*>::const_iterator
-    i = group.Subgroups.begin(); i != group.Subgroups.end(); ++i)
-    {
+  for (std::vector<cmCPackComponentGroup*>::const_iterator i =
+         group.Subgroups.begin();
+       i != group.Subgroups.end(); ++i) {
     EmitFeatureForComponentGroup(**i);
-    }
+  }
 
-  for(std::vector<cmCPackComponent*>::const_iterator
-    i = group.Components.begin(); i != group.Components.end(); ++i)
-    {
+  for (std::vector<cmCPackComponent*>::const_iterator i =
+         group.Components.begin();
+       i != group.Components.end(); ++i) {
     EmitFeatureForComponent(**i);
-    }
+  }
 
   EndElement("Feature");
 }
@@ -81,15 +78,13 @@ void cmWIXFeaturesSourceWriter::EmitFeatureForComponent(
   AddAttributeUnlessEmpty("Title", component.DisplayName);
   AddAttributeUnlessEmpty("Description", component.Description);
 
-  if(component.IsRequired)
-    {
+  if (component.IsRequired) {
     AddAttribute("Absent", "disallow");
-    }
+  }
 
-  if(component.IsHidden)
-    {
+  if (component.IsHidden) {
     AddAttribute("Display", "hidden");
-    }
+  }
 
   EndElement("Feature");
 }

@@ -56,8 +56,7 @@
 #include <iostream>
 #endif
 
-
-int main(int argv, char **args)
+int main(int argv, char** args)
 {
   QCoreApplication app(argv, args);
 

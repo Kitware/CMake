@@ -16,7 +16,7 @@
 #include <stdio.h>
 
 Bar::Bar()
-:QObject()
+  : QObject()
 {
 }
 

@@ -1,1 +1,4 @@
-int obj() { return 0; }
+int obj()
+{
+  return 0;
+}

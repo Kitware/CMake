@@ -28,6 +28,7 @@ public:
    */
   cmCPackCygwinSourceGenerator();
   virtual ~cmCPackCygwinSourceGenerator();
+
 protected:
   const char* GetPackagingInstallPrefix();
   virtual int InitializeInternal();

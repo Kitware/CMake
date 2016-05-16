@@ -28,7 +28,9 @@ public:
   cmCPackTypeMacro(cmCPackNSISGenerator, cmCPackGenerator);
 
   static cmCPackGenerator* CreateGenerator64()
-    { return new cmCPackNSISGenerator(true); }
+  {
+    return new cmCPackNSISGenerator(true);
+  }
 
   /**
    * Construct generator
@@ -38,14 +40,13 @@ public:
 
 protected:
   virtual int InitializeInternal();
-  void CreateMenuLinks( std::ostringstream& str,
-                        std::ostringstream& deleteStr);
+  void CreateMenuLinks(std::ostringstream& str, std::ostringstream& deleteStr);
   int PackageFiles();
   virtual const char* GetOutputExtension() { return ".exe"; }
   virtual const char* GetOutputPostfix() { return "win32"; }
 
   bool GetListOfSubdirectories(const char* dir,
-    std::vector<std::string>& dirs);
+                               std::vector<std::string>& dirs);
 
   enum cmCPackGenerator::CPackSetDestdirSupport SupportsSetDestdir() const;
   virtual bool SupportsAbsoluteDestination() const;
@@ -54,28 +55,24 @@ protected:
   /// Produce a string that contains the NSIS code to describe a
   /// particular component. Any added macros will be emitted via
   /// macrosOut.
-  std::string
-  CreateComponentDescription(cmCPackComponent *component,
-                             std::ostringstream& macrosOut);
+  std::string CreateComponentDescription(cmCPackComponent* component,
+                                         std::ostringstream& macrosOut);
 
   /// Produce NSIS code that selects all of the components that this component
   /// depends on, recursively.
-  std::string CreateSelectionDependenciesDescription
-                (cmCPackComponent *component,
-                 std::set<cmCPackComponent *>& visited);
+  std::string CreateSelectionDependenciesDescription(
+    cmCPackComponent* component, std::set<cmCPackComponent*>& visited);
 
   /// Produce NSIS code that de-selects all of the components that are
   /// dependent on this component, recursively.
-  std::string CreateDeselectionDependenciesDescription
-                (cmCPackComponent *component,
-                 std::set<cmCPackComponent *>& visited);
+  std::string CreateDeselectionDependenciesDescription(
+    cmCPackComponent* component, std::set<cmCPackComponent*>& visited);
 
   /// Produce a string that contains the NSIS code to describe a
   /// particular component group, including its components. Any
   /// added macros will be emitted via macrosOut.
-  std::string
-  CreateComponentGroupDescription(cmCPackComponentGroup *group,
-                                  std::ostringstream& macrosOut);
+  std::string CreateComponentGroupDescription(cmCPackComponentGroup* group,
+                                              std::ostringstream& macrosOut);
 
   /// Translations any newlines found in the string into \\r\\n, so that the
   /// resulting string can be used within NSIS.

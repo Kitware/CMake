@@ -20,28 +20,26 @@ struct test_pair
 };
 
 static test_pair const pairs[] = {
-  {"copyright \xC2\xA9", "copyright \xC2\xA9"},
-  {"form-feed \f", "form-feed [NON-XML-CHAR-0xC]"},
-  {"angles <>", "angles &lt;&gt;"},
-  {"ampersand &", "ampersand &amp;"},
-  {"bad-byte \x80", "bad-byte [NON-UTF-8-BYTE-0x80]"},
-  {0,0}
+  { "copyright \xC2\xA9", "copyright \xC2\xA9" },
+  { "form-feed \f", "form-feed [NON-XML-CHAR-0xC]" },
+  { "angles <>", "angles &lt;&gt;" },
+  { "ampersand &", "ampersand &amp;" },
+  { "bad-byte \x80", "bad-byte [NON-UTF-8-BYTE-0x80]" },
+  { 0, 0 }
 };
 
-int testXMLSafe(int, char*[])
+int testXMLSafe(int, char* [])
 {
   int result = 0;
-  for(test_pair const* p = pairs; p->in; ++p)
-    {
+  for (test_pair const* p = pairs; p->in; ++p) {
     cmXMLSafe xs(p->in);
     std::ostringstream oss;
     oss << xs;
     std::string out = oss.str();
-    if(out != p->out)
-      {
+    if (out != p->out) {
       printf("expected [%s], got [%s]\n", p->out, out.c_str());
       result = 1;
-      }
     }
+  }
   return result;
 }

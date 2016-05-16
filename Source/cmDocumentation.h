@@ -18,13 +18,12 @@
 #include "cmDocumentationSection.h"
 #include "cmake.h"
 
-namespace cmsys
-{
-  class Directory;
+namespace cmsys {
+class Directory;
 }
 
 /** Class to generate documentation.  */
-class cmDocumentation: public cmDocumentationEnums
+class cmDocumentation : public cmDocumentationEnums
 {
 public:
   cmDocumentation();
@@ -40,7 +39,7 @@ public:
    * help arguments.
    */
   bool CheckOptions(int argc, const char* const* argv,
-                    const char* exitOpt =0);
+                    const char* exitOpt = 0);
 
   /**
    * Print help requested on the command line.  Call after
@@ -60,28 +59,21 @@ public:
 
   /** Set a section of the documentation. Typical sections include Name,
       Usage, Description, Options */
-  void SetSection(const char *sectionName,
-                  cmDocumentationSection *section);
-  void SetSection(const char *sectionName,
-                  std::vector<cmDocumentationEntry> &docs);
-  void SetSection(const char *sectionName,
-                  const char *docs[][2]);
-  void SetSections(std::map<std::string,cmDocumentationSection *>
-                   &sections);
+  void SetSection(const char* sectionName, cmDocumentationSection* section);
+  void SetSection(const char* sectionName,
+                  std::vector<cmDocumentationEntry>& docs);
+  void SetSection(const char* sectionName, const char* docs[][2]);
+  void SetSections(std::map<std::string, cmDocumentationSection*>& sections);
 
   /** Add the documentation to the beginning/end of the section */
-  void PrependSection(const char *sectionName,
-                      const char *docs[][2]);
-  void PrependSection(const char *sectionName,
-                      std::vector<cmDocumentationEntry> &docs);
-  void PrependSection(const char *sectionName,
-                      cmDocumentationEntry &docs);
-  void AppendSection(const char *sectionName,
-                     const char *docs[][2]);
-  void AppendSection(const char *sectionName,
-                     std::vector<cmDocumentationEntry> &docs);
-  void AppendSection(const char *sectionName,
-                     cmDocumentationEntry &docs);
+  void PrependSection(const char* sectionName, const char* docs[][2]);
+  void PrependSection(const char* sectionName,
+                      std::vector<cmDocumentationEntry>& docs);
+  void PrependSection(const char* sectionName, cmDocumentationEntry& docs);
+  void AppendSection(const char* sectionName, const char* docs[][2]);
+  void AppendSection(const char* sectionName,
+                     std::vector<cmDocumentationEntry>& docs);
+  void AppendSection(const char* sectionName, cmDocumentationEntry& docs);
 
   /** Add common (to all tools) documentation section(s) */
   void addCommonStandardDocSections();
@@ -96,7 +88,6 @@ public:
   void addCPackStandardDocSections();
 
 private:
-
   void GlobHelp(std::vector<std::string>& files, std::string const& pattern);
   void PrintNames(std::ostream& os, std::string const& pattern);
   bool PrintFiles(std::ostream& os, std::string const& pattern);
@@ -126,13 +117,16 @@ private:
   bool ShowGenerators;
 
   std::string NameString;
-  std::map<std::string,cmDocumentationSection*> AllSections;
+  std::map<std::string, cmDocumentationSection*> AllSections;
 
   std::string CurrentArgument;
 
   struct RequestedHelpItem
   {
-    RequestedHelpItem(): HelpType(None) {}
+    RequestedHelpItem()
+      : HelpType(None)
+    {
+    }
     cmDocumentationEnums::Type HelpType;
     std::string Filename;
     std::string Argument;

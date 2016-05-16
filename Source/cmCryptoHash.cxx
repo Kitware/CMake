@@ -17,20 +17,21 @@
 
 cmsys::auto_ptr<cmCryptoHash> cmCryptoHash::New(const char* algo)
 {
-  if(strcmp(algo,"MD5") == 0)
-    { return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashMD5); }
-  else if(strcmp(algo,"SHA1") == 0)
-    { return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA1); }
-  else if(strcmp(algo,"SHA224") == 0)
-    { return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA224); }
-  else if(strcmp(algo,"SHA256") == 0)
-    { return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA256); }
-  else if(strcmp(algo,"SHA384") == 0)
-    { return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA384); }
-  else if(strcmp(algo,"SHA512") == 0)
-    { return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA512); }
-  else
-    { return cmsys::auto_ptr<cmCryptoHash>(0); }
+  if (strcmp(algo, "MD5") == 0) {
+    return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashMD5);
+  } else if (strcmp(algo, "SHA1") == 0) {
+    return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA1);
+  } else if (strcmp(algo, "SHA224") == 0) {
+    return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA224);
+  } else if (strcmp(algo, "SHA256") == 0) {
+    return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA256);
+  } else if (strcmp(algo, "SHA384") == 0) {
+    return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA384);
+  } else if (strcmp(algo, "SHA512") == 0) {
+    return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA512);
+  } else {
+    return cmsys::auto_ptr<cmCryptoHash>(0);
+  }
 }
 
 std::string cmCryptoHash::HashString(const std::string& input)
@@ -44,10 +45,9 @@ std::string cmCryptoHash::HashString(const std::string& input)
 std::string cmCryptoHash::HashFile(const std::string& file)
 {
   cmsys::ifstream fin(file.c_str(), std::ios::in | std::ios::binary);
-  if(!fin)
-    {
+  if (!fin) {
     return "";
-    }
+  }
 
   this->Initialize();
 
@@ -61,22 +61,20 @@ std::string cmCryptoHash::HashFile(const std::string& file)
   // incorrect to not check the error condition on the fin.read()
   // before using the data, but the fin.gcount() will be zero if an
   // error occurred.  Therefore, the loop should be safe everywhere.
-  while(fin)
-    {
+  while (fin) {
     fin.read(buffer_c, sizeof(buffer));
-    if(int gcount = static_cast<int>(fin.gcount()))
-      {
+    if (int gcount = static_cast<int>(fin.gcount())) {
       this->Append(buffer_uc, gcount);
-      }
     }
-  if(fin.eof())
-    {
+  }
+  if (fin.eof()) {
     return this->Finalize();
-    }
+  }
   return "";
 }
 
-cmCryptoHashMD5::cmCryptoHashMD5(): MD5(cmsysMD5_New())
+cmCryptoHashMD5::cmCryptoHashMD5()
+  : MD5(cmsysMD5_New())
 {
 }
 
@@ -102,22 +100,24 @@ std::string cmCryptoHashMD5::Finalize()
   return std::string(md5out, 32);
 }
 
+#define cmCryptoHash_SHA_CLASS_IMPL(SHA)                                      \
+  cmCryptoHash##SHA::cmCryptoHash##SHA()                                      \
+    : SHA(new SHA_CTX)                                                        \
+  {                                                                           \
+  }                                                                           \
+  cmCryptoHash##SHA::~cmCryptoHash##SHA() { delete this->SHA; }               \
+  void cmCryptoHash##SHA::Initialize() { SHA##_Init(this->SHA); }             \
+  void cmCryptoHash##SHA::Append(unsigned char const* buf, int sz)            \
+  {                                                                           \
+    SHA##_Update(this->SHA, buf, sz);                                         \
+  }                                                                           \
+  std::string cmCryptoHash##SHA::Finalize()                                   \
+  {                                                                           \
+    char out[SHA##_DIGEST_STRING_LENGTH];                                     \
+    SHA##_End(this->SHA, out);                                                \
+    return std::string(out, SHA##_DIGEST_STRING_LENGTH - 1);                  \
+  }
 
-#define cmCryptoHash_SHA_CLASS_IMPL(SHA) \
-cmCryptoHash##SHA::cmCryptoHash##SHA(): SHA(new SHA_CTX) {} \
-cmCryptoHash##SHA::~cmCryptoHash##SHA() { delete this->SHA; } \
-void cmCryptoHash##SHA::Initialize() { SHA##_Init(this->SHA); } \
-void cmCryptoHash##SHA::Append(unsigned char const* buf, int sz) \
-{ SHA##_Update(this->SHA, buf, sz); } \
-std::string cmCryptoHash##SHA::Finalize() \
-{ \
-  char out[SHA##_DIGEST_STRING_LENGTH]; \
-  SHA##_End(this->SHA, out); \
-  return std::string(out, SHA##_DIGEST_STRING_LENGTH-1); \
-}
-
-cmCryptoHash_SHA_CLASS_IMPL(SHA1)
-cmCryptoHash_SHA_CLASS_IMPL(SHA224)
-cmCryptoHash_SHA_CLASS_IMPL(SHA256)
-cmCryptoHash_SHA_CLASS_IMPL(SHA384)
-cmCryptoHash_SHA_CLASS_IMPL(SHA512)
+cmCryptoHash_SHA_CLASS_IMPL(SHA1) cmCryptoHash_SHA_CLASS_IMPL(SHA224)
+  cmCryptoHash_SHA_CLASS_IMPL(SHA256) cmCryptoHash_SHA_CLASS_IMPL(SHA384)
+    cmCryptoHash_SHA_CLASS_IMPL(SHA512)

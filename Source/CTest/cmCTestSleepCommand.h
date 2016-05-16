@@ -23,35 +23,32 @@
 class cmCTestSleepCommand : public cmCTestCommand
 {
 public:
-
   cmCTestSleepCommand() {}
 
   /**
    * This is a virtual constructor for the command.
    */
   virtual cmCommand* Clone()
-    {
+  {
     cmCTestSleepCommand* ni = new cmCTestSleepCommand;
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
-    }
+  }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_sleep";}
+  virtual std::string GetName() const { return "ctest_sleep"; }
 
   cmTypeMacro(cmCTestSleepCommand, cmCTestCommand);
-
 };
-
 
 #endif

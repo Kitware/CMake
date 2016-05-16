@@ -1,38 +1,35 @@
 // MainFrm.h : interface of the CMainFrame class
 //
 
-
 #pragma once
 class CMainFrame : public CMDIFrameWnd
 {
-	DECLARE_DYNAMIC(CMainFrame)
+  DECLARE_DYNAMIC(CMainFrame)
 public:
-	CMainFrame();
+  CMainFrame();
 
-// Attributes
+  // Attributes
 public:
+  // Operations
+public:
+  // Overrides
+public:
+  virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 
-// Operations
+  // Implementation
 public:
-
-// Overrides
-public:
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-
-// Implementation
-public:
-	virtual ~CMainFrame();
+  virtual ~CMainFrame();
 #ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
+  virtual void AssertValid() const;
+  virtual void Dump(CDumpContext& dc) const;
 #endif
 
-protected:  // control bar embedded members
-	CStatusBar  m_wndStatusBar;
-	CToolBar    m_wndToolBar;
+protected: // control bar embedded members
+  CStatusBar m_wndStatusBar;
+  CToolBar m_wndToolBar;
 
-// Generated message map functions
+  // Generated message map functions
 protected:
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	DECLARE_MESSAGE_MAP()
+  afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+  DECLARE_MESSAGE_MAP()
 };

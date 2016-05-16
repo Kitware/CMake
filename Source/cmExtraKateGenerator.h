@@ -27,26 +27,28 @@ public:
   cmExtraKateGenerator();
 
   virtual std::string GetName() const
-                         { return cmExtraKateGenerator::GetActualName();}
-  static std::string GetActualName()                    { return "Kate";}
+  {
+    return cmExtraKateGenerator::GetActualName();
+  }
+  static std::string GetActualName() { return "Kate"; }
   static cmExternalMakefileProjectGenerator* New()
-                                     { return new cmExtraKateGenerator; }
+  {
+    return new cmExtraKateGenerator;
+  }
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry,
                                 const std::string& fullName) const;
 
   virtual void Generate();
+
 private:
   void CreateKateProjectFile(const cmLocalGenerator* lg) const;
   void CreateDummyKateProjectFile(const cmLocalGenerator* lg) const;
   void WriteTargets(const cmLocalGenerator* lg,
                     cmGeneratedFileStream& fout) const;
-  void AppendTarget(cmGeneratedFileStream& fout,
-                    const std::string&     target,
-                    const std::string&     make,
-                    const std::string&     makeArgs,
-                    const std::string&     path,
-                    const char*            homeOutputDir) const;
+  void AppendTarget(cmGeneratedFileStream& fout, const std::string& target,
+                    const std::string& make, const std::string& makeArgs,
+                    const std::string& path, const char* homeOutputDir) const;
 
   std::string GenerateFilesString(const cmLocalGenerator* lg) const;
   std::string GetPathBasename(const std::string& path) const;

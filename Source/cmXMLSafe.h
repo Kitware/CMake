@@ -35,6 +35,7 @@ public:
 
   /** Get the escaped data as a string.  */
   std::string str();
+
 private:
   char const* Data;
   unsigned long Size;

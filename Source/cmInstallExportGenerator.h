@@ -23,20 +23,18 @@ class cmMakefile;
 /** \class cmInstallExportGenerator
  * \brief Generate rules for creating an export files.
  */
-class cmInstallExportGenerator: public cmInstallGenerator
+class cmInstallExportGenerator : public cmInstallGenerator
 {
 public:
-  cmInstallExportGenerator(cmExportSet* exportSet,
-                           const char* dest, const char* file_permissions,
+  cmInstallExportGenerator(cmExportSet* exportSet, const char* dest,
+                           const char* file_permissions,
                            const std::vector<std::string>& configurations,
-                           const char* component,
-                           MessageLevel message,
-                           bool exclude_from_all,
-                           const char* filename, const char* name_space,
-                           bool exportOld);
+                           const char* component, MessageLevel message,
+                           bool exclude_from_all, const char* filename,
+                           const char* name_space, bool exportOld);
   ~cmInstallExportGenerator();
 
-  cmExportSet* GetExportSet() {return this->ExportSet;}
+  cmExportSet* GetExportSet() { return this->ExportSet; }
 
   void Compute(cmLocalGenerator* lg);
 
@@ -44,8 +42,7 @@ public:
 
   const std::string& GetNamespace() const { return this->Namespace; }
 
-  std::string const& GetDestination() const
-    { return this->Destination; }
+  std::string const& GetDestination() const { return this->Destination; }
 
 protected:
   virtual void GenerateScript(std::ostream& os);

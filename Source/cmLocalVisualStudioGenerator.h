@@ -45,24 +45,22 @@ public:
 
   cmGlobalVisualStudioGenerator::VSVersion GetVersion() const;
 
-  virtual std::string
-  ComputeLongestObjectDirectory(cmGeneratorTarget const*) const = 0;
+  virtual std::string ComputeLongestObjectDirectory(
+    cmGeneratorTarget const*) const = 0;
 
   virtual void AddCMakeListsRules() = 0;
 
   virtual void ComputeObjectFilenames(
-                        std::map<cmSourceFile const*, std::string>& mapping,
-                        cmGeneratorTarget const* = 0);
+    std::map<cmSourceFile const*, std::string>& mapping,
+    cmGeneratorTarget const* = 0);
 
 protected:
   virtual const char* ReportErrorLabel() const;
   virtual bool CustomCommandUseLocal() const { return false; }
 
   /** Construct a custom command to make exe import lib dir.  */
-  cmsys::auto_ptr<cmCustomCommand>
-  MaybeCreateImplibDir(cmGeneratorTarget *target,
-                       const std::string& config,
-                       bool isFortran);
+  cmsys::auto_ptr<cmCustomCommand> MaybeCreateImplibDir(
+    cmGeneratorTarget* target, const std::string& config, bool isFortran);
 };
 
 #endif

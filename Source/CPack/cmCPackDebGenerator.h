@@ -31,18 +31,18 @@ public:
   virtual ~cmCPackDebGenerator();
 
   static bool CanGenerate()
-    {
+  {
 #ifdef __APPLE__
     // on MacOS enable CPackDeb iff dpkg is found
     std::vector<std::string> locations;
     locations.push_back("/sw/bin");        // Fink
     locations.push_back("/opt/local/bin"); // MacPorts
-    return cmSystemTools::FindProgram("dpkg",locations) != "" ? true : false;
+    return cmSystemTools::FindProgram("dpkg", locations) != "" ? true : false;
 #else
     // legacy behavior on other systems
     return true;
 #endif
-    }
+  }
 
 protected:
   virtual int InitializeInternal();
@@ -65,12 +65,11 @@ protected:
   virtual const char* GetOutputExtension() { return ".deb"; }
   virtual bool SupportsComponentInstallation() const;
   virtual std::string GetComponentInstallDirNameSuffix(
-      const std::string& componentName);
+    const std::string& componentName);
 
 private:
   int createDeb();
   std::vector<std::string> packageFiles;
-
 };
 
 #endif

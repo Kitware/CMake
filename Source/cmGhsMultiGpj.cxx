@@ -14,11 +14,10 @@
 #include "cmGeneratedFileStream.h"
 
 void GhsMultiGpj::WriteGpjTag(Types const gpjType,
-                              cmGeneratedFileStream *const filestream)
+                              cmGeneratedFileStream* const filestream)
 {
-  char const *tag;
-  switch (gpjType)
-    {
+  char const* tag;
+  switch (gpjType) {
     case INTERGRITY_APPLICATION:
       tag = "INTEGRITY Application";
       break;
@@ -39,6 +38,6 @@ void GhsMultiGpj::WriteGpjTag(Types const gpjType,
       break;
     default:
       tag = "";
-    }
+  }
   *filestream << "[" << tag << "]" << std::endl;
 }

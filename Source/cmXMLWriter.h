@@ -37,27 +37,27 @@ public:
 
   template <typename T>
   void Attribute(const char* name, T const& value)
-    {
+  {
     this->PreAttribute();
     this->Output << name << "=\"" << SafeAttribute(value) << '"';
-    }
+  }
 
   void Element(const char* name);
 
   template <typename T>
   void Element(std::string const& name, T const& value)
-    {
+  {
     this->StartElement(name);
     this->Content(value);
     this->EndElement();
-    }
+  }
 
   template <typename T>
   void Content(T const& content)
-    {
+  {
     this->PreContent();
     this->Output << SafeContent(content);
-    }
+  }
 
   void Comment(const char* comment);
 
@@ -82,36 +82,36 @@ private:
 
 private:
   static cmXMLSafe SafeAttribute(const char* value)
-    {
+  {
     return cmXMLSafe(value);
-    }
+  }
 
   static cmXMLSafe SafeAttribute(std::string const& value)
-    {
+  {
     return cmXMLSafe(value);
-    }
+  }
 
   template <typename T>
   static T SafeAttribute(T value)
-    {
+  {
     return value;
-    }
+  }
 
   static cmXMLSafe SafeContent(const char* value)
-    {
+  {
     return cmXMLSafe(value).Quotes(false);
-    }
+  }
 
   static cmXMLSafe SafeContent(std::string const& value)
-    {
+  {
     return cmXMLSafe(value).Quotes(false);
-    }
+  }
 
   template <typename T>
   static T SafeContent(T value)
-    {
+  {
     return value;
-    }
+  }
 
 private:
   std::ostream& Output;

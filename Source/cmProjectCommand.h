@@ -28,26 +28,21 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
-    {
-    return new cmProjectCommand;
-    }
+  virtual cmCommand* Clone() { return new cmProjectCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const {return "project";}
+  virtual std::string GetName() const { return "project"; }
 
   cmTypeMacro(cmProjectCommand, cmCommand);
 };
-
-
 
 #endif

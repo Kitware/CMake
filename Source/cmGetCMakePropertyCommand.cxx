@@ -17,51 +17,39 @@
 #include "cmake.h"
 
 // cmGetCMakePropertyCommand
-bool cmGetCMakePropertyCommand
-::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
+bool cmGetCMakePropertyCommand::InitialPass(
+  std::vector<std::string> const& args, cmExecutionStatus&)
 {
-  if(args.size() < 2 )
-    {
+  if (args.size() < 2) {
     this->SetError("called with incorrect number of arguments");
     return false;
-    }
+  }
 
   std::string variable = args[0];
   std::string output = "NOTFOUND";
 
-  if ( args[1] == "VARIABLES" )
-    {
-    if (const char* varsProp = this->Makefile->GetProperty("VARIABLES"))
-      {
+  if (args[1] == "VARIABLES") {
+    if (const char* varsProp = this->Makefile->GetProperty("VARIABLES")) {
       output = varsProp;
-      }
     }
-  else if ( args[1] == "MACROS" )
-    {
+  } else if (args[1] == "MACROS") {
     output.clear();
-    if (const char* macrosProp = this->Makefile->GetProperty("MACROS"))
-      {
+    if (const char* macrosProp = this->Makefile->GetProperty("MACROS")) {
       output = macrosProp;
-      }
     }
-  else if ( args[1] == "COMPONENTS" )
-    {
-    const std::set<std::string>* components
-      = this->Makefile->GetGlobalGenerator()->GetInstallComponents();
+  } else if (args[1] == "COMPONENTS") {
+    const std::set<std::string>* components =
+      this->Makefile->GetGlobalGenerator()->GetInstallComponents();
     output = cmJoin(*components, ";");
-    }
-  else
-    {
-    const char *prop = 0;
-    if (!args[1].empty())
-      {
+  } else {
+    const char* prop = 0;
+    if (!args[1].empty()) {
       prop = this->Makefile->GetState()->GetGlobalProperty(args[1]);
-      }
-    if (prop)
-      {
-      output = prop;
-      }
     }
+    if (prop) {
+      output = prop;
+    }
+  }
 
   this->Makefile->AddDefinition(variable, output.c_str());
 

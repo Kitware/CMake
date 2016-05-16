@@ -26,35 +26,31 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
-    {
-    return new cmCMakePolicyCommand;
-    }
+  virtual cmCommand* Clone() { return new cmCMakePolicyCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
- /**
-   * This determines if the command is invoked when in script mode.
-   */
+  /**
+    * This determines if the command is invoked when in script mode.
+    */
   virtual bool IsScriptable() const { return true; }
 
- /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  virtual std::string GetName() const {return "cmake_policy";}
+  /**
+    * The name of the command as specified in CMakeList.txt.
+    */
+  virtual std::string GetName() const { return "cmake_policy"; }
 
   cmTypeMacro(cmCMakePolicyCommand, cmCommand);
+
 private:
   bool HandleSetMode(std::vector<std::string> const& args);
   bool HandleGetMode(std::vector<std::string> const& args);
   bool HandleVersionMode(std::vector<std::string> const& args);
 };
-
-
 
 #endif

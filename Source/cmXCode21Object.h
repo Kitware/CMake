@@ -19,10 +19,8 @@ class cmXCode21Object : public cmXCodeObject
 public:
   cmXCode21Object(PBXType ptype, Type type);
   virtual void PrintComment(std::ostream&);
-  static void PrintList(std::vector<cmXCodeObject*> const&,
-                        std::ostream& out,
+  static void PrintList(std::vector<cmXCodeObject*> const&, std::ostream& out,
                         PBXType t);
-  static void PrintList(std::vector<cmXCodeObject*> const&,
-                        std::ostream& out);
+  static void PrintList(std::vector<cmXCodeObject*> const&, std::ostream& out);
 };
 #endif

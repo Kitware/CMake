@@ -31,11 +31,11 @@ public:
 
   enum CompareTypes
   {
-    CompareNone           = 0x0,
-    CompareEqual          = 0x1,
-    CompareLess           = 0x2,
-    CompareLessOrEqual    = 0x3,
-    CompareGreater        = 0x4,
+    CompareNone = 0x0,
+    CompareEqual = 0x1,
+    CompareLess = 0x2,
+    CompareLessOrEqual = 0x3,
+    CompareGreater = 0x4,
     CompareGreaterOrEqual = 0x5
   };
 
@@ -50,17 +50,17 @@ public:
   struct DependenceStruct
   {
     DependenceStruct();
-    DependenceStruct(const std::string &dependence);
+    DependenceStruct(const std::string& dependence);
 
     std::string Name;
     CompareStruct Compare;
 
     std::string NameWithCompare() const;
 
-    bool operator < (const DependenceStruct &other) const
-      {
+    bool operator<(const DependenceStruct& other) const
+    {
       return Name < other.Name;
-      }
+    }
   };
 
 public:
@@ -113,18 +113,18 @@ public:
   const char* GetOption(const std::string& op) const;
   bool IsOn(const std::string& op) const;
 
-  bool IsVersionLess(const char *version);
-  bool IsVersionGreater(const char *version);
-  bool IsVersionEqual(const char *version);
+  bool IsVersionLess(const char* version);
+  bool IsVersionGreater(const char* version);
+  bool IsVersionEqual(const char* version);
 
-  std::string GetComponentName(cmCPackComponent *component);
+  std::string GetComponentName(cmCPackComponent* component);
 
   void DefaultConfiguration();
 
   int ConfigureFromOptions();
-  int ConfigureFromComponent(cmCPackComponent *component);
-  int ConfigureFromGroup(cmCPackComponentGroup *group);
-  int ConfigureFromGroup(const std::string &groupName);
+  int ConfigureFromComponent(cmCPackComponent* component);
+  int ConfigureFromGroup(cmCPackComponentGroup* group);
+  int ConfigureFromGroup(const std::string& groupName);
 
   void GeneratePackageFile();
 

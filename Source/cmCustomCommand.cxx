@@ -30,22 +30,21 @@ cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
                                  const std::vector<std::string>& depends,
                                  const cmCustomCommandLines& commandLines,
                                  const char* comment,
-                                 const char* workingDirectory):
-  Outputs(outputs),
-  Byproducts(byproducts),
-  Depends(depends),
-  CommandLines(commandLines),
-  Backtrace(),
-  Comment(comment?comment:""),
-  WorkingDirectory(workingDirectory?workingDirectory:""),
-  HaveComment(comment?true:false),
-  EscapeAllowMakeVars(false),
-  EscapeOldStyle(true)
+                                 const char* workingDirectory)
+  : Outputs(outputs)
+  , Byproducts(byproducts)
+  , Depends(depends)
+  , CommandLines(commandLines)
+  , Backtrace()
+  , Comment(comment ? comment : "")
+  , WorkingDirectory(workingDirectory ? workingDirectory : "")
+  , HaveComment(comment ? true : false)
+  , EscapeAllowMakeVars(false)
+  , EscapeOldStyle(true)
 {
-  if(mf)
-    {
+  if (mf) {
     this->Backtrace = mf->GetBacktrace();
-    }
+  }
 }
 
 const std::vector<std::string>& cmCustomCommand::GetOutputs() const
@@ -71,13 +70,13 @@ const cmCustomCommandLines& cmCustomCommand::GetCommandLines() const
 const char* cmCustomCommand::GetComment() const
 {
   const char* no_comment = 0;
-  return this->HaveComment? this->Comment.c_str() : no_comment;
+  return this->HaveComment ? this->Comment.c_str() : no_comment;
 }
 
 void cmCustomCommand::AppendCommands(const cmCustomCommandLines& commandLines)
 {
-  this->CommandLines.insert(this->CommandLines.end(),
-                            commandLines.begin(), commandLines.end());
+  this->CommandLines.insert(this->CommandLines.end(), commandLines.begin(),
+                            commandLines.end());
 }
 
 void cmCustomCommand::AppendDepends(const std::vector<std::string>& depends)
@@ -123,8 +122,8 @@ void cmCustomCommand::SetImplicitDepends(ImplicitDependsList const& l)
 
 void cmCustomCommand::AppendImplicitDepends(ImplicitDependsList const& l)
 {
-  this->ImplicitDepends.insert(this->ImplicitDepends.end(),
-                               l.begin(), l.end());
+  this->ImplicitDepends.insert(this->ImplicitDepends.end(), l.begin(),
+                               l.end());
 }
 
 bool cmCustomCommand::GetUsesTerminal() const

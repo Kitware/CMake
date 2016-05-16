@@ -14,7 +14,6 @@
 
 #include "cmFindBase.h"
 
-
 /** \class cmFindLibraryCommand
  * \brief Define a command to search for a library.
  *
@@ -29,17 +28,14 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
-    {
-    return new cmFindLibraryCommand;
-    }
+  virtual cmCommand* Clone() { return new cmFindLibraryCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * This determines if the command is invoked when in script mode.
@@ -49,7 +45,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const {return "find_library";}
+  virtual std::string GetName() const { return "find_library"; }
 
   cmTypeMacro(cmFindLibraryCommand, cmFindBase);
 
@@ -57,9 +53,9 @@ protected:
   void AddArchitecturePaths(const char* suffix);
   void AddArchitecturePath(std::string const& dir,
                            std::string::size_type start_pos,
-                           const char* suffix,
-                           bool fresh = true);
+                           const char* suffix, bool fresh = true);
   std::string FindLibrary();
+
 private:
   std::string FindNormalLibrary();
   std::string FindNormalLibraryNamesPerDir();
@@ -68,7 +64,5 @@ private:
   std::string FindFrameworkLibraryNamesPerDir();
   std::string FindFrameworkLibraryDirsPerName();
 };
-
-
 
 #endif

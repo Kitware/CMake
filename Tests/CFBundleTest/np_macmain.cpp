@@ -8,7 +8,6 @@
   doing anything useful.
 \***********************************************************/
 
-
 #include <stdio.h>
 
 typedef void (*NPP_ShutdownProcPtr)(void);
@@ -20,9 +19,9 @@ struct NPNetscapeFuncs;
 struct NPPluginFuncs;
 
 extern "C" {
-    NPError NP_Initialize(NPNetscapeFuncs *browserFuncs);
-    NPError NP_GetEntryPoints(NPPluginFuncs *pluginFuncs);
-    NPError NP_Shutdown(void);
+NPError NP_Initialize(NPNetscapeFuncs* browserFuncs);
+NPError NP_GetEntryPoints(NPPluginFuncs* pluginFuncs);
+NPError NP_Shutdown(void);
 }
 
 #pragma GCC visibility pop
@@ -33,17 +32,17 @@ void initPluginModule()
 
 NPError NP_GetEntryPoints(NPPluginFuncs* pFuncs)
 {
-    printf("NP_GetEntryPoints()\n");
-    return 0;
+  printf("NP_GetEntryPoints()\n");
+  return 0;
 }
 
 NPError NP_Initialize(NPNetscapeFuncs* pFuncs)
 {
-    printf("NP_Initialize()\n");
-    return 0;
+  printf("NP_Initialize()\n");
+  return 0;
 }
 
 NPError NP_Shutdown()
 {
-    return 0;
+  return 0;
 }

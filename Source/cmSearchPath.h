@@ -47,10 +47,10 @@ public:
 
 protected:
   void AddPrefixPaths(const std::vector<std::string>& paths,
-                      const char *base = 0);
-  void AddPathInternal(const std::string& path, const char *base = 0);
+                      const char* base = 0);
+  void AddPathInternal(const std::string& path, const char* base = 0);
 
-  cmFindCommon *FC;
+  cmFindCommon* FC;
   std::vector<std::string> Paths;
 };
 

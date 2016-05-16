@@ -24,10 +24,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
-    {
-    return new cmVariableWatchCommand;
-    }
+  virtual cmCommand* Clone() { return new cmVariableWatchCommand; }
 
   //! Default constructor
   cmVariableWatchCommand();
@@ -40,7 +37,7 @@ public:
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * This determines if the command is invoked when in script mode.
@@ -54,7 +51,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "variable_watch";}
+  virtual std::string GetName() const { return "variable_watch"; }
 
   cmTypeMacro(cmVariableWatchCommand, cmCommand);
 
@@ -62,7 +59,4 @@ protected:
   std::set<std::string> WatchedVariables;
 };
 
-
 #endif
-
-

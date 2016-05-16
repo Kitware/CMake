@@ -26,22 +26,19 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
-    {
-    return new cmInstallFilesCommand;
-    }
+  virtual cmCommand* Clone() { return new cmInstallFilesCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "install_files";}
+  virtual std::string GetName() const { return "install_files"; }
 
   /**
    * This is called at the end after all the information
@@ -58,12 +55,11 @@ protected:
   void CreateInstallGenerator() const;
   std::string FindInstallSource(const char* name) const;
 
- private:
+private:
   std::vector<std::string> FinalArgs;
   bool IsFilesForm;
   std::string Destination;
   std::vector<std::string> Files;
 };
-
 
 #endif

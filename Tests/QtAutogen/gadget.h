@@ -9,7 +9,8 @@ class Gadget
   Q_GADGET
   Q_ENUMS(Type)
 public:
-  enum Type {
+  enum Type
+  {
     Type0,
     Type1
   };

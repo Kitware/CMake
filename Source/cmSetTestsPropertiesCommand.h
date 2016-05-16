@@ -17,31 +17,25 @@
 class cmSetTestsPropertiesCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone()
-    {
-    return new cmSetTestsPropertiesCommand;
-    }
+  virtual cmCommand* Clone() { return new cmSetTestsPropertiesCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "set_tests_properties";}
+  virtual std::string GetName() const { return "set_tests_properties"; }
 
   cmTypeMacro(cmSetTestsPropertiesCommand, cmCommand);
 
   static bool SetOneTest(const std::string& tname,
-                         std::vector<std::string> &propertyPairs,
-                         cmMakefile *mf,
-                         std::string &errors);
+                         std::vector<std::string>& propertyPairs,
+                         cmMakefile* mf, std::string& errors);
 };
-
-
 
 #endif

@@ -11,22 +11,17 @@
 ============================================================================*/
 #include "cmEndWhileCommand.h"
 
-bool cmEndWhileCommand
-::InvokeInitialPass(std::vector<cmListFileArgument> const& args,
-                    cmExecutionStatus &)
+bool cmEndWhileCommand::InvokeInitialPass(
+  std::vector<cmListFileArgument> const& args, cmExecutionStatus&)
 {
-  if (args.empty())
-    {
+  if (args.empty()) {
     this->SetError("An ENDWHILE command was found outside of a proper "
                    "WHILE ENDWHILE structure.");
-    }
-  else
-    {
+  } else {
     this->SetError("An ENDWHILE command was found outside of a proper "
                    "WHILE ENDWHILE structure. Or its arguments did not "
                    "match the opening WHILE command.");
-    }
+  }
 
   return false;
 }
-

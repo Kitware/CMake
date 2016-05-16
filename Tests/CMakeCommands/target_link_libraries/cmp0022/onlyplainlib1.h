@@ -1,9 +1,9 @@
 
 struct
 #ifdef _WIN32
-__declspec(dllexport)
+  __declspec(dllexport)
 #endif
-OnlyPlainLib1
+    OnlyPlainLib1
 {
   OnlyPlainLib1();
 

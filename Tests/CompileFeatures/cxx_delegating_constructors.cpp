@@ -7,7 +7,6 @@ public:
   Foo(double d)
     : Foo(static_cast<int>(d))
   {
-
   }
 
 private:

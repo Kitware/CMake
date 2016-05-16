@@ -71,36 +71,36 @@ public:
   bool IsRootMakefile() const;
 
   ///! Get the makefile for this generator
-  cmMakefile *GetMakefile() {
-    return this->Makefile; }
+  cmMakefile* GetMakefile() { return this->Makefile; }
 
   ///! Get the makefile for this generator, const version
-    const cmMakefile *GetMakefile() const {
-      return this->Makefile; }
+  const cmMakefile* GetMakefile() const { return this->Makefile; }
 
   ///! Get the GlobalGenerator this is associated with
-  cmGlobalGenerator *GetGlobalGenerator() {
-    return this->GlobalGenerator; }
-  const cmGlobalGenerator *GetGlobalGenerator() const {
-    return this->GlobalGenerator; }
+  cmGlobalGenerator* GetGlobalGenerator() { return this->GlobalGenerator; }
+  const cmGlobalGenerator* GetGlobalGenerator() const
+  {
+    return this->GlobalGenerator;
+  }
 
   cmState* GetState() const;
   cmState::Snapshot GetStateSnapshot() const;
 
   void AddArchitectureFlags(std::string& flags,
                             cmGeneratorTarget const* target,
-                            const std::string&lang, const std::string& config);
+                            const std::string& lang,
+                            const std::string& config);
 
   void AddLanguageFlags(std::string& flags, const std::string& lang,
                         const std::string& config);
-  void AddCMP0018Flags(std::string &flags, cmGeneratorTarget const* target,
+  void AddCMP0018Flags(std::string& flags, cmGeneratorTarget const* target,
                        std::string const& lang, const std::string& config);
-  void AddVisibilityPresetFlags(std::string &flags,
+  void AddVisibilityPresetFlags(std::string& flags,
                                 cmGeneratorTarget const* target,
                                 const std::string& lang);
   void AddConfigVariableFlags(std::string& flags, const std::string& var,
                               const std::string& config);
-  void AddCompilerRequirementFlag(std::string &flags,
+  void AddCompilerRequirementFlag(std::string& flags,
                                   cmGeneratorTarget const* target,
                                   const std::string& lang);
   ///! Append flags to a string.
@@ -109,51 +109,48 @@ public:
   virtual void AppendFlagEscape(std::string& flags,
                                 const std::string& rawFlag);
   ///! Get the include flags for the current makefile and language
-  std::string GetIncludeFlags(const std::vector<std::string> &includes,
+  std::string GetIncludeFlags(const std::vector<std::string>& includes,
                               cmGeneratorTarget* target,
                               const std::string& lang,
                               bool forceFullPaths = false,
                               bool forResponseFile = false,
                               const std::string& config = "");
 
-  const std::vector<cmGeneratorTarget*> &GetGeneratorTargets() const
-    {
-      return this->GeneratorTargets;
-    }
+  const std::vector<cmGeneratorTarget*>& GetGeneratorTargets() const
+  {
+    return this->GeneratorTargets;
+  }
 
-  const std::vector<cmGeneratorTarget*> &GetImportedGeneratorTargets() const
-    {
-      return this->ImportedGeneratorTargets;
-    }
+  const std::vector<cmGeneratorTarget*>& GetImportedGeneratorTargets() const
+  {
+    return this->ImportedGeneratorTargets;
+  }
 
   void AddGeneratorTarget(cmGeneratorTarget* gt);
   void AddImportedGeneratorTarget(cmGeneratorTarget* gt);
   void AddOwnedImportedGeneratorTarget(cmGeneratorTarget* gt);
 
-  cmGeneratorTarget*
-    FindLocalNonAliasGeneratorTarget(const std::string& name) const;
+  cmGeneratorTarget* FindLocalNonAliasGeneratorTarget(
+    const std::string& name) const;
   cmGeneratorTarget* FindGeneratorTargetToUse(const std::string& name) const;
 
   /**
    * Encode a list of preprocessor definitions for the compiler
    * command line.
    */
-  void AppendDefines(std::set<std::string>& defines,
-                     const char* defines_list);
-  void AppendDefines(std::set<std::string>& defines,
-                     std::string defines_list)
+  void AppendDefines(std::set<std::string>& defines, const char* defines_list);
+  void AppendDefines(std::set<std::string>& defines, std::string defines_list)
   {
     this->AppendDefines(defines, defines_list.c_str());
   }
   void AppendDefines(std::set<std::string>& defines,
-                     const std::vector<std::string> &defines_vec);
+                     const std::vector<std::string>& defines_vec);
 
   /**
    * Join a set of defines into a definesString with a space separator.
    */
   void JoinDefines(const std::set<std::string>& defines,
-                   std::string &definesString,
-                   const std::string& lang);
+                   std::string& definesString, const std::string& lang);
 
   /** Lookup and append options associated with a particular feature.  */
   void AppendFeatureOptions(std::string& flags, const std::string& lang,
@@ -182,14 +179,14 @@ public:
                                                 bool forceFullPaths = false);
 
   /** Called from command-line hook to clear dependencies.  */
-  virtual void ClearDependencies(cmMakefile* /* mf */,
-                                 bool /* verbose */) {}
+  virtual void ClearDependencies(cmMakefile* /* mf */, bool /* verbose */) {}
 
   /** Called from command-line hook to update dependencies.  */
-  virtual bool UpdateDependencies(const char* /* tgtInfo */,
-                                  bool /*verbose*/,
+  virtual bool UpdateDependencies(const char* /* tgtInfo */, bool /*verbose*/,
                                   bool /*color*/)
-    { return true; }
+  {
+    return true;
+  }
 
   /** Get the include flags for the current makefile and language.  */
   void GetIncludeDirectories(std::vector<std::string>& dirs,
@@ -217,10 +214,7 @@ public:
   // ExpandRuleVariables
   struct RuleVariables
   {
-    RuleVariables()
-      {
-        memset(this, 0,  sizeof(*this));
-      }
+    RuleVariables() { memset(this, 0, sizeof(*this)); }
     cmGeneratorTarget* CMTarget;
     const char* TargetPDB;
     const char* TargetCompilePDB;
@@ -256,8 +250,8 @@ public:
    * Get the relative path from the generator output directory to a
    * per-target support directory.
    */
-  virtual std::string
-  GetTargetDirectory(cmGeneratorTarget const* target) const;
+  virtual std::string GetTargetDirectory(
+    cmGeneratorTarget const* target) const;
 
   /**
    * Get the level of backwards compatibility requested by the project
@@ -308,23 +302,19 @@ public:
                                              bool* hasSourceExtension = 0);
 
   /** Fill out the static linker flags for the given target.  */
-  void GetStaticLibraryFlags(std::string& flags,
-                             std::string const& config,
+  void GetStaticLibraryFlags(std::string& flags, std::string const& config,
                              cmGeneratorTarget* target);
 
   /** Fill out these strings for the given target.  Libraries to link,
    *  flags, and linkflags. */
-  void GetTargetFlags(std::string& linkLibs,
-                      std::string& flags,
-                      std::string& linkFlags,
-                      std::string& frameworkPath,
-                      std::string& linkPath,
-                      cmGeneratorTarget* target,
+  void GetTargetFlags(std::string& linkLibs, std::string& flags,
+                      std::string& linkFlags, std::string& frameworkPath,
+                      std::string& linkPath, cmGeneratorTarget* target,
                       bool useWatcomQuote);
 
   virtual void ComputeObjectFilenames(
-                        std::map<cmSourceFile const*, std::string>& mapping,
-                        cmGeneratorTarget const* gt = 0);
+    std::map<cmSourceFile const*, std::string>& mapping,
+    cmGeneratorTarget const* gt = 0);
 
   bool IsWindowsShell() const;
   bool IsWatcomWMake() const;
@@ -339,12 +329,9 @@ public:
 protected:
   ///! put all the libraries for a target on into the given stream
   void OutputLinkLibraries(std::string& linkLibraries,
-                                   std::string& frameworkPath,
-                                   std::string& linkPath,
-                                   cmGeneratorTarget &,
-                                   bool relink,
-                                   bool forResponseFile,
-                                   bool useWatcomQuote);
+                           std::string& frameworkPath, std::string& linkPath,
+                           cmGeneratorTarget&, bool relink,
+                           bool forResponseFile, bool useWatcomQuote);
 
   // Expand rule variables in CMake of the type found in language rules
   void ExpandRuleVariables(std::string& string,
@@ -373,9 +360,9 @@ protected:
       definition.  Issues a warning.  */
   virtual bool CheckDefinition(std::string const& define) const;
 
-  cmMakefile *Makefile;
+  cmMakefile* Makefile;
   cmState::Snapshot StateSnapshot;
-  cmGlobalGenerator *GlobalGenerator;
+  cmGlobalGenerator* GlobalGenerator;
   std::map<std::string, std::string> UniqueObjectNamesMap;
   std::string::size_type ObjectPathMax;
   std::set<std::string> ObjectMaxPathViolations;
@@ -394,10 +381,11 @@ protected:
 
   KWIML_INT_uint64_t BackwardsCompatibility;
   bool BackwardsCompatibilityFinal;
+
 private:
   void AddSharedFlags(std::string& flags, const std::string& lang,
                       bool shared);
-  bool GetShouldUseOldFlags(bool shared, const std::string &lang) const;
+  bool GetShouldUseOldFlags(bool shared, const std::string& lang) const;
   void AddPositionIndependentFlags(std::string& flags, std::string const& l,
                                    int targetType);
 
@@ -405,7 +393,7 @@ private:
 };
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-bool cmLocalGeneratorCheckObjectName(std::string &objName,
+bool cmLocalGeneratorCheckObjectName(std::string& objName,
                                      std::string::size_type dir_len,
                                      std::string::size_type max_total_len);
 #endif

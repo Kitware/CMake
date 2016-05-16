@@ -12,19 +12,17 @@
 #include "cmLinkDirectoriesCommand.h"
 
 // cmLinkDirectoriesCommand
-bool cmLinkDirectoriesCommand
-::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
+bool cmLinkDirectoriesCommand::InitialPass(
+  std::vector<std::string> const& args, cmExecutionStatus&)
 {
- if(args.size() < 1 )
-    {
+  if (args.size() < 1) {
     return true;
-    }
+  }
 
-  for(std::vector<std::string>::const_iterator i = args.begin();
-      i != args.end(); ++i)
-    {
+  for (std::vector<std::string>::const_iterator i = args.begin();
+       i != args.end(); ++i) {
     this->AddLinkDir(*i);
-    }
+  }
   return true;
 }
 
@@ -32,8 +30,7 @@ void cmLinkDirectoriesCommand::AddLinkDir(std::string const& dir)
 {
   std::string unixPath = dir;
   cmSystemTools::ConvertToUnixSlashes(unixPath);
-  if(!cmSystemTools::FileIsFullPath(unixPath.c_str()))
-    {
+  if (!cmSystemTools::FileIsFullPath(unixPath.c_str())) {
     bool convertToAbsolute = false;
     std::ostringstream e;
     /* clang-format off */
@@ -41,8 +38,7 @@ void cmLinkDirectoriesCommand::AddLinkDir(std::string const& dir)
       << "  " << unixPath << "\n"
       << "as a link directory.\n";
     /* clang-format on */
-    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0015))
-      {
+    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0015)) {
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0015);
         this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
@@ -57,14 +53,13 @@ void cmLinkDirectoriesCommand::AddLinkDir(std::string const& dir)
         // NEW behavior converts
         convertToAbsolute = true;
         break;
-      }
-    if (convertToAbsolute)
-      {
+    }
+    if (convertToAbsolute) {
       std::string tmp = this->Makefile->GetCurrentSourceDirectory();
       tmp += "/";
       tmp += unixPath;
       unixPath = tmp;
-      }
     }
+  }
   this->Makefile->AppendProperty("LINK_DIRECTORIES", unixPath.c_str());
 }

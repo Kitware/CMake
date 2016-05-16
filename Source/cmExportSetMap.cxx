@@ -15,13 +15,13 @@
 #include "cmAlgorithms.h"
 #include "cmExportSet.h"
 
-cmExportSet* cmExportSetMap::operator[](const std::string &name)
+cmExportSet* cmExportSetMap::operator[](const std::string& name)
 {
   std::map<std::string, cmExportSet*>::iterator it = this->find(name);
   if (it == this->end()) // Export set not found
-    {
+  {
     it = this->insert(std::make_pair(name, new cmExportSet(name))).first;
-    }
+  }
   return it->second;
 }
 

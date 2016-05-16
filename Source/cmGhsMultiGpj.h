@@ -30,7 +30,7 @@ public:
   };
 
   static void WriteGpjTag(Types const gpjType,
-                          cmGeneratedFileStream *filestream);
+                          cmGeneratedFileStream* filestream);
 };
 
 #endif // ! cmGhsMultiGpjType_h

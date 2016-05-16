@@ -13,14 +13,14 @@
 
 #include "cmCursesMainForm.h"
 
-cmCursesBoolWidget::cmCursesBoolWidget(int width, int height,
-                                       int left, int top) :
-  cmCursesWidget(width, height, left, top)
+cmCursesBoolWidget::cmCursesBoolWidget(int width, int height, int left,
+                                       int top)
+  : cmCursesWidget(width, height, left, top)
 {
   this->Type = cmState::BOOL;
-  set_field_fore(this->Field,  A_NORMAL);
-  set_field_back(this->Field,  A_STANDOUT);
-  field_opts_off(this->Field,  O_STATIC);
+  set_field_fore(this->Field, A_NORMAL);
+  set_field_back(this->Field, A_STANDOUT);
+  field_opts_off(this->Field, O_STATIC);
   this->SetValueAsBool(false);
 }
 
@@ -28,48 +28,35 @@ bool cmCursesBoolWidget::HandleInput(int& key, cmCursesMainForm*, WINDOW* w)
 {
 
   // 10 == enter
-  if (key == 10 || key == KEY_ENTER)
-    {
-    if (this->GetValueAsBool())
-      {
+  if (key == 10 || key == KEY_ENTER) {
+    if (this->GetValueAsBool()) {
       this->SetValueAsBool(false);
-      }
-    else
-      {
+    } else {
       this->SetValueAsBool(true);
-      }
+    }
 
     touchwin(w);
     wrefresh(w);
     return true;
-    }
-  else
-    {
+  } else {
     return false;
-    }
-
+  }
 }
 
 void cmCursesBoolWidget::SetValueAsBool(bool value)
 {
-  if (value)
-    {
+  if (value) {
     this->SetValue("ON");
-    }
-  else
-    {
+  } else {
     this->SetValue("OFF");
-    }
+  }
 }
 
 bool cmCursesBoolWidget::GetValueAsBool()
 {
-  if (this->Value == "ON")
-    {
+  if (this->Value == "ON") {
     return true;
-    }
-  else
-    {
+  } else {
     return false;
-    }
+  }
 }

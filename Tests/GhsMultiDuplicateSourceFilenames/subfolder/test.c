@@ -1,5 +1,5 @@
 
 int test_b()
 {
-    return 2;
+  return 2;
 }

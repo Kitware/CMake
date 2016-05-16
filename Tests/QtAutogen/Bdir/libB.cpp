@@ -1,10 +1,9 @@
 
 #include "libB.h"
 
-LibB::LibB(QObject *parent)
+LibB::LibB(QObject* parent)
   : QObject(parent)
 {
-
 }
 
 int LibB::foo()

@@ -35,11 +35,24 @@ public:
 
   struct Item
   {
-    Item(): Value(), IsPath(true), Target(0) {}
-    Item(Item const& item):
-      Value(item.Value), IsPath(item.IsPath), Target(item.Target) {}
-    Item(std::string const& v, bool p, cmGeneratorTarget const* target = 0):
-      Value(v), IsPath(p), Target(target) {}
+    Item()
+      : Value()
+      , IsPath(true)
+      , Target(0)
+    {
+    }
+    Item(Item const& item)
+      : Value(item.Value)
+      , IsPath(item.IsPath)
+      , Target(item.Target)
+    {
+    }
+    Item(std::string const& v, bool p, cmGeneratorTarget const* target = 0)
+      : Value(v)
+      , IsPath(p)
+      , Target(target)
+    {
+    }
     std::string Value;
     bool IsPath;
     cmGeneratorTarget const* Target;
@@ -60,6 +73,7 @@ public:
 
   std::string const& GetRPathLinkFlag() const { return this->RPathLinkFlag; }
   std::string GetRPathLinkString();
+
 private:
   void AddItem(std::string const& item, const cmGeneratorTarget* tgt);
   void AddSharedDepItem(std::string const& item, cmGeneratorTarget const* tgt);
@@ -101,7 +115,12 @@ private:
   std::string RPathLinkFlag;
   SharedDepMode SharedDependencyMode;
 
-  enum LinkType { LinkUnknown, LinkStatic, LinkShared };
+  enum LinkType
+  {
+    LinkUnknown,
+    LinkStatic,
+    LinkShared
+  };
   void SetCurrentLinkType(LinkType lt);
 
   // Link type adjustment.
@@ -184,7 +203,6 @@ private:
   void AddLibraryRuntimeInfo(std::string const& fullPath,
                              const cmGeneratorTarget* target);
   void AddLibraryRuntimeInfo(std::string const& fullPath);
-
 };
 
 #endif
