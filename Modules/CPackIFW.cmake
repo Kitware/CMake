@@ -377,6 +377,8 @@ set(_CPACK_IFW_SUFFIXES
   "QtIFW2.3.0/bin"
   "QtIFW2.2.0/bin"
   "QtIFW2.1.0/bin"
+  "QtIFW2.0.3/bin"
+  "QtIFW2.0.1/bin"
   "QtIFW2.0.0/bin"
 # First branch
   "QtIFW-1.6.0/bin"
