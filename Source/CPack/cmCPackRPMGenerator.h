@@ -65,12 +65,13 @@ protected:
    * Special case of component install where all
    * components will be put in a single installer.
    */
-  int PackageComponentsAllInOne();
+  int PackageComponentsAllInOne(const std::string& compInstDirName);
   virtual const char* GetOutputExtension() { return ".rpm"; }
   virtual bool SupportsComponentInstallation() const;
   virtual std::string GetComponentInstallDirNameSuffix(
       const std::string& componentName);
 
+  void AddGeneratedPackageNames();
 };
 
 #endif

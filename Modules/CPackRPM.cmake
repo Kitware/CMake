@@ -54,6 +54,30 @@
 #  * Mandatory : YES
 #  * Default   : CPACK_PACKAGE_NAME
 #
+# .. variable:: CPACK_RPM_FILE_NAME
+#               CPACK_RPM_<component>_FILE_NAME
+#
+#  Package file name.
+#
+#  * Mandatory : YES
+#  * Default   : ``<CPACK_PACKAGE_FILE_NAME>[-<component>].rpm`` with spaces
+#                replaced by '-'
+#
+#  This may be set to ``RPM-DEFAULT`` to allow rpmbuild tool to generate package
+#  file name by itself.
+#  Alternatively provided package file name must end with ".rpm" suffix.
+#
+#  .. note::
+#
+#    By using user provided spec file, rpm macro extensions such as for
+#    generating debuginfo packages or by simply using multiple components more
+#    than one rpm file may be generated, either from a single spec file or from
+#    multiple spec files (each component execution produces it's own spec file).
+#    In such cases duplicate file names may occur as a result of this variable
+#    setting or spec file content structure. Duplicate files get overwritten
+#    and it is up to the packager to set the variables in a manner that will
+#    prevent such errors.
+#
 # .. variable:: CPACK_RPM_PACKAGE_VERSION
 #
 #  The RPM package version.
@@ -1534,8 +1558,6 @@ function(cpack_rpm_generate_package)
   file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/SPECS)
   file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/SRPMS)
 
-  #set(CPACK_RPM_FILE_NAME "${CPACK_RPM_PACKAGE_NAME}-${CPACK_RPM_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}-${CPACK_RPM_PACKAGE_ARCHITECTURE}.rpm")
-  set(CPACK_RPM_FILE_NAME "${CPACK_OUTPUT_FILE_NAME}")
   # it seems rpmbuild can't handle spaces in the path
   # neither escaping (as below) nor putting quotes around the path seem to help
   #string(REGEX REPLACE " " "\\\\ " CPACK_RPM_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}")
@@ -1716,6 +1738,28 @@ function(cpack_rpm_generate_package)
       "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_USER_BINARY_SPECFILE")
   endif()
 
+  cpack_rpm_variable_fallback("CPACK_RPM_FILE_NAME"
+    "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_FILE_NAME"
+    "CPACK_RPM_FILE_NAME")
+  if(NOT CPACK_RPM_FILE_NAME STREQUAL "RPM-DEFAULT")
+    if(CPACK_RPM_FILE_NAME)
+      cmake_policy(PUSH)
+        cmake_policy(SET CMP0010 NEW)
+        if(NOT CPACK_RPM_FILE_NAME MATCHES ".*\\.rpm")
+      cmake_policy(POP)
+          message(FATAL_ERROR "'${CPACK_RPM_FILE_NAME}' is not a valid RPM package file name as it must end with '.rpm'!")
+        endif()
+      cmake_policy(POP)
+    else()
+      # old file name format for back compatibility
+      set(CPACK_RPM_FILE_NAME "${CPACK_OUTPUT_FILE_NAME}")
+    endif()
+    # else example:
+    #set(CPACK_RPM_FILE_NAME "${CPACK_RPM_PACKAGE_NAME}-${CPACK_RPM_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}-${CPACK_RPM_PACKAGE_ARCHITECTURE}.rpm")
+
+    set(FILE_NAME_DEFINE "%define _rpmfilename ${CPACK_RPM_FILE_NAME}")
+  endif()
+
   # We should generate a USER spec file template:
   #  - either because the user asked for it : CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE
   #  - or the user did not provide one : NOT CPACK_RPM_USER_BINARY_SPECFILE
@@ -1746,7 +1790,7 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 \@TMP_RPM_PREFIXES\@
 
 %define _rpmdir \@CPACK_RPM_DIRECTORY\@
-%define _rpmfilename \@CPACK_RPM_FILE_NAME\@
+\@FILE_NAME_DEFINE\@
 %define _unpackaged_files_terminate_build 0
 %define _topdir \@CPACK_RPM_DIRECTORY\@
 \@TMP_RPM_SPEC_INSTALL_POST\@
@@ -1843,6 +1887,24 @@ mv \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot\" $RPM_BUILD_ROOT
     if(ALIEN_EXECUTABLE)
       message(FATAL_ERROR "RPM packaging through alien not done (yet)")
     endif()
+  endif()
+
+  # find generated rpm files and take their names
+  cmake_policy(PUSH)
+    # Tell file(GLOB_RECURSE) not to follow directory symlinks
+    # even if the project does not set this policy to NEW.
+    cmake_policy(SET CMP0009 NEW)
+    file(GLOB_RECURSE GENERATED_FILES "${CPACK_RPM_DIRECTORY}/*.rpm")
+  cmake_policy(POP)
+
+  if(NOT GENERATED_FILES)
+    message(FATAL_ERROR "RPM package was not generated! ${CPACK_RPM_DIRECTORY}")
+  endif()
+
+  set(GEN_CPACK_OUTPUT_FILES "${GENERATED_FILES}" PARENT_SCOPE)
+
+  if(CPACK_RPM_PACKAGE_DEBUG)
+     message("CPackRPM:Debug: GEN_CPACK_OUTPUT_FILES = ${GENERATED_FILES}")
   endif()
 endfunction()
 
