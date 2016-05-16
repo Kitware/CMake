@@ -21,3 +21,5 @@ configure        crlf=input
 *.cxx            whitespace=tab-in-indent
 *.txt            whitespace=tab-in-indent
 *.cmake          whitespace=tab-in-indent
+
+*.rst            whitespace=tab-in-indent conflict-marker-size=79
