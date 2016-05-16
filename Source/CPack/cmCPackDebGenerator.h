@@ -60,7 +60,7 @@ protected:
    * Special case of component install where all
    * components will be put in a single installer.
    */
-  int PackageComponentsAllInOne();
+  int PackageComponentsAllInOne(const std::string& compInstDirName);
   virtual int PackageFiles();
   virtual const char* GetOutputExtension() { return ".deb"; }
   virtual bool SupportsComponentInstallation() const;

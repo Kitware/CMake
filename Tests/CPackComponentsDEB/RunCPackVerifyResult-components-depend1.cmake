@@ -6,7 +6,7 @@ include(${CPackComponentsDEB_SOURCE_DIR}/RunCPackVerifyResult.cmake)
 
 
 # expected results
-set(expected_file_mask "${CPackComponentsDEB_BINARY_DIR}/MyLib-*.deb")
+set(expected_file_mask "${CPackComponentsDEB_BINARY_DIR}/mylib-*_1.0.2-1_*.deb")
 set(expected_count 3)
 
 
@@ -60,9 +60,9 @@ if(DPKGDEB_EXECUTABLE)
                                       "dpkg-deb: ${_f}: Incorrect dependencies for package ${dpkg_package_name}: '${dpkg_depends}' != 'depend-application'\n")
       endif()
     elseif("${dpkg_package_name}" STREQUAL "mylib-headers")
-      if(NOT "${dpkg_depends}" STREQUAL "depend-headers")
+      if(NOT "${dpkg_depends}" STREQUAL "mylib-libraries (= 1.0.2), depend-headers")
         set(dpkgdeb_output_errors_all ${dpkgdeb_output_errors_all}
-                                      "dpkg-deb: ${_f}: Incorrect dependencies for package ${dpkg_package_name}: '${dpkg_depends}' != 'depend-headers'\n")
+                                      "dpkg-deb: ${_f}: Incorrect dependencies for package ${dpkg_package_name}: '${dpkg_depends}' != 'mylib-libraries (= 1.0.2), depend-headers'\n")
       endif()
     elseif("${dpkg_package_name}" STREQUAL "mylib-libraries")
       if(NOT "${dpkg_depends}" STREQUAL "depend-default")

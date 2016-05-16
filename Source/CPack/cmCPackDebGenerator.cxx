@@ -60,9 +60,10 @@ int cmCPackDebGenerator::PackageOnePack(std::string initialTopLevel,
       cmSystemTools::GetParentDirectory(toplevel)
   );
   std::string outputFileName(
-      std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
-  +"-"+packageName + this->GetOutputExtension()
-  );
+          cmsys::SystemTools::LowerCase(
+              std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME")))
+          +"-"+packageName + this->GetOutputExtension()
+      );
 
   localToplevel += "/"+ packageName;
   /* replace the TEMP DIRECTORY with the component one */
@@ -107,6 +108,9 @@ int cmCPackDebGenerator::PackageOnePack(std::string initialTopLevel,
     retval = 0;
     }
   // add the generated package to package file names list
+  packageFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+  packageFileName += "/";
+  packageFileName += this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME");
   packageFileNames.push_back(packageFileName);
   return retval;
 }
@@ -165,16 +169,15 @@ int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
   return retval;
 }
 
-int cmCPackDebGenerator::PackageComponentsAllInOne()
+//----------------------------------------------------------------------
+int cmCPackDebGenerator::PackageComponentsAllInOne(
+    const std::string& compInstDirName)
 {
   int retval = 1;
-  std::string compInstDirName;
   /* Reset package file name list it will be populated during the
    * component packaging run*/
   packageFileNames.clear();
   std::string initialTopLevel(this->GetOption("CPACK_TEMPORARY_DIRECTORY"));
-
-  compInstDirName = "ALL_COMPONENTS_IN_ONE";
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Packaging all groups in one package..."
@@ -187,7 +190,8 @@ int cmCPackDebGenerator::PackageComponentsAllInOne()
       cmSystemTools::GetParentDirectory(toplevel)
                              );
   std::string outputFileName(
-            std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
+            cmsys::SystemTools::LowerCase(
+                std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME")))
             + this->GetOutputExtension()
                             );
   // all GROUP in one vs all COMPONENT in one
@@ -201,11 +205,15 @@ int cmCPackDebGenerator::PackageComponentsAllInOne()
   /* replace the TEMPORARY package file name */
   this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
       packageFileName.c_str());
-  // Tell CPackDeb.cmake the path where the component is.
-  std::string component_path = "/";
-  component_path += compInstDirName;
-  this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH",
-                  component_path.c_str());
+
+  if(!compInstDirName.empty())
+    {
+    // Tell CPackDeb.cmake the path where the component is.
+    std::string component_path = "/";
+    component_path += compInstDirName;
+    this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH",
+                    component_path.c_str());
+    }
   if (!this->ReadListFile("CPackDeb.cmake"))
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -227,20 +235,22 @@ int cmCPackDebGenerator::PackageComponentsAllInOne()
     }
   packageFiles = gl.GetFiles();
 
+
   int res = createDeb();
   if (res != 1)
     {
     retval = 0;
     }
   // add the generated package to package file names list
+  packageFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+  packageFileName += "/";
+  packageFileName += this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME");
   packageFileNames.push_back(packageFileName);
   return retval;
 }
 
 int cmCPackDebGenerator::PackageFiles()
 {
-  int retval = -1;
-
   /* Are we in the component packaging case */
   if (WantsComponentInstallation()) {
     // CASE 1 : COMPONENT ALL-IN-ONE package
@@ -248,7 +258,7 @@ int cmCPackDebGenerator::PackageFiles()
     // then the package file is unique and should be open here.
     if (componentPackageMethod == ONE_PACKAGE)
       {
-      return PackageComponentsAllInOne();
+      return PackageComponentsAllInOne("ALL_COMPONENTS_IN_ONE");
       }
     // CASE 2 : COMPONENT CLASSICAL package(s) (i.e. not all-in-one)
     // There will be 1 package for each component group
@@ -263,27 +273,15 @@ int cmCPackDebGenerator::PackageFiles()
   // CASE 3 : NON COMPONENT package.
   else
     {
-    if (!this->ReadListFile("CPackDeb.cmake"))
-      {
-      cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Error while execution CPackDeb.cmake" << std::endl);
-      retval = 0;
-      }
-    else
-      {
-      packageFiles = files;
-      return createDeb();
-      }
+    return PackageComponentsAllInOne("");
     }
-  return retval;
 }
 
 int cmCPackDebGenerator::createDeb()
 {
   // debian-binary file
-  std::string dbfilename;
-    dbfilename += this->GetOption("GEN_WDIR");
-  dbfilename += "/debian-binary";
+  const std::string strGenWDIR(this->GetOption("GEN_WDIR"));
+  const std::string dbfilename = strGenWDIR + "/debian-binary";
     { // the scope is needed for cmGeneratedFileStream
     cmGeneratedFileStream out(dbfilename.c_str());
     out << "2.0";
@@ -291,9 +289,7 @@ int cmCPackDebGenerator::createDeb()
     }
 
   // control file
-  std::string ctlfilename;
-    ctlfilename = this->GetOption("GEN_WDIR");
-  ctlfilename += "/control";
+  std::string ctlfilename = strGenWDIR + "/control";
 
   // debian policy enforce lower case for package name
   // mandatory entries:
@@ -405,7 +401,41 @@ int cmCPackDebGenerator::createDeb()
     out << std::endl;
     }
 
-  const std::string strGenWDIR(this->GetOption("GEN_WDIR"));
+  const std::string shlibsfilename = strGenWDIR + "/shlibs";
+
+  const char* debian_pkg_shlibs = this->GetOption(
+      "GEN_CPACK_DEBIAN_PACKAGE_SHLIBS");
+  const bool gen_shibs = this->IsOn("CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS")
+      && debian_pkg_shlibs && *debian_pkg_shlibs;
+  if( gen_shibs )
+    {
+    cmGeneratedFileStream out(shlibsfilename.c_str());
+    out << debian_pkg_shlibs;
+    out << std::endl;
+    }
+
+  const std::string postinst = strGenWDIR + "/postinst";
+  const std::string postrm = strGenWDIR + "/postrm";
+  if(this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTINST"))
+    {
+    cmGeneratedFileStream out(postinst.c_str());
+     out <<
+       "#!/bin/sh\n\n"
+       "set -e\n\n"
+       "if [ \"$1\" = \"configure\" ]; then\n"
+       "\tldconfig\n"
+       "fi\n";
+    }
+  if(this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTRM"))
+    {
+    cmGeneratedFileStream out(postrm.c_str());
+    out <<
+      "#!/bin/sh\n\n"
+      "set -e\n\n"
+      "if [ \"$1\" = \"remove\" ]; then\n"
+      "\tldconfig\n"
+      "fi\n";
+    }
 
   cmArchiveWrite::Compress tar_compression_type = cmArchiveWrite::CompressGZip;
   const char* debian_compression_type =
@@ -605,6 +635,54 @@ int cmCPackDebGenerator::createDeb()
         return 0;
       }
 
+    // adds generated shlibs file
+    if( gen_shibs )
+      {
+      if( !control_tar.Add(shlibsfilename, strGenWDIR.length(), ".") )
+        {
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+              "Error adding file to tar:" << std::endl
+              << "#top level directory: "
+                 << strGenWDIR << std::endl
+              << "#file: \"shlibs\"" << std::endl
+              << "#error:" << control_tar.GetError() << std::endl);
+          return 0;
+        }
+      }
+
+    // adds LDCONFIG related files
+    if(this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTINST"))
+      {
+      control_tar.SetPermissions(permission755);
+      if(!control_tar.Add(postinst, strGenWDIR.length(), "."))
+        {
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+              "Error adding file to tar:" << std::endl
+              << "#top level directory: "
+                 << strGenWDIR << std::endl
+              << "#file: \"postinst\"" << std::endl
+              << "#error:" << control_tar.GetError() << std::endl);
+          return 0;
+        }
+      control_tar.SetPermissions(permission644);
+      }
+
+    if(this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTRM"))
+      {
+      control_tar.SetPermissions(permission755);
+      if(!control_tar.Add(postrm, strGenWDIR.length(), "."))
+        {
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+              "Error adding file to tar:" << std::endl
+              << "#top level directory: "
+                 << strGenWDIR << std::endl
+              << "#file: \"postinst\"" << std::endl
+              << "#error:" << control_tar.GetError() << std::endl);
+          return 0;
+        }
+      control_tar.SetPermissions(permission644);
+      }
+
     // for the other files, we use
     // -either the original permission on the files
     // -either a permission strictly defined by the Debian policies
@@ -662,11 +740,12 @@ int cmCPackDebGenerator::createDeb()
   arFiles.push_back(topLevelString + "data.tar" + compression_suffix);
   std::string outputFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   outputFileName += "/";
-  outputFileName += this->GetOption("CPACK_OUTPUT_FILE_NAME");
+  outputFileName += this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME");
   int res = ar_append(outputFileName.c_str(), arFiles);
   if ( res!=0 )
     {
-    std::string tmpFile = this->GetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME");
+    std::string tmpFile = this->GetOption(
+        "GEN_CPACK_TEMPORARY_PACKAGE_FILE_NAME");
     tmpFile += "/Deb.log";
     cmGeneratedFileStream ofs(tmpFile.c_str());
     ofs << "# Problem creating archive using: " << res << std::endl;

@@ -9,6 +9,20 @@ function(run_cpack_test TEST_NAME types build)
     file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
     file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
+    if(EXISTS "${RunCMake_SOURCE_DIR}/${TEST_TYPE}/${TEST_NAME}-Prerequirements.cmake")
+      include("${RunCMake_SOURCE_DIR}/${TEST_TYPE}/${TEST_NAME}-Prerequirements.cmake")
+
+      set(FOUND_PREREQUIREMENTS false)
+      get_test_prerequirements("FOUND_PREREQUIREMENTS"
+          "${TEST_CONFIG_DIR}/${type}_config.cmake")
+
+      # skip the test if prerequirements are not met
+      if(NOT FOUND_PREREQUIREMENTS)
+        message(STATUS "${TEST_NAME} - SKIPPED")
+        return()
+      endif()
+    endif()
+
     # execute cmake
     set(RunCMake_TEST_OPTIONS "-DGENERATOR_TYPE=${TEST_TYPE}")
     run_cmake(${TEST_NAME})
