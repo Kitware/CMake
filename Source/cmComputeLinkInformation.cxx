@@ -655,7 +655,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       // Add the interface library as an item so it can be considered as part
       // of COMPATIBLE_INTERFACE_ enforcement.  The generators will ignore
       // this for the actual link line.
-      this->Items.push_back(Item(std::string(), true, tgt));
+      this->Items.push_back(Item(std::string(), false, tgt));
       }
     else
       {
