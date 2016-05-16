@@ -23,6 +23,16 @@ Please base all new work on the ``master`` branch.  Then use
 ``git format-patch`` to produce patches suitable to post to
 the mailing list.
 
+Code Style
+==========
+
+We use `clang-format`_ to define our style for C++ code in the CMake source
+tree.  See the `.clang-format`_ configuration file for our style settings.
+Use ``clang-format`` version 3.8 or higher to format source files.
+
+.. _`clang-format`: http://clang.llvm.org/docs/ClangFormat.html
+.. _`.clang-format`: .clang-format
+
 License
 =======
 
