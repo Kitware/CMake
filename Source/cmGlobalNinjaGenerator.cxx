@@ -836,15 +836,10 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
     }
     case cmState::OBJECT_LIBRARY:
     case cmState::UTILITY: {
-      std::string path = this->ConvertToNinjaPath(
-        target->GetLocalGenerator()->GetCurrentBinaryDirectory());
-      if (path.empty() || path == ".")
-        outputs.push_back(target->GetName());
-      else {
-        path += "/";
-        path += target->GetName();
-        outputs.push_back(path);
-      }
+      std::string path =
+        target->GetLocalGenerator()->GetCurrentBinaryDirectory() +
+        std::string("/") + target->GetName();
+      outputs.push_back(this->ConvertToNinjaPath(path));
       break;
     }
 
