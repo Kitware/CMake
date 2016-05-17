@@ -17,6 +17,7 @@
 
 #include "cmCPackIFWInstaller.h"
 #include "cmCPackIFWPackage.h"
+#include "cmCPackIFWRepository.h"
 
 class cmXMLWriter;
 
@@ -31,6 +32,7 @@ public:
   cmCPackTypeMacro(cmCPackIFWGenerator, cmCPackGenerator);
 
   typedef std::map<std::string, cmCPackIFWPackage> PackagesMap;
+  typedef std::map<std::string, cmCPackIFWRepository> RepositoriesMap;
   typedef std::map<std::string, cmCPackComponent> ComponentsMap;
   typedef std::map<std::string, cmCPackComponentGroup> ComponentGoupsMap;
   typedef std::map<std::string, cmCPackIFWPackage::DependenceStruct>
@@ -122,6 +124,8 @@ protected:
   cmCPackIFWPackage* GetGroupPackage(cmCPackComponentGroup* group) const;
   cmCPackIFWPackage* GetComponentPackage(cmCPackComponent* component) const;
 
+  cmCPackIFWRepository* GetRepository(const std::string& repositoryName);
+
   void WriteGeneratedByToStrim(cmXMLWriter& xout);
 
 protected:
@@ -129,11 +133,16 @@ protected:
 
   friend class cmCPackIFWPackage;
   friend class cmCPackIFWInstaller;
+  friend class cmCPackIFWRepository;
 
   // Installer
   cmCPackIFWInstaller Installer;
+  // Repository
+  cmCPackIFWRepository Repository;
   // Collection of packages
   PackagesMap Packages;
+  // Collection of repositories
+  RepositoriesMap Repositories;
   // Collection of binary packages
   std::set<cmCPackIFWPackage*> BinaryPackages;
   // Collection of downloaded packages
