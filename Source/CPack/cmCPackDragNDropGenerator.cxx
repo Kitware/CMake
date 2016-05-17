@@ -447,12 +447,11 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
 
     cmsys::RegularExpression mountpoint_regex(".*(/Volumes/[^\n]+)\n.*");
     mountpoint_regex.find(attach_output.c_str());
-    std::ostringstream temp_mount;
-    temp_mount << mountpoint_regex.match(1);
+    std::string const temp_mount = mountpoint_regex.match(1);
 
     // Remove dummy padding file so we have enough space on RW image ...
     std::ostringstream dummy_padding;
-    dummy_padding << temp_mount.str() << "/.dummy-padding-file";
+    dummy_padding << temp_mount << "/.dummy-padding-file";
     if (!cmSystemTools::RemoveFile(dummy_padding.str())) {
       cmCPackLogger(cmCPackLog::LOG_ERROR, "Error removing dummy padding file."
                       << std::endl);
@@ -465,7 +464,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
       std::ostringstream setfile_command;
       setfile_command << this->GetOption("CPACK_COMMAND_SETFILE");
       setfile_command << " -a C";
-      setfile_command << " \"" << temp_mount.str() << "\"";
+      setfile_command << " \"" << temp_mount << "\"";
 
       if (!this->RunCommand(setfile_command)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -497,7 +496,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     std::ostringstream detach_command;
     detach_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
     detach_command << " detach";
-    detach_command << " \"" << temp_mount.str() << "\"";
+    detach_command << " \"" << temp_mount << "\"";
 
     if (!this->RunCommand(detach_command)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
