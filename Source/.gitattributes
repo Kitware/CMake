@@ -1,2 +1,5 @@
 # Preserve upstream indentation style.
 cm_sha2.*        whitespace=indent-with-non-tab
+
+# Preserve indentation style in generated code.
+cmListFileLexer.c       whitespace=-tab-in-indent,-indent-with-non-tab

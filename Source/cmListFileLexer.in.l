@@ -14,19 +14,16 @@
 
 This file must be translated to C and modified to build everywhere.
 
-Run flex like this:
+Run flex >= 2.6 like this:
 
   flex --prefix=cmListFileLexer_yy -ocmListFileLexer.c cmListFileLexer.in.l
 
 Modify cmListFileLexer.c:
-  - remove TABs
-  - remove use of the 'register' storage class specifier
-  - remove the yyunput function
-  - add a statement "(void)yyscanner;" to the top of these methods:
-      yy_fatal_error, cmListFileLexer_yyalloc, cmListFileLexer_yyrealloc, cmListFileLexer_yyfree
+  - remove trailing whitespace: sed -i 's/\s*$//' cmListFileLexer.c
+  - remove blank lines at end of file
   - remove statement "yyscanner = NULL;" from cmListFileLexer_yylex_destroy
   - remove all YY_BREAK lines occurring right after return statements
-  - remove the isatty forward declaration
+  - remove unnecessary cast to (int) in yy_get_next_buffer
 
 */
 
@@ -45,7 +42,7 @@ Modify cmListFileLexer.c:
 struct cmListFileLexer_s
 {
   cmListFileLexer_Token token;
-  int bracket;
+  yy_size_t bracket;
   int comment;
   int line;
   int column;
@@ -112,7 +109,7 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
     lexer->token.type = cmListFileLexer_Token_ArgumentBracket;
     }
   cmListFileLexerSetToken(lexer, "", 0);
-  lexer->bracket = (int)(strchr(bracket+1, '[') - bracket);
+  lexer->bracket = strchr(bracket+1, '[') - bracket;
   if(yytext[yyleng-1] == '\n')
     {
     ++lexer->line;
