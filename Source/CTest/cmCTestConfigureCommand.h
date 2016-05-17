@@ -28,29 +28,29 @@ public:
    * This is a virtual constructor for the command.
    */
   virtual cmCommand* Clone()
-    {
+  {
     cmCTestConfigureCommand* ni = new cmCTestConfigureCommand;
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
-    }
+  }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_configure";}
+  virtual std::string GetName() const { return "ctest_configure"; }
 
   cmTypeMacro(cmCTestConfigureCommand, cmCTestHandlerCommand);
 
 protected:
   cmCTestGenericHandler* InitializeHandler();
 
-  enum {
+  enum
+  {
     ctc_FIRST = ct_LAST,
     ctc_OPTIONS,
     ctc_LAST
   };
 };
-
 
 #endif

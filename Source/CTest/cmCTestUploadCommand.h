@@ -25,26 +25,23 @@
 class cmCTestUploadCommand : public cmCTestHandlerCommand
 {
 public:
-
-  cmCTestUploadCommand()
-    {
-    }
+  cmCTestUploadCommand() {}
 
   /**
    * This is a virtual constructor for the command.
    */
   virtual cmCommand* Clone()
-    {
+  {
     cmCTestUploadCommand* ni = new cmCTestUploadCommand;
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
-    }
+  }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_upload";}
+  virtual std::string GetName() const { return "ctest_upload"; }
 
   cmTypeMacro(cmCTestUploadCommand, cmCTestHandlerCommand);
 
@@ -62,6 +59,5 @@ protected:
 
   cmCTest::SetOfStrings Files;
 };
-
 
 #endif

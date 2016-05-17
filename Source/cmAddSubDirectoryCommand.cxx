@@ -12,14 +12,13 @@
 #include "cmAddSubDirectoryCommand.h"
 
 // cmAddSubDirectoryCommand
-bool cmAddSubDirectoryCommand::InitialPass
-(std::vector<std::string> const& args, cmExecutionStatus &)
+bool cmAddSubDirectoryCommand::InitialPass(
+  std::vector<std::string> const& args, cmExecutionStatus&)
 {
-  if(args.size() < 1 )
-    {
+  if (args.size() < 1) {
     this->SetError("called with incorrect number of arguments");
     return false;
-    }
+  }
 
   // store the binpath
   std::string srcArg = args[0];
@@ -30,57 +29,45 @@ bool cmAddSubDirectoryCommand::InitialPass
   // process the rest of the arguments looking for optional args
   std::vector<std::string>::const_iterator i = args.begin();
   ++i;
-  for(;i != args.end(); ++i)
-    {
-    if(*i == "EXCLUDE_FROM_ALL")
-      {
+  for (; i != args.end(); ++i) {
+    if (*i == "EXCLUDE_FROM_ALL") {
       excludeFromAll = true;
       continue;
-      }
-    else if (binArg.empty())
-      {
+    } else if (binArg.empty()) {
       binArg = *i;
-      }
-    else
-      {
+    } else {
       this->SetError("called with incorrect number of arguments");
       return false;
-      }
     }
+  }
 
   // Compute the full path to the specified source directory.
   // Interpret a relative path with respect to the current source directory.
   std::string srcPath;
-  if(cmSystemTools::FileIsFullPath(srcArg.c_str()))
-    {
+  if (cmSystemTools::FileIsFullPath(srcArg.c_str())) {
     srcPath = srcArg;
-    }
-  else
-    {
+  } else {
     srcPath = this->Makefile->GetCurrentSourceDirectory();
     srcPath += "/";
     srcPath += srcArg;
-    }
-  if(!cmSystemTools::FileIsDirectory(srcPath))
-    {
+  }
+  if (!cmSystemTools::FileIsDirectory(srcPath)) {
     std::string error = "given source \"";
     error += srcArg;
     error += "\" which is not an existing directory.";
     this->SetError(error);
     return false;
-    }
+  }
   srcPath = cmSystemTools::CollapseFullPath(srcPath);
 
   // Compute the full path to the binary directory.
   std::string binPath;
-  if(binArg.empty())
-    {
+  if (binArg.empty()) {
     // No binary directory was specified.  If the source directory is
     // not a subdirectory of the current directory then it is an
     // error.
-    if(!cmSystemTools::IsSubDirectory(srcPath,
-          this->Makefile->GetCurrentSourceDirectory()))
-      {
+    if (!cmSystemTools::IsSubDirectory(
+          srcPath, this->Makefile->GetCurrentSourceDirectory())) {
       std::ostringstream e;
       e << "not given a binary directory but the given source directory "
         << "\"" << srcPath << "\" is not a subdirectory of \""
@@ -89,7 +76,7 @@ bool cmAddSubDirectoryCommand::InitialPass
         << "must be explicitly specified.";
       this->SetError(e.str());
       return false;
-      }
+    }
 
     // Remove the CurrentDirectory from the srcPath and replace it
     // with the CurrentOutputDirectory.
@@ -97,32 +84,28 @@ bool cmAddSubDirectoryCommand::InitialPass
     const char* bin = this->Makefile->GetCurrentBinaryDirectory();
     size_t srcLen = strlen(src);
     size_t binLen = strlen(bin);
-    if(srcLen > 0 && src[srcLen-1] == '/')
-      { --srcLen; }
-    if(binLen > 0 && bin[binLen-1] == '/')
-      { --binLen; }
-    binPath = std::string(bin, binLen) + srcPath.substr(srcLen);
+    if (srcLen > 0 && src[srcLen - 1] == '/') {
+      --srcLen;
     }
-  else
-    {
+    if (binLen > 0 && bin[binLen - 1] == '/') {
+      --binLen;
+    }
+    binPath = std::string(bin, binLen) + srcPath.substr(srcLen);
+  } else {
     // Use the binary directory specified.
     // Interpret a relative path with respect to the current binary directory.
-    if(cmSystemTools::FileIsFullPath(binArg.c_str()))
-      {
+    if (cmSystemTools::FileIsFullPath(binArg.c_str())) {
       binPath = binArg;
-      }
-    else
-      {
+    } else {
       binPath = this->Makefile->GetCurrentBinaryDirectory();
       binPath += "/";
       binPath += binArg;
-      }
     }
+  }
   binPath = cmSystemTools::CollapseFullPath(binPath);
 
   // Add the subdirectory using the computed full paths.
-  this->Makefile->AddSubDirectory(srcPath, binPath,
-                                  excludeFromAll, true);
+  this->Makefile->AddSubDirectory(srcPath, binPath, excludeFromAll, true);
 
   return true;
 }

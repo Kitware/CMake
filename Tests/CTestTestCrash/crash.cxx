@@ -1,4 +1,4 @@
-//causes a segfault
+// causes a segfault
 int main()
 {
   int* ptr = 0;

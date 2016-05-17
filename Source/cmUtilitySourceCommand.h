@@ -20,8 +20,8 @@ public:
   cmTypeMacro(cmUtilitySourceCommand, cmCommand);
   virtual cmCommand* Clone() { return new cmUtilitySourceCommand; }
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
-  virtual std::string GetName() const { return "utility_source";}
+                           cmExecutionStatus& status);
+  virtual std::string GetName() const { return "utility_source"; }
 };
 
 #endif

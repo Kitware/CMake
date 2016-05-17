@@ -12,8 +12,7 @@
 #ifndef cmListFileLexer_h
 #define cmListFileLexer_h
 
-typedef enum cmListFileLexer_Type_e
-{
+typedef enum cmListFileLexer_Type_e {
   cmListFileLexer_Token_None,
   cmListFileLexer_Token_Space,
   cmListFileLexer_Token_Newline,
@@ -53,8 +52,7 @@ typedef enum cmListFileLexer_BOM_e cmListFileLexer_BOM;
 typedef struct cmListFileLexer_s cmListFileLexer;
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 cmListFileLexer* cmListFileLexer_New();

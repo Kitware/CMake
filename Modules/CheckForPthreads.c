@@ -6,11 +6,13 @@ void* runner(void*);
 
 int res = 0;
 #ifdef __CLASSIC_C__
-int main(){
+int main()
+{
   int ac;
-  char*av[];
+  char* av[];
 #else
-int main(int ac, char*av[]){
+int main(int ac, char* av[])
+{
 #endif
   pthread_t tid[2];
   pthread_create(&tid[0], 0, runner, (void*)1);
@@ -22,17 +24,18 @@ int main(int ac, char*av[]){
 
   pthread_join(tid[0], 0);
   pthread_join(tid[1], 0);
-  if(ac > 1000){return *av[0];}
+  if (ac > 1000) {
+    return *av[0];
+  }
   return res;
 }
 
 void* runner(void* args)
 {
   int cc;
-  for ( cc = 0; cc < 10; cc ++ )
-    {
+  for (cc = 0; cc < 10; cc++) {
     printf("%p CC: %d\n", args, cc);
-    }
-  res ++;
+  }
+  res++;
   return 0;
 }

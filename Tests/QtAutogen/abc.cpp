@@ -11,7 +11,6 @@
   See the License for more information.
 ============================================================================*/
 
-
 #include "abc.h"
 #include "abc_p.h"
 
@@ -20,17 +19,19 @@
 class PrintAbc : public QObject
 {
   Q_OBJECT
-  public:
-    PrintAbc():QObject() {}
-  public slots:
-    void print() const { printf("abc\n"); }
+public:
+  PrintAbc()
+    : QObject()
+  {
+  }
+public slots:
+  void print() const { printf("abc\n"); }
 };
 
 Abc::Abc()
-:QObject()
+  : QObject()
 {
 }
-
 
 void Abc::doAbc()
 {

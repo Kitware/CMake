@@ -14,18 +14,16 @@
 
 #include "cmGlobalVisualStudio8Generator.h"
 
-
 /** \class cmGlobalVisualStudio10Generator
  * \brief Write a Unix makefiles.
  *
  * cmGlobalVisualStudio10Generator manages UNIX build process for a tree
  */
-class cmGlobalVisualStudio10Generator :
-  public cmGlobalVisualStudio8Generator
+class cmGlobalVisualStudio10Generator : public cmGlobalVisualStudio8Generator
 {
 public:
   cmGlobalVisualStudio10Generator(cmake* cm, const std::string& name,
-    const std::string& platformName);
+                                  const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   virtual bool MatchesGeneratorName(const std::string& name) const;
@@ -35,25 +33,21 @@ public:
   virtual bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf);
 
   virtual void GenerateBuildCommand(
-    std::vector<std::string>& makeCommand,
-    const std::string& makeProgram,
-    const std::string& projectName,
-    const std::string& projectDir,
-    const std::string& targetName,
-    const std::string& config,
-    bool fast, bool verbose,
-    std::vector<std::string> const& makeOptions = std::vector<std::string>()
-    );
+    std::vector<std::string>& makeCommand, const std::string& makeProgram,
+    const std::string& projectName, const std::string& projectDir,
+    const std::string& targetName, const std::string& config, bool fast,
+    bool verbose,
+    std::vector<std::string> const& makeOptions = std::vector<std::string>());
 
   ///! create the correct local generator
-  virtual cmLocalGenerator *CreateLocalGenerator(cmMakefile* mf);
+  virtual cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf);
 
   /**
    * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
-  virtual void EnableLanguage(std::vector<std::string>const& languages,
-                              cmMakefile *, bool optional);
+  virtual void EnableLanguage(std::vector<std::string> const& languages,
+                              cmMakefile*, bool optional);
   virtual void WriteSLNHeader(std::ostream& fout);
 
   /** Generating for Nsight Tegra VS plugin?  */
@@ -71,22 +65,20 @@ public:
 
   /** Return the Windows version targeted on VS 2015 and above.  */
   std::string const& GetWindowsTargetPlatformVersion() const
-    { return this->WindowsTargetPlatformVersion; }
+  {
+    return this->WindowsTargetPlatformVersion;
+  }
 
   /** Return true if building for WindowsCE */
-  bool TargetsWindowsCE() const
-    { return this->SystemIsWindowsCE; }
+  bool TargetsWindowsCE() const { return this->SystemIsWindowsCE; }
 
   /** Return true if building for WindowsPhone */
-  bool TargetsWindowsPhone() const
-    { return this->SystemIsWindowsPhone; }
+  bool TargetsWindowsPhone() const { return this->SystemIsWindowsPhone; }
 
   /** Return true if building for WindowsStore */
-  bool TargetsWindowsStore() const
-    { return this->SystemIsWindowsStore; }
+  bool TargetsWindowsStore() const { return this->SystemIsWindowsStore; }
 
-  virtual const char* GetCMakeCFGIntDir() const
-    { return "$(Configuration)";}
+  virtual const char* GetCMakeCFGIntDir() const { return "$(Configuration)"; }
   bool Find64BitTools(cmMakefile* mf);
 
   /** Generate an <output>.rule file path for a given command output.  */
@@ -131,7 +123,12 @@ private:
   class Factory;
   struct LongestSourcePath
   {
-    LongestSourcePath(): Length(0), Target(0), SourceFile(0) {}
+    LongestSourcePath()
+      : Length(0)
+      , Target(0)
+      , SourceFile(0)
+    {
+    }
     size_t Length;
     cmGeneratorTarget* Target;
     cmSourceFile const* SourceFile;

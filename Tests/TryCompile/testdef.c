@@ -1,4 +1,7 @@
 #ifndef TESTDEF
-# error "TESTDEF should be defined!"
+#error "TESTDEF should be defined!"
 #endif
-int main(void) { return 0; }
+int main(void)
+{
+  return 0;
+}

@@ -22,7 +22,6 @@ public:
 protected:
   cmCursesFilePathWidget(const cmCursesFilePathWidget& from);
   void operator=(const cmCursesFilePathWidget&);
-
 };
 
 #endif // cmCursesFilePathWidget_h

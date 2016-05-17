@@ -16,8 +16,8 @@
 #include "cmake.h"
 
 #ifdef _MSC_VER
-#pragma warning ( disable : 4127 )
-#pragma warning ( disable : 4512 )
+#pragma warning(disable : 4127)
+#pragma warning(disable : 4512)
 #endif
 
 #include <vector>
@@ -34,7 +34,13 @@
 /// Value is of type String or Bool
 struct QCMakeProperty
 {
-  enum PropertyType { BOOL, PATH, FILEPATH, STRING };
+  enum PropertyType
+  {
+    BOOL,
+    PATH,
+    FILEPATH,
+    STRING
+  };
   QString Key;
   QVariant Value;
   QStringList Strings;
@@ -42,13 +48,13 @@ struct QCMakeProperty
   PropertyType Type;
   bool Advanced;
   bool operator==(const QCMakeProperty& other) const
-    {
+  {
     return this->Key == other.Key;
-    }
+  }
   bool operator<(const QCMakeProperty& other) const
-    {
+  {
     return this->Key < other.Key;
-    }
+  }
 };
 
 // list of properties
@@ -65,7 +71,7 @@ class QCMake : public QObject
 {
   Q_OBJECT
 public:
-  QCMake(QObject* p=0);
+  QCMake(QObject* p = 0);
   ~QCMake();
 public slots:
   /// load the cache file in a directory
@@ -84,7 +90,8 @@ public slots:
   void generate();
   /// set the property values
   void setProperties(const QCMakePropertyList&);
-  /// interrupt the configure or generate process (if connecting, make a direct connection)
+  /// interrupt the configure or generate process (if connecting, make a direct
+  /// connection)
   void interrupt();
   /// delete the cache in binary directory
   void deleteCache();
@@ -128,7 +135,8 @@ public:
   bool getDebugOutput() const;
 
 signals:
-  /// signal when properties change (during read from disk or configure process)
+  /// signal when properties change (during read from disk or configure
+  /// process)
   void propertiesChanged(const QCMakePropertyList& vars);
   /// signal when the generator changes
   void generatorChanged(const QString& gen);
@@ -157,8 +165,8 @@ protected:
 
   static bool interruptCallback(void*);
   static void progressCallback(const char* msg, float percent, void* cd);
-  static void messageCallback(const char* msg, const char* title,
-                              bool&, void* cd);
+  static void messageCallback(const char* msg, const char* title, bool&,
+                              void* cd);
   static void stdoutCallback(const char* msg, size_t len, void* cd);
   static void stderrCallback(const char* msg, size_t len, void* cd);
   bool WarnUninitializedMode;
@@ -174,4 +182,3 @@ protected:
 };
 
 #endif // QCMake_h
-

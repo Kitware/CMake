@@ -17,8 +17,8 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 
-cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(cmake* cm,
-  const std::string& platformName)
+cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(
+  cmake* cm, const std::string& platformName)
   : cmGlobalVisualStudio7Generator(cm, platformName)
 {
   this->ProjectConfigurationSectionName = "ProjectConfiguration";
@@ -76,10 +76,9 @@ std::string cmGlobalVisualStudio71Generator::GetUserMacrosRegKeyBase()
 #endif
 }
 
-void cmGlobalVisualStudio71Generator
-::WriteSLNFile(std::ostream& fout,
-               cmLocalGenerator* root,
-               std::vector<cmLocalGenerator*>& generators)
+void cmGlobalVisualStudio71Generator::WriteSLNFile(
+  std::ostream& fout, cmLocalGenerator* root,
+  std::vector<cmLocalGenerator*>& generators)
 {
   std::vector<std::string> configs;
   root->GetMakefile()->GetConfigurations(configs);
@@ -102,23 +101,20 @@ void cmGlobalVisualStudio71Generator
   this->WriteTargetsToSolution(targetsSlnString, root, orderedProjectTargets);
 
   // VS 7 does not support folders specified first.
-  if (this->GetVersion() <= VS71)
-    {
+  if (this->GetVersion() <= VS71) {
     fout << targetsSlnString.str();
-    }
+  }
 
   // Generate folder specification.
   bool useFolderProperty = this->UseFolderProperty();
-  if (useFolderProperty)
-    {
+  if (useFolderProperty) {
     this->WriteFolders(fout);
-    }
+  }
 
   // Now write the actual target specification content.
-  if (this->GetVersion() > VS71)
-    {
+  if (this->GetVersion() > VS71) {
     fout << targetsSlnString.str();
-    }
+  }
 
   // Write out the configurations information for the solution
   fout << "Global\n";
@@ -130,13 +126,12 @@ void cmGlobalVisualStudio71Generator
   this->WriteTargetConfigurations(fout, configs, orderedProjectTargets);
   fout << "\tEndGlobalSection\n";
 
-  if (useFolderProperty)
-    {
+  if (useFolderProperty) {
     // Write out project folders
     fout << "\tGlobalSection(NestedProjects) = preSolution\n";
     this->WriteFoldersContent(fout);
     fout << "\tEndGlobalSection\n";
-    }
+  }
 
   // Write out global sections
   this->WriteSLNGlobalSections(fout, root);
@@ -145,58 +140,50 @@ void cmGlobalVisualStudio71Generator
   this->WriteSLNFooter(fout);
 }
 
-void
-cmGlobalVisualStudio71Generator
-::WriteSolutionConfigurations(std::ostream& fout,
-                              std::vector<std::string> const& configs)
+void cmGlobalVisualStudio71Generator::WriteSolutionConfigurations(
+  std::ostream& fout, std::vector<std::string> const& configs)
 {
   fout << "\tGlobalSection(SolutionConfiguration) = preSolution\n";
-  for(std::vector<std::string>::const_iterator i = configs.begin();
-      i != configs.end(); ++i)
-    {
+  for (std::vector<std::string>::const_iterator i = configs.begin();
+       i != configs.end(); ++i) {
     fout << "\t\t" << *i << " = " << *i << "\n";
-    }
+  }
   fout << "\tEndGlobalSection\n";
 }
 
 // Write a dsp file into the SLN file,
 // Note, that dependencies from executables to
 // the libraries it uses are also done here
-void
-cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
-                                              const std::string& dspname,
-                                              const char* dir,
-                                              cmGeneratorTarget const* t)
+void cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
+                                                   const std::string& dspname,
+                                                   const char* dir,
+                                                   cmGeneratorTarget const* t)
 {
   // check to see if this is a fortran build
   const char* ext = ".vcproj";
   const char* project =
     "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"";
-  if(this->TargetIsFortranOnly(t))
-    {
+  if (this->TargetIsFortranOnly(t)) {
     ext = ".vfproj";
     project = "Project(\"{6989167D-11E4-40FE-8C1A-2192A86A7E90}\") = \"";
-    }
+  }
   const char* targetExt = t->GetProperty("GENERATOR_FILE_NAME_EXT");
-  if(targetExt)
-    {
+  if (targetExt) {
     ext = targetExt;
-    }
+  }
 
   std::string guid = this->GetGUID(dspname);
-  fout << project
-       << dspname << "\", \""
-       << this->ConvertToSolutionPath(dir) << (dir[0]? "\\":"")
-       << dspname << ext << "\", \"{" << guid << "}\"\n";
+  fout << project << dspname << "\", \"" << this->ConvertToSolutionPath(dir)
+       << (dir[0] ? "\\" : "") << dspname << ext << "\", \"{" << guid
+       << "}\"\n";
   fout << "\tProjectSection(ProjectDependencies) = postProject\n";
   this->WriteProjectDepends(fout, dspname, dir, t);
   fout << "\tEndProjectSection\n";
 
-  fout <<"EndProject\n";
+  fout << "EndProject\n";
 
   UtilityDependsMap::iterator ui = this->UtilityDepends.find(t);
-  if(ui != this->UtilityDepends.end())
-    {
+  if (ui != this->UtilityDepends.end()) {
     const char* uname = ui->second.c_str();
     /* clang-format off */
     fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \""
@@ -209,82 +196,64 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
          << "\tEndProjectSection\n"
          << "EndProject\n";
     /* clang-format on */
-    }
+  }
 }
 
 // Write a dsp file into the SLN file,
 // Note, that dependencies from executables to
 // the libraries it uses are also done here
-void
-cmGlobalVisualStudio71Generator
-::WriteProjectDepends(std::ostream& fout,
-                      const std::string&,
-                      const char*, cmGeneratorTarget const* target)
+void cmGlobalVisualStudio71Generator::WriteProjectDepends(
+  std::ostream& fout, const std::string&, const char*,
+  cmGeneratorTarget const* target)
 {
   VSDependSet const& depends = this->VSTargetDepends[target];
-  for(VSDependSet::const_iterator di = depends.begin();
-      di != depends.end(); ++di)
-    {
+  for (VSDependSet::const_iterator di = depends.begin(); di != depends.end();
+       ++di) {
     const char* name = di->c_str();
     std::string guid = this->GetGUID(name);
-    if(guid.empty())
-      {
+    if (guid.empty()) {
       std::string m = "Target: ";
       m += target->GetName();
       m += " depends on unknown target: ";
       m += name;
       cmSystemTools::Error(m.c_str());
-      }
-    fout << "\t\t{" << guid << "} = {" << guid << "}\n";
     }
+    fout << "\t\t{" << guid << "} = {" << guid << "}\n";
+  }
 }
 
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
-void cmGlobalVisualStudio71Generator
-::WriteExternalProject(std::ostream& fout,
-                       const std::string& name,
-                       const char* location,
-                       const char* typeGuid,
-                       const std::set<std::string>& depends)
+void cmGlobalVisualStudio71Generator::WriteExternalProject(
+  std::ostream& fout, const std::string& name, const char* location,
+  const char* typeGuid, const std::set<std::string>& depends)
 {
   fout << "Project(\"{"
        << (typeGuid ? typeGuid : this->ExternalProjectType(location))
-       << "}\") = \""
-       << name << "\", \""
+       << "}\") = \"" << name << "\", \""
        << this->ConvertToSolutionPath(location) << "\", \"{"
-       << this->GetGUID(name)
-       << "}\"\n";
+       << this->GetGUID(name) << "}\"\n";
 
   // write out the dependencies here VS 7.1 includes dependencies with the
   // project instead of in the global section
-  if(!depends.empty())
-    {
+  if (!depends.empty()) {
     fout << "\tProjectSection(ProjectDependencies) = postProject\n";
     std::set<std::string>::const_iterator it;
-    for(it = depends.begin(); it != depends.end(); ++it)
-      {
-      if(!it->empty())
-        {
-        fout << "\t\t{"
-             << this->GetGUID(it->c_str())
-             << "} = {"
-             << this->GetGUID(it->c_str())
-             << "}\n";
-        }
+    for (it = depends.begin(); it != depends.end(); ++it) {
+      if (!it->empty()) {
+        fout << "\t\t{" << this->GetGUID(it->c_str()) << "} = {"
+             << this->GetGUID(it->c_str()) << "}\n";
       }
-    fout << "\tEndProjectSection\n";
     }
+    fout << "\tEndProjectSection\n";
+  }
 
   fout << "EndProject\n";
-
-
 }
 
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
-void cmGlobalVisualStudio71Generator
-::WriteProjectConfigurations(
+void cmGlobalVisualStudio71Generator::WriteProjectConfigurations(
   std::ostream& fout, const std::string& name, cmState::TargetType,
   std::vector<std::string> const& configs,
   const std::set<std::string>& configsPartOfDefaultBuild,
@@ -293,19 +262,17 @@ void cmGlobalVisualStudio71Generator
   const std::string& platformName =
     !platformMapping.empty() ? platformMapping : this->GetPlatformName();
   std::string guid = this->GetGUID(name);
-  for(std::vector<std::string>::const_iterator i = configs.begin();
-      i != configs.end(); ++i)
-    {
-    fout << "\t\t{" << guid << "}." << *i
-         << ".ActiveCfg = " << *i << "|" << platformName << std::endl;
-    std::set<std::string>::const_iterator
-      ci = configsPartOfDefaultBuild.find(*i);
-    if(!(ci == configsPartOfDefaultBuild.end()))
-      {
-      fout << "\t\t{" << guid << "}." << *i
-           << ".Build.0 = " << *i << "|" << platformName << std::endl;
-      }
+  for (std::vector<std::string>::const_iterator i = configs.begin();
+       i != configs.end(); ++i) {
+    fout << "\t\t{" << guid << "}." << *i << ".ActiveCfg = " << *i << "|"
+         << platformName << std::endl;
+    std::set<std::string>::const_iterator ci =
+      configsPartOfDefaultBuild.find(*i);
+    if (!(ci == configsPartOfDefaultBuild.end())) {
+      fout << "\t\t{" << guid << "}." << *i << ".Build.0 = " << *i << "|"
+           << platformName << std::endl;
     }
+  }
 }
 
 // ouput standard header for dsw file
@@ -314,8 +281,8 @@ void cmGlobalVisualStudio71Generator::WriteSLNHeader(std::ostream& fout)
   fout << "Microsoft Visual Studio Solution File, Format Version 8.00\n";
 }
 
-void cmGlobalVisualStudio71Generator
-::GetDocumentation(cmDocumentationEntry& entry)
+void cmGlobalVisualStudio71Generator::GetDocumentation(
+  cmDocumentationEntry& entry)
 {
   entry.Name = cmGlobalVisualStudio71Generator::GetActualName();
   entry.Brief = "Deprecated. Generates Visual Studio .NET 2003 project files.";

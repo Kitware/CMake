@@ -1,7 +1,7 @@
 #ifdef _WIN32
 __declspec(dllimport)
 #endif
-void foo(void);
+  void foo(void);
 
 #include <stdio.h>
 

@@ -26,31 +26,26 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
-    {
-    return new cmIncludeDirectoryCommand;
-    }
+  virtual cmCommand* Clone() { return new cmIncludeDirectoryCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "include_directories";}
+  virtual std::string GetName() const { return "include_directories"; }
 
   cmTypeMacro(cmIncludeDirectoryCommand, cmCommand);
 
 protected:
   // used internally
-  void GetIncludes(const std::string &arg, std::vector<std::string> &incs);
-  void NormalizeInclude(std::string &inc);
+  void GetIncludes(const std::string& arg, std::vector<std::string>& incs);
+  void NormalizeInclude(std::string& inc);
 };
-
-
 
 #endif

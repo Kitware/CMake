@@ -1,2 +1,5 @@
 
-int staticlib2() { return 0; }
+int staticlib2()
+{
+  return 0;
+}

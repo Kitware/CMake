@@ -1,4 +1,4 @@
-int main(int, char **)
+int main(int, char**)
 {
   return 13;
 }

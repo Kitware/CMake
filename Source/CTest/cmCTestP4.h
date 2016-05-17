@@ -21,7 +21,7 @@
  * \brief Interaction with the Perforce command-line tool
  *
  */
-class cmCTestP4: public cmCTestGlobalVC
+class cmCTestP4 : public cmCTestGlobalVC
 {
 public:
   /** Construct with a CTest instance and update log stream.  */
@@ -33,19 +33,25 @@ private:
   std::vector<std::string> ChangeLists;
 
   struct User
-    {
+  {
     std::string UserName;
     std::string Name;
     std::string EMail;
     std::string AccessTime;
 
-    User(): UserName(), Name(), EMail(), AccessTime() {}
-    };
+    User()
+      : UserName()
+      , Name()
+      , EMail()
+      , AccessTime()
+    {
+    }
+  };
   std::map<std::string, User> Users;
   std::vector<std::string> P4Options;
 
   User GetUserData(const std::string& username);
-  void SetP4Options(std::vector<char const*> &options);
+  void SetP4Options(std::vector<char const*>& options);
 
   std::string GetWorkingRevision();
   virtual void NoteOldRevision();

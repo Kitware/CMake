@@ -17,17 +17,14 @@
 class cmGetCMakePropertyCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone()
-    {
-      return new cmGetCMakePropertyCommand;
-    }
+  virtual cmCommand* Clone() { return new cmGetCMakePropertyCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * This determines if the command is invoked when in script mode.
@@ -37,11 +34,9 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "get_cmake_property";}
+  virtual std::string GetName() const { return "get_cmake_property"; }
 
   cmTypeMacro(cmGetCMakePropertyCommand, cmCommand);
 };
-
-
 
 #endif

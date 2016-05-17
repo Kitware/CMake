@@ -1,1 +1,4 @@
-int ExternalLibrary(void) { return 0; }
+int ExternalLibrary(void)
+{
+  return 0;
+}

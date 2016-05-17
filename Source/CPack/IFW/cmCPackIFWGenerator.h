@@ -49,17 +49,17 @@ public:
   /**
    * Compare \a version with QtIFW framework version
    */
-  bool IsVersionLess(const char *version);
+  bool IsVersionLess(const char* version);
 
   /**
    * Compare \a version with QtIFW framework version
    */
-  bool IsVersionGreater(const char *version);
+  bool IsVersionGreater(const char* version);
 
   /**
    * Compare \a version with QtIFW framework version
    */
-  bool IsVersionEqual(const char *version);
+  bool IsVersionEqual(const char* version);
 
 protected:
   // cmCPackGenerator reimplementation
@@ -90,9 +90,8 @@ protected:
    *
    * @return Pointer to component
    */
-  virtual cmCPackComponent* GetComponent(
-    const std::string& projectName,
-    const std::string& componentName);
+  virtual cmCPackComponent* GetComponent(const std::string& projectName,
+                                         const std::string& componentName);
 
   /**
    * @brief Get group of component
@@ -104,8 +103,7 @@ protected:
    * @return Pointer to component group
    */
   virtual cmCPackComponentGroup* GetComponentGroup(
-    const std::string& projectName,
-    const std::string& groupName);
+    const std::string& projectName, const std::string& groupName);
 
   enum cmCPackGenerator::CPackSetDestdirSupport SupportsSetDestdir() const;
   virtual bool SupportsAbsoluteDestination() const;
@@ -118,11 +116,11 @@ protected:
 
   std::string GetRootPackageName();
 
-  std::string GetGroupPackageName(cmCPackComponentGroup *group) const;
-  std::string GetComponentPackageName(cmCPackComponent *component) const;
+  std::string GetGroupPackageName(cmCPackComponentGroup* group) const;
+  std::string GetComponentPackageName(cmCPackComponent* component) const;
 
-  cmCPackIFWPackage* GetGroupPackage(cmCPackComponentGroup *group) const;
-  cmCPackIFWPackage* GetComponentPackage(cmCPackComponent *component) const;
+  cmCPackIFWPackage* GetGroupPackage(cmCPackComponentGroup* group) const;
+  cmCPackIFWPackage* GetComponentPackage(cmCPackComponent* component) const;
 
   void WriteGeneratedByToStrim(cmXMLWriter& xout);
 

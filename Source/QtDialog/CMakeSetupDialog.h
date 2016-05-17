@@ -78,7 +78,7 @@ protected slots:
   bool doConfigureInternal();
   bool doGenerateInternal();
   void exitLoop(int);
-  void doOutputContextMenu(const QPoint &);
+  void doOutputContextMenu(const QPoint&);
   void doOutputFindDialog();
   void doOutputFindNext(bool directionForward = true);
   void doOutputFindPrev();
@@ -88,8 +88,14 @@ protected slots:
   void doWarningMessagesDialog();
 
 protected:
-
-  enum State { Interrupting, ReadyConfigure, ReadyGenerate, Configuring, Generating };
+  enum State
+  {
+    Interrupting,
+    ReadyConfigure,
+    ReadyGenerate,
+    Configuring,
+    Generating
+  };
   void enterState(State s);
 
   void closeEvent(QCloseEvent*);

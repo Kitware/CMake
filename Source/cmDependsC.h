@@ -20,7 +20,7 @@
 /** \class cmDependsC
  * \brief Dependency scanner for C and C++ object files.
  */
-class cmDependsC: public cmDepends
+class cmDependsC : public cmDepends
 {
 public:
   /** Checking instances need to know the build directory name and the
@@ -36,13 +36,13 @@ public:
 protected:
   // Implement writing/checking methods required by superclass.
   virtual bool WriteDependencies(const std::set<std::string>& sources,
-                                 const std::string&           obj,
+                                 const std::string& obj,
                                  std::ostream& makeDepends,
                                  std::ostream& internalDepends);
 
   // Method to scan a single file.
   void Scan(std::istream& is, const char* directory,
-    const std::string& fullName);
+            const std::string& fullName);
 
   // Regular expression to identify C preprocessor include directives.
   cmsys::RegularExpression IncludeRegexLine;
@@ -74,24 +74,29 @@ public:
 
   struct cmIncludeLines
   {
-    cmIncludeLines(): Used(false) {}
+    cmIncludeLines()
+      : Used(false)
+    {
+    }
     std::vector<UnscannedEntry> UnscannedEntries;
     bool Used;
   };
+
 protected:
   const std::map<std::string, DependencyVector>* ValidDeps;
   std::set<std::string> Encountered;
   std::queue<UnscannedEntry> Unscanned;
 
-  std::map<std::string, cmIncludeLines *> FileCache;
+  std::map<std::string, cmIncludeLines*> FileCache;
   std::map<std::string, std::string> HeaderLocationCache;
 
   std::string CacheFileName;
 
   void WriteCacheFile() const;
   void ReadCacheFile();
+
 private:
-  cmDependsC(cmDependsC const&); // Purposely not implemented.
+  cmDependsC(cmDependsC const&);     // Purposely not implemented.
   void operator=(cmDependsC const&); // Purposely not implemented.
 };
 

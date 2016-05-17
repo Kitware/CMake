@@ -11,4 +11,7 @@
 #error Unexpected MY_INTERFACE_DEFINE
 #endif
 
-int main() { return 0; }
+int main()
+{
+  return 0;
+}

@@ -35,7 +35,7 @@ public:
   std::string const& GetPlatformName() const;
 
   ///! Create a local generator appropriate to this Global Generator
-  virtual cmLocalGenerator *CreateLocalGenerator(cmMakefile* mf);
+  virtual cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf);
 
   virtual bool SetSystemName(std::string const& s, cmMakefile* mf);
 
@@ -51,23 +51,19 @@ public:
    * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
-  virtual void EnableLanguage(std::vector<std::string>const& languages,
-                              cmMakefile *, bool optional);
+  virtual void EnableLanguage(std::vector<std::string> const& languages,
+                              cmMakefile*, bool optional);
 
   /**
    * Try running cmake and building a file. This is used for dynamically
    * loaded commands, not as part of the usual build process.
    */
   virtual void GenerateBuildCommand(
-    std::vector<std::string>& makeCommand,
-    const std::string& makeProgram,
-    const std::string& projectName,
-    const std::string& projectDir,
-    const std::string& targetName,
-    const std::string& config,
-    bool fast, bool verbose,
-    std::vector<std::string> const& makeOptions = std::vector<std::string>()
-    );
+    std::vector<std::string>& makeCommand, const std::string& makeProgram,
+    const std::string& projectName, const std::string& projectDir,
+    const std::string& targetName, const std::string& config, bool fast,
+    bool verbose,
+    std::vector<std::string> const& makeOptions = std::vector<std::string>());
 
   /**
    * Generate the DSW workspace file.
@@ -85,12 +81,16 @@ public:
 
   ///! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGIntDir() const
-    { return "$(ConfigurationName)"; }
+  {
+    return "$(ConfigurationName)";
+  }
 
   /** Return true if the target project file should have the option
       LinkLibraryDependencies and link to .sln dependencies. */
   virtual bool NeedLinkLibraryDependencies(cmGeneratorTarget*)
-  { return false; }
+  {
+    return false;
+  }
 
   const char* GetIntelProjectVersion();
 
@@ -117,12 +117,11 @@ protected:
                              std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators) = 0;
-  virtual void WriteProject(std::ostream& fout,
-                            const std::string& name, const char* path,
-                            const cmGeneratorTarget *t) = 0;
-  virtual void WriteProjectDepends(std::ostream& fout,
-                           const std::string& name, const char* path,
-                           cmGeneratorTarget const* t) = 0;
+  virtual void WriteProject(std::ostream& fout, const std::string& name,
+                            const char* path, const cmGeneratorTarget* t) = 0;
+  virtual void WriteProjectDepends(std::ostream& fout, const std::string& name,
+                                   const char* path,
+                                   cmGeneratorTarget const* t) = 0;
   virtual void WriteProjectConfigurations(
     std::ostream& fout, const std::string& name, cmState::TargetType type,
     std::vector<std::string> const& configs,
@@ -132,40 +131,34 @@ protected:
                                       cmLocalGenerator* root);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout) = 0;
-  virtual std::string WriteUtilityDepend(const cmGeneratorTarget *target);
+  virtual std::string WriteUtilityDepend(const cmGeneratorTarget* target);
 
   virtual void WriteTargetsToSolution(
-    std::ostream& fout,
-    cmLocalGenerator* root,
+    std::ostream& fout, cmLocalGenerator* root,
     OrderedTargetDependSet const& projectTargets);
   virtual void WriteTargetDepends(
-    std::ostream& fout,
-    OrderedTargetDependSet const& projectTargets);
+    std::ostream& fout, OrderedTargetDependSet const& projectTargets);
   virtual void WriteTargetConfigurations(
-    std::ostream& fout,
-    std::vector<std::string> const& configs,
+    std::ostream& fout, std::vector<std::string> const& configs,
     OrderedTargetDependSet const& projectTargets);
 
-  virtual void WriteExternalProject(std::ostream& fout,
-                                    const std::string& name,
-                                    const char* path,
-                                    const char* typeGuid,
-                                    const std::set<std::string>&
-                                    dependencies) = 0;
+  virtual void WriteExternalProject(
+    std::ostream& fout, const std::string& name, const char* path,
+    const char* typeGuid, const std::set<std::string>& dependencies) = 0;
 
   std::string ConvertToSolutionPath(const char* path);
 
-  std::set<std::string>
-    IsPartOfDefaultBuild(std::vector<std::string> const& configs,
-                         OrderedTargetDependSet const& projectTargets,
-                         cmGeneratorTarget const* target);
+  std::set<std::string> IsPartOfDefaultBuild(
+    std::vector<std::string> const& configs,
+    OrderedTargetDependSet const& projectTargets,
+    cmGeneratorTarget const* target);
   bool IsDependedOn(OrderedTargetDependSet const& projectTargets,
                     cmGeneratorTarget const* target);
   std::map<std::string, std::string> GUIDMap;
 
   virtual void WriteFolders(std::ostream& fout);
   virtual void WriteFoldersContent(std::ostream& fout);
-  std::map<std::string,std::set<std::string> > VisualStudioFolders;
+  std::map<std::string, std::set<std::string> > VisualStudioFolders;
 
   // Set during OutputSLNFile with the name of the current project.
   // There is one SLN file per project.

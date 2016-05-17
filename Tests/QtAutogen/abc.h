@@ -19,10 +19,10 @@
 class Abc : public QObject
 {
   Q_OBJECT
-  public:
-    Abc();
-  public slots:
-    void doAbc();
+public:
+  Abc();
+public slots:
+  void doAbc();
 };
 
 #endif

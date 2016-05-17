@@ -1,5 +1,4 @@
 
 void foo(void)
 {
-
 }

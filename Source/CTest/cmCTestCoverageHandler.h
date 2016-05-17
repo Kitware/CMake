@@ -54,14 +54,14 @@ public:
   /**
    * This method is called when reading CTest custom file
    */
-  void PopulateCustomVectors(cmMakefile *mf);
+  void PopulateCustomVectors(cmMakefile* mf);
 
   /** Report coverage only for sources with these labels.  */
   void SetLabelFilter(std::set<std::string> const& labels);
 
 private:
   bool ShouldIDoCoverage(const char* file, const char* srcDir,
-    const char* binDir);
+                         const char* binDir);
   void CleanCoverageLogFiles(std::ostream& log);
   bool StartCoverageLogFile(cmGeneratedFileStream& ostr, int logFileCount);
   void EndCoverageLogFile(cmGeneratedFileStream& ostr, int logFileCount);
@@ -95,7 +95,7 @@ private:
   //! Handle coverage for Jacoco
   int HandleBlanketJSCoverage(cmCTestCoverageHandlerContainer* cont);
 
-//! Handle coverage using Bullseye
+  //! Handle coverage using Bullseye
   int HandleBullseyeCoverage(cmCTestCoverageHandlerContainer* cont);
   int RunBullseyeSourceSummary(cmCTestCoverageHandlerContainer* cont);
   int RunBullseyeCoverageBranch(cmCTestCoverageHandlerContainer* cont,
@@ -103,22 +103,15 @@ private:
                                 std::vector<std::string>& files,
                                 std::vector<std::string>& filesFullPath);
 
-  int RunBullseyeCommand(
-    cmCTestCoverageHandlerContainer* cont,
-    const char* cmd,
-    const char* arg,
-    std::string& outputFile);
-  bool ParseBullsEyeCovsrcLine(
-    std::string const& inputLine,
-    std::string& sourceFile,
-    int& functionsCalled,
-    int& totalFunctions,
-    int& percentFunction,
-    int& branchCovered,
-    int& totalBranches,
-    int& percentBranch);
-  bool GetNextInt(std::string const& inputLine,
-                  std::string::size_type& pos,
+  int RunBullseyeCommand(cmCTestCoverageHandlerContainer* cont,
+                         const char* cmd, const char* arg,
+                         std::string& outputFile);
+  bool ParseBullsEyeCovsrcLine(std::string const& inputLine,
+                               std::string& sourceFile, int& functionsCalled,
+                               int& totalFunctions, int& percentFunction,
+                               int& branchCovered, int& totalBranches,
+                               int& percentBranch);
+  bool GetNextInt(std::string const& inputLine, std::string::size_type& pos,
                   int& value);
   //! Handle Python coverage using Python's Trace.py
   int HandleTracePyCoverage(cmCTestCoverageHandlerContainer* cont);
@@ -126,7 +119,7 @@ private:
   // Find the source file based on the source and build tree. This is used for
   // Trace.py mode, since that one does not tell us where the source file is.
   std::string FindFile(cmCTestCoverageHandlerContainer* cont,
-    std::string fileName);
+                       std::string fileName);
 
   std::set<std::string> FindUncoveredFiles(
     cmCTestCoverageHandlerContainer* cont);
@@ -134,9 +127,10 @@ private:
   std::vector<cmsys::RegularExpression> CustomCoverageExcludeRegex;
   std::vector<std::string> ExtraCoverageGlobs;
 
-
   // Map from source file to label ids.
-  class LabelSet: public std::set<int> {};
+  class LabelSet : public std::set<int>
+  {
+  };
   typedef std::map<std::string, LabelSet> LabelMapType;
   LabelMapType SourceLabels;
   LabelMapType TargetDirs;

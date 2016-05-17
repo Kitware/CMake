@@ -19,7 +19,7 @@
 #include <string.h>
 #include <time.h>
 #ifdef __QNX__
-# include <malloc.h> /* for malloc/free on QNX */
+#include <malloc.h> /* for malloc/free on QNX */
 #endif
 #include <cmsys/Directory.hxx>
 #include <cmsys/Encoding.hxx>
@@ -27,49 +27,49 @@
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/System.h>
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-# include "cmArchiveWrite.h"
-# include "cmLocale.h"
-# include <cm_libarchive.h>
-# ifndef __LA_INT64_T
-#  define __LA_INT64_T la_int64_t
-# endif
+#include "cmArchiveWrite.h"
+#include "cmLocale.h"
+#include <cm_libarchive.h>
+#ifndef __LA_INT64_T
+#define __LA_INT64_T la_int64_t
+#endif
 #endif
 #include <cmsys/FStream.hxx>
 #include <cmsys/Terminal.h>
 
 #if defined(_WIN32)
-# include <windows.h>
-  // include wincrypt.h after windows.h
-# include <wincrypt.h>
+#include <windows.h>
+// include wincrypt.h after windows.h
+#include <wincrypt.h>
 #else
-# include <sys/time.h>
-# include <sys/types.h>
-# include <sys/wait.h>
-# include <unistd.h>
-# include <utime.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <utime.h>
 #endif
 
 #if defined(__APPLE__)
-# include <mach-o/dyld.h>
+#include <mach-o/dyld.h>
 #endif
 
 #include <sys/stat.h>
 
-#if defined(_WIN32) && \
-   (defined(_MSC_VER) || defined(__WATCOMC__) || defined(__MINGW32__))
-# include <io.h>
+#if defined(_WIN32) &&                                                        \
+  (defined(_MSC_VER) || defined(__WATCOMC__) || defined(__MINGW32__))
+#include <io.h>
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-# include "cmCryptoHash.h"
+#include "cmCryptoHash.h"
 #endif
 
 #if defined(CMAKE_USE_ELF_PARSER)
-# include "cmELF.h"
+#include "cmELF.h"
 #endif
 
 #if defined(CMAKE_USE_MACH_PARSER)
-# include "cmMachO.h"
+#include "cmMachO.h"
 #endif
 
 static bool cm_isspace(char c)
@@ -91,27 +91,24 @@ public:
 
 #if !defined(HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE)
 // For GetEnvironmentVariables
-# if defined(_WIN32)
-extern __declspec( dllimport ) char** environ;
-# else
+#if defined(_WIN32)
+extern __declspec(dllimport) char** environ;
+#else
 extern char** environ;
-# endif
+#endif
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-static std::string
-cm_archive_entry_pathname(struct archive_entry *entry)
+static std::string cm_archive_entry_pathname(struct archive_entry* entry)
 {
 #if cmsys_STL_HAS_WSTRING
-  return cmsys::Encoding::ToNarrow(
-    archive_entry_pathname_w(entry));
+  return cmsys::Encoding::ToNarrow(archive_entry_pathname_w(entry));
 #else
   return archive_entry_pathname(entry);
 #endif
 }
 
-static int cm_archive_read_open_file(struct archive* a,
-                                     const char* file,
+static int cm_archive_read_open_file(struct archive* a, const char* file,
                                      int block_size)
 {
 #if cmsys_STL_HAS_WSTRING
@@ -127,16 +124,18 @@ static int cm_archive_read_open_file(struct archive* a,
 class cmSystemToolsWindowsHandle
 {
 public:
-  cmSystemToolsWindowsHandle(HANDLE h): handle_(h) {}
+  cmSystemToolsWindowsHandle(HANDLE h)
+    : handle_(h)
+  {
+  }
   ~cmSystemToolsWindowsHandle()
-    {
-    if(this->handle_ != INVALID_HANDLE_VALUE)
-      {
+  {
+    if (this->handle_ != INVALID_HANDLE_VALUE) {
       CloseHandle(this->handle_);
-      }
     }
+  }
   operator bool() const { return this->handle_ != INVALID_HANDLE_VALUE; }
-  bool operator !() const { return this->handle_ == INVALID_HANDLE_VALUE; }
+  bool operator!() const { return this->handle_ == INVALID_HANDLE_VALUE; }
   operator HANDLE() const { return this->handle_; }
 private:
   HANDLE handle_;
@@ -176,39 +175,33 @@ void cmSystemTools::ExpandRegistryValues(std::string& source, KeyWOW64 view)
   cmsys::RegularExpression regEntry("\\[(HKEY[^]]*)\\]");
 
   // check for black line or comment
-  while (regEntry.find(source))
-    {
+  while (regEntry.find(source)) {
     // the arguments are the second match
     std::string key = regEntry.match(1);
     std::string val;
-    if (ReadRegistryValue(key.c_str(), val, view))
-      {
+    if (ReadRegistryValue(key.c_str(), val, view)) {
       std::string reg = "[";
       reg += key + "]";
       cmSystemTools::ReplaceString(source, reg.c_str(), val.c_str());
-      }
-    else
-      {
+    } else {
       std::string reg = "[";
       reg += key + "]";
       cmSystemTools::ReplaceString(source, reg.c_str(), "/registry");
-      }
     }
+  }
 }
 #else
 void cmSystemTools::ExpandRegistryValues(std::string& source, KeyWOW64)
 {
   cmsys::RegularExpression regEntry("\\[(HKEY[^]]*)\\]");
-  while (regEntry.find(source))
-    {
+  while (regEntry.find(source)) {
     // the arguments are the second match
     std::string key = regEntry.match(1);
     std::string val;
     std::string reg = "[";
     reg += key + "]";
     cmSystemTools::ReplaceString(source, reg.c_str(), "/registry");
-    }
-
+  }
 }
 #endif
 
@@ -216,14 +209,12 @@ std::string cmSystemTools::EscapeQuotes(const std::string& str)
 {
   std::string result;
   result.reserve(str.size());
-  for(const char* ch = str.c_str(); *ch != '\0'; ++ch)
-    {
-    if(*ch == '"')
-      {
+  for (const char* ch = str.c_str(); *ch != '\0'; ++ch) {
+    if (*ch == '"') {
       result += '\\';
-      }
-    result += *ch;
     }
+    result += *ch;
+  }
   return result;
 }
 
@@ -242,34 +233,30 @@ std::string cmSystemTools::TrimWhitespace(const std::string& s)
   if (start == s.end())
     return "";
 
-  std::string::const_iterator stop = s.end()-1;
+  std::string::const_iterator stop = s.end() - 1;
   while (cm_isspace(*stop))
     --stop;
-  return std::string(start, stop+1);
+  return std::string(start, stop + 1);
 }
 
-void cmSystemTools::Error(const char* m1, const char* m2,
-                          const char* m3, const char* m4)
+void cmSystemTools::Error(const char* m1, const char* m2, const char* m3,
+                          const char* m4)
 {
   std::string message = "CMake Error: ";
-  if(m1)
-    {
+  if (m1) {
     message += m1;
-    }
-  if(m2)
-    {
+  }
+  if (m2) {
     message += m2;
-    }
-  if(m3)
-    {
+  }
+  if (m3) {
     message += m3;
-    }
-  if(m4)
-    {
+  }
+  if (m4) {
     message += m4;
-    }
+  }
   cmSystemTools::s_ErrorOccured = true;
-  cmSystemTools::Message(message.c_str(),"Error");
+  cmSystemTools::Message(message.c_str(), "Error");
 }
 
 void cmSystemTools::SetInterruptCallback(InterruptCallback f, void* clientData)
@@ -280,10 +267,9 @@ void cmSystemTools::SetInterruptCallback(InterruptCallback f, void* clientData)
 
 bool cmSystemTools::GetInterruptFlag()
 {
-  if(s_InterruptCallback)
-    {
+  if (s_InterruptCallback) {
     return (*s_InterruptCallback)(s_InterruptCallbackClientData);
-    }
+  }
   return false;
 }
 
@@ -317,49 +303,37 @@ void cmSystemTools::Stderr(const char* s)
 
 void cmSystemTools::Stderr(const char* s, size_t length)
 {
-  if(s_StderrCallback)
-    {
+  if (s_StderrCallback) {
     (*s_StderrCallback)(s, length, s_StderrCallbackClientData);
-    }
-  else
-    {
+  } else {
     std::cerr.write(s, length);
     std::cerr.flush();
-    }
+  }
 }
 
 void cmSystemTools::Stdout(const char* s, size_t length)
 {
-  if(s_StdoutCallback)
-    {
+  if (s_StdoutCallback) {
     (*s_StdoutCallback)(s, length, s_StdoutCallbackClientData);
-    }
-  else
-    {
+  } else {
     std::cout.write(s, length);
     std::cout.flush();
-    }
+  }
 }
 
-void cmSystemTools::Message(const char* m1, const char *title)
+void cmSystemTools::Message(const char* m1, const char* title)
 {
-  if(s_DisableMessages)
-    {
+  if (s_DisableMessages) {
     return;
-    }
-  if(s_MessageCallback)
-    {
+  }
+  if (s_MessageCallback) {
     (*s_MessageCallback)(m1, title, s_DisableMessages,
                          s_MessageCallbackClientData);
     return;
-    }
-  else
-    {
+  } else {
     std::cerr << m1 << std::endl << std::flush;
-    }
-
+  }
 }
-
 
 void cmSystemTools::ReportLastSystemError(const char* msg)
 {
@@ -371,94 +345,78 @@ void cmSystemTools::ReportLastSystemError(const char* msg)
 
 bool cmSystemTools::IsInternallyOn(const char* val)
 {
-  if (!val)
-    {
+  if (!val) {
     return false;
-    }
+  }
   std::basic_string<char> v = val;
-  if (v.size() > 4)
-    {
+  if (v.size() > 4) {
     return false;
-    }
+  }
 
-  for(std::basic_string<char>::iterator c = v.begin();
-      c != v.end(); c++)
-    {
+  for (std::basic_string<char>::iterator c = v.begin(); c != v.end(); c++) {
     *c = static_cast<char>(toupper(*c));
-    }
+  }
   return v == "I_ON";
 }
 
 bool cmSystemTools::IsOn(const char* val)
 {
-  if (!val)
-    {
+  if (!val) {
     return false;
-    }
+  }
   size_t len = strlen(val);
-  if (len > 4)
-    {
+  if (len > 4) {
     return false;
-    }
+  }
   std::basic_string<char> v(val, len);
 
   static std::set<std::string> onValues;
-  if(onValues.empty())
-    {
+  if (onValues.empty()) {
     onValues.insert("ON");
     onValues.insert("1");
     onValues.insert("YES");
     onValues.insert("TRUE");
     onValues.insert("Y");
-    }
-  for(std::basic_string<char>::iterator c = v.begin();
-      c != v.end(); c++)
-    {
+  }
+  for (std::basic_string<char>::iterator c = v.begin(); c != v.end(); c++) {
     *c = static_cast<char>(toupper(*c));
-    }
+  }
   return (onValues.count(v) > 0);
 }
 
 bool cmSystemTools::IsNOTFOUND(const char* val)
 {
-  if(strcmp(val, "NOTFOUND") == 0)
-    {
+  if (strcmp(val, "NOTFOUND") == 0) {
     return true;
-    }
+  }
   return cmHasLiteralSuffix(val, "-NOTFOUND");
 }
 
-
 bool cmSystemTools::IsOff(const char* val)
 {
-  if (!val || !*val)
-    {
+  if (!val || !*val) {
     return true;
-    }
+  }
   size_t len = strlen(val);
   // Try and avoid toupper() for large strings.
-  if (len > 6)
-    {
+  if (len > 6) {
     return cmSystemTools::IsNOTFOUND(val);
-    }
+  }
 
   static std::set<std::string> offValues;
-  if(offValues.empty())
-    {
+  if (offValues.empty()) {
     offValues.insert("OFF");
     offValues.insert("0");
     offValues.insert("NO");
     offValues.insert("FALSE");
     offValues.insert("N");
     offValues.insert("IGNORE");
-    }
+  }
   // Try and avoid toupper().
   std::basic_string<char> v(val, len);
-  for(std::basic_string<char>::iterator c = v.begin();
-      c != v.end(); c++)
-    {
+  for (std::basic_string<char>::iterator c = v.begin(); c != v.end(); c++) {
     *c = static_cast<char>(toupper(*c));
-    }
+  }
   return (offValues.count(v) > 0);
 }
 
@@ -473,84 +431,70 @@ void cmSystemTools::ParseWindowsCommandLine(const char* command,
   bool in_quotes = false;
   int backslashes = 0;
   std::string arg;
-  for(const char* c = command;*c; ++c)
-    {
-    if(*c == '\\')
-      {
+  for (const char* c = command; *c; ++c) {
+    if (*c == '\\') {
       ++backslashes;
       in_argument = true;
-      }
-    else if(*c == '"')
-      {
-      int backslash_pairs  = backslashes >> 1;
+    } else if (*c == '"') {
+      int backslash_pairs = backslashes >> 1;
       int backslash_escaped = backslashes & 1;
       arg.append(backslash_pairs, '\\');
       backslashes = 0;
-      if(backslash_escaped)
-        {
+      if (backslash_escaped) {
         /* An odd number of backslashes precede this quote.
            It is escaped.  */
         arg.append(1, '"');
-        }
-      else
-        {
+      } else {
         /* An even number of backslashes precede this quote.
            It is not escaped.  */
         in_quotes = !in_quotes;
-        }
-      in_argument = true;
       }
-    else
-      {
+      in_argument = true;
+    } else {
       arg.append(backslashes, '\\');
       backslashes = 0;
-      if (cm_isspace(*c))
-        {
-        if(in_quotes)
-          {
+      if (cm_isspace(*c)) {
+        if (in_quotes) {
           arg.append(1, *c);
-          }
-        else if(in_argument)
-          {
+        } else if (in_argument) {
           args.push_back(arg);
           arg = "";
           in_argument = false;
-          }
         }
-      else
-        {
+      } else {
         in_argument = true;
         arg.append(1, *c);
-        }
       }
     }
+  }
   arg.append(backslashes, '\\');
-  if(in_argument)
-    {
+  if (in_argument) {
     args.push_back(arg);
-    }
+  }
 }
 
 class cmSystemToolsArgV
 {
   char** ArgV;
+
 public:
-  cmSystemToolsArgV(char** argv): ArgV(argv) {}
+  cmSystemToolsArgV(char** argv)
+    : ArgV(argv)
+  {
+  }
   ~cmSystemToolsArgV()
-    {
-    for(char** arg = this->ArgV; arg && *arg; ++arg)
-      {
+  {
+    for (char** arg = this->ArgV; arg && *arg; ++arg) {
       free(*arg);
-      }
+    }
     free(this->ArgV);
-    }
+  }
   void Store(std::vector<std::string>& args) const
-    {
-    for(char** arg = this->ArgV; arg && *arg; ++arg)
-      {
+  {
+    for (char** arg = this->ArgV; arg && *arg; ++arg) {
       args.push_back(*arg);
-      }
     }
+  }
 };
 
 void cmSystemTools::ParseUnixCommandLine(const char* command,
@@ -569,117 +513,93 @@ std::vector<std::string> cmSystemTools::ParseArguments(const char* command)
   bool win_path = false;
 
   if ((command[0] != '/' && command[1] == ':' && command[2] == '\\') ||
-      (command[0] == '\"' && command[1] != '/' && command[2] == ':'
-       && command[3] == '\\') ||
-      (command[0] == '\'' && command[1] != '/' && command[2] == ':'
-       && command[3] == '\\') ||
-      (command[0] == '\\' && command[1] == '\\'))
-    {
+      (command[0] == '\"' && command[1] != '/' && command[2] == ':' &&
+       command[3] == '\\') ||
+      (command[0] == '\'' && command[1] != '/' && command[2] == ':' &&
+       command[3] == '\\') ||
+      (command[0] == '\\' && command[1] == '\\')) {
     win_path = true;
-    }
+  }
   // Split the command into an argv array.
-  for(const char* c = command; *c;)
-    {
+  for (const char* c = command; *c;) {
     // Skip over whitespace.
-    while(*c == ' ' || *c == '\t')
-      {
+    while (*c == ' ' || *c == '\t') {
       ++c;
-      }
+    }
     arg = "";
-    if(*c == '"')
-      {
+    if (*c == '"') {
       // Parse a quoted argument.
       ++c;
-      while(*c && *c != '"')
-        {
+      while (*c && *c != '"') {
         arg.append(1, *c);
         ++c;
-        }
-      if(*c)
-        {
-        ++c;
-        }
-      args.push_back(arg);
       }
-    else if(*c == '\'')
-      {
+      if (*c) {
+        ++c;
+      }
+      args.push_back(arg);
+    } else if (*c == '\'') {
       // Parse a quoted argument.
       ++c;
-      while(*c && *c != '\'')
-        {
+      while (*c && *c != '\'') {
         arg.append(1, *c);
         ++c;
-        }
-      if(*c)
-        {
-        ++c;
-        }
-      args.push_back(arg);
       }
-    else if(*c)
-      {
+      if (*c) {
+        ++c;
+      }
+      args.push_back(arg);
+    } else if (*c) {
       // Parse an unquoted argument.
-      while(*c && *c != ' ' && *c != '\t')
-        {
-        if(*c == '\\' && !win_path)
-          {
+      while (*c && *c != ' ' && *c != '\t') {
+        if (*c == '\\' && !win_path) {
           ++c;
-          if(*c)
-            {
+          if (*c) {
             arg.append(1, *c);
             ++c;
-            }
           }
-        else
-          {
+        } else {
           arg.append(1, *c);
           ++c;
-          }
         }
-      args.push_back(arg);
       }
+      args.push_back(arg);
     }
+  }
 
   return args;
 }
 
-
-bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
+bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
                                      std::string* captureStdOut,
-                                     std::string* captureStdErr,
-                                     int* retVal , const char* dir ,
-                                     OutputOption outputflag ,
-                                     double timeout )
+                                     std::string* captureStdErr, int* retVal,
+                                     const char* dir, OutputOption outputflag,
+                                     double timeout)
 {
   std::vector<const char*> argv;
-  for(std::vector<std::string>::const_iterator a = command.begin();
-      a != command.end(); ++a)
-    {
+  for (std::vector<std::string>::const_iterator a = command.begin();
+       a != command.end(); ++a) {
     argv.push_back(a->c_str());
-    }
+  }
   argv.push_back(0);
 
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_SetCommand(cp, &*argv.begin());
   cmsysProcess_SetWorkingDirectory(cp, dir);
-  if(cmSystemTools::GetRunCommandHideConsole())
-    {
+  if (cmSystemTools::GetRunCommandHideConsole()) {
     cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
-    }
+  }
 
-  if (outputflag == OUTPUT_PASSTHROUGH)
-    {
+  if (outputflag == OUTPUT_PASSTHROUGH) {
     cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDOUT, 1);
     cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDERR, 1);
     captureStdOut = 0;
     captureStdErr = 0;
-    }
-  else if (outputflag == OUTPUT_MERGE ||
-           (captureStdErr && captureStdErr == captureStdOut))
-    {
+  } else if (outputflag == OUTPUT_MERGE ||
+             (captureStdErr && captureStdErr == captureStdOut)) {
     cmsysProcess_SetOption(cp, cmsysProcess_Option_MergeOutput, 1);
     captureStdErr = 0;
-    }
+  }
   assert(!captureStdErr || captureStdErr != captureStdOut);
 
   cmsysProcess_SetTimeout(cp, timeout);
@@ -690,193 +610,152 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
   char* data;
   int length;
   int pipe;
-  if(outputflag != OUTPUT_PASSTHROUGH &&
-     (captureStdOut || captureStdErr || outputflag != OUTPUT_NONE))
-    {
-    while((pipe = cmsysProcess_WaitForData(cp, &data, &length, 0)) > 0)
-      {
+  if (outputflag != OUTPUT_PASSTHROUGH &&
+      (captureStdOut || captureStdErr || outputflag != OUTPUT_NONE)) {
+    while ((pipe = cmsysProcess_WaitForData(cp, &data, &length, 0)) > 0) {
       // Translate NULL characters in the output into valid text.
       // Visual Studio 7 puts these characters in the output of its
       // build process.
-      for(int i=0; i < length; ++i)
-        {
-        if(data[i] == '\0')
-          {
+      for (int i = 0; i < length; ++i) {
+        if (data[i] == '\0') {
           data[i] = ' ';
-          }
         }
+      }
 
-      if (pipe == cmsysProcess_Pipe_STDOUT)
-        {
-        if (outputflag != OUTPUT_NONE)
-          {
+      if (pipe == cmsysProcess_Pipe_STDOUT) {
+        if (outputflag != OUTPUT_NONE) {
           cmSystemTools::Stdout(data, length);
-          }
-        if (captureStdOut)
-          {
-          tempStdOut.insert(tempStdOut.end(), data, data+length);
-          }
         }
-      else if (pipe == cmsysProcess_Pipe_STDERR)
-        {
-        if (outputflag != OUTPUT_NONE)
-          {
+        if (captureStdOut) {
+          tempStdOut.insert(tempStdOut.end(), data, data + length);
+        }
+      } else if (pipe == cmsysProcess_Pipe_STDERR) {
+        if (outputflag != OUTPUT_NONE) {
           cmSystemTools::Stderr(data, length);
-          }
-        if (captureStdErr)
-          {
-          tempStdErr.insert(tempStdErr.end(), data, data+length);
-          }
+        }
+        if (captureStdErr) {
+          tempStdErr.insert(tempStdErr.end(), data, data + length);
         }
       }
     }
+  }
 
   cmsysProcess_WaitForExit(cp, 0);
-  if (captureStdOut)
-    {
+  if (captureStdOut) {
     captureStdOut->assign(tempStdOut.begin(), tempStdOut.end());
-    }
-  if (captureStdErr)
-    {
+  }
+  if (captureStdErr) {
     captureStdErr->assign(tempStdErr.begin(), tempStdErr.end());
-    }
+  }
 
   bool result = true;
-  if(cmsysProcess_GetState(cp) == cmsysProcess_State_Exited)
-    {
-    if ( retVal )
-      {
+  if (cmsysProcess_GetState(cp) == cmsysProcess_State_Exited) {
+    if (retVal) {
       *retVal = cmsysProcess_GetExitValue(cp);
-      }
-    else
-      {
-      if ( cmsysProcess_GetExitValue(cp) !=  0 )
-        {
+    } else {
+      if (cmsysProcess_GetExitValue(cp) != 0) {
         result = false;
-        }
       }
     }
-  else if(cmsysProcess_GetState(cp) == cmsysProcess_State_Exception)
-    {
+  } else if (cmsysProcess_GetState(cp) == cmsysProcess_State_Exception) {
     const char* exception_str = cmsysProcess_GetExceptionString(cp);
-    if ( outputflag != OUTPUT_NONE )
-      {
+    if (outputflag != OUTPUT_NONE) {
       std::cerr << exception_str << std::endl;
-      }
-    if ( captureStdErr )
-      {
+    }
+    if (captureStdErr) {
       captureStdErr->append(exception_str, strlen(exception_str));
-      }
-    result = false;
     }
-  else if(cmsysProcess_GetState(cp) == cmsysProcess_State_Error)
-    {
+    result = false;
+  } else if (cmsysProcess_GetState(cp) == cmsysProcess_State_Error) {
     const char* error_str = cmsysProcess_GetErrorString(cp);
-    if ( outputflag != OUTPUT_NONE )
-      {
+    if (outputflag != OUTPUT_NONE) {
       std::cerr << error_str << std::endl;
-      }
-    if ( captureStdErr )
-      {
-      captureStdErr->append(error_str, strlen(error_str));
-      }
-    result = false;
     }
-  else if(cmsysProcess_GetState(cp) == cmsysProcess_State_Expired)
-    {
+    if (captureStdErr) {
+      captureStdErr->append(error_str, strlen(error_str));
+    }
+    result = false;
+  } else if (cmsysProcess_GetState(cp) == cmsysProcess_State_Expired) {
     const char* error_str = "Process terminated due to timeout\n";
-    if ( outputflag != OUTPUT_NONE )
-      {
+    if (outputflag != OUTPUT_NONE) {
       std::cerr << error_str << std::endl;
-      }
-    if ( captureStdErr )
-      {
-      captureStdErr->append(error_str, strlen(error_str));
-      }
-    result = false;
     }
+    if (captureStdErr) {
+      captureStdErr->append(error_str, strlen(error_str));
+    }
+    result = false;
+  }
 
   cmsysProcess_Delete(cp);
   return result;
 }
 
-bool cmSystemTools::RunSingleCommand(
-  const char* command,
-  std::string* captureStdOut,
-  std::string* captureStdErr,
-  int *retVal,
-  const char* dir,
-  OutputOption outputflag,
-  double timeout)
+bool cmSystemTools::RunSingleCommand(const char* command,
+                                     std::string* captureStdOut,
+                                     std::string* captureStdErr, int* retVal,
+                                     const char* dir, OutputOption outputflag,
+                                     double timeout)
 {
-  if(s_DisableRunCommandOutput)
-    {
+  if (s_DisableRunCommandOutput) {
     outputflag = OUTPUT_NONE;
-    }
+  }
 
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
 
-  if(args.size() < 1)
-    {
+  if (args.size() < 1) {
     return false;
-    }
+  }
   return cmSystemTools::RunSingleCommand(args, captureStdOut, captureStdErr,
                                          retVal, dir, outputflag, timeout);
 }
 
-std::string
-cmSystemTools::PrintSingleCommand(std::vector<std::string> const& command)
+std::string cmSystemTools::PrintSingleCommand(
+  std::vector<std::string> const& command)
 {
-  if (command.empty())
-    {
+  if (command.empty()) {
     return std::string();
-    }
+  }
 
   return cmWrap('"', command, '"', " ");
 }
 
 bool cmSystemTools::DoesFileExistWithExtensions(
-  const char* name,
-  const std::vector<std::string>& headerExts)
+  const char* name, const std::vector<std::string>& headerExts)
 {
   std::string hname;
 
-  for( std::vector<std::string>::const_iterator ext = headerExts.begin();
-       ext != headerExts.end(); ++ext )
-    {
+  for (std::vector<std::string>::const_iterator ext = headerExts.begin();
+       ext != headerExts.end(); ++ext) {
     hname = name;
     hname += ".";
     hname += *ext;
-    if(cmSystemTools::FileExists(hname.c_str()))
-      {
+    if (cmSystemTools::FileExists(hname.c_str())) {
       return true;
-      }
     }
+  }
   return false;
 }
 
 std::string cmSystemTools::FileExistsInParentDirectories(const char* fname,
-  const char* directory, const char* toplevel)
+                                                         const char* directory,
+                                                         const char* toplevel)
 {
   std::string file = fname;
   cmSystemTools::ConvertToUnixSlashes(file);
   std::string dir = directory;
   cmSystemTools::ConvertToUnixSlashes(dir);
   std::string prevDir;
-  while(dir != prevDir)
-    {
+  while (dir != prevDir) {
     std::string path = dir + "/" + file;
-    if ( cmSystemTools::FileExists(path.c_str()) )
-      {
+    if (cmSystemTools::FileExists(path.c_str())) {
       return path;
-      }
-    if ( dir.size() < strlen(toplevel) )
-      {
+    }
+    if (dir.size() < strlen(toplevel)) {
       break;
-      }
+    }
     prevDir = dir;
     dir = cmSystemTools::GetParentDirectory(dir);
-    }
+  }
   return "";
 }
 
@@ -886,7 +765,7 @@ bool cmSystemTools::cmCopyFile(const char* source, const char* destination)
 }
 
 bool cmSystemTools::CopyFileIfDifferent(const char* source,
-  const char* destination)
+                                        const char* destination)
 {
   return Superclass::CopyFileIfDifferent(source, destination);
 }
@@ -894,36 +773,31 @@ bool cmSystemTools::CopyFileIfDifferent(const char* source,
 #ifdef _WIN32
 cmSystemTools::WindowsFileRetry cmSystemTools::GetWindowsFileRetry()
 {
-  static WindowsFileRetry retry = {0,0};
-  if(!retry.Count)
-    {
-    unsigned int data[2] = {0,0};
-    HKEY const keys[2] = {HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE};
-    wchar_t const* const values[2] = {L"FilesystemRetryCount",
-                                      L"FilesystemRetryDelay"};
-    for(int k=0; k < 2; ++k)
-      {
+  static WindowsFileRetry retry = { 0, 0 };
+  if (!retry.Count) {
+    unsigned int data[2] = { 0, 0 };
+    HKEY const keys[2] = { HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE };
+    wchar_t const* const values[2] = { L"FilesystemRetryCount",
+                                       L"FilesystemRetryDelay" };
+    for (int k = 0; k < 2; ++k) {
       HKEY hKey;
-      if(RegOpenKeyExW(keys[k], L"Software\\Kitware\\CMake\\Config",
-                       0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS)
-        {
-        for(int v=0; v < 2; ++v)
-          {
+      if (RegOpenKeyExW(keys[k], L"Software\\Kitware\\CMake\\Config", 0,
+                        KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS) {
+        for (int v = 0; v < 2; ++v) {
           DWORD dwData, dwType, dwSize = 4;
-          if(!data[v] &&
-             RegQueryValueExW(hKey, values[v], 0, &dwType, (BYTE *)&dwData,
-                              &dwSize) == ERROR_SUCCESS &&
-             dwType == REG_DWORD && dwSize == 4)
-            {
+          if (!data[v] &&
+              RegQueryValueExW(hKey, values[v], 0, &dwType, (BYTE*)&dwData,
+                               &dwSize) == ERROR_SUCCESS &&
+              dwType == REG_DWORD && dwSize == 4) {
             data[v] = static_cast<unsigned int>(dwData);
-            }
           }
-        RegCloseKey(hKey);
         }
+        RegCloseKey(hKey);
       }
-    retry.Count = data[0]? data[0] : 5;
-    retry.Delay = data[1]? data[1] : 500;
     }
+    retry.Count = data[0] ? data[0] : 5;
+    retry.Delay = data[1] ? data[1] : 500;
+  }
   return retry;
 }
 #endif
@@ -931,43 +805,38 @@ cmSystemTools::WindowsFileRetry cmSystemTools::GetWindowsFileRetry()
 bool cmSystemTools::RenameFile(const char* oldname, const char* newname)
 {
 #ifdef _WIN32
-# ifndef INVALID_FILE_ATTRIBUTES
-#  define INVALID_FILE_ATTRIBUTES ((DWORD)-1)
-# endif
+#ifndef INVALID_FILE_ATTRIBUTES
+#define INVALID_FILE_ATTRIBUTES ((DWORD)-1)
+#endif
   /* Windows MoveFileEx may not replace read-only or in-use files.  If it
      fails then remove the read-only attribute from any existing destination.
      Try multiple times since we may be racing against another process
      creating/opening the destination file just before our MoveFileEx.  */
   WindowsFileRetry retry = cmSystemTools::GetWindowsFileRetry();
-  while(!MoveFileExW(
-      SystemTools::ConvertToWindowsExtendedPath(oldname).c_str(),
-      SystemTools::ConvertToWindowsExtendedPath(newname).c_str(),
-                     MOVEFILE_REPLACE_EXISTING) && --retry.Count)
-    {
+  while (
+    !MoveFileExW(SystemTools::ConvertToWindowsExtendedPath(oldname).c_str(),
+                 SystemTools::ConvertToWindowsExtendedPath(newname).c_str(),
+                 MOVEFILE_REPLACE_EXISTING) &&
+    --retry.Count) {
     DWORD last_error = GetLastError();
     // Try again only if failure was due to access/sharing permissions.
-    if(last_error != ERROR_ACCESS_DENIED &&
-       last_error != ERROR_SHARING_VIOLATION)
-      {
+    if (last_error != ERROR_ACCESS_DENIED &&
+        last_error != ERROR_SHARING_VIOLATION) {
       return false;
-      }
-    DWORD attrs =
-      GetFileAttributesW(
-        SystemTools::ConvertToWindowsExtendedPath(newname).c_str());
-    if((attrs != INVALID_FILE_ATTRIBUTES) &&
-       (attrs & FILE_ATTRIBUTE_READONLY))
-      {
+    }
+    DWORD attrs = GetFileAttributesW(
+      SystemTools::ConvertToWindowsExtendedPath(newname).c_str());
+    if ((attrs != INVALID_FILE_ATTRIBUTES) &&
+        (attrs & FILE_ATTRIBUTE_READONLY)) {
       // Remove the read-only attribute from the destination file.
       SetFileAttributesW(
         SystemTools::ConvertToWindowsExtendedPath(newname).c_str(),
-                         attrs & ~FILE_ATTRIBUTE_READONLY);
-      }
-    else
-      {
+        attrs & ~FILE_ATTRIBUTE_READONLY);
+    } else {
       // The file may be temporarily in use so wait a bit.
       cmSystemTools::Delay(retry.Delay);
-      }
     }
+  }
   return retry.Count > 0;
 #else
   /* On UNIX we have an OS-provided call to do this atomically.  */
@@ -985,7 +854,8 @@ bool cmSystemTools::ComputeFileMD5(const std::string& source, char* md5out)
 #else
   (void)source;
   (void)md5out;
-  cmSystemTools::Message("md5sum not supported in bootstrapping mode","Error");
+  cmSystemTools::Message("md5sum not supported in bootstrapping mode",
+                         "Error");
   return false;
 #endif
 }
@@ -997,7 +867,8 @@ std::string cmSystemTools::ComputeStringMD5(const std::string& input)
   return md5.HashString(input);
 #else
   (void)input;
-  cmSystemTools::Message("md5sum not supported in bootstrapping mode","Error");
+  cmSystemTools::Message("md5sum not supported in bootstrapping mode",
+                         "Error");
   return "";
 #endif
 }
@@ -1013,42 +884,29 @@ std::string cmSystemTools::ComputeCertificateThumbprint(
   HCERTSTORE certStore = NULL;
   PCCERT_CONTEXT certContext = NULL;
 
-  HANDLE certFile =
-    CreateFileW(cmsys::Encoding::ToWide(source.c_str()).c_str(),
-                GENERIC_READ,
-                FILE_SHARE_READ,
-                NULL,
-                OPEN_EXISTING,
-                FILE_ATTRIBUTE_NORMAL,
-                NULL);
+  HANDLE certFile = CreateFileW(
+    cmsys::Encoding::ToWide(source.c_str()).c_str(), GENERIC_READ,
+    FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
-  if (certFile != INVALID_HANDLE_VALUE && certFile != NULL)
-    {
+  if (certFile != INVALID_HANDLE_VALUE && certFile != NULL) {
     DWORD fileSize = GetFileSize(certFile, NULL);
-    if (fileSize != INVALID_FILE_SIZE)
-      {
+    if (fileSize != INVALID_FILE_SIZE) {
       certData = new BYTE[fileSize];
-      if (certData != NULL)
-        {
+      if (certData != NULL) {
         DWORD dwRead = 0;
-        if (ReadFile(certFile, certData, fileSize, &dwRead, NULL))
-          {
+        if (ReadFile(certFile, certData, fileSize, &dwRead, NULL)) {
           cryptBlob.cbData = fileSize;
           cryptBlob.pbData = certData;
 
           // Verify that this is a valid cert
-          if (PFXIsPFXBlob(&cryptBlob))
-            {
+          if (PFXIsPFXBlob(&cryptBlob)) {
             // Open the certificate as a store
-            certStore = PFXImportCertStore(
-              &cryptBlob, NULL, CRYPT_EXPORTABLE);
-            if (certStore != NULL)
-              {
+            certStore = PFXImportCertStore(&cryptBlob, NULL, CRYPT_EXPORTABLE);
+            if (certStore != NULL) {
               // There should only be 1 cert.
-              certContext = CertEnumCertificatesInStore(certStore,
-                certContext);
-              if (certContext != NULL)
-                {
+              certContext =
+                CertEnumCertificatesInStore(certStore, certContext);
+              if (certContext != NULL) {
                 // The hash is 20 bytes
                 BYTE hashData[20];
                 DWORD hashLength = 20;
@@ -1056,35 +914,33 @@ std::string cmSystemTools::ComputeCertificateThumbprint(
                 // Buffer to print the hash. Each byte takes 2 chars +
                 // terminating character
                 char hashPrint[41];
-                char *pHashPrint = hashPrint;
+                char* pHashPrint = hashPrint;
                 // Get the hash property from the certificate
-                if (CertGetCertificateContextProperty(certContext,
-                  CERT_HASH_PROP_ID, hashData, &hashLength))
-                  {
-                  for (DWORD i = 0; i < hashLength; i++)
-                    {
+                if (CertGetCertificateContextProperty(
+                      certContext, CERT_HASH_PROP_ID, hashData, &hashLength)) {
+                  for (DWORD i = 0; i < hashLength; i++) {
                     // Convert each byte to hexadecimal
                     sprintf(pHashPrint, "%02X", hashData[i]);
                     pHashPrint += 2;
-                    }
+                  }
                   *pHashPrint = '\0';
                   thumbprint = hashPrint;
-                  }
-                CertFreeCertificateContext(certContext);
                 }
-              CertCloseStore(certStore, 0);
+                CertFreeCertificateContext(certContext);
               }
+              CertCloseStore(certStore, 0);
             }
           }
-        delete[] certData;
         }
+        delete[] certData;
       }
-    CloseHandle(certFile);
     }
+    CloseHandle(certFile);
+  }
 #else
   (void)source;
   cmSystemTools::Message("ComputeCertificateThumbprint is not implemented",
-    "Error");
+                         "Error");
 #endif
 
   return thumbprint;
@@ -1097,65 +953,54 @@ void cmSystemTools::Glob(const std::string& directory,
   cmsys::Directory d;
   cmsys::RegularExpression reg(regexp.c_str());
 
-  if (d.Load(directory))
-    {
+  if (d.Load(directory)) {
     size_t numf;
-        unsigned int i;
+    unsigned int i;
     numf = d.GetNumberOfFiles();
-    for (i = 0; i < numf; i++)
-      {
+    for (i = 0; i < numf; i++) {
       std::string fname = d.GetFile(i);
-      if (reg.find(fname))
-        {
+      if (reg.find(fname)) {
         files.push_back(fname);
-        }
       }
     }
+  }
 }
-
 
 void cmSystemTools::GlobDirs(const std::string& path,
                              std::vector<std::string>& files)
 {
   std::string::size_type pos = path.find("/*");
-  if(pos == std::string::npos)
-    {
+  if (pos == std::string::npos) {
     files.push_back(path);
     return;
-    }
+  }
   std::string startPath = path.substr(0, pos);
-  std::string finishPath = path.substr(pos+2);
+  std::string finishPath = path.substr(pos + 2);
 
   cmsys::Directory d;
-  if (d.Load(startPath))
-    {
-    for (unsigned int i = 0; i < d.GetNumberOfFiles(); ++i)
-      {
-      if((std::string(d.GetFile(i)) != ".")
-         && (std::string(d.GetFile(i)) != ".."))
-        {
+  if (d.Load(startPath)) {
+    for (unsigned int i = 0; i < d.GetNumberOfFiles(); ++i) {
+      if ((std::string(d.GetFile(i)) != ".") &&
+          (std::string(d.GetFile(i)) != "..")) {
         std::string fname = startPath;
-        fname +="/";
+        fname += "/";
         fname += d.GetFile(i);
-        if(cmSystemTools::FileIsDirectory(fname))
-          {
+        if (cmSystemTools::FileIsDirectory(fname)) {
           fname += finishPath;
           cmSystemTools::GlobDirs(fname, files);
-          }
         }
       }
     }
+  }
 }
-
 
 void cmSystemTools::ExpandList(std::vector<std::string> const& arguments,
                                std::vector<std::string>& newargs)
 {
   std::vector<std::string>::const_iterator i;
-  for(i = arguments.begin();i != arguments.end(); ++i)
-    {
+  for (i = arguments.begin(); i != arguments.end(); ++i) {
     cmSystemTools::ExpandListArgument(*i, newargs);
-    }
+  }
 }
 
 void cmSystemTools::ExpandListArgument(const std::string& arg,
@@ -1163,73 +1008,60 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
                                        bool emptyArgs)
 {
   // If argument is empty, it is an empty list.
-  if(!emptyArgs && arg.empty())
-    {
+  if (!emptyArgs && arg.empty()) {
     return;
-    }
+  }
   // if there are no ; in the name then just copy the current string
-  if(arg.find(';') == std::string::npos)
-    {
+  if (arg.find(';') == std::string::npos) {
     newargs.push_back(arg);
     return;
-    }
+  }
   std::string newArg;
-  const char *last = arg.c_str();
+  const char* last = arg.c_str();
   // Break the string at non-escaped semicolons not nested in [].
   int squareNesting = 0;
-  for(const char* c = last; *c; ++c)
-    {
-    switch(*c)
-      {
-      case '\\':
-        {
+  for (const char* c = last; *c; ++c) {
+    switch (*c) {
+      case '\\': {
         // We only want to allow escaping of semicolons.  Other
         // escapes should not be processed here.
         const char* next = c + 1;
-        if(*next == ';')
-          {
+        if (*next == ';') {
           newArg.append(last, c - last);
           // Skip over the escape character
           last = c = next;
-          }
-        } break;
-      case '[':
-        {
+        }
+      } break;
+      case '[': {
         ++squareNesting;
-        } break;
-      case ']':
-        {
+      } break;
+      case ']': {
         --squareNesting;
-        } break;
-      case ';':
-        {
+      } break;
+      case ';': {
         // Break the string here if we are not nested inside square
         // brackets.
-        if(squareNesting == 0)
-          {
+        if (squareNesting == 0) {
           newArg.append(last, c - last);
           // Skip over the semicolon
           last = c + 1;
-          if ( !newArg.empty() || emptyArgs )
-            {
+          if (!newArg.empty() || emptyArgs) {
             // Add the last argument if the string is not empty.
             newargs.push_back(newArg);
             newArg = "";
-            }
           }
-        } break;
-      default:
-        {
+        }
+      } break;
+      default: {
         // Just append this character.
-        } break;
-      }
+      } break;
     }
+  }
   newArg.append(last);
-  if ( !newArg.empty() || emptyArgs )
-    {
+  if (!newArg.empty() || emptyArgs) {
     // Add the last argument if the string is not empty.
     newargs.push_back(newArg);
-    }
+  }
 }
 
 bool cmSystemTools::SimpleGlob(const std::string& glob,
@@ -1237,116 +1069,99 @@ bool cmSystemTools::SimpleGlob(const std::string& glob,
                                int type /* = 0 */)
 {
   files.clear();
-  if ( glob[glob.size()-1] != '*' )
-    {
+  if (glob[glob.size() - 1] != '*') {
     return false;
-    }
+  }
   std::string path = cmSystemTools::GetFilenamePath(glob);
   std::string ppath = cmSystemTools::GetFilenameName(glob);
-  ppath = ppath.substr(0, ppath.size()-1);
-  if (path.empty())
-    {
+  ppath = ppath.substr(0, ppath.size() - 1);
+  if (path.empty()) {
     path = "/";
-    }
+  }
 
   bool res = false;
   cmsys::Directory d;
-  if (d.Load(path))
-    {
-    for (unsigned int i = 0; i < d.GetNumberOfFiles(); ++i)
-      {
-      if((std::string(d.GetFile(i)) != ".")
-         && (std::string(d.GetFile(i)) != ".."))
-        {
+  if (d.Load(path)) {
+    for (unsigned int i = 0; i < d.GetNumberOfFiles(); ++i) {
+      if ((std::string(d.GetFile(i)) != ".") &&
+          (std::string(d.GetFile(i)) != "..")) {
         std::string fname = path;
-        if ( path[path.size()-1] != '/' )
-          {
-          fname +="/";
-          }
+        if (path[path.size() - 1] != '/') {
+          fname += "/";
+        }
         fname += d.GetFile(i);
         std::string sfname = d.GetFile(i);
-        if ( type > 0 && cmSystemTools::FileIsDirectory(fname) )
-          {
+        if (type > 0 && cmSystemTools::FileIsDirectory(fname)) {
           continue;
-          }
-        if ( type < 0 && !cmSystemTools::FileIsDirectory(fname) )
-          {
+        }
+        if (type < 0 && !cmSystemTools::FileIsDirectory(fname)) {
           continue;
-          }
-        if ( sfname.size() >= ppath.size() &&
-             sfname.substr(0, ppath.size()) ==
-             ppath )
-          {
+        }
+        if (sfname.size() >= ppath.size() &&
+            sfname.substr(0, ppath.size()) == ppath) {
           files.push_back(fname);
           res = true;
-          }
         }
       }
     }
+  }
   return res;
 }
 
 cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
 {
-  if ( ! cext || *cext == 0 )
-    {
+  if (!cext || *cext == 0) {
     return cmSystemTools::NO_FILE_FORMAT;
-    }
-  //std::string ext = cmSystemTools::LowerCase(cext);
+  }
+  // std::string ext = cmSystemTools::LowerCase(cext);
   std::string ext = cext;
-  if ( ext == "c" || ext == ".c" ||
-       ext == "m" || ext == ".m"
-    ) { return cmSystemTools::C_FILE_FORMAT; }
-  if (
-    ext == "C" || ext == ".C" ||
-    ext == "M" || ext == ".M" ||
-    ext == "c++" || ext == ".c++" ||
-    ext == "cc" || ext == ".cc" ||
-    ext == "cpp" || ext == ".cpp" ||
-    ext == "cxx" || ext == ".cxx" ||
-    ext == "mm" || ext == ".mm"
-    ) { return cmSystemTools::CXX_FILE_FORMAT; }
-  if (
-    ext == "f" || ext == ".f" ||
-    ext == "F" || ext == ".F" ||
-    ext == "f77" || ext == ".f77" ||
-    ext == "f90" || ext == ".f90" ||
-    ext == "for" || ext == ".for" ||
-    ext == "f95" || ext == ".f95"
-    ) { return cmSystemTools::FORTRAN_FILE_FORMAT; }
-  if ( ext == "java" || ext == ".java" )
-    { return cmSystemTools::JAVA_FILE_FORMAT; }
-  if (
-    ext == "H" || ext == ".H" ||
-    ext == "h" || ext == ".h" ||
-    ext == "h++" || ext == ".h++" ||
-    ext == "hm" || ext == ".hm" ||
-    ext == "hpp" || ext == ".hpp" ||
-    ext == "hxx" || ext == ".hxx" ||
-    ext == "in" || ext == ".in" ||
-    ext == "txx" || ext == ".txx"
-    ) { return cmSystemTools::HEADER_FILE_FORMAT; }
-  if ( ext == "rc" || ext == ".rc" )
-    { return cmSystemTools::RESOURCE_FILE_FORMAT; }
-  if ( ext == "def" || ext == ".def" )
-    { return cmSystemTools::DEFINITION_FILE_FORMAT; }
-  if ( ext == "lib" || ext == ".lib" ||
-       ext == "a" || ext == ".a")
-    { return cmSystemTools::STATIC_LIBRARY_FILE_FORMAT; }
-  if ( ext == "o" || ext == ".o" ||
-       ext == "obj" || ext == ".obj")
-    { return cmSystemTools::OBJECT_FILE_FORMAT; }
+  if (ext == "c" || ext == ".c" || ext == "m" || ext == ".m") {
+    return cmSystemTools::C_FILE_FORMAT;
+  }
+  if (ext == "C" || ext == ".C" || ext == "M" || ext == ".M" || ext == "c++" ||
+      ext == ".c++" || ext == "cc" || ext == ".cc" || ext == "cpp" ||
+      ext == ".cpp" || ext == "cxx" || ext == ".cxx" || ext == "mm" ||
+      ext == ".mm") {
+    return cmSystemTools::CXX_FILE_FORMAT;
+  }
+  if (ext == "f" || ext == ".f" || ext == "F" || ext == ".F" || ext == "f77" ||
+      ext == ".f77" || ext == "f90" || ext == ".f90" || ext == "for" ||
+      ext == ".for" || ext == "f95" || ext == ".f95") {
+    return cmSystemTools::FORTRAN_FILE_FORMAT;
+  }
+  if (ext == "java" || ext == ".java") {
+    return cmSystemTools::JAVA_FILE_FORMAT;
+  }
+  if (ext == "H" || ext == ".H" || ext == "h" || ext == ".h" || ext == "h++" ||
+      ext == ".h++" || ext == "hm" || ext == ".hm" || ext == "hpp" ||
+      ext == ".hpp" || ext == "hxx" || ext == ".hxx" || ext == "in" ||
+      ext == ".in" || ext == "txx" || ext == ".txx") {
+    return cmSystemTools::HEADER_FILE_FORMAT;
+  }
+  if (ext == "rc" || ext == ".rc") {
+    return cmSystemTools::RESOURCE_FILE_FORMAT;
+  }
+  if (ext == "def" || ext == ".def") {
+    return cmSystemTools::DEFINITION_FILE_FORMAT;
+  }
+  if (ext == "lib" || ext == ".lib" || ext == "a" || ext == ".a") {
+    return cmSystemTools::STATIC_LIBRARY_FILE_FORMAT;
+  }
+  if (ext == "o" || ext == ".o" || ext == "obj" || ext == ".obj") {
+    return cmSystemTools::OBJECT_FILE_FORMAT;
+  }
 #ifdef __APPLE__
-  if ( ext == "dylib" || ext == ".dylib" )
-    { return cmSystemTools::SHARED_LIBRARY_FILE_FORMAT; }
-  if ( ext == "so" || ext == ".so" ||
-       ext == "bundle" || ext == ".bundle" )
-    { return cmSystemTools::MODULE_FILE_FORMAT; }
-#else // __APPLE__
-  if ( ext == "so" || ext == ".so" ||
-       ext == "sl" || ext == ".sl" ||
-       ext == "dll" || ext == ".dll" )
-    { return cmSystemTools::SHARED_LIBRARY_FILE_FORMAT; }
+  if (ext == "dylib" || ext == ".dylib") {
+    return cmSystemTools::SHARED_LIBRARY_FILE_FORMAT;
+  }
+  if (ext == "so" || ext == ".so" || ext == "bundle" || ext == ".bundle") {
+    return cmSystemTools::MODULE_FILE_FORMAT;
+  }
+#else  // __APPLE__
+  if (ext == "so" || ext == ".so" || ext == "sl" || ext == ".sl" ||
+      ext == "dll" || ext == ".dll") {
+    return cmSystemTools::SHARED_LIBRARY_FILE_FORMAT;
+  }
 #endif // __APPLE__
   return cmSystemTools::UNKNOWN_FILE_FORMAT;
 }
@@ -1362,10 +1177,9 @@ bool cmSystemTools::Split(const char* s, std::vector<std::string>& l)
 std::string cmSystemTools::ConvertToOutputPath(const char* path)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  if(s_ForceUnixPaths)
-    {
+  if (s_ForceUnixPaths) {
     return cmSystemTools::ConvertToUnixOutputPath(path);
-    }
+  }
   return cmSystemTools::ConvertToWindowsOutputPath(path);
 #else
   return cmSystemTools::ConvertToUnixOutputPath(path);
@@ -1375,15 +1189,13 @@ std::string cmSystemTools::ConvertToOutputPath(const char* path)
 void cmSystemTools::ConvertToOutputSlashes(std::string& path)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  if(!s_ForceUnixPaths)
-    {
+  if (!s_ForceUnixPaths) {
     // Convert to windows slashes.
     std::string::size_type pos = 0;
-    while((pos = path.find('/', pos)) != std::string::npos)
-      {
+    while ((pos = path.find('/', pos)) != std::string::npos) {
       path[pos++] = '\\';
-      }
     }
+  }
 #else
   static_cast<void>(path);
 #endif
@@ -1401,48 +1213,42 @@ std::string cmSystemTools::ConvertToRunCommandPath(const char* path)
 // compute the relative path from here to there
 std::string cmSystemTools::RelativePath(const char* local, const char* remote)
 {
-  if(!cmSystemTools::FileIsFullPath(local))
-    {
+  if (!cmSystemTools::FileIsFullPath(local)) {
     cmSystemTools::Error("RelativePath must be passed a full path to local: ",
                          local);
-    }
-  if(!cmSystemTools::FileIsFullPath(remote))
-    {
-    cmSystemTools::Error
-      ("RelativePath must be passed a full path to remote: ", remote);
-    }
+  }
+  if (!cmSystemTools::FileIsFullPath(remote)) {
+    cmSystemTools::Error("RelativePath must be passed a full path to remote: ",
+                         remote);
+  }
   return cmsys::SystemTools::RelativePath(local, remote);
 }
 
 std::string cmSystemTools::CollapseCombinedPath(std::string const& dir,
                                                 std::string const& file)
 {
-  if(dir.empty() || dir == ".")
-    {
+  if (dir.empty() || dir == ".") {
     return file;
-    }
+  }
 
   std::vector<std::string> dirComponents;
   std::vector<std::string> fileComponents;
   cmSystemTools::SplitPath(dir, dirComponents);
   cmSystemTools::SplitPath(file, fileComponents);
 
-  if(fileComponents.empty())
-    {
+  if (fileComponents.empty()) {
     return dir;
-    }
-  if(fileComponents[0] != "")
-    {
+  }
+  if (fileComponents[0] != "") {
     // File is not a relative path.
     return file;
-    }
+  }
 
-  std::vector<std::string>::iterator i = fileComponents.begin()+1;
-  while(i != fileComponents.end() && *i == ".." && dirComponents.size() > 1)
-    {
-    ++i; // Remove ".." file component.
+  std::vector<std::string>::iterator i = fileComponents.begin() + 1;
+  while (i != fileComponents.end() && *i == ".." && dirComponents.size() > 1) {
+    ++i;                      // Remove ".." file component.
     dirComponents.pop_back(); // Remove last dir component.
-    }
+  }
 
   dirComponents.insert(dirComponents.end(), i, fileComponents.end());
   return cmSystemTools::JoinPath(dirComponents);
@@ -1465,20 +1271,18 @@ std::vector<std::string> cmSystemTools::GetEnvironmentVariables()
 {
   std::vector<std::string> env;
   int cc;
-  for ( cc = 0; environ[cc]; ++ cc )
-    {
+  for (cc = 0; environ[cc]; ++cc) {
     env.push_back(environ[cc]);
-    }
+  }
   return env;
 }
 
 void cmSystemTools::AppendEnv(std::vector<std::string> const& env)
 {
-  for(std::vector<std::string>::const_iterator eit = env.begin();
-      eit != env.end(); ++eit)
-    {
+  for (std::vector<std::string>::const_iterator eit = env.begin();
+       eit != env.end(); ++eit) {
     cmSystemTools::PutEnv(*eit);
-    }
+  }
 }
 
 cmSystemTools::SaveRestoreEnvironment::SaveRestoreEnvironment()
@@ -1490,19 +1294,17 @@ cmSystemTools::SaveRestoreEnvironment::~SaveRestoreEnvironment()
 {
   // First clear everything in the current environment:
   std::vector<std::string> currentEnv = GetEnvironmentVariables();
-  for(std::vector<std::string>::const_iterator
-        eit = currentEnv.begin(); eit != currentEnv.end(); ++eit)
-    {
+  for (std::vector<std::string>::const_iterator eit = currentEnv.begin();
+       eit != currentEnv.end(); ++eit) {
     std::string var(*eit);
 
     std::string::size_type pos = var.find("=");
-    if (pos != std::string::npos)
-      {
+    if (pos != std::string::npos) {
       var = var.substr(0, pos);
-      }
+    }
 
     cmSystemTools::UnsetEnv(var.c_str());
-    }
+  }
 
   // Then put back each entry from the original environment:
   cmSystemTools::AppendEnv(this->Env);
@@ -1521,13 +1323,13 @@ void cmSystemTools::EnableVSConsoleOutput()
   // output and allow it to be captured on the fly.
   cmSystemTools::PutEnv("vsconsoleoutput=1");
 
-# ifdef CMAKE_BUILD_WITH_CMAKE
+#ifdef CMAKE_BUILD_WITH_CMAKE
   // VS sets an environment variable to tell MS tools like "cl" to report
   // output through a backdoor pipe instead of stdout/stderr.  Unset the
   // environment variable to close this backdoor for any path of process
   // invocations that passes through CMake so we can capture the output.
   cmSystemTools::UnsetEnv("VS_UNICODE_OUTPUT");
-# endif
+#endif
 #endif
 }
 
@@ -1539,25 +1341,23 @@ bool cmSystemTools::IsPathToFramework(const char* path)
 
 bool cmSystemTools::CreateTar(const char* outFileName,
                               const std::vector<std::string>& files,
-                              cmTarCompression compressType,
-                              bool verbose, std::string const& mtime,
+                              cmTarCompression compressType, bool verbose,
+                              std::string const& mtime,
                               std::string const& format)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   cmsys::ofstream fout(outFileName, std::ios::out | std::ios::binary);
-  if(!fout)
-    {
+  if (!fout) {
     std::string e = "Cannot open output file \"";
     e += outFileName;
     e += "\": ";
     e += cmSystemTools::GetLastSystemError();
     cmSystemTools::Error(e.c_str());
     return false;
-    }
+  }
   cmArchiveWrite::Compress compress = cmArchiveWrite::CompressNone;
-  switch (compressType)
-    {
+  switch (compressType) {
     case TarCompressGZip:
       compress = cmArchiveWrite::CompressGZip;
       break;
@@ -1570,32 +1370,27 @@ bool cmSystemTools::CreateTar(const char* outFileName,
     case TarCompressNone:
       compress = cmArchiveWrite::CompressNone;
       break;
-    }
+  }
 
-  cmArchiveWrite a(fout, compress,
-    format.empty() ? "paxr" : format);
+  cmArchiveWrite a(fout, compress, format.empty() ? "paxr" : format);
 
   a.SetMTime(mtime);
   a.SetVerbose(verbose);
-  for(std::vector<std::string>::const_iterator i = files.begin();
-      i != files.end(); ++i)
-    {
+  for (std::vector<std::string>::const_iterator i = files.begin();
+       i != files.end(); ++i) {
     std::string path = *i;
-    if(cmSystemTools::FileIsFullPath(path.c_str()))
-      {
+    if (cmSystemTools::FileIsFullPath(path.c_str())) {
       // Get the relative path to the file.
       path = cmSystemTools::RelativePath(cwd.c_str(), path.c_str());
-      }
-    if(!a.Add(path))
-      {
-      break;
-      }
     }
-  if(!a)
-    {
+    if (!a.Add(path)) {
+      break;
+    }
+  }
+  if (!a) {
     cmSystemTools::Error(a.GetError().c_str());
     return false;
-    }
+  }
   return true;
 #else
   (void)outFileName;
@@ -1606,18 +1401,17 @@ bool cmSystemTools::CreateTar(const char* outFileName,
 }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-namespace{
-#define BSDTAR_FILESIZE_PRINTF  "%lu"
-#define BSDTAR_FILESIZE_TYPE    unsigned long
-  void
-    list_item_verbose(FILE *out, struct archive_entry *entry)
+namespace {
+#define BSDTAR_FILESIZE_PRINTF "%lu"
+#define BSDTAR_FILESIZE_TYPE unsigned long
+void list_item_verbose(FILE* out, struct archive_entry* entry)
 {
-  char                   tmp[100];
-  size_t                         w;
-  const char            *p;
-  const char            *fmt;
-  time_t                         tim;
-  static time_t          now;
+  char tmp[100];
+  size_t w;
+  const char* p;
+  const char* fmt;
+  time_t tim;
+  static time_t now;
   size_t u_width = 6;
   size_t gs_width = 13;
 
@@ -1628,57 +1422,44 @@ namespace{
    * and just widen them as necessary.  These numbers are completely
    * arbitrary.
    */
-  if (!now)
-    {
+  if (!now) {
     time(&now);
-    }
-  fprintf(out, "%s %d ",
-          archive_entry_strmode(entry),
+  }
+  fprintf(out, "%s %d ", archive_entry_strmode(entry),
           archive_entry_nlink(entry));
 
   /* Use uname if it's present, else uid. */
   p = archive_entry_uname(entry);
-  if ((p == NULL) || (*p == '\0'))
-    {
-    sprintf(tmp, "%lu ",
-            (unsigned long)archive_entry_uid(entry));
+  if ((p == NULL) || (*p == '\0')) {
+    sprintf(tmp, "%lu ", (unsigned long)archive_entry_uid(entry));
     p = tmp;
-    }
+  }
   w = strlen(p);
-  if (w > u_width)
-    {
+  if (w > u_width) {
     u_width = w;
-    }
+  }
   fprintf(out, "%-*s ", (int)u_width, p);
   /* Use gname if it's present, else gid. */
   p = archive_entry_gname(entry);
-  if (p != NULL && p[0] != '\0')
-    {
+  if (p != NULL && p[0] != '\0') {
     fprintf(out, "%s", p);
     w = strlen(p);
-    }
-  else
-    {
-    sprintf(tmp, "%lu",
-            (unsigned long)archive_entry_gid(entry));
+  } else {
+    sprintf(tmp, "%lu", (unsigned long)archive_entry_gid(entry));
     w = strlen(tmp);
     fprintf(out, "%s", tmp);
-    }
+  }
 
   /*
    * Print device number or file size, right-aligned so as to make
    * total width of group and devnum/filesize fields be gs_width.
    * If gs_width is too small, grow it.
    */
-  if (archive_entry_filetype(entry) == AE_IFCHR
-      || archive_entry_filetype(entry) == AE_IFBLK)
-    {
-    sprintf(tmp, "%lu,%lu",
-            (unsigned long)archive_entry_rdevmajor(entry),
+  if (archive_entry_filetype(entry) == AE_IFCHR ||
+      archive_entry_filetype(entry) == AE_IFBLK) {
+    sprintf(tmp, "%lu,%lu", (unsigned long)archive_entry_rdevmajor(entry),
             (unsigned long)archive_entry_rdevminor(entry));
-    }
-  else
-    {
+  } else {
     /*
      * Note the use of platform-dependent macros to format
      * the filesize here.  We need the format string and the
@@ -1686,50 +1467,44 @@ namespace{
      */
     sprintf(tmp, BSDTAR_FILESIZE_PRINTF,
             (BSDTAR_FILESIZE_TYPE)archive_entry_size(entry));
-    }
-  if (w + strlen(tmp) >= gs_width)
-    {
-    gs_width = w+strlen(tmp)+1;
-    }
+  }
+  if (w + strlen(tmp) >= gs_width) {
+    gs_width = w + strlen(tmp) + 1;
+  }
   fprintf(out, "%*s", (int)(gs_width - w), tmp);
 
   /* Format the time using 'ls -l' conventions. */
   tim = archive_entry_mtime(entry);
 #define HALF_YEAR (time_t)365 * 86400 / 2
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  /* Windows' strftime function does not support %e format. */
-#define DAY_FMT  "%d"
+/* Windows' strftime function does not support %e format. */
+#define DAY_FMT "%d"
 #else
-#define DAY_FMT  "%e"  /* Day number without leading zeros */
+#define DAY_FMT "%e" /* Day number without leading zeros */
 #endif
-  if (tim < now - HALF_YEAR || tim > now + HALF_YEAR)
-    {
+  if (tim < now - HALF_YEAR || tim > now + HALF_YEAR) {
     fmt = DAY_FMT " %b  %Y";
-    }
-  else
-    {
+  } else {
     fmt = DAY_FMT " %b %H:%M";
-    }
+  }
   strftime(tmp, sizeof(tmp), fmt, localtime(&tim));
   fprintf(out, " %s ", tmp);
   fprintf(out, "%s", cm_archive_entry_pathname(entry).c_str());
 
   /* Extra information for links. */
   if (archive_entry_hardlink(entry)) /* Hard link */
-    {
-    fprintf(out, " link to %s",
-            archive_entry_hardlink(entry));
-    }
-  else if (archive_entry_symlink(entry)) /* Symbolic link */
-    {
+  {
+    fprintf(out, " link to %s", archive_entry_hardlink(entry));
+  } else if (archive_entry_symlink(entry)) /* Symbolic link */
+  {
     fprintf(out, " -> %s", archive_entry_symlink(entry));
-    }
+  }
 }
 
-long copy_data(struct archive *ar, struct archive *aw)
+long copy_data(struct archive* ar, struct archive* aw)
 {
   long r;
-  const void *buff;
+  const void* buff;
   size_t size;
 #if defined(ARCHIVE_VERSION_NUMBER) && ARCHIVE_VERSION_NUMBER >= 3000000
   __LA_INT64_T offset;
@@ -1737,122 +1512,99 @@ long copy_data(struct archive *ar, struct archive *aw)
   off_t offset;
 #endif
 
-  for (;;)
-    {
+  for (;;) {
     r = archive_read_data_block(ar, &buff, &size, &offset);
-    if (r == ARCHIVE_EOF)
-      {
+    if (r == ARCHIVE_EOF) {
       return (ARCHIVE_OK);
-      }
-    if (r != ARCHIVE_OK)
-      {
+    }
+    if (r != ARCHIVE_OK) {
       return (r);
-      }
+    }
     r = archive_write_data_block(aw, buff, size, offset);
-    if (r != ARCHIVE_OK)
-      {
+    if (r != ARCHIVE_OK) {
       cmSystemTools::Message("archive_write_data_block()",
                              archive_error_string(aw));
       return (r);
-      }
     }
+  }
 #if !defined(__clang__) && !defined(__HP_aCC)
   return r; /* this should not happen but it quiets some compilers */
 #endif
 }
 
-bool extract_tar(const char* outFileName, bool verbose,
-                 bool extract)
+bool extract_tar(const char* outFileName, bool verbose, bool extract)
 {
   cmLocaleRAII localeRAII;
   static_cast<void>(localeRAII);
   struct archive* a = archive_read_new();
-  struct archive *ext = archive_write_disk_new();
+  struct archive* ext = archive_write_disk_new();
   archive_read_support_filter_all(a);
   archive_read_support_format_all(a);
-  struct archive_entry *entry;
+  struct archive_entry* entry;
   int r = cm_archive_read_open_file(a, outFileName, 10240);
-  if(r)
-    {
+  if (r) {
     cmSystemTools::Error("Problem with archive_read_open_file(): ",
                          archive_error_string(a));
     archive_write_free(ext);
     archive_read_close(a);
     return false;
-    }
-  for (;;)
-    {
+  }
+  for (;;) {
     r = archive_read_next_header(a, &entry);
-    if (r == ARCHIVE_EOF)
-      {
+    if (r == ARCHIVE_EOF) {
       break;
-      }
-    if (r != ARCHIVE_OK)
-      {
+    }
+    if (r != ARCHIVE_OK) {
       cmSystemTools::Error("Problem with archive_read_next_header(): ",
                            archive_error_string(a));
       break;
-      }
-    if(verbose)
-      {
-      if(extract)
-        {
+    }
+    if (verbose) {
+      if (extract) {
         cmSystemTools::Stdout("x ");
         cmSystemTools::Stdout(cm_archive_entry_pathname(entry).c_str());
-        }
-      else
-        {
+      } else {
         list_item_verbose(stdout, entry);
-        }
-      cmSystemTools::Stdout("\n");
       }
-    else if(!extract)
-      {
+      cmSystemTools::Stdout("\n");
+    } else if (!extract) {
       cmSystemTools::Stdout(cm_archive_entry_pathname(entry).c_str());
       cmSystemTools::Stdout("\n");
-      }
-    if(extract)
-      {
+    }
+    if (extract) {
       r = archive_write_disk_set_options(ext, ARCHIVE_EXTRACT_TIME);
-      if (r != ARCHIVE_OK)
-        {
-        cmSystemTools::Error(
-          "Problem with archive_write_disk_set_options(): ",
-          archive_error_string(ext));
+      if (r != ARCHIVE_OK) {
+        cmSystemTools::Error("Problem with archive_write_disk_set_options(): ",
+                             archive_error_string(ext));
         break;
-        }
+      }
 
       r = archive_write_header(ext, entry);
-      if (r == ARCHIVE_OK)
-        {
+      if (r == ARCHIVE_OK) {
         copy_data(a, ext);
         r = archive_write_finish_entry(ext);
-        if (r != ARCHIVE_OK)
-          {
+        if (r != ARCHIVE_OK) {
           cmSystemTools::Error("Problem with archive_write_finish_entry(): ",
                                archive_error_string(ext));
           break;
-          }
         }
+      }
 #ifdef _WIN32
-      else if(const char* linktext = archive_entry_symlink(entry))
-        {
+      else if (const char* linktext = archive_entry_symlink(entry)) {
         std::cerr << "cmake -E tar: warning: skipping symbolic link \""
-                  << cm_archive_entry_pathname(entry)
-                  << "\" -> \""
-                  << linktext << "\"." << std::endl;
-        }
+                  << cm_archive_entry_pathname(entry) << "\" -> \"" << linktext
+                  << "\"." << std::endl;
+      }
 #endif
-      else
-        {
+      else {
         cmSystemTools::Error("Problem with archive_write_header(): ",
                              archive_error_string(ext));
         cmSystemTools::Error("Current file: ",
                              cm_archive_entry_pathname(entry).c_str());
         break;
-        }
       }
     }
+  }
   archive_write_free(ext);
   archive_read_close(a);
   archive_read_free(a);
@@ -1861,8 +1613,7 @@ bool extract_tar(const char* outFileName, bool verbose,
 }
 #endif
 
-bool cmSystemTools::ExtractTar(const char* outFileName,
-                               bool verbose)
+bool cmSystemTools::ExtractTar(const char* outFileName, bool verbose)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   return extract_tar(outFileName, verbose, true);
@@ -1873,8 +1624,7 @@ bool cmSystemTools::ExtractTar(const char* outFileName,
 #endif
 }
 
-bool cmSystemTools::ListTar(const char* outFileName,
-                            bool verbose)
+bool cmSystemTools::ListTar(const char* outFileName, bool verbose)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   return extract_tar(outFileName, verbose, false);
@@ -1886,105 +1636,79 @@ bool cmSystemTools::ListTar(const char* outFileName,
 }
 
 int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
-                               double timeout,
-                               std::vector<char>& out,
+                               double timeout, std::vector<char>& out,
                                std::vector<char>& err)
 {
   line = "";
   std::vector<char>::iterator outiter = out.begin();
   std::vector<char>::iterator erriter = err.begin();
-  while(1)
-    {
+  while (1) {
     // Check for a newline in stdout.
-    for(;outiter != out.end(); ++outiter)
-      {
-      if((*outiter == '\r') && ((outiter+1) == out.end()))
-        {
+    for (; outiter != out.end(); ++outiter) {
+      if ((*outiter == '\r') && ((outiter + 1) == out.end())) {
         break;
-        }
-      else if(*outiter == '\n' || *outiter == '\0')
-        {
-        std::vector<char>::size_type length = outiter-out.begin();
-        if(length > 1 && *(outiter-1) == '\r')
-          {
+      } else if (*outiter == '\n' || *outiter == '\0') {
+        std::vector<char>::size_type length = outiter - out.begin();
+        if (length > 1 && *(outiter - 1) == '\r') {
           --length;
-          }
-        if(length > 0)
-          {
-          line.append(&out[0], length);
-          }
-        out.erase(out.begin(), outiter+1);
-        return cmsysProcess_Pipe_STDOUT;
         }
+        if (length > 0) {
+          line.append(&out[0], length);
+        }
+        out.erase(out.begin(), outiter + 1);
+        return cmsysProcess_Pipe_STDOUT;
       }
+    }
 
     // Check for a newline in stderr.
-    for(;erriter != err.end(); ++erriter)
-      {
-      if((*erriter == '\r') && ((erriter+1) == err.end()))
-        {
+    for (; erriter != err.end(); ++erriter) {
+      if ((*erriter == '\r') && ((erriter + 1) == err.end())) {
         break;
-        }
-      else if(*erriter == '\n' || *erriter == '\0')
-        {
-        std::vector<char>::size_type length = erriter-err.begin();
-        if(length > 1 && *(erriter-1) == '\r')
-          {
+      } else if (*erriter == '\n' || *erriter == '\0') {
+        std::vector<char>::size_type length = erriter - err.begin();
+        if (length > 1 && *(erriter - 1) == '\r') {
           --length;
-          }
-        if(length > 0)
-          {
-          line.append(&err[0], length);
-          }
-        err.erase(err.begin(), erriter+1);
-        return cmsysProcess_Pipe_STDERR;
         }
+        if (length > 0) {
+          line.append(&err[0], length);
+        }
+        err.erase(err.begin(), erriter + 1);
+        return cmsysProcess_Pipe_STDERR;
       }
+    }
 
     // No newlines found.  Wait for more data from the process.
     int length;
     char* data;
     int pipe = cmsysProcess_WaitForData(process, &data, &length, &timeout);
-    if(pipe == cmsysProcess_Pipe_Timeout)
-      {
+    if (pipe == cmsysProcess_Pipe_Timeout) {
       // Timeout has been exceeded.
       return pipe;
-      }
-    else if(pipe == cmsysProcess_Pipe_STDOUT)
-      {
+    } else if (pipe == cmsysProcess_Pipe_STDOUT) {
       // Append to the stdout buffer.
       std::vector<char>::size_type size = out.size();
-      out.insert(out.end(), data, data+length);
-      outiter = out.begin()+size;
-      }
-    else if(pipe == cmsysProcess_Pipe_STDERR)
-      {
+      out.insert(out.end(), data, data + length);
+      outiter = out.begin() + size;
+    } else if (pipe == cmsysProcess_Pipe_STDERR) {
       // Append to the stderr buffer.
       std::vector<char>::size_type size = err.size();
-      err.insert(err.end(), data, data+length);
-      erriter = err.begin()+size;
-      }
-    else if(pipe == cmsysProcess_Pipe_None)
-      {
+      err.insert(err.end(), data, data + length);
+      erriter = err.begin() + size;
+    } else if (pipe == cmsysProcess_Pipe_None) {
       // Both stdout and stderr pipes have broken.  Return leftover data.
-      if(!out.empty())
-        {
-        line.append(&out[0], outiter-out.begin());
+      if (!out.empty()) {
+        line.append(&out[0], outiter - out.begin());
         out.erase(out.begin(), out.end());
         return cmsysProcess_Pipe_STDOUT;
-        }
-      else if(!err.empty())
-        {
-        line.append(&err[0], erriter-err.begin());
+      } else if (!err.empty()) {
+        line.append(&err[0], erriter - err.begin());
         err.erase(err.begin(), err.end());
         return cmsysProcess_Pipe_STDERR;
-        }
-      else
-        {
+      } else {
         return cmsysProcess_Pipe_None;
-        }
       }
     }
+  }
 }
 
 void cmSystemTools::DoNotInheritStdPipes()
@@ -1996,23 +1720,20 @@ void cmSystemTools::DoNotInheritStdPipes()
   // shell windows
   CONSOLE_SCREEN_BUFFER_INFO hOutInfo;
   HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-  if(GetConsoleScreenBufferInfo(hOut, &hOutInfo))
-    {
+  if (GetConsoleScreenBufferInfo(hOut, &hOutInfo)) {
     return;
-    }
-  {
-  HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
-  DuplicateHandle(GetCurrentProcess(), out,
-                  GetCurrentProcess(), &out, 0, FALSE,
-                  DUPLICATE_SAME_ACCESS | DUPLICATE_CLOSE_SOURCE);
-  SetStdHandle(STD_OUTPUT_HANDLE, out);
   }
   {
-  HANDLE out = GetStdHandle(STD_ERROR_HANDLE);
-  DuplicateHandle(GetCurrentProcess(), out,
-                  GetCurrentProcess(), &out, 0, FALSE,
-                  DUPLICATE_SAME_ACCESS | DUPLICATE_CLOSE_SOURCE);
-  SetStdHandle(STD_ERROR_HANDLE, out);
+    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+    DuplicateHandle(GetCurrentProcess(), out, GetCurrentProcess(), &out, 0,
+                    FALSE, DUPLICATE_SAME_ACCESS | DUPLICATE_CLOSE_SOURCE);
+    SetStdHandle(STD_OUTPUT_HANDLE, out);
+  }
+  {
+    HANDLE out = GetStdHandle(STD_ERROR_HANDLE);
+    DuplicateHandle(GetCurrentProcess(), out, GetCurrentProcess(), &out, 0,
+                    FALSE, DUPLICATE_SAME_ACCESS | DUPLICATE_CLOSE_SOURCE);
+    SetStdHandle(STD_ERROR_HANDLE, out);
   }
 #endif
 }
@@ -2020,43 +1741,36 @@ void cmSystemTools::DoNotInheritStdPipes()
 bool cmSystemTools::CopyFileTime(const char* fromFile, const char* toFile)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  cmSystemToolsWindowsHandle hFrom =
-    CreateFileW(SystemTools::ConvertToWindowsExtendedPath(fromFile).c_str(),
-                GENERIC_READ, FILE_SHARE_READ, 0,
-                OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
-  cmSystemToolsWindowsHandle hTo =
-    CreateFileW(SystemTools::ConvertToWindowsExtendedPath(toFile).c_str(),
-                FILE_WRITE_ATTRIBUTES, 0, 0, OPEN_EXISTING,
-                FILE_FLAG_BACKUP_SEMANTICS, 0);
-  if(!hFrom || !hTo)
-    {
+  cmSystemToolsWindowsHandle hFrom = CreateFileW(
+    SystemTools::ConvertToWindowsExtendedPath(fromFile).c_str(), GENERIC_READ,
+    FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
+  cmSystemToolsWindowsHandle hTo = CreateFileW(
+    SystemTools::ConvertToWindowsExtendedPath(toFile).c_str(),
+    FILE_WRITE_ATTRIBUTES, 0, 0, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
+  if (!hFrom || !hTo) {
     return false;
-    }
+  }
   FILETIME timeCreation;
   FILETIME timeLastAccess;
   FILETIME timeLastWrite;
-  if(!GetFileTime(hFrom, &timeCreation, &timeLastAccess, &timeLastWrite))
-    {
+  if (!GetFileTime(hFrom, &timeCreation, &timeLastAccess, &timeLastWrite)) {
     return false;
-    }
-  if(!SetFileTime(hTo, &timeCreation, &timeLastAccess, &timeLastWrite))
-    {
+  }
+  if (!SetFileTime(hTo, &timeCreation, &timeLastAccess, &timeLastWrite)) {
     return false;
-    }
+  }
 #else
   struct stat fromStat;
-  if(stat(fromFile, &fromStat) < 0)
-    {
+  if (stat(fromFile, &fromStat) < 0) {
     return false;
-    }
+  }
 
   struct utimbuf buf;
   buf.actime = fromStat.st_atime;
   buf.modtime = fromStat.st_mtime;
-  if(utime(toFile, &buf) < 0)
-    {
+  if (utime(toFile, &buf) < 0) {
     return false;
-    }
+  }
 #endif
   return true;
 }
@@ -2074,24 +1788,21 @@ void cmSystemTools::FileTimeDelete(cmSystemToolsFileTime* t)
 bool cmSystemTools::FileTimeGet(const char* fname, cmSystemToolsFileTime* t)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  cmSystemToolsWindowsHandle h =
-    CreateFileW(SystemTools::ConvertToWindowsExtendedPath(fname).c_str(),
-                GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING,
-                FILE_FLAG_BACKUP_SEMANTICS, 0);
-  if(!h)
-    {
+  cmSystemToolsWindowsHandle h = CreateFileW(
+    SystemTools::ConvertToWindowsExtendedPath(fname).c_str(), GENERIC_READ,
+    FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
+  if (!h) {
     return false;
-    }
-  if(!GetFileTime(h, &t->timeCreation, &t->timeLastAccess, &t->timeLastWrite))
-    {
+  }
+  if (!GetFileTime(h, &t->timeCreation, &t->timeLastAccess,
+                   &t->timeLastWrite)) {
     return false;
-    }
+  }
 #else
   struct stat st;
-  if(stat(fname, &st) < 0)
-    {
+  if (stat(fname, &st) < 0) {
     return false;
-    }
+  }
   t->timeBuf.actime = st.st_atime;
   t->timeBuf.modtime = st.st_mtime;
 #endif
@@ -2101,41 +1812,37 @@ bool cmSystemTools::FileTimeGet(const char* fname, cmSystemToolsFileTime* t)
 bool cmSystemTools::FileTimeSet(const char* fname, cmSystemToolsFileTime* t)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  cmSystemToolsWindowsHandle h =
-    CreateFileW(SystemTools::ConvertToWindowsExtendedPath(fname).c_str(),
-                FILE_WRITE_ATTRIBUTES, 0, 0, OPEN_EXISTING,
-                FILE_FLAG_BACKUP_SEMANTICS, 0);
-  if(!h)
-    {
+  cmSystemToolsWindowsHandle h = CreateFileW(
+    SystemTools::ConvertToWindowsExtendedPath(fname).c_str(),
+    FILE_WRITE_ATTRIBUTES, 0, 0, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
+  if (!h) {
     return false;
-    }
-  if(!SetFileTime(h, &t->timeCreation, &t->timeLastAccess, &t->timeLastWrite))
-    {
+  }
+  if (!SetFileTime(h, &t->timeCreation, &t->timeLastAccess,
+                   &t->timeLastWrite)) {
     return false;
-    }
+  }
 #else
-  if(utime(fname, &t->timeBuf) < 0)
-    {
+  if (utime(fname, &t->timeBuf) < 0) {
     return false;
-    }
+  }
 #endif
   return true;
 }
 
 #ifdef _WIN32
-# ifndef CRYPT_SILENT
-#  define CRYPT_SILENT 0x40 /* Not defined by VS 6 version of header.  */
-# endif
+#ifndef CRYPT_SILENT
+#define CRYPT_SILENT 0x40 /* Not defined by VS 6 version of header.  */
+#endif
 static int WinCryptRandom(void* data, size_t size)
 {
   int result = 0;
   HCRYPTPROV hProvider = 0;
-  if(CryptAcquireContextW(&hProvider, 0, 0, PROV_RSA_FULL,
-                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
-    {
-    result = CryptGenRandom(hProvider, (DWORD)size, (BYTE*)data)? 1:0;
+  if (CryptAcquireContextW(&hProvider, 0, 0, PROV_RSA_FULL,
+                           CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
+    result = CryptGenRandom(hProvider, (DWORD)size, (BYTE*)data) ? 1 : 0;
     CryptReleaseContext(hProvider, 0);
-    }
+  }
   return result;
 }
 #endif
@@ -2146,10 +1853,9 @@ unsigned int cmSystemTools::RandomSeed()
   unsigned int seed = 0;
 
   // Try using a real random source.
-  if(WinCryptRandom(&seed, sizeof(seed)))
-    {
+  if (WinCryptRandom(&seed, sizeof(seed))) {
     return seed;
-    }
+  }
 
   // Fall back to the time and pid.
   FILETIME ft;
@@ -2169,11 +1875,10 @@ unsigned int cmSystemTools::RandomSeed()
   cmsys::ifstream fin;
   fin.rdbuf()->pubsetbuf(0, 0); // Unbuffered read.
   fin.open("/dev/urandom");
-  if(fin.good() && fin.read(seed.bytes, sizeof(seed)) &&
-     fin.gcount() == sizeof(seed))
-    {
+  if (fin.good() && fin.read(seed.bytes, sizeof(seed)) &&
+      fin.gcount() == sizeof(seed)) {
     return seed.integer;
-    }
+  }
 
   // Fall back to the time and pid.
   struct timeval t;
@@ -2205,57 +1910,46 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
     cmSystemTools::GetFilenamePath(cmsys::Encoding::ToNarrow(modulepath));
 #elif defined(__APPLE__)
   (void)argv0; // ignore this on OS X
-# define CM_EXE_PATH_LOCAL_SIZE 16384
+#define CM_EXE_PATH_LOCAL_SIZE 16384
   char exe_path_local[CM_EXE_PATH_LOCAL_SIZE];
-# if defined(MAC_OS_X_VERSION_10_3) && !defined(MAC_OS_X_VERSION_10_4)
+#if defined(MAC_OS_X_VERSION_10_3) && !defined(MAC_OS_X_VERSION_10_4)
   unsigned long exe_path_size = CM_EXE_PATH_LOCAL_SIZE;
-# else
+#else
   uint32_t exe_path_size = CM_EXE_PATH_LOCAL_SIZE;
-# endif
-# undef CM_EXE_PATH_LOCAL_SIZE
+#endif
+#undef CM_EXE_PATH_LOCAL_SIZE
   char* exe_path = exe_path_local;
-  if(_NSGetExecutablePath(exe_path, &exe_path_size) < 0)
-    {
+  if (_NSGetExecutablePath(exe_path, &exe_path_size) < 0) {
     exe_path = (char*)malloc(exe_path_size);
     _NSGetExecutablePath(exe_path, &exe_path_size);
-    }
+  }
   exe_dir =
-    cmSystemTools::GetFilenamePath(
-      cmSystemTools::GetRealPath(exe_path));
-  if(exe_path != exe_path_local)
-    {
+    cmSystemTools::GetFilenamePath(cmSystemTools::GetRealPath(exe_path));
+  if (exe_path != exe_path_local) {
     free(exe_path);
-    }
-  if(cmSystemTools::GetFilenameName(exe_dir) == "MacOS")
-    {
+  }
+  if (cmSystemTools::GetFilenameName(exe_dir) == "MacOS") {
     // The executable is inside an application bundle.
     // Look for ../bin (install tree) and then fall back to
     // ../../../bin (build tree).
     exe_dir = cmSystemTools::GetFilenamePath(exe_dir);
-    if(cmSystemTools::FileExists((exe_dir+"/bin/cmake").c_str()))
-      {
+    if (cmSystemTools::FileExists((exe_dir + "/bin/cmake").c_str())) {
       exe_dir += "/bin";
-      }
-    else
-      {
+    } else {
       exe_dir = cmSystemTools::GetFilenamePath(exe_dir);
       exe_dir = cmSystemTools::GetFilenamePath(exe_dir);
-      }
     }
+  }
 #else
   std::string errorMsg;
   std::string exe;
-  if(cmSystemTools::FindProgramPath(argv0, exe, errorMsg))
-    {
+  if (cmSystemTools::FindProgramPath(argv0, exe, errorMsg)) {
     // remove symlinks
     exe = cmSystemTools::GetRealPath(exe);
-    exe_dir =
-      cmSystemTools::GetFilenamePath(exe);
-    }
-  else
-    {
+    exe_dir = cmSystemTools::GetFilenamePath(exe);
+  } else {
     // ???
-    }
+  }
 #endif
   cmSystemToolsCMakeCommand = exe_dir;
   cmSystemToolsCMakeCommand += "/cmake";
@@ -2274,54 +1968,46 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   cmSystemToolsCMakeGUICommand = exe_dir;
   cmSystemToolsCMakeGUICommand += "/cmake-gui";
   cmSystemToolsCMakeGUICommand += cmSystemTools::GetExecutableExtension();
-  if(!cmSystemTools::FileExists(cmSystemToolsCMakeGUICommand.c_str()))
-    {
+  if (!cmSystemTools::FileExists(cmSystemToolsCMakeGUICommand.c_str())) {
     cmSystemToolsCMakeGUICommand = "";
-    }
+  }
   cmSystemToolsCMakeCursesCommand = exe_dir;
   cmSystemToolsCMakeCursesCommand += "/ccmake";
   cmSystemToolsCMakeCursesCommand += cmSystemTools::GetExecutableExtension();
-  if(!cmSystemTools::FileExists(cmSystemToolsCMakeCursesCommand.c_str()))
-    {
+  if (!cmSystemTools::FileExists(cmSystemToolsCMakeCursesCommand.c_str())) {
     cmSystemToolsCMakeCursesCommand = "";
-    }
+  }
   cmSystemToolsCMClDepsCommand = exe_dir;
   cmSystemToolsCMClDepsCommand += "/cmcldeps";
   cmSystemToolsCMClDepsCommand += cmSystemTools::GetExecutableExtension();
-  if(!cmSystemTools::FileExists(cmSystemToolsCMClDepsCommand.c_str()))
-    {
+  if (!cmSystemTools::FileExists(cmSystemToolsCMClDepsCommand.c_str())) {
     cmSystemToolsCMClDepsCommand = "";
-    }
+  }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   // Install tree has "<prefix>/bin/cmake" and "<prefix><CMAKE_DATA_DIR>".
   std::string dir = cmSystemTools::GetFilenamePath(exe_dir);
   cmSystemToolsCMakeRoot = dir + CMAKE_DATA_DIR;
-  if(!cmSystemTools::FileExists(
-       (cmSystemToolsCMakeRoot+"/Modules/CMake.cmake").c_str()))
-    {
+  if (!cmSystemTools::FileExists(
+        (cmSystemToolsCMakeRoot + "/Modules/CMake.cmake").c_str())) {
     // Build tree has "<build>/bin[/<config>]/cmake" and
     // "<build>/CMakeFiles/CMakeSourceDir.txt".
     std::string src_dir_txt = dir + "/CMakeFiles/CMakeSourceDir.txt";
     cmsys::ifstream fin(src_dir_txt.c_str());
     std::string src_dir;
-    if(fin && cmSystemTools::GetLineFromStream(fin, src_dir) &&
-       cmSystemTools::FileIsDirectory(src_dir))
-      {
+    if (fin && cmSystemTools::GetLineFromStream(fin, src_dir) &&
+        cmSystemTools::FileIsDirectory(src_dir)) {
       cmSystemToolsCMakeRoot = src_dir;
-      }
-    else
-      {
+    } else {
       dir = cmSystemTools::GetFilenamePath(dir);
       src_dir_txt = dir + "/CMakeFiles/CMakeSourceDir.txt";
       cmsys::ifstream fin2(src_dir_txt.c_str());
-      if(fin2 && cmSystemTools::GetLineFromStream(fin2, src_dir) &&
-         cmSystemTools::FileIsDirectory(src_dir))
-        {
+      if (fin2 && cmSystemTools::GetLineFromStream(fin2, src_dir) &&
+          cmSystemTools::FileIsDirectory(src_dir)) {
         cmSystemToolsCMakeRoot = src_dir;
-        }
       }
     }
+  }
 #else
   // Bootstrap build knows its source.
   cmSystemToolsCMakeRoot = CMAKE_BOOTSTRAP_SOURCE_DIR;
@@ -2373,81 +2059,70 @@ void cmSystemTools::MakefileColorEcho(int color, const char* message,
   // However, we can test for some situations when the answer is most
   // likely no.
   int assumeTTY = cmsysTerminal_Color_AssumeTTY;
-  if(cmSystemTools::GetEnv("DART_TEST_FROM_DART") ||
-     cmSystemTools::GetEnv("DASHBOARD_TEST_FROM_CTEST") ||
-     cmSystemTools::GetEnv("CTEST_INTERACTIVE_DEBUG_MODE"))
-    {
+  if (cmSystemTools::GetEnv("DART_TEST_FROM_DART") ||
+      cmSystemTools::GetEnv("DASHBOARD_TEST_FROM_CTEST") ||
+      cmSystemTools::GetEnv("CTEST_INTERACTIVE_DEBUG_MODE")) {
     // Avoid printing color escapes during dashboard builds.
     assumeTTY = 0;
-    }
+  }
 
-  if(enabled && color != cmsysTerminal_Color_Normal)
-    {
+  if (enabled && color != cmsysTerminal_Color_Normal) {
     // Print with color.  Delay the newline until later so that
     // all color restore sequences appear before it.
     cmsysTerminal_cfprintf(color | assumeTTY, stdout, "%s", message);
-    }
-  else
-    {
+  } else {
     // Color is disabled.  Print without color.
     fprintf(stdout, "%s", message);
-    }
+  }
 
-  if(newline)
-    {
+  if (newline) {
     fprintf(stdout, "\n");
-    }
+  }
 }
 
 bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
                                        std::string& soname)
 {
-  // For ELF shared libraries use a real parser to get the correct
-  // soname.
+// For ELF shared libraries use a real parser to get the correct
+// soname.
 #if defined(CMAKE_USE_ELF_PARSER)
   cmELF elf(fullPath.c_str());
-  if(elf)
-    {
+  if (elf) {
     return elf.GetSOName(soname);
-    }
+  }
 #endif
 
   // If the file is not a symlink we have no guess for its soname.
-  if(!cmSystemTools::FileIsSymlink(fullPath))
-    {
+  if (!cmSystemTools::FileIsSymlink(fullPath)) {
     return false;
-    }
-  if(!cmSystemTools::ReadSymlink(fullPath, soname))
-    {
+  }
+  if (!cmSystemTools::ReadSymlink(fullPath, soname)) {
     return false;
-    }
+  }
 
   // If the symlink has a path component we have no guess for the soname.
-  if(!cmSystemTools::GetFilenamePath(soname).empty())
-    {
+  if (!cmSystemTools::GetFilenamePath(soname).empty()) {
     return false;
-    }
+  }
 
   // If the symlink points at an extended version of the same name
   // assume it is the soname.
   std::string name = cmSystemTools::GetFilenameName(fullPath);
-  if(soname.length() > name.length() &&
-     soname.substr(0, name.length()) == name)
-    {
+  if (soname.length() > name.length() &&
+      soname.substr(0, name.length()) == name) {
     return true;
-    }
+  }
   return false;
 }
 
 bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
-                                       std::string& soname)
+                                            std::string& soname)
 {
 #if defined(CMAKE_USE_MACH_PARSER)
   cmMachO macho(fullPath.c_str());
-  if(macho)
-    {
+  if (macho) {
     return macho.GetInstallName(soname);
-    }
+  }
 #else
   (void)fullPath;
   (void)soname;
@@ -2464,40 +2139,33 @@ std::string::size_type cmSystemToolsFindRPath(std::string const& have,
   std::string::size_type pos = have.find(want);
 
   // If the path is not present we are done.
-  if(pos == std::string::npos)
-    {
+  if (pos == std::string::npos) {
     return pos;
-    }
+  }
 
   // Build a regex to match a properly separated path instance.
   std::string regex_str = "(^|:)(";
-  for(std::string::const_iterator i = want.begin(); i != want.end(); ++i)
-    {
+  for (std::string::const_iterator i = want.begin(); i != want.end(); ++i) {
     int ch = *i;
-    if(!(('a' <= ch && ch <= 'z') ||
-         ('A' <= ch && ch <= 'Z') ||
-         ('0' <= ch && ch <= '9')))
-      {
+    if (!(('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') ||
+          ('0' <= ch && ch <= '9'))) {
       // Escape the non-alphanumeric character.
       regex_str += "\\";
-      }
+    }
     // Store the character.
     regex_str.append(1, static_cast<char>(ch));
-    }
+  }
   regex_str += ")(:|$)";
 
   // Look for the separated path.
   cmsys::RegularExpression regex(regex_str.c_str());
-  if(regex.find(have))
-    {
+  if (regex.find(have)) {
     // Return the position of the path portion.
     return regex.start(2);
-    }
-  else
-    {
+  } else {
     // The desired rpath was not found.
     return std::string::npos;
-    }
+  }
 }
 #endif
 
@@ -2513,206 +2181,176 @@ struct cmSystemToolsRPathInfo
 
 bool cmSystemTools::ChangeRPath(std::string const& file,
                                 std::string const& oldRPath,
-                                std::string const& newRPath,
-                                std::string* emsg,
+                                std::string const& newRPath, std::string* emsg,
                                 bool* changed)
 {
 #if defined(CMAKE_USE_ELF_PARSER)
-  if(changed)
-    {
+  if (changed) {
     *changed = false;
-    }
+  }
   int rp_count = 0;
   bool remove_rpath = true;
   cmSystemToolsRPathInfo rp[2];
   {
-  // Parse the ELF binary.
-  cmELF elf(file.c_str());
+    // Parse the ELF binary.
+    cmELF elf(file.c_str());
 
-  // Get the RPATH and RUNPATH entries from it.
-  int se_count = 0;
-  cmELF::StringEntry const* se[2] = {0, 0};
-  const char* se_name[2] = {0, 0};
-  if(cmELF::StringEntry const* se_rpath = elf.GetRPath())
-    {
-    se[se_count] = se_rpath;
-    se_name[se_count] = "RPATH";
-    ++se_count;
+    // Get the RPATH and RUNPATH entries from it.
+    int se_count = 0;
+    cmELF::StringEntry const* se[2] = { 0, 0 };
+    const char* se_name[2] = { 0, 0 };
+    if (cmELF::StringEntry const* se_rpath = elf.GetRPath()) {
+      se[se_count] = se_rpath;
+      se_name[se_count] = "RPATH";
+      ++se_count;
     }
-  if(cmELF::StringEntry const* se_runpath = elf.GetRunPath())
-    {
-    se[se_count] = se_runpath;
-    se_name[se_count] = "RUNPATH";
-    ++se_count;
+    if (cmELF::StringEntry const* se_runpath = elf.GetRunPath()) {
+      se[se_count] = se_runpath;
+      se_name[se_count] = "RUNPATH";
+      ++se_count;
     }
-  if(se_count == 0)
-    {
-    if(newRPath.empty())
-      {
-      // The new rpath is empty and there is no rpath anyway so it is
-      // okay.
-      return true;
-      }
-    else
-      {
-      if(emsg)
-        {
-        *emsg = "No valid ELF RPATH or RUNPATH entry exists in the file; ";
-        *emsg += elf.GetErrorMessage();
+    if (se_count == 0) {
+      if (newRPath.empty()) {
+        // The new rpath is empty and there is no rpath anyway so it is
+        // okay.
+        return true;
+      } else {
+        if (emsg) {
+          *emsg = "No valid ELF RPATH or RUNPATH entry exists in the file; ";
+          *emsg += elf.GetErrorMessage();
         }
-      return false;
+        return false;
       }
     }
 
-  for(int i=0; i < se_count; ++i)
-    {
-    // If both RPATH and RUNPATH refer to the same string literal it
-    // needs to be changed only once.
-    if(rp_count && rp[0].Position == se[i]->Position)
-      {
-      continue;
-      }
-
-    // Make sure the current rpath contains the old rpath.
-    std::string::size_type pos =
-      cmSystemToolsFindRPath(se[i]->Value, oldRPath);
-    if(pos == std::string::npos)
-      {
-      // If it contains the new rpath instead then it is okay.
-      if(cmSystemToolsFindRPath(se[i]->Value, newRPath) != std::string::npos)
-        {
-        remove_rpath = false;
+    for (int i = 0; i < se_count; ++i) {
+      // If both RPATH and RUNPATH refer to the same string literal it
+      // needs to be changed only once.
+      if (rp_count && rp[0].Position == se[i]->Position) {
         continue;
+      }
+
+      // Make sure the current rpath contains the old rpath.
+      std::string::size_type pos =
+        cmSystemToolsFindRPath(se[i]->Value, oldRPath);
+      if (pos == std::string::npos) {
+        // If it contains the new rpath instead then it is okay.
+        if (cmSystemToolsFindRPath(se[i]->Value, newRPath) !=
+            std::string::npos) {
+          remove_rpath = false;
+          continue;
         }
-      if(emsg)
-        {
-        std::ostringstream e;
-        /* clang-format off */
+        if (emsg) {
+          std::ostringstream e;
+          /* clang-format off */
         e << "The current " << se_name[i] << " is:\n"
           << "  " << se[i]->Value << "\n"
           << "which does not contain:\n"
           << "  " << oldRPath << "\n"
           << "as was expected.";
-        /* clang-format on */
-        *emsg = e.str();
+          /* clang-format on */
+          *emsg = e.str();
         }
-      return false;
+        return false;
       }
 
-    // Store information about the entry in the file.
-    rp[rp_count].Position = se[i]->Position;
-    rp[rp_count].Size = se[i]->Size;
-    rp[rp_count].Name = se_name[i];
+      // Store information about the entry in the file.
+      rp[rp_count].Position = se[i]->Position;
+      rp[rp_count].Size = se[i]->Size;
+      rp[rp_count].Name = se_name[i];
 
-    std::string::size_type prefix_len = pos;
+      std::string::size_type prefix_len = pos;
 
-    // If oldRPath was at the end of the file's RPath, and newRPath is empty,
-    // we should remove the unnecessary ':' at the end.
-    if (newRPath.empty() &&
-        pos > 0 &&
-        se[i]->Value[pos - 1] == ':' &&
-        pos + oldRPath.length() == se[i]->Value.length())
-      {
-      prefix_len--;
+      // If oldRPath was at the end of the file's RPath, and newRPath is empty,
+      // we should remove the unnecessary ':' at the end.
+      if (newRPath.empty() && pos > 0 && se[i]->Value[pos - 1] == ':' &&
+          pos + oldRPath.length() == se[i]->Value.length()) {
+        prefix_len--;
       }
 
-    // Construct the new value which preserves the part of the path
-    // not being changed.
-    rp[rp_count].Value = se[i]->Value.substr(0, prefix_len);
-    rp[rp_count].Value += newRPath;
-    rp[rp_count].Value += se[i]->Value.substr(pos+oldRPath.length(),
-                                              oldRPath.npos);
+      // Construct the new value which preserves the part of the path
+      // not being changed.
+      rp[rp_count].Value = se[i]->Value.substr(0, prefix_len);
+      rp[rp_count].Value += newRPath;
+      rp[rp_count].Value +=
+        se[i]->Value.substr(pos + oldRPath.length(), oldRPath.npos);
 
-    if (!rp[rp_count].Value.empty())
-      {
-      remove_rpath = false;
+      if (!rp[rp_count].Value.empty()) {
+        remove_rpath = false;
       }
 
-    // Make sure there is enough room to store the new rpath and at
-    // least one null terminator.
-    if(rp[rp_count].Size < rp[rp_count].Value.length()+1)
-      {
-      if(emsg)
-        {
-        *emsg = "The replacement path is too long for the ";
-        *emsg += se_name[i];
-        *emsg += " entry.";
+      // Make sure there is enough room to store the new rpath and at
+      // least one null terminator.
+      if (rp[rp_count].Size < rp[rp_count].Value.length() + 1) {
+        if (emsg) {
+          *emsg = "The replacement path is too long for the ";
+          *emsg += se_name[i];
+          *emsg += " entry.";
         }
-      return false;
+        return false;
       }
 
-    // This entry is ready for update.
-    ++rp_count;
+      // This entry is ready for update.
+      ++rp_count;
     }
   }
 
   // If no runtime path needs to be changed, we are done.
-  if(rp_count == 0)
-    {
+  if (rp_count == 0) {
     return true;
-    }
+  }
 
   // If the resulting rpath is empty, just remove the entire entry instead.
-  if (remove_rpath)
-    {
+  if (remove_rpath) {
     return cmSystemTools::RemoveRPath(file, emsg, changed);
-    }
+  }
 
   {
-  // Open the file for update.
-  cmsys::ofstream f(file.c_str(),
-                  std::ios::in | std::ios::out | std::ios::binary);
-  if(!f)
-    {
-    if(emsg)
-      {
-      *emsg = "Error opening file for update.";
+    // Open the file for update.
+    cmsys::ofstream f(file.c_str(),
+                      std::ios::in | std::ios::out | std::ios::binary);
+    if (!f) {
+      if (emsg) {
+        *emsg = "Error opening file for update.";
       }
-    return false;
+      return false;
     }
 
-  // Store the new RPATH and RUNPATH strings.
-  for(int i=0; i < rp_count; ++i)
-    {
-    // Seek to the RPATH position.
-    if(!f.seekp(rp[i].Position))
-      {
-      if(emsg)
-        {
-        *emsg = "Error seeking to ";
-        *emsg += rp[i].Name;
-        *emsg += " position.";
+    // Store the new RPATH and RUNPATH strings.
+    for (int i = 0; i < rp_count; ++i) {
+      // Seek to the RPATH position.
+      if (!f.seekp(rp[i].Position)) {
+        if (emsg) {
+          *emsg = "Error seeking to ";
+          *emsg += rp[i].Name;
+          *emsg += " position.";
         }
-      return false;
+        return false;
       }
 
-    // Write the new rpath.  Follow it with enough null terminators to
-    // fill the string table entry.
-    f << rp[i].Value;
-    for(unsigned long j=rp[i].Value.length(); j < rp[i].Size; ++j)
-      {
-      f << '\0';
+      // Write the new rpath.  Follow it with enough null terminators to
+      // fill the string table entry.
+      f << rp[i].Value;
+      for (unsigned long j = rp[i].Value.length(); j < rp[i].Size; ++j) {
+        f << '\0';
       }
 
-    // Make sure it wrote correctly.
-    if(!f)
-      {
-      if(emsg)
-        {
-        *emsg = "Error writing the new ";
-        *emsg += rp[i].Name;
-        *emsg += " string to the file.";
+      // Make sure it wrote correctly.
+      if (!f) {
+        if (emsg) {
+          *emsg = "Error writing the new ";
+          *emsg += rp[i].Name;
+          *emsg += " string to the file.";
         }
-      return false;
+        return false;
       }
     }
   }
 
   // Everything was updated successfully.
-  if(changed)
-    {
+  if (changed) {
     *changed = true;
-    }
+  }
   return true;
 #else
   (void)file;
@@ -2727,38 +2365,32 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
 bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
                                    const char* lhss, const char* rhss)
 {
-  const char *endl = lhss;
-  const char *endr = rhss;
+  const char* endl = lhss;
+  const char* endr = rhss;
   unsigned long lhs, rhs;
 
   while (((*endl >= '0') && (*endl <= '9')) ||
-         ((*endr >= '0') && (*endr <= '9')))
-    {
+         ((*endr >= '0') && (*endr <= '9'))) {
     // Do component-wise comparison.
     lhs = strtoul(endl, const_cast<char**>(&endl), 10);
     rhs = strtoul(endr, const_cast<char**>(&endr), 10);
 
-    if(lhs < rhs)
-      {
+    if (lhs < rhs) {
       // lhs < rhs, so true if operation is LESS
       return op == cmSystemTools::OP_LESS;
-      }
-    else if(lhs > rhs)
-      {
+    } else if (lhs > rhs) {
       // lhs > rhs, so true if operation is GREATER
       return op == cmSystemTools::OP_GREATER;
-      }
-
-    if (*endr == '.')
-      {
-      endr++;
-      }
-
-    if (*endl == '.')
-      {
-      endl++;
-      }
     }
+
+    if (*endr == '.') {
+      endr++;
+    }
+
+    if (*endl == '.') {
+      endl++;
+    }
+  }
   // lhs == rhs, so true if operation is EQUAL
   return op == cmSystemTools::OP_EQUAL;
 }
@@ -2766,177 +2398,152 @@ bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
 bool cmSystemTools::VersionCompareEqual(std::string const& lhs,
                                         std::string const& rhs)
 {
-  return cmSystemTools::VersionCompare(
-    cmSystemTools::OP_EQUAL, lhs.c_str(), rhs.c_str());
+  return cmSystemTools::VersionCompare(cmSystemTools::OP_EQUAL, lhs.c_str(),
+                                       rhs.c_str());
 }
 
 bool cmSystemTools::VersionCompareGreater(std::string const& lhs,
                                           std::string const& rhs)
 {
-  return cmSystemTools::VersionCompare(
-    cmSystemTools::OP_GREATER, lhs.c_str(), rhs.c_str());
+  return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER, lhs.c_str(),
+                                       rhs.c_str());
 }
 
 bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
                                 bool* removed)
 {
 #if defined(CMAKE_USE_ELF_PARSER)
-  if(removed)
-    {
+  if (removed) {
     *removed = false;
-    }
+  }
   int zeroCount = 0;
-  unsigned long zeroPosition[2] = {0,0};
-  unsigned long zeroSize[2] = {0,0};
+  unsigned long zeroPosition[2] = { 0, 0 };
+  unsigned long zeroSize[2] = { 0, 0 };
   unsigned long bytesBegin = 0;
   std::vector<char> bytes;
   {
-  // Parse the ELF binary.
-  cmELF elf(file.c_str());
+    // Parse the ELF binary.
+    cmELF elf(file.c_str());
 
-  // Get the RPATH and RUNPATH entries from it and sort them by index
-  // in the dynamic section header.
-  int se_count = 0;
-  cmELF::StringEntry const* se[2] = {0, 0};
-  if(cmELF::StringEntry const* se_rpath = elf.GetRPath())
-    {
-    se[se_count++] = se_rpath;
+    // Get the RPATH and RUNPATH entries from it and sort them by index
+    // in the dynamic section header.
+    int se_count = 0;
+    cmELF::StringEntry const* se[2] = { 0, 0 };
+    if (cmELF::StringEntry const* se_rpath = elf.GetRPath()) {
+      se[se_count++] = se_rpath;
     }
-  if(cmELF::StringEntry const* se_runpath = elf.GetRunPath())
-    {
-    se[se_count++] = se_runpath;
+    if (cmELF::StringEntry const* se_runpath = elf.GetRunPath()) {
+      se[se_count++] = se_runpath;
     }
-  if(se_count == 0)
-    {
-    // There is no RPATH or RUNPATH anyway.
-    return true;
+    if (se_count == 0) {
+      // There is no RPATH or RUNPATH anyway.
+      return true;
     }
-  if(se_count == 2 && se[1]->IndexInSection < se[0]->IndexInSection)
-    {
-    std::swap(se[0], se[1]);
+    if (se_count == 2 && se[1]->IndexInSection < se[0]->IndexInSection) {
+      std::swap(se[0], se[1]);
     }
 
-  // Get the size of the dynamic section header.
-  unsigned int count = elf.GetDynamicEntryCount();
-  if(count == 0)
-    {
-    // This should happen only for invalid ELF files where a DT_NULL
-    // appears before the end of the table.
-    if(emsg)
-      {
-      *emsg = "DYNAMIC section contains a DT_NULL before the end.";
+    // Get the size of the dynamic section header.
+    unsigned int count = elf.GetDynamicEntryCount();
+    if (count == 0) {
+      // This should happen only for invalid ELF files where a DT_NULL
+      // appears before the end of the table.
+      if (emsg) {
+        *emsg = "DYNAMIC section contains a DT_NULL before the end.";
       }
-    return false;
-    }
-
-  // Save information about the string entries to be zeroed.
-  zeroCount = se_count;
-  for(int i=0; i < se_count; ++i)
-    {
-    zeroPosition[i] = se[i]->Position;
-    zeroSize[i] = se[i]->Size;
-    }
-
-  // Get the range of file positions corresponding to each entry and
-  // the rest of the table after them.
-  unsigned long entryBegin[3] = {0,0,0};
-  unsigned long entryEnd[2] = {0,0};
-  for(int i=0; i < se_count; ++i)
-    {
-    entryBegin[i] = elf.GetDynamicEntryPosition(se[i]->IndexInSection);
-    entryEnd[i] = elf.GetDynamicEntryPosition(se[i]->IndexInSection+1);
-    }
-  entryBegin[se_count] = elf.GetDynamicEntryPosition(count);
-
-  // The data are to be written over the old table entries starting at
-  // the first one being removed.
-  bytesBegin = entryBegin[0];
-  unsigned long bytesEnd = entryBegin[se_count];
-
-  // Allocate a buffer to hold the part of the file to be written.
-  // Initialize it with zeros.
-  bytes.resize(bytesEnd - bytesBegin, 0);
-
-  // Read the part of the DYNAMIC section header that will move.
-  // The remainder of the buffer will be left with zeros which
-  // represent a DT_NULL entry.
-  char* data = &bytes[0];
-  for(int i=0; i < se_count; ++i)
-    {
-    // Read data between the entries being removed.
-    unsigned long sz = entryBegin[i+1] - entryEnd[i];
-    if(sz > 0 && !elf.ReadBytes(entryEnd[i], sz, data))
-      {
-      if(emsg)
-        {
-        *emsg = "Failed to read DYNAMIC section header.";
-        }
       return false;
+    }
+
+    // Save information about the string entries to be zeroed.
+    zeroCount = se_count;
+    for (int i = 0; i < se_count; ++i) {
+      zeroPosition[i] = se[i]->Position;
+      zeroSize[i] = se[i]->Size;
+    }
+
+    // Get the range of file positions corresponding to each entry and
+    // the rest of the table after them.
+    unsigned long entryBegin[3] = { 0, 0, 0 };
+    unsigned long entryEnd[2] = { 0, 0 };
+    for (int i = 0; i < se_count; ++i) {
+      entryBegin[i] = elf.GetDynamicEntryPosition(se[i]->IndexInSection);
+      entryEnd[i] = elf.GetDynamicEntryPosition(se[i]->IndexInSection + 1);
+    }
+    entryBegin[se_count] = elf.GetDynamicEntryPosition(count);
+
+    // The data are to be written over the old table entries starting at
+    // the first one being removed.
+    bytesBegin = entryBegin[0];
+    unsigned long bytesEnd = entryBegin[se_count];
+
+    // Allocate a buffer to hold the part of the file to be written.
+    // Initialize it with zeros.
+    bytes.resize(bytesEnd - bytesBegin, 0);
+
+    // Read the part of the DYNAMIC section header that will move.
+    // The remainder of the buffer will be left with zeros which
+    // represent a DT_NULL entry.
+    char* data = &bytes[0];
+    for (int i = 0; i < se_count; ++i) {
+      // Read data between the entries being removed.
+      unsigned long sz = entryBegin[i + 1] - entryEnd[i];
+      if (sz > 0 && !elf.ReadBytes(entryEnd[i], sz, data)) {
+        if (emsg) {
+          *emsg = "Failed to read DYNAMIC section header.";
+        }
+        return false;
       }
-    data += sz;
+      data += sz;
     }
   }
 
   // Open the file for update.
   cmsys::ofstream f(file.c_str(),
-                  std::ios::in | std::ios::out | std::ios::binary);
-  if(!f)
-    {
-    if(emsg)
-      {
+                    std::ios::in | std::ios::out | std::ios::binary);
+  if (!f) {
+    if (emsg) {
       *emsg = "Error opening file for update.";
-      }
-    return false;
     }
+    return false;
+  }
 
   // Write the new DYNAMIC table header.
-  if(!f.seekp(bytesBegin))
-    {
-    if(emsg)
-      {
+  if (!f.seekp(bytesBegin)) {
+    if (emsg) {
       *emsg = "Error seeking to DYNAMIC table header for RPATH.";
-      }
-    return false;
     }
-  if(!f.write(&bytes[0], bytes.size()))
-    {
-    if(emsg)
-      {
+    return false;
+  }
+  if (!f.write(&bytes[0], bytes.size())) {
+    if (emsg) {
       *emsg = "Error replacing DYNAMIC table header.";
-      }
-    return false;
     }
+    return false;
+  }
 
   // Fill the RPATH and RUNPATH strings with zero bytes.
-  for(int i=0; i < zeroCount; ++i)
-    {
-    if(!f.seekp(zeroPosition[i]))
-      {
-      if(emsg)
-        {
+  for (int i = 0; i < zeroCount; ++i) {
+    if (!f.seekp(zeroPosition[i])) {
+      if (emsg) {
         *emsg = "Error seeking to RPATH position.";
-        }
+      }
       return false;
-      }
-    for(unsigned long j=0; j < zeroSize[i]; ++j)
-      {
-      f << '\0';
-      }
-    if(!f)
-      {
-      if(emsg)
-        {
-        *emsg = "Error writing the empty rpath string to the file.";
-        }
-      return false;
-      }
     }
+    for (unsigned long j = 0; j < zeroSize[i]; ++j) {
+      f << '\0';
+    }
+    if (!f) {
+      if (emsg) {
+        *emsg = "Error writing the empty rpath string to the file.";
+      }
+      return false;
+    }
+  }
 
   // Everything was updated successfully.
-  if(removed)
-    {
+  if (removed) {
     *removed = true;
-    }
+  }
   return true;
 #else
   (void)file;
@@ -2955,27 +2562,21 @@ bool cmSystemTools::CheckRPath(std::string const& file,
 
   // Get the RPATH or RUNPATH entry from it.
   cmELF::StringEntry const* se = elf.GetRPath();
-  if(!se)
-    {
+  if (!se) {
     se = elf.GetRunPath();
-    }
+  }
 
   // Make sure the current rpath contains the new rpath.
-  if(newRPath.empty())
-    {
-    if(!se)
-      {
+  if (newRPath.empty()) {
+    if (!se) {
       return true;
-      }
     }
-  else
-    {
-    if(se &&
-       cmSystemToolsFindRPath(se->Value, newRPath) != std::string::npos)
-      {
+  } else {
+    if (se &&
+        cmSystemToolsFindRPath(se->Value, newRPath) != std::string::npos) {
       return true;
-      }
     }
+  }
   return false;
 #else
   (void)file;
@@ -2987,52 +2588,44 @@ bool cmSystemTools::CheckRPath(std::string const& file,
 bool cmSystemTools::RepeatedRemoveDirectory(const char* dir)
 {
   // Windows sometimes locks files temporarily so try a few times.
-  for(int i = 0; i < 10; ++i)
-    {
-    if(cmSystemTools::RemoveADirectory(dir))
-      {
+  for (int i = 0; i < 10; ++i) {
+    if (cmSystemTools::RemoveADirectory(dir)) {
       return true;
-      }
-    cmSystemTools::Delay(100);
     }
+    cmSystemTools::Delay(100);
+  }
   return false;
 }
 
 std::vector<std::string> cmSystemTools::tokenize(const std::string& str,
-                                  const std::string& sep)
+                                                 const std::string& sep)
 {
   std::vector<std::string> tokens;
   std::string::size_type tokend = 0;
 
-  do
-    {
-    std::string::size_type tokstart=str.find_first_not_of(sep, tokend);
-    if (tokstart==std::string::npos)
-      {
-      break;    // no more tokens
-      }
-    tokend=str.find_first_of(sep,tokstart);
-    if (tokend==std::string::npos)
-      {
-      tokens.push_back(str.substr(tokstart));
-      }
-    else
-      {
-      tokens.push_back(str.substr(tokstart,tokend-tokstart));
-      }
-    } while (tokend!=std::string::npos);
-
-  if (tokens.empty())
-    {
-    tokens.push_back("");
+  do {
+    std::string::size_type tokstart = str.find_first_not_of(sep, tokend);
+    if (tokstart == std::string::npos) {
+      break; // no more tokens
     }
+    tokend = str.find_first_of(sep, tokstart);
+    if (tokend == std::string::npos) {
+      tokens.push_back(str.substr(tokstart));
+    } else {
+      tokens.push_back(str.substr(tokstart, tokend - tokstart));
+    }
+  } while (tokend != std::string::npos);
+
+  if (tokens.empty()) {
+    tokens.push_back("");
+  }
   return tokens;
 }
 
 bool cmSystemTools::StringToLong(const char* str, long* value)
 {
   errno = 0;
-  char *endp;
+  char* endp;
   *value = strtol(str, &endp, 10);
   return (*endp == '\0') && (endp != str) && (errno == 0);
 }
@@ -3040,7 +2633,7 @@ bool cmSystemTools::StringToLong(const char* str, long* value)
 bool cmSystemTools::StringToULong(const char* str, unsigned long* value)
 {
   errno = 0;
-  char *endp;
+  char* endp;
   *value = strtoul(str, &endp, 10);
   return (*endp == '\0') && (endp != str) && (errno == 0);
 }

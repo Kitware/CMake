@@ -1,9 +1,12 @@
-struct A {};
-struct B {
+struct A
+{
+};
+struct B
+{
   B(A) {}
 };
 
 void Func()
 {
-  B b{A{}};
+  B b{ A{} };
 }

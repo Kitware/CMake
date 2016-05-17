@@ -22,24 +22,23 @@
 class cmCTestCoverageCommand : public cmCTestHandlerCommand
 {
 public:
-
   cmCTestCoverageCommand();
 
   /**
    * This is a virtual constructor for the command.
    */
   virtual cmCommand* Clone()
-    {
+  {
     cmCTestCoverageCommand* ni = new cmCTestCoverageCommand;
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
-    }
+  }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_coverage";}
+  virtual std::string GetName() const { return "ctest_coverage"; }
 
   cmTypeMacro(cmCTestCoverageCommand, cmCTestHandlerCommand);
 
@@ -59,6 +58,4 @@ protected:
   std::set<std::string> Labels;
 };
 
-
 #endif
-

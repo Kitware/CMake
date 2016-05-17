@@ -1,1 +1,4 @@
-int lib() { return 0; }
+int lib()
+{
+  return 0;
+}

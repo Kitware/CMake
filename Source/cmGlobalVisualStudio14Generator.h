@@ -14,14 +14,12 @@
 
 #include "cmGlobalVisualStudio12Generator.h"
 
-
 /** \class cmGlobalVisualStudio14Generator  */
-class cmGlobalVisualStudio14Generator:
-  public cmGlobalVisualStudio12Generator
+class cmGlobalVisualStudio14Generator : public cmGlobalVisualStudio12Generator
 {
 public:
   cmGlobalVisualStudio14Generator(cmake* cm, const std::string& name,
-    const std::string& platformName);
+                                  const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   virtual bool MatchesGeneratorName(const std::string& name) const;

@@ -12,10 +12,11 @@
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 
-#define cmFailed(m1, m2) \
-  std::cout << "FAILED: " << m1 << m2 << "\n"; failed=1
+#define cmFailed(m1, m2)                                                      \
+  std::cout << "FAILED: " << m1 << m2 << "\n";                                \
+  failed = 1
 
-int testGeneratedFileStream(int, char*[])
+int testGeneratedFileStream(int, char* [])
 {
   int failed = 0;
   cmGeneratedFileStream gm;
@@ -39,54 +40,47 @@ int testGeneratedFileStream(int, char*[])
   gm.Open(file4.c_str());
   gm << "This is generated file 4";
   gm.Close();
-  if ( cmSystemTools::FileExists(file1.c_str()) )
-    {
-    if ( cmSystemTools::FileExists(file2.c_str()) )
-      {
-      if ( cmSystemTools::FileExists(file3.c_str()) )
-        {
-        if ( cmSystemTools::FileExists(file4.c_str()) )
-          {
-          if ( cmSystemTools::FileExists(file1tmp.c_str()) )
-            {
-            cmFailed("Something wrong with cmGeneratedFileStream. Temporary file is still here: ", file1tmp.c_str());
-            }
-          else if ( cmSystemTools::FileExists(file2tmp.c_str()) )
-            {
-            cmFailed("Something wrong with cmGeneratedFileStream. Temporary file is still here: ", file2tmp.c_str());
-            }
-          else if ( cmSystemTools::FileExists(file3tmp.c_str()) )
-            {
-            cmFailed("Something wrong with cmGeneratedFileStream. Temporary file is still here: ", file3tmp.c_str());
-            }
-          else if ( cmSystemTools::FileExists(file4tmp.c_str()) )
-            {
-            cmFailed("Something wrong with cmGeneratedFileStream. Temporary file is still here: ", file4tmp.c_str());
-            }
-          else
-            {
+  if (cmSystemTools::FileExists(file1.c_str())) {
+    if (cmSystemTools::FileExists(file2.c_str())) {
+      if (cmSystemTools::FileExists(file3.c_str())) {
+        if (cmSystemTools::FileExists(file4.c_str())) {
+          if (cmSystemTools::FileExists(file1tmp.c_str())) {
+            cmFailed("Something wrong with cmGeneratedFileStream. Temporary "
+                     "file is still here: ",
+                     file1tmp.c_str());
+          } else if (cmSystemTools::FileExists(file2tmp.c_str())) {
+            cmFailed("Something wrong with cmGeneratedFileStream. Temporary "
+                     "file is still here: ",
+                     file2tmp.c_str());
+          } else if (cmSystemTools::FileExists(file3tmp.c_str())) {
+            cmFailed("Something wrong with cmGeneratedFileStream. Temporary "
+                     "file is still here: ",
+                     file3tmp.c_str());
+          } else if (cmSystemTools::FileExists(file4tmp.c_str())) {
+            cmFailed("Something wrong with cmGeneratedFileStream. Temporary "
+                     "file is still here: ",
+                     file4tmp.c_str());
+          } else {
             std::cout << "cmGeneratedFileStream works\n";
-            }
           }
-        else
-          {
-          cmFailed("Something wrong with cmGeneratedFileStream. Cannot find file: ", file4.c_str());
-          }
+        } else {
+          cmFailed(
+            "Something wrong with cmGeneratedFileStream. Cannot find file: ",
+            file4.c_str());
         }
-      else
-        {
-        cmFailed("Something wrong with cmGeneratedFileStream. Found file: ", file3.c_str());
-        }
+      } else {
+        cmFailed("Something wrong with cmGeneratedFileStream. Found file: ",
+                 file3.c_str());
       }
-    else
-      {
-      cmFailed("Something wrong with cmGeneratedFileStream. Cannot find file: ", file2.c_str());
-      }
+    } else {
+      cmFailed(
+        "Something wrong with cmGeneratedFileStream. Cannot find file: ",
+        file2.c_str());
     }
-  else
-    {
-    cmFailed("Something wrong with cmGeneratedFileStream. Cannot find file: ", file1.c_str());
-    }
+  } else {
+    cmFailed("Something wrong with cmGeneratedFileStream. Cannot find file: ",
+             file1.c_str());
+  }
   cmSystemTools::RemoveFile(file1.c_str());
   cmSystemTools::RemoveFile(file2.c_str());
   cmSystemTools::RemoveFile(file3.c_str());

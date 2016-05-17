@@ -17,13 +17,12 @@ extern "C" {
 #include <stdio.h>
 #include <sys/stat.h>
 #if !defined(S_ISDIR)
-# define S_ISDIR(mode) ((mode) & _S_IFDIR)
+#define S_ISDIR(mode) ((mode)&_S_IFDIR)
 #endif
 
 #ifdef COMPLEX_TEST_LINK_STATIC
-extern "C"
-{
-  int TestLinkGetType();
+extern "C" {
+int TestLinkGetType();
 }
 #endif
 
@@ -31,7 +30,7 @@ int cm_passed = 0;
 int cm_failed = 0;
 // ======================================================================
 
-void cmFailed(const char* Message, const char* m2= "", const char* m3 = "")
+void cmFailed(const char* Message, const char* m2 = "", const char* m3 = "")
 {
   std::cout << "FAILED: " << Message << m2 << m3 << "\n";
   cm_failed++;
@@ -39,30 +38,30 @@ void cmFailed(const char* Message, const char* m2= "", const char* m3 = "")
 
 // ======================================================================
 
-void cmPassed(const char* Message, const char* m2="")
+void cmPassed(const char* Message, const char* m2 = "")
 {
   std::cout << "Passed: " << Message << m2 << "\n";
   cm_passed++;
 }
 
 #ifndef COMPLEX_DEFINED_PRE
-# error "COMPLEX_DEFINED_PRE not defined!"
+#error "COMPLEX_DEFINED_PRE not defined!"
 #endif
 
 #ifdef COMPLEX_DEFINED
-# error "COMPLEX_DEFINED is defined but it should not!"
+#error "COMPLEX_DEFINED is defined but it should not!"
 #endif
 
 #ifndef COMPLEX_DEFINED_POST
-# error "COMPLEX_DEFINED_POST not defined!"
+#error "COMPLEX_DEFINED_POST not defined!"
 #endif
 
 #ifndef CMAKE_IS_REALLY_FUN
-# error This is a problem. Looks like ADD_DEFINITIONS and REMOVE_DEFINITIONS does not work
+#error This is a problem. Looks like ADD_DEFINITIONS and REMOVE_DEFINITIONS does not work
 #endif
 
 #if defined(NDEBUG) && !defined(CMAKE_IS_FUN_IN_RELEASE_MODE)
-# error Per-configuration directory-level definition not inherited.
+#error Per-configuration directory-level definition not inherited.
 #endif
 
 // ======================================================================
@@ -70,21 +69,18 @@ void cmPassed(const char* Message, const char* m2="")
 void TestAndRemoveFile(const char* filename)
 {
   struct stat st;
-  if(stat(filename, &st) < 0)
-    {
+  if (stat(filename, &st) < 0) {
     cmFailed("Could not find file: ", filename);
-    }
-  else
-    {
-    if (remove(filename) < 0)
-      {
-      cmFailed("Unable to remove file. It does not imply that this test failed, but it *will* be corrupted thereafter if this file is not removed: ", filename);
-      }
-    else
-      {
+  } else {
+    if (remove(filename) < 0) {
+      cmFailed("Unable to remove file. It does not imply that this test "
+               "failed, but it *will* be corrupted thereafter if this file is "
+               "not removed: ",
+               filename);
+    } else {
       cmPassed("Find and remove file: ", filename);
-      }
     }
+  }
 }
 
 // ======================================================================
@@ -92,14 +88,11 @@ void TestAndRemoveFile(const char* filename)
 void TestDir(const char* filename)
 {
   struct stat st;
-  if(stat(filename, &st) < 0 || !S_ISDIR(st.st_mode))
-    {
+  if (stat(filename, &st) < 0 || !S_ISDIR(st.st_mode)) {
     cmFailed("Could not find dir: ", filename);
-    }
-  else
-    {
+  } else {
     cmPassed("Find dir: ", filename);
-    }
+  }
 }
 
 // Here is a stupid function that tries to use std::string methods
@@ -113,7 +106,7 @@ void ForceStringUse()
   std::string cachetest = CACHE_TEST_VAR_INTERNAL;
   v.push_back(cachetest);
   v2 = v;
-  std::string x(5,'x');
+  std::string x(5, 'x');
   char buff[5];
   x.copy(buff, 1, 0);
   x[0] = 'a';
@@ -125,7 +118,6 @@ void ForceStringUse()
   copy.append(cachetest);
   copy = cachetest.substr(0, cachetest.size());
 }
-
 
 // defined in testcflags.c
 extern "C" int TestCFlags(char* m);
@@ -152,14 +144,11 @@ int main()
     cmFailed("Sub dir with same named source fails");
     }
 #endif
-  if(file1() != 1)
-    {
+  if (file1() != 1) {
     cmFailed("Call to file1 function from library failed.");
-    }
-  else
-    {
+  } else {
     cmPassed("Call to file1 function returned 1.");
-    }
+  }
 #ifndef COMPLEX_TARGET_FLAG
   cmFailed("COMPILE_FLAGS did not work with SET_TARGET_PROPERTIES");
 #else
@@ -178,14 +167,11 @@ int main()
   cmFailed("CONDITIONAL_PARENTHESES did not work");
 #endif
 
-  if(file2() != 1)
-    {
+  if (file2() != 1) {
     cmFailed("Call to file2 function from library failed.");
-    }
-  else
-    {
+  } else {
     cmPassed("Call to file2 function returned 1.");
-    }
+  }
 #ifndef TEST_CXX_FLAGS
   cmFailed("CMake CMAKE_CXX_FLAGS is not being passed to the compiler!");
 #else
@@ -194,34 +180,28 @@ int main()
   std::string gen = CMAKE_GENERATOR;
   // visual studio is currently broken for c flags
   char msg[1024];
-  if(gen.find("Visual") == gen.npos)
-    {
+  if (gen.find("Visual") == gen.npos) {
 #ifdef TEST_C_FLAGS
-    cmFailed("CMake CMAKE_C_FLAGS are being passed to c++ files the compiler!");
+    cmFailed(
+      "CMake CMAKE_C_FLAGS are being passed to c++ files the compiler!");
 #else
     cmPassed("CMake CMAKE_C_FLAGS are not being passed to c++ files.");
 #endif
-    if(TestCFlags(msg))
-      {
-      cmPassed(
-        "CMake CMAKE_C_FLAGS are being passed to c files and CXX flags are not.");
-      }
-    else
-      {
+    if (TestCFlags(msg)) {
+      cmPassed("CMake CMAKE_C_FLAGS are being passed to c files and CXX flags "
+               "are not.");
+    } else {
       cmFailed(msg);
-      }
     }
-  if(TestTargetCompileFlags(msg))
-    {
+  }
+  if (TestTargetCompileFlags(msg)) {
     cmPassed(msg);
-    }
-  else
-    {
+  } else {
     cmFailed(msg);
-    }
+  }
 
-  // ----------------------------------------------------------------------
-  // Test ADD_DEFINITIONS
+// ----------------------------------------------------------------------
+// Test ADD_DEFINITIONS
 
 #ifndef CMAKE_IS_FUN
   cmFailed("CMake is not fun, so it is broken and should be fixed.");
@@ -229,38 +209,39 @@ int main()
   cmPassed("CMAKE_IS_FUN is defined.");
 #endif
 
-#if defined(CMAKE_ARGV1) && defined(CMAKE_ARGV2) && defined(CMAKE_ARGV3) && defined(CMAKE_ARGV4)
+#if defined(CMAKE_ARGV1) && defined(CMAKE_ARGV2) && defined(CMAKE_ARGV3) &&   \
+  defined(CMAKE_ARGV4)
   cmPassed("Variable args for MACROs are working.");
 #else
   cmFailed("Variable args for MACROs are failing.");
 #endif
 
-  // ----------------------------------------------------------------------
-  // Test GET_SOURCE_FILE_PROPERTY for location
+// ----------------------------------------------------------------------
+// Test GET_SOURCE_FILE_PROPERTY for location
 #ifndef CMAKE_FOUND_ACXX
   cmFailed("CMake did not get the location of A.cxx correctly");
 #else
   cmPassed("CMake found A.cxx properly");
 #endif
 
-  // ----------------------------------------------------------------------
-  // Test GET_DIRECTORY_PROPERTY for parent
+// ----------------------------------------------------------------------
+// Test GET_DIRECTORY_PROPERTY for parent
 #ifndef CMAKE_FOUND_PARENT
   cmFailed("CMake did not get the location of the parent directory properly");
 #else
   cmPassed("CMake found the parent directory properly");
 #endif
 
-  // ----------------------------------------------------------------------
-  // Test GET_DIRECTORY_PROPERTY for listfiles
+// ----------------------------------------------------------------------
+// Test GET_DIRECTORY_PROPERTY for listfiles
 #ifndef CMAKE_FOUND_LISTFILE_STACK
   cmFailed("CMake did not get the listfile stack properly");
 #else
   cmPassed("CMake found the listfile stack properly");
 #endif
 
-  // ----------------------------------------------------------------------
-  // Test SET, VARIABLE_REQUIRES
+// ----------------------------------------------------------------------
+// Test SET, VARIABLE_REQUIRES
 
 #ifdef SHOULD_NOT_BE_DEFINED
   cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED is defined.");
@@ -282,7 +263,7 @@ int main()
 
 #ifndef ONE_VAR_IS_DEFINED
   cmFailed("cmakedefine, SET or VARIABLE_REQUIRES is broken, "
-         "ONE_VAR_IS_DEFINED is not defined.");
+           "ONE_VAR_IS_DEFINED is not defined.");
 #else
   cmPassed("ONE_VAR_IS_DEFINED is defined.");
 #endif
@@ -296,19 +277,16 @@ int main()
 #ifndef STRING_VAR
   cmFailed("the CONFIGURE_FILE command is broken, STRING_VAR is not defined.");
 #else
-  if(strcmp(STRING_VAR, "CMake is great") != 0)
-    {
+  if (strcmp(STRING_VAR, "CMake is great") != 0) {
     cmFailed("the SET or CONFIGURE_FILE command is broken. STRING_VAR == ",
-           STRING_VAR);
-    }
-  else
-    {
+             STRING_VAR);
+  } else {
     cmPassed("STRING_VAR == ", STRING_VAR);
-    }
+  }
 #endif
 
-  // ----------------------------------------------------------------------
-  // Test various IF/ELSE combinations
+// ----------------------------------------------------------------------
+// Test various IF/ELSE combinations
 
 #ifdef SHOULD_NOT_BE_DEFINED_NOT
   cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_NOT is defined.");
@@ -401,7 +379,8 @@ int main()
 #endif
 
 #ifndef SHOULD_BE_DEFINED_MATCHES2
-  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_MATCHES2 is not defined.\n");
+  cmFailed(
+    "IF or SET is broken, SHOULD_BE_DEFINED_MATCHES2 is not defined.\n");
 #else
   cmPassed("SHOULD_BE_DEFINED_MATCHES2 is defined.");
 #endif
@@ -425,7 +404,8 @@ int main()
 #endif
 
 #ifndef SHOULD_BE_DEFINED_COMMAND2
-  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_COMMAND2 is not defined.\n");
+  cmFailed(
+    "IF or SET is broken, SHOULD_BE_DEFINED_COMMAND2 is not defined.\n");
 #else
   cmPassed("SHOULD_BE_DEFINED_COMMAND2 is defined.");
 #endif
@@ -455,13 +435,15 @@ int main()
 #endif
 
 #ifndef SHOULD_BE_DEFINED_IS_DIRECTORY
-  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_IS_DIRECTORY is not defined.\n");
+  cmFailed(
+    "IF or SET is broken, SHOULD_BE_DEFINED_IS_DIRECTORY is not defined.\n");
 #else
   cmPassed("SHOULD_BE_DEFINED_IS_DIRECTORY is defined.");
 #endif
 
 #ifndef SHOULD_BE_DEFINED_IS_DIRECTORY2
-  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_IS_DIRECTORY2 is not defined.\n");
+  cmFailed(
+    "IF or SET is broken, SHOULD_BE_DEFINED_IS_DIRECTORY2 is not defined.\n");
 #else
   cmPassed("SHOULD_BE_DEFINED_IS_DIRECTORY2 is defined.");
 #endif
@@ -521,7 +503,8 @@ int main()
 #endif
 
 #ifndef SHOULD_BE_DEFINED_GREATER2
-  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_GREATER2 is not defined.\n");
+  cmFailed(
+    "IF or SET is broken, SHOULD_BE_DEFINED_GREATER2 is not defined.\n");
 #else
   cmPassed("SHOULD_BE_DEFINED_GREATER2 is defined.");
 #endif
@@ -545,164 +528,153 @@ int main()
 #endif
 
 #ifndef SHOULD_BE_DEFINED_STRLESS2
-  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_STRLESS2 is not defined.\n");
+  cmFailed(
+    "IF or SET is broken, SHOULD_BE_DEFINED_STRLESS2 is not defined.\n");
 #else
   cmPassed("SHOULD_BE_DEFINED_STRLESS2 is defined.");
 #endif
 
 #ifdef SHOULD_NOT_BE_DEFINED_STRGREATER
-  cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_STRGREATER is defined.");
+  cmFailed(
+    "IF or SET is broken, SHOULD_NOT_BE_DEFINED_STRGREATER is defined.");
 #else
   cmPassed("SHOULD_NOT_BE_DEFINED_STRGREATER is not defined.");
 #endif
 
 #ifndef SHOULD_BE_DEFINED_STRGREATER
-  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_STRGREATER is not defined.\n");
+  cmFailed(
+    "IF or SET is broken, SHOULD_BE_DEFINED_STRGREATER is not defined.\n");
 #else
   cmPassed("SHOULD_BE_DEFINED_STRGREATER is defined.");
 #endif
 
 #ifdef SHOULD_NOT_BE_DEFINED_STRGREATER2
-  cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_STRGREATER2 is defined.");
+  cmFailed(
+    "IF or SET is broken, SHOULD_NOT_BE_DEFINED_STRGREATER2 is defined.");
 #else
   cmPassed("SHOULD_NOT_BE_DEFINED_STRGREATER2 is not defined.");
 #endif
 
 #ifndef SHOULD_BE_DEFINED_STRGREATER2
-  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_STRGREATER2 is not defined.\n");
+  cmFailed(
+    "IF or SET is broken, SHOULD_BE_DEFINED_STRGREATER2 is not defined.\n");
 #else
   cmPassed("SHOULD_BE_DEFINED_STRGREATER2 is defined.");
 #endif
 
-  // ----------------------------------------------------------------------
-  // Test FOREACH
+// ----------------------------------------------------------------------
+// Test FOREACH
 
 #ifndef FOREACH_VAR1
   cmFailed("the FOREACH, SET or CONFIGURE_FILE command is broken, "
-         "FOREACH_VAR1 is not defined.");
+           "FOREACH_VAR1 is not defined.");
 #else
-  if(strcmp(FOREACH_VAR1, "VALUE1") != 0)
-    {
+  if (strcmp(FOREACH_VAR1, "VALUE1") != 0) {
     cmFailed("the FOREACH, SET or CONFIGURE_FILE command is broken, "
-           "FOREACH_VAR1 == ", FOREACH_VAR1);
-    }
-  else
-    {
+             "FOREACH_VAR1 == ",
+             FOREACH_VAR1);
+  } else {
     cmPassed("FOREACH_VAR1 == ", FOREACH_VAR1);
-    }
+  }
 #endif
 
 #ifndef FOREACH_VAR2
   cmFailed("the FOREACH, SET or CONFIGURE_FILE command is broken, "
-         "FOREACH_VAR2 is not defined.");
+           "FOREACH_VAR2 is not defined.");
 #else
-  if(strcmp(FOREACH_VAR2, "VALUE2") != 0)
-    {
+  if (strcmp(FOREACH_VAR2, "VALUE2") != 0) {
     cmFailed("the FOREACH, SET or CONFIGURE_FILE command is broken, "
-           "FOREACH_VAR2 == ", FOREACH_VAR2);
-    }
-  else
-    {
+             "FOREACH_VAR2 == ",
+             FOREACH_VAR2);
+  } else {
     cmPassed("FOREACH_VAR2 == ", FOREACH_VAR2);
-    }
+  }
 #endif
 
 #ifndef FOREACH_CONCAT
   cmFailed("the FOREACH, SET or CONFIGURE_FILE command is broken, "
-         "FOREACH_CONCAT is not defined.");
+           "FOREACH_CONCAT is not defined.");
 #else
-  if(strcmp(FOREACH_CONCAT, "abcdefg") != 0)
-    {
+  if (strcmp(FOREACH_CONCAT, "abcdefg") != 0) {
     cmFailed("the FOREACH, SET or CONFIGURE_FILE command is broken, "
-           "FOREACH_CONCAT == ", FOREACH_CONCAT);
-    }
-  else
-    {
+             "FOREACH_CONCAT == ",
+             FOREACH_CONCAT);
+  } else {
     cmPassed("FOREACH_CONCAT == ", FOREACH_CONCAT);
-    }
+  }
 #endif
 
   // ----------------------------------------------------------------------
   // Test WHILE
 
-  if(WHILE_VALUE != 1000)
-    {
+  if (WHILE_VALUE != 1000) {
     cmFailed("WHILE command is not working");
-    }
-  else
-    {
+  } else {
     cmPassed("WHILE command is working");
-    }
+  }
 
-  // ----------------------------------------------------------------------
-  // Test LOAD_CACHE
+// ----------------------------------------------------------------------
+// Test LOAD_CACHE
 
 #ifndef CACHE_TEST_VAR1
   cmFailed("the LOAD_CACHE or CONFIGURE_FILE command is broken, "
-         "CACHE_TEST_VAR1 is not defined.");
+           "CACHE_TEST_VAR1 is not defined.");
 #else
-  if(strcmp(CACHE_TEST_VAR1, "foo") != 0)
-    {
+  if (strcmp(CACHE_TEST_VAR1, "foo") != 0) {
     cmFailed("the LOAD_CACHE or CONFIGURE_FILE command is broken, "
-           "CACHE_TEST_VAR1 == ", CACHE_TEST_VAR1);
-    }
-  else
-    {
+             "CACHE_TEST_VAR1 == ",
+             CACHE_TEST_VAR1);
+  } else {
     cmPassed("CACHE_TEST_VAR1 == ", CACHE_TEST_VAR1);
-    }
+  }
 #endif
 
 #ifndef CACHE_TEST_VAR2
   cmFailed("the LOAD_CACHE or CONFIGURE_FILE command is broken, "
-         "CACHE_TEST_VAR2 is not defined.");
+           "CACHE_TEST_VAR2 is not defined.");
 #else
-  if(strcmp(CACHE_TEST_VAR2, "bar") != 0)
-    {
+  if (strcmp(CACHE_TEST_VAR2, "bar") != 0) {
     cmFailed("the LOAD_CACHE or CONFIGURE_FILE command is broken, "
-           "CACHE_TEST_VAR2 == ", CACHE_TEST_VAR2);
-    }
-  else
-    {
+             "CACHE_TEST_VAR2 == ",
+             CACHE_TEST_VAR2);
+  } else {
     cmPassed("CACHE_TEST_VAR2 == ", CACHE_TEST_VAR2);
-    }
+  }
 #endif
 
 #ifndef CACHE_TEST_VAR3
   cmFailed("the LOAD_CACHE or CONFIGURE_FILE command is broken, "
-         "CACHE_TEST_VAR3 is not defined.");
+           "CACHE_TEST_VAR3 is not defined.");
 #else
-  if(strcmp(CACHE_TEST_VAR3, "1") != 0)
-    {
+  if (strcmp(CACHE_TEST_VAR3, "1") != 0) {
     cmFailed("the LOAD_CACHE or CONFIGURE_FILE command is broken, "
-           "CACHE_TEST_VAR3 == ", CACHE_TEST_VAR3);
-    }
-  else
-    {
+             "CACHE_TEST_VAR3 == ",
+             CACHE_TEST_VAR3);
+  } else {
     cmPassed("CACHE_TEST_VAR3 == ", CACHE_TEST_VAR3);
-    }
+  }
 #endif
 
 #ifdef CACHE_TEST_VAR_EXCLUDED
-  cmFailed("the LOAD_CACHE or CONFIGURE_FILE command or cmakedefine is broken, "
-         "CACHE_TEST_VAR_EXCLUDED is defined (should not have been loaded).");
+  cmFailed(
+    "the LOAD_CACHE or CONFIGURE_FILE command or cmakedefine is broken, "
+    "CACHE_TEST_VAR_EXCLUDED is defined (should not have been loaded).");
 #else
   cmPassed("CACHE_TEST_VAR_EXCLUDED is not defined.");
 #endif
 
 #ifndef CACHE_TEST_VAR_INTERNAL
   cmFailed("the LOAD_CACHE or CONFIGURE_FILE command is broken, "
-         "CACHE_TEST_VAR_INTERNAL is not defined.");
+           "CACHE_TEST_VAR_INTERNAL is not defined.");
 #else
   std::string cachetest = CACHE_TEST_VAR_INTERNAL;
-  if(cachetest != "bar")
-    {
+  if (cachetest != "bar") {
     cmFailed("the LOAD_CACHE or CONFIGURE_FILE command is broken, "
-           "CACHE_TEST_VAR_INTERNAL == ", CACHE_TEST_VAR_INTERNAL);
-    }
-  else
-    {
+             "CACHE_TEST_VAR_INTERNAL == ",
+             CACHE_TEST_VAR_INTERNAL);
+  } else {
     cmPassed("CACHE_TEST_VAR_INTERNAL == ", CACHE_TEST_VAR_INTERNAL);
-    }
+  }
 #endif
 
   // ----------------------------------------------------------------------
@@ -751,34 +723,34 @@ int main()
 
   TestAndRemoveFile("Executable/Temp/complex-required.txt");
 
-  // ----------------------------------------------------------------------
-  // Test FIND_LIBRARY
+// ----------------------------------------------------------------------
+// Test FIND_LIBRARY
 
 #ifndef FIND_DUMMY_LIB
   cmFailed("the CONFIGURE_FILE command is broken, "
-         "FIND_DUMMY_LIB is not defined.");
+           "FIND_DUMMY_LIB is not defined.");
 #else
-  if(strstr(FIND_DUMMY_LIB, "dummylib") == NULL)
-    {
+  if (strstr(FIND_DUMMY_LIB, "dummylib") == NULL) {
     cmFailed("the FIND_LIBRARY or CONFIGURE_FILE command is broken, "
-           "FIND_DUMMY_LIB == ", FIND_DUMMY_LIB);
-    }
-  else
-    {
+             "FIND_DUMMY_LIB == ",
+             FIND_DUMMY_LIB);
+  } else {
     cmPassed("FIND_DUMMY_LIB == ", FIND_DUMMY_LIB);
-    }
+  }
 #endif
 
-  // ----------------------------------------------------------------------
-  // Test SET_SOURCE_FILES_PROPERTIES
+// ----------------------------------------------------------------------
+// Test SET_SOURCE_FILES_PROPERTIES
 
 #ifndef FILE_HAS_EXTRA_COMPILE_FLAGS
-  cmFailed("SET_SOURCE_FILES_PROPERTIES failed at setting FILE_HAS_EXTRA_COMPILE_FLAGS flag");
+  cmFailed("SET_SOURCE_FILES_PROPERTIES failed at setting "
+           "FILE_HAS_EXTRA_COMPILE_FLAGS flag");
 #else
-  cmPassed("SET_SOURCE_FILES_PROPERTIES succeeded in setting FILE_HAS_EXTRA_COMPILE_FLAGS flag");
+  cmPassed("SET_SOURCE_FILES_PROPERTIES succeeded in setting "
+           "FILE_HAS_EXTRA_COMPILE_FLAGS flag");
 #endif
 
-#if 0  // Disable until implemented everywhere.
+#if 0 // Disable until implemented everywhere.
 #ifndef FILE_DEFINE_STRING
   cmFailed("SET_SOURCE_FILES_PROPERTIES failed at setting FILE_DEFINE_STRING flag");
 #else
@@ -806,84 +778,72 @@ int main()
 #endif
 
 #ifndef FILE_COMPILE_FLAGS
-  cmFailed("the CONFIGURE_FILE command is broken, FILE_COMPILE_FLAGS is not defined.");
+  cmFailed("the CONFIGURE_FILE command is broken, FILE_COMPILE_FLAGS is not "
+           "defined.");
 #else
-  if(strcmp(FILE_COMPILE_FLAGS, "-foo -bar") != 0)
-    {
-    cmFailed("the SET_SOURCE_FILES_PROPERTIES or CONFIGURE_FILE command is broken. FILE_COMPILE_FLAGS == ",
+  if (strcmp(FILE_COMPILE_FLAGS, "-foo -bar") != 0) {
+    cmFailed("the SET_SOURCE_FILES_PROPERTIES or CONFIGURE_FILE command is "
+             "broken. FILE_COMPILE_FLAGS == ",
              FILE_COMPILE_FLAGS);
-    }
-  else
-    {
-    cmPassed("SET_SOURCE_FILES_PROPERTIES succeeded in setting extra flags == ", FILE_COMPILE_FLAGS);
-    }
+  } else {
+    cmPassed(
+      "SET_SOURCE_FILES_PROPERTIES succeeded in setting extra flags == ",
+      FILE_COMPILE_FLAGS);
+  }
 #endif
 
-  // ----------------------------------------------------------------------
-  // Test registry (win32)
+// ----------------------------------------------------------------------
+// Test registry (win32)
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #ifndef REGISTRY_TEST_PATH
-  cmFailed("the CONFIGURE_FILE command is broken, REGISTRY_TEST_PATH is not defined.");
+  cmFailed("the CONFIGURE_FILE command is broken, REGISTRY_TEST_PATH is not "
+           "defined.");
 #else
   std::cout << "REGISTRY_TEST_PATH == " << REGISTRY_TEST_PATH << "\n";
-  if(stricmp(REGISTRY_TEST_PATH, BINARY_DIR "/registry_dir") != 0)
-    {
-    cmFailed("the 'read registry value' function or CONFIGURE_FILE command is broken. REGISTRY_TEST_PATH == ",
+  if (stricmp(REGISTRY_TEST_PATH, BINARY_DIR "/registry_dir") != 0) {
+    cmFailed("the 'read registry value' function or CONFIGURE_FILE command is "
+             "broken. REGISTRY_TEST_PATH == ",
              REGISTRY_TEST_PATH, " is not " BINARY_DIR "/registry_dir");
-    }
-  else
-    {
+  } else {
     cmPassed("REGISTRY_TEST_PATH == ", REGISTRY_TEST_PATH);
-    }
+  }
 #endif
 #endif // defined(_WIN32) && !defined(__CYGWIN__)
 
-  if(strcmp(CMAKE_MINIMUM_REQUIRED_VERSION, "2.4") == 0)
-    {
+  if (strcmp(CMAKE_MINIMUM_REQUIRED_VERSION, "2.4") == 0) {
     cmPassed("CMAKE_MINIMUM_REQUIRED_VERSION is set to 2.4");
-    }
-  else
-    {
+  } else {
     cmFailed("CMAKE_MINIMUM_REQUIRED_VERSION is not set to the expected 2.4");
-    }
+  }
 
   // ----------------------------------------------------------------------
   // Test REMOVE command
-  if (strcmp("a;b;d",REMOVE_STRING) == 0)
-    {
+  if (strcmp("a;b;d", REMOVE_STRING) == 0) {
     cmPassed("REMOVE is working");
-    }
-  else
-    {
+  } else {
     cmFailed("REMOVE is not working");
-    }
+  }
 
   // ----------------------------------------------------------------------
   // Test SEPARATE_ARGUMENTS
-  if(strcmp("a;b;c", TEST_SEP) == 0)
-    {
+  if (strcmp("a;b;c", TEST_SEP) == 0) {
     cmPassed("SEPARATE_ARGUMENTS is working");
-    }
-  else
-    {
+  } else {
     cmFailed("SEPARATE_ARGUMENTS is not working");
-    }
+  }
 
   // ----------------------------------------------------------------------
   // Test Escape Quotes
-  if(strcmp("\"hello world\"", STRING_WITH_QUOTES) == 0)
-    {
+  if (strcmp("\"hello world\"", STRING_WITH_QUOTES) == 0) {
     cmPassed("ESCAPE_QUOTES is working");
-    }
-  else
-    {
+  } else {
     cmFailed("ESCAPE_QUOTES is not working");
-    }
+  }
 
-
-  // ----------------------------------------------------------------------
-  // Test if IF command inside a FOREACH works.
-#if defined(IF_INSIDE_FOREACH_THEN_EXECUTED) && !defined(IF_INSIDE_FOREACH_ELSE_EXECUTED)
+// ----------------------------------------------------------------------
+// Test if IF command inside a FOREACH works.
+#if defined(IF_INSIDE_FOREACH_THEN_EXECUTED) &&                               \
+  !defined(IF_INSIDE_FOREACH_ELSE_EXECUTED)
   cmPassed("IF inside a FOREACH block works");
 #else
   cmFailed("IF inside a FOREACH block is broken");
@@ -894,22 +854,16 @@ int main()
 #else
   cmFailed("Generated header included by non-generated source failed.");
 #endif
-  if(SHOULD_BE_ZERO == 0)
-    {
+  if (SHOULD_BE_ZERO == 0) {
     cmPassed("cmakedefine01 is working for 0");
-    }
-  else
-    {
+  } else {
     cmFailed("cmakedefine01 is not working for 0");
-    }
-  if(SHOULD_BE_ONE == 1)
-    {
+  }
+  if (SHOULD_BE_ONE == 1) {
     cmPassed("cmakedefine01 is working for 1");
-    }
-  else
-    {
+  } else {
     cmFailed("cmakedefine01 is not working for 1");
-    }
+  }
 #ifdef FORCE_TEST
   cmFailed("CMake SET CACHE FORCE");
 #else
@@ -917,14 +871,11 @@ int main()
 #endif
 
 #ifdef COMPLEX_TEST_LINK_STATIC
-  if(TestLinkGetType())
-    {
+  if (TestLinkGetType()) {
     cmPassed("Link to static over shared worked.");
-    }
-  else
-    {
+  } else {
     cmFailed("Link to static over shared failed.");
-    }
+  }
 #endif
 
 #if defined(A_VALUE) && A_VALUE == 10
@@ -937,10 +888,9 @@ int main()
   // Summary
 
   std::cout << "Passed: " << cm_passed << "\n";
-  if(cm_failed)
-    {
+  if (cm_failed) {
     std::cout << "Failed: " << cm_failed << "\n";
     return cm_failed;
-    }
+  }
   return 0;
 }

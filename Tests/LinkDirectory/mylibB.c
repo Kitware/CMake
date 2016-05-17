@@ -1,1 +1,4 @@
-int mylibB(void) { return 0; }
+int mylibB(void)
+{
+  return 0;
+}

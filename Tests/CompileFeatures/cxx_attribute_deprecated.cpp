@@ -1,6 +1,5 @@
 
-[[deprecated]]
-int foo()
+[[deprecated]] int foo()
 {
   return 0;
 }

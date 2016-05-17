@@ -5,7 +5,7 @@
 
 #include "subdirlib.h"
 
-int main(int, char **)
+int main(int, char**)
 {
   DepA a;
   DepB b;

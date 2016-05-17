@@ -29,9 +29,13 @@ public:
         done incrementally.  Returns true if the parser is interested
         in any more data and false if it is done.  */
     bool Process(const char* data, int length)
-      { return this->ProcessChunk(data, length); }
+    {
+      return this->ProcessChunk(data, length);
+    }
     bool Process(const char* data)
-      { return this->Process(data, static_cast<int>(strlen(data))); }
+    {
+      return this->Process(data, static_cast<int>(strlen(data)));
+    }
 
     virtual ~OutputParser() {}
   protected:
@@ -41,7 +45,7 @@ public:
   };
 
   /** Process output parser that extracts one line at a time.  */
-  class LineParser: public OutputParser
+  class LineParser : public OutputParser
   {
   public:
     /** Construct with line separation character and choose whether to
@@ -50,6 +54,7 @@ public:
 
     /** Configure logging of lines as they are extracted.  */
     void SetLog(std::ostream* log, const char* prefix);
+
   protected:
     std::ostream* Log;
     const char* Prefix;
@@ -65,18 +70,21 @@ public:
   };
 
   /** Trivial line handler for simple logging.  */
-  class OutputLogger: public LineParser
+  class OutputLogger : public LineParser
   {
   public:
     OutputLogger(std::ostream& log, const char* prefix = 0)
-      { this->SetLog(&log, prefix); }
+    {
+      this->SetLog(&log, prefix);
+    }
+
   private:
     virtual bool ProcessLine() { return true; }
   };
 
   /** Run a process and send output to given parsers.  */
-  static void RunProcess(struct cmsysProcess_s* cp,
-                         OutputParser* out, OutputParser* err = 0);
+  static void RunProcess(struct cmsysProcess_s* cp, OutputParser* out,
+                         OutputParser* err = 0);
 };
 
 #endif

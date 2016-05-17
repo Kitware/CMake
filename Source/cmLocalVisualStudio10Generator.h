@@ -14,7 +14,6 @@
 
 #include "cmLocalVisualStudio7Generator.h"
 
-
 /** \class cmLocalVisualStudio10Generator
  * \brief Write Visual Studio 10 project files.
  *
@@ -28,7 +27,6 @@ public:
   cmLocalVisualStudio10Generator(cmGlobalGenerator* gg, cmMakefile* mf);
 
   virtual ~cmLocalVisualStudio10Generator();
-
 
   /**
    * Generate the makefile for this directory.

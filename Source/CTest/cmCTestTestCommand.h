@@ -22,24 +22,23 @@
 class cmCTestTestCommand : public cmCTestHandlerCommand
 {
 public:
-
   cmCTestTestCommand();
 
   /**
    * This is a virtual constructor for the command.
    */
   virtual cmCommand* Clone()
-    {
+  {
     cmCTestTestCommand* ni = new cmCTestTestCommand;
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
-    }
+  }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_test";}
+  virtual std::string GetName() const { return "ctest_test"; }
 
   cmTypeMacro(cmCTestTestCommand, cmCTestHandlerCommand);
 
@@ -47,7 +46,8 @@ protected:
   virtual cmCTestGenericHandler* InitializeActualHandler();
   cmCTestGenericHandler* InitializeHandler();
 
-  enum {
+  enum
+  {
     ctt_BUILD = ct_LAST,
     ctt_RETURN_VALUE,
     ctt_START,
@@ -64,6 +64,5 @@ protected:
     ctt_LAST
   };
 };
-
 
 #endif

@@ -1,1 +1,4 @@
-int bar() {return 5;}
+int bar()
+{
+  return 5;
+}

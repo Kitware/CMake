@@ -1,3 +1,5 @@
 #include "relative.h"
 
-void relative() {}
+void relative()
+{
+}

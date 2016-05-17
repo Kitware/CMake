@@ -52,7 +52,6 @@ protected:
   std::string Title;
 
   FIELD* Fields[2];
-
 };
 
 #endif // cmCursesLongMessageForm_h

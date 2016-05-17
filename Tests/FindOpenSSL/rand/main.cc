@@ -12,8 +12,7 @@ int main()
   int rezval = RAND_bytes(buf, sizeof(buf)); /* 1 succes, 0 otherwise */
 
   // check result
-  if(rezval == 1)
-  {
+  if (rezval == 1) {
     retval = 0;
   }
 

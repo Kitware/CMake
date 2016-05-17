@@ -1,11 +1,13 @@
 
-struct test{
-  void f() & { }
-  void f() && { }
+struct test
+{
+  void f() & {}
+  void f() && {}
 };
 
-void someFunc(){
+void someFunc()
+{
   test t;
-  t.f(); // lvalue
+  t.f();      // lvalue
   test().f(); // rvalue
 }

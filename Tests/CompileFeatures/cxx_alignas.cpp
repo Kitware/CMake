@@ -1,4 +1,5 @@
 
-struct S1 {
+struct S1
+{
   alignas(8) int n;
 };

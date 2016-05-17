@@ -1,1 +1,4 @@
-int Cobj(void) { return 0; }
+int Cobj(void)
+{
+  return 0;
+}

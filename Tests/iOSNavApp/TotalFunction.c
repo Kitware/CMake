@@ -8,7 +8,7 @@
 
 #include "TotalFunction.h"
 
-int Total(const char *context)
+int Total(const char* context)
 {
   return 22;
 }

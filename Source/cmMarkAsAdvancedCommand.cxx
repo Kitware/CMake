@@ -12,47 +12,39 @@
 #include "cmMarkAsAdvancedCommand.h"
 
 // cmMarkAsAdvancedCommand
-bool cmMarkAsAdvancedCommand
-::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
+bool cmMarkAsAdvancedCommand::InitialPass(std::vector<std::string> const& args,
+                                          cmExecutionStatus&)
 {
-  if(args.size() < 1 )
-    {
+  if (args.size() < 1) {
     this->SetError("called with incorrect number of arguments");
     return false;
-    }
+  }
 
-  unsigned int i =0;
+  unsigned int i = 0;
   const char* value = "1";
   bool overwrite = false;
-  if(args[0] == "CLEAR" || args[0] == "FORCE")
-    {
+  if (args[0] == "CLEAR" || args[0] == "FORCE") {
     overwrite = true;
-    if(args[0] == "CLEAR")
-      {
+    if (args[0] == "CLEAR") {
       value = "0";
-      }
-    i = 1;
     }
-  for(; i < args.size(); ++i)
-    {
+    i = 1;
+  }
+  for (; i < args.size(); ++i) {
     std::string variable = args[i];
     cmState* state = this->Makefile->GetState();
-    if (!state->GetCacheEntryValue(variable))
-      {
+    if (!state->GetCacheEntryValue(variable)) {
       this->Makefile->GetCMakeInstance()->AddCacheEntry(
-              variable, 0, 0, cmState::UNINITIALIZED);
+        variable, 0, 0, cmState::UNINITIALIZED);
       overwrite = true;
-      }
-    if (!state->GetCacheEntryValue(variable))
-      {
+    }
+    if (!state->GetCacheEntryValue(variable)) {
       cmSystemTools::Error("This should never happen...");
       return false;
-      }
-    if (!state->GetCacheEntryProperty(variable, "ADVANCED") || overwrite)
-      {
-      state->SetCacheEntryProperty(variable, "ADVANCED", value);
-      }
     }
+    if (!state->GetCacheEntryProperty(variable, "ADVANCED") || overwrite) {
+      state->SetCacheEntryProperty(variable, "ADVANCED", value);
+    }
+  }
   return true;
 }
-

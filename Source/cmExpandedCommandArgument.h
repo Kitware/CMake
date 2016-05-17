@@ -31,7 +31,7 @@ public:
 
   bool WasQuoted() const;
 
-  bool operator== (std::string const& value) const;
+  bool operator==(std::string const& value) const;
 
   bool empty() const;
 

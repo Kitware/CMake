@@ -20,11 +20,9 @@ public:
   cmTypeMacro(cmBuildNameCommand, cmCommand);
   virtual cmCommand* Clone() { return new cmBuildNameCommand; }
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
-  virtual std::string GetName() const {return "build_name";}
+                           cmExecutionStatus& status);
+  virtual std::string GetName() const { return "build_name"; }
   virtual bool IsScriptable() const { return true; }
 };
-
-
 
 #endif

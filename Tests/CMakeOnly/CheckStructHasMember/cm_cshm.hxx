@@ -4,13 +4,14 @@
 namespace ns {
 
 class non_existent_class;
-class class_with_non_existent_members {
+class class_with_non_existent_members
+{
 };
-class class_with_member {
+class class_with_member
+{
 public:
-    int foo;
+  int foo;
 };
-
 }
 
 #endif

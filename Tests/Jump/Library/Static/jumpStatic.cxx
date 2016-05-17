@@ -1,1 +1,4 @@
-int jumpStatic() { return 0; }
+int jumpStatic()
+{
+  return 0;
+}

@@ -26,23 +26,18 @@
 #include "cmExportSet.h"
 
 cmInstallExportGenerator::cmInstallExportGenerator(
-  cmExportSet* exportSet,
-  const char* destination,
-  const char* file_permissions,
-  std::vector<std::string> const& configurations,
-  const char* component,
-  MessageLevel message,
-  bool exclude_from_all,
-  const char* filename, const char* name_space,
-  bool exportOld)
-  :cmInstallGenerator(destination, configurations, component, message,
-                      exclude_from_all)
-  ,ExportSet(exportSet)
-  ,FilePermissions(file_permissions)
-  ,FileName(filename)
-  ,Namespace(name_space)
-  ,ExportOld(exportOld)
-  ,LocalGenerator(0)
+  cmExportSet* exportSet, const char* destination,
+  const char* file_permissions, std::vector<std::string> const& configurations,
+  const char* component, MessageLevel message, bool exclude_from_all,
+  const char* filename, const char* name_space, bool exportOld)
+  : cmInstallGenerator(destination, configurations, component, message,
+                       exclude_from_all)
+  , ExportSet(exportSet)
+  , FilePermissions(file_permissions)
+  , FileName(filename)
+  , Namespace(name_space)
+  , ExportOld(exportOld)
+  , LocalGenerator(0)
 {
   this->EFGen = new cmExportInstallFileGenerator(this);
   exportSet->AddInstallation(this);
@@ -63,18 +58,14 @@ void cmInstallExportGenerator::ComputeTempDir()
 {
   // Choose a temporary directory in which to generate the import
   // files to be installed.
-  this->TempDir =
-      this->LocalGenerator->GetCurrentBinaryDirectory();
+  this->TempDir = this->LocalGenerator->GetCurrentBinaryDirectory();
   this->TempDir += cmake::GetCMakeFilesDirectory();
   this->TempDir += "/Export";
-  if(this->Destination.empty())
-    {
+  if (this->Destination.empty()) {
     return;
-    }
-  else
-    {
+  } else {
     this->TempDir += "/";
-    }
+  }
 
   // Enforce a maximum length.
   bool useMD5 = false;
@@ -83,33 +74,24 @@ void cmInstallExportGenerator::ComputeTempDir()
 #else
   std::string::size_type const max_total_len = 1000;
 #endif
-  if(this->TempDir.size() < max_total_len)
-    {
+  if (this->TempDir.size() < max_total_len) {
     // Keep the total path length below the limit.
     std::string::size_type max_len = max_total_len - this->TempDir.size();
-    if(this->Destination.size() > max_len)
-      {
+    if (this->Destination.size() > max_len) {
       useMD5 = true;
-      }
     }
-  else
-    {
+  } else {
     useMD5 = true;
-    }
-  if(useMD5)
-    {
+  }
+  if (useMD5) {
     // Replace the destination path with a hash to keep it short.
-    this->TempDir +=
-      cmSystemTools::ComputeStringMD5(this->Destination);
-    }
-  else
-    {
+    this->TempDir += cmSystemTools::ComputeStringMD5(this->Destination);
+  } else {
     std::string dest = this->Destination;
     // Avoid unix full paths.
-    if(dest[0] == '/')
-      {
+    if (dest[0] == '/') {
       dest[0] = '_';
-      }
+    }
     // Avoid windows full paths by removing colons.
     cmSystemTools::ReplaceString(dest, ":", "_");
     // Avoid relative paths that go up the tree.
@@ -117,20 +99,19 @@ void cmInstallExportGenerator::ComputeTempDir()
     // Avoid spaces.
     cmSystemTools::ReplaceString(dest, " ", "_");
     this->TempDir += dest;
-    }
+  }
 }
 
 void cmInstallExportGenerator::GenerateScript(std::ostream& os)
 {
   // Skip empty sets.
-  if(ExportSet->GetTargetExports()->empty())
-    {
+  if (ExportSet->GetTargetExports()->empty()) {
     std::ostringstream e;
-    e << "INSTALL(EXPORT) given unknown export \""
-      << ExportSet->GetName() << "\"";
+    e << "INSTALL(EXPORT) given unknown export \"" << ExportSet->GetName()
+      << "\"";
     cmSystemTools::Error(e.str().c_str());
     return;
-    }
+  }
 
   // Create the temporary directory in which to store the files.
   this->ComputeTempDir();
@@ -145,35 +126,27 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
   this->EFGen->SetExportFile(this->MainImportFile.c_str());
   this->EFGen->SetNamespace(this->Namespace);
   this->EFGen->SetExportOld(this->ExportOld);
-  if(this->ConfigurationTypes->empty())
-    {
-    if(!this->ConfigurationName.empty())
-      {
+  if (this->ConfigurationTypes->empty()) {
+    if (!this->ConfigurationName.empty()) {
       this->EFGen->AddConfiguration(this->ConfigurationName);
-      }
-    else
-      {
+    } else {
       this->EFGen->AddConfiguration("");
-      }
     }
-  else
-    {
-    for(std::vector<std::string>::const_iterator
-          ci = this->ConfigurationTypes->begin();
-        ci != this->ConfigurationTypes->end(); ++ci)
-      {
+  } else {
+    for (std::vector<std::string>::const_iterator ci =
+           this->ConfigurationTypes->begin();
+         ci != this->ConfigurationTypes->end(); ++ci) {
       this->EFGen->AddConfiguration(*ci);
-      }
     }
+  }
   this->EFGen->GenerateImportFile();
 
   // Perform the main install script generation.
   this->cmInstallGenerator::GenerateScript(os);
 }
 
-void
-cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
-                                                Indent const& indent)
+void cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
+                                                     Indent const& indent)
 {
   // Create the main install rules first.
   this->cmInstallGenerator::GenerateScriptConfigs(os, indent);
@@ -181,20 +154,18 @@ cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
   // Now create a configuration-specific install rule for the import
   // file of each configuration.
   std::vector<std::string> files;
-  for(std::map<std::string, std::string>::const_iterator
-        i = this->EFGen->GetConfigImportFiles().begin();
-      i != this->EFGen->GetConfigImportFiles().end(); ++i)
-    {
+  for (std::map<std::string, std::string>::const_iterator i =
+         this->EFGen->GetConfigImportFiles().begin();
+       i != this->EFGen->GetConfigImportFiles().end(); ++i) {
     files.push_back(i->second);
     std::string config_test = this->CreateConfigTest(i->first);
     os << indent << "if(" << config_test << ")\n";
-    this->AddInstallRule(os, this->Destination,
-                         cmInstallType_FILES, files, false,
-                         this->FilePermissions.c_str(), 0, 0, 0,
+    this->AddInstallRule(os, this->Destination, cmInstallType_FILES, files,
+                         false, this->FilePermissions.c_str(), 0, 0, 0,
                          indent.Next());
     os << indent << "endif()\n";
     files.clear();
-    }
+  }
 }
 
 void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
@@ -229,7 +200,6 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
   // Install the main export file.
   std::vector<std::string> files;
   files.push_back(this->MainImportFile);
-  this->AddInstallRule(os, this->Destination,
-                       cmInstallType_FILES, files, false,
-                       this->FilePermissions.c_str(), 0, 0, 0, indent);
+  this->AddInstallRule(os, this->Destination, cmInstallType_FILES, files,
+                       false, this->FilePermissions.c_str(), 0, 0, 0, indent);
 }

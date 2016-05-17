@@ -1,15 +1,15 @@
 #include <gtk/gtk.h>
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-    GtkWidget *window;
+  GtkWidget* window;
 
-    gtk_init (&argc, &argv);
+  gtk_init(&argc, &argv);
 
-    window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    gtk_widget_show  (window);
+  window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  gtk_widget_show(window);
 
-    gtk_main ();
+  gtk_main();
 
-    return 0;
+  return 0;
 }

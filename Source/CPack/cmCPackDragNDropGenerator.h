@@ -34,13 +34,12 @@ protected:
   int PackageFiles();
   bool SupportsComponentInstallation() const;
 
-
   bool CopyFile(std::ostringstream& source, std::ostringstream& target);
   bool CreateEmptyFile(std::ostringstream& target, size_t size);
   bool RunCommand(std::ostringstream& command, std::string* output = 0);
 
-  std::string
-  GetComponentInstallDirNameSuffix(const std::string& componentName);
+  std::string GetComponentInstallDirNameSuffix(
+    const std::string& componentName);
 
   int CreateDMG(const std::string& src_dir, const std::string& output_file);
 
@@ -51,11 +50,10 @@ private:
   bool singleLicense;
 
   bool WriteLicense(cmGeneratedFileStream& outputStream, int licenseNumber,
-    std::string licenseLanguage, std::string licenseFile,
-    std::string *error);
-  bool BreakLongLine(const std::string& line,
-    std::vector<std::string>& lines,
-    std::string *error);
+                    std::string licenseLanguage, std::string licenseFile,
+                    std::string* error);
+  bool BreakLongLine(const std::string& line, std::vector<std::string>& lines,
+                     std::string* error);
   void EscapeQuotesAndBackslashes(std::string& line);
 };
 

@@ -34,15 +34,20 @@ public:
   cmGlobalKdevelopGenerator();
 
   virtual std::string GetName() const
-                          { return cmGlobalKdevelopGenerator::GetActualName();}
-  static std::string GetActualName()                     { return "KDevelop3";}
+  {
+    return cmGlobalKdevelopGenerator::GetActualName();
+  }
+  static std::string GetActualName() { return "KDevelop3"; }
   static cmExternalMakefileProjectGenerator* New()
-                                      { return new cmGlobalKdevelopGenerator; }
+  {
+    return new cmGlobalKdevelopGenerator;
+  }
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry,
                                 const std::string& fullName) const;
 
   virtual void Generate();
+
 private:
   /*** Create the foo.kdevelop.filelist file, return false if it doesn't
     succeed.  If the file already exists the contents will be merged.

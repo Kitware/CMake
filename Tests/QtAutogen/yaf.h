@@ -16,10 +16,11 @@
 
 class Yaf
 {
-  public:
-    Yaf();
-  public:
-    void doYaf();
+public:
+  Yaf();
+
+public:
+  void doYaf();
 };
 
 #endif

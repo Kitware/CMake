@@ -11,18 +11,16 @@
 ============================================================================*/
 #include "cmAddCompileOptionsCommand.h"
 
-bool cmAddCompileOptionsCommand
-::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
+bool cmAddCompileOptionsCommand::InitialPass(
+  std::vector<std::string> const& args, cmExecutionStatus&)
 {
-  if(args.size() < 1 )
-    {
+  if (args.size() < 1) {
     return true;
-    }
+  }
 
-  for(std::vector<std::string>::const_iterator i = args.begin();
-      i != args.end(); ++i)
-    {
+  for (std::vector<std::string>::const_iterator i = args.begin();
+       i != args.end(); ++i) {
     this->Makefile->AddCompileOption(i->c_str());
-    }
+  }
   return true;
 }

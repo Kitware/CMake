@@ -11,7 +11,7 @@ class UicOnly : public QWidget
 {
   Q_OBJECT
 public:
-  explicit UicOnly(QWidget *parent = 0);
+  explicit UicOnly(QWidget* parent = 0);
 
 private:
   const std::auto_ptr<Ui::UicOnly> ui;

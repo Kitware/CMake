@@ -9,8 +9,7 @@
 #error Unexpected SHAREDLIB_DEFINE
 #endif
 
-
-int main(int,char**)
+int main(int, char**)
 {
   HeaderOnly ho;
   return ho.foo();

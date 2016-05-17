@@ -24,24 +24,30 @@ public:
   /**
    * should a function be blocked
    */
-  virtual bool IsFunctionBlocked(const cmListFileFunction& lff,
-                                 cmMakefile&mf,
-                                 cmExecutionStatus &status) = 0;
+  virtual bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
+                                 cmExecutionStatus& status) = 0;
 
   /**
    * should this function blocker be removed, useful when one function adds a
    * blocker and another must remove it
    */
-  virtual bool ShouldRemove(const cmListFileFunction&,
-                            cmMakefile&) {return false;}
+  virtual bool ShouldRemove(const cmListFileFunction&, cmMakefile&)
+  {
+    return false;
+  }
 
   virtual ~cmFunctionBlocker() {}
 
   /** Set/Get the context in which this blocker is created.  */
   void SetStartingContext(cmListFileContext const& lfc)
-    { this->StartingContext = lfc; }
+  {
+    this->StartingContext = lfc;
+  }
   cmListFileContext const& GetStartingContext() const
-    { return this->StartingContext; }
+  {
+    return this->StartingContext;
+  }
+
 private:
   cmListFileContext StartingContext;
 };

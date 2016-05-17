@@ -3,7 +3,7 @@
 #ifdef _WIN32
 __declspec(dllexport)
 #endif
-void foo(void)
+  void foo(void)
 {
   printf("foo()\n");
 }

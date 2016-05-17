@@ -9,8 +9,7 @@ public:
   // Initializes internal timer values.
   BasicTimer()
   {
-    if (!QueryPerformanceFrequency(&m_frequency))
-    {
+    if (!QueryPerformanceFrequency(&m_frequency)) {
       throw ref new Platform::FailureException();
     }
     Reset();
@@ -28,33 +27,29 @@ public:
   // Update the timer's internal values.
   void Update()
   {
-    if (!QueryPerformanceCounter(&m_currentTime))
-    {
+    if (!QueryPerformanceCounter(&m_currentTime)) {
       throw ref new Platform::FailureException();
     }
 
     m_total = static_cast<float>(
       static_cast<double>(m_currentTime.QuadPart - m_startTime.QuadPart) /
-      static_cast<double>(m_frequency.QuadPart)
-      );
+      static_cast<double>(m_frequency.QuadPart));
 
-    if (m_lastTime.QuadPart == m_startTime.QuadPart)
-    {
-      // If the timer was just reset, report a time delta equivalent to 60Hz frame time.
+    if (m_lastTime.QuadPart == m_startTime.QuadPart) {
+      // If the timer was just reset, report a time delta equivalent to 60Hz
+      // frame time.
       m_delta = 1.0f / 60.0f;
-    }
-    else
-    {
+    } else {
       m_delta = static_cast<float>(
         static_cast<double>(m_currentTime.QuadPart - m_lastTime.QuadPart) /
-        static_cast<double>(m_frequency.QuadPart)
-        );
+        static_cast<double>(m_frequency.QuadPart));
     }
 
     m_lastTime = m_currentTime;
   }
 
-  // Duration in seconds between the last call to Reset() and the last call to Update().
+  // Duration in seconds between the last call to Reset() and the last call to
+  // Update().
   property float Total
   {
     float get() { return m_total; }

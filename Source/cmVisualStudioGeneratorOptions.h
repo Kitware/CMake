@@ -19,7 +19,7 @@ typedef cmIDEFlagTable cmVS7FlagTable;
 
 class cmVisualStudio10TargetGenerator;
 
-class cmVisualStudioGeneratorOptions: public cmIDEOptions
+class cmVisualStudioGeneratorOptions : public cmIDEOptions
 {
 public:
   // Construct an options table for a given tool.
@@ -31,14 +31,12 @@ public:
     Linker,
     FortranCompiler
   };
-  cmVisualStudioGeneratorOptions(cmLocalVisualStudioGenerator* lg,
-                                 Tool tool,
+  cmVisualStudioGeneratorOptions(cmLocalVisualStudioGenerator* lg, Tool tool,
                                  cmVS7FlagTable const* table,
                                  cmVS7FlagTable const* extraTable = 0,
                                  cmVisualStudio10TargetGenerator* g = 0);
 
-  cmVisualStudioGeneratorOptions(cmLocalVisualStudioGenerator* lg,
-                                 Tool tool,
+  cmVisualStudioGeneratorOptions(cmLocalVisualStudioGenerator* lg, Tool tool,
                                  cmVisualStudio10TargetGenerator* g = 0);
 
   // Add a table of flags.
@@ -61,15 +59,14 @@ public:
   bool IsDebug() const;
   bool IsWinRt() const;
   // Write options to output.
-  void OutputPreprocessorDefinitions(std::ostream& fout,
-                                     const char* prefix,
+  void OutputPreprocessorDefinitions(std::ostream& fout, const char* prefix,
                                      const char* suffix,
                                      const std::string& lang);
   void OutputFlagMap(std::ostream& fout, const char* indent);
-  void OutputAdditionalOptions(std::ostream& fout,
-                               const char* prefix,
+  void OutputAdditionalOptions(std::ostream& fout, const char* prefix,
                                const char* suffix);
   void SetConfiguration(const char* config);
+
 private:
   cmLocalVisualStudioGenerator* LocalGenerator;
   cmGlobalVisualStudioGenerator::VSVersion Version;

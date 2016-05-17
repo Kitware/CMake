@@ -17,57 +17,48 @@
 
 cmCTestGenericHandler* cmCTestUploadCommand::InitializeHandler()
 {
-  cmCTestGenericHandler* handler
-    = this->CTest->GetInitializedHandler("upload");
-  if ( !handler )
-    {
+  cmCTestGenericHandler* handler =
+    this->CTest->GetInitializedHandler("upload");
+  if (!handler) {
     this->SetError("internal CTest error. Cannot instantiate upload handler");
     return 0;
-    }
+  }
   static_cast<cmCTestUploadHandler*>(handler)->SetFiles(this->Files);
 
   handler->SetQuiet(this->Quiet);
   return handler;
 }
 
-
 bool cmCTestUploadCommand::CheckArgumentKeyword(std::string const& arg)
 {
-  if(arg == "FILES")
-    {
+  if (arg == "FILES") {
     this->ArgumentDoing = ArgumentDoingFiles;
     return true;
-    }
-  if(arg == "QUIET")
-    {
+  }
+  if (arg == "QUIET") {
     this->ArgumentDoing = ArgumentDoingNone;
     this->Quiet = true;
     return true;
-    }
+  }
   return false;
 }
 
-
 bool cmCTestUploadCommand::CheckArgumentValue(std::string const& arg)
 {
-  if(this->ArgumentDoing == ArgumentDoingFiles)
-    {
+  if (this->ArgumentDoing == ArgumentDoingFiles) {
     std::string filename(arg);
-    if(cmSystemTools::FileExists(filename.c_str()))
-      {
+    if (cmSystemTools::FileExists(filename.c_str())) {
       this->Files.insert(filename);
       return true;
-      }
-    else
-      {
+    } else {
       std::ostringstream e;
       e << "File \"" << filename << "\" does not exist. Cannot submit "
-          << "a non-existent file.";
+        << "a non-existent file.";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       this->ArgumentDoing = ArgumentDoingError;
       return false;
-      }
     }
+  }
 
   // Look for other arguments.
   return this->Superclass::CheckArgumentValue(arg);

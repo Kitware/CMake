@@ -1,13 +1,27 @@
 
 template <typename T>
-class X { };
+class X
+{
+};
 template <typename T>
-void f(T t) { }
-struct {} unnamed_obj;
-void f() {
-  struct A { };
-  enum { e1 };
-  typedef struct {} B;
+void f(T t)
+{
+}
+struct
+{
+} unnamed_obj;
+void f()
+{
+  struct A
+  {
+  };
+  enum
+  {
+    e1
+  };
+  typedef struct
+  {
+  } B;
   B b;
   X<A> x1;
   X<A*> x2;

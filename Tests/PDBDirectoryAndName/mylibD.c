@@ -1,1 +1,4 @@
-int mylibD() { return -1; }
+int mylibD()
+{
+  return -1;
+}

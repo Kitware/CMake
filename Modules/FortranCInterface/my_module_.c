@@ -1,1 +1,3 @@
-void my_module_(void) {}
+void my_module_(void)
+{
+}

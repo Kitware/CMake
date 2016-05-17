@@ -67,15 +67,12 @@ void cmTarget::SetType(cmState::TargetType type, const std::string& name)
   this->Name = name;
   // only add dependency information for library targets
   this->TargetTypeValue = type;
-  if(this->TargetTypeValue >= cmState::STATIC_LIBRARY
-     && this->TargetTypeValue <= cmState::MODULE_LIBRARY)
-    {
+  if (this->TargetTypeValue >= cmState::STATIC_LIBRARY &&
+      this->TargetTypeValue <= cmState::MODULE_LIBRARY) {
     this->RecordDependencies = true;
-    }
-  else
-    {
+  } else {
     this->RecordDependencies = false;
-    }
+  }
 }
 
 void cmTarget::SetMakefile(cmMakefile* mf)
@@ -84,9 +81,9 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->Makefile = mf;
 
   // Check whether this is a DLL platform.
-  this->DLLPlatform = (this->Makefile->IsOn("WIN32") ||
-                       this->Makefile->IsOn("CYGWIN") ||
-                       this->Makefile->IsOn("MINGW"));
+  this->DLLPlatform =
+    (this->Makefile->IsOn("WIN32") || this->Makefile->IsOn("CYGWIN") ||
+     this->Makefile->IsOn("MINGW"));
 
   // Check whether we are targeting an Android platform.
   this->IsAndroid =
@@ -94,9 +91,8 @@ void cmTarget::SetMakefile(cmMakefile* mf)
            "Android") == 0;
 
   // Setup default property values.
-  if (this->GetType() != cmState::INTERFACE_LIBRARY
-      && this->GetType() != cmState::UTILITY)
-    {
+  if (this->GetType() != cmState::INTERFACE_LIBRARY &&
+      this->GetType() != cmState::UTILITY) {
     this->SetPropertyDefault("ANDROID_API", 0);
     this->SetPropertyDefault("ANDROID_API_MIN", 0);
     this->SetPropertyDefault("ANDROID_ARCH", 0);
@@ -154,15 +150,14 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     this->SetPropertyDefault("CXX_EXTENSIONS", 0);
     this->SetPropertyDefault("LINK_SEARCH_START_STATIC", 0);
     this->SetPropertyDefault("LINK_SEARCH_END_STATIC", 0);
-    }
+  }
 
   // Collect the set of configuration types.
   std::vector<std::string> configNames;
   mf->GetConfigurations(configNames);
 
   // Setup per-configuration property default values.
-  if (this->GetType() != cmState::UTILITY)
-    {
+  if (this->GetType() != cmState::UTILITY) {
     const char* configProps[] = {
       /* clang-format needs this comment to break after the opening brace */
       "ARCHIVE_OUTPUT_DIRECTORY_",
@@ -171,140 +166,129 @@ void cmTarget::SetMakefile(cmMakefile* mf)
       "PDB_OUTPUT_DIRECTORY_",
       "COMPILE_PDB_OUTPUT_DIRECTORY_",
       "MAP_IMPORTED_CONFIG_",
-      0};
-    for(std::vector<std::string>::iterator ci = configNames.begin();
-        ci != configNames.end(); ++ci)
-      {
+      0
+    };
+    for (std::vector<std::string>::iterator ci = configNames.begin();
+         ci != configNames.end(); ++ci) {
       std::string configUpper = cmSystemTools::UpperCase(*ci);
-      for(const char** p = configProps; *p; ++p)
-        {
-        if (this->TargetTypeValue == cmState::INTERFACE_LIBRARY
-            && strcmp(*p, "MAP_IMPORTED_CONFIG_") != 0)
-          {
+      for (const char** p = configProps; *p; ++p) {
+        if (this->TargetTypeValue == cmState::INTERFACE_LIBRARY &&
+            strcmp(*p, "MAP_IMPORTED_CONFIG_") != 0) {
           continue;
-          }
+        }
         std::string property = *p;
         property += configUpper;
         this->SetPropertyDefault(property, 0);
-        }
+      }
 
       // Initialize per-configuration name postfix property from the
       // variable only for non-executable targets.  This preserves
       // compatibility with previous CMake versions in which executables
       // did not support this variable.  Projects may still specify the
       // property directly.
-      if(this->TargetTypeValue != cmState::EXECUTABLE
-          && this->TargetTypeValue != cmState::INTERFACE_LIBRARY)
-        {
+      if (this->TargetTypeValue != cmState::EXECUTABLE &&
+          this->TargetTypeValue != cmState::INTERFACE_LIBRARY) {
         std::string property = cmSystemTools::UpperCase(*ci);
         property += "_POSTFIX";
         this->SetPropertyDefault(property, 0);
-        }
       }
     }
+  }
 
   // Save the backtrace of target construction.
   this->Backtrace = this->Makefile->GetBacktrace();
 
-  if (!this->IsImported())
-    {
+  if (!this->IsImported()) {
     // Initialize the INCLUDE_DIRECTORIES property based on the current value
     // of the same directory property:
     const cmStringRange parentIncludes =
-        this->Makefile->GetIncludeDirectoriesEntries();
+      this->Makefile->GetIncludeDirectoriesEntries();
     const cmBacktraceRange parentIncludesBts =
-        this->Makefile->GetIncludeDirectoriesBacktraces();
+      this->Makefile->GetIncludeDirectoriesBacktraces();
 
     this->Internal->IncludeDirectoriesEntries.insert(
-          this->Internal->IncludeDirectoriesEntries.end(),
-          parentIncludes.begin(), parentIncludes.end());
+      this->Internal->IncludeDirectoriesEntries.end(), parentIncludes.begin(),
+      parentIncludes.end());
     this->Internal->IncludeDirectoriesBacktraces.insert(
-          this->Internal->IncludeDirectoriesBacktraces.end(),
-          parentIncludesBts.begin(), parentIncludesBts.end());
+      this->Internal->IncludeDirectoriesBacktraces.end(),
+      parentIncludesBts.begin(), parentIncludesBts.end());
 
     const std::set<std::string> parentSystemIncludes =
-                                this->Makefile->GetSystemIncludeDirectories();
+      this->Makefile->GetSystemIncludeDirectories();
 
     this->SystemIncludeDirectories.insert(parentSystemIncludes.begin(),
                                           parentSystemIncludes.end());
 
     const cmStringRange parentOptions =
-                                this->Makefile->GetCompileOptionsEntries();
+      this->Makefile->GetCompileOptionsEntries();
     const cmBacktraceRange parentOptionsBts =
-                                this->Makefile->GetCompileOptionsBacktraces();
+      this->Makefile->GetCompileOptionsBacktraces();
 
     this->Internal->CompileOptionsEntries.insert(
-          this->Internal->CompileOptionsEntries.end(),
-          parentOptions.begin(), parentOptions.end());
+      this->Internal->CompileOptionsEntries.end(), parentOptions.begin(),
+      parentOptions.end());
     this->Internal->CompileOptionsBacktraces.insert(
-          this->Internal->CompileOptionsBacktraces.end(),
-          parentOptionsBts.begin(), parentOptionsBts.end());
-    }
+      this->Internal->CompileOptionsBacktraces.end(), parentOptionsBts.begin(),
+      parentOptionsBts.end());
+  }
 
-  if (this->GetType() != cmState::INTERFACE_LIBRARY
-      && this->GetType() != cmState::UTILITY)
-    {
+  if (this->GetType() != cmState::INTERFACE_LIBRARY &&
+      this->GetType() != cmState::UTILITY) {
     this->SetPropertyDefault("C_VISIBILITY_PRESET", 0);
     this->SetPropertyDefault("CXX_VISIBILITY_PRESET", 0);
     this->SetPropertyDefault("VISIBILITY_INLINES_HIDDEN", 0);
-    }
+  }
 
-  if(this->TargetTypeValue == cmState::EXECUTABLE)
-    {
+  if (this->TargetTypeValue == cmState::EXECUTABLE) {
     this->SetPropertyDefault("ANDROID_GUI", 0);
     this->SetPropertyDefault("CROSSCOMPILING_EMULATOR", 0);
     this->SetPropertyDefault("ENABLE_EXPORTS", 0);
-    }
-  if(this->TargetTypeValue == cmState::SHARED_LIBRARY
-      || this->TargetTypeValue == cmState::MODULE_LIBRARY)
-    {
+  }
+  if (this->TargetTypeValue == cmState::SHARED_LIBRARY ||
+      this->TargetTypeValue == cmState::MODULE_LIBRARY) {
     this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
-    }
-  if(this->TargetTypeValue == cmState::SHARED_LIBRARY)
-    {
+  }
+  if (this->TargetTypeValue == cmState::SHARED_LIBRARY) {
     this->SetPropertyDefault("WINDOWS_EXPORT_ALL_SYMBOLS", 0);
-    }
+  }
 
-  if (this->GetType() != cmState::INTERFACE_LIBRARY
-      && this->GetType() != cmState::UTILITY)
-    {
+  if (this->GetType() != cmState::INTERFACE_LIBRARY &&
+      this->GetType() != cmState::UTILITY) {
     this->SetPropertyDefault("POSITION_INDEPENDENT_CODE", 0);
-    }
+  }
 
   // Record current policies for later use.
   this->Makefile->RecordPolicies(this->PolicyMap);
 
-  if (this->TargetTypeValue == cmState::INTERFACE_LIBRARY)
-    {
+  if (this->TargetTypeValue == cmState::INTERFACE_LIBRARY) {
     // This policy is checked in a few conditions. The properties relevant
     // to the policy are always ignored for cmState::INTERFACE_LIBRARY targets,
     // so ensure that the conditions don't lead to nonsense.
     this->PolicyMap.Set(cmPolicies::CMP0022, cmPolicies::NEW);
-    }
+  }
 
-  if (this->GetType() != cmState::INTERFACE_LIBRARY
-      && this->GetType() != cmState::UTILITY)
-    {
+  if (this->GetType() != cmState::INTERFACE_LIBRARY &&
+      this->GetType() != cmState::UTILITY) {
     this->SetPropertyDefault("JOB_POOL_COMPILE", 0);
     this->SetPropertyDefault("JOB_POOL_LINK", 0);
-    }
+  }
 }
 
-void cmTarget::AddUtility(const std::string& u, cmMakefile *makefile)
+void cmTarget::AddUtility(const std::string& u, cmMakefile* makefile)
 {
-  if(this->Utilities.insert(u).second && makefile)
-    {
+  if (this->Utilities.insert(u).second && makefile) {
     this->UtilityBacktraces.insert(
-            std::make_pair(u, makefile->GetBacktrace()));
-    }
+      std::make_pair(u, makefile->GetBacktrace()));
+  }
 }
 
 cmListFileBacktrace const* cmTarget::GetUtilityBacktrace(
-    const std::string& u) const
+  const std::string& u) const
 {
   std::map<std::string, cmListFileBacktrace>::const_iterator i =
     this->UtilityBacktraces.find(u);
-  if(i == this->UtilityBacktraces.end()) return 0;
+  if (i == this->UtilityBacktraces.end())
+    return 0;
 
   return &i->second;
 }
@@ -322,9 +306,8 @@ bool cmTarget::IsExecutableWithExports() const
 
 bool cmTarget::HasImportLibrary() const
 {
-  return (this->DLLPlatform &&
-          (this->GetType() == cmState::SHARED_LIBRARY ||
-           this->IsExecutableWithExports()));
+  return (this->DLLPlatform && (this->GetType() == cmState::SHARED_LIBRARY ||
+                                this->IsExecutableWithExports()));
 }
 
 bool cmTarget::IsFrameworkOnApple() const
@@ -343,46 +326,40 @@ bool cmTarget::IsAppBundleOnApple() const
 
 void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)
 {
-  if (!srcs.empty())
-    {
+  if (!srcs.empty()) {
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
     this->Internal->SourceEntries.push_back(cmJoin(srcs, ";"));
     this->Internal->SourceBacktraces.push_back(lfbt);
-    }
+  }
 }
 
 void cmTarget::AddSources(std::vector<std::string> const& srcs)
 {
   std::string srcFiles;
   const char* sep = "";
-  for(std::vector<std::string>::const_iterator i = srcs.begin();
-      i != srcs.end(); ++i)
-    {
+  for (std::vector<std::string>::const_iterator i = srcs.begin();
+       i != srcs.end(); ++i) {
     std::string filename = *i;
     const char* src = filename.c_str();
 
-    if(!(src[0] == '$' && src[1] == '<'))
-      {
-      if(!filename.empty())
-        {
+    if (!(src[0] == '$' && src[1] == '<')) {
+      if (!filename.empty()) {
         filename = this->ProcessSourceItemCMP0049(filename);
-        if(filename.empty())
-          {
+        if (filename.empty()) {
           return;
-          }
         }
-      this->Makefile->GetOrCreateSource(filename);
       }
+      this->Makefile->GetOrCreateSource(filename);
+    }
     srcFiles += sep;
     srcFiles += filename;
     sep = ";";
-    }
-  if (!srcFiles.empty())
-    {
+  }
+  if (!srcFiles.empty()) {
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
     this->Internal->SourceEntries.push_back(srcFiles);
     this->Internal->SourceBacktraces.push_back(lfbt);
-    }
+  }
 }
 
 std::string cmTarget::ProcessSourceItemCMP0049(const std::string& s)
@@ -392,13 +369,11 @@ std::string cmTarget::ProcessSourceItemCMP0049(const std::string& s)
   // For backwards compatibility replace varibles in source names.
   // This should eventually be removed.
   this->Makefile->ExpandVariablesInString(src);
-  if (src != s)
-    {
+  if (src != s) {
     std::ostringstream e;
     bool noMessage = false;
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
-    switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0049))
-      {
+    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0049)) {
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0049) << "\n";
         break;
@@ -409,30 +384,27 @@ std::string cmTarget::ProcessSourceItemCMP0049(const std::string& s)
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::NEW:
         messageType = cmake::FATAL_ERROR;
-      }
-    if (!noMessage)
-      {
-      e << "Legacy variable expansion in source file \""
-        << s << "\" expanded to \"" << src << "\" in target \""
-        << this->GetName() << "\".  This behavior will be removed in a "
-        "future version of CMake.";
+    }
+    if (!noMessage) {
+      e << "Legacy variable expansion in source file \"" << s
+        << "\" expanded to \"" << src << "\" in target \"" << this->GetName()
+        << "\".  This behavior will be removed in a "
+           "future version of CMake.";
       this->Makefile->IssueMessage(messageType, e.str());
-      if (messageType == cmake::FATAL_ERROR)
-        {
+      if (messageType == cmake::FATAL_ERROR) {
         return "";
-        }
       }
     }
+  }
   return src;
 }
 
 cmSourceFile* cmTarget::AddSourceCMP0049(const std::string& s)
 {
   std::string src = this->ProcessSourceItemCMP0049(s);
-  if(!s.empty() && src.empty())
-    {
+  if (!s.empty() && src.empty()) {
     return 0;
-    }
+  }
   return this->AddSource(src);
 }
 
@@ -443,7 +415,6 @@ struct CreateLocation
   CreateLocation(cmMakefile const* mf)
     : Makefile(mf)
   {
-
   }
 
   cmSourceFileLocation operator()(const std::string& filename)
@@ -459,25 +430,23 @@ struct LocationMatcher
   LocationMatcher(const cmSourceFileLocation& needle)
     : Needle(needle)
   {
-
   }
 
-  bool operator()(cmSourceFileLocation &loc)
+  bool operator()(cmSourceFileLocation& loc)
   {
     return loc.Matches(this->Needle);
   }
 };
 
-
 struct TargetPropertyEntryFinder
 {
 private:
   const cmSourceFileLocation& Needle;
+
 public:
   TargetPropertyEntryFinder(const cmSourceFileLocation& needle)
     : Needle(needle)
   {
-
   }
 
   bool operator()(std::string const& entry)
@@ -489,7 +458,7 @@ public:
                    CreateLocation(this->Needle.GetMakefile()));
 
     return std::find_if(locations.begin(), locations.end(),
-        LocationMatcher(this->Needle)) != locations.end();
+                        LocationMatcher(this->Needle)) != locations.end();
   }
 };
 
@@ -498,45 +467,41 @@ cmSourceFile* cmTarget::AddSource(const std::string& src)
   cmSourceFileLocation sfl(this->Makefile, src);
   if (std::find_if(this->Internal->SourceEntries.begin(),
                    this->Internal->SourceEntries.end(),
-                   TargetPropertyEntryFinder(sfl))
-                                      == this->Internal->SourceEntries.end())
-    {
+                   TargetPropertyEntryFinder(sfl)) ==
+      this->Internal->SourceEntries.end()) {
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
     this->Internal->SourceEntries.push_back(src);
     this->Internal->SourceBacktraces.push_back(lfbt);
-    }
-  if (cmGeneratorExpression::Find(src) != std::string::npos)
-    {
+  }
+  if (cmGeneratorExpression::Find(src) != std::string::npos) {
     return 0;
-    }
+  }
   return this->Makefile->GetOrCreateSource(src);
 }
 
-void cmTarget::MergeLinkLibraries( cmMakefile& mf,
-                                   const std::string& selfname,
-                                   const LinkLibraryVectorType& libs )
+void cmTarget::MergeLinkLibraries(cmMakefile& mf, const std::string& selfname,
+                                  const LinkLibraryVectorType& libs)
 {
   // Only add on libraries we haven't added on before.
   // Assumption: the global link libraries could only grow, never shrink
   LinkLibraryVectorType::const_iterator i = libs.begin();
   i += this->PrevLinkedLibraries.size();
-  for( ; i != libs.end(); ++i )
-    {
+  for (; i != libs.end(); ++i) {
     // This is equivalent to the target_link_libraries plain signature.
-    this->AddLinkLibrary( mf, selfname, i->first, i->second );
-    this->AppendProperty("INTERFACE_LINK_LIBRARIES",
+    this->AddLinkLibrary(mf, selfname, i->first, i->second);
+    this->AppendProperty(
+      "INTERFACE_LINK_LIBRARIES",
       this->GetDebugGeneratorExpressions(i->first, i->second).c_str());
-    }
+  }
   this->PrevLinkedLibraries = libs;
 }
 
 void cmTarget::AddLinkDirectory(const std::string& d)
 {
   // Make sure we don't add unnecessary search directories.
-  if(this->LinkDirectoriesEmmitted.insert(d).second)
-    {
+  if (this->LinkDirectoriesEmmitted.insert(d).second) {
     this->LinkDirectories.push_back(d);
-    }
+  }
 }
 
 const std::vector<std::string>& cmTarget::GetLinkDirectories() const
@@ -544,61 +509,54 @@ const std::vector<std::string>& cmTarget::GetLinkDirectories() const
   return this->LinkDirectories;
 }
 
-void cmTarget::ClearDependencyInformation( cmMakefile& mf,
-                                           const std::string& target )
+void cmTarget::ClearDependencyInformation(cmMakefile& mf,
+                                          const std::string& target)
 {
   // Clear the dependencies. The cache variable must exist iff we are
   // recording dependency information for this target.
   std::string depname = target;
   depname += "_LIB_DEPENDS";
-  if (this->RecordDependencies)
-    {
-    mf.AddCacheDefinition(depname, "",
-                          "Dependencies for target", cmState::STATIC);
-    }
-  else
-    {
-    if (mf.GetDefinition( depname ))
-      {
+  if (this->RecordDependencies) {
+    mf.AddCacheDefinition(depname, "", "Dependencies for target",
+                          cmState::STATIC);
+  } else {
+    if (mf.GetDefinition(depname)) {
       std::string message = "Target ";
       message += target;
       message += " has dependency information when it shouldn't.\n";
       message += "Your cache is probably stale. Please remove the entry\n  ";
       message += depname;
       message += "\nfrom the cache.";
-      cmSystemTools::Error( message.c_str() );
-      }
+      cmSystemTools::Error(message.c_str());
     }
+  }
 }
 
-std::string cmTarget::GetDebugGeneratorExpressions(const std::string &value,
-                                  cmTargetLinkLibraryType llt) const
+std::string cmTarget::GetDebugGeneratorExpressions(
+  const std::string& value, cmTargetLinkLibraryType llt) const
 {
-  if (llt == GENERAL_LibraryType)
-    {
+  if (llt == GENERAL_LibraryType) {
     return value;
-    }
+  }
 
   // Get the list of configurations considered to be DEBUG.
   std::vector<std::string> debugConfigs =
-                      this->Makefile->GetCMakeInstance()->GetDebugConfigs();
+    this->Makefile->GetCMakeInstance()->GetDebugConfigs();
 
   std::string configString = "$<CONFIG:" + debugConfigs[0] + ">";
 
-  if (debugConfigs.size() > 1)
-    {
-    for(std::vector<std::string>::const_iterator
-          li = debugConfigs.begin() + 1; li != debugConfigs.end(); ++li)
-      {
+  if (debugConfigs.size() > 1) {
+    for (std::vector<std::string>::const_iterator li =
+           debugConfigs.begin() + 1;
+         li != debugConfigs.end(); ++li) {
       configString += ",$<CONFIG:" + *li + ">";
-      }
+    }
     configString = "$<OR:" + configString + ">";
-    }
+  }
 
-  if (llt == OPTIMIZED_LibraryType)
-    {
+  if (llt == OPTIMIZED_LibraryType) {
     configString = "$<NOT:" + configString + ">";
-    }
+  }
   return "$<" + configString + ":" + value + ">";
 }
 
@@ -611,64 +569,57 @@ bool cmTarget::PushTLLCommandTrace(TLLSignature signature,
                                    cmListFileContext const& lfc)
 {
   bool ret = true;
-  if (!this->TLLCommands.empty())
-    {
-    if (this->TLLCommands.back().first != signature)
-      {
+  if (!this->TLLCommands.empty()) {
+    if (this->TLLCommands.back().first != signature) {
       ret = false;
-      }
     }
-  if (this->TLLCommands.empty() || this->TLLCommands.back().second != lfc)
-    {
+  }
+  if (this->TLLCommands.empty() || this->TLLCommands.back().second != lfc) {
     this->TLLCommands.push_back(std::make_pair(signature, lfc));
-    }
+  }
   return ret;
 }
 
-void cmTarget::GetTllSignatureTraces(std::ostringstream &s,
+void cmTarget::GetTllSignatureTraces(std::ostringstream& s,
                                      TLLSignature sig) const
 {
-  const char *sigString = (sig == cmTarget::KeywordTLLSignature ? "keyword"
-                                                                : "plain");
+  const char* sigString =
+    (sig == cmTarget::KeywordTLLSignature ? "keyword" : "plain");
   s << "The uses of the " << sigString << " signature are here:\n";
   typedef std::vector<std::pair<TLLSignature, cmListFileContext> > Container;
   cmOutputConverter converter(this->GetMakefile()->GetStateSnapshot());
-  for(Container::const_iterator it = this->TLLCommands.begin();
-      it != this->TLLCommands.end(); ++it)
-    {
-    if (it->first == sig)
-      {
+  for (Container::const_iterator it = this->TLLCommands.begin();
+       it != this->TLLCommands.end(); ++it) {
+    if (it->first == sig) {
       cmListFileContext lfc = it->second;
       lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
       s << " * " << lfc << std::endl;
-      }
     }
+  }
 }
 
-void cmTarget::AddLinkLibrary(cmMakefile& mf,
-                              const std::string& target,
+void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& target,
                               const std::string& lib,
                               cmTargetLinkLibraryType llt)
 {
-  cmTarget *tgt = this->Makefile->FindTargetToUse(lib);
+  cmTarget* tgt = this->Makefile->FindTargetToUse(lib);
   {
-  const bool isNonImportedTarget = tgt && !tgt->IsImported();
+    const bool isNonImportedTarget = tgt && !tgt->IsImported();
 
-  const std::string libName =
+    const std::string libName =
       (isNonImportedTarget && llt != GENERAL_LibraryType)
       ? targetNameGenex(lib)
       : lib;
-  this->AppendProperty("LINK_LIBRARIES",
-                       this->GetDebugGeneratorExpressions(libName,
-                                                          llt).c_str());
+    this->AppendProperty(
+      "LINK_LIBRARIES",
+      this->GetDebugGeneratorExpressions(libName, llt).c_str());
   }
 
-  if (cmGeneratorExpression::Find(lib) != std::string::npos
-      || (tgt && tgt->GetType() == cmState::INTERFACE_LIBRARY)
-      || (target == lib ))
-    {
+  if (cmGeneratorExpression::Find(lib) != std::string::npos ||
+      (tgt && tgt->GetType() == cmState::INTERFACE_LIBRARY) ||
+      (target == lib)) {
     return;
-    }
+  }
 
   cmTarget::LibraryID tmp;
   tmp.first = lib;
@@ -683,18 +634,15 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
   // may be purposefully duplicated to handle recursive dependencies,
   // and we removing one instance will break the link line. Duplicates
   // will be appropriately eliminated at emit time.
-  if(this->RecordDependencies)
-    {
+  if (this->RecordDependencies) {
     std::string targetEntry = target;
     targetEntry += "_LIB_DEPENDS";
     std::string dependencies;
-    const char* old_val = mf.GetDefinition( targetEntry );
-    if( old_val )
-      {
+    const char* old_val = mf.GetDefinition(targetEntry);
+    if (old_val) {
       dependencies += old_val;
-      }
-    switch (llt)
-      {
+    }
+    switch (llt) {
       case GENERAL_LibraryType:
         dependencies += "general";
         break;
@@ -704,19 +652,16 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
       case OPTIMIZED_LibraryType:
         dependencies += "optimized";
         break;
-      }
+    }
     dependencies += ";";
     dependencies += lib;
     dependencies += ";";
-    mf.AddCacheDefinition( targetEntry, dependencies.c_str(),
-                           "Dependencies for the target",
-                           cmState::STATIC );
-    }
-
+    mf.AddCacheDefinition(targetEntry, dependencies.c_str(),
+                          "Dependencies for the target", cmState::STATIC);
+  }
 }
 
-void
-cmTarget::AddSystemIncludeDirectories(const std::set<std::string> &incs)
+void cmTarget::AddSystemIncludeDirectories(const std::set<std::string>& incs)
 {
   this->SystemIncludeDirectories.insert(incs.begin(), incs.end());
 }
@@ -783,13 +728,11 @@ cmBacktraceRange cmTarget::GetLinkImplementationBacktraces() const
 
 static bool whiteListedInterfaceProperty(const std::string& prop)
 {
-  if(cmHasLiteralPrefix(prop, "INTERFACE_"))
-    {
+  if (cmHasLiteralPrefix(prop, "INTERFACE_")) {
     return true;
-    }
+  }
   static UNORDERED_SET<std::string> builtIns;
-  if (builtIns.empty())
-    {
+  if (builtIns.empty()) {
     builtIns.insert("COMPATIBLE_INTERFACE_BOOL");
     builtIns.insert("COMPATIBLE_INTERFACE_NUMBER_MAX");
     builtIns.insert("COMPATIBLE_INTERFACE_NUMBER_MIN");
@@ -798,276 +741,218 @@ static bool whiteListedInterfaceProperty(const std::string& prop)
     builtIns.insert("IMPORTED");
     builtIns.insert("NAME");
     builtIns.insert("TYPE");
-    }
+  }
 
-  if (builtIns.count(prop))
-    {
+  if (builtIns.count(prop)) {
     return true;
-    }
+  }
 
-  if (cmHasLiteralPrefix(prop, "MAP_IMPORTED_CONFIG_"))
-    {
+  if (cmHasLiteralPrefix(prop, "MAP_IMPORTED_CONFIG_")) {
     return true;
-    }
+  }
 
   return false;
 }
 
 void cmTarget::SetProperty(const std::string& prop, const char* value)
 {
-  if (this->GetType() == cmState::INTERFACE_LIBRARY
-      && !whiteListedInterfaceProperty(prop))
-    {
+  if (this->GetType() == cmState::INTERFACE_LIBRARY &&
+      !whiteListedInterfaceProperty(prop)) {
     std::ostringstream e;
     e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
-         "The property \"" << prop << "\" is not allowed.";
+         "The property \""
+      << prop << "\" is not allowed.";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
-    }
-  else if (prop == "NAME")
-    {
+  } else if (prop == "NAME") {
     std::ostringstream e;
     e << "NAME property is read-only\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
-    }
-  else if(prop == "INCLUDE_DIRECTORIES")
-    {
+  } else if (prop == "INCLUDE_DIRECTORIES") {
     this->Internal->IncludeDirectoriesEntries.clear();
     this->Internal->IncludeDirectoriesBacktraces.clear();
-    if (value)
-      {
+    if (value) {
       this->Internal->IncludeDirectoriesEntries.push_back(value);
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->IncludeDirectoriesBacktraces.push_back(lfbt);
-      }
     }
-  else if(prop == "COMPILE_OPTIONS")
-    {
+  } else if (prop == "COMPILE_OPTIONS") {
     this->Internal->CompileOptionsEntries.clear();
     this->Internal->CompileOptionsBacktraces.clear();
-    if (value)
-      {
+    if (value) {
       this->Internal->CompileOptionsEntries.push_back(value);
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->CompileOptionsBacktraces.push_back(lfbt);
-      }
     }
-  else if(prop == "COMPILE_FEATURES")
-    {
+  } else if (prop == "COMPILE_FEATURES") {
     this->Internal->CompileFeaturesEntries.clear();
     this->Internal->CompileFeaturesBacktraces.clear();
-    if (value)
-      {
+    if (value) {
       this->Internal->CompileFeaturesEntries.push_back(value);
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->CompileFeaturesBacktraces.push_back(lfbt);
-      }
     }
-  else if(prop == "COMPILE_DEFINITIONS")
-    {
+  } else if (prop == "COMPILE_DEFINITIONS") {
     this->Internal->CompileDefinitionsEntries.clear();
     this->Internal->CompileDefinitionsBacktraces.clear();
-    if (value)
-      {
+    if (value) {
       this->Internal->CompileDefinitionsEntries.push_back(value);
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->CompileDefinitionsBacktraces.push_back(lfbt);
-      }
     }
-  else if(prop == "EXPORT_NAME" && this->IsImported())
-    {
+  } else if (prop == "EXPORT_NAME" && this->IsImported()) {
     std::ostringstream e;
     e << "EXPORT_NAME property can't be set on imported targets (\""
-          << this->Name << "\")\n";
+      << this->Name << "\")\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-    }
-  else if (prop == "LINK_LIBRARIES")
-    {
+  } else if (prop == "LINK_LIBRARIES") {
     this->Internal->LinkImplementationPropertyEntries.clear();
     this->Internal->LinkImplementationPropertyBacktraces.clear();
-    if (value)
-      {
+    if (value) {
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->LinkImplementationPropertyEntries.push_back(value);
       this->Internal->LinkImplementationPropertyBacktraces.push_back(lfbt);
-      }
     }
-  else if (prop == "SOURCES")
-    {
-    if(this->IsImported())
-      {
+  } else if (prop == "SOURCES") {
+    if (this->IsImported()) {
       std::ostringstream e;
       e << "SOURCES property can't be set on imported targets (\""
-            << this->Name << "\")\n";
+        << this->Name << "\")\n";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       return;
-      }
+    }
 
     this->Internal->SourceEntries.clear();
     this->Internal->SourceBacktraces.clear();
-    if (value)
-      {
+    if (value) {
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->SourceEntries.push_back(value);
       this->Internal->SourceBacktraces.push_back(lfbt);
-      }
     }
-  else
-    {
+  } else {
     this->Properties.SetProperty(prop, value);
-    }
+  }
 }
 
 void cmTarget::AppendProperty(const std::string& prop, const char* value,
                               bool asString)
 {
-  if (this->GetType() == cmState::INTERFACE_LIBRARY
-      && !whiteListedInterfaceProperty(prop))
-    {
+  if (this->GetType() == cmState::INTERFACE_LIBRARY &&
+      !whiteListedInterfaceProperty(prop)) {
     std::ostringstream e;
     e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
-         "The property \"" << prop << "\" is not allowed.";
+         "The property \""
+      << prop << "\" is not allowed.";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
-    }
-  else if (prop == "NAME")
-    {
+  } else if (prop == "NAME") {
     std::ostringstream e;
     e << "NAME property is read-only\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
-    }
-  else if(prop == "INCLUDE_DIRECTORIES")
-    {
-    if (value && *value)
-      {
+  } else if (prop == "INCLUDE_DIRECTORIES") {
+    if (value && *value) {
       this->Internal->IncludeDirectoriesEntries.push_back(value);
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->IncludeDirectoriesBacktraces.push_back(lfbt);
-      }
     }
-  else if(prop == "COMPILE_OPTIONS")
-    {
-    if (value && *value)
-      {
+  } else if (prop == "COMPILE_OPTIONS") {
+    if (value && *value) {
       this->Internal->CompileOptionsEntries.push_back(value);
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->CompileOptionsBacktraces.push_back(lfbt);
-      }
     }
-  else if(prop == "COMPILE_FEATURES")
-    {
-    if (value && *value)
-      {
+  } else if (prop == "COMPILE_FEATURES") {
+    if (value && *value) {
       this->Internal->CompileFeaturesEntries.push_back(value);
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->CompileFeaturesBacktraces.push_back(lfbt);
-      }
     }
-  else if(prop == "COMPILE_DEFINITIONS")
-    {
-    if (value && *value)
-      {
+  } else if (prop == "COMPILE_DEFINITIONS") {
+    if (value && *value) {
       this->Internal->CompileDefinitionsEntries.push_back(value);
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->CompileDefinitionsBacktraces.push_back(lfbt);
-      }
     }
-  else if(prop == "EXPORT_NAME" && this->IsImported())
-    {
+  } else if (prop == "EXPORT_NAME" && this->IsImported()) {
     std::ostringstream e;
     e << "EXPORT_NAME property can't be set on imported targets (\""
-          << this->Name << "\")\n";
+      << this->Name << "\")\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-    }
-  else if (prop == "LINK_LIBRARIES")
-    {
-    if (value && *value)
-      {
+  } else if (prop == "LINK_LIBRARIES") {
+    if (value && *value) {
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->LinkImplementationPropertyEntries.push_back(value);
       this->Internal->LinkImplementationPropertyBacktraces.push_back(lfbt);
-      }
     }
-  else if (prop == "SOURCES")
-    {
-    if(this->IsImported())
-      {
+  } else if (prop == "SOURCES") {
+    if (this->IsImported()) {
       std::ostringstream e;
       e << "SOURCES property can't be set on imported targets (\""
-            << this->Name << "\")\n";
+        << this->Name << "\")\n";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       return;
-      }
+    }
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
     this->Internal->SourceEntries.push_back(value);
     this->Internal->SourceBacktraces.push_back(lfbt);
-    }
-  else
-    {
+  } else {
     this->Properties.AppendProperty(prop, value, asString);
-    }
+  }
 }
 
 void cmTarget::AppendBuildInterfaceIncludes()
 {
-  if(this->GetType() != cmState::SHARED_LIBRARY &&
-     this->GetType() != cmState::STATIC_LIBRARY &&
-     this->GetType() != cmState::MODULE_LIBRARY &&
-     this->GetType() != cmState::INTERFACE_LIBRARY &&
-     !this->IsExecutableWithExports())
-    {
+  if (this->GetType() != cmState::SHARED_LIBRARY &&
+      this->GetType() != cmState::STATIC_LIBRARY &&
+      this->GetType() != cmState::MODULE_LIBRARY &&
+      this->GetType() != cmState::INTERFACE_LIBRARY &&
+      !this->IsExecutableWithExports()) {
     return;
-    }
-  if (this->BuildInterfaceIncludesAppended)
-    {
+  }
+  if (this->BuildInterfaceIncludesAppended) {
     return;
-    }
+  }
   this->BuildInterfaceIncludesAppended = true;
 
-  if (this->Makefile->IsOn("CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE"))
-    {
-    const char *binDir = this->Makefile->GetCurrentBinaryDirectory();
-    const char *srcDir = this->Makefile->GetCurrentSourceDirectory();
-    const std::string dirs = std::string(binDir ? binDir : "")
-                            + std::string(binDir ? ";" : "")
-                            + std::string(srcDir ? srcDir : "");
-    if (!dirs.empty())
-      {
+  if (this->Makefile->IsOn("CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE")) {
+    const char* binDir = this->Makefile->GetCurrentBinaryDirectory();
+    const char* srcDir = this->Makefile->GetCurrentSourceDirectory();
+    const std::string dirs = std::string(binDir ? binDir : "") +
+      std::string(binDir ? ";" : "") + std::string(srcDir ? srcDir : "");
+    if (!dirs.empty()) {
       this->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
-                            ("$<BUILD_INTERFACE:" + dirs + ">").c_str());
-      }
+                           ("$<BUILD_INTERFACE:" + dirs + ">").c_str());
     }
+  }
 }
 
 void cmTarget::InsertInclude(std::string const& entry,
-                             cmListFileBacktrace const& bt,
-                             bool before)
+                             cmListFileBacktrace const& bt, bool before)
 {
-  std::vector<std::string>::iterator position =
-      before ? this->Internal->IncludeDirectoriesEntries.begin()
-             : this->Internal->IncludeDirectoriesEntries.end();
+  std::vector<std::string>::iterator position = before
+    ? this->Internal->IncludeDirectoriesEntries.begin()
+    : this->Internal->IncludeDirectoriesEntries.end();
 
-  std::vector<cmListFileBacktrace>::iterator btPosition =
-      before ? this->Internal->IncludeDirectoriesBacktraces.begin()
-             : this->Internal->IncludeDirectoriesBacktraces.end();
+  std::vector<cmListFileBacktrace>::iterator btPosition = before
+    ? this->Internal->IncludeDirectoriesBacktraces.begin()
+    : this->Internal->IncludeDirectoriesBacktraces.end();
 
   this->Internal->IncludeDirectoriesEntries.insert(position, entry);
   this->Internal->IncludeDirectoriesBacktraces.insert(btPosition, bt);
 }
 
 void cmTarget::InsertCompileOption(std::string const& entry,
-                                   cmListFileBacktrace const& bt,
-                                   bool before)
+                                   cmListFileBacktrace const& bt, bool before)
 {
-  std::vector<std::string>::iterator position =
-      before ? this->Internal->CompileOptionsEntries.begin()
-             : this->Internal->CompileOptionsEntries.end();
+  std::vector<std::string>::iterator position = before
+    ? this->Internal->CompileOptionsEntries.begin()
+    : this->Internal->CompileOptionsEntries.end();
 
-  std::vector<cmListFileBacktrace>::iterator btPosition =
-      before ? this->Internal->CompileOptionsBacktraces.begin()
-             : this->Internal->CompileOptionsBacktraces.end();
+  std::vector<cmListFileBacktrace>::iterator btPosition = before
+    ? this->Internal->CompileOptionsBacktraces.begin()
+    : this->Internal->CompileOptionsBacktraces.end();
 
   this->Internal->CompileOptionsEntries.insert(position, entry);
   this->Internal->CompileOptionsBacktraces.insert(btPosition, bt);
@@ -1080,22 +965,20 @@ void cmTarget::InsertCompileDefinition(std::string const& entry,
   this->Internal->CompileDefinitionsBacktraces.push_back(bt);
 }
 
-static void cmTargetCheckLINK_INTERFACE_LIBRARIES(
-  const std::string& prop, const char* value, cmMakefile* context,
-  bool imported)
+static void cmTargetCheckLINK_INTERFACE_LIBRARIES(const std::string& prop,
+                                                  const char* value,
+                                                  cmMakefile* context,
+                                                  bool imported)
 {
   // Look for link-type keywords in the value.
-  static cmsys::RegularExpression
-    keys("(^|;)(debug|optimized|general)(;|$)");
-  if(!keys.find(value))
-    {
+  static cmsys::RegularExpression keys("(^|;)(debug|optimized|general)(;|$)");
+  if (!keys.find(value)) {
     return;
-    }
+  }
 
   // Support imported and non-imported versions of the property.
-  const char* base = (imported?
-                      "IMPORTED_LINK_INTERFACE_LIBRARIES" :
-                      "LINK_INTERFACE_LIBRARIES");
+  const char* base = (imported ? "IMPORTED_LINK_INTERFACE_LIBRARIES"
+                               : "LINK_INTERFACE_LIBRARIES");
 
   // Report an error.
   std::ostringstream e;
@@ -1104,8 +987,7 @@ static void cmTargetCheckLINK_INTERFACE_LIBRARIES(
     << "The " << base << " property has a per-configuration "
     << "version called " << base << "_<CONFIG> which may be "
     << "used to specify per-configuration rules.";
-  if(!imported)
-    {
+  if (!imported) {
     e << "  "
       << "Alternatively, an IMPORTED library may be created, configured "
       << "with a per-configuration location, and then named in the "
@@ -1118,7 +1000,7 @@ static void cmTargetCheckLINK_INTERFACE_LIBRARIES(
       << "The command automatically recognizes link-type keywords and sets "
       << "the LINK_INTERFACE_LIBRARIES and LINK_INTERFACE_LIBRARIES_DEBUG "
       << "properties accordingly.";
-    }
+  }
   context->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
 
@@ -1126,20 +1008,20 @@ static void cmTargetCheckINTERFACE_LINK_LIBRARIES(const char* value,
                                                   cmMakefile* context)
 {
   // Look for link-type keywords in the value.
-  static cmsys::RegularExpression
-    keys("(^|;)(debug|optimized|general)(;|$)");
-  if(!keys.find(value))
-    {
+  static cmsys::RegularExpression keys("(^|;)(debug|optimized|general)(;|$)");
+  if (!keys.find(value)) {
     return;
-    }
+  }
 
   // Report an error.
   std::ostringstream e;
 
   e << "Property INTERFACE_LINK_LIBRARIES may not contain link-type "
-    "keyword \"" << keys.match(2) << "\".  The INTERFACE_LINK_LIBRARIES "
-    "property may contain configuration-sensitive generator-expressions "
-    "which may be used to specify per-configuration rules.";
+       "keyword \""
+    << keys.match(2)
+    << "\".  The INTERFACE_LINK_LIBRARIES "
+       "property may contain configuration-sensitive generator-expressions "
+       "which may be used to specify per-configuration rules.";
 
   context->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
@@ -1148,27 +1030,21 @@ void cmTarget::CheckProperty(const std::string& prop,
                              cmMakefile* context) const
 {
   // Certain properties need checking.
-  if(cmHasLiteralPrefix(prop, "LINK_INTERFACE_LIBRARIES"))
-    {
-    if(const char* value = this->GetProperty(prop))
-      {
+  if (cmHasLiteralPrefix(prop, "LINK_INTERFACE_LIBRARIES")) {
+    if (const char* value = this->GetProperty(prop)) {
       cmTargetCheckLINK_INTERFACE_LIBRARIES(prop, value, context, false);
-      }
     }
-  if(cmHasLiteralPrefix(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES"))
-    {
-    if(const char* value = this->GetProperty(prop))
-      {
+  }
+  if (cmHasLiteralPrefix(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES")) {
+    if (const char* value = this->GetProperty(prop)) {
       cmTargetCheckLINK_INTERFACE_LIBRARIES(prop, value, context, true);
-      }
     }
-  if(cmHasLiteralPrefix(prop, "INTERFACE_LINK_LIBRARIES"))
-    {
-    if(const char* value = this->GetProperty(prop))
-      {
+  }
+  if (cmHasLiteralPrefix(prop, "INTERFACE_LINK_LIBRARIES")) {
+    if (const char* value = this->GetProperty(prop)) {
       cmTargetCheckINTERFACE_LINK_LIBRARIES(value, context);
-      }
     }
+  }
 }
 
 void cmTarget::MarkAsImported(bool global)
@@ -1179,15 +1055,13 @@ void cmTarget::MarkAsImported(bool global)
 
 bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
 {
-  if (this->IsImported())
-    {
+  if (this->IsImported()) {
     return true;
-    }
+  }
   std::ostringstream e;
-  const char *modal = 0;
+  const char* modal = 0;
   cmake::MessageType messageType = cmake::AUTHOR_WARNING;
-  switch (context->GetPolicyStatus(cmPolicies::CMP0026))
-    {
+  switch (context->GetPolicyStatus(cmPolicies::CMP0026)) {
     case cmPolicies::WARN:
       e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0026) << "\n";
       modal = "should";
@@ -1198,66 +1072,60 @@ bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
     case cmPolicies::NEW:
       modal = "may";
       messageType = cmake::FATAL_ERROR;
-    }
+  }
 
-  if (modal)
-    {
+  if (modal) {
     e << "The LOCATION property " << modal << " not be read from target \""
-      << this->GetName() << "\".  Use the target name directly with "
-      "add_custom_command, or use the generator expression $<TARGET_FILE>, "
-      "as appropriate.\n";
+      << this->GetName()
+      << "\".  Use the target name directly with "
+         "add_custom_command, or use the generator expression $<TARGET_FILE>, "
+         "as appropriate.\n";
     context->IssueMessage(messageType, e.str());
-    }
+  }
 
   return messageType != cmake::FATAL_ERROR;
 }
 
-const char *cmTarget::GetProperty(const std::string& prop) const
+const char* cmTarget::GetProperty(const std::string& prop) const
 {
   return this->GetProperty(prop, this->Makefile);
 }
 
-const char *cmTarget::GetProperty(const std::string& prop,
+const char* cmTarget::GetProperty(const std::string& prop,
                                   cmMakefile* context) const
 {
-  if (this->GetType() == cmState::INTERFACE_LIBRARY
-      && !whiteListedInterfaceProperty(prop))
-    {
+  if (this->GetType() == cmState::INTERFACE_LIBRARY &&
+      !whiteListedInterfaceProperty(prop)) {
     std::ostringstream e;
     e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
-         "The property \"" << prop << "\" is not allowed.";
+         "The property \""
+      << prop << "\" is not allowed.";
     context->IssueMessage(cmake::FATAL_ERROR, e.str());
     return 0;
-    }
+  }
 
   // Watch for special "computed" properties that are dependent on
   // other properties or variables.  Always recompute them.
-  if(this->GetType() == cmState::EXECUTABLE ||
-     this->GetType() == cmState::STATIC_LIBRARY ||
-     this->GetType() == cmState::SHARED_LIBRARY ||
-     this->GetType() == cmState::MODULE_LIBRARY ||
-     this->GetType() == cmState::UNKNOWN_LIBRARY)
-    {
+  if (this->GetType() == cmState::EXECUTABLE ||
+      this->GetType() == cmState::STATIC_LIBRARY ||
+      this->GetType() == cmState::SHARED_LIBRARY ||
+      this->GetType() == cmState::MODULE_LIBRARY ||
+      this->GetType() == cmState::UNKNOWN_LIBRARY) {
     static const std::string propLOCATION = "LOCATION";
-    if(prop == propLOCATION)
-      {
-      if (!this->HandleLocationPropertyPolicy(context))
-        {
+    if (prop == propLOCATION) {
+      if (!this->HandleLocationPropertyPolicy(context)) {
         return 0;
-        }
+      }
 
       // Set the LOCATION property of the target.
       //
       // For an imported target this is the location of an arbitrary
       // available configuration.
       //
-      if(this->IsImported())
-        {
+      if (this->IsImported()) {
         this->Properties.SetProperty(
-                propLOCATION, this->ImportedGetFullPath("", false).c_str());
-        }
-      else
-        {
+          propLOCATION, this->ImportedGetFullPath("", false).c_str());
+      } else {
         // For a non-imported target this is deprecated because it
         // cannot take into account the per-configuration name of the
         // target because the configuration type may not be known at
@@ -1265,64 +1133,51 @@ const char *cmTarget::GetProperty(const std::string& prop,
         cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
         gg->CreateGenerationObjects();
         cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
-        this->Properties.SetProperty(propLOCATION,
-                                     gt->GetLocationForBuild());
-        }
-
+        this->Properties.SetProperty(propLOCATION, gt->GetLocationForBuild());
       }
 
+    }
+
     // Support "LOCATION_<CONFIG>".
-    else if(cmHasLiteralPrefix(prop, "LOCATION_"))
-      {
-      if (!this->HandleLocationPropertyPolicy(context))
-        {
+    else if (cmHasLiteralPrefix(prop, "LOCATION_")) {
+      if (!this->HandleLocationPropertyPolicy(context)) {
         return 0;
-        }
+      }
       const char* configName = prop.c_str() + 9;
 
-      if (this->IsImported())
-        {
+      if (this->IsImported()) {
         this->Properties.SetProperty(
-                prop, this->ImportedGetFullPath(configName, false).c_str());
-        }
-      else
-        {
+          prop, this->ImportedGetFullPath(configName, false).c_str());
+      } else {
         cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
         gg->CreateGenerationObjects();
         cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
         this->Properties.SetProperty(
-                prop, gt->GetFullPath(configName, false).c_str());
-        }
+          prop, gt->GetFullPath(configName, false).c_str());
       }
+    }
     // Support "<CONFIG>_LOCATION".
-    else if(cmHasLiteralSuffix(prop, "_LOCATION"))
-      {
+    else if (cmHasLiteralSuffix(prop, "_LOCATION")) {
       std::string configName(prop.c_str(), prop.size() - 9);
-      if(configName != "IMPORTED")
-        {
-        if (!this->HandleLocationPropertyPolicy(context))
-          {
+      if (configName != "IMPORTED") {
+        if (!this->HandleLocationPropertyPolicy(context)) {
           return 0;
-          }
-        if (this->IsImported())
-          {
+        }
+        if (this->IsImported()) {
           this->Properties.SetProperty(
-                  prop, this->ImportedGetFullPath(configName, false).c_str());
-          }
-        else
-          {
+            prop, this->ImportedGetFullPath(configName, false).c_str());
+        } else {
           cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
           gg->CreateGenerationObjects();
           cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
           this->Properties.SetProperty(
-                  prop, gt->GetFullPath(configName, false).c_str());
-          }
+            prop, gt->GetFullPath(configName, false).c_str());
         }
       }
     }
+  }
   static UNORDERED_SET<std::string> specialProps;
-#define MAKE_STATIC_PROP(PROP) \
-  static const std::string prop##PROP = #PROP
+#define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
   MAKE_STATIC_PROP(LINK_LIBRARIES);
   MAKE_STATIC_PROP(TYPE);
   MAKE_STATIC_PROP(INCLUDE_DIRECTORIES);
@@ -1335,8 +1190,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
   MAKE_STATIC_PROP(SOURCE_DIR);
   MAKE_STATIC_PROP(SOURCES);
 #undef MAKE_STATIC_PROP
-  if(specialProps.empty())
-    {
+  if (specialProps.empty()) {
     specialProps.insert(propLINK_LIBRARIES);
     specialProps.insert(propTYPE);
     specialProps.insert(propINCLUDE_DIRECTORIES);
@@ -1348,124 +1202,92 @@ const char *cmTarget::GetProperty(const std::string& prop,
     specialProps.insert(propBINARY_DIR);
     specialProps.insert(propSOURCE_DIR);
     specialProps.insert(propSOURCES);
-    }
-  if(specialProps.count(prop))
-    {
-    if(prop == propLINK_LIBRARIES)
-      {
-      if (this->Internal->LinkImplementationPropertyEntries.empty())
-        {
+  }
+  if (specialProps.count(prop)) {
+    if (prop == propLINK_LIBRARIES) {
+      if (this->Internal->LinkImplementationPropertyEntries.empty()) {
         return 0;
-        }
+      }
 
       static std::string output;
       output = cmJoin(this->Internal->LinkImplementationPropertyEntries, ";");
       return output.c_str();
-      }
+    }
     // the type property returns what type the target is
-    else if (prop == propTYPE)
-      {
+    else if (prop == propTYPE) {
       return cmState::GetTargetTypeName(this->GetType());
-      }
-    else if(prop == propINCLUDE_DIRECTORIES)
-      {
-      if (this->Internal->IncludeDirectoriesEntries.empty())
-        {
+    } else if (prop == propINCLUDE_DIRECTORIES) {
+      if (this->Internal->IncludeDirectoriesEntries.empty()) {
         return 0;
-        }
+      }
 
       static std::string output;
       output = cmJoin(this->Internal->IncludeDirectoriesEntries, ";");
       return output.c_str();
-      }
-    else if(prop == propCOMPILE_FEATURES)
-      {
-      if (this->Internal->CompileFeaturesEntries.empty())
-        {
+    } else if (prop == propCOMPILE_FEATURES) {
+      if (this->Internal->CompileFeaturesEntries.empty()) {
         return 0;
-        }
+      }
 
       static std::string output;
       output = cmJoin(this->Internal->CompileFeaturesEntries, ";");
       return output.c_str();
-      }
-    else if(prop == propCOMPILE_OPTIONS)
-      {
-      if (this->Internal->CompileOptionsEntries.empty())
-        {
+    } else if (prop == propCOMPILE_OPTIONS) {
+      if (this->Internal->CompileOptionsEntries.empty()) {
         return 0;
-        }
+      }
 
       static std::string output;
       output = cmJoin(this->Internal->CompileOptionsEntries, ";");
       return output.c_str();
-      }
-    else if(prop == propCOMPILE_DEFINITIONS)
-      {
-      if (this->Internal->CompileDefinitionsEntries.empty())
-        {
+    } else if (prop == propCOMPILE_DEFINITIONS) {
+      if (this->Internal->CompileDefinitionsEntries.empty()) {
         return 0;
-        }
+      }
 
       static std::string output;
       output = cmJoin(this->Internal->CompileDefinitionsEntries, ";");
       return output.c_str();
-      }
-    else if (prop == propIMPORTED)
-      {
-      return this->IsImported()?"TRUE":"FALSE";
-      }
-    else if (prop == propNAME)
-      {
+    } else if (prop == propIMPORTED) {
+      return this->IsImported() ? "TRUE" : "FALSE";
+    } else if (prop == propNAME) {
       return this->GetName().c_str();
-      }
-    else if (prop == propBINARY_DIR)
-      {
+    } else if (prop == propBINARY_DIR) {
       return this->GetMakefile()->GetCurrentBinaryDirectory();
-      }
-    else if (prop == propSOURCE_DIR)
-      {
+    } else if (prop == propSOURCE_DIR) {
       return this->GetMakefile()->GetCurrentSourceDirectory();
-      }
-    else if(prop == propSOURCES)
-      {
-      if (this->Internal->SourceEntries.empty())
-        {
+    } else if (prop == propSOURCES) {
+      if (this->Internal->SourceEntries.empty()) {
         return 0;
-        }
+      }
 
       std::ostringstream ss;
       const char* sep = "";
-      for(std::vector<std::string>::const_iterator
-            i = this->Internal->SourceEntries.begin();
-          i != this->Internal->SourceEntries.end(); ++i)
-        {
+      for (std::vector<std::string>::const_iterator i =
+             this->Internal->SourceEntries.begin();
+           i != this->Internal->SourceEntries.end(); ++i) {
         std::string const& entry = *i;
 
         std::vector<std::string> files;
         cmSystemTools::ExpandListArgument(entry, files);
-        for (std::vector<std::string>::const_iterator
-            li = files.begin(); li != files.end(); ++li)
-          {
-          if(cmHasLiteralPrefix(*li, "$<TARGET_OBJECTS:") &&
-              (*li)[li->size() - 1] == '>')
-            {
-            std::string objLibName = li->substr(17, li->size()-18);
+        for (std::vector<std::string>::const_iterator li = files.begin();
+             li != files.end(); ++li) {
+          if (cmHasLiteralPrefix(*li, "$<TARGET_OBJECTS:") &&
+              (*li)[li->size() - 1] == '>') {
+            std::string objLibName = li->substr(17, li->size() - 18);
 
-            if (cmGeneratorExpression::Find(objLibName) != std::string::npos)
-              {
+            if (cmGeneratorExpression::Find(objLibName) != std::string::npos) {
               ss << sep;
               sep = ";";
               ss << *li;
               continue;
-              }
+            }
 
             bool addContent = false;
             bool noMessage = true;
             std::ostringstream e;
             cmake::MessageType messageType = cmake::AUTHOR_WARNING;
-            switch(context->GetPolicyStatus(cmPolicies::CMP0051))
-              {
+            switch (context->GetPolicyStatus(cmPolicies::CMP0051)) {
               case cmPolicies::WARN:
                 e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0051) << "\n";
                 noMessage = false;
@@ -1475,63 +1297,58 @@ const char *cmTarget::GetProperty(const std::string& prop,
               case cmPolicies::REQUIRED_IF_USED:
               case cmPolicies::NEW:
                 addContent = true;
-              }
-            if (!noMessage)
-              {
-              e << "Target \"" << this->Name << "\" contains "
-              "$<TARGET_OBJECTS> generator expression in its sources list.  "
-              "This content was not previously part of the SOURCES property "
-              "when that property was read at configure time.  Code reading "
-              "that property needs to be adapted to ignore the generator "
-              "expression using the string(GENEX_STRIP) command.";
+            }
+            if (!noMessage) {
+              e << "Target \"" << this->Name
+                << "\" contains "
+                   "$<TARGET_OBJECTS> generator expression in its sources "
+                   "list.  "
+                   "This content was not previously part of the SOURCES "
+                   "property "
+                   "when that property was read at configure time.  Code "
+                   "reading "
+                   "that property needs to be adapted to ignore the generator "
+                   "expression using the string(GENEX_STRIP) command.";
               context->IssueMessage(messageType, e.str());
-              }
-            if (addContent)
-              {
+            }
+            if (addContent) {
               ss << sep;
               sep = ";";
               ss << *li;
-              }
             }
-          else if (cmGeneratorExpression::Find(*li) == std::string::npos)
-            {
+          } else if (cmGeneratorExpression::Find(*li) == std::string::npos) {
             ss << sep;
             sep = ";";
             ss << *li;
-            }
-          else
-            {
-            cmSourceFile *sf = this->Makefile->GetOrCreateSource(*li);
+          } else {
+            cmSourceFile* sf = this->Makefile->GetOrCreateSource(*li);
             // Construct what is known about this source file location.
             cmSourceFileLocation const& location = sf->GetLocation();
             std::string sname = location.GetDirectory();
-            if(!sname.empty())
-              {
+            if (!sname.empty()) {
               sname += "/";
-              }
+            }
             sname += location.GetName();
 
             ss << sep;
             sep = ";";
             // Append this list entry.
             ss << sname;
-            }
           }
         }
+      }
       this->Properties.SetProperty("SOURCES", ss.str().c_str());
-      }
     }
+  }
 
-  const char *retVal = this->Properties.GetPropertyValue(prop);
-  if (!retVal)
-    {
-    const bool chain = this->GetMakefile()->GetState()->
-                      IsPropertyChained(prop, cmProperty::TARGET);
-    if (chain)
-      {
+  const char* retVal = this->Properties.GetPropertyValue(prop);
+  if (!retVal) {
+    const bool chain = this->GetMakefile()->GetState()->IsPropertyChained(
+      prop, cmProperty::TARGET);
+    if (chain) {
       return this->Makefile->GetProperty(prop, chain);
-      }
     }
+  }
   return retVal;
 }
 
@@ -1542,75 +1359,67 @@ bool cmTarget::GetPropertyAsBool(const std::string& prop) const
 
 const char* cmTarget::GetSuffixVariableInternal(bool implib) const
 {
-  switch(this->GetType())
-    {
+  switch (this->GetType()) {
     case cmState::STATIC_LIBRARY:
       return "CMAKE_STATIC_LIBRARY_SUFFIX";
     case cmState::SHARED_LIBRARY:
-      return (implib
-              ? "CMAKE_IMPORT_LIBRARY_SUFFIX"
-              : "CMAKE_SHARED_LIBRARY_SUFFIX");
+      return (implib ? "CMAKE_IMPORT_LIBRARY_SUFFIX"
+                     : "CMAKE_SHARED_LIBRARY_SUFFIX");
     case cmState::MODULE_LIBRARY:
-      return (implib
-              ? "CMAKE_IMPORT_LIBRARY_SUFFIX"
-              : "CMAKE_SHARED_MODULE_SUFFIX");
+      return (implib ? "CMAKE_IMPORT_LIBRARY_SUFFIX"
+                     : "CMAKE_SHARED_MODULE_SUFFIX");
     case cmState::EXECUTABLE:
       return (implib
-              ? "CMAKE_IMPORT_LIBRARY_SUFFIX"
+                ? "CMAKE_IMPORT_LIBRARY_SUFFIX"
                 // Android GUI application packages store the native
                 // binary as a shared library.
-              : (this->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI")?
-                 "CMAKE_SHARED_LIBRARY_SUFFIX" : "CMAKE_EXECUTABLE_SUFFIX"));
+                : (this->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI")
+                     ? "CMAKE_SHARED_LIBRARY_SUFFIX"
+                     : "CMAKE_EXECUTABLE_SUFFIX"));
     default:
       break;
-    }
+  }
   return "";
 }
-
 
 const char* cmTarget::GetPrefixVariableInternal(bool implib) const
 {
-  switch(this->GetType())
-    {
+  switch (this->GetType()) {
     case cmState::STATIC_LIBRARY:
       return "CMAKE_STATIC_LIBRARY_PREFIX";
     case cmState::SHARED_LIBRARY:
-      return (implib
-              ? "CMAKE_IMPORT_LIBRARY_PREFIX"
-              : "CMAKE_SHARED_LIBRARY_PREFIX");
+      return (implib ? "CMAKE_IMPORT_LIBRARY_PREFIX"
+                     : "CMAKE_SHARED_LIBRARY_PREFIX");
     case cmState::MODULE_LIBRARY:
-      return (implib
-              ? "CMAKE_IMPORT_LIBRARY_PREFIX"
-              : "CMAKE_SHARED_MODULE_PREFIX");
+      return (implib ? "CMAKE_IMPORT_LIBRARY_PREFIX"
+                     : "CMAKE_SHARED_MODULE_PREFIX");
     case cmState::EXECUTABLE:
       return (implib
-              ? "CMAKE_IMPORT_LIBRARY_PREFIX"
+                ? "CMAKE_IMPORT_LIBRARY_PREFIX"
                 // Android GUI application packages store the native
                 // binary as a shared library.
-              : (this->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI")?
-                 "CMAKE_SHARED_LIBRARY_PREFIX" : ""));
+                : (this->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI")
+                     ? "CMAKE_SHARED_LIBRARY_PREFIX"
+                     : ""));
     default:
       break;
-    }
+  }
   return "";
 }
 
-std::string
-cmTarget::ImportedGetFullPath(const std::string& config, bool pimplib) const
+std::string cmTarget::ImportedGetFullPath(const std::string& config,
+                                          bool pimplib) const
 {
   assert(this->IsImported());
 
   // Lookup/compute/cache the import information for this
   // configuration.
   std::string config_upper;
-  if(!config.empty())
-    {
+  if (!config.empty()) {
     config_upper = cmSystemTools::UpperCase(config);
-    }
-  else
-    {
+  } else {
     config_upper = "NOCONFIG";
-    }
+  }
 
   std::string result;
 
@@ -1618,58 +1427,41 @@ cmTarget::ImportedGetFullPath(const std::string& config, bool pimplib) const
   const char* imp = 0;
   std::string suffix;
 
-  if(this->GetType() != cmState::INTERFACE_LIBRARY
-     && this->GetMappedConfig(config_upper, &loc, &imp, suffix))
-    {
-    if (!pimplib)
-      {
-      if(loc)
-        {
+  if (this->GetType() != cmState::INTERFACE_LIBRARY &&
+      this->GetMappedConfig(config_upper, &loc, &imp, suffix)) {
+    if (!pimplib) {
+      if (loc) {
         result = loc;
-        }
-      else
-        {
+      } else {
         std::string impProp = "IMPORTED_LOCATION";
         impProp += suffix;
-        if(const char* config_location = this->GetProperty(impProp))
-          {
+        if (const char* config_location = this->GetProperty(impProp)) {
           result = config_location;
-          }
-        else if(const char* location =
-                this->GetProperty("IMPORTED_LOCATION"))
-          {
+        } else if (const char* location =
+                     this->GetProperty("IMPORTED_LOCATION")) {
           result = location;
-          }
         }
       }
-    else
-      {
-      if(imp)
-        {
+    } else {
+      if (imp) {
         result = imp;
-        }
-      else if(this->GetType() == cmState::SHARED_LIBRARY ||
-              this->IsExecutableWithExports())
-        {
+      } else if (this->GetType() == cmState::SHARED_LIBRARY ||
+                 this->IsExecutableWithExports()) {
         std::string impProp = "IMPORTED_IMPLIB";
         impProp += suffix;
-        if(const char* config_implib = this->GetProperty(impProp))
-          {
+        if (const char* config_implib = this->GetProperty(impProp)) {
           result = config_implib;
-          }
-        else if(const char* implib = this->GetProperty("IMPORTED_IMPLIB"))
-          {
+        } else if (const char* implib = this->GetProperty("IMPORTED_IMPLIB")) {
           result = implib;
-          }
         }
       }
     }
+  }
 
-  if(result.empty())
-    {
+  if (result.empty()) {
     result = this->GetName();
     result += "-NOTFOUND";
-    }
+  }
   return result;
 }
 
@@ -1680,29 +1472,24 @@ void cmTarget::SetPropertyDefault(const std::string& property,
   std::string var = "CMAKE_";
   var += property;
 
-  if(const char* value = this->Makefile->GetDefinition(var))
-    {
+  if (const char* value = this->Makefile->GetDefinition(var)) {
     this->SetProperty(property, value);
-    }
-  else if(default_value)
-    {
+  } else if (default_value) {
     this->SetProperty(property, default_value);
-    }
+  }
 }
 
 bool cmTarget::GetMappedConfig(std::string const& desired_config,
-                               const char** loc,
-                               const char** imp,
+                               const char** loc, const char** imp,
                                std::string& suffix) const
 {
-  if (this->GetType() == cmState::INTERFACE_LIBRARY)
-    {
+  if (this->GetType() == cmState::INTERFACE_LIBRARY) {
     // This method attempts to find a config-specific LOCATION for the
     // IMPORTED library. In the case of cmState::INTERFACE_LIBRARY, there is no
     // LOCATION at all, so leaving *loc and *imp unchanged is the appropriate
     // and valid response.
     return true;
-    }
+  }
 
   // Track the configuration-specific property suffix.
   suffix = "_";
@@ -1710,11 +1497,10 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
 
   std::vector<std::string> mappedConfigs;
   {
-  std::string mapProp = "MAP_IMPORTED_CONFIG_";
-  mapProp += desired_config;
-  if(const char* mapValue = this->GetProperty(mapProp))
-    {
-    cmSystemTools::ExpandListArgument(mapValue, mappedConfigs);
+    std::string mapProp = "MAP_IMPORTED_CONFIG_";
+    mapProp += desired_config;
+    if (const char* mapValue = this->GetProperty(mapProp)) {
+      cmSystemTools::ExpandListArgument(mapValue, mappedConfigs);
     }
   }
 
@@ -1724,99 +1510,86 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   bool allowImp = this->HasImportLibrary();
 
   // If a mapping was found, check its configurations.
-  for(std::vector<std::string>::const_iterator mci = mappedConfigs.begin();
-      !*loc && !*imp && mci != mappedConfigs.end(); ++mci)
-    {
+  for (std::vector<std::string>::const_iterator mci = mappedConfigs.begin();
+       !*loc && !*imp && mci != mappedConfigs.end(); ++mci) {
     // Look for this configuration.
     std::string mcUpper = cmSystemTools::UpperCase(*mci);
     std::string locProp = "IMPORTED_LOCATION_";
     locProp += mcUpper;
     *loc = this->GetProperty(locProp);
-    if(allowImp)
-      {
+    if (allowImp) {
       std::string impProp = "IMPORTED_IMPLIB_";
       impProp += mcUpper;
       *imp = this->GetProperty(impProp);
-      }
+    }
 
     // If it was found, use it for all properties below.
-    if(*loc || *imp)
-      {
+    if (*loc || *imp) {
       suffix = "_";
       suffix += mcUpper;
-      }
     }
+  }
 
   // If we needed to find one of the mapped configurations but did not
   // then the target is not found.  The project does not want any
   // other configuration.
-  if(!mappedConfigs.empty() && !*loc && !*imp)
-    {
+  if (!mappedConfigs.empty() && !*loc && !*imp) {
     return false;
-    }
+  }
 
   // If we have not yet found it then there are no mapped
   // configurations.  Look for an exact-match.
-  if(!*loc && !*imp)
-    {
+  if (!*loc && !*imp) {
     std::string locProp = "IMPORTED_LOCATION";
     locProp += suffix;
     *loc = this->GetProperty(locProp);
-    if(allowImp)
-      {
+    if (allowImp) {
       std::string impProp = "IMPORTED_IMPLIB";
       impProp += suffix;
       *imp = this->GetProperty(impProp);
-      }
     }
+  }
 
   // If we have not yet found it then there are no mapped
   // configurations and no exact match.
-  if(!*loc && !*imp)
-    {
+  if (!*loc && !*imp) {
     // The suffix computed above is not useful.
     suffix = "";
 
     // Look for a configuration-less location.  This may be set by
     // manually-written code.
     *loc = this->GetProperty("IMPORTED_LOCATION");
-    if(allowImp)
-      {
+    if (allowImp) {
       *imp = this->GetProperty("IMPORTED_IMPLIB");
-      }
     }
+  }
 
   // If we have not yet found it then the project is willing to try
   // any available configuration.
-  if(!*loc && !*imp)
-    {
+  if (!*loc && !*imp) {
     std::vector<std::string> availableConfigs;
-    if(const char* iconfigs = this->GetProperty("IMPORTED_CONFIGURATIONS"))
-      {
+    if (const char* iconfigs = this->GetProperty("IMPORTED_CONFIGURATIONS")) {
       cmSystemTools::ExpandListArgument(iconfigs, availableConfigs);
-      }
-    for(std::vector<std::string>::const_iterator
-          aci = availableConfigs.begin();
-        !*loc && !*imp && aci != availableConfigs.end(); ++aci)
-      {
+    }
+    for (std::vector<std::string>::const_iterator aci =
+           availableConfigs.begin();
+         !*loc && !*imp && aci != availableConfigs.end(); ++aci) {
       suffix = "_";
       suffix += cmSystemTools::UpperCase(*aci);
       std::string locProp = "IMPORTED_LOCATION";
       locProp += suffix;
       *loc = this->GetProperty(locProp);
-      if(allowImp)
-        {
+      if (allowImp) {
         std::string impProp = "IMPORTED_IMPLIB";
         impProp += suffix;
         *imp = this->GetProperty(impProp);
-        }
       }
     }
+  }
   // If we have not yet found it then the target is not available.
-  if(!*loc && !*imp)
-    {
+  if (!*loc && !*imp) {
     return false;
-    }
+  }
 
   return true;
 }
@@ -1826,8 +1599,8 @@ cmTargetInternalPointer::cmTargetInternalPointer()
   this->Pointer = new cmTargetInternals;
 }
 
-cmTargetInternalPointer
-::cmTargetInternalPointer(cmTargetInternalPointer const& r)
+cmTargetInternalPointer::cmTargetInternalPointer(
+  cmTargetInternalPointer const& r)
 {
   // Ideally cmTarget instances should never be copied.  However until
   // we can make a sweep to remove that, this copy constructor avoids
@@ -1840,10 +1613,12 @@ cmTargetInternalPointer::~cmTargetInternalPointer()
   delete this->Pointer;
 }
 
-cmTargetInternalPointer&
-cmTargetInternalPointer::operator=(cmTargetInternalPointer const& r)
+cmTargetInternalPointer& cmTargetInternalPointer::operator=(
+  cmTargetInternalPointer const& r)
 {
-  if(this == &r) { return *this; } // avoid warning on HP about self check
+  if (this == &r) {
+    return *this;
+  } // avoid warning on HP about self check
   // Ideally cmTarget instances should never be copied.  However until
   // we can make a sweep to remove that, this copy constructor avoids
   // allowing the resources (Internals) to be copied.

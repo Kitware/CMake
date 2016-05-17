@@ -11,17 +11,18 @@
 ============================================================================*/
 #include "cmInstallScriptGenerator.h"
 
-cmInstallScriptGenerator
-::cmInstallScriptGenerator(const char* script, bool code,
-                           const char* component, bool exclude_from_all) :
-  cmInstallGenerator(0, std::vector<std::string>(), component, MessageDefault,
-                     exclude_from_all),
-  Script(script), Code(code)
+cmInstallScriptGenerator::cmInstallScriptGenerator(const char* script,
+                                                   bool code,
+                                                   const char* component,
+                                                   bool exclude_from_all)
+  : cmInstallGenerator(0, std::vector<std::string>(), component,
+                       MessageDefault, exclude_from_all)
+  , Script(script)
+  , Code(code)
 {
 }
 
-cmInstallScriptGenerator
-::~cmInstallScriptGenerator()
+cmInstallScriptGenerator::~cmInstallScriptGenerator()
 {
 }
 
@@ -32,14 +33,11 @@ void cmInstallScriptGenerator::GenerateScript(std::ostream& os)
     this->CreateComponentTest(this->Component.c_str(), this->ExcludeFromAll);
   os << indent << "if(" << component_test << ")\n";
 
-  if(this->Code)
-    {
+  if (this->Code) {
     os << indent.Next() << this->Script << "\n";
-    }
-  else
-    {
+  } else {
     os << indent.Next() << "include(\"" << this->Script << "\")\n";
-    }
+  }
 
   os << indent << "endif()\n\n";
 }

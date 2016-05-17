@@ -1,10 +1,13 @@
 
 #ifdef TEST_LANG_DEFINES
-  #include "c_only.h"
+#include "c_only.h"
 
-  #ifndef C_ONLY_DEFINE
-  #error Expected C_ONLY_DEFINE
-  #endif
+#ifndef C_ONLY_DEFINE
+#error Expected C_ONLY_DEFINE
+#endif
 #endif
 
-int consumer_c() { return 0; }
+int consumer_c()
+{
+  return 0;
+}

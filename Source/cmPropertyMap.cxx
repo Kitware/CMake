@@ -17,30 +17,26 @@
 
 #include <assert.h>
 
-cmProperty *cmPropertyMap::GetOrCreateProperty(const std::string& name)
+cmProperty* cmPropertyMap::GetOrCreateProperty(const std::string& name)
 {
   cmPropertyMap::iterator it = this->find(name);
-  cmProperty *prop;
-  if (it == this->end())
-    {
+  cmProperty* prop;
+  if (it == this->end()) {
     prop = &(*this)[name];
-    }
-  else
-    {
+  } else {
     prop = &(it->second);
-    }
+  }
   return prop;
 }
 
-void cmPropertyMap::SetProperty(const std::string& name, const char *value)
+void cmPropertyMap::SetProperty(const std::string& name, const char* value)
 {
-  if(!value)
-    {
+  if (!value) {
     this->erase(name);
     return;
-    }
+  }
 
-  cmProperty *prop = this->GetOrCreateProperty(name);
+  cmProperty* prop = this->GetOrCreateProperty(name);
   prop->Set(value);
 }
 
@@ -48,25 +44,21 @@ void cmPropertyMap::AppendProperty(const std::string& name, const char* value,
                                    bool asString)
 {
   // Skip if nothing to append.
-  if(!value || !*value)
-    {
+  if (!value || !*value) {
     return;
-    }
+  }
 
-  cmProperty *prop = this->GetOrCreateProperty(name);
-  prop->Append(value,asString);
+  cmProperty* prop = this->GetOrCreateProperty(name);
+  prop->Append(value, asString);
 }
 
-const char *cmPropertyMap
-::GetPropertyValue(const std::string& name) const
+const char* cmPropertyMap::GetPropertyValue(const std::string& name) const
 {
   assert(!name.empty());
 
   cmPropertyMap::const_iterator it = this->find(name);
-  if (it == this->end())
-    {
+  if (it == this->end()) {
     return 0;
-    }
+  }
   return it->second.GetValue();
 }
-

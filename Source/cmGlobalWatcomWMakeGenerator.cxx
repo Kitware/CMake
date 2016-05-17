@@ -34,10 +34,8 @@ cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator(cmake* cm)
   this->MakeSilentFlag = "-h";
 }
 
-void cmGlobalWatcomWMakeGenerator
-::EnableLanguage(std::vector<std::string>const& l,
-                 cmMakefile *mf,
-                 bool optional)
+void cmGlobalWatcomWMakeGenerator::EnableLanguage(
+  std::vector<std::string> const& l, cmMakefile* mf, bool optional)
 {
   // pick a default
   mf->AddDefinition("WATCOM", "1");
@@ -50,8 +48,8 @@ void cmGlobalWatcomWMakeGenerator
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 }
 
-void cmGlobalWatcomWMakeGenerator
-::GetDocumentation(cmDocumentationEntry& entry)
+void cmGlobalWatcomWMakeGenerator::GetDocumentation(
+  cmDocumentationEntry& entry)
 {
   entry.Name = cmGlobalWatcomWMakeGenerator::GetActualName();
   entry.Brief = "Generates Watcom WMake makefiles.";

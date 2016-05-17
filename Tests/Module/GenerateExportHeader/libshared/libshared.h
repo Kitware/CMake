@@ -4,7 +4,8 @@
 
 #include "libshared_export.h"
 
-class LIBSHARED_EXPORT Libshared {
+class LIBSHARED_EXPORT Libshared
+{
 public:
   int libshared() const;
 
@@ -17,7 +18,8 @@ public:
   int LIBSHARED_NO_EXPORT libshared_excluded() const;
 };
 
-class LibsharedNotExported {
+class LibsharedNotExported
+{
 public:
   int libshared() const;
 
@@ -30,7 +32,8 @@ public:
   int LIBSHARED_NO_EXPORT libshared_excluded() const;
 };
 
-class LIBSHARED_NO_EXPORT LibsharedExcluded {
+class LIBSHARED_NO_EXPORT LibsharedExcluded
+{
 public:
   int libshared() const;
 

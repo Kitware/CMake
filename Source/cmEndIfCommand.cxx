@@ -13,18 +13,16 @@
 
 #include <stdlib.h> // required for atof
 bool cmEndIfCommand::InitialPass(std::vector<std::string> const&,
-                                 cmExecutionStatus &)
+                                 cmExecutionStatus&)
 {
-  const char* versionValue
-    = this->Makefile->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
-  if (!versionValue || (atof(versionValue) <= 1.4))
-    {
+  const char* versionValue =
+    this->Makefile->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
+  if (!versionValue || (atof(versionValue) <= 1.4)) {
     return true;
-    }
+  }
 
   this->SetError("An ENDIF command was found outside of a proper "
                  "IF ENDIF structure. Or its arguments did not match "
                  "the opening IF command.");
   return false;
 }
-

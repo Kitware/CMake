@@ -1,7 +1,7 @@
 #ifdef _WIN32
 __declspec(dllexport)
 #endif
-int main(void)
+  int main(void)
 {
   return 0;
 }

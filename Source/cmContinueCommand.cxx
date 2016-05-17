@@ -12,28 +12,26 @@
 #include "cmContinueCommand.h"
 
 // cmContinueCommand
-bool cmContinueCommand::InitialPass(std::vector<std::string> const &args,
-                                  cmExecutionStatus &status)
+bool cmContinueCommand::InitialPass(std::vector<std::string> const& args,
+                                    cmExecutionStatus& status)
 {
-  if(!this->Makefile->IsLoopBlock())
-    {
+  if (!this->Makefile->IsLoopBlock()) {
     this->Makefile->IssueMessage(cmake::FATAL_ERROR,
                                  "A CONTINUE command was found outside of a "
                                  "proper FOREACH or WHILE loop scope.");
     cmSystemTools::SetFatalErrorOccured();
     return true;
-    }
+  }
 
   status.SetContinueInvoked(true);
 
-  if(!args.empty())
-    {
+  if (!args.empty()) {
     this->Makefile->IssueMessage(cmake::FATAL_ERROR,
                                  "The CONTINUE command does not accept any "
                                  "arguments.");
     cmSystemTools::SetFatalErrorOccured();
     return true;
-    }
+  }
 
   return true;
 }

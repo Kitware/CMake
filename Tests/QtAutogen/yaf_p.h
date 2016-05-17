@@ -21,10 +21,10 @@
 class YafP : public QObject
 {
   Q_OBJECT
-  public:
-    YafP() {}
-  public slots:
-    void doYafP() { printf("I am yet another file !\n"); }
+public:
+  YafP() {}
+public slots:
+  void doYafP() { printf("I am yet another file !\n"); }
 };
 
 #endif

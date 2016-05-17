@@ -9,7 +9,7 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include "QCMake.h"  // include to disable MS warnings
+#include "QCMake.h" // include to disable MS warnings
 
 #include "CMakeSetupDialog.h"
 #include "cmAlgorithms.h"
@@ -25,26 +25,18 @@
 #include <cmsys/Encoding.hxx>
 #include <cmsys/SystemTools.hxx>
 
-static const char * cmDocumentationName[][2] =
-{
-  {0,
-   "  cmake-gui - CMake GUI."},
-  {0,0}
+static const char* cmDocumentationName[][2] = { { 0,
+                                                  "  cmake-gui - CMake GUI." },
+                                                { 0, 0 } };
+
+static const char* cmDocumentationUsage[][2] = {
+  { 0, "  cmake-gui [options]\n"
+       "  cmake-gui [options] <path-to-source>\n"
+       "  cmake-gui [options] <path-to-existing-build>" },
+  { 0, 0 }
 };
 
-static const char * cmDocumentationUsage[][2] =
-{
-  {0,
-   "  cmake-gui [options]\n"
-   "  cmake-gui [options] <path-to-source>\n"
-   "  cmake-gui [options] <path-to-existing-build>"},
-  {0,0}
-};
-
-static const char * cmDocumentationOptions[][2] =
-{
-  {0,0}
-};
+static const char* cmDocumentationOptions[][2] = { { 0, 0 } };
 
 #if defined(Q_OS_MAC)
 static int cmOSXInstall(std::string dir);
@@ -62,8 +54,7 @@ int main(int argc, char** argv)
   // do docs, if args were given
   cmDocumentation doc;
   doc.addCMakeStandardDocSections();
-  if(argc2 >1 && doc.CheckOptions(argc2, argv2))
-    {
+  if (argc2 > 1 && doc.CheckOptions(argc2, argv2)) {
     // Construct and print requested documentation.
     cmake hcm;
     hcm.SetHomeDirectory("");
@@ -73,23 +64,21 @@ int main(int argc, char** argv)
     std::vector<cmDocumentationEntry> generators;
     hcm.GetGeneratorDocumentation(generators);
     doc.SetName("cmake");
-    doc.SetSection("Name",cmDocumentationName);
-    doc.SetSection("Usage",cmDocumentationUsage);
-    doc.AppendSection("Generators",generators);
-    doc.PrependSection("Options",cmDocumentationOptions);
+    doc.SetSection("Name", cmDocumentationName);
+    doc.SetSection("Usage", cmDocumentationUsage);
+    doc.AppendSection("Generators", generators);
+    doc.PrependSection("Options", cmDocumentationOptions);
 
-    return (doc.PrintRequestedDocumentation(std::cout)? 0:1);
-    }
+    return (doc.PrintRequestedDocumentation(std::cout) ? 0 : 1);
+  }
 
 #if defined(Q_OS_MAC)
-  if (argc2 == 2 && strcmp(argv2[1], "--install") == 0)
-    {
+  if (argc2 == 2 && strcmp(argv2[1], "--install") == 0) {
     return cmOSXInstall("/usr/local/bin");
-    }
-  if (argc2 == 2 && cmHasLiteralPrefix(argv2[1], "--install="))
-    {
-    return cmOSXInstall(argv2[1]+10);
-    }
+  }
+  if (argc2 == 2 && cmHasLiteralPrefix(argv2[1], "--install=")) {
+    return cmOSXInstall(argv2[1] + 10);
+  }
 #endif
 
   QApplication app(argc, argv);
@@ -103,10 +92,9 @@ int main(int argc, char** argv)
 
   // clean out standard Qt paths for plugins, which we don't use anyway
   // when creating Mac bundles, it potentially causes problems
-  foreach(QString p, QApplication::libraryPaths())
-    {
+  foreach (QString p, QApplication::libraryPaths()) {
     QApplication::removeLibraryPath(p);
-    }
+  }
 
   // tell the cmake library where cmake is
   QDir cmExecDir(QApplication::applicationDirPath());
@@ -139,110 +127,92 @@ int main(int argc, char** argv)
   std::string binaryDirectory;
   std::string sourceDirectory;
   typedef cmsys::CommandLineArguments argT;
-  arg.AddArgument("-B", argT::CONCAT_ARGUMENT,
-                  &binaryDirectory, "Binary Directory");
-  arg.AddArgument("-H", argT::CONCAT_ARGUMENT,
-                  &sourceDirectory, "Source Directory");
+  arg.AddArgument("-B", argT::CONCAT_ARGUMENT, &binaryDirectory,
+                  "Binary Directory");
+  arg.AddArgument("-H", argT::CONCAT_ARGUMENT, &sourceDirectory,
+                  "Source Directory");
   // do not complain about unknown options
   arg.StoreUnusedArguments(true);
   arg.Parse();
-  if(!sourceDirectory.empty() && !binaryDirectory.empty())
-    {
+  if (!sourceDirectory.empty() && !binaryDirectory.empty()) {
     dialog.setSourceDirectory(QString::fromLocal8Bit(sourceDirectory.c_str()));
     dialog.setBinaryDirectory(QString::fromLocal8Bit(binaryDirectory.c_str()));
-    }
-  else
-    {
+  } else {
     QStringList args = app.arguments();
-    if(args.count() == 2)
-      {
-      std::string filePath = cmSystemTools::CollapseFullPath(args[1].toLocal8Bit().data());
+    if (args.count() == 2) {
+      std::string filePath =
+        cmSystemTools::CollapseFullPath(args[1].toLocal8Bit().data());
 
       // check if argument is a directory containing CMakeCache.txt
       std::string buildFilePath =
         cmSystemTools::CollapseFullPath("CMakeCache.txt", filePath.c_str());
 
       // check if argument is a CMakeCache.txt file
-      if(cmSystemTools::GetFilenameName(filePath) == "CMakeCache.txt" &&
-         cmSystemTools::FileExists(filePath.c_str()))
-        {
+      if (cmSystemTools::GetFilenameName(filePath) == "CMakeCache.txt" &&
+          cmSystemTools::FileExists(filePath.c_str())) {
         buildFilePath = filePath;
-        }
+      }
 
       // check if argument is a directory containing CMakeLists.txt
       std::string srcFilePath =
         cmSystemTools::CollapseFullPath("CMakeLists.txt", filePath.c_str());
 
-      if(cmSystemTools::FileExists(buildFilePath.c_str()))
-        {
-        dialog.setBinaryDirectory(
-          QString::fromLocal8Bit(
-            cmSystemTools::GetFilenamePath(buildFilePath).c_str()
-            )
-          );
-        }
-      else if(cmSystemTools::FileExists(srcFilePath.c_str()))
-        {
+      if (cmSystemTools::FileExists(buildFilePath.c_str())) {
+        dialog.setBinaryDirectory(QString::fromLocal8Bit(
+          cmSystemTools::GetFilenamePath(buildFilePath).c_str()));
+      } else if (cmSystemTools::FileExists(srcFilePath.c_str())) {
         dialog.setSourceDirectory(QString::fromLocal8Bit(filePath.c_str()));
-        dialog.setBinaryDirectory(
-          QString::fromLocal8Bit(cmSystemTools::CollapseFullPath(".").c_str())
-          );
-        }
+        dialog.setBinaryDirectory(QString::fromLocal8Bit(
+          cmSystemTools::CollapseFullPath(".").c_str()));
       }
     }
+  }
 
   return app.exec();
 }
 
 #if defined(Q_OS_MAC)
-# include <errno.h>
-# include <string.h>
-# include <sys/stat.h>
-# include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 static bool cmOSXInstall(std::string const& dir, std::string const& tool)
 {
-  if (tool.empty())
-    {
+  if (tool.empty()) {
     return true;
-    }
+  }
   std::string link = dir + cmSystemTools::GetFilenameName(tool);
   struct stat st;
-  if (lstat(link.c_str(), &st) == 0 && S_ISLNK(st.st_mode))
-    {
+  if (lstat(link.c_str(), &st) == 0 && S_ISLNK(st.st_mode)) {
     char buf[4096];
-    ssize_t s = readlink(link.c_str(), buf, sizeof(buf)-1);
-    if (s >= 0 && std::string(buf, s) == tool)
-      {
+    ssize_t s = readlink(link.c_str(), buf, sizeof(buf) - 1);
+    if (s >= 0 && std::string(buf, s) == tool) {
       std::cerr << "Exists: '" << link << "' -> '" << tool << "'\n";
       return true;
-      }
     }
+  }
   cmSystemTools::MakeDirectory(dir);
-  if (symlink(tool.c_str(), link.c_str()) == 0)
-    {
+  if (symlink(tool.c_str(), link.c_str()) == 0) {
     std::cerr << "Linked: '" << link << "' -> '" << tool << "'\n";
     return true;
-    }
-  else
-    {
+  } else {
     int err = errno;
-    std::cerr << "Failed: '" << link << "' -> '" << tool << "': "
-              << strerror(err) << "\n";
+    std::cerr << "Failed: '" << link << "' -> '" << tool
+              << "': " << strerror(err) << "\n";
     return false;
-    }
+  }
 }
 static int cmOSXInstall(std::string dir)
 {
-  if (!cmHasLiteralSuffix(dir, "/"))
-    {
+  if (!cmHasLiteralSuffix(dir, "/")) {
     dir += "/";
-    }
-  return (
-    cmOSXInstall(dir, cmSystemTools::GetCMakeCommand()) &&
-    cmOSXInstall(dir, cmSystemTools::GetCTestCommand()) &&
-    cmOSXInstall(dir, cmSystemTools::GetCPackCommand()) &&
-    cmOSXInstall(dir, cmSystemTools::GetCMakeGUICommand()) &&
-    cmOSXInstall(dir, cmSystemTools::GetCMakeCursesCommand())
-    ) ? 0 : 1;
+  }
+  return (cmOSXInstall(dir, cmSystemTools::GetCMakeCommand()) &&
+          cmOSXInstall(dir, cmSystemTools::GetCTestCommand()) &&
+          cmOSXInstall(dir, cmSystemTools::GetCPackCommand()) &&
+          cmOSXInstall(dir, cmSystemTools::GetCMakeGUICommand()) &&
+          cmOSXInstall(dir, cmSystemTools::GetCMakeCursesCommand()))
+    ? 0
+    : 1;
 }
 #endif

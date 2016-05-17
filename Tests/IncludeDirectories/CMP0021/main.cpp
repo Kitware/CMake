@@ -5,7 +5,7 @@
 #error Expected CMP0021_DEFINE
 #endif
 
-int main(int, char **)
+int main(int, char**)
 {
   return 0;
 }

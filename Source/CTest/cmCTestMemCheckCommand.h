@@ -24,24 +24,23 @@ class cmCTestGenericHandler;
 class cmCTestMemCheckCommand : public cmCTestTestCommand
 {
 public:
-
   cmCTestMemCheckCommand() {}
 
   /**
    * This is a virtual constructor for the command.
    */
   virtual cmCommand* Clone()
-    {
+  {
     cmCTestMemCheckCommand* ni = new cmCTestMemCheckCommand;
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
-    }
+  }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_memcheck";}
+  virtual std::string GetName() const { return "ctest_memcheck"; }
 
   cmTypeMacro(cmCTestMemCheckCommand, cmCTestTestCommand);
 
@@ -49,6 +48,4 @@ protected:
   cmCTestGenericHandler* InitializeActualHandler();
 };
 
-
 #endif
-

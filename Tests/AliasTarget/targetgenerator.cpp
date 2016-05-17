@@ -1,7 +1,7 @@
 
 #include <fstream>
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   std::fstream fout;
   fout.open("targetoutput.h", std::ios::out);

@@ -11,10 +11,9 @@
 ============================================================================*/
 #include "cmCursesFilePathWidget.h"
 
-cmCursesFilePathWidget::cmCursesFilePathWidget(int width, int height,
-                                           int left, int top) :
-  cmCursesPathWidget(width, height, left, top)
+cmCursesFilePathWidget::cmCursesFilePathWidget(int width, int height, int left,
+                                               int top)
+  : cmCursesPathWidget(width, height, left, top)
 {
   this->Type = cmState::FILEPATH;
 }
-

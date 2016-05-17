@@ -12,11 +12,10 @@
 
 #include "cmWIXDirectoriesSourceWriter.h"
 
-cmWIXDirectoriesSourceWriter::cmWIXDirectoriesSourceWriter(cmCPackLog* logger,
-  std::string const& filename):
-    cmWIXSourceWriter(logger, filename)
+cmWIXDirectoriesSourceWriter::cmWIXDirectoriesSourceWriter(
+  cmCPackLog* logger, std::string const& filename)
+  : cmWIXSourceWriter(logger, filename)
 {
-
 }
 
 void cmWIXDirectoriesSourceWriter::EmitStartMenuFolder(
@@ -60,25 +59,20 @@ size_t cmWIXDirectoriesSourceWriter::BeginInstallationPrefixDirectory(
 
   cmSystemTools::SplitPath(installRootString.c_str(), installRoot);
 
-  if(!installRoot.empty() && installRoot.back().empty())
-    {
+  if (!installRoot.empty() && installRoot.back().empty()) {
     installRoot.pop_back();
-    }
+  }
 
-  for(size_t i = 1; i < installRoot.size(); ++i)
-    {
+  for (size_t i = 1; i < installRoot.size(); ++i) {
     BeginElement("Directory");
 
-    if(i == installRoot.size() - 1)
-      {
+    if (i == installRoot.size() - 1) {
       AddAttribute("Id", "INSTALL_ROOT");
-      }
-    else
-      {
+    } else {
       std::stringstream tmp;
       tmp << "INSTALL_PREFIX_" << i;
       AddAttribute("Id", tmp.str());
-      }
+    }
 
     AddAttribute("Name", installRoot[i]);
   }
@@ -88,8 +82,7 @@ size_t cmWIXDirectoriesSourceWriter::BeginInstallationPrefixDirectory(
 
 void cmWIXDirectoriesSourceWriter::EndInstallationPrefixDirectory(size_t size)
 {
-  for(size_t i = 0; i < size; ++i)
-    {
+  for (size_t i = 0; i < size; ++i) {
     EndElement("Directory");
-    }
+  }
 }

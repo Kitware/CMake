@@ -25,7 +25,6 @@ class cmGeneratorTarget;
 class cmGraphVizWriter
 {
 public:
-
   cmGraphVizWriter(const std::vector<cmLocalGenerator*>& localGenerators);
 
   void ReadSettings(const char* settingsFileName,
@@ -37,7 +36,6 @@ public:
   void WriteGlobalFile(const char* fileName);
 
 protected:
-
   void CollectTargetsAndLibs();
 
   int CollectAllTargets();

@@ -5,5 +5,5 @@ class Empty : public QObject
 {
   Q_OBJECT
 public:
-  explicit Empty(QObject *parent = 0) {}
+  explicit Empty(QObject* parent = 0) {}
 };

@@ -34,8 +34,7 @@ public:
                   const std::vector<std::string>& byproducts,
                   const std::vector<std::string>& depends,
                   const cmCustomCommandLines& commandLines,
-                  const char* comment,
-                  const char* workingDirectory);
+                  const char* comment, const char* workingDirectory);
 
   /** Get the output file produced by the command.  */
   const std::vector<std::string>& GetOutputs() const;
@@ -48,7 +47,9 @@ public:
 
   /** Get the working directory.  */
   std::string const& GetWorkingDirectory() const
-    { return this->WorkingDirectory; }
+  {
+    return this->WorkingDirectory;
+  }
 
   /** Get the list of command lines.  */
   const cmCustomCommandLines& GetCommandLines() const;
@@ -75,7 +76,9 @@ public:
   cmListFileBacktrace const& GetBacktrace() const;
 
   typedef std::pair<std::string, std::string> ImplicitDependsPair;
-  class ImplicitDependsList: public std::vector<ImplicitDependsPair> {};
+  class ImplicitDependsList : public std::vector<ImplicitDependsPair>
+  {
+  };
   void SetImplicitDepends(ImplicitDependsList const&);
   void AppendImplicitDepends(ImplicitDependsList const&);
   ImplicitDependsList const& GetImplicitDepends() const;

@@ -4,8 +4,8 @@
 #include "cmSystemTools.h"
 #include "cmVisualStudio10TargetGenerator.h"
 
-static
-std::string cmVisualStudio10GeneratorOptionsEscapeForXML(std::string ret)
+static std::string cmVisualStudio10GeneratorOptionsEscapeForXML(
+  std::string ret)
 {
   cmSystemTools::ReplaceString(ret, ";", "%3B");
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
@@ -14,8 +14,7 @@ std::string cmVisualStudio10GeneratorOptionsEscapeForXML(std::string ret)
   return ret;
 }
 
-static
-std::string cmVisualStudioGeneratorOptionsEscapeForXML(std::string ret)
+static std::string cmVisualStudioGeneratorOptionsEscapeForXML(std::string ret)
 {
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
   cmSystemTools::ReplaceString(ret, "\"", "&quot;");
@@ -25,13 +24,14 @@ std::string cmVisualStudioGeneratorOptionsEscapeForXML(std::string ret)
   return ret;
 }
 
-cmVisualStudioGeneratorOptions
-::cmVisualStudioGeneratorOptions(cmLocalVisualStudioGenerator* lg,
-                                 Tool tool,
-                                 cmVisualStudio10TargetGenerator* g):
-  cmIDEOptions(),
-  LocalGenerator(lg), Version(lg->GetVersion()), CurrentTool(tool),
-  TargetGenerator(g)
+cmVisualStudioGeneratorOptions::cmVisualStudioGeneratorOptions(
+  cmLocalVisualStudioGenerator* lg, Tool tool,
+  cmVisualStudio10TargetGenerator* g)
+  : cmIDEOptions()
+  , LocalGenerator(lg)
+  , Version(lg->GetVersion())
+  , CurrentTool(tool)
+  , TargetGenerator(g)
 {
   // Preprocessor definitions are not allowed for linker tools.
   this->AllowDefine = (tool != Linker);
@@ -44,15 +44,14 @@ cmVisualStudioGeneratorOptions
   this->FortranRuntimeMT = false;
 }
 
-cmVisualStudioGeneratorOptions
-::cmVisualStudioGeneratorOptions(cmLocalVisualStudioGenerator* lg,
-                                 Tool tool,
-                                 cmVS7FlagTable const* table,
-                                 cmVS7FlagTable const* extraTable,
-                                 cmVisualStudio10TargetGenerator* g):
-  cmIDEOptions(),
-  LocalGenerator(lg), Version(lg->GetVersion()), CurrentTool(tool),
-  TargetGenerator(g)
+cmVisualStudioGeneratorOptions::cmVisualStudioGeneratorOptions(
+  cmLocalVisualStudioGenerator* lg, Tool tool, cmVS7FlagTable const* table,
+  cmVS7FlagTable const* extraTable, cmVisualStudio10TargetGenerator* g)
+  : cmIDEOptions()
+  , LocalGenerator(lg)
+  , Version(lg->GetVersion())
+  , CurrentTool(tool)
+  , TargetGenerator(g)
 {
   // Store the given flag tables.
   this->AddTable(table);
@@ -71,17 +70,14 @@ cmVisualStudioGeneratorOptions
 
 void cmVisualStudioGeneratorOptions::AddTable(cmVS7FlagTable const* table)
 {
-  if(table)
-    {
-    for(int i=0; i < FlagTableCount; ++i)
-      {
-      if (!this->FlagTable[i])
-        {
+  if (table) {
+    for (int i = 0; i < FlagTableCount; ++i) {
+      if (!this->FlagTable[i]) {
         this->FlagTable[i] = table;
         break;
-        }
       }
     }
+  }
 }
 
 void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
@@ -91,8 +87,7 @@ void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
   // initialization to off, but the user has the option of removing
   // the flag to disable exception handling.  When the user does
   // remove the flag we need to override the IDE default of on.
-  switch (this->Version)
-    {
+  switch (this->Version) {
     case cmGlobalVisualStudioGenerator::VS7:
     case cmGlobalVisualStudioGenerator::VS71:
       this->FlagMap["ExceptionHandling"] = "FALSE";
@@ -109,8 +104,8 @@ void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
       break;
     default:
       this->FlagMap["ExceptionHandling"] = "0";
-    break;
-    }
+      break;
+  }
 }
 
 void cmVisualStudioGeneratorOptions::SetVerboseMakefile(bool verbose)
@@ -124,12 +119,11 @@ void cmVisualStudioGeneratorOptions::SetVerboseMakefile(bool verbose)
   // an empty string, instead of "FALSE", in order to avoid a warning:
   //   "cl ... warning D9035: option 'nologo-' has been deprecated"
   //
-  if(verbose &&
-     this->FlagMap.find("SuppressStartupBanner") == this->FlagMap.end())
-    {
+  if (verbose &&
+      this->FlagMap.find("SuppressStartupBanner") == this->FlagMap.end()) {
     this->FlagMap["SuppressStartupBanner"] =
       this->Version < cmGlobalVisualStudioGenerator::VS10 ? "FALSE" : "";
-    }
+  }
 }
 
 bool cmVisualStudioGeneratorOptions::IsDebug() const
@@ -145,27 +139,23 @@ bool cmVisualStudioGeneratorOptions::IsWinRt() const
 bool cmVisualStudioGeneratorOptions::UsingUnicode() const
 {
   // Look for the a _UNICODE definition.
-  for(std::vector<std::string>::const_iterator di = this->Defines.begin();
-      di != this->Defines.end(); ++di)
-    {
-    if(*di == "_UNICODE")
-      {
+  for (std::vector<std::string>::const_iterator di = this->Defines.begin();
+       di != this->Defines.end(); ++di) {
+    if (*di == "_UNICODE") {
       return true;
-      }
     }
+  }
   return false;
 }
 bool cmVisualStudioGeneratorOptions::UsingSBCS() const
 {
   // Look for the a _SBCS definition.
-  for(std::vector<std::string>::const_iterator di = this->Defines.begin();
-      di != this->Defines.end(); ++di)
-    {
-    if(*di == "_SBCS")
-      {
+  for (std::vector<std::string>::const_iterator di = this->Defines.begin();
+       di != this->Defines.end(); ++di) {
+    if (*di == "_SBCS") {
       return true;
-      }
     }
+  }
   return false;
 }
 
@@ -178,17 +168,15 @@ void cmVisualStudioGeneratorOptions::Parse(const char* flags)
 
   // Process flags that need to be represented specially in the IDE
   // project file.
-  for(std::vector<std::string>::iterator ai = args.begin();
-      ai != args.end(); ++ai)
-    {
+  for (std::vector<std::string>::iterator ai = args.begin(); ai != args.end();
+       ++ai) {
     this->HandleFlag(ai->c_str());
-    }
+  }
 }
 
 void cmVisualStudioGeneratorOptions::ParseFinish()
 {
-  if(this->CurrentTool == FortranCompiler)
-    {
+  if (this->CurrentTool == FortranCompiler) {
     // "RuntimeLibrary" attribute values:
     //  "rtMultiThreaded", "0", /threads /libs:static
     //  "rtMultiThreadedDLL", "2", /threads /libs:dll
@@ -200,45 +188,38 @@ void cmVisualStudioGeneratorOptions::ParseFinish()
     //  "rtSingleThreadedDebug", "5", /dbglibs /libs:static
     //  "rtSingleThreadedDebugDLL", "11", /dbglibs /libs:dll
     std::string rl = "rtMultiThreaded";
-    rl += this->FortranRuntimeDebug? "Debug" : "";
-    rl += this->FortranRuntimeDLL? "DLL" : "";
+    rl += this->FortranRuntimeDebug ? "Debug" : "";
+    rl += this->FortranRuntimeDLL ? "DLL" : "";
     this->FlagMap["RuntimeLibrary"] = rl;
-    }
+  }
 }
 
 void cmVisualStudioGeneratorOptions::StoreUnknownFlag(const char* flag)
 {
   // Look for Intel Fortran flags that do not map well in the flag table.
-  if(this->CurrentTool == FortranCompiler)
-    {
-    if(strcmp(flag, "/dbglibs") == 0)
-      {
+  if (this->CurrentTool == FortranCompiler) {
+    if (strcmp(flag, "/dbglibs") == 0) {
       this->FortranRuntimeDebug = true;
       return;
-      }
-    if(strcmp(flag, "/threads") == 0)
-      {
+    }
+    if (strcmp(flag, "/threads") == 0) {
       this->FortranRuntimeMT = true;
       return;
-      }
-    if(strcmp(flag, "/libs:dll") == 0)
-      {
+    }
+    if (strcmp(flag, "/libs:dll") == 0) {
       this->FortranRuntimeDLL = true;
       return;
-      }
-    if(strcmp(flag, "/libs:static") == 0)
-      {
+    }
+    if (strcmp(flag, "/libs:static") == 0) {
       this->FortranRuntimeDLL = false;
       return;
-      }
     }
+  }
 
   // This option is not known.  Store it in the output flags.
   this->FlagString += " ";
-  this->FlagString +=
-    cmOutputConverter::EscapeWindowsShellArgument(
-      flag,
-      cmOutputConverter::Shell_Flag_AllowMakeVariables |
+  this->FlagString += cmOutputConverter::EscapeWindowsShellArgument(
+    flag, cmOutputConverter::Shell_Flag_AllowMakeVariables |
       cmOutputConverter::Shell_Flag_VSIDE);
 }
 
@@ -247,163 +228,112 @@ void cmVisualStudioGeneratorOptions::SetConfiguration(const char* config)
   this->Configuration = config;
 }
 
-void
-cmVisualStudioGeneratorOptions
-::OutputPreprocessorDefinitions(std::ostream& fout,
-                                const char* prefix,
-                                const char* suffix,
-                                const std::string& lang)
+void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
+  std::ostream& fout, const char* prefix, const char* suffix,
+  const std::string& lang)
 {
-  if(this->Defines.empty())
-    {
+  if (this->Defines.empty()) {
     return;
-    }
-  if(this->Version >= cmGlobalVisualStudioGenerator::VS10)
-    {
+  }
+  if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
     // if there are configuration specific flags, then
     // use the configuration specific tag for PreprocessorDefinitions
-    if(!this->Configuration.empty())
-      {
+    if (!this->Configuration.empty()) {
       fout << prefix;
       this->TargetGenerator->WritePlatformConfigTag(
-        "PreprocessorDefinitions",
-        this->Configuration.c_str(),
-        0,
-        0, 0, &fout);
-      }
-    else
-      {
+        "PreprocessorDefinitions", this->Configuration.c_str(), 0, 0, 0,
+        &fout);
+    } else {
       fout << prefix << "<PreprocessorDefinitions>";
-      }
     }
-  else
-    {
-    fout << prefix <<  "PreprocessorDefinitions=\"";
-    }
+  } else {
+    fout << prefix << "PreprocessorDefinitions=\"";
+  }
   const char* sep = "";
-  for(std::vector<std::string>::const_iterator di = this->Defines.begin();
-      di != this->Defines.end(); ++di)
-    {
+  for (std::vector<std::string>::const_iterator di = this->Defines.begin();
+       di != this->Defines.end(); ++di) {
     // Escape the definition for the compiler.
     std::string define;
-    if(this->Version < cmGlobalVisualStudioGenerator::VS10)
-      {
-      define =
-        this->LocalGenerator->EscapeForShell(di->c_str(), true);
-      }
-    else
-      {
+    if (this->Version < cmGlobalVisualStudioGenerator::VS10) {
+      define = this->LocalGenerator->EscapeForShell(di->c_str(), true);
+    } else {
       define = *di;
-      }
+    }
     // Escape this flag for the IDE.
-    if(this->Version >= cmGlobalVisualStudioGenerator::VS10)
-      {
+    if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
       define = cmVisualStudio10GeneratorOptionsEscapeForXML(define);
 
-      if(lang == "RC")
-        {
+      if (lang == "RC") {
         cmSystemTools::ReplaceString(define, "\"", "\\\"");
-        }
       }
-    else
-      {
+    } else {
       define = cmVisualStudioGeneratorOptionsEscapeForXML(define);
-      }
+    }
     // Store the flag in the project file.
     fout << sep << define;
     sep = ";";
-    }
-  if(this->Version >= cmGlobalVisualStudioGenerator::VS10)
-    {
-    fout <<  ";%(PreprocessorDefinitions)</PreprocessorDefinitions>" << suffix;
-    }
-  else
-    {
+  }
+  if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
+    fout << ";%(PreprocessorDefinitions)</PreprocessorDefinitions>" << suffix;
+  } else {
     fout << "\"" << suffix;
-    }
+  }
 }
 
-void
-cmVisualStudioGeneratorOptions
-::OutputFlagMap(std::ostream& fout, const char* indent)
+void cmVisualStudioGeneratorOptions::OutputFlagMap(std::ostream& fout,
+                                                   const char* indent)
 {
-  if(this->Version >= cmGlobalVisualStudioGenerator::VS10)
-    {
-    for(std::map<std::string, FlagValue>::iterator m = this->FlagMap.begin();
-        m != this->FlagMap.end(); ++m)
-      {
+  if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
+    for (std::map<std::string, FlagValue>::iterator m = this->FlagMap.begin();
+         m != this->FlagMap.end(); ++m) {
       fout << indent;
-      if(!this->Configuration.empty())
-        {
+      if (!this->Configuration.empty()) {
         this->TargetGenerator->WritePlatformConfigTag(
-          m->first.c_str(),
-          this->Configuration.c_str(),
-          0,
-          0, 0, &fout);
-        }
-      else
-        {
+          m->first.c_str(), this->Configuration.c_str(), 0, 0, 0, &fout);
+      } else {
         fout << "<" << m->first << ">";
-        }
+      }
       const char* sep = "";
-      for(std::vector<std::string>::iterator i = m->second.begin();
-            i != m->second.end(); ++i)
-        {
+      for (std::vector<std::string>::iterator i = m->second.begin();
+           i != m->second.end(); ++i) {
         fout << sep << cmVisualStudio10GeneratorOptionsEscapeForXML(*i);
         sep = ";";
-        }
-      fout  << "</" << m->first << ">\n";
       }
+      fout << "</" << m->first << ">\n";
     }
-  else
-    {
-    for(std::map<std::string, FlagValue>::iterator m = this->FlagMap.begin();
-        m != this->FlagMap.end(); ++m)
-      {
+  } else {
+    for (std::map<std::string, FlagValue>::iterator m = this->FlagMap.begin();
+         m != this->FlagMap.end(); ++m) {
       fout << indent << m->first << "=\"";
       const char* sep = "";
-      for(std::vector<std::string>::iterator i = m->second.begin();
-            i != m->second.end(); ++i)
-        {
+      for (std::vector<std::string>::iterator i = m->second.begin();
+           i != m->second.end(); ++i) {
         fout << sep << cmVisualStudioGeneratorOptionsEscapeForXML(*i);
         sep = ";";
-        }
-      fout << "\"\n";
       }
+      fout << "\"\n";
     }
+  }
 }
 
-void
-cmVisualStudioGeneratorOptions
-::OutputAdditionalOptions(std::ostream& fout,
-                          const char* prefix,
-                          const char* suffix)
+void cmVisualStudioGeneratorOptions::OutputAdditionalOptions(
+  std::ostream& fout, const char* prefix, const char* suffix)
 {
-  if(!this->FlagString.empty())
-    {
-    if(this->Version >= cmGlobalVisualStudioGenerator::VS10)
-      {
+  if (!this->FlagString.empty()) {
+    if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
       fout << prefix;
-      if(!this->Configuration.empty())
-        {
+      if (!this->Configuration.empty()) {
         this->TargetGenerator->WritePlatformConfigTag(
-          "AdditionalOptions",
-          this->Configuration.c_str(),
-          0,
-          0, 0, &fout);
-        }
-      else
-        {
+          "AdditionalOptions", this->Configuration.c_str(), 0, 0, 0, &fout);
+      } else {
         fout << "<AdditionalOptions>";
-        }
+      }
       fout << cmVisualStudio10GeneratorOptionsEscapeForXML(this->FlagString)
            << " %(AdditionalOptions)</AdditionalOptions>\n";
-      }
-    else
-      {
+    } else {
       fout << prefix << "AdditionalOptions=\"";
       fout << cmVisualStudioGeneratorOptionsEscapeForXML(this->FlagString);
       fout << "\"" << suffix;
-      }
     }
+  }
 }

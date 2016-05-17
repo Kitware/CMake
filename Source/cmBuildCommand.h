@@ -25,17 +25,14 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
-    {
-    return new cmBuildCommand;
-    }
+  virtual cmCommand* Clone() { return new cmBuildCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * The primary command signature with optional, KEYWORD-based args.
@@ -50,9 +47,10 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const {return "build_command";}
+  virtual std::string GetName() const { return "build_command"; }
 
   cmTypeMacro(cmBuildCommand, cmCommand);
+
 private:
   bool IgnoreErrors() const;
 };

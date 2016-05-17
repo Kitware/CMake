@@ -14,14 +14,12 @@
 
 #include "cmGlobalVisualStudio10Generator.h"
 
-
 /** \class cmGlobalVisualStudio11Generator  */
-class cmGlobalVisualStudio11Generator:
-  public cmGlobalVisualStudio10Generator
+class cmGlobalVisualStudio11Generator : public cmGlobalVisualStudio10Generator
 {
 public:
   cmGlobalVisualStudio11Generator(cmake* cm, const std::string& name,
-    const std::string& platformName);
+                                  const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   virtual bool MatchesGeneratorName(const std::string& name) const;
@@ -49,6 +47,7 @@ protected:
 
   /** Return true if the configuration needs to be deployed */
   virtual bool NeedsDeploy(cmState::TargetType type) const;
+
 private:
   class Factory;
   friend class Factory;

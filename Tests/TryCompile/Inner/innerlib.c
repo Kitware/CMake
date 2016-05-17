@@ -1,1 +1,4 @@
-int innerlib(void) { return 0; }
+int innerlib(void)
+{
+  return 0;
+}

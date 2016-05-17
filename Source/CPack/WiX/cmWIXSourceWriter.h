@@ -26,8 +26,8 @@
 class cmWIXSourceWriter
 {
 public:
-  cmWIXSourceWriter(cmCPackLog* logger,
-    std::string const& filename, bool isIncludeFile = false);
+  cmWIXSourceWriter(cmCPackLog* logger, std::string const& filename,
+                    bool isIncludeFile = false);
 
   ~cmWIXSourceWriter();
 
@@ -37,19 +37,18 @@ public:
 
   void AddTextNode(std::string const& text);
 
-  void AddProcessingInstruction(
-    std::string const& target, std::string const& content);
+  void AddProcessingInstruction(std::string const& target,
+                                std::string const& content);
 
-  void AddAttribute(
-    std::string const& key, std::string const& value);
+  void AddAttribute(std::string const& key, std::string const& value);
 
-  void AddAttributeUnlessEmpty(
-    std::string const& key, std::string const& value);
+  void AddAttributeUnlessEmpty(std::string const& key,
+                               std::string const& value);
 
   static std::string CMakeEncodingToUtf8(std::string const& value);
 
 protected:
-   cmCPackLog* Logger;
+  cmCPackLog* Logger;
 
 private:
   enum State

@@ -1,12 +1,16 @@
 
-struct X {
-  constexpr X() : n(5) {
+struct X
+{
+  constexpr X()
+    : n(5)
+  {
     n *= 2;
   }
   int n;
 };
 
-constexpr int g(const int (&is)[4]) {
+constexpr int g(const int (&is)[4])
+{
   X x;
   int r = x.n;
   for (int i = 0; i < 5; ++i)

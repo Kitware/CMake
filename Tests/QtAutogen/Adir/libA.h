@@ -10,7 +10,7 @@ class LIBA_EXPORT LibA : public QObject
 {
   Q_OBJECT
 public:
-  explicit LibA(QObject *parent = 0);
+  explicit LibA(QObject* parent = 0);
 
   int foo();
 };

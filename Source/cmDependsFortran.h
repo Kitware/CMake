@@ -20,7 +20,7 @@ class cmFortranSourceInfo;
 /** \class cmDependsFortran
  * \brief Dependency scanner for Fortran object files.
  */
-class cmDependsFortran: public cmDepends
+class cmDependsFortran : public cmDepends
 {
 public:
   /** Checking instances need to know the build directory name and the
@@ -43,8 +43,8 @@ public:
 
   /** Determine if a mod file and the corresponding mod.stamp file
       are representing  different module information. */
-  static bool  ModulesDiffer(const char* modFile, const char* stampFile,
-                             const char* compilerId);
+  static bool ModulesDiffer(const char* modFile, const char* stampFile,
+                            const char* compilerId);
 
 protected:
   // Finalize the dependency information for the target.
@@ -59,15 +59,14 @@ protected:
   bool FindModule(std::string const& name, std::string& module);
 
   // Implement writing/checking methods required by superclass.
-  virtual bool WriteDependencies(
-    const std::set<std::string>& sources, const std::string& file,
-    std::ostream& makeDepends, std::ostream& internalDepends);
+  virtual bool WriteDependencies(const std::set<std::string>& sources,
+                                 const std::string& file,
+                                 std::ostream& makeDepends,
+                                 std::ostream& internalDepends);
 
   // Actually write the depenencies to the streams.
-  bool WriteDependenciesReal(const char *obj,
-                             cmFortranSourceInfo const& info,
-                             std::string const& mod_dir,
-                             const char* stamp_dir,
+  bool WriteDependenciesReal(const char* obj, cmFortranSourceInfo const& info,
+                             std::string const& mod_dir, const char* stamp_dir,
                              std::ostream& makeDepends,
                              std::ostream& internalDepends);
 
@@ -81,7 +80,7 @@ protected:
 
 private:
   cmDependsFortran(cmDependsFortran const&); // Purposely not implemented.
-  void operator=(cmDependsFortran const&); // Purposely not implemented.
+  void operator=(cmDependsFortran const&);   // Purposely not implemented.
 };
 
 #endif

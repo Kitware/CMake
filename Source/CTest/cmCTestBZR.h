@@ -18,7 +18,7 @@
  * \brief Interaction with bzr command-line tool
  *
  */
-class cmCTestBZR: public cmCTestGlobalVC
+class cmCTestBZR : public cmCTestGlobalVC
 {
 public:
   /** Construct with a CTest instance and update log stream.  */

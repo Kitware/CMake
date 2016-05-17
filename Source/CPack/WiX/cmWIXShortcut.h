@@ -45,26 +45,23 @@ public:
 
   bool empty(Type type) const;
 
-  bool EmitShortcuts(
-    Type type,
-    std::string const& registryKey,
-    std::string const& cpackComponentName,
-    cmWIXFilesSourceWriter& fileDefinitions) const;
+  bool EmitShortcuts(Type type, std::string const& registryKey,
+                     std::string const& cpackComponentName,
+                     cmWIXFilesSourceWriter& fileDefinitions) const;
 
   void AddShortcutTypes(std::set<Type>& types);
 
   void CreateFromProperties(std::string const& id,
-    std::string const& directoryId, cmInstalledFile const& installedFile);
+                            std::string const& directoryId,
+                            cmInstalledFile const& installedFile);
 
 private:
   typedef std::map<Type, shortcut_id_map_t> shortcut_type_map_t;
 
-  void CreateFromProperty(
-    std::string const& propertyName,
-    Type type,
-    std::string const& id,
-    std::string const& directoryId,
-    cmInstalledFile const& installedFile);
+  void CreateFromProperty(std::string const& propertyName, Type type,
+                          std::string const& id,
+                          std::string const& directoryId,
+                          cmInstalledFile const& installedFile);
 
   shortcut_type_map_t Shortcuts;
   shortcut_id_map_t EmptyIdMap;

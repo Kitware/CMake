@@ -15,7 +15,6 @@
 
 #include "cmCTestCoverageHandler.h"
 
-
 /** \class cmParseJacocoCoverage
  * \brief Parse JaCoCO coverage information
  *
@@ -27,14 +26,14 @@
 class cmParseJacocoCoverage
 {
 public:
-  cmParseJacocoCoverage(cmCTestCoverageHandlerContainer& cont,
-    cmCTest* ctest);
+  cmParseJacocoCoverage(cmCTestCoverageHandlerContainer& cont, cmCTest* ctest);
   bool LoadCoverageData(const std::vector<std::string> files);
 
   std::string PackageName;
   std::string FileName;
   std::string ModuleName;
   std::string CurFileName;
+
 private:
   // implement virtual from parent
   // remove files with no coverage
@@ -42,10 +41,8 @@ private:
   // Read a single mcov file
   bool ReadJacocoXML(const char* f);
   // split a string based on ,
-  bool SplitString(std::vector<std::string>& args,
-    std::string const& line);
-  bool FindJavaFile(std::string const& routine,
-    std::string& filepath);
+  bool SplitString(std::vector<std::string>& args, std::string const& line);
+  bool FindJavaFile(std::string const& routine, std::string& filepath);
   void InitializeJavaFile(std::string& file);
   bool LoadSource(std::string d);
 

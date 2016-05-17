@@ -19,7 +19,7 @@ class cmCommonTargetGenerator;
 /** \class cmLocalCommonGenerator
  * \brief Common infrastructure for Makefile and Ninja local generators.
  */
-class cmLocalCommonGenerator: public cmLocalGenerator
+class cmLocalCommonGenerator : public cmLocalGenerator
 {
 public:
   cmLocalCommonGenerator(cmGlobalGenerator* gg, cmMakefile* mf);

@@ -1,1 +1,4 @@
-int testLibAbs1(void) { return 0; }
+int testLibAbs1(void)
+{
+  return 0;
+}

@@ -37,103 +37,78 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
     this->Makefile->GetDefinition("CTEST_TEST_TIMEOUT");
 
   double timeout = this->CTest->GetTimeOut();
-  if ( ctestTimeout )
-    {
+  if (ctestTimeout) {
     timeout = atof(ctestTimeout);
-    }
-  else
-    {
-    if ( timeout <= 0 )
-      {
+  } else {
+    if (timeout <= 0) {
       // By default use timeout of 10 minutes
       timeout = 600;
-      }
     }
+  }
   this->CTest->SetTimeOut(timeout);
   cmCTestGenericHandler* handler = this->InitializeActualHandler();
-  if ( this->Values[ctt_START] || this->Values[ctt_END] ||
-    this->Values[ctt_STRIDE] )
-    {
+  if (this->Values[ctt_START] || this->Values[ctt_END] ||
+      this->Values[ctt_STRIDE]) {
     std::ostringstream testsToRunString;
-    if ( this->Values[ctt_START] )
-      {
+    if (this->Values[ctt_START]) {
       testsToRunString << this->Values[ctt_START];
-      }
+    }
     testsToRunString << ",";
-    if ( this->Values[ctt_END] )
-      {
+    if (this->Values[ctt_END]) {
       testsToRunString << this->Values[ctt_END];
-      }
+    }
     testsToRunString << ",";
-    if ( this->Values[ctt_STRIDE] )
-      {
+    if (this->Values[ctt_STRIDE]) {
       testsToRunString << this->Values[ctt_STRIDE];
-      }
+    }
     handler->SetOption("TestsToRunInformation",
-      testsToRunString.str().c_str());
-    }
-  if(this->Values[ctt_EXCLUDE])
-    {
+                       testsToRunString.str().c_str());
+  }
+  if (this->Values[ctt_EXCLUDE]) {
     handler->SetOption("ExcludeRegularExpression", this->Values[ctt_EXCLUDE]);
-    }
-  if(this->Values[ctt_INCLUDE])
-    {
+  }
+  if (this->Values[ctt_INCLUDE]) {
     handler->SetOption("IncludeRegularExpression", this->Values[ctt_INCLUDE]);
-    }
-  if(this->Values[ctt_EXCLUDE_LABEL])
-    {
+  }
+  if (this->Values[ctt_EXCLUDE_LABEL]) {
     handler->SetOption("ExcludeLabelRegularExpression",
                        this->Values[ctt_EXCLUDE_LABEL]);
-    }
-  if(this->Values[ctt_INCLUDE_LABEL])
-    {
+  }
+  if (this->Values[ctt_INCLUDE_LABEL]) {
     handler->SetOption("LabelRegularExpression",
                        this->Values[ctt_INCLUDE_LABEL]);
-    }
-  if(this->Values[ctt_PARALLEL_LEVEL])
-    {
-    handler->SetOption("ParallelLevel",
-                       this->Values[ctt_PARALLEL_LEVEL]);
-    }
-  if(this->Values[ctt_SCHEDULE_RANDOM])
-    {
-    handler->SetOption("ScheduleRandom",
-                       this->Values[ctt_SCHEDULE_RANDOM]);
-    }
-  if(this->Values[ctt_STOP_TIME])
-    {
+  }
+  if (this->Values[ctt_PARALLEL_LEVEL]) {
+    handler->SetOption("ParallelLevel", this->Values[ctt_PARALLEL_LEVEL]);
+  }
+  if (this->Values[ctt_SCHEDULE_RANDOM]) {
+    handler->SetOption("ScheduleRandom", this->Values[ctt_SCHEDULE_RANDOM]);
+  }
+  if (this->Values[ctt_STOP_TIME]) {
     this->CTest->SetStopTime(this->Values[ctt_STOP_TIME]);
-    }
+  }
 
   // Test load is determined by: TEST_LOAD argument,
   // or CTEST_TEST_LOAD script variable, or ctest --test-load
   // command line argument... in that order.
   unsigned long testLoad;
-  const char* ctestTestLoad
-    = this->Makefile->GetDefinition("CTEST_TEST_LOAD");
-  if(this->Values[ctt_TEST_LOAD] && *this->Values[ctt_TEST_LOAD])
-    {
-    if (!cmSystemTools::StringToULong(this->Values[ctt_TEST_LOAD], &testLoad))
-      {
+  const char* ctestTestLoad = this->Makefile->GetDefinition("CTEST_TEST_LOAD");
+  if (this->Values[ctt_TEST_LOAD] && *this->Values[ctt_TEST_LOAD]) {
+    if (!cmSystemTools::StringToULong(this->Values[ctt_TEST_LOAD],
+                                      &testLoad)) {
       testLoad = 0;
       cmCTestLog(this->CTest, WARNING, "Invalid value for 'TEST_LOAD' : "
-          << this->Values[ctt_TEST_LOAD] << std::endl);
-      }
+                   << this->Values[ctt_TEST_LOAD] << std::endl);
     }
-  else if(ctestTestLoad && *ctestTestLoad)
-    {
-    if (!cmSystemTools::StringToULong(ctestTestLoad, &testLoad))
-      {
+  } else if (ctestTestLoad && *ctestTestLoad) {
+    if (!cmSystemTools::StringToULong(ctestTestLoad, &testLoad)) {
       testLoad = 0;
-      cmCTestLog(this->CTest, WARNING,
-        "Invalid value for 'CTEST_TEST_LOAD' : " <<
-        ctestTestLoad << std::endl);
-      }
+      cmCTestLog(this->CTest, WARNING, "Invalid value for 'CTEST_TEST_LOAD' : "
+                   << ctestTestLoad << std::endl);
     }
-  else
-    {
+  } else {
     testLoad = this->CTest->GetTestLoad();
-    }
+  }
   handler->SetTestLoad(testLoad);
 
   handler->SetQuiet(this->Quiet);

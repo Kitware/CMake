@@ -28,17 +28,14 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
-    {
-    return new cmFLTKWrapUICommand;
-    }
+  virtual cmCommand* Clone() { return new cmFLTKWrapUICommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * This is called at the end after all the information
@@ -52,13 +49,13 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "fltk_wrap_ui";}
+  virtual std::string GetName() const { return "fltk_wrap_ui"; }
 
 private:
   /**
    * List of produced files.
    */
-  std::vector<cmSourceFile *> GeneratedSourcesClasses;
+  std::vector<cmSourceFile*> GeneratedSourcesClasses;
 
   /**
    * List of Fluid files that provide the source
@@ -66,7 +63,5 @@ private:
    */
   std::string Target;
 };
-
-
 
 #endif

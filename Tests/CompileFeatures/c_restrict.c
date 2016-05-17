@@ -1,5 +1,5 @@
 
-int f (int * restrict a, int * restrict b)
+int f(int* restrict a, int* restrict b)
 {
   (void)a;
   (void)b;

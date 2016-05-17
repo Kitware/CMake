@@ -17,17 +17,14 @@
 class cmSetDirectoryPropertiesCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone()
-    {
-      return new cmSetDirectoryPropertiesCommand;
-    }
+  virtual cmCommand* Clone() { return new cmSetDirectoryPropertiesCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * This determines if the command is invoked when in script mode.
@@ -37,19 +34,17 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "set_directory_properties";}
+  virtual std::string GetName() const { return "set_directory_properties"; }
 
   /**
    * Static entry point for use by other commands
    */
-  static bool RunCommand(cmMakefile *mf,
+  static bool RunCommand(cmMakefile* mf,
                          std::vector<std::string>::const_iterator ait,
                          std::vector<std::string>::const_iterator aitend,
-                         std::string &errors);
+                         std::string& errors);
 
   cmTypeMacro(cmSetDirectoryPropertiesCommand, cmCommand);
 };
-
-
 
 #endif

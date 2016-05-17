@@ -18,16 +18,18 @@
 class BlubBlub : public QObject
 {
   Q_OBJECT
-  public:
-    BlubBlub():QObject() {}
-  public slots:
-    int getValue() const { return 13; }
+public:
+  BlubBlub()
+    : QObject()
+  {
+  }
+public slots:
+  int getValue() const { return 13; }
 };
 
 Blub::Blub()
 {
 }
-
 
 void Blub::blubber()
 {

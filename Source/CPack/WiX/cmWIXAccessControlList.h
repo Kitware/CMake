@@ -21,10 +21,9 @@
 class cmWIXAccessControlList
 {
 public:
-  cmWIXAccessControlList(
-        cmCPackLog *logger,
-        cmInstalledFile const& installedFile,
-        cmWIXSourceWriter &sourceWriter);
+  cmWIXAccessControlList(cmCPackLog* logger,
+                         cmInstalledFile const& installedFile,
+                         cmWIXSourceWriter& sourceWriter);
 
   bool Apply();
 
@@ -35,12 +34,11 @@ private:
 
   bool IsBooleanAttribute(std::string const& name);
 
-  void EmitBooleanAttribute(
-    std::string const& entry, std::string const& name);
+  void EmitBooleanAttribute(std::string const& entry, std::string const& name);
 
   cmCPackLog* Logger;
   cmInstalledFile const& InstalledFile;
-  cmWIXSourceWriter &SourceWriter;
+  cmWIXSourceWriter& SourceWriter;
 };
 
 #endif

@@ -18,9 +18,9 @@
 
 class Blub
 {
-  public:
-    Blub();
-    void blubber();
+public:
+  Blub();
+  void blubber();
 };
 
 #endif

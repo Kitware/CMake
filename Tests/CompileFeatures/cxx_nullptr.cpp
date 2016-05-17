@@ -1,7 +1,6 @@
 
 void someFunc(int*)
 {
-
 }
 
 void otherFunc()

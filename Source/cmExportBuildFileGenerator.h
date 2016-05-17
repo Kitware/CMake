@@ -26,18 +26,21 @@ class cmExportSet;
  *
  * This is used to implement the EXPORT() command.
  */
-class cmExportBuildFileGenerator: public cmExportFileGenerator
+class cmExportBuildFileGenerator : public cmExportFileGenerator
 {
 public:
   cmExportBuildFileGenerator();
 
   /** Set the list of targets to export.  */
   void SetTargets(std::vector<std::string> const& targets)
-    { this->Targets = targets; }
-  void GetTargets(std::vector<std::string> &targets) const;
+  {
+    this->Targets = targets;
+  }
+  void GetTargets(std::vector<std::string>& targets) const;
   void AppendTargets(std::vector<std::string> const& targets)
-    { this->Targets.insert(this->Targets.end(),
-      targets.begin(), targets.end()); }
+  {
+    this->Targets.insert(this->Targets.end(), targets.begin(), targets.end());
+  }
   void SetExportSet(cmExportSet*);
 
   /** Set whether to append generated code to the output file.  */
@@ -48,10 +51,9 @@ public:
 protected:
   // Implement virtual methods from the superclass.
   virtual bool GenerateMainFile(std::ostream& os);
-  virtual void GenerateImportTargetsConfig(std::ostream& os,
-                                           const std::string& config,
-                                           std::string const& suffix,
-                            std::vector<std::string> &missingTargets);
+  virtual void GenerateImportTargetsConfig(
+    std::ostream& os, const std::string& config, std::string const& suffix,
+    std::vector<std::string>& missingTargets);
   virtual void HandleMissingTarget(std::string& link_libs,
                                    std::vector<std::string>& missingTargets,
                                    cmGeneratorTarget* depender,
@@ -70,11 +72,11 @@ protected:
   std::string InstallNameDir(cmGeneratorTarget* target,
                              const std::string& config);
 
-  std::vector<std::string>
-  FindNamespaces(cmGlobalGenerator* gg, const std::string& name);
+  std::vector<std::string> FindNamespaces(cmGlobalGenerator* gg,
+                                          const std::string& name);
 
   std::vector<std::string> Targets;
-  cmExportSet *ExportSet;
+  cmExportSet* ExportSet;
   std::vector<cmGeneratorTarget*> Exports;
   cmLocalGenerator* LG;
 };

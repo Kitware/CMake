@@ -52,6 +52,7 @@ protected:
 
   bool AlreadyInCache;
   bool AlreadyInCacheWithoutMetaInfo;
+
 private:
   // Add pieces of the search.
   void FillCMakeVariablePath();
@@ -61,7 +62,5 @@ private:
   void FillCMakeSystemVariablePath();
   void FillUserGuessPath();
 };
-
-
 
 #endif

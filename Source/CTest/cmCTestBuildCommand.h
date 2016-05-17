@@ -25,7 +25,6 @@ class cmCTestBuildHandler;
 class cmCTestBuildCommand : public cmCTestHandlerCommand
 {
 public:
-
   cmCTestBuildCommand();
   ~cmCTestBuildCommand();
 
@@ -33,20 +32,20 @@ public:
    * This is a virtual constructor for the command.
    */
   virtual cmCommand* Clone()
-    {
+  {
     cmCTestBuildCommand* ni = new cmCTestBuildCommand;
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
-    }
+  }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_build";}
+  virtual std::string GetName() const { return "ctest_build"; }
 
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   cmTypeMacro(cmCTestBuildCommand, cmCTestHandlerCommand);
 
@@ -54,7 +53,8 @@ public:
 
 protected:
   cmCTestBuildHandler* Handler;
-  enum {
+  enum
+  {
     ctb_BUILD = ct_LAST,
     ctb_NUMBER_ERRORS,
     ctb_NUMBER_WARNINGS,
@@ -67,6 +67,5 @@ protected:
 
   cmCTestGenericHandler* InitializeHandler();
 };
-
 
 #endif

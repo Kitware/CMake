@@ -12,22 +12,21 @@
 #include "cmSystemTools.h"
 
 #define cmPassed(m) std::cout << "Passed: " << m << "\n"
-#define cmFailed(m) std::cout << "FAILED: " << m << "\n"; failed=1
+#define cmFailed(m)                                                           \
+  std::cout << "FAILED: " << m << "\n";                                       \
+  failed = 1
 
-int testSystemTools(int, char*[])
+int testSystemTools(int, char* [])
 {
   int failed = 0;
   // ----------------------------------------------------------------------
   // Test cmSystemTools::UpperCase
   std::string str = "abc";
   std::string strupper = "ABC";
-  if(cmSystemTools::UpperCase(str) == strupper)
-    {
+  if (cmSystemTools::UpperCase(str) == strupper) {
     cmPassed("cmSystemTools::UpperCase is working");
-    }
-  else
-    {
+  } else {
     cmFailed("cmSystemTools::UpperCase is working");
-    }
+  }
   return failed;
 }

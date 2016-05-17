@@ -42,9 +42,15 @@ public:
 class cmCPackComponent
 {
 public:
- cmCPackComponent() : Group(0), IsRequired(true), IsHidden(false),
-                      IsDisabledByDefault(false), IsDownloaded(false),
-                      TotalSize(0) { }
+  cmCPackComponent()
+    : Group(0)
+    , IsRequired(true)
+    , IsHidden(false)
+    , IsDisabledByDefault(false)
+    , IsDownloaded(false)
+    , TotalSize(0)
+  {
+  }
 
   /// The name of the component (used to reference the component).
   std::string Name;
@@ -53,7 +59,7 @@ public:
   std::string DisplayName;
 
   /// The component group that contains this component (if any).
-  cmCPackComponentGroup *Group;
+  cmCPackComponentGroup* Group;
 
   /// Whether this component group must always be installed.
   bool IsRequired : 1;
@@ -73,17 +79,17 @@ public:
   std::string Description;
 
   /// The installation types that this component is a part of.
-  std::vector<cmCPackInstallationType *> InstallationTypes;
+  std::vector<cmCPackInstallationType*> InstallationTypes;
 
   /// If IsDownloaded is true, the name of the archive file that
   /// contains the files that are part of this component.
   std::string ArchiveFile;
 
   /// The components that this component depends on.
-  std::vector<cmCPackComponent *> Dependencies;
+  std::vector<cmCPackComponent*> Dependencies;
 
   /// The components that depend on this component.
-  std::vector<cmCPackComponent *> ReverseDependencies;
+  std::vector<cmCPackComponent*> ReverseDependencies;
 
   /// The list of installed files that are part of this component.
   std::vector<std::string> Files;
@@ -100,7 +106,7 @@ public:
   /// kilobytes.
   unsigned long GetInstalledSizeInKbytes(const std::string& installDir) const;
 
- private:
+private:
   mutable unsigned long TotalSize;
 };
 
@@ -110,7 +116,10 @@ public:
 class cmCPackComponentGroup
 {
 public:
- cmCPackComponentGroup() : ParentGroup(0) { }
+  cmCPackComponentGroup()
+    : ParentGroup(0)
+  {
+  }
 
   /// The name of the group (used to reference the group).
   std::string Name;
@@ -131,7 +140,7 @@ public:
   std::vector<cmCPackComponent*> Components;
 
   /// The parent group of this component group (if any).
-  cmCPackComponentGroup *ParentGroup;
+  cmCPackComponentGroup* ParentGroup;
 
   /// The subgroups of this group.
   std::vector<cmCPackComponentGroup*> Subgroups;

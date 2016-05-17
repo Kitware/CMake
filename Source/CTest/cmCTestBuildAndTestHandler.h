@@ -13,7 +13,6 @@
 #ifndef cmCTestBuildAndTestHandler_h
 #define cmCTestBuildAndTestHandler_h
 
-
 #include "cmCTestGenericHandler.h"
 #include "cmListFileCache.h"
 
@@ -50,31 +49,29 @@ public:
 protected:
   ///! Run CMake and build a test and then run it as a single test.
   int RunCMakeAndTest(std::string* output);
-  int RunCMake(std::string* outstring, std::ostringstream &out,
-               std::string &cmakeOutString,
-               std::string &cwd, cmake *cm);
+  int RunCMake(std::string* outstring, std::ostringstream& out,
+               std::string& cmakeOutString, std::string& cwd, cmake* cm);
 
-  std::string  Output;
+  std::string Output;
 
-  std::string              BuildGenerator;
-  std::string              BuildGeneratorPlatform;
-  std::string              BuildGeneratorToolset;
+  std::string BuildGenerator;
+  std::string BuildGeneratorPlatform;
+  std::string BuildGeneratorToolset;
   std::vector<std::string> BuildOptions;
-  bool                     BuildTwoConfig;
-  std::string              BuildMakeProgram;
-  std::string              ConfigSample;
-  std::string              SourceDir;
-  std::string              BinaryDir;
-  std::string              BuildProject;
-  std::string              TestCommand;
-  bool                     BuildNoClean;
-  std::string              BuildRunDir;
-  std::string              ExecutableDirectory;
+  bool BuildTwoConfig;
+  std::string BuildMakeProgram;
+  std::string ConfigSample;
+  std::string SourceDir;
+  std::string BinaryDir;
+  std::string BuildProject;
+  std::string TestCommand;
+  bool BuildNoClean;
+  std::string BuildRunDir;
+  std::string ExecutableDirectory;
   std::vector<std::string> TestCommandArgs;
   std::vector<std::string> BuildTargets;
-  bool                     BuildNoCMake;
-  double                   Timeout;
+  bool BuildNoCMake;
+  double Timeout;
 };
 
 #endif
-

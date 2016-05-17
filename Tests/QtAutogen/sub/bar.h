@@ -19,10 +19,10 @@
 class Bar : public QObject
 {
   Q_OBJECT
-  public:
-    Bar();
-  public slots:
-    void doBar();
+public:
+  Bar();
+public slots:
+  void doBar();
 };
 
 #endif

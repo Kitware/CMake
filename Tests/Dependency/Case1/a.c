@@ -1,5 +1,4 @@
 int a()
 {
-   return 5;
+  return 5;
 }
-

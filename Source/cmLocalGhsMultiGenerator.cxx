@@ -23,20 +23,20 @@ cmLocalGhsMultiGenerator::cmLocalGhsMultiGenerator(cmGlobalGenerator* gg,
 {
 }
 
-cmLocalGhsMultiGenerator::~cmLocalGhsMultiGenerator() {}
+cmLocalGhsMultiGenerator::~cmLocalGhsMultiGenerator()
+{
+}
 
 void cmLocalGhsMultiGenerator::Generate()
 {
   std::vector<cmGeneratorTarget*> tgts = this->GetGeneratorTargets();
 
   for (std::vector<cmGeneratorTarget*>::iterator l = tgts.begin();
-       l != tgts.end(); ++l)
-    {
-    if ((*l)->GetType() == cmState::INTERFACE_LIBRARY)
-      {
+       l != tgts.end(); ++l) {
+    if ((*l)->GetType() == cmState::INTERFACE_LIBRARY) {
       continue;
-      }
+    }
     cmGhsMultiTargetGenerator tg(*l);
     tg.Generate();
-    }
+  }
 }

@@ -10,7 +10,7 @@
 #include "sharedlib.h"
 #include "shareddependlib.h"
 
-int main(int,char**)
+int main(int, char**)
 {
   SharedLibObject sl;
   SharedDependLibObject sdl = sl.object();

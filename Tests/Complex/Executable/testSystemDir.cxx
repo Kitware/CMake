@@ -1,3 +1,6 @@
 #include <testSystemDir.h>
 
-int main() { return foo(); }
+int main()
+{
+  return foo();
+}

@@ -20,8 +20,8 @@ public:
   cmTypeMacro(cmExportLibraryDependenciesCommand, cmCommand);
   virtual cmCommand* Clone() { return new cmExportLibraryDependenciesCommand; }
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
-  virtual std::string GetName() const { return "export_library_dependencies";}
+                           cmExecutionStatus& status);
+  virtual std::string GetName() const { return "export_library_dependencies"; }
 
   virtual void FinalPass();
   virtual bool HasFinalPass() const { return true; }
@@ -31,6 +31,5 @@ private:
   bool Append;
   void ConstFinalPass() const;
 };
-
 
 #endif

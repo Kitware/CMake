@@ -19,18 +19,14 @@ class cmGeneratorTarget;
 /** \class cmInstallTargetGenerator
  * \brief Generate target installation rules.
  */
-class cmInstallTargetGenerator: public cmInstallGenerator
+class cmInstallTargetGenerator : public cmInstallGenerator
 {
 public:
-  cmInstallTargetGenerator(
-    std::string const& targetName, const char* dest, bool implib,
-    const char* file_permissions,
-    std::vector<std::string> const& configurations,
-    const char* component,
-    MessageLevel message,
-    bool exclude_from_all,
-    bool optional
-    );
+  cmInstallTargetGenerator(std::string const& targetName, const char* dest,
+                           bool implib, const char* file_permissions,
+                           std::vector<std::string> const& configurations,
+                           const char* component, MessageLevel message,
+                           bool exclude_from_all, bool optional);
   virtual ~cmInstallTargetGenerator();
 
   /** Select the policy for installing shared library linkable name
@@ -71,16 +67,16 @@ protected:
   virtual void GenerateScriptForConfig(std::ostream& os,
                                        const std::string& config,
                                        Indent const& indent);
-  typedef void (cmInstallTargetGenerator::*TweakMethod)(
-    std::ostream&, Indent const&, const std::string&, std::string const&
-    );
+  typedef void (cmInstallTargetGenerator::*TweakMethod)(std::ostream&,
+                                                        Indent const&,
+                                                        const std::string&,
+                                                        std::string const&);
   void AddTweak(std::ostream& os, Indent const& indent,
                 const std::string& config, std::string const& file,
                 TweakMethod tweak);
   void AddTweak(std::ostream& os, Indent const& indent,
                 const std::string& config,
-                std::vector<std::string> const& files,
-                TweakMethod tweak);
+                std::vector<std::string> const& files, TweakMethod tweak);
   std::string GetDestDirPath(std::string const& file);
   void PreReplacementTweaks(std::ostream& os, Indent const& indent,
                             const std::string& config,

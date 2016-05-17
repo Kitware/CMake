@@ -13,8 +13,7 @@
 #include "cmCPackTXZGenerator.h"
 
 cmCPackTXZGenerator::cmCPackTXZGenerator()
-  :cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ,
-                           "paxr")
+  : cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "paxr")
 {
 }
 

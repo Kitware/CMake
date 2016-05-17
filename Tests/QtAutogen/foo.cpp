@@ -18,17 +18,19 @@
 class FooFoo : public QObject
 {
   Q_OBJECT
-  public:
-    FooFoo():QObject() {}
-  public slots:
-    int getValue() const { return 12; }
+public:
+  FooFoo()
+    : QObject()
+  {
+  }
+public slots:
+  int getValue() const { return 12; }
 };
 
 Foo::Foo()
-:QObject()
+  : QObject()
 {
 }
-
 
 void Foo::doFoo()
 {

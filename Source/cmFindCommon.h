@@ -38,8 +38,12 @@ protected:
   {
   protected:
     PathGroup();
+
   public:
-    PathGroup(const std::string& label) : cmPathLabel(label) { }
+    PathGroup(const std::string& label)
+      : cmPathLabel(label)
+    {
+    }
     static PathGroup All;
   };
 
@@ -48,8 +52,12 @@ protected:
   {
   protected:
     PathLabel();
+
   public:
-    PathLabel(const std::string& label) : cmPathLabel(label) { }
+    PathLabel(const std::string& label)
+      : cmPathLabel(label)
+    {
+    }
     static PathLabel CMake;
     static PathLabel CMakeEnvironment;
     static PathLabel Hints;
@@ -58,9 +66,12 @@ protected:
     static PathLabel Guess;
   };
 
-  enum RootPathMode { RootPathModeNever,
-                      RootPathModeOnly,
-                      RootPathModeBoth };
+  enum RootPathMode
+  {
+    RootPathModeNever,
+    RootPathModeOnly,
+    RootPathModeBoth
+  };
 
   /** Construct the various path groups and labels */
   void InitializeSearchPathGroups();

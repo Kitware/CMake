@@ -20,13 +20,14 @@ class cmExportSet;
 class cmExportSetMap : public std::map<std::string, cmExportSet*>
 {
   typedef std::map<std::string, cmExportSet*> derived;
+
 public:
   /** \brief Overloaded operator[].
    *
    * The operator is overloaded because cmExportSet has no default constructor:
    * we do not want unnamed export sets.
    */
-  cmExportSet* operator[](const std::string &name);
+  cmExportSet* operator[](const std::string& name);
 
   void clear();
 

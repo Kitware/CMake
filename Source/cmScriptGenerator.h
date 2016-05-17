@@ -17,19 +17,25 @@
 class cmScriptGeneratorIndent
 {
 public:
-  cmScriptGeneratorIndent(): Level(0) {}
-  cmScriptGeneratorIndent(int level): Level(level) {}
+  cmScriptGeneratorIndent()
+    : Level(0)
+  {
+  }
+  cmScriptGeneratorIndent(int level)
+    : Level(level)
+  {
+  }
   void Write(std::ostream& os) const
-    {
-    for(int i=0; i < this->Level; ++i)
-      {
+  {
+    for (int i = 0; i < this->Level; ++i) {
       os << " ";
-      }
     }
+  }
   cmScriptGeneratorIndent Next(int step = 2) const
-    {
+  {
     return cmScriptGeneratorIndent(this->Level + step);
-    }
+  }
+
 private:
   int Level;
 };

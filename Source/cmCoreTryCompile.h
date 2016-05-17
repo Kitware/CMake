@@ -23,8 +23,7 @@
 class cmCoreTryCompile : public cmCommand
 {
 public:
-
-  protected:
+protected:
   /**
    * This is the core code for try compile. It is here so that other
    * commands, such as TryRun can access the same logic without
@@ -53,8 +52,6 @@ public:
   std::string OutputFile;
   std::string FindErrorMessage;
   bool SrcFileSignature;
-
 };
-
 
 #endif

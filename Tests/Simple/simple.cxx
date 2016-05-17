@@ -2,7 +2,7 @@ extern void simpleLib();
 extern "C" int FooBar();
 extern int bar();
 extern int bar1();
-int main ()
+int main()
 {
   FooBar();
   bar();

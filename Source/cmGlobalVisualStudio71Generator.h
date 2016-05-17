@@ -14,7 +14,6 @@
 
 #include "cmGlobalVisualStudio7Generator.h"
 
-
 /** \class cmGlobalVisualStudio71Generator
  * \brief Write a Unix makefiles.
  *
@@ -25,14 +24,18 @@ class cmGlobalVisualStudio71Generator : public cmGlobalVisualStudio7Generator
 public:
   cmGlobalVisualStudio71Generator(cmake* cm,
                                   const std::string& platformName = "");
-  static cmGlobalGeneratorFactory* NewFactory() {
-    return new cmGlobalGeneratorSimpleFactory
-      <cmGlobalVisualStudio71Generator>(); }
+  static cmGlobalGeneratorFactory* NewFactory()
+  {
+    return new cmGlobalGeneratorSimpleFactory<
+      cmGlobalVisualStudio71Generator>();
+  }
 
   ///! Get the name for the generator.
-  virtual std::string GetName() const {
-    return cmGlobalVisualStudio71Generator::GetActualName();}
-  static std::string GetActualName() {return "Visual Studio 7 .NET 2003";}
+  virtual std::string GetName() const
+  {
+    return cmGlobalVisualStudio71Generator::GetActualName();
+  }
+  static std::string GetActualName() { return "Visual Studio 7 .NET 2003"; }
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
@@ -52,25 +55,22 @@ public:
 
 protected:
   virtual const char* GetIDEVersion() { return "7.1"; }
-  virtual void WriteSLNFile(std::ostream& fout,
-                            cmLocalGenerator* root,
+  virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSolutionConfigurations(
     std::ostream& fout, std::vector<std::string> const& configs);
-  virtual void WriteProject(std::ostream& fout,
-                            const std::string& name, const char* path,
-                            const cmGeneratorTarget *t);
-  virtual void WriteProjectDepends(std::ostream& fout,
-                           const std::string& name, const char* path,
-                           cmGeneratorTarget const* t);
+  virtual void WriteProject(std::ostream& fout, const std::string& name,
+                            const char* path, const cmGeneratorTarget* t);
+  virtual void WriteProjectDepends(std::ostream& fout, const std::string& name,
+                                   const char* path,
+                                   cmGeneratorTarget const* t);
   virtual void WriteProjectConfigurations(
     std::ostream& fout, const std::string& name, cmState::TargetType type,
     std::vector<std::string> const& configs,
     const std::set<std::string>& configsPartOfDefaultBuild,
     const std::string& platformMapping = "");
   virtual void WriteExternalProject(std::ostream& fout,
-                                    const std::string& name,
-                                    const char* path,
+                                    const std::string& name, const char* path,
                                     const char* typeGuid,
                                     const std::set<std::string>& depends);
   virtual void WriteSLNHeader(std::ostream& fout);

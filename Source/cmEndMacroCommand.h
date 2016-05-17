@@ -25,24 +25,23 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
-    {
-    return new cmEndMacroCommand;
-    }
+  virtual cmCommand* Clone() { return new cmEndMacroCommand; }
 
   /**
    * Override cmCommand::InvokeInitialPass to get arguments before
    * expansion.
    */
   virtual bool InvokeInitialPass(std::vector<cmListFileArgument> const&,
-                                 cmExecutionStatus &);
+                                 cmExecutionStatus&);
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const&,
-                           cmExecutionStatus &) {return false;}
+  virtual bool InitialPass(std::vector<std::string> const&, cmExecutionStatus&)
+  {
+    return false;
+  }
 
   /**
    * This determines if the command is invoked when in script mode.
@@ -52,10 +51,9 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "endmacro";}
+  virtual std::string GetName() const { return "endmacro"; }
 
   cmTypeMacro(cmEndMacroCommand, cmCommand);
 };
-
 
 #endif

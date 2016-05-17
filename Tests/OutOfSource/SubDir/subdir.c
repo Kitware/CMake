@@ -1,1 +1,4 @@
-int subdir(void) { return 0; }
+int subdir(void)
+{
+  return 0;
+}

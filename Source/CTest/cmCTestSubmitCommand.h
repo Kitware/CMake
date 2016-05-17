@@ -25,35 +25,34 @@
 class cmCTestSubmitCommand : public cmCTestHandlerCommand
 {
 public:
-
   cmCTestSubmitCommand()
-    {
+  {
     this->PartsMentioned = false;
     this->FilesMentioned = false;
     this->InternalTest = false;
     this->RetryCount = "";
     this->RetryDelay = "";
     this->CDashUpload = false;
-    }
+  }
 
   /**
    * This is a virtual constructor for the command.
    */
   virtual cmCommand* Clone()
-    {
+  {
     cmCTestSubmitCommand* ni = new cmCTestSubmitCommand;
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
-    }
+  }
 
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_submit";}
+  virtual std::string GetName() const { return "ctest_submit"; }
 
   cmTypeMacro(cmCTestSubmitCommand, cmCTestHandlerCommand);
 
@@ -85,6 +84,5 @@ protected:
   std::string CDashUploadFile;
   std::string CDashUploadType;
 };
-
 
 #endif

@@ -30,15 +30,14 @@ struct cmGeneratorExpressionContext
                                cmListFileBacktrace const& backtrace,
                                std::string const& language);
 
-
   cmListFileBacktrace Backtrace;
   std::set<cmGeneratorTarget*> DependTargets;
   std::set<cmGeneratorTarget const*> AllTargets;
   std::set<std::string> SeenTargetProperties;
   std::set<cmGeneratorTarget const*> SourceSensitiveTargets;
   std::map<cmGeneratorTarget const*, std::map<std::string, std::string> >
-                                                          MaxLanguageStandard;
-  cmLocalGenerator *LG;
+    MaxLanguageStandard;
+  cmLocalGenerator* LG;
   std::string Config;
   std::string Language;
   // The target whose property is being evaluated.

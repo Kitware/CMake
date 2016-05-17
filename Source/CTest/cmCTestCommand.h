@@ -27,14 +27,16 @@ class cmCTestScriptHandler;
 class cmCTestCommand : public cmCommand
 {
 public:
+  cmCTestCommand()
+  {
+    this->CTest = 0;
+    this->CTestScriptHandler = 0;
+  }
 
-  cmCTestCommand() {this->CTest = 0; this->CTestScriptHandler = 0;}
-
-  cmCTest *CTest;
-  cmCTestScriptHandler *CTestScriptHandler;
+  cmCTest* CTest;
+  cmCTestScriptHandler* CTestScriptHandler;
 
   cmTypeMacro(cmCTestCommand, cmCommand);
 };
-
 
 #endif

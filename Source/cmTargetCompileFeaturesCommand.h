@@ -16,26 +16,23 @@
 
 class cmTargetCompileFeaturesCommand : public cmTargetPropCommandBase
 {
-  virtual cmCommand* Clone()
-    {
-    return new cmTargetCompileFeaturesCommand;
-    }
+  virtual cmCommand* Clone() { return new cmTargetCompileFeaturesCommand; }
 
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
-  virtual std::string GetName() const { return "target_compile_features";}
+  virtual std::string GetName() const { return "target_compile_features"; }
 
   cmTypeMacro(cmTargetCompileFeaturesCommand, cmTargetPropCommandBase);
 
 private:
-  virtual void HandleImportedTarget(const std::string &tgt);
-  virtual void HandleMissingTarget(const std::string &name);
+  virtual void HandleImportedTarget(const std::string& tgt);
+  virtual void HandleMissingTarget(const std::string& name);
 
-  virtual bool HandleDirectContent(cmTarget *tgt,
-                                   const std::vector<std::string> &content,
+  virtual bool HandleDirectContent(cmTarget* tgt,
+                                   const std::vector<std::string>& content,
                                    bool prepend, bool system);
-  virtual std::string Join(const std::vector<std::string> &content);
+  virtual std::string Join(const std::vector<std::string>& content);
 };
 
 #endif

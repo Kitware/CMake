@@ -5,8 +5,8 @@ extern int bar();
 
 int main()
 {
-   int i=foo();
-   int k=bar();
-   i=i*k;
-   return i;
+  int i = foo();
+  int k = bar();
+  i = i * k;
+  return i;
 }

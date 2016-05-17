@@ -11,10 +11,10 @@ class LIBC_EXPORT LibC : public QObject
 {
   Q_OBJECT
 public:
-  explicit LibC(QObject *parent = 0);
-
+  explicit LibC(QObject* parent = 0);
 
   int foo();
+
 private:
   LibB b;
 };

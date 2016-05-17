@@ -1,5 +1,5 @@
 
-template<typename T>
+template <typename T>
 struct A
 {
   typedef T Result;
@@ -7,6 +7,6 @@ struct A
 
 void someFunc()
 {
-  A<A<int>> object;
+  A<A<int> > object;
   (void)object;
 }

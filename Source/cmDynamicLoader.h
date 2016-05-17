@@ -14,7 +14,6 @@
 // cmDynamicLoader provides a portable interface to loading dynamic
 // libraries into a process.
 
-
 #ifndef cmDynamicLoader_h
 #define cmDynamicLoader_h
 
@@ -40,7 +39,7 @@ protected:
   ~cmDynamicLoader() {}
 
 private:
-  cmDynamicLoader(const cmDynamicLoader&);  // Not implemented.
+  cmDynamicLoader(const cmDynamicLoader&); // Not implemented.
   void operator=(const cmDynamicLoader&);  // Not implemented.
 };
 

@@ -16,7 +16,7 @@
 #include "cmStandardIncludes.h"
 
 #if defined(_WIN32)
-# include <windows.h> // HANDLE
+#include <windows.h> // HANDLE
 #endif
 
 class cmFileLockResult;
@@ -29,7 +29,7 @@ class cmFileLockResult;
   */
 class cmFileLock
 {
- public:
+public:
   cmFileLock();
   ~cmFileLock();
 
@@ -51,7 +51,7 @@ class cmFileLock
     */
   bool IsLocked(const std::string& filename) const;
 
- private:
+private:
   cmFileLock(const cmFileLock&);
   cmFileLock& operator=(const cmFileLock&);
 

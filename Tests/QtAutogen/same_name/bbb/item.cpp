@@ -2,9 +2,7 @@
 
 namespace bbb {
 
-void
-Item::go ( )
+void Item::go()
 {
 }
-
 }

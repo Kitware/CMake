@@ -8,4 +8,3 @@ extern int SomeFunctionInFoo();
 #ifdef __cplusplus
 }
 #endif
-

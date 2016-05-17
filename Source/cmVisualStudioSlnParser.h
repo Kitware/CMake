@@ -16,9 +16,7 @@
 
 #include <bitset>
 
-
 class cmSlnData;
-
 
 class cmVisualStudioSlnParser
 {
@@ -60,12 +58,10 @@ public:
   static const DataGroupSet DataGroupGenericGlobalSections;
   static const DataGroupSet DataGroupAll;
 
-  bool Parse(std::istream& input,
-             cmSlnData& output,
+  bool Parse(std::istream& input, cmSlnData& output,
              DataGroupSet dataGroups = DataGroupAll);
 
-  bool ParseFile(const std::string& file,
-                 cmSlnData& output,
+  bool ParseFile(const std::string& file, cmSlnData& output,
                  DataGroupSet dataGroups = DataGroupAll);
 
   ParseResult GetParseResult() const;
@@ -96,20 +92,16 @@ protected:
 
   bool ParseBOM(std::istream& input, std::string& line, State& state);
 
-  bool ParseMultiValueTag(const std::string& line,
-                          ParsedLine& parsedLine,
+  bool ParseMultiValueTag(const std::string& line, ParsedLine& parsedLine,
                           State& state);
 
-  bool ParseSingleValueTag(const std::string& line,
-                           ParsedLine& parsedLine,
+  bool ParseSingleValueTag(const std::string& line, ParsedLine& parsedLine,
                            State& state);
 
-  bool ParseKeyValuePair(const std::string& line,
-                         ParsedLine& parsedLine,
+  bool ParseKeyValuePair(const std::string& line, ParsedLine& parsedLine,
                          State& state);
 
-  bool ParseTag(const std::string& fullTag,
-                ParsedLine& parsedLine,
+  bool ParseTag(const std::string& fullTag, ParsedLine& parsedLine,
                 State& state);
 
   bool ParseValue(const std::string& value, ParsedLine& parsedLine);

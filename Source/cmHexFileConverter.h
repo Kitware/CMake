@@ -22,7 +22,12 @@
 class cmHexFileConverter
 {
 public:
-  enum FileType {Binary, IntelHex, MotorolaSrec};
+  enum FileType
+  {
+    Binary,
+    IntelHex,
+    MotorolaSrec
+  };
   static FileType DetermineFileType(const char* inFileName);
   static bool TryConvert(const char* inFileName, const char* outFileName);
 };

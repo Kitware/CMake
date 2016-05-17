@@ -1,5 +1,8 @@
 
-enum { one };
+enum
+{
+  one
+};
 
 struct HeaderOnly
 {

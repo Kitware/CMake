@@ -12,98 +12,68 @@
 #include "cmMessageCommand.h"
 
 // cmLibraryCommand
-bool cmMessageCommand
-::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
+bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
+                                   cmExecutionStatus&)
 {
-  if(args.size() < 1 )
-    {
+  if (args.size() < 1) {
     this->SetError("called with incorrect number of arguments");
     return false;
-    }
+  }
   std::vector<std::string>::const_iterator i = args.begin();
 
   cmake::MessageType type = cmake::MESSAGE;
   bool status = false;
   bool fatal = false;
   cmake* cm = this->Makefile->GetCMakeInstance();
-  if (*i == "SEND_ERROR")
-    {
+  if (*i == "SEND_ERROR") {
     type = cmake::FATAL_ERROR;
     ++i;
-    }
-  else if (*i == "FATAL_ERROR")
-    {
+  } else if (*i == "FATAL_ERROR") {
     fatal = true;
     type = cmake::FATAL_ERROR;
     ++i;
-    }
-  else if (*i == "WARNING")
-    {
+  } else if (*i == "WARNING") {
     type = cmake::WARNING;
     ++i;
-    }
-  else if (*i == "AUTHOR_WARNING")
-    {
-    if (cm->GetDevWarningsAsErrors(this->Makefile))
-      {
+  } else if (*i == "AUTHOR_WARNING") {
+    if (cm->GetDevWarningsAsErrors(this->Makefile)) {
       fatal = true;
       type = cmake::AUTHOR_ERROR;
-      }
-    else if (!cm->GetSuppressDevWarnings(this->Makefile))
-      {
+    } else if (!cm->GetSuppressDevWarnings(this->Makefile)) {
       type = cmake::AUTHOR_WARNING;
-      }
-    else
-      {
+    } else {
       return true;
-      }
-    ++i;
     }
-  else if (*i == "STATUS")
-    {
+    ++i;
+  } else if (*i == "STATUS") {
     status = true;
     ++i;
-    }
-  else if (*i == "DEPRECATION")
-    {
-    if (cm->GetDeprecatedWarningsAsErrors(this->Makefile))
-      {
+  } else if (*i == "DEPRECATION") {
+    if (cm->GetDeprecatedWarningsAsErrors(this->Makefile)) {
       fatal = true;
       type = cmake::DEPRECATION_ERROR;
-      }
-    else if (!cm->GetSuppressDeprecatedWarnings(this->Makefile))
-      {
+    } else if (!cm->GetSuppressDeprecatedWarnings(this->Makefile)) {
       type = cmake::DEPRECATION_WARNING;
-      }
-    else
-      {
+    } else {
       return true;
-      }
-    ++i;
     }
+    ++i;
+  }
 
   std::string message = cmJoin(cmMakeRange(i, args.end()), std::string());
 
-  if (type != cmake::MESSAGE)
-    {
+  if (type != cmake::MESSAGE) {
     // we've overriden the message type, above, so force IssueMessage to use it
     this->Makefile->IssueMessage(type, message, true);
-    }
-  else
-    {
-    if (status)
-      {
+  } else {
+    if (status) {
       this->Makefile->DisplayStatus(message.c_str(), -1);
-      }
-    else
-      {
+    } else {
       cmSystemTools::Message(message.c_str());
-      }
     }
-  if(fatal)
-    {
+  }
+  if (fatal) {
     cmSystemTools::SetFatalErrorOccured();
-    }
+  }
   return true;
 }
-

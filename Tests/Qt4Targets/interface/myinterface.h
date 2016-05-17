@@ -4,7 +4,6 @@
 
 class MyInterface
 {
-
 };
 
 Q_DECLARE_INTERFACE(MyInterface, "org.cmake.example.MyInterface")

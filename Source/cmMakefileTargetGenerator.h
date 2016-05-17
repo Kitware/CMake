@@ -30,7 +30,7 @@ class cmSourceFile;
  * \brief Support Routines for writing makefiles
  *
  */
-class cmMakefileTargetGenerator: public cmCommonTargetGenerator
+class cmMakefileTargetGenerator : public cmCommonTargetGenerator
 {
 public:
   // constructor to set the ivars
@@ -38,22 +38,22 @@ public:
   virtual ~cmMakefileTargetGenerator();
 
   // construct using this factory call
-  static cmMakefileTargetGenerator *New(cmGeneratorTarget *tgt);
+  static cmMakefileTargetGenerator* New(cmGeneratorTarget* tgt);
 
   /* the main entry point for this class. Writes the Makefiles associated
      with this target */
   virtual void WriteRuleFiles() = 0;
 
   /* return the number of actions that have progress reporting on them */
-  virtual unsigned long GetNumberOfProgressActions() {
-    return this->NumberOfProgressActions;}
-  std::string GetProgressFileNameFull()
-    { return this->ProgressFileNameFull; }
+  virtual unsigned long GetNumberOfProgressActions()
+  {
+    return this->NumberOfProgressActions;
+  }
+  std::string GetProgressFileNameFull() { return this->ProgressFileNameFull; }
 
-  cmGeneratorTarget* GetGeneratorTarget() { return this->GeneratorTarget;}
+  cmGeneratorTarget* GetGeneratorTarget() { return this->GeneratorTarget; }
 
 protected:
-
   // create the file and directory etc
   void CreateRuleFile();
 
@@ -75,11 +75,13 @@ protected:
   void WriteTargetDependRules();
 
   // write rules for Mac OS X Application Bundle content.
-  struct MacOSXContentGeneratorType :
-    cmOSXBundleGenerator::MacOSXContentGeneratorType
+  struct MacOSXContentGeneratorType
+    : cmOSXBundleGenerator::MacOSXContentGeneratorType
   {
-    MacOSXContentGeneratorType(cmMakefileTargetGenerator* gen) :
-      Generator(gen) {}
+    MacOSXContentGeneratorType(cmMakefileTargetGenerator* gen)
+      : Generator(gen)
+    {
+    }
 
     void operator()(cmSourceFile const& source, const char* pkgloc);
 
@@ -92,8 +94,7 @@ protected:
   void WriteObjectRuleFiles(cmSourceFile const& source);
 
   // write the build rule for an object
-  void WriteObjectBuildFile(std::string &obj,
-                            const std::string& lang,
+  void WriteObjectBuildFile(std::string& obj, const std::string& lang,
                             cmSourceFile const& source,
                             std::vector<std::string>& depends);
 
@@ -146,13 +147,11 @@ protected:
   /** Create a response file with the given set of options.  Returns
       the relative path from the target build working directory to the
       response file name.  */
-  std::string CreateResponseFile(const char* name,
-                                 std::string const& options,
+  std::string CreateResponseFile(const char* name, std::string const& options,
                                  std::vector<std::string>& makefile_depends);
 
   /** Create list of flags for link libraries. */
-  void CreateLinkLibs(std::string& linkLibs, bool relink,
-                      bool useResponseFile,
+  void CreateLinkLibs(std::string& linkLibs, bool relink, bool useResponseFile,
                       std::vector<std::string>& makefile_depends,
                       bool useWatcomQuote);
 
@@ -167,10 +166,15 @@ protected:
   virtual void CloseFileStreams();
   void RemoveForbiddenFlags(const char* flagVar, const std::string& linkLang,
                             std::string& linkFlags);
-  cmLocalUnixMakefileGenerator3 *LocalGenerator;
-  cmGlobalUnixMakefileGenerator3 *GlobalGenerator;
+  cmLocalUnixMakefileGenerator3* LocalGenerator;
+  cmGlobalUnixMakefileGenerator3* GlobalGenerator;
 
-  enum CustomCommandDriveType { OnBuild, OnDepends, OnUtility };
+  enum CustomCommandDriveType
+  {
+    OnBuild,
+    OnDepends,
+    OnUtility
+  };
   CustomCommandDriveType CustomCommandDriver;
 
   // the full path to the build file
@@ -187,17 +191,19 @@ protected:
   std::string TargetBuildDirectoryFull;
 
   // the stream for the build file
-  cmGeneratedFileStream *BuildFileStream;
+  cmGeneratedFileStream* BuildFileStream;
 
   // the stream for the flag file
   std::string FlagFileNameFull;
-  cmGeneratedFileStream *FlagFileStream;
-  class StringList: public std::vector<std::string> {};
+  cmGeneratedFileStream* FlagFileStream;
+  class StringList : public std::vector<std::string>
+  {
+  };
   std::map<std::string, StringList> FlagFileDepends;
 
   // the stream for the info file
   std::string InfoFileNameFull;
-  cmGeneratedFileStream *InfoFileStream;
+  cmGeneratedFileStream* InfoFileStream;
 
   // files to clean
   std::vector<std::string> CleanFiles;
@@ -214,8 +220,7 @@ protected:
 
   typedef std::map<std::string, std::string> MultipleOutputPairsType;
   MultipleOutputPairsType MultipleOutputPairs;
-  bool WriteMakeRule(std::ostream& os,
-                     const char* comment,
+  bool WriteMakeRule(std::ostream& os, const char* comment,
                      const std::vector<std::string>& outputs,
                      const std::vector<std::string>& depends,
                      const std::vector<std::string>& commands,

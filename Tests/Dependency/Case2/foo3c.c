@@ -1,1 +1,4 @@
-int foo3c(void) { return 0; }
+int foo3c(void)
+{
+  return 0;
+}

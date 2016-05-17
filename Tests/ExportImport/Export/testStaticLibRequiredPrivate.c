@@ -1,1 +1,4 @@
-int testStaticLibRequiredPrivate(void) { return 0; }
+int testStaticLibRequiredPrivate(void)
+{
+  return 0;
+}

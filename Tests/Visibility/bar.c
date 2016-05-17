@@ -1,1 +1,3 @@
-void bar() {}
+void bar()
+{
+}

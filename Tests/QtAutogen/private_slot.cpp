@@ -4,18 +4,13 @@
 class PrivateSlotPrivate
 {
 public:
-
-  void privateSlot()
-  {
-
-  }
+  void privateSlot() {}
 };
 
-PrivateSlot::PrivateSlot(QObject *parent)
-  : QObject(parent),
-  d(new PrivateSlotPrivate)
+PrivateSlot::PrivateSlot(QObject* parent)
+  : QObject(parent)
+  , d(new PrivateSlotPrivate)
 {
-
 }
 
 #include "private_slot.moc"

@@ -1,1 +1,4 @@
-int simple() { return 123; }
+int simple()
+{
+  return 123;
+}

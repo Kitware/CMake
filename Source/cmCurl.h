@@ -16,6 +16,6 @@
 
 #include "cm_curl.h"
 
-std::string cmCurlSetCAInfo(::CURL *curl, const char* cafile = 0);
+std::string cmCurlSetCAInfo(::CURL* curl, const char* cafile = 0);
 
 #endif

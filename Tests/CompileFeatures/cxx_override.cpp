@@ -1,7 +1,9 @@
 
-struct A {
+struct A
+{
   virtual void doNothing() {}
 };
-struct B : A {
+struct B : A
+{
   void doNothing() override {}
 };

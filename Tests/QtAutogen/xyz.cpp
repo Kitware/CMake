@@ -11,16 +11,14 @@
   See the License for more information.
 ============================================================================*/
 
-
 #include "xyz.h"
 
 #include <stdio.h>
 
 Xyz::Xyz()
-:QObject()
+  : QObject()
 {
 }
-
 
 void Xyz::doXyz()
 {

@@ -31,6 +31,7 @@ protected slots:
   virtual void chooseFile() = 0;
 signals:
   void fileDialogExists(bool);
+
 protected:
   void resizeEvent(QResizeEvent* e);
   QToolButton* ToolButton;
@@ -69,20 +70,20 @@ class QCMakeComboBox : public QComboBox
 {
   Q_OBJECT
   Q_PROPERTY(QString value READ currentText WRITE setValue USER true);
+
 public:
-  QCMakeComboBox(QWidget* p, QStringList strings) : QComboBox(p)
+  QCMakeComboBox(QWidget* p, QStringList strings)
+    : QComboBox(p)
   {
     this->addItems(strings);
   }
   void setValue(const QString& v)
   {
     int i = this->findText(v);
-    if(i != -1)
-    {
+    if (i != -1) {
       this->setCurrentIndex(i);
     }
   }
 };
 
 #endif
-

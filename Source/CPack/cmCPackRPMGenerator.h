@@ -35,7 +35,7 @@ public:
   virtual ~cmCPackRPMGenerator();
 
   static bool CanGenerate()
-    {
+  {
 #ifdef __APPLE__
     // on MacOS enable CPackRPM iff rpmbuild is found
     std::vector<std::string> locations;
@@ -46,7 +46,7 @@ public:
     // legacy behavior on other systems
     return true;
 #endif
-    }
+  }
 
 protected:
   virtual int InitializeInternal();
@@ -69,7 +69,7 @@ protected:
   virtual const char* GetOutputExtension() { return ".rpm"; }
   virtual bool SupportsComponentInstallation() const;
   virtual std::string GetComponentInstallDirNameSuffix(
-      const std::string& componentName);
+    const std::string& componentName);
 
   void AddGeneratedPackageNames();
 };

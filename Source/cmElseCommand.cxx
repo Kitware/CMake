@@ -12,7 +12,7 @@
 #include "cmElseCommand.h"
 
 bool cmElseCommand::InitialPass(std::vector<std::string> const&,
-                                cmExecutionStatus &)
+                                cmExecutionStatus&)
 {
   this->SetError("An ELSE command was found outside of a proper "
                  "IF ENDIF structure. Or its arguments did not match "

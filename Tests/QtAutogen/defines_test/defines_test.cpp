@@ -23,7 +23,7 @@ Q_SIGNALS:
 };
 #endif
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
 #ifdef QT_CORE_LIB
   QMetaObject sosmo = SomeObject::staticMetaObject;

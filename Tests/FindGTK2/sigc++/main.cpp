@@ -6,24 +6,24 @@
 class AlienDetector
 {
 public:
-    AlienDetector() {}
+  AlienDetector() {}
 
-    void run() {}
+  void run() {}
 
-    sigc::signal<void> signal_detected;
+  sigc::signal<void> signal_detected;
 };
 
 void warn_people()
 {
-    std::cout << "There are aliens in the carpark!" << std::endl;
+  std::cout << "There are aliens in the carpark!" << std::endl;
 }
 
 int main()
 {
-    AlienDetector mydetector;
-    mydetector.signal_detected.connect( sigc::ptr_fun(warn_people) );
+  AlienDetector mydetector;
+  mydetector.signal_detected.connect(sigc::ptr_fun(warn_people));
 
-    mydetector.run();
+  mydetector.run();
 
-    return 0;
+  return 0;
 }

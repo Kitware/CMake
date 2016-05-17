@@ -2,7 +2,11 @@
 template <typename T>
 struct B
 {
-  B() : m_i(42) {}
+  B()
+    : m_i(42)
+  {
+  }
+
 private:
   int m_i;
   friend T;
@@ -10,7 +14,7 @@ private:
 
 struct A
 {
-  template<typename T>
+  template <typename T>
   int getBValue(B<T> b)
   {
     return b.m_i;

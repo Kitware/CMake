@@ -1,7 +1,7 @@
 #include <glib.h>
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-    g_thread_init(NULL);
-    return 0;
+  g_thread_init(NULL);
+  return 0;
 }

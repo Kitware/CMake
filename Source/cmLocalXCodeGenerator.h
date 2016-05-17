@@ -24,22 +24,20 @@ class cmLocalXCodeGenerator : public cmLocalGenerator
 {
 public:
   ///! Set cache only and recurse to false by default.
-  cmLocalXCodeGenerator(cmGlobalGenerator* gg,
-                        cmMakefile* mf);
+  cmLocalXCodeGenerator(cmGlobalGenerator* gg, cmMakefile* mf);
 
   virtual ~cmLocalXCodeGenerator();
-  virtual
-  std::string GetTargetDirectory(cmGeneratorTarget const* target) const;
+  virtual std::string GetTargetDirectory(
+    cmGeneratorTarget const* target) const;
   virtual void AppendFlagEscape(std::string& flags,
                                 const std::string& rawFlag);
   virtual void Generate();
   virtual void GenerateInstallRules();
   virtual void ComputeObjectFilenames(
-                        std::map<cmSourceFile const*, std::string>& mapping,
-                        cmGeneratorTarget const* gt = 0);
-private:
+    std::map<cmSourceFile const*, std::string>& mapping,
+    cmGeneratorTarget const* gt = 0);
 
+private:
 };
 
 #endif
-

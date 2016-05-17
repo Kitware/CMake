@@ -13,23 +13,18 @@
 
 #include "cmCTest.h"
 
-bool cmCTestReadCustomFilesCommand
-::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
+bool cmCTestReadCustomFilesCommand::InitialPass(
+  std::vector<std::string> const& args, cmExecutionStatus&)
 {
-  if (args.size() < 1)
-    {
+  if (args.size() < 1) {
     this->SetError("called with incorrect number of arguments");
     return false;
-    }
+  }
 
   std::vector<std::string>::const_iterator dit;
-  for ( dit = args.begin(); dit != args.end(); ++ dit )
-    {
-    this->CTest->ReadCustomConfigurationFileTree(dit->c_str(),
-      this->Makefile);
-    }
+  for (dit = args.begin(); dit != args.end(); ++dit) {
+    this->CTest->ReadCustomConfigurationFileTree(dit->c_str(), this->Makefile);
+  }
 
   return true;
 }
-
-

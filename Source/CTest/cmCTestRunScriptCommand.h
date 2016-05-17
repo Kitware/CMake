@@ -23,34 +23,32 @@
 class cmCTestRunScriptCommand : public cmCTestCommand
 {
 public:
-
   cmCTestRunScriptCommand() {}
 
   /**
    * This is a virtual constructor for the command.
    */
   virtual cmCommand* Clone()
-    {
+  {
     cmCTestRunScriptCommand* ni = new cmCTestRunScriptCommand;
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
-    }
+  }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_run_script";}
+  virtual std::string GetName() const { return "ctest_run_script"; }
 
   cmTypeMacro(cmCTestRunScriptCommand, cmCTestCommand);
 };
-
 
 #endif

@@ -25,17 +25,14 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
-    {
-    return new cmContinueCommand;
-    }
+  virtual cmCommand* Clone() { return new cmContinueCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * This determines if the command is invoked when in script mode.
@@ -49,7 +46,5 @@ public:
 
   cmTypeMacro(cmContinueCommand, cmCommand);
 };
-
-
 
 #endif

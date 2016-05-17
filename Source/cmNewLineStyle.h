@@ -17,16 +17,15 @@
 class cmNewLineStyle
 {
 public:
-
   cmNewLineStyle();
 
   enum Style
   {
     Invalid,
-               // LF = '\n', 0x0A, 10
-               // CR = '\r', 0x0D, 13
-    LF,        // Unix
-    CRLF       // Dos
+    // LF = '\n', 0x0A, 10
+    // CR = '\r', 0x0D, 13
+    LF,  // Unix
+    CRLF // Dos
   };
 
   void SetStyle(Style);
@@ -35,7 +34,7 @@ public:
   bool IsValid() const;
 
   bool ReadFromArguments(const std::vector<std::string>& args,
-                         std::string &errorString);
+                         std::string& errorString);
 
   const std::string GetCharacters() const;
 

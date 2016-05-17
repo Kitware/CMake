@@ -13,10 +13,22 @@
 
 #include "cmVersionMacros.h"
 
-unsigned int cmVersion::GetMajorVersion() { return CMake_VERSION_MAJOR; }
-unsigned int cmVersion::GetMinorVersion() { return CMake_VERSION_MINOR; }
-unsigned int cmVersion::GetPatchVersion() { return CMake_VERSION_PATCH; }
-unsigned int cmVersion::GetTweakVersion() { return 0; }
+unsigned int cmVersion::GetMajorVersion()
+{
+  return CMake_VERSION_MAJOR;
+}
+unsigned int cmVersion::GetMinorVersion()
+{
+  return CMake_VERSION_MINOR;
+}
+unsigned int cmVersion::GetPatchVersion()
+{
+  return CMake_VERSION_PATCH;
+}
+unsigned int cmVersion::GetTweakVersion()
+{
+  return 0;
+}
 
 const char* cmVersion::GetCMakeVersion()
 {

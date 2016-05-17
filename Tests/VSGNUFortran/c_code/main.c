@@ -2,6 +2,6 @@
 extern void FC_hello(void);
 int main()
 {
- FC_hello();
- return 0;
+  FC_hello();
+  return 0;
 }

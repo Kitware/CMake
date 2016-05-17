@@ -24,12 +24,12 @@
 class cmParseMumpsCoverage
 {
 public:
-  cmParseMumpsCoverage(cmCTestCoverageHandlerContainer& cont,
-    cmCTest* ctest);
+  cmParseMumpsCoverage(cmCTestCoverageHandlerContainer& cont, cmCTest* ctest);
   virtual ~cmParseMumpsCoverage();
   // This is the toplevel coverage file locating the coverage files
   // and the mumps source code package tree.
   bool ReadCoverageFile(const char* file);
+
 protected:
   // sub classes will use this to
   // load all coverage files found in the given directory
@@ -40,8 +40,8 @@ protected:
   // initialize the coverage information for a single mumps file
   void InitializeMumpsFile(std::string& file);
   // Find mumps file for routine
-  bool FindMumpsFile(std::string const& routine,
-                     std::string& filepath);
+  bool FindMumpsFile(std::string const& routine, std::string& filepath);
+
 protected:
   std::map<std::string, std::string> RoutineToDirectory;
   cmCTestCoverageHandlerContainer& Coverage;

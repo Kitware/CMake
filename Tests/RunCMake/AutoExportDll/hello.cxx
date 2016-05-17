@@ -9,5 +9,5 @@ void hello()
 {
   printf("hello");
 }
-void Hello::operator delete[](void*) {};
-void Hello::operator delete(void*) {};
+void Hello::operator delete[](void*){};
+void Hello::operator delete(void*){};

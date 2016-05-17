@@ -14,8 +14,7 @@
 
 #include "cmMakefileTargetGenerator.h"
 
-class cmMakefileUtilityTargetGenerator:
-  public cmMakefileTargetGenerator
+class cmMakefileUtilityTargetGenerator : public cmMakefileTargetGenerator
 {
 public:
   cmMakefileUtilityTargetGenerator(cmGeneratorTarget* target);
@@ -26,7 +25,6 @@ public:
   virtual void WriteRuleFiles();
 
 protected:
-
 };
 
 #endif

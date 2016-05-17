@@ -1,22 +1,23 @@
 
-template<long l>
+template <long l>
 struct Outputter;
 
 #if DEFAULT_CXX14
-#  if __cplusplus != 201402L
+#if __cplusplus != 201402L
 Outputter<__cplusplus> o;
-#  endif
+#endif
 #elif DEFAULT_CXX11
-#  if __cplusplus != 201103L
+#if __cplusplus != 201103L
 Outputter<__cplusplus> o;
-#  endif
+#endif
 #else
-#  if !DEFAULT_CXX98
-#    error Buildsystem error
-#  endif
-#  if __cplusplus != 199711L && __cplusplus != 1 && !defined(__GXX_EXPERIMENTAL_CXX0X__)
+#if !DEFAULT_CXX98
+#error Buildsystem error
+#endif
+#if __cplusplus != 199711L && __cplusplus != 1 &&                             \
+  !defined(__GXX_EXPERIMENTAL_CXX0X__)
 Outputter<__cplusplus> o;
-#  endif
+#endif
 #endif
 
 int main()

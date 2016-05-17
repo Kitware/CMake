@@ -1,5 +1,5 @@
 
-template<typename T = int>
+template <typename T = int>
 int someFunc()
 {
   T t = 0;

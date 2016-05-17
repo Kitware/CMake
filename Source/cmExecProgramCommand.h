@@ -27,23 +27,19 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
-    {
-    return new cmExecProgramCommand;
-    }
+  virtual cmCommand* Clone() { return new cmExecProgramCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
+                           cmExecutionStatus& status);
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const
-    {return "exec_program";}
+  virtual std::string GetName() const { return "exec_program"; }
 
   /**
    * This determines if the command is invoked when in script mode.
@@ -51,10 +47,10 @@ public:
   virtual bool IsScriptable() const { return true; }
 
   cmTypeMacro(cmExecProgramCommand, cmCommand);
+
 private:
-  static bool RunCommand(const char* command, std::string& output,
-                         int &retVal, const char* directory = 0,
-                         bool verbose = true);
+  static bool RunCommand(const char* command, std::string& output, int& retVal,
+                         const char* directory = 0, bool verbose = true);
 };
 
 #endif

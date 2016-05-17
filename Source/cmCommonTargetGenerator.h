@@ -35,7 +35,6 @@ public:
   std::string const& GetConfigName() const;
 
 protected:
-
   // Add language feature flags.
   void AddFeatureFlags(std::string& flags, const std::string& lang);
 
@@ -65,10 +64,9 @@ protected:
   // Compute target-specific Fortran language flags.
   void AddFortranFlags(std::string& flags);
 
-  std::string Convert(std::string const& source,
-                      cmLocalGenerator::RelativeRoot relative,
-                      cmLocalGenerator::OutputFormat output =
-                      cmLocalGenerator::UNCHANGED);
+  std::string Convert(
+    std::string const& source, cmLocalGenerator::RelativeRoot relative,
+    cmLocalGenerator::OutputFormat output = cmLocalGenerator::UNCHANGED);
 
   void AppendFortranFormatFlags(std::string& flags,
                                 cmSourceFile const& source);
@@ -83,9 +81,9 @@ protected:
                         const char* name, bool so);
 
   typedef std::map<std::string, std::string> ByLanguageMap;
-  std::string GetFlags(const std::string &l);
+  std::string GetFlags(const std::string& l);
   ByLanguageMap FlagsByLanguage;
-  std::string GetDefines(const std::string &l);
+  std::string GetDefines(const std::string& l);
   ByLanguageMap DefinesByLanguage;
   std::string GetIncludes(std::string const& l);
   ByLanguageMap IncludesByLanguage;

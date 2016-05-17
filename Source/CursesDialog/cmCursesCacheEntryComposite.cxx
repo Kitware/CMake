@@ -25,10 +25,10 @@
 #include <assert.h>
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
-                                                        const std::string& key,
-                                                        int labelwidth,
-                                                        int entrywidth) :
-  Key(key), LabelWidth(labelwidth), EntryWidth(entrywidth)
+  const std::string& key, int labelwidth, int entrywidth)
+  : Key(key)
+  , LabelWidth(labelwidth)
+  , EntryWidth(entrywidth)
 {
   this->Label = new cmCursesLabelWidget(this->LabelWidth, 1, 1, 1, key);
   this->IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, " ");
@@ -37,35 +37,30 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
 }
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
-  const std::string& key, cmake *cm, bool isNew,
-  int labelwidth, int entrywidth)
-  : Key(key), LabelWidth(labelwidth), EntryWidth(entrywidth)
+  const std::string& key, cmake* cm, bool isNew, int labelwidth,
+  int entrywidth)
+  : Key(key)
+  , LabelWidth(labelwidth)
+  , EntryWidth(entrywidth)
 {
   this->Label = new cmCursesLabelWidget(this->LabelWidth, 1, 1, 1, key);
-  if (isNew)
-    {
+  if (isNew) {
     this->IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, "*");
-    }
-  else
-    {
+  } else {
     this->IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, " ");
-    }
+  }
 
   this->Entry = 0;
   const char* value = cm->GetState()->GetCacheEntryValue(key);
   assert(value);
-  switch (cm->GetState()->GetCacheEntryType(key))
-    {
+  switch (cm->GetState()->GetCacheEntryType(key)) {
     case cmState::BOOL:
       this->Entry = new cmCursesBoolWidget(this->EntryWidth, 1, 1, 1);
-      if (cmSystemTools::IsOn(value))
-        {
+      if (cmSystemTools::IsOn(value)) {
         static_cast<cmCursesBoolWidget*>(this->Entry)->SetValueAsBool(true);
-        }
-      else
-        {
+      } else {
         static_cast<cmCursesBoolWidget*>(this->Entry)->SetValueAsBool(false);
-        }
+      }
       break;
     case cmState::PATH:
       this->Entry = new cmCursesPathWidget(this->EntryWidth, 1, 1, 1);
@@ -75,40 +70,33 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
       this->Entry = new cmCursesFilePathWidget(this->EntryWidth, 1, 1, 1);
       static_cast<cmCursesFilePathWidget*>(this->Entry)->SetString(value);
       break;
-    case cmState::STRING:
-      {
-      const char* stringsProp = cm->GetState()
-                                  ->GetCacheEntryProperty(key, "STRINGS");
-      if(stringsProp)
-        {
+    case cmState::STRING: {
+      const char* stringsProp =
+        cm->GetState()->GetCacheEntryProperty(key, "STRINGS");
+      if (stringsProp) {
         cmCursesOptionsWidget* ow =
           new cmCursesOptionsWidget(this->EntryWidth, 1, 1, 1);
         this->Entry = ow;
         std::vector<std::string> options;
         cmSystemTools::ExpandListArgument(stringsProp, options);
-        for(std::vector<std::string>::iterator
-              si = options.begin(); si != options.end(); ++si)
-          {
+        for (std::vector<std::string>::iterator si = options.begin();
+             si != options.end(); ++si) {
           ow->AddOption(*si);
-          }
-        ow->SetOption(value);
         }
-      else
-        {
+        ow->SetOption(value);
+      } else {
         this->Entry = new cmCursesStringWidget(this->EntryWidth, 1, 1, 1);
         static_cast<cmCursesStringWidget*>(this->Entry)->SetString(value);
-        }
-      break;
       }
+      break;
+    }
     case cmState::UNINITIALIZED:
-      cmSystemTools::Error("Found an undefined variable: ",
-                           key.c_str());
+      cmSystemTools::Error("Found an undefined variable: ", key.c_str());
       break;
     default:
       // TODO : put warning message here
       break;
-    }
-
+  }
 }
 
 cmCursesCacheEntryComposite::~cmCursesCacheEntryComposite()
@@ -120,12 +108,9 @@ cmCursesCacheEntryComposite::~cmCursesCacheEntryComposite()
 
 const char* cmCursesCacheEntryComposite::GetValue()
 {
-  if (this->Label)
-    {
+  if (this->Label) {
     return this->Label->GetValue();
-    }
-  else
-    {
+  } else {
     return 0;
-    }
+  }
 }

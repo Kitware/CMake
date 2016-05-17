@@ -5,7 +5,7 @@
 #ifdef _WIN32
 __declspec(dllexport)
 #endif
-int configUnusedFunc()
+  int configUnusedFunc()
 {
   int unused;
   return 0;

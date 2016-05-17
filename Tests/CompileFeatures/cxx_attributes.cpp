@@ -1,2 +1,5 @@
 
-void unusedFunc [[noreturn]] () { throw 1; }
+void unusedFunc[[noreturn]]()
+{
+  throw 1;
+}

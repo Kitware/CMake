@@ -3,5 +3,4 @@
 
 SystemStruct::SystemStruct()
 {
-
 }

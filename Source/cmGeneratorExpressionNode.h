@@ -29,7 +29,8 @@
 
 struct cmGeneratorExpressionNode
 {
-  enum {
+  enum
+  {
     DynamicParameters = 0,
     OneOrMoreParameters = -1,
     OneOrZeroParameters = -2
@@ -40,29 +41,27 @@ struct cmGeneratorExpressionNode
 
   virtual bool RequiresLiteralInput() const { return false; }
 
-  virtual bool AcceptsArbitraryContentParameter() const
-    { return false; }
+  virtual bool AcceptsArbitraryContentParameter() const { return false; }
 
   virtual int NumExpectedParameters() const { return 1; }
 
-  virtual std::string Evaluate(const std::vector<std::string> &parameters,
-                               cmGeneratorExpressionContext *context,
-                               const GeneratorExpressionContent *content,
-                               cmGeneratorExpressionDAGChecker *dagChecker
-                              ) const = 0;
+  virtual std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const = 0;
 
   static std::string EvaluateDependentExpression(
-    std::string const& prop, cmLocalGenerator *lg,
-    cmGeneratorExpressionContext *context,
-    const cmGeneratorTarget* headTarget,
+    std::string const& prop, cmLocalGenerator* lg,
+    cmGeneratorExpressionContext* context, const cmGeneratorTarget* headTarget,
     const cmGeneratorTarget* currentTarget,
-    cmGeneratorExpressionDAGChecker *dagChecker);
+    cmGeneratorExpressionDAGChecker* dagChecker);
 
   static const cmGeneratorExpressionNode* GetNode(
-                                              const std::string &identifier);
+    const std::string& identifier);
 };
 
-void reportError(cmGeneratorExpressionContext *context,
-                 const std::string &expr, const std::string &result);
+void reportError(cmGeneratorExpressionContext* context,
+                 const std::string& expr, const std::string& result);
 
 #endif

@@ -28,6 +28,7 @@ public:
    */
   cmCPackTXZGenerator();
   virtual ~cmCPackTXZGenerator();
+
 protected:
   virtual const char* GetOutputExtension() { return ".tar.xz"; }
 };

@@ -1,4 +1,4 @@
 #ifdef _WIN32
 __declspec(dllexport)
 #endif
-int staticlib1();
+  int staticlib1();

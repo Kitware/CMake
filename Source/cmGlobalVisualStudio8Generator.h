@@ -14,7 +14,6 @@
 
 #include "cmGlobalVisualStudio71Generator.h"
 
-
 /** \class cmGlobalVisualStudio8Generator
  * \brief Write a Unix makefiles.
  *
@@ -24,17 +23,17 @@ class cmGlobalVisualStudio8Generator : public cmGlobalVisualStudio71Generator
 {
 public:
   cmGlobalVisualStudio8Generator(cmake* cm, const std::string& name,
-    const std::string& platformName);
+                                 const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.
-  virtual std::string GetName() const {return this->Name;}
+  virtual std::string GetName() const { return this->Name; }
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
 
-  virtual void EnableLanguage(std::vector<std::string>const& languages,
-                              cmMakefile *, bool optional);
+  virtual void EnableLanguage(std::vector<std::string> const& languages,
+                              cmMakefile*, bool optional);
   virtual void AddPlatformDefinitions(cmMakefile* mf);
 
   virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
@@ -63,8 +62,10 @@ public:
   virtual bool NeedLinkLibraryDependencies(cmGeneratorTarget* target);
 
   /** Return true if building for Windows CE */
-  virtual bool TargetsWindowsCE() const {
-    return !this->WindowsCEVersion.empty(); }
+  virtual bool TargetsWindowsCE() const
+  {
+    return !this->WindowsCEVersion.empty();
+  }
 
   /** Is the installed VS an Express edition?  */
   bool IsExpressEdition() const { return this->ExpressEdition; }
@@ -92,10 +93,9 @@ protected:
     const std::set<std::string>& configsPartOfDefaultBuild,
     const std::string& platformMapping = "");
   virtual bool ComputeTargetDepends();
-  virtual void WriteProjectDepends(std::ostream& fout,
-                                   const std::string& name,
+  virtual void WriteProjectDepends(std::ostream& fout, const std::string& name,
                                    const char* path,
-                                   const cmGeneratorTarget *t);
+                                   const cmGeneratorTarget* t);
 
   bool UseFolderProperty();
 

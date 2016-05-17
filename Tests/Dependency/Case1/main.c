@@ -4,7 +4,7 @@ extern int d();
 
 int main()
 {
-   c();
-   b();
-   d();
+  c();
+  b();
+  d();
 }

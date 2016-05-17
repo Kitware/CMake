@@ -19,5 +19,4 @@
 
 void someFunc(void)
 {
-
 }

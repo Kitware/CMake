@@ -1,7 +1,7 @@
 
 #include "lib_restrict.h"
 
-int bar(int * restrict a, int * restrict b)
+int bar(int* restrict a, int* restrict b)
 {
   (void)a;
   (void)b;

@@ -4,5 +4,4 @@
 Foo::Foo()
   : QObject(0)
 {
-
 }

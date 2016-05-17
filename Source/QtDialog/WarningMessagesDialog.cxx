@@ -13,7 +13,8 @@
 #include "WarningMessagesDialog.h"
 
 WarningMessagesDialog::WarningMessagesDialog(QWidget* prnt, QCMake* instance)
-  : QDialog(prnt), cmakeInstance(instance)
+  : QDialog(prnt)
+  , cmakeInstance(instance)
 {
   this->setupUi(this);
   this->setInitialValues();
@@ -35,8 +36,8 @@ void WarningMessagesDialog::setInitialValues()
 
 void WarningMessagesDialog::setupSignals()
 {
-  QObject::connect(this->buttonBox, SIGNAL(accepted()),
-                   this, SLOT(doAccept()));
+  QObject::connect(this->buttonBox, SIGNAL(accepted()), this,
+                   SLOT(doAccept()));
 
   QObject::connect(this->suppressDeveloperWarnings, SIGNAL(stateChanged(int)),
                    this, SLOT(doSuppressDeveloperWarningsChanged(int)));
@@ -65,35 +66,31 @@ void WarningMessagesDialog::doAccept()
 void WarningMessagesDialog::doSuppressDeveloperWarningsChanged(int state)
 {
   // no warnings implies no errors either
-  if (state)
-    {
+  if (state) {
     this->developerWarningsAsErrors->setChecked(false);
-    }
+  }
 }
 
 void WarningMessagesDialog::doSuppressDeprecatedWarningsChanged(int state)
 {
   // no warnings implies no errors either
-  if (state)
-    {
+  if (state) {
     this->deprecatedWarningsAsErrors->setChecked(false);
-    }
+  }
 }
 
 void WarningMessagesDialog::doDeveloperWarningsAsErrorsChanged(int state)
 {
   // warnings as errors implies warnings are not suppressed
-  if (state)
-    {
+  if (state) {
     this->suppressDeveloperWarnings->setChecked(false);
-    }
+  }
 }
 
 void WarningMessagesDialog::doDeprecatedWarningsAsErrorsChanged(int state)
 {
   // warnings as errors implies warnings are not suppressed
-  if (state)
-    {
+  if (state) {
     this->suppressDeprecatedWarnings->setChecked(false);
-    }
+  }
 }

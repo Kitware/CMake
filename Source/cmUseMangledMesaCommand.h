@@ -20,12 +20,11 @@ public:
   cmTypeMacro(cmUseMangledMesaCommand, cmCommand);
   virtual cmCommand* Clone() { return new cmUseMangledMesaCommand; }
   virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus &status);
-  virtual std::string GetName() const { return "use_mangled_mesa";}
+                           cmExecutionStatus& status);
+  virtual std::string GetName() const { return "use_mangled_mesa"; }
   virtual bool IsScriptable() const { return true; }
 protected:
-  void CopyAndFullPathMesaHeader(const char* source,
-                                 const char* outdir);
+  void CopyAndFullPathMesaHeader(const char* source, const char* outdir);
 };
 
 #endif
