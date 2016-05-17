@@ -99,26 +99,20 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
 #?\[=*\[\n? {
   const char* bracket = yytext;
   lexer->comment = yytext[0] == '#';
-  if(lexer->comment)
-    {
+  if (lexer->comment) {
     lexer->token.type = cmListFileLexer_Token_CommentBracket;
     bracket += 1;
-    }
-  else
-    {
+  } else {
     lexer->token.type = cmListFileLexer_Token_ArgumentBracket;
-    }
+  }
   cmListFileLexerSetToken(lexer, "", 0);
   lexer->bracket = strchr(bracket+1, '[') - bracket;
-  if(yytext[yyleng-1] == '\n')
-    {
+  if (yytext[yyleng-1] == '\n') {
     ++lexer->line;
     lexer->column = 1;
-    }
-  else
-    {
+  } else {
     lexer->column += yyleng;
-    }
+  }
   BEGIN(BRACKET);
 }
 
@@ -156,10 +150,9 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
   /* Handle ]]====]=======]*/
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
-  if(yyleng == lexer->bracket)
-    {
+  if (yyleng == lexer->bracket) {
     BEGIN(BRACKETEND);
-    }
+  }
 }
 
 <BRACKETEND>\] {
@@ -288,30 +281,25 @@ static void cmListFileLexerSetToken(cmListFileLexer* lexer, const char* text,
   lexer->token.column = lexer->column;
 
   /* Use the same buffer if possible.  */
-  if(lexer->token.text)
-    {
-    if(text && length < lexer->size)
-      {
+  if (lexer->token.text) {
+    if (text && length < lexer->size) {
       strcpy(lexer->token.text, text);
       lexer->token.length = length;
       return;
-      }
+    }
     free(lexer->token.text);
     lexer->token.text = 0;
     lexer->size = 0;
-    }
+  }
 
   /* Need to extend the buffer.  */
-  if(text)
-    {
+  if (text) {
     lexer->token.text = strdup(text);
     lexer->token.length = length;
-    lexer->size = length+1;
-    }
-  else
-    {
+    lexer->size = length + 1;
+  } else {
     lexer->token.length = 0;
-    }
+  }
 }
 
 /*--------------------------------------------------------------------------*/
@@ -323,22 +311,20 @@ static void cmListFileLexerAppend(cmListFileLexer* lexer, const char* text,
 
   /* If the appended text will fit in the buffer, do not reallocate.  */
   newSize = lexer->token.length + length + 1;
-  if(lexer->token.text && newSize <= lexer->size)
-    {
-    strcpy(lexer->token.text+lexer->token.length, text);
+  if (lexer->token.text && newSize <= lexer->size) {
+    strcpy(lexer->token.text + lexer->token.length, text);
     lexer->token.length += length;
     return;
-    }
+  }
 
   /* We need to extend the buffer.  */
   temp = malloc(newSize);
-  if(lexer->token.text)
-    {
+  if (lexer->token.text) {
     memcpy(temp, lexer->token.text, lexer->token.length);
     free(lexer->token.text);
-    }
-  memcpy(temp+lexer->token.length, text, length);
-  temp[lexer->token.length+length] = 0;
+  }
+  memcpy(temp + lexer->token.length, text, length);
+  temp[lexer->token.length + length] = 0;
   lexer->token.text = temp;
   lexer->token.length += length;
   lexer->size = newSize;
@@ -348,96 +334,84 @@ static void cmListFileLexerAppend(cmListFileLexer* lexer, const char* text,
 static int cmListFileLexerInput(cmListFileLexer* lexer, char* buffer,
                                 size_t bufferSize)
 {
-  if(lexer)
-    {
-    if(lexer->file)
-      {
+  if (lexer) {
+    if (lexer->file) {
       /* Convert CRLF -> LF explicitly.  The C FILE "t"ext mode
          does not convert newlines on all platforms.  Move any
          trailing CR to the start of the buffer for the next read. */
       size_t cr = lexer->cr;
       size_t n;
       buffer[0] = '\r';
-      n = fread(buffer+cr, 1, bufferSize-cr, lexer->file);
-      if(n)
-        {
+      n = fread(buffer + cr, 1, bufferSize - cr, lexer->file);
+      if (n) {
         char* o = buffer;
         const char* i = buffer;
         const char* e;
         n += cr;
-        cr = (buffer[n-1] == '\r')? 1:0;
+        cr = (buffer[n - 1] == '\r') ? 1 : 0;
         e = buffer + n - cr;
-        while(i != e)
-          {
-          if(i[0] == '\r' && i[1] == '\n')
-            {
+        while (i != e) {
+          if (i[0] == '\r' && i[1] == '\n') {
             ++i;
-            }
-          *o++ = *i++;
           }
-        n = o - buffer;
+          *o++ = *i++;
         }
-      else
-        {
+        n = o - buffer;
+      } else {
         n = cr;
         cr = 0;
-        }
+      }
       lexer->cr = cr;
       return n;
-      }
-    else if(lexer->string_left)
-      {
+    } else if (lexer->string_left) {
       int length = lexer->string_left;
-      if((int)bufferSize < length) { length = (int)bufferSize; }
+      if ((int)bufferSize < length) {
+        length = (int)bufferSize;
+      }
       memcpy(buffer, lexer->string_position, length);
       lexer->string_position += length;
       lexer->string_left -= length;
       return length;
-      }
     }
+  }
   return 0;
 }
 
 /*--------------------------------------------------------------------------*/
 static void cmListFileLexerInit(cmListFileLexer* lexer)
 {
-  if(lexer->file || lexer->string_buffer)
-    {
+  if (lexer->file || lexer->string_buffer) {
     cmListFileLexer_yylex_init(&lexer->scanner);
     cmListFileLexer_yyset_extra(lexer, lexer->scanner);
-    }
+  }
 }
 
 /*--------------------------------------------------------------------------*/
 static void cmListFileLexerDestroy(cmListFileLexer* lexer)
 {
   cmListFileLexerSetToken(lexer, 0, 0);
-  if(lexer->file || lexer->string_buffer)
-    {
+  if (lexer->file || lexer->string_buffer) {
     cmListFileLexer_yylex_destroy(lexer->scanner);
-    if(lexer->file)
-      {
+    if (lexer->file) {
       fclose(lexer->file);
       lexer->file = 0;
-      }
-    if(lexer->string_buffer)
-      {
+    }
+    if (lexer->string_buffer) {
       free(lexer->string_buffer);
       lexer->string_buffer = 0;
       lexer->string_left = 0;
       lexer->string_position = 0;
-      }
     }
+  }
 }
 
 /*--------------------------------------------------------------------------*/
 cmListFileLexer* cmListFileLexer_New()
 {
   cmListFileLexer* lexer = (cmListFileLexer*)malloc(sizeof(cmListFileLexer));
-  if(!lexer)
-    {
+  if (!lexer) {
     return 0;
-    }
+  }
   memset(lexer, 0, sizeof(*lexer));
   lexer->line = 1;
   lexer->column = 1;
@@ -455,39 +429,28 @@ void cmListFileLexer_Delete(cmListFileLexer* lexer)
 static cmListFileLexer_BOM cmListFileLexer_ReadBOM(FILE* f)
 {
   unsigned char b[2];
-  if(fread(b, 1, 2, f) == 2)
-    {
-    if(b[0] == 0xEF && b[1] == 0xBB)
-      {
-      if(fread(b, 1, 1, f) == 1 && b[0] == 0xBF)
-        {
+  if (fread(b, 1, 2, f) == 2) {
+    if (b[0] == 0xEF && b[1] == 0xBB) {
+      if (fread(b, 1, 1, f) == 1 && b[0] == 0xBF) {
         return cmListFileLexer_BOM_UTF8;
-        }
       }
-    else if(b[0] == 0xFE && b[1] == 0xFF)
-      {
+    } else if (b[0] == 0xFE && b[1] == 0xFF) {
       /* UTF-16 BE */
       return cmListFileLexer_BOM_UTF16BE;
-      }
-    else if(b[0] == 0 && b[1] == 0)
-      {
-      if(fread(b, 1, 2, f) == 2 && b[0] == 0xFE && b[1] == 0xFF)
-        {
+    } else if (b[0] == 0 && b[1] == 0) {
+      if (fread(b, 1, 2, f) == 2 && b[0] == 0xFE && b[1] == 0xFF) {
         return cmListFileLexer_BOM_UTF32BE;
-        }
       }
-    else if(b[0] == 0xFF && b[1] == 0xFE)
-      {
+    } else if (b[0] == 0xFF && b[1] == 0xFE) {
       fpos_t p;
       fgetpos(f, &p);
-      if(fread(b, 1, 2, f) == 2 && b[0] == 0 && b[1] == 0)
-        {
+      if (fread(b, 1, 2, f) == 2 && b[0] == 0 && b[1] == 0) {
         return cmListFileLexer_BOM_UTF32LE;
-        }
+      }
       fsetpos(f, &p);
       return cmListFileLexer_BOM_UTF16LE;
-      }
     }
+  }
   rewind(f);
   return cmListFileLexer_BOM_None;
 }
@@ -498,8 +461,7 @@ int cmListFileLexer_SetFileName(cmListFileLexer* lexer, const char* name,
 {
   int result = 1;
   cmListFileLexerDestroy(lexer);
-  if(name)
-    {
+  if (name) {
 #ifdef _WIN32
     wchar_t* wname = cmsysEncoding_DupToWide(name);
     lexer->file = _wfopen(wname, L"rb");
@@ -507,18 +469,14 @@ int cmListFileLexer_SetFileName(cmListFileLexer* lexer, const char* name,
 #else
     lexer->file = fopen(name, "rb");
 #endif
-    if(lexer->file)
-      {
-      if(bom)
-        {
+    if (lexer->file) {
+      if (bom) {
         *bom = cmListFileLexer_ReadBOM(lexer->file);
-        }
       }
-    else
-      {
+    } else {
       result = 0;
-      }
     }
+  }
   cmListFileLexerInit(lexer);
   return result;
 }
@@ -528,21 +486,17 @@ int cmListFileLexer_SetString(cmListFileLexer* lexer, const char* text)
 {
   int result = 1;
   cmListFileLexerDestroy(lexer);
-  if(text)
-    {
+  if (text) {
     int length = (int)strlen(text);
-    lexer->string_buffer = (char*)malloc(length+1);
-    if(lexer->string_buffer)
-      {
+    lexer->string_buffer = (char*)malloc(length + 1);
+    if (lexer->string_buffer) {
       strcpy(lexer->string_buffer, text);
       lexer->string_position = lexer->string_buffer;
       lexer->string_left = length;
-      }
-    else
-      {
+    } else {
       result = 0;
-      }
     }
+  }
   cmListFileLexerInit(lexer);
   return result;
 }
@@ -550,45 +504,35 @@ int cmListFileLexer_SetString(cmListFileLexer* lexer, const char* text)
 /*--------------------------------------------------------------------------*/
 cmListFileLexer_Token* cmListFileLexer_Scan(cmListFileLexer* lexer)
 {
-  if(!lexer->file)
-    {
+  if (!lexer->file) {
     return 0;
-    }
-  if(cmListFileLexer_yylex(lexer->scanner, lexer))
-    {
+  }
+  if (cmListFileLexer_yylex(lexer->scanner, lexer)) {
     return &lexer->token;
-    }
-  else
-    {
+  } else {
     cmListFileLexer_SetFileName(lexer, 0, 0);
     return 0;
-    }
+  }
 }
 
 /*--------------------------------------------------------------------------*/
 long cmListFileLexer_GetCurrentLine(cmListFileLexer* lexer)
 {
-  if(lexer->file)
-    {
+  if (lexer->file) {
     return lexer->line;
-    }
-  else
-    {
+  } else {
     return 0;
-    }
+  }
 }
 
 /*--------------------------------------------------------------------------*/
 long cmListFileLexer_GetCurrentColumn(cmListFileLexer* lexer)
 {
-  if(lexer->file)
-    {
+  if (lexer->file) {
     return lexer->column;
-    }
-  else
-    {
+  } else {
     return 0;
-    }
+  }
 }
 
 /*--------------------------------------------------------------------------*/
@@ -596,21 +540,33 @@ const char* cmListFileLexer_GetTypeAsString(cmListFileLexer* lexer,
                                             cmListFileLexer_Type type)
 {
   (void)lexer;
-  switch(type)
-    {
-    case cmListFileLexer_Token_None: return "nothing";
-    case cmListFileLexer_Token_Space: return "space";
-    case cmListFileLexer_Token_Newline: return "newline";
-    case cmListFileLexer_Token_Identifier: return "identifier";
-    case cmListFileLexer_Token_ParenLeft: return "left paren";
-    case cmListFileLexer_Token_ParenRight: return "right paren";
-    case cmListFileLexer_Token_ArgumentUnquoted: return "unquoted argument";
-    case cmListFileLexer_Token_ArgumentQuoted: return "quoted argument";
-    case cmListFileLexer_Token_ArgumentBracket: return "bracket argument";
-    case cmListFileLexer_Token_CommentBracket: return "bracket comment";
-    case cmListFileLexer_Token_BadCharacter: return "bad character";
-    case cmListFileLexer_Token_BadBracket: return "unterminated bracket";
-    case cmListFileLexer_Token_BadString: return "unterminated string";
-    }
+  switch (type) {
+    case cmListFileLexer_Token_None:
+      return "nothing";
+    case cmListFileLexer_Token_Space:
+      return "space";
+    case cmListFileLexer_Token_Newline:
+      return "newline";
+    case cmListFileLexer_Token_Identifier:
+      return "identifier";
+    case cmListFileLexer_Token_ParenLeft:
+      return "left paren";
+    case cmListFileLexer_Token_ParenRight:
+      return "right paren";
+    case cmListFileLexer_Token_ArgumentUnquoted:
+      return "unquoted argument";
+    case cmListFileLexer_Token_ArgumentQuoted:
+      return "quoted argument";
+    case cmListFileLexer_Token_ArgumentBracket:
+      return "bracket argument";
+    case cmListFileLexer_Token_CommentBracket:
+      return "bracket comment";
+    case cmListFileLexer_Token_BadCharacter:
+      return "bad character";
+    case cmListFileLexer_Token_BadBracket:
+      return "unterminated bracket";
+    case cmListFileLexer_Token_BadString:
+      return "unterminated string";
+  }
   return "unknown token";
 }
