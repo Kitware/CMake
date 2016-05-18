@@ -21,6 +21,18 @@ set_property(DIRECTORY PROPERTY EP_BASE ${base})
 set_property(DIRECTORY PROPERTY EP_STEP_TARGETS configure build test)
 set_property(DIRECTORY PROPERTY EP_INDEPENDENT_STEP_TARGETS update)
 
+ExternalProject_Add(TestUpdateCommand
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+  UPDATE_COMMAND ${CMAKE_COMMAND} -E echo update
+  UPDATE_DISCONNECTED 1
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+  INDEPENDENT_STEP_TARGETS update
+  )
+add_custom_target(TestUpdateCommandDriver ALL)
+add_dependencies(TestUpdateCommandDriver TestUpdateCommand-update)
+
 set(do_git_tests 0)
 
 if(GIT_EXECUTABLE)
