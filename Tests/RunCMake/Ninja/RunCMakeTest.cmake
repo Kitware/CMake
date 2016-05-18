@@ -1,5 +1,20 @@
 include(RunCMake)
 
+# Detect ninja version so we know what tests can be supported.
+execute_process(
+  COMMAND "${RunCMake_MAKE_PROGRAM}" --version
+  OUTPUT_VARIABLE ninja_out
+  ERROR_VARIABLE ninja_out
+  RESULT_VARIABLE ninja_res
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+if(ninja_res EQUAL 0 AND "x${ninja_out}" MATCHES "^x[0-9]+\\.[0-9]+")
+  set(ninja_version "${ninja_out}")
+  message(STATUS "ninja version: ${ninja_version}")
+else()
+  message(FATAL_ERROR "'ninja --version' reported:\n${ninja_out}")
+endif()
+
 function(run_CMP0058 case)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CMP0058-${case}-build)
@@ -168,6 +183,11 @@ build build.ninja: RERUN ${escaped_build_ninja_dep} || ${escaped_ninja_output_pa
   endif()
 
 endfunction(run_sub_cmake)
+
+if("${ninja_version}" VERSION_LESS 1.6)
+  message(WARNING "Ninja is too old; skipping rest of test.")
+  return()
+endif()
 
 foreach(ninja_output_path_prefix "sub space" "sub")
   run_sub_cmake(Executable "${ninja_output_path_prefix}")
