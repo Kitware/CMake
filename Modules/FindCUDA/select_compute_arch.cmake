@@ -1,21 +1,35 @@
 # Synopsis:
-#   CUDA_SELECT_NVCC_ARCH_FLAGS(out_variable [list of target CUDA architectures])
-#   -- Selects GPU arch flags for nvcc based on target CUDA architectures list
-#      More information on CUDA architectures: https://en.wikipedia.org/wiki/CUDA
+#   CUDA_SELECT_NVCC_ARCH_FLAGS(out_variable [target_CUDA_architectures])
+#   -- Selects GPU arch flags for nvcc based on target_CUDA_architectures
+#      target_CUDA_architectures : Auto | Common | All | LIST(ARCH_AND_PTX ...)
+#       - "Auto" detects local machine GPU compute arch at runtime.
+#       - "Common" and "All" cover common and entire subsets of architectures
+#      ARCH_AND_PTX : NAME | NUM.NUM | NUM.NUM(NUM.NUM) | NUM.NUM+PTX
+#      NAME: Fermi Kepler Maxwell Kepler+Tegra Kepler+Tesla Maxwell+Tegra Pascal
+#      NUM: Any number. Only those pairs are currently accepted by NVCC though:
+#            2.0 2.1 3.0 3.2 3.5 3.7 5.0 5.2 5.3 6.0 6.2
+#      Returns LIST of flags to be added to CUDA_NVCC_FLAGS in ${out_variable}
+#      Additionally, sets ${out_variable}_readable to the resulting numeric list
+#      Example:
+#       CUDA_SELECT_NVCC_ARCH_FLAGS(ARCH_FLAGS 3.0 3.5+PTX 5.2(5.0) Maxwell)
+#        LIST(APPEND CUDA_NVCC_FLAGS ${ARCH_FLAGS})
+#
+#      More info on CUDA architectures: https://en.wikipedia.org/wiki/CUDA
 #
 
 # This list will be used for CUDA_ARCH_NAME = All option
-set(CUDA_KNOWN_GPU_ARCHITECTURES  "Fermi" "Kepler" "Maxwell" "2.0" "2.1(2.0)" "3.0" "3.5" "5.0")
+set(CUDA_KNOWN_GPU_ARCHITECTURES  "Fermi" "Kepler" "Maxwell")
 
 # This list will be used for CUDA_ARCH_NAME = Common option (enabled by default)
 set(CUDA_COMMON_GPU_ARCHITECTURES "3.0" "3.5" "5.0")
 
 if (CUDA_VERSION VERSION_GREATER "6.5")
-  list(APPEND CUDA_KNOWN_GPU_ARCHITECTURES "3.2" "3.7" "5.2" "5.3" "Kepler+Tegra" "Kepler+Tesla" "Maxwell+Tegra")
+  list(APPEND CUDA_KNOWN_GPU_ARCHITECTURES "Kepler+Tegra" "Kepler+Tesla" "Maxwell+Tegra")
   list(APPEND CUDA_COMMON_GPU_ARCHITECTURES "3.7" "5.2")
 endif ()
+
 if (CUDA_VERSION VERSION_GREATER "7.5")
-  list(APPEND CUDA_KNOWN_GPU_ARCHITECTURES "Pascal" "6.0" "6.2")
+  list(APPEND CUDA_KNOWN_GPU_ARCHITECTURES "Pascal")
   list(APPEND CUDA_COMMON_GPU_ARCHITECTURES "6.0" "6.2")
 endif ()
 
@@ -77,51 +91,72 @@ function(CUDA_SELECT_NVCC_ARCH_FLAGS out_variable)
     set(CUDA_ARCH_LIST "Auto")
   endif()
 
+  set(cuda_arch_bin)
+  set(cuda_arch_ptx)
+
   if("${CUDA_ARCH_LIST}" STREQUAL "All")
-    set(cuda_arch_bin ${CUDA_KNOWN_GPU_ARCHITECTURES})
+    set(CUDA_ARCH_LIST ${CUDA_KNOWN_GPU_ARCHITECTURES})
   elseif("${CUDA_ARCH_LIST}" STREQUAL "Common")
-    set(cuda_arch_bin ${CUDA_COMMON_GPU_ARCHITECTURES})
+    set(CUDA_ARCH_LIST ${CUDA_COMMON_GPU_ARCHITECTURES})
   elseif("${CUDA_ARCH_LIST}" STREQUAL "Auto")
-    CUDA_DETECT_INSTALLED_GPUS(cuda_arch_bin)
-  else()
-    set(cuda_arch_bin "")
-    list(REMOVE_DUPLICATES CUDA_KNOWN_GPU_ARCHITECTURES)
-    string(REGEX REPLACE "[ \t]+" ";" CUDA_ARCH_LIST ${CUDA_ARCH_LIST})
-    list(REMOVE_DUPLICATES CUDA_ARCH_LIST)
-    foreach(arch_name ${CUDA_ARCH_LIST})
-      list(FIND CUDA_KNOWN_GPU_ARCHITECTURES ${arch_name} found_pos)
-      if (${found_pos} EQUAL -1)
-        message(SEND_ERROR "Unknown CUDA Architecture Name ${arch_name} in CUDA_SELECT_NVCC_ARCH_TARGETS)")
-      elseif(${arch_name} STREQUAL "Fermi")
-        list(APPEND cuda_arch_bin "2.0 2.1(2.0)")
-      elseif(${arch_name} STREQUAL "Kepler+Tegra")
-        list(APPEND cuda_arch_bin "3.2")
-      elseif(${arch_name} STREQUAL "Kepler+Tesla")
-        list(APPEND cuda_arch_bin "3.7")
-      elseif(${arch_name} STREQUAL "Kepler")
-        list(APPEND cuda_arch_bin "3.0 3.5")
-      elseif(${arch_name} STREQUAL "Maxwell+Tegra")
-        list(APPEND cuda_arch_bin "5.3")
-      elseif(${arch_name} STREQUAL "Maxwell")
-        list(APPEND cuda_arch_bin "5.0 5.2")
-      elseif(${arch_name} STREQUAL "Pascal")
-        list(APPEND cuda_arch_bin "6.0 6.2")
-      else()
-        list(APPEND cuda_arch_bin ${arch_name})
-      endif()
-    endforeach()
+    CUDA_DETECT_INSTALLED_GPUS(CUDA_ARCH_LIST)
+    message(STATUS "Autodetected CUDA architecture(s): ${cuda_arch_bin}")
   endif()
 
-  message(STATUS "Compiling for CUDA architecture(s): ${cuda_arch_bin}")
+  # Now process the list and look for names
+  string(REGEX REPLACE "[ \t]+" ";" CUDA_ARCH_LIST "${CUDA_ARCH_LIST}")
+  list(REMOVE_DUPLICATES CUDA_ARCH_LIST)
+  foreach(arch_name ${CUDA_ARCH_LIST})
+    set(arch_bin)
+    set(add_ptx FALSE)
+    # Check to see if we are compiling PTX
+    if(arch_name MATCHES "(.*)\\+PTX$")
+      set(add_ptx TRUE)
+      set(arch_name ${CMAKE_MATCH_1})
+    endif()
+    if(arch_name MATCHES "([0-9]\\.[0-9])$")
+      set(arch_bin ${CMAKE_MATCH_1})
+    else()
+      # Look for it in our list of known architectures
+      if(${arch_name} STREQUAL "Fermi")
+        set(arch_bin 2.0 "2.1(2.0)")
+      elseif(${arch_name} STREQUAL "Kepler+Tegra")
+        set(arch_bin 3.2)
+      elseif(${arch_name} STREQUAL "Kepler+Tesla")
+        set(arch_bin 3.7)
+      elseif(${arch_name} STREQUAL "Kepler")
+        set(arch_bin 3.0 3.5)
+      elseif(${arch_name} STREQUAL "Maxwell+Tegra")
+        set(arch_bin 5.3)
+      elseif(${arch_name} STREQUAL "Maxwell")
+        set(arch_bin 5.0 5.2)
+      elseif(${arch_name} STREQUAL "Pascal")
+        set(arch_bin 6.0 6.2)
+      else()
+        message(SEND_ERROR "Unknown CUDA Architecture Name ${arch_name} in CUDA_SELECT_NVCC_ARCH_FLAGS")
+      endif()
+    endif()
+    if(NOT arch_bin)
+      message(SEND_ERROR "arch_bin wasn't set for some reason")
+    endif()
+    list(APPEND cuda_arch_bin ${arch_bin})
+    if(add_ptx)
+      list(APPEND cuda_arch_ptx ${arch_bin})
+    endif()
+  endforeach()
 
   # remove dots and convert to lists
   string(REGEX REPLACE "\\." "" cuda_arch_bin "${cuda_arch_bin}")
-  string(REGEX REPLACE "\\." "" cuda_arch_ptx "${CUDA_ARCH_PTX}")
+  string(REGEX REPLACE "\\." "" cuda_arch_ptx "${cuda_arch_ptx}")
   string(REGEX MATCHALL "[0-9()]+" cuda_arch_bin "${cuda_arch_bin}")
   string(REGEX MATCHALL "[0-9]+"   cuda_arch_ptx "${cuda_arch_ptx}")
 
-  list(REMOVE_DUPLICATES cuda_arch_bin)
-  list(REMOVE_DUPLICATES cuda_arch_ptx)
+  if(cuda_arch_bin)
+    list(REMOVE_DUPLICATES cuda_arch_bin)
+  endif()
+  if(cuda_arch_ptx)
+    list(REMOVE_DUPLICATES cuda_arch_ptx)
+  endif()
 
   set(nvcc_flags "")
   set(nvcc_archs_readable "")

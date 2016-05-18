@@ -200,16 +200,22 @@
 #      specified by CUDA_64_BIT_DEVICE_CODE.  Note that this is a function
 #      instead of a macro.
 #
-#   CUDA_SELECT_NVCC_ARCH_FLAGS(out_variable [list of target CUDA architectures])
-#   -- Selects GPU arch flags for nvcc based on target CUDA architectures list
-#      (Default is "Auto" if no list)
-#      Possible list values(semicolon or space separated):
+#   CUDA_SELECT_NVCC_ARCH_FLAGS(out_variable [target_CUDA_architectures])
+#   -- Selects GPU arch flags for nvcc based on target_CUDA_architectures
+#      target_CUDA_architectures : Auto | Common | All | LIST(ARCH_AND_PTX ...)
 #       - "Auto" detects local machine GPU compute arch at runtime.
-#       - "Common" and "All" cover common and entire subsets of GPU architectures
-#      The above three cannot be combined in a list, only those below can be:
-#       - Fermi Kepler Maxwell Kepler+Tegra Kepler+Tesla Maxwell+Tegra Pascal
-#       - 2.0 2.1(2.0) 3.0 3.2 3.5 3.7 5.0 5.2 5.3 6.0 6.2
-#      More information on CUDA architectures: https://en.wikipedia.org/wiki/CUDA
+#       - "Common" and "All" cover common and entire subsets of architectures
+#      ARCH_AND_PTX : NAME | NUM.NUM | NUM.NUM(NUM.NUM) | NUM.NUM+PTX
+#      NAME: Fermi Kepler Maxwell Kepler+Tegra Kepler+Tesla Maxwell+Tegra Pascal
+#      NUM: Any number. Only those pairs are currently accepted by NVCC though:
+#            2.0 2.1 3.0 3.2 3.5 3.7 5.0 5.2 5.3 6.0 6.2
+#      Returns LIST of flags to be added to CUDA_NVCC_FLAGS in ${out_variable}
+#      Additionally, sets ${out_variable}_readable to the resulting numeric list
+#      Example:
+#       CUDA_SELECT_NVCC_ARCH_FLAGS(ARCH_FLAGS 3.0 3.5+PTX 5.2(5.0) Maxwell)
+#        LIST(APPEND CUDA_NVCC_FLAGS ${ARCH_FLAGS})
+#
+#      More info on CUDA architectures: https://en.wikipedia.org/wiki/CUDA
 #      Note that this is a function instead of a macro.
 #
 #   CUDA_WRAP_SRCS ( cuda_target format generated_files file0 file1 ...
