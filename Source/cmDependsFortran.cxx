@@ -192,16 +192,16 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
       stamp += ".mod.stamp";
       fcStream << "\n";
       fcStream << "  \""
-               << this->LocalGenerator->Convert(mod_lower,
-                                                cmLocalGenerator::START_OUTPUT)
+               << this->LocalGenerator->Convert(
+                    mod_lower, cmOutputConverter::START_OUTPUT)
                << "\"\n";
       fcStream << "  \""
-               << this->LocalGenerator->Convert(mod_upper,
-                                                cmLocalGenerator::START_OUTPUT)
+               << this->LocalGenerator->Convert(
+                    mod_upper, cmOutputConverter::START_OUTPUT)
                << "\"\n";
       fcStream << "  \""
-               << this->LocalGenerator->Convert(stamp,
-                                                cmLocalGenerator::START_OUTPUT)
+               << this->LocalGenerator->Convert(
+                    stamp, cmOutputConverter::START_OUTPUT)
                << "\"\n";
     }
     fcStream << "  )\n";
@@ -317,17 +317,17 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
 
   // Write the include dependencies to the output stream.
   std::string obj_i =
-    this->LocalGenerator->Convert(obj, cmLocalGenerator::HOME_OUTPUT);
+    this->LocalGenerator->Convert(obj, cmOutputConverter::HOME_OUTPUT);
   std::string obj_m = this->LocalGenerator->ConvertToOutputFormat(
-    obj_i, cmLocalGenerator::MAKERULE);
+    obj_i, cmOutputConverter::MAKERULE);
   internalDepends << obj_i << std::endl;
   internalDepends << " " << src << std::endl;
   for (std::set<std::string>::const_iterator i = info.Includes.begin();
        i != info.Includes.end(); ++i) {
     makeDepends << obj_m << ": "
-                << this->LocalGenerator->Convert(*i,
-                                                 cmLocalGenerator::HOME_OUTPUT,
-                                                 cmLocalGenerator::MAKERULE)
+                << this->LocalGenerator->Convert(
+                     *i, cmOutputConverter::HOME_OUTPUT,
+                     cmOutputConverter::MAKERULE)
                 << std::endl;
     internalDepends << " " << *i << std::endl;
   }
@@ -354,7 +354,7 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
       proxy += *i;
       proxy += ".mod.proxy";
       proxy = this->LocalGenerator->Convert(
-        proxy, cmLocalGenerator::HOME_OUTPUT, cmLocalGenerator::MAKERULE);
+        proxy, cmOutputConverter::HOME_OUTPUT, cmOutputConverter::MAKERULE);
 
       // since we require some things add them to our list of requirements
       makeDepends << obj_m << ".requires: " << proxy << std::endl;
@@ -370,8 +370,8 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
     if (!required->second.empty()) {
       // This module is known.  Depend on its timestamp file.
       std::string stampFile = this->LocalGenerator->Convert(
-        required->second, cmLocalGenerator::HOME_OUTPUT,
-        cmLocalGenerator::MAKERULE);
+        required->second, cmOutputConverter::HOME_OUTPUT,
+        cmOutputConverter::MAKERULE);
       makeDepends << obj_m << ": " << stampFile << "\n";
     } else {
       // This module is not known to CMake.  Try to locate it where
@@ -379,7 +379,7 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
       std::string module;
       if (this->FindModule(*i, module)) {
         module = this->LocalGenerator->Convert(
-          module, cmLocalGenerator::HOME_OUTPUT, cmLocalGenerator::MAKERULE);
+          module, cmOutputConverter::HOME_OUTPUT, cmOutputConverter::MAKERULE);
         makeDepends << obj_m << ": " << module << "\n";
       }
     }
@@ -392,8 +392,8 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
     proxy += "/";
     proxy += *i;
     proxy += ".mod.proxy";
-    proxy = this->LocalGenerator->Convert(proxy, cmLocalGenerator::HOME_OUTPUT,
-                                          cmLocalGenerator::MAKERULE);
+    proxy = this->LocalGenerator->Convert(
+      proxy, cmOutputConverter::HOME_OUTPUT, cmOutputConverter::MAKERULE);
     makeDepends << proxy << ": " << obj_m << ".provides" << std::endl;
   }
 
@@ -415,13 +415,13 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
       modFile += "/";
       modFile += *i;
       modFile = this->LocalGenerator->Convert(
-        modFile, cmLocalGenerator::HOME_OUTPUT, cmLocalGenerator::SHELL);
+        modFile, cmOutputConverter::HOME_OUTPUT, cmOutputConverter::SHELL);
       std::string stampFile = stamp_dir;
       stampFile += "/";
       stampFile += m;
       stampFile += ".mod.stamp";
       stampFile = this->LocalGenerator->Convert(
-        stampFile, cmLocalGenerator::HOME_OUTPUT, cmLocalGenerator::SHELL);
+        stampFile, cmOutputConverter::HOME_OUTPUT, cmOutputConverter::SHELL);
       makeDepends << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod " << modFile
                   << " " << stampFile;
       cmMakefile* mf = this->LocalGenerator->GetMakefile();
@@ -441,7 +441,7 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
     std::string driver = this->TargetDirectory;
     driver += "/build";
     driver = this->LocalGenerator->Convert(
-      driver, cmLocalGenerator::HOME_OUTPUT, cmLocalGenerator::MAKERULE);
+      driver, cmOutputConverter::HOME_OUTPUT, cmOutputConverter::MAKERULE);
     makeDepends << driver << ": " << obj_m << ".provides.build\n";
   }
 

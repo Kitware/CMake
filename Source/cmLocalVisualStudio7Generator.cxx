@@ -269,7 +269,8 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   args += this->GetBinaryDirectory();
   commandLine.push_back(args);
   commandLine.push_back("--check-stamp-file");
-  std::string stampFilename = this->Convert(stampName.c_str(), FULL, SHELL);
+  std::string stampFilename = this->Convert(
+    stampName.c_str(), cmOutputConverter::FULL, cmOutputConverter::SHELL);
   commandLine.push_back(stampFilename.c_str());
 
   std::vector<std::string> const& listFiles = this->Makefile->GetListFiles();
@@ -277,8 +278,8 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   cmCustomCommandLines commandLines;
   commandLines.push_back(commandLine);
   const char* no_working_directory = 0;
-  std::string fullpathStampName =
-    this->Convert(stampName.c_str(), FULL, UNCHANGED);
+  std::string fullpathStampName = this->Convert(
+    stampName.c_str(), cmOutputConverter::FULL, cmOutputConverter::UNCHANGED);
   this->Makefile->AddCustomCommandToOutput(
     fullpathStampName.c_str(), listFiles, makefileIn.c_str(), commandLines,
     comment.c_str(), no_working_directory, true);
@@ -683,10 +684,10 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
 
   if (this->FortranProject) {
     switch (this->GetFortranFormat(target->GetProperty("Fortran_FORMAT"))) {
-      case FortranFormatFixed:
+      case cmOutputConverter::FortranFormatFixed:
         flags += " -fixed";
         break;
-      case FortranFormatFree:
+      case cmOutputConverter::FortranFormatFree:
         flags += " -free";
         break;
       default:
@@ -786,8 +787,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
       target->GetProperty("Fortran_MODULE_DIRECTORY");
     std::string modDir;
     if (target_mod_dir) {
-      modDir = this->Convert(target_mod_dir, cmLocalGenerator::START_OUTPUT,
-                             cmLocalGenerator::UNCHANGED);
+      modDir = this->Convert(target_mod_dir, cmOutputConverter::START_OUTPUT,
+                             cmOutputConverter::UNCHANGED);
     } else {
       modDir = ".";
     }
@@ -1006,8 +1007,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
 
   linkOptions.Parse(extraLinkOptions.c_str());
   if (!this->ModuleDefinitionFile.empty()) {
-    std::string defFile =
-      this->ConvertToOutputFormat(this->ModuleDefinitionFile, SHELL);
+    std::string defFile = this->ConvertToOutputFormat(
+      this->ModuleDefinitionFile, cmOutputConverter::SHELL);
     linkOptions.AddFlag("ModuleDefinitionFile", defFile.c_str());
   }
 
@@ -1298,8 +1299,8 @@ void cmLocalVisualStudio7GeneratorInternals::OutputLibraries(
   for (ItemVector::const_iterator l = libs.begin(); l != libs.end(); ++l) {
     if (l->IsPath) {
       std::string rel =
-        lg->Convert(l->Value.c_str(), cmLocalGenerator::START_OUTPUT,
-                    cmLocalGenerator::UNCHANGED);
+        lg->Convert(l->Value.c_str(), cmOutputConverter::START_OUTPUT,
+                    cmOutputConverter::UNCHANGED);
       fout << lg->ConvertToXMLOutputPath(rel.c_str()) << " ";
     } else if (!l->Target ||
                l->Target->GetType() != cmState::INTERFACE_LIBRARY) {
@@ -1319,8 +1320,8 @@ void cmLocalVisualStudio7GeneratorInternals::OutputObjects(
   const char* sep = isep ? isep : "";
   for (std::vector<std::string>::const_iterator oi = objs.begin();
        oi != objs.end(); ++oi) {
-    std::string rel = lg->Convert(oi->c_str(), cmLocalGenerator::START_OUTPUT,
-                                  cmLocalGenerator::UNCHANGED);
+    std::string rel = lg->Convert(oi->c_str(), cmOutputConverter::START_OUTPUT,
+                                  cmOutputConverter::UNCHANGED);
     fout << sep << lg->ConvertToXMLOutputPath(rel.c_str());
     sep = " ";
   }
@@ -1343,7 +1344,9 @@ void cmLocalVisualStudio7Generator::OutputLibraryDirectories(
 
     // Switch to a relative path specification if it is shorter.
     if (cmSystemTools::FileIsFullPath(dir.c_str())) {
-      std::string rel = this->Convert(dir.c_str(), START_OUTPUT, UNCHANGED);
+      std::string rel =
+        this->Convert(dir.c_str(), cmOutputConverter::START_OUTPUT,
+                      cmOutputConverter::UNCHANGED);
       if (rel.size() < dir.size()) {
         dir = rel;
       }
@@ -1472,11 +1475,11 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
     }
     if (lg->FortranProject) {
       switch (lg->GetFortranFormat(sf.GetProperty("Fortran_FORMAT"))) {
-        case cmLocalGenerator::FortranFormatFixed:
+        case cmOutputConverter::FortranFormatFixed:
           fc.CompileFlags = "-fixed " + fc.CompileFlags;
           needfc = true;
           break;
-        case cmLocalGenerator::FortranFormatFree:
+        case cmOutputConverter::FortranFormatFree:
           fc.CompileFlags = "-free " + fc.CompileFlags;
           needfc = true;
           break;
@@ -2042,7 +2045,8 @@ std::string cmLocalVisualStudio7Generator::EscapeForXML(const std::string& s)
 std::string cmLocalVisualStudio7Generator::ConvertToXMLOutputPath(
   const char* path)
 {
-  std::string ret = this->ConvertToOutputFormat(path, SHELL);
+  std::string ret =
+    this->ConvertToOutputFormat(path, cmOutputConverter::SHELL);
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
   cmSystemTools::ReplaceString(ret, "\"", "&quot;");
   cmSystemTools::ReplaceString(ret, "<", "&lt;");
@@ -2053,7 +2057,8 @@ std::string cmLocalVisualStudio7Generator::ConvertToXMLOutputPath(
 std::string cmLocalVisualStudio7Generator::ConvertToXMLOutputPathSingle(
   const char* path)
 {
-  std::string ret = this->ConvertToOutputFormat(path, SHELL);
+  std::string ret =
+    this->ConvertToOutputFormat(path, cmOutputConverter::SHELL);
   cmSystemTools::ReplaceString(ret, "\"", "");
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
   cmSystemTools::ReplaceString(ret, "<", "&lt;");

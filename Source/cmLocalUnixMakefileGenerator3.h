@@ -120,7 +120,7 @@ public:
   // create a command that cds to the start dir then runs the commands
   void CreateCDCommand(std::vector<std::string>& commands,
                        const char* targetDir,
-                       cmLocalGenerator::RelativeRoot returnDir);
+                       cmOutputConverter::RelativeRoot returnDir);
 
   static std::string ConvertToQuotedOutputPath(const char* p,
                                                bool useWatcomQuote);
@@ -230,11 +230,11 @@ protected:
   void AppendCustomCommands(
     std::vector<std::string>& commands,
     const std::vector<cmCustomCommand>& ccs, cmGeneratorTarget* target,
-    cmLocalGenerator::RelativeRoot relative = cmLocalGenerator::HOME_OUTPUT);
+    cmOutputConverter::RelativeRoot relative = cmOutputConverter::HOME_OUTPUT);
   void AppendCustomCommand(
     std::vector<std::string>& commands, cmCustomCommandGenerator const& ccg,
     cmGeneratorTarget* target, bool echo_comment = false,
-    cmLocalGenerator::RelativeRoot relative = cmLocalGenerator::HOME_OUTPUT,
+    cmOutputConverter::RelativeRoot relative = cmOutputConverter::HOME_OUTPUT,
     std::ostream* content = 0);
   void AppendCleanCommand(std::vector<std::string>& commands,
                           const std::vector<std::string>& files,
@@ -247,9 +247,11 @@ protected:
   void CheckMultipleOutputs(bool verbose);
 
 private:
-  std::string ConvertShellCommand(std::string const& cmd, RelativeRoot root);
+  std::string ConvertShellCommand(std::string const& cmd,
+                                  cmOutputConverter::RelativeRoot root);
   std::string MakeLauncher(cmCustomCommandGenerator const& ccg,
-                           cmGeneratorTarget* target, RelativeRoot relative);
+                           cmGeneratorTarget* target,
+                           cmOutputConverter::RelativeRoot relative);
 
   virtual void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,

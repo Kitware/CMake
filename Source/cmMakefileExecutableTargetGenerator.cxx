@@ -128,16 +128,16 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string targetFullPathPDB = pdbOutputPath + targetNamePDB;
   std::string targetFullPathImport = outpathImp + targetNameImport;
   std::string targetOutPathPDB = this->Convert(
-    targetFullPathPDB, cmLocalGenerator::NONE, cmLocalGenerator::SHELL);
+    targetFullPathPDB, cmOutputConverter::NONE, cmOutputConverter::SHELL);
   // Convert to the output path to use in constructing commands.
   std::string targetOutPath = this->Convert(
-    targetFullPath, cmLocalGenerator::START_OUTPUT, cmLocalGenerator::SHELL);
+    targetFullPath, cmOutputConverter::START_OUTPUT, cmOutputConverter::SHELL);
   std::string targetOutPathReal =
-    this->Convert(targetFullPathReal, cmLocalGenerator::START_OUTPUT,
-                  cmLocalGenerator::SHELL);
+    this->Convert(targetFullPathReal, cmOutputConverter::START_OUTPUT,
+                  cmOutputConverter::SHELL);
   std::string targetOutPathImport =
-    this->Convert(targetFullPathImport, cmLocalGenerator::START_OUTPUT,
-                  cmLocalGenerator::SHELL);
+    this->Convert(targetFullPathImport, cmOutputConverter::START_OUTPUT,
+                  cmOutputConverter::SHELL);
 
   // Get the language to use for linking this executable.
   std::string linkLanguage =
@@ -209,29 +209,30 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // may need to be cleaned.
   std::vector<std::string> exeCleanFiles;
   exeCleanFiles.push_back(this->Convert(targetFullPath,
-                                        cmLocalGenerator::START_OUTPUT,
-                                        cmLocalGenerator::UNCHANGED));
+                                        cmOutputConverter::START_OUTPUT,
+                                        cmOutputConverter::UNCHANGED));
 #ifdef _WIN32
   // There may be a manifest file for this target.  Add it to the
   // clean set just in case.
   exeCleanFiles.push_back(this->Convert((targetFullPath + ".manifest").c_str(),
-                                        cmLocalGenerator::START_OUTPUT,
-                                        cmLocalGenerator::UNCHANGED));
+                                        cmOutputConverter::START_OUTPUT,
+                                        cmOutputConverter::UNCHANGED));
 #endif
   if (targetNameReal != targetName) {
     exeCleanFiles.push_back(this->Convert(targetFullPathReal,
-                                          cmLocalGenerator::START_OUTPUT,
-                                          cmLocalGenerator::UNCHANGED));
+                                          cmOutputConverter::START_OUTPUT,
+                                          cmOutputConverter::UNCHANGED));
   }
   if (!targetNameImport.empty()) {
     exeCleanFiles.push_back(this->Convert(targetFullPathImport,
-                                          cmLocalGenerator::START_OUTPUT,
-                                          cmLocalGenerator::UNCHANGED));
+                                          cmOutputConverter::START_OUTPUT,
+                                          cmOutputConverter::UNCHANGED));
     std::string implib;
     if (this->GeneratorTarget->GetImplibGNUtoMS(targetFullPathImport,
                                                 implib)) {
-      exeCleanFiles.push_back(this->Convert(
-        implib, cmLocalGenerator::START_OUTPUT, cmLocalGenerator::UNCHANGED));
+      exeCleanFiles.push_back(this->Convert(implib,
+                                            cmOutputConverter::START_OUTPUT,
+                                            cmOutputConverter::UNCHANGED));
     }
   }
 
@@ -239,8 +240,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // cleaned.  We do not want to delete the .pdb file just before
   // linking the target.
   this->CleanFiles.push_back(this->Convert(targetFullPathPDB,
-                                           cmLocalGenerator::START_OUTPUT,
-                                           cmLocalGenerator::UNCHANGED));
+                                           cmOutputConverter::START_OUTPUT,
+                                           cmOutputConverter::UNCHANGED));
 
   // Add the pre-build and pre-link rules building but not when relinking.
   if (!relink) {
@@ -323,14 +324,14 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     vars.Language = linkLanguage.c_str();
     vars.Objects = buildObjs.c_str();
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
-    objectDir = this->Convert(objectDir, cmLocalGenerator::START_OUTPUT,
-                              cmLocalGenerator::SHELL);
+    objectDir = this->Convert(objectDir, cmOutputConverter::START_OUTPUT,
+                              cmOutputConverter::SHELL);
     vars.ObjectDir = objectDir.c_str();
-    cmLocalGenerator::OutputFormat output = (useWatcomQuote)
-      ? cmLocalGenerator::WATCOMQUOTE
-      : cmLocalGenerator::SHELL;
-    std::string target = this->Convert(targetFullPathReal,
-                                       cmLocalGenerator::START_OUTPUT, output);
+    cmOutputConverter::OutputFormat output = (useWatcomQuote)
+      ? cmOutputConverter::WATCOMQUOTE
+      : cmOutputConverter::SHELL;
+    std::string target = this->Convert(
+      targetFullPathReal, cmOutputConverter::START_OUTPUT, output);
     vars.Target = target.c_str();
     vars.TargetPDB = targetOutPathPDB.c_str();
 
@@ -380,7 +381,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   }
   this->LocalGenerator->CreateCDCommand(
     commands1, this->Makefile->GetCurrentBinaryDirectory(),
-    cmLocalGenerator::HOME_OUTPUT);
+    cmOutputConverter::HOME_OUTPUT);
   commands.insert(commands.end(), commands1.begin(), commands1.end());
   commands1.clear();
 
@@ -393,7 +394,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     commands1.push_back(symlink);
     this->LocalGenerator->CreateCDCommand(
       commands1, this->Makefile->GetCurrentBinaryDirectory(),
-      cmLocalGenerator::HOME_OUTPUT);
+      cmOutputConverter::HOME_OUTPUT);
     commands.insert(commands.end(), commands1.begin(), commands1.end());
     commands1.clear();
   }
