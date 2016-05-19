@@ -17,6 +17,7 @@
 
 class cmCPackIFWPackage;
 class cmCPackIFWGenerator;
+class cmCPackIFWRepository;
 class cmXMLWriter;
 
 /** \class cmCPackIFWInstaller
@@ -28,15 +29,7 @@ public:
   // Types
 
   typedef std::map<std::string, cmCPackIFWPackage*> PackagesMap;
-
-  struct RepositoryStruct
-  {
-    std::string Url;
-    std::string Enabled;
-    std::string Username;
-    std::string Password;
-    std::string DisplayName;
-  };
+  typedef std::vector<cmCPackIFWRepository*> RepositoriesVector;
 
 public:
   // Constructor
@@ -115,7 +108,7 @@ public:
 
   cmCPackIFWGenerator* Generator;
   PackagesMap Packages;
-  std::vector<RepositoryStruct> Repositories;
+  RepositoriesVector RemoteRepositories;
   std::string Directory;
 
 protected:

@@ -12,9 +12,6 @@
 
 #include "cmCPackIFWGenerator.h"
 
-#include "cmCPackIFWInstaller.h"
-#include "cmCPackIFWPackage.h"
-
 #include <CPack/cmCPackComponentGroup.h>
 #include <CPack/cmCPackLog.h>
 
@@ -72,7 +69,7 @@ int cmCPackIFWGenerator::PackageFiles()
   ifwTmpFile += "/IFWOutput.log";
 
   // Run repogen
-  if (!Installer.Repositories.empty()) {
+  if (!Installer.RemoteRepositories.empty()) {
     std::string ifwCmd = RepoGen;
 
     if (IsVersionLess("2.0.0")) {
@@ -117,6 +114,14 @@ int cmCPackIFWGenerator::PackageFiles()
                       << std::endl);
       return 0;
     }
+
+    if (!Repository.RepositoryUpdate.empty() &&
+        !Repository.PatchUpdatesXml()) {
+      cmCPackLogger(cmCPackLog::LOG_WARNING, "Problem patch IFW \"Updates\" "
+                      << "file: " << this->toplevel + "/repository/Updates.xml"
+                      << std::endl);
+    }
+
     cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- repository: "
                     << this->toplevel << "/repository generated" << std::endl);
   }
@@ -137,7 +142,7 @@ int cmCPackIFWGenerator::PackageFiles()
     if (OnlineOnly) {
       ifwCmd += " --online-only";
     } else if (!DownloadedPackages.empty() &&
-               !Installer.Repositories.empty()) {
+               !Installer.RemoteRepositories.empty()) {
       ifwCmd += " -e ";
       std::set<cmCPackIFWPackage*>::iterator it = DownloadedPackages.begin();
       ifwCmd += (*it)->Name;
@@ -272,6 +277,24 @@ int cmCPackIFWGenerator::InitializeInternal()
   Installer.Generator = this;
   Installer.ConfigureFromOptions();
 
+  // Repository
+  Repository.Generator = this;
+  Repository.Name = "Unspecified";
+  if (const char* site = this->GetOption("CPACK_DOWNLOAD_SITE")) {
+    Repository.Url = site;
+    Installer.RemoteRepositories.push_back(&Repository);
+  }
+
+  // Repositories
+  if (const char* RepoAllStr = this->GetOption("CPACK_IFW_REPOSITORIES_ALL")) {
+    std::vector<std::string> RepoAllVector;
+    cmSystemTools::ExpandListArgument(RepoAllStr, RepoAllVector);
+    for (std::vector<std::string>::iterator rit = RepoAllVector.begin();
+         rit != RepoAllVector.end(); ++rit) {
+      GetRepository(*rit);
+    }
+  }
+
   if (const char* ifwDownloadAll = this->GetOption("CPACK_IFW_DOWNLOAD_ALL")) {
     OnlineOnly = cmSystemTools::IsOn(ifwDownloadAll);
   } else if (const char* cpackDownloadAll =
@@ -281,7 +304,7 @@ int cmCPackIFWGenerator::InitializeInternal()
     OnlineOnly = false;
   }
 
-  if (!Installer.Repositories.empty() && RepoGen.empty()) {
+  if (!Installer.RemoteRepositories.empty() && RepoGen.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Cannot find QtIFW repository generator \"repogen\": "
                   "likely it is not installed, or not in your PATH"
@@ -505,6 +528,33 @@ cmCPackIFWPackage* cmCPackIFWGenerator::GetComponentPackage(
   std::map<cmCPackComponent*, cmCPackIFWPackage*>::const_iterator pit =
     ComponentPackages.find(component);
   return pit != ComponentPackages.end() ? pit->second : 0;
+}
+
+cmCPackIFWRepository* cmCPackIFWGenerator::GetRepository(
+  const std::string& repositoryName)
+{
+  RepositoriesMap::iterator rit = Repositories.find(repositoryName);
+  if (rit != Repositories.end())
+    return &(rit->second);
+
+  cmCPackIFWRepository* repository = &Repositories[repositoryName];
+  repository->Name = repositoryName;
+  repository->Generator = this;
+  if (repository->ConfigureFromOptions()) {
+    if (repository->Update == cmCPackIFWRepository::None) {
+      Installer.RemoteRepositories.push_back(repository);
+    } else {
+      Repository.RepositoryUpdate.push_back(repository);
+    }
+  } else {
+    Repositories.erase(repositoryName);
+    repository = 0;
+    cmCPackLogger(cmCPackLog::LOG_WARNING, "Invalid repository \""
+                    << repositoryName << "\""
+                    << " configuration. Repository will be skipped."
+                    << std::endl);
+  }
+  return repository;
 }
 
 void cmCPackIFWGenerator::WriteGeneratedByToStrim(cmXMLWriter& xout)

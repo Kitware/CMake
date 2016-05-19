@@ -159,57 +159,6 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
     AdminTargetDir = option;
   }
 
-  // Repositories
-  Repositories.clear();
-  RepositoryStruct Repo;
-  if (const char* site = this->GetOption("CPACK_DOWNLOAD_SITE")) {
-    Repo.Url = site;
-    Repositories.push_back(Repo);
-  }
-  if (const char* RepoAllStr = this->GetOption("CPACK_IFW_REPOSITORIES_ALL")) {
-    std::vector<std::string> RepoAllVector;
-    cmSystemTools::ExpandListArgument(RepoAllStr, RepoAllVector);
-    for (std::vector<std::string>::iterator rit = RepoAllVector.begin();
-         rit != RepoAllVector.end(); ++rit) {
-      std::string prefix =
-        "CPACK_IFW_REPOSITORY_" + cmsys::SystemTools::UpperCase(*rit) + "_";
-      // Url
-      if (const char* url = GetOption(prefix + "URL")) {
-        Repo.Url = url;
-      } else {
-        Repo.Url = "";
-      }
-      // Enabled
-      if (IsOn(prefix + "DISABLED")) {
-        Repo.Enabled = "0";
-      } else {
-        Repo.Enabled = "";
-      }
-      // Username
-      if (const char* username = GetOption(prefix + "USERNAME")) {
-        Repo.Username = username;
-      } else {
-        Repo.Username = "";
-      }
-      // Password
-      if (const char* password = GetOption(prefix + "PASSWORD")) {
-        Repo.Password = password;
-      } else {
-        Repo.Password = "";
-      }
-      // DisplayName
-      if (const char* displayName = GetOption(prefix + "DISPLAY_NAME")) {
-        Repo.DisplayName = displayName;
-      } else {
-        Repo.DisplayName = "";
-      }
-
-      if (!Repo.Url.empty()) {
-        Repositories.push_back(Repo);
-      }
-    }
-  }
-
   // Maintenance tool
   if (const char* optIFW_MAINTENANCE_TOOL =
         this->GetOption("CPACK_IFW_PACKAGE_MAINTENANCE_TOOL_NAME")) {
@@ -320,30 +269,11 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   }
 
   // Remote repositories
-  if (!Repositories.empty()) {
+  if (!RemoteRepositories.empty()) {
     xout.StartElement("RemoteRepositories");
-    for (std::vector<RepositoryStruct>::iterator rit = Repositories.begin();
-         rit != Repositories.end(); ++rit) {
-      xout.StartElement("Repository");
-      // Url
-      xout.Element("Url", rit->Url);
-      // Enabled
-      if (!rit->Enabled.empty()) {
-        xout.Element("Enabled", rit->Enabled);
-      }
-      // Username
-      if (!rit->Username.empty()) {
-        xout.Element("Username", rit->Username);
-      }
-      // Password
-      if (!rit->Password.empty()) {
-        xout.Element("Password", rit->Password);
-      }
-      // DisplayName
-      if (!rit->DisplayName.empty()) {
-        xout.Element("DisplayName", rit->DisplayName);
-      }
-      xout.EndElement();
+    for (RepositoriesVector::iterator rit = RemoteRepositories.begin();
+         rit != RemoteRepositories.end(); ++rit) {
+      (*rit)->WriteRepositoryConfig(xout);
     }
     xout.EndElement();
   }
