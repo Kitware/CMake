@@ -867,16 +867,11 @@ function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_p
   endif()
 
   if("${hash}" MATCHES "${_ep_hash_regex}")
-    string(CONCAT hash_check
-      "if(EXISTS \"${LOCAL}\")\n"
-      "  file(\"${CMAKE_MATCH_1}\" \"${LOCAL}\" hash_value)\n"
-      "  if(\"x\${hash_value}\" STREQUAL \"x${CMAKE_MATCH_2}\")\n"
-      "    return()\n"
-      "  endif()\n"
-      "endif()\n"
-      )
+    set(ALGO "${CMAKE_MATCH_1}")
+    set(EXPECT_VALUE "${CMAKE_MATCH_2}")
   else()
-    set(hash_check "")
+    set(ALGO "")
+    set(EXPECT_VALUE "")
   endif()
 
   set(TLS_VERIFY_CODE "")
@@ -904,40 +899,22 @@ function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_p
     set(TLS_CAINFO_CODE "set(CMAKE_TLS_CAINFO \"${tls_cainfo}\")")
   endif()
 
-  file(WRITE ${script_filename}
-"${hash_check}message(STATUS \"downloading...
-     src='${REMOTE}'
-     dst='${LOCAL}'
-     timeout='${TIMEOUT_MSG}'\")
-
-${TLS_VERIFY_CODE}
-${TLS_CAINFO_CODE}
-
-file(DOWNLOAD
-  \"${REMOTE}\"
-  \"${LOCAL}\"
-  ${SHOW_PROGRESS}
-  ${TIMEOUT_ARGS}
-  STATUS status
-  LOG log)
-
-list(GET status 0 status_code)
-list(GET status 1 status_string)
-
-if(NOT status_code EQUAL 0)
-  message(FATAL_ERROR \"error: downloading '${REMOTE}' failed
-  status_code: \${status_code}
-  status_string: \${status_string}
-  log: \${log}
-\")
-endif()
-
-message(STATUS \"downloading... done\")
-"
-)
-
+  # Used variables:
+  # * TLS_VERIFY_CODE
+  # * TLS_CAINFO_CODE
+  # * ALGO
+  # * EXPECT_VALUE
+  # * REMOTE
+  # * LOCAL
+  # * SHOW_PROGRESS
+  # * TIMEOUT_ARGS
+  # * TIMEOUT_MSG
+  configure_file(
+      "${_ExternalProject_SELF_DIR}/ExternalProject-download.cmake.in"
+      "${script_filename}"
+      @ONLY
+  )
 endfunction()
-
 
 function(_ep_write_verifyfile_script script_filename LOCAL hash)
   if("${hash}" MATCHES "${_ep_hash_regex}")
