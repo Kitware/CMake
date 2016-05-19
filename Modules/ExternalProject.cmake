@@ -377,6 +377,7 @@ file::
 
 #=============================================================================
 # Copyright 2008-2013 Kitware, Inc.
+# Copyright 2016 Ruslan Baratov
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -417,6 +418,9 @@ endif()
 # Save regex matching supported hash algorithm names.
 set(_ep_hash_algos "MD5|SHA1|SHA224|SHA256|SHA384|SHA512")
 set(_ep_hash_regex "^(${_ep_hash_algos})=([0-9A-Fa-f]+)$")
+
+set(_ExternalProject_SELF "${CMAKE_CURRENT_LIST_FILE}")
+get_filename_component(_ExternalProject_SELF_DIR "${_ExternalProject_SELF}" PATH)
 
 function(_ep_parse_arguments f name ns args)
   # Transfer the arguments to this function into target properties for the
@@ -937,33 +941,22 @@ endfunction()
 
 function(_ep_write_verifyfile_script script_filename LOCAL hash)
   if("${hash}" MATCHES "${_ep_hash_regex}")
-    set(algo "${CMAKE_MATCH_1}")
-    string(TOLOWER "${CMAKE_MATCH_2}" expect_value)
-    set(script_content "set(expect_value \"${expect_value}\")
-set(succeeded 0)
-  file(${algo} \"\${file}\" actual_value)
-  if(\"\${actual_value}\" STREQUAL \"\${expect_value}\")
-    set(succeeded 1)
+    set(ALGO "${CMAKE_MATCH_1}")
+    string(TOLOWER "${CMAKE_MATCH_2}" EXPECT_VALUE)
+  else()
+    set(ALGO "")
+    set(EXPECT_VALUE "")
   endif()
 
-if(\${succeeded})
-  message(STATUS \"verifying file... done\")
-else()
-  message(FATAL_ERROR \"error: ${algo} hash of
-  \${file}
-does not match expected value
-  expected: \${expect_value}
-    actual: \${actual_value}
-\")
-endif()")
-  else()
-    set(script_content "message(STATUS \"verifying file... warning: did not verify file - no URL_HASH specified?\")")
-  endif()
-  file(WRITE ${script_filename} "set(file \"${LOCAL}\")
-message(STATUS \"verifying file...
-     file='\${file}'\")
-${script_content}
-")
+  # Used variables:
+  # * ALGO
+  # * EXPECT_VALUE
+  # * LOCAL
+  configure_file(
+      "${_ExternalProject_SELF_DIR}/ExternalProject-verify.cmake.in"
+      "${script_filename}"
+      @ONLY
+  )
 endfunction()
 
 
