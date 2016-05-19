@@ -652,7 +652,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
         cmNinjaDeps(1, targetOutputReal), emptyDeps, emptyDeps, symlinkVars);
     } else {
       cmNinjaDeps symlinks;
-      const std::string soName = this->GetTargetFilePath(this->TargetNameSO);
+      std::string const soName =
+        this->ConvertToNinjaPath(this->GetTargetFilePath(this->TargetNameSO));
       // If one link has to be created.
       if (targetOutputReal == soName || targetOutput == soName) {
         symlinkVars["SONAME"] = soName;

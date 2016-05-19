@@ -521,8 +521,10 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   std::string const language = source->GetLanguage();
   std::string const sourceFileName =
     language == "RC" ? source->GetFullPath() : this->GetSourceFilePath(source);
-  std::string const objectDir = this->GeneratorTarget->GetSupportDirectory();
-  std::string const objectFileName = this->GetObjectFilePath(source);
+  std::string const objectDir =
+    this->ConvertToNinjaPath(this->GeneratorTarget->GetSupportDirectory());
+  std::string const objectFileName =
+    this->ConvertToNinjaPath(this->GetObjectFilePath(source));
   std::string const objectFileDir =
     cmSystemTools::GetFilenamePath(objectFileName);
 
@@ -582,9 +584,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   EnsureParentDirectoryExists(objectFileName);
 
   vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-    ConvertToNinjaPath(objectDir), cmLocalGenerator::SHELL);
+    objectDir, cmLocalGenerator::SHELL);
   vars["OBJECT_FILE_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-    ConvertToNinjaPath(objectFileDir), cmLocalGenerator::SHELL);
+    objectFileDir, cmLocalGenerator::SHELL);
 
   this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
                              vars);
@@ -667,10 +669,12 @@ void cmNinjaTargetGenerator::EnsureDirectoryExists(
   if (cmSystemTools::FileIsFullPath(path.c_str())) {
     cmSystemTools::MakeDirectory(path.c_str());
   } else {
-    const std::string fullPath = std::string(this->GetGlobalGenerator()
-                                               ->GetCMakeInstance()
-                                               ->GetHomeOutputDirectory()) +
-      "/" + path;
+    cmGlobalNinjaGenerator* gg = this->GetGlobalGenerator();
+    std::string fullPath =
+      std::string(gg->GetCMakeInstance()->GetHomeOutputDirectory());
+    // Also ensures their is a trailing slash.
+    gg->StripNinjaOutputPathPrefixAsSuffix(fullPath);
+    fullPath += path;
     cmSystemTools::MakeDirectory(fullPath.c_str());
   }
 }
