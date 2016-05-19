@@ -847,25 +847,25 @@ endif()
 
 endfunction(_ep_write_gitupdate_script)
 
-function(_ep_write_downloadfile_script script_filename remote local timeout no_progress hash tls_verify tls_cainfo)
+function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_progress hash tls_verify tls_cainfo)
   if(timeout)
-    set(timeout_args TIMEOUT ${timeout})
-    set(timeout_msg "${timeout} seconds")
+    set(TIMEOUT_ARGS TIMEOUT ${timeout})
+    set(TIMEOUT_MSG "${timeout} seconds")
   else()
-    set(timeout_args "# no TIMEOUT")
-    set(timeout_msg "none")
+    set(TIMEOUT_ARGS "# no TIMEOUT")
+    set(TIMEOUT_MSG "none")
   endif()
 
   if(no_progress)
-    set(show_progress "")
+    set(SHOW_PROGRESS "")
   else()
-    set(show_progress "SHOW_PROGRESS")
+    set(SHOW_PROGRESS "SHOW_PROGRESS")
   endif()
 
   if("${hash}" MATCHES "${_ep_hash_regex}")
     string(CONCAT hash_check
-      "if(EXISTS \"${local}\")\n"
-      "  file(\"${CMAKE_MATCH_1}\" \"${local}\" hash_value)\n"
+      "if(EXISTS \"${LOCAL}\")\n"
+      "  file(\"${CMAKE_MATCH_1}\" \"${LOCAL}\" hash_value)\n"
       "  if(\"x\${hash_value}\" STREQUAL \"x${CMAKE_MATCH_2}\")\n"
       "    return()\n"
       "  endif()\n"
@@ -875,15 +875,15 @@ function(_ep_write_downloadfile_script script_filename remote local timeout no_p
     set(hash_check "")
   endif()
 
-  set(tls_verify_code "")
-  set(tls_cainfo_code "")
+  set(TLS_VERIFY_CODE "")
+  set(TLS_CAINFO_CODE "")
 
   # check for curl globals in the project
   if(DEFINED CMAKE_TLS_VERIFY)
-    set(tls_verify_code "set(CMAKE_TLS_VERIFY ${CMAKE_TLS_VERIFY})")
+    set(TLS_VERIFY_CODE "set(CMAKE_TLS_VERIFY ${CMAKE_TLS_VERIFY})")
   endif()
   if(DEFINED CMAKE_TLS_CAINFO)
-    set(tls_cainfo_code "set(CMAKE_TLS_CAINFO \"${CMAKE_TLS_CAINFO}\")")
+    set(TLS_CAINFO_CODE "set(CMAKE_TLS_CAINFO \"${CMAKE_TLS_CAINFO}\")")
   endif()
 
   # now check for curl locals so that the local values
@@ -892,28 +892,28 @@ function(_ep_write_downloadfile_script script_filename remote local timeout no_p
   # check for tls_verify argument
   string(LENGTH "${tls_verify}" tls_verify_len)
   if(tls_verify_len GREATER 0)
-    set(tls_verify_code "set(CMAKE_TLS_VERIFY ${tls_verify})")
+    set(TLS_VERIFY_CODE "set(CMAKE_TLS_VERIFY ${tls_verify})")
   endif()
   # check for tls_cainfo argument
   string(LENGTH "${tls_cainfo}" tls_cainfo_len)
   if(tls_cainfo_len GREATER 0)
-    set(tls_cainfo_code "set(CMAKE_TLS_CAINFO \"${tls_cainfo}\")")
+    set(TLS_CAINFO_CODE "set(CMAKE_TLS_CAINFO \"${tls_cainfo}\")")
   endif()
 
   file(WRITE ${script_filename}
 "${hash_check}message(STATUS \"downloading...
-     src='${remote}'
-     dst='${local}'
-     timeout='${timeout_msg}'\")
+     src='${REMOTE}'
+     dst='${LOCAL}'
+     timeout='${TIMEOUT_MSG}'\")
 
-${tls_verify_code}
-${tls_cainfo_code}
+${TLS_VERIFY_CODE}
+${TLS_CAINFO_CODE}
 
 file(DOWNLOAD
-  \"${remote}\"
-  \"${local}\"
-  ${show_progress}
-  ${timeout_args}
+  \"${REMOTE}\"
+  \"${LOCAL}\"
+  ${SHOW_PROGRESS}
+  ${TIMEOUT_ARGS}
   STATUS status
   LOG log)
 
@@ -921,7 +921,7 @@ list(GET status 0 status_code)
 list(GET status 1 status_string)
 
 if(NOT status_code EQUAL 0)
-  message(FATAL_ERROR \"error: downloading '${remote}' failed
+  message(FATAL_ERROR \"error: downloading '${REMOTE}' failed
   status_code: \${status_code}
   status_string: \${status_string}
   log: \${log}
@@ -935,7 +935,7 @@ message(STATUS \"downloading... done\")
 endfunction()
 
 
-function(_ep_write_verifyfile_script script_filename local hash retries download_script)
+function(_ep_write_verifyfile_script script_filename LOCAL hash retries download_script)
   if("${hash}" MATCHES "${_ep_hash_regex}")
     set(algo "${CMAKE_MATCH_1}")
     string(TOLOWER "${CMAKE_MATCH_2}" expect_value)
@@ -972,7 +972,7 @@ endif()")
   else()
     set(script_content "message(STATUS \"verifying file... warning: did not verify file - no URL_HASH specified?\")")
   endif()
-  file(WRITE ${script_filename} "set(file \"${local}\")
+  file(WRITE ${script_filename} "set(file \"${LOCAL}\")
 message(STATUS \"verifying file...
      file='\${file}'\")
 ${script_content}
