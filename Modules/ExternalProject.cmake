@@ -935,30 +935,16 @@ message(STATUS \"downloading... done\")
 endfunction()
 
 
-function(_ep_write_verifyfile_script script_filename LOCAL hash download_script)
-  set(retries 0)
+function(_ep_write_verifyfile_script script_filename LOCAL hash)
   if("${hash}" MATCHES "${_ep_hash_regex}")
     set(algo "${CMAKE_MATCH_1}")
     string(TOLOWER "${CMAKE_MATCH_2}" expect_value)
     set(script_content "set(expect_value \"${expect_value}\")
-set(attempt 0)
 set(succeeded 0)
-while(\${attempt} LESS ${retries} OR \${attempt} EQUAL ${retries} AND NOT \${succeeded})
   file(${algo} \"\${file}\" actual_value)
   if(\"\${actual_value}\" STREQUAL \"\${expect_value}\")
     set(succeeded 1)
-  elseif(\${attempt} LESS ${retries})
-    message(STATUS \"${algo} hash of \${file}
-does not match expected value
-  expected: \${expect_value}
-    actual: \${actual_value}
-Retrying download.
-\")
-    file(REMOVE \"\${file}\")
-    execute_process(COMMAND \${CMAKE_COMMAND} -P \"${download_script}\")
   endif()
-  math(EXPR attempt \"\${attempt} + 1\")
-endwhile()
 
 if(\${succeeded})
   message(STATUS \"verifying file... done\")
@@ -1899,7 +1885,6 @@ function(_ep_add_download_command name)
     set(repository "external project URL")
     set(module "${url}")
     set(tag "${hash}")
-    set(download_script "")
     configure_file(
       "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-urlinfo.txt"
@@ -1952,7 +1937,7 @@ function(_ep_add_download_command name)
         endif ()
         set(comment "Performing download step (${steps}) for '${name}'")
       endif()
-      _ep_write_verifyfile_script("${stamp_dir}/verify-${name}.cmake" "${file}" "${hash}" "${download_script}")
+      _ep_write_verifyfile_script("${stamp_dir}/verify-${name}.cmake" "${file}" "${hash}")
       list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/verify-${name}.cmake
         COMMAND)
       if (NOT no_extract)
