@@ -377,6 +377,7 @@ file::
 
 #=============================================================================
 # Copyright 2008-2013 Kitware, Inc.
+# Copyright 2016 Ruslan Baratov
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -417,6 +418,9 @@ endif()
 # Save regex matching supported hash algorithm names.
 set(_ep_hash_algos "MD5|SHA1|SHA224|SHA256|SHA384|SHA512")
 set(_ep_hash_regex "^(${_ep_hash_algos})=([0-9A-Fa-f]+)$")
+
+set(_ExternalProject_SELF "${CMAKE_CURRENT_LIST_FILE}")
+get_filename_component(_ExternalProject_SELF_DIR "${_ExternalProject_SELF}" PATH)
 
 function(_ep_parse_arguments f name ns args)
   # Transfer the arguments to this function into target properties for the
@@ -847,43 +851,38 @@ endif()
 
 endfunction(_ep_write_gitupdate_script)
 
-function(_ep_write_downloadfile_script script_filename remote local timeout no_progress hash tls_verify tls_cainfo)
+function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_progress hash tls_verify tls_cainfo)
   if(timeout)
-    set(timeout_args TIMEOUT ${timeout})
-    set(timeout_msg "${timeout} seconds")
+    set(TIMEOUT_ARGS TIMEOUT ${timeout})
+    set(TIMEOUT_MSG "${timeout} seconds")
   else()
-    set(timeout_args "# no TIMEOUT")
-    set(timeout_msg "none")
+    set(TIMEOUT_ARGS "# no TIMEOUT")
+    set(TIMEOUT_MSG "none")
   endif()
 
   if(no_progress)
-    set(show_progress "")
+    set(SHOW_PROGRESS "")
   else()
-    set(show_progress "SHOW_PROGRESS")
+    set(SHOW_PROGRESS "SHOW_PROGRESS")
   endif()
 
   if("${hash}" MATCHES "${_ep_hash_regex}")
-    string(CONCAT hash_check
-      "if(EXISTS \"${local}\")\n"
-      "  file(\"${CMAKE_MATCH_1}\" \"${local}\" hash_value)\n"
-      "  if(\"x\${hash_value}\" STREQUAL \"x${CMAKE_MATCH_2}\")\n"
-      "    return()\n"
-      "  endif()\n"
-      "endif()\n"
-      )
+    set(ALGO "${CMAKE_MATCH_1}")
+    set(EXPECT_VALUE "${CMAKE_MATCH_2}")
   else()
-    set(hash_check "")
+    set(ALGO "")
+    set(EXPECT_VALUE "")
   endif()
 
-  set(tls_verify_code "")
-  set(tls_cainfo_code "")
+  set(TLS_VERIFY_CODE "")
+  set(TLS_CAINFO_CODE "")
 
   # check for curl globals in the project
   if(DEFINED CMAKE_TLS_VERIFY)
-    set(tls_verify_code "set(CMAKE_TLS_VERIFY ${CMAKE_TLS_VERIFY})")
+    set(TLS_VERIFY_CODE "set(CMAKE_TLS_VERIFY ${CMAKE_TLS_VERIFY})")
   endif()
   if(DEFINED CMAKE_TLS_CAINFO)
-    set(tls_cainfo_code "set(CMAKE_TLS_CAINFO \"${CMAKE_TLS_CAINFO}\")")
+    set(TLS_CAINFO_CODE "set(CMAKE_TLS_CAINFO \"${CMAKE_TLS_CAINFO}\")")
   endif()
 
   # now check for curl locals so that the local values
@@ -892,91 +891,49 @@ function(_ep_write_downloadfile_script script_filename remote local timeout no_p
   # check for tls_verify argument
   string(LENGTH "${tls_verify}" tls_verify_len)
   if(tls_verify_len GREATER 0)
-    set(tls_verify_code "set(CMAKE_TLS_VERIFY ${tls_verify})")
+    set(TLS_VERIFY_CODE "set(CMAKE_TLS_VERIFY ${tls_verify})")
   endif()
   # check for tls_cainfo argument
   string(LENGTH "${tls_cainfo}" tls_cainfo_len)
   if(tls_cainfo_len GREATER 0)
-    set(tls_cainfo_code "set(CMAKE_TLS_CAINFO \"${tls_cainfo}\")")
+    set(TLS_CAINFO_CODE "set(CMAKE_TLS_CAINFO \"${tls_cainfo}\")")
   endif()
 
-  file(WRITE ${script_filename}
-"${hash_check}message(STATUS \"downloading...
-     src='${remote}'
-     dst='${local}'
-     timeout='${timeout_msg}'\")
-
-${tls_verify_code}
-${tls_cainfo_code}
-
-file(DOWNLOAD
-  \"${remote}\"
-  \"${local}\"
-  ${show_progress}
-  ${timeout_args}
-  STATUS status
-  LOG log)
-
-list(GET status 0 status_code)
-list(GET status 1 status_string)
-
-if(NOT status_code EQUAL 0)
-  message(FATAL_ERROR \"error: downloading '${remote}' failed
-  status_code: \${status_code}
-  status_string: \${status_string}
-  log: \${log}
-\")
-endif()
-
-message(STATUS \"downloading... done\")
-"
-)
-
+  # Used variables:
+  # * TLS_VERIFY_CODE
+  # * TLS_CAINFO_CODE
+  # * ALGO
+  # * EXPECT_VALUE
+  # * REMOTE
+  # * LOCAL
+  # * SHOW_PROGRESS
+  # * TIMEOUT_ARGS
+  # * TIMEOUT_MSG
+  configure_file(
+      "${_ExternalProject_SELF_DIR}/ExternalProject-download.cmake.in"
+      "${script_filename}"
+      @ONLY
+  )
 endfunction()
 
-
-function(_ep_write_verifyfile_script script_filename local hash retries download_script)
+function(_ep_write_verifyfile_script script_filename LOCAL hash)
   if("${hash}" MATCHES "${_ep_hash_regex}")
-    set(algo "${CMAKE_MATCH_1}")
-    string(TOLOWER "${CMAKE_MATCH_2}" expect_value)
-    set(script_content "set(expect_value \"${expect_value}\")
-set(attempt 0)
-set(succeeded 0)
-while(\${attempt} LESS ${retries} OR \${attempt} EQUAL ${retries} AND NOT \${succeeded})
-  file(${algo} \"\${file}\" actual_value)
-  if(\"\${actual_value}\" STREQUAL \"\${expect_value}\")
-    set(succeeded 1)
-  elseif(\${attempt} LESS ${retries})
-    message(STATUS \"${algo} hash of \${file}
-does not match expected value
-  expected: \${expect_value}
-    actual: \${actual_value}
-Retrying download.
-\")
-    file(REMOVE \"\${file}\")
-    execute_process(COMMAND \${CMAKE_COMMAND} -P \"${download_script}\")
-  endif()
-  math(EXPR attempt \"\${attempt} + 1\")
-endwhile()
-
-if(\${succeeded})
-  message(STATUS \"verifying file... done\")
-else()
-  message(FATAL_ERROR \"error: ${algo} hash of
-  \${file}
-does not match expected value
-  expected: \${expect_value}
-    actual: \${actual_value}
-\")
-endif()")
+    set(ALGO "${CMAKE_MATCH_1}")
+    string(TOLOWER "${CMAKE_MATCH_2}" EXPECT_VALUE)
   else()
-    set(script_content "message(STATUS \"verifying file... warning: did not verify file - no URL_HASH specified?\")")
+    set(ALGO "")
+    set(EXPECT_VALUE "")
   endif()
-  file(WRITE ${script_filename} "set(file \"${local}\")
-message(STATUS \"verifying file...
-     file='\${file}'\")
-${script_content}
-")
+
+  # Used variables:
+  # * ALGO
+  # * EXPECT_VALUE
+  # * LOCAL
+  configure_file(
+      "${_ExternalProject_SELF_DIR}/ExternalProject-verify.cmake.in"
+      "${script_filename}"
+      @ONLY
+  )
 endfunction()
 
 
@@ -1898,8 +1855,6 @@ function(_ep_add_download_command name)
     set(repository "external project URL")
     set(module "${url}")
     set(tag "${hash}")
-    set(retries 0)
-    set(download_script "")
     configure_file(
       "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-urlinfo.txt"
@@ -1937,13 +1892,13 @@ function(_ep_add_download_command name)
         _ep_write_downloadfile_script("${download_script}" "${url}" "${file}" "${timeout}" "${no_progress}" "${hash}" "${tls_verify}" "${tls_cainfo}")
         set(cmd ${CMAKE_COMMAND} -P "${download_script}"
           COMMAND)
-        set(retries 3)
         if (no_extract)
           set(steps "download and verify")
         else ()
           set(steps "download, verify and extract")
         endif ()
         set(comment "Performing download step (${steps}) for '${name}'")
+        file(WRITE "${stamp_dir}/verify-${name}.cmake" "") # already verified by 'download_script'
       else()
         set(file "${url}")
         if (no_extract)
@@ -1952,8 +1907,8 @@ function(_ep_add_download_command name)
           set(steps "verify and extract")
         endif ()
         set(comment "Performing download step (${steps}) for '${name}'")
+        _ep_write_verifyfile_script("${stamp_dir}/verify-${name}.cmake" "${file}" "${hash}")
       endif()
-      _ep_write_verifyfile_script("${stamp_dir}/verify-${name}.cmake" "${file}" "${hash}" "${retries}" "${download_script}")
       list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/verify-${name}.cmake
         COMMAND)
       if (NOT no_extract)
