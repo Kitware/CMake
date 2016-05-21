@@ -2021,6 +2021,8 @@ function(_ep_add_update_command name)
       --non-interactive ${svn_trust_cert_args} ${svn_user_pw_args})
     set(always 1)
   elseif(git_repository)
+    unset(CMAKE_MODULE_PATH) # Use CMake builtin find module
+    find_package(Git QUIET)
     if(NOT GIT_EXECUTABLE)
       message(FATAL_ERROR "error: could not find git for fetch of ${name}")
     endif()
