@@ -146,6 +146,7 @@ void cmCPackIFWPackage::DefaultConfiguration()
   Licenses.clear();
   SortingPriority = "";
   Default = "";
+  Essential = "";
   Virtual = "";
   ForcedInstallation = "";
 }
@@ -266,6 +267,11 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
 
   // Default
   Default = component->IsDisabledByDefault ? "false" : "true";
+
+  // Essential
+  if (this->IsOn(prefix + "ESSENTIAL")) {
+    Essential = "true";
+  }
 
   // Virtual
   Virtual = component->IsHidden ? "true" : "";
@@ -450,6 +456,11 @@ void cmCPackIFWPackage::GeneratePackageFile()
     xout.Element("Virtual", Virtual);
   } else if (!Default.empty()) {
     xout.Element("Default", Default);
+  }
+
+  // Essential
+  if (!Essential.empty()) {
+    xout.Element("Essential", Essential);
   }
 
   // Priority

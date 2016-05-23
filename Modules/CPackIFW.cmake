@@ -189,7 +189,7 @@
 #
 # ::
 #
-#   cpack_ifw_configure_component(<compname> [COMMON]
+#   cpack_ifw_configure_component(<compname> [COMMON] [ESSENTIAL]
 #                       [NAME <name>]
 #                       [VERSION <version>]
 #                       [SCRIPT <script>]
@@ -201,6 +201,9 @@
 #
 # ``COMMON`` if set, then the component will be packaged and installed as part
 # of a group to which it belongs.
+#
+# ``ESSENTIAL`` if set, then the package manager stays disabled until that
+# component is updated.
 #
 # ``NAME`` is used to create domain-like identification for this component.
 # By default used origin component name.
@@ -545,7 +548,7 @@ macro(cpack_ifw_configure_component compname)
 
   string(TOUPPER ${compname} _CPACK_IFWCOMP_UNAME)
 
-  set(_IFW_OPT COMMON)
+  set(_IFW_OPT COMMON ESSENTIAL)
   set(_IFW_ARGS NAME VERSION SCRIPT PRIORITY)
   set(_IFW_MULTI_ARGS DEPENDS LICENSES)
   cmake_parse_arguments(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME} "${_IFW_OPT}" "${_IFW_ARGS}" "${_IFW_MULTI_ARGS}" ${ARGN})
