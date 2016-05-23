@@ -13,6 +13,18 @@
 #include "cmServer.h"
 
 #include "cmServerProtocol.h"
+#include <cmsys/Encoding.hxx>
+#include <cmsys/FStream.hxx>
+
+#ifndef _WIN32
+#include <unistd.h>
+#define CM_O_CREAT O_CREAT
+#define CM_O_RDWR O_RDWR
+#else
+#include <fcntl.h>
+#define CM_O_CREAT _O_CREAT
+#define CM_O_RDWR _O_RDWR
+#endif
 
 #include "cmVersionMacros.h"
 
@@ -45,6 +57,12 @@ void on_stdout_write(uv_write_t* req, int status)
   auto server = reinterpret_cast<cmMetadataServer*>(req->data);
   free_write_req(req);
   server->PopOne();
+}
+
+void on_logfile_write(uv_write_t* req, int status)
+{
+  (void)req;
+  (void)status;
 }
 
 void write_data(uv_stream_t* dest, std::string content, uv_write_cb cb)
@@ -109,6 +127,17 @@ void cmMetadataServer::PopOne()
   if (mQueue.empty()) {
     return;
   }
+
+  auto fname = mBuildDir + "/cmake-daemon-" + std::to_string(getpid());
+
+  uv_fs_t file_req;
+  int fd = uv_fs_open(mLoop, &file_req, fname.c_str(), O_RDWR, 0644, NULL);
+  uv_pipe_open(&mLogFile_pipe, fd);
+
+  auto request = mQueue.front();
+  request = "<<< " + request;
+  write_data((uv_stream_t*)&mLogFile_pipe, request, on_logfile_write);
+
   this->Protocol->processRequest(mQueue.front());
   mQueue.erase(mQueue.begin());
 }
@@ -151,6 +180,17 @@ void cmMetadataServer::handleData(const std::string& data)
 
 void cmMetadataServer::ServeMetadata(const std::string& buildDir)
 {
+  auto fname = buildDir + "/cmake-daemon-" + std::to_string(getpid());
+
+  uv_fs_t file_req;
+  int fd = uv_fs_open(mLoop, &file_req, fname.c_str(), CM_O_CREAT | CM_O_RDWR,
+                      0644, NULL);
+  uv_pipe_init(mLoop, &mLogFile_pipe, 0);
+  uv_pipe_open(&mLogFile_pipe, fd);
+
+  write_data((uv_stream_t*)&mLogFile_pipe, "Log file\n", on_logfile_write);
+
+  mBuildDir = buildDir;
   this->State = Started;
 
   Json::Value obj = Json::objectValue;
@@ -171,9 +211,21 @@ void cmMetadataServer::ServeMetadata(const std::string& buildDir)
 void cmMetadataServer::WriteResponse(const Json::Value& jsonValue)
 {
   Json::FastWriter writer;
+  auto decoded = writer.write(jsonValue);
+
+  auto fname = mBuildDir + "/cmake-daemon-" + std::to_string(getpid());
+
+  uv_fs_t file_req;
+  int fd = uv_fs_open(mLoop, &file_req, fname.c_str(), O_RDWR, 0644, NULL);
+  uv_pipe_open(&mLogFile_pipe, fd);
+
+  auto response = decoded;
+  response = ">>> " + response;
+
+  write_data((uv_stream_t*)&mLogFile_pipe, response, on_logfile_write);
 
   std::string result = "\n[== CMake MetaMagic ==[\n";
-  result += writer.write(jsonValue);
+  result += decoded;
   result += "]== CMake MetaMagic ==]\n";
 
   this->Writing = true;

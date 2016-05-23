@@ -51,6 +51,7 @@ public:
 
 private:
   cmServerProtocol* Protocol;
+  std::string mBuildDir;
   std::vector<std::string> mQueue;
 
   std::string mDataBuffer;
@@ -61,6 +62,7 @@ private:
   uv_pipe_t mStdout_pipe;
   uv_tty_t mStdin_tty;
   uv_tty_t mStdout_tty;
+  uv_pipe_t mLogFile_pipe;
 
   ServerState State;
   bool Writing;
