@@ -17,7 +17,34 @@
 
 usage='usage: clang-format.bash [<options>] [--]
 
-    --clang-format <tool>              Use given clang-format tool.
+    --help                     Print usage plus more detailed help.
+
+    --clang-format <tool>      Use given clang-format tool.
+
+    --amend                    Filter files changed by HEAD.
+    --cached                   Filter files locally staged for commit.
+    --modified                 Filter files locally modified from HEAD.
+    --tracked                  Filter files tracked by Git.
+'
+
+help="$usage"'
+Example to format locally modified files:
+
+    Utilities/Scripts/clang-format.bash --modified
+
+Example to format locally modified files staged for commit:
+
+    Utilities/Scripts/clang-format.bash --cached
+
+Example to format the current topic:
+
+    git filter-branch \
+      --tree-filter "Utilities/Scripts/clang-format.bash --amend" \
+      master..
+
+Example to format all files:
+
+    Utilities/Scripts/clang-format.bash --tracked
 '
 
 die() {
@@ -28,9 +55,15 @@ die() {
 
 # Parse command-line arguments.
 clang_format=''
+mode=''
 while test "$#" != 0; do
     case "$1" in
+    --amend) mode="amend" ;;
+    --cached) mode="cached" ;;
     --clang-format) shift; clang_format="$1" ;;
+    --help) echo "$help"; exit 0 ;;
+    --modified) mode="modified" ;;
+    --tracked) mode="tracked" ;;
     --) shift ; break ;;
     -*) die "$usage" ;;
     *) break ;;
@@ -59,8 +92,18 @@ if ! type -p "$clang_format" >/dev/null; then
     exit 1
 fi
 
+# Select listing mode.
+case "$mode" in
+    '')       echo "$usage"; exit 0 ;;
+    amend)    git_ls='git diff-tree  --diff-filter=AM --name-only HEAD -r --no-commit-id' ;;
+    cached)   git_ls='git diff-index --diff-filter=AM --name-only HEAD --cached' ;;
+    modified) git_ls='git diff-index --diff-filter=AM --name-only HEAD' ;;
+    tracked)  git_ls='git ls-files' ;;
+    *) die "invalid mode: $mode" ;;
+esac
+
 # Filter sources to which our style should apply.
-git ls-files -z -- '*.c' '*.cc' '*.cpp' '*.cxx' '*.h' '*.hh' '*.hpp' '*.hxx' |
+$git_ls -z -- '*.c' '*.cc' '*.cpp' '*.cxx' '*.h' '*.hh' '*.hpp' '*.hxx' |
 
   # Exclude lexer/parser generator input and output.
   egrep -z -v '^Source/cmCommandArgumentLexer\.' |
