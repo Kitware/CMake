@@ -2135,37 +2135,33 @@ bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
 std::string::size_type cmSystemToolsFindRPath(std::string const& have,
                                               std::string const& want)
 {
-  // Search for the desired rpath.
-  std::string::size_type pos = have.find(want);
-
-  // If the path is not present we are done.
-  if (pos == std::string::npos) {
-    return pos;
-  }
-
-  // Build a regex to match a properly separated path instance.
-  std::string regex_str = "(^|:)(";
-  for (std::string::const_iterator i = want.begin(); i != want.end(); ++i) {
-    int ch = *i;
-    if (!(('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') ||
-          ('0' <= ch && ch <= '9'))) {
-      // Escape the non-alphanumeric character.
-      regex_str += "\\";
+  std::string::size_type pos = 0;
+  while (pos < have.size()) {
+    // Look for an occurrence of the string.
+    std::string::size_type const beg = have.find(want, pos);
+    if (beg == std::string::npos) {
+      return std::string::npos;
     }
-    // Store the character.
-    regex_str.append(1, static_cast<char>(ch));
-  }
-  regex_str += ")(:|$)";
 
-  // Look for the separated path.
-  cmsys::RegularExpression regex(regex_str.c_str());
-  if (regex.find(have)) {
+    // Make sure it is separated from preceding entries.
+    if (beg > 0 && have[beg - 1] != ':') {
+      pos = beg + 1;
+      continue;
+    }
+
+    // Make sure it is separated from following entries.
+    std::string::size_type const end = beg + want.size();
+    if (end < have.size() && have[end] != ':') {
+      pos = beg + 1;
+      continue;
+     }
+
     // Return the position of the path portion.
-    return regex.start(2);
-  } else {
-    // The desired rpath was not found.
-    return std::string::npos;
+    return beg;
   }
+
+  // The desired rpath was not found.
+  return std::string::npos;
 }
 #endif
 
