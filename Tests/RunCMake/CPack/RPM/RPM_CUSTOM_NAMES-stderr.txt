@@ -1,3 +1,0 @@
-^CPackRPM: Will use GENERATED spec file: .*/Tests/RunCMake/RPM/CPack/RPM_CUSTOM_NAMES-build/_CPack_Packages/.*/RPM/SPECS/custom_names-pkg_1.spec
-CPackRPM: Will use GENERATED spec file: .*/Tests/RunCMake/RPM/CPack/RPM_CUSTOM_NAMES-build/_CPack_Packages/.*/RPM/SPECS/second.spec
-CPackRPM: Will use GENERATED spec file: .*/Tests/RunCMake/RPM/CPack/RPM_CUSTOM_NAMES-build/_CPack_Packages/.*/RPM/SPECS/custom_names-pkg_3.spec$

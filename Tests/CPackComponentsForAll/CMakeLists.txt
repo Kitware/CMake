@@ -165,6 +165,9 @@ set(CPACK_RPM_RELOCATION_PATHS "${CMAKE_INSTALL_INCLUDEDIR}"
   "${CMAKE_INSTALL_LIBDIR}" "${CMAKE_INSTALL_BINDIR}" "other_relocatable"
   "${CMAKE_INSTALL_LIBDIR}/inside_relocatable_two/depth_two/different_relocatable")
 
+# set CPACK_DEBIAN_FILE_NAME to use default package name format
+set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
+
 # We may use the CPack specific config file in order
 # to tailor CPack behavior on a CPack generator specific way
 # (Behavior would be different for RPM or TGZ or DEB ...)

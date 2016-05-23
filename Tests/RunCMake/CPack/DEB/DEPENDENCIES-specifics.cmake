@@ -1,5 +1,7 @@
 set(CPACK_PACKAGE_CONTACT "someone")
 set(CPACK_DEB_COMPONENT_INSTALL "ON")
+#intentionaly commented out to test old file naming
+#set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
 
 # false by default
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS FALSE)

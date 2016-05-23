@@ -42,6 +42,32 @@
 #
 #  See https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Source
 #
+# .. variable:: CPACK_DEBIAN_FILE_NAME
+#               CPACK_DEBIAN_<COMPONENT>_FILE_NAME
+#
+#  Package file name.
+#
+#  * Mandatory : YES
+#  * Default   : ``<CPACK_PACKAGE_FILE_NAME>[-<component>].deb``
+#
+#  This may be set to ``DEB-DEFAULT`` to allow CPackDeb to generate package file
+#  name by itself in deb format::
+#
+#    <PackageName>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb
+#
+#  Alternatively provided package file name must end with ".deb" suffix.
+#
+#  .. note::
+#
+#    Preferred setting of this variable is ``DEB-DEFAULT`` but for backward
+#    compatibility with CPackDeb in CMake prior to version 3.6 this feature
+#    is disabled by default.
+#
+#  .. note::
+#
+#    By using non default filenames duplicate names may occur. Duplicate files
+#    get overwritten and it is up to the packager to set the variables in a
+#    manner that will prevent such errors.
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_VERSION
 #
@@ -466,6 +492,17 @@ if(NOT UNIX)
   message(FATAL_ERROR "CPackDeb.cmake may only be used under UNIX.")
 endif()
 
+function(cpack_deb_variable_fallback OUTPUT_VAR_NAME)
+  set(FALLBACK_VAR_NAMES ${ARGN})
+
+  foreach(variable_name IN LISTS FALLBACK_VAR_NAMES)
+    if(${variable_name})
+      set(${OUTPUT_VAR_NAME} "${${variable_name}}" PARENT_SCOPE)
+      break()
+    endif()
+  endforeach()
+endfunction()
+
 function(get_component_package_name var component)
   string(TOUPPER "${component}" component_upcase)
   if(CPACK_DEBIAN_${component_upcase}_PACKAGE_NAME)
@@ -878,13 +915,32 @@ function(cpack_deb_prepare_package_vars)
     set(CPACK_DEBIAN_PACKAGE_RELEASE 1)
   endif()
 
-  # Patch package file name to be in corrent debian format:
-  # <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb
-  set(CPACK_OUTPUT_FILE_NAME
-    "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
-  set(CPACK_TEMPORARY_PACKAGE_FILE_NAME "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_OUTPUT_FILE_NAME}")
-  get_filename_component(BINARY_DIR "${CPACK_OUTPUT_FILE_PATH}" DIRECTORY)
-  set(CPACK_OUTPUT_FILE_PATH "${BINARY_DIR}/${CPACK_OUTPUT_FILE_NAME}")
+
+  cpack_deb_variable_fallback("CPACK_DEBIAN_FILE_NAME"
+    "CPACK_DEBIAN_${_local_component_name}_FILE_NAME"
+    "CPACK_DEBIAN_FILE_NAME")
+  if(CPACK_DEBIAN_FILE_NAME)
+    if(CPACK_DEBIAN_FILE_NAME STREQUAL "DEB-DEFAULT")
+      # Patch package file name to be in corrent debian format:
+      # <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb
+      set(CPACK_OUTPUT_FILE_NAME
+        "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
+    else()
+      cmake_policy(PUSH)
+        cmake_policy(SET CMP0010 NEW)
+        if(NOT CPACK_DEBIAN_FILE_NAME MATCHES ".*\\.deb")
+      cmake_policy(POP)
+          message(FATAL_ERROR "'${CPACK_DEBIAN_FILE_NAME}' is not a valid DEB package file name as it must end with '.deb'!")
+        endif()
+      cmake_policy(POP)
+
+      set(CPACK_OUTPUT_FILE_NAME "${CPACK_DEBIAN_FILE_NAME}")
+    endif()
+
+    set(CPACK_TEMPORARY_PACKAGE_FILE_NAME "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_OUTPUT_FILE_NAME}")
+    get_filename_component(BINARY_DIR "${CPACK_OUTPUT_FILE_PATH}" DIRECTORY)
+    set(CPACK_OUTPUT_FILE_PATH "${BINARY_DIR}/${CPACK_OUTPUT_FILE_NAME}")
+  endif() # else() back compatibility - don't change the name
 
   # Print out some debug information if we were asked for that
   if(CPACK_DEBIAN_PACKAGE_DEBUG)
