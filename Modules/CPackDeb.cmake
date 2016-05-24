@@ -100,6 +100,13 @@
 #
 #    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.3.1-6), libc6 (< 2.4)")
 #
+# .. variable:: CPACK_DEBIAN_ENABLE_COMPONENT_DEPENDS
+#
+#  Sets inter component dependencies if listed with
+#  :variable:`CPACK_COMPONENT_<compName>_DEPENDS` variables.
+#
+#  * Mandatory : NO
+#  * Default   : -
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_MAINTAINER
 #
@@ -713,20 +720,23 @@ function(cpack_deb_prepare_package_vars)
         endif()
       endif()
     endforeach()
-    set(COMPONENT_DEPENDS "")
-    foreach (_PACK ${CPACK_COMPONENT_${_local_component_name}_DEPENDS})
-      get_component_package_name(_PACK_NAME "${_PACK}")
+
+    if(CPACK_DEBIAN_ENABLE_COMPONENT_DEPENDS)
+      set(COMPONENT_DEPENDS "")
+      foreach (_PACK ${CPACK_COMPONENT_${_local_component_name}_DEPENDS})
+        get_component_package_name(_PACK_NAME "${_PACK}")
+        if(COMPONENT_DEPENDS)
+          set(COMPONENT_DEPENDS "${_PACK_NAME} (= ${CPACK_DEBIAN_PACKAGE_VERSION}), ${COMPONENT_DEPENDS}")
+        else()
+          set(COMPONENT_DEPENDS "${_PACK_NAME} (= ${CPACK_DEBIAN_PACKAGE_VERSION})")
+        endif()
+      endforeach()
       if(COMPONENT_DEPENDS)
-        set(COMPONENT_DEPENDS "${_PACK_NAME} (= ${CPACK_DEBIAN_PACKAGE_VERSION}), ${COMPONENT_DEPENDS}")
-      else()
-        set(COMPONENT_DEPENDS "${_PACK_NAME} (= ${CPACK_DEBIAN_PACKAGE_VERSION})")
-      endif()
-    endforeach()
-    if(COMPONENT_DEPENDS)
-      if(CPACK_DEBIAN_PACKAGE_DEPENDS)
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS "${COMPONENT_DEPENDS}, ${CPACK_DEBIAN_PACKAGE_DEPENDS}")
-      else()
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS "${COMPONENT_DEPENDS}")
+        if(CPACK_DEBIAN_PACKAGE_DEPENDS)
+          set(CPACK_DEBIAN_PACKAGE_DEPENDS "${COMPONENT_DEPENDS}, ${CPACK_DEBIAN_PACKAGE_DEPENDS}")
+        else()
+          set(CPACK_DEBIAN_PACKAGE_DEPENDS "${COMPONENT_DEPENDS}")
+        endif()
       endif()
     endif()
   endif()

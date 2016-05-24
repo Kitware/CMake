@@ -11,7 +11,8 @@ cpack-deb-imporvements
 * The :module:`CPackDeb` module learned how to generate dependencies between
   Debian packages if multi-component setup is used and
   :variable:`CPACK_COMPONENT_<compName>_DEPENDS` variables are set.
-  This breaks compatibility with previous versions.
+  For backward compatibility this feature is disabled by default. See
+  :variable:`CPACK_DEBIAN_ENABLE_COMPONENT_DEPENDS`.
 
 * The :module:`CPackDeb` module learned how to set the package release number
   (``DebianRevisionNumber`` in package file name).  See
