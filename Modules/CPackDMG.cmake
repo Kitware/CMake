@@ -19,7 +19,7 @@
 #
 #  The disk image format. Common values are UDRO (UDIF read-only), UDZO (UDIF
 #  zlib-compressed) or UDBZ (UDIF bzip2-compressed). Refer to hdiutil(1) for
-#  more information on other available formats.
+#  more information on other available formats. Defaults to UDZO.
 #
 # .. variable:: CPACK_DMG_DS_STORE
 #
