@@ -1574,6 +1574,10 @@ void cmMakefile::AddIncludeDirectories(const std::vector<std::string>& incs,
 
 void cmMakefile::AddSystemIncludeDirectories(const std::set<std::string>& incs)
 {
+  if (incs.empty()) {
+    return;
+  }
+
   this->SystemIncludeDirectories.insert(incs.begin(), incs.end());
 
   for (cmTargets::iterator l = this->Targets.begin(); l != this->Targets.end();
