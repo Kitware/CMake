@@ -4,8 +4,8 @@
 #
 # .. _QtIFW: http://doc.qt.io/qtinstallerframework/index.html
 #
-# This module looks for the location of the command line utilities supplied with
-# the Qt Installer Framework (QtIFW_).
+# This module looks for the location of the command line utilities supplied
+# with the Qt Installer Framework (QtIFW_).
 #
 # The module also defines several commands to control the behavior of the
 # CPack ``IFW`` generator.
@@ -31,7 +31,8 @@
 # Variables
 # ^^^^^^^^^
 #
-# You can use the following variables to change behavior of CPack ``IFW`` generator.
+# You can use the following variables to change behavior of CPack ``IFW``
+# generator.
 #
 # Debug
 # """"""
@@ -65,7 +66,8 @@
 #
 # .. variable:: CPACK_IFW_PACKAGE_WINDOW_ICON
 #
-#  Filename for a custom window icon in PNG format for the Installer application.
+#  Filename for a custom window icon in PNG format for the Installer
+#  application.
 #
 # .. variable:: CPACK_IFW_PACKAGE_LOGO
 #
@@ -80,7 +82,8 @@
 # .. variable:: CPACK_IFW_TARGET_DIRECTORY
 #
 #  Default target directory for installation.
-#  By default used "@ApplicationsDir@/:variable:`CPACK_PACKAGE_INSTALL_DIRECTORY`"
+#  By default used
+#  "@ApplicationsDir@/:variable:`CPACK_PACKAGE_INSTALL_DIRECTORY`"
 #
 #  You can use predefined variables.
 #
@@ -186,7 +189,7 @@
 #
 # ::
 #
-#   cpack_ifw_configure_component(<compname> [COMMON]
+#   cpack_ifw_configure_component(<compname> [COMMON] [ESSENTIAL]
 #                       [NAME <name>]
 #                       [VERSION <version>]
 #                       [SCRIPT <script>]
@@ -194,19 +197,22 @@
 #                       [DEPENDS <com_id> ...]
 #                       [LICENSES <display_name> <file_path> ...])
 #
-# This command should be called after cpack_add_component command.
+# This command should be called after :command:`cpack_add_component` command.
 #
 # ``COMMON`` if set, then the component will be packaged and installed as part
 # of a group to which it belongs.
+#
+# ``ESSENTIAL`` if set, then the package manager stays disabled until that
+# component is updated.
+#
+# ``NAME`` is used to create domain-like identification for this component.
+# By default used origin component name.
 #
 # ``VERSION`` is version of component.
 # By default used :variable:`CPACK_PACKAGE_VERSION`.
 #
 # ``SCRIPT`` is a relative or absolute path to operations script
 # for this component.
-#
-# ``NAME`` is used to create domain-like identification for this component.
-# By default used origin component name.
 #
 # ``PRIORITY`` is priority of the component in the tree.
 #
@@ -223,20 +229,22 @@
 #
 # ::
 #
-#   cpack_ifw_configure_component_group(<grpname>
-#                       [VERSION <version>]
+#   cpack_ifw_configure_component_group(<groupname>
 #                       [NAME <name>]
+#                       [VERSION <version>]
 #                       [SCRIPT <script>]
 #                       [PRIORITY <priority>]
 #                       [LICENSES <display_name> <file_path> ...])
 #
-# This command should be called after cpack_add_component_group command.
+# This command should be called after :command:`cpack_add_component_group`
+# command.
+#
+# ``NAME`` is used to create domain-like identification for this component
+# group.
+# By default used origin component group name.
 #
 # ``VERSION`` is version of component group.
 # By default used :variable:`CPACK_PACKAGE_VERSION`.
-#
-# ``NAME`` is used to create domain-like identification for this component group.
-# By default used origin component group name.
 #
 # ``SCRIPT`` is a relative or absolute path to operations script
 # for this component group.
@@ -260,8 +268,8 @@
 #                       [PASSWORD <password>]
 #                       [DISPLAY_NAME <display_name>])
 #
-# This macro will also add the <reponame> repository
-# to a variable :variable:`CPACK_IFW_REPOSITORIES_ALL`
+# This command will also add the <reponame> repository
+# to a variable :variable:`CPACK_IFW_REPOSITORIES_ALL`.
 #
 # ``DISABLED`` if set, then the repository will be disabled by default.
 #
@@ -289,9 +297,8 @@
 #                       [PASSWORD <password>]
 #                       [DISPLAY_NAME <display_name>])
 #
-# Specified will
-# This macro will also add the repository action
-# to a variable :variable:`CPACK_IFW_REPOSITORIES_ALL`
+# This command will also add the <reponame> repository
+# to a variable :variable:`CPACK_IFW_REPOSITORIES_ALL`.
 #
 # ``URL`` is points to a list of available components.
 #
@@ -541,8 +548,8 @@ macro(cpack_ifw_configure_component compname)
 
   string(TOUPPER ${compname} _CPACK_IFWCOMP_UNAME)
 
-  set(_IFW_OPT COMMON)
-  set(_IFW_ARGS VERSION SCRIPT NAME PRIORITY)
+  set(_IFW_OPT COMMON ESSENTIAL)
+  set(_IFW_ARGS NAME VERSION SCRIPT PRIORITY)
   set(_IFW_MULTI_ARGS DEPENDS LICENSES)
   cmake_parse_arguments(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME} "${_IFW_OPT}" "${_IFW_ARGS}" "${_IFW_MULTI_ARGS}" ${ARGN})
 

@@ -101,6 +101,9 @@ public:
   /// Set to true to preselect the component in the installer
   std::string Default;
 
+  /// Marks the package as essential to force a restart of the MaintenanceTool
+  std::string Essential;
+
   /// Set to true to hide the component from the installer
   std::string Virtual;
 
