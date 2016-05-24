@@ -171,7 +171,7 @@ public:
       }
 
       lastoffset = line.find("class=");
-      endcovpos = line.find(">", lastoffset);
+      endcovpos = line.find('>', lastoffset);
       lineresult = line.substr(lastoffset + 7, (endcovpos - 8) - lastoffset);
 
       if (lineresult == "covered") {

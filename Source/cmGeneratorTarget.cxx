@@ -145,7 +145,7 @@ struct DoAccept<true>
     // where the user supplied the file name and Visual Studio
     // appended the suffix.
     std::string resx = f->GetFullPath();
-    std::string hFileName = resx.substr(0, resx.find_last_of(".")) + ".h";
+    std::string hFileName = resx.substr(0, resx.find_last_of('.')) + ".h";
     data.ExpectedResxHeaders.insert(hFileName);
     data.ResxSources.push_back(f);
   }

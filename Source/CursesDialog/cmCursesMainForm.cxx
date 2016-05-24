@@ -729,7 +729,7 @@ void cmCursesMainForm::FillCacheManagerFromUI()
 void cmCursesMainForm::FixValue(cmState::CacheEntryType type,
                                 const std::string& in, std::string& out) const
 {
-  out = in.substr(0, in.find_last_not_of(" ") + 1);
+  out = in.substr(0, in.find_last_not_of(' ') + 1);
   if (type == cmState::PATH || type == cmState::FILEPATH) {
     cmSystemTools::ConvertToUnixSlashes(out);
   }

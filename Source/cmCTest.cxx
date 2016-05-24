@@ -721,7 +721,7 @@ bool cmCTest::UpdateCTestConfiguration()
       if (line[0] == '#') {
         continue;
       }
-      std::string::size_type cpos = line.find_first_of(":");
+      std::string::size_type cpos = line.find_first_of(':');
       if (cpos == line.npos) {
         continue;
       }
@@ -2480,7 +2480,7 @@ void cmCTest::AddSubmitFile(Part part, const char* name)
 
 void cmCTest::AddCTestConfigurationOverwrite(const std::string& overStr)
 {
-  size_t epos = overStr.find("=");
+  size_t epos = overStr.find('=');
   if (epos == overStr.npos) {
     cmCTestLog(this, ERROR_MESSAGE,
                "CTest configuration overwrite specified in the wrong format."
