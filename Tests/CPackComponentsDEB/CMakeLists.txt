@@ -130,6 +130,8 @@ configure_file(${CPackComponentsDEB_SOURCE_DIR}/MyLibCPackConfig-${CPackDEBConfi
                @ONLY)
 set(CPACK_PROJECT_CONFIG_FILE ${CPackComponentsDEB_BINARY_DIR}/MyLibCPackConfig-${CPackDEBConfiguration}.cmake)
 
+# set CPACK_DEBIAN_FILE_NAME to use default package name format
+set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
 
 # Include CPack to introduce the appropriate targets
 include(CPack)
