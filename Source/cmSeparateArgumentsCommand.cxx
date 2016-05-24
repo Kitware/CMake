@@ -62,7 +62,7 @@ bool cmSeparateArgumentsCommand::InitialPass(
     // Original space-replacement version of command.
     if (const char* def = this->Makefile->GetDefinition(var)) {
       std::string value = def;
-      cmSystemTools::ReplaceString(value, " ", ";");
+      std::replace(value.begin(), value.end(), ' ', ';');
       this->Makefile->AddDefinition(var, value.c_str());
     }
   } else {

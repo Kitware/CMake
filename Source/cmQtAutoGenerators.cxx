@@ -1303,7 +1303,7 @@ bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
                                      const std::string& qrcOutputFile)
 {
   std::string relName = this->SourceRelativePath(qrcInputFile);
-  cmSystemTools::ReplaceString(relName, "/", "_");
+  std::replace(relName.begin(), relName.end(), '/', '_');
   relName += cmsys::SystemTools::GetFilenameWithoutLastExtension(qrcInputFile);
 
   const ::std::string qrcBuildFile = this->Builddir + qrcOutputFile;

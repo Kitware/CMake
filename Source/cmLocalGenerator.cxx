@@ -2309,13 +2309,13 @@ std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(
     ssin.erase(0, ssin.find_first_not_of("/"));
 
     // Avoid full paths by removing colons.
-    cmSystemTools::ReplaceString(ssin, ":", "_");
+    std::replace(ssin.begin(), ssin.end(), ':', '_');
 
     // Avoid relative paths that go up the tree.
     cmSystemTools::ReplaceString(ssin, "../", "__/");
 
     // Avoid spaces.
-    cmSystemTools::ReplaceString(ssin, " ", "_");
+    std::replace(ssin.begin(), ssin.end(), ' ', '_');
 
     // Mangle the name if necessary.
     if (this->Makefile->IsOn("CMAKE_MANGLE_OBJECT_FILE_NAMES")) {

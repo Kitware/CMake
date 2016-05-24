@@ -457,7 +457,7 @@ void cmGlobalVisualStudio7Generator::WriteFolders(std::ostream& fout)
     std::string fullName = iter->first;
     std::string guid = this->GetGUID(fullName.c_str());
 
-    cmSystemTools::ReplaceString(fullName, "/", "\\");
+    std::replace(fullName.begin(), fullName.end(), '/', '\\');
     if (cmSystemTools::StringStartsWith(fullName.c_str(), prefix)) {
       fullName = fullName.substr(skip_prefix);
     }

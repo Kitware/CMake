@@ -32,9 +32,9 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args,
     cmsys::RegularExpression reg("[()/]");
     if (reg.find(cacheValue)) {
       std::string cv = cacheValue;
-      cmSystemTools::ReplaceString(cv, "/", "_");
-      cmSystemTools::ReplaceString(cv, "(", "_");
-      cmSystemTools::ReplaceString(cv, ")", "_");
+      std::replace(cv.begin(), cv.end(), '/', '_');
+      std::replace(cv.begin(), cv.end(), '(', '_');
+      std::replace(cv.begin(), cv.end(), ')', '_');
       this->Makefile->AddCacheDefinition(args[0], cv.c_str(), "Name of build.",
                                          cmState::STRING);
     }
@@ -57,9 +57,9 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args,
   this->Makefile->ExpandVariablesInString(compiler);
   buildname += "-";
   buildname += cmSystemTools::GetFilenameName(compiler);
-  cmSystemTools::ReplaceString(buildname, "/", "_");
-  cmSystemTools::ReplaceString(buildname, "(", "_");
-  cmSystemTools::ReplaceString(buildname, ")", "_");
+  std::replace(buildname.begin(), buildname.end(), '/', '_');
+  std::replace(buildname.begin(), buildname.end(), '(', '_');
+  std::replace(buildname.begin(), buildname.end(), ')', '_');
 
   this->Makefile->AddCacheDefinition(args[0], buildname.c_str(),
                                      "Name of build.", cmState::STRING);

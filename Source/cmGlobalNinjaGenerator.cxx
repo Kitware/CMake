@@ -113,9 +113,9 @@ std::string cmGlobalNinjaGenerator::EncodePath(const std::string& path)
   std::string result = path;
 #ifdef _WIN32
   if (this->IsGCCOnWindows())
-    cmSystemTools::ReplaceString(result, "\\", "/");
+    std::replace(result.begin(), result.end(), '\\', '/');
   else
-    cmSystemTools::ReplaceString(result, "/", "\\");
+    std::replace(result.begin(), result.end(), '/', '\\');
 #endif
   return EncodeLiteral(result);
 }
@@ -742,7 +742,7 @@ std::string cmGlobalNinjaGenerator::ConvertToNinjaPath(const std::string& path)
   std::string convPath = ng->Convert(path, cmOutputConverter::HOME_OUTPUT);
   convPath = this->NinjaOutputPath(convPath);
 #ifdef _WIN32
-  cmSystemTools::ReplaceString(convPath, "/", "\\");
+  std::replace(convPath.begin(), convPath.end(), '/', '\\');
 #endif
   return convPath;
 }
@@ -755,7 +755,7 @@ std::string cmGlobalNinjaGenerator::ConvertToNinjaFolderRule(
   std::string convPath = ng->Convert(path + "/all", cmOutputConverter::HOME);
   convPath = this->NinjaOutputPath(convPath);
 #ifdef _WIN32
-  cmSystemTools::ReplaceString(convPath, "/", "\\");
+  std::replace(convPath.begin(), convPath.end(), '/', '\\');
 #endif
   return convPath;
 }

@@ -134,7 +134,7 @@ void cmNinjaTargetGenerator::AddIncludeFlags(std::string& languageFlags,
     // needed by cmcldeps
     false, this->GetConfigName());
   if (this->GetGlobalGenerator()->IsGCCOnWindows())
-    cmSystemTools::ReplaceString(includeFlags, "\\", "/");
+    std::replace(includeFlags.begin(), includeFlags.end(), '\\', '/');
 
   this->LocalGenerator->AppendFlags(languageFlags, includeFlags);
 }

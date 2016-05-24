@@ -214,7 +214,7 @@ void cmGlobalGhsMultiGenerator::OpenBuildFileStream()
     this->GetCMakeInstance()->MarkCliAsUsed("GHS_OS_DIR");
   }
   std::string fOSDir(this->trimQuotes(osDir));
-  cmSystemTools::ReplaceString(fOSDir, "\\", "/");
+  std::replace(fOSDir.begin(), fOSDir.end(), '\\', '/');
   if (!fOSDir.empty() && ('c' == fOSDir[0] || 'C' == fOSDir[0])) {
     this->OSDirRelative = false;
   } else {
@@ -230,7 +230,7 @@ void cmGlobalGhsMultiGenerator::OpenBuildFileStream()
     this->GetCMakeInstance()->MarkCliAsUsed("GHS_BSP_NAME");
   }
   std::string fBspName(this->trimQuotes(bspName));
-  cmSystemTools::ReplaceString(fBspName, "\\", "/");
+  std::replace(fBspName.begin(), fBspName.end(), '\\', '/');
   this->WriteMacros();
   this->WriteHighLevelDirectives();
 

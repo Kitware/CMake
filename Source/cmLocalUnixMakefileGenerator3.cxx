@@ -1190,7 +1190,7 @@ std::string cmLocalUnixMakefileGenerator3::CreateMakeVariable(
   // if this there is no value for this->MakefileVariableSize then
   // the string must have bad characters in it
   if (!this->MakefileVariableSize) {
-    cmSystemTools::ReplaceString(ret, ".", "_");
+    std::replace(ret.begin(), ret.end(), '.', '_');
     cmSystemTools::ReplaceString(ret, "-", "__");
     cmSystemTools::ReplaceString(ret, "+", "___");
     int ni = 0;
