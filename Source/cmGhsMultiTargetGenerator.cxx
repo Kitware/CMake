@@ -322,8 +322,10 @@ void cmGhsMultiTargetGenerator::WriteCompilerDefinitions(
 void cmGhsMultiTargetGenerator::WriteIncludes(const std::string& config,
                                               const std::string& language)
 {
-  std::vector<std::string> includes =
-    this->GeneratorTarget->GetIncludeDirectories(config, language);
+  std::vector<std::string> includes;
+  this->LocalGenerator->GetIncludeDirectories(includes, this->GeneratorTarget,
+                                              language, config);
+
   for (std::vector<std::string>::const_iterator includes_i = includes.begin();
        includes_i != includes.end(); ++includes_i) {
     *this->GetFolderBuildStreams() << "    -I\"" << *includes_i << "\""
