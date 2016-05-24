@@ -16,6 +16,10 @@ run_cmake(BadSources2)
 run_cmake(NonSourceCopyFile)
 run_cmake(NonSourceCompileDefinitions)
 
+set(RunCMake_TEST_OPTIONS --debug-trycompile)
+run_cmake(PlatformVariables)
+unset(RunCMake_TEST_OPTIONS)
+
 run_cmake(TargetTypeExe)
 run_cmake(TargetTypeInvalid)
 run_cmake(TargetTypeStatic)

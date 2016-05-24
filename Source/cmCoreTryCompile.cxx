@@ -41,6 +41,8 @@ static std::string const kCMAKE_POSITION_INDEPENDENT_CODE =
 static std::string const kCMAKE_SYSROOT = "CMAKE_SYSROOT";
 static std::string const kCMAKE_TRY_COMPILE_OSX_ARCHITECTURES =
   "CMAKE_TRY_COMPILE_OSX_ARCHITECTURES";
+static std::string const kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES =
+  "CMAKE_TRY_COMPILE_PLATFORM_VARIABLES";
 
 int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
                                      bool isTryRun)
@@ -420,6 +422,13 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       vars.insert(kCMAKE_OSX_SYSROOT);
       vars.insert(kCMAKE_POSITION_INDEPENDENT_CODE);
       vars.insert(kCMAKE_SYSROOT);
+
+      if (const char* varListStr = this->Makefile->GetDefinition(
+            kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {
+        std::vector<std::string> varList;
+        cmSystemTools::ExpandListArgument(varListStr, varList);
+        vars.insert(varList.begin(), varList.end());
+      }
 
       /* for the TRY_COMPILEs we want to be able to specify the architecture.
          So the user can set CMAKE_OSX_ARCHITECTURES to i386;ppc and then set
