@@ -63,6 +63,7 @@ else()
     PROPERTIES COMPILE_FLAGS "-ITarProp")
 endif()
 
+add_subdirectory(StandardIncludeDirectories)
 add_subdirectory(TargetIncludeDirectories)
 
 set_property(DIRECTORY PROPERTY INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}")
