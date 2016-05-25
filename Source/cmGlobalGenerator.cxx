@@ -1385,6 +1385,9 @@ cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
 
 void cmGlobalGenerator::FinalizeTargetCompileInfo()
 {
+  std::vector<std::string> const langs =
+    this->CMakeInstance->GetState()->GetEnabledLanguages();
+
   // Construct per-target generator information.
   for (unsigned int i = 0; i < this->Makefiles.size(); ++i) {
     cmMakefile* mf = this->Makefiles[i];
@@ -1429,6 +1432,23 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
         }
       }
     }
+
+    // The standard include directories for each language
+    // should be treated as system include directories.
+    std::set<std::string> standardIncludesSet;
+    for (std::vector<std::string>::const_iterator li = langs.begin();
+         li != langs.end(); ++li) {
+      std::string const standardIncludesVar =
+        "CMAKE_" + *li + "_STANDARD_INCLUDE_DIRECTORIES";
+      std::string const standardIncludesStr =
+        mf->GetSafeDefinition(standardIncludesVar);
+      std::vector<std::string> standardIncludesVec;
+      cmSystemTools::ExpandListArgument(standardIncludesStr,
+                                        standardIncludesVec);
+      standardIncludesSet.insert(standardIncludesVec.begin(),
+                                 standardIncludesVec.end());
+    }
+    mf->AddSystemIncludeDirectories(standardIncludesSet);
   }
 }
 
