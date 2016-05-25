@@ -74,7 +74,7 @@ int cmCPackNSISGenerator::PackageFiles()
       // Strip off the component part of the path.
       fileN = fileN.substr(fileN.find('/') + 1, std::string::npos);
     }
-    cmSystemTools::ReplaceString(fileN, "/", "\\");
+    std::replace(fileN.begin(), fileN.end(), '/', '\\');
     str << "  Delete \"$INSTDIR\\" << fileN << "\"" << std::endl;
   }
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Uninstall Files: " << str.str()
@@ -104,7 +104,7 @@ int cmCPackNSISGenerator::PackageFiles()
         fileN = fileN.substr(slash + 1, std::string::npos);
       }
     }
-    cmSystemTools::ReplaceString(fileN, "/", "\\");
+    std::replace(fileN.begin(), fileN.end(), '/', '\\');
     dstr << "  RMDir \"$INSTDIR\\" << fileN << "\"" << std::endl;
     if (!componentName.empty()) {
       this->Components[componentName].Directories.push_back(fileN);
@@ -548,7 +548,7 @@ void cmCPackNSISGenerator::CreateMenuLinks(std::ostringstream& str,
     // Convert / to \ in filenames, but not in urls:
     //
     if (!url) {
-      cmSystemTools::ReplaceString(sourceName, "/", "\\");
+      std::replace(sourceName.begin(), sourceName.end(), '/', '\\');
     }
 
     ++it;
@@ -790,13 +790,13 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
   for (pathIt = component->Files.begin(); pathIt != component->Files.end();
        ++pathIt) {
     path = *pathIt;
-    cmSystemTools::ReplaceString(path, "/", "\\");
+    std::replace(path.begin(), path.end(), '/', '\\');
     macrosOut << "  Delete \"$INSTDIR\\" << path << "\"\n";
   }
   for (pathIt = component->Directories.begin();
        pathIt != component->Directories.end(); ++pathIt) {
     path = *pathIt;
-    cmSystemTools::ReplaceString(path, "/", "\\");
+    std::replace(path.begin(), path.end(), '/', '\\');
     macrosOut << "  RMDir \"$INSTDIR\\" << path << "\"\n";
   }
   macrosOut << "  noremove_" << component->Name << ":\n";

@@ -2207,7 +2207,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     libs = libs.substr(0, pos + 1);
   }
   // Replace spaces in libs with ;
-  cmSystemTools::ReplaceString(libs, " ", ";");
+  std::replace(libs.begin(), libs.end(), ' ', ';');
   std::vector<std::string> libVec;
   cmSystemTools::ExpandListArgument(libs, libVec);
 

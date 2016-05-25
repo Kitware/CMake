@@ -640,7 +640,7 @@ std::string cmLocalGenerator::ExpandRuleVariable(
       if (variable == "TARGET_BASE") {
         // Strip the last extension off the target name.
         std::string targetBase = replaceValues.Target;
-        std::string::size_type pos = targetBase.rfind(".");
+        std::string::size_type pos = targetBase.rfind('.');
         if (pos != targetBase.npos) {
           return targetBase.substr(0, pos);
         } else {
@@ -2306,16 +2306,16 @@ std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(
     std::string ssin = sin;
 
     // Avoid full paths by removing leading slashes.
-    ssin.erase(0, ssin.find_first_not_of("/"));
+    ssin.erase(0, ssin.find_first_not_of('/'));
 
     // Avoid full paths by removing colons.
-    cmSystemTools::ReplaceString(ssin, ":", "_");
+    std::replace(ssin.begin(), ssin.end(), ':', '_');
 
     // Avoid relative paths that go up the tree.
     cmSystemTools::ReplaceString(ssin, "../", "__/");
 
     // Avoid spaces.
-    cmSystemTools::ReplaceString(ssin, " ", "_");
+    std::replace(ssin.begin(), ssin.end(), ' ', '_');
 
     // Mangle the name if necessary.
     if (this->Makefile->IsOn("CMAKE_MANGLE_OBJECT_FILE_NAMES")) {
@@ -2464,7 +2464,7 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
     // Remove the source extension if it is to be replaced.
     if (replaceExt) {
       keptSourceExtension = false;
-      std::string::size_type dot_pos = objectName.rfind(".");
+      std::string::size_type dot_pos = objectName.rfind('.');
       if (dot_pos != std::string::npos) {
         objectName = objectName.substr(0, dot_pos);
       }
@@ -2603,7 +2603,7 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
   }
 
   // Many compilers do not support # in the value so we disable it.
-  if (define.find_first_of("#") != define.npos) {
+  if (define.find_first_of('#') != define.npos) {
     std::ostringstream e;
     /* clang-format off */
     e << "WARNING: Preprocessor definitions containing '#' may not be "

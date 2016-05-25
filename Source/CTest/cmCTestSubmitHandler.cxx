@@ -417,7 +417,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
         }
       }
       std::string upload_as = url +
-        ((url.find("?", 0) == std::string::npos) ? "?" : "&") + "FileName=" +
+        ((url.find('?') == std::string::npos) ? '?' : '&') + "FileName=" +
         ofile;
 
       upload_as += "&MD5=";
@@ -706,7 +706,7 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::set<std::string>& files,
         }
       }
       std::string turl = url +
-        ((url.find("?", 0) == std::string::npos) ? "?" : "&") + "xmlfile=" +
+        ((url.find('?') == std::string::npos) ? '?' : '&') + "xmlfile=" +
         ofile;
       *this->LogFile << "Trigger url: " << turl << std::endl;
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,

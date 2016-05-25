@@ -1869,7 +1869,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             cmSystemTools::ExpandListArgument(val, rtit->Labels);
           }
           if (key == "MEASUREMENT") {
-            size_t pos = val.find_first_of("=");
+            size_t pos = val.find_first_of('=');
             if (pos != val.npos) {
               std::string mKey = val.substr(0, pos);
               const char* mVal = val.c_str() + pos + 1;

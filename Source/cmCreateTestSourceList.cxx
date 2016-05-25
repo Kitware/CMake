@@ -95,9 +95,9 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args,
       func_name = cmSystemTools::GetFilenameWithoutLastExtension(*i);
     }
     cmSystemTools::ConvertToUnixSlashes(func_name);
-    cmSystemTools::ReplaceString(func_name, " ", "_");
-    cmSystemTools::ReplaceString(func_name, "/", "_");
-    cmSystemTools::ReplaceString(func_name, ":", "_");
+    std::replace(func_name.begin(), func_name.end(), ' ', '_');
+    std::replace(func_name.begin(), func_name.end(), '/', '_');
+    std::replace(func_name.begin(), func_name.end(), ':', '_');
     tests_func_name.push_back(func_name);
     forwardDeclareCode += "int ";
     forwardDeclareCode += func_name;

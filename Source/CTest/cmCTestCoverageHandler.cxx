@@ -1238,7 +1238,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
               // Initially all entries are -1 (not used). If we get coverage
               // information, increment it to 0 first.
               if (vec[lineIdx] < 0) {
-                if (cov > 0 || prefix.find("#") != prefix.npos) {
+                if (cov > 0 || prefix.find('#') != prefix.npos) {
                   vec[lineIdx] = 0;
                 }
               }
@@ -1543,7 +1543,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
                 // Initially all entries are -1 (not used). If we get coverage
                 // information, increment it to 0 first.
                 if (vec[lineIdx] < 0) {
-                  if (cov > 0 || prefix.find("#") != prefix.npos) {
+                  if (cov > 0 || prefix.find('#') != prefix.npos) {
                     vec[lineIdx] = 0;
                   }
                 }

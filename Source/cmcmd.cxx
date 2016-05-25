@@ -386,7 +386,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           std::cerr << "cmake -E env: unknown option '" << a << "'"
                     << std::endl;
           return 1;
-        } else if (a.find("=") != a.npos) {
+        } else if (a.find('=') != a.npos) {
           // Set environment variable.
           cmSystemTools::PutEnv(a);
         } else {

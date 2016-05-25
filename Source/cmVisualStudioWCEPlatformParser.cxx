@@ -141,8 +141,8 @@ std::string cmVisualStudioWCEPlatformParser::FixPaths(
   cmSystemTools::ReplaceString(ret, "$(PATH)", "%PATH%");
   cmSystemTools::ReplaceString(ret, "$(VCInstallDir)", VcInstallDir.c_str());
   cmSystemTools::ReplaceString(ret, "$(VSInstallDir)", VsInstallDir.c_str());
-  cmSystemTools::ReplaceString(ret, "\\", "/");
+  std::replace(ret.begin(), ret.end(), '\\', '/');
   cmSystemTools::ReplaceString(ret, "//", "/");
-  cmSystemTools::ReplaceString(ret, "/", "\\");
+  std::replace(ret.begin(), ret.end(), '/', '\\');
   return ret;
 }

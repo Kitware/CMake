@@ -93,11 +93,11 @@ void cmInstallExportGenerator::ComputeTempDir()
       dest[0] = '_';
     }
     // Avoid windows full paths by removing colons.
-    cmSystemTools::ReplaceString(dest, ":", "_");
+    std::replace(dest.begin(), dest.end(), ':', '_');
     // Avoid relative paths that go up the tree.
     cmSystemTools::ReplaceString(dest, "../", "__/");
     // Avoid spaces.
-    cmSystemTools::ReplaceString(dest, " ", "_");
+    std::replace(dest.begin(), dest.end(), ' ', '_');
     this->TempDir += dest;
   }
 }

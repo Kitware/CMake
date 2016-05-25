@@ -71,7 +71,7 @@ private:
 static std::string cmSplitExtension(std::string const& in, std::string& base)
 {
   std::string ext;
-  std::string::size_type dot_pos = in.rfind(".");
+  std::string::size_type dot_pos = in.rfind('.');
   if (dot_pos != std::string::npos) {
     // Remove the extension first in case &base == &in.
     ext = in.substr(dot_pos, std::string::npos);
@@ -960,11 +960,11 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
       cmSystemTools::ReplaceString(cmd, "/./", "/");
       // Convert the command to a relative path only if the current
       // working directory will be the start-output directory.
-      bool had_slash = cmd.find("/") != cmd.npos;
+      bool had_slash = cmd.find('/') != cmd.npos;
       if (workingDir.empty()) {
         cmd = this->Convert(cmd, cmOutputConverter::START_OUTPUT);
       }
-      bool has_slash = cmd.find("/") != cmd.npos;
+      bool has_slash = cmd.find('/') != cmd.npos;
       if (had_slash && !has_slash) {
         // This command was specified as a path to a file in the
         // current directory.  Add a leading "./" so it can run
@@ -987,9 +987,9 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
         // must be written {{} instead of just {.  Otherwise some
         // curly braces are removed.  The hack can be skipped if the
         // first curly brace is the last character.
-        std::string::size_type lcurly = cmd.find("{");
+        std::string::size_type lcurly = cmd.find('{');
         if (lcurly != cmd.npos && lcurly < (cmd.size() - 1)) {
-          std::string::size_type rcurly = cmd.find("}");
+          std::string::size_type rcurly = cmd.find('}');
           if (rcurly == cmd.npos || rcurly > lcurly) {
             // The first curly is a left curly.  Use the hack.
             std::string hack_cmd = cmd.substr(0, lcurly);
@@ -1205,7 +1205,7 @@ std::string cmLocalUnixMakefileGenerator3::CreateMakeVariable(
   // if this there is no value for this->MakefileVariableSize then
   // the string must have bad characters in it
   if (!this->MakefileVariableSize) {
-    cmSystemTools::ReplaceString(ret, ".", "_");
+    std::replace(ret.begin(), ret.end(), '.', '_');
     cmSystemTools::ReplaceString(ret, "-", "__");
     cmSystemTools::ReplaceString(ret, "+", "___");
     int ni = 0;

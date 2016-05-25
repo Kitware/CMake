@@ -435,11 +435,7 @@ void cmExtraEclipseCDT4Generator::WriteGroups(
     linkName3 += "/";
     linkName3 += sgIt->GetFullName();
 
-    size_t pos = 0;
-    while ((pos = linkName3.find("\\", pos)) != std::string::npos) {
-      linkName3.replace(pos, 1, "/");
-      pos++;
-    }
+    std::replace(linkName3.begin(), linkName3.end(), '\\', '/');
 
     this->AppendLinkedResource(xml, linkName3, "virtual:/virtual",
                                VirtualFolder);

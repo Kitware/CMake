@@ -617,7 +617,7 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(cmXMLWriter& xml)
           cmSystemTools::ConvertToUnixSlashes(cm->SourceFile);
           if (cm->SourceFile.find("/.../") != cm->SourceFile.npos) {
             cmSystemTools::ReplaceString(cm->SourceFile, "/.../", "");
-            std::string::size_type p = cm->SourceFile.find("/");
+            std::string::size_type p = cm->SourceFile.find('/');
             if (p != cm->SourceFile.npos) {
               cm->SourceFile =
                 cm->SourceFile.substr(p + 1, cm->SourceFile.size() - p);

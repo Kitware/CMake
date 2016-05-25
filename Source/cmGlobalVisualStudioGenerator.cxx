@@ -622,7 +622,7 @@ void WriteVSMacrosFileRegistryEntry(const std::string& nextAvailableSubKeyName,
       DWORD dw = 0;
 
       std::string s(macrosFile);
-      cmSystemTools::ReplaceString(s, "/", "\\");
+      std::replace(s.begin(), s.end(), '/', '\\');
       std::wstring ws = cmsys::Encoding::ToWide(s);
 
       result =

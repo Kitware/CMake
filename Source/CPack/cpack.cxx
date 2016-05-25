@@ -68,7 +68,7 @@ int cpackDefinitionArgument(const char* argument, const char* cValue,
   (void)argument;
   cpackDefinitions* def = static_cast<cpackDefinitions*>(call_data);
   std::string value = cValue;
-  size_t pos = value.find_first_of("=");
+  size_t pos = value.find_first_of('=');
   if (pos == std::string::npos) {
     cmCPack_Log(def->Log, cmCPackLog::LOG_ERROR,
                 "Please specify CPack definitions as: KEY=VALUE" << std::endl);
