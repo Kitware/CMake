@@ -13,6 +13,8 @@
 
 #include "cmAlgorithms.h"
 
+#include <cmsys/auto_ptr.hxx>
+
 static const char* const cmVariableWatchAccessStrings[] = {
   "READ_ACCESS",     "UNKNOWN_READ_ACCESS", "UNKNOWN_DEFINED_ACCESS",
   "MODIFIED_ACCESS", "REMOVED_ACCESS",      "NO_ACCESS"
@@ -46,7 +48,7 @@ bool cmVariableWatch::AddWatch(const std::string& variable, WatchMethod method,
                                void* client_data /*=0*/,
                                DeleteData delete_data /*=0*/)
 {
-  cmVariableWatch::Pair* p = new cmVariableWatch::Pair;
+  cmsys::auto_ptr<cmVariableWatch::Pair> p(new cmVariableWatch::Pair);
   p->Method = method;
   p->ClientData = client_data;
   p->DeleteDataCall = delete_data;
@@ -60,7 +62,7 @@ bool cmVariableWatch::AddWatch(const std::string& variable, WatchMethod method,
       return false;
     }
   }
-  vp->push_back(p);
+  vp->push_back(p.release());
   return true;
 }
 
