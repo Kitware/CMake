@@ -68,7 +68,6 @@ Variables that Provide Information
    /variable/CMAKE_SKIP_INSTALL_RULES
    /variable/CMAKE_SKIP_RPATH
    /variable/CMAKE_SOURCE_DIR
-   /variable/CMAKE_STANDARD_LIBRARIES
    /variable/CMAKE_STATIC_LIBRARY_PREFIX
    /variable/CMAKE_STATIC_LIBRARY_SUFFIX
    /variable/CMAKE_TOOLCHAIN_FILE
@@ -366,6 +365,7 @@ Variables for Languages
    /variable/CMAKE_LANG_SIMULATE_VERSION
    /variable/CMAKE_LANG_SIZEOF_DATA_PTR
    /variable/CMAKE_LANG_SOURCE_FILE_EXTENSIONS
+   /variable/CMAKE_LANG_STANDARD_LIBRARIES
    /variable/CMAKE_USER_MAKE_RULES_OVERRIDE_LANG
 
 Variables for CTest
