@@ -305,6 +305,9 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     ? this->GetOption("CPACK_DMG_DS_STORE_SETUP_SCRIPT")
     : "";
 
+  const bool cpack_dmg_disable_applications_symlink =
+    this->IsOn("CPACK_DMG_DISABLE_APPLICATIONS_SYMLINK");
+
   // only put license on dmg if is user provided
   if (!cpack_license_file.empty() &&
       cpack_license_file.find("CPack.GenericLicense.txt") !=
@@ -323,11 +326,13 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   staging << src_dir;
 
   // Add a symlink to /Applications so users can drag-and-drop the bundle
-  // into it
-  std::ostringstream application_link;
-  application_link << staging.str() << "/Applications";
-  cmSystemTools::CreateSymlink("/Applications",
-                               application_link.str().c_str());
+  // into it unless this behaviour was disabled
+  if (!cpack_dmg_disable_applications_symlink) {
+    std::ostringstream application_link;
+    application_link << staging.str() << "/Applications";
+    cmSystemTools::CreateSymlink("/Applications",
+                                 application_link.str().c_str());
+  }
 
   // Optionally add a custom volume icon ...
   if (!cpack_package_icon.empty()) {

@@ -46,6 +46,11 @@
 #  CPACK_DMG_DS_STORE_SETUP_SCRIPT is executed or CPACK_DMG_DS_STORE is
 #  installed.  By default no background image is set.
 #
+# .. variable:: CPACK_DMG_DISABLE_APPLICATIONS_SYMLINK
+#
+#  Default behaviour is to include a symlink to ``/Applications`` in the DMG.
+#  Set this option to ``ON`` to avoid adding the symlink.
+#
 # .. variable:: CPACK_DMG_SLA_DIR
 #
 #   Directory where license and menu files for different languages are stored.
