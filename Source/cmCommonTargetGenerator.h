@@ -65,8 +65,8 @@ protected:
   void AddFortranFlags(std::string& flags);
 
   std::string Convert(
-    std::string const& source, cmLocalGenerator::RelativeRoot relative,
-    cmLocalGenerator::OutputFormat output = cmLocalGenerator::UNCHANGED);
+    std::string const& source, cmOutputConverter::RelativeRoot relative,
+    cmOutputConverter::OutputFormat output = cmOutputConverter::UNCHANGED);
 
   void AppendFortranFormatFlags(std::string& flags,
                                 cmSourceFile const& source);

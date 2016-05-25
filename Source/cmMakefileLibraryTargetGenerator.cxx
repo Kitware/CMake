@@ -301,17 +301,18 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   // Construct the output path version of the names for use in command
   // arguments.
   std::string targetOutPathPDB = this->Convert(
-    targetFullPathPDB, cmLocalGenerator::NONE, cmLocalGenerator::SHELL);
+    targetFullPathPDB, cmOutputConverter::NONE, cmOutputConverter::SHELL);
   std::string targetOutPath = this->Convert(
-    targetFullPath, cmLocalGenerator::START_OUTPUT, cmLocalGenerator::SHELL);
-  std::string targetOutPathSO = this->Convert(
-    targetFullPathSO, cmLocalGenerator::START_OUTPUT, cmLocalGenerator::SHELL);
+    targetFullPath, cmOutputConverter::START_OUTPUT, cmOutputConverter::SHELL);
+  std::string targetOutPathSO =
+    this->Convert(targetFullPathSO, cmOutputConverter::START_OUTPUT,
+                  cmOutputConverter::SHELL);
   std::string targetOutPathReal =
-    this->Convert(targetFullPathReal, cmLocalGenerator::START_OUTPUT,
-                  cmLocalGenerator::SHELL);
+    this->Convert(targetFullPathReal, cmOutputConverter::START_OUTPUT,
+                  cmOutputConverter::SHELL);
   std::string targetOutPathImport =
-    this->Convert(targetFullPathImport, cmLocalGenerator::START_OUTPUT,
-                  cmLocalGenerator::SHELL);
+    this->Convert(targetFullPathImport, cmOutputConverter::START_OUTPUT,
+                  cmOutputConverter::SHELL);
 
   this->NumberOfProgressActions++;
   if (!this->NoRuleMessages) {
@@ -357,27 +358,28 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   // Clean files associated with this library.
   std::vector<std::string> libCleanFiles;
   libCleanFiles.push_back(this->Convert(targetFullPath,
-                                        cmLocalGenerator::START_OUTPUT,
-                                        cmLocalGenerator::UNCHANGED));
+                                        cmOutputConverter::START_OUTPUT,
+                                        cmOutputConverter::UNCHANGED));
   if (targetNameReal != targetName) {
     libCleanFiles.push_back(this->Convert(targetFullPathReal,
-                                          cmLocalGenerator::START_OUTPUT,
-                                          cmLocalGenerator::UNCHANGED));
+                                          cmOutputConverter::START_OUTPUT,
+                                          cmOutputConverter::UNCHANGED));
   }
   if (targetNameSO != targetName && targetNameSO != targetNameReal) {
     libCleanFiles.push_back(this->Convert(targetFullPathSO,
-                                          cmLocalGenerator::START_OUTPUT,
-                                          cmLocalGenerator::UNCHANGED));
+                                          cmOutputConverter::START_OUTPUT,
+                                          cmOutputConverter::UNCHANGED));
   }
   if (!targetNameImport.empty()) {
     libCleanFiles.push_back(this->Convert(targetFullPathImport,
-                                          cmLocalGenerator::START_OUTPUT,
-                                          cmLocalGenerator::UNCHANGED));
+                                          cmOutputConverter::START_OUTPUT,
+                                          cmOutputConverter::UNCHANGED));
     std::string implib;
     if (this->GeneratorTarget->GetImplibGNUtoMS(targetFullPathImport,
                                                 implib)) {
-      libCleanFiles.push_back(this->Convert(
-        implib, cmLocalGenerator::START_OUTPUT, cmLocalGenerator::UNCHANGED));
+      libCleanFiles.push_back(this->Convert(implib,
+                                            cmOutputConverter::START_OUTPUT,
+                                            cmOutputConverter::UNCHANGED));
     }
   }
 
@@ -385,16 +387,16 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   // cleaned.  We do not want to delete the .pdb file just before
   // linking the target.
   this->CleanFiles.push_back(this->Convert(targetFullPathPDB,
-                                           cmLocalGenerator::START_OUTPUT,
-                                           cmLocalGenerator::UNCHANGED));
+                                           cmOutputConverter::START_OUTPUT,
+                                           cmOutputConverter::UNCHANGED));
 
 #ifdef _WIN32
   // There may be a manifest file for this target.  Add it to the
   // clean set just in case.
   if (this->GeneratorTarget->GetType() != cmState::STATIC_LIBRARY) {
     libCleanFiles.push_back(this->Convert(
-      (targetFullPath + ".manifest").c_str(), cmLocalGenerator::START_OUTPUT,
-      cmLocalGenerator::UNCHANGED));
+      (targetFullPath + ".manifest").c_str(), cmOutputConverter::START_OUTPUT,
+      cmOutputConverter::UNCHANGED));
   }
 #endif
 
@@ -406,7 +408,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
                                              this->GeneratorTarget, "target");
     this->LocalGenerator->CreateCDCommand(
       commands1, this->Makefile->GetCurrentBinaryDirectory(),
-      cmLocalGenerator::HOME_OUTPUT);
+      cmOutputConverter::HOME_OUTPUT);
     commands.insert(commands.end(), commands1.begin(), commands1.end());
     commands1.clear();
   }
@@ -525,16 +527,16 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
           std::string("/") + this->GeneratorTarget->GetName();
         name_of_def_file += ".def";
         std::string cmd = cmSystemTools::GetCMakeCommand();
-        cmd =
-          this->Convert(cmd, cmLocalGenerator::NONE, cmLocalGenerator::SHELL);
+        cmd = this->Convert(cmd, cmOutputConverter::NONE,
+                            cmOutputConverter::SHELL);
         cmd += " -E __create_def ";
-        cmd += this->Convert(name_of_def_file, cmLocalGenerator::START_OUTPUT,
-                             cmLocalGenerator::SHELL);
+        cmd += this->Convert(name_of_def_file, cmOutputConverter::START_OUTPUT,
+                             cmOutputConverter::SHELL);
         cmd += " ";
         std::string objlist_file = name_of_def_file;
         objlist_file += ".objs";
-        cmd += this->Convert(objlist_file, cmLocalGenerator::START_OUTPUT,
-                             cmLocalGenerator::SHELL);
+        cmd += this->Convert(objlist_file, cmOutputConverter::START_OUTPUT,
+                             cmOutputConverter::SHELL);
         real_link_commands.push_back(cmd);
         // create a list of obj files for the -E __create_def to read
         cmGeneratedFileStream fout(objlist_file.c_str());
@@ -555,8 +557,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
         linkFlags +=
           this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
         linkFlags +=
-          this->Convert(name_of_def_file, cmLocalGenerator::START_OUTPUT,
-                        cmLocalGenerator::SHELL);
+          this->Convert(name_of_def_file, cmOutputConverter::START_OUTPUT,
+                        cmOutputConverter::SHELL);
         linkFlags += " ";
       }
     }
@@ -588,14 +590,14 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     vars.Language = linkLanguage.c_str();
     vars.Objects = buildObjs.c_str();
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
-    objectDir = this->Convert(objectDir, cmLocalGenerator::START_OUTPUT,
-                              cmLocalGenerator::SHELL);
+    objectDir = this->Convert(objectDir, cmOutputConverter::START_OUTPUT,
+                              cmOutputConverter::SHELL);
     vars.ObjectDir = objectDir.c_str();
-    cmLocalGenerator::OutputFormat output = (useWatcomQuote)
-      ? cmLocalGenerator::WATCOMQUOTE
-      : cmLocalGenerator::SHELL;
-    std::string target = this->Convert(targetFullPathReal,
-                                       cmLocalGenerator::START_OUTPUT, output);
+    cmOutputConverter::OutputFormat output = (useWatcomQuote)
+      ? cmOutputConverter::WATCOMQUOTE
+      : cmOutputConverter::SHELL;
+    std::string target = this->Convert(
+      targetFullPathReal, cmOutputConverter::START_OUTPUT, output);
     vars.Target = target.c_str();
     vars.LinkLibraries = linkLibs.c_str();
     vars.ObjectsQuoted = buildObjs.c_str();
@@ -620,7 +622,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       } else {
         // Convert to a path for the native build tool.
         install_name_dir = this->LocalGenerator->Convert(
-          install_name_dir, cmLocalGenerator::NONE, cmLocalGenerator::SHELL);
+          install_name_dir, cmOutputConverter::NONE, cmOutputConverter::SHELL);
         vars.TargetInstallNameDir = install_name_dir.c_str();
       }
     }
@@ -707,7 +709,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   }
   this->LocalGenerator->CreateCDCommand(
     commands1, this->Makefile->GetCurrentBinaryDirectory(),
-    cmLocalGenerator::HOME_OUTPUT);
+    cmOutputConverter::HOME_OUTPUT);
   commands.insert(commands.end(), commands1.begin(), commands1.end());
   commands1.clear();
 
@@ -724,7 +726,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     commands1.push_back(symlink);
     this->LocalGenerator->CreateCDCommand(
       commands1, this->Makefile->GetCurrentBinaryDirectory(),
-      cmLocalGenerator::HOME_OUTPUT);
+      cmOutputConverter::HOME_OUTPUT);
     commands.insert(commands.end(), commands1.begin(), commands1.end());
     commands1.clear();
   }

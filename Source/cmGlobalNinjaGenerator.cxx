@@ -289,7 +289,7 @@ void cmGlobalNinjaGenerator::AddMacOSXContentRule()
 
   std::ostringstream cmd;
   cmd << lg->ConvertToOutputFormat(cmSystemTools::GetCMakeCommand(),
-                                   cmLocalGenerator::SHELL)
+                                   cmOutputConverter::SHELL)
       << " -E copy $in $out";
 
   this->AddRule("COPY_OSX_CONTENT", cmd.str(), "Copying OS X Content $out",
@@ -1166,13 +1166,13 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
 
   std::ostringstream cmd;
   cmd << lg->ConvertToOutputFormat(cmSystemTools::GetCMakeCommand(),
-                                   cmLocalGenerator::SHELL)
+                                   cmOutputConverter::SHELL)
       << " -H"
       << lg->ConvertToOutputFormat(lg->GetSourceDirectory(),
-                                   cmLocalGenerator::SHELL)
+                                   cmOutputConverter::SHELL)
       << " -B"
       << lg->ConvertToOutputFormat(lg->GetBinaryDirectory(),
-                                   cmLocalGenerator::SHELL);
+                                   cmOutputConverter::SHELL);
   WriteRule(*this->RulesFileStream, "RERUN_CMAKE", cmd.str(),
             "Re-running CMake...", "Rule for re-running cmake.",
             /*depfile=*/"",
@@ -1221,7 +1221,7 @@ std::string cmGlobalNinjaGenerator::ninjaCmd() const
   cmLocalGenerator* lgen = this->LocalGenerators[0];
   if (lgen) {
     return lgen->ConvertToOutputFormat(this->NinjaCommand,
-                                       cmLocalGenerator::SHELL);
+                                       cmOutputConverter::SHELL);
   }
   return "ninja";
 }

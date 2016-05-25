@@ -2140,7 +2140,7 @@ std::string cmLocalGenerator::ConstructComment(
     for (std::vector<std::string>::const_iterator o = ccg.GetOutputs().begin();
          o != ccg.GetOutputs().end(); ++o) {
       comment += sep;
-      comment += this->Convert(*o, cmLocalGenerator::START_OUTPUT);
+      comment += this->Convert(*o, cmOutputConverter::START_OUTPUT);
       sep = ", ";
     }
     return comment;

@@ -238,17 +238,17 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   // convert the dependencies to paths relative to the home output
   // directory.  We must do the same here.
   std::string obj_i =
-    this->LocalGenerator->Convert(obj, cmLocalGenerator::HOME_OUTPUT);
+    this->LocalGenerator->Convert(obj, cmOutputConverter::HOME_OUTPUT);
   std::string obj_m = this->LocalGenerator->ConvertToOutputFormat(
-    obj_i, cmLocalGenerator::MAKERULE);
+    obj_i, cmOutputConverter::MAKERULE);
   internalDepends << obj_i << std::endl;
 
   for (std::set<std::string>::const_iterator i = dependencies.begin();
        i != dependencies.end(); ++i) {
     makeDepends << obj_m << ": "
-                << this->LocalGenerator->Convert(*i,
-                                                 cmLocalGenerator::HOME_OUTPUT,
-                                                 cmLocalGenerator::MAKERULE)
+                << this->LocalGenerator->Convert(
+                     *i, cmOutputConverter::HOME_OUTPUT,
+                     cmOutputConverter::MAKERULE)
                 << std::endl;
     internalDepends << " " << *i << std::endl;
   }

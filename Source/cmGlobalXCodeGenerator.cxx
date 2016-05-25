@@ -660,10 +660,10 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   std::string flags;
   const char* srcfmt = sf->GetProperty("Fortran_FORMAT");
   switch (this->CurrentLocalGenerator->GetFortranFormat(srcfmt)) {
-    case cmLocalGenerator::FortranFormatFixed:
+    case cmOutputConverter::FortranFormatFixed:
       flags = "-fixed " + flags;
       break;
-    case cmLocalGenerator::FortranFormatFree:
+    case cmOutputConverter::FortranFormatFree:
       flags = "-free " + flags;
       break;
     default:
@@ -1982,10 +1982,10 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   const char* format = 0;
   const char* tgtfmt = gtgt->GetProperty("Fortran_FORMAT");
   switch (this->CurrentLocalGenerator->GetFortranFormat(tgtfmt)) {
-    case cmLocalGenerator::FortranFormatFixed:
+    case cmOutputConverter::FortranFormatFixed:
       format = "fixed";
       break;
-    case cmLocalGenerator::FortranFormatFree:
+    case cmOutputConverter::FortranFormatFree:
       format = "free";
       break;
     default:

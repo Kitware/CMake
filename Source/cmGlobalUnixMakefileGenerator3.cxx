@@ -311,11 +311,11 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   cmakefileStream
     << "# The top level Makefile was generated from the following files:\n"
     << "set(CMAKE_MAKEFILE_DEPENDS\n"
-    << "  \"" << lg->Convert(cache, cmLocalGenerator::START_OUTPUT) << "\"\n";
+    << "  \"" << lg->Convert(cache, cmOutputConverter::START_OUTPUT) << "\"\n";
   for (std::vector<std::string>::const_iterator i = lfiles.begin();
        i != lfiles.end(); ++i) {
     cmakefileStream << "  \""
-                    << lg->Convert(*i, cmLocalGenerator::START_OUTPUT)
+                    << lg->Convert(*i, cmOutputConverter::START_OUTPUT)
                     << "\"\n";
   }
   cmakefileStream << "  )\n\n";
@@ -329,10 +329,10 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   cmakefileStream << "# The corresponding makefile is:\n"
                   << "set(CMAKE_MAKEFILE_OUTPUTS\n"
                   << "  \""
-                  << lg->Convert(makefileName, cmLocalGenerator::START_OUTPUT)
+                  << lg->Convert(makefileName, cmOutputConverter::START_OUTPUT)
                   << "\"\n"
                   << "  \""
-                  << lg->Convert(check, cmLocalGenerator::START_OUTPUT)
+                  << lg->Convert(check, cmOutputConverter::START_OUTPUT)
                   << "\"\n";
   cmakefileStream << "  )\n\n";
 
@@ -345,7 +345,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     for (std::vector<std::string>::const_iterator k = outfiles.begin();
          k != outfiles.end(); ++k) {
       cmakefileStream << "  \""
-                      << lg->Convert(*k, cmLocalGenerator::HOME_OUTPUT)
+                      << lg->Convert(*k, cmOutputConverter::HOME_OUTPUT)
                       << "\"\n";
     }
 
@@ -358,7 +358,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
       tmpStr += cmake::GetCMakeFilesDirectory();
       tmpStr += "/CMakeDirectoryInformation.cmake";
       cmakefileStream << "  \""
-                      << lg->Convert(tmpStr, cmLocalGenerator::HOME_OUTPUT)
+                      << lg->Convert(tmpStr, cmOutputConverter::HOME_OUTPUT)
                       << "\"\n";
     }
     cmakefileStream << "  )\n\n";
@@ -470,8 +470,8 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
 
   // Begin the directory-level rules section.
   std::string dir = lg->GetCurrentBinaryDirectory();
-  dir = lg->Convert(dir, cmLocalGenerator::HOME_OUTPUT,
-                    cmLocalGenerator::MAKERULE);
+  dir = lg->Convert(dir, cmOutputConverter::HOME_OUTPUT,
+                    cmOutputConverter::MAKERULE);
   lg->WriteDivider(ruleFileStream);
   ruleFileStream << "# Directory level rules for directory " << dir << "\n\n";
 
@@ -716,8 +716,8 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
         std::ostringstream progCmd;
         progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
         // # in target
-        progCmd << lg->Convert(progress.Dir, cmLocalGenerator::FULL,
-                               cmLocalGenerator::SHELL);
+        progCmd << lg->Convert(progress.Dir, cmOutputConverter::FULL,
+                               cmOutputConverter::SHELL);
         //
         std::set<cmGeneratorTarget const*> emitted;
         progCmd << " " << this->CountProgressMarksInTarget(gtarget, emitted);
@@ -729,8 +729,8 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       {
         std::ostringstream progCmd;
         progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
-        progCmd << lg->Convert(progress.Dir, cmLocalGenerator::FULL,
-                               cmLocalGenerator::SHELL);
+        progCmd << lg->Convert(progress.Dir, cmOutputConverter::FULL,
+                               cmOutputConverter::SHELL);
         progCmd << " 0";
         commands.push_back(progCmd.str());
       }

@@ -41,8 +41,8 @@ void cmLocalNinjaGenerator::Generate()
 {
   // Compute the path to use when referencing the current output
   // directory from the top output directory.
-  this->HomeRelativeOutputPath =
-    this->Convert(this->GetCurrentBinaryDirectory(), HOME_OUTPUT);
+  this->HomeRelativeOutputPath = this->Convert(
+    this->GetCurrentBinaryDirectory(), cmOutputConverter::HOME_OUTPUT);
   if (this->HomeRelativeOutputPath == ".") {
     this->HomeRelativeOutputPath = "";
   }
@@ -121,16 +121,19 @@ cmGlobalNinjaGenerator* cmLocalNinjaGenerator::GetGlobalNinjaGenerator()
 // Virtual protected methods.
 
 std::string cmLocalNinjaGenerator::ConvertToLinkReference(
-  std::string const& lib, OutputFormat format)
+  std::string const& lib, cmOutputConverter::OutputFormat format)
 {
   std::string path = this->GetGlobalNinjaGenerator()->ConvertToNinjaPath(lib);
   return this->ConvertToOutputFormat(path, format);
 }
 
 std::string cmLocalNinjaGenerator::ConvertToIncludeReference(
-  std::string const& path, OutputFormat format, bool forceFullPaths)
+  std::string const& path, cmOutputConverter::OutputFormat format,
+  bool forceFullPaths)
 {
-  return this->Convert(path, forceFullPaths ? FULL : HOME_OUTPUT, format);
+  return this->Convert(path, forceFullPaths ? cmOutputConverter::FULL
+                                            : cmOutputConverter::HOME_OUTPUT,
+                       format);
 }
 
 // Private methods.
@@ -338,7 +341,8 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(
 #else
     std::string cdStr = "cd ";
 #endif
-    cdCmd << cdStr << this->ConvertToOutputFormat(wd, SHELL);
+    cdCmd << cdStr
+          << this->ConvertToOutputFormat(wd, cmOutputConverter::SHELL);
     cmdLines.push_back(cdCmd.str());
   }
 
@@ -346,7 +350,8 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(
 
   for (unsigned i = 0; i != ccg.GetNumberOfCommands(); ++i) {
     cmdLines.push_back(launcher +
-                       this->ConvertToOutputFormat(ccg.GetCommand(i), SHELL));
+                       this->ConvertToOutputFormat(ccg.GetCommand(i),
+                                                   cmOutputConverter::SHELL));
 
     std::string& cmd = cmdLines.back();
     ccg.AppendArguments(i, cmd);
@@ -473,10 +478,12 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   std::string output;
   const std::vector<std::string>& outputs = ccg.GetOutputs();
   if (!outputs.empty()) {
-    RelativeRoot relative_root =
-      ccg.GetWorkingDirectory().empty() ? START_OUTPUT : NONE;
+    cmOutputConverter::RelativeRoot relative_root =
+      ccg.GetWorkingDirectory().empty() ? cmOutputConverter::START_OUTPUT
+                                        : cmOutputConverter::NONE;
 
-    output = this->Convert(outputs[0], relative_root, SHELL);
+    output =
+      this->Convert(outputs[0], relative_root, cmOutputConverter::SHELL);
   }
   vars.Output = output.c_str();
 

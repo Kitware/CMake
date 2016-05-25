@@ -43,8 +43,8 @@ std::string const& cmCommonTargetGenerator::GetConfigName() const
 }
 
 std::string cmCommonTargetGenerator::Convert(
-  std::string const& source, cmLocalGenerator::RelativeRoot relative,
-  cmLocalGenerator::OutputFormat output)
+  std::string const& source, cmOutputConverter::RelativeRoot relative,
+  cmOutputConverter::OutputFormat output)
 {
   return this->LocalGenerator->Convert(source, relative, output);
 }
@@ -140,7 +140,7 @@ void cmCommonTargetGenerator::AddFortranFlags(std::string& flags)
   std::string mod_dir = this->GetFortranModuleDirectory();
   if (!mod_dir.empty()) {
     mod_dir =
-      this->Convert(mod_dir, this->WorkingDirectory, cmLocalGenerator::SHELL);
+      this->Convert(mod_dir, this->WorkingDirectory, cmOutputConverter::SHELL);
   } else {
     mod_dir =
       this->Makefile->GetSafeDefinition("CMAKE_Fortran_MODDIR_DEFAULT");
@@ -167,7 +167,7 @@ void cmCommonTargetGenerator::AddFortranFlags(std::string& flags)
          idi != includes.end(); ++idi) {
       std::string flg = modpath_flag;
       flg +=
-        this->Convert(*idi, cmLocalGenerator::NONE, cmLocalGenerator::SHELL);
+        this->Convert(*idi, cmOutputConverter::NONE, cmOutputConverter::SHELL);
       this->LocalGenerator->AppendFlags(flags, flg);
     }
   }
@@ -177,18 +177,18 @@ void cmCommonTargetGenerator::AppendFortranFormatFlags(
   std::string& flags, cmSourceFile const& source)
 {
   const char* srcfmt = source.GetProperty("Fortran_FORMAT");
-  cmLocalGenerator::FortranFormat format =
+  cmOutputConverter::FortranFormat format =
     this->LocalGenerator->GetFortranFormat(srcfmt);
-  if (format == cmLocalGenerator::FortranFormatNone) {
+  if (format == cmOutputConverter::FortranFormatNone) {
     const char* tgtfmt = this->GeneratorTarget->GetProperty("Fortran_FORMAT");
     format = this->LocalGenerator->GetFortranFormat(tgtfmt);
   }
   const char* var = 0;
   switch (format) {
-    case cmLocalGenerator::FortranFormatFixed:
+    case cmOutputConverter::FortranFormatFixed:
       var = "CMAKE_Fortran_FORMAT_FIXED_FLAG";
       break;
-    case cmLocalGenerator::FortranFormatFree:
+    case cmOutputConverter::FortranFormatFree:
       var = "CMAKE_Fortran_FORMAT_FREE_FLAG";
       break;
     default:
@@ -244,7 +244,7 @@ std::string cmCommonTargetGenerator::GetFrameworkFlags(std::string const& l)
       if (emitted.insert(*i).second) {
         flags += fwSearchFlag;
         flags += this->LocalGenerator->ConvertToOutputFormat(
-          *i, cmLocalGenerator::SHELL);
+          *i, cmOutputConverter::SHELL);
         flags += " ";
       }
     }

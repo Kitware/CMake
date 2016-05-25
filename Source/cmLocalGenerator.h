@@ -174,9 +174,10 @@ public:
   bool GetRealDependency(const std::string& name, const std::string& config,
                          std::string& dep);
 
-  virtual std::string ConvertToIncludeReference(std::string const& path,
-                                                OutputFormat format = SHELL,
-                                                bool forceFullPaths = false);
+  virtual std::string ConvertToIncludeReference(
+    std::string const& path,
+    cmOutputConverter::OutputFormat format = cmOutputConverter::SHELL,
+    bool forceFullPaths = false);
 
   /** Called from command-line hook to clear dependencies.  */
   virtual void ClearDependencies(cmMakefile* /* mf */, bool /* verbose */) {}
@@ -353,8 +354,9 @@ protected:
   std::string& CreateSafeUniqueObjectFileName(const std::string& sin,
                                               std::string const& dir_max);
 
-  virtual std::string ConvertToLinkReference(std::string const& lib,
-                                             OutputFormat format = SHELL);
+  virtual std::string ConvertToLinkReference(
+    std::string const& lib,
+    cmOutputConverter::OutputFormat format = cmOutputConverter::SHELL);
 
   /** Check whether the native build system supports the given
       definition.  Issues a warning.  */

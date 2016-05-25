@@ -255,7 +255,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
       !this->GetGeneratorTarget()->IsFrameworkOnApple()) {
     std::string cmakeCommand =
       this->GetLocalGenerator()->ConvertToOutputFormat(
-        cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
+        cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
     if (targetType == cmState::EXECUTABLE)
       this->GetGlobalGenerator()->AddRule(
         "CMAKE_SYMLINK_EXECUTABLE",
@@ -304,7 +304,7 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
       {
         std::string cmakeCommand =
           this->GetLocalGenerator()->ConvertToOutputFormat(
-            cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
+            cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
         linkCmds.push_back(cmakeCommand + " -E remove $TARGET_FILE");
       }
       // TODO: Use ARCHIVE_APPEND for archives over a certain size.
@@ -432,7 +432,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   cmLocalNinjaGenerator& localGen = *this->GetLocalGenerator();
 
   vars["TARGET_FILE"] =
-    localGen.ConvertToOutputFormat(targetOutputReal, cmLocalGenerator::SHELL);
+    localGen.ConvertToOutputFormat(targetOutputReal, cmOutputConverter::SHELL);
 
   localGen.GetTargetFlags(vars["LINK_LIBRARIES"], vars["FLAGS"],
                           vars["LINK_FLAGS"], frameworkPath, linkPath,
@@ -445,7 +445,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       name_of_def_file += ".def ";
       vars["LINK_FLAGS"] += " /DEF:";
       vars["LINK_FLAGS"] += this->GetLocalGenerator()->ConvertToOutputFormat(
-        name_of_def_file.c_str(), cmLocalGenerator::SHELL);
+        name_of_def_file.c_str(), cmOutputConverter::SHELL);
     }
   }
 
@@ -492,7 +492,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
         this->GetGeneratorTarget()->GetInstallNameDirForBuildTree(cfgName);
       if (!install_dir.empty()) {
         vars["INSTALLNAME_DIR"] = localGen.Convert(
-          install_dir, cmLocalGenerator::NONE, cmLocalGenerator::SHELL);
+          install_dir, cmOutputConverter::NONE, cmOutputConverter::SHELL);
       }
     }
   }
@@ -501,7 +501,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   if (!this->TargetNameImport.empty()) {
     const std::string impLibPath = localGen.ConvertToOutputFormat(
-      targetOutputImplib, cmLocalGenerator::SHELL);
+      targetOutputImplib, cmOutputConverter::SHELL);
     vars["TARGET_IMPLIB"] = impLibPath;
     EnsureParentDirectoryExists(impLibPath);
     if (genTarget.HasImportLibrary()) {
@@ -526,7 +526,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   const std::string objPath = GetGeneratorTarget()->GetSupportDirectory();
   vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-    this->ConvertToNinjaPath(objPath), cmLocalGenerator::SHELL);
+    this->ConvertToNinjaPath(objPath), cmOutputConverter::SHELL);
   EnsureDirectoryExists(objPath);
 
   if (this->GetGlobalGenerator()->IsGCCOnWindows()) {
@@ -565,20 +565,20 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     if (gt.GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS")) {
       std::string cmakeCommand =
         this->GetLocalGenerator()->ConvertToOutputFormat(
-          cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
+          cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
       std::string name_of_def_file = gt.GetSupportDirectory();
       name_of_def_file += "/" + gt.GetName();
       name_of_def_file += ".def";
       std::string cmd = cmakeCommand;
       cmd += " -E __create_def ";
       cmd += this->GetLocalGenerator()->ConvertToOutputFormat(
-        name_of_def_file.c_str(), cmLocalGenerator::SHELL);
+        name_of_def_file.c_str(), cmOutputConverter::SHELL);
       cmd += " ";
       cmNinjaDeps objs = this->GetObjects();
       std::string obj_list_file = name_of_def_file;
       obj_list_file += ".objs";
       cmd += this->GetLocalGenerator()->ConvertToOutputFormat(
-        obj_list_file.c_str(), cmLocalGenerator::SHELL);
+        obj_list_file.c_str(), cmOutputConverter::SHELL);
       preLinkCmdLines.push_back(cmd);
       // create a list of obj files for the -E __create_def to read
       cmGeneratedFileStream fout(obj_list_file.c_str());
@@ -593,7 +593,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   // the link commands.
   if (!preLinkCmdLines.empty()) {
     const std::string homeOutDir = localGen.ConvertToOutputFormat(
-      localGen.GetBinaryDirectory(), cmLocalGenerator::SHELL);
+      localGen.GetBinaryDirectory(), cmOutputConverter::SHELL);
     preLinkCmdLines.push_back("cd " + homeOutDir);
   }
 

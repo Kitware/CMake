@@ -72,17 +72,19 @@ public:
   void AppendCustomCommandDeps(cmCustomCommandGenerator const& ccg,
                                cmNinjaDeps& ninjaDeps);
 
-  virtual std::string ConvertToLinkReference(std::string const& lib,
-                                             OutputFormat format = SHELL);
+  virtual std::string ConvertToLinkReference(
+    std::string const& lib,
+    cmOutputConverter::OutputFormat format = cmOutputConverter::SHELL);
 
   virtual void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
     cmGeneratorTarget const* gt = 0);
 
 protected:
-  virtual std::string ConvertToIncludeReference(std::string const& path,
-                                                OutputFormat format = SHELL,
-                                                bool forceFullPaths = false);
+  virtual std::string ConvertToIncludeReference(
+    std::string const& path,
+    cmOutputConverter::OutputFormat format = cmOutputConverter::SHELL,
+    bool forceFullPaths = false);
 
 private:
   cmGeneratedFileStream& GetBuildFileStream() const;

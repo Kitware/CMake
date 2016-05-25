@@ -274,10 +274,10 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
     }
 
     vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-      ConvertToNinjaPath(pdbPath), cmLocalGenerator::SHELL);
+      ConvertToNinjaPath(pdbPath), cmOutputConverter::SHELL);
     vars["TARGET_COMPILE_PDB"] =
       this->GetLocalGenerator()->ConvertToOutputFormat(
-        ConvertToNinjaPath(compilePdbPath), cmLocalGenerator::SHELL);
+        ConvertToNinjaPath(compilePdbPath), cmOutputConverter::SHELL);
 
     EnsureParentDirectoryExists(pdbPath);
     EnsureParentDirectoryExists(compilePdbPath);
@@ -383,7 +383,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     const char* tidy = this->GeneratorTarget->GetProperty(tidy_prop);
     if ((iwyu && *iwyu) || (tidy && *tidy)) {
       std::string run_iwyu = this->GetLocalGenerator()->ConvertToOutputFormat(
-        cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
+        cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
       run_iwyu += " -E __run_iwyu";
       if (iwyu && *iwyu) {
         run_iwyu += " --iwyu=";
@@ -584,9 +584,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   EnsureParentDirectoryExists(objectFileName);
 
   vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-    objectDir, cmLocalGenerator::SHELL);
+    objectDir, cmOutputConverter::SHELL);
   vars["OBJECT_FILE_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-    objectFileDir, cmLocalGenerator::SHELL);
+    objectFileDir, cmOutputConverter::SHELL);
 
   this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
                              vars);
@@ -634,7 +634,7 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   }
 
   escapedSourceFileName = this->LocalGenerator->ConvertToOutputFormat(
-    escapedSourceFileName, cmLocalGenerator::SHELL);
+    escapedSourceFileName, cmOutputConverter::SHELL);
 
   compileObjectVars.Source = escapedSourceFileName.c_str();
   compileObjectVars.Object = objectFileName.c_str();
