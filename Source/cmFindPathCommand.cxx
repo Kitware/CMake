@@ -117,7 +117,7 @@ std::string cmFindPathCommand::FindHeaderInFramework(std::string const& file,
     if (this->IncludeFileInPath) {
       return fheader;
     }
-    fheader = cmSystemTools::GetFilenamePath(fheader);
+    fheader.resize(fheader.size() - file.size());
     return fheader;
   }
   return "";
