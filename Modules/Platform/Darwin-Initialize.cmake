@@ -90,16 +90,6 @@ elseif("${CMAKE_GENERATOR}" MATCHES Xcode
       endif()
     endforeach()
 
-    if(CMAKE_OSX_DEPLOYMENT_TARGET AND
-        NOT CMAKE_OSX_DEPLOYMENT_TARGET VERSION_EQUAL ${_CMAKE_OSX_DEPLOYMENT_TARGET})
-      set(_CMAKE_OSX_SDKS_VER ${CMAKE_OSX_DEPLOYMENT_TARGET}${_CMAKE_OSX_SDKS_VER_SUFFIX_${CMAKE_OSX_DEPLOYMENT_TARGET}})
-      set(_CMAKE_OSX_SYSROOT_CHECK "${_CMAKE_OSX_SDKS_DIR}/MacOSX${_CMAKE_OSX_SDKS_VER}.sdk")
-      message(WARNING
-        "CMAKE_OSX_DEPLOYMENT_TARGET is '${CMAKE_OSX_DEPLOYMENT_TARGET}' "
-        "but the matching SDK does not exist at:\n \"${_CMAKE_OSX_SYSROOT_CHECK}\"\n"
-        "Instead using SDK:\n \"${_CMAKE_OSX_SYSROOT_DEFAULT}\"."
-        )
-    endif()
     if(NOT CMAKE_OSX_DEPLOYMENT_TARGET AND _CURRENT_OSX_VERSION VERSION_LESS _CMAKE_OSX_DEPLOYMENT_TARGET)
       set(CMAKE_OSX_DEPLOYMENT_TARGET ${_CURRENT_OSX_VERSION} CACHE STRING
         "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value." FORCE)
