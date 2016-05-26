@@ -103,7 +103,7 @@ x86_code(lzma_simple *simple, uint32_t now_pos, bool is_encoder,
 				if (!Test86MSByte(b))
 					break;
 
-				src = dest ^ ((1 << (32 - i * 8)) - 1);
+				src = dest ^ ((1u << (32 - i * 8)) - 1);
 			}
 
 			buffer[buffer_pos + 4]
