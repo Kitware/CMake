@@ -2154,7 +2154,7 @@ std::string::size_type cmSystemToolsFindRPath(std::string const& have,
     if (end < have.size() && have[end] != ':') {
       pos = beg + 1;
       continue;
-     }
+    }
 
     // Return the position of the path portion.
     return beg;
