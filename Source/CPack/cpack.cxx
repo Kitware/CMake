@@ -414,8 +414,8 @@ int main(int argc, char const* const* argv)
     for (generatorIt = generators.GetGeneratorsList().begin();
          generatorIt != generators.GetGeneratorsList().end(); ++generatorIt) {
       cmDocumentationEntry e;
-      e.Name = generatorIt->first.c_str();
-      e.Brief = generatorIt->second.c_str();
+      e.Name = generatorIt->first;
+      e.Brief = generatorIt->second;
       v.push_back(e);
     }
     doc.SetSection("Generators", v);

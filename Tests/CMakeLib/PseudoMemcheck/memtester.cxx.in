@@ -51,7 +51,7 @@ main(int ac, char **av)
       }
 
     if (!logfile.empty())
-      cmSystemTools::Touch(logfile.c_str(), true);
+      cmSystemTools::Touch(logfile, true);
   }
 
   return RETVAL;

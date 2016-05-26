@@ -121,7 +121,7 @@ bool cmParseGTMCoverage::FindFunctionInMumpsFile(std::string const& filepath,
   std::string line;
   int linenum = 0;
   while (cmSystemTools::GetLineFromStream(in, line)) {
-    std::string::size_type pos = line.find(function.c_str());
+    std::string::size_type pos = line.find(function);
     if (pos == 0) {
       char nextchar = line[function.size()];
       if (nextchar == ' ' || nextchar == '(' || nextchar == '\t') {

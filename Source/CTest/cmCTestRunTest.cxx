@@ -424,7 +424,7 @@ bool cmCTestRunTest::StartTest(size_t total)
   this->TestResult.Status = cmCTestTestHandler::BAD_COMMAND;
   this->TestResult.TestCount = this->TestProperties->Index;
   this->TestResult.Name = this->TestProperties->Name;
-  this->TestResult.Path = this->TestProperties->Directory.c_str();
+  this->TestResult.Path = this->TestProperties->Directory;
 
   if (args.size() >= 2 && args[1] == "NOT_AVAILABLE") {
     this->TestProcess = new cmProcess;
@@ -502,7 +502,7 @@ void cmCTestRunTest::ComputeArguments()
   if (this->TestHandler->MemCheck) {
     cmCTestMemCheckHandler* handler =
       static_cast<cmCTestMemCheckHandler*>(this->TestHandler);
-    this->ActualCommand = handler->MemoryTester.c_str();
+    this->ActualCommand = handler->MemoryTester;
     this->TestProperties->Args[1] = this->TestHandler->FindTheExecutable(
       this->TestProperties->Args[1].c_str());
   } else {

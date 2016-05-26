@@ -963,7 +963,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
     cmsys::ofstream infoFile(outputFile.c_str(), std::ios::app);
     if (!infoFile) {
       std::string error = "Internal CMake error when trying to open file: ";
-      error += outputFile.c_str();
+      error += outputFile;
       error += " for writing.";
       cmSystemTools::Error(error.c_str());
       return;

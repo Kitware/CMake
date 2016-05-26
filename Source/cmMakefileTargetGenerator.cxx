@@ -311,7 +311,7 @@ void cmMakefileTargetGenerator::MacOSXContentGeneratorType::operator()(
   std::string copyEcho = "Copying OS X content ";
   copyEcho += output;
   this->Generator->LocalGenerator->AppendEcho(
-    commands, copyEcho.c_str(), cmLocalUnixMakefileGenerator3::EchoBuild);
+    commands, copyEcho, cmLocalUnixMakefileGenerator3::EchoBuild);
   std::string copyCommand = "$(CMAKE_COMMAND) -E copy ";
   copyCommand += this->Generator->Convert(input, cmOutputConverter::NONE,
                                           cmOutputConverter::SHELL);
@@ -469,7 +469,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
     buildEcho += lang;
     buildEcho += " object ";
     buildEcho += relativeObj;
-    this->LocalGenerator->AppendEcho(commands, buildEcho.c_str(),
+    this->LocalGenerator->AppendEcho(commands, buildEcho,
                                      cmLocalUnixMakefileGenerator3::EchoBuild,
                                      &progress);
   }
@@ -676,8 +676,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       preprocessEcho += " source to ";
       preprocessEcho += objI;
       this->LocalGenerator->AppendEcho(
-        commands, preprocessEcho.c_str(),
-        cmLocalUnixMakefileGenerator3::EchoBuild);
+        commands, preprocessEcho, cmLocalUnixMakefileGenerator3::EchoBuild);
 
       std::string preprocessRuleVar = "CMAKE_";
       preprocessRuleVar += lang;
@@ -724,8 +723,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       assemblyEcho += " source to assembly ";
       assemblyEcho += objS;
       this->LocalGenerator->AppendEcho(
-        commands, assemblyEcho.c_str(),
-        cmLocalUnixMakefileGenerator3::EchoBuild);
+        commands, assemblyEcho, cmLocalUnixMakefileGenerator3::EchoBuild);
 
       std::string assemblyRuleVar = "CMAKE_";
       assemblyRuleVar += lang;
@@ -1073,7 +1071,7 @@ void cmMakefileTargetGenerator::GenerateCustomRuleFile(
       cmLocalUnixMakefileGenerator3::EchoProgress progress;
       this->MakeEchoProgress(progress);
       this->LocalGenerator->AppendEcho(
-        commands, comment.c_str(), cmLocalUnixMakefileGenerator3::EchoGenerate,
+        commands, comment, cmLocalUnixMakefileGenerator3::EchoGenerate,
         &progress);
     }
   }

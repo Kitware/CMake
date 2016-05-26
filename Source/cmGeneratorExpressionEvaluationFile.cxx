@@ -76,7 +76,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(
     return;
   }
 
-  lg->GetMakefile()->AddCMakeOutputFile(outputFileName.c_str());
+  lg->GetMakefile()->AddCMakeOutputFile(outputFileName);
   this->Files.push_back(outputFileName);
   outputFiles[outputFileName] = outputContent;
 
@@ -114,7 +114,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
   if (this->InputIsContent) {
     inputContent = this->Input;
   } else {
-    lg->GetMakefile()->AddCMakeDependFile(this->Input.c_str());
+    lg->GetMakefile()->AddCMakeDependFile(this->Input);
     cmSystemTools::GetPermissions(this->Input.c_str(), perm);
     cmsys::ifstream fin(this->Input.c_str());
     if (!fin) {

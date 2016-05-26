@@ -196,8 +196,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       // If error occurs we want to continue copying next files.
       bool return_value = 0;
       for (std::string::size_type cc = 2; cc < args.size() - 1; cc++) {
-        if (!cmSystemTools::CopyADirectory(args[cc].c_str(),
-                                           args[args.size() - 1].c_str())) {
+        if (!cmSystemTools::CopyADirectory(args[cc], args[args.size() - 1])) {
           std::cerr << "Error copying directory from \"" << args[cc]
                     << "\" to \"" << args[args.size() - 1] << "\".\n";
           return_value = 1;

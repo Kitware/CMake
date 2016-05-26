@@ -81,14 +81,14 @@ int testGeneratedFileStream(int, char* [])
     cmFailed("Something wrong with cmGeneratedFileStream. Cannot find file: ",
              file1.c_str());
   }
-  cmSystemTools::RemoveFile(file1.c_str());
-  cmSystemTools::RemoveFile(file2.c_str());
-  cmSystemTools::RemoveFile(file3.c_str());
-  cmSystemTools::RemoveFile(file4.c_str());
-  cmSystemTools::RemoveFile(file1tmp.c_str());
-  cmSystemTools::RemoveFile(file2tmp.c_str());
-  cmSystemTools::RemoveFile(file3tmp.c_str());
-  cmSystemTools::RemoveFile(file4tmp.c_str());
+  cmSystemTools::RemoveFile(file1);
+  cmSystemTools::RemoveFile(file2);
+  cmSystemTools::RemoveFile(file3);
+  cmSystemTools::RemoveFile(file4);
+  cmSystemTools::RemoveFile(file1tmp);
+  cmSystemTools::RemoveFile(file2tmp);
+  cmSystemTools::RemoveFile(file3tmp);
+  cmSystemTools::RemoveFile(file4tmp);
 
   return failed;
 }
