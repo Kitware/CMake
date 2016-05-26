@@ -20,6 +20,7 @@
 # as a default compiler
 
 include(${CMAKE_ROOT}/Modules/CMakeDetermineCompiler.cmake)
+include(Platform/${CMAKE_SYSTEM_NAME}-Determine-Fortran OPTIONAL)
 include(Platform/${CMAKE_SYSTEM_NAME}-Fortran OPTIONAL)
 if(NOT CMAKE_Fortran_COMPILER_NAMES)
   set(CMAKE_Fortran_COMPILER_NAMES f95)
