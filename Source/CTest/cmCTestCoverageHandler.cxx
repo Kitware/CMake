@@ -1759,7 +1759,7 @@ int cmCTestCoverageHandler::HandleTracePyCoverage(
 }
 
 std::string cmCTestCoverageHandler::FindFile(
-  cmCTestCoverageHandlerContainer* cont, std::string fileName)
+  cmCTestCoverageHandlerContainer* cont, std::string const& fileName)
 {
   std::string fileNameNoE =
     cmSystemTools::GetFilenameWithoutLastExtension(fileName);

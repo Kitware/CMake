@@ -61,7 +61,7 @@ std::string cmInstallFilesGenerator::GetDestination(
 }
 
 void cmInstallFilesGenerator::AddFilesInstallRule(
-  std::ostream& os, const std::string config, Indent const& indent,
+  std::ostream& os, std::string const& config, Indent const& indent,
   std::vector<std::string> const& files)
 {
   // Write code to install the files.

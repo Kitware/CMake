@@ -84,7 +84,7 @@ protected:
   void UpdateCostData();
   void ReadCostData();
   // Return index of a test based on its name
-  int SearchByName(std::string name);
+  int SearchByName(std::string const& name);
 
   void CreateTestCostList();
 

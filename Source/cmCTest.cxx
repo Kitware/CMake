@@ -67,7 +67,7 @@
   std::cerr << __LINE__ << " ";                                               \
   std::cerr
 
-struct tm* cmCTest::GetNightlyTime(std::string str, bool tomorrowtag)
+struct tm* cmCTest::GetNightlyTime(std::string const& str, bool tomorrowtag)
 {
   struct tm* lctime;
   time_t tctime = time(0);
@@ -170,8 +170,8 @@ static size_t HTTPResponseCallback(void* ptr, size_t size, size_t nmemb,
 }
 
 int cmCTest::HTTPRequest(std::string url, HTTPMethod method,
-                         std::string& response, std::string fields,
-                         std::string putFile, int timeout)
+                         std::string& response, std::string const& fields,
+                         std::string const& putFile, int timeout)
 {
   CURL* curl;
   FILE* file;
@@ -1481,7 +1481,7 @@ int cmCTest::GenerateNotesFile(const char* cfiles)
   return this->GenerateNotesFile(files);
 }
 
-std::string cmCTest::Base64GzipEncodeFile(std::string file)
+std::string cmCTest::Base64GzipEncodeFile(std::string const& file)
 {
   std::string tarFile = file + "_temp.tar.gz";
   std::vector<std::string> files;
@@ -1499,7 +1499,7 @@ std::string cmCTest::Base64GzipEncodeFile(std::string file)
   return base64;
 }
 
-std::string cmCTest::Base64EncodeFile(std::string file)
+std::string cmCTest::Base64EncodeFile(std::string const& file)
 {
   size_t const len = cmSystemTools::FileLength(file);
   cmsys::ifstream ifs(file.c_str(), std::ios::in
@@ -2208,7 +2208,7 @@ void cmCTest::SetNotesFiles(const char* notes)
   this->NotesFiles = notes;
 }
 
-void cmCTest::SetStopTime(std::string time)
+void cmCTest::SetStopTime(std::string const& time)
 {
   this->StopTime = time;
   this->DetermineNextDayStop();

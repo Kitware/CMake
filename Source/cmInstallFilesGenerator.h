@@ -38,7 +38,7 @@ protected:
   virtual void GenerateScriptForConfig(std::ostream& os,
                                        const std::string& config,
                                        Indent const& indent);
-  void AddFilesInstallRule(std::ostream& os, const std::string config,
+  void AddFilesInstallRule(std::ostream& os, std::string const& config,
                            Indent const& indent,
                            std::vector<std::string> const& files);
 

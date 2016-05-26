@@ -103,7 +103,7 @@ const std::vector<const cmSourceFile*>& cmSourceGroup::GetSourceFiles() const
   return this->SourceFiles;
 }
 
-void cmSourceGroup::AddChild(cmSourceGroup child)
+void cmSourceGroup::AddChild(cmSourceGroup const& child)
 {
   this->Internal->GroupChildren.push_back(child);
 }

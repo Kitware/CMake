@@ -49,7 +49,8 @@ protected:
   /**
    * This method factors out the work done in component packaging case.
    */
-  int PackageOnePack(std::string initialToplevel, std::string packageName);
+  int PackageOnePack(std::string const& initialToplevel,
+                     std::string const& packageName);
   /**
    * The method used to package files when component
    * install is used. This will create one

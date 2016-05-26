@@ -28,7 +28,7 @@ class cmParseDelphiCoverage
 {
 public:
   cmParseDelphiCoverage(cmCTestCoverageHandlerContainer& cont, cmCTest* ctest);
-  bool LoadCoverageData(const std::vector<std::string> files);
+  bool LoadCoverageData(std::vector<std::string> const& files);
   bool ReadDelphiHTML(const char* file);
   // Read a single HTML file from output
   bool ReadHTMLFile(const char* f);

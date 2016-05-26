@@ -52,7 +52,7 @@ public:
   /**
    * Add child to this sourcegroup
    */
-  void AddChild(cmSourceGroup child);
+  void AddChild(cmSourceGroup const& child);
 
   /**
    * Looks up child and returns it

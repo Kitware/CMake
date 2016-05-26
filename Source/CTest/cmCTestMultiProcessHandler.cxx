@@ -500,7 +500,7 @@ void cmCTestMultiProcessHandler::ReadCostData()
   }
 }
 
-int cmCTestMultiProcessHandler::SearchByName(std::string name)
+int cmCTestMultiProcessHandler::SearchByName(std::string const& name)
 {
   int index = -1;
 

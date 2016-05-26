@@ -61,8 +61,8 @@ void cmCPackRPMGenerator::AddGeneratedPackageNames()
   packageFileNames.push_back(fileNames.substr(pos1, pos2 - pos1));
 }
 
-int cmCPackRPMGenerator::PackageOnePack(std::string initialToplevel,
-                                        std::string packageName)
+int cmCPackRPMGenerator::PackageOnePack(std::string const& initialToplevel,
+                                        std::string const& packageName)
 {
   int retval = 1;
   // Begin the archive for this pack

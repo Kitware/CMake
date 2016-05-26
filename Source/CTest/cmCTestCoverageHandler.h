@@ -119,7 +119,7 @@ private:
   // Find the source file based on the source and build tree. This is used for
   // Trace.py mode, since that one does not tell us where the source file is.
   std::string FindFile(cmCTestCoverageHandlerContainer* cont,
-                       std::string fileName);
+                       std::string const& fileName);
 
   std::set<std::string> FindUncoveredFiles(
     cmCTestCoverageHandlerContainer* cont);

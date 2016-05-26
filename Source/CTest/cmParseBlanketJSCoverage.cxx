@@ -46,7 +46,7 @@ public:
       return line.substr(begIndex, line.npos);
     }
   }
-  bool ParseFile(std::string file)
+  bool ParseFile(std::string const& file)
   {
     FileLinesType localCoverageVector;
     std::string filename;
@@ -138,7 +138,7 @@ bool cmParseBlanketJSCoverage::LoadCoverageData(std::vector<std::string> files)
   return true;
 }
 
-bool cmParseBlanketJSCoverage::ReadJSONFile(std::string file)
+bool cmParseBlanketJSCoverage::ReadJSONFile(std::string const& file)
 {
   cmParseBlanketJSCoverage::JSONParser parser(this->Coverage);
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,

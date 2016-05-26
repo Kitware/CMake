@@ -27,7 +27,7 @@ class cmParseJacocoCoverage
 {
 public:
   cmParseJacocoCoverage(cmCTestCoverageHandlerContainer& cont, cmCTest* ctest);
-  bool LoadCoverageData(const std::vector<std::string> files);
+  bool LoadCoverageData(std::vector<std::string> const& files);
 
   std::string PackageName;
   std::string FileName;

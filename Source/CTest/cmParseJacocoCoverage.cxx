@@ -85,7 +85,7 @@ protected:
     }
   }
 
-  virtual bool FindPackagePath(const std::string fileName)
+  virtual bool FindPackagePath(std::string const& fileName)
   {
     // Search for the source file in the source directory.
     if (this->PackagePathFound(fileName, this->Coverage.SourceDir)) {
@@ -99,8 +99,8 @@ protected:
     return false;
   }
 
-  virtual bool PackagePathFound(const std::string fileName,
-                                const std::string baseDir)
+  virtual bool PackagePathFound(std::string const& fileName,
+                                std::string const& baseDir)
   {
     // Search for the file in the baseDir and its subdirectories.
     std::string packageGlob = baseDir;
@@ -149,7 +149,7 @@ cmParseJacocoCoverage::cmParseJacocoCoverage(
 }
 
 bool cmParseJacocoCoverage::LoadCoverageData(
-  const std::vector<std::string> files)
+  std::vector<std::string> const& files)
 {
   // load all the jacoco.xml files in the source directory
   cmsys::Directory dir;
