@@ -43,9 +43,8 @@ std::string cmExternalMakefileProjectGenerator::GetGlobalGeneratorName(
     return "";
   }
 
-  std::string currentName = fullName;
   // if we get only the short name, take the first global generator as default
-  if (currentName == this->GetName()) {
+  if (fullName == this->GetName()) {
     return this->SupportedGlobalGenerators[0];
   }
 
@@ -53,7 +52,7 @@ std::string cmExternalMakefileProjectGenerator::GetGlobalGeneratorName(
   for (std::vector<std::string>::const_iterator it =
          this->SupportedGlobalGenerators.begin();
        it != this->SupportedGlobalGenerators.end(); ++it) {
-    if (this->CreateFullGeneratorName(*it, this->GetName()) == currentName) {
+    if (this->CreateFullGeneratorName(*it, this->GetName()) == fullName) {
       return *it;
     }
   }

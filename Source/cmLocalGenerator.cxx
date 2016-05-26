@@ -1766,13 +1766,12 @@ static void AddVisibilityCompileOption(std::string& flags,
                                        const std::string& lang,
                                        std::string* warnCMP0063)
 {
-  std::string l(lang);
-  std::string compileOption = "CMAKE_" + l + "_COMPILE_OPTIONS_VISIBILITY";
+  std::string compileOption = "CMAKE_" + lang + "_COMPILE_OPTIONS_VISIBILITY";
   const char* opt = lg->GetMakefile()->GetDefinition(compileOption);
   if (!opt) {
     return;
   }
-  std::string flagDefine = l + "_VISIBILITY_PRESET";
+  std::string flagDefine = lang + "_VISIBILITY_PRESET";
 
   const char* prop = target->GetProperty(flagDefine);
   if (!prop) {

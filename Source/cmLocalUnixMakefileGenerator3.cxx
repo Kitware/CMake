@@ -1178,10 +1178,9 @@ void cmLocalUnixMakefileGenerator3::AppendEcho(
 }
 
 std::string cmLocalUnixMakefileGenerator3::CreateMakeVariable(
-  const std::string& sin, const std::string& s2in)
+  const std::string& sin, const std::string& s2)
 {
   std::string s = sin;
-  std::string s2 = s2in;
   std::string unmodified = s;
   unmodified += s2;
   // if there is no restriction on the length of make variables

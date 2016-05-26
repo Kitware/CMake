@@ -1356,7 +1356,6 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
     return 0;
   }
   std::string testingDir = this->CTest->GetBinaryDir();
-  std::string tempDir = testingDir;
   std::string currentDirectory = cmSystemTools::GetCurrentWorkingDirectory();
 
   std::set<std::string> missingFiles;

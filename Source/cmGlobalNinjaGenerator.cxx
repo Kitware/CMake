@@ -46,15 +46,14 @@ void cmGlobalNinjaGenerator::WriteComment(std::ostream& os,
   if (comment.empty())
     return;
 
-  std::string replace = comment;
   std::string::size_type lpos = 0;
   std::string::size_type rpos;
   os << "\n#############################################\n";
-  while ((rpos = replace.find('\n', lpos)) != std::string::npos) {
-    os << "# " << replace.substr(lpos, rpos - lpos) << "\n";
+  while ((rpos = comment.find('\n', lpos)) != std::string::npos) {
+    os << "# " << comment.substr(lpos, rpos - lpos) << "\n";
     lpos = rpos + 1;
   }
-  os << "# " << replace.substr(lpos) << "\n\n";
+  os << "# " << comment.substr(lpos) << "\n\n";
 }
 
 std::string cmGlobalNinjaGenerator::EncodeRuleName(std::string const& name)
