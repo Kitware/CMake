@@ -702,7 +702,7 @@ bool cmSystemTools::RunSingleCommand(const char* command,
 
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
 
-  if (args.size() < 1) {
+  if (args.empty()) {
     return false;
   }
   return cmSystemTools::RunSingleCommand(args, captureStdOut, captureStdErr,

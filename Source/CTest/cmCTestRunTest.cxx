@@ -207,7 +207,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   }
   if (res == cmsysProcess_State_Exited) {
     bool success = !forceFail &&
-      (retVal == 0 || this->TestProperties->RequiredRegularExpressions.size());
+      (retVal == 0 ||
+       !this->TestProperties->RequiredRegularExpressions.empty());
     if (this->TestProperties->SkipReturnCode >= 0 &&
         this->TestProperties->SkipReturnCode == retVal) {
       this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
@@ -537,7 +538,7 @@ void cmCTestRunTest::ComputeArguments()
                << " command: " << testCommand << std::endl);
 
   // Print any test-specific env vars in verbose mode
-  if (this->TestProperties->Environment.size()) {
+  if (!this->TestProperties->Environment.empty()) {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index
                  << ": "
                  << "Environment variables: " << std::endl);

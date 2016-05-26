@@ -16,7 +16,7 @@
 bool cmCTestRunScriptCommand::InitialPass(std::vector<std::string> const& args,
                                           cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->CTestScriptHandler->RunCurrentScript();
     return true;
   }

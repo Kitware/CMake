@@ -111,7 +111,7 @@ protected:
     gl.RecurseThroughSymlinksOn();
     gl.FindFiles(packageGlob);
     std::vector<std::string> const& files = gl.GetFiles();
-    if (files.size() == 0) {
+    if (files.empty()) {
       return false;
     }
 

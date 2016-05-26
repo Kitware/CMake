@@ -790,7 +790,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
   // First generate the command and arguments
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
 
-  if (args.size() < 1) {
+  if (args.empty()) {
     return false;
   }
 

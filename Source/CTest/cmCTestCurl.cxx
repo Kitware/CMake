@@ -88,10 +88,10 @@ bool cmCTestCurl::InitCurl()
   if (this->VerifyHostOff) {
     curl_easy_setopt(this->Curl, CURLOPT_SSL_VERIFYHOST, 0);
   }
-  if (this->HTTPProxy.size()) {
+  if (!this->HTTPProxy.empty()) {
     curl_easy_setopt(this->Curl, CURLOPT_PROXY, this->HTTPProxy.c_str());
     curl_easy_setopt(this->Curl, CURLOPT_PROXYTYPE, this->HTTPProxyType);
-    if (this->HTTPProxyAuth.size() > 0) {
+    if (!this->HTTPProxyAuth.empty()) {
       curl_easy_setopt(this->Curl, CURLOPT_PROXYUSERPWD,
                        this->HTTPProxyAuth.c_str());
     }
@@ -160,17 +160,17 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
   ::curl_easy_setopt(this->Curl, CURLOPT_HTTPHEADER, NULL);
   ::curl_slist_free_all(headers);
 
-  if (responseData.size() > 0) {
+  if (!responseData.empty()) {
     response = std::string(responseData.begin(), responseData.end());
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Curl response: ["
                  << response << "]\n");
   }
   std::string curlDebug;
-  if (debugData.size() > 0) {
+  if (!debugData.empty()) {
     curlDebug = std::string(debugData.begin(), debugData.end());
     cmCTestLog(this->CTest, DEBUG, "Curl debug: [" << curlDebug << "]\n");
   }
-  if (response.size() == 0) {
+  if (response.empty()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "No response from server.\n"
                  << curlDebug);
     return false;
@@ -205,11 +205,11 @@ bool cmCTestCurl::HttpRequest(std::string const& url,
 
   CURLcode res = ::curl_easy_perform(this->Curl);
 
-  if (responseData.size() > 0) {
+  if (!responseData.empty()) {
     response = std::string(responseData.begin(), responseData.end());
     cmCTestLog(this->CTest, DEBUG, "Curl response: [" << response << "]\n");
   }
-  if (debugData.size() > 0) {
+  if (!debugData.empty()) {
     std::string curlDebug = std::string(debugData.begin(), debugData.end());
     cmCTestLog(this->CTest, DEBUG, "Curl debug: [" << curlDebug << "]\n");
   }

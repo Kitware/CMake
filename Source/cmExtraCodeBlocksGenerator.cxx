@@ -248,7 +248,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
       // We don't want paths with CMakeFiles in them
       // or do we?
       // In speedcrunch those where purely internal
-      if (splitted.size() >= 1 &&
+      if (!splitted.empty() &&
           relative.find("CMakeFiles") == std::string::npos) {
         tree.InsertPath(splitted, 1, fileName);
       }
@@ -729,7 +729,7 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
   const std::string& makeFlags)
 {
   std::string command = make;
-  if (makeFlags.size() > 0) {
+  if (!makeFlags.empty()) {
     command += " ";
     command += makeFlags;
   }

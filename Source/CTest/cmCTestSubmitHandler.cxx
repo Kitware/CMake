@@ -999,12 +999,12 @@ void cmCTestSubmitHandler::ConstructCDashURL(std::string& dropMethod,
   dropMethod = this->CTest->GetCTestConfiguration("DropMethod");
   url = dropMethod;
   url += "://";
-  if (this->CTest->GetCTestConfiguration("DropSiteUser").size() > 0) {
+  if (!this->CTest->GetCTestConfiguration("DropSiteUser").empty()) {
     url += this->CTest->GetCTestConfiguration("DropSiteUser");
     cmCTestOptionalLog(
       this->CTest, HANDLER_OUTPUT,
       this->CTest->GetCTestConfiguration("DropSiteUser").c_str(), this->Quiet);
-    if (this->CTest->GetCTestConfiguration("DropSitePassword").size() > 0) {
+    if (!this->CTest->GetCTestConfiguration("DropSitePassword").empty()) {
       url += ":" + this->CTest->GetCTestConfiguration("DropSitePassword");
       cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, ":******", this->Quiet);
     }

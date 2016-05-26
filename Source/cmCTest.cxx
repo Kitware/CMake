@@ -1020,7 +1020,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
   // First generate the command and arguments
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
 
-  if (args.size() < 1) {
+  if (args.empty()) {
     return false;
   }
 
@@ -2525,7 +2525,7 @@ bool cmCTest::RunCommand(const char* command, std::string* stdOut,
 {
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
 
-  if (args.size() < 1) {
+  if (args.empty()) {
     return false;
   }
 
