@@ -445,7 +445,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       name_of_def_file += ".def ";
       vars["LINK_FLAGS"] += " /DEF:";
       vars["LINK_FLAGS"] += this->GetLocalGenerator()->ConvertToOutputFormat(
-        name_of_def_file.c_str(), cmOutputConverter::SHELL);
+        name_of_def_file, cmOutputConverter::SHELL);
     }
   }
 
@@ -572,13 +572,13 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       std::string cmd = cmakeCommand;
       cmd += " -E __create_def ";
       cmd += this->GetLocalGenerator()->ConvertToOutputFormat(
-        name_of_def_file.c_str(), cmOutputConverter::SHELL);
+        name_of_def_file, cmOutputConverter::SHELL);
       cmd += " ";
       cmNinjaDeps objs = this->GetObjects();
       std::string obj_list_file = name_of_def_file;
       obj_list_file += ".objs";
       cmd += this->GetLocalGenerator()->ConvertToOutputFormat(
-        obj_list_file.c_str(), cmOutputConverter::SHELL);
+        obj_list_file, cmOutputConverter::SHELL);
       preLinkCmdLines.push_back(cmd);
       // create a list of obj files for the -E __create_def to read
       cmGeneratedFileStream fout(obj_list_file.c_str());

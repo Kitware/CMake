@@ -958,7 +958,7 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule(
           if (emittedTargets.insert(name).second) {
             path = "... ";
             path += name;
-            lg->AppendEcho(commands, path.c_str());
+            lg->AppendEcho(commands, path);
           }
         }
       }
@@ -969,7 +969,7 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule(
        o != localHelp.end(); ++o) {
     path = "... ";
     path += *o;
-    lg->AppendEcho(commands, path.c_str());
+    lg->AppendEcho(commands, path);
   }
   lg->WriteMakeRule(ruleFileStream, "Help Target", "help", no_depends,
                     commands, true);

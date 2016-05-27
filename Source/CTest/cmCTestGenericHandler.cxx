@@ -68,7 +68,7 @@ void cmCTestGenericHandler::Initialize()
   t_StringToString::iterator it;
   for (it = this->PersistentOptions.begin();
        it != this->PersistentOptions.end(); ++it) {
-    this->Options[it->first] = it->second.c_str();
+    this->Options[it->first] = it->second;
   }
 }
 

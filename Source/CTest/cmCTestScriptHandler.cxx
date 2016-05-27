@@ -485,7 +485,7 @@ int cmCTestScriptHandler::ExtractVariables()
   // if the dashboard root isn't specified then we can compute it from the
   // this->SourceDir
   if (this->CTestRoot.empty()) {
-    this->CTestRoot = cmSystemTools::GetFilenamePath(this->SourceDir).c_str();
+    this->CTestRoot = cmSystemTools::GetFilenamePath(this->SourceDir);
   }
 
   // the script may override the minimum continuous interval

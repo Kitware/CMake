@@ -1622,7 +1622,7 @@ bool cmCTestCoverageHandler::FindLCovFiles(std::vector<std::string>& files)
     return false;
   }
 
-  prevBinaryDir = cmSystemTools::GetCurrentWorkingDirectory().c_str();
+  prevBinaryDir = cmSystemTools::GetCurrentWorkingDirectory();
 
   // DPI file should appear in build directory
   std::string daGlob;

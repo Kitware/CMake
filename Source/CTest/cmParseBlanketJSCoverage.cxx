@@ -74,7 +74,7 @@ public:
         }
         foundFile = true;
         inSource = false;
-        filename = getValue(line, 0).c_str();
+        filename = getValue(line, 0);
       } else if ((line.find("coverage") != line.npos) && foundFile &&
                  inSource) {
         /*

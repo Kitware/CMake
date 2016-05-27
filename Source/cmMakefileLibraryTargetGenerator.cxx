@@ -337,10 +337,9 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
         buildEcho += " library ";
         break;
     }
-    buildEcho += targetOutPath.c_str();
-    this->LocalGenerator->AppendEcho(commands, buildEcho.c_str(),
-                                     cmLocalUnixMakefileGenerator3::EchoLink,
-                                     &progress);
+    buildEcho += targetOutPath;
+    this->LocalGenerator->AppendEcho(
+      commands, buildEcho, cmLocalUnixMakefileGenerator3::EchoLink, &progress);
   }
 
   const char* forbiddenFlagVar = 0;
