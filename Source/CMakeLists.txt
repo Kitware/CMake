@@ -786,7 +786,7 @@ endif()
 
 foreach(_tool ${_tools})
   CMake_OPTIONAL_COMPONENT(${_tool})
-  install(TARGETS ${_tool} DESTINATION bin ${COMPONENT})
+  install(TARGETS ${_tool} DESTINATION ${CMAKE_BIN_DIR} ${COMPONENT})
 endforeach()
 
 install(FILES cmCPluginAPI.h DESTINATION ${CMAKE_DATA_DIR}/include)

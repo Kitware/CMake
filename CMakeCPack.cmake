@@ -166,7 +166,7 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   set(CPACK_PACKAGE_CONTACT "cmake@cmake.org")
 
   if(UNIX)
-    set(CPACK_STRIP_FILES "bin/ccmake;bin/cmake;bin/cpack;bin/ctest")
+    set(CPACK_STRIP_FILES "${CMAKE_BIN_DIR}/ccmake;${CMAKE_BIN_DIR}/cmake;${CMAKE_BIN_DIR}/cpack;${CMAKE_BIN_DIR}/ctest")
     set(CPACK_SOURCE_STRIP_FILES "")
     set(CPACK_PACKAGE_EXECUTABLES "ccmake" "CMake")
   endif()
