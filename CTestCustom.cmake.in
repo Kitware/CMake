@@ -81,6 +81,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "index.c.*warning: Access to field.*results in a dereference of a null pointer.*loaded from variable.*"
   "cm_sha2.*warning: Value stored to.*is never read"
   "testProcess.*warning: Dereference of null pointer .loaded from variable .invalidAddress.."
+  "liblzma/simple/x86.c:[0-9]+:[0-9]+: warning: The result of the '<<' expression is undefined"
   )
 
 if(NOT "@CMAKE_GENERATOR@" MATCHES "Xcode")
