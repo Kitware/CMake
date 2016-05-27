@@ -294,7 +294,7 @@ void cmMakefileTargetGenerator::MacOSXContentGeneratorType::operator()(
     this->Generator->OSXBundleGenerator->InitMacOSXContentDirectory(pkgloc);
 
   // Get the input file location.
-  std::string input = source.GetFullPath();
+  std::string const& input = source.GetFullPath();
 
   // Get the output file location.
   std::string output = macdir;

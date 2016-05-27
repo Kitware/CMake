@@ -50,8 +50,8 @@ int cmCPackDebGenerator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
-int cmCPackDebGenerator::PackageOnePack(std::string initialTopLevel,
-                                        std::string packageName)
+int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
+                                        std::string const& packageName)
 {
   int retval = 1;
   // Begin the archive for this pack

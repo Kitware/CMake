@@ -1356,7 +1356,6 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
     return 0;
   }
   std::string testingDir = this->CTest->GetBinaryDir();
-  std::string tempDir = testingDir;
   std::string currentDirectory = cmSystemTools::GetCurrentWorkingDirectory();
 
   std::set<std::string> missingFiles;
@@ -1759,7 +1758,7 @@ int cmCTestCoverageHandler::HandleTracePyCoverage(
 }
 
 std::string cmCTestCoverageHandler::FindFile(
-  cmCTestCoverageHandlerContainer* cont, std::string fileName)
+  cmCTestCoverageHandlerContainer* cont, std::string const& fileName)
 {
   std::string fileNameNoE =
     cmSystemTools::GetFilenameWithoutLastExtension(fileName);

@@ -108,8 +108,8 @@ public:
    * Perform an HTTP request.
    */
   static int HTTPRequest(std::string url, HTTPMethod method,
-                         std::string& response, std::string fields = "",
-                         std::string putFile = "", int timeout = 0);
+                         std::string& response, std::string const& fields = "",
+                         std::string const& putFile = "", int timeout = 0);
 #endif
 
   /** Get a testing part id from its string name.  Returns PartCount
@@ -143,7 +143,7 @@ public:
   /*
    * A utility function that returns the nightly time
    */
-  struct tm* GetNightlyTime(std::string str, bool tomorrowtag);
+  struct tm* GetNightlyTime(std::string const& str, bool tomorrowtag);
 
   /*
    * Is the tomorrow tag set?
@@ -211,9 +211,9 @@ public:
   std::string CurrentTime();
 
   //! tar/gzip and then base 64 encode a file
-  std::string Base64GzipEncodeFile(std::string file);
+  std::string Base64GzipEncodeFile(std::string const& file);
   //! base64 encode a file
-  std::string Base64EncodeFile(std::string file);
+  std::string Base64EncodeFile(std::string const& file);
 
   /**
    * Return the time remaining that the script is allowed to run in
@@ -240,7 +240,7 @@ public:
   std::string GetCDashVersion();
 
   std::string GetStopTime() { return this->StopTime; }
-  void SetStopTime(std::string time);
+  void SetStopTime(std::string const& time);
 
   // Used for parallel ctest job scheduling
   std::string GetScheduleType() { return this->ScheduleType; }

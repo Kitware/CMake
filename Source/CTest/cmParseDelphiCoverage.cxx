@@ -22,7 +22,7 @@ public:
   virtual ~HTMLParser() {}
 
   bool initializeDelphiFile(
-    const std::string filename,
+    std::string const& filename,
     cmParseDelphiCoverage::HTMLParser::FileLinesType& coverageVector)
   {
     std::string line;
@@ -197,7 +197,7 @@ cmParseDelphiCoverage::cmParseDelphiCoverage(
 }
 
 bool cmParseDelphiCoverage::LoadCoverageData(
-  const std::vector<std::string> files)
+  std::vector<std::string> const& files)
 {
   size_t i;
   std::string path;

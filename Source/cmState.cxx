@@ -1616,7 +1616,7 @@ bool cmState::Snapshot::StrictWeakOrder::operator()(
 
 void cmState::Directory::SetProperty(const std::string& prop,
                                      const char* value,
-                                     cmListFileBacktrace lfbt)
+                                     cmListFileBacktrace const& lfbt)
 {
   if (prop == "INCLUDE_DIRECTORIES") {
     if (!value) {
@@ -1648,7 +1648,7 @@ void cmState::Directory::SetProperty(const std::string& prop,
 
 void cmState::Directory::AppendProperty(const std::string& prop,
                                         const char* value, bool asString,
-                                        cmListFileBacktrace lfbt)
+                                        cmListFileBacktrace const& lfbt)
 {
   if (prop == "INCLUDE_DIRECTORIES") {
     this->AppendIncludeDirectoriesEntry(value, lfbt);

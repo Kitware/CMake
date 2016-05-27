@@ -2296,10 +2296,8 @@ void displayMessage(cmake::MessageType t, std::ostringstream& msg)
 }
 
 void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
-                         cmListFileBacktrace const& bt, bool force)
+                         cmListFileBacktrace const& backtrace, bool force)
 {
-  cmListFileBacktrace backtrace = bt;
-
   if (!force) {
     // override the message type, if needed, for warnings and errors
     cmake::MessageType override = this->ConvertMessageType(t);

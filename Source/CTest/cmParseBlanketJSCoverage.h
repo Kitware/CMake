@@ -35,7 +35,7 @@ public:
                            cmCTest* ctest);
   bool LoadCoverageData(std::vector<std::string> files);
   //  Read the JSON output
-  bool ReadJSONFile(std::string file);
+  bool ReadJSONFile(std::string const& file);
 
 protected:
   class JSONParser;

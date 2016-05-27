@@ -219,12 +219,11 @@ bool cmCTestSubmitCommand::CheckArgumentValue(std::string const& arg)
   }
 
   if (this->ArgumentDoing == ArgumentDoingFiles) {
-    std::string filename(arg);
-    if (cmSystemTools::FileExists(filename.c_str())) {
-      this->Files.insert(filename);
+    if (cmSystemTools::FileExists(arg.c_str())) {
+      this->Files.insert(arg);
     } else {
       std::ostringstream e;
-      e << "File \"" << filename << "\" does not exist. Cannot submit "
+      e << "File \"" << arg << "\" does not exist. Cannot submit "
         << "a non-existent file.";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       this->ArgumentDoing = ArgumentDoingError;
