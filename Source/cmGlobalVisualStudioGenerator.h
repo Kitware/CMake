@@ -85,7 +85,7 @@ public:
 
   /** Return true if the generated build tree may contain multiple builds.
       i.e. "Can I build Debug and Release in the same tree?" */
-  virtual bool IsMultiConfig() { return true; }
+  virtual bool IsMultiConfig() const { return true; }
 
   /** Return true if building for Windows CE */
   virtual bool TargetsWindowsCE() const { return false; }
