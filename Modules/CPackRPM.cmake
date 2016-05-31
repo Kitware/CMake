@@ -2,14 +2,14 @@
 # CPackRPM
 # --------
 #
-# The builtin (binary) CPack RPM generator (Unix only)
+# The built in (binary) CPack RPM generator (Unix only)
 #
 # Variables specific to CPack RPM generator
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
-# CPackRPM may be used to create RPM package using CPack.
-# CPackRPM is a CPack generator thus it uses the ``CPACK_XXX`` variables
-# used by CPack : https://cmake.org/Wiki/CMake:CPackConfiguration.
+# CPackRPM may be used to create RPM packages using :module:`CPack`.
+# CPackRPM is a :module:`CPack` generator thus it uses the ``CPACK_XXX``
+# variables used by :module:`CPack`.
 #
 # CPackRPM has specific features which are controlled by the specifics
 # :code:`CPACK_RPM_XXX` variables.
@@ -17,8 +17,8 @@
 # :code:`CPACK_RPM_<COMPONENT>_XXXX` variables may be used in order to have
 # **component** specific values.  Note however that ``<COMPONENT>`` refers to the
 # **grouping name** written in upper case. It may be either a component name or
-# a component GROUP name. Usually those vars correspond to RPM spec file
-# entities, one may find information about spec files here
+# a component GROUP name. Usually those variables correspond to RPM spec file
+# entities. One may find information about spec files here
 # http://www.rpm.org/wiki/Docs
 #
 # .. note::
@@ -34,9 +34,23 @@
 #  component variables also override upper cased versions where both are
 #  present.
 #
-# List of CPack/RPM specific variables:
-# https://cmake.org/Wiki/CMake:CPackPackageGenerators#DEB_.28UNIX_only.29 .
-# However as a handy reminder here comes the list of specific variables:
+# Here are some CPackRPM wiki resources that are here for historic reasons and
+# are no longer maintained but may still prove useful:
+#
+#  - https://cmake.org/Wiki/CMake:CPackConfiguration
+#  - https://cmake.org/Wiki/CMake:CPackPackageGenerators#RPM_.28Unix_Only.29
+#
+# List of CPackRPM specific variables:
+#
+# .. variable:: CPACK_RPM_PACKAGE_COMPONENT
+#
+#  Enable component packaging for CPackRPM
+#
+#  * Mandatory : NO
+#  * Default   : OFF
+#
+#  If enabled (ON) multiple packages are generated. By default a single package
+#  containing files of all components is generated.
 #
 # .. variable:: CPACK_RPM_PACKAGE_SUMMARY
 #               CPACK_RPM_<component>_PACKAGE_SUMMARY
@@ -44,7 +58,7 @@
 #  The RPM package summary.
 #
 #  * Mandatory : YES
-#  * Default   : CPACK_PACKAGE_DESCRIPTION_SUMMARY
+#  * Default   : :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY`
 #
 # .. variable:: CPACK_RPM_PACKAGE_NAME
 #               CPACK_RPM_<component>_PACKAGE_NAME
@@ -52,7 +66,7 @@
 #  The RPM package name.
 #
 #  * Mandatory : YES
-#  * Default   : CPACK_PACKAGE_NAME
+#  * Default   : :variable:`CPACK_PACKAGE_NAME`
 #
 # .. variable:: CPACK_RPM_FILE_NAME
 #               CPACK_RPM_<component>_FILE_NAME
@@ -65,7 +79,7 @@
 #
 #  This may be set to ``RPM-DEFAULT`` to allow rpmbuild tool to generate package
 #  file name by itself.
-#  Alternatively provided package file name must end with ".rpm" suffix.
+#  Alternatively provided package file name must end with ``.rpm`` suffix.
 #
 #  .. note::
 #
@@ -83,7 +97,7 @@
 #  The RPM package version.
 #
 #  * Mandatory : YES
-#  * Default   : CPACK_PACKAGE_VERSION
+#  * Default   : :variable:`CPACK_PACKAGE_VERSION`
 #
 # .. variable:: CPACK_RPM_PACKAGE_ARCHITECTURE
 #               CPACK_RPM_<component>_PACKAGE_ARCHITECTURE
@@ -91,9 +105,9 @@
 #  The RPM package architecture.
 #
 #  * Mandatory : YES
-#  * Default   : Native architecture output by "uname -m"
+#  * Default   : Native architecture output by ``uname -m``
 #
-#  This may be set to "noarch" if you know you are building a noarch package.
+#  This may be set to ``noarch`` if you know you are building a noarch package.
 #
 # .. variable:: CPACK_RPM_PACKAGE_RELEASE
 #
@@ -161,9 +175,9 @@
 #  RPM package description.
 #
 #  * Mandatory : YES
-#  * Default : CPACK_COMPONENT_<compName>_DESCRIPTION (component based installers
-#    only) if set, CPACK_PACKAGE_DESCRIPTION_FILE if set or "no package
-#    description available"
+#  * Default : :variable:`CPACK_COMPONENT_<compName>_DESCRIPTION` (component
+#    based installers only) if set, :variable:`CPACK_PACKAGE_DESCRIPTION_FILE`
+#    if set or "no package description available"
 #
 # .. variable:: CPACK_RPM_COMPRESSION_TYPE
 #
@@ -174,8 +188,15 @@
 #
 #  May be used to override RPM compression type to be used to build the
 #  RPM. For example some Linux distribution now default to lzma or xz
-#  compression whereas older cannot use such RPM.  Using this one can enforce
-#  compression type to be used.  Possible value are: lzma, xz, bzip2 and gzip.
+#  compression whereas older cannot use such RPM. Using this one can enforce
+#  compression type to be used.
+#
+#  Possible values are:
+#
+#  - lzma
+#  - xz
+#  - bzip2
+#  - gzip
 #
 # .. variable:: CPACK_RPM_PACKAGE_AUTOREQ
 #               CPACK_RPM_<component>_PACKAGE_AUTOREQ
@@ -190,7 +211,7 @@
 #
 #  .. note::
 #
-#    By defalut automatic dependency detection is enabled by rpm generator.
+#    By default automatic dependency detection is enabled by rpm generator.
 #
 # .. variable:: CPACK_RPM_PACKAGE_AUTOPROV
 #               CPACK_RPM_<component>_PACKAGE_AUTOPROV
@@ -206,7 +227,7 @@
 #
 #  .. note::
 #
-#    By defalut automatic provides detection is enabled by rpm generator.
+#    By default automatic provides detection is enabled by rpm generator.
 #
 # .. variable:: CPACK_RPM_PACKAGE_AUTOREQPROV
 #               CPACK_RPM_<component>_PACKAGE_AUTOREQPROV
@@ -222,7 +243,7 @@
 #
 #  .. note::
 #
-#    By defalut automatic detection feature is enabled by rpm.
+#    By default automatic detection feature is enabled by rpm.
 #
 # .. variable:: CPACK_RPM_PACKAGE_REQUIRES
 #               CPACK_RPM_<component>_PACKAGE_REQUIRES
@@ -232,7 +253,7 @@
 #  * Mandatory : NO
 #  * Default   : -
 #
-#  May be used to set RPM dependencies (requires).  Note that you must enclose
+#  May be used to set RPM dependencies (requires). Note that you must enclose
 #  the complete requires string between quotes, for example::
 #
 #   set(CPACK_RPM_PACKAGE_REQUIRES "python >= 2.5.0, cmake >= 2.8")
@@ -249,8 +270,8 @@
 #  * Mandatory : NO
 #  * Default   : -
 #
-#  May be used to set negative RPM dependencies (conflicts). Note that you must enclose
-#  the complete requires string between quotes, for example::
+#  May be used to set negative RPM dependencies (conflicts). Note that you must
+#  enclose the complete requires string between quotes, for example::
 #
 #   set(CPACK_RPM_PACKAGE_CONFLICTS "libxml2")
 #
@@ -266,8 +287,8 @@
 #  * Mandatory : NO
 #  * Default   : -
 #
-#  May be used to set RPM preinstall dependencies (requires(pre)).  Note that you must enclose
-#  the complete requires string between quotes, for example::
+#  May be used to set RPM preinstall dependencies (requires(pre)). Note that
+#  you must enclose the complete requires string between quotes, for example::
 #
 #   set(CPACK_RPM_PACKAGE_REQUIRES_PRE "shadow-utils, initscripts")
 #
@@ -279,11 +300,10 @@
 #  * Mandatory : NO
 #  * Default   : -
 #
-#  May be used to set RPM postinstall dependencies (requires(post)).  Note that you must enclose
-#  the complete requires string between quotes, for example::
+#  May be used to set RPM postinstall dependencies (requires(post)). Note that
+#  you must enclose the complete requires string between quotes, for example::
 #
 #   set(CPACK_RPM_PACKAGE_REQUIRES_POST "shadow-utils, initscripts")
-#
 #
 # .. variable:: CPACK_RPM_PACKAGE_REQUIRES_POSTUN
 #               CPACK_RPM_<component>_PACKAGE_REQUIRES_POSTUN
@@ -293,11 +313,11 @@
 #  * Mandatory : NO
 #  * Default   : -
 #
-#  May be used to set RPM postuninstall dependencies (requires(postun)).  Note that you must enclose
-#  the complete requires string between quotes, for example::
+#  May be used to set RPM postuninstall dependencies (requires(postun)). Note
+#  that you must enclose the complete requires string between quotes, for
+#  example::
 #
 #   set(CPACK_RPM_PACKAGE_REQUIRES_POSTUN "shadow-utils, initscripts")
-#
 #
 # .. variable:: CPACK_RPM_PACKAGE_REQUIRES_PREUN
 #               CPACK_RPM_<component>_PACKAGE_REQUIRES_PREUN
@@ -307,8 +327,8 @@
 #  * Mandatory : NO
 #  * Default   : -
 #
-#  May be used to set RPM preuninstall dependencies (requires(preun)).  Note that you must enclose
-#  the complete requires string between quotes, for example::
+#  May be used to set RPM preuninstall dependencies (requires(preun)). Note that
+#  you must enclose the complete requires string between quotes, for example::
 #
 #   set(CPACK_RPM_PACKAGE_REQUIRES_PREUN "shadow-utils, initscripts")
 #
@@ -320,7 +340,7 @@
 #  * Mandatory : NO
 #  * Default   : -
 #
-#  May be used to set weak RPM dependencies (suggests).  Note that you must
+#  May be used to set weak RPM dependencies (suggests). Note that you must
 #  enclose the complete requires string between quotes.
 #
 # .. variable:: CPACK_RPM_PACKAGE_PROVIDES
@@ -331,7 +351,7 @@
 #  * Mandatory : NO
 #  * Default   : -
 #
-#  May be used to set RPM dependencies (provides).  The provided package list
+#  May be used to set RPM dependencies (provides). The provided package list
 #  of an RPM file could be printed with::
 #
 #   rpm -qp --provides file.rpm
@@ -359,21 +379,23 @@
 #
 #   rpm --prefix or --relocate
 #
-#  in order to install it at an alternate place see rpm(8).  Note that
-#  currently this may fail if CPACK_SET_DESTDIR is set to ON.  If
-#  CPACK_SET_DESTDIR is set then you will get a warning message but if there
-#  is file installed with absolute path you'll get unexpected behavior.
+#  in order to install it at an alternate place see rpm(8). Note that
+#  currently this may fail if :variable:`CPACK_SET_DESTDIR` is set to ``ON``. If
+#  :variable:`CPACK_SET_DESTDIR` is set then you will get a warning message but
+#  if there is file installed with absolute path you'll get unexpected behavior.
 #
 # .. variable:: CPACK_RPM_SPEC_INSTALL_POST
+#
+#  Deprecated - use :variable:`CPACK_RPM_POST_INSTALL_SCRIPT_FILE` instead.
 #
 #  * Mandatory : NO
 #  * Default   : -
 #  * Deprecated: YES
 #
 #  This way of specifying post-install script is deprecated, use
-#  CPACK_RPM_POST_INSTALL_SCRIPT_FILE.
+#  :variable:`CPACK_RPM_POST_INSTALL_SCRIPT_FILE`.
 #  May be used to set an RPM post-install command inside the spec file.
-#  For example setting it to "/bin/true" may be used to prevent
+#  For example setting it to ``/bin/true`` may be used to prevent
 #  rpmbuild to strip binaries.
 #
 # .. variable:: CPACK_RPM_SPEC_MORE_DEFINE
@@ -383,7 +405,7 @@
 #  * Mandatory : NO
 #  * Default   : -
 #
-#  May be used to add any %define lines to the generated spec file.
+#  May be used to add any ``%define`` lines to the generated spec file.
 #
 # .. variable:: CPACK_RPM_PACKAGE_DEBUG
 #
@@ -398,6 +420,7 @@
 #   cpack -D CPACK_RPM_PACKAGE_DEBUG=1 -G RPM
 #
 # .. variable:: CPACK_RPM_USER_BINARY_SPECFILE
+#               CPACK_RPM_<componentName>_USER_BINARY_SPECFILE
 #
 #  A user provided spec file.
 #
@@ -407,8 +430,6 @@
 #  May be set by the user in order to specify a USER binary spec file
 #  to be used by CPackRPM instead of generating the file.
 #  The specified file will be processed by configure_file( @ONLY).
-#  One can provide a component specific file by setting
-#  CPACK_RPM_<componentName>_USER_BINARY_SPECFILE.
 #
 # .. variable:: CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE
 #
@@ -423,21 +444,24 @@
 #   cpack -D CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE=1 -G RPM
 #
 #  The user may then use this file in order to hand-craft is own
-#  binary spec file which may be used with CPACK_RPM_USER_BINARY_SPECFILE.
+#  binary spec file which may be used with
+#  :variable:`CPACK_RPM_USER_BINARY_SPECFILE`.
 #
 # .. variable:: CPACK_RPM_PRE_INSTALL_SCRIPT_FILE
 #               CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE
+#
+#  Path to file containing pre (un)install script.
 #
 #  * Mandatory : NO
 #  * Default   : -
 #
 #  May be used to embed a pre (un)installation script in the spec file.
-#  The refered script file(s) will be read and directly
-#  put after the %pre or %preun section
-#  If CPACK_RPM_COMPONENT_INSTALL is set to ON the (un)install script for
-#  each component can be overridden with
-#  CPACK_RPM_<COMPONENT>_PRE_INSTALL_SCRIPT_FILE and
-#  CPACK_RPM_<COMPONENT>_PRE_UNINSTALL_SCRIPT_FILE.
+#  The referred script file (or both) will be read and directly
+#  put after the ``%pre`` or ``%preun`` section
+#  If :variable:`CPACK_RPM_PACKAGE_COMPONENT` is set to ON the (un)install
+#  script for each component can be overridden with
+#  ``CPACK_RPM_<COMPONENT>_PRE_INSTALL_SCRIPT_FILE`` and
+#  ``CPACK_RPM_<COMPONENT>_PRE_UNINSTALL_SCRIPT_FILE``.
 #  One may verify which scriptlet has been included with::
 #
 #   rpm -qp --scripts  package.rpm
@@ -445,16 +469,18 @@
 # .. variable:: CPACK_RPM_POST_INSTALL_SCRIPT_FILE
 #               CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE
 #
+#  Path to file containing post (un)install script.
+#
 #  * Mandatory : NO
 #  * Default   : -
 #
 #  May be used to embed a post (un)installation script in the spec file.
-#  The refered script file(s) will be read and directly
-#  put after the %post or %postun section.
-#  If CPACK_RPM_COMPONENT_INSTALL is set to ON the (un)install script for
-#  each component can be overridden with
-#  CPACK_RPM_<COMPONENT>_POST_INSTALL_SCRIPT_FILE and
-#  CPACK_RPM_<COMPONENT>_POST_UNINSTALL_SCRIPT_FILE.
+#  The referred script file (or both) will be read and directly
+#  put after the ``%post`` or ``%postun`` section.
+#  If :variable:`CPACK_RPM_PACKAGE_COMPONENT` is set to ON the (un)install
+#  script for each component can be overridden with
+#  ``CPACK_RPM_<COMPONENT>_POST_INSTALL_SCRIPT_FILE`` and
+#  ``CPACK_RPM_<COMPONENT>_POST_UNINSTALL_SCRIPT_FILE``.
 #  One may verify which scriptlet has been included with::
 #
 #   rpm -qp --scripts  package.rpm
@@ -465,11 +491,11 @@
 #  * Mandatory : NO
 #  * Default   : -
 #
-#  May be used to explicitly specify %(<directive>) file line
-#  in the spec file. Like %config(noreplace) or any other directive
-#  that be found in the %files section. Since CPackRPM is generating
+#  May be used to explicitly specify ``%(<directive>)`` file line
+#  in the spec file. Like ``%config(noreplace)`` or any other directive
+#  that be found in the ``%files`` section. Since CPackRPM is generating
 #  the list of files (and directories) the user specified files of
-#  the CPACK_RPM_<COMPONENT>_USER_FILELIST list will be removed from
+#  the ``CPACK_RPM_<COMPONENT>_USER_FILELIST`` list will be removed from
 #  the generated list.
 #
 # .. variable:: CPACK_RPM_CHANGELOG_FILE
@@ -480,7 +506,7 @@
 #  * Default   : -
 #
 #  May be used to embed a changelog in the spec file.
-#  The refered file will be read and directly put after the %changelog
+#  The referred file will be read and directly put after the ``%changelog``
 #  section.
 #
 # .. variable:: CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST
@@ -494,8 +520,8 @@
 #  list of paths discovered by CPack RPM. The defaut value contains a
 #  reasonable set of values if the variable is not defined by the user. If the
 #  variable is defined by the user then CPackRPM will NOT any of the default
-#  path.  If you want to add some path to the default list then you can use
-#  CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION variable.
+#  path. If you want to add some path to the default list then you can use
+#  :variable:`CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION` variable.
 #
 # .. variable:: CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
 #
@@ -505,38 +531,46 @@
 #  * Default   : -
 #
 #  May be used to add more exclude path (directories or files) from the initial
-#  default list of excluded paths. See CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST.
+#  default list of excluded paths. See
+#  :variable:`CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST`.
 #
 # .. variable:: CPACK_RPM_RELOCATION_PATHS
+#
+#  Packages relocation paths list.
 #
 #  * Mandatory : NO
 #  * Default   : -
 #
 #  May be used to specify more than one relocation path per relocatable RPM.
 #  Variable contains a list of relocation paths that if relative are prefixed
-#  by the value of CPACK_RPM_<COMPONENT>_PACKAGE_PREFIX or by the value of
-#  CPACK_PACKAGING_INSTALL_PREFIX if the component version is not provided.
+#  by the value of :variable:`CPACK_RPM_<COMPONENT>_PACKAGE_PREFIX` or by the
+#  value of :variable:`CPACK_PACKAGING_INSTALL_PREFIX` if the component version
+#  is not provided.
 #  Variable is not component based as its content can be used to set a different
 #  path prefix for e.g. binary dir and documentation dir at the same time.
 #  Only prefixes that are required by a certain component are added to that
 #  component - component must contain at least one file/directory/symbolic link
-#  with CPACK_RPM_RELOCATION_PATHS prefix for a certain relocation path
-#  to be added. Package will not contain any relocation paths if there are no
-#  files/directories/symbolic links on any of the provided prefix locations.
+#  with :variable:`CPACK_RPM_RELOCATION_PATHS` prefix for a certain relocation
+#  path to be added. Package will not contain any relocation paths if there are
+#  no files/directories/symbolic links on any of the provided prefix locations.
 #  Packages that either do not contain any relocation paths or contain
 #  files/directories/symbolic links that are outside relocation paths print
-#  out an AUTHOR_WARNING that RPM will be partially relocatable.
+#  out an ``AUTHOR_WARNING`` that RPM will be partially relocatable.
 #
 # .. variable:: CPACK_RPM_<COMPONENT>_PACKAGE_PREFIX
+#
+#  Per component relocation path install prefix.
 #
 #  * Mandatory : NO
 #  * Default   : CPACK_PACKAGING_INSTALL_PREFIX
 #
-#  May be used to set per component CPACK_PACKAGING_INSTALL_PREFIX for
-#  relocatable RPM packages.
+#  May be used to set per component :variable:`CPACK_PACKAGING_INSTALL_PREFIX`
+#  for relocatable RPM packages.
 #
 # .. variable:: CPACK_RPM_NO_INSTALL_PREFIX_RELOCATION
 #               CPACK_RPM_NO_<COMPONENT>_INSTALL_PREFIX_RELOCATION
+#
+#  Removal of default install prefix from relocation paths list.
 #
 #  * Mandatory : NO
 #  * Default   : CPACK_PACKAGING_INSTALL_PREFIX or CPACK_RPM_<COMPONENT>_PACKAGE_PREFIX
@@ -602,9 +636,19 @@
 #  * Mandatory : NO
 #  * Default   : - (system default)
 #
-#  Accepted values are lists with PERMISSIONS. Valid permissions
-#  are OWNER_READ, OWNER_WRITE, OWNER_EXECUTE, GROUP_READ,
-#  GROUP_WRITE, GROUP_EXECUTE, WORLD_READ, WORLD_WRITE and WORLD_EXECUTE.
+#  Accepted values are lists with ``PERMISSIONS``. Valid permissions
+#  are:
+#
+#  - OWNER_READ
+#  - OWNER_WRITE
+#  - OWNER_EXECUTE
+#  - GROUP_READ
+#  - GROUP_WRITE
+#  - GROUP_EXECUTE
+#  - WORLD_READ
+#  - WORLD_WRITE
+#  - WORLD_EXECUTE
+#
 #  Note that <compName> must be in upper-case.
 #
 # .. variable:: CPACK_RPM_DEFAULT_DIR_PERMISSIONS
@@ -616,8 +660,7 @@
 #  * Default   : - (system default)
 #
 #  Accepted values are lists with PERMISSIONS. Valid permissions
-#  are OWNER_READ, OWNER_WRITE, OWNER_EXECUTE, GROUP_READ,
-#  GROUP_WRITE, GROUP_EXECUTE, WORLD_READ, WORLD_WRITE and WORLD_EXECUTE.
+#  are the same as for :variable:`CPACK_RPM_DEFAULT_FILE_PERMISSIONS`.
 #  Note that <compName> must be in upper-case.
 #
 # Packaging of Symbolic Links
@@ -643,7 +686,7 @@
 # Symbolic links that point to locations outside packaging path produce a
 # warning and are treated as non relocatable permanent symbolic links.
 #
-# Currenty there are a few limitations though:
+# Currently there are a few limitations though:
 #
 # * For component based packaging component interdependency is not checked
 #   when processing symbolic links. Symbolic links pointing to content of
