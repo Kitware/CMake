@@ -26,7 +26,7 @@ class cmSearchPath
 {
 public:
   // cmSearchPath must be initialized from a valid pointer.  The only reason
-  // for teh default is to allow it to be easily used in stl containers.
+  // for the default is to allow it to be easily used in stl containers.
   // Attempting to initialize with a NULL value will fail an assertion
   cmSearchPath(cmFindCommon* findCmd = 0);
   ~cmSearchPath();
