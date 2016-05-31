@@ -53,7 +53,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "[Qq]t([Cc]ore|[Gg]ui|[Ww]idgets).*warning.*conversion.*may alter its value"
   "warning:.*is.*very unsafe.*consider using.*"
   "warning:.*is.*misused, please use.*"
-  "CMakeSetupManifest.xml.*manifest authoring warning.*Unrecognized Element"
+  "cmake.version.manifest.*manifest authoring warning.*Unrecognized Element"
   "cc-3968 CC: WARNING File.*" # "implicit" truncation by static_cast
   "ld: warning: directory not found for option .-(F|L)"
   "ld: warning .*/libgcc.a archive's cputype"
@@ -62,6 +62,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "warning.*This version of Mac OS X is unsupported"
   "clang.*: warning: argument unused during compilation: .-g"
   "note: in expansion of macro" # diagnostic context note
+  "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*rand.*may return deterministic values"
   "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*rand.*isn.*t random" # we do not do crypto
   "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*srand.*seed choices are.*poor" # we do not do crypto
 
@@ -80,6 +81,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "index.c.*warning: Access to field.*results in a dereference of a null pointer.*loaded from variable.*"
   "cm_sha2.*warning: Value stored to.*is never read"
   "testProcess.*warning: Dereference of null pointer .loaded from variable .invalidAddress.."
+  "liblzma/simple/x86.c:[0-9]+:[0-9]+: warning: The result of the '<<' expression is undefined"
   )
 
 if(NOT "@CMAKE_GENERATOR@" MATCHES "Xcode")
