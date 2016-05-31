@@ -39,7 +39,7 @@ public:
   cmSourceFileLocation& operator=(const cmSourceFileLocation& loc);
 
   /**
-   * Return whether the givne source file location could refers to the
+   * Return whether the given source file location could refers to the
    * same source file as this location given the level of ambiguity in
    * each location.
    */
