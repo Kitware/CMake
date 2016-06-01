@@ -2,29 +2,44 @@
 # CPackDeb
 # --------
 #
-# The builtin (binary) CPack Deb generator (Unix only)
+# The built in (binary) CPack Deb generator (Unix only)
 #
 # Variables specific to CPack Debian (DEB) generator
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
-# CPackDeb may be used to create Deb package using CPack.
-# CPackDeb is a CPack generator thus it uses the ``CPACK_XXX`` variables
-# used by CPack : https://cmake.org/Wiki/CMake:CPackConfiguration.
-# CPackDeb generator should work on any linux host but it will produce
-# better deb package when Debian specific tools 'dpkg-xxx' are usable on
+# CPackDeb may be used to create Deb package using :module:`CPack`.
+# CPackDeb is a :module:`CPack` generator thus it uses the ``CPACK_XXX``
+# variables used by :module:`CPack`.
+#
+# CPackDeb generator should work on any Linux host but it will produce
+# better deb package when Debian specific tools ``dpkg-xxx`` are usable on
 # the build system.
 #
 # CPackDeb has specific features which are controlled by the specifics
 # :code:`CPACK_DEBIAN_XXX` variables.
 #
 # :code:`CPACK_DEBIAN_<COMPONENT>_XXXX` variables may be used in order to have
-# **component** specific values.  Note however that ``<COMPONENT>`` refers to the
-# **grouping name** written in upper case. It may be either a component name or
-# a component GROUP name.
+# **component** specific values.  Note however that ``<COMPONENT>`` refers to
+# the **grouping name** written in upper case. It may be either a component name
+# or a component GROUP name.
 #
-# You'll find a detailed usage on the wiki:
-# https://cmake.org/Wiki/CMake:CPackPackageGenerators#DEB_.28UNIX_only.29 .
-# However as a handy reminder here comes the list of specific variables:
+# Here are some CPackDeb wiki resources that are here for historic reasons and
+# are no longer maintained but may still prove useful:
+#
+#  - https://cmake.org/Wiki/CMake:CPackConfiguration
+#  - https://cmake.org/Wiki/CMake:CPackPackageGenerators#DEB_.28UNIX_only.29
+#
+# List of CPackRPM specific variables:
+#
+# .. variable:: CPACK_DEB_PACKAGE_COMPONENT
+#
+#  Enable component packaging for CPackRPM
+#
+#  * Mandatory : NO
+#  * Default   : OFF
+#
+#  If enabled (ON) multiple packages are generated. By default a single package
+#  containing files of all components is generated.
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_NAME
 #               CPACK_DEBIAN_<COMPONENT>_PACKAGE_NAME
@@ -55,7 +70,7 @@
 #
 #    <PackageName>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb
 #
-#  Alternatively provided package file name must end with ".deb" suffix.
+#  Alternatively provided package file name must end with ``.deb`` suffix.
 #
 #  .. note::
 #
@@ -97,7 +112,6 @@
 #  * Mandatory : YES
 #  * Default   : Output of :code:`dpkg --print-architecture` (or :code:`i386`
 #    if :code:`dpkg` is not found)
-#
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_DEPENDS
 #               CPACK_DEBIAN_<COMPONENT>_PACKAGE_DEPENDS
@@ -141,7 +155,6 @@
 #  * Mandatory : YES
 #  * Default   : :code:`CPACK_PACKAGE_CONTACT`
 #
-#
 # .. variable:: CPACK_DEBIAN_PACKAGE_DESCRIPTION
 #               CPACK_COMPONENT_<COMPONENT>_DESCRIPTION
 #
@@ -160,19 +173,23 @@
 #  Set Section control field e.g. admin, devel, doc, ...
 #
 #  * Mandatory : YES
-#  * Default   : 'devel'
+#  * Default   : "devel"
 #
 #  See https://www.debian.org/doc/debian-policy/ch-archive.html#s-subsections
-#
 #
 # .. variable:: CPACK_DEBIAN_COMPRESSION_TYPE
 #
 #  The compression used for creating the Debian package.
-#  Possible values are: lzma, xz, bzip2 and gzip.
 #
 #  * Mandatory : YES
-#  * Default   : 'gzip'
+#  * Default   : "gzip"
 #
+#  Possible values are:
+#
+#  - lzma
+#  - xz
+#  - bzip2
+#  - gzip
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_PRIORITY
 #               CPACK_DEBIAN_<COMPONENT>_PACKAGE_PRIORITY
@@ -181,10 +198,9 @@
 #  extra
 #
 #  * Mandatory : YES
-#  * Default   : 'optional'
+#  * Default   : "optional"
 #
 #  See https://www.debian.org/doc/debian-policy/ch-archive.html#s-priorities
-#
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_HOMEPAGE
 #
@@ -199,7 +215,6 @@
 #
 #    The content of this field is a simple URL without any surrounding
 #    characters such as <>.
-#
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_SHLIBDEPS
 #               CPACK_DEBIAN_<COMPONENT>_PACKAGE_SHLIBDEPS
@@ -219,7 +234,6 @@
 #    if you use this feature, because if you don't :code:`dpkg-shlibdeps`
 #    may fail to find your own shared libs.
 #    See https://cmake.org/Wiki/CMake_RPATH_handling.
-#
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_DEBUG
 #
@@ -284,7 +298,6 @@
 #
 #  See https://www.debian.org/doc/debian-policy/ch-relationships.html#s-breaks
 #
-#
 # .. variable:: CPACK_DEBIAN_PACKAGE_CONFLICTS
 #               CPACK_DEBIAN_<COMPONENT>_PACKAGE_CONFLICTS
 #
@@ -326,7 +339,6 @@
 #
 #  See https://www.debian.org/doc/debian-policy/ch-relationships.html#s-virtual
 #
-#
 # .. variable:: CPACK_DEBIAN_PACKAGE_REPLACES
 #               CPACK_DEBIAN_<COMPONENT>_PACKAGE_REPLACES
 #
@@ -342,7 +354,6 @@
 #      installations.
 #
 #  See http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
-#
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_RECOMMENDS
 #               CPACK_DEBIAN_<COMPONENT>_PACKAGE_RECOMMENDS
@@ -360,7 +371,6 @@
 #
 #  See http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
 #
-#
 # .. variable:: CPACK_DEBIAN_PACKAGE_SUGGESTS
 #               CPACK_DEBIAN_<COMPONENT>_PACKAGE_SUGGESTS
 #
@@ -376,14 +386,13 @@
 #
 #  See http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
 #
-#
 # .. variable:: CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS
 #
 #  * Mandatory : NO
 #  * Default   : OFF
 #
 #  Allows to generate shlibs control file automatically. Compatibility is defined by
-#  CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY variable value.
+#  :variable:`CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY` variable value.
 #
 #  .. note::
 #
@@ -391,8 +400,9 @@
 #    set. This can be done by setting SOVERSION property with
 #    :command:`set_target_properties` command.
 #
-#
 # .. variable:: CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY
+#
+#  Compatibility policy for auto-generated shlibs control file.
 #
 #  * Mandatory : NO
 #  * Default   : "="
@@ -401,7 +411,6 @@
 #  Possible values: "=", ">="
 #
 #  See https://www.debian.org/doc/debian-policy/ch-sharedlibs.html#s-sharedlibs-shlibdeps
-#
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
 #               CPACK_DEBIAN_<COMPONENT>_PACKAGE_CONTROL_EXTRA
