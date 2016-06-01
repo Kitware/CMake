@@ -319,7 +319,7 @@ public:
 
   /** Return true if the generated build tree may contain multiple builds.
       i.e. "Can I build Debug and Release in the same tree?" */
-  virtual bool IsMultiConfig() { return false; }
+  virtual bool IsMultiConfig() const { return false; }
 
   std::string GetSharedLibFlagsForLanguage(std::string const& lang) const;
 

@@ -79,7 +79,7 @@ public:
 
   /** Return true if the generated build tree may contain multiple builds.
       i.e. "Can I build Debug and Release in the same tree?" */
-  virtual bool IsMultiConfig();
+  virtual bool IsMultiConfig() const;
 
   virtual bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf);
   void AppendFlag(std::string& flags, std::string const& flag);
