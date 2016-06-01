@@ -90,11 +90,8 @@ public:
     cmsysProcess_Execute(this->Process);
     this->PipeState = cmsysProcess_GetState(this->Process);
     // if the process is running or exited return true
-    if (this->PipeState == cmsysProcess_State_Executing ||
-        this->PipeState == cmsysProcess_State_Exited) {
-      return true;
-    }
-    return false;
+    return this->PipeState == cmsysProcess_State_Executing ||
+      this->PipeState == cmsysProcess_State_Exited;
   }
   void SetStdoutFile(const char* fname)
   {
@@ -705,13 +702,8 @@ bool IsFileInDir(const std::string& infile, const std::string& indir)
   std::string file = cmSystemTools::CollapseFullPath(infile);
   std::string dir = cmSystemTools::CollapseFullPath(indir);
 
-  if (file.size() > dir.size() &&
-      (fnc(file.substr(0, dir.size())) == fnc(dir)) &&
-      file[dir.size()] == '/') {
-    return true;
-  }
-
-  return false;
+  return file.size() > dir.size() &&
+    fnc(file.substr(0, dir.size())) == fnc(dir) && file[dir.size()] == '/';
 }
 
 int cmCTestCoverageHandler::HandlePHPCoverage(

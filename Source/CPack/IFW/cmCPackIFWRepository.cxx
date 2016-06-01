@@ -45,16 +45,16 @@ bool cmCPackIFWRepository::IsValid() const
 
   switch (Update) {
     case None:
-      valid = Url.empty() ? false : true;
+      valid = !Url.empty();
       break;
     case Add:
-      valid = Url.empty() ? false : true;
+      valid = !Url.empty();
       break;
     case Remove:
-      valid = Url.empty() ? false : true;
+      valid = !Url.empty();
       break;
     case Replace:
-      valid = (OldUrl.empty() || NewUrl.empty()) ? false : true;
+      valid = !OldUrl.empty() && !NewUrl.empty();
       break;
   }
 
@@ -244,11 +244,7 @@ bool cmCPackIFWRepository::PatchUpdatesXml()
 
   fout.Close();
 
-  if (!cmSystemTools::RenameFile(updatesPatchXml.data(), updatesXml.data())) {
-    return false;
-  }
-
-  return true;
+  return cmSystemTools::RenameFile(updatesPatchXml.data(), updatesXml.data());
 }
 
 void cmCPackIFWRepository::WriteRepositoryConfig(cmXMLWriter& xout)

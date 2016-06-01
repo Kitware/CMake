@@ -454,8 +454,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   std::vector<std::string> archiveFinishCommands;
   std::string::size_type archiveCommandLimit = std::string::npos;
   if (this->GeneratorTarget->GetType() == cmState::STATIC_LIBRARY) {
-    haveStaticLibraryRule =
-      this->Makefile->GetDefinition(linkRuleVar) ? true : false;
+    haveStaticLibraryRule = this->Makefile->IsDefinitionSet(linkRuleVar);
     std::string arCreateVar = "CMAKE_";
     arCreateVar += linkLanguage;
     arCreateVar += "_ARCHIVE_CREATE";

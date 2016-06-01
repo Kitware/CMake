@@ -642,5 +642,5 @@ void cmCacheManager::CacheIterator::SetProperty(const std::string& p, bool v)
 bool cmCacheManager::CacheIterator::PropertyExists(
   const std::string& prop) const
 {
-  return this->GetProperty(prop) ? true : false;
+  return this->GetProperty(prop) != NULL;
 }

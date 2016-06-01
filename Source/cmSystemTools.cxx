@@ -2115,11 +2115,8 @@ bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
   // If the symlink points at an extended version of the same name
   // assume it is the soname.
   std::string name = cmSystemTools::GetFilenameName(fullPath);
-  if (soname.length() > name.length() &&
-      soname.substr(0, name.length()) == name) {
-    return true;
-  }
-  return false;
+  return soname.length() > name.length() &&
+    soname.compare(0, name.length(), name) == 0;
 }
 
 bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
