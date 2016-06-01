@@ -675,11 +675,7 @@ int cmCPackDebGenerator::createDeb()
 
 bool cmCPackDebGenerator::SupportsComponentInstallation() const
 {
-  if (IsOn("CPACK_DEB_COMPONENT_INSTALL")) {
-    return true;
-  } else {
-    return false;
-  }
+  return IsOn("CPACK_DEB_COMPONENT_INSTALL");
 }
 
 std::string cmCPackDebGenerator::GetComponentInstallDirNameSuffix(

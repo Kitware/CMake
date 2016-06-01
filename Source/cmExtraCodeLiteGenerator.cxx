@@ -407,7 +407,7 @@ std::string cmExtraCodeLiteGenerator::GetCodeLiteCompilerName(
   // figure out which language to use
   // for now care only for C and C++
   std::string compilerIdVar = "CMAKE_CXX_COMPILER_ID";
-  if (this->GlobalGenerator->GetLanguageEnabled("CXX") == false) {
+  if (!this->GlobalGenerator->GetLanguageEnabled("CXX")) {
     compilerIdVar = "CMAKE_C_COMPILER_ID";
   }
 

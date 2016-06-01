@@ -278,21 +278,21 @@ void cmDependsC::ReadCacheFile()
       continue;
     }
     // the first line after an empty line is the name of the parsed file
-    if (haveFileName == false) {
+    if (!haveFileName) {
       haveFileName = true;
       int newer = 0;
       cmFileTimeComparison comp;
       bool res = comp.FileTimeCompare(this->CacheFileName.c_str(),
                                       line.c_str(), &newer);
 
-      if ((res == true) && (newer == 1)) // cache is newer than the parsed file
+      if (res && newer == 1) // cache is newer than the parsed file
       {
         cacheEntry = new cmIncludeLines;
         this->FileCache[line] = cacheEntry;
       }
       // file doesn't exist, check that the regular expressions
       // haven't changed
-      else if (res == false) {
+      else if (!res) {
         if (line.find(INCLUDE_REGEX_LINE_MARKER) == 0) {
           if (line != this->IncludeRegexLineString) {
             return;

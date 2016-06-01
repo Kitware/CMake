@@ -1306,11 +1306,7 @@ bool cmGeneratorTarget::MacOSXRpathInstallNameDirDefault() const
       this->GetName());
   }
 
-  if (cmp0042 == cmPolicies::NEW) {
-    return true;
-  }
-
-  return false;
+  return cmp0042 == cmPolicies::NEW;
 }
 
 std::string cmGeneratorTarget::GetSOName(const std::string& config) const

@@ -202,10 +202,7 @@ bool cmListFile::ParseFile(const char* filename, bool topLevel, cmMakefile* mf)
       this->Functions.insert(this->Functions.begin(), project);
     }
   }
-  if (parseError) {
-    return false;
-  }
-  return true;
+  return !parseError;
 }
 
 bool cmListFileParser::ParseFunction(const char* name, long line)

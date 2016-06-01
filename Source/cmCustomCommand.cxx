@@ -38,7 +38,7 @@ cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
   , Backtrace()
   , Comment(comment ? comment : "")
   , WorkingDirectory(workingDirectory ? workingDirectory : "")
-  , HaveComment(comment ? true : false)
+  , HaveComment(comment != NULL)
   , EscapeAllowMakeVars(false)
   , EscapeOldStyle(true)
 {

@@ -1322,7 +1322,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
   // not be considered.
   std::map<std::string, cmDepends::DependencyVector> validDependencies;
   bool needRescanDependencies = false;
-  if (needRescanDirInfo == false) {
+  if (!needRescanDirInfo) {
     cmDependsC checker;
     checker.SetVerbose(verbose);
     checker.SetFileComparison(ftc);

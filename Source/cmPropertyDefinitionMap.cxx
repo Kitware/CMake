@@ -31,12 +31,7 @@ void cmPropertyDefinitionMap::DefineProperty(const std::string& name,
 
 bool cmPropertyDefinitionMap::IsPropertyDefined(const std::string& name) const
 {
-  cmPropertyDefinitionMap::const_iterator it = this->find(name);
-  if (it == this->end()) {
-    return false;
-  }
-
-  return true;
+  return this->find(name) != this->end();
 }
 
 bool cmPropertyDefinitionMap::IsPropertyChained(const std::string& name) const

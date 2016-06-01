@@ -54,9 +54,5 @@ void cmCursesBoolWidget::SetValueAsBool(bool value)
 
 bool cmCursesBoolWidget::GetValueAsBool()
 {
-  if (this->Value == "ON") {
-    return true;
-  } else {
-    return false;
-  }
+  return this->Value == "ON";
 }
