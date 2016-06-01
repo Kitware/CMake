@@ -1930,11 +1930,11 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   }
   if (cmSystemTools::GetFilenameName(exe_dir) == "MacOS") {
     // The executable is inside an application bundle.
-    // Look for ../bin (install tree) and then fall back to
+    // Look for ..<CMAKE_BIN_DIR> (install tree) and then fall back to
     // ../../../bin (build tree).
     exe_dir = cmSystemTools::GetFilenamePath(exe_dir);
-    if (cmSystemTools::FileExists((exe_dir + "/bin/cmake").c_str())) {
-      exe_dir += "/bin";
+    if (cmSystemTools::FileExists(exe_dir + CMAKE_BIN_DIR "/cmake")) {
+      exe_dir += CMAKE_BIN_DIR;
     } else {
       exe_dir = cmSystemTools::GetFilenamePath(exe_dir);
       exe_dir = cmSystemTools::GetFilenamePath(exe_dir);
@@ -1985,13 +1985,20 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  // Install tree has "<prefix>/bin/cmake" and "<prefix><CMAKE_DATA_DIR>".
-  std::string dir = cmSystemTools::GetFilenamePath(exe_dir);
-  cmSystemToolsCMakeRoot = dir + CMAKE_DATA_DIR;
-  if (!cmSystemTools::FileExists(
+  // Install tree has
+  // - "<prefix><CMAKE_BIN_DIR>/cmake"
+  // - "<prefix><CMAKE_DATA_DIR>"
+  if (cmHasSuffix(exe_dir, CMAKE_BIN_DIR)) {
+    std::string const prefix =
+      exe_dir.substr(0, exe_dir.size() - strlen(CMAKE_BIN_DIR));
+    cmSystemToolsCMakeRoot = prefix + CMAKE_DATA_DIR;
+  }
+  if (cmSystemToolsCMakeRoot.empty() ||
+      !cmSystemTools::FileExists(
         (cmSystemToolsCMakeRoot + "/Modules/CMake.cmake").c_str())) {
     // Build tree has "<build>/bin[/<config>]/cmake" and
     // "<build>/CMakeFiles/CMakeSourceDir.txt".
+    std::string dir = cmSystemTools::GetFilenamePath(exe_dir);
     std::string src_dir_txt = dir + "/CMakeFiles/CMakeSourceDir.txt";
     cmsys::ifstream fin(src_dir_txt.c_str());
     std::string src_dir;
