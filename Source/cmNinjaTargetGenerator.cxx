@@ -130,8 +130,7 @@ void cmNinjaTargetGenerator::AddIncludeFlags(std::string& languageFlags,
   // Add include directory flags.
   std::string includeFlags = this->LocalGenerator->GetIncludeFlags(
     includes, this->GeneratorTarget, language,
-    language == "RC" ? true : false, // full include paths for RC
-    // needed by cmcldeps
+    language == "RC", // full include paths for RC needed by cmcldeps
     false, this->GetConfigName());
   if (this->GetGlobalGenerator()->IsGCCOnWindows())
     std::replace(includeFlags.begin(), includeFlags.end(), '\\', '/');

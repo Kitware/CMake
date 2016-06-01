@@ -209,11 +209,7 @@ int main(int argc, char const* const* argv)
    * should launch cpack using "cpackConfigFile" if it exists
    * in the current directory.
    */
-  if ((doc.CheckOptions(argc, argv, "-G")) && !(argc == 1)) {
-    help = true;
-  } else {
-    help = false;
-  }
+  help = doc.CheckOptions(argc, argv, "-G") && argc != 1;
 
   // This part is used for cpack documentation lookup as well.
   cminst.AddCMakePaths();

@@ -722,10 +722,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckSanitizerOutput(
     ostr << *i << std::endl;
   }
   log = ostr.str();
-  if (defects) {
-    return false;
-  }
-  return true;
+  return defects == 0;
 }
 bool cmCTestMemCheckHandler::ProcessMemCheckPurifyOutput(
   const std::string& str, std::string& log, std::vector<int>& results)
@@ -766,10 +763,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckPurifyOutput(
   }
 
   log = ostr.str();
-  if (defects) {
-    return false;
-  }
-  return true;
+  return defects == 0;
 }
 
 bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
@@ -904,10 +898,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
                        << (cmSystemTools::GetTime() - sttime) << std::endl,
                      this->Quiet);
   log = ostr.str();
-  if (defects) {
-    return false;
-  }
-  return true;
+  return defects == 0;
 }
 
 bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(

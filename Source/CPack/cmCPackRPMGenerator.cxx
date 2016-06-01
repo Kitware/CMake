@@ -228,11 +228,7 @@ int cmCPackRPMGenerator::PackageFiles()
 
 bool cmCPackRPMGenerator::SupportsComponentInstallation() const
 {
-  if (IsOn("CPACK_RPM_COMPONENT_INSTALL")) {
-    return true;
-  } else {
-    return false;
-  }
+  return IsOn("CPACK_RPM_COMPONENT_INSTALL");
 }
 
 std::string cmCPackRPMGenerator::GetComponentInstallDirNameSuffix(

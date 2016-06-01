@@ -2124,20 +2124,11 @@ bool cmMakefile::CanIWriteThisFile(const char* fileName) const
   // If we are doing an in-source build, then the test will always fail
   if (cmSystemTools::SameFile(this->GetHomeDirectory(),
                               this->GetHomeOutputDirectory())) {
-    if (this->IsOn("CMAKE_DISABLE_IN_SOURCE_BUILD")) {
-      return false;
-    }
-    return true;
+    return !this->IsOn("CMAKE_DISABLE_IN_SOURCE_BUILD");
   }
 
-  // Check if this is a subdirectory of the source tree but not a
-  // subdirectory of the build tree
-  if (cmSystemTools::IsSubDirectory(fileName, this->GetHomeDirectory()) &&
-      !cmSystemTools::IsSubDirectory(fileName,
-                                     this->GetHomeOutputDirectory())) {
-    return false;
-  }
-  return true;
+  return !cmSystemTools::IsSubDirectory(fileName, this->GetHomeDirectory()) ||
+    cmSystemTools::IsSubDirectory(fileName, this->GetHomeOutputDirectory());
 }
 
 const char* cmMakefile::GetRequiredDefinition(const std::string& name) const
@@ -2166,7 +2157,7 @@ bool cmMakefile::IsDefinitionSet(const std::string& name) const
     }
   }
 #endif
-  return def ? true : false;
+  return def != NULL;
 }
 
 const char* cmMakefile::GetDefinition(const std::string& name) const

@@ -86,11 +86,7 @@ bool cmSourceGroup::MatchesRegex(const char* name)
 
 bool cmSourceGroup::MatchesFiles(const char* name)
 {
-  std::set<std::string>::const_iterator i = this->GroupFiles.find(name);
-  if (i != this->GroupFiles.end()) {
-    return true;
-  }
-  return false;
+  return this->GroupFiles.find(name) != this->GroupFiles.end();
 }
 
 void cmSourceGroup::AssignSource(const cmSourceFile* sf)

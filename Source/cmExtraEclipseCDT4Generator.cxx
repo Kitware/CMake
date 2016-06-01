@@ -129,7 +129,7 @@ void cmExtraEclipseCDT4Generator::Generate()
     (this->IsOutOfSourceBuild &&
      mf->IsOn("CMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT"));
 
-  if ((this->GenerateSourceProject == false) &&
+  if (!this->GenerateSourceProject &&
       (mf->IsOn("ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT"))) {
     mf->IssueMessage(
       cmake::WARNING,

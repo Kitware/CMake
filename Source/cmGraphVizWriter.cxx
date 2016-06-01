@@ -140,7 +140,7 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
 // which other targets depend on it.
 void cmGraphVizWriter::WriteTargetDependersFiles(const char* fileName)
 {
-  if (this->GenerateDependers == false) {
+  if (!this->GenerateDependers) {
     return;
   }
 
@@ -153,7 +153,7 @@ void cmGraphVizWriter::WriteTargetDependersFiles(const char* fileName)
       continue;
     }
 
-    if (this->GenerateForTargetType(ptrIt->second->GetType()) == false) {
+    if (!this->GenerateForTargetType(ptrIt->second->GetType())) {
       continue;
     }
 
@@ -184,7 +184,7 @@ void cmGraphVizWriter::WriteTargetDependersFiles(const char* fileName)
 // on which targets it depends.
 void cmGraphVizWriter::WritePerTargetFiles(const char* fileName)
 {
-  if (this->GeneratePerTarget == false) {
+  if (!this->GeneratePerTarget) {
     return;
   }
 
@@ -197,7 +197,7 @@ void cmGraphVizWriter::WritePerTargetFiles(const char* fileName)
       continue;
     }
 
-    if (this->GenerateForTargetType(ptrIt->second->GetType()) == false) {
+    if (!this->GenerateForTargetType(ptrIt->second->GetType())) {
       continue;
     }
 
@@ -243,7 +243,7 @@ void cmGraphVizWriter::WriteGlobalFile(const char* fileName)
       continue;
     }
 
-    if (this->GenerateForTargetType(ptrIt->second->GetType()) == false) {
+    if (!this->GenerateForTargetType(ptrIt->second->GetType())) {
       continue;
     }
 
@@ -344,7 +344,7 @@ void cmGraphVizWriter::WriteDependerConnections(
       continue;
     }
 
-    if (this->GenerateForTargetType(dependerIt->second->GetType()) == false) {
+    if (!this->GenerateForTargetType(dependerIt->second->GetType())) {
       continue;
     }
 
@@ -403,7 +403,7 @@ void cmGraphVizWriter::WriteNode(const std::string& targetName,
 
 void cmGraphVizWriter::CollectTargetsAndLibs()
 {
-  if (this->HaveTargetsAndLibs == false) {
+  if (!this->HaveTargetsAndLibs) {
     this->HaveTargetsAndLibs = true;
     int cnt = this->CollectAllTargets();
     if (this->GenerateForExternals) {

@@ -42,7 +42,7 @@ cmGeneratedFileStream::~cmGeneratedFileStream()
   // stream will be destroyed which will close the temporary file.
   // Finally the base destructor will be called to replace the
   // destination file.
-  this->Okay = (*this) ? true : false;
+  this->Okay = !this->fail();
 }
 
 cmGeneratedFileStream& cmGeneratedFileStream::Open(const char* name,
@@ -71,7 +71,7 @@ cmGeneratedFileStream& cmGeneratedFileStream::Open(const char* name,
 bool cmGeneratedFileStream::Close()
 {
   // Save whether the temporary output file is valid before closing.
-  this->Okay = (*this) ? true : false;
+  this->Okay = !this->fail();
 
   // Close the temporary output file.
   this->Stream::close();
