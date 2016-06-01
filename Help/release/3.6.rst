@@ -7,31 +7,170 @@ CMake 3.6 Release Notes
 
 Changes made since CMake 3.5 include the following.
 
-* Support was added for the Bruce C Compiler with compiler id ``Bruce``.
+New Features
+============
 
-* The :module:`FindLTTngUST` module was introduced to find the LTTng-UST
-  library.
+Generators
+----------
 
-* :prop_tgt:`AUTOMOC` now diagnoses name collisions when multiple source
-  files in different directories use ``#include <moc_foo.cpp>`` with the
-  same name (because the generated ``moc_foo.cpp`` files would collide).
+* The :generator:`Ninja` generator learned to produce phony targets
+  of the form ``sub/dir/all`` to drive the build of a subdirectory.
+  This is equivalent to ``cd sub/dir; make all`` with
+  :ref:`Makefile Generators`.
+
+* The :generator:`Ninja` generator now includes system header files in build
+  dependencies to ensure correct re-builds when system packages are updated.
+
+* The :generator:`Visual Studio 14 2015` generator learned to support the
+  Clang/C2 toolsets, e.g. with the ``-T v140_clang_3_7`` option.
+  This feature is experimental.
+
+Commands
+--------
+
+* The :command:`add_custom_command` and :command:`add_custom_target` commands
+  learned how to use the :prop_tgt:`CROSSCOMPILING_EMULATOR` executable
+  target property.
+
+* The :command:`install` command learned a new ``EXCLUDE_FROM_ALL`` option
+  to leave installation rules out of the default installation.
+
+* The :command:`list` command gained a ``FILTER`` sub-command to filter
+  list elements by regular expression.
+
+* The :command:`string(TIMESTAMP)` and :command:`file(TIMESTAMP)`
+  commands gained support for the ``%s`` placeholder.  This is
+  the number of seconds since the UNIX Epoch.
+
+* The :command:`try_compile` command source file signature now honors
+  configuration-specific flags (e.g. :variable:`CMAKE_<LANG>_FLAGS_DEBUG`)
+  in the generated test project.  Previously only the default such flags
+  for the current toolchain were used.
+
+Variables
+---------
+
+* A :variable:`CMAKE_DEPENDS_IN_PROJECT_ONLY` variable was introduced
+  to tell :ref:`Makefile Generators` to limit dependency scanning only
+  to files in the project source and build trees.
+
+* A new :variable:`CMAKE_HOST_SOLARIS` variable was introduced to
+  indicate when CMake is running on an Oracle Solaris host.
+
+* A :variable:`CMAKE_<LANG>_STANDARD_INCLUDE_DIRECTORIES` variable was
+  added for use by toolchain files to specify system include directories
+  to be appended to all compiler command lines.
+
+* The :variable:`CMAKE_<LANG>_STANDARD_LIBRARIES` variable is now documented.
+  It is intended for use by toolchain files to specify system libraries to be
+  added to all linker command lines.
+
+* A :variable:`CMAKE_NINJA_OUTPUT_PATH_PREFIX` variable was introduced
+  to tell the :generator:`Ninja` generator to configure the generated
+  ``build.ninja`` file for use as a ``subninja``.
+
+* A :variable:`CMAKE_TRY_COMPILE_PLATFORM_VARIABLES` variable was
+  added for use by toolchain files to specify platform-specific
+  variables that must be propagated by the :command:`try_compile`
+  command into test projects.
+
+* A :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` variable was added
+  to optionally tell the :command:`try_compile` command to build
+  a static library instead of an executable.  This is useful for
+  cross-compiling toolchains that cannot link binaries without
+  custom flags or scripts.
+
+Properties
+----------
+
+* A :prop_tgt:`DEPLOYMENT_REMOTE_DIRECTORY` target property was introduced
+  to tell the :generator:`Visual Studio 9 2008` and
+  :generator:`Visual Studio 8 2005` generators to generate the "remote
+  directory" for WinCE project deployment and debugger settings.
 
 * A :prop_tgt:`<LANG>_CLANG_TIDY` target property and supporting
   :variable:`CMAKE_<LANG>_CLANG_TIDY` variable were introduced to tell the
   :ref:`Makefile Generators` and the :generator:`Ninja` generator to run
   ``clang-tidy`` along with the compiler for ``C`` and ``CXX`` languages.
 
-* The :ref:`Makefile Generators` learned to optionally limit dependency
-  scanning only to files in the project source and build trees.
-  See the :variable:`CMAKE_DEPENDS_IN_PROJECT_ONLY` variable.
+* A :prop_test:`TIMEOUT_AFTER_MATCH` test property was introduced to
+  optionally tell CTest to enforce a secondary timeout after matching
+  certain output from a test.
 
-* A new :variable:`CMAKE_HOST_SOLARIS` variable was introduced to
-  indicate when CMake is running on an Oracle Solaris host.
+* A :prop_tgt:`VS_CONFIGURATION_TYPE` target property was introduced
+  to specify a custom project file type for :ref:`Visual Studio Generators`
+  supporting VS 2010 and above.
+
+* A :prop_dir:`VS_STARTUP_PROJECT` directory property was introduced
+  to specify for :ref:`Visual Studio Generators` the default startup
+  project for generated solutions (``.sln`` files).
+
+Modules
+-------
 
 * The :module:`CMakePushCheckState` module now pushes/pops/resets the variable
   ``CMAKE_EXTRA_INCLUDE_FILE`` used in :module:`CheckTypeSize`.
 
-* The "CPackDeb" module learned how to handle ``$ORIGIN``
+* The :module:`ExternalProject` module leared the ``GIT_SHALLOW 1``
+  option to perform a shallow clone of a Git repository.
+
+* The :module:`ExternalProject` module learned to initialize Git submodules
+  recursively and also to initialize new submodules on updates.  Use the
+  ``GIT_SUBMODULES`` option to restrict which submodules are initalized and
+  updated.
+
+* The :module:`ExternalProject` module leared the ``DOWNLOAD_NO_EXTRACT 1``
+  argument to skip extracting the file that is downloaded (e.g., for
+  self-extracting shell installers or ``.msi`` files).
+
+* The :module:`ExternalProject` module now uses ``TLS_VERIFY`` when fetching
+  from git repositories.
+
+* The :module:`FindBLAS` and :module:`FindLAPACK` modules learned to
+  support `OpenBLAS <http://www.openblas.net>`__.
+
+* The :module:`FindCUDA` module learned to find the ``cublas_device`` library.
+
+* The :module:`FindGTest` module ``gtest_add_tests`` function now causes
+  CMake to automatically re-run when test sources change so that they
+  can be re-scanned.
+
+* The :module:`FindLTTngUST` module was introduced to find the LTTng-UST
+  library.
+
+* The :module:`FindPkgConfig` module learned to optionally create imported
+  targets for the libraries it has found.
+
+* The :module:`FindProtobuf` module learned to provide a ``Protobuf_VERSION``
+  variable and check the version number requested in a :command:`find_package`
+  call.
+
+* The :module:`InstallRequiredSystemLibraries` module learned a new
+  ``CMAKE_INSTALL_UCRT_LIBRARIES`` option to enable app-local deployment
+  of the Windows Universal CRT libraries with Visual Studio 2015.
+
+Platforms
+---------
+
+* The Clang compiler is now supported on CYGWIN.
+
+* Support was added for the Bruce C Compiler with compiler id ``Bruce``.
+
+CTest
+-----
+
+* The :command:`ctest_update` command now looks at the
+  :variable:`CTEST_GIT_INIT_SUBMODULES` variable to determine whether
+  submodules should be updated or not before updating.
+
+* The :command:`ctest_update` command will now synchronize submodules on an
+  update. Updates which add submodules or change a submodule's URL will now be
+  pulled properly.
+
+CPack
+-----
+
+* The :module:`CPackDeb` module learned how to handle ``$ORIGIN``
   in ``CMAKE_INSTALL_RPATH`` when :variable:`CPACK_DEBIAN_PACKAGE_SHLIBDEPS`
   is used for dependency auto detection.
 
@@ -45,8 +184,8 @@ Changes made since CMake 3.5 include the following.
 * The :module:`CPackDeb` module learned how to generate dependencies between
   Debian packages if multi-component setup is used and
   :variable:`CPACK_COMPONENT_<compName>_DEPENDS` variables are set.
-  For backward compatibility this feature is disabled by default. See
-  :variable:`CPACK_DEBIAN_ENABLE_COMPONENT_DEPENDS`.
+  For backward compatibility this feature is disabled by default.
+  See :variable:`CPACK_DEBIAN_ENABLE_COMPONENT_DEPENDS`.
 
 * The :module:`CPackDeb` module learned how to set custom package file names
   including how to generate properly-named Debian packages::
@@ -78,8 +217,8 @@ Changes made since CMake 3.5 include the following.
   e.g. on Fedora).
   See :variable:`CPACK_RPM_PACKAGE_RELEASE_DIST`.
 
-* The "CPackRPM" module learned how to set default values for owning user/group
-  and file/directory permissions of package content.
+* The :module:`CPackRPM` module learned how to set default values for owning
+  user/group and file/directory permissions of package content.
   See :variable:`CPACK_RPM_DEFAULT_USER`, :variable:`CPACK_RPM_DEFAULT_GROUP`,
   :variable:`CPACK_RPM_DEFAULT_FILE_PERMISSIONS`,
   :variable:`CPACK_RPM_DEFAULT_DIR_PERMISSIONS` and their per component
@@ -92,69 +231,21 @@ Changes made since CMake 3.5 include the following.
   See :variable:`CPACK_RPM_PACKAGE_NAME` and
   :variable:`CPACK_RPM_<component>_PACKAGE_NAME`.
 
-* The "CPackRPM" module learned how to correctly handle symlinks
+* The :module:`CPackRPM` module learned how to correctly handle symlinks
   that are pointing outside generated packages.
 
-* The "CPackRPM" module now supports upper cased component name
-  in per component CPackRPM specific variables.
-  E.g. component named ``foo`` now expects component specific
-  variable to be ``CPACK_RPM_FOO_PACKAGE_NAME`` while before
-  it expected ``CPACK_RPM_foo_PACKAGE_NAME``.
-  Upper cased component name part in variables is compatible
-  with convention used for other CPack variables.
-  For back compatibility old format of variables is still valid
-  and preferred if both versions of variable are set, but the
-  preferred future use is upper cased component names in variables.
-  New variables that will be added to CPackRPM in later versions
-  will only support upper cased component variable format.
+Other
+-----
 
-* The :command:`ctest_update` command now looks at the
-  :variable:`CTEST_GIT_INIT_SUBMODULES` variable to determine whether
-  submodules should be updated or not before updating.
-* The :command:`ctest_update` command will now synchronize submodules on an
-  update. Updates which add submodules or change a submodule's URL will now be
-  pulled properly.
+* The :manual:`Compile Features <cmake-compile-features(7)>` functionality
+  is now aware of features supported by Intel C++ compilers versions 12.1
+  through 16.0 on UNIX platforms.
 
-* The :command:`add_custom_command` and :command:`add_custom_target` commands
-  learned how to use the :prop_tgt:`CROSSCOMPILING_EMULATOR` executable
-  target property.
-
-* The Clang compiler is now supported on CYGWIN.
+Deprecated and Removed Features
+===============================
 
 * The :module:`CMakeForceCompiler` module and its macros are now deprecated.
   See module documentation for an explanation.
-
-* The :variable:`CMAKE_<LANG>_STANDARD_LIBRARIES` variable is now documented.
-  It is intended for use by toolchain files to specify system libraries to be
-  added to all linker command lines.
-
-* On Linux and FreeBSD platforms, when building CMake itself from source and
-  not using a system-provided libcurl, OpenSSL is now used by default if it is
-  found on the system.  This enables SSL/TLS support for commands supporting
-  network communication via ``https``, such as :command:`file(DOWNLOAD)`,
-  :command:`file(UPLOAD)`, and :command:`ctest_submit`.
-
-* The :module:`ExternalProject` module now uses ``TLS_VERIFY`` when fetching
-  from git repositories.
-
-* The :manual:`cmake(1)` ``--build`` command-line tool now rejects multiple
-  ``--target`` options with an error instead of silently ignoring all but the
-  last one.
-
-* The :module:`ExternalProject` module leared the ``GIT_SHALLOW 1``
-  option to perform a shallow clone of a Git repository.
-
-* The :module:`ExternalProject` module learned to initialize Git submodules
-  recursively and also to initialize new submodules on updates.  Use the
-  ``GIT_SUBMODULES`` option to restrict which submodules are initalized and
-  updated.
-
-* The :module:`ExternalProject` module leared the ``DOWNLOAD_NO_EXTRACT 1``
-  argument to skip extracting the file that is downloaded (e.g., for
-  self-extracting shell installers or ``.msi`` files).
-
-* The :module:`FindBLAS` and :module:`FindLAPACK` modules learned to
-  support `OpenBLAS <http://www.openblas.net>`__.
 
 * The :command:`find_library`, :command:`find_path`, and :command:`find_file`
   commands no longer search in installation prefixes derived from the ``PATH``
@@ -166,23 +257,34 @@ Changes made since CMake 3.5 include the following.
   variable with a :ref:`;-list <CMake Language Lists>` of prefixes that are
   to be searched.
 
-* The :module:`FindCUDA` module learned to find the ``cublas_device`` library.
+* The :generator:`Visual Studio 7 .NET 2003` generator is now
+  deprecated and will be removed in a future version of CMake.
 
-* The :module:`FindGTest` module ``gtest_add_tests`` function now causes
-  CMake to automatically re-run when test sources change so that they
-  can be re-scanned.
+* The :generator:`Visual Studio 7` generator (for VS .NET 2002) has been
+  removed.  It had been deprecated since CMake 3.3.
 
-* The :module:`FindPkgConfig` module learned to optionally create imported
-  targets for the libraries it has found.
+* The :generator:`Visual Studio 6` generator has been removed.
+  It had been deprecated since CMake 3.3.
 
-* The :module:`FindProtobuf` module input and output variables were all renamed
-  from ``PROTOBUF_`` to ``Protobuf_`` for consistency with other find modules.
-  Input variables of the old case will be honored if provided, and output
-  variables of the old case are always provided.
+Other Changes
+=============
 
-* The :module:`FindProtobuf` module learned to provide a ``Protobuf_VERSION``
-  variable and check the version number requested in a :command:`find_package`
-  call.
+* The precompiled OS X binary provided on ``cmake.org`` now requires
+  OS X 10.7 or newer.
+
+* On Linux and FreeBSD platforms, when building CMake itself from source and
+  not using a system-provided libcurl, OpenSSL is now used by default if it is
+  found on the system.  This enables SSL/TLS support for commands supporting
+  network communication via ``https``, such as :command:`file(DOWNLOAD)`,
+  :command:`file(UPLOAD)`, and :command:`ctest_submit`.
+
+* The :manual:`cmake(1)` ``--build`` command-line tool now rejects multiple
+  ``--target`` options with an error instead of silently ignoring all but the
+  last one.
+
+* :prop_tgt:`AUTOMOC` now diagnoses name collisions when multiple source
+  files in different directories use ``#include <moc_foo.cpp>`` with the
+  same name (because the generated ``moc_foo.cpp`` files would collide).
 
 * The :module:`FindBISON` module ``BISON_TARGET`` macro now supports
   special characters by passing the ``VERBATIM`` option to internal
@@ -194,83 +296,20 @@ Changes made since CMake 3.5 include the following.
   :command:`add_custom_command` calls.  This may break clients that
   added escaping manually to work around the bug.
 
-* The :command:`install` command learned a new ``EXCLUDE_FROM_ALL`` option
-  to leave installation rules out of the default installation.
+* The :module:`FindProtobuf` module input and output variables were all renamed
+  from ``PROTOBUF_`` to ``Protobuf_`` for consistency with other find modules.
+  Input variables of the old case will be honored if provided, and output
+  variables of the old case are always provided.
 
-* The :module:`InstallRequiredSystemLibraries` module learned a new
-  ``CMAKE_INSTALL_UCRT_LIBRARIES`` option to enable app-local deployment
-  of the Windows Universal CRT libraries with Visual Studio 2015.
-
-* The :manual:`Compile Features <cmake-compile-features(7)>` functionality
-  is now aware of features supported by Intel C++ compilers versions 12.1
-  through 16.0 on UNIX platforms.
-
-* The :command:`list` command gained a ``FILTER`` sub-command to filter
-  list elements by regular expression.
-
-* The :generator:`Ninja` generator now includes system header files in build
-  dependencies to ensure correct re-builds when system packages are updated.
-
-* The :generator:`Ninja` generator learned to produce phony targets
-  of the form ``sub/dir/all`` to drive the build of a subdirectory.
-  This is equivalent to ``cd sub/dir; make all`` with
-  :ref:`Makefile Generators`.
-
-* The :generator:`Ninja` generator learned to read a new
-  :variable:`CMAKE_NINJA_OUTPUT_PATH_PREFIX` variable to configure
-  the generated ``build.ninja`` file for use as a ``subninja``.
-
-* The :generator:`Visual Studio 6` generator has been removed.
-
-* The :generator:`Visual Studio 7` generator (for VS .NET 2002) has been
-  removed.
-
-* A :variable:`CMAKE_<LANG>_STANDARD_INCLUDE_DIRECTORIES` variable was
-  added for use by toolchain files to specify system include directories
-  to be appended to all compiler command lines.
-
-* CTest learned to optionally enforce a secondary timeout after matching
-  certain output from a test.  See the :prop_test:`TIMEOUT_AFTER_MATCH` test
-  property.
-
-* The :command:`try_compile` command source file signature now honors
-  configuration-specific flags (e.g. :variable:`CMAKE_<LANG>_FLAGS_DEBUG`)
-  in the generated test project.  Previously only the default such flags
-  for the current toolchain were used.
-
-* A :variable:`CMAKE_TRY_COMPILE_PLATFORM_VARIABLES` variable was
-  added for use by toolchain files to specify platform-specific
-  variables that must be propagated by the :command:`try_compile`
-  command into test projects.
-
-* The :command:`try_compile` command learned to check a new
-  :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` variable to optionally
-  build a static library instead of an executable.  This is useful
-  for cross-compiling toolchains that cannot link binaries without
-  custom flags or scripts.
-
-* The :command:`string(TIMESTAMP)` and :command:`file(TIMESTAMP)`
-  commands gained support for the ``%s`` placeholder.  This is
-  the number of seconds since the UNIX Epoch.
-
-* The precompiled OS X binary provided on ``cmake.org`` now requires
-  OS X 10.7 or newer.
-
-* The :generator:`Visual Studio 7 .NET 2003` generator is now
-  deprecated and will be removed in a future version of CMake.
-
-* The :generator:`Visual Studio 14 2015` generator learned to support the
-  Clang/C2 toolsets, e.g. with the ``-T v140_clang_3_7`` option.
-
-* The :generator:`Visual Studio 9 2008` and :generator:`Visual Studio 8 2005`
-  generators learned to generate the remote directory for WinCE project
-  deployment and debugger settings.  See the
-  :prop_tgt:`DEPLOYMENT_REMOTE_DIRECTORY` target property.
-
-* The :ref:`Visual Studio Generators` learned to honor a new
-  :prop_dir:`VS_STARTUP_PROJECT` directory property that specifies
-  the default startup project for generated solutions (``.sln`` files).
-
-* :ref:`Visual Studio Generators` for VS 2010 and above learned a new
-  :prop_tgt:`VS_CONFIGURATION_TYPE` target property to specify a custom
-  project file type.
+* The :module:`CPackRPM` module now supports upper cased component
+  names in per component CPackRPM specific variables.
+  E.g. component named ``foo`` now expects component specific
+  variable to be ``CPACK_RPM_FOO_PACKAGE_NAME`` while before
+  it expected ``CPACK_RPM_foo_PACKAGE_NAME``.
+  Upper cased component name part in variables is compatible
+  with convention used for other CPack variables.
+  For back compatibility old format of variables is still valid
+  and preferred if both versions of variable are set, but the
+  preferred future use is upper cased component names in variables.
+  New variables that will be added to CPackRPM in later versions
+  will only support upper cased component variable format.
