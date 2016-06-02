@@ -36,8 +36,17 @@ endif()
 
 include(Platform/Android-Common)
 
+# The NDK toolchain configuration files at:
+#
+#   <ndk>/[build/core/]toolchains/*-clang*/setup.mk
+#
+# contain logic to set LLVM_TRIPLE for Clang-based toolchains for each target.
+# We need to produce the same target here to produce compatible binaries.
 include(Platform/Android/abi-${CMAKE_ANDROID_ARCH_ABI}-Clang)
 
 macro(__android_compiler_clang lang)
   __android_compiler_common(${lang})
+  if(NOT CMAKE_${lang}_COMPILER_TARGET)
+    set(CMAKE_${lang}_COMPILER_TARGET "${_ANDROID_ABI_CLANG_TARGET}")
+  endif()
 endmacro()
