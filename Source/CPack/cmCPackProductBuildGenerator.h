@@ -41,7 +41,7 @@ protected:
   // Run ProductBuild with the given command line, which will (if
   // successful) produce the given package file. Returns true if
   // ProductBuild succeeds, false otherwise.
-  bool RunProductBuild(const std::string& command, const std::string& packageFile);
+  bool RunProductBuild(const std::string& command);
 
   // Generate a package in the file packageFile for the given
   // component.  All of the files within this component are stored in
