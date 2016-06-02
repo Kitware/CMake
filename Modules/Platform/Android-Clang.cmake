@@ -17,6 +17,15 @@ if(__ANDROID_COMPILER_CLANG)
 endif()
 set(__ANDROID_COMPILER_CLANG 1)
 
+# Support for NVIDIA Nsight Tegra Visual Studio Edition was previously
+# implemented in the CMake VS IDE generators.  Avoid interfering with
+# that functionality for now.  Later we may try to integrate this.
+if(CMAKE_VS_PLATFORM_NAME STREQUAL "Tegra-Android")
+  macro(__android_compiler_clang lang)
+  endmacro()
+  return()
+endif()
+
 include(Platform/Android-Common)
 
 macro(__android_compiler_clang lang)

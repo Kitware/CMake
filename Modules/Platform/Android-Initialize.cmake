@@ -13,3 +13,10 @@
 
 # When CMAKE_SYSTEM_NAME is "Android", CMakeSystemSpecificInitialize loads this
 # module.
+
+# Support for NVIDIA Nsight Tegra Visual Studio Edition was previously
+# implemented in the CMake VS IDE generators.  Avoid interfering with
+# that functionality for now.  Later we may try to integrate this.
+if(CMAKE_VS_PLATFORM_NAME STREQUAL "Tegra-Android")
+  return()
+endif()
