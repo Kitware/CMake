@@ -209,7 +209,7 @@
 # Copyright 2007      Mike Jackson
 # Copyright 2008      Andreas Pakulat <apaku@gmx.de>
 # Copyright 2008-2012 Philip Lowman <philip@yhbt.com>
-# Copyright 2016 Alex Turbov <i.zaufi@gmail.com>
+# Copyright 2016      Alex Turbov <i.zaufi@gmail.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -870,27 +870,27 @@ endfunction()
 # Prebuilt windows binaries (https://sourceforge.net/projects/boost/files/boost-binaries/)
 # have library directories named using MSVC compiler version and architecture.
 # This function would append corresponding directories if MSVS is a current compiler,
-# so having Boost_ROOT would be enough to specify to find everything.
+# so having `BOOST_ROOT` would be enough to specify to find everything.
 #
 macro(_Boost_UPDATE_LIBRARY_SEARCH_DIRS_WITH_PREBUILD_PATHS componentlibvar basedir)
-  if(MSVC)
-    if(CMAKE_CL_64)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
       set(_arch_suffix 64)
     else()
       set(_arch_suffix 32)
     endif()
-    if(MSVC80)
-      list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-8.0)
-    elseif(MSVC90)
-      list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-9.0)
-    elseif(MSVC10)
-      list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-10.0)
-    elseif(MSVC11)
-      list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-11.0)
-    elseif(MSVC12)
-      list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-12.0)
-    elseif(MSVC14)
+    if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19)
       list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-14.0)
+    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 18)
+      list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-12.0)
+    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17)
+      list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-11.0)
+    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16)
+      list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-10.0)
+    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15)
+      list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-9.0)
+    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14)
+      list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-8.0)
     endif()
   endif()
 endmacro()
