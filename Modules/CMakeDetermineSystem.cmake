@@ -131,6 +131,7 @@ else()
   set(PRESET_CMAKE_SYSTEM_NAME FALSE)
 endif()
 
+include(Platform/${CMAKE_SYSTEM_NAME}-Determine OPTIONAL)
 
 macro(ADJUST_CMAKE_SYSTEM_VARIABLES _PREFIX)
   if(NOT ${_PREFIX}_NAME)
