@@ -48,4 +48,4 @@ else()
 endif()
 
 CMake_OPTIONAL_COMPONENT(ccmake)
-install(TARGETS ccmake DESTINATION bin ${COMPONENT})
+install(TARGETS ccmake DESTINATION ${CMAKE_BIN_DIR} ${COMPONENT})

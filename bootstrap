@@ -60,10 +60,12 @@ fi
 
 cmake_copyright="`grep '^Copyright .* Kitware' "${cmake_source_dir}/Copyright.txt"`"
 
+cmake_bin_dir_keyword="OTHER"
 cmake_data_dir_keyword="OTHER"
 cmake_doc_dir_keyword="OTHER"
 cmake_man_dir_keyword="OTHER"
 cmake_xdgdata_dir_keyword="OTHER"
+cmake_bin_dir=""
 cmake_data_dir=""
 cmake_doc_dir=""
 cmake_man_dir=""
@@ -213,6 +215,7 @@ else
 fi
 
 # Lookup default install destinations.
+cmake_bin_dir_default="`cmake_install_dest_default BIN ${cmake_bin_dir_keyword}`"
 cmake_data_dir_default="`cmake_install_dest_default DATA ${cmake_data_dir_keyword}`"
 cmake_doc_dir_default="`cmake_install_dest_default DOC ${cmake_doc_dir_keyword}`"
 cmake_man_dir_default="`cmake_install_dest_default MAN ${cmake_man_dir_keyword}`"
@@ -422,6 +425,8 @@ Configuration:
 Directory and file names:
   --prefix=PREFIX         install files in tree rooted at PREFIX
                           ['"${cmake_default_prefix}"']
+  --bindir=DIR            install binaries in PREFIX/DIR
+                          ['"${cmake_bin_dir_default}"']
   --datadir=DIR           install data files in PREFIX/DIR
                           ['"${cmake_data_dir_default}"']
   --docdir=DIR            install documentation files in PREFIX/DIR
@@ -627,6 +632,7 @@ while test $# != 0; do
   --prefix=*) dir=`cmake_arg "$1"`
               cmake_prefix_dir=`cmake_fix_slashes "$dir"` ;;
   --parallel=*) cmake_parallel_make=`cmake_arg "$1"` ;;
+  --bindir=*) cmake_bin_dir=`cmake_arg "$1"` ;;
   --datadir=*) cmake_data_dir=`cmake_arg "$1"` ;;
   --docdir=*) cmake_doc_dir=`cmake_arg "$1"` ;;
   --mandir=*) cmake_man_dir=`cmake_arg "$1"` ;;
@@ -1263,6 +1269,7 @@ cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION_PATCH ${cmake_versi
 cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION \"${cmake_version}\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP_SOURCE_DIR \"${CMAKE_BOOTSTRAP_SOURCE_DIR}\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP_BINARY_DIR \"${CMAKE_BOOTSTRAP_BINARY_DIR}\""
+cmake_report cmConfigure.h${_tmp} "#define CMAKE_BIN_DIR \"/bootstrap-not-insalled\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_DATA_DIR \"/bootstrap-not-insalled\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP"
 
@@ -1374,6 +1381,7 @@ echo '
 set (CMAKE_INSTALL_PREFIX "'"${cmake_prefix_dir}"'" CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
 set (CMAKE_DOC_DIR "'"${cmake_doc_dir}"'" CACHE PATH "Install location for documentation (relative to prefix)." FORCE)
 set (CMAKE_MAN_DIR "'"${cmake_man_dir}"'" CACHE PATH "Install location for man pages (relative to prefix)." FORCE)
+set (CMAKE_BIN_DIR "'"${cmake_bin_dir}"'" CACHE PATH "Install location for binaries (relative to prefix)." FORCE)
 set (CMAKE_DATA_DIR "'"${cmake_data_dir}"'" CACHE PATH "Install location for data (relative to prefix)." FORCE)
 set (CMAKE_XDGDATA_DIR "'"${cmake_xdgdata_dir}"'" CACHE PATH "Install location for XDG specific files (relative to prefix)." FORCE)
 ' > "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
