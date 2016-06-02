@@ -4,7 +4,16 @@
 #
 # Try to find OpenCL
 #
-# Once done this will define::
+# IMPORTED Targets
+# ^^^^^^^^^^^^^^^^
+#
+# This module defines :prop_tgt:`IMPORTED` target ``OpenCL::OpenCL``, if
+# OpenCL has been found.
+#
+# Result Variables
+# ^^^^^^^^^^^^^^^^
+#
+# This module defines the following variables::
 #
 #   OpenCL_FOUND          - True if OpenCL was found
 #   OpenCL_INCLUDE_DIRS   - include directories for OpenCL
@@ -20,7 +29,7 @@
 #
 
 #=============================================================================
-# Copyright 2014 Matthaeus G. Chajdas
+# Copyright 2014-2016 Matthaeus G. Chajdas
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -134,3 +143,10 @@ find_package_handle_standard_args(
 mark_as_advanced(
   OpenCL_INCLUDE_DIR
   OpenCL_LIBRARY)
+
+if(OpenCL_FOUND AND NOT TARGET OpenCL::OpenCL)
+  add_library(OpenCL::OpenCL UNKNOWN IMPORTED)
+  set_target_properties(OpenCL::OpenCL PROPERTIES
+    IMPORTED_LOCATION "${OpenCL_LIBRARY}"
+    INTERFACE_INCLUDE_DIRECTORIES "${OpenCL_INCLUDE_DIRS}")
+endif()
