@@ -22,6 +22,36 @@ if(CMAKE_VS_PLATFORM_NAME STREQUAL "Tegra-Android")
   return()
 endif()
 
+# If the user provided CMAKE_SYSROOT for us, extract information from it.
+set(_ANDROID_SYSROOT_NDK "")
+set(_ANDROID_SYSROOT_API "")
+set(_ANDROID_SYSROOT_ARCH "")
+if(CMAKE_SYSROOT)
+  if(NOT IS_DIRECTORY "${CMAKE_SYSROOT}")
+    message(FATAL_ERROR
+      "Android: The specified CMAKE_SYSROOT:\n"
+      "  ${CMAKE_SYSROOT}\n"
+      "is not an existing directory."
+      )
+  endif()
+  if(CMAKE_SYSROOT MATCHES "^([^\\\n]*)/platforms/android-([0-9]+)/arch-([a-z0-9_]+)$")
+    set(_ANDROID_SYSROOT_NDK "${CMAKE_MATCH_1}")
+    set(_ANDROID_SYSROOT_API "${CMAKE_MATCH_2}")
+    set(_ANDROID_SYSROOT_ARCH "${CMAKE_MATCH_3}")
+  else()
+    message(FATAL_ERROR
+      "The value of CMAKE_SYSROOT:\n"
+      "  ${CMAKE_SYSROOT}\n"
+      "does not match the form:\n"
+      "  <ndk>/platforms/android-<api>/arch-<arch>\n"
+      "where:\n"
+      "  <ndk>  = Android NDK directory (with forward slashes)\n"
+      "  <api>  = Android API version number (decimal digits)\n"
+      "  <arch> = Android ARCH name (lower case)"
+      )
+  endif()
+endif()
+
 # Find the Android NDK.
 if(CMAKE_ANDROID_NDK)
   if(NOT IS_DIRECTORY "${CMAKE_ANDROID_NDK}")
@@ -32,7 +62,9 @@ if(CMAKE_ANDROID_NDK)
       )
   endif()
 else()
-  if(IS_DIRECTORY "$ENV{ANDROID_NDK_ROOT}")
+  if(IS_DIRECTORY "${_ANDROID_SYSROOT_NDK}")
+    set(CMAKE_ANDROID_NDK "${_ANDROID_SYSROOT_NDK}")
+  elseif(IS_DIRECTORY "$ENV{ANDROID_NDK_ROOT}")
     file(TO_CMAKE_PATH "$ENV{ANDROID_NDK_ROOT}" CMAKE_ANDROID_NDK)
   endif()
   # TODO: Search harder for the NDK.
@@ -48,12 +80,25 @@ if(CMAKE_SYSTEM_VERSION)
 elseif(CMAKE_ANDROID_API)
   set(CMAKE_SYSTEM_VERSION "${CMAKE_ANDROID_API}")
   set(_ANDROID_API_VAR CMAKE_ANDROID_API)
+elseif(_ANDROID_SYSROOT_API)
+  set(CMAKE_SYSTEM_VERSION "${_ANDROID_SYSROOT_API}")
+  set(_ANDROID_API_VAR CMAKE_SYSROOT)
 endif()
 if(CMAKE_SYSTEM_VERSION)
   if(CMAKE_ANDROID_API AND NOT "x${CMAKE_ANDROID_API}" STREQUAL "x${CMAKE_SYSTEM_VERSION}")
     message(FATAL_ERROR
       "Android: The API specified by CMAKE_ANDROID_API='${CMAKE_ANDROID_API}' is not consistent with CMAKE_SYSTEM_VERSION='${CMAKE_SYSTEM_VERSION}'."
       )
+  endif()
+  if(_ANDROID_SYSROOT_API)
+    foreach(v CMAKE_ANDROID_API CMAKE_SYSTEM_VERSION)
+      if(${v} AND NOT "x${_ANDROID_SYSROOT_API}" STREQUAL "x${${v}}")
+        message(FATAL_ERROR
+          "Android: The API specified by ${v}='${${v}}' is not consistent with CMAKE_SYSROOT:\n"
+          "  ${CMAKE_SYSROOT}"
+          )
+      endif()
+    endforeach()
   endif()
   if(CMAKE_ANDROID_NDK AND NOT IS_DIRECTORY "${CMAKE_ANDROID_NDK}/platforms/android-${CMAKE_SYSTEM_VERSION}")
     message(FATAL_ERROR
@@ -115,6 +160,13 @@ set(_ANDROID_PROC_mips_ARCH_ABI    "mips")
 set(_ANDROID_PROC_mips64_ARCH_ABI  "mips64")
 set(_ANDROID_PROC_x86_64_ARCH_ABI  "x86_64")
 
+set(_ANDROID_ARCH_arm64_ABI  "arm64-v8a")
+set(_ANDROID_ARCH_arm_ABI    "armeabi")
+set(_ANDROID_ARCH_mips_ABI   "mips")
+set(_ANDROID_ARCH_mips64_ABI "mips64")
+set(_ANDROID_ARCH_x86_ABI    "x86")
+set(_ANDROID_ARCH_x86_64_ABI "x86_64")
+
 # Validate inputs.
 if(CMAKE_ANDROID_ARCH_ABI AND NOT DEFINED "_ANDROID_ABI_${CMAKE_ANDROID_ARCH_ABI}_PROC")
   message(FATAL_ERROR "Android: Unknown ABI CMAKE_ANDROID_ARCH_ABI='${CMAKE_ANDROID_ARCH_ABI}'.")
@@ -122,11 +174,19 @@ endif()
 if(CMAKE_SYSTEM_PROCESSOR AND NOT DEFINED "_ANDROID_PROC_${CMAKE_SYSTEM_PROCESSOR}_ARCH_ABI")
   message(FATAL_ERROR "Android: Unknown processor CMAKE_SYSTEM_PROCESSOR='${CMAKE_SYSTEM_PROCESSOR}'.")
 endif()
+if(_ANDROID_SYSROOT_ARCH AND NOT DEFINED "_ANDROID_ARCH_${_ANDROID_SYSROOT_ARCH}_ABI")
+  message(FATAL_ERROR
+    "Android: Unknown architecture '${_ANDROID_SYSROOT_ARCH}' specified in CMAKE_SYSROOT:\n"
+    "  ${CMAKE_SYSROOT}"
+    )
+endif()
 
 # Select an ABI.
 if(NOT CMAKE_ANDROID_ARCH_ABI)
   if(CMAKE_SYSTEM_PROCESSOR)
     set(CMAKE_ANDROID_ARCH_ABI "${_ANDROID_PROC_${CMAKE_SYSTEM_PROCESSOR}_ARCH_ABI}")
+  elseif(_ANDROID_SYSROOT_ARCH)
+    set(CMAKE_ANDROID_ARCH_ABI "${_ANDROID_ARCH_${_ANDROID_SYSROOT_ARCH}_ABI}")
   else()
     # https://developer.android.com/ndk/guides/application_mk.html
     # Default is the oldest ARM ABI.
@@ -134,6 +194,13 @@ if(NOT CMAKE_ANDROID_ARCH_ABI)
   endif()
 endif()
 set(CMAKE_ANDROID_ARCH "${_ANDROID_ABI_${CMAKE_ANDROID_ARCH_ABI}_ARCH}")
+if(_ANDROID_SYSROOT_ARCH AND NOT "x${_ANDROID_SYSROOT_ARCH}" STREQUAL "x${CMAKE_ANDROID_ARCH}")
+  message(FATAL_ERROR
+    "Android: Architecture '${_ANDROID_SYSROOT_ARCH}' specified in CMAKE_SYSROOT:\n"
+    "  ${CMAKE_SYSROOT}\n"
+    "does not match architecture '${CMAKE_ANDROID_ARCH}' for the ABI '${CMAKE_ANDROID_ARCH_ABI}'."
+    )
+endif()
 
 # Select a processor.
 if(NOT CMAKE_SYSTEM_PROCESSOR)
