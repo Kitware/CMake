@@ -34,6 +34,7 @@
 include(${CMAKE_ROOT}/Modules/CMakeDetermineCompiler.cmake)
 
 # Load system-specific compiler preferences for this language.
+include(Platform/${CMAKE_SYSTEM_NAME}-Determine-C OPTIONAL)
 include(Platform/${CMAKE_SYSTEM_NAME}-C OPTIONAL)
 if(NOT CMAKE_C_COMPILER_NAMES)
   set(CMAKE_C_COMPILER_NAMES cc)
