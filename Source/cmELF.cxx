@@ -143,7 +143,7 @@ public:
   {
     this->Stream.seekg(pos);
     this->Stream.read(buf, size);
-    return static_cast<bool>(this->Stream);
+    return !this->Stream.fail();
   }
 
   // Lookup the SONAME in the DYNAMIC section.
@@ -497,7 +497,7 @@ private:
         this->NeedSwap) {
       ByteSwap(x);
     }
-    return static_cast<bool>(this->Stream);
+    return !this->Stream.fail();
   }
   bool Read(ELF_Dyn& x)
   {
@@ -505,7 +505,7 @@ private:
         this->NeedSwap) {
       ByteSwap(x);
     }
-    return static_cast<bool>(this->Stream);
+    return !this->Stream.fail();
   }
 
   bool LoadSectionHeader(ELF_Half i)
