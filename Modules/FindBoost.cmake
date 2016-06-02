@@ -460,7 +460,7 @@ function(_Boost_GUESS_COMPILER_PREFIX _ret)
       set(_boost_COMPILER "-vc71")
     elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 13) # Good luck!
       set(_boost_COMPILER "-vc7") # yes, this is correct
-    elseif() # MSVC60 Good luck!
+    else() # MSVC60 Good luck!
       set(_boost_COMPILER "-vc6") # yes, this is correct
     endif()
   elseif (BORLAND)
