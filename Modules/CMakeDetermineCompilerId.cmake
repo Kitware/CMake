@@ -365,14 +365,15 @@ ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
 
     # Find the executable produced by the compiler, try all files in the
     # binary dir.
+    string(REGEX REPLACE "([][])" "[\\1]" _glob_id_dir "${CMAKE_${lang}_COMPILER_ID_DIR}")
     file(GLOB files
       RELATIVE ${CMAKE_${lang}_COMPILER_ID_DIR}
 
       # normal case
-      ${CMAKE_${lang}_COMPILER_ID_DIR}/*
+      ${_glob_id_dir}/*
 
       # com.apple.package-type.bundle.unit-test
-      ${CMAKE_${lang}_COMPILER_ID_DIR}/*.xctest/*
+      ${_glob_id_dir}/*.xctest/*
       )
     list(REMOVE_ITEM files "${src}")
     set(COMPILER_${lang}_PRODUCED_FILES "")
