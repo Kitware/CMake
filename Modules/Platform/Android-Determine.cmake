@@ -87,10 +87,97 @@ if(NOT CMAKE_SYSTEM_VERSION MATCHES "^[0-9]+$")
   message(FATAL_ERROR "Android: The API specified by CMAKE_SYSTEM_VERSION='${CMAKE_SYSTEM_VERSION}' is not an integer.")
 endif()
 
+# https://developer.android.com/ndk/guides/abis.html
+
+set(_ANDROID_ABI_arm64-v8a_PROC   "aarch64")
+set(_ANDROID_ABI_arm64-v8a_ARCH   "arm64")
+set(_ANDROID_ABI_armeabi-v7a_PROC "armv7-a")
+set(_ANDROID_ABI_armeabi-v7a_ARCH "arm")
+set(_ANDROID_ABI_armeabi-v6_PROC  "armv6")
+set(_ANDROID_ABI_armeabi-v6_ARCH  "arm")
+set(_ANDROID_ABI_armeabi_PROC     "armv5te")
+set(_ANDROID_ABI_armeabi_ARCH     "arm")
+set(_ANDROID_ABI_mips_PROC        "mips")
+set(_ANDROID_ABI_mips_ARCH        "mips")
+set(_ANDROID_ABI_mips64_PROC      "mips64")
+set(_ANDROID_ABI_mips64_ARCH      "mips64")
+set(_ANDROID_ABI_x86_PROC         "i686")
+set(_ANDROID_ABI_x86_ARCH         "x86")
+set(_ANDROID_ABI_x86_64_PROC      "x86_64")
+set(_ANDROID_ABI_x86_64_ARCH      "x86_64")
+
+set(_ANDROID_PROC_aarch64_ARCH_ABI "arm64-v8a")
+set(_ANDROID_PROC_armv7-a_ARCH_ABI "armeabi-v7a")
+set(_ANDROID_PROC_armv6_ARCH_ABI   "armeabi-v6")
+set(_ANDROID_PROC_armv5te_ARCH_ABI "armeabi")
+set(_ANDROID_PROC_i686_ARCH_ABI    "x86")
+set(_ANDROID_PROC_mips_ARCH_ABI    "mips")
+set(_ANDROID_PROC_mips64_ARCH_ABI  "mips64")
+set(_ANDROID_PROC_x86_64_ARCH_ABI  "x86_64")
+
+# Validate inputs.
+if(CMAKE_ANDROID_ARCH_ABI AND NOT DEFINED "_ANDROID_ABI_${CMAKE_ANDROID_ARCH_ABI}_PROC")
+  message(FATAL_ERROR "Android: Unknown ABI CMAKE_ANDROID_ARCH_ABI='${CMAKE_ANDROID_ARCH_ABI}'.")
+endif()
+if(CMAKE_SYSTEM_PROCESSOR AND NOT DEFINED "_ANDROID_PROC_${CMAKE_SYSTEM_PROCESSOR}_ARCH_ABI")
+  message(FATAL_ERROR "Android: Unknown processor CMAKE_SYSTEM_PROCESSOR='${CMAKE_SYSTEM_PROCESSOR}'.")
+endif()
+
+# Select an ABI.
+if(NOT CMAKE_ANDROID_ARCH_ABI)
+  if(CMAKE_SYSTEM_PROCESSOR)
+    set(CMAKE_ANDROID_ARCH_ABI "${_ANDROID_PROC_${CMAKE_SYSTEM_PROCESSOR}_ARCH_ABI}")
+  else()
+    # https://developer.android.com/ndk/guides/application_mk.html
+    # Default is the oldest ARM ABI.
+    set(CMAKE_ANDROID_ARCH_ABI "armeabi")
+  endif()
+endif()
+set(CMAKE_ANDROID_ARCH "${_ANDROID_ABI_${CMAKE_ANDROID_ARCH_ABI}_ARCH}")
+
+# Select a processor.
+if(NOT CMAKE_SYSTEM_PROCESSOR)
+  set(CMAKE_SYSTEM_PROCESSOR "${_ANDROID_ABI_${CMAKE_ANDROID_ARCH_ABI}_PROC}")
+endif()
+
+# If the user specified both an ABI and a processor then they might not match.
+if(NOT _ANDROID_ABI_${CMAKE_ANDROID_ARCH_ABI}_PROC STREQUAL CMAKE_SYSTEM_PROCESSOR)
+  message(FATAL_ERROR "Android: The specified CMAKE_ANDROID_ARCH_ABI='${CMAKE_ANDROID_ARCH_ABI}' and CMAKE_SYSTEM_PROCESSOR='${CMAKE_SYSTEM_PROCESSOR}' is not a valid combination.")
+endif()
+
 # Save the Android-specific information in CMakeSystem.cmake.
 set(CMAKE_SYSTEM_CUSTOM_CODE "
 set(CMAKE_ANDROID_NDK \"${CMAKE_ANDROID_NDK}\")
+set(CMAKE_ANDROID_ARCH \"${CMAKE_ANDROID_ARCH}\")
+set(CMAKE_ANDROID_ARCH_ABI \"${CMAKE_ANDROID_ARCH_ABI}\")
 ")
 
+# Select an ARM variant.
+if(CMAKE_ANDROID_ARCH_ABI MATCHES "^armeabi")
+  if(CMAKE_ANDROID_ARM_MODE)
+    set(CMAKE_ANDROID_ARM_MODE 1)
+  else()
+    set(CMAKE_ANDROID_ARM_MODE 0)
+  endif()
+  string(APPEND CMAKE_SYSTEM_CUSTOM_CODE
+    "set(CMAKE_ANDROID_ARM_MODE \"${CMAKE_ANDROID_ARM_MODE}\")\n"
+    )
+elseif(DEFINED CMAKE_ANDROID_ARM_MODE)
+  message(FATAL_ERROR "Android: CMAKE_ANDROID_ARM_MODE is set but is valid only for 'armeabi' architectures.")
+endif()
+
+if(CMAKE_ANDROID_ARCH_ABI STREQUAL "armeabi-v7a")
+  if(CMAKE_ANDROID_ARM_NEON)
+    set(CMAKE_ANDROID_ARM_NEON 1)
+  else()
+    set(CMAKE_ANDROID_ARM_NEON 0)
+  endif()
+  string(APPEND CMAKE_SYSTEM_CUSTOM_CODE
+    "set(CMAKE_ANDROID_ARM_NEON \"${CMAKE_ANDROID_ARM_NEON}\")\n"
+    )
+elseif(DEFINED CMAKE_ANDROID_ARM_NEON)
+  message(FATAL_ERROR "Android: CMAKE_ANDROID_ARM_NEON is set but is valid only for 'armeabi-v7a' architecture.")
+endif()
+
 # Report the chosen architecture.
-message(STATUS "Android: Targeting API '${CMAKE_SYSTEM_VERSION}'")
+message(STATUS "Android: Targeting API '${CMAKE_SYSTEM_VERSION}' with architecture '${CMAKE_ANDROID_ARCH}', ABI '${CMAKE_ANDROID_ARCH_ABI}', and processor '${CMAKE_SYSTEM_PROCESSOR}'")
