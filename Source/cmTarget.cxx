@@ -1131,7 +1131,9 @@ const char* cmTarget::GetProperty(const std::string& prop,
         // target because the configuration type may not be known at
         // CMake time.
         cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
-        gg->CreateGenerationObjects();
+        if (!gg->GetConfigureDoneCMP0026()) {
+          gg->CreateGenerationObjects();
+        }
         cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
         this->Properties.SetProperty(propLOCATION, gt->GetLocationForBuild());
       }
@@ -1150,7 +1152,9 @@ const char* cmTarget::GetProperty(const std::string& prop,
           prop, this->ImportedGetFullPath(configName, false).c_str());
       } else {
         cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
-        gg->CreateGenerationObjects();
+        if (!gg->GetConfigureDoneCMP0026()) {
+          gg->CreateGenerationObjects();
+        }
         cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
         this->Properties.SetProperty(
           prop, gt->GetFullPath(configName, false).c_str());
@@ -1168,7 +1172,9 @@ const char* cmTarget::GetProperty(const std::string& prop,
             prop, this->ImportedGetFullPath(configName, false).c_str());
         } else {
           cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
-          gg->CreateGenerationObjects();
+          if (!gg->GetConfigureDoneCMP0026()) {
+            gg->CreateGenerationObjects();
+          }
           cmGeneratorTarget* gt = gg->FindGeneratorTarget(this->GetName());
           this->Properties.SetProperty(
             prop, gt->GetFullPath(configName, false).c_str());
