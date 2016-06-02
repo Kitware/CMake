@@ -951,8 +951,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     set(CPackComponents_BUILD_OPTIONS)
     if(APPLE)
       set(CPackComponents_BUILD_OPTIONS -DCPACK_BINARY_DRAGNDROP:BOOL=ON)
-      set(CPackComponents_BUILD_OPTIONS ${CPackComponents_BUILD_OPTIONS}
-        -DCPACK_BINARY_PRODUCTBUILD:BOOL=ON)
+      if(CMake_TEST_XCODE_VERSION VERSION_GREATER "4.6")
+        set(CPackComponents_BUILD_OPTIONS ${CPackComponents_BUILD_OPTIONS}
+          -DCPACK_BINARY_PRODUCTBUILD:BOOL=ON)
+      endif()
     endif()
     if(NSIS_MAKENSIS_EXECUTABLE)
       set(CPackComponents_BUILD_OPTIONS ${CPackComponents_BUILD_OPTIONS}
@@ -997,7 +999,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     list(APPEND ACTIVE_CPACK_GENERATORS "ZIP")
     if(APPLE)
       list(APPEND ACTIVE_CPACK_GENERATORS "DragNDrop")
-      list(APPEND ACTIVE_CPACK_GENERATORS "productbuild")
+      if(CMake_TEST_XCODE_VERSION VERSION_GREATER "4.6")
+        list(APPEND ACTIVE_CPACK_GENERATORS "productbuild")
+      endif()
     endif()
 
     # set up list of component packaging ways
@@ -1108,8 +1112,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     set(CPackComponents_BUILD_OPTIONS)
     if(APPLE)
       set(CPackComponents_BUILD_OPTIONS -DCPACK_BINARY_DRAGNDROP:BOOL=ON)
-      set(CPackComponents_BUILD_OPTIONS ${CPackComponents_BUILD_OPTIONS}
-        -DCPACK_BINARY_PRODUCTBUILD:BOOL=ON)
+      if(CMake_TEST_XCODE_VERSION VERSION_GREATER "4.6")
+        set(CPackComponents_BUILD_OPTIONS ${CPackComponents_BUILD_OPTIONS}
+          -DCPACK_BINARY_PRODUCTBUILD:BOOL=ON)
+      endif()
     endif()
     if(NOT NSIS_MAKENSIS_EXECUTABLE)
       set(CPackComponents_BUILD_OPTIONS ${CPackComponents_BUILD_OPTIONS}
