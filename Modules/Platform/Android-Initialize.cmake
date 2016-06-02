@@ -20,3 +20,22 @@
 if(CMAKE_VS_PLATFORM_NAME STREQUAL "Tegra-Android")
   return()
 endif()
+
+if(NOT CMAKE_SYSROOT)
+  if(CMAKE_ANDROID_NDK)
+    set(CMAKE_SYSROOT "${CMAKE_ANDROID_NDK}/platforms/android-${CMAKE_SYSTEM_VERSION}/arch-${CMAKE_ANDROID_ARCH}")
+  endif()
+endif()
+
+if(CMAKE_SYSROOT)
+  if(NOT IS_DIRECTORY "${CMAKE_SYSROOT}")
+    message(FATAL_ERROR
+      "Android: The system root directory needed for the selected Android version and architecture does not exist:\n"
+      "  ${CMAKE_SYSROOT}\n"
+      )
+  endif()
+else()
+  message(FATAL_ERROR
+    "Android: No CMAKE_SYSROOT was selected."
+    )
+endif()
