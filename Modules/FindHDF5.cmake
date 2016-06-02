@@ -345,7 +345,7 @@ macro( _HDF5_parse_compile_line
 endmacro()
 
 # Try to find HDF5 using an installed hdf5-config.cmake
-if(NOT HDF5_ROOT AND NOT HDF5_FOUND)
+if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
     find_package(HDF5 QUIET NO_MODULE)
     if( HDF5_FOUND)
         set(HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIR})
@@ -382,7 +382,7 @@ if(NOT HDF5_ROOT AND NOT HDF5_FOUND)
     endif()
 endif()
 
-if(NOT HDF5_ROOT AND NOT HDF5_FOUND)
+if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
   set(_HDF5_NEED_TO_SEARCH False)
   set(HDF5_COMPILER_NO_INTERROGATE True)
   # Only search for languages we've enabled
@@ -488,12 +488,12 @@ else()
   set(_HDF5_NEED_TO_SEARCH True)
 endif()
 
-if(HDF5_COMPILER_NO_INTERROGATE)
+if(NOT HDF5_FOUND AND HDF5_COMPILER_NO_INTERROGATE)
   # No arguments necessary, all languages can use the compiler wrappers
   set(HDF5_FOUND True)
   set(HDF5_METHOD "Included by compiler wrappers")
   set(HDF5_REQUIRED_VARS HDF5_METHOD)
-elseif(NOT _HDF5_NEED_TO_SEARCH)
+elseif(NOT HDF5_FOUND AND NOT _HDF5_NEED_TO_SEARCH)
   # Compiler wrappers aren't being used by the build but were found and used
   # to determine necessary include and library flags
   set(HDF5_INCLUDE_DIRS)
@@ -678,6 +678,13 @@ if( NOT HDF5_FOUND )
     if(FIND_HL)
         list(APPEND HDF5_REQUIRED_VARS HDF5_HL_LIBRARIES)
     endif()
+endif()
+
+# If HDF5_REQUIRED_VARS is empty at this point, then it's likely that
+# something external is trying to explicitly pass already found
+# locations
+if(NOT HDF5_REQUIRED_VARS)
+    set(HDF5_REQUIRED_VARS HDF5_LIBRARIES HDF5_INCLUDE_DIRS)
 endif()
 
 find_package_handle_standard_args(HDF5
