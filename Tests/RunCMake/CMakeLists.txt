@@ -307,6 +307,15 @@ if(CMAKE_OSX_ARCHITECTURES AND XCODE AND NOT "${XCODE_VERSION}" MATCHES "^[^12]"
 endif()
 
 if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
+  find_program(LDD_PATH ldd)
+  if(UNIX AND LDD_PATH)
+    execute_process(COMMAND ${LDD_PATH} --help
+      OUTPUT_VARIABLE LDD_HELP)
+    if("${LDD_HELP}" MATCHES
+        "(-r, --function-relocs.*process data and function relocations|-u, --unused.*print unused direct dependencies)")
+      add_RunCMake_test(LinkWhatYouUse)
+    endif()
+  endif()
   add_executable(pseudo_tidy pseudo_tidy.c)
   add_executable(pseudo_iwyu pseudo_iwyu.c)
   add_RunCMake_test(ClangTidy -DPSEUDO_TIDY=$<TARGET_FILE:pseudo_tidy>)
