@@ -98,14 +98,15 @@ int cmCPackProductBuildGenerator::PackageFiles()
   std::string productbuild = this->GetOption("CPACK_COMMAND_PRODUCTBUILD");
 
   pkgCmd << productbuild
-  << " --distribution \"" << packageDirFileName << "/Contents/distribution.dist\""
+  << " --distribution \"" << packageDirFileName
+    << "/Contents/distribution.dist\""
   << " --package-path \"" << packageDirFileName << "/Contents/Packages" << "\""
   << " --resources \"" << resDir << "\""
   << " --version \"" << version << "\""
   << " \"" << packageFileNames[0] << "\"";
 
   // Run ProductBuild
-  return RunProductBuild(pkgCmd.str(), packageFileNames[0]);
+  return RunProductBuild(pkgCmd.str());
 }
 
 int cmCPackProductBuildGenerator::InitializeInternal()
@@ -135,17 +136,17 @@ int cmCPackProductBuildGenerator::InitializeInternal()
 }
 
 
-bool cmCPackProductBuildGenerator::RunProductBuild(const std::string& command,
-                                                   const std::string& packageFile)
+bool cmCPackProductBuildGenerator::RunProductBuild(
+  const std::string& command)
 {
   std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   tmpFile += "/ProductBuildOutput.log";
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << command << std::endl);
-  std::string output, stderr;
+  std::string output, error_output;
   int retVal = 1;
-  bool res = cmSystemTools::RunSingleCommand(command.c_str(), &output, &stderr, &retVal, 0,
-                                             this->GeneratorVerbose, 0);
+  bool res = cmSystemTools::RunSingleCommand(command.c_str(),
+    &output, &error_output, &retVal, 0, this->GeneratorVerbose, 0);
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Done running command"
     << std::endl);
   if ( !res || retVal )
@@ -240,11 +241,12 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
          << " \"" << packageFile << "\"";
 
   // Run ProductBuild
-  return RunProductBuild(pkgCmd.str(), packageFile);
+  return RunProductBuild(pkgCmd.str());
 }
 
-const char* cmCPackProductBuildGenerator::GetComponentScript(const char* script,
-                                                             const char* component_name)
+const char* cmCPackProductBuildGenerator::GetComponentScript(
+  const char* script,
+  const char* component_name)
 {
   std::string scriptname = std::string("CPACK_") + script + "_";
   if(component_name)
