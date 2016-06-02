@@ -139,6 +139,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     this->SetPropertyDefault("C_CLANG_TIDY", 0);
     this->SetPropertyDefault("C_COMPILER_LAUNCHER", 0);
     this->SetPropertyDefault("C_INCLUDE_WHAT_YOU_USE", 0);
+    this->SetPropertyDefault("LINK_WHAT_YOU_USE", 0);
     this->SetPropertyDefault("C_STANDARD", 0);
     this->SetPropertyDefault("C_STANDARD_REQUIRED", 0);
     this->SetPropertyDefault("C_EXTENSIONS", 0);
