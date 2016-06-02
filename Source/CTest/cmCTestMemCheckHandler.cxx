@@ -499,11 +499,12 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
 
   // Setup the options
   std::string memoryTesterOptions;
-  if (this->CTest->GetCTestConfiguration("MemoryCheckCommandOptions").size()) {
+  if (!this->CTest->GetCTestConfiguration("MemoryCheckCommandOptions")
+         .empty()) {
     memoryTesterOptions =
       this->CTest->GetCTestConfiguration("MemoryCheckCommandOptions");
-  } else if (this->CTest->GetCTestConfiguration("ValgrindCommandOptions")
-               .size()) {
+  } else if (!this->CTest->GetCTestConfiguration("ValgrindCommandOptions")
+                .empty()) {
     memoryTesterOptions =
       this->CTest->GetCTestConfiguration("ValgrindCommandOptions");
   }
@@ -522,8 +523,8 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
         this->MemoryTesterOptions.push_back("--show-reachable=yes");
         this->MemoryTesterOptions.push_back("--num-callers=50");
       }
-      if (this->CTest->GetCTestConfiguration("MemoryCheckSuppressionFile")
-            .size()) {
+      if (!this->CTest->GetCTestConfiguration("MemoryCheckSuppressionFile")
+             .empty()) {
         if (!cmSystemTools::FileExists(
               this->CTest->GetCTestConfiguration("MemoryCheckSuppressionFile")
                 .c_str())) {

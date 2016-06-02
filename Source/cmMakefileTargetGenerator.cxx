@@ -848,7 +848,7 @@ bool cmMakefileTargetGenerator::WriteMakeRule(
   const std::vector<std::string>& commands, bool in_help)
 {
   bool symbolic = false;
-  if (outputs.size() == 0) {
+  if (outputs.empty()) {
     return symbolic;
   }
 
