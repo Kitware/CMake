@@ -3437,7 +3437,7 @@ std::string cmGlobalXCodeGenerator::ComputeInfoPListLocation(
 
 // Return true if the generated build tree may contain multiple builds.
 // i.e. "Can I build Debug and Release in the same tree?"
-bool cmGlobalXCodeGenerator::IsMultiConfig()
+bool cmGlobalXCodeGenerator::IsMultiConfig() const
 {
   // Old Xcode 1.5 is single config:
   if (this->XcodeVersion == 15) {
