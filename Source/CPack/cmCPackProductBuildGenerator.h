@@ -10,51 +10,51 @@
   See the License for more information.
 ============================================================================*/
 
-#ifndef cmCPackPackageMakerGenerator_h
-#define cmCPackPackageMakerGenerator_h
+#ifndef cmCPackProductBuildGenerator_h
+#define cmCPackProductBuildGenerator_h
+
 
 #include "cmCPackPKGGenerator.h"
 
 class cmCPackComponent;
 
-/** \class cmCPackPackageMakerGenerator
- * \brief A generator for PackageMaker files
+/** \class cmCPackProductBuildGenerator
+ * \brief A generator for ProductBuild files
  *
- * http://developer.apple.com/documentation/Darwin
- * /Reference/ManPages/man1/packagemaker.1.html
  */
-class cmCPackPackageMakerGenerator : public cmCPackPKGGenerator
+class cmCPackProductBuildGenerator : public cmCPackPKGGenerator
 {
 public:
-  cmCPackTypeMacro(cmCPackPackageMakerGenerator, cmCPackPKGGenerator);
+  cmCPackTypeMacro(cmCPackProductBuildGenerator, cmCPackPKGGenerator);
 
   /**
    * Construct generator
    */
-  cmCPackPackageMakerGenerator();
-  virtual ~cmCPackPackageMakerGenerator();
-  bool SupportsComponentInstallation() const;
+  cmCPackProductBuildGenerator();
+  virtual ~cmCPackProductBuildGenerator();
 
 protected:
   virtual int InitializeInternal();
   int PackageFiles();
-  virtual const char* GetOutputExtension() { return ".dmg"; }
+  virtual const char* GetOutputExtension() { return ".pkg"; }
 
-  // Run PackageMaker with the given command line, which will (if
+  // Run ProductBuild with the given command line, which will (if
   // successful) produce the given package file. Returns true if
-  // PackageMaker succeeds, false otherwise.
-  bool RunPackageMaker(const char* command, const char* packageFile);
+  // ProductBuild succeeds, false otherwise.
+  bool RunProductBuild(const std::string& command, const std::string& packageFile);
 
   // Generate a package in the file packageFile for the given
   // component.  All of the files within this component are stored in
   // the directory packageDir. Returns true if successful, false
   // otherwise.
-  bool GenerateComponentPackage(const char* packageFile,
-                                const char* packageDir,
-                                const cmCPackComponent& component);
+  bool GenerateComponentPackage(const std::string& packageFileDir,
+                                const std::string& packageFileName,
+                                const std::string& packageDir,
+                                const cmCPackComponent* component);
 
-  double PackageMakerVersion;
-  unsigned int PackageCompatibilityVersion;
+  const char* GetComponentScript(const char* script,
+                                 const char* script_component);
+
 };
 
 #endif
