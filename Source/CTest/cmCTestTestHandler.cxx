@@ -1406,7 +1406,7 @@ void cmCTestTestHandler::UseIncludeRegExp()
 void cmCTestTestHandler::UseExcludeRegExp()
 {
   this->UseExcludeRegExpFlag = true;
-  this->UseExcludeRegExpFirst = this->UseIncludeRegExpFlag ? false : true;
+  this->UseExcludeRegExpFirst = !this->UseIncludeRegExpFlag;
 }
 
 const char* cmCTestTestHandler::GetTestStatus(int status)

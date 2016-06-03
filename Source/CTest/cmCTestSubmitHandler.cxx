@@ -845,10 +845,7 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(const std::string& scp_command,
     }
   }
   cmsysProcess_Delete(cp);
-  if (problems) {
-    return false;
-  }
-  return true;
+  return problems == 0;
 }
 
 bool cmCTestSubmitHandler::SubmitUsingCP(const std::string& localprefix,
@@ -870,7 +867,6 @@ bool cmCTestSubmitHandler::SubmitUsingCP(const std::string& localprefix,
   }
 
   cmCTest::SetOfStrings::const_iterator file;
-  bool problems = false;
   for (file = files.begin(); file != files.end(); ++file) {
     std::string lfname = localprefix;
     cmSystemTools::ConvertToUnixSlashes(lfname);
@@ -883,9 +879,6 @@ bool cmCTestSubmitHandler::SubmitUsingCP(const std::string& localprefix,
   }
   std::string tagDoneFile = destination + "/" + remoteprefix + "DONE";
   cmSystemTools::Touch(tagDoneFile, true);
-  if (problems) {
-    return false;
-  }
   return true;
 }
 

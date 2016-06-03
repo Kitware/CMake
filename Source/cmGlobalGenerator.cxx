@@ -180,8 +180,7 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string& lang,
   } else {
     path = name;
   }
-  if ((path.empty() || !cmSystemTools::FileExists(path.c_str())) &&
-      (optional == false)) {
+  if (!optional && (path.empty() || !cmSystemTools::FileExists(path))) {
     return;
   }
   const char* cname =

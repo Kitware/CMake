@@ -27,10 +27,7 @@ bool cmParsePHPCoverage::ReadUntil(std::istream& in, char until)
   char c = 0;
   while (in.get(c) && c != until) {
   }
-  if (c != until) {
-    return false;
-  }
-  return true;
+  return c == until;
 }
 bool cmParsePHPCoverage::ReadCoverageArray(std::istream& in,
                                            std::string const& fileName)

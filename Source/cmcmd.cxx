@@ -1027,11 +1027,7 @@ int cmcmd::ExecuteEchoColor(std::vector<std::string>& args)
       // Enable or disable color based on the switch value.
       std::string value = args[i].substr(9);
       if (!value.empty()) {
-        if (cmSystemTools::IsOn(value.c_str())) {
-          enabled = true;
-        } else {
-          enabled = false;
-        }
+        enabled = cmSystemTools::IsOn(value.c_str());
       }
     } else if (cmHasLiteralPrefix(args[i], "--progress-dir=")) {
       progressDir = args[i].substr(15);
@@ -1226,7 +1222,7 @@ int cmcmd::VisualStudioLink(std::vector<std::string>& args, int type)
   if (args.size() < 2) {
     return -1;
   }
-  bool verbose = cmSystemTools::GetEnv("VERBOSE") ? true : false;
+  bool verbose = cmSystemTools::GetEnv("VERBOSE") != NULL;
   std::vector<std::string> expandedArgs;
   for (std::vector<std::string>::iterator i = args.begin(); i != args.end();
        ++i) {

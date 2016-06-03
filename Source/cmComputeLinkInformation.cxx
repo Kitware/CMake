@@ -274,8 +274,7 @@ cmComputeLinkInformation::cmComputeLinkInformation(
 
   // Check whether we should use an import library for linking a target.
   this->UseImportLibrary =
-    this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX") ? true
-                                                                 : false;
+    this->Makefile->IsDefinitionSet("CMAKE_IMPORT_LIBRARY_SUFFIX");
 
   // Check whether we should skip dependencies on shared library files.
   this->LinkDependsNoShared =

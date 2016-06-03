@@ -654,10 +654,9 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
     // but also do not include a date so we can fall through to
     // compare them without skipping any prefix.
     unsigned char hdr[2];
-    bool okay =
-      finModFile.read(reinterpret_cast<char*>(hdr), 2) ? true : false;
+    bool okay = !finModFile.read(reinterpret_cast<char*>(hdr), 2).fail();
     finModFile.seekg(0);
-    if (!(okay && hdr[0] == 0x1f && hdr[1] == 0x8b)) {
+    if (!okay || hdr[0] != 0x1f || hdr[1] != 0x8b) {
       const char seq[1] = { '\n' };
       const int seqlen = 1;
 

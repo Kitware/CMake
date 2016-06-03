@@ -177,10 +177,7 @@ bool cmSourceFileLocation::MatchesAmbiguousExtension(
   }
   std::vector<std::string> hdrExts =
     mf->GetCMakeInstance()->GetHeaderExtensions();
-  if (std::find(hdrExts.begin(), hdrExts.end(), ext) != hdrExts.end()) {
-    return true;
-  }
-  return false;
+  return std::find(hdrExts.begin(), hdrExts.end(), ext) != hdrExts.end();
 }
 
 bool cmSourceFileLocation::Matches(cmSourceFileLocation const& loc)

@@ -636,14 +636,14 @@ void cmQtAutoGenerators::ParseCppFile(
         }
       } else {
         std::string fileToMoc = absFilename;
-        if ((basename != scannedFileBasename) || (requiresMoc == false)) {
+        if (!requiresMoc || basename != scannedFileBasename) {
           std::string mocSubDir = extractSubDir(absPath, currentMoc);
           std::string headerToMoc =
             findMatchingHeader(absPath, mocSubDir, basename, headerExtensions);
           if (!headerToMoc.empty()) {
             // this is for KDE4 compatibility:
             fileToMoc = headerToMoc;
-            if ((requiresMoc == false) && (basename == scannedFileBasename)) {
+            if (!requiresMoc && basename == scannedFileBasename) {
               std::stringstream err;
               err << "AUTOGEN: warning: " << absFilename
                   << ": The file "
@@ -696,8 +696,8 @@ void cmQtAutoGenerators::ParseCppFile(
   // If this is the case, the moc_foo.cpp should probably be generated from
   // foo.cpp instead of foo.h, because otherwise it won't build.
   // But warn, since this is not how it is supposed to be used.
-  if ((dotMocIncluded == false) && (requiresMoc == true)) {
-    if (mocUnderscoreIncluded == true) {
+  if (!dotMocIncluded && requiresMoc) {
+    if (mocUnderscoreIncluded) {
       // this is for KDE4 compatibility:
       std::stringstream err;
       err << "AUTOGEN: warning: " << absFilename << ": The file "
@@ -833,8 +833,7 @@ void cmQtAutoGenerators::StrictParseCppFile(
   // foo.cpp instead of foo.h, because otherwise it won't build.
   // But warn, since this is not how it is supposed to be used.
   std::string macroName;
-  if ((dotMocIncluded == false) &&
-      (requiresMocing(contentsString, macroName))) {
+  if (!dotMocIncluded && requiresMocing(contentsString, macroName)) {
     // otherwise always error out since it will not compile:
     std::stringstream err;
     err << "AUTOGEN: error: " << absFilename << ": The file "

@@ -655,11 +655,11 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
   // projects with C/C++ and Fortran are handled as C/C++ projects
   bool pureFortran = false;
   std::string compilerIdVar;
-  if (this->GlobalGenerator->GetLanguageEnabled("CXX") == true) {
+  if (this->GlobalGenerator->GetLanguageEnabled("CXX")) {
     compilerIdVar = "CMAKE_CXX_COMPILER_ID";
-  } else if (this->GlobalGenerator->GetLanguageEnabled("C") == true) {
+  } else if (this->GlobalGenerator->GetLanguageEnabled("C")) {
     compilerIdVar = "CMAKE_C_COMPILER_ID";
-  } else if (this->GlobalGenerator->GetLanguageEnabled("Fortran") == true) {
+  } else if (this->GlobalGenerator->GetLanguageEnabled("Fortran")) {
     compilerIdVar = "CMAKE_Fortran_COMPILER_ID";
     pureFortran = true;
   }
@@ -667,7 +667,7 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
   std::string compilerId = mf->GetSafeDefinition(compilerIdVar);
   std::string compiler = "gcc"; // default to gcc
   if (compilerId == "MSVC") {
-    if (mf->IsDefinitionSet("MSVC10") == true) {
+    if (mf->IsDefinitionSet("MSVC10")) {
       compiler = "msvc10";
     } else {
       compiler = "msvc8";
