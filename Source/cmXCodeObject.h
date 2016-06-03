@@ -59,11 +59,11 @@ public:
   static const char* PBXTypeNames[];
   virtual ~cmXCodeObject();
   cmXCodeObject(PBXType ptype, Type type);
-  Type GetType() { return this->TypeValue; }
-  PBXType GetIsA() { return this->IsA; }
+  Type GetType() const { return this->TypeValue; }
+  PBXType GetIsA() const { return this->IsA; }
 
   void SetString(const std::string& s);
-  const std::string& GetString() { return this->String; }
+  const std::string& GetString() const { return this->String; }
 
   void AddAttribute(const std::string& name, cmXCodeObject* value)
   {
@@ -73,7 +73,7 @@ public:
   void SetObject(cmXCodeObject* value) { this->Object = value; }
   cmXCodeObject* GetObject() { return this->Object; }
   void AddObject(cmXCodeObject* value) { this->List.push_back(value); }
-  bool HasObject(cmXCodeObject* o)
+  bool HasObject(cmXCodeObject* o) const
   {
     return !(std::find(this->List.begin(), this->List.end(), o) ==
              this->List.end());
@@ -94,23 +94,25 @@ public:
   virtual void PrintComment(std::ostream&) {}
 
   static void PrintList(std::vector<cmXCodeObject*> const&, std::ostream& out);
-  const std::string& GetId() { return this->Id; }
+  const std::string& GetId() const { return this->Id; }
   void SetId(const std::string& id) { this->Id = id; }
-  cmGeneratorTarget* GetTarget() { return this->Target; }
+  cmGeneratorTarget* GetTarget() const { return this->Target; }
   void SetTarget(cmGeneratorTarget* t) { this->Target = t; }
-  const std::string& GetComment() { return this->Comment; }
-  bool HasComment() { return (!this->Comment.empty()); }
-  cmXCodeObject* GetObject(const char* name)
+  const std::string& GetComment() const { return this->Comment; }
+  bool HasComment() const { return (!this->Comment.empty()); }
+  cmXCodeObject* GetObject(const char* name) const
   {
-    if (this->ObjectAttributes.count(name)) {
-      return this->ObjectAttributes[name];
+    std::map<std::string, cmXCodeObject*>::const_iterator i =
+      this->ObjectAttributes.find(name);
+    if (i != this->ObjectAttributes.end()) {
+      return i->second;
     }
     return 0;
   }
   // search the attribute list for an object of the specified type
-  cmXCodeObject* GetObject(cmXCodeObject::PBXType t)
+  cmXCodeObject* GetObject(cmXCodeObject::PBXType t) const
   {
-    for (std::vector<cmXCodeObject*>::iterator i = this->List.begin();
+    for (std::vector<cmXCodeObject*>::const_iterator i = this->List.begin();
          i != this->List.end(); ++i) {
       cmXCodeObject* o = *i;
       if (o->IsA == t) {
@@ -126,7 +128,7 @@ public:
   {
     this->DependLibraries[configName].push_back(l);
   }
-  std::map<std::string, StringVec> const& GetDependLibraries()
+  std::map<std::string, StringVec> const& GetDependLibraries() const
   {
     return this->DependLibraries;
   }
@@ -134,11 +136,14 @@ public:
   {
     this->DependTargets[configName].push_back(tName);
   }
-  std::map<std::string, StringVec> const& GetDependTargets()
+  std::map<std::string, StringVec> const& GetDependTargets() const
   {
     return this->DependTargets;
   }
-  std::vector<cmXCodeObject*> const& GetObjectList() { return this->List; }
+  std::vector<cmXCodeObject*> const& GetObjectList() const
+  {
+    return this->List;
+  }
   void SetComment(const std::string& c) { this->Comment = c; }
   static void PrintString(std::ostream& os, std::string String);
 
