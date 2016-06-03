@@ -255,7 +255,7 @@ bool cmArchiveWrite::AddFile(const char* file, size_t skip, const char* prefix)
     archive_entry_set_gid(e, this->Gid.Get());
   }
 
-  if (this->Uname.size() && this->Gname.size()) {
+  if (!this->Uname.empty() && !this->Gname.empty()) {
     archive_entry_set_uname(e, this->Uname.c_str());
     archive_entry_set_gname(e, this->Gname.c_str());
   }

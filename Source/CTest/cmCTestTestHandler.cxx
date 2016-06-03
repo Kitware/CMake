@@ -69,7 +69,7 @@ public:
 bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args,
                                        cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }
@@ -150,7 +150,7 @@ public:
 bool cmCTestAddSubdirectoryCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }
@@ -1125,7 +1125,7 @@ void cmCTestTestHandler::AttachFiles(cmXMLWriter& xml,
                                      cmCTestTestResult* result)
 {
   if (result->Status != cmCTestTestHandler::COMPLETED &&
-      result->Properties->AttachOnFail.size()) {
+      !result->Properties->AttachOnFail.empty()) {
     result->Properties->AttachedFiles.insert(
       result->Properties->AttachedFiles.end(),
       result->Properties->AttachOnFail.begin(),
