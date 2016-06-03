@@ -42,14 +42,15 @@ mark_as_advanced(LibArchive_INCLUDE_DIR LibArchive_LIBRARY)
 
 # Extract the version number from the header.
 if(LibArchive_INCLUDE_DIR AND EXISTS "${LibArchive_INCLUDE_DIR}/archive.h")
-  # The version string appears in one of two known formats in the header:
+  # The version string appears in one of three known formats in the header:
   #  #define ARCHIVE_LIBRARY_VERSION "libarchive 2.4.12"
   #  #define ARCHIVE_VERSION_STRING "libarchive 2.8.4"
-  # Match either format.
-  set(_LibArchive_VERSION_REGEX "^#define[ \t]+ARCHIVE[_A-Z]+VERSION[_A-Z]*[ \t]+\"libarchive +([0-9]+)\\.([0-9]+)\\.([0-9]+)[^\"]*\".*$")
+  #  #define ARCHIVE_VERSION_ONLY_STRING "3.2.0"
+  # Match any format.
+  set(_LibArchive_VERSION_REGEX "^#define[ \t]+ARCHIVE[_A-Z]+VERSION[_A-Z]*[ \t]+\"(libarchive +)?([0-9]+)\\.([0-9]+)\\.([0-9]+)[^\"]*\".*$")
   file(STRINGS "${LibArchive_INCLUDE_DIR}/archive.h" _LibArchive_VERSION_STRING LIMIT_COUNT 1 REGEX "${_LibArchive_VERSION_REGEX}")
   if(_LibArchive_VERSION_STRING)
-    string(REGEX REPLACE "${_LibArchive_VERSION_REGEX}" "\\1.\\2.\\3" LibArchive_VERSION "${_LibArchive_VERSION_STRING}")
+    string(REGEX REPLACE "${_LibArchive_VERSION_REGEX}" "\\2.\\3.\\4" LibArchive_VERSION "${_LibArchive_VERSION_STRING}")
   endif()
   unset(_LibArchive_VERSION_REGEX)
   unset(_LibArchive_VERSION_STRING)
