@@ -26,6 +26,7 @@ endif()
 set(_ANDROID_SYSROOT_NDK "")
 set(_ANDROID_SYSROOT_API "")
 set(_ANDROID_SYSROOT_ARCH "")
+set(_ANDROID_SYSROOT_STANDALONE_TOOLCHAIN "")
 if(CMAKE_SYSROOT)
   if(NOT IS_DIRECTORY "${CMAKE_SYSROOT}")
     message(FATAL_ERROR
@@ -38,16 +39,20 @@ if(CMAKE_SYSROOT)
     set(_ANDROID_SYSROOT_NDK "${CMAKE_MATCH_1}")
     set(_ANDROID_SYSROOT_API "${CMAKE_MATCH_2}")
     set(_ANDROID_SYSROOT_ARCH "${CMAKE_MATCH_3}")
+  elseif(CMAKE_SYSROOT MATCHES "^([^\\\n]*)/sysroot$")
+    set(_ANDROID_SYSROOT_STANDALONE_TOOLCHAIN "${CMAKE_MATCH_1}")
   else()
     message(FATAL_ERROR
       "The value of CMAKE_SYSROOT:\n"
       "  ${CMAKE_SYSROOT}\n"
-      "does not match the form:\n"
+      "does not match any of the forms:\n"
       "  <ndk>/platforms/android-<api>/arch-<arch>\n"
+      "  <standalone-toolchain>/sysroot\n"
       "where:\n"
       "  <ndk>  = Android NDK directory (with forward slashes)\n"
       "  <api>  = Android API version number (decimal digits)\n"
-      "  <arch> = Android ARCH name (lower case)"
+      "  <arch> = Android ARCH name (lower case)\n"
+      "  <standalone-toolchain> = Path to standalone toolchain prefix\n"
       )
   endif()
 endif()
@@ -61,17 +66,46 @@ if(CMAKE_ANDROID_NDK)
       "does not exist."
       )
   endif()
+elseif(CMAKE_ANDROID_STANDALONE_TOOLCHAIN)
+  if(NOT IS_DIRECTORY "${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}")
+    message(FATAL_ERROR
+      "Android: The standalone toolchain directory specified by CMAKE_ANDROID_STANDALONE_TOOLCHAIN:\n"
+      "  ${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}\n"
+      "does not exist."
+      )
+  endif()
+  if(NOT EXISTS "${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}/sysroot/usr/include/android/api-level.h")
+    message(FATAL_ERROR
+      "Android: The standalone toolchain directory specified by CMAKE_ANDROID_STANDALONE_TOOLCHAIN:\n"
+      "  ${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}\n"
+      "does not contain a sysroot with a known layout.  The file:\n"
+      "  ${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}/sysroot/usr/include/android/api-level.h\n"
+      "does not exist."
+      )
+  endif()
 else()
   if(IS_DIRECTORY "${_ANDROID_SYSROOT_NDK}")
     set(CMAKE_ANDROID_NDK "${_ANDROID_SYSROOT_NDK}")
+  elseif(IS_DIRECTORY "${_ANDROID_SYSROOT_STANDALONE_TOOLCHAIN}")
+    set(CMAKE_ANDROID_STANDALONE_TOOLCHAIN "${_ANDROID_SYSROOT_STANDALONE_TOOLCHAIN}")
   elseif(IS_DIRECTORY "$ENV{ANDROID_NDK_ROOT}")
     file(TO_CMAKE_PATH "$ENV{ANDROID_NDK_ROOT}" CMAKE_ANDROID_NDK)
   endif()
-  # TODO: Search harder for the NDK.
+  # TODO: Search harder for the NDK or standalone toolchain.
 endif()
 
-if(NOT CMAKE_ANDROID_NDK)
-  message(FATAL_ERROR "Android: The NDK root directory was not found.")
+set(_ANDROID_STANDALONE_TOOLCHAIN_API "")
+if(CMAKE_ANDROID_STANDALONE_TOOLCHAIN)
+  set(_ANDROID_API_LEVEL_H_REGEX "^[\t ]*#[\t ]*define[\t ]+__ANDROID_API__[\t ]+([0-9]+)")
+  file(STRINGS "${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}/sysroot/usr/include/android/api-level.h"
+    _ANDROID_API_LEVEL_H_CONTENT REGEX "${_ANDROID_API_LEVEL_H_REGEX}")
+  if(_ANDROID_API_LEVEL_H_CONTENT MATCHES "${_ANDROID_API_LEVEL_H_REGEX}")
+    set(_ANDROID_STANDALONE_TOOLCHAIN_API "${CMAKE_MATCH_1}")
+  endif()
+endif()
+
+if(NOT CMAKE_ANDROID_NDK AND NOT CMAKE_ANDROID_STANDALONE_TOOLCHAIN)
+  message(FATAL_ERROR "Android: Neither the NDK or a standalone toolchain was found.")
 endif()
 
 # Select an API.
@@ -83,6 +117,8 @@ elseif(CMAKE_ANDROID_API)
 elseif(_ANDROID_SYSROOT_API)
   set(CMAKE_SYSTEM_VERSION "${_ANDROID_SYSROOT_API}")
   set(_ANDROID_API_VAR CMAKE_SYSROOT)
+elseif(_ANDROID_STANDALONE_TOOLCHAIN_API)
+  set(CMAKE_SYSTEM_VERSION "${_ANDROID_STANDALONE_TOOLCHAIN_API}")
 endif()
 if(CMAKE_SYSTEM_VERSION)
   if(CMAKE_ANDROID_API AND NOT "x${CMAKE_ANDROID_API}" STREQUAL "x${CMAKE_SYSTEM_VERSION}")
@@ -215,6 +251,7 @@ endif()
 # Save the Android-specific information in CMakeSystem.cmake.
 set(CMAKE_SYSTEM_CUSTOM_CODE "
 set(CMAKE_ANDROID_NDK \"${CMAKE_ANDROID_NDK}\")
+set(CMAKE_ANDROID_STANDALONE_TOOLCHAIN \"${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}\")
 set(CMAKE_ANDROID_ARCH \"${CMAKE_ANDROID_ARCH}\")
 set(CMAKE_ANDROID_ARCH_ABI \"${CMAKE_ANDROID_ARCH_ABI}\")
 ")

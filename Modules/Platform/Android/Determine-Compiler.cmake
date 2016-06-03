@@ -39,6 +39,8 @@ endif()
 
 if(CMAKE_ANDROID_NDK)
   include(Platform/Android/Determine-Compiler-NDK)
+elseif(CMAKE_ANDROID_STANDALONE_TOOLCHAIN)
+  include(Platform/Android/Determine-Compiler-Standalone)
 else()
   set(_ANDROID_TOOL_C_COMPILER "")
   set(_ANDROID_TOOL_C_TOOLCHAIN_VERSION "")
