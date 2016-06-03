@@ -1,1 +1,1 @@
-.. cmake-module:: ../../Modules/CPackPackageMaker.cmake
+.. cmake-module:: ../../Modules/CPackProductBuild.cmake
