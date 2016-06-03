@@ -157,13 +157,6 @@ Var AR_RegFlags
   !define MUI_HEADERIMAGE
   !define MUI_ABORTWARNING
 
-;--------------------------------
-; path functions
-
-!verbose 3
-!include "WinMessages.NSH"
-!verbose 4
-
 ;----------------------------------------
 ; based upon a script of "Written by KiCHiK 2003-01-18 05:57:02"
 ;----------------------------------------
