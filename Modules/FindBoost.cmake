@@ -209,6 +209,7 @@
 # Copyright 2007      Mike Jackson
 # Copyright 2008      Andreas Pakulat <apaku@gmx.de>
 # Copyright 2008-2012 Philip Lowman <philip@yhbt.com>
+# Copyright 2016      Alex Turbov <i.zaufi@gmail.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -864,6 +865,37 @@ function(_Boost_MISSING_DEPENDENCIES componentvar extravar)
 endfunction()
 
 #
+# Update library search directory hint variable with paths used by prebuilt boost binaries.
+#
+# Prebuilt windows binaries (https://sourceforge.net/projects/boost/files/boost-binaries/)
+# have library directories named using MSVC compiler version and architecture.
+# This function would append corresponding directories if MSVS is a current compiler,
+# so having `BOOST_ROOT` would be enough to specify to find everything.
+#
+macro(_Boost_UPDATE_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS componentlibvar basedir)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+      set(_arch_suffix 64)
+    else()
+      set(_arch_suffix 32)
+    endif()
+    if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19)
+      list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-14.0)
+    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 18)
+      list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-12.0)
+    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17)
+      list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-11.0)
+    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16)
+      list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-10.0)
+    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15)
+      list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-9.0)
+    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14)
+      list(APPEND ${componentlibvar} ${${basedir}}/lib${_arch_suffix}-msvc-8.0)
+    endif()
+  endif()
+endmacro()
+
+#
 # End functions/macros
 #
 #-------------------------------------------------------------------------------
@@ -1322,8 +1354,10 @@ foreach(c DEBUG RELEASE)
 
     if(BOOST_ROOT)
       list(APPEND _boost_LIBRARY_SEARCH_DIRS_${c} ${BOOST_ROOT}/lib ${BOOST_ROOT}/stage/lib)
+      _Boost_UPDATE_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS(_boost_LIBRARY_SEARCH_DIRS_${c} BOOST_ROOT)
     elseif(_ENV_BOOST_ROOT)
       list(APPEND _boost_LIBRARY_SEARCH_DIRS_${c} ${_ENV_BOOST_ROOT}/lib ${_ENV_BOOST_ROOT}/stage/lib)
+      _Boost_UPDATE_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS(_boost_LIBRARY_SEARCH_DIRS_${c} _ENV_BOOST_ROOT)
     endif()
 
     list(APPEND _boost_LIBRARY_SEARCH_DIRS_${c}
