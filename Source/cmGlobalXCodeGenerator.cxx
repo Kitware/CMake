@@ -315,6 +315,10 @@ void cmGlobalXCodeGenerator::GenerateBuildCommand(
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator* cmGlobalXCodeGenerator::CreateLocalGenerator(cmMakefile* mf)
 {
+  // Default handling for mig files.
+  mf->AddDefinition("CMAKE_MIG_SOURCE_FILE_EXTENSIONS", "mig");
+  FillExtensionToLanguageMap("MIG", mf);
+
   return new cmLocalXCodeGenerator(this, mf);
 }
 
@@ -792,6 +796,8 @@ std::string GetSourcecodeValueFromFileExtension(const std::string& _ext,
     sourcecode += ".asm";
   } else if (ext == "metal") {
     sourcecode += ".metal";
+  } else if (ext == "mig") {
+    sourcecode += ".mig";
   }
   // else
   //  {
