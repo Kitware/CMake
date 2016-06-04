@@ -714,6 +714,20 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
     }
   }
 
+  // Add user-specified file attributes.
+  const char* extraFileAttributes = sf->GetProperty("XCODE_FILE_ATTRIBUTES");
+  if (extraFileAttributes) {
+    // Expand the list of attributes.
+    std::vector<std::string> attributes;
+    cmSystemTools::ExpandListArgument(extraFileAttributes, attributes);
+
+    // Store the attributes.
+    for (std::vector<std::string>::const_iterator ai = attributes.begin();
+         ai != attributes.end(); ++ai) {
+      attrs->AddObject(this->CreateString(*ai));
+    }
+  }
+
   settings->AddAttributeIfNotEmpty("ATTRIBUTES", attrs);
 
   // Add the fileRef to the top level Resources group/folder if it is not
