@@ -787,6 +787,8 @@ std::string GetSourcecodeValueFromFileExtension(const std::string& _ext,
     sourcecode += ".asm";
   } else if (ext == "metal") {
     sourcecode += ".metal";
+  } else if (ext == "mig") {
+    sourcecode += ".mig";
   }
   // else
   //  {
