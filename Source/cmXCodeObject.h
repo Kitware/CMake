@@ -122,6 +122,9 @@ public:
     return 0;
   }
 
+  std::size_t CountAttributes() const { return this->ObjectAttributes.size(); }
+  std::size_t CountObjects() const { return this->List.size(); }
+
   void CopyAttributes(cmXCodeObject*);
 
   void AddDependLibrary(const std::string& configName, const std::string& l)

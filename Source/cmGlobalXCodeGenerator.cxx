@@ -689,7 +689,9 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   cmXCodeObject* fileRef = buildFile->GetObject("fileRef")->GetObject();
 
   cmXCodeObject* settings = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-  settings->AddAttribute("COMPILER_FLAGS", this->CreateString(flags));
+  if (!flags.empty()) {
+    settings->AddAttribute("COMPILER_FLAGS", this->CreateString(flags));
+  }
 
   // Is this a resource file in this target? Add it to the resources group...
   //
@@ -698,21 +700,23 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
     gtgt->GetTargetSourceFileFlags(sf);
   bool isResource = tsFlags.Type == cmGeneratorTarget::SourceFileTypeResource;
 
+  cmXCodeObject* attrs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+
   // Is this a "private" or "public" framework header file?
   // Set the ATTRIBUTES attribute appropriately...
   //
   if (gtgt->IsFrameworkOnApple()) {
     if (tsFlags.Type == cmGeneratorTarget::SourceFileTypePrivateHeader) {
-      cmXCodeObject* attrs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
       attrs->AddObject(this->CreateString("Private"));
-      settings->AddAttribute("ATTRIBUTES", attrs);
       isResource = true;
     } else if (tsFlags.Type == cmGeneratorTarget::SourceFileTypePublicHeader) {
-      cmXCodeObject* attrs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
       attrs->AddObject(this->CreateString("Public"));
-      settings->AddAttribute("ATTRIBUTES", attrs);
       isResource = true;
     }
+  }
+
+  if (attrs->CountObjects() != 0) {
+    settings->AddAttribute("ATTRIBUTES", attrs);
   }
 
   // Add the fileRef to the top level Resources group/folder if it is not
@@ -723,7 +727,9 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
     this->ResourcesGroupChildren->AddObject(fileRef);
   }
 
-  buildFile->AddAttribute("settings", settings);
+  if (settings->CountAttributes() != 0) {
+    buildFile->AddAttribute("settings", settings);
+  }
   return buildFile;
 }
 
