@@ -683,7 +683,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   }
 
   if (this->FortranProject) {
-    switch (this->GetFortranFormat(target->GetProperty("Fortran_FORMAT"))) {
+    switch (cmOutputConverter::GetFortranFormat(
+      target->GetProperty("Fortran_FORMAT"))) {
       case cmOutputConverter::FortranFormatFixed:
         flags += " -fixed";
         break;
@@ -1474,7 +1475,8 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
       needfc = true;
     }
     if (lg->FortranProject) {
-      switch (lg->GetFortranFormat(sf.GetProperty("Fortran_FORMAT"))) {
+      switch (cmOutputConverter::GetFortranFormat(
+        sf.GetProperty("Fortran_FORMAT"))) {
         case cmOutputConverter::FortranFormatFixed:
           fc.CompileFlags = "-fixed " + fc.CompileFlags;
           needfc = true;
