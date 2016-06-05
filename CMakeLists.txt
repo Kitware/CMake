@@ -43,6 +43,7 @@ if(MSVC)
 endif(MSVC)
 if(WIN32)
     add_definitions(-DCOMPILING_FOR_WINDOWS)
+    set(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Add a suffix, usually d on Windows")
 endif(WIN32)
 
 set(expat_SRCS
@@ -67,6 +68,15 @@ endif(BUILD_shared)
 
 add_library(expat ${_SHARED} ${expat_SRCS})
 
+set(LIBCURRENT 7)   # sync
+set(LIBREVISION 2)  # with
+set(LIBAGE 6)       # configure.ac!
+math(EXPR LIBCURRENT_MINUS_AGE "${LIBCURRENT} - ${LIBAGE}")
+
+set_property(TARGET expat PROPERTY VERSION ${LIBCURRENT_MINUS_AGE}.${LIBAGE}.${LIBREVISION})
+set_property(TARGET expat PROPERTY SOVERSION ${LIBCURRENT_MINUS_AGE})
+set_property(TARGET expat PROPERTY NO_SONAME ${NO_SONAME})
+
 install(TARGETS expat RUNTIME DESTINATION bin
                       LIBRARY DESTINATION lib
                       ARCHIVE DESTINATION lib)
@@ -81,6 +91,7 @@ install(FILES lib/expat.h lib/expat_external.h DESTINATION include)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/expat.pc DESTINATION lib/pkgconfig)
 
 
+add_custom_command(TARGET expat PRE_BUILD COMMAND $(MAKE) -C doc xmlwf.1)
 
 if(BUILD_tools AND NOT WINCE)
     set(xmlwf_SRCS
