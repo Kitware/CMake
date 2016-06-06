@@ -60,6 +60,7 @@ All Modules
    /module/CPackIFW
    /module/CPackNSIS
    /module/CPackPackageMaker
+   /module/CPackProductBuild
    /module/CPackRPM
    /module/CPack
    /module/CPackWIX

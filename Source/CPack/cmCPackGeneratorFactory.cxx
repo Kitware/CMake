@@ -28,6 +28,7 @@
 #include "cmCPackDragNDropGenerator.h"
 #include "cmCPackOSXX11Generator.h"
 #include "cmCPackPackageMakerGenerator.h"
+#include "cmCPackProductBuildGenerator.h"
 #endif
 
 #ifdef __CYGWIN__
@@ -121,6 +122,10 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
   if (cmCPackOSXX11Generator::CanGenerate()) {
     this->RegisterGenerator("OSXX11", "Mac OSX X11 bundle",
                             cmCPackOSXX11Generator::CreateGenerator);
+  }
+  if (cmCPackProductBuildGenerator::CanGenerate()) {
+    this->RegisterGenerator("productbuild", "Mac OSX pkg",
+      cmCPackProductBuildGenerator::CreateGenerator);
   }
 #endif
 #if !defined(_WIN32) && !defined(__QNXNTO__) && !defined(__BEOS__) &&         \
