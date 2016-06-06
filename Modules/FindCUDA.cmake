@@ -581,6 +581,7 @@ macro(cuda_unset_include_and_libraries)
   unset(CUDA_npps_LIBRARY CACHE)
   unset(CUDA_nvcuvenc_LIBRARY CACHE)
   unset(CUDA_nvcuvid_LIBRARY CACHE)
+  unset(CUDA_USE_STATIC_CUDA_RUNTIME CACHE)
   unset(CUDA_GPU_DETECT_OUTPUT CACHE)
 endmacro()
 
@@ -793,7 +794,7 @@ else()
 endif()
 
 if(CUDA_USE_STATIC_CUDA_RUNTIME)
-  if(UNIX AND NOT ANDROID)
+  if(UNIX)
     # Check for the dependent libraries.  Here we look for pthreads.
     if (DEFINED CMAKE_THREAD_PREFER_PTHREAD)
       set(_cuda_cmake_thread_prefer_pthread ${CMAKE_THREAD_PREFER_PTHREAD})
