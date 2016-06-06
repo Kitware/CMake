@@ -22,6 +22,12 @@ if(CMAKE_VS_PLATFORM_NAME STREQUAL "Tegra-Android")
   return()
 endif()
 
+# Commonly used Android toolchain files that pre-date CMake upstream support
+# set CMAKE_SYSTEM_VERSION to 1.  Avoid interfering with them.
+if(CMAKE_SYSTEM_VERSION EQUAL 1)
+  return()
+endif()
+
 # If the user provided CMAKE_SYSROOT for us, extract information from it.
 set(_ANDROID_SYSROOT_NDK "")
 set(_ANDROID_SYSROOT_API "")

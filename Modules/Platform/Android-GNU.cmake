@@ -26,6 +26,14 @@ if(CMAKE_VS_PLATFORM_NAME STREQUAL "Tegra-Android")
   return()
 endif()
 
+# Commonly used Android toolchain files that pre-date CMake upstream support
+# set CMAKE_SYSTEM_VERSION to 1.  Avoid interfering with them.
+if(CMAKE_SYSTEM_VERSION EQUAL 1)
+  macro(__android_compiler_gnu lang)
+  endmacro()
+  return()
+endif()
+
 include(Platform/Android-Common)
 
 macro(__android_compiler_gnu lang)
