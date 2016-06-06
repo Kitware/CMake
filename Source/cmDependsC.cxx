@@ -343,16 +343,16 @@ void cmDependsC::WriteCacheFile() const
          this->FileCache.begin();
        fileIt != this->FileCache.end(); ++fileIt) {
     if (fileIt->second->Used) {
-      cacheOut << fileIt->first.c_str() << std::endl;
+      cacheOut << fileIt->first << std::endl;
 
       for (std::vector<UnscannedEntry>::const_iterator incIt =
              fileIt->second->UnscannedEntries.begin();
            incIt != fileIt->second->UnscannedEntries.end(); ++incIt) {
-        cacheOut << incIt->FileName.c_str() << std::endl;
+        cacheOut << incIt->FileName << std::endl;
         if (incIt->QuotedLocation.empty()) {
           cacheOut << "-" << std::endl;
         } else {
-          cacheOut << incIt->QuotedLocation.c_str() << std::endl;
+          cacheOut << incIt->QuotedLocation << std::endl;
         }
       }
       cacheOut << std::endl;

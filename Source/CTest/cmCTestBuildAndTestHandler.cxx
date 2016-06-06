@@ -302,7 +302,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     out << "Could not find path to executable, perhaps it was not built: "
         << this->TestCommand << "\n";
     out << "tried to find it in these places:\n";
-    out << fullPath.c_str() << "\n";
+    out << fullPath << "\n";
     for (unsigned int i = 0; i < failed.size(); ++i) {
       out << failed[i] << "\n";
     }

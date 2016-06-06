@@ -1544,7 +1544,7 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
         std::string echo_cmd = "echo ";
         echo_cmd += (this->CurrentLocalGenerator->EscapeForShell(
           comment, ccg.GetCC().GetEscapeAllowMakeVars()));
-        makefileStream << "\t" << echo_cmd.c_str() << "\n";
+        makefileStream << "\t" << echo_cmd << "\n";
       }
 
       // Add each command line to the set of commands.
@@ -1562,7 +1562,7 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
         }
         cmd += cmd2;
         ccg.AppendArguments(c, cmd);
-        makefileStream << "\t" << cmd.c_str() << "\n";
+        makefileStream << "\t" << cmd << "\n";
       }
     }
   }

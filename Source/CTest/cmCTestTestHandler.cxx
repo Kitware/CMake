@@ -1321,7 +1321,7 @@ std::string cmCTestTestHandler::FindExecutable(
                  << "Looked in the following places:\n");
     for (std::vector<std::string>::iterator i = failed.begin();
          i != failed.end(); ++i) {
-      cmCTestLog(ctest, HANDLER_OUTPUT, i->c_str() << "\n");
+      cmCTestLog(ctest, HANDLER_OUTPUT, *i << "\n");
     }
   }
 

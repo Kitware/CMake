@@ -427,7 +427,7 @@ int cmGraphVizWriter::CollectAllTargets()
         // Skip ignored targets
         continue;
       }
-      // std::cout << "Found target: " << tit->first.c_str() << std::endl;
+      // std::cout << "Found target: " << tit->first << std::endl;
       std::ostringstream ostr;
       ostr << this->GraphNodePrefix << cnt++;
       this->TargetNamesNodes[realTargetName] = ostr.str();
@@ -469,7 +469,7 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
           ostr << this->GraphNodePrefix << cnt++;
           this->TargetNamesNodes[libName] = ostr.str();
           this->TargetPtrs[libName] = NULL;
-          // str << "    \"" << ostr.c_str() << "\" [ label=\"" << libName
+          // str << "    \"" << ostr << "\" [ label=\"" << libName
           // <<  "\" shape=\"ellipse\"];" << std::endl;
         }
       }

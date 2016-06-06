@@ -902,8 +902,7 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
 
   /* Call the famous server at UserLand. */
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "   Submitting to: "
-                       << realURL.c_str() << " (" << remoteprefix.c_str()
-                       << ")" << std::endl,
+                       << realURL << " (" << remoteprefix << ")" << std::endl,
                      this->Quiet);
   cmCTest::SetOfStrings::const_iterator file;
   for (file = files.begin(); file != files.end(); ++file) {
@@ -914,12 +913,12 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
       local_file = localprefix + "/" + *file;
     }
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Submit file: " << local_file.c_str() << std::endl,
+                       "   Submit file: " << local_file << std::endl,
                        this->Quiet);
     struct stat st;
     if (::stat(local_file.c_str(), &st)) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "  Cannot find file: " << local_file.c_str() << std::endl);
+                 "  Cannot find file: " << local_file << std::endl);
       return false;
     }
 
@@ -927,15 +926,15 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
     // make sure the file is not too big.
     if (static_cast<off_t>(static_cast<size_t>(st.st_size)) !=
         static_cast<off_t>(st.st_size)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "  File too big: " << local_file.c_str() << std::endl);
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "  File too big: " << local_file
+                                                                << std::endl);
       return false;
     }
     size_t fileSize = static_cast<size_t>(st.st_size);
     FILE* fp = cmsys::SystemTools::Fopen(local_file.c_str(), "rb");
     if (!fp) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "  Cannot open file: " << local_file.c_str() << std::endl);
+                 "  Cannot open file: " << local_file << std::endl);
       return false;
     }
 
@@ -944,7 +943,7 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
       delete[] fileBuffer;
       fclose(fp);
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "  Cannot read file: " << local_file.c_str() << std::endl);
+                 "  Cannot read file: " << local_file << std::endl);
       return false;
     }
     fclose(fp);

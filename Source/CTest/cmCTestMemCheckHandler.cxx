@@ -991,7 +991,7 @@ void cmCTestMemCheckHandler::PostProcessBoundsCheckerTest(
     cmsys::ifstream ifs(ofile.c_str());
     if (!ifs) {
       std::string log = "Cannot read memory tester output file: " + ofile;
-      cmCTestLog(this->CTest, ERROR_MESSAGE, log.c_str() << std::endl);
+      cmCTestLog(this->CTest, ERROR_MESSAGE, log << std::endl);
       return;
     }
     res.Output += BOUNDS_CHECKER_MARKER;
@@ -1024,7 +1024,7 @@ void cmCTestMemCheckHandler::AppendMemTesterOutput(cmCTestTestResult& res,
     cmsys::ifstream ifs(ofile.c_str());
     if (!ifs) {
       std::string log = "Cannot read memory tester output file: " + ofile;
-      cmCTestLog(this->CTest, ERROR_MESSAGE, log.c_str() << std::endl);
+      cmCTestLog(this->CTest, ERROR_MESSAGE, log << std::endl);
       return;
     }
     std::string line;
@@ -1056,7 +1056,7 @@ void cmCTestMemCheckHandler::TestOutputFileNames(
     g.FindFiles(ofile);
     if (g.GetFiles().empty()) {
       std::string log = "Cannot find memory tester output file: " + ofile;
-      cmCTestLog(this->CTest, ERROR_MESSAGE, log.c_str() << std::endl);
+      cmCTestLog(this->CTest, ERROR_MESSAGE, log << std::endl);
       ofile = "";
     } else {
       files = g.GetFiles();
@@ -1064,7 +1064,7 @@ void cmCTestMemCheckHandler::TestOutputFileNames(
     }
   } else if (!cmSystemTools::FileExists(ofile.c_str())) {
     std::string log = "Cannot find memory tester output file: " + ofile;
-    cmCTestLog(this->CTest, ERROR_MESSAGE, log.c_str() << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE, log << std::endl);
     ofile = "";
   }
   files.push_back(ofile);

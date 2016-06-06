@@ -3416,7 +3416,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
     while (cmSystemTools::GetLineFromStream(fin, inLine)) {
       outLine = "";
       this->ConfigureString(inLine, outLine, atOnly, escapeQuotes);
-      fout << outLine.c_str() << newLineCharacters;
+      fout << outLine << newLineCharacters;
     }
     // close the files before attempting to copy
     fin.close();

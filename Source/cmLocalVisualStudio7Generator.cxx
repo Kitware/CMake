@@ -1688,12 +1688,12 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
                                                       ppLang);
           }
           if (!fc.AdditionalDeps.empty()) {
-            fout << "\t\t\t\t\tAdditionalDependencies=\""
-                 << fc.AdditionalDeps.c_str() << "\"\n";
+            fout << "\t\t\t\t\tAdditionalDependencies=\"" << fc.AdditionalDeps
+                 << "\"\n";
           }
           if (!fc.ObjectName.empty()) {
-            fout << "\t\t\t\t\tObjectFile=\"$(IntDir)/"
-                 << fc.ObjectName.c_str() << "\"\n";
+            fout << "\t\t\t\t\tObjectFile=\"$(IntDir)/" << fc.ObjectName
+                 << "\"\n";
           }
           fout << "\t\t\t\t\t/>\n"
                << "\t\t\t\t</FileConfiguration>\n";
