@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 
   std::string scriptDirectory =
     cmsys::SystemTools::GetFilenamePath(fullScriptPath);
-  ofs << fullScriptPath.c_str() << std::endl;
+  ofs << fullScriptPath << std::endl;
   std::vector<const char*> args;
   args.push_back(fullScriptPath.c_str());
   int cc;

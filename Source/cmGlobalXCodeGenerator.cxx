@@ -659,7 +659,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   // Add flags from target and source file properties.
   std::string flags;
   const char* srcfmt = sf->GetProperty("Fortran_FORMAT");
-  switch (this->CurrentLocalGenerator->GetFortranFormat(srcfmt)) {
+  switch (cmOutputConverter::GetFortranFormat(srcfmt)) {
     case cmOutputConverter::FortranFormatFixed:
       flags = "-fixed " + flags;
       break;
@@ -1544,7 +1544,7 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
         std::string echo_cmd = "echo ";
         echo_cmd += (this->CurrentLocalGenerator->EscapeForShell(
           comment, ccg.GetCC().GetEscapeAllowMakeVars()));
-        makefileStream << "\t" << echo_cmd.c_str() << "\n";
+        makefileStream << "\t" << echo_cmd << "\n";
       }
 
       // Add each command line to the set of commands.
@@ -1562,7 +1562,7 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
         }
         cmd += cmd2;
         ccg.AppendArguments(c, cmd);
-        makefileStream << "\t" << cmd.c_str() << "\n";
+        makefileStream << "\t" << cmd << "\n";
       }
     }
   }
@@ -1981,7 +1981,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   // Add Fortran source format attribute if property is set.
   const char* format = 0;
   const char* tgtfmt = gtgt->GetProperty("Fortran_FORMAT");
-  switch (this->CurrentLocalGenerator->GetFortranFormat(tgtfmt)) {
+  switch (cmOutputConverter::GetFortranFormat(tgtfmt)) {
     case cmOutputConverter::FortranFormatFixed:
       format = "fixed";
       break;

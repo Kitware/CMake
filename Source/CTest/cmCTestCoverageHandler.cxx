@@ -1012,7 +1012,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
       "-o \"" + fileDir + "\" " + "\"" + *it + "\"";
 
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       command.c_str() << std::endl, this->Quiet);
+                       command << std::endl, this->Quiet);
 
     std::string output = "";
     std::string errors = "";
@@ -1377,7 +1377,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
                        "Current coverage dir: " << fileDir << std::endl,
                        this->Quiet);
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       command.c_str() << std::endl, this->Quiet);
+                       command << std::endl, this->Quiet);
 
     std::string output = "";
     std::string errors = "";

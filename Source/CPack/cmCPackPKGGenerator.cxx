@@ -316,9 +316,9 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(
   this->SetOption(("CPACK_RESOURCE_FILE_" + uname + "_NOPATH").c_str(),
                   (name + ext).c_str());
 
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: "
-                  << (inFileName ? inFileName : "(NULL)") << " to "
-                  << destFileName.c_str() << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+                "Configure file: " << (inFileName ? inFileName : "(NULL)")
+                                   << " to " << destFileName << std::endl);
   this->ConfigureFile(inFileName, destFileName.c_str());
   return true;
 }
@@ -344,9 +344,8 @@ bool cmCPackPKGGenerator::CopyResourcePlistFile(
   destFileName += "/";
   destFileName += outName;
 
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE,
-                "Configure file: " << inFileName.c_str() << " to "
-                                   << destFileName.c_str() << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: "
+                  << inFileName << " to " << destFileName << std::endl);
   this->ConfigureFile(inFileName.c_str(), destFileName.c_str());
   return true;
 }
@@ -360,8 +359,8 @@ int cmCPackPKGGenerator::CopyInstallScript(const std::string& resdir,
   dst += name;
   cmSystemTools::CopyFileAlways(script.c_str(), dst.c_str());
   cmSystemTools::SetPermissions(dst.c_str(), 0777);
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "copy script : "
-                  << script << "\ninto " << dst.c_str() << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+                "copy script : " << script << "\ninto " << dst << std::endl);
 
   return 1;
 }

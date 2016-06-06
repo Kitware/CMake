@@ -213,7 +213,7 @@ bool cmGlobalKdevelopGenerator::CreateFilelistFile(
     cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
     // only put relative paths
     if (!tmp.empty() && tmp[0] != '/') {
-      fout << tmp.c_str() << "\n";
+      fout << tmp << "\n";
     }
   }
   return true;

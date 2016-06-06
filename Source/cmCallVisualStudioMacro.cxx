@@ -105,8 +105,8 @@ HRESULT InstanceCallMacro(IDispatch* vsIDE, const std::string& macro,
       std::ostringstream oss;
       oss << std::endl;
       oss << "Invoke(ExecuteCommand)" << std::endl;
-      oss << "  Macro: " << macro.c_str() << std::endl;
-      oss << "  Args: " << args.c_str() << std::endl;
+      oss << "  Macro: " << macro << std::endl;
+      oss << "  Args: " << args << std::endl;
 
       if (DISP_E_EXCEPTION == hr) {
         oss << "DISP_E_EXCEPTION EXCEPINFO:" << excep.wCode << std::endl;
