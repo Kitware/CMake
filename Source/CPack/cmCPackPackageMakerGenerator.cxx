@@ -101,7 +101,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
       if (!cmsys::SystemTools::MakeDirectory(preflightDirName.c_str())) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
                       "Problem creating installer directory: "
-                        << preflightDirName.c_str() << std::endl);
+                        << preflightDirName << std::endl);
         return 0;
       }
     }
@@ -109,7 +109,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
       if (!cmsys::SystemTools::MakeDirectory(postflightDirName.c_str())) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
                       "Problem creating installer directory: "
-                        << postflightDirName.c_str() << std::endl);
+                        << postflightDirName << std::endl);
         return 0;
       }
     }
@@ -137,7 +137,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     if (!cmsys::SystemTools::MakeDirectory(packageDir.c_str())) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Problem creating component packages directory: "
-                      << packageDir.c_str() << std::endl);
+                      << packageDir << std::endl);
       return 0;
     }
 
@@ -147,7 +147,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
       cmCPackLogger(
         cmCPackLog::LOG_ERROR,
         "Problem creating component PostFlight Packages directory: "
-          << packageFileDir.c_str() << std::endl);
+          << packageFileDir << std::endl);
       return 0;
     }
     std::string packageFile =
@@ -169,7 +169,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     if (!cmsys::SystemTools::MakeDirectory(basePackageDir.c_str())) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Problem creating component packages directory: "
-                      << basePackageDir.c_str() << std::endl);
+                      << basePackageDir << std::endl);
       return 0;
     }
 
@@ -314,12 +314,12 @@ int cmCPackPackageMakerGenerator::PackageFiles()
   }
   if (!res || retVal) {
     cmGeneratedFileStream ofs(tmpFile.c_str());
-    ofs << "# Run command: " << dmgCmd.str().c_str() << std::endl
+    ofs << "# Run command: " << dmgCmd.str() << std::endl
         << "# Output:" << std::endl
-        << output.c_str() << std::endl;
+        << output << std::endl;
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running hdiutil command: "
-                    << dmgCmd.str().c_str() << std::endl
-                    << "Please check " << tmpFile.c_str() << " for errors"
+                    << dmgCmd.str() << std::endl
+                    << "Please check " << tmpFile << " for errors"
                     << std::endl);
     return 0;
   }
@@ -382,7 +382,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
   if (!cmSystemTools::FileExists(versionFile.c_str())) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Cannot find PackageMaker compiler version file: "
-                    << versionFile.c_str() << std::endl);
+                    << versionFile << std::endl);
     return 0;
   }
 
@@ -416,7 +416,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
   if (!cmSystemTools::GetLineFromStream(ifs, line) || !rexVersion.find(line)) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Problem reading the PackageMaker compiler version file: "
-                    << versionFile.c_str() << std::endl);
+                    << versionFile << std::endl);
     return 0;
   }
   this->PackageMakerVersion = atof(rexVersion.match(1).c_str());
@@ -481,11 +481,11 @@ bool cmCPackPackageMakerGenerator::RunPackageMaker(const char* command,
     cmGeneratedFileStream ofs(tmpFile.c_str());
     ofs << "# Run command: " << command << std::endl
         << "# Output:" << std::endl
-        << output.c_str() << std::endl;
+        << output << std::endl;
     cmCPackLogger(
       cmCPackLog::LOG_ERROR, "Problem running PackageMaker command: "
         << command << std::endl
-        << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
+        << "Please check " << tmpFile << " for errors" << std::endl);
     return false;
   }
   // sometimes the command finishes but the directory is not yet

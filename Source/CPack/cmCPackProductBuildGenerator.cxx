@@ -47,7 +47,7 @@ int cmCPackProductBuildGenerator::PackageFiles()
   {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Problem creating component packages directory: "
-                  << basePackageDir.c_str() << std::endl);
+                    << basePackageDir << std::endl);
     return 0;
   }
 
@@ -153,12 +153,12 @@ bool cmCPackProductBuildGenerator::RunProductBuild(
     {
     cmGeneratedFileStream ofs(tmpFile.c_str());
     ofs << "# Run command: " << command << std::endl
-      << "# Output:" << std::endl
-      << output.c_str() << std::endl;
+        << "# Output:" << std::endl
+        << output << std::endl;
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "Problem running command: " << command
-      << std::endl << "Please check " << tmpFile.c_str() << " for errors"
-      << std::endl);
+                  "Problem running command: " << command << std::endl
+                                              << "Please check " << tmpFile
+                                              << " for errors" << std::endl);
     return false;
     }
   return true;
@@ -194,8 +194,8 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
   if ( !cmsys::SystemTools::MakeDirectory(scriptDir.c_str()))
   {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Problem creating installer directory: "
-                  << scriptDir.c_str() << std::endl);
+                  "Problem creating installer directory: " << scriptDir
+                                                           << std::endl);
     return 0;
   }
 

@@ -178,10 +178,10 @@ void cmCommonTargetGenerator::AppendFortranFormatFlags(
 {
   const char* srcfmt = source.GetProperty("Fortran_FORMAT");
   cmOutputConverter::FortranFormat format =
-    this->LocalGenerator->GetFortranFormat(srcfmt);
+    cmOutputConverter::GetFortranFormat(srcfmt);
   if (format == cmOutputConverter::FortranFormatNone) {
     const char* tgtfmt = this->GeneratorTarget->GetProperty("Fortran_FORMAT");
-    format = this->LocalGenerator->GetFortranFormat(tgtfmt);
+    format = cmOutputConverter::GetFortranFormat(tgtfmt);
   }
   const char* var = 0;
   switch (format) {
