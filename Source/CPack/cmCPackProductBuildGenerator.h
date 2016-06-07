@@ -13,7 +13,6 @@
 #ifndef cmCPackProductBuildGenerator_h
 #define cmCPackProductBuildGenerator_h
 
-
 #include "cmCPackPKGGenerator.h"
 
 class cmCPackComponent;
@@ -54,7 +53,6 @@ protected:
 
   const char* GetComponentScript(const char* script,
                                  const char* script_component);
-
 };
 
 #endif

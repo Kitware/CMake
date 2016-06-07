@@ -13,7 +13,6 @@
 #ifndef cmCPackPKGGenerator_h
 #define cmCPackPKGGenerator_h
 
-
 #include "cmCPackGenerator.h"
 
 class cmCPackComponent;
@@ -97,7 +96,6 @@ protected:
 
   // The PostFlight component when creating a metapackage
   cmCPackComponent PostFlightComponent;
-
 };
 
 #endif

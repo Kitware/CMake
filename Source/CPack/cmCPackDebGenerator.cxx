@@ -57,9 +57,9 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
   // Begin the archive for this pack
   std::string localToplevel(initialTopLevel);
   std::string packageFileName(cmSystemTools::GetParentDirectory(toplevel));
-  std::string outputFileName(std::string(
-                               this->GetOption("CPACK_PACKAGE_FILE_NAME")) +
-                             "-" + packageName + this->GetOutputExtension());
+  std::string outputFileName(
+    std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME")) + "-" +
+    packageName + this->GetOutputExtension());
 
   localToplevel += "/" + packageName;
   /* replace the TEMP DIRECTORY with the component one */
@@ -174,9 +174,9 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
   // The ALL GROUPS in ONE package case
   std::string localToplevel(initialTopLevel);
   std::string packageFileName(cmSystemTools::GetParentDirectory(toplevel));
-  std::string outputFileName(std::string(
-                               this->GetOption("CPACK_PACKAGE_FILE_NAME")) +
-                             this->GetOutputExtension());
+  std::string outputFileName(
+    std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME")) +
+    this->GetOutputExtension());
   // all GROUP in one vs all COMPONENT in one
   localToplevel += "/" + compInstDirName;
 
