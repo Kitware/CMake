@@ -3104,6 +3104,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   find_package(Java COMPONENTS Development QUIET)
   if(Java_JAVA_EXECUTABLE AND Java_JAVAC_EXECUTABLE AND Java_JAR_EXECUTABLE AND NOT MINGW
       AND NOT "${CMAKE_GENERATOR}" MATCHES "Xcode")
+
+    set(JavaExportImport_BUILD_OPTIONS -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM})
+    ADD_TEST_MACRO(JavaExportImport JavaExportImport)
+
     get_filename_component(JNIPATH ${JAVA_COMPILE} PATH)
     find_file(JNI_H jni.h
       "${JNIPATH}/../include"
