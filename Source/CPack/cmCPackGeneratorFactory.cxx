@@ -125,7 +125,7 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
   }
   if (cmCPackProductBuildGenerator::CanGenerate()) {
     this->RegisterGenerator("productbuild", "Mac OSX pkg",
-      cmCPackProductBuildGenerator::CreateGenerator);
+                            cmCPackProductBuildGenerator::CreateGenerator);
   }
 #endif
 #if !defined(_WIN32) && !defined(__QNXNTO__) && !defined(__BEOS__) &&         \
