@@ -209,6 +209,7 @@ All Modules
    /module/FindTIFF
    /module/FindUnixCommands
    /module/FindVTK
+   /module/FindVulkan
    /module/FindWget
    /module/FindWish
    /module/FindwxWidgets
