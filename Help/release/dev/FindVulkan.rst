@@ -1,4 +1,4 @@
 FindVulkan
 ----------
 
-* The :module:`FindVulkan` module has been added.
+* A :module:`FindVulkan` module was added.
