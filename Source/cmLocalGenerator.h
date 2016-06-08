@@ -314,6 +314,9 @@ public:
                       std::string& flags, std::string& linkFlags,
                       std::string& frameworkPath, std::string& linkPath,
                       cmGeneratorTarget* target, bool useWatcomQuote);
+  void GetTargetDefines(cmGeneratorTarget const* target,
+                        std::string const& config, std::string const& lang,
+                        std::set<std::string>& defines) const;
 
   std::string GetFrameworkFlags(std::string const& l,
                                 std::string const& config,

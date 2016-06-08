@@ -1329,6 +1329,20 @@ std::string cmLocalGenerator::GetFrameworkFlags(std::string const& l,
   return ::GetFrameworkFlags(l, config, target);
 }
 
+void cmLocalGenerator::GetTargetDefines(cmGeneratorTarget const* target,
+                                        std::string const& config,
+                                        std::string const& lang,
+                                        std::set<std::string>& defines) const
+{
+  // Add the export symbol definition for shared library objects.
+  if (const char* exportMacro = target->GetExportMacro()) {
+    this->AppendDefines(defines, exportMacro);
+  }
+
+  // Add preprocessor definitions for this target and configuration.
+  this->AddCompileDefinitions(defines, target, config, lang.c_str());
+}
+
 std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib,
                                                      OutputFormat format)
 {

@@ -246,19 +246,11 @@ std::string cmCommonTargetGenerator::GetDefines(const std::string& l)
   ByLanguageMap::iterator i = this->DefinesByLanguage.find(l);
   if (i == this->DefinesByLanguage.end()) {
     std::set<std::string> defines;
-    const char* lang = l.c_str();
-    // Add the export symbol definition for shared library objects.
-    if (const char* exportMacro = this->GeneratorTarget->GetExportMacro()) {
-      this->LocalGenerator->AppendDefines(defines, exportMacro);
-    }
-
-    // Add preprocessor definitions for this target and configuration.
-    this->LocalGenerator->AddCompileDefinitions(
-      defines, this->GeneratorTarget, this->LocalGenerator->GetConfigName(),
-      l);
+    this->LocalGenerator->GetTargetDefines(this->GeneratorTarget,
+                                           this->ConfigName, l, defines);
 
     std::string definesString;
-    this->LocalGenerator->JoinDefines(defines, definesString, lang);
+    this->LocalGenerator->JoinDefines(defines, definesString, l);
 
     ByLanguageMap::value_type entry(l, definesString);
     i = this->DefinesByLanguage.insert(entry).first;
