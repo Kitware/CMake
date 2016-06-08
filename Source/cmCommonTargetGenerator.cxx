@@ -159,8 +159,7 @@ void cmCommonTargetGenerator::AddFortranFlags(std::string& flags)
   if (const char* modpath_flag =
         this->Makefile->GetDefinition("CMAKE_Fortran_MODPATH_FLAG")) {
     std::vector<std::string> includes;
-    const std::string& config =
-      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+    const std::string& config = this->ConfigName;
     this->LocalGenerator->GetIncludeDirectories(
       includes, this->GeneratorTarget, "C", config);
     for (std::vector<std::string>::const_iterator idi = includes.begin();
@@ -202,6 +201,7 @@ void cmCommonTargetGenerator::AppendFortranFormatFlags(
 
 std::string cmCommonTargetGenerator::GetFrameworkFlags(std::string const& l)
 {
+  std::string const& config = this->ConfigName;
   if (!this->Makefile->IsOn("APPLE")) {
     return std::string();
   }
@@ -218,8 +218,6 @@ std::string cmCommonTargetGenerator::GetFrameworkFlags(std::string const& l)
 #endif
   std::vector<std::string> includes;
 
-  const std::string& config =
-    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   this->LocalGenerator->GetIncludeDirectories(includes, this->GeneratorTarget,
                                               "C", config);
   // check all include directories for frameworks as this
@@ -235,9 +233,8 @@ std::string cmCommonTargetGenerator::GetFrameworkFlags(std::string const& l)
   }
 
   std::string flags;
-  const char* cfg = this->LocalGenerator->GetConfigName().c_str();
   if (cmComputeLinkInformation* cli =
-        this->GeneratorTarget->GetLinkInformation(cfg)) {
+        this->GeneratorTarget->GetLinkInformation(config)) {
     std::vector<std::string> const& frameworks = cli->GetFrameworkPaths();
     for (std::vector<std::string>::const_iterator i = frameworks.begin();
          i != frameworks.end(); ++i) {
