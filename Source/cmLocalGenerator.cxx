@@ -1271,16 +1271,19 @@ void cmLocalGenerator::GetTargetFlags(
   }
 }
 
-std::string cmLocalGenerator::GetFrameworkFlags(std::string const& l,
-                                                std::string const& config,
-                                                cmGeneratorTarget* target)
+static std::string GetFrameworkFlags(const std::string& lang,
+                                     const std::string& config,
+                                     cmGeneratorTarget* target)
 {
-  if (!this->Makefile->IsOn("APPLE")) {
+  cmLocalGenerator* lg = target->GetLocalGenerator();
+  cmMakefile* mf = lg->GetMakefile();
+
+  if (!mf->IsOn("APPLE")) {
     return std::string();
   }
 
-  std::string fwSearchFlagVar = "CMAKE_" + l + "_FRAMEWORK_SEARCH_FLAG";
-  const char* fwSearchFlag = this->Makefile->GetDefinition(fwSearchFlagVar);
+  std::string fwSearchFlagVar = "CMAKE_" + lang + "_FRAMEWORK_SEARCH_FLAG";
+  const char* fwSearchFlag = mf->GetDefinition(fwSearchFlagVar);
   if (!(fwSearchFlag && *fwSearchFlag)) {
     return std::string();
   }
@@ -1291,12 +1294,12 @@ std::string cmLocalGenerator::GetFrameworkFlags(std::string const& l,
 #endif
   std::vector<std::string> includes;
 
-  this->GetIncludeDirectories(includes, target, "C", config);
+  lg->GetIncludeDirectories(includes, target, "C", config);
   // check all include directories for frameworks as this
   // will already have added a -F for the framework
   for (std::vector<std::string>::iterator i = includes.begin();
        i != includes.end(); ++i) {
-    if (this->GlobalGenerator->NameResolvesToFramework(*i)) {
+    if (lg->GetGlobalGenerator()->NameResolvesToFramework(*i)) {
       std::string frameworkDir = *i;
       frameworkDir += "/../";
       frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir);
@@ -1311,12 +1314,19 @@ std::string cmLocalGenerator::GetFrameworkFlags(std::string const& l,
          i != frameworks.end(); ++i) {
       if (emitted.insert(*i).second) {
         flags += fwSearchFlag;
-        flags += this->ConvertToOutputFormat(*i, cmOutputConverter::SHELL);
+        flags += lg->ConvertToOutputFormat(*i, cmOutputConverter::SHELL);
         flags += " ";
       }
     }
   }
   return flags;
+}
+
+std::string cmLocalGenerator::GetFrameworkFlags(std::string const& l,
+                                                std::string const& config,
+                                                cmGeneratorTarget* target)
+{
+  return ::GetFrameworkFlags(l, config, target);
 }
 
 std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib,
