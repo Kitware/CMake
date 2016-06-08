@@ -1271,6 +1271,54 @@ void cmLocalGenerator::GetTargetFlags(
   }
 }
 
+std::string cmLocalGenerator::GetFrameworkFlags(std::string const& l,
+                                                std::string const& config,
+                                                cmGeneratorTarget* target)
+{
+  if (!this->Makefile->IsOn("APPLE")) {
+    return std::string();
+  }
+
+  std::string fwSearchFlagVar = "CMAKE_" + l + "_FRAMEWORK_SEARCH_FLAG";
+  const char* fwSearchFlag = this->Makefile->GetDefinition(fwSearchFlagVar);
+  if (!(fwSearchFlag && *fwSearchFlag)) {
+    return std::string();
+  }
+
+  std::set<std::string> emitted;
+#ifdef __APPLE__ /* don't insert this when crosscompiling e.g. to iphone */
+  emitted.insert("/System/Library/Frameworks");
+#endif
+  std::vector<std::string> includes;
+
+  this->GetIncludeDirectories(includes, target, "C", config);
+  // check all include directories for frameworks as this
+  // will already have added a -F for the framework
+  for (std::vector<std::string>::iterator i = includes.begin();
+       i != includes.end(); ++i) {
+    if (this->GlobalGenerator->NameResolvesToFramework(*i)) {
+      std::string frameworkDir = *i;
+      frameworkDir += "/../";
+      frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir);
+      emitted.insert(frameworkDir);
+    }
+  }
+
+  std::string flags;
+  if (cmComputeLinkInformation* cli = target->GetLinkInformation(config)) {
+    std::vector<std::string> const& frameworks = cli->GetFrameworkPaths();
+    for (std::vector<std::string>::const_iterator i = frameworks.begin();
+         i != frameworks.end(); ++i) {
+      if (emitted.insert(*i).second) {
+        flags += fwSearchFlag;
+        flags += this->ConvertToOutputFormat(*i, cmOutputConverter::SHELL);
+        flags += " ";
+      }
+    }
+  }
+  return flags;
+}
+
 std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib,
                                                      OutputFormat format)
 {

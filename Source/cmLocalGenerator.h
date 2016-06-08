@@ -313,6 +313,10 @@ public:
                       std::string& frameworkPath, std::string& linkPath,
                       cmGeneratorTarget* target, bool useWatcomQuote);
 
+  std::string GetFrameworkFlags(std::string const& l,
+                                std::string const& config,
+                                cmGeneratorTarget* target);
+
   virtual void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
     cmGeneratorTarget const* gt = 0);
