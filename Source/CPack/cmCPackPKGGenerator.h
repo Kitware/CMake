@@ -16,6 +16,7 @@
 #include "cmCPackGenerator.h"
 
 class cmCPackComponent;
+class cmXMLWriter;
 
 /** \class cmCPackPKGGenerator
  * \brief A generator for pkg files
@@ -78,21 +79,15 @@ protected:
   // their components in a form that can be used by distribution
   // metapackages.
   void CreateChoiceOutline(const cmCPackComponentGroup& group,
-                           std::ostringstream& out);
+                           cmXMLWriter& xout);
 
   /// Create the "choice" XML element to describe a component group
   /// for the installer GUI.
-  void CreateChoice(const cmCPackComponentGroup& group,
-                    std::ostringstream& out);
+  void CreateChoice(const cmCPackComponentGroup& group, cmXMLWriter& xout);
 
   /// Create the "choice" XML element to describe a component for the
   /// installer GUI.
-  void CreateChoice(const cmCPackComponent& component,
-                    std::ostringstream& out);
-
-  // Escape the given string to make it usable as an XML attribute
-  // value.
-  std::string EscapeForXML(std::string str);
+  void CreateChoice(const cmCPackComponent& component, cmXMLWriter& xout);
 
   // The PostFlight component when creating a metapackage
   cmCPackComponent PostFlightComponent;

@@ -18,6 +18,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
+#include "cmXMLWriter.h"
 #include "cmake.h"
 
 #include <cmsys/Glob.hxx>
@@ -76,14 +77,15 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile)
   // Create the choice outline, which provides a tree-based view of
   // the components in their groups.
   std::ostringstream choiceOut;
-  choiceOut << "<choices-outline>" << std::endl;
+  cmXMLWriter xout(choiceOut, 1);
+  xout.StartElement("choices-outline");
 
   // Emit the outline for the groups
   std::map<std::string, cmCPackComponentGroup>::iterator groupIt;
   for (groupIt = this->ComponentGroups.begin();
        groupIt != this->ComponentGroups.end(); ++groupIt) {
     if (groupIt->second.ParentGroup == 0) {
-      CreateChoiceOutline(groupIt->second, choiceOut);
+      CreateChoiceOutline(groupIt->second, xout);
     }
   }
 
@@ -92,28 +94,32 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile)
   for (compIt = this->Components.begin(); compIt != this->Components.end();
        ++compIt) {
     if (!compIt->second.Group) {
-      choiceOut << "<line choice=\"" << compIt->first << "Choice\"></line>"
-                << std::endl;
+      xout.StartElement("line");
+      xout.Attribute("choice", compIt->first + "Choice");
+      xout.Content(""); // Avoid self-closing tag.
+      xout.EndElement();
     }
   }
   if (!this->PostFlightComponent.Name.empty()) {
-    choiceOut << "<line choice=\"" << PostFlightComponent.Name
-              << "Choice\"></line>" << std::endl;
+    xout.StartElement("line");
+    xout.Attribute("choice", PostFlightComponent.Name + "Choice");
+    xout.Content(""); // Avoid self-closing tag.
+    xout.EndElement();
   }
-  choiceOut << "</choices-outline>" << std::endl;
+  xout.EndElement(); // choices-outline>
 
   // Create the actual choices
   for (groupIt = this->ComponentGroups.begin();
        groupIt != this->ComponentGroups.end(); ++groupIt) {
-    CreateChoice(groupIt->second, choiceOut);
+    CreateChoice(groupIt->second, xout);
   }
   for (compIt = this->Components.begin(); compIt != this->Components.end();
        ++compIt) {
-    CreateChoice(compIt->second, choiceOut);
+    CreateChoice(compIt->second, xout);
   }
 
   if (!this->PostFlightComponent.Name.empty()) {
-    CreateChoice(PostFlightComponent, choiceOut);
+    CreateChoice(PostFlightComponent, xout);
   }
 
   this->SetOption("CPACK_PACKAGEMAKER_CHOICES", choiceOut.str().c_str());
@@ -124,40 +130,44 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile)
 }
 
 void cmCPackPKGGenerator::CreateChoiceOutline(
-  const cmCPackComponentGroup& group, std::ostringstream& out)
+  const cmCPackComponentGroup& group, cmXMLWriter& xout)
 {
-  out << "<line choice=\"" << group.Name << "Choice\">" << std::endl;
+  xout.StartElement("line");
+  xout.Attribute("choice", group.Name + "Choice");
   std::vector<cmCPackComponentGroup*>::const_iterator groupIt;
   for (groupIt = group.Subgroups.begin(); groupIt != group.Subgroups.end();
        ++groupIt) {
-    CreateChoiceOutline(**groupIt, out);
+    CreateChoiceOutline(**groupIt, xout);
   }
 
   std::vector<cmCPackComponent*>::const_iterator compIt;
   for (compIt = group.Components.begin(); compIt != group.Components.end();
        ++compIt) {
-    out << "  <line choice=\"" << (*compIt)->Name << "Choice\"></line>"
-        << std::endl;
+    xout.StartElement("line");
+    xout.Attribute("choice", (*compIt)->Name + "Choice");
+    xout.Content(""); // Avoid self-closing tag.
+    xout.EndElement();
   }
-  out << "</line>" << std::endl;
+  xout.EndElement();
 }
 
 void cmCPackPKGGenerator::CreateChoice(const cmCPackComponentGroup& group,
-                                       std::ostringstream& out)
+                                       cmXMLWriter& xout)
 {
-  out << "<choice id=\"" << group.Name << "Choice\" "
-      << "title=\"" << group.DisplayName << "\" "
-      << "start_selected=\"true\" "
-      << "start_enabled=\"true\" "
-      << "start_visible=\"true\" ";
+  xout.StartElement("choice");
+  xout.Attribute("id", group.Name + "Choice");
+  xout.Attribute("title", group.DisplayName);
+  xout.Attribute("start_selected", "true");
+  xout.Attribute("start_enabled", "true");
+  xout.Attribute("start_visible", "true");
   if (!group.Description.empty()) {
-    out << "description=\"" << EscapeForXML(group.Description) << "\"";
+    xout.Attribute("description", group.Description);
   }
-  out << "></choice>" << std::endl;
+  xout.EndElement();
 }
 
 void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
-                                       std::ostringstream& out)
+                                       cmXMLWriter& xout)
 {
   std::string packageId = "com.";
   packageId += this->GetOption("CPACK_PACKAGE_VENDOR");
@@ -166,18 +176,16 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
   packageId += '.';
   packageId += component.Name;
 
-  out << "<choice id=\"" << component.Name << "Choice\" "
-      << "title=\"" << component.DisplayName << "\" "
-      << "start_selected=\""
-      << (component.IsDisabledByDefault && !component.IsRequired ? "false"
-                                                                 : "true")
-      << "\" "
-      << "start_enabled=\"" << (component.IsRequired ? "false" : "true")
-      << "\" "
-      << "start_visible=\"" << (component.IsHidden ? "false" : "true")
-      << "\" ";
+  xout.StartElement("choice");
+  xout.Attribute("id", component.Name + "Choice");
+  xout.Attribute("title", component.DisplayName);
+  xout.Attribute(
+    "start_selected",
+    component.IsDisabledByDefault && !component.IsRequired ? "false" : "true");
+  xout.Attribute("start_enabled", component.IsRequired ? "false" : "true");
+  xout.Attribute("start_visible", component.IsHidden ? "false" : "true");
   if (!component.Description.empty()) {
-    out << "description=\"" << EscapeForXML(component.Description) << "\" ";
+    xout.Attribute("description", component.Description);
   }
   if (!component.Dependencies.empty() ||
       !component.ReverseDependencies.empty()) {
@@ -195,16 +203,17 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
     // This way, selecting C will automatically select everything it depends
     // on (B and A), while selecting something that depends on C--either D
     // or E--will automatically cause C to get selected.
-    out << "selected=\"my.choice.selected";
+    std::ostringstream selected("my.choice.selected");
     std::set<const cmCPackComponent*> visited;
-    AddDependencyAttributes(component, visited, out);
+    AddDependencyAttributes(component, visited, selected);
     visited.clear();
-    AddReverseDependencyAttributes(component, visited, out);
-    out << "\"";
+    AddReverseDependencyAttributes(component, visited, selected);
+    xout.Attribute("selected", selected.str());
   }
-  out << ">" << std::endl;
-  out << "  <pkg-ref id=\"" << packageId << "\"></pkg-ref>" << std::endl;
-  out << "</choice>" << std::endl;
+  xout.StartElement("pkg-ref");
+  xout.Attribute("id", packageId);
+  xout.EndElement(); // pkg-ref
+  xout.EndElement(); // choice
 
   // Create a description of the package associated with this
   // component.
@@ -219,17 +228,20 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
   unsigned long installedSize =
     component.GetInstalledSizeInKbytes(dirName.c_str());
 
-  out << "<pkg-ref id=\"" << packageId << "\" "
-      << "version=\"" << this->GetOption("CPACK_PACKAGE_VERSION") << "\" "
-      << "installKBytes=\"" << installedSize << "\" "
-      << ">";
+  xout.StartElement("pkg-ref");
+  xout.Attribute("id", packageId);
+  xout.Attribute("version", this->GetOption("CPACK_PACKAGE_VERSION"));
+  xout.Attribute("installKBytes", installedSize);
+  xout.Attribute("auth", "Admin");
+  xout.Attribute("onConclusion", "None");
   if (component.IsDownloaded) {
-    out << this->GetOption("CPACK_DOWNLOAD_SITE")
-        << this->GetPackageName(component);
+    xout.Content(this->GetOption("CPACK_DOWNLOAD_SITE"));
+    xout.Content(this->GetPackageName(component));
   } else {
-    out << "file:./" << relativePackageLocation;
+    xout.Content("file:./");
+    xout.Content(relativePackageLocation);
   }
-  out << "</pkg-ref>" << std::endl;
+  xout.EndElement(); // pkg-ref
 }
 
 void cmCPackPKGGenerator::AddDependencyAttributes(
@@ -244,7 +256,7 @@ void cmCPackPKGGenerator::AddDependencyAttributes(
   std::vector<cmCPackComponent*>::const_iterator dependIt;
   for (dependIt = component.Dependencies.begin();
        dependIt != component.Dependencies.end(); ++dependIt) {
-    out << " &amp;&amp; choices['" << (*dependIt)->Name << "Choice'].selected";
+    out << " && choices['" << (*dependIt)->Name << "Choice'].selected";
     AddDependencyAttributes(**dependIt, visited, out);
   }
 }
@@ -264,15 +276,6 @@ void cmCPackPKGGenerator::AddReverseDependencyAttributes(
     out << " || choices['" << (*dependIt)->Name << "Choice'].selected";
     AddReverseDependencyAttributes(**dependIt, visited, out);
   }
-}
-
-std::string cmCPackPKGGenerator::EscapeForXML(std::string str)
-{
-  cmSystemTools::ReplaceString(str, "&", "&amp;");
-  cmSystemTools::ReplaceString(str, "<", "&lt;");
-  cmSystemTools::ReplaceString(str, ">", "&gt;");
-  cmSystemTools::ReplaceString(str, "\"", "&quot;");
-  return str;
 }
 
 bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
