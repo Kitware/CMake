@@ -22,7 +22,7 @@ int main()
   // error if no driver is found - but if we get here, FindVulkan is working
 
   if (instance != VK_NULL_HANDLE) {
-      vkDestroyInstance (instance, NULL);
+    vkDestroyInstance(instance, NULL);
   }
 
   return 0;
