@@ -1405,6 +1405,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindTIFF)
   endif()
 
+  if(CMake_TEST_FindVulkan)
+    add_subdirectory(FindVulkan)
+  endif()
+
   if(CMake_TEST_FindXalanC)
     add_subdirectory(FindXalanC)
   endif()
