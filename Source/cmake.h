@@ -455,7 +455,6 @@ private:
   void operator=(const cmake&); // Not implemented.
   ProgressCallbackType ProgressCallback;
   void* ProgressCallbackClientData;
-  bool Verbose;
   bool InTryCompile;
   WorkingMode CurrentWorkingMode;
   bool DebugOutput;

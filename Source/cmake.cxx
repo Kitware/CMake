@@ -145,7 +145,6 @@ cmake::cmake()
   }
 #endif
 
-  this->Verbose = false;
   this->GlobalGenerator = 0;
   this->ProgressCallback = 0;
   this->ProgressCallbackClientData = 0;
@@ -555,9 +554,7 @@ void cmake::SetArgs(const std::vector<std::string>& args,
       this->VSSolutionFile = args[++i];
     }
 #endif
-    else if (arg.find("-V", 0) == 0) {
-      this->Verbose = true;
-    } else if (arg.find("-D", 0) == 0) {
+    else if (arg.find("-D", 0) == 0) {
       // skip for now
     } else if (arg.find("-U", 0) == 0) {
       // skip for now
@@ -1989,9 +1986,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   bool writeToStdout = true;
   for (unsigned int i = 1; i < args.size(); ++i) {
     std::string arg = args[i];
-    if (arg.find("-V", 0) == 0) {
-      this->Verbose = true;
-    } else if (arg.find("-G", 0) == 0) {
+    if (arg.find("-G", 0) == 0) {
       std::string value = arg.substr(2);
       if (value.empty()) {
         ++i;
