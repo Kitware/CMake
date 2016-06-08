@@ -676,7 +676,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
            i != archiveFinishCommands.end(); ++i) {
         std::string cmd = *i;
         this->LocalGenerator->ExpandRuleVariables(cmd, vars);
-        real_link_commands.push_back(cmd);
+        // If there is no ranlib the command will be ":".  Skip it.
+        if (!cmd.empty() && cmd[0] != ':') {
+          real_link_commands.push_back(cmd);
+        }
       }
     } else {
       // Get the set of commands.
