@@ -47,3 +47,5 @@ else()
     "Android: No CMAKE_SYSROOT was selected."
     )
 endif()
+
+set(CMAKE_BUILD_TYPE_INIT Debug)
