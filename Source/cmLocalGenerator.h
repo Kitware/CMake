@@ -308,10 +308,10 @@ public:
 
   /** Fill out these strings for the given target.  Libraries to link,
    *  flags, and linkflags. */
-  void GetTargetFlags(const std::string& config, std::string& linkLibs,
-                      std::string& flags, std::string& linkFlags,
-                      std::string& frameworkPath, std::string& linkPath,
-                      cmGeneratorTarget* target, bool useWatcomQuote);
+  void GetTargetFlags(std::string& linkLibs, std::string& flags,
+                      std::string& linkFlags, std::string& frameworkPath,
+                      std::string& linkPath, cmGeneratorTarget* target,
+                      bool useWatcomQuote);
 
   virtual void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,

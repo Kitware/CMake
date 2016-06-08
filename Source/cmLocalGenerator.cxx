@@ -1152,33 +1152,36 @@ void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
 }
 
 void cmLocalGenerator::GetTargetFlags(
-  const std::string& config, std::string& linkLibs, std::string& flags,
-  std::string& linkFlags, std::string& frameworkPath, std::string& linkPath,
-  cmGeneratorTarget* target, bool useWatcomQuote)
+  std::string& linkLibs, std::string& flags, std::string& linkFlags,
+  std::string& frameworkPath, std::string& linkPath, cmGeneratorTarget* target,
+  bool useWatcomQuote)
 {
+  std::string buildType =
+    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  buildType = cmSystemTools::UpperCase(buildType);
   const char* libraryLinkVariable =
     "CMAKE_SHARED_LINKER_FLAGS"; // default to shared library
 
   switch (target->GetType()) {
     case cmState::STATIC_LIBRARY:
-      this->GetStaticLibraryFlags(linkFlags, config, target);
+      this->GetStaticLibraryFlags(linkFlags, buildType, target);
       break;
     case cmState::MODULE_LIBRARY:
       libraryLinkVariable = "CMAKE_MODULE_LINKER_FLAGS";
     case cmState::SHARED_LIBRARY: {
       linkFlags = this->Makefile->GetSafeDefinition(libraryLinkVariable);
       linkFlags += " ";
-      if (!config.empty()) {
+      if (!buildType.empty()) {
         std::string build = libraryLinkVariable;
         build += "_";
-        build += config;
+        build += buildType;
         linkFlags += this->Makefile->GetSafeDefinition(build);
         linkFlags += " ";
       }
       if (this->Makefile->IsOn("WIN32") &&
           !(this->Makefile->IsOn("CYGWIN") || this->Makefile->IsOn("MINGW"))) {
         std::vector<cmSourceFile*> sources;
-        target->GetSourceFiles(sources, config);
+        target->GetSourceFiles(sources, buildType);
         for (std::vector<cmSourceFile*>::const_iterator i = sources.begin();
              i != sources.end(); ++i) {
           cmSourceFile* sf = *i;
@@ -1195,9 +1198,9 @@ void cmLocalGenerator::GetTargetFlags(
         linkFlags += targetLinkFlags;
         linkFlags += " ";
       }
-      if (!config.empty()) {
+      if (!buildType.empty()) {
         std::string configLinkFlags = "LINK_FLAGS_";
-        configLinkFlags += config;
+        configLinkFlags += buildType;
         targetLinkFlags = target->GetProperty(configLinkFlags);
         if (targetLinkFlags) {
           linkFlags += targetLinkFlags;
@@ -1210,20 +1213,20 @@ void cmLocalGenerator::GetTargetFlags(
     case cmState::EXECUTABLE: {
       linkFlags += this->Makefile->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
       linkFlags += " ";
-      if (!config.empty()) {
+      if (!buildType.empty()) {
         std::string build = "CMAKE_EXE_LINKER_FLAGS_";
-        build += config;
+        build += buildType;
         linkFlags += this->Makefile->GetSafeDefinition(build);
         linkFlags += " ";
       }
-      std::string linkLanguage = target->GetLinkerLanguage(config);
+      std::string linkLanguage = target->GetLinkerLanguage(buildType);
       if (linkLanguage.empty()) {
         cmSystemTools::Error(
           "CMake can not determine linker language for target: ",
           target->GetName().c_str());
         return;
       }
-      this->AddLanguageFlags(flags, linkLanguage, config);
+      this->AddLanguageFlags(flags, linkLanguage, buildType);
       this->OutputLinkLibraries(linkLibs, frameworkPath, linkPath, *target,
                                 false, false, useWatcomQuote);
       if (cmSystemTools::IsOn(
@@ -1255,9 +1258,9 @@ void cmLocalGenerator::GetTargetFlags(
         linkFlags += targetLinkFlags;
         linkFlags += " ";
       }
-      if (!config.empty()) {
+      if (!buildType.empty()) {
         std::string configLinkFlags = "LINK_FLAGS_";
-        configLinkFlags += config;
+        configLinkFlags += buildType;
         targetLinkFlags = target->GetProperty(configLinkFlags);
         if (targetLinkFlags) {
           linkFlags += targetLinkFlags;

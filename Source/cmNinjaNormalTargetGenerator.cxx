@@ -434,9 +434,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   vars["TARGET_FILE"] =
     localGen.ConvertToOutputFormat(targetOutputReal, cmOutputConverter::SHELL);
 
-  localGen.GetTargetFlags(this->GetConfigName(), vars["LINK_LIBRARIES"],
-                          vars["FLAGS"], vars["LINK_FLAGS"], frameworkPath,
-                          linkPath, &genTarget, useWatcomQuote);
+  localGen.GetTargetFlags(vars["LINK_LIBRARIES"], vars["FLAGS"],
+                          vars["LINK_FLAGS"], frameworkPath, linkPath,
+                          &genTarget, useWatcomQuote);
   if (this->GetMakefile()->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS") &&
       gt.GetType() == cmState::SHARED_LIBRARY) {
     if (gt.GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS")) {

@@ -371,7 +371,7 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries(
     bool useWatcomQuote =
       this->Makefile->IsOn(createRule + "_USE_WATCOM_QUOTE");
     this->LocalGenerator->GetTargetFlags(
-      config, linkLibraries, flags, linkFlags, frameworkPath, linkPath,
+      linkLibraries, flags, linkFlags, frameworkPath, linkPath,
       this->GeneratorTarget, useWatcomQuote);
     linkFlags = cmSystemTools::TrimWhitespace(linkFlags);
 
