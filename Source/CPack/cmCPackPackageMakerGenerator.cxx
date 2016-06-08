@@ -528,9 +528,9 @@ bool cmCPackPackageMakerGenerator::GenerateComponentPackage(
     xout.StartDocument();
     xout.Doctype("plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\""
                  "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"");
-    xout.Element("plist");
+    xout.StartElement("plist");
     xout.Attribute("version", "1.4");
-    xout.Element("dict");
+    xout.StartElement("dict");
     xout.Element("key", "IFPkgDescriptionTitle");
     xout.Element("string", component.DisplayName);
     xout.Element("key", "IFPkgDescriptionVersion");
