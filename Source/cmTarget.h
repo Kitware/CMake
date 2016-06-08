@@ -156,7 +156,7 @@ public:
   };
   bool PushTLLCommandTrace(TLLSignature signature,
                            cmListFileContext const& lfc);
-  void GetTllSignatureTraces(std::ostringstream& s, TLLSignature sig) const;
+  void GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const;
 
   void MergeLinkLibraries(cmMakefile& mf, const std::string& selfname,
                           const LinkLibraryVectorType& libs);

@@ -339,7 +339,7 @@ public:
    * Returns false, by default, if developer warnings should be shown, true
    * otherwise.
    */
-  bool GetSuppressDevWarnings(cmMakefile const* mf = NULL);
+  bool GetSuppressDevWarnings(cmMakefile const* mf = NULL) const;
   /*
    * Set the state of the suppression of developer (author) warnings.
    */
@@ -350,7 +350,7 @@ public:
    * Returns false, by default, if deprecated warnings should be shown, true
    * otherwise.
    */
-  bool GetSuppressDeprecatedWarnings(cmMakefile const* mf = NULL);
+  bool GetSuppressDeprecatedWarnings(cmMakefile const* mf = NULL) const;
   /*
    * Set the state of the suppression of deprecated warnings.
    */
@@ -361,7 +361,7 @@ public:
    * Returns false, by default, if warnings should not be treated as errors,
    * true otherwise.
    */
-  bool GetDevWarningsAsErrors(cmMakefile const* mf = NULL);
+  bool GetDevWarningsAsErrors(cmMakefile const* mf = NULL) const;
   /**
    * Set the state of treating developer (author) warnings as errors.
    */
@@ -372,7 +372,7 @@ public:
    * Returns false, by default, if warnings should not be treated as errors,
    * true otherwise.
    */
-  bool GetDeprecatedWarningsAsErrors(cmMakefile const* mf = NULL);
+  bool GetDeprecatedWarningsAsErrors(cmMakefile const* mf = NULL) const;
   /**
    * Set the state of treating developer (author) warnings as errors.
    */
@@ -382,7 +382,7 @@ public:
   void IssueMessage(
     cmake::MessageType t, std::string const& text,
     cmListFileBacktrace const& backtrace = cmListFileBacktrace(),
-    bool force = false);
+    bool force = false) const;
 
   ///! run the --build option
   int Build(const std::string& dir, const std::string& target,
@@ -455,7 +455,6 @@ private:
   void operator=(const cmake&); // Not implemented.
   ProgressCallbackType ProgressCallback;
   void* ProgressCallbackClientData;
-  bool Verbose;
   bool InTryCompile;
   WorkingMode CurrentWorkingMode;
   bool DebugOutput;
@@ -493,15 +492,13 @@ private:
    * Convert a message type between a warning and an error, based on the state
    * of the error output CMake variables, in the cache.
    */
-  cmake::MessageType ConvertMessageType(cmake::MessageType t);
+  cmake::MessageType ConvertMessageType(cmake::MessageType t) const;
 
   /*
    * Check if messages of this type should be output, based on the state of the
    * warning and error output CMake variables, in the cache.
    */
-  bool IsMessageTypeVisible(cmake::MessageType t);
-
-  bool PrintMessagePreamble(cmake::MessageType t, std::ostream& msg);
+  bool IsMessageTypeVisible(cmake::MessageType t) const;
 };
 
 #define CMAKE_STANDARD_OPTIONS_TABLE                                          \
