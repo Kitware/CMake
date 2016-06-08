@@ -33,8 +33,8 @@ public:
 
 protected:
   void WriteBatchScript();
-  void WriteSrunArgs(int test, cmsys::ofstream& fout);
-  void WriteTestCommand(int test, cmsys::ofstream& fout);
+  void WriteSrunArgs(int test, std::ostream& fout);
+  void WriteTestCommand(int test, std::ostream& fout);
 
   void SubmitBatchScript();
 

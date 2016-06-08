@@ -516,8 +516,8 @@ int cmCPackNSISGenerator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
-void cmCPackNSISGenerator::CreateMenuLinks(std::ostringstream& str,
-                                           std::ostringstream& deleteStr)
+void cmCPackNSISGenerator::CreateMenuLinks(std::ostream& str,
+                                           std::ostream& deleteStr)
 {
   const char* cpackMenuLinks = this->GetOption("CPACK_NSIS_MENU_LINKS");
   if (!cpackMenuLinks) {
@@ -621,7 +621,7 @@ bool cmCPackNSISGenerator::SupportsComponentInstallation() const
 }
 
 std::string cmCPackNSISGenerator::CreateComponentDescription(
-  cmCPackComponent* component, std::ostringstream& macrosOut)
+  cmCPackComponent* component, std::ostream& macrosOut)
 {
   // Basic description of the component
   std::string componentCode = "Section ";
@@ -873,7 +873,7 @@ std::string cmCPackNSISGenerator::CreateDeselectionDependenciesDescription(
 }
 
 std::string cmCPackNSISGenerator::CreateComponentGroupDescription(
-  cmCPackComponentGroup* group, std::ostringstream& macrosOut)
+  cmCPackComponentGroup* group, std::ostream& macrosOut)
 {
   if (group->Components.empty() && group->Subgroups.empty()) {
     // Silently skip empty groups. NSIS doesn't support them.
