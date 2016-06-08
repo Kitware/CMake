@@ -210,10 +210,9 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if(APPLE)
-  install(CODE "
-    execute_process(COMMAND ln -s \"../MacOS/CMake\" cmake-gui
-        WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin)
-  " ${COMPONENT})
+  install(PROGRAMS cmake-gui.bash RENAME cmake-gui
+    DESTINATION bin
+    ${COMPONENT})
 endif()
 
 if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
