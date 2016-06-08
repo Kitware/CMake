@@ -482,9 +482,6 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
       mf->AddLinkLibraryForTarget(targetName, *libIt, GENERAL_LibraryType);
     }
 
-    std::string buildType = mf->GetSafeDefinition("CMAKE_BUILD_TYPE");
-    buildType = cmSystemTools::UpperCase(buildType);
-
     std::string linkLibs;
     std::string frameworkPath;
     std::string linkPath;
@@ -493,8 +490,8 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     gg->CreateGenerationObjects();
     cmGeneratorTarget* gtgt = gg->FindGeneratorTarget(tgt->GetName());
     cmLocalGenerator* lg = gtgt->GetLocalGenerator();
-    lg->GetTargetFlags(buildType, linkLibs, frameworkPath, linkPath, flags,
-                       linkFlags, gtgt, false);
+    lg->GetTargetFlags(linkLibs, frameworkPath, linkPath, flags, linkFlags,
+                       gtgt, false);
     linkLibs = frameworkPath + linkPath + linkLibs;
 
     printf("%s\n", linkLibs.c_str());
