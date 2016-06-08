@@ -25,3 +25,7 @@ The options are:
   have otherwise printed to the console.  CTest will still report
   the new revision of the repository and any conflicting files
   that were found.
+
+The update always follows the version control branch currently checked
+out in the source directory.  See the :ref:`CTest Update Step`
+documentation for more information.
