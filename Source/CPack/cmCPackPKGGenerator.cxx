@@ -11,17 +11,17 @@
 ============================================================================*/
 #include "cmCPackPKGGenerator.h"
 
-#include "cmake.h"
-#include "cmGlobalGenerator.h"
-#include "cmLocalGenerator.h"
-#include "cmSystemTools.h"
-#include "cmMakefile.h"
-#include "cmGeneratedFileStream.h"
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
+#include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
 
-#include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
+#include <cmsys/SystemTools.hxx>
 
 cmCPackPKGGenerator::cmCPackPKGGenerator()
 {
@@ -39,12 +39,11 @@ bool cmCPackPKGGenerator::SupportsComponentInstallation() const
 
 int cmCPackPKGGenerator::InitializeInternal()
 {
-  cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                "cmCPackPKGGenerator::Initialize()" << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "cmCPackPKGGenerator::Initialize()"
+                  << std::endl);
 
   return this->Superclass::InitializeInternal();
 }
-
 
 std::string cmCPackPKGGenerator::GetPackageName(
   const cmCPackComponent& component)
@@ -53,16 +52,15 @@ std::string cmCPackPKGGenerator::GetPackageName(
     std::string packagesDir = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
     packagesDir += ".dummy";
     std::ostringstream out;
-    out << cmSystemTools::GetFilenameWithoutLastExtension(packagesDir)
-        << "-" << component.Name << ".pkg";
+    out << cmSystemTools::GetFilenameWithoutLastExtension(packagesDir) << "-"
+        << component.Name << ".pkg";
     return out.str();
   } else {
     return component.ArchiveFile + ".pkg";
   }
 }
 
-void cmCPackPKGGenerator::WriteDistributionFile(
-  const char* metapackageFile)
+void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile)
 {
   std::string distributionTemplate =
     this->FindTemplate("CPack.distribution.dist.in");
@@ -144,8 +142,8 @@ void cmCPackPKGGenerator::CreateChoiceOutline(
   out << "</line>" << std::endl;
 }
 
-void cmCPackPKGGenerator::CreateChoice(
-  const cmCPackComponentGroup& group, std::ostringstream& out)
+void cmCPackPKGGenerator::CreateChoice(const cmCPackComponentGroup& group,
+                                       std::ostringstream& out)
 {
   out << "<choice id=\"" << group.Name << "Choice\" "
       << "title=\"" << group.DisplayName << "\" "
@@ -158,8 +156,8 @@ void cmCPackPKGGenerator::CreateChoice(
   out << "></choice>" << std::endl;
 }
 
-void cmCPackPKGGenerator::CreateChoice(
-  const cmCPackComponent& component, std::ostringstream& out)
+void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
+                                       std::ostringstream& out)
 {
   std::string packageId = "com.";
   packageId += this->GetOption("CPACK_PACKAGE_VENDOR");
@@ -277,8 +275,8 @@ std::string cmCPackPKGGenerator::EscapeForXML(std::string str)
   return str;
 }
 
-bool cmCPackPKGGenerator::CopyCreateResourceFile(
-  const std::string& name, const std::string& dirName)
+bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
+                                                 const std::string& dirName)
 {
   std::string uname = cmSystemTools::UpperCase(name);
   std::string cpackVar = "CPACK_RESOURCE_FILE_" + uname;
@@ -323,8 +321,8 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(
   return true;
 }
 
-bool cmCPackPKGGenerator::CopyResourcePlistFile(
-  const std::string& name, const char* outName)
+bool cmCPackPKGGenerator::CopyResourcePlistFile(const std::string& name,
+                                                const char* outName)
 {
   if (!outName) {
     outName = name.c_str();
