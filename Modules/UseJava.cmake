@@ -217,6 +217,19 @@
 # This command installs the TARGET_NAME files to the given DESTINATION.
 # It should be called in the same scope as add_jar() or it will fail.
 #
+# Target Properties:
+#
+# ::
+#
+#    The install_jar() function sets the INSTALL_DESTINATION target property
+#    on jars so installed. This property holds the DESTINATION as described
+#    above, and is used by install_jar_exports(). You can get this property
+#    with the
+#       get_property(TARGET <target_name> PROPERTY INSTALL_DESTINATION)
+#    command.
+#
+#
+#
 # ::
 #
 #  install_jni_symlink(target_name destination)
@@ -225,6 +238,24 @@
 # This command installs the TARGET_NAME JNI symlinks to the given
 # DESTINATION.  It should be called in the same scope as add_jar() or it
 # will fail.
+#
+# ::
+#
+#  install_jar_exports(TARGETS jar1 [jar2 ...]
+#                      FILE export_filename
+#                      DESTINATION destination [COMPONENT component])
+#
+# This command installs a target export file export_filename for the named jar
+# targets to the given DESTINATION. Its function is similar to that of
+# install(EXPORTS).
+#
+# ::
+#
+#  export_jars(TARGETS jar1 [jar2 ...]
+#              FILE export_filename)
+#
+# This command writes a target export file export_filename for the named jar
+# targets. Its function is similar to that of export().
 #
 # ::
 #
@@ -396,7 +427,29 @@ function (__java_copy_file src dest comment)
         COMMENT ${comment})
 endfunction ()
 
+function(__java_lcat VAR)
+    foreach(_line ${ARGN})
+        set(${VAR} "${${VAR}}${_line}\n")
+    endforeach()
+
+    set(${VAR} "${${VAR}}" PARENT_SCOPE)
+endfunction()
+
+function(__java_export_jar VAR TARGET PATH)
+    get_target_property(_jarpath ${TARGET} JAR_FILE)
+    get_filename_component(_jarname ${_jarpath} NAME)
+    __java_lcat(${VAR}
+      "# Create imported target ${TARGET}"
+      "add_custom_target(${TARGET})"
+      "set_target_properties(${TARGET} PROPERTIES"
+      "  JAR_FILE \"${PATH}/${_jarname}\")"
+      ""
+    )
+    set(${VAR} "${${VAR}}" PARENT_SCOPE)
+endfunction()
+
 # define helper scripts
+set(_JAVA_EXPORT_TARGETS_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/javaTargets.cmake.in)
 set(_JAVA_CLASS_FILELIST_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/UseJavaClassFilelist.cmake)
 set(_JAVA_SYMLINK_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/UseJavaSymlinks.cmake)
 
@@ -435,6 +488,8 @@ function(add_jar _TARGET_NAME)
 
     if (NOT DEFINED _add_jar_OUTPUT_DIR)
         set(_add_jar_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
+    else()
+        get_filename_component(_add_jar_OUTPUT_DIR ${_add_jar_OUTPUT_DIR} ABSOLUTE)
     endif()
 
     if (_add_jar_ENTRY_POINT)
@@ -554,11 +609,6 @@ function(add_jar _TARGET_NAME)
         endif ()
     endforeach()
 
-    # create an empty java_class_filelist
-    if (NOT EXISTS ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist)
-        file(WRITE ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist "")
-    endif()
-
     if (_JAVA_COMPILE_FILES OR _JAVA_COMPILE_FILELISTS)
         set (_JAVA_SOURCES_FILELISTS)
 
@@ -598,6 +648,11 @@ function(add_jar _TARGET_NAME)
             DEPENDS ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_compiled_${_TARGET_NAME}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         )
+    else ()
+        # create an empty java_class_filelist
+        if (NOT EXISTS ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist)
+            file(WRITE ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist "")
+        endif()
     endif ()
 
     # create the jar file
@@ -715,6 +770,13 @@ function(INSTALL_JAR _TARGET_NAME)
             ${_TARGET_NAME}
         PROPERTY
             INSTALL_FILES
+    )
+    set_property(
+        TARGET
+            ${_TARGET_NAME}
+        PROPERTY
+            INSTALL_DESTINATION
+            ${_DESTINATION}
     )
 
     if (__FILES)
@@ -1287,4 +1349,95 @@ function (create_javah)
     if (_create_javah_GENERATED_FILES)
       set (${_create_javah_GENERATED_FILES} ${_output_files} PARENT_SCOPE)
     endif()
+endfunction()
+
+function(export_jars)
+    # Parse and validate arguments
+    cmake_parse_arguments(_export_jars
+      ""
+      "FILE"
+      "TARGETS"
+      ${ARGN}
+    )
+    if (NOT _export_jars_FILE)
+      message(SEND_ERROR "export_jars: FILE must be specified.")
+    endif()
+    if (NOT _export_jars_TARGETS)
+      message(SEND_ERROR "export_jars: TARGETS must be specified.")
+    endif()
+
+    # Set content of generated exports file
+    string(REPLACE ";" " " __targets__ "${_export_jars_TARGETS}")
+    set(__targetdefs__ "")
+    foreach(_target ${_export_jars_TARGETS})
+        get_target_property(_jarpath ${_target} JAR_FILE)
+        get_filename_component(_jarpath ${_jarpath} PATH)
+        __java_export_jar(__targetdefs__ ${_target} "${_jarpath}")
+    endforeach()
+
+    # Generate exports file
+    configure_file(
+      ${_JAVA_EXPORT_TARGETS_SCRIPT}
+      ${_export_jars_FILE}
+      @ONLY
+    )
+endfunction()
+
+function(install_jar_exports)
+    # Parse and validate arguments
+    cmake_parse_arguments(_install_jar_exports
+      ""
+      "FILE;DESTINATION;COMPONENT"
+      "TARGETS"
+      ${ARGN}
+    )
+    if (NOT _install_jar_exports_FILE)
+      message(SEND_ERROR "install_jar_exports: FILE must be specified.")
+    endif()
+    if (NOT _install_jar_exports_DESTINATION)
+      message(SEND_ERROR "install_jar_exports: DESTINATION must be specified.")
+    endif()
+    if (NOT _install_jar_exports_TARGETS)
+      message(SEND_ERROR "install_jar_exports: TARGETS must be specified.")
+    endif()
+
+    if (_install_jar_exports_COMPONENT)
+      set (_COMPONENT COMPONENT ${_install_jar_exports_COMPONENT})
+    endif()
+
+    # Determine relative path from installed export file to install prefix
+    if(IS_ABSOLUTE ${_install_jar_exports_DESTINATION})
+      file(RELATIVE_PATH _relpath
+        ${_install_jar_exports_DESTINATION}
+        ${CMAKE_INSTALL_PREFIX}
+      )
+    else()
+      file(RELATIVE_PATH _relpath
+        ${CMAKE_INSTALL_PREFIX}/${_install_jar_exports_DESTINATION}
+        ${CMAKE_INSTALL_PREFIX}
+      )
+    endif()
+
+    # Set up unique location for generated exports file
+    string(SHA256 _hash "${_install_jar_exports_DESTINATION}")
+    set(_tmpdir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/JavaExports/${_hash})
+
+    # Set content of generated exports file
+    string(REPLACE ";" " " __targets__ "${_install_jar_exports_TARGETS}")
+    set(__targetdefs__ "set(_prefix \${CMAKE_CURRENT_LIST_DIR}/${_relpath})\n\n")
+    foreach(_target ${_install_jar_exports_TARGETS})
+        get_target_property(_dir ${_target} INSTALL_DESTINATION)
+        __java_export_jar(__targetdefs__ ${_target} "\${_prefix}/${_dir}")
+    endforeach()
+    __java_lcat(__targetdefs__ "\nunset(_prefix)")
+
+    # Generate and install exports file
+    configure_file(
+      ${_JAVA_EXPORT_TARGETS_SCRIPT}
+      ${_tmpdir}/${_install_jar_exports_FILE}
+      @ONLY
+    )
+    install(FILES ${_tmpdir}/${_install_jar_exports_FILE}
+            DESTINATION ${_install_jar_exports_DESTINATION}
+            ${_COMPONENT})
 endfunction()
