@@ -144,6 +144,14 @@ std::string cmNinjaNormalTargetGenerator::LanguageLinkerRule() const
                     this->GetGeneratorTarget()->GetName());
 }
 
+struct cmNinjaRemoveNoOpCommands
+{
+  bool operator()(std::string const& cmd)
+  {
+    return cmd.empty() || cmd[0] == ':';
+  }
+};
+
 void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
 {
   cmState::TargetType targetType = this->GetGeneratorTarget()->GetType();
@@ -231,6 +239,13 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
          i != linkCmds.end(); ++i) {
       this->GetLocalGenerator()->ExpandRuleVariables(*i, vars);
     }
+    {
+      // If there is no ranlib the command will be ":".  Skip it.
+      std::vector<std::string>::iterator newEnd = std::remove_if(
+        linkCmds.begin(), linkCmds.end(), cmNinjaRemoveNoOpCommands());
+      linkCmds.erase(newEnd, linkCmds.end());
+    }
+
     linkCmds.insert(linkCmds.begin(), "$PRE_LINK");
     linkCmds.push_back("$POST_BUILD");
     std::string linkCmd =
