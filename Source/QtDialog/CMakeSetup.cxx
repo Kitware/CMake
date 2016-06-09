@@ -19,6 +19,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QLocale>
+#include <QString>
 #include <QTextCodec>
 #include <QTranslator>
 #include <cmsys/CommandLineArguments.hxx>
@@ -40,6 +41,7 @@ static const char* cmDocumentationOptions[][2] = { { 0, 0 } };
 
 #if defined(Q_OS_MAC)
 static int cmOSXInstall(std::string dir);
+static void cmAddPluginPath();
 #endif
 
 int main(int argc, char** argv)
@@ -79,6 +81,15 @@ int main(int argc, char** argv)
   if (argc2 == 2 && cmHasLiteralPrefix(argv2[1], "--install=")) {
     return cmOSXInstall(argv2[1] + 10);
   }
+#endif
+
+// When we are on OSX and we are launching cmake-gui from a symlink, the
+// application will fail to launch as it can't find the qt.conf file which
+// tells it what the name of the plugin folder is. We need to add this path
+// BEFORE the application is constructed as that is what triggers the
+// searching for the platform plugins
+#if defined(Q_OS_MAC)
+  cmAddPluginPath();
 #endif
 
   QApplication app(argc, argv);
@@ -215,4 +226,27 @@ static int cmOSXInstall(std::string dir)
     ? 0
     : 1;
 }
+
+// Locate the PlugIns directory and add it to the QApplication library paths.
+// We need to resolve all symlinks so we have a known relative path between
+// MacOS/CMake and the PlugIns directory.
+//
+// Note we are using cmSystemTools sine Qt can't provide the path to the
+// executable before the QApplication is created, and that is when plugin
+// searching occurs.
+static void cmAddPluginPath()
+{
+  std::string const& path = cmSystemTools::GetCMakeGUICommand();
+  if (path.empty()) {
+    return;
+  }
+  std::string const& realPath = cmSystemTools::GetRealPath(path);
+  QFileInfo appPath(QString::fromLocal8Bit(realPath.c_str()));
+  QDir pluginDir = appPath.dir();
+  bool const foundPluginDir = pluginDir.cd("../PlugIns");
+  if (foundPluginDir) {
+    QApplication::addLibraryPath(pluginDir.path());
+  }
+}
+
 #endif
