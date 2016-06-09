@@ -231,7 +231,7 @@ static int cmOSXInstall(std::string dir)
 // We need to resolve all symlinks so we have a known relative path between
 // MacOS/CMake and the PlugIns directory.
 //
-// Note we are using cmSystemTools sine Qt can't provide the path to the
+// Note we are using cmSystemTools since Qt can't provide the path to the
 // executable before the QApplication is created, and that is when plugin
 // searching occurs.
 static void cmAddPluginPath()
