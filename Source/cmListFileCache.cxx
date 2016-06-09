@@ -23,6 +23,7 @@ struct cmListFileParser
 {
   cmListFileParser(cmListFile* lf, cmMakefile* mf, const char* filename);
   ~cmListFileParser();
+  void IssueFileOpenError(std::string const& text) const;
   bool ParseFile();
   bool ParseFunction(const char* name, long line);
   bool AddArgument(cmListFileLexer_Token* token,
@@ -54,23 +55,25 @@ cmListFileParser::~cmListFileParser()
   cmListFileLexer_Delete(this->Lexer);
 }
 
+void cmListFileParser::IssueFileOpenError(const std::string& text) const
+{
+  this->Makefile->IssueMessage(cmake::FATAL_ERROR, text);
+}
+
 bool cmListFileParser::ParseFile()
 {
   // Open the file.
   cmListFileLexer_BOM bom;
   if (!cmListFileLexer_SetFileName(this->Lexer, this->FileName, &bom)) {
-    cmSystemTools::Error("cmListFileCache: error can not open file ",
-                         this->FileName);
+    this->IssueFileOpenError("cmListFileCache: error can not open file.");
     return false;
   }
 
   // Verify the Byte-Order-Mark, if any.
   if (bom != cmListFileLexer_BOM_None && bom != cmListFileLexer_BOM_UTF8) {
     cmListFileLexer_SetFileName(this->Lexer, 0, 0);
-    std::ostringstream m;
-    m << "File\n  " << this->FileName << "\n"
-      << "starts with a Byte-Order-Mark that is not UTF-8.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, m.str());
+    this->IssueFileOpenError(
+      "File starts with a Byte-Order-Mark that is not UTF-8.");
     return false;
   }
 
