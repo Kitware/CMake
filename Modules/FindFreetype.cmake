@@ -96,17 +96,6 @@ find_library(FREETYPE_LIBRARY
   PATH_SUFFIXES
     lib
 )
-find_library(FREETYPE_LIBRARY_DEBUG
-  NAMES
-    freetyped
-    libfreetyped
-    freetype219d
-  ${FREETYPE_FIND_ARGS}
-  PATH_SUFFIXES
-    lib
-)
-include(SelectLibraryConfigurations)
-select_library_configurations(FREETYPE)
 
 unset(FREETYPE_FIND_ARGS)
 
