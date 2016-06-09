@@ -381,8 +381,7 @@ public:
   /** Display a message to the user.  */
   void IssueMessage(
     cmake::MessageType t, std::string const& text,
-    cmListFileBacktrace const& backtrace = cmListFileBacktrace(),
-    bool force = false) const;
+    cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const;
 
   void DisplayMessage(cmake::MessageType t, std::string const& text,
                       cmListFileBacktrace const& backtrace) const;

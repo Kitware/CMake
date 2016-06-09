@@ -105,8 +105,8 @@ cmMakefile::~cmMakefile()
   cmDeleteAll(this->EvaluationFiles);
 }
 
-void cmMakefile::IssueMessage(cmake::MessageType t, std::string const& text,
-                              bool force) const
+void cmMakefile::IssueMessage(cmake::MessageType t,
+                              std::string const& text) const
 {
   // Collect context information.
   if (!this->ExecutionStatusStack.empty()) {
@@ -114,7 +114,7 @@ void cmMakefile::IssueMessage(cmake::MessageType t, std::string const& text,
       this->ExecutionStatusStack.back()->SetNestedError(true);
     }
   }
-  this->GetCMakeInstance()->IssueMessage(t, text, this->GetBacktrace(), force);
+  this->GetCMakeInstance()->IssueMessage(t, text, this->GetBacktrace());
 }
 
 cmStringRange cmMakefile::GetIncludeDirectoriesEntries() const

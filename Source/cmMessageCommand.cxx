@@ -63,8 +63,9 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
   std::string message = cmJoin(cmMakeRange(i, args.end()), std::string());
 
   if (type != cmake::MESSAGE) {
-    // we've overriden the message type, above, so force IssueMessage to use it
-    this->Makefile->IssueMessage(type, message, true);
+    // we've overriden the message type, above, so display it directly
+    cmake* cm = this->Makefile->GetCMakeInstance();
+    cm->DisplayMessage(type, message, this->Makefile->GetBacktrace());
   } else {
     if (status) {
       this->Makefile->DisplayStatus(message.c_str(), -1);
