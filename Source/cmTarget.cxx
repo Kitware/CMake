@@ -580,8 +580,7 @@ bool cmTarget::PushTLLCommandTrace(TLLSignature signature,
   return ret;
 }
 
-void cmTarget::GetTllSignatureTraces(std::ostringstream& s,
-                                     TLLSignature sig) const
+void cmTarget::GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const
 {
   const char* sigString =
     (sig == cmTarget::KeywordTLLSignature ? "keyword" : "plain");

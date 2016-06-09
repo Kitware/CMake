@@ -145,7 +145,6 @@ cmake::cmake()
   }
 #endif
 
-  this->Verbose = false;
   this->GlobalGenerator = 0;
   this->ProgressCallback = 0;
   this->ProgressCallbackClientData = 0;
@@ -555,9 +554,7 @@ void cmake::SetArgs(const std::vector<std::string>& args,
       this->VSSolutionFile = args[++i];
     }
 #endif
-    else if (arg.find("-V", 0) == 0) {
-      this->Verbose = true;
-    } else if (arg.find("-D", 0) == 0) {
+    else if (arg.find("-D", 0) == 0) {
       // skip for now
     } else if (arg.find("-U", 0) == 0) {
       // skip for now
@@ -1989,9 +1986,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   bool writeToStdout = true;
   for (unsigned int i = 1; i < args.size(); ++i) {
     std::string arg = args[i];
-    if (arg.find("-V", 0) == 0) {
-      this->Verbose = true;
-    } else if (arg.find("-G", 0) == 0) {
+    if (arg.find("-G", 0) == 0) {
       std::string value = arg.substr(2);
       if (value.empty()) {
         ++i;
@@ -2176,7 +2171,7 @@ static bool cmakeCheckStampList(const char* stampList)
   return true;
 }
 
-cmake::MessageType cmake::ConvertMessageType(cmake::MessageType t)
+cmake::MessageType cmake::ConvertMessageType(cmake::MessageType t) const
 {
   bool warningsAsErrors;
 
@@ -2200,7 +2195,7 @@ cmake::MessageType cmake::ConvertMessageType(cmake::MessageType t)
   return t;
 }
 
-bool cmake::IsMessageTypeVisible(cmake::MessageType t)
+bool cmake::IsMessageTypeVisible(cmake::MessageType t) const
 {
   bool isVisible = true;
 
@@ -2225,7 +2220,7 @@ bool cmake::IsMessageTypeVisible(cmake::MessageType t)
   return isVisible;
 }
 
-bool cmake::PrintMessagePreamble(cmake::MessageType t, std::ostream& msg)
+static bool printMessagePreamble(cmake::MessageType t, std::ostream& msg)
 {
   // Construct the message header.
   if (t == cmake::FATAL_ERROR) {
@@ -2296,7 +2291,8 @@ void displayMessage(cmake::MessageType t, std::ostringstream& msg)
 }
 
 void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
-                         cmListFileBacktrace const& backtrace, bool force)
+                         cmListFileBacktrace const& backtrace,
+                         bool force) const
 {
   if (!force) {
     // override the message type, if needed, for warnings and errors
@@ -2312,7 +2308,7 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
   }
 
   std::ostringstream msg;
-  if (!this->PrintMessagePreamble(t, msg)) {
+  if (!printMessagePreamble(t, msg)) {
     return;
   }
 
@@ -2448,7 +2444,7 @@ void cmake::RunCheckForUnusedVariables()
 #endif
 }
 
-bool cmake::GetSuppressDevWarnings(cmMakefile const* mf)
+bool cmake::GetSuppressDevWarnings(cmMakefile const* mf) const
 {
   /*
    * The suppression CMake variable may be set in the CMake configuration file
@@ -2482,7 +2478,7 @@ void cmake::SetSuppressDevWarnings(bool b)
                       cmState::INTERNAL);
 }
 
-bool cmake::GetSuppressDeprecatedWarnings(cmMakefile const* mf)
+bool cmake::GetSuppressDeprecatedWarnings(cmMakefile const* mf) const
 {
   /*
    * The suppression CMake variable may be set in the CMake configuration file
@@ -2517,7 +2513,7 @@ void cmake::SetSuppressDeprecatedWarnings(bool b)
                       cmState::INTERNAL);
 }
 
-bool cmake::GetDevWarningsAsErrors(cmMakefile const* mf)
+bool cmake::GetDevWarningsAsErrors(cmMakefile const* mf) const
 {
   if (mf) {
     return (mf->IsSet("CMAKE_SUPPRESS_DEVELOPER_ERRORS") &&
@@ -2548,7 +2544,7 @@ void cmake::SetDevWarningsAsErrors(bool b)
                       cmState::INTERNAL);
 }
 
-bool cmake::GetDeprecatedWarningsAsErrors(cmMakefile const* mf)
+bool cmake::GetDeprecatedWarningsAsErrors(cmMakefile const* mf) const
 {
   if (mf) {
     return mf->IsOn("CMAKE_ERROR_DEPRECATED");

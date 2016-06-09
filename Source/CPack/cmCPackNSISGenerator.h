@@ -40,7 +40,7 @@ public:
 
 protected:
   virtual int InitializeInternal();
-  void CreateMenuLinks(std::ostringstream& str, std::ostringstream& deleteStr);
+  void CreateMenuLinks(std::ostream& str, std::ostream& deleteStr);
   int PackageFiles();
   virtual const char* GetOutputExtension() { return ".exe"; }
   virtual const char* GetOutputPostfix() { return "win32"; }
@@ -56,7 +56,7 @@ protected:
   /// particular component. Any added macros will be emitted via
   /// macrosOut.
   std::string CreateComponentDescription(cmCPackComponent* component,
-                                         std::ostringstream& macrosOut);
+                                         std::ostream& macrosOut);
 
   /// Produce NSIS code that selects all of the components that this component
   /// depends on, recursively.
@@ -72,7 +72,7 @@ protected:
   /// particular component group, including its components. Any
   /// added macros will be emitted via macrosOut.
   std::string CreateComponentGroupDescription(cmCPackComponentGroup* group,
-                                              std::ostringstream& macrosOut);
+                                              std::ostream& macrosOut);
 
   /// Translations any newlines found in the string into \\r\\n, so that the
   /// resulting string can be used within NSIS.

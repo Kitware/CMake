@@ -45,7 +45,7 @@ void cmCTestBatchTestHandler::WriteBatchScript()
   fout.close();
 }
 
-void cmCTestBatchTestHandler::WriteSrunArgs(int test, cmsys::ofstream& fout)
+void cmCTestBatchTestHandler::WriteSrunArgs(int test, std::ostream& fout)
 {
   cmCTestTestHandler::cmCTestTestProperties* properties =
     this->Properties[test];
@@ -73,7 +73,7 @@ void cmCTestBatchTestHandler::WriteSrunArgs(int test, cmsys::ofstream& fout)
   }
 }
 
-void cmCTestBatchTestHandler::WriteTestCommand(int test, cmsys::ofstream& fout)
+void cmCTestBatchTestHandler::WriteTestCommand(int test, std::ostream& fout)
 {
   std::vector<std::string> args = this->Properties[test]->Args;
   std::vector<std::string> processArgs;
