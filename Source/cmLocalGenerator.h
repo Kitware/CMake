@@ -368,6 +368,7 @@ protected:
 
   cmMakefile* Makefile;
   cmState::Snapshot StateSnapshot;
+  cmListFileBacktrace DirectoryBacktrace;
   cmGlobalGenerator* GlobalGenerator;
   std::map<std::string, std::string> UniqueObjectNamesMap;
   std::string::size_type ObjectPathMax;

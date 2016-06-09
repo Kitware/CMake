@@ -45,6 +45,7 @@
 cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
   : cmOutputConverter(makefile->GetStateSnapshot())
   , StateSnapshot(makefile->GetStateSnapshot())
+  , DirectoryBacktrace(makefile->GetBacktrace())
 {
   this->GlobalGenerator = gg;
 
@@ -68,7 +69,7 @@ cmLocalGenerator::~cmLocalGenerator()
 void cmLocalGenerator::IssueMessage(cmake::MessageType t,
                                     std::string const& text) const
 {
-  this->Makefile->IssueMessage(t, text);
+  this->GetCMakeInstance()->IssueMessage(t, text, this->DirectoryBacktrace);
 }
 
 void cmLocalGenerator::ComputeObjectMaxPath()
