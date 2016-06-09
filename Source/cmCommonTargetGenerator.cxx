@@ -159,8 +159,7 @@ void cmCommonTargetGenerator::AddFortranFlags(std::string& flags)
   if (const char* modpath_flag =
         this->Makefile->GetDefinition("CMAKE_Fortran_MODPATH_FLAG")) {
     std::vector<std::string> includes;
-    const std::string& config =
-      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+    const std::string& config = this->ConfigName;
     this->LocalGenerator->GetIncludeDirectories(
       includes, this->GeneratorTarget, "C", config);
     for (std::vector<std::string>::const_iterator idi = includes.begin();
@@ -200,58 +199,6 @@ void cmCommonTargetGenerator::AppendFortranFormatFlags(
   }
 }
 
-std::string cmCommonTargetGenerator::GetFrameworkFlags(std::string const& l)
-{
-  if (!this->Makefile->IsOn("APPLE")) {
-    return std::string();
-  }
-
-  std::string fwSearchFlagVar = "CMAKE_" + l + "_FRAMEWORK_SEARCH_FLAG";
-  const char* fwSearchFlag = this->Makefile->GetDefinition(fwSearchFlagVar);
-  if (!(fwSearchFlag && *fwSearchFlag)) {
-    return std::string();
-  }
-
-  std::set<std::string> emitted;
-#ifdef __APPLE__ /* don't insert this when crosscompiling e.g. to iphone */
-  emitted.insert("/System/Library/Frameworks");
-#endif
-  std::vector<std::string> includes;
-
-  const std::string& config =
-    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  this->LocalGenerator->GetIncludeDirectories(includes, this->GeneratorTarget,
-                                              "C", config);
-  // check all include directories for frameworks as this
-  // will already have added a -F for the framework
-  for (std::vector<std::string>::iterator i = includes.begin();
-       i != includes.end(); ++i) {
-    if (this->GlobalGenerator->NameResolvesToFramework(*i)) {
-      std::string frameworkDir = *i;
-      frameworkDir += "/../";
-      frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir);
-      emitted.insert(frameworkDir);
-    }
-  }
-
-  std::string flags;
-  const char* cfg = this->LocalGenerator->GetConfigName().c_str();
-  if (cmComputeLinkInformation* cli =
-        this->GeneratorTarget->GetLinkInformation(cfg)) {
-    std::vector<std::string> const& frameworks = cli->GetFrameworkPaths();
-    for (std::vector<std::string>::const_iterator i = frameworks.begin();
-         i != frameworks.end(); ++i) {
-      if (emitted.insert(*i).second) {
-        flags += fwSearchFlag;
-        flags += this->LocalGenerator->ConvertToOutputFormat(
-          *i, cmOutputConverter::SHELL);
-        flags += " ";
-      }
-    }
-  }
-  return flags;
-}
-
 std::string cmCommonTargetGenerator::GetFlags(const std::string& l)
 {
   ByLanguageMap::iterator i = this->FlagsByLanguage.find(l);
@@ -280,7 +227,9 @@ std::string cmCommonTargetGenerator::GetFlags(const std::string& l)
     this->LocalGenerator->AppendFlags(flags, this->Makefile->GetDefineFlags());
 
     // Add framework directory flags.
-    this->LocalGenerator->AppendFlags(flags, this->GetFrameworkFlags(l));
+    this->LocalGenerator->AppendFlags(
+      flags, this->LocalGenerator->GetFrameworkFlags(l, this->ConfigName,
+                                                     this->GeneratorTarget));
 
     // Add target-specific flags.
     this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget, lang,

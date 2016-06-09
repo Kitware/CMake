@@ -71,9 +71,6 @@ protected:
   void AppendFortranFormatFlags(std::string& flags,
                                 cmSourceFile const& source);
 
-  // Return the a string with -F flags on apple
-  std::string GetFrameworkFlags(std::string const& l);
-
   virtual void AddIncludeFlags(std::string& flags,
                                std::string const& lang) = 0;
 
