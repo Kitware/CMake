@@ -1152,13 +1152,11 @@ void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
 }
 
 void cmLocalGenerator::GetTargetFlags(
-  std::string& linkLibs, std::string& flags, std::string& linkFlags,
-  std::string& frameworkPath, std::string& linkPath, cmGeneratorTarget* target,
-  bool useWatcomQuote)
+  const std::string& config, std::string& linkLibs, std::string& flags,
+  std::string& linkFlags, std::string& frameworkPath, std::string& linkPath,
+  cmGeneratorTarget* target, bool useWatcomQuote)
 {
-  std::string buildType =
-    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  buildType = cmSystemTools::UpperCase(buildType);
+  const std::string buildType = cmSystemTools::UpperCase(config);
   const char* libraryLinkVariable =
     "CMAKE_SHARED_LINKER_FLAGS"; // default to shared library
 
