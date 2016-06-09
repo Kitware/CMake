@@ -17,6 +17,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
+#include "cmXMLWriter.h"
 #include "cmake.h"
 
 #include <cmsys/FStream.hxx>
@@ -523,21 +524,22 @@ bool cmCPackPackageMakerGenerator::GenerateComponentPackage(
     std::string descriptionFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     descriptionFile += '/' + component.Name + "-Description.plist";
     cmsys::ofstream out(descriptionFile.c_str());
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl
-        << "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\""
-        << "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" << std::endl
-        << "<plist version=\"1.4\">" << std::endl
-        << "<dict>" << std::endl
-        << "  <key>IFPkgDescriptionTitle</key>" << std::endl
-        << "  <string>" << component.DisplayName << "</string>" << std::endl
-        << "  <key>IFPkgDescriptionVersion</key>" << std::endl
-        << "  <string>" << this->GetOption("CPACK_PACKAGE_VERSION")
-        << "</string>" << std::endl
-        << "  <key>IFPkgDescriptionDescription</key>" << std::endl
-        << "  <string>" + this->EscapeForXML(component.Description)
-        << "</string>" << std::endl
-        << "</dict>" << std::endl
-        << "</plist>" << std::endl;
+    cmXMLWriter xout(out);
+    xout.StartDocument();
+    xout.Doctype("plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\""
+                 "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"");
+    xout.StartElement("plist");
+    xout.Attribute("version", "1.4");
+    xout.StartElement("dict");
+    xout.Element("key", "IFPkgDescriptionTitle");
+    xout.Element("string", component.DisplayName);
+    xout.Element("key", "IFPkgDescriptionVersion");
+    xout.Element("string", this->GetOption("CPACK_PACKAGE_VERSION"));
+    xout.Element("key", "IFPkgDescriptionDescription");
+    xout.Element("string", component.Description);
+    xout.EndElement(); // dict
+    xout.EndElement(); // plist
+    xout.EndDocument();
     out.close();
 
     // Create the Info.plist file for this component
