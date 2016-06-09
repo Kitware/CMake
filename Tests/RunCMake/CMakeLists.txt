@@ -307,9 +307,8 @@ if(CMAKE_OSX_ARCHITECTURES AND XCODE AND NOT "${XCODE_VERSION}" MATCHES "^[^12]"
 endif()
 
 if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
-  find_program(LDD_PATH ldd)
-  if(UNIX AND LDD_PATH)
-    execute_process(COMMAND ${LDD_PATH} --help
+  if(UNIX)
+    execute_process(COMMAND ldd --help
       OUTPUT_VARIABLE LDD_HELP)
     if("${LDD_HELP}" MATCHES
         "(-r, --function-relocs.*process data and function relocations|-u, --unused.*print unused direct dependencies)")

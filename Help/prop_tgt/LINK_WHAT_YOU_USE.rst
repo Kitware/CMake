@@ -1,10 +1,10 @@
 LINK_WHAT_YOU_USE
 ---------------------------
 
-This is a boolean option that when set to TRUE will automatically run
-ldd -r -u on the target after it is linked. In addition, the linker flag
--Wl,--no-as-needed will be passed to the target with the link command so that
-all libraries specified on the command line will be linked into the
+This is a boolean option that when set to ``TRUE`` will automatically run
+``ldd -r -u`` on the target after it is linked. In addition, the linker flag
+``-Wl,--no-as-needed`` will be passed to the target with the link command so
+that all libraries specified on the command line will be linked into the
 target. This will result in the link producing a list of libraries that
 provide no symbols used by this target but are being linked to it.
 This is only applicable to executable and shared library targets and
