@@ -51,9 +51,8 @@
 # wants explicit full paths and this trickery doesn't work too well.
 # I'm going to attempt to cut out the middleman and hope
 # everything still works.
-find_path(
-  FREETYPE_INCLUDE_DIR_ft2build
-  ft2build.h
+
+set(FREETYPE_FIND_ARGS
   HINTS
     ENV FREETYPE_DIR
   PATHS
@@ -64,6 +63,12 @@ find_path(
     ENV GTKMM_BASEPATH
     [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]
+)
+
+find_path(
+  FREETYPE_INCLUDE_DIR_ft2build
+  ft2build.h
+  ${FREETYPE_FIND_ARGS}
   PATH_SUFFIXES
     include/freetype2
     include
@@ -75,16 +80,7 @@ find_path(
   NAMES
     freetype/config/ftheader.h
     config/ftheader.h
-  HINTS
-    ENV FREETYPE_DIR
-  PATHS
-    /usr/X11R6
-    /usr/local/X11R6
-    /usr/local/X11
-    /usr/freeware
-    ENV GTKMM_BASEPATH
-    [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]
+  ${FREETYPE_FIND_ARGS}
   PATH_SUFFIXES
     include/freetype2
     include
@@ -96,19 +92,23 @@ find_library(FREETYPE_LIBRARY
     freetype
     libfreetype
     freetype219
-  HINTS
-    ENV FREETYPE_DIR
-  PATHS
-    /usr/X11R6
-    /usr/local/X11R6
-    /usr/local/X11
-    /usr/freeware
-    ENV GTKMM_BASEPATH
-    [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]
+  ${FREETYPE_FIND_ARGS}
   PATH_SUFFIXES
     lib
 )
+find_library(FREETYPE_LIBRARY_DEBUG
+  NAMES
+    freetyped
+    libfreetyped
+    freetype219d
+  ${FREETYPE_FIND_ARGS}
+  PATH_SUFFIXES
+    lib
+)
+include(SelectLibraryConfigurations)
+select_library_configurations(FREETYPE)
+
+unset(FREETYPE_FIND_ARGS)
 
 # set the user variables
 if(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
