@@ -53,9 +53,6 @@ protected:
   // The windows module definition source file (.def), if any.
   cmSourceFile const* ModuleDefinitionFile;
 
-  // Compute target-specific Fortran language flags.
-  void AddFortranFlags(std::string& flags);
-
   std::string Convert(
     std::string const& source, cmOutputConverter::RelativeRoot relative,
     cmOutputConverter::OutputFormat output = cmOutputConverter::UNCHANGED);

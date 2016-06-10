@@ -88,51 +88,6 @@ void cmCommonTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
   this->LocalGenerator->AppendFlags(flags, flag);
 }
 
-void cmCommonTargetGenerator::AddFortranFlags(std::string& flags)
-{
-  // Enable module output if necessary.
-  if (const char* modout_flag =
-        this->Makefile->GetDefinition("CMAKE_Fortran_MODOUT_FLAG")) {
-    this->LocalGenerator->AppendFlags(flags, modout_flag);
-  }
-
-  // Add a module output directory flag if necessary.
-  std::string mod_dir = this->GeneratorTarget->GetFortranModuleDirectory();
-  if (!mod_dir.empty()) {
-    mod_dir =
-      this->Convert(mod_dir, this->LocalGenerator->GetWorkingDirectory(),
-                    cmOutputConverter::SHELL);
-  } else {
-    mod_dir =
-      this->Makefile->GetSafeDefinition("CMAKE_Fortran_MODDIR_DEFAULT");
-  }
-  if (!mod_dir.empty()) {
-    const char* moddir_flag =
-      this->Makefile->GetRequiredDefinition("CMAKE_Fortran_MODDIR_FLAG");
-    std::string modflag = moddir_flag;
-    modflag += mod_dir;
-    this->LocalGenerator->AppendFlags(flags, modflag);
-  }
-
-  // If there is a separate module path flag then duplicate the
-  // include path with it.  This compiler does not search the include
-  // path for modules.
-  if (const char* modpath_flag =
-        this->Makefile->GetDefinition("CMAKE_Fortran_MODPATH_FLAG")) {
-    std::vector<std::string> includes;
-    const std::string& config = this->ConfigName;
-    this->LocalGenerator->GetIncludeDirectories(
-      includes, this->GeneratorTarget, "C", config);
-    for (std::vector<std::string>::const_iterator idi = includes.begin();
-         idi != includes.end(); ++idi) {
-      std::string flg = modpath_flag;
-      flg +=
-        this->Convert(*idi, cmOutputConverter::NONE, cmOutputConverter::SHELL);
-      this->LocalGenerator->AppendFlags(flags, flg);
-    }
-  }
-}
-
 void cmCommonTargetGenerator::AppendFortranFormatFlags(
   std::string& flags, cmSourceFile const& source)
 {
@@ -175,7 +130,8 @@ std::string cmCommonTargetGenerator::GetFlags(const std::string& l)
 
     // Fortran-specific flags computed for this target.
     if (l == "Fortran") {
-      this->AddFortranFlags(flags);
+      this->LocalGenerator->AppendFlags(
+        flags, this->LocalGenerator->GetFortranFlags(this->GeneratorTarget));
     }
 
     this->LocalGenerator->AddCMP0018Flags(flags, this->GeneratorTarget, lang,
