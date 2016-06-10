@@ -132,8 +132,8 @@ _cmake()
             return
             ;;
          --help-policy)
-            COMPREPLY=( $( compgen -W '$( cmake --help-policies 2>/dev/null |
-                grep "^  CMP" 2>/dev/null )' -- "$cur" ) )
+            COMPREPLY=( $( compgen -W '$( cmake --help-policy-list 2>/dev/null |
+                grep -v "^cmake version " )' -- "$cur" ) )
             return
             ;;
          --help-property)
