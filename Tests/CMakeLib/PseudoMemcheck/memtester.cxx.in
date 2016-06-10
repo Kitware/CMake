@@ -4,8 +4,7 @@
 
 #define RETVAL @_retval@
 
-int
-main(int ac, char **av)
+int main(int ac, char** av)
 {
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(ac, av);
@@ -24,31 +23,26 @@ main(int ac, char **av)
 #else
     logarg = "-log-file=";
 #endif
-  else if (exename.find("BC") != exename.npos)
-    {
+  else if (exename.find("BC") != exename.npos) {
     nextarg = true;
     logarg = "/X";
-    }
+  }
 
   if (!logarg.empty()) {
     std::string logfile;
     for (int i = 1; i < argc; i++) {
       std::string arg = argv[i];
-      if (arg.find(logarg) == 0)
-        {
-        if (nextarg)
-          {
+      if (arg.find(logarg) == 0) {
+        if (nextarg) {
           if (i == argc - 1)
             return 1; // invalid command line
           logfile = argv[i + 1];
-          }
-        else
-          {
+        } else {
           logfile = arg.substr(logarg.length());
-          }
-        // keep searching, it may be overridden later to provoke an error
         }
+        // keep searching, it may be overridden later to provoke an error
       }
+    }
 
     if (!logfile.empty())
       cmSystemTools::Touch(logfile, true);
