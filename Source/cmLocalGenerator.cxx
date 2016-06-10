@@ -943,7 +943,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
 void cmLocalGenerator::AddCompileDefinitions(std::set<std::string>& defines,
                                              cmGeneratorTarget const* target,
                                              const std::string& config,
-                                             const std::string& lang)
+                                             const std::string& lang) const
 {
   std::vector<std::string> targetDefines;
   target->GetCompileDefinitions(targetDefines, config, lang);
@@ -1327,6 +1327,20 @@ std::string cmLocalGenerator::GetFrameworkFlags(std::string const& l,
                                                 cmGeneratorTarget* target)
 {
   return ::GetFrameworkFlags(l, config, target);
+}
+
+void cmLocalGenerator::GetTargetDefines(cmGeneratorTarget const* target,
+                                        std::string const& config,
+                                        std::string const& lang,
+                                        std::set<std::string>& defines) const
+{
+  // Add the export symbol definition for shared library objects.
+  if (const char* exportMacro = target->GetExportMacro()) {
+    this->AppendDefines(defines, exportMacro);
+  }
+
+  // Add preprocessor definitions for this target and configuration.
+  this->AddCompileDefinitions(defines, target, config, lang.c_str());
 }
 
 std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib,
@@ -2051,7 +2065,7 @@ void cmLocalGenerator::AppendFlagEscape(std::string& flags,
 }
 
 void cmLocalGenerator::AppendDefines(std::set<std::string>& defines,
-                                     const char* defines_list)
+                                     const char* defines_list) const
 {
   // Short-circuit if there are no definitions.
   if (!defines_list) {
@@ -2065,7 +2079,8 @@ void cmLocalGenerator::AppendDefines(std::set<std::string>& defines,
 }
 
 void cmLocalGenerator::AppendDefines(
-  std::set<std::string>& defines, const std::vector<std::string>& defines_vec)
+  std::set<std::string>& defines,
+  const std::vector<std::string>& defines_vec) const
 {
   for (std::vector<std::string>::const_iterator di = defines_vec.begin();
        di != defines_vec.end(); ++di) {
