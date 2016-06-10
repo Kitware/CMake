@@ -38,6 +38,7 @@ private:
     std::string Value;
     cmState::CacheEntryType Type;
     cmPropertyMap Properties;
+    std::vector<std::string> GetPropertyList() const;
     const char* GetProperty(const std::string&) const;
     void SetProperty(const std::string& property, const char* value);
     void AppendProperty(const std::string& property, const char* value,
@@ -60,6 +61,7 @@ public:
     bool IsAtEnd() const;
     void Next();
     std::string GetName() const { return this->Position->first; }
+    std::vector<std::string> GetPropertyList() const;
     const char* GetProperty(const std::string&) const;
     bool GetPropertyAsBool(const std::string&) const;
     bool PropertyExists(const std::string&) const;

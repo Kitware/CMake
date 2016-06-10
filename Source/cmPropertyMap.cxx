@@ -15,6 +15,7 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
+#include <algorithm>
 #include <assert.h>
 
 cmProperty* cmPropertyMap::GetOrCreateProperty(const std::string& name)
@@ -27,6 +28,17 @@ cmProperty* cmPropertyMap::GetOrCreateProperty(const std::string& name)
     prop = &(it->second);
   }
   return prop;
+}
+
+std::vector<std::string> cmPropertyMap::GetPropertyList() const
+{
+  std::vector<std::string> keyList;
+  for (cmPropertyMap::const_iterator i = this->begin(), e = this->end();
+       i != e; ++i) {
+    keyList.push_back(i->first);
+  }
+  std::sort(keyList.begin(), keyList.end());
+  return keyList;
 }
 
 void cmPropertyMap::SetProperty(const std::string& name, const char* value)
