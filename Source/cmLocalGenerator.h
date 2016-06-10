@@ -138,13 +138,15 @@ public:
    * Encode a list of preprocessor definitions for the compiler
    * command line.
    */
-  void AppendDefines(std::set<std::string>& defines, const char* defines_list);
-  void AppendDefines(std::set<std::string>& defines, std::string defines_list)
+  void AppendDefines(std::set<std::string>& defines,
+                     const char* defines_list) const;
+  void AppendDefines(std::set<std::string>& defines,
+                     std::string defines_list) const
   {
     this->AppendDefines(defines, defines_list.c_str());
   }
   void AppendDefines(std::set<std::string>& defines,
-                     const std::vector<std::string>& defines_vec);
+                     const std::vector<std::string>& defines_vec) const;
 
   /**
    * Join a set of defines into a definesString with a space separator.
@@ -200,7 +202,7 @@ public:
   void AddCompileDefinitions(std::set<std::string>& defines,
                              cmGeneratorTarget const* target,
                              const std::string& config,
-                             const std::string& lang);
+                             const std::string& lang) const;
 
   std::string GetProjectName() const;
 
