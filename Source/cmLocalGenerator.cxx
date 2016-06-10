@@ -1272,6 +1272,33 @@ void cmLocalGenerator::GetTargetFlags(
   }
 }
 
+void cmLocalGenerator::GetTargetCompileFlags(cmGeneratorTarget* target,
+                                             std::string const& config,
+                                             std::string const& lang,
+                                             std::string& flags)
+{
+  cmMakefile* mf = this->GetMakefile();
+
+  // Add language-specific flags.
+  this->AddLanguageFlags(flags, lang, config);
+
+  if (target->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION", config)) {
+    this->AppendFeatureOptions(flags, lang, "IPO");
+  }
+
+  this->AddArchitectureFlags(flags, target, lang, config);
+
+  if (lang == "Fortran") {
+    this->AppendFlags(flags, this->GetTargetFortranFlags(target, config));
+  }
+
+  this->AddCMP0018Flags(flags, target, lang, config);
+  this->AddVisibilityPresetFlags(flags, target, lang);
+  this->AppendFlags(flags, mf->GetDefineFlags());
+  this->AppendFlags(flags, this->GetFrameworkFlags(lang, config, target));
+  this->AddCompileOptions(flags, target, lang, config);
+}
+
 static std::string GetFrameworkFlags(const std::string& lang,
                                      const std::string& config,
                                      cmGeneratorTarget* target)
