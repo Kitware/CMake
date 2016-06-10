@@ -89,8 +89,8 @@ _ctest()
             return
             ;;
         --help-policy)
-            COMPREPLY=( $( compgen -W '$( ctest --help-policies 2>/dev/null |
-                grep "^  CMP" 2>/dev/null )' -- "$cur" ) )
+            COMPREPLY=( $( compgen -W '$( ctest --help-policy-list 2>/dev/null |
+                grep -v "^ctest version " )' -- "$cur" ) )
             return
             ;;
         --help-property)
