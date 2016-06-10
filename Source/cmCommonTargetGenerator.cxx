@@ -27,7 +27,6 @@ cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
       gt->LocalGenerator->GetGlobalGenerator()))
   , ConfigName(LocalGenerator->GetConfigName())
   , ModuleDefinitionFile(GeneratorTarget->GetModuleDefinitionFile(ConfigName))
-  , FortranModuleDirectoryComputed(false)
 {
 }
 
@@ -89,43 +88,6 @@ void cmCommonTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
   this->LocalGenerator->AppendFlags(flags, flag);
 }
 
-std::string cmCommonTargetGenerator::ComputeFortranModuleDirectory() const
-{
-  std::string mod_dir;
-  const char* target_mod_dir =
-    this->GeneratorTarget->GetProperty("Fortran_MODULE_DIRECTORY");
-  const char* moddir_flag =
-    this->Makefile->GetDefinition("CMAKE_Fortran_MODDIR_FLAG");
-  if (target_mod_dir && moddir_flag) {
-    // Compute the full path to the module directory.
-    if (cmSystemTools::FileIsFullPath(target_mod_dir)) {
-      // Already a full path.
-      mod_dir = target_mod_dir;
-    } else {
-      // Interpret relative to the current output directory.
-      mod_dir = this->LocalGenerator->GetCurrentBinaryDirectory();
-      mod_dir += "/";
-      mod_dir += target_mod_dir;
-    }
-
-    // Make sure the module output directory exists.
-    cmSystemTools::MakeDirectory(mod_dir);
-  }
-  return mod_dir;
-}
-
-std::string cmCommonTargetGenerator::GetFortranModuleDirectory()
-{
-  // Compute the module directory.
-  if (!this->FortranModuleDirectoryComputed) {
-    this->FortranModuleDirectoryComputed = true;
-    this->FortranModuleDirectory = this->ComputeFortranModuleDirectory();
-  }
-
-  // Return the computed directory.
-  return this->FortranModuleDirectory;
-}
-
 void cmCommonTargetGenerator::AddFortranFlags(std::string& flags)
 {
   // Enable module output if necessary.
@@ -135,7 +97,7 @@ void cmCommonTargetGenerator::AddFortranFlags(std::string& flags)
   }
 
   // Add a module output directory flag if necessary.
-  std::string mod_dir = this->GetFortranModuleDirectory();
+  std::string mod_dir = this->GeneratorTarget->GetFortranModuleDirectory();
   if (!mod_dir.empty()) {
     mod_dir =
       this->Convert(mod_dir, this->LocalGenerator->GetWorkingDirectory(),
