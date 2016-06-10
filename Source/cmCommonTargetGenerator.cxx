@@ -109,37 +109,9 @@ std::string cmCommonTargetGenerator::GetFlags(const std::string& l)
   ByLanguageMap::iterator i = this->FlagsByLanguage.find(l);
   if (i == this->FlagsByLanguage.end()) {
     std::string flags;
-    const char* lang = l.c_str();
 
-    // Add language feature flags.
-    this->LocalGenerator->AddFeatureFlags(flags, lang, this->GeneratorTarget);
-
-    this->LocalGenerator->AddArchitectureFlags(flags, this->GeneratorTarget,
-                                               lang, this->ConfigName);
-
-    // Fortran-specific flags computed for this target.
-    if (l == "Fortran") {
-      this->LocalGenerator->AppendFlags(
-        flags, this->LocalGenerator->GetFortranFlags(this->GeneratorTarget));
-    }
-
-    this->LocalGenerator->AddCMP0018Flags(flags, this->GeneratorTarget, lang,
-                                          this->ConfigName);
-
-    this->LocalGenerator->AddVisibilityPresetFlags(
-      flags, this->GeneratorTarget, lang);
-
-    // Append old-style preprocessor definition flags.
-    this->LocalGenerator->AppendFlags(flags, this->Makefile->GetDefineFlags());
-
-    // Add framework directory flags.
-    this->LocalGenerator->AppendFlags(
-      flags, this->LocalGenerator->GetFrameworkFlags(l, this->ConfigName,
-                                                     this->GeneratorTarget));
-
-    // Add target-specific flags.
-    this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget, lang,
-                                            this->ConfigName);
+    this->LocalGenerator->GetTargetCompileFlags(this->GeneratorTarget, l,
+                                                flags);
 
     ByLanguageMap::value_type entry(l, flags);
     i = this->FlagsByLanguage.insert(entry).first;

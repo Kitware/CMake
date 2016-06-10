@@ -38,6 +38,9 @@ public:
 
   std::string GetFortranFlags(cmGeneratorTarget const* target);
 
+  void GetTargetCompileFlags(cmGeneratorTarget* target,
+                             std::string const& lang, std::string& flags);
+
 protected:
   cmOutputConverter::RelativeRoot WorkingDirectory;
 

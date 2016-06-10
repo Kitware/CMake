@@ -95,3 +95,23 @@ std::string cmLocalCommonGenerator::GetFortranFlags(
 
   return flags;
 }
+
+void cmLocalCommonGenerator::GetTargetCompileFlags(cmGeneratorTarget* target,
+                                                   std::string const& lang,
+                                                   std::string& flags)
+{
+  cmMakefile* mf = this->GetMakefile();
+
+  this->AddFeatureFlags(flags, lang, target);
+  this->AddArchitectureFlags(flags, target, lang, this->ConfigName);
+
+  if (lang == "Fortran") {
+    this->AppendFlags(flags, this->GetFortranFlags(target));
+  }
+
+  this->AddCMP0018Flags(flags, target, lang, this->ConfigName);
+  this->AddVisibilityPresetFlags(flags, target, lang);
+  this->AppendFlags(flags, mf->GetDefineFlags());
+  this->AppendFlags(flags, GetFrameworkFlags(lang, this->ConfigName, target));
+  this->AddCompileOptions(flags, target, lang, this->ConfigName);
+}
