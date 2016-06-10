@@ -148,6 +148,7 @@ private:
   bool NoUserRegistry;
   bool NoSystemRegistry;
   bool DebugMode;
+  bool UseLib32Paths;
   bool UseLib64Paths;
   bool PolicyScope;
   std::string LibraryArchitecture;

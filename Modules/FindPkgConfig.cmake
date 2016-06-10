@@ -316,9 +316,13 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
             list(APPEND _lib_dirs "lib/${CMAKE_LIBRARY_ARCHITECTURE}/pkgconfig")
           endif()
         else()
-          # not debian, chech the FIND_LIBRARY_USE_LIB64_PATHS property
+          # not debian, check the FIND_LIBRARY_USE_LIB32_PATHS and FIND_LIBRARY_USE_LIB64_PATHS properties
+          get_property(uselib32 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB32_PATHS)
+          if(uselib32 AND CMAKE_SIZEOF_VOID_P EQUAL 4)
+            list(APPEND _lib_dirs "lib32/pkgconfig")
+          endif()
           get_property(uselib64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
-          if(uselib64)
+          if(uselib64 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
             list(APPEND _lib_dirs "lib64/pkgconfig")
           endif()
         endif()
