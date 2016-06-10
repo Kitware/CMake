@@ -59,8 +59,8 @@ _cpack()
             return
             ;;
         --help-policy)
-            COMPREPLY=( $( compgen -W '$( cpack --help-policies 2>/dev/null |
-                grep "^  CMP" 2>/dev/null )' -- "$cur" ) )
+            COMPREPLY=( $( compgen -W '$( cpack --help-policy-list 2>/dev/null |
+                grep -v "^cpack version " )' -- "$cur" ) )
             return
             ;;
         --help-property)
