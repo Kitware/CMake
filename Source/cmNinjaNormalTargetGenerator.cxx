@@ -41,15 +41,16 @@ cmNinjaNormalTargetGenerator::cmNinjaNormalTargetGenerator(
   , TargetLinkLanguage("")
 {
   this->TargetLinkLanguage = target->GetLinkerLanguage(this->GetConfigName());
-  if (target->GetType() == cmState::EXECUTABLE)
+  if (target->GetType() == cmState::EXECUTABLE) {
     this->GetGeneratorTarget()->GetExecutableNames(
       this->TargetNameOut, this->TargetNameReal, this->TargetNameImport,
       this->TargetNamePDB, GetLocalGenerator()->GetConfigName());
-  else
+  } else {
     this->GetGeneratorTarget()->GetLibraryNames(
       this->TargetNameOut, this->TargetNameSO, this->TargetNameReal,
       this->TargetNameImport, this->TargetNamePDB,
       GetLocalGenerator()->GetConfigName());
+  }
 
   if (target->GetType() != cmState::OBJECT_LIBRARY) {
     // on Windows the output dir is already needed at compile time
@@ -125,10 +126,11 @@ const char* cmNinjaNormalTargetGenerator::GetVisibleTypeName() const
     case cmState::SHARED_LIBRARY:
       return "shared library";
     case cmState::MODULE_LIBRARY:
-      if (this->GetGeneratorTarget()->IsCFBundleOnApple())
+      if (this->GetGeneratorTarget()->IsCFBundleOnApple()) {
         return "CFBundle shared module";
-      else
+      } else {
         return "shared module";
+      }
     case cmState::EXECUTABLE:
       return "executable";
     default:
@@ -271,7 +273,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
     std::string cmakeCommand =
       this->GetLocalGenerator()->ConvertToOutputFormat(
         cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
-    if (targetType == cmState::EXECUTABLE)
+    if (targetType == cmState::EXECUTABLE) {
       this->GetGlobalGenerator()->AddRule(
         "CMAKE_SYMLINK_EXECUTABLE",
         cmakeCommand + " -E cmake_symlink_executable"
@@ -284,7 +286,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
         /*rspcontent*/ "",
         /*restat*/ "",
         /*generator*/ false);
-    else
+    } else {
       this->GetGlobalGenerator()->AddRule(
         "CMAKE_SYMLINK_LIBRARY",
         cmakeCommand + " -E cmake_symlink_library"
@@ -297,6 +299,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
         /*rspcontent*/ "",
         /*restat*/ "",
         /*generator*/ false);
+    }
   }
 }
 

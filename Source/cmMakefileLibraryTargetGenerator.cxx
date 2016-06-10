@@ -329,8 +329,9 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
         buildEcho += " shared library ";
         break;
       case cmState::MODULE_LIBRARY:
-        if (this->GeneratorTarget->IsCFBundleOnApple())
+        if (this->GeneratorTarget->IsCFBundleOnApple()) {
           buildEcho += " CFBundle";
+        }
         buildEcho += " shared module ";
         break;
       default:

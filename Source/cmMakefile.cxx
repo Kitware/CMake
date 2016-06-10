@@ -3620,8 +3620,9 @@ cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
 
 bool cmMakefile::IsAlias(const std::string& name) const
 {
-  if (this->AliasTargets.find(name) != this->AliasTargets.end())
+  if (this->AliasTargets.find(name) != this->AliasTargets.end()) {
     return true;
+  }
   return this->GetGlobalGenerator()->IsAlias(name);
 }
 

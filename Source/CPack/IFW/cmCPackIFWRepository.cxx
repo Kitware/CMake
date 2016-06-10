@@ -89,8 +89,9 @@ bool cmCPackIFWRepository::IsVersionEqual(const char* version)
 bool cmCPackIFWRepository::ConfigureFromOptions()
 {
   // Name;
-  if (Name.empty())
+  if (Name.empty()) {
     return false;
+  }
 
   std::string prefix =
     "CPACK_IFW_REPOSITORY_" + cmsys::SystemTools::UpperCase(Name) + "_";
@@ -198,8 +199,9 @@ protected:
       patched = true;
     }
     xout.EndElement();
-    if (patched)
+    if (patched) {
       return;
+    }
     if (name == "Checksum") {
       repository->WriteRepositoryUpdates(xout);
       patched = true;
@@ -209,8 +211,10 @@ protected:
   virtual void CharacterDataHandler(const char* data, int length)
   {
     std::string content(data, data + length);
-    if (content == "" || content == " " || content == "  " || content == "\n")
+    if (content == "" || content == " " || content == "  " ||
+        content == "\n") {
       return;
+    }
     xout.Content(content);
   }
 };
@@ -332,6 +336,7 @@ void cmCPackIFWRepository::WriteRepositoryUpdates(cmXMLWriter& xout)
 
 void cmCPackIFWRepository::WriteGeneratedByToStrim(cmXMLWriter& xout)
 {
-  if (Generator)
+  if (Generator) {
     Generator->WriteGeneratedByToStrim(xout);
+  }
 }

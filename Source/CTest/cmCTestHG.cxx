@@ -75,8 +75,9 @@ private:
 
   void DoPath(char status, std::string const& path)
   {
-    if (path.empty())
+    if (path.empty()) {
       return;
+    }
 
     // See "hg help status".  Note that there is no 'conflict' status.
     switch (status) {

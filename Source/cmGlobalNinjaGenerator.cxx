@@ -30,8 +30,9 @@ const char* cmGlobalNinjaGenerator::INDENT = "  ";
 
 void cmGlobalNinjaGenerator::Indent(std::ostream& os, int count)
 {
-  for (int i = 0; i < count; ++i)
+  for (int i = 0; i < count; ++i) {
     os << cmGlobalNinjaGenerator::INDENT;
+  }
 }
 
 void cmGlobalNinjaGenerator::WriteDivider(std::ostream& os)
@@ -43,8 +44,9 @@ void cmGlobalNinjaGenerator::WriteDivider(std::ostream& os)
 void cmGlobalNinjaGenerator::WriteComment(std::ostream& os,
                                           const std::string& comment)
 {
-  if (comment.empty())
+  if (comment.empty()) {
     return;
+  }
 
   std::string::size_type lpos = 0;
   std::string::size_type rpos;
@@ -165,16 +167,18 @@ void cmGlobalNinjaGenerator::WriteBuild(
   if (!implicitDeps.empty()) {
     arguments += " |";
     for (cmNinjaDeps::const_iterator i = implicitDeps.begin();
-         i != implicitDeps.end(); ++i)
+         i != implicitDeps.end(); ++i) {
       arguments += " " + EncodeIdent(EncodePath(*i), os);
+    }
   }
 
   // Write order-only dependencies.
   if (!orderOnlyDeps.empty()) {
     arguments += " ||";
     for (cmNinjaDeps::const_iterator i = orderOnlyDeps.begin();
-         i != orderOnlyDeps.end(); ++i)
+         i != orderOnlyDeps.end(); ++i) {
       arguments += " " + EncodeIdent(EncodePath(*i), os);
+    }
   }
 
   arguments += "\n";
@@ -198,9 +202,10 @@ void cmGlobalNinjaGenerator::WriteBuild(
   // Write the variables bound to this build statement.
   std::ostringstream variable_assignments;
   for (cmNinjaVars::const_iterator i = variables.begin(); i != variables.end();
-       ++i)
+       ++i) {
     cmGlobalNinjaGenerator::WriteVariable(variable_assignments, i->first,
                                           i->second, "", 1);
+  }
 
   // check if a response file rule should be used
   std::string buildstr = build;
@@ -430,8 +435,9 @@ void cmGlobalNinjaGenerator::WriteDefault(std::ostream& os,
   cmGlobalNinjaGenerator::WriteComment(os, comment);
   os << "default";
   for (cmNinjaDeps::const_iterator i = targets.begin(); i != targets.end();
-       ++i)
+       ++i) {
     os << " " << *i;
+  }
   os << "\n";
 }
 
@@ -907,15 +913,17 @@ void cmGlobalNinjaGenerator::AddTargetAlias(const std::string& alias,
   this->AppendTargetOutputs(target, outputs);
   // Mark the target's outputs as ambiguous to ensure that no other target uses
   // the output as an alias.
-  for (cmNinjaDeps::iterator i = outputs.begin(); i != outputs.end(); ++i)
+  for (cmNinjaDeps::iterator i = outputs.begin(); i != outputs.end(); ++i) {
     TargetAliases[*i] = 0;
+  }
 
   // Insert the alias into the map.  If the alias was already present in the
   // map and referred to another target, mark it as ambiguous.
   std::pair<TargetAliasMap::iterator, bool> newAlias =
     TargetAliases.insert(std::make_pair(buildAlias, target));
-  if (newAlias.second && newAlias.first->second != target)
+  if (newAlias.second && newAlias.first->second != target) {
     newAlias.first->second = 0;
+  }
 }
 
 void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
@@ -926,8 +934,9 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
   for (TargetAliasMap::const_iterator i = TargetAliases.begin();
        i != TargetAliases.end(); ++i) {
     // Don't write ambiguous aliases.
-    if (!i->second)
+    if (!i->second) {
       continue;
+    }
 
     cmNinjaDeps deps;
     this->AppendTargetOutputs(i->second, deps);

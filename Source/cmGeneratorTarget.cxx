@@ -1348,8 +1348,9 @@ std::string cmGeneratorTarget::GetAppBundleDirectory(const std::string& config,
   fpath += ".app";
   if (!this->Makefile->PlatformIsAppleIos()) {
     fpath += "/Contents";
-    if (!contentOnly)
+    if (!contentOnly) {
       fpath += "/MacOS";
+    }
   }
   return fpath;
 }
@@ -1377,8 +1378,9 @@ std::string cmGeneratorTarget::GetCFBundleDirectory(const std::string& config,
   fpath += ext;
   if (!this->Makefile->PlatformIsAppleIos()) {
     fpath += "/Contents";
-    if (!contentOnly)
+    if (!contentOnly) {
       fpath += "/MacOS";
+    }
   }
   return fpath;
 }
@@ -3336,11 +3338,13 @@ static std::string intersect(const std::set<std::string>& s1,
 {
   std::string result;
   result = intersect(s1, s2);
-  if (!result.empty())
+  if (!result.empty()) {
     return result;
+  }
   result = intersect(s1, s3);
-  if (!result.empty())
+  if (!result.empty()) {
     return result;
+  }
   return intersect(s2, s3);
 }
 
@@ -3351,14 +3355,17 @@ static std::string intersect(const std::set<std::string>& s1,
 {
   std::string result;
   result = intersect(s1, s2);
-  if (!result.empty())
+  if (!result.empty()) {
     return result;
+  }
   result = intersect(s1, s3);
-  if (!result.empty())
+  if (!result.empty()) {
     return result;
+  }
   result = intersect(s1, s4);
-  if (!result.empty())
+  if (!result.empty()) {
     return result;
+  }
   return intersect(s2, s3, s4);
 }
 

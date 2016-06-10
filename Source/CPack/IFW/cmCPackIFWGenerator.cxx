@@ -345,18 +345,21 @@ cmCPackComponent* cmCPackIFWGenerator::GetComponent(
   const std::string& projectName, const std::string& componentName)
 {
   ComponentsMap::iterator cit = Components.find(componentName);
-  if (cit != Components.end())
+  if (cit != Components.end()) {
     return &(cit->second);
+  }
 
   cmCPackComponent* component =
     cmCPackGenerator::GetComponent(projectName, componentName);
-  if (!component)
+  if (!component) {
     return component;
+  }
 
   std::string name = GetComponentPackageName(component);
   PackagesMap::iterator pit = Packages.find(name);
-  if (pit != Packages.end())
+  if (pit != Packages.end()) {
     return component;
+  }
 
   cmCPackIFWPackage* package = &Packages[name];
   package->Name = name;
@@ -387,13 +390,15 @@ cmCPackComponentGroup* cmCPackIFWGenerator::GetComponentGroup(
 {
   cmCPackComponentGroup* group =
     cmCPackGenerator::GetComponentGroup(projectName, groupName);
-  if (!group)
+  if (!group) {
     return group;
+  }
 
   std::string name = GetGroupPackageName(group);
   PackagesMap::iterator pit = Packages.find(name);
-  if (pit != Packages.end())
+  if (pit != Packages.end()) {
     return group;
+  }
 
   cmCPackIFWPackage* package = &Packages[name];
   package->Name = name;
@@ -462,8 +467,9 @@ std::string cmCPackIFWGenerator::GetGroupPackageName(
   cmCPackComponentGroup* group) const
 {
   std::string name;
-  if (!group)
+  if (!group) {
     return name;
+  }
   if (cmCPackIFWPackage* package = GetGroupPackage(group)) {
     return package->Name;
   }
@@ -488,8 +494,9 @@ std::string cmCPackIFWGenerator::GetComponentPackageName(
   cmCPackComponent* component) const
 {
   std::string name;
-  if (!component)
+  if (!component) {
     return name;
+  }
   if (cmCPackIFWPackage* package = GetComponentPackage(component)) {
     return package->Name;
   }
@@ -534,8 +541,9 @@ cmCPackIFWRepository* cmCPackIFWGenerator::GetRepository(
   const std::string& repositoryName)
 {
   RepositoriesMap::iterator rit = Repositories.find(repositoryName);
-  if (rit != Repositories.end())
+  if (rit != Repositories.end()) {
     return &(rit->second);
+  }
 
   cmCPackIFWRepository* repository = &Repositories[repositoryName];
   repository->Name = repositoryName;

@@ -81,8 +81,9 @@ void cmLocalNinjaGenerator::Generate()
       tg->Generate();
       // Add the target to "all" if required.
       if (!this->GetGlobalNinjaGenerator()->IsExcluded(
-            this->GetGlobalNinjaGenerator()->GetLocalGenerators()[0], *t))
+            this->GetGlobalNinjaGenerator()->GetLocalGenerators()[0], *t)) {
         this->GetGlobalNinjaGenerator()->AddDependencyToAll(*t);
+      }
       delete tg;
     }
   }
@@ -257,8 +258,9 @@ void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
   os << "# Write statements declared in CMakeLists.txt:" << std::endl
      << "# " << this->Makefile->GetDefinition("CMAKE_CURRENT_LIST_FILE")
      << std::endl;
-  if (this->IsRootMakefile())
+  if (this->IsRootMakefile()) {
     os << "# Which is the root file." << std::endl;
+  }
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << std::endl;
 }
@@ -282,9 +284,10 @@ void cmLocalNinjaGenerator::AppendCustomCommandDeps(
   for (std::vector<std::string>::const_iterator i = deps.begin();
        i != deps.end(); ++i) {
     std::string dep;
-    if (this->GetRealDependency(*i, this->GetConfigName(), dep))
+    if (this->GetRealDependency(*i, this->GetConfigName(), dep)) {
       ninjaDeps.push_back(
         this->GetGlobalNinjaGenerator()->ConvertToNinjaPath(dep));
+    }
   }
 }
 
@@ -294,12 +297,13 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
   // If we have no commands but we need to build a command anyway, use ":".
   // This happens when building a POST_BUILD value for link targets that
   // don't use POST_BUILD.
-  if (cmdLines.empty())
+  if (cmdLines.empty()) {
 #ifdef _WIN32
     return "cd .";
 #else
     return ":";
 #endif
+  }
 
   std::ostringstream cmd;
   for (std::vector<std::string>::const_iterator li = cmdLines.begin();
@@ -332,8 +336,9 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(
 {
   if (ccg.GetNumberOfCommands() > 0) {
     std::string wd = ccg.GetWorkingDirectory();
-    if (wd.empty())
+    if (wd.empty()) {
       wd = this->GetCurrentBinaryDirectory();
+    }
 
     std::ostringstream cdCmd;
 #ifdef _WIN32
@@ -361,8 +366,9 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(
 void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
   cmCustomCommand const* cc, const cmNinjaDeps& orderOnlyDeps)
 {
-  if (this->GetGlobalNinjaGenerator()->SeenCustomCommand(cc))
+  if (this->GetGlobalNinjaGenerator()->SeenCustomCommand(cc)) {
     return;
+  }
 
   cmCustomCommandGenerator ccg(*cc, this->GetConfigName(), this);
 
@@ -391,8 +397,9 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
   this->AppendCustomCommandDeps(ccg, ninjaDeps);
 
   for (cmNinjaDeps::iterator i = ninjaOutputs.begin(); i != ninjaOutputs.end();
-       ++i)
+       ++i) {
     this->GetGlobalNinjaGenerator()->SeenCustomCommandOutput(*i);
+  }
 
   std::vector<std::string> cmdLines;
   this->AppendCustomCommandLines(ccg, cmdLines);

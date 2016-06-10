@@ -46,10 +46,12 @@ private:
   void ParseTranslationUnit()
   {
     this->Command = CommandType();
-    if (!Expect('{'))
+    if (!Expect('{')) {
       return;
-    if (Expect('}'))
+    }
+    if (Expect('}')) {
       return;
+    }
     do {
       ParseString();
       std::string name = this->String;
@@ -64,8 +66,9 @@ private:
   void ParseString()
   {
     this->String = "";
-    if (!Expect('"'))
+    if (!Expect('"')) {
       return;
+    }
     while (!Expect('"')) {
       Expect('\\');
       this->String.append(1, C);
@@ -84,8 +87,9 @@ private:
 
   void ExpectOrDie(char c, const std::string& message)
   {
-    if (!Expect(c))
+    if (!Expect(c)) {
       ErrorExit(std::string("'") + c + "' expected " + message + ".");
+    }
   }
 
   void NextNonWhitespace()
@@ -98,8 +102,9 @@ private:
   void Next()
   {
     this->C = char(Input->get());
-    if (this->Input->bad())
+    if (this->Input->bad()) {
       ErrorExit("Unexpected end of file.");
+    }
   }
 
   void ErrorExit(const std::string& message)

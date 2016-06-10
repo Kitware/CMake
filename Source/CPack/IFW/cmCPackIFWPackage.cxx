@@ -71,8 +71,9 @@ cmCPackIFWPackage::DependenceStruct::DependenceStruct(
 
 std::string cmCPackIFWPackage::DependenceStruct::NameWithCompare() const
 {
-  if (Compare.Type == CompareNone)
+  if (Compare.Type == CompareNone) {
     return Name;
+  }
 
   std::string result = Name;
 
@@ -128,8 +129,9 @@ bool cmCPackIFWPackage::IsVersionEqual(const char* version)
 
 std::string cmCPackIFWPackage::GetComponentName(cmCPackComponent* component)
 {
-  if (!component)
+  if (!component) {
     return "";
+  }
   const char* option =
     GetOption("CPACK_IFW_COMPONENT_" +
               cmsys::SystemTools::UpperCase(component->Name) + "_NAME");
@@ -189,8 +191,9 @@ int cmCPackIFWPackage::ConfigureFromOptions()
 
 int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
 {
-  if (!component)
+  if (!component) {
     return 0;
+  }
 
   // Restore defaul configuration
   DefaultConfiguration();
@@ -284,8 +287,9 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
 
 int cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup* group)
 {
-  if (!group)
+  if (!group) {
     return 0;
+  }
 
   // Restore defaul configuration
   DefaultConfiguration();
@@ -474,6 +478,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
 
 void cmCPackIFWPackage::WriteGeneratedByToStrim(cmXMLWriter& xout)
 {
-  if (Generator)
+  if (Generator) {
     Generator->WriteGeneratedByToStrim(xout);
+  }
 }

@@ -46,8 +46,9 @@ cmNinjaTargetGenerator* cmNinjaTargetGenerator::New(cmGeneratorTarget* target)
       // (i.e. top-level) directory.  CMake creates copies of these targets
       // in every directory, which we don't need.
       if (strcmp(target->GetLocalGenerator()->GetCurrentSourceDirectory(),
-                 target->GetLocalGenerator()->GetSourceDirectory()) == 0)
+                 target->GetLocalGenerator()->GetSourceDirectory()) == 0) {
         return new cmNinjaUtilityTargetGenerator(target);
+      }
       // else fallthrough
     }
 
@@ -132,8 +133,9 @@ void cmNinjaTargetGenerator::AddIncludeFlags(std::string& languageFlags,
     includes, this->GeneratorTarget, language,
     language == "RC", // full include paths for RC needed by cmcldeps
     false, this->GetConfigName());
-  if (this->GetGlobalGenerator()->IsGCCOnWindows())
+  if (this->GetGlobalGenerator()->IsGCCOnWindows()) {
     std::replace(includeFlags.begin(), includeFlags.end(), '\\', '/');
+  }
 
   this->LocalGenerator->AppendFlags(languageFlags, includeFlags);
 }
@@ -170,13 +172,15 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
 {
   // Static libraries never depend on other targets for linking.
   if (this->GeneratorTarget->GetType() == cmState::STATIC_LIBRARY ||
-      this->GeneratorTarget->GetType() == cmState::OBJECT_LIBRARY)
+      this->GeneratorTarget->GetType() == cmState::OBJECT_LIBRARY) {
     return cmNinjaDeps();
+  }
 
   cmComputeLinkInformation* cli =
     this->GeneratorTarget->GetLinkInformation(this->GetConfigName());
-  if (!cli)
+  if (!cli) {
     return cmNinjaDeps();
+  }
 
   const std::vector<std::string>& deps = cli->GetDepends();
   cmNinjaDeps result(deps.size());
@@ -218,8 +222,9 @@ std::string cmNinjaTargetGenerator::GetObjectFilePath(
   cmSourceFile const* source) const
 {
   std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
-  if (!path.empty())
+  if (!path.empty()) {
     path += "/";
+  }
   std::string const& objectName = this->GeneratorTarget->GetObjectName(source);
   path += this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   path += "/";
@@ -237,8 +242,9 @@ std::string cmNinjaTargetGenerator::GetTargetFilePath(
   const std::string& name) const
 {
   std::string path = this->GetTargetOutputDir();
-  if (path.empty() || path == ".")
+  if (path.empty() || path == ".") {
     return name;
+  }
   path += "/";
   path += name;
   return path;
@@ -420,8 +426,9 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   }
 
   for (std::vector<std::string>::iterator i = compileCmds.begin();
-       i != compileCmds.end(); ++i)
+       i != compileCmds.end(); ++i) {
     this->GetLocalGenerator()->ExpandRuleVariables(*i, vars);
+  }
 
   std::string cmdLine =
     this->GetLocalGenerator()->BuildCommandLine(compileCmds);
@@ -653,8 +660,9 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
 
   for (std::vector<std::string>::iterator i = compileCmds.begin();
-       i != compileCmds.end(); ++i)
+       i != compileCmds.end(); ++i) {
     this->GetLocalGenerator()->ExpandRuleVariables(*i, compileObjectVars);
+  }
 
   std::string cmdLine =
     this->GetLocalGenerator()->BuildCommandLine(compileCmds);
