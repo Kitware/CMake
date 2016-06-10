@@ -121,6 +121,11 @@ _cmake()
                 grep -v "^cmake version " )' -- "$cur" ) )
             return
             ;;
+        --help-manual)
+            COMPREPLY=( $( compgen -W '$( cmake --help-manual-list 2>/dev/null|
+                grep -v "^cmake version " | sed -e "s/([0-9])$//" )' -- "$cur" ) )
+            return
+            ;;
         --help-module)
             COMPREPLY=( $( compgen -W '$( cmake --help-module-list 2>/dev/null|
                 grep -v "^cmake version " )' -- "$cur" ) )
