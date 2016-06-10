@@ -71,8 +71,9 @@ bool cmCacheManager::LoadCache(const std::string& path, bool internal,
     while (*realbuffer != '0' &&
            (*realbuffer == ' ' || *realbuffer == '\t' || *realbuffer == '\r' ||
             *realbuffer == '\n')) {
-      if (*realbuffer == '\n')
+      if (*realbuffer == '\n') {
         lineno++;
+      }
       realbuffer++;
     }
     // skip blank lines and comment lines

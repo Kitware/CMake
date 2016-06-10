@@ -61,8 +61,9 @@ extern "C" int cmBZRXMLParserUnknownEncodingHandler(void*,
   // workaround for these unknown encodings.
   if (name == std::string("ascii") || name == std::string("cp1252") ||
       name == std::string("ANSI_X3.4-1968")) {
-    for (unsigned int i = 0; i < 256; ++i)
+    for (unsigned int i = 0; i < 256; ++i) {
       info->map[i] = latin1[i];
+    }
     return 1;
   }
 
@@ -336,8 +337,9 @@ private:
 
   void DoPath(char c0, char c1, char c2, std::string path)
   {
-    if (path.empty())
+    if (path.empty()) {
       return;
+    }
     cmSystemTools::ConvertToUnixSlashes(path);
 
     const std::string dir = cmSystemTools::GetFilenamePath(path);
@@ -441,8 +443,9 @@ private:
 
   void DoPath(char c0, char c1, char c2, std::string path)
   {
-    if (path.empty())
+    if (path.empty()) {
       return;
+    }
     cmSystemTools::ConvertToUnixSlashes(path);
 
     if (c0 == 'C') {

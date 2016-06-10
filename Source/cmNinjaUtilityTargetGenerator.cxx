@@ -57,8 +57,9 @@ void cmNinjaUtilityTargetGenerator::Generate()
       std::vector<std::string> const& ccByproducts = ccg.GetByproducts();
       std::transform(ccByproducts.begin(), ccByproducts.end(),
                      std::back_inserter(util_outputs), MapToNinjaPath());
-      if (ci->GetUsesTerminal())
+      if (ci->GetUsesTerminal()) {
         uses_terminal = true;
+      }
     }
   }
 
@@ -99,10 +100,11 @@ void cmNinjaUtilityTargetGenerator::Generate()
     const char* echoStr =
       this->GetGeneratorTarget()->GetProperty("EchoString");
     std::string desc;
-    if (echoStr)
+    if (echoStr) {
       desc = echoStr;
-    else
+    } else {
       desc = "Running utility command for " + this->GetTargetName();
+    }
 
     // TODO: fix problematic global targets.  For now, search and replace the
     // makefile vars.
@@ -122,8 +124,9 @@ void cmNinjaUtilityTargetGenerator::Generate()
         .c_str());
     cmSystemTools::ReplaceString(command, "$(ARGS)", "");
 
-    if (command.find('$') != std::string::npos)
+    if (command.find('$') != std::string::npos) {
       return;
+    }
 
     for (cmNinjaDeps::const_iterator oi = util_outputs.begin(),
                                      oe = util_outputs.end();

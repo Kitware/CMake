@@ -826,8 +826,9 @@ static int copy_ar(CF* cfp, off_t size)
   size_t nr, nw;
   char buf[8 * 1024];
 
-  if (sz == 0)
+  if (sz == 0) {
     return 0;
+  }
 
   FILE* from = cfp->rFile;
   FILE* to = cfp->wFile;
@@ -837,16 +838,20 @@ static int copy_ar(CF* cfp, off_t size)
                        : sizeof(buf),
                      from)) > 0) {
     sz -= nr;
-    for (size_t off = 0; off < nr; nr -= off, off += nw)
-      if ((nw = fwrite(buf + off, 1, nr, to)) < nr)
+    for (size_t off = 0; off < nr; nr -= off, off += nw) {
+      if ((nw = fwrite(buf + off, 1, nr, to)) < nr) {
         return -1;
+      }
+    }
   }
-  if (sz)
+  if (sz) {
     return -2;
+  }
 
   if (cfp->flags & WPAD && (size + ar_already_written) & 1 &&
-      fwrite(&pad, 1, 1, to) != 1)
+      fwrite(&pad, 1, 1, to) != 1) {
     return -4;
+  }
 
   return 0;
 }
@@ -874,11 +879,11 @@ static int put_arobj(CF* cfp, struct stat* sb)
   if (gid > USHRT_MAX) {
     gid = USHRT_MAX;
   }
-  if (lname > sizeof(hdr->ar_name) || strchr(name, ' '))
+  if (lname > sizeof(hdr->ar_name) || strchr(name, ' ')) {
     (void)sprintf(ar_hb, HDR1, AR_EFMT1, (int)lname, (long int)sb->st_mtime,
                   (unsigned)uid, (unsigned)gid, (unsigned)sb->st_mode,
                   (long long)sb->st_size + lname, ARFMAG);
-  else {
+  } else {
     lname = 0;
     (void)sprintf(ar_hb, HDR2, name, (long int)sb->st_mtime, (unsigned)uid,
                   (unsigned)gid, (unsigned)sb->st_mode, (long long)sb->st_size,
@@ -886,12 +891,14 @@ static int put_arobj(CF* cfp, struct stat* sb)
   }
   off_t size = sb->st_size;
 
-  if (fwrite(ar_hb, 1, sizeof(HDR), cfp->wFile) != sizeof(HDR))
+  if (fwrite(ar_hb, 1, sizeof(HDR), cfp->wFile) != sizeof(HDR)) {
     return -1;
+  }
 
   if (lname) {
-    if (fwrite(name, 1, lname, cfp->wFile) != lname)
+    if (fwrite(name, 1, lname, cfp->wFile) != lname) {
       return -2;
+    }
     ar_already_written = lname;
   }
   result = copy_ar(cfp, size);

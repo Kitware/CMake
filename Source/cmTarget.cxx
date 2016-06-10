@@ -288,8 +288,9 @@ cmListFileBacktrace const* cmTarget::GetUtilityBacktrace(
 {
   std::map<std::string, cmListFileBacktrace>::const_iterator i =
     this->UtilityBacktraces.find(u);
-  if (i == this->UtilityBacktraces.end())
+  if (i == this->UtilityBacktraces.end()) {
     return 0;
+  }
 
   return &i->second;
 }

@@ -158,7 +158,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
           this->HeaderLocationCache.find(current.FileName);
         if (headerLocationIt != this->HeaderLocationCache.end()) {
           fullName = headerLocationIt->second;
-        } else
+        } else {
           for (std::vector<std::string>::const_iterator i =
                  this->IncludePath.begin();
                i != this->IncludePath.end(); ++i) {
@@ -175,6 +175,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
               break;
             }
           }
+        }
       }
 
       // Complain if the file cannot be found and matches the complain
