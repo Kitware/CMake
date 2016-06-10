@@ -1,4 +1,4 @@
-# Needed for CMAKE_SYSTEM_NAME, CMAKE_LIBRARY_ARCHITECTURE and FIND_LIBRARY_USE_LIB64_PATHS
+# Needed for CMAKE_SYSTEM_NAME, CMAKE_LIBRARY_ARCHITECTURE, FIND_LIBRARY_USE_LIB32_PATHS and FIND_LIBRARY_USE_LIB64_PATHS
 enable_language(C)
 
 # Prepare environment and variables
@@ -29,10 +29,15 @@ if(NOT DEFINED CMAKE_SYSTEM_NAME
       set(expected_path "/baz:${CMAKE_CURRENT_SOURCE_DIR}/pc-bar/lib/pkgconfig")
     endif()
   else()
-    # not debian, chech the FIND_LIBRARY_USE_LIB64_PATHS property
+    # not debian, check the FIND_LIBRARY_USE_LIB64_PATHS and FIND_LIBRARY_USE_LIB32_PATHS properties
+    get_property(uselib32 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB32_PATHS)
     get_property(uselib64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
-    if(uselib64)
+    if(uselib32 AND CMAKE_SIZEOF_VOID_P EQUAL 4)
+      set(expected_path "/baz:${CMAKE_CURRENT_SOURCE_DIR}/pc-bar/lib32/pkgconfig:${CMAKE_CURRENT_SOURCE_DIR}/pc-bar/lib/pkgconfig")
+    elseif(uselib64 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
       set(expected_path "/baz:${CMAKE_CURRENT_SOURCE_DIR}/pc-bar/lib64/pkgconfig:${CMAKE_CURRENT_SOURCE_DIR}/pc-bar/lib/pkgconfig")
+    else()
+      set(expected_path "/baz:${CMAKE_CURRENT_SOURCE_DIR}/pc-bar/lib/pkgconfig")
     endif()
   endif()
 else()

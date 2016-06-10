@@ -93,5 +93,6 @@ list(APPEND CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES
   /usr/include
   )
 
-# Enable use of lib64 search path variants by default.
+# Enable use of lib32 and lib64 search path variants by default.
+set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB32_PATHS TRUE)
 set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS TRUE)

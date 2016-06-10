@@ -33,16 +33,23 @@ endmacro()
 
 set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB32_PATHS TRUE)
 set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS TRUE)
 
 set(CMAKE_SIZEOF_VOID_P 4)
 foreach(lib
+    lib/32/libtest5.a
     lib/A/lib/libtest1.a
+    lib/A/lib32/libtest3.a
     lib/A/libtest1.a
     lib/libtest1.a
     lib/libtest2.a
     lib/libtest3.a
     lib/libtest3.a
+    lib32/A/lib/libtest2.a
+    lib32/A/lib32/libtest4.a
+    lib32/A/libtest4.a
+    lib32/libtest4.a
     )
   test_find_library_subst(${lib})
 endforeach()

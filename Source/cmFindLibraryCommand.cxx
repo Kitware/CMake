@@ -40,11 +40,10 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn,
     return true;
   }
 
-  if (const char* abi_name =
-        this->Makefile->GetDefinition("CMAKE_INTERNAL_PLATFORM_ABI")) {
-    std::string abi = abi_name;
-    if (abi.find("ELF N32") != abi.npos) {
-      // Convert lib to lib32.
+  if (this->Makefile->GetState()->GetGlobalPropertyAsBool(
+        "FIND_LIBRARY_USE_LIB32_PATHS")) {
+    // add special 32 bit paths if this is a 32 bit compile.
+    if (this->Makefile->PlatformIs32Bit()) {
       this->AddArchitecturePaths("32");
     }
   }
