@@ -75,17 +75,21 @@ struct cmDocumentationEntry
   cmDocumentationEntry() {}
   cmDocumentationEntry(const char* doc[2])
   {
-    if (doc[0])
+    if (doc[0]) {
       this->Name = doc[0];
-    if (doc[1])
+    }
+    if (doc[1]) {
       this->Brief = doc[1];
+    }
   }
   cmDocumentationEntry(const char* n, const char* b)
   {
-    if (n)
+    if (n) {
       this->Name = n;
-    if (b)
+    }
+    if (b) {
       this->Brief = b;
+    }
   }
 };
 
