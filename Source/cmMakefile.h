@@ -643,8 +643,9 @@ public:
 
   void AddInstallGenerator(cmInstallGenerator* g)
   {
-    if (g)
+    if (g) {
       this->InstallGenerators.push_back(g);
+    }
   }
   std::vector<cmInstallGenerator*>& GetInstallGenerators()
   {
@@ -653,8 +654,9 @@ public:
 
   void AddTestGenerator(cmTestGenerator* g)
   {
-    if (g)
+    if (g) {
       this->TestGenerators.push_back(g);
+    }
   }
   const std::vector<cmTestGenerator*>& GetTestGenerators() const
   {

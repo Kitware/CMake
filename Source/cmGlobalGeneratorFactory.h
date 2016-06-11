@@ -51,8 +51,9 @@ public:
   virtual cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
                                                    cmake* cm) const
   {
-    if (name != T::GetActualName())
+    if (name != T::GetActualName()) {
       return 0;
+    }
     return new T(cm);
   }
 
