@@ -56,24 +56,7 @@ typedef unsigned short mode_t;
 extern void operator<<(std::ostream&, const std::ostringstream&);
 
 #include "cmDocumentationEntry.h"
-
-/** Data structure to represent a single command line.  */
-class cmCustomCommandLine : public std::vector<std::string>
-{
-public:
-  typedef std::vector<std::string> Superclass;
-  typedef Superclass::iterator iterator;
-  typedef Superclass::const_iterator const_iterator;
-};
-
-/** Data structure to represent a list of command lines.  */
-class cmCustomCommandLines : public std::vector<cmCustomCommandLine>
-{
-public:
-  typedef std::vector<cmCustomCommandLine> Superclass;
-  typedef Superclass::iterator iterator;
-  typedef Superclass::const_iterator const_iterator;
-};
+#include "cmCustomCommandLines.h"
 
 // All subclasses of cmCommand or cmCTestGenericHandler should
 // invoke this macro.
