@@ -57,13 +57,7 @@ extern void operator<<(std::ostream&, const std::ostringstream&);
 
 #include "cmCustomCommandLines.h"
 #include "cmDocumentationEntry.h"
+#include "cmTargetLinkLibraryType.h"
 #include "cmTypeMacro.h"
-
-enum cmTargetLinkLibraryType
-{
-  GENERAL_LibraryType,
-  DEBUG_LibraryType,
-  OPTIMIZED_LibraryType
-};
 
 #endif
