@@ -47,7 +47,7 @@ cmListFileParser::cmListFileParser(cmListFile* lf, cmMakefile* mf,
                                    const char* filename)
   : ListFile(lf)
   , Makefile(mf)
-  , Backtrace(this->Makefile->GetBacktrace())
+  , Backtrace(mf->GetBacktrace())
   , FileName(filename)
   , Lexer(cmListFileLexer_New())
 {
