@@ -18,18 +18,6 @@
 
 #include <cmConfigure.h>
 
-#include <cmsys/Configure.hxx>
-
-#ifdef _MSC_VER
-#pragma warning(disable : 4786)
-#pragma warning(disable : 4503)
-#endif
-
-#ifdef __ICL
-#pragma warning(disable : 985)
-#pragma warning(disable : 1572) /* floating-point equality test */
-#endif
-
 // Provide fixed-size integer types.
 #include <cm_kwiml.h>
 
