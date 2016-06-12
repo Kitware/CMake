@@ -23,12 +23,15 @@ struct cmListFileParser
 {
   cmListFileParser(cmListFile* lf, cmMakefile* mf, const char* filename);
   ~cmListFileParser();
+  void IssueError(std::string const& text);
+  void IssueFileOpenError(std::string const& text) const;
   bool ParseFile();
   bool ParseFunction(const char* name, long line);
   bool AddArgument(cmListFileLexer_Token* token,
                    cmListFileArgument::Delimiter delim);
   cmListFile* ListFile;
   cmMakefile* Makefile;
+  cmListFileBacktrace Backtrace;
   const char* FileName;
   cmListFileLexer* Lexer;
   cmListFileFunction Function;
@@ -44,6 +47,7 @@ cmListFileParser::cmListFileParser(cmListFile* lf, cmMakefile* mf,
                                    const char* filename)
   : ListFile(lf)
   , Makefile(mf)
+  , Backtrace(this->Makefile->GetBacktrace())
   , FileName(filename)
   , Lexer(cmListFileLexer_New())
 {
@@ -54,23 +58,36 @@ cmListFileParser::~cmListFileParser()
   cmListFileLexer_Delete(this->Lexer);
 }
 
+void cmListFileParser::IssueFileOpenError(const std::string& text) const
+{
+  this->Makefile->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, text,
+                                                   this->Backtrace);
+}
+
+void cmListFileParser::IssueError(const std::string& text)
+{
+  cmListFileContext lfc;
+  lfc.FilePath = this->FileName;
+  lfc.Line = cmListFileLexer_GetCurrentLine(this->Lexer);
+  cmListFileBacktrace lfbt = this->Backtrace.Pop();
+  lfbt = lfbt.Push(lfc);
+  this->Makefile->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, text,
+                                                   lfbt);
+}
+
 bool cmListFileParser::ParseFile()
 {
   // Open the file.
   cmListFileLexer_BOM bom;
   if (!cmListFileLexer_SetFileName(this->Lexer, this->FileName, &bom)) {
-    cmSystemTools::Error("cmListFileCache: error can not open file ",
-                         this->FileName);
+    this->IssueFileOpenError("cmListFileCache: error can not open file.");
     return false;
   }
 
   // Verify the Byte-Order-Mark, if any.
   if (bom != cmListFileLexer_BOM_None && bom != cmListFileLexer_BOM_UTF8) {
     cmListFileLexer_SetFileName(this->Lexer, 0, 0);
-    std::ostringstream m;
-    m << "File\n  " << this->FileName << "\n"
-      << "starts with a Byte-Order-Mark that is not UTF-8.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, m.str());
+    this->IssueFileOpenError("File starts with a Byte-Order-Mark that is not UTF-8.");
     return false;
   }
 
@@ -93,29 +110,25 @@ bool cmListFileParser::ParseFile()
         }
       } else {
         std::ostringstream error;
-        error << "Error in cmake code at\n"
-              << this->FileName << ":" << token->line << ":\n"
-              << "Parse error.  Expected a newline, got "
+        error << "Parse error.  Expected a newline, got "
               << cmListFileLexer_GetTypeAsString(this->Lexer, token->type)
               << " with text \"" << token->text << "\".";
-        cmSystemTools::Error(error.str().c_str());
+        this->IssueError(error.str());
         return false;
       }
     } else {
       std::ostringstream error;
-      error << "Error in cmake code at\n"
-            << this->FileName << ":" << token->line << ":\n"
-            << "Parse error.  Expected a command name, got "
+      error << "Parse error.  Expected a command name, got "
             << cmListFileLexer_GetTypeAsString(this->Lexer, token->type)
             << " with text \"" << token->text << "\".";
-      cmSystemTools::Error(error.str().c_str());
+      this->IssueError(error.str());
       return false;
     }
   }
   return true;
 }
 
-bool cmListFile::ParseFile(const char* filename, bool topLevel, cmMakefile* mf)
+bool cmListFile::ParseFile(const char* filename, cmMakefile* mf)
 {
   if (!cmSystemTools::FileExists(filename) ||
       cmSystemTools::FileIsDirectory(filename)) {
@@ -129,76 +142,6 @@ bool cmListFile::ParseFile(const char* filename, bool topLevel, cmMakefile* mf)
     parseError = !parser.ParseFile();
   }
 
-  // do we need a cmake_policy(VERSION call?
-  if (topLevel) {
-    bool hasVersion = false;
-    // search for the right policy command
-    for (std::vector<cmListFileFunction>::iterator i = this->Functions.begin();
-         i != this->Functions.end(); ++i) {
-      if (cmSystemTools::LowerCase(i->Name) == "cmake_minimum_required") {
-        hasVersion = true;
-        break;
-      }
-    }
-    // if no policy command is found this is an error if they use any
-    // non advanced functions or a lot of functions
-    if (!hasVersion) {
-      bool isProblem = true;
-      if (this->Functions.size() < 30) {
-        // the list of simple commands DO NOT ADD TO THIS LIST!!!!!
-        // these commands must have backwards compatibility forever and
-        // and that is a lot longer than your tiny mind can comprehend mortal
-        std::set<std::string> allowedCommands;
-        allowedCommands.insert("project");
-        allowedCommands.insert("set");
-        allowedCommands.insert("if");
-        allowedCommands.insert("endif");
-        allowedCommands.insert("else");
-        allowedCommands.insert("elseif");
-        allowedCommands.insert("add_executable");
-        allowedCommands.insert("add_library");
-        allowedCommands.insert("target_link_libraries");
-        allowedCommands.insert("option");
-        allowedCommands.insert("message");
-        isProblem = false;
-        for (std::vector<cmListFileFunction>::iterator i =
-               this->Functions.begin();
-             i != this->Functions.end(); ++i) {
-          std::string name = cmSystemTools::LowerCase(i->Name);
-          if (allowedCommands.find(name) == allowedCommands.end()) {
-            isProblem = true;
-            break;
-          }
-        }
-      }
-
-      if (isProblem) {
-        // Tell the top level cmMakefile to diagnose
-        // this violation of CMP0000.
-        mf->SetCheckCMP0000(true);
-
-        // Implicitly set the version for the user.
-        mf->SetPolicyVersion("2.4");
-      }
-    }
-    bool hasProject = false;
-    // search for a project command
-    for (std::vector<cmListFileFunction>::iterator i = this->Functions.begin();
-         i != this->Functions.end(); ++i) {
-      if (cmSystemTools::LowerCase(i->Name) == "project") {
-        hasProject = true;
-        break;
-      }
-    }
-    // if no project command is found, add one
-    if (!hasProject) {
-      cmListFileFunction project;
-      project.Name = "PROJECT";
-      cmListFileArgument prj("Project", cmListFileArgument::Unquoted, 0);
-      project.Arguments.push_back(prj);
-      this->Functions.insert(this->Functions.begin(), project);
-    }
-  }
   return !parseError;
 }
 
@@ -221,18 +164,15 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
           << cmListFileLexer_GetCurrentLine(this->Lexer) << ":\n"
           << "Parse error.  Function missing opening \"(\".";
     /* clang-format on */
-    cmSystemTools::Error(error.str().c_str());
+    this->IssueError(error.str());
     return false;
   }
   if (token->type != cmListFileLexer_Token_ParenLeft) {
     std::ostringstream error;
-    error << "Error in cmake code at\n"
-          << this->FileName << ":"
-          << cmListFileLexer_GetCurrentLine(this->Lexer) << ":\n"
-          << "Parse error.  Expected \"(\", got "
+    error << "Parse error.  Expected \"(\", got "
           << cmListFileLexer_GetTypeAsString(this->Lexer, token->type)
           << " with text \"" << token->text << "\".";
-    cmSystemTools::Error(error.str().c_str());
+    this->IssueError(error.str());
     return false;
   }
 
@@ -284,25 +224,25 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
     } else {
       // Error.
       std::ostringstream error;
-      error << "Error in cmake code at\n"
-            << this->FileName << ":"
-            << cmListFileLexer_GetCurrentLine(this->Lexer) << ":\n"
-            << "Parse error.  Function missing ending \")\".  "
+      error << "Parse error.  Function missing ending \")\".  "
             << "Instead found "
             << cmListFileLexer_GetTypeAsString(this->Lexer, token->type)
             << " with text \"" << token->text << "\".";
-      cmSystemTools::Error(error.str().c_str());
+      this->IssueError(error.str());
       return false;
     }
   }
 
   std::ostringstream error;
-  error << "Error in cmake code at\n"
-        << this->FileName << ":" << lastLine << ":\n"
-        << "Parse error.  Function missing ending \")\".  "
+  cmListFileContext lfc;
+  lfc.FilePath = this->FileName;
+  lfc.Line = lastLine;
+  cmListFileBacktrace lfbt = this->Backtrace.Pop();
+  lfbt = lfbt.Push(lfc);
+  error << "Parse error.  Function missing ending \")\".  "
         << "End of file reached.";
-  cmSystemTools::Error(error.str().c_str());
-
+  this->Makefile->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR,
+                                                   error.str(), lfbt);
   return false;
 }
 
@@ -317,19 +257,18 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
   bool isError = (this->Separation == SeparationError ||
                   delim == cmListFileArgument::Bracket);
   std::ostringstream m;
-  /* clang-format off */
-  m << "Syntax " << (isError? "Error":"Warning") << " in cmake code at\n"
-    << "  " << this->FileName << ":" << token->line << ":"
-    << token->column << "\n"
+  cmListFileContext lfc;
+  lfc.FilePath = this->FileName;
+  lfc.Line = token->line;
+  cmListFileBacktrace lfbt = this->Backtrace.Pop();
+  lfbt = lfbt.Push(lfc);
+
+  m << "Syntax " << (isError ? "Error" : "Warning") << " in cmake code at "
+    << token->line << ":" << token->column << "\n"
     << "Argument not separated from preceding token by whitespace.";
-  /* clang-format on */
-  if (isError) {
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, m.str());
-    return false;
-  } else {
-    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, m.str());
-    return true;
-  }
+  this->Makefile->GetCMakeInstance()->IssueMessage(
+    isError ? cmake::FATAL_ERROR : cmake::AUTHOR_WARNING, m.str(), lfbt);
+  return !isError;
 }
 
 struct cmListFileBacktrace::Entry : public cmListFileContext
