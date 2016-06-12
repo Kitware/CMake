@@ -87,7 +87,8 @@ bool cmListFileParser::ParseFile()
   // Verify the Byte-Order-Mark, if any.
   if (bom != cmListFileLexer_BOM_None && bom != cmListFileLexer_BOM_UTF8) {
     cmListFileLexer_SetFileName(this->Lexer, 0, 0);
-    this->IssueFileOpenError("File starts with a Byte-Order-Mark that is not UTF-8.");
+    this->IssueFileOpenError(
+      "File starts with a Byte-Order-Mark that is not UTF-8.");
     return false;
   }
 
