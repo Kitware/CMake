@@ -2294,22 +2294,26 @@ void displayMessage(cmake::MessageType t, std::ostringstream& msg)
 }
 
 void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
-                         cmListFileBacktrace const& backtrace,
-                         bool force) const
+                         cmListFileBacktrace const& backtrace) const
 {
-  if (!force) {
-    // override the message type, if needed, for warnings and errors
-    cmake::MessageType override = this->ConvertMessageType(t);
-    if (override != t) {
-      t = override;
-      force = true;
-    }
+  bool force = false;
+  // override the message type, if needed, for warnings and errors
+  cmake::MessageType override = this->ConvertMessageType(t);
+  if (override != t) {
+    t = override;
+    force = true;
   }
 
   if (!force && !this->IsMessageTypeVisible(t)) {
     return;
   }
 
+  this->DisplayMessage(t, text, backtrace);
+}
+
+void cmake::DisplayMessage(cmake::MessageType t, std::string const& text,
+                           cmListFileBacktrace const& backtrace) const
+{
   std::ostringstream msg;
   if (!printMessagePreamble(t, msg)) {
     return;
