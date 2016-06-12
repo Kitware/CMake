@@ -57,28 +57,7 @@ extern void operator<<(std::ostream&, const std::ostringstream&);
 
 #include "cmDocumentationEntry.h"
 #include "cmCustomCommandLines.h"
-
-// All subclasses of cmCommand or cmCTestGenericHandler should
-// invoke this macro.
-#define cmTypeMacro(thisClass, superclass)                                    \
-  virtual const char* GetNameOfClass() { return #thisClass; }                 \
-  typedef superclass Superclass;                                              \
-  static bool IsTypeOf(const char* type)                                      \
-  {                                                                           \
-    if (!strcmp(#thisClass, type)) {                                          \
-      return true;                                                            \
-    }                                                                         \
-    return Superclass::IsTypeOf(type);                                        \
-  }                                                                           \
-  virtual bool IsA(const char* type) { return thisClass::IsTypeOf(type); }    \
-  static thisClass* SafeDownCast(cmObject* c)                                 \
-  {                                                                           \
-    if (c && c->IsA(#thisClass)) {                                            \
-      return static_cast<thisClass*>(c);                                      \
-    }                                                                         \
-    return 0;                                                                 \
-  }                                                                           \
-  class cmTypeMacro_UseTrailingSemicolon
+#include "cmTypeMacro.h"
 
 enum cmTargetLinkLibraryType
 {
