@@ -384,6 +384,9 @@ public:
     cmListFileBacktrace const& backtrace = cmListFileBacktrace(),
     bool force = false) const;
 
+  void DisplayMessage(cmake::MessageType t, std::string const& text,
+                      cmListFileBacktrace const& backtrace) const;
+
   ///! run the --build option
   int Build(const std::string& dir, const std::string& target,
             const std::string& config,

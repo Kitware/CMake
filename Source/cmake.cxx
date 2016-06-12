@@ -2310,6 +2310,12 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
     return;
   }
 
+  this->DisplayMessage(t, text, backtrace);
+}
+
+void cmake::DisplayMessage(cmake::MessageType t, std::string const& text,
+                           cmListFileBacktrace const& backtrace) const
+{
   std::ostringstream msg;
   if (!printMessagePreamble(t, msg)) {
     return;
