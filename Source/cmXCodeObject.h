@@ -62,12 +62,21 @@ public:
   Type GetType() const { return this->TypeValue; }
   PBXType GetIsA() const { return this->IsA; }
 
+  bool IsEmpty() const;
+
   void SetString(const std::string& s);
   const std::string& GetString() const { return this->String; }
 
   void AddAttribute(const std::string& name, cmXCodeObject* value)
   {
     this->ObjectAttributes[name] = value;
+  }
+
+  void AddAttributeIfNotEmpty(const std::string& name, cmXCodeObject* value)
+  {
+    if (value && !value->IsEmpty()) {
+      AddAttribute(name, value);
+    }
   }
 
   void SetObject(cmXCodeObject* value) { this->Object = value; }
