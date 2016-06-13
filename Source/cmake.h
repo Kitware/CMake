@@ -339,7 +339,7 @@ public:
    * Returns false, by default, if developer warnings should be shown, true
    * otherwise.
    */
-  bool GetSuppressDevWarnings(cmMakefile const* mf = NULL) const;
+  bool GetSuppressDevWarnings() const;
   /*
    * Set the state of the suppression of developer (author) warnings.
    */
@@ -350,7 +350,7 @@ public:
    * Returns false, by default, if deprecated warnings should be shown, true
    * otherwise.
    */
-  bool GetSuppressDeprecatedWarnings(cmMakefile const* mf = NULL) const;
+  bool GetSuppressDeprecatedWarnings() const;
   /*
    * Set the state of the suppression of deprecated warnings.
    */
@@ -361,7 +361,7 @@ public:
    * Returns false, by default, if warnings should not be treated as errors,
    * true otherwise.
    */
-  bool GetDevWarningsAsErrors(cmMakefile const* mf = NULL) const;
+  bool GetDevWarningsAsErrors() const;
   /**
    * Set the state of treating developer (author) warnings as errors.
    */
@@ -372,7 +372,7 @@ public:
    * Returns false, by default, if warnings should not be treated as errors,
    * true otherwise.
    */
-  bool GetDeprecatedWarningsAsErrors(cmMakefile const* mf = NULL) const;
+  bool GetDeprecatedWarningsAsErrors() const;
   /**
    * Set the state of treating developer (author) warnings as errors.
    */

@@ -2447,19 +2447,11 @@ void cmake::RunCheckForUnusedVariables()
 #endif
 }
 
-bool cmake::GetSuppressDevWarnings(cmMakefile const* mf) const
+bool cmake::GetSuppressDevWarnings() const
 {
-  /*
-   * The suppression CMake variable may be set in the CMake configuration file
-   * itself, so we have to check what its set to in the makefile if we can.
-   */
-  if (mf) {
-    return mf->IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
-  } else {
-    const char* cacheEntryValue =
-      this->State->GetCacheEntryValue("CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
-    return cmSystemTools::IsOn(cacheEntryValue);
-  }
+  const char* cacheEntryValue =
+    this->State->GetCacheEntryValue("CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
+  return cmSystemTools::IsOn(cacheEntryValue);
 }
 
 void cmake::SetSuppressDevWarnings(bool b)
@@ -2481,20 +2473,11 @@ void cmake::SetSuppressDevWarnings(bool b)
                       cmState::INTERNAL);
 }
 
-bool cmake::GetSuppressDeprecatedWarnings(cmMakefile const* mf) const
+bool cmake::GetSuppressDeprecatedWarnings() const
 {
-  /*
-   * The suppression CMake variable may be set in the CMake configuration file
-   * itself, so we have to check what its set to in the makefile if we can.
-   */
-  if (mf) {
-    return (mf->IsSet("CMAKE_WARN_DEPRECATED") &&
-            !mf->IsOn("CMAKE_WARN_DEPRECATED"));
-  } else {
-    const char* cacheEntryValue =
-      this->State->GetCacheEntryValue("CMAKE_WARN_DEPRECATED");
-    return cacheEntryValue && cmSystemTools::IsOff(cacheEntryValue);
-  }
+  const char* cacheEntryValue =
+    this->State->GetCacheEntryValue("CMAKE_WARN_DEPRECATED");
+  return cacheEntryValue && cmSystemTools::IsOff(cacheEntryValue);
 }
 
 void cmake::SetSuppressDeprecatedWarnings(bool b)
@@ -2516,16 +2499,11 @@ void cmake::SetSuppressDeprecatedWarnings(bool b)
                       cmState::INTERNAL);
 }
 
-bool cmake::GetDevWarningsAsErrors(cmMakefile const* mf) const
+bool cmake::GetDevWarningsAsErrors() const
 {
-  if (mf) {
-    return (mf->IsSet("CMAKE_SUPPRESS_DEVELOPER_ERRORS") &&
-            !mf->IsOn("CMAKE_SUPPRESS_DEVELOPER_ERRORS"));
-  } else {
-    const char* cacheEntryValue =
-      this->State->GetCacheEntryValue("CMAKE_SUPPRESS_DEVELOPER_ERRORS");
-    return cacheEntryValue && cmSystemTools::IsOff(cacheEntryValue);
-  }
+  const char* cacheEntryValue =
+    this->State->GetCacheEntryValue("CMAKE_SUPPRESS_DEVELOPER_ERRORS");
+  return cacheEntryValue && cmSystemTools::IsOff(cacheEntryValue);
 }
 
 void cmake::SetDevWarningsAsErrors(bool b)
@@ -2547,15 +2525,11 @@ void cmake::SetDevWarningsAsErrors(bool b)
                       cmState::INTERNAL);
 }
 
-bool cmake::GetDeprecatedWarningsAsErrors(cmMakefile const* mf) const
+bool cmake::GetDeprecatedWarningsAsErrors() const
 {
-  if (mf) {
-    return mf->IsOn("CMAKE_ERROR_DEPRECATED");
-  } else {
-    const char* cacheEntryValue =
-      this->State->GetCacheEntryValue("CMAKE_ERROR_DEPRECATED");
-    return cmSystemTools::IsOn(cacheEntryValue);
-  }
+  const char* cacheEntryValue =
+    this->State->GetCacheEntryValue("CMAKE_ERROR_DEPRECATED");
+  return cmSystemTools::IsOn(cacheEntryValue);
 }
 
 void cmake::SetDeprecatedWarningsAsErrors(bool b)
