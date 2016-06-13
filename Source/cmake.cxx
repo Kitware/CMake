@@ -589,6 +589,11 @@ void cmake::SetArgs(const std::vector<std::string>& args,
       std::cout << "Running with expanded trace output on.\n";
       this->SetTrace(true);
       this->SetTraceExpand(true);
+    } else if (arg.find("--trace-source=", 0) == 0) {
+      std::string file = arg.substr(strlen("--trace-source="));
+      cmSystemTools::ConvertToUnixSlashes(file);
+      this->AddTraceSource(file);
+      this->SetTrace(true);
     } else if (arg.find("--trace", 0) == 0) {
       std::cout << "Running with trace output on.\n";
       this->SetTrace(true);
