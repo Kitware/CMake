@@ -158,7 +158,7 @@ private:
 
 struct cmListFile
 {
-  bool ParseFile(const char* path, cmMakefile* mf);
+  bool ParseFile(const char* path, bool topLevel, cmMakefile* mf);
 
   std::vector<cmListFileFunction> Functions;
 };
