@@ -633,8 +633,8 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
   cmsys::ifstream finModFile(modFile, std::ios::in | std::ios::binary);
   cmsys::ifstream finStampFile(stampFile, std::ios::in | std::ios::binary);
 #else
-  cmsys::ifstream finModFile(modFile, std::ios::in);
-  cmsys::ifstream finStampFile(stampFile, std::ios::in);
+  cmsys::ifstream finModFile(modFile);
+  cmsys::ifstream finStampFile(stampFile);
 #endif
   if (!finModFile || !finStampFile) {
     // At least one of the files does not exist.  The modules differ.
