@@ -246,6 +246,14 @@ void cmState::SetCacheEntryBoolProperty(std::string const& key,
   it.SetProperty(propertyName, value);
 }
 
+std::vector<std::string> cmState::GetCacheEntryPropertyList(
+  const std::string& key)
+{
+  cmCacheManager::CacheIterator it =
+    this->CacheManager->GetCacheIterator(key.c_str());
+  return it.GetPropertyList();
+}
+
 const char* cmState::GetCacheEntryProperty(std::string const& key,
                                            std::string const& propertyName)
 {

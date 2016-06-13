@@ -19,6 +19,8 @@ class cmPropertyMap : public std::map<std::string, cmProperty>
 public:
   cmProperty* GetOrCreateProperty(const std::string& name);
 
+  std::vector<std::string> GetPropertyList() const;
+
   void SetProperty(const std::string& name, const char* value);
 
   void AppendProperty(const std::string& name, const char* value,

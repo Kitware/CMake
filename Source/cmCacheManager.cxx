@@ -540,6 +540,11 @@ void cmCacheManager::CacheIterator::Next()
   }
 }
 
+std::vector<std::string> cmCacheManager::CacheIterator::GetPropertyList() const
+{
+  return this->GetEntry().GetPropertyList();
+}
+
 void cmCacheManager::CacheIterator::SetValue(const char* value)
 {
   if (this->IsAtEnd()) {
@@ -557,6 +562,11 @@ void cmCacheManager::CacheIterator::SetValue(const char* value)
 bool cmCacheManager::CacheIterator::GetValueAsBool() const
 {
   return cmSystemTools::IsOn(this->GetEntry().Value.c_str());
+}
+
+std::vector<std::string> cmCacheManager::CacheEntry::GetPropertyList() const
+{
+  return this->Properties.GetPropertyList();
 }
 
 const char* cmCacheManager::CacheEntry::GetProperty(

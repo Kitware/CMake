@@ -247,6 +247,7 @@ public:
                              std::string const& value);
   void SetCacheEntryBoolProperty(std::string const& key,
                                  std::string const& propertyName, bool value);
+  std::vector<std::string> GetCacheEntryPropertyList(std::string const& key);
   const char* GetCacheEntryProperty(std::string const& key,
                                     std::string const& propertyName);
   bool GetCacheEntryPropertyAsBool(std::string const& key,

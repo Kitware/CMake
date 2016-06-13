@@ -209,9 +209,6 @@ public:
     return this->GeneratorToolset;
   }
 
-  ///! get the cmCachemManager used by this invocation of cmake
-  cmCacheManager* GetCacheManager() { return this->CacheManager; }
-
   const std::vector<std::string>& GetSourceExtensions() const
   {
     return this->SourceFileExtensions;
@@ -423,7 +420,6 @@ protected:
                          CreateExtraGeneratorFunctionType newFunction);
 
   cmGlobalGenerator* GlobalGenerator;
-  cmCacheManager* CacheManager;
   std::map<std::string, DiagLevel> DiagLevels;
   std::string GeneratorPlatform;
   std::string GeneratorToolset;
