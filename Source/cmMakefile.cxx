@@ -3459,7 +3459,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
     }
   } else {
     std::string newLineCharacters;
-    std::ios_base::openmode omode = std::ios_base::out | std::ios_base::trunc;
+    std::ios::openmode omode = std::ios::out | std::ios::trunc;
     if (newLine.IsValid()) {
       newLineCharacters = newLine.GetCharacters();
       omode |= std::ios::binary;
@@ -3468,14 +3468,14 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
     }
     std::string tempOutputFile = soutfile;
     tempOutputFile += ".tmp";
-    cmsys::ofstream fout(tempOutputFile.c_str(), omode);
+    std::ofstream fout(tempOutputFile.c_str(), omode);
     if (!fout) {
       cmSystemTools::Error("Could not open file for write in copy operation ",
                            tempOutputFile.c_str());
       cmSystemTools::ReportLastSystemError("");
       return 0;
     }
-    cmsys::ifstream fin(sinfile.c_str());
+    std::ifstream fin(sinfile.c_str());
     if (!fin) {
       cmSystemTools::Error("Could not open file for read in copy operation ",
                            sinfile.c_str());

@@ -211,7 +211,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
 
           // Try to scan the file.  Just leave it out if we cannot find
           // it.
-          cmsys::ifstream fin(fullName.c_str());
+          std::ifstream fin(fullName.c_str());
           if (fin) {
             cmsys::FStream::BOM bom = cmsys::FStream::ReadBOM(fin);
             if (bom == cmsys::FStream::BOM_None ||
@@ -263,7 +263,7 @@ void cmDependsC::ReadCacheFile()
   if (this->CacheFileName.empty()) {
     return;
   }
-  cmsys::ifstream fin(this->CacheFileName.c_str());
+  std::ifstream fin(this->CacheFileName.c_str());
   if (!fin) {
     return;
   }
@@ -330,7 +330,7 @@ void cmDependsC::WriteCacheFile() const
   if (this->CacheFileName.empty()) {
     return;
   }
-  cmsys::ofstream cacheOut(this->CacheFileName.c_str());
+  std::ofstream cacheOut(this->CacheFileName.c_str());
   if (!cacheOut) {
     return;
   }

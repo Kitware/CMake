@@ -107,7 +107,7 @@ public:
   };
 
   // Construct and take ownership of the file stream object.
-  cmELFInternal(cmELF* external, cmsys::auto_ptr<cmsys::ifstream>& fin,
+  cmELFInternal(cmELF* external, cmsys::auto_ptr<std::ifstream>& fin,
                 ByteOrderType order)
     : External(external)
     , Stream(*fin.release())
@@ -237,7 +237,7 @@ public:
   typedef typename Types::tagtype tagtype;
 
   // Construct with a stream and byte swap indicator.
-  cmELFInternalImpl(cmELF* external, cmsys::auto_ptr<cmsys::ifstream>& fin,
+  cmELFInternalImpl(cmELF* external, cmsys::auto_ptr<std::ifstream>& fin,
                     ByteOrderType order);
 
   // Return the number of sections as specified by the ELF header.
@@ -538,7 +538,7 @@ private:
 
 template <class Types>
 cmELFInternalImpl<Types>::cmELFInternalImpl(
-  cmELF* external, cmsys::auto_ptr<cmsys::ifstream>& fin, ByteOrderType order)
+  cmELF* external, cmsys::auto_ptr<std::ifstream>& fin, ByteOrderType order)
   : cmELFInternal(external, fin, order)
 {
   // Read the main header.
@@ -755,7 +755,7 @@ cmELF::cmELF(const char* fname)
   : Internal(0)
 {
   // Try to open the file.
-  cmsys::auto_ptr<cmsys::ifstream> fin(new cmsys::ifstream(fname));
+  cmsys::auto_ptr<std::ifstream> fin(new std::ifstream(fname));
 
   // Quit now if the file could not be opened.
   if (!fin.get() || !*fin) {

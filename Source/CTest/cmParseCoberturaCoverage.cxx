@@ -86,7 +86,7 @@ protected:
             }
           }
 
-          cmsys::ifstream fin(this->CurFileName.c_str());
+          std::ifstream fin(this->CurFileName.c_str());
           if (this->CurFileName == "" || !fin) {
             this->CurFileName =
               this->Coverage.BinaryDir + "/" + atts[tagCount + 1];

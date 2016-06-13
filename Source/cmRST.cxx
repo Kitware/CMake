@@ -53,7 +53,7 @@ cmRST::cmRST(std::ostream& os, std::string const& docroot)
 
 bool cmRST::ProcessFile(std::string const& fname, bool isModule)
 {
-  cmsys::ifstream fin(fname.c_str());
+  std::ifstream fin(fname.c_str());
   if (fin) {
     this->DocDir = cmSystemTools::GetFilenamePath(fname);
     if (isModule) {

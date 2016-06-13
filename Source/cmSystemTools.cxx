@@ -1349,7 +1349,7 @@ bool cmSystemTools::CreateTar(const char* outFileName,
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  cmsys::ofstream fout(outFileName, std::ios::out | std::ios::binary);
+  std::ofstream fout(outFileName, std::ios::out | std::ios::binary);
   if (!fout) {
     std::string e = "Cannot open output file \"";
     e += outFileName;
@@ -1874,7 +1874,7 @@ unsigned int cmSystemTools::RandomSeed()
   } seed;
 
   // Try using a real random source.
-  cmsys::ifstream fin;
+  std::ifstream fin;
   fin.rdbuf()->pubsetbuf(0, 0); // Unbuffered read.
   fin.open("/dev/urandom");
   if (fin.good() && fin.read(seed.bytes, sizeof(seed)) &&
@@ -2002,7 +2002,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
     // "<build>/CMakeFiles/CMakeSourceDir.txt".
     std::string dir = cmSystemTools::GetFilenamePath(exe_dir);
     std::string src_dir_txt = dir + "/CMakeFiles/CMakeSourceDir.txt";
-    cmsys::ifstream fin(src_dir_txt.c_str());
+    std::ifstream fin(src_dir_txt.c_str());
     std::string src_dir;
     if (fin && cmSystemTools::GetLineFromStream(fin, src_dir) &&
         cmSystemTools::FileIsDirectory(src_dir)) {
@@ -2010,7 +2010,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
     } else {
       dir = cmSystemTools::GetFilenamePath(dir);
       src_dir_txt = dir + "/CMakeFiles/CMakeSourceDir.txt";
-      cmsys::ifstream fin2(src_dir_txt.c_str());
+      std::ifstream fin2(src_dir_txt.c_str());
       if (fin2 && cmSystemTools::GetLineFromStream(fin2, src_dir) &&
           cmSystemTools::FileIsDirectory(src_dir)) {
         cmSystemToolsCMakeRoot = src_dir;
@@ -2309,7 +2309,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
 
   {
     // Open the file for update.
-    cmsys::ofstream f(file.c_str(),
+    std::ofstream f(file.c_str(),
                       std::ios::in | std::ios::out | std::ios::binary);
     if (!f) {
       if (emsg) {
@@ -2500,7 +2500,7 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
   }
 
   // Open the file for update.
-  cmsys::ofstream f(file.c_str(),
+  std::ofstream f(file.c_str(),
                     std::ios::in | std::ios::out | std::ios::binary);
   if (!f) {
     if (emsg) {

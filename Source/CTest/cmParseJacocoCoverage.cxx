@@ -47,7 +47,7 @@ protected:
                          this->Coverage.Quiet);
 
       this->FilePath = this->PackagePath + "/" + fileName;
-      cmsys::ifstream fin(this->FilePath.c_str());
+      std::ifstream fin(this->FilePath.c_str());
       if (!fin) {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
                    "Jacoco Coverage: Error opening " << this->FilePath

@@ -347,7 +347,7 @@ void cmQtAutoGenerators::WriteOldMocDefinitionsFile(
   cmSystemTools::ConvertToUnixSlashes(filename);
   filename += "/AutomocOldMocDefinitions.cmake";
 
-  cmsys::ofstream outfile;
+  std::ofstream outfile;
   outfile.open(filename.c_str(), std::ios::trunc);
   outfile << "set(AM_OLD_COMPILE_SETTINGS "
           << cmOutputConverter::EscapeForCMake(this->CurrentCompileSettingsStr)
@@ -431,7 +431,7 @@ void cmQtAutoGenerators::Init()
 
 static std::string ReadAll(const std::string& filename)
 {
-  cmsys::ifstream file(filename.c_str());
+  std::ifstream file(filename.c_str());
   std::stringstream stream;
   stream << file.rdbuf();
   file.close();
@@ -1053,7 +1053,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
                                      msg.c_str(), true, this->ColorOutput);
   }
   {
-    cmsys::ofstream outfile;
+    std::ofstream outfile;
     outfile.open(this->OutMocCppFilenameAbs.c_str(), std::ios::trunc);
     outfile << automocSource;
     outfile.close();

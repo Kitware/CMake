@@ -45,7 +45,7 @@ namespace {
 
 // peek in the file
 template <typename T>
-bool peek(cmsys::ifstream& fin, T& v)
+bool peek(std::ifstream& fin, T& v)
 {
   std::streampos p = fin.tellg();
   if (!fin.read(reinterpret_cast<char*>(&v), sizeof(T))) {
@@ -57,7 +57,7 @@ bool peek(cmsys::ifstream& fin, T& v)
 
 // read from the file and fill a data structure
 template <typename T>
-bool read(cmsys::ifstream& fin, T& v)
+bool read(std::ifstream& fin, T& v)
 {
   if (!fin.read(reinterpret_cast<char*>(&v), sizeof(T))) {
     return false;
@@ -68,7 +68,7 @@ bool read(cmsys::ifstream& fin, T& v)
 // read from the file and fill multiple data structures where
 // the vector has been resized
 template <typename T>
-bool read(cmsys::ifstream& fin, std::vector<T>& v)
+bool read(std::ifstream& fin, std::vector<T>& v)
 {
   // nothing to read
   if (v.empty()) {
@@ -106,7 +106,7 @@ public:
   }
   virtual ~cmMachOHeaderAndLoadCommands() {}
 
-  virtual bool read_mach_o(cmsys::ifstream& fin) = 0;
+  virtual bool read_mach_o(std::ifstream& fin) = 0;
 
   const std::vector<RawLoadCommand>& load_commands() const
   {
@@ -125,7 +125,7 @@ public:
 
 protected:
   bool read_load_commands(uint32_t ncmds, uint32_t sizeofcmds,
-                          cmsys::ifstream& fin);
+                          std::ifstream& fin);
 
   bool Swap;
   std::vector<RawLoadCommand> LoadCommands;
@@ -141,7 +141,7 @@ public:
     : cmMachOHeaderAndLoadCommands(_swap)
   {
   }
-  bool read_mach_o(cmsys::ifstream& fin)
+  bool read_mach_o(std::ifstream& fin)
   {
     if (!read(fin, this->Header)) {
       return false;
@@ -163,7 +163,7 @@ protected:
 
 bool cmMachOHeaderAndLoadCommands::read_load_commands(uint32_t ncmds,
                                                       uint32_t sizeofcmds,
-                                                      cmsys::ifstream& fin)
+                                                      std::ifstream& fin)
 {
   uint32_t size_read = 0;
   this->LoadCommands.resize(ncmds);
@@ -201,7 +201,7 @@ public:
   bool read_mach_o(uint32_t file_offset);
 
   // the file we are reading
-  cmsys::ifstream Fin;
+  std::ifstream Fin;
 
   // The archs in the universal binary
   // If the binary is not a universal binary, this will be empty.

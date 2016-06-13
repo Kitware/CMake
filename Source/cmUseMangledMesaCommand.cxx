@@ -71,14 +71,14 @@ void cmUseMangledMesaCommand::CopyAndFullPathMesaHeader(const char* source,
   outFile += file;
   std::string tempOutputFile = outFile;
   tempOutputFile += ".tmp";
-  cmsys::ofstream fout(tempOutputFile.c_str());
+  std::ofstream fout(tempOutputFile.c_str());
   if (!fout) {
     cmSystemTools::Error("Could not open file for write in copy operation: ",
                          tempOutputFile.c_str(), outdir);
     cmSystemTools::ReportLastSystemError("");
     return;
   }
-  cmsys::ifstream fin(source);
+  std::ifstream fin(source);
   if (!fin) {
     cmSystemTools::Error("Could not open file for read in copy operation",
                          source);

@@ -200,7 +200,7 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
   }
   // If GetPermissions fails, pretend like it is ok. File open will fail if
   // the file is not writable
-  cmsys::ofstream file(fileName.c_str(),
+  std::ofstream file(fileName.c_str(),
                        append ? std::ios::app : std::ios::out);
   if (!file) {
     std::string error = "failed to open for writing (";
@@ -253,11 +253,11 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
 
 // Open the specified file.
 #if defined(_WIN32) || defined(__CYGWIN__)
-  cmsys::ifstream file(
+  std::ifstream file(
     fileName.c_str(), std::ios::in |
       (hexOutputArg.IsEnabled() ? std::ios::binary : std::ios::in));
 #else
-  cmsys::ifstream file(fileName.c_str(), std::ios::in);
+  std::ifstream file(fileName.c_str());
 #endif
 
   if (!file) {
@@ -524,9 +524,9 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
 
 // Open the specified file.
 #if defined(_WIN32) || defined(__CYGWIN__)
-  cmsys::ifstream fin(fileName.c_str(), std::ios::in | std::ios::binary);
+  std::ifstream fin(fileName.c_str(), std::ios::in | std::ios::binary);
 #else
-  cmsys::ifstream fin(fileName.c_str(), std::ios::in);
+  std::ifstream fin(fileName.c_str());
 #endif
   if (!fin) {
     std::ostringstream e;
@@ -2292,7 +2292,7 @@ namespace {
 size_t cmWriteToFileCallback(void* ptr, size_t size, size_t nmemb, void* data)
 {
   int realsize = (int)(size * nmemb);
-  cmsys::ofstream* fout = static_cast<cmsys::ofstream*>(data);
+  std::ofstream* fout = static_cast<std::ofstream*>(data);
   const char* chPtr = static_cast<char*>(ptr);
   fout->write(chPtr, realsize);
   return realsize;
@@ -2598,7 +2598,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
     return false;
   }
 
-  cmsys::ofstream fout(file.c_str(), std::ios::binary);
+  std::ofstream fout(file.c_str(), std::ios::binary);
   if (!fout) {
     this->SetError("DOWNLOAD cannot open file for write.");
     return false;

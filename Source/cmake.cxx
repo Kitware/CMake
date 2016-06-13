@@ -1679,7 +1679,7 @@ void cmake::UpdateConversionPathTable()
     this->State->GetInitializedCacheValue("CMAKE_PATH_TRANSLATION_FILE");
 
   if (tablepath) {
-    cmsys::ifstream table(tablepath);
+    std::ifstream table(tablepath);
     if (!table) {
       cmSystemTools::Error("CMAKE_PATH_TRANSLATION_FILE set to ", tablepath,
                            ". CMake can not open file.");
@@ -2092,9 +2092,9 @@ static bool cmakeCheckStampFile(const char* stampName)
   std::string stampDepends = stampName;
   stampDepends += ".depend";
 #if defined(_WIN32) || defined(__CYGWIN__)
-  cmsys::ifstream fin(stampDepends.c_str(), std::ios::in | std::ios::binary);
+  std::ifstream fin(stampDepends.c_str(), std::ios::in | std::ios::binary);
 #else
-  cmsys::ifstream fin(stampDepends.c_str(), std::ios::in);
+  std::ifstream fin(stampDepends.c_str());
 #endif
   if (!fin) {
     // The stamp dependencies file cannot be read.  Just assume the
@@ -2132,7 +2132,7 @@ static bool cmakeCheckStampFile(const char* stampName)
   {
     // TODO: Teach cmGeneratedFileStream to use a random temp file (with
     // multiple tries in unlikely case of conflict) and use that here.
-    cmsys::ofstream stamp(stampTemp);
+    std::ofstream stamp(stampTemp);
     stamp << "# CMake generation timestamp file for this directory.\n";
   }
   if (cmSystemTools::RenameFile(stampTemp, stampName)) {
@@ -2157,7 +2157,7 @@ static bool cmakeCheckStampList(const char* stampList)
               << "is missing.\n";
     return false;
   }
-  cmsys::ifstream fin(stampList);
+  std::ifstream fin(stampList);
   if (!fin) {
     std::cout << "CMake is re-running because generate.stamp.list "
               << "could not be read.\n";

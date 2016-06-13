@@ -134,7 +134,7 @@ int cmCPackGenerator::PrepareNames()
                       << descFileName << "]" << std::endl);
       return 0;
     }
-    cmsys::ifstream ifs(descFileName);
+    std::ifstream ifs(descFileName);
     if (!ifs) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Cannot open description file name: " << descFileName

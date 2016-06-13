@@ -1533,7 +1533,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
   }
 
   // parse the list of tests to rerun from LastTestsFailed.log
-  cmsys::ifstream ifs(lastTestsFailedLog.c_str());
+  std::ifstream ifs(lastTestsFailedLog.c_str());
   if (ifs) {
     std::string line;
     std::string::size_type pos;
@@ -1658,7 +1658,7 @@ void cmCTestTestHandler::GenerateRegressionImages(cmXMLWriter& xml,
           xml.Element("Value", "Image " + filename + " is empty");
           xml.EndElement();
         } else {
-          cmsys::ifstream ifs(filename.c_str(), std::ios::in
+          std::ifstream ifs(filename.c_str(), std::ios::in
 #ifdef _WIN32
                                 | std::ios::binary
 #endif
@@ -1730,7 +1730,7 @@ void cmCTestTestHandler::SetTestsToRunInformation(const char* in)
   // if the argument is a file, then read it and use the contents as the
   // string
   if (cmSystemTools::FileExists(in)) {
-    cmsys::ifstream fin(in);
+    std::ifstream fin(in);
     unsigned long filelen = cmSystemTools::FileLength(in);
     char* buff = new char[filelen + 1];
     fin.getline(buff, filelen);

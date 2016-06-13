@@ -345,7 +345,7 @@ int cmDependsJavaParserHelper::ParseFile(const char* file)
   if (!cmSystemTools::FileExists(file)) {
     return 0;
   }
-  cmsys::ifstream ifs(file);
+  std::ifstream ifs(file);
   if (!ifs) {
     return 0;
   }

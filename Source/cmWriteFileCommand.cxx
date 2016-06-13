@@ -65,7 +65,7 @@ bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& args,
   }
   // If GetPermissions fails, pretend like it is ok. File open will fail if
   // the file is not writable
-  cmsys::ofstream file(fileName.c_str(),
+  std::ofstream file(fileName.c_str(),
                        overwrite ? std::ios::out : std::ios::app);
   if (!file) {
     std::string error = "Internal CMake error when trying to open file: ";
