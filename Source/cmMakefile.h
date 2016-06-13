@@ -437,6 +437,9 @@ public:
   bool IsOn(const std::string& name) const;
   bool IsSet(const std::string& name) const;
 
+  /** Return whether the target platform is 32-bit. */
+  bool PlatformIs32Bit() const;
+
   /** Return whether the target platform is 64-bit.  */
   bool PlatformIs64Bit() const;
 

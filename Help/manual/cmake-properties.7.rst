@@ -24,6 +24,7 @@ Properties of Global Scope
    /prop_gbl/DISABLED_FEATURES
    /prop_gbl/ENABLED_FEATURES
    /prop_gbl/ENABLED_LANGUAGES
+   /prop_gbl/FIND_LIBRARY_USE_LIB32_PATHS
    /prop_gbl/FIND_LIBRARY_USE_LIB64_PATHS
    /prop_gbl/FIND_LIBRARY_USE_OPENBSD_VERSIONING
    /prop_gbl/GLOBAL_DEPENDS_DEBUG_MODE

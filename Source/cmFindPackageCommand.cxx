@@ -43,6 +43,7 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->UseConfigFiles = true;
   this->UseFindModules = true;
   this->DebugMode = false;
+  this->UseLib32Paths = false;
   this->UseLib64Paths = false;
   this->PolicyScope = true;
   this->VersionMajor = 0;
@@ -108,6 +109,13 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
   if (const char* arch =
         this->Makefile->GetDefinition("CMAKE_LIBRARY_ARCHITECTURE")) {
     this->LibraryArchitecture = arch;
+  }
+
+  // Lookup whether lib32 paths should be used.
+  if (this->Makefile->PlatformIs32Bit() &&
+      this->Makefile->GetState()->GetGlobalPropertyAsBool(
+        "FIND_LIBRARY_USE_LIB32_PATHS")) {
+    this->UseLib32Paths = true;
   }
 
   // Lookup whether lib64 paths should be used.
@@ -1906,6 +1914,9 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   std::vector<std::string> common;
   if (!this->LibraryArchitecture.empty()) {
     common.push_back("lib/" + this->LibraryArchitecture);
+  }
+  if (this->UseLib32Paths) {
+    common.push_back("lib32");
   }
   if (this->UseLib64Paths) {
     common.push_back("lib64");

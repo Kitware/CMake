@@ -2076,6 +2076,14 @@ bool cmMakefile::IsSet(const std::string& name) const
   return true;
 }
 
+bool cmMakefile::PlatformIs32Bit() const
+{
+  if (const char* sizeof_dptr = this->GetDefinition("CMAKE_SIZEOF_VOID_P")) {
+    return atoi(sizeof_dptr) == 4;
+  }
+  return false;
+}
+
 bool cmMakefile::PlatformIs64Bit() const
 {
   if (const char* sizeof_dptr = this->GetDefinition("CMAKE_SIZEOF_VOID_P")) {
