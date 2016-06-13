@@ -387,7 +387,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
     return 0;
   }
 
-  cmsys::ifstream ifs(versionFile.c_str());
+  std::ifstream ifs(versionFile.c_str());
   if (!ifs) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Cannot open PackageMaker compiler version file"
@@ -523,7 +523,7 @@ bool cmCPackPackageMakerGenerator::GenerateComponentPackage(
     // X packages, which work on Mac OS X 10.3 and newer.
     std::string descriptionFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     descriptionFile += '/' + component.Name + "-Description.plist";
-    cmsys::ofstream out(descriptionFile.c_str());
+    std::ofstream out(descriptionFile.c_str());
     cmXMLWriter xout(out);
     xout.StartDocument();
     xout.Doctype("plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\""

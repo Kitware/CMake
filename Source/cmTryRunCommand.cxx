@@ -277,7 +277,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
 
   if (error) {
     static bool firstTryRun = true;
-    cmsys::ofstream file(resultFileName.c_str(),
+    std::ofstream file(resultFileName.c_str(),
                          firstTryRun ? std::ios::out : std::ios::app);
     if (file) {
       if (firstTryRun) {

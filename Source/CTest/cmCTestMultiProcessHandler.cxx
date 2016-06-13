@@ -402,13 +402,13 @@ void cmCTestMultiProcessHandler::UpdateCostData()
 {
   std::string fname = this->CTest->GetCostDataFile();
   std::string tmpout = fname + ".tmp";
-  cmsys::ofstream fout;
+  std::ofstream fout;
   fout.open(tmpout.c_str());
 
   PropertiesMap temp = this->Properties;
 
   if (cmSystemTools::FileExists(fname.c_str())) {
-    cmsys::ifstream fin;
+    std::ifstream fin;
     fin.open(fname.c_str());
 
     std::string line;
@@ -462,7 +462,7 @@ void cmCTestMultiProcessHandler::ReadCostData()
   std::string fname = this->CTest->GetCostDataFile();
 
   if (cmSystemTools::FileExists(fname.c_str(), true)) {
-    cmsys::ifstream fin;
+    std::ifstream fin;
     fin.open(fname.c_str());
     std::string line;
     while (std::getline(fin, line)) {
@@ -651,7 +651,7 @@ void cmCTestMultiProcessHandler::WriteCheckpoint(int index)
 {
   std::string fname =
     this->CTest->GetBinaryDir() + "/Testing/Temporary/CTestCheckpoint.txt";
-  cmsys::ofstream fout;
+  std::ofstream fout;
   fout.open(fname.c_str(), std::ios::app);
   fout << index << "\n";
   fout.close();
@@ -759,7 +759,7 @@ void cmCTestMultiProcessHandler::CheckResume()
         << "----------------------------------------------------------"
         << std::endl;
 
-      cmsys::ifstream fin;
+      std::ifstream fin;
       fin.open(fname.c_str());
       std::string line;
       while (std::getline(fin, line)) {

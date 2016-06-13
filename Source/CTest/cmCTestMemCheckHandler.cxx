@@ -988,7 +988,7 @@ void cmCTestMemCheckHandler::PostProcessBoundsCheckerTest(
   }
   // put a scope around this to close ifs so the file can be removed
   {
-    cmsys::ifstream ifs(ofile.c_str());
+    std::ifstream ifs(ofile.c_str());
     if (!ifs) {
       std::string log = "Cannot read memory tester output file: " + ofile;
       cmCTestLog(this->CTest, ERROR_MESSAGE, log << std::endl);
@@ -1021,7 +1021,7 @@ void cmCTestMemCheckHandler::AppendMemTesterOutput(cmCTestTestResult& res,
   }
   // put ifs in scope so file can be deleted if needed
   {
-    cmsys::ifstream ifs(ofile.c_str());
+    std::ifstream ifs(ofile.c_str());
     if (!ifs) {
       std::string log = "Cannot read memory tester output file: " + ofile;
       cmCTestLog(this->CTest, ERROR_MESSAGE, log << std::endl);

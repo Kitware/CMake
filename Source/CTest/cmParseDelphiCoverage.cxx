@@ -31,7 +31,7 @@ public:
     bool blockComFlag = false;
     bool lineComFlag = false;
     std::vector<std::string> beginSet;
-    cmsys::ifstream in(filename.c_str());
+    std::ifstream in(filename.c_str());
     if (!in) {
       return false;
     }
@@ -148,7 +148,7 @@ public:
 
     this->initializeDelphiFile(files[0], coverageVector);
 
-    cmsys::ifstream in(file);
+    std::ifstream in(file);
     if (!in) {
       return false;
     }

@@ -139,7 +139,7 @@ void cmCTestLaunch::HandleRealArg(const char* arg)
 #ifdef _WIN32
   // Expand response file arguments.
   if (arg[0] == '@' && cmSystemTools::FileExists(arg + 1)) {
-    cmsys::ifstream fin(arg + 1);
+    std::ifstream fin(arg + 1);
     std::string line;
     while (cmSystemTools::GetLineFromStream(fin, line)) {
       cmSystemTools::ParseWindowsCommandLine(line.c_str(), this->RealArgs);
@@ -203,8 +203,8 @@ void cmCTestLaunch::RunChild()
   cmsysProcess* cp = this->Process;
   cmsysProcess_SetCommand(cp, this->RealArgV);
 
-  cmsys::ofstream fout;
-  cmsys::ofstream ferr;
+  std::ofstream fout;
+  std::ofstream ferr;
   if (this->Passthru) {
     // In passthru mode we just share the output pipes.
     cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDOUT, 1);
@@ -284,7 +284,7 @@ void cmCTestLaunch::LoadLabels()
   cmSystemTools::ConvertToUnixSlashes(source);
 
   // Load the labels file.
-  cmsys::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
+  std::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
   if (!fin) {
     return;
   }
@@ -487,7 +487,7 @@ void cmCTestLaunch::WriteXMLLabels(cmXMLWriter& xml)
 
 void cmCTestLaunch::DumpFileToXML(cmXMLWriter& xml, std::string const& fname)
 {
-  cmsys::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
+  std::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
 
   std::string line;
   const char* sep = "";
@@ -549,7 +549,7 @@ void cmCTestLaunch::LoadScrapeRules(
   fname += "Custom";
   fname += purpose;
   fname += ".txt";
-  cmsys::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
+  std::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
   std::string line;
   cmsys::RegularExpression rex;
   while (cmSystemTools::GetLineFromStream(fin, line)) {
@@ -565,7 +565,7 @@ bool cmCTestLaunch::ScrapeLog(std::string const& fname)
 
   // Look for log file lines matching warning expressions but not
   // suppression expressions.
-  cmsys::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
+  std::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
   std::string line;
   while (cmSystemTools::GetLineFromStream(fin, line)) {
     if (MatchesFilterPrefix(line)) {

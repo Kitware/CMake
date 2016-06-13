@@ -69,11 +69,11 @@ const char* cmExportFileGenerator::GetMainExportFileName() const
 bool cmExportFileGenerator::GenerateImportFile()
 {
   // Open the output file to generate it.
-  cmsys::auto_ptr<cmsys::ofstream> foutPtr;
+  cmsys::auto_ptr<std::ofstream> foutPtr;
   if (this->AppendMode) {
     // Open for append.
-    cmsys::auto_ptr<cmsys::ofstream> ap(
-      new cmsys::ofstream(this->MainImportFile.c_str(), std::ios::app));
+    cmsys::auto_ptr<std::ofstream> ap(
+      new std::ofstream(this->MainImportFile.c_str(), std::ios::app));
     foutPtr = ap;
   } else {
     // Generate atomically and with copy-if-different.

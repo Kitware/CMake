@@ -59,7 +59,7 @@ public:
   static cmCursesForm* CurrentForm;
 
 protected:
-  static cmsys::ofstream DebugFile;
+  static std::ofstream DebugFile;
   static bool Debug;
 
   cmCursesForm(const cmCursesForm& form);

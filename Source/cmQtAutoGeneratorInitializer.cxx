@@ -463,7 +463,7 @@ static std::string cmQtAutoGeneratorsStripCR(std::string const& line)
 
 static std::string ReadAll(const std::string& filename)
 {
-  cmsys::ifstream file(filename.c_str());
+  std::ifstream file(filename.c_str());
   std::stringstream stream;
   stream << file.rdbuf();
   file.close();
@@ -960,7 +960,7 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
   }
   if (!configDefines.empty() || !configIncludes.empty() ||
       !configUicOptions.empty()) {
-    cmsys::ofstream infoFile(outputFile.c_str(), std::ios::app);
+    std::ofstream infoFile(outputFile.c_str(), std::ios::app);
     if (!infoFile) {
       std::string error = "Internal CMake error when trying to open file: ";
       error += outputFile;

@@ -3396,14 +3396,14 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
     }
     std::string tempOutputFile = soutfile;
     tempOutputFile += ".tmp";
-    cmsys::ofstream fout(tempOutputFile.c_str(), omode);
+    std::ofstream fout(tempOutputFile.c_str(), omode);
     if (!fout) {
       cmSystemTools::Error("Could not open file for write in copy operation ",
                            tempOutputFile.c_str());
       cmSystemTools::ReportLastSystemError("");
       return 0;
     }
-    cmsys::ifstream fin(sinfile.c_str());
+    std::ifstream fin(sinfile.c_str());
     if (!fin) {
       cmSystemTools::Error("Could not open file for read in copy operation ",
                            sinfile.c_str());

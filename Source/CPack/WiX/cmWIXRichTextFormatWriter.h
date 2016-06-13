@@ -48,7 +48,7 @@ private:
 
   void EmitInvalidCodepoint(int c);
 
-  cmsys::ofstream File;
+  std::ofstream File;
 };
 
 #endif

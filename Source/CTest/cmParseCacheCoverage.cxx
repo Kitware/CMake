@@ -90,7 +90,7 @@ bool cmParseCacheCoverage::SplitString(std::vector<std::string>& args,
 
 bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
 {
-  cmsys::ifstream in(file);
+  std::ifstream in(file);
   if (!in) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Can not open : " << file << "\n");
     return false;

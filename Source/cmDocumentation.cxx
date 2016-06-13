@@ -137,10 +137,10 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
     this->CurrentArgument = i->Argument;
     // If a file name was given, use it.  Otherwise, default to the
     // given stream.
-    cmsys::ofstream* fout = 0;
+    std::ofstream* fout = 0;
     std::ostream* s = &os;
     if (!i->Filename.empty()) {
-      fout = new cmsys::ofstream(i->Filename.c_str(), std::ios::out);
+      fout = new std::ofstream(i->Filename.c_str(), std::ios::out);
       if (fout) {
         s = fout;
       } else {
@@ -509,7 +509,7 @@ void cmDocumentation::PrintNames(std::ostream& os, std::string const& pattern)
   for (std::vector<std::string>::const_iterator i = files.begin();
        i != files.end(); ++i) {
     std::string line;
-    cmsys::ifstream fin(i->c_str());
+    std::ifstream fin(i->c_str());
     while (fin && cmSystemTools::GetLineFromStream(fin, line)) {
       if (!line.empty() && (isalnum(line[0]) || line[0] == '<')) {
         names.push_back(line);

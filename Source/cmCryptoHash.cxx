@@ -44,7 +44,7 @@ std::string cmCryptoHash::HashString(const std::string& input)
 
 std::string cmCryptoHash::HashFile(const std::string& file)
 {
-  cmsys::ifstream fin(file.c_str(), std::ios::in | std::ios::binary);
+  std::ifstream fin(file.c_str(), std::ios::in | std::ios::binary);
   if (!fin) {
     return "";
   }

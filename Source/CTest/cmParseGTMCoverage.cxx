@@ -41,7 +41,7 @@ bool cmParseGTMCoverage::LoadCoverageData(const char* d)
 
 bool cmParseGTMCoverage::ReadMCovFile(const char* file)
 {
-  cmsys::ifstream in(file);
+  std::ifstream in(file);
   if (!in) {
     return false;
   }
@@ -114,7 +114,7 @@ bool cmParseGTMCoverage::FindFunctionInMumpsFile(std::string const& filepath,
                                                  std::string const& function,
                                                  int& lineoffset)
 {
-  cmsys::ifstream in(filepath.c_str());
+  std::ifstream in(filepath.c_str());
   if (!in) {
     return false;
   }

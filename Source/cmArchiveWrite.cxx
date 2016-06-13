@@ -299,7 +299,7 @@ bool cmArchiveWrite::AddFile(const char* file, size_t skip, const char* prefix)
 
 bool cmArchiveWrite::AddData(const char* file, size_t size)
 {
-  cmsys::ifstream fin(file, std::ios::in | std::ios::binary);
+  std::ifstream fin(file, std::ios::in | std::ios::binary);
   if (!fin) {
     this->Error = "Error opening \"";
     this->Error += file;

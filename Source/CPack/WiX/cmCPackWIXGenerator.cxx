@@ -66,7 +66,7 @@ bool cmCPackWIXGenerator::RunWiXCommand(std::string const& command)
                                                 &output, &returnValue, 0,
                                                 cmSystemTools::OUTPUT_NONE);
 
-  cmsys::ofstream logFile(logFileName.c_str(), std::ios::app);
+  std::ofstream logFile(logFileName.c_str(), std::ios::app);
   logFile << command << std::endl;
   logFile << output;
   logFile.close();
@@ -796,7 +796,7 @@ bool cmCPackWIXGenerator::CreateLicenseFile()
   } else if (extension == ".txt") {
     cmWIXRichTextFormatWriter rtfWriter(licenseDestinationFilename);
 
-    cmsys::ifstream licenseSource(licenseSourceFilename.c_str());
+    std::ifstream licenseSource(licenseSourceFilename.c_str());
 
     std::string line;
     while (std::getline(licenseSource, line)) {

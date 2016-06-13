@@ -31,7 +31,7 @@ void cmCTestBatchTestHandler::RunTests()
 void cmCTestBatchTestHandler::WriteBatchScript()
 {
   this->Script = this->CTest->GetBinaryDir() + "/Testing/CTestBatch.txt";
-  cmsys::ofstream fout;
+  std::ofstream fout;
   fout.open(this->Script.c_str());
   fout << "#!/bin/sh\n";
 
