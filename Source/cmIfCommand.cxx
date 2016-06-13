@@ -185,12 +185,12 @@ bool cmIfCommand::InvokeInitialPass(
     conditionEvaluator.IsTrue(expandedArguments, errorString, status);
 
   if (!errorString.empty()) {
-    std::string err = cmIfCommandError(expandedArguments);
+    std::string err = "if " + cmIfCommandError(expandedArguments);
     err += errorString;
     if (status == cmake::FATAL_ERROR) {
-      this->SetError(err);
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, err);
       cmSystemTools::SetFatalErrorOccured();
-      return false;
+      return true;
     } else {
       this->Makefile->IssueMessage(status, err);
     }
