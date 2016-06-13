@@ -275,7 +275,6 @@ Variables that Control the Build
    /variable/CMAKE_LINK_INTERFACE_LIBRARIES
    /variable/CMAKE_LINK_LIBRARY_FILE_FLAG
    /variable/CMAKE_LINK_LIBRARY_FLAG
-   /variable/CMAKE_LINK_WHAT_YOU_USE
    /variable/CMAKE_MACOSX_BUNDLE
    /variable/CMAKE_MACOSX_RPATH
    /variable/CMAKE_MAP_IMPORTED_CONFIG_CONFIG

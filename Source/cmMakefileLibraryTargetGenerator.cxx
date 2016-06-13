@@ -163,10 +163,6 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
     extraFlags, "CMAKE_SHARED_LINKER_FLAGS", this->ConfigName);
   this->AddModuleDefinitionFlag(extraFlags);
 
-  if(this->GeneratorTarget->GetProperty("LINK_WHAT_YOU_USE")) {
-    this->LocalGenerator->AppendFlags(extraFlags,
-                                      " -Wl,--no-as-needed");
-  }
   this->WriteLibraryRules(linkRuleVar, extraFlags, relink);
 }
 
@@ -686,16 +682,6 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       // Get the set of commands.
       std::string linkRule = this->GetLinkRule(linkRuleVar);
       cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
-      if(this->GeneratorTarget->GetProperty("LINK_WHAT_YOU_USE") &&
-         (this->GeneratorTarget->GetType() == cmState::SHARED_LIBRARY)) {
-        std::string cmakeCommand =
-          this->Convert(
-            cmSystemTools::GetCMakeCommand(), cmLocalGenerator::NONE,
-            cmLocalGenerator::SHELL);
-        cmakeCommand += " -E __run_iwyu --lwyu=";
-        cmakeCommand += targetOutPathReal;
-        real_link_commands.push_back(cmakeCommand);
-      }
 
       // Expand placeholders.
       for (std::vector<std::string>::iterator i = real_link_commands.begin();
@@ -725,7 +711,6 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   commands.insert(commands.end(), commands1.begin(), commands1.end());
   commands1.clear();
 
-
   // Add a rule to create necessary symlinks for the library.
   // Frameworks are handled by cmOSXBundleGenerator.
   if (targetOutPath != targetOutPathReal &&
@@ -743,7 +728,6 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     commands.insert(commands.end(), commands1.begin(), commands1.end());
     commands1.clear();
   }
-
   // Add the post-build rules when building but not when relinking.
   if (!relink) {
     this->LocalGenerator->AppendCustomCommands(
