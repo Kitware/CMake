@@ -670,10 +670,10 @@ bool cmFindPackageCommand::HandlePackageMode()
         << " requested version \"" << this->Version << "\".\n"
         << "The following configuration files were considered but not "
            "accepted:\n";
-      for (std::vector<ConfigFileInfo>::size_type i = 0;
-           i < this->ConsideredConfigs.size(); i++) {
-        e << "  " << this->ConsideredConfigs[i].filename
-          << ", version: " << this->ConsideredConfigs[i].version << "\n";
+      for (std::vector<ConfigFileInfo>::const_iterator i =
+             this->ConsideredConfigs.begin();
+           i != this->ConsideredConfigs.end(); ++i) {
+        e << "  " << i->filename << ", version: " << i->version << "\n";
       }
     } else {
       std::string requestedVersionString;
@@ -766,12 +766,13 @@ bool cmFindPackageCommand::HandlePackageMode()
   std::string consideredVersions;
 
   const char* sep = "";
-  for (std::vector<ConfigFileInfo>::size_type i = 0;
-       i < this->ConsideredConfigs.size(); i++) {
+  for (std::vector<ConfigFileInfo>::const_iterator i =
+         this->ConsideredConfigs.begin();
+       i != this->ConsideredConfigs.end(); ++i) {
     consideredConfigFiles += sep;
     consideredVersions += sep;
-    consideredConfigFiles += this->ConsideredConfigs[i].filename;
-    consideredVersions += this->ConsideredConfigs[i].version;
+    consideredConfigFiles += i->filename;
+    consideredVersions += i->version;
     sep = ";";
   }
 
