@@ -9,6 +9,21 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
+#ifndef cmConfigure_h
+#define cmConfigure_h
+
+#include <cmsys/Configure.hxx>
+
+#ifdef _MSC_VER
+#pragma warning(disable : 4786)
+#pragma warning(disable : 4503)
+#endif
+
+#ifdef __ICL
+#pragma warning(disable : 985)
+#pragma warning(disable : 1572) /* floating-point equality test */
+#endif
+
 #cmakedefine HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE
 #cmakedefine HAVE_UNSETENV
 #cmakedefine CMAKE_USE_ELF_PARSER
@@ -17,3 +32,5 @@
 #cmakedefine CMake_HAVE_CXX11_UNORDERED_MAP
 #define CMAKE_BIN_DIR "/@CMAKE_BIN_DIR@"
 #define CMAKE_DATA_DIR "/@CMAKE_DATA_DIR@"
+
+#endif
