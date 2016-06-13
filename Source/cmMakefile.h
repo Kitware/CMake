@@ -933,11 +933,12 @@ private:
 
   std::vector<cmSourceFile*> QtUiFilesWithOptions;
 
-  bool AddRequiredTargetCFeature(cmTarget* target,
-                                 const std::string& feature) const;
+  bool AddRequiredTargetCFeature(cmTarget* target, const std::string& feature,
+                                 std::string* error = 0) const;
 
   bool AddRequiredTargetCxxFeature(cmTarget* target,
-                                   const std::string& feature) const;
+                                   const std::string& feature,
+                                   std::string* error = 0) const;
 
   void CheckNeededCLanguage(const std::string& feature, bool& needC90,
                             bool& needC99, bool& needC11) const;

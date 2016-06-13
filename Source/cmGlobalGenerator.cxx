@@ -2188,9 +2188,10 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   // Install
   bool skipInstallRules = mf->IsOn("CMAKE_SKIP_INSTALL_RULES");
   if (this->InstallTargetEnabled && skipInstallRules) {
-    mf->IssueMessage(cmake::WARNING,
-                     "CMAKE_SKIP_INSTALL_RULES was enabled even though "
-                     "installation rules have been specified");
+    this->CMakeInstance->IssueMessage(
+      cmake::WARNING, "CMAKE_SKIP_INSTALL_RULES was enabled even though "
+                      "installation rules have been specified",
+      mf->GetBacktrace());
   } else if (this->InstallTargetEnabled && !skipInstallRules) {
     if (!cmakeCfgIntDir || !*cmakeCfgIntDir || cmakeCfgIntDir[0] == '.') {
       std::set<std::string>* componentsSet = &this->InstallComponents;
