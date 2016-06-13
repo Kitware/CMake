@@ -257,7 +257,7 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
     fileName.c_str(), std::ios::in |
       (hexOutputArg.IsEnabled() ? std::ios::binary : std::ios::in));
 #else
-  std::ifstream file(fileName.c_str(), std::ios::in);
+  std::ifstream file(fileName.c_str());
 #endif
 
   if (!file) {
@@ -526,7 +526,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
 #if defined(_WIN32) || defined(__CYGWIN__)
   std::ifstream fin(fileName.c_str(), std::ios::in | std::ios::binary);
 #else
-  std::ifstream fin(fileName.c_str(), std::ios::in);
+  std::ifstream fin(fileName.c_str());
 #endif
   if (!fin) {
     std::ostringstream e;

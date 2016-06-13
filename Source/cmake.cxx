@@ -2094,7 +2094,7 @@ static bool cmakeCheckStampFile(const char* stampName)
 #if defined(_WIN32) || defined(__CYGWIN__)
   std::ifstream fin(stampDepends.c_str(), std::ios::in | std::ios::binary);
 #else
-  std::ifstream fin(stampDepends.c_str(), std::ios::in);
+  std::ifstream fin(stampDepends.c_str());
 #endif
   if (!fin) {
     // The stamp dependencies file cannot be read.  Just assume the
