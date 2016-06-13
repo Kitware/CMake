@@ -112,7 +112,7 @@ public:
   cmXCodeObject* GetObject(const char* name) const
   {
     std::map<std::string, cmXCodeObject*>::const_iterator i =
-        this->ObjectAttributes.find(name);
+      this->ObjectAttributes.find(name);
     if (i != this->ObjectAttributes.end()) {
       return i->second;
     }
@@ -149,7 +149,10 @@ public:
   {
     return this->DependTargets;
   }
-  std::vector<cmXCodeObject*> const& GetObjectList() const { return this->List; }
+  std::vector<cmXCodeObject*> const& GetObjectList() const
+  {
+    return this->List;
+  }
   void SetComment(const std::string& c) { this->Comment = c; }
   static void PrintString(std::ostream& os, std::string String);
 
