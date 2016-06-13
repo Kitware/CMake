@@ -72,9 +72,35 @@ _ctest()
             COMPREPLY=( $( compgen -W '0 1' -- "$cur" ) )
             return
             ;;
+
         --help-command)
             COMPREPLY=( $( compgen -W '$( ctest --help-command-list 2>/dev/null|
                 grep -v "^ctest version " )' -- "$cur" ) )
+            return
+            ;;
+        --help-manual)
+            COMPREPLY=( $( compgen -W '$( ctest --help-manual-list 2>/dev/null|
+                grep -v "^ctest version " | sed -e "s/([0-9])$//" )' -- "$cur" ) )
+            return
+            ;;
+        --help-module)
+            COMPREPLY=( $( compgen -W '$( ctest --help-module-list 2>/dev/null|
+                grep -v "^ctest version " )' -- "$cur" ) )
+            return
+            ;;
+        --help-policy)
+            COMPREPLY=( $( compgen -W '$( ctest --help-policy-list 2>/dev/null |
+                grep -v "^ctest version " )' -- "$cur" ) )
+            return
+            ;;
+        --help-property)
+            COMPREPLY=( $( compgen -W '$( ctest --help-property-list \
+                2>/dev/null | grep -v "^ctest version " )' -- "$cur" ) )
+            return
+            ;;
+        --help-variable)
+            COMPREPLY=( $( compgen -W '$( ctest --help-variable-list \
+                2>/dev/null | grep -v "^ctest version " )' -- "$cur" ) )
             return
             ;;
     esac
