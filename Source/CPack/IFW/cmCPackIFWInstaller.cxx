@@ -343,6 +343,7 @@ void cmCPackIFWInstaller::GeneratePackageFiles()
 
 void cmCPackIFWInstaller::WriteGeneratedByToStrim(cmXMLWriter& xout)
 {
-  if (Generator)
+  if (Generator) {
     Generator->WriteGeneratedByToStrim(xout);
+  }
 }

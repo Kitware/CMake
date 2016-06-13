@@ -271,8 +271,9 @@ bool cmCTestSVN::UpdateImpl()
 bool cmCTestSVN::RunSVNCommand(std::vector<char const*> const& parameters,
                                OutputParser* out, OutputParser* err)
 {
-  if (parameters.empty())
+  if (parameters.empty()) {
     return false;
+  }
 
   std::vector<char const*> args;
   args.push_back(this->CommandLineTool.c_str());

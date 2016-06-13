@@ -426,8 +426,9 @@ void cmCTestP4::LoadRevisions()
   ChangeLists.clear();
   this->RunChild(&p4_changes[0], &out, &err);
 
-  if (ChangeLists.empty())
+  if (ChangeLists.empty()) {
     return;
+  }
 
   // p4 describe -s ...@1111111,2222222
   std::vector<char const*> p4_describe;

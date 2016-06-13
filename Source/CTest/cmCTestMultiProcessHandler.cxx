@@ -413,12 +413,14 @@ void cmCTestMultiProcessHandler::UpdateCostData()
 
     std::string line;
     while (std::getline(fin, line)) {
-      if (line == "---")
+      if (line == "---") {
         break;
+      }
       std::vector<cmsys::String> parts = cmSystemTools::SplitString(line, ' ');
       // Format: <name> <previous_runs> <avg_cost>
-      if (parts.size() < 3)
+      if (parts.size() < 3) {
         break;
+      }
 
       std::string name = parts[0];
       int prev = atoi(parts[1].c_str());
@@ -464,8 +466,9 @@ void cmCTestMultiProcessHandler::ReadCostData()
     fin.open(fname.c_str());
     std::string line;
     while (std::getline(fin, line)) {
-      if (line == "---")
+      if (line == "---") {
         break;
+      }
 
       std::vector<cmsys::String> parts = cmSystemTools::SplitString(line, ' ');
 
@@ -480,8 +483,9 @@ void cmCTestMultiProcessHandler::ReadCostData()
       float cost = static_cast<float>(atof(parts[2].c_str()));
 
       int index = this->SearchByName(name);
-      if (index == -1)
+      if (index == -1) {
         continue;
+      }
 
       this->Properties[index]->PreviousRuns = prev;
       // When not running in parallel mode, don't use cost data
