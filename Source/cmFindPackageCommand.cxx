@@ -664,6 +664,8 @@ bool cmFindPackageCommand::HandlePackageMode()
     // If there are files in ConsideredConfigs, it means that FooConfig.cmake
     // have been found, but they didn't have appropriate versions.
     else if (!this->ConsideredConfigs.empty()) {
+      std::vector<ConfigFileInfo>::const_iterator duplicate_end =
+        cmRemoveDuplicates(this->ConsideredConfigs);
       e << "Could not find a configuration file for package \"" << this->Name
         << "\" that "
         << (this->VersionExact ? "exactly matches" : "is compatible with")
@@ -672,7 +674,7 @@ bool cmFindPackageCommand::HandlePackageMode()
            "accepted:\n";
       for (std::vector<ConfigFileInfo>::const_iterator i =
              this->ConsideredConfigs.begin();
-           i != this->ConsideredConfigs.end(); ++i) {
+           i != duplicate_end; ++i) {
         e << "  " << i->filename << ", version: " << i->version << "\n";
       }
     } else {

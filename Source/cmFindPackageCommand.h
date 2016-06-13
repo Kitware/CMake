@@ -159,6 +159,21 @@ private:
   {
     std::string filename;
     std::string version;
+
+    bool operator<(ConfigFileInfo const& rhs) const
+    {
+      return this->filename < rhs.filename;
+    }
+
+    bool operator==(ConfigFileInfo const& rhs) const
+    {
+      return this->filename == rhs.filename;
+    }
+
+    bool operator!=(ConfigFileInfo const& rhs) const
+    {
+      return !(*this == rhs);
+    }
   };
   std::vector<ConfigFileInfo> ConsideredConfigs;
 };
