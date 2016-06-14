@@ -1,1 +1,1 @@
-message("trace particular file test passed")
+message(STATUS "trace particular file test passed")

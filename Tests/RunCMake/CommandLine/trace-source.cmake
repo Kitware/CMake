@@ -1,3 +1,3 @@
-message("before include()")
+message(STATUS "before include()")
 include("trace-only-this-file.cmake")
-message("after include()")
+message(STATUS "after include()")

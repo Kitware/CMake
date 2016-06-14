@@ -181,13 +181,20 @@ void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
     this->GetCMakeInstance()->GetTraceSources();
   std::string const& full_path = this->GetExecutionFilePath();
   std::string const& only_filename = cmSystemTools::GetFilenameName(full_path);
-  bool trace = trace_only_this_files.empty() ||
-    std::find(trace_only_this_files.begin(), trace_only_this_files.end(),
-      only_filename) != trace_only_this_files.end();
-
-  // Do nothing if current file wasn't requested for trace...
+  bool trace = trace_only_this_files.empty();
   if (!trace) {
-      return;
+    for (std::vector<std::string>::const_iterator i =
+        trace_only_this_files.begin();
+        !trace && i != trace_only_this_files.end(); ++i) {
+      std::string::size_type const pos = full_path.rfind(*i);
+      trace = (pos != std::string::npos) &&
+        ((pos + i->size()) == full_path.size()) &&
+        (only_filename == cmSystemTools::GetFilenameName(*i));
+    }
+    // Do nothing if current file wasn't requested for trace...
+    if (!trace) {
+        return;
+    }
   }
 
   std::ostringstream msg;
