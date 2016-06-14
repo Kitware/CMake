@@ -116,7 +116,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
   } else {
     lg->GetMakefile()->AddCMakeDependFile(this->Input);
     cmSystemTools::GetPermissions(this->Input.c_str(), perm);
-    std::ifstream fin(this->Input.c_str());
+    cmsys::ifstream fin(this->Input.c_str());
     if (!fin) {
       std::ostringstream e;
       e << "Evaluation file \"" << this->Input << "\" cannot be read.";

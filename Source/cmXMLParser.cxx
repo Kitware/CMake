@@ -43,7 +43,7 @@ int cmXMLParser::ParseFile(const char* file)
     return 0;
   }
 
-  std::ifstream ifs(file);
+  cmsys::ifstream ifs(file);
   if (!ifs) {
     return 0;
   }

@@ -114,7 +114,7 @@ static bool cmTarFilesFrom(std::string const& file,
     cmSystemTools::Error(e.str().c_str());
     return false;
   }
-  std::ifstream fin(file.c_str());
+  cmsys::ifstream fin(file.c_str());
   if (!fin) {
     std::ostringstream e;
     e << "-E tar --files-from= file '" << file << "' not found";
@@ -239,7 +239,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
                   << "\n";
         return 1;
       }
-      std::ifstream fin(args[3].c_str(), std::ios::in | std::ios::binary);
+      cmsys::ifstream fin(args[3].c_str(), std::ios::in | std::ios::binary);
       if (!fin) {
         std::cerr << "could not open object list file: " << args[3].c_str()
                   << "\n";
@@ -1102,7 +1102,7 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string>& args)
   cmsysProcess_SetOption(cp, cmsysProcess_Option_Verbatim, 1);
 
   // Read command lines from the script.
-  std::ifstream fin(args[2].c_str());
+  cmsys::ifstream fin(args[2].c_str());
   if (!fin) {
     std::cerr << "Error opening link script \"" << args[2] << "\""
               << std::endl;
@@ -1228,7 +1228,7 @@ int cmcmd::VisualStudioLink(std::vector<std::string>& args, int type)
        ++i) {
     // check for nmake temporary files
     if ((*i)[0] == '@' && i->find("@CMakeFiles") != 0) {
-      std::ifstream fin(i->substr(1).c_str());
+      cmsys::ifstream fin(i->substr(1).c_str());
       std::string line;
       while (cmSystemTools::GetLineFromStream(fin, line)) {
         cmSystemTools::ParseWindowsCommandLine(line.c_str(), expandedArgs);
@@ -1407,7 +1407,7 @@ int cmVSLink::LinkIncremental()
     std::cout << "Create " << this->ManifestFileRC << "\n";
   }
   {
-    std::ofstream fout(this->ManifestFileRC.c_str());
+    cmsys::ofstream fout(this->ManifestFileRC.c_str());
     if (!fout) {
       return -1;
     }
@@ -1422,7 +1422,7 @@ int cmVSLink::LinkIncremental()
     if (this->Verbose) {
       std::cout << "Create empty: " << this->ManifestFile << "\n";
     }
-    std::ofstream foutTmp(this->ManifestFile.c_str());
+    cmsys::ofstream foutTmp(this->ManifestFile.c_str());
   }
 
   // Compile the resource file.

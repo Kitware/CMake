@@ -165,7 +165,7 @@ bool cmParsePHPCoverage::ReadFileInformation(std::istream& in)
 
 bool cmParsePHPCoverage::ReadPHPData(const char* file)
 {
-  std::ifstream in(file);
+  cmsys::ifstream in(file);
   if (!in) {
     return false;
   }

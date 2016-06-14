@@ -53,7 +53,7 @@ bool cmCacheManager::LoadCache(const std::string& path, bool internal,
     return false;
   }
 
-  std::ifstream fin(cacheFile.c_str());
+  cmsys::ifstream fin(cacheFile.c_str());
   if (!fin) {
     return false;
   }
@@ -360,7 +360,7 @@ bool cmCacheManager::SaveCache(const std::string& path)
   checkCacheFile += cmake::GetCMakeFilesDirectory();
   cmSystemTools::MakeDirectory(checkCacheFile.c_str());
   checkCacheFile += "/cmake.check_cache";
-  std::ofstream checkCache(checkCacheFile.c_str());
+  cmsys::ofstream checkCache(checkCacheFile.c_str());
   if (!checkCache) {
     cmSystemTools::Error("Unable to open check cache file for write. ",
                          checkCacheFile.c_str());

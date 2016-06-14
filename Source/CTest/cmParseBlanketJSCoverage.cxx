@@ -55,7 +55,7 @@ public:
     std::string covResult;
     std::string line;
 
-    std::ifstream in(file.c_str());
+    cmsys::ifstream in(file.c_str());
     if (!in) {
       return false;
     }

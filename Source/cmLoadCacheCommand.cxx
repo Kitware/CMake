@@ -97,7 +97,7 @@ bool cmLoadCacheCommand::ReadWithPrefix(std::vector<std::string> const& args)
   this->VariablesToRead.insert(args.begin() + 3, args.end());
 
   // Read the cache file.
-  std::ifstream fin(cacheFile.c_str());
+  cmsys::ifstream fin(cacheFile.c_str());
 
   // This is a big hack read loop to overcome a buggy ifstream
   // implementation on HP-UX.  This should work on all platforms even

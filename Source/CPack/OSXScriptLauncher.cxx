@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 {
   // if ( cmsys::SystemTools::FileExists(
   std::string cwd = cmsys::SystemTools::GetCurrentWorkingDirectory();
-  std::ofstream ofs("/tmp/output.txt");
+  cmsys::ofstream ofs("/tmp/output.txt");
 
   CFStringRef fileName;
   CFBundleRef appBundle;

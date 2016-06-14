@@ -246,7 +246,7 @@ void cmDependsFortran::LocateModules()
        i != infoFiles.end(); ++i) {
     std::string targetDir = cmSystemTools::GetFilenamePath(*i);
     std::string fname = targetDir + "/fortran.internal";
-    std::ifstream fin(fname.c_str());
+    cmsys::ifstream fin(fname.c_str());
     if (fin) {
       this->MatchRemoteModules(fin, targetDir.c_str());
     }
@@ -630,11 +630,11 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
   }
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-  std::ifstream finModFile(modFile, std::ios::in | std::ios::binary);
-  std::ifstream finStampFile(stampFile, std::ios::in | std::ios::binary);
+  cmsys::ifstream finModFile(modFile, std::ios::in | std::ios::binary);
+  cmsys::ifstream finStampFile(stampFile, std::ios::in | std::ios::binary);
 #else
-  std::ifstream finModFile(modFile);
-  std::ifstream finStampFile(stampFile);
+  cmsys::ifstream finModFile(modFile, std::ios::in);
+  cmsys::ifstream finStampFile(stampFile, std::ios::in);
 #endif
   if (!finModFile || !finStampFile) {
     // At least one of the files does not exist.  The modules differ.

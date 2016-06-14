@@ -63,7 +63,7 @@ private:
 
   static std::string EscapeAttributeValue(std::string const& value);
 
-  std::ofstream File;
+  cmsys::ofstream File;
 
   State State;
 

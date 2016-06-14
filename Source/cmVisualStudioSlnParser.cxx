@@ -431,7 +431,7 @@ bool cmVisualStudioSlnParser::ParseFile(const std::string& file,
     this->LastResult.SetError(ResultErrorUnsupportedDataGroup, 0);
     return false;
   }
-  std::ifstream f(file.c_str());
+  cmsys::ifstream f(file.c_str());
   if (!f) {
     this->LastResult.SetError(ResultErrorOpeningInput, 0);
     return false;

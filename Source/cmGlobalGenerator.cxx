@@ -2569,9 +2569,9 @@ void cmGlobalGenerator::CheckRuleHashes(std::string const& pfile,
                                         std::string const& home)
 {
 #if defined(_WIN32) || defined(__CYGWIN__)
-  std::ifstream fin(pfile.c_str(), std::ios::in | std::ios::binary);
+  cmsys::ifstream fin(pfile.c_str(), std::ios::in | std::ios::binary);
 #else
-  std::ifstream fin(pfile.c_str());
+  cmsys::ifstream fin(pfile.c_str(), std::ios::in);
 #endif
   if (!fin) {
     return;

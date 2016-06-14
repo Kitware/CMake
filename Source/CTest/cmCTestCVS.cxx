@@ -209,7 +209,7 @@ std::string cmCTestCVS::ComputeBranchFlag(std::string const& dir)
 
   // Lookup the branch in the tag file, if any.
   std::string tagLine;
-  std::ifstream tagStream(tagFile.c_str());
+  cmsys::ifstream tagStream(tagFile.c_str());
   if (tagStream && cmSystemTools::GetLineFromStream(tagStream, tagLine) &&
       tagLine.size() > 1 && tagLine[0] == 'T') {
     // Use the branch specified in the tag file.
