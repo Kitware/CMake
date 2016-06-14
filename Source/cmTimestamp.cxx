@@ -152,7 +152,7 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
         return std::string();
       }
 
-      std::stringstream ss;
+      std::ostringstream ss;
       ss << static_cast<long int>(difftime(timeT, unixEpoch));
       return ss.str();
     }

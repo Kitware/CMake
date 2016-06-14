@@ -140,7 +140,7 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
     cmsys::ofstream* fout = 0;
     std::ostream* s = &os;
     if (!i->Filename.empty()) {
-      fout = new cmsys::ofstream(i->Filename.c_str(), std::ios::out);
+      fout = new cmsys::ofstream(i->Filename.c_str());
       if (fout) {
         s = fout;
       } else {

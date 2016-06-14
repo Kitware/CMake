@@ -31,7 +31,7 @@ void cmWIXFilesSourceWriter::EmitShortcut(std::string const& id,
                                           std::string const& shortcutPrefix,
                                           size_t shortcutIndex)
 {
-  std::stringstream shortcutId;
+  std::ostringstream shortcutId;
   shortcutId << shortcutPrefix << id;
 
   if (shortcutIndex > 0) {

@@ -3459,7 +3459,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
     }
   } else {
     std::string newLineCharacters;
-    std::ios_base::openmode omode = std::ios_base::out | std::ios_base::trunc;
+    std::ios::openmode omode = std::ios::out | std::ios::trunc;
     if (newLine.IsValid()) {
       newLineCharacters = newLine.GetCharacters();
       omode |= std::ios::binary;

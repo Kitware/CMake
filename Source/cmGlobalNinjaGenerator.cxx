@@ -513,8 +513,8 @@ void cmGlobalNinjaGenerator::Generate()
   this->WriteBuiltinTargets(*this->BuildFileStream);
 
   if (cmSystemTools::GetErrorOccuredFlag()) {
-    this->RulesFileStream->setstate(std::ios_base::failbit);
-    this->BuildFileStream->setstate(std::ios_base::failbit);
+    this->RulesFileStream->setstate(std::ios::failbit);
+    this->BuildFileStream->setstate(std::ios::failbit);
   }
 
   this->CloseCompileCommandsStream();
