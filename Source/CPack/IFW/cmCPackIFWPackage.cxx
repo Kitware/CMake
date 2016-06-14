@@ -422,7 +422,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   }
   // Write dependencies
   if (!compDepSet.empty()) {
-    std::stringstream dependencies;
+    std::ostringstream dependencies;
     std::set<DependenceStruct>::iterator it = compDepSet.begin();
     dependencies << it->NameWithCompare();
     ++it;

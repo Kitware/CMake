@@ -464,7 +464,7 @@ static std::string cmQtAutoGeneratorsStripCR(std::string const& line)
 static std::string ReadAll(const std::string& filename)
 {
   cmsys::ifstream file(filename.c_str());
-  std::stringstream stream;
+  std::ostringstream stream;
   stream << file.rdbuf();
   file.close();
   return stream.str();
@@ -508,7 +508,7 @@ static std::string ListQt5RccInputs(cmSourceFile* sf,
   bool result = cmSystemTools::RunSingleCommand(
     command, &rccStdOut, &rccStdErr, &retVal, 0, cmSystemTools::OUTPUT_NONE);
   if (!result || retVal) {
-    std::stringstream err;
+    std::ostringstream err;
     err << "AUTOGEN: error: Rcc list process for " << sf->GetFullPath()
         << " failed:\n"
         << rccStdOut << "\n"
@@ -538,7 +538,7 @@ static std::string ListQt5RccInputs(cmSourceFile* sf,
 
         std::string::size_type pos = eline.find(searchString);
         if (pos == std::string::npos) {
-          std::stringstream err;
+          std::ostringstream err;
           err << "AUTOGEN: error: Rcc lists unparsable output " << eline
               << std::endl;
           std::cerr << err.str();

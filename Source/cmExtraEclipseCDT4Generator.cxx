@@ -311,7 +311,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
                    "false");
 
   // set project specific environment
-  std::stringstream environment;
+  std::ostringstream environment;
   environment << "VERBOSE=1|CMAKE_NO_VERBOSE=1|"; // verbose Makefile output
   // set vsvars32.bat environment available at CMake time,
   //   but not necessarily when eclipse is open
@@ -341,7 +341,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   AppendDictionary(xml, "org.eclipse.cdt.make.core.autoBuildTarget", "all");
 
   // set error parsers
-  std::stringstream errorOutputParser;
+  std::ostringstream errorOutputParser;
 
   if (compilerId == "MSVC") {
     errorOutputParser << "org.eclipse.cdt.core.VCErrorParser;";

@@ -1527,7 +1527,7 @@ public:
       if (item.find("::") != std::string::npos) {
         bool noMessage = false;
         cmake::MessageType messageType = cmake::FATAL_ERROR;
-        std::stringstream e;
+        std::ostringstream e;
         switch (this->Target->GetLocalGenerator()->GetPolicyStatus(
           cmPolicies::CMP0028)) {
           case cmPolicies::WARN: {
@@ -1628,7 +1628,7 @@ public:
     if (this->Preferred.empty()) {
       return "";
     } else if (this->Preferred.size() > 1) {
-      std::stringstream e;
+      std::ostringstream e;
       e << "Target " << this->Target->GetName()
         << " contains multiple languages with the highest linker preference"
         << " (" << this->Preference << "):\n";

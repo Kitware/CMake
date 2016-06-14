@@ -90,7 +90,7 @@ bool cmCPackWIXGenerator::RunCandleCommand(std::string const& sourceFile,
     return false;
   }
 
-  std::stringstream command;
+  std::ostringstream command;
   command << QuotePath(executable);
   command << " -nologo";
   command << " -arch " << GetArchitecture();
@@ -115,7 +115,7 @@ bool cmCPackWIXGenerator::RunLightCommand(std::string const& objectFiles)
     return false;
   }
 
-  std::stringstream command;
+  std::ostringstream command;
   command << QuotePath(executable);
   command << " -nologo";
   command << " -out " << QuotePath(packageFileNames.at(0));
@@ -254,7 +254,7 @@ bool cmCPackWIXGenerator::PackageFilesImpl()
 
   std::set<std::string> usedBaseNames;
 
-  std::stringstream objectFiles;
+  std::ostringstream objectFiles;
   for (size_t i = 0; i < this->WixSources.size(); ++i) {
     std::string const& sourceFilename = this->WixSources[i];
 
@@ -265,7 +265,7 @@ bool cmCPackWIXGenerator::PackageFilesImpl()
     std::string uniqueBaseName = baseName;
 
     while (usedBaseNames.find(uniqueBaseName) != usedBaseNames.end()) {
-      std::stringstream tmp;
+      std::ostringstream tmp;
       tmp << baseName << ++counter;
       uniqueBaseName = tmp.str();
     }
@@ -403,7 +403,7 @@ void cmCPackWIXGenerator::AddDefinition(cmWIXSourceWriter& source,
                                         std::string const& name,
                                         std::string const& value)
 {
-  std::stringstream tmp;
+  std::ostringstream tmp;
   tmp << name << "=\"" << value << '"';
 
   source.AddProcessingInstruction(
@@ -1019,7 +1019,7 @@ std::string cmCPackWIXGenerator::CreateNewIdForPath(std::string const& path)
     idPrefix = "H";
   }
 
-  std::stringstream result;
+  std::ostringstream result;
   result << idPrefix << "_" << identifier;
 
   size_t ambiguityCount = ++IdAmbiguityCounter[identifier];

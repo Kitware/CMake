@@ -1677,7 +1677,7 @@ void cmCTestTestHandler::GenerateRegressionImages(cmXMLWriter& xml,
           xml.Attribute(measurementfile.match(3).c_str(),
                         measurementfile.match(4));
           xml.Attribute("encoding", "base64");
-          std::stringstream ostr;
+          std::ostringstream ostr;
           for (size_t cc = 0; cc < rlen; cc++) {
             ostr << encoded_buffer[cc];
             if (cc % 60 == 0 && cc) {
