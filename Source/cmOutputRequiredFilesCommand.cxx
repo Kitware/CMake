@@ -166,7 +166,7 @@ protected:
 
   void DependWalk(cmDependInformation* info)
   {
-    std::ifstream fin(info->FullPath.c_str());
+    cmsys::ifstream fin(info->FullPath.c_str());
     if (!fin) {
       cmSystemTools::Error("error can not open ", info->FullPath.c_str());
       return;

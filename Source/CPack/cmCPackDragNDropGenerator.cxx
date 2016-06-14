@@ -230,12 +230,12 @@ bool cmCPackDragNDropGenerator::CopyFile(std::ostringstream& source,
 bool cmCPackDragNDropGenerator::CreateEmptyFile(std::ostringstream& target,
                                                 size_t size)
 {
-  std::ofstream fout(target.str().c_str(), std::ios::out | std::ios::binary);
+  cmsys::ofstream fout(target.str().c_str(), std::ios::out | std::ios::binary);
   if (!fout) {
     return false;
   } else {
     // Seek to desired size - 1 byte
-    fout.seekp(size - 1, std::ios::beg);
+    fout.seekp(size - 1, std::ios_base::beg);
     char byte = 0;
     // Write one byte to ensure file grows
     fout.write(&byte, 1);
@@ -784,7 +784,7 @@ bool cmCPackDragNDropGenerator::WriteLicense(
   std::string actual_license = !licenseFile.empty()
     ? licenseFile
     : (slaDirectory + "/" + licenseLanguage + ".license.txt");
-  std::ifstream license_ifs;
+  cmsys::ifstream license_ifs;
   license_ifs.open(actual_license.c_str());
   if (license_ifs.is_open()) {
     while (license_ifs.good()) {
@@ -816,7 +816,7 @@ bool cmCPackDragNDropGenerator::WriteLicense(
     outputStream << "    {\n";
 
     // Menu body
-    std::ifstream menu_ifs;
+    cmsys::ifstream menu_ifs;
     menu_ifs.open(
       (slaDirectory + "/" + licenseLanguage + ".menu.txt").c_str());
     if (menu_ifs.is_open()) {

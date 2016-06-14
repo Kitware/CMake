@@ -75,10 +75,10 @@ protected:
  * being updated.
  */
 class cmGeneratedFileStream : private cmGeneratedFileStreamBase,
-                              public std::ofstream
+                              public cmsys::ofstream
 {
 public:
-  typedef std::ofstream Stream;
+  typedef cmsys::ofstream Stream;
 
   /**
    * This constructor prepares a default stream.  The open method must

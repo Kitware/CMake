@@ -487,7 +487,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     covLogXML.Attribute("FullPath", shortFileName);
     covLogXML.StartElement("Report");
 
-    std::ifstream ifs(fullFileName.c_str());
+    cmsys::ifstream ifs(fullFileName.c_str());
     if (!ifs) {
       std::ostringstream ostr;
       ostr << "Cannot open source file: " << fullFileName;
@@ -567,7 +567,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     covLogXML.Attribute("FullPath", *i);
     covLogXML.StartElement("Report");
 
-    std::ifstream ifs(fullPath.c_str());
+    cmsys::ifstream ifs(fullPath.c_str());
     if (!ifs) {
       std::ostringstream ostr;
       ostr << "Cannot open source file: " << fullPath;
@@ -899,7 +899,7 @@ int cmCTestCoverageHandler::HandleBlanketJSCoverage(
   // string on the second line
   std::string line;
   for (unsigned int fileEntry = 0; fileEntry < files.size(); fileEntry++) {
-    std::ifstream in(files[fileEntry].c_str());
+    cmsys::ifstream in(files[fileEntry].c_str());
     cmSystemTools::GetLineFromStream(in, line);
     cmSystemTools::GetLineFromStream(in, line);
     if (line.find("node-jscoverage") != line.npos) {
@@ -1190,7 +1190,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
                            "   in gcovFile: " << gcovFile << std::endl,
                            this->Quiet);
 
-        std::ifstream ifile(gcovFile.c_str());
+        cmsys::ifstream ifile(gcovFile.c_str());
         if (!ifile) {
           cmCTestLog(this->CTest, ERROR_MESSAGE,
                      "Cannot open file: " << gcovFile << std::endl);
@@ -1448,7 +1448,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
       for (std::vector<std::string>::iterator a = lcovFiles.begin();
            a != lcovFiles.end(); ++a) {
         lcovFile = *a;
-        std::ifstream srcead(lcovFile.c_str());
+        cmsys::ifstream srcead(lcovFile.c_str());
         if (!srcead) {
           cmCTestLog(this->CTest, ERROR_MESSAGE,
                      "Cannot open file: " << lcovFile << std::endl);
@@ -1490,7 +1490,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
                              "   in lcovFile: " << lcovFile << std::endl,
                              this->Quiet);
 
-          std::ifstream ifile(lcovFile.c_str());
+          cmsys::ifstream ifile(lcovFile.c_str());
           if (!ifile) {
             cmCTestLog(this->CTest, ERROR_MESSAGE,
                        "Cannot open file: " << lcovFile << std::endl);
@@ -1680,7 +1680,7 @@ int cmCTestCoverageHandler::HandleTracePyCoverage(
       &cont->TotalCoverage[actualSourceFile];
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        "   in file: " << *fileIt << std::endl, this->Quiet);
-    std::ifstream ifile(fileIt->c_str());
+    cmsys::ifstream ifile(fileIt->c_str());
     if (!ifile) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "Cannot open file: " << *fileIt << std::endl);
@@ -1818,7 +1818,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
                      "covbr output in  " << outputFile << std::endl,
                      this->Quiet);
   // open the output file
-  std::ifstream fin(outputFile.c_str());
+  cmsys::ifstream fin(outputFile.c_str());
   if (!fin) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot open coverage file: " << outputFile << std::endl);
@@ -2006,7 +2006,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
   std::vector<std::string> coveredFiles;
   std::vector<std::string> coveredFilesFullPath;
   // Read and parse the summary output file
-  std::ifstream fin(outputFile.c_str());
+  cmsys::ifstream fin(outputFile.c_str());
   if (!fin) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot open coverage summary file: " << outputFile
@@ -2218,7 +2218,7 @@ void cmCTestCoverageHandler::LoadLabels()
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      " target directory list [" << fileList << "]\n",
                      this->Quiet);
-  std::ifstream finList(fileList.c_str());
+  cmsys::ifstream finList(fileList.c_str());
   std::string line;
   while (cmSystemTools::GetLineFromStream(finList, line)) {
     this->LoadLabels(line.c_str());
@@ -2230,7 +2230,7 @@ void cmCTestCoverageHandler::LoadLabels(const char* dir)
   LabelSet& dirLabels = this->TargetDirs[dir];
   std::string fname = dir;
   fname += "/Labels.txt";
-  std::ifstream fin(fname.c_str());
+  cmsys::ifstream fin(fname.c_str());
   if (!fin) {
     return;
   }

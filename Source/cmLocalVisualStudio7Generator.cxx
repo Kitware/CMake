@@ -183,7 +183,7 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
   cmSystemTools::MakeDirectory(stampName.c_str());
   stampName += "/";
   stampName += "generate.stamp";
-  std::ofstream stamp(stampName.c_str());
+  cmsys::ofstream stamp(stampName.c_str());
   stamp << "# CMake generation timestamp file for this directory.\n";
 
   // Create a helper file so CMake can determine when it is run
@@ -194,7 +194,7 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
   // the stamp file can just be touched.
   std::string depName = stampName;
   depName += ".depend";
-  std::ofstream depFile(depName.c_str());
+  cmsys::ofstream depFile(depName.c_str());
   depFile << "# CMake generation dependency list for this directory.\n";
   std::vector<std::string> const& listFiles = this->Makefile->GetListFiles();
   for (std::vector<std::string>::const_iterator lf = listFiles.begin();
@@ -1764,7 +1764,7 @@ void cmLocalVisualStudio7Generator::WriteCustomRule(
       // There are no real dependencies.  Produce an artificial one to
       // make sure the rule runs reliably.
       if (!cmSystemTools::FileExists(source)) {
-        std::ofstream depout(source);
+        cmsys::ofstream depout(source);
         depout << "Artificial dependency for a custom command.\n";
       }
       fout << this->ConvertToXMLOutputPath(source);

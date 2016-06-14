@@ -511,7 +511,7 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
     }
 
     std::string tagfile = testingDir + "/TAG";
-    std::ifstream tfin(tagfile.c_str());
+    cmsys::ifstream tfin(tagfile.c_str());
     std::string tag;
 
     if (createNewTag) {
@@ -556,7 +556,7 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
                 lctime->tm_mon + 1, lctime->tm_mday, lctime->tm_hour,
                 lctime->tm_min);
         tag = datestring;
-        std::ofstream ofs(tagfile.c_str());
+        cmsys::ofstream ofs(tagfile.c_str());
         if (ofs) {
           ofs << tag << std::endl;
           ofs << this->GetTestModelString() << std::endl;
@@ -696,7 +696,7 @@ bool cmCTest::UpdateCTestConfiguration()
     cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "Parse Config file:" << fileName
                                                                   << "\n");
     // parse the dart test file
-    std::ifstream fin(fileName.c_str());
+    cmsys::ifstream fin(fileName.c_str());
 
     if (!fin) {
       return false;
@@ -1429,7 +1429,7 @@ int cmCTest::GenerateCTestNotesOutput(cmXMLWriter& xml,
     xml.Element("Time", cmSystemTools::GetTime());
     xml.Element("DateTime", note_time);
     xml.StartElement("Text");
-    std::ifstream ifs(it->c_str());
+    cmsys::ifstream ifs(it->c_str());
     if (ifs) {
       std::string line;
       while (cmSystemTools::GetLineFromStream(ifs, line)) {
@@ -1502,7 +1502,7 @@ std::string cmCTest::Base64GzipEncodeFile(std::string const& file)
 std::string cmCTest::Base64EncodeFile(std::string const& file)
 {
   size_t const len = cmSystemTools::FileLength(file);
-  std::ifstream ifs(file.c_str(), std::ios::in
+  cmsys::ifstream ifs(file.c_str(), std::ios::in
 #ifdef _WIN32
                         | std::ios::binary
 #endif

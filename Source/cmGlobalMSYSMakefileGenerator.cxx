@@ -31,7 +31,7 @@ std::string cmGlobalMSYSMakefileGenerator::FindMinGW(
 {
   std::string fstab = makeloc;
   fstab += "/../etc/fstab";
-  std::ifstream fin(fstab.c_str());
+  cmsys::ifstream fin(fstab.c_str());
   std::string path;
   std::string mount;
   std::string mingwBin;

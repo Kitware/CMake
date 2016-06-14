@@ -816,7 +816,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
       // Make sure the path exists for the file
       std::string path = cmSystemTools::GetFilenamePath(sourcePath);
       cmSystemTools::MakeDirectory(path.c_str());
-      std::ofstream fout(sourcePath.c_str());
+      cmsys::ofstream fout(sourcePath.c_str());
       if (fout) {
         fout << "# generated from CMake\n";
         fout.flush();
