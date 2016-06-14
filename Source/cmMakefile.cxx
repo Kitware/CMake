@@ -178,7 +178,7 @@ void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
 {
   // Check if current file in the list of requested to trace...
   std::vector<std::string> const& trace_only_this_files =
-    this->GetCMakeInstance()->GetTraceFiles();
+    this->GetCMakeInstance()->GetTraceSources();
   std::string const& full_path = this->GetExecutionFilePath();
   std::string const& only_filename = cmSystemTools::GetFilenameName(full_path);
   bool trace = trace_only_this_files.empty() ||

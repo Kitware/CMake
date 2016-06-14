@@ -307,13 +307,13 @@ public:
   void SetTrace(bool b) { this->Trace = b; }
   bool GetTraceExpand() { return this->TraceExpand; }
   void SetTraceExpand(bool b) { this->TraceExpand = b; }
-  void AddTraceFile(std::string const& file)
+  void AddTraceSource(std::string const& file)
   {
-    this->TraceOnlyThisFiles.push_back(file);
+    this->TraceOnlyThisSources.push_back(file);
   }
-  std::vector<std::string> const& GetTraceFiles() const
+  std::vector<std::string> const& GetTraceSources() const
   {
-    return this->TraceOnlyThisFiles;
+    return this->TraceOnlyThisSources;
   }
   bool GetWarnUninitialized() { return this->WarnUninitialized; }
   void SetWarnUninitialized(bool b) { this->WarnUninitialized = b; }
@@ -489,7 +489,7 @@ private:
   cmState* State;
   cmState::Snapshot CurrentSnapshot;
 
-  std::vector<std::string> TraceOnlyThisFiles;
+  std::vector<std::string> TraceOnlyThisSources;
 
   void UpdateConversionPathTable();
 
