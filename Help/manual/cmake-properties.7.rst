@@ -345,6 +345,7 @@ Properties on Source Files
    /prop_sf/VS_XAML_TYPE
    /prop_sf/WRAP_EXCLUDE
    /prop_sf/XCODE_EXPLICIT_FILE_TYPE
+   /prop_sf/XCODE_FILE_ATTRIBUTES
    /prop_sf/XCODE_LAST_KNOWN_FILE_TYPE
 
 .. _`Cache Entry Properties`:
