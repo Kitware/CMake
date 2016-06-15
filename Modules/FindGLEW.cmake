@@ -35,7 +35,7 @@
 #  License text for the above reference.)
 
 find_path(GLEW_INCLUDE_DIR GL/glew.h)
-find_library(GLEW_LIBRARY NAMES GLEW glew32 glew glew32s PATH_SUFFIXES lib64)
+find_library(GLEW_LIBRARY NAMES GLEW glew32 glew glew32s GLEWd glew32d glewd PATH_SUFFIXES lib64)
 
 set(GLEW_INCLUDE_DIRS ${GLEW_INCLUDE_DIR})
 set(GLEW_LIBRARIES ${GLEW_LIBRARY})
