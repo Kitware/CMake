@@ -126,17 +126,8 @@ public:
    * modify the generated quoting and escape sequences to work under
    * alternative environments.
    */
-  static char* Shell_GetArgumentForWindows(const char* in, char* out,
-                                           int flags);
-  static char* Shell_GetArgumentForUnix(const char* in, char* out, int flags);
-
-  /**
-   * Compute the size of the buffer required to store the output from
-   * Shell_GetArgumentForWindows or Shell_GetArgumentForUnix.  The flags
-   * passed must be identical between the two calls.
-   */
-  static int Shell_GetArgumentSizeForWindows(const char* in, int flags);
-  static int Shell_GetArgumentSizeForUnix(const char* in, int flags);
+  static std::string Shell_GetArgumentForWindows(const char* in, int flags);
+  static std::string Shell_GetArgumentForUnix(const char* in, int flags);
 
   std::string EscapeForShell(const std::string& str, bool makeVars = false,
                              bool forEcho = false,
@@ -182,9 +173,7 @@ private:
   static int Shell__CharIsMakeVariableName(char c);
   static const char* Shell__SkipMakeVariables(const char* c);
   static int Shell__ArgumentNeedsQuotes(const char* in, int isUnix, int flags);
-  static int Shell__GetArgumentSize(const char* in, int isUnix, int flags);
-  static char* Shell__GetArgument(const char* in, char* out, int isUnix,
-                                  int flags);
+  static std::string Shell__GetArgument(const char* in, int isUnix, int flags);
 
 private:
   cmState::Snapshot StateSnapshot;
