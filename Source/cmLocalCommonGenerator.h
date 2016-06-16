@@ -33,6 +33,9 @@ public:
     return this->WorkingDirectory;
   }
 
+  void AddFeatureFlags(std::string& flags, std::string const& lang,
+                       cmGeneratorTarget const* target);
+
   std::string GetFortranFlags(cmGeneratorTarget const* target);
 
 protected:

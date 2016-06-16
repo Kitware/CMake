@@ -36,6 +36,19 @@ void cmLocalCommonGenerator::SetConfigName()
   }
 }
 
+void cmLocalCommonGenerator::AddFeatureFlags(std::string& flags,
+                                             std::string const& lang,
+                                             cmGeneratorTarget const* target)
+{
+  // Add language-specific flags.
+  this->AddLanguageFlags(flags, lang, this->ConfigName);
+
+  if (target->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION",
+                               this->ConfigName)) {
+    this->AppendFeatureOptions(flags, lang, "IPO");
+  }
+}
+
 std::string cmLocalCommonGenerator::GetFortranFlags(
   cmGeneratorTarget const* target)
 {

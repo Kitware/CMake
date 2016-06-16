@@ -56,17 +56,6 @@ bool cmCommonTargetGenerator::GetFeatureAsBool(const std::string& feature)
   return this->GeneratorTarget->GetFeatureAsBool(feature, this->ConfigName);
 }
 
-void cmCommonTargetGenerator::AddFeatureFlags(std::string& flags,
-                                              const std::string& lang)
-{
-  // Add language-specific flags.
-  this->LocalGenerator->AddLanguageFlags(flags, lang, this->ConfigName);
-
-  if (this->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION")) {
-    this->LocalGenerator->AppendFeatureOptions(flags, lang, "IPO");
-  }
-}
-
 void cmCommonTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
 {
   if (!this->ModuleDefinitionFile) {
@@ -123,7 +112,7 @@ std::string cmCommonTargetGenerator::GetFlags(const std::string& l)
     const char* lang = l.c_str();
 
     // Add language feature flags.
-    this->AddFeatureFlags(flags, lang);
+    this->LocalGenerator->AddFeatureFlags(flags, lang, this->GeneratorTarget);
 
     this->LocalGenerator->AddArchitectureFlags(flags, this->GeneratorTarget,
                                                lang, this->ConfigName);

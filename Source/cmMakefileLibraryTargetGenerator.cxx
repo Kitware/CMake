@@ -628,7 +628,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 
     // Add language feature flags.
     std::string langFlags;
-    this->AddFeatureFlags(langFlags, linkLanguage);
+    this->LocalGenerator->AddFeatureFlags(langFlags, linkLanguage,
+                                          this->GeneratorTarget);
 
     this->LocalGenerator->AddArchitectureFlags(
       langFlags, this->GeneratorTarget, linkLanguage, this->ConfigName);
