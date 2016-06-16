@@ -96,6 +96,7 @@ bool cmXCodeObject::IsEmpty() const
     case OBJECT:
       return this->Object == 0;
   }
+  return true; // unreachable, but quiets warnings
 }
 
 void cmXCodeObject::Indent(int level, std::ostream& out)
