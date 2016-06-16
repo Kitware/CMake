@@ -12,7 +12,10 @@
 #ifndef cmDependsJavaParserHelper_h
 #define cmDependsJavaParserHelper_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <string>
+#include <vector>
 
 #define YYSTYPE cmDependsJavaParserHelper::ParserType
 #define YYSTYPE_IS_DECLARED
@@ -48,7 +51,7 @@ public:
 
   // For yacc
   void AddClassFound(const char* sclass);
-  void PrepareElement(ParserType* opt);
+  void PrepareElement(ParserType* me);
   void DeallocateParserType(char** pt);
   void CheckEmpty(int line, int cnt, ParserType* pt);
   void StartClass(const char* cls);
@@ -69,20 +72,9 @@ private:
   {
   public:
     std::string Name;
-    std::vector<CurrentClass>* NestedClasses;
-    CurrentClass() { this->NestedClasses = new std::vector<CurrentClass>; }
-    ~CurrentClass() { delete this->NestedClasses; }
-    CurrentClass& operator=(CurrentClass const& c)
-    {
-      this->NestedClasses->clear();
-      this->Name = c.Name;
-      std::copy(c.NestedClasses->begin(), c.NestedClasses->end(),
-                std::back_inserter(*this->NestedClasses));
-      return *this;
-    }
-    CurrentClass(CurrentClass const& c) { (*this) = c; }
+    std::vector<CurrentClass> NestedClasses;
     void AddFileNamesForPrinting(std::vector<std::string>* files,
-                                 const char* prefix, const char* sep);
+                                 const char* prefix, const char* sep) const;
   };
   std::string CurrentPackage;
   std::string::size_type InputBufferPos;

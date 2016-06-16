@@ -13,7 +13,12 @@
 
 #include "cmDependsJavaLexer.h"
 #include "cmSystemTools.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <cmsys/FStream.hxx>
+#include <iostream>
 
 int cmDependsJava_yyparse(yyscan_t yyscanner);
 
@@ -35,7 +40,7 @@ cmDependsJavaParserHelper::~cmDependsJavaParserHelper()
 }
 
 void cmDependsJavaParserHelper::CurrentClass::AddFileNamesForPrinting(
-  std::vector<std::string>* files, const char* prefix, const char* sep)
+  std::vector<std::string>* files, const char* prefix, const char* sep) const
 {
   std::string rname = "";
   if (prefix) {
@@ -44,8 +49,8 @@ void cmDependsJavaParserHelper::CurrentClass::AddFileNamesForPrinting(
   }
   rname += this->Name;
   files->push_back(rname);
-  std::vector<CurrentClass>::iterator it;
-  for (it = this->NestedClasses->begin(); it != this->NestedClasses->end();
+  std::vector<CurrentClass>::const_iterator it;
+  for (it = this->NestedClasses.begin(); it != this->NestedClasses.end();
        ++it) {
     it->AddFileNamesForPrinting(files, rname.c_str(), sep);
   }
@@ -191,25 +196,19 @@ void cmDependsJavaParserHelper::StartClass(const char* cls)
 
 void cmDependsJavaParserHelper::EndClass()
 {
-  CurrentClass* parent = 0;
-  CurrentClass* current = 0;
-  if (!this->ClassStack.empty()) {
-    current = &(*(this->ClassStack.end() - 1));
-    if (this->ClassStack.size() > 1) {
-      parent = &(*(this->ClassStack.end() - 2));
-    }
-  }
-  if (current == 0) {
+  if (this->ClassStack.empty()) {
     std::cerr << "Error when parsing. Current class is null" << std::endl;
     abort();
   }
-  if (parent == 0) {
+  if (this->ClassStack.size() <= 1) {
     std::cerr << "Error when parsing. Parent class is null" << std::endl;
     abort();
   }
+  CurrentClass& current = this->ClassStack.back();
+  CurrentClass& parent = this->ClassStack[this->ClassStack.size() - 2];
   this->CurrentDepth--;
-  parent->NestedClasses->push_back(*current);
-  this->ClassStack.erase(this->ClassStack.end() - 1, this->ClassStack.end());
+  parent.NestedClasses.push_back(current);
+  this->ClassStack.pop_back();
 }
 
 void cmDependsJavaParserHelper::PrintClasses()
@@ -228,10 +227,10 @@ void cmDependsJavaParserHelper::PrintClasses()
 std::vector<std::string> cmDependsJavaParserHelper::GetFilesProduced()
 {
   std::vector<std::string> files;
-  CurrentClass* toplevel = &(*(this->ClassStack.begin()));
-  std::vector<CurrentClass>::iterator it;
-  for (it = toplevel->NestedClasses->begin();
-       it != toplevel->NestedClasses->end(); ++it) {
+  CurrentClass const& toplevel = this->ClassStack.front();
+  std::vector<CurrentClass>::const_iterator it;
+  for (it = toplevel.NestedClasses.begin(); it != toplevel.NestedClasses.end();
+       ++it) {
     it->AddFileNamesForPrinting(&files, 0, "$");
   }
   return files;
@@ -309,11 +308,10 @@ int cmDependsJavaParserHelper::LexInput(char* buf, int maxlen)
     if (buf[0] == '\n') {
       this->CurrentLine++;
     }
-    return (1);
-  } else {
-    buf[0] = '\n';
-    return (0);
+    return 1;
   }
+  buf[0] = '\n';
+  return 0;
 }
 void cmDependsJavaParserHelper::Error(const char* str)
 {
