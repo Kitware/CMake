@@ -101,17 +101,6 @@ public:
 
   /**
    * Convert the given remote path to a relative path with respect to
-   * the given local path.  The local path must be given in component
-   * form (see SystemTools::SplitPath) without a trailing slash.  The
-   * remote path must use forward slashes and not already be escaped
-   * or quoted.
-   */
-  std::string ConvertToRelativePath(const std::vector<std::string>& local,
-                                    const std::string& in_remote,
-                                    bool force = false) const;
-
-  /**
-   * Convert the given remote path to a relative path with respect to
    * the given local path.  Both paths must use forward slashes and not
    * already be escaped or quoted.
    * The conversion is skipped if the paths are not both in the source

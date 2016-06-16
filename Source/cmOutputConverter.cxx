@@ -77,15 +77,6 @@ static bool cmOutputConverterNotAbove(const char* a, const char* b)
 }
 
 std::string cmOutputConverter::ConvertToRelativePath(
-  const std::vector<std::string>& local, const std::string& in_remote,
-  bool force) const
-{
-  std::string local_path = cmSystemTools::JoinPath(local);
-  return force ? this->ForceToRelativePath(local_path, in_remote)
-               : this->ConvertToRelativePath(local_path, in_remote);
-}
-
-std::string cmOutputConverter::ConvertToRelativePath(
   std::string const& local_path, std::string const& remote_path) const
 {
   // The paths should never be quoted.
