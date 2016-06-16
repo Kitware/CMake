@@ -19,17 +19,14 @@
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 
-cmCommonTargetGenerator::cmCommonTargetGenerator(
-  cmOutputConverter::RelativeRoot wd, cmGeneratorTarget* gt)
-  : WorkingDirectory(wd)
-  , GeneratorTarget(gt)
+cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
+  : GeneratorTarget(gt)
   , Makefile(gt->Makefile)
   , LocalGenerator(static_cast<cmLocalCommonGenerator*>(gt->LocalGenerator))
   , GlobalGenerator(static_cast<cmGlobalCommonGenerator*>(
       gt->LocalGenerator->GetGlobalGenerator()))
   , ConfigName(LocalGenerator->GetConfigName())
   , ModuleDefinitionFile(GeneratorTarget->GetModuleDefinitionFile(ConfigName))
-  , FortranModuleDirectoryComputed(false)
 {
 }
 
@@ -59,17 +56,6 @@ bool cmCommonTargetGenerator::GetFeatureAsBool(const std::string& feature)
   return this->GeneratorTarget->GetFeatureAsBool(feature, this->ConfigName);
 }
 
-void cmCommonTargetGenerator::AddFeatureFlags(std::string& flags,
-                                              const std::string& lang)
-{
-  // Add language-specific flags.
-  this->LocalGenerator->AddLanguageFlags(flags, lang, this->ConfigName);
-
-  if (this->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION")) {
-    this->LocalGenerator->AppendFeatureOptions(flags, lang, "IPO");
-  }
-}
-
 void cmCommonTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
 {
   if (!this->ModuleDefinitionFile) {
@@ -89,87 +75,6 @@ void cmCommonTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
   flag += (this->LocalGenerator->ConvertToLinkReference(
     this->ModuleDefinitionFile->GetFullPath()));
   this->LocalGenerator->AppendFlags(flags, flag);
-}
-
-std::string cmCommonTargetGenerator::ComputeFortranModuleDirectory() const
-{
-  std::string mod_dir;
-  const char* target_mod_dir =
-    this->GeneratorTarget->GetProperty("Fortran_MODULE_DIRECTORY");
-  const char* moddir_flag =
-    this->Makefile->GetDefinition("CMAKE_Fortran_MODDIR_FLAG");
-  if (target_mod_dir && moddir_flag) {
-    // Compute the full path to the module directory.
-    if (cmSystemTools::FileIsFullPath(target_mod_dir)) {
-      // Already a full path.
-      mod_dir = target_mod_dir;
-    } else {
-      // Interpret relative to the current output directory.
-      mod_dir = this->LocalGenerator->GetCurrentBinaryDirectory();
-      mod_dir += "/";
-      mod_dir += target_mod_dir;
-    }
-
-    // Make sure the module output directory exists.
-    cmSystemTools::MakeDirectory(mod_dir);
-  }
-  return mod_dir;
-}
-
-std::string cmCommonTargetGenerator::GetFortranModuleDirectory()
-{
-  // Compute the module directory.
-  if (!this->FortranModuleDirectoryComputed) {
-    this->FortranModuleDirectoryComputed = true;
-    this->FortranModuleDirectory = this->ComputeFortranModuleDirectory();
-  }
-
-  // Return the computed directory.
-  return this->FortranModuleDirectory;
-}
-
-void cmCommonTargetGenerator::AddFortranFlags(std::string& flags)
-{
-  // Enable module output if necessary.
-  if (const char* modout_flag =
-        this->Makefile->GetDefinition("CMAKE_Fortran_MODOUT_FLAG")) {
-    this->LocalGenerator->AppendFlags(flags, modout_flag);
-  }
-
-  // Add a module output directory flag if necessary.
-  std::string mod_dir = this->GetFortranModuleDirectory();
-  if (!mod_dir.empty()) {
-    mod_dir =
-      this->Convert(mod_dir, this->WorkingDirectory, cmOutputConverter::SHELL);
-  } else {
-    mod_dir =
-      this->Makefile->GetSafeDefinition("CMAKE_Fortran_MODDIR_DEFAULT");
-  }
-  if (!mod_dir.empty()) {
-    const char* moddir_flag =
-      this->Makefile->GetRequiredDefinition("CMAKE_Fortran_MODDIR_FLAG");
-    std::string modflag = moddir_flag;
-    modflag += mod_dir;
-    this->LocalGenerator->AppendFlags(flags, modflag);
-  }
-
-  // If there is a separate module path flag then duplicate the
-  // include path with it.  This compiler does not search the include
-  // path for modules.
-  if (const char* modpath_flag =
-        this->Makefile->GetDefinition("CMAKE_Fortran_MODPATH_FLAG")) {
-    std::vector<std::string> includes;
-    const std::string& config = this->ConfigName;
-    this->LocalGenerator->GetIncludeDirectories(
-      includes, this->GeneratorTarget, "C", config);
-    for (std::vector<std::string>::const_iterator idi = includes.begin();
-         idi != includes.end(); ++idi) {
-      std::string flg = modpath_flag;
-      flg +=
-        this->Convert(*idi, cmOutputConverter::NONE, cmOutputConverter::SHELL);
-      this->LocalGenerator->AppendFlags(flags, flg);
-    }
-  }
 }
 
 void cmCommonTargetGenerator::AppendFortranFormatFlags(
@@ -204,36 +109,9 @@ std::string cmCommonTargetGenerator::GetFlags(const std::string& l)
   ByLanguageMap::iterator i = this->FlagsByLanguage.find(l);
   if (i == this->FlagsByLanguage.end()) {
     std::string flags;
-    const char* lang = l.c_str();
 
-    // Add language feature flags.
-    this->AddFeatureFlags(flags, lang);
-
-    this->LocalGenerator->AddArchitectureFlags(flags, this->GeneratorTarget,
-                                               lang, this->ConfigName);
-
-    // Fortran-specific flags computed for this target.
-    if (l == "Fortran") {
-      this->AddFortranFlags(flags);
-    }
-
-    this->LocalGenerator->AddCMP0018Flags(flags, this->GeneratorTarget, lang,
-                                          this->ConfigName);
-
-    this->LocalGenerator->AddVisibilityPresetFlags(
-      flags, this->GeneratorTarget, lang);
-
-    // Append old-style preprocessor definition flags.
-    this->LocalGenerator->AppendFlags(flags, this->Makefile->GetDefineFlags());
-
-    // Add framework directory flags.
-    this->LocalGenerator->AppendFlags(
-      flags, this->LocalGenerator->GetFrameworkFlags(l, this->ConfigName,
-                                                     this->GeneratorTarget));
-
-    // Add target-specific flags.
-    this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget, lang,
-                                            this->ConfigName);
+    this->LocalGenerator->GetTargetCompileFlags(this->GeneratorTarget, l,
+                                                flags);
 
     ByLanguageMap::value_type entry(l, flags);
     i = this->FlagsByLanguage.insert(entry).first;
@@ -308,7 +186,8 @@ std::string cmCommonTargetGenerator::GetManifests()
   for (std::vector<cmSourceFile const*>::iterator mi = manifest_srcs.begin();
        mi != manifest_srcs.end(); ++mi) {
     manifests.push_back(this->Convert(
-      (*mi)->GetFullPath(), this->WorkingDirectory, cmOutputConverter::SHELL));
+      (*mi)->GetFullPath(), this->LocalGenerator->GetWorkingDirectory(),
+      cmOutputConverter::SHELL));
   }
 
   return cmJoin(manifests, " ");

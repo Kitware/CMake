@@ -28,16 +28,12 @@ class cmSourceFile;
 class cmCommonTargetGenerator
 {
 public:
-  cmCommonTargetGenerator(cmOutputConverter::RelativeRoot wd,
-                          cmGeneratorTarget* gt);
+  cmCommonTargetGenerator(cmGeneratorTarget* gt);
   virtual ~cmCommonTargetGenerator();
 
   std::string const& GetConfigName() const;
 
 protected:
-  // Add language feature flags.
-  void AddFeatureFlags(std::string& flags, const std::string& lang);
-
   // Feature query methods.
   const char* GetFeature(const std::string& feature);
   bool GetFeatureAsBool(const std::string& feature);
@@ -45,7 +41,6 @@ protected:
   // Helper to add flag for windows .def file.
   void AddModuleDefinitionFlag(std::string& flags);
 
-  cmOutputConverter::RelativeRoot WorkingDirectory;
   cmGeneratorTarget* GeneratorTarget;
   cmMakefile* Makefile;
   cmLocalCommonGenerator* LocalGenerator;
@@ -54,15 +49,6 @@ protected:
 
   // The windows module definition source file (.def), if any.
   cmSourceFile const* ModuleDefinitionFile;
-
-  // Target-wide Fortran module output directory.
-  bool FortranModuleDirectoryComputed;
-  std::string FortranModuleDirectory;
-  std::string GetFortranModuleDirectory();
-  virtual std::string ComputeFortranModuleDirectory() const;
-
-  // Compute target-specific Fortran language flags.
-  void AddFortranFlags(std::string& flags);
 
   std::string Convert(
     std::string const& source, cmOutputConverter::RelativeRoot relative,

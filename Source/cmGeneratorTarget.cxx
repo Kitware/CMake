@@ -258,6 +258,7 @@ void CreatePropertyGeneratorExpressions(
 
 cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   : Target(t)
+  , FortranModuleDirectoryCreated(false)
   , SourceFileFlagsConstructed(false)
   , PolicyWarnedCMP0022(false)
   , DebugIncludesDone(false)
@@ -3840,6 +3841,40 @@ void cmGeneratorTarget::GetTargetVersion(bool soversion, int& major,
         break;
     }
   }
+}
+
+std::string cmGeneratorTarget::GetFortranModuleDirectory() const
+{
+  if (!this->FortranModuleDirectoryCreated) {
+    this->FortranModuleDirectory = true;
+    this->FortranModuleDirectory = this->CreateFortranModuleDirectory();
+  }
+
+  return this->FortranModuleDirectory;
+}
+
+std::string cmGeneratorTarget::CreateFortranModuleDirectory() const
+{
+  static std::string mod_dir;
+  const char* target_mod_dir = this->GetProperty("Fortran_MODULE_DIRECTORY");
+  const char* moddir_flag =
+    this->Makefile->GetDefinition("CMAKE_Fortran_MODDIR_FLAG");
+  if (target_mod_dir && moddir_flag) {
+    // Compute the full path to the module directory.
+    if (cmSystemTools::FileIsFullPath(target_mod_dir)) {
+      // Already a full path.
+      mod_dir = target_mod_dir;
+    } else {
+      // Interpret relative to the current output directory.
+      mod_dir = this->LocalGenerator->GetCurrentBinaryDirectory();
+      mod_dir += "/";
+      mod_dir += target_mod_dir;
+    }
+
+    // Make sure the module output directory exists.
+    cmSystemTools::MakeDirectory(mod_dir);
+  }
+  return mod_dir;
 }
 
 std::string cmGeneratorTarget::GetFrameworkVersion() const
