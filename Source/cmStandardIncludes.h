@@ -55,9 +55,9 @@ typedef unsigned short mode_t;
 /* Poison this operator to avoid common mistakes.  */
 extern void operator<<(std::ostream&, const std::ostringstream&);
 
-#include "cmDocumentationEntry.h"
 #include "cmCustomCommandLines.h"
-#include "cmTypeMacro.h"
+#include "cmDocumentationEntry.h"
 #include "cmTargetLinkLibraryType.h"
+#include "cmTypeMacro.h"
 
 #endif
