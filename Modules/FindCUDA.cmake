@@ -787,8 +787,10 @@ endif()
 if(CUDA_cudart_static_LIBRARY)
   # Set whether to use the static cuda runtime.
   option(CUDA_USE_STATIC_CUDA_RUNTIME "Use the static version of the CUDA runtime library if available" ON)
+  set(CUDA_CUDART_LIBRARY_VAR CUDA_cudart_static_LIBRARY)
 else()
   option(CUDA_USE_STATIC_CUDA_RUNTIME "Use the static version of the CUDA runtime library if available" OFF)
+  set(CUDA_CUDART_LIBRARY_VAR CUDA_CUDART_LIBRARY)
 endif()
 
 if(CUDA_USE_STATIC_CUDA_RUNTIME)
@@ -1003,7 +1005,7 @@ find_package_handle_standard_args(CUDA
     CUDA_TOOLKIT_ROOT_DIR
     CUDA_NVCC_EXECUTABLE
     CUDA_INCLUDE_DIRS
-    CUDA_CUDART_LIBRARY
+    ${CUDA_CUDART_LIBRARY_VAR}
   VERSION_VAR
     CUDA_VERSION
   )
