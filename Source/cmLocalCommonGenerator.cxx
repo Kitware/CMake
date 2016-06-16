@@ -13,9 +13,10 @@
 
 #include "cmMakefile.h"
 
-cmLocalCommonGenerator::cmLocalCommonGenerator(cmGlobalGenerator* gg,
-                                               cmMakefile* mf)
+cmLocalCommonGenerator::cmLocalCommonGenerator(
+  cmGlobalGenerator* gg, cmMakefile* mf, cmOutputConverter::RelativeRoot wd)
   : cmLocalGenerator(gg, mf)
+  , WorkingDirectory(wd)
 {
 }
 

@@ -28,8 +28,7 @@ class cmSourceFile;
 class cmCommonTargetGenerator
 {
 public:
-  cmCommonTargetGenerator(cmOutputConverter::RelativeRoot wd,
-                          cmGeneratorTarget* gt);
+  cmCommonTargetGenerator(cmGeneratorTarget* gt);
   virtual ~cmCommonTargetGenerator();
 
   std::string const& GetConfigName() const;
@@ -45,7 +44,6 @@ protected:
   // Helper to add flag for windows .def file.
   void AddModuleDefinitionFlag(std::string& flags);
 
-  cmOutputConverter::RelativeRoot WorkingDirectory;
   cmGeneratorTarget* GeneratorTarget;
   cmMakefile* Makefile;
   cmLocalCommonGenerator* LocalGenerator;
