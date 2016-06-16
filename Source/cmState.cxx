@@ -77,8 +77,6 @@ struct cmState::BuildsystemDirectoryStateType
   std::string Location;
   std::string OutputLocation;
 
-  std::vector<std::string> CurrentSourceDirectoryComponents;
-  std::vector<std::string> CurrentBinaryDirectoryComponents;
   // The top-most directories for relative path conversion.  Both the
   // source and destination location of a relative path conversion
   // must be underneath one of these directories (both under source or
@@ -591,10 +589,6 @@ void cmState::SetSourceDirectory(std::string const& sourceDirectory)
 {
   this->SourceDirectory = sourceDirectory;
   cmSystemTools::ConvertToUnixSlashes(this->SourceDirectory);
-
-  cmSystemTools::SplitPath(
-    cmSystemTools::CollapseFullPath(this->SourceDirectory),
-    this->SourceDirectoryComponents);
 }
 
 const char* cmState::GetSourceDirectory() const
@@ -602,19 +596,10 @@ const char* cmState::GetSourceDirectory() const
   return this->SourceDirectory.c_str();
 }
 
-std::vector<std::string> const& cmState::GetSourceDirectoryComponents() const
-{
-  return this->SourceDirectoryComponents;
-}
-
 void cmState::SetBinaryDirectory(std::string const& binaryDirectory)
 {
   this->BinaryDirectory = binaryDirectory;
   cmSystemTools::ConvertToUnixSlashes(this->BinaryDirectory);
-
-  cmSystemTools::SplitPath(
-    cmSystemTools::CollapseFullPath(this->BinaryDirectory),
-    this->BinaryDirectoryComponents);
 }
 
 void cmState::SetWindowsShell(bool windowsShell)
@@ -690,11 +675,6 @@ unsigned int cmState::GetCacheMinorVersion() const
 const char* cmState::GetBinaryDirectory() const
 {
   return this->BinaryDirectory.c_str();
-}
-
-std::vector<std::string> const& cmState::GetBinaryDirectoryComponents() const
-{
-  return this->BinaryDirectoryComponents;
 }
 
 void cmState::Directory::ComputeRelativePathTopSource()
@@ -978,8 +958,6 @@ void cmState::Directory::SetCurrentSource(std::string const& dir)
   cmSystemTools::ConvertToUnixSlashes(loc);
   loc = cmSystemTools::CollapseFullPath(loc);
 
-  cmSystemTools::SplitPath(
-    loc, this->DirectoryState->CurrentSourceDirectoryComponents);
   this->ComputeRelativePathTopSource();
 
   this->Snapshot_.SetDefinition("CMAKE_CURRENT_SOURCE_DIR", loc);
@@ -997,8 +975,6 @@ void cmState::Directory::SetCurrentBinary(std::string const& dir)
   cmSystemTools::ConvertToUnixSlashes(loc);
   loc = cmSystemTools::CollapseFullPath(loc);
 
-  cmSystemTools::SplitPath(
-    loc, this->DirectoryState->CurrentBinaryDirectoryComponents);
   this->ComputeRelativePathTopBinary();
 
   this->Snapshot_.SetDefinition("CMAKE_CURRENT_BINARY_DIR", loc);
@@ -1007,18 +983,6 @@ void cmState::Directory::SetCurrentBinary(std::string const& dir)
 void cmState::Snapshot::SetListFile(const std::string& listfile)
 {
   *this->Position->ExecutionListFile = listfile;
-}
-
-std::vector<std::string> const&
-cmState::Directory::GetCurrentSourceComponents() const
-{
-  return this->DirectoryState->CurrentSourceDirectoryComponents;
-}
-
-std::vector<std::string> const&
-cmState::Directory::GetCurrentBinaryComponents() const
-{
-  return this->DirectoryState->CurrentBinaryDirectoryComponents;
 }
 
 const char* cmState::Directory::GetRelativePathTopSource() const
