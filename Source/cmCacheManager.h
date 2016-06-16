@@ -12,19 +12,12 @@
 #ifndef cmCacheManager_h
 #define cmCacheManager_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
+#include "cmStandardIncludes.h"
 
 #include "cmPropertyMap.h"
 #include "cmState.h"
 
-#include <iosfwd>
-#include <map>
-#include <set>
-#include <string>
-#include <utility>
-#include <vector>
-
-class cmake;
+class cmMarkAsAdvancedCommand;
 
 /** \class cmCacheManager
  * \brief Control class for cmake's cache
