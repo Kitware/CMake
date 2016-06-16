@@ -88,7 +88,7 @@ void cmWIXPatchParser::StartFragment(const char** attributes)
 
     if (key == "Id") {
       if (Fragments.find(value) != Fragments.end()) {
-        std::stringstream tmp;
+        std::ostringstream tmp;
         tmp << "Invalid reuse of 'CPackWixFragment' 'Id': " << value;
         ReportValidationError(tmp.str());
       }

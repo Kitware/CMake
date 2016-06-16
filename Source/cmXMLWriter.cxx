@@ -14,7 +14,7 @@
 #include "cmXMLSafe.h"
 
 #include <cassert>
-#include <fstream>
+#include <cmsys/FStream.hxx>
 
 cmXMLWriter::cmXMLWriter(std::ostream& output, std::size_t level)
   : Output(output)
@@ -107,7 +107,7 @@ void cmXMLWriter::ProcessingInstruction(const char* target, const char* data)
 void cmXMLWriter::FragmentFile(const char* fname)
 {
   this->CloseStartElement();
-  std::ifstream fin(fname, std::ios::in | std::ios::binary);
+  cmsys::ifstream fin(fname, std::ios::in | std::ios::binary);
   this->Output << fin.rdbuf();
 }
 

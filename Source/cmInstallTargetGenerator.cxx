@@ -623,7 +623,7 @@ void cmInstallTargetGenerator::AddChrpathPatchRule(
     std::string darwin_major_version_s =
       mf->GetSafeDefinition("DARWIN_MAJOR_VERSION");
 
-    std::stringstream ss(darwin_major_version_s);
+    std::istringstream ss(darwin_major_version_s);
     int darwin_major_version;
     ss >> darwin_major_version;
     if (!ss.fail() && darwin_major_version <= 9 &&

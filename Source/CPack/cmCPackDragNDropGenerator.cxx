@@ -235,7 +235,7 @@ bool cmCPackDragNDropGenerator::CreateEmptyFile(std::ostringstream& target,
     return false;
   } else {
     // Seek to desired size - 1 byte
-    fout.seekp(size - 1, std::ios_base::beg);
+    fout.seekp(size - 1, std::ios::beg);
     char byte = 0;
     // Write one byte to ensure file grows
     fout.write(&byte, 1);

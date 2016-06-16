@@ -127,7 +127,7 @@ void cmWIXAccessControlList::EmitBooleanAttribute(std::string const& entry,
                                                   std::string const& name)
 {
   if (!this->IsBooleanAttribute(name)) {
-    std::stringstream message;
+    std::ostringstream message;
     message << "Unknown boolean attribute '" << name << "'";
     this->ReportError(entry, message.str());
   }

@@ -56,7 +56,7 @@ cmGeneratedFileStream& cmGeneratedFileStream::Open(const char* name,
     this->Stream::open(this->TempName.c_str(),
                        std::ios::out | std::ios::binary);
   } else {
-    this->Stream::open(this->TempName.c_str(), std::ios::out);
+    this->Stream::open(this->TempName.c_str());
   }
 
   // Check if the file opened.

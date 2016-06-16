@@ -69,7 +69,7 @@ size_t cmWIXDirectoriesSourceWriter::BeginInstallationPrefixDirectory(
     if (i == installRoot.size() - 1) {
       AddAttribute("Id", "INSTALL_ROOT");
     } else {
-      std::stringstream tmp;
+      std::ostringstream tmp;
       tmp << "INSTALL_PREFIX_" << i;
       AddAttribute("Id", tmp.str());
     }

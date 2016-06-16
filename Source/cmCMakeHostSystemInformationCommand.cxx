@@ -84,7 +84,7 @@ bool cmCMakeHostSystemInformationCommand::GetValue(
 std::string cmCMakeHostSystemInformationCommand::ValueToString(
   size_t value) const
 {
-  std::stringstream tmp;
+  std::ostringstream tmp;
   tmp << value;
   return tmp.str();
 }
