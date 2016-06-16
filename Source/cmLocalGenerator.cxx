@@ -1344,6 +1344,13 @@ void cmLocalGenerator::GetTargetDefines(cmGeneratorTarget const* target,
   this->AddCompileDefinitions(defines, target, config, lang.c_str());
 }
 
+std::string cmLocalGenerator::GetTargetFortranFlags(cmGeneratorTarget const*,
+                                                    std::string const&)
+{
+  // Implemented by specific generators that override this.
+  return std::string();
+}
+
 std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib,
                                                      OutputFormat format)
 {

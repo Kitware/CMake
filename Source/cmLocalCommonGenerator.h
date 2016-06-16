@@ -33,6 +33,9 @@ public:
     return this->WorkingDirectory;
   }
 
+  std::string GetTargetFortranFlags(cmGeneratorTarget const* target,
+                                    std::string const& config);
+
 protected:
   cmOutputConverter::RelativeRoot WorkingDirectory;
 
