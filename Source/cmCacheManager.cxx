@@ -16,11 +16,10 @@
 #include "cmVersion.h"
 #include "cmake.h"
 
-#include <algorithm>
+#include <cmsys/Directory.hxx>
+#include <cmsys/FStream.hxx>
 #include <cmsys/Glob.hxx>
-#include <sstream>
-#include <stdio.h>
-#include <string.h>
+#include <cmsys/RegularExpression.hxx>
 
 cmCacheManager::cmCacheManager()
 {

@@ -15,7 +15,6 @@
 #include "cmSystemTools.h"
 
 #include <sstream>
-#include <utility>
 
 cmCLocaleEnvironmentScope::cmCLocaleEnvironmentScope()
 {

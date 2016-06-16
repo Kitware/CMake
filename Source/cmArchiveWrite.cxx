@@ -14,15 +14,9 @@
 #include "cmLocale.h"
 #include "cmSystemTools.h"
 #include "cm_get_date.h"
-
 #include <cm_libarchive.h>
-#include <cmsys/Configure.hxx>
 #include <cmsys/Directory.hxx>
-#include <cmsys/Encoding.hxx>
 #include <cmsys/FStream.hxx>
-#include <iostream>
-#include <string.h>
-#include <time.h>
 
 #ifndef __LA_SSIZE_T
 #define __LA_SSIZE_T la_ssize_t
