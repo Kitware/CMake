@@ -19,10 +19,8 @@
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 
-cmCommonTargetGenerator::cmCommonTargetGenerator(
-  cmOutputConverter::RelativeRoot wd, cmGeneratorTarget* gt)
-  : WorkingDirectory(wd)
-  , GeneratorTarget(gt)
+cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
+  : GeneratorTarget(gt)
   , Makefile(gt->Makefile)
   , LocalGenerator(static_cast<cmLocalCommonGenerator*>(gt->LocalGenerator))
   , GlobalGenerator(static_cast<cmGlobalCommonGenerator*>(
@@ -140,7 +138,8 @@ void cmCommonTargetGenerator::AddFortranFlags(std::string& flags)
   std::string mod_dir = this->GetFortranModuleDirectory();
   if (!mod_dir.empty()) {
     mod_dir =
-      this->Convert(mod_dir, this->WorkingDirectory, cmOutputConverter::SHELL);
+      this->Convert(mod_dir, this->LocalGenerator->GetWorkingDirectory(),
+                    cmOutputConverter::SHELL);
   } else {
     mod_dir =
       this->Makefile->GetSafeDefinition("CMAKE_Fortran_MODDIR_DEFAULT");
@@ -308,7 +307,8 @@ std::string cmCommonTargetGenerator::GetManifests()
   for (std::vector<cmSourceFile const*>::iterator mi = manifest_srcs.begin();
        mi != manifest_srcs.end(); ++mi) {
     manifests.push_back(this->Convert(
-      (*mi)->GetFullPath(), this->WorkingDirectory, cmOutputConverter::SHELL));
+      (*mi)->GetFullPath(), this->LocalGenerator->GetWorkingDirectory(),
+      cmOutputConverter::SHELL));
   }
 
   return cmJoin(manifests, " ");
