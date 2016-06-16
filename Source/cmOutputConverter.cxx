@@ -128,41 +128,67 @@ std::string cmOutputConverter::ConvertToRelativePath(
   const std::vector<std::string>& local, const std::string& in_remote,
   bool force) const
 {
-  // The path should never be quoted.
-  assert(in_remote[0] != '\"');
+  std::string local_path = cmSystemTools::JoinPath(local);
+  return force ? this->ForceToRelativePath(local_path, in_remote)
+               : this->ConvertToRelativePath(local_path, in_remote);
+}
+
+std::string cmOutputConverter::ConvertToRelativePath(
+  std::string const& local_path, std::string const& remote_path) const
+{
+  // The paths should never be quoted.
+  assert(local_path[0] != '\"');
+  assert(remote_path[0] != '\"');
 
   // The local path should never have a trailing slash.
-  assert(!local.empty() && !(local[local.size() - 1] == ""));
+  assert(local_path.empty() || local_path[local_path.size() - 1] != '/');
 
   // If the path is already relative then just return the path.
-  if (!cmSystemTools::FileIsFullPath(in_remote.c_str())) {
-    return in_remote;
+  if (!cmSystemTools::FileIsFullPath(remote_path.c_str())) {
+    return remote_path;
   }
 
-  if (!force) {
-    // Skip conversion if the path and local are not both in the source
-    // or both in the binary tree.
-    std::string local_path = cmSystemTools::JoinPath(local);
-    if (!((cmOutputConverterNotAbove(
-             local_path.c_str(),
-             this->StateSnapshot.GetDirectory().GetRelativePathTopBinary()) &&
-           cmOutputConverterNotAbove(
-             in_remote.c_str(),
-             this->StateSnapshot.GetDirectory().GetRelativePathTopBinary())) ||
-          (cmOutputConverterNotAbove(
-             local_path.c_str(),
-             this->StateSnapshot.GetDirectory().GetRelativePathTopSource()) &&
-           cmOutputConverterNotAbove(in_remote.c_str(),
-                                     this->StateSnapshot.GetDirectory()
-                                       .GetRelativePathTopSource())))) {
-      return in_remote;
-    }
+  // Skip conversion if the path and local are not both in the source
+  // or both in the binary tree.
+  if (!((cmOutputConverterNotAbove(
+           local_path.c_str(),
+           this->StateSnapshot.GetDirectory().GetRelativePathTopBinary()) &&
+         cmOutputConverterNotAbove(
+           remote_path.c_str(),
+           this->StateSnapshot.GetDirectory().GetRelativePathTopBinary())) ||
+        (cmOutputConverterNotAbove(
+           local_path.c_str(),
+           this->StateSnapshot.GetDirectory().GetRelativePathTopSource()) &&
+         cmOutputConverterNotAbove(
+           remote_path.c_str(),
+           this->StateSnapshot.GetDirectory().GetRelativePathTopSource())))) {
+    return remote_path;
+  }
+
+  return this->ForceToRelativePath(local_path, remote_path);
+}
+
+std::string cmOutputConverter::ForceToRelativePath(
+  std::string const& local_path, std::string const& remote_path)
+{
+  // The paths should never be quoted.
+  assert(local_path[0] != '\"');
+  assert(remote_path[0] != '\"');
+
+  // The local path should never have a trailing slash.
+  assert(local_path.empty() || local_path[local_path.size() - 1] != '/');
+
+  // If the path is already relative then just return the path.
+  if (!cmSystemTools::FileIsFullPath(remote_path.c_str())) {
+    return remote_path;
   }
 
   // Identify the longest shared path component between the remote
   // path and the local path.
+  std::vector<std::string> local;
+  cmSystemTools::SplitPath(local_path, local);
   std::vector<std::string> remote;
-  cmSystemTools::SplitPath(in_remote, remote);
+  cmSystemTools::SplitPath(remote_path, remote);
   unsigned int common = 0;
   while (common < remote.size() && common < local.size() &&
          cmSystemTools::ComparePath(remote[common], local[common])) {
@@ -171,7 +197,7 @@ std::string cmOutputConverter::ConvertToRelativePath(
 
   // If no part of the path is in common then return the full path.
   if (common == 0) {
-    return in_remote;
+    return remote_path;
   }
 
   // If the entire path is in common then just return a ".".
