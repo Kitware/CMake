@@ -218,6 +218,7 @@ Properties on Targets
    /prop_tgt/LINK_LIBRARIES
    /prop_tgt/LINK_SEARCH_END_STATIC
    /prop_tgt/LINK_SEARCH_START_STATIC
+   /prop_tgt/LINK_WHAT_YOU_USE
    /prop_tgt/LOCATION_CONFIG
    /prop_tgt/LOCATION
    /prop_tgt/MACOSX_BUNDLE_INFO_PLIST

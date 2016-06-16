@@ -271,6 +271,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::string iwyu;
       std::string tidy;
       std::string sourceFile;
+      std::string lwyu;
       for (std::string::size_type cc = 2; cc < args.size(); cc++) {
         std::string const& arg = args[cc];
         if (arg == "--") {
@@ -281,6 +282,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           tidy = arg.substr(7);
         } else if (doing_options && cmHasLiteralPrefix(arg, "--source=")) {
           sourceFile = arg.substr(9);
+        } else if (doing_options && cmHasLiteralPrefix(arg, "--lwyu=")) {
+          lwyu = arg.substr(7);
         } else if (doing_options) {
           std::cerr << "__run_iwyu given unknown argument: " << arg << "\n";
           return 1;
@@ -288,7 +291,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           orig_cmd.push_back(arg);
         }
       }
-      if (tidy.empty() && iwyu.empty()) {
+      if (tidy.empty() && iwyu.empty() && lwyu.empty()) {
         std::cerr << "__run_iwyu missing --tidy= or --iwyu=\n";
         return 1;
       }
@@ -296,7 +299,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         std::cerr << "__run_iwyu --tidy= requires --source=\n";
         return 1;
       }
-      if (orig_cmd.empty()) {
+      if (orig_cmd.empty() && lwyu.empty()) {
         std::cerr << "__run_iwyu missing compile command after --\n";
         return 1;
       }
@@ -345,13 +348,36 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           std::cerr << "Error running '" << tidy_cmd[0] << "'\n";
           return 1;
         }
-
         // Output the stdout from clang-tidy to stderr
         std::cerr << stdOut;
       }
+      if (!lwyu.empty()) {
+        // Construct the ldd -r -u (link what you use lwyu) command line
+        // ldd -u -r lwuy target
+        std::vector<std::string> lwyu_cmd;
+        lwyu_cmd.push_back("ldd");
+        lwyu_cmd.push_back("-u");
+        lwyu_cmd.push_back("-r");
+        lwyu_cmd.push_back(lwyu);
 
+        // Run the ldd -u -r command line.
+        // Capture its stdout and hide its stderr.
+        std::string stdOut;
+        if (!cmSystemTools::RunSingleCommand(lwyu_cmd, &stdOut, 0, &ret, 0,
+                                             cmSystemTools::OUTPUT_NONE)) {
+          std::cerr << "Error running '" << lwyu_cmd[0] << "'\n";
+          return 1;
+        }
+
+        // Output the stdout from ldd -r -u to stderr
+        // Warn if lwyu reported anything.
+        if (stdOut.find("Unused direct dependencies:") != stdOut.npos) {
+          std::cerr <<  "Warning: " << stdOut;
+        }
+      }
+      ret = 0;
       // Now run the real compiler command and return its result value.
-      if (!cmSystemTools::RunSingleCommand(
+      if (lwyu.empty() && !cmSystemTools::RunSingleCommand(
             orig_cmd, 0, 0, &ret, 0, cmSystemTools::OUTPUT_PASSTHROUGH)) {
         std::cerr << "Error running '" << orig_cmd[0] << "'\n";
         return 1;
