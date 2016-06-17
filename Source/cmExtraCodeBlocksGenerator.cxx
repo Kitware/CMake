@@ -578,19 +578,20 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
     }
 
     // the include directories for this target
-    std::set<std::string> uniqIncludeDirs;
+    std::vector<std::string> allIncludeDirs;
 
     std::vector<std::string> includes;
     lg->GetIncludeDirectories(includes, target, "C", buildType);
 
-    uniqIncludeDirs.insert(includes.begin(), includes.end());
+    allIncludeDirs.insert(allIncludeDirs.end(), includes.begin(),
+                          includes.end());
 
     std::string systemIncludeDirs = makefile->GetSafeDefinition(
       "CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
     if (!systemIncludeDirs.empty()) {
       std::vector<std::string> dirs;
       cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
-      uniqIncludeDirs.insert(dirs.begin(), dirs.end());
+      allIncludeDirs.insert(allIncludeDirs.end(), dirs.begin(), dirs.end());
     }
 
     systemIncludeDirs = makefile->GetSafeDefinition(
@@ -598,13 +599,16 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
     if (!systemIncludeDirs.empty()) {
       std::vector<std::string> dirs;
       cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
-      uniqIncludeDirs.insert(dirs.begin(), dirs.end());
+      allIncludeDirs.insert(allIncludeDirs.end(), dirs.begin(), dirs.end());
     }
 
-    for (std::set<std::string>::const_iterator dirIt = uniqIncludeDirs.begin();
-         dirIt != uniqIncludeDirs.end(); ++dirIt) {
+    std::vector<std::string>::const_iterator end =
+      cmRemoveDuplicates(allIncludeDirs);
+
+    for (std::vector<std::string>::const_iterator i = allIncludeDirs.begin();
+         i != end; ++i) {
       xml.StartElement("Add");
-      xml.Attribute("directory", *dirIt);
+      xml.Attribute("directory", *i);
       xml.EndElement();
     }
 
