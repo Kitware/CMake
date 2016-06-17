@@ -12,10 +12,7 @@
 #ifndef cmDependsJavaParserHelper_h
 #define cmDependsJavaParserHelper_h
 
-#include <cmConfigure.h> // IWYU pragma: keep
-
-#include <string>
-#include <vector>
+#include "cmStandardIncludes.h"
 
 #define YYSTYPE cmDependsJavaParserHelper::ParserType
 #define YYSTYPE_IS_DECLARED
