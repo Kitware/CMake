@@ -305,7 +305,7 @@ macro(__windows_compiler_msvc lang)
     set(CMAKE_${lang}_FLAGS_DEBUG_INIT "-D_DEBUG /MDd -gline-tables-only -fno-inline -O0 ${_RTC1}")
     set(CMAKE_${lang}_FLAGS_RELEASE_INIT "/MD -O2 -DNDEBUG")
     set(CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT "/MD -gline-tables-only -O2 -fno-inline -DNDEBUG")
-    set(CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "/MD -Os -DNDEBUG")
+    set(CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "/MD -DNDEBUG") # TODO: Add '-Os' once VS generator maps it properly for Clang
   else()
     set(CMAKE_${lang}_FLAGS_INIT "${_PLATFORM_DEFINES}${_PLATFORM_DEFINES_${lang}} /D_WINDOWS /W3${_FLAGS_${lang}}")
     set(CMAKE_${lang}_FLAGS_DEBUG_INIT "/D_DEBUG /MDd /Zi /Ob0 /Od ${_RTC1}")

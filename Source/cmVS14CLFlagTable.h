@@ -16,7 +16,6 @@ static cmVS7FlagTable cmVS14CLFlagTable[] = {
 
   { "Optimization", "", "Custom", "Custom", 0 },
   { "Optimization", "Od", "Disabled", "Disabled", 0 },
-  { "Optimization", "Os", "Minimize Size", "MinSize", 0 },
   { "Optimization", "O1", "Minimize Size", "MinSpace", 0 },
   { "Optimization", "O2", "Maximize Speed", "MaxSpeed", 0 },
   { "Optimization", "Ox", "Full Optimization", "Full", 0 },
