@@ -376,8 +376,10 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
                              makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
           for (std::vector<cmSourceFile*>::const_iterator si = sources.begin();
                si != sources.end(); si++) {
-            // don't add source files which have the GENERATED property set:
-            if ((*si)->GetPropertyAsBool("GENERATED")) {
+            // don't add source files from UTILITY target which have the
+            // GENERATED property set:
+            if (gt->GetType() == cmState::UTILITY &&
+                (*si)->GetPropertyAsBool("GENERATED")) {
               continue;
             }
 
