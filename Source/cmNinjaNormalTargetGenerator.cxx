@@ -313,7 +313,7 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
     const char* linkCmd = mf->GetDefinition(linkCmdVar);
     if (linkCmd) {
       cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
-      if( this->GetGeneratorTarget()->GetProperty("LINK_WHAT_YOU_USE")) {
+      if (this->GetGeneratorTarget()->GetProperty("LINK_WHAT_YOU_USE")) {
         std::string cmakeCommand =
           this->GetLocalGenerator()->ConvertToOutputFormat(
             cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
@@ -323,8 +323,8 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
         std::string targetOutput = ConvertToNinjaPath(gt.GetFullPath(cfgName));
         std::string targetOutputReal =
           this->ConvertToNinjaPath(gt.GetFullPath(cfgName,
-                                            /*implib=*/false,
-                                            /*realpath=*/true));
+                                                  /*implib=*/false,
+                                                  /*realpath=*/true));
         cmakeCommand += targetOutputReal;
         cmakeCommand += " || true";
         linkCmds.push_back(cmakeCommand);
@@ -502,7 +502,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   vars["LINK_PATH"] = frameworkPath + linkPath;
   std::string lwyuFlags;
-  if(genTarget.GetProperty("LINK_WHAT_YOU_USE")) {
+  if (genTarget.GetProperty("LINK_WHAT_YOU_USE")) {
     lwyuFlags = " -Wl,--no-as-needed";
   }
 
