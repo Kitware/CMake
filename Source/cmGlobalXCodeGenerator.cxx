@@ -689,7 +689,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   cmXCodeObject* fileRef = buildFile->GetObject("fileRef")->GetObject();
 
   cmXCodeObject* settings = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-  settings->AddAttribute("COMPILER_FLAGS", this->CreateString(flags));
+  settings->AddAttributeIfNotEmpty("COMPILER_FLAGS",
+                                   this->CreateString(flags));
 
   // Is this a resource file in this target? Add it to the resources group...
   //
@@ -698,22 +699,36 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
     gtgt->GetTargetSourceFileFlags(sf);
   bool isResource = tsFlags.Type == cmGeneratorTarget::SourceFileTypeResource;
 
+  cmXCodeObject* attrs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+
   // Is this a "private" or "public" framework header file?
   // Set the ATTRIBUTES attribute appropriately...
   //
   if (gtgt->IsFrameworkOnApple()) {
     if (tsFlags.Type == cmGeneratorTarget::SourceFileTypePrivateHeader) {
-      cmXCodeObject* attrs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
       attrs->AddObject(this->CreateString("Private"));
-      settings->AddAttribute("ATTRIBUTES", attrs);
       isResource = true;
     } else if (tsFlags.Type == cmGeneratorTarget::SourceFileTypePublicHeader) {
-      cmXCodeObject* attrs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
       attrs->AddObject(this->CreateString("Public"));
-      settings->AddAttribute("ATTRIBUTES", attrs);
       isResource = true;
     }
   }
+
+  // Add user-specified file attributes.
+  const char* extraFileAttributes = sf->GetProperty("XCODE_FILE_ATTRIBUTES");
+  if (extraFileAttributes) {
+    // Expand the list of attributes.
+    std::vector<std::string> attributes;
+    cmSystemTools::ExpandListArgument(extraFileAttributes, attributes);
+
+    // Store the attributes.
+    for (std::vector<std::string>::const_iterator ai = attributes.begin();
+         ai != attributes.end(); ++ai) {
+      attrs->AddObject(this->CreateString(*ai));
+    }
+  }
+
+  settings->AddAttributeIfNotEmpty("ATTRIBUTES", attrs);
 
   // Add the fileRef to the top level Resources group/folder if it is not
   // already there.
@@ -723,7 +738,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
     this->ResourcesGroupChildren->AddObject(fileRef);
   }
 
-  buildFile->AddAttribute("settings", settings);
+  buildFile->AddAttributeIfNotEmpty("settings", settings);
   return buildFile;
 }
 
@@ -772,6 +787,8 @@ std::string GetSourcecodeValueFromFileExtension(const std::string& _ext,
     sourcecode += ".asm";
   } else if (ext == "metal") {
     sourcecode += ".metal";
+  } else if (ext == "mig") {
+    sourcecode += ".mig";
   }
   // else
   //  {

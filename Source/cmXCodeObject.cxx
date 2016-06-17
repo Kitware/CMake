@@ -83,6 +83,22 @@ cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
   }
 }
 
+bool cmXCodeObject::IsEmpty() const
+{
+  switch (this->TypeValue) {
+    case OBJECT_LIST:
+      return this->List.empty();
+    case STRING:
+      return this->String.empty();
+    case ATTRIBUTE_GROUP:
+      return this->ObjectAttributes.empty();
+    case OBJECT_REF:
+    case OBJECT:
+      return this->Object == 0;
+  }
+  return true; // unreachable, but quiets warnings
+}
+
 void cmXCodeObject::Indent(int level, std::ostream& out)
 {
   while (level) {
