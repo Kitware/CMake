@@ -307,6 +307,14 @@ public:
   void SetTrace(bool b) { this->Trace = b; }
   bool GetTraceExpand() { return this->TraceExpand; }
   void SetTraceExpand(bool b) { this->TraceExpand = b; }
+  void AddTraceSource(std::string const& file)
+  {
+    this->TraceOnlyThisSources.push_back(file);
+  }
+  std::vector<std::string> const& GetTraceSources() const
+  {
+    return this->TraceOnlyThisSources;
+  }
   bool GetWarnUninitialized() { return this->WarnUninitialized; }
   void SetWarnUninitialized(bool b) { this->WarnUninitialized = b; }
   bool GetWarnUnused() { return this->WarnUnused; }
@@ -480,6 +488,8 @@ private:
 
   cmState* State;
   cmState::Snapshot CurrentSnapshot;
+
+  std::vector<std::string> TraceOnlyThisSources;
 
   void UpdateConversionPathTable();
 
