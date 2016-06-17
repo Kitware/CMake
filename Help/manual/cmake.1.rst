@@ -108,6 +108,11 @@ Options
 
  Like ``--trace``, but with variables expanded.
 
+``--trace-source=<file>``
+ Put cmake in trace mode, but output only lines of a specified file.
+
+ Multiple options are allowed.
+
 ``--warn-uninitialized``
  Warn about uninitialized values.
 

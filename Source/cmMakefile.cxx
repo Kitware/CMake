@@ -37,6 +37,7 @@
 
 #include <cmsys/FStream.hxx>
 #include <cmsys/RegularExpression.hxx>
+#include <cmsys/SystemTools.hxx>
 #include <cmsys/auto_ptr.hxx>
 
 #include <assert.h>
@@ -175,8 +176,29 @@ cmListFileContext cmMakefile::GetExecutionContext() const
 
 void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
 {
+  // Check if current file in the list of requested to trace...
+  std::vector<std::string> const& trace_only_this_files =
+    this->GetCMakeInstance()->GetTraceSources();
+  std::string const& full_path = this->GetExecutionFilePath();
+  std::string const& only_filename = cmSystemTools::GetFilenameName(full_path);
+  bool trace = trace_only_this_files.empty();
+  if (!trace) {
+    for (std::vector<std::string>::const_iterator i =
+        trace_only_this_files.begin();
+        !trace && i != trace_only_this_files.end(); ++i) {
+      std::string::size_type const pos = full_path.rfind(*i);
+      trace = (pos != std::string::npos) &&
+        ((pos + i->size()) == full_path.size()) &&
+        (only_filename == cmSystemTools::GetFilenameName(*i));
+    }
+    // Do nothing if current file wasn't requested for trace...
+    if (!trace) {
+        return;
+    }
+  }
+
   std::ostringstream msg;
-  msg << this->GetExecutionFilePath() << "(" << lff.Line << "):  ";
+  msg << full_path << "(" << lff.Line << "):  ";
   msg << lff.Name << "(";
   bool expand = this->GetCMakeInstance()->GetTraceExpand();
   std::string temp;
