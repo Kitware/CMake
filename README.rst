@@ -89,7 +89,7 @@ If you have found a bug:
 3. Finally, if the issue is not resolved by the above steps, open
    an entry in the `CMake Issue Tracker`_.
 
-.. _`CMake Issue Tracker`: https://cmake.org/Bug
+.. _`CMake Issue Tracker`: https://gitlab.kitware.com/cmake/cmake/issues
 
 Contributing
 ============
