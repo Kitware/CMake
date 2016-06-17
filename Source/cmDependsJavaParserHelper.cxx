@@ -13,12 +13,7 @@
 
 #include "cmDependsJavaLexer.h"
 #include "cmSystemTools.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <cmsys/FStream.hxx>
-#include <iostream>
 
 int cmDependsJava_yyparse(yyscan_t yyscanner);
 
