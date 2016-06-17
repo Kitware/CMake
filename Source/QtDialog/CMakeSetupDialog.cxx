@@ -830,17 +830,18 @@ void CMakeSetupDialog::doAbout()
     "\n"
     "CMake GUI maintained by csimsoft,\n"
     "built using Qt %2 (qt-project.org).\n"
-#ifdef CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL
+#ifdef USE_LGPL
     "\n"
     "The Qt Toolkit is Copyright (C) Digia Plc and/or its subsidiary(-ies).\n"
-    "Qt is licensed under terms of the GNU LGPLv2.1, available at:\n"
+    "Qt is licensed under terms of the GNU LGPLv" USE_LGPL ", available at:\n"
     " \"%3\""
 #endif
     );
   msg = msg.arg(cmVersion::GetCMakeVersion());
   msg = msg.arg(qVersion());
-#ifdef CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL
-  std::string lgpl = cmSystemTools::GetCMakeRoot() + "/Licenses/LGPLv2.1.txt";
+#ifdef USE_LGPL
+  std::string lgpl =
+    cmSystemTools::GetCMakeRoot() + "/Licenses/LGPLv" USE_LGPL ".txt";
   msg = msg.arg(lgpl.c_str());
 #endif
 

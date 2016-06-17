@@ -28,6 +28,16 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   set(CMake_BIN_DIR ${CMake_BINARY_DIR}/bin)
 endif()
 
+if(CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL)
+  if(CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL MATCHES "^3|2\\.1$")
+    set(USE_LGPL "${CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL}")
+  else()
+    set(USE_LGPL "2.1")
+  endif()
+else()
+  set(USE_LGPL "")
+endif()
+
 if("${CMake_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
   # Disallow architecture-specific try_run.  It may not run on the host.
   macro(TRY_RUN)
