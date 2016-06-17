@@ -34,6 +34,9 @@
 #define YY_NO_UNISTD_H 1
 #endif
 
+/* Prefer C99 *_MAX macros from stdint.h where available. */
+#include <cm_kwiml.h>
+
 /* Make sure malloc and free are available on QNX.  */
 #ifdef __QNX__
 #include <malloc.h>
