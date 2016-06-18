@@ -591,12 +591,14 @@ endmacro()
    XRENDER_STATIC_LIBRARIES=Xrender;X11;pthread;Xau;Xdmcp
 #]========================================]
 macro(pkg_check_modules _prefix _module0)
+  _pkgconfig_parse_options(_pkg_modules _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path _imp_target "${_module0}" ${ARGN})
   # check cached value
   if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION} OR NOT ${_prefix}_FOUND)
-    _pkgconfig_parse_options   (_pkg_modules _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path _imp_target "${_module0}" ${ARGN})
     _pkg_check_modules_internal("${_pkg_is_required}" "${_pkg_is_silent}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target} "${_prefix}" ${_pkg_modules})
 
     _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})
+  elseif (${_prefix}_FOUND and ${_imp_target})
+    _pkg_create_imp_target("${_prefix}" _no_cmake_path _no_cmake_environment_path)
   endif()
 endmacro()
 
@@ -619,10 +621,10 @@ endmacro()
     pkg_search_module (BAR     libxml-2.0 libxml2 libxml>=2)
 #]========================================]
 macro(pkg_search_module _prefix _module0)
+  _pkgconfig_parse_options(_pkg_modules_alt _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path _imp_target "${_module0}" ${ARGN})
   # check cached value
   if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION} OR NOT ${_prefix}_FOUND)
     set(_pkg_modules_found 0)
-    _pkgconfig_parse_options(_pkg_modules_alt _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path _imp_target "${_module0}" ${ARGN})
 
     if (NOT ${_pkg_is_silent})
       message(STATUS "Checking for one of the modules '${_pkg_modules_alt}'")
@@ -646,6 +648,8 @@ macro(pkg_search_module _prefix _module0)
     endif()
 
     _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})
+  elseif (${_prefix}_FOUND and ${_imp_target})
+    _pkg_create_imp_target("${_prefix}" _no_cmake_path _no_cmake_environment_path)
   endif()
 endmacro()
 
