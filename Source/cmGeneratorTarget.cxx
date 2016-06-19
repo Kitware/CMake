@@ -1350,7 +1350,12 @@ std::string cmGeneratorTarget::GetAppBundleDirectory(const std::string& config,
                                                      bool contentOnly) const
 {
   std::string fpath = this->GetFullName(config, false);
-  fpath += ".app";
+  fpath += ".";
+  const char* ext = this->GetProperty("BUNDLE_EXTENSION");
+  if (!ext) {
+    ext = "app";
+  }
+  fpath += ext;
   if (!this->Makefile->PlatformIsAppleIos()) {
     fpath += "/Contents";
     if (!contentOnly) {
