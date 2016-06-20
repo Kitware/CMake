@@ -365,7 +365,7 @@ IF(DEFINED __GNUWIN32PATH AND EXISTS "${__GNUWIN32PATH}")
   #   e.g.
   #     cmake -DCMAKE_PREFIX_PATH=<your-GnuWin32-path> <path-to-source>
   #
-  # If compiling error occured in zconf.h, You may need patch to zconf.h.
+  # If compiling error occurred in zconf.h, You may need patch to zconf.h.
   #--- zconf.h.orig	2005-07-21 00:40:26.000000000
   #+++ zconf.h	2009-01-19 11:39:10.093750000
   #@@ -286,7 +286,7 @@
