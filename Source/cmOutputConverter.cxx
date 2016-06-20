@@ -161,9 +161,11 @@ std::string cmOutputConverter::Convert(RelativeRoot remote,
                                        OutputFormat output,
                                        bool optional) const
 {
-  const char* remotePath = this->GetRelativeRootPath(remote);
-
   // The relative root must have a path (i.e. not FULL or NONE)
+  assert(remote != FULL);
+  assert(remote != NONE);
+
+  const char* remotePath = this->GetRelativeRootPath(remote);
   assert(remotePath != 0);
 
   if (!local.empty() && !optional) {
