@@ -95,6 +95,34 @@ function(_lua_set_version_vars)
     set(_lua_library_names "${_lua_library_names}" PARENT_SCOPE)
 endfunction(_lua_set_version_vars)
 
+function(_lua_check_header_version _hdr_file)
+    # At least 5.[012] have different ways to express the version
+    # so all of them need to be tested. Lua 5.2 defines LUA_VERSION
+    # and LUA_RELEASE as joined by the C preprocessor, so avoid those.
+    file(STRINGS "${_hdr_file}" lua_version_strings
+         REGEX "^#define[ \t]+LUA_(RELEASE[ \t]+\"Lua [0-9]|VERSION([ \t]+\"Lua [0-9]|_[MR])).*")
+
+    string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION_MAJOR[ \t]+\"([0-9])\"[ \t]*;.*" "\\1" LUA_VERSION_MAJOR ";${lua_version_strings};")
+    if (LUA_VERSION_MAJOR MATCHES "^[0-9]+$")
+        string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION_MINOR[ \t]+\"([0-9])\"[ \t]*;.*" "\\1" LUA_VERSION_MINOR ";${lua_version_strings};")
+        string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION_RELEASE[ \t]+\"([0-9])\"[ \t]*;.*" "\\1" LUA_VERSION_PATCH ";${lua_version_strings};")
+        set(LUA_VERSION_STRING "${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}.${LUA_VERSION_PATCH}")
+    else ()
+        string(REGEX REPLACE ".*;#define[ \t]+LUA_RELEASE[ \t]+\"Lua ([0-9.]+)\"[ \t]*;.*" "\\1" LUA_VERSION_STRING ";${lua_version_strings};")
+        if (NOT LUA_VERSION_STRING MATCHES "^[0-9.]+$")
+            string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION[ \t]+\"Lua ([0-9.]+)\"[ \t]*;.*" "\\1" LUA_VERSION_STRING ";${lua_version_strings};")
+        endif ()
+        string(REGEX REPLACE "^([0-9]+)\\.[0-9.]*$" "\\1" LUA_VERSION_MAJOR "${LUA_VERSION_STRING}")
+        string(REGEX REPLACE "^[0-9]+\\.([0-9]+)[0-9.]*$" "\\1" LUA_VERSION_MINOR "${LUA_VERSION_STRING}")
+        string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]).*" "\\1" LUA_VERSION_PATCH "${LUA_VERSION_STRING}")
+    endif ()
+
+    set(LUA_VERSION_MAJOR ${LUA_VERSION_MAJOR} PARENT_SCOPE)
+    set(LUA_VERSION_MINOR ${LUA_VERSION_MINOR} PARENT_SCOPE)
+    set(LUA_VERSION_PATCH ${LUA_VERSION_PATCH} PARENT_SCOPE)
+    set(LUA_VERSION_STRING ${LUA_VERSION_STRING} PARENT_SCOPE)
+endfunction(_lua_check_header_version)
+
 _lua_set_version_vars()
 
 find_path(LUA_INCLUDE_DIR lua.h
@@ -138,29 +166,8 @@ if (LUA_LIBRARY)
 endif ()
 
 if (LUA_INCLUDE_DIR AND EXISTS "${LUA_INCLUDE_DIR}/lua.h")
-    # At least 5.[012] have different ways to express the version
-    # so all of them need to be tested. Lua 5.2 defines LUA_VERSION
-    # and LUA_RELEASE as joined by the C preprocessor, so avoid those.
-    file(STRINGS "${LUA_INCLUDE_DIR}/lua.h" lua_version_strings
-         REGEX "^#define[ \t]+LUA_(RELEASE[ \t]+\"Lua [0-9]|VERSION([ \t]+\"Lua [0-9]|_[MR])).*")
-
-    string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION_MAJOR[ \t]+\"([0-9])\"[ \t]*;.*" "\\1" LUA_VERSION_MAJOR ";${lua_version_strings};")
-    if (LUA_VERSION_MAJOR MATCHES "^[0-9]+$")
-        string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION_MINOR[ \t]+\"([0-9])\"[ \t]*;.*" "\\1" LUA_VERSION_MINOR ";${lua_version_strings};")
-        string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION_RELEASE[ \t]+\"([0-9])\"[ \t]*;.*" "\\1" LUA_VERSION_PATCH ";${lua_version_strings};")
-        set(LUA_VERSION_STRING "${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}.${LUA_VERSION_PATCH}")
-    else ()
-        string(REGEX REPLACE ".*;#define[ \t]+LUA_RELEASE[ \t]+\"Lua ([0-9.]+)\"[ \t]*;.*" "\\1" LUA_VERSION_STRING ";${lua_version_strings};")
-        if (NOT LUA_VERSION_STRING MATCHES "^[0-9.]+$")
-            string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION[ \t]+\"Lua ([0-9.]+)\"[ \t]*;.*" "\\1" LUA_VERSION_STRING ";${lua_version_strings};")
-        endif ()
-        string(REGEX REPLACE "^([0-9]+)\\.[0-9.]*$" "\\1" LUA_VERSION_MAJOR "${LUA_VERSION_STRING}")
-        string(REGEX REPLACE "^[0-9]+\\.([0-9]+)[0-9.]*$" "\\1" LUA_VERSION_MINOR "${LUA_VERSION_STRING}")
-        string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]).*" "\\1" LUA_VERSION_PATCH "${LUA_VERSION_STRING}")
-    endif ()
-
-    unset(lua_version_strings)
-endif()
+    _lua_check_header_version("${LUA_INCLUDE_DIR}/lua.h")
+endif ()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 # handle the QUIETLY and REQUIRED arguments and set LUA_FOUND to TRUE if
