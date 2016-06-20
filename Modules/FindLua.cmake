@@ -77,6 +77,8 @@ function(_lua_set_version_vars)
         set(_lua_append_versions ${LUA_VERSIONS5})
     endif ()
 
+    list(APPEND _lua_include_subdirs "include/lua" "include")
+
     foreach (ver IN LISTS _lua_append_versions)
         string(REGEX MATCH "^([0-9]+)\\.([0-9]+)$" _ver "${ver}")
         list(APPEND _lua_include_subdirs
@@ -131,18 +133,33 @@ endfunction(_lua_check_header_version)
 
 _lua_set_version_vars()
 
-find_path(LUA_INCLUDE_DIR lua.h
-  HINTS
-    ENV LUA_DIR
-  PATH_SUFFIXES ${_lua_include_subdirs} include/lua include
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /sw # Fink
-  /opt/local # DarwinPorts
-  /opt/csw # Blastwave
-  /opt
-)
+if (LUA_INCLUDE_DIR AND EXISTS "${LUA_INCLUDE_DIR}/lua.h")
+    _lua_check_header_version("${LUA_INCLUDE_DIR}/lua.h")
+endif ()
+
+if (NOT LUA_VERSION_STRING)
+    foreach (subdir IN LISTS _lua_include_subdirs)
+        unset(LUA_INCLUDE_PREFIX CACHE)
+        find_path(LUA_INCLUDE_PREFIX ${subdir}/lua.h
+          HINTS
+            ENV LUA_DIR
+          PATHS
+          ~/Library/Frameworks
+          /Library/Frameworks
+          /sw # Fink
+          /opt/local # DarwinPorts
+          /opt/csw # Blastwave
+          /opt
+        )
+        if (LUA_INCLUDE_PREFIX)
+            _lua_check_header_version("${LUA_INCLUDE_PREFIX}/${subdir}/lua.h")
+            if (LUA_VERSION_STRING)
+                set(LUA_INCLUDE_DIR "${LUA_INCLUDE_PREFIX}/${subdir}")
+                break()
+            endif ()
+        endif ()
+    endforeach ()
+endif ()
 unset(_lua_include_subdirs)
 unset(_lua_append_versions)
 
@@ -170,10 +187,6 @@ if (LUA_LIBRARY)
     else ()
         set(LUA_LIBRARIES "${LUA_LIBRARY}")
     endif ()
-endif ()
-
-if (LUA_INCLUDE_DIR AND EXISTS "${LUA_INCLUDE_DIR}/lua.h")
-    _lua_check_header_version("${LUA_INCLUDE_DIR}/lua.h")
 endif ()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
