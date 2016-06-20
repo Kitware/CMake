@@ -240,6 +240,8 @@
 #  The QAxServer target (Windows only)
 # ``Qt4::QtDBus``
 #  The QtDBus target
+# ``Qt4::QtDeclarative``
+#  The QtDeclarative target
 # ``Qt4::QtDesigner``
 #  The QtDesigner target
 # ``Qt4::QtDesignerComponents``
