@@ -49,6 +49,7 @@
 
 unset(_lua_include_subdirs)
 unset(_lua_library_names)
+unset(_lua_append_versions)
 
 # this is a function only to have all the variables inside go away automatically
 function(_lua_set_version_vars)
@@ -93,6 +94,7 @@ function(_lua_set_version_vars)
 
     set(_lua_include_subdirs "${_lua_include_subdirs}" PARENT_SCOPE)
     set(_lua_library_names "${_lua_library_names}" PARENT_SCOPE)
+    set(_lua_append_versions "${_lua_append_versions}" PARENT_SCOPE)
 endfunction(_lua_set_version_vars)
 
 function(_lua_check_header_version _hdr_file)
@@ -116,11 +118,15 @@ function(_lua_check_header_version _hdr_file)
         string(REGEX REPLACE "^[0-9]+\\.([0-9]+)[0-9.]*$" "\\1" LUA_VERSION_MINOR "${LUA_VERSION_STRING}")
         string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]).*" "\\1" LUA_VERSION_PATCH "${LUA_VERSION_STRING}")
     endif ()
-
-    set(LUA_VERSION_MAJOR ${LUA_VERSION_MAJOR} PARENT_SCOPE)
-    set(LUA_VERSION_MINOR ${LUA_VERSION_MINOR} PARENT_SCOPE)
-    set(LUA_VERSION_PATCH ${LUA_VERSION_PATCH} PARENT_SCOPE)
-    set(LUA_VERSION_STRING ${LUA_VERSION_STRING} PARENT_SCOPE)
+    foreach (ver IN LISTS _lua_append_versions)
+        if (ver STREQUAL "${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}")
+            set(LUA_VERSION_MAJOR ${LUA_VERSION_MAJOR} PARENT_SCOPE)
+            set(LUA_VERSION_MINOR ${LUA_VERSION_MINOR} PARENT_SCOPE)
+            set(LUA_VERSION_PATCH ${LUA_VERSION_PATCH} PARENT_SCOPE)
+            set(LUA_VERSION_STRING ${LUA_VERSION_STRING} PARENT_SCOPE)
+            return()
+        endif ()
+    endforeach ()
 endfunction(_lua_check_header_version)
 
 _lua_set_version_vars()
@@ -138,6 +144,7 @@ find_path(LUA_INCLUDE_DIR lua.h
   /opt
 )
 unset(_lua_include_subdirs)
+unset(_lua_append_versions)
 
 find_library(LUA_LIBRARY
   NAMES ${_lua_library_names} lua
