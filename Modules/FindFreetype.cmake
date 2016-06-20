@@ -87,15 +87,28 @@ find_path(
     freetype2
 )
 
-find_library(FREETYPE_LIBRARY
-  NAMES
-    freetype
-    libfreetype
-    freetype219
-  ${FREETYPE_FIND_ARGS}
-  PATH_SUFFIXES
-    lib
-)
+if(NOT FREETYPE_LIBRARY)
+  find_library(FREETYPE_LIBRARY_RELEASE
+    NAMES
+      freetype
+      libfreetype
+      freetype219
+    ${FREETYPE_FIND_ARGS}
+    PATH_SUFFIXES
+      lib
+  )
+  find_library(FREETYPE_LIBRARY_DEBUG
+    NAMES
+      freetyped
+      libfreetyped
+      freetype219d
+    ${FREETYPE_FIND_ARGS}
+    PATH_SUFFIXES
+      lib
+  )
+  include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+  select_library_configurations(FREETYPE)
+endif()
 
 unset(FREETYPE_FIND_ARGS)
 
@@ -147,7 +160,6 @@ find_package_handle_standard_args(
 )
 
 mark_as_advanced(
-  FREETYPE_LIBRARY
   FREETYPE_INCLUDE_DIR_freetype2
   FREETYPE_INCLUDE_DIR_ft2build
 )
