@@ -224,16 +224,16 @@ if(BUILD_TESTING)
       set(BUILD_NAME_SYSTEM_NAME "Win32")
     endif()
     if(UNIX OR BORLAND)
-      get_filename_component(DART_CXX_NAME
-        "${CMAKE_CXX_COMPILER}" ${DART_NAME_COMPONENT})
+      get_filename_component(DART_COMPILER_NAME
+        "${DART_COMPILER}" ${DART_NAME_COMPONENT})
     else()
-      get_filename_component(DART_CXX_NAME
+      get_filename_component(DART_COMPILER_NAME
         "${CMAKE_MAKE_PROGRAM}" ${DART_NAME_COMPONENT})
     endif()
-    if(DART_CXX_NAME MATCHES "devenv")
-      GET_VS_VERSION_STRING("${CMAKE_GENERATOR}" DART_CXX_NAME)
+    if(DART_COMPILER_NAME MATCHES "devenv")
+      GET_VS_VERSION_STRING("${CMAKE_GENERATOR}" DART_COMPILER_NAME)
     endif()
-    set(BUILDNAME "${BUILD_NAME_SYSTEM_NAME}-${DART_CXX_NAME}")
+    set(BUILDNAME "${BUILD_NAME_SYSTEM_NAME}-${DART_COMPILER_NAME}")
   endif()
 
   # the build command
