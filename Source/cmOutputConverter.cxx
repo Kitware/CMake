@@ -27,10 +27,12 @@ cmOutputConverter::cmOutputConverter(cmState::Snapshot snapshot)
   assert(this->StateSnapshot.IsValid());
 }
 
-std::string cmOutputConverter::ConvertToOutputForExistingCommon(
-  const std::string& remote, std::string const& result,
-  OutputFormat format) const
+std::string cmOutputConverter::ConvertToOutputForExisting(
+  const std::string& remote, OutputFormat format) const
 {
+  // Perform standard conversion.
+  std::string result = this->ConvertToOutputFormat(remote, format);
+
   // If this is a windows shell, the result has a space, and the path
   // already exists, we can use a short-path to reference it without a
   // space.
@@ -47,16 +49,6 @@ std::string cmOutputConverter::ConvertToOutputForExistingCommon(
 }
 
 std::string cmOutputConverter::ConvertToOutputForExisting(
-  const std::string& remote, OutputFormat format) const
-{
-  // Perform standard conversion.
-  std::string result = this->ConvertToOutputFormat(remote, format);
-
-  // Consider short-path.
-  return this->ConvertToOutputForExistingCommon(remote, result, format);
-}
-
-std::string cmOutputConverter::ConvertToOutputForExisting(
   RelativeRoot remote, OutputFormat format) const
 {
   // The relative root must have a path (i.e. not FULL or NONE)
@@ -66,11 +58,7 @@ std::string cmOutputConverter::ConvertToOutputForExisting(
   const char* remotePath = this->GetRelativeRootPath(remote);
   assert(remotePath != 0);
 
-  // Perform standard conversion.
-  std::string result = this->ConvertToOutputFormat(remotePath, format);
-
-  // Consider short-path.
-  return this->ConvertToOutputForExistingCommon(remotePath, result, format);
+  return this->ConvertToOutputForExisting(remotePath, format);
 }
 
 const char* cmOutputConverter::GetRelativeRootPath(RelativeRoot relroot) const

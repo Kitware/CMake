@@ -159,10 +159,6 @@ public:
 private:
   cmState* GetState() const;
 
-  std::string ConvertToOutputForExistingCommon(const std::string& remote,
-                                               std::string const& result,
-                                               OutputFormat format) const;
-
   static int Shell__CharIsWhitespace(char c);
   static int Shell__CharNeedsQuotesOnUnix(char c);
   static int Shell__CharNeedsQuotesOnWindows(char c);
