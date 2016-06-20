@@ -30,13 +30,11 @@ cmOutputConverter::cmOutputConverter(cmState::Snapshot snapshot)
 std::string cmOutputConverter::ConvertToOutputForExisting(
   const std::string& remote, OutputFormat format) const
 {
-  // Perform standard conversion.
-  std::string result = this->ConvertToOutputFormat(remote, format);
-
   // If this is a windows shell, the result has a space, and the path
   // already exists, we can use a short-path to reference it without a
   // space.
-  if (this->GetState()->UseWindowsShell() && result.find(' ') != result.npos &&
+  if (this->GetState()->UseWindowsShell() &&
+      remote.find(' ') != std::string::npos &&
       cmSystemTools::FileExists(remote.c_str())) {
     std::string tmp;
     if (cmSystemTools::GetShortPath(remote, tmp)) {
@@ -44,8 +42,8 @@ std::string cmOutputConverter::ConvertToOutputForExisting(
     }
   }
 
-  // Otherwise, leave it unchanged.
-  return result;
+  // Otherwise, perform standard conversion.
+  return this->ConvertToOutputFormat(remote, format);
 }
 
 std::string cmOutputConverter::ConvertToOutputForExisting(
