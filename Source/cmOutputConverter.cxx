@@ -61,11 +61,19 @@ std::string cmOutputConverter::ConvertToOutputForExisting(
 std::string cmOutputConverter::ConvertToOutputForExisting(
   RelativeRoot remote, const std::string& local, OutputFormat format) const
 {
+  static_cast<void>(local);
+
+  // The relative root must have a path (i.e. not FULL or NONE)
+  assert(remote != FULL);
+  assert(remote != NONE);
+
+  const char* remotePath = this->GetRelativeRootPath(remote);
+  assert(remotePath != 0);
+
   // Perform standard conversion.
-  std::string result = this->Convert(remote, local, format, true);
+  std::string result = this->ConvertToOutputFormat(remotePath, format);
 
   // Consider short-path.
-  const char* remotePath = this->GetRelativeRootPath(remote);
   return this->ConvertToOutputForExistingCommon(remotePath, result, format);
 }
 
@@ -158,8 +166,7 @@ std::string cmOutputConverter::ConvertDirectorySeparatorsForShell(
 
 std::string cmOutputConverter::Convert(RelativeRoot remote,
                                        const std::string& local,
-                                       OutputFormat output,
-                                       bool optional) const
+                                       OutputFormat output) const
 {
   // The relative root must have a path (i.e. not FULL or NONE)
   assert(remote != FULL);
@@ -168,7 +175,7 @@ std::string cmOutputConverter::Convert(RelativeRoot remote,
   const char* remotePath = this->GetRelativeRootPath(remote);
   assert(remotePath != 0);
 
-  if (local.empty() || optional) {
+  if (local.empty()) {
     return this->ConvertToOutputFormat(remotePath, output);
   }
 
