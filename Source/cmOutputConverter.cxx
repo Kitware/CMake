@@ -168,14 +168,14 @@ std::string cmOutputConverter::Convert(RelativeRoot remote,
   const char* remotePath = this->GetRelativeRootPath(remote);
   assert(remotePath != 0);
 
-  if (!local.empty() && !optional) {
-    std::vector<std::string> components;
-    cmSystemTools::SplitPath(local, components);
-    std::string result = this->ConvertToRelativePath(components, remotePath);
-    return this->ConvertToOutputFormat(result, output);
+  if (local.empty() || optional) {
+    return this->ConvertToOutputFormat(remotePath, output);
   }
 
-  return this->ConvertToOutputFormat(remotePath, output);
+  std::vector<std::string> components;
+  cmSystemTools::SplitPath(local, components);
+  std::string result = this->ConvertToRelativePath(components, remotePath);
+  return this->ConvertToOutputFormat(result, output);
 }
 
 static bool cmOutputConverterNotAbove(const char* a, const char* b)
