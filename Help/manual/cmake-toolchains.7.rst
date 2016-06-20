@@ -290,12 +290,206 @@ Windows Store may look like this:
   set(CMAKE_SYSTEM_NAME WindowsStore)
   set(CMAKE_SYSTEM_VERSION 8.1)
 
-Cross Compiling using NVIDIA Nsight Tegra
------------------------------------------
+.. _`Cross Compiling for Android`:
 
-A toolchain file to configure a Visual Studio generator to
-build using NVIDIA Nsight Tegra targeting Android may look
-like this:
+Cross Compiling for Android
+---------------------------
+
+A toolchain file may configure cross-compiling for Android by setting the
+:variable:`CMAKE_SYSTEM_NAME` variable to ``Android``.  Further configuration
+is specific to the Android development environment to be used.
+
+For :ref:`Visual Studio Generators`, CMake expects :ref:`NVIDIA Nsight Tegra
+Visual Studio Edition <Cross Compiling for Android with NVIDIA Nsight Tegra
+Visual Studio Edition>` to be installed.  See that section for further
+configuration details.
+
+For :ref:`Makefile Generators` and the :generator:`Ninja` generator,
+CMake expects one of these environments:
+
+* :ref:`NDK <Cross Compiling for Android with the NDK>`
+* :ref:`Standalone Toolchain <Cross Compiling for Android with a Standalone Toolchain>`
+
+CMake uses the following steps to select one of the environments:
+
+* If the :variable:`CMAKE_ANDROID_NDK` variable is set, the NDK at the
+  specified location will be used.
+
+* Else, if the :variable:`CMAKE_ANDROID_STANDALONE_TOOLCHAIN` variable
+  is set, the Standalone Toolchain at the specified location will be used.
+
+* Else, if the :variable:`CMAKE_SYSROOT` variable is set to a directory
+  of the form ``<ndk>/platforms/android-<api>/arch-<arch>``, the ``<ndk>``
+  part will be used as the value of :variable:`CMAKE_ANDROID_NDK` and the
+  NDK will be used.
+
+* Else, if the :variable:`CMAKE_SYSROOT` variable is set to a directory of the
+  form ``<standalone-toolchain>/sysroot``, the ``<standalone-toolchain>`` part
+  will be used as the value of :variable:`CMAKE_ANDROID_STANDALONE_TOOLCHAIN`
+  and the Standalone Toolchain will be used.
+
+* Else, if a cmake variable ``ANDROID_NDK`` is set it will be used
+  as the value of :variable:`CMAKE_ANDROID_NDK`, and the NDK will be used.
+
+* Else, if a cmake variable ``ANDROID_STANDALONE_TOOLCHAIN`` is set, it will be
+  used as the value of :variable:`CMAKE_ANDROID_STANDALONE_TOOLCHAIN`, and the
+  Standalone Toolchain will be used.
+
+* Else, if an environment variable ``ANDROID_NDK_ROOT`` or
+  ``ANDROID_NDK`` is set, it will be used as the value of
+  :variable:`CMAKE_ANDROID_NDK`, and the NDK will be used.
+
+* Else, if an environment variable ``ANDROID_STANDALONE_TOOLCHAIN`` is
+  set then it will be used as the value of
+  :variable:`CMAKE_ANDROID_STANDALONE_TOOLCHAIN`, and the Standalone
+  Toolchain will be used.
+
+* Else, an error diagnostic will be issued that neither the NDK or
+  Standalone Toolchain can be found.
+
+.. _`Cross Compiling for Android with the NDK`:
+
+Cross Compiling for Android with the NDK
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A toolchain file may configure :ref:`Makefile Generators` or the
+:generator:`Ninja` generator to target Android for cross-compiling.
+
+Configure use of an Android NDK with the following variables:
+
+:variable:`CMAKE_SYSTEM_NAME`
+  Set to ``Android``.  Must be specified to enable cross compiling
+  for Android.
+
+:variable:`CMAKE_SYSTEM_VERSION`
+  Set to the Android API level.  If not specified, the value is
+  determined as follows:
+
+  * If the :variable:`CMAKE_ANDROID_API` variable is set, its value
+    is used as the API level.
+  * If the :variable:`CMAKE_SYSROOT` variable is set, the API level is
+    detected from the NDK directory structure containing the sysroot.
+  * Otherwise, the latest API level available in the NDK is used.
+
+:variable:`CMAKE_ANDROID_ARCH_ABI`
+  Set to the Android ABI (architecture).  If not specified, this
+  variable will default to ``armeabi``.
+  The :variable:`CMAKE_ANDROID_ARCH` variable will be computed
+  from ``CMAKE_ANDROID_ARCH_ABI`` automatically.
+  Also see the :variable:`CMAKE_ANDROID_ARM_MODE` and
+  :variable:`CMAKE_ANDROID_ARM_NEON` variables.
+
+:variable:`CMAKE_ANDROID_NDK`
+  Set to the absolute path to the Android NDK root directory.
+  A ``${CMAKE_ANDROID_NDK}/platforms`` directory must exist.
+  If not specified, a default for this variable will be chosen
+  as specified :ref:`above <Cross Compiling for Android>`.
+
+:variable:`CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION`
+  Set to the version of the NDK toolchain to be selected as the compiler.
+  If not specified, the latest available GCC toolchain will be used.
+
+:variable:`CMAKE_ANDROID_STL_TYPE`
+  Set to specify which C++ standard library to use.  If not specified,
+  a default will be selected as described in the variable documentation.
+
+The following variables will be computed and provided automatically:
+
+:variable:`CMAKE_<LANG>_ANDROID_TOOLCHAIN_PREFIX`
+  The absolute path prefix to the binutils in the NDK toolchain.
+
+:variable:`CMAKE_<LANG>_ANDROID_TOOLCHAIN_SUFFIX`
+  The host platform suffix of the binutils in the NDK toolchain.
+
+
+For example, a toolchain file might contain:
+
+.. code-block:: cmake
+
+  set(CMAKE_SYSTEM_NAME Android)
+  set(CMAKE_SYSTEM_VERSION 21) # API level
+  set(CMAKE_ANDROID_ARCH_ABI arm64-v8a)
+  set(CMAKE_ANDROID_NDK /path/to/android-ndk)
+  set(CMAKE_ANDROID_STL_TYPE gnustl_static)
+
+Alternatively one may specify the values without a toolchain file:
+
+.. code-block:: console
+
+  $ cmake ../src \
+    -DCMAKE_SYSTEM_NAME=Android \
+    -DCMAKE_SYSTEM_VERSION=21 \
+    -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a \
+    -DCMAKE_ANDROID_NDK=/path/to/android-ndk \
+    -DCMAKE_ANDROID_STL_TYPE=gnustl_static
+
+.. _`Cross Compiling for Android with a Standalone Toolchain`:
+
+Cross Compiling for Android with a Standalone Toolchain
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A toolchain file may configure :ref:`Makefile Generators` or the
+:generator:`Ninja` generator to target Android for cross-compiling
+using a standalone toolchain.
+
+Configure use of an Android standalone toolchain with the following variables:
+
+:variable:`CMAKE_SYSTEM_NAME`
+  Set to ``Android``.  Must be specified to enable cross compiling
+  for Android.
+
+:variable:`CMAKE_ANDROID_STANDALONE_TOOLCHAIN`
+  Set to the absolute path to the standalone toolchain root directory.
+  A ``${CMAKE_ANDROID_STANDALONE_TOOLCHAIN}/sysroot`` directory
+  must exist.
+  If not specified, a default for this variable will be chosen
+  as specified :ref:`above <Cross Compiling for Android>`.
+
+:variable:`CMAKE_ANDROID_ARM_MODE`
+  When the standalone toolchain targets ARM, optionally set this to ``ON``
+  to target 32-bit ARM instead of 16-bit Thumb.
+  See variable documentation for details.
+
+:variable:`CMAKE_ANDROID_ARM_NEON`
+  When the standalone toolchain targets ARM v7, optionally set thisto ``ON``
+  to target ARM NEON devices.  See variable documentation for details.
+
+The following variables will be computed and provided automatically:
+
+:variable:`CMAKE_SYSTEM_VERSION`
+  The Android API level detected from the standalone toolchain.
+
+:variable:`CMAKE_ANDROID_ARCH_ABI`
+  The Android ABI detected from the standalone toolchain.
+
+:variable:`CMAKE_<LANG>_ANDROID_TOOLCHAIN_PREFIX`
+  The absolute path prefix to the binutils in the standalone toolchain.
+
+:variable:`CMAKE_<LANG>_ANDROID_TOOLCHAIN_SUFFIX`
+  The host platform suffix of the binutils in the standalone toolchain.
+
+For example, a toolchain file might contain:
+
+.. code-block:: cmake
+
+  set(CMAKE_SYSTEM_NAME Android)
+  set(CMAKE_ANDROID_STANDALONE_TOOLCHAIN /path/to/android-toolchain)
+
+Alternatively one may specify the values without a toolchain file:
+
+.. code-block:: console
+
+  $ cmake ../src \
+    -DCMAKE_SYSTEM_NAME=Android \
+    -DCMAKE_ANDROID_STANDALONE_TOOLCHAIN=/path/to/android-toolchain
+
+.. _`Cross Compiling for Android with NVIDIA Nsight Tegra Visual Studio Edition`:
+
+Cross Compiling for Android with NVIDIA Nsight Tegra Visual Studio Edition
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A toolchain file to configure one of the :ref:`Visual Studio Generators`
+to build using NVIDIA Nsight Tegra targeting Android may look like this:
 
 .. code-block:: cmake
 

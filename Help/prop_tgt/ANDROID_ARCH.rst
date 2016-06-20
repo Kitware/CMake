@@ -1,7 +1,8 @@
 ANDROID_ARCH
 ------------
 
-Set the Android target architecture.
+When :ref:`Cross Compiling for Android with NVIDIA Nsight Tegra Visual Studio
+Edition`, this property sets the Android target architecture.
 
 This is a string property that could be set to the one of
 the following values:
