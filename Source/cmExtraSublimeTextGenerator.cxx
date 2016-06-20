@@ -314,27 +314,14 @@ std::string cmExtraSublimeTextGenerator::ComputeFlagsForObject(
   cmSourceFile* source, cmLocalGenerator* lg, cmGeneratorTarget* gtgt)
 {
   std::string flags;
-
-  cmMakefile* makefile = lg->GetMakefile();
   std::string language = source->GetLanguage();
   if (language.empty()) {
     language = "C";
   }
-  const std::string& config = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  // Add language-specific flags.
-  lg->AddLanguageFlags(flags, language, config);
+  std::string const& config =
+    lg->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
 
-  lg->AddArchitectureFlags(flags, gtgt, language, config);
-
-  // TODO: Fortran support.
-  // // Fortran-specific flags computed for this target.
-  // if(*l == "Fortran")
-  //   {
-  //   this->AddFortranFlags(flags);
-  //   }
-
-  // Add shared-library flags if needed.
-  lg->AddCMP0018Flags(flags, gtgt, language, config);
+  lg->GetTargetCompileFlags(gtgt, config, language, flags);
 
   // Add include directory flags.
   {
@@ -345,16 +332,8 @@ std::string cmExtraSublimeTextGenerator::ComputeFlagsForObject(
     lg->AppendFlags(flags, includeFlags);
   }
 
-  // Append old-style preprocessor definition flags.
-  lg->AppendFlags(flags, makefile->GetDefineFlags());
-
-  // Add target-specific flags.
-  lg->AddCompileOptions(flags, gtgt, language, config);
-
   // Add source file specific flags.
   lg->AppendFlags(flags, source->GetProperty("COMPILE_FLAGS"));
-
-  // TODO: Handle Apple frameworks.
 
   return flags;
 }

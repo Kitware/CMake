@@ -22,12 +22,23 @@ class cmCommonTargetGenerator;
 class cmLocalCommonGenerator : public cmLocalGenerator
 {
 public:
-  cmLocalCommonGenerator(cmGlobalGenerator* gg, cmMakefile* mf);
+  cmLocalCommonGenerator(cmGlobalGenerator* gg, cmMakefile* mf,
+                         cmOutputConverter::RelativeRoot wd);
   ~cmLocalCommonGenerator();
 
   std::string const& GetConfigName() { return this->ConfigName; }
 
+  cmOutputConverter::RelativeRoot GetWorkingDirectory() const
+  {
+    return this->WorkingDirectory;
+  }
+
+  std::string GetTargetFortranFlags(cmGeneratorTarget const* target,
+                                    std::string const& config);
+
 protected:
+  cmOutputConverter::RelativeRoot WorkingDirectory;
+
   void SetConfigName();
   std::string ConfigName;
 

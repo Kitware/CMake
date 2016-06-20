@@ -25,7 +25,7 @@
 
 cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
                                              cmMakefile* mf)
-  : cmLocalCommonGenerator(gg, mf)
+  : cmLocalCommonGenerator(gg, mf, cmOutputConverter::HOME_OUTPUT)
   , HomeRelativeOutputPath("")
 {
   this->TargetImplib = "$TARGET_IMPLIB";

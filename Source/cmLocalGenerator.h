@@ -317,10 +317,15 @@ public:
   void GetTargetDefines(cmGeneratorTarget const* target,
                         std::string const& config, std::string const& lang,
                         std::set<std::string>& defines) const;
+  void GetTargetCompileFlags(cmGeneratorTarget* target,
+                             std::string const& config,
+                             std::string const& lang, std::string& flags);
 
   std::string GetFrameworkFlags(std::string const& l,
                                 std::string const& config,
                                 cmGeneratorTarget* target);
+  virtual std::string GetTargetFortranFlags(cmGeneratorTarget const* target,
+                                            std::string const& config);
 
   virtual void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
