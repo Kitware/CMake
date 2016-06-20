@@ -51,32 +51,32 @@ unset(_lua_include_subdirs)
 unset(_lua_library_names)
 
 # this is a function only to have all the variables inside go away automatically
-function(set_lua_version_vars)
+function(_lua_set_version_vars)
     set(LUA_VERSIONS5 5.3 5.2 5.1 5.0)
 
     if (Lua_FIND_VERSION_EXACT)
         if (Lua_FIND_VERSION_COUNT GREATER 1)
-            set(lua_append_versions ${Lua_FIND_VERSION_MAJOR}.${Lua_FIND_VERSION_MINOR})
+            set(_lua_append_versions ${Lua_FIND_VERSION_MAJOR}.${Lua_FIND_VERSION_MINOR})
         endif ()
     elseif (Lua_FIND_VERSION)
         # once there is a different major version supported this should become a loop
         if (NOT Lua_FIND_VERSION_MAJOR GREATER 5)
             if (Lua_FIND_VERSION_COUNT EQUAL 1)
-                set(lua_append_versions ${LUA_VERSIONS5})
+                set(_lua_append_versions ${LUA_VERSIONS5})
             else ()
                 foreach (subver IN LISTS LUA_VERSIONS5)
                     if (NOT subver VERSION_LESS ${Lua_FIND_VERSION})
-                        list(APPEND lua_append_versions ${subver})
+                        list(APPEND _lua_append_versions ${subver})
                     endif ()
                 endforeach ()
             endif ()
         endif ()
     else ()
         # once there is a different major version supported this should become a loop
-        set(lua_append_versions ${LUA_VERSIONS5})
+        set(_lua_append_versions ${LUA_VERSIONS5})
     endif ()
 
-    foreach (ver IN LISTS lua_append_versions)
+    foreach (ver IN LISTS _lua_append_versions)
         string(REGEX MATCH "^([0-9]+)\\.([0-9]+)$" _ver "${ver}")
         list(APPEND _lua_include_subdirs
              include/lua${CMAKE_MATCH_1}${CMAKE_MATCH_2}
@@ -93,9 +93,9 @@ function(set_lua_version_vars)
 
     set(_lua_include_subdirs "${_lua_include_subdirs}" PARENT_SCOPE)
     set(_lua_library_names "${_lua_library_names}" PARENT_SCOPE)
-endfunction(set_lua_version_vars)
+endfunction(_lua_set_version_vars)
 
-set_lua_version_vars()
+_lua_set_version_vars()
 
 find_path(LUA_INCLUDE_DIR lua.h
   HINTS
