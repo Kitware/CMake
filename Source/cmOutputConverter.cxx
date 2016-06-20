@@ -27,14 +27,14 @@ cmOutputConverter::cmOutputConverter(cmState::Snapshot snapshot)
   assert(this->StateSnapshot.IsValid());
 }
 
-std::string cmOutputConverter::ConvertToOutputForExistingCommon(
-  const std::string& remote, std::string const& result,
-  OutputFormat format) const
+std::string cmOutputConverter::ConvertToOutputForExisting(
+  const std::string& remote, OutputFormat format) const
 {
   // If this is a windows shell, the result has a space, and the path
   // already exists, we can use a short-path to reference it without a
   // space.
-  if (this->GetState()->UseWindowsShell() && result.find(' ') != result.npos &&
+  if (this->GetState()->UseWindowsShell() &&
+      remote.find(' ') != std::string::npos &&
       cmSystemTools::FileExists(remote.c_str())) {
     std::string tmp;
     if (cmSystemTools::GetShortPath(remote, tmp)) {
@@ -42,31 +42,21 @@ std::string cmOutputConverter::ConvertToOutputForExistingCommon(
     }
   }
 
-  // Otherwise, leave it unchanged.
-  return result;
+  // Otherwise, perform standard conversion.
+  return this->ConvertToOutputFormat(remote, format);
 }
 
 std::string cmOutputConverter::ConvertToOutputForExisting(
-  const std::string& remote, RelativeRoot local, OutputFormat format) const
+  RelativeRoot remote, OutputFormat format) const
 {
-  static_cast<void>(local);
+  // The relative root must have a path (i.e. not FULL or NONE)
+  assert(remote != FULL);
+  assert(remote != NONE);
 
-  // Perform standard conversion.
-  std::string result = this->ConvertToOutputFormat(remote, format);
-
-  // Consider short-path.
-  return this->ConvertToOutputForExistingCommon(remote, result, format);
-}
-
-std::string cmOutputConverter::ConvertToOutputForExisting(
-  RelativeRoot remote, const std::string& local, OutputFormat format) const
-{
-  // Perform standard conversion.
-  std::string result = this->Convert(remote, local, format, true);
-
-  // Consider short-path.
   const char* remotePath = this->GetRelativeRootPath(remote);
-  return this->ConvertToOutputForExistingCommon(remotePath, result, format);
+  assert(remotePath != 0);
+
+  return this->ConvertToOutputForExisting(remotePath, format);
 }
 
 const char* cmOutputConverter::GetRelativeRootPath(RelativeRoot relroot) const
@@ -158,22 +148,23 @@ std::string cmOutputConverter::ConvertDirectorySeparatorsForShell(
 
 std::string cmOutputConverter::Convert(RelativeRoot remote,
                                        const std::string& local,
-                                       OutputFormat output,
-                                       bool optional) const
+                                       OutputFormat output) const
 {
-  const char* remotePath = this->GetRelativeRootPath(remote);
-
   // The relative root must have a path (i.e. not FULL or NONE)
+  assert(remote != FULL);
+  assert(remote != NONE);
+
+  const char* remotePath = this->GetRelativeRootPath(remote);
   assert(remotePath != 0);
 
-  if (!local.empty() && !optional) {
-    std::vector<std::string> components;
-    cmSystemTools::SplitPath(local, components);
-    std::string result = this->ConvertToRelativePath(components, remotePath);
-    return this->ConvertToOutputFormat(result, output);
+  if (local.empty()) {
+    return this->ConvertToOutputFormat(remotePath, output);
   }
 
-  return this->ConvertToOutputFormat(remotePath, output);
+  std::vector<std::string> components;
+  cmSystemTools::SplitPath(local, components);
+  std::string result = this->ConvertToRelativePath(components, remotePath);
+  return this->ConvertToOutputFormat(result, output);
 }
 
 static bool cmOutputConverterNotAbove(const char* a, const char* b)
