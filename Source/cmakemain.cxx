@@ -73,6 +73,8 @@ static const char* cmDocumentationOptions[][2] = {
   { "--debug-output", "Put cmake in a debug mode." },
   { "--trace", "Put cmake in trace mode." },
   { "--trace-expand", "Put cmake in trace mode with variable expansion." },
+  { "--trace-source=<file>",
+    "Trace only this CMake file/module. Multiple options allowed." },
   { "--warn-uninitialized", "Warn about uninitialized values." },
   { "--warn-unused-vars", "Warn about unused variables." },
   { "--no-warn-unused-cli", "Don't warn about command line options." },

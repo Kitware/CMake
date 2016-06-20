@@ -264,6 +264,10 @@ set(RunCMake_TEST_OPTIONS --trace-expand)
 run_cmake(trace-expand)
 unset(RunCMake_TEST_OPTIONS)
 
+set(RunCMake_TEST_OPTIONS --trace-source=trace-only-this-file.cmake)
+run_cmake(trace-source)
+unset(RunCMake_TEST_OPTIONS)
+
 set(RunCMake_TEST_OPTIONS --debug-trycompile)
 run_cmake(debug-trycompile)
 unset(RunCMake_TEST_OPTIONS)
