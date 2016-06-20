@@ -344,6 +344,7 @@ Properties on Source Files
    /prop_sf/VS_SHADER_FLAGS
    /prop_sf/VS_SHADER_MODEL
    /prop_sf/VS_SHADER_TYPE
+   /prop_sf/VS_TOOL_OVERRIDE.rst
    /prop_sf/VS_XAML_TYPE
    /prop_sf/WRAP_EXCLUDE
    /prop_sf/XCODE_EXPLICIT_FILE_TYPE
