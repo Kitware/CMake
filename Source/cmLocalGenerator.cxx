@@ -832,8 +832,8 @@ void cmLocalGenerator::InsertRuleLauncher(std::string& s,
 std::string cmLocalGenerator::ConvertToIncludeReference(
   std::string const& path, OutputFormat format, bool forceFullPaths)
 {
-  return this->ConvertToOutputForExisting(
-    path, forceFullPaths ? FULL : START_OUTPUT, format);
+  static_cast<void>(forceFullPaths);
+  return this->ConvertToOutputForExisting(path, format);
 }
 
 std::string cmLocalGenerator::GetIncludeFlags(
@@ -1503,7 +1503,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
   for (std::vector<std::string>::const_iterator libDir = libDirs.begin();
        libDir != libDirs.end(); ++libDir) {
     std::string libpath =
-      this->ConvertToOutputForExisting(*libDir, START_OUTPUT, shellFormat);
+      this->ConvertToOutputForExisting(*libDir, shellFormat);
     linkPath += " " + libPathFlag;
     linkPath += libpath;
     linkPath += libPathTerminator;

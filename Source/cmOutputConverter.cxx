@@ -47,10 +47,8 @@ std::string cmOutputConverter::ConvertToOutputForExistingCommon(
 }
 
 std::string cmOutputConverter::ConvertToOutputForExisting(
-  const std::string& remote, RelativeRoot local, OutputFormat format) const
+  const std::string& remote, OutputFormat format) const
 {
-  static_cast<void>(local);
-
   // Perform standard conversion.
   std::string result = this->ConvertToOutputFormat(remote, format);
 
@@ -59,10 +57,8 @@ std::string cmOutputConverter::ConvertToOutputForExisting(
 }
 
 std::string cmOutputConverter::ConvertToOutputForExisting(
-  RelativeRoot remote, const std::string& local, OutputFormat format) const
+  RelativeRoot remote, OutputFormat format) const
 {
-  static_cast<void>(local);
-
   // The relative root must have a path (i.e. not FULL or NONE)
   assert(remote != FULL);
   assert(remote != NONE);

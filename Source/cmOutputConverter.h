@@ -69,13 +69,11 @@ public:
 
   ///! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const std::string& remote,
-                                         RelativeRoot local = START_OUTPUT,
                                          OutputFormat format = SHELL) const;
 
   /** For existing path identified by RelativeRoot convert to output
       path and short path if spaces.  */
   std::string ConvertToOutputForExisting(RelativeRoot remote,
-                                         const std::string& local = "",
                                          OutputFormat format = SHELL) const;
 
   void SetLinkScriptShell(bool linkScriptShell);
