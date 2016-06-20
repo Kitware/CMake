@@ -108,9 +108,9 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   set(CPACK_COMPONENTS_GROUPING IGNORE)
 ")
   else()
-    if(BUILD_QtDialog AND CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL)
+    if(BUILD_QtDialog AND USE_LGPL)
       set(_CPACK_IFW_ADDITIONAL_LICENSES
-        "\"LGPLv2.1\" \"${CMake_SOURCE_DIR}/Licenses/LGPLv2.1.txt\"")
+        "\"LGPLv${USE_LGPL}\" \"${CMake_SOURCE_DIR}/Licenses/LGPLv${USE_LGPL}.txt\"")
     endif()
   endif()
 
