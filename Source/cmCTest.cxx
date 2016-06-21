@@ -2018,7 +2018,7 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
     // handle the script arguments -S -SR -SP
     this->HandleScriptArguments(i, args, SRArgumentSpecified);
 
-    // handle a request for a dashboard
+    // --dashboard: handle a request for a dashboard
     std::string arg = args[i];
     if (this->CheckArgument(arg, "-D", "--dashboard") && i < args.size() - 1) {
       this->ProduceXML = true;
@@ -2044,17 +2044,18 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
       this->AddVariableDefinition(input);
     }
 
-    // calls SetTest(<stage>, /*report=*/ false) to enable the corresponding
-    // stage. <stage> is a string like 'All', 'Start', or 'Udpate'.
+    // --test-action: calls SetTest(<stage>, /*report=*/ false) to enable
+    // the corresponding stage
     if (!this->HandleTestActionArgument(ctestExec, i, args)) {
       executeTests = false;
     }
 
-    // what type of test model
+    // --test-model: what type of test model
     if (!this->HandleTestModelArgument(ctestExec, i, args)) {
       executeTests = false;
     }
 
+    // --extra-submit
     if (this->CheckArgument(arg, "--extra-submit") && i < args.size() - 1) {
       this->ProduceXML = true;
       this->SetTest("Submit");
@@ -2069,6 +2070,7 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
       cmakeAndTest = true;
     }
 
+    // --schedule-random
     if (this->CheckArgument(arg, "--schedule-random")) {
       this->ScheduleType = "Random";
     }
@@ -2087,6 +2089,7 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
     }
   } // the close of the for argument loop
 
+  // handle CTEST_PARALLEL_LEVEL environment variable
   if (!this->ParallelLevelSetInCli) {
     if (const char* parallel = cmSystemTools::GetEnv("CTEST_PARALLEL_LEVEL")) {
       int plevel = atoi(parallel);
