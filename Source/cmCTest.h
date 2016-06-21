@@ -579,6 +579,14 @@ private:
   //! Output errors from a test
   void OutputTestErrors(std::vector<char> const& process_output);
 
+  //! Handle the --test-action command line argument
+  bool HandleTestActionArgument(const char* ctestExec, size_t& i,
+                                const std::vector<std::string>& args);
+
+  //! Handle the --test-model command line argument
+  bool HandleTestModelArgument(const char* ctestExec, size_t& i,
+                               const std::vector<std::string>& args);
+
   int RunCMakeAndTest(std::string* output);
   int ExecuteTests();
 

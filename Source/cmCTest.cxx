@@ -2044,52 +2044,15 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
       this->AddVariableDefinition(input);
     }
 
-    if (this->CheckArgument(arg, "-T", "--test-action") &&
-        (i < args.size() - 1)) {
-      this->ProduceXML = true;
-      i++;
-      if (!this->SetTest(args[i].c_str(), false)) {
-        executeTests = false;
-        cmCTestLog(this, ERROR_MESSAGE,
-                   "CTest -T called with incorrect option: " << args[i]
-                                                             << std::endl);
-        cmCTestLog(this, ERROR_MESSAGE, "Available options are:"
-                     << std::endl
-                     << "  " << ctestExec << " -T all" << std::endl
-                     << "  " << ctestExec << " -T start" << std::endl
-                     << "  " << ctestExec << " -T update" << std::endl
-                     << "  " << ctestExec << " -T configure" << std::endl
-                     << "  " << ctestExec << " -T build" << std::endl
-                     << "  " << ctestExec << " -T test" << std::endl
-                     << "  " << ctestExec << " -T coverage" << std::endl
-                     << "  " << ctestExec << " -T memcheck" << std::endl
-                     << "  " << ctestExec << " -T notes" << std::endl
-                     << "  " << ctestExec << " -T submit" << std::endl);
-      }
+    // calls SetTest(<stage>, /*report=*/ false) to enable the corresponding
+    // stage. <stage> is a string like 'All', 'Start', or 'Udpate'.
+    if (!this->HandleTestActionArgument(ctestExec, i, args)) {
+      executeTests = false;
     }
 
     // what type of test model
-    if (this->CheckArgument(arg, "-M", "--test-model") &&
-        (i < args.size() - 1)) {
-      i++;
-      std::string const& str = args[i];
-      if (cmSystemTools::LowerCase(str) == "nightly") {
-        this->SetTestModel(cmCTest::NIGHTLY);
-      } else if (cmSystemTools::LowerCase(str) == "continuous") {
-        this->SetTestModel(cmCTest::CONTINUOUS);
-      } else if (cmSystemTools::LowerCase(str) == "experimental") {
-        this->SetTestModel(cmCTest::EXPERIMENTAL);
-      } else {
-        executeTests = false;
-        cmCTestLog(this, ERROR_MESSAGE,
-                   "CTest -M called with incorrect option: " << str
-                                                             << std::endl);
-        cmCTestLog(this, ERROR_MESSAGE, "Available options are:"
-                     << std::endl
-                     << "  " << ctestExec << " -M Continuous" << std::endl
-                     << "  " << ctestExec << " -M Experimental" << std::endl
-                     << "  " << ctestExec << " -M Nightly" << std::endl);
-      }
+    if (!this->HandleTestModelArgument(ctestExec, i, args)) {
+      executeTests = false;
     }
 
     if (this->CheckArgument(arg, "--extra-submit") && i < args.size() - 1) {
@@ -2142,6 +2105,65 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
   }
 
   return 1;
+}
+
+bool cmCTest::HandleTestActionArgument(const char* ctestExec, size_t& i,
+                                       const std::vector<std::string>& args)
+{
+  bool success = true;
+  std::string arg = args[i];
+  if (this->CheckArgument(arg, "-T", "--test-action") &&
+      (i < args.size() - 1)) {
+    this->ProduceXML = true;
+    i++;
+    if (!this->SetTest(args[i].c_str(), false)) {
+      success = false;
+      cmCTestLog(this, ERROR_MESSAGE, "CTest -T called with incorrect option: "
+                   << args[i] << std::endl);
+      cmCTestLog(this, ERROR_MESSAGE, "Available options are:"
+                   << std::endl
+                   << "  " << ctestExec << " -T all" << std::endl
+                   << "  " << ctestExec << " -T start" << std::endl
+                   << "  " << ctestExec << " -T update" << std::endl
+                   << "  " << ctestExec << " -T configure" << std::endl
+                   << "  " << ctestExec << " -T build" << std::endl
+                   << "  " << ctestExec << " -T test" << std::endl
+                   << "  " << ctestExec << " -T coverage" << std::endl
+                   << "  " << ctestExec << " -T memcheck" << std::endl
+                   << "  " << ctestExec << " -T notes" << std::endl
+                   << "  " << ctestExec << " -T submit" << std::endl);
+    }
+  }
+  return success;
+}
+
+bool cmCTest::HandleTestModelArgument(const char* ctestExec, size_t& i,
+                                      const std::vector<std::string>& args)
+{
+  bool success = true;
+  std::string arg = args[i];
+  if (this->CheckArgument(arg, "-M", "--test-model") &&
+      (i < args.size() - 1)) {
+    i++;
+    std::string const& str = args[i];
+    if (cmSystemTools::LowerCase(str) == "nightly") {
+      this->SetTestModel(cmCTest::NIGHTLY);
+    } else if (cmSystemTools::LowerCase(str) == "continuous") {
+      this->SetTestModel(cmCTest::CONTINUOUS);
+    } else if (cmSystemTools::LowerCase(str) == "experimental") {
+      this->SetTestModel(cmCTest::EXPERIMENTAL);
+    } else {
+      success = false;
+      cmCTestLog(this, ERROR_MESSAGE, "CTest -M called with incorrect option: "
+                   << str << std::endl);
+      cmCTestLog(this, ERROR_MESSAGE, "Available options are:"
+                   << std::endl
+                   << "  " << ctestExec << " -M Continuous" << std::endl
+                   << "  " << ctestExec << " -M Experimental" << std::endl
+                   << "  " << ctestExec << " -M Nightly" << std::endl);
+    }
+  }
+  return success;
 }
 
 int cmCTest::ExecuteTests()
