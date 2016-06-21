@@ -129,16 +129,21 @@ public:
   void Finalize();
 
   /**
-   * Process the tests. This is the main routine. The execution of the
-   * tests should look like this:
+   * Process the dashboard client steps.
+   *
+   * Steps are enabled using SetTest()
+   *
+   * The execution of the steps (or #Part) should look like this:
    *
    * ctest foo;
    * foo.Initialize();
    * // Set some things on foo
-   * foo.ProcessTests();
+   * foo.ProcessSteps();
    * foo.Finalize();
+   *
+   * \sa Initialize(), Finalize(), Part, PartInfo, SetTest()
    */
-  int ProcessTests();
+  int ProcessSteps();
 
   /*
    * A utility function that returns the nightly time

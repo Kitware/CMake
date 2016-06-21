@@ -886,7 +886,7 @@ int cmCTest::ExecuteHandler(const char* shandler)
   return handler->ProcessHandler();
 }
 
-int cmCTest::ProcessTests()
+int cmCTest::ProcessSteps()
 {
   int res = 0;
   bool notest = true;
@@ -2207,7 +2207,7 @@ int cmCTest::ExecuteTests()
       cmCTestLog(this, ERROR_MESSAGE, "Problem initializing the dashboard."
                    << std::endl);
     } else {
-      res = this->ProcessTests();
+      res = this->ProcessSteps();
     }
     this->Finalize();
   }
