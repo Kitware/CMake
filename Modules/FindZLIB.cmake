@@ -96,7 +96,7 @@ endif()
 unset(ZLIB_NAMES)
 unset(ZLIB_NAMES_DEBUG)
 
-mark_as_advanced(ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
+mark_as_advanced(ZLIB_INCLUDE_DIR)
 
 if(ZLIB_INCLUDE_DIR AND EXISTS "${ZLIB_INCLUDE_DIR}/zlib.h")
     file(STRINGS "${ZLIB_INCLUDE_DIR}/zlib.h" ZLIB_H REGEX "^#define ZLIB_VERSION \"[^\"]*\"$")
