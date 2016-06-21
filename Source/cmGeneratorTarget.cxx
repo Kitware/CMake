@@ -3855,7 +3855,7 @@ std::string cmGeneratorTarget::GetFortranModuleDirectory() const
 
 std::string cmGeneratorTarget::CreateFortranModuleDirectory() const
 {
-  static std::string mod_dir;
+  std::string mod_dir;
   const char* target_mod_dir = this->GetProperty("Fortran_MODULE_DIRECTORY");
   const char* moddir_flag =
     this->Makefile->GetDefinition("CMAKE_Fortran_MODDIR_FLAG");
