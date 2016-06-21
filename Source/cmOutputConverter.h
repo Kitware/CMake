@@ -58,8 +58,7 @@ public:
   std::string Convert(const std::string& remote, RelativeRoot local,
                       OutputFormat output = UNCHANGED) const;
   std::string Convert(RelativeRoot remote, const std::string& local,
-                      OutputFormat output = UNCHANGED,
-                      bool optional = false) const;
+                      OutputFormat output = UNCHANGED) const;
   std::string ConvertDirectorySeparatorsForShell(
     const std::string& source) const;
 
@@ -70,13 +69,11 @@ public:
 
   ///! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const std::string& remote,
-                                         RelativeRoot local = START_OUTPUT,
                                          OutputFormat format = SHELL) const;
 
   /** For existing path identified by RelativeRoot convert to output
       path and short path if spaces.  */
   std::string ConvertToOutputForExisting(RelativeRoot remote,
-                                         const std::string& local = "",
                                          OutputFormat format = SHELL) const;
 
   void SetLinkScriptShell(bool linkScriptShell);
@@ -161,10 +158,6 @@ public:
 
 private:
   cmState* GetState() const;
-
-  std::string ConvertToOutputForExistingCommon(const std::string& remote,
-                                               std::string const& result,
-                                               OutputFormat format) const;
 
   static int Shell__CharIsWhitespace(char c);
   static int Shell__CharNeedsQuotesOnUnix(char c);
