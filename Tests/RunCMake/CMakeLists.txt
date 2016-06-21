@@ -327,3 +327,24 @@ add_RunCMake_test_group(CPack "DEB;RPM;TGZ")
 # add a test to make sure symbols are exported from a shared library
 # for MSVC compilers CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS property is used
 add_RunCMake_test(AutoExportDll)
+
+if(CMake_TEST_ANDROID_NDK OR CMake_TEST_ANDROID_STANDALONE_TOOLCHAIN)
+  if(NOT "${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
+    message(FATAL_ERROR "Android tests supported only by Makefile and Ninja generators")
+  endif()
+  foreach(v TEST_ANDROID_NDK TEST_ANDROID_STANDALONE_TOOLCHAIN)
+    if(CMake_${v})
+      string(REPLACE ";" "|" ${v} "${CMake_${v}}")
+      list(APPEND Android_ARGS "-D${v}=${${v}}")
+    endif()
+  endforeach()
+
+  add_RunCMake_test(Android)
+
+  # This test can take a very long time due to lots of combinations.
+  # Use a long default timeout and provide an option to customize it.
+  if(NOT DEFINED CMake_TEST_ANDROID_TIMEOUT)
+    set(CMake_TEST_ANDROID_TIMEOUT 3000)
+  endif()
+  set_property(TEST RunCMake.Android PROPERTY TIMEOUT ${CMake_TEST_ANDROID_TIMEOUT})
+endif()
