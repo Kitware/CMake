@@ -746,7 +746,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     set(gp_regex_error "")
     set(gp_regex_fallback "")
     set(gp_regex_cmp_count 1)
-    # objdump generaates copious output so we create a grep filter to pre-filter results
+    # objdump generates copious output so we create a grep filter to pre-filter results
     if(WIN32)
       find_program(gp_grep_cmd findstr)
     else()
