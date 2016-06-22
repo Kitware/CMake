@@ -61,6 +61,7 @@ cmNinjaNormalTargetGenerator::cmNinjaNormalTargetGenerator(
   this->OSXBundleGenerator =
     new cmOSXBundleGenerator(target, this->GetConfigName());
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
+  this->MacOSXContentGenerator->SetOSXBundleGenerator(this->OSXBundleGenerator);
 }
 
 cmNinjaNormalTargetGenerator::~cmNinjaNormalTargetGenerator()
