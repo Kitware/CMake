@@ -101,7 +101,7 @@ private:
   bool CheckOutFound;
   cmsys::RegularExpression RegexCheckOut;
   cmsys::RegularExpression RegexParent;
-  virtual bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexCheckOut.find(this->Line)) {
       this->BZR->URL = this->RegexCheckOut.match(1);
@@ -126,7 +126,7 @@ public:
 private:
   std::string& Rev;
   cmsys::RegularExpression RegexRevno;
-  virtual bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexRevno.find(this->Line)) {
       this->Rev = this->RegexRevno.match(1);
@@ -185,7 +185,7 @@ public:
   }
   ~LogParser() { this->CleanupParser(); }
 
-  virtual int InitializeParser()
+  int InitializeParser() CM_OVERRIDE
   {
     int res = cmXMLParser::InitializeParser();
     if (res) {
@@ -207,14 +207,14 @@ private:
 
   cmsys::RegularExpression EmailRegex;
 
-  virtual bool ProcessChunk(const char* data, int length)
+  bool ProcessChunk(const char* data, int length) CM_OVERRIDE
   {
     this->OutputLogger::ProcessChunk(data, length);
     this->ParseChunk(data, length);
     return true;
   }
 
-  virtual void StartElement(const std::string& name, const char**)
+  void StartElement(const std::string& name, const char**) CM_OVERRIDE
   {
     this->CData.clear();
     if (name == "log") {
@@ -239,12 +239,12 @@ private:
     }
   }
 
-  virtual void CharacterDataHandler(const char* data, int length)
+  void CharacterDataHandler(const char* data, int length) CM_OVERRIDE
   {
     this->CData.insert(this->CData.end(), data, data + length);
   }
 
-  virtual void EndElement(const std::string& name)
+  void EndElement(const std::string& name) CM_OVERRIDE
   {
     if (name == "log") {
       this->BZR->DoRevision(this->Rev, this->Changes);
@@ -274,7 +274,7 @@ private:
     this->CData.clear();
   }
 
-  virtual void ReportError(int, int, const char* msg)
+  void ReportError(int, int, const char* msg) CM_OVERRIDE
   {
     this->BZR->Log << "Error parsing bzr log xml: " << msg << "\n";
   }
@@ -294,7 +294,7 @@ private:
   cmCTestBZR* BZR;
   cmsys::RegularExpression RegexUpdate;
 
-  virtual bool ProcessChunk(const char* first, int length)
+  bool ProcessChunk(const char* first, int length) CM_OVERRIDE
   {
     bool last_is_new_line = (*first == '\r' || *first == '\n');
 
@@ -325,7 +325,7 @@ private:
     return true;
   }
 
-  bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexUpdate.find(this->Line)) {
       this->DoPath(this->RegexUpdate.match(1)[0],
@@ -431,7 +431,7 @@ public:
 private:
   cmCTestBZR* BZR;
   cmsys::RegularExpression RegexStatus;
-  bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexStatus.find(this->Line)) {
       this->DoPath(this->RegexStatus.match(1)[0],

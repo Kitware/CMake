@@ -241,20 +241,20 @@ public:
                     ByteOrderType order);
 
   // Return the number of sections as specified by the ELF header.
-  virtual unsigned int GetNumberOfSections() const
+  unsigned int GetNumberOfSections() const CM_OVERRIDE
   {
     return static_cast<unsigned int>(this->ELFHeader.e_shnum);
   }
 
   // Get the file position and size of a dynamic section entry.
-  virtual unsigned int GetDynamicEntryCount();
-  virtual unsigned long GetDynamicEntryPosition(int j);
+  unsigned int GetDynamicEntryCount() CM_OVERRIDE;
+  unsigned long GetDynamicEntryPosition(int j) CM_OVERRIDE;
 
   // Lookup a string from the dynamic section with the given tag.
-  virtual StringEntry const* GetDynamicSectionString(unsigned int tag);
+  StringEntry const* GetDynamicSectionString(unsigned int tag) CM_OVERRIDE;
 
   // Print information about the ELF file.
-  virtual void PrintInfo(std::ostream& os) const
+  void PrintInfo(std::ostream& os) const CM_OVERRIDE
   {
     os << "ELF " << Types::GetName();
     if (this->ByteOrder == ByteOrderMSB) {

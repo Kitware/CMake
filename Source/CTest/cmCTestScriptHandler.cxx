@@ -60,8 +60,8 @@ class cmCTestScriptFunctionBlocker : public cmFunctionBlocker
 public:
   cmCTestScriptFunctionBlocker() {}
   virtual ~cmCTestScriptFunctionBlocker() {}
-  virtual bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
-                                 cmExecutionStatus&);
+  bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
+                         cmExecutionStatus&) CM_OVERRIDE;
   // virtual bool ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf);
   // virtual void ScopeEnded(cmMakefile &mf);
 

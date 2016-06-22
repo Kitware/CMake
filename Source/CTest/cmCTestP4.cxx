@@ -45,7 +45,7 @@ private:
   std::string& Rev;
   cmsys::RegularExpression RegexIdentify;
 
-  bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexIdentify.find(this->Line)) {
       this->Rev = this->RegexIdentify.match(1);
@@ -69,7 +69,7 @@ private:
   cmsys::RegularExpression RegexIdentify;
   cmCTestP4* P4;
 
-  bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexIdentify.find(this->Line)) {
       P4->ChangeLists.push_back(this->RegexIdentify.match(1));
@@ -92,7 +92,7 @@ private:
   cmsys::RegularExpression RegexUser;
   cmCTestP4* P4;
 
-  bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexUser.find(this->Line)) {
       User NewUser;
@@ -135,7 +135,7 @@ private:
   std::string CurrentPath;
   cmsys::RegularExpression RegexDiff;
 
-  bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (!this->Line.empty() && this->Line[0] == '=' &&
         this->RegexDiff.find(this->Line)) {
@@ -225,7 +225,7 @@ private:
   SectionType Section;
   Revision Rev;
 
-  virtual bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->Line.empty()) {
       this->NextSection();

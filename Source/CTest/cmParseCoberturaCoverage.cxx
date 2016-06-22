@@ -23,7 +23,7 @@ public:
   virtual ~XMLParser() {}
 
 protected:
-  virtual void EndElement(const std::string& name)
+  void EndElement(const std::string& name) CM_OVERRIDE
   {
     if (name == "source") {
       this->InSource = false;
@@ -34,7 +34,7 @@ protected:
     }
   }
 
-  virtual void CharacterDataHandler(const char* data, int length)
+  void CharacterDataHandler(const char* data, int length) CM_OVERRIDE
   {
     std::string tmp;
     tmp.insert(0, data, length);
@@ -46,7 +46,7 @@ protected:
     }
   }
 
-  virtual void StartElement(const std::string& name, const char** atts)
+  void StartElement(const std::string& name, const char** atts) CM_OVERRIDE
   {
     std::string FoundSource;
     std::string finalpath = "";
