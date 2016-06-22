@@ -130,14 +130,21 @@ protected:
     : cmOSXBundleGenerator::MacOSXContentGeneratorType
   {
     MacOSXContentGeneratorType(cmNinjaTargetGenerator* g)
-      : Generator(g)
+      : Generator(g),
+        OSXBundleGenerator(0)
     {
     }
 
     void operator()(cmSourceFile const& source, const char* pkgloc);
 
+    void SetOSXBundleGenerator(cmOSXBundleGenerator* generator)
+    {
+      OSXBundleGenerator = generator;
+    }
+
   private:
     cmNinjaTargetGenerator* Generator;
+    cmOSXBundleGenerator* OSXBundleGenerator;
   };
   friend struct MacOSXContentGeneratorType;
 

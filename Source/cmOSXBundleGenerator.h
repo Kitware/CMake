@@ -18,6 +18,7 @@
 
 #include <set>
 #include <string>
+#include <vector>
 
 class cmTarget;
 class cmMakefile;
@@ -57,6 +58,16 @@ public:
     this->MacContentFolders = macContentFolders;
   }
 
+  void AddOutput(const std::string& output)
+  {
+    this->Outputs.push_back(output);
+  }
+
+  void GetOutputs(std::vector<std::string>& outputs)
+  {
+    outputs = Outputs;
+  }
+
 private:
   bool MustSkip();
 
@@ -66,6 +77,7 @@ private:
   cmLocalGenerator* LocalGenerator;
   std::string ConfigName;
   std::set<std::string>* MacContentFolders;
+  std::vector<std::string> Outputs;
 };
 
 #endif

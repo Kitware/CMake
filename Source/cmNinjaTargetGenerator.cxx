@@ -487,6 +487,10 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
   this->GetLocalGenerator()->AppendTargetDepends(this->GeneratorTarget,
                                                  orderOnlyDeps);
 
+  cmNinjaDeps bundleDeps;
+  this->OSXBundleGenerator->GetOutputs(bundleDeps);
+  orderOnlyDeps.insert(orderOnlyDeps.end(), bundleDeps.begin(), bundleDeps.end());
+
   // Add order-only dependencies on custom command outputs.
   for (std::vector<cmCustomCommand const*>::const_iterator cci =
          this->CustomCommands.begin();
@@ -717,8 +721,8 @@ void cmNinjaTargetGenerator::MacOSXContentGeneratorType::operator()(
   this->Generator->GetGlobalGenerator()->WriteMacOSXContentBuild(input,
                                                                  output);
 
-  // Add as a dependency of all target so that it gets called.
-  this->Generator->GetGlobalGenerator()->AddDependencyToAll(output);
+  // Add as a dependency to the target so that it gets called.
+  this->OSXBundleGenerator->AddOutput(output);
 }
 
 void cmNinjaTargetGenerator::addPoolNinjaVariable(
