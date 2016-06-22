@@ -27,7 +27,10 @@
 #include "assert.h"
 #include <errno.h>
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if defined(CMake_HAVE_CXX_UNORDERED_SET)
+#include <unordered_set>
+#define UNORDERED_SET std::unordered_set
+#elif defined(CMAKE_BUILD_WITH_CMAKE)
 #include <cmsys/hash_set.hxx>
 #define UNORDERED_SET cmsys::hash_set
 #else

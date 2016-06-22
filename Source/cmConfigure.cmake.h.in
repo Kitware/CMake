@@ -30,6 +30,7 @@
 #cmakedefine CMAKE_USE_MACH_PARSER
 #cmakedefine CMAKE_ENCODING_UTF8
 #cmakedefine CMake_HAVE_CXX_UNORDERED_MAP
+#cmakedefine CMake_HAVE_CXX_UNORDERED_SET
 #define CMAKE_BIN_DIR "/@CMAKE_BIN_DIR@"
 #define CMAKE_DATA_DIR "/@CMAKE_DATA_DIR@"
 
