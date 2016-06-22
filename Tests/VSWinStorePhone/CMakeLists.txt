@@ -136,7 +136,7 @@ if("${SHORT_VERSION}" STREQUAL "10.0")
   set_property(TARGET ${EXE_NAME} PROPERTY VS_IOT_EXTENSIONS_VERSION "${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
 
   # Add a reference to an SDK
-  set_property(TARGET ${EXE_NAME} PROPERTY VS_SDK_REFERENCES "Microsoft.NET.Native.Runtime.1.1, Version=1.1")
+  set_property(TARGET ${EXE_NAME} PROPERTY VS_SDK_REFERENCES "Microsoft.UniversalCRT.Debug, Version=${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
 endif()
 
 
