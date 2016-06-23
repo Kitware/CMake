@@ -746,7 +746,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     set(gp_regex_error "")
     set(gp_regex_fallback "")
     set(gp_regex_cmp_count 1)
-    # objdump generaates copious output so we create a grep filter to pre-filter results
+    # objdump generates copious output so we create a grep filter to pre-filter results
     find_program(gp_grep_cmd grep)
     if(gp_grep_cmd)
       set(gp_cmd_maybe_filter COMMAND ${gp_grep_cmd} "^[[:blank:]]*DLL Name: ")
