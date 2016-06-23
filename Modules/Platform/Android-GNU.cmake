@@ -36,6 +36,8 @@ endif()
 
 include(Platform/Android-Common)
 
+include(Platform/Android/abi-${CMAKE_ANDROID_ARCH_ABI}-GNU)
+
 macro(__android_compiler_gnu lang)
   __android_compiler_common(${lang})
 endmacro()
