@@ -156,6 +156,7 @@ private:
   /// List of object files for this target.
   cmNinjaDeps Objects;
   std::vector<cmCustomCommand const*> CustomCommands;
+  cmNinjaDeps ExtraFiles;
 };
 
 #endif // ! cmNinjaTargetGenerator_h
