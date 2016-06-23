@@ -366,6 +366,12 @@ if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
             #Older versions of hdf5 don't have a static/shared suffix so
             #if we detect that occurrence clear the suffix
             if(_suffix AND NOT TARGET ${HDF5_${_lang}_TARGET}${_suffix})
+              if(NOT TARGET ${HDF5_${_lang}_TARGET})
+                #cant find this component with our without the suffix
+                #so bail out, and let the following locate HDF5
+                set(HDF5_FOUND FALSE)
+                break()
+              endif()
               set(_suffix "")
             endif()
 
