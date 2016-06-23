@@ -362,7 +362,7 @@ if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
             set(_suffix "-shared")
         endif()
         foreach(_lang ${HDF5_LANGUAGE_BINDINGS})
-            get_target_property(_lang_location ${HDF5_${_component}_TARGET}${_suffix} LOCATION)
+            get_target_property(_lang_location ${HDF5_${_lang}_TARGET}${_suffix} LOCATION)
             if( _lang_location )
                 set(HDF5_${_lang}_LIBRARY ${_lang_location} CACHE PATH
                     "HDF5 ${_lang} library" )
