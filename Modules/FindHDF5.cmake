@@ -362,6 +362,13 @@ if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
             set(_suffix "-shared")
         endif()
         foreach(_lang ${HDF5_LANGUAGE_BINDINGS})
+
+            #Older versions of hdf5 don't have a static/shared suffix so
+            #if we detect that occurrence clear the suffix
+            if(_suffix AND NOT TARGET ${HDF5_${_lang}_TARGET}${_suffix})
+              set(_suffix "")
+            endif()
+
             get_target_property(_lang_location ${HDF5_${_lang}_TARGET}${_suffix} LOCATION)
             if( _lang_location )
                 set(HDF5_${_lang}_LIBRARY ${_lang_location} CACHE PATH
