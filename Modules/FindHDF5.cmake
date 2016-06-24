@@ -384,10 +384,10 @@ if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
             endif()
             if(FIND_HL)
                 get_target_property(_lang_hl_location ${HDF5_${_lang}_HL_TARGET}${_suffix} LOCATION)
-                if( _lang_location )
-                    set(HDF5_${_lang}_HL_LIBRARY ${_lang_location} CACHE PATH
+                if( _lang_hl_location )
+                    set(HDF5_${_lang}_HL_LIBRARY ${_lang_hl_location} CACHE PATH
                         "HDF5 ${_lang} HL library" )
-                    mark_as_advanced(HDF5_${_lang}_LIBRARY)
+                    mark_as_advanced(HDF5_${_lang}_HL_LIBRARY)
                     list(APPEND HDF5_HL_LIBRARIES ${HDF5_${_lang}_HL_LIBRARY})
                 endif()
             endif()
