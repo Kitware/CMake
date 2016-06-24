@@ -1683,8 +1683,8 @@ function(cpack_rpm_generate_package)
 
     set(CPACK_RPM_USER_INSTALL_FILES "")
     foreach(F IN LISTS CPACK_RPM_USER_FILELIST_INTERNAL)
-      string(REGEX REPLACE "%[A-Za-z0-9\(\),-]* " "" F_PATH ${F})
-      string(REGEX MATCH "%[A-Za-z0-9\(\),-]*" F_PREFIX ${F})
+      string(REGEX REPLACE "%[A-Za-z]+(\\([^()]*\\))? " "" F_PATH ${F})
+      string(REGEX MATCH "%[A-Za-z]+(\\([^()]*\\))?" F_PREFIX ${F})
 
       if(CPACK_RPM_PACKAGE_DEBUG)
         message("CPackRPM:Debug: F_PREFIX=<${F_PREFIX}>, F_PATH=<${F_PATH}>")
