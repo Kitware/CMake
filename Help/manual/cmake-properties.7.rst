@@ -236,6 +236,7 @@ Properties on Targets
    /prop_tgt/MACOSX_BUNDLE
    /prop_tgt/MACOSX_FRAMEWORK_INFO_PLIST
    /prop_tgt/MACOSX_RPATH
+   /prop_tgt/MANUALLY_ADDED_DEPENDENCIES
    /prop_tgt/MAP_IMPORTED_CONFIG_CONFIG
    /prop_tgt/NAME
    /prop_tgt/NO_SONAME

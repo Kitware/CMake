@@ -852,6 +852,12 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
         this->Makefile->GetBacktrace())) {
     return;
   }
+  if (prop == "MANUALLY_ADDED_DEPENDENCIES") {
+    std::ostringstream e;
+    e << "MANUALLY_ADDED_DEPENDENCIES property is read-only\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
+  }
   if (prop == "NAME") {
     std::ostringstream e;
     e << "NAME property is read-only\n";
@@ -1168,6 +1174,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
   MAKE_STATIC_PROP(COMPILE_OPTIONS);
   MAKE_STATIC_PROP(COMPILE_DEFINITIONS);
   MAKE_STATIC_PROP(IMPORTED);
+  MAKE_STATIC_PROP(MANUALLY_ADDED_DEPENDENCIES);
   MAKE_STATIC_PROP(NAME);
   MAKE_STATIC_PROP(BINARY_DIR);
   MAKE_STATIC_PROP(SOURCE_DIR);
@@ -1181,6 +1188,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
     specialProps.insert(propCOMPILE_OPTIONS);
     specialProps.insert(propCOMPILE_DEFINITIONS);
     specialProps.insert(propIMPORTED);
+    specialProps.insert(propMANUALLY_ADDED_DEPENDENCIES);
     specialProps.insert(propNAME);
     specialProps.insert(propBINARY_DIR);
     specialProps.insert(propSOURCE_DIR);
@@ -1234,6 +1242,15 @@ const char* cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(this->Internal->CompileDefinitionsEntries, ";");
+      return output.c_str();
+    }
+    if (prop == propMANUALLY_ADDED_DEPENDENCIES) {
+      if (this->Utilities.empty()) {
+        return CM_NULLPTR;
+      }
+
+      static std::string output;
+      output = cmJoin(this->Utilities, ";");
       return output.c_str();
     }
     if (prop == propIMPORTED) {
