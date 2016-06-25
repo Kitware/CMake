@@ -253,7 +253,7 @@ bool cmGetPropertyCommand::HandleTargetMode()
       if (this->Makefile->IsAlias(this->Name)) {
         return this->StoreResult(target->GetName().c_str());
       } else {
-        return this->StoreResult((this->Variable + "-NOTFOUND").c_str());
+        return this->StoreResult(NULL);
       }
     }
     return this->StoreResult(
