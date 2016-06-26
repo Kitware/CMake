@@ -24,22 +24,18 @@ bool cmGetTargetPropertyCommand::InitialPass(
   std::string prop;
   bool prop_exists = false;
 
-  if (args[2] == "ALIASED_TARGET") {
-    if (this->Makefile->IsAlias(targetName)) {
-      if (cmTarget* target = this->Makefile->FindTargetToUse(targetName)) {
-        prop = target->GetName();
+  if (cmTarget* tgt = this->Makefile->FindTargetToUse(targetName)) {
+    if (args[2] == "ALIASED_TARGET") {
+      if (this->Makefile->IsAlias(targetName)) {
+        prop = tgt->GetName();
         prop_exists = true;
       }
-    }
-  } else if (cmTarget* tgt = this->Makefile->FindTargetToUse(targetName)) {
-    cmTarget& target = *tgt;
-    const char* prop_cstr = 0;
-    if (!args[2].empty()) {
-      prop_cstr = target.GetProperty(args[2], this->Makefile);
-    }
-    if (prop_cstr) {
-      prop = prop_cstr;
-      prop_exists = true;
+    } else if (!args[2].empty()) {
+      const char* prop_cstr = tgt->GetProperty(args[2], this->Makefile);
+      if (prop_cstr) {
+        prop = prop_cstr;
+        prop_exists = true;
+      }
     }
   } else {
     bool issueMessage = false;
