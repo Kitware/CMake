@@ -362,20 +362,35 @@ if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
             set(_suffix "-shared")
         endif()
         foreach(_lang ${HDF5_LANGUAGE_BINDINGS})
-            get_target_property(_lang_location ${HDF5_${_component}_TARGET}${_suffix} LOCATION)
+
+            #Older versions of hdf5 don't have a static/shared suffix so
+            #if we detect that occurrence clear the suffix
+            if(_suffix AND NOT TARGET ${HDF5_${_lang}_TARGET}${_suffix})
+              if(NOT TARGET ${HDF5_${_lang}_TARGET})
+                #cant find this component with our without the suffix
+                #so bail out, and let the following locate HDF5
+                set(HDF5_FOUND FALSE)
+                break()
+              endif()
+              set(_suffix "")
+            endif()
+
+            get_target_property(_lang_location ${HDF5_${_lang}_TARGET}${_suffix} LOCATION)
             if( _lang_location )
                 set(HDF5_${_lang}_LIBRARY ${_lang_location} CACHE PATH
                     "HDF5 ${_lang} library" )
                 mark_as_advanced(HDF5_${_lang}_LIBRARY)
                 list(APPEND HDF5_LIBRARIES ${HDF5_${_lang}_LIBRARY})
+                set(HDF5_${_lang}_LIBRARIES ${HDF5_${_lang}_LIBRARY})
             endif()
             if(FIND_HL)
                 get_target_property(_lang_hl_location ${HDF5_${_lang}_HL_TARGET}${_suffix} LOCATION)
-                if( _lang_location )
-                    set(HDF5_${_lang}_HL_LIBRARY ${_lang_location} CACHE PATH
+                if( _lang_hl_location )
+                    set(HDF5_${_lang}_HL_LIBRARY ${_lang_hl_location} CACHE PATH
                         "HDF5 ${_lang} HL library" )
-                    mark_as_advanced(HDF5_${_lang}_LIBRARY)
+                    mark_as_advanced(HDF5_${_lang}_HL_LIBRARY)
                     list(APPEND HDF5_HL_LIBRARIES ${HDF5_${_lang}_HL_LIBRARY})
+                    set(HDF5_${_lang}_HL_LIBRARIES ${HDF5_${_lang}_HL_LIBRARY})
                 endif()
             endif()
         endforeach()
@@ -411,6 +426,8 @@ if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
       set(HDF5_${__lang}_DEFINITIONS)
       set(HDF5_${__lang}_INCLUDE_DIRS)
       set(HDF5_${__lang}_LIBRARIES)
+      set(HDF5_${__lang}_HL_LIBRARIES)
+
       mark_as_advanced(HDF5_${__lang}_COMPILER_EXECUTABLE_NO_INTERROGATE)
       mark_as_advanced(HDF5_${__lang}_DEFINITIONS)
       mark_as_advanced(HDF5_${__lang}_INCLUDE_DIRS)
