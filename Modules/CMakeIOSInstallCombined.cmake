@@ -237,20 +237,30 @@ function(ios_install_combined target destination)
   endif()
 
   set(cmd xcrun -f lipo)
+
+  # Do not merge OUTPUT_VARIABLE and ERROR_VARIABLE since latter may contain
+  # some diagnostic information even for the successful run.
   execute_process(
       COMMAND ${cmd}
       RESULT_VARIABLE result
       OUTPUT_VARIABLE output
-      ERROR_VARIABLE output
+      ERROR_VARIABLE error_output
       OUTPUT_STRIP_TRAILING_WHITESPACE
       ERROR_STRIP_TRAILING_WHITESPACE
   )
   if(NOT result EQUAL 0)
     message(
-        FATAL_ERROR "Command failed (${result}): ${cmd}\n\nOutput:\n${output}"
+        FATAL_ERROR "Command failed (${result}): ${cmd}\n\nOutput:\n${output}\nOutput(error):\n${error_output}"
     )
   endif()
   set(_lipo_path ${output})
+  list(LENGTH _lipo_path len)
+  if(NOT len EQUAL 1)
+    message(FATAL_ERROR "Unexpected xcrun output: ${_lipo_path}")
+  endif()
+  if(NOT EXISTS "${_lipo_path}")
+    message(FATAL_ERROR "File not found: ${_lipo_path}")
+  endif()
 
   set(CURRENT_CONFIG "${CMAKE_INSTALL_CONFIG_NAME}")
   set(CURRENT_TARGET "${target}")
