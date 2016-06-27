@@ -53,7 +53,7 @@ private:
   cmsys::RegularExpression RegexFileRemoved1;
   cmsys::RegularExpression RegexFileRemoved2;
 
-  virtual bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexFileUpdated.find(this->Line)) {
       this->DoFile(PathUpdated, this->RegexFileUpdated.match(2));
@@ -140,7 +140,7 @@ private:
   SectionType Section;
   Revision Rev;
 
-  virtual bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->Line == ("======================================="
                        "======================================")) {

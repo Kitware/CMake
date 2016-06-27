@@ -42,7 +42,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmCTestSubdirCommand* c = new cmCTestSubdirCommand;
     c->TestHandler = this->TestHandler;
@@ -53,13 +53,13 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus&);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus&) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "subdirs"; }
+  std::string GetName() const CM_OVERRIDE { return "subdirs"; }
 
   cmTypeMacro(cmCTestSubdirCommand, cmCommand);
 
@@ -123,7 +123,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmCTestAddSubdirectoryCommand* c = new cmCTestAddSubdirectoryCommand;
     c->TestHandler = this->TestHandler;
@@ -134,13 +134,13 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus&);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus&) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "add_subdirectory"; }
+  std::string GetName() const CM_OVERRIDE { return "add_subdirectory"; }
 
   cmTypeMacro(cmCTestAddSubdirectoryCommand, cmCommand);
 
@@ -197,7 +197,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmCTestAddTestCommand* c = new cmCTestAddTestCommand;
     c->TestHandler = this->TestHandler;
@@ -208,13 +208,13 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const&,
-                           cmExecutionStatus&);
+  bool InitialPass(std::vector<std::string> const&,
+                   cmExecutionStatus&) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "add_test"; }
+  std::string GetName() const CM_OVERRIDE { return "add_test"; }
 
   cmTypeMacro(cmCTestAddTestCommand, cmCommand);
 
@@ -237,7 +237,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmCTestSetTestsPropertiesCommand* c = new cmCTestSetTestsPropertiesCommand;
     c->TestHandler = this->TestHandler;
@@ -248,13 +248,13 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
   */
-  virtual bool InitialPass(std::vector<std::string> const&,
-                           cmExecutionStatus&);
+  bool InitialPass(std::vector<std::string> const&,
+                   cmExecutionStatus&) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "set_tests_properties"; }
+  std::string GetName() const CM_OVERRIDE { return "set_tests_properties"; }
 
   cmTypeMacro(cmCTestSetTestsPropertiesCommand, cmCommand);
 

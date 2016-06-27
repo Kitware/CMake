@@ -29,8 +29,16 @@
 #cmakedefine CMAKE_USE_ELF_PARSER
 #cmakedefine CMAKE_USE_MACH_PARSER
 #cmakedefine CMAKE_ENCODING_UTF8
-#cmakedefine CMake_HAVE_CXX11_UNORDERED_MAP
+#cmakedefine CMake_HAVE_CXX_OVERRIDE
+#cmakedefine CMake_HAVE_CXX_UNORDERED_MAP
+#cmakedefine CMake_HAVE_CXX_UNORDERED_SET
 #define CMAKE_BIN_DIR "/@CMAKE_BIN_DIR@"
 #define CMAKE_DATA_DIR "/@CMAKE_DATA_DIR@"
+
+#ifdef CMake_HAVE_CXX_OVERRIDE
+#define CM_OVERRIDE override
+#else
+#define CM_OVERRIDE
+#endif
 
 #endif

@@ -69,7 +69,7 @@ private:
     return val;
   }
 
-  virtual void StartElement(const std::string& name, const char** atts)
+  void StartElement(const std::string& name, const char** atts) CM_OVERRIDE
   {
     this->CurrentValue.clear();
     if (name == "cdash") {
@@ -77,12 +77,12 @@ private:
     }
   }
 
-  virtual void CharacterDataHandler(const char* data, int length)
+  void CharacterDataHandler(const char* data, int length) CM_OVERRIDE
   {
     this->CurrentValue.insert(this->CurrentValue.end(), data, data + length);
   }
 
-  virtual void EndElement(const std::string& name)
+  void EndElement(const std::string& name) CM_OVERRIDE
   {
     if (name == "status") {
       std::string status = cmSystemTools::UpperCase(this->GetCurrentValue());

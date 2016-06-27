@@ -62,7 +62,7 @@ private:
   cmsys::RegularExpression RegexRev;
   cmsys::RegularExpression RegexURL;
   cmsys::RegularExpression RegexRoot;
-  virtual bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexRev.find(this->Line)) {
       this->Rev = this->RegexRev.match(1);
@@ -206,7 +206,7 @@ private:
   cmCTestSVN* SVN;
   cmsys::RegularExpression RegexUpdate;
 
-  bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexUpdate.find(this->Line)) {
       this->DoPath(this->RegexUpdate.match(1)[0],
@@ -323,14 +323,14 @@ private:
   Change CurChange;
   std::vector<char> CData;
 
-  virtual bool ProcessChunk(const char* data, int length)
+  bool ProcessChunk(const char* data, int length) CM_OVERRIDE
   {
     this->OutputLogger::ProcessChunk(data, length);
     this->ParseChunk(data, length);
     return true;
   }
 
-  virtual void StartElement(const std::string& name, const char** atts)
+  void StartElement(const std::string& name, const char** atts) CM_OVERRIDE
   {
     this->CData.clear();
     if (name == "logentry") {
@@ -348,12 +348,12 @@ private:
     }
   }
 
-  virtual void CharacterDataHandler(const char* data, int length)
+  void CharacterDataHandler(const char* data, int length) CM_OVERRIDE
   {
     this->CData.insert(this->CData.end(), data, data + length);
   }
 
-  virtual void EndElement(const std::string& name)
+  void EndElement(const std::string& name) CM_OVERRIDE
   {
     if (name == "logentry") {
       this->SVN->DoRevisionSVN(this->Rev, this->Changes);
@@ -372,7 +372,7 @@ private:
     this->CData.clear();
   }
 
-  virtual void ReportError(int, int, const char* msg)
+  void ReportError(int, int, const char* msg) CM_OVERRIDE
   {
     this->SVN->Log << "Error parsing svn log xml: " << msg << "\n";
   }
@@ -441,7 +441,7 @@ public:
 private:
   cmCTestSVN* SVN;
   cmsys::RegularExpression RegexStatus;
-  bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexStatus.find(this->Line)) {
       this->DoPath(this->RegexStatus.match(1)[0],
@@ -506,7 +506,7 @@ public:
 private:
   cmCTestSVN* SVN;
   cmsys::RegularExpression RegexExternal;
-  bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->RegexExternal.find(this->Line)) {
       this->DoPath(this->RegexExternal.match(1));

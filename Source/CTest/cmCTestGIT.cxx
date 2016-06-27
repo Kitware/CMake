@@ -52,7 +52,7 @@ public:
 
 private:
   std::string& Line1;
-  virtual bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     // Only the first line is of interest.
     this->Line1 = this->Line;
@@ -355,7 +355,7 @@ protected:
     this->Changes.clear();
   }
 
-  virtual bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->Line[0] == ':') {
       this->DiffField = DiffFieldChange;
@@ -513,7 +513,7 @@ private:
     person.TimeZone = strtol(c, (char**)&c, 10);
   }
 
-  virtual bool ProcessLine()
+  bool ProcessLine() CM_OVERRIDE
   {
     if (this->Line.empty()) {
       if (this->Section == SectionBody && this->LineEnd == '\0') {

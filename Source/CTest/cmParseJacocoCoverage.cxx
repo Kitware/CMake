@@ -23,9 +23,9 @@ public:
   virtual ~XMLParser() {}
 
 protected:
-  virtual void EndElement(const std::string&) {}
+  void EndElement(const std::string&) CM_OVERRIDE {}
 
-  virtual void StartElement(const std::string& name, const char** atts)
+  void StartElement(const std::string& name, const char** atts) CM_OVERRIDE
   {
     if (name == "package") {
       this->PackageName = atts[1];

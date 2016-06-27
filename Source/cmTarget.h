@@ -21,7 +21,7 @@
 
 #include <cmsys/auto_ptr.hxx>
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#ifdef CMake_HAVE_CXX11_UNORDERED_MAP
+#ifdef CMake_HAVE_CXX_UNORDERED_MAP
 #include <unordered_map>
 #else
 #include <cmsys/hash_map.hxx>
@@ -331,7 +331,7 @@ private:
 };
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-#ifdef CMake_HAVE_CXX11_UNORDERED_MAP
+#ifdef CMake_HAVE_CXX_UNORDERED_MAP
 typedef std::unordered_map<std::string, cmTarget> cmTargets;
 #else
 typedef cmsys::hash_map<std::string, cmTarget> cmTargets;
