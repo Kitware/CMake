@@ -316,7 +316,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   std::string rspcontent;
   std::string responseFlag;
 
-  if (this->ForceResponseFile()) {
+  if (lang != "RC" && this->ForceResponseFile()) {
     rspfile = "$RSP_FILE";
     responseFlag = "@" + rspfile;
     rspcontent = " $DEFINES $INCLUDES $FLAGS";
@@ -593,7 +593,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
   this->SetMsvcTargetPdbVariable(vars);
 
-  int const commandLineLengthLimit = this->ForceResponseFile() ? -1 : 0;
+  bool const isRC = (language == "RC");
+  int const commandLineLengthLimit =
+    ((!isRC && this->ForceResponseFile())) ? -1 : 0;
   std::string const rspfile = objectFileName + ".rsp";
 
   this->GetGlobalGenerator()->WriteBuild(
