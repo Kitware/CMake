@@ -99,7 +99,7 @@ public:
    * file was successfully written before allowing the original to be
    * replaced.
    */
-  ~cmGeneratedFileStream();
+  ~cmGeneratedFileStream() CM_OVERRIDE;
 
   /**
    * Open an output file by name.  This should be used only with a

@@ -29,9 +29,8 @@ public:
                              std::vector<std::string> const& configurations);
 
 protected:
-  virtual void GenerateScriptForConfig(std::ostream& os,
-                                       const std::string& config,
-                                       Indent const& indent);
+  void GenerateScriptForConfig(std::ostream& os, const std::string& config,
+                               Indent const& indent) CM_OVERRIDE;
 
   cmLocalGenerator* LG;
   cmInstalledFile const& InstalledFile;

@@ -22,10 +22,10 @@ class cmInstallScriptGenerator : public cmInstallGenerator
 public:
   cmInstallScriptGenerator(const char* script, bool code,
                            const char* component, bool exclude_from_all);
-  virtual ~cmInstallScriptGenerator();
+  ~cmInstallScriptGenerator() CM_OVERRIDE;
 
 protected:
-  virtual void GenerateScript(std::ostream& os);
+  void GenerateScript(std::ostream& os) CM_OVERRIDE;
   std::string Script;
   bool Code;
 };

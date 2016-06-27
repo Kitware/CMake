@@ -18,10 +18,10 @@ class cmVariableRequiresCommand : public cmCommand
 {
 public:
   cmTypeMacro(cmVariableRequiresCommand, cmCommand);
-  virtual cmCommand* Clone() { return new cmVariableRequiresCommand; }
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
-  virtual std::string GetName() const { return "variable_requires"; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmVariableRequiresCommand; }
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
+  std::string GetName() const CM_OVERRIDE { return "variable_requires"; }
 };
 
 #endif

@@ -32,14 +32,14 @@ public:
    * when this widget has focus. Returns true if the input was
    * handled.
    */
-  virtual bool HandleInput(int& key, cmCursesMainForm* fm, WINDOW* w);
+  bool HandleInput(int& key, cmCursesMainForm* fm, WINDOW* w) CM_OVERRIDE;
 
   /**
    * Set/Get the string.
    */
   void SetString(const std::string& value);
   const char* GetString();
-  virtual const char* GetValue();
+  const char* GetValue() CM_OVERRIDE;
 
   /**
    * Set/Get InEdit flag. Can be used to tell the widget to leave
@@ -61,7 +61,7 @@ public:
    * in the toolbar and return true. Otherwise, return false
    * and the parent widget will print.
    */
-  virtual bool PrintKeys();
+  bool PrintKeys() CM_OVERRIDE;
 
 protected:
   cmCursesStringWidget(const cmCursesStringWidget& from);

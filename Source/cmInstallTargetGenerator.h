@@ -27,7 +27,7 @@ public:
                            std::vector<std::string> const& configurations,
                            const char* component, MessageLevel message,
                            bool exclude_from_all, bool optional);
-  virtual ~cmInstallTargetGenerator();
+  ~cmInstallTargetGenerator() CM_OVERRIDE;
 
   /** Select the policy for installing shared library linkable name
       symlinks.  */
@@ -54,7 +54,7 @@ public:
                                         const std::string& config,
                                         NameType nameType = NameNormal);
 
-  void Compute(cmLocalGenerator* lg);
+  void Compute(cmLocalGenerator* lg) CM_OVERRIDE;
 
   cmGeneratorTarget* GetTarget() const { return this->Target; }
 
@@ -63,10 +63,9 @@ public:
   std::string GetDestination(std::string const& config) const;
 
 protected:
-  virtual void GenerateScript(std::ostream& os);
-  virtual void GenerateScriptForConfig(std::ostream& os,
-                                       const std::string& config,
-                                       Indent const& indent);
+  void GenerateScript(std::ostream& os) CM_OVERRIDE;
+  void GenerateScriptForConfig(std::ostream& os, const std::string& config,
+                               Indent const& indent) CM_OVERRIDE;
   typedef void (cmInstallTargetGenerator::*TweakMethod)(std::ostream&,
                                                         Indent const&,
                                                         const std::string&,

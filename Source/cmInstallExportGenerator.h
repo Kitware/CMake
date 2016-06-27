@@ -32,11 +32,11 @@ public:
                            const char* component, MessageLevel message,
                            bool exclude_from_all, const char* filename,
                            const char* name_space, bool exportOld);
-  ~cmInstallExportGenerator();
+  ~cmInstallExportGenerator() CM_OVERRIDE;
 
   cmExportSet* GetExportSet() { return this->ExportSet; }
 
-  void Compute(cmLocalGenerator* lg);
+  void Compute(cmLocalGenerator* lg) CM_OVERRIDE;
 
   cmLocalGenerator* GetLocalGenerator() const { return this->LocalGenerator; }
 
@@ -45,9 +45,11 @@ public:
   std::string const& GetDestination() const { return this->Destination; }
 
 protected:
-  virtual void GenerateScript(std::ostream& os);
-  virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);
-  virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
+  void GenerateScript(std::ostream& os) CM_OVERRIDE;
+  void GenerateScriptConfigs(std::ostream& os,
+                             Indent const& indent) CM_OVERRIDE;
+  void GenerateScriptActions(std::ostream& os,
+                             Indent const& indent) CM_OVERRIDE;
   void GenerateImportFile(cmExportSet const* exportSet);
   void GenerateImportFile(const char* config, cmExportSet const* exportSet);
   void ComputeTempDir();

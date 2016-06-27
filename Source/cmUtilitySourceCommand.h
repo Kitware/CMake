@@ -18,10 +18,10 @@ class cmUtilitySourceCommand : public cmCommand
 {
 public:
   cmTypeMacro(cmUtilitySourceCommand, cmCommand);
-  virtual cmCommand* Clone() { return new cmUtilitySourceCommand; }
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
-  virtual std::string GetName() const { return "utility_source"; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmUtilitySourceCommand; }
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
+  std::string GetName() const CM_OVERRIDE { return "utility_source"; }
 };
 
 #endif

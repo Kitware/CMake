@@ -28,7 +28,7 @@ class cmExtraCodeBlocksGenerator : public cmExternalMakefileProjectGenerator
 public:
   cmExtraCodeBlocksGenerator();
 
-  virtual std::string GetName() const
+  std::string GetName() const CM_OVERRIDE
   {
     return cmExtraCodeBlocksGenerator::GetActualName();
   }
@@ -38,10 +38,10 @@ public:
     return new cmExtraCodeBlocksGenerator;
   }
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry,
-                                const std::string& fullName) const;
+  void GetDocumentation(cmDocumentationEntry& entry,
+                        const std::string& fullName) const CM_OVERRIDE;
 
-  virtual void Generate();
+  void Generate() CM_OVERRIDE;
 
 private:
   struct CbpUnit

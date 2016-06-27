@@ -28,7 +28,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmCTestRunScriptCommand* ni = new cmCTestRunScriptCommand;
     ni->CTest = this->CTest;
@@ -40,13 +40,13 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_run_script"; }
+  std::string GetName() const CM_OVERRIDE { return "ctest_run_script"; }
 
   cmTypeMacro(cmCTestRunScriptCommand, cmCTestCommand);
 };

@@ -36,12 +36,12 @@ class cmCryptoHashMD5 : public cmCryptoHash
 
 public:
   cmCryptoHashMD5();
-  ~cmCryptoHashMD5();
+  ~cmCryptoHashMD5() CM_OVERRIDE;
 
 protected:
-  virtual void Initialize();
-  virtual void Append(unsigned char const* buf, int sz);
-  virtual std::string Finalize();
+  void Initialize() CM_OVERRIDE;
+  void Append(unsigned char const* buf, int sz) CM_OVERRIDE;
+  std::string Finalize() CM_OVERRIDE;
 };
 
 #define cmCryptoHash_SHA_CLASS_DECL(SHA)                                      \

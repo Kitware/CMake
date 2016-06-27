@@ -24,20 +24,20 @@ public:
   /** Construct with a CTest instance and update log stream.  */
   cmCTestBZR(cmCTest* ctest, std::ostream& log);
 
-  virtual ~cmCTestBZR();
+  ~cmCTestBZR() CM_OVERRIDE;
 
 private:
   // Implement cmCTestVC internal API.
-  virtual void NoteOldRevision();
-  virtual void NoteNewRevision();
-  virtual bool UpdateImpl();
+  void NoteOldRevision() CM_OVERRIDE;
+  void NoteNewRevision() CM_OVERRIDE;
+  bool UpdateImpl() CM_OVERRIDE;
 
   // URL of repository directory checked out in the working tree.
   std::string URL;
 
   std::string LoadInfo();
-  void LoadModifications();
-  void LoadRevisions();
+  void LoadModifications() CM_OVERRIDE;
+  void LoadRevisions() CM_OVERRIDE;
 
   // Parsing helper classes.
   class InfoParser;

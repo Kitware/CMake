@@ -34,12 +34,12 @@ class cmLocalNinjaGenerator : public cmLocalCommonGenerator
 public:
   cmLocalNinjaGenerator(cmGlobalGenerator* gg, cmMakefile* mf);
 
-  virtual ~cmLocalNinjaGenerator();
+  ~cmLocalNinjaGenerator() CM_OVERRIDE;
 
-  virtual void Generate();
+  void Generate() CM_OVERRIDE;
 
-  virtual std::string GetTargetDirectory(
-    cmGeneratorTarget const* target) const;
+  std::string GetTargetDirectory(cmGeneratorTarget const* target) const
+    CM_OVERRIDE;
 
   const cmGlobalNinjaGenerator* GetGlobalNinjaGenerator() const;
   cmGlobalNinjaGenerator* GetGlobalNinjaGenerator();
@@ -72,19 +72,19 @@ public:
   void AppendCustomCommandDeps(cmCustomCommandGenerator const& ccg,
                                cmNinjaDeps& ninjaDeps);
 
-  virtual std::string ConvertToLinkReference(
-    std::string const& lib,
-    cmOutputConverter::OutputFormat format = cmOutputConverter::SHELL);
+  std::string ConvertToLinkReference(std::string const& lib,
+                                     cmOutputConverter::OutputFormat format =
+                                       cmOutputConverter::SHELL) CM_OVERRIDE;
 
-  virtual void ComputeObjectFilenames(
+  void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
-    cmGeneratorTarget const* gt = 0);
+    cmGeneratorTarget const* gt = 0) CM_OVERRIDE;
 
 protected:
-  virtual std::string ConvertToIncludeReference(
+  std::string ConvertToIncludeReference(
     std::string const& path,
     cmOutputConverter::OutputFormat format = cmOutputConverter::SHELL,
-    bool forceFullPaths = false);
+    bool forceFullPaths = false) CM_OVERRIDE;
 
 private:
   cmGeneratedFileStream& GetBuildFileStream() const;

@@ -28,15 +28,15 @@ public:
   void SetConfig(const std::string& config) { this->Config = config; }
 protected:
   // Implement virtual methods from the superclass.
-  virtual bool GenerateMainFile(std::ostream& os);
+  bool GenerateMainFile(std::ostream& os) CM_OVERRIDE;
 
-  virtual void GenerateImportTargetsConfig(std::ostream&, const std::string&,
-                                           std::string const&,
-                                           std::vector<std::string>&)
+  void GenerateImportTargetsConfig(std::ostream&, const std::string&,
+                                   std::string const&,
+                                   std::vector<std::string>&) CM_OVERRIDE
   {
   }
-  virtual void HandleMissingTarget(std::string&, std::vector<std::string>&,
-                                   cmGeneratorTarget*, cmGeneratorTarget*)
+  void HandleMissingTarget(std::string&, std::vector<std::string>&,
+                           cmGeneratorTarget*, cmGeneratorTarget*) CM_OVERRIDE
   {
   }
 
@@ -45,7 +45,7 @@ protected:
                           std::set<const cmGeneratorTarget*>& emitted);
 
   std::string InstallNameDir(cmGeneratorTarget* target,
-                             const std::string& config);
+                             const std::string& config) CM_OVERRIDE;
 
 private:
   std::string FindTargets(const std::string& prop,

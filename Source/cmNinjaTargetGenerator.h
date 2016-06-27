@@ -37,7 +37,7 @@ public:
   cmNinjaTargetGenerator(cmGeneratorTarget* target);
 
   /// Destructor.
-  virtual ~cmNinjaTargetGenerator();
+  ~cmNinjaTargetGenerator() CM_OVERRIDE;
 
   virtual void Generate() = 0;
 
@@ -79,7 +79,8 @@ protected:
   std::string ComputeFlagsForObject(cmSourceFile const* source,
                                     const std::string& language);
 
-  void AddIncludeFlags(std::string& flags, std::string const& lang);
+  void AddIncludeFlags(std::string& flags,
+                       std::string const& lang) CM_OVERRIDE;
 
   std::string ComputeDefines(cmSourceFile const* source,
                              const std::string& language);
@@ -134,7 +135,8 @@ protected:
     {
     }
 
-    void operator()(cmSourceFile const& source, const char* pkgloc);
+    void operator()(cmSourceFile const& source,
+                    const char* pkgloc) CM_OVERRIDE;
 
   private:
     cmNinjaTargetGenerator* Generator;

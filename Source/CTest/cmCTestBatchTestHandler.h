@@ -28,8 +28,8 @@
 class cmCTestBatchTestHandler : public cmCTestMultiProcessHandler
 {
 public:
-  ~cmCTestBatchTestHandler();
-  virtual void RunTests();
+  ~cmCTestBatchTestHandler() CM_OVERRIDE;
+  void RunTests() CM_OVERRIDE;
 
 protected:
   void WriteBatchScript();

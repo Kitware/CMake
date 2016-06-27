@@ -24,7 +24,7 @@ class cmLocalCommonGenerator : public cmLocalGenerator
 public:
   cmLocalCommonGenerator(cmGlobalGenerator* gg, cmMakefile* mf,
                          cmOutputConverter::RelativeRoot wd);
-  ~cmLocalCommonGenerator();
+  ~cmLocalCommonGenerator() CM_OVERRIDE;
 
   std::string const& GetConfigName() { return this->ConfigName; }
 
@@ -34,7 +34,7 @@ public:
   }
 
   std::string GetTargetFortranFlags(cmGeneratorTarget const* target,
-                                    std::string const& config);
+                                    std::string const& config) CM_OVERRIDE;
 
 protected:
   cmOutputConverter::RelativeRoot WorkingDirectory;

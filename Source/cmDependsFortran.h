@@ -34,7 +34,7 @@ public:
   cmDependsFortran(cmLocalGenerator* lg);
 
   /** Virtual destructor to cleanup subclasses properly.  */
-  virtual ~cmDependsFortran();
+  ~cmDependsFortran() CM_OVERRIDE;
 
   /** Callback from build system after a .mod file has been generated
       by a Fortran90 compiler to copy the .mod file to the
@@ -48,8 +48,8 @@ public:
 
 protected:
   // Finalize the dependency information for the target.
-  virtual bool Finalize(std::ostream& makeDepends,
-                        std::ostream& internalDepends);
+  bool Finalize(std::ostream& makeDepends,
+                std::ostream& internalDepends) CM_OVERRIDE;
 
   // Find all the modules required by the target.
   void LocateModules();
@@ -59,10 +59,9 @@ protected:
   bool FindModule(std::string const& name, std::string& module);
 
   // Implement writing/checking methods required by superclass.
-  virtual bool WriteDependencies(const std::set<std::string>& sources,
-                                 const std::string& file,
-                                 std::ostream& makeDepends,
-                                 std::ostream& internalDepends);
+  bool WriteDependencies(const std::set<std::string>& sources,
+                         const std::string& file, std::ostream& makeDepends,
+                         std::ostream& internalDepends) CM_OVERRIDE;
 
   // Actually write the depenencies to the streams.
   bool WriteDependenciesReal(const char* obj, cmFortranSourceInfo const& info,

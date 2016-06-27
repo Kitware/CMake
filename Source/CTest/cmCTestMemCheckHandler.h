@@ -33,16 +33,17 @@ class cmCTestMemCheckHandler : public cmCTestTestHandler
 public:
   cmTypeMacro(cmCTestMemCheckHandler, cmCTestTestHandler);
 
-  void PopulateCustomVectors(cmMakefile* mf);
+  void PopulateCustomVectors(cmMakefile* mf) CM_OVERRIDE;
 
   cmCTestMemCheckHandler();
 
-  void Initialize();
+  void Initialize() CM_OVERRIDE;
 
 protected:
-  virtual int PreProcessHandler();
-  virtual int PostProcessHandler();
-  virtual void GenerateTestCommand(std::vector<std::string>& args, int test);
+  int PreProcessHandler() CM_OVERRIDE;
+  int PostProcessHandler() CM_OVERRIDE;
+  void GenerateTestCommand(std::vector<std::string>& args,
+                           int test) CM_OVERRIDE;
 
 private:
   enum
@@ -125,7 +126,7 @@ private:
   /**
    * Generate the Dart compatible output
    */
-  void GenerateDartOutput(cmXMLWriter& xml);
+  void GenerateDartOutput(cmXMLWriter& xml) CM_OVERRIDE;
 
   std::vector<std::string> CustomPreMemCheck;
   std::vector<std::string> CustomPostMemCheck;

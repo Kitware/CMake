@@ -25,14 +25,14 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() { return new cmBuildCommand; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmBuildCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * The primary command signature with optional, KEYWORD-based args.
@@ -47,7 +47,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "build_command"; }
+  std::string GetName() const CM_OVERRIDE { return "build_command"; }
 
   cmTypeMacro(cmBuildCommand, cmCommand);
 

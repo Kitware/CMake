@@ -48,8 +48,8 @@ class cmGlobalGeneratorSimpleFactory : public cmGlobalGeneratorFactory
 {
 public:
   /** Create a GlobalGenerator */
-  virtual cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
-                                                   cmake* cm) const
+  cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
+                                           cmake* cm) const CM_OVERRIDE
   {
     if (name != T::GetActualName()) {
       return 0;
@@ -58,19 +58,19 @@ public:
   }
 
   /** Get the documentation entry for this factory */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const
+  void GetDocumentation(cmDocumentationEntry& entry) const CM_OVERRIDE
   {
     T::GetDocumentation(entry);
   }
 
   /** Get the names of the current registered generators */
-  virtual void GetGenerators(std::vector<std::string>& names) const
+  void GetGenerators(std::vector<std::string>& names) const CM_OVERRIDE
   {
     names.push_back(T::GetActualName());
   }
 
   /** Determine whether or not this generator supports toolsets */
-  virtual bool SupportsToolset() const { return T::SupportsToolset(); }
+  bool SupportsToolset() const CM_OVERRIDE { return T::SupportsToolset(); }
 };
 
 #endif

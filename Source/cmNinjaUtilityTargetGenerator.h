@@ -23,9 +23,9 @@ class cmNinjaUtilityTargetGenerator : public cmNinjaTargetGenerator
 {
 public:
   cmNinjaUtilityTargetGenerator(cmGeneratorTarget* target);
-  ~cmNinjaUtilityTargetGenerator();
+  ~cmNinjaUtilityTargetGenerator() CM_OVERRIDE;
 
-  void Generate();
+  void Generate() CM_OVERRIDE;
 };
 
 #endif // ! cmNinjaUtilityTargetGenerator_h

@@ -23,16 +23,16 @@ class cmCursesLongMessageForm : public cmCursesForm
 public:
   cmCursesLongMessageForm(std::vector<std::string> const& messages,
                           const char* title);
-  virtual ~cmCursesLongMessageForm();
+  ~cmCursesLongMessageForm() CM_OVERRIDE;
 
   // Description:
   // Handle user input.
-  virtual void HandleInput();
+  void HandleInput() CM_OVERRIDE;
 
   // Description:
   // Display form. Use a window of size width x height, starting
   // at top, left.
-  virtual void Render(int left, int top, int width, int height);
+  void Render(int left, int top, int width, int height) CM_OVERRIDE;
 
   // Description:
   // This method should normally  called only by the form.
@@ -42,7 +42,7 @@ public:
   // Description:
   // This method should normally  called only by the form.
   // The only exception is during a resize.
-  virtual void UpdateStatusBar();
+  void UpdateStatusBar() CM_OVERRIDE;
 
 protected:
   cmCursesLongMessageForm(const cmCursesLongMessageForm& from);

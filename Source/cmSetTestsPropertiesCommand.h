@@ -17,19 +17,19 @@
 class cmSetTestsPropertiesCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone() { return new cmSetTestsPropertiesCommand; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmSetTestsPropertiesCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "set_tests_properties"; }
+  std::string GetName() const CM_OVERRIDE { return "set_tests_properties"; }
 
   cmTypeMacro(cmSetTestsPropertiesCommand, cmCommand);
 

@@ -25,24 +25,24 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() { return new cmSeparateArgumentsCommand; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmSeparateArgumentsCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * This determines if the command is invoked when in script mode.
    */
-  virtual bool IsScriptable() const { return true; }
+  bool IsScriptable() const CM_OVERRIDE { return true; }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "separate_arguments"; }
+  std::string GetName() const CM_OVERRIDE { return "separate_arguments"; }
 
   cmTypeMacro(cmSeparateArgumentsCommand, cmCommand);
 };

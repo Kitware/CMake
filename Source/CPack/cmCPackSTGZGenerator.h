@@ -28,13 +28,13 @@ public:
    * Construct generator
    */
   cmCPackSTGZGenerator();
-  virtual ~cmCPackSTGZGenerator();
+  ~cmCPackSTGZGenerator() CM_OVERRIDE;
 
 protected:
-  int PackageFiles();
-  virtual int InitializeInternal();
-  int GenerateHeader(std::ostream* os);
-  virtual const char* GetOutputExtension() { return ".sh"; }
+  int PackageFiles() CM_OVERRIDE;
+  int InitializeInternal() CM_OVERRIDE;
+  int GenerateHeader(std::ostream* os) CM_OVERRIDE;
+  const char* GetOutputExtension() CM_OVERRIDE { return ".sh"; }
 };
 
 #endif

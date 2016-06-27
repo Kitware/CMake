@@ -26,14 +26,14 @@ public:
   cmTypeMacro(cmCTestUploadHandler, cmCTestGenericHandler);
 
   cmCTestUploadHandler();
-  ~cmCTestUploadHandler() {}
+  ~cmCTestUploadHandler() CM_OVERRIDE {}
 
   /*
    * The main entry point for this class
    */
-  int ProcessHandler();
+  int ProcessHandler() CM_OVERRIDE;
 
-  void Initialize();
+  void Initialize() CM_OVERRIDE;
 
   /** Specify a set of files to submit.  */
   void SetFiles(cmCTest::SetOfStrings const& files);

@@ -40,19 +40,19 @@ public:
     return new cmExtraEclipseCDT4Generator;
   }
 
-  virtual std::string GetName() const
+  std::string GetName() const CM_OVERRIDE
   {
     return cmExtraEclipseCDT4Generator::GetActualName();
   }
 
   static std::string GetActualName() { return "Eclipse CDT4"; }
 
-  virtual void GetDocumentation(cmDocumentationEntry& entry,
-                                const std::string& fullName) const;
-  virtual void EnableLanguage(std::vector<std::string> const& languages,
-                              cmMakefile*, bool optional);
+  void GetDocumentation(cmDocumentationEntry& entry,
+                        const std::string& fullName) const CM_OVERRIDE;
+  void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
+                      bool optional) CM_OVERRIDE;
 
-  virtual void Generate();
+  void Generate() CM_OVERRIDE;
 
 private:
   // create .project file in the source tree

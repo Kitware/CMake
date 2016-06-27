@@ -23,9 +23,9 @@ public:
    * This method is called when different keys are pressed. The
    * subclass can have a special implementation handler for this.
    */
-  virtual void OnTab(cmCursesMainForm* fm, WINDOW* w);
-  virtual void OnReturn(cmCursesMainForm* fm, WINDOW* w);
-  virtual void OnType(int& key, cmCursesMainForm* fm, WINDOW* w);
+  void OnTab(cmCursesMainForm* fm, WINDOW* w) CM_OVERRIDE;
+  void OnReturn(cmCursesMainForm* fm, WINDOW* w) CM_OVERRIDE;
+  void OnType(int& key, cmCursesMainForm* fm, WINDOW* w) CM_OVERRIDE;
 
 protected:
   cmCursesPathWidget(const cmCursesPathWidget& from);

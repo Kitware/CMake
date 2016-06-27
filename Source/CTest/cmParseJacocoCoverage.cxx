@@ -20,7 +20,7 @@ public:
     this->PackageName = "";
   }
 
-  virtual ~XMLParser() {}
+  ~XMLParser() CM_OVERRIDE {}
 
 protected:
   void EndElement(const std::string&) CM_OVERRIDE {}

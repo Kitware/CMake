@@ -27,7 +27,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmCTestCoverageCommand* ni = new cmCTestCoverageCommand;
     ni->CTest = this->CTest;
@@ -38,15 +38,15 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_coverage"; }
+  std::string GetName() const CM_OVERRIDE { return "ctest_coverage"; }
 
   cmTypeMacro(cmCTestCoverageCommand, cmCTestHandlerCommand);
 
 protected:
-  cmCTestGenericHandler* InitializeHandler();
+  cmCTestGenericHandler* InitializeHandler() CM_OVERRIDE;
 
-  virtual bool CheckArgumentKeyword(std::string const& arg);
-  virtual bool CheckArgumentValue(std::string const& arg);
+  bool CheckArgumentKeyword(std::string const& arg) CM_OVERRIDE;
+  bool CheckArgumentValue(std::string const& arg) CM_OVERRIDE;
 
   enum
   {

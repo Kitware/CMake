@@ -183,7 +183,7 @@ public:
   {
     this->InitializeParser();
   }
-  ~LogParser() { this->CleanupParser(); }
+  ~LogParser() CM_OVERRIDE { this->CleanupParser(); }
 
   int InitializeParser() CM_OVERRIDE
   {

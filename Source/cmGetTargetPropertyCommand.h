@@ -17,19 +17,19 @@
 class cmGetTargetPropertyCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone() { return new cmGetTargetPropertyCommand; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmGetTargetPropertyCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "get_target_property"; }
+  std::string GetName() const CM_OVERRIDE { return "get_target_property"; }
 
   cmTypeMacro(cmGetTargetPropertyCommand, cmCommand);
 };

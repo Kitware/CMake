@@ -45,7 +45,7 @@ public:
   /**
    * Need virtual destructor to destroy real command type.
    */
-  virtual ~cmCommand() {}
+  ~cmCommand() CM_OVERRIDE {}
 
   /**
    * Specify the makefile.

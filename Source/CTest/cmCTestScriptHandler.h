@@ -71,7 +71,7 @@ public:
   /**
    * Run a dashboard using a specified confiuration script
    */
-  int ProcessHandler();
+  int ProcessHandler() CM_OVERRIDE;
 
   /*
    * Run a script
@@ -104,9 +104,9 @@ public:
   double GetRemainingTimeAllowed();
 
   cmCTestScriptHandler();
-  ~cmCTestScriptHandler();
+  ~cmCTestScriptHandler() CM_OVERRIDE;
 
-  void Initialize();
+  void Initialize() CM_OVERRIDE;
 
   void CreateCMake();
   cmake* GetCMake() { return this->CMake; }

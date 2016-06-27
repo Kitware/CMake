@@ -17,19 +17,25 @@
 class cmSetSourceFilesPropertiesCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone() { return new cmSetSourceFilesPropertiesCommand; }
+  cmCommand* Clone() CM_OVERRIDE
+  {
+    return new cmSetSourceFilesPropertiesCommand;
+  }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "set_source_files_properties"; }
+  std::string GetName() const CM_OVERRIDE
+  {
+    return "set_source_files_properties";
+  }
 
   cmTypeMacro(cmSetSourceFilesPropertiesCommand, cmCommand);
 

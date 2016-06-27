@@ -37,7 +37,7 @@ public:
                      std::vector<std::string> const& configurations,
                      const char* component, MessageLevel message,
                      bool exclude_from_all);
-  virtual ~cmInstallGenerator();
+  ~cmInstallGenerator() CM_OVERRIDE;
 
   void AddInstallRule(std::ostream& os, std::string const& dest,
                       cmInstallType type,
@@ -60,7 +60,7 @@ public:
   virtual void Compute(cmLocalGenerator*) {}
 
 protected:
-  virtual void GenerateScript(std::ostream& os);
+  void GenerateScript(std::ostream& os) CM_OVERRIDE;
 
   std::string CreateComponentTest(const char* component,
                                   bool exclude_from_all);

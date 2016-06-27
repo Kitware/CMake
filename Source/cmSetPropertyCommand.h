@@ -19,24 +19,24 @@ class cmSetPropertyCommand : public cmCommand
 public:
   cmSetPropertyCommand();
 
-  virtual cmCommand* Clone() { return new cmSetPropertyCommand; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmSetPropertyCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "set_property"; }
+  std::string GetName() const CM_OVERRIDE { return "set_property"; }
 
   /**
    * This determines if the command is invoked when in script mode.
    */
-  virtual bool IsScriptable() const { return true; }
+  bool IsScriptable() const CM_OVERRIDE { return true; }
 
   cmTypeMacro(cmSetPropertyCommand, cmCommand);
 

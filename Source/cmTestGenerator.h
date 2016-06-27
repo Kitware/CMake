@@ -27,18 +27,20 @@ public:
   cmTestGenerator(cmTest* test,
                   std::vector<std::string> const& configurations =
                     std::vector<std::string>());
-  virtual ~cmTestGenerator();
+  ~cmTestGenerator() CM_OVERRIDE;
 
   void Compute(cmLocalGenerator* lg);
 
 protected:
-  virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);
-  virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
-  virtual void GenerateScriptForConfig(std::ostream& os,
-                                       const std::string& config,
-                                       Indent const& indent);
-  virtual void GenerateScriptNoConfig(std::ostream& os, Indent const& indent);
-  virtual bool NeedsScriptNoConfig() const;
+  void GenerateScriptConfigs(std::ostream& os,
+                             Indent const& indent) CM_OVERRIDE;
+  void GenerateScriptActions(std::ostream& os,
+                             Indent const& indent) CM_OVERRIDE;
+  void GenerateScriptForConfig(std::ostream& os, const std::string& config,
+                               Indent const& indent) CM_OVERRIDE;
+  void GenerateScriptNoConfig(std::ostream& os,
+                              Indent const& indent) CM_OVERRIDE;
+  bool NeedsScriptNoConfig() const CM_OVERRIDE;
   void GenerateOldStyle(std::ostream& os, Indent const& indent);
 
   cmLocalGenerator* LG;

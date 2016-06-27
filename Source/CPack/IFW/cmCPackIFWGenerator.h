@@ -46,7 +46,7 @@ public:
   /**
    * Destruct IFW generator
    */
-  virtual ~cmCPackIFWGenerator();
+  ~cmCPackIFWGenerator() CM_OVERRIDE;
 
   /**
    * Compare \a version with QtIFW framework version
@@ -70,18 +70,18 @@ protected:
    * @brief Initialize generator
    * @return 0 on failure
    */
-  virtual int InitializeInternal();
-  virtual int PackageFiles();
-  virtual const char* GetPackagingInstallPrefix();
+  int InitializeInternal() CM_OVERRIDE;
+  int PackageFiles() CM_OVERRIDE;
+  const char* GetPackagingInstallPrefix() CM_OVERRIDE;
 
   /**
    * @brief Extension of binary installer
    * @return Executable suffix or value from default implementation
    */
-  virtual const char* GetOutputExtension();
+  const char* GetOutputExtension() CM_OVERRIDE;
 
-  virtual std::string GetComponentInstallDirNameSuffix(
-    const std::string& componentName);
+  std::string GetComponentInstallDirNameSuffix(
+    const std::string& componentName) CM_OVERRIDE;
 
   /**
    * @brief Get Component
@@ -92,8 +92,8 @@ protected:
    *
    * @return Pointer to component
    */
-  virtual cmCPackComponent* GetComponent(const std::string& projectName,
-                                         const std::string& componentName);
+  cmCPackComponent* GetComponent(const std::string& projectName,
+                                 const std::string& componentName) CM_OVERRIDE;
 
   /**
    * @brief Get group of component
@@ -104,12 +104,13 @@ protected:
    *
    * @return Pointer to component group
    */
-  virtual cmCPackComponentGroup* GetComponentGroup(
-    const std::string& projectName, const std::string& groupName);
+  cmCPackComponentGroup* GetComponentGroup(
+    const std::string& projectName, const std::string& groupName) CM_OVERRIDE;
 
-  enum cmCPackGenerator::CPackSetDestdirSupport SupportsSetDestdir() const;
-  virtual bool SupportsAbsoluteDestination() const;
-  virtual bool SupportsComponentInstallation() const;
+  enum cmCPackGenerator::CPackSetDestdirSupport SupportsSetDestdir() const
+    CM_OVERRIDE;
+  bool SupportsAbsoluteDestination() const CM_OVERRIDE;
+  bool SupportsComponentInstallation() const CM_OVERRIDE;
 
 protected:
   // Methods

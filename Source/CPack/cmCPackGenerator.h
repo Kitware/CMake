@@ -101,7 +101,7 @@ public:
    * Construct generator
    */
   cmCPackGenerator();
-  virtual ~cmCPackGenerator();
+  ~cmCPackGenerator() CM_OVERRIDE;
 
   //! Set and get the options
   void SetOption(const std::string& op, const char* value);

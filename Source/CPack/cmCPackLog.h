@@ -42,7 +42,7 @@ public:
   cmTypeMacro(cmCPackLog, cmObject);
 
   cmCPackLog();
-  ~cmCPackLog();
+  ~cmCPackLog() CM_OVERRIDE;
 
   enum __log_tags
   {

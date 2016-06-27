@@ -32,7 +32,7 @@ public:
    * Construct generator
    */
   cmCPackRPMGenerator();
-  virtual ~cmCPackRPMGenerator();
+  ~cmCPackRPMGenerator() CM_OVERRIDE;
 
   static bool CanGenerate()
   {
@@ -49,8 +49,8 @@ public:
   }
 
 protected:
-  virtual int InitializeInternal();
-  virtual int PackageFiles();
+  int InitializeInternal() CM_OVERRIDE;
+  int PackageFiles() CM_OVERRIDE;
   /**
    * This method factors out the work done in component packaging case.
    */
@@ -67,10 +67,10 @@ protected:
    * components will be put in a single installer.
    */
   int PackageComponentsAllInOne(const std::string& compInstDirName);
-  virtual const char* GetOutputExtension() { return ".rpm"; }
-  virtual bool SupportsComponentInstallation() const;
-  virtual std::string GetComponentInstallDirNameSuffix(
-    const std::string& componentName);
+  const char* GetOutputExtension() CM_OVERRIDE { return ".rpm"; }
+  bool SupportsComponentInstallation() const CM_OVERRIDE;
+  std::string GetComponentInstallDirNameSuffix(
+    const std::string& componentName) CM_OVERRIDE;
 
   void AddGeneratedPackageNames();
 };

@@ -24,34 +24,34 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() { return new cmVariableWatchCommand; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmVariableWatchCommand; }
 
   //! Default constructor
   cmVariableWatchCommand();
 
   //! Destructor.
-  ~cmVariableWatchCommand();
+  ~cmVariableWatchCommand() CM_OVERRIDE;
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * This determines if the command is invoked when in script mode.
    */
-  virtual bool IsScriptable() const { return true; }
+  bool IsScriptable() const CM_OVERRIDE { return true; }
 
   /** This command does not really have a final pass but it needs to
       stay alive since it owns variable watch callback information. */
-  virtual bool HasFinalPass() const { return true; }
+  bool HasFinalPass() const CM_OVERRIDE { return true; }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "variable_watch"; }
+  std::string GetName() const CM_OVERRIDE { return "variable_watch"; }
 
   cmTypeMacro(cmVariableWatchCommand, cmCommand);
 

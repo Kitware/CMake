@@ -28,7 +28,7 @@ public:
   cmTypeMacro(cmCPackGeneratorFactory, cmObject);
 
   cmCPackGeneratorFactory();
-  ~cmCPackGeneratorFactory();
+  ~cmCPackGeneratorFactory() CM_OVERRIDE;
 
   //! Get the generator
   cmCPackGenerator* NewGenerator(const std::string& name);

@@ -26,12 +26,12 @@ class cmCTestBuildCommand : public cmCTestHandlerCommand
 {
 public:
   cmCTestBuildCommand();
-  ~cmCTestBuildCommand();
+  ~cmCTestBuildCommand() CM_OVERRIDE;
 
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmCTestBuildCommand* ni = new cmCTestBuildCommand;
     ni->CTest = this->CTest;
@@ -42,10 +42,10 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_build"; }
+  std::string GetName() const CM_OVERRIDE { return "ctest_build"; }
 
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   cmTypeMacro(cmCTestBuildCommand, cmCTestHandlerCommand);
 
@@ -65,7 +65,7 @@ protected:
     ctb_LAST
   };
 
-  cmCTestGenericHandler* InitializeHandler();
+  cmCTestGenericHandler* InitializeHandler() CM_OVERRIDE;
 };
 
 #endif

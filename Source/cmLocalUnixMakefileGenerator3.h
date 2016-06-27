@@ -33,14 +33,14 @@ class cmLocalUnixMakefileGenerator3 : public cmLocalCommonGenerator
 {
 public:
   cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg, cmMakefile* mf);
-  virtual ~cmLocalUnixMakefileGenerator3();
+  ~cmLocalUnixMakefileGenerator3() CM_OVERRIDE;
 
-  virtual void ComputeHomeRelativeOutputPath();
+  void ComputeHomeRelativeOutputPath() CM_OVERRIDE;
 
   /**
    * Generate the makefile for this directory.
    */
-  virtual void Generate();
+  void Generate() CM_OVERRIDE;
 
   // this returns the relative path between the HomeOutputDirectory and this
   // local generators StartOutputDirectory
@@ -90,8 +90,9 @@ public:
                                    const std::string& tgt);
 
   // append flags to a string
-  virtual void AppendFlags(std::string& flags, const std::string& newFlags);
-  virtual void AppendFlags(std::string& flags, const char* newFlags);
+  void AppendFlags(std::string& flags,
+                   const std::string& newFlags) CM_OVERRIDE;
+  void AppendFlags(std::string& flags, const char* newFlags) CM_OVERRIDE;
 
   // append an echo command
   enum EchoColor
@@ -114,8 +115,8 @@ public:
   /** Get whether the makefile is to have color.  */
   bool GetColorMakefile() const { return this->ColorMakefile; }
 
-  virtual std::string GetTargetDirectory(
-    cmGeneratorTarget const* target) const;
+  std::string GetTargetDirectory(cmGeneratorTarget const* target) const
+    CM_OVERRIDE;
 
   // create a command that cds to the start dir then runs the commands
   void CreateCDCommand(std::vector<std::string>& commands,
@@ -130,11 +131,11 @@ public:
 
   /** Called from command-line hook to bring dependencies up to date
       for a target.  */
-  virtual bool UpdateDependencies(const char* tgtInfo, bool verbose,
-                                  bool color);
+  bool UpdateDependencies(const char* tgtInfo, bool verbose,
+                          bool color) CM_OVERRIDE;
 
   /** Called from command-line hook to clear dependencies.  */
-  virtual void ClearDependencies(cmMakefile* mf, bool verbose);
+  void ClearDependencies(cmMakefile* mf, bool verbose) CM_OVERRIDE;
 
   /** write some extra rules such as make test etc */
   void WriteSpecialTargetsTop(std::ostream& makefileStream);
@@ -253,9 +254,9 @@ private:
                            cmGeneratorTarget* target,
                            cmOutputConverter::RelativeRoot relative);
 
-  virtual void ComputeObjectFilenames(
+  void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
-    cmGeneratorTarget const* gt = 0);
+    cmGeneratorTarget const* gt = 0) CM_OVERRIDE;
 
   friend class cmMakefileTargetGenerator;
   friend class cmMakefileExecutableTargetGenerator;

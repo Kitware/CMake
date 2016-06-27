@@ -28,7 +28,7 @@ public:
 
 protected:
   // implement virtual from parent
-  bool LoadCoverageData(const char* dir);
+  bool LoadCoverageData(const char* dir) CM_OVERRIDE;
   // remove files with no coverage
   void RemoveUnCoveredFiles();
   // Read a single mcov file

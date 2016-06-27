@@ -37,12 +37,12 @@ public:
   }
 
   ///! clean up any memory allocated by the plugin
-  ~cmLoadedCommand();
+  ~cmLoadedCommand() CM_OVERRIDE;
 
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmLoadedCommand* newC = new cmLoadedCommand;
     // we must copy when we clone
@@ -54,8 +54,8 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus&);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus&) CM_OVERRIDE;
 
   /**
    * This is called at the end after all the information
@@ -63,8 +63,8 @@ public:
    * not implement this method.  At this point, reading and
    * writing to the cache can be done.
    */
-  virtual void FinalPass();
-  virtual bool HasFinalPass() const
+  void FinalPass() CM_OVERRIDE;
+  bool HasFinalPass() const CM_OVERRIDE
   {
     return this->info.FinalPass ? true : false;
   }
@@ -72,7 +72,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return info.Name; }
+  std::string GetName() const CM_OVERRIDE { return info.Name; }
 
   static const char* LastName;
   static void TrapsForSignals(int sig)

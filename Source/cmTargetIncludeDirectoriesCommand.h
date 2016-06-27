@@ -21,34 +21,40 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() { return new cmTargetIncludeDirectoriesCommand; }
+  cmCommand* Clone() CM_OVERRIDE
+  {
+    return new cmTargetIncludeDirectoriesCommand;
+  }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "target_include_directories"; }
+  std::string GetName() const CM_OVERRIDE
+  {
+    return "target_include_directories";
+  }
 
   cmTypeMacro(cmTargetIncludeDirectoriesCommand, cmTargetPropCommandBase);
 
 private:
-  virtual void HandleImportedTarget(const std::string& tgt);
-  virtual void HandleMissingTarget(const std::string& name);
+  void HandleImportedTarget(const std::string& tgt) CM_OVERRIDE;
+  void HandleMissingTarget(const std::string& name) CM_OVERRIDE;
 
-  virtual bool HandleDirectContent(cmTarget* tgt,
-                                   const std::vector<std::string>& content,
-                                   bool prepend, bool system);
-  virtual void HandleInterfaceContent(cmTarget* tgt,
-                                      const std::vector<std::string>& content,
-                                      bool prepend, bool system);
+  bool HandleDirectContent(cmTarget* tgt,
+                           const std::vector<std::string>& content,
+                           bool prepend, bool system) CM_OVERRIDE;
+  void HandleInterfaceContent(cmTarget* tgt,
+                              const std::vector<std::string>& content,
+                              bool prepend, bool system) CM_OVERRIDE;
 
-  virtual std::string Join(const std::vector<std::string>& content);
+  std::string Join(const std::vector<std::string>& content) CM_OVERRIDE;
 };
 
 #endif

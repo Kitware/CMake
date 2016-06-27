@@ -30,7 +30,7 @@ class cmCursesMainForm : public cmCursesForm
 {
 public:
   cmCursesMainForm(std::vector<std::string> const& args, int initwidth);
-  virtual ~cmCursesMainForm();
+  ~cmCursesMainForm() CM_OVERRIDE;
 
   /**
    * Set the widgets which represent the cache entries.
@@ -40,13 +40,13 @@ public:
   /**
    * Handle user input.
    */
-  virtual void HandleInput();
+  void HandleInput() CM_OVERRIDE;
 
   /**
    * Display form. Use a window of size width x height, starting
    * at top, left.
    */
-  virtual void Render(int left, int top, int width, int height);
+  void Render(int left, int top, int width, int height) CM_OVERRIDE;
 
   /**
    * Returns true if an entry with the given key is in the
@@ -67,7 +67,7 @@ public:
    * exception is during a resize. The optional argument specifies the
    * string to be displayed in the status bar.
    */
-  virtual void UpdateStatusBar() { this->UpdateStatusBar(0); }
+  void UpdateStatusBar() CM_OVERRIDE { this->UpdateStatusBar(0); }
   virtual void UpdateStatusBar(const char* message);
 
   /**
@@ -83,7 +83,7 @@ public:
    * During a CMake run, an error handle should add errors
    * to be displayed afterwards.
    */
-  virtual void AddError(const char* message, const char* title);
+  void AddError(const char* message, const char* title) CM_OVERRIDE;
 
   /**
    * Used to do a configure. If argument is specified, it does only the check

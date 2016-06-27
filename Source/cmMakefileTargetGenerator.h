@@ -35,7 +35,7 @@ class cmMakefileTargetGenerator : public cmCommonTargetGenerator
 public:
   // constructor to set the ivars
   cmMakefileTargetGenerator(cmGeneratorTarget* target);
-  virtual ~cmMakefileTargetGenerator();
+  ~cmMakefileTargetGenerator() CM_OVERRIDE;
 
   // construct using this factory call
   static cmMakefileTargetGenerator* New(cmGeneratorTarget* tgt);
@@ -83,7 +83,8 @@ protected:
     {
     }
 
-    void operator()(cmSourceFile const& source, const char* pkgloc);
+    void operator()(cmSourceFile const& source,
+                    const char* pkgloc) CM_OVERRIDE;
 
   private:
     cmMakefileTargetGenerator* Generator;
@@ -161,7 +162,8 @@ protected:
                          std::vector<std::string>& makefile_depends,
                          bool useWatcomQuote);
 
-  void AddIncludeFlags(std::string& flags, const std::string& lang);
+  void AddIncludeFlags(std::string& flags,
+                       const std::string& lang) CM_OVERRIDE;
 
   virtual void CloseFileStreams();
   void RemoveForbiddenFlags(const char* flagVar, const std::string& linkLang,

@@ -32,14 +32,14 @@ public:
    * Construct generator
    */
   cmCPackArchiveGenerator(cmArchiveWrite::Compress, std::string const& format);
-  virtual ~cmCPackArchiveGenerator();
+  ~cmCPackArchiveGenerator() CM_OVERRIDE;
   // Used to add a header to the archive
   virtual int GenerateHeader(std::ostream* os);
   // component support
-  virtual bool SupportsComponentInstallation() const;
+  bool SupportsComponentInstallation() const CM_OVERRIDE;
 
 protected:
-  virtual int InitializeInternal();
+  int InitializeInternal() CM_OVERRIDE;
   /**
    * Add the files belonging to the specified component
    * to the provided (already opened) archive.
@@ -55,7 +55,7 @@ protected:
    * method will call either PackageComponents or
    * PackageComponentsAllInOne.
    */
-  int PackageFiles();
+  int PackageFiles() CM_OVERRIDE;
   /**
    * The method used to package files when component
    * install is used. This will create one
@@ -67,7 +67,7 @@ protected:
    * components will be put in a single installer.
    */
   int PackageComponentsAllInOne();
-  virtual const char* GetOutputExtension() = 0;
+  const char* GetOutputExtension() CM_OVERRIDE = 0;
   cmArchiveWrite::Compress Compress;
   std::string ArchiveFormat;
 };

@@ -26,7 +26,7 @@ class cmExtraKateGenerator : public cmExternalMakefileProjectGenerator
 public:
   cmExtraKateGenerator();
 
-  virtual std::string GetName() const
+  std::string GetName() const CM_OVERRIDE
   {
     return cmExtraKateGenerator::GetActualName();
   }
@@ -36,10 +36,10 @@ public:
     return new cmExtraKateGenerator;
   }
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry,
-                                const std::string& fullName) const;
+  void GetDocumentation(cmDocumentationEntry& entry,
+                        const std::string& fullName) const CM_OVERRIDE;
 
-  virtual void Generate();
+  void Generate() CM_OVERRIDE;
 
 private:
   void CreateKateProjectFile(const cmLocalGenerator* lg) const;

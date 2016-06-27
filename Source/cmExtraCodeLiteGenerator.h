@@ -36,7 +36,7 @@ protected:
 public:
   cmExtraCodeLiteGenerator();
 
-  virtual std::string GetName() const
+  std::string GetName() const CM_OVERRIDE
   {
     return cmExtraCodeLiteGenerator::GetActualName();
   }
@@ -46,10 +46,10 @@ public:
     return new cmExtraCodeLiteGenerator;
   }
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry,
-                                const std::string& fullName) const;
+  void GetDocumentation(cmDocumentationEntry& entry,
+                        const std::string& fullName) const CM_OVERRIDE;
 
-  virtual void Generate();
+  void Generate() CM_OVERRIDE;
   void CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs);
 
   void CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,

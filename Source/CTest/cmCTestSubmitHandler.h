@@ -26,14 +26,14 @@ public:
   cmTypeMacro(cmCTestSubmitHandler, cmCTestGenericHandler);
 
   cmCTestSubmitHandler();
-  ~cmCTestSubmitHandler() { this->LogFile = 0; }
+  ~cmCTestSubmitHandler() CM_OVERRIDE { this->LogFile = 0; }
 
   /*
    * The main entry point for this class
    */
-  int ProcessHandler();
+  int ProcessHandler() CM_OVERRIDE;
 
-  void Initialize();
+  void Initialize() CM_OVERRIDE;
 
   /** Specify a set of parts (by name) to submit.  */
   void SelectParts(std::set<cmCTest::Part> const& parts);

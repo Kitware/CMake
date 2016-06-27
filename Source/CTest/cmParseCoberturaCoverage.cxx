@@ -20,7 +20,7 @@ public:
     this->CurFileName = "";
   }
 
-  virtual ~XMLParser() {}
+  ~XMLParser() CM_OVERRIDE {}
 
 protected:
   void EndElement(const std::string& name) CM_OVERRIDE

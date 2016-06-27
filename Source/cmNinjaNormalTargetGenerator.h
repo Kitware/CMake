@@ -27,9 +27,9 @@ class cmNinjaNormalTargetGenerator : public cmNinjaTargetGenerator
 {
 public:
   cmNinjaNormalTargetGenerator(cmGeneratorTarget* target);
-  ~cmNinjaNormalTargetGenerator();
+  ~cmNinjaNormalTargetGenerator() CM_OVERRIDE;
 
-  void Generate();
+  void Generate() CM_OVERRIDE;
 
 private:
   std::string LanguageLinkerRule() const;
