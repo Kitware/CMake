@@ -98,7 +98,7 @@ void cmCommonTargetGenerator::AppendFortranFormatFlags(
     const char* tgtfmt = this->GeneratorTarget->GetProperty("Fortran_FORMAT");
     format = cmOutputConverter::GetFortranFormat(tgtfmt);
   }
-  const char* var = 0;
+  const char* var = CM_NULLPTR;
   switch (format) {
     case cmOutputConverter::FortranFormatFixed:
       var = "CMAKE_Fortran_FORMAT_FIXED_FLAG";

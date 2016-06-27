@@ -33,12 +33,12 @@
 
 cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
   : cmCommonTargetGenerator(target)
-  , OSXBundleGenerator(0)
-  , MacOSXContentGenerator(0)
+  , OSXBundleGenerator(CM_NULLPTR)
+  , MacOSXContentGenerator(CM_NULLPTR)
 {
-  this->BuildFileStream = 0;
-  this->InfoFileStream = 0;
-  this->FlagFileStream = 0;
+  this->BuildFileStream = CM_NULLPTR;
+  this->InfoFileStream = CM_NULLPTR;
+  this->FlagFileStream = CM_NULLPTR;
   this->CustomCommandDriver = OnBuild;
   this->LocalGenerator =
     static_cast<cmLocalUnixMakefileGenerator3*>(target->GetLocalGenerator());
@@ -61,7 +61,7 @@ cmMakefileTargetGenerator::~cmMakefileTargetGenerator()
 cmMakefileTargetGenerator* cmMakefileTargetGenerator::New(
   cmGeneratorTarget* tgt)
 {
-  cmMakefileTargetGenerator* result = 0;
+  cmMakefileTargetGenerator* result = CM_NULLPTR;
 
   switch (tgt->GetType()) {
     case cmState::EXECUTABLE:
@@ -139,7 +139,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
 
     cmSystemTools::ExpandListArgument(
       cge->Evaluate(this->LocalGenerator, config, false, this->GeneratorTarget,
-                    0, 0),
+                    CM_NULLPTR, CM_NULLPTR),
       this->CleanFiles);
   }
 
@@ -320,7 +320,8 @@ void cmMakefileTargetGenerator::MacOSXContentGeneratorType::operator()(
                                           cmOutputConverter::SHELL);
   commands.push_back(copyCommand);
   this->Generator->LocalGenerator->WriteMakeRule(
-    *this->Generator->BuildFileStream, 0, output, depends, commands, false);
+    *this->Generator->BuildFileStream, CM_NULLPTR, output, depends, commands,
+    false);
   this->Generator->ExtraFiles.insert(output);
 }
 
@@ -652,7 +653,8 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   }
 
   // Write the rule.
-  this->WriteMakeRule(*this->BuildFileStream, 0, outputs, depends, commands);
+  this->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR, outputs, depends,
+                      commands);
 
   bool do_preprocess_rules = lang_has_preprocessor &&
     this->LocalGenerator->GetCreatePreprocessedSourceRules();
@@ -708,7 +710,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         commands.push_back(cmd);
       }
 
-      this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
+      this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
                                           relativeObjI, force_depends,
                                           commands, false);
     }
@@ -754,7 +756,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         commands.push_back(cmd);
       }
 
-      this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
+      this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
                                           relativeObjS, force_depends,
                                           commands, false);
     }
@@ -766,8 +768,9 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   objectRequires += ".requires";
   std::vector<std::string> p_depends;
   // always provide an empty requires target
-  this->LocalGenerator->WriteMakeRule(
-    *this->BuildFileStream, 0, objectRequires, p_depends, no_commands, true);
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
+                                      objectRequires, p_depends, no_commands,
+                                      true);
 
   // write a build rule to recursively build what this obj provides
   std::string objectProvides = relativeObj;
@@ -783,13 +786,14 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
 
   p_depends.clear();
   p_depends.push_back(objectRequires);
-  this->LocalGenerator->WriteMakeRule(
-    *this->BuildFileStream, 0, objectProvides, p_depends, r_commands, true);
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
+                                      objectProvides, p_depends, r_commands,
+                                      true);
 
   // write the provides.build rule dependency on the obj file
   p_depends.clear();
   p_depends.push_back(relativeObj);
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0, temp,
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR, temp,
                                       p_depends, no_commands, false);
 }
 
@@ -815,8 +819,8 @@ void cmMakefileTargetGenerator::WriteTargetRequiresRules()
   }
 
   // Write the rule.
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0, depTarget,
-                                      depends, no_commands, true);
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
+                                      depTarget, depends, no_commands, true);
 }
 
 void cmMakefileTargetGenerator::WriteTargetCleanRules()
@@ -837,8 +841,8 @@ void cmMakefileTargetGenerator::WriteTargetCleanRules()
     cmOutputConverter::HOME_OUTPUT);
 
   // Write the rule.
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0, cleanTarget,
-                                      depends, commands, true);
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
+                                      cleanTarget, depends, commands, true);
 }
 
 bool cmMakefileTargetGenerator::WriteMakeRule(
@@ -892,7 +896,7 @@ bool cmMakefileTargetGenerator::WriteMakeRule(
     if (!o_symbolic) {
       output_commands.push_back("@$(CMAKE_COMMAND) -E touch_nocreate " + out);
     }
-    this->LocalGenerator->WriteMakeRule(os, 0, *o, output_depends,
+    this->LocalGenerator->WriteMakeRule(os, CM_NULLPTR, *o, output_depends,
                                         output_commands, o_symbolic, in_help);
 
     if (!o_symbolic) {
@@ -1025,8 +1029,8 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   }
 
   // Write the rule.
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0, depTarget,
-                                      depends, commands, true);
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
+                                      depTarget, depends, commands, true);
 }
 
 void cmMakefileTargetGenerator::DriveCustomCommands(
@@ -1088,8 +1092,8 @@ void cmMakefileTargetGenerator::GenerateCustomRuleFile(
 
   // Write the rule.
   const std::vector<std::string>& outputs = ccg.GetOutputs();
-  bool symbolic =
-    this->WriteMakeRule(*this->BuildFileStream, 0, outputs, depends, commands);
+  bool symbolic = this->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
+                                      outputs, depends, commands);
 
   // If the rule has changed make sure the output is rebuilt.
   if (!symbolic) {
@@ -1254,7 +1258,7 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(
   std::vector<std::string> depends;
   depends.push_back(main_output);
 
-  const char* comment = 0;
+  const char* comment = CM_NULLPTR;
   if (relink) {
     // Setup the comment for the preinstall driver.
     comment = "Rule to relink during preinstall.";

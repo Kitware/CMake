@@ -19,7 +19,7 @@
 cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name)
   : Location(mf, name)
 {
-  this->CustomCommand = 0;
+  this->CustomCommand = CM_NULLPTR;
   this->FindFullPathFailed = false;
   this->IsUiFile = (".ui" == cmSystemTools::GetFilenameLastExtension(
                                this->Location.GetName()));
@@ -27,7 +27,7 @@ cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name)
 
 cmSourceFile::~cmSourceFile()
 {
-  this->SetCustomCommand(0);
+  this->SetCustomCommand(CM_NULLPTR);
 }
 
 std::string const& cmSourceFile::GetExtension() const
@@ -135,7 +135,7 @@ bool cmSourceFile::FindFullPath(std::string* error)
 
   // The file is not generated.  It must exist on disk.
   cmMakefile const* mf = this->Location.GetMakefile();
-  const char* tryDirs[3] = { 0, 0, 0 };
+  const char* tryDirs[3] = { CM_NULLPTR, CM_NULLPTR, CM_NULLPTR };
   if (this->Location.DirectoryIsAmbiguous()) {
     tryDirs[0] = mf->GetCurrentSourceDirectory();
     tryDirs[1] = mf->GetCurrentBinaryDirectory();
@@ -294,7 +294,7 @@ const char* cmSourceFile::GetProperty(const std::string& prop) const
   // Check for computed properties.
   if (prop == "LOCATION") {
     if (this->FullPath.empty()) {
-      return 0;
+      return CM_NULLPTR;
     } else {
       return this->FullPath.c_str();
     }

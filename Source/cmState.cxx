@@ -135,12 +135,12 @@ const char* cmState::GetTargetTypeName(cmState::TargetType targetType)
       return "UNKNOWN_LIBRARY";
   }
   assert(0 && "Unexpected target type");
-  return 0;
+  return CM_NULLPTR;
 }
 
 const char* cmCacheEntryTypes[] = { "BOOL",          "PATH",     "FILEPATH",
                                     "STRING",        "INTERNAL", "STATIC",
-                                    "UNINITIALIZED", 0 };
+                                    "UNINITIALIZED", CM_NULLPTR };
 
 const char* cmState::CacheEntryTypeToString(cmState::CacheEntryType type)
 {
@@ -204,7 +204,7 @@ const char* cmState::GetCacheEntryValue(std::string const& key) const
 {
   cmCacheManager::CacheEntry* e = this->CacheManager->GetCacheEntry(key);
   if (!e) {
-    return 0;
+    return CM_NULLPTR;
   }
   return e->Value.c_str();
 }
@@ -260,7 +260,7 @@ const char* cmState::GetCacheEntryProperty(std::string const& key,
   cmCacheManager::CacheIterator it =
     this->CacheManager->GetCacheIterator(key.c_str());
   if (!it.PropertyExists(propertyName)) {
-    return 0;
+    return CM_NULLPTR;
   }
   return it.GetProperty(propertyName);
 }
@@ -296,7 +296,7 @@ void cmState::RemoveCacheEntryProperty(std::string const& key,
                                        std::string const& propertyName)
 {
   this->CacheManager->GetCacheIterator(key.c_str())
-    .SetProperty(propertyName, (void*)0);
+    .SetProperty(propertyName, (void*)CM_NULLPTR);
 }
 
 cmState::Snapshot cmState::Reset()
@@ -374,7 +374,7 @@ cmPropertyDefinition const* cmState::GetPropertyDefinition(
       this->PropertyDefinitions.find(scope)->second;
     return &defs.find(name)->second;
   }
-  return 0;
+  return CM_NULLPTR;
 }
 
 bool cmState::IsPropertyDefined(const std::string& name,
@@ -491,7 +491,7 @@ void cmState::RemoveUnscriptableCommands()
 
 cmCommand* cmState::GetCommand(std::string const& name) const
 {
-  cmCommand* command = 0;
+  cmCommand* command = CM_NULLPTR;
   std::string sName = cmSystemTools::LowerCase(name);
   std::map<std::string, cmCommand*>::const_iterator pos =
     this->Commands.find(sName);
@@ -1197,7 +1197,7 @@ void cmState::Snapshot::SetDefinition(std::string const& name,
 
 void cmState::Snapshot::RemoveDefinition(std::string const& name)
 {
-  this->Position->Vars->Set(name, 0);
+  this->Position->Vars->Set(name, CM_NULLPTR);
 }
 
 std::vector<std::string> cmState::Snapshot::UnusedKeys() const

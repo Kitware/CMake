@@ -81,12 +81,12 @@ private:
 class cmCompiledGeneratorExpression
 {
 public:
-  const char* Evaluate(cmLocalGenerator* lg, const std::string& config,
-                       bool quiet = false,
-                       cmGeneratorTarget const* headTarget = 0,
-                       cmGeneratorTarget const* currentTarget = 0,
-                       cmGeneratorExpressionDAGChecker* dagChecker = 0,
-                       std::string const& language = std::string()) const;
+  const char* Evaluate(
+    cmLocalGenerator* lg, const std::string& config, bool quiet = false,
+    cmGeneratorTarget const* headTarget = CM_NULLPTR,
+    cmGeneratorTarget const* currentTarget = CM_NULLPTR,
+    cmGeneratorExpressionDAGChecker* dagChecker = CM_NULLPTR,
+    std::string const& language = std::string()) const;
   const char* Evaluate(cmLocalGenerator* lg, const std::string& config,
                        bool quiet, cmGeneratorTarget const* headTarget,
                        cmGeneratorExpressionDAGChecker* dagChecker,

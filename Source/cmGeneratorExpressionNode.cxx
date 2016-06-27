@@ -627,7 +627,8 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
                        cmGeneratorExpressionDAGChecker*) const CM_OVERRIDE
   {
     if (parameters.empty()) {
-      return configurationNode.Evaluate(parameters, context, content, 0);
+      return configurationNode.Evaluate(parameters, context, content,
+                                        CM_NULLPTR);
     }
     static cmsys::RegularExpression configValidator("^[A-Za-z0-9_]*$");
     if (!configValidator.find(*parameters.begin())) {
@@ -646,8 +647,8 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
     }
 
     if (context->CurrentTarget && context->CurrentTarget->IsImported()) {
-      const char* loc = 0;
-      const char* imp = 0;
+      const char* loc = CM_NULLPTR;
+      const char* imp = CM_NULLPTR;
       std::string suffix;
       if (context->CurrentTarget->Target->GetMappedConfig(
             context->Config, &loc, &imp, suffix)) {
@@ -758,7 +759,7 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
 #define TRANSITIVE_PROPERTY_NAME(PROPERTY) , "INTERFACE_" #PROPERTY
 
 static const char* targetPropertyTransitiveWhitelist[] = {
-  0 CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(TRANSITIVE_PROPERTY_NAME)
+  CM_NULLPTR CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(TRANSITIVE_PROPERTY_NAME)
 };
 
 #undef TRANSITIVE_PROPERTY_NAME
@@ -1270,10 +1271,10 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
 } compileFeaturesNode;
 
 static const char* targetPolicyWhitelist[] = {
-  0
+  CM_NULLPTR
 #define TARGET_POLICY_STRING(POLICY) , #POLICY
 
-  CM_FOR_EACH_TARGET_POLICY(TARGET_POLICY_STRING)
+    CM_FOR_EACH_TARGET_POLICY(TARGET_POLICY_STRING)
 
 #undef TARGET_POLICY_STRING
 };
@@ -1683,7 +1684,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
   }
   NodeMap::const_iterator i = nodeMap.find(identifier);
   if (i == nodeMap.end()) {
-    return 0;
+    return CM_NULLPTR;
   }
   return i->second;
 }

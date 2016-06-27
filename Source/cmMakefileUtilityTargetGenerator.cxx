@@ -95,7 +95,7 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
   }
 
   // Write the rule.
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
                                       this->GeneratorTarget->GetName(),
                                       depends, commands, true);
 

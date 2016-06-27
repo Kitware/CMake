@@ -289,8 +289,8 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
 
   xml.StartElement("Build");
 
-  this->AppendTarget(xml, "all", 0, make.c_str(), lgs[0], compiler.c_str(),
-                     makeArgs);
+  this->AppendTarget(xml, "all", CM_NULLPTR, make.c_str(), lgs[0],
+                     compiler.c_str(), makeArgs);
 
   // add all executable and library targets and some of the GLOBAL
   // and UTILITY targets
@@ -306,7 +306,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
           // not from the subdirs
           if (strcmp((*lg)->GetCurrentBinaryDirectory(),
                      (*lg)->GetBinaryDirectory()) == 0) {
-            this->AppendTarget(xml, targetName, 0, make.c_str(), *lg,
+            this->AppendTarget(xml, targetName, CM_NULLPTR, make.c_str(), *lg,
                                compiler.c_str(), makeArgs);
           }
         } break;
@@ -322,7 +322,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
             break;
           }
 
-          this->AppendTarget(xml, targetName, 0, make.c_str(), *lg,
+          this->AppendTarget(xml, targetName, CM_NULLPTR, make.c_str(), *lg,
                              compiler.c_str(), makeArgs);
           break;
         case cmState::EXECUTABLE:
@@ -515,7 +515,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
   xml.StartElement("Target");
   xml.Attribute("title", targetName);
 
-  if (target != 0) {
+  if (target != CM_NULLPTR) {
     int cbTargetType = this->GetCBTargetType(target);
     std::string workingDir = lg->GetCurrentBinaryDirectory();
     if (target->GetType() == cmState::EXECUTABLE) {
@@ -523,12 +523,12 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
       // set the working directory to this dir.
       const char* runtimeOutputDir =
         makefile->GetDefinition("CMAKE_RUNTIME_OUTPUT_DIRECTORY");
-      if (runtimeOutputDir != 0) {
+      if (runtimeOutputDir != CM_NULLPTR) {
         workingDir = runtimeOutputDir;
       } else {
         const char* executableOutputDir =
           makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
-        if (executableOutputDir != 0) {
+        if (executableOutputDir != CM_NULLPTR) {
           workingDir = executableOutputDir;
         }
       }

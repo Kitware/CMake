@@ -40,8 +40,8 @@ void cmGeneratorExpressionEvaluationFile::Generate(
 {
   std::string rawCondition = this->Condition->GetInput();
   if (!rawCondition.empty()) {
-    std::string condResult =
-      this->Condition->Evaluate(lg, config, false, 0, 0, 0, lang);
+    std::string condResult = this->Condition->Evaluate(
+      lg, config, false, CM_NULLPTR, CM_NULLPTR, CM_NULLPTR, lang);
     if (condResult == "0") {
       return;
     }
@@ -56,10 +56,10 @@ void cmGeneratorExpressionEvaluationFile::Generate(
     }
   }
 
-  const std::string outputFileName =
-    this->OutputFileExpr->Evaluate(lg, config, false, 0, 0, 0, lang);
-  const std::string outputContent =
-    inputExpression->Evaluate(lg, config, false, 0, 0, 0, lang);
+  const std::string outputFileName = this->OutputFileExpr->Evaluate(
+    lg, config, false, CM_NULLPTR, CM_NULLPTR, CM_NULLPTR, lang);
+  const std::string outputContent = inputExpression->Evaluate(
+    lg, config, false, CM_NULLPTR, CM_NULLPTR, CM_NULLPTR, lang);
 
   std::map<std::string, std::string>::iterator it =
     outputFiles.find(outputFileName);
@@ -97,8 +97,8 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
 
   for (std::vector<std::string>::const_iterator le = enabledLanguages.begin();
        le != enabledLanguages.end(); ++le) {
-    std::string name =
-      this->OutputFileExpr->Evaluate(lg, config, false, 0, 0, 0, *le);
+    std::string name = this->OutputFileExpr->Evaluate(
+      lg, config, false, CM_NULLPTR, CM_NULLPTR, CM_NULLPTR, *le);
     cmSourceFile* sf = lg->GetMakefile()->GetOrCreateSource(name);
     sf->SetProperty("GENERATED", "1");
 

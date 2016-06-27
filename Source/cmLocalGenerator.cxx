@@ -272,7 +272,7 @@ void cmLocalGenerator::GenerateInstallRules()
   // Choose a default install configuration.
   std::string default_config = config;
   const char* default_order[] = { "RELEASE", "MINSIZEREL", "RELWITHDEBINFO",
-                                  "DEBUG", 0 };
+                                  "DEBUG", CM_NULLPTR };
   for (const char** c = default_order; *c && default_config.empty(); ++c) {
     for (std::vector<std::string>::iterator i = configurationTypes.begin();
          i != configurationTypes.end(); ++i) {
@@ -445,7 +445,7 @@ cmGeneratorTarget* cmLocalGenerator::FindLocalNonAliasGeneratorTarget(
   if (ti != this->GeneratorTargets.end()) {
     return *ti;
   }
-  return 0;
+  return CM_NULLPTR;
 }
 
 void cmLocalGenerator::ComputeTargetManifest()
@@ -508,7 +508,7 @@ static const char* ruleReplaceVars[] = {
   "CMAKE_RANLIB",
   "CMAKE_LINKER",
   "CMAKE_CL_SHOWINCLUDES_PREFIX",
-  0
+  CM_NULLPTR
 };
 
 std::string cmLocalGenerator::ExpandRuleVariable(
@@ -704,13 +704,13 @@ std::string cmLocalGenerator::ExpandRuleVariable(
       std::string actualReplace = ruleReplaceVars[pos];
       // If this is the compiler then look for the extra variable
       // _COMPILER_ARG1 which must be the first argument to the compiler
-      const char* compilerArg1 = 0;
-      const char* compilerTarget = 0;
-      const char* compilerOptionTarget = 0;
-      const char* compilerExternalToolchain = 0;
-      const char* compilerOptionExternalToolchain = 0;
-      const char* compilerSysroot = 0;
-      const char* compilerOptionSysroot = 0;
+      const char* compilerArg1 = CM_NULLPTR;
+      const char* compilerTarget = CM_NULLPTR;
+      const char* compilerOptionTarget = CM_NULLPTR;
+      const char* compilerExternalToolchain = CM_NULLPTR;
+      const char* compilerOptionExternalToolchain = CM_NULLPTR;
+      const char* compilerSysroot = CM_NULLPTR;
+      const char* compilerOptionSysroot = CM_NULLPTR;
       if (actualReplace == "CMAKE_${LANG}_COMPILER") {
         std::string arg1 = actualReplace + "_ARG1";
         cmSystemTools::ReplaceString(arg1, "${LANG}", lang);
@@ -872,7 +872,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
   // normal flag is repeated for each directory.
   std::string sysFlagVar = "CMAKE_INCLUDE_SYSTEM_FLAG_";
   sysFlagVar += lang;
-  const char* sysIncludeFlag = 0;
+  const char* sysIncludeFlag = CM_NULLPTR;
   if (repeatFlag) {
     sysIncludeFlag = this->Makefile->GetDefinition(sysFlagVar);
   }
@@ -1585,7 +1585,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
     target->GetAppleArchs(config, archs);
     const char* sysroot = this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT");
     if (sysroot && sysroot[0] == '/' && !sysroot[1]) {
-      sysroot = 0;
+      sysroot = CM_NULLPTR;
     }
     std::string sysrootFlagVar =
       std::string("CMAKE_") + lang + "_SYSROOT_FLAG";
@@ -1925,7 +1925,7 @@ void cmLocalGenerator::AddVisibilityPresetFlags(
   }
 
   std::string warnCMP0063;
-  std::string* pWarnCMP0063 = 0;
+  std::string* pWarnCMP0063 = CM_NULLPTR;
   if (target->GetType() != cmState::SHARED_LIBRARY &&
       target->GetType() != cmState::MODULE_LIBRARY &&
       !target->IsExecutableWithExports()) {
@@ -2036,7 +2036,7 @@ void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
                                                    std::string const& lang,
                                                    int targetType)
 {
-  const char* picFlags = 0;
+  const char* picFlags = CM_NULLPTR;
 
   if (targetType == cmState::EXECUTABLE) {
     std::string flagsVar = "CMAKE_";
@@ -2217,7 +2217,7 @@ const char* cmLocalGenerator::GetFeature(const std::string& feature,
     }
     snp = snp.GetBuildsystemDirectoryParent();
   }
-  return 0;
+  return CM_NULLPTR;
 }
 
 std::string cmLocalGenerator::GetProjectName() const
@@ -2280,7 +2280,7 @@ void cmLocalGenerator::GenerateTargetInstallRules(
 
     // Include the user-specified pre-install script for this target.
     if (const char* preinstall = (*l)->GetProperty("PRE_INSTALL_SCRIPT")) {
-      cmInstallScriptGenerator g(preinstall, false, 0, false);
+      cmInstallScriptGenerator g(preinstall, false, CM_NULLPTR, false);
       g.Generate(os, config, configurationTypes);
     }
 
@@ -2333,7 +2333,7 @@ void cmLocalGenerator::GenerateTargetInstallRules(
 
     // Include the user-specified post-install script for this target.
     if (const char* postinstall = (*l)->GetProperty("POST_INSTALL_SCRIPT")) {
-      cmInstallScriptGenerator g(postinstall, false, 0, false);
+      cmInstallScriptGenerator g(postinstall, false, CM_NULLPTR, false);
       g.Generate(os, config, configurationTypes);
     }
   }

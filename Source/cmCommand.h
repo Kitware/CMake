@@ -38,7 +38,7 @@ public:
    */
   cmCommand()
   {
-    this->Makefile = 0;
+    this->Makefile = CM_NULLPTR;
     this->Enabled = true;
   }
 

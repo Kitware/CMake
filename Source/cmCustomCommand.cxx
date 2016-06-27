@@ -38,7 +38,7 @@ cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
   , Backtrace()
   , Comment(comment ? comment : "")
   , WorkingDirectory(workingDirectory ? workingDirectory : "")
-  , HaveComment(comment != NULL)
+  , HaveComment(comment != CM_NULLPTR)
   , EscapeAllowMakeVars(false)
   , EscapeOldStyle(true)
 {
@@ -69,7 +69,7 @@ const cmCustomCommandLines& cmCustomCommand::GetCommandLines() const
 
 const char* cmCustomCommand::GetComment() const
 {
-  const char* no_comment = 0;
+  const char* no_comment = CM_NULLPTR;
   return this->HaveComment ? this->Comment.c_str() : no_comment;
 }
 

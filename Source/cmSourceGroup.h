@@ -34,7 +34,7 @@ class cmSourceGroup
 {
 public:
   cmSourceGroup(const char* name, const char* regex,
-                const char* parentName = 0);
+                const char* parentName = CM_NULLPTR);
   cmSourceGroup(cmSourceGroup const& r);
   ~cmSourceGroup();
   cmSourceGroup& operator=(cmSourceGroup const&);

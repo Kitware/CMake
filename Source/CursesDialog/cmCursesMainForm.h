@@ -67,7 +67,7 @@ public:
    * exception is during a resize. The optional argument specifies the
    * string to be displayed in the status bar.
    */
-  void UpdateStatusBar() CM_OVERRIDE { this->UpdateStatusBar(0); }
+  void UpdateStatusBar() CM_OVERRIDE { this->UpdateStatusBar(CM_NULLPTR); }
   virtual void UpdateStatusBar(const char* message);
 
   /**

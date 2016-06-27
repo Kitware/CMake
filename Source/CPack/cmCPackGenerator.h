@@ -136,7 +136,7 @@ protected:
   cmInstalledFile const* GetInstalledFile(std::string const& name) const;
 
   virtual const char* GetOutputExtension() { return ".cpack"; }
-  virtual const char* GetOutputPostfix() { return 0; }
+  virtual const char* GetOutputPostfix() { return CM_NULLPTR; }
 
   /**
    * Prepare requested grouping kind from CPACK_xxx vars

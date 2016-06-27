@@ -52,7 +52,7 @@ public:
                                            cmake* cm) const CM_OVERRIDE
   {
     if (name != T::GetActualName()) {
-      return 0;
+      return CM_NULLPTR;
     }
     return new T(cm);
   }

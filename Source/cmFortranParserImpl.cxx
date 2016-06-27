@@ -65,7 +65,8 @@ cmFortranParser_s::cmFortranParser_s(std::vector<std::string> const& includes,
 
   // Create a dummy buffer that is never read but is the fallback
   // buffer when the last file is popped off the stack.
-  YY_BUFFER_STATE buffer = cmFortran_yy_create_buffer(0, 4, this->Scanner);
+  YY_BUFFER_STATE buffer =
+    cmFortran_yy_create_buffer(CM_NULLPTR, 4, this->Scanner);
   cmFortran_yy_switch_to_buffer(buffer, this->Scanner);
 }
 
@@ -83,7 +84,7 @@ bool cmFortranParser_FilePush(cmFortranParser* parser, const char* fname)
     std::string dir = cmSystemTools::GetParentDirectory(fname);
     cmFortranFile f(file, current, dir);
     YY_BUFFER_STATE buffer =
-      cmFortran_yy_create_buffer(0, 16384, parser->Scanner);
+      cmFortran_yy_create_buffer(CM_NULLPTR, 16384, parser->Scanner);
     cmFortran_yy_switch_to_buffer(buffer, parser->Scanner);
     parser->FileStack.push(f);
     return 1;

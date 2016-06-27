@@ -35,7 +35,7 @@
 
 cmCPackIFWRepository::cmCPackIFWRepository()
   : Update(None)
-  , Generator(0)
+  , Generator(CM_NULLPTR)
 {
 }
 
@@ -63,7 +63,7 @@ bool cmCPackIFWRepository::IsValid() const
 
 const char* cmCPackIFWRepository::GetOption(const std::string& op) const
 {
-  return Generator ? Generator->GetOption(op) : 0;
+  return Generator ? Generator->GetOption(op) : CM_NULLPTR;
 }
 
 bool cmCPackIFWRepository::IsOn(const std::string& op) const

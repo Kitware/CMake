@@ -70,7 +70,7 @@
 struct tm* cmCTest::GetNightlyTime(std::string const& str, bool tomorrowtag)
 {
   struct tm* lctime;
-  time_t tctime = time(0);
+  time_t tctime = time(CM_NULLPTR);
   lctime = gmtime(&tctime);
   char buf[1024];
   // add todays year day and month to the time in str because
@@ -88,7 +88,7 @@ struct tm* cmCTest::GetNightlyTime(std::string const& str, bool tomorrowtag)
   // As such, this time may be in the past or in the future.
   time_t ntime = curl_getdate(buf, &tctime);
   cmCTestLog(this, DEBUG, "   Get curl time: " << ntime << std::endl);
-  tctime = time(0);
+  tctime = time(CM_NULLPTR);
   cmCTestLog(this, DEBUG, "   Get the current time: " << tctime << std::endl);
 
   const int dayLength = 24 * 60 * 60;
@@ -134,7 +134,7 @@ std::string cmCTest::CleanString(const std::string& str)
 
 std::string cmCTest::CurrentTime()
 {
-  time_t currenttime = time(0);
+  time_t currenttime = time(CM_NULLPTR);
   struct tm* t = localtime(&currenttime);
   // return ::CleanString(ctime(&currenttime));
   char current_time[1024];
@@ -244,7 +244,7 @@ std::string cmCTest::DecodeURL(const std::string& in)
   for (const char* c = in.c_str(); *c; ++c) {
     if (*c == '%' && isxdigit(*(c + 1)) && isxdigit(*(c + 2))) {
       char buf[3] = { *(c + 1), *(c + 2), 0 };
-      out.append(1, char(strtoul(buf, 0, 16)));
+      out.append(1, char(strtoul(buf, CM_NULLPTR, 16)));
       c += 2;
     } else {
       out.append(1, *c);
@@ -288,7 +288,7 @@ cmCTest::cmCTest()
   this->ScheduleType = "";
   this->StopTime = "";
   this->NextDayStopTime = false;
-  this->OutputLogFile = 0;
+  this->OutputLogFile = CM_NULLPTR;
   this->OutputLogFileLastTag = -1;
   this->SuppressUpdatingCTestConfiguration = false;
   this->DartVersion = 1;
@@ -347,7 +347,7 @@ cmCTest::cmCTest()
 cmCTest::~cmCTest()
 {
   cmDeleteAll(this->TestingHandlers);
-  this->SetOutputLogFileName(0);
+  this->SetOutputLogFileName(CM_NULLPTR);
 }
 
 void cmCTest::SetParallelLevel(int level)
@@ -515,7 +515,7 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
     std::string tag;
 
     if (createNewTag) {
-      time_t tctime = time(0);
+      time_t tctime = time(CM_NULLPTR);
       if (this->TomorrowTag) {
         tctime += (24 * 60 * 60);
       }
@@ -540,7 +540,7 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
         }
         tfin.close();
       }
-      if (tag.empty() || (0 != command) || this->Parts[PartStart]) {
+      if (tag.empty() || (CM_NULLPTR != command) || this->Parts[PartStart]) {
         cmCTestOptionalLog(
           this, DEBUG,
           "TestModel: " << this->GetTestModelString() << std::endl, quiet);
@@ -562,7 +562,7 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
           ofs << this->GetTestModelString() << std::endl;
         }
         ofs.close();
-        if (0 == command) {
+        if (CM_NULLPTR == command) {
           cmCTestOptionalLog(this, OUTPUT, "Create new tag: "
                                << tag << " - " << this->GetTestModelString()
                                << std::endl,
@@ -860,7 +860,7 @@ cmCTestGenericHandler* cmCTest::GetInitializedHandler(const char* handler)
   cmCTest::t_TestingHandlers::iterator it =
     this->TestingHandlers.find(handler);
   if (it == this->TestingHandlers.end()) {
-    return 0;
+    return CM_NULLPTR;
   }
   it->second->Initialize();
   return it->second;
@@ -871,7 +871,7 @@ cmCTestGenericHandler* cmCTest::GetHandler(const char* handler)
   cmCTest::t_TestingHandlers::iterator it =
     this->TestingHandlers.find(handler);
   if (it == this->TestingHandlers.end()) {
-    return 0;
+    return CM_NULLPTR;
   }
   return it->second;
 }
@@ -1029,7 +1029,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
        a != args.end(); ++a) {
     argv.push_back(a->c_str());
   }
-  argv.push_back(0);
+  argv.push_back(CM_NULLPTR);
 
   output = "";
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "Run command:");
@@ -1057,7 +1057,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
   cmCTestLog(this, HANDLER_PROGRESS_OUTPUT, "   Each . represents "
                << tick_len << " bytes of output" << std::endl
                << "    " << std::flush);
-  while (cmsysProcess_WaitForData(cp, &data, &length, 0)) {
+  while (cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR)) {
     for (int cc = 0; cc < length; ++cc) {
       if (data[cc] == 0) {
         data[cc] = '\n';
@@ -1082,7 +1082,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
   cmCTestLog(this, HANDLER_PROGRESS_OUTPUT, " Size of output: "
                << int(double(output.size()) / 1024.0) << "K" << std::endl);
 
-  cmsysProcess_WaitForExit(cp, 0);
+  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
 
   int result = cmsysProcess_GetState(cp);
 
@@ -1211,7 +1211,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
 
   char* data;
   int length;
-  while (cmsysProcess_WaitForData(cp, &data, &length, 0)) {
+  while (cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR)) {
     if (output) {
       tempOutput.insert(tempOutput.end(), data, data + length);
     }
@@ -1221,7 +1221,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
     }
   }
 
-  cmsysProcess_WaitForExit(cp, 0);
+  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
   if (output && tempOutput.begin() != tempOutput.end()) {
     output->append(&*tempOutput.begin(), tempOutput.size());
   }
@@ -2181,7 +2181,7 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
         it->second->SetSubmitIndex(this->SubmitIndex);
       }
       std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-      if (!this->Initialize(cwd.c_str(), 0)) {
+      if (!this->Initialize(cwd.c_str(), CM_NULLPTR)) {
         res = 12;
         cmCTestLog(this, ERROR_MESSAGE, "Problem initializing the dashboard."
                      << std::endl);
@@ -2325,7 +2325,7 @@ std::string cmCTest::GetShortPathToFile(const char* cfname)
   bool inBld = bldRelpath.find("..") == bldRelpath.npos;
   // TODO: Handle files with .. in their name
 
-  std::string* res = 0;
+  std::string* res = CM_NULLPTR;
 
   if (inSrc && inBld) {
     // If both have relative path with no dots, pick the shorter one
@@ -2375,7 +2375,7 @@ void cmCTest::EmptyCTestConfiguration()
 void cmCTest::DetermineNextDayStop()
 {
   struct tm* lctime;
-  time_t current_time = time(0);
+  time_t current_time = time(CM_NULLPTR);
   lctime = gmtime(&current_time);
   int gm_hour = lctime->tm_hour;
   time_t gm_time = mktime(lctime);
@@ -2459,7 +2459,7 @@ bool cmCTest::GetProduceXML()
 const char* cmCTest::GetSpecificTrack()
 {
   if (this->SpecificTrack.empty()) {
-    return 0;
+    return CM_NULLPTR;
   }
   return this->SpecificTrack.c_str();
 }
@@ -2534,7 +2534,7 @@ bool cmCTest::RunCommand(const char* command, std::string* stdOut,
        a != args.end(); ++a) {
     argv.push_back(a->c_str());
   }
-  argv.push_back(0);
+  argv.push_back(CM_NULLPTR);
 
   *stdOut = "";
   *stdErr = "";
@@ -2555,7 +2555,7 @@ bool cmCTest::RunCommand(const char* command, std::string* stdOut,
   int res;
   bool done = false;
   while (!done) {
-    res = cmsysProcess_WaitForData(cp, &data, &length, 0);
+    res = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR);
     switch (res) {
       case cmsysProcess_Pipe_STDOUT:
         tempOutput.insert(tempOutput.end(), data, data + length);
@@ -2572,7 +2572,7 @@ bool cmCTest::RunCommand(const char* command, std::string* stdOut,
     }
   }
 
-  cmsysProcess_WaitForExit(cp, 0);
+  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
   if (!tempOutput.empty()) {
     stdOut->append(&*tempOutput.begin(), tempOutput.size());
   }
@@ -2614,7 +2614,7 @@ void cmCTest::SetOutputLogFileName(const char* name)
 {
   if (this->OutputLogFile) {
     delete this->OutputLogFile;
-    this->OutputLogFile = 0;
+    this->OutputLogFile = CM_NULLPTR;
   }
   if (name) {
     this->OutputLogFile = new cmGeneratedFileStream(name);
@@ -2628,7 +2628,7 @@ static const char* cmCTestStringLogType[] = { "DEBUG",
                                               "HANDLER_VERBOSE_OUTPUT",
                                               "WARNING",
                                               "ERROR_MESSAGE",
-                                              0 };
+                                              CM_NULLPTR };
 
 #ifdef cerr
 #undef cerr

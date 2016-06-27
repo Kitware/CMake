@@ -147,7 +147,7 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
   ::curl_easy_setopt(this->Curl, CURLOPT_DEBUGFUNCTION, curlDebugCallback);
   // Be sure to set Content-Type to satisfy fussy modsecurity rules
   struct curl_slist* headers =
-    ::curl_slist_append(NULL, "Content-Type: text/xml");
+    ::curl_slist_append(CM_NULLPTR, "Content-Type: text/xml");
   ::curl_easy_setopt(this->Curl, CURLOPT_HTTPHEADER, headers);
   std::vector<char> responseData;
   std::vector<char> debugData;

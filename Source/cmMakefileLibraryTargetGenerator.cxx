@@ -111,7 +111,7 @@ void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
   this->AppendObjectDepends(depends);
 
   // Write the rule.
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
                                       this->GeneratorTarget->GetName(),
                                       depends, commands, true);
 
@@ -346,7 +346,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       commands, buildEcho, cmLocalUnixMakefileGenerator3::EchoLink, &progress);
   }
 
-  const char* forbiddenFlagVar = 0;
+  const char* forbiddenFlagVar = CM_NULLPTR;
   switch (this->GeneratorTarget->GetType()) {
     case cmState::SHARED_LIBRARY:
       forbiddenFlagVar = "_CREATE_SHARED_LIBRARY_FORBIDDEN_FLAGS";
@@ -762,8 +762,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   }
 
   // Write the build rule.
-  this->WriteMakeRule(*this->BuildFileStream, 0, outputs, depends, commands,
-                      false);
+  this->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR, outputs, depends,
+                      commands, false);
 
   // Write the main driver rule to build everything in this target.
   this->WriteTargetDriverRule(targetFullPath, relink);

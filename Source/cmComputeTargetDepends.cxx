@@ -291,7 +291,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(
   // within the project.
   if (dependee && dependee->GetType() == cmState::EXECUTABLE &&
       !dependee->IsExecutableWithExports()) {
-    dependee = 0;
+    dependee = CM_NULLPTR;
   }
 
   if (dependee) {
@@ -355,7 +355,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
   // within the project.
   if (linking && dependee && dependee->GetType() == cmState::EXECUTABLE &&
       !dependee->IsExecutableWithExports()) {
-    dependee = 0;
+    dependee = CM_NULLPTR;
   }
 
   if (dependee) {

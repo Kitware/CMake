@@ -19,14 +19,14 @@
 
 cmCTestBuildCommand::cmCTestBuildCommand()
 {
-  this->GlobalGenerator = 0;
+  this->GlobalGenerator = CM_NULLPTR;
   this->Arguments[ctb_NUMBER_ERRORS] = "NUMBER_ERRORS";
   this->Arguments[ctb_NUMBER_WARNINGS] = "NUMBER_WARNINGS";
   this->Arguments[ctb_TARGET] = "TARGET";
   this->Arguments[ctb_CONFIGURATION] = "CONFIGURATION";
   this->Arguments[ctb_FLAGS] = "FLAGS";
   this->Arguments[ctb_PROJECT_NAME] = "PROJECT_NAME";
-  this->Arguments[ctb_LAST] = 0;
+  this->Arguments[ctb_LAST] = CM_NULLPTR;
   this->Last = ctb_LAST;
 }
 
@@ -34,7 +34,7 @@ cmCTestBuildCommand::~cmCTestBuildCommand()
 {
   if (this->GlobalGenerator) {
     delete this->GlobalGenerator;
-    this->GlobalGenerator = 0;
+    this->GlobalGenerator = CM_NULLPTR;
   }
 }
 
@@ -43,7 +43,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
   cmCTestGenericHandler* handler = this->CTest->GetInitializedHandler("build");
   if (!handler) {
     this->SetError("internal CTest error. Cannot instantiate build handler");
-    return 0;
+    return CM_NULLPTR;
   }
   this->Handler = (cmCTestBuildHandler*)handler;
 
@@ -91,7 +91,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       if (this->GlobalGenerator) {
         if (this->GlobalGenerator->GetName() != cmakeGeneratorName) {
           delete this->GlobalGenerator;
-          this->GlobalGenerator = 0;
+          this->GlobalGenerator = CM_NULLPTR;
         }
       }
       if (!this->GlobalGenerator) {
@@ -104,11 +104,11 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
           e += "\"";
           this->Makefile->IssueMessage(cmake::FATAL_ERROR, e);
           cmSystemTools::SetFatalErrorOccured();
-          return 0;
+          return CM_NULLPTR;
         }
       }
       if (strlen(cmakeBuildConfiguration) == 0) {
-        const char* config = 0;
+        const char* config = CM_NULLPTR;
 #ifdef CMAKE_INTDIR
         config = CMAKE_INTDIR;
 #endif
@@ -145,7 +145,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
         "with a custom command line.";
       /* clang-format on */
       this->SetError(ostr.str());
-      return 0;
+      return CM_NULLPTR;
     }
   }
 

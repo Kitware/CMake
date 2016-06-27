@@ -277,15 +277,15 @@ public:
 
   virtual const char* GetAllTargetName() const { return "ALL_BUILD"; }
   virtual const char* GetInstallTargetName() const { return "INSTALL"; }
-  virtual const char* GetInstallLocalTargetName() const { return 0; }
-  virtual const char* GetInstallStripTargetName() const { return 0; }
-  virtual const char* GetPreinstallTargetName() const { return 0; }
+  virtual const char* GetInstallLocalTargetName() const { return CM_NULLPTR; }
+  virtual const char* GetInstallStripTargetName() const { return CM_NULLPTR; }
+  virtual const char* GetPreinstallTargetName() const { return CM_NULLPTR; }
   virtual const char* GetTestTargetName() const { return "RUN_TESTS"; }
   virtual const char* GetPackageTargetName() const { return "PACKAGE"; }
-  virtual const char* GetPackageSourceTargetName() const { return 0; }
-  virtual const char* GetEditCacheTargetName() const { return 0; }
-  virtual const char* GetRebuildCacheTargetName() const { return 0; }
-  virtual const char* GetCleanTargetName() const { return 0; }
+  virtual const char* GetPackageSourceTargetName() const { return CM_NULLPTR; }
+  virtual const char* GetEditCacheTargetName() const { return CM_NULLPTR; }
+  virtual const char* GetRebuildCacheTargetName() const { return CM_NULLPTR; }
+  virtual const char* GetCleanTargetName() const { return CM_NULLPTR; }
 
   // Lookup edit_cache target command preferred by this generator.
   virtual std::string GetEditCacheCommand() const { return ""; }
@@ -503,7 +503,7 @@ private:
 
   void ClearGeneratorMembers();
 
-  virtual const char* GetBuildIgnoreErrorsFlag() const { return 0; }
+  virtual const char* GetBuildIgnoreErrorsFlag() const { return CM_NULLPTR; }
 
   // Cache directory content and target files to be built.
   struct DirectoryContent

@@ -54,7 +54,7 @@ std::string cmOutputConverter::ConvertToOutputForExisting(
   assert(remote != NONE);
 
   const char* remotePath = this->GetRelativeRootPath(remote);
-  assert(remotePath != 0);
+  assert(remotePath != CM_NULLPTR);
 
   return this->ConvertToOutputForExisting(remotePath, format);
 }
@@ -73,7 +73,7 @@ const char* cmOutputConverter::GetRelativeRootPath(RelativeRoot relroot) const
     default:
       break;
   }
-  return 0;
+  return CM_NULLPTR;
 }
 
 std::string cmOutputConverter::Convert(const std::string& source,
@@ -155,7 +155,7 @@ std::string cmOutputConverter::Convert(RelativeRoot remote,
   assert(remote != NONE);
 
   const char* remotePath = this->GetRelativeRootPath(remote);
-  assert(remotePath != 0);
+  assert(remotePath != CM_NULLPTR);
 
   if (local.empty()) {
     return this->ConvertToOutputFormat(remotePath, output);

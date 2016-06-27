@@ -25,7 +25,7 @@ cmCommandArgumentParserHelper::cmCommandArgumentParserHelper()
   this->WarnUninitialized = false;
   this->CheckSystemVars = false;
   this->FileLine = -1;
-  this->FileName = 0;
+  this->FileName = CM_NULLPTR;
   this->RemoveEmpty = true;
   this->EmptyVariable[0] = 0;
   strcpy(this->DCURLYVariable, "${");
@@ -96,13 +96,13 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
   e << "Syntax $" << key << "{} is not supported.  "
     << "Only ${}, $ENV{}, and $CACHE{} are allowed.";
   this->SetError(e.str());
-  return 0;
+  return CM_NULLPTR;
 }
 
 char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
 {
   if (!var) {
-    return 0;
+    return CM_NULLPTR;
   }
   if (this->FileLine >= 0 && strcmp(var, "CMAKE_CURRENT_LIST_LINE") == 0) {
     std::ostringstream ostr;
@@ -125,7 +125,7 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
         this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
       }
     }
-    return 0;
+    return CM_NULLPTR;
   }
   if (this->EscapeQuotes && value) {
     return this->AddString(cmSystemTools::EscapeQuotes(value));
@@ -176,7 +176,7 @@ char* cmCommandArgumentParserHelper::CombineUnions(char* in1, char* in2)
 void cmCommandArgumentParserHelper::AllocateParserType(
   cmCommandArgumentParserHelper::ParserType* pt, const char* str, int len)
 {
-  pt->str = 0;
+  pt->str = CM_NULLPTR;
   if (len == 0) {
     len = static_cast<int>(strlen(str));
   }

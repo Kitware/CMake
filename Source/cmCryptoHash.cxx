@@ -30,7 +30,7 @@ cmsys::auto_ptr<cmCryptoHash> cmCryptoHash::New(const char* algo)
   } else if (strcmp(algo, "SHA512") == 0) {
     return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA512);
   } else {
-    return cmsys::auto_ptr<cmCryptoHash>(0);
+    return cmsys::auto_ptr<cmCryptoHash>(CM_NULLPTR);
   }
 }
 

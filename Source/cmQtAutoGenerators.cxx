@@ -34,8 +34,8 @@
 static bool requiresMocing(const std::string& text, std::string& macroName)
 {
   // this simple check is much much faster than the regexp
-  if (strstr(text.c_str(), "Q_OBJECT") == NULL &&
-      strstr(text.c_str(), "Q_GADGET") == NULL) {
+  if (strstr(text.c_str(), "Q_OBJECT") == CM_NULLPTR &&
+      strstr(text.c_str(), "Q_GADGET") == CM_NULLPTR) {
     return false;
   }
 
@@ -88,7 +88,7 @@ static std::string extractSubDir(const std::string& absPath,
 }
 
 cmQtAutoGenerators::cmQtAutoGenerators()
-  : Verbose(cmsys::SystemTools::GetEnv("VERBOSE") != 0)
+  : Verbose(cmsys::SystemTools::GetEnv("VERBOSE") != CM_NULLPTR)
   , ColorOutput(true)
   , RunMocFailed(false)
   , RunUicFailed(false)
@@ -588,7 +588,7 @@ void cmQtAutoGenerators::ParseCppFile(
   // first a simple string check for "moc" is *much* faster than the regexp,
   // and if the string search already fails, we don't have to try the
   // expensive regexp
-  if ((strstr(contentsString.c_str(), "moc") != NULL) &&
+  if ((strstr(contentsString.c_str(), "moc") != CM_NULLPTR) &&
       (mocIncludeRegExp.find(contentsString))) {
     // for every moc include in the file
     do {
@@ -765,7 +765,7 @@ void cmQtAutoGenerators::StrictParseCppFile(
   // first a simple string check for "moc" is *much* faster than the regexp,
   // and if the string search already fails, we don't have to try the
   // expensive regexp
-  if ((strstr(contentsString.c_str(), "moc") != NULL) &&
+  if ((strstr(contentsString.c_str(), "moc") != CM_NULLPTR) &&
       (mocIncludeRegExp.find(contentsString))) {
     // for every moc include in the file
     do {
@@ -879,7 +879,7 @@ void cmQtAutoGenerators::ParseForUic(
   const std::string realName = cmsys::SystemTools::GetRealPath(absFilename);
 
   matchOffset = 0;
-  if ((strstr(contentsString.c_str(), "ui_") != NULL) &&
+  if ((strstr(contentsString.c_str(), "ui_") != CM_NULLPTR) &&
       (uiIncludeRegExp.find(contentsString))) {
     do {
       const std::string currentUi = uiIncludeRegExp.match(1);

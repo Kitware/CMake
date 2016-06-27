@@ -212,7 +212,7 @@ int cmCPackNSISGenerator::PackageFiles()
     std::map<std::string, cmCPackComponentGroup>::iterator groupIt;
     for (groupIt = this->ComponentGroups.begin();
          groupIt != this->ComponentGroups.end(); ++groupIt) {
-      if (groupIt->second.ParentGroup == 0) {
+      if (groupIt->second.ParentGroup == CM_NULLPTR) {
         componentCode +=
           this->CreateComponentGroupDescription(&groupIt->second, macrosOut);
       }
@@ -301,8 +301,9 @@ int cmCPackNSISGenerator::PackageFiles()
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << nsisCmd << std::endl);
   std::string output;
   int retVal = 1;
-  bool res = cmSystemTools::RunSingleCommand(
-    nsisCmd.c_str(), &output, &output, &retVal, 0, this->GeneratorVerbose, 0);
+  bool res =
+    cmSystemTools::RunSingleCommand(nsisCmd.c_str(), &output, &output, &retVal,
+                                    CM_NULLPTR, this->GeneratorVerbose, 0);
   if (!res || retVal) {
     cmGeneratedFileStream ofs(tmpFile.c_str());
     ofs << "# Run command: " << nsisCmd << std::endl
@@ -326,7 +327,7 @@ int cmCPackNSISGenerator::InitializeInternal()
       "NSIS Generator cannot work with CPACK_INCLUDE_TOPLEVEL_DIRECTORY set. "
       "This option will be reset to 0 (for this generator only)."
         << std::endl);
-    this->SetOption("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", 0);
+    this->SetOption("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", CM_NULLPTR);
   }
 
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "cmCPackNSISGenerator::Initialize()"
@@ -399,8 +400,9 @@ int cmCPackNSISGenerator::InitializeInternal()
                                                                << std::endl);
   std::string output;
   int retVal = 1;
-  bool resS = cmSystemTools::RunSingleCommand(
-    nsisCmd.c_str(), &output, &output, &retVal, 0, this->GeneratorVerbose, 0);
+  bool resS =
+    cmSystemTools::RunSingleCommand(nsisCmd.c_str(), &output, &output, &retVal,
+                                    CM_NULLPTR, this->GeneratorVerbose, 0);
   cmsys::RegularExpression versionRex("v([0-9]+.[0-9]+)");
   cmsys::RegularExpression versionRexCVS("v(.*)\\.cvs");
   if (!resS || retVal ||

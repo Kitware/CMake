@@ -62,7 +62,7 @@ public:
    * horrible interface, but is necessary for backwards
    * compatibility).
    */
-  std::string const& GetFullPath(std::string* error = 0);
+  std::string const& GetFullPath(std::string* error = CM_NULLPTR);
   std::string const& GetFullPath() const;
 
   /**

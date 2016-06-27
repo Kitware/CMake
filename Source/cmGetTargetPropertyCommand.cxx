@@ -33,7 +33,7 @@ bool cmGetTargetPropertyCommand::InitialPass(
     }
   } else if (cmTarget* tgt = this->Makefile->FindTargetToUse(targetName)) {
     cmTarget& target = *tgt;
-    const char* prop_cstr = 0;
+    const char* prop_cstr = CM_NULLPTR;
     if (!args[2].empty()) {
       prop_cstr = target.GetProperty(args[2], this->Makefile);
     }

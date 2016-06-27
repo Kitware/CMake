@@ -113,7 +113,7 @@ public:
   void PrintCache(std::ostream&) const;
 
   ///! Get the iterator for an entry with a given key.
-  cmCacheManager::CacheIterator GetCacheIterator(const char* key = 0);
+  cmCacheManager::CacheIterator GetCacheIterator(const char* key = CM_NULLPTR);
 
   ///! Remove an entry from the cache
   void RemoveCacheEntry(const std::string& key);
@@ -128,7 +128,7 @@ public:
   {
     cmCacheManager::CacheIterator it = this->GetCacheIterator(key.c_str());
     if (it.IsAtEnd()) {
-      return 0;
+      return CM_NULLPTR;
     }
     return it.GetValue();
   }
@@ -171,7 +171,8 @@ public:
   void RemoveCacheEntryProperty(std::string const& key,
                                 std::string const& propName)
   {
-    this->GetCacheIterator(key.c_str()).SetProperty(propName, (void*)0);
+    this->GetCacheIterator(key.c_str())
+      .SetProperty(propName, (void*)CM_NULLPTR);
   }
 
   void AppendCacheEntryProperty(std::string const& key,

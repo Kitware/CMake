@@ -150,7 +150,7 @@ void cmCTestSubmitHandler::Initialize()
   this->HTTPProxyAuth = "";
   this->FTPProxy = "";
   this->FTPProxyType = 0;
-  this->LogFile = 0;
+  this->LogFile = CM_NULLPTR;
   this->Files.clear();
 }
 
@@ -308,7 +308,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
   FILE* ftpfile;
   char error_buffer[1024];
   struct curl_slist* headers =
-    ::curl_slist_append(NULL, "Content-Type: text/xml");
+    ::curl_slist_append(CM_NULLPTR, "Content-Type: text/xml");
 
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
@@ -507,10 +507,10 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
       // If curl failed for any reason, or checksum fails, wait and retry
       //
       if (res != CURLE_OK || this->HasErrors) {
-        std::string retryDelay = this->GetOption("RetryDelay") == NULL
+        std::string retryDelay = this->GetOption("RetryDelay") == CM_NULLPTR
           ? ""
           : this->GetOption("RetryDelay");
-        std::string retryCount = this->GetOption("RetryCount") == NULL
+        std::string retryCount = this->GetOption("RetryCount") == CM_NULLPTR
           ? ""
           : this->GetOption("RetryCount");
 
@@ -776,7 +776,7 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(const std::string& scp_command,
   argv.push_back(scp_command.c_str()); // Scp command
   argv.push_back(scp_command.c_str()); // Dummy string for file
   argv.push_back(scp_command.c_str()); // Dummy string for remote url
-  argv.push_back(0);
+  argv.push_back(CM_NULLPTR);
 
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
@@ -807,12 +807,12 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(const std::string& scp_command,
     char* data;
     int length;
 
-    while (cmsysProcess_WaitForData(cp, &data, &length, 0)) {
+    while (cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR)) {
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                          cmCTestLogWrite(data, length), this->Quiet);
     }
 
-    cmsysProcess_WaitForExit(cp, 0);
+    cmsysProcess_WaitForExit(cp, CM_NULLPTR);
 
     int result = cmsysProcess_GetState(cp);
 

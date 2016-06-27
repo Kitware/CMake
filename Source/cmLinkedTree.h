@@ -56,7 +56,7 @@ public:
 
   public:
     iterator()
-      : Tree(0)
+      : Tree(CM_NULLPTR)
       , Position(0)
     {
     }

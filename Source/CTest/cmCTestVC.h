@@ -104,8 +104,8 @@ protected:
     Revision const* PriorRev;
     File()
       : Status(PathUpdated)
-      , Rev(0)
-      , PriorRev(0)
+      , Rev(CM_NULLPTR)
+      , PriorRev(CM_NULLPTR)
     {
     }
     File(PathStatus status, Revision const* rev, Revision const* priorRev)
@@ -121,11 +121,11 @@ protected:
 
   /** Run a command line and send output to given parsers.  */
   bool RunChild(char const* const* cmd, OutputParser* out, OutputParser* err,
-                const char* workDir = 0);
+                const char* workDir = CM_NULLPTR);
 
   /** Run VC update command line and send output to given parsers.  */
   bool RunUpdateCommand(char const* const* cmd, OutputParser* out,
-                        OutputParser* err = 0);
+                        OutputParser* err = CM_NULLPTR);
 
   /** Write xml element for one file.  */
   void WriteXMLEntry(cmXMLWriter& xml, std::string const& path,

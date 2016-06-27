@@ -34,14 +34,14 @@
 cmCPackGenerator::cmCPackGenerator()
 {
   this->GeneratorVerbose = cmSystemTools::OUTPUT_NONE;
-  this->MakefileMap = 0;
-  this->Logger = 0;
+  this->MakefileMap = CM_NULLPTR;
+  this->Logger = CM_NULLPTR;
   this->componentPackageMethod = ONE_PACKAGE_PER_GROUP;
 }
 
 cmCPackGenerator::~cmCPackGenerator()
 {
-  this->MakefileMap = 0;
+  this->MakefileMap = CM_NULLPTR;
 }
 
 void cmCPackGeneratorProgress(const char* msg, float prog, void* ptr)
@@ -251,8 +251,9 @@ int cmCPackGenerator::InstallProjectViaInstallCommands(
       cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << *it << std::endl);
       std::string output;
       int retVal = 1;
-      bool resB = cmSystemTools::RunSingleCommand(
-        it->c_str(), &output, &output, &retVal, 0, this->GeneratorVerbose, 0);
+      bool resB =
+        cmSystemTools::RunSingleCommand(it->c_str(), &output, &output, &retVal,
+                                        CM_NULLPTR, this->GeneratorVerbose, 0);
       if (!resB || retVal) {
         std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
         tmpFile += "/InstallOutput.log";
@@ -814,7 +815,8 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           }
         }
 
-        if (NULL != mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES")) {
+        if (CM_NULLPTR !=
+            mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES")) {
           if (!absoluteDestFiles.empty()) {
             absoluteDestFiles += ";";
           }
@@ -828,7 +830,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
             std::string absoluteDestFileComponent =
               std::string("CPACK_ABSOLUTE_DESTINATION_FILES") + "_" +
               GetComponentInstallDirNameSuffix(installComponent);
-            if (NULL != this->GetOption(absoluteDestFileComponent)) {
+            if (CM_NULLPTR != this->GetOption(absoluteDestFileComponent)) {
               std::string absoluteDestFilesListComponent =
                 this->GetOption(absoluteDestFileComponent);
               absoluteDestFilesListComponent += ";";
@@ -1178,7 +1180,7 @@ int cmCPackGenerator::PrepareGroupingKind()
   std::string groupingType;
 
   // Second way to specify grouping
-  if (NULL != this->GetOption("CPACK_COMPONENTS_GROUPING")) {
+  if (CM_NULLPTR != this->GetOption("CPACK_COMPONENTS_GROUPING")) {
     groupingType = this->GetOption("CPACK_COMPONENTS_GROUPING");
   }
 
@@ -1355,7 +1357,7 @@ cmCPackComponent* cmCPackGenerator::GetComponent(
       component->Group = GetComponentGroup(projectName, groupName);
       component->Group->Components.push_back(component);
     } else {
-      component->Group = 0;
+      component->Group = CM_NULLPTR;
     }
 
     const char* description = this->GetOption(macroPrefix + "_DESCRIPTION");
@@ -1423,7 +1425,7 @@ cmCPackComponentGroup* cmCPackGenerator::GetComponentGroup(
       group->ParentGroup = GetComponentGroup(projectName, parentGroupName);
       group->ParentGroup->Subgroups.push_back(group);
     } else {
-      group->ParentGroup = 0;
+      group->ParentGroup = CM_NULLPTR;
     }
   }
   return group;

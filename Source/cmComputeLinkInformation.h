@@ -38,7 +38,7 @@ public:
     Item()
       : Value()
       , IsPath(true)
-      , Target(0)
+      , Target(CM_NULLPTR)
     {
     }
     Item(Item const& item)
@@ -47,7 +47,8 @@ public:
       , Target(item.Target)
     {
     }
-    Item(std::string const& v, bool p, cmGeneratorTarget const* target = 0)
+    Item(std::string const& v, bool p,
+         cmGeneratorTarget const* target = CM_NULLPTR)
       : Value(v)
       , IsPath(p)
       , Target(target)

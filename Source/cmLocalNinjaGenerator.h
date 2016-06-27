@@ -78,7 +78,7 @@ public:
 
   void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
-    cmGeneratorTarget const* gt = 0) CM_OVERRIDE;
+    cmGeneratorTarget const* gt = CM_NULLPTR) CM_OVERRIDE;
 
 protected:
   std::string ConvertToIncludeReference(

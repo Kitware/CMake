@@ -34,7 +34,7 @@ bool cmGetSourceFilePropertyCommand::InitialPass(
       this->Makefile->AddDefinition(var, sf->GetLanguage().c_str());
       return true;
     }
-    const char* prop = 0;
+    const char* prop = CM_NULLPTR;
     if (!args[2].empty()) {
       prop = sf->GetPropertyForUser(args[2]);
     }

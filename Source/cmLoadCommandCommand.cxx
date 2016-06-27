@@ -94,11 +94,11 @@ public:
 #endif
       signal(SIGILL, TrapsForSignalsCFunction);
     } else {
-      signal(SIGSEGV, 0);
+      signal(SIGSEGV, CM_NULLPTR);
 #ifdef SIGBUS
-      signal(SIGBUS, 0);
+      signal(SIGBUS, CM_NULLPTR);
 #endif
-      signal(SIGILL, 0);
+      signal(SIGILL, CM_NULLPTR);
     }
   }
 
@@ -112,7 +112,7 @@ extern "C" void TrapsForSignalsCFunction(int sig)
   cmLoadedCommand::TrapsForSignals(sig);
 }
 
-const char* cmLoadedCommand::LastName = 0;
+const char* cmLoadedCommand::LastName = CM_NULLPTR;
 
 bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args,
                                   cmExecutionStatus&)
@@ -128,7 +128,7 @@ bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args,
 
   // create argc and argv and then invoke the command
   int argc = static_cast<int>(args.size());
-  char** argv = 0;
+  char** argv = CM_NULLPTR;
   if (argc) {
     argv = (char**)malloc(argc * sizeof(char*));
   }

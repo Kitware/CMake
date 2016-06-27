@@ -77,7 +77,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   }
 
   const char* sourceDirectory = argv[2].c_str();
-  const char* projectName = 0;
+  const char* projectName = CM_NULLPTR;
   std::string targetName;
   std::vector<std::string> cmakeFlags(1, "CMAKE_FLAGS"); // fake argv[0]
   std::vector<std::string> compileDefs;

@@ -37,7 +37,7 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   , FileName(filename)
   , Namespace(name_space)
   , ExportOld(exportOld)
-  , LocalGenerator(0)
+  , LocalGenerator(CM_NULLPTR)
 {
   this->EFGen = new cmExportInstallFileGenerator(this);
   exportSet->AddInstallation(this);
@@ -161,8 +161,8 @@ void cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
     std::string config_test = this->CreateConfigTest(i->first);
     os << indent << "if(" << config_test << ")\n";
     this->AddInstallRule(os, this->Destination, cmInstallType_FILES, files,
-                         false, this->FilePermissions.c_str(), 0, 0, 0,
-                         indent.Next());
+                         false, this->FilePermissions.c_str(), CM_NULLPTR,
+                         CM_NULLPTR, CM_NULLPTR, indent.Next());
     os << indent << "endif()\n";
     files.clear();
   }
@@ -201,5 +201,6 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
   std::vector<std::string> files;
   files.push_back(this->MainImportFile);
   this->AddInstallRule(os, this->Destination, cmInstallType_FILES, files,
-                       false, this->FilePermissions.c_str(), 0, 0, 0, indent);
+                       false, this->FilePermissions.c_str(), CM_NULLPTR,
+                       CM_NULLPTR, CM_NULLPTR, indent);
 }

@@ -29,7 +29,7 @@
 #define INCLUDE_REGEX_TRANSFORM_MARKER "#IncludeRegexTransform: "
 
 cmDependsC::cmDependsC()
-  : ValidDeps(0)
+  : ValidDeps(CM_NULLPTR)
 {
 }
 
@@ -105,7 +105,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   std::set<std::string> dependencies;
   bool haveDeps = false;
 
-  if (this->ValidDeps != 0) {
+  if (this->ValidDeps != CM_NULLPTR) {
     std::map<std::string, DependencyVector>::const_iterator tmpIt =
       this->ValidDeps->find(obj);
     if (tmpIt != this->ValidDeps->end()) {
@@ -269,12 +269,12 @@ void cmDependsC::ReadCacheFile()
   }
 
   std::string line;
-  cmIncludeLines* cacheEntry = 0;
+  cmIncludeLines* cacheEntry = CM_NULLPTR;
   bool haveFileName = false;
 
   while (cmSystemTools::GetLineFromStream(fin, line)) {
     if (line.empty()) {
-      cacheEntry = 0;
+      cacheEntry = CM_NULLPTR;
       haveFileName = false;
       continue;
     }
@@ -312,7 +312,7 @@ void cmDependsC::ReadCacheFile()
           }
         }
       }
-    } else if (cacheEntry != 0) {
+    } else if (cacheEntry != CM_NULLPTR) {
       UnscannedEntry entry;
       entry.FileName = line;
       if (cmSystemTools::GetLineFromStream(fin, line)) {

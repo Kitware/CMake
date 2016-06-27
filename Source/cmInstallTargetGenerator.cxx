@@ -30,7 +30,7 @@ cmInstallTargetGenerator::cmInstallTargetGenerator(
   : cmInstallGenerator(dest, configurations, component, message,
                        exclude_from_all)
   , TargetName(targetName)
-  , Target(0)
+  , Target(CM_NULLPTR)
   , FilePermissions(file_permissions)
   , ImportLibrary(implib)
   , Optional(optional)
@@ -294,8 +294,8 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
                  &cmInstallTargetGenerator::PreReplacementTweaks);
 
   // Write code to install the target file.
-  const char* no_dir_permissions = 0;
-  const char* no_rename = 0;
+  const char* no_dir_permissions = CM_NULLPTR;
+  const char* no_rename = CM_NULLPTR;
   bool optional = this->Optional || this->ImportLibrary;
   this->AddInstallRule(os, this->GetDestination(config), type, filesFrom,
                        optional, this->FilePermissions.c_str(),

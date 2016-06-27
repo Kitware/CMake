@@ -39,7 +39,7 @@ public:
    * help arguments.
    */
   bool CheckOptions(int argc, const char* const* argv,
-                    const char* exitOpt = 0);
+                    const char* exitOpt = CM_NULLPTR);
 
   /**
    * Print help requested on the command line.  Call after

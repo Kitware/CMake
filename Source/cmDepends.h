@@ -29,7 +29,7 @@ class cmDepends
 public:
   /** Instances need to know the build directory name and the relative
       path from the build directory to the target file.  */
-  cmDepends(cmLocalGenerator* lg = 0, const char* targetDir = "");
+  cmDepends(cmLocalGenerator* lg = CM_NULLPTR, const char* targetDir = "");
 
   /** at what level will the compile be done from */
   void SetCompileDirectory(const char* dir) { this->CompileDirectory = dir; }

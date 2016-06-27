@@ -323,7 +323,7 @@ bool cmGetPropertyCommand::HandleCacheMode()
     return false;
   }
 
-  const char* value = 0;
+  const char* value = CM_NULLPTR;
   if (this->Makefile->GetState()->GetCacheEntryValue(this->Name)) {
     value = this->Makefile->GetState()->GetCacheEntryProperty(
       this->Name, this->PropertyName);
@@ -347,7 +347,7 @@ bool cmGetPropertyCommand::HandleInstallMode()
     std::string value;
     bool isSet = file->GetProperty(this->PropertyName, value);
 
-    return this->StoreResult(isSet ? value.c_str() : 0);
+    return this->StoreResult(isSet ? value.c_str() : CM_NULLPTR);
   } else {
     std::ostringstream e;
     e << "given INSTALL name that could not be found or created: "

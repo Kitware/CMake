@@ -55,7 +55,7 @@ public:
   class Snapshot
   {
   public:
-    Snapshot(cmState* state = 0);
+    Snapshot(cmState* state = CM_NULLPTR);
     Snapshot(cmState* state, PositionType position);
 
     const char* GetDefinition(std::string const& name) const;

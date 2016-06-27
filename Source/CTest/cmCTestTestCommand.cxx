@@ -27,7 +27,7 @@ cmCTestTestCommand::cmCTestTestCommand()
   this->Arguments[ctt_SCHEDULE_RANDOM] = "SCHEDULE_RANDOM";
   this->Arguments[ctt_STOP_TIME] = "STOP_TIME";
   this->Arguments[ctt_TEST_LOAD] = "TEST_LOAD";
-  this->Arguments[ctt_LAST] = 0;
+  this->Arguments[ctt_LAST] = CM_NULLPTR;
   this->Last = ctt_LAST;
 }
 

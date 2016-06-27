@@ -23,7 +23,7 @@ cmCursesWidget::~cmCursesWidget()
 {
   if (this->Field) {
     free_field(this->Field);
-    this->Field = 0;
+    this->Field = CM_NULLPTR;
   }
 }
 

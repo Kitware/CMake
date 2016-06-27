@@ -234,13 +234,13 @@ void cmFindCommon::GetIgnoredPaths(std::vector<std::string>& ignore)
 {
   // null-terminated list of paths.
   static const char* paths[] = { "CMAKE_SYSTEM_IGNORE_PATH",
-                                 "CMAKE_IGNORE_PATH", 0 };
+                                 "CMAKE_IGNORE_PATH", CM_NULLPTR };
 
   // Construct the list of path roots with no trailing slashes.
   for (const char** pathName = paths; *pathName; ++pathName) {
     // Get the list of paths to ignore from the variable.
     const char* ignorePath = this->Makefile->GetDefinition(*pathName);
-    if ((ignorePath == 0) || (strlen(ignorePath) == 0)) {
+    if ((ignorePath == CM_NULLPTR) || (strlen(ignorePath) == 0)) {
       continue;
     }
 

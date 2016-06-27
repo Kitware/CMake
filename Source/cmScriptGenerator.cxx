@@ -19,7 +19,7 @@ cmScriptGenerator::cmScriptGenerator(
   : RuntimeConfigVariable(config_var)
   , Configurations(configurations)
   , ConfigurationName("")
-  , ConfigurationTypes(0)
+  , ConfigurationTypes(CM_NULLPTR)
   , ActionsPerConfig(false)
 {
 }
@@ -36,7 +36,7 @@ void cmScriptGenerator::Generate(
   this->ConfigurationTypes = &configurationTypes;
   this->GenerateScript(os);
   this->ConfigurationName = "";
-  this->ConfigurationTypes = 0;
+  this->ConfigurationTypes = CM_NULLPTR;
 }
 
 static void cmScriptGeneratorEncodeConfig(const std::string& config,

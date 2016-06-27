@@ -1199,7 +1199,7 @@ public:
       cmSystemTools::RemoveFile(this->File);
     }
   }
-  void Release() { this->File = 0; }
+  void Release() { this->File = CM_NULLPTR; }
 };
 
 void cmFindPackageCommand::LoadPackageRegistryDir(std::string const& dir,
@@ -1526,7 +1526,7 @@ class cmFileList
 public:
   cmFileList()
     : First()
-    , Last(0)
+    , Last(CM_NULLPTR)
   {
   }
   virtual ~cmFileList() {}

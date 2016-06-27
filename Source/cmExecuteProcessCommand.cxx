@@ -161,7 +161,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
       return false;
     } else {
       // Add the null terminating pointer to the command argument list.
-      cmds[i].push_back(0);
+      cmds[i].push_back(CM_NULLPTR);
     }
   }
 
@@ -228,7 +228,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
   int length;
   char* data;
   int p;
-  while ((p = cmsysProcess_WaitForData(cp, &data, &length, 0), p)) {
+  while ((p = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR), p)) {
     // Put the output in the right place.
     if (p == cmsysProcess_Pipe_STDOUT && !output_quiet) {
       if (output_variable.empty()) {
@@ -246,7 +246,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // All output has been read.  Wait for the process to exit.
-  cmsysProcess_WaitForExit(cp, 0);
+  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
 
   // Fix the text in the output strings.
   cmExecuteProcessCommandFixText(tempOutput, output_strip_trailing_whitespace);

@@ -15,7 +15,7 @@ cmInstallScriptGenerator::cmInstallScriptGenerator(const char* script,
                                                    bool code,
                                                    const char* component,
                                                    bool exclude_from_all)
-  : cmInstallGenerator(0, std::vector<std::string>(), component,
+  : cmInstallGenerator(CM_NULLPTR, std::vector<std::string>(), component,
                        MessageDefault, exclude_from_all)
   , Script(script)
   , Code(code)

@@ -217,17 +217,17 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
 
   // now we have both, decide which one to use
   std::string valueToUse;
-  if (envVarValue == 0 && cacheValue == 0) {
+  if (envVarValue == CM_NULLPTR && cacheValue == CM_NULLPTR) {
     // nothing known, do nothing
     valueToUse = "";
-  } else if (envVarValue != 0 && cacheValue == 0) {
+  } else if (envVarValue != CM_NULLPTR && cacheValue == CM_NULLPTR) {
     // The variable is in the env, but not in the cache. Use it and put it
     // in the cache
     valueToUse = envVarValue;
     mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
                            cacheEntryName.c_str(), cmState::STRING, true);
     mf->GetCMakeInstance()->SaveCache(lg->GetBinaryDirectory());
-  } else if (envVarValue == 0 && cacheValue != 0) {
+  } else if (envVarValue == CM_NULLPTR && cacheValue != CM_NULLPTR) {
     // It is already in the cache, but not in the env, so use it from the cache
     valueToUse = cacheValue;
   } else {

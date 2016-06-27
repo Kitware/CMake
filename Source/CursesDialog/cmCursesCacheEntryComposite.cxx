@@ -32,7 +32,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
 {
   this->Label = new cmCursesLabelWidget(this->LabelWidth, 1, 1, 1, key);
   this->IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, " ");
-  this->Entry = 0;
+  this->Entry = CM_NULLPTR;
   this->Entry = new cmCursesStringWidget(this->EntryWidth, 1, 1, 1);
 }
 
@@ -50,7 +50,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
     this->IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, " ");
   }
 
-  this->Entry = 0;
+  this->Entry = CM_NULLPTR;
   const char* value = cm->GetState()->GetCacheEntryValue(key);
   assert(value);
   switch (cm->GetState()->GetCacheEntryType(key)) {
@@ -111,6 +111,6 @@ const char* cmCursesCacheEntryComposite::GetValue()
   if (this->Label) {
     return this->Label->GetValue();
   } else {
-    return 0;
+    return CM_NULLPTR;
   }
 }

@@ -218,8 +218,8 @@ void CCONV cmAddUtilityCommand(void* arg, const char* utilityName,
   }
 
   // Pass the call to the makefile instance.
-  mf->AddUtilityCommand(utilityName, (all ? false : true), 0, depends2,
-                        commandLines);
+  mf->AddUtilityCommand(utilityName, (all ? false : true), CM_NULLPTR,
+                        depends2, commandLines);
 }
 void CCONV cmAddCustomCommand(void* arg, const char* source,
                               const char* command, int numArgs,
@@ -257,7 +257,7 @@ void CCONV cmAddCustomCommand(void* arg, const char* source,
   }
 
   // Pass the call to the makefile instance.
-  const char* no_comment = 0;
+  const char* no_comment = CM_NULLPTR;
   mf->AddCustomCommandOldStyle(target, outputs2, depends2, source,
                                commandLines, no_comment);
 }
@@ -291,8 +291,8 @@ void CCONV cmAddCustomCommandToOutput(void* arg, const char* output,
   }
 
   // Pass the call to the makefile instance.
-  const char* no_comment = 0;
-  const char* no_working_dir = 0;
+  const char* no_comment = CM_NULLPTR;
+  const char* no_working_dir = CM_NULLPTR;
   mf->AddCustomCommandToOutput(output, depends2, main_dependency, commandLines,
                                no_comment, no_working_dir);
 }
@@ -333,8 +333,8 @@ void CCONV cmAddCustomCommandToTarget(void* arg, const char* target,
   // Pass the call to the makefile instance.
   std::vector<std::string> no_byproducts;
   std::vector<std::string> no_depends;
-  const char* no_comment = 0;
-  const char* no_working_dir = 0;
+  const char* no_comment = CM_NULLPTR;
+  const char* no_working_dir = CM_NULLPTR;
   mf->AddCustomCommandToTarget(target, no_byproducts, no_depends, commandLines,
                                cctype, no_comment, no_working_dir);
 }
@@ -414,7 +414,7 @@ void CCONV cmExpandSourceListArguments(void* arg, int numArgs,
     result.push_back(args[i]);
   }
   int resargc = static_cast<int>(result.size());
-  char** resargv = 0;
+  char** resargv = CM_NULLPTR;
   if (resargc) {
     resargv = (char**)malloc(resargc * sizeof(char*));
   }
@@ -453,7 +453,7 @@ int CCONV cmGetTotalArgumentSize(int argc, char** argv)
 struct cmCPluginAPISourceFile
 {
   cmCPluginAPISourceFile()
-    : RealSourceFile(0)
+    : RealSourceFile(CM_NULLPTR)
   {
   }
   cmSourceFile* RealSourceFile;
@@ -525,7 +525,7 @@ void CCONV* cmGetSource(void* arg, const char* name)
     }
     return (void*)i->second;
   } else {
-    return 0;
+    return CM_NULLPTR;
   }
 }
 
@@ -534,7 +534,7 @@ void* CCONV cmAddSource(void* arg, void* arg2)
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
   cmCPluginAPISourceFile* osf = static_cast<cmCPluginAPISourceFile*>(arg2);
   if (osf->FullPath.empty()) {
-    return 0;
+    return CM_NULLPTR;
   }
 
   // Create the real cmSourceFile instance and copy over saved information.

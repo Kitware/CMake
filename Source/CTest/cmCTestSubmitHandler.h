@@ -26,7 +26,7 @@ public:
   cmTypeMacro(cmCTestSubmitHandler, cmCTestGenericHandler);
 
   cmCTestSubmitHandler();
-  ~cmCTestSubmitHandler() CM_OVERRIDE { this->LogFile = 0; }
+  ~cmCTestSubmitHandler() CM_OVERRIDE { this->LogFile = CM_NULLPTR; }
 
   /*
    * The main entry point for this class

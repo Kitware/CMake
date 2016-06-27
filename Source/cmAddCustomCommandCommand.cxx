@@ -30,7 +30,7 @@ bool cmAddCustomCommandCommand::InitialPass(
 
   std::string source, target, main_dependency, working;
   std::string comment_buffer;
-  const char* comment = 0;
+  const char* comment = CM_NULLPTR;
   std::vector<std::string> depends, outputs, output, byproducts;
   bool verbatim = false;
   bool append = false;

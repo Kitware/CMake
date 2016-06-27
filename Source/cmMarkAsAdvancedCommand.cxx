@@ -35,7 +35,7 @@ bool cmMarkAsAdvancedCommand::InitialPass(std::vector<std::string> const& args,
     cmState* state = this->Makefile->GetState();
     if (!state->GetCacheEntryValue(variable)) {
       this->Makefile->GetCMakeInstance()->AddCacheEntry(
-        variable, 0, 0, cmState::UNINITIALIZED);
+        variable, CM_NULLPTR, CM_NULLPTR, cmState::UNINITIALIZED);
       overwrite = true;
     }
     if (!state->GetCacheEntryValue(variable)) {

@@ -24,29 +24,30 @@
 #include <form.h>
 
 static const char* cmDocumentationName[][2] = {
-  { 0, "  ccmake - Curses Interface for CMake." },
-  { 0, 0 }
+  { CM_NULLPTR, "  ccmake - Curses Interface for CMake." },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 static const char* cmDocumentationUsage[][2] = {
-  { 0, "  ccmake <path-to-source>\n"
-       "  ccmake <path-to-existing-build>" },
-  { 0, "Specify a source directory to (re-)generate a build system for "
-       "it in the current working directory.  Specify an existing build "
-       "directory to re-generate its build system." },
-  { 0, 0 }
+  { CM_NULLPTR, "  ccmake <path-to-source>\n"
+                "  ccmake <path-to-existing-build>" },
+  { CM_NULLPTR,
+    "Specify a source directory to (re-)generate a build system for "
+    "it in the current working directory.  Specify an existing build "
+    "directory to re-generate its build system." },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 static const char* cmDocumentationUsageNote[][2] = {
-  { 0, "Run 'ccmake --help' for more information." },
-  { 0, 0 }
+  { CM_NULLPTR, "Run 'ccmake --help' for more information." },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 static const char* cmDocumentationOptions[]
                                          [2] = { CMAKE_STANDARD_OPTIONS_TABLE,
-                                                 { 0, 0 } };
+                                                 { CM_NULLPTR, CM_NULLPTR } };
 
-cmCursesForm* cmCursesForm::CurrentForm = 0;
+cmCursesForm* cmCursesForm::CurrentForm = CM_NULLPTR;
 
 extern "C" {
 
@@ -176,7 +177,7 @@ int main(int argc, char const* const* argv)
   touchwin(stdscr);
   endwin();
   delete cmCursesForm::CurrentForm;
-  cmCursesForm::CurrentForm = 0;
+  cmCursesForm::CurrentForm = CM_NULLPTR;
 
   std::cout << std::endl << std::endl;
 

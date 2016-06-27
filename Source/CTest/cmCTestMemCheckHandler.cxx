@@ -42,7 +42,7 @@ static CatToErrorType cmCTestMemCheckBoundsChecker[] = {
   { "Allocation Conflict", cmCTestMemCheckHandler::FMM },
   { "Bad Pointer Use", cmCTestMemCheckHandler::FMW },
   { "Dangling Pointer", cmCTestMemCheckHandler::FMR },
-  { 0, 0 }
+  { CM_NULLPTR, 0 }
 };
 
 static void xmlReportError(int line, const char* msg, void* data)
@@ -72,7 +72,7 @@ public:
     std::ostringstream ostr;
     ostr << name << ":\n";
     int i = 0;
-    for (; atts[i] != 0; i += 2) {
+    for (; atts[i] != CM_NULLPTR; i += 2) {
       ostr << "   " << atts[i] << " - " << atts[i + 1] << "\n";
     }
     ostr << "\n";
@@ -83,12 +83,12 @@ public:
   const char* GetAttribute(const char* name, const char** atts)
   {
     int i = 0;
-    for (; atts[i] != 0; ++i) {
+    for (; atts[i] != CM_NULLPTR; ++i) {
       if (strcmp(name, atts[i]) == 0) {
         return atts[i + 1];
       }
     }
-    return 0;
+    return CM_NULLPTR;
   }
   void ParseError(const char** atts)
   {
@@ -241,9 +241,9 @@ void cmCTestMemCheckHandler::InitializeResultsVectors()
   // define the standard set of errors
   //----------------------------------------------------------------------
   static const char* cmCTestMemCheckResultStrings[] = {
-    "ABR", "ABW", "ABWL", "COR", "EXU", "FFM", "FIM", "FMM",
-    "FMR", "FMW", "FUM",  "IPR", "IPW", "MAF", "MLK", "MPK",
-    "NPR", "ODS", "PAR",  "PLK", "UMC", "UMR", 0
+    "ABR", "ABW", "ABWL", "COR", "EXU", "FFM", "FIM",     "FMM",
+    "FMR", "FMW", "FUM",  "IPR", "IPW", "MAF", "MLK",     "MPK",
+    "NPR", "ODS", "PAR",  "PLK", "UMC", "UMR", CM_NULLPTR
   };
   static const char* cmCTestMemCheckResultLongStrings[] = {
     "Threading Problem",
@@ -268,10 +268,10 @@ void cmCTestMemCheckHandler::InitializeResultsVectors()
     "PLK",
     "Uninitialized Memory Conditional",
     "Uninitialized Memory Read",
-    0
+    CM_NULLPTR
   };
   this->GlobalResults.clear();
-  for (int i = 0; cmCTestMemCheckResultStrings[i] != 0; ++i) {
+  for (int i = 0; cmCTestMemCheckResultStrings[i] != CM_NULLPTR; ++i) {
     this->ResultStrings.push_back(cmCTestMemCheckResultStrings[i]);
     this->ResultStringsLong.push_back(cmCTestMemCheckResultLongStrings[i]);
     this->GlobalResults.push_back(0);

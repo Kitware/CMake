@@ -300,9 +300,9 @@ public:
   std::string ConstructComment(cmCustomCommandGenerator const& ccg,
                                const char* default_comment = "");
   // Compute object file names.
-  std::string GetObjectFileNameWithoutTarget(const cmSourceFile& source,
-                                             std::string const& dir_max,
-                                             bool* hasSourceExtension = 0);
+  std::string GetObjectFileNameWithoutTarget(
+    const cmSourceFile& source, std::string const& dir_max,
+    bool* hasSourceExtension = CM_NULLPTR);
 
   /** Fill out the static linker flags for the given target.  */
   void GetStaticLibraryFlags(std::string& flags, std::string const& config,
@@ -329,7 +329,7 @@ public:
 
   virtual void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
-    cmGeneratorTarget const* gt = 0);
+    cmGeneratorTarget const* gt = CM_NULLPTR);
 
   bool IsWindowsShell() const;
   bool IsWatcomWMake() const;

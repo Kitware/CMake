@@ -47,7 +47,7 @@ bool cmUnsetCommand::InitialPass(std::vector<std::string> const& args,
   }
   // unset(VAR PARENT_SCOPE)
   else if ((args.size() == 2) && (args[1] == "PARENT_SCOPE")) {
-    this->Makefile->RaiseScope(variable, 0);
+    this->Makefile->RaiseScope(variable, CM_NULLPTR);
     return true;
   }
   // ERROR: second argument isn't CACHE or PARENT_SCOPE

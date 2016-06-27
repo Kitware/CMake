@@ -19,7 +19,7 @@
 cmCTestGenericHandler::cmCTestGenericHandler()
 {
   this->HandlerVerbose = cmSystemTools::OUTPUT_NONE;
-  this->CTest = 0;
+  this->CTest = CM_NULLPTR;
   this->SubmitIndex = 0;
   this->AppendXML = false;
   this->Quiet = false;
@@ -77,7 +77,7 @@ const char* cmCTestGenericHandler::GetOption(const std::string& op)
   cmCTestGenericHandler::t_StringToString::iterator remit =
     this->Options.find(op);
   if (remit == this->Options.end()) {
-    return 0;
+    return CM_NULLPTR;
   }
   return remit->second.c_str();
 }

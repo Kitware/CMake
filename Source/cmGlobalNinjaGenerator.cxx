@@ -443,9 +443,9 @@ void cmGlobalNinjaGenerator::WriteDefault(std::ostream& os,
 
 cmGlobalNinjaGenerator::cmGlobalNinjaGenerator(cmake* cm)
   : cmGlobalCommonGenerator(cm)
-  , BuildFileStream(0)
-  , RulesFileStream(0)
-  , CompileCommandsStream(0)
+  , BuildFileStream(CM_NULLPTR)
+  , RulesFileStream(CM_NULLPTR)
+  , CompileCommandsStream(CM_NULLPTR)
   , Rules()
   , AllDependencies()
   , UsingGCCOnWindows(false)
@@ -531,8 +531,8 @@ void cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
     command.push_back(this->NinjaCommand);
     command.push_back("--version");
     std::string version;
-    cmSystemTools::RunSingleCommand(command, &version, 0, 0, 0,
-                                    cmSystemTools::OUTPUT_NONE);
+    cmSystemTools::RunSingleCommand(command, &version, CM_NULLPTR, CM_NULLPTR,
+                                    CM_NULLPTR, cmSystemTools::OUTPUT_NONE);
     this->NinjaVersion = cmSystemTools::TrimWhitespace(version);
   }
 }
@@ -676,7 +676,7 @@ void cmGlobalNinjaGenerator::CloseBuildFileStream()
 {
   if (this->BuildFileStream) {
     delete this->BuildFileStream;
-    this->BuildFileStream = 0;
+    this->BuildFileStream = CM_NULLPTR;
   } else {
     cmSystemTools::Error("Build file stream was not open.");
   }
@@ -717,7 +717,7 @@ void cmGlobalNinjaGenerator::CloseRulesFileStream()
 {
   if (this->RulesFileStream) {
     delete this->RulesFileStream;
-    this->RulesFileStream = 0;
+    this->RulesFileStream = CM_NULLPTR;
   } else {
     cmSystemTools::Error("Rules file stream was not open.");
   }
@@ -805,7 +805,7 @@ void cmGlobalNinjaGenerator::CloseCompileCommandsStream()
   if (this->CompileCommandsStream) {
     *this->CompileCommandsStream << "\n]";
     delete this->CompileCommandsStream;
-    this->CompileCommandsStream = 0;
+    this->CompileCommandsStream = CM_NULLPTR;
   }
 }
 
@@ -914,7 +914,7 @@ void cmGlobalNinjaGenerator::AddTargetAlias(const std::string& alias,
   // Mark the target's outputs as ambiguous to ensure that no other target uses
   // the output as an alias.
   for (cmNinjaDeps::iterator i = outputs.begin(); i != outputs.end(); ++i) {
-    TargetAliases[*i] = 0;
+    TargetAliases[*i] = CM_NULLPTR;
   }
 
   // Insert the alias into the map.  If the alias was already present in the
@@ -922,7 +922,7 @@ void cmGlobalNinjaGenerator::AddTargetAlias(const std::string& alias,
   std::pair<TargetAliasMap::iterator, bool> newAlias =
     TargetAliases.insert(std::make_pair(buildAlias, target));
   if (newAlias.second && newAlias.first->second != target) {
-    newAlias.first->second = 0;
+    newAlias.first->second = CM_NULLPTR;
   }
 }
 

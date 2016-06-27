@@ -53,14 +53,14 @@ cmNinjaTargetGenerator* cmNinjaTargetGenerator::New(cmGeneratorTarget* target)
     }
 
     default:
-      return 0;
+      return CM_NULLPTR;
   }
 }
 
 cmNinjaTargetGenerator::cmNinjaTargetGenerator(cmGeneratorTarget* target)
   : cmCommonTargetGenerator(target)
-  , MacOSXContentGenerator(0)
-  , OSXBundleGenerator(0)
+  , MacOSXContentGenerator(CM_NULLPTR)
+  , OSXBundleGenerator(CM_NULLPTR)
   , MacContentFolders()
   , LocalGenerator(
       static_cast<cmLocalNinjaGenerator*>(target->GetLocalGenerator()))
@@ -739,5 +739,5 @@ bool cmNinjaTargetGenerator::ForceResponseFile()
 {
   static std::string const forceRspFile = "CMAKE_NINJA_FORCE_RESPONSE_FILE";
   return (this->GetMakefile()->IsDefinitionSet(forceRspFile) ||
-          cmSystemTools::GetEnv(forceRspFile) != 0);
+          cmSystemTools::GetEnv(forceRspFile) != CM_NULLPTR);
 }

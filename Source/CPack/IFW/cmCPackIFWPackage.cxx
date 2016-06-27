@@ -96,15 +96,15 @@ std::string cmCPackIFWPackage::DependenceStruct::NameWithCompare() const
 
 //------------------------------------------------------ cmCPackIFWPackage ---
 cmCPackIFWPackage::cmCPackIFWPackage()
-  : Generator(0)
-  , Installer(0)
+  : Generator(CM_NULLPTR)
+  , Installer(CM_NULLPTR)
 {
 }
 
 const char* cmCPackIFWPackage::GetOption(const std::string& op) const
 {
-  const char* option = Generator ? Generator->GetOption(op) : 0;
-  return option && *option ? option : 0;
+  const char* option = Generator ? Generator->GetOption(op) : CM_NULLPTR;
+  return option && *option ? option : CM_NULLPTR;
 }
 
 bool cmCPackIFWPackage::IsOn(const std::string& op) const

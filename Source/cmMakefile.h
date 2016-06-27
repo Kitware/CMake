@@ -182,24 +182,23 @@ public:
    * Add a utility to the build.  A utiltity target is a command that
    * is run every time the target is built.
    */
-  cmTarget* AddUtilityCommand(const std::string& utilityName,
-                              bool excludeFromAll,
-                              const std::vector<std::string>& depends,
-                              const char* workingDirectory,
-                              const char* command, const char* arg1 = 0,
-                              const char* arg2 = 0, const char* arg3 = 0,
-                              const char* arg4 = 0);
+  cmTarget* AddUtilityCommand(
+    const std::string& utilityName, bool excludeFromAll,
+    const std::vector<std::string>& depends, const char* workingDirectory,
+    const char* command, const char* arg1 = CM_NULLPTR,
+    const char* arg2 = CM_NULLPTR, const char* arg3 = CM_NULLPTR,
+    const char* arg4 = CM_NULLPTR);
   cmTarget* AddUtilityCommand(
     const std::string& utilityName, bool excludeFromAll,
     const char* workingDirectory, const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
-    const char* comment = 0, bool uses_terminal = false);
+    const char* comment = CM_NULLPTR, bool uses_terminal = false);
   cmTarget* AddUtilityCommand(
     const std::string& utilityName, bool excludeFromAll,
     const char* workingDirectory, const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
-    const char* comment = 0, bool uses_terminal = false);
+    const char* comment = CM_NULLPTR, bool uses_terminal = false);
 
   /**
    * Add a link library to the build.
@@ -274,14 +273,14 @@ public:
   /**
    * Add a root source group for consideration when adding a new source.
    */
-  void AddSourceGroup(const std::string& name, const char* regex = 0);
+  void AddSourceGroup(const std::string& name, const char* regex = CM_NULLPTR);
 
   /**
    * Add a source group for consideration when adding a new source.
    * name is tokenized.
    */
   void AddSourceGroup(const std::vector<std::string>& name,
-                      const char* regex = 0);
+                      const char* regex = CM_NULLPTR);
 
 #endif
 
@@ -519,8 +518,8 @@ public:
   const char* ExpandVariablesInString(std::string& source) const;
   const char* ExpandVariablesInString(std::string& source, bool escapeQuotes,
                                       bool noEscapes, bool atOnly = false,
-                                      const char* filename = 0, long line = -1,
-                                      bool removeEmpty = false,
+                                      const char* filename = CM_NULLPTR,
+                                      long line = -1, bool removeEmpty = false,
                                       bool replaceAt = false) const;
 
   /**
@@ -592,11 +591,11 @@ public:
    */
   bool ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
                        std::vector<std::string>& outArgs,
-                       const char* filename = 0) const;
+                       const char* filename = CM_NULLPTR) const;
 
   bool ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
                        std::vector<cmExpandedCommandArgument>& outArgs,
-                       const char* filename = 0) const;
+                       const char* filename = CM_NULLPTR) const;
 
   /**
    * Get the instance
@@ -743,7 +742,7 @@ public:
   bool PolicyOptionalWarningEnabled(std::string const& var);
 
   bool AddRequiredTargetFeature(cmTarget* target, const std::string& feature,
-                                std::string* error = 0) const;
+                                std::string* error = CM_NULLPTR) const;
 
   bool CompileFeatureKnown(cmTarget const* target, const std::string& feature,
                            std::string& lang, std::string* error) const;
@@ -933,11 +932,11 @@ private:
   std::vector<cmSourceFile*> QtUiFilesWithOptions;
 
   bool AddRequiredTargetCFeature(cmTarget* target, const std::string& feature,
-                                 std::string* error = 0) const;
+                                 std::string* error = CM_NULLPTR) const;
 
   bool AddRequiredTargetCxxFeature(cmTarget* target,
                                    const std::string& feature,
-                                   std::string* error = 0) const;
+                                   std::string* error = CM_NULLPTR) const;
 
   void CheckNeededCLanguage(const std::string& feature, bool& needC90,
                             bool& needC99, bool& needC11) const;

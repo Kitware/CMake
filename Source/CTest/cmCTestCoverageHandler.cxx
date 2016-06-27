@@ -76,7 +76,7 @@ public:
          i != this->CommandLineStrings.end(); ++i) {
       args.push_back(i->c_str());
     }
-    args.push_back(0); // null terminate
+    args.push_back(CM_NULLPTR); // null terminate
     cmsysProcess_SetCommand(this->Process, &*args.begin());
     if (!this->WorkingDirectory.empty()) {
       cmsysProcess_SetWorkingDirectory(this->Process,
@@ -101,7 +101,7 @@ public:
   {
     cmsysProcess_SetPipeFile(this->Process, cmsysProcess_Pipe_STDERR, fname);
   }
-  int WaitForExit(double* timeout = 0)
+  int WaitForExit(double* timeout = CM_NULLPTR)
   {
     this->PipeState = cmsysProcess_WaitForExit(this->Process, timeout);
     return this->PipeState;
@@ -1781,7 +1781,7 @@ const char* bullseyeHelp[] = {
   "      condition evaluated true or false, respectively.",
   "    * A k indicates a constant decision or condition.",
   "    * The slash / means this probe is excluded from summary results. ",
-  0
+  CM_NULLPTR
 };
 }
 
@@ -1809,7 +1809,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "run covbr: " << std::endl, this->Quiet);
 
-  if (!this->RunBullseyeCommand(cont, "covbr", 0, outputFile)) {
+  if (!this->RunBullseyeCommand(cont, "covbr", CM_NULLPTR, outputFile)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "error running covbr for."
                  << "\n");
     return -1;
@@ -1882,7 +1882,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
         covLogXML.StartElement("Report");
         // write the bullseye header
         line = 0;
-        for (int k = 0; bullseyeHelp[k] != 0; ++k) {
+        for (int k = 0; bullseyeHelp[k] != CM_NULLPTR; ++k) {
           covLogXML.StartElement("Line");
           covLogXML.Attribute("Number", line);
           covLogXML.Attribute("Count", -1);

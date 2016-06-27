@@ -20,7 +20,7 @@ cmCTestHandlerCommand::cmCTestHandlerCommand()
   size_t cc;
   this->Arguments.reserve(INIT_SIZE);
   for (cc = 0; cc < INIT_SIZE; ++cc) {
-    this->Arguments.push_back(0);
+    this->Arguments.push_back(CM_NULLPTR);
   }
   this->Arguments[ct_RETURN_VALUE] = "RETURN_VALUE";
   this->Arguments[ct_SOURCE] = "SOURCE";
@@ -36,7 +36,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
 {
   // Allocate space for argument values.
   this->Values.clear();
-  this->Values.resize(this->Last, 0);
+  this->Values.resize(this->Last, CM_NULLPTR);
 
   // Process input arguments.
   this->ArgumentDoing = ArgumentDoingNone;

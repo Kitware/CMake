@@ -28,7 +28,7 @@ public:
    */
   cmDependInformation()
     : DependDone(false)
-    , SourceFile(0)
+    , SourceFile(CM_NULLPTR)
   {
   }
 
@@ -154,7 +154,7 @@ public:
    */
   const cmDependInformation* FindDependencies(const char* file)
   {
-    cmDependInformation* info = this->GetDependInformation(file, 0);
+    cmDependInformation* info = this->GetDependInformation(file, CM_NULLPTR);
     this->GenerateDependInformation(info);
     return info;
   }
@@ -203,7 +203,7 @@ protected:
             message += includeFile;
             message += " for file ";
             message += info->FullPath.c_str();
-            cmSystemTools::Error(message.c_str(), 0);
+            cmSystemTools::Error(message.c_str(), CM_NULLPTR);
           }
           continue;
         }
@@ -329,7 +329,7 @@ protected:
 
     // See if the cmSourceFile for it has any files specified as
     // dependency hints.
-    if (info->SourceFile != 0) {
+    if (info->SourceFile != CM_NULLPTR) {
 
       // Get the cmSourceFile corresponding to this.
       const cmSourceFile& cFile = *(info->SourceFile);

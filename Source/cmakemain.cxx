@@ -29,22 +29,23 @@
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
 static const char* cmDocumentationName[][2] = {
-  { 0, "  cmake - Cross-Platform Makefile Generator." },
-  { 0, 0 }
+  { CM_NULLPTR, "  cmake - Cross-Platform Makefile Generator." },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 static const char* cmDocumentationUsage[][2] = {
-  { 0, "  cmake [options] <path-to-source>\n"
-       "  cmake [options] <path-to-existing-build>" },
-  { 0, "Specify a source directory to (re-)generate a build system for "
-       "it in the current working directory.  Specify an existing build "
-       "directory to re-generate its build system." },
-  { 0, 0 }
+  { CM_NULLPTR, "  cmake [options] <path-to-source>\n"
+                "  cmake [options] <path-to-existing-build>" },
+  { CM_NULLPTR,
+    "Specify a source directory to (re-)generate a build system for "
+    "it in the current working directory.  Specify an existing build "
+    "directory to re-generate its build system." },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 static const char* cmDocumentationUsageNote[][2] = {
-  { 0, "Run 'cmake --help' for more information." },
-  { 0, 0 }
+  { CM_NULLPTR, "Run 'cmake --help' for more information." },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 #define CMAKE_BUILD_OPTIONS                                                   \
@@ -80,7 +81,7 @@ static const char* cmDocumentationOptions[][2] = {
   { "--no-warn-unused-cli", "Don't warn about command line options." },
   { "--check-system-vars", "Find problems with variable usage in system "
                            "files." },
-  { 0, 0 }
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 #endif
@@ -106,7 +107,7 @@ static cmMakefile* cmakemainGetMakefile(void* clientdata)
       return gg->GetCurrentMakefile();
     }
   }
-  return 0;
+  return CM_NULLPTR;
 }
 
 static std::string cmakemainGetStack(void* clientdata)

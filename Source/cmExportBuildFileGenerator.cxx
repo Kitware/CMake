@@ -18,8 +18,8 @@
 
 cmExportBuildFileGenerator::cmExportBuildFileGenerator()
 {
-  this->LG = 0;
-  this->ExportSet = 0;
+  this->LG = CM_NULLPTR;
+  this->ExportSet = CM_NULLPTR;
 }
 
 void cmExportBuildFileGenerator::Compute(cmLocalGenerator* lg)

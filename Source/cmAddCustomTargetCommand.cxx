@@ -47,7 +47,7 @@ bool cmAddCustomTargetCommand::InitialPass(
   bool verbatim = false;
   bool uses_terminal = false;
   std::string comment_buffer;
-  const char* comment = 0;
+  const char* comment = CM_NULLPTR;
   std::vector<std::string> sources;
 
   // Keep track of parser state.

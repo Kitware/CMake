@@ -33,13 +33,13 @@
   } while (0)
 
 cmCPackIFWInstaller::cmCPackIFWInstaller()
-  : Generator(0)
+  : Generator(CM_NULLPTR)
 {
 }
 
 const char* cmCPackIFWInstaller::GetOption(const std::string& op) const
 {
-  return Generator ? Generator->GetOption(op) : 0;
+  return Generator ? Generator->GetOption(op) : CM_NULLPTR;
 }
 
 bool cmCPackIFWInstaller::IsOn(const std::string& op) const
