@@ -56,63 +56,64 @@ void cmServerProtocol::processRequest(const std::string& json)
      return;
    }
 
+  auto const type = value["type"].asString();
   if (this->Server->GetState() == cmMetadataServer::Started) {
-    if (value["type"] == "handshake") {
+    if (type == "handshake") {
       this->ProcessHandshake(value["protocolVersion"].asString());
     } else {
-      this->Error("unknown query type " + value["type"].asString());
+      this->Error("unknown query type " + type);
     }
     return;
   }
   if (this->Server->GetState() == cmMetadataServer::ProcessingRequests) {
-    if (value["type"] == "version") {
+    if (type == "version") {
       this->ProcessVersion();
-    } else if (value["type"] == "buildsystem") {
+    } else if (type == "buildsystem") {
       this->ProcessBuildsystem();
-    } else if (value["type"] == "target_info") {
+    } else if (type == "target_info") {
       const char* language = 0;
       if (value.isMember("language")) {
         language = value["language"].asCString();
       }
       this->ProcessTargetInfo(value["target_name"].asString(),
                               value["config"].asString(), language);
-    } else if (value["type"] == "file_info") {
+    } else if (type == "file_info") {
       this->ProcessFileInfo(value["target_name"].asString(),
                             value["config"].asString(),
                             value["file_path"].asString());
-    } else if (value["type"] == "content") {
+    } else if (type == "content") {
       auto diff = cmServerDiff::GetDiff(value);
       this->ProcessContent(value["file_path"].asString(),
                            value["file_line"].asInt(), diff,
                            value["matcher"].asString());
-    } else if (value["type"] == "parse") {
+    } else if (type == "parse") {
       auto diff = cmServerDiff::GetDiff(value);
       this->ProcessParse(value["file_path"].asString(), diff);
-    } else if (value["type"] == "contextual_help") {
+    } else if (type == "contextual_help") {
       this->ProcessContextualHelp(
         value["file_path"].asString(), value["file_line"].asInt(),
         value["file_column"].asInt(), value["file_content"].asString());
-    } else if (value["type"] == "content_diff") {
+    } else if (type == "content_diff") {
       auto diffs = cmServerDiff::GetDiffs(value);
       this->ProcessContentDiff(
         value["file_path1"].asString(), value["file_line1"].asInt(),
         value["file_path2"].asString(), value["file_line2"].asInt(), diffs);
-    } else if (value["type"] == "code_complete") {
+    } else if (type == "code_complete") {
       auto diff = cmServerDiff::GetDiff(value);
       this->ProcessCodeComplete(value["file_path"].asString(),
                                 value["file_line"].asInt(),
                                 value["file_column"].asInt(), diff);
-    } else if (value["type"] == "context_writers") {
+    } else if (type == "context_writers") {
       auto diff = cmServerDiff::GetDiff(value);
 
       this->ProcessContextWriters(value["file_path"].asString(),
                                   value["file_line"].asInt(),
                                   value["file_column"].asInt(), diff);
     } else {
-      this->Error("unknown query type " + value["type"].asString());
+      this->Error("unknown query type " + type);
     }
   } else {
-    this->Error("unknown query type " + value["type"].asString());
+    this->Error("unknown query type " + type);
   }
 }
 
