@@ -159,8 +159,7 @@ void cmMetadataServer::handleData(const std::string& data)
       return;
     }
     std::string line = mDataBuffer.substr(0, needle);
-    mDataBuffer.erase(mDataBuffer.begin(),
-                      mDataBuffer.begin() + needle + sizeof(LINE_SEP) - 1);
+    mDataBuffer.erase(0, needle + sizeof(LINE_SEP));
     if (line == "[== CMake MetaMagic ==[") {
       mJsonData.clear();
       continue;
