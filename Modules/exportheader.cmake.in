@@ -38,5 +38,5 @@
 #    define @NO_DEPRECATED_MACRO_NAME@
 #  endif
 #endif
-
+@CUSTOM_CONTENT@
 #endif

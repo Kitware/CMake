@@ -25,9 +25,12 @@ add_library(shared_variant SHARED ${lib_SRCS})
 set_target_properties(shared_variant PROPERTIES DEFINE_SYMBOL SHARED_VARIANT_MAKEDLL)
 add_library(static_variant ${lib_SRCS})
 
+set(MY_CUSTOM_CONTENT "#define MY_CUSTOM_CONTENT_ADDED")
+
 generate_export_header(shared_variant
   BASE_NAME libshared_and_static
   PREFIX_NAME MYPREFIX_
+  CUSTOM_CONTENT_FROM_VARIABLE MY_CUSTOM_CONTENT
 )
 
 set_target_properties(static_variant PROPERTIES COMPILE_FLAGS -DLIBSHARED_AND_STATIC_STATIC_DEFINE)
