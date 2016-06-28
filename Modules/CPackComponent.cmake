@@ -360,6 +360,20 @@ macro(cpack_append_string_variable_set_command var strvar)
   endif ()
 endmacro()
 
+# Macro that appends a SET command for the given list variable name (var)
+# to the macro named strvar, but only if the variable named "var"
+# has been defined. It's like add variable, but wrap each item to quotes.
+# The string will eventually be appended to a CPack configuration file.
+macro(cpack_append_list_variable_set_command var strvar)
+  if (DEFINED ${var})
+    string(APPEND ${strvar} "set(${var}")
+    foreach(_val IN LISTS ${var})
+      string(APPEND ${strvar} "\n  \"${_val}\"")
+    endforeach()
+    string(APPEND ${strvar} ")\n")
+  endif ()
+endmacro()
+
 # Macro that appends a SET command for the given variable name (var)
 # to the macro named strvar, but only if the variable named "var"
 # has been set to true. The string will eventually be
