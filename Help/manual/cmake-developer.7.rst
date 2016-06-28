@@ -24,9 +24,10 @@ to build with such toolchains.
 std::auto_ptr
 -------------
 
-Some implementations have a ``std::auto_ptr`` which can not be used as a
-return value from a function. ``std::auto_ptr`` may not be used. Use
-``cmsys::auto_ptr`` instead.
+The ``std::auto_ptr`` template is deprecated in C++11.  We want to use it
+so we can build on C++98 compilers but we do not want to turn off compiler
+warnings about deprecated interfaces in general.  Use the ``CM_AUTO_PTR``
+macro instead.
 
 size_t
 ------

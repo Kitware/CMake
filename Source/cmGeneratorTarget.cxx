@@ -42,13 +42,13 @@ class cmGeneratorTarget::TargetPropertyEntry
   static cmLinkImplItem NoLinkImplItem;
 
 public:
-  TargetPropertyEntry(cmsys::auto_ptr<cmCompiledGeneratorExpression> cge,
+  TargetPropertyEntry(CM_AUTO_PTR<cmCompiledGeneratorExpression> cge,
                       cmLinkImplItem const& item = NoLinkImplItem)
     : ge(cge)
     , LinkImplItem(item)
   {
   }
-  const cmsys::auto_ptr<cmCompiledGeneratorExpression> ge;
+  const CM_AUTO_PTR<cmCompiledGeneratorExpression> ge;
   cmLinkImplItem const& LinkImplItem;
 };
 cmLinkImplItem cmGeneratorTarget::TargetPropertyEntry::NoLinkImplItem;
@@ -253,7 +253,7 @@ void CreatePropertyGeneratorExpressions(
   for (std::vector<std::string>::const_iterator it = entries.begin();
        it != entries.end(); ++it, ++btIt) {
     cmGeneratorExpression ge(*btIt);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*it);
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(*it);
     cge->SetEvaluateForBuildsystem(evaluateForBuildsystem);
     items.push_back(new cmGeneratorTarget::TargetPropertyEntry(cge));
   }
@@ -443,7 +443,7 @@ std::string cmGeneratorTarget::GetOutputName(const std::string& config,
 
     // Now evaluate genex and update the previously-prepared map entry.
     cmGeneratorExpression ge;
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(outName);
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(outName);
     i->second = cge->Evaluate(this->LocalGenerator, config);
   } else if (i->second.empty()) {
     // An empty map entry indicates we have been called recursively
@@ -461,7 +461,7 @@ void cmGeneratorTarget::AddSource(const std::string& src)
   this->Target->AddSource(src);
   cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
   cmGeneratorExpression ge(lfbt);
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(src);
+  CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(src);
   cge->SetEvaluateForBuildsystem(true);
   this->SourceEntries.push_back(new TargetPropertyEntry(cge));
   this->SourceFilesMap.clear();
@@ -477,7 +477,7 @@ void cmGeneratorTarget::AddTracedSources(std::vector<std::string> const& srcs)
     this->LinkImplementationLanguageIsContextDependent = true;
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
     cmGeneratorExpression ge(lfbt);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(srcFiles);
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(srcFiles);
     cge->SetEvaluateForBuildsystem(true);
     this->SourceEntries.push_back(
       new cmGeneratorTarget::TargetPropertyEntry(cge));
@@ -862,7 +862,7 @@ static void AddInterfaceEntries(
       if (it->Target) {
         std::string genex = "$<TARGET_PROPERTY:" + *it + "," + prop + ">";
         cmGeneratorExpression ge(it->Backtrace);
-        cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
+        CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
         cge->SetEvaluateForBuildsystem(true);
         entries.push_back(
           new cmGeneratorTarget::TargetPropertyEntry(cge, *it));
@@ -2119,8 +2119,7 @@ void cmTargetTraceDependencies::CheckCustomCommand(cmCustomCommand const& cc)
     // Check for target references in generator expressions.
     for (cmCustomCommandLine::const_iterator cli = cit->begin();
          cli != cit->end(); ++cli) {
-      const cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-        ge.Parse(*cli);
+      const CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(*cli);
       cge->Evaluate(this->GeneratorTarget->GetLocalGenerator(), "", true);
       std::set<cmGeneratorTarget*> geTargets = cge->GetTargets();
       targets.insert(geTargets.begin(), geTargets.end());
@@ -2405,7 +2404,7 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories(
       libDir = frameworkCheck.match(1);
 
       cmGeneratorExpression ge;
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+      CM_AUTO_PTR<cmCompiledGeneratorExpression> cge =
         ge.Parse(libDir.c_str());
       linkInterfaceIncludeDirectoriesEntries.push_back(
         new cmGeneratorTarget::TargetPropertyEntry(cge));
@@ -2629,7 +2628,7 @@ void cmGeneratorTarget::GetCompileDefinitions(
         }
         case cmPolicies::OLD: {
           cmGeneratorExpression ge;
-          cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+          CM_AUTO_PTR<cmCompiledGeneratorExpression> cge =
             ge.Parse(configProp);
           linkInterfaceCompileDefinitionsEntries.push_back(
             new cmGeneratorTarget::TargetPropertyEntry(cge));
@@ -3981,7 +3980,7 @@ void cmGeneratorTarget::ExpandLinkItems(
     dagChecker.SetTransitivePropertiesOnly();
   }
   std::vector<std::string> libs;
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
+  CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(value);
   cmSystemTools::ExpandListArgument(cge->Evaluate(this->LocalGenerator, config,
                                                   false, headTarget, this,
                                                   &dagChecker),
@@ -4246,8 +4245,7 @@ bool cmGeneratorTarget::ComputeOutputDir(const std::string& config,
   if (const char* config_outdir = this->GetProperty(configProp)) {
     // Use the user-specified per-configuration output directory.
     cmGeneratorExpression ge;
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-      ge.Parse(config_outdir);
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(config_outdir);
     out = cge->Evaluate(this->LocalGenerator, config);
 
     // Skip per-configuration subdirectory.
@@ -4255,7 +4253,7 @@ bool cmGeneratorTarget::ComputeOutputDir(const std::string& config,
   } else if (const char* outdir = this->GetProperty(propertyName)) {
     // Use the user-specified output directory.
     cmGeneratorExpression ge;
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(outdir);
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(outdir);
     out = cge->Evaluate(this->LocalGenerator, config);
 
     // Skip per-configuration subdirectory if the value contained a
@@ -4990,7 +4988,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     cmGeneratorExpressionDAGChecker dagChecker(
       this->GetName(), "LINK_LIBRARIES", CM_NULLPTR, CM_NULLPTR);
     cmGeneratorExpression ge(*btIt);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> const cge = ge.Parse(*le);
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> const cge = ge.Parse(*le);
     std::string const evaluated =
       cge->Evaluate(this->LocalGenerator, config, false, head, &dagChecker);
     cmSystemTools::ExpandListArgument(evaluated, llibs);

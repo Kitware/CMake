@@ -74,12 +74,12 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
   }
 }
 
-cmsys::auto_ptr<cmCustomCommand>
+CM_AUTO_PTR<cmCustomCommand>
 cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmGeneratorTarget* target,
                                                    const std::string& config,
                                                    bool isFortran)
 {
-  cmsys::auto_ptr<cmCustomCommand> pcc;
+  CM_AUTO_PTR<cmCustomCommand> pcc;
 
   // If an executable exports symbols then VS wants to create an
   // import library but forgets to create the output directory.

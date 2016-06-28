@@ -365,7 +365,6 @@ KWSYS_CXX_SOURCES="\
   SystemTools"
 
 KWSYS_FILES="\
-  auto_ptr.hxx \
   Directory.hxx \
   Encoding.h \
   Encoding.hxx \

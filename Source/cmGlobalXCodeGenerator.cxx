@@ -24,7 +24,7 @@
 #include "cmXCodeObject.h"
 #include "cmake.h"
 
-#include <cmsys/auto_ptr.hxx>
+#include <cm_auto_ptr.hxx>
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmXMLParser.h"
@@ -175,7 +175,7 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(
     parser.ParseFile(
       "/Developer/Applications/Xcode.app/Contents/version.plist");
   }
-  cmsys::auto_ptr<cmGlobalXCodeGenerator> gg(
+  CM_AUTO_PTR<cmGlobalXCodeGenerator> gg(
     new cmGlobalXCodeGenerator(cm, parser.Version));
   if (gg->XcodeVersion == 20) {
     cmSystemTools::Message("Xcode 2.0 not really supported by cmake, "

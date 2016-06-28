@@ -17,8 +17,8 @@
 
 #include "cmListFileCache.h"
 
+#include <cm_auto_ptr.hxx>
 #include <cmsys/RegularExpression.hxx>
-#include <cmsys/auto_ptr.hxx>
 
 class cmGeneratorTarget;
 class cmLocalGenerator;
@@ -47,9 +47,8 @@ public:
     cmListFileBacktrace const& backtrace = cmListFileBacktrace());
   ~cmGeneratorExpression();
 
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> Parse(
-    std::string const& input);
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> Parse(const char* input);
+  CM_AUTO_PTR<cmCompiledGeneratorExpression> Parse(std::string const& input);
+  CM_AUTO_PTR<cmCompiledGeneratorExpression> Parse(const char* input);
 
   enum PreprocessContext
   {

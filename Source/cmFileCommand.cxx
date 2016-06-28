@@ -34,12 +34,12 @@
 // include sys/stat.h after sys/types.h
 #include <sys/stat.h>
 
+#include <cm_auto_ptr.hxx>
 #include <cmsys/Directory.hxx>
 #include <cmsys/Encoding.hxx>
 #include <cmsys/FStream.hxx>
 #include <cmsys/Glob.hxx>
 #include <cmsys/RegularExpression.hxx>
-#include <cmsys/auto_ptr.hxx>
 
 // Table of permissions flags.
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -330,7 +330,7 @@ bool cmFileCommand::HandleHashCommand(std::vector<std::string> const& args)
     return false;
   }
 
-  cmsys::auto_ptr<cmCryptoHash> hash(cmCryptoHash::New(args[0].c_str()));
+  CM_AUTO_PTR<cmCryptoHash> hash(cmCryptoHash::New(args[0].c_str()));
   if (hash.get()) {
     std::string out = hash->HashFile(args[1]);
     if (!out.empty()) {
@@ -2478,7 +2478,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   const char* cainfo = this->Makefile->GetDefinition("CMAKE_TLS_CAINFO");
   std::string expectedHash;
   std::string hashMatchMSG;
-  cmsys::auto_ptr<cmCryptoHash> hash;
+  CM_AUTO_PTR<cmCryptoHash> hash;
   bool showProgress = false;
 
   while (i != args.end()) {
@@ -2534,7 +2534,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
         this->SetError("DOWNLOAD missing sum value for EXPECTED_MD5.");
         return false;
       }
-      hash = cmsys::auto_ptr<cmCryptoHash>(cmCryptoHash::New("MD5"));
+      hash = CM_AUTO_PTR<cmCryptoHash>(cmCryptoHash::New("MD5"));
       hashMatchMSG = "MD5 sum";
       expectedHash = cmSystemTools::LowerCase(*i);
     } else if (*i == "SHOW_PROGRESS") {
@@ -2555,7 +2555,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
       }
       std::string algo = i->substr(0, pos);
       expectedHash = cmSystemTools::LowerCase(i->substr(pos + 1));
-      hash = cmsys::auto_ptr<cmCryptoHash>(cmCryptoHash::New(algo.c_str()));
+      hash = CM_AUTO_PTR<cmCryptoHash>(cmCryptoHash::New(algo.c_str()));
       if (!hash.get()) {
         std::string err = "DOWNLOAD EXPECTED_HASH given unknown ALGO: ";
         err += algo;
@@ -2971,11 +2971,11 @@ void cmFileCommand::AddEvaluationFile(const std::string& inputName,
   cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
 
   cmGeneratorExpression outputGe(lfbt);
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> outputCge =
+  CM_AUTO_PTR<cmCompiledGeneratorExpression> outputCge =
     outputGe.Parse(outputExpr);
 
   cmGeneratorExpression conditionGe(lfbt);
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> conditionCge =
+  CM_AUTO_PTR<cmCompiledGeneratorExpression> conditionCge =
     conditionGe.Parse(condition);
 
   this->Makefile->AddEvaluationFile(inputName, outputCge, conditionCge,

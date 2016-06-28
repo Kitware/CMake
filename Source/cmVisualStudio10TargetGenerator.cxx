@@ -42,7 +42,7 @@
 #include "cmVisualStudioGeneratorOptions.h"
 #include "windows.h"
 
-#include <cmsys/auto_ptr.hxx>
+#include <cm_auto_ptr.hxx>
 
 cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetClFlagTable() const
 {
@@ -1229,8 +1229,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
 
     if (!deployContent.empty()) {
       cmGeneratorExpression ge;
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-        ge.Parse(deployContent);
+      CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(deployContent);
       // Deployment location cannot be set on a configuration basis
       if (!deployLocation.empty()) {
         this->WriteString("<Link>", 3);
@@ -1684,7 +1683,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   // copied from cmLocalVisualStudio7Generator.cxx 805
   // TODO: Integrate code below with cmLocalVisualStudio7Generator.
 
-  cmsys::auto_ptr<Options> pOptions(new Options(
+  CM_AUTO_PTR<Options> pOptions(new Options(
     this->LocalGenerator, Options::Compiler, this->GetClFlagTable()));
   Options& clOptions = *pOptions;
 
@@ -1848,7 +1847,7 @@ bool cmVisualStudio10TargetGenerator::ComputeRcOptions()
 bool cmVisualStudio10TargetGenerator::ComputeRcOptions(
   std::string const& configName)
 {
-  cmsys::auto_ptr<Options> pOptions(new Options(
+  CM_AUTO_PTR<Options> pOptions(new Options(
     this->LocalGenerator, Options::ResourceCompiler, this->GetRcFlagTable()));
   Options& rcOptions = *pOptions;
 
@@ -1905,7 +1904,7 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions()
 bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
   std::string const& configName)
 {
-  cmsys::auto_ptr<Options> pOptions(new Options(
+  CM_AUTO_PTR<Options> pOptions(new Options(
     this->LocalGenerator, Options::MasmCompiler, this->GetMasmFlagTable()));
   Options& masmOptions = *pOptions;
 
@@ -2058,7 +2057,7 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
   if (const char* nativeLibDirectoriesExpression =
         this->GeneratorTarget->GetProperty("ANDROID_NATIVE_LIB_DIRECTORIES")) {
     cmGeneratorExpression ge;
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge =
       ge.Parse(nativeLibDirectoriesExpression);
     std::string nativeLibDirs =
       cge->Evaluate(this->LocalGenerator, configName);
@@ -2071,7 +2070,7 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
         this->GeneratorTarget->GetProperty(
           "ANDROID_NATIVE_LIB_DEPENDENCIES")) {
     cmGeneratorExpression ge;
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge =
       ge.Parse(nativeLibDependenciesExpression);
     std::string nativeLibDeps =
       cge->Evaluate(this->LocalGenerator, configName);
@@ -2090,7 +2089,7 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
   if (const char* jarDirectoriesExpression =
         this->GeneratorTarget->GetProperty("ANDROID_JAR_DIRECTORIES")) {
     cmGeneratorExpression ge;
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge =
       ge.Parse(jarDirectoriesExpression);
     std::string jarDirectories =
       cge->Evaluate(this->LocalGenerator, configName);
@@ -2150,7 +2149,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions()
 bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   std::string const& config)
 {
-  cmsys::auto_ptr<Options> pOptions(new Options(
+  CM_AUTO_PTR<Options> pOptions(new Options(
     this->LocalGenerator, Options::Linker, this->GetLinkFlagTable(), 0, this));
   Options& linkOptions = *pOptions;
 

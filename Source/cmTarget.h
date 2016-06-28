@@ -19,7 +19,7 @@
 #include "cmPolicies.h"
 #include "cmPropertyMap.h"
 
-#include <cmsys/auto_ptr.hxx>
+#include <cm_auto_ptr.hxx>
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #ifdef CMake_HAVE_CXX_UNORDERED_MAP
 #include <unordered_map>

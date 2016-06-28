@@ -66,7 +66,7 @@ std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
     }
   }
 
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = this->GE->Parse(argv0);
+  CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = this->GE->Parse(argv0);
   std::string exe = cge->Evaluate(this->LG, this->Config);
 
   return exe;
@@ -145,7 +145,7 @@ std::vector<std::string> const& cmCustomCommandGenerator::GetDepends() const
     std::vector<std::string> depends = this->CC.GetDepends();
     for (std::vector<std::string>::const_iterator i = depends.begin();
          i != depends.end(); ++i) {
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = this->GE->Parse(*i);
+      CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = this->GE->Parse(*i);
       std::vector<std::string> result;
       cmSystemTools::ExpandListArgument(cge->Evaluate(this->LG, this->Config),
                                         result);

@@ -28,8 +28,8 @@
 #include "cmSourceGroup.h"
 #endif
 
+#include <cm_auto_ptr.hxx>
 #include <cmsys/RegularExpression.hxx>
-#include <cmsys/auto_ptr.hxx>
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #ifdef CMake_HAVE_CXX_UNORDERED_MAP
 #include <unordered_map>
@@ -97,7 +97,7 @@ public:
    * Remove the function blocker whose scope ends with the given command.
    * This returns ownership of the function blocker object.
    */
-  cmsys::auto_ptr<cmFunctionBlocker> RemoveFunctionBlocker(
+  CM_AUTO_PTR<cmFunctionBlocker> RemoveFunctionBlocker(
     cmFunctionBlocker* fb, const cmListFileFunction& lff);
 
   /**
@@ -771,11 +771,10 @@ public:
 
   void EnforceDirectoryLevelRules() const;
 
-  void AddEvaluationFile(
-    const std::string& inputFile,
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> outputName,
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> condition,
-    bool inputIsContent);
+  void AddEvaluationFile(const std::string& inputFile,
+                         CM_AUTO_PTR<cmCompiledGeneratorExpression> outputName,
+                         CM_AUTO_PTR<cmCompiledGeneratorExpression> condition,
+                         bool inputIsContent);
   std::vector<cmGeneratorExpressionEvaluationFile*> GetEvaluationFiles() const;
 
   std::vector<cmExportBuildFileGenerator*> GetExportBuildFileGenerators()
