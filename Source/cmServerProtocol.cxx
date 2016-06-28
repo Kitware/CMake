@@ -228,6 +228,9 @@ void cmServerProtocol::ProcessBuildsystem()
   auto mf = this->CMakeInstance->GetGlobalGenerator()->GetMakefiles()[0];
   auto lg = this->CMakeInstance->GetGlobalGenerator()->GetLocalGenerators()[0];
 
+  obj["version"  ] = mf->GetSafeDefinition("CMAKE_VERSION");
+  obj["generator"] = mf->GetSafeDefinition("CMAKE_GENERATOR");
+
   Json::Value& configs = obj["configs"] = Json::arrayValue;
 
   std::vector<std::string> configsVec;
