@@ -571,7 +571,7 @@ macro(cpack_ifw_configure_component compname)
   endforeach()
 
   foreach(_IFW_ARG_NAME ${_IFW_MULTI_ARGS})
-  cpack_append_variable_set_command(
+  cpack_append_list_variable_set_command(
     CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME}_${_IFW_ARG_NAME}
     _CPACK_IFWCOMP_STR)
   endforeach()
@@ -604,7 +604,7 @@ macro(cpack_ifw_configure_component_group grpname)
   endforeach()
 
   foreach(_IFW_ARG_NAME ${_IFW_MULTI_ARGS})
-  cpack_append_variable_set_command(
+  cpack_append_list_variable_set_command(
     CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME}_${_IFW_ARG_NAME}
     _CPACK_IFWGRP_STR)
   endforeach()
