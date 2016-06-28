@@ -43,6 +43,7 @@ private:
   void ProcessHandshake(const std::string& protocolVersion);
   void ProcessVersion();
   void ProcessBuildsystem();
+  void ProcessCMakeVariables();
   void ProcessTargetInfo(std::string tgtName, std::string config,
                          const char* language);
   void ProcessFileInfo(std::string tgtName, std::string config,

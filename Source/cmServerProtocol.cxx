@@ -74,6 +74,8 @@ bool cmServerProtocol::processRequest(const std::string& json)
       this->ProcessVersion();
     } else if (type == "buildsystem") {
       this->ProcessBuildsystem();
+    } else if (type == "cmake_variables") {
+      this->ProcessCMakeVariables();
     } else if (type == "target_info") {
       const char* language = 0;
       if (value.isMember("language")) {
@@ -278,6 +280,18 @@ void cmServerProtocol::ProcessBuildsystem()
       target["projectName"] = lg->GetProjectName();
       targets.append(target);
     }
+  }
+  this->Server->WriteResponse(root);
+}
+
+void cmServerProtocol::ProcessCMakeVariables()
+{
+  Json::Value root = Json::objectValue;
+  Json::Value& obj = root["cmake_variables"] = Json::objectValue;
+
+  auto const state = this->CMakeInstance->GetState();
+  for (auto const& key : state->GetCacheEntryKeys()) {
+    obj[key] = state->GetCacheEntryValue(key);
   }
   this->Server->WriteResponse(root);
 }
