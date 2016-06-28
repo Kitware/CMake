@@ -91,7 +91,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
 
   if (this->Target->GetType() == cmState::UTILITY) {
     std::ostringstream e;
-    const char* modal = 0;
+    const char* modal = CM_NULLPTR;
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0039)) {
       case cmPolicies::WARN:
@@ -307,7 +307,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
   if (!this->Target->PushTLLCommandTrace(
         sig, this->Makefile->GetExecutionContext())) {
     std::ostringstream e;
-    const char* modal = 0;
+    const char* modal = CM_NULLPTR;
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0023)) {
       case cmPolicies::WARN:

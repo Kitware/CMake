@@ -27,7 +27,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmCTestUpdateCommand* ni = new cmCTestUpdateCommand;
     ni->CTest = this->CTest;
@@ -38,12 +38,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_update"; }
+  std::string GetName() const CM_OVERRIDE { return "ctest_update"; }
 
   cmTypeMacro(cmCTestUpdateCommand, cmCTestHandlerCommand);
 
 protected:
-  cmCTestGenericHandler* InitializeHandler();
+  cmCTestGenericHandler* InitializeHandler() CM_OVERRIDE;
 };
 
 #endif

@@ -27,17 +27,17 @@ public:
                               const char* component, MessageLevel message,
                               bool exclude_from_all, const char* literal_args,
                               bool optional = false);
-  virtual ~cmInstallDirectoryGenerator();
+  ~cmInstallDirectoryGenerator() CM_OVERRIDE;
 
-  void Compute(cmLocalGenerator* lg);
+  void Compute(cmLocalGenerator* lg) CM_OVERRIDE;
 
   std::string GetDestination(std::string const& config) const;
 
 protected:
-  virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
-  virtual void GenerateScriptForConfig(std::ostream& os,
-                                       const std::string& config,
-                                       Indent const& indent);
+  void GenerateScriptActions(std::ostream& os,
+                             Indent const& indent) CM_OVERRIDE;
+  void GenerateScriptForConfig(std::ostream& os, const std::string& config,
+                               Indent const& indent) CM_OVERRIDE;
   void AddDirectoryInstallRule(std::ostream& os, const std::string& config,
                                Indent const& indent,
                                std::vector<std::string> const& dirs);

@@ -33,7 +33,7 @@ class cmGlobalKdevelopGenerator : public cmExternalMakefileProjectGenerator
 public:
   cmGlobalKdevelopGenerator();
 
-  virtual std::string GetName() const
+  std::string GetName() const CM_OVERRIDE
   {
     return cmGlobalKdevelopGenerator::GetActualName();
   }
@@ -43,10 +43,10 @@ public:
     return new cmGlobalKdevelopGenerator;
   }
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry,
-                                const std::string& fullName) const;
+  void GetDocumentation(cmDocumentationEntry& entry,
+                        const std::string& fullName) const CM_OVERRIDE;
 
-  virtual void Generate();
+  void Generate() CM_OVERRIDE;
 
 private:
   /*** Create the foo.kdevelop.filelist file, return false if it doesn't

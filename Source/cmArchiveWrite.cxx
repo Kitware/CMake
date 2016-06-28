@@ -151,9 +151,9 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c,
   }
 
   if (archive_write_open(
-        this->Archive, this, 0,
+        this->Archive, this, CM_NULLPTR,
         reinterpret_cast<archive_write_callback*>(&Callback::Write),
-        0) != ARCHIVE_OK) {
+        CM_NULLPTR) != ARCHIVE_OK) {
     this->Error = "archive_write_open: ";
     this->Error += cm_archive_error_string(this->Archive);
     return;
@@ -229,7 +229,8 @@ bool cmArchiveWrite::AddFile(const char* file, size_t skip, const char* prefix)
   Entry e;
   cm_archive_entry_copy_sourcepath(e, file);
   cm_archive_entry_copy_pathname(e, dest);
-  if (archive_read_disk_entry_from_file(this->Disk, e, -1, 0) != ARCHIVE_OK) {
+  if (archive_read_disk_entry_from_file(this->Disk, e, -1, CM_NULLPTR) !=
+      ARCHIVE_OK) {
     this->Error = "archive_read_disk_entry_from_file '";
     this->Error += file;
     this->Error += "': ";

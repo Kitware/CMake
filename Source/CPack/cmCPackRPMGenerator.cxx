@@ -121,7 +121,7 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
     for (compIt = this->Components.begin(); compIt != this->Components.end();
          ++compIt) {
       // Does the component belong to a group?
-      if (compIt->second.Group == NULL) {
+      if (compIt->second.Group == CM_NULLPTR) {
         cmCPackLogger(
           cmCPackLog::LOG_VERBOSE, "Component <"
             << compIt->second.Name
@@ -245,7 +245,7 @@ std::string cmCPackRPMGenerator::GetComponentInstallDirNameSuffix(
   // the current COMPONENT belongs to.
   std::string groupVar =
     "CPACK_COMPONENT_" + cmSystemTools::UpperCase(componentName) + "_GROUP";
-  if (NULL != GetOption(groupVar)) {
+  if (CM_NULLPTR != GetOption(groupVar)) {
     return std::string(GetOption(groupVar));
   } else {
     return componentName;

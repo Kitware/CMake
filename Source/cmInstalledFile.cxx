@@ -16,7 +16,7 @@
 #include "cmSystemTools.h"
 
 cmInstalledFile::cmInstalledFile()
-  : NameExpression(0)
+  : NameExpression(CM_NULLPTR)
 {
 }
 

@@ -340,8 +340,8 @@ void cmLocalUnixMakefileGenerator3::WriteObjectConvenienceRule(
     std::vector<std::string> depends;
     depends.push_back(output);
     std::vector<std::string> no_commands;
-    this->WriteMakeRule(ruleFileStream, 0, outNoExt, depends, no_commands,
-                        true, true);
+    this->WriteMakeRule(ruleFileStream, CM_NULLPTR, outNoExt, depends,
+                        no_commands, true, true);
     inHelp = false;
   }
 
@@ -703,8 +703,8 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsTop(
   // Add a fake suffix to keep HP happy.  Must be max 32 chars for SGI make.
   std::vector<std::string> depends;
   depends.push_back(".hpux_make_needs_suffix_list");
-  this->WriteMakeRule(makefileStream, 0, ".SUFFIXES", depends, no_commands,
-                      false);
+  this->WriteMakeRule(makefileStream, CM_NULLPTR, ".SUFFIXES", depends,
+                      no_commands, false);
   if (this->IsWatcomWMake()) {
     // Switch on WMake feature, if an error or interrupt occurs during
     // makefile processing, the current target being made may be deleted
@@ -1164,7 +1164,7 @@ void cmLocalUnixMakefileGenerator3::AppendEcho(
       line = "";
 
       // Progress appears only on first line.
-      progress = 0;
+      progress = CM_NULLPTR;
 
       // Terminate on end-of-string.
       if (*c == '\0') {
@@ -1433,7 +1433,7 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
     std::string lang = *li;
 
     // Create the scanner for this language
-    cmDepends* scanner = 0;
+    cmDepends* scanner = CM_NULLPTR;
     if (lang == "C" || lang == "CXX" || lang == "RC" || lang == "ASM") {
       // TODO: Handle RC (resource files) dependencies correctly.
       scanner = new cmDependsC(this, targetDir, lang, &validDeps);

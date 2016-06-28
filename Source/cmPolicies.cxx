@@ -57,9 +57,9 @@ static const char* idToString(cmPolicies::PolicyID id)
     CM_FOR_EACH_POLICY_ID(POLICY_CASE)
 #undef POLICY_CASE
     case cmPolicies::CMPCOUNT:
-      return 0;
+      return CM_NULLPTR;
   }
-  return 0;
+  return CM_NULLPTR;
 }
 
 static const char* idToVersion(cmPolicies::PolicyID id)
@@ -71,9 +71,9 @@ static const char* idToVersion(cmPolicies::PolicyID id)
     CM_FOR_EACH_POLICY_ID_VERSION(POLICY_CASE)
 #undef POLICY_CASE
     case cmPolicies::CMPCOUNT:
-      return 0;
+      return CM_NULLPTR;
   }
-  return 0;
+  return CM_NULLPTR;
 }
 
 static bool isPolicyNewerThan(cmPolicies::PolicyID id, unsigned int majorV,
@@ -102,9 +102,9 @@ const char* idToShortDescription(cmPolicies::PolicyID id)
     CM_FOR_EACH_POLICY_ID_DOC(POLICY_CASE)
 #undef POLICY_CASE
     case cmPolicies::CMPCOUNT:
-      return 0;
+      return CM_NULLPTR;
   }
-  return 0;
+  return CM_NULLPTR;
 }
 
 static void DiagnoseAncientPolicies(

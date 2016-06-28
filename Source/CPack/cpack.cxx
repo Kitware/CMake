@@ -27,13 +27,13 @@
 #include <cmsys/SystemTools.hxx>
 
 static const char* cmDocumentationName[][2] = {
-  { 0, "  cpack - Packaging driver provided by CMake." },
-  { 0, 0 }
+  { CM_NULLPTR, "  cpack - Packaging driver provided by CMake." },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 static const char* cmDocumentationUsage[][2] = {
-  { 0, "  cpack -G <generator> [options]" },
-  { 0, 0 }
+  { CM_NULLPTR, "  cpack -G <generator> [options]" },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 static const char* cmDocumentationOptions[][2] = {
@@ -47,7 +47,7 @@ static const char* cmDocumentationOptions[][2] = {
   { "-R <package version>", "override/define CPACK_PACKAGE_VERSION" },
   { "-B <package directory>", "override/define CPACK_PACKAGE_DIRECTORY" },
   { "--vendor <vendor name>", "override/define CPACK_PACKAGE_VENDOR" },
-  { 0, 0 }
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 int cpackUnknownArgument(const char*, void*)
@@ -200,7 +200,7 @@ int main(int argc, char const* const* argv)
 
   cmCPackGeneratorFactory generators;
   generators.SetLogger(&log);
-  cmCPackGenerator* cpackGenerator = 0;
+  cmCPackGenerator* cpackGenerator = CM_NULLPTR;
 
   cmDocumentation doc;
   doc.addCPackStandardDocSections();

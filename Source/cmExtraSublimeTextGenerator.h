@@ -30,7 +30,7 @@ public:
   typedef std::map<std::string, std::vector<std::string> > MapSourceFileFlags;
   cmExtraSublimeTextGenerator();
 
-  virtual std::string GetName() const
+  std::string GetName() const CM_OVERRIDE
   {
     return cmExtraSublimeTextGenerator::GetActualName();
   }
@@ -40,10 +40,10 @@ public:
     return new cmExtraSublimeTextGenerator;
   }
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry,
-                                const std::string& fullName) const;
+  void GetDocumentation(cmDocumentationEntry& entry,
+                        const std::string& fullName) const CM_OVERRIDE;
 
-  virtual void Generate();
+  void Generate() CM_OVERRIDE;
 
 private:
   void CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs);

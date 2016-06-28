@@ -63,7 +63,7 @@ struct cmGeneratorExpressionDAGChecker
   void ReportError(cmGeneratorExpressionContext* context,
                    const std::string& expr);
 
-  bool EvaluatingLinkLibraries(const char* tgt = 0);
+  bool EvaluatingLinkLibraries(const char* tgt = CM_NULLPTR);
 
 #define DECLARE_TRANSITIVE_PROPERTY_METHOD(METHOD) bool METHOD() const;
 

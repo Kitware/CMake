@@ -23,7 +23,7 @@ cmInstallFilesGenerator::cmInstallFilesGenerator(
   const char* rename, bool optional)
   : cmInstallGenerator(dest, configurations, component, message,
                        exclude_from_all)
-  , LocalGenerator(0)
+  , LocalGenerator(CM_NULLPTR)
   , Files(files)
   , FilePermissions(file_permissions)
   , Rename(rename)
@@ -65,12 +65,12 @@ void cmInstallFilesGenerator::AddFilesInstallRule(
   std::vector<std::string> const& files)
 {
   // Write code to install the files.
-  const char* no_dir_permissions = 0;
+  const char* no_dir_permissions = CM_NULLPTR;
   this->AddInstallRule(
     os, this->GetDestination(config),
     (this->Programs ? cmInstallType_PROGRAMS : cmInstallType_FILES), files,
     this->Optional, this->FilePermissions.c_str(), no_dir_permissions,
-    this->Rename.c_str(), 0, indent);
+    this->Rename.c_str(), CM_NULLPTR, indent);
 }
 
 void cmInstallFilesGenerator::GenerateScriptActions(std::ostream& os,

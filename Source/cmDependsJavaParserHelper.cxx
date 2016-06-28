@@ -59,7 +59,7 @@ void cmDependsJavaParserHelper::DeallocateParserType(char** pt)
   if (!*pt) {
     return;
   }
-  *pt = 0;
+  *pt = CM_NULLPTR;
   this->UnionsAvailable--;
 }
 
@@ -160,13 +160,13 @@ void cmDependsJavaParserHelper::PrepareElement(
   cmDependsJavaParserHelper::ParserType* me)
 {
   // Inititalize self
-  me->str = 0;
+  me->str = CM_NULLPTR;
 }
 
 void cmDependsJavaParserHelper::AllocateParserType(
   cmDependsJavaParserHelper::ParserType* pt, const char* str, int len)
 {
-  pt->str = 0;
+  pt->str = CM_NULLPTR;
   if (len == 0) {
     len = (int)strlen(str);
   }
@@ -226,7 +226,7 @@ std::vector<std::string> cmDependsJavaParserHelper::GetFilesProduced()
   std::vector<CurrentClass>::const_iterator it;
   for (it = toplevel.NestedClasses.begin(); it != toplevel.NestedClasses.end();
        ++it) {
-    it->AddFileNamesForPrinting(&files, 0, "$");
+    it->AddFileNamesForPrinting(&files, CM_NULLPTR, "$");
   }
   return files;
 }
@@ -326,7 +326,7 @@ void cmDependsJavaParserHelper::Error(const char* str)
 void cmDependsJavaParserHelper::UpdateCombine(const char* str1,
                                               const char* str2)
 {
-  if (this->CurrentCombine == "" && str1 != 0) {
+  if (this->CurrentCombine == "" && str1 != CM_NULLPTR) {
     this->CurrentCombine = str1;
   }
   this->CurrentCombine += ".";

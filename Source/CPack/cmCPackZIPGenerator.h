@@ -27,10 +27,10 @@ public:
    * Construct generator
    */
   cmCPackZIPGenerator();
-  virtual ~cmCPackZIPGenerator();
+  ~cmCPackZIPGenerator() CM_OVERRIDE;
 
 protected:
-  virtual const char* GetOutputExtension() { return ".zip"; }
+  const char* GetOutputExtension() CM_OVERRIDE { return ".zip"; }
 };
 
 #endif

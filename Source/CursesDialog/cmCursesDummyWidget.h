@@ -25,7 +25,7 @@ public:
   // Handle user input. Called by the container of this widget
   // when this widget has focus. Returns true if the input was
   // handled.
-  virtual bool HandleInput(int& key, cmCursesMainForm* fm, WINDOW* w);
+  bool HandleInput(int& key, cmCursesMainForm* fm, WINDOW* w) CM_OVERRIDE;
 
 protected:
   cmCursesDummyWidget(const cmCursesDummyWidget& from);

@@ -24,12 +24,12 @@ public:
   /** Construct with a CTest instance and update log stream.  */
   cmCTestCVS(cmCTest* ctest, std::ostream& log);
 
-  virtual ~cmCTestCVS();
+  ~cmCTestCVS() CM_OVERRIDE;
 
 private:
   // Implement cmCTestVC internal API.
-  virtual bool UpdateImpl();
-  virtual bool WriteXMLUpdates(cmXMLWriter& xml);
+  bool UpdateImpl() CM_OVERRIDE;
+  bool WriteXMLUpdates(cmXMLWriter& xml) CM_OVERRIDE;
 
   // Update status for files in each directory.
   class Directory : public std::map<std::string, PathStatus>

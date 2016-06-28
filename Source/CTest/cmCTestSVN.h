@@ -26,14 +26,14 @@ public:
   /** Construct with a CTest instance and update log stream.  */
   cmCTestSVN(cmCTest* ctest, std::ostream& log);
 
-  virtual ~cmCTestSVN();
+  ~cmCTestSVN() CM_OVERRIDE;
 
 private:
   // Implement cmCTestVC internal API.
-  virtual void CleanupImpl();
-  virtual void NoteOldRevision();
-  virtual void NoteNewRevision();
-  virtual bool UpdateImpl();
+  void CleanupImpl() CM_OVERRIDE;
+  void NoteOldRevision() CM_OVERRIDE;
+  void NoteNewRevision() CM_OVERRIDE;
+  bool UpdateImpl() CM_OVERRIDE;
 
   bool RunSVNCommand(std::vector<char const*> const& parameters,
                      OutputParser* out, OutputParser* err);
@@ -78,8 +78,8 @@ private:
 
   std::string LoadInfo(SVNInfo& svninfo);
   void LoadExternals();
-  void LoadModifications();
-  void LoadRevisions();
+  void LoadModifications() CM_OVERRIDE;
+  void LoadRevisions() CM_OVERRIDE;
   void LoadRevisions(SVNInfo& svninfo);
 
   void GuessBase(SVNInfo& svninfo, std::vector<Change> const& changes);
@@ -87,7 +87,7 @@ private:
   void DoRevisionSVN(Revision const& revision,
                      std::vector<Change> const& changes);
 
-  void WriteXMLGlobal(cmXMLWriter& xml);
+  void WriteXMLGlobal(cmXMLWriter& xml) CM_OVERRIDE;
 
   // Parsing helper classes.
   class InfoParser;

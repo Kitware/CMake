@@ -93,7 +93,7 @@ public:
                   const cmNinjaDeps& orderOnlyDeps,
                   const cmNinjaVars& variables,
                   const std::string& rspfile = std::string(),
-                  int cmdLineLimit = 0, bool* usedResponseFile = 0);
+                  int cmdLineLimit = 0, bool* usedResponseFile = CM_NULLPTR);
 
   /**
    * Helper to write a build statement with the special 'phony' rule.
@@ -161,11 +161,11 @@ public:
     return new cmGlobalGeneratorSimpleFactory<cmGlobalNinjaGenerator>();
   }
 
-  virtual ~cmGlobalNinjaGenerator() {}
+  ~cmGlobalNinjaGenerator() CM_OVERRIDE {}
 
-  virtual cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf);
+  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) CM_OVERRIDE;
 
-  virtual std::string GetName() const
+  std::string GetName() const CM_OVERRIDE
   {
     return cmGlobalNinjaGenerator::GetActualName();
   }
@@ -174,39 +174,44 @@ public:
 
   static void GetDocumentation(cmDocumentationEntry& entry);
 
-  virtual void EnableLanguage(std::vector<std::string> const& languages,
-                              cmMakefile* mf, bool optional);
+  void EnableLanguage(std::vector<std::string> const& languages,
+                      cmMakefile* mf, bool optional) CM_OVERRIDE;
 
-  virtual void GenerateBuildCommand(
-    std::vector<std::string>& makeCommand, const std::string& makeProgram,
-    const std::string& projectName, const std::string& projectDir,
-    const std::string& targetName, const std::string& config, bool fast,
-    bool verbose,
-    std::vector<std::string> const& makeOptions = std::vector<std::string>());
+  void GenerateBuildCommand(std::vector<std::string>& makeCommand,
+                            const std::string& makeProgram,
+                            const std::string& projectName,
+                            const std::string& projectDir,
+                            const std::string& targetName,
+                            const std::string& config, bool fast, bool verbose,
+                            std::vector<std::string> const& makeOptions =
+                              std::vector<std::string>()) CM_OVERRIDE;
 
   // Setup target names
-  virtual const char* GetAllTargetName() const { return "all"; }
-  virtual const char* GetInstallTargetName() const { return "install"; }
-  virtual const char* GetInstallLocalTargetName() const
+  const char* GetAllTargetName() const CM_OVERRIDE { return "all"; }
+  const char* GetInstallTargetName() const CM_OVERRIDE { return "install"; }
+  const char* GetInstallLocalTargetName() const CM_OVERRIDE
   {
     return "install/local";
   }
-  virtual const char* GetInstallStripTargetName() const
+  const char* GetInstallStripTargetName() const CM_OVERRIDE
   {
     return "install/strip";
   }
-  virtual const char* GetTestTargetName() const { return "test"; }
-  virtual const char* GetPackageTargetName() const { return "package"; }
-  virtual const char* GetPackageSourceTargetName() const
+  const char* GetTestTargetName() const CM_OVERRIDE { return "test"; }
+  const char* GetPackageTargetName() const CM_OVERRIDE { return "package"; }
+  const char* GetPackageSourceTargetName() const CM_OVERRIDE
   {
     return "package_source";
   }
-  virtual const char* GetEditCacheTargetName() const { return "edit_cache"; }
-  virtual const char* GetRebuildCacheTargetName() const
+  const char* GetEditCacheTargetName() const CM_OVERRIDE
+  {
+    return "edit_cache";
+  }
+  const char* GetRebuildCacheTargetName() const CM_OVERRIDE
   {
     return "rebuild_cache";
   }
-  virtual const char* GetCleanTargetName() const { return "clean"; }
+  const char* GetCleanTargetName() const CM_OVERRIDE { return "clean"; }
 
   cmGeneratedFileStream* GetBuildFileStream() const
   {
@@ -307,7 +312,7 @@ public:
 
   void AddTargetAlias(const std::string& alias, cmGeneratorTarget* target);
 
-  virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
+  void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const CM_OVERRIDE;
 
   // Ninja generator uses 'deps' and 'msvc_deps_prefix' introduced in 1.3
   static std::string RequiredNinjaVersion() { return "1.3"; }
@@ -319,13 +324,13 @@ public:
   void StripNinjaOutputPathPrefixAsSuffix(std::string& path);
 
 protected:
-  virtual void Generate();
+  void Generate() CM_OVERRIDE;
 
-  virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const { return true; }
+  bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const CM_OVERRIDE { return true; }
 
 private:
-  virtual std::string GetEditCacheCommand() const;
-  virtual void FindMakeProgram(cmMakefile* mf);
+  std::string GetEditCacheCommand() const CM_OVERRIDE;
+  void FindMakeProgram(cmMakefile* mf) CM_OVERRIDE;
 
   void OpenBuildFileStream();
   void CloseBuildFileStream();

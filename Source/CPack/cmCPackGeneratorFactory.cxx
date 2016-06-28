@@ -151,7 +151,7 @@ cmCPackGenerator* cmCPackGeneratorFactory::NewGenerator(
 {
   cmCPackGenerator* gen = this->NewGeneratorInternal(name);
   if (!gen) {
-    return 0;
+    return CM_NULLPTR;
   }
   this->Generators.push_back(gen);
   gen->SetLogger(this->Logger);
@@ -164,7 +164,7 @@ cmCPackGenerator* cmCPackGeneratorFactory::NewGeneratorInternal(
   cmCPackGeneratorFactory::t_GeneratorCreatorsMap::iterator it =
     this->GeneratorCreators.find(name);
   if (it == this->GeneratorCreators.end()) {
-    return 0;
+    return CM_NULLPTR;
   }
   return (it->second)();
 }

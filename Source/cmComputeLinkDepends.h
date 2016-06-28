@@ -44,7 +44,7 @@ public:
     bool IsFlag;
     LinkEntry()
       : Item()
-      , Target(0)
+      , Target(CM_NULLPTR)
       , IsSharedDep(false)
       , IsFlag(false)
     {

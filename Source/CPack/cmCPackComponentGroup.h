@@ -43,7 +43,7 @@ class cmCPackComponent
 {
 public:
   cmCPackComponent()
-    : Group(0)
+    : Group(CM_NULLPTR)
     , IsRequired(true)
     , IsHidden(false)
     , IsDisabledByDefault(false)
@@ -117,7 +117,7 @@ class cmCPackComponentGroup
 {
 public:
   cmCPackComponentGroup()
-    : ParentGroup(0)
+    : ParentGroup(CM_NULLPTR)
   {
   }
 

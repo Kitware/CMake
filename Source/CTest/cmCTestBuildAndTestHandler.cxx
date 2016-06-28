@@ -72,7 +72,7 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
     args.push_back(toolset);
   }
 
-  const char* config = 0;
+  const char* config = CM_NULLPTR;
   if (!this->CTest->GetConfigType().empty()) {
     config = this->CTest->GetConfigType().c_str();
   }
@@ -158,10 +158,10 @@ public:
   }
   ~cmCTestBuildAndTestCaptureRAII()
   {
-    this->CM.SetProgressCallback(0, 0);
-    cmSystemTools::SetStderrCallback(0, 0);
-    cmSystemTools::SetStdoutCallback(0, 0);
-    cmSystemTools::SetMessageCallback(0, 0);
+    this->CM.SetProgressCallback(CM_NULLPTR, CM_NULLPTR);
+    cmSystemTools::SetStderrCallback(CM_NULLPTR, CM_NULLPTR);
+    cmSystemTools::SetStdoutCallback(CM_NULLPTR, CM_NULLPTR);
+    cmSystemTools::SetMessageCallback(CM_NULLPTR, CM_NULLPTR);
   }
 };
 
@@ -247,7 +247,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
       }
     }
     std::string output;
-    const char* config = 0;
+    const char* config = CM_NULLPTR;
     if (!this->CTest->GetConfigType().empty()) {
       config = this->CTest->GetConfigType().c_str();
     }
@@ -321,7 +321,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   for (size_t k = 0; k < this->TestCommandArgs.size(); ++k) {
     testCommand.push_back(this->TestCommandArgs[k].c_str());
   }
-  testCommand.push_back(0);
+  testCommand.push_back(CM_NULLPTR);
   std::string outs;
   int retval = 0;
   // run the test from the this->BuildRunDir if set
@@ -347,8 +347,8 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     }
   }
 
-  int runTestRes =
-    this->CTest->RunTest(testCommand, &outs, &retval, 0, remainingTime, 0);
+  int runTestRes = this->CTest->RunTest(testCommand, &outs, &retval,
+                                        CM_NULLPTR, remainingTime, CM_NULLPTR);
 
   if (runTestRes != cmsysProcess_State_Exited || retval != 0) {
     out << "Test command failed: " << testCommand[0] << "\n";

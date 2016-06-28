@@ -29,8 +29,8 @@ class cmCTestCommand : public cmCommand
 public:
   cmCTestCommand()
   {
-    this->CTest = 0;
-    this->CTestScriptHandler = 0;
+    this->CTest = CM_NULLPTR;
+    this->CTestScriptHandler = CM_NULLPTR;
   }
 
   cmCTest* CTest;

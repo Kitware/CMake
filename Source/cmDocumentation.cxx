@@ -49,12 +49,12 @@ static const char* cmDocumentationStandardOptions[][2] = {
   { "--help-variable-list [<f>]",
     "List variables with help available and exit." },
   { "--help-variables [<f>]", "Print cmake-variables manual and exit." },
-  { 0, 0 }
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 static const char* cmDocumentationGeneratorsHeader[][2] = {
-  { 0, "The following generators are available on this platform:" },
-  { 0, 0 }
+  { CM_NULLPTR, "The following generators are available on this platform:" },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 cmDocumentation::cmDocumentation()
@@ -137,7 +137,7 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
     this->CurrentArgument = i->Argument;
     // If a file name was given, use it.  Otherwise, default to the
     // given stream.
-    cmsys::ofstream* fout = 0;
+    cmsys::ofstream* fout = CM_NULLPTR;
     std::ostream* s = &os;
     if (!i->Filename.empty()) {
       fout = new cmsys::ofstream(i->Filename.c_str());
@@ -420,7 +420,7 @@ void cmDocumentation::SetSections(
 
 void cmDocumentation::PrependSection(const char* name, const char* docs[][2])
 {
-  cmDocumentationSection* sec = 0;
+  cmDocumentationSection* sec = CM_NULLPTR;
   if (this->AllSections.find(name) == this->AllSections.end()) {
     sec =
       new cmDocumentationSection(name, cmSystemTools::UpperCase(name).c_str());
@@ -434,7 +434,7 @@ void cmDocumentation::PrependSection(const char* name, const char* docs[][2])
 void cmDocumentation::PrependSection(const char* name,
                                      std::vector<cmDocumentationEntry>& docs)
 {
-  cmDocumentationSection* sec = 0;
+  cmDocumentationSection* sec = CM_NULLPTR;
   if (this->AllSections.find(name) == this->AllSections.end()) {
     sec =
       new cmDocumentationSection(name, cmSystemTools::UpperCase(name).c_str());
@@ -447,7 +447,7 @@ void cmDocumentation::PrependSection(const char* name,
 
 void cmDocumentation::AppendSection(const char* name, const char* docs[][2])
 {
-  cmDocumentationSection* sec = 0;
+  cmDocumentationSection* sec = CM_NULLPTR;
   if (this->AllSections.find(name) == this->AllSections.end()) {
     sec =
       new cmDocumentationSection(name, cmSystemTools::UpperCase(name).c_str());
@@ -461,7 +461,7 @@ void cmDocumentation::AppendSection(const char* name, const char* docs[][2])
 void cmDocumentation::AppendSection(const char* name,
                                     std::vector<cmDocumentationEntry>& docs)
 {
-  cmDocumentationSection* sec = 0;
+  cmDocumentationSection* sec = CM_NULLPTR;
   if (this->AllSections.find(name) == this->AllSections.end()) {
     sec =
       new cmDocumentationSection(name, cmSystemTools::UpperCase(name).c_str());

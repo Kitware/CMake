@@ -32,6 +32,7 @@ function(cm_check_cxx_feature name)
 endfunction()
 
 if(CMAKE_CXX_STANDARD)
+  cm_check_cxx_feature(nullptr)
   cm_check_cxx_feature(override)
   cm_check_cxx_feature(unordered_map)
   cm_check_cxx_feature(unordered_set)

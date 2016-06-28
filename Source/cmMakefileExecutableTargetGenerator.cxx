@@ -418,8 +418,9 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   }
 
   // Write the build rule.
-  this->LocalGenerator->WriteMakeRule(
-    *this->BuildFileStream, 0, targetFullPathReal, depends, commands, false);
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
+                                      targetFullPathReal, depends, commands,
+                                      false);
 
   // The symlink name for the target should depend on the real target
   // so if the target version changes it rebuilds and recreates the
@@ -428,8 +429,9 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     depends.clear();
     commands.clear();
     depends.push_back(targetFullPathReal);
-    this->LocalGenerator->WriteMakeRule(
-      *this->BuildFileStream, 0, targetFullPath, depends, commands, false);
+    this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
+                                        targetFullPath, depends, commands,
+                                        false);
   }
 
   // Write the main driver rule to build everything in this target.

@@ -17,24 +17,24 @@
 class cmGetCMakePropertyCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone() { return new cmGetCMakePropertyCommand; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmGetCMakePropertyCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * This determines if the command is invoked when in script mode.
    */
-  virtual bool IsScriptable() const { return true; }
+  bool IsScriptable() const CM_OVERRIDE { return true; }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "get_cmake_property"; }
+  std::string GetName() const CM_OVERRIDE { return "get_cmake_property"; }
 
   cmTypeMacro(cmGetCMakePropertyCommand, cmCommand);
 };

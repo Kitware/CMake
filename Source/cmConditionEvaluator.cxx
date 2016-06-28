@@ -130,7 +130,7 @@ const char* cmConditionEvaluator::GetDefinitionIfUnquoted(
   if ((this->Policy54Status != cmPolicies::WARN &&
        this->Policy54Status != cmPolicies::OLD) &&
       argument.WasQuoted()) {
-    return 0;
+    return CM_NULLPTR;
   }
 
   const char* def = this->Makefile.GetDefinition(argument.GetValue());

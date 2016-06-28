@@ -134,7 +134,7 @@ const char* cmNinjaNormalTargetGenerator::GetVisibleTypeName() const
     case cmState::EXECUTABLE:
       return "executable";
     default:
-      return 0;
+      return CM_NULLPTR;
   }
 }
 

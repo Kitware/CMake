@@ -22,7 +22,7 @@ class cmLocaleRAII
 
 public:
   cmLocaleRAII()
-    : OldLocale(setlocale(LC_CTYPE, 0))
+    : OldLocale(setlocale(LC_CTYPE, CM_NULLPTR))
   {
     setlocale(LC_CTYPE, "");
   }

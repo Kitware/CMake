@@ -31,14 +31,13 @@ public:
              const std::map<std::string, DependencyVector>* validDeps);
 
   /** Virtual destructor to cleanup subclasses properly.  */
-  virtual ~cmDependsC();
+  ~cmDependsC() CM_OVERRIDE;
 
 protected:
   // Implement writing/checking methods required by superclass.
-  virtual bool WriteDependencies(const std::set<std::string>& sources,
-                                 const std::string& obj,
-                                 std::ostream& makeDepends,
-                                 std::ostream& internalDepends);
+  bool WriteDependencies(const std::set<std::string>& sources,
+                         const std::string& obj, std::ostream& makeDepends,
+                         std::ostream& internalDepends) CM_OVERRIDE;
 
   // Method to scan a single file.
   void Scan(std::istream& is, const char* directory,

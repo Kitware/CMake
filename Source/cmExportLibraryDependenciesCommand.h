@@ -18,13 +18,19 @@ class cmExportLibraryDependenciesCommand : public cmCommand
 {
 public:
   cmTypeMacro(cmExportLibraryDependenciesCommand, cmCommand);
-  virtual cmCommand* Clone() { return new cmExportLibraryDependenciesCommand; }
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
-  virtual std::string GetName() const { return "export_library_dependencies"; }
+  cmCommand* Clone() CM_OVERRIDE
+  {
+    return new cmExportLibraryDependenciesCommand;
+  }
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
+  std::string GetName() const CM_OVERRIDE
+  {
+    return "export_library_dependencies";
+  }
 
-  virtual void FinalPass();
-  virtual bool HasFinalPass() const { return true; }
+  void FinalPass() CM_OVERRIDE;
+  bool HasFinalPass() const CM_OVERRIDE { return true; }
 
 private:
   std::string Filename;

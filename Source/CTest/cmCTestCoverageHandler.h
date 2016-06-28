@@ -45,16 +45,16 @@ public:
   /*
    * The main entry point for this class
    */
-  int ProcessHandler();
+  int ProcessHandler() CM_OVERRIDE;
 
   cmCTestCoverageHandler();
 
-  virtual void Initialize();
+  void Initialize() CM_OVERRIDE;
 
   /**
    * This method is called when reading CTest custom file
    */
-  void PopulateCustomVectors(cmMakefile* mf);
+  void PopulateCustomVectors(cmMakefile* mf) CM_OVERRIDE;
 
   /** Report coverage only for sources with these labels.  */
   void SetLabelFilter(std::set<std::string> const& labels);

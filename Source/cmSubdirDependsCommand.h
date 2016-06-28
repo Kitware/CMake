@@ -17,10 +17,10 @@
 class cmSubdirDependsCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone() { return new cmSubdirDependsCommand; }
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
-  virtual std::string GetName() const { return "subdir_depends"; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmSubdirDependsCommand; }
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
+  std::string GetName() const CM_OVERRIDE { return "subdir_depends"; }
   cmTypeMacro(cmSubdirDependsCommand, cmCommand);
 };
 

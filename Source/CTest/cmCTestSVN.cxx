@@ -291,7 +291,7 @@ bool cmCTestSVN::RunSVNCommand(std::vector<char const*> const& parameters,
     args.push_back(i->c_str());
   }
 
-  args.push_back(0);
+  args.push_back(CM_NULLPTR);
 
   if (strcmp(parameters[0], "update") == 0) {
     return RunUpdateCommand(&args[0], out, err);
@@ -311,7 +311,7 @@ public:
   {
     this->InitializeParser();
   }
-  ~LogParser() { this->CleanupParser(); }
+  ~LogParser() CM_OVERRIDE { this->CleanupParser(); }
 private:
   cmCTestSVN* SVN;
   cmCTestSVN::SVNInfo& SVNRepo;

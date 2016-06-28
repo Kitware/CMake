@@ -17,24 +17,30 @@
 class cmSetDirectoryPropertiesCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone() { return new cmSetDirectoryPropertiesCommand; }
+  cmCommand* Clone() CM_OVERRIDE
+  {
+    return new cmSetDirectoryPropertiesCommand;
+  }
 
   /**
    * This is called when the command is first encountered in
    * the input file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * This determines if the command is invoked when in script mode.
    */
-  virtual bool IsScriptable() const { return true; }
+  bool IsScriptable() const CM_OVERRIDE { return true; }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "set_directory_properties"; }
+  std::string GetName() const CM_OVERRIDE
+  {
+    return "set_directory_properties";
+  }
 
   /**
    * Static entry point for use by other commands

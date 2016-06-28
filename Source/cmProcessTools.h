@@ -62,7 +62,7 @@ public:
     char Separator;
     char LineEnd;
     bool IgnoreCR;
-    virtual bool ProcessChunk(const char* data, int length);
+    bool ProcessChunk(const char* data, int length) CM_OVERRIDE;
 
     /** Implement in a subclass to process one line of input.  It
         should return true only if it is interested in more data.  */
@@ -73,18 +73,18 @@ public:
   class OutputLogger : public LineParser
   {
   public:
-    OutputLogger(std::ostream& log, const char* prefix = 0)
+    OutputLogger(std::ostream& log, const char* prefix = CM_NULLPTR)
     {
       this->SetLog(&log, prefix);
     }
 
   private:
-    virtual bool ProcessLine() { return true; }
+    bool ProcessLine() CM_OVERRIDE { return true; }
   };
 
   /** Run a process and send output to given parsers.  */
   static void RunProcess(struct cmsysProcess_s* cp, OutputParser* out,
-                         OutputParser* err = 0);
+                         OutputParser* err = CM_NULLPTR);
 };
 
 #endif

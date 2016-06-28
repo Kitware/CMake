@@ -29,8 +29,8 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() { return new cmFindFileCommand; }
-  virtual std::string GetName() const { return "find_file"; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmFindFileCommand; }
+  std::string GetName() const CM_OVERRIDE { return "find_file"; }
 
   cmTypeMacro(cmFindFileCommand, cmFindPathCommand);
 };

@@ -52,16 +52,16 @@ public:
 
 protected:
   // Implement virtual methods from the superclass.
-  virtual bool GenerateMainFile(std::ostream& os);
-  virtual void GenerateImportTargetsConfig(
+  bool GenerateMainFile(std::ostream& os) CM_OVERRIDE;
+  void GenerateImportTargetsConfig(
     std::ostream& os, const std::string& config, std::string const& suffix,
-    std::vector<std::string>& missingTargets);
-  virtual void HandleMissingTarget(std::string& link_libs,
-                                   std::vector<std::string>& missingTargets,
-                                   cmGeneratorTarget* depender,
-                                   cmGeneratorTarget* dependee);
+    std::vector<std::string>& missingTargets) CM_OVERRIDE;
+  void HandleMissingTarget(std::string& link_libs,
+                           std::vector<std::string>& missingTargets,
+                           cmGeneratorTarget* depender,
+                           cmGeneratorTarget* dependee) CM_OVERRIDE;
 
-  virtual void ReplaceInstallPrefix(std::string& input);
+  void ReplaceInstallPrefix(std::string& input) CM_OVERRIDE;
 
   void ComplainAboutMissingTarget(cmGeneratorTarget* depender,
                                   cmGeneratorTarget* dependee,
@@ -82,7 +82,7 @@ protected:
                                  std::set<std::string>& importedLocations);
 
   std::string InstallNameDir(cmGeneratorTarget* target,
-                             const std::string& config);
+                             const std::string& config) CM_OVERRIDE;
 
   cmInstallExportGenerator* IEGen;
 

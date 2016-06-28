@@ -17,10 +17,10 @@
 class cmLoadCommandCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone() { return new cmLoadCommandCommand; }
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
-  virtual std::string GetName() const { return "load_command"; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmLoadCommandCommand; }
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
+  std::string GetName() const CM_OVERRIDE { return "load_command"; }
   cmTypeMacro(cmLoadCommandCommand, cmCommand);
 };
 

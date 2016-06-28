@@ -35,7 +35,7 @@ cmExportCommand::cmExportCommand()
   , Filename(&Helper, "FILE", &ArgumentGroup)
   , ExportOld(&Helper, "EXPORT_LINK_INTERFACE_LIBRARIES", &ArgumentGroup)
 {
-  this->ExportSet = 0;
+  this->ExportSet = CM_NULLPTR;
 }
 
 // cmExportCommand
@@ -50,10 +50,10 @@ bool cmExportCommand::InitialPass(std::vector<std::string> const& args,
   if (args[0] == "PACKAGE") {
     return this->HandlePackage(args);
   } else if (args[0] == "EXPORT") {
-    this->ExportSetName.Follows(0);
+    this->ExportSetName.Follows(CM_NULLPTR);
     this->ArgumentGroup.Follows(&this->ExportSetName);
   } else {
-    this->Targets.Follows(0);
+    this->Targets.Follows(CM_NULLPTR);
     this->ArgumentGroup.Follows(&this->Targets);
   }
 

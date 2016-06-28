@@ -19,7 +19,7 @@
 #include "assert.h"
 
 cmSourceFileLocation::cmSourceFileLocation()
-  : Makefile(0)
+  : Makefile(CM_NULLPTR)
   , AmbiguousDirectory(true)
   , AmbiguousExtension(true)
 {

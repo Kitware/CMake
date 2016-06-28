@@ -27,10 +27,10 @@ public:
    * Construct generator
    */
   cmCPack7zGenerator();
-  virtual ~cmCPack7zGenerator();
+  ~cmCPack7zGenerator() CM_OVERRIDE;
 
 protected:
-  virtual const char* GetOutputExtension() { return ".7z"; }
+  const char* GetOutputExtension() CM_OVERRIDE { return ".7z"; }
 };
 
 #endif

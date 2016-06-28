@@ -20,10 +20,10 @@ class cmOutputRequiredFilesCommand : public cmCommand
 {
 public:
   cmTypeMacro(cmOutputRequiredFilesCommand, cmCommand);
-  virtual cmCommand* Clone() { return new cmOutputRequiredFilesCommand; }
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
-  virtual std::string GetName() const { return "output_required_files"; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmOutputRequiredFilesCommand; }
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
+  std::string GetName() const CM_OVERRIDE { return "output_required_files"; }
 
   void ListDependencies(cmDependInformation const* info, FILE* fout,
                         std::set<cmDependInformation const*>* visited);

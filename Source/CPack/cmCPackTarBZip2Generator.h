@@ -26,10 +26,10 @@ public:
    * Construct generator
    */
   cmCPackTarBZip2Generator();
-  virtual ~cmCPackTarBZip2Generator();
+  ~cmCPackTarBZip2Generator() CM_OVERRIDE;
 
 protected:
-  virtual const char* GetOutputExtension() { return ".tar.bz2"; }
+  const char* GetOutputExtension() CM_OVERRIDE { return ".tar.bz2"; }
 };
 
 #endif

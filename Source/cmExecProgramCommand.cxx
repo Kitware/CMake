@@ -90,7 +90,7 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,
                                               args[1].c_str(), verbose);
   } else {
     result = cmExecProgramCommand::RunCommand(command.c_str(), output, retVal,
-                                              0, verbose);
+                                              CM_NULLPTR, verbose);
   }
   if (!result) {
     retVal = -1;
@@ -209,7 +209,7 @@ bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
   }
   fflush(stdout);
   fflush(stderr);
-  const char* cmd[] = { "/bin/sh", "-c", command, 0 };
+  const char* cmd[] = { "/bin/sh", "-c", command, CM_NULLPTR };
   cmsysProcess_SetCommand(cp, cmd);
 #endif
 
@@ -219,7 +219,7 @@ bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
   int length;
   char* data;
   int p;
-  while ((p = cmsysProcess_WaitForData(cp, &data, &length, 0), p)) {
+  while ((p = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR), p)) {
     if (p == cmsysProcess_Pipe_STDOUT || p == cmsysProcess_Pipe_STDERR) {
       if (verbose) {
         cmSystemTools::Stdout(data, length);
@@ -229,7 +229,7 @@ bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
   }
 
   // All output has been read.  Wait for the process to exit.
-  cmsysProcess_WaitForExit(cp, 0);
+  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
 
   // Check the result of running the process.
   std::string msg;

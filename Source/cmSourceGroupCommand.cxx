@@ -28,7 +28,7 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
   std::vector<std::string> folders =
     cmSystemTools::tokenize(args[0], delimiter);
 
-  cmSourceGroup* sg = 0;
+  cmSourceGroup* sg = CM_NULLPTR;
   sg = this->Makefile->GetSourceGroup(folders);
   if (!sg) {
     this->Makefile->AddSourceGroup(folders);

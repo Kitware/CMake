@@ -38,14 +38,14 @@ public:
    */
   cmCommand()
   {
-    this->Makefile = 0;
+    this->Makefile = CM_NULLPTR;
     this->Enabled = true;
   }
 
   /**
    * Need virtual destructor to destroy real command type.
    */
-  virtual ~cmCommand() {}
+  ~cmCommand() CM_OVERRIDE {}
 
   /**
    * Specify the makefile.

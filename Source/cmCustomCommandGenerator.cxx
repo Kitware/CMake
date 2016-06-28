@@ -45,7 +45,7 @@ bool cmCustomCommandGenerator::UseCrossCompilingEmulator(unsigned int c) const
   std::string const& argv0 = this->CC.GetCommandLines()[c][0];
   cmGeneratorTarget* target = this->LG->FindGeneratorTargetToUse(argv0);
   if (target && target->GetType() == cmState::EXECUTABLE) {
-    return target->GetProperty("CROSSCOMPILING_EMULATOR") != 0;
+    return target->GetProperty("CROSSCOMPILING_EMULATOR") != CM_NULLPTR;
   }
   return false;
 }

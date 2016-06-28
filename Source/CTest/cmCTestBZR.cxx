@@ -139,13 +139,13 @@ std::string cmCTestBZR::LoadInfo()
 {
   // Run "bzr info" to get the repository info from the work tree.
   const char* bzr = this->CommandLineTool.c_str();
-  const char* bzr_info[] = { bzr, "info", 0 };
+  const char* bzr_info[] = { bzr, "info", CM_NULLPTR };
   InfoParser iout(this, "info-out> ");
   OutputLogger ierr(this->Log, "info-err> ");
   this->RunChild(bzr_info, &iout, &ierr);
 
   // Run "bzr revno" to get the repository revision number from the work tree.
-  const char* bzr_revno[] = { bzr, "revno", 0 };
+  const char* bzr_revno[] = { bzr, "revno", CM_NULLPTR };
   std::string rev;
   RevnoParser rout(this, "revno-out> ", rev);
   OutputLogger rerr(this->Log, "revno-err> ");
@@ -183,14 +183,15 @@ public:
   {
     this->InitializeParser();
   }
-  ~LogParser() { this->CleanupParser(); }
+  ~LogParser() CM_OVERRIDE { this->CleanupParser(); }
 
   int InitializeParser() CM_OVERRIDE
   {
     int res = cmXMLParser::InitializeParser();
     if (res) {
       XML_SetUnknownEncodingHandler(static_cast<XML_Parser>(this->Parser),
-                                    cmBZRXMLParserUnknownEncodingHandler, 0);
+                                    cmBZRXMLParserUnknownEncodingHandler,
+                                    CM_NULLPTR);
     }
     return res;
   }
@@ -380,7 +381,7 @@ bool cmCTestBZR::UpdateImpl()
 
   bzr_update.push_back(this->URL.c_str());
 
-  bzr_update.push_back(0);
+  bzr_update.push_back(CM_NULLPTR);
 
   // For some reason bzr uses stderr to display the update status.
   OutputLogger out(this->Log, "pull-out> ");
@@ -408,7 +409,8 @@ void cmCTestBZR::LoadRevisions()
   // Run "bzr log" to get all global revisions of interest.
   const char* bzr = this->CommandLineTool.c_str();
   const char* bzr_log[] = {
-    bzr, "log", "-v", "-r", revs.c_str(), "--xml", this->URL.c_str(), 0
+    bzr,       "log", "-v", "-r", revs.c_str(), "--xml", this->URL.c_str(),
+    CM_NULLPTR
   };
   {
     LogParser out(this, "log-out> ");
@@ -465,7 +467,7 @@ void cmCTestBZR::LoadModifications()
 {
   // Run "bzr status" which reports local modifications.
   const char* bzr = this->CommandLineTool.c_str();
-  const char* bzr_status[] = { bzr, "status", "-SV", 0 };
+  const char* bzr_status[] = { bzr, "status", "-SV", CM_NULLPTR };
   StatusParser out(this, "status-out> ");
   OutputLogger err(this->Log, "status-err> ");
   this->RunChild(bzr_status, &out, &err);

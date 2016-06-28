@@ -24,15 +24,15 @@ public:
   /** Construct with a CTest instance and update log stream.  */
   cmCTestGIT(cmCTest* ctest, std::ostream& log);
 
-  virtual ~cmCTestGIT();
+  ~cmCTestGIT() CM_OVERRIDE;
 
 private:
   unsigned int CurrentGitVersion;
   unsigned int GetGitVersion();
   std::string GetWorkingRevision();
-  virtual void NoteOldRevision();
-  virtual void NoteNewRevision();
-  virtual bool UpdateImpl();
+  void NoteOldRevision() CM_OVERRIDE;
+  void NoteNewRevision() CM_OVERRIDE;
+  bool UpdateImpl() CM_OVERRIDE;
 
   std::string FindGitDir();
   std::string FindTopDir();
@@ -41,8 +41,8 @@ private:
   bool UpdateByCustom(std::string const& custom);
   bool UpdateInternal();
 
-  void LoadRevisions();
-  void LoadModifications();
+  void LoadRevisions() CM_OVERRIDE;
+  void LoadModifications() CM_OVERRIDE;
 
   // "public" needed by older Sun compilers
 public:

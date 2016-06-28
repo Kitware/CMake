@@ -26,10 +26,10 @@ public:
    * Construct generator
    */
   cmCPackTarCompressGenerator();
-  virtual ~cmCPackTarCompressGenerator();
+  ~cmCPackTarCompressGenerator() CM_OVERRIDE;
 
 protected:
-  virtual const char* GetOutputExtension() { return ".tar.Z"; }
+  const char* GetOutputExtension() CM_OVERRIDE { return ".tar.Z"; }
 };
 
 #endif

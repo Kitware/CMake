@@ -18,11 +18,11 @@ class cmMakefileExecutableTargetGenerator : public cmMakefileTargetGenerator
 {
 public:
   cmMakefileExecutableTargetGenerator(cmGeneratorTarget* target);
-  virtual ~cmMakefileExecutableTargetGenerator();
+  ~cmMakefileExecutableTargetGenerator() CM_OVERRIDE;
 
   /* the main entry point for this class. Writes the Makefiles associated
      with this target */
-  virtual void WriteRuleFiles();
+  void WriteRuleFiles() CM_OVERRIDE;
 
 protected:
   virtual void WriteExecutableRule(bool relink);

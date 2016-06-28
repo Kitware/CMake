@@ -231,17 +231,17 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
   cmCommandArgumentGroup group;
 
   cmCAString readArg(&argHelper, "READ");
-  cmCAString fileNameArg(&argHelper, 0);
-  cmCAString resultArg(&argHelper, 0);
+  cmCAString fileNameArg(&argHelper, CM_NULLPTR);
+  cmCAString resultArg(&argHelper, CM_NULLPTR);
 
   cmCAString offsetArg(&argHelper, "OFFSET", &group);
   cmCAString limitArg(&argHelper, "LIMIT", &group);
   cmCAEnabler hexOutputArg(&argHelper, "HEX", &group);
-  readArg.Follows(0);
+  readArg.Follows(CM_NULLPTR);
   fileNameArg.Follows(&readArg);
   resultArg.Follows(&fileNameArg);
   group.Follows(&resultArg);
-  argHelper.Parse(&args, 0);
+  argHelper.Parse(&args, CM_NULLPTR);
 
   std::string fileName = fileNameArg.GetString();
   if (!cmsys::SystemTools::FileIsFullPath(fileName.c_str())) {
@@ -901,9 +901,9 @@ bool cmFileCommand::HandleDifferentCommand(
    */
 
   // Evaluate arguments.
-  const char* file_lhs = 0;
-  const char* file_rhs = 0;
-  const char* var = 0;
+  const char* file_lhs = CM_NULLPTR;
+  const char* file_rhs = CM_NULLPTR;
+  const char* var = CM_NULLPTR;
   enum Doing
   {
     DoingNone,
@@ -958,7 +958,7 @@ struct cmFileCopier
     , MatchlessFiles(true)
     , FilePermissions(0)
     , DirPermissions(0)
-    , CurrentMatchRule(0)
+    , CurrentMatchRule(CM_NULLPTR)
     , UseGivenPermissionsFile(false)
     , UseGivenPermissionsDir(false)
     , UseSourcePermissions(true)
@@ -1615,7 +1615,7 @@ struct cmFileInstaller : public cmFileCopier
     this->Manifest =
       this->Makefile->GetSafeDefinition("CMAKE_INSTALL_MANIFEST_FILES");
   }
-  ~cmFileInstaller()
+  ~cmFileInstaller() CM_OVERRIDE
   {
     // Save the updated install manifest.
     this->Makefile->AddDefinition("CMAKE_INSTALL_MANIFEST_FILES",
@@ -1640,12 +1640,12 @@ protected:
     this->Manifest += file.substr(this->DestDirLength);
   }
 
-  virtual std::string const& ToName(std::string const& fromName)
+  std::string const& ToName(std::string const& fromName) CM_OVERRIDE
   {
     return this->Rename.empty() ? fromName : this->Rename;
   }
 
-  virtual void ReportCopy(const char* toFile, Type type, bool copy)
+  void ReportCopy(const char* toFile, Type type, bool copy) CM_OVERRIDE
   {
     if (!this->MessageNever && (copy || !this->MessageLazy)) {
       std::string message = (copy ? "Installing: " : "Up-to-date: ");
@@ -1657,11 +1657,11 @@ protected:
       this->ManifestAppend(toFile);
     }
   }
-  virtual bool ReportMissing(const char* fromFile)
+  bool ReportMissing(const char* fromFile) CM_OVERRIDE
   {
     return (this->Optional || this->cmFileCopier::ReportMissing(fromFile));
   }
-  virtual bool Install(const char* fromFile, const char* toFile)
+  bool Install(const char* fromFile, const char* toFile) CM_OVERRIDE
   {
     // Support installing from empty source to make a directory.
     if (this->InstallType == cmInstallType_DIRECTORY && !*fromFile) {
@@ -1670,16 +1670,16 @@ protected:
     return this->cmFileCopier::Install(fromFile, toFile);
   }
 
-  virtual bool Parse(std::vector<std::string> const& args);
+  bool Parse(std::vector<std::string> const& args) CM_OVERRIDE;
   enum
   {
     DoingType = DoingLast1,
     DoingRename,
     DoingLast2
   };
-  virtual bool CheckKeyword(std::string const& arg);
-  virtual bool CheckValue(std::string const& arg);
-  virtual void DefaultFilePermissions()
+  bool CheckKeyword(std::string const& arg) CM_OVERRIDE;
+  bool CheckValue(std::string const& arg) CM_OVERRIDE;
+  void DefaultFilePermissions() CM_OVERRIDE
   {
     this->cmFileCopier::DefaultFilePermissions();
     // Add execute permissions based on the target type.
@@ -1942,9 +1942,9 @@ bool cmFileCommand::HandleRPathChangeCommand(
   std::vector<std::string> const& args)
 {
   // Evaluate arguments.
-  const char* file = 0;
-  const char* oldRPath = 0;
-  const char* newRPath = 0;
+  const char* file = CM_NULLPTR;
+  const char* oldRPath = CM_NULLPTR;
+  const char* newRPath = CM_NULLPTR;
   enum Doing
   {
     DoingNone,
@@ -2032,7 +2032,7 @@ bool cmFileCommand::HandleRPathRemoveCommand(
   std::vector<std::string> const& args)
 {
   // Evaluate arguments.
-  const char* file = 0;
+  const char* file = CM_NULLPTR;
   enum Doing
   {
     DoingNone,
@@ -2096,8 +2096,8 @@ bool cmFileCommand::HandleRPathCheckCommand(
   std::vector<std::string> const& args)
 {
   // Evaluate arguments.
-  const char* file = 0;
-  const char* rpath = 0;
+  const char* file = CM_NULLPTR;
+  const char* rpath = CM_NULLPTR;
   enum Doing
   {
     DoingNone,
@@ -2438,7 +2438,7 @@ public:
 
   inline void release(void)
   {
-    this->Easy = 0;
+    this->Easy = CM_NULLPTR;
     return;
   }
 
@@ -2934,7 +2934,7 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   ::curl_global_cleanup();
 
   fclose(fin);
-  fin = NULL;
+  fin = CM_NULLPTR;
 
   if (!logVar.empty()) {
     std::string log;

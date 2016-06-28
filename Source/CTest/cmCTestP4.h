@@ -27,7 +27,7 @@ public:
   /** Construct with a CTest instance and update log stream.  */
   cmCTestP4(cmCTest* ctest, std::ostream& log);
 
-  virtual ~cmCTestP4();
+  ~cmCTestP4() CM_OVERRIDE;
 
 private:
   std::vector<std::string> ChangeLists;
@@ -54,13 +54,13 @@ private:
   void SetP4Options(std::vector<char const*>& options);
 
   std::string GetWorkingRevision();
-  virtual void NoteOldRevision();
-  virtual void NoteNewRevision();
-  virtual bool UpdateImpl();
+  void NoteOldRevision() CM_OVERRIDE;
+  void NoteNewRevision() CM_OVERRIDE;
+  bool UpdateImpl() CM_OVERRIDE;
   bool UpdateCustom(const std::string& custom);
 
-  void LoadRevisions();
-  void LoadModifications();
+  void LoadRevisions() CM_OVERRIDE;
+  void LoadModifications() CM_OVERRIDE;
 
   // Parsing helper classes.
   class IdentifyParser;

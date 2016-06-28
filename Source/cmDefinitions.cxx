@@ -41,7 +41,7 @@ const char* cmDefinitions::Get(const std::string& key, StackIter begin,
                                StackIter end)
 {
   Def const& def = cmDefinitions::GetInternal(key, begin, end, false);
-  return def.Exists ? def.c_str() : 0;
+  return def.Exists ? def.c_str() : CM_NULLPTR;
 }
 
 void cmDefinitions::Raise(const std::string& key, StackIter begin,

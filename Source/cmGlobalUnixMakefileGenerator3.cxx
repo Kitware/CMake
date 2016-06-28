@@ -32,7 +32,7 @@ cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3(cmake* cm)
 #else
   this->UseLinkScript = true;
 #endif
-  this->CommandDatabase = NULL;
+  this->CommandDatabase = CM_NULLPTR;
 
   this->IncludeDirective = "include";
   this->DefineWindowsNULL = false;
@@ -155,10 +155,10 @@ void cmGlobalUnixMakefileGenerator3::Generate()
   this->WriteMainMakefile2();
   this->WriteMainCMakefile();
 
-  if (this->CommandDatabase != NULL) {
+  if (this->CommandDatabase != CM_NULLPTR) {
     *this->CommandDatabase << std::endl << "]";
     delete this->CommandDatabase;
-    this->CommandDatabase = NULL;
+    this->CommandDatabase = CM_NULLPTR;
   }
 }
 
@@ -166,7 +166,7 @@ void cmGlobalUnixMakefileGenerator3::AddCXXCompileCommand(
   const std::string& sourceFile, const std::string& workingDirectory,
   const std::string& compileCommand)
 {
-  if (this->CommandDatabase == NULL) {
+  if (this->CommandDatabase == CM_NULLPTR) {
     std::string commandDatabaseName =
       std::string(this->GetCMakeInstance()->GetHomeOutputDirectory()) +
       "/compile_commands.json";

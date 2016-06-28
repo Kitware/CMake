@@ -59,7 +59,7 @@ class cmCTestScriptFunctionBlocker : public cmFunctionBlocker
 {
 public:
   cmCTestScriptFunctionBlocker() {}
-  virtual ~cmCTestScriptFunctionBlocker() {}
+  ~cmCTestScriptFunctionBlocker() CM_OVERRIDE {}
   bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
                          cmExecutionStatus&) CM_OVERRIDE;
   // virtual bool ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf);
@@ -82,9 +82,9 @@ cmCTestScriptHandler::cmCTestScriptHandler()
   this->Backup = false;
   this->EmptyBinDir = false;
   this->EmptyBinDirOnce = false;
-  this->Makefile = 0;
-  this->CMake = 0;
-  this->GlobalGenerator = 0;
+  this->Makefile = CM_NULLPTR;
+  this->CMake = CM_NULLPTR;
+  this->GlobalGenerator = CM_NULLPTR;
 
   this->ScriptStartTime = 0;
 
@@ -121,10 +121,10 @@ void cmCTestScriptHandler::Initialize()
   this->ScriptStartTime = 0;
 
   delete this->Makefile;
-  this->Makefile = 0;
+  this->Makefile = CM_NULLPTR;
 
   delete this->GlobalGenerator;
-  this->GlobalGenerator = 0;
+  this->GlobalGenerator = CM_NULLPTR;
 
   delete this->CMake;
 }
@@ -200,7 +200,7 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   for (size_t i = 1; i < initArgs.size(); ++i) {
     argv.push_back(initArgs[i].c_str());
   }
-  argv.push_back(0);
+  argv.push_back(CM_NULLPTR);
 
   // Now create process object
   cmsysProcess* cp = cmsysProcess_New();
@@ -226,7 +226,7 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   }
 
   // Properly handle output of the build command
-  cmsysProcess_WaitForExit(cp, 0);
+  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
   int result = cmsysProcess_GetState(cp);
   int retVal = 0;
   bool failed = false;
@@ -863,7 +863,7 @@ bool cmCTestScriptHandler::WriteInitialCache(const char* directory,
     return false;
   }
 
-  if (text != 0) {
+  if (text != CM_NULLPTR) {
     fout.write(text, strlen(text));
   }
 

@@ -29,7 +29,7 @@ public:
   /*
    * The main entry point for this class
    */
-  int ProcessHandler();
+  int ProcessHandler() CM_OVERRIDE;
 
   cmCTestUpdateHandler();
 
@@ -48,7 +48,7 @@ public:
   /**
    * Initialize handler
    */
-  virtual void Initialize();
+  void Initialize() CM_OVERRIDE;
 
 private:
   // Some structures needed for update

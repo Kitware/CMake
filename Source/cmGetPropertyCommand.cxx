@@ -248,15 +248,14 @@ bool cmGetPropertyCommand::HandleTargetMode()
     return false;
   }
 
-  if (this->PropertyName == "ALIASED_TARGET") {
-    if (this->Makefile->IsAlias(this->Name)) {
-      if (cmTarget* target = this->Makefile->FindTargetToUse(this->Name)) {
+  if (cmTarget* target = this->Makefile->FindTargetToUse(this->Name)) {
+    if (this->PropertyName == "ALIASED_TARGET") {
+      if (this->Makefile->IsAlias(this->Name)) {
         return this->StoreResult(target->GetName().c_str());
+      } else {
+        return this->StoreResult((this->Variable + "-NOTFOUND").c_str());
       }
     }
-    return this->StoreResult((this->Variable + "-NOTFOUND").c_str());
-  }
-  if (cmTarget* target = this->Makefile->FindTargetToUse(this->Name)) {
     return this->StoreResult(
       target->GetProperty(this->PropertyName, this->Makefile));
   } else {
@@ -323,7 +322,7 @@ bool cmGetPropertyCommand::HandleCacheMode()
     return false;
   }
 
-  const char* value = 0;
+  const char* value = CM_NULLPTR;
   if (this->Makefile->GetState()->GetCacheEntryValue(this->Name)) {
     value = this->Makefile->GetState()->GetCacheEntryProperty(
       this->Name, this->PropertyName);
@@ -347,7 +346,7 @@ bool cmGetPropertyCommand::HandleInstallMode()
     std::string value;
     bool isSet = file->GetProperty(this->PropertyName, value);
 
-    return this->StoreResult(isSet ? value.c_str() : 0);
+    return this->StoreResult(isSet ? value.c_str() : CM_NULLPTR);
   } else {
     std::ostringstream e;
     e << "given INSTALL name that could not be found or created: "

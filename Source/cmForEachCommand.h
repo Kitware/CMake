@@ -21,10 +21,10 @@ class cmForEachFunctionBlocker : public cmFunctionBlocker
 {
 public:
   cmForEachFunctionBlocker(cmMakefile* mf);
-  ~cmForEachFunctionBlocker();
-  virtual bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
-                                 cmExecutionStatus&);
-  virtual bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf);
+  ~cmForEachFunctionBlocker() CM_OVERRIDE;
+  bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
+                         cmExecutionStatus&) CM_OVERRIDE;
+  bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) CM_OVERRIDE;
 
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
@@ -41,24 +41,24 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() { return new cmForEachCommand; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmForEachCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * This determines if the command is invoked when in script mode.
    */
-  virtual bool IsScriptable() const { return true; }
+  bool IsScriptable() const CM_OVERRIDE { return true; }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "foreach"; }
+  std::string GetName() const CM_OVERRIDE { return "foreach"; }
 
   cmTypeMacro(cmForEachCommand, cmCommand);
 

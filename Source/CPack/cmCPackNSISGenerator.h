@@ -36,21 +36,22 @@ public:
    * Construct generator
    */
   cmCPackNSISGenerator(bool nsis64 = false);
-  virtual ~cmCPackNSISGenerator();
+  ~cmCPackNSISGenerator() CM_OVERRIDE;
 
 protected:
-  virtual int InitializeInternal();
+  int InitializeInternal() CM_OVERRIDE;
   void CreateMenuLinks(std::ostream& str, std::ostream& deleteStr);
-  int PackageFiles();
-  virtual const char* GetOutputExtension() { return ".exe"; }
-  virtual const char* GetOutputPostfix() { return "win32"; }
+  int PackageFiles() CM_OVERRIDE;
+  const char* GetOutputExtension() CM_OVERRIDE { return ".exe"; }
+  const char* GetOutputPostfix() CM_OVERRIDE { return "win32"; }
 
   bool GetListOfSubdirectories(const char* dir,
                                std::vector<std::string>& dirs);
 
-  enum cmCPackGenerator::CPackSetDestdirSupport SupportsSetDestdir() const;
-  virtual bool SupportsAbsoluteDestination() const;
-  virtual bool SupportsComponentInstallation() const;
+  enum cmCPackGenerator::CPackSetDestdirSupport SupportsSetDestdir() const
+    CM_OVERRIDE;
+  bool SupportsAbsoluteDestination() const CM_OVERRIDE;
+  bool SupportsComponentInstallation() const CM_OVERRIDE;
 
   /// Produce a string that contains the NSIS code to describe a
   /// particular component. Any added macros will be emitted via

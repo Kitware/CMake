@@ -21,7 +21,7 @@ class cmGlobalCommonGenerator : public cmGlobalGenerator
 {
 public:
   cmGlobalCommonGenerator(cmake* cm);
-  ~cmGlobalCommonGenerator();
+  ~cmGlobalCommonGenerator() CM_OVERRIDE;
 };
 
 #endif

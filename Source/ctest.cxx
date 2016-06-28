@@ -21,12 +21,13 @@
 #include "cmsys/Encoding.hxx"
 
 static const char* cmDocumentationName[][2] = {
-  { 0, "  ctest - Testing driver provided by CMake." },
-  { 0, 0 }
+  { CM_NULLPTR, "  ctest - Testing driver provided by CMake." },
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
-static const char* cmDocumentationUsage[][2] = { { 0, "  ctest [options]" },
-                                                 { 0, 0 } };
+static const char* cmDocumentationUsage[][2] = { { CM_NULLPTR,
+                                                   "  ctest [options]" },
+                                                 { CM_NULLPTR, CM_NULLPTR } };
 
 static const char* cmDocumentationOptions[][2] = {
   { "-C <cfg>, --build-config <cfg>", "Choose configuration to test." },
@@ -108,7 +109,7 @@ static const char* cmDocumentationOptions[][2] = {
   { "--http1.0", "Submit using HTTP 1.0." },
   { "--no-compress-output", "Do not compress test output when submitting." },
   { "--print-labels", "Print all available test labels." },
-  { 0, 0 }
+  { CM_NULLPTR, CM_NULLPTR }
 };
 
 // this is a test driver program for cmCTest.

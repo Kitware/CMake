@@ -18,11 +18,11 @@ class cmMakefileLibraryTargetGenerator : public cmMakefileTargetGenerator
 {
 public:
   cmMakefileLibraryTargetGenerator(cmGeneratorTarget* target);
-  virtual ~cmMakefileLibraryTargetGenerator();
+  ~cmMakefileLibraryTargetGenerator() CM_OVERRIDE;
 
   /* the main entry point for this class. Writes the Makefiles associated
      with this target */
-  virtual void WriteRuleFiles();
+  void WriteRuleFiles() CM_OVERRIDE;
 
 protected:
   void WriteObjectLibraryRules();

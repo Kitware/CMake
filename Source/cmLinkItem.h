@@ -26,7 +26,7 @@ class cmLinkItem : public std::string
 public:
   cmLinkItem()
     : std_string()
-    , Target(0)
+    , Target(CM_NULLPTR)
   {
   }
   cmLinkItem(const std_string& n, cmGeneratorTarget const* t)
@@ -118,7 +118,7 @@ struct cmOptionalLinkInterface : public cmLinkInterface
     , AllDone(false)
     , Exists(false)
     , HadHeadSensitiveCondition(false)
-    , ExplicitLibraries(0)
+    , ExplicitLibraries(CM_NULLPTR)
   {
   }
   bool LibrariesDone;

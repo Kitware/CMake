@@ -30,12 +30,12 @@ public:
   /*
    * The main entry point for this class
    */
-  int ProcessHandler();
+  int ProcessHandler() CM_OVERRIDE;
 
   //! Set all the build and test arguments
-  virtual int ProcessCommandLineArguments(
-    const std::string& currentArg, size_t& idx,
-    const std::vector<std::string>& allArgs);
+  int ProcessCommandLineArguments(const std::string& currentArg, size_t& idx,
+                                  const std::vector<std::string>& allArgs)
+    CM_OVERRIDE;
 
   /*
    * Get the output variable
@@ -44,7 +44,7 @@ public:
 
   cmCTestBuildAndTestHandler();
 
-  virtual void Initialize();
+  void Initialize() CM_OVERRIDE;
 
 protected:
   ///! Run CMake and build a test and then run it as a single test.

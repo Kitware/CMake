@@ -74,7 +74,7 @@ public:
    * Construct handler
    */
   cmCTestGenericHandler();
-  virtual ~cmCTestGenericHandler();
+  ~cmCTestGenericHandler() CM_OVERRIDE;
 
   typedef std::map<std::string, std::string> t_StringToString;
 

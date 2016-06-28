@@ -33,19 +33,19 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() { return new cmEnableTestingCommand; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmEnableTestingCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const&,
-                           cmExecutionStatus&);
+  bool InitialPass(std::vector<std::string> const&,
+                   cmExecutionStatus&) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "enable_testing"; }
+  std::string GetName() const CM_OVERRIDE { return "enable_testing"; }
 
   cmTypeMacro(cmEnableTestingCommand, cmCommand);
 };

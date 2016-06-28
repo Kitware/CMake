@@ -215,7 +215,7 @@ public:
                                        bool contentOnly = true) const;
 
   /** @return the mac content directory for this target. */
-  std::string GetMacContentDirectory(const std::string& config = 0,
+  std::string GetMacContentDirectory(const std::string& config = CM_NULLPTR,
                                      bool implib = false) const;
 
   cmTarget* Target;
@@ -402,7 +402,7 @@ public:
   {
     SourceFileFlags()
       : Type(SourceFileTypeNormal)
-      , MacFolder(0)
+      , MacFolder(CM_NULLPTR)
     {
     }
     SourceFileFlags(SourceFileFlags const& r)
@@ -453,7 +453,7 @@ public:
   /** Convert the given GNU import library name (.dll.a) to a name with a new
       extension (.lib or ${CMAKE_IMPORT_LIBRARY_SUFFIX}).  */
   bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
-                        const char* newExt = 0) const;
+                        const char* newExt = CM_NULLPTR) const;
 
   bool IsExecutableWithExports() const;
 

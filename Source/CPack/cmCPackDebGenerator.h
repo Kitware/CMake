@@ -28,7 +28,7 @@ public:
    * Construct generator
    */
   cmCPackDebGenerator();
-  virtual ~cmCPackDebGenerator();
+  ~cmCPackDebGenerator() CM_OVERRIDE;
 
   static bool CanGenerate()
   {
@@ -45,7 +45,7 @@ public:
   }
 
 protected:
-  virtual int InitializeInternal();
+  int InitializeInternal() CM_OVERRIDE;
   /**
    * This method factors out the work done in component packaging case.
    */
@@ -62,11 +62,11 @@ protected:
    * components will be put in a single installer.
    */
   int PackageComponentsAllInOne(const std::string& compInstDirName);
-  virtual int PackageFiles();
-  virtual const char* GetOutputExtension() { return ".deb"; }
-  virtual bool SupportsComponentInstallation() const;
-  virtual std::string GetComponentInstallDirNameSuffix(
-    const std::string& componentName);
+  int PackageFiles() CM_OVERRIDE;
+  const char* GetOutputExtension() CM_OVERRIDE { return ".deb"; }
+  bool SupportsComponentInstallation() const CM_OVERRIDE;
+  std::string GetComponentInstallDirNameSuffix(
+    const std::string& componentName) CM_OVERRIDE;
 
 private:
   int createDeb();

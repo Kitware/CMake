@@ -43,7 +43,7 @@ class cmCommandArgument
 {
 public:
   cmCommandArgument(cmCommandArgumentsHelper* args, const char* key,
-                    cmCommandArgumentGroup* group = 0);
+                    cmCommandArgumentGroup* group = CM_NULLPTR);
   virtual ~cmCommandArgument() {}
 
   /// this argument may follow after arg. 0 means it comes first.
@@ -95,7 +95,7 @@ class cmCAStringVector : public cmCommandArgument
 {
 public:
   cmCAStringVector(cmCommandArgumentsHelper* args, const char* key,
-                   cmCommandArgumentGroup* group = 0);
+                   cmCommandArgumentGroup* group = CM_NULLPTR);
 
   /// Return the vector of strings
   const std::vector<std::string>& GetVector() const { return this->Vector; }
@@ -108,8 +108,8 @@ private:
   unsigned int DataStart;
   const char* Ignore;
   cmCAStringVector();
-  virtual bool DoConsume(const std::string& arg, unsigned int index);
-  virtual void DoReset();
+  bool DoConsume(const std::string& arg, unsigned int index) CM_OVERRIDE;
+  void DoReset() CM_OVERRIDE;
 };
 
 /** cmCAString is to be used for arguments which consist of one value,
@@ -118,7 +118,7 @@ class cmCAString : public cmCommandArgument
 {
 public:
   cmCAString(cmCommandArgumentsHelper* args, const char* key,
-             cmCommandArgumentGroup* group = 0);
+             cmCommandArgumentGroup* group = CM_NULLPTR);
 
   /// Return the string
   const std::string& GetString() const { return this->String; }
@@ -126,8 +126,8 @@ public:
 private:
   std::string String;
   unsigned int DataStart;
-  virtual bool DoConsume(const std::string& arg, unsigned int index);
-  virtual void DoReset();
+  bool DoConsume(const std::string& arg, unsigned int index) CM_OVERRIDE;
+  void DoReset() CM_OVERRIDE;
   cmCAString();
 };
 
@@ -137,14 +137,14 @@ class cmCAEnabler : public cmCommandArgument
 {
 public:
   cmCAEnabler(cmCommandArgumentsHelper* args, const char* key,
-              cmCommandArgumentGroup* group = 0);
+              cmCommandArgumentGroup* group = CM_NULLPTR);
 
   /// Has it been enabled ?
   bool IsEnabled() const { return this->Enabled; }
 private:
   bool Enabled;
-  virtual bool DoConsume(const std::string& arg, unsigned int index);
-  virtual void DoReset();
+  bool DoConsume(const std::string& arg, unsigned int index) CM_OVERRIDE;
+  void DoReset() CM_OVERRIDE;
   cmCAEnabler();
 };
 
@@ -154,14 +154,14 @@ class cmCADisabler : public cmCommandArgument
 {
 public:
   cmCADisabler(cmCommandArgumentsHelper* args, const char* key,
-               cmCommandArgumentGroup* group = 0);
+               cmCommandArgumentGroup* group = CM_NULLPTR);
 
   /// Is it still enabled ?
   bool IsEnabled() const { return this->Enabled; }
 private:
   bool Enabled;
-  virtual bool DoConsume(const std::string& arg, unsigned int index);
-  virtual void DoReset();
+  bool DoConsume(const std::string& arg, unsigned int index) CM_OVERRIDE;
+  void DoReset() CM_OVERRIDE;
   cmCADisabler();
 };
 

@@ -24,12 +24,12 @@ cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
 {
   this->CTest = handler->CTest;
   this->TestHandler = handler;
-  this->TestProcess = 0;
+  this->TestProcess = CM_NULLPTR;
   this->TestResult.ExecutionTime = 0;
   this->TestResult.ReturnValue = 0;
   this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
   this->TestResult.TestCount = 0;
-  this->TestResult.Properties = 0;
+  this->TestResult.Properties = CM_NULLPTR;
   this->ProcessOutput = "";
   this->CompressedOutput = "";
   this->CompressionRatio = 2;
@@ -577,7 +577,7 @@ double cmCTestRunTest::ResolveTimeout()
     return timeout;
   }
   struct tm* lctime;
-  time_t current_time = time(0);
+  time_t current_time = time(CM_NULLPTR);
   lctime = gmtime(&current_time);
   int gm_hour = lctime->tm_hour;
   time_t gm_time = mktime(lctime);

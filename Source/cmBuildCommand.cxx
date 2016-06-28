@@ -36,8 +36,8 @@ bool cmBuildCommand::MainSignature(std::vector<std::string> const& args)
   const char* variable = args[0].c_str();
 
   // Parse remaining arguments.
-  const char* configuration = 0;
-  const char* project_name = 0;
+  const char* configuration = CM_NULLPTR;
+  const char* project_name = CM_NULLPTR;
   std::string target;
   enum Doing
   {

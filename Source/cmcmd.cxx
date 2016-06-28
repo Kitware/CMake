@@ -315,7 +315,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 
         // Run the iwyu command line.  Capture its stderr and hide its stdout.
         std::string stdErr;
-        if (!cmSystemTools::RunSingleCommand(iwyu_cmd, 0, &stdErr, &ret, 0,
+        if (!cmSystemTools::RunSingleCommand(iwyu_cmd, CM_NULLPTR, &stdErr,
+                                             &ret, CM_NULLPTR,
                                              cmSystemTools::OUTPUT_NONE)) {
           std::cerr << "Error running '" << iwyu_cmd[0] << "': " << stdErr
                     << "\n";
@@ -343,7 +344,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 
         // Run the tidy command line.  Capture its stdout and hide its stderr.
         std::string stdOut;
-        if (!cmSystemTools::RunSingleCommand(tidy_cmd, &stdOut, 0, &ret, 0,
+        if (!cmSystemTools::RunSingleCommand(tidy_cmd, &stdOut, CM_NULLPTR,
+                                             &ret, CM_NULLPTR,
                                              cmSystemTools::OUTPUT_NONE)) {
           std::cerr << "Error running '" << tidy_cmd[0] << "'\n";
           return 1;
@@ -363,7 +365,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         // Run the ldd -u -r command line.
         // Capture its stdout and hide its stderr.
         std::string stdOut;
-        if (!cmSystemTools::RunSingleCommand(lwyu_cmd, &stdOut, 0, &ret, 0,
+        if (!cmSystemTools::RunSingleCommand(lwyu_cmd, &stdOut, CM_NULLPTR,
+                                             &ret, CM_NULLPTR,
                                              cmSystemTools::OUTPUT_NONE)) {
           std::cerr << "Error running '" << lwyu_cmd[0] << "'\n";
           return 1;
@@ -379,7 +382,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       // Now run the real compiler command and return its result value.
       if (lwyu.empty() &&
           !cmSystemTools::RunSingleCommand(
-            orig_cmd, 0, 0, &ret, 0, cmSystemTools::OUTPUT_PASSTHROUGH)) {
+            orig_cmd, CM_NULLPTR, CM_NULLPTR, &ret, CM_NULLPTR,
+            cmSystemTools::OUTPUT_PASSTHROUGH)) {
         std::cerr << "Error running '" << orig_cmd[0] << "'\n";
         return 1;
       }
@@ -429,7 +433,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       // Execute command from remaining arguments.
       std::vector<std::string> cmd(ai, ae);
       int retval;
-      if (cmSystemTools::RunSingleCommand(cmd, 0, 0, &retval, NULL,
+      if (cmSystemTools::RunSingleCommand(cmd, CM_NULLPTR, CM_NULLPTR, &retval,
+                                          CM_NULLPTR,
                                           cmSystemTools::OUTPUT_PASSTHROUGH)) {
         return retval;
       }
@@ -537,7 +542,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       time(&time_start);
       clock_start = clock();
       int ret = 0;
-      cmSystemTools::RunSingleCommand(command, 0, 0, &ret);
+      cmSystemTools::RunSingleCommand(command, CM_NULLPTR, CM_NULLPTR, &ret);
 
       clock_finish = clock();
       time(&time_finish);
@@ -588,8 +593,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       int retval = 0;
       int timeout = 0;
       if (cmSystemTools::RunSingleCommand(
-            command.c_str(), 0, 0, &retval, directory.c_str(),
-            cmSystemTools::OUTPUT_PASSTHROUGH, timeout)) {
+            command.c_str(), CM_NULLPTR, CM_NULLPTR, &retval,
+            directory.c_str(), cmSystemTools::OUTPUT_PASSTHROUGH, timeout)) {
         return retval;
       }
 
@@ -695,8 +700,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       // Use the make system's VERBOSE environment variable to enable
       // verbose output. This can be skipped by also setting CMAKE_NO_VERBOSE
       // (which is set by the Eclipse and KDevelop generators).
-      bool verbose = ((cmSystemTools::GetEnv("VERBOSE") != 0) &&
-                      (cmSystemTools::GetEnv("CMAKE_NO_VERBOSE") == 0));
+      bool verbose =
+        ((cmSystemTools::GetEnv("VERBOSE") != CM_NULLPTR) &&
+         (cmSystemTools::GetEnv("CMAKE_NO_VERBOSE") == CM_NULLPTR));
 
       // Create a cmake object instance to process dependencies.
       cmake cm;
@@ -1146,7 +1152,7 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string>& args)
     }
 
     // Setup this command line.
-    const char* cmd[2] = { command.c_str(), 0 };
+    const char* cmd[2] = { command.c_str(), CM_NULLPTR };
     cmsysProcess_SetCommand(cp, cmd);
 
     // Report the command if verbose output is enabled.
@@ -1156,7 +1162,7 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string>& args)
 
     // Run the command and wait for it to exit.
     cmsysProcess_Execute(cp);
-    cmsysProcess_WaitForExit(cp, 0);
+    cmsysProcess_WaitForExit(cp, CM_NULLPTR);
 
     // Report failure if any.
     switch (cmsysProcess_GetState(cp)) {
@@ -1249,7 +1255,7 @@ int cmcmd::VisualStudioLink(std::vector<std::string>& args, int type)
   if (args.size() < 2) {
     return -1;
   }
-  bool verbose = cmSystemTools::GetEnv("VERBOSE") != NULL;
+  bool verbose = cmSystemTools::GetEnv("VERBOSE") != CM_NULLPTR;
   std::vector<std::string> expandedArgs;
   for (std::vector<std::string>::iterator i = args.begin(); i != args.end();
        ++i) {
@@ -1273,7 +1279,7 @@ int cmcmd::VisualStudioLink(std::vector<std::string>& args, int type)
 }
 
 static bool RunCommand(const char* comment, std::vector<std::string>& command,
-                       bool verbose, int* retCodeOut = 0)
+                       bool verbose, int* retCodeOut = CM_NULLPTR)
 {
   if (verbose) {
     std::cout << comment << ":\n";
@@ -1282,8 +1288,9 @@ static bool RunCommand(const char* comment, std::vector<std::string>& command,
   std::string output;
   int retCode = 0;
   // use rc command to create .res file
-  bool res = cmSystemTools::RunSingleCommand(
-    command, &output, &output, &retCode, 0, cmSystemTools::OUTPUT_NONE);
+  bool res =
+    cmSystemTools::RunSingleCommand(command, &output, &output, &retCode,
+                                    CM_NULLPTR, cmSystemTools::OUTPUT_NONE);
   // always print the output of the command, unless
   // it is the dumb rc command banner, but if the command
   // returned an error code then print the output anyway as

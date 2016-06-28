@@ -36,9 +36,10 @@ public:
    * Add watch to the variable
    */
   bool AddWatch(const std::string& variable, WatchMethod method,
-                void* client_data = 0, DeleteData delete_data = 0);
+                void* client_data = CM_NULLPTR,
+                DeleteData delete_data = CM_NULLPTR);
   void RemoveWatch(const std::string& variable, WatchMethod method,
-                   void* client_data = 0);
+                   void* client_data = CM_NULLPTR);
 
   /**
    * This method is called when variable is accessed
@@ -71,9 +72,9 @@ protected:
     void* ClientData;
     DeleteData DeleteDataCall;
     Pair()
-      : Method(0)
-      , ClientData(0)
-      , DeleteDataCall(0)
+      : Method(CM_NULLPTR)
+      , ClientData(CM_NULLPTR)
+      , DeleteDataCall(CM_NULLPTR)
     {
     }
     ~Pair()

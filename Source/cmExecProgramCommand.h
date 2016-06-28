@@ -27,30 +27,31 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() { return new cmExecProgramCommand; }
+  cmCommand* Clone() CM_OVERRIDE { return new cmExecProgramCommand; }
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "exec_program"; }
+  std::string GetName() const CM_OVERRIDE { return "exec_program"; }
 
   /**
    * This determines if the command is invoked when in script mode.
    */
-  virtual bool IsScriptable() const { return true; }
+  bool IsScriptable() const CM_OVERRIDE { return true; }
 
   cmTypeMacro(cmExecProgramCommand, cmCommand);
 
 private:
   static bool RunCommand(const char* command, std::string& output, int& retVal,
-                         const char* directory = 0, bool verbose = true);
+                         const char* directory = CM_NULLPTR,
+                         bool verbose = true);
 };
 
 #endif

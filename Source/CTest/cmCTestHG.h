@@ -24,16 +24,16 @@ public:
   /** Construct with a CTest instance and update log stream.  */
   cmCTestHG(cmCTest* ctest, std::ostream& log);
 
-  virtual ~cmCTestHG();
+  ~cmCTestHG() CM_OVERRIDE;
 
 private:
   std::string GetWorkingRevision();
-  virtual void NoteOldRevision();
-  virtual void NoteNewRevision();
-  virtual bool UpdateImpl();
+  void NoteOldRevision() CM_OVERRIDE;
+  void NoteNewRevision() CM_OVERRIDE;
+  bool UpdateImpl() CM_OVERRIDE;
 
-  void LoadRevisions();
-  void LoadModifications();
+  void LoadRevisions() CM_OVERRIDE;
+  void LoadModifications() CM_OVERRIDE;
 
   // Parsing helper classes.
   class IdentifyParser;

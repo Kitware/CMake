@@ -27,10 +27,10 @@ public:
    * Construct generator
    */
   cmCPackTGZGenerator();
-  virtual ~cmCPackTGZGenerator();
+  ~cmCPackTGZGenerator() CM_OVERRIDE;
 
 protected:
-  virtual const char* GetOutputExtension() { return ".tar.gz"; }
+  const char* GetOutputExtension() CM_OVERRIDE { return ".tar.gz"; }
 };
 
 #endif

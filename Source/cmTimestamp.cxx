@@ -22,7 +22,7 @@
 std::string cmTimestamp::CurrentTime(const std::string& formatString,
                                      bool utcFlag)
 {
-  time_t currentTimeT = time(0);
+  time_t currentTimeT = time(CM_NULLPTR);
   if (currentTimeT == time_t(-1)) {
     return std::string();
   }
@@ -56,14 +56,14 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
   struct tm timeStruct;
   memset(&timeStruct, 0, sizeof(timeStruct));
 
-  struct tm* ptr = (struct tm*)0;
+  struct tm* ptr = (struct tm*)CM_NULLPTR;
   if (utcFlag) {
     ptr = gmtime(&timeT);
   } else {
     ptr = localtime(&timeT);
   }
 
-  if (ptr == 0) {
+  if (ptr == CM_NULLPTR) {
     return std::string();
   }
 

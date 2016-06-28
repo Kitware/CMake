@@ -77,7 +77,7 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args,
 
   cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
   if (gg->IsExportedTargetsFile(fname_abs)) {
-    const char* modal = 0;
+    const char* modal = CM_NULLPTR;
     std::ostringstream e;
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
 

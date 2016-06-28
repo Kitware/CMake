@@ -27,7 +27,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone()
+  cmCommand* Clone() CM_OVERRIDE
   {
     cmCTestStartCommand* ni = new cmCTestStartCommand;
     ni->CTest = this->CTest;
@@ -41,8 +41,8 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) CM_OVERRIDE;
 
   /**
    * Will this invocation of ctest_start create a new TAG file?
@@ -57,7 +57,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual std::string GetName() const { return "ctest_start"; }
+  std::string GetName() const CM_OVERRIDE { return "ctest_start"; }
 
   cmTypeMacro(cmCTestStartCommand, cmCTestCommand);
 

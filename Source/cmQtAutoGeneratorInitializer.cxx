@@ -195,7 +195,7 @@ static void SetupAutoMocTarget(
   cmMakefile* makefile = target->Target->GetMakefile();
 
   const char* tmp = target->GetProperty("AUTOMOC_MOC_OPTIONS");
-  std::string _moc_options = (tmp != 0 ? tmp : "");
+  std::string _moc_options = (tmp != CM_NULLPTR ? tmp : "");
   makefile->AddDefinition(
     "_moc_options", cmOutputConverter::EscapeForCMake(_moc_options).c_str());
   makefile->AddDefinition(
@@ -484,8 +484,9 @@ static std::string ListQt5RccInputs(cmSourceFile* sf,
     std::string rccStdOut;
     std::string rccStdErr;
     int retVal = 0;
-    bool result = cmSystemTools::RunSingleCommand(
-      command, &rccStdOut, &rccStdErr, &retVal, 0, cmSystemTools::OUTPUT_NONE);
+    bool result =
+      cmSystemTools::RunSingleCommand(command, &rccStdOut, &rccStdErr, &retVal,
+                                      CM_NULLPTR, cmSystemTools::OUTPUT_NONE);
     if (result && retVal == 0 &&
         rccStdOut.find("--list") != std::string::npos) {
       hasDashDashList = true;
@@ -505,8 +506,9 @@ static std::string ListQt5RccInputs(cmSourceFile* sf,
   std::string rccStdOut;
   std::string rccStdErr;
   int retVal = 0;
-  bool result = cmSystemTools::RunSingleCommand(
-    command, &rccStdOut, &rccStdErr, &retVal, 0, cmSystemTools::OUTPUT_NONE);
+  bool result =
+    cmSystemTools::RunSingleCommand(command, &rccStdOut, &rccStdErr, &retVal,
+                                    CM_NULLPTR, cmSystemTools::OUTPUT_NONE);
   if (!result || retVal) {
     std::ostringstream err;
     err << "AUTOGEN: error: Rcc list process for " << sf->GetFullPath()

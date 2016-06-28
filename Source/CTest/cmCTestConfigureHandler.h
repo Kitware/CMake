@@ -29,11 +29,11 @@ public:
   /*
    * The main entry point for this class
    */
-  int ProcessHandler();
+  int ProcessHandler() CM_OVERRIDE;
 
   cmCTestConfigureHandler();
 
-  void Initialize();
+  void Initialize() CM_OVERRIDE;
 };
 
 #endif

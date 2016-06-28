@@ -36,16 +36,16 @@ public:
   /*
    * The main entry point for this class
    */
-  int ProcessHandler();
+  int ProcessHandler() CM_OVERRIDE;
 
   cmCTestBuildHandler();
 
-  void PopulateCustomVectors(cmMakefile* mf);
+  void PopulateCustomVectors(cmMakefile* mf) CM_OVERRIDE;
 
   /**
    * Initialize handler
    */
-  virtual void Initialize();
+  void Initialize() CM_OVERRIDE;
 
   int GetTotalErrors() { return this->TotalErrors; }
   int GetTotalWarnings() { return this->TotalWarnings; }

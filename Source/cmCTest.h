@@ -120,7 +120,7 @@ public:
   typedef std::set<std::string> SetOfStrings;
 
   ///! Process Command line arguments
-  int Run(std::vector<std::string>&, std::string* output = 0);
+  int Run(std::vector<std::string>&, std::string* output = CM_NULLPTR);
 
   /**
    * Initialize and finalize testing
@@ -271,8 +271,8 @@ public:
    * escaped for this to with spaces.
    */
   bool RunCommand(const char* command, std::string* stdOut,
-                  std::string* stdErr, int* retVal = 0, const char* dir = 0,
-                  double timeout = 0.0);
+                  std::string* stdErr, int* retVal = CM_NULLPTR,
+                  const char* dir = CM_NULLPTR, double timeout = 0.0);
 
   //! Clean/make safe for xml the given value such that it may be used as
   // one of the key fields by CDash when computing the buildid.
@@ -574,7 +574,7 @@ private:
 
   //! Check if the argument is the one specified
   bool CheckArgument(const std::string& arg, const char* varg1,
-                     const char* varg2 = 0);
+                     const char* varg2 = CM_NULLPTR);
 
   //! Output errors from a test
   void OutputTestErrors(std::vector<char> const& process_output);

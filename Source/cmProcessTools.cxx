@@ -17,27 +17,27 @@ void cmProcessTools::RunProcess(struct cmsysProcess_s* cp, OutputParser* out,
                                 OutputParser* err)
 {
   cmsysProcess_Execute(cp);
-  char* data = 0;
+  char* data = CM_NULLPTR;
   int length = 0;
   int p;
   while ((out || err) &&
-         (p = cmsysProcess_WaitForData(cp, &data, &length, 0), p)) {
+         (p = cmsysProcess_WaitForData(cp, &data, &length, CM_NULLPTR), p)) {
     if (out && p == cmsysProcess_Pipe_STDOUT) {
       if (!out->Process(data, length)) {
-        out = 0;
+        out = CM_NULLPTR;
       }
     } else if (err && p == cmsysProcess_Pipe_STDERR) {
       if (!err->Process(data, length)) {
-        err = 0;
+        err = CM_NULLPTR;
       }
     }
   }
-  cmsysProcess_WaitForExit(cp, 0);
+  cmsysProcess_WaitForExit(cp, CM_NULLPTR);
 }
 
 cmProcessTools::LineParser::LineParser(char sep, bool ignoreCR)
-  : Log(0)
-  , Prefix(0)
+  : Log(CM_NULLPTR)
+  , Prefix(CM_NULLPTR)
   , Separator(sep)
   , LineEnd('\0')
   , IgnoreCR(ignoreCR)

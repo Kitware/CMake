@@ -71,7 +71,7 @@ bool cmListFileParser::ParseFile()
 
   // Verify the Byte-Order-Mark, if any.
   if (bom != cmListFileLexer_BOM_None && bom != cmListFileLexer_BOM_UTF8) {
-    cmListFileLexer_SetFileName(this->Lexer, 0, 0);
+    cmListFileLexer_SetFileName(this->Lexer, CM_NULLPTR, CM_NULLPTR);
     this->IssueFileOpenError(
       "File starts with a Byte-Order-Mark that is not UTF-8.");
     return false;
@@ -314,13 +314,13 @@ cmListFileBacktrace::cmListFileBacktrace(cmState::Snapshot bottom, Entry* cur)
 
 cmListFileBacktrace::cmListFileBacktrace()
   : Bottom()
-  , Cur(0)
+  , Cur(CM_NULLPTR)
 {
 }
 
 cmListFileBacktrace::cmListFileBacktrace(cmState::Snapshot snapshot)
   : Bottom(snapshot.GetCallStackBottom())
-  , Cur(0)
+  , Cur(CM_NULLPTR)
 {
 }
 

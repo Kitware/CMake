@@ -30,7 +30,8 @@ public:
   cmOrderDirectories(cmGlobalGenerator* gg, cmGeneratorTarget const* target,
                      const char* purpose);
   ~cmOrderDirectories();
-  void AddRuntimeLibrary(std::string const& fullPath, const char* soname = 0);
+  void AddRuntimeLibrary(std::string const& fullPath,
+                         const char* soname = CM_NULLPTR);
   void AddLinkLibrary(std::string const& fullPath);
   void AddUserDirectories(std::vector<std::string> const& extra);
   void AddLanguageDirectories(std::vector<std::string> const& dirs);
