@@ -182,10 +182,6 @@ SET(LZMA_SRCS
   liblzma/simple/x86.c
   )
 
-IF(WIN32 AND BUILD_SHARED_LIBS)
-  SET(LZMA_SRCS ${LZMA_SRCS} liblzma/liblzma_w32res.rc)
-ENDIF()
-
 CONFIGURE_FILE(config.h.in config.h @ONLY)
 
 INCLUDE_DIRECTORIES(
@@ -209,7 +205,7 @@ ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -woffall")
 ENDIF()
 
-ADD_LIBRARY(cmliblzma ${LZMA_SRCS})
+ADD_LIBRARY(cmliblzma STATIC ${LZMA_SRCS})
 
 IF(CMAKE_C_COMPILER_ID STREQUAL "XL")
   # Disable the XL compiler optimizer because it causes crashes
