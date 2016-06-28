@@ -2134,70 +2134,80 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
   // now what should cmake do? if --build-and-test was specified then
   // we run the build and test handler and return
   if (cmakeAndTest) {
-    this->Verbose = true;
-    cmCTestBuildAndTestHandler* handler =
-      static_cast<cmCTestBuildAndTestHandler*>(this->GetHandler("buildtest"));
-    int retv = handler->ProcessHandler();
-    *output = handler->GetOutput();
-#ifdef CMAKE_BUILD_WITH_CMAKE
-    cmDynamicLoader::FlushCache();
-#endif
-    if (retv != 0) {
-      cmCTestLog(this, DEBUG,
-                 "build and test failing returning: " << retv << std::endl);
-    }
-    return retv;
+    return this->RunCMakeAndTest(output);
   }
 
   if (executeTests) {
-    int res;
-    // call process directory
-    if (this->RunConfigurationScript) {
-      if (this->ExtraVerbose) {
-        cmCTestLog(this, OUTPUT, "* Extra verbosity turned on" << std::endl);
-      }
-      cmCTest::t_TestingHandlers::iterator it;
-      for (it = this->TestingHandlers.begin();
-           it != this->TestingHandlers.end(); ++it) {
-        it->second->SetVerbose(this->ExtraVerbose);
-        it->second->SetSubmitIndex(this->SubmitIndex);
-      }
-      this->GetHandler("script")->SetVerbose(this->Verbose);
-      res = this->GetHandler("script")->ProcessHandler();
-      if (res != 0) {
-        cmCTestLog(this, DEBUG,
-                   "running script failing returning: " << res << std::endl);
-      }
-
-    } else {
-      // What is this?  -V seems to be the same as -VV,
-      // and Verbose is always on in this case
-      this->ExtraVerbose = this->Verbose;
-      this->Verbose = true;
-      cmCTest::t_TestingHandlers::iterator it;
-      for (it = this->TestingHandlers.begin();
-           it != this->TestingHandlers.end(); ++it) {
-        it->second->SetVerbose(this->Verbose);
-        it->second->SetSubmitIndex(this->SubmitIndex);
-      }
-      std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-      if (!this->Initialize(cwd.c_str(), CM_NULLPTR)) {
-        res = 12;
-        cmCTestLog(this, ERROR_MESSAGE, "Problem initializing the dashboard."
-                     << std::endl);
-      } else {
-        res = this->ProcessTests();
-      }
-      this->Finalize();
-    }
-    if (res != 0) {
-      cmCTestLog(this, DEBUG,
-                 "Running a test(s) failed returning : " << res << std::endl);
-    }
-    return res;
+    return this->ExecuteTests();
   }
 
   return 1;
+}
+
+int cmCTest::ExecuteTests()
+{
+  int res;
+  // call process directory
+  if (this->RunConfigurationScript) {
+    if (this->ExtraVerbose) {
+      cmCTestLog(this, OUTPUT, "* Extra verbosity turned on" << std::endl);
+    }
+    cmCTest::t_TestingHandlers::iterator it;
+    for (it = this->TestingHandlers.begin(); it != this->TestingHandlers.end();
+         ++it) {
+      it->second->SetVerbose(this->ExtraVerbose);
+      it->second->SetSubmitIndex(this->SubmitIndex);
+    }
+    this->GetHandler("script")->SetVerbose(this->Verbose);
+    res = this->GetHandler("script")->ProcessHandler();
+    if (res != 0) {
+      cmCTestLog(this, DEBUG,
+                 "running script failing returning: " << res << std::endl);
+    }
+
+  } else {
+    // What is this?  -V seems to be the same as -VV,
+    // and Verbose is always on in this case
+    this->ExtraVerbose = this->Verbose;
+    this->Verbose = true;
+    cmCTest::t_TestingHandlers::iterator it;
+    for (it = this->TestingHandlers.begin(); it != this->TestingHandlers.end();
+         ++it) {
+      it->second->SetVerbose(this->Verbose);
+      it->second->SetSubmitIndex(this->SubmitIndex);
+    }
+    std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+    if (!this->Initialize(cwd.c_str(), CM_NULLPTR)) {
+      res = 12;
+      cmCTestLog(this, ERROR_MESSAGE, "Problem initializing the dashboard."
+                   << std::endl);
+    } else {
+      res = this->ProcessTests();
+    }
+    this->Finalize();
+  }
+  if (res != 0) {
+    cmCTestLog(this, DEBUG,
+               "Running a test(s) failed returning : " << res << std::endl);
+  }
+  return res;
+}
+
+int cmCTest::RunCMakeAndTest(std::string* output)
+{
+  this->Verbose = true;
+  cmCTestBuildAndTestHandler* handler =
+    static_cast<cmCTestBuildAndTestHandler*>(this->GetHandler("buildtest"));
+  int retv = handler->ProcessHandler();
+  *output = handler->GetOutput();
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  cmDynamicLoader::FlushCache();
+#endif
+  if (retv != 0) {
+    cmCTestLog(this, DEBUG, "build and test failing returning: " << retv
+                                                                 << std::endl);
+  }
+  return retv;
 }
 
 void cmCTest::SetNotesFiles(const char* notes)

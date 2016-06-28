@@ -579,6 +579,9 @@ private:
   //! Output errors from a test
   void OutputTestErrors(std::vector<char> const& process_output);
 
+  int RunCMakeAndTest(std::string* output);
+  int ExecuteTests();
+
   bool SuppressUpdatingCTestConfiguration;
 
   bool Debug;
