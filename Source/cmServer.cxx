@@ -121,11 +121,12 @@ cmMetadataServer::~cmMetadataServer()
   delete this->Protocol;
 }
 
-void cmMetadataServer::PopOne()
+// return true if server should quit, false otherwise.
+bool cmMetadataServer::PopOne()
 {
   this->Writing = false;
   if (mQueue.empty()) {
-    return;
+    return false;
   }
 
   auto fname = mBuildDir + "/cmake-daemon-" + std::to_string(getpid());
@@ -138,8 +139,9 @@ void cmMetadataServer::PopOne()
   request = "<<< " + request;
   write_data((uv_stream_t*)&mLogFile_pipe, request, on_logfile_write);
 
-  this->Protocol->processRequest(mQueue.front());
+  auto const quit = this->Protocol->processRequest(mQueue.front());
   mQueue.erase(mQueue.begin());
+  return quit;
 }
 
 void cmMetadataServer::handleData(const std::string& data)
@@ -168,7 +170,10 @@ void cmMetadataServer::handleData(const std::string& data)
       mQueue.push_back(mJsonData);
       mJsonData.clear();
       if (!this->Writing) {
-        this->PopOne();
+        if (this->PopOne()) {
+          uv_stop(mLoop);
+          return;
+        }
       }
     } else {
       mJsonData += line;

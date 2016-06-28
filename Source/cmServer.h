@@ -39,7 +39,7 @@ public:
 
   void ServeMetadata(const std::string& buildDir);
 
-  void PopOne();
+  bool PopOne();
 
   void handleData(std::string const& data);
 

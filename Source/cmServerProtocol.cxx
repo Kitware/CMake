@@ -48,22 +48,26 @@ void cmServerProtocol::Error(std::string const& error = "unknown")
   this->Server->WriteResponse(obj);
 }
 
-void cmServerProtocol::processRequest(const std::string& json)
+// return true if server should quit, false otherwise.
+bool cmServerProtocol::processRequest(const std::string& json)
 {
    Json::Value value;
    if (!Json::Reader{}.parse(json, value)) {
      this->Error("json parse failed on.\n" + json);
-     return;
+     return false;
    }
 
   auto const type = value["type"].asString();
+  if (type == "quit") {
+    return true;
+  }
+
   if (this->Server->GetState() == cmMetadataServer::Started) {
     if (type == "handshake") {
       this->ProcessHandshake(value["protocolVersion"].asString());
     } else {
       this->Error("unknown query type " + type);
     }
-    return;
   }
   if (this->Server->GetState() == cmMetadataServer::ProcessingRequests) {
     if (type == "version") {
@@ -115,6 +119,8 @@ void cmServerProtocol::processRequest(const std::string& json)
   } else {
     this->Error("unknown query type " + type);
   }
+
+  return false;
 }
 
 void cmServerProtocol::ProcessHandshake(std::string const& protocolVersion)

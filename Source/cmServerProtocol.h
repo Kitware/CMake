@@ -37,7 +37,7 @@ public:
   cmServerProtocol(cmMetadataServer* server, std::string buildDir);
   ~cmServerProtocol();
 
-  void processRequest(const std::string& json);
+  bool processRequest(const std::string& json);
 
 private:
   void ProcessHandshake(const std::string& protocolVersion);
