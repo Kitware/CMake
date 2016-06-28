@@ -41,71 +41,78 @@ cmServerProtocol::~cmServerProtocol()
   delete this->CMakeInstance;
 }
 
+void cmServerProtocol::Error(std::string const& error = "unknown")
+{
+  Json::Value obj = Json::objectValue;
+  obj["error"] = error;
+  this->Server->WriteResponse(obj);
+}
+
 void cmServerProtocol::processRequest(const std::string& json)
 {
-  Json::Reader reader;
-  Json::Value value;
-  reader.parse(json, value);
+   Json::Value value;
+   if (!Json::Reader{}.parse(json, value)) {
+     this->Error("json parse failed on.\n" + json);
+     return;
+   }
 
   if (this->Server->GetState() == cmMetadataServer::Started) {
     if (value["type"] == "handshake") {
       this->ProcessHandshake(value["protocolVersion"].asString());
+    } else {
+      this->Error("unknown query type " + value["type"].asString());
     }
+    return;
   }
   if (this->Server->GetState() == cmMetadataServer::ProcessingRequests) {
     if (value["type"] == "version") {
       this->ProcessVersion();
-    }
-    if (value["type"] == "buildsystem") {
+    } else if (value["type"] == "buildsystem") {
       this->ProcessBuildsystem();
-    }
-    if (value["type"] == "target_info") {
+    } else if (value["type"] == "target_info") {
       const char* language = 0;
       if (value.isMember("language")) {
         language = value["language"].asCString();
       }
       this->ProcessTargetInfo(value["target_name"].asString(),
                               value["config"].asString(), language);
-    }
-    if (value["type"] == "file_info") {
+    } else if (value["type"] == "file_info") {
       this->ProcessFileInfo(value["target_name"].asString(),
                             value["config"].asString(),
                             value["file_path"].asString());
-    }
-    if (value["type"] == "content") {
+    } else if (value["type"] == "content") {
       auto diff = cmServerDiff::GetDiff(value);
       this->ProcessContent(value["file_path"].asString(),
                            value["file_line"].asInt(), diff,
                            value["matcher"].asString());
-    }
-    if (value["type"] == "parse") {
+    } else if (value["type"] == "parse") {
       auto diff = cmServerDiff::GetDiff(value);
       this->ProcessParse(value["file_path"].asString(), diff);
-    }
-    if (value["type"] == "contextual_help") {
+    } else if (value["type"] == "contextual_help") {
       this->ProcessContextualHelp(
         value["file_path"].asString(), value["file_line"].asInt(),
         value["file_column"].asInt(), value["file_content"].asString());
-    }
-    if (value["type"] == "content_diff") {
+    } else if (value["type"] == "content_diff") {
       auto diffs = cmServerDiff::GetDiffs(value);
       this->ProcessContentDiff(
         value["file_path1"].asString(), value["file_line1"].asInt(),
         value["file_path2"].asString(), value["file_line2"].asInt(), diffs);
-    }
-    if (value["type"] == "code_complete") {
+    } else if (value["type"] == "code_complete") {
       auto diff = cmServerDiff::GetDiff(value);
       this->ProcessCodeComplete(value["file_path"].asString(),
                                 value["file_line"].asInt(),
                                 value["file_column"].asInt(), diff);
-    }
-    if (value["type"] == "context_writers") {
+    } else if (value["type"] == "context_writers") {
       auto diff = cmServerDiff::GetDiff(value);
 
       this->ProcessContextWriters(value["file_path"].asString(),
                                   value["file_line"].asInt(),
                                   value["file_column"].asInt(), diff);
+    } else {
+      this->Error("unknown query type " + value["type"].asString());
     }
+  } else {
+    this->Error("unknown query type " + value["type"].asString());
   }
 }
 
@@ -120,7 +127,7 @@ void cmServerProtocol::ProcessHandshake(std::string const& protocolVersion)
   std::set<std::string> emptySet;
   if (!this->CMakeInstance->GetState()->LoadCache(m_buildDir.c_str(), true,
                                                   emptySet, emptySet)) {
-    // Error;
+    this->Error("LoadCache failed.");
     return;
   }
 
@@ -128,7 +135,7 @@ void cmServerProtocol::ProcessHandshake(std::string const& protocolVersion)
     this->CMakeInstance->GetState()->GetInitializedCacheValue(
       "CMAKE_GENERATOR");
   if (!genName) {
-    // Error
+    this->Error("CMAKE_GENERATOR not found in cache.");
     return;
   }
 
@@ -136,7 +143,7 @@ void cmServerProtocol::ProcessHandshake(std::string const& protocolVersion)
     this->CMakeInstance->GetState()->GetInitializedCacheValue(
       "CMAKE_HOME_DIRECTORY");
   if (!sourceDir) {
-    // Error
+    this->Error("CMAKE_HOME_DIRECTORY not found in cache.");
     return;
   }
 
@@ -165,7 +172,7 @@ void cmServerProtocol::ProcessHandshake(std::string const& protocolVersion)
   this->Server->WriteResponse(obj);
 
   if (!this->CMakeInstance->GetGlobalGenerator()->Compute()) {
-    // Error
+    this->Error("GlobalGenerator::Compute failed.");
     return;
   }
 
@@ -279,7 +286,7 @@ void cmServerProtocol::ProcessTargetInfo(std::string tgtName,
     this->CMakeInstance->GetGlobalGenerator()->FindGeneratorTarget(tgtName);
 
   if (!tgt) {
-    // Error
+    this->Error(tgtName + " not found.");
     return;
   }
 
@@ -370,7 +377,7 @@ void cmServerProtocol::ProcessFileInfo(std::string tgtName, std::string config,
     this->CMakeInstance->GetGlobalGenerator()->FindGeneratorTarget(tgtName);
 
   if (!tgt) {
-    // Error
+    this->Error(tgtName + " not found.");
     return;
   }
 
@@ -386,7 +393,7 @@ void cmServerProtocol::ProcessFileInfo(std::string tgtName, std::string config,
   }
 
   if (!file) {
-    // Error
+    this->Error(file_path + " not found");
     return;
   }
 
@@ -791,7 +798,7 @@ void cmServerProtocol::ProcessContextualHelp(std::string filePath,
   if (!listFile.ParseString(
         content.c_str(), filePath.c_str(),
         this->CMakeInstance->GetGlobalGenerator()->GetMakefiles()[0])) {
-    // Error
+    this->Error("cmListFile::ParseString failed.");
     return;
   }
 

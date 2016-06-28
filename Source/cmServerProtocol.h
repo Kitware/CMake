@@ -82,6 +82,8 @@ private:
                            std::vector<cmListFileArgument> args,
                            size_t argIndex);
 
+  void Error(std::string const& error);
+
 private:
   cmMetadataServer* Server;
   cmake* CMakeInstance;
