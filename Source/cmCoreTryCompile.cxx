@@ -333,14 +333,6 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       fprintf(fout, "set(CMAKE_%s_FLAGS \"${CMAKE_%s_FLAGS}"
                     " ${COMPILE_DEFINITIONS}\")\n",
               li->c_str(), li->c_str());
-      static std::string const cfgDefault = "DEBUG";
-      std::string const cfg =
-        !tcConfig.empty() ? cmSystemTools::UpperCase(tcConfig) : cfgDefault;
-      std::string const langFlagsCfg = "CMAKE_" + *li + "_FLAGS_" + cfg;
-      const char* flagsCfg = this->Makefile->GetDefinition(langFlagsCfg);
-      fprintf(
-        fout, "set(%s %s)\n", langFlagsCfg.c_str(),
-        cmOutputConverter::EscapeForCMake(flagsCfg ? flagsCfg : "").c_str());
     }
     switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0056)) {
       case cmPolicies::WARN:
