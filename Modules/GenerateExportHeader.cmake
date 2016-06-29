@@ -20,6 +20,7 @@
 #              [NO_DEPRECATED_MACRO_NAME <no_deprecated_macro_name>]
 #              [DEFINE_NO_DEPRECATED]
 #              [PREFIX_NAME <prefix_name>]
+#              [CUSTOM_CONTENT_FROM_VARIABLE <variable>]
 #    )
 #
 #
@@ -60,8 +61,10 @@
 # The CMake fragment will generate a file in the
 # ``${CMAKE_CURRENT_BINARY_DIR}`` called ``somelib_export.h`` containing the
 # macros ``SOMELIB_EXPORT``, ``SOMELIB_NO_EXPORT``, ``SOMELIB_DEPRECATED``,
-# ``SOMELIB_DEPRECATED_EXPORT`` and ``SOMELIB_DEPRECATED_NO_EXPORT``.  The
-# resulting file should be installed with other headers in the library.
+# ``SOMELIB_DEPRECATED_EXPORT`` and ``SOMELIB_DEPRECATED_NO_EXPORT``.
+# They will be followed by content taken from the variable specified by
+# the ``CUSTOM_CONTENT_FROM_VARIABLE`` option, if any.
+# The resulting file should be installed with other headers in the library.
 #
 # The ``BASE_NAME`` argument can be used to override the file name and the
 # names used for the macros:
@@ -288,7 +291,7 @@ macro(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
   set(options DEFINE_NO_DEPRECATED)
   set(oneValueArgs PREFIX_NAME BASE_NAME EXPORT_MACRO_NAME EXPORT_FILE_NAME
     DEPRECATED_MACRO_NAME NO_EXPORT_MACRO_NAME STATIC_DEFINE
-    NO_DEPRECATED_MACRO_NAME)
+    NO_DEPRECATED_MACRO_NAME CUSTOM_CONTENT_FROM_VARIABLE)
   set(multiValueArgs)
 
   cmake_parse_arguments(_GEH "${options}" "${oneValueArgs}" "${multiValueArgs}"
@@ -360,6 +363,14 @@ macro(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
     set(EXPORT_IMPORT_CONDITION ${TARGET_LIBRARY}_EXPORTS)
   endif()
   string(MAKE_C_IDENTIFIER ${EXPORT_IMPORT_CONDITION} EXPORT_IMPORT_CONDITION)
+
+  if(_GEH_CUSTOM_CONTENT_FROM_VARIABLE)
+    if(DEFINED "${_GEH_CUSTOM_CONTENT_FROM_VARIABLE}")
+      set(CUSTOM_CONTENT "${${_GEH_CUSTOM_CONTENT_FROM_VARIABLE}}")
+    else()
+      set(CUSTOM_CONTENT "")
+    endif()
+  endif()
 
   configure_file("${_GENERATE_EXPORT_HEADER_MODULE_DIR}/exportheader.cmake.in"
     "${EXPORT_FILE_NAME}" @ONLY)
