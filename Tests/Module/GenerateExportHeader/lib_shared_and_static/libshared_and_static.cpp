@@ -2,7 +2,7 @@
 #include "libshared_and_static.h"
 
 #ifndef MY_CUSTOM_CONTENT_ADDED
-# error "MY_CUSTOM_CONTENT_ADDED not defined!"
+#error "MY_CUSTOM_CONTENT_ADDED not defined!"
 #endif
 
 int LibsharedAndStatic::libshared_and_static() const
