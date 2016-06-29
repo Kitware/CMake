@@ -427,6 +427,14 @@ void cmServerProtocol::ProcessFileInfo(std::string tgtName, std::string config,
   root["filePath"] = file_path;
 
   auto lg = tgt->GetLocalGenerator();
+  auto mf = lg->GetMakefile();
+
+  root["c_compiler"]         = mf->GetSafeDefinition("CMAKE_C_COMPILER");
+  root["c_compiler_version"] = mf->GetSafeDefinition("CMAKE_C_COMPILER_VERSION");
+
+  root["cxx_compiler"]         = mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
+  root["cxx_compiler_version"] = mf->GetSafeDefinition("CMAKE_CXX_COMPILER_VERSION");
+
 
   std::string lang = file->GetLanguage();
 
