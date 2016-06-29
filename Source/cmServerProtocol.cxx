@@ -68,8 +68,7 @@ bool cmServerProtocol::processRequest(const std::string& json)
     } else {
       this->Error("unknown query type " + type);
     }
-  }
-  if (this->Server->GetState() == cmMetadataServer::ProcessingRequests) {
+  } else if (this->Server->GetState() == cmMetadataServer::ProcessingRequests) {
     if (type == "version") {
       this->ProcessVersion();
     } else if (type == "buildsystem") {

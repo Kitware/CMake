@@ -2239,7 +2239,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
         singleLine.push_back(cfgArg);
         cfgArg = "-DEFFECTIVE_PLATFORM_NAME=$(EFFECTIVE_PLATFORM_NAME)";
       } else {
-        cfgArg += mf->GetDefinition("CMAKE_CFG_INTDIR");
+        cfgArg += mf->GetSafeDefinition("CMAKE_CFG_INTDIR");
       }
       singleLine.push_back(cfgArg);
     }
