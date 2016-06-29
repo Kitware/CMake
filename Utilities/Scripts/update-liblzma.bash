@@ -8,7 +8,7 @@ readonly name="liblzma"
 readonly ownership="liblzma upstream <xz-devel@tukaani.org>"
 readonly subtree="Utilities/cmliblzma"
 readonly repo="http://git.tukaani.org/xz.git"
-readonly tag="v5.0.5"
+readonly tag="v5.0.8"
 readonly shortlog=false
 readonly paths="
   COPYING
