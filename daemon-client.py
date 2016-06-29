@@ -6,7 +6,7 @@ is_debug = False
 
 termwidth = 150
 
-print_communication = True
+print_communication = False
 
 def col_print(title, array):
     print
