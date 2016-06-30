@@ -20,6 +20,7 @@
 #include <QDir>
 #include <QLocale>
 #include <QString>
+#include <QtPlugin>
 #include <QTextCodec>
 #include <QTranslator>
 #include <cmsys/CommandLineArguments.hxx>
@@ -42,6 +43,10 @@ static const char* cmDocumentationOptions[][2] = { { 0, 0 } };
 #if defined(Q_OS_MAC)
 static int cmOSXInstall(std::string dir);
 static void cmAddPluginPath();
+#endif
+
+#if defined(USE_QXcbIntegrationPlugin)
+Q_IMPORT_PLUGIN(QXcbIntegrationPlugin);
 #endif
 
 int main(int argc, char** argv)
