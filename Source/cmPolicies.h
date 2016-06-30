@@ -203,7 +203,10 @@ class cmPolicy;
   SELECT(POLICY, CMP0065,                                                     \
          "Do not add flags to export symbols from executables without "       \
          "the ENABLE_EXPORTS target property.",                               \
-         3, 4, 0, cmPolicies::WARN)
+         3, 4, 0, cmPolicies::WARN)                                           \
+  SELECT(POLICY, CMP0066,                                                     \
+         "Honor per-config flags in try_compile() source-file signature.", 3, \
+         7, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

@@ -334,6 +334,43 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
                     " ${COMPILE_DEFINITIONS}\")\n",
               li->c_str(), li->c_str());
     }
+    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0066)) {
+      case cmPolicies::WARN:
+        if (this->Makefile->PolicyOptionalWarningEnabled(
+              "CMAKE_POLICY_WARNING_CMP0066")) {
+          std::ostringstream w;
+          /* clang-format off */
+          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0066) << "\n"
+            "For compatibility with older versions of CMake, try_compile "
+            "is not honoring caller config-specific compiler flags "
+            "(e.g. CMAKE_C_FLAGS_DEBUG) in the test project."
+            ;
+          /* clang-format on */
+          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+        }
+      case cmPolicies::OLD:
+        // OLD behavior is to do nothing.
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        this->Makefile->IssueMessage(
+          cmake::FATAL_ERROR,
+          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0066));
+      case cmPolicies::NEW: {
+        // NEW behavior is to pass config-specific compiler flags.
+        static std::string const cfgDefault = "DEBUG";
+        std::string const cfg =
+          !tcConfig.empty() ? cmSystemTools::UpperCase(tcConfig) : cfgDefault;
+        for (std::set<std::string>::iterator li = testLangs.begin();
+             li != testLangs.end(); ++li) {
+          std::string const langFlagsCfg = "CMAKE_" + *li + "_FLAGS_" + cfg;
+          const char* flagsCfg = this->Makefile->GetDefinition(langFlagsCfg);
+          fprintf(fout, "set(%s %s)\n", langFlagsCfg.c_str(),
+                  cmOutputConverter::EscapeForCMake(flagsCfg ? flagsCfg : "")
+                    .c_str());
+        }
+      } break;
+    }
     switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0056)) {
       case cmPolicies::WARN:
         if (this->Makefile->PolicyOptionalWarningEnabled(

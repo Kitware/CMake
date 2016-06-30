@@ -51,6 +51,14 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.7
+================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0066: Honor per-config flags in try_compile() source-file signature. </policy/CMP0066>
+
 Policies Introduced by CMake 3.4
 ================================
 
