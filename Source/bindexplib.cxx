@@ -244,9 +244,7 @@ public:
    *----------------------------------------------------------------------
    */
   void DumpObjFile() {
-     if(!HaveExportedObjects()) {
-        this->DumpExternalsObjects();
-     }
+    this->DumpExternalsObjects();
   }
 
   /*
