@@ -60,6 +60,8 @@ void CMakeCommandUsage(const char* program)
   errorStream
     << "Usage: " << program << " -E <command> [arguments...]\n"
     << "Available commands: \n"
+    << "  capabilities              - Report capabilities built into cmake "
+       "in JSON format\n"
     << "  chdir dir cmd [args...]   - run command in a given directory\n"
     << "  compare_files file1 file2 - check if file1 is same as file2\n"
     << "  copy <file>... destination  - copy files to destination "
@@ -508,6 +510,16 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           return 1;
         }
       }
+      return 0;
+    }
+    // capabilities
+    else if (args[1] == "capabilities") {
+      if (args.size() > 2) {
+        std::cerr << "-E capabilities accepts no additional arguments\n";
+        return 1;
+      }
+      cmake cm;
+      std::cout << cm.ReportCapabilities();
       return 0;
     }
 

@@ -117,6 +117,8 @@ public:
   /// Destructor
   ~cmake();
 
+  std::string ReportCapabilities() const;
+
   static const char* GetCMakeFilesDirectory() { return "/CMakeFiles"; }
   static const char* GetCMakeFilesDirectoryPostSlash()
   {
