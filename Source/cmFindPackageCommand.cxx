@@ -1500,9 +1500,9 @@ void cmFindPackageCommand::StoreVersionFound()
   this->Makefile->AddDefinition(ver + "_COUNT", buf);
 }
 
+#include <cm_auto_ptr.hxx>
 #include <cmsys/Glob.hxx>
 #include <cmsys/String.h>
-#include <cmsys/auto_ptr.hxx>
 
 class cmFileList;
 class cmFileListGeneratorBase
@@ -1515,10 +1515,10 @@ protected:
 private:
   bool Search(cmFileList&);
   virtual bool Search(std::string const& parent, cmFileList&) = 0;
-  virtual cmsys::auto_ptr<cmFileListGeneratorBase> Clone() const = 0;
+  virtual CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const = 0;
   friend class cmFileList;
   cmFileListGeneratorBase* SetNext(cmFileListGeneratorBase const& next);
-  cmsys::auto_ptr<cmFileListGeneratorBase> Next;
+  CM_AUTO_PTR<cmFileListGeneratorBase> Next;
 };
 
 class cmFileList
@@ -1551,7 +1551,7 @@ public:
 private:
   virtual bool Visit(std::string const& fullPath) = 0;
   friend class cmFileListGeneratorBase;
-  cmsys::auto_ptr<cmFileListGeneratorBase> First;
+  CM_AUTO_PTR<cmFileListGeneratorBase> First;
   cmFileListGeneratorBase* Last;
 };
 
@@ -1621,9 +1621,9 @@ private:
     std::string fullPath = parent + this->String;
     return this->Consider(fullPath, lister);
   }
-  cmsys::auto_ptr<cmFileListGeneratorBase> Clone() const CM_OVERRIDE
+  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const CM_OVERRIDE
   {
-    cmsys::auto_ptr<cmFileListGeneratorBase> g(
+    CM_AUTO_PTR<cmFileListGeneratorBase> g(
       new cmFileListGeneratorFixed(*this));
     return g;
   }
@@ -1655,9 +1655,9 @@ private:
     }
     return false;
   }
-  cmsys::auto_ptr<cmFileListGeneratorBase> Clone() const CM_OVERRIDE
+  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const CM_OVERRIDE
   {
-    cmsys::auto_ptr<cmFileListGeneratorBase> g(
+    CM_AUTO_PTR<cmFileListGeneratorBase> g(
       new cmFileListGeneratorEnumerate(*this));
     return g;
   }
@@ -1706,9 +1706,9 @@ private:
     }
     return false;
   }
-  cmsys::auto_ptr<cmFileListGeneratorBase> Clone() const CM_OVERRIDE
+  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const CM_OVERRIDE
   {
-    cmsys::auto_ptr<cmFileListGeneratorBase> g(
+    CM_AUTO_PTR<cmFileListGeneratorBase> g(
       new cmFileListGeneratorProject(*this));
     return g;
   }
@@ -1763,9 +1763,9 @@ private:
     }
     return false;
   }
-  cmsys::auto_ptr<cmFileListGeneratorBase> Clone() const CM_OVERRIDE
+  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const CM_OVERRIDE
   {
-    cmsys::auto_ptr<cmFileListGeneratorBase> g(
+    CM_AUTO_PTR<cmFileListGeneratorBase> g(
       new cmFileListGeneratorMacProject(*this));
     return g;
   }
@@ -1807,9 +1807,9 @@ private:
     }
     return false;
   }
-  cmsys::auto_ptr<cmFileListGeneratorBase> Clone() const CM_OVERRIDE
+  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const CM_OVERRIDE
   {
-    cmsys::auto_ptr<cmFileListGeneratorBase> g(
+    CM_AUTO_PTR<cmFileListGeneratorBase> g(
       new cmFileListGeneratorCaseInsensitive(*this));
     return g;
   }
@@ -1853,10 +1853,9 @@ private:
     }
     return false;
   }
-  cmsys::auto_ptr<cmFileListGeneratorBase> Clone() const CM_OVERRIDE
+  CM_AUTO_PTR<cmFileListGeneratorBase> Clone() const CM_OVERRIDE
   {
-    cmsys::auto_ptr<cmFileListGeneratorBase> g(
-      new cmFileListGeneratorGlob(*this));
+    CM_AUTO_PTR<cmFileListGeneratorBase> g(new cmFileListGeneratorGlob(*this));
     return g;
   }
 };

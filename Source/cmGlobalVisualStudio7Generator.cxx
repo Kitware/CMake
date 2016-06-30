@@ -674,7 +674,7 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
           target->Target->GetMakefile()->GetDefinition(
             "CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD");
         cmGeneratorExpression ge;
-        cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+        CM_AUTO_PTR<cmCompiledGeneratorExpression> cge =
           ge.Parse(propertyValue);
         if (cmSystemTools::IsOn(
               cge->Evaluate(target->GetLocalGenerator(), *i))) {

@@ -11,7 +11,7 @@
 ============================================================================*/
 #include "cmForEachCommand.h"
 
-#include <cmsys/auto_ptr.hxx>
+#include <cm_auto_ptr.hxx>
 
 cmForEachFunctionBlocker::cmForEachFunctionBlocker(cmMakefile* mf)
   : Makefile(mf)
@@ -36,8 +36,7 @@ bool cmForEachFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
     // if this is the endofreach for this statement
     if (!this->Depth) {
       // Remove the function blocker for this scope or bail.
-      cmsys::auto_ptr<cmFunctionBlocker> fb(
-        mf.RemoveFunctionBlocker(this, lff));
+      CM_AUTO_PTR<cmFunctionBlocker> fb(mf.RemoveFunctionBlocker(this, lff));
       if (!fb.get()) {
         return false;
       }
@@ -184,7 +183,7 @@ bool cmForEachCommand::InitialPass(std::vector<std::string> const& args,
 
 bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
 {
-  cmsys::auto_ptr<cmForEachFunctionBlocker> f(
+  CM_AUTO_PTR<cmForEachFunctionBlocker> f(
     new cmForEachFunctionBlocker(this->Makefile));
   f->Args.push_back(args[0]);
 

@@ -13,8 +13,8 @@
 
 #include "cmELF.h"
 
+#include <cm_auto_ptr.hxx>
 #include <cmsys/FStream.hxx>
-#include <cmsys/auto_ptr.hxx>
 
 // Include the ELF format information system header.
 #if defined(__OpenBSD__)
@@ -107,7 +107,7 @@ public:
   };
 
   // Construct and take ownership of the file stream object.
-  cmELFInternal(cmELF* external, cmsys::auto_ptr<cmsys::ifstream>& fin,
+  cmELFInternal(cmELF* external, CM_AUTO_PTR<cmsys::ifstream>& fin,
                 ByteOrderType order)
     : External(external)
     , Stream(*fin.release())
@@ -237,7 +237,7 @@ public:
   typedef typename Types::tagtype tagtype;
 
   // Construct with a stream and byte swap indicator.
-  cmELFInternalImpl(cmELF* external, cmsys::auto_ptr<cmsys::ifstream>& fin,
+  cmELFInternalImpl(cmELF* external, CM_AUTO_PTR<cmsys::ifstream>& fin,
                     ByteOrderType order);
 
   // Return the number of sections as specified by the ELF header.
@@ -537,8 +537,9 @@ private:
 };
 
 template <class Types>
-cmELFInternalImpl<Types>::cmELFInternalImpl(
-  cmELF* external, cmsys::auto_ptr<cmsys::ifstream>& fin, ByteOrderType order)
+cmELFInternalImpl<Types>::cmELFInternalImpl(cmELF* external,
+                                            CM_AUTO_PTR<cmsys::ifstream>& fin,
+                                            ByteOrderType order)
   : cmELFInternal(external, fin, order)
 {
   // Read the main header.
@@ -755,7 +756,7 @@ cmELF::cmELF(const char* fname)
   : Internal(CM_NULLPTR)
 {
   // Try to open the file.
-  cmsys::auto_ptr<cmsys::ifstream> fin(new cmsys::ifstream(fname));
+  CM_AUTO_PTR<cmsys::ifstream> fin(new cmsys::ifstream(fname));
 
   // Quit now if the file could not be opened.
   if (!fin.get() || !*fin) {

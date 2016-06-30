@@ -30,8 +30,8 @@
 #include "cmDependsJava.h"
 #endif
 
+#include <cm_auto_ptr.hxx>
 #include <cmsys/Terminal.h>
-#include <cmsys/auto_ptr.hxx>
 
 #include <algorithm>
 #include <queue>
@@ -121,7 +121,7 @@ void cmLocalUnixMakefileGenerator3::Generate()
     if ((*t)->GetType() == cmState::INTERFACE_LIBRARY) {
       continue;
     }
-    cmsys::auto_ptr<cmMakefileTargetGenerator> tg(
+    CM_AUTO_PTR<cmMakefileTargetGenerator> tg(
       cmMakefileTargetGenerator::New(*t));
     if (tg.get()) {
       tg->WriteRuleFiles();

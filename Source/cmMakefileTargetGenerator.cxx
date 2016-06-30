@@ -134,7 +134,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   if (const char* additional_clean_files =
         this->Makefile->GetProperty("ADDITIONAL_MAKE_CLEAN_FILES")) {
     cmGeneratorExpression ge;
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge =
       ge.Parse(additional_clean_files);
 
     cmSystemTools::ExpandListArgument(

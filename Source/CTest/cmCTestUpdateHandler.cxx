@@ -30,7 +30,7 @@
 #include "cmCTestSVN.h"
 #include "cmCTestVC.h"
 
-#include <cmsys/auto_ptr.hxx>
+#include <cm_auto_ptr.hxx>
 
 //#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Process.h>
@@ -159,7 +159,7 @@ int cmCTestUpdateHandler::ProcessHandler()
                      , this->Quiet);
 
   // Create an object to interact with the VCS tool.
-  cmsys::auto_ptr<cmCTestVC> vc;
+  CM_AUTO_PTR<cmCTestVC> vc;
   switch (this->UpdateType) {
     case e_CVS:
       vc.reset(new cmCTestCVS(this->CTest, ofs));

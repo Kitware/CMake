@@ -1850,7 +1850,7 @@ void cmLocalVisualStudio7Generator::OutputTargetRules(
   if (!addedPrelink) {
     event.Write(target->GetPreLinkCommands());
   }
-  cmsys::auto_ptr<cmCustomCommand> pcc(
+  CM_AUTO_PTR<cmCustomCommand> pcc(
     this->MaybeCreateImplibDir(target, configName, this->FortranProject));
   if (pcc.get()) {
     event.Write(*pcc);

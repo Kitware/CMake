@@ -397,7 +397,7 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
     snapshot.GetDirectory().SetCurrentSource(
       cmSystemTools::GetCurrentWorkingDirectory());
     snapshot.SetDefaultDefinitions();
-    cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(gg, snapshot));
+    CM_AUTO_PTR<cmMakefile> mf(new cmMakefile(gg, snapshot));
     if (this->GetWorkingMode() != NORMAL_MODE) {
       std::string file(cmSystemTools::CollapseFullPath(path));
       cmSystemTools::ConvertToUnixSlashes(file);
@@ -1743,7 +1743,7 @@ int cmake::CheckBuildSystem()
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
-  cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(&gg, cm.GetCurrentSnapshot()));
+  CM_AUTO_PTR<cmMakefile> mf(new cmMakefile(&gg, cm.GetCurrentSnapshot()));
   if (!mf->ReadListFile(this->CheckBuildSystemArgument.c_str()) ||
       cmSystemTools::GetErrorOccuredFlag()) {
     if (verbose) {
@@ -1764,14 +1764,12 @@ int cmake::CheckBuildSystem()
     }
 
     // Create the generator and use it to clear the dependencies.
-    cmsys::auto_ptr<cmGlobalGenerator> ggd(
-      this->CreateGlobalGenerator(genName));
+    CM_AUTO_PTR<cmGlobalGenerator> ggd(this->CreateGlobalGenerator(genName));
     if (ggd.get()) {
       cm.GetCurrentSnapshot().SetDefaultDefinitions();
-      cmsys::auto_ptr<cmMakefile> mfd(
+      CM_AUTO_PTR<cmMakefile> mfd(
         new cmMakefile(ggd.get(), cm.GetCurrentSnapshot()));
-      cmsys::auto_ptr<cmLocalGenerator> lgd(
-        ggd->CreateLocalGenerator(mfd.get()));
+      CM_AUTO_PTR<cmLocalGenerator> lgd(ggd->CreateLocalGenerator(mfd.get()));
       lgd->ClearDependencies(mfd.get(), verbose);
     }
   }
@@ -1911,7 +1909,7 @@ void cmake::MarkCliAsUsed(const std::string& variable)
 void cmake::GenerateGraphViz(const char* fileName) const
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  cmsys::auto_ptr<cmGraphVizWriter> gvWriter(
+  CM_AUTO_PTR<cmGraphVizWriter> gvWriter(
     new cmGraphVizWriter(this->GetGlobalGenerator()->GetLocalGenerators()));
 
   std::string settingsFile = this->GetHomeOutputDirectory();
@@ -2392,7 +2390,7 @@ int cmake::Build(const std::string& dir, const std::string& target,
     std::cerr << "Error: could not find CMAKE_GENERATOR in Cache\n";
     return 1;
   }
-  cmsys::auto_ptr<cmGlobalGenerator> gen(
+  CM_AUTO_PTR<cmGlobalGenerator> gen(
     this->CreateGlobalGenerator(cachedGenerator));
   if (!gen.get()) {
     std::cerr << "Error: could create CMAKE_GENERATOR \"" << cachedGenerator

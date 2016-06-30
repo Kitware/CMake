@@ -16,7 +16,7 @@
 
 #include "cmGlobalVisualStudioGenerator.h"
 
-#include <cmsys/auto_ptr.hxx>
+#include <cm_auto_ptr.hxx>
 
 class cmSourceFile;
 class cmSourceGroup;
@@ -59,8 +59,9 @@ protected:
   virtual bool CustomCommandUseLocal() const { return false; }
 
   /** Construct a custom command to make exe import lib dir.  */
-  cmsys::auto_ptr<cmCustomCommand> MaybeCreateImplibDir(
-    cmGeneratorTarget* target, const std::string& config, bool isFortran);
+  CM_AUTO_PTR<cmCustomCommand> MaybeCreateImplibDir(cmGeneratorTarget* target,
+                                                    const std::string& config,
+                                                    bool isFortran);
 };
 
 #endif

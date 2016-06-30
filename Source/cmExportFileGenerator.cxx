@@ -25,8 +25,8 @@
 #include "cmVersion.h"
 
 #include <assert.h>
+#include <cm_auto_ptr.hxx>
 #include <cmsys/FStream.hxx>
-#include <cmsys/auto_ptr.hxx>
 
 static std::string cmExportFileGeneratorEscape(std::string const& str)
 {
@@ -69,15 +69,15 @@ const char* cmExportFileGenerator::GetMainExportFileName() const
 bool cmExportFileGenerator::GenerateImportFile()
 {
   // Open the output file to generate it.
-  cmsys::auto_ptr<cmsys::ofstream> foutPtr;
+  CM_AUTO_PTR<cmsys::ofstream> foutPtr;
   if (this->AppendMode) {
     // Open for append.
-    cmsys::auto_ptr<cmsys::ofstream> ap(
+    CM_AUTO_PTR<cmsys::ofstream> ap(
       new cmsys::ofstream(this->MainImportFile.c_str(), std::ios::app));
     foutPtr = ap;
   } else {
     // Generate atomically and with copy-if-different.
-    cmsys::auto_ptr<cmGeneratedFileStream> ap(
+    CM_AUTO_PTR<cmGeneratedFileStream> ap(
       new cmGeneratedFileStream(this->MainImportFile.c_str(), true));
     ap->SetCopyIfDifferent(true);
     foutPtr = ap;
@@ -393,7 +393,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   std::string dirs = cmGeneratorExpression::Preprocess(
     tei->InterfaceIncludeDirectories, preprocessRule, true);
   this->ReplaceInstallPrefix(dirs);
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(dirs);
+  CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(dirs);
   std::string exportDirs =
     cge->Evaluate(target->GetLocalGenerator(), "", false, target);
 

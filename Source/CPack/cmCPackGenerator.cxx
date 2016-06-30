@@ -624,7 +624,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         cm.AddCMakePaths();
         cm.SetProgressCallback(cmCPackGeneratorProgress, this);
         cmGlobalGenerator gg(&cm);
-        cmsys::auto_ptr<cmMakefile> mf(
+        CM_AUTO_PTR<cmMakefile> mf(
           new cmMakefile(&gg, cm.GetCurrentSnapshot()));
         if (!installSubDirectory.empty() && installSubDirectory != "/") {
           tempInstallDirectory += installSubDirectory;

@@ -15,22 +15,22 @@
 #include <cmsys/FStream.hxx>
 #include <cmsys/MD5.h>
 
-cmsys::auto_ptr<cmCryptoHash> cmCryptoHash::New(const char* algo)
+CM_AUTO_PTR<cmCryptoHash> cmCryptoHash::New(const char* algo)
 {
   if (strcmp(algo, "MD5") == 0) {
-    return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashMD5);
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashMD5);
   } else if (strcmp(algo, "SHA1") == 0) {
-    return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA1);
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA1);
   } else if (strcmp(algo, "SHA224") == 0) {
-    return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA224);
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA224);
   } else if (strcmp(algo, "SHA256") == 0) {
-    return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA256);
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA256);
   } else if (strcmp(algo, "SHA384") == 0) {
-    return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA384);
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA384);
   } else if (strcmp(algo, "SHA512") == 0) {
-    return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA512);
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA512);
   } else {
-    return cmsys::auto_ptr<cmCryptoHash>(CM_NULLPTR);
+    return CM_AUTO_PTR<cmCryptoHash>(CM_NULLPTR);
   }
 }
 
