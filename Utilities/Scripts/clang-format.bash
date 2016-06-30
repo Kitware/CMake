@@ -36,15 +36,19 @@ Example to format locally modified files staged for commit:
 
     Utilities/Scripts/clang-format.bash --cached
 
-Example to format the current topic:
+Example to format files modified by the most recent commit:
 
-    git filter-branch \
-      --tree-filter "Utilities/Scripts/clang-format.bash --amend" \
-      master..
+    Utilities/Scripts/clang-format.bash --amend
 
 Example to format all files:
 
     Utilities/Scripts/clang-format.bash --tracked
+
+Example to format the current topic:
+
+    git filter-branch \
+      --tree-filter "Utilities/Scripts/clang-format.bash --tracked" \
+      master..
 '
 
 die() {
