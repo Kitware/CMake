@@ -76,10 +76,11 @@ endif()
 
 # Support for CMAKE_ASM${ASM_DIALECT}_FLAGS_INIT and friends:
 set(CMAKE_ASM${ASM_DIALECT}_FLAGS_INIT "$ENV{ASM${ASM_DIALECT}FLAGS} ${CMAKE_ASM${ASM_DIALECT}_FLAGS_INIT}")
-# avoid just having a space as the initial value for the cache
-if(CMAKE_ASM${ASM_DIALECT}_FLAGS_INIT STREQUAL " ")
-  set(CMAKE_ASM${ASM_DIALECT}_FLAGS_INIT)
-endif()
+
+foreach(c "" _DEBUG _RELEASE _MINSIZEREL _RELWITHDEBINFO)
+  string(STRIP "${CMAKE_ASM${ASM_DIALECT}_FLAGS${c}_INIT}" CMAKE_ASM${ASM_DIALECT}_FLAGS${c}_INIT)
+endforeach()
+
 set (CMAKE_ASM${ASM_DIALECT}_FLAGS "${CMAKE_ASM${ASM_DIALECT}_FLAGS_INIT}" CACHE STRING
      "Flags used by the assembler during all build types.")
 
