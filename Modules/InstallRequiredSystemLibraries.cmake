@@ -25,8 +25,8 @@
 #
 # ``CMAKE_INSTALL_UCRT_LIBRARIES``
 #   Set to TRUE to install the Windows Universal CRT libraries for
-#   app-local deployment.  This is meaningful only with MSVC from
-#   Visual Studio 2015 or higher.
+#   app-local deployment (e.g. to Windows XP).  This is meaningful
+#   only with MSVC from Visual Studio 2015 or higher.
 #
 # ``CMAKE_INSTALL_MFC_LIBRARIES``
 #   Set to TRUE to install the MSVC MFC runtime libraries.
