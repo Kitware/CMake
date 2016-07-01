@@ -663,7 +663,6 @@ SET(KWSYS_CLASSES)
 SET(KWSYS_H_FILES Configure SharedForward)
 SET(KWSYS_HXX_FILES Configure String
   hashtable hash_fun hash_map hash_set
-  auto_ptr
   )
 
 # Add selected C++ classes.
@@ -903,7 +902,6 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
     # C++ tests
     IF(NOT WATCOM)
       SET(KWSYS_CXX_TESTS
-        testAutoPtr
         testHashSTL
         )
     ENDIF()
