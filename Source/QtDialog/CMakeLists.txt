@@ -36,6 +36,12 @@ if (Qt5Widgets_FOUND)
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
+  if(CMake_QT_STATIC_QXcbIntegrationPlugin_LIBRARIES)
+    list(APPEND CMake_QT_LIBRARIES ${CMake_QT_STATIC_QXcbIntegrationPlugin_LIBRARIES})
+    set_property(SOURCE CMakeSetup.cxx
+      PROPERTY COMPILE_DEFINITIONS USE_QXcbIntegrationPlugin)
+  endif()
+
   # We need to install platform plugin and add qt.conf for Qt5 on Mac and Windows.
   # FIXME: This should be part of Qt5 CMake scripts, but unfortunatelly
   # Qt5 support is missing there.
