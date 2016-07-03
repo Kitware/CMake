@@ -151,13 +151,14 @@ JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
   /usr/lib/jvm/java-6-sun-1.6.0.00/jre/lib/{libarch}       # can this one be removed according to #8821 ? Alex
   /usr/lib/jvm/java-6-openjdk/jre/lib/{libarch}
   /usr/lib/jvm/java-1.6.0-openjdk-1.6.0.0/jre/lib/{libarch}        # fedora
-  /usr/lib/jvm/java-8-openjdk-{libarch}/lib/{libarch}              # ubuntu 15.10
-  /usr/lib/jvm/java-7-openjdk-{libarch}/lib/{libarch}              # ubuntu 15.10
-  /usr/lib/jvm/java-6-openjdk-{libarch}/lib/{libarch}              # ubuntu 15.10
   # Debian specific paths for default JVM
   /usr/lib/jvm/default-java/jre/lib/{libarch}
   /usr/lib/jvm/default-java/jre/lib
   /usr/lib/jvm/default-java/lib
+  # Ubuntu specific paths for default JVM
+  /usr/lib/jvm/java-8-openjdk-{libarch}/jre/lib/{libarch}     # Ubuntu 15.10
+  /usr/lib/jvm/java-7-openjdk-{libarch}/jre/lib/{libarch}     # Ubuntu 15.10
+  /usr/lib/jvm/java-6-openjdk-{libarch}/jre/lib/{libarch}     # Ubuntu 15.10
   # OpenBSD specific paths for default JVM
   /usr/local/jdk-1.7.0/jre/lib/{libarch}
   /usr/local/jre-1.7.0/lib/{libarch}
