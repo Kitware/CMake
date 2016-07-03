@@ -36,7 +36,7 @@
 #  License text for the above reference.)
 
 # Expand {libarch} occurences to java_libarch subdirectory(-ies) and set ${_var}
-macro(java_append_library_directories _var)
+macro(JAVA_APPEND_LIBRARY_DIRECTORIES _var)
     # Determine java arch-specific library subdir
     # Mostly based on openjdk/jdk/make/common/shared/Platform.gmk as of openjdk
     # 1.6.0_18 + icedtea patches. However, it would be much better to base the
@@ -312,8 +312,11 @@ else()
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(JNI  DEFAULT_MSG  JAVA_AWT_LIBRARY JAVA_JVM_LIBRARY
-                                                    JAVA_INCLUDE_PATH  JAVA_INCLUDE_PATH2 JAVA_AWT_INCLUDE_PATH)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(JNI  DEFAULT_MSG  JAVA_AWT_LIBRARY
+                                                    JAVA_JVM_LIBRARY
+                                                    JAVA_INCLUDE_PATH
+                                                    JAVA_INCLUDE_PATH2
+                                                    JAVA_AWT_INCLUDE_PATH)
 
 mark_as_advanced(
   JAVA_AWT_LIBRARY
