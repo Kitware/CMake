@@ -111,10 +111,11 @@ if(NOT CMAKE_MODULE_EXISTS)
 endif()
 
 set(CMAKE_C_FLAGS_INIT "$ENV{CFLAGS} ${CMAKE_C_FLAGS_INIT}")
-# avoid just having a space as the initial value for the cache
-if(CMAKE_C_FLAGS_INIT STREQUAL " ")
-  set(CMAKE_C_FLAGS_INIT)
-endif()
+
+foreach(c "" _DEBUG _RELEASE _MINSIZEREL _RELWITHDEBINFO)
+  string(STRIP "${CMAKE_C_FLAGS${c}_INIT}" CMAKE_C_FLAGS${c}_INIT)
+endforeach()
+
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT}" CACHE STRING
      "Flags used by the compiler during all build types.")
 

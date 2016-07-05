@@ -206,10 +206,11 @@ endforeach()
 # use _INIT variables so that this only happens the first time
 # and you can set these flags in the cmake cache
 set(CMAKE_CXX_FLAGS_INIT "$ENV{CXXFLAGS} ${CMAKE_CXX_FLAGS_INIT}")
-# avoid just having a space as the initial value for the cache
-if(CMAKE_CXX_FLAGS_INIT STREQUAL " ")
-  set(CMAKE_CXX_FLAGS_INIT)
-endif()
+
+foreach(c "" _DEBUG _RELEASE _MINSIZEREL _RELWITHDEBINFO)
+  string(STRIP "${CMAKE_CXX_FLAGS${c}_INIT}" CMAKE_CXX_FLAGS${c}_INIT)
+endforeach()
+
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT}" CACHE STRING
      "Flags used by the compiler during all build types.")
 
