@@ -20,9 +20,9 @@
 #include <QDir>
 #include <QLocale>
 #include <QString>
-#include <QtPlugin>
 #include <QTextCodec>
 #include <QTranslator>
+#include <QtPlugin>
 #include <cmsys/CommandLineArguments.hxx>
 #include <cmsys/Encoding.hxx>
 #include <cmsys/SystemTools.hxx>
