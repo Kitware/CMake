@@ -8,6 +8,7 @@
 # include files and libraries are.  The caller may set variable JAVA_HOME
 # to specify a Java installation prefix explicitly.
 #
+# See also the :module:`FindJNI` module to find Java development tools.
 #
 # Specify one or more of the following components as you call this find module. See example below.
 #
@@ -54,8 +55,6 @@
 # ::
 #
 #   Java_FOUND                    - TRUE if all components are found.
-#   Java_INCLUDE_DIRS             - Full paths to all include dirs.
-#   Java_LIBRARIES                - Full paths to all libraries.
 #   Java_<component>_FOUND        - TRUE if <component> is found.
 #
 #
