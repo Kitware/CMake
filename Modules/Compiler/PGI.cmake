@@ -23,11 +23,11 @@ macro(__compiler_pgi lang)
   set(CMAKE_${lang}_VERBOSE_FLAG "-v")
 
   # Initial configuration flags.
-  set(CMAKE_${lang}_FLAGS_INIT "")
-  set(CMAKE_${lang}_FLAGS_DEBUG_INIT "-g -O0")
-  set(CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "-O2 -s")
-  set(CMAKE_${lang}_FLAGS_RELEASE_INIT "-fast -O3 -Mipa=fast")
-  set(CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT "-O2 -gopt")
+  string(APPEND CMAKE_${lang}_FLAGS_INIT " ")
+  string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -g -O0")
+  string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -O2 -s")
+  string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -fast -O3 -Mipa=fast")
+  string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -O2 -gopt")
 
   # Preprocessing and assembly rules.
   set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "<CMAKE_${lang}_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -E <SOURCE> > <PREPROCESSED_SOURCE>")

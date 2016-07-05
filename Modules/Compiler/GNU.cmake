@@ -45,11 +45,11 @@ macro(__compiler_gnu lang)
   endif()
 
   # Initial configuration flags.
-  set(CMAKE_${lang}_FLAGS_INIT "")
-  set(CMAKE_${lang}_FLAGS_DEBUG_INIT "-g")
-  set(CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "-Os -DNDEBUG")
-  set(CMAKE_${lang}_FLAGS_RELEASE_INIT "-O3 -DNDEBUG")
-  set(CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT "-O2 -g -DNDEBUG")
+  string(APPEND CMAKE_${lang}_FLAGS_INIT " ")
+  string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -g")
+  string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -Os -DNDEBUG")
+  string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -O3 -DNDEBUG")
+  string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -O2 -g -DNDEBUG")
   set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "<CMAKE_${lang}_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -E <SOURCE> > <PREPROCESSED_SOURCE>")
   set(CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE "<CMAKE_${lang}_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -S <SOURCE> -o <ASSEMBLY_SOURCE>")
   if(NOT APPLE OR NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4) # work around #4462

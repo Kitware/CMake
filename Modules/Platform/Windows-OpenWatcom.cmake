@@ -52,13 +52,13 @@ set(CMAKE_BUILD_TYPE_INIT Debug)
 # single/multi-threaded                 /-bm
 # static/DLL run-time libraries         /-br
 # default is setup for multi-threaded + DLL run-time libraries
-set (CMAKE_C_FLAGS_INIT "-bt=nt -w3 -dWIN32 -br -bm")
-set (CMAKE_CXX_FLAGS_INIT "-bt=nt -xs -w3 -dWIN32 -br -bm")
+string(APPEND CMAKE_C_FLAGS_INIT " -bt=nt -w3 -dWIN32 -br -bm")
+string(APPEND CMAKE_CXX_FLAGS_INIT " -bt=nt -xs -w3 -dWIN32 -br -bm")
 foreach(lang C CXX)
-  set (CMAKE_${lang}_FLAGS_DEBUG_INIT "-d2")
-  set (CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "-s -os -d0 -dNDEBUG")
-  set (CMAKE_${lang}_FLAGS_RELEASE_INIT "-s -ot -d0 -dNDEBUG")
-  set (CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT "-s -ot -d1 -dNDEBUG")
+  string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -d2")
+  string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -s -os -d0 -dNDEBUG")
+  string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -s -ot -d0 -dNDEBUG")
+  string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -s -ot -d1 -dNDEBUG")
 endforeach()
 
 foreach(type CREATE_SHARED_LIBRARY CREATE_SHARED_MODULE LINK_EXECUTABLE)
