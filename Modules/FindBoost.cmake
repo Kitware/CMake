@@ -131,6 +131,11 @@
 #   Boost_NAMESPACE          - Alternate namespace used to build boost with
 #                              e.g. if set to "myboost", will search for
 #                              myboost_thread instead of boost_thread.
+#   Boost_PYTHON_VERSION_TAG - Suffix for "python" component library name.
+#                              Various distributions may use python version
+#                              in the library name. I.e. something like this:
+#                              * `-3.5` used in Gentoo
+#                              * `-py35` used in Debian and derivatives...
 #
 # Other variables one may set to control this module are::
 #
@@ -410,6 +415,17 @@ function(_Boost_PREPEND_LIST_WITH_THREADAPI _output)
   set(_orig_libnames ${ARGN})
   string(REPLACE "thread" "thread_${Boost_THREADAPI}" _threadapi_libnames "${_orig_libnames}")
   set(${_output} ${_threadapi_libnames} ${_orig_libnames} PARENT_SCOPE)
+endfunction()
+
+#
+# Take a list of libraries with "python" in it
+# and prepend duplicates with "python${Boost_PYTHON_VERSION_TAG}"
+# at the front of the list
+#
+function(_Boost_PREPEND_LIST_WITH_PYTHON_VERSION_TAG _output)
+  set(_orig_libnames ${ARGN})
+  string(REPLACE "python" "python${Boost_PYTHON_VERSION_TAG}" _python_libnames "${_orig_libnames}")
+  set(${_output} ${_python_libnames} ${_orig_libnames} PARENT_SCOPE)
 endfunction()
 
 #
@@ -808,6 +824,10 @@ function(_Boost_COMPONENT_HEADERS component _hdrs)
   set(_Boost_UNIT_TEST_FRAMEWORK_HEADERS "boost/test/framework.hpp")
   set(_Boost_WAVE_HEADERS                "boost/wave.hpp")
   set(_Boost_WSERIALIZATION_HEADERS      "boost/archive/text_wiarchive.hpp")
+  if(WIN32)
+    set(_Boost_BZIP2_HEADERS             "boost/iostreams/filter/bzip2.hpp")
+    set(_Boost_ZLIB_HEADERS              "boost/iostreams/filter/zlib.hpp")
+  endif()
 
   string(TOUPPER ${component} uppercomponent)
   set(${_hdrs} ${_Boost_${uppercomponent}_HEADERS} PARENT_SCOPE)
@@ -1516,6 +1536,9 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   if(Boost_THREADAPI AND ${COMPONENT} STREQUAL "thread")
      _Boost_PREPEND_LIST_WITH_THREADAPI(_boost_RELEASE_NAMES ${_boost_RELEASE_NAMES})
   endif()
+  if(${COMPONENT} STREQUAL "python")
+     _Boost_PREPEND_LIST_WITH_PYTHON_VERSION_TAG(_boost_RELEASE_NAMES ${_boost_RELEASE_NAMES})
+  endif()
   if(Boost_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
                    "Searching for ${UPPERCOMPONENT}_LIBRARY_RELEASE: ${_boost_RELEASE_NAMES}")
@@ -1557,6 +1580,9 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   endif()
   if(Boost_THREADAPI AND ${COMPONENT} STREQUAL "thread")
      _Boost_PREPEND_LIST_WITH_THREADAPI(_boost_DEBUG_NAMES ${_boost_DEBUG_NAMES})
+  endif()
+  if(${COMPONENT} STREQUAL "python")
+     _Boost_PREPEND_LIST_WITH_PYTHON_VERSION_TAG(_boost_DEBUG_NAMES ${_boost_DEBUG_NAMES})
   endif()
   if(Boost_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
