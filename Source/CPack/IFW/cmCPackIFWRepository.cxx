@@ -299,8 +299,8 @@ void cmCPackIFWRepository::WriteRepositoryUpdate(cmXMLWriter& xout)
   if (Update == Add || Update == Remove) {
     xout.Attribute("url", Url);
   } else if (Update == Replace) {
-    xout.Attribute("oldurl", OldUrl);
-    xout.Attribute("newurl", NewUrl);
+    xout.Attribute("oldUrl", OldUrl);
+    xout.Attribute("newUrl", NewUrl);
   }
   // Enabled
   if (!Enabled.empty()) {
