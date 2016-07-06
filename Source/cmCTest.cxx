@@ -886,7 +886,7 @@ int cmCTest::ExecuteHandler(const char* shandler)
   return handler->ProcessHandler();
 }
 
-int cmCTest::ProcessTests()
+int cmCTest::ProcessSteps()
 {
   int res = 0;
   bool notest = true;
@@ -2018,7 +2018,7 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
     // handle the script arguments -S -SR -SP
     this->HandleScriptArguments(i, args, SRArgumentSpecified);
 
-    // handle a request for a dashboard
+    // --dashboard: handle a request for a dashboard
     std::string arg = args[i];
     if (this->CheckArgument(arg, "-D", "--dashboard") && i < args.size() - 1) {
       this->ProduceXML = true;
@@ -2044,54 +2044,18 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
       this->AddVariableDefinition(input);
     }
 
-    if (this->CheckArgument(arg, "-T", "--test-action") &&
-        (i < args.size() - 1)) {
-      this->ProduceXML = true;
-      i++;
-      if (!this->SetTest(args[i].c_str(), false)) {
-        executeTests = false;
-        cmCTestLog(this, ERROR_MESSAGE,
-                   "CTest -T called with incorrect option: " << args[i]
-                                                             << std::endl);
-        cmCTestLog(this, ERROR_MESSAGE, "Available options are:"
-                     << std::endl
-                     << "  " << ctestExec << " -T all" << std::endl
-                     << "  " << ctestExec << " -T start" << std::endl
-                     << "  " << ctestExec << " -T update" << std::endl
-                     << "  " << ctestExec << " -T configure" << std::endl
-                     << "  " << ctestExec << " -T build" << std::endl
-                     << "  " << ctestExec << " -T test" << std::endl
-                     << "  " << ctestExec << " -T coverage" << std::endl
-                     << "  " << ctestExec << " -T memcheck" << std::endl
-                     << "  " << ctestExec << " -T notes" << std::endl
-                     << "  " << ctestExec << " -T submit" << std::endl);
-      }
+    // --test-action: calls SetTest(<stage>, /*report=*/ false) to enable
+    // the corresponding stage
+    if (!this->HandleTestActionArgument(ctestExec, i, args)) {
+      executeTests = false;
     }
 
-    // what type of test model
-    if (this->CheckArgument(arg, "-M", "--test-model") &&
-        (i < args.size() - 1)) {
-      i++;
-      std::string const& str = args[i];
-      if (cmSystemTools::LowerCase(str) == "nightly") {
-        this->SetTestModel(cmCTest::NIGHTLY);
-      } else if (cmSystemTools::LowerCase(str) == "continuous") {
-        this->SetTestModel(cmCTest::CONTINUOUS);
-      } else if (cmSystemTools::LowerCase(str) == "experimental") {
-        this->SetTestModel(cmCTest::EXPERIMENTAL);
-      } else {
-        executeTests = false;
-        cmCTestLog(this, ERROR_MESSAGE,
-                   "CTest -M called with incorrect option: " << str
-                                                             << std::endl);
-        cmCTestLog(this, ERROR_MESSAGE, "Available options are:"
-                     << std::endl
-                     << "  " << ctestExec << " -M Continuous" << std::endl
-                     << "  " << ctestExec << " -M Experimental" << std::endl
-                     << "  " << ctestExec << " -M Nightly" << std::endl);
-      }
+    // --test-model: what type of test model
+    if (!this->HandleTestModelArgument(ctestExec, i, args)) {
+      executeTests = false;
     }
 
+    // --extra-submit
     if (this->CheckArgument(arg, "--extra-submit") && i < args.size() - 1) {
       this->ProduceXML = true;
       this->SetTest("Submit");
@@ -2106,6 +2070,7 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
       cmakeAndTest = true;
     }
 
+    // --schedule-random
     if (this->CheckArgument(arg, "--schedule-random")) {
       this->ScheduleType = "Random";
     }
@@ -2124,6 +2089,7 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
     }
   } // the close of the for argument loop
 
+  // handle CTEST_PARALLEL_LEVEL environment variable
   if (!this->ParallelLevelSetInCli) {
     if (const char* parallel = cmSystemTools::GetEnv("CTEST_PARALLEL_LEVEL")) {
       int plevel = atoi(parallel);
@@ -2131,73 +2097,142 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
     }
   }
 
-  // now what sould cmake do? if --build-and-test was specified then
+  // now what should cmake do? if --build-and-test was specified then
   // we run the build and test handler and return
   if (cmakeAndTest) {
-    this->Verbose = true;
-    cmCTestBuildAndTestHandler* handler =
-      static_cast<cmCTestBuildAndTestHandler*>(this->GetHandler("buildtest"));
-    int retv = handler->ProcessHandler();
-    *output = handler->GetOutput();
-#ifdef CMAKE_BUILD_WITH_CMAKE
-    cmDynamicLoader::FlushCache();
-#endif
-    if (retv != 0) {
-      cmCTestLog(this, DEBUG,
-                 "build and test failing returning: " << retv << std::endl);
-    }
-    return retv;
+    return this->RunCMakeAndTest(output);
   }
 
   if (executeTests) {
-    int res;
-    // call process directory
-    if (this->RunConfigurationScript) {
-      if (this->ExtraVerbose) {
-        cmCTestLog(this, OUTPUT, "* Extra verbosity turned on" << std::endl);
-      }
-      cmCTest::t_TestingHandlers::iterator it;
-      for (it = this->TestingHandlers.begin();
-           it != this->TestingHandlers.end(); ++it) {
-        it->second->SetVerbose(this->ExtraVerbose);
-        it->second->SetSubmitIndex(this->SubmitIndex);
-      }
-      this->GetHandler("script")->SetVerbose(this->Verbose);
-      res = this->GetHandler("script")->ProcessHandler();
-      if (res != 0) {
-        cmCTestLog(this, DEBUG,
-                   "running script failing returning: " << res << std::endl);
-      }
-
-    } else {
-      // What is this?  -V seems to be the same as -VV,
-      // and Verbose is always on in this case
-      this->ExtraVerbose = this->Verbose;
-      this->Verbose = true;
-      cmCTest::t_TestingHandlers::iterator it;
-      for (it = this->TestingHandlers.begin();
-           it != this->TestingHandlers.end(); ++it) {
-        it->second->SetVerbose(this->Verbose);
-        it->second->SetSubmitIndex(this->SubmitIndex);
-      }
-      std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-      if (!this->Initialize(cwd.c_str(), CM_NULLPTR)) {
-        res = 12;
-        cmCTestLog(this, ERROR_MESSAGE, "Problem initializing the dashboard."
-                     << std::endl);
-      } else {
-        res = this->ProcessTests();
-      }
-      this->Finalize();
-    }
-    if (res != 0) {
-      cmCTestLog(this, DEBUG,
-                 "Running a test(s) failed returning : " << res << std::endl);
-    }
-    return res;
+    return this->ExecuteTests();
   }
 
   return 1;
+}
+
+bool cmCTest::HandleTestActionArgument(const char* ctestExec, size_t& i,
+                                       const std::vector<std::string>& args)
+{
+  bool success = true;
+  std::string arg = args[i];
+  if (this->CheckArgument(arg, "-T", "--test-action") &&
+      (i < args.size() - 1)) {
+    this->ProduceXML = true;
+    i++;
+    if (!this->SetTest(args[i].c_str(), false)) {
+      success = false;
+      cmCTestLog(this, ERROR_MESSAGE, "CTest -T called with incorrect option: "
+                   << args[i] << std::endl);
+      cmCTestLog(this, ERROR_MESSAGE, "Available options are:"
+                   << std::endl
+                   << "  " << ctestExec << " -T all" << std::endl
+                   << "  " << ctestExec << " -T start" << std::endl
+                   << "  " << ctestExec << " -T update" << std::endl
+                   << "  " << ctestExec << " -T configure" << std::endl
+                   << "  " << ctestExec << " -T build" << std::endl
+                   << "  " << ctestExec << " -T test" << std::endl
+                   << "  " << ctestExec << " -T coverage" << std::endl
+                   << "  " << ctestExec << " -T memcheck" << std::endl
+                   << "  " << ctestExec << " -T notes" << std::endl
+                   << "  " << ctestExec << " -T submit" << std::endl);
+    }
+  }
+  return success;
+}
+
+bool cmCTest::HandleTestModelArgument(const char* ctestExec, size_t& i,
+                                      const std::vector<std::string>& args)
+{
+  bool success = true;
+  std::string arg = args[i];
+  if (this->CheckArgument(arg, "-M", "--test-model") &&
+      (i < args.size() - 1)) {
+    i++;
+    std::string const& str = args[i];
+    if (cmSystemTools::LowerCase(str) == "nightly") {
+      this->SetTestModel(cmCTest::NIGHTLY);
+    } else if (cmSystemTools::LowerCase(str) == "continuous") {
+      this->SetTestModel(cmCTest::CONTINUOUS);
+    } else if (cmSystemTools::LowerCase(str) == "experimental") {
+      this->SetTestModel(cmCTest::EXPERIMENTAL);
+    } else {
+      success = false;
+      cmCTestLog(this, ERROR_MESSAGE, "CTest -M called with incorrect option: "
+                   << str << std::endl);
+      cmCTestLog(this, ERROR_MESSAGE, "Available options are:"
+                   << std::endl
+                   << "  " << ctestExec << " -M Continuous" << std::endl
+                   << "  " << ctestExec << " -M Experimental" << std::endl
+                   << "  " << ctestExec << " -M Nightly" << std::endl);
+    }
+  }
+  return success;
+}
+
+int cmCTest::ExecuteTests()
+{
+  int res;
+  // call process directory
+  if (this->RunConfigurationScript) {
+    if (this->ExtraVerbose) {
+      cmCTestLog(this, OUTPUT, "* Extra verbosity turned on" << std::endl);
+    }
+    cmCTest::t_TestingHandlers::iterator it;
+    for (it = this->TestingHandlers.begin(); it != this->TestingHandlers.end();
+         ++it) {
+      it->second->SetVerbose(this->ExtraVerbose);
+      it->second->SetSubmitIndex(this->SubmitIndex);
+    }
+    this->GetHandler("script")->SetVerbose(this->Verbose);
+    res = this->GetHandler("script")->ProcessHandler();
+    if (res != 0) {
+      cmCTestLog(this, DEBUG,
+                 "running script failing returning: " << res << std::endl);
+    }
+
+  } else {
+    // What is this?  -V seems to be the same as -VV,
+    // and Verbose is always on in this case
+    this->ExtraVerbose = this->Verbose;
+    this->Verbose = true;
+    cmCTest::t_TestingHandlers::iterator it;
+    for (it = this->TestingHandlers.begin(); it != this->TestingHandlers.end();
+         ++it) {
+      it->second->SetVerbose(this->Verbose);
+      it->second->SetSubmitIndex(this->SubmitIndex);
+    }
+    std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+    if (!this->Initialize(cwd.c_str(), CM_NULLPTR)) {
+      res = 12;
+      cmCTestLog(this, ERROR_MESSAGE, "Problem initializing the dashboard."
+                   << std::endl);
+    } else {
+      res = this->ProcessSteps();
+    }
+    this->Finalize();
+  }
+  if (res != 0) {
+    cmCTestLog(this, DEBUG,
+               "Running a test(s) failed returning : " << res << std::endl);
+  }
+  return res;
+}
+
+int cmCTest::RunCMakeAndTest(std::string* output)
+{
+  this->Verbose = true;
+  cmCTestBuildAndTestHandler* handler =
+    static_cast<cmCTestBuildAndTestHandler*>(this->GetHandler("buildtest"));
+  int retv = handler->ProcessHandler();
+  *output = handler->GetOutput();
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  cmDynamicLoader::FlushCache();
+#endif
+  if (retv != 0) {
+    cmCTestLog(this, DEBUG, "build and test failing returning: " << retv
+                                                                 << std::endl);
+  }
+  return retv;
 }
 
 void cmCTest::SetNotesFiles(const char* notes)
