@@ -1,3 +1,23 @@
+
+#=============================================================================
+# Copyright 2002-2016 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distribute this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
+# This module is shared by multiple languages; use include blocker.
+if(__WINDOWS_OPENWATCOM)
+  return()
+endif()
+set(__WINDOWS_OPENWATCOM 1)
+
 set(CMAKE_LIBRARY_PATH_FLAG "libpath ")
 set(CMAKE_LINK_LIBRARY_FLAG "library ")
 set(CMAKE_LINK_LIBRARY_FILE_FLAG "library")
