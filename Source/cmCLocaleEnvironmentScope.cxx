@@ -31,8 +31,9 @@ cmCLocaleEnvironmentScope::cmCLocaleEnvironmentScope()
 
 std::string cmCLocaleEnvironmentScope::GetEnv(std::string const& key)
 {
-  const char* value = cmSystemTools::GetEnv(key);
-  return value ? value : std::string();
+  std::string value;
+  cmSystemTools::GetEnv(key, value);
+  return value;
 }
 
 void cmCLocaleEnvironmentScope::SetEnv(std::string const& key,

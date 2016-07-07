@@ -1077,8 +1077,8 @@ void cmFindPackageCommand::FillPrefixesUserRegistry()
                                  this->LabeledPaths[PathLabel::UserRegistry]);
   }
 #else
-  if (const char* home = cmSystemTools::GetEnv("HOME")) {
-    std::string dir = home;
+  std::string dir;
+  if (cmSystemTools::GetEnv("HOME", dir)) {
     dir += "/.cmake/packages/";
     dir += this->Name;
     this->LoadPackageRegistryDir(dir,

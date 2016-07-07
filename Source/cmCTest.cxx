@@ -298,9 +298,10 @@ cmCTest::cmCTest()
   this->ComputedCompressMemCheckOutput = false;
   this->RepeatTests = 1; // default to run each test once
   this->RepeatUntilFail = false;
-  if (const char* outOnFail =
-        cmSystemTools::GetEnv("CTEST_OUTPUT_ON_FAILURE")) {
-    this->OutputTestOutputOnTestFailure = !cmSystemTools::IsOff(outOnFail);
+  std::string outOnFail;
+  if (cmSystemTools::GetEnv("CTEST_OUTPUT_ON_FAILURE", outOnFail)) {
+    this->OutputTestOutputOnTestFailure =
+      !cmSystemTools::IsOff(outOnFail.c_str());
   }
   this->InitStreams();
 
@@ -2091,8 +2092,9 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
 
   // handle CTEST_PARALLEL_LEVEL environment variable
   if (!this->ParallelLevelSetInCli) {
-    if (const char* parallel = cmSystemTools::GetEnv("CTEST_PARALLEL_LEVEL")) {
-      int plevel = atoi(parallel);
+    std::string parallel;
+    if (cmSystemTools::GetEnv("CTEST_PARALLEL_LEVEL", parallel)) {
+      int plevel = atoi(parallel.c_str());
       this->SetParallelLevel(plevel);
     }
   }

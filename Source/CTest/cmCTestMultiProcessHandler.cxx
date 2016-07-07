@@ -261,12 +261,14 @@ void cmCTestMultiProcessHandler::StartNextTests()
     allTestsFailedTestLoadCheck = true;
 
     // Check for a fake load average value used in testing.
-    if (const char* fake_load_value =
-          cmSystemTools::GetEnv("__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING")) {
+    std::string fake_load_value;
+    if (cmSystemTools::GetEnv("__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING",
+                              fake_load_value)) {
       usedFakeLoadForTesting = true;
-      if (!cmSystemTools::StringToULong(fake_load_value, &systemLoad)) {
+      if (!cmSystemTools::StringToULong(fake_load_value.c_str(),
+                                        &systemLoad)) {
         cmSystemTools::Error("Failed to parse fake load value: ",
-                             fake_load_value);
+                             fake_load_value.c_str());
       }
     }
     // If it's not set, look up the true load average.
