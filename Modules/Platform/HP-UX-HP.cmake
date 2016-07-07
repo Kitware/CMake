@@ -27,7 +27,7 @@ macro(__hpux_compiler_hp lang)
   set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG_SEP ":")
   set(CMAKE_SHARED_LIBRARY_SONAME_${lang}_FLAG "-Wl,+h")
 
-  set(CMAKE_${lang}_FLAGS_INIT "")
+  string(APPEND CMAKE_${lang}_FLAGS_INIT " ")
 
   set(CMAKE_${lang}_LINK_FLAGS "-Wl,+s,+nodefaultrpath")
 endmacro()

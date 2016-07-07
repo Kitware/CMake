@@ -14,8 +14,10 @@ variables that must be set before CMake builds its first test project
 to check that the compiler for a language works.  It should not be
 used to load a file in cases that a normal :command:`include` will work.  Use
 it only as a last resort for behavior that cannot be achieved any
-other way.  For example, one may set ``CMAKE_C_FLAGS_INIT`` to change the
-default value used to initialize :variable:`CMAKE_C_FLAGS <CMAKE_<LANG>_FLAGS>`
+other way.  For example, one may set the
+:variable:`CMAKE_C_FLAGS_INIT <CMAKE_<LANG>_FLAGS_INIT>` variable
+to change the default value used to initialize the
+:variable:`CMAKE_C_FLAGS <CMAKE_<LANG>_FLAGS>` variable
 before it is cached.  The override file should NOT be used to set anything
 that could be set after languages are enabled, such as variables like
 :variable:`CMAKE_RUNTIME_OUTPUT_DIRECTORY` that affect the placement of

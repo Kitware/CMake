@@ -1,3 +1,23 @@
+
+#=============================================================================
+# Copyright 2002-2016 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distribute this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
+# This module is shared by multiple languages; use include blocker.
+if(__WINDOWS_OPENWATCOM)
+  return()
+endif()
+set(__WINDOWS_OPENWATCOM 1)
+
 set(CMAKE_LIBRARY_PATH_FLAG "libpath ")
 set(CMAKE_LINK_LIBRARY_FLAG "library ")
 set(CMAKE_LINK_LIBRARY_FILE_FLAG "library")
@@ -32,13 +52,13 @@ set(CMAKE_BUILD_TYPE_INIT Debug)
 # single/multi-threaded                 /-bm
 # static/DLL run-time libraries         /-br
 # default is setup for multi-threaded + DLL run-time libraries
-set (CMAKE_C_FLAGS_INIT "-bt=nt -w3 -dWIN32 -br -bm")
-set (CMAKE_CXX_FLAGS_INIT "-bt=nt -xs -w3 -dWIN32 -br -bm")
+string(APPEND CMAKE_C_FLAGS_INIT " -bt=nt -w3 -dWIN32 -br -bm")
+string(APPEND CMAKE_CXX_FLAGS_INIT " -bt=nt -xs -w3 -dWIN32 -br -bm")
 foreach(lang C CXX)
-  set (CMAKE_${lang}_FLAGS_DEBUG_INIT "-d2")
-  set (CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "-s -os -d0 -dNDEBUG")
-  set (CMAKE_${lang}_FLAGS_RELEASE_INIT "-s -ot -d0 -dNDEBUG")
-  set (CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT "-s -ot -d1 -dNDEBUG")
+  string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -d2")
+  string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -s -os -d0 -dNDEBUG")
+  string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -s -ot -d0 -dNDEBUG")
+  string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -s -ot -d1 -dNDEBUG")
 endforeach()
 
 foreach(type CREATE_SHARED_LIBRARY CREATE_SHARED_MODULE LINK_EXECUTABLE)
