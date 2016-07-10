@@ -299,7 +299,7 @@
 #                            implementation (alternative to:
 #                            CUDA_ADD_CUFFT_TO_TARGET macro)
 #   CUDA_CUBLAS_LIBRARIES -- Device or emulation library for the Cuda BLAS
-#                            implementation (alterative to:
+#                            implementation (alternative to:
 #                            CUDA_ADD_CUBLAS_TO_TARGET macro).
 #   CUDA_cudart_static_LIBRARY -- Statically linkable cuda runtime library.
 #                                 Only available for CUDA version 5.5+

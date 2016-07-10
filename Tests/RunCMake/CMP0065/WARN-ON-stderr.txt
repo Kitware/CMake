@@ -5,6 +5,6 @@ CMake Warning \(dev\) in CMakeLists.txt:
   set the policy and suppress this warning.
 
   For compatibility with older versions of CMake, additional flags may be
-  added to export symbols on all executables regardless of thier
+  added to export symbols on all executables regardless of their
   ENABLE_EXPORTS property.
 This warning is for project developers.  Use -Wno-dev to suppress it.

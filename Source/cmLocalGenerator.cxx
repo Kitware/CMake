@@ -1455,7 +1455,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
           w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0065) << "\n"
             "For compatibility with older versions of CMake, "
             "additional flags may be added to export symbols on all "
-            "executables regardless of thier ENABLE_EXPORTS property.";
+            "executables regardless of their ENABLE_EXPORTS property.";
           /* clang-format on */
           this->IssueMessage(cmake::AUTHOR_WARNING, w.str());
         }

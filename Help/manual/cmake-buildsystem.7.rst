@@ -860,7 +860,7 @@ with :prop_tgt:`IMPORTED` targets.
 Alias Targets
 -------------
 
-An ``ALIAS`` target is a name which may be used interchangably with
+An ``ALIAS`` target is a name which may be used interchangeably with
 a binary target name in read-only contexts.  A primary use-case for ``ALIAS``
 targets is for example or unit test executables accompanying a library, which
 may be part of the same buildsystem or built separately based on user
