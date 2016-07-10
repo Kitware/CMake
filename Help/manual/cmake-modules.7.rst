@@ -121,6 +121,7 @@ All Modules
    /module/FindHTMLHelp
    /module/FindIce
    /module/FindIcotool
+   /module/FindICU
    /module/FindImageMagick
    /module/FindIntl
    /module/FindITK
