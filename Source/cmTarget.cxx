@@ -253,7 +253,8 @@ void cmTarget::SetMakefile(cmMakefile* mf)
       this->TargetTypeValue == cmState::MODULE_LIBRARY) {
     this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
   }
-  if (this->TargetTypeValue == cmState::SHARED_LIBRARY) {
+  if (this->TargetTypeValue == cmState::SHARED_LIBRARY ||
+      this->TargetTypeValue == cmState::EXECUTABLE) {
     this->SetPropertyDefault("WINDOWS_EXPORT_ALL_SYMBOLS", CM_NULLPTR);
   }
 

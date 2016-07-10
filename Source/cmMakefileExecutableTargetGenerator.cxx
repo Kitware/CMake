@@ -318,6 +318,12 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     this->CreateObjectLists(useLinkScript, false, useResponseFileForObjects,
                             buildObjs, depends, useWatcomQuote);
 
+    // maybe create .def file from list of objects
+    if (this->GeneratorTarget->IsExecutableWithExports() &&
+        this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")) {
+      this->GenDefFile(real_link_commands, linkFlags);
+    }
+
     std::string manifests = this->GetManifests();
 
     cmLocalGenerator::RuleVariables vars;
