@@ -521,48 +521,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     // maybe create .def file from list of objects
     if (this->GeneratorTarget->GetType() == cmState::SHARED_LIBRARY &&
         this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")) {
-      if (this->GeneratorTarget->GetPropertyAsBool(
-            "WINDOWS_EXPORT_ALL_SYMBOLS")) {
-        std::string name_of_def_file =
-          this->GeneratorTarget->GetSupportDirectory();
-        name_of_def_file +=
-          std::string("/") + this->GeneratorTarget->GetName();
-        name_of_def_file += ".def";
-        std::string cmd = cmSystemTools::GetCMakeCommand();
-        cmd = this->Convert(cmd, cmOutputConverter::NONE,
-                            cmOutputConverter::SHELL);
-        cmd += " -E __create_def ";
-        cmd += this->Convert(name_of_def_file, cmOutputConverter::START_OUTPUT,
-                             cmOutputConverter::SHELL);
-        cmd += " ";
-        std::string objlist_file = name_of_def_file;
-        objlist_file += ".objs";
-        cmd += this->Convert(objlist_file, cmOutputConverter::START_OUTPUT,
-                             cmOutputConverter::SHELL);
-        real_link_commands.push_back(cmd);
-        // create a list of obj files for the -E __create_def to read
-        cmGeneratedFileStream fout(objlist_file.c_str());
-        for (std::vector<std::string>::const_iterator i =
-               this->Objects.begin();
-             i != this->Objects.end(); ++i) {
-          if (cmHasLiteralSuffix(*i, ".obj")) {
-            fout << *i << "\n";
-          }
-        }
-        for (std::vector<std::string>::const_iterator i =
-               this->ExternalObjects.begin();
-             i != this->ExternalObjects.end(); ++i) {
-          fout << *i << "\n";
-        }
-        // now add the def file link flag
-        linkFlags += " ";
-        linkFlags +=
-          this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-        linkFlags +=
-          this->Convert(name_of_def_file, cmOutputConverter::START_OUTPUT,
-                        cmOutputConverter::SHELL);
-        linkFlags += " ";
-      }
+      this->GenDefFile(real_link_commands, linkFlags);
     }
 
     std::string manifests = this->GetManifests();
