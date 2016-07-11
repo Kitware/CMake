@@ -853,6 +853,7 @@ void cmake::GetRegisteredGenerators(std::vector<GeneratorInfo>& generators)
     for (size_t j = 0; j < names.size(); ++j) {
       GeneratorInfo info;
       info.supportsToolset = (*i)->SupportsToolset();
+      info.supportsPlatform = (*i)->SupportsPlatform();
       info.name = names[j];
       generators.push_back(info);
     }
@@ -865,6 +866,7 @@ void cmake::GetRegisteredGenerators(std::vector<GeneratorInfo>& generators)
     GeneratorInfo info;
     info.name = i->first;
     info.supportsToolset = false;
+    info.supportsPlatform = false;
     generators.push_back(info);
   }
 }

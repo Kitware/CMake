@@ -86,6 +86,7 @@ public:
   }
 
   bool SupportsToolset() const CM_OVERRIDE { return false; }
+  bool SupportsPlatform() const CM_OVERRIDE { return true; }
 };
 
 cmGlobalGeneratorFactory* cmGlobalVisualStudio9Generator::NewFactory()
