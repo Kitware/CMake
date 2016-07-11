@@ -1803,6 +1803,7 @@ function(cpack_rpm_generate_package)
   endif()
 
   cpack_rpm_variable_fallback("CPACK_RPM_FILE_NAME"
+    "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_FILE_NAME"
     "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_FILE_NAME"
     "CPACK_RPM_FILE_NAME")
   if(NOT CPACK_RPM_FILE_NAME STREQUAL "RPM-DEFAULT")
