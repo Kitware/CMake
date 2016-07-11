@@ -27,7 +27,7 @@
 #include <cmsys/Process.h>
 #include <cmsys/Terminal.h>
 
-#if defined(CMAKE_HAVE_VS_GENERATORS)
+#if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32) && !defined(__CYGWIN__)
 #include "cmVisualStudioWCEPlatformParser.h"
 #endif
 
@@ -1171,7 +1171,7 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string>& args)
 
 int cmcmd::WindowsCEEnvironment(const char* version, const std::string& name)
 {
-#if defined(CMAKE_HAVE_VS_GENERATORS)
+#if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32) && !defined(__CYGWIN__)
   cmVisualStudioWCEPlatformParser parser(name.c_str());
   parser.ParseVersion(version);
   if (parser.Found()) {
