@@ -80,6 +80,14 @@ protected:
   std::vector<std::string> FindNamespaces(cmGlobalGenerator* gg,
                                           const std::string& name);
 
+  /** Generate the relative import prefix.  */
+  void GenerateImportPrefix(std::ostream&);
+
+  /** Generate the relative import prefix.  */
+  void LoadConfigFiles(std::ostream&);
+
+  void CleanupTemporaryVariables(std::ostream&);
+
   /** Generate a per-configuration file for the targets.  */
   bool GenerateImportFileConfig(const std::string& config,
                                 std::vector<std::string>& missingTargets);

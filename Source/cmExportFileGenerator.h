@@ -78,6 +78,8 @@ protected:
                             std::vector<std::string>& missingTargets);
 
   // Methods to implement export file code generation.
+  void GeneratePolicyHeaderCode(std::ostream& os);
+  void GeneratePolicyFooterCode(std::ostream& os);
   void GenerateImportHeaderCode(std::ostream& os,
                                 const std::string& config = "");
   void GenerateImportFooterCode(std::ostream& os);
