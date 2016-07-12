@@ -54,6 +54,7 @@ private:
   cmCAString Namespace;
   cmCAString Filename;
   cmCAEnabler ExportOld;
+  cmCAString AndroidMKFile;
 
   cmExportSet* ExportSet;
 
