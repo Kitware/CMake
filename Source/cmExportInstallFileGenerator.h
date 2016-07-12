@@ -81,16 +81,16 @@ protected:
                                           const std::string& name);
 
   /** Generate the relative import prefix.  */
-  void GenerateImportPrefix(std::ostream&);
+  virtual void GenerateImportPrefix(std::ostream&);
 
   /** Generate the relative import prefix.  */
-  void LoadConfigFiles(std::ostream&);
+  virtual void LoadConfigFiles(std::ostream&);
 
-  void CleanupTemporaryVariables(std::ostream&);
+  virtual void CleanupTemporaryVariables(std::ostream&);
 
   /** Generate a per-configuration file for the targets.  */
-  bool GenerateImportFileConfig(const std::string& config,
-                                std::vector<std::string>& missingTargets);
+  virtual bool GenerateImportFileConfig(
+    const std::string& config, std::vector<std::string>& missingTargets);
 
   /** Fill in properties indicating installed file locations.  */
   void SetImportLocationProperty(const std::string& config,
