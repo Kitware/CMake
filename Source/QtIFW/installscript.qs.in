@@ -1,6 +1,7 @@
 function Component()
 {
-    // default constructor
+    // Do not show component selection page
+    installer.setDefaultPageVisible(QInstaller.ComponentSelection, false);
 }
 
 Component.prototype.createOperations = function()
