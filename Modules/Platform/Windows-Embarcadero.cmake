@@ -65,9 +65,9 @@ set (CMAKE_BUILD_TYPE Debug CACHE STRING
      "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel.")
 
 foreach(t EXE SHARED MODULE)
-  set(CMAKE_${t}_LINKER_FLAGS_INIT "${_tM} -lS:1048576 -lSc:4098 -lH:1048576 -lHc:8192 ")
-  set(CMAKE_${t}_LINKER_FLAGS_DEBUG_INIT "-v")
-  set(CMAKE_${t}_LINKER_FLAGS_RELWITHDEBINFO_INIT "-v")
+  string(APPEND CMAKE_${t}_LINKER_FLAGS_INIT " ${_tM} -lS:1048576 -lSc:4098 -lH:1048576 -lHc:8192 ")
+  string(APPEND CMAKE_${t}_LINKER_FLAGS_DEBUG_INIT " -v")
+  string(APPEND CMAKE_${t}_LINKER_FLAGS_RELWITHDEBINFO_INIT " -v")
 endforeach()
 
 # The Borland link tool does not support multiple concurrent
