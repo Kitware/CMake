@@ -2343,7 +2343,8 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
                            "%(IgnoreSpecificDefaultLibraries)");
   }
 
-  if (this->GeneratorTarget->GetType() == cmState::SHARED_LIBRARY &&
+  if ((this->GeneratorTarget->GetType() == cmState::SHARED_LIBRARY ||
+       this->GeneratorTarget->IsExecutableWithExports()) &&
       this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")) {
     if (this->GeneratorTarget->GetPropertyAsBool(
           "WINDOWS_EXPORT_ALL_SYMBOLS")) {
@@ -2506,7 +2507,8 @@ void cmVisualStudio10TargetGenerator::WriteEvents(
   std::string const& configName)
 {
   bool addedPrelink = false;
-  if (this->GeneratorTarget->GetType() == cmState::SHARED_LIBRARY &&
+  if ((this->GeneratorTarget->GetType() == cmState::SHARED_LIBRARY ||
+       this->GeneratorTarget->IsExecutableWithExports()) &&
       this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")) {
     if (this->GeneratorTarget->GetPropertyAsBool(
           "WINDOWS_EXPORT_ALL_SYMBOLS")) {

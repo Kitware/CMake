@@ -472,7 +472,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                           vars["FLAGS"], vars["LINK_FLAGS"], frameworkPath,
                           linkPath, &genTarget, useWatcomQuote);
   if (this->GetMakefile()->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS") &&
-      gt.GetType() == cmState::SHARED_LIBRARY) {
+      (gt.GetType() == cmState::SHARED_LIBRARY ||
+       gt.IsExecutableWithExports())) {
     if (gt.GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS")) {
       std::string name_of_def_file = gt.GetSupportDirectory();
       name_of_def_file += "/" + gt.GetName();
@@ -599,7 +600,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   }
 
   // maybe create .def file from list of objects
-  if (gt.GetType() == cmState::SHARED_LIBRARY &&
+  if ((gt.GetType() == cmState::SHARED_LIBRARY ||
+       gt.IsExecutableWithExports()) &&
       this->GetMakefile()->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")) {
     if (gt.GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS")) {
       std::string cmakeCommand =

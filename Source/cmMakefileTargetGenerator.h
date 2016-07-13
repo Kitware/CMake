@@ -162,6 +162,10 @@ protected:
                          std::vector<std::string>& makefile_depends,
                          bool useWatcomQuote);
 
+  /** Add commands for generate def files */
+  void GenDefFile(std::vector<std::string>& real_link_commands,
+                  std::string& linkFlags);
+
   void AddIncludeFlags(std::string& flags,
                        const std::string& lang) CM_OVERRIDE;
 

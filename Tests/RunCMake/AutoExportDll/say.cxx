@@ -18,6 +18,14 @@ int bar();
 void hello();
 void world();
 
+// test exports for executable target
+extern "C" {
+int own_auto_export_function(int i)
+{
+  return i + 1;
+}
+}
+
 int main()
 {
   // test static data (needs declspec to work)
