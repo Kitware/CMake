@@ -1,6 +1,6 @@
 set(CMAKE_RELEASE_DIRECTORY "c:/msys64/home/dashboard/CMakeReleaseDirectory64")
 set(CONFIGURE_WITH_CMAKE TRUE)
-set(CMAKE_CONFIGURE_PATH "c:/Program\\ Files\\ \\(x86\\)/CMake/bin/cmake.exe")
+set(CMAKE_CONFIGURE_PATH "c:/Program\\ Files/CMake/bin/cmake.exe")
 set(PROCESSORS 8)
 set(HOST dash3win7)
 set(SCRIPT_NAME dash3win7x64)
