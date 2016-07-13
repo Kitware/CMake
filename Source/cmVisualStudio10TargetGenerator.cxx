@@ -2354,7 +2354,8 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     cmGlobalVisualStudio10Generator* gg =
       static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
     const char* toolset = gg->GetPlatformToolset();
-    if (toolset && (cmHasLiteralPrefix(toolset, "v100") ||
+    if (toolset && (cmHasLiteralPrefix(toolset, "v90") ||
+                    cmHasLiteralPrefix(toolset, "v100") ||
                     cmHasLiteralPrefix(toolset, "v110") ||
                     cmHasLiteralPrefix(toolset, "v120"))) {
       if (const char* debug =
