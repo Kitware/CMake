@@ -12,17 +12,14 @@
 #
 # The following variables are set:
 #
-# ::
-#
-#    OpenMP_C_FLAGS - flags to add to the C compiler for OpenMP support
-#    OpenMP_CXX_FLAGS - flags to add to the CXX compiler for OpenMP support
-#    OpenMP_Fortran_FLAGS - flags to add to the Fortran compiler for OpenMP support
-#    OPENMP_FOUND - true if openmp is detected
-#
-#
-#
-# Supported compilers can be found at
-# http://openmp.org/wp/openmp-compilers/
+# ``OpenMP_C_FLAGS``
+#   Flags to add to the C compiler for OpenMP support.
+# ``OpenMP_CXX_FLAGS``
+#   Flags to add to the CXX compiler for OpenMP support.
+# ``OpenMP_Fortran_FLAGS``
+#   Flags to add to the Fortran compiler for OpenMP support.
+# ``OPENMP_FOUND``
+#   True if openmp is detected.
 
 #=============================================================================
 # Copyright 2009 Kitware, Inc.
