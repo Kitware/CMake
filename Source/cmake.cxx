@@ -559,7 +559,17 @@ void cmake::SetArgs(const std::vector<std::string>& args,
     }
 #endif
     else if (arg.find("-D", 0) == 0) {
-      // skip for now
+      // skip for now and check if -D is used with followed whitespace
+      std::string entry = arg.substr(2);
+      if (entry.empty()) {
+        ++i;
+        if (i < args.size()) {
+        }
+        else {
+          cmSystemTools::Error("-D must be followed with VAR=VALUE.");
+          return;
+        }
+      }
     } else if (arg.find("-U", 0) == 0) {
       // skip for now
     } else if (arg.find("-C", 0) == 0) {
