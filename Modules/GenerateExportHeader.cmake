@@ -81,7 +81,7 @@
 # ``OTHER_NAME_EXPORT``, ``OTHER_NAME_NO_EXPORT`` and ``OTHER_NAME_DEPRECATED``
 # etc.
 #
-# The ``BASE_NAME`` may be overridden by specifiying other options in the
+# The ``BASE_NAME`` may be overridden by specifying other options in the
 # function.  For example:
 #
 # .. code-block:: cmake
