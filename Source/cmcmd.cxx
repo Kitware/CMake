@@ -27,8 +27,7 @@
 #include <cmsys/Process.h>
 #include <cmsys/Terminal.h>
 
-#if defined(CMAKE_HAVE_VS_GENERATORS)
-#include "cmCallVisualStudioMacro.h"
+#if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32) && !defined(__CYGWIN__)
 #include "cmVisualStudioWCEPlatformParser.h"
 #endif
 
@@ -672,29 +671,6 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       return cmcmd::SymlinkExecutable(args);
     }
 
-#if defined(CMAKE_HAVE_VS_GENERATORS)
-    // Internal CMake support for calling Visual Studio macros.
-    else if (args[1] == "cmake_call_visual_studio_macro" && args.size() >= 4) {
-      // args[2] = full path to .sln file or "ALL"
-      // args[3] = name of Visual Studio macro to call
-      // args[4..args.size()-1] = [optional] args for Visual Studio macro
-
-      std::string macroArgs;
-
-      if (args.size() > 4) {
-        macroArgs = args[4];
-
-        for (size_t i = 5; i < args.size(); ++i) {
-          macroArgs += " ";
-          macroArgs += args[i];
-        }
-      }
-
-      return cmCallVisualStudioMacro::CallMacro(args[2], args[3], macroArgs,
-                                                true);
-    }
-#endif
-
     // Internal CMake dependency scanning support.
     else if (args[1] == "cmake_depends" && args.size() >= 6) {
       // Use the make system's VERBOSE environment variable to enable
@@ -1195,7 +1171,7 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string>& args)
 
 int cmcmd::WindowsCEEnvironment(const char* version, const std::string& name)
 {
-#if defined(CMAKE_HAVE_VS_GENERATORS)
+#if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32) && !defined(__CYGWIN__)
   cmVisualStudioWCEPlatformParser parser(name.c_str());
   parser.ParseVersion(version);
   if (parser.Found()) {
