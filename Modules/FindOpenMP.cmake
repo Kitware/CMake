@@ -186,7 +186,6 @@ if(CMAKE_CXX_COMPILER_LOADED)
 
   list(APPEND _OPENMP_REQUIRED_VARS OpenMP_CXX_FLAGS)
   unset(OpenMP_CXX_FLAG_CANDIDATES)
-  unset(OpenMP_CXX_TEST_SOURCE)
 endif()
 
 # check Fortran compiler
@@ -220,7 +219,6 @@ if(CMAKE_Fortran_COMPILER_LOADED)
 
   list(APPEND _OPENMP_REQUIRED_VARS OpenMP_Fortran_FLAGS)
   unset(OpenMP_Fortran_FLAG_CANDIDATES)
-  unset(OpenMP_Fortran_TEST_SOURCE)
 endif()
 
 set(CMAKE_REQUIRED_QUIET ${CMAKE_REQUIRED_QUIET_SAVE})
@@ -237,3 +235,7 @@ if(_OPENMP_REQUIRED_VARS)
 else()
   message(SEND_ERROR "FindOpenMP requires C or CXX language to be enabled")
 endif()
+
+unset(OpenMP_C_TEST_SOURCE)
+unset(OpenMP_CXX_TEST_SOURCE)
+unset(OpenMP_Fortran_TEST_SOURCE)
