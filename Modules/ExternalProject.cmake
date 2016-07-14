@@ -69,8 +69,8 @@ Create custom targets to build projects in external trees
     URL of mercurial repo
   ``HG_TAG <tag>``
     Mercurial branch name, commit id or tag
-  ``URL /.../src.tgz``
-    Full path or URL of source
+  ``URL /.../src.tgz [/.../src.tgz]...``
+    Full path or URL(s) of source.  Multiple URLs are allowed as mirrors.
   ``URL_HASH ALGO=value``
     Hash of file at URL
   ``URL_MD5 md5``
@@ -1667,7 +1667,7 @@ function(_ep_add_download_command name)
   get_property(fname TARGET ${name} PROPERTY _EP_DOWNLOAD_NAME)
 
   # TODO: Perhaps file:// should be copied to download dir before extraction.
-  string(REGEX REPLACE "^file://" "" url "${url}")
+  string(REGEX REPLACE "file://" "" url "${url}")
 
   set(depends)
   set(comment)
@@ -1861,6 +1861,19 @@ function(_ep_add_download_command name)
       @ONLY
       )
     list(APPEND depends ${stamp_dir}/${name}-urlinfo.txt)
+
+    list(LENGTH url url_list_length)
+    if(NOT "${url_list_length}" STREQUAL "1")
+      foreach(entry ${url})
+        if(NOT "${entry}" MATCHES "^[a-z]+://")
+          message(FATAL_ERROR "At least one entry of URL is a path (invalid in a list)")
+        endif()
+      endforeach()
+      if("x${fname}" STREQUAL "x")
+        list(GET url 0 fname)
+      endif()
+    endif()
+
     if(IS_DIRECTORY "${url}")
       get_filename_component(abs_dir "${url}" ABSOLUTE)
       set(comment "Performing download step (DIR copy) for '${name}'")

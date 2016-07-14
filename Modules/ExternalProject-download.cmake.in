@@ -114,48 +114,56 @@ endif()
 
 set(retry_number 5)
 
+message(STATUS "Downloading...
+   dst='@LOCAL@'
+   timeout='@TIMEOUT_MSG@'"
+)
+
 foreach(i RANGE ${retry_number})
   sleep_before_download(${i})
 
-  message(STATUS "downloading...
-       src='@REMOTE@'
-       dst='@LOCAL@'
-       timeout='@TIMEOUT_MSG@'")
+  foreach(url @REMOTE@)
+    message(STATUS "Using src='${url}'")
 
-  @TLS_VERIFY_CODE@
-  @TLS_CAINFO_CODE@
+    @TLS_VERIFY_CODE@
+    @TLS_CAINFO_CODE@
 
-  file(
-      DOWNLOAD
-      "@REMOTE@" "@LOCAL@"
-      @SHOW_PROGRESS@
-      @TIMEOUT_ARGS@
-      STATUS status
-      LOG log
-  )
-
-  list(GET status 0 status_code)
-  list(GET status 1 status_string)
-
-  if(status_code EQUAL 0)
-    check_file_hash(has_hash hash_is_good)
-    if(has_hash AND NOT hash_is_good)
-      message(STATUS "Hash mismatch, removing...")
-      file(REMOVE "@LOCAL@")
-    else()
-      message(STATUS "Downloading... done")
-      return()
-    endif()
-  else()
-    message("error: downloading '@REMOTE@' failed
-  status_code: ${status_code}
-  status_string: ${status_string}
-  log:
-  --- LOG BEGIN ---
-  ${log}
-  --- LOG END ---"
+    file(
+        DOWNLOAD
+        "${url}" "@LOCAL@"
+        @SHOW_PROGRESS@
+        @TIMEOUT_ARGS@
+        STATUS status
+        LOG log
     )
-  endif()
+
+    list(GET status 0 status_code)
+    list(GET status 1 status_string)
+
+    if(status_code EQUAL 0)
+      check_file_hash(has_hash hash_is_good)
+      if(has_hash AND NOT hash_is_good)
+        message(STATUS "Hash mismatch, removing...")
+        file(REMOVE "@LOCAL@")
+      else()
+        message(STATUS "Downloading... done")
+        return()
+      endif()
+    else()
+      string(APPEND logFailedURLs "error: downloading '${url}' failed
+       status_code: ${status_code}
+       status_string: ${status_string}
+       log:
+       --- LOG BEGIN ---
+       ${log}
+       --- LOG END ---
+       "
+      )
+    endif()
+  endforeach()
 endforeach()
 
-message(FATAL_ERROR "Downloading failed")
+message(FATAL_ERROR "Each download failed!
+  ${logFailedURLs}
+  "
+)
