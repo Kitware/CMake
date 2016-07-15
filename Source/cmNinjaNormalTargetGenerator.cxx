@@ -354,7 +354,7 @@ static int calculateCommandLineLengthLimit(int linkRuleLength)
   size_t const arrSz = cmArraySize(limits);
   int const sz = *std::min_element(limits, limits + arrSz);
   if (sz == std::numeric_limits<int>::max()) {
-    return -1;
+    return 0;
   }
 
   return sz - linkRuleLength;
