@@ -41,6 +41,9 @@ public:
 
   /** Determine whether or not this generator supports toolsets */
   virtual bool SupportsToolset() const = 0;
+
+  /** Determine whether or not this generator supports platforms */
+  virtual bool SupportsPlatform() const = 0;
 };
 
 template <class T>
@@ -71,6 +74,9 @@ public:
 
   /** Determine whether or not this generator supports toolsets */
   bool SupportsToolset() const CM_OVERRIDE { return T::SupportsToolset(); }
+
+  /** Determine whether or not this generator supports platforms */
+  bool SupportsPlatform() const CM_OVERRIDE { return T::SupportsPlatform(); }
 };
 
 #endif

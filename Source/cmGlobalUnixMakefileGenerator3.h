@@ -75,6 +75,12 @@ public:
    */
   static bool SupportsToolset() { return false; }
 
+  /**
+   * Utilized by the generator factory to determine if this generator
+   * supports platforms.
+   */
+  static bool SupportsPlatform() { return false; }
+
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
 

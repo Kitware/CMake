@@ -25,8 +25,8 @@ static const char vs8generatorName[] = "Visual Studio 8 2005";
 class cmGlobalVisualStudio8Generator::Factory : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
-                                                   cmake* cm) const
+  cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
+                                           cmake* cm) const CM_OVERRIDE
   {
     if (strncmp(name.c_str(), vs8generatorName,
                 sizeof(vs8generatorName) - 1) != 0) {
@@ -60,14 +60,14 @@ public:
     return ret;
   }
 
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const
+  void GetDocumentation(cmDocumentationEntry& entry) const CM_OVERRIDE
   {
     entry.Name = std::string(vs8generatorName) + " [arch]";
     entry.Brief = "Generates Visual Studio 2005 project files.  "
                   "Optional [arch] can be \"Win64\".";
   }
 
-  virtual void GetGenerators(std::vector<std::string>& names) const
+  void GetGenerators(std::vector<std::string>& names) const CM_OVERRIDE
   {
     names.push_back(vs8generatorName);
     names.push_back(vs8generatorName + std::string(" Win64"));
@@ -82,7 +82,8 @@ public:
     }
   }
 
-  virtual bool SupportsToolset() const { return false; }
+  bool SupportsToolset() const CM_OVERRIDE { return false; }
+  bool SupportsPlatform() const CM_OVERRIDE { return true; }
 };
 
 cmGlobalGeneratorFactory* cmGlobalVisualStudio8Generator::NewFactory()

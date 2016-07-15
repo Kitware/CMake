@@ -52,6 +52,12 @@ public:
   static bool SupportsToolset() { return false; }
 
   /**
+   * Utilized by the generator factory to determine if this generator
+   * supports platforms.
+   */
+  static bool SupportsPlatform() { return false; }
+
+  /**
   * Try to determine system information such as shared library
   * extension, pthreads, byte order etc.
   */

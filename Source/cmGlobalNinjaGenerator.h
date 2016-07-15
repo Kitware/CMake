@@ -81,6 +81,12 @@ public:
   static bool SupportsToolset() { return false; }
 
   /**
+   * Utilized by the generator factory to determine if this generator
+   * supports platforms.
+   */
+  static bool SupportsPlatform() { return false; }
+
+  /**
    * Write a build statement to @a os with the @a comment using
    * the @a rule the list of @a outputs files and inputs.
    * It also writes the variables bound to this build statement.

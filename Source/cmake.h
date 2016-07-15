@@ -104,6 +104,7 @@ public:
   {
     std::string name;
     bool supportsToolset;
+    bool supportsPlatform;
   };
 
   typedef std::map<std::string, cmInstalledFile> InstalledFilesMap;
