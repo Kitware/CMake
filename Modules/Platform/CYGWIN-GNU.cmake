@@ -19,7 +19,7 @@ endif()
 set(__CYGWIN_COMPILER_GNU 1)
 
 # TODO: Is -Wl,--enable-auto-import now always default?
-set(CMAKE_EXE_LINKER_FLAGS_INIT "-Wl,--enable-auto-import")
+string(APPEND CMAKE_EXE_LINKER_FLAGS_INIT " -Wl,--enable-auto-import")
 set(CMAKE_CREATE_WIN32_EXE  "-mwindows")
 
 set(CMAKE_GNULD_IMAGE_VERSION

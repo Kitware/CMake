@@ -21,9 +21,9 @@ set(__AIX_COMPILER_GNU 1)
 #
 # By default, runtime linking is enabled. All shared objects specified on the command line
 # will be listed, even if there are no symbols referenced, in the output file.
-set (CMAKE_SHARED_LINKER_FLAGS_INIT "-Wl,-brtl")
-set (CMAKE_MODULE_LINKER_FLAGS_INIT "-Wl,-brtl")
-set (CMAKE_EXE_LINKER_FLAGS_INIT "-Wl,-brtl")
+string(APPEND CMAKE_SHARED_LINKER_FLAGS_INIT " -Wl,-brtl")
+string(APPEND CMAKE_MODULE_LINKER_FLAGS_INIT " -Wl,-brtl")
+string(APPEND CMAKE_EXE_LINKER_FLAGS_INIT " -Wl,-brtl")
 
 
 macro(__aix_compiler_gnu lang)
