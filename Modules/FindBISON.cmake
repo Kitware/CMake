@@ -24,6 +24,7 @@
 #                [COMPILE_FLAGS <flags>]
 #                [DEFINES_FILE <file>]
 #                [VERBOSE [<file>]]
+#                [REPORT_FILE <file>]
 #                )
 #
 # which will create a custom rule to generate a parser.  ``<YaccInput>`` is
@@ -41,7 +42,12 @@
 #
 # ``VERBOSE [<file>]``
 #   Tell ``bison`` to write a report file of the grammar and parser.
-#   If given, the report file is copied to ``<file>``.
+#   If ``<file>`` is given, it specifies path the report file is copied to.
+#   ``[<file>]`` is left for backward compatibility of this module.
+#   Use ``VERBOSE REPORT_FILE <file>``.
+#
+# ``REPORT_FILE <file>``
+#   Specify a non-default report ``<file>``, if generated.
 #
 # The macro defines the following variables:
 #
@@ -158,7 +164,13 @@ if(BISON_EXECUTABLE)
   # internal macro
   macro(BISON_TARGET_option_defines Header)
     set(BISON_TARGET_output_header "${Header}")
-    list(APPEND BISON_TARGET_cmdopt --defines=${BISON_TARGET_output_header})
+    list(APPEND BISON_TARGET_cmdopt "--defines=${BISON_TARGET_output_header}")
+  endmacro()
+
+  # internal macro
+  macro(BISON_TARGET_option_report_file ReportFile)
+    set(BISON_TARGET_verbose_file "${ReportFile}")
+    list(APPEND BISON_TARGET_cmdopt "--report-file=${BISON_TARGET_verbose_file}")
   endmacro()
 
   #============================================================
@@ -178,6 +190,7 @@ if(BISON_EXECUTABLE)
     set(BISON_TARGET_PARAM_ONE_VALUE_KEYWORDS
       COMPILE_FLAGS
       DEFINES_FILE
+      REPORT_FILE
       )
     set(BISON_TARGET_PARAM_MULTI_VALUE_KEYWORDS
       VERBOSE
@@ -196,6 +209,15 @@ if(BISON_EXECUTABLE)
       # [VERBOSE [<file>] hack: <file> is non-multi value by usage
       message(SEND_ERROR "Usage")
     else()
+      if(NOT "${BISON_TARGET_ARG_COMPILE_FLAGS}" STREQUAL "")
+        BISON_TARGET_option_extraopts("${BISON_TARGET_ARG_COMPILE_FLAGS}")
+      endif()
+      if(NOT "${BISON_TARGET_ARG_DEFINES_FILE}" STREQUAL "")
+        BISON_TARGET_option_defines("${BISON_TARGET_ARG_DEFINES_FILE}")
+      endif()
+      if(NOT "${BISON_TARGET_ARG_REPORT_FILE}" STREQUAL "")
+        BISON_TARGET_option_report_file("${BISON_TARGET_ARG_REPORT_FILE}")
+      endif()
       if(NOT "${BISON_TARGET_ARG_VERBOSE}" STREQUAL "")
         BISON_TARGET_option_verbose(${Name} ${BisonOutput} "${BISON_TARGET_ARG_VERBOSE}")
       else()
@@ -206,12 +228,6 @@ if(BISON_EXECUTABLE)
           # VERBOSE is used without <file>
           BISON_TARGET_option_verbose(${Name} ${BisonOutput} "")
         endif()
-      endif()
-      if(NOT "${BISON_TARGET_ARG_COMPILE_FLAGS}" STREQUAL "")
-        BISON_TARGET_option_extraopts("${BISON_TARGET_ARG_COMPILE_FLAGS}")
-      endif()
-      if(NOT "${BISON_TARGET_ARG_DEFINES_FILE}" STREQUAL "")
-        BISON_TARGET_option_defines("${BISON_TARGET_ARG_DEFINES_FILE}")
       endif()
 
       if("${BISON_TARGET_output_header}" STREQUAL "")
