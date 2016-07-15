@@ -186,7 +186,7 @@ set(PostgreSQL_FOUND  ${POSTGRESQL_FOUND})
 if(PostgreSQL_FOUND)
   set(PostgreSQL_INCLUDE_DIRS ${PostgreSQL_INCLUDE_DIR} ${PostgreSQL_TYPE_INCLUDE_DIR} )
   set(PostgreSQL_LIBRARY_DIRS ${PostgreSQL_LIBRARY_DIR} )
-  set(PostgreSQL_LIBRARIES ${PostgreSQL_LIBRARY_TO_FIND})
+  set(PostgreSQL_LIBRARIES ${PostgreSQL_LIBRARY})
 endif()
 
 mark_as_advanced(PostgreSQL_INCLUDE_DIR PostgreSQL_TYPE_INCLUDE_DIR PostgreSQL_LIBRARY )
