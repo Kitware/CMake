@@ -374,7 +374,7 @@ static int calculateCommandLineLengthLimit(int linkRuleLength)
 #ifdef _WIN32
     8000,
 #endif
-#if defined(__APPLE__) || defined(__HAIKU__) || defined(__linux)
+#if defined(_SC_ARG_MAX)
     // for instance ARG_MAX is 2096152 on Ubuntu or 262144 on Mac
     ((int)sysconf(_SC_ARG_MAX)) - 1000,
 #endif
