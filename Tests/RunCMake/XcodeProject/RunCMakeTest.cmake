@@ -31,13 +31,16 @@ if(NOT XCODE_VERSION VERSION_LESS 5)
 
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeBundlesOSX-build)
   set(RunCMake_TEST_NO_CLEAN 1)
-  set(RunCMake_TEST_OPTIONS "-DTEST_IOS=OFF")
+  set(RunCMake_TEST_OPTIONS
+    "-DTEST_IOS=OFF"
+    "-DCMAKE_INSTALL_PREFIX:PATH=${RunCMake_TEST_BINARY_DIR}/_install")
 
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
   run_cmake(XcodeBundles)
   run_cmake_command(XcodeBundles-build ${CMAKE_COMMAND} --build .)
+  run_cmake_command(XcodeBundles-install ${CMAKE_COMMAND} --build . --target install)
 
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
@@ -45,13 +48,16 @@ if(NOT XCODE_VERSION VERSION_LESS 5)
 
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeBundlesIOS-build)
   set(RunCMake_TEST_NO_CLEAN 1)
-  set(RunCMake_TEST_OPTIONS "-DTEST_IOS=ON")
+  set(RunCMake_TEST_OPTIONS
+    "-DTEST_IOS=ON"
+    "-DCMAKE_INSTALL_PREFIX:PATH=${RunCMake_TEST_BINARY_DIR}/_install")
 
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
   run_cmake(XcodeBundles)
   run_cmake_command(XcodeBundles-build ${CMAKE_COMMAND} --build .)
+  run_cmake_command(XcodeBundles-install ${CMAKE_COMMAND} --build . --target install)
 
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
@@ -61,13 +67,16 @@ endif()
 if(NOT XCODE_VERSION VERSION_LESS 7)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeBundlesWatchOS-build)
   set(RunCMake_TEST_NO_CLEAN 1)
-  set(RunCMake_TEST_OPTIONS "-DTEST_WATCHOS=ON")
+  set(RunCMake_TEST_OPTIONS
+    "-DTEST_WATCHOS=ON"
+    "-DCMAKE_INSTALL_PREFIX:PATH=${RunCMake_TEST_BINARY_DIR}/_install")
 
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
   run_cmake(XcodeBundles)
   run_cmake_command(XcodeBundles-build ${CMAKE_COMMAND} --build .)
+  run_cmake_command(XcodeBundles-install ${CMAKE_COMMAND} --build . --target install)
 
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
@@ -77,13 +86,16 @@ endif()
 if(NOT XCODE_VERSION VERSION_LESS 7.1)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeBundlesTvOS-build)
   set(RunCMake_TEST_NO_CLEAN 1)
-  set(RunCMake_TEST_OPTIONS "-DTEST_TVOS=ON")
+  set(RunCMake_TEST_OPTIONS
+    "-DTEST_TVOS=ON"
+    "-DCMAKE_INSTALL_PREFIX:PATH=${RunCMake_TEST_BINARY_DIR}/_install")
 
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
   run_cmake(XcodeBundles)
   run_cmake_command(XcodeBundles-build ${CMAKE_COMMAND} --build .)
+  run_cmake_command(XcodeBundles-install ${CMAKE_COMMAND} --build . --target install)
 
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
