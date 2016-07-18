@@ -98,8 +98,8 @@ ____cpack__here_doc____
   if [ "x${cpack_include_subdir}x" = "xx" ]
   then
     echo "By default the @CPACK_PACKAGE_NAME@ will be installed in:"
-    echo "  \"${toplevel}/@CPACK_PACKAGE_FILE_NAME@\""
-    echo "Do you want to include the subdirectory @CPACK_PACKAGE_FILE_NAME@?"
+    echo "  \"${toplevel}/@CPACK_PACKAGE_INSTALL_DIRECTORY@\""
+    echo "Do you want to include the subdirectory @CPACK_PACKAGE_INSTALL_DIRECTORY@?"
     echo "Saying no will install in: \"${toplevel}\" [Yn]: "
     read line leftover
     cpack_include_subdir=TRUE
@@ -112,7 +112,7 @@ fi
 
 if [ "x${cpack_include_subdir}x" = "xTRUEx" ]
 then
-  toplevel="${toplevel}/@CPACK_PACKAGE_FILE_NAME@"
+  toplevel="${toplevel}/@CPACK_PACKAGE_INSTALL_DIRECTORY@"
   mkdir -p "${toplevel}"
 fi
 echo
