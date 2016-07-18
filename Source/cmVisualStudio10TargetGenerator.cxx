@@ -1187,6 +1187,8 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
     tool = "PRIResource";
   } else if (ext == "xml") {
     tool = "XML";
+  } else if (ext == "natvis") {
+    tool = "Natvis";
   }
 
   if (this->NsightTegra) {
