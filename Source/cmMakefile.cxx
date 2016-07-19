@@ -2572,6 +2572,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
           std::string const& lookup = result.substr(var.loc);
           const char* value = CM_NULLPTR;
           std::string varresult;
+          std::string svalue;
           static const std::string lineVar = "CMAKE_CURRENT_LIST_LINE";
           switch (var.domain) {
             case NORMAL:
@@ -2584,7 +2585,9 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
               }
               break;
             case ENVIRONMENT:
-              value = cmSystemTools::GetEnv(lookup.c_str());
+              if (cmSystemTools::GetEnv(lookup, svalue)) {
+                value = svalue.c_str();
+              }
               break;
             case CACHE:
               value = state->GetCacheEntryValue(lookup);

@@ -71,12 +71,12 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
     return this->EmptyVariable;
   }
   if (strcmp(key, "ENV") == 0) {
-    char* ptr = getenv(var);
-    if (ptr) {
+    std::string str;
+    if (cmSystemTools::GetEnv(var, str)) {
       if (this->EscapeQuotes) {
-        return this->AddString(cmSystemTools::EscapeQuotes(ptr));
+        return this->AddString(cmSystemTools::EscapeQuotes(str.c_str()));
       } else {
-        return ptr;
+        return this->AddString(str);
       }
     }
     return this->EmptyVariable;

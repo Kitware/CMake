@@ -486,7 +486,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
         if (argP1len > 4 && argP1->GetValue().substr(0, 4) == "ENV{" &&
             argP1->GetValue().operator[](argP1len - 1) == '}') {
           std::string env = argP1->GetValue().substr(4, argP1len - 5);
-          bdef = cmSystemTools::GetEnv(env.c_str()) ? true : false;
+          bdef = cmSystemTools::HasEnv(env.c_str());
         } else {
           bdef = this->Makefile.IsDefinitionSet(argP1->GetValue());
         }

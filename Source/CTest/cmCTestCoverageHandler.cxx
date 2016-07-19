@@ -727,10 +727,8 @@ int cmCTestCoverageHandler::HandleCoberturaCoverage(
   // if it doesn't exist or is empty, assume the
   // binary directory is used.
   std::string coverageXMLFile;
-  const char* covDir = cmSystemTools::GetEnv("COBERTURADIR");
-  if (covDir && strlen(covDir) != 0) {
-    coverageXMLFile = std::string(covDir);
-  } else {
+  if (!cmSystemTools::GetEnv("COBERTURADIR", coverageXMLFile) ||
+      coverageXMLFile.empty()) {
     coverageXMLFile = this->CTest->GetBinaryDir();
   }
   // build the find file string with the directory from above
@@ -791,7 +789,8 @@ struct cmCTestCoverageHandlerLocale
 {
   cmCTestCoverageHandlerLocale()
   {
-    if (const char* l = cmSystemTools::GetEnv("LC_ALL")) {
+    std::string l;
+    if (cmSystemTools::GetEnv("LC_ALL", l)) {
       lc_all = l;
     }
     if (lc_all != "C") {
@@ -2121,8 +2120,8 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
 int cmCTestCoverageHandler::HandleBullseyeCoverage(
   cmCTestCoverageHandlerContainer* cont)
 {
-  const char* covfile = cmSystemTools::GetEnv("COVFILE");
-  if (!covfile || strlen(covfile) == 0) {
+  std::string covfile;
+  if (!cmSystemTools::GetEnv("COVFILE", covfile) || covfile.empty()) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        " COVFILE environment variable not found, not running "
                        " bullseye\n",

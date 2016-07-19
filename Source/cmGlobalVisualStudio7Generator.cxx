@@ -122,9 +122,9 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(
   // does not use the environment it is run in, and this allows
   // for running commands and using dll's that the IDE environment
   // does not know about.
-  const char* extraPath = cmSystemTools::GetEnv("CMAKE_MSVCIDE_RUN_PATH");
-  if (extraPath) {
-    mf->AddCacheDefinition("CMAKE_MSVCIDE_RUN_PATH", extraPath,
+  std::string extraPath;
+  if (cmSystemTools::GetEnv("CMAKE_MSVCIDE_RUN_PATH", extraPath)) {
+    mf->AddCacheDefinition("CMAKE_MSVCIDE_RUN_PATH", extraPath.c_str(),
                            "Saved environment variable CMAKE_MSVCIDE_RUN_PATH",
                            cmState::STATIC);
   }

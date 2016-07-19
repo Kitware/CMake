@@ -741,5 +741,5 @@ bool cmNinjaTargetGenerator::ForceResponseFile()
 {
   static std::string const forceRspFile = "CMAKE_NINJA_FORCE_RESPONSE_FILE";
   return (this->GetMakefile()->IsDefinitionSet(forceRspFile) ||
-          cmSystemTools::GetEnv(forceRspFile) != CM_NULLPTR);
+          cmSystemTools::HasEnv(forceRspFile));
 }

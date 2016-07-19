@@ -208,7 +208,8 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
   // get the variables from the environment and from the cache and then
   // figure out which one to use:
 
-  const char* envVarValue = getenv(envVar);
+  std::string envVarValue;
+  const bool envVarSet = cmSystemTools::GetEnv(envVar, envVarValue);
 
   std::string cacheEntryName = "CMAKE_ECLIPSE_ENVVAR_";
   cacheEntryName += envVar;
@@ -217,17 +218,17 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
 
   // now we have both, decide which one to use
   std::string valueToUse;
-  if (envVarValue == CM_NULLPTR && cacheValue == CM_NULLPTR) {
+  if (!envVarSet && cacheValue == CM_NULLPTR) {
     // nothing known, do nothing
     valueToUse = "";
-  } else if (envVarValue != CM_NULLPTR && cacheValue == CM_NULLPTR) {
+  } else if (envVarSet && cacheValue == CM_NULLPTR) {
     // The variable is in the env, but not in the cache. Use it and put it
     // in the cache
     valueToUse = envVarValue;
     mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
                            cacheEntryName.c_str(), cmState::STRING, true);
     mf->GetCMakeInstance()->SaveCache(lg->GetBinaryDirectory());
-  } else if (envVarValue == CM_NULLPTR && cacheValue != CM_NULLPTR) {
+  } else if (!envVarSet && cacheValue != CM_NULLPTR) {
     // It is already in the cache, but not in the env, so use it from the cache
     valueToUse = cacheValue;
   } else {

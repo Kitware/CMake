@@ -1609,8 +1609,10 @@ struct cmFileInstaller : public cmFileCopier
     // Installation does not use source permissions by default.
     this->UseSourcePermissions = false;
     // Check whether to copy files always or only if they have changed.
-    this->Always =
-      cmSystemTools::IsOn(cmSystemTools::GetEnv("CMAKE_INSTALL_ALWAYS"));
+    std::string install_always;
+    if (cmSystemTools::GetEnv("CMAKE_INSTALL_ALWAYS", install_always)) {
+      this->Always = cmSystemTools::IsOn(install_always.c_str());
+    }
     // Get the current manifest.
     this->Manifest =
       this->Makefile->GetSafeDefinition("CMAKE_INSTALL_MANIFEST_FILES");
@@ -1869,9 +1871,8 @@ bool cmFileInstaller::HandleInstallDestination()
     return false;
   }
 
-  const char* destdir = cmSystemTools::GetEnv("DESTDIR");
-  if (destdir && *destdir) {
-    std::string sdestdir = destdir;
+  std::string sdestdir;
+  if (cmSystemTools::GetEnv("DESTDIR", sdestdir) && !sdestdir.empty()) {
     cmSystemTools::ConvertToUnixSlashes(sdestdir);
     char ch1 = destination[0];
     char ch2 = destination[1];

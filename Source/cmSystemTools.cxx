@@ -2069,9 +2069,9 @@ void cmSystemTools::MakefileColorEcho(int color, const char* message,
   // However, we can test for some situations when the answer is most
   // likely no.
   int assumeTTY = cmsysTerminal_Color_AssumeTTY;
-  if (cmSystemTools::GetEnv("DART_TEST_FROM_DART") ||
-      cmSystemTools::GetEnv("DASHBOARD_TEST_FROM_CTEST") ||
-      cmSystemTools::GetEnv("CTEST_INTERACTIVE_DEBUG_MODE")) {
+  if (cmSystemTools::HasEnv("DART_TEST_FROM_DART") ||
+      cmSystemTools::HasEnv("DASHBOARD_TEST_FROM_CTEST") ||
+      cmSystemTools::HasEnv("CTEST_INTERACTIVE_DEBUG_MODE")) {
     // Avoid printing color escapes during dashboard builds.
     assumeTTY = 0;
   }

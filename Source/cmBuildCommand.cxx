@@ -36,8 +36,8 @@ bool cmBuildCommand::MainSignature(std::vector<std::string> const& args)
   const char* variable = args[0].c_str();
 
   // Parse remaining arguments.
-  const char* configuration = CM_NULLPTR;
-  const char* project_name = CM_NULLPTR;
+  std::string configuration;
+  std::string project_name;
   std::string target;
   enum Doing
   {
@@ -56,10 +56,10 @@ bool cmBuildCommand::MainSignature(std::vector<std::string> const& args)
       doing = DoingTarget;
     } else if (doing == DoingConfiguration) {
       doing = DoingNone;
-      configuration = args[i].c_str();
+      configuration = args[i];
     } else if (doing == DoingProjectName) {
       doing = DoingNone;
-      project_name = args[i].c_str();
+      project_name = args[i];
     } else if (doing == DoingTarget) {
       doing = DoingNone;
       target = args[i];
@@ -76,14 +76,14 @@ bool cmBuildCommand::MainSignature(std::vector<std::string> const& args)
   // so we put this code here to end up with the same default configuration
   // as the original 2-arg build_command signature:
   //
-  if (!configuration || !*configuration) {
-    configuration = getenv("CMAKE_CONFIG_TYPE");
+  if (configuration.empty()) {
+    cmSystemTools::GetEnv("CMAKE_CONFIG_TYPE", configuration);
   }
-  if (!configuration || !*configuration) {
+  if (configuration.empty()) {
     configuration = "Release";
   }
 
-  if (project_name && *project_name) {
+  if (!project_name.empty()) {
     this->Makefile->IssueMessage(
       cmake::AUTHOR_WARNING,
       "Ignoring PROJECT_NAME option because it has no effect.");
@@ -91,7 +91,8 @@ bool cmBuildCommand::MainSignature(std::vector<std::string> const& args)
 
   std::string makecommand =
     this->Makefile->GetGlobalGenerator()->GenerateCMakeBuildCommand(
-      target, configuration, "", this->Makefile->IgnoreErrorsCMP0061());
+      target, configuration.c_str(), "",
+      this->Makefile->IgnoreErrorsCMP0061());
 
   this->Makefile->AddDefinition(variable, makecommand.c_str());
 
@@ -108,10 +109,10 @@ bool cmBuildCommand::TwoArgsSignature(std::vector<std::string> const& args)
   const char* define = args[0].c_str();
   const char* cacheValue = this->Makefile->GetDefinition(define);
 
-  std::string configType = "Release";
-  const char* cfg = getenv("CMAKE_CONFIG_TYPE");
-  if (cfg && *cfg) {
-    configType = cfg;
+  std::string configType;
+  if (!cmSystemTools::GetEnv("CMAKE_CONFIG_TYPE", configType) ||
+      configType.empty()) {
+    configType = "Release";
   }
 
   std::string makecommand =

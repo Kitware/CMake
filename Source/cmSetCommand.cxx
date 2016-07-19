@@ -31,13 +31,14 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
     putEnvArg += "=";
 
     // what is the current value if any
-    const char* currValue = getenv(varName);
+    std::string currValue;
+    const bool currValueSet = cmSystemTools::GetEnv(varName, currValue);
     delete[] varName;
 
     // will it be set to something, then set it
     if (args.size() > 1 && !args[1].empty()) {
       // but only if it is different from current value
-      if (!currValue || strcmp(currValue, args[1].c_str())) {
+      if (!currValueSet || currValue != args[1]) {
         putEnvArg += args[1];
         cmSystemTools::PutEnv(putEnvArg);
       }
@@ -45,7 +46,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
     }
 
     // if it will be cleared, then clear it if it isn't already clear
-    if (currValue) {
+    if (currValueSet) {
       cmSystemTools::PutEnv(putEnvArg);
     }
     return true;

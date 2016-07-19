@@ -327,11 +327,10 @@ void cmExportCommand::StorePackageRegistryDir(std::string const& package,
   fname += "/cmake/packages/";
   fname += package;
 #else
-  const char* home = cmSystemTools::GetEnv("HOME");
-  if (!home) {
+  std::string fname;
+  if (!cmSystemTools::GetEnv("HOME", fname)) {
     return;
   }
-  std::string fname = home;
   cmSystemTools::ConvertToUnixSlashes(fname);
   fname += "/.cmake/packages/";
   fname += package;

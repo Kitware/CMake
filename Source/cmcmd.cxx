@@ -16,6 +16,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmQtAutoGenerators.h"
+#include "cmUtils.hxx"
 #include "cmVersion.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -673,12 +674,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 
     // Internal CMake dependency scanning support.
     else if (args[1] == "cmake_depends" && args.size() >= 6) {
-      // Use the make system's VERBOSE environment variable to enable
-      // verbose output. This can be skipped by also setting CMAKE_NO_VERBOSE
-      // (which is set by the Eclipse and KDevelop generators).
-      bool verbose =
-        ((cmSystemTools::GetEnv("VERBOSE") != CM_NULLPTR) &&
-         (cmSystemTools::GetEnv("CMAKE_NO_VERBOSE") == CM_NULLPTR));
+      const bool verbose = isCMakeVerbose();
 
       // Create a cmake object instance to process dependencies.
       cmake cm;
@@ -876,9 +872,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         // 1/10th of a second after the untar.  If CMAKE_UNTAR_DELAY
         // is set in the env, its value will be used instead of 100.
         int delay = 100;
-        const char* delayVar = cmSystemTools::GetEnv("CMAKE_UNTAR_DELAY");
-        if (delayVar) {
-          delay = atoi(delayVar);
+        std::string delayVar;
+        if (cmSystemTools::GetEnv("CMAKE_UNTAR_DELAY", delayVar)) {
+          delay = atoi(delayVar.c_str());
         }
         if (delay) {
           cmSystemTools::Delay(delay);
@@ -1230,7 +1226,7 @@ int cmcmd::VisualStudioLink(std::vector<std::string>& args, int type)
   if (args.size() < 2) {
     return -1;
   }
-  bool verbose = cmSystemTools::GetEnv("VERBOSE") != CM_NULLPTR;
+  const bool verbose = cmSystemTools::HasEnv("VERBOSE");
   std::vector<std::string> expandedArgs;
   for (std::vector<std::string>::iterator i = args.begin(); i != args.end();
        ++i) {

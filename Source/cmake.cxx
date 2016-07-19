@@ -22,6 +22,7 @@
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmTest.h"
+#include "cmUtils.hxx"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmGraphVizWriter.h"
@@ -957,16 +958,10 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator* gg)
   cmSystemTools::SetForceUnixPaths(this->GlobalGenerator->GetForceUnixPaths());
 
   // Save the environment variables CXX and CC
-  const char* cxx = getenv("CXX");
-  const char* cc = getenv("CC");
-  if (cxx) {
-    this->CXXEnvironment = cxx;
-  } else {
+  if (!cmSystemTools::GetEnv("CXX", this->CXXEnvironment)) {
     this->CXXEnvironment = "";
   }
-  if (cc) {
-    this->CCEnvironment = cc;
-  } else {
+  if (!cmSystemTools::GetEnv("CC", this->CCEnvironment)) {
     this->CCEnvironment = "";
   }
 }
@@ -1431,7 +1426,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   // should fail (if "-i" is an option).  We cannot simply test
   // whether "-i" is given and remove it because some make programs
   // encode the MAKEFLAGS variable in a strange way.
-  if (getenv("MAKEFLAGS")) {
+  if (cmSystemTools::HasEnv("MAKEFLAGS")) {
     cmSystemTools::PutEnv("MAKEFLAGS=");
   }
 
@@ -1706,12 +1701,8 @@ void cmake::UpdateConversionPathTable()
 
 int cmake::CheckBuildSystem()
 {
-  // We do not need to rerun CMake.  Check dependency integrity.  Use
-  // the make system's VERBOSE environment variable to enable verbose
-  // output. This can be skipped by setting CMAKE_NO_VERBOSE (which is set
-  // by the Eclipse and KDevelop generators).
-  bool verbose = ((cmSystemTools::GetEnv("VERBOSE") != CM_NULLPTR) &&
-                  (cmSystemTools::GetEnv("CMAKE_NO_VERBOSE") == CM_NULLPTR));
+  // We do not need to rerun CMake.  Check dependency integrity.
+  const bool verbose = isCMakeVerbose();
 
   // This method will check the integrity of the build system if the
   // option was given on the command line.  It reads the given file to

@@ -88,7 +88,7 @@ static std::string extractSubDir(const std::string& absPath,
 }
 
 cmQtAutoGenerators::cmQtAutoGenerators()
-  : Verbose(cmsys::SystemTools::GetEnv("VERBOSE") != CM_NULLPTR)
+  : Verbose(cmsys::SystemTools::HasEnv("VERBOSE"))
   , ColorOutput(true)
   , RunMocFailed(false)
   , RunUicFailed(false)

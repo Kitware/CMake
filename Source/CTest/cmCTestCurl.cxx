@@ -219,16 +219,18 @@ bool cmCTestCurl::HttpRequest(std::string const& url,
 
 void cmCTestCurl::SetProxyType()
 {
-  if (cmSystemTools::GetEnv("HTTP_PROXY")) {
-    this->HTTPProxy = cmSystemTools::GetEnv("HTTP_PROXY");
-    if (cmSystemTools::GetEnv("HTTP_PROXY_PORT")) {
+  this->HTTPProxy = "";
+  // this is the default
+  this->HTTPProxyType = CURLPROXY_HTTP;
+  this->HTTPProxyAuth = "";
+  if (cmSystemTools::GetEnv("HTTP_PROXY", this->HTTPProxy)) {
+    std::string port;
+    if (cmSystemTools::GetEnv("HTTP_PROXY_PORT", port)) {
       this->HTTPProxy += ":";
-      this->HTTPProxy += cmSystemTools::GetEnv("HTTP_PROXY_PORT");
+      this->HTTPProxy += port;
     }
-    if (cmSystemTools::GetEnv("HTTP_PROXY_TYPE")) {
-      // this is the default
-      this->HTTPProxyType = CURLPROXY_HTTP;
-      std::string type = cmSystemTools::GetEnv("HTTP_PROXY_TYPE");
+    std::string type;
+    if (cmSystemTools::GetEnv("HTTP_PROXY_TYPE", type)) {
       // HTTP/SOCKS4/SOCKS5
       if (type == "HTTP") {
         this->HTTPProxyType = CURLPROXY_HTTP;
@@ -238,12 +240,11 @@ void cmCTestCurl::SetProxyType()
         this->HTTPProxyType = CURLPROXY_SOCKS5;
       }
     }
-    if (cmSystemTools::GetEnv("HTTP_PROXY_USER")) {
-      this->HTTPProxyAuth = cmSystemTools::GetEnv("HTTP_PROXY_USER");
-    }
-    if (cmSystemTools::GetEnv("HTTP_PROXY_PASSWD")) {
+    cmSystemTools::GetEnv("HTTP_PROXY_USER", this->HTTPProxyAuth);
+    std::string passwd;
+    if (cmSystemTools::GetEnv("HTTP_PROXY_PASSWD", passwd)) {
       this->HTTPProxyAuth += ":";
-      this->HTTPProxyAuth += cmSystemTools::GetEnv("HTTP_PROXY_PASSWD");
+      this->HTTPProxyAuth += passwd;
     }
   }
 }

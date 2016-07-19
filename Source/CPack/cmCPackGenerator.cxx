@@ -1074,11 +1074,11 @@ const char* cmCPackGenerator::GetInstallPath()
     return this->InstallPath.c_str();
   }
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  const char* prgfiles = cmsys::SystemTools::GetEnv("ProgramFiles");
-  const char* sysDrive = cmsys::SystemTools::GetEnv("SystemDrive");
-  if (prgfiles) {
+  std::string prgfiles;
+  std::string sysDrive;
+  if (cmsys::SystemTools::GetEnv("ProgramFiles", prgfiles)) {
     this->InstallPath = prgfiles;
-  } else if (sysDrive) {
+  } else if (cmsys::SystemTools::GetEnv("SystemDrive", sysDrive)) {
     this->InstallPath = sysDrive;
     this->InstallPath += "/Program Files";
   } else {
