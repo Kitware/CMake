@@ -490,13 +490,11 @@ void SystemTools::GetPath(std::vector<std::string>& path, const char* env)
     {
     env = "PATH";
     }
-  const char* cpathEnv = SystemTools::GetEnv(env);
-  if ( !cpathEnv )
+  std::string pathEnv;
+  if ( !SystemTools::GetEnv(env, pathEnv) )
     {
     return;
     }
-
-  std::string pathEnv = cpathEnv;
 
   // A hack to make the below algorithm work.
   if(!pathEnv.empty() && *pathEnv.rbegin() != pathSep)
@@ -2132,8 +2130,8 @@ void SystemTools::ConvertToUnixSlashes(std::string& path)
     pathCString = path.c_str();
     if(pathCString[0] == '~' && (pathCString[1] == '/' || pathCString[1] == '\0'))
       {
-      const char* homeEnv = SystemTools::GetEnv("HOME");
-      if (homeEnv)
+      std::string homeEnv;
+      if (SystemTools::GetEnv("HOME", homeEnv))
         {
         path.replace(0,1,homeEnv);
         }
@@ -4149,16 +4147,9 @@ void SystemTools::SplitPath(const std::string& p,
     if(root.size() == 1)
       {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-      if(const char* userp = getenv("USERPROFILE"))
-        {
-        homedir = userp;
-        }
-      else
+      if (!SystemTools::GetEnv("USERPROFILE", homedir))
 #endif
-      if(const char* h = getenv("HOME"))
-        {
-        homedir = h;
-        }
+      SystemTools::GetEnv("HOME", homedir);
       }
 #ifdef HAVE_GETPWNAM
     else if(passwd* pw = getpwnam(root.c_str()+1))
@@ -4899,7 +4890,7 @@ int SystemTools::GetTerminalWidth()
   int width = -1;
 #ifdef HAVE_TTY_INFO
   struct winsize ws;
-  char *columns; /* Unix98 environment variable */
+  std::string columns; /* Unix98 environment variable */
   if(ioctl(1, TIOCGWINSZ, &ws) != -1 && ws.ws_col>0 && ws.ws_row>0)
     {
     width = ws.ws_col;
@@ -4908,12 +4899,11 @@ int SystemTools::GetTerminalWidth()
     {
     width = -1;
     }
-  columns = getenv("COLUMNS");
-  if(columns && *columns)
+  if(SystemTools::GetEnv("COLUMNS", columns) && !columns.empty())
     {
     long t;
     char *endptr;
-    t = strtol(columns, &endptr, 0);
+    t = strtol(columns.c_str(), &endptr, 0);
     if(endptr && !*endptr && (t>0) && (t<1000))
       {
       width = static_cast<int>(t);
@@ -5525,7 +5515,8 @@ void SystemTools::ClassInitialize()
 
   // If the current working directory is a logical path then keep the
   // logical name.
-  if(const char* pwd = getenv("PWD"))
+  std::string pwd_str;
+  if(SystemTools::GetEnv("PWD", pwd_str))
     {
     char buf[2048];
     if(const char* cwd = Getcwd(buf, 2048))
@@ -5537,10 +5528,9 @@ void SystemTools::ClassInitialize()
       std::string pwd_changed;
 
       // Test progressively shorter logical-to-physical mappings.
-      std::string pwd_str = pwd;
       std::string cwd_str = cwd;
       std::string pwd_path;
-      Realpath(pwd, pwd_path);
+      Realpath(pwd_str.c_str(), pwd_path);
       while(cwd_str == pwd_path && cwd_str != pwd_str)
         {
         // The current pair of paths is a working logical mapping.
@@ -5596,8 +5586,8 @@ static int SystemToolsDebugReport(int, char* message, int*)
 
 void SystemTools::EnableMSVCDebugHook()
 {
-  if (getenv("DART_TEST_FROM_DART") ||
-      getenv("DASHBOARD_TEST_FROM_CTEST"))
+  if (SystemTools::HasEnv("DART_TEST_FROM_DART") ||
+      SystemTools::HasEnv("DASHBOARD_TEST_FROM_CTEST"))
     {
     _CrtSetReportHook(SystemToolsDebugReport);
     }
