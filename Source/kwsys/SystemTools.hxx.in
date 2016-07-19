@@ -53,6 +53,7 @@ namespace @KWSYS_NAMESPACE@
 
 class SystemToolsTranslationMap;
 class SystemToolsPathCaseMap;
+class SystemToolsEnvMap;
 
 /** \class SystemToolsManager
  * \brief Use to make sure SystemTools is initialized before it is used
@@ -843,6 +844,8 @@ public:
   static const char* GetEnv(const std::string& key);
   static bool GetEnv(const char* key, std::string& result);
   static bool GetEnv(const std::string& key, std::string& result);
+  static bool HasEnv(const char* key);
+  static bool HasEnv(const std::string& key);
 
   /** Put a string into the environment
       of the form var=value */
@@ -989,6 +992,7 @@ private:
   static SystemToolsTranslationMap *TranslationMap;
 #ifdef _WIN32
   static SystemToolsPathCaseMap *PathCaseMap;
+  static SystemToolsEnvMap *EnvMap;
 #endif
 #ifdef __CYGWIN__
   static SystemToolsTranslationMap *Cyg2Win32Map;
