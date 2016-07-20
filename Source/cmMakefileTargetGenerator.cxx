@@ -31,6 +31,10 @@
 
 #include <ctype.h>
 
+#ifndef _WIN32
+#include <unistd.h>
+#endif
+
 cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
   : cmCommonTargetGenerator(target)
   , OSXBundleGenerator(CM_NULLPTR)
@@ -1447,6 +1451,15 @@ void cmMakefileTargetGenerator::CreateLinkScript(
   makefile_depends.push_back(linkScriptName);
 }
 
+static size_t calculateCommandLineLengthLimit()
+{
+#if defined(_SC_ARG_MAX)
+  return ((size_t)sysconf(_SC_ARG_MAX)) - 1000;
+#else
+  return 0;
+#endif
+}
+
 bool cmMakefileTargetGenerator::CheckUseResponseFileForObjects(
   std::string const& l) const
 {
@@ -1456,6 +1469,32 @@ bool cmMakefileTargetGenerator::CheckUseResponseFileForObjects(
   if (const char* val = this->Makefile->GetDefinition(responseVar)) {
     if (*val) {
       return cmSystemTools::IsOn(val);
+    }
+  }
+
+  // Check for a system limit.
+  if (size_t const limit = calculateCommandLineLengthLimit()) {
+    // Compute the total length of our list of object files with room
+    // for argument separation and quoting.  This does not convert paths
+    // relative to START_OUTPUT like the final list will be, so the actual
+    // list will likely be much shorter than this.  However, in the worst
+    // case all objects will remain as absolute paths.
+    size_t length = 0;
+    for (std::vector<std::string>::const_iterator i = this->Objects.begin();
+         i != this->Objects.end(); ++i) {
+      length += i->size() + 3;
+    }
+    for (std::vector<std::string>::const_iterator i =
+           this->ExternalObjects.begin();
+         i != this->ExternalObjects.end(); ++i) {
+      length += i->size() + 3;
+    }
+
+    // We need to guarantee room for both objects and libraries, so
+    // if the objects take up more than half then use a response file
+    // for them.
+    if (length > (limit / 2)) {
+      return true;
     }
   }
 
