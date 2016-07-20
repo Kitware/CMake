@@ -36,24 +36,30 @@ Discussion:
 http://forums.codeblocks.org/index.php/topic,6789.0.html
 */
 
-void cmExtraCodeBlocksGenerator::GetDocumentation(cmDocumentationEntry& entry,
-                                                  const std::string&) const
-{
-  entry.Name = this->GetName();
-  entry.Brief = "Generates CodeBlocks project files.";
-}
-
 cmExtraCodeBlocksGenerator::cmExtraCodeBlocksGenerator()
   : cmExternalMakefileProjectGenerator()
 {
+}
+
+cmExternalMakefileProjectGeneratorFactory*
+cmExtraCodeBlocksGenerator::GetFactory()
+{
+  static cmExternalMakefileProjectGeneratorSimpleFactory<
+    cmExtraCodeBlocksGenerator>
+    factory("CodeBlocks", "Generates CodeBlocks project files.");
+
+  if (factory.GetSupportedGlobalGenerators().empty()) {
 #if defined(_WIN32)
-  this->SupportedGlobalGenerators.push_back("MinGW Makefiles");
-  this->SupportedGlobalGenerators.push_back("NMake Makefiles");
+    factory.AddSupportedGlobalGenerator("MinGW Makefiles");
+    factory.AddSupportedGlobalGenerator("NMake Makefiles");
 // disable until somebody actually tests it:
-//  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
+// this->AddSupportedGlobalGenerator("MSYS Makefiles");
 #endif
-  this->SupportedGlobalGenerators.push_back("Ninja");
-  this->SupportedGlobalGenerators.push_back("Unix Makefiles");
+    factory.AddSupportedGlobalGenerator("Ninja");
+    factory.AddSupportedGlobalGenerator("Unix Makefiles");
+  }
+
+  return &factory;
 }
 
 void cmExtraCodeBlocksGenerator::Generate()

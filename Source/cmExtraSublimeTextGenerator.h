@@ -27,21 +27,9 @@ class cmGeneratorTarget;
 class cmExtraSublimeTextGenerator : public cmExternalMakefileProjectGenerator
 {
 public:
+  static cmExternalMakefileProjectGeneratorFactory* GetFactory();
   typedef std::map<std::string, std::vector<std::string> > MapSourceFileFlags;
   cmExtraSublimeTextGenerator();
-
-  std::string GetName() const CM_OVERRIDE
-  {
-    return cmExtraSublimeTextGenerator::GetActualName();
-  }
-  static std::string GetActualName() { return "Sublime Text 2"; }
-  static cmExternalMakefileProjectGenerator* New()
-  {
-    return new cmExtraSublimeTextGenerator;
-  }
-  /** Get the documentation entry for this generator.  */
-  void GetDocumentation(cmDocumentationEntry& entry,
-                        const std::string& fullName) const CM_OVERRIDE;
 
   void Generate() CM_OVERRIDE;
 

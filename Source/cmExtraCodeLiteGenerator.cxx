@@ -27,24 +27,30 @@
 #include <cmsys/SystemInformation.hxx>
 #include <cmsys/SystemTools.hxx>
 
-void cmExtraCodeLiteGenerator::GetDocumentation(cmDocumentationEntry& entry,
-                                                const std::string&) const
-{
-  entry.Name = this->GetName();
-  entry.Brief = "Generates CodeLite project files.";
-}
-
 cmExtraCodeLiteGenerator::cmExtraCodeLiteGenerator()
   : cmExternalMakefileProjectGenerator()
   , ConfigName("NoConfig")
   , CpuCount(2)
 {
+}
+
+cmExternalMakefileProjectGeneratorFactory*
+cmExtraCodeLiteGenerator::GetFactory()
+{
+  static cmExternalMakefileProjectGeneratorSimpleFactory<
+    cmExtraCodeLiteGenerator>
+    factory("CodeLite", "Generates CodeLite project files.");
+
+  if (factory.GetSupportedGlobalGenerators().empty()) {
 #if defined(_WIN32)
-  this->SupportedGlobalGenerators.push_back("MinGW Makefiles");
-  this->SupportedGlobalGenerators.push_back("NMake Makefiles");
+    factory.AddSupportedGlobalGenerator("MinGW Makefiles");
+    factory.AddSupportedGlobalGenerator("NMake Makefiles");
 #endif
-  this->SupportedGlobalGenerators.push_back("Ninja");
-  this->SupportedGlobalGenerators.push_back("Unix Makefiles");
+    factory.AddSupportedGlobalGenerator("Ninja");
+    factory.AddSupportedGlobalGenerator("Unix Makefiles");
+  }
+
+  return &factory;
 }
 
 void cmExtraCodeLiteGenerator::Generate()

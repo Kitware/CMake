@@ -22,24 +22,28 @@
 
 #include <cmsys/SystemTools.hxx>
 
-void cmExtraKateGenerator::GetDocumentation(cmDocumentationEntry& entry,
-                                            const std::string&) const
-{
-  entry.Name = this->GetName();
-  entry.Brief = "Generates Kate project files.";
-}
-
 cmExtraKateGenerator::cmExtraKateGenerator()
   : cmExternalMakefileProjectGenerator()
 {
+}
+
+cmExternalMakefileProjectGeneratorFactory* cmExtraKateGenerator::GetFactory()
+{
+  static cmExternalMakefileProjectGeneratorSimpleFactory<cmExtraKateGenerator>
+    factory("Kate", "Generates Kate project files.");
+
+  if (factory.GetSupportedGlobalGenerators().empty()) {
 #if defined(_WIN32)
-  this->SupportedGlobalGenerators.push_back("MinGW Makefiles");
-  this->SupportedGlobalGenerators.push_back("NMake Makefiles");
+    factory.AddSupportedGlobalGenerator("MinGW Makefiles");
+    factory.AddSupportedGlobalGenerator("NMake Makefiles");
 // disable until somebody actually tests it:
-//  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
+// factory.AddSupportedGlobalGenerator("MSYS Makefiles");
 #endif
-  this->SupportedGlobalGenerators.push_back("Ninja");
-  this->SupportedGlobalGenerators.push_back("Unix Makefiles");
+    factory.AddSupportedGlobalGenerator("Ninja");
+    factory.AddSupportedGlobalGenerator("Unix Makefiles");
+  }
+
+  return &factory;
 }
 
 void cmExtraKateGenerator::Generate()

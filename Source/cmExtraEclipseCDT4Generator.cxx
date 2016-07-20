@@ -46,16 +46,6 @@ void AppendDictionary(cmXMLWriter& xml, const char* key, T const& value)
 cmExtraEclipseCDT4Generator::cmExtraEclipseCDT4Generator()
   : cmExternalMakefileProjectGenerator()
 {
-// TODO: Verify if __CYGWIN__ should be checked.
-//#if defined(_WIN32) && !defined(__CYGWIN__)
-#if defined(_WIN32)
-  this->SupportedGlobalGenerators.push_back("NMake Makefiles");
-  this->SupportedGlobalGenerators.push_back("MinGW Makefiles");
-//  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
-#endif
-  this->SupportedGlobalGenerators.push_back("Ninja");
-  this->SupportedGlobalGenerators.push_back("Unix Makefiles");
-
   this->SupportsVirtualFolders = true;
   this->GenerateLinkedResources = true;
   this->SupportsGmakeErrorParser = true;
@@ -64,11 +54,26 @@ cmExtraEclipseCDT4Generator::cmExtraEclipseCDT4Generator()
   this->CXXEnabled = false;
 }
 
-void cmExtraEclipseCDT4Generator::GetDocumentation(cmDocumentationEntry& entry,
-                                                   const std::string&) const
+cmExternalMakefileProjectGeneratorFactory*
+cmExtraEclipseCDT4Generator::GetFactory()
 {
-  entry.Name = this->GetName();
-  entry.Brief = "Generates Eclipse CDT 4.0 project files.";
+  static cmExternalMakefileProjectGeneratorSimpleFactory<
+    cmExtraEclipseCDT4Generator>
+    factory("Eclipse CDT4", "Generates Eclipse CDT 4.0 project files.");
+
+  if (factory.GetSupportedGlobalGenerators().empty()) {
+// TODO: Verify if __CYGWIN__ should be checked.
+//#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32)
+    factory.AddSupportedGlobalGenerator("NMake Makefiles");
+    factory.AddSupportedGlobalGenerator("MinGW Makefiles");
+// factory.AddSupportedGlobalGenerator("MSYS Makefiles");
+#endif
+    factory.AddSupportedGlobalGenerator("Ninja");
+    factory.AddSupportedGlobalGenerator("Unix Makefiles");
+  }
+
+  return &factory;
 }
 
 void cmExtraEclipseCDT4Generator::EnableLanguage(

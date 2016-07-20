@@ -793,53 +793,21 @@ int cmake::AddCMakePaths()
   return 1;
 }
 
-void cmake::AddExtraGenerator(const std::string& name,
-                              CreateExtraGeneratorFunctionType newFunction)
-{
-  cmExternalMakefileProjectGenerator* extraGenerator = newFunction();
-  const std::vector<std::string>& supportedGlobalGenerators =
-    extraGenerator->GetSupportedGlobalGenerators();
-
-  for (std::vector<std::string>::const_iterator it =
-         supportedGlobalGenerators.begin();
-       it != supportedGlobalGenerators.end(); ++it) {
-    std::string fullName =
-      cmExternalMakefileProjectGenerator::CreateFullGeneratorName(*it, name);
-    this->ExtraGenerators[fullName] = newFunction;
-  }
-  delete extraGenerator;
-}
-
 void cmake::AddDefaultExtraGenerators()
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#if defined(_WIN32) && !defined(__CYGWIN__)
-// e.g. kdevelop4 ?
-#endif
-
-  this->AddExtraGenerator(cmExtraCodeBlocksGenerator::GetActualName(),
-                          &cmExtraCodeBlocksGenerator::New);
-  this->AddExtraGenerator(cmExtraCodeLiteGenerator::GetActualName(),
-                          &cmExtraCodeLiteGenerator::New);
-  this->AddExtraGenerator(cmExtraSublimeTextGenerator::GetActualName(),
-                          &cmExtraSublimeTextGenerator::New);
-  this->AddExtraGenerator(cmExtraKateGenerator::GetActualName(),
-                          &cmExtraKateGenerator::New);
+  this->ExtraGenerators.push_back(cmExtraCodeBlocksGenerator::GetFactory());
+  this->ExtraGenerators.push_back(cmExtraCodeLiteGenerator::GetFactory());
+  this->ExtraGenerators.push_back(cmExtraSublimeTextGenerator::GetFactory());
+  this->ExtraGenerators.push_back(cmExtraKateGenerator::GetFactory());
 
 #ifdef CMAKE_USE_ECLIPSE
-  this->AddExtraGenerator(cmExtraEclipseCDT4Generator::GetActualName(),
-                          &cmExtraEclipseCDT4Generator::New);
+  this->ExtraGenerators.push_back(cmExtraEclipseCDT4Generator::GetFactory());
 #endif
 
 #ifdef CMAKE_USE_KDEVELOP
-  this->AddExtraGenerator(cmGlobalKdevelopGenerator::GetActualName(),
-                          &cmGlobalKdevelopGenerator::New);
-  // for kdevelop also add the generator with just the name of the
-  // extra generator, since it was this way since cmake 2.2
-  this->ExtraGenerators[cmGlobalKdevelopGenerator::GetActualName()] =
-    &cmGlobalKdevelopGenerator::New;
+  this->ExtraGenerators.push_back(cmGlobalKdevelopGenerator::GetFactory());
 #endif
-
 #endif
 }
 
@@ -856,32 +824,74 @@ void cmake::GetRegisteredGenerators(std::vector<GeneratorInfo>& generators)
       info.supportsToolset = (*i)->SupportsToolset();
       info.supportsPlatform = (*i)->SupportsPlatform();
       info.name = names[j];
+      info.isAlias = false;
       generators.push_back(info);
     }
   }
 
-  for (RegisteredExtraGeneratorsMap::const_iterator
+  for (RegisteredExtraGeneratorsVector::const_iterator
          i = this->ExtraGenerators.begin(),
          e = this->ExtraGenerators.end();
        i != e; ++i) {
-    GeneratorInfo info;
-    info.name = i->first;
-    info.supportsToolset = false;
-    info.supportsPlatform = false;
-    generators.push_back(info);
+    const std::vector<std::string> genList =
+      (*i)->GetSupportedGlobalGenerators();
+    for (std::vector<std::string>::const_iterator gen = genList.begin();
+         gen != genList.end(); ++gen) {
+      GeneratorInfo info;
+      info.name = cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
+        (*i)->GetName(), *gen);
+      info.supportsPlatform = false;
+      info.supportsToolset = false;
+      info.isAlias = false;
+      generators.push_back(info);
+    }
+    for (std::vector<std::string>::const_iterator a = (*i)->Aliases.begin();
+         a != (*i)->Aliases.end(); ++a) {
+      GeneratorInfo info;
+      info.name = *a;
+      info.supportsPlatform = false;
+      info.supportsToolset = false;
+      info.isAlias = true;
+      generators.push_back(info);
+    }
   }
+}
+
+static std::pair<cmExternalMakefileProjectGenerator*, std::string>
+createExtraGenerator(
+  const std::vector<cmExternalMakefileProjectGeneratorFactory*>& in,
+  const std::string& name)
+{
+  for (std::vector<cmExternalMakefileProjectGeneratorFactory*>::const_iterator
+         i = in.begin();
+       i != in.end(); ++i) {
+    const std::vector<std::string> generators =
+      (*i)->GetSupportedGlobalGenerators();
+    if ((*i)->GetName() == name) { // Match aliases
+      return std::make_pair((*i)->CreateExternalMakefileProjectGenerator(),
+                            generators.at(0));
+    }
+    for (std::vector<std::string>::const_iterator g = generators.begin();
+         g != generators.end(); ++g) {
+      const std::string fullName =
+        cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
+          *g, (*i)->GetName());
+      if (fullName == name) {
+        return std::make_pair((*i)->CreateExternalMakefileProjectGenerator(),
+                              *g);
+      }
+    }
+  }
+  return std::make_pair(
+    static_cast<cmExternalMakefileProjectGenerator*>(CM_NULLPTR), name);
 }
 
 cmGlobalGenerator* cmake::CreateGlobalGenerator(const std::string& gname)
 {
-  cmExternalMakefileProjectGenerator* extraGenerator = CM_NULLPTR;
-  std::string name = gname;
-  RegisteredExtraGeneratorsMap::const_iterator extraGenIt =
-    this->ExtraGenerators.find(name);
-  if (extraGenIt != this->ExtraGenerators.end()) {
-    extraGenerator = (extraGenIt->second)();
-    name = extraGenerator->GetGlobalGeneratorName(name);
-  }
+  std::pair<cmExternalMakefileProjectGenerator*, std::string> extra =
+    createExtraGenerator(this->ExtraGenerators, gname);
+  cmExternalMakefileProjectGenerator* extraGenerator = extra.first;
+  const std::string name = extra.second;
 
   cmGlobalGenerator* generator = CM_NULLPTR;
   for (RegisteredGeneratorsVector::const_iterator i = this->Generators.begin();
@@ -1651,15 +1661,32 @@ void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
     (*i)->GetDocumentation(e);
     v.push_back(e);
   }
-  for (RegisteredExtraGeneratorsMap::const_iterator i =
+  for (RegisteredExtraGeneratorsVector::const_iterator i =
          this->ExtraGenerators.begin();
        i != this->ExtraGenerators.end(); ++i) {
-    cmDocumentationEntry e;
-    cmExternalMakefileProjectGenerator* generator = (i->second)();
-    generator->GetDocumentation(e, i->first);
-    e.Name = i->first;
-    delete generator;
-    v.push_back(e);
+    const std::string doc = (*i)->GetDocumentation();
+    const std::string name = (*i)->GetName();
+
+    // Aliases:
+    for (std::vector<std::string>::const_iterator a = (*i)->Aliases.begin();
+         a != (*i)->Aliases.end(); ++a) {
+      cmDocumentationEntry e;
+      e.Name = *a;
+      e.Brief = doc;
+      v.push_back(e);
+    }
+
+    // Full names:
+    const std::vector<std::string> generators =
+      (*i)->GetSupportedGlobalGenerators();
+    for (std::vector<std::string>::const_iterator g = generators.begin();
+         g != generators.end(); ++g) {
+      cmDocumentationEntry e;
+      e.Name =
+        cmExternalMakefileProjectGenerator::CreateFullGeneratorName(*g, name);
+      e.Brief = doc;
+      v.push_back(e);
+    }
   }
 }
 

@@ -38,24 +38,30 @@ http://www.sublimetext.com/docs/2/projects.html
 http://sublimetext.info/docs/en/reference/build_systems.html
 */
 
-void cmExtraSublimeTextGenerator::GetDocumentation(cmDocumentationEntry& entry,
-                                                   const std::string&) const
+cmExternalMakefileProjectGeneratorFactory*
+cmExtraSublimeTextGenerator::GetFactory()
 {
-  entry.Name = this->GetName();
-  entry.Brief = "Generates Sublime Text 2 project files.";
+  static cmExternalMakefileProjectGeneratorSimpleFactory<
+    cmExtraSublimeTextGenerator>
+    factory("Sublime Text 2", "Generates Sublime Text 2 project files.");
+
+  if (factory.GetSupportedGlobalGenerators().empty()) {
+#if defined(_WIN32)
+    factory.AddSupportedGlobalGenerator("MinGW Makefiles");
+    factory.AddSupportedGlobalGenerator("NMake Makefiles");
+// disable until somebody actually tests it:
+// factory.AddSupportedGlobalGenerator("MSYS Makefiles");
+#endif
+    factory.AddSupportedGlobalGenerator("Ninja");
+    factory.AddSupportedGlobalGenerator("Unix Makefiles");
+  }
+
+  return &factory;
 }
 
 cmExtraSublimeTextGenerator::cmExtraSublimeTextGenerator()
   : cmExternalMakefileProjectGenerator()
 {
-#if defined(_WIN32)
-  this->SupportedGlobalGenerators.push_back("MinGW Makefiles");
-  this->SupportedGlobalGenerators.push_back("NMake Makefiles");
-// disable until somebody actually tests it:
-//  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
-#endif
-  this->SupportedGlobalGenerators.push_back("Ninja");
-  this->SupportedGlobalGenerators.push_back("Unix Makefiles");
 }
 
 void cmExtraSublimeTextGenerator::Generate()
