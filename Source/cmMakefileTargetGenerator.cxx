@@ -1447,6 +1447,38 @@ void cmMakefileTargetGenerator::CreateLinkScript(
   makefile_depends.push_back(linkScriptName);
 }
 
+bool cmMakefileTargetGenerator::CheckUseResponseFileForObjects(
+  std::string const& l) const
+{
+  // Check for an explicit setting one way or the other.
+  std::string const responseVar =
+    "CMAKE_" + l + "_USE_RESPONSE_FILE_FOR_OBJECTS";
+  if (const char* val = this->Makefile->GetDefinition(responseVar)) {
+    if (*val) {
+      return cmSystemTools::IsOn(val);
+    }
+  }
+
+  // We do not need a response file for objects.
+  return false;
+}
+
+bool cmMakefileTargetGenerator::CheckUseResponseFileForLibraries(
+  std::string const& l) const
+{
+  // Check for an explicit setting one way or the other.
+  std::string const responseVar =
+    "CMAKE_" + l + "_USE_RESPONSE_FILE_FOR_LIBRARIES";
+  if (const char* val = this->Makefile->GetDefinition(responseVar)) {
+    if (*val) {
+      return cmSystemTools::IsOn(val);
+    }
+  }
+
+  // We do not need a response file for libraries.
+  return false;
+}
+
 std::string cmMakefileTargetGenerator::CreateResponseFile(
   const char* name, std::string const& options,
   std::vector<std::string>& makefile_depends)
