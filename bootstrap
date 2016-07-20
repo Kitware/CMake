@@ -90,7 +90,7 @@ else
 fi
 
 # Determine whether this is a MinGW environment.
-if echo "${cmake_system}" | grep MINGW >/dev/null 2>&1; then
+if echo "${cmake_system}" | grep 'MINGW\|MSYS' >/dev/null 2>&1; then
   cmake_system_mingw=true
 else
   cmake_system_mingw=false
