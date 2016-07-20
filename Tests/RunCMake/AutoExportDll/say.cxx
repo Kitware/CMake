@@ -11,6 +11,7 @@ extern "C" {
 int WINAPI foo();
 // test regular C
 int bar();
+int objlib();
 }
 
 // test c++ functions
@@ -39,6 +40,7 @@ int main()
   foo();
   printf("\n");
   bar();
+  objlib();
   printf("\n");
   return 0;
 }
