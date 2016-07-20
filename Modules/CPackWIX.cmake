@@ -248,6 +248,23 @@
 # Sets the description of the root install feature in the WIX installer. Same as
 # CPACK_COMPONENT_<compName>_DESCRIPTION for components.
 #
+# .. variable:: CPACK_WIX_SKIP_PROGRAM_FOLDER
+#
+# If this variable is set to true, the default install location
+# of the generated package will be CPACK_PACKAGE_INSTALL_DIRECTORY directly.
+# The install location will not be located relatively below
+# ProgramFiles or ProgramFiles64.
+#
+#   .. note::
+#     Installers created with this feature do not take differences
+#     between the system on which the installer is created
+#     and the system on which the installer might be used into account.
+#
+#     It is therefor possible that the installer e.g. might try to install
+#     onto a drive that is unavailable or unintended or a path that does not
+#     follow the localization or convention of the system on which the
+#     installation is performed.
+#
 
 #=============================================================================
 # Copyright 2014-2015 Kitware, Inc.

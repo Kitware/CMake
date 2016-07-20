@@ -52,8 +52,12 @@ size_t cmWIXDirectoriesSourceWriter::BeginInstallationPrefixDirectory(
   std::string const& programFilesFolderId,
   std::string const& installRootString)
 {
-  BeginElement("Directory");
-  AddAttribute("Id", programFilesFolderId);
+  size_t offset = 1;
+  if (!programFilesFolderId.empty()) {
+    BeginElement("Directory");
+    AddAttribute("Id", programFilesFolderId);
+    offset = 0;
+  }
 
   std::vector<std::string> installRoot;
 
@@ -77,7 +81,7 @@ size_t cmWIXDirectoriesSourceWriter::BeginInstallationPrefixDirectory(
     AddAttribute("Name", installRoot[i]);
   }
 
-  return installRoot.size();
+  return installRoot.size() - offset;
 }
 
 void cmWIXDirectoriesSourceWriter::EndInstallationPrefixDirectory(size_t size)
