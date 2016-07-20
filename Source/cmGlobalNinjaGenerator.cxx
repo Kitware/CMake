@@ -493,6 +493,8 @@ void cmGlobalNinjaGenerator::Generate()
   this->OpenBuildFileStream();
   this->OpenRulesFileStream();
 
+  this->TargetDependsClosures.clear();
+
   this->InitOutputPathPrefix();
   this->TargetAll = this->NinjaOutputPath("all");
   this->CMakeCacheFile = this->NinjaOutputPath("CMakeCache.txt");
@@ -902,6 +904,42 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
     }
     std::sort(outs.begin(), outs.end());
     outputs.insert(outputs.end(), outs.begin(), outs.end());
+  }
+}
+
+void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
+  cmGeneratorTarget const* target, cmNinjaDeps& outputs)
+{
+  TargetDependsClosureMap::iterator i =
+    this->TargetDependsClosures.find(target);
+  if (i == this->TargetDependsClosures.end()) {
+    TargetDependsClosureMap::value_type e(
+      target, std::set<cmGeneratorTarget const*>());
+    i = this->TargetDependsClosures.insert(e).first;
+    this->ComputeTargetDependsClosure(target, i->second);
+  }
+  std::set<cmGeneratorTarget const*> const& targets = i->second;
+  cmNinjaDeps outs;
+  for (std::set<cmGeneratorTarget const*>::const_iterator ti = targets.begin();
+       ti != targets.end(); ++ti) {
+    this->AppendTargetOutputs(*ti, outs);
+  }
+  std::sort(outs.begin(), outs.end());
+  outputs.insert(outputs.end(), outs.begin(), outs.end());
+}
+
+void cmGlobalNinjaGenerator::ComputeTargetDependsClosure(
+  cmGeneratorTarget const* target, std::set<cmGeneratorTarget const*>& depends)
+{
+  cmTargetDependSet const& targetDeps = this->GetTargetDirectDepends(target);
+  for (cmTargetDependSet::const_iterator i = targetDeps.begin();
+       i != targetDeps.end(); ++i) {
+    if ((*i)->GetType() == cmState::INTERFACE_LIBRARY) {
+      continue;
+    }
+    if (depends.insert(*i).second) {
+      this->ComputeTargetDependsClosure(*i, depends);
+    }
   }
 }
 

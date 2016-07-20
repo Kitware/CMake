@@ -450,13 +450,14 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements()
     std::set<cmGeneratorTarget*>::iterator j = i->second.begin();
     assert(j != i->second.end());
     std::vector<std::string> ccTargetDeps;
-    this->AppendTargetDepends(*j, ccTargetDeps);
+    this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(*j,
+                                                                ccTargetDeps);
     std::sort(ccTargetDeps.begin(), ccTargetDeps.end());
     ++j;
 
     for (; j != i->second.end(); ++j) {
       std::vector<std::string> jDeps, depsIntersection;
-      this->AppendTargetDepends(*j, jDeps);
+      this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(*j, jDeps);
       std::sort(jDeps.begin(), jDeps.end());
       std::set_intersection(ccTargetDeps.begin(), ccTargetDeps.end(),
                             jDeps.begin(), jDeps.end(),
