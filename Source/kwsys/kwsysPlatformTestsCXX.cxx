@@ -349,3 +349,8 @@ int main()
 void f(std ::wstring*) {}
 int main() { return 0; }
 #endif
+
+#ifdef TEST_KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H
+#include <ext/stdio_filebuf.h>
+int main() { return 0; }
+#endif
