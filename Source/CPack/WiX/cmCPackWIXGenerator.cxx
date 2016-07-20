@@ -464,7 +464,14 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
     return false;
   }
 
-  featureDefinitions.AddAttribute("Title", cpackPackageName);
+  std::string featureTitle = cpackPackageName;
+  if (const char* title = GetOption("CPACK_WIX_ROOT_FEATURE_TITLE")) {
+    featureTitle = title;
+  }
+  featureDefinitions.AddAttribute("Title", featureTitle);
+  if (const char* desc = GetOption("CPACK_WIX_ROOT_FEATURE_DESCRIPTION")) {
+    featureDefinitions.AddAttribute("Description", desc);
+  }
   featureDefinitions.AddAttribute("Level", "1");
   this->Patch->ApplyFragment("#PRODUCTFEATURE", featureDefinitions);
 
