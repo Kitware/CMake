@@ -531,7 +531,9 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
              this->Configurations.begin();
            i != this->Configurations.end(); ++i) {
         this->WritePlatformConfigTag("LogicalName", i->c_str(), 3);
-        if (this->GeneratorTarget->GetProperty("VS_GLOBAL_ROOTNAMESPACE")) {
+        if (this->GeneratorTarget->GetProperty("VS_GLOBAL_ROOTNAMESPACE") ||
+            // Handle variant of VS_GLOBAL_<variable> for RootNamespace.
+            this->GeneratorTarget->GetProperty("VS_GLOBAL_RootNamespace")) {
           (*this->BuildFileStream) << "$(RootNamespace).";
         }
         (*this->BuildFileStream) << "%(Filename)";
