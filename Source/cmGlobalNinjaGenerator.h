@@ -301,6 +301,8 @@ public:
                            cmNinjaDeps& outputs);
   void AppendTargetDepends(cmGeneratorTarget const* target,
                            cmNinjaDeps& outputs);
+  void AppendTargetDependsClosure(cmGeneratorTarget const* target,
+                                  cmNinjaDeps& outputs);
   void AddDependencyToAll(cmGeneratorTarget* target);
   void AddDependencyToAll(const std::string& input);
 
@@ -361,6 +363,10 @@ private:
   void WriteTargetClean(std::ostream& os);
   void WriteTargetHelp(std::ostream& os);
 
+  void ComputeTargetDependsClosure(
+    cmGeneratorTarget const* target,
+    std::set<cmGeneratorTarget const*>& depends);
+
   std::string ninjaCmd() const;
 
   /// The file containing the build statement. (the relationship of the
@@ -409,6 +415,11 @@ private:
 
   typedef std::map<std::string, cmGeneratorTarget*> TargetAliasMap;
   TargetAliasMap TargetAliases;
+
+  typedef std::map<cmGeneratorTarget const*,
+                   std::set<cmGeneratorTarget const*> >
+    TargetDependsClosureMap;
+  TargetDependsClosureMap TargetDependsClosures;
 
   std::string NinjaCommand;
   std::string NinjaVersion;
