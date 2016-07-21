@@ -837,7 +837,9 @@ void cmCursesMainForm::HandleInput()
       // therefore, the label field for the prev. entry is index-5
       // and the label field for the next entry is index+1
       // (index always corresponds to the value field)
-      else if (key == KEY_DOWN || key == ctrl('n')) {
+      // scroll down with arrow down, ctrl+n (emacs binding), or j (vim
+      // binding)
+      else if (key == KEY_DOWN || key == ctrl('n') || key == 'j') {
         FIELD* cur = current_field(this->Form);
         size_t findex = field_index(cur);
         if (findex == 3 * this->NumberOfVisibleEntries - 1) {
@@ -854,7 +856,8 @@ void cmCursesMainForm::HandleInput()
       // therefore, the label field for the prev. entry is index-5
       // and the label field for the next entry is index+1
       // (index always corresponds to the value field)
-      else if (key == KEY_UP || key == ctrl('p')) {
+      // scroll down with arrow up, ctrl+p (emacs binding), or k (vim binding)
+      else if (key == KEY_UP || key == ctrl('p') || key == 'k') {
         FIELD* cur = current_field(this->Form);
         int findex = field_index(cur);
         if (findex == 2) {
@@ -1122,16 +1125,17 @@ const char* cmCursesMainForm::s_ConstHelpMessage =
   "Navigation: "
   "You can use the arrow keys and page up, down to navigate the options. "
   "Alternatively, you can use the following keys: \n"
-  " C-n : next option\n"
-  " C-p : previous options\n"
+  " C-n or j : next option\n"
+  " C-p or k : previous options\n"
   " C-d : down one page\n"
   " C-u : up one page\n\n"
   "Editing options: "
   "To change an option  press enter or return. If the current options is a "
   "boolean, this will toggle its value. "
-  "Otherwise, ccmake will enter edit mode. In this mode you can edit an "
-  "option using arrow keys and backspace. Alternatively, you can use the "
-  "following keys:\n"
+  "Otherwise, ccmake will enter edit mode. Alternatively, you can toggle "
+  "a bool variable by pressing space, and enter edit mode with i."
+  "In this mode you can edit an option using arrow keys and backspace. "
+  "Alternatively, you can use the following keys:\n"
   " C-b : back one character\n"
   " C-f : forward one character\n"
   " C-a : go to the beginning of the field\n"
