@@ -103,6 +103,8 @@ public:
   struct GeneratorInfo
   {
     std::string name;
+    std::string baseName;
+    std::string extraName;
     bool supportsToolset;
     bool supportsPlatform;
     bool isAlias;

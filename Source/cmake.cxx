@@ -824,6 +824,7 @@ void cmake::GetRegisteredGenerators(std::vector<GeneratorInfo>& generators)
       info.supportsToolset = (*i)->SupportsToolset();
       info.supportsPlatform = (*i)->SupportsPlatform();
       info.name = names[j];
+      info.baseName = names[j];
       info.isAlias = false;
       generators.push_back(info);
     }
@@ -840,6 +841,8 @@ void cmake::GetRegisteredGenerators(std::vector<GeneratorInfo>& generators)
       GeneratorInfo info;
       info.name = cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
         (*i)->GetName(), *gen);
+      info.baseName = *gen;
+      info.extraName = (*i)->GetName();
       info.supportsPlatform = false;
       info.supportsToolset = false;
       info.isAlias = false;
@@ -849,6 +852,10 @@ void cmake::GetRegisteredGenerators(std::vector<GeneratorInfo>& generators)
          a != (*i)->Aliases.end(); ++a) {
       GeneratorInfo info;
       info.name = *a;
+      if (!genList.empty()) {
+        info.baseName = genList.at(0);
+      }
+      info.extraName = (*i)->GetName();
       info.supportsPlatform = false;
       info.supportsToolset = false;
       info.isAlias = true;
