@@ -151,6 +151,9 @@ protected:
   std::string CreateResponseFile(const char* name, std::string const& options,
                                  std::vector<std::string>& makefile_depends);
 
+  bool CheckUseResponseFileForObjects(std::string const& l) const;
+  bool CheckUseResponseFileForLibraries(std::string const& l) const;
+
   /** Create list of flags for link libraries. */
   void CreateLinkLibs(std::string& linkLibs, bool relink, bool useResponseFile,
                       std::vector<std::string>& makefile_depends,

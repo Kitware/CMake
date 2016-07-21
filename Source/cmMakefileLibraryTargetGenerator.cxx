@@ -429,27 +429,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   // Determine whether a link script will be used.
   bool useLinkScript = this->GlobalGenerator->GetUseLinkScript();
 
-  // Select whether to use a response file for objects.
-  bool useResponseFileForObjects = false;
-  {
-    std::string responseVar = "CMAKE_";
-    responseVar += linkLanguage;
-    responseVar += "_USE_RESPONSE_FILE_FOR_OBJECTS";
-    if (this->Makefile->IsOn(responseVar)) {
-      useResponseFileForObjects = true;
-    }
-  }
-
-  // Select whether to use a response file for libraries.
-  bool useResponseFileForLibs = false;
-  {
-    std::string responseVar = "CMAKE_";
-    responseVar += linkLanguage;
-    responseVar += "_USE_RESPONSE_FILE_FOR_LIBRARIES";
-    if (this->Makefile->IsOn(responseVar)) {
-      useResponseFileForLibs = true;
-    }
-  }
+  bool useResponseFileForObjects =
+    this->CheckUseResponseFileForObjects(linkLanguage);
+  bool const useResponseFileForLibs =
+    this->CheckUseResponseFileForLibraries(linkLanguage);
 
   // For static libraries there might be archiving rules.
   bool haveStaticLibraryRule = false;
