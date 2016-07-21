@@ -358,12 +358,11 @@ void cmQtAutoGenerators::WriteOldMocDefinitionsFile(
 
 void cmQtAutoGenerators::Init()
 {
-  this->TargetBuildSubDir = this->TargetName;
-  this->TargetBuildSubDir += ".dir/";
-
   this->OutMocCppFilenameRel = this->TargetName;
   this->OutMocCppFilenameRel += ".cpp";
-  this->OutMocCppFilenameAbs = this->Builddir + this->OutMocCppFilenameRel;
+
+  this->OutMocCppFilename = this->Builddir;
+  this->OutMocCppFilename += this->OutMocCppFilenameRel;
 
   std::vector<std::string> cdefList;
   cmSystemTools::ExpandListArgument(this->MocCompileDefinitionsStr, cdefList);
@@ -440,7 +439,7 @@ static std::string ReadAll(const std::string& filename)
 
 bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 {
-  if (!cmsys::SystemTools::FileExists(this->OutMocCppFilenameAbs.c_str()) ||
+  if (!cmsys::SystemTools::FileExists(this->OutMocCppFilename.c_str()) ||
       (this->OldCompileSettingsStr != this->CurrentCompileSettingsStr)) {
     this->GenerateAll = true;
   }
@@ -948,13 +947,12 @@ void cmQtAutoGenerators::ParseHeaders(
         this->LogInfo(err.str());
       }
 
+      const std::string basename =
+        cmsys::SystemTools::GetFilenameWithoutLastExtension(headerName);
+
+      const std::string currentMoc = "moc_" + basename + ".cpp";
       std::string macroName;
       if (requiresMocing(contents, macroName)) {
-        const std::string parentDir =
-          this->TargetBuildSubDir + this->SourceRelativePath(headerName);
-        const std::string basename =
-          cmsys::SystemTools::GetFilenameWithoutLastExtension(headerName);
-        const std::string currentMoc = parentDir + "moc_" + basename + ".cpp";
         notIncludedMocs[headerName] = currentMoc;
       }
     }
@@ -1032,7 +1030,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
   // check if we even need to update _automoc.cpp
   if (!automocCppChanged) {
     // compare contents of the _automoc.cpp file
-    const std::string oldContents = ReadAll(this->OutMocCppFilenameAbs);
+    const std::string oldContents = ReadAll(this->OutMocCppFilename);
     if (oldContents == automocSource) {
       // nothing changed: don't touch the _automoc.cpp file
       if (this->Verbose) {
@@ -1055,7 +1053,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
   }
   {
     cmsys::ofstream outfile;
-    outfile.open(this->OutMocCppFilenameAbs.c_str(), std::ios::trunc);
+    outfile.open(this->OutMocCppFilename.c_str(), std::ios::trunc);
     outfile << automocSource;
     outfile.close();
   }
@@ -1264,10 +1262,8 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
     if (ext == ".qrc") {
       std::string basename =
         cmsys::SystemTools::GetFilenameWithoutLastExtension(*si);
-      std::string qrcOutputFile = this->TargetBuildSubDir +
-        this->SourceRelativePath(*si) + "qrc_" + basename + ".cpp";
-      // std::string qrcOutputFile = "CMakeFiles/" + this->OriginTargetName
-      //                         + ".dir/qrc_" + basename + ".cpp";
+      std::string qrcOutputFile = "CMakeFiles/" + this->OriginTargetName +
+        ".dir/qrc_" + basename + ".cpp";
       qrcGenMap[*si] = qrcOutputFile;
     }
   }
@@ -1302,10 +1298,8 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
 bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
                                      const std::string& qrcOutputFile)
 {
-  std::string relName = this->SourceRelativePath(qrcInputFile);
-  std::replace(relName.begin(), relName.end(), '/', '_');
-  relName += cmsys::SystemTools::GetFilenameWithoutLastExtension(qrcInputFile);
-
+  const std::string basename =
+    cmsys::SystemTools::GetFilenameWithoutLastExtension(qrcInputFile);
   const ::std::string qrcBuildFile = this->Builddir + qrcOutputFile;
 
   int sourceNewerThanQrc = 0;
@@ -1332,7 +1326,7 @@ bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
     }
 
     command.push_back("-name");
-    command.push_back(relName);
+    command.push_back(basename);
     command.push_back("-o");
     command.push_back(qrcBuildFile);
     command.push_back(qrcInputFile);
@@ -1355,49 +1349,6 @@ bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
     }
   }
   return true;
-}
-
-std::string cmQtAutoGenerators::SourceRelativePath(const std::string& filename)
-{
-  std::string pathRel;
-
-  // Test if the file is child to any of the known directories
-  {
-    std::string fileNameReal = cmsys::SystemTools::GetRealPath(filename);
-    std::string parentDirectory;
-    bool match(false);
-    {
-      const ::std::string* testDirs[4];
-      testDirs[0] = &(this->Srcdir);
-      testDirs[1] = &(this->Builddir);
-      testDirs[2] = &(this->ProjectSourceDir);
-      testDirs[3] = &(this->ProjectBinaryDir);
-      for (int ii = 0; ii != sizeof(testDirs) / sizeof(const ::std::string*);
-           ++ii) {
-        const ::std::string testDir =
-          cmsys::SystemTools::GetRealPath(*(testDirs[ii]));
-        if (cmsys::SystemTools::IsSubDirectory(fileNameReal, testDir)) {
-          parentDirectory = testDir;
-          match = true;
-          break;
-        }
-      }
-    }
-    // Use root as fallback parent directory
-    if (!match) {
-      cmsys::SystemTools::SplitPathRootComponent(fileNameReal,
-                                                 &parentDirectory);
-    }
-    pathRel = cmsys::SystemTools::RelativePath(
-      parentDirectory, cmsys::SystemTools::GetParentDirectory(fileNameReal));
-  }
-
-  // Sanitize relative path
-  if (!pathRel.empty()) {
-    pathRel += '/';
-    cmSystemTools::ReplaceString(pathRel, "..", "__");
-  }
-  return pathRel;
 }
 
 /**
