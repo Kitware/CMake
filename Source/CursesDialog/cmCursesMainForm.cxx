@@ -388,7 +388,7 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
 
   curses_move(y - 4, 0);
   char fmt_s[] = "%s";
-  char fmt[512] = "Press [enter] to edit option";
+  char fmt[512] = "Press [enter] to edit option Press [d] to delete an entry";
   if (process) {
     strcpy(fmt, "                           ");
   }
@@ -1140,7 +1140,6 @@ const char* cmCursesMainForm::s_ConstHelpMessage =
   " C-k : kill the rest of the field\n"
   " Esc : Restore field (discard last changes)\n"
   " Enter : Leave edit mode\n"
-  "You can also delete an option by pressing 'd'\n\n"
   "Commands:\n"
   " q : quit ccmake without generating build files\n"
   " h : help, shows this screen\n"
@@ -1148,6 +1147,7 @@ const char* cmCursesMainForm::s_ConstHelpMessage =
   " g : generate build files and exit, only available when there are no "
   "new options and no errors have been detected during last configuration.\n"
   " l : shows last errors\n"
+  " d : delete an option\n"
   " t : toggles advanced mode. In normal mode, only the most important "
   "options are shown. In advanced mode, all options are shown. We recommend "
   "using normal mode unless you are an expert.\n"
