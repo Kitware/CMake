@@ -632,6 +632,11 @@ IF(KWSYS_USE_SystemInformation)
   ENDIF()
 ENDIF()
 
+IF(KWSYS_USE_FStream)
+  KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H
+    "Checking whether <ext/stdio_filebuf.h> is available" DIRECT)
+ENDIF()
+
 #-----------------------------------------------------------------------------
 # Choose a directory for the generated headers.
 IF(NOT KWSYS_HEADER_ROOT)
