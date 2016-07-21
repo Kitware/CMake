@@ -101,6 +101,7 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   this->SystemIsWindowsPhone = false;
   this->SystemIsWindowsStore = false;
   this->MSBuildCommandInitialized = false;
+  this->DefaultPlatformToolset = "v100";
   this->Version = VS10;
 }
 
