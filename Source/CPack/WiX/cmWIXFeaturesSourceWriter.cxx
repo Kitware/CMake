@@ -86,6 +86,10 @@ void cmWIXFeaturesSourceWriter::EmitFeatureForComponent(
     AddAttribute("Display", "hidden");
   }
 
+  if (component.IsDisabledByDefault) {
+    AddAttribute("Level", "2");
+  }
+
   EndElement("Feature");
 }
 
