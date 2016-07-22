@@ -309,7 +309,8 @@ endif()
 if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
   if(UNIX AND NOT CYGWIN)
     execute_process(COMMAND ldd --help
-      OUTPUT_VARIABLE LDD_HELP)
+      OUTPUT_VARIABLE LDD_HELP
+      ERROR_VARIABLE LDD_ERR)
     if("${LDD_HELP}" MATCHES
         "(-r, --function-relocs.*process data and function relocations.*-u, --unused.*print unused direct dependencies)")
       add_RunCMake_test(LinkWhatYouUse)
