@@ -15,7 +15,7 @@ if exists("b:current_syntax")
 endif
 
 syn match cmakeEscaped /\(\\\\\|\\"\|\\n\|\\t\)/ contained
-syn region cmakeComment start="#" end="$" contains=cmakeTodo
+syn region cmakeComment start="#" end="$" contains=cmakeTodo,@Spell
 syn region cmakeGeneratorExpression start=/$</ end=/>/
             \ contained oneline contains=CONTAINED,cmakeTodo,cmakeVariable,cmakeProperty,cmakeGeneratorExpressions
 syn region cmakeRegistry start=/\[/ end=/]/
