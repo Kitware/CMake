@@ -437,9 +437,7 @@ syn keyword cmakeTodo
 hi def link cmakeCommand Statement
 hi def link cmakeComment Comment
 hi def link cmakeEnvironment Special
-hi def link cmakeError Error
 hi def link cmakeEscaped Special
-hi def link cmakeMacro PreProc
 hi def link cmakeLuaComment Comment
 hi def link cmakeModule PreProc
 hi def link cmakeRegistry Underlined
