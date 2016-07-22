@@ -29,17 +29,17 @@ public:
   virtual ~cmCPackDragNDropGenerator();
 
 protected:
-  virtual int InitializeInternal();
-  virtual const char* GetOutputExtension();
-  int PackageFiles();
-  bool SupportsComponentInstallation() const;
+  int InitializeInternal() CM_OVERRIDE;
+  const char* GetOutputExtension() CM_OVERRIDE;
+  int PackageFiles() CM_OVERRIDE;
+  bool SupportsComponentInstallation() const CM_OVERRIDE;
 
   bool CopyFile(std::ostringstream& source, std::ostringstream& target);
   bool CreateEmptyFile(std::ostringstream& target, size_t size);
   bool RunCommand(std::ostringstream& command, std::string* output = 0);
 
   std::string GetComponentInstallDirNameSuffix(
-    const std::string& componentName);
+    const std::string& componentName) CM_OVERRIDE;
 
   int CreateDMG(const std::string& src_dir, const std::string& output_file);
 

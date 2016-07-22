@@ -33,11 +33,11 @@ public:
   cmCPackPKGGenerator();
   virtual ~cmCPackPKGGenerator();
 
-  virtual bool SupportsComponentInstallation() const;
+  bool SupportsComponentInstallation() const CM_OVERRIDE;
 
 protected:
-  virtual int InitializeInternal();
-  virtual const char* GetOutputPostfix() { return "darwin"; }
+  int InitializeInternal() CM_OVERRIDE;
+  const char* GetOutputPostfix() CM_OVERRIDE { return "darwin"; }
 
   // Copies or creates the resource file with the given name to the
   // package or package staging directory dirName. The variable

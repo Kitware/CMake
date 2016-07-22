@@ -29,12 +29,12 @@ public:
   virtual ~cmCPackBundleGenerator();
 
 protected:
-  virtual int InitializeInternal();
-  virtual const char* GetPackagingInstallPrefix();
+  int InitializeInternal() CM_OVERRIDE;
+  const char* GetPackagingInstallPrefix() CM_OVERRIDE;
   int ConstructBundle();
   int SignBundle(const std::string& src_dir);
-  int PackageFiles();
-  bool SupportsComponentInstallation() const;
+  int PackageFiles() CM_OVERRIDE;
+  bool SupportsComponentInstallation() const CM_OVERRIDE;
 
   std::string InstallPrefix;
 };
