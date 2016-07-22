@@ -16,6 +16,7 @@ endif
 
 syn match cmakeEscaped /\(\\\\\|\\"\|\\n\|\\t\)/ contained
 syn region cmakeComment start="#" end="$" contains=cmakeTodo,@Spell
+syn region cmakeLuaComment start="\[\z(=*\)\[" end="\]\z1\]" contains=cmakeTodo,@Spell
 syn region cmakeGeneratorExpression start=/$</ end=/>/
             \ contained oneline contains=CONTAINED,cmakeTodo,cmakeVariable,cmakeProperty,cmakeGeneratorExpressions
 syn region cmakeRegistry start=/\[/ end=/]/
@@ -439,6 +440,7 @@ hi def link cmakeEnvironment Special
 hi def link cmakeError Error
 hi def link cmakeEscaped Special
 hi def link cmakeMacro PreProc
+hi def link cmakeLuaComment Comment
 hi def link cmakeModule PreProc
 hi def link cmakeRegistry Underlined
 hi def link cmakeString String
