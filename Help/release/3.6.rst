@@ -308,3 +308,9 @@ Other Changes
   preferred future use is upper cased component names in variables.
   New variables that will be added to CPackRPM in later versions
   will only support upper cased component variable format.
+
+* The CPack NSIS generator's configuration file template was fixed to
+  quote the path to the uninstaller tool used by the
+  :variable:`CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL` option.
+  This avoids depending on an insecure Windows feature to run an
+  uninstaller tool with a space in the path.
