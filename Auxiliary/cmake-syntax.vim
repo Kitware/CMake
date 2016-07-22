@@ -450,15 +450,15 @@ hi def link cmakeCommandRepeat Repeat
 hi def link cmakeComment Comment
 hi def link cmakeEnvironment Special
 hi def link cmakeEscaped Special
+hi def link cmakeGeneratorExpression WarningMsg
+hi def link cmakeGeneratorExpressions Function
 hi def link cmakeLuaComment Comment
 hi def link cmakeModule Include
+hi def link cmakeProperty Function
 hi def link cmakeRegistry Underlined
 hi def link cmakeString String
 hi def link cmakeTodo TODO
-hi def link cmakeGeneratorExpression WarningMsg
 hi def link cmakeVariable Identifier
-hi def link cmakeGeneratorExpressions Function
-hi def link cmakeProperty Function
 hi def link cmakeVariableValue Type
 
 hi def link cmakeKWExternalProject ModeMsg
