@@ -451,7 +451,7 @@ hi def link cmakeComment Comment
 hi def link cmakeEnvironment Special
 hi def link cmakeEscaped Special
 hi def link cmakeLuaComment Comment
-hi def link cmakeModule PreProc
+hi def link cmakeModule Include
 hi def link cmakeRegistry Underlined
 hi def link cmakeString String
 hi def link cmakeTodo TODO
