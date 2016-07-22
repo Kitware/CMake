@@ -75,9 +75,17 @@
 #
 #  The dependencies (list of components) on which this component depends.
 #
+# .. variable:: CPACK_COMPONENT_<compName>_HIDDEN
+#
+#  True if this component is hidden from the user.
+#
 # .. variable:: CPACK_COMPONENT_<compName>_REQUIRED
 #
-#  True is this component is required.
+#  True if this component is required.
+#
+# .. variable:: CPACK_COMPONENT_<compName>_DISABLED
+#
+#  True if this component is not selected to be installed by default.
 #
 # .. command:: cpack_add_component
 #
