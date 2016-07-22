@@ -443,7 +443,7 @@ syn keyword cmakeTodo
             \ TODO FIXME XXX
             \ contained
 
-hi def link cmakeCommand Statement
+hi def link cmakeCommand Function
 hi def link cmakeCommandConditional Conditional
 hi def link cmakeCommandDeprecated WarningMsg
 hi def link cmakeCommandRepeat Repeat
@@ -451,10 +451,10 @@ hi def link cmakeComment Comment
 hi def link cmakeEnvironment Special
 hi def link cmakeEscaped Special
 hi def link cmakeGeneratorExpression WarningMsg
-hi def link cmakeGeneratorExpressions Function
+hi def link cmakeGeneratorExpressions Keyword
 hi def link cmakeLuaComment Comment
 hi def link cmakeModule Include
-hi def link cmakeProperty Function
+hi def link cmakeProperty Constant
 hi def link cmakeRegistry Underlined
 hi def link cmakeString String
 hi def link cmakeTodo TODO
