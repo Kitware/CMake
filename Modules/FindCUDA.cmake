@@ -817,7 +817,7 @@ if(CUDA_USE_STATIC_CUDA_RUNTIME)
       unset(CMAKE_THREAD_PREFER_PTHREAD)
     endif()
   endif()
-  if (NOT APPLE AND CUDA_VERSION VERSION_LESS "7.0")
+  if (UNIX AND NOT APPLE AND CUDA_VERSION VERSION_LESS "7.0")
     # Before CUDA 7.0, there was librt that has things such as, clock_gettime, shm_open, and shm_unlink.
     find_library(CUDA_rt_LIBRARY rt)
     if (NOT CUDA_rt_LIBRARY)
