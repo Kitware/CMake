@@ -114,6 +114,14 @@ set the path with these commands:
 ;------------------------------------------------------------------------------
 
 ;;
+;; Indentation increment.
+;;
+(defcustom cmake-tab-width 2
+  "Number of columns to indent cmake blocks"
+  :type 'integer
+  :group 'cmake)
+
+;;
 ;; Line indentation function.
 ;;
 (defun cmake-indent ()
@@ -224,13 +232,6 @@ the indentation.  Otherwise it retains the same position on the line"
 ;; User hook entry point.
 ;;
 (defvar cmake-mode-hook nil)
-
-;;
-;; Indentation increment.
-;;
-(defcustom cmake-tab-width 2
-  "Number of columns to indent cmake blocks"
-  :type 'integer)
 
 ;------------------------------------------------------------------------------
 
