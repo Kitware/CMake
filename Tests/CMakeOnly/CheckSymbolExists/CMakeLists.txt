@@ -39,7 +39,7 @@ else ()
 endif ()
 
 if (CMAKE_COMPILER_IS_GNUCC)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+  string(APPEND CMAKE_C_FLAGS " -O3")
   unset(CSE_RESULT_O3 CACHE)
   message(STATUS "Testing with optimization -O3")
 

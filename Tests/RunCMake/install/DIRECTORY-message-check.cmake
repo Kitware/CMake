@@ -7,13 +7,13 @@ set(expect "
 ")
 if(NOT out MATCHES "${expect}")
   string(REGEX REPLACE "\n" "\n  " out "  ${out}")
-  set(RunCMake_TEST_FAILED
-    "${RunCMake_TEST_FAILED}First install did not say 'Installing' as expected:\n${out}")
+  string(APPEND RunCMake_TEST_FAILED
+    "First install did not say 'Installing' as expected:\n${out}")
 endif()
 set(f ${RunCMake_TEST_BINARY_DIR}/prefix/dir/empty.txt)
 if(NOT EXISTS "${f}")
-  set(RunCMake_TEST_FAILED
-    "${RunCMake_TEST_FAILED}File was not installed:\n  ${f}\n")
+  string(APPEND RunCMake_TEST_FAILED
+    "File was not installed:\n  ${f}\n")
 endif()
 execute_process(COMMAND ${CMAKE_COMMAND} -P ${RunCMake_TEST_BINARY_DIR}/cmake_install.cmake
   OUTPUT_VARIABLE out ERROR_VARIABLE err)
@@ -23,6 +23,6 @@ set(expect "
 ")
 if(NOT out MATCHES "${expect}")
   string(REGEX REPLACE "\n" "\n  " out "  ${out}")
-  set(RunCMake_TEST_FAILED
-    "${RunCMake_TEST_FAILED}Second install did not say 'Up-to-date' as expected:\n${out}")
+  string(APPEND RunCMake_TEST_FAILED
+    "Second install did not say 'Up-to-date' as expected:\n${out}")
 endif()

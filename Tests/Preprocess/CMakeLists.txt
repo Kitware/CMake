@@ -57,7 +57,7 @@ if(NOT BORLAND AND NOT PP_VS70)
   set(SEMICOLON "\;")
 endif()
 
-set(STRING_EXTRA "${STRING_EXTRA} ")
+string(APPEND STRING_EXTRA " ")
 
 if(NOT PP_BORLAND AND NOT PP_WATCOM)
   # Borland, WMake: multiple spaces
@@ -65,7 +65,7 @@ if(NOT PP_BORLAND AND NOT PP_WATCOM)
   # quoted strings when passing to the compiler.  It does not have
   # trouble passing to other tools, and the compiler may be directly
   # invoked from the command line.
-  set(STRING_EXTRA "${STRING_EXTRA} ")
+  string(APPEND STRING_EXTRA " ")
 endif()
 
 if(NOT PP_VS)
@@ -73,21 +73,21 @@ if(NOT PP_VS)
   # Visual Studio will not accept a comma in the value of a definition.
   # The comma-separated list of PreprocessorDefinitions in the project
   # file seems to be parsed before the content of entries is examined.
-  set(STRING_EXTRA "${STRING_EXTRA},")
+  string(APPEND STRING_EXTRA ",")
 endif()
 
 if(NOT PP_MINGW)
   # MinGW: &
   # When inside -D"FOO=\"a & b\"" MinGW make wants -D"FOO=\"a "&" b\""
   # but it does not like quoted ampersand elsewhere.
-  set(STRING_EXTRA "${STRING_EXTRA}&")
+  string(APPEND STRING_EXTRA "&")
 endif()
 
 if(NOT PP_MINGW)
   # MinGW: |
   # When inside -D"FOO=\"a | b\"" MinGW make wants -D"FOO=\"a "|" b\""
   # but it does not like quoted pipe elsewhere.
-  set(STRING_EXTRA "${STRING_EXTRA}|")
+  string(APPEND STRING_EXTRA "|")
 endif()
 
 if(NOT PP_BORLAND AND NOT PP_MINGW AND NOT PP_NMAKE)
@@ -95,13 +95,13 @@ if(NOT PP_BORLAND AND NOT PP_MINGW AND NOT PP_NMAKE)
   # When inside -D"FOO=\"a ^ b\"" the make tools want -D"FOO=\"a "^" b\""
   # but do not like quoted carrot elsewhere.  In NMake the non-quoted
   # syntax works when the flags are not in a make variable.
-  set(STRING_EXTRA "${STRING_EXTRA}^")
+  string(APPEND STRING_EXTRA "^")
 endif()
 
 if(NOT PP_BORLAND AND NOT PP_MINGW AND NOT PP_NMAKE)
   # Borland, MinGW: < >
   # Angle-brackets have funny behavior that is hard to escape.
-  set(STRING_EXTRA "${STRING_EXTRA}<>")
+  string(APPEND STRING_EXTRA "<>")
 endif()
 
 set(EXPR_OP1 "/")
@@ -122,7 +122,7 @@ if((NOT MSVC OR PP_NMAKE) AND
   # be written just '%'.  However nmake requires '%%' except when using
   # response files.  Currently we have no way to affect escaping based
   # on whether flags go in a response file, so we just have to skip it.
-  set(STRING_EXTRA "${STRING_EXTRA}%")
+  string(APPEND STRING_EXTRA "%")
   set(EXPR_OP1 "%")
 endif()
 
@@ -130,9 +130,9 @@ endif()
 # The XL compiler cannot pass unbalanced parens correctly to a tool
 # it launches internally.
 if(CMAKE_C_COMPILER_ID STREQUAL "XL")
-  set(STRING_EXTRA "${STRING_EXTRA}()")
+  string(APPEND STRING_EXTRA "()")
 else()
-  set(STRING_EXTRA "${STRING_EXTRA})(")
+  string(APPEND STRING_EXTRA ")(")
 endif()
 
 # General: \"
@@ -146,7 +146,7 @@ endif()
 #    internal tool to do preprocessing .
 if((PP_NMAKE OR PP_UMAKE) AND
     NOT CMAKE_C_COMPILER_ID STREQUAL "XL")
-  set(STRING_EXTRA "${STRING_EXTRA}\\\"")
+  string(APPEND STRING_EXTRA "\\\"")
 endif()
 
 # General: #
@@ -183,15 +183,15 @@ set(EXPR "x*y+!(x==(y+1*2))*f(x${EXPR_OP1}2)")
 
 if(NOT WATCOM)
   # Watcom does not support - or / because it parses them as options.
-  set(EXPR "${EXPR} + y/x-x")
+  string(APPEND EXPR " + y/x-x")
 endif()
 
 #-----------------------------------------------------------------------------
 
 # Inform the test if the debug configuration is getting built.
 # The NDEBUG definition takes care of this for release.
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DPREPROCESS_DEBUG")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DPREPROCESS_DEBUG")
+string(APPEND CMAKE_C_FLAGS_DEBUG " -DPREPROCESS_DEBUG")
+string(APPEND CMAKE_CXX_FLAGS_DEBUG " -DPREPROCESS_DEBUG")
 
 # Inform the test if it built from Xcode.
 if(PP_XCODE)
@@ -265,7 +265,7 @@ add_custom_target(drive COMMAND Preprocess)
 
 # Configure the header file with the desired string value.
 if(SEMICOLON)
-  set(STRING_VALUE "${STRING_VALUE};")
+  string(APPEND STRING_VALUE ";")
 endif()
 configure_file(${Preprocess_SOURCE_DIR}/preprocess.h.in
                ${Preprocess_BINARY_DIR}/preprocess.h)

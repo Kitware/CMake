@@ -109,9 +109,9 @@ endif()
 # try to compile a file that should compile
 set(_c_flags "${CMAKE_C_FLAGS}")
 if(WATCOM)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -dTESTDEF")
+  string(APPEND CMAKE_C_FLAGS " -dTESTDEF")
 else()
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \"-DTESTDEF\"")
+  string(APPEND CMAKE_C_FLAGS " \"-DTESTDEF\"")
 endif()
 try_compile(SHOULD_PASS
     ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp

@@ -126,7 +126,7 @@ function(lintian_check_specific_errors output_errors)
     string(REGEX MATCHALL "${_s}" "_TMP_CHECK_ERROR" "${lintian_output}")
 
     if(NOT "${_TMP_CHECK_ERROR}" STREQUAL "")
-      set(ERROR_ACC "${ERROR_ACC}\nlintian: ${_f}: output contains an undesirable regex:\n\t${_TMP_CHECK_ERROR}")
+      string(APPEND ERROR_ACC "\nlintian: ${_f}: output contains an undesirable regex:\n\t${_TMP_CHECK_ERROR}")
     endif()
   endforeach()
 

@@ -16,7 +16,7 @@ include("${src_dir}/${GENERATOR_TYPE}/${RunCMake_TEST}-ExpectedFiles.cmake")
 if(NOT EXPECTED_FILES_COUNT EQUAL 0)
   foreach(file_no_ RANGE 1 ${EXPECTED_FILES_COUNT})
     file(GLOB FOUND_FILE_${file_no_} RELATIVE "${bin_dir}" "${EXPECTED_FILE_${file_no_}}")
-    set(foundFiles_ "${foundFiles_};${FOUND_FILE_${file_no_}}")
+    string(APPEND foundFiles_ ";${FOUND_FILE_${file_no_}}")
     list(LENGTH FOUND_FILE_${file_no_} foundFilesCount_)
 
     if(foundFilesCount_ EQUAL 1)
@@ -45,7 +45,7 @@ if(NOT EXPECTED_FILES_COUNT EQUAL 0)
   # check that there were no extra files generated
   foreach(all_files_glob_ IN LISTS ALL_FILES_GLOB)
     file(GLOB foundAll_ RELATIVE "${bin_dir}" "${all_files_glob_}")
-    set(allFoundFiles_ "${allFoundFiles_};${foundAll_}")
+    string(APPEND allFoundFiles_ ";${foundAll_}")
   endforeach()
 
   list(LENGTH foundFiles_ foundFilesCount_)

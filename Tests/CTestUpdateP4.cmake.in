@@ -5,7 +5,7 @@
 # Test in a directory next to this script.
 get_filename_component(TOP "${CMAKE_CURRENT_LIST_FILE}" PATH)
 set(P4_TOP "${TOP}")
-set(TOP "${TOP}/@CTestUpdateP4_DIR@")
+string(APPEND TOP "/@CTestUpdateP4_DIR@")
 
 # Include code common to all update tests.
 set(REPOSITORY_FILE_PREFIX "//ctest/")
@@ -48,9 +48,9 @@ if(UNIX)
   file(MAKE_DIRECTORY ${P4_ROOT})
 
   set(P4_SERVER "nohup '${P4D}' -d -r '${P4_ROOT}'")
-  set(P4_SERVER "${P4_SERVER} -L '${P4_ROOT}/p4.log'")
-  set(P4_SERVER "${P4_SERVER} -J '${P4_ROOT}/journal'")
-  set(P4_SERVER "${P4_SERVER} -p ${P4_PORT} >/dev/null 2>&1 &")
+  string(APPEND P4_SERVER " -L '${P4_ROOT}/p4.log'")
+  string(APPEND P4_SERVER " -J '${P4_ROOT}/journal'")
+  string(APPEND P4_SERVER " -p ${P4_PORT} >/dev/null 2>&1 &")
 
   message("Server command line: ${P4_SERVER}")
 

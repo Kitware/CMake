@@ -35,7 +35,7 @@ foreach(module ${all_modules})
   message(STATUS "module: ${module}")
   file(READ "${dir}/${module}" module_content)
   if(NOT "${module_content}" MATCHES "${notice_regex}")
-    set(notice_missing "${notice_missing}  ${module}\n")
+    string(APPEND notice_missing "  ${module}\n")
   endif()
 endforeach()
 
