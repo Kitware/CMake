@@ -55,11 +55,11 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
     set(CHECK_INCLUDE_FILES_CONTENT "/* */\n")
     set(MACRO_CHECK_INCLUDE_FILES_FLAGS ${CMAKE_REQUIRED_FLAGS})
     foreach(FILE ${INCLUDE})
-      set(CMAKE_CONFIGURABLE_FILE_CONTENT
-        "${CMAKE_CONFIGURABLE_FILE_CONTENT}#include <${FILE}>\n")
+      string(APPEND CMAKE_CONFIGURABLE_FILE_CONTENT
+        "#include <${FILE}>\n")
     endforeach()
-    set(CMAKE_CONFIGURABLE_FILE_CONTENT
-      "${CMAKE_CONFIGURABLE_FILE_CONTENT}\n\nint main(void){return 0;}\n")
+    string(APPEND CMAKE_CONFIGURABLE_FILE_CONTENT
+      "\n\nint main(void){return 0;}\n")
     configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
       "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFiles.c" @ONLY)
 

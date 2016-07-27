@@ -270,7 +270,7 @@ function(FortranCInterface_HEADER file)
   set(_desc_MODULE_ "/* Mangling for Fortran module symbols with underscores. */")
   foreach(macro GLOBAL GLOBAL_ MODULE MODULE_)
     if(FortranCInterface_${macro}_MACRO)
-      set(HEADER_CONTENT "${HEADER_CONTENT}
+      string(APPEND HEADER_CONTENT "
 ${_desc_${macro}}
 #define ${MACRO_NAMESPACE}${macro}${FortranCInterface_${macro}_MACRO}
 ")
@@ -279,7 +279,7 @@ ${_desc_${macro}}
 
   # Generate symbol mangling definitions.
   if(SYMBOLS)
-    set(HEADER_CONTENT "${HEADER_CONTENT}
+    string(APPEND HEADER_CONTENT "
 /*--------------------------------------------------------------------------*/
 /* Mangle some symbols automatically.                                       */
 ")
@@ -300,7 +300,7 @@ ${_desc_${macro}}
         set(form "")
       endif()
       if(FortranCInterface_MODULE${form}_MACRO)
-        set(HEADER_CONTENT "${HEADER_CONTENT}#define ${SYMBOL_NAMESPACE}${module}_${function} ${MACRO_NAMESPACE}MODULE${form}(${m_lower},${f_lower}, ${m_upper},${f_upper})\n")
+        string(APPEND HEADER_CONTENT "#define ${SYMBOL_NAMESPACE}${module}_${function} ${MACRO_NAMESPACE}MODULE${form}(${m_lower},${f_lower}, ${m_upper},${f_upper})\n")
       else()
         message(AUTHOR_WARNING "No FortranCInterface mangling known for ${f}")
       endif()
@@ -314,7 +314,7 @@ ${_desc_${macro}}
       string(TOUPPER "${f}" f_upper)
       string(TOLOWER "${f}" f_lower)
       if(FortranCInterface_GLOBAL${form}_MACRO)
-        set(HEADER_CONTENT "${HEADER_CONTENT}#define ${SYMBOL_NAMESPACE}${f} ${MACRO_NAMESPACE}GLOBAL${form}(${f_lower}, ${f_upper})\n")
+        string(APPEND HEADER_CONTENT "#define ${SYMBOL_NAMESPACE}${f} ${MACRO_NAMESPACE}GLOBAL${form}(${f_lower}, ${f_upper})\n")
       else()
         message(AUTHOR_WARNING "No FortranCInterface mangling known for ${f}")
       endif()

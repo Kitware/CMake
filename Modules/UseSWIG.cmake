@@ -163,15 +163,15 @@ macro(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
     "${swig_outdir}/${swig_source_file_name_we}")
   # add the language into the name of the file (i.e. TCL_wrap)
   # this allows for the same .i file to be wrapped into different languages
-  set(swig_generated_file_fullname
-    "${swig_generated_file_fullname}${SWIG_MODULE_${name}_LANGUAGE}_wrap")
+  string(APPEND swig_generated_file_fullname
+    "${SWIG_MODULE_${name}_LANGUAGE}_wrap")
 
   if(swig_source_file_cplusplus)
-    set(swig_generated_file_fullname
-      "${swig_generated_file_fullname}.${SWIG_CXX_EXTENSION}")
+    string(APPEND swig_generated_file_fullname
+      ".${SWIG_CXX_EXTENSION}")
   else()
-    set(swig_generated_file_fullname
-      "${swig_generated_file_fullname}.c")
+    string(APPEND swig_generated_file_fullname
+      ".c")
   endif()
 
   #message("Full path to source file: ${swig_source_file_fullname}")

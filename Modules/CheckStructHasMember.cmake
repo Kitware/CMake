@@ -54,7 +54,7 @@ include(CheckCXXSourceCompiles)
 macro (CHECK_STRUCT_HAS_MEMBER _STRUCT _MEMBER _HEADER _RESULT)
    set(_INCLUDE_FILES)
    foreach (it ${_HEADER})
-      set(_INCLUDE_FILES "${_INCLUDE_FILES}#include <${it}>\n")
+      string(APPEND _INCLUDE_FILES "#include <${it}>\n")
    endforeach ()
 
    if("x${ARGN}" STREQUAL "x")

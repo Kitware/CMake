@@ -280,7 +280,7 @@ get_filename_component(PACKAGE_PREFIX_DIR \"\${CMAKE_CURRENT_LIST_DIR}/${PACKAGE
 
   if("${absInstallDir}" MATCHES "^(/usr)?/lib(64)?/.+")
     # Handle "/usr move" symlinks created by some Linux distros.
-    set(PACKAGE_INIT "${PACKAGE_INIT}
+    string(APPEND PACKAGE_INIT "
 # Use original install prefix when loaded through a \"/usr move\"
 # cross-prefix symbolic link such as /lib -> /usr/lib.
 get_filename_component(_realCurr \"\${CMAKE_CURRENT_LIST_DIR}\" REALPATH)
@@ -294,7 +294,7 @@ unset(_realCurr)
   endif()
 
   if(NOT CCF_NO_SET_AND_CHECK_MACRO)
-    set(PACKAGE_INIT "${PACKAGE_INIT}
+    string(APPEND PACKAGE_INIT "
 macro(set_and_check _var _file)
   set(\${_var} \"\${_file}\")
   if(NOT EXISTS \"\${_file}\")
@@ -306,7 +306,7 @@ endmacro()
 
 
   if(NOT CCF_NO_CHECK_REQUIRED_COMPONENTS_MACRO)
-    set(PACKAGE_INIT "${PACKAGE_INIT}
+    string(APPEND PACKAGE_INIT "
 macro(check_required_components _NAME)
   foreach(comp \${\${_NAME}_FIND_COMPONENTS})
     if(NOT \${_NAME}_\${comp}_FOUND)
@@ -319,7 +319,7 @@ endmacro()
 ")
   endif()
 
-  set(PACKAGE_INIT "${PACKAGE_INIT}
+  string(APPEND PACKAGE_INIT "
 ####################################################################################")
 
   configure_file("${_inputFile}" "${_outputFile}" @ONLY)

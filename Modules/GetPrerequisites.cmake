@@ -796,7 +796,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     set(old_ld_env "$ENV{LD_LIBRARY_PATH}")
     set(new_ld_env "${exepath}")
     foreach(dir ${dirs})
-      set(new_ld_env "${new_ld_env}:${dir}")
+      string(APPEND new_ld_env ":${dir}")
     endforeach()
     set(ENV{LD_LIBRARY_PATH} "${new_ld_env}:$ENV{LD_LIBRARY_PATH}")
   endif()

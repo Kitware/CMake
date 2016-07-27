@@ -59,7 +59,7 @@ macro(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
     endif()
     if(${ARGC} EQUAL 3)
       set(CMAKE_CXX_FLAGS_SAVE ${CMAKE_CXX_FLAGS})
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARGV2}")
+      string(APPEND CMAKE_CXX_FLAGS " ${ARGV2}")
     endif()
 
     try_compile(${VARIABLE}
