@@ -46,6 +46,9 @@ typedef struct Elf32_Rela Elf32_Rela;
 #if defined(__sun)
 #include <sys/link.h> // For dynamic section information
 #endif
+#ifdef _SCO_DS
+#include <link.h> // For DT_SONAME etc.
+#endif
 
 // Low-level byte swapping implementation.
 template <size_t s>
@@ -214,6 +217,7 @@ struct cmELFTypes32
 };
 
 // Configure the implementation template for 64-bit ELF files.
+#ifndef _SCO_DS
 struct cmELFTypes64
 {
   typedef Elf64_Ehdr ELF_Ehdr;
@@ -223,6 +227,7 @@ struct cmELFTypes64
   typedef KWIML_INT_uint64_t tagtype;
   static const char* GetName() { return "64-bit"; }
 };
+#endif
 
 // Parser implementation template.
 template <class Types>
@@ -800,10 +805,14 @@ cmELF::cmELF(const char* fname)
   if (ident[EI_CLASS] == ELFCLASS32) {
     // 32-bit ELF
     this->Internal = new cmELFInternalImpl<cmELFTypes32>(this, fin, order);
-  } else if (ident[EI_CLASS] == ELFCLASS64) {
+  }
+#ifndef _SCO_DS
+  else if (ident[EI_CLASS] == ELFCLASS64) {
     // 64-bit ELF
     this->Internal = new cmELFInternalImpl<cmELFTypes64>(this, fin, order);
-  } else {
+  }
+#endif
+  else {
     this->ErrorMessage = "ELF file class is not 32-bit or 64-bit.";
     return;
   }
