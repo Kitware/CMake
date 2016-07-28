@@ -18,6 +18,7 @@ Perform the :ref:`CTest Test Step` as a :ref:`Dashboard Client`.
              [SCHEDULE_RANDOM <ON|OFF>]
              [STOP_TIME <time-of-day>]
              [RETURN_VALUE <result-var>]
+             [CAPTURE_CMAKE_ERROR <result-var>]
              [QUIET]
              )
 
@@ -79,6 +80,10 @@ The options are:
 ``RETURN_VALUE <result-var>``
   Store in the ``<result-var>`` variable ``0`` if all tests passed.
   Store non-zero if anything went wrong.
+
+``CAPTURE_CMAKE_ERROR <result-var>``
+  Store in the ``<result-var>`` variable -1 if there are any errors running
+  the command and prevent ctest from returning non-zero if an error occurs.
 
 ``QUIET``
   Suppress any CTest-specific non-error messages that would have otherwise

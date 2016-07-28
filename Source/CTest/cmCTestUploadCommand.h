@@ -61,6 +61,7 @@ protected:
   enum
   {
     ArgumentDoingFiles = Superclass::ArgumentDoingLast1,
+    ArgumentDoingCaptureCMakeError,
     ArgumentDoingLast2
   };
 

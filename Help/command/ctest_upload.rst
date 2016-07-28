@@ -5,7 +5,7 @@ Upload files to a dashboard server as a :ref:`Dashboard Client`.
 
 ::
 
-  ctest_upload(FILES <file>... [QUIET])
+  ctest_upload(FILES <file>... [QUIET] [CAPTURE_CMAKE_ERROR <result-var>])
 
 The options are:
 
@@ -16,3 +16,7 @@ The options are:
 ``QUIET``
   Suppress any CTest-specific non-error output that would have been
   printed to the console otherwise.
+
+``CAPTURE_CMAKE_ERROR <result-var>``
+  Store in the ``<result-var>`` variable -1 if there are any errors running
+  the command and prevent ctest from returning non-zero if an error occurs.

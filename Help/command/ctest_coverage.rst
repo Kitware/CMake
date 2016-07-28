@@ -8,6 +8,7 @@ Perform the :ref:`CTest Coverage Step` as a :ref:`Dashboard Client`.
   ctest_coverage([BUILD <build-dir>] [APPEND]
                  [LABELS <label>...]
                  [RETURN_VALUE <result-var>]
+                 [CAPTURE_CMAKE_ERROR <result-var]
                  [QUIET]
                  )
 
@@ -32,6 +33,10 @@ The options are:
 ``RETURN_VALUE <result-var>``
   Store in the ``<result-var>`` variable ``0`` if coverage tools
   ran without error and non-zero otherwise.
+
+``CAPTURE_CMAKE_ERROR <result-var>``
+  Store in the ``<result-var>`` variable -1 if there are any errors running
+  the command and prevent ctest from returning non-zero if an error occurs.
 
 ``QUIET``
   Suppress any CTest-specific non-error output that would have been
