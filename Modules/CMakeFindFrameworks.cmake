@@ -3,6 +3,10 @@
 # -------------------
 #
 # helper module to find OSX frameworks
+#
+# This module reads hints about search locations from variables::
+#
+#   CMAKE_FIND_FRAMEWORK_EXTRA_LOCATIONS - Extra directories
 
 #=============================================================================
 # Copyright 2003-2009 Kitware, Inc.
@@ -24,9 +28,11 @@ if(NOT CMAKE_FIND_FRAMEWORKS_INCLUDED)
     if(APPLE)
       foreach(dir
           ~/Library/Frameworks/${fwk}.framework
+          /usr/local/Frameworks/${fwk}.framework
           /Library/Frameworks/${fwk}.framework
           /System/Library/Frameworks/${fwk}.framework
-          /Network/Library/Frameworks/${fwk}.framework)
+          /Network/Library/Frameworks/${fwk}.framework
+          ${CMAKE_FIND_FRAMEWORK_EXTRA_LOCATIONS})
         if(EXISTS ${dir})
           set(${fwk}_FRAMEWORKS ${${fwk}_FRAMEWORKS} ${dir})
         endif()
