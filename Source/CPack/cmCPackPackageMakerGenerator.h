@@ -33,12 +33,12 @@ public:
    */
   cmCPackPackageMakerGenerator();
   virtual ~cmCPackPackageMakerGenerator();
-  bool SupportsComponentInstallation() const;
+  bool SupportsComponentInstallation() const CM_OVERRIDE;
 
 protected:
-  virtual int InitializeInternal();
-  int PackageFiles();
-  virtual const char* GetOutputExtension() { return ".dmg"; }
+  int InitializeInternal() CM_OVERRIDE;
+  int PackageFiles() CM_OVERRIDE;
+  const char* GetOutputExtension() CM_OVERRIDE { return ".dmg"; }
 
   // Run PackageMaker with the given command line, which will (if
   // successful) produce the given package file. Returns true if

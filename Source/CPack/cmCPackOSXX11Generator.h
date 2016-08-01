@@ -32,10 +32,10 @@ public:
   virtual ~cmCPackOSXX11Generator();
 
 protected:
-  virtual int InitializeInternal();
-  int PackageFiles();
-  virtual const char* GetPackagingInstallPrefix();
-  virtual const char* GetOutputExtension() { return ".dmg"; }
+  virtual int InitializeInternal() CM_OVERRIDE;
+  int PackageFiles() CM_OVERRIDE;
+  const char* GetPackagingInstallPrefix() CM_OVERRIDE;
+  const char* GetOutputExtension() CM_OVERRIDE { return ".dmg"; }
 
   // bool CopyCreateResourceFile(const std::string& name,
   //                            const std::string& dir);

@@ -33,9 +33,9 @@ public:
   virtual ~cmCPackProductBuildGenerator();
 
 protected:
-  virtual int InitializeInternal();
-  int PackageFiles();
-  virtual const char* GetOutputExtension() { return ".pkg"; }
+  int InitializeInternal() CM_OVERRIDE;
+  int PackageFiles() CM_OVERRIDE;
+  const char* GetOutputExtension() CM_OVERRIDE { return ".pkg"; }
 
   // Run ProductBuild with the given command line, which will (if
   // successful) produce the given package file. Returns true if
