@@ -16,7 +16,7 @@ set(FILE_EXPRESSIONS "")
 foreach(expression
     ${expressions})
   math(EXPR expr "${expression}")
-  set(FILE_EXPRESSIONS "${FILE_EXPRESSIONS}TEST_EXPRESSION(${expression}, ${expr})\n")
+  string(APPEND FILE_EXPRESSIONS "TEST_EXPRESSION(${expression}, ${expr})\n")
 endforeach()
 
 configure_file(

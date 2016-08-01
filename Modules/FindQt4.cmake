@@ -764,7 +764,7 @@ if (QT_QMAKE_EXECUTABLE AND
   #############################################
   cmake_push_check_state()
   # Add QT_INCLUDE_DIR to CMAKE_REQUIRED_INCLUDES
-  set(CMAKE_REQUIRED_INCLUDES "${CMAKE_REQUIRED_INCLUDES};${QT_INCLUDE_DIR}")
+  string(APPEND CMAKE_REQUIRED_INCLUDES ";${QT_INCLUDE_DIR}")
   set(CMAKE_REQUIRED_QUIET ${Qt4_FIND_QUIETLY})
   # Check for Window system symbols (note: only one should end up being set)
   CHECK_CXX_SYMBOL_EXISTS(Q_WS_X11 "QtCore/qglobal.h" Q_WS_X11)

@@ -6,7 +6,7 @@ if(EXISTS ${RunCMake_TEST_BINARY_DIR}/check-debug.cmake)
   foreach(exe IN LISTS check_exes)
     execute_process(COMMAND ${exe} RESULT_VARIABLE res)
     if(NOT res EQUAL ${check_step})
-      set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}
+      string(APPEND RunCMake_TEST_FAILED "
  '${exe}' returned '${res}' but expected '${check_step}'
 ")
     endif()
@@ -16,15 +16,15 @@ if(EXISTS ${RunCMake_TEST_BINARY_DIR}/check-debug.cmake)
       set(lhs "${CMAKE_MATCH_1}")
       set(rhs "${CMAKE_MATCH_2}")
       if(NOT EXISTS "${lhs}")
-        set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}
+        string(APPEND RunCMake_TEST_FAILED "
  '${lhs}' missing
 ")
       elseif(NOT EXISTS "${rhs}")
-        set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}
+        string(APPEND RunCMake_TEST_FAILED "
  '${rhs}' missing
 ")
       elseif(NOT "${lhs}" IS_NEWER_THAN "${rhs}")
-        set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}
+        string(APPEND RunCMake_TEST_FAILED "
  '${lhs}' is not newer than '${rhs}'
 ")
       endif()

@@ -119,7 +119,7 @@ if(BUILD_TESTING)
     # add testing targets
     set(DART_EXPERIMENTAL_NAME Experimental)
     if(DART_EXPERIMENTAL_USE_PROJECT_NAME)
-      set(DART_EXPERIMENTAL_NAME "${DART_EXPERIMENTAL_NAME}${PROJECT_NAME}")
+      string(APPEND DART_EXPERIMENTAL_NAME "${PROJECT_NAME}")
     endif()
   endif ()
 

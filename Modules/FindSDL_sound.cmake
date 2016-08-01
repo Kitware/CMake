@@ -123,7 +123,7 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
   # To get multiple single variables to work, I must separate them with a "\;"
   # I could go back and modify the FindSDL.cmake module, but that's kind of painful.
   # The solution would be to try something like:
-  # set(SDL_TRY_COMPILE_LIBRARY_LIST "${SDL_TRY_COMPILE_LIBRARY_LIST}\;${CMAKE_THREAD_LIBS_INIT}")
+  # string(APPEND SDL_TRY_COMPILE_LIBRARY_LIST "\;${CMAKE_THREAD_LIBS_INIT}")
   # Instead, it was suggested on the mailing list to write a temporary CMakeLists.txt
   # with a temporary test project and invoke that with TRY_COMPILE.
   # See message thread "Figuring out dependencies for a library in order to build"
@@ -173,7 +173,7 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
    # would fix the problem.
    set(TMP_TRY_LIBS)
    foreach(lib ${SDL_SOUND_LIBRARY} ${SDL_LIBRARY})
-     set(TMP_TRY_LIBS "${TMP_TRY_LIBS} \"${lib}\"")
+     string(APPEND TMP_TRY_LIBS " \"${lib}\"")
    endforeach()
 
    # message("TMP_TRY_LIBS ${TMP_TRY_LIBS}")

@@ -1181,8 +1181,8 @@ if(Boost_INCLUDE_DIR)
   math(EXPR Boost_MINOR_VERSION "${Boost_VERSION} / 100 % 1000")
   math(EXPR Boost_SUBMINOR_VERSION "${Boost_VERSION} % 100")
 
-  set(Boost_ERROR_REASON
-    "${Boost_ERROR_REASON}Boost version: ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}\nBoost include path: ${Boost_INCLUDE_DIR}")
+  string(APPEND Boost_ERROR_REASON
+    "Boost version: ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}\nBoost include path: ${Boost_INCLUDE_DIR}")
   if(Boost_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
                    "version.hpp reveals boost "
@@ -1204,16 +1204,16 @@ if(Boost_INCLUDE_DIR)
     endif()
     if(NOT Boost_FOUND)
       # State that we found a version of Boost that is too new or too old.
-      set(Boost_ERROR_REASON
-        "${Boost_ERROR_REASON}\nDetected version of Boost is too ${_Boost_VERSION_AGE}. Requested version was ${Boost_FIND_VERSION_MAJOR}.${Boost_FIND_VERSION_MINOR}")
+      string(APPEND Boost_ERROR_REASON
+        "\nDetected version of Boost is too ${_Boost_VERSION_AGE}. Requested version was ${Boost_FIND_VERSION_MAJOR}.${Boost_FIND_VERSION_MINOR}")
       if (Boost_FIND_VERSION_PATCH)
-        set(Boost_ERROR_REASON
-          "${Boost_ERROR_REASON}.${Boost_FIND_VERSION_PATCH}")
+        string(APPEND Boost_ERROR_REASON
+          ".${Boost_FIND_VERSION_PATCH}")
       endif ()
       if (NOT Boost_FIND_VERSION_EXACT)
-        set(Boost_ERROR_REASON "${Boost_ERROR_REASON} (or newer)")
+        string(APPEND Boost_ERROR_REASON " (or newer)")
       endif ()
-      set(Boost_ERROR_REASON "${Boost_ERROR_REASON}.")
+      string(APPEND Boost_ERROR_REASON ".")
     endif ()
   else()
     # Caller will accept any Boost version.
@@ -1221,8 +1221,8 @@ if(Boost_INCLUDE_DIR)
   endif()
 else()
   set(Boost_FOUND 0)
-  set(Boost_ERROR_REASON
-    "${Boost_ERROR_REASON}Unable to find the Boost header files. Please set BOOST_ROOT to the root directory containing Boost or BOOST_INCLUDEDIR to the directory containing Boost's headers.")
+  string(APPEND Boost_ERROR_REASON
+    "Unable to find the Boost header files. Please set BOOST_ROOT to the root directory containing Boost or BOOST_INCLUDEDIR to the directory containing Boost's headers.")
 endif()
 
 # ------------------------------------------------------------------------
@@ -1302,15 +1302,15 @@ if(WIN32 AND Boost_USE_DEBUG_RUNTIME)
   if("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC"
           OR "${CMAKE_CXX_COMPILER}" MATCHES "icl"
           OR "${CMAKE_CXX_COMPILER}" MATCHES "icpc")
-    set(_boost_DEBUG_ABI_TAG "${_boost_DEBUG_ABI_TAG}g")
+    string(APPEND _boost_DEBUG_ABI_TAG "g")
   endif()
 endif()
 #  y        using special debug build of python
 if(Boost_USE_DEBUG_PYTHON)
-  set(_boost_DEBUG_ABI_TAG "${_boost_DEBUG_ABI_TAG}y")
+  string(APPEND _boost_DEBUG_ABI_TAG "y")
 endif()
 #  d        using a debug version of your code
-set(_boost_DEBUG_ABI_TAG "${_boost_DEBUG_ABI_TAG}d")
+string(APPEND _boost_DEBUG_ABI_TAG "d")
 #  p        using the STLport standard library rather than the
 #           default one supplied with your compiler
 if(Boost_USE_STLPORT)
@@ -1640,26 +1640,26 @@ if(Boost_FOUND)
     set(Boost_FOUND 0)
     # We were unable to find some libraries, so generate a sensible
     # error message that lists the libraries we were unable to find.
-    set(Boost_ERROR_REASON
-      "${Boost_ERROR_REASON}\nCould not find the following")
+    string(APPEND Boost_ERROR_REASON
+      "\nCould not find the following")
     if(Boost_USE_STATIC_LIBS)
-      set(Boost_ERROR_REASON "${Boost_ERROR_REASON} static")
+      string(APPEND Boost_ERROR_REASON " static")
     endif()
-    set(Boost_ERROR_REASON
-      "${Boost_ERROR_REASON} Boost libraries:\n")
+    string(APPEND Boost_ERROR_REASON
+      " Boost libraries:\n")
     foreach(COMPONENT ${_Boost_MISSING_COMPONENTS})
-      set(Boost_ERROR_REASON
-        "${Boost_ERROR_REASON}        ${Boost_NAMESPACE}_${COMPONENT}\n")
+      string(APPEND Boost_ERROR_REASON
+        "        ${Boost_NAMESPACE}_${COMPONENT}\n")
     endforeach()
 
     list(LENGTH Boost_FIND_COMPONENTS Boost_NUM_COMPONENTS_WANTED)
     list(LENGTH _Boost_MISSING_COMPONENTS Boost_NUM_MISSING_COMPONENTS)
     if (${Boost_NUM_COMPONENTS_WANTED} EQUAL ${Boost_NUM_MISSING_COMPONENTS})
-      set(Boost_ERROR_REASON
-        "${Boost_ERROR_REASON}No Boost libraries were found. You may need to set BOOST_LIBRARYDIR to the directory containing Boost libraries or BOOST_ROOT to the location of Boost.")
+      string(APPEND Boost_ERROR_REASON
+        "No Boost libraries were found. You may need to set BOOST_LIBRARYDIR to the directory containing Boost libraries or BOOST_ROOT to the location of Boost.")
     else ()
-      set(Boost_ERROR_REASON
-        "${Boost_ERROR_REASON}Some (but not all) of the required Boost libraries were found. You may need to install these additional Boost libraries. Alternatively, set BOOST_LIBRARYDIR to the directory containing Boost libraries or BOOST_ROOT to the location of Boost.")
+      string(APPEND Boost_ERROR_REASON
+        "Some (but not all) of the required Boost libraries were found. You may need to install these additional Boost libraries. Alternatively, set BOOST_LIBRARYDIR to the directory containing Boost libraries or BOOST_ROOT to the location of Boost.")
     endif ()
   endif ()
 

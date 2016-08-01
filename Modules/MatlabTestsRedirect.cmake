@@ -46,7 +46,7 @@ get_filename_component(unittest_file_to_run_name "${unittest_file_to_run}" NAME_
 set(concat_string '${unittest_file_directory}')
 foreach(s IN LISTS additional_paths)
   if(NOT "${s}" STREQUAL "")
-    set(concat_string "${concat_string}, '${s}'")
+    string(APPEND concat_string ", '${s}'")
   endif()
 endforeach()
 

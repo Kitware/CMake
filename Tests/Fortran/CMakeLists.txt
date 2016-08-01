@@ -188,7 +188,7 @@ if(TEST_MODULE_DEPENDS)
   if("${testf_BINARY_DIR}" MATCHES " ")
     # Our build tree has a space, so the build tool supports spaces.
     # Test using modules from a path with spaces.
-    set(External_BINARY_DIR "${External_BINARY_DIR} Build")
+    string(APPEND External_BINARY_DIR " Build")
   endif()
   add_custom_command(
     OUTPUT ${testf_BINARY_DIR}/ExternalProject

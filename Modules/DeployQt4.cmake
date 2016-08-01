@@ -247,7 +247,7 @@ function(install_qt4_plugin_path plugin executable copy installed_plugin_path_va
                                 set(plugins_path ".")
                         endif()
                         if(plugins_dir)
-                                set(plugins_path "${plugins_path}/${plugins_dir}")
+                                string(APPEND plugins_path "/${plugins_dir}")
                         endif()
                 endif()
 
@@ -263,7 +263,7 @@ function(install_qt4_plugin_path plugin executable copy installed_plugin_path_va
                         get_filename_component(plugin_group "${plugin_path}" NAME)
                         set(${plugin_group_var} "${plugin_group}")
                 endif()
-                set(plugins_path "${plugins_path}/${plugin_group}")
+                string(APPEND plugins_path "/${plugin_group}")
 
                 if(${copy})
                         file(MAKE_DIRECTORY "${plugins_path}")

@@ -58,8 +58,8 @@ mark_as_advanced(
 
 if(APPLE)
 # this is a hack for now
-  set(CMAKE_SHARED_MODULE_CREATE_C_FLAGS
-   "${CMAKE_SHARED_MODULE_CREATE_C_FLAGS} -Wl,-flat_namespace")
+  string(APPEND CMAKE_SHARED_MODULE_CREATE_C_FLAGS
+   " -Wl,-flat_namespace")
   foreach(symbol
     __efree
     __emalloc
@@ -82,8 +82,8 @@ if(APPLE)
     _zend_wrong_param_count
     _zval_used_for_init
     )
-    set(CMAKE_SHARED_MODULE_CREATE_C_FLAGS
-      "${CMAKE_SHARED_MODULE_CREATE_C_FLAGS},-U,${symbol}")
+    string(APPEND CMAKE_SHARED_MODULE_CREATE_C_FLAGS
+      ",-U,${symbol}")
   endforeach()
 endif()
 

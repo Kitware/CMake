@@ -200,7 +200,7 @@ function(_pkg_create_imp_target _prefix _no_cmake_path _no_cmake_environment_pat
     set(_find_opts "NO_CMAKE_PATH")
   endif()
   if(_no_cmake_environment_path)
-    set(_find_opts "${_find_opts} NO_CMAKE_ENVIRONMENT_PATH")
+    string(APPEND _find_opts " NO_CMAKE_ENVIRONMENT_PATH")
   endif()
 
   foreach (flag IN LISTS ${_prefix}_LDFLAGS)

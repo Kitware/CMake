@@ -645,7 +645,7 @@ macro(cpack_ifw_add_repository reponame)
   endforeach()
 
   list(APPEND CPACK_IFW_REPOSITORIES_ALL ${reponame})
-  set(_CPACK_IFWREPO_STR "${_CPACK_IFWREPO_STR}list(APPEND CPACK_IFW_REPOSITORIES_ALL ${reponame})\n")
+  string(APPEND _CPACK_IFWREPO_STR "list(APPEND CPACK_IFW_REPOSITORIES_ALL ${reponame})\n")
 
   if(CPack_CMake_INCLUDED)
     file(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${_CPACK_IFWREPO_STR}")
@@ -687,7 +687,7 @@ macro(cpack_ifw_update_repository reponame)
     OR CPACK_IFW_REPOSITORY_${_CPACK_IFWREPO_UNAME}_REMOVE
     OR CPACK_IFW_REPOSITORY_${_CPACK_IFWREPO_UNAME}_REPLACE)
     list(APPEND CPACK_IFW_REPOSITORIES_ALL ${reponame})
-    set(_CPACK_IFWREPO_STR "${_CPACK_IFWREPO_STR}list(APPEND CPACK_IFW_REPOSITORIES_ALL ${reponame})\n")
+    string(APPEND _CPACK_IFWREPO_STR "list(APPEND CPACK_IFW_REPOSITORIES_ALL ${reponame})\n")
   else()
     set(_CPACK_IFWREPO_STR)
   endif()

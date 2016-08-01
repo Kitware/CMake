@@ -59,7 +59,7 @@ if(CTEST_USE_LAUNCHERS)
     "${__launch_common_options} --output <OUTPUT>")
 
   if("${CMAKE_GENERATOR}" MATCHES "Ninja")
-    set(__launch_compile_options "${__launch_compile_options} --filter-prefix <CMAKE_CL_SHOWINCLUDES_PREFIX>")
+    string(APPEND __launch_compile_options " --filter-prefix <CMAKE_CL_SHOWINCLUDES_PREFIX>")
   endif()
 
   set(CTEST_LAUNCH_COMPILE

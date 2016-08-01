@@ -650,7 +650,7 @@ else()
 
       # do we need additionial wx GL stuff like GLCanvas ?
       if(WXWINDOWS_USE_GL)
-        set(WX_CONFIG_ARGS_LIBS "${WX_CONFIG_ARGS_LIBS} --gl-libs" )
+        string(APPEND WX_CONFIG_ARGS_LIBS " --gl-libs" )
       endif()
       ##message("DBG: WX_CONFIG_ARGS_LIBS=${WX_CONFIG_ARGS_LIBS}===")
 

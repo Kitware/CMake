@@ -180,5 +180,5 @@ endforeach()
 
 set(FOREACH_CONCAT "")
 foreach (INDEX a;b;c;d;e;f;g)
-  set(FOREACH_CONCAT "${FOREACH_CONCAT}${INDEX}")
+  string(APPEND FOREACH_CONCAT "${INDEX}")
 endforeach()

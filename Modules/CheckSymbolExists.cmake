@@ -71,11 +71,11 @@ macro(_CHECK_SYMBOL_EXISTS SOURCEFILE SYMBOL FILES VARIABLE)
       set(CMAKE_SYMBOL_EXISTS_INCLUDES)
     endif()
     foreach(FILE ${FILES})
-      set(CMAKE_CONFIGURABLE_FILE_CONTENT
-        "${CMAKE_CONFIGURABLE_FILE_CONTENT}#include <${FILE}>\n")
+      string(APPEND CMAKE_CONFIGURABLE_FILE_CONTENT
+        "#include <${FILE}>\n")
     endforeach()
-    set(CMAKE_CONFIGURABLE_FILE_CONTENT
-      "${CMAKE_CONFIGURABLE_FILE_CONTENT}\nint main(int argc, char** argv)\n{\n  (void)argv;\n#ifndef ${SYMBOL}\n  return ((int*)(&${SYMBOL}))[argc];\n#else\n  (void)argc;\n  return 0;\n#endif\n}\n")
+    string(APPEND CMAKE_CONFIGURABLE_FILE_CONTENT
+      "\nint main(int argc, char** argv)\n{\n  (void)argv;\n#ifndef ${SYMBOL}\n  return ((int*)(&${SYMBOL}))[argc];\n#else\n  (void)argc;\n  return 0;\n#endif\n}\n")
 
     configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
       "${SOURCEFILE}" @ONLY)

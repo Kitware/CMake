@@ -333,7 +333,7 @@ endif()
 # Choose a unique version.
 string(REGEX REPLACE "-.*$" "" version ${CMAKE_VERSION})
 string(RANDOM LENGTH 4 ALPHABET "0123456789" v)
-set(version "${version}.${v}")
+string(APPEND version ".${v}")
 
 message(STATUS "Preparing export(PACKAGE) test project")
 try_compile(EXPORTER_COMPILED

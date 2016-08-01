@@ -1,8 +1,8 @@
 #
 # Create exe.
 #
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTEST_CXX_FLAGS")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTEST_C_FLAGS")
+string(APPEND CMAKE_CXX_FLAGS " -DTEST_CXX_FLAGS")
+string(APPEND CMAKE_C_FLAGS " -DTEST_C_FLAGS")
 
 # Create an imported target for if(TARGET) test below.
 add_library(ExeImportedTarget UNKNOWN IMPORTED)

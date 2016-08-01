@@ -40,13 +40,13 @@ function(getMissingShlibsErrorExtra FILE RESULT_VAR)
       set(error_extra " Extra: install files '${deb_install_files}'")
 
       if(deb_install_files_errors)
-        set(error_extra "${error_extra}; errors \"${deb_install_files_errors}\"")
+        string(APPEND error_extra "; errors \"${deb_install_files_errors}\"")
       endif()
 
       find_program(READELF_EXECUTABLE NAMES readelf)
 
       if(READELF_EXECUTABLE)
-        set(error_extra "${error_extra}; readelf \"\n")
+        string(APPEND error_extra "; readelf \"\n")
 
         # Only dynamically linked ELF files are included
         # Extract only file name infront of ":"
@@ -61,13 +61,13 @@ function(getMissingShlibsErrorExtra FILE RESULT_VAR)
               ERROR_VARIABLE err_
               OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-            set(error_extra "${error_extra} name '${CMAKE_MATCH_1}'\n result '${result}'\n output '${output}'\n error '${err_}'\n")
+            string(APPEND error_extra " name '${CMAKE_MATCH_1}'\n result '${result}'\n output '${output}'\n error '${err_}'\n")
           endif()
         endforeach()
 
-        set(error_extra "${error_extra}\"")
+        string(APPEND error_extra "\"")
       else()
-        set(error_extra "${error_extra}; error readelf missing")
+        string(APPEND error_extra "; error readelf missing")
       endif()
     endif()
 

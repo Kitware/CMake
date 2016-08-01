@@ -327,7 +327,7 @@ function (interrogate_mpi_compiler lang try_libs)
 
         foreach(FLAG ${MPI_ALL_COMPILE_FLAGS})
           if (MPI_COMPILE_FLAGS_WORK)
-            set(MPI_COMPILE_FLAGS_WORK "${MPI_COMPILE_FLAGS_WORK} ${FLAG}")
+            string(APPEND MPI_COMPILE_FLAGS_WORK " ${FLAG}")
           else()
             set(MPI_COMPILE_FLAGS_WORK ${FLAG})
           endif()
@@ -376,7 +376,7 @@ function (interrogate_mpi_compiler lang try_libs)
         set(MPI_LINK_FLAGS_WORK)
         foreach(FLAG ${MPI_ALL_LINK_FLAGS})
           if (MPI_LINK_FLAGS_WORK)
-            set(MPI_LINK_FLAGS_WORK "${MPI_LINK_FLAGS_WORK} ${FLAG}")
+            string(APPEND MPI_LINK_FLAGS_WORK " ${FLAG}")
           else()
             set(MPI_LINK_FLAGS_WORK ${FLAG})
           endif()
@@ -398,8 +398,8 @@ function (interrogate_mpi_compiler lang try_libs)
         # in the showme list that can only be found in the implicit
         # link directories of the compiler.
         if (DEFINED CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES)
-          set(MPI_LINK_PATH
-            "${MPI_LINK_PATH};${CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES}")
+          string(APPEND MPI_LINK_PATH
+            ";${CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES}")
         endif ()
 
         # Determine full path names for all of the libraries that one needs

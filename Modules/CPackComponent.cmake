@@ -409,11 +409,11 @@ macro(cpack_add_component compname)
     # moduled was included.
     if(NOT CPACK_COMPONENTS_ALL_SET_BY_USER)
       get_cmake_property(_CPACK_ADDCOMP_COMPONENTS COMPONENTS)
-      set(_CPACK_ADDCOMP_STR "${_CPACK_ADDCOMP_STR}\nSET(CPACK_COMPONENTS_ALL")
+      string(APPEND _CPACK_ADDCOMP_STR "\nSET(CPACK_COMPONENTS_ALL")
       foreach(COMP ${_CPACK_ADDCOMP_COMPONENTS})
-       set(_CPACK_ADDCOMP_STR "${_CPACK_ADDCOMP_STR} ${COMP}")
+       string(APPEND _CPACK_ADDCOMP_STR " ${COMP}")
       endforeach()
-      set(_CPACK_ADDCOMP_STR "${_CPACK_ADDCOMP_STR})\n")
+      string(APPEND _CPACK_ADDCOMP_STR ")\n")
     endif()
   endif()
 
@@ -501,8 +501,8 @@ macro(cpack_add_install_type insttype)
 
   set(_CPACK_INSTTYPE_STR
     "\n# Configuration for installation type \"${insttype}\"\n")
-  set(_CPACK_INSTTYPE_STR
-    "${_CPACK_INSTTYPE_STR}list(APPEND CPACK_ALL_INSTALL_TYPES ${insttype})\n")
+  string(APPEND _CPACK_INSTTYPE_STR
+    "list(APPEND CPACK_ALL_INSTALL_TYPES ${insttype})\n")
   cpack_append_string_variable_set_command(
     CPACK_INSTALL_TYPE_${_CPACK_INSTTYPE_UNAME}_DISPLAY_NAME
     _CPACK_INSTTYPE_STR)

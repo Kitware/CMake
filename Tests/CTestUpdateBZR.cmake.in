@@ -4,7 +4,7 @@
 #-----------------------------------------------------------------------------
 # Test in a directory next to this script.
 get_filename_component(TOP "${CMAKE_CURRENT_LIST_FILE}" PATH)
-set(TOP "${TOP}/@CTestUpdateBZR_DIR@")
+string(APPEND TOP "/@CTestUpdateBZR_DIR@")
 
 # Include code common to all update tests.
 include("@CMAKE_CURRENT_SOURCE_DIR@/CTestUpdateCommon.cmake")

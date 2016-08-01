@@ -4,7 +4,7 @@
 #-----------------------------------------------------------------------------
 # Test in a directory next to this script.
 get_filename_component(TOP "${CMAKE_CURRENT_LIST_FILE}" PATH)
-set(TOP "${TOP}/@CTestUpdateSVN_DIR@")
+string(APPEND TOP "/@CTestUpdateSVN_DIR@")
 set(UPDATE_GLOBAL_ELEMENTS SVNPath)
 
 # Include code common to all update tests.
