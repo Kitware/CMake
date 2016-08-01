@@ -36,6 +36,20 @@ add_custom_target(AppBundleTest ALL
 
 add_dependencies(AppBundleTest AppBundle)
 
+# with custom extension
+
+if (NOT TEST_IOS AND NOT TEST_WATCHOS AND NOT TEST_TVOS)
+  add_executable(AppBundleExt MACOSX_BUNDLE main.m)
+  set_target_properties(AppBundleExt PROPERTIES BUNDLE_EXTENSION "foo")
+  install(TARGETS AppBundleExt BUNDLE DESTINATION FooExtension)
+
+  add_custom_target(AppBundleExtTest ALL
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_FILE:AppBundleExt>" "$<TARGET_FILE:AppBundleExt>.old")
+
+  add_dependencies(AppBundleExtTest AppBundleExt)
+endif()
+
 # Framework (not supported for iOS on Xcode < 6)
 
 if(NOT TEST_IOS OR NOT XCODE_VERSION VERSION_LESS 6)
@@ -47,6 +61,19 @@ if(NOT TEST_IOS OR NOT XCODE_VERSION VERSION_LESS 6)
       "$<TARGET_FILE:Framework>" "$<TARGET_FILE:Framework>.old")
 
   add_dependencies(FrameworkTest Framework)
+
+  # with custom extension
+
+  add_library(FrameworkExt SHARED main.c)
+  set_target_properties(FrameworkExt PROPERTIES FRAMEWORK TRUE)
+  set_target_properties(FrameworkExt PROPERTIES BUNDLE_EXTENSION "foo")
+  install(TARGETS FrameworkExt FRAMEWORK DESTINATION FooExtension)
+
+  add_custom_target(FrameworkExtTest ALL
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_FILE:FrameworkExt>" "$<TARGET_FILE:FrameworkExt>.old")
+
+  add_dependencies(FrameworkExtTest FrameworkExt)
 endif()
 
 # Bundle
@@ -60,4 +87,17 @@ if(NOT CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE)
       "$<TARGET_FILE:Bundle>" "$<TARGET_FILE:Bundle>.old")
 
   add_dependencies(BundleTest Bundle)
+
+  # with custom extension
+
+  add_library(BundleExt MODULE main.c)
+  set_target_properties(BundleExt PROPERTIES BUNDLE TRUE)
+  set_target_properties(BundleExt PROPERTIES BUNDLE_EXTENSION "foo")
+  install(TARGETS BundleExt LIBRARY DESTINATION FooExtension)
+
+  add_custom_target(BundleExtTest ALL
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "$<TARGET_FILE:BundleExt>" "$<TARGET_FILE:BundleExt>.old")
+
+  add_dependencies(BundleExtTest BundleExt)
 endif()

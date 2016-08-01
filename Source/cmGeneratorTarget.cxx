@@ -1350,7 +1350,12 @@ std::string cmGeneratorTarget::GetAppBundleDirectory(const std::string& config,
                                                      bool contentOnly) const
 {
   std::string fpath = this->GetFullName(config, false);
-  fpath += ".app";
+  fpath += ".";
+  const char* ext = this->GetProperty("BUNDLE_EXTENSION");
+  if (!ext) {
+    ext = "app";
+  }
+  fpath += ext;
   if (!this->Makefile->PlatformIsAppleIos()) {
     fpath += "/Contents";
     if (!contentOnly) {
@@ -1395,7 +1400,12 @@ std::string cmGeneratorTarget::GetFrameworkDirectory(const std::string& config,
 {
   std::string fpath;
   fpath += this->GetOutputName(config, false);
-  fpath += ".framework";
+  fpath += ".";
+  const char* ext = this->GetProperty("BUNDLE_EXTENSION");
+  if (!ext) {
+    ext = "framework";
+  }
+  fpath += ext;
   if (!rootDir && !this->Makefile->PlatformIsAppleIos()) {
     fpath += "/Versions/";
     fpath += this->GetFrameworkVersion();
@@ -3011,7 +3021,13 @@ void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
   std::string fw_prefix;
   if (this->IsFrameworkOnApple()) {
     fw_prefix = this->GetOutputName(config, false);
-    fw_prefix += ".framework/";
+    fw_prefix += ".";
+    const char* ext = this->GetProperty("BUNDLE_EXTENSION");
+    if (!ext) {
+      ext = "framework";
+    }
+    fw_prefix += ext;
+    fw_prefix += "/";
     targetPrefix = fw_prefix.c_str();
     targetSuffix = CM_NULLPTR;
   }
