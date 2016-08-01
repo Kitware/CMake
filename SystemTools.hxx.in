@@ -984,6 +984,7 @@ private:
     std::vector<std::string>(),
     bool no_system_path = false);
 
+  static const char* GetEnvImpl(const char* key);
 
   /**
    * Path translation table from dir to refdir
