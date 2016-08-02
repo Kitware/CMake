@@ -5,7 +5,7 @@ Install directory used by :command:`install`.
 
 If ``make install`` is invoked or ``INSTALL`` is built, this directory is
 prepended onto all install directories.  This variable defaults to
-``/usr/local`` on UNIX and ``c:/Program Files`` on Windows.
+``/usr/local`` on UNIX and ``c:/Program Files/${PROJECT_NAME}`` on Windows.
 
 On UNIX one can use the ``DESTDIR`` mechanism in order to relocate the
 whole installation.  ``DESTDIR`` means DESTination DIRectory.  It is
