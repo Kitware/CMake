@@ -129,6 +129,10 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
     set(_protobuf_include_path -I ${CMAKE_CURRENT_SOURCE_DIR})
   endif()
 
+  if(DEFINED PROTOBUF_IMPORT_DIRS AND NOT DEFINED Protobuf_IMPORT_DIRS)
+    set(Protobuf_IMPORT_DIRS "${PROTOBUF_IMPORT_DIRS}")
+  endif()
+
   if(DEFINED Protobuf_IMPORT_DIRS)
     foreach(DIR ${Protobuf_IMPORT_DIRS})
       get_filename_component(ABS_PATH ${DIR} ABSOLUTE)
@@ -181,6 +185,10 @@ function(PROTOBUF_GENERATE_PYTHON SRCS)
     endforeach()
   else()
     set(_protobuf_include_path -I ${CMAKE_CURRENT_SOURCE_DIR})
+  endif()
+
+  if(DEFINED PROTOBUF_IMPORT_DIRS AND NOT DEFINED Protobuf_IMPORT_DIRS)
+    set(Protobuf_IMPORT_DIRS "${PROTOBUF_IMPORT_DIRS}")
   endif()
 
   if(DEFINED Protobuf_IMPORT_DIRS)
