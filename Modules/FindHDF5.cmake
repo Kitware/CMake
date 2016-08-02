@@ -332,7 +332,7 @@ macro( _HDF5_parse_compile_line
     set( RE " -D([^ ]*)")
     string( REGEX MATCHALL "${RE}" definition_flags "${${compile_line_var}}" )
     foreach( DEF IN LISTS definition_flags )
-        string( REGEX REPLACE "${RE}" "\\1" DEF "${DEF}" )
+        string( STRIP "${DEF}" DEF )
         list( APPEND ${definitions} ${DEF} )
     endforeach()
 
