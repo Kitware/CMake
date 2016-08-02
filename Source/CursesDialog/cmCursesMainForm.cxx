@@ -1128,7 +1128,7 @@ const char* cmCursesMainForm::s_ConstHelpMessage =
   " C-u : up one page\n\n"
   "Editing options: "
   "To change an option  press enter or return. If the current options is a "
-  "boolean, this will toggle it's value. "
+  "boolean, this will toggle its value. "
   "Otherwise, ccmake will enter edit mode. In this mode you can edit an "
   "option using arrow keys and backspace. Alternatively, you can use the "
   "following keys:\n"
