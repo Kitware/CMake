@@ -84,9 +84,9 @@ void Directory::Clear()
 
 } // namespace KWSYS_NAMESPACE
 
-// First microsoft compilers
+// First Windows platforms
 
-#if defined(_MSC_VER) || defined(__WATCOMC__)
+#if defined(_WIN32) && !defined(__CYGWIN__)
 #include <windows.h>
 #include <io.h>
 #include <ctype.h>
@@ -97,15 +97,25 @@ void Directory::Clear()
 #include <sys/stat.h>
 #include <sys/types.h>
 
+// Wide function names can vary depending on compiler:
+#ifdef __BORLANDC__
+# define _wfindfirst_func __wfindfirst
+# define _wfindnext_func __wfindnext
+#else
+# define _wfindfirst_func _wfindfirst
+# define _wfindnext_func _wfindnext
+#endif
+
 namespace KWSYS_NAMESPACE
 {
 
 bool Directory::Load(const std::string& name)
 {
   this->Clear();
-#if _MSC_VER < 1300
+#if (defined(_MSC_VER) && _MSC_VER < 1300) || defined(__BORLANDC__)
+  // Older Visual C++ and Embarcadero compilers.
   long srchHandle;
-#else
+#else // Newer Visual C++
   intptr_t srchHandle;
 #endif
   char* buf;
@@ -132,7 +142,7 @@ bool Directory::Load(const std::string& name)
   struct _wfinddata_t data;      // data of current file
 
   // Now put them into the file array
-  srchHandle = _wfindfirst((wchar_t*)Encoding::ToWide(buf).c_str(), &data);
+  srchHandle = _wfindfirst_func((wchar_t*)Encoding::ToWide(buf).c_str(), &data);
   delete [] buf;
 
   if ( srchHandle == -1 )
@@ -145,16 +155,17 @@ bool Directory::Load(const std::string& name)
     {
     this->Internal->Files.push_back(Encoding::ToNarrow(data.name));
     }
-  while ( _wfindnext(srchHandle, &data) != -1 );
+  while ( _wfindnext_func(srchHandle, &data) != -1 );
   this->Internal->Path = name;
   return _findclose(srchHandle) != -1;
 }
 
 unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name)
 {
-#if _MSC_VER < 1300
+#if (defined(_MSC_VER) && _MSC_VER < 1300) || defined(__BORLANDC__)
+  // Older Visual C++ and Embarcadero compilers.
   long srchHandle;
-#else
+#else // Newer Visual C++
   intptr_t srchHandle;
 #endif
   char* buf;
@@ -172,7 +183,7 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name)
   struct _wfinddata_t data;      // data of current file
 
   // Now put them into the file array
-  srchHandle = _wfindfirst((wchar_t*)Encoding::ToWide(buf).c_str(), &data);
+  srchHandle = _wfindfirst_func((wchar_t*)Encoding::ToWide(buf).c_str(), &data);
   delete [] buf;
 
   if ( srchHandle == -1 )
@@ -186,7 +197,7 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name)
     {
     count++;
     }
-  while ( _wfindnext(srchHandle, &data) != -1 );
+  while ( _wfindnext_func(srchHandle, &data) != -1 );
   _findclose(srchHandle);
   return count;
 }
