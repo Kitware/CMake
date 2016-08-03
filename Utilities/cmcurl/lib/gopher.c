@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -75,7 +75,7 @@ const struct Curl_handler Curl_handler_gopher = {
 static CURLcode gopher_do(struct connectdata *conn, bool *done)
 {
   CURLcode result=CURLE_OK;
-  struct SessionHandle *data=conn->data;
+  struct Curl_easy *data=conn->data;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 
   curl_off_t *bytecount = &data->req.bytecount;
@@ -83,16 +83,18 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   char *sel;
   char *sel_org = NULL;
   ssize_t amount, k;
+  int len;
 
   *done = TRUE; /* unconditionally */
 
   /* Create selector. Degenerate cases: / and /1 => convert to "" */
-  if(strlen(path) <= 2)
+  if(strlen(path) <= 2) {
     sel = (char *)"";
+    len = (int)strlen(sel);
+  }
   else {
     char *newp;
     size_t j, i;
-    int len;
 
     /* Otherwise, drop / and the first character (i.e., item type) ... */
     newp = path;
@@ -113,7 +115,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
 
   /* We use Curl_write instead of Curl_sendf to make sure the entire buffer is
      sent, which could be sizeable with long selectors. */
-  k = curlx_uztosz(strlen(sel));
+  k = curlx_uztosz(len);
 
   for(;;) {
     result = Curl_write(conn, sockfd, sel, k, &amount);

@@ -5,11 +5,11 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -76,9 +76,8 @@
 #include "curl_base64.h"
 #include "rawstr.h"
 #include "connect.h"
+/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
-
-/* The last #include files should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -193,7 +192,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   LDAPMessage *ldapmsg = NULL;
   LDAPMessage *entryIterator;
   int num = 0;
-  struct SessionHandle *data=conn->data;
+  struct Curl_easy *data=conn->data;
   int ldap_proto = LDAP_VERSION3;
   int ldap_ssl = 0;
   char *val_b64 = NULL;
@@ -228,7 +227,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     goto quit;
   }
 
-  /* Get the URL scheme ( either ldap or ldaps ) */
+  /* Get the URL scheme (either ldap or ldaps) */
   if(conn->given->flags & PROTOPT_SSL)
     ldap_ssl = 1;
   infof(data, "LDAP local: trying to establish %s connection\n",
@@ -717,7 +716,7 @@ static int str2scope (const char *p)
      return LDAP_SCOPE_BASE;
   if(strequal(p, "sub"))
      return LDAP_SCOPE_SUBTREE;
-  if(strequal( p, "subtree"))
+  if(strequal(p, "subtree"))
      return LDAP_SCOPE_SUBTREE;
   return (-1);
 }
