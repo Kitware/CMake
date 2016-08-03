@@ -621,7 +621,8 @@ if(NOT CUDA_TOOLKIT_ROOT_DIR AND NOT CMAKE_CROSSCOMPILING)
   # Now search default paths
   find_path(CUDA_TOOLKIT_ROOT_DIR
     NAMES nvcc nvcc.exe
-    PATHS /usr/local/bin
+    PATHS /opt/cuda/bin
+          /usr/local/bin
           /usr/local/cuda/bin
     DOC "Toolkit location."
     )
