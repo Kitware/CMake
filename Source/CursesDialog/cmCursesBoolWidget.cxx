@@ -27,8 +27,9 @@ cmCursesBoolWidget::cmCursesBoolWidget(int width, int height, int left,
 bool cmCursesBoolWidget::HandleInput(int& key, cmCursesMainForm*, WINDOW* w)
 {
 
+  // toggle boolean values with enter or space
   // 10 == enter
-  if (key == 10 || key == KEY_ENTER) {
+  if (key == 10 || key == KEY_ENTER || key == ' ') {
     if (this->GetValueAsBool()) {
       this->SetValueAsBool(false);
     } else {
