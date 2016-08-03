@@ -523,7 +523,7 @@ void SystemTools::GetPath(std::vector<std::string>& path, const char* env)
     }
 }
 
-const char* SystemTools::GetEnv(const char* key)
+const char* SystemTools::GetEnvImpl(const char* key)
 {
   const char *v = 0;
 #if defined(_WIN32)
@@ -540,9 +540,14 @@ const char* SystemTools::GetEnv(const char* key)
   return v;
 }
 
+const char* SystemTools::GetEnv(const char* key)
+{
+  return SystemTools::GetEnvImpl(key);
+}
+
 const char* SystemTools::GetEnv(const std::string& key)
 {
-  return SystemTools::GetEnv(key.c_str());
+  return SystemTools::GetEnvImpl(key.c_str());
 }
 
 bool SystemTools::GetEnv(const char* key, std::string& result)
