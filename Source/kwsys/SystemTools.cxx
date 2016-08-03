@@ -1321,7 +1321,12 @@ bool SystemTools::FileExists(const std::string& filename)
             SystemTools::ConvertToWindowsExtendedPath(filename).c_str())
           != INVALID_FILE_ATTRIBUTES);
 #else
+// SCO OpenServer 5.0.7/3.2's command has 711 permission.
+#if defined(_SCO_DS)
+  return access(filename.c_str(), F_OK) == 0;
+#else
   return access(filename.c_str(), R_OK) == 0;
+#endif
 #endif
 }
 
