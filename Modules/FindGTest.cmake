@@ -226,19 +226,19 @@ if(GTEST_FOUND)
                 IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
                 IMPORTED_LOCATION "${GTEST_LIBRARY}")
         endif()
-        if(EXISTS "${GTEST_LIBRARY_DEBUG}")
-            set_property(TARGET GTest::GTest APPEND PROPERTY
-                IMPORTED_CONFIGURATIONS DEBUG)
-            set_target_properties(GTest::GTest PROPERTIES
-                IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
-                IMPORTED_LOCATION_DEBUG "${GTEST_LIBRARY_DEBUG}")
-        endif()
         if(EXISTS "${GTEST_LIBRARY_RELEASE}")
             set_property(TARGET GTest::GTest APPEND PROPERTY
                 IMPORTED_CONFIGURATIONS RELEASE)
             set_target_properties(GTest::GTest PROPERTIES
                 IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
                 IMPORTED_LOCATION_RELEASE "${GTEST_LIBRARY_RELEASE}")
+        endif()
+        if(EXISTS "${GTEST_LIBRARY_DEBUG}")
+            set_property(TARGET GTest::GTest APPEND PROPERTY
+                IMPORTED_CONFIGURATIONS DEBUG)
+            set_target_properties(GTest::GTest PROPERTIES
+                IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
+                IMPORTED_LOCATION_DEBUG "${GTEST_LIBRARY_DEBUG}")
         endif()
       endif()
       if(NOT TARGET GTest::Main)
@@ -250,19 +250,19 @@ if(GTEST_FOUND)
                   IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
                   IMPORTED_LOCATION "${GTEST_MAIN_LIBRARY}")
           endif()
-          if(EXISTS "${GTEST_MAIN_LIBRARY_DEBUG}")
-            set_property(TARGET GTest::Main APPEND PROPERTY
-                IMPORTED_CONFIGURATIONS DEBUG)
-            set_target_properties(GTest::Main PROPERTIES
-                IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
-                IMPORTED_LOCATION_DEBUG "${GTEST_MAIN_LIBRARY_DEBUG}")
-          endif()
           if(EXISTS "${GTEST_MAIN_LIBRARY_RELEASE}")
             set_property(TARGET GTest::Main APPEND PROPERTY
                 IMPORTED_CONFIGURATIONS RELEASE)
             set_target_properties(GTest::Main PROPERTIES
                 IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
                 IMPORTED_LOCATION_RELEASE "${GTEST_MAIN_LIBRARY_RELEASE}")
+          endif()
+          if(EXISTS "${GTEST_MAIN_LIBRARY_DEBUG}")
+            set_property(TARGET GTest::Main APPEND PROPERTY
+                IMPORTED_CONFIGURATIONS DEBUG)
+            set_target_properties(GTest::Main PROPERTIES
+                IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
+                IMPORTED_LOCATION_DEBUG "${GTEST_MAIN_LIBRARY_DEBUG}")
           endif()
     endif()
 endif()

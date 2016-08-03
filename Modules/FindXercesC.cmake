@@ -122,19 +122,19 @@ if(XercesC_FOUND)
         IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
         IMPORTED_LOCATION "${XercesC_LIBRARY}")
     endif()
-    if(EXISTS "${XercesC_LIBRARY_DEBUG}")
-      set_property(TARGET XercesC::XercesC APPEND PROPERTY
-        IMPORTED_CONFIGURATIONS DEBUG)
-      set_target_properties(XercesC::XercesC PROPERTIES
-        IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
-        IMPORTED_LOCATION_DEBUG "${XercesC_LIBRARY_DEBUG}")
-    endif()
     if(EXISTS "${XercesC_LIBRARY_RELEASE}")
       set_property(TARGET XercesC::XercesC APPEND PROPERTY
         IMPORTED_CONFIGURATIONS RELEASE)
       set_target_properties(XercesC::XercesC PROPERTIES
         IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
         IMPORTED_LOCATION_RELEASE "${XercesC_LIBRARY_RELEASE}")
+    endif()
+    if(EXISTS "${XercesC_LIBRARY_DEBUG}")
+      set_property(TARGET XercesC::XercesC APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS DEBUG)
+      set_target_properties(XercesC::XercesC PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
+        IMPORTED_LOCATION_DEBUG "${XercesC_LIBRARY_DEBUG}")
     endif()
   endif()
 endif()
