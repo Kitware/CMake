@@ -306,6 +306,11 @@ public:
   static std::string ConvertToWindowsOutputPath(const std::string&);
 
   /**
+   * Return true if a path with the given name exists in the current directory.
+   */
+  static bool PathExists(const std::string& path);
+
+  /**
    * Return true if a file exists in the current directory.
    * If isFile = true, then make sure the file is a file and
    * not a directory.  If isFile = false, then return true
