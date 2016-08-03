@@ -237,6 +237,17 @@
 #  * ARPURLUPDATEINFO - Update information URL
 #  * ARPHELPTELEPHONE - Help and support telephone number
 #  * ARPSIZE - Size (in kilobytes) of the application
+#
+# .. variable:: CPACK_WIX_ROOT_FEATURE_TITLE
+#
+# Sets the name of the root install feature in the WIX installer. Same as
+# CPACK_COMPONENT_<compName>_DISPLAY_NAME for components.
+#
+# .. variable:: CPACK_WIX_ROOT_FEATURE_DESCRIPTION
+#
+# Sets the description of the root install feature in the WIX installer. Same as
+# CPACK_COMPONENT_<compName>_DESCRIPTION for components.
+#
 
 #=============================================================================
 # Copyright 2014-2015 Kitware, Inc.
