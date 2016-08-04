@@ -143,19 +143,19 @@ if(XalanC_FOUND)
         IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
         IMPORTED_LOCATION "${XalanC_LIBRARY}")
     endif()
-    if(EXISTS "${XalanC_LIBRARY_DEBUG}")
-      set_property(TARGET XalanC::XalanC APPEND PROPERTY
-        IMPORTED_CONFIGURATIONS DEBUG)
-      set_target_properties(XalanC::XalanC PROPERTIES
-        IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
-        IMPORTED_LOCATION_DEBUG "${XalanC_LIBRARY_DEBUG}")
-    endif()
     if(EXISTS "${XalanC_LIBRARY_RELEASE}")
       set_property(TARGET XalanC::XalanC APPEND PROPERTY
         IMPORTED_CONFIGURATIONS RELEASE)
       set_target_properties(XalanC::XalanC PROPERTIES
         IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
         IMPORTED_LOCATION_RELEASE "${XalanC_LIBRARY_RELEASE}")
+    endif()
+    if(EXISTS "${XalanC_LIBRARY_DEBUG}")
+      set_property(TARGET XalanC::XalanC APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS DEBUG)
+      set_target_properties(XalanC::XalanC PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
+        IMPORTED_LOCATION_DEBUG "${XalanC_LIBRARY_DEBUG}")
     endif()
     set_target_properties(XalanC::XalanC PROPERTIES INTERFACE_LINK_LIBRARIES XercesC::XercesC)
   endif()

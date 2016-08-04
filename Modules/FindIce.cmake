@@ -466,19 +466,19 @@ if(Ice_FOUND)
             IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
             IMPORTED_LOCATION "${${_Ice_component_cache}}")
         endif()
-        if(EXISTS "${${_Ice_component_cache_debug}}")
-          set_property(TARGET ${_Ice_imported_target} APPEND PROPERTY
-            IMPORTED_CONFIGURATIONS DEBUG)
-          set_target_properties(${_Ice_imported_target} PROPERTIES
-            IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
-            IMPORTED_LOCATION_DEBUG "${${_Ice_component_cache_debug}}")
-        endif()
         if(EXISTS "${${_Ice_component_cache_release}}")
           set_property(TARGET ${_Ice_imported_target} APPEND PROPERTY
             IMPORTED_CONFIGURATIONS RELEASE)
           set_target_properties(${_Ice_imported_target} PROPERTIES
             IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
             IMPORTED_LOCATION_RELEASE "${${_Ice_component_cache_release}}")
+        endif()
+        if(EXISTS "${${_Ice_component_cache_debug}}")
+          set_property(TARGET ${_Ice_imported_target} APPEND PROPERTY
+            IMPORTED_CONFIGURATIONS DEBUG)
+          set_target_properties(${_Ice_imported_target} PROPERTIES
+            IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
+            IMPORTED_LOCATION_DEBUG "${${_Ice_component_cache_debug}}")
         endif()
       endif()
     endif()

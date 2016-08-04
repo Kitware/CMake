@@ -126,19 +126,19 @@ if(ZLIB_FOUND)
             IMPORTED_LINK_INTERFACE_LANGUAGES "C"
             IMPORTED_LOCATION "${PNG_LIBRARY}")
         endif()
-        if(EXISTS "${PNG_LIBRARY_DEBUG}")
-          set_property(TARGET PNG::PNG APPEND PROPERTY
-            IMPORTED_CONFIGURATIONS DEBUG)
-          set_target_properties(PNG::PNG PROPERTIES
-            IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
-            IMPORTED_LOCATION_DEBUG "${PNG_LIBRARY_DEBUG}")
-        endif()
         if(EXISTS "${PNG_LIBRARY_RELEASE}")
           set_property(TARGET PNG::PNG APPEND PROPERTY
             IMPORTED_CONFIGURATIONS RELEASE)
           set_target_properties(PNG::PNG PROPERTIES
             IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
             IMPORTED_LOCATION_RELEASE "${PNG_LIBRARY_RELEASE}")
+        endif()
+        if(EXISTS "${PNG_LIBRARY_DEBUG}")
+          set_property(TARGET PNG::PNG APPEND PROPERTY
+            IMPORTED_CONFIGURATIONS DEBUG)
+          set_target_properties(PNG::PNG PROPERTIES
+            IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
+            IMPORTED_LOCATION_DEBUG "${PNG_LIBRARY_DEBUG}")
         endif()
       endif()
   endif ()
