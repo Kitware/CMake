@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -43,7 +43,7 @@
  *  "foo.host.com" matches "*.host.com".
  *
  * We use the matching rule described in RFC6125, section 6.4.3.
- * http://tools.ietf.org/html/rfc6125#section-6.4.3
+ * https://tools.ietf.org/html/rfc6125#section-6.4.3
  *
  * In addition: ignore trailing dots in the host names and wildcards, so that
  * the names are used normalized. This is what the browsers do.

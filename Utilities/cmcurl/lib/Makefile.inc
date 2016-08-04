@@ -5,11 +5,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at http://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.haxx.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,13 +20,22 @@
 #
 ###########################################################################
 
+LIB_VAUTH_CFILES = vauth/vauth.c vauth/cleartext.c vauth/cram.c         \
+  vauth/digest.c vauth/digest_sspi.c vauth/krb5_gssapi.c                \
+  vauth/krb5_sspi.c vauth/ntlm.c vauth/ntlm_sspi.c vauth/oauth2.c       \
+  vauth/spnego_gssapi.c vauth/spnego_sspi.c
+
+LIB_VAUTH_HFILES = vauth/vauth.h vauth/digest.h vauth/ntlm.h
+
 LIB_VTLS_CFILES = vtls/openssl.c vtls/gtls.c vtls/vtls.c vtls/nss.c     \
   vtls/polarssl.c vtls/polarssl_threadlock.c vtls/axtls.c               \
-  vtls/cyassl.c vtls/schannel.c vtls/darwinssl.c vtls/gskit.c
+  vtls/cyassl.c vtls/schannel.c vtls/darwinssl.c vtls/gskit.c           \
+  vtls/mbedtls.c
 
 LIB_VTLS_HFILES = vtls/openssl.h vtls/vtls.h vtls/gtls.h                \
   vtls/nssg.h vtls/polarssl.h vtls/polarssl_threadlock.h vtls/axtls.h   \
-  vtls/cyassl.h vtls/schannel.h vtls/darwinssl.h vtls/gskit.h
+  vtls/cyassl.h vtls/schannel.h vtls/darwinssl.h vtls/gskit.h           \
+  vtls/mbedtls.h
 
 LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
   cookie.c http.c sendf.c ftp.c url.c dict.c if2ip.c speedcheck.c       \
@@ -41,12 +50,10 @@ LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
   curl_sspi.c slist.c nonblock.c curl_memrchr.c imap.c pop3.c smtp.c    \
   pingpong.c rtsp.c curl_threads.c warnless.c hmac.c curl_rtmp.c        \
   openldap.c curl_gethostname.c gopher.c idn_win32.c                    \
-  http_negotiate_sspi.c http_proxy.c non-ascii.c asyn-ares.c            \
-  asyn-thread.c curl_gssapi.c curl_ntlm.c curl_ntlm_wb.c                \
-  curl_ntlm_core.c curl_ntlm_msgs.c curl_sasl.c curl_multibyte.c        \
-  hostcheck.c conncache.c pipeline.c dotdot.c x509asn1.c                \
-  http2.c curl_sasl_sspi.c smb.c curl_sasl_gssapi.c curl_endian.c       \
-  curl_des.c
+  http_proxy.c non-ascii.c asyn-ares.c asyn-thread.c curl_gssapi.c      \
+  http_ntlm.c curl_ntlm_wb.c curl_ntlm_core.c curl_sasl.c               \
+  curl_multibyte.c hostcheck.c conncache.c pipeline.c dotdot.c          \
+  x509asn1.c http2.c smb.c curl_endian.c curl_des.c system_win32.c
 
 LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
   formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h if2ip.h         \
@@ -61,13 +68,13 @@ LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
   slist.h nonblock.h curl_memrchr.h imap.h pop3.h smtp.h pingpong.h     \
   rtsp.h curl_threads.h warnless.h curl_hmac.h curl_rtmp.h              \
   curl_gethostname.h gopher.h http_proxy.h non-ascii.h asyn.h           \
-  curl_ntlm.h curl_gssapi.h curl_ntlm_wb.h curl_ntlm_core.h             \
-  curl_ntlm_msgs.h curl_sasl.h curl_multibyte.h hostcheck.h             \
-  conncache.h curl_setup_once.h multihandle.h setup-vms.h pipeline.h    \
-  dotdot.h x509asn1.h http2.h sigpipe.h smb.h curl_endian.h curl_des.h  \
-  curl_printf.h
+  http_ntlm.h curl_gssapi.h curl_ntlm_wb.h curl_ntlm_core.h             \
+  curl_sasl.h curl_multibyte.h hostcheck.h conncache.h                  \
+  curl_setup_once.h multihandle.h setup-vms.h pipeline.h dotdot.h       \
+  x509asn1.h http2.h sigpipe.h smb.h curl_endian.h curl_des.h           \
+  curl_printf.h system_win32.h
 
 LIB_RCFILES = libcurl.rc
 
-CSOURCES = $(LIB_CFILES) $(LIB_VTLS_CFILES)
-HHEADERS = $(LIB_HFILES) $(LIB_VTLS_HFILES)
+CSOURCES = $(LIB_CFILES) $(LIB_VAUTH_CFILES) $(LIB_VTLS_CFILES)
+HHEADERS = $(LIB_HFILES) $(LIB_VAUTH_HFILES) $(LIB_VTLS_HFILES)

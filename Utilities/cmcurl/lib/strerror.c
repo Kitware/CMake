@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2004 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2004 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -39,10 +39,14 @@
 #include <idna.h>
 #endif
 
+#ifdef USE_WINDOWS_SSPI
+#include "curl_sspi.h"
+#endif
+
 #include "strerror.h"
+/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 const char *
@@ -300,6 +304,9 @@ curl_easy_strerror(CURLcode error)
 
   case CURLE_SSL_INVALIDCERTSTATUS:
     return "SSL server certificate status verification FAILED";
+
+  case CURLE_HTTP2_STREAM:
+    return "Stream error in the HTTP/2 framing layer";
 
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE20:
@@ -1072,14 +1079,13 @@ const char *Curl_sspi_strerror (struct connectdata *conn, int err)
     strncpy(outbuf, txt, outmax);
   else if(err == SEC_E_ILLEGAL_MESSAGE)
     snprintf(outbuf, outmax,
-             "SEC_E_ILLEGAL_MESSAGE (0x%04X%04X) - This error usually occurs "
+             "SEC_E_ILLEGAL_MESSAGE (0x%08X) - This error usually occurs "
              "when a fatal SSL/TLS alert is received (e.g. handshake failed). "
              "More detail may be available in the Windows System event log.",
-             (err >> 16) & 0xffff, err & 0xffff);
+             err);
   else {
     str = txtbuf;
-    snprintf(txtbuf, sizeof(txtbuf), "%s (0x%04X%04X)",
-             txt, (err >> 16) & 0xffff, err & 0xffff);
+    snprintf(txtbuf, sizeof(txtbuf), "%s (0x%08X)", txt, err);
     txtbuf[sizeof(txtbuf)-1] = '\0';
 
 #ifdef _WIN32_WCE
