@@ -204,6 +204,14 @@ static bool CheckFileOperations()
       << testNewDir << std::endl;
     res = false;
     }
+  // check existence
+  if (!kwsys::SystemTools::PathExists(testNewDir))
+    {
+    std::cerr
+      << "Problem with PathExists for: "
+      << testNewDir << std::endl;
+    res = false;
+    }
   // remove it
   if (!kwsys::SystemTools::RemoveADirectory(testNewDir))
     {
@@ -218,6 +226,15 @@ static bool CheckFileOperations()
     std::cerr
       << "After RemoveADirectory: "
       << "Problem with FileExists as C string and not file for: "
+      << testNewDir << std::endl;
+    res = false;
+    }
+  // check existence
+  if (kwsys::SystemTools::PathExists(testNewDir))
+    {
+    std::cerr
+      << "After RemoveADirectory: "
+      << "Problem with PathExists for: "
       << testNewDir << std::endl;
     res = false;
     }
@@ -325,6 +342,31 @@ static bool CheckFileOperations()
     {
     std::cerr
       << "Problem with FileExists as C string and file for: "
+      << testNewDir << std::endl;
+    res = false;
+    }
+
+  // calling with an empty string should return false
+  if (kwsys::SystemTools::PathExists(std::string()))
+    {
+    std::cerr
+      << "Problem with PathExists(std::string())"
+      << std::endl;
+    res = false;
+    }
+  // PathExists(x) should return true on a directory
+  if (!kwsys::SystemTools::PathExists(testNewDir))
+    {
+    std::cerr
+      << "Problem with PathExists for: "
+      << testNewDir << std::endl;
+    res = false;
+    }
+  // should work, was created as new file before
+  if (!kwsys::SystemTools::PathExists(testNewFile))
+    {
+    std::cerr
+      << "Problem with PathExists for: "
       << testNewDir << std::endl;
     res = false;
     }
