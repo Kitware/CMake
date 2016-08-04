@@ -93,6 +93,11 @@ option(CMake_INSTALL_DEPENDENCIES
   "Whether to install 3rd-party runtime dependencies" OFF)
 mark_as_advanced(CMake_INSTALL_DEPENDENCIES)
 
+# option to build reference for CMake developers
+option(CMake_BUILD_DEVELOPER_REFERENCE
+  "Build CMake Developer Reference" OFF)
+mark_as_advanced(CMake_BUILD_DEVELOPER_REFERENCE)
+
 #-----------------------------------------------------------------------
 # a macro to deal with system libraries, implemented as a macro
 # simply to improve readability of the main script

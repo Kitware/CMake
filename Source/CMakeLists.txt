@@ -50,6 +50,15 @@ if(WIN32)
   add_definitions(-DUNICODE -D_UNICODE)
 endif()
 
+# configure the .dox.in file
+if(CMake_BUILD_DEVELOPER_REFERENCE)
+  configure_file(
+    "${CMake_SOURCE_DIR}/Source/dir.dox.in"
+    "${CMake_BINARY_DIR}/Source/dir.dox"
+    @ONLY
+    )
+endif()
+
 # configure the .h file
 configure_file(
   "${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in"
