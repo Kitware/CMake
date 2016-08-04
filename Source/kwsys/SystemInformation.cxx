@@ -79,9 +79,9 @@ typedef int siginfo_t;
 # undef _WIN32
 #endif
 
-#ifdef __FreeBSD__
+#if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
+# include <sys/param.h>
 # include <sys/sysctl.h>
-# include <fenv.h>
 # include <sys/socket.h>
 # include <netdb.h>
 # include <netinet/in.h>
@@ -91,17 +91,8 @@ typedef int siginfo_t;
 # endif
 #endif
 
-#if defined(__OpenBSD__) || defined(__NetBSD__)
-# include <sys/param.h>
-# include <sys/sysctl.h>
-#endif
-
 #if defined(KWSYS_SYS_HAS_MACHINE_CPU_H)
 # include <machine/cpu.h>
-#endif
-
-#if defined(__DragonFly__)
-# include <sys/sysctl.h>
 #endif
 
 #ifdef __APPLE__
@@ -123,7 +114,7 @@ typedef int siginfo_t;
 # endif
 #endif
 
-#ifdef __linux
+#if defined(__linux) || defined (__sun) || defined(_SCO_DS)
 # include <fenv.h>
 # include <sys/socket.h>
 # include <netdb.h>
