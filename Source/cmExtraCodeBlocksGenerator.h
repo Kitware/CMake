@@ -28,18 +28,7 @@ class cmExtraCodeBlocksGenerator : public cmExternalMakefileProjectGenerator
 public:
   cmExtraCodeBlocksGenerator();
 
-  std::string GetName() const CM_OVERRIDE
-  {
-    return cmExtraCodeBlocksGenerator::GetActualName();
-  }
-  static std::string GetActualName() { return "CodeBlocks"; }
-  static cmExternalMakefileProjectGenerator* New()
-  {
-    return new cmExtraCodeBlocksGenerator;
-  }
-  /** Get the documentation entry for this generator.  */
-  void GetDocumentation(cmDocumentationEntry& entry,
-                        const std::string& fullName) const CM_OVERRIDE;
+  static cmExternalMakefileProjectGeneratorFactory* GetFactory();
 
   void Generate() CM_OVERRIDE;
 

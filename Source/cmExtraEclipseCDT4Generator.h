@@ -35,20 +35,8 @@ public:
 
   cmExtraEclipseCDT4Generator();
 
-  static cmExternalMakefileProjectGenerator* New()
-  {
-    return new cmExtraEclipseCDT4Generator;
-  }
+  static cmExternalMakefileProjectGeneratorFactory* GetFactory();
 
-  std::string GetName() const CM_OVERRIDE
-  {
-    return cmExtraEclipseCDT4Generator::GetActualName();
-  }
-
-  static std::string GetActualName() { return "Eclipse CDT4"; }
-
-  void GetDocumentation(cmDocumentationEntry& entry,
-                        const std::string& fullName) const CM_OVERRIDE;
   void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
                       bool optional) CM_OVERRIDE;
 

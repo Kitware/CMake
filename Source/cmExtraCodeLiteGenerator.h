@@ -36,18 +36,7 @@ protected:
 public:
   cmExtraCodeLiteGenerator();
 
-  std::string GetName() const CM_OVERRIDE
-  {
-    return cmExtraCodeLiteGenerator::GetActualName();
-  }
-  static std::string GetActualName() { return "CodeLite"; }
-  static cmExternalMakefileProjectGenerator* New()
-  {
-    return new cmExtraCodeLiteGenerator;
-  }
-  /** Get the documentation entry for this generator.  */
-  void GetDocumentation(cmDocumentationEntry& entry,
-                        const std::string& fullName) const CM_OVERRIDE;
+  static cmExternalMakefileProjectGeneratorFactory* GetFactory();
 
   void Generate() CM_OVERRIDE;
   void CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs);

@@ -27,7 +27,7 @@ class cmLocalGenerator;
 class cmMakefile;
 class cmVariableWatch;
 class cmFileTimeComparison;
-class cmExternalMakefileProjectGenerator;
+class cmExternalMakefileProjectGeneratorFactory;
 class cmDocumentationSection;
 class cmTarget;
 class cmGeneratedFileStream;
@@ -103,8 +103,11 @@ public:
   struct GeneratorInfo
   {
     std::string name;
+    std::string baseName;
+    std::string extraName;
     bool supportsToolset;
     bool supportsPlatform;
+    bool isAlias;
   };
 
   typedef std::map<std::string, cmInstalledFile> InstalledFilesMap;
@@ -416,18 +419,14 @@ protected:
   void InitializeProperties();
   int HandleDeleteCacheVariables(const std::string& var);
 
-  typedef cmExternalMakefileProjectGenerator* (
-    *CreateExtraGeneratorFunctionType)();
-  typedef std::map<std::string, CreateExtraGeneratorFunctionType>
-    RegisteredExtraGeneratorsMap;
   typedef std::vector<cmGlobalGeneratorFactory*> RegisteredGeneratorsVector;
   RegisteredGeneratorsVector Generators;
-  RegisteredExtraGeneratorsMap ExtraGenerators;
+  typedef std::vector<cmExternalMakefileProjectGeneratorFactory*>
+    RegisteredExtraGeneratorsVector;
+  RegisteredExtraGeneratorsVector ExtraGenerators;
   void AddDefaultCommands();
   void AddDefaultGenerators();
   void AddDefaultExtraGenerators();
-  void AddExtraGenerator(const std::string& name,
-                         CreateExtraGeneratorFunctionType newFunction);
 
   cmGlobalGenerator* GlobalGenerator;
   std::map<std::string, DiagLevel> DiagLevels;

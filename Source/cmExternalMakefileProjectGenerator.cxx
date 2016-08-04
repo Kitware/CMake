@@ -33,28 +33,37 @@ std::string cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
   return fullName;
 }
 
-std::string cmExternalMakefileProjectGenerator::GetGlobalGeneratorName(
-  const std::string& fullName)
+cmExternalMakefileProjectGeneratorFactory::
+  cmExternalMakefileProjectGeneratorFactory(const std::string& n,
+                                            const std::string& doc)
+  : Name(n)
+  , Documentation(doc)
 {
-  // at least one global generator must be supported
-  assert(!this->SupportedGlobalGenerators.empty());
+}
 
-  if (fullName.empty()) {
-    return "";
-  }
+cmExternalMakefileProjectGeneratorFactory::
+  ~cmExternalMakefileProjectGeneratorFactory()
+{
+}
 
-  // if we get only the short name, take the first global generator as default
-  if (fullName == this->GetName()) {
-    return this->SupportedGlobalGenerators[0];
-  }
+std::string cmExternalMakefileProjectGeneratorFactory::GetName() const
+{
+  return this->Name;
+}
 
-  // otherwise search for the matching global generator
-  for (std::vector<std::string>::const_iterator it =
-         this->SupportedGlobalGenerators.begin();
-       it != this->SupportedGlobalGenerators.end(); ++it) {
-    if (this->CreateFullGeneratorName(*it, this->GetName()) == fullName) {
-      return *it;
-    }
-  }
-  return "";
+std::string cmExternalMakefileProjectGeneratorFactory::GetDocumentation() const
+{
+  return this->Documentation;
+}
+
+std::vector<std::string>
+cmExternalMakefileProjectGeneratorFactory::GetSupportedGlobalGenerators() const
+{
+  return this->SupportedGlobalGenerators;
+}
+
+void cmExternalMakefileProjectGeneratorFactory::AddSupportedGlobalGenerator(
+  const std::string& base)
+{
+  this->SupportedGlobalGenerators.push_back(base);
 }
