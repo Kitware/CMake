@@ -38,19 +38,8 @@ cmNinjaTargetGenerator* cmNinjaTargetGenerator::New(cmGeneratorTarget* target)
       return new cmNinjaNormalTargetGenerator(target);
 
     case cmState::UTILITY:
+    case cmState::GLOBAL_TARGET:
       return new cmNinjaUtilityTargetGenerator(target);
-      ;
-
-    case cmState::GLOBAL_TARGET: {
-      // We only want to process global targets that live in the home
-      // (i.e. top-level) directory.  CMake creates copies of these targets
-      // in every directory, which we don't need.
-      if (strcmp(target->GetLocalGenerator()->GetCurrentSourceDirectory(),
-                 target->GetLocalGenerator()->GetSourceDirectory()) == 0) {
-        return new cmNinjaUtilityTargetGenerator(target);
-      }
-      // else fallthrough
-    }
 
     default:
       return CM_NULLPTR;

@@ -31,10 +31,12 @@ cmNinjaUtilityTargetGenerator::~cmNinjaUtilityTargetGenerator()
 
 void cmNinjaUtilityTargetGenerator::Generate()
 {
-  std::string utilCommandName = cmake::GetCMakeFilesDirectoryPostSlash();
+  std::string utilCommandName =
+    this->GetLocalGenerator()->GetCurrentBinaryDirectory();
+  utilCommandName += cmake::GetCMakeFilesDirectory();
+  utilCommandName += "/";
   utilCommandName += this->GetTargetName() + ".util";
-  utilCommandName =
-    this->GetGlobalGenerator()->NinjaOutputPath(utilCommandName);
+  utilCommandName = this->ConvertToNinjaPath(utilCommandName);
 
   std::vector<std::string> commands;
   cmNinjaDeps deps, outputs, util_outputs(1, utilCommandName);
@@ -144,6 +146,11 @@ void cmNinjaUtilityTargetGenerator::Generate()
       cmNinjaDeps(1, utilCommandName));
   }
 
-  this->GetGlobalGenerator()->AddTargetAlias(this->GetTargetName(),
-                                             this->GetGeneratorTarget());
+  // Add an alias for the logical target name regardless of what directory
+  // contains it.  Skip this for GLOBAL_TARGET because they are meant to
+  // be per-directory and have one at the top-level anyway.
+  if (this->GetGeneratorTarget()->GetType() != cmState::GLOBAL_TARGET) {
+    this->GetGlobalGenerator()->AddTargetAlias(this->GetTargetName(),
+                                               this->GetGeneratorTarget());
+  }
 }

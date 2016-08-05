@@ -885,10 +885,15 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
   cmGeneratorTarget const* target, cmNinjaDeps& outputs)
 {
   if (target->GetType() == cmState::GLOBAL_TARGET) {
-    // Global targets only depend on other utilities, which may not appear in
-    // the TargetDepends set (e.g. "all").
+    // These depend only on other CMake-provided targets, e.g. "all".
     std::set<std::string> const& utils = target->GetUtilities();
-    std::copy(utils.begin(), utils.end(), std::back_inserter(outputs));
+    for (std::set<std::string>::const_iterator i = utils.begin();
+         i != utils.end(); ++i) {
+      std::string d =
+        target->GetLocalGenerator()->GetCurrentBinaryDirectory() +
+        std::string("/") + *i;
+      outputs.push_back(this->ConvertToNinjaPath(d));
+    }
   } else {
     cmNinjaDeps outs;
     cmTargetDependSet const& targetDeps = this->GetTargetDirectDepends(target);
