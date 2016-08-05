@@ -867,6 +867,7 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
       break;
     }
     case cmState::OBJECT_LIBRARY:
+    case cmState::GLOBAL_TARGET:
     case cmState::UTILITY: {
       std::string path =
         target->GetLocalGenerator()->GetCurrentBinaryDirectory() +
@@ -874,12 +875,6 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
       outputs.push_back(this->ConvertToNinjaPath(path));
       break;
     }
-
-    case cmState::GLOBAL_TARGET:
-      // Always use the target in HOME instead of an unused duplicate in a
-      // subdirectory.
-      outputs.push_back(this->NinjaOutputPath(target->GetName()));
-      break;
 
     default:
       return;
