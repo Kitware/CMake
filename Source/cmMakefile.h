@@ -135,14 +135,12 @@ public:
   void FinalPass();
 
   /** Add a custom command to the build.  */
-  void AddCustomCommandToTarget(const std::string& target,
-                                const std::vector<std::string>& byproducts,
-                                const std::vector<std::string>& depends,
-                                const cmCustomCommandLines& commandLines,
-                                cmTarget::CustomCommandType type,
-                                const char* comment, const char* workingDir,
-                                bool escapeOldStyle = true,
-                                bool uses_terminal = false);
+  void AddCustomCommandToTarget(
+    const std::string& target, const std::vector<std::string>& byproducts,
+    const std::vector<std::string>& depends,
+    const cmCustomCommandLines& commandLines, cmTarget::CustomCommandType type,
+    const char* comment, const char* workingDir, bool escapeOldStyle = true,
+    bool uses_terminal = false, const std::string& depfile = "");
   cmSourceFile* AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
     const std::vector<std::string>& byproducts,
@@ -150,13 +148,13 @@ public:
     const std::string& main_dependency,
     const cmCustomCommandLines& commandLines, const char* comment,
     const char* workingDir, bool replace = false, bool escapeOldStyle = true,
-    bool uses_terminal = false);
+    bool uses_terminal = false, const std::string& depfile = "");
   cmSourceFile* AddCustomCommandToOutput(
     const std::string& output, const std::vector<std::string>& depends,
     const std::string& main_dependency,
     const cmCustomCommandLines& commandLines, const char* comment,
     const char* workingDir, bool replace = false, bool escapeOldStyle = true,
-    bool uses_terminal = false);
+    bool uses_terminal = false, const std::string& depfile = "");
   void AddCustomCommandOldStyle(const std::string& target,
                                 const std::vector<std::string>& outputs,
                                 const std::vector<std::string>& depends,

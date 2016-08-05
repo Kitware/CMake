@@ -15,6 +15,8 @@
 
 #include "cmSourceFile.h"
 
+#include "cmGlobalGenerator.h"
+
 // cmAddCustomCommandCommand
 bool cmAddCustomCommandCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)
@@ -28,7 +30,7 @@ bool cmAddCustomCommandCommand::InitialPass(
     return false;
   }
 
-  std::string source, target, main_dependency, working;
+  std::string source, target, main_dependency, working, depfile;
   std::string comment_buffer;
   const char* comment = CM_NULLPTR;
   std::vector<std::string> depends, outputs, output, byproducts;
@@ -60,6 +62,7 @@ bool cmAddCustomCommandCommand::InitialPass(
     doing_byproducts,
     doing_comment,
     doing_working_directory,
+    doing_depfile,
     doing_nothing
   };
 
@@ -110,6 +113,13 @@ bool cmAddCustomCommandCommand::InitialPass(
       doing = doing_implicit_depends_lang;
     } else if (copy == "COMMENT") {
       doing = doing_comment;
+    } else if (copy == "DEPFILE") {
+      doing = doing_depfile;
+      if (this->Makefile->GetGlobalGenerator()->GetName() != "Ninja") {
+        this->SetError("Option DEPFILE not supported by " +
+                       this->Makefile->GetGlobalGenerator()->GetName());
+        return false;
+      }
     } else {
       std::string filename;
       switch (doing) {
@@ -147,6 +157,9 @@ bool cmAddCustomCommandCommand::InitialPass(
         filename = cmSystemTools::CollapseFullPath(filename);
       }
       switch (doing) {
+        case doing_depfile:
+          depfile = copy;
+          break;
         case doing_working_directory:
           working = copy;
           break;
@@ -269,12 +282,12 @@ bool cmAddCustomCommandCommand::InitialPass(
     std::vector<std::string> no_depends;
     this->Makefile->AddCustomCommandToTarget(
       target, byproducts, no_depends, commandLines, cctype, comment,
-      working.c_str(), escapeOldStyle, uses_terminal);
+      working.c_str(), escapeOldStyle, uses_terminal, depfile);
   } else if (target.empty()) {
     // Target is empty, use the output.
     this->Makefile->AddCustomCommandToOutput(
       output, byproducts, depends, main_dependency, commandLines, comment,
-      working.c_str(), false, escapeOldStyle, uses_terminal);
+      working.c_str(), false, escapeOldStyle, uses_terminal, depfile);
 
     // Add implicit dependency scanning requests if any were given.
     if (!implicit_depends.empty()) {
