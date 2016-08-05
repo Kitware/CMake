@@ -197,10 +197,12 @@ Comparison
 
 ::
 
-  string(COMPARE EQUAL <string1> <string2> <output variable>)
-  string(COMPARE NOTEQUAL <string1> <string2> <output variable>)
   string(COMPARE LESS <string1> <string2> <output variable>)
   string(COMPARE GREATER <string1> <string2> <output variable>)
+  string(COMPARE EQUAL <string1> <string2> <output variable>)
+  string(COMPARE NOTEQUAL <string1> <string2> <output variable>)
+  string(COMPARE LESS_EQUAL <string1> <string2> <output variable>)
+  string(COMPARE GREATER_EQUAL <string1> <string2> <output variable>)
 
 Compare the strings and store true or false in the output variable.
 

@@ -485,7 +485,8 @@ bool cmStringCommand::HandleCompareCommand(
   }
   std::string mode = args[1];
   if ((mode == "EQUAL") || (mode == "NOTEQUAL") || (mode == "LESS") ||
-      (mode == "GREATER")) {
+      (mode == "LESS_EQUAL") || (mode == "GREATER") ||
+      (mode == "GREATER_EQUAL")) {
     if (args.size() < 5) {
       std::string e = "sub-command COMPARE, mode ";
       e += mode;
@@ -500,8 +501,12 @@ bool cmStringCommand::HandleCompareCommand(
     bool result;
     if (mode == "LESS") {
       result = (left < right);
+    } else if (mode == "LESS_EQUAL") {
+      result = (left <= right);
     } else if (mode == "GREATER") {
       result = (left > right);
+    } else if (mode == "GREATER_EQUAL") {
+      result = (left >= right);
     } else if (mode == "EQUAL") {
       result = (left == right);
     } else // if(mode == "NOTEQUAL")

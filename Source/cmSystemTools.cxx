@@ -2380,10 +2380,10 @@ bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
 
     if (lhs < rhs) {
       // lhs < rhs, so true if operation is LESS
-      return op == cmSystemTools::OP_LESS;
+      return (op & cmSystemTools::OP_LESS) != 0;
     } else if (lhs > rhs) {
       // lhs > rhs, so true if operation is GREATER
-      return op == cmSystemTools::OP_GREATER;
+      return (op & cmSystemTools::OP_GREATER) != 0;
     }
 
     if (*endr == '.') {
@@ -2395,7 +2395,7 @@ bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
     }
   }
   // lhs == rhs, so true if operation is EQUAL
-  return op == cmSystemTools::OP_EQUAL;
+  return (op & cmSystemTools::OP_EQUAL) != 0;
 }
 
 bool cmSystemTools::VersionCompareEqual(std::string const& lhs,
@@ -2410,6 +2410,13 @@ bool cmSystemTools::VersionCompareGreater(std::string const& lhs,
 {
   return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER, lhs.c_str(),
                                        rhs.c_str());
+}
+
+bool cmSystemTools::VersionCompareGreaterEq(std::string const& lhs,
+                                            std::string const& rhs)
+{
+  return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER_EQUAL,
+                                       lhs.c_str(), rhs.c_str());
 }
 
 bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,

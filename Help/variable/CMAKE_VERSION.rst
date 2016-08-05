@@ -26,11 +26,11 @@ Individual component values are also available in variables:
 * :variable:`CMAKE_PATCH_VERSION`
 * :variable:`CMAKE_TWEAK_VERSION`
 
-Use the :command:`if` command ``VERSION_LESS``, ``VERSION_EQUAL``, or
-``VERSION_GREATER`` operators to compare version string values against
-``CMAKE_VERSION`` using a component-wise test.  Version component
-values may be 10 or larger so do not attempt to compare version
-strings as floating-point numbers.
+Use the :command:`if` command ``VERSION_LESS``, ``VERSION_GREATER``,
+``VERSION_EQUAL``, ``VERSION_LESS_EQUAL``, or ``VERSION_GREATER_EQUAL``
+operators to compare version string values against ``CMAKE_VERSION`` using a
+component-wise test.  Version component values may be 10 or larger so do not
+attempt to compare version strings as floating-point numbers.
 
 .. note::
 
