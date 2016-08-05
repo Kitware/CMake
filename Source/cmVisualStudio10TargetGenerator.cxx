@@ -44,6 +44,8 @@
 
 #include <cm_auto_ptr.hxx>
 
+static std::string const kWINDOWS_7_1_SDK = "Windows7.1SDK";
+
 cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetClFlagTable() const
 {
   if (this->MSTools) {
@@ -2363,7 +2365,8 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     cmGlobalVisualStudio10Generator* gg =
       static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
     const char* toolset = gg->GetPlatformToolset();
-    if (toolset && (cmHasLiteralPrefix(toolset, "v90") ||
+    if (toolset && (toolset == kWINDOWS_7_1_SDK ||
+                    cmHasLiteralPrefix(toolset, "v90") ||
                     cmHasLiteralPrefix(toolset, "v100") ||
                     cmHasLiteralPrefix(toolset, "v110") ||
                     cmHasLiteralPrefix(toolset, "v120"))) {
