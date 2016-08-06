@@ -123,8 +123,9 @@ private:
   std::string CurrentCompileSettingsStr;
   std::string OldCompileSettingsStr;
 
+  std::string TargetBuildSubDir;
   std::string OutMocCppFilenameRel;
-  std::string OutMocCppFilename;
+  std::string OutMocCppFilenameAbs;
   std::list<std::string> MocIncludes;
   std::list<std::string> MocDefinitions;
   std::vector<std::string> MocOptions;

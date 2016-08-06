@@ -14,6 +14,7 @@
 #include "cmQtAutoGenerators.h"
 
 #include "cmAlgorithms.h"
+#include "cmFilePathUuid.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
@@ -358,11 +359,13 @@ void cmQtAutoGenerators::WriteOldMocDefinitionsFile(
 
 void cmQtAutoGenerators::Init()
 {
+  this->TargetBuildSubDir = this->TargetName;
+  this->TargetBuildSubDir += ".dir/";
+
   this->OutMocCppFilenameRel = this->TargetName;
   this->OutMocCppFilenameRel += ".cpp";
 
-  this->OutMocCppFilename = this->Builddir;
-  this->OutMocCppFilename += this->OutMocCppFilenameRel;
+  this->OutMocCppFilenameAbs = this->Builddir + this->OutMocCppFilenameRel;
 
   std::vector<std::string> cdefList;
   cmSystemTools::ExpandListArgument(this->MocCompileDefinitionsStr, cdefList);
@@ -439,7 +442,7 @@ static std::string ReadAll(const std::string& filename)
 
 bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 {
-  if (!cmsys::SystemTools::FileExists(this->OutMocCppFilename.c_str()) ||
+  if (!cmsys::SystemTools::FileExists(this->OutMocCppFilenameAbs.c_str()) ||
       (this->OldCompileSettingsStr != this->CurrentCompileSettingsStr)) {
     this->GenerateAll = true;
   }
@@ -933,6 +936,8 @@ void cmQtAutoGenerators::ParseHeaders(
   std::map<std::string, std::string>& notIncludedMocs,
   std::map<std::string, std::vector<std::string> >& includedUis)
 {
+  cmFilePathUuid fpathUuid(this->Srcdir, this->Builddir,
+                           this->ProjectSourceDir, this->ProjectBinaryDir);
   for (std::set<std::string>::const_iterator hIt = absHeaders.begin();
        hIt != absHeaders.end(); ++hIt) {
     const std::string& headerName = *hIt;
@@ -946,13 +951,10 @@ void cmQtAutoGenerators::ParseHeaders(
         this->LogInfo(err.str());
       }
 
-      const std::string basename =
-        cmsys::SystemTools::GetFilenameWithoutLastExtension(headerName);
-
-      const std::string currentMoc = "moc_" + basename + ".cpp";
       std::string macroName;
       if (requiresMocing(contents, macroName)) {
-        notIncludedMocs[headerName] = currentMoc;
+        notIncludedMocs[headerName] =
+          this->TargetBuildSubDir + fpathUuid.get(headerName, "moc_", ".cpp");
       }
     }
     this->ParseForUic(headerName, contents, includedUis);
@@ -1029,7 +1031,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
   // check if we even need to update _automoc.cpp
   if (!automocCppChanged) {
     // compare contents of the _automoc.cpp file
-    const std::string oldContents = ReadAll(this->OutMocCppFilename);
+    const std::string oldContents = ReadAll(this->OutMocCppFilenameAbs);
     if (oldContents == automocSource) {
       // nothing changed: don't touch the _automoc.cpp file
       if (this->Verbose) {
@@ -1052,7 +1054,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
   }
   {
     cmsys::ofstream outfile;
-    outfile.open(this->OutMocCppFilename.c_str(), std::ios::trunc);
+    outfile.open(this->OutMocCppFilenameAbs.c_str(), std::ios::trunc);
     outfile << automocSource;
     outfile.close();
   }
