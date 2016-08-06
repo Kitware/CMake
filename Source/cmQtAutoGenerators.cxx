@@ -88,6 +88,23 @@ static std::string extractSubDir(const std::string& absPath,
   return subDir;
 }
 
+static bool FileNameIsUnique(const std::string& filePath,
+                             const std::map<std::string, std::string>& fileMap)
+{
+  size_t count(0);
+  const std::string fileName = cmsys::SystemTools::GetFilenameName(filePath);
+  for (std::map<std::string, std::string>::const_iterator si = fileMap.begin();
+       si != fileMap.end(); ++si) {
+    if (cmsys::SystemTools::GetFilenameName(si->first) == fileName) {
+      ++count;
+      if (count > 1) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 cmQtAutoGenerators::cmQtAutoGenerators()
   : Verbose(cmsys::SystemTools::HasEnv("VERBOSE"))
   , ColorOutput(true)
@@ -1257,15 +1274,18 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
 {
   // generate single map with input / output names
   std::map<std::string, std::string> qrcGenMap;
-  for (std::vector<std::string>::const_iterator si = this->RccSources.begin();
-       si != this->RccSources.end(); ++si) {
-    const std::string ext = cmsys::SystemTools::GetFilenameLastExtension(*si);
-    if (ext == ".qrc") {
-      std::string basename =
-        cmsys::SystemTools::GetFilenameWithoutLastExtension(*si);
-      std::string qrcOutputFile = "CMakeFiles/" + this->OriginTargetName +
-        ".dir/qrc_" + basename + ".cpp";
-      qrcGenMap[*si] = qrcOutputFile;
+  {
+    cmFilePathUuid fpathUuid(this->Srcdir, this->Builddir,
+                             this->ProjectSourceDir, this->ProjectBinaryDir);
+    for (std::vector<std::string>::const_iterator si =
+           this->RccSources.begin();
+         si != this->RccSources.end(); ++si) {
+      const std::string ext =
+        cmsys::SystemTools::GetFilenameLastExtension(*si);
+      if (ext == ".qrc") {
+        qrcGenMap[*si] =
+          (this->TargetBuildSubDir + fpathUuid.get(*si, "qrc_", ".cpp"));
+      }
     }
   }
 
@@ -1287,7 +1307,8 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
   for (std::map<std::string, std::string>::const_iterator si =
          qrcGenMap.begin();
        si != qrcGenMap.end(); ++si) {
-    if (!this->GenerateQrc(si->first, si->second)) {
+    bool unique = FileNameIsUnique(si->first, qrcGenMap);
+    if (!this->GenerateQrc(si->first, si->second, unique)) {
       if (this->RunRccFailed) {
         return false;
       }
@@ -1297,10 +1318,23 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
 }
 
 bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
-                                     const std::string& qrcOutputFile)
+                                     const std::string& qrcOutputFile,
+                                     bool unique_n)
 {
-  const std::string basename =
-    cmsys::SystemTools::GetFilenameWithoutLastExtension(qrcInputFile);
+  std::string symbolName;
+  if (unique_n) {
+    symbolName =
+      cmsys::SystemTools::GetFilenameWithoutLastExtension(qrcInputFile);
+  } else {
+    symbolName =
+      cmsys::SystemTools::GetFilenameWithoutLastExtension(qrcOutputFile);
+    // Remove "qrc_" at string begin
+    symbolName.erase(0, 4);
+  }
+  // Replace '-' with '_'. The former is valid for
+  // file names but not for symbol names.
+  std::replace(symbolName.begin(), symbolName.end(), '-', '_');
+
   const std::string qrcBuildFile = this->Builddir + qrcOutputFile;
 
   int sourceNewerThanQrc = 0;
@@ -1327,7 +1361,7 @@ bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
     }
 
     command.push_back("-name");
-    command.push_back(basename);
+    command.push_back(symbolName);
     command.push_back("-o");
     command.push_back(qrcBuildFile);
     command.push_back(qrcInputFile);
