@@ -1183,7 +1183,7 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
     cmsys::SystemTools::MakeDirectory(this->Builddir.c_str());
   }
 
-  const ::std::string uiBuildFile = this->Builddir + uiOutputFile;
+  const std::string uiBuildFile = this->Builddir + uiOutputFile;
 
   int sourceNewerThanUi = 0;
   bool success = cmsys::SystemTools::FileTimeCompare(uiInputFile, uiBuildFile,
@@ -1299,7 +1299,7 @@ bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
 {
   const std::string basename =
     cmsys::SystemTools::GetFilenameWithoutLastExtension(qrcInputFile);
-  const ::std::string qrcBuildFile = this->Builddir + qrcOutputFile;
+  const std::string qrcBuildFile = this->Builddir + qrcOutputFile;
 
   int sourceNewerThanQrc = 0;
   bool generateQrc = !cmsys::SystemTools::FileTimeCompare(
