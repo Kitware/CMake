@@ -2365,11 +2365,11 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     cmGlobalVisualStudio10Generator* gg =
       static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
     const char* toolset = gg->GetPlatformToolset();
-    if (toolset && (toolset == kWINDOWS_7_1_SDK ||
-                    cmHasLiteralPrefix(toolset, "v90") ||
-                    cmHasLiteralPrefix(toolset, "v100") ||
-                    cmHasLiteralPrefix(toolset, "v110") ||
-                    cmHasLiteralPrefix(toolset, "v120"))) {
+    if (toolset &&
+        (toolset == kWINDOWS_7_1_SDK || cmHasLiteralPrefix(toolset, "v90") ||
+         cmHasLiteralPrefix(toolset, "v100") ||
+         cmHasLiteralPrefix(toolset, "v110") ||
+         cmHasLiteralPrefix(toolset, "v120"))) {
       if (const char* debug =
             linkOptions.GetFlag("GenerateDebugInformation")) {
         // Convert value from enumeration back to boolean for older toolsets.
