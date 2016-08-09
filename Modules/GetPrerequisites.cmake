@@ -753,7 +753,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
       find_program(gp_grep_cmd grep)
     endif()
     if(gp_grep_cmd)
-      set(gp_cmd_maybe_filter COMMAND ${gp_grep_cmd} "^[[:blank:]]*DLL Name: ")
+      set(gp_cmd_maybe_filter COMMAND ${gp_grep_cmd} "-a" "^[[:blank:]]*DLL Name: ")
     endif()
   else()
     message(STATUS "warning: gp_tool='${gp_tool}' is an unknown tool...")
