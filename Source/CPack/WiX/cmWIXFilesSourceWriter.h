@@ -47,6 +47,8 @@ public:
                                 std::string const& id,
                                 std::string const& filePath, cmWIXPatch& patch,
                                 cmInstalledFile const* installedFile);
+
+  bool GenerateComponentGuids;
 };
 
 #endif

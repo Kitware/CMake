@@ -16,6 +16,9 @@
 
 #include <cmInstalledFile.h>
 
+#include <cmSystemTools.h>
+#include <cmUuid.h>
+
 #include <sys/types.h>
 // include sys/stat.h after sys/types.h
 #include <sys/stat.h>
@@ -23,6 +26,7 @@
 cmWIXFilesSourceWriter::cmWIXFilesSourceWriter(cmCPackLog* logger,
                                                std::string const& filename)
   : cmWIXSourceWriter(logger, filename)
+  , GenerateComponentGuids(false)
 {
 }
 
@@ -126,12 +130,20 @@ std::string cmWIXFilesSourceWriter::EmitComponentFile(
   std::string componentId = std::string("CM_C") + id;
   std::string fileId = std::string("CM_F") + id;
 
+  std::string guid = "*";
+  if (this->GenerateComponentGuids) {
+    std::string md5 = cmSystemTools::ComputeStringMD5(componentId);
+    cmUuid uuid;
+    std::vector<unsigned char> ns;
+    guid = uuid.FromMd5(ns, md5);
+  }
+
   BeginElement("DirectoryRef");
   AddAttribute("Id", directoryId);
 
   BeginElement("Component");
   AddAttribute("Id", componentId);
-  AddAttribute("Guid", "*");
+  AddAttribute("Guid", guid);
 
   if (installedFile) {
     if (installedFile->GetPropertyAsBool("CPACK_NEVER_OVERWRITE")) {

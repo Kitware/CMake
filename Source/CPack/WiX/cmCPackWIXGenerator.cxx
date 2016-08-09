@@ -18,6 +18,7 @@
 #include <cmGeneratedFileStream.h>
 #include <cmInstalledFile.h>
 #include <cmSystemTools.h>
+#include <cmUuid.h>
 
 #include "cmWIXDirectoriesSourceWriter.h"
 #include "cmWIXFeaturesSourceWriter.h"
@@ -441,6 +442,11 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   cmWIXFilesSourceWriter fileDefinitions(this->Logger,
                                          fileDefinitionsFilename);
 
+  // if install folder is supposed to be set absolutely, the default
+  // component guid "*" cannot be used
+  fileDefinitions.GenerateComponentGuids =
+    cmSystemTools::IsOn(GetOption("CPACK_WIX_SKIP_PROGRAM_FOLDER"));
+
   fileDefinitions.BeginElement("Fragment");
 
   std::string featureDefinitionsFilename =
@@ -566,6 +572,9 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 
 std::string cmCPackWIXGenerator::GetProgramFilesFolderId() const
 {
+  if (cmSystemTools::IsOn(GetOption("CPACK_WIX_SKIP_PROGRAM_FOLDER"))) {
+    return "";
+  }
   if (GetArchitecture() == "x86") {
     return "ProgramFilesFolder";
   } else {
