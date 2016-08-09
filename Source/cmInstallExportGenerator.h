@@ -53,6 +53,7 @@ protected:
   void GenerateImportFile(cmExportSet const* exportSet);
   void GenerateImportFile(const char* config, cmExportSet const* exportSet);
   void ComputeTempDir();
+  size_t GetMaxConfigLength() const;
 
   cmExportSet* ExportSet;
   std::string FilePermissions;
