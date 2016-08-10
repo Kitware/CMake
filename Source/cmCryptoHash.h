@@ -16,12 +16,26 @@
 
 #include <cm_auto_ptr.hxx>
 
+/**
+ * @brief Abstract base class for cryptographic hash generators
+ */
 class cmCryptoHash
 {
 public:
   virtual ~cmCryptoHash() {}
+  /// @brief Returns a new hash generator of the requested type
+  /// @arg algo Hash type name. Supported hash types are
+  ///      MD5, SHA1, SHA224, SHA256, SHA384, SHA512
+  /// @return A valid auto pointer if algo is supported or
+  ///         an invalid/NULL pointer otherwise
   static CM_AUTO_PTR<cmCryptoHash> New(const char* algo);
+  /// @brief Calculates a hash string from string input data
+  /// @return Sequence of hex characters pairs for each byte of the binary hash
   std::string HashString(const std::string& input);
+  /// @brief Calculates a hash string from file content
+  /// @see HashString()
+  /// @return Non empty hash string if the file was read successfully.
+  ///         An empty string otherwise.
   std::string HashFile(const std::string& file);
 
 protected:
