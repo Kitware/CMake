@@ -70,7 +70,7 @@ std::string cmCryptoHash::HashString(const std::string& input)
   this->Initialize();
   this->Append(reinterpret_cast<unsigned char const*>(input.c_str()),
                static_cast<int>(input.size()));
-  return this->Finalize();
+  return ByteHashToString(this->Finalize());
 }
 
 std::string cmCryptoHash::HashFile(const std::string& file)
@@ -99,7 +99,7 @@ std::string cmCryptoHash::HashFile(const std::string& file)
     }
   }
   if (fin.eof()) {
-    return this->Finalize();
+    return ByteHashToString(this->Finalize());
   }
   return "";
 }
@@ -124,11 +124,11 @@ void cmCryptoHashMD5::Append(unsigned char const* buf, int sz)
   cmsysMD5_Append(this->MD5, buf, sz);
 }
 
-std::string cmCryptoHashMD5::Finalize()
+std::vector<unsigned char> cmCryptoHashMD5::Finalize()
 {
-  char md5out[32];
-  cmsysMD5_FinalizeHex(this->MD5, md5out);
-  return std::string(md5out, 32);
+  std::vector<unsigned char> hash(16, 0);
+  cmsysMD5_Finalize(this->MD5, &hash[0]);
+  return hash;
 }
 
 #define cmCryptoHash_SHA_CLASS_IMPL(SHA)                                      \
@@ -142,11 +142,11 @@ std::string cmCryptoHashMD5::Finalize()
   {                                                                           \
     SHA##_Update(this->SHA, buf, sz);                                         \
   }                                                                           \
-  std::string cmCryptoHash##SHA::Finalize()                                   \
+  std::vector<unsigned char> cmCryptoHash##SHA::Finalize()                    \
   {                                                                           \
-    char out[SHA##_DIGEST_STRING_LENGTH];                                     \
-    SHA##_End(this->SHA, out);                                                \
-    return std::string(out, SHA##_DIGEST_STRING_LENGTH - 1);                  \
+    std::vector<unsigned char> hash(SHA##_DIGEST_LENGTH, 0);                  \
+    SHA##_Final(&hash[0], this->SHA);                                         \
+    return hash;                                                              \
   }
 
 cmCryptoHash_SHA_CLASS_IMPL(SHA1) cmCryptoHash_SHA_CLASS_IMPL(SHA224)

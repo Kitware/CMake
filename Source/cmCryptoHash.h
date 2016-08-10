@@ -48,7 +48,7 @@ public:
 protected:
   virtual void Initialize() = 0;
   virtual void Append(unsigned char const*, int) = 0;
-  virtual std::string Finalize() = 0;
+  virtual std::vector<unsigned char> Finalize() = 0;
 };
 
 class cmCryptoHashMD5 : public cmCryptoHash
@@ -62,7 +62,7 @@ public:
 protected:
   void Initialize() CM_OVERRIDE;
   void Append(unsigned char const* buf, int sz) CM_OVERRIDE;
-  std::string Finalize() CM_OVERRIDE;
+  std::vector<unsigned char> Finalize() CM_OVERRIDE;
 };
 
 #define cmCryptoHash_SHA_CLASS_DECL(SHA)                                      \
@@ -77,7 +77,7 @@ protected:
   protected:                                                                  \
     virtual void Initialize();                                                \
     virtual void Append(unsigned char const* buf, int sz);                    \
-    virtual std::string Finalize();                                           \
+    virtual std::vector<unsigned char> Finalize();                            \
   }
 
 cmCryptoHash_SHA_CLASS_DECL(SHA1);
