@@ -29,6 +29,13 @@ public:
   /// @return A valid auto pointer if algo is supported or
   ///         an invalid/NULL pointer otherwise
   static CM_AUTO_PTR<cmCryptoHash> New(const char* algo);
+  /// @brief Converts a hex character to its binary value (4 bits)
+  /// @arg input Hex character [0-9a-fA-F].
+  /// @arg output Binary value of the input character (4 bits)
+  /// @return True if input was a valid hex character
+  static bool IntFromHexDigit(char input, char& output);
+  /// @brief Converts a byte hash to a sequence of hex character pairs
+  static std::string ByteHashToString(const std::vector<unsigned char>& hash);
   /// @brief Calculates a hash string from string input data
   /// @return Sequence of hex characters pairs for each byte of the binary hash
   std::string HashString(const std::string& input);

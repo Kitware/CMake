@@ -34,6 +34,37 @@ CM_AUTO_PTR<cmCryptoHash> cmCryptoHash::New(const char* algo)
   }
 }
 
+bool cmCryptoHash::IntFromHexDigit(char input, char& output)
+{
+  if (input >= '0' && input <= '9') {
+    output = char(input - '0');
+    return true;
+  } else if (input >= 'a' && input <= 'f') {
+    output = char(input - 'a' + 0xA);
+    return true;
+  } else if (input >= 'A' && input <= 'F') {
+    output = char(input - 'A' + 0xA);
+    return true;
+  }
+  return false;
+}
+
+std::string cmCryptoHash::ByteHashToString(
+  const std::vector<unsigned char>& hash)
+{
+  // Map from 4-bit index to hexadecimal representation.
+  static char const hex[16] = { '0', '1', '2', '3', '4', '5', '6', '7',
+                                '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+
+  std::string res;
+  for (std::vector<unsigned char>::const_iterator vit = hash.begin();
+       vit != hash.end(); ++vit) {
+    res.push_back(hex[(*vit) >> 4]);
+    res.push_back(hex[(*vit) & 0xF]);
+  }
+  return res;
+}
+
 std::string cmCryptoHash::HashString(const std::string& input)
 {
   this->Initialize();
