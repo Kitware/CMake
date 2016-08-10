@@ -74,9 +74,12 @@ void cmInstallExportGenerator::ComputeTempDir()
 #else
   std::string::size_type const max_total_len = 1000;
 #endif
-  if (this->TempDir.size() < max_total_len) {
+  // Will generate files of the form "<temp-dir>/<base>-<config>.<ext>".
+  std::string::size_type const len = this->TempDir.size() + 1 +
+    this->FileName.size() + 1 + this->GetMaxConfigLength();
+  if (len < max_total_len) {
     // Keep the total path length below the limit.
-    std::string::size_type max_len = max_total_len - this->TempDir.size();
+    std::string::size_type const max_len = max_total_len - len;
     if (this->Destination.size() > max_len) {
       useMD5 = true;
     }
@@ -100,6 +103,26 @@ void cmInstallExportGenerator::ComputeTempDir()
     std::replace(dest.begin(), dest.end(), ' ', '_');
     this->TempDir += dest;
   }
+}
+
+size_t cmInstallExportGenerator::GetMaxConfigLength() const
+{
+  // Always use at least 8 for "noconfig".
+  size_t len = 8;
+  if (this->ConfigurationTypes->empty()) {
+    if (this->ConfigurationName.size() > 8) {
+      len = this->ConfigurationName.size();
+    }
+  } else {
+    for (std::vector<std::string>::const_iterator ci =
+           this->ConfigurationTypes->begin();
+         ci != this->ConfigurationTypes->end(); ++ci) {
+      if (ci->size() > len) {
+        len = ci->size();
+      }
+    }
+  }
+  return len;
 }
 
 void cmInstallExportGenerator::GenerateScript(std::ostream& os)
