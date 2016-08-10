@@ -65,43 +65,57 @@ std::string cmCryptoHash::ByteHashToString(
   return res;
 }
 
-std::string cmCryptoHash::HashString(const std::string& input)
+std::vector<unsigned char> cmCryptoHash::ByteHashString(
+  const std::string& input)
 {
   this->Initialize();
   this->Append(reinterpret_cast<unsigned char const*>(input.c_str()),
                static_cast<int>(input.size()));
-  return ByteHashToString(this->Finalize());
+  return this->Finalize();
+}
+
+std::vector<unsigned char> cmCryptoHash::ByteHashFile(const std::string& file)
+{
+  cmsys::ifstream fin(file.c_str(), std::ios::in | std::ios::binary);
+  if (fin) {
+    this->Initialize();
+    {
+      // Should be efficient enough on most system:
+      cm_sha2_uint64_t buffer[512];
+      char* buffer_c = reinterpret_cast<char*>(buffer);
+      unsigned char const* buffer_uc =
+        reinterpret_cast<unsigned char const*>(buffer);
+      // This copy loop is very sensitive on certain platforms with
+      // slightly broken stream libraries (like HPUX).  Normally, it is
+      // incorrect to not check the error condition on the fin.read()
+      // before using the data, but the fin.gcount() will be zero if an
+      // error occurred.  Therefore, the loop should be safe everywhere.
+      while (fin) {
+        fin.read(buffer_c, sizeof(buffer));
+        if (int gcount = static_cast<int>(fin.gcount())) {
+          this->Append(buffer_uc, gcount);
+        }
+      }
+    }
+    if (fin.eof()) {
+      // Success
+      return this->Finalize();
+    }
+    // Finalize anyway
+    this->Finalize();
+  }
+  // Return without success
+  return std::vector<unsigned char>();
+}
+
+std::string cmCryptoHash::HashString(const std::string& input)
+{
+  return ByteHashToString(this->ByteHashString(input));
 }
 
 std::string cmCryptoHash::HashFile(const std::string& file)
 {
-  cmsys::ifstream fin(file.c_str(), std::ios::in | std::ios::binary);
-  if (!fin) {
-    return "";
-  }
-
-  this->Initialize();
-
-  // Should be efficient enough on most system:
-  cm_sha2_uint64_t buffer[512];
-  char* buffer_c = reinterpret_cast<char*>(buffer);
-  unsigned char const* buffer_uc =
-    reinterpret_cast<unsigned char const*>(buffer);
-  // This copy loop is very sensitive on certain platforms with
-  // slightly broken stream libraries (like HPUX).  Normally, it is
-  // incorrect to not check the error condition on the fin.read()
-  // before using the data, but the fin.gcount() will be zero if an
-  // error occurred.  Therefore, the loop should be safe everywhere.
-  while (fin) {
-    fin.read(buffer_c, sizeof(buffer));
-    if (int gcount = static_cast<int>(fin.gcount())) {
-      this->Append(buffer_uc, gcount);
-    }
-  }
-  if (fin.eof()) {
-    return ByteHashToString(this->Finalize());
-  }
-  return "";
+  return ByteHashToString(this->ByteHashFile(file));
 }
 
 cmCryptoHashMD5::cmCryptoHashMD5()
