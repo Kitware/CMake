@@ -284,9 +284,11 @@ public:
 
   enum CompareOp
   {
-    OP_LESS,
-    OP_GREATER,
-    OP_EQUAL
+    OP_EQUAL = 1,
+    OP_LESS = 2,
+    OP_GREATER = 4,
+    OP_LESS_EQUAL = OP_LESS | OP_EQUAL,
+    OP_GREATER_EQUAL = OP_GREATER | OP_EQUAL
   };
 
   /**
@@ -297,6 +299,8 @@ public:
                                   std::string const& rhs);
   static bool VersionCompareGreater(std::string const& lhs,
                                     std::string const& rhs);
+  static bool VersionCompareGreaterEq(std::string const& lhs,
+                                      std::string const& rhs);
 
   /**
    * Determine the file type based on the extension

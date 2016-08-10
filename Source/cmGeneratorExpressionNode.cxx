@@ -545,6 +545,25 @@ static const struct VersionGreaterNode : public cmGeneratorExpressionNode
   }
 } versionGreaterNode;
 
+static const struct VersionGreaterEqNode : public cmGeneratorExpressionNode
+{
+  VersionGreaterEqNode() {}
+
+  int NumExpectedParameters() const CM_OVERRIDE { return 2; }
+
+  std::string Evaluate(const std::vector<std::string>& parameters,
+                       cmGeneratorExpressionContext*,
+                       const GeneratorExpressionContent*,
+                       cmGeneratorExpressionDAGChecker*) const CM_OVERRIDE
+  {
+    return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER_EQUAL,
+                                         parameters.front().c_str(),
+                                         parameters[1].c_str())
+      ? "1"
+      : "0";
+  }
+} versionGreaterEqNode;
+
 static const struct VersionLessNode : public cmGeneratorExpressionNode
 {
   VersionLessNode() {}
@@ -563,6 +582,25 @@ static const struct VersionLessNode : public cmGeneratorExpressionNode
       : "0";
   }
 } versionLessNode;
+
+static const struct VersionLessEqNode : public cmGeneratorExpressionNode
+{
+  VersionLessEqNode() {}
+
+  int NumExpectedParameters() const CM_OVERRIDE { return 2; }
+
+  std::string Evaluate(const std::vector<std::string>& parameters,
+                       cmGeneratorExpressionContext*,
+                       const GeneratorExpressionContent*,
+                       cmGeneratorExpressionDAGChecker*) const CM_OVERRIDE
+  {
+    return cmSystemTools::VersionCompare(cmSystemTools::OP_LESS_EQUAL,
+                                         parameters.front().c_str(),
+                                         parameters[1].c_str())
+      ? "1"
+      : "0";
+  }
+} versionLessEqNode;
 
 static const struct VersionEqualNode : public cmGeneratorExpressionNode
 {
@@ -1641,7 +1679,9 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     nodeMap["C_COMPILER_ID"] = &cCompilerIdNode;
     nodeMap["CXX_COMPILER_ID"] = &cxxCompilerIdNode;
     nodeMap["VERSION_GREATER"] = &versionGreaterNode;
+    nodeMap["VERSION_GREATER_EQUAL"] = &versionGreaterEqNode;
     nodeMap["VERSION_LESS"] = &versionLessNode;
+    nodeMap["VERSION_LESS_EQUAL"] = &versionLessEqNode;
     nodeMap["VERSION_EQUAL"] = &versionEqualNode;
     nodeMap["C_COMPILER_VERSION"] = &cCompilerVersionNode;
     nodeMap["CXX_COMPILER_VERSION"] = &cxxCompilerVersionNode;

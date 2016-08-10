@@ -21,12 +21,14 @@ static std::string const keyDEFINED = "DEFINED";
 static std::string const keyEQUAL = "EQUAL";
 static std::string const keyEXISTS = "EXISTS";
 static std::string const keyGREATER = "GREATER";
+static std::string const keyGREATER_EQUAL = "GREATER_EQUAL";
 static std::string const keyIN_LIST = "IN_LIST";
 static std::string const keyIS_ABSOLUTE = "IS_ABSOLUTE";
 static std::string const keyIS_DIRECTORY = "IS_DIRECTORY";
 static std::string const keyIS_NEWER_THAN = "IS_NEWER_THAN";
 static std::string const keyIS_SYMLINK = "IS_SYMLINK";
 static std::string const keyLESS = "LESS";
+static std::string const keyLESS_EQUAL = "LESS_EQUAL";
 static std::string const keyMATCHES = "MATCHES";
 static std::string const keyNOT = "NOT";
 static std::string const keyOR = "OR";
@@ -35,12 +37,16 @@ static std::string const keyParenR = ")";
 static std::string const keyPOLICY = "POLICY";
 static std::string const keySTREQUAL = "STREQUAL";
 static std::string const keySTRGREATER = "STRGREATER";
+static std::string const keySTRGREATER_EQUAL = "STRGREATER_EQUAL";
 static std::string const keySTRLESS = "STRLESS";
+static std::string const keySTRLESS_EQUAL = "STRLESS_EQUAL";
 static std::string const keyTARGET = "TARGET";
 static std::string const keyTEST = "TEST";
 static std::string const keyVERSION_EQUAL = "VERSION_EQUAL";
 static std::string const keyVERSION_GREATER = "VERSION_GREATER";
+static std::string const keyVERSION_GREATER_EQUAL = "VERSION_GREATER_EQUAL";
 static std::string const keyVERSION_LESS = "VERSION_LESS";
+static std::string const keyVERSION_LESS_EQUAL = "VERSION_LESS_EQUAL";
 
 cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
                                            const cmListFileContext& context,
@@ -559,7 +565,9 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
           (this->IsKeyword(keyLESS, *argP1) ||
+           this->IsKeyword(keyLESS_EQUAL, *argP1) ||
            this->IsKeyword(keyGREATER, *argP1) ||
+           this->IsKeyword(keyGREATER_EQUAL, *argP1) ||
            this->IsKeyword(keyEQUAL, *argP1))) {
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
@@ -570,8 +578,12 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
           result = false;
         } else if (*(argP1) == keyLESS) {
           result = (lhs < rhs);
+        } else if (*(argP1) == keyLESS_EQUAL) {
+          result = (lhs <= rhs);
         } else if (*(argP1) == keyGREATER) {
           result = (lhs > rhs);
+        } else if (*(argP1) == keyGREATER_EQUAL) {
+          result = (lhs >= rhs);
         } else {
           result = (lhs == rhs);
         }
@@ -580,16 +592,22 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
           (this->IsKeyword(keySTRLESS, *argP1) ||
-           this->IsKeyword(keySTREQUAL, *argP1) ||
-           this->IsKeyword(keySTRGREATER, *argP1))) {
+           this->IsKeyword(keySTRLESS_EQUAL, *argP1) ||
+           this->IsKeyword(keySTRGREATER, *argP1) ||
+           this->IsKeyword(keySTRGREATER_EQUAL, *argP1) ||
+           this->IsKeyword(keySTREQUAL, *argP1))) {
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
         int val = strcmp(def, def2);
         bool result;
         if (*(argP1) == keySTRLESS) {
           result = (val < 0);
+        } else if (*(argP1) == keySTRLESS_EQUAL) {
+          result = (val <= 0);
         } else if (*(argP1) == keySTRGREATER) {
           result = (val > 0);
+        } else if (*(argP1) == keySTRGREATER_EQUAL) {
+          result = (val >= 0);
         } else // strequal
         {
           result = (val == 0);
@@ -599,15 +617,23 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
           (this->IsKeyword(keyVERSION_LESS, *argP1) ||
+           this->IsKeyword(keyVERSION_LESS_EQUAL, *argP1) ||
            this->IsKeyword(keyVERSION_GREATER, *argP1) ||
+           this->IsKeyword(keyVERSION_GREATER_EQUAL, *argP1) ||
            this->IsKeyword(keyVERSION_EQUAL, *argP1))) {
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
-        cmSystemTools::CompareOp op = cmSystemTools::OP_EQUAL;
+        cmSystemTools::CompareOp op;
         if (*argP1 == keyVERSION_LESS) {
           op = cmSystemTools::OP_LESS;
+        } else if (*argP1 == keyVERSION_LESS_EQUAL) {
+          op = cmSystemTools::OP_LESS_EQUAL;
         } else if (*argP1 == keyVERSION_GREATER) {
           op = cmSystemTools::OP_GREATER;
+        } else if (*argP1 == keyVERSION_GREATER_EQUAL) {
+          op = cmSystemTools::OP_GREATER_EQUAL;
+        } else { // version_equal
+          op = cmSystemTools::OP_EQUAL;
         }
         bool result = cmSystemTools::VersionCompare(op, def, def2);
         this->HandleBinaryOp(result, reducible, arg, newArgs, argP1, argP2);
