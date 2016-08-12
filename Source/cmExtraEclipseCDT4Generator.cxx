@@ -404,8 +404,8 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   if (this->IsOutOfSourceBuild) {
     // create a linked resource to CMAKE_SOURCE_DIR
     // (this is not done anymore for each project because of
-    // http://public.kitware.com/Bug/view.php?id=9978 and because I found it
-    // actually quite confusing in bigger projects with many directories and
+    // https://gitlab.kitware.com/cmake/cmake/issues/9978 and because I found
+    // it actually quite confusing in bigger projects with many directories and
     // projects, Alex
 
     std::string sourceLinkedResourceName = "[Source directory]";

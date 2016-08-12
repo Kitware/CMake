@@ -639,7 +639,7 @@ if( NOT HDF5_FOUND )
             if(UNIX AND HDF5_USE_STATIC_LIBRARIES)
                 # According to bug 1643 on the CMake bug tracker, this is the
                 # preferred method for searching for a static library.
-                # See https://cmake.org/Bug/view.php?id=1643.  We search
+                # See https://gitlab.kitware.com/cmake/cmake/issues/1643.  We search
                 # first for the full static library name, but fall back to a
                 # generic search on the name if the static search fails.
                 set( THIS_LIBRARY_SEARCH_DEBUG
@@ -676,7 +676,7 @@ if( NOT HDF5_FOUND )
                 if(UNIX AND HDF5_USE_STATIC_LIBRARIES)
                     # According to bug 1643 on the CMake bug tracker, this is the
                     # preferred method for searching for a static library.
-                    # See https://cmake.org/Bug/view.php?id=1643.  We search
+                    # See https://gitlab.kitware.com/cmake/cmake/issues/1643.  We search
                     # first for the full static library name, but fall back to a
                     # generic search on the name if the static search fails.
                     set( THIS_LIBRARY_SEARCH_DEBUG
