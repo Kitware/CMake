@@ -14,6 +14,7 @@
 #include "cmQtAutoGenerators.h"
 
 #include "cmAlgorithms.h"
+#include "cmFilePathUuid.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
@@ -85,6 +86,23 @@ static std::string extractSubDir(const std::string& absPath,
     subDir = absPath + cmsys::SystemTools::GetFilenamePath(currentMoc) + '/';
   }
   return subDir;
+}
+
+static bool FileNameIsUnique(const std::string& filePath,
+                             const std::map<std::string, std::string>& fileMap)
+{
+  size_t count(0);
+  const std::string fileName = cmsys::SystemTools::GetFilenameName(filePath);
+  for (std::map<std::string, std::string>::const_iterator si = fileMap.begin();
+       si != fileMap.end(); ++si) {
+    if (cmsys::SystemTools::GetFilenameName(si->first) == fileName) {
+      ++count;
+      if (count > 1) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 cmQtAutoGenerators::cmQtAutoGenerators()
@@ -358,11 +376,13 @@ void cmQtAutoGenerators::WriteOldMocDefinitionsFile(
 
 void cmQtAutoGenerators::Init()
 {
+  this->TargetBuildSubDir = this->TargetName;
+  this->TargetBuildSubDir += ".dir/";
+
   this->OutMocCppFilenameRel = this->TargetName;
   this->OutMocCppFilenameRel += ".cpp";
 
-  this->OutMocCppFilename = this->Builddir;
-  this->OutMocCppFilename += this->OutMocCppFilenameRel;
+  this->OutMocCppFilenameAbs = this->Builddir + this->OutMocCppFilenameRel;
 
   std::vector<std::string> cdefList;
   cmSystemTools::ExpandListArgument(this->MocCompileDefinitionsStr, cdefList);
@@ -439,7 +459,7 @@ static std::string ReadAll(const std::string& filename)
 
 bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 {
-  if (!cmsys::SystemTools::FileExists(this->OutMocCppFilename.c_str()) ||
+  if (!cmsys::SystemTools::FileExists(this->OutMocCppFilenameAbs.c_str()) ||
       (this->OldCompileSettingsStr != this->CurrentCompileSettingsStr)) {
     this->GenerateAll = true;
   }
@@ -933,6 +953,8 @@ void cmQtAutoGenerators::ParseHeaders(
   std::map<std::string, std::string>& notIncludedMocs,
   std::map<std::string, std::vector<std::string> >& includedUis)
 {
+  cmFilePathUuid fpathUuid(this->Srcdir, this->Builddir,
+                           this->ProjectSourceDir, this->ProjectBinaryDir);
   for (std::set<std::string>::const_iterator hIt = absHeaders.begin();
        hIt != absHeaders.end(); ++hIt) {
     const std::string& headerName = *hIt;
@@ -946,13 +968,10 @@ void cmQtAutoGenerators::ParseHeaders(
         this->LogInfo(err.str());
       }
 
-      const std::string basename =
-        cmsys::SystemTools::GetFilenameWithoutLastExtension(headerName);
-
-      const std::string currentMoc = "moc_" + basename + ".cpp";
       std::string macroName;
       if (requiresMocing(contents, macroName)) {
-        notIncludedMocs[headerName] = currentMoc;
+        notIncludedMocs[headerName] =
+          this->TargetBuildSubDir + fpathUuid.get(headerName, "moc_", ".cpp");
       }
     }
     this->ParseForUic(headerName, contents, includedUis);
@@ -1029,7 +1048,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
   // check if we even need to update _automoc.cpp
   if (!automocCppChanged) {
     // compare contents of the _automoc.cpp file
-    const std::string oldContents = ReadAll(this->OutMocCppFilename);
+    const std::string oldContents = ReadAll(this->OutMocCppFilenameAbs);
     if (oldContents == automocSource) {
       // nothing changed: don't touch the _automoc.cpp file
       if (this->Verbose) {
@@ -1052,7 +1071,7 @@ bool cmQtAutoGenerators::GenerateMocFiles(
   }
   {
     cmsys::ofstream outfile;
-    outfile.open(this->OutMocCppFilename.c_str(), std::ios::trunc);
+    outfile.open(this->OutMocCppFilenameAbs.c_str(), std::ios::trunc);
     outfile << automocSource;
     outfile.close();
   }
@@ -1183,7 +1202,7 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
     cmsys::SystemTools::MakeDirectory(this->Builddir.c_str());
   }
 
-  const ::std::string uiBuildFile = this->Builddir + uiOutputFile;
+  const std::string uiBuildFile = this->Builddir + uiOutputFile;
 
   int sourceNewerThanUi = 0;
   bool success = cmsys::SystemTools::FileTimeCompare(uiInputFile, uiBuildFile,
@@ -1255,15 +1274,18 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
 {
   // generate single map with input / output names
   std::map<std::string, std::string> qrcGenMap;
-  for (std::vector<std::string>::const_iterator si = this->RccSources.begin();
-       si != this->RccSources.end(); ++si) {
-    const std::string ext = cmsys::SystemTools::GetFilenameLastExtension(*si);
-    if (ext == ".qrc") {
-      std::string basename =
-        cmsys::SystemTools::GetFilenameWithoutLastExtension(*si);
-      std::string qrcOutputFile = "CMakeFiles/" + this->OriginTargetName +
-        ".dir/qrc_" + basename + ".cpp";
-      qrcGenMap[*si] = qrcOutputFile;
+  {
+    cmFilePathUuid fpathUuid(this->Srcdir, this->Builddir,
+                             this->ProjectSourceDir, this->ProjectBinaryDir);
+    for (std::vector<std::string>::const_iterator si =
+           this->RccSources.begin();
+         si != this->RccSources.end(); ++si) {
+      const std::string ext =
+        cmsys::SystemTools::GetFilenameLastExtension(*si);
+      if (ext == ".qrc") {
+        qrcGenMap[*si] =
+          (this->TargetBuildSubDir + fpathUuid.get(*si, "qrc_", ".cpp"));
+      }
     }
   }
 
@@ -1285,7 +1307,8 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
   for (std::map<std::string, std::string>::const_iterator si =
          qrcGenMap.begin();
        si != qrcGenMap.end(); ++si) {
-    if (!this->GenerateQrc(si->first, si->second)) {
+    bool unique = FileNameIsUnique(si->first, qrcGenMap);
+    if (!this->GenerateQrc(si->first, si->second, unique)) {
       if (this->RunRccFailed) {
         return false;
       }
@@ -1295,11 +1318,24 @@ bool cmQtAutoGenerators::GenerateQrcFiles()
 }
 
 bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
-                                     const std::string& qrcOutputFile)
+                                     const std::string& qrcOutputFile,
+                                     bool unique_n)
 {
-  const std::string basename =
-    cmsys::SystemTools::GetFilenameWithoutLastExtension(qrcInputFile);
-  const ::std::string qrcBuildFile = this->Builddir + qrcOutputFile;
+  std::string symbolName;
+  if (unique_n) {
+    symbolName =
+      cmsys::SystemTools::GetFilenameWithoutLastExtension(qrcInputFile);
+  } else {
+    symbolName =
+      cmsys::SystemTools::GetFilenameWithoutLastExtension(qrcOutputFile);
+    // Remove "qrc_" at string begin
+    symbolName.erase(0, 4);
+  }
+  // Replace '-' with '_'. The former is valid for
+  // file names but not for symbol names.
+  std::replace(symbolName.begin(), symbolName.end(), '-', '_');
+
+  const std::string qrcBuildFile = this->Builddir + qrcOutputFile;
 
   int sourceNewerThanQrc = 0;
   bool generateQrc = !cmsys::SystemTools::FileTimeCompare(
@@ -1325,7 +1361,7 @@ bool cmQtAutoGenerators::GenerateQrc(const std::string& qrcInputFile,
     }
 
     command.push_back("-name");
-    command.push_back(basename);
+    command.push_back(symbolName);
     command.push_back("-o");
     command.push_back(qrcBuildFile);
     command.push_back(qrcInputFile);

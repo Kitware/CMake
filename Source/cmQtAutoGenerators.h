@@ -51,7 +51,8 @@ private:
                   const std::string& uiOutputFile);
   bool GenerateQrcFiles();
   bool GenerateQrc(const std::string& qrcInputFile,
-                   const std::string& qrcOutputFile);
+                   const std::string& qrcOutputFile, bool unique_n);
+
   void ParseCppFile(
     const std::string& absFilename,
     const std::vector<std::string>& headerExtensions,
@@ -123,8 +124,9 @@ private:
   std::string CurrentCompileSettingsStr;
   std::string OldCompileSettingsStr;
 
+  std::string TargetBuildSubDir;
   std::string OutMocCppFilenameRel;
-  std::string OutMocCppFilename;
+  std::string OutMocCppFilenameAbs;
   std::list<std::string> MocIncludes;
   std::list<std::string> MocDefinitions;
   std::vector<std::string> MocOptions;

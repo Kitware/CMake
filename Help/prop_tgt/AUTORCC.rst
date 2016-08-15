@@ -19,5 +19,10 @@ Additional command line options for rcc can be set via the
 The global property :prop_gbl:`AUTOGEN_TARGETS_FOLDER` can be used to group
 the autorcc targets together in an IDE, e.g. in MSVS.
 
+When there are multiple ``.qrc`` files with the same name, CMake will
+generate unspecified unique names for ``rcc``.  Therefore if
+``Q_INIT_RESOURCE()`` or ``Q_CLEANUP_RESOURCE()`` need to be used the
+``.qrc`` file name must be unique.
+
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.
