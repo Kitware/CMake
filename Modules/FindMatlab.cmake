@@ -1287,7 +1287,12 @@ set(Matlab_EXTERN_LIBRARY_DIR
     ${Matlab_ROOT_DIR}/extern/lib/${_matlab_bin_prefix}${_matlab_current_suffix})
 
 if(WIN32)
-  set(_matlab_lib_dir_for_search ${Matlab_EXTERN_LIBRARY_DIR}/microsoft)
+  set(_matlab_lib_dir_for_search ${Matlab_EXTERN_LIBRARY_DIR})
+  if(MINGW)
+    set(_matlab_lib_dir_for_search ${_matlab_lib_dir_for_search}/mingw64)
+  else()
+    set(_matlab_lib_dir_for_search ${_matlab_lib_dir_for_search}/microsoft)
+  endif()
   set(_matlab_lib_prefix_for_search "lib")
 else()
   set(_matlab_lib_dir_for_search ${Matlab_BINARIES_DIR})
