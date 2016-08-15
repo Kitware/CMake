@@ -779,18 +779,19 @@ if(CUDA_VERSION VERSION_EQUAL "3.0")
     )
 endif()
 
-if(CUDA_USE_STATIC_CUDA_RUNTIME AND NOT CUDA_VERSION VERSION_LESS "5.5")
+if(NOT CUDA_VERSION VERSION_LESS "5.5")
   cuda_find_library_local_first(CUDA_cudart_static_LIBRARY cudart_static "static CUDA runtime library")
   mark_as_advanced(CUDA_cudart_static_LIBRARY)
 endif()
 
 
 if(CUDA_cudart_static_LIBRARY)
-  # Set whether to use the static cuda runtime.
+  # If static cudart available, use it by default, but provide a user-visible option to disable it.
   option(CUDA_USE_STATIC_CUDA_RUNTIME "Use the static version of the CUDA runtime library if available" ON)
   set(CUDA_CUDART_LIBRARY_VAR CUDA_cudart_static_LIBRARY)
 else()
-  option(CUDA_USE_STATIC_CUDA_RUNTIME "Use the static version of the CUDA runtime library if available" OFF)
+  # If not available, silently disable the option.
+  set(CUDA_USE_STATIC_CUDA_RUNTIME OFF CACHE INTERNAL "")
   set(CUDA_CUDART_LIBRARY_VAR CUDA_CUDART_LIBRARY)
 endif()
 
@@ -817,12 +818,13 @@ if(CUDA_USE_STATIC_CUDA_RUNTIME)
     else()
       unset(CMAKE_THREAD_PREFER_PTHREAD)
     endif()
-  endif()
-  if (UNIX AND NOT APPLE AND CUDA_VERSION VERSION_LESS "7.0")
-    # Before CUDA 7.0, there was librt that has things such as, clock_gettime, shm_open, and shm_unlink.
-    find_library(CUDA_rt_LIBRARY rt)
-    if (NOT CUDA_rt_LIBRARY)
-      message(WARNING "Expecting to find librt for libcudart_static, but didn't find it.")
+
+    if(NOT APPLE)
+      #On Linux, you must link against librt when using the static cuda runtime.
+      find_library(CUDA_rt_LIBRARY rt)
+      if (NOT CUDA_rt_LIBRARY)
+        message(WARNING "Expecting to find librt for libcudart_static, but didn't find it.")
+      endif()
     endif()
   endif()
 endif()
