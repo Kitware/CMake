@@ -98,6 +98,8 @@ Create custom targets to build projects in external trees
 
   ``SOURCE_DIR <dir>``
     Source dir to be used for build
+  ``SOURCE_SUBDIR <dir>``
+    Path to source CMakeLists.txt relative to ``SOURCE_DIR``
   ``CONFIGURE_COMMAND <cmd>...``
     Build tree configuration command
   ``CMAKE_COMMAND /.../cmake``
@@ -236,6 +238,11 @@ Create custom targets to build projects in external trees
   interpreted with respect to the build directory corresponding to the
   source directory in which ``ExternalProject_Add`` is invoked.
 
+  If ``SOURCE_SUBDIR`` is set and no ``CONFIGURE_COMMAND`` is specified, the
+  configure command will run CMake using the ``CMakeLists.txt`` located in the
+  relative path specified by ``SOURCE_SUBDIR``, relative to the ``SOURCE_DIR``.
+  If no ``SOURCE_SUBDIR`` is given, ``SOURCE_DIR`` is used.
+
   If ``SOURCE_DIR`` is explicitly set to an existing directory the project
   will be built from it.  Otherwise a download step must be specified
   using one of the ``DOWNLOAD_COMMAND``, ``CVS_*``, ``SVN_*``, or ``URL``
@@ -287,8 +294,8 @@ Create custom targets to build projects in external trees
 
   The command line, comment, working directory, and byproducts of every
   standard and custom step are processed to replace tokens ``<SOURCE_DIR>``,
-  ``<BINARY_DIR>``, ``<INSTALL_DIR>``, and ``<TMP_DIR>`` with
-  corresponding property values.
+  ``<SOURCE_SUBDIR>``,  ``<BINARY_DIR>``, ``<INSTALL_DIR>``, and ``<TMP_DIR>``
+  with corresponding property values.
 
 Any builtin step that specifies a ``<step>_COMMAND cmd...`` or custom
 step that specifies a ``COMMAND cmd...`` may specify additional command
@@ -1064,6 +1071,13 @@ function(_ep_set_directories name)
     endif()
     set_property(TARGET ${name} PROPERTY _EP_${VAR}_DIR "${${var}_dir}")
   endforeach()
+  get_property(source_subdir TARGET ${name} PROPERTY _EP_SOURCE_SUBDIR)
+  if(NOT source_subdir)
+    set_property(TARGET ${name} PROPERTY _EP_SOURCE_SUBDIR ".")
+  elseif(IS_ABSOLUTE "${source_subdir}")
+    message(FATAL_ERROR
+      "External project ${name} has non-relative SOURCE_SUBDIR!")
+  endif()
   if(build_in_source)
     get_property(source_dir TARGET ${name} PROPERTY _EP_SOURCE_DIR)
     set_property(TARGET ${name} PROPERTY _EP_BINARY_DIR "${source_dir}")
@@ -1095,7 +1109,7 @@ macro(_ep_replace_location_tags target_name)
   set(vars ${ARGN})
   foreach(var ${vars})
     if(${var})
-      foreach(dir SOURCE_DIR BINARY_DIR INSTALL_DIR TMP_DIR DOWNLOADED_FILE)
+      foreach(dir SOURCE_DIR SOURCE_SUBDIR BINARY_DIR INSTALL_DIR TMP_DIR DOWNLOADED_FILE)
         get_property(val TARGET ${target_name} PROPERTY _EP_${dir})
         string(REPLACE "<${dir}>" "${val}" ${var} "${${var}}")
       endforeach()
@@ -2131,7 +2145,7 @@ endfunction()
 
 # TODO: Make sure external projects use the proper compiler
 function(_ep_add_configure_command name)
-  ExternalProject_Get_Property(${name} source_dir binary_dir tmp_dir)
+  ExternalProject_Get_Property(${name} source_dir source_subdir binary_dir tmp_dir)
 
   # Depend on other external projects (file-level).
   set(file_deps)
@@ -2209,7 +2223,11 @@ function(_ep_add_configure_command name)
       endif()
     endif()
 
-    list(APPEND cmd "${source_dir}")
+    if(source_subdir STREQUAL ".")
+      list(APPEND cmd "${source_dir}")
+    else()
+      list(APPEND cmd "${source_dir}/${source_subdir}")
+    endif()
   endif()
 
   # If anything about the configure command changes, (command itself, cmake

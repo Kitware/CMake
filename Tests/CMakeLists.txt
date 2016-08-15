@@ -1441,6 +1441,18 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectSubdir")
 
+  add_test(NAME ExternalProjectSourceSubdir
+    COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/ExternalProjectSourceSubdir"
+    "${CMake_BINARY_DIR}/Tests/ExternalProjectSourceSubdir"
+    ${build_generator_args}
+    --build-project ExternalProjectSourceSubdir
+    --force-new-ctest-process
+    --build-options ${build_options}
+    )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectSourceSubdir")
+
   add_test(ExternalProjectLocal ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/ExternalProjectLocal"
