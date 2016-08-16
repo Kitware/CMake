@@ -23,6 +23,10 @@
 
 #ifndef UV_H
 #define UV_H
+
+/* Include KWSys Large File Support configuration. */
+#include <cmsys/Configure.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

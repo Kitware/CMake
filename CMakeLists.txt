@@ -464,6 +464,19 @@ macro (CMAKE_BUILD_UTILITIES)
   endif()
 
   #---------------------------------------------------------------------
+  # Build libuv library.
+  if(NOT DEFINED CMAKE_USE_LIBUV)
+    set(CMAKE_USE_LIBUV 1)
+  endif()
+  if(CMAKE_USE_LIBUV)
+    set(CMAKE_LIBUV_LIBRARIES cmlibuv)
+    add_subdirectory(Utilities/cmlibuv)
+    CMAKE_SET_TARGET_FOLDER(cmlibuv "Utilities/3rdParty")
+  else()
+    set(CMAKE_LIBUV_LIBRARIES)
+  endif()
+
+  #---------------------------------------------------------------------
   # Build XMLRPC library for CMake and CTest.
   if(CTEST_USE_XMLRPC)
     find_package(XMLRPC QUIET REQUIRED libwww-client)
