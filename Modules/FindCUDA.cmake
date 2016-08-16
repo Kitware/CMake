@@ -730,7 +730,7 @@ else()
 endif()
 
 # Set the user list of include dir to nothing to initialize it.
-set (CUDA_NVCC_INCLUDE_ARGS_USER "")
+set (CUDA_NVCC_INCLUDE_DIRS_USER "")
 set (CUDA_INCLUDE_DIRS ${CUDA_TOOLKIT_INCLUDE})
 
 macro(cuda_find_library_local_first_with_path_ext _var _names _doc _path_ext )
@@ -1025,7 +1025,7 @@ find_package_handle_standard_args(CUDA
 # Add include directories to pass to the nvcc command.
 macro(CUDA_INCLUDE_DIRECTORIES)
   foreach(dir ${ARGN})
-    list(APPEND CUDA_NVCC_INCLUDE_ARGS_USER -I${dir})
+    list(APPEND CUDA_NVCC_INCLUDE_DIRS_USER ${dir})
   endforeach()
 endmacro()
 
@@ -1249,17 +1249,15 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   endif()
 
   # Initialize our list of includes with the user ones followed by the CUDA system ones.
-  set(CUDA_NVCC_INCLUDE_ARGS ${CUDA_NVCC_INCLUDE_ARGS_USER} "-I${CUDA_INCLUDE_DIRS}")
-  # Get the include directories for this directory and use them for our nvcc command.
-  # Remove duplicate entries which may be present since include_directories
-  # in CMake >= 2.8.8 does not remove them.
-  get_directory_property(CUDA_NVCC_INCLUDE_DIRECTORIES INCLUDE_DIRECTORIES)
-  list(REMOVE_DUPLICATES CUDA_NVCC_INCLUDE_DIRECTORIES)
-  if(CUDA_NVCC_INCLUDE_DIRECTORIES)
-    foreach(dir ${CUDA_NVCC_INCLUDE_DIRECTORIES})
-      list(APPEND CUDA_NVCC_INCLUDE_ARGS -I${dir})
-    endforeach()
-  endif()
+  set(CUDA_NVCC_INCLUDE_DIRS ${CUDA_NVCC_INCLUDE_DIRS_USER} "${CUDA_INCLUDE_DIRS}")
+  # Append the include directories for this target via generator expression, which is
+  # expanded by the FILE(GENERATE) call below.  This generator expression captures all
+  # include dirs set by the user, whether via directory properties or target properties
+  list(APPEND CUDA_NVCC_INCLUDE_DIRS "$<TARGET_PROPERTY:${cuda_target},INCLUDE_DIRECTORIES>")
+
+  # Do the same thing with compile definitions
+  set(CUDA_NVCC_COMPILE_DEFINITIONS "$<TARGET_PROPERTY:${cuda_target},COMPILE_DEFINITIONS>")
+
 
   # Reset these variables
   set(CUDA_WRAP_OPTION_NVCC_FLAGS)
@@ -1347,14 +1345,6 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
       list(APPEND nvcc_flags --std c++11)
     endif()
     string(REGEX REPLACE "[-]+std=c\\+\\+11" "" _cuda_host_flags "${_cuda_host_flags}")
-  endif()
-
-  # Get the list of definitions from the directory property
-  get_directory_property(CUDA_NVCC_DEFINITIONS COMPILE_DEFINITIONS)
-  if(CUDA_NVCC_DEFINITIONS)
-    foreach(_definition ${CUDA_NVCC_DEFINITIONS})
-      list(APPEND nvcc_flags "-D${_definition}")
-    endforeach()
   endif()
 
   if(_cuda_build_shared_libs)
