@@ -12,6 +12,12 @@
 #ifndef cm_uv_h
 #define cm_uv_h
 
+/* Use the libuv library configured for CMake.  */
+#include "cmThirdParty.h"
+#ifdef CMAKE_USE_SYSTEM_LIBUV
+#include <uv.h>
+#else
 #include <cmlibuv/include/uv.h>
+#endif
 
 #endif
