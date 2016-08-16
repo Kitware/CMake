@@ -811,7 +811,8 @@ void cmake::AddDefaultExtraGenerators()
 #endif
 }
 
-void cmake::GetRegisteredGenerators(std::vector<GeneratorInfo>& generators)
+void cmake::GetRegisteredGenerators(
+  std::vector<GeneratorInfo>& generators) const
 {
   for (RegisteredGeneratorsVector::const_iterator i = this->Generators.begin(),
                                                   e = this->Generators.end();
