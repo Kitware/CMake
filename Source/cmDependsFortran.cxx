@@ -91,8 +91,9 @@ cmDependsFortran::~cmDependsFortran()
 }
 
 bool cmDependsFortran::WriteDependencies(const std::set<std::string>& sources,
-                                         const std::string& obj, std::ostream&,
-                                         std::ostream&)
+                                         const std::string& obj,
+                                         std::ostream& /*makeDepends*/,
+                                         std::ostream& /*internalDepends*/)
 {
   // Make sure this is a scanning instance.
   if (sources.empty() || sources.begin()->empty()) {

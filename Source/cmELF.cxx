@@ -55,17 +55,17 @@ template <size_t s>
 struct cmELFByteSwapSize
 {
 };
-void cmELFByteSwap(char*, cmELFByteSwapSize<1> const&)
+void cmELFByteSwap(char* /*unused*/, cmELFByteSwapSize<1> const& /*unused*/)
 {
 }
-void cmELFByteSwap(char* data, cmELFByteSwapSize<2> const&)
+void cmELFByteSwap(char* data, cmELFByteSwapSize<2> const& /*unused*/)
 {
   char one_byte;
   one_byte = data[0];
   data[0] = data[1];
   data[1] = one_byte;
 }
-void cmELFByteSwap(char* data, cmELFByteSwapSize<4> const&)
+void cmELFByteSwap(char* data, cmELFByteSwapSize<4> const& /*unused*/)
 {
   char one_byte;
   one_byte = data[0];
@@ -75,7 +75,7 @@ void cmELFByteSwap(char* data, cmELFByteSwapSize<4> const&)
   data[1] = data[2];
   data[2] = one_byte;
 }
-void cmELFByteSwap(char* data, cmELFByteSwapSize<8> const&)
+void cmELFByteSwap(char* data, cmELFByteSwapSize<8> const& /*unused*/)
 {
   char one_byte;
   one_byte = data[0];

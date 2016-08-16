@@ -161,7 +161,7 @@ int cmFortranParser_GetOldStartcond(cmFortranParser* parser)
   return parser->OldStartcond;
 }
 
-void cmFortranParser_Error(cmFortranParser*, const char*)
+void cmFortranParser_Error(cmFortranParser* /*unused*/, const char* /*unused*/)
 {
   // If there is a parser error just ignore it.  The source will not
   // compile and the user will edit it.  Then dependencies will have

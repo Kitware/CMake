@@ -78,7 +78,7 @@ public:
     ostr << "\n";
     this->Log += ostr.str();
   }
-  void EndElement(const std::string&) CM_OVERRIDE {}
+  void EndElement(const std::string& /*name*/) CM_OVERRIDE {}
 
   const char* GetAttribute(const char* name, const char** atts)
   {

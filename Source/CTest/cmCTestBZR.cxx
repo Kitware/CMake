@@ -19,7 +19,7 @@
 
 #include <cm_expat.h>
 
-extern "C" int cmBZRXMLParserUnknownEncodingHandler(void*,
+extern "C" int cmBZRXMLParserUnknownEncodingHandler(void* /*unused*/,
                                                     const XML_Char* name,
                                                     XML_Encoding* info)
 {
@@ -215,7 +215,7 @@ private:
     return true;
   }
 
-  void StartElement(const std::string& name, const char**) CM_OVERRIDE
+  void StartElement(const std::string& name, const char** /*atts*/) CM_OVERRIDE
   {
     this->CData.clear();
     if (name == "log") {
@@ -275,7 +275,7 @@ private:
     this->CData.clear();
   }
 
-  void ReportError(int, int, const char* msg) CM_OVERRIDE
+  void ReportError(int /*line*/, int /*column*/, const char* msg) CM_OVERRIDE
   {
     this->BZR->Log << "Error parsing bzr log xml: " << msg << "\n";
   }

@@ -23,7 +23,7 @@ public:
   ~XMLParser() CM_OVERRIDE {}
 
 protected:
-  void EndElement(const std::string&) CM_OVERRIDE {}
+  void EndElement(const std::string& /*name*/) CM_OVERRIDE {}
 
   void StartElement(const std::string& name, const char** atts) CM_OVERRIDE
   {

@@ -32,7 +32,7 @@ cmCTestHandlerCommand::cmCTestHandlerCommand()
 }
 
 bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
-                                        cmExecutionStatus&)
+                                        cmExecutionStatus& /*unused*/)
 {
   // Allocate space for argument values.
   this->Values.clear();

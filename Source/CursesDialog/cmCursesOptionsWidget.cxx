@@ -31,7 +31,8 @@ cmCursesOptionsWidget::cmCursesOptionsWidget(int width, int height, int left,
   field_opts_off(this->Field, O_STATIC);
 }
 
-bool cmCursesOptionsWidget::HandleInput(int& key, cmCursesMainForm*, WINDOW* w)
+bool cmCursesOptionsWidget::HandleInput(int& key, cmCursesMainForm* /*fm*/,
+                                        WINDOW* w)
 {
 
   // 10 == enter

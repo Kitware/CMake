@@ -128,7 +128,7 @@ template <bool>
 struct DoAccept
 {
   template <typename T>
-  static void Do(T&, cmSourceFile*)
+  static void Do(T& /*unused*/, cmSourceFile* /*unused*/)
   {
   }
 };
@@ -3271,7 +3271,8 @@ template <>
 bool getLinkInterfaceDependentProperty(cmGeneratorTarget const* tgt,
                                        const std::string& prop,
                                        const std::string& config,
-                                       CompatibleType, bool*)
+                                       CompatibleType /*unused*/,
+                                       bool* /*unused*/)
 {
   return tgt->GetLinkInterfaceDependentBoolProperty(prop, config);
 }
@@ -3280,7 +3281,8 @@ template <>
 const char* getLinkInterfaceDependentProperty(cmGeneratorTarget const* tgt,
                                               const std::string& prop,
                                               const std::string& config,
-                                              CompatibleType t, const char**)
+                                              CompatibleType t,
+                                              const char** /*unused*/)
 {
   switch (t) {
     case BoolType:
@@ -3303,7 +3305,7 @@ void checkPropertyConsistency(cmGeneratorTarget const* depender,
                               const std::string& propName,
                               std::set<std::string>& emitted,
                               const std::string& config, CompatibleType t,
-                              PropertyType*)
+                              PropertyType* /*unused*/)
 {
   const char* prop = dependee->GetProperty(propName);
   if (!prop) {
@@ -3536,12 +3538,12 @@ std::string valueAsString<const char*>(const char* value)
 template <typename PropertyType>
 PropertyType impliedValue(PropertyType);
 template <>
-bool impliedValue<bool>(bool)
+bool impliedValue<bool>(bool /*unused*/)
 {
   return false;
 }
 template <>
-const char* impliedValue<const char*>(const char*)
+const char* impliedValue<const char*>(const char* /*unused*/)
 {
   return "";
 }
@@ -3552,7 +3554,8 @@ std::pair<bool, PropertyType> consistentProperty(PropertyType lhs,
                                                  CompatibleType t);
 
 template <>
-std::pair<bool, bool> consistentProperty(bool lhs, bool rhs, CompatibleType)
+std::pair<bool, bool> consistentProperty(bool lhs, bool rhs,
+                                         CompatibleType /*unused*/)
 {
   return std::make_pair(lhs == rhs, lhs);
 }
@@ -3626,7 +3629,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
                                                  const std::string& config,
                                                  const char* defaultValue,
                                                  CompatibleType t,
-                                                 PropertyType*)
+                                                 PropertyType* /*unused*/)
 {
   PropertyType propContent = getTypedProperty<PropertyType>(tgt, p);
   std::vector<std::string> headPropKeys = tgt->GetPropertyKeys();

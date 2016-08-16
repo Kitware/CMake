@@ -14,7 +14,7 @@
 #include "cmCTest.h"
 
 bool cmCTestReadCustomFilesCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+  std::vector<std::string> const& args, cmExecutionStatus& /*unused*/)
 {
   if (args.empty()) {
     this->SetError("called with incorrect number of arguments");

@@ -102,7 +102,8 @@ void cmCursesLongMessageForm::PrintKeys()
   pos_form_cursor(this->Form);
 }
 
-void cmCursesLongMessageForm::Render(int, int, int, int)
+void cmCursesLongMessageForm::Render(int /*left*/, int /*top*/, int /*width*/,
+                                     int /*height*/)
 {
   int x, y;
   getmaxyx(stdscr, y, x);

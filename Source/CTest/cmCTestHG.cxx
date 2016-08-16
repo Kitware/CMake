@@ -261,7 +261,7 @@ private:
     return output;
   }
 
-  void ReportError(int, int, const char* msg) CM_OVERRIDE
+  void ReportError(int /*line*/, int /*column*/, const char* msg) CM_OVERRIDE
   {
     this->HG->Log << "Error parsing hg log xml: " << msg << "\n";
   }

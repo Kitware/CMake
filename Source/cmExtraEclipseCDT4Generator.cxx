@@ -77,7 +77,8 @@ cmExtraEclipseCDT4Generator::GetFactory()
 }
 
 void cmExtraEclipseCDT4Generator::EnableLanguage(
-  std::vector<std::string> const& languages, cmMakefile*, bool)
+  std::vector<std::string> const& languages, cmMakefile* /*unused*/,
+  bool /*optional*/)
 {
   for (std::vector<std::string>::const_iterator lit = languages.begin();
        lit != languages.end(); ++lit) {

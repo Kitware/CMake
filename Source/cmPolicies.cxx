@@ -293,7 +293,8 @@ std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
 }
 
 ///! Get the default status for a policy
-cmPolicies::PolicyStatus cmPolicies::GetPolicyStatus(cmPolicies::PolicyID)
+cmPolicies::PolicyStatus cmPolicies::GetPolicyStatus(
+  cmPolicies::PolicyID /*unused*/)
 {
   return cmPolicies::WARN;
 }

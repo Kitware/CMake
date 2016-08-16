@@ -124,8 +124,8 @@ static std::string cmakemainGetStack(void* clientdata)
   return msg;
 }
 
-static void cmakemainMessageCallback(const char* m, const char*, bool&,
-                                     void* clientdata)
+static void cmakemainMessageCallback(const char* m, const char* /*unused*/,
+                                     bool& /*unused*/, void* clientdata)
 {
   std::cerr << m << cmakemainGetStack(clientdata) << std::endl << std::flush;
 }

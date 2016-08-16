@@ -679,7 +679,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
   }
 }
 
-void cmExportFileGenerator::ReplaceInstallPrefix(std::string&)
+void cmExportFileGenerator::ReplaceInstallPrefix(std::string& /*unused*/)
 {
   // Do nothing
 }

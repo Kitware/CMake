@@ -64,7 +64,8 @@ public:
 struct cmArchiveWrite::Callback
 {
   // archive_write_callback
-  static __LA_SSIZE_T Write(struct archive*, void* cd, const void* b, size_t n)
+  static __LA_SSIZE_T Write(struct archive* /*unused*/, void* cd,
+                            const void* b, size_t n)
   {
     cmArchiveWrite* self = static_cast<cmArchiveWrite*>(cd);
     if (self->Stream.write(static_cast<const char*>(b),

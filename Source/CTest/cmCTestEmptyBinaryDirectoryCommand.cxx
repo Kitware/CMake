@@ -14,7 +14,7 @@
 #include "cmCTestScriptHandler.h"
 
 bool cmCTestEmptyBinaryDirectoryCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+  std::vector<std::string> const& args, cmExecutionStatus& /*unused*/)
 {
   if (args.size() != 1) {
     this->SetError("called with incorrect number of arguments");

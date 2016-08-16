@@ -198,7 +198,7 @@ enum TransitiveProperty
 };
 
 template <TransitiveProperty>
-bool additionalTest(const char* const)
+bool additionalTest(const char* const /*unused*/)
 {
   return false;
 }

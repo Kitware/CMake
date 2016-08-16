@@ -97,7 +97,7 @@ static bool decode_bad(test_utf8_char const s)
   return true;
 }
 
-int testUTF8(int, char* [])
+int testUTF8(int /*unused*/, char* /*unused*/ [])
 {
   int result = 0;
   for (test_utf8_entry const* e = good_entry; e->n; ++e) {

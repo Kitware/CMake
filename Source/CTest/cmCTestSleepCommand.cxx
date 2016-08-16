@@ -15,7 +15,7 @@
 #include <stdlib.h> // required for atoi
 
 bool cmCTestSleepCommand::InitialPass(std::vector<std::string> const& args,
-                                      cmExecutionStatus&)
+                                      cmExecutionStatus& /*unused*/)
 {
   if (args.empty()) {
     this->SetError("called with incorrect number of arguments");

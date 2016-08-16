@@ -116,7 +116,8 @@ static size_t cmCTestSubmitHandlerWriteMemoryCallback(void* ptr, size_t size,
   return realsize;
 }
 
-static size_t cmCTestSubmitHandlerCurlDebugCallback(CURL*, curl_infotype,
+static size_t cmCTestSubmitHandlerCurlDebugCallback(CURL* /*unused*/,
+                                                    curl_infotype /*unused*/,
                                                     char* chPtr, size_t size,
                                                     void* data)
 {
@@ -976,10 +977,9 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
   return true;
 }
 #else
-bool cmCTestSubmitHandler::SubmitUsingXMLRPC(std::string const&,
-                                             std::set<std::string> const&,
-                                             std::string const&,
-                                             std::string const&)
+bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
+  std::string const& /*unused*/, std::set<std::string> const& /*unused*/,
+  std::string const& /*unused*/, std::string const& /*unused*/)
 {
   return false;
 }

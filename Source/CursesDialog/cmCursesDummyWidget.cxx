@@ -18,7 +18,8 @@ cmCursesDummyWidget::cmCursesDummyWidget(int width, int height, int left,
   this->Type = cmState::INTERNAL;
 }
 
-bool cmCursesDummyWidget::HandleInput(int&, cmCursesMainForm*, WINDOW*)
+bool cmCursesDummyWidget::HandleInput(int& /*key*/, cmCursesMainForm* /*fm*/,
+                                      WINDOW* /*w*/)
 {
   return false;
 }

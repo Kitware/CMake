@@ -61,7 +61,7 @@ public:
   cmCTestScriptFunctionBlocker() {}
   ~cmCTestScriptFunctionBlocker() CM_OVERRIDE {}
   bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
-                         cmExecutionStatus&) CM_OVERRIDE;
+                         cmExecutionStatus& /*status*/) CM_OVERRIDE;
   // virtual bool ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf);
   // virtual void ScopeEnded(cmMakefile &mf);
 
@@ -69,9 +69,9 @@ public:
 };
 
 // simply update the time and don't block anything
-bool cmCTestScriptFunctionBlocker::IsFunctionBlocked(const cmListFileFunction&,
-                                                     cmMakefile&,
-                                                     cmExecutionStatus&)
+bool cmCTestScriptFunctionBlocker::IsFunctionBlocked(
+  const cmListFileFunction& /*lff*/, cmMakefile& /*mf*/,
+  cmExecutionStatus& /*status*/)
 {
   this->CTestScriptHandler->UpdateElapsedTime();
   return false;
@@ -265,7 +265,8 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   return retVal;
 }
 
-static void ctestScriptProgressCallback(const char* m, float, void* cd)
+static void ctestScriptProgressCallback(const char* m, float /*unused*/,
+                                        void* cd)
 {
   cmCTest* ctest = static_cast<cmCTest*>(cd);
   if (m && *m) {

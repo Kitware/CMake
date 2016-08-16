@@ -72,7 +72,7 @@ bool cmDepends::Write(std::ostream& makeDepends, std::ostream& internalDepends)
   return this->Finalize(makeDepends, internalDepends);
 }
 
-bool cmDepends::Finalize(std::ostream&, std::ostream&)
+bool cmDepends::Finalize(std::ostream& /*unused*/, std::ostream& /*unused*/)
 {
   return true;
 }
@@ -123,9 +123,10 @@ void cmDepends::Clear(const char* file)
                 << std::endl;
 }
 
-bool cmDepends::WriteDependencies(const std::set<std::string>&,
-                                  const std::string&, std::ostream&,
-                                  std::ostream&)
+bool cmDepends::WriteDependencies(const std::set<std::string>& /*unused*/,
+                                  const std::string& /*unused*/,
+                                  std::ostream& /*unused*/,
+                                  std::ostream& /*unused*/)
 {
   // This should be implemented by the subclass.
   return false;

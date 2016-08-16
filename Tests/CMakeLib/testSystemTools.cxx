@@ -16,7 +16,7 @@
   std::cout << "FAILED: " << m << "\n";                                       \
   failed = 1
 
-int testSystemTools(int, char* [])
+int testSystemTools(int /*unused*/, char* /*unused*/ [])
 {
   int failed = 0;
   // ----------------------------------------------------------------------

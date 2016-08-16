@@ -1515,7 +1515,8 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->BinaryDirectories.clear();
 }
 
-void cmGlobalGenerator::ComputeTargetObjectDirectory(cmGeneratorTarget*) const
+void cmGlobalGenerator::ComputeTargetObjectDirectory(
+  cmGeneratorTarget* /*unused*/) const
 {
 }
 
@@ -1644,15 +1645,17 @@ int cmGlobalGenerator::TryCompile(const std::string& srcdir,
 }
 
 void cmGlobalGenerator::GenerateBuildCommand(
-  std::vector<std::string>& makeCommand, const std::string&,
-  const std::string&, const std::string&, const std::string&,
-  const std::string&, bool, bool, std::vector<std::string> const&)
+  std::vector<std::string>& makeCommand, const std::string& /*unused*/,
+  const std::string& /*unused*/, const std::string& /*unused*/,
+  const std::string& /*unused*/, const std::string& /*unused*/,
+  bool /*unused*/, bool /*unused*/, std::vector<std::string> const& /*unused*/)
 {
   makeCommand.push_back(
     "cmGlobalGenerator::GenerateBuildCommand not implemented");
 }
 
-int cmGlobalGenerator::Build(const std::string&, const std::string& bindir,
+int cmGlobalGenerator::Build(const std::string& /*unused*/,
+                             const std::string& bindir,
                              const std::string& projectName,
                              const std::string& target, std::string& output,
                              const std::string& makeCommandCSTR,
@@ -2372,10 +2375,10 @@ std::string cmGlobalGenerator::GetSharedLibFlagsForLanguage(
   return "";
 }
 
-void cmGlobalGenerator::AppendDirectoryForConfig(const std::string&,
-                                                 const std::string&,
-                                                 const std::string&,
-                                                 std::string&)
+void cmGlobalGenerator::AppendDirectoryForConfig(const std::string& /*unused*/,
+                                                 const std::string& /*unused*/,
+                                                 const std::string& /*unused*/,
+                                                 std::string& /*unused*/)
 {
   // Subclasses that support multiple configurations should implement
   // this method to append the subdirectory for the given build

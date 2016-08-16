@@ -51,7 +51,7 @@ cmCursesForm* cmCursesForm::CurrentForm = CM_NULLPTR;
 
 extern "C" {
 
-void onsig(int)
+void onsig(int /*unused*/)
 {
   if (cmCursesForm::CurrentForm) {
     endwin();
@@ -70,8 +70,8 @@ void onsig(int)
 }
 }
 
-void CMakeMessageHandler(const char* message, const char* title, bool&,
-                         void* clientData)
+void CMakeMessageHandler(const char* message, const char* title,
+                         bool& /*unused*/, void* clientData)
 {
   cmCursesForm* self = static_cast<cmCursesForm*>(clientData);
   self->AddError(message, title);

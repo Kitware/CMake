@@ -15,7 +15,8 @@
 #include <assert.h>
 
 void cmExternalMakefileProjectGenerator::EnableLanguage(
-  std::vector<std::string> const&, cmMakefile*, bool)
+  std::vector<std::string> const& /*unused*/, cmMakefile* /*unused*/,
+  bool /*unused*/)
 {
 }
 
