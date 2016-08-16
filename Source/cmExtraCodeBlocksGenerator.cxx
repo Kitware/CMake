@@ -750,7 +750,7 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
   if (generator == "NMake Makefiles") {
     // For Windows ConvertToOutputPath already adds quotes when required.
     // These need to be escaped, see
-    // http://public.kitware.com/Bug/view.php?id=13952
+    // https://gitlab.kitware.com/cmake/cmake/issues/13952
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
     command += " /NOLOGO /f ";
     command += makefileName;
@@ -758,7 +758,7 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     command += target;
   } else if (generator == "MinGW Makefiles") {
     // no escaping of spaces in this case, see
-    // http://public.kitware.com/Bug/view.php?id=10014
+    // https://gitlab.kitware.com/cmake/cmake/issues/10014
     std::string makefileName = makefile;
     command += " -f \"";
     command += makefileName;

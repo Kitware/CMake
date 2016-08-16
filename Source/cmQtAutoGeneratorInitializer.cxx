@@ -126,7 +126,7 @@ static void GetCompileDefinitionsAndDirectories(
   std::vector<std::string> includeDirs;
   cmLocalGenerator* localGen = target->GetLocalGenerator();
   // Get the include dirs for this target, without stripping the implicit
-  // include dirs off, see http://public.kitware.com/Bug/view.php?id=13667
+  // include dirs off, see https://gitlab.kitware.com/cmake/cmake/issues/13667
   localGen->GetIncludeDirectories(includeDirs, target, "CXX", config, false);
 
   incs = cmJoin(includeDirs, ";");
