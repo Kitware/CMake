@@ -14,6 +14,8 @@
 
 #include "cmCursesLabelWidget.h"
 
+class cmake;
+
 class cmCursesCacheEntryComposite
 {
 public:

@@ -11,7 +11,7 @@
 ============================================================================*/
 #include "cmVersion.h"
 
-#include "cmVersionMacros.h"
+#include "cmVersionConfig.h"
 
 unsigned int cmVersion::GetMajorVersion()
 {

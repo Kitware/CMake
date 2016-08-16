@@ -15,10 +15,19 @@
 #include "cmCacheManager.h"
 #include "cmCommand.h"
 #include "cmDefinitions.h"
+#include "cmListFileCache.h"
+#include "cmSystemTools.h"
+#include "cmTypeMacro.h"
 #include "cmVersion.h"
 #include "cmake.h"
 
+#include <algorithm>
 #include <assert.h>
+#include <cmsys/RegularExpression.hxx>
+#include <iterator>
+#include <stdio.h>
+#include <string.h>
+#include <utility>
 
 struct cmState::SnapshotDataType
 {

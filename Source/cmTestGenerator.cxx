@@ -12,10 +12,18 @@
 #include "cmTestGenerator.h"
 
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmOutputConverter.h"
+#include "cmProperty.h"
+#include "cmPropertyMap.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmTest.h"
+
+#include <map>
+#include <ostream>
+#include <utility>
 
 cmTestGenerator::cmTestGenerator(
   cmTest* test, std::vector<std::string> const& configurations)

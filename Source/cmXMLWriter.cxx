@@ -11,8 +11,6 @@
 ============================================================================*/
 #include "cmXMLWriter.h"
 
-#include "cmXMLSafe.h"
-
 #include <cassert>
 #include <cmsys/FStream.hxx>
 

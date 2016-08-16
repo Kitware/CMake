@@ -11,6 +11,9 @@
 ============================================================================*/
 #include "cmSystemTools.h"
 
+#include <iostream>
+#include <string>
+
 #define cmPassed(m) std::cout << "Passed: " << m << "\n"
 #define cmFailed(m)                                                           \
   std::cout << "FAILED: " << m << "\n";                                       \

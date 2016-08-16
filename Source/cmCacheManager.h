@@ -17,6 +17,7 @@
 #include "cmPropertyMap.h"
 #include "cmState.h"
 
+class cmake;
 class cmMarkAsAdvancedCommand;
 
 /** \class cmCacheManager

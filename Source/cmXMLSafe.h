@@ -12,7 +12,7 @@
 #ifndef cmXMLSafe_h
 #define cmXMLSafe_h
 
-#include <cmsys/Configure.hxx>
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include <iosfwd>
 #include <string>

@@ -13,7 +13,9 @@
 
 #include "cmAlgorithms.h"
 
+#include <algorithm>
 #include <cm_auto_ptr.hxx>
+#include <utility>
 
 static const char* const cmVariableWatchAccessStrings[] = {
   "READ_ACCESS",     "UNKNOWN_READ_ACCESS", "UNKNOWN_DEFINED_ACCESS",

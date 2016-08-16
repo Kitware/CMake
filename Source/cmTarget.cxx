@@ -12,21 +12,25 @@
 #include "cmTarget.h"
 
 #include "cmAlgorithms.h"
-#include "cmComputeLinkInformation.h"
 #include "cmGeneratorExpression.h"
-#include "cmGeneratorExpressionDAGChecker.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
+#include "cmProperty.h"
 #include "cmSourceFile.h"
+#include "cmSourceFileLocation.h"
+#include "cmSystemTools.h"
 #include "cmake.h"
+
+#include <algorithm>
 #include <assert.h>
 #include <cmsys/RegularExpression.hxx>
-#include <errno.h>
 #include <map>
 #include <set>
-#include <stdlib.h> // required for atof
+#include <sstream>
+#include <string.h>
 
 #if defined(CMake_HAVE_CXX_UNORDERED_SET)
 #include <unordered_set>
