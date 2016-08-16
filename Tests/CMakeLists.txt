@@ -1375,6 +1375,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindJsonCpp)
   endif()
 
+  if(CMake_TEST_FindLibUV)
+    add_subdirectory(FindLibUV)
+  endif()
+
   if(CMake_TEST_FindLTTngUST)
     add_subdirectory(FindLTTngUST)
   endif()
