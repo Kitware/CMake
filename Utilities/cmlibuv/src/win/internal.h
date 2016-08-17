@@ -22,6 +22,10 @@
 #ifndef UV_WIN_INTERNAL_H_
 #define UV_WIN_INTERNAL_H_
 
+#if defined(_MSC_VER)
+# pragma warning(push,1)
+#endif
+
 #include "uv.h"
 #include "../uv-common.h"
 
