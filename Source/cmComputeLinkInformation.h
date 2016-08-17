@@ -12,15 +12,19 @@
 #ifndef cmComputeLinkInformation_h
 #define cmComputeLinkInformation_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include <cmsys/RegularExpression.hxx>
+#include <iosfwd>
+#include <set>
+#include <string>
+#include <vector>
 
-class cmake;
+class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmMakefile;
-class cmGeneratorTarget;
 class cmOrderDirectories;
+class cmake;
 
 /** \class cmComputeLinkInformation
  * \brief Compute link information for a target in one configuration.

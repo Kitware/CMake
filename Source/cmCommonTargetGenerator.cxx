@@ -11,13 +11,21 @@
 ============================================================================*/
 #include "cmCommonTargetGenerator.h"
 
+#include <algorithm>
+#include <cmConfigure.h>
+#include <set>
+#include <sstream>
+#include <utility>
+
+#include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalCommonGenerator.h"
 #include "cmLocalCommonGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-#include "cmSystemTools.h"
+#include "cmState.h"
 
 cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
   : GeneratorTarget(gt)

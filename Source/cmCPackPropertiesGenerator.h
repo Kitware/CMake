@@ -12,9 +12,15 @@
 #ifndef cmCPackPropertiesGenerator_h
 #define cmCPackPropertiesGenerator_h
 
-#include "cmInstalledFile.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
 #include "cmScriptGenerator.h"
 
+#include <iosfwd>
+#include <string>
+#include <vector>
+
+class cmInstalledFile;
 class cmLocalGenerator;
 
 /** \class cmCPackPropertiesGenerator

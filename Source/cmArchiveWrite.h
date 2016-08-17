@@ -12,7 +12,11 @@
 #ifndef cmArchiveWrite_h
 #define cmArchiveWrite_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <iosfwd>
+#include <stddef.h>
+#include <string>
 
 #if !defined(CMAKE_BUILD_WITH_CMAKE)
 #error "cmArchiveWrite not allowed during bootstrap build!"

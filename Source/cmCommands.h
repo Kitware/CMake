@@ -12,7 +12,7 @@
 #ifndef cmCommands_h
 #define cmCommands_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include <vector>
 

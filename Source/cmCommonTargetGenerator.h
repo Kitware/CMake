@@ -12,9 +12,13 @@
 #ifndef cmCommonTargetGenerator_h
 #define cmCommonTargetGenerator_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmLocalGenerator.h"
+#include "cmOutputConverter.h"
+
+#include <map>
+#include <string>
+#include <vector>
 
 class cmGeneratorTarget;
 class cmGlobalCommonGenerator;
