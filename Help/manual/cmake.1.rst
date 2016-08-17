@@ -180,6 +180,43 @@ CMake provides builtin command-line tools through the signature::
 Run ``cmake -E`` or ``cmake -E help`` for a summary of commands.
 Available commands are:
 
+``capabilities``
+  Report cmake capabilities in JSON format. The output is a JSON object
+  with the following keys:
+
+  ``version``
+    A JSON object with version information. Keys are:
+
+    ``string``
+      The full version string as displayed by cmake ``--version``.
+    ``major``
+      The major version number in integer form.
+    ``minor``
+      The minor version number in integer form.
+    ``patch``
+      The patch level in integer form.
+    ``suffix``
+      The cmake version suffix string.
+    ``isDirty``
+      A bool that is set if the cmake build is from a dirty tree.
+
+  ``generators``
+    A list available generators. Each generator is a JSON object with the
+    following keys:
+
+    ``name``
+      A string containing the name of the generator.
+    ``toolsetSupport``
+      ``true`` if the generator supports toolsets and ``false`` otherwise.
+    ``platformSupport``
+      ``true`` if the generator supports platforms and ``false`` otherwise.
+    ``extraGenerators``
+      A list of strings with all the extra generators compatible with
+      the generator.
+
+  ``serverMode``
+    ``true`` if cmake supports server-mode and ``false`` otherwise.
+
 ``chdir <dir> <cmd> [<arg>...]``
   Change the current working directory and run a command.
 

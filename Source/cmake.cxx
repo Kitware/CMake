@@ -23,11 +23,15 @@
 #include "cmState.h"
 #include "cmTest.h"
 #include "cmUtils.hxx"
+#include "cmVersionMacros.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmGraphVizWriter.h"
 #include "cmVariableWatch.h"
 #include <cmsys/SystemInformation.hxx>
+
+#include "cm_jsoncpp_value.h"
+#include "cm_jsoncpp_writer.h"
 #endif
 
 #include <cmsys/FStream.hxx>
@@ -109,6 +113,18 @@
 #include <sys/stat.h> // struct stat
 
 #include <list>
+
+namespace {
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+#ifdef CMake_HAVE_CXX_UNORDERED_MAP
+typedef std::unordered_map<std::string, Json::Value> JsonValueMapType;
+#else
+typedef cmsys::hash_map<std::string, Json::Value> JsonValueMapType;
+#endif
+#endif
+
+} // namespace
 
 static bool cmakeCheckStampFile(const char* stampName);
 static bool cmakeCheckStampList(const char* stampName);
@@ -199,6 +215,68 @@ cmake::~cmake()
   delete this->VariableWatch;
 #endif
   delete this->FileComparison;
+}
+
+std::string cmake::ReportCapabilities() const
+{
+  std::string result;
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  Json::Value obj = Json::objectValue;
+  // Version information:
+  Json::Value version = Json::objectValue;
+  version["string"] = CMake_VERSION;
+  version["major"] = CMake_VERSION_MAJOR;
+  version["minor"] = CMake_VERSION_MINOR;
+  version["suffix"] = CMake_VERSION_SUFFIX;
+  version["isDirty"] = (CMake_VERSION_IS_DIRTY == 1);
+  version["patch"] = CMake_VERSION_PATCH;
+
+  obj["version"] = version;
+
+  // Generators:
+  std::vector<cmake::GeneratorInfo> generatorInfoList;
+  this->GetRegisteredGenerators(generatorInfoList);
+
+  JsonValueMapType generatorMap;
+  for (std::vector<cmake::GeneratorInfo>::const_iterator i =
+         generatorInfoList.begin();
+       i != generatorInfoList.end(); ++i) {
+    if (i->isAlias) { // skip aliases, they are there for compatibility reasons
+                      // only
+      continue;
+    }
+
+    if (i->extraName.empty()) {
+      Json::Value gen = Json::objectValue;
+      gen["name"] = i->name;
+      gen["toolsetSupport"] = i->supportsToolset;
+      gen["platformSupport"] = i->supportsPlatform;
+      gen["extraGenerators"] = Json::arrayValue;
+      generatorMap[i->name] = gen;
+    } else {
+      Json::Value& gen = generatorMap[i->baseName];
+      gen["extraGenerators"].append(i->extraName);
+    }
+  }
+
+  Json::Value generators = Json::arrayValue;
+  for (JsonValueMapType::const_iterator i = generatorMap.begin();
+       i != generatorMap.end(); ++i) {
+    generators.append(i->second);
+  }
+  obj["generators"] = generators;
+
+#if defined(HAVE_SERVER_MODE) && HAVE_SERVER_MODE
+  obj["serverMode"] = true;
+#else
+  obj["serverMode"] = false;
+#endif
+  Json::FastWriter writer;
+  result = writer.write(obj);
+#else
+  result = "Not supported";
+#endif
+  return result;
 }
 
 void cmake::CleanupCommandsAndMacros()
@@ -811,7 +889,8 @@ void cmake::AddDefaultExtraGenerators()
 #endif
 }
 
-void cmake::GetRegisteredGenerators(std::vector<GeneratorInfo>& generators)
+void cmake::GetRegisteredGenerators(
+  std::vector<GeneratorInfo>& generators) const
 {
   for (RegisteredGeneratorsVector::const_iterator i = this->Generators.begin(),
                                                   e = this->Generators.end();

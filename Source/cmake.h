@@ -117,6 +117,8 @@ public:
   /// Destructor
   ~cmake();
 
+  std::string ReportCapabilities() const;
+
   static const char* GetCMakeFilesDirectory() { return "/CMakeFiles"; }
   static const char* GetCMakeFilesDirectoryPostSlash()
   {
@@ -187,7 +189,7 @@ public:
   void SetGlobalGenerator(cmGlobalGenerator*);
 
   ///! Get the names of the current registered generators
-  void GetRegisteredGenerators(std::vector<GeneratorInfo>& generators);
+  void GetRegisteredGenerators(std::vector<GeneratorInfo>& generators) const;
 
   ///! Set the name of the selected generator-specific platform.
   void SetGeneratorPlatform(std::string const& ts)
