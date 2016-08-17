@@ -268,7 +268,7 @@ bool cmArchiveWrite::AddFile(const char* file, size_t skip, const char* prefix)
   }
 
   if (this->PermissionsMask.IsSet()) {
-    mode_t perm = archive_entry_perm(e);
+    int perm = archive_entry_perm(e);
     archive_entry_set_perm(e, perm & this->PermissionsMask.Get());
   }
 
