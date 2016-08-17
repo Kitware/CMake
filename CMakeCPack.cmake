@@ -107,6 +107,14 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     if(SPHINX_QTHELP)
       list(APPEND _CPACK_IFW_COMPONENTS_ALL sphinx-qthelp)
     endif()
+    if(CMake_BUILD_DEVELOPER_REFERENCE)
+      if(CMake_BUILD_DEVELOPER_REFERENCE_HTML)
+        list(APPEND _CPACK_IFW_COMPONENTS_ALL cmake-developer-reference-html)
+      endif()
+      if(CMake_BUILD_DEVELOPER_REFERENCE_QTHELP)
+        list(APPEND _CPACK_IFW_COMPONENTS_ALL cmake-developer-reference-qthelp)
+      endif()
+    endif()
     set(_CPACK_IFW_COMPONENTS_CONFIGURATION "
   # Components
   set(CPACK_COMPONENTS_ALL \"${_CPACK_IFW_COMPONENTS_ALL}\")
@@ -122,7 +130,8 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   # Components scripts configuration
   foreach(_script
     CMake
-    CMake.Documentation.SphinxHTML)
+    CMake.Documentation.SphinxHTML
+    CMake.DeveloperReference.HTML)
     configure_file("${CMake_SOURCE_DIR}/Source/QtIFW/${_script}.qs.in"
       "${CMake_BINARY_DIR}/${_script}.qs" @ONLY)
   endforeach()
@@ -135,6 +144,11 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     endif()
     if(SPHINX_HTML)
       set(_CPACK_IFW_SHORTCUT_OPTIONAL "${_CPACK_IFW_SHORTCUT_OPTIONAL}component.addOperation(\"CreateShortcut\", \"@TargetDir@/doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}/html/index.html\", \"@StartMenuDir@/CMake Documentation.lnk\");\n")
+    endif()
+    if(CMake_BUILD_DEVELOPER_REFERENCE)
+      if(CMake_BUILD_DEVELOPER_REFERENCE_HTML)
+      set(_CPACK_IFW_SHORTCUT_OPTIONAL "${_CPACK_IFW_SHORTCUT_OPTIONAL}component.addOperation(\"CreateShortcut\", \"@TargetDir@/doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}/developer-reference/html/index.html\", \"@StartMenuDir@/CMake Developer Reference.lnk\");\n")
+      endif()
     endif()
     configure_file("${CMake_SOURCE_DIR}/Source/QtIFW/installscript.qs.in"
       "${CMake_BINARY_DIR}/installscript.qs" @ONLY

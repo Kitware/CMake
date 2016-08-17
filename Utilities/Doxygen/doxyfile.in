@@ -1,28 +1,30 @@
 # -------------------------------------------------------------------------
-# doxyfile for CMake
-# modified by S. Barre (Time-stamp: <2002-02-13 18:24:35 barre>
+# doxyfile for CMakeReference
 # -------------------------------------------------------------------------
 
 PROJECT_NAME         = CMake
+PROJECT_BRIEF        = "Cross-platform Make"
+PROJECT_NUMBER       = "@CMake_VERSION@"
+PROJECT_LOGO         = "@CMake_SOURCE_DIR@/Source/QtDialog/CMakeSetup64.png"
 
 FULL_PATH_NAMES      = YES
 STRIP_FROM_PATH      = \
- "@CMake_SOURCE_DIR@/Source/" \
- "@CMake_BINARY_DIR@/Source/"
+ "@CMake_SOURCE_DIR@/" \
+ "@CMake_BINARY_DIR@/"
 
 WARN_IF_UNDOCUMENTED = NO
 
 GENERATE_TREEVIEW    = NO
 GENERATE_TODOLIST    = YES
 GENERATE_BUGLIST     = YES
-GENERATE_HTML        = YES
+GENERATE_HTML        = @GENERATE_HTML@
 GENERATE_HTMLHELP    = YES
+GENERATE_QHP         = @GENERATE_QHP@
 GENERATE_LATEX       = NO
 GENERATE_MAN         = NO
 GENERATE_RTF         = NO
 
-HAVE_DOT             = YES
-#HAVE_DOT            = NO
+HAVE_DOT             = @HAVE_DOT@
 DOT_PATH             = "@DOT_PATH@"
 CLASS_GRAPH          = YES
 COLLABORATION_GRAPH  = YES
@@ -37,20 +39,21 @@ REFERENCES_RELATION    = YES
 
 ALLEXTERNALS         = NO
 
-IMAGE_PATH           = "@CMake_BINARY_DIR@/Utilities/Doxygen/contrib"
-
-OUTPUT_DIRECTORY     = "@CMake_BINARY_DIR@/Utilities/Doxygen/doc"
+OUTPUT_DIRECTORY     = "@CMakeDeveloperReference_BINARY_DIR@/developer-reference"
 
 INPUT                = \
+ "@CMake_SOURCE_DIR@/Utilities/Doxygen/DeveloperReference" \
  "@CMake_SOURCE_DIR@/Source" \
  "@CMake_SOURCE_DIR@/Source/CPack" \
  "@CMake_SOURCE_DIR@/Source/CPack/IFW" \
+ "@CMake_SOURCE_DIR@/Source/CPack/WiX" \
  "@CMake_SOURCE_DIR@/Source/CTest" \
  "@CMake_SOURCE_DIR@/Source/CursesDialog" \
- "@CMake_SOURCE_DIR@/Source/MFCDialog" \
+ "@CMake_SOURCE_DIR@/Source/kwsys" \
+ "@CMake_SOURCE_DIR@/Source/QtDialog" \
+ "@CMake_BINARY_DIR@/Source" \
  "@CMake_BINARY_DIR@/Source/kwsys" \
- "@CMake_BINARY_DIR@/Source/cmsys" \
- "@CMake_BINARY_DIR@/Utilities/Doxygen/dox/doc_CMake_contributors.dox" \
+ "@CMake_BINARY_DIR@/Source/cmsys"
 
 EXTRACT_ALL          = YES
 EXTRACT_PRIVATE      = NO
@@ -68,7 +71,7 @@ SORT_MEMBER_DOCS     = NO
 DISTRIBUTE_GROUP_DOC = YES
 TAB_SIZE             = 3
 
-FILE_PATTERNS        = *.h *.hxx *.cxx
+FILE_PATTERNS        = *.h *.hxx *.cxx *.dox
 RECURSIVE            = NO
 EXCLUDE_PATTERNS     =
 
@@ -82,3 +85,7 @@ MACRO_EXPANSION      = YES
 SEARCH_INCLUDES      = YES
 INCLUDE_PATH         =
 EXPAND_ONLY_PREDEF   = YES
+
+QHP_NAMESPACE        = org.cmake.developer-reference.@CMake_VERSION_MAJOR@@CMake_VERSION_MINOR@@CMake_VERSION_PATCH@
+QCH_FILE             = ../CMakeDeveloperReference-@CMake_VERSION_MAJOR@@CMake_VERSION_MINOR@@CMake_VERSION_PATCH@.qch
+QHG_LOCATION         = "@QHELPGENERATOR_EXECUTABLE@"
