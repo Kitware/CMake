@@ -12,14 +12,23 @@
 #ifndef cmTarget_h
 #define cmTarget_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
+#include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
 #include "cmPropertyMap.h"
+#include "cmState.h"
+#include "cmTargetLinkLibraryType.h"
 
-#include <cm_auto_ptr.hxx>
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #ifdef CMake_HAVE_CXX_UNORDERED_MAP
 #include <unordered_map>
@@ -28,16 +37,10 @@
 #endif
 #endif
 
-class cmake;
 class cmMakefile;
 class cmSourceFile;
-class cmGlobalGenerator;
-class cmListFileBacktrace;
-class cmTarget;
-class cmGeneratorTarget;
-class cmTargetTraceDependencies;
-
 class cmTargetInternals;
+
 class cmTargetInternalPointer
 {
 public:

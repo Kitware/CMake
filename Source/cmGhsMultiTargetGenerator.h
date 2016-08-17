@@ -16,13 +16,13 @@
 
 #include "cmTarget.h"
 
+class cmCustomCommand;
 class cmGeneratedFileStream;
+class cmGeneratorTarget;
 class cmGlobalGhsMultiGenerator;
 class cmLocalGhsMultiGenerator;
 class cmMakefile;
 class cmSourceFile;
-class cmGeneratedFileStream;
-class cmCustomCommand;
 
 class cmGhsMultiTargetGenerator
 {

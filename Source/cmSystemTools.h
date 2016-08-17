@@ -12,10 +12,13 @@
 #ifndef cmSystemTools_h
 #define cmSystemTools_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include <cmsys/Process.h>
 #include <cmsys/SystemTools.hxx>
+#include <stddef.h>
+#include <string>
+#include <vector>
 
 class cmSystemToolsFileTime;
 

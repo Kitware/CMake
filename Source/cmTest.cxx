@@ -11,10 +11,10 @@
 ============================================================================*/
 #include "cmTest.h"
 
-#include "cmSystemTools.h"
-
 #include "cmMakefile.h"
-#include "cmake.h"
+#include "cmProperty.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
 
 cmTest::cmTest(cmMakefile* mf)
   : Backtrace(mf->GetBacktrace())

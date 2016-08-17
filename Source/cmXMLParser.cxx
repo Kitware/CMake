@@ -11,10 +11,12 @@
 ============================================================================*/
 #include "cmXMLParser.h"
 
-#include <cmsys/FStream.hxx>
-
 #include <cm_expat.h>
+#include <cmsys/FStream.hxx>
 #include <ctype.h>
+#include <iostream>
+#include <sstream>
+#include <string.h>
 
 cmXMLParser::cmXMLParser()
 {

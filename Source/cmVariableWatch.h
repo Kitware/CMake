@@ -12,7 +12,11 @@
 #ifndef cmVariableWatch_h
 #define cmVariableWatch_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <map>
+#include <string>
+#include <vector>
 
 class cmMakefile;
 

@@ -12,19 +12,25 @@
 #ifndef cmState_h
 #define cmState_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include "cmAlgorithms.h"
+#include "cmDefinitions.h"
 #include "cmLinkedTree.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmPropertyDefinitionMap.h"
 #include "cmPropertyMap.h"
 
-class cmake;
-class cmCommand;
-class cmDefinitions;
-class cmListFileBacktrace;
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
 class cmCacheManager;
+class cmCommand;
+class cmListFileBacktrace;
+class cmPropertyDefinition;
 
 class cmState
 {

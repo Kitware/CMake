@@ -12,7 +12,7 @@
 #ifndef cmVersion_h
 #define cmVersion_h
 
-#include "cmStandardIncludes.h"
+#include <cm_kwiml.h>
 
 /** \class cmVersion
  * \brief Helper class for providing CMake and CTest version information.

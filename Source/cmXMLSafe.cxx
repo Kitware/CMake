@@ -13,9 +13,7 @@
 
 #include "cm_utf8.h"
 
-#include <iostream>
 #include <sstream>
-
 #include <stdio.h>
 #include <string.h>
 

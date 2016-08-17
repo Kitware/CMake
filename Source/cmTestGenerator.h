@@ -12,10 +12,16 @@
 #ifndef cmTestGenerator_h
 #define cmTestGenerator_h
 
+#include <cmConfigure.h> // IWYU pragma: keep
+
 #include "cmScriptGenerator.h"
 
-class cmTest;
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 class cmLocalGenerator;
+class cmTest;
 
 /** \class cmTestGenerator
  * \brief Support class for generating install scripts.

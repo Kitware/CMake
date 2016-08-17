@@ -12,7 +12,7 @@
 #ifndef cmXMLWiter_h
 #define cmXMLWiter_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include "cmXMLSafe.h"
 

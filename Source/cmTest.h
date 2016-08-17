@@ -12,11 +12,14 @@
 #ifndef cmTest_h
 #define cmTest_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmCustomCommand.h"
 #include "cmListFileCache.h"
 #include "cmPropertyMap.h"
+
+#include <string>
+#include <vector>
+
 class cmMakefile;
 
 /** \class cmTest

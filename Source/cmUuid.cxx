@@ -11,10 +11,10 @@
 ============================================================================*/
 #include "cmUuid.h"
 
-#include <string.h>
-
 #include "cm_sha2.h"
+
 #include <cmsys/MD5.h>
+#include <string.h>
 
 cmUuid::cmUuid()
 {

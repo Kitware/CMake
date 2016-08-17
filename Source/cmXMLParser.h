@@ -12,7 +12,9 @@
 #ifndef cmXMLParser_h
 #define cmXMLParser_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <string>
 
 extern "C" {
 void cmXMLParserStartElement(void*, const char*, const char**);

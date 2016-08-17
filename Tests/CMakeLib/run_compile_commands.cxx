@@ -1,5 +1,13 @@
 #include "cmSystemTools.h"
 
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <stdlib.h>
+#include <string>
+#include <utility>
+#include <vector>
+
 class CompileCommandParser
 {
 public:

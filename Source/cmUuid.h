@@ -12,7 +12,10 @@
 #ifndef cmUuid_h
 #define cmUuid_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <string>
+#include <vector>
 
 /** \class cmUuid
  * \brief Utility class to generate UUIDs as defined by RFC4122

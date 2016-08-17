@@ -21,6 +21,7 @@
 #include <cmSystemTools.h>
 #include <cmsys/Encoding.hxx>
 
+#include <algorithm>
 #include <sstream>
 #include <windows.h>
 
