@@ -54,7 +54,7 @@ public:
    * the CMakeLists.txt file.
    */
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus&) CM_OVERRIDE;
+                   cmExecutionStatus& /*unused*/) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -67,7 +67,7 @@ public:
 };
 
 bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args,
-                                       cmExecutionStatus&)
+                                       cmExecutionStatus& /*unused*/)
 {
   if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
@@ -135,7 +135,7 @@ public:
    * the CMakeLists.txt file.
    */
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus&) CM_OVERRIDE;
+                   cmExecutionStatus& /*unused*/) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -148,7 +148,7 @@ public:
 };
 
 bool cmCTestAddSubdirectoryCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+  std::vector<std::string> const& args, cmExecutionStatus& /*unused*/)
 {
   if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
@@ -208,8 +208,8 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  bool InitialPass(std::vector<std::string> const&,
-                   cmExecutionStatus&) CM_OVERRIDE;
+  bool InitialPass(std::vector<std::string> const& /*args*/,
+                   cmExecutionStatus& /*unused*/) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -222,7 +222,7 @@ public:
 };
 
 bool cmCTestAddTestCommand::InitialPass(std::vector<std::string> const& args,
-                                        cmExecutionStatus&)
+                                        cmExecutionStatus& /*unused*/)
 {
   if (args.size() < 2) {
     this->SetError("called with incorrect number of arguments");
@@ -248,8 +248,8 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
   */
-  bool InitialPass(std::vector<std::string> const&,
-                   cmExecutionStatus&) CM_OVERRIDE;
+  bool InitialPass(std::vector<std::string> const& /*args*/,
+                   cmExecutionStatus& /*unused*/) CM_OVERRIDE;
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -262,7 +262,7 @@ public:
 };
 
 bool cmCTestSetTestsPropertiesCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+  std::vector<std::string> const& args, cmExecutionStatus& /*unused*/)
 {
   return this->TestHandler->SetTestsProperties(args);
 }
@@ -986,7 +986,8 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   *this->LogFile << "End testing: " << this->CTest->CurrentTime() << std::endl;
 }
 
-void cmCTestTestHandler::GenerateTestCommand(std::vector<std::string>&, int)
+void cmCTestTestHandler::GenerateTestCommand(
+  std::vector<std::string>& /*unused*/, int /*unused*/)
 {
 }
 

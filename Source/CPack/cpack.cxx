@@ -50,7 +50,7 @@ static const char* cmDocumentationOptions[][2] = {
   { CM_NULLPTR, CM_NULLPTR }
 };
 
-int cpackUnknownArgument(const char*, void*)
+int cpackUnknownArgument(const char* /*unused*/, void* /*unused*/)
 {
   return 1;
 }

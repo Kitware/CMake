@@ -1371,8 +1371,8 @@ void cmLocalGenerator::GetTargetDefines(cmGeneratorTarget const* target,
   this->AddCompileDefinitions(defines, target, config, lang.c_str());
 }
 
-std::string cmLocalGenerator::GetTargetFortranFlags(cmGeneratorTarget const*,
-                                                    std::string const&)
+std::string cmLocalGenerator::GetTargetFortranFlags(
+  cmGeneratorTarget const* /*unused*/, std::string const& /*unused*/)
 {
   // Implemented by specific generators that override this.
   return std::string();
@@ -2478,7 +2478,8 @@ std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(
 }
 
 void cmLocalGenerator::ComputeObjectFilenames(
-  std::map<cmSourceFile const*, std::string>&, cmGeneratorTarget const*)
+  std::map<cmSourceFile const*, std::string>& /*unused*/,
+  cmGeneratorTarget const* /*unused*/)
 {
 }
 
@@ -2613,7 +2614,7 @@ const char* cmLocalGenerator::GetCurrentSourceDirectory() const
 }
 
 std::string cmLocalGenerator::GetTargetDirectory(
-  const cmGeneratorTarget*) const
+  const cmGeneratorTarget* /*unused*/) const
 {
   cmSystemTools::Error("GetTargetDirectory"
                        " called on cmLocalGenerator");

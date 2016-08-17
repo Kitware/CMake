@@ -28,7 +28,7 @@ static test_pair const pairs[] = {
   { 0, 0 }
 };
 
-int testXMLSafe(int, char* [])
+int testXMLSafe(int /*unused*/, char* /*unused*/ [])
 {
   int result = 0;
   for (test_pair const* p = pairs; p->in; ++p) {

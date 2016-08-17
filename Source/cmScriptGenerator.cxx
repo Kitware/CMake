@@ -117,9 +117,9 @@ void cmScriptGenerator::GenerateScriptActions(std::ostream& os,
   }
 }
 
-void cmScriptGenerator::GenerateScriptForConfig(std::ostream&,
-                                                const std::string&,
-                                                Indent const&)
+void cmScriptGenerator::GenerateScriptForConfig(std::ostream& /*unused*/,
+                                                const std::string& /*unused*/,
+                                                Indent const& /*unused*/)
 {
   // No actions for this generator.
 }

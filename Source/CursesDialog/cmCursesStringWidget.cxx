@@ -29,12 +29,13 @@ cmCursesStringWidget::cmCursesStringWidget(int width, int height, int left,
   field_opts_off(this->Field, O_STATIC);
 }
 
-void cmCursesStringWidget::OnTab(cmCursesMainForm*, WINDOW*)
+void cmCursesStringWidget::OnTab(cmCursesMainForm* /*unused*/,
+                                 WINDOW* /*unused*/)
 {
   // FORM* form = fm->GetForm();
 }
 
-void cmCursesStringWidget::OnReturn(cmCursesMainForm* fm, WINDOW*)
+void cmCursesStringWidget::OnReturn(cmCursesMainForm* fm, WINDOW* /*unused*/)
 {
   FORM* form = fm->GetForm();
   if (this->InEdit) {
@@ -56,7 +57,8 @@ void cmCursesStringWidget::OnReturn(cmCursesMainForm* fm, WINDOW*)
   }
 }
 
-void cmCursesStringWidget::OnType(int& key, cmCursesMainForm* fm, WINDOW*)
+void cmCursesStringWidget::OnType(int& key, cmCursesMainForm* fm,
+                                  WINDOW* /*unused*/)
 {
   form_driver(fm->GetForm(), key);
 }

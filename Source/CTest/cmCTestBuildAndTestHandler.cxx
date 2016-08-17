@@ -123,14 +123,15 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
   return 0;
 }
 
-void CMakeMessageCallback(const char* m, const char*, bool&, void* s)
+void CMakeMessageCallback(const char* m, const char* /*unused*/,
+                          bool& /*unused*/, void* s)
 {
   std::string* out = (std::string*)s;
   *out += m;
   *out += "\n";
 }
 
-void CMakeProgressCallback(const char* msg, float, void* s)
+void CMakeProgressCallback(const char* msg, float /*unused*/, void* s)
 {
   std::string* out = (std::string*)s;
   *out += msg;

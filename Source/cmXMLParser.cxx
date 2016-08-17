@@ -200,7 +200,7 @@ void cmXMLParser::ReportXmlParseError()
                     XML_ErrorString(XML_GetErrorCode(parser)));
 }
 
-void cmXMLParser::ReportError(int line, int, const char* msg)
+void cmXMLParser::ReportError(int line, int /*unused*/, const char* msg)
 {
   if (this->ReportCallback) {
     this->ReportCallback(line, msg, this->ReportCallbackData);

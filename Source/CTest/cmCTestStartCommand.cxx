@@ -23,7 +23,7 @@ cmCTestStartCommand::cmCTestStartCommand()
 }
 
 bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
-                                      cmExecutionStatus&)
+                                      cmExecutionStatus& /*unused*/)
 {
   if (args.empty()) {
     this->SetError("called with incorrect number of arguments");

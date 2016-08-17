@@ -372,7 +372,7 @@ private:
     this->CData.clear();
   }
 
-  void ReportError(int, int, const char* msg) CM_OVERRIDE
+  void ReportError(int /*line*/, int /*column*/, const char* msg) CM_OVERRIDE
   {
     this->SVN->Log << "Error parsing svn log xml: " << msg << "\n";
   }

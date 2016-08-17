@@ -206,8 +206,7 @@ void cmExtraSublimeTextGenerator::AppendAllTargets(
 void cmExtraSublimeTextGenerator::AppendTarget(
   cmGeneratedFileStream& fout, const std::string& targetName,
   cmLocalGenerator* lg, cmGeneratorTarget* target, const char* make,
-  const cmMakefile* makefile,
-  const char*, // compiler
+  const cmMakefile* makefile, const char* /*compiler*/,
   MapSourceFileFlags& sourceFileFlags, bool firstTarget)
 {
 

@@ -185,7 +185,7 @@ bool cmCTestVC::WriteXML(cmXMLWriter& xml)
   return result;
 }
 
-bool cmCTestVC::WriteXMLUpdates(cmXMLWriter&)
+bool cmCTestVC::WriteXMLUpdates(cmXMLWriter& /*unused*/)
 {
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
              "* CTest cannot extract updates for this VCS tool.\n");

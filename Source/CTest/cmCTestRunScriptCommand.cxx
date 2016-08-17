@@ -14,7 +14,7 @@
 #include "cmCTestScriptHandler.h"
 
 bool cmCTestRunScriptCommand::InitialPass(std::vector<std::string> const& args,
-                                          cmExecutionStatus&)
+                                          cmExecutionStatus& /*unused*/)
 {
   if (args.empty()) {
     this->CTestScriptHandler->RunCurrentScript();

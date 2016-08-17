@@ -15,8 +15,10 @@ class cmDynamicLoaderCache
 {
 public:
   ~cmDynamicLoaderCache();
-  void CacheFile(const char* path, const cmsys::DynamicLoader::LibraryHandle&);
-  bool GetCacheFile(const char* path, cmsys::DynamicLoader::LibraryHandle&);
+  void CacheFile(const char* path,
+                 const cmsys::DynamicLoader::LibraryHandle& /*p*/);
+  bool GetCacheFile(const char* path,
+                    cmsys::DynamicLoader::LibraryHandle& /*p*/);
   bool FlushCache(const char* path);
   void FlushCache();
   static cmDynamicLoaderCache* GetInstance();

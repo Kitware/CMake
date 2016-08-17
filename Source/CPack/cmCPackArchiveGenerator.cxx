@@ -259,7 +259,7 @@ int cmCPackArchiveGenerator::PackageFiles()
   return 1;
 }
 
-int cmCPackArchiveGenerator::GenerateHeader(std::ostream*)
+int cmCPackArchiveGenerator::GenerateHeader(std::ostream* /*unused*/)
 {
   return 1;
 }

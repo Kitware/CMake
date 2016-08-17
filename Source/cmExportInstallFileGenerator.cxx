@@ -468,7 +468,7 @@ void cmExportInstallFileGenerator::ComplainAboutMissingTarget(
 }
 
 std::string cmExportInstallFileGenerator::InstallNameDir(
-  cmGeneratorTarget* target, const std::string&)
+  cmGeneratorTarget* target, const std::string& /*config*/)
 {
   std::string install_name_dir;
 

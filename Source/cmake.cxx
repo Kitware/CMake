@@ -129,8 +129,9 @@ typedef cmsys::hash_map<std::string, Json::Value> JsonValueMapType;
 static bool cmakeCheckStampFile(const char* stampName);
 static bool cmakeCheckStampList(const char* stampName);
 
-void cmWarnUnusedCliWarning(const std::string& variable, int, void* ctx,
-                            const char*, const cmMakefile*)
+void cmWarnUnusedCliWarning(const std::string& variable, int /*unused*/,
+                            void* ctx, const char* /*unused*/,
+                            const cmMakefile* /*unused*/)
 {
   cmake* cm = reinterpret_cast<cmake*>(ctx);
   cm->MarkCliAsUsed(variable);
