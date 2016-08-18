@@ -102,7 +102,7 @@ function(CUDA_SELECT_NVCC_ARCH_FLAGS out_variable)
     set(CUDA_ARCH_LIST ${CUDA_COMMON_GPU_ARCHITECTURES})
   elseif("${CUDA_ARCH_LIST}" STREQUAL "Auto")
     CUDA_DETECT_INSTALLED_GPUS(CUDA_ARCH_LIST)
-    message(STATUS "Autodetected CUDA architecture(s): ${cuda_arch_bin}")
+    message(STATUS "Autodetected CUDA architecture(s): ${CUDA_ARCH_LIST}")
   endif()
 
   # Now process the list and look for names
@@ -116,7 +116,7 @@ function(CUDA_SELECT_NVCC_ARCH_FLAGS out_variable)
       set(add_ptx TRUE)
       set(arch_name ${CMAKE_MATCH_1})
     endif()
-    if(arch_name MATCHES "([0-9]\\.[0-9])$")
+    if(arch_name MATCHES "^([0-9]\\.[0-9](\\([0-9]\\.[0-9]\\))?)$")
       set(arch_bin ${CMAKE_MATCH_1})
       set(arch_ptx ${arch_bin})
     else()
@@ -173,11 +173,11 @@ function(CUDA_SELECT_NVCC_ARCH_FLAGS out_variable)
   # Tell NVCC to add binaries for the specified GPUs
   foreach(arch ${cuda_arch_bin})
     if(arch MATCHES "([0-9]+)\\(([0-9]+)\\)")
-      # User explicitly specified PTX for the concrete BIN
+      # User explicitly specified ARCH for the concrete CODE
       list(APPEND nvcc_flags -gencode arch=compute_${CMAKE_MATCH_2},code=sm_${CMAKE_MATCH_1})
       list(APPEND nvcc_archs_readable sm_${CMAKE_MATCH_1})
     else()
-      # User didn't explicitly specify PTX for the concrete BIN, we assume PTX=BIN
+      # User didn't explicitly specify ARCH for the concrete CODE, we assume ARCH=CODE
       list(APPEND nvcc_flags -gencode arch=compute_${arch},code=sm_${arch})
       list(APPEND nvcc_archs_readable sm_${arch})
     endif()
