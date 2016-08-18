@@ -40,9 +40,8 @@ bool cmCursesBoolWidget::HandleInput(int& key, cmCursesMainForm* /*fm*/,
     touchwin(w);
     wrefresh(w);
     return true;
-  } else {
-    return false;
   }
+  return false;
 }
 
 void cmCursesBoolWidget::SetValueAsBool(bool value)
