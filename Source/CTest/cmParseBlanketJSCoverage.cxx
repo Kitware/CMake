@@ -42,9 +42,8 @@ public:
       std::string foundFileName =
         line.substr(begIndex + 3, endIndex - (begIndex + 4));
       return foundFileName;
-    } else {
-      return line.substr(begIndex, line.npos);
     }
+    return line.substr(begIndex, line.npos);
   }
   bool ParseFile(std::string const& file)
   {

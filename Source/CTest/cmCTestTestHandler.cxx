@@ -284,14 +284,13 @@ inline int GetNextNumber(std::string const& in, int& val,
     }
     pos = pos2 + 1;
     return 1;
-  } else {
-    if (in.size() - pos == 0) {
-      val = -1;
-    } else {
-      val = atoi(in.substr(pos, in.size() - pos).c_str());
-    }
-    return 0;
   }
+  if (in.size() - pos == 0) {
+    val = -1;
+  } else {
+    val = atoi(in.substr(pos, in.size() - pos).c_str());
+  }
+  return 0;
 }
 
 // get the next number in a string with numbers separated by ,
@@ -311,14 +310,13 @@ inline int GetNextRealNumber(std::string const& in, double& val,
     }
     pos = pos2 + 1;
     return 1;
-  } else {
-    if (in.size() - pos == 0) {
-      val = -1;
-    } else {
-      val = atof(in.substr(pos, in.size() - pos).c_str());
-    }
-    return 0;
   }
+  if (in.size() - pos == 0) {
+    val = -1;
+  } else {
+    val = atof(in.substr(pos, in.size() - pos).c_str());
+  }
+  return 0;
 }
 
 cmCTestTestHandler::cmCTestTestHandler()

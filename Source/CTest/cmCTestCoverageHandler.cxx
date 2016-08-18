@@ -763,12 +763,11 @@ int cmCTestCoverageHandler::HandleMumpsCoverage(
                        this->Quiet);
     cov.ReadCoverageFile(coverageFile.c_str());
     return static_cast<int>(cont->TotalCoverage.size());
-  } else {
-    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       " Cannot find GTM coverage file: " << coverageFile
-                                                          << std::endl,
-                       this->Quiet);
   }
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                     " Cannot find GTM coverage file: " << coverageFile
+                                                        << std::endl,
+                     this->Quiet);
   cmParseCacheCoverage ccov(*cont, this->CTest);
   coverageFile = this->CTest->GetBinaryDir() + "/cache_coverage.cmcov";
   if (cmSystemTools::FileExists(coverageFile.c_str())) {

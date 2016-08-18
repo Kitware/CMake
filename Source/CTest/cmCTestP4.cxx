@@ -373,9 +373,8 @@ std::string cmCTestP4::GetWorkingRevision()
 
   if (rev.empty()) {
     return "0";
-  } else {
-    return rev;
   }
+  return rev;
 }
 
 void cmCTestP4::NoteOldRevision()

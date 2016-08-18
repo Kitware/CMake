@@ -80,11 +80,11 @@ static bool cmCTestSVNPathStarts(std::string const& p1, std::string const& p2)
   // Does path p1 start with path p2?
   if (p1.size() == p2.size()) {
     return p1 == p2;
-  } else if (p1.size() > p2.size() && p1[p2.size()] == '/') {
-    return strncmp(p1.c_str(), p2.c_str(), p2.size()) == 0;
-  } else {
-    return false;
   }
+  if (p1.size() > p2.size() && p1[p2.size()] == '/') {
+    return strncmp(p1.c_str(), p2.c_str(), p2.size()) == 0;
+  }
+  return false;
 }
 
 std::string cmCTestSVN::LoadInfo(SVNInfo& svninfo)
@@ -295,9 +295,8 @@ bool cmCTestSVN::RunSVNCommand(std::vector<char const*> const& parameters,
 
   if (strcmp(parameters[0], "update") == 0) {
     return RunUpdateCommand(&args[0], out, err);
-  } else {
-    return RunChild(&args[0], out, err);
   }
+  return RunChild(&args[0], out, err);
 }
 
 class cmCTestSVN::LogParser : public cmCTestVC::OutputLogger,

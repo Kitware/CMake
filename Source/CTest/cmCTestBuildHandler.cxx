@@ -532,9 +532,8 @@ public:
     if (this->FTC->FileTimeCompare(l.c_str(), r.c_str(), &result) &&
         result != 0) {
       return result < 0;
-    } else {
-      return l < r;
     }
+    return l < r;
   }
 
 private:

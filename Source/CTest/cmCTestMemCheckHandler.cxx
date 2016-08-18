@@ -638,27 +638,24 @@ bool cmCTestMemCheckHandler::ProcessMemCheckOutput(const std::string& str,
                                                    std::string& log,
                                                    std::vector<int>& results)
 {
-  if (this->MemoryTesterStyle == cmCTestMemCheckHandler::VALGRIND) {
-    return this->ProcessMemCheckValgrindOutput(str, log, results);
-  } else if (this->MemoryTesterStyle == cmCTestMemCheckHandler::PURIFY) {
-    return this->ProcessMemCheckPurifyOutput(str, log, results);
-  } else if (this->MemoryTesterStyle ==
-               cmCTestMemCheckHandler::ADDRESS_SANITIZER ||
-             this->MemoryTesterStyle ==
-               cmCTestMemCheckHandler::THREAD_SANITIZER ||
-             this->MemoryTesterStyle ==
-               cmCTestMemCheckHandler::MEMORY_SANITIZER ||
-             this->MemoryTesterStyle == cmCTestMemCheckHandler::UB_SANITIZER) {
-    return this->ProcessMemCheckSanitizerOutput(str, log, results);
-  } else if (this->MemoryTesterStyle ==
-             cmCTestMemCheckHandler::BOUNDS_CHECKER) {
-    return this->ProcessMemCheckBoundsCheckerOutput(str, log, results);
-  } else {
-    log.append("\nMemory checking style used was: ");
-    log.append("None that I know");
-    log = str;
+  switch (this->MemoryTesterStyle) {
+    case cmCTestMemCheckHandler::VALGRIND:
+      return this->ProcessMemCheckValgrindOutput(str, log, results);
+    case cmCTestMemCheckHandler::PURIFY:
+      return this->ProcessMemCheckPurifyOutput(str, log, results);
+    case cmCTestMemCheckHandler::ADDRESS_SANITIZER:
+    case cmCTestMemCheckHandler::THREAD_SANITIZER:
+    case cmCTestMemCheckHandler::MEMORY_SANITIZER:
+    case cmCTestMemCheckHandler::UB_SANITIZER:
+      return this->ProcessMemCheckSanitizerOutput(str, log, results);
+    case cmCTestMemCheckHandler::BOUNDS_CHECKER:
+      return this->ProcessMemCheckBoundsCheckerOutput(str, log, results);
+    default:
+      log.append("\nMemory checking style used was: ");
+      log.append("None that I know");
+      log = str;
+      return true;
   }
-  return true;
 }
 
 std::vector<int>::size_type cmCTestMemCheckHandler::FindOrAddWarning(

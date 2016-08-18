@@ -124,10 +124,10 @@ int cmProcess::GetNextOutputLine(std::string& line, double timeout)
     int p = cmsysProcess_WaitForData(this->Process, &data, &length, &timeout);
     if (p == cmsysProcess_Pipe_Timeout) {
       return cmsysProcess_Pipe_Timeout;
-    } else if (p == cmsysProcess_Pipe_STDOUT) {
+    }
+    if (p == cmsysProcess_Pipe_STDOUT) {
       this->Output.insert(this->Output.end(), data, data + length);
-    } else // p == cmsysProcess_Pipe_None
-    {
+    } else { // p == cmsysProcess_Pipe_None
       // The process will provide no more data.
       break;
     }
