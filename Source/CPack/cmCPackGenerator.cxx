@@ -67,7 +67,8 @@ int cmCPackGenerator::PrepareNames()
         cmCPackLog::LOG_ERROR, "CPACK_SET_DESTDIR is set to ON but the '"
           << Name << "' generator does NOT support it." << std::endl);
       return 0;
-    } else if (SETDESTDIR_SHOULD_NOT_BE_USED == SupportsSetDestdir()) {
+    }
+    if (SETDESTDIR_SHOULD_NOT_BE_USED == SupportsSetDestdir()) {
       cmCPackLogger(cmCPackLog::LOG_WARNING,
                     "CPACK_SET_DESTDIR is set to ON but it is "
                       << "usually a bad idea to do that with '" << Name

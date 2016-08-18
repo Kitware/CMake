@@ -215,15 +215,11 @@ int cmCPackRPMGenerator::PackageFiles()
     // There will be 1 package for each component group
     // however one may require to ignore component group and
     // in this case you'll get 1 package for each component.
-    else {
-      return PackageComponents(componentPackageMethod ==
-                               ONE_PACKAGE_PER_COMPONENT);
-    }
+    return PackageComponents(componentPackageMethod ==
+                             ONE_PACKAGE_PER_COMPONENT);
   }
   // CASE 3 : NON COMPONENT package.
-  else {
-    return PackageComponentsAllInOne("");
-  }
+  return PackageComponentsAllInOne("");
 }
 
 bool cmCPackRPMGenerator::SupportsComponentInstallation() const
@@ -247,7 +243,6 @@ std::string cmCPackRPMGenerator::GetComponentInstallDirNameSuffix(
     "CPACK_COMPONENT_" + cmSystemTools::UpperCase(componentName) + "_GROUP";
   if (CM_NULLPTR != GetOption(groupVar)) {
     return std::string(GetOption(groupVar));
-  } else {
-    return componentName;
   }
+  return componentName;
 }
