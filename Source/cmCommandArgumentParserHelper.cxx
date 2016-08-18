@@ -75,9 +75,8 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
     if (cmSystemTools::GetEnv(var, str)) {
       if (this->EscapeQuotes) {
         return this->AddString(cmSystemTools::EscapeQuotes(str.c_str()));
-      } else {
-        return this->AddString(str);
       }
+      return this->AddString(str);
     }
     return this->EmptyVariable;
   }
@@ -86,9 +85,8 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
           this->Makefile->GetState()->GetInitializedCacheValue(var)) {
       if (this->EscapeQuotes) {
         return this->AddString(cmSystemTools::EscapeQuotes(c));
-      } else {
-        return this->AddString(c);
       }
+      return this->AddString(c);
     }
     return this->EmptyVariable;
   }
@@ -162,7 +160,8 @@ char* cmCommandArgumentParserHelper::CombineUnions(char* in1, char* in2)
 {
   if (!in1) {
     return in2;
-  } else if (!in2) {
+  }
+  if (!in2) {
     return in1;
   }
   size_t len = strlen(in1) + strlen(in2) + 1;
@@ -282,10 +281,9 @@ int cmCommandArgumentParserHelper::LexInput(char* buf, int maxlen)
       this->CurrentLine++;
     }
     return (1);
-  } else {
-    buf[0] = '\n';
-    return (0);
   }
+  buf[0] = '\n';
+  return (0);
 }
 
 void cmCommandArgumentParserHelper::Error(const char* str)

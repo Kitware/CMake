@@ -211,11 +211,10 @@ void cmExportBuildFileGenerator::HandleMissingTarget(
       link_libs += missingTarget;
       missingTargets.push_back(missingTarget);
       return;
-    } else {
-      // We are not appending, so all exported targets should be
-      // known here.  This is probably user-error.
-      this->ComplainAboutMissingTarget(depender, dependee, targetOccurrences);
     }
+    // We are not appending, so all exported targets should be
+    // known here.  This is probably user-error.
+    this->ComplainAboutMissingTarget(depender, dependee, targetOccurrences);
   }
   // Assume the target will be exported by another command.
   // Append it with the export namespace.

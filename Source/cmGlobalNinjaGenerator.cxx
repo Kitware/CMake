@@ -93,12 +93,11 @@ std::string cmGlobalNinjaGenerator::EncodeIdent(const std::string& ident,
     names << "ident" << VarNum++;
     vars << names.str() << " = " << ident << "\n";
     return "$" + names.str();
-  } else {
-    std::string result = ident;
-    cmSystemTools::ReplaceString(result, " ", "$ ");
-    cmSystemTools::ReplaceString(result, ":", "$:");
-    return result;
   }
+  std::string result = ident;
+  cmSystemTools::ReplaceString(result, " ", "$ ");
+  cmSystemTools::ReplaceString(result, ":", "$:");
+  return result;
 }
 
 std::string cmGlobalNinjaGenerator::EncodeLiteral(const std::string& lit)

@@ -34,19 +34,18 @@ bool cmNewLineStyle::ReadFromArguments(const std::vector<std::string>& args,
         if (eol == "LF" || eol == "UNIX") {
           NewLineStyle = LF;
           return true;
-        } else if (eol == "CRLF" || eol == "WIN32" || eol == "DOS") {
+        }
+        if (eol == "CRLF" || eol == "WIN32" || eol == "DOS") {
           NewLineStyle = CRLF;
           return true;
-        } else {
-          errorString = "NEWLINE_STYLE sets an unknown style, only LF, "
-                        "CRLF, UNIX, DOS, and WIN32 are supported";
-          return false;
         }
-      } else {
-        errorString = "NEWLINE_STYLE must set a style: "
-                      "LF, CRLF, UNIX, DOS, or WIN32";
+        errorString = "NEWLINE_STYLE sets an unknown style, only LF, "
+                      "CRLF, UNIX, DOS, and WIN32 are supported";
         return false;
       }
+      errorString = "NEWLINE_STYLE must set a style: "
+                    "LF, CRLF, UNIX, DOS, or WIN32";
+      return false;
     }
   }
   return true;

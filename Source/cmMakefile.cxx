@@ -813,11 +813,10 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
         // The existing custom command is identical.  Silently ignore
         // the duplicate.
         return file;
-      } else {
-        // The existing custom command is different.  We need to
-        // generate a rule file for this new command.
-        file = CM_NULLPTR;
       }
+      // The existing custom command is different.  We need to
+      // generate a rule file for this new command.
+      file = CM_NULLPTR;
     } else if (!file) {
       file = this->CreateSource(main_dependency);
     }
@@ -2029,7 +2028,8 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
       sg->SetGroupRegex(regex);
     }
     return;
-  } else if (i == -1) {
+  }
+  if (i == -1) {
     // group does not exist nor belong to any existing group
     // add its first component
     this->SourceGroups.push_back(cmSourceGroup(name[0].c_str(), regex));
@@ -2817,13 +2817,12 @@ std::string cmMakefile::GetConfigurations(std::vector<std::string>& configs,
       cmSystemTools::ExpandListArgument(configTypes, configs);
     }
     return "";
-  } else {
-    const std::string& buildType = this->GetSafeDefinition("CMAKE_BUILD_TYPE");
-    if (singleConfig && !buildType.empty()) {
-      configs.push_back(buildType);
-    }
-    return buildType;
   }
+  const std::string& buildType = this->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  if (singleConfig && !buildType.empty()) {
+    configs.push_back(buildType);
+  }
+  return buildType;
 }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -3129,9 +3128,8 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const std::string& sourceName,
 {
   if (cmSourceFile* esf = this->GetSource(sourceName)) {
     return esf;
-  } else {
-    return this->CreateSource(sourceName, generated);
   }
+  return this->CreateSource(sourceName, generated);
 }
 
 void cmMakefile::EnableLanguage(std::vector<std::string> const& lang,
@@ -3756,69 +3754,67 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
         << "\" because an imported target with the same name already exists.";
       msg = e.str();
       return false;
-    } else {
-      // target names must be globally unique
-      switch (this->GetPolicyStatus(cmPolicies::CMP0002)) {
-        case cmPolicies::WARN:
-          this->IssueMessage(
-            cmake::AUTHOR_WARNING,
-            cmPolicies::GetPolicyWarning(cmPolicies::CMP0002));
-        case cmPolicies::OLD:
-          return true;
-        case cmPolicies::REQUIRED_IF_USED:
-        case cmPolicies::REQUIRED_ALWAYS:
-          this->IssueMessage(
-            cmake::FATAL_ERROR,
-            cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0002));
-          return true;
-        case cmPolicies::NEW:
-          break;
-      }
-
-      // The conflict is with a non-imported target.
-      // Allow this if the user has requested support.
-      cmake* cm = this->GetCMakeInstance();
-      if (isCustom && existing->GetType() == cmState::UTILITY &&
-          this != existing->GetMakefile() &&
-          cm->GetState()->GetGlobalPropertyAsBool(
-            "ALLOW_DUPLICATE_CUSTOM_TARGETS")) {
-        return true;
-      }
-
-      // Produce an error that tells the user how to work around the
-      // problem.
-      std::ostringstream e;
-      e << "cannot create target \"" << name
-        << "\" because another target with the same name already exists.  "
-        << "The existing target is ";
-      switch (existing->GetType()) {
-        case cmState::EXECUTABLE:
-          e << "an executable ";
-          break;
-        case cmState::STATIC_LIBRARY:
-          e << "a static library ";
-          break;
-        case cmState::SHARED_LIBRARY:
-          e << "a shared library ";
-          break;
-        case cmState::MODULE_LIBRARY:
-          e << "a module library ";
-          break;
-        case cmState::UTILITY:
-          e << "a custom target ";
-          break;
-        case cmState::INTERFACE_LIBRARY:
-          e << "an interface library ";
-          break;
-        default:
-          break;
-      }
-      e << "created in source directory \""
-        << existing->GetMakefile()->GetCurrentSourceDirectory() << "\".  "
-        << "See documentation for policy CMP0002 for more details.";
-      msg = e.str();
-      return false;
     }
+    // target names must be globally unique
+    switch (this->GetPolicyStatus(cmPolicies::CMP0002)) {
+      case cmPolicies::WARN:
+        this->IssueMessage(cmake::AUTHOR_WARNING,
+                           cmPolicies::GetPolicyWarning(cmPolicies::CMP0002));
+      case cmPolicies::OLD:
+        return true;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        this->IssueMessage(
+          cmake::FATAL_ERROR,
+          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0002));
+        return true;
+      case cmPolicies::NEW:
+        break;
+    }
+
+    // The conflict is with a non-imported target.
+    // Allow this if the user has requested support.
+    cmake* cm = this->GetCMakeInstance();
+    if (isCustom && existing->GetType() == cmState::UTILITY &&
+        this != existing->GetMakefile() &&
+        cm->GetState()->GetGlobalPropertyAsBool(
+          "ALLOW_DUPLICATE_CUSTOM_TARGETS")) {
+      return true;
+    }
+
+    // Produce an error that tells the user how to work around the
+    // problem.
+    std::ostringstream e;
+    e << "cannot create target \"" << name
+      << "\" because another target with the same name already exists.  "
+      << "The existing target is ";
+    switch (existing->GetType()) {
+      case cmState::EXECUTABLE:
+        e << "an executable ";
+        break;
+      case cmState::STATIC_LIBRARY:
+        e << "a static library ";
+        break;
+      case cmState::SHARED_LIBRARY:
+        e << "a shared library ";
+        break;
+      case cmState::MODULE_LIBRARY:
+        e << "a module library ";
+        break;
+      case cmState::UTILITY:
+        e << "a custom target ";
+        break;
+      case cmState::INTERFACE_LIBRARY:
+        e << "an interface library ";
+        break;
+      default:
+        break;
+    }
+    e << "created in source directory \""
+      << existing->GetMakefile()->GetCurrentSourceDirectory() << "\".  "
+      << "See documentation for policy CMP0002 for more details.";
+    msg = e.str();
+    return false;
   }
   return true;
 }
@@ -4246,15 +4242,15 @@ bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
       existingCIt < std::find_if(cmArrayBegin(C_STANDARDS),
                                  cmArrayEnd(C_STANDARDS), cmStrCmp("11"))) {
     return false;
-  } else if (needC99 && existingCStandard &&
-             existingCIt < std::find_if(cmArrayBegin(C_STANDARDS),
-                                        cmArrayEnd(C_STANDARDS),
-                                        cmStrCmp("99"))) {
+  }
+  if (needC99 && existingCStandard &&
+      existingCIt < std::find_if(cmArrayBegin(C_STANDARDS),
+                                 cmArrayEnd(C_STANDARDS), cmStrCmp("99"))) {
     return false;
-  } else if (needC90 && existingCStandard &&
-             existingCIt < std::find_if(cmArrayBegin(C_STANDARDS),
-                                        cmArrayEnd(C_STANDARDS),
-                                        cmStrCmp("90"))) {
+  }
+  if (needC90 && existingCStandard &&
+      existingCIt < std::find_if(cmArrayBegin(C_STANDARDS),
+                                 cmArrayEnd(C_STANDARDS), cmStrCmp("90"))) {
     return false;
   }
   return true;
@@ -4332,10 +4328,11 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
                                    cmArrayEnd(CXX_STANDARDS),
                                    cmStrCmp("11"))) {
     return false;
-  } else if (needCxx98 &&
-             existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
-                                          cmArrayEnd(CXX_STANDARDS),
-                                          cmStrCmp("98"))) {
+  }
+  if (needCxx98 &&
+      existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
+                                   cmArrayEnd(CXX_STANDARDS),
+                                   cmStrCmp("98"))) {
     return false;
   }
   return true;

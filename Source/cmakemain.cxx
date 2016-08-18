@@ -163,7 +163,8 @@ int main(int ac, char const* const* av)
   if (ac > 1) {
     if (strcmp(av[1], "--build") == 0) {
       return do_build(ac, av);
-    } else if (strcmp(av[1], "-E") == 0) {
+    }
+    if (strcmp(av[1], "-E") == 0) {
       return do_command(ac, av);
     }
   }
@@ -237,7 +238,8 @@ int do_cmake(int ac, char const* const* av)
         "Use cmake-gui or ccmake for an interactive dialog.\n";
       /* clang-format on */
       return 1;
-    } else if (strcmp(av[i], "--system-information") == 0) {
+    }
+    if (strcmp(av[i], "--system-information") == 0) {
       sysinfo = true;
     } else if (strcmp(av[i], "-N") == 0) {
       view_only = true;
@@ -313,9 +315,8 @@ int do_cmake(int ac, char const* const* av)
   // interpret negative return values as errors.
   if (res != 0) {
     return 1;
-  } else {
-    return 0;
   }
+  return 0;
 }
 
 static int do_build(int ac, char const* const* av)

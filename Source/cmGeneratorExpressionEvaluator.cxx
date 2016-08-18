@@ -154,20 +154,19 @@ std::string GeneratorExpressionContent::EvaluateParameters(
           node, identifier, context, dagChecker, pit);
         parameters.push_back(lastParam);
         return std::string();
-      } else {
-        std::string parameter;
-        std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it =
-          pit->begin();
-        const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator
-          end = pit->end();
-        for (; it != end; ++it) {
-          parameter += (*it)->Evaluate(context, dagChecker);
-          if (context->HadError) {
-            return std::string();
-          }
-        }
-        parameters.push_back(parameter);
       }
+      std::string parameter;
+      std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it =
+        pit->begin();
+      const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator end =
+        pit->end();
+      for (; it != end; ++it) {
+        parameter += (*it)->Evaluate(context, dagChecker);
+        if (context->HadError) {
+          return std::string();
+        }
+      }
+      parameters.push_back(parameter);
     }
   }
 

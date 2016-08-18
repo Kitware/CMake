@@ -719,9 +719,8 @@ const char* cmDocumentation::GetNameString() const
 {
   if (!this->NameString.empty()) {
     return this->NameString.c_str();
-  } else {
-    return "CMake";
   }
+  return "CMake";
 }
 
 bool cmDocumentation::IsOption(const char* arg) const

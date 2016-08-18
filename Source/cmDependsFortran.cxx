@@ -521,7 +521,8 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
       }
     }
     return true;
-  } else if (cmSystemTools::FileExists(mod_lower.c_str(), true)) {
+  }
+  if (cmSystemTools::FileExists(mod_lower.c_str(), true)) {
     if (cmDependsFortran::ModulesDiffer(mod_lower.c_str(), stamp.c_str(),
                                         compilerId.c_str())) {
       if (!cmSystemTools::CopyFileAlways(mod_lower, stamp)) {

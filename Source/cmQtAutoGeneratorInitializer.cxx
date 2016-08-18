@@ -347,7 +347,8 @@ static std::string GetRccExecutable(cmGeneratorTarget const* target)
       return std::string();
     }
     return qt5Rcc->ImportedGetLocation("");
-  } else if (strcmp(qtVersion, "4") == 0) {
+  }
+  if (strcmp(qtVersion, "4") == 0) {
     cmGeneratorTarget* qt4Rcc = lg->FindGeneratorTargetToUse("Qt4::rcc");
     if (!qt4Rcc) {
       cmSystemTools::Error("Qt4::rcc target not found ", targetName.c_str());

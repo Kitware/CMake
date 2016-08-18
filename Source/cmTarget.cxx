@@ -774,12 +774,14 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       << prop << "\" is not allowed.";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
-  } else if (prop == "NAME") {
+  }
+  if (prop == "NAME") {
     std::ostringstream e;
     e << "NAME property is read-only\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
-  } else if (prop == "INCLUDE_DIRECTORIES") {
+  }
+  if (prop == "INCLUDE_DIRECTORIES") {
     this->Internal->IncludeDirectoriesEntries.clear();
     this->Internal->IncludeDirectoriesBacktraces.clear();
     if (value) {
@@ -856,12 +858,14 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
       << prop << "\" is not allowed.";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
-  } else if (prop == "NAME") {
+  }
+  if (prop == "NAME") {
     std::ostringstream e;
     e << "NAME property is read-only\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
-  } else if (prop == "INCLUDE_DIRECTORIES") {
+  }
+  if (prop == "INCLUDE_DIRECTORIES") {
     if (value && *value) {
       this->Internal->IncludeDirectoriesEntries.push_back(value);
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
@@ -1230,9 +1234,10 @@ const char* cmTarget::GetProperty(const std::string& prop,
       return output.c_str();
     }
     // the type property returns what type the target is
-    else if (prop == propTYPE) {
+    if (prop == propTYPE) {
       return cmState::GetTargetTypeName(this->GetType());
-    } else if (prop == propINCLUDE_DIRECTORIES) {
+    }
+    if (prop == propINCLUDE_DIRECTORIES) {
       if (this->Internal->IncludeDirectoriesEntries.empty()) {
         return CM_NULLPTR;
       }
@@ -1240,7 +1245,8 @@ const char* cmTarget::GetProperty(const std::string& prop,
       static std::string output;
       output = cmJoin(this->Internal->IncludeDirectoriesEntries, ";");
       return output.c_str();
-    } else if (prop == propCOMPILE_FEATURES) {
+    }
+    if (prop == propCOMPILE_FEATURES) {
       if (this->Internal->CompileFeaturesEntries.empty()) {
         return CM_NULLPTR;
       }
@@ -1248,7 +1254,8 @@ const char* cmTarget::GetProperty(const std::string& prop,
       static std::string output;
       output = cmJoin(this->Internal->CompileFeaturesEntries, ";");
       return output.c_str();
-    } else if (prop == propCOMPILE_OPTIONS) {
+    }
+    if (prop == propCOMPILE_OPTIONS) {
       if (this->Internal->CompileOptionsEntries.empty()) {
         return CM_NULLPTR;
       }
@@ -1256,7 +1263,8 @@ const char* cmTarget::GetProperty(const std::string& prop,
       static std::string output;
       output = cmJoin(this->Internal->CompileOptionsEntries, ";");
       return output.c_str();
-    } else if (prop == propCOMPILE_DEFINITIONS) {
+    }
+    if (prop == propCOMPILE_DEFINITIONS) {
       if (this->Internal->CompileDefinitionsEntries.empty()) {
         return CM_NULLPTR;
       }
@@ -1264,15 +1272,20 @@ const char* cmTarget::GetProperty(const std::string& prop,
       static std::string output;
       output = cmJoin(this->Internal->CompileDefinitionsEntries, ";");
       return output.c_str();
-    } else if (prop == propIMPORTED) {
+    }
+    if (prop == propIMPORTED) {
       return this->IsImported() ? "TRUE" : "FALSE";
-    } else if (prop == propNAME) {
+    }
+    if (prop == propNAME) {
       return this->GetName().c_str();
-    } else if (prop == propBINARY_DIR) {
+    }
+    if (prop == propBINARY_DIR) {
       return this->GetMakefile()->GetCurrentBinaryDirectory();
-    } else if (prop == propSOURCE_DIR) {
+    }
+    if (prop == propSOURCE_DIR) {
       return this->GetMakefile()->GetCurrentSourceDirectory();
-    } else if (prop == propSOURCES) {
+    }
+    if (prop == propSOURCES) {
       if (this->Internal->SourceEntries.empty()) {
         return CM_NULLPTR;
       }

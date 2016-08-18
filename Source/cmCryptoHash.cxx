@@ -19,19 +19,23 @@ CM_AUTO_PTR<cmCryptoHash> cmCryptoHash::New(const char* algo)
 {
   if (strcmp(algo, "MD5") == 0) {
     return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashMD5);
-  } else if (strcmp(algo, "SHA1") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA1);
-  } else if (strcmp(algo, "SHA224") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA224);
-  } else if (strcmp(algo, "SHA256") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA256);
-  } else if (strcmp(algo, "SHA384") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA384);
-  } else if (strcmp(algo, "SHA512") == 0) {
-    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA512);
-  } else {
-    return CM_AUTO_PTR<cmCryptoHash>(CM_NULLPTR);
   }
+  if (strcmp(algo, "SHA1") == 0) {
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA1);
+  }
+  if (strcmp(algo, "SHA224") == 0) {
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA224);
+  }
+  if (strcmp(algo, "SHA256") == 0) {
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA256);
+  }
+  if (strcmp(algo, "SHA384") == 0) {
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA384);
+  }
+  if (strcmp(algo, "SHA512") == 0) {
+    return CM_AUTO_PTR<cmCryptoHash>(new cmCryptoHashSHA512);
+  }
+  return CM_AUTO_PTR<cmCryptoHash>(CM_NULLPTR);
 }
 
 bool cmCryptoHash::IntFromHexDigit(char input, char& output)
@@ -39,10 +43,12 @@ bool cmCryptoHash::IntFromHexDigit(char input, char& output)
   if (input >= '0' && input <= '9') {
     output = char(input - '0');
     return true;
-  } else if (input >= 'a' && input <= 'f') {
+  }
+  if (input >= 'a' && input <= 'f') {
     output = char(input - 'a' + 0xA);
     return true;
-  } else if (input >= 'A' && input <= 'F') {
+  }
+  if (input >= 'A' && input <= 'F') {
     output = char(input - 'A' + 0xA);
     return true;
   }

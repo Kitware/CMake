@@ -180,13 +180,14 @@ bool cmUuid::IntFromHexDigit(char input, char& output) const
   if (input >= '0' && input <= '9') {
     output = char(input - '0');
     return true;
-  } else if (input >= 'a' && input <= 'f') {
+  }
+  if (input >= 'a' && input <= 'f') {
     output = char(input - 'a' + 0xA);
     return true;
-  } else if (input >= 'A' && input <= 'F') {
+  }
+  if (input >= 'A' && input <= 'F') {
     output = char(input - 'A' + 0xA);
     return true;
-  } else {
-    return false;
   }
+  return false;
 }

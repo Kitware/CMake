@@ -1702,7 +1702,8 @@ const char* cmState::Directory::GetProperty(const std::string& prop,
       return parent.GetDirectory().GetCurrentSource();
     }
     return "";
-  } else if (prop == "LISTFILE_STACK") {
+  }
+  if (prop == "LISTFILE_STACK") {
     std::vector<std::string> listFiles;
     cmState::Snapshot snp = this->Snapshot_;
     while (snp.IsValid()) {
@@ -1712,10 +1713,12 @@ const char* cmState::Directory::GetProperty(const std::string& prop,
     std::reverse(listFiles.begin(), listFiles.end());
     output = cmJoin(listFiles, ";");
     return output.c_str();
-  } else if (prop == "CACHE_VARIABLES") {
+  }
+  if (prop == "CACHE_VARIABLES") {
     output = cmJoin(this->Snapshot_.State->GetCacheEntryKeys(), ";");
     return output.c_str();
-  } else if (prop == "VARIABLES") {
+  }
+  if (prop == "VARIABLES") {
     std::vector<std::string> res = this->Snapshot_.ClosureKeys();
     std::vector<std::string> cacheKeys =
       this->Snapshot_.State->GetCacheEntryKeys();
@@ -1723,13 +1726,16 @@ const char* cmState::Directory::GetProperty(const std::string& prop,
     std::sort(res.begin(), res.end());
     output = cmJoin(res, ";");
     return output.c_str();
-  } else if (prop == "INCLUDE_DIRECTORIES") {
+  }
+  if (prop == "INCLUDE_DIRECTORIES") {
     output = cmJoin(this->GetIncludeDirectoriesEntries(), ";");
     return output.c_str();
-  } else if (prop == "COMPILE_OPTIONS") {
+  }
+  if (prop == "COMPILE_OPTIONS") {
     output = cmJoin(this->GetCompileOptionsEntries(), ";");
     return output.c_str();
-  } else if (prop == "COMPILE_DEFINITIONS") {
+  }
+  if (prop == "COMPILE_DEFINITIONS") {
     output = cmJoin(this->GetCompileDefinitionsEntries(), ";");
     return output.c_str();
   }

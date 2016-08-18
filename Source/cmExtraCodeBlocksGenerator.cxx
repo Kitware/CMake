@@ -124,11 +124,10 @@ void Tree::InsertPath(const std::vector<std::string>& splitted,
       if (start + 1 < splitted.size()) {
         it->InsertPath(splitted, start + 1, fileName);
         return;
-      } else {
-        // last part of splitted
-        it->files.push_back(fileName);
-        return;
       }
+      // last part of splitted
+      it->files.push_back(fileName);
+      return;
     }
   }
   // Not found in folders, thus insert
@@ -138,12 +137,11 @@ void Tree::InsertPath(const std::vector<std::string>& splitted,
     newFolder.InsertPath(splitted, start + 1, fileName);
     folders.push_back(newFolder);
     return;
-  } else {
-    // last part of splitted
-    newFolder.files.push_back(fileName);
-    folders.push_back(newFolder);
-    return;
   }
+  // last part of splitted
+  newFolder.files.push_back(fileName);
+  folders.push_back(newFolder);
+  return;
 }
 
 void Tree::BuildVirtualFolder(cmXMLWriter& xml) const
@@ -717,21 +715,22 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
 // Translate the cmake target type into the CodeBlocks target type id
 int cmExtraCodeBlocksGenerator::GetCBTargetType(cmGeneratorTarget* target)
 {
-  if (target->GetType() == cmState::EXECUTABLE) {
-    if ((target->GetPropertyAsBool("WIN32_EXECUTABLE")) ||
-        (target->GetPropertyAsBool("MACOSX_BUNDLE"))) {
-      return 0;
-    } else {
+  switch (target->GetType()) {
+    case cmState::EXECUTABLE:
+      if ((target->GetPropertyAsBool("WIN32_EXECUTABLE")) ||
+          (target->GetPropertyAsBool("MACOSX_BUNDLE"))) {
+        return 0;
+      }
       return 1;
-    }
-  } else if ((target->GetType() == cmState::STATIC_LIBRARY) ||
-             (target->GetType() == cmState::OBJECT_LIBRARY)) {
-    return 2;
-  } else if ((target->GetType() == cmState::SHARED_LIBRARY) ||
-             (target->GetType() == cmState::MODULE_LIBRARY)) {
-    return 3;
+    case cmState::STATIC_LIBRARY:
+    case cmState::OBJECT_LIBRARY:
+      return 2;
+    case cmState::SHARED_LIBRARY:
+    case cmState::MODULE_LIBRARY:
+      return 3;
+    default:
+      return 4;
   }
-  return 4;
 }
 
 // Create the command line for building the given target using the selected

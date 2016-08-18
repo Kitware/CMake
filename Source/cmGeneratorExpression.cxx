@@ -352,7 +352,8 @@ std::string cmGeneratorExpression::Preprocess(const std::string& input,
 {
   if (context == StripAllGeneratorExpressions) {
     return stripAllGeneratorExpressions(input);
-  } else if (context == BuildInterface || context == InstallInterface) {
+  }
+  if (context == BuildInterface || context == InstallInterface) {
     return stripExportInterface(input, context, resolveRelative);
   }
 

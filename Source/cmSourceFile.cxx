@@ -295,9 +295,8 @@ const char* cmSourceFile::GetProperty(const std::string& prop) const
   if (prop == "LOCATION") {
     if (this->FullPath.empty()) {
       return CM_NULLPTR;
-    } else {
-      return this->FullPath.c_str();
     }
+    return this->FullPath.c_str();
   }
 
   const char* retVal = this->Properties.GetPropertyValue(prop);

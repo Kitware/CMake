@@ -63,9 +63,8 @@ void cmInstallExportGenerator::ComputeTempDir()
   this->TempDir += "/Export";
   if (this->Destination.empty()) {
     return;
-  } else {
-    this->TempDir += "/";
   }
+  this->TempDir += "/";
 
   // Enforce a maximum length.
   bool useMD5 = false;
