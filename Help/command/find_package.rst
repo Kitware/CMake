@@ -201,6 +201,9 @@ Each entry is meant for installation trees following Windows (W), UNIX
   <prefix>/(lib/<arch>|lib|share)/cmake/<name>*/                  (U)
   <prefix>/(lib/<arch>|lib|share)/<name>*/                        (U)
   <prefix>/(lib/<arch>|lib|share)/<name>*/(cmake|CMake)/          (U)
+  <prefix>/<name>*/(lib/<arch>|lib|share)/cmake/<name>*/          (W/U)
+  <prefix>/<name>*/(lib/<arch>|lib|share)/<name>*/                (W/U)
+  <prefix>/<name>*/(lib/<arch>|lib|share)/<name>*/(cmake|CMake)/  (W/U)
 
 On systems supporting OS X Frameworks and Application Bundles the
 following directories are searched for frameworks or bundles

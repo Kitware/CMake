@@ -1961,6 +1961,44 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
     }
   }
 
+  // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib|share)/cmake/(Foo|foo|FOO).*/
+  {
+    cmFindPackageFileList lister(this);
+    lister / cmFileListGeneratorFixed(prefix) /
+      cmFileListGeneratorProject(this->Names) /
+      cmFileListGeneratorEnumerate(common) /
+      cmFileListGeneratorFixed("cmake") /
+      cmFileListGeneratorProject(this->Names);
+    if (lister.Search()) {
+      return true;
+    }
+  }
+
+  // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib|share)/(Foo|foo|FOO).*/
+  {
+    cmFindPackageFileList lister(this);
+    lister / cmFileListGeneratorFixed(prefix) /
+      cmFileListGeneratorProject(this->Names) /
+      cmFileListGeneratorEnumerate(common) /
+      cmFileListGeneratorProject(this->Names);
+    if (lister.Search()) {
+      return true;
+    }
+  }
+
+  // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib|share)/(Foo|foo|FOO).*/(cmake|CMake)/
+  {
+    cmFindPackageFileList lister(this);
+    lister / cmFileListGeneratorFixed(prefix) /
+      cmFileListGeneratorProject(this->Names) /
+      cmFileListGeneratorEnumerate(common) /
+      cmFileListGeneratorProject(this->Names) /
+      cmFileListGeneratorCaseInsensitive("cmake");
+    if (lister.Search()) {
+      return true;
+    }
+  }
+
   return false;
 }
 
