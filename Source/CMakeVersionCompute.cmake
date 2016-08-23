@@ -7,6 +7,7 @@ if("${CMake_VERSION_PATCH}" VERSION_LESS 20000000)
   set(CMake_VERSION_IS_RELEASE 1)
   set(CMake_VERSION_SOURCE "")
 else()
+  set(CMake_VERSION_IS_DIRTY 0) # may be set to 1 by CMakeVersionSource
   set(CMake_VERSION_IS_RELEASE 0)
   include(${CMake_SOURCE_DIR}/Source/CMakeVersionSource.cmake)
 endif()
