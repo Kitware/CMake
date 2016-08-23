@@ -1,6 +1,10 @@
 enable_language(C)
 enable_language(CXX)
 
+if(NOT ANDROID)
+  message(SEND_ERROR "CMake variable 'ANDROID' is not set to a true value.")
+endif()
+
 foreach(f
     "${CMAKE_C_ANDROID_TOOLCHAIN_PREFIX}gcc${CMAKE_C_ANDROID_TOOLCHAIN_SUFFIX}"
     "${CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX}g++${CMAKE_CXX_ANDROID_TOOLCHAIN_SUFFIX}"

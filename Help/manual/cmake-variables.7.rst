@@ -173,6 +173,7 @@ Variables that Describe the System
 .. toctree::
    :maxdepth: 1
 
+   /variable/ANDROID
    /variable/APPLE
    /variable/BORLAND
    /variable/CMAKE_CL_64
