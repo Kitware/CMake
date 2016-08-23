@@ -29,11 +29,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 You can contact the author at :
 - xxHash source repository : http://code.google.com/p/xxhash/
 */
-#include <stdlib.h>
-#include <string.h>
 
 #include "archive_platform.h"
 #include "archive_xxhash.h"
+
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef HAVE_LIBLZ4
 
