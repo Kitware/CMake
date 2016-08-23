@@ -28,6 +28,8 @@
 #include "cm_jsoncpp_value.h"
 #endif
 
+#include<memory>
+
 cmServerProtocol::cmServerProtocol(cmMetadataServer* server,
                                    std::string buildDir)
   : Server(server)
@@ -75,6 +77,8 @@ bool cmServerProtocol::processRequest(const std::string& json)
       this->ProcessBuildsystem();
     } else if (type == "cmake_variables") {
       this->ProcessCMakeVariables();
+    } else if (type == "system_include_paths") {
+      this->ProcessSystemIncludePaths();
     } else if (type == "target_info") {
       const char* language = 0;
       if (value.isMember("language")) {
@@ -295,6 +299,47 @@ void cmServerProtocol::ProcessCMakeVariables()
   for (auto const& key : state->GetCacheEntryKeys()) {
     obj[key] = state->GetCacheEntryValue(key);
   }
+  this->Server->WriteResponse(root);
+}
+
+void cmServerProtocol::ProcessSystemIncludePaths()
+{
+  Json::Value root = Json::objectValue;
+  root["system_include_paths"] = "";
+
+  auto const cmake = this->CMakeInstance;
+  cmMakefile mf (cmake->GetGlobalGenerator(), cmake->GetCurrentSnapshot());
+
+  if (!cmake->GetIsInTryCompile()) {
+    char const entry_name [] = "MSBUILD_FLAG";
+    cmake->AddCacheEntry(entry_name, "/verbosity:diagnostic",
+                         nullptr, cmState::CacheEntryType::STRING);
+    auto const file = cmSystemTools::GetCMakeRoot()
+                    + "/Modules/VCSystemIncludePaths.cmake";
+    auto const ok = mf.ReadListFile(file.c_str());
+    cmake->GetState()->RemoveCacheEntry(entry_name);
+
+    if (!ok) {
+      this->Error("Could not find cmake module file: " + file);
+      return;
+    }
+
+    auto const system_paths = "VC_SYSTEM_INCLUDE_PATHS_OUTPUT";
+    std::string const output = mf.GetDefinition(system_paths);
+    mf.RemoveDefinition(system_paths);
+
+    char const marker [] = "IncludePath = ";
+    auto const begin = output.find(marker);
+    if (begin != std::string::npos) {
+      auto const content_begin = begin + sizeof(marker) - 1;
+      auto const end = output.find('\n',content_begin);
+      if (end != std::string::npos) {
+        auto const size = end - content_begin;
+        root["system_include_paths"] = std::string(output,content_begin,size);
+      }
+    }
+  }
+
   this->Server->WriteResponse(root);
 }
 

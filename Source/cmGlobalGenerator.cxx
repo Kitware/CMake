@@ -48,6 +48,7 @@
 #include <stdlib.h> // required for atof
 
 #include <assert.h>
+#include <ctype.h>
 
 bool cmTarget::StrictTargetComparison::operator()(cmTarget const* t1,
                                                   cmTarget const* t2) const
@@ -1716,6 +1717,18 @@ int cmGlobalGenerator::Build(const std::string&, const std::string& bindir,
   output += "\nRun Build Command:";
   output += makeCommandStr;
   output += "\n";
+
+  // inject additional flags to msbuild.exe.
+  if (!makeCommand.empty()) {
+    auto build = makeCommand[0];
+    std::transform(build.begin(),build.end(),build.begin(),tolower);
+    if (build.find("msbuild.exe") != std::string::npos) {
+      auto const flag = this->CMakeInstance->GetCacheDefinition("MSBUILD_FLAG");
+      if (flag) {
+        makeCommand.emplace_back(flag);
+      }
+    }
+  }
 
   if (!cmSystemTools::RunSingleCommand(makeCommand, outputPtr, outputPtr,
                                        &retVal, 0, outputflag, timeout)) {

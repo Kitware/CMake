@@ -38,6 +38,12 @@ def print_error(packet):
     col_print('error', [packet['error']])
 
 
+def print_include_paths(include_path):
+    col_print('system include paths',
+              filter(lambda p: p,
+                     [path.strip() for path in include_path.split(';')]))
+
+
 def print_build_system(build_info):
     col_print('version', [build_info['version']])
     col_print('generator', [build_info['generator']])
@@ -313,18 +319,28 @@ srcDir = packet['source_dir']
 binDir = packet['binary_dir']
 projectName = packet['project_name']
 
-writePayload({'type': 'cmake_variables'})
-
+writePayload({'type': 'system_include_paths'})
 packet = waitForMessage()
+if 'error' in packet.keys():
+    print_error(packet);
+else:
+    print_include_paths(packet['system_include_paths']);
 
-print_cmake_cache(packet['cmake_variables']);
+writePayload({'type': 'cmake_variables'})
+packet = waitForMessage()
+if 'error' in packet.keys():
+    print_error(packet);
+else:
+    print_cmake_cache(packet['cmake_variables']);
 
 writePayload({'type': 'buildsystem'})
-
 packet = waitForMessage()
-
-print_build_system(packet['buildsystem']);
-print
-print
+if 'error' in packet.keys():
+    print_error(packet);
+    sys.exit(1)
+else:
+    print_build_system(packet['buildsystem']);
+    print
+    print
 
 serve_targets(packet)
