@@ -216,10 +216,9 @@ std::string cmCTestCVS::ComputeBranchFlag(std::string const& dir)
     std::string flag = "-r";
     flag += tagLine.substr(1);
     return flag;
-  } else {
-    // Use the default branch.
-    return "-b";
   }
+  // Use the default branch.
+  return "-b";
 }
 
 void cmCTestCVS::LoadRevisions(std::string const& file, const char* branchFlag,

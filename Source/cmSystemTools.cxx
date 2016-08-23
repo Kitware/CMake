@@ -333,9 +333,8 @@ void cmSystemTools::Message(const char* m1, const char* title)
     (*s_MessageCallback)(m1, title, s_DisableMessages,
                          s_MessageCallbackClientData);
     return;
-  } else {
-    std::cerr << m1 << std::endl << std::flush;
   }
+  std::cerr << m1 << std::endl << std::flush;
 }
 
 void cmSystemTools::ReportLastSystemError(const char* msg)
@@ -1688,7 +1687,8 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
     if (pipe == cmsysProcess_Pipe_Timeout) {
       // Timeout has been exceeded.
       return pipe;
-    } else if (pipe == cmsysProcess_Pipe_STDOUT) {
+    }
+    if (pipe == cmsysProcess_Pipe_STDOUT) {
       // Append to the stdout buffer.
       std::vector<char>::size_type size = out.size();
       out.insert(out.end(), data, data + length);
@@ -1704,13 +1704,13 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
         line.append(&out[0], outiter - out.begin());
         out.erase(out.begin(), out.end());
         return cmsysProcess_Pipe_STDOUT;
-      } else if (!err.empty()) {
+      }
+      if (!err.empty()) {
         line.append(&err[0], erriter - err.begin());
         err.erase(err.begin(), err.end());
         return cmsysProcess_Pipe_STDERR;
-      } else {
-        return cmsysProcess_Pipe_None;
       }
+      return cmsysProcess_Pipe_None;
     }
   }
 }
@@ -2218,13 +2218,12 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
         // The new rpath is empty and there is no rpath anyway so it is
         // okay.
         return true;
-      } else {
-        if (emsg) {
-          *emsg = "No valid ELF RPATH or RUNPATH entry exists in the file; ";
-          *emsg += elf.GetErrorMessage();
-        }
-        return false;
       }
+      if (emsg) {
+        *emsg = "No valid ELF RPATH or RUNPATH entry exists in the file; ";
+        *emsg += elf.GetErrorMessage();
+      }
+      return false;
     }
 
     for (int i = 0; i < se_count; ++i) {
@@ -2382,7 +2381,8 @@ bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
     if (lhs < rhs) {
       // lhs < rhs, so true if operation is LESS
       return (op & cmSystemTools::OP_LESS) != 0;
-    } else if (lhs > rhs) {
+    }
+    if (lhs > rhs) {
       // lhs > rhs, so true if operation is GREATER
       return (op & cmSystemTools::OP_GREATER) != 0;
     }

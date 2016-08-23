@@ -832,45 +832,40 @@ cmELF::FileType cmELF::GetFileType() const
 {
   if (this->Valid()) {
     return this->Internal->GetFileType();
-  } else {
-    return FileTypeInvalid;
   }
+  return FileTypeInvalid;
 }
 
 unsigned int cmELF::GetNumberOfSections() const
 {
   if (this->Valid()) {
     return this->Internal->GetNumberOfSections();
-  } else {
-    return 0;
   }
+  return 0;
 }
 
 unsigned int cmELF::GetDynamicEntryCount() const
 {
   if (this->Valid()) {
     return this->Internal->GetDynamicEntryCount();
-  } else {
-    return 0;
   }
+  return 0;
 }
 
 unsigned long cmELF::GetDynamicEntryPosition(int index) const
 {
   if (this->Valid()) {
     return this->Internal->GetDynamicEntryPosition(index);
-  } else {
-    return 0;
   }
+  return 0;
 }
 
 bool cmELF::ReadBytes(unsigned long pos, unsigned long size, char* buf) const
 {
   if (this->Valid()) {
     return this->Internal->ReadBytes(pos, size, buf);
-  } else {
-    return false;
   }
+  return false;
 }
 
 bool cmELF::GetSOName(std::string& soname)
@@ -878,9 +873,8 @@ bool cmELF::GetSOName(std::string& soname)
   if (StringEntry const* se = this->GetSOName()) {
     soname = se->Value;
     return true;
-  } else {
-    return false;
   }
+  return false;
 }
 
 cmELF::StringEntry const* cmELF::GetSOName()
@@ -888,9 +882,8 @@ cmELF::StringEntry const* cmELF::GetSOName()
   if (this->Valid() &&
       this->Internal->GetFileType() == cmELF::FileTypeSharedLibrary) {
     return this->Internal->GetSOName();
-  } else {
-    return CM_NULLPTR;
   }
+  return CM_NULLPTR;
 }
 
 cmELF::StringEntry const* cmELF::GetRPath()
@@ -899,9 +892,8 @@ cmELF::StringEntry const* cmELF::GetRPath()
       (this->Internal->GetFileType() == cmELF::FileTypeExecutable ||
        this->Internal->GetFileType() == cmELF::FileTypeSharedLibrary)) {
     return this->Internal->GetRPath();
-  } else {
-    return CM_NULLPTR;
   }
+  return CM_NULLPTR;
 }
 
 cmELF::StringEntry const* cmELF::GetRunPath()
@@ -910,9 +902,8 @@ cmELF::StringEntry const* cmELF::GetRunPath()
       (this->Internal->GetFileType() == cmELF::FileTypeExecutable ||
        this->Internal->GetFileType() == cmELF::FileTypeSharedLibrary)) {
     return this->Internal->GetRunPath();
-  } else {
-    return CM_NULLPTR;
   }
+  return CM_NULLPTR;
 }
 
 void cmELF::PrintInfo(std::ostream& os) const

@@ -126,12 +126,11 @@ bool cmCTestLaunch::ParseArguments(int argc, const char* const* argv)
       this->HandleRealArg(this->RealArgV[i]);
     }
     return true;
-  } else {
-    this->RealArgC = 0;
-    this->RealArgV = CM_NULLPTR;
-    std::cerr << "No launch/command separator ('--') found!\n";
-    return false;
   }
+  this->RealArgC = 0;
+  this->RealArgV = CM_NULLPTR;
+  std::cerr << "No launch/command separator ('--') found!\n";
+  return false;
 }
 
 void cmCTestLaunch::HandleRealArg(const char* arg)

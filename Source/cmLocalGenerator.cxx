@@ -626,16 +626,14 @@ std::string cmLocalGenerator::ExpandRuleVariable(
     if (variable == "TARGET_VERSION_MAJOR") {
       if (replaceValues.TargetVersionMajor) {
         return replaceValues.TargetVersionMajor;
-      } else {
-        return "0";
       }
+      return "0";
     }
     if (variable == "TARGET_VERSION_MINOR") {
       if (replaceValues.TargetVersionMinor) {
         return replaceValues.TargetVersionMinor;
-      } else {
-        return "0";
       }
+      return "0";
     }
     if (replaceValues.Target) {
       if (variable == "TARGET_BASE") {
@@ -644,9 +642,8 @@ std::string cmLocalGenerator::ExpandRuleVariable(
         std::string::size_type pos = targetBase.rfind('.');
         if (pos != targetBase.npos) {
           return targetBase.substr(0, pos);
-        } else {
-          return targetBase;
         }
+        return targetBase;
       }
     }
   }
@@ -813,9 +810,8 @@ const char* cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
 {
   if (target) {
     return target->GetProperty(prop);
-  } else {
-    return this->Makefile->GetProperty(prop);
   }
+  return this->Makefile->GetProperty(prop);
 }
 
 void cmLocalGenerator::InsertRuleLauncher(std::string& s,
@@ -2365,10 +2361,9 @@ static bool cmLocalGeneratorShortenObjectName(std::string& objName,
 
     // The object name is now short enough.
     return true;
-  } else {
-    // The object name could not be shortened enough.
-    return false;
   }
+  // The object name could not be shortened enough.
+  return false;
 }
 
 bool cmLocalGeneratorCheckObjectName(std::string& objName,
@@ -2382,15 +2377,13 @@ bool cmLocalGeneratorCheckObjectName(std::string& objName,
     if (objName.size() > max_obj_len) {
       // The current object file name is too long.  Try to shorten it.
       return cmLocalGeneratorShortenObjectName(objName, max_obj_len);
-    } else {
-      // The object file name is short enough.
-      return true;
     }
-  } else {
-    // The build directory in which the object will be stored is
-    // already too deep.
-    return false;
+    // The object file name is short enough.
+    return true;
   }
+  // The build directory in which the object will be stored is
+  // already too deep.
+  return false;
 }
 #endif
 

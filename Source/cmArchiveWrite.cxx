@@ -75,9 +75,8 @@ struct cmArchiveWrite::Callback
     if (self->Stream.write(static_cast<const char*>(b),
                            static_cast<std::streamsize>(n))) {
       return static_cast<__LA_SSIZE_T>(n);
-    } else {
-      return static_cast<__LA_SSIZE_T>(-1);
     }
+    return static_cast<__LA_SSIZE_T>(-1);
   }
 };
 

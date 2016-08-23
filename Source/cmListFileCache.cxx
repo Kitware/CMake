@@ -259,10 +259,9 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
   if (isError) {
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, m.str());
     return false;
-  } else {
-    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, m.str());
-    return true;
   }
+  this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, m.str());
+  return true;
 }
 
 struct cmListFileBacktrace::Entry : public cmListFileContext
@@ -377,10 +376,9 @@ cmListFileContext const& cmListFileBacktrace::Top() const
 {
   if (this->Cur) {
     return *this->Cur;
-  } else {
-    static cmListFileContext const empty;
-    return empty;
   }
+  static cmListFileContext const empty;
+  return empty;
 }
 
 void cmListFileBacktrace::PrintTitle(std::ostream& out) const

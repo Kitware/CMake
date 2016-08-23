@@ -22,28 +22,26 @@ bool cmFortranParser_s::FindIncludeFile(const char* dir,
   if (cmSystemTools::FileIsFullPath(includeName)) {
     fileName = includeName;
     return cmSystemTools::FileExists(fileName.c_str(), true);
-  } else {
-    // Check for the file in the directory containing the including
-    // file.
-    std::string fullName = dir;
+  }
+  // Check for the file in the directory containing the including
+  // file.
+  std::string fullName = dir;
+  fullName += "/";
+  fullName += includeName;
+  if (cmSystemTools::FileExists(fullName.c_str(), true)) {
+    fileName = fullName;
+    return true;
+  }
+
+  // Search the include path for the file.
+  for (std::vector<std::string>::const_iterator i = this->IncludePath.begin();
+       i != this->IncludePath.end(); ++i) {
+    fullName = *i;
     fullName += "/";
     fullName += includeName;
     if (cmSystemTools::FileExists(fullName.c_str(), true)) {
       fileName = fullName;
       return true;
-    }
-
-    // Search the include path for the file.
-    for (std::vector<std::string>::const_iterator i =
-           this->IncludePath.begin();
-         i != this->IncludePath.end(); ++i) {
-      fullName = *i;
-      fullName += "/";
-      fullName += includeName;
-      if (cmSystemTools::FileExists(fullName.c_str(), true)) {
-        fileName = fullName;
-        return true;
-      }
     }
   }
   return false;
@@ -88,9 +86,8 @@ bool cmFortranParser_FilePush(cmFortranParser* parser, const char* fname)
     cmFortran_yy_switch_to_buffer(buffer, parser->Scanner);
     parser->FileStack.push(f);
     return 1;
-  } else {
-    return 0;
   }
+  return 0;
 }
 
 bool cmFortranParser_FilePop(cmFortranParser* parser)
@@ -99,15 +96,14 @@ bool cmFortranParser_FilePop(cmFortranParser* parser)
   // to the next one on the stack.
   if (parser->FileStack.empty()) {
     return 0;
-  } else {
-    cmFortranFile f = parser->FileStack.top();
-    parser->FileStack.pop();
-    fclose(f.File);
-    YY_BUFFER_STATE current = cmFortranLexer_GetCurrentBuffer(parser->Scanner);
-    cmFortran_yy_delete_buffer(current, parser->Scanner);
-    cmFortran_yy_switch_to_buffer(f.Buffer, parser->Scanner);
-    return 1;
   }
+  cmFortranFile f = parser->FileStack.top();
+  parser->FileStack.pop();
+  fclose(f.File);
+  YY_BUFFER_STATE current = cmFortranLexer_GetCurrentBuffer(parser->Scanner);
+  cmFortran_yy_delete_buffer(current, parser->Scanner);
+  cmFortran_yy_switch_to_buffer(f.Buffer, parser->Scanner);
+  return 1;
 }
 
 int cmFortranParser_Input(cmFortranParser* parser, char* buffer,

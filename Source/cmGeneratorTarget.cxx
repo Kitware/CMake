@@ -361,10 +361,9 @@ const char* cmGeneratorTarget::GetOutputTargetType(bool implib) const
         if (implib) {
           // A DLL import library is treated as an archive target.
           return "ARCHIVE";
-        } else {
-          // A DLL shared library is treated as a runtime target.
-          return "RUNTIME";
         }
+        // A DLL shared library is treated as a runtime target.
+        return "RUNTIME";
       } else {
         // For non-DLL platforms shared libraries are treated as
         // library targets.
@@ -1324,26 +1323,23 @@ std::string cmGeneratorTarget::GetSOName(const std::string& config) const
         // The imported library has no builtin soname so the name
         // searched at runtime will be just the filename.
         return cmSystemTools::GetFilenameName(info->Location);
-      } else {
-        // Use the soname given if any.
-        if (info->SOName.find("@rpath/") == 0) {
-          return info->SOName.substr(6);
-        }
-        return info->SOName;
       }
-    } else {
-      return "";
+      // Use the soname given if any.
+      if (info->SOName.find("@rpath/") == 0) {
+        return info->SOName.substr(6);
+      }
+      return info->SOName;
     }
-  } else {
-    // Compute the soname that will be built.
-    std::string name;
-    std::string soName;
-    std::string realName;
-    std::string impName;
-    std::string pdbName;
-    this->GetLibraryNames(name, soName, realName, impName, pdbName, config);
-    return soName;
+    return "";
   }
+  // Compute the soname that will be built.
+  std::string name;
+  std::string soName;
+  std::string realName;
+  std::string impName;
+  std::string pdbName;
+  this->GetLibraryNames(name, soName, realName, impName, pdbName, config);
+  return soName;
 }
 
 std::string cmGeneratorTarget::GetAppBundleDirectory(const std::string& config,
@@ -1418,9 +1414,8 @@ std::string cmGeneratorTarget::GetFullName(const std::string& config,
 {
   if (this->IsImported()) {
     return this->GetFullNameImported(config, implib);
-  } else {
-    return this->GetFullNameInternal(config, implib);
   }
+  return this->GetFullNameInternal(config, implib);
 }
 
 std::string cmGeneratorTarget::GetInstallNameDirForBuildTree(
@@ -1444,9 +1439,8 @@ std::string cmGeneratorTarget::GetInstallNameDirForBuildTree(
     }
     dir += "/";
     return dir;
-  } else {
-    return "";
   }
+  return "";
 }
 
 std::string cmGeneratorTarget::GetInstallNameDirForInstallTree() const
@@ -1468,9 +1462,8 @@ std::string cmGeneratorTarget::GetInstallNameDirForInstallTree() const
       }
     }
     return dir;
-  } else {
-    return "";
   }
+  return "";
 }
 
 cmListFileBacktrace cmGeneratorTarget::GetBacktrace() const
@@ -1516,9 +1509,8 @@ const char* cmGeneratorTarget::GetExportMacro() const
       this->ExportMacro = cmSystemTools::MakeCidentifier(in);
     }
     return this->ExportMacro.c_str();
-  } else {
-    return CM_NULLPTR;
   }
+  return CM_NULLPTR;
 }
 
 class cmTargetCollectLinkLanguages
@@ -1642,7 +1634,8 @@ public:
   {
     if (this->Preferred.empty()) {
       return "";
-    } else if (this->Preferred.size() > 1) {
+    }
+    if (this->Preferred.size() > 1) {
       std::ostringstream e;
       e << "Target " << this->Target->GetName()
         << " contains multiple languages with the highest linker preference"
@@ -2723,9 +2716,8 @@ std::string cmGeneratorTarget::GetFullPath(const std::string& config,
 {
   if (this->IsImported()) {
     return this->Target->ImportedGetFullPath(config, implib);
-  } else {
-    return this->NormalGetFullPath(config, implib, realname);
   }
+  return this->NormalGetFullPath(config, implib, realname);
 }
 
 std::string cmGeneratorTarget::NormalGetFullPath(const std::string& config,
@@ -2770,16 +2762,15 @@ std::string cmGeneratorTarget::NormalGetRealName(
     std::string pdbName;
     this->GetExecutableNames(name, realName, impName, pdbName, config);
     return realName;
-  } else {
-    // Compute the real name that will be built.
-    std::string name;
-    std::string soName;
-    std::string realName;
-    std::string impName;
-    std::string pdbName;
-    this->GetLibraryNames(name, soName, realName, impName, pdbName, config);
-    return realName;
   }
+  // Compute the real name that will be built.
+  std::string name;
+  std::string soName;
+  std::string realName;
+  std::string impName;
+  std::string pdbName;
+  this->GetLibraryNames(name, soName, realName, impName, pdbName, config);
+  return realName;
 }
 
 void cmGeneratorTarget::GetLibraryNames(std::string& name, std::string& soName,
@@ -3587,9 +3578,8 @@ std::pair<bool, const char*> consistentNumberProperty(const char* lhs,
 
   if (t == NumberMaxType) {
     return std::make_pair(true, std::max(lnum, rnum) == lnum ? lhs : rhs);
-  } else {
-    return std::make_pair(true, std::min(lnum, rnum) == lnum ? lhs : rhs);
   }
+  return std::make_pair(true, std::min(lnum, rnum) == lnum ? lhs : rhs);
 }
 
 template <>
@@ -3906,11 +3896,11 @@ std::string cmGeneratorTarget::GetFrameworkVersion() const
 
   if (const char* fversion = this->GetProperty("FRAMEWORK_VERSION")) {
     return fversion;
-  } else if (const char* tversion = this->GetProperty("VERSION")) {
-    return tversion;
-  } else {
-    return "A";
   }
+  if (const char* tversion = this->GetProperty("VERSION")) {
+    return tversion;
+  }
+  return "A";
 }
 
 void cmGeneratorTarget::ComputeVersionedName(std::string& vName,
@@ -4169,7 +4159,8 @@ std::string cmGeneratorTarget::GetDirectory(const std::string& config,
     // Return the directory from which the target is imported.
     return cmSystemTools::GetFilenamePath(
       this->Target->ImportedGetFullPath(config, implib));
-  } else if (OutputInfo const* info = this->GetOutputInfo(config)) {
+  }
+  if (OutputInfo const* info = this->GetOutputInfo(config)) {
     // Return the directory in which the target will be built.
     return implib ? info->ImpDir : info->OutDir;
   }

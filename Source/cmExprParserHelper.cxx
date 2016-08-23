@@ -81,10 +81,9 @@ int cmExprParserHelper::LexInput(char* buf, int maxlen)
       this->CurrentLine++;
     }
     return (1);
-  } else {
-    buf[0] = '\n';
-    return (0);
   }
+  buf[0] = '\n';
+  return (0);
 }
 
 void cmExprParserHelper::Error(const char* str)

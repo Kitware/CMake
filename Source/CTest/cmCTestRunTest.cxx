@@ -54,7 +54,8 @@ bool cmCTestRunTest::CheckOutput()
     if (p == cmsysProcess_Pipe_None) {
       // Process has terminated and all output read.
       return false;
-    } else if (p == cmsysProcess_Pipe_STDOUT) {
+    }
+    if (p == cmsysProcess_Pipe_STDOUT) {
       // Store this line of output.
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex()
                    << ": " << line << std::endl);
@@ -82,8 +83,7 @@ bool cmCTestRunTest::CheckOutput()
           }
         }
       }
-    } else // if(p == cmsysProcess_Pipe_Timeout)
-    {
+    } else { // if(p == cmsysProcess_Pipe_Timeout)
       break;
     }
   }

@@ -1513,9 +1513,8 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   if (this->GetWorkingMode() != NORMAL_MODE) {
     if (cmSystemTools::GetErrorOccuredFlag()) {
       return -1;
-    } else {
-      return 0;
     }
+    return 0;
   }
 
   // If MAKEFLAGS are given in the environment, remove the environment
@@ -2063,11 +2062,10 @@ cmInstalledFile* cmake::GetOrCreateInstalledFile(cmMakefile* mf,
   if (i != this->InstalledFiles.end()) {
     cmInstalledFile& file = i->second;
     return &file;
-  } else {
-    cmInstalledFile& file = this->InstalledFiles[name];
-    file.SetName(mf, name);
-    return &file;
   }
+  cmInstalledFile& file = this->InstalledFiles[name];
+  file.SetName(mf, name);
+  return &file;
 }
 
 cmInstalledFile const* cmake::GetInstalledFile(const std::string& name) const
@@ -2078,9 +2076,8 @@ cmInstalledFile const* cmake::GetInstalledFile(const std::string& name) const
   if (i != this->InstalledFiles.end()) {
     cmInstalledFile const& file = i->second;
     return &file;
-  } else {
-    return CM_NULLPTR;
   }
+  return CM_NULLPTR;
 }
 
 int cmake::GetSystemInformation(std::vector<std::string>& args)
@@ -2253,11 +2250,10 @@ static bool cmakeCheckStampFile(const char* stampName)
     std::cout << "CMake does not need to re-run because " << stampName
               << " is up-to-date.\n";
     return true;
-  } else {
-    cmSystemTools::RemoveFile(stampTemp);
-    cmSystemTools::Error("Cannot restore timestamp ", stampName);
-    return false;
   }
+  cmSystemTools::RemoveFile(stampTemp);
+  cmSystemTools::Error("Cannot restore timestamp ", stampName);
+  return false;
 }
 
 static bool cmakeCheckStampList(const char* stampList)

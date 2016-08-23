@@ -262,7 +262,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     // run include what you use command and then run the compile
     // command. This is an internal undocumented option and should
     // only be used by CMake itself when running iwyu.
-    else if (args[1] == "__run_iwyu") {
+    if (args[1] == "__run_iwyu") {
       if (args.size() < 3) {
         std::cerr << "__run_iwyu Usage: -E __run_iwyu [--iwyu=/path/iwyu]"
                      " [--tidy=/path/tidy] -- compile command\n";
@@ -393,13 +393,13 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     }
 
     // Echo string
-    else if (args[1] == "echo") {
+    if (args[1] == "echo") {
       std::cout << cmJoin(cmMakeRange(args).advance(2), " ") << std::endl;
       return 0;
     }
 
     // Echo string no new line
-    else if (args[1] == "echo_append") {
+    if (args[1] == "echo_append") {
       std::cout << cmJoin(cmMakeRange(args).advance(2), " ");
       return 0;
     }
@@ -851,7 +851,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         cmSystemTools::Error("Can not use compression flags with format: ",
                              format.c_str());
         return 1;
-      } else if (nCompress > 1) {
+      }
+      if (nCompress > 1) {
         cmSystemTools::Error("Can only compress a tar file one way; "
                              "at most one flag of z, j, or J may be used");
         return 1;
@@ -995,12 +996,12 @@ static void cmcmdProgressReport(std::string const& dir, std::string const& num)
   int count = 0;
   if (!progFile) {
     return;
-  } else {
-    if (1 != fscanf(progFile, "%i", &count)) {
-      cmSystemTools::Message("Could not read from progress file.");
-    }
-    fclose(progFile);
   }
+  if (1 != fscanf(progFile, "%i", &count)) {
+    cmSystemTools::Message("Could not read from progress file.");
+  }
+  fclose(progFile);
+
   const char* last = num.c_str();
   for (const char* c = last;; ++c) {
     if (*c == ',' || *c == '\0') {

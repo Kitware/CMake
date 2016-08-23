@@ -824,9 +824,8 @@ bool cmCTestMultiProcessHandler::CheckCycles()
                 << this->Properties[root]->Name
                 << "\".\nPlease fix the cycle and run ctest again.\n");
             return false;
-          } else {
-            s.push(*d);
           }
+          s.push(*d);
         }
       }
     }

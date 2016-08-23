@@ -94,10 +94,9 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
       // quit
       if (key == 'q') {
         return false;
-      } else {
-        key = getch();
-        continue;
       }
+      key = getch();
+      continue;
     }
 
     // If resize occurred during edit, move out of edit mode
@@ -207,7 +206,6 @@ bool cmCursesStringWidget::PrintKeys()
     curses_move(y - 3, 0);
     printw(fmt_s, "Editing option, press [enter] to leave edit.");
     return true;
-  } else {
-    return false;
   }
+  return false;
 }

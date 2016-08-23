@@ -140,10 +140,9 @@ cmFileLockResult cmFileLockPool::ScopePool::Lock(const std::string& filename,
   if (result.IsOk()) {
     this->Locks.push_back(lock);
     return cmFileLockResult::MakeOk();
-  } else {
-    delete lock;
-    return result;
   }
+  delete lock;
+  return result;
 }
 
 cmFileLockResult cmFileLockPool::ScopePool::Release(

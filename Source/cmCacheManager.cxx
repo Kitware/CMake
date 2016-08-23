@@ -576,7 +576,8 @@ const char* cmCacheManager::CacheEntry::GetProperty(
 {
   if (prop == "TYPE") {
     return cmState::CacheEntryTypeToString(this->Type);
-  } else if (prop == "VALUE") {
+  }
+  if (prop == "VALUE") {
     return this->Value.c_str();
   }
   return this->Properties.GetPropertyValue(prop);

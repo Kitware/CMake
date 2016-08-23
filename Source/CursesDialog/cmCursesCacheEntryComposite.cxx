@@ -110,7 +110,6 @@ const char* cmCursesCacheEntryComposite::GetValue()
 {
   if (this->Label) {
     return this->Label->GetValue();
-  } else {
-    return CM_NULLPTR;
   }
+  return CM_NULLPTR;
 }

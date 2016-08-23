@@ -781,13 +781,12 @@ bool cmCTest::SetTest(const char* ttype, bool report)
   if (p != PartCount) {
     this->Parts[p].Enable();
     return true;
-  } else {
-    if (report) {
-      cmCTestLog(this, ERROR_MESSAGE, "Don't know about test \""
-                   << ttype << "\" yet..." << std::endl);
-    }
-    return false;
   }
+  if (report) {
+    cmCTestLog(this, ERROR_MESSAGE, "Don't know about test \""
+                 << ttype << "\" yet..." << std::endl);
+  }
+  return false;
 }
 
 void cmCTest::Finalize()

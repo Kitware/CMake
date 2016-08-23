@@ -92,7 +92,8 @@ static const struct ZeroNode installInterfaceNode;
       for (; it != end; ++it) {                                               \
         if (*it == #FAILURE_VALUE) {                                          \
           return #FAILURE_VALUE;                                              \
-        } else if (*it != #SUCCESS_VALUE) {                                   \
+        }                                                                     \
+        if (*it != #SUCCESS_VALUE) {                                          \
           reportError(context, content->GetOriginalExpression(),              \
                       "Parameters to $<" #OP                                  \
                       "> must resolve to either '0' or '1'.");                \
@@ -790,7 +791,8 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
                   "$<COMPILE_LANGUAGE:...> may not be used with Visual Studio "
                   "generators.");
       return std::string();
-    } else if (genName.find("Xcode") != std::string::npos) {
+    }
+    if (genName.find("Xcode") != std::string::npos) {
       if (dagChecker && (dagChecker->EvaluatingCompileDefinitions() ||
                          dagChecker->EvaluatingIncludeDirectories())) {
         reportError(
