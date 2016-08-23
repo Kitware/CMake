@@ -12,17 +12,22 @@
 #ifndef cmComputeLinkDepends_h
 #define cmComputeLinkDepends_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include "cmGraphAdjacencyList.h"
 #include "cmLinkItem.h"
+#include "cmTargetLinkLibraryType.h"
 
+#include <map>
 #include <queue>
+#include <set>
+#include <string>
+#include <vector>
 
 class cmComputeComponentGraph;
+class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmMakefile;
-class cmGeneratorTarget;
 class cmake;
 
 /** \class cmComputeLinkDepends

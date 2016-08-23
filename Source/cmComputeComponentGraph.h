@@ -12,11 +12,12 @@
 #ifndef cmComputeComponentGraph_h
 #define cmComputeComponentGraph_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include "cmGraphAdjacencyList.h"
 
 #include <stack>
+#include <vector>
 
 /** \class cmComputeComponentGraph
  * \brief Analyze a graph to determine strongly connected components.

@@ -12,7 +12,11 @@
 #ifndef cmArchiveWrite_h
 #define cmArchiveWrite_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <iosfwd>
+#include <stddef.h>
+#include <string>
 
 #if !defined(CMAKE_BUILD_WITH_CMAKE)
 #error "cmArchiveWrite not allowed during bootstrap build!"
@@ -94,7 +98,7 @@ public:
   void SetMTime(std::string const& t) { this->MTime = t; }
 
   //! Sets the permissions of the added files/folders
-  void SetPermissions(mode_t permissions_)
+  void SetPermissions(int permissions_)
   {
     this->Permissions.Set(permissions_);
   }
@@ -107,7 +111,7 @@ public:
   //! The permissions will be copied from the existing file
   //! or folder. The mask will then be applied to unset
   //! some of them
-  void SetPermissionsMask(mode_t permissionsMask_)
+  void SetPermissionsMask(int permissionsMask_)
   {
     this->PermissionsMask.Set(permissionsMask_);
   }
@@ -177,8 +181,8 @@ private:
   //!@}
 
   //! Permissions on files/folders
-  cmArchiveWriteOptional<mode_t> Permissions;
-  cmArchiveWriteOptional<mode_t> PermissionsMask;
+  cmArchiveWriteOptional<int> Permissions;
+  cmArchiveWriteOptional<int> PermissionsMask;
 };
 
 #endif

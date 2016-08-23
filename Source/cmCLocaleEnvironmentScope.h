@@ -13,7 +13,10 @@
 #ifndef cmCLocaleEnvironmentScope_h
 #define cmCLocaleEnvironmentScope_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <map>
+#include <string>
 
 class cmCLocaleEnvironmentScope
 {

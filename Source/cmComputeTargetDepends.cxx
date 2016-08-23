@@ -12,18 +12,25 @@
 #include "cmComputeTargetDepends.h"
 
 #include "cmComputeComponentGraph.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmLinkItem.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmPolicies.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmTargetDepend.h"
 #include "cmake.h"
 
-#include <algorithm>
-
 #include <assert.h>
+#include <sstream>
+#include <stdio.h>
+#include <utility>
+
+class cmListFileBacktrace;
 
 /*
 

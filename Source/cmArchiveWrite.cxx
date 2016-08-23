@@ -16,7 +16,11 @@
 #include "cm_get_date.h"
 #include <cm_libarchive.h>
 #include <cmsys/Directory.hxx>
+#include <cmsys/Encoding.hxx>
 #include <cmsys/FStream.hxx>
+#include <iostream>
+#include <string.h>
+#include <time.h>
 
 #ifndef __LA_SSIZE_T
 #define __LA_SSIZE_T la_ssize_t
@@ -268,7 +272,7 @@ bool cmArchiveWrite::AddFile(const char* file, size_t skip, const char* prefix)
   }
 
   if (this->PermissionsMask.IsSet()) {
-    mode_t perm = archive_entry_perm(e);
+    int perm = archive_entry_perm(e);
     archive_entry_set_perm(e, perm & this->PermissionsMask.Get());
   }
 
