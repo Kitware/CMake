@@ -12,18 +12,22 @@
 #ifndef cmMakefileTargetGenerator_h
 #define cmMakefileTargetGenerator_h
 
-#include "cmCommonTargetGenerator.h"
+#include <cmConfigure.h>
 
+#include "cmCommonTargetGenerator.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmOSXBundleGenerator.h"
 
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
 class cmCustomCommandGenerator;
-class cmDepends;
-class cmGeneratorTarget;
 class cmGeneratedFileStream;
+class cmGeneratorTarget;
 class cmGlobalUnixMakefileGenerator3;
-class cmLocalUnixMakefileGenerator3;
-class cmMakefile;
 class cmSourceFile;
 
 /** \class cmMakefileTargetGenerator

@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmNewLineStyle.h"
 
+#include <stddef.h>
+
 cmNewLineStyle::cmNewLineStyle()
   : NewLineStyle(Invalid)
 {

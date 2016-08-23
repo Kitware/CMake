@@ -11,12 +11,10 @@
 ============================================================================*/
 #include "cmPropertyMap.h"
 
-#include "cmState.h"
-#include "cmSystemTools.h"
-#include "cmake.h"
-
 #include <algorithm>
 #include <assert.h>
+#include <cmConfigure.h>
+#include <utility>
 
 cmProperty* cmPropertyMap::GetOrCreateProperty(const std::string& name)
 {

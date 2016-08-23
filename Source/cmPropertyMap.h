@@ -12,7 +12,13 @@
 #ifndef cmPropertyMap_h
 #define cmPropertyMap_h
 
+#include <cmConfigure.h> // IWYU pragma: keep
+
 #include "cmProperty.h"
+
+#include <map>
+#include <string>
+#include <vector>
 
 class cmPropertyMap : public std::map<std::string, cmProperty>
 {

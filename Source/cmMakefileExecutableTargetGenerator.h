@@ -12,7 +12,11 @@
 #ifndef cmMakefileExecutableTargetGenerator_h
 #define cmMakefileExecutableTargetGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmMakefileTargetGenerator.h"
+
+class cmGeneratorTarget;
 
 class cmMakefileExecutableTargetGenerator : public cmMakefileTargetGenerator
 {

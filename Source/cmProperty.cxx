@@ -11,7 +11,7 @@
 ============================================================================*/
 #include "cmProperty.h"
 
-#include "cmSystemTools.h"
+#include <cmConfigure.h>
 
 void cmProperty::Set(const char* value)
 {

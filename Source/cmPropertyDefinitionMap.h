@@ -12,9 +12,13 @@
 #ifndef cmPropertyDefinitionMap_h
 #define cmPropertyDefinitionMap_h
 
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include "cmProperty.h"
 #include "cmPropertyDefinition.h"
 
-class cmDocumentationSection;
+#include <map>
+#include <string>
 
 class cmPropertyDefinitionMap
   : public std::map<std::string, cmPropertyDefinition>

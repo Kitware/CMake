@@ -12,7 +12,11 @@
 #ifndef cmPropertyDefinition_h
 #define cmPropertyDefinition_h
 
+#include <cmConfigure.h> // IWYU pragma: keep
+
 #include "cmProperty.h"
+
+#include <string>
 
 /** \class cmPropertyDefinition
  * \brief Property meta-information

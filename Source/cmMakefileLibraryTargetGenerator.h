@@ -12,7 +12,13 @@
 #ifndef cmMakefileLibraryTargetGenerator_h
 #define cmMakefileLibraryTargetGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmMakefileTargetGenerator.h"
+
+#include <string>
+
+class cmGeneratorTarget;
 
 class cmMakefileLibraryTargetGenerator : public cmMakefileTargetGenerator
 {

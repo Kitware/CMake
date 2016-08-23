@@ -12,6 +12,7 @@
 #include "cmProcessTools.h"
 
 #include <cmsys/Process.h>
+#include <ostream>
 
 void cmProcessTools::RunProcess(struct cmsysProcess_s* cp, OutputParser* out,
                                 OutputParser* err)

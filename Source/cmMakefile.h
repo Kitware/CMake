@@ -12,16 +12,15 @@
 #ifndef cmMakefile_h
 #define cmMakefile_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h>
 
 #include "cmAlgorithms.h"
-#include "cmExecutionStatus.h"
-#include "cmExpandedCommandArgument.h"
 #include "cmListFileCache.h"
 #include "cmNewLineStyle.h"
+#include "cmPolicies.h"
 #include "cmState.h"
-#include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmTargetLinkLibraryType.h"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -30,6 +29,13 @@
 
 #include <cm_auto_ptr.hxx>
 #include <cmsys/RegularExpression.hxx>
+
+#include <map>
+#include <set>
+#include <stack>
+#include <string>
+#include <vector>
+
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #ifdef CMake_HAVE_CXX_UNORDERED_MAP
 #include <unordered_map>
@@ -38,20 +44,20 @@
 #endif
 #endif
 
-#include <stack>
-
-class cmFunctionBlocker;
 class cmCommand;
+class cmCompiledGeneratorExpression;
+class cmCustomCommandLines;
+class cmExecutionStatus;
+class cmExpandedCommandArgument;
+class cmExportBuildFileGenerator;
+class cmFunctionBlocker;
+class cmGeneratorExpressionEvaluationFile;
+class cmGlobalGenerator;
 class cmInstallGenerator;
 class cmSourceFile;
 class cmTest;
 class cmTestGenerator;
 class cmVariableWatch;
-class cmake;
-class cmMakefileCall;
-class cmCMakePolicyCommand;
-class cmGeneratorExpressionEvaluationFile;
-class cmExportBuildFileGenerator;
 
 /** \class cmMakefile
  * \brief Process the input CMakeLists.txt file.

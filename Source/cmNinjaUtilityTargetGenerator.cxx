@@ -15,9 +15,21 @@
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalNinjaGenerator.h"
+#include "cmLocalNinjaGenerator.h"
 #include "cmMakefile.h"
+#include "cmNinjaTypes.h"
+#include "cmOutputConverter.h"
 #include "cmSourceFile.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+#include <algorithm>
+#include <iterator>
+#include <string>
+#include <vector>
 
 cmNinjaUtilityTargetGenerator::cmNinjaUtilityTargetGenerator(
   cmGeneratorTarget* target)

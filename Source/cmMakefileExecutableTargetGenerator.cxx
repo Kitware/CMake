@@ -12,11 +12,19 @@
 #include "cmMakefileExecutableTargetGenerator.h"
 
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
+#include "cmLocalGenerator.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
-#include "cmSourceFile.h"
+#include "cmOSXBundleGenerator.h"
+#include "cmOutputConverter.h"
+#include "cmSystemTools.h"
 #include "cmake.h"
+
+#include <sstream>
+#include <string>
+#include <vector>
 
 cmMakefileExecutableTargetGenerator::cmMakefileExecutableTargetGenerator(
   cmGeneratorTarget* target)
