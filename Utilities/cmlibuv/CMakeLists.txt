@@ -223,3 +223,5 @@ include_directories(
 add_library(cmlibuv STATIC ${uv_sources})
 target_link_libraries(cmlibuv ${uv_libraries})
 set_property(TARGET cmlibuv PROPERTY COMPILE_DEFINITIONS ${uv_defines})
+
+install(FILES LICENSE DESTINATION ${CMAKE_DOC_DIR}/cmlibuv)
