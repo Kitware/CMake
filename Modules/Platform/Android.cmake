@@ -1,5 +1,7 @@
 include(Platform/Linux)
 
+set(ANDROID 1)
+
 # Android has soname, but binary names must end in ".so" so we cannot append
 # a version number.  Also we cannot portably represent symlinks on the host.
 set(CMAKE_PLATFORM_NO_VERSIONED_SONAME 1)

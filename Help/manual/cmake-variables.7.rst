@@ -173,6 +173,7 @@ Variables that Describe the System
 .. toctree::
    :maxdepth: 1
 
+   /variable/ANDROID
    /variable/APPLE
    /variable/BORLAND
    /variable/CMAKE_CL_64
@@ -225,6 +226,9 @@ Variables that Control the Build
    /variable/CMAKE_ANDROID_API
    /variable/CMAKE_ANDROID_API_MIN
    /variable/CMAKE_ANDROID_ARCH
+   /variable/CMAKE_ANDROID_ARCH_ABI
+   /variable/CMAKE_ANDROID_ARM_MODE
+   /variable/CMAKE_ANDROID_ARM_NEON
    /variable/CMAKE_ANDROID_ASSETS_DIRECTORIES
    /variable/CMAKE_ANDROID_GUI
    /variable/CMAKE_ANDROID_JAR_DEPENDENCIES
@@ -232,11 +236,14 @@ Variables that Control the Build
    /variable/CMAKE_ANDROID_JAVA_SOURCE_DIR
    /variable/CMAKE_ANDROID_NATIVE_LIB_DEPENDENCIES
    /variable/CMAKE_ANDROID_NATIVE_LIB_DIRECTORIES
+   /variable/CMAKE_ANDROID_NDK
+   /variable/CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION
    /variable/CMAKE_ANDROID_PROCESS_MAX
    /variable/CMAKE_ANDROID_PROGUARD
    /variable/CMAKE_ANDROID_PROGUARD_CONFIG_PATH
    /variable/CMAKE_ANDROID_SECURE_PROPS_PATH
    /variable/CMAKE_ANDROID_SKIP_ANT_STEP
+   /variable/CMAKE_ANDROID_STANDALONE_TOOLCHAIN
    /variable/CMAKE_ANDROID_STL_TYPE
    /variable/CMAKE_ARCHIVE_OUTPUT_DIRECTORY
    /variable/CMAKE_ARCHIVE_OUTPUT_DIRECTORY_CONFIG
@@ -337,6 +344,8 @@ Variables for Languages
    /variable/CMAKE_Fortran_MODDIR_FLAG
    /variable/CMAKE_Fortran_MODOUT_FLAG
    /variable/CMAKE_INTERNAL_PLATFORM_ABI
+   /variable/CMAKE_LANG_ANDROID_TOOLCHAIN_PREFIX
+   /variable/CMAKE_LANG_ANDROID_TOOLCHAIN_SUFFIX
    /variable/CMAKE_LANG_ARCHIVE_APPEND
    /variable/CMAKE_LANG_ARCHIVE_CREATE
    /variable/CMAKE_LANG_ARCHIVE_FINISH
