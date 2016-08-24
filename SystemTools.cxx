@@ -4725,8 +4725,11 @@ bool SystemTools::GetShortPath(const std::string& path, std::string& shortPath)
   std::wstring wtempPath = Encoding::ToWide(tempPath);
   DWORD ret = GetShortPathNameW(wtempPath.c_str(), NULL, 0);
   std::vector<wchar_t> buffer(ret);
-  ret = GetShortPathNameW(wtempPath.c_str(),
-                          &buffer[0], static_cast<DWORD>(buffer.size()));
+  if (ret != 0)
+    {
+    ret = GetShortPathNameW(wtempPath.c_str(),
+                            &buffer[0], static_cast<DWORD>(buffer.size()));
+    }
 
   if (ret == 0)
     {
