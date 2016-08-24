@@ -302,42 +302,78 @@ void cmServerProtocol::ProcessCMakeVariables()
   this->Server->WriteResponse(root);
 }
 
+namespace
+{
+  // we need to make sure the injected flag gets removed from cmake cache,
+  // otherwise all subsequent calls to try_compile will be affected.
+  // consequently, these operations are wrapped up in an RAII class to ensure
+  // proper removal.
+  struct VCSystemIncludePaths
+  {
+    VCSystemIncludePaths(cmake* cmake)
+    : file(cmSystemTools::GetCMakeRoot() + "/Modules/VCSystemIncludePaths.cmake")
+    , cmake(cmake)
+    , mf(cmake->GetGlobalGenerator(), cmake->GetCurrentSnapshot())
+    {
+      this->cmake->AddCacheEntry(this->entryName, "/verbosity:diagnostic",
+                                 nullptr, cmState::CacheEntryType::STRING);
+      this->ok = mf.ReadListFile(this->file.c_str());
+    }
+
+    ~VCSystemIncludePaths()
+    {
+      try
+      {
+        this->cmake->GetState()->RemoveCacheEntry(entryName);
+        this->mf.RemoveDefinition(systemPathsFlag);
+      }
+      catch (...) { }
+    }
+
+    std::string GetPaths() const
+    {
+      std::string const output = this->mf.GetDefinition(systemPathsFlag);
+      char const marker [] = "IncludePath = ";
+      auto const begin = output.find(marker);
+      if (begin != std::string::npos) {
+        auto const contentBegin = begin + (sizeof marker - 1);
+        auto const end = output.find('\n',contentBegin);
+        if (end != std::string::npos) {
+          auto const size = end - contentBegin;
+          return {output,contentBegin,size};
+        }
+      }
+      return {};
+    }
+
+    bool Failed() const { return !this->ok; }
+    auto const& FileName() const { return this->file; }
+
+  private:
+    char const entryName [14] = "MSBUILD_FLAGS";
+    char const systemPathsFlag [31] = "VC_SYSTEM_INCLUDE_PATHS_OUTPUT";
+    std::string const file;
+
+    cmake* const cmake;
+    cmMakefile mf;
+    bool ok = false;
+  };
+}
+
 void cmServerProtocol::ProcessSystemIncludePaths()
 {
   Json::Value root = Json::objectValue;
   root["system_include_paths"] = "";
 
-  auto const cmake = this->CMakeInstance;
-  cmMakefile mf (cmake->GetGlobalGenerator(), cmake->GetCurrentSnapshot());
+  if (!this->CMakeInstance->GetIsInTryCompile()) {
+    VCSystemIncludePaths const paths(this->CMakeInstance);
 
-  if (!cmake->GetIsInTryCompile()) {
-    char const entry_name [] = "MSBUILD_FLAG";
-    cmake->AddCacheEntry(entry_name, "/verbosity:diagnostic",
-                         nullptr, cmState::CacheEntryType::STRING);
-    auto const file = cmSystemTools::GetCMakeRoot()
-                    + "/Modules/VCSystemIncludePaths.cmake";
-    auto const ok = mf.ReadListFile(file.c_str());
-    cmake->GetState()->RemoveCacheEntry(entry_name);
-
-    if (!ok) {
-      this->Error("Could not find cmake module file: " + file);
+    if (paths.Failed()) {
+      this->Error("Could not find cmake module file: " + paths.FileName());
       return;
     }
 
-    auto const system_paths = "VC_SYSTEM_INCLUDE_PATHS_OUTPUT";
-    std::string const output = mf.GetDefinition(system_paths);
-    mf.RemoveDefinition(system_paths);
-
-    char const marker [] = "IncludePath = ";
-    auto const begin = output.find(marker);
-    if (begin != std::string::npos) {
-      auto const content_begin = begin + sizeof(marker) - 1;
-      auto const end = output.find('\n',content_begin);
-      if (end != std::string::npos) {
-        auto const size = end - content_begin;
-        root["system_include_paths"] = std::string(output,content_begin,size);
-      }
-    }
+    root["system_include_paths"] = paths.GetPaths();
   }
 
   this->Server->WriteResponse(root);

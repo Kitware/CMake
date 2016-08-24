@@ -1723,7 +1723,7 @@ int cmGlobalGenerator::Build(const std::string&, const std::string& bindir,
     auto build = makeCommand[0];
     std::transform(build.begin(),build.end(),build.begin(),tolower);
     if (build.find("msbuild.exe") != std::string::npos) {
-      auto const flag = this->CMakeInstance->GetCacheDefinition("MSBUILD_FLAG");
+      auto const flag = this->CMakeInstance->GetCacheDefinition("MSBUILD_FLAGS");
       if (flag) {
         makeCommand.emplace_back(flag);
       }
