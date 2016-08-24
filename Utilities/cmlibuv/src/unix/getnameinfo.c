@@ -19,13 +19,13 @@
 * IN THE SOFTWARE.
 */
 
+#include "uv.h"
+#include "internal.h"
+
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-#include "uv.h"
-#include "internal.h"
 
 
 static void uv__getnameinfo_work(struct uv__work* w) {

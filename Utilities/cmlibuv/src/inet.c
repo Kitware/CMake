@@ -15,6 +15,9 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "uv.h"
+#include "uv-common.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -23,9 +26,6 @@
 #else
 # include <stdint.h>
 #endif
-
-#include "uv.h"
-#include "uv-common.h"
 
 #define UV__INET_ADDRSTRLEN         16
 #define UV__INET6_ADDRSTRLEN        46
