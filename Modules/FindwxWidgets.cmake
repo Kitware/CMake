@@ -452,6 +452,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
       D:/
       ENV ProgramFiles
     PATH_SUFFIXES
+      wxWidgets-3.1.0
       wxWidgets-3.0.2
       wxWidgets-3.0.1
       wxWidgets-3.0.0
