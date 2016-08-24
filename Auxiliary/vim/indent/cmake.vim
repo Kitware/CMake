@@ -1,13 +1,3 @@
-" =============================================================================
-"
-"   Program:   CMake - Cross-Platform Makefile Generator
-"   Module:    $RCSfile$
-"   Language:  VIM
-"   Date:      $Date$
-"   Version:   $Revision$
-"
-" =============================================================================
-
 " Vim indent file
 " Language:     CMake (ft=cmake)
 " Author:       Andy Cedilnik <andy.cedilnik@kitware.com>
