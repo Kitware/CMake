@@ -13,8 +13,15 @@
 #ifndef cmCTestBuildAndTestHandler_h
 #define cmCTestBuildAndTestHandler_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestGenericHandler.h"
-#include "cmListFileCache.h"
+#include "cmTypeMacro.h"
+
+#include <sstream>
+#include <stddef.h>
+#include <string>
+#include <vector>
 
 class cmake;
 

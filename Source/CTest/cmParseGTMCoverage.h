@@ -13,7 +13,14 @@
 #ifndef cmParseGTMCoverage_h
 #define cmParseGTMCoverage_h
 
+#include <cmConfigure.h>
+
 #include "cmParseMumpsCoverage.h"
+
+#include <string>
+
+class cmCTest;
+class cmCTestCoverageHandlerContainer;
 
 /** \class cmParseGTMCoverage
  * \brief Parse GTM coverage information

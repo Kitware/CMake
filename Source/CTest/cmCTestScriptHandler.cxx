@@ -13,32 +13,8 @@
 #include "cmCTestScriptHandler.h"
 
 #include "cmCTest.h"
-#include "cmFunctionBlocker.h"
-#include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
-#include "cmake.h"
-
-//#include <cmsys/RegularExpression.hxx>
-#include <cmsys/Directory.hxx>
-#include <cmsys/Process.h>
-
-// used for sleep
-#ifdef _WIN32
-#include "windows.h"
-#endif
-
-#include <float.h>
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
-
-// needed for sleep
-#if !defined(_WIN32)
-#include <unistd.h>
-#endif
-
 #include "cmCTestBuildCommand.h"
+#include "cmCTestCommand.h"
 #include "cmCTestConfigureCommand.h"
 #include "cmCTestCoverageCommand.h"
 #include "cmCTestEmptyBinaryDirectoryCommand.h"
@@ -51,6 +27,31 @@
 #include "cmCTestTestCommand.h"
 #include "cmCTestUpdateCommand.h"
 #include "cmCTestUploadCommand.h"
+#include "cmFunctionBlocker.h"
+#include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+#include <cmsys/Directory.hxx>
+#include <cmsys/Process.h>
+#include <map>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <utility>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
+class cmExecutionStatus;
+struct cmListFileFunction;
 
 #define CTEST_INITIAL_CMAKE_OUTPUT_FILE_NAME "CTestInitialCMakeOutput.log"
 

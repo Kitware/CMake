@@ -14,6 +14,13 @@
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 #include "cmCTestSubmitHandler.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+#include <sstream>
+
+class cmExecutionStatus;
 
 cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
 {

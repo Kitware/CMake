@@ -12,7 +12,14 @@
 #ifndef cmCTestBZR_h
 #define cmCTestBZR_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestGlobalVC.h"
+
+#include <iosfwd>
+#include <string>
+
+class cmCTest;
 
 /** \class cmCTestBZR
  * \brief Interaction with bzr command-line tool
@@ -41,13 +48,14 @@ private:
 
   // Parsing helper classes.
   class InfoParser;
-  class RevnoParser;
   class LogParser;
-  class UpdateParser;
+  class RevnoParser;
   class StatusParser;
+  class UpdateParser;
+
   friend class InfoParser;
-  friend class RevnoParser;
   friend class LogParser;
+  friend class RevnoParser;
   friend class UpdateParser;
   friend class StatusParser;
 };

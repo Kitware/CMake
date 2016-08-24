@@ -12,7 +12,14 @@
 #ifndef cmCTestHG_h
 #define cmCTestHG_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestGlobalVC.h"
+
+#include <iosfwd>
+#include <string>
+
+class cmCTest;
 
 /** \class cmCTestHG
  * \brief Interaction with Mercurial command-line tool
@@ -37,11 +44,12 @@ private:
 
   // Parsing helper classes.
   class IdentifyParser;
-  class StatusParser;
   class LogParser;
+  class StatusParser;
+
   friend class IdentifyParser;
-  friend class StatusParser;
   friend class LogParser;
+  friend class StatusParser;
 };
 
 #endif

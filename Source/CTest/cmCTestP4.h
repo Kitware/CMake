@@ -12,10 +12,16 @@
 #ifndef cmCTestP4_h
 #define cmCTestP4_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestGlobalVC.h"
 
+#include <iosfwd>
 #include <map>
+#include <string>
 #include <vector>
+
+class cmCTest;
 
 /** \class cmCTestP4
  * \brief Interaction with the Perforce command-line tool
@@ -62,12 +68,13 @@ private:
   void LoadRevisions() CM_OVERRIDE;
   void LoadModifications() CM_OVERRIDE;
 
-  // Parsing helper classes.
-  class IdentifyParser;
   class ChangesParser;
-  class UserParser;
   class DescribeParser;
   class DiffParser;
+  // Parsing helper classes.
+  class IdentifyParser;
+  class UserParser;
+
   friend class IdentifyParser;
   friend class ChangesParser;
   friend class UserParser;

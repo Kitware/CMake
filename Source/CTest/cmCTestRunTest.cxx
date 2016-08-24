@@ -14,11 +14,21 @@
 
 #include "cmCTest.h"
 #include "cmCTestMemCheckHandler.h"
+#include "cmCTestTestHandler.h"
+#include "cmProcess.h"
 #include "cmSystemTools.h"
-#include "cm_curl.h"
 
+#include <cmConfigure.h>
+#include <cm_curl.h>
 #include <cm_zlib.h>
 #include <cmsys/Base64.h>
+#include <cmsys/Process.h>
+#include <cmsys/RegularExpression.hxx>
+#include <iomanip>
+#include <sstream>
+#include <stdio.h>
+#include <time.h>
+#include <utility>
 
 cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
 {

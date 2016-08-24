@@ -15,7 +15,14 @@
 #include "cmCTestBuildHandler.h"
 #include "cmCTestGenericHandler.h"
 #include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
 #include "cmake.h"
+
+#include <sstream>
+#include <string.h>
+
+class cmExecutionStatus;
 
 cmCTestBuildCommand::cmCTestBuildCommand()
 {

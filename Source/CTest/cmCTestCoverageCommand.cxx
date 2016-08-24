@@ -14,6 +14,8 @@
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
 
+class cmCTestGenericHandler;
+
 cmCTestCoverageCommand::cmCTestCoverageCommand()
 {
   this->LabelsMentioned = false;

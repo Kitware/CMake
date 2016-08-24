@@ -13,10 +13,14 @@
 #include "cmCTestBatchTestHandler.h"
 
 #include "cmCTest.h"
+#include "cmCTestMultiProcessHandler.h"
+#include "cmCTestTestHandler.h"
 #include "cmProcess.h"
-#include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
-#include <stdlib.h>
+
+#include <map>
+#include <utility>
+#include <vector>
 
 cmCTestBatchTestHandler::~cmCTestBatchTestHandler()
 {

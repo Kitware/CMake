@@ -14,7 +14,13 @@
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+
+#include <sstream>
+#include <stddef.h>
+
+class cmExecutionStatus;
 
 cmCTestStartCommand::cmCTestStartCommand()
 {

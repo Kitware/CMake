@@ -12,6 +12,11 @@
 #include "cmCTestRunScriptCommand.h"
 
 #include "cmCTestScriptHandler.h"
+#include "cmMakefile.h"
+
+#include <sstream>
+
+class cmExecutionStatus;
 
 bool cmCTestRunScriptCommand::InitialPass(std::vector<std::string> const& args,
                                           cmExecutionStatus& /*unused*/)

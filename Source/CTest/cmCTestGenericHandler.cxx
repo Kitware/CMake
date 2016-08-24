@@ -12,9 +12,11 @@
 
 #include "cmCTestGenericHandler.h"
 
+#include "cmCTest.h"
 #include "cmSystemTools.h"
 
-#include "cmCTest.h"
+#include <sstream>
+#include <utility>
 
 cmCTestGenericHandler::cmCTestGenericHandler()
 {

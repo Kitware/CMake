@@ -16,25 +16,16 @@
 #include "cmCTest.h"
 #include "cmFileTimeComparison.h"
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmSystemTools.h"
 #include "cmXMLWriter.h"
-#include "cmake.h"
 
-//#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
 #include <cmsys/Process.h>
-
-// used for sleep
-#ifdef _WIN32
-#include "windows.h"
-#endif
-
-#include <float.h>
-#include <math.h>
+#include <set>
 #include <stdlib.h>
-#include <time.h>
+#include <string.h>
 
 static const char* cmCTestErrorMatches[] = {
   "^[Bb]us [Ee]rror",

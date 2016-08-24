@@ -12,7 +12,15 @@
 #ifndef cmCTestUpdateCommand_h
 #define cmCTestUpdateCommand_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestHandlerCommand.h"
+#include "cmTypeMacro.h"
+
+#include <string>
+
+class cmCTestGenericHandler;
+class cmCommand;
 
 /** \class cmCTestUpdate
  * \brief Run a ctest script

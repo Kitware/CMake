@@ -13,7 +13,14 @@
 #ifndef cmParseJacocoCoverage_h
 #define cmParseJacocoCoverage_h
 
-#include "cmCTestCoverageHandler.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <map>
+#include <string>
+#include <vector>
+
+class cmCTest;
+class cmCTestCoverageHandlerContainer;
 
 /** \class cmParseJacocoCoverage
  * \brief Parse JaCoCO coverage information
@@ -47,6 +54,7 @@ private:
   bool LoadSource(std::string d);
 
   class XMLParser;
+
   std::map<std::string, std::string> RoutineToDirectory;
   cmCTestCoverageHandlerContainer& Coverage;
   cmCTest* CTest;

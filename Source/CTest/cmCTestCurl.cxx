@@ -14,6 +14,10 @@
 #include "cmCTest.h"
 #include "cmSystemTools.h"
 
+#include <cmConfigure.h>
+#include <ostream>
+#include <stdio.h>
+
 cmCTestCurl::cmCTestCurl(cmCTest* ctest)
 {
   this->CTest = ctest;

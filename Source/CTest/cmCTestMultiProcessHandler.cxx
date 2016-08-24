@@ -12,17 +12,22 @@
 #include "cmCTestMultiProcessHandler.h"
 
 #include "cmCTest.h"
+#include "cmCTestRunTest.h"
 #include "cmCTestScriptHandler.h"
-#include "cmProcess.h"
-#include "cmStandardIncludes.h"
+#include "cmCTestTestHandler.h"
 #include "cmSystemTools.h"
+
+#include <algorithm>
 #include <cmsys/FStream.hxx>
+#include <cmsys/String.hxx>
 #include <cmsys/SystemInformation.hxx>
-#include <float.h>
+#include <iomanip>
 #include <list>
 #include <math.h>
+#include <sstream>
 #include <stack>
 #include <stdlib.h>
+#include <utility>
 
 class TestComparator
 {

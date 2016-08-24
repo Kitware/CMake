@@ -12,10 +12,17 @@
 #ifndef cmCTestCVS_h
 #define cmCTestCVS_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestVC.h"
 
+#include <iosfwd>
 #include <map>
+#include <string>
 #include <vector>
+
+class cmCTest;
+class cmXMLWriter;
 
 /** \class cmCTestCVS
  * \brief Interaction with cvs command-line tool
@@ -47,10 +54,11 @@ private:
                          Directory const& dir);
 
   // Parsing helper classes.
-  class UpdateParser;
   class LogParser;
-  friend class UpdateParser;
+  class UpdateParser;
+
   friend class LogParser;
+  friend class UpdateParser;
 };
 
 #endif

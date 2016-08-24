@@ -14,14 +14,6 @@
 
 #include "cmCLocaleEnvironmentScope.h"
 #include "cmCTest.h"
-#include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
-#include "cmVersion.h"
-#include "cmXMLParser.h"
-#include "cmXMLWriter.h"
-#include "cmake.h"
-
 #include "cmCTestBZR.h"
 #include "cmCTestCVS.h"
 #include "cmCTestGIT.h"
@@ -29,20 +21,13 @@
 #include "cmCTestP4.h"
 #include "cmCTestSVN.h"
 #include "cmCTestVC.h"
+#include "cmGeneratedFileStream.h"
+#include "cmSystemTools.h"
+#include "cmVersion.h"
+#include "cmXMLWriter.h"
 
 #include <cm_auto_ptr.hxx>
-
-//#include <cmsys/RegularExpression.hxx>
-#include <cmsys/Process.h>
-
-// used for sleep
-#ifdef _WIN32
-#include "windows.h"
-#endif
-
-#include <float.h>
-#include <math.h>
-#include <stdlib.h>
+#include <sstream>
 
 static const char* cmCTestUpdateHandlerUpdateStrings[] = {
   "Unknown", "CVS", "SVN", "BZR", "GIT", "HG", "P4"

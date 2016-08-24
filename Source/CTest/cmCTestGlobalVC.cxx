@@ -15,7 +15,8 @@
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 
-#include <cmsys/RegularExpression.hxx>
+#include <ostream>
+#include <utility>
 
 cmCTestGlobalVC::cmCTestGlobalVC(cmCTest* ct, std::ostream& log)
   : cmCTestVC(ct, log)

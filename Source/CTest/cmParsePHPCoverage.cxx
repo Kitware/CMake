@@ -1,8 +1,13 @@
 #include "cmParsePHPCoverage.h"
 
+#include "cmCTest.h"
+#include "cmCTestCoverageHandler.h"
 #include "cmSystemTools.h"
+
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
+#include <stdlib.h>
+#include <string.h>
 
 /*
   To setup coverage for php.

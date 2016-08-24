@@ -12,10 +12,19 @@
 #ifndef cmCTestBuildCommand_h
 #define cmCTestBuildCommand_h
 
-#include "cmCTestHandlerCommand.h"
+#include <cmConfigure.h>
 
-class cmGlobalGenerator;
+#include "cmCTestHandlerCommand.h"
+#include "cmTypeMacro.h"
+
+#include <string>
+#include <vector>
+
 class cmCTestBuildHandler;
+class cmCTestGenericHandler;
+class cmCommand;
+class cmExecutionStatus;
+class cmGlobalGenerator;
 
 /** \class cmCTestBuild
  * \brief Run a ctest script

@@ -15,26 +15,32 @@
 #include "cmCTest.h"
 #include "cmCTestBatchTestHandler.h"
 #include "cmCTestMultiProcessHandler.h"
-#include "cmCTestRunTest.h"
 #include "cmCommand.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
+#include "cm_auto_ptr.hxx"
 #include "cm_utf8.h"
 #include "cmake.h"
+
+#include <algorithm>
 #include <cmsys/Base64.h>
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
-#include <cmsys/Process.h>
 #include <cmsys/RegularExpression.hxx>
-
-#include <float.h>
-#include <math.h>
-#include <stdlib.h>
-
+#include <functional>
+#include <iomanip>
 #include <set>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+class cmExecutionStatus;
 
 class cmCTestSubdirCommand : public cmCommand
 {

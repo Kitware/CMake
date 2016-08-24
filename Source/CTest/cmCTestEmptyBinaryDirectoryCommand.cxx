@@ -13,6 +13,10 @@
 
 #include "cmCTestScriptHandler.h"
 
+#include <sstream>
+
+class cmExecutionStatus;
+
 bool cmCTestEmptyBinaryDirectoryCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus& /*unused*/)
 {

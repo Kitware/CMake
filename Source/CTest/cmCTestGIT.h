@@ -12,7 +12,14 @@
 #ifndef cmCTestGIT_h
 #define cmCTestGIT_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestGlobalVC.h"
+
+#include <iosfwd>
+#include <string>
+
+class cmCTest;
 
 /** \class cmCTestGIT
  * \brief Interaction with git command-line tool
@@ -47,12 +54,13 @@ private:
   // "public" needed by older Sun compilers
 public:
   // Parsing helper classes.
-  class OneLineParser;
-  class DiffParser;
   class CommitParser;
-  friend class OneLineParser;
-  friend class DiffParser;
+  class DiffParser;
+  class OneLineParser;
+
   friend class CommitParser;
+  friend class DiffParser;
+  friend class OneLineParser;
 };
 
 #endif

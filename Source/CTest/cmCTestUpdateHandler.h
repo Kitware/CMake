@@ -13,9 +13,14 @@
 #ifndef cmCTestUpdateHandler_h
 #define cmCTestUpdateHandler_h
 
-#include "cmCTestGenericHandler.h"
+#include <cmConfigure.h>
 
-#include "cmListFileCache.h"
+#include "cmCTestGenericHandler.h"
+#include "cmTypeMacro.h"
+
+#include <string>
+#include <utility>
+#include <vector>
 
 /** \class cmCTestUpdateHandler
  * \brief A class that handles ctest -S invocations

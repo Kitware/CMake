@@ -14,6 +14,11 @@
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 #include "cmCTestUploadHandler.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+#include <sstream>
 
 cmCTestGenericHandler* cmCTestUploadCommand::InitializeHandler()
 {

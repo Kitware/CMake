@@ -13,7 +13,6 @@
 
 #include "cmCTest.h"
 #include "cmGeneratedFileStream.h"
-#include "cmMakefile.h"
 #include "cmParseBlanketJSCoverage.h"
 #include "cmParseCacheCoverage.h"
 #include "cmParseCoberturaCoverage.h"
@@ -25,14 +24,19 @@
 #include "cmXMLWriter.h"
 #include "cmake.h"
 
+#include <algorithm>
 #include <cmsys/FStream.hxx>
 #include <cmsys/Glob.hxx>
 #include <cmsys/Process.h>
 #include <cmsys/RegularExpression.hxx>
-
-#include <float.h>
-#include <math.h>
+#include <iomanip>
+#include <iterator>
+#include <sstream>
+#include <stdio.h>
 #include <stdlib.h>
+#include <utility>
+
+class cmMakefile;
 
 #define SAFEDIV(x, y) (((y) != 0) ? ((x) / (y)) : (0))
 

@@ -15,6 +15,10 @@
 #include "cmVersion.h"
 #include "cmXMLWriter.h"
 
+#include <ostream>
+#include <set>
+#include <string>
+
 cmCTestUploadHandler::cmCTestUploadHandler()
 {
   this->Initialize();

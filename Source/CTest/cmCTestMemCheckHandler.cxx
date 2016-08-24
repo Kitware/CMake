@@ -13,20 +13,16 @@
 #include "cmCTestMemCheckHandler.h"
 
 #include "cmCTest.h"
-#include "cmGeneratedFileStream.h"
-#include "cmMakefile.h"
+#include "cmSystemTools.h"
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
-#include "cmake.h"
-#include <cmsys/Base64.h>
+
 #include <cmsys/FStream.hxx>
 #include <cmsys/Glob.hxx>
-#include <cmsys/Process.h>
 #include <cmsys/RegularExpression.hxx>
-
-#include <float.h>
-#include <math.h>
-#include <stdlib.h>
+#include <iostream>
+#include <sstream>
+#include <string.h>
 
 struct CatToErrorType
 {

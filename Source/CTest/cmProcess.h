@@ -12,9 +12,11 @@
 #ifndef cmProcess_h
 #define cmProcess_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include <cmsys/Process.h>
+#include <string>
+#include <vector>
 
 /** \class cmProcess
  * \brief run a process with c++
