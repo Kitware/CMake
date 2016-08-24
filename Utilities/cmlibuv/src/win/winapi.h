@@ -4118,6 +4118,14 @@ typedef const UNICODE_STRING *PCUNICODE_STRING;
 # define DEVICE_TYPE DWORD
 #endif
 
+#ifndef VOLUME_NAME_DOS
+# define VOLUME_NAME_DOS 0x0
+#endif
+
+#ifndef MAPVK_VK_TO_VSC
+# define MAPVK_VK_TO_VSC (0)
+#endif
+
 /* MinGW already has a definition for REPARSE_DATA_BUFFER, but mingw-w64 does
  * not.
  */
@@ -4583,7 +4591,8 @@ typedef NTSTATUS (NTAPI *sNtQueryDirectoryFile)
 # define SYMBOLIC_LINK_FLAG_DIRECTORY 0x1
 #endif
 
-#if defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)
+#if (defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)) \
+ || (defined(_MSC_VER) && _MSC_VER < 1500)
   typedef struct _OVERLAPPED_ENTRY {
       ULONG_PTR lpCompletionKey;
       LPOVERLAPPED lpOverlapped;
