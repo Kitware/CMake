@@ -12,7 +12,11 @@
 #ifndef cmProcessTools_h
 #define cmProcessTools_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h>
+
+#include <iosfwd>
+#include <string.h>
+#include <string>
 
 /** \class cmProcessTools
  * \brief Helper classes for process output parsing

@@ -14,6 +14,9 @@
 
 #include "cmCTestVC.h"
 
+#include <map>
+#include <vector>
+
 /** \class cmCTestCVS
  * \brief Interaction with cvs command-line tool
  *

@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmBreakCommand.h"
 
+#include "cmExecutionStatus.h"
+
 // cmBreakCommand
 bool cmBreakCommand::InitialPass(std::vector<std::string> const& args,
                                  cmExecutionStatus& status)

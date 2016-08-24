@@ -12,12 +12,12 @@
 #ifndef cmPolicies_h
 #define cmPolicies_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include <bitset>
+#include <string>
 
 class cmMakefile;
-class cmPolicy;
 
 #define CM_FOR_EACH_POLICY_TABLE(POLICY, SELECT)                              \
   SELECT(POLICY, CMP0000,                                                     \

@@ -12,7 +12,10 @@
 #ifndef cmNewLineStyle_h
 #define cmNewLineStyle_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <string>
+#include <vector>
 
 class cmNewLineStyle
 {

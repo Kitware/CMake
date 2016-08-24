@@ -18,14 +18,22 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalNinjaGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmLocalNinjaGenerator.h"
 #include "cmMakefile.h"
 #include "cmNinjaNormalTargetGenerator.h"
 #include "cmNinjaUtilityTargetGenerator.h"
+#include "cmOutputConverter.h"
 #include "cmSourceFile.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
 
 #include <algorithm>
+#include <iterator>
+#include <map>
+#include <sstream>
+#include <string.h>
 
 cmNinjaTargetGenerator* cmNinjaTargetGenerator::New(cmGeneratorTarget* target)
 {

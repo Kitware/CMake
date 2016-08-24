@@ -11,8 +11,7 @@
 ============================================================================*/
 #include "cmPropertyDefinitionMap.h"
 
-#include "cmDocumentationSection.h"
-#include "cmSystemTools.h"
+#include <utility>
 
 void cmPropertyDefinitionMap::DefineProperty(const std::string& name,
                                              cmProperty::ScopeType scope,

@@ -2,14 +2,18 @@
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
 #include "cmVersion.h"
-#include "cmVersionMacros.h"
 #include "cmake.h"
+
 #include <assert.h>
+#include <cmConfigure.h>
 #include <ctype.h>
-#include <map>
-#include <queue>
-#include <set>
+#include <sstream>
+#include <stdio.h>
+#include <string.h>
+#include <vector>
 
 static bool stringToId(const char* input, cmPolicies::PolicyID& pid)
 {

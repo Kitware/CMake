@@ -13,14 +13,13 @@
 #ifndef cmNinjaNormalTargetGenerator_h
 #define cmNinjaNormalTargetGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmNinjaTargetGenerator.h"
 
-#include "cmNinjaTypes.h"
+#include <string>
+#include <vector>
 
-#include <set>
-
-class cmSourceFile;
-class cmOSXBundleGenerator;
 class cmGeneratorTarget;
 
 class cmNinjaNormalTargetGenerator : public cmNinjaTargetGenerator

@@ -13,11 +13,11 @@
 #ifndef cmNinjaUtilityTargetGenerator_h
 #define cmNinjaUtilityTargetGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmNinjaTargetGenerator.h"
 
-#include "cmNinjaTypes.h"
-
-class cmSourceFile;
+class cmGeneratorTarget;
 
 class cmNinjaUtilityTargetGenerator : public cmNinjaTargetGenerator
 {

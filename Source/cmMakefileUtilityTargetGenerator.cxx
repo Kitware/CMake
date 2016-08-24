@@ -12,10 +12,16 @@
 #include "cmMakefileUtilityTargetGenerator.h"
 
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
-#include "cmSourceFile.h"
+#include "cmOSXBundleGenerator.h"
+#include "cmOutputConverter.h"
+
+#include <ostream>
+#include <string>
+#include <vector>
 
 cmMakefileUtilityTargetGenerator::cmMakefileUtilityTargetGenerator(
   cmGeneratorTarget* target)
