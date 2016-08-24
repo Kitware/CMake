@@ -677,6 +677,12 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
     const char seq[2] = { '\n', '\0' };
     const int seqlen = 2;
 
+    // Skip the leading byte which appears to be a version number.
+    // We do not need to check for an error because the sequence search
+    // below will fail in that case.
+    finModFile.get();
+    finStampFile.get();
+
     if (!cmFortranStreamContainsSequence(finModFile, seq, seqlen)) {
       // The module is of unexpected format.  Assume it is different.
       std::cerr << compilerId << " fortran module " << modFile
