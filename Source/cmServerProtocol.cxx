@@ -338,9 +338,10 @@ namespace
       if (begin != std::string::npos) {
         auto const contentBegin = begin + (sizeof marker - 1);
         auto const end = output.find('\n',contentBegin);
-        if (end != std::string::npos) {
-          auto const size = end - contentBegin;
-          return {output,contentBegin,size};
+        if (end == std::string::npos) {
+          return {output,contentBegin};
+        } else {
+          return {output,contentBegin,end-contentBegin};
         }
       }
       return {};
