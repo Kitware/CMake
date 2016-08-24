@@ -194,13 +194,16 @@ configuration file.  The tables below show the directories searched.
 Each entry is meant for installation trees following Windows (W), UNIX
 (U), or Apple (A) conventions::
 
-  <prefix>/                                               (W)
-  <prefix>/(cmake|CMake)/                                 (W)
-  <prefix>/<name>*/                                       (W)
-  <prefix>/<name>*/(cmake|CMake)/                         (W)
-  <prefix>/(lib/<arch>|lib|share)/cmake/<name>*/          (U)
-  <prefix>/(lib/<arch>|lib|share)/<name>*/                (U)
-  <prefix>/(lib/<arch>|lib|share)/<name>*/(cmake|CMake)/  (U)
+  <prefix>/                                                       (W)
+  <prefix>/(cmake|CMake)/                                         (W)
+  <prefix>/<name>*/                                               (W)
+  <prefix>/<name>*/(cmake|CMake)/                                 (W)
+  <prefix>/(lib/<arch>|lib|share)/cmake/<name>*/                  (U)
+  <prefix>/(lib/<arch>|lib|share)/<name>*/                        (U)
+  <prefix>/(lib/<arch>|lib|share)/<name>*/(cmake|CMake)/          (U)
+  <prefix>/<name>*/(lib/<arch>|lib|share)/cmake/<name>*/          (W/U)
+  <prefix>/<name>*/(lib/<arch>|lib|share)/<name>*/                (W/U)
+  <prefix>/<name>*/(lib/<arch>|lib|share)/<name>*/(cmake|CMake)/  (W/U)
 
 On systems supporting OS X Frameworks and Application Bundles the
 following directories are searched for frameworks or bundles
