@@ -155,8 +155,14 @@ popd
 if [ -n "$basehash" ]; then
     git merge --log -s recursive "-Xsubtree=$subtree/" --no-commit "upstream-$name"
 else
+    unrelated_histories_flag=""
+    if git merge --help | grep -q -e allow-unrelated-histories; then
+        unrelated_histories_flag="--allow-unrelated-histories "
+    fi
+    readonly unrelated_histories_flag
+
     git fetch "$extractdir" "upstream-$name:upstream-$name"
-    git merge --log -s ours --no-commit "upstream-$name"
+    git merge --log -s ours --no-commit $unrelated_histories_flag "upstream-$name"
     git read-tree -u --prefix="$subtree/" "upstream-$name"
 fi
 git commit --no-edit
