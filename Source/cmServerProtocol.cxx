@@ -311,51 +311,61 @@ namespace
   struct VCSystemIncludePaths
   {
     VCSystemIncludePaths(cmake* cmake)
-    : file(cmSystemTools::GetCMakeRoot() + "/Modules/VCSystemIncludePaths.cmake")
-    , cmake(cmake)
-    , mf(cmake->GetGlobalGenerator(), cmake->GetCurrentSnapshot())
+    : cmake(cmake), mf(cmake->GetGlobalGenerator(), cmake->GetCurrentSnapshot())
     {
-      this->cmake->AddCacheEntry(this->entryName, "/verbosity:diagnostic",
-                                 nullptr, cmState::CacheEntryType::STRING);
-      this->ok = mf.ReadListFile(this->file.c_str());
+      if (this->cmake)
+      {
+        this->cmake->AddCacheEntry(this->entryName, "/verbosity:diagnostic",
+                                   nullptr, cmState::CacheEntryType::STRING);
+        this->ok = mf.ReadListFile(this->file.c_str());
+      }
     }
 
     ~VCSystemIncludePaths()
     {
       try
       {
-        this->cmake->GetState()->RemoveCacheEntry(entryName);
-        this->mf.RemoveDefinition(systemPathsFlag);
-      }
-      catch (...) { }
-    }
-
-    std::string GetPaths() const
-    {
-      std::string const output = this->mf.GetDefinition(systemPathsFlag);
-      char const marker [] = "IncludePath = ";
-      auto const begin = output.find(marker);
-      if (begin != std::string::npos) {
-        auto const contentBegin = begin + (sizeof marker - 1);
-        auto const end = output.find('\n',contentBegin);
-        if (end == std::string::npos) {
-          return {output,contentBegin};
-        } else {
-          return {output,contentBegin,end-contentBegin};
+        if (this->cmake)
+        {
+          this->cmake->GetState()->RemoveCacheEntry(entryName);
+          this->mf.RemoveDefinition(systemPathsFlag);
         }
       }
-      return {};
+      catch (...) { }
     }
 
     bool Failed() const { return !this->ok; }
     auto const& FileName() const { return this->file; }
 
+    std::string GetPaths() const
+    {
+      return this->Extract(this->mf.GetDefinition(systemPathsFlag));
+    }
+
+  private:
+    std::string Extract(std::string const& string) const
+    {
+      char const pattern [] = "\nIncludePath = ";
+      auto const index = string.find(pattern);
+      if (index != std::string::npos) {
+        auto const begin = index + (sizeof pattern - 1);
+        auto const end   = string.find('\n',begin);
+        if (end == std::string::npos) {
+          return {string,begin};
+        } else {
+          return {string,begin,end-begin};
+        }
+      }
+      return {};
+    }
+
   private:
     char const entryName [14] = "MSBUILD_FLAGS";
     char const systemPathsFlag [31] = "VC_SYSTEM_INCLUDE_PATHS_OUTPUT";
-    std::string const file;
+    std::string const file = cmSystemTools::GetCMakeRoot()
+                           + "/Modules/VCSystemIncludePaths.cmake";
 
-    cmake* const cmake;
+    cmake* const cmake = nullptr;
     cmMakefile mf;
     bool ok = false;
   };
