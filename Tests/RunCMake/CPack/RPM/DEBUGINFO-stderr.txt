@@ -1,0 +1,3 @@
+^CPackRPM: Will use GENERATED spec file: .*/Tests/RunCMake/RPM/CPack/DEBUGINFO-build/_CPack_Packages/.*/RPM/SPECS/debuginfo-applications.spec
+CPackRPM: Will use GENERATED spec file: .*/Tests/RunCMake/RPM/CPack/DEBUGINFO-build/_CPack_Packages/.*/RPM/SPECS/debuginfo-headers.spec
+CPackRPM: Will use GENERATED spec file: .*/Tests/RunCMake/RPM/CPack/DEBUGINFO-build/_CPack_Packages/.*/RPM/SPECS/debuginfo-libs.spec$
