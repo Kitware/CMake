@@ -51,10 +51,6 @@
 # include <poll.h>
 #endif /* _AIX */
 
-#if defined(__APPLE__) && !TARGET_OS_IPHONE
-# include <CoreServices/CoreServices.h>
-#endif
-
 #if defined(__ANDROID__)
 int uv__pthread_sigmask(int how, const sigset_t* set, sigset_t* oset);
 # ifdef pthread_sigmask
@@ -272,6 +268,7 @@ int uv__make_socketpair(int fds[2], int flags);
 int uv__make_pipe(int fds[2], int flags);
 
 #if defined(__APPLE__)
+#include <AvailabilityMacros.h>
 
 int uv__fsevents_init(uv_fs_event_t* handle);
 int uv__fsevents_close(uv_fs_event_t* handle);
