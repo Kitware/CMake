@@ -319,6 +319,8 @@ set(SRCS
   cmMakefileExecutableTargetGenerator.cxx
   cmMakefileLibraryTargetGenerator.cxx
   cmMakefileUtilityTargetGenerator.cxx
+  cmMessenger.cxx
+  cmMessenger.h
   cmOSXBundleGenerator.cxx
   cmOSXBundleGenerator.h
   cmOutputConverter.cxx

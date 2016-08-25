@@ -25,6 +25,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmInstallGenerator.h"
 #include "cmListFileCache.h"
+#include "cmMessenger.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmState.h"
@@ -115,12 +116,6 @@ cmMakefile::~cmMakefile()
 void cmMakefile::IssueMessage(cmake::MessageType t,
                               std::string const& text) const
 {
-  // Collect context information.
-  if (!this->ExecutionStatusStack.empty()) {
-    if ((t == cmake::FATAL_ERROR) || (t == cmake::INTERNAL_ERROR)) {
-      this->ExecutionStatusStack.back()->SetNestedError(true);
-    }
-  }
   this->GetCMakeInstance()->IssueMessage(t, text, this->GetBacktrace());
 }
 
@@ -281,11 +276,19 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
       if (this->GetCMakeInstance()->GetTrace()) {
         this->PrintCommandTrace(lff);
       }
-      // Try invoking the command.
+
+      bool hadPreviousNonFatalError = cmSystemTools::GetErrorOccuredFlag() &&
+        !cmSystemTools::GetFatalErrorOccured();
+      cmSystemTools::ResetErrorOccuredFlag();
+
       bool invokeSucceeded = pcmd->InvokeInitialPass(lff.Arguments, status);
-      bool hadNestedError = status.GetNestedError();
+      bool hadNestedError = cmSystemTools::GetErrorOccuredFlag() &&
+        !cmSystemTools::GetFatalErrorOccured();
+      if (hadPreviousNonFatalError) {
+        cmSystemTools::SetErrorOccured();
+      }
       if (!invokeSucceeded || hadNestedError) {
-        if (!hadNestedError) {
+        if (!hadNestedError && !cmSystemTools::GetFatalErrorOccured()) {
           // The command invocation requested that we report an error.
           this->IssueMessage(cmake::FATAL_ERROR, pcmd->GetError());
         }
@@ -455,7 +458,8 @@ bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
   IncludeScope incScope(this, filenametoread, noPolicyScope);
 
   cmListFile listFile;
-  if (!listFile.ParseFile(filenametoread.c_str(), this)) {
+  if (!listFile.ParseFile(filenametoread.c_str(), this->GetMessenger(),
+                          this->Backtrace)) {
     return false;
   }
 
@@ -504,7 +508,8 @@ bool cmMakefile::ReadListFile(const char* filename)
   ListFileScope scope(this, filenametoread);
 
   cmListFile listFile;
-  if (!listFile.ParseFile(filenametoread.c_str(), this)) {
+  if (!listFile.ParseFile(filenametoread.c_str(), this->GetMessenger(),
+                          this->Backtrace)) {
     return false;
   }
 
@@ -1450,7 +1455,8 @@ void cmMakefile::Configure()
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentStart.c_str());
 
   cmListFile listFile;
-  if (!listFile.ParseFile(currentStart.c_str(), this)) {
+  if (!listFile.ParseFile(currentStart.c_str(), this->GetMessenger(),
+                          this->Backtrace)) {
     return;
   }
   if (this->IsRootMakefile()) {
@@ -3270,6 +3276,11 @@ bool cmMakefile::GetIsSourceFileTryCompile() const
 cmake* cmMakefile::GetCMakeInstance() const
 {
   return this->GlobalGenerator->GetCMakeInstance();
+}
+
+cmMessenger* cmMakefile::GetMessenger() const
+{
+  return this->GetCMakeInstance()->GetMessenger();
 }
 
 cmGlobalGenerator* cmMakefile::GetGlobalGenerator() const

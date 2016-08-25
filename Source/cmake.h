@@ -25,6 +25,7 @@ class cmGlobalGeneratorFactory;
 class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmMakefile;
+class cmMessenger;
 class cmVariableWatch;
 class cmFileTimeComparison;
 class cmExternalMakefileProjectGeneratorFactory;
@@ -346,6 +347,8 @@ public:
     return this->CMakeEditCommand;
   }
 
+  cmMessenger* GetMessenger() const;
+
   /*
    * Get the state of the suppression of developer (author) warnings.
    * Returns false, by default, if developer warnings should be shown, true
@@ -394,9 +397,6 @@ public:
   void IssueMessage(
     cmake::MessageType t, std::string const& text,
     cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const;
-
-  void DisplayMessage(cmake::MessageType t, std::string const& text,
-                      cmListFileBacktrace const& backtrace) const;
 
   ///! run the --build option
   int Build(const std::string& dir, const std::string& target,
@@ -491,6 +491,7 @@ private:
 
   cmState* State;
   cmState::Snapshot CurrentSnapshot;
+  cmMessenger* Messenger;
 
   std::vector<std::string> TraceOnlyThisSources;
 

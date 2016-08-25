@@ -23,7 +23,7 @@
  * cmake list files.
  */
 
-class cmMakefile;
+class cmMessenger;
 
 struct cmCommandContext
 {
@@ -158,7 +158,8 @@ private:
 
 struct cmListFile
 {
-  bool ParseFile(const char* path, cmMakefile* mf);
+  bool ParseFile(const char* path, cmMessenger* messenger,
+                 cmListFileBacktrace const& lfbt);
 
   std::vector<cmListFileFunction> Functions;
 };

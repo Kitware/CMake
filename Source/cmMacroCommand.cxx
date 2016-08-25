@@ -159,11 +159,11 @@ bool cmMacroHelperCommand::InvokeInitialPass(
     }
     cmExecutionStatus status;
     if (!this->Makefile->ExecuteCommand(newLFF, status) ||
-        status.GetNestedError()) {
+        (cmSystemTools::GetErrorOccuredFlag() &&
+         !cmSystemTools::GetFatalErrorOccured())) {
       // The error message should have already included the call stack
       // so we do not need to report an error here.
       macroScope.Quiet();
-      inStatus.SetNestedError(true);
       return false;
     }
     if (status.GetReturnInvoked()) {
