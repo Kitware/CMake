@@ -468,6 +468,20 @@ macro (CMAKE_BUILD_UTILITIES)
   # Build libuv library.
   if(NOT DEFINED CMAKE_USE_LIBUV)
     set(CMAKE_USE_LIBUV 1)
+    if(APPLE)
+      include(CheckCSourceCompiles)
+      check_c_source_compiles("
+#include <CoreServices/CoreServices.h>
+#include <AvailabilityMacros.h>
+#ifndef MAC_OS_X_VERSION_10_5
+#error \"MAC_OS_X_VERSION_10_5 is not defined\"
+#endif
+int main(void) { return 0; }
+" HAVE_CoreServices_OS_X_10_5)
+      if(NOT HAVE_CoreServices_OS_X_10_5)
+        set(CMAKE_USE_LIBUV 0)
+      endif()
+    endif()
   endif()
   if(CMAKE_USE_LIBUV)
     if(CMAKE_USE_SYSTEM_LIBUV)
