@@ -16,6 +16,10 @@
 #include "cmXMLWriter.h"
 
 #include <cmsys/Process.h>
+#include <sstream>
+#include <stdio.h>
+#include <time.h>
+#include <vector>
 
 cmCTestVC::cmCTestVC(cmCTest* ct, std::ostream& log)
   : CTest(ct)

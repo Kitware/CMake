@@ -13,6 +13,12 @@
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
+
+#include <sstream>
+#include <stdlib.h>
+#include <vector>
 
 cmCTestTestCommand::cmCTestTestCommand()
 {

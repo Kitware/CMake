@@ -12,9 +12,17 @@
 #ifndef cmCTestMultiProcessHandler_h
 #define cmCTestMultiProcessHandler_h
 
-#include <cmCTestTestHandler.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include <cmCTestRunTest.h>
+#include <cmCTestTestHandler.h>
+#include <map>
+#include <set>
+#include <stddef.h>
+#include <string>
+#include <vector>
+
+class cmCTest;
+class cmCTestRunTest;
 
 /** \class cmCTestMultiProcessHandler
  * \brief run parallel ctest

@@ -13,15 +13,17 @@
 
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
+#include "cmCTestVC.h"
+#include "cmProcessTools.h"
 #include "cmSystemTools.h"
 
 #include <cmsys/FStream.hxx>
 #include <cmsys/Process.h>
-#include <cmsys/RegularExpression.hxx>
-
 #include <ctype.h>
-#include <sys/types.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
+#include <vector>
 
 static unsigned int cmCTestGITVersion(unsigned int epic, unsigned int major,
                                       unsigned int minor, unsigned int fix)

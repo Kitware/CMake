@@ -13,7 +13,13 @@
 #ifndef cmParseBlanketJSCoverage_h
 #define cmParseBlanketJSCoverage_h
 
-#include "cmCTestCoverageHandler.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <string>
+#include <vector>
+
+class cmCTest;
+class cmCTestCoverageHandlerContainer;
 
 /** \class cmParseBlanketJSCoverage
  * \brief Parse BlanketJS coverage information
@@ -39,6 +45,7 @@ public:
 
 protected:
   class JSONParser;
+
   cmCTestCoverageHandlerContainer& Coverage;
   cmCTest* CTest;
 };

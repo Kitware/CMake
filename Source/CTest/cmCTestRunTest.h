@@ -12,9 +12,15 @@
 #ifndef cmCTestRunTest_h
 #define cmCTestRunTest_h
 
-#include <cmCTestTestHandler.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include <cmProcess.h>
+#include <cmCTestTestHandler.h>
+#include <stddef.h>
+#include <string>
+#include <vector>
+
+class cmCTest;
+class cmProcess;
 
 /** \class cmRunTest
  * \brief represents a single test to be run

@@ -13,12 +13,11 @@
 #ifndef cmCTestBatchTestHandler_h
 #define cmCTestBatchTestHandler_h
 
-#include <cmStandardIncludes.h>
+#include <cmConfigure.h>
 
 #include <cmCTestMultiProcessHandler.h>
-#include <cmCTestRunTest.h>
-#include <cmCTestTestHandler.h>
 #include <cmsys/FStream.hxx>
+#include <string>
 
 /** \class cmCTestBatchTestHandler
  * \brief run parallel ctest

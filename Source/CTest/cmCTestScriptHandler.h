@@ -13,14 +13,19 @@
 #ifndef cmCTestScriptHandler_h
 #define cmCTestScriptHandler_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestGenericHandler.h"
+#include "cmTypeMacro.h"
 
-#include "cmListFileCache.h"
+#include <string>
+#include <vector>
 
-class cmMakefile;
-class cmGlobalGenerator;
-class cmake;
+class cmCTest;
 class cmCTestCommand;
+class cmGlobalGenerator;
+class cmMakefile;
+class cmake;
 
 /** \class cmCTestScriptHandler
  * \brief A class that handles ctest -S invocations

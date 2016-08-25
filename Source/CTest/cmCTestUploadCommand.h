@@ -12,9 +12,16 @@
 #ifndef cmCTestUploadCommand_h
 #define cmCTestUploadCommand_h
 
-#include "cmCTestHandlerCommand.h"
+#include <cmConfigure.h>
 
 #include "cmCTest.h"
+#include "cmCTestHandlerCommand.h"
+#include "cmTypeMacro.h"
+
+#include <string>
+
+class cmCTestGenericHandler;
+class cmCommand;
 
 /** \class cmCTestUpload
  * \brief Run a ctest script

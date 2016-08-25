@@ -12,7 +12,16 @@
 #ifndef cmCTestSubmitHandler_h
 #define cmCTestSubmitHandler_h
 
+#include <cmConfigure.h>
+
+#include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
+#include "cmTypeMacro.h"
+
+#include <iosfwd>
+#include <set>
+#include <string>
+#include <vector>
 
 /** \class cmCTestSubmitHandler
  * \brief Helper class for CTest
@@ -84,6 +93,7 @@ private:
   std::string GetSubmitResultsPrefix();
 
   class ResponseParser;
+
   std::string HTTPProxy;
   int HTTPProxyType;
   std::string HTTPProxyAuth;

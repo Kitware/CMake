@@ -14,9 +14,11 @@
 
 #include "cmCTest.h"
 #include "cmGeneratedFileStream.h"
+#include "cmSystemTools.h"
 #include "cmXMLWriter.h"
-#include "cmake.h"
-#include <cmsys/Process.h>
+
+#include <ostream>
+#include <string>
 
 cmCTestConfigureHandler::cmCTestConfigureHandler()
 {

@@ -13,7 +13,13 @@
 #ifndef cmParseDelphiCoverage_h
 #define cmParseDelphiCoverage_h
 
-#include "cmCTestCoverageHandler.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <string>
+#include <vector>
+
+class cmCTest;
+class cmCTestCoverageHandlerContainer;
 
 /** \class cmParseDelphiCoverage
  * \brief Parse Delphi coverage information
@@ -35,6 +41,7 @@ public:
 
 protected:
   class HTMLParser;
+
   cmCTestCoverageHandlerContainer& Coverage;
   cmCTest* CTest;
 };

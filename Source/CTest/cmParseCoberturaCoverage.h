@@ -13,7 +13,13 @@
 #ifndef cmParseCoberturaCoverage_h
 #define cmParseCoberturaCoverage_h
 
-#include "cmCTestCoverageHandler.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <string>
+#include <vector>
+
+class cmCTest;
+class cmCTestCoverageHandlerContainer;
 
 /** \class cmParsePythonCoverage
  * \brief Parse coverage.py Python coverage information
@@ -40,6 +46,7 @@ public:
 
 private:
   class XMLParser;
+
   cmCTestCoverageHandlerContainer& Coverage;
   cmCTest* CTest;
   std::string CurFileName;

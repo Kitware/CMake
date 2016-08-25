@@ -12,7 +12,16 @@
 #ifndef cmCTestEmptyBinaryDirectoryCommand_h
 #define cmCTestEmptyBinaryDirectoryCommand_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestCommand.h"
+#include "cmTypeMacro.h"
+
+#include <string>
+#include <vector>
+
+class cmCommand;
+class cmExecutionStatus;
 
 /** \class cmCTestEmptyBinaryDirectory
  * \brief Run a ctest script

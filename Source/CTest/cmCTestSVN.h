@@ -12,9 +12,17 @@
 #ifndef cmCTestSVN_h
 #define cmCTestSVN_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestGlobalVC.h"
 
+#include <iosfwd>
 #include <list>
+#include <string>
+#include <vector>
+
+class cmCTest;
+class cmXMLWriter;
 
 /** \class cmCTestSVN
  * \brief Interaction with subversion command-line tool
@@ -68,6 +76,7 @@ private:
 
   // Extended revision structure to include info about external it refers to.
   struct Revision;
+
   friend struct Revision;
 
   // Info of all the repositories (root, externals and nested ones).
@@ -89,12 +98,13 @@ private:
 
   void WriteXMLGlobal(cmXMLWriter& xml) CM_OVERRIDE;
 
+  class ExternalParser;
   // Parsing helper classes.
   class InfoParser;
   class LogParser;
   class StatusParser;
   class UpdateParser;
-  class ExternalParser;
+
   friend class InfoParser;
   friend class LogParser;
   friend class StatusParser;

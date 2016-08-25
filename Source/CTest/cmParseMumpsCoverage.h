@@ -13,7 +13,13 @@
 #ifndef cmParseMumpsCoverage_h
 #define cmParseMumpsCoverage_h
 
-#include "cmCTestCoverageHandler.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <map>
+#include <string>
+
+class cmCTest;
+class cmCTestCoverageHandlerContainer;
 
 /** \class cmParseMumpsCoverage
  * \brief Parse Mumps coverage information

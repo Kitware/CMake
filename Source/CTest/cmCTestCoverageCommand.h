@@ -12,7 +12,16 @@
 #ifndef cmCTestCoverageCommand_h
 #define cmCTestCoverageCommand_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestHandlerCommand.h"
+#include "cmTypeMacro.h"
+
+#include <set>
+#include <string>
+
+class cmCTestGenericHandler;
+class cmCommand;
 
 /** \class cmCTestCoverage
  * \brief Run a ctest script

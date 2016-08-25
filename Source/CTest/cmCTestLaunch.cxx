@@ -11,15 +11,24 @@
 ============================================================================*/
 #include "cmCTestLaunch.h"
 
+#include <cmConfigure.h>
+
 #include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
 
+#include <cm_auto_ptr.hxx>
 #include <cmsys/FStream.hxx>
 #include <cmsys/MD5.h>
 #include <cmsys/Process.h>
 #include <cmsys/RegularExpression.hxx>
+#include <iostream>
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef _WIN32
 #include <fcntl.h> // for _O_BINARY
@@ -608,10 +617,6 @@ int cmCTestLaunch::Main(int argc, const char* const argv[])
   return self.Run();
 }
 
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
-#include "cmake.h"
-#include <cm_auto_ptr.hxx>
 void cmCTestLaunch::LoadConfig()
 {
   cmake cm;

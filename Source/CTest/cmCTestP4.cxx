@@ -12,14 +12,15 @@
 #include "cmCTestP4.h"
 
 #include "cmCTest.h"
+#include "cmCTestVC.h"
+#include "cmProcessTools.h"
 #include "cmSystemTools.h"
 
-#include <cmsys/Process.h>
+#include <algorithm>
 #include <cmsys/RegularExpression.hxx>
-
-#include <ctype.h>
-#include <sys/types.h>
+#include <ostream>
 #include <time.h>
+#include <utility>
 
 cmCTestP4::cmCTestP4(cmCTest* ct, std::ostream& log)
   : cmCTestGlobalVC(ct, log)

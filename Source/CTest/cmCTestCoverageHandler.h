@@ -13,14 +13,22 @@
 #ifndef cmCTestCoverageHandler_h
 #define cmCTestCoverageHandler_h
 
-#include "cmCTestGenericHandler.h"
+#include <cmConfigure.h>
 
-#include "cmListFileCache.h"
+#include "cmCTestGenericHandler.h"
+#include "cmTypeMacro.h"
 
 #include <cmsys/RegularExpression.hxx>
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
 class cmGeneratedFileStream;
+class cmMakefile;
 class cmXMLWriter;
+
 class cmCTestCoverageHandlerContainer
 {
 public:

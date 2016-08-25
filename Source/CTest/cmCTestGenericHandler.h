@@ -13,14 +13,20 @@
 #ifndef cmCTestGenericHandler_h
 #define cmCTestGenericHandler_h
 
-#include "cmObject.h"
+#include <cmConfigure.h>
 
 #include "cmCTest.h"
-#include "cmSystemTools.h" //OutputOption
+#include "cmObject.h"
+#include "cmSystemTools.h"
 
-class cmMakefile;
+#include <map>
+#include <stddef.h>
+#include <string>
+#include <vector>
+
 class cmCTestCommand;
 class cmGeneratedFileStream;
+class cmMakefile;
 
 /** \class cmCTestGenericHandler
  * \brief A superclass of all CTest Handlers

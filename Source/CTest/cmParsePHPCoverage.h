@@ -13,7 +13,13 @@
 #ifndef cmParsePHPCoverage_h
 #define cmParsePHPCoverage_h
 
-#include "cmCTestCoverageHandler.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <iosfwd>
+#include <string>
+
+class cmCTest;
+class cmCTestCoverageHandlerContainer;
 
 /** \class cmParsePHPCoverage
  * \brief Parse xdebug PHP coverage information

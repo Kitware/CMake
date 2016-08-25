@@ -12,7 +12,16 @@
 #ifndef cmCTestReadCustomFilesCommand_h
 #define cmCTestReadCustomFilesCommand_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestCommand.h"
+#include "cmTypeMacro.h"
+
+#include <string>
+#include <vector>
+
+class cmCommand;
+class cmExecutionStatus;
 
 /** \class cmCTestReadCustomFiles
  * \brief Run a ctest script

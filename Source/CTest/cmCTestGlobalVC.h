@@ -12,11 +12,18 @@
 #ifndef cmCTestGlobalVC_h
 #define cmCTestGlobalVC_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestVC.h"
 
+#include <iosfwd>
 #include <list>
 #include <map>
+#include <string>
 #include <vector>
+
+class cmCTest;
+class cmXMLWriter;
 
 /** \class cmCTestGlobalVC
  * \brief Base class for handling globally-versioned trees

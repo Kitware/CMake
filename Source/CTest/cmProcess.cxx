@@ -9,10 +9,11 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
+#include "cmProcess.h"
 
-#include <cmProcess.h>
-
+#include <cmConfigure.h>
 #include <cmSystemTools.h>
+#include <iostream>
 
 cmProcess::cmProcess()
 {

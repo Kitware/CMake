@@ -12,10 +12,14 @@
 #include "cmCTestHG.h"
 
 #include "cmCTest.h"
+#include "cmCTestVC.h"
+#include "cmProcessTools.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 
 #include <cmsys/RegularExpression.hxx>
+#include <ostream>
+#include <vector>
 
 cmCTestHG::cmCTestHG(cmCTest* ct, std::ostream& log)
   : cmCTestGlobalVC(ct, log)

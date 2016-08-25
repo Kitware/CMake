@@ -13,6 +13,8 @@
 
 #include "cmCTest.h"
 
+class cmExecutionStatus;
+
 bool cmCTestReadCustomFilesCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus& /*unused*/)
 {

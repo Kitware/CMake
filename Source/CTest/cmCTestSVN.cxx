@@ -12,11 +12,17 @@
 #include "cmCTestSVN.h"
 
 #include "cmCTest.h"
+#include "cmCTestVC.h"
+#include "cmProcessTools.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
 
 #include <cmsys/RegularExpression.hxx>
+#include <map>
+#include <ostream>
+#include <stdlib.h>
+#include <string.h>
 
 struct cmCTestSVN::Revision : public cmCTestVC::Revision
 {

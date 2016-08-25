@@ -1,12 +1,17 @@
 #include "cmParseJacocoCoverage.h"
 
+#include <cmConfigure.h>
+
+#include "cmCTest.h"
+#include "cmCTestCoverageHandler.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
+
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
 #include <cmsys/Glob.hxx>
-#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 class cmParseJacocoCoverage::XMLParser : public cmXMLParser
 {

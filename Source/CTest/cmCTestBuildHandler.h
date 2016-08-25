@@ -13,13 +13,17 @@
 #ifndef cmCTestBuildHandler_h
 #define cmCTestBuildHandler_h
 
-#include "cmCTestGenericHandler.h"
+#include <cmConfigure.h>
 
-#include "cmListFileCache.h"
+#include "cmCTestGenericHandler.h"
+#include "cmTypeMacro.h"
 
 #include <cmsys/RegularExpression.hxx>
-
 #include <deque>
+#include <iosfwd>
+#include <stddef.h>
+#include <string>
+#include <vector>
 
 class cmMakefile;
 class cmXMLWriter;
@@ -148,6 +152,7 @@ private:
   bool UseCTestLaunch;
   std::string CTestLaunchDir;
   class LaunchHelper;
+
   friend class LaunchHelper;
   class FragmentCompare;
 };

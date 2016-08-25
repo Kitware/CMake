@@ -12,7 +12,10 @@
 #include "cmCTestSleepCommand.h"
 
 #include "cmCTestScriptHandler.h"
-#include <stdlib.h> // required for atoi
+
+#include <stdlib.h>
+
+class cmExecutionStatus;
 
 bool cmCTestSleepCommand::InitialPass(std::vector<std::string> const& args,
                                       cmExecutionStatus& /*unused*/)

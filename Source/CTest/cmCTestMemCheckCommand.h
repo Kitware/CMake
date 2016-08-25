@@ -12,9 +12,15 @@
 #ifndef cmCTestMemCheckCommand_h
 #define cmCTestMemCheckCommand_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestTestCommand.h"
+#include "cmTypeMacro.h"
+
+#include <string>
 
 class cmCTestGenericHandler;
+class cmCommand;
 
 /** \class cmCTestMemCheck
  * \brief Run a ctest script

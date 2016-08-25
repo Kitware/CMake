@@ -12,7 +12,12 @@
 #ifndef cmCTestVC_h
 #define cmCTestVC_h
 
+#include <cmConfigure.h>
+
 #include "cmProcessTools.h"
+
+#include <iosfwd>
+#include <string>
 
 class cmCTest;
 class cmXMLWriter;
@@ -93,7 +98,6 @@ public:
   };
 
 protected:
-  struct File;
   friend struct File;
 
   /** Represent change to one file.  */

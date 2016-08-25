@@ -12,7 +12,16 @@
 #ifndef cmCTestSleepCommand_h
 #define cmCTestSleepCommand_h
 
+#include <cmConfigure.h>
+
 #include "cmCTestCommand.h"
+#include "cmTypeMacro.h"
+
+#include <string>
+#include <vector>
+
+class cmCommand;
+class cmExecutionStatus;
 
 /** \class cmCTestSleep
  * \brief Run a ctest script
