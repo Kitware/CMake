@@ -481,6 +481,9 @@ int main(void) { return 0; }
       if(NOT HAVE_CoreServices_OS_X_10_5)
         set(CMAKE_USE_LIBUV 0)
       endif()
+    elseif(CYGWIN)
+      # libuv does not support Cygwin
+      set(CMAKE_USE_LIBUV 0)
     endif()
   endif()
   if(CMAKE_USE_LIBUV)
