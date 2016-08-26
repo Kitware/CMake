@@ -452,6 +452,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
       D:/
       ENV ProgramFiles
     PATH_SUFFIXES
+      wxWidgets-3.1.0
       wxWidgets-3.0.2
       wxWidgets-3.0.1
       wxWidgets-3.0.0
@@ -503,10 +504,22 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
     # settings.
     if(MINGW)
       set(WX_LIB_DIR_PREFIX gcc)
-    elseif(CMAKE_CL_64)
-      set(WX_LIB_DIR_PREFIX vc_x64)
-    else()
+    elseif(MSVC)
       set(WX_LIB_DIR_PREFIX vc)
+      if(MSVC14)
+        set(WX_LIB_DIR_PREFIX ${WX_LIB_DIR_PREFIX}140)
+      elseif(MSVC12)
+        set(WX_LIB_DIR_PREFIX ${WX_LIB_DIR_PREFIX}120)
+      elseif(MSVC11)
+        set(WX_LIB_DIR_PREFIX ${WX_LIB_DIR_PREFIX}110)
+      elseif(MSVC10)
+        set(WX_LIB_DIR_PREFIX ${WX_LIB_DIR_PREFIX}100)
+      elseif(MSVC90)
+        set(WX_LIB_DIR_PREFIX ${WX_LIB_DIR_PREFIX}90)
+      endif()
+      if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(WX_LIB_DIR_PREFIX ${WX_LIB_DIR_PREFIX}_x64)
+      endif()
     endif()
     if(BUILD_SHARED_LIBS)
       find_path(wxWidgets_LIB_DIR
