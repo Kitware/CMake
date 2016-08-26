@@ -60,6 +60,14 @@
 #  * Mandatory : YES
 #  * Default   : :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY`
 #
+# .. variable:: CPACK_RPM_DEBUGINFO_PACKAGE
+#               CPACK_RPM_<component>_DEBUGINFO_PACKAGE
+#
+#  Option to additionally generate debuginfo RPM package(s).
+#
+#  * Mandatory : NO
+#  * Default   : OFF
+#
 # .. variable:: CPACK_RPM_PACKAGE_NAME
 #               CPACK_RPM_<component>_PACKAGE_NAME
 #
@@ -1236,6 +1244,30 @@ if(NOT UNIX)
   message(FATAL_ERROR "CPackRPM.cmake may only be used under UNIX.")
 endif()
 
+# We need to check if the binaries were compiled with debug symbols
+# because without them the package will be useless
+function(cpack_rpm_debugsymbol_check INSTALL_FILES WORKING_DIR)
+  # With objdump we should check the debug symbols
+  find_program(OBJDUMP_EXECUTABLE objdump)
+  if(NOT OBJDUMP_EXECUTABLE)
+    message(WARNING "CPackRPM: objdump binary could not be found!")
+  endif()
+
+  foreach(F IN LISTS INSTALL_FILES)
+    execute_process(COMMAND "${OBJDUMP_EXECUTABLE}" -h ${WORKING_DIR}/${F}
+                    WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}"
+                    RESULT_VARIABLE OBJDUMP_EXEC_RESULT
+                    OUTPUT_VARIABLE OBJDUMP_OUT)
+    # Check that if the given file was executable or not
+    if(NOT OBJDUMP_EXEC_RESULT)
+      string(FIND "${OBJDUMP_OUT}" "debug" FIND_RESULT)
+      if(NOT FIND_RESULT GREATER -1)
+        message(WARNING "CPackRPM: File: ${F} does not contain debug symbols. They will possibly be missing from debuginfo package!")
+      endif()
+    endif()
+  endforeach()
+endfunction()
+
 function(cpack_rpm_variable_fallback OUTPUT_VAR_NAME)
   set(FALLBACK_VAR_NAMES ${ARGN})
 
@@ -1804,6 +1836,15 @@ function(cpack_rpm_generate_package)
       "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_USER_BINARY_SPECFILE")
   endif()
 
+  cpack_rpm_variable_fallback("CPACK_RPM_DEBUGINFO_PACKAGE"
+    "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_DEBUGINFO_PACKAGE"
+    "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DEBUGINFO_PACKAGE"
+    "CPACK_RPM_DEBUGINFO_PACKAGE")
+  if(CPACK_RPM_DEBUGINFO_PACKAGE)
+    cpack_rpm_debugsymbol_check("${CPACK_ABSOLUTE_DESTINATION_FILES}" "${WDIR}")
+    set(TMP_RPM_DEBUGINFO "%debug_package")
+  endif()
+
   cpack_rpm_variable_fallback("CPACK_RPM_FILE_NAME"
     "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_FILE_NAME"
     "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_FILE_NAME"
@@ -1824,7 +1865,9 @@ function(cpack_rpm_generate_package)
     # else example:
     #set(CPACK_RPM_FILE_NAME "${CPACK_RPM_PACKAGE_NAME}-${CPACK_RPM_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}-${CPACK_RPM_PACKAGE_ARCHITECTURE}.rpm")
 
-    set(FILE_NAME_DEFINE "%define _rpmfilename ${CPACK_RPM_FILE_NAME}")
+    if(NOT CPACK_RPM_DEBUGINFO_PACKAGE)
+      set(FILE_NAME_DEFINE "%define _rpmfilename ${CPACK_RPM_FILE_NAME}")
+    endif()
   endif()
 
   # We should generate a USER spec file template:
@@ -1855,6 +1898,8 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 \@TMP_RPM_AUTOREQPROV\@
 \@TMP_RPM_BUILDARCH\@
 \@TMP_RPM_PREFIXES\@
+
+\@TMP_RPM_DEBUGINFO\@
 
 %define _rpmdir \@CPACK_RPM_DIRECTORY\@
 \@FILE_NAME_DEFINE\@
@@ -1911,7 +1956,7 @@ mv \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot\" $RPM_BUILD_ROOT
     # The generated file may then be used as a template by user who wants
     # to customize their own spec file.
     if(CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE)
-       message(FATAL_ERROR "CPackRPM: STOP here Generated USER binary spec file templare is: ${CPACK_RPM_BINARY_SPECFILE}.in")
+      message(FATAL_ERROR "CPackRPM: STOP here Generated USER binary spec file template is: ${CPACK_RPM_BINARY_SPECFILE}.in")
     endif()
   endif()
 
@@ -1966,6 +2011,22 @@ mv \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot\" $RPM_BUILD_ROOT
 
   if(NOT GENERATED_FILES)
     message(FATAL_ERROR "RPM package was not generated! ${CPACK_RPM_DIRECTORY}")
+  endif()
+
+  if(CPACK_RPM_DEBUGINFO_PACKAGE AND NOT CPACK_RPM_FILE_NAME STREQUAL "RPM-DEFAULT")
+    string(TOLOWER "${CPACK_RPM_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}.*\\.rpm" EXPECTED_FILENAME)
+
+    foreach(F IN LISTS GENERATED_FILES)
+      if(F MATCHES ".*/${EXPECTED_FILENAME}")
+        get_filename_component(FILE_PATH "${F}" DIRECTORY)
+        file(RENAME "${F}" "${FILE_PATH}/${CPACK_RPM_FILE_NAME}")
+        list(APPEND new_files_list_ "${FILE_PATH}/${CPACK_RPM_FILE_NAME}")
+      else()
+        list(APPEND new_files_list_ "${F}")
+      endif()
+    endforeach()
+
+    set(GENERATED_FILES "${new_files_list_}")
   endif()
 
   set(GEN_CPACK_OUTPUT_FILES "${GENERATED_FILES}" PARENT_SCOPE)
