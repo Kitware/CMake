@@ -185,13 +185,12 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
   this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
   this->Platform = gg->GetPlatformName();
   this->NsightTegra = gg->IsNsightTegra();
-  for (int i =
-         sscanf(gg->GetNsightTegraVersion().c_str(), "%u.%u.%u.%u",
-                &this->NsightTegraVersion[0], &this->NsightTegraVersion[1],
-                &this->NsightTegraVersion[2], &this->NsightTegraVersion[3]);
-       i < 4; ++i) {
+  for (int i = 0; i < 4; ++i) {
     this->NsightTegraVersion[i] = 0;
   }
+  sscanf(gg->GetNsightTegraVersion().c_str(), "%u.%u.%u.%u",
+         &this->NsightTegraVersion[0], &this->NsightTegraVersion[1],
+         &this->NsightTegraVersion[2], &this->NsightTegraVersion[3]);
   this->MSTools = !this->NsightTegra;
   this->TargetCompileAsWinRT = false;
   this->BuildFileStream = 0;
