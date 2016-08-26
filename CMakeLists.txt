@@ -484,6 +484,9 @@ int main(void) { return 0; }
     elseif(CYGWIN)
       # libuv does not support Cygwin
       set(CMAKE_USE_LIBUV 0)
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "sparc")
+      # Disable until it can be ported.
+      set(CMAKE_USE_LIBUV 0)
     endif()
   endif()
   if(CMAKE_USE_LIBUV)
