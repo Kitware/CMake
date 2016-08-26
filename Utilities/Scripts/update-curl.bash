@@ -7,7 +7,7 @@ shopt -s dotglob
 readonly name="curl"
 readonly ownership="Curl Upstream <curl-library@cool.haxx.se>"
 readonly subtree="Utilities/cmcurl"
-readonly repo="https://github.com/bagder/curl.git"
+readonly repo="https://github.com/curl/curl.git"
 readonly tag="curl-7_50_1"
 readonly shortlog=false
 readonly paths="
