@@ -46,23 +46,6 @@ std::string cmOutputConverter::ConvertToOutputForExisting(
   return this->ConvertToOutputFormat(remote, format);
 }
 
-const char* cmOutputConverter::GetRelativeRootPath(RelativeRoot relroot) const
-{
-  switch (relroot) {
-    case HOME:
-      return this->GetState()->GetSourceDirectory();
-    case START:
-      return this->StateSnapshot.GetDirectory().GetCurrentSource();
-    case HOME_OUTPUT:
-      return this->GetState()->GetBinaryDirectory();
-    case START_OUTPUT:
-      return this->StateSnapshot.GetDirectory().GetCurrentBinary();
-    default:
-      break;
-  }
-  return CM_NULLPTR;
-}
-
 std::string cmOutputConverter::Convert(const std::string& source,
                                        RelativeRoot relative,
                                        OutputFormat output) const

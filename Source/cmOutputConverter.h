@@ -60,11 +60,6 @@ public:
   std::string ConvertDirectorySeparatorsForShell(
     const std::string& source) const;
 
-  /**
-    * Get path for the specified relative root.
-    */
-  const char* GetRelativeRootPath(RelativeRoot relroot) const;
-
   ///! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const std::string& remote,
                                          OutputFormat format = SHELL) const;
