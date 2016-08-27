@@ -132,9 +132,10 @@ std::string cmLocalNinjaGenerator::ConvertToIncludeReference(
   std::string const& path, cmOutputConverter::OutputFormat format,
   bool forceFullPaths)
 {
-  return this->Convert(path, forceFullPaths ? cmOutputConverter::FULL
-                                            : cmOutputConverter::HOME_OUTPUT,
-                       format);
+  if (forceFullPaths) {
+    return this->Convert(path, cmOutputConverter::FULL, format);
+  }
+  return this->Convert(path, cmOutputConverter::HOME_OUTPUT, format);
 }
 
 // Private methods.
