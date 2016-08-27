@@ -40,7 +40,6 @@ public:
    */
   enum RelativeRoot
   {
-    HOME_OUTPUT,
     START_OUTPUT
   };
   enum OutputFormat
