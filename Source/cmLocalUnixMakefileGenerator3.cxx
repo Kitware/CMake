@@ -94,7 +94,7 @@ static std::string cmSplitExtension(std::string const& in, std::string& base)
 
 cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3(
   cmGlobalGenerator* gg, cmMakefile* mf)
-  : cmLocalCommonGenerator(gg, mf, cmOutputConverter::START_OUTPUT)
+  : cmLocalCommonGenerator(gg, mf, mf->GetCurrentBinaryDirectory())
 {
   this->MakefileVariableSize = 0;
   this->ColorMakefile = false;

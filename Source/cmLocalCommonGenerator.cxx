@@ -18,8 +18,9 @@
 
 class cmGlobalGenerator;
 
-cmLocalCommonGenerator::cmLocalCommonGenerator(
-  cmGlobalGenerator* gg, cmMakefile* mf, cmOutputConverter::RelativeRoot wd)
+cmLocalCommonGenerator::cmLocalCommonGenerator(cmGlobalGenerator* gg,
+                                               cmMakefile* mf,
+                                               std::string const& wd)
   : cmLocalGenerator(gg, mf)
   , WorkingDirectory(wd)
 {
@@ -55,8 +56,9 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
   // Add a module output directory flag if necessary.
   std::string mod_dir = target->GetFortranModuleDirectory();
   if (!mod_dir.empty()) {
-    mod_dir =
-      this->Convert(mod_dir, this->WorkingDirectory, cmOutputConverter::SHELL);
+    mod_dir = this->ConvertToOutputFormat(
+      this->ConvertToRelativePath(this->WorkingDirectory, mod_dir),
+      cmOutputConverter::SHELL);
   } else {
     mod_dir =
       this->Makefile->GetSafeDefinition("CMAKE_Fortran_MODDIR_DEFAULT");

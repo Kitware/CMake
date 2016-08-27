@@ -204,8 +204,9 @@ std::string cmCommonTargetGenerator::GetManifests()
   std::vector<std::string> manifests;
   for (std::vector<cmSourceFile const*>::iterator mi = manifest_srcs.begin();
        mi != manifest_srcs.end(); ++mi) {
-    manifests.push_back(this->Convert(
-      (*mi)->GetFullPath(), this->LocalGenerator->GetWorkingDirectory(),
+    manifests.push_back(this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->ConvertToRelativePath(
+        this->LocalGenerator->GetWorkingDirectory(), (*mi)->GetFullPath()),
       cmOutputConverter::SHELL));
   }
 
