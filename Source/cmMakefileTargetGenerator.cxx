@@ -904,8 +904,10 @@ bool cmMakefileTargetGenerator::WriteMakeRule(
        o != outputs.end(); ++o) {
     // Touch the extra output so "make" knows that it was updated,
     // but only if the output was acually created.
-    std::string const out = this->Convert(*o, cmOutputConverter::HOME_OUTPUT,
-                                          cmOutputConverter::SHELL);
+    std::string const out = this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->ConvertToRelativePath(
+        this->LocalGenerator->GetBinaryDirectory(), *o),
+      cmOutputConverter::SHELL);
     std::vector<std::string> output_commands;
 
     bool o_symbolic = false;

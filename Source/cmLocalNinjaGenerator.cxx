@@ -145,7 +145,8 @@ std::string cmLocalNinjaGenerator::ConvertToIncludeReference(
     return this->ConvertToOutputFormat(cmSystemTools::CollapseFullPath(path),
                                        format);
   }
-  return this->Convert(path, cmOutputConverter::HOME_OUTPUT, format);
+  return this->ConvertToOutputFormat(
+    this->ConvertToRelativePath(this->GetBinaryDirectory(), path), format);
 }
 
 // Private methods.
