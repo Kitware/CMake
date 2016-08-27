@@ -638,19 +638,20 @@ void cmLocalUnixMakefileGenerator3::WriteMakeVariables(
 #endif
   }
 
+  std::string cmakeShellCommand = this->ConvertShellCommand(
+    cmSystemTools::GetCMakeCommand(), cmOutputConverter::FULL);
+
   /* clang-format off */
   makefileStream
     << "# The CMake executable.\n"
     << "CMAKE_COMMAND = "
-    << this->ConvertShellCommand(cmSystemTools::GetCMakeCommand(),
-                                 cmOutputConverter::FULL)
+    << cmakeShellCommand
     << "\n"
     << "\n";
   makefileStream
     << "# The command to remove a file.\n"
     << "RM = "
-    << this->ConvertShellCommand(cmSystemTools::GetCMakeCommand(),
-                                 cmOutputConverter::FULL)
+    << cmakeShellCommand
     << " -E remove -f\n"
     << "\n";
   makefileStream
