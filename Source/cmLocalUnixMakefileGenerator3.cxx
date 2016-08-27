@@ -556,8 +556,8 @@ void cmLocalUnixMakefileGenerator3::WriteMakeRule(
   }
 
   // Construct the left hand side of the rule.
-  std::string tgt = this->Convert(target, cmOutputConverter::HOME_OUTPUT,
-                                  cmOutputConverter::MAKERULE);
+  std::string tgt = cmSystemTools::ConvertToOutputPath(
+    this->ConvertToRelativePath(this->GetBinaryDirectory(), target).c_str());
 
   const char* space = "";
   if (tgt.size() == 1) {
@@ -584,8 +584,9 @@ void cmLocalUnixMakefileGenerator3::WriteMakeRule(
     for (std::vector<std::string>::const_iterator dep = depends.begin();
          dep != depends.end(); ++dep) {
       replace = *dep;
-      replace = this->Convert(replace, cmOutputConverter::HOME_OUTPUT,
-                              cmOutputConverter::MAKERULE);
+      replace = cmSystemTools::ConvertToOutputPath(
+        this->ConvertToRelativePath(this->GetBinaryDirectory(), replace)
+          .c_str());
       os << cmMakeSafe(tgt) << space << ": " << cmMakeSafe(replace) << "\n";
     }
   }

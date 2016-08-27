@@ -216,8 +216,11 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
   *this->BuildFileStream
     << "# Include any dependencies generated for this target.\n"
     << this->GlobalGenerator->IncludeDirective << " " << root
-    << this->Convert(dependFileNameFull, cmOutputConverter::HOME_OUTPUT,
-                     cmOutputConverter::MAKERULE)
+    << cmSystemTools::ConvertToOutputPath(
+         this->LocalGenerator
+           ->ConvertToRelativePath(this->LocalGenerator->GetBinaryDirectory(),
+                                   dependFileNameFull)
+           .c_str())
     << "\n\n";
 
   if (!this->NoRuleMessages) {
@@ -225,9 +228,12 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
     *this->BuildFileStream
       << "# Include the progress variables for this target.\n"
       << this->GlobalGenerator->IncludeDirective << " " << root
-      << this->Convert(this->ProgressFileNameFull,
-                       cmOutputConverter::HOME_OUTPUT,
-                       cmOutputConverter::MAKERULE)
+      << cmSystemTools::ConvertToOutputPath(
+           this->LocalGenerator
+             ->ConvertToRelativePath(
+               this->LocalGenerator->GetBinaryDirectory(),
+               this->ProgressFileNameFull)
+             .c_str())
       << "\n\n";
   }
 
@@ -257,8 +263,11 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
   *this->BuildFileStream
     << "# Include the compile flags for this target's objects.\n"
     << this->GlobalGenerator->IncludeDirective << " " << root
-    << this->Convert(this->FlagFileNameFull, cmOutputConverter::HOME_OUTPUT,
-                     cmOutputConverter::MAKERULE)
+    << cmSystemTools::ConvertToOutputPath(
+         this->LocalGenerator
+           ->ConvertToRelativePath(this->LocalGenerator->GetBinaryDirectory(),
+                                   this->FlagFileNameFull)
+           .c_str())
     << "\n\n";
 }
 

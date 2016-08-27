@@ -339,9 +339,11 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
   for (std::set<std::string>::const_iterator i = info.Includes.begin();
        i != info.Includes.end(); ++i) {
     makeDepends << obj_m << ": "
-                << this->LocalGenerator->Convert(
-                     *i, cmOutputConverter::HOME_OUTPUT,
-                     cmOutputConverter::MAKERULE)
+                << cmSystemTools::ConvertToOutputPath(
+                     this->LocalGenerator
+                       ->ConvertToRelativePath(
+                         this->LocalGenerator->GetBinaryDirectory(), *i)
+                       .c_str())
                 << std::endl;
     internalDepends << " " << *i << std::endl;
   }
@@ -367,8 +369,11 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
       proxy += "/";
       proxy += *i;
       proxy += ".mod.proxy";
-      proxy = this->LocalGenerator->Convert(
-        proxy, cmOutputConverter::HOME_OUTPUT, cmOutputConverter::MAKERULE);
+      proxy = cmSystemTools::ConvertToOutputPath(
+        this->LocalGenerator
+          ->ConvertToRelativePath(this->LocalGenerator->GetBinaryDirectory(),
+                                  proxy)
+          .c_str());
 
       // since we require some things add them to our list of requirements
       makeDepends << obj_m << ".requires: " << proxy << std::endl;
@@ -383,17 +388,22 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
     }
     if (!required->second.empty()) {
       // This module is known.  Depend on its timestamp file.
-      std::string stampFile = this->LocalGenerator->Convert(
-        required->second, cmOutputConverter::HOME_OUTPUT,
-        cmOutputConverter::MAKERULE);
+      std::string stampFile = cmSystemTools::ConvertToOutputPath(
+        this->LocalGenerator
+          ->ConvertToRelativePath(this->LocalGenerator->GetBinaryDirectory(),
+                                  required->second)
+          .c_str());
       makeDepends << obj_m << ": " << stampFile << "\n";
     } else {
       // This module is not known to CMake.  Try to locate it where
       // the compiler will and depend on that.
       std::string module;
       if (this->FindModule(*i, module)) {
-        module = this->LocalGenerator->Convert(
-          module, cmOutputConverter::HOME_OUTPUT, cmOutputConverter::MAKERULE);
+        module = cmSystemTools::ConvertToOutputPath(
+          this->LocalGenerator
+            ->ConvertToRelativePath(this->LocalGenerator->GetBinaryDirectory(),
+                                    module)
+            .c_str());
         makeDepends << obj_m << ": " << module << "\n";
       }
     }
@@ -406,8 +416,11 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
     proxy += "/";
     proxy += *i;
     proxy += ".mod.proxy";
-    proxy = this->LocalGenerator->Convert(
-      proxy, cmOutputConverter::HOME_OUTPUT, cmOutputConverter::MAKERULE);
+    proxy = cmSystemTools::ConvertToOutputPath(
+      this->LocalGenerator
+        ->ConvertToRelativePath(this->LocalGenerator->GetBinaryDirectory(),
+                                proxy)
+        .c_str());
     makeDepends << proxy << ": " << obj_m << ".provides" << std::endl;
   }
 
@@ -454,8 +467,11 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
     // the target finishes building.
     std::string driver = this->TargetDirectory;
     driver += "/build";
-    driver = this->LocalGenerator->Convert(
-      driver, cmOutputConverter::HOME_OUTPUT, cmOutputConverter::MAKERULE);
+    driver = cmSystemTools::ConvertToOutputPath(
+      this->LocalGenerator
+        ->ConvertToRelativePath(this->LocalGenerator->GetBinaryDirectory(),
+                                driver)
+        .c_str());
     makeDepends << driver << ": " << obj_m << ".provides.build\n";
   }
 

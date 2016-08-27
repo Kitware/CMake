@@ -480,9 +480,10 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
   }
 
   // Begin the directory-level rules section.
-  std::string dir = lg->GetCurrentBinaryDirectory();
-  dir = lg->Convert(dir, cmOutputConverter::HOME_OUTPUT,
-                    cmOutputConverter::MAKERULE);
+  std::string dir = cmSystemTools::ConvertToOutputPath(
+    lg->ConvertToRelativePath(lg->GetBinaryDirectory(),
+                              lg->GetCurrentBinaryDirectory())
+      .c_str());
   lg->WriteDivider(ruleFileStream);
   ruleFileStream << "# Directory level rules for directory " << dir << "\n\n";
 

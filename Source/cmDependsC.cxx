@@ -247,9 +247,11 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   for (std::set<std::string>::const_iterator i = dependencies.begin();
        i != dependencies.end(); ++i) {
     makeDepends << obj_m << ": "
-                << this->LocalGenerator->Convert(
-                     *i, cmOutputConverter::HOME_OUTPUT,
-                     cmOutputConverter::MAKERULE)
+                << cmSystemTools::ConvertToOutputPath(
+                     this->LocalGenerator
+                       ->ConvertToRelativePath(
+                         this->LocalGenerator->GetBinaryDirectory(), *i)
+                       .c_str())
                 << std::endl;
     internalDepends << " " << *i << std::endl;
   }
