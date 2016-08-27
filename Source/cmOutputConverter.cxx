@@ -49,26 +49,26 @@ std::string cmOutputConverter::ConvertToOutputForExisting(
 std::string cmOutputConverter::ConvertToRelativePath(
   const std::string& source, RelativeRoot relative) const
 {
-  std::string result = source;
+  std::string result;
 
   switch (relative) {
     case HOME:
       result = this->ConvertToRelativePath(
-        this->GetState()->GetSourceDirectoryComponents(), result);
+        this->GetState()->GetSourceDirectoryComponents(), source);
       break;
     case START:
       result = this->ConvertToRelativePath(
         this->StateSnapshot.GetDirectory().GetCurrentSourceComponents(),
-        result);
+        source);
       break;
     case HOME_OUTPUT:
       result = this->ConvertToRelativePath(
-        this->GetState()->GetBinaryDirectoryComponents(), result);
+        this->GetState()->GetBinaryDirectoryComponents(), source);
       break;
     case START_OUTPUT:
       result = this->ConvertToRelativePath(
         this->StateSnapshot.GetDirectory().GetCurrentBinaryComponents(),
-        result);
+        source);
       break;
   }
   return result;
