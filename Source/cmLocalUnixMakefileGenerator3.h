@@ -121,8 +121,7 @@ public:
 
   // create a command that cds to the start dir then runs the commands
   void CreateCDCommand(std::vector<std::string>& commands,
-                       const char* targetDir,
-                       cmOutputConverter::RelativeRoot returnDir);
+                       const char* targetDir, std::string const& relDir);
 
   static std::string ConvertToQuotedOutputPath(const char* p,
                                                bool useWatcomQuote);

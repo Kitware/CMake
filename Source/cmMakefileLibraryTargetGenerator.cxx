@@ -418,7 +418,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
                                              this->GeneratorTarget, "target");
     this->LocalGenerator->CreateCDCommand(
       commands1, this->Makefile->GetCurrentBinaryDirectory(),
-      cmOutputConverter::HOME_OUTPUT);
+      this->LocalGenerator->GetBinaryDirectory());
     commands.insert(commands.end(), commands1.begin(), commands1.end());
     commands1.clear();
   }
@@ -672,7 +672,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   }
   this->LocalGenerator->CreateCDCommand(
     commands1, this->Makefile->GetCurrentBinaryDirectory(),
-    cmOutputConverter::HOME_OUTPUT);
+    this->LocalGenerator->GetBinaryDirectory());
   commands.insert(commands.end(), commands1.begin(), commands1.end());
   commands1.clear();
 
@@ -689,7 +689,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     commands1.push_back(symlink);
     this->LocalGenerator->CreateCDCommand(
       commands1, this->Makefile->GetCurrentBinaryDirectory(),
-      cmOutputConverter::HOME_OUTPUT);
+      this->LocalGenerator->GetBinaryDirectory());
     commands.insert(commands.end(), commands1.begin(), commands1.end());
     commands1.clear();
   }

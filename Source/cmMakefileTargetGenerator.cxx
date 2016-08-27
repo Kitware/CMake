@@ -649,7 +649,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
     // Change the command working directory to the local build tree.
     this->LocalGenerator->CreateCDCommand(
       compileCommands, this->LocalGenerator->GetCurrentBinaryDirectory(),
-      cmOutputConverter::HOME_OUTPUT);
+      this->LocalGenerator->GetBinaryDirectory());
     commands.insert(commands.end(), compileCommands.begin(),
                     compileCommands.end());
   }
@@ -712,7 +712,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         this->LocalGenerator->CreateCDCommand(
           preprocessCommands,
           this->LocalGenerator->GetCurrentBinaryDirectory(),
-          cmOutputConverter::HOME_OUTPUT);
+          this->LocalGenerator->GetBinaryDirectory());
         commands.insert(commands.end(), preprocessCommands.begin(),
                         preprocessCommands.end());
       } else {
@@ -758,7 +758,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
 
         this->LocalGenerator->CreateCDCommand(
           assemblyCommands, this->LocalGenerator->GetCurrentBinaryDirectory(),
-          cmOutputConverter::HOME_OUTPUT);
+          this->LocalGenerator->GetBinaryDirectory());
         commands.insert(commands.end(), assemblyCommands.begin(),
                         assemblyCommands.end());
       } else {
@@ -849,7 +849,7 @@ void cmMakefileTargetGenerator::WriteTargetCleanRules()
                                            this->GeneratorTarget);
   this->LocalGenerator->CreateCDCommand(
     commands, this->LocalGenerator->GetCurrentBinaryDirectory(),
-    cmOutputConverter::HOME_OUTPUT);
+    this->LocalGenerator->GetBinaryDirectory());
 
   // Write the rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, CM_NULLPTR,
