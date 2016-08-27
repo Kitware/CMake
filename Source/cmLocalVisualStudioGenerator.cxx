@@ -127,7 +127,6 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
 {
   bool useLocal = this->CustomCommandUseLocal();
   std::string workingDirectory = ccg.GetWorkingDirectory();
-  RelativeRoot relativeRoot = workingDirectory.empty() ? START_OUTPUT : NONE;
 
   // Avoid leading or trailing newlines.
   std::string newline = "";
@@ -203,7 +202,11 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
       }
     }
 
-    script += this->Convert(cmd.c_str(), relativeRoot, SHELL);
+    if (workingDirectory.empty()) {
+      script += this->Convert(cmd.c_str(), START_OUTPUT, SHELL);
+    } else {
+      script += this->Convert(cmd.c_str(), NONE, SHELL);
+    }
     ccg.AppendArguments(c, script);
 
     // After each custom command, check for an error result.
