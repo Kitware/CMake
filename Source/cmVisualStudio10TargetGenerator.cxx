@@ -2416,9 +2416,8 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
   ItemVector libs = cli.GetItems();
   for (ItemVector::const_iterator l = libs.begin(); l != libs.end(); ++l) {
     if (l->IsPath) {
-      std::string path = this->LocalGenerator->Convert(
-        l->Value.c_str(), cmOutputConverter::START_OUTPUT,
-        cmOutputConverter::UNCHANGED);
+      std::string path = this->LocalGenerator->ConvertToRelativePath(
+        l->Value.c_str(), cmOutputConverter::START_OUTPUT);
       this->ConvertToWindowsSlash(path);
       libVec.push_back(path);
     } else if (!l->Target ||

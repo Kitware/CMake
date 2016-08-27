@@ -172,8 +172,8 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
       const std::vector<std::string>& outputs = ccg.GetOutputs();
       for (std::vector<std::string>::const_iterator o = outputs.begin();
            o != outputs.end(); ++o) {
-        this->CleanFiles.push_back(this->Convert(
-          *o, cmOutputConverter::START_OUTPUT, cmOutputConverter::UNCHANGED));
+        this->CleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
+          *o, cmOutputConverter::START_OUTPUT));
       }
     }
   }
@@ -1258,9 +1258,8 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(
     this->LocalGenerator->GetRelativeTargetDirectory(this->GeneratorTarget);
   std::string buildTargetRuleName = dir;
   buildTargetRuleName += relink ? "/preinstall" : "/build";
-  buildTargetRuleName =
-    this->Convert(buildTargetRuleName, cmOutputConverter::HOME_OUTPUT,
-                  cmOutputConverter::UNCHANGED);
+  buildTargetRuleName = this->LocalGenerator->ConvertToRelativePath(
+    buildTargetRuleName, cmOutputConverter::HOME_OUTPUT);
 
   // Build the list of target outputs to drive.
   std::vector<std::string> depends;

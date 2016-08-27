@@ -1076,8 +1076,8 @@ void cmLocalUnixMakefileGenerator3::AppendCleanCommand(
     fout << "file(REMOVE_RECURSE\n";
     for (std::vector<std::string>::const_iterator f = files.begin();
          f != files.end(); ++f) {
-      std::string fc = this->Convert(*f, cmOutputConverter::START_OUTPUT,
-                                     cmOutputConverter::UNCHANGED);
+      std::string fc =
+        this->ConvertToRelativePath(*f, cmOutputConverter::START_OUTPUT);
       fout << "  " << cmOutputConverter::EscapeForCMake(fc) << "\n";
     }
     fout << ")\n";
