@@ -250,8 +250,7 @@ protected:
   void CheckMultipleOutputs(bool verbose);
 
 private:
-  std::string ConvertShellCommand(std::string const& cmd,
-                                  cmOutputConverter::RelativeRoot root);
+  std::string MaybeConvertWatcomShellCommand(std::string const& cmd);
   std::string MakeLauncher(cmCustomCommandGenerator const& ccg,
                            cmGeneratorTarget* target,
                            cmOutputConverter::RelativeRoot relative);

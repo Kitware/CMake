@@ -592,8 +592,8 @@ void cmLocalUnixMakefileGenerator3::WriteMakeRule(
   }
 }
 
-std::string cmLocalUnixMakefileGenerator3::ConvertShellCommand(
-  std::string const& cmd, cmOutputConverter::RelativeRoot root)
+std::string cmLocalUnixMakefileGenerator3::MaybeConvertWatcomShellCommand(
+  std::string const& cmd)
 {
   if (this->IsWatcomWMake() && cmSystemTools::FileIsFullPath(cmd.c_str()) &&
       cmd.find_first_of("( )") != cmd.npos) {
@@ -606,7 +606,7 @@ std::string cmLocalUnixMakefileGenerator3::ConvertShellCommand(
                            cmOutputConverter::SHELL);
     }
   }
-  return this->Convert(cmd, root, cmOutputConverter::SHELL);
+  return std::string();
 }
 
 void cmLocalUnixMakefileGenerator3::WriteMakeVariables(
@@ -638,8 +638,13 @@ void cmLocalUnixMakefileGenerator3::WriteMakeVariables(
 #endif
   }
 
-  std::string cmakeShellCommand = this->ConvertShellCommand(
-    cmSystemTools::GetCMakeCommand(), cmOutputConverter::FULL);
+  std::string cmakeShellCommand =
+    this->MaybeConvertWatcomShellCommand(cmSystemTools::GetCMakeCommand());
+  if (cmakeShellCommand.empty()) {
+    cmakeShellCommand =
+      this->Convert(cmSystemTools::GetCMakeCommand(), cmOutputConverter::FULL,
+                    cmOutputConverter::SHELL);
+  }
 
   /* clang-format off */
   makefileStream
@@ -975,7 +980,12 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
       std::string launcher = this->MakeLauncher(
         ccg, target, workingDir.empty() ? cmOutputConverter::START_OUTPUT
                                         : cmOutputConverter::NONE);
-      cmd = launcher + this->ConvertShellCommand(cmd, cmOutputConverter::NONE);
+      std::string shellCommand = this->MaybeConvertWatcomShellCommand(cmd);
+      if (shellCommand.empty()) {
+        shellCommand = this->Convert(cmd, cmOutputConverter::NONE,
+                                     cmOutputConverter::SHELL);
+      }
+      cmd = launcher + shellCommand;
 
       ccg.AppendArguments(c, cmd);
       if (content) {
