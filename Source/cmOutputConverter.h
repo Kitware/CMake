@@ -38,7 +38,6 @@ public:
    */
   enum RelativeRoot
   {
-    FULL,
     HOME,
     START,
     HOME_OUTPUT,

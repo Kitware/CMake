@@ -70,9 +70,6 @@ std::string cmOutputConverter::ConvertToRelativePath(
         this->StateSnapshot.GetDirectory().GetCurrentBinaryComponents(),
         result);
       break;
-    case FULL:
-      result = cmSystemTools::CollapseFullPath(result);
-      break;
   }
   return result;
 }
