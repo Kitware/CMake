@@ -977,7 +977,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
       bool had_slash = cmd.find('/') != cmd.npos;
       if (workingDir.empty()) {
         cmd =
-          this->ConvertToRelativePath(cmd, cmOutputConverter::START_OUTPUT);
+          this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), cmd);
       }
       bool has_slash = cmd.find('/') != cmd.npos;
       if (had_slash && !has_slash) {
@@ -1088,7 +1088,7 @@ void cmLocalUnixMakefileGenerator3::AppendCleanCommand(
     for (std::vector<std::string>::const_iterator f = files.begin();
          f != files.end(); ++f) {
       std::string fc =
-        this->ConvertToRelativePath(*f, cmOutputConverter::START_OUTPUT);
+        this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), *f);
       fout << "  " << cmOutputConverter::EscapeForCMake(fc) << "\n";
     }
     fout << ")\n";

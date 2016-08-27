@@ -173,7 +173,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
       for (std::vector<std::string>::const_iterator o = outputs.begin();
            o != outputs.end(); ++o) {
         this->CleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
-          *o, cmOutputConverter::START_OUTPUT));
+          this->LocalGenerator->GetCurrentBinaryDirectory(), *o));
       }
     }
   }
@@ -313,7 +313,7 @@ void cmMakefileTargetGenerator::MacOSXContentGeneratorType::operator()(
   output += cmSystemTools::GetFilenameName(input);
   this->Generator->CleanFiles.push_back(
     this->Generator->LocalGenerator->ConvertToRelativePath(
-      output, cmOutputConverter::START_OUTPUT));
+      this->Generator->LocalGenerator->GetCurrentBinaryDirectory(), output));
   output = this->Generator->LocalGenerator->ConvertToRelativePath(
     output, cmOutputConverter::HOME_OUTPUT);
 
@@ -1184,7 +1184,7 @@ void cmMakefileTargetGenerator::WriteObjectsVariable(
          this->ExternalObjects.begin();
        i != this->ExternalObjects.end(); ++i) {
     object = this->LocalGenerator->ConvertToRelativePath(
-      *i, cmOutputConverter::START_OUTPUT);
+      this->LocalGenerator->GetCurrentBinaryDirectory(), *i);
     *this->BuildFileStream << " " << lineContinue << "\n"
                            << this->Makefile->GetSafeDefinition(
                                 "CMAKE_OBJECT_NAME");

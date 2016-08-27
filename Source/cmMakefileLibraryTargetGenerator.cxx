@@ -368,23 +368,24 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   // Clean files associated with this library.
   std::vector<std::string> libCleanFiles;
   libCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
-    targetFullPath, cmOutputConverter::START_OUTPUT));
+    this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPath));
   if (targetNameReal != targetName) {
     libCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
-      targetFullPathReal, cmOutputConverter::START_OUTPUT));
+      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal));
   }
   if (targetNameSO != targetName && targetNameSO != targetNameReal) {
     libCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
-      targetFullPathSO, cmOutputConverter::START_OUTPUT));
+      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathSO));
   }
   if (!targetNameImport.empty()) {
     libCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
-      targetFullPathImport, cmOutputConverter::START_OUTPUT));
+      this->LocalGenerator->GetCurrentBinaryDirectory(),
+      targetFullPathImport));
     std::string implib;
     if (this->GeneratorTarget->GetImplibGNUtoMS(targetFullPathImport,
                                                 implib)) {
       libCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
-        implib, cmOutputConverter::START_OUTPUT));
+        this->LocalGenerator->GetCurrentBinaryDirectory(), implib));
     }
   }
 
@@ -392,15 +393,15 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   // cleaned.  We do not want to delete the .pdb file just before
   // linking the target.
   this->CleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
-    targetFullPathPDB, cmOutputConverter::START_OUTPUT));
+    this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathPDB));
 
 #ifdef _WIN32
   // There may be a manifest file for this target.  Add it to the
   // clean set just in case.
   if (this->GeneratorTarget->GetType() != cmState::STATIC_LIBRARY) {
     libCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
-      (targetFullPath + ".manifest").c_str(),
-      cmOutputConverter::START_OUTPUT));
+      this->LocalGenerator->GetCurrentBinaryDirectory(),
+      (targetFullPath + ".manifest").c_str()));
   }
 #endif
 

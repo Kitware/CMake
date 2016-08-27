@@ -206,15 +206,17 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
       fcStream << "\n";
       fcStream << "  \""
                << this->LocalGenerator->ConvertToRelativePath(
-                    mod_lower, cmOutputConverter::START_OUTPUT)
+                    this->LocalGenerator->GetCurrentBinaryDirectory(),
+                    mod_lower)
                << "\"\n";
       fcStream << "  \""
                << this->LocalGenerator->ConvertToRelativePath(
-                    mod_upper, cmOutputConverter::START_OUTPUT)
+                    this->LocalGenerator->GetCurrentBinaryDirectory(),
+                    mod_upper)
                << "\"\n";
       fcStream << "  \""
                << this->LocalGenerator->ConvertToRelativePath(
-                    stamp, cmOutputConverter::START_OUTPUT)
+                    this->LocalGenerator->GetCurrentBinaryDirectory(), stamp)
                << "\"\n";
     }
     fcStream << "  )\n";

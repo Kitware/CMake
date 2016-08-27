@@ -180,7 +180,8 @@ void cmLocalGenerator::GenerateTestFiles()
   for (vec_t::const_iterator i = children.begin(); i != children.end(); ++i) {
     // TODO: Use add_subdirectory instead?
     std::string outP = i->GetDirectory().GetCurrentBinary();
-    outP = this->ConvertToRelativePath(outP, START_OUTPUT);
+    outP =
+      this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), outP);
     outP = cmOutputConverter::EscapeForCMake(outP);
     fout << "subdirs(" << outP << ")" << std::endl;
   }
@@ -2246,7 +2247,7 @@ std::string cmLocalGenerator::ConstructComment(
          o != ccg.GetOutputs().end(); ++o) {
       comment += sep;
       comment +=
-        this->ConvertToRelativePath(*o, cmOutputConverter::START_OUTPUT);
+        this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), *o);
       sep = ", ";
     }
     return comment;
@@ -2522,7 +2523,7 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
 
   // Try referencing the source relative to the binary tree.
   std::string relFromBinary =
-    this->ConvertToRelativePath(fullPath, START_OUTPUT);
+    this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), fullPath);
   assert(!relFromBinary.empty());
   bool relBinary = !cmSystemTools::FileIsFullPath(relFromBinary.c_str());
   bool subBinary = relBinary && relFromBinary[0] != '.';

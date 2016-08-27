@@ -324,13 +324,13 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     << "# The top level Makefile was generated from the following files:\n"
     << "set(CMAKE_MAKEFILE_DEPENDS\n"
     << "  \""
-    << lg->ConvertToRelativePath(cache, cmOutputConverter::START_OUTPUT)
+    << lg->ConvertToRelativePath(lg->GetCurrentBinaryDirectory(), cache)
     << "\"\n";
   for (std::vector<std::string>::const_iterator i = lfiles.begin();
        i != lfiles.end(); ++i) {
     cmakefileStream << "  \""
                     << lg->ConvertToRelativePath(
-                         *i, cmOutputConverter::START_OUTPUT)
+                         lg->GetCurrentBinaryDirectory(), *i)
                     << "\"\n";
   }
   cmakefileStream << "  )\n\n";
@@ -344,12 +344,12 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   cmakefileStream << "# The corresponding makefile is:\n"
                   << "set(CMAKE_MAKEFILE_OUTPUTS\n"
                   << "  \""
-                  << lg->ConvertToRelativePath(makefileName,
-                                               cmOutputConverter::START_OUTPUT)
+                  << lg->ConvertToRelativePath(lg->GetCurrentBinaryDirectory(),
+                                               makefileName)
                   << "\"\n"
                   << "  \""
-                  << lg->ConvertToRelativePath(check,
-                                               cmOutputConverter::START_OUTPUT)
+                  << lg->ConvertToRelativePath(lg->GetCurrentBinaryDirectory(),
+                                               check)
                   << "\"\n";
   cmakefileStream << "  )\n\n";
 
