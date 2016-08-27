@@ -2547,8 +2547,8 @@ void cmGlobalGenerator::AddRuleHash(const std::vector<std::string>& outputs,
 
   // Shorten the output name (in expected use case).
   cmOutputConverter converter(this->GetMakefiles()[0]->GetStateSnapshot());
-  std::string fname =
-    converter.Convert(outputs[0], cmOutputConverter::HOME_OUTPUT);
+  std::string fname = converter.ConvertToRelativePath(
+    outputs[0], cmOutputConverter::HOME_OUTPUT);
 
   // Associate the hash with this output.
   this->RuleHashes[fname] = hash;

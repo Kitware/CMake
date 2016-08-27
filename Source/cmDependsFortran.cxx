@@ -193,15 +193,15 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
       stamp += ".mod.stamp";
       fcStream << "\n";
       fcStream << "  \""
-               << this->LocalGenerator->Convert(
+               << this->LocalGenerator->ConvertToRelativePath(
                     mod_lower, cmOutputConverter::START_OUTPUT)
                << "\"\n";
       fcStream << "  \""
-               << this->LocalGenerator->Convert(
+               << this->LocalGenerator->ConvertToRelativePath(
                     mod_upper, cmOutputConverter::START_OUTPUT)
                << "\"\n";
       fcStream << "  \""
-               << this->LocalGenerator->Convert(
+               << this->LocalGenerator->ConvertToRelativePath(
                     stamp, cmOutputConverter::START_OUTPUT)
                << "\"\n";
     }
@@ -317,8 +317,8 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
   const char* src = info.Source.c_str();
 
   // Write the include dependencies to the output stream.
-  std::string obj_i =
-    this->LocalGenerator->Convert(obj, cmOutputConverter::HOME_OUTPUT);
+  std::string obj_i = this->LocalGenerator->ConvertToRelativePath(
+    obj, cmOutputConverter::HOME_OUTPUT);
   std::string obj_m = this->LocalGenerator->ConvertToOutputFormat(
     obj_i, cmOutputConverter::MAKERULE);
   internalDepends << obj_i << std::endl;

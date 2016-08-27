@@ -176,7 +176,7 @@ void cmLocalGenerator::GenerateTestFiles()
     // TODO: Use add_subdirectory instead?
     fout << "subdirs(";
     std::string outP = children[i].GetDirectory().GetCurrentBinary();
-    fout << this->Convert(outP, START_OUTPUT);
+    fout << this->ConvertToRelativePath(outP, START_OUTPUT);
     fout << ")" << std::endl;
   }
 }
@@ -2237,7 +2237,8 @@ std::string cmLocalGenerator::ConstructComment(
     for (std::vector<std::string>::const_iterator o = ccg.GetOutputs().begin();
          o != ccg.GetOutputs().end(); ++o) {
       comment += sep;
-      comment += this->Convert(*o, cmOutputConverter::START_OUTPUT);
+      comment +=
+        this->ConvertToRelativePath(*o, cmOutputConverter::START_OUTPUT);
       sep = ", ";
     }
     return comment;
@@ -2505,13 +2506,14 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   const char* fullPath = source.GetFullPath().c_str();
 
   // Try referencing the source relative to the source tree.
-  std::string relFromSource = this->Convert(fullPath, START);
+  std::string relFromSource = this->ConvertToRelativePath(fullPath, START);
   assert(!relFromSource.empty());
   bool relSource = !cmSystemTools::FileIsFullPath(relFromSource.c_str());
   bool subSource = relSource && relFromSource[0] != '.';
 
   // Try referencing the source relative to the binary tree.
-  std::string relFromBinary = this->Convert(fullPath, START_OUTPUT);
+  std::string relFromBinary =
+    this->ConvertToRelativePath(fullPath, START_OUTPUT);
   assert(!relFromBinary.empty());
   bool relBinary = !cmSystemTools::FileIsFullPath(relFromBinary.c_str());
   bool subBinary = relBinary && relFromBinary[0] != '.';

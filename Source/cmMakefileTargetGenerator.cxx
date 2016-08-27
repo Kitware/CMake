@@ -312,8 +312,10 @@ void cmMakefileTargetGenerator::MacOSXContentGeneratorType::operator()(
   output += "/";
   output += cmSystemTools::GetFilenameName(input);
   this->Generator->CleanFiles.push_back(
-    this->Generator->Convert(output, cmOutputConverter::START_OUTPUT));
-  output = this->Generator->Convert(output, cmOutputConverter::HOME_OUTPUT);
+    this->Generator->LocalGenerator->ConvertToRelativePath(
+      output, cmOutputConverter::START_OUTPUT));
+  output = this->Generator->LocalGenerator->ConvertToRelativePath(
+    output, cmOutputConverter::HOME_OUTPUT);
 
   // Create a rule to copy the content into the bundle.
   std::vector<std::string> depends;
@@ -1171,7 +1173,8 @@ void cmMakefileTargetGenerator::WriteObjectsVariable(
   for (std::vector<std::string>::const_iterator i =
          this->ExternalObjects.begin();
        i != this->ExternalObjects.end(); ++i) {
-    object = this->Convert(*i, cmOutputConverter::START_OUTPUT);
+    object = this->LocalGenerator->ConvertToRelativePath(
+      *i, cmOutputConverter::START_OUTPUT);
     *this->BuildFileStream << " " << lineContinue << "\n"
                            << this->Makefile->GetSafeDefinition(
                                 "CMAKE_OBJECT_NAME");

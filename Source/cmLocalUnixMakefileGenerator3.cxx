@@ -140,7 +140,7 @@ void cmLocalUnixMakefileGenerator3::ComputeHomeRelativeOutputPath()
 {
   // Compute the path to use when referencing the current output
   // directory from the top output directory.
-  this->HomeRelativeOutputPath = this->Convert(
+  this->HomeRelativeOutputPath = this->ConvertToRelativePath(
     this->GetCurrentBinaryDirectory(), cmOutputConverter::HOME_OUTPUT);
   if (this->HomeRelativeOutputPath == ".") {
     this->HomeRelativeOutputPath = "";
@@ -966,7 +966,8 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
       // working directory will be the start-output directory.
       bool had_slash = cmd.find('/') != cmd.npos;
       if (workingDir.empty()) {
-        cmd = this->Convert(cmd, cmOutputConverter::START_OUTPUT);
+        cmd =
+          this->ConvertToRelativePath(cmd, cmOutputConverter::START_OUTPUT);
       }
       bool has_slash = cmd.find('/') != cmd.npos;
       if (had_slash && !has_slash) {
@@ -1851,7 +1852,8 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
     for (std::vector<std::string>::iterator i = includes.begin();
          i != includes.end(); ++i) {
       cmakefileStream << "  \""
-                      << this->Convert(*i, cmOutputConverter::HOME_OUTPUT)
+                      << this->ConvertToRelativePath(
+                           *i, cmOutputConverter::HOME_OUTPUT)
                       << "\"\n";
     }
     cmakefileStream << "  )\n";
@@ -1915,7 +1917,8 @@ std::string cmLocalUnixMakefileGenerator3::GetRecursiveMakeCall(
   // Add the target.
   if (!tgt.empty()) {
     // The make target is always relative to the top of the build tree.
-    std::string tgt2 = this->Convert(tgt, cmOutputConverter::HOME_OUTPUT);
+    std::string tgt2 =
+      this->ConvertToRelativePath(tgt, cmOutputConverter::HOME_OUTPUT);
 
     // The target may have been written with windows paths.
     cmSystemTools::ConvertToOutputSlashes(tgt2);

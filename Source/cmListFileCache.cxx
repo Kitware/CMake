@@ -402,7 +402,8 @@ void cmListFileBacktrace::PrintTitle(std::ostream& out) const
   cmOutputConverter converter(this->Bottom);
   cmListFileContext lfc = *this->Cur;
   if (!this->Bottom.GetState()->GetIsInTryCompile()) {
-    lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
+    lfc.FilePath =
+      converter.ConvertToRelativePath(lfc.FilePath, cmOutputConverter::HOME);
   }
   out << (lfc.Line ? " at " : " in ") << lfc;
 }
@@ -427,7 +428,8 @@ void cmListFileBacktrace::PrintCallStack(std::ostream& out) const
     }
     cmListFileContext lfc = *i;
     if (!this->Bottom.GetState()->GetIsInTryCompile()) {
-      lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
+      lfc.FilePath =
+        converter.ConvertToRelativePath(lfc.FilePath, cmOutputConverter::HOME);
     }
     out << "  " << lfc << "\n";
   }
