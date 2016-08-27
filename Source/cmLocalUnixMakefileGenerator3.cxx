@@ -990,10 +990,14 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
         std::string output;
         const std::vector<std::string>& outputs = ccg.GetOutputs();
         if (!outputs.empty()) {
-          output = this->Convert(outputs[0], workingDir.empty()
-                                   ? cmOutputConverter::START_OUTPUT
-                                   : cmOutputConverter::NONE,
-                                 cmOutputConverter::SHELL);
+          if (workingDir.empty()) {
+            output = this->Convert(outputs[0], cmOutputConverter::START_OUTPUT,
+                                   cmOutputConverter::SHELL);
+
+          } else {
+            output = this->Convert(outputs[0], cmOutputConverter::NONE,
+                                   cmOutputConverter::SHELL);
+          }
         }
         vars.Output = output.c_str();
 

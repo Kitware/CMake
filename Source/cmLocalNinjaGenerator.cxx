@@ -486,12 +486,13 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   std::string output;
   const std::vector<std::string>& outputs = ccg.GetOutputs();
   if (!outputs.empty()) {
-    cmOutputConverter::RelativeRoot relative_root =
-      ccg.GetWorkingDirectory().empty() ? cmOutputConverter::START_OUTPUT
-                                        : cmOutputConverter::NONE;
-
-    output =
-      this->Convert(outputs[0], relative_root, cmOutputConverter::SHELL);
+    if (ccg.GetWorkingDirectory().empty()) {
+      output = this->Convert(outputs[0], cmOutputConverter::START_OUTPUT,
+                             cmOutputConverter::SHELL);
+    } else {
+      output = this->Convert(outputs[0], cmOutputConverter::NONE,
+                             cmOutputConverter::SHELL);
+    }
   }
   vars.Output = output.c_str();
 
