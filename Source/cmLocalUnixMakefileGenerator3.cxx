@@ -976,9 +976,33 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
         // without the current directory being in the search path.
         cmd = "./" + cmd;
       }
-      std::string launcher = this->MakeLauncher(
-        ccg, target, workingDir.empty() ? cmOutputConverter::START_OUTPUT
-                                        : cmOutputConverter::NONE);
+
+      std::string launcher;
+      // Short-circuit if there is no launcher.
+      const char* prop = "RULE_LAUNCH_CUSTOM";
+      const char* val = this->GetRuleLauncher(target, prop);
+      if (val && *val) {
+        // Expand rules in the empty string.  It may insert the launcher and
+        // perform replacements.
+        RuleVariables vars;
+        vars.RuleLauncher = prop;
+        vars.CMTarget = target;
+        std::string output;
+        const std::vector<std::string>& outputs = ccg.GetOutputs();
+        if (!outputs.empty()) {
+          output = this->Convert(outputs[0], workingDir.empty()
+                                   ? cmOutputConverter::START_OUTPUT
+                                   : cmOutputConverter::NONE,
+                                 cmOutputConverter::SHELL);
+        }
+        vars.Output = output.c_str();
+
+        this->ExpandRuleVariables(launcher, vars);
+        if (!launcher.empty()) {
+          launcher += " ";
+        }
+      }
+
       std::string shellCommand = this->MaybeConvertWatcomShellCommand(cmd);
       if (shellCommand.empty()) {
         shellCommand = this->Convert(cmd, cmOutputConverter::NONE,
@@ -1025,35 +1049,6 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
 
   // push back the custom commands
   commands.insert(commands.end(), commands1.begin(), commands1.end());
-}
-
-std::string cmLocalUnixMakefileGenerator3::MakeLauncher(
-  cmCustomCommandGenerator const& ccg, cmGeneratorTarget* target,
-  cmOutputConverter::RelativeRoot relative)
-{
-  std::string launcher;
-  // Short-circuit if there is no launcher.
-  const char* prop = "RULE_LAUNCH_CUSTOM";
-  const char* val = this->GetRuleLauncher(target, prop);
-  if (val && *val) {
-    // Expand rules in the empty string.  It may insert the launcher and
-    // perform replacements.
-    RuleVariables vars;
-    vars.RuleLauncher = prop;
-    vars.CMTarget = target;
-    std::string output;
-    const std::vector<std::string>& outputs = ccg.GetOutputs();
-    if (!outputs.empty()) {
-      output = this->Convert(outputs[0], relative, cmOutputConverter::SHELL);
-    }
-    vars.Output = output.c_str();
-
-    this->ExpandRuleVariables(launcher, vars);
-    if (!launcher.empty()) {
-      launcher += " ";
-    }
-  }
-  return launcher;
 }
 
 void cmLocalUnixMakefileGenerator3::AppendCleanCommand(
