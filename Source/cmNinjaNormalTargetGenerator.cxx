@@ -543,8 +543,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       std::string install_dir =
         this->GetGeneratorTarget()->GetInstallNameDirForBuildTree(cfgName);
       if (!install_dir.empty()) {
-        vars["INSTALLNAME_DIR"] = localGen.Convert(
-          install_dir, cmOutputConverter::NONE, cmOutputConverter::SHELL);
+        vars["INSTALLNAME_DIR"] = localGen.ConvertToOutputFormat(
+          install_dir, cmOutputConverter::SHELL);
       }
     }
   }

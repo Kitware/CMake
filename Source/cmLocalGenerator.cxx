@@ -1393,7 +1393,7 @@ std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib,
         sp += lib.substr(pos);
 
         // Convert to an output path.
-        return this->Convert(sp.c_str(), NONE, format);
+        return this->ConvertToOutputFormat(sp.c_str(), format);
       }
     }
   }
@@ -1489,7 +1489,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
     for (std::vector<std::string>::const_iterator fdi = fwDirs.begin();
          fdi != fwDirs.end(); ++fdi) {
       frameworkPath += fwSearchFlag;
-      frameworkPath += this->Convert(*fdi, NONE, shellFormat);
+      frameworkPath += this->ConvertToOutputFormat(*fdi, shellFormat);
       frameworkPath += " ";
     }
   }
@@ -1535,7 +1535,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
     for (std::vector<std::string>::iterator ri = runtimeDirs.begin();
          ri != runtimeDirs.end(); ++ri) {
       rpath += cli.GetRuntimeFlag();
-      rpath += this->Convert(*ri, NONE, shellFormat);
+      rpath += this->ConvertToOutputFormat(*ri, shellFormat);
       rpath += " ";
     }
     fout << rpath;
@@ -1605,7 +1605,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
       flags += " ";
       flags += sysrootFlag;
       flags += " ";
-      flags += this->Convert(sysroot, NONE, SHELL);
+      flags += this->ConvertToOutputFormat(sysroot, SHELL);
     }
 
     if (deploymentTargetFlag && *deploymentTargetFlag && deploymentTarget &&

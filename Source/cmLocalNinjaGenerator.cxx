@@ -490,8 +490,8 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
       output = this->Convert(outputs[0], cmOutputConverter::START_OUTPUT,
                              cmOutputConverter::SHELL);
     } else {
-      output = this->Convert(outputs[0], cmOutputConverter::NONE,
-                             cmOutputConverter::SHELL);
+      output =
+        this->ConvertToOutputFormat(outputs[0], cmOutputConverter::SHELL);
     }
   }
   vars.Output = output.c_str();

@@ -74,8 +74,7 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
     for (std::vector<std::string>::const_iterator idi = includes.begin();
          idi != includes.end(); ++idi) {
       std::string flg = modpath_flag;
-      flg +=
-        this->Convert(*idi, cmOutputConverter::NONE, cmOutputConverter::SHELL);
+      flg += this->ConvertToOutputFormat(*idi, cmOutputConverter::SHELL);
       this->AppendFlags(flags, flg);
     }
   }

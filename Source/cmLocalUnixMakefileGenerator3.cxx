@@ -602,8 +602,7 @@ std::string cmLocalUnixMakefileGenerator3::MaybeConvertWatcomShellCommand(
     // lines with shell redirection operators.
     std::string scmd;
     if (cmSystemTools::GetShortPath(cmd, scmd)) {
-      return this->Convert(scmd, cmOutputConverter::NONE,
-                           cmOutputConverter::SHELL);
+      return this->ConvertToOutputFormat(scmd, cmOutputConverter::SHELL);
     }
   }
   return std::string();
@@ -790,8 +789,8 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsBottom(
     std::string runRule =
       "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
     runRule += " --check-build-system ";
-    runRule += this->Convert(cmakefileName, cmOutputConverter::NONE,
-                             cmOutputConverter::SHELL);
+    runRule +=
+      this->ConvertToOutputFormat(cmakefileName, cmOutputConverter::SHELL);
     runRule += " 0";
 
     std::vector<std::string> no_depends;
@@ -995,8 +994,8 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
                                    cmOutputConverter::SHELL);
 
           } else {
-            output = this->Convert(outputs[0], cmOutputConverter::NONE,
-                                   cmOutputConverter::SHELL);
+            output = this->ConvertToOutputFormat(outputs[0],
+                                                 cmOutputConverter::SHELL);
           }
         }
         vars.Output = output.c_str();
@@ -1009,8 +1008,8 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
 
       std::string shellCommand = this->MaybeConvertWatcomShellCommand(cmd);
       if (shellCommand.empty()) {
-        shellCommand = this->Convert(cmd, cmOutputConverter::NONE,
-                                     cmOutputConverter::SHELL);
+        shellCommand =
+          this->ConvertToOutputFormat(cmd, cmOutputConverter::SHELL);
       }
       cmd = launcher + shellCommand;
 
@@ -1681,8 +1680,8 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   std::string runRule =
     "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
   runRule += " --check-build-system ";
-  runRule += this->Convert(cmakefileName, cmOutputConverter::NONE,
-                           cmOutputConverter::SHELL);
+  runRule +=
+    this->ConvertToOutputFormat(cmakefileName, cmOutputConverter::SHELL);
   runRule += " 1";
   commands.push_back(runRule);
   this->CreateCDCommand(commands, this->GetBinaryDirectory(),
@@ -1895,8 +1894,7 @@ std::string cmLocalUnixMakefileGenerator3::GetRecursiveMakeCall(
   // Call make on the given file.
   std::string cmd;
   cmd += "$(MAKE) -f ";
-  cmd +=
-    this->Convert(makefile, cmOutputConverter::NONE, cmOutputConverter::SHELL);
+  cmd += this->ConvertToOutputFormat(makefile, cmOutputConverter::SHELL);
   cmd += " ";
 
   cmGlobalUnixMakefileGenerator3* gg =

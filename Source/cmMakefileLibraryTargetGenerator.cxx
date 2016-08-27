@@ -310,8 +310,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 
   // Construct the output path version of the names for use in command
   // arguments.
-  std::string targetOutPathPDB = this->Convert(
-    targetFullPathPDB, cmOutputConverter::NONE, cmOutputConverter::SHELL);
+  std::string targetOutPathPDB = this->LocalGenerator->ConvertToOutputFormat(
+    targetFullPathPDB, cmOutputConverter::SHELL);
   std::string targetOutPath = this->Convert(
     targetFullPath, cmOutputConverter::START_OUTPUT, cmOutputConverter::SHELL);
   std::string targetOutPathSO =
@@ -572,8 +572,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
         vars.TargetInstallNameDir = "";
       } else {
         // Convert to a path for the native build tool.
-        install_name_dir = this->LocalGenerator->Convert(
-          install_name_dir, cmOutputConverter::NONE, cmOutputConverter::SHELL);
+        install_name_dir = this->LocalGenerator->ConvertToOutputFormat(
+          install_name_dir, cmOutputConverter::SHELL);
         vars.TargetInstallNameDir = install_name_dir.c_str();
       }
     }
@@ -640,9 +640,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
       if (this->GeneratorTarget->GetProperty("LINK_WHAT_YOU_USE") &&
           (this->GeneratorTarget->GetType() == cmState::SHARED_LIBRARY)) {
-        std::string cmakeCommand =
-          this->Convert(cmSystemTools::GetCMakeCommand(),
-                        cmLocalGenerator::NONE, cmLocalGenerator::SHELL);
+        std::string cmakeCommand = this->LocalGenerator->ConvertToOutputFormat(
+          cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
         cmakeCommand += " -E __run_iwyu --lwyu=";
         cmakeCommand += targetOutPathReal;
         real_link_commands.push_back(cmakeCommand);

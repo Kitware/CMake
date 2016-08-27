@@ -205,7 +205,7 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
     if (workingDirectory.empty()) {
       script += this->Convert(cmd.c_str(), START_OUTPUT, SHELL);
     } else {
-      script += this->Convert(cmd.c_str(), NONE, SHELL);
+      script += this->ConvertToOutputFormat(cmd.c_str(), SHELL);
     }
     ccg.AppendArguments(c, script);
 

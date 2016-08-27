@@ -135,8 +135,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string targetFullPathReal = outpath + targetNameReal;
   std::string targetFullPathPDB = pdbOutputPath + targetNamePDB;
   std::string targetFullPathImport = outpathImp + targetNameImport;
-  std::string targetOutPathPDB = this->Convert(
-    targetFullPathPDB, cmOutputConverter::NONE, cmOutputConverter::SHELL);
+  std::string targetOutPathPDB = this->LocalGenerator->ConvertToOutputFormat(
+    targetFullPathPDB, cmOutputConverter::SHELL);
   // Convert to the output path to use in constructing commands.
   std::string targetOutPath = this->Convert(
     targetFullPath, cmOutputConverter::START_OUTPUT, cmOutputConverter::SHELL);
@@ -357,9 +357,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     vars.Manifests = manifests.c_str();
 
     if (this->GeneratorTarget->GetProperty("LINK_WHAT_YOU_USE")) {
-      std::string cmakeCommand =
-        this->Convert(cmSystemTools::GetCMakeCommand(), cmLocalGenerator::NONE,
-                      cmLocalGenerator::SHELL);
+      std::string cmakeCommand = this->LocalGenerator->ConvertToOutputFormat(
+        cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
       cmakeCommand += " -E __run_iwyu --lwyu=";
       cmakeCommand += targetOutPathReal;
       real_link_commands.push_back(cmakeCommand);
