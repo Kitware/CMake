@@ -57,9 +57,9 @@ protected:
   // The windows module definition source file (.def), if any.
   cmSourceFile const* ModuleDefinitionFile;
 
-  std::string Convert(
-    std::string const& source, cmOutputConverter::RelativeRoot relative,
-    cmOutputConverter::OutputFormat output = cmOutputConverter::UNCHANGED);
+  std::string Convert(std::string const& source,
+                      cmOutputConverter::RelativeRoot relative,
+                      cmOutputConverter::OutputFormat output);
 
   void AppendFortranFormatFlags(std::string& flags,
                                 cmSourceFile const& source);

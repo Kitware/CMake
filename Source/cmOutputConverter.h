@@ -45,7 +45,6 @@ public:
   };
   enum OutputFormat
   {
-    UNCHANGED,
     MAKERULE,
     SHELL,
     WATCOMQUOTE,
@@ -54,7 +53,7 @@ public:
   std::string ConvertToOutputFormat(const std::string& source,
                                     OutputFormat output) const;
   std::string Convert(const std::string& remote, RelativeRoot local,
-                      OutputFormat output = UNCHANGED) const;
+                      OutputFormat output) const;
   std::string ConvertToRelativePath(const std::string& remote,
                                     RelativeRoot local) const;
   std::string ConvertDirectorySeparatorsForShell(
