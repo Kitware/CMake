@@ -234,9 +234,9 @@ protected:
     cmOutputConverter::RelativeRoot relative = cmOutputConverter::HOME_OUTPUT);
   void AppendCustomCommand(
     std::vector<std::string>& commands, cmCustomCommandGenerator const& ccg,
-    cmGeneratorTarget* target, bool echo_comment = false,
+    cmGeneratorTarget* target,
     cmOutputConverter::RelativeRoot relative = cmOutputConverter::HOME_OUTPUT,
-    std::ostream* content = CM_NULLPTR);
+    bool echo_comment = false, std::ostream* content = CM_NULLPTR);
   void AppendCleanCommand(std::vector<std::string>& commands,
                           const std::vector<std::string>& files,
                           cmGeneratorTarget* target,

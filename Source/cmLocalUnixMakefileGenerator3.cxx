@@ -905,14 +905,14 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommands(
   for (std::vector<cmCustomCommand>::const_iterator i = ccs.begin();
        i != ccs.end(); ++i) {
     cmCustomCommandGenerator ccg(*i, this->ConfigName, this);
-    this->AppendCustomCommand(commands, ccg, target, true, relative);
+    this->AppendCustomCommand(commands, ccg, target, relative, true);
   }
 }
 
 void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
   std::vector<std::string>& commands, cmCustomCommandGenerator const& ccg,
-  cmGeneratorTarget* target, bool echo_comment,
-  cmOutputConverter::RelativeRoot relative, std::ostream* content)
+  cmGeneratorTarget* target, cmOutputConverter::RelativeRoot relative,
+  bool echo_comment, std::ostream* content)
 {
   // Optionally create a command to display the custom command's
   // comment text.  This is used for pre-build, pre-link, and
