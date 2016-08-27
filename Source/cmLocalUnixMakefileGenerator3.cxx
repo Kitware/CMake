@@ -2048,10 +2048,10 @@ void cmLocalUnixMakefileGenerator3::CreateCDCommand(
   std::vector<std::string>& commands, const char* tgtDir,
   cmOutputConverter::RelativeRoot relRetDir)
 {
-  const char* retDir = this->GetRelativeRootPath(relRetDir);
+  const char* relDir = this->GetRelativeRootPath(relRetDir);
 
   // do we need to cd?
-  if (!strcmp(tgtDir, retDir)) {
+  if (!strcmp(tgtDir, relDir)) {
     return;
   }
 
