@@ -835,8 +835,7 @@ std::string cmLocalUnixMakefileGenerator3::GetRelativeTargetDirectory(
 {
   std::string dir = this->HomeRelativeOutputPath;
   dir += this->GetTargetDirectory(target);
-  return this->Convert(dir, cmOutputConverter::NONE,
-                       cmOutputConverter::UNCHANGED);
+  return dir;
 }
 
 void cmLocalUnixMakefileGenerator3::AppendFlags(std::string& flags,
