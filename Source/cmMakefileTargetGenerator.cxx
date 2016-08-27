@@ -393,9 +393,9 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   std::string objFullPath = this->LocalGenerator->GetCurrentBinaryDirectory();
   objFullPath += "/";
   objFullPath += obj;
-  objFullPath = this->Convert(objFullPath, cmOutputConverter::FULL);
+  objFullPath = cmSystemTools::CollapseFullPath(objFullPath);
   std::string srcFullPath =
-    this->Convert(source.GetFullPath(), cmOutputConverter::FULL);
+    cmSystemTools::CollapseFullPath(source.GetFullPath());
   this->LocalGenerator->AddImplicitDepends(
     this->GeneratorTarget, lang, objFullPath.c_str(), srcFullPath.c_str());
 }
@@ -584,9 +584,8 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         lang_can_export_cmds && compileCommands.size() == 1) {
       std::string compileCommand = compileCommands[0];
       this->LocalGenerator->ExpandRuleVariables(compileCommand, vars);
-      std::string workingDirectory = this->LocalGenerator->Convert(
-        this->LocalGenerator->GetCurrentBinaryDirectory(),
-        cmOutputConverter::FULL);
+      std::string workingDirectory = cmSystemTools::CollapseFullPath(
+        this->LocalGenerator->GetCurrentBinaryDirectory());
       compileCommand.replace(compileCommand.find(langFlags), langFlags.size(),
                              this->GetFlags(lang));
       std::string langDefines = std::string("$(") + lang + "_DEFINES)";
@@ -1115,10 +1114,8 @@ void cmMakefileTargetGenerator::GenerateCustomRuleFile(
   for (cmCustomCommand::ImplicitDependsList::const_iterator idi =
          ccg.GetCC().GetImplicitDepends().begin();
        idi != ccg.GetCC().GetImplicitDepends().end(); ++idi) {
-    std::string objFullPath =
-      this->Convert(outputs[0], cmOutputConverter::FULL);
-    std::string srcFullPath =
-      this->Convert(idi->second, cmOutputConverter::FULL);
+    std::string objFullPath = cmSystemTools::CollapseFullPath(outputs[0]);
+    std::string srcFullPath = cmSystemTools::CollapseFullPath(idi->second);
     this->LocalGenerator->AddImplicitDepends(this->GeneratorTarget, idi->first,
                                              objFullPath.c_str(),
                                              srcFullPath.c_str());

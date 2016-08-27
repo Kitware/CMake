@@ -1067,8 +1067,7 @@ void cmLocalUnixMakefileGenerator3::AppendCleanCommand(
     cleanfile += filename;
   }
   cleanfile += ".cmake";
-  std::string cleanfilePath =
-    this->Convert(cleanfile, cmOutputConverter::FULL);
+  std::string cleanfilePath = cmSystemTools::CollapseFullPath(cleanfile);
   cmsys::ofstream fout(cleanfilePath.c_str());
   if (!fout) {
     cmSystemTools::Error("Could not create ", cleanfilePath.c_str());
