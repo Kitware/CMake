@@ -38,7 +38,6 @@ public:
    */
   enum RelativeRoot
   {
-    NONE,
     FULL,
     HOME,
     START,

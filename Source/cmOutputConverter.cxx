@@ -75,8 +75,6 @@ std::string cmOutputConverter::Convert(const std::string& source,
     case FULL:
       result = cmSystemTools::CollapseFullPath(result);
       break;
-    case NONE:
-      break;
   }
   return this->ConvertToOutputFormat(result, output);
 }
