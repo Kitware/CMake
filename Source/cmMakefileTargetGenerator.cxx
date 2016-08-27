@@ -1094,8 +1094,8 @@ void cmMakefileTargetGenerator::GenerateCustomRuleFile(
   // Now append the actual user-specified commands.
   std::ostringstream content;
   this->LocalGenerator->AppendCustomCommand(
-    commands, ccg, this->GeneratorTarget, cmOutputConverter::HOME_OUTPUT,
-    false, &content);
+    commands, ccg, this->GeneratorTarget,
+    this->LocalGenerator->GetBinaryDirectory(), false, &content);
 
   // Collect the dependencies.
   std::vector<std::string> depends;

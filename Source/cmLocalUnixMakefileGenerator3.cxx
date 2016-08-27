@@ -900,7 +900,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomDepend(
 
 void cmLocalUnixMakefileGenerator3::AppendCustomCommands(
   std::vector<std::string>& commands, const std::vector<cmCustomCommand>& ccs,
-  cmGeneratorTarget* target, cmOutputConverter::RelativeRoot relative)
+  cmGeneratorTarget* target, std::string const& relative)
 {
   for (std::vector<cmCustomCommand>::const_iterator i = ccs.begin();
        i != ccs.end(); ++i) {
@@ -911,8 +911,8 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommands(
 
 void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
   std::vector<std::string>& commands, cmCustomCommandGenerator const& ccg,
-  cmGeneratorTarget* target, cmOutputConverter::RelativeRoot relative,
-  bool echo_comment, std::ostream* content)
+  cmGeneratorTarget* target, std::string const& relative, bool echo_comment,
+  std::ostream* content)
 {
   // Optionally create a command to display the custom command's
   // comment text.  This is used for pre-build, pre-link, and
@@ -1011,8 +1011,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
   }
 
   // Setup the proper working directory for the commands.
-  std::string relativeDir = this->GetRelativeRootPath(relative);
-  this->CreateCDCommand(commands1, dir.c_str(), relativeDir);
+  this->CreateCDCommand(commands1, dir.c_str(), relative);
 
   // push back the custom commands
   commands.insert(commands.end(), commands1.begin(), commands1.end());
@@ -1559,9 +1558,9 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
       this->AppendCustomDepends(depends, gt->GetPreBuildCommands());
       this->AppendCustomDepends(depends, gt->GetPostBuildCommands());
       this->AppendCustomCommands(commands, gt->GetPreBuildCommands(), gt,
-                                 cmOutputConverter::START_OUTPUT);
+                                 this->GetCurrentBinaryDirectory());
       this->AppendCustomCommands(commands, gt->GetPostBuildCommands(), gt,
-                                 cmOutputConverter::START_OUTPUT);
+                                 this->GetCurrentBinaryDirectory());
       std::string targetName = gt->GetName();
       this->WriteMakeRule(ruleFileStream, targetString.c_str(), targetName,
                           depends, commands, true);

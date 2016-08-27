@@ -228,15 +228,16 @@ protected:
                            const std::vector<cmCustomCommand>& ccs);
   void AppendCustomDepend(std::vector<std::string>& depends,
                           cmCustomCommandGenerator const& cc);
-  void AppendCustomCommands(
-    std::vector<std::string>& commands,
-    const std::vector<cmCustomCommand>& ccs, cmGeneratorTarget* target,
-    cmOutputConverter::RelativeRoot relative = cmOutputConverter::HOME_OUTPUT);
-  void AppendCustomCommand(
-    std::vector<std::string>& commands, cmCustomCommandGenerator const& ccg,
-    cmGeneratorTarget* target,
-    cmOutputConverter::RelativeRoot relative = cmOutputConverter::HOME_OUTPUT,
-    bool echo_comment = false, std::ostream* content = CM_NULLPTR);
+  void AppendCustomCommands(std::vector<std::string>& commands,
+                            const std::vector<cmCustomCommand>& ccs,
+                            cmGeneratorTarget* target,
+                            std::string const& relative);
+  void AppendCustomCommand(std::vector<std::string>& commands,
+                           cmCustomCommandGenerator const& ccg,
+                           cmGeneratorTarget* target,
+                           std::string const& relative,
+                           bool echo_comment = false,
+                           std::ostream* content = CM_NULLPTR);
   void AppendCleanCommand(std::vector<std::string>& commands,
                           const std::vector<std::string>& files,
                           cmGeneratorTarget* target,

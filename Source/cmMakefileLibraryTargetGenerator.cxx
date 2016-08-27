@@ -112,7 +112,7 @@ void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
   // Add post-build rules.
   this->LocalGenerator->AppendCustomCommands(
     commands, this->GeneratorTarget->GetPostBuildCommands(),
-    this->GeneratorTarget);
+    this->GeneratorTarget, this->LocalGenerator->GetBinaryDirectory());
 
   // Depend on the object files.
   this->AppendObjectDepends(depends);
@@ -427,10 +427,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   if (!relink) {
     this->LocalGenerator->AppendCustomCommands(
       commands, this->GeneratorTarget->GetPreBuildCommands(),
-      this->GeneratorTarget);
+      this->GeneratorTarget, this->LocalGenerator->GetBinaryDirectory());
     this->LocalGenerator->AppendCustomCommands(
       commands, this->GeneratorTarget->GetPreLinkCommands(),
-      this->GeneratorTarget);
+      this->GeneratorTarget, this->LocalGenerator->GetBinaryDirectory());
   }
 
   // Determine whether a link script will be used.
@@ -698,7 +698,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   if (!relink) {
     this->LocalGenerator->AppendCustomCommands(
       commands, this->GeneratorTarget->GetPostBuildCommands(),
-      this->GeneratorTarget);
+      this->GeneratorTarget, this->LocalGenerator->GetBinaryDirectory());
   }
 
   // Compute the list of outputs.
