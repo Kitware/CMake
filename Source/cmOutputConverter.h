@@ -57,8 +57,6 @@ public:
                                     OutputFormat output) const;
   std::string Convert(const std::string& remote, RelativeRoot local,
                       OutputFormat output = UNCHANGED) const;
-  std::string Convert(RelativeRoot remote, const std::string& local,
-                      OutputFormat output = UNCHANGED) const;
   std::string ConvertDirectorySeparatorsForShell(
     const std::string& source) const;
 

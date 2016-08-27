@@ -146,27 +146,6 @@ std::string cmOutputConverter::ConvertDirectorySeparatorsForShell(
   return result;
 }
 
-std::string cmOutputConverter::Convert(RelativeRoot remote,
-                                       const std::string& local,
-                                       OutputFormat output) const
-{
-  // The relative root must have a path (i.e. not FULL or NONE)
-  assert(remote != FULL);
-  assert(remote != NONE);
-
-  const char* remotePath = this->GetRelativeRootPath(remote);
-  assert(remotePath != CM_NULLPTR);
-
-  if (local.empty()) {
-    return this->ConvertToOutputFormat(remotePath, output);
-  }
-
-  std::vector<std::string> components;
-  cmSystemTools::SplitPath(local, components);
-  std::string result = this->ConvertToRelativePath(components, remotePath);
-  return this->ConvertToOutputFormat(result, output);
-}
-
 static bool cmOutputConverterNotAbove(const char* a, const char* b)
 {
   return (cmSystemTools::ComparePath(a, b) ||
