@@ -46,19 +46,6 @@ std::string cmOutputConverter::ConvertToOutputForExisting(
   return this->ConvertToOutputFormat(remote, format);
 }
 
-std::string cmOutputConverter::ConvertToOutputForExisting(
-  RelativeRoot remote, OutputFormat format) const
-{
-  // The relative root must have a path (i.e. not FULL or NONE)
-  assert(remote != FULL);
-  assert(remote != NONE);
-
-  const char* remotePath = this->GetRelativeRootPath(remote);
-  assert(remotePath != CM_NULLPTR);
-
-  return this->ConvertToOutputForExisting(remotePath, format);
-}
-
 const char* cmOutputConverter::GetRelativeRootPath(RelativeRoot relroot) const
 {
   switch (relroot) {
