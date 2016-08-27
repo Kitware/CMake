@@ -40,8 +40,6 @@ public:
    */
   enum RelativeRoot
   {
-    HOME,
-    START,
     HOME_OUTPUT,
     START_OUTPUT
   };

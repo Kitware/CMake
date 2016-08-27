@@ -52,14 +52,6 @@ std::string cmOutputConverter::ConvertToRelativePath(
   std::string result;
 
   switch (relative) {
-    case HOME:
-      result = this->ConvertToRelativePath(
-        this->GetState()->GetSourceDirectory(), source);
-      break;
-    case START:
-      result = this->ConvertToRelativePath(
-        this->StateSnapshot.GetDirectory().GetCurrentSource(), source);
-      break;
     case HOME_OUTPUT:
       result = this->ConvertToRelativePath(
         this->GetState()->GetBinaryDirectory(), source);
