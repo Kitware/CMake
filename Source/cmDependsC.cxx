@@ -241,8 +241,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   // directory.  We must do the same here.
   std::string obj_i = this->LocalGenerator->ConvertToRelativePath(
     this->LocalGenerator->GetBinaryDirectory(), obj);
-  std::string obj_m = this->LocalGenerator->ConvertToOutputFormat(
-    obj_i, cmOutputConverter::MAKERULE);
+  std::string obj_m = cmSystemTools::ConvertToOutputPath(obj_i.c_str());
   internalDepends << obj_i << std::endl;
 
   for (std::set<std::string>::const_iterator i = dependencies.begin();
