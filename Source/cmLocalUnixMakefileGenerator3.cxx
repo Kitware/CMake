@@ -2073,7 +2073,7 @@ void cmLocalUnixMakefileGenerator3::CreateCDCommand(
 
     // Change back to the starting directory.
     cmd = cd_cmd;
-    cmd += this->ConvertToOutputForExisting(relRetDir);
+    cmd += this->ConvertToOutputForExisting(relDir);
     commands.push_back(cmd);
   } else {
     // On UNIX we must construct a single shell command to change
