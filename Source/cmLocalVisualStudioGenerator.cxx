@@ -205,7 +205,9 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
     }
 
     if (workingDirectory.empty()) {
-      script += this->Convert(cmd.c_str(), START_OUTPUT, SHELL);
+      script += this->ConvertToOutputFormat(
+        this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), cmd),
+        cmOutputConverter::SHELL);
     } else {
       script += this->ConvertToOutputFormat(cmd.c_str(), SHELL);
     }

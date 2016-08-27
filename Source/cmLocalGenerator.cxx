@@ -1409,7 +1409,9 @@ std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib,
 #endif
 
   // Normal behavior.
-  return this->Convert(lib, START_OUTPUT, format);
+  return this->ConvertToOutputFormat(
+    this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), lib),
+    format);
 }
 
 /**

@@ -138,14 +138,20 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string targetOutPathPDB = this->LocalGenerator->ConvertToOutputFormat(
     targetFullPathPDB, cmOutputConverter::SHELL);
   // Convert to the output path to use in constructing commands.
-  std::string targetOutPath = this->Convert(
-    targetFullPath, cmOutputConverter::START_OUTPUT, cmOutputConverter::SHELL);
-  std::string targetOutPathReal =
-    this->Convert(targetFullPathReal, cmOutputConverter::START_OUTPUT,
-                  cmOutputConverter::SHELL);
+  std::string targetOutPath = this->LocalGenerator->ConvertToOutputFormat(
+    this->LocalGenerator->ConvertToRelativePath(
+      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPath),
+    cmOutputConverter::SHELL);
+  std::string targetOutPathReal = this->LocalGenerator->ConvertToOutputFormat(
+    this->LocalGenerator->ConvertToRelativePath(
+      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal),
+    cmOutputConverter::SHELL);
   std::string targetOutPathImport =
-    this->Convert(targetFullPathImport, cmOutputConverter::START_OUTPUT,
-                  cmOutputConverter::SHELL);
+    this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->ConvertToRelativePath(
+        this->LocalGenerator->GetCurrentBinaryDirectory(),
+        targetFullPathImport),
+      cmOutputConverter::SHELL);
 
   // Get the language to use for linking this executable.
   std::string linkLanguage =
@@ -319,14 +325,19 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     vars.Language = linkLanguage.c_str();
     vars.Objects = buildObjs.c_str();
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
-    objectDir = this->Convert(objectDir, cmOutputConverter::START_OUTPUT,
-                              cmOutputConverter::SHELL);
+
+    objectDir = this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->ConvertToRelativePath(
+        this->LocalGenerator->GetCurrentBinaryDirectory(), objectDir),
+      cmOutputConverter::SHELL);
     vars.ObjectDir = objectDir.c_str();
     cmOutputConverter::OutputFormat output = (useWatcomQuote)
       ? cmOutputConverter::WATCOMQUOTE
       : cmOutputConverter::SHELL;
-    std::string target = this->Convert(
-      targetFullPathReal, cmOutputConverter::START_OUTPUT, output);
+    std::string target = this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->ConvertToRelativePath(
+        this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal),
+      output);
     vars.Target = target.c_str();
     vars.TargetPDB = targetOutPathPDB.c_str();
 

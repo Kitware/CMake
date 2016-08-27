@@ -500,8 +500,10 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   const std::vector<std::string>& outputs = ccg.GetOutputs();
   if (!outputs.empty()) {
     if (ccg.GetWorkingDirectory().empty()) {
-      output = this->Convert(outputs[0], cmOutputConverter::START_OUTPUT,
-                             cmOutputConverter::SHELL);
+      output = this->ConvertToOutputFormat(
+        this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(),
+                                    outputs[0]),
+        cmOutputConverter::SHELL);
     } else {
       output =
         this->ConvertToOutputFormat(outputs[0], cmOutputConverter::SHELL);
