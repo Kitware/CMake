@@ -78,9 +78,7 @@ std::string cmOutputConverter::ConvertToOutputFormat(const std::string& source,
 {
   std::string result = source;
   // Convert it to an output path.
-  if (output == MAKERULE) {
-    result = cmSystemTools::ConvertToOutputPath(result.c_str());
-  } else if (output == SHELL || output == WATCOMQUOTE) {
+  if (output == SHELL || output == WATCOMQUOTE) {
     result = this->ConvertDirectorySeparatorsForShell(source);
     result = this->EscapeForShell(result, true, false, output == WATCOMQUOTE);
   } else if (output == RESPONSE) {

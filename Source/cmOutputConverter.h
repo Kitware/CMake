@@ -45,7 +45,6 @@ public:
   };
   enum OutputFormat
   {
-    MAKERULE,
     SHELL,
     WATCOMQUOTE,
     RESPONSE
