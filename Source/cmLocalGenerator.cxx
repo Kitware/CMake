@@ -688,7 +688,9 @@ std::string cmLocalGenerator::ExpandRuleVariable(
     }
   }
   if (variable == "CMAKE_COMMAND") {
-    return this->Convert(cmSystemTools::GetCMakeCommand(), FULL, SHELL);
+    return this->ConvertToOutputFormat(
+      cmSystemTools::CollapseFullPath(cmSystemTools::GetCMakeCommand()),
+      SHELL);
   }
   std::vector<std::string> enabledLanguages =
     this->GetState()->GetEnabledLanguages();
@@ -1183,7 +1185,8 @@ void cmLocalGenerator::GetTargetFlags(
           if (sf->GetExtension() == "def") {
             linkFlags +=
               this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-            linkFlags += this->Convert(sf->GetFullPath(), FULL, SHELL);
+            linkFlags += this->ConvertToOutputFormat(
+              cmSystemTools::CollapseFullPath(sf->GetFullPath()), SHELL);
             linkFlags += " ";
           }
         }

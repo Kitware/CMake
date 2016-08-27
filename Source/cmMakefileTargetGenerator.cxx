@@ -1000,9 +1000,10 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   // paths.  Make sure PWD is set to the original name of the home
   // output directory to help cmSystemTools to create the same
   // translation table for the dependency scanning process.
-  depCmd << "cd " << (this->LocalGenerator->Convert(
-                       this->LocalGenerator->GetBinaryDirectory(),
-                       cmOutputConverter::FULL, cmOutputConverter::SHELL))
+  depCmd << "cd " << (this->LocalGenerator->ConvertToOutputFormat(
+                       cmSystemTools::CollapseFullPath(
+                         this->LocalGenerator->GetBinaryDirectory()),
+                       cmOutputConverter::SHELL))
          << " && ";
 #endif
   // Generate a call this signature:
@@ -1016,20 +1017,29 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   // the state of our local generator sufficiently for its needs.
   depCmd << "$(CMAKE_COMMAND) -E cmake_depends \""
          << this->GlobalGenerator->GetName() << "\" "
-         << this->Convert(this->LocalGenerator->GetSourceDirectory(),
-                          cmOutputConverter::FULL, cmOutputConverter::SHELL)
+         << this->LocalGenerator->ConvertToOutputFormat(
+              cmSystemTools::CollapseFullPath(
+                this->LocalGenerator->GetSourceDirectory()),
+              cmOutputConverter::SHELL)
          << " "
-         << this->Convert(this->LocalGenerator->GetCurrentSourceDirectory(),
-                          cmOutputConverter::FULL, cmOutputConverter::SHELL)
+         << this->LocalGenerator->ConvertToOutputFormat(
+              cmSystemTools::CollapseFullPath(
+                this->LocalGenerator->GetCurrentSourceDirectory()),
+              cmOutputConverter::SHELL)
          << " "
-         << this->Convert(this->LocalGenerator->GetBinaryDirectory(),
-                          cmOutputConverter::FULL, cmOutputConverter::SHELL)
+         << this->LocalGenerator->ConvertToOutputFormat(
+              cmSystemTools::CollapseFullPath(
+                this->LocalGenerator->GetBinaryDirectory()),
+              cmOutputConverter::SHELL)
          << " "
-         << this->Convert(this->LocalGenerator->GetCurrentBinaryDirectory(),
-                          cmOutputConverter::FULL, cmOutputConverter::SHELL)
+         << this->LocalGenerator->ConvertToOutputFormat(
+              cmSystemTools::CollapseFullPath(
+                this->LocalGenerator->GetCurrentBinaryDirectory()),
+              cmOutputConverter::SHELL)
          << " "
-         << this->Convert(this->InfoFileNameFull, cmOutputConverter::FULL,
-                          cmOutputConverter::SHELL);
+         << this->LocalGenerator->ConvertToOutputFormat(
+              cmSystemTools::CollapseFullPath(this->InfoFileNameFull),
+              cmOutputConverter::SHELL);
   if (this->LocalGenerator->GetColorMakefile()) {
     depCmd << " --color=$(COLOR)";
   }

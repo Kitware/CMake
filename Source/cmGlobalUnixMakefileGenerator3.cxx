@@ -723,8 +723,9 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
         std::ostringstream progCmd;
         progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
         // # in target
-        progCmd << lg->Convert(progress.Dir, cmOutputConverter::FULL,
-                               cmOutputConverter::SHELL);
+        progCmd << lg->ConvertToOutputFormat(
+          cmSystemTools::CollapseFullPath(progress.Dir),
+          cmOutputConverter::SHELL);
         //
         std::set<cmGeneratorTarget const*> emitted;
         progCmd << " " << this->CountProgressMarksInTarget(gtarget, emitted);
@@ -736,8 +737,9 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       {
         std::ostringstream progCmd;
         progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
-        progCmd << lg->Convert(progress.Dir, cmOutputConverter::FULL,
-                               cmOutputConverter::SHELL);
+        progCmd << lg->ConvertToOutputFormat(
+          cmSystemTools::CollapseFullPath(progress.Dir),
+          cmOutputConverter::SHELL);
         progCmd << " 0";
         commands.push_back(progCmd.str());
       }

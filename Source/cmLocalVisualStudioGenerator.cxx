@@ -155,7 +155,8 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
     script += newline;
     newline = newline_text;
     script += "cd ";
-    script += this->Convert(workingDirectory, FULL, SHELL);
+    script += this->ConvertToOutputFormat(
+      cmSystemTools::CollapseFullPath(workingDirectory), SHELL);
     script += check_error;
 
     // Change the working drive.

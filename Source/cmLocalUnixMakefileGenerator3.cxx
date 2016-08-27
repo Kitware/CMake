@@ -640,9 +640,9 @@ void cmLocalUnixMakefileGenerator3::WriteMakeVariables(
   std::string cmakeShellCommand =
     this->MaybeConvertWatcomShellCommand(cmSystemTools::GetCMakeCommand());
   if (cmakeShellCommand.empty()) {
-    cmakeShellCommand =
-      this->Convert(cmSystemTools::GetCMakeCommand(), cmOutputConverter::FULL,
-                    cmOutputConverter::SHELL);
+    cmakeShellCommand = this->ConvertToOutputFormat(
+      cmSystemTools::CollapseFullPath(cmSystemTools::GetCMakeCommand()),
+      cmOutputConverter::SHELL);
   }
 
   /* clang-format off */
@@ -665,16 +665,16 @@ void cmLocalUnixMakefileGenerator3::WriteMakeVariables(
   makefileStream
     << "# The top-level source directory on which CMake was run.\n"
     << "CMAKE_SOURCE_DIR = "
-    << this->Convert(this->GetSourceDirectory(),
-                     cmOutputConverter::FULL,
+    << this->ConvertToOutputFormat(
+      cmSystemTools::CollapseFullPath(this->GetSourceDirectory()),
                      cmOutputConverter::SHELL)
     << "\n"
     << "\n";
   makefileStream
     << "# The top-level build directory on which CMake was run.\n"
     << "CMAKE_BINARY_DIR = "
-    << this->Convert(this->GetBinaryDirectory(),
-                     cmOutputConverter::FULL,
+    << this->ConvertToOutputFormat(
+      cmSystemTools::CollapseFullPath(this->GetBinaryDirectory()),
                      cmOutputConverter::SHELL)
     << "\n"
     << "\n";
@@ -1154,8 +1154,9 @@ void cmLocalUnixMakefileGenerator3::AppendEcho(
           cmd += color_name;
           if (progress) {
             cmd += "--progress-dir=";
-            cmd += this->Convert(progress->Dir, cmOutputConverter::FULL,
-                                 cmOutputConverter::SHELL);
+            cmd += this->ConvertToOutputFormat(
+              cmSystemTools::CollapseFullPath(progress->Dir),
+              cmOutputConverter::SHELL);
             cmd += " ";
             cmd += "--progress-num=";
             cmd += progress->Arg;
@@ -1603,15 +1604,16 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   {
     std::ostringstream progCmd;
     progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
-    progCmd << this->Convert(progressDir, cmOutputConverter::FULL,
-                             cmOutputConverter::SHELL);
+    progCmd << this->ConvertToOutputFormat(
+      cmSystemTools::CollapseFullPath(progressDir), cmOutputConverter::SHELL);
 
     std::string progressFile = cmake::GetCMakeFilesDirectory();
     progressFile += "/progress.marks";
     std::string progressFileNameFull = this->ConvertToFullPath(progressFile);
     progCmd << " "
-            << this->Convert(progressFileNameFull, cmOutputConverter::FULL,
-                             cmOutputConverter::SHELL);
+            << this->ConvertToOutputFormat(
+                 cmSystemTools::CollapseFullPath(progressFileNameFull),
+                 cmOutputConverter::SHELL);
     commands.push_back(progCmd.str());
   }
   std::string mf2Dir = cmake::GetCMakeFilesDirectoryPostSlash();
@@ -1623,8 +1625,8 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   {
     std::ostringstream progCmd;
     progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
-    progCmd << this->Convert(progressDir, cmOutputConverter::FULL,
-                             cmOutputConverter::SHELL);
+    progCmd << this->ConvertToOutputFormat(
+      cmSystemTools::CollapseFullPath(progressDir), cmOutputConverter::SHELL);
     progCmd << " 0";
     commands.push_back(progCmd.str());
   }
