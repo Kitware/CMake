@@ -1031,6 +1031,7 @@ std::string cmLocalUnixMakefileGenerator3::MakeLauncher(
   cmCustomCommandGenerator const& ccg, cmGeneratorTarget* target,
   cmOutputConverter::RelativeRoot relative)
 {
+  std::string launcher;
   // Short-circuit if there is no launcher.
   const char* prop = "RULE_LAUNCH_CUSTOM";
   const char* val = this->GetRuleLauncher(target, prop);
@@ -1047,14 +1048,12 @@ std::string cmLocalUnixMakefileGenerator3::MakeLauncher(
     }
     vars.Output = output.c_str();
 
-    std::string launcher;
     this->ExpandRuleVariables(launcher, vars);
     if (!launcher.empty()) {
       launcher += " ";
     }
-    return launcher;
   }
-  return "";
+  return launcher;
 }
 
 void cmLocalUnixMakefileGenerator3::AppendCleanCommand(
