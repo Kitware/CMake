@@ -278,8 +278,8 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   cmCustomCommandLines commandLines;
   commandLines.push_back(commandLine);
   const char* no_working_directory = 0;
-  std::string fullpathStampName = this->Convert(
-    stampName.c_str(), cmOutputConverter::FULL, cmOutputConverter::UNCHANGED);
+  std::string fullpathStampName =
+    cmSystemTools::CollapseFullPath(stampName.c_str());
   this->Makefile->AddCustomCommandToOutput(
     fullpathStampName.c_str(), listFiles, makefileIn.c_str(), commandLines,
     comment.c_str(), no_working_directory, true);
