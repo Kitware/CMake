@@ -46,11 +46,9 @@ std::string cmOutputConverter::ConvertToOutputForExisting(
   return this->ConvertToOutputFormat(remote, format);
 }
 
-std::string cmOutputConverter::Convert(const std::string& source,
-                                       RelativeRoot relative,
-                                       OutputFormat output) const
+std::string cmOutputConverter::ConvertToRelativePath(
+  const std::string& source, RelativeRoot relative) const
 {
-  // Convert the path to a relative path.
   std::string result = source;
 
   switch (relative) {
@@ -76,6 +74,15 @@ std::string cmOutputConverter::Convert(const std::string& source,
       result = cmSystemTools::CollapseFullPath(result);
       break;
   }
+  return result;
+}
+
+std::string cmOutputConverter::Convert(const std::string& source,
+                                       RelativeRoot relative,
+                                       OutputFormat output) const
+{
+  // Convert the path to a relative path.
+  std::string result = this->ConvertToRelativePath(source, relative);
   return this->ConvertToOutputFormat(result, output);
 }
 
