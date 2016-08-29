@@ -976,7 +976,8 @@ bool cmInstallCommand::HandleDirectoryMode(
     } else if (doing == DoingDirs) {
       // Convert this directory to a full path.
       std::string dir = args[i];
-      if (!cmSystemTools::FileIsFullPath(dir.c_str())) {
+      std::string::size_type gpos = cmGeneratorExpression::Find(dir);
+      if (gpos != 0 && !cmSystemTools::FileIsFullPath(dir.c_str())) {
         dir = this->Makefile->GetCurrentSourceDirectory();
         dir += "/";
         dir += args[i];
