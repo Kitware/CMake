@@ -133,6 +133,13 @@ if(WIN32 AND NOT CYGWIN)
       set(_OPENSSL_MSVC_RT_MODE "MD")
     endif ()
 
+    # Since OpenSSL 1.1, lib names are like libcrypto32MTd.lib and libssl32MTd.lib
+    if( "${CMAKE_SIZEOF_VOID_P}" STREQUAL "8" )
+        set(_OPENSSL_MSVC_ARCH_SUFFIX "64")
+    else()
+        set(_OPENSSL_MSVC_ARCH_SUFFIX "32")
+    endif()
+
     if(OPENSSL_USE_STATIC_LIBS)
       set(_OPENSSL_PATH_SUFFIXES
         "lib"
@@ -149,6 +156,8 @@ if(WIN32 AND NOT CYGWIN)
 
     find_library(LIB_EAY_DEBUG
       NAMES
+        libcrypto${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
+        libcryptod
         libeay32${_OPENSSL_MSVC_RT_MODE}d
         libeay32d
       NAMES_PER_DIR
@@ -159,6 +168,8 @@ if(WIN32 AND NOT CYGWIN)
 
     find_library(LIB_EAY_RELEASE
       NAMES
+        libcrypto${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}
+        libcrypto
         libeay32${_OPENSSL_MSVC_RT_MODE}
         libeay32
       NAMES_PER_DIR
@@ -169,6 +180,8 @@ if(WIN32 AND NOT CYGWIN)
 
     find_library(SSL_EAY_DEBUG
       NAMES
+        libssl${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
+        libssld
         ssleay32${_OPENSSL_MSVC_RT_MODE}d
         ssleay32d
       NAMES_PER_DIR
@@ -179,6 +192,8 @@ if(WIN32 AND NOT CYGWIN)
 
     find_library(SSL_EAY_RELEASE
       NAMES
+        libssl${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}
+        libssl
         ssleay32${_OPENSSL_MSVC_RT_MODE}
         ssleay32
         ssl
@@ -236,6 +251,7 @@ if(WIN32 AND NOT CYGWIN)
     # Not sure what to pick for -say- intel, let's use the toplevel ones and hope someone report issues:
     find_library(LIB_EAY
       NAMES
+        libcrypto
         libeay32
       NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
@@ -247,6 +263,7 @@ if(WIN32 AND NOT CYGWIN)
 
     find_library(SSL_EAY
       NAMES
+        libssl
         ssleay32
       NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
