@@ -1,4 +1,4 @@
-set(CMAKE_CXX_VERBOSE_FLAG "-v")
+set(CMAKE_CUDA_VERBOSE_FLAG "-v -Xcompiler=-v")
 
 
 set(CMAKE_CUDA_COMPILE_OPTIONS_PIE -Xcompiler=-fPIE)

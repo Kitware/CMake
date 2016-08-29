@@ -53,6 +53,19 @@ else()
       "Determining if the CUDA compiler works passed with "
       "the following output:\n${__CMAKE_CUDA_COMPILER_OUTPUT}\n\n")
   endif()
+
+  # Try to identify the ABI and configure it into CMakeCUDACompiler.cmake
+  include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerABI.cmake)
+  CMAKE_DETERMINE_COMPILER_ABI(CUDA ${CMAKE_ROOT}/Modules/CMakeCUDACompilerABI.cu)
+
+  # Re-configure to save learned information.
+  configure_file(
+    ${CMAKE_ROOT}/Modules/CMakeCUDACompiler.cmake.in
+    ${CMAKE_PLATFORM_INFO_DIR}/CMakeCUDACompiler.cmake
+    @ONLY
+    )
+  include(${CMAKE_PLATFORM_INFO_DIR}/CMakeCUDACompiler.cmake)
 endif()
+
 
 unset(__CMAKE_CUDA_COMPILER_OUTPUT)

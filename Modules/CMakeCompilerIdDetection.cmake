@@ -90,6 +90,11 @@ function(compiler_id_detection outvar lang)
     list(APPEND ordered_compilers
       MIPSpro)
 
+    #Currently the only CUDA compilers are NVIDIA
+    if(lang STREQUAL CUDA)
+      set(ordered_compilers NVIDIA)
+    endif()
+
     if(CID_ID_DEFINE)
       foreach(Id ${ordered_compilers})
         set(CMAKE_${lang}_COMPILER_ID_CONTENT "${CMAKE_${lang}_COMPILER_ID_CONTENT}# define ${CID_PREFIX}COMPILER_IS_${Id} 0\n")

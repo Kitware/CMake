@@ -27,10 +27,16 @@ mark_as_advanced(CMAKE_CUDA_COMPILER)
 if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
   set(CMAKE_CUDA_COMPILER_ID_RUN 1)
 
-  list(APPEND CMAKE_CUDA_COMPILER_ID_MATCH_VENDORS NVidia)
-  set(CMAKE_CUDA_COMPILER_ID_MATCH_VENDOR_REGEX_NVidia "nvcc: NVIDIA \(R\) Cuda compiler driver")
+  # Try to identify the compiler.
+  set(CMAKE_CUDA_COMPILER_ID)
+  set(CMAKE_CUDA_PLATFORM_ID)
+  file(READ ${CMAKE_ROOT}/Modules/CMakePlatformId.h.in
+    CMAKE_CUDA_COMPILER_ID_PLATFORM_CONTENT)
 
-  set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_REGEX "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerIdCXX/(\\./)?(CompilerIdCXX.xctest/)?CompilerIdCXX[ \t\n\\\"]")
+  list(APPEND CMAKE_CUDA_COMPILER_ID_MATCH_VENDORS NVIDIA)
+  set(CMAKE_CUDA_COMPILER_ID_MATCH_VENDOR_REGEX_NVIDIA "nvcc: NVIDIA \(R\) Cuda compiler driver")
+
+  set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_REGEX "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerIdCUDA/(\\./)?(CompilerIdCUDA.xctest/)?CompilerIdCUDA[ \t\n\\\"]")
   set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_INDEX 2)
 
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)

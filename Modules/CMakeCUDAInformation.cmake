@@ -7,10 +7,6 @@ set(CMAKE_INCLUDE_FLAG_CUDA "-I")
 # Load compiler-specific information.
 if(CMAKE_CUDA_COMPILER_ID)
   include(Compiler/${CMAKE_CUDA_COMPILER_ID}-CUDA OPTIONAL)
-else()
-  #couldn't id the cuda compile, fall back to the default setting
-  set(CMAKE_CUDA_COMPILER_ID "NVidia")
-  include(Compiler/NVidia-CUDA OPTIONAL)
 endif()
 
 # load the system- and compiler specific files
