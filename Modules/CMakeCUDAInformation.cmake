@@ -89,7 +89,7 @@ endif()
 # compile a cu file into an object file
 if(NOT CMAKE_CUDA_COMPILE_OBJECT)
   set(CMAKE_CUDA_COMPILE_OBJECT
-    "<CMAKE_CUDA_COMPILER>  <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>")
+    "<CMAKE_CUDA_COMPILER>  <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -x cu -c <SOURCE>")
 endif()
 
 # compile a cu file into an executable
