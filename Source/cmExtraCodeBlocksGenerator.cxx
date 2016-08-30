@@ -593,7 +593,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
                           includes.end());
 
     std::string systemIncludeDirs = makefile->GetSafeDefinition(
-      "CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
+      "CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_INCLUDE_DIRS");
     if (!systemIncludeDirs.empty()) {
       std::vector<std::string> dirs;
       cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
@@ -601,7 +601,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
     }
 
     systemIncludeDirs = makefile->GetSafeDefinition(
-      "CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_INCLUDE_DIRS");
+      "CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
     if (!systemIncludeDirs.empty()) {
       std::vector<std::string> dirs;
       cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
