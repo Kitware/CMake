@@ -46,34 +46,32 @@ std::string cmOutputConverter::ConvertToOutputForExisting(
   return this->ConvertToOutputFormat(remote, format);
 }
 
-std::string cmOutputConverter::ConvertToOutputForExisting(
-  RelativeRoot remote, OutputFormat format) const
+std::string cmOutputConverter::ConvertToRelativePath(
+  const std::string& source, RelativeRoot relative) const
 {
-  // The relative root must have a path (i.e. not FULL or NONE)
-  assert(remote != FULL);
-  assert(remote != NONE);
+  std::string result;
 
-  const char* remotePath = this->GetRelativeRootPath(remote);
-  assert(remotePath != CM_NULLPTR);
-
-  return this->ConvertToOutputForExisting(remotePath, format);
-}
-
-const char* cmOutputConverter::GetRelativeRootPath(RelativeRoot relroot) const
-{
-  switch (relroot) {
+  switch (relative) {
     case HOME:
-      return this->GetState()->GetSourceDirectory();
+      result = this->ConvertToRelativePath(
+        this->GetState()->GetSourceDirectoryComponents(), source);
+      break;
     case START:
-      return this->StateSnapshot.GetDirectory().GetCurrentSource();
+      result = this->ConvertToRelativePath(
+        this->StateSnapshot.GetDirectory().GetCurrentSourceComponents(),
+        source);
+      break;
     case HOME_OUTPUT:
-      return this->GetState()->GetBinaryDirectory();
+      result = this->ConvertToRelativePath(
+        this->GetState()->GetBinaryDirectoryComponents(), source);
+      break;
     case START_OUTPUT:
-      return this->StateSnapshot.GetDirectory().GetCurrentBinary();
-    default:
+      result = this->ConvertToRelativePath(
+        this->StateSnapshot.GetDirectory().GetCurrentBinaryComponents(),
+        source);
       break;
   }
-  return CM_NULLPTR;
+  return result;
 }
 
 std::string cmOutputConverter::Convert(const std::string& source,
@@ -81,33 +79,7 @@ std::string cmOutputConverter::Convert(const std::string& source,
                                        OutputFormat output) const
 {
   // Convert the path to a relative path.
-  std::string result = source;
-
-  switch (relative) {
-    case HOME:
-      result = this->ConvertToRelativePath(
-        this->GetState()->GetSourceDirectoryComponents(), result);
-      break;
-    case START:
-      result = this->ConvertToRelativePath(
-        this->StateSnapshot.GetDirectory().GetCurrentSourceComponents(),
-        result);
-      break;
-    case HOME_OUTPUT:
-      result = this->ConvertToRelativePath(
-        this->GetState()->GetBinaryDirectoryComponents(), result);
-      break;
-    case START_OUTPUT:
-      result = this->ConvertToRelativePath(
-        this->StateSnapshot.GetDirectory().GetCurrentBinaryComponents(),
-        result);
-      break;
-    case FULL:
-      result = cmSystemTools::CollapseFullPath(result);
-      break;
-    case NONE:
-      break;
-  }
+  std::string result = this->ConvertToRelativePath(source, relative);
   return this->ConvertToOutputFormat(result, output);
 }
 
@@ -144,27 +116,6 @@ std::string cmOutputConverter::ConvertDirectorySeparatorsForShell(
     std::replace(result.begin(), result.end(), '/', '\\');
   }
   return result;
-}
-
-std::string cmOutputConverter::Convert(RelativeRoot remote,
-                                       const std::string& local,
-                                       OutputFormat output) const
-{
-  // The relative root must have a path (i.e. not FULL or NONE)
-  assert(remote != FULL);
-  assert(remote != NONE);
-
-  const char* remotePath = this->GetRelativeRootPath(remote);
-  assert(remotePath != CM_NULLPTR);
-
-  if (local.empty()) {
-    return this->ConvertToOutputFormat(remotePath, output);
-  }
-
-  std::vector<std::string> components;
-  cmSystemTools::SplitPath(local, components);
-  std::string result = this->ConvertToRelativePath(components, remotePath);
-  return this->ConvertToOutputFormat(result, output);
 }
 
 static bool cmOutputConverterNotAbove(const char* a, const char* b)

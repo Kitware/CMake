@@ -38,8 +38,6 @@ public:
    */
   enum RelativeRoot
   {
-    NONE,
-    FULL,
     HOME,
     START,
     HOME_OUTPUT,
@@ -47,7 +45,6 @@ public:
   };
   enum OutputFormat
   {
-    UNCHANGED,
     MAKERULE,
     SHELL,
     WATCOMQUOTE,
@@ -56,24 +53,14 @@ public:
   std::string ConvertToOutputFormat(const std::string& source,
                                     OutputFormat output) const;
   std::string Convert(const std::string& remote, RelativeRoot local,
-                      OutputFormat output = UNCHANGED) const;
-  std::string Convert(RelativeRoot remote, const std::string& local,
-                      OutputFormat output = UNCHANGED) const;
+                      OutputFormat output) const;
+  std::string ConvertToRelativePath(const std::string& remote,
+                                    RelativeRoot local) const;
   std::string ConvertDirectorySeparatorsForShell(
     const std::string& source) const;
 
-  /**
-    * Get path for the specified relative root.
-    */
-  const char* GetRelativeRootPath(RelativeRoot relroot) const;
-
   ///! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const std::string& remote,
-                                         OutputFormat format = SHELL) const;
-
-  /** For existing path identified by RelativeRoot convert to output
-      path and short path if spaces.  */
-  std::string ConvertToOutputForExisting(RelativeRoot remote,
                                          OutputFormat format = SHELL) const;
 
   void SetLinkScriptShell(bool linkScriptShell);

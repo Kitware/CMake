@@ -904,8 +904,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
        it != this->GlobalGenerator->GetLocalGenerators().end(); ++it) {
     const std::vector<cmGeneratorTarget*> targets =
       (*it)->GetGeneratorTargets();
-    std::string subdir = (*it)->Convert((*it)->GetCurrentBinaryDirectory(),
-                                        cmOutputConverter::HOME_OUTPUT);
+    std::string subdir = (*it)->ConvertToRelativePath(
+      (*it)->GetCurrentBinaryDirectory(), cmOutputConverter::HOME_OUTPUT);
     if (subdir == ".") {
       subdir = "";
     }

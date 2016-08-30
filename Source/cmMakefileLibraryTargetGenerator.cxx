@@ -112,7 +112,7 @@ void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
   // Add post-build rules.
   this->LocalGenerator->AppendCustomCommands(
     commands, this->GeneratorTarget->GetPostBuildCommands(),
-    this->GeneratorTarget);
+    this->GeneratorTarget, this->LocalGenerator->GetBinaryDirectory());
 
   // Depend on the object files.
   this->AppendObjectDepends(depends);
@@ -310,8 +310,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 
   // Construct the output path version of the names for use in command
   // arguments.
-  std::string targetOutPathPDB = this->Convert(
-    targetFullPathPDB, cmOutputConverter::NONE, cmOutputConverter::SHELL);
+  std::string targetOutPathPDB = this->LocalGenerator->ConvertToOutputFormat(
+    targetFullPathPDB, cmOutputConverter::SHELL);
   std::string targetOutPath = this->Convert(
     targetFullPath, cmOutputConverter::START_OUTPUT, cmOutputConverter::SHELL);
   std::string targetOutPathSO =
@@ -367,46 +367,40 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 
   // Clean files associated with this library.
   std::vector<std::string> libCleanFiles;
-  libCleanFiles.push_back(this->Convert(targetFullPath,
-                                        cmOutputConverter::START_OUTPUT,
-                                        cmOutputConverter::UNCHANGED));
+  libCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
+    targetFullPath, cmOutputConverter::START_OUTPUT));
   if (targetNameReal != targetName) {
-    libCleanFiles.push_back(this->Convert(targetFullPathReal,
-                                          cmOutputConverter::START_OUTPUT,
-                                          cmOutputConverter::UNCHANGED));
+    libCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
+      targetFullPathReal, cmOutputConverter::START_OUTPUT));
   }
   if (targetNameSO != targetName && targetNameSO != targetNameReal) {
-    libCleanFiles.push_back(this->Convert(targetFullPathSO,
-                                          cmOutputConverter::START_OUTPUT,
-                                          cmOutputConverter::UNCHANGED));
+    libCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
+      targetFullPathSO, cmOutputConverter::START_OUTPUT));
   }
   if (!targetNameImport.empty()) {
-    libCleanFiles.push_back(this->Convert(targetFullPathImport,
-                                          cmOutputConverter::START_OUTPUT,
-                                          cmOutputConverter::UNCHANGED));
+    libCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
+      targetFullPathImport, cmOutputConverter::START_OUTPUT));
     std::string implib;
     if (this->GeneratorTarget->GetImplibGNUtoMS(targetFullPathImport,
                                                 implib)) {
-      libCleanFiles.push_back(this->Convert(implib,
-                                            cmOutputConverter::START_OUTPUT,
-                                            cmOutputConverter::UNCHANGED));
+      libCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
+        implib, cmOutputConverter::START_OUTPUT));
     }
   }
 
   // List the PDB for cleaning only when the whole target is
   // cleaned.  We do not want to delete the .pdb file just before
   // linking the target.
-  this->CleanFiles.push_back(this->Convert(targetFullPathPDB,
-                                           cmOutputConverter::START_OUTPUT,
-                                           cmOutputConverter::UNCHANGED));
+  this->CleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
+    targetFullPathPDB, cmOutputConverter::START_OUTPUT));
 
 #ifdef _WIN32
   // There may be a manifest file for this target.  Add it to the
   // clean set just in case.
   if (this->GeneratorTarget->GetType() != cmState::STATIC_LIBRARY) {
-    libCleanFiles.push_back(this->Convert(
-      (targetFullPath + ".manifest").c_str(), cmOutputConverter::START_OUTPUT,
-      cmOutputConverter::UNCHANGED));
+    libCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
+      (targetFullPath + ".manifest").c_str(),
+      cmOutputConverter::START_OUTPUT));
   }
 #endif
 
@@ -418,7 +412,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
                                              this->GeneratorTarget, "target");
     this->LocalGenerator->CreateCDCommand(
       commands1, this->Makefile->GetCurrentBinaryDirectory(),
-      cmOutputConverter::HOME_OUTPUT);
+      this->LocalGenerator->GetBinaryDirectory());
     commands.insert(commands.end(), commands1.begin(), commands1.end());
     commands1.clear();
   }
@@ -427,10 +421,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   if (!relink) {
     this->LocalGenerator->AppendCustomCommands(
       commands, this->GeneratorTarget->GetPreBuildCommands(),
-      this->GeneratorTarget);
+      this->GeneratorTarget, this->LocalGenerator->GetBinaryDirectory());
     this->LocalGenerator->AppendCustomCommands(
       commands, this->GeneratorTarget->GetPreLinkCommands(),
-      this->GeneratorTarget);
+      this->GeneratorTarget, this->LocalGenerator->GetBinaryDirectory());
   }
 
   // Determine whether a link script will be used.
@@ -572,8 +566,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
         vars.TargetInstallNameDir = "";
       } else {
         // Convert to a path for the native build tool.
-        install_name_dir = this->LocalGenerator->Convert(
-          install_name_dir, cmOutputConverter::NONE, cmOutputConverter::SHELL);
+        install_name_dir = this->LocalGenerator->ConvertToOutputFormat(
+          install_name_dir, cmOutputConverter::SHELL);
         vars.TargetInstallNameDir = install_name_dir.c_str();
       }
     }
@@ -640,9 +634,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
       if (this->GeneratorTarget->GetProperty("LINK_WHAT_YOU_USE") &&
           (this->GeneratorTarget->GetType() == cmState::SHARED_LIBRARY)) {
-        std::string cmakeCommand =
-          this->Convert(cmSystemTools::GetCMakeCommand(),
-                        cmLocalGenerator::NONE, cmLocalGenerator::SHELL);
+        std::string cmakeCommand = this->LocalGenerator->ConvertToOutputFormat(
+          cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
         cmakeCommand += " -E __run_iwyu --lwyu=";
         cmakeCommand += targetOutPathReal;
         real_link_commands.push_back(cmakeCommand);
@@ -672,7 +665,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   }
   this->LocalGenerator->CreateCDCommand(
     commands1, this->Makefile->GetCurrentBinaryDirectory(),
-    cmOutputConverter::HOME_OUTPUT);
+    this->LocalGenerator->GetBinaryDirectory());
   commands.insert(commands.end(), commands1.begin(), commands1.end());
   commands1.clear();
 
@@ -689,7 +682,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     commands1.push_back(symlink);
     this->LocalGenerator->CreateCDCommand(
       commands1, this->Makefile->GetCurrentBinaryDirectory(),
-      cmOutputConverter::HOME_OUTPUT);
+      this->LocalGenerator->GetBinaryDirectory());
     commands.insert(commands.end(), commands1.begin(), commands1.end());
     commands1.clear();
   }
@@ -698,7 +691,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   if (!relink) {
     this->LocalGenerator->AppendCustomCommands(
       commands, this->GeneratorTarget->GetPostBuildCommands(),
-      this->GeneratorTarget);
+      this->GeneratorTarget, this->LocalGenerator->GetBinaryDirectory());
   }
 
   // Compute the list of outputs.

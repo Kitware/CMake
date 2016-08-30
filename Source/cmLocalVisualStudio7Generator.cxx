@@ -269,8 +269,8 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   args += this->GetBinaryDirectory();
   commandLine.push_back(args);
   commandLine.push_back("--check-stamp-file");
-  std::string stampFilename = this->Convert(
-    stampName.c_str(), cmOutputConverter::FULL, cmOutputConverter::SHELL);
+  std::string stampFilename = this->ConvertToOutputFormat(
+    cmSystemTools::CollapseFullPath(stampName), cmOutputConverter::SHELL);
   commandLine.push_back(stampFilename.c_str());
 
   std::vector<std::string> const& listFiles = this->Makefile->GetListFiles();
@@ -278,8 +278,8 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   cmCustomCommandLines commandLines;
   commandLines.push_back(commandLine);
   const char* no_working_directory = 0;
-  std::string fullpathStampName = this->Convert(
-    stampName.c_str(), cmOutputConverter::FULL, cmOutputConverter::UNCHANGED);
+  std::string fullpathStampName =
+    cmSystemTools::CollapseFullPath(stampName.c_str());
   this->Makefile->AddCustomCommandToOutput(
     fullpathStampName.c_str(), listFiles, makefileIn.c_str(), commandLines,
     comment.c_str(), no_working_directory, true);
@@ -788,8 +788,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
       target->GetProperty("Fortran_MODULE_DIRECTORY");
     std::string modDir;
     if (target_mod_dir) {
-      modDir = this->Convert(target_mod_dir, cmOutputConverter::START_OUTPUT,
-                             cmOutputConverter::UNCHANGED);
+      modDir = this->ConvertToRelativePath(target_mod_dir,
+                                           cmOutputConverter::START_OUTPUT);
     } else {
       modDir = ".";
     }
@@ -1300,9 +1300,8 @@ void cmLocalVisualStudio7GeneratorInternals::OutputLibraries(
   cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
   for (ItemVector::const_iterator l = libs.begin(); l != libs.end(); ++l) {
     if (l->IsPath) {
-      std::string rel =
-        lg->Convert(l->Value.c_str(), cmOutputConverter::START_OUTPUT,
-                    cmOutputConverter::UNCHANGED);
+      std::string rel = lg->ConvertToRelativePath(
+        l->Value.c_str(), cmOutputConverter::START_OUTPUT);
       fout << lg->ConvertToXMLOutputPath(rel.c_str()) << " ";
     } else if (!l->Target ||
                l->Target->GetType() != cmState::INTERFACE_LIBRARY) {
@@ -1322,8 +1321,8 @@ void cmLocalVisualStudio7GeneratorInternals::OutputObjects(
   const char* sep = isep ? isep : "";
   for (std::vector<std::string>::const_iterator oi = objs.begin();
        oi != objs.end(); ++oi) {
-    std::string rel = lg->Convert(oi->c_str(), cmOutputConverter::START_OUTPUT,
-                                  cmOutputConverter::UNCHANGED);
+    std::string rel =
+      lg->ConvertToRelativePath(oi->c_str(), cmOutputConverter::START_OUTPUT);
     fout << sep << lg->ConvertToXMLOutputPath(rel.c_str());
     sep = " ";
   }
@@ -1346,9 +1345,8 @@ void cmLocalVisualStudio7Generator::OutputLibraryDirectories(
 
     // Switch to a relative path specification if it is shorter.
     if (cmSystemTools::FileIsFullPath(dir.c_str())) {
-      std::string rel =
-        this->Convert(dir.c_str(), cmOutputConverter::START_OUTPUT,
-                      cmOutputConverter::UNCHANGED);
+      std::string rel = this->ConvertToRelativePath(
+        dir.c_str(), cmOutputConverter::START_OUTPUT);
       if (rel.size() < dir.size()) {
         dir = rel;
       }

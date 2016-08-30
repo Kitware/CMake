@@ -311,11 +311,14 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   cmakefileStream
     << "# The top level Makefile was generated from the following files:\n"
     << "set(CMAKE_MAKEFILE_DEPENDS\n"
-    << "  \"" << lg->Convert(cache, cmOutputConverter::START_OUTPUT) << "\"\n";
+    << "  \""
+    << lg->ConvertToRelativePath(cache, cmOutputConverter::START_OUTPUT)
+    << "\"\n";
   for (std::vector<std::string>::const_iterator i = lfiles.begin();
        i != lfiles.end(); ++i) {
     cmakefileStream << "  \""
-                    << lg->Convert(*i, cmOutputConverter::START_OUTPUT)
+                    << lg->ConvertToRelativePath(
+                         *i, cmOutputConverter::START_OUTPUT)
                     << "\"\n";
   }
   cmakefileStream << "  )\n\n";
@@ -329,10 +332,12 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   cmakefileStream << "# The corresponding makefile is:\n"
                   << "set(CMAKE_MAKEFILE_OUTPUTS\n"
                   << "  \""
-                  << lg->Convert(makefileName, cmOutputConverter::START_OUTPUT)
+                  << lg->ConvertToRelativePath(makefileName,
+                                               cmOutputConverter::START_OUTPUT)
                   << "\"\n"
                   << "  \""
-                  << lg->Convert(check, cmOutputConverter::START_OUTPUT)
+                  << lg->ConvertToRelativePath(check,
+                                               cmOutputConverter::START_OUTPUT)
                   << "\"\n";
   cmakefileStream << "  )\n\n";
 
@@ -345,7 +350,8 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     for (std::vector<std::string>::const_iterator k = outfiles.begin();
          k != outfiles.end(); ++k) {
       cmakefileStream << "  \""
-                      << lg->Convert(*k, cmOutputConverter::HOME_OUTPUT)
+                      << lg->ConvertToRelativePath(
+                           *k, cmOutputConverter::HOME_OUTPUT)
                       << "\"\n";
     }
 
@@ -358,7 +364,8 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
       tmpStr += cmake::GetCMakeFilesDirectory();
       tmpStr += "/CMakeDirectoryInformation.cmake";
       cmakefileStream << "  \""
-                      << lg->Convert(tmpStr, cmOutputConverter::HOME_OUTPUT)
+                      << lg->ConvertToRelativePath(
+                           tmpStr, cmOutputConverter::HOME_OUTPUT)
                       << "\"\n";
     }
     cmakefileStream << "  )\n\n";
@@ -519,7 +526,7 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
       tname += "/fast";
     }
     cmOutputConverter conv(mf->GetStateSnapshot());
-    tname = conv.Convert(tname, cmOutputConverter::HOME_OUTPUT);
+    tname = conv.ConvertToRelativePath(tname, cmOutputConverter::HOME_OUTPUT);
     cmSystemTools::ConvertToOutputSlashes(tname);
     makeCommand.push_back(tname);
     if (this->Makefiles.empty()) {
@@ -716,8 +723,9 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
         std::ostringstream progCmd;
         progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
         // # in target
-        progCmd << lg->Convert(progress.Dir, cmOutputConverter::FULL,
-                               cmOutputConverter::SHELL);
+        progCmd << lg->ConvertToOutputFormat(
+          cmSystemTools::CollapseFullPath(progress.Dir),
+          cmOutputConverter::SHELL);
         //
         std::set<cmGeneratorTarget const*> emitted;
         progCmd << " " << this->CountProgressMarksInTarget(gtarget, emitted);
@@ -729,8 +737,9 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       {
         std::ostringstream progCmd;
         progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
-        progCmd << lg->Convert(progress.Dir, cmOutputConverter::FULL,
-                               cmOutputConverter::SHELL);
+        progCmd << lg->ConvertToOutputFormat(
+          cmSystemTools::CollapseFullPath(progress.Dir),
+          cmOutputConverter::SHELL);
         progCmd << " 0";
         commands.push_back(progCmd.str());
       }

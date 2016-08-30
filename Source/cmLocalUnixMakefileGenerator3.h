@@ -121,8 +121,7 @@ public:
 
   // create a command that cds to the start dir then runs the commands
   void CreateCDCommand(std::vector<std::string>& commands,
-                       const char* targetDir,
-                       cmOutputConverter::RelativeRoot returnDir);
+                       const char* targetDir, std::string const& relDir);
 
   static std::string ConvertToQuotedOutputPath(const char* p,
                                                bool useWatcomQuote);
@@ -229,15 +228,16 @@ protected:
                            const std::vector<cmCustomCommand>& ccs);
   void AppendCustomDepend(std::vector<std::string>& depends,
                           cmCustomCommandGenerator const& cc);
-  void AppendCustomCommands(
-    std::vector<std::string>& commands,
-    const std::vector<cmCustomCommand>& ccs, cmGeneratorTarget* target,
-    cmOutputConverter::RelativeRoot relative = cmOutputConverter::HOME_OUTPUT);
-  void AppendCustomCommand(
-    std::vector<std::string>& commands, cmCustomCommandGenerator const& ccg,
-    cmGeneratorTarget* target, bool echo_comment = false,
-    cmOutputConverter::RelativeRoot relative = cmOutputConverter::HOME_OUTPUT,
-    std::ostream* content = CM_NULLPTR);
+  void AppendCustomCommands(std::vector<std::string>& commands,
+                            const std::vector<cmCustomCommand>& ccs,
+                            cmGeneratorTarget* target,
+                            std::string const& relative);
+  void AppendCustomCommand(std::vector<std::string>& commands,
+                           cmCustomCommandGenerator const& ccg,
+                           cmGeneratorTarget* target,
+                           std::string const& relative,
+                           bool echo_comment = false,
+                           std::ostream* content = CM_NULLPTR);
   void AppendCleanCommand(std::vector<std::string>& commands,
                           const std::vector<std::string>& files,
                           cmGeneratorTarget* target,
@@ -250,11 +250,7 @@ protected:
   void CheckMultipleOutputs(bool verbose);
 
 private:
-  std::string ConvertShellCommand(std::string const& cmd,
-                                  cmOutputConverter::RelativeRoot root);
-  std::string MakeLauncher(cmCustomCommandGenerator const& ccg,
-                           cmGeneratorTarget* target,
-                           cmOutputConverter::RelativeRoot relative);
+  std::string MaybeConvertWatcomShellCommand(std::string const& cmd);
 
   void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,

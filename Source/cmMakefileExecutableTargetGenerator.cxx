@@ -135,8 +135,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string targetFullPathReal = outpath + targetNameReal;
   std::string targetFullPathPDB = pdbOutputPath + targetNamePDB;
   std::string targetFullPathImport = outpathImp + targetNameImport;
-  std::string targetOutPathPDB = this->Convert(
-    targetFullPathPDB, cmOutputConverter::NONE, cmOutputConverter::SHELL);
+  std::string targetOutPathPDB = this->LocalGenerator->ConvertToOutputFormat(
+    targetFullPathPDB, cmOutputConverter::SHELL);
   // Convert to the output path to use in constructing commands.
   std::string targetOutPath = this->Convert(
     targetFullPath, cmOutputConverter::START_OUTPUT, cmOutputConverter::SHELL);
@@ -218,49 +218,43 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // Construct a list of files associated with this executable that
   // may need to be cleaned.
   std::vector<std::string> exeCleanFiles;
-  exeCleanFiles.push_back(this->Convert(targetFullPath,
-                                        cmOutputConverter::START_OUTPUT,
-                                        cmOutputConverter::UNCHANGED));
+  exeCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
+    targetFullPath, cmOutputConverter::START_OUTPUT));
 #ifdef _WIN32
   // There may be a manifest file for this target.  Add it to the
   // clean set just in case.
-  exeCleanFiles.push_back(this->Convert((targetFullPath + ".manifest").c_str(),
-                                        cmOutputConverter::START_OUTPUT,
-                                        cmOutputConverter::UNCHANGED));
+  exeCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
+    (targetFullPath + ".manifest").c_str(), cmOutputConverter::START_OUTPUT));
 #endif
   if (targetNameReal != targetName) {
-    exeCleanFiles.push_back(this->Convert(targetFullPathReal,
-                                          cmOutputConverter::START_OUTPUT,
-                                          cmOutputConverter::UNCHANGED));
+    exeCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
+      targetFullPathReal, cmOutputConverter::START_OUTPUT));
   }
   if (!targetNameImport.empty()) {
-    exeCleanFiles.push_back(this->Convert(targetFullPathImport,
-                                          cmOutputConverter::START_OUTPUT,
-                                          cmOutputConverter::UNCHANGED));
+    exeCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
+      targetFullPathImport, cmOutputConverter::START_OUTPUT));
     std::string implib;
     if (this->GeneratorTarget->GetImplibGNUtoMS(targetFullPathImport,
                                                 implib)) {
-      exeCleanFiles.push_back(this->Convert(implib,
-                                            cmOutputConverter::START_OUTPUT,
-                                            cmOutputConverter::UNCHANGED));
+      exeCleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
+        implib, cmOutputConverter::START_OUTPUT));
     }
   }
 
   // List the PDB for cleaning only when the whole target is
   // cleaned.  We do not want to delete the .pdb file just before
   // linking the target.
-  this->CleanFiles.push_back(this->Convert(targetFullPathPDB,
-                                           cmOutputConverter::START_OUTPUT,
-                                           cmOutputConverter::UNCHANGED));
+  this->CleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
+    targetFullPathPDB, cmOutputConverter::START_OUTPUT));
 
   // Add the pre-build and pre-link rules building but not when relinking.
   if (!relink) {
     this->LocalGenerator->AppendCustomCommands(
       commands, this->GeneratorTarget->GetPreBuildCommands(),
-      this->GeneratorTarget);
+      this->GeneratorTarget, this->LocalGenerator->GetBinaryDirectory());
     this->LocalGenerator->AppendCustomCommands(
       commands, this->GeneratorTarget->GetPreLinkCommands(),
-      this->GeneratorTarget);
+      this->GeneratorTarget, this->LocalGenerator->GetBinaryDirectory());
   }
 
   // Determine whether a link script will be used.
@@ -357,9 +351,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     vars.Manifests = manifests.c_str();
 
     if (this->GeneratorTarget->GetProperty("LINK_WHAT_YOU_USE")) {
-      std::string cmakeCommand =
-        this->Convert(cmSystemTools::GetCMakeCommand(), cmLocalGenerator::NONE,
-                      cmLocalGenerator::SHELL);
+      std::string cmakeCommand = this->LocalGenerator->ConvertToOutputFormat(
+        cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
       cmakeCommand += " -E __run_iwyu --lwyu=";
       cmakeCommand += targetOutPathReal;
       real_link_commands.push_back(cmakeCommand);
@@ -389,7 +382,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   }
   this->LocalGenerator->CreateCDCommand(
     commands1, this->Makefile->GetCurrentBinaryDirectory(),
-    cmOutputConverter::HOME_OUTPUT);
+    this->LocalGenerator->GetBinaryDirectory());
   commands.insert(commands.end(), commands1.begin(), commands1.end());
   commands1.clear();
 
@@ -402,7 +395,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     commands1.push_back(symlink);
     this->LocalGenerator->CreateCDCommand(
       commands1, this->Makefile->GetCurrentBinaryDirectory(),
-      cmOutputConverter::HOME_OUTPUT);
+      this->LocalGenerator->GetBinaryDirectory());
     commands.insert(commands.end(), commands1.begin(), commands1.end());
     commands1.clear();
   }
@@ -411,7 +404,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   if (!relink) {
     this->LocalGenerator->AppendCustomCommands(
       commands, this->GeneratorTarget->GetPostBuildCommands(),
-      this->GeneratorTarget);
+      this->GeneratorTarget, this->LocalGenerator->GetBinaryDirectory());
   }
 
   // Write the build rule.

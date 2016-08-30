@@ -749,7 +749,8 @@ std::string cmGlobalNinjaGenerator::ConvertToNinjaPath(const std::string& path)
 {
   cmLocalNinjaGenerator* ng =
     static_cast<cmLocalNinjaGenerator*>(this->LocalGenerators[0]);
-  std::string convPath = ng->Convert(path, cmOutputConverter::HOME_OUTPUT);
+  std::string convPath =
+    ng->ConvertToRelativePath(path, cmOutputConverter::HOME_OUTPUT);
   convPath = this->NinjaOutputPath(convPath);
 #ifdef _WIN32
   std::replace(convPath.begin(), convPath.end(), '/', '\\');
@@ -762,7 +763,8 @@ std::string cmGlobalNinjaGenerator::ConvertToNinjaFolderRule(
 {
   cmLocalNinjaGenerator* ng =
     static_cast<cmLocalNinjaGenerator*>(this->LocalGenerators[0]);
-  std::string convPath = ng->Convert(path + "/all", cmOutputConverter::HOME);
+  std::string convPath =
+    ng->ConvertToRelativePath(path + "/all", cmOutputConverter::HOME);
   convPath = this->NinjaOutputPath(convPath);
 #ifdef _WIN32
   std::replace(convPath.begin(), convPath.end(), '/', '\\');
