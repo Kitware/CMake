@@ -163,8 +163,7 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
   if (!token) {
     std::ostringstream error;
     /* clang-format off */
-    error << "Error in cmake code at\n" << this->FileName << ":"
-          << cmListFileLexer_GetCurrentLine(this->Lexer) << ":\n"
+    error << "Unexpected end of file.\n"
           << "Parse error.  Function missing opening \"(\".";
     /* clang-format on */
     this->IssueError(error.str());
