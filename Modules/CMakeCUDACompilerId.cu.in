@@ -1,6 +1,5 @@
-
-#ifndef __cplusplus
-# error "A C compiler has been selected for CUDA/C++."
+#ifndef __CUDACC__
+# error "A C or C++ compiler has been selected for CUDA"
 #endif
 
 @CMAKE_CUDA_COMPILER_ID_CONTENT@
