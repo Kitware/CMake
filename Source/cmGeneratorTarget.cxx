@@ -1767,6 +1767,22 @@ std::string cmGeneratorTarget::GetMacContentDirectory(
   return fpath;
 }
 
+std::string cmGeneratorTarget::GetEffectiveFolderName() const
+{
+  std::string effectiveFolder;
+
+  if (!this->GlobalGenerator->UseFolderProperty()) {
+    return effectiveFolder;
+  }
+
+  const char* targetFolder = this->GetProperty("FOLDER");
+  if (targetFolder) {
+    effectiveFolder += targetFolder;
+  }
+
+  return effectiveFolder;
+}
+
 cmGeneratorTarget::CompileInfo const* cmGeneratorTarget::GetCompileInfo(
   const std::string& config) const
 {

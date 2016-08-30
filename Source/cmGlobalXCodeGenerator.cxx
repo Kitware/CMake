@@ -2723,8 +2723,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateOrGetPBXGroup(
 {
   std::string s;
   std::string target;
-  const char* targetFolder = gtgt->GetProperty("FOLDER");
-  if (targetFolder) {
+  const std::string targetFolder = gtgt->GetEffectiveFolderName();
+  if (!targetFolder.empty()) {
     target = targetFolder;
     target += "/";
   }

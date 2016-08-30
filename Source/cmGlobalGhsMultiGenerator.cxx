@@ -439,11 +439,7 @@ void cmGlobalGhsMultiGenerator::UpdateBuildFiles(
        tgtsI != tgts.end(); ++tgtsI) {
     const cmGeneratorTarget* tgt = *tgtsI;
     if (IsTgtForBuild(tgt)) {
-      char const* rawFolderName = tgt->GetProperty("FOLDER");
-      if (NULL == rawFolderName) {
-        rawFolderName = "";
-      }
-      std::string folderName(rawFolderName);
+      std::string folderName = tgt->GetEffectiveFolderName();
       if (this->TargetFolderBuildStreams.end() ==
           this->TargetFolderBuildStreams.find(folderName)) {
         this->AddFilesUpToPath(

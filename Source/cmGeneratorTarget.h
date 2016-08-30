@@ -220,6 +220,9 @@ public:
   std::string GetMacContentDirectory(const std::string& config = CM_NULLPTR,
                                      bool implib = false) const;
 
+  /** @return folder prefix for IDEs. */
+  std::string GetEffectiveFolderName() const;
+
   cmTarget* Target;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
