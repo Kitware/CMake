@@ -701,7 +701,7 @@ void cmMakefile::AddCustomCommandToTarget(
   const std::vector<std::string>& depends,
   const cmCustomCommandLines& commandLines, cmTarget::CustomCommandType type,
   const char* comment, const char* workingDir, bool escapeOldStyle,
-  bool uses_terminal)
+  bool uses_terminal, const std::string& depfile)
 {
   // Find the target to which to add the custom command.
   cmTargets::iterator ti = this->Targets.find(target);
@@ -773,6 +773,7 @@ void cmMakefile::AddCustomCommandToTarget(
   cc.SetEscapeOldStyle(escapeOldStyle);
   cc.SetEscapeAllowMakeVars(true);
   cc.SetUsesTerminal(uses_terminal);
+  cc.SetDepfile(depfile);
   switch (type) {
     case cmTarget::PRE_BUILD:
       ti->second.AddPreBuildCommand(cc);
@@ -792,7 +793,7 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
   const std::vector<std::string>& depends, const std::string& main_dependency,
   const cmCustomCommandLines& commandLines, const char* comment,
   const char* workingDir, bool replace, bool escapeOldStyle,
-  bool uses_terminal)
+  bool uses_terminal, const std::string& depfile)
 {
   // Make sure there is at least one output.
   if (outputs.empty()) {
@@ -886,6 +887,7 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
     cc->SetEscapeOldStyle(escapeOldStyle);
     cc->SetEscapeAllowMakeVars(true);
     cc->SetUsesTerminal(uses_terminal);
+    cc->SetDepfile(depfile);
     file->SetCustomCommand(cc);
     this->UpdateOutputToSourceMap(outputs, file);
   }
@@ -923,14 +925,14 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
   const std::string& output, const std::vector<std::string>& depends,
   const std::string& main_dependency, const cmCustomCommandLines& commandLines,
   const char* comment, const char* workingDir, bool replace,
-  bool escapeOldStyle, bool uses_terminal)
+  bool escapeOldStyle, bool uses_terminal, const std::string& depfile)
 {
   std::vector<std::string> outputs;
   outputs.push_back(output);
   std::vector<std::string> no_byproducts;
   return this->AddCustomCommandToOutput(
     outputs, no_byproducts, depends, main_dependency, commandLines, comment,
-    workingDir, replace, escapeOldStyle, uses_terminal);
+    workingDir, replace, escapeOldStyle, uses_terminal, depfile);
 }
 
 void cmMakefile::AddCustomCommandOldStyle(

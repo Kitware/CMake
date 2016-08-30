@@ -88,6 +88,10 @@ public:
   bool GetUsesTerminal() const;
   void SetUsesTerminal(bool b);
 
+  /** Set/Get the depfile (used by the Ninja generator) */
+  const std::string& GetDepfile() const;
+  void SetDepfile(const std::string& depfile);
+
 private:
   std::vector<std::string> Outputs;
   std::vector<std::string> Byproducts;
@@ -97,6 +101,7 @@ private:
   ImplicitDependsList ImplicitDepends;
   std::string Comment;
   std::string WorkingDirectory;
+  std::string Depfile;
   bool HaveComment;
   bool EscapeAllowMakeVars;
   bool EscapeOldStyle;

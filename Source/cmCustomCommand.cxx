@@ -135,3 +135,13 @@ void cmCustomCommand::SetUsesTerminal(bool b)
 {
   this->UsesTerminal = b;
 }
+
+const std::string& cmCustomCommand::GetDepfile() const
+{
+  return this->Depfile;
+}
+
+void cmCustomCommand::SetDepfile(const std::string& depfile)
+{
+  this->Depfile = depfile;
+}

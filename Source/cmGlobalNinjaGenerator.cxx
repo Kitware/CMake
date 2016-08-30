@@ -251,8 +251,8 @@ void cmGlobalNinjaGenerator::AddCustomCommandRule()
 
 void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
   const std::string& command, const std::string& description,
-  const std::string& comment, bool uses_terminal, bool restat,
-  const cmNinjaDeps& outputs, const cmNinjaDeps& deps,
+  const std::string& comment, const std::string& depfile, bool uses_terminal,
+  bool restat, const cmNinjaDeps& outputs, const cmNinjaDeps& deps,
   const cmNinjaDeps& orderOnly)
 {
   std::string cmd = command;
@@ -273,7 +273,9 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
   if (uses_terminal && SupportsConsolePool()) {
     vars["pool"] = "console";
   }
-
+  if (!depfile.empty()) {
+    vars["depfile"] = depfile;
+  }
   this->WriteBuild(*this->BuildFileStream, comment, "CUSTOM_COMMAND", outputs,
                    deps, cmNinjaDeps(), orderOnly, vars);
 
@@ -839,7 +841,7 @@ void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
     std::copy(i->second.begin(), i->second.end(), std::back_inserter(deps));
     WriteCustomCommandBuild(/*command=*/"", /*description=*/"",
                             "Assume dependencies for generated source file.",
-                            /*uses_terminal*/ false,
+                            /*depfile*/ "", /*uses_terminal*/ false,
                             /*restat*/ true, cmNinjaDeps(1, i->first), deps);
   }
 }

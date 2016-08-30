@@ -412,7 +412,8 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
   } else {
     this->GetGlobalNinjaGenerator()->WriteCustomCommandBuild(
       this->BuildCommandLine(cmdLines), this->ConstructComment(ccg),
-      "Custom command for " + ninjaOutputs[0], cc->GetUsesTerminal(),
+      "Custom command for " + ninjaOutputs[0], cc->GetDepfile(),
+      cc->GetUsesTerminal(),
       /*restat*/ !symbolic || !byproducts.empty(), ninjaOutputs, ninjaDeps,
       orderOnlyDeps);
   }

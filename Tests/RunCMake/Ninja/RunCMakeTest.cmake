@@ -32,6 +32,8 @@ run_CMP0058(WARN-by)
 run_CMP0058(NEW-no)
 run_CMP0058(NEW-by)
 
+run_cmake(CustomCommandDepfile)
+
 function(run_SubDir)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SubDir-build)
