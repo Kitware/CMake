@@ -214,6 +214,7 @@ Variables that Describe the System
    /variable/WINCE
    /variable/WINDOWS_PHONE
    /variable/WINDOWS_STORE
+   /variable/XCODE
    /variable/XCODE_VERSION
 
 Variables that Control the Build
