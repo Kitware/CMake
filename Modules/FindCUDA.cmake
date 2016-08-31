@@ -1797,12 +1797,23 @@ endmacro()
 ###############################################################################
 ###############################################################################
 macro(cuda_compile_base cuda_target format generated_files)
+  # Update a counter in this directory, to keep phony target names unique.
+  set(_cuda_target "${cuda_target}")
+  get_property(_counter DIRECTORY PROPERTY _cuda_internal_phony_counter)
+  if(_counter)
+    math(EXPR _counter "${_counter} + 1")
+  else()
+    set(_counter 1)
+  endif()
+  set(_cuda_target "${_cuda_target}_${_counter}")
+  set_property(DIRECTORY PROPERTY _cuda_internal_phony_counter ${_counter})
 
   # Separate the sources from the options
   CUDA_GET_SOURCES_AND_OPTIONS(_sources _cmake_options _options ${ARGN})
+
   # Create custom commands and targets for each file.
-  CUDA_WRAP_SRCS( ${cuda_target} ${format} _generated_files ${_sources} ${_cmake_options}
-    OPTIONS ${_options} PHONY)
+  CUDA_WRAP_SRCS( ${_cuda_target} ${format} _generated_files ${_sources}
+                  ${_cmake_options} OPTIONS ${_options} PHONY)
 
   set( ${generated_files} ${_generated_files})
 
