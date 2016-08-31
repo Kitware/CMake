@@ -1458,7 +1458,8 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
 
     // Create the scanner for this language
     cmDepends* scanner = CM_NULLPTR;
-    if (lang == "C" || lang == "CXX" || lang == "RC" || lang == "ASM") {
+    if (lang == "C" || lang == "CXX" || lang == "RC" || lang == "ASM" ||
+        lang == "CUDA") {
       // TODO: Handle RC (resource files) dependencies correctly.
       scanner = new cmDependsC(this, targetDir, lang, &validDeps);
     }

@@ -85,7 +85,20 @@ endif()
 # compile a cu file into an object file
 if(NOT CMAKE_CUDA_COMPILE_OBJECT)
   set(CMAKE_CUDA_COMPILE_OBJECT
-    "<CMAKE_CUDA_COMPILER>  <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -x cu -c <SOURCE>")
+    "<CMAKE_CUDA_COMPILER>  <DEFINES> <INCLUDES> <FLAGS> -x cu -c <SOURCE> -o <OBJECT>")
+
+  #The Ninja generator uses the make file dependency files to determine what
+  #files need to be recompiled. Unfortunately, nvcc doesn't support building
+  #a source file and generating the dependencies of said file in a single
+  #invocation. Instead we have to state that you need to chain two commands.
+  #
+  #The makefile generators uses the custom CMake dependency scanner, and thus
+  #it is exempt from this logic.
+  if(CMAKE_GENERATOR STREQUAL "Ninja")
+    list(APPEND CMAKE_CUDA_COMPILE_OBJECT
+      "<CMAKE_CUDA_COMPILER>  <DEFINES> <INCLUDES> <FLAGS> -x cu -M <SOURCE> -MT <OBJECT> -o $DEP_FILE")
+  endif()
+
 endif()
 
 # compile a cu file into an executable
