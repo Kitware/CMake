@@ -15,8 +15,8 @@
 #
 # The module supports the following components:
 #
-# * ``MX_LIBRARY`` and ``ENG_LIBRARY`` respectively the MX and ENG libraries of
-#   Matlab
+# * ``MX_LIBRARY``, ``ENG_LIBRARY`` and ``MAT_LIBRARY``: respectively the MX,
+#   ENG and MAT libraries of Matlab
 # * ``MAIN_PROGRAM`` the Matlab binary program.
 #
 # .. note::
@@ -92,6 +92,9 @@
 #   ``MX_LIBRARY`` has been requested.
 # ``Matlab_ENG_LIBRARY``
 #   Matlab engine library. Available only if the component ``ENG_LIBRARY``
+#   is requested.
+# ``Matlab_MAT_LIBRARY``
+#   Matlab matrix library. Available only if the component ``MAT_LIBRARY``
 #   is requested.
 # ``Matlab_LIBRARIES``
 #   the whole set of libraries of Matlab
@@ -1213,6 +1216,7 @@ if(DEFINED Matlab_ROOT_DIR_LAST_CACHED)
         Matlab_MAIN_PROGRAM
         Matlab_MX_LIBRARY
         Matlab_ENG_LIBRARY
+        Matlab_MAT_LIBRARY
         Matlab_MEX_EXTENSION
 
         # internal
@@ -1346,7 +1350,6 @@ _Matlab_find_library(
   NO_DEFAULT_PATH
 )
 
-
 list(APPEND _matlab_required_variables Matlab_MEX_LIBRARY)
 
 # the MEX extension is required
@@ -1354,7 +1357,6 @@ list(APPEND _matlab_required_variables Matlab_MEX_EXTENSION)
 
 # the matlab root is required
 list(APPEND _matlab_required_variables Matlab_ROOT_DIR)
-
 
 # component Mex Compiler
 list(FIND Matlab_FIND_COMPONENTS MEX_COMPILER _matlab_find_mex_compiler)
@@ -1366,7 +1368,6 @@ if(_matlab_find_mex_compiler GREATER -1)
     DOC "Matlab MEX compiler"
     NO_DEFAULT_PATH
   )
-
   if(Matlab_MEX_COMPILER)
     set(Matlab_MEX_COMPILER_FOUND TRUE)
   endif()
@@ -1376,7 +1377,6 @@ unset(_matlab_find_mex_compiler)
 # component Matlab program
 list(FIND Matlab_FIND_COMPONENTS MAIN_PROGRAM _matlab_find_matlab_program)
 if(_matlab_find_matlab_program GREATER -1)
-
   find_program(
     Matlab_MAIN_PROGRAM
     matlab
@@ -1384,11 +1384,9 @@ if(_matlab_find_matlab_program GREATER -1)
     DOC "Matlab main program"
     NO_DEFAULT_PATH
   )
-
   if(Matlab_MAIN_PROGRAM)
     set(Matlab_MAIN_PROGRAM_FOUND TRUE)
   endif()
-
 endif()
 unset(_matlab_find_matlab_program)
 
@@ -1402,13 +1400,11 @@ if(_matlab_find_mx GREATER -1)
     PATHS ${_matlab_lib_dir_for_search}
     NO_DEFAULT_PATH
   )
-
   if(Matlab_MX_LIBRARY)
     set(Matlab_MX_LIBRARY_FOUND TRUE)
   endif()
 endif()
 unset(_matlab_find_mx)
-
 
 # Component ENG library
 list(FIND Matlab_FIND_COMPONENTS ENG_LIBRARY _matlab_find_eng)
@@ -1426,15 +1422,26 @@ if(_matlab_find_eng GREATER -1)
 endif()
 unset(_matlab_find_eng)
 
-
-
+# Component MAT library
+list(FIND Matlab_FIND_COMPONENTS MAT_LIBRARY _matlab_find_mat)
+if(_matlab_find_mat GREATER -1)
+  _Matlab_find_library(
+    ${_matlab_lib_prefix_for_search}
+    Matlab_MAT_LIBRARY
+    mat
+    PATHS ${_matlab_lib_dir_for_search}
+    NO_DEFAULT_PATH
+  )
+  if(Matlab_MAT_LIBRARY)
+    set(Matlab_MAT_LIBRARY_FOUND TRUE)
+  endif()
+endif()
+unset(_matlab_find_mat)
 
 
 unset(_matlab_lib_dir_for_search)
 
-
-set(Matlab_LIBRARIES ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY} ${Matlab_ENG_LIBRARY})
-
+set(Matlab_LIBRARIES ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY} ${Matlab_ENG_LIBRARY} ${Matlab_MAT_LIBRARY})
 
 find_package_handle_standard_args(
   Matlab
@@ -1453,18 +1460,14 @@ unset(_matlab_lib_prefix_for_search)
 
 if(Matlab_INCLUDE_DIRS AND Matlab_LIBRARIES)
   mark_as_advanced(
-    #Matlab_LIBRARIES
     Matlab_MEX_LIBRARY
     Matlab_MX_LIBRARY
     Matlab_ENG_LIBRARY
+    Matlab_MAT_LIBRARY
     Matlab_INCLUDE_DIRS
     Matlab_FOUND
-    #Matlab_ROOT_DIR
-    #Matlab_VERSION_STRING
     Matlab_MAIN_PROGRAM
-    #Matlab_MEX_EXTENSION
     Matlab_MEXEXTENSIONS_PROG
     Matlab_MEX_EXTENSION
-    #Matlab_BINARIES_DIR
   )
 endif()
