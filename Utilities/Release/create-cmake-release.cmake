@@ -8,7 +8,6 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/logs)
 set(RELEASE_SCRIPTS_BATCH_1
   win32_release.cmake         # Windows x86
   osx_release.cmake           # OS X x86_64
-  linux32_release.cmake       # Linux x86
   linux64_release.cmake       # Linux x86_64
 )
 
