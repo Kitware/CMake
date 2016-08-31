@@ -285,8 +285,8 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
     for (std::vector<LocalObjectEntry>::const_iterator ei = lo->second.begin();
          ei != lo->second.end(); ++ei) {
       if (ei->Language == "C" || ei->Language == "CXX" ||
-          ei->Language == "Fortran") {
-        // Right now, C, C++ and Fortran have both a preprocessor and the
+          ei->Language == "CUDA" || ei->Language == "Fortran") {
+        // Right now, C, C++, Fortran and CUDA have both a preprocessor and the
         // ability to generate assembly code
         lang_has_preprocessor = true;
         lang_has_assembly = true;
