@@ -2635,13 +2635,10 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
 }
 
 bool cmGlobalXCodeGenerator::CreateGroups(
-  cmLocalGenerator* root, std::vector<cmLocalGenerator*>& generators)
+  std::vector<cmLocalGenerator*>& generators)
 {
   for (std::vector<cmLocalGenerator*>::iterator i = generators.begin();
        i != generators.end(); ++i) {
-    if (this->IsExcluded(root, *i)) {
-      continue;
-    }
     cmMakefile* mf = (*i)->GetMakefile();
     std::vector<cmSourceGroup> sourceGroups = mf->GetSourceGroups();
     std::vector<cmGeneratorTarget*> tgts = (*i)->GetGeneratorTargets();
@@ -2873,7 +2870,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   this->MainGroupChildren->AddObject(resourcesGroup);
 
   // now create the cmake groups
-  if (!this->CreateGroups(root, generators)) {
+  if (!this->CreateGroups(generators)) {
     return false;
   }
 
@@ -3041,10 +3038,8 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   std::vector<cmXCodeObject*> targets;
   for (std::vector<cmLocalGenerator*>::iterator i = generators.begin();
        i != generators.end(); ++i) {
-    if (!this->IsExcluded(root, *i)) {
-      if (!this->CreateXCodeTargets(*i, targets)) {
-        return false;
-      }
+    if (!this->CreateXCodeTargets(*i, targets)) {
+      return false;
     }
   }
   // loop over all targets and add link and depend info
