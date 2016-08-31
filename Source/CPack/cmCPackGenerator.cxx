@@ -14,6 +14,7 @@
 
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
+#include "cmCryptoHash.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -162,6 +163,14 @@ int cmCPackGenerator::PrepareNames()
       "CPACK_PACKAGE_DESCRIPTION or CPACK_PACKAGE_DESCRIPTION_FILE."
         << std::endl);
     return 0;
+  }
+  const char* algoSignature = this->GetOption("CPACK_PACKAGE_CHECKSUM");
+  if (algoSignature) {
+    if (cmCryptoHash::New(algoSignature).get() == CM_NULLPTR) {
+      cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot recognize algorithm: "
+                      << algoSignature << std::endl);
+      return 0;
+    }
   }
 
   this->SetOptionIfNotSet("CPACK_REMOVE_TOPLEVEL_DIRECTORY", "1");
