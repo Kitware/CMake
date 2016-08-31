@@ -112,7 +112,7 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
 
   # Allow the user to enable/disable all system utility library options by
   # defining CMAKE_USE_SYSTEM_LIBRARIES or CMAKE_USE_SYSTEM_LIBRARY_${util}.
-  set(UTILITIES BZIP2 CURL EXPAT FORM JSONCPP LIBARCHIVE LIBLZMA ZLIB)
+  set(UTILITIES BZIP2 CURL EXPAT FORM JSONCPP LIBARCHIVE LIBLZMA LIBUV ZLIB)
   foreach(util ${UTILITIES})
     if(NOT DEFINED CMAKE_USE_SYSTEM_LIBRARY_${util}
         AND DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
@@ -152,6 +152,7 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
     "${CMAKE_USE_SYSTEM_LIBRARY_LIBLZMA}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
   option(CMAKE_USE_SYSTEM_FORM "Use system-installed libform" "${CMAKE_USE_SYSTEM_LIBRARY_FORM}")
   option(CMAKE_USE_SYSTEM_JSONCPP "Use system-installed jsoncpp" "${CMAKE_USE_SYSTEM_LIBRARY_JSONCPP}")
+  option(CMAKE_USE_SYSTEM_LIBUV "Use system-installed libuv" "${CMAKE_USE_SYSTEM_LIBRARY_LIBUV}")
 
   # For now use system KWIML only if explicitly requested rather
   # than activating via the general system libs options.
@@ -461,6 +462,55 @@ macro (CMAKE_BUILD_UTILITIES)
     set(CMAKE_JSONCPP_LIBRARIES cmjsoncpp)
     add_subdirectory(Utilities/cmjsoncpp)
     CMAKE_SET_TARGET_FOLDER(cmjsoncpp "Utilities/3rdParty")
+  endif()
+
+  #---------------------------------------------------------------------
+  # Build libuv library.
+  if(NOT DEFINED CMAKE_USE_LIBUV)
+    set(CMAKE_USE_LIBUV 1)
+    if(APPLE)
+      include(CheckCSourceCompiles)
+      check_c_source_compiles("
+#include <CoreServices/CoreServices.h>
+#include <AvailabilityMacros.h>
+#ifndef MAC_OS_X_VERSION_10_5
+#error \"MAC_OS_X_VERSION_10_5 is not defined\"
+#endif
+int main(void) { return 0; }
+" HAVE_CoreServices_OS_X_10_5)
+      if(NOT HAVE_CoreServices_OS_X_10_5)
+        set(CMAKE_USE_LIBUV 0)
+      endif()
+    elseif(CYGWIN)
+      # libuv does not support Cygwin
+      set(CMAKE_USE_LIBUV 0)
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "HP-UX")
+      # Disable until it can be ported.
+      set(CMAKE_USE_LIBUV 0)
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "sparc")
+      # Disable until it can be ported.
+      set(CMAKE_USE_LIBUV 0)
+    endif()
+  endif()
+  if(CMAKE_USE_LIBUV)
+    if(CMAKE_USE_SYSTEM_LIBUV)
+      if(NOT CMAKE_VERSION VERSION_LESS 3.0)
+        include(${CMake_SOURCE_DIR}/Source/Modules/FindLibUV.cmake)
+      else()
+        message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBUV requires CMake >= 3.0")
+      endif()
+      if(NOT LIBUV_FOUND)
+        message(FATAL_ERROR
+          "CMAKE_USE_SYSTEM_LIBUV is ON but a libuv is not found!")
+      endif()
+      set(CMAKE_LIBUV_LIBRARIES LibUV::LibUV)
+    else()
+      set(CMAKE_LIBUV_LIBRARIES cmlibuv)
+      add_subdirectory(Utilities/cmlibuv)
+      CMAKE_SET_TARGET_FOLDER(cmlibuv "Utilities/3rdParty")
+    endif()
+  else()
+    set(CMAKE_LIBUV_LIBRARIES)
   endif()
 
   #---------------------------------------------------------------------

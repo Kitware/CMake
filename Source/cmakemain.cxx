@@ -27,6 +27,10 @@
 #include "cmcmd.h"
 #include <cmsys/Encoding.hxx>
 
+#ifdef CMAKE_USE_LIBUV
+#include "cm_uv.h"
+#endif
+
 #ifdef CMAKE_BUILD_WITH_CMAKE
 static const char* cmDocumentationName[][2] = {
   { CM_NULLPTR, "  cmake - Cross-Platform Makefile Generator." },
@@ -171,6 +175,9 @@ int main(int ac, char const* const* av)
   int ret = do_cmake(ac, av);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmDynamicLoader::FlushCache();
+#endif
+#ifdef CMAKE_USE_LIBUV
+  uv_loop_close(uv_default_loop());
 #endif
   return ret;
 }
