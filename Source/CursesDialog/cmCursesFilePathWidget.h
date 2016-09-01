@@ -12,6 +12,8 @@
 #ifndef cmCursesFilePathWidget_h
 #define cmCursesFilePathWidget_h
 
+#include <cmConfigure.h> // IWYU pragma: keep
+
 #include "cmCursesPathWidget.h"
 
 class cmCursesFilePathWidget : public cmCursesPathWidget

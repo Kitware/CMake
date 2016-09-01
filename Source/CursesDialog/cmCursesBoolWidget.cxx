@@ -11,7 +11,10 @@
 ============================================================================*/
 #include "cmCursesBoolWidget.h"
 
-#include "cmCursesMainForm.h"
+#include "cmCursesWidget.h"
+#include "cmState.h"
+
+#include <string>
 
 cmCursesBoolWidget::cmCursesBoolWidget(int width, int height, int left,
                                        int top)

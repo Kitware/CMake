@@ -12,11 +12,13 @@
 #ifndef cmCursesLongMessageForm_h
 #define cmCursesLongMessageForm_h
 
-#include "cmCursesStandardIncludes.h"
+#include <cmConfigure.h>
 
 #include "cmCursesForm.h"
+#include "cmCursesStandardIncludes.h"
 
-class cmCursesCacheEntryComposite;
+#include <string>
+#include <vector>
 
 class cmCursesLongMessageForm : public cmCursesForm
 {

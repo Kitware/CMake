@@ -12,7 +12,13 @@
 #ifndef cmCursesOptionsWidget_h
 #define cmCursesOptionsWidget_h
 
+#include <cmConfigure.h>
+
+#include "cmCursesStandardIncludes.h"
 #include "cmCursesWidget.h"
+
+#include <string>
+#include <vector>
 
 class cmCursesMainForm;
 

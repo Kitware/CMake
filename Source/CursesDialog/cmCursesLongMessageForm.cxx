@@ -11,10 +11,13 @@
 ============================================================================*/
 #include "cmCursesLongMessageForm.h"
 
-#include "../cmSystemTools.h"
-#include "../cmVersion.h"
-#include "../cmake.h"
+#include "cmCursesForm.h"
 #include "cmCursesMainForm.h"
+#include "cmCursesStandardIncludes.h"
+#include "cmVersion.h"
+
+#include <stdio.h>
+#include <string.h>
 
 inline int ctrl(int z)
 {
