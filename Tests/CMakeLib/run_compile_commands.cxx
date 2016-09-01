@@ -1,6 +1,6 @@
 #include "cmSystemTools.h"
 
-#include <fstream>
+#include <cmsys/FStream.hxx>
 #include <iostream>
 #include <map>
 #include <stdlib.h>
@@ -26,7 +26,10 @@ public:
   };
   typedef std::vector<CommandType> TranslationUnitsType;
 
-  CompileCommandParser(std::ifstream* input) { this->Input = input; }
+  CompileCommandParser(std::istream& input)
+    : Input(input)
+  {
+  }
 
   void Parse()
   {
@@ -109,8 +112,8 @@ private:
 
   void Next()
   {
-    this->C = char(Input->get());
-    if (this->Input->bad()) {
+    this->C = char(Input.get());
+    if (this->Input.bad()) {
       ErrorExit("Unexpected end of file.");
     }
   }
@@ -131,13 +134,13 @@ private:
   TranslationUnitsType TranslationUnits;
   CommandType Command;
   std::string String;
-  std::ifstream* Input;
+  std::istream& Input;
 };
 
 int main()
 {
-  std::ifstream file("compile_commands.json");
-  CompileCommandParser parser(&file);
+  cmsys::ifstream file("compile_commands.json");
+  CompileCommandParser parser(file);
   parser.Parse();
   for (CompileCommandParser::TranslationUnitsType::const_iterator
          it = parser.GetTranslationUnits().begin(),
