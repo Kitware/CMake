@@ -13,6 +13,7 @@
 
 #include "cmGeneratorExpression.h"
 #include "cmLocalGenerator.h"
+#include "cmMakefile.h"
 
 cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
   std::vector<std::string> const& dirs, const char* dest,
@@ -73,6 +74,16 @@ void cmInstallDirectoryGenerator::GenerateScriptForConfig(
     cmSystemTools::ExpandListArgument(
       cge->Evaluate(this->LocalGenerator, config), dirs);
   }
+
+  // Make sure all dirs have absolute paths.
+  cmMakefile const& mf = *this->LocalGenerator->GetMakefile();
+  for (std::vector<std::string>::iterator i = dirs.begin(); i != dirs.end();
+       ++i) {
+    if (!cmSystemTools::FileIsFullPath(i->c_str())) {
+      *i = std::string(mf.GetCurrentSourceDirectory()) + "/" + *i;
+    }
+  }
+
   this->AddDirectoryInstallRule(os, config, indent, dirs);
 }
 
