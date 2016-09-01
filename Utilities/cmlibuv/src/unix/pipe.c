@@ -42,12 +42,9 @@ int uv_pipe_init(uv_loop_t* loop, uv_pipe_t* handle, int ipc) {
 
 int uv_pipe_bind(uv_pipe_t* handle, const char* name) {
   struct sockaddr_un saddr;
-  const char* pipe_fname;
-  int sockfd;
+  const char* pipe_fname = NULL;
+  int sockfd = -1;
   int err;
-
-  pipe_fname = NULL;
-  sockfd = -1;
 
   /* Already bound? */
   if (uv__stream_fd(handle) >= 0)
