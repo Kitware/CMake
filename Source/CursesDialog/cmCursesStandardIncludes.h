@@ -12,6 +12,8 @@
 #ifndef cmCursesStandardIncludes_h
 #define cmCursesStandardIncludes_h
 
+#include <cmConfigure.h>
+
 #include "../cmStandardIncludes.h"
 
 #if defined(__sun__) && defined(__GNUC__)

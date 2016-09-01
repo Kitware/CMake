@@ -13,6 +13,10 @@
 #ifndef cmGlobalGeneratorFactory_h
 #define cmGlobalGeneratorFactory_h
 
+#include <cmConfigure.h>
+
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 class cmake;

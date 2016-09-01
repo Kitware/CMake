@@ -13,6 +13,8 @@
 #ifndef cmFileLockResult_h
 #define cmFileLockResult_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #if defined(_WIN32)

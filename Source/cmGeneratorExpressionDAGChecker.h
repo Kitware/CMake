@@ -12,6 +12,8 @@
 #ifndef cmGeneratorExpressionDAGChecker_h
 #define cmGeneratorExpressionDAGChecker_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include "cmGeneratorExpressionEvaluator.h"

@@ -12,6 +12,8 @@
 #ifndef cmLinkedTree_h
 #define cmLinkedTree_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include <assert.h>

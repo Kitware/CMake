@@ -17,6 +17,8 @@
 #ifndef cmDynamicLoader_h
 #define cmDynamicLoader_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include <cmsys/DynamicLoader.hxx>

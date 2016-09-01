@@ -12,7 +12,7 @@
 #ifndef cmConfigure_h
 #define cmConfigure_h
 
-#include <cmsys/Configure.hxx>
+#include <cmsys/Configure.hxx> // IWYU pragma: keep
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4786)

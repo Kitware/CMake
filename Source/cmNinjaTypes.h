@@ -13,6 +13,8 @@
 #ifndef cmNinjaTypes_h
 #define cmNinjaTypes_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 typedef std::vector<std::string> cmNinjaDeps;

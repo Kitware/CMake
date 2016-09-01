@@ -12,6 +12,8 @@
 #ifndef cmPathLabel_h
 #define cmPathLabel_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 /** \class cmPathLabel

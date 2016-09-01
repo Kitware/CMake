@@ -12,6 +12,8 @@
 #ifndef cmLocalGenerator_h
 #define cmLocalGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include "cmOutputConverter.h"

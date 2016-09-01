@@ -12,6 +12,8 @@
 #ifndef cmObject_h
 #define cmObject_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 /** \class cmObject

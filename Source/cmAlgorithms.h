@@ -12,6 +12,8 @@
 #ifndef cmAlgorithms_h
 #define cmAlgorithms_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 inline bool cmHasLiteralPrefixImpl(const std::string& str1, const char* str2,

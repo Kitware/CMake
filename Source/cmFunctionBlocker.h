@@ -12,6 +12,8 @@
 #ifndef cmFunctionBlocker_h
 #define cmFunctionBlocker_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include "cmExecutionStatus.h"

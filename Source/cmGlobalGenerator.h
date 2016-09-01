@@ -13,6 +13,8 @@
 #ifndef cmGlobalGenerator_h
 #define cmGlobalGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include "cmExportSetMap.h" // For cmExportSetMap

@@ -12,6 +12,8 @@
 #ifndef cmSourceFileLocation_h
 #define cmSourceFileLocation_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 class cmMakefile;

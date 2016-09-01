@@ -12,6 +12,8 @@
 #ifndef cmOutputConverter_h
 #define cmOutputConverter_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include "cmGlobalGenerator.h"

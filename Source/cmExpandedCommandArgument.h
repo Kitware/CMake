@@ -12,6 +12,8 @@
 #ifndef cmExpandedCommandArgument_h
 #define cmExpandedCommandArgument_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 /** \class cmExpandedCommandArgument

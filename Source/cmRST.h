@@ -12,6 +12,8 @@
 #ifndef _cmRST_h
 #define _cmRST_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include <cmsys/RegularExpression.hxx>

@@ -13,6 +13,8 @@
 #define cmFortranParser_h
 
 #if !defined(cmFortranLexer_cxx) && !defined(cmFortranParser_cxx)
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 #endif
 

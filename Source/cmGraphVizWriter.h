@@ -12,6 +12,8 @@
 #ifndef CMGRAPHVIZWRITER_H
 #define CMGRAPHVIZWRITER_H
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include "cmGeneratedFileStream.h"

@@ -13,6 +13,8 @@
 #ifndef cmInstallCommandArguments_h
 #define cmInstallCommandArguments_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include "cmCommandArgumentsHelper.h"

@@ -14,6 +14,8 @@
 #ifndef cmQtAutoGenerators_h
 #define cmQtAutoGenerators_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include <list>

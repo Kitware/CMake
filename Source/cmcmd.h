@@ -13,6 +13,8 @@
 #ifndef cmcmd_h
 #define cmcmd_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 class cmcmd

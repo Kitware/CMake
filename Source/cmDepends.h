@@ -12,6 +12,8 @@
 #ifndef cmDepends_h
 #define cmDepends_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 class cmFileTimeComparison;

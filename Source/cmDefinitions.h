@@ -12,6 +12,8 @@
 #ifndef cmDefinitions_h
 #define cmDefinitions_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include "cmLinkedTree.h"

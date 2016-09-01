@@ -12,6 +12,8 @@
 #ifndef cmDependsJavaParserHelper_h
 #define cmDependsJavaParserHelper_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #define YYSTYPE cmDependsJavaParserHelper::ParserType

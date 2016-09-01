@@ -13,6 +13,8 @@
 #ifndef cmCTest_h
 #define cmCTest_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include "cmListFileCache.h"

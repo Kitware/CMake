@@ -12,6 +12,8 @@
 #ifndef cmHexFileConverter_h
 #define cmHexFileConverter_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 /** \class cmHexFileConverter

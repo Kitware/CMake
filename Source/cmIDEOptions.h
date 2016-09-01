@@ -12,6 +12,8 @@
 #ifndef cmIDEOptions_h
 #define cmIDEOptions_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include "cmIDEFlagTable.h"

@@ -12,6 +12,8 @@
 #ifndef cmXCodeObject_h
 #define cmXCodeObject_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 class cmGeneratorTarget;

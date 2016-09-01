@@ -12,6 +12,8 @@
 #ifndef cmGeneratedFileStream_h
 #define cmGeneratedFileStream_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include <cmsys/FStream.hxx>

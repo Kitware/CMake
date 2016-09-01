@@ -12,6 +12,8 @@
 #ifndef cmCommandArgumentParserHelper_h
 #define cmCommandArgumentParserHelper_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #define YYSTYPE cmCommandArgumentParserHelper::ParserType

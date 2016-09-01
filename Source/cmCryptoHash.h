@@ -12,6 +12,8 @@
 #ifndef cmCryptoHash_h
 #define cmCryptoHash_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include <cm_auto_ptr.hxx>

@@ -12,6 +12,8 @@
 #ifndef cmCustomCommandGenerator_h
 #define cmCustomCommandGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 class cmCustomCommand;

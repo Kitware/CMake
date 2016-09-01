@@ -12,6 +12,8 @@
 #ifndef cmCurl_h
 #define cmCurl_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include "cm_curl.h"

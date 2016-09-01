@@ -12,6 +12,8 @@
 #ifndef cmListFileCache_h
 #define cmListFileCache_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include "cmState.h"

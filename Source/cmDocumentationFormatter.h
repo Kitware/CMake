@@ -12,6 +12,8 @@
 #ifndef _cmDocumentationFormatter_h
 #define _cmDocumentationFormatter_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 /** This is just a helper class to make it build with MSVC 6.0.

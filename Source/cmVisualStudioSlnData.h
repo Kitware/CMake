@@ -12,6 +12,8 @@
 #ifndef cmVisualStudioSlnData_h
 #define cmVisualStudioSlnData_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 class cmSlnProjectEntry

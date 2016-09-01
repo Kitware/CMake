@@ -12,6 +12,8 @@
 #ifndef cmExprParserHelper_h
 #define cmExprParserHelper_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #define YYSTYPE cmExprParserHelper::ParserType

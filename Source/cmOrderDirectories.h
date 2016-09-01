@@ -12,6 +12,8 @@
 #ifndef cmOrderDirectories_h
 #define cmOrderDirectories_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include <cmsys/RegularExpression.hxx>

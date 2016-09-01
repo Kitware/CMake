@@ -12,6 +12,8 @@
 #ifndef cmScriptGenerator_h
 #define cmScriptGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 class cmScriptGeneratorIndent

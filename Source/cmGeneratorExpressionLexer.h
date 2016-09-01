@@ -12,6 +12,8 @@
 #ifndef cmGeneratorExpressionLexer_h
 #define cmGeneratorExpressionLexer_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include <vector>

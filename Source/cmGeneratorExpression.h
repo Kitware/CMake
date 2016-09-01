@@ -13,6 +13,8 @@
 #ifndef cmGeneratorExpression_h
 #define cmGeneratorExpression_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include "cmListFileCache.h"

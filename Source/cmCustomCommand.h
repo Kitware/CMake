@@ -12,6 +12,8 @@
 #ifndef cmCustomCommand_h
 #define cmCustomCommand_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include "cmListFileCache.h"

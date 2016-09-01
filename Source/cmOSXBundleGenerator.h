@@ -12,6 +12,8 @@
 #ifndef cmOSXBundleGenerator_h
 #define cmOSXBundleGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include "cmSourceFile.h"
