@@ -12,6 +12,9 @@
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 
+#include <iostream>
+#include <string>
+
 #define cmFailed(m1, m2)                                                      \
   std::cout << "FAILED: " << m1 << m2 << "\n";                                \
   failed = 1

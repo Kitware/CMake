@@ -10,9 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include <cm_utf8.h>
-
 #include <stdio.h>
-#include <string.h>
 
 typedef char test_utf8_char[5];
 
