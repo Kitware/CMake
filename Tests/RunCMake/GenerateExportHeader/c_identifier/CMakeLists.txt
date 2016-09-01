@@ -1,5 +1,3 @@
-project(c_identifier)
-
 set(c_identifier_lib_SRCS
   c_identifier_class.cpp
 )

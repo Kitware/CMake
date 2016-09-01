@@ -1,8 +1,3 @@
-
-cmake_minimum_required(VERSION 2.8)
-
-project(libshared)
-
 include(GenerateExportHeader)
 
 add_compiler_export_flags()

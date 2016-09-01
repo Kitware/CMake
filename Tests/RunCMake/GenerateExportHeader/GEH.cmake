@@ -1,22 +1,7 @@
-cmake_minimum_required(VERSION 2.8.5 FATAL_ERROR)
-cmake_policy(SET CMP0054 NEW)
+# Test add_compiler_export_flags without deprecation warning.
+set(CMAKE_WARN_DEPRECATED OFF)
 
 project(GenerateExportHeader)
-
-# Prevent timeout on Watcom by not running the tests.
-if ("${CMAKE_CXX_COMPILER_ID}" MATCHES Watcom)
-  file(WRITE
-    "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
-    "int main() { return 0; }
-  "
-  )
-
-  add_executable(
-    GenerateExportHeader
-    "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
-  )
-  return()
-endif()
 
 include(CheckCXXCompilerFlag)
 
@@ -80,16 +65,16 @@ add_compiler_export_flags()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR})
 
-message("#### COMPILER_HAS_DEPRECATED: " ${COMPILER_HAS_DEPRECATED})
-message("#### COMPILER_HAS_HIDDEN_VISIBILITY: " ${COMPILER_HAS_HIDDEN_VISIBILITY})
-message("#### WIN32: " ${WIN32})
-message("#### HAS_WERROR_FLAG: " ${HAS_WERROR_FLAG})
+message(STATUS "COMPILER_HAS_DEPRECATED: " ${COMPILER_HAS_DEPRECATED})
+message(STATUS "COMPILER_HAS_HIDDEN_VISIBILITY: " ${COMPILER_HAS_HIDDEN_VISIBILITY})
+message(STATUS "WIN32: " ${WIN32})
+message(STATUS "HAS_WERROR_FLAG: " ${HAS_WERROR_FLAG})
 
 set(link_libraries)
 macro(macro_add_test_library name)
   add_subdirectory(${name})
   include_directories(${name}
-            ${${name}_BINARY_DIR} # For the export header.
+    ${CMAKE_CURRENT_BINARY_DIR}/${name} # For the export header.
   )
   list(APPEND link_libraries ${name})
 endmacro()
@@ -132,7 +117,7 @@ elseif(COMPILER_HAS_DEPRECATED)
 else()
   set(_platform Empty)
 endif()
-message("#### Testing reference: ${_platform}")
+message(STATUS "Testing reference: ${_platform}")
 target_compile_definitions(GenerateExportHeader
   PRIVATE
     "SRC_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/reference/${_platform}\""

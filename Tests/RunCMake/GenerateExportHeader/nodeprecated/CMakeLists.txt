@@ -1,7 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(nodeprecated)
-
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/nodeprecated_defined)
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/nodeprecated_not_defined)
 

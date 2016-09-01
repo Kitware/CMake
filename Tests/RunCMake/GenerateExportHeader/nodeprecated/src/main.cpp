@@ -1,7 +1,7 @@
 
 #include "someclass.h"
 
-int main(int, char**)
+int main()
 {
   SomeClass sc;
   sc.someMethod();
