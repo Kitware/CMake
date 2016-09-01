@@ -45,16 +45,6 @@ class cmXMLWriter;
                   cmCTestLog_msg.str().c_str(), suppress);                    \
   } while (0)
 
-#ifdef cerr
-#undef cerr
-#endif
-#define cerr no_cerr_use_cmCTestLog
-
-#ifdef cout
-#undef cout
-#endif
-#define cout no_cout_use_cmCTestLog
-
 /** \class cmCTest
  * \brief Represents a ctest invocation.
  *
