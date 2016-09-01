@@ -1188,6 +1188,18 @@ endfunction()
 
 macro(CUDA_WRAP_SRCS cuda_target format generated_files)
 
+  # Put optional arguments in list.
+  set(_argn_list "${ARGN}")
+  # If one of the given optional arguments is "PHONY", make a note of it, then
+  # remove it from the list.
+  list(FIND _argn_list "PHONY" _phony_idx)
+  if("${_phony_idx}" GREATER "-1")
+    set(_target_is_phony true)
+    list(REMOVE_AT _argn_list ${_phony_idx})
+  else()
+    set(_target_is_phony false)
+  endif()
+
   # If CMake doesn't support separable compilation, complain
   if(CUDA_SEPARABLE_COMPILATION AND CMAKE_VERSION VERSION_LESS "2.8.10.1")
     message(SEND_ERROR "CUDA_SEPARABLE_COMPILATION isn't supported for CMake versions less than 2.8.10.1")
@@ -1250,13 +1262,24 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
 
   # Initialize our list of includes with the user ones followed by the CUDA system ones.
   set(CUDA_NVCC_INCLUDE_DIRS ${CUDA_NVCC_INCLUDE_DIRS_USER} "${CUDA_INCLUDE_DIRS}")
-  # Append the include directories for this target via generator expression, which is
-  # expanded by the FILE(GENERATE) call below.  This generator expression captures all
-  # include dirs set by the user, whether via directory properties or target properties
-  list(APPEND CUDA_NVCC_INCLUDE_DIRS "$<TARGET_PROPERTY:${cuda_target},INCLUDE_DIRECTORIES>")
+  if(_target_is_phony)
+    # If the passed in target name isn't a real target (i.e., this is from a call to one of the
+    # cuda_compile_* functions), need to query directory properties to get include directories
+    # and compile definitions.
+    get_directory_property(_dir_include_dirs INCLUDE_DIRECTORIES)
+    get_directory_property(_dir_compile_defs COMPILE_DEFINITIONS)
 
-  # Do the same thing with compile definitions
-  set(CUDA_NVCC_COMPILE_DEFINITIONS "$<TARGET_PROPERTY:${cuda_target},COMPILE_DEFINITIONS>")
+    list(APPEND CUDA_NVCC_INCLUDE_DIRS "${_dir_include_dirs}")
+    set(CUDA_NVCC_COMPILE_DEFINITIONS "${_dir_compile_defs}")
+  else()
+    # Append the include directories for this target via generator expression, which is
+    # expanded by the FILE(GENERATE) call below.  This generator expression captures all
+    # include dirs set by the user, whether via directory properties or target properties
+    list(APPEND CUDA_NVCC_INCLUDE_DIRS "$<TARGET_PROPERTY:${cuda_target},INCLUDE_DIRECTORIES>")
+
+    # Do the same thing with compile definitions
+    set(CUDA_NVCC_COMPILE_DEFINITIONS "$<TARGET_PROPERTY:${cuda_target},COMPILE_DEFINITIONS>")
+  endif()
 
 
   # Reset these variables
@@ -1266,7 +1289,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
     set(CUDA_WRAP_OPTION_NVCC_FLAGS_${config_upper})
   endforeach()
 
-  CUDA_GET_SOURCES_AND_OPTIONS(_cuda_wrap_sources _cuda_wrap_cmake_options _cuda_wrap_options ${ARGN})
+  CUDA_GET_SOURCES_AND_OPTIONS(_cuda_wrap_sources _cuda_wrap_cmake_options _cuda_wrap_options ${_argn_list})
   CUDA_PARSE_NVCC_OPTIONS(CUDA_WRAP_OPTION_NVCC_FLAGS ${_cuda_wrap_options})
 
   # Figure out if we are building a shared library.  BUILD_SHARED_LIBS is
@@ -1356,7 +1379,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
 
   # Iterate over the macro arguments and create custom
   # commands for all the .cu files.
-  foreach(file ${ARGN})
+  foreach(file ${_argn_list})
     # Ignore any file marked as a HEADER_FILE_ONLY
     get_source_file_property(_is_header ${file} HEADER_FILE_ONLY)
     # Allow per source file overrides of the format.  Also allows compiling non-.cu files.
@@ -1774,12 +1797,23 @@ endmacro()
 ###############################################################################
 ###############################################################################
 macro(cuda_compile_base cuda_target format generated_files)
+  # Update a counter in this directory, to keep phony target names unique.
+  set(_cuda_target "${cuda_target}")
+  get_property(_counter DIRECTORY PROPERTY _cuda_internal_phony_counter)
+  if(_counter)
+    math(EXPR _counter "${_counter} + 1")
+  else()
+    set(_counter 1)
+  endif()
+  set(_cuda_target "${_cuda_target}_${_counter}")
+  set_property(DIRECTORY PROPERTY _cuda_internal_phony_counter ${_counter})
 
   # Separate the sources from the options
   CUDA_GET_SOURCES_AND_OPTIONS(_sources _cmake_options _options ${ARGN})
+
   # Create custom commands and targets for each file.
-  CUDA_WRAP_SRCS( ${cuda_target} ${format} _generated_files ${_sources} ${_cmake_options}
-    OPTIONS ${_options} )
+  CUDA_WRAP_SRCS( ${_cuda_target} ${format} _generated_files ${_sources}
+                  ${_cmake_options} OPTIONS ${_options} PHONY)
 
   set( ${generated_files} ${_generated_files})
 
