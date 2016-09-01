@@ -12,13 +12,13 @@
 #include "cmOutputConverter.h"
 
 #include "cmAlgorithms.h"
-#include "cmake.h"
+#include "cmSystemTools.h"
 
+#include <algorithm>
 #include <assert.h>
+#include <ctype.h>
+#include <set>
 #include <sstream>
-
-#include <ctype.h>  /* isalpha */
-#include <string.h> /* strlen */
 
 cmOutputConverter::cmOutputConverter(cmState::Snapshot snapshot)
   : StateSnapshot(snapshot)

@@ -12,7 +12,7 @@
 
 #include "cmExternalMakefileProjectGenerator.h"
 
-#include <assert.h>
+class cmMakefile;
 
 void cmExternalMakefileProjectGenerator::EnableLanguage(
   std::vector<std::string> const& /*unused*/, cmMakefile* /*unused*/,

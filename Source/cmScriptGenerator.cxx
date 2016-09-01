@@ -13,6 +13,8 @@
 
 #include "cmSystemTools.h"
 
+#include <cmConfigure.h>
+
 cmScriptGenerator::cmScriptGenerator(
   const std::string& config_var,
   std::vector<std::string> const& configurations)

@@ -14,19 +14,25 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
-
+#include "cmListFileCache.h"
 #include "cmOutputConverter.h"
+#include "cmPolicies.h"
 #include "cmState.h"
 #include "cmake.h"
 
-class cmMakefile;
-class cmGlobalGenerator;
-class cmGeneratorTarget;
-class cmTargetManifest;
-class cmSourceFile;
-class cmCustomCommand;
+#include <cm_kwiml.h>
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string.h>
+#include <string>
+#include <vector>
+
 class cmCustomCommandGenerator;
+class cmGeneratorTarget;
+class cmGlobalGenerator;
+class cmMakefile;
+class cmSourceFile;
 
 /** \class cmLocalGenerator
  * \brief Create required build files for a directory.

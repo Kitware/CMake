@@ -12,9 +12,16 @@
 #ifndef cmLocalCommonGenerator_h
 #define cmLocalCommonGenerator_h
 
-#include "cmLocalGenerator.h"
+#include <cmConfigure.h>
 
-class cmCommonTargetGenerator;
+#include "cmLocalGenerator.h"
+#include "cmOutputConverter.h"
+
+#include <string>
+
+class cmGeneratorTarget;
+class cmGlobalGenerator;
+class cmMakefile;
 
 /** \class cmLocalCommonGenerator
  * \brief Common infrastructure for Makefile and Ninja local generators.

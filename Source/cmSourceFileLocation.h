@@ -12,9 +12,9 @@
 #ifndef cmSourceFileLocation_h
 #define cmSourceFileLocation_h
 
-#include <cmConfigure.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmStandardIncludes.h"
+#include <string>
 
 class cmMakefile;
 

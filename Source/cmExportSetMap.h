@@ -12,7 +12,10 @@
 #ifndef cmExportSetMap_h
 #define cmExportSetMap_h
 
-#include "cmSystemTools.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <map>
+#include <string>
 
 class cmExportSet;
 

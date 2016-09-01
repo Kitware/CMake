@@ -11,9 +11,16 @@
 ============================================================================*/
 #include "cmDependsJavaParserHelper.h"
 
+#include <cmConfigure.h>
+
 #include "cmDependsJavaLexer.h"
 #include "cmSystemTools.h"
+
 #include <cmsys/FStream.hxx>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 int cmDependsJava_yyparse(yyscan_t yyscanner);
 

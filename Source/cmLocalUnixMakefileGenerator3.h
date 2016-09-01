@@ -12,15 +12,22 @@
 #ifndef cmLocalUnixMakefileGenerator3_h
 #define cmLocalUnixMakefileGenerator3_h
 
+#include <cmConfigure.h>
+
+#include "cmDepends.h"
 #include "cmLocalCommonGenerator.h"
 
-// for cmDepends::DependencyVector
-#include "cmDepends.h"
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
 class cmCustomCommand;
 class cmCustomCommandGenerator;
-class cmDepends;
-class cmMakefileTargetGenerator;
+class cmGeneratorTarget;
+class cmGlobalGenerator;
+class cmMakefile;
 class cmSourceFile;
 
 /** \class cmLocalUnixMakefileGenerator3

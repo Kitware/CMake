@@ -14,12 +14,12 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
-
 #include <cmsys/RegularExpression.hxx>
+#include <set>
+#include <string>
+#include <vector>
 
 class cmSourceFile;
-
 class cmSourceGroupInternals;
 
 /** \class cmSourceGroup

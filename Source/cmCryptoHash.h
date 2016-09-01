@@ -14,9 +14,9 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
-
 #include <cm_auto_ptr.hxx>
+#include <string>
+#include <vector>
 
 /**
  * @brief Abstract base class for cryptographic hash generators

@@ -13,7 +13,12 @@
 #ifndef cmGlobalKdevelopGenerator_h
 #define cmGlobalKdevelopGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmExternalMakefileProjectGenerator.h"
+
+#include <string>
+#include <vector>
 
 class cmLocalGenerator;
 

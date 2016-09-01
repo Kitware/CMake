@@ -12,10 +12,17 @@
 #include "cmCustomCommandGenerator.h"
 
 #include "cmCustomCommand.h"
+#include "cmCustomCommandLines.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+#include "cm_auto_ptr.hxx"
+
+#include <cmConfigure.h>
 
 cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
                                                    const std::string& config,

@@ -17,18 +17,23 @@
 #endif
 
 #include "cmAlgorithms.h"
+#include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
-#include "cmListFileCache.h"
-#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmSourceFile.h"
 #include "cmState.h"
+#include "cmSystemTools.h"
 #include "cmake.h"
 #include "cmcmd.h"
+
+#include <cmConfigure.h>
 #include <cmsys/Encoding.hxx>
+#include <iostream>
+#include <string.h>
+#include <string>
+#include <vector>
 
 #ifdef CMAKE_USE_LIBUV
-#include "cm_uv.h"
+#include <cm_uv.h>
 #endif
 
 #ifdef CMAKE_BUILD_WITH_CMAKE

@@ -12,20 +12,11 @@
 #include "cmGeneratorExpressionEvaluator.h"
 
 #include "cmAlgorithms.h"
-#include "cmGeneratorExpression.h"
-#include "cmGeneratorExpressionDAGChecker.h"
-#include "cmGeneratorExpressionParser.h"
-#include "cmGlobalGenerator.h"
-#include "cmLocalGenerator.h"
-#include "cmMakefile.h"
-#include "cmSourceFile.h"
-
-#include <cmsys/String.h>
-
-#include <assert.h>
-#include <errno.h>
-
+#include "cmGeneratorExpressionContext.h"
 #include "cmGeneratorExpressionNode.h"
+
+#include <algorithm>
+#include <sstream>
 
 GeneratorExpressionContent::GeneratorExpressionContent(
   const char* startContent, size_t length)

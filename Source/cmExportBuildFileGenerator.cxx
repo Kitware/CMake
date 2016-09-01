@@ -12,9 +12,23 @@
 #include "cmExportBuildFileGenerator.h"
 
 #include "cmExportSet.h"
+#include "cmGeneratorExpression.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
+#include "cmMakefile.h"
+#include "cmPolicies.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmTargetExport.h"
+#include "cmake.h"
+
+#include <algorithm>
+#include <map>
+#include <set>
+#include <sstream>
+#include <utility>
 
 cmExportBuildFileGenerator::cmExportBuildFileGenerator()
 {

@@ -11,11 +11,17 @@
 ============================================================================*/
 #include "cmOSXBundleGenerator.h"
 
+#include <cmConfigure.h>
+
+#include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmSystemTools.h"
 #include "cmTarget.h"
 
 #include <cassert>
+
+class cmSourceFile;
 
 cmOSXBundleGenerator::cmOSXBundleGenerator(cmGeneratorTarget* target,
                                            const std::string& configName)

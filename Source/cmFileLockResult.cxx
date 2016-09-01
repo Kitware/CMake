@@ -13,6 +13,7 @@
 #include "cmFileLockResult.h"
 
 #include <errno.h>
+#include <string.h>
 
 cmFileLockResult cmFileLockResult::MakeOk()
 {

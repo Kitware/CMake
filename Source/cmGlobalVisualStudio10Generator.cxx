@@ -14,6 +14,7 @@
 #include "cmGlobalVisualStudio10Generator.h"
 
 #include "cmAlgorithms.h"
+#include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"

@@ -13,6 +13,14 @@
 #define cmInstallDirectoryGenerator_h
 
 #include "cmInstallGenerator.h"
+#include "cmScriptGenerator.h"
+
+#include <cmConfigure.h>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
+class cmLocalGenerator;
 
 /** \class cmInstallDirectoryGenerator
  * \brief Generate directory installation rules.

@@ -13,14 +13,18 @@
 #include "cmExtraKateGenerator.h"
 
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalUnixMakefileGenerator3.h"
-#include "cmLocalUnixMakefileGenerator3.h"
+#include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
-#include <cmsys/SystemTools.hxx>
+#include <ostream>
+#include <set>
+#include <string.h>
+#include <vector>
 
 cmExtraKateGenerator::cmExtraKateGenerator()
   : cmExternalMakefileProjectGenerator()

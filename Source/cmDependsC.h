@@ -12,10 +12,19 @@
 #ifndef cmDependsC_h
 #define cmDependsC_h
 
+#include <cmConfigure.h>
+
 #include "cmDepends.h"
 
 #include <cmsys/RegularExpression.hxx>
+#include <iosfwd>
+#include <map>
 #include <queue>
+#include <set>
+#include <string>
+#include <vector>
+
+class cmLocalGenerator;
 
 /** \class cmDependsC
  * \brief Dependency scanner for C and C++ object files.

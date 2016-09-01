@@ -13,6 +13,8 @@
 
 #include "cmSystemTools.h"
 
+#include <stdio.h>
+
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include <cm_zlib.h>
 #endif

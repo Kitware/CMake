@@ -12,9 +12,7 @@
 #ifndef cmFileTimeComparison_h
 #define cmFileTimeComparison_h
 
-#include <cmConfigure.h>
-
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
 class cmFileTimeComparisonInternal;
 

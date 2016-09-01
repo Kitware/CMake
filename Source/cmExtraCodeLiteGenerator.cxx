@@ -14,18 +14,22 @@
 #include "cmExtraCodeLiteGenerator.h"
 
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalUnixMakefileGenerator3.h"
-#include "cmLocalUnixMakefileGenerator3.h"
+#include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
+#include "cmXMLWriter.h"
 #include "cmake.h"
 
-#include "cmStandardIncludes.h"
-#include "cmXMLWriter.h"
-#include <cmsys/Directory.hxx>
 #include <cmsys/SystemInformation.hxx>
-#include <cmsys/SystemTools.hxx>
+#include <map>
+#include <set>
+#include <sstream>
+#include <string.h>
+#include <utility>
 
 cmExtraCodeLiteGenerator::cmExtraCodeLiteGenerator()
   : cmExternalMakefileProjectGenerator()

@@ -11,8 +11,10 @@
 ============================================================================*/
 #include "cmGlobalWatcomWMakeGenerator.h"
 
-#include "cmLocalUnixMakefileGenerator3.h"
+#include "cmDocumentationEntry.h"
 #include "cmMakefile.h"
+#include "cmState.h"
+#include "cmake.h"
 
 cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator(cmake* cm)
   : cmGlobalUnixMakefileGenerator3(cm)

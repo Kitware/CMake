@@ -13,12 +13,14 @@
 
 #include "assert.h"
 #include "cmAlgorithms.h"
-#include "cmSystemTools.h"
-
-#include "cmGeneratorExpressionDAGChecker.h"
+#include "cmGeneratorExpressionContext.h"
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionLexer.h"
 #include "cmGeneratorExpressionParser.h"
+#include "cmSystemTools.h"
+
+#include <cmsys/RegularExpression.hxx>
+#include <utility>
 
 cmGeneratorExpression::cmGeneratorExpression(
   const cmListFileBacktrace& backtrace)

@@ -12,10 +12,10 @@
 #ifndef cmGeneratorExpressionLexer_h
 #define cmGeneratorExpressionLexer_h
 
-#include <cmConfigure.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmStandardIncludes.h"
-
+#include <stddef.h>
+#include <string>
 #include <vector>
 
 struct cmGeneratorExpressionToken

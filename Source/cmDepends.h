@@ -14,7 +14,12 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <stddef.h>
+#include <string>
+#include <vector>
 
 class cmFileTimeComparison;
 class cmLocalGenerator;

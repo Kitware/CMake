@@ -12,9 +12,19 @@
 #include "cmGraphVizWriter.h"
 
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
+
+#include <cmConfigure.h>
+#include <iostream>
+#include <sstream>
+#include <utility>
 
 static const char* getShapeForTarget(const cmGeneratorTarget* target)
 {

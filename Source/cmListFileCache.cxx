@@ -15,9 +15,12 @@
 #include "cmMessenger.h"
 #include "cmOutputConverter.h"
 #include "cmSystemTools.h"
-#include "cmVersion.h"
+#include "cmake.h"
 
-#include <cmsys/RegularExpression.hxx>
+#include <algorithm>
+#include <assert.h>
+#include <cmConfigure.h>
+#include <sstream>
 
 struct cmListFileParser
 {

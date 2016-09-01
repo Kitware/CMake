@@ -12,15 +12,19 @@
 #ifndef CMGRAPHVIZWRITER_H
 #define CMGRAPHVIZWRITER_H
 
-#include <cmConfigure.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmStandardIncludes.h"
+#include "cmState.h"
 
-#include "cmGeneratedFileStream.h"
-#include "cmLocalGenerator.h"
 #include <cmsys/RegularExpression.hxx>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
+class cmGeneratedFileStream;
 class cmGeneratorTarget;
+class cmLocalGenerator;
 
 /** This class implements writing files for graphviz (dot) for graphs
  * representing the dependencies between the targets in the project. */

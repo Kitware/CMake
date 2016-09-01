@@ -12,10 +12,15 @@
 #ifndef cmGeneratorExpressionEvaluationFile_h
 #define cmGeneratorExpressionEvaluationFile_h
 
+#include <cmConfigure.h> // IWYU pragma: keep
+
 #include "cmGeneratorExpression.h"
 
 #include <cm_auto_ptr.hxx>
+#include <map>
+#include <string>
 #include <sys/types.h>
+#include <vector>
 
 class cmLocalGenerator;
 

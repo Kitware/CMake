@@ -10,9 +10,16 @@
   See the License for more information.
 ============================================================================*/
 #include "cmFortranParser.h"
-
+#include "cmFortranLexer.h"
 #include "cmSystemTools.h"
+
 #include <assert.h>
+#include <cmConfigure.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <string>
+#include <vector>
 
 bool cmFortranParser_s::FindIncludeFile(const char* dir,
                                         const char* includeName,

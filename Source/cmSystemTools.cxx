@@ -12,20 +12,7 @@
 #include "cmSystemTools.h"
 
 #include "cmAlgorithms.h"
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#ifdef __QNX__
-#include <malloc.h> /* for malloc/free on QNX */
-#endif
-#include <cmsys/Directory.hxx>
-#include <cmsys/Encoding.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/RegularExpression.hxx>
-#include <cmsys/System.h>
+
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmArchiveWrite.h"
 #include "cmLocale.h"
@@ -33,31 +20,6 @@
 #ifndef __LA_INT64_T
 #define __LA_INT64_T la_int64_t
 #endif
-#endif
-#include <cmsys/FStream.hxx>
-#include <cmsys/Terminal.h>
-
-#if defined(_WIN32)
-#include <windows.h>
-// include wincrypt.h after windows.h
-#include <wincrypt.h>
-#else
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
-#include <utime.h>
-#endif
-
-#if defined(__APPLE__)
-#include <mach-o/dyld.h>
-#endif
-
-#include <sys/stat.h>
-
-#if defined(_WIN32) &&                                                        \
-  (defined(_MSC_VER) || defined(__WATCOMC__) || defined(__MINGW32__))
-#include <io.h>
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -70,6 +32,49 @@
 
 #if defined(CMAKE_USE_MACH_PARSER)
 #include "cmMachO.h"
+#endif
+
+#include <algorithm>
+#include <assert.h>
+#include <cmsys/Directory.hxx>
+#include <cmsys/Encoding.hxx>
+#include <cmsys/FStream.hxx>
+#include <cmsys/RegularExpression.hxx>
+#include <cmsys/System.h>
+#include <cmsys/SystemTools.hxx>
+#include <cmsys/Terminal.h>
+#include <ctype.h>
+#include <errno.h>
+#include <iostream>
+#include <set>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <time.h>
+
+#if defined(_WIN32)
+#include <windows.h>
+// include wincrypt.h after windows.h
+#include <wincrypt.h>
+#else
+#include <sys/time.h>
+#include <unistd.h>
+#include <utime.h>
+#endif
+
+#if defined(_WIN32) &&                                                        \
+  (defined(_MSC_VER) || defined(__WATCOMC__) || defined(__MINGW32__))
+#include <io.h>
+#endif
+
+#if defined(__APPLE__)
+#include <mach-o/dyld.h>
+#endif
+
+#ifdef __QNX__
+#include <malloc.h> /* for malloc/free on QNX */
 #endif
 
 static bool cm_isspace(char c)
@@ -142,6 +147,7 @@ private:
 };
 #elif defined(__APPLE__)
 #include <crt_externs.h>
+
 #define environ (*_NSGetEnviron())
 #endif
 

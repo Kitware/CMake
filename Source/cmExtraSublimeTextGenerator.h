@@ -13,13 +13,19 @@
 #ifndef cmExtraSublimeTextGenerator_h
 #define cmExtraSublimeTextGenerator_h
 
-#include "cmExternalMakefileProjectGenerator.h"
-#include "cmSourceFile.h"
+#include <cmConfigure.h>
 
-class cmLocalGenerator;
-class cmMakefile;
+#include "cmExternalMakefileProjectGenerator.h"
+
+#include <map>
+#include <string>
+#include <vector>
+
 class cmGeneratedFileStream;
 class cmGeneratorTarget;
+class cmLocalGenerator;
+class cmMakefile;
+class cmSourceFile;
 
 /** \class cmExtraSublimeTextGenerator
  * \brief Write Sublime Text 2 project files for Makefile based projects

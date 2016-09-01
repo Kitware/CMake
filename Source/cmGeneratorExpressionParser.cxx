@@ -14,7 +14,8 @@
 
 #include "cmGeneratorExpressionEvaluator.h"
 
-#include "assert.h"
+#include <assert.h>
+#include <stddef.h>
 
 cmGeneratorExpressionParser::cmGeneratorExpressionParser(
   const std::vector<cmGeneratorExpressionToken>& tokens)

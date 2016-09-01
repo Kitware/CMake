@@ -11,14 +11,20 @@
 ============================================================================*/
 #include "cmDependsFortran.h"
 
+#include "cmFortranParser.h" /* Interface to parser object.  */
 #include "cmGeneratedFileStream.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmOutputConverter.h"
 #include "cmSystemTools.h"
 
-#include "cmFortranParser.h" /* Interface to parser object.  */
 #include <assert.h>
 #include <cmsys/FStream.hxx>
+#include <iostream>
+#include <map>
+#include <stdlib.h>
+#include <string.h>
+#include <utility>
 
 // TODO: Test compiler for the case of the mod file.  Some always
 // use lower case and some always use upper case.  I do not know if any

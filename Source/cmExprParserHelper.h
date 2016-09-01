@@ -12,9 +12,10 @@
 #ifndef cmExprParserHelper_h
 #define cmExprParserHelper_h
 
-#include <cmConfigure.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmStandardIncludes.h"
+#include <string>
+#include <vector>
 
 #define YYSTYPE cmExprParserHelper::ParserType
 #define YYSTYPE_IS_DECLARED
@@ -26,9 +27,6 @@
  *
  * Finds dependencies for java file and list of outputs
  */
-
-class cmMakefile;
-
 class cmExprParserHelper
 {
 public:

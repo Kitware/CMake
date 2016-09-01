@@ -12,15 +12,26 @@
 #ifndef cmGeneratorTarget_h
 #define cmGeneratorTarget_h
 
-#include "cmLinkItem.h"
+#include <cmConfigure.h>
 
+#include "cmLinkItem.h"
+#include "cmListFileCache.h"
+#include "cmPolicies.h"
+#include "cmState.h"
+
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
+class cmComputeLinkInformation;
 class cmCustomCommand;
 class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmMakefile;
 class cmSourceFile;
 class cmTarget;
-class cmComputeLinkInformation;
 
 class cmGeneratorTarget
 {

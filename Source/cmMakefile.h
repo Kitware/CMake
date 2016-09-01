@@ -54,6 +54,7 @@ class cmFunctionBlocker;
 class cmGeneratorExpressionEvaluationFile;
 class cmGlobalGenerator;
 class cmInstallGenerator;
+class cmMessenger;
 class cmSourceFile;
 class cmTest;
 class cmTestGenerator;
@@ -892,10 +893,13 @@ private:
   void PopSnapshot(bool reportError = true);
   friend class cmCMakePolicyCommand;
   class IncludeScope;
+
   friend class IncludeScope;
   class ListFileScope;
+
   friend class ListFileScope;
   class BuildsystemFileScope;
+
   friend class BuildsystemFileScope;
 
   // CMP0053 == old

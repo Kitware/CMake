@@ -14,8 +14,13 @@
 #include "cmAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
+
+#include <algorithm>
 #include <cmsys/FStream.hxx>
 #include <ctype.h>
+#include <iterator>
+#include <stddef.h>
+#include <utility>
 
 cmRST::cmRST(std::ostream& os, std::string const& docroot)
   : OS(os)

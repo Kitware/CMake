@@ -12,7 +12,11 @@
 #ifndef cmGlobalCommonGenerator_h
 #define cmGlobalCommonGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmGlobalGenerator.h"
+
+class cmake;
 
 /** \class cmGlobalCommonGenerator
  * \brief Common infrastructure for Makefile and Ninja global generators.

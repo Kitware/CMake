@@ -15,25 +15,23 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
-
-#include "cmCacheManager.h"
 #include "cmInstalledFile.h"
 #include "cmListFileCache.h"
 #include "cmState.h"
-#include "cmSystemTools.h"
 
-class cmGlobalGeneratorFactory;
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
+class cmExternalMakefileProjectGeneratorFactory;
+class cmFileTimeComparison;
 class cmGlobalGenerator;
-class cmLocalGenerator;
+class cmGlobalGeneratorFactory;
 class cmMakefile;
 class cmMessenger;
 class cmVariableWatch;
-class cmFileTimeComparison;
-class cmExternalMakefileProjectGeneratorFactory;
-class cmDocumentationSection;
-class cmTarget;
-class cmGeneratedFileStream;
+struct cmDocumentationEntry;
 
 /** \brief Represents a cmake invocation.
  *

@@ -14,9 +14,8 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
-
-#include "cm_curl.h"
+#include <cm_curl.h>
+#include <string>
 
 std::string cmCurlSetCAInfo(::CURL* curl, const char* cafile = CM_NULLPTR);
 

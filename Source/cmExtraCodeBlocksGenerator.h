@@ -13,11 +13,16 @@
 #ifndef cmExtraCodeBlocksGenerator_h
 #define cmExtraCodeBlocksGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmExternalMakefileProjectGenerator.h"
 
+#include <string>
+#include <vector>
+
+class cmGeneratorTarget;
 class cmLocalGenerator;
 class cmMakefile;
-class cmGeneratorTarget;
 class cmXMLWriter;
 
 /** \class cmExtraCodeBlocksGenerator

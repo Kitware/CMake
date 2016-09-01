@@ -12,7 +12,12 @@
 #ifndef _cmDocumentationSection_h
 #define _cmDocumentationSection_h
 
-#include "cmDocumentationFormatter.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include "cmDocumentationEntry.h"
+
+#include <string>
+#include <vector>
 
 // Low-level interface for custom documents:
 /** Internal class representing a section of the documentation.

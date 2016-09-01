@@ -11,19 +11,17 @@
 ============================================================================*/
 #include "cmInstallExportGenerator.h"
 
-#include <stdio.h>
-
-#include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmInstallTargetGenerator.h"
-#include "cmLocalGenerator.h"
-#include "cmMakefile.h"
-#include "cmake.h"
-
-#include "cmInstallFilesGenerator.h"
+#include <algorithm>
+#include <map>
+#include <sstream>
+#include <utility>
 
 #include "cmExportInstallFileGenerator.h"
 #include "cmExportSet.h"
+#include "cmInstallType.h"
+#include "cmLocalGenerator.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
 
 cmInstallExportGenerator::cmInstallExportGenerator(
   cmExportSet* exportSet, const char* destination,

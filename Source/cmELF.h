@@ -12,6 +12,11 @@
 #ifndef cmELF_h
 #define cmELF_h
 
+#include <cmConfigure.h>
+
+#include <iosfwd>
+#include <string>
+
 #if !defined(CMAKE_USE_ELF_PARSER)
 #error "This file may be included only if CMAKE_USE_ELF_PARSER is enabled."
 #endif

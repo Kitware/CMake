@@ -11,6 +11,7 @@
 ============================================================================*/
 #include "cmLocalXCodeGenerator.h"
 
+#include "cmGeneratorTarget.h"
 #include "cmGlobalXCodeGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"

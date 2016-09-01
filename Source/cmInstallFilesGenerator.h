@@ -12,7 +12,16 @@
 #ifndef cmInstallFilesGenerator_h
 #define cmInstallFilesGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmInstallGenerator.h"
+#include "cmScriptGenerator.h"
+
+#include <iosfwd>
+#include <string>
+#include <vector>
+
+class cmLocalGenerator;
 
 /** \class cmInstallFilesGenerator
  * \brief Generate file installation rules.

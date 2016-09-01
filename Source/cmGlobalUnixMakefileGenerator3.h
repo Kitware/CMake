@@ -12,13 +12,27 @@
 #ifndef cmGlobalUnixMakefileGenerator3_h
 #define cmGlobalUnixMakefileGenerator3_h
 
-#include "cmGlobalCommonGenerator.h"
+#include <cmConfigure.h>
 
+#include "cmGeneratorTarget.h"
+#include "cmGlobalCommonGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
+#include "cmState.h"
+
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <stddef.h>
+#include <string>
+#include <vector>
 
 class cmGeneratedFileStream;
-class cmMakefileTargetGenerator;
+class cmLocalGenerator;
 class cmLocalUnixMakefileGenerator3;
+class cmMakefile;
+class cmMakefileTargetGenerator;
+class cmake;
+struct cmDocumentationEntry;
 
 /** \class cmGlobalUnixMakefileGenerator3
  * \brief Write a Unix makefiles.

@@ -12,8 +12,12 @@
 #include "cmInstalledFile.h"
 
 #include "cmAlgorithms.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
+
+#include <cmConfigure.h>
+#include <utility>
 
 cmInstalledFile::cmInstalledFile()
   : NameExpression(CM_NULLPTR)

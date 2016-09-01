@@ -13,18 +13,39 @@
 
 #include "cmQtAutoGeneratorInitializer.h"
 
+#include "cmAlgorithms.h"
+#include "cmCustomCommandLines.h"
 #include "cmFilePathUuid.h"
+#include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmOutputConverter.h"
 #include "cmSourceFile.h"
-
-#include <sys/stat.h>
-
-#include <cmsys/FStream.hxx>
+#include "cmSourceFileLocation.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmake.h"
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include "cmGlobalVisualStudioGenerator.h"
 #endif
+
+#include <algorithm>
+#include <assert.h>
+#include <cmConfigure.h>
+#include <cmsys/FStream.hxx>
+#include <cmsys/RegularExpression.hxx>
+#include <iostream>
+#include <map>
+#include <set>
+#include <sstream>
+#include <string.h>
+#include <string>
+#include <sys/stat.h>
+#include <utility>
+#include <vector>
 
 static std::string GetAutogenTargetName(cmGeneratorTarget const* target)
 {

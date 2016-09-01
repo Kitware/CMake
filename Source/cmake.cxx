@@ -12,32 +12,32 @@
 #include "cmake.h"
 
 #include "cmAlgorithms.h"
-#include "cmCommand.h"
 #include "cmCommands.h"
+#include "cmDocumentation.h"
+#include "cmDocumentationEntry.h"
 #include "cmDocumentationFormatter.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileTimeComparison.h"
+#include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
+#include "cmGlobalGeneratorFactory.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessenger.h"
-#include "cmSourceFile.h"
 #include "cmState.h"
-#include "cmTest.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmTargetLinkLibraryType.h"
 #include "cmUtils.hxx"
-#include "cmVersionMacros.h"
+#include "cmVersionConfig.h"
+#include "cm_auto_ptr.hxx"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmGraphVizWriter.h"
 #include "cmVariableWatch.h"
-#include <cmsys/SystemInformation.hxx>
-
-#include "cm_jsoncpp_value.h"
-#include "cm_jsoncpp_writer.h"
+#include <cm_jsoncpp_value.h>
+#include <cm_jsoncpp_writer.h>
 #endif
-
-#include <cmsys/FStream.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/RegularExpression.hxx>
 
 // only build kdevelop generator on non-windows platforms
 // when not bootstrapping cmake
@@ -69,6 +69,7 @@
 #include "cmGlobalVisualStudio71Generator.h"
 #include "cmGlobalVisualStudio8Generator.h"
 #include "cmGlobalVisualStudio9Generator.h"
+
 #define CMAKE_HAVE_VS_GENERATORS
 #endif
 #include "cmGlobalMSYSMakefileGenerator.h"
@@ -98,11 +99,10 @@
 #include "cmExtraEclipseCDT4Generator.h"
 #endif
 
-#include <stdlib.h> // required for atoi
-
 #if defined(__APPLE__)
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmGlobalXCodeGenerator.h"
+
 #define CMAKE_USE_XCODE 1
 #endif
 #include <sys/resource.h>
@@ -113,7 +113,18 @@
 // include sys/stat.h after sys/types.h
 #include <sys/stat.h> // struct stat
 
-#include <list>
+#include <algorithm>
+#include <cmsys/FStream.hxx>
+#include <cmsys/Glob.hxx>
+#include <cmsys/RegularExpression.hxx>
+#include <iostream>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <utility>
+
+class cmCommand;
 
 namespace {
 

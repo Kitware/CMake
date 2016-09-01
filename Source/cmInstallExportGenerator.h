@@ -12,13 +12,19 @@
 #ifndef cmInstallExportGenerator_h
 #define cmInstallExportGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmInstallGenerator.h"
+#include "cmScriptGenerator.h"
+
+#include <iosfwd>
+#include <stddef.h>
+#include <string>
+#include <vector>
 
 class cmExportInstallFileGenerator;
-class cmInstallFilesGenerator;
-class cmInstallTargetGenerator;
 class cmExportSet;
-class cmMakefile;
+class cmLocalGenerator;
 
 /** \class cmInstallExportGenerator
  * \brief Generate rules for creating an export files.

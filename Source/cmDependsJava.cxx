@@ -11,7 +11,6 @@
 ============================================================================*/
 #include "cmDependsJava.h"
 
-#include "cmDependsJavaParserHelper.h"
 #include "cmSystemTools.h"
 
 cmDependsJava::cmDependsJava()

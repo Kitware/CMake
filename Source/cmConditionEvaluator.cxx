@@ -14,6 +14,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmOutputConverter.h"
+#include "cmSystemTools.h"
 
 static std::string const keyAND = "AND";
 static std::string const keyCOMMAND = "COMMAND";

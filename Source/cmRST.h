@@ -12,11 +12,14 @@
 #ifndef _cmRST_h
 #define _cmRST_h
 
-#include <cmConfigure.h>
-
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include <cmsys/RegularExpression.hxx>
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
 /** \class cmRST
  * \brief Perform basic .rst processing for command-line help

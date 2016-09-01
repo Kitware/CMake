@@ -13,6 +13,7 @@
 
 #include "cmGlobalVisualStudio71Generator.h"
 
+#include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
 #include "cmake.h"

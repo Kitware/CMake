@@ -12,10 +12,17 @@
 #ifndef cmFortran_h
 #define cmFortran_h
 
+#include <cmConfigure.h>
+#include <iosfwd>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "cmDepends.h"
 
 class cmDependsFortranInternals;
 class cmFortranSourceInfo;
+class cmLocalGenerator;
 
 /** \class cmDependsFortran
  * \brief Dependency scanner for Fortran object files.

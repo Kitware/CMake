@@ -20,14 +20,21 @@
 #include "cmOutputConverter.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
 
-#include <sys/stat.h>
-
+#include <algorithm>
 #include <assert.h>
+#include <cmConfigure.h>
 #include <cmsys/FStream.hxx>
+#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Terminal.h>
-
+#include <iostream>
+#include <sstream>
+#include <stdlib.h>
 #include <string.h>
+#include <utility>
+
 #if defined(__APPLE__)
 #include <unistd.h>
 #endif

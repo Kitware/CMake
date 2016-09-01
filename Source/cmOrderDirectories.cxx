@@ -12,13 +12,15 @@
 #include "cmOrderDirectories.h"
 
 #include "cmAlgorithms.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-#include <assert.h>
-
 #include <algorithm>
+#include <assert.h>
+#include <functional>
+#include <sstream>
 
 /*
 Directory ordering computation.

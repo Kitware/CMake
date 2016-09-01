@@ -15,22 +15,20 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
-
 #include "cmListFileCache.h"
 
 #include <cm_auto_ptr.hxx>
-#include <cmsys/RegularExpression.hxx>
-
-class cmGeneratorTarget;
-class cmLocalGenerator;
-class cmListFileBacktrace;
-
-struct cmGeneratorExpressionEvaluator;
-struct cmGeneratorExpressionContext;
-struct cmGeneratorExpressionDAGChecker;
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
 class cmCompiledGeneratorExpression;
+class cmGeneratorTarget;
+class cmLocalGenerator;
+struct cmGeneratorExpressionContext;
+struct cmGeneratorExpressionDAGChecker;
+struct cmGeneratorExpressionEvaluator;
 
 /** \class cmGeneratorExpression
  * \brief Evaluate generate-time query expression syntax.

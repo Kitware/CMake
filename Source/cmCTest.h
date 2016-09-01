@@ -15,18 +15,18 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
-
-#include "cmListFileCache.h"
+#include <cmsys/String.hxx>
+#include <map>
+#include <set>
+#include <sstream>
+#include <string>
 #include <time.h>
+#include <vector>
 
-class cmake;
-class cmMakefile;
 class cmCTestGenericHandler;
-class cmGeneratedFileStream;
-class cmCTestCommand;
-class cmCTestScriptHandler;
 class cmCTestStartCommand;
+class cmGeneratedFileStream;
+class cmMakefile;
 class cmXMLWriter;
 
 #define cmCTestLog(ctSelf, logType, msg)                                      \

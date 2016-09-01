@@ -15,10 +15,11 @@
 #include "cmFileTimeComparison.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmOutputConverter.h"
 #include "cmSystemTools.h"
-#include <cmsys/FStream.hxx>
 
-#include <ctype.h> // isspace
+#include <cmsys/FStream.hxx>
+#include <utility>
 
 #define INCLUDE_REGEX_LINE                                                    \
   "^[ \t]*#[ \t]*(include|import)[ \t]*[<\"]([^\">]+)([\">])"

@@ -27,6 +27,8 @@
 #include <cmsys/Encoding.hxx>
 #include <cmsys/SystemTools.hxx>
 
+#include "cmSystemTools.h" // IWYU pragma: keep
+
 static const char* cmDocumentationName[][2] = { { 0,
                                                   "  cmake-gui - CMake GUI." },
                                                 { 0, 0 } };

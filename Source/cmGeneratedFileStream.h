@@ -14,9 +14,8 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
-
 #include <cmsys/FStream.hxx>
+#include <string>
 
 // This is the first base class of cmGeneratedFileStream.  It will be
 // created before and destroyed after the ofstream portion and can

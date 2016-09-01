@@ -12,9 +12,11 @@
 #include "cmInstallFilesGenerator.h"
 
 #include "cmGeneratorExpression.h"
-#include "cmLocalGenerator.h"
-#include "cmMakefile.h"
+#include "cmInstallType.h"
 #include "cmSystemTools.h"
+#include "cm_auto_ptr.hxx"
+
+class cmLocalGenerator;
 
 cmInstallFilesGenerator::cmInstallFilesGenerator(
   std::vector<std::string> const& files, const char* dest, bool programs,

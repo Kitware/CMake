@@ -14,12 +14,11 @@
 #ifndef cmQtAutoGenerators_h
 #define cmQtAutoGenerators_h
 
-#include <cmConfigure.h>
-
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include <list>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 

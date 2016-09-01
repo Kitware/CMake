@@ -12,19 +12,16 @@
 #ifndef cmOSXBundleGenerator_h
 #define cmOSXBundleGenerator_h
 
-#include <cmConfigure.h>
-
-#include "cmStandardIncludes.h"
-
-#include "cmSourceFile.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include <set>
 #include <string>
+#include <vector>
 
-class cmTarget;
-class cmMakefile;
-class cmLocalGenerator;
 class cmGeneratorTarget;
+class cmLocalGenerator;
+class cmMakefile;
+class cmSourceFile;
 
 class cmOSXBundleGenerator
 {

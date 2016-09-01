@@ -12,10 +12,18 @@
 #ifndef cmExportBuildFileGenerator_h
 #define cmExportBuildFileGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmExportFileGenerator.h"
-#include "cmListFileCache.h"
+
+#include <iosfwd>
+#include <string>
+#include <vector>
 
 class cmExportSet;
+class cmGeneratorTarget;
+class cmGlobalGenerator;
+class cmLocalGenerator;
 
 /** \class cmExportBuildFileGenerator
  * \brief Generate a file exporting targets from a build tree.

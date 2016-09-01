@@ -11,7 +11,13 @@
 ============================================================================*/
 #include "cmDocumentationFormatter.h"
 
+#include "cmDocumentationEntry.h"
 #include "cmDocumentationSection.h"
+
+#include <ostream>
+#include <string.h>
+#include <string>
+#include <vector>
 
 cmDocumentationFormatter::cmDocumentationFormatter()
   : TextWidth(77)

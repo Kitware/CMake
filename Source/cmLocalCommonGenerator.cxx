@@ -11,7 +11,12 @@
 ============================================================================*/
 #include "cmLocalCommonGenerator.h"
 
+#include "cmGeneratorTarget.h"
 #include "cmMakefile.h"
+
+#include <vector>
+
+class cmGlobalGenerator;
 
 cmLocalCommonGenerator::cmLocalCommonGenerator(
   cmGlobalGenerator* gg, cmMakefile* mf, cmOutputConverter::RelativeRoot wd)

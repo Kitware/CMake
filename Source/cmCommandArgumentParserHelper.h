@@ -12,9 +12,10 @@
 #ifndef cmCommandArgumentParserHelper_h
 #define cmCommandArgumentParserHelper_h
 
-#include <cmConfigure.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmStandardIncludes.h"
+#include <string>
+#include <vector>
 
 #define YYSTYPE cmCommandArgumentParserHelper::ParserType
 #define YYSTYPE_IS_DECLARED

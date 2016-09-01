@@ -17,9 +17,7 @@
 #ifndef cmDynamicLoader_h
 #define cmDynamicLoader_h
 
-#include <cmConfigure.h>
-
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include <cmsys/DynamicLoader.hxx>
 
