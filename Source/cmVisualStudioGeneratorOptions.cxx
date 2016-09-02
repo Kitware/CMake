@@ -96,6 +96,7 @@ void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
     case cmGlobalVisualStudioGenerator::VS11:
     case cmGlobalVisualStudioGenerator::VS12:
     case cmGlobalVisualStudioGenerator::VS14:
+    case cmGlobalVisualStudioGenerator::VS15:
       // by default VS puts <ExceptionHandling></ExceptionHandling> empty
       // for a project, to make our projects look the same put a new line
       // and space over for the closing </ExceptionHandling> as the default

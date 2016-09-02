@@ -163,6 +163,18 @@ std::string cmGlobalVisualStudio7Generator::FindDevEnvCommand()
     }
   }
 
+  // Search where VS15Preview places it.
+  vskey = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VS7;";
+  vskey += this->GetIDEVersion();
+  if (cmSystemTools::ReadRegistryValue(vskey.c_str(), vscmd,
+                                       cmSystemTools::KeyWOW64_32)) {
+    cmSystemTools::ConvertToUnixSlashes(vscmd);
+    vscmd += "/Common7/IDE/devenv.com";
+    if (cmSystemTools::FileExists(vscmd, true)) {
+      return vscmd;
+    }
+  }
+
   vscmd = "devenv.com";
   return vscmd;
 }
