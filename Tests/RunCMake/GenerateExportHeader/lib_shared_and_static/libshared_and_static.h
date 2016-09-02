@@ -1,66 +1,83 @@
-
-#ifndef SHARED_AND_STATIC_H
-#define SHARED_AND_STATIC_H
+#ifndef LIBSHARED_AND_STATIC_H
+#define LIBSHARED_AND_STATIC_H
 
 #include "libshared_and_static_export.h"
 
-class MYPREFIX_LIBSHARED_AND_STATIC_EXPORT LibsharedAndStatic
+namespace libshared_and_static {
+
+class Class
 {
 public:
-  int libshared_and_static() const;
+  int method() const;
 
-  int libshared_and_static_exported() const;
+  int MYPREFIX_LIBSHARED_AND_STATIC_EXPORT method_exported() const;
 
-  int MYPREFIX_LIBSHARED_AND_STATIC_DEPRECATED
-  libshared_and_static_deprecated() const;
+  int MYPREFIX_LIBSHARED_AND_STATIC_DEPRECATED method_deprecated() const;
 
-  int libshared_and_static_not_exported() const;
+  int MYPREFIX_LIBSHARED_AND_STATIC_DEPRECATED_EXPORT
+  method_deprecated_exported() const;
 
-  int MYPREFIX_LIBSHARED_AND_STATIC_NO_EXPORT
-  libshared_and_static_excluded() const;
+  int MYPREFIX_LIBSHARED_AND_STATIC_NO_EXPORT method_excluded() const;
+
+  static int const data;
+
+  static int const MYPREFIX_LIBSHARED_AND_STATIC_EXPORT data_exported;
+
+  static int const MYPREFIX_LIBSHARED_AND_STATIC_NO_EXPORT data_excluded;
 };
 
-class LibsharedAndStaticNotExported
+class MYPREFIX_LIBSHARED_AND_STATIC_EXPORT ExportedClass
 {
 public:
-  int libshared_and_static() const;
+  int method() const;
 
-  int MYPREFIX_LIBSHARED_AND_STATIC_EXPORT
-  libshared_and_static_exported() const;
+  int MYPREFIX_LIBSHARED_AND_STATIC_DEPRECATED method_deprecated() const;
 
-  int MYPREFIX_LIBSHARED_AND_STATIC_DEPRECATED
-  libshared_and_static_deprecated() const;
+  int MYPREFIX_LIBSHARED_AND_STATIC_NO_EXPORT method_excluded() const;
 
-  int libshared_and_static_not_exported() const;
+  static int const data;
 
-  int MYPREFIX_LIBSHARED_AND_STATIC_NO_EXPORT
-  libshared_and_static_excluded() const;
+  static int const MYPREFIX_LIBSHARED_AND_STATIC_NO_EXPORT data_excluded;
 };
 
-class MYPREFIX_LIBSHARED_AND_STATIC_NO_EXPORT LibsharedAndStaticExcluded
+class MYPREFIX_LIBSHARED_AND_STATIC_NO_EXPORT ExcludedClass
 {
 public:
-  int libshared_and_static() const;
+  int method() const;
 
-  int MYPREFIX_LIBSHARED_AND_STATIC_EXPORT
-  libshared_and_static_exported() const;
+  int MYPREFIX_LIBSHARED_AND_STATIC_EXPORT method_exported() const;
 
-  int MYPREFIX_LIBSHARED_AND_STATIC_DEPRECATED
-  libshared_and_static_deprecated() const;
+  int MYPREFIX_LIBSHARED_AND_STATIC_DEPRECATED method_deprecated() const;
 
-  int libshared_and_static_not_exported() const;
+  int MYPREFIX_LIBSHARED_AND_STATIC_DEPRECATED_EXPORT
+  method_deprecated_exported() const;
 
-  int MYPREFIX_LIBSHARED_AND_STATIC_NO_EXPORT
-  libshared_and_static_excluded() const;
+  int MYPREFIX_LIBSHARED_AND_STATIC_NO_EXPORT method_excluded() const;
+
+  static int const data;
+
+  static int const MYPREFIX_LIBSHARED_AND_STATIC_EXPORT data_exported;
+
+  static int const MYPREFIX_LIBSHARED_AND_STATIC_NO_EXPORT data_excluded;
 };
 
-MYPREFIX_LIBSHARED_AND_STATIC_EXPORT int libshared_and_static_exported();
+int function();
 
-MYPREFIX_LIBSHARED_AND_STATIC_DEPRECATED_EXPORT int
-libshared_and_static_deprecated();
+int MYPREFIX_LIBSHARED_AND_STATIC_EXPORT function_exported();
 
-int libshared_and_static_not_exported();
+int MYPREFIX_LIBSHARED_AND_STATIC_DEPRECATED function_deprecated();
 
-int MYPREFIX_LIBSHARED_AND_STATIC_NO_EXPORT libshared_and_static_excluded();
+int MYPREFIX_LIBSHARED_AND_STATIC_DEPRECATED_EXPORT
+function_deprecated_exported();
+
+int MYPREFIX_LIBSHARED_AND_STATIC_NO_EXPORT function_excluded();
+
+extern int const data;
+
+extern int const MYPREFIX_LIBSHARED_AND_STATIC_EXPORT data_exported;
+
+extern int const MYPREFIX_LIBSHARED_AND_STATIC_NO_EXPORT data_excluded;
+
+} // namespace libshared_and_static
 
 #endif
