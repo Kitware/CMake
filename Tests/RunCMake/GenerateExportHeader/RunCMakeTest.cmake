@@ -12,6 +12,16 @@ function(run_GEH)
   run_cmake(GEH)
   run_cmake_command(GEH-build ${CMAKE_COMMAND} --build . --config Debug)
   run_cmake_command(GEH-run ${RunCMake_TEST_BINARY_DIR}/GenerateExportHeader)
+
+  file(STRINGS "${RunCMake_TEST_BINARY_DIR}/failure_test_targets"
+    failure_test_targets)
+
+  foreach(failure_test_target ${failure_test_targets})
+    run_cmake_command(GEH-link-error ${CMAKE_COMMAND}
+      --build .
+      --config Debug
+      --target ${failure_test_target})
+  endforeach()
 endfunction()
 
 run_GEH()

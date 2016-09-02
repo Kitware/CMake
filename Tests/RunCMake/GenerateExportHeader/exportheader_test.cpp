@@ -3,14 +3,6 @@
 
 #include "libstatic.h"
 
-// #define BUILD_FAIL
-
-#ifndef BUILD_FAIL
-#define DOES_NOT_BUILD(function)
-#else
-#define DOES_NOT_BUILD(function) function
-#endif
-
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
@@ -69,32 +61,35 @@ int main()
     l.libshared_exported();
     l.libshared_deprecated();
     l.libshared_not_exported();
-
-    DOES_NOT_BUILD(l.libshared_excluded();)
+#if defined(_WIN32) || defined(__CYGWIN__)
+    l.libshared_excluded();
+#else
+// l.libshared_excluded(); LINK ERROR (NOT WIN32 AND NOT CYGWIN)
+#endif
   }
 
   {
     LibsharedNotExported l;
-    DOES_NOT_BUILD(l.libshared();)
+    // l.libshared(); LINK ERROR
     l.libshared_exported();
     l.libshared_deprecated();
-    DOES_NOT_BUILD(l.libshared_not_exported();)
-    DOES_NOT_BUILD(l.libshared_excluded();)
+    // l.libshared_not_exported(); LINK ERROR
+    // l.libshared_excluded(); LINK ERROR
   }
 
   {
     LibsharedExcluded l;
-    DOES_NOT_BUILD(l.libshared();)
+    // l.libshared(); LINK ERROR
     l.libshared_exported();
     l.libshared_deprecated();
-    DOES_NOT_BUILD(l.libshared_not_exported();)
-    DOES_NOT_BUILD(l.libshared_excluded();)
+    // l.libshared_not_exported(); LINK ERROR
+    // l.libshared_excluded(); LINK ERROR
   }
 
   libshared_exported();
   libshared_deprecated();
-  DOES_NOT_BUILD(libshared_not_exported();)
-  DOES_NOT_BUILD(libshared_excluded();)
+  // libshared_not_exported(); LINK ERROR
+  // libshared_excluded(); LINK ERROR
 
   {
     Libstatic l;
@@ -128,10 +123,12 @@ int main()
   libstatic_not_exported();
   libstatic_excluded();
 
+#if defined(SRC_DIR) && defined(BIN_DIR)
   compare(SRC_DIR "/libshared_export.h",
           BIN_DIR "/libshared/libshared_export.h");
   compare(SRC_DIR "/libstatic_export.h",
           BIN_DIR "/libstatic/libstatic_export.h");
+#endif
 
   return 0;
 }
