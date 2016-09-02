@@ -26,6 +26,12 @@ int Libshared::libshared_excluded() const
   return 0;
 }
 
+int const Libshared::data_exported = 1;
+
+int const Libshared::data_not_exported = 1;
+
+int const Libshared::data_excluded = 1;
+
 int LibsharedNotExported::libshared() const
 {
   return 0;
@@ -50,6 +56,12 @@ int LibsharedNotExported::libshared_excluded() const
 {
   return 0;
 }
+
+int const LibsharedNotExported::data_exported = 1;
+
+int const LibsharedNotExported::data_not_exported = 1;
+
+int const LibsharedNotExported::data_excluded = 1;
 
 int LibsharedExcluded::libshared() const
 {
@@ -76,6 +88,12 @@ int LibsharedExcluded::libshared_excluded() const
   return 0;
 }
 
+int const LibsharedExcluded::data_exported = 1;
+
+int const LibsharedExcluded::data_not_exported = 1;
+
+int const LibsharedExcluded::data_excluded = 1;
+
 int libshared()
 {
   return 0;
@@ -99,4 +117,14 @@ int libshared_not_exported()
 int libshared_excluded()
 {
   return 0;
+}
+
+int const data_exported = 1;
+
+int const data_not_exported = 1;
+
+int const data_excluded = 1;
+
+void use_int(int)
+{
 }

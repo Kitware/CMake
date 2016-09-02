@@ -66,6 +66,14 @@ int main()
 #else
 // l.libshared_excluded(); LINK ERROR (NOT WIN32 AND NOT CYGWIN)
 #endif
+
+    use_int(l.data_exported);
+    use_int(l.data_not_exported);
+#if defined(_WIN32) || defined(__CYGWIN__)
+    use_int(l.data_excluded);
+#else
+// use_int(l.data_excluded); LINK ERROR (NOT WIN32 AND NOT CYGWIN)
+#endif
   }
 
   {
@@ -75,6 +83,10 @@ int main()
     l.libshared_deprecated();
     // l.libshared_not_exported(); LINK ERROR
     // l.libshared_excluded(); LINK ERROR
+
+    use_int(l.data_exported);
+    // use_int(l.data_not_exported); LINK ERROR
+    // use_int(l.data_excluded); LINK ERROR
   }
 
   {
@@ -84,12 +96,20 @@ int main()
     l.libshared_deprecated();
     // l.libshared_not_exported(); LINK ERROR
     // l.libshared_excluded(); LINK ERROR
+
+    use_int(l.data_exported);
+    // use_int(l.data_not_exported); LINK ERROR
+    // use_int(l.data_excluded); LINK ERROR
   }
 
   libshared_exported();
   libshared_deprecated();
   // libshared_not_exported(); LINK ERROR
   // libshared_excluded(); LINK ERROR
+
+  use_int(data_exported);
+  // use_int(data_not_exported); LINK ERROR
+  // use_int(data_excluded); LINK ERROR
 
   {
     Libstatic l;
