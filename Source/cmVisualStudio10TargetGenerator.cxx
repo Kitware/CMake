@@ -2365,7 +2365,9 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
       static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
     const char* toolset = gg->GetPlatformToolset();
     if (toolset &&
-        (toolset == kWINDOWS_7_1_SDK || cmHasLiteralPrefix(toolset, "v90") ||
+        (toolset == kWINDOWS_7_1_SDK || /* clang-format please break here */
+         cmHasLiteralPrefix(toolset, "v80") ||
+         cmHasLiteralPrefix(toolset, "v90") ||
          cmHasLiteralPrefix(toolset, "v100") ||
          cmHasLiteralPrefix(toolset, "v110") ||
          cmHasLiteralPrefix(toolset, "v120"))) {
