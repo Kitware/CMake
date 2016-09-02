@@ -12,10 +12,10 @@
 
 #include "cmFilePathUuid.h"
 
+#include "cmBase32.h"
 #include "cmCryptoHash.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
-#include "cmsys/Base64.h"
 
 cmFilePathUuid::cmFilePathUuid(cmMakefile* makefile)
 {
@@ -111,22 +111,16 @@ std::string cmFilePathUuid::GetChecksumString(
   const std::string& sourceFilename, const std::string& sourceRelPath,
   const std::string& sourceRelSeed)
 {
-  std::string checksumBase64;
+  std::string checksumBase32;
   {
     // Calculate the file ( seed + relative path + name ) checksum
     std::vector<unsigned char> hashBytes =
       cmCryptoHash::New("SHA256")->ByteHashString(
         (sourceRelSeed + sourceRelPath + sourceFilename).c_str());
-    // Convert hash bytes to Base64 text string
-    std::vector<unsigned char> base64Bytes(hashBytes.size() * 2, 0);
-    cmsysBase64_Encode(&hashBytes[0], hashBytes.size(), &base64Bytes[0], 0);
-    checksumBase64 = reinterpret_cast<const char*>(&base64Bytes[0]);
-  }
-  // Base64 allows '/', '+' and '=' characters which are problematic
-  // when used in file names. Replace them with safer alternatives.
-  std::replace(checksumBase64.begin(), checksumBase64.end(), '/', '-');
-  std::replace(checksumBase64.begin(), checksumBase64.end(), '+', '_');
-  std::replace(checksumBase64.begin(), checksumBase64.end(), '=', '_');
 
-  return checksumBase64;
+    checksumBase32 =
+      cmBase32Encoder().encodeString(&hashBytes[0], hashBytes.size(), false);
+  }
+
+  return checksumBase32;
 }

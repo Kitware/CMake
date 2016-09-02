@@ -166,6 +166,7 @@ endif()
 #
 set(SRCS
   cmArchiveWrite.cxx
+  cmBase32.cxx
   cmBootstrapCommands1.cxx
   cmBootstrapCommands2.cxx
   cmCacheManager.cxx
