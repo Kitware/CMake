@@ -1,6 +1,5 @@
 MSVC12
 ------
 
-``True`` when using Microsoft Visual C++ 12.0.
-
-Set to ``true`` when the compiler is version 12.0 of Microsoft Visual C++.
+``True`` when using the Microsoft Visual Studio ``v120`` toolset
+(``cl`` version 18) or another compiler that simulates it.

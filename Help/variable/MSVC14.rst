@@ -1,6 +1,5 @@
 MSVC14
 ------
 
-``True`` when using Microsoft Visual C++ 14.0.
-
-Set to ``true`` when the compiler is version 14.0 of Microsoft Visual C++.
+``True`` when using the Microsoft Visual Studio ``v140`` toolset
+(``cl`` version 19) or another compiler that simulates it.
