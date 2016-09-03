@@ -26,4 +26,5 @@ macro(__hpux_compiler_gnu lang)
   set(CMAKE_SHARED_LIBRARY_SONAME_${lang}_FLAG "-Wl,+h")
 
   set(CMAKE_${lang}_LINK_FLAGS "-Wl,+s,+nodefaultrpath")
+  unset(CMAKE_${lang}_COMPILE_OPTIONS_VISIBILITY)
 endmacro()

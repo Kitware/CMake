@@ -34,4 +34,5 @@ macro(__aix_compiler_gnu lang)
   set(CMAKE_${lang}_USE_IMPLICIT_LINK_DIRECTORIES_IN_RUNTIME_PATH 1)
 
   set(CMAKE_${lang}_LINK_FLAGS "-Wl,-bnoipath")
+  unset(CMAKE_${lang}_COMPILE_OPTIONS_VISIBILITY)
 endmacro()
