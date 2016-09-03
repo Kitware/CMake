@@ -183,7 +183,7 @@ endmacro()
 
 # Test first if the current compilers automatically wrap HDF5
 
-function(_HDF5_test_regular_compiler_C success version)
+function(_HDF5_test_regular_compiler_C success version is_parallel)
   set(scratch_directory
     ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/hdf5)
   if(NOT ${success} OR
@@ -214,10 +214,21 @@ function(_HDF5_test_regular_compiler_C success version)
       set(${version} ${HDF5_CXX_VERSION}.${CMAKE_MATCH_3})
     endif()
     set(${version} ${${version}} PARENT_SCOPE)
+
+    execute_process(COMMAND ${CMAKE_C_COMPILER} -showconfig
+      OUTPUT_VARIABLE config_output
+      ERROR_VARIABLE config_error
+      RESULT_VARIABLE config_result
+      )
+    if(config_output MATCHES "Parallel HDF5: yes")
+      set(${is_parallel} TRUE PARENT_SCOPE)
+    else()
+      set(${is_parallel} FALSE PARENT_SCOPE)
+    endif()
   endif()
 endfunction()
 
-function(_HDF5_test_regular_compiler_CXX success version)
+function(_HDF5_test_regular_compiler_CXX success version is_parallel)
   set(scratch_directory ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/hdf5)
   if(NOT ${success} OR
      NOT EXISTS ${scratch_directory}/compiler_has_h5_cxx)
@@ -248,10 +259,21 @@ function(_HDF5_test_regular_compiler_CXX success version)
       set(${version} ${HDF5_CXX_VERSION}.${CMAKE_MATCH_3})
     endif()
     set(${version} ${${version}} PARENT_SCOPE)
+
+    execute_process(COMMAND ${CMAKE_CXX_COMPILER} -showconfig
+      OUTPUT_VARIABLE config_output
+      ERROR_VARIABLE config_error
+      RESULT_VARIABLE config_result
+      )
+    if(config_output MATCHES "Parallel HDF5: yes")
+      set(${is_parallel} TRUE PARENT_SCOPE)
+    else()
+      set(${is_parallel} FALSE PARENT_SCOPE)
+    endif()
   endif()
 endfunction()
 
-function(_HDF5_test_regular_compiler_Fortran success)
+function(_HDF5_test_regular_compiler_Fortran success is_parallel)
   if(NOT ${success})
     set(scratch_directory
       ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/hdf5)
@@ -266,12 +288,24 @@ function(_HDF5_test_regular_compiler_Fortran success)
       "  call h5close_f(error)\n"
       "end\n")
     try_compile(${success} ${scratch_directory} ${test_file})
+    if(${success})
+      execute_process(COMMAND ${CMAKE_Fortran_COMPILER} -showconfig
+        OUTPUT_VARIABLE config_output
+        ERROR_VARIABLE config_error
+        RESULT_VARIABLE config_result
+        )
+      if(config_output MATCHES "Parallel HDF5: yes")
+        set(${is_parallel} TRUE PARENT_SCOPE)
+      else()
+        set(${is_parallel} FALSE PARENT_SCOPE)
+      endif()
+    endif()
   endif()
 endfunction()
 
 # Invoke the HDF5 wrapper compiler.  The compiler return value is stored to the
 # return_value argument, the text output is stored to the output variable.
-macro( _HDF5_invoke_compiler language output return_value version)
+macro( _HDF5_invoke_compiler language output return_value version is_parallel)
     set(${version})
     if(HDF5_USE_STATIC_LIBRARIES)
         set(lib_type_args -noshlib)
@@ -308,6 +342,11 @@ macro( _HDF5_invoke_compiler language output return_value version)
     if(version_match)
         string(REPLACE "HDF5 Version: " "" ${version} "${version_match}")
         string(REPLACE "-patch" "." ${version} "${${version}}")
+    endif()
+    if(config_output MATCHES "Parallel HDF5: yes")
+      set(${is_parallel} TRUE)
+    else()
+      set(${is_parallel} FALSE)
     endif()
 endmacro()
 
@@ -386,6 +425,7 @@ endif()
 if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
     find_package(HDF5 QUIET NO_MODULE)
     if( HDF5_FOUND)
+        set(HDF5_IS_PARALLEL ${HDF5_ENABLE_PARALLEL})
         set(HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIR})
         set(HDF5_LIBRARIES)
         set(HDF5_C_TARGET hdf5)
@@ -446,14 +486,17 @@ if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
     if(__lang STREQUAL "C")
       _HDF5_test_regular_compiler_C(
         HDF5_${__lang}_COMPILER_NO_INTERROGATE
-        HDF5_${__lang}_VERSION)
+        HDF5_${__lang}_VERSION
+        HDF5_${__lang}_IS_PARALLEL)
     elseif(__lang STREQUAL "CXX")
       _HDF5_test_regular_compiler_CXX(
         HDF5_${__lang}_COMPILER_NO_INTERROGATE
-        HDF5_${__lang}_VERSION)
+        HDF5_${__lang}_VERSION
+        HDF5_${__lang}_IS_PARALLEL)
     elseif(__lang STREQUAL "Fortran")
       _HDF5_test_regular_compiler_Fortran(
-        HDF5_${__lang}_COMPILER_NO_INTERROGATE)
+        HDF5_${__lang}_COMPILER_NO_INTERROGATE
+        HDF5_${__lang}_IS_PARALLEL)
     else()
       continue()
     endif()
@@ -490,7 +533,7 @@ if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
 
       if(HDF5_${__lang}_COMPILER_EXECUTABLE)
         _HDF5_invoke_compiler(${__lang} HDF5_${__lang}_COMPILE_LINE
-          HDF5_${__lang}_RETURN_VALUE HDF5_${__lang}_VERSION)
+          HDF5_${__lang}_RETURN_VALUE HDF5_${__lang}_VERSION HDF5_${__lang}_IS_PARALLEL)
         if(HDF5_${__lang}_RETURN_VALUE EQUAL 0)
           message(STATUS "HDF5: Using hdf5 compiler wrapper to determine ${__lang} configuration")
           _HDF5_parse_compile_line( HDF5_${__lang}_COMPILE_LINE
@@ -552,6 +595,15 @@ if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
         set(HDF5_VERSION ${HDF5_${__lang}_VERSION})
       elseif(NOT HDF5_VERSION VERSION_EQUAL HDF5_${__lang}_VERSION)
         message(WARNING "HDF5 Version found for language ${__lang}, ${HDF5_${__lang}_VERSION} is different than previously found version ${HDF5_VERSION}")
+      endif()
+    endif()
+    if(DEFINED HDF5_${__lang}_IS_PARALLEL)
+      if(NOT DEFINED HDF5_IS_PARALLEL)
+        set(HDF5_IS_PARALLEL ${HDF5_${__lang}_IS_PARALLEL})
+      elseif(NOT HDF5_IS_PARALLEL AND HDF5_${__lang}_IS_PARALLEL)
+        message(WARNING "HDF5 found for language ${__lang} is parallel but previously found language is not parallel.")
+      elseif(HDF5_IS_PARALLEL AND NOT HDF5_${__lang}_IS_PARALLEL)
+        message(WARNING "HDF5 found for language ${__lang} is not parallel but previously found language is parallel.")
       endif()
     endif()
   endforeach()
