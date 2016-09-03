@@ -12,9 +12,12 @@
 #ifndef cmDefinitions_h
 #define cmDefinitions_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h>
 
 #include "cmLinkedTree.h"
+
+#include <string>
+#include <vector>
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #ifdef CMake_HAVE_CXX_UNORDERED_MAP
@@ -22,9 +25,9 @@
 #else
 #include "cmsys/hash_map.hxx"
 #endif
+#else
+#include <map>
 #endif
-
-#include <list>
 
 /** \class cmDefinitions
  * \brief Store a scope of variable definitions for CMake language.

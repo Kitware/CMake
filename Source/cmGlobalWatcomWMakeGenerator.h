@@ -12,7 +12,17 @@
 #ifndef cmGlobalWatcomWMakeGenerator_h
 #define cmGlobalWatcomWMakeGenerator_h
 
+#include <cmConfigure.h>
+
+#include "cmGlobalGeneratorFactory.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
+
+#include <string>
+#include <vector>
+
+class cmMakefile;
+class cmake;
+struct cmDocumentationEntry;
 
 /** \class cmGlobalWatcomWMakeGenerator
  * \brief Write a NMake makefiles.

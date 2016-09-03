@@ -20,6 +20,7 @@
 #include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmTest.h"
+#include "cm_auto_ptr.hxx"
 
 #include <map>
 #include <ostream>

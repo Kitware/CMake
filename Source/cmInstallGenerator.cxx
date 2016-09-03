@@ -14,6 +14,8 @@
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 
+#include <ostream>
+
 cmInstallGenerator::cmInstallGenerator(
   const char* destination, std::vector<std::string> const& configurations,
   const char* component, MessageLevel message, bool exclude_from_all)

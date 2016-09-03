@@ -21,6 +21,8 @@
 #include "cmAlgorithms.h"
 #include "cmCPackPropertiesGenerator.h"
 #include "cmComputeTargetDepends.h"
+#include "cmCustomCommand.h"
+#include "cmCustomCommandLines.h"
 #include "cmExportBuildFileGenerator.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmGeneratedFileStream.h"
@@ -29,25 +31,31 @@
 #include "cmInstallGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmOutputConverter.h"
+#include "cmPolicies.h"
 #include "cmQtAutoGeneratorInitializer.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
-#include "cmTargetExport.h"
 #include "cmVersion.h"
 #include "cmake.h"
 
+#include <algorithm>
+#include <assert.h>
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
+#include <iterator>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cm_jsoncpp_value.h"
-#include "cm_jsoncpp_writer.h"
+#include <cm_jsoncpp_value.h>
+#include <cm_jsoncpp_writer.h>
 #include <cmsys/MD5.h>
 #endif
 
-#include <stdlib.h> // required for atof
-
-#include <assert.h>
+class cmInstalledFile;
 
 bool cmTarget::StrictTargetComparison::operator()(cmTarget const* t1,
                                                   cmTarget const* t2) const

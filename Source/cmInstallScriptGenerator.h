@@ -12,7 +12,12 @@
 #ifndef cmInstallScriptGenerator_h
 #define cmInstallScriptGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmInstallGenerator.h"
+
+#include <iosfwd>
+#include <string>
 
 /** \class cmInstallScriptGenerator
  * \brief Generate target installation rules.

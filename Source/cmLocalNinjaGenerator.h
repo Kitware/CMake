@@ -13,13 +13,27 @@
 #ifndef cmLocalNinjaGenerator_h
 #define cmLocalNinjaGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmLocalCommonGenerator.h"
-
+#include "cmLocalGenerator.h"
 #include "cmNinjaTypes.h"
+#include "cmOutputConverter.h"
 
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
+class cmCustomCommand;
 class cmCustomCommandGenerator;
-class cmGlobalNinjaGenerator;
 class cmGeneratedFileStream;
+class cmGeneratorTarget;
+class cmGlobalGenerator;
+class cmGlobalNinjaGenerator;
+class cmMakefile;
+class cmSourceFile;
 class cmake;
 
 /**

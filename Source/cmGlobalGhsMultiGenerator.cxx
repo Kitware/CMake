@@ -12,6 +12,7 @@
 #include "cmGlobalGhsMultiGenerator.h"
 
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
 #include "cmGhsMultiTargetGenerator.h"
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"

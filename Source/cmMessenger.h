@@ -13,9 +13,14 @@
 #ifndef cmMessenger_h
 #define cmMessenger_h
 
+#include <cmConfigure.h> // IWYU pragma: keep
+
 #include "cmListFileCache.h"
-#include "cmState.h"
 #include "cmake.h"
+
+#include <string>
+
+class cmState;
 
 class cmMessenger
 {

@@ -16,8 +16,11 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
+
 #include <cmsys/FStream.hxx>
+#include <sstream>
 #include <string.h>
+#include <utility>
 
 cmDepends::cmDepends(cmLocalGenerator* lg, const char* targetDir)
   : CompileDirectory()

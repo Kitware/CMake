@@ -12,6 +12,8 @@
 #include "cmDefinitions.h"
 
 #include <assert.h>
+#include <set>
+#include <utility>
 
 cmDefinitions::Def cmDefinitions::NoDef;
 

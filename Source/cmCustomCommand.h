@@ -12,9 +12,15 @@
 #ifndef cmCustomCommand_h
 #define cmCustomCommand_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
+#include "cmCustomCommandLines.h"
 #include "cmListFileCache.h"
+
+#include <string>
+#include <utility>
+#include <vector>
+
 class cmMakefile;
 
 /** \class cmCustomCommand

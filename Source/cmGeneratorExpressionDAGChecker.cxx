@@ -13,7 +13,15 @@
 #include "cmGeneratorExpressionDAGChecker.h"
 
 #include "cmAlgorithms.h"
+#include "cmGeneratorExpressionContext.h"
+#include "cmGeneratorExpressionEvaluator.h"
+#include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
+#include "cmake.h"
+
+#include <sstream>
+#include <string.h>
+#include <utility>
 
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   const cmListFileBacktrace& backtrace, const std::string& target,

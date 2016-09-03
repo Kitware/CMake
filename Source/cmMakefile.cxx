@@ -23,33 +23,34 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
 #include "cmGlobalGenerator.h"
-#include "cmInstallGenerator.h"
 #include "cmListFileCache.h"
-#include "cmMessenger.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmTest.h"
-#include "cmTestGenerator.h"
 #include "cmVersion.h"
 #include "cmake.h"
+
+#include "cmInstallGenerator.h" // IWYU pragma: keep
+#include "cmTestGenerator.h"    // IWYU pragma: keep
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
 #include "cmVariableWatch.h"
 #endif
 
+#include <algorithm>
+#include <assert.h>
 #include <cm_auto_ptr.hxx>
 #include <cmsys/FStream.hxx>
 #include <cmsys/RegularExpression.hxx>
-
-#include <algorithm>
-#include <assert.h>
 #include <ctype.h>
 #include <sstream>
 #include <stdlib.h>
 #include <string.h>
 #include <utility>
+
+class cmMessenger;
 
 // default is not to be building executables
 cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,

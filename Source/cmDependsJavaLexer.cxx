@@ -1,3 +1,5 @@
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 #line 2 "cmDependsJavaLexer.cxx"
 

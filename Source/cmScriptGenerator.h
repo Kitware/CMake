@@ -12,7 +12,11 @@
 #ifndef cmScriptGenerator_h
 #define cmScriptGenerator_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <ostream>
+#include <string>
+#include <vector>
 
 class cmScriptGeneratorIndent
 {

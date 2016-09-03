@@ -12,8 +12,11 @@
 #include "cmInstallDirectoryGenerator.h"
 
 #include "cmGeneratorExpression.h"
+#include "cmInstallType.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmSystemTools.h"
+#include "cm_auto_ptr.hxx"
 
 cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
   std::vector<std::string> const& dirs, const char* dest,

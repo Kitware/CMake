@@ -11,12 +11,17 @@
 ============================================================================*/
 #include "cmSourceFileLocation.h"
 
+#include <cmConfigure.h>
+
 #include "cmAlgorithms.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
 
-#include "assert.h"
+#include <algorithm>
+#include <assert.h>
+#include <vector>
 
 cmSourceFileLocation::cmSourceFileLocation()
   : Makefile(CM_NULLPTR)

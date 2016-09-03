@@ -16,14 +16,15 @@
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
-#include "cmInstallFilesGenerator.h"
 #include "cmInstallGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-#include "cmTest.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmTestGenerator.h"
 #include "cmVersion.h"
 #include "cmake.h"
@@ -33,9 +34,14 @@
 #include <cmsys/MD5.h>
 #endif
 
-#include <ctype.h> // for isalpha
-
+#include <algorithm>
 #include <assert.h>
+#include <cmsys/RegularExpression.hxx>
+#include <ctype.h>
+#include <iterator>
+#include <sstream>
+#include <stdio.h>
+#include <utility>
 
 #if defined(__HAIKU__)
 #include <FindDirectory.h>

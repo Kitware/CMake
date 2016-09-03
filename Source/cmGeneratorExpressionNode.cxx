@@ -13,9 +13,36 @@
 #include "cmGeneratorExpressionNode.h"
 
 #include "cmAlgorithms.h"
+#include "cmGeneratorExpression.h"
+#include "cmGeneratorExpressionContext.h"
+#include "cmGeneratorExpressionDAGChecker.h"
+#include "cmGeneratorExpressionEvaluator.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmLinkItem.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
+#include "cmPolicies.h"
+#include "cmSourceFile.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
+
+#include <algorithm>
+#include <assert.h>
+#include <cmConfigure.h>
+#include <cmsys/RegularExpression.hxx>
+#include <cmsys/String.h>
+#include <errno.h>
+#include <map>
+#include <set>
+#include <sstream>
+#include <stdlib.h>
+#include <string.h>
+#include <utility>
 
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   std::string const& prop, cmLocalGenerator* lg,
@@ -1455,13 +1482,12 @@ static const struct InstallPrefixNode : public cmGeneratorExpressionNode
 
 } installPrefixNode;
 
-class ArtifactNameTag;
-class ArtifactLinkerTag;
-class ArtifactSonameTag;
-class ArtifactPdbTag;
-
-class ArtifactPathTag;
 class ArtifactDirTag;
+class ArtifactLinkerTag;
+class ArtifactNameTag;
+class ArtifactPathTag;
+class ArtifactPdbTag;
+class ArtifactSonameTag;
 
 template <typename ArtifactT>
 struct TargetFilesystemArtifactResultCreator

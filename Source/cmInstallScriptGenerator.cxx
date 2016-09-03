@@ -11,6 +11,11 @@
 ============================================================================*/
 #include "cmInstallScriptGenerator.h"
 
+#include "cmScriptGenerator.h"
+
+#include <ostream>
+#include <vector>
+
 cmInstallScriptGenerator::cmInstallScriptGenerator(const char* script,
                                                    bool code,
                                                    const char* component,

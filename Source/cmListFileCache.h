@@ -12,7 +12,11 @@
 #ifndef cmListFileCache_h
 #define cmListFileCache_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <iosfwd>
+#include <string>
+#include <vector>
 
 #include "cmState.h"
 
@@ -149,6 +153,7 @@ public:
 
 private:
   struct Entry;
+
   cmState::Snapshot Bottom;
   Entry* Cur;
   cmListFileBacktrace(cmState::Snapshot bottom, Entry* up,

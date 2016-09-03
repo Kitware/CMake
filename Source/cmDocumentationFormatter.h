@@ -12,7 +12,9 @@
 #ifndef _cmDocumentationFormatter_h
 #define _cmDocumentationFormatter_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <iosfwd>
 
 /** This is just a helper class to make it build with MSVC 6.0.
 Actually the enums and internal classes could directly go into

@@ -14,17 +14,26 @@
 #include "cmExtraEclipseCDT4Generator.h"
 
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalUnixMakefileGenerator3.h"
-#include "cmLocalUnixMakefileGenerator3.h"
+#include "cmGeneratorExpression.h"
+#include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmOutputConverter.h"
 #include "cmSourceFile.h"
+#include "cmSourceGroup.h"
 #include "cmState.h"
-#include "cmTarget.h"
-#include "cmXMLWriter.h"
-
 #include "cmSystemTools.h"
+#include "cmXMLWriter.h"
+#include "cmake.h"
+
+#include <algorithm>
 #include <assert.h>
-#include <stdlib.h>
+#include <cmsys/RegularExpression.hxx>
+#include <map>
+#include <sstream>
+#include <stdio.h>
+#include <utility>
 
 static void AppendAttribute(cmXMLWriter& xml, const char* keyval)
 {

@@ -13,19 +13,33 @@
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
+#include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmCustomCommandLines.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmPropertyMap.h"
 #include "cmSourceFile.h"
+#include "cmSourceFileLocation.h"
+#include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmTargetLinkLibraryType.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
 
-#include <queue>
-
-#include "assert.h"
+#include <algorithm>
+#include <assert.h>
+#include <cmsys/RegularExpression.hxx>
 #include <errno.h>
+#include <iterator>
+#include <queue>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #if defined(CMake_HAVE_CXX_UNORDERED_SET)
 #include <unordered_set>

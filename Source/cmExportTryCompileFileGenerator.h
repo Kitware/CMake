@@ -12,10 +12,18 @@
 #ifndef cmExportTryCompileFileGenerator_h
 #define cmExportTryCompileFileGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmExportFileGenerator.h"
 
-class cmInstallExportGenerator;
-class cmInstallTargetGenerator;
+#include <iosfwd>
+#include <set>
+#include <string>
+#include <vector>
+
+class cmGeneratorTarget;
+class cmGlobalGenerator;
+class cmMakefile;
 
 class cmExportTryCompileFileGenerator : public cmExportFileGenerator
 {

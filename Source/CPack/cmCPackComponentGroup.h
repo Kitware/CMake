@@ -13,6 +13,8 @@
 #ifndef cmCPackComponentGroup_h
 #define cmCPackComponentGroup_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 class cmCPackComponentGroup;

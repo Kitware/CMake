@@ -12,11 +12,14 @@
 #ifndef cmCustomCommandGenerator_h
 #define cmCustomCommandGenerator_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <string>
+#include <vector>
 
 class cmCustomCommand;
-class cmLocalGenerator;
 class cmGeneratorExpression;
+class cmLocalGenerator;
 
 class cmCustomCommandGenerator
 {

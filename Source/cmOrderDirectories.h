@@ -12,14 +12,18 @@
 #ifndef cmOrderDirectories_h
 #define cmOrderDirectories_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h>
 
 #include <cmsys/RegularExpression.hxx>
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
 
+class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmOrderDirectoriesConstraint;
-class cmOrderDirectoriesConstraintLibrary;
-class cmGeneratorTarget;
 
 /** \class cmOrderDirectories
  * \brief Compute a safe runtime path order for a set of shared libraries.

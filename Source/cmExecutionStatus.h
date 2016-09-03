@@ -12,6 +12,8 @@
 #ifndef cmExecutionStatus_h
 #define cmExecutionStatus_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 /** \class cmExecutionStatus

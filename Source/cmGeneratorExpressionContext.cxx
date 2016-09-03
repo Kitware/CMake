@@ -12,8 +12,6 @@
 
 #include "cmGeneratorExpressionContext.h"
 
-#include "cmGeneratorTarget.h"
-
 cmGeneratorExpressionContext::cmGeneratorExpressionContext(
   cmLocalGenerator* lg, std::string const& config, bool quiet,
   cmGeneratorTarget const* headTarget, const cmGeneratorTarget* currentTarget,

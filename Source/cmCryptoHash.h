@@ -12,9 +12,11 @@
 #ifndef cmCryptoHash_h
 #define cmCryptoHash_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h>
 
 #include <cm_auto_ptr.hxx>
+#include <string>
+#include <vector>
 
 /**
  * @brief Abstract base class for cryptographic hash generators

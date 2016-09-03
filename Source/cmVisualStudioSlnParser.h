@@ -12,6 +12,8 @@
 #ifndef cmVisualStudioSlnParser_h
 #define cmVisualStudioSlnParser_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 #include <bitset>

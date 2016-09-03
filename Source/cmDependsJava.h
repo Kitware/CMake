@@ -12,7 +12,14 @@
 #ifndef cmDependsJava_h
 #define cmDependsJava_h
 
+#include <cmConfigure.h>
+
 #include "cmDepends.h"
+
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
 
 /** \class cmDependsJava
  * \brief Dependency scanner for Java class files.

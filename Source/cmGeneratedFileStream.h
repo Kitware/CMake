@@ -12,9 +12,10 @@
 #ifndef cmGeneratedFileStream_h
 #define cmGeneratedFileStream_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h>
 
 #include <cmsys/FStream.hxx>
+#include <string>
 
 // This is the first base class of cmGeneratedFileStream.  It will be
 // created before and destroyed after the ofstream portion and can

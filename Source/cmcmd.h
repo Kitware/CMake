@@ -13,7 +13,10 @@
 #ifndef cmcmd_h
 #define cmcmd_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <string>
+#include <vector>
 
 class cmcmd
 {

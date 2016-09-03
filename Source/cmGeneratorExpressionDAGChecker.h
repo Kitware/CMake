@@ -12,9 +12,16 @@
 #ifndef cmGeneratorExpressionDAGChecker_h
 #define cmGeneratorExpressionDAGChecker_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h>
 
-#include "cmGeneratorExpressionEvaluator.h"
+#include "cmListFileCache.h"
+
+#include <map>
+#include <set>
+#include <string>
+
+struct GeneratorExpressionContent;
+struct cmGeneratorExpressionContext;
 
 #define CM_SELECT_BOTH(F, A1, A2) F(A1, A2)
 #define CM_SELECT_FIRST(F, A1, A2) F(A1)

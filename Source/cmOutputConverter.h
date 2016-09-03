@@ -12,10 +12,12 @@
 #ifndef cmOutputConverter_h
 #define cmOutputConverter_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmGlobalGenerator.h"
 #include "cmState.h"
+
+#include <string>
+#include <vector>
 
 class cmOutputConverter
 {

@@ -12,12 +12,13 @@
 #ifndef cmFileLockPool_h
 #define cmFileLockPool_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
 #include <list>
+#include <string>
 
-class cmFileLockResult;
 class cmFileLock;
+class cmFileLockResult;
 
 class cmFileLockPool
 {

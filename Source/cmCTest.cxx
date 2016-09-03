@@ -9,52 +9,54 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include "cmCurl.h" // include before anything that includes windows.h
-
 #include "cmCTest.h"
 
 #include "cmAlgorithms.h"
-#include "cmCTestCommand.h"
+#include "cmCTestBuildAndTestHandler.h"
+#include "cmCTestBuildHandler.h"
+#include "cmCTestConfigureHandler.h"
+#include "cmCTestCoverageHandler.h"
+#include "cmCTestGenericHandler.h"
+#include "cmCTestMemCheckHandler.h"
+#include "cmCTestScriptHandler.h"
 #include "cmCTestStartCommand.h"
+#include "cmCTestSubmitHandler.h"
+#include "cmCTestTestHandler.h"
+#include "cmCTestUpdateHandler.h"
+#include "cmCTestUploadHandler.h"
+#include "cmCurl.h"
 #include "cmDynamicLoader.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
-#include "cmVersionMacros.h"
+#include "cmSystemTools.h"
+#include "cmVersion.h"
+#include "cmVersionConfig.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
+
+#include <cm_auto_ptr.hxx>
+#include <cm_curl.h>
+#include <cm_zlib.h>
 #include <cmsys/Base64.h>
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
-#include <cmsys/SystemInformation.hxx>
-
-#include "cmCTestBuildAndTestHandler.h"
-#include "cmCTestBuildHandler.h"
-#include "cmCTestConfigureHandler.h"
-#include "cmCTestCoverageHandler.h"
-#include "cmCTestMemCheckHandler.h"
-#include "cmCTestScriptHandler.h"
-#include "cmCTestSubmitHandler.h"
-#include "cmCTestTestHandler.h"
-#include "cmCTestUpdateHandler.h"
-#include "cmCTestUploadHandler.h"
-
-#include "cmVersion.h"
-
 #include <cmsys/Glob.hxx>
 #include <cmsys/Process.h>
-#include <cmsys/RegularExpression.hxx>
-
+#include <cmsys/String.hxx>
+#include <cmsys/SystemInformation.hxx>
 #include <ctype.h>
-#include <float.h>
-#include <math.h>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <stdio.h>
 #include <stdlib.h>
-
-#include <cm_auto_ptr.hxx>
-
-#include <cm_zlib.h>
-#include <cmsys/Base64.h>
+#include <string.h>
+#include <string>
+#include <time.h>
+#include <utility>
+#include <vector>
 
 #if defined(__BEOS__) || defined(__HAIKU__)
 #include <be/kernel/OS.h> /* disable_debugger() API. */

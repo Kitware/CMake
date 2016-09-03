@@ -12,12 +12,16 @@
 #ifndef cmSourceFile_h
 #define cmSourceFile_h
 
+#include <cmConfigure.h>
+
+#include "cmPropertyMap.h"
 #include "cmSourceFileLocation.h"
 
-#include "cmCustomCommand.h"
-#include "cmPropertyMap.h"
+#include <string>
+#include <vector>
 
-class cmake;
+class cmCustomCommand;
+class cmMakefile;
 
 /** \class cmSourceFile
  * \brief Represent a class loaded from a makefile.

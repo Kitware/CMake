@@ -13,7 +13,9 @@
 #ifndef cmFileLockResult_h
 #define cmFileLockResult_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <string>
 
 #if defined(_WIN32)
 #include <windows.h> // DWORD

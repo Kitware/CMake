@@ -12,8 +12,14 @@
 #ifndef cmInstallGenerator_h
 #define cmInstallGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmInstallType.h"
 #include "cmScriptGenerator.h"
+
+#include <iosfwd>
+#include <string>
+#include <vector>
 
 class cmLocalGenerator;
 class cmMakefile;

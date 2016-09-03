@@ -12,12 +12,11 @@
 #ifndef cmGeneratorExpressionParser_h
 #define cmGeneratorExpressionParser_h
 
-#include "cmGeneratorExpressionLexer.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include <set>
 #include <vector>
 
-#include "cmListFileCache.h"
+#include "cmGeneratorExpressionLexer.h"
 
 struct cmGeneratorExpressionEvaluator;
 

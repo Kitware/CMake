@@ -11,6 +11,11 @@
 ============================================================================*/
 #include "cmFileTimeComparison.h"
 
+#include <cmConfigure.h>
+#include <string>
+#include <time.h>
+#include <utility>
+
 // Use a hash table to avoid duplicate file time checks from disk.
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #ifdef CMake_HAVE_CXX_UNORDERED_MAP
@@ -20,16 +25,14 @@
 #endif
 #endif
 
-#include <cmsys/Encoding.hxx>
-
 // Use a platform-specific API to get file times efficiently.
 #if !defined(_WIN32) || defined(__CYGWIN__)
-#define cmFileTimeComparison_Type struct stat
-#include <ctype.h>
 #include <sys/stat.h>
+#define cmFileTimeComparison_Type struct stat
 #else
-#define cmFileTimeComparison_Type FILETIME
+#include <cmsys/Encoding.hxx>
 #include <windows.h>
+#define cmFileTimeComparison_Type FILETIME
 #endif
 
 class cmFileTimeComparisonInternal

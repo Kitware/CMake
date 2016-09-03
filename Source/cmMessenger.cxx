@@ -11,13 +11,17 @@
 ============================================================================*/
 
 #include "cmMessenger.h"
+
+#include "cmAlgorithms.h"
 #include "cmDocumentationFormatter.h"
-#include "cmMessenger.h"
-#include "cmOutputConverter.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include <cmsys/SystemInformation.hxx>
 #endif
+
+#include <sstream>
 
 cmake::MessageType cmMessenger::ConvertMessageType(cmake::MessageType t) const
 {

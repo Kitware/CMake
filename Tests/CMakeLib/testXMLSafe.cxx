@@ -9,9 +9,11 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include <cmXMLSafe.h>
+#include "cmXMLSafe.h"
 
-#include "cmStandardIncludes.h"
+#include <sstream>
+#include <stdio.h>
+#include <string>
 
 struct test_pair
 {

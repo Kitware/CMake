@@ -12,15 +12,17 @@
 #ifndef _cmDocumentation_h
 #define _cmDocumentation_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h>
 
 #include "cmDocumentationFormatter.h"
-#include "cmDocumentationSection.h"
-#include "cmake.h"
 
-namespace cmsys {
-class Directory;
-}
+#include <iosfwd>
+#include <map>
+#include <string>
+#include <vector>
+
+class cmDocumentationSection;
+struct cmDocumentationEntry;
 
 /** Class to generate documentation.  */
 class cmDocumentation : public cmDocumentationEnums

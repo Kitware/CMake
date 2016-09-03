@@ -13,20 +13,25 @@
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
-#include "cmExportSet.h"
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmInstallExportGenerator.h"
+#include "cmGeneratorTarget.h"
+#include "cmLinkItem.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
+#include "cmPolicies.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmTargetExport.h"
-#include "cmVersion.h"
+#include "cmake.h"
 
 #include <assert.h>
 #include <cm_auto_ptr.hxx>
 #include <cmsys/FStream.hxx>
+#include <sstream>
+#include <string.h>
+#include <utility>
 
 static std::string cmExportFileGeneratorEscape(std::string const& str)
 {

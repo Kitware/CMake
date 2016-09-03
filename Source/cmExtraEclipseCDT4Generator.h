@@ -14,11 +14,19 @@
 #ifndef cmExtraEclipseCDT4Generator_h
 #define cmExtraEclipseCDT4Generator_h
 
+#include <cmConfigure.h>
+
 #include "cmExternalMakefileProjectGenerator.h"
 
+#include <iosfwd>
+#include <set>
+#include <string>
+#include <vector>
+
+class cmLocalGenerator;
 class cmMakefile;
-class cmXMLWriter;
 class cmSourceGroup;
+class cmXMLWriter;
 
 /** \class cmExtraEclipseCDT4Generator
  * \brief Write Eclipse project files for Makefile based projects

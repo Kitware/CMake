@@ -12,8 +12,18 @@
 #ifndef cmExportInstallFileGenerator_h
 #define cmExportInstallFileGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmExportFileGenerator.h"
 
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
+class cmGeneratorTarget;
+class cmGlobalGenerator;
 class cmInstallExportGenerator;
 class cmInstallTargetGenerator;
 

@@ -12,7 +12,14 @@
 #ifndef cmDepends_h
 #define cmDepends_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h>
+
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <stddef.h>
+#include <string>
+#include <vector>
 
 class cmFileTimeComparison;
 class cmLocalGenerator;

@@ -12,6 +12,7 @@
 #include "cmLocalVisualStudioGenerator.h"
 
 #include "cmCustomCommandGenerator.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"

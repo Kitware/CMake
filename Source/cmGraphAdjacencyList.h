@@ -12,6 +12,8 @@
 #ifndef cmGraphAdjacencyList_h
 #define cmGraphAdjacencyList_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 /**

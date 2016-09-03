@@ -11,6 +11,13 @@
 ============================================================================*/
 #include "cmDynamicLoader.h"
 
+#include <cmConfigure.h>
+
+#include <cmsys/DynamicLoader.hxx>
+#include <map>
+#include <string>
+#include <utility>
+
 class cmDynamicLoaderCache
 {
 public:

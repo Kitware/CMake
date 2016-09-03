@@ -10,8 +10,11 @@
   See the License for more information.
 ============================================================================*/
 #include "cmRST.h"
-
 #include "cmSystemTools.h"
+
+#include <cmsys/FStream.hxx>
+#include <iostream>
+#include <string>
 
 void reportLine(std::ostream& os, bool ret, std::string const& line, bool eol)
 {
@@ -52,8 +55,8 @@ int testRST(int argc, char* argv[])
   }
 
   // Compare expected and actual outputs.
-  std::ifstream e_fin(e_name.c_str());
-  std::ifstream a_fin(a_name.c_str());
+  cmsys::ifstream e_fin(e_name.c_str());
+  cmsys::ifstream a_fin(a_name.c_str());
   if (!e_fin) {
     std::cerr << "Could not open input " << e_name << std::endl;
     return 1;

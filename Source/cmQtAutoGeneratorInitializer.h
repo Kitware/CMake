@@ -14,13 +14,8 @@
 #ifndef cmQtAutoGeneratorInitializer_h
 #define cmQtAutoGeneratorInitializer_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include <map>
-#include <string>
-#include <vector>
-
-class cmSourceFile;
 class cmGeneratorTarget;
 class cmLocalGenerator;
 

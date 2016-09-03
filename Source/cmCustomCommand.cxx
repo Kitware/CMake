@@ -13,7 +13,7 @@
 
 #include "cmMakefile.h"
 
-#include <cm_auto_ptr.hxx>
+#include <cmConfigure.h>
 
 cmCustomCommand::cmCustomCommand()
   : Backtrace()

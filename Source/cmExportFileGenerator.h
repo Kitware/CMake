@@ -12,11 +12,19 @@
 #ifndef cmExportFileGenerator_h
 #define cmExportFileGenerator_h
 
-#include "cmCommand.h"
-#include "cmGeneratorExpression.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
+#include "cmGeneratorExpression.h"
 #include "cmVersion.h"
-#include "cmVersionMacros.h"
+#include "cmVersionConfig.h"
+
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
+class cmGeneratorTarget;
 
 #define STRINGIFY_HELPER(X) #X
 #define STRINGIFY(X) STRINGIFY_HELPER(X)

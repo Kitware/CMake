@@ -12,16 +12,25 @@
 ============================================================================*/
 #include "cmLocalNinjaGenerator.h"
 
+#include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
 #include "cmMakefile.h"
 #include "cmNinjaTargetGenerator.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
+#include "cmSystemTools.h"
 #include "cmake.h"
 
+#include <algorithm>
 #include <assert.h>
+#include <iterator>
+#include <sstream>
+#include <stdio.h>
+#include <utility>
 
 cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
                                              cmMakefile* mf)

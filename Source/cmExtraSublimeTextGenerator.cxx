@@ -14,15 +14,18 @@
 
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
-#include "cmGlobalUnixMakefileGenerator3.h"
+#include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
-#include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
-#include <cmsys/SystemTools.hxx>
+#include <cmsys/RegularExpression.hxx>
+#include <ostream>
+#include <set>
+#include <string.h>
+#include <utility>
 
 /*
 Sublime Text 2 Generator

@@ -13,10 +13,14 @@
 #ifndef cmExtraKateGenerator_h
 #define cmExtraKateGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmExternalMakefileProjectGenerator.h"
 
-class cmLocalGenerator;
+#include <string>
+
 class cmGeneratedFileStream;
+class cmLocalGenerator;
 
 /** \class cmExtraKateGenerator
  * \brief Write Kate project files for Makefile or ninja based projects

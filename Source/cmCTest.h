@@ -13,18 +13,20 @@
 #ifndef cmCTest_h
 #define cmCTest_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h>
 
-#include "cmListFileCache.h"
+#include <cmsys/String.hxx>
+#include <map>
+#include <set>
+#include <sstream>
+#include <string>
 #include <time.h>
+#include <vector>
 
-class cmake;
-class cmMakefile;
 class cmCTestGenericHandler;
-class cmGeneratedFileStream;
-class cmCTestCommand;
-class cmCTestScriptHandler;
 class cmCTestStartCommand;
+class cmGeneratedFileStream;
+class cmMakefile;
 class cmXMLWriter;
 
 #define cmCTestLog(ctSelf, logType, msg)                                      \
@@ -42,16 +44,6 @@ class cmXMLWriter;
     (ctSelf)->Log(cmCTest::logType, __FILE__, __LINE__,                       \
                   cmCTestLog_msg.str().c_str(), suppress);                    \
   } while (0)
-
-#ifdef cerr
-#undef cerr
-#endif
-#define cerr no_cerr_use_cmCTestLog
-
-#ifdef cout
-#undef cout
-#endif
-#define cout no_cout_use_cmCTestLog
 
 /** \class cmCTest
  * \brief Represents a ctest invocation.

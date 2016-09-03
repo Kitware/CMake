@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmGlobalCommonGenerator.h"
 
+class cmake;
+
 cmGlobalCommonGenerator::cmGlobalCommonGenerator(cmake* cm)
   : cmGlobalGenerator(cm)
 {

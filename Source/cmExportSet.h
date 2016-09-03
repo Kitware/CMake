@@ -12,11 +12,14 @@
 #ifndef cmExportSet_h
 #define cmExportSet_h
 
-#include "cmSystemTools.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
-class cmTargetExport;
+#include <string>
+#include <vector>
+
 class cmInstallExportGenerator;
 class cmLocalGenerator;
+class cmTargetExport;
 
 /// A set of targets that were installed with the same EXPORT parameter.
 class cmExportSet

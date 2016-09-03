@@ -14,9 +14,15 @@
 #ifndef cmGlobalCodeLiteGenerator_h
 #define cmGlobalCodeLiteGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmExternalMakefileProjectGenerator.h"
 
+#include <string>
+#include <vector>
+
 class cmLocalGenerator;
+class cmMakefile;
 
 class cmExtraCodeLiteGenerator : public cmExternalMakefileProjectGenerator
 {

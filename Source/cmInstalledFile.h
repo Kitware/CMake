@@ -13,6 +13,13 @@
 #define cmInstalledFile_h
 
 #include "cmGeneratorExpression.h"
+#include "cm_auto_ptr.hxx"
+
+#include <map>
+#include <string>
+#include <vector>
+
+class cmMakefile;
 
 /** \class cmInstalledFile
  * \brief Represents a file intended for installation.

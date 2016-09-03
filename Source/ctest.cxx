@@ -9,16 +9,21 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include "cmCTest.h"
-#include "cmSystemTools.h"
 
-// Need these for documentation support.
-#include "cmDocumentation.h"
-#include "cmake.h"
+#include <cmConfigure.h>
 
 #include "CTest/cmCTestLaunch.h"
 #include "CTest/cmCTestScriptHandler.h"
-#include "cmsys/Encoding.hxx"
+#include "cmCTest.h"
+#include "cmDocumentation.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
+
+#include <cmsys/Encoding.hxx>
+#include <iostream>
+#include <string.h>
+#include <string>
+#include <vector>
 
 static const char* cmDocumentationName[][2] = {
   { CM_NULLPTR, "  ctest - Testing driver provided by CMake." },

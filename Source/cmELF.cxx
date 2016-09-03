@@ -9,12 +9,16 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include "cmStandardIncludes.h" // to get CMAKE_USE_ELF_PARSER first
-
 #include "cmELF.h"
 
 #include <cm_auto_ptr.hxx>
+#include <cm_kwiml.h>
 #include <cmsys/FStream.hxx>
+#include <map>
+#include <sstream>
+#include <stddef.h>
+#include <utility>
+#include <vector>
 
 // Include the ELF format information system header.
 #if defined(__OpenBSD__)

@@ -16,28 +16,36 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmQtAutoGenerators.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
 #include "cmUtils.hxx"
 #include "cmVersion.h"
+#include "cm_auto_ptr.hxx"
+#include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmDependsFortran.h" // For -E cmake_copy_f90_mod callback.
 #endif
 
-#include <cmsys/Directory.hxx>
-#include <cmsys/FStream.hxx>
-#include <cmsys/Process.h>
-#include <cmsys/Terminal.h>
+#if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32)
+#include "bindexplib.h"
+#endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32) && !defined(__CYGWIN__)
 #include "cmVisualStudioWCEPlatformParser.h"
 #endif
 
+#include <algorithm>
+#include <cmConfigure.h>
+#include <cmsys/Directory.hxx>
+#include <cmsys/FStream.hxx>
+#include <cmsys/Process.h>
+#include <cmsys/Terminal.h>
+#include <iostream>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
-
-#include <stdlib.h> // required for atoi
-#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
-#include "bindexplib.h"
-#endif
 
 void CMakeCommandUsage(const char* program)
 {

@@ -12,20 +12,16 @@
 #ifndef cmGeneratorExpressionNode_h
 #define cmGeneratorExpressionNode_h
 
-#include "cmGeneratorExpression.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmGeneratorExpressionDAGChecker.h"
-#include "cmGeneratorExpressionEvaluator.h"
-#include "cmGeneratorExpressionParser.h"
-#include "cmLocalGenerator.h"
-#include "cmSourceFile.h"
+#include <string>
+#include <vector>
 
-#include <cmsys/String.h>
-
-#include <assert.h>
-#include <errno.h>
-
-#include "cmListFileCache.h"
+class cmGeneratorTarget;
+class cmLocalGenerator;
+struct GeneratorExpressionContent;
+struct cmGeneratorExpressionContext;
+struct cmGeneratorExpressionDAGChecker;
 
 struct cmGeneratorExpressionNode
 {

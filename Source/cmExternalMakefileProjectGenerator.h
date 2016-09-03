@@ -12,11 +12,13 @@
 #ifndef cmExternalMakefileProjectGenerator_h
 #define cmExternalMakefileProjectGenerator_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "cmDocumentation.h"
+#include <string>
+#include <vector>
 
 class cmGlobalGenerator;
+class cmMakefile;
 
 /** \class cmExternalMakefileProjectGenerator
  * \brief Base class for generators for "External Makefile based IDE projects".

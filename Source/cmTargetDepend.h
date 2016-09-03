@@ -12,6 +12,8 @@
 #ifndef cmTargetDepend_h
 #define cmTargetDepend_h
 
+#include <cmConfigure.h>
+
 #include "cmStandardIncludes.h"
 
 class cmGeneratorTarget;

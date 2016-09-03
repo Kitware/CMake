@@ -11,10 +11,12 @@
 ============================================================================*/
 #include "cmExprParserHelper.h"
 
-#include "cmMakefile.h"
-#include "cmSystemTools.h"
+#include <cmConfigure.h>
 
 #include "cmExprLexer.h"
+
+#include <iostream>
+#include <sstream>
 
 int cmExpr_yyparse(yyscan_t yyscanner);
 //

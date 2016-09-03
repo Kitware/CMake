@@ -12,13 +12,13 @@
 #ifndef cmGeneratorExpressionEvaluator_h
 #define cmGeneratorExpressionEvaluator_h
 
-#include "cmGeneratorExpressionContext.h"
+#include <cmConfigure.h>
 
-#include "cmListFileCache.h"
-
+#include <stddef.h>
 #include <string>
 #include <vector>
 
+struct cmGeneratorExpressionContext;
 struct cmGeneratorExpressionDAGChecker;
 struct cmGeneratorExpressionNode;
 

@@ -14,12 +14,17 @@
 
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-#include <cmsys/FStream.hxx>
+#include "cmSystemTools.h"
+#include "cmake.h"
 
-#include <assert.h>
+#include <cmConfigure.h>
+#include <cmsys/FStream.hxx>
+#include <sstream>
+#include <utility>
 
 cmGeneratorExpressionEvaluationFile::cmGeneratorExpressionEvaluationFile(
   const std::string& input,

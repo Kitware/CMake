@@ -12,13 +12,20 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 
 #include "cmAlgorithms.h"
+#include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmFileTimeComparison.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMakefileTargetGenerator.h"
+#include "cmOutputConverter.h"
 #include "cmSourceFile.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
 #include "cmVersion.h"
 #include "cmake.h"
 
@@ -30,11 +37,14 @@
 #include "cmDependsJava.h"
 #endif
 
-#include <cm_auto_ptr.hxx>
-#include <cmsys/Terminal.h>
-
 #include <algorithm>
-#include <queue>
+#include <cm_auto_ptr.hxx>
+#include <cmsys/FStream.hxx>
+#include <cmsys/Terminal.h>
+#include <functional>
+#include <sstream>
+#include <stdio.h>
+#include <utility>
 
 // Escape special characters in Makefile dependency lines
 class cmMakeSafe

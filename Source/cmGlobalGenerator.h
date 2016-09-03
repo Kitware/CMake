@@ -13,15 +13,20 @@
 #ifndef cmGlobalGenerator_h
 #define cmGlobalGenerator_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h>
 
-#include "cmExportSetMap.h" // For cmExportSetMap
-#include "cmGeneratorExpression.h"
-#include "cmGeneratorTarget.h"
+#include "cmExportSetMap.h"
 #include "cmState.h"
-#include "cmSystemTools.h"  // for cmSystemTools::OutputOption
-#include "cmTarget.h"       // For cmTargets
-#include "cmTargetDepend.h" // For cmTargetDependSet
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmTargetDepend.h"
+
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmFileLockPool.h"
@@ -32,15 +37,14 @@
 #endif
 #endif
 
-class cmake;
-class cmGeneratorTarget;
-class cmMakefile;
-class cmLocalGenerator;
-class cmExternalMakefileProjectGenerator;
-class cmTarget;
-class cmInstallTargetGenerator;
-class cmInstallFilesGenerator;
+class cmCustomCommandLines;
+class cmSourceFile;
 class cmExportBuildFileGenerator;
+class cmExternalMakefileProjectGenerator;
+class cmGeneratorTarget;
+class cmLocalGenerator;
+class cmMakefile;
+class cmake;
 
 /** \class cmGlobalGenerator
  * \brief Responsible for overseeing the generation process for the entire tree

@@ -15,6 +15,8 @@
 #include "cmAlgorithms.h"
 #include "cmExportSet.h"
 
+#include <utility>
+
 cmExportSet* cmExportSetMap::operator[](const std::string& name)
 {
   std::map<std::string, cmExportSet*>::iterator it = this->find(name);

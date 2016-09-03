@@ -13,8 +13,9 @@
 #ifndef cmFilePathUuid_h
 #define cmFilePathUuid_h
 
-#include "cmStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
+#include <stddef.h>
 #include <string>
 #include <utility>
 
