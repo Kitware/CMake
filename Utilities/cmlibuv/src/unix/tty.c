@@ -58,8 +58,8 @@ static int uv__tty_is_slave(const int fd) {
 
 int uv_tty_init(uv_loop_t* loop, uv_tty_t* tty, int fd, int readable) {
   uv_handle_type type;
-  int flags;
-  int newfd;
+  int flags = 0;
+  int newfd = -1;
   int r;
   int saved_flags;
   char path[256];
@@ -71,9 +71,6 @@ int uv_tty_init(uv_loop_t* loop, uv_tty_t* tty, int fd, int readable) {
   type = uv_guess_handle(fd);
   if (type == UV_FILE || type == UV_UNKNOWN_HANDLE)
     return -EINVAL;
-
-  flags = 0;
-  newfd = -1;
 
   /* Reopen the file descriptor when it refers to a tty. This lets us put the
    * tty in non-blocking mode without affecting other processes that share it
