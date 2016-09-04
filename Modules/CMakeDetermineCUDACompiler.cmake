@@ -23,6 +23,10 @@ endif()
 
 mark_as_advanced(CMAKE_CUDA_COMPILER)
 
+#Allow the user to specify a host compiler
+#todo: need to specify this to compiler test passes
+set(CMAKE_CUDA_HOST_COMPILER "" CACHE FILEPATH "Host compiler to be used by nvcc")
+
 # Build a small source file to identify the compiler.
 if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
   set(CMAKE_CUDA_COMPILER_ID_RUN 1)
@@ -39,9 +43,16 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
   set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_REGEX "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerIdCUDA/(\\./)?(CompilerIdCUDA.xctest/)?CompilerIdCUDA[ \t\n\\\"]")
   set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_INDEX 2)
 
+  if(CMAKE_CUDA_HOST_COMPILER)
+      # Each entry in this list is a set of extra flags to try
+      # adding to the compile line to see if it helps produce
+      # a valid identification file. In our case this would just
+      # be the explicit host compiler
+      set(CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "-ccbin=${CMAKE_CUDA_HOST_COMPILER}")
+  endif()
+
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
   CMAKE_DETERMINE_COMPILER_ID(CUDA CUDAFLAGS CMakeCUDACompilerId.cu)
-
 endif()
 
 include(CMakeFindBinUtils)
