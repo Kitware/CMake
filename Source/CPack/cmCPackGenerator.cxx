@@ -989,6 +989,10 @@ int cmCPackGenerator::DoPackage()
     return 0;
   }
 
+  /* Prepare checksum algorithm*/
+  const char* algo = this->GetOption("CPACK_PACKAGE_CHECKSUM");
+  CM_AUTO_PTR<cmCryptoHash> crypto = cmCryptoHash::New(algo ? algo : "");
+
   /*
    * Copy the generated packages to final destination
    *  - there may be several of them
@@ -1001,8 +1005,9 @@ int cmCPackGenerator::DoPackage()
   /* now copy package one by one */
   for (it = packageFileNames.begin(); it != packageFileNames.end(); ++it) {
     std::string tmpPF(this->GetOption("CPACK_OUTPUT_FILE_PREFIX"));
+    std::string filename(cmSystemTools::GetFilenameName(*it));
     tempPackageFileName = it->c_str();
-    tmpPF += "/" + cmSystemTools::GetFilenameName(*it);
+    tmpPF += "/" + filename;
     const char* packageFileName = tmpPF.c_str();
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "Copy final package(s): "
                     << (tempPackageFileName ? tempPackageFileName : "(NULL)")
@@ -1018,6 +1023,23 @@ int cmCPackGenerator::DoPackage()
     }
     cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- package: "
                     << packageFileName << " generated." << std::endl);
+
+    /* Generate checksum file */
+    if (crypto.get() != CM_NULLPTR) {
+      std::string hashFile(this->GetOption("CPACK_OUTPUT_FILE_PREFIX"));
+      hashFile +=
+        "/" + filename.substr(0, filename.rfind(this->GetOutputExtension()));
+      hashFile += "." + cmSystemTools::LowerCase(algo);
+      cmsys::ofstream outF(hashFile.c_str());
+      if (!outF) {
+        cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot create checksum file: "
+                        << hashFile << std::endl);
+        return 0;
+      }
+      outF << crypto->HashFile(packageFileName) << "  " << filename << "\n";
+      cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- checksum file: "
+                      << hashFile << " generated." << std::endl);
+    }
   }
 
   return 1;
