@@ -118,13 +118,13 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     // then copy them into the resource directory and make
     // them executable
     if (preflight) {
-      this->CopyInstallScript(resDir.c_str(), preflight, "preflight");
+      this->CopyInstallScript(resDir, preflight, "preflight");
     }
     if (postflight) {
-      this->CopyInstallScript(resDir.c_str(), postflight, "postflight");
+      this->CopyInstallScript(resDir, postflight, "postflight");
     }
     if (postupgrade) {
-      this->CopyInstallScript(resDir.c_str(), postupgrade, "postupgrade");
+      this->CopyInstallScript(resDir, postupgrade, "postupgrade");
     }
   } else if (postflight) {
     // create a postflight component to house the script
@@ -160,7 +160,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
 
     // copy postflight script into resource directory of .pkg
     std::string resourceDir = packageFile + "/Contents/Resources";
-    this->CopyInstallScript(resourceDir.c_str(), postflight, "postflight");
+    this->CopyInstallScript(resourceDir, postflight, "postflight");
   }
 
   if (!this->Components.empty()) {
@@ -254,9 +254,9 @@ int cmCPackPackageMakerGenerator::PackageFiles()
   this->SetOption("CPACK_MODULE_VERSION_SUFFIX", "");
 
   // Copy or create all of the resource files we need.
-  if (!this->CopyCreateResourceFile("License", resDir.c_str()) ||
-      !this->CopyCreateResourceFile("ReadMe", resDir.c_str()) ||
-      !this->CopyCreateResourceFile("Welcome", resDir.c_str()) ||
+  if (!this->CopyCreateResourceFile("License", resDir) ||
+      !this->CopyCreateResourceFile("ReadMe", resDir) ||
+      !this->CopyCreateResourceFile("Welcome", resDir) ||
       !this->CopyResourcePlistFile("Info.plist") ||
       !this->CopyResourcePlistFile("Description.plist")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying the resource files"
@@ -372,7 +372,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
   }
 
   // Get path to the real PackageMaker, not a symlink:
-  pkgPath = cmSystemTools::GetRealPath(pkgPath.c_str());
+  pkgPath = cmSystemTools::GetRealPath(pkgPath);
   // Up from there to find the version.plist file in the "Contents" dir:
   std::string contents_dir;
   contents_dir = cmSystemTools::GetFilenamePath(pkgPath);

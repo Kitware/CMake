@@ -102,15 +102,14 @@ int cmCPackOSXX11Generator::PackageFiles()
   }
 
   std::string applicationsLinkName = diskImageDirectory + "/Applications";
-  cmSystemTools::CreateSymlink("/Applications", applicationsLinkName.c_str());
+  cmSystemTools::CreateSymlink("/Applications", applicationsLinkName);
 
-  if (!this->CopyResourcePlistFile("VolumeIcon.icns",
-                                   diskImageDirectory.c_str(),
+  if (!this->CopyResourcePlistFile("VolumeIcon.icns", diskImageDirectory,
                                    ".VolumeIcon.icns", true) ||
-      !this->CopyResourcePlistFile("DS_Store", diskImageDirectory.c_str(),
-                                   ".DS_Store", true) ||
+      !this->CopyResourcePlistFile("DS_Store", diskImageDirectory, ".DS_Store",
+                                   true) ||
       !this->CopyResourcePlistFile("background.png",
-                                   diskImageBackgroundImageDir.c_str(),
+                                   diskImageBackgroundImageDir,
                                    "background.png", true) ||
       !this->CopyResourcePlistFile("RuntimeScript", dir) ||
       !this->CopyResourcePlistFile("OSXX11.Info.plist", contDir,

@@ -80,7 +80,7 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
     std::string str;
     if (cmSystemTools::GetEnv(var, str)) {
       if (this->EscapeQuotes) {
-        return this->AddString(cmSystemTools::EscapeQuotes(str.c_str()));
+        return this->AddString(cmSystemTools::EscapeQuotes(str));
       }
       return this->AddString(str);
     }

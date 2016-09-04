@@ -1373,7 +1373,7 @@ void cmLocalGenerator::GetTargetDefines(cmGeneratorTarget const* target,
   }
 
   // Add preprocessor definitions for this target and configuration.
-  this->AddCompileDefinitions(defines, target, config, lang.c_str());
+  this->AddCompileDefinitions(defines, target, config, lang);
 }
 
 std::string cmLocalGenerator::GetTargetFortranFlags(
