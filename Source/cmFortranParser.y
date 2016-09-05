@@ -102,14 +102,7 @@ static bool cmFortranParserIsKeyword(const char* word,
 
 code: /* empty */ | code stmt;
 
-stmt: keyword_stmt | assignment_stmt;
-
-assignment_stmt:
-  WORD ASSIGNMENT_OP other EOSTMT {
-    free($1);
-  }
-
-keyword_stmt:
+stmt:
   WORD EOSTMT {
     if (cmFortranParserIsKeyword($1, "interface")) {
       cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
@@ -212,12 +205,8 @@ keyword_stmt:
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleEndif(parser);
   }
-| WORD GARBAGE other EOSTMT {
-    free($1);
-  }
-| GARBAGE other EOSTMT
 | EOSTMT
-| error
+| error EOSTMT /* tolerate unknown statements until their end */
 ;
 
 
