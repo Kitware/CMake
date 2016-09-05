@@ -12,13 +12,17 @@
 #ifndef cmCursesMainForm_h
 #define cmCursesMainForm_h
 
-#include "cmCursesStandardIncludes.h"
+#include <cmConfigure.h>
 
-#include "../cmState.h"
 #include "cmCursesForm.h"
+#include "cmCursesStandardIncludes.h"
+#include "cmState.h"
+
+#include <stddef.h>
+#include <string>
+#include <vector>
 
 class cmCursesCacheEntryComposite;
-class cmCursesWidget;
 class cmake;
 
 /** \class cmCursesMainForm

@@ -12,9 +12,12 @@
 #ifndef cmCursesWidget_h
 #define cmCursesWidget_h
 
-#include "cmCursesStandardIncludes.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
-#include "../cmState.h"
+#include "cmCursesStandardIncludes.h"
+#include "cmState.h"
+
+#include <string>
 
 class cmCursesMainForm;
 

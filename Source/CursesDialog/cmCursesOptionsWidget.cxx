@@ -11,7 +11,8 @@
 ============================================================================*/
 #include "cmCursesOptionsWidget.h"
 
-#include "cmCursesMainForm.h"
+#include "cmCursesWidget.h"
+#include "cmState.h"
 
 #define ctrl(z) ((z)&037)
 

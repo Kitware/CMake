@@ -12,6 +12,9 @@
 #ifndef cmCursesDummyWidget_h
 #define cmCursesDummyWidget_h
 
+#include <cmConfigure.h>
+
+#include "cmCursesStandardIncludes.h"
 #include "cmCursesWidget.h"
 
 class cmCursesMainForm;

@@ -11,7 +11,14 @@
 ============================================================================*/
 #include "cmCursesStringWidget.h"
 
+#include "cmCursesForm.h"
 #include "cmCursesMainForm.h"
+#include "cmCursesStandardIncludes.h"
+#include "cmCursesWidget.h"
+#include "cmState.h"
+
+#include <stdio.h>
+#include <string.h>
 
 inline int ctrl(int z)
 {

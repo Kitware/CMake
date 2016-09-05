@@ -14,8 +14,6 @@
 
 #include <cmConfigure.h>
 
-#include "../cmStandardIncludes.h"
-
 #if defined(__sun__) && defined(__GNUC__)
 #define _MSE_INT_H
 #endif

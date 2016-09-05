@@ -11,19 +11,22 @@
 ============================================================================*/
 #include "cmCursesMainForm.h"
 
-#include "../cmSystemTools.h"
-#include "../cmVersion.h"
-#include "../cmake.h"
 #include "cmAlgorithms.h"
-#include "cmCursesBoolWidget.h"
 #include "cmCursesCacheEntryComposite.h"
 #include "cmCursesDummyWidget.h"
-#include "cmCursesFilePathWidget.h"
+#include "cmCursesForm.h"
 #include "cmCursesLabelWidget.h"
 #include "cmCursesLongMessageForm.h"
-#include "cmCursesPathWidget.h"
+#include "cmCursesStandardIncludes.h"
 #include "cmCursesStringWidget.h"
+#include "cmCursesWidget.h"
 #include "cmState.h"
+#include "cmSystemTools.h"
+#include "cmVersion.h"
+#include "cmake.h"
+
+#include <stdio.h>
+#include <string.h>
 
 inline int ctrl(int z)
 {
@@ -741,8 +744,6 @@ void cmCursesMainForm::FixValue(cmState::CacheEntryType type,
     }
   }
 }
-
-#include <unistd.h>
 
 void cmCursesMainForm::HandleInput()
 {

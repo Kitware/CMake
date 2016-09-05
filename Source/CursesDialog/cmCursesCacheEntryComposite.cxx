@@ -11,18 +11,20 @@
 ============================================================================*/
 #include "cmCursesCacheEntryComposite.h"
 
-#include "../cmState.h"
-#include "../cmSystemTools.h"
-#include "../cmake.h"
 #include "cmCursesBoolWidget.h"
-#include "cmCursesDummyWidget.h"
 #include "cmCursesFilePathWidget.h"
 #include "cmCursesLabelWidget.h"
 #include "cmCursesOptionsWidget.h"
 #include "cmCursesPathWidget.h"
 #include "cmCursesStringWidget.h"
+#include "cmCursesWidget.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
 
 #include <assert.h>
+#include <cmConfigure.h>
+#include <vector>
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
   const std::string& key, int labelwidth, int entrywidth)

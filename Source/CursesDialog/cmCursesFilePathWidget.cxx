@@ -11,6 +11,9 @@
 ============================================================================*/
 #include "cmCursesFilePathWidget.h"
 
+#include "cmCursesPathWidget.h"
+#include "cmState.h"
+
 cmCursesFilePathWidget::cmCursesFilePathWidget(int width, int height, int left,
                                                int top)
   : cmCursesPathWidget(width, height, left, top)

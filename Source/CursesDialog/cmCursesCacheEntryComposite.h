@@ -12,8 +12,12 @@
 #ifndef cmCursesCacheEntryComposite_h
 #define cmCursesCacheEntryComposite_h
 
-#include "cmCursesLabelWidget.h"
+#include <cmConfigure.h> // IWYU pragma: keep
 
+#include <string>
+
+class cmCursesLabelWidget;
+class cmCursesWidget;
 class cmake;
 
 class cmCursesCacheEntryComposite

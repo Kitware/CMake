@@ -12,7 +12,14 @@
 #ifndef cmCursesPathWidget_h
 #define cmCursesPathWidget_h
 
+#include <cmConfigure.h>
+
+#include "cmCursesStandardIncludes.h"
 #include "cmCursesStringWidget.h"
+
+#include <string>
+
+class cmCursesMainForm;
 
 class cmCursesPathWidget : public cmCursesStringWidget
 {

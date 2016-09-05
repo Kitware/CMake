@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmCursesWidget.h"
 
+#include <cmConfigure.h>
+
 cmCursesWidget::cmCursesWidget(int width, int height, int left, int top)
 {
   this->Field = new_field(height, width, top, left, 0, 0);

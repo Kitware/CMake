@@ -9,19 +9,22 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include "cmCursesStandardIncludes.h"
+#include <cmConfigure.h>
 
-#include "../cmDocumentation.h"
-#include "../cmSystemTools.h"
-#include "../cmake.h"
-
-#include <signal.h>
-#include <sys/ioctl.h>
-
+#include "cmCursesForm.h"
 #include "cmCursesMainForm.h"
-#include <cmsys/Encoding.hxx>
+#include "cmCursesStandardIncludes.h"
+#include "cmDocumentation.h"
+#include "cmDocumentationEntry.h"
+#include "cmSystemTools.h"
+#include "cmake.h"
 
-#include <form.h>
+#include <cmsys/Encoding.hxx>
+#include <iostream>
+#include <signal.h>
+#include <string.h>
+#include <string>
+#include <vector>
 
 static const char* cmDocumentationName[][2] = {
   { CM_NULLPTR, "  ccmake - Curses Interface for CMake." },

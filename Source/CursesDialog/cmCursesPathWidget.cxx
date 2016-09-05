@@ -12,7 +12,11 @@
 #include "cmCursesPathWidget.h"
 
 #include "cmCursesMainForm.h"
+#include "cmCursesStringWidget.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
+
+#include <vector>
 
 cmCursesPathWidget::cmCursesPathWidget(int width, int height, int left,
                                        int top)
