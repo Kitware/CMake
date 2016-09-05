@@ -64,7 +64,8 @@ QVariant AddCacheEntry::value() const
   QWidget* w = this->StackedWidget->currentWidget();
   if (qobject_cast<QLineEdit*>(w)) {
     return static_cast<QLineEdit*>(w)->text();
-  } else if (qobject_cast<QCheckBox*>(w)) {
+  }
+  if (qobject_cast<QCheckBox*>(w)) {
     return static_cast<QCheckBox*>(w)->isChecked();
   }
   return QVariant();

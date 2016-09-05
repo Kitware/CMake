@@ -129,8 +129,9 @@ bool StartCompilerSetup::crossCompilerSetup() const
 
 void StartCompilerSetup::onSelectionChanged(bool on)
 {
-  if (on)
+  if (on) {
     selectionChanged();
+  }
 }
 
 void StartCompilerSetup::onGeneratorChanged(QString const& name)
@@ -144,12 +145,15 @@ void StartCompilerSetup::onGeneratorChanged(QString const& name)
 
 int StartCompilerSetup::nextId() const
 {
-  if (compilerSetup())
+  if (compilerSetup()) {
     return NativeSetup;
-  if (crossCompilerSetup())
+  }
+  if (crossCompilerSetup()) {
     return CrossSetup;
-  if (crossCompilerToolChainFile())
+  }
+  if (crossCompilerToolChainFile()) {
     return ToolchainSetup;
+  }
   return -1;
 }
 
@@ -515,7 +519,8 @@ QString FirstConfigure::getCCompiler() const
 {
   if (this->compilerSetup()) {
     return this->mNativeCompilerSetupPage->getCCompiler();
-  } else if (this->crossCompilerSetup()) {
+  }
+  if (this->crossCompilerSetup()) {
     return this->mCrossCompilerSetupPage->getCCompiler();
   }
   return QString();
@@ -525,7 +530,8 @@ QString FirstConfigure::getCXXCompiler() const
 {
   if (this->compilerSetup()) {
     return this->mNativeCompilerSetupPage->getCXXCompiler();
-  } else if (this->crossCompilerSetup()) {
+  }
+  if (this->crossCompilerSetup()) {
     return this->mCrossCompilerSetupPage->getCXXCompiler();
   }
   return QString();
@@ -535,7 +541,8 @@ QString FirstConfigure::getFortranCompiler() const
 {
   if (this->compilerSetup()) {
     return this->mNativeCompilerSetupPage->getFortranCompiler();
-  } else if (this->crossCompilerSetup()) {
+  }
+  if (this->crossCompilerSetup()) {
     return this->mCrossCompilerSetupPage->getFortranCompiler();
   }
   return QString();
