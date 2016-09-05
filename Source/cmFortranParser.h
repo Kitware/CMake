@@ -118,11 +118,13 @@ struct cmFortranFile
     : File(file)
     , Buffer(buffer)
     , Directory(dir)
+    , LastCharWasNewline(false)
   {
   }
   FILE* File;
   YY_BUFFER_STATE Buffer;
   std::string Directory;
+  bool LastCharWasNewline;
 };
 
 struct cmFortranParser_s

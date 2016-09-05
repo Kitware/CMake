@@ -119,8 +119,19 @@ int cmFortranParser_Input(cmFortranParser* parser, char* buffer,
   // Read from the file on top of the stack.  If the stack is empty,
   // the end of the translation unit has been reached.
   if (!parser->FileStack.empty()) {
-    FILE* file = parser->FileStack.top().File;
-    return (int)fread(buffer, 1, bufferSize, file);
+    cmFortranFile& ff = parser->FileStack.top();
+    FILE* file = ff.File;
+    size_t n = fread(buffer, 1, bufferSize, file);
+    if (n > 0) {
+      ff.LastCharWasNewline = buffer[n - 1] == '\n';
+    } else if (!ff.LastCharWasNewline) {
+      // The file ended without a newline.  Inject one so
+      // that the file always ends in an end-of-statement.
+      buffer[0] = '\n';
+      n = 1;
+      ff.LastCharWasNewline = true;
+    }
+    return (int)n;
   }
   return 0;
 }
