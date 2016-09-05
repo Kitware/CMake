@@ -1,0 +1,2 @@
+# Generate MD5 checksum file
+set(CPACK_PACKAGE_CHECKSUM "MD5")

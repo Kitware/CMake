@@ -1060,6 +1060,40 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
 
   endif()
 
+  # CPack checksum tests
+  if(NOT DEFINED CTEST_CPACK_CHECKSUM)
+    set(CTEST_CPACK_CHECKSUM ON)
+  endif()
+
+  if(CTEST_CPACK_CHECKSUM)
+    unset(ChecksumConf)
+    set(CHECK_SUM_TEST "CPackChecksumFile")
+    set(ChecksumConf_TESTS "invalid"
+                           "md5"
+                           "sha1"
+                           "sha224"
+                           "sha256"
+                           "sha384"
+                           "sha512")
+    foreach(ChecksumConf IN LISTS ChecksumConf_TESTS)
+      add_test(CPackChecksumFile-${ChecksumConf} ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+            "${CMake_SOURCE_DIR}/Tests/${CHECK_SUM_TEST}"
+            "${CMake_BINARY_DIR}/Tests/${CHECK_SUM_TEST}/${ChecksumConf}"
+            ${build_generator_args}
+        --build-project CPackChecksumFile
+        --build-options ${build_options}
+            "-DChecksumConf=${ChecksumConf}"
+        --test-command ${CMAKE_CMAKE_COMMAND}
+            "-D${CHECK_SUM_TEST}_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/${CHECK_SUM_TEST}/${ChecksumConf}"
+            "-DCMAKE_CMAKE_COMMAND=${CMAKE_CMAKE_COMMAND}"
+            "-DChecksumConf=${ChecksumConf}"
+            -P "${CMake_SOURCE_DIR}/Tests/${CHECK_SUM_TEST}/VerifyResult.cmake"
+        )
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CHECK_SUM_TEST}/${ChecksumConf}")
+    endforeach()
+  endif()
+
   # By default, turn this test off (because it takes a long time...)
   #
   if(NOT DEFINED CTEST_RUN_CPackTestAllGenerators)
