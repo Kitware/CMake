@@ -118,7 +118,7 @@ std::string cmFilePathUuid::GetChecksumString(
     // Calculate the file ( seed + relative path + name ) checksum
     std::vector<unsigned char> hashBytes =
       cmCryptoHash::New("SHA256")->ByteHashString(
-        (sourceRelSeed + sourceRelPath + sourceFilename).c_str());
+        sourceRelSeed + sourceRelPath + sourceFilename);
 
     checksumBase32 =
       cmBase32Encoder().encodeString(&hashBytes[0], hashBytes.size(), false);

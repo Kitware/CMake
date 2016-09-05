@@ -73,9 +73,9 @@ int cmCPackProductBuildGenerator::PackageFiles()
 
   // Copy or create all of the resource files we need.
   std::string resDir = packageDirFileName + "/Contents";
-  if (!this->CopyCreateResourceFile("License", resDir.c_str()) ||
-      !this->CopyCreateResourceFile("ReadMe", resDir.c_str()) ||
-      !this->CopyCreateResourceFile("Welcome", resDir.c_str())) {
+  if (!this->CopyCreateResourceFile("License", resDir) ||
+      !this->CopyCreateResourceFile("ReadMe", resDir) ||
+      !this->CopyCreateResourceFile("Welcome", resDir)) {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying the resource files"
                     << std::endl);
     return 0;
@@ -185,10 +185,10 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
   // then copy them into the script directory and make
   // them executable
   if (preflight) {
-    this->CopyInstallScript(scriptDir.c_str(), preflight, "preinstall");
+    this->CopyInstallScript(scriptDir, preflight, "preinstall");
   }
   if (postflight) {
-    this->CopyInstallScript(scriptDir.c_str(), postflight, "postinstall");
+    this->CopyInstallScript(scriptDir, postflight, "postinstall");
   }
 
   // The command that will be used to run ProductBuild

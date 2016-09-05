@@ -225,8 +225,7 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
   dirName += '/';
   dirName += component.Name;
   dirName += this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX");
-  unsigned long installedSize =
-    component.GetInstalledSizeInKbytes(dirName.c_str());
+  unsigned long installedSize = component.GetInstalledSizeInKbytes(dirName);
 
   xout.StartElement("pkg-ref");
   xout.Attribute("id", packageId);
@@ -283,7 +282,7 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
 {
   std::string uname = cmSystemTools::UpperCase(name);
   std::string cpackVar = "CPACK_RESOURCE_FILE_" + uname;
-  const char* inFileName = this->GetOption(cpackVar.c_str());
+  const char* inFileName = this->GetOption(cpackVar);
   if (!inFileName) {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "CPack option: "
                     << cpackVar.c_str()
@@ -314,7 +313,7 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
 
   // Set this so that distribution.dist gets the right name (without
   // the path).
-  this->SetOption(("CPACK_RESOURCE_FILE_" + uname + "_NOPATH").c_str(),
+  this->SetOption("CPACK_RESOURCE_FILE_" + uname + "_NOPATH",
                   (name + ext).c_str());
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
@@ -358,7 +357,7 @@ int cmCPackPKGGenerator::CopyInstallScript(const std::string& resdir,
   std::string dst = resdir;
   dst += "/";
   dst += name;
-  cmSystemTools::CopyFileAlways(script.c_str(), dst.c_str());
+  cmSystemTools::CopyFileAlways(script, dst);
   cmSystemTools::SetPermissions(dst.c_str(), 0777);
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "copy script : " << script << "\ninto " << dst << std::endl);

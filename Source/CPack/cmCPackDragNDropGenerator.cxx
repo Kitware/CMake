@@ -330,8 +330,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   if (!cpack_dmg_disable_applications_symlink) {
     std::ostringstream application_link;
     application_link << staging.str() << "/Applications";
-    cmSystemTools::CreateSymlink("/Applications",
-                                 application_link.str().c_str());
+    cmSystemTools::CreateSymlink("/Applications", application_link.str());
   }
 
   // Optionally add a custom volume icon ...
@@ -755,7 +754,7 @@ std::string cmCPackDragNDropGenerator::GetComponentInstallDirNameSuffix(
     // the current COMPONENT belongs to.
     std::string groupVar =
       "CPACK_COMPONENT_" + cmSystemTools::UpperCase(componentName) + "_GROUP";
-    const char* _groupName = GetOption(groupVar.c_str());
+    const char* _groupName = GetOption(groupVar);
     if (_groupName) {
       std::string groupName = _groupName;
 
