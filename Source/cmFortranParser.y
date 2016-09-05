@@ -113,7 +113,11 @@ stmt:
   }
 | MODULE WORD other EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
-    cmFortranParser_RuleModule(parser, $2);
+    if (cmsysString_strcasecmp($2, "function") != 0 &&
+        cmsysString_strcasecmp($2, "procedure") != 0 &&
+        cmsysString_strcasecmp($2, "subroutine") != 0) {
+      cmFortranParser_RuleModule(parser, $2);
+    }
     free($2);
   }
 | INTERFACE WORD other EOSTMT {
