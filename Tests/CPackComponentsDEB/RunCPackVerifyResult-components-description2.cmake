@@ -55,12 +55,12 @@ if(DPKGDEB_EXECUTABLE)
     message(STATUS "package='${dpkg_package_name}', description='${dpkg_description}'")
 
     if("${dpkg_package_name}" STREQUAL "mylib-applications")
-      if(NOT "${dpkg_description}" STREQUAL "main description 2")
+      if(NOT "${dpkg_description}" STREQUAL "Debian package description file")
         set(dpkgdeb_output_errors_all ${dpkgdeb_output_errors_all}
                                       "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: ${dpkg_description} != applications_description")
       endif()
     elseif("${dpkg_package_name}" STREQUAL "mylib-headers")
-      if(NOT "${dpkg_description}" STREQUAL "main description 2")
+      if(NOT "${dpkg_description}" STREQUAL "Debian package description file")
         set(dpkgdeb_output_errors_all ${dpkgdeb_output_errors_all}
                                       "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: ${dpkg_description} != headers_description")
       endif()

@@ -156,16 +156,18 @@
 #  * Default   : :code:`CPACK_PACKAGE_CONTACT`
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_DESCRIPTION
-#               CPACK_COMPONENT_<COMPONENT>_DESCRIPTION
+#               CPACK_DEBIAN_<COMPONENT>_PACKAGE_DESCRIPTION
 #
 #  The Debian package description
 #
 #  * Mandatory : YES
 #  * Default   :
 #
-#    - :variable:`CPACK_DEBIAN_PACKAGE_DESCRIPTION` if set or
-#    - :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY`
-#
+#    - :variable:`CPACK_COMPONENT_<compName>_DESCRIPTION` (component based installers only) if set,
+#    - :variable:`CPACK_PACKAGE_DESCRIPTION_FILE` if set to non default location,
+#    - :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY` if set,
+#    - :variable:`CPACK_PACKAGE_DESCRIPTION_FILE` default value if set,
+#    - or "no package description available"
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_SECTION
 #               CPACK_DEBIAN_<COMPONENT>_PACKAGE_SECTION
@@ -829,24 +831,23 @@ function(cpack_deb_prepare_package_vars)
   endif()
 
   # Description: (mandatory)
-  if(NOT CPACK_DEB_PACKAGE_COMPONENT)
-    if(NOT CPACK_DEBIAN_PACKAGE_DESCRIPTION)
-      if(NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY)
-        message(FATAL_ERROR "CPackDeb: Debian package requires a summary for a package, set CPACK_PACKAGE_DESCRIPTION_SUMMARY or CPACK_DEBIAN_PACKAGE_DESCRIPTION")
-      endif()
-      set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
+  if(CPACK_DEB_PACKAGE_COMPONENT)
+    if(CPACK_DEBIAN_${_local_component_name}_PACKAGE_DESCRIPTION)
+      set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "${CPACK_DEBIAN_${_local_component_name}_PACKAGE_DESCRIPTION}")
+    elseif(CPACK_COMPONENT_${_local_component_name}_DESCRIPTION)
+      set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "${CPACK_COMPONENT_${_local_component_name}_DESCRIPTION}")
     endif()
-  else()
-    set(component_description_var CPACK_COMPONENT_${_local_component_name}_DESCRIPTION)
+  endif()
 
-    # component description overrides package description
-    if(${component_description_var})
-      set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${${component_description_var}})
-    elseif(NOT CPACK_DEBIAN_PACKAGE_DESCRIPTION)
-      if(NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY)
-        message(FATAL_ERROR "CPackDeb: Debian package requires a summary for a package, set CPACK_PACKAGE_DESCRIPTION_SUMMARY or CPACK_DEBIAN_PACKAGE_DESCRIPTION or ${component_description_var}")
-      endif()
-      set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
+  if(NOT CPACK_DEBIAN_PACKAGE_DESCRIPTION)
+    if(CPACK_PACKAGE_DESCRIPTION_FILE AND NOT "${CPACK_PACKAGE_DESCRIPTION_FILE}" STREQUAL "${CMAKE_ROOT}/Templates/CPack.GenericDescription.txt")
+      file(READ "${CPACK_PACKAGE_DESCRIPTION_FILE}" CPACK_DEBIAN_PACKAGE_DESCRIPTION)
+    elseif(CPACK_PACKAGE_DESCRIPTION_SUMMARY)
+      set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}")
+    elseif(CPACK_PACKAGE_DESCRIPTION_FILE) # use default package description file content
+      file(READ "${CPACK_PACKAGE_DESCRIPTION_FILE}" CPACK_DEBIAN_PACKAGE_DESCRIPTION)
+    else()
+      set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "no package description available")
     endif()
   endif()
 
