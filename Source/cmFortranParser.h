@@ -146,6 +146,9 @@ struct cmFortranParser_s
   // Buffer for string literals.
   std::string TokenString;
 
+  // Error message text if a parser error occurs.
+  std::string Error;
+
   // Flag for whether lexer is reading from inside an interface.
   bool InInterface;
 
