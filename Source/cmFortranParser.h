@@ -73,6 +73,7 @@ union cmFortran_yystype_u
 #define YYSTYPE cmFortran_yystype
 #define YYSTYPE_IS_DECLARED 1
 #if !defined(cmFortranLexer_cxx)
+#define YY_NO_UNISTD_H
 #include "cmFortranLexer.h"
 #endif
 #if !defined(cmFortranLexer_cxx)
