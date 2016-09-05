@@ -16,7 +16,7 @@
 #include <string>
 
 #define cmFailed(m1, m2)                                                      \
-  std::cout << "FAILED: " << m1 << m2 << "\n";                                \
+  std::cout << "FAILED: " << (m1) << (m2) << "\n";                            \
   failed = 1
 
 int testGeneratedFileStream(int /*unused*/, char* /*unused*/ [])

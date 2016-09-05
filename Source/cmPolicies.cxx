@@ -86,9 +86,10 @@ static bool isPolicyNewerThan(cmPolicies::PolicyID id, unsigned int majorV,
   switch (id) {
 #define POLICY_CASE(ID, V_MAJOR, V_MINOR, V_PATCH)                            \
   case cmPolicies::ID:                                                        \
-    return (                                                                  \
-      majorV < V_MAJOR || (majorV == V_MAJOR && minorV + 1 < V_MINOR + 1) ||  \
-      (majorV == V_MAJOR && minorV == V_MINOR && patchV + 1 < V_PATCH + 1));
+    return (majorV < (V_MAJOR) ||                                             \
+            (majorV == (V_MAJOR) && minorV + 1 < (V_MINOR) + 1) ||            \
+            (majorV == (V_MAJOR) && minorV == (V_MINOR) &&                    \
+             patchV + 1 < (V_PATCH) + 1));
     CM_FOR_EACH_POLICY_ID_VERSION(POLICY_CASE)
 #undef POLICY_CASE
     case cmPolicies::CMPCOUNT:
