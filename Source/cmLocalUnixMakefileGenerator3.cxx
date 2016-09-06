@@ -1853,9 +1853,9 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
     const std::string& config =
       this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
     this->GetIncludeDirectories(includes, target, l->first, config);
+    std::string binaryDir = this->GetState()->GetBinaryDirectory();
     if (this->Makefile->IsOn("CMAKE_DEPENDS_IN_PROJECT_ONLY")) {
       const char* sourceDir = this->GetState()->GetSourceDirectory();
-      const char* binaryDir = this->GetState()->GetBinaryDirectory();
       std::vector<std::string>::iterator itr =
         std::remove_if(includes.begin(), includes.end(),
                        ::NotInProjectDir(sourceDir, binaryDir));
@@ -1863,9 +1863,7 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
     }
     for (std::vector<std::string>::iterator i = includes.begin();
          i != includes.end(); ++i) {
-      cmakefileStream << "  \""
-                      << this->ConvertToRelativePath(
-                           this->GetBinaryDirectory(), *i)
+      cmakefileStream << "  \"" << this->ConvertToRelativePath(binaryDir, *i)
                       << "\"\n";
     }
     cmakefileStream << "  )\n";

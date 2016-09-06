@@ -347,6 +347,8 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
                   << "\"\n";
   cmakefileStream << "  )\n\n";
 
+  const std::string binDir = lg->GetBinaryDirectory();
+
   // CMake must rerun if a byproduct is missing.
   {
     cmakefileStream << "# Byproducts of CMake generate step:\n"
@@ -355,9 +357,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
       lg->GetMakefile()->GetOutputFiles();
     for (std::vector<std::string>::const_iterator k = outfiles.begin();
          k != outfiles.end(); ++k) {
-      cmakefileStream << "  \""
-                      << lg->ConvertToRelativePath(lg->GetBinaryDirectory(),
-                                                   *k)
+      cmakefileStream << "  \"" << lg->ConvertToRelativePath(binDir, *k)
                       << "\"\n";
     }
 
@@ -369,9 +369,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
       tmpStr = lg->GetCurrentBinaryDirectory();
       tmpStr += cmake::GetCMakeFilesDirectory();
       tmpStr += "/CMakeDirectoryInformation.cmake";
-      cmakefileStream << "  \""
-                      << lg->ConvertToRelativePath(lg->GetBinaryDirectory(),
-                                                   tmpStr)
+      cmakefileStream << "  \"" << lg->ConvertToRelativePath(binDir, tmpStr)
                       << "\"\n";
     }
     cmakefileStream << "  )\n\n";
