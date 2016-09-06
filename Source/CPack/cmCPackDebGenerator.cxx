@@ -419,6 +419,12 @@ int cmCPackDebGenerator::createDeb()
                     << debian_compression_type << std::endl);
   }
 
+  const char* debian_archive_type =
+    this->GetOption("GEN_CPACK_DEBIAN_ARCHIVE_TYPE");
+  if (!debian_archive_type) {
+    debian_archive_type = "paxr";
+  }
+
   std::string filename_data_tar =
     strGenWDIR + "/data.tar" + compression_suffix;
 
@@ -431,7 +437,8 @@ int cmCPackDebGenerator::createDeb()
                       << filename_data_tar << "\" for writing" << std::endl);
       return 0;
     }
-    cmArchiveWrite data_tar(fileStream_data_tar, tar_compression_type, "paxr");
+    cmArchiveWrite data_tar(fileStream_data_tar, tar_compression_type,
+                            debian_archive_type);
 
     // uid/gid should be the one of the root user, and this root user has
     // always uid/gid equal to 0.
@@ -535,7 +542,8 @@ int cmCPackDebGenerator::createDeb()
       return 0;
     }
     cmArchiveWrite control_tar(fileStream_control_tar,
-                               cmArchiveWrite::CompressGZip, "paxr");
+                               cmArchiveWrite::CompressGZip,
+                               debian_archive_type);
 
     // sets permissions and uid/gid for the files
     control_tar.SetUIDAndGID(0u, 0u);

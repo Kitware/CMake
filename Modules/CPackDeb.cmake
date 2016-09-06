@@ -177,6 +177,24 @@
 #
 #  See https://www.debian.org/doc/debian-policy/ch-archive.html#s-subsections
 #
+# .. variable:: CPACK_DEBIAN_ARCHIVE_TYPE
+#
+#  The archive format used for creating the Debian package.
+#
+#  * Mandatory : YES
+#  * Default   : "paxr"
+#
+#  Possible values are:
+#
+#  - paxr
+#  - gnutar
+#
+#  .. note::
+#
+#    Default pax archive format is the most portable format and generates
+#    packages that do not treat sparse files specially.
+#    GNU tar format on the other hand supports longer filenames.
+#
 # .. variable:: CPACK_DEBIAN_COMPRESSION_TYPE
 #
 #  The compression used for creating the Debian package.
@@ -842,11 +860,23 @@ function(cpack_deb_prepare_package_vars)
     set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
   endif()
 
+  if(CPACK_DEBIAN_ARCHIVE_TYPE)
+    set(archive_types_ "paxr;gnutar")
+    cmake_policy(PUSH)
+      cmake_policy(SET CMP0057 NEW)
+      if(NOT CPACK_DEBIAN_ARCHIVE_TYPE IN_LIST archive_types_)
+        message(FATAL_ERROR "CPACK_DEBIAN_ARCHIVE_TYPE set to unsupported"
+          "type ${CPACK_DEBIAN_ARCHIVE_TYPE}")
+      endif()
+    cmake_policy(POP)
+  else()
+    set(CPACK_DEBIAN_ARCHIVE_TYPE "paxr")
+  endif()
+
   # Compression: (recommended)
   if(NOT CPACK_DEBIAN_COMPRESSION_TYPE)
     set(CPACK_DEBIAN_COMPRESSION_TYPE "gzip")
   endif()
-
 
   # Recommends:
   # You should set: CPACK_DEBIAN_PACKAGE_RECOMMENDS
@@ -1000,6 +1030,7 @@ function(cpack_deb_prepare_package_vars)
   set(GEN_CPACK_DEBIAN_PACKAGE_MAINTAINER "${CPACK_DEBIAN_PACKAGE_MAINTAINER}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_DESCRIPTION "${CPACK_DEBIAN_PACKAGE_DESCRIPTION}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}" PARENT_SCOPE)
+  set(GEN_CPACK_DEBIAN_ARCHIVE_TYPE "${CPACK_DEBIAN_ARCHIVE_TYPE}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_COMPRESSION_TYPE "${CPACK_DEBIAN_COMPRESSION_TYPE}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_RECOMMENDS "${CPACK_DEBIAN_PACKAGE_RECOMMENDS}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_SUGGESTS "${CPACK_DEBIAN_PACKAGE_SUGGESTS}" PARENT_SCOPE)
