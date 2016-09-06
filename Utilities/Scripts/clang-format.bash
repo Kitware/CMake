@@ -126,7 +126,7 @@ $git_ls -z -- '*.c' '*.cc' '*.cpp' '*.cxx' '*.h' '*.hh' '*.hpp' '*.hxx' |
   egrep -z -v '^Utilities/(KW|cm).*/' |
 
   # Exclude reference content.
-  egrep -z -v '^Tests/Module/GenerateExportHeader/reference/' |
+  egrep -z -v '^Tests/RunCMake/GenerateExportHeader/reference/' |
 
   # Exclude manually-formatted sources (e.g. with long lines).
   egrep -z -v '^Tests/PositionIndependentTargets/pic_test.h' |

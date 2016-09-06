@@ -1,8 +1,3 @@
-
-cmake_minimum_required(VERSION 2.8)
-
-project(lib_shared_and_static)
-
 include(GenerateExportHeader)
 
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -33,6 +28,6 @@ generate_export_header(shared_variant
   CUSTOM_CONTENT_FROM_VARIABLE MY_CUSTOM_CONTENT
 )
 
-set_target_properties(static_variant PROPERTIES COMPILE_FLAGS -DLIBSHARED_AND_STATIC_STATIC_DEFINE)
+target_compile_definitions(static_variant PUBLIC MYPREFIX_LIBSHARED_AND_STATIC_STATIC_DEFINE)
 
 export(TARGETS shared_variant static_variant FILE Targets.cmake)
