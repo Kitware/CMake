@@ -189,6 +189,8 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
     cmGeneratedFileStream fcStream(fcName.c_str());
     fcStream << "# Remove fortran modules provided by this target.\n";
     fcStream << "FILE(REMOVE";
+    std::string currentBinDir =
+      this->LocalGenerator->GetCurrentBinaryDirectory();
     for (std::set<std::string>::const_iterator i = provides.begin();
          i != provides.end(); ++i) {
       std::string mod_upper = mod_dir;
@@ -205,18 +207,16 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
       stamp += ".mod.stamp";
       fcStream << "\n";
       fcStream << "  \""
-               << this->LocalGenerator->ConvertToRelativePath(
-                    this->LocalGenerator->GetCurrentBinaryDirectory(),
-                    mod_lower)
+               << this->LocalGenerator->ConvertToRelativePath(currentBinDir,
+                                                              mod_lower)
                << "\"\n";
       fcStream << "  \""
-               << this->LocalGenerator->ConvertToRelativePath(
-                    this->LocalGenerator->GetCurrentBinaryDirectory(),
-                    mod_upper)
+               << this->LocalGenerator->ConvertToRelativePath(currentBinDir,
+                                                              mod_upper)
                << "\"\n";
       fcStream << "  \""
-               << this->LocalGenerator->ConvertToRelativePath(
-                    this->LocalGenerator->GetCurrentBinaryDirectory(), stamp)
+               << this->LocalGenerator->ConvertToRelativePath(currentBinDir,
+                                                              stamp)
                << "\"\n";
     }
     fcStream << "  )\n";

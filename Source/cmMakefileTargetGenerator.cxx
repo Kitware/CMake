@@ -162,6 +162,8 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   // files for this target.
   std::vector<cmSourceFile const*> customCommands;
   this->GeneratorTarget->GetCustomCommands(customCommands, config);
+  std::string currentBinDir =
+    this->LocalGenerator->GetCurrentBinaryDirectory();
   for (std::vector<cmSourceFile const*>::const_iterator si =
          customCommands.begin();
        si != customCommands.end(); ++si) {
@@ -172,8 +174,8 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
       const std::vector<std::string>& outputs = ccg.GetOutputs();
       for (std::vector<std::string>::const_iterator o = outputs.begin();
            o != outputs.end(); ++o) {
-        this->CleanFiles.push_back(this->LocalGenerator->ConvertToRelativePath(
-          this->LocalGenerator->GetCurrentBinaryDirectory(), *o));
+        this->CleanFiles.push_back(
+          this->LocalGenerator->ConvertToRelativePath(currentBinDir, *o));
       }
     }
   }
@@ -1180,11 +1182,12 @@ void cmMakefileTargetGenerator::WriteObjectsVariable(
     << this->GeneratorTarget->GetName() << "\n"
     << variableNameExternal << " =";
   /* clang-format on */
+  std::string currentBinDir =
+    this->LocalGenerator->GetCurrentBinaryDirectory();
   for (std::vector<std::string>::const_iterator i =
          this->ExternalObjects.begin();
        i != this->ExternalObjects.end(); ++i) {
-    object = this->LocalGenerator->ConvertToRelativePath(
-      this->LocalGenerator->GetCurrentBinaryDirectory(), *i);
+    object = this->LocalGenerator->ConvertToRelativePath(currentBinDir, *i);
     *this->BuildFileStream << " " << lineContinue << "\n"
                            << this->Makefile->GetSafeDefinition(
                                 "CMAKE_OBJECT_NAME");

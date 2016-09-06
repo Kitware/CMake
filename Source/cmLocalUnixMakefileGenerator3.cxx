@@ -952,6 +952,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
 
   // Add each command line to the set of commands.
   std::vector<std::string> commands1;
+  std::string currentBinDir = this->GetCurrentBinaryDirectory();
   for (unsigned int c = 0; c < ccg.GetNumberOfCommands(); ++c) {
     // Build the command line in a single string.
     std::string cmd = ccg.GetCommand(c);
@@ -976,8 +977,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
       // working directory will be the start-output directory.
       bool had_slash = cmd.find('/') != cmd.npos;
       if (workingDir.empty()) {
-        cmd =
-          this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), cmd);
+        cmd = this->ConvertToRelativePath(currentBinDir, cmd);
       }
       bool has_slash = cmd.find('/') != cmd.npos;
       if (had_slash && !has_slash) {
@@ -1069,7 +1069,8 @@ void cmLocalUnixMakefileGenerator3::AppendCleanCommand(
   std::vector<std::string>& commands, const std::vector<std::string>& files,
   cmGeneratorTarget* target, const char* filename)
 {
-  std::string cleanfile = this->GetCurrentBinaryDirectory();
+  std::string currentBinDir = this->GetCurrentBinaryDirectory();
+  std::string cleanfile = currentBinDir;
   cleanfile += "/";
   cleanfile += this->GetTargetDirectory(target);
   cleanfile += "/cmake_clean";
@@ -1087,8 +1088,7 @@ void cmLocalUnixMakefileGenerator3::AppendCleanCommand(
     fout << "file(REMOVE_RECURSE\n";
     for (std::vector<std::string>::const_iterator f = files.begin();
          f != files.end(); ++f) {
-      std::string fc =
-        this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), *f);
+      std::string fc = this->ConvertToRelativePath(currentBinDir, *f);
       fout << "  " << cmOutputConverter::EscapeForCMake(fc) << "\n";
     }
     fout << ")\n";

@@ -319,18 +319,15 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   std::string cache = this->GetCMakeInstance()->GetHomeOutputDirectory();
   cache += "/CMakeCache.txt";
 
+  std::string currentBinDir = lg->GetCurrentBinaryDirectory();
   // Save the list to the cmake file.
   cmakefileStream
     << "# The top level Makefile was generated from the following files:\n"
     << "set(CMAKE_MAKEFILE_DEPENDS\n"
-    << "  \""
-    << lg->ConvertToRelativePath(lg->GetCurrentBinaryDirectory(), cache)
-    << "\"\n";
+    << "  \"" << lg->ConvertToRelativePath(currentBinDir, cache) << "\"\n";
   for (std::vector<std::string>::const_iterator i = lfiles.begin();
        i != lfiles.end(); ++i) {
-    cmakefileStream << "  \""
-                    << lg->ConvertToRelativePath(
-                         lg->GetCurrentBinaryDirectory(), *i)
+    cmakefileStream << "  \"" << lg->ConvertToRelativePath(currentBinDir, *i)
                     << "\"\n";
   }
   cmakefileStream << "  )\n\n";
@@ -344,12 +341,9 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   cmakefileStream << "# The corresponding makefile is:\n"
                   << "set(CMAKE_MAKEFILE_OUTPUTS\n"
                   << "  \""
-                  << lg->ConvertToRelativePath(lg->GetCurrentBinaryDirectory(),
-                                               makefileName)
+                  << lg->ConvertToRelativePath(currentBinDir, makefileName)
                   << "\"\n"
-                  << "  \""
-                  << lg->ConvertToRelativePath(lg->GetCurrentBinaryDirectory(),
-                                               check)
+                  << "  \"" << lg->ConvertToRelativePath(currentBinDir, check)
                   << "\"\n";
   cmakefileStream << "  )\n\n";
 

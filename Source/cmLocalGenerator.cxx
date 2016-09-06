@@ -177,11 +177,11 @@ void cmLocalGenerator::GenerateTestFiles()
   }
   typedef std::vector<cmState::Snapshot> vec_t;
   vec_t const& children = this->Makefile->GetStateSnapshot().GetChildren();
+  std::string parentBinDir = this->GetCurrentBinaryDirectory();
   for (vec_t::const_iterator i = children.begin(); i != children.end(); ++i) {
     // TODO: Use add_subdirectory instead?
     std::string outP = i->GetDirectory().GetCurrentBinary();
-    outP =
-      this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), outP);
+    outP = this->ConvertToRelativePath(parentBinDir, outP);
     outP = cmOutputConverter::EscapeForCMake(outP);
     fout << "subdirs(" << outP << ")" << std::endl;
   }
@@ -2243,11 +2243,11 @@ std::string cmLocalGenerator::ConstructComment(
     std::string comment;
     comment = "Generating ";
     const char* sep = "";
+    std::string currentBinaryDir = this->GetCurrentBinaryDirectory();
     for (std::vector<std::string>::const_iterator o = ccg.GetOutputs().begin();
          o != ccg.GetOutputs().end(); ++o) {
       comment += sep;
-      comment +=
-        this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), *o);
+      comment += this->ConvertToRelativePath(currentBinaryDir, *o);
       sep = ", ";
     }
     return comment;
