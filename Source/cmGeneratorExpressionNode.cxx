@@ -672,15 +672,20 @@ static const struct LinkOnlyNode : public cmGeneratorExpressionNode
   LinkOnlyNode() {}
 
   std::string Evaluate(const std::vector<std::string>& parameters,
-                       cmGeneratorExpressionContext* /*context*/,
-                       const GeneratorExpressionContent* /*content*/,
+                       cmGeneratorExpressionContext* context,
+                       const GeneratorExpressionContent* content,
                        cmGeneratorExpressionDAGChecker* dagChecker) const
     CM_OVERRIDE
   {
+    if (!dagChecker) {
+      reportError(context, content->GetOriginalExpression(),
+                  "$<LINK_ONLY:...> may only be used for linking");
+      return std::string();
+    }
     if (!dagChecker->GetTransitivePropertiesOnly()) {
       return parameters.front();
     }
-    return "";
+    return std::string();
   }
 } linkOnlyNode;
 
