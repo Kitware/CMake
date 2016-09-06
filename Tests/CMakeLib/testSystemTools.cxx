@@ -14,9 +14,9 @@
 #include <iostream>
 #include <string>
 
-#define cmPassed(m) std::cout << "Passed: " << m << "\n"
+#define cmPassed(m) std::cout << "Passed: " << (m) << "\n"
 #define cmFailed(m)                                                           \
-  std::cout << "FAILED: " << m << "\n";                                       \
+  std::cout << "FAILED: " << (m) << "\n";                                     \
   failed = 1
 
 int testSystemTools(int /*unused*/, char* /*unused*/ [])

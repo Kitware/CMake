@@ -25,9 +25,9 @@
 #endif
 
 #define check_curl_result(result, errstr)                                     \
-  if (result != CURLE_OK && result != CURLE_NOT_BUILT_IN) {                   \
+  if ((result) != CURLE_OK && (result) != CURLE_NOT_BUILT_IN) {               \
     e += e.empty() ? "" : "\n";                                               \
-    e += errstr;                                                              \
+    e += (errstr);                                                            \
     e += ::curl_easy_strerror(result);                                        \
   }
 

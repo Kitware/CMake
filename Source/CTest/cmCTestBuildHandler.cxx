@@ -366,11 +366,11 @@ int cmCTestBuildHandler::ProcessHandler()
   regexes.clear();                                                            \
   cmCTestOptionalLog(this->CTest, DEBUG,                                      \
                      this << "Add " #regexes << std::endl, this->Quiet);      \
-  for (it = strings.begin(); it != strings.end(); ++it) {                     \
+  for (it = (strings).begin(); it != (strings).end(); ++it) {                 \
     cmCTestOptionalLog(this->CTest, DEBUG,                                    \
                        "Add " #strings ": " << *it << std::endl,              \
                        this->Quiet);                                          \
-    regexes.push_back(it->c_str());                                           \
+    (regexes).push_back(it->c_str());                                         \
   }
   cmCTestBuildHandlerPopulateRegexVector(this->CustomErrorMatches,
                                          this->ErrorMatchRegex);

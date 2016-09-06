@@ -98,7 +98,7 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   {                                                                           \
     const char* value = mf->GetDefinition(cmakeDefinition);                   \
     if (value) {                                                              \
-      var = value;                                                            \
+      (var) = value;                                                          \
     }                                                                         \
   }
 
@@ -111,7 +111,7 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   {                                                                           \
     const char* value = mf->GetDefinition(cmakeDefinition);                   \
     if (value) {                                                              \
-      var = mf->IsOn(cmakeDefinition);                                        \
+      (var) = mf->IsOn(cmakeDefinition);                                      \
     }                                                                         \
   }
 
