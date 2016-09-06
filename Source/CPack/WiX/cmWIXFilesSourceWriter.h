@@ -26,7 +26,8 @@
 class cmWIXFilesSourceWriter : public cmWIXSourceWriter
 {
 public:
-  cmWIXFilesSourceWriter(cmCPackLog* logger, std::string const& filename);
+  cmWIXFilesSourceWriter(cmCPackLog* logger, std::string const& filename,
+                         GuidType componentGuidType);
 
   void EmitShortcut(std::string const& id, cmWIXShortcut const& shortcut,
                     std::string const& shortcutPrefix, size_t shortcutIndex);
@@ -47,8 +48,6 @@ public:
                                 std::string const& id,
                                 std::string const& filePath, cmWIXPatch& patch,
                                 cmInstalledFile const* installedFile);
-
-  bool GenerateComponentGuids;
 };
 
 #endif

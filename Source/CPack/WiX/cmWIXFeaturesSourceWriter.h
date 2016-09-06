@@ -23,7 +23,8 @@
 class cmWIXFeaturesSourceWriter : public cmWIXSourceWriter
 {
 public:
-  cmWIXFeaturesSourceWriter(cmCPackLog* logger, std::string const& filename);
+  cmWIXFeaturesSourceWriter(cmCPackLog* logger, std::string const& filename,
+                            GuidType componentGuidType);
 
   void CreateCMakePackageRegistryEntry(std::string const& package,
                                        std::string const& upgradeGuid);

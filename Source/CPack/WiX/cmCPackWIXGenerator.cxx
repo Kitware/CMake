@@ -35,6 +35,7 @@
 
 cmCPackWIXGenerator::cmCPackWIXGenerator()
   : Patch(0)
+  , ComponentGuidType(cmWIXSourceWriter::WIX_GENERATED_GUID)
 {
 }
 
@@ -234,6 +235,12 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
     }
   }
 
+  // if install folder is supposed to be set absolutely, the default
+  // component guid "*" cannot be used
+  if (cmSystemTools::IsOn(GetOption("CPACK_WIX_SKIP_PROGRAM_FOLDER"))) {
+    this->ComponentGuidType = cmWIXSourceWriter::CMAKE_GENERATED_GUID;
+  }
+
   return true;
 }
 
@@ -317,7 +324,9 @@ void cmCPackWIXGenerator::CreateWiXVariablesIncludeFile()
 {
   std::string includeFilename = this->CPackTopLevel + "/cpack_variables.wxi";
 
-  cmWIXSourceWriter includeFile(this->Logger, includeFilename, true);
+  cmWIXSourceWriter includeFile(this->Logger, includeFilename,
+                                this->ComponentGuidType,
+                                cmWIXSourceWriter::INCLUDE_ELEMENT_ROOT);
 
   CopyDefinition(includeFile, "CPACK_WIX_PRODUCT_GUID");
   CopyDefinition(includeFile, "CPACK_WIX_UPGRADE_GUID");
@@ -338,7 +347,9 @@ void cmCPackWIXGenerator::CreateWiXPropertiesIncludeFile()
 {
   std::string includeFilename = this->CPackTopLevel + "/properties.wxi";
 
-  cmWIXSourceWriter includeFile(this->Logger, includeFilename, true);
+  cmWIXSourceWriter includeFile(this->Logger, includeFilename,
+                                this->ComponentGuidType,
+                                cmWIXSourceWriter::INCLUDE_ELEMENT_ROOT);
 
   std::string prefix = "CPACK_WIX_PROPERTY_";
   std::vector<std::string> options = GetOptions();
@@ -386,7 +397,9 @@ void cmCPackWIXGenerator::CreateWiXProductFragmentIncludeFile()
 {
   std::string includeFilename = this->CPackTopLevel + "/product_fragment.wxi";
 
-  cmWIXSourceWriter includeFile(this->Logger, includeFilename, true);
+  cmWIXSourceWriter includeFile(this->Logger, includeFilename,
+                                this->ComponentGuidType,
+                                cmWIXSourceWriter::INCLUDE_ELEMENT_ROOT);
 
   this->Patch->ApplyFragment("#PRODUCT", includeFile);
 }
@@ -413,13 +426,15 @@ void cmCPackWIXGenerator::AddDefinition(cmWIXSourceWriter& source,
 
 bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 {
+  // if install folder is supposed to be set absolutely, the default
+  // component guid "*" cannot be used
   std::string directoryDefinitionsFilename =
     this->CPackTopLevel + "/directories.wxs";
 
   this->WixSources.push_back(directoryDefinitionsFilename);
 
   cmWIXDirectoriesSourceWriter directoryDefinitions(
-    this->Logger, directoryDefinitionsFilename);
+    this->Logger, directoryDefinitionsFilename, this->ComponentGuidType);
   directoryDefinitions.BeginElement("Fragment");
 
   std::string installRoot;
@@ -439,13 +454,8 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 
   this->WixSources.push_back(fileDefinitionsFilename);
 
-  cmWIXFilesSourceWriter fileDefinitions(this->Logger,
-                                         fileDefinitionsFilename);
-
-  // if install folder is supposed to be set absolutely, the default
-  // component guid "*" cannot be used
-  fileDefinitions.GenerateComponentGuids =
-    cmSystemTools::IsOn(GetOption("CPACK_WIX_SKIP_PROGRAM_FOLDER"));
+  cmWIXFilesSourceWriter fileDefinitions(this->Logger, fileDefinitionsFilename,
+                                         this->ComponentGuidType);
 
   fileDefinitions.BeginElement("Fragment");
 
@@ -454,8 +464,8 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 
   this->WixSources.push_back(featureDefinitionsFilename);
 
-  cmWIXFeaturesSourceWriter featureDefinitions(this->Logger,
-                                               featureDefinitionsFilename);
+  cmWIXFeaturesSourceWriter featureDefinitions(
+    this->Logger, featureDefinitionsFilename, this->ComponentGuidType);
 
   featureDefinitions.BeginElement("Fragment");
 
@@ -764,7 +774,8 @@ bool cmCPackWIXGenerator::CreateShortcutsOfSpecificType(
 
   fileDefinitions.BeginElement("Component");
   fileDefinitions.AddAttribute("Id", componentId);
-  fileDefinitions.AddAttribute("Guid", "*");
+  fileDefinitions.AddAttribute(
+    "Guid", fileDefinitions.CreateGuidFromComponentId(componentId));
 
   this->Patch->ApplyFragment(componentId, fileDefinitions);
 

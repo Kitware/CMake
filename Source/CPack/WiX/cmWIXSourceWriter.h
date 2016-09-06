@@ -26,8 +26,21 @@
 class cmWIXSourceWriter
 {
 public:
+  enum GuidType
+  {
+    WIX_GENERATED_GUID,
+    CMAKE_GENERATED_GUID
+  };
+
+  enum RootElementType
+  {
+    WIX_ELEMENT_ROOT,
+    INCLUDE_ELEMENT_ROOT
+  };
+
   cmWIXSourceWriter(cmCPackLog* logger, std::string const& filename,
-                    bool isIncludeFile = false);
+                    GuidType componentGuidType,
+                    RootElementType rootElementType = WIX_ELEMENT_ROOT);
 
   ~cmWIXSourceWriter();
 
@@ -44,6 +57,8 @@ public:
 
   void AddAttributeUnlessEmpty(std::string const& key,
                                std::string const& value);
+
+  std::string CreateGuidFromComponentId(std::string const& componentId);
 
   static std::string CMakeEncodingToUtf8(std::string const& value);
 
@@ -70,6 +85,8 @@ private:
   std::vector<std::string> Elements;
 
   std::string SourceFilename;
+
+  GuidType ComponentGuidType;
 };
 
 #endif

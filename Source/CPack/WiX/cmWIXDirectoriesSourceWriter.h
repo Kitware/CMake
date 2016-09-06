@@ -25,8 +25,8 @@
 class cmWIXDirectoriesSourceWriter : public cmWIXSourceWriter
 {
 public:
-  cmWIXDirectoriesSourceWriter(cmCPackLog* logger,
-                               std::string const& filename);
+  cmWIXDirectoriesSourceWriter(cmCPackLog* logger, std::string const& filename,
+                               GuidType componentGuidType);
 
   void EmitStartMenuFolder(std::string const& startMenuFolder);
 

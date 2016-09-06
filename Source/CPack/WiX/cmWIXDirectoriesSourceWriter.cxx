@@ -13,8 +13,8 @@
 #include "cmWIXDirectoriesSourceWriter.h"
 
 cmWIXDirectoriesSourceWriter::cmWIXDirectoriesSourceWriter(
-  cmCPackLog* logger, std::string const& filename)
-  : cmWIXSourceWriter(logger, filename)
+  cmCPackLog* logger, std::string const& filename, GuidType componentGuidType)
+  : cmWIXSourceWriter(logger, filename, componentGuidType)
 {
 }
 
