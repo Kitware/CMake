@@ -40,12 +40,16 @@ public:
     this->ReturnInvoked = false;
     this->BreakInvoked = false;
     this->ContinueInvoked = false;
+    this->NestedError = false;
   }
+  void SetNestedError(bool val) { this->NestedError = val; }
+  bool GetNestedError() { return this->NestedError; }
 
 private:
   bool ReturnInvoked;
   bool BreakInvoked;
   bool ContinueInvoked;
+  bool NestedError;
 };
 
 #endif
