@@ -51,7 +51,7 @@ void cmLocalNinjaGenerator::Generate()
   // Compute the path to use when referencing the current output
   // directory from the top output directory.
   this->HomeRelativeOutputPath = this->ConvertToRelativePath(
-    this->GetCurrentBinaryDirectory(), cmOutputConverter::HOME_OUTPUT);
+    this->GetBinaryDirectory(), this->GetCurrentBinaryDirectory());
   if (this->HomeRelativeOutputPath == ".") {
     this->HomeRelativeOutputPath = "";
   }

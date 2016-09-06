@@ -332,7 +332,7 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
 
   // Write the include dependencies to the output stream.
   std::string obj_i = this->LocalGenerator->ConvertToRelativePath(
-    obj, cmOutputConverter::HOME_OUTPUT);
+    this->LocalGenerator->GetBinaryDirectory(), obj);
   std::string obj_m = this->LocalGenerator->ConvertToOutputFormat(
     obj_i, cmOutputConverter::MAKERULE);
   internalDepends << obj_i << std::endl;

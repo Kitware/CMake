@@ -317,7 +317,7 @@ void cmMakefileTargetGenerator::MacOSXContentGeneratorType::operator()(
     this->Generator->LocalGenerator->ConvertToRelativePath(
       this->Generator->LocalGenerator->GetCurrentBinaryDirectory(), output));
   output = this->Generator->LocalGenerator->ConvertToRelativePath(
-    output, cmOutputConverter::HOME_OUTPUT);
+    this->Generator->LocalGenerator->GetBinaryDirectory(), output);
 
   // Create a rule to copy the content into the bundle.
   std::vector<std::string> depends;
@@ -1275,7 +1275,7 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(
   std::string buildTargetRuleName = dir;
   buildTargetRuleName += relink ? "/preinstall" : "/build";
   buildTargetRuleName = this->LocalGenerator->ConvertToRelativePath(
-    buildTargetRuleName, cmOutputConverter::HOME_OUTPUT);
+    this->LocalGenerator->GetBinaryDirectory(), buildTargetRuleName);
 
   // Build the list of target outputs to drive.
   std::vector<std::string> depends;

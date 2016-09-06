@@ -356,8 +356,8 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     for (std::vector<std::string>::const_iterator k = outfiles.begin();
          k != outfiles.end(); ++k) {
       cmakefileStream << "  \""
-                      << lg->ConvertToRelativePath(
-                           *k, cmOutputConverter::HOME_OUTPUT)
+                      << lg->ConvertToRelativePath(lg->GetBinaryDirectory(),
+                                                   *k)
                       << "\"\n";
     }
 
@@ -370,8 +370,8 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
       tmpStr += cmake::GetCMakeFilesDirectory();
       tmpStr += "/CMakeDirectoryInformation.cmake";
       cmakefileStream << "  \""
-                      << lg->ConvertToRelativePath(
-                           tmpStr, cmOutputConverter::HOME_OUTPUT)
+                      << lg->ConvertToRelativePath(lg->GetBinaryDirectory(),
+                                                   tmpStr)
                       << "\"\n";
     }
     cmakefileStream << "  )\n\n";
@@ -532,7 +532,8 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
       tname += "/fast";
     }
     cmOutputConverter conv(mf->GetStateSnapshot());
-    tname = conv.ConvertToRelativePath(tname, cmOutputConverter::HOME_OUTPUT);
+    tname =
+      conv.ConvertToRelativePath(mf->GetState()->GetBinaryDirectory(), tname);
     cmSystemTools::ConvertToOutputSlashes(tname);
     makeCommand.push_back(tname);
     if (this->Makefiles.empty()) {

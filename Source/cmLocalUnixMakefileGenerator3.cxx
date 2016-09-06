@@ -151,7 +151,7 @@ void cmLocalUnixMakefileGenerator3::ComputeHomeRelativeOutputPath()
   // Compute the path to use when referencing the current output
   // directory from the top output directory.
   this->HomeRelativeOutputPath = this->ConvertToRelativePath(
-    this->GetCurrentBinaryDirectory(), cmOutputConverter::HOME_OUTPUT);
+    this->GetBinaryDirectory(), this->GetCurrentBinaryDirectory());
   if (this->HomeRelativeOutputPath == ".") {
     this->HomeRelativeOutputPath = "";
   }
@@ -1865,7 +1865,7 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
          i != includes.end(); ++i) {
       cmakefileStream << "  \""
                       << this->ConvertToRelativePath(
-                           *i, cmOutputConverter::HOME_OUTPUT)
+                           this->GetBinaryDirectory(), *i)
                       << "\"\n";
     }
     cmakefileStream << "  )\n";
@@ -1930,7 +1930,7 @@ std::string cmLocalUnixMakefileGenerator3::GetRecursiveMakeCall(
   if (!tgt.empty()) {
     // The make target is always relative to the top of the build tree.
     std::string tgt2 =
-      this->ConvertToRelativePath(tgt, cmOutputConverter::HOME_OUTPUT);
+      this->ConvertToRelativePath(this->GetBinaryDirectory(), tgt);
 
     // The target may have been written with windows paths.
     cmSystemTools::ConvertToOutputSlashes(tgt2);

@@ -240,7 +240,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   // convert the dependencies to paths relative to the home output
   // directory.  We must do the same here.
   std::string obj_i = this->LocalGenerator->ConvertToRelativePath(
-    obj, cmOutputConverter::HOME_OUTPUT);
+    this->LocalGenerator->GetBinaryDirectory(), obj);
   std::string obj_m = this->LocalGenerator->ConvertToOutputFormat(
     obj_i, cmOutputConverter::MAKERULE);
   internalDepends << obj_i << std::endl;
