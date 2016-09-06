@@ -13,6 +13,8 @@
 #ifndef QCMake_h
 #define QCMake_h
 
+#include <cmConfigure.h>
+
 #include "cmake.h"
 
 #ifdef _MSC_VER
@@ -71,7 +73,7 @@ class QCMake : public QObject
 {
   Q_OBJECT
 public:
-  QCMake(QObject* p = 0);
+  QCMake(QObject* p = CM_NULLPTR);
   ~QCMake();
 public slots:
   /// load the cache file in a directory

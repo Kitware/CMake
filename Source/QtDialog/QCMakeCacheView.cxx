@@ -33,7 +33,7 @@ public:
   }
 
 protected:
-  bool filterAcceptsRow(int row, const QModelIndex& p) const
+  bool filterAcceptsRow(int row, const QModelIndex& p) const CM_OVERRIDE
   {
     QStringList strs;
     const QAbstractItemModel* m = this->sourceModel();
@@ -87,7 +87,7 @@ public:
 protected:
   bool ShowAdvanced;
 
-  bool filterAcceptsRow(int row, const QModelIndex& p) const
+  bool filterAcceptsRow(int row, const QModelIndex& p) const CM_OVERRIDE
   {
     const QAbstractItemModel* m = this->sourceModel();
     QModelIndex idx = m->index(row, 0, p);
@@ -160,7 +160,8 @@ QModelIndex QCMakeCacheView::moveCursor(CursorAction act,
   // want home/end to go to begin/end of rows, not columns
   if (act == MoveHome) {
     return this->model()->index(0, 1);
-  } else if (act == MoveEnd) {
+  }
+  if (act == MoveEnd) {
     return this->model()->index(this->model()->rowCount() - 1, 1);
   }
   return QTreeView::moveCursor(act, mod);
@@ -538,15 +539,16 @@ void QCMakeCacheModelDelegate::setFileDialogFlag(bool f)
   this->FileDialogFlag = f;
 }
 
-QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p,
-                                                const QStyleOptionViewItem&,
-                                                const QModelIndex& idx) const
+QWidget* QCMakeCacheModelDelegate::createEditor(
+  QWidget* p, const QStyleOptionViewItem& /*option*/,
+  const QModelIndex& idx) const
 {
   QModelIndex var = idx.sibling(idx.row(), 0);
   int type = var.data(QCMakeCacheModel::TypeRole).toInt();
   if (type == QCMakeProperty::BOOL) {
-    return NULL;
-  } else if (type == QCMakeProperty::PATH) {
+    return CM_NULLPTR;
+  }
+  if (type == QCMakeProperty::PATH) {
     QCMakePathEditor* editor =
       new QCMakePathEditor(p, var.data(Qt::DisplayRole).toString());
     QObject::connect(editor, SIGNAL(fileDialogExists(bool)), this,
@@ -645,7 +647,7 @@ QSize QCMakeCacheModelDelegate::sizeHint(const QStyleOptionViewItem& option,
   QStyleOptionButton opt;
   opt.QStyleOption::operator=(option);
   sz = sz.expandedTo(
-    style->subElementRect(QStyle::SE_ViewItemCheckIndicator, &opt, NULL)
+    style->subElementRect(QStyle::SE_ViewItemCheckIndicator, &opt, CM_NULLPTR)
       .size());
 
   return sz;

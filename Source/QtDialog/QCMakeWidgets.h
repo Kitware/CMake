@@ -13,6 +13,8 @@
 #ifndef QCMakeWidgets_h
 #define QCMakeWidgets_h
 
+#include <cmConfigure.h>
+
 #include <QComboBox>
 #include <QCompleter>
 #include <QLineEdit>
@@ -43,7 +45,7 @@ class QCMakePathEditor : public QCMakeFileEditor
 {
   Q_OBJECT
 public:
-  QCMakePathEditor(QWidget* p = NULL, const QString& var = QString());
+  QCMakePathEditor(QWidget* p = CM_NULLPTR, const QString& var = QString());
   void chooseFile();
 };
 
@@ -52,7 +54,8 @@ class QCMakeFilePathEditor : public QCMakeFileEditor
 {
   Q_OBJECT
 public:
-  QCMakeFilePathEditor(QWidget* p = NULL, const QString& var = QString());
+  QCMakeFilePathEditor(QWidget* p = CM_NULLPTR,
+                       const QString& var = QString());
   void chooseFile();
 };
 
