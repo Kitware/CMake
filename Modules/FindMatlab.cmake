@@ -1030,13 +1030,17 @@ function(_Matlab_get_version_from_root matlab_root matlab_known_version matlab_f
   set(matlab_list_of_all_versions)
   matlab_get_version_from_matlab_run("${Matlab_PROG_VERSION_STRING_AUTO_DETECT}" matlab_list_of_all_versions)
 
-  list(GET matlab_list_of_all_versions 0 _matlab_version_tmp)
+  list(LENGTH matlab_list_of_all_versions list_of_all_versions_length)
+  if(${list_of_all_versions_length} GREATER 0)
+    list(GET matlab_list_of_all_versions 0 _matlab_version_tmp)
+  else()
+    set(_matlab_version_tmp "")
+  endif()
 
   # set the version into the cache
   set(Matlab_VERSION_STRING_INTERNAL ${_matlab_version_tmp} CACHE INTERNAL "Matlab version (automatically determined)" FORCE)
 
   # warning, just in case several versions found (should not happen)
-  list(LENGTH matlab_list_of_all_versions list_of_all_versions_length)
   if((${list_of_all_versions_length} GREATER 1) AND MATLAB_FIND_DEBUG)
     message(WARNING "[MATLAB] Found several versions, taking the first one (versions found ${matlab_list_of_all_versions})")
   endif()
