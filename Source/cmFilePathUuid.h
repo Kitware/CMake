@@ -52,8 +52,9 @@ public:
    * @arg outputPrefix optional string to prepend to the result
    * @arg outputSuffix optional string to append to the result
    */
-  std::string get(const std::string& filePath, const char* outputPrefix = NULL,
-                  const char* outputSuffix = NULL);
+  std::string get(const std::string& filePath,
+                  const char* outputPrefix = CM_NULLPTR,
+                  const char* outputSuffix = CM_NULLPTR);
 
 private:
   void initParentDirs(const std::string& currentSrcDir,
