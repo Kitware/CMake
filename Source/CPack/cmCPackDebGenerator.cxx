@@ -13,16 +13,21 @@
 #include "cmCPackDebGenerator.h"
 
 #include "cmArchiveWrite.h"
+#include "cmCPackComponentGroup.h"
+#include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
-#include "cmMakefile.h"
 #include "cmSystemTools.h"
 
 #include <cmsys/Glob.hxx>
-#include <cmsys/SystemTools.hxx>
-
-#include <limits.h> // USHRT_MAX
+#include <limits.h>
+#include <map>
+#include <ostream>
+#include <set>
+#include <stdio.h>
+#include <string.h>
 #include <sys/stat.h>
+#include <utility>
 
 // NOTE:
 // A debian package .deb is simply an 'ar' archive. The only subtle difference
@@ -742,14 +747,6 @@ std::string cmCPackDebGenerator::GetComponentInstallDirNameSuffix(
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-
-#include <sys/types.h>
-// include sys/stat.h after sys/types.h
-#include <sys/stat.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #define ARMAG "!<arch>\n" /* ar "magic number" */
 #define SARMAG 8          /* strlen(ARMAG); */

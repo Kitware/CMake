@@ -12,6 +12,9 @@
 
 #include "cmCPackTarBZip2Generator.h"
 
+#include "cmArchiveWrite.h"
+#include "cmCPackArchiveGenerator.h"
+
 cmCPackTarBZip2Generator::cmCPackTarBZip2Generator()
   : cmCPackArchiveGenerator(cmArchiveWrite::CompressBZip2, "paxr")
 {

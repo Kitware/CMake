@@ -12,13 +12,20 @@
 
 #include "cmCPackIFWPackage.h"
 
+#include "CPack/cmCPackComponentGroup.h"
+#include "CPack/cmCPackGenerator.h"
+#include "CPack/cmCPackLog.h"
 #include "cmCPackIFWGenerator.h"
+#include "cmCPackIFWInstaller.h"
+#include "cmGeneratedFileStream.h"
+#include "cmSystemTools.h"
+#include "cmTimestamp.h"
+#include "cmXMLWriter.h"
 
-#include <CPack/cmCPackLog.h>
-
-#include <cmGeneratedFileStream.h>
-#include <cmTimestamp.h>
-#include <cmXMLWriter.h>
+#include <cmConfigure.h>
+#include <map>
+#include <sstream>
+#include <stddef.h>
 
 //----------------------------------------------------------------- Logger ---
 #ifdef cmCPackLogger

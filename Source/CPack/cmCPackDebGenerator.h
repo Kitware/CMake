@@ -13,7 +13,13 @@
 #ifndef cmCPackDebGenerator_h
 #define cmCPackDebGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmCPackGenerator.h"
+#include "cmTypeMacro.h"
+
+#include <string>
+#include <vector>
 
 /** \class cmCPackDebGenerator
  * \brief A generator for Debian packages

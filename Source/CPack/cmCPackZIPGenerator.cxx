@@ -12,6 +12,9 @@
 
 #include "cmCPackZIPGenerator.h"
 
+#include "cmArchiveWrite.h"
+#include "cmCPackArchiveGenerator.h"
+
 cmCPackZIPGenerator::cmCPackZIPGenerator()
   : cmCPackArchiveGenerator(cmArchiveWrite::CompressNone, "zip")
 {

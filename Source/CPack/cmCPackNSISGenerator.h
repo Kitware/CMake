@@ -13,9 +13,18 @@
 #ifndef cmCPackNSISGenerator_h
 #define cmCPackNSISGenerator_h
 
-#include "cmCPackGenerator.h"
+#include <cmConfigure.h>
 
+#include "cmCPackGenerator.h"
+#include "cmTypeMacro.h"
+
+#include <iosfwd>
 #include <set>
+#include <string>
+#include <vector>
+
+class cmCPackComponent;
+class cmCPackComponentGroup;
 
 /** \class cmCPackNSISGenerator
  * \brief A generator for NSIS files

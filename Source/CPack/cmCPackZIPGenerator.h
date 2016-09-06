@@ -13,7 +13,11 @@
 #ifndef cmCPackZIPGenerator_h
 #define cmCPackZIPGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmCPackArchiveGenerator.h"
+#include "cmCPackGenerator.h"
+#include "cmTypeMacro.h"
 
 /** \class cmCPackZIPGenerator
  * \brief A generator for ZIP files

@@ -13,11 +13,19 @@
 #ifndef cmCPackIFWGenerator_h
 #define cmCPackIFWGenerator_h
 
-#include <CPack/cmCPackGenerator.h>
+#include <cmConfigure.h>
 
+#include "CPack/cmCPackComponentGroup.h"
+#include "CPack/cmCPackGenerator.h"
 #include "cmCPackIFWInstaller.h"
 #include "cmCPackIFWPackage.h"
 #include "cmCPackIFWRepository.h"
+#include "cmTypeMacro.h"
+
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
 class cmXMLWriter;
 

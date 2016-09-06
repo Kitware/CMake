@@ -13,7 +13,13 @@
 #ifndef cmCPackSTGZGenerator_h
 #define cmCPackSTGZGenerator_h
 
+#include <cmConfigure.h>
+
+#include "cmCPackGenerator.h"
 #include "cmCPackTGZGenerator.h"
+#include "cmTypeMacro.h"
+
+#include <iosfwd>
 
 /** \class cmCPackSTGZGenerator
  * \brief A generator for Self extractable TGZ files

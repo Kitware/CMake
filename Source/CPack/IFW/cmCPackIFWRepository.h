@@ -13,7 +13,10 @@
 #ifndef cmCPackIFWRepository_h
 #define cmCPackIFWRepository_h
 
-#include <cmStandardIncludes.h>
+#include <cmConfigure.h> // IWYU pragma: keep
+
+#include <string>
+#include <vector>
 
 class cmCPackIFWGenerator;
 class cmXMLWriter;

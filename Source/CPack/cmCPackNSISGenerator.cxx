@@ -13,16 +13,19 @@
 #include "cmCPackNSISGenerator.h"
 
 #include "cmCPackComponentGroup.h"
+#include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
 #include "cmSystemTools.h"
 
+#include <algorithm>
 #include <cmsys/Directory.hxx>
-#include <cmsys/Glob.hxx>
 #include <cmsys/RegularExpression.hxx>
-#include <cmsys/SystemTools.hxx>
+#include <map>
+#include <sstream>
+#include <stdlib.h>
+#include <string.h>
+#include <utility>
 
 /* NSIS uses different command line syntax on Windows and others */
 #ifdef _WIN32

@@ -12,13 +12,15 @@
 
 #include "cmCPackSTGZGenerator.h"
 
+#include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 #include <cmsys/FStream.hxx>
+#include <sstream>
+#include <stdio.h>
+#include <string>
+#include <vector>
 
 #include <sys/types.h>
 // include sys/stat.h after sys/types.h

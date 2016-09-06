@@ -13,15 +13,21 @@
 #ifndef cmCPackGenerator_h
 #define cmCPackGenerator_h
 
-#include "cmObject.h"
+#include <cmConfigure.h>
 
+#include "cmCPackComponentGroup.h"
+#include "cmObject.h"
 #include "cmSystemTools.h"
+#include "cmTypeMacro.h"
+
 #include <map>
+#include <sstream>
+#include <string>
 #include <vector>
 
-#include "cmCPackComponentGroup.h" // cmCPackComponent and friends
-// Forward declarations are insufficient since we use them in
-// std::map data members below...
+class cmCPackLog;
+class cmInstalledFile;
+class cmMakefile;
 
 #define cmCPackTypeMacro(klass, superclass)                                   \
   cmTypeMacro(klass, superclass);                                             \
@@ -45,10 +51,6 @@
 #undef cout
 #endif
 #define cout no_cout_use_cmCPack_Log
-
-class cmMakefile;
-class cmCPackLog;
-class cmInstalledFile;
 
 /** \class cmCPackGenerator
  * \brief A superclass of all CPack Generators

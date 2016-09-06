@@ -13,7 +13,11 @@
 #ifndef cmCPack7zGenerator_h
 #define cmCPack7zGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmCPackArchiveGenerator.h"
+#include "cmCPackGenerator.h"
+#include "cmTypeMacro.h"
 
 /** \class cmCPack7zGenerator
  * \brief A generator for 7z files

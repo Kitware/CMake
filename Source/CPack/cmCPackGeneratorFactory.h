@@ -13,10 +13,17 @@
 #ifndef cmCPackGeneratorFactory_h
 #define cmCPackGeneratorFactory_h
 
-#include "cmObject.h"
+#include <cmConfigure.h>
 
-class cmCPackLog;
+#include "cmObject.h"
+#include "cmTypeMacro.h"
+
+#include <map>
+#include <string>
+#include <vector>
+
 class cmCPackGenerator;
+class cmCPackLog;
 
 /** \class cmCPackGeneratorFactory
  * \brief A container for CPack generators

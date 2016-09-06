@@ -15,7 +15,8 @@
 
 #include <cmConfigure.h>
 
-#include "cmStandardIncludes.h"
+#include <string>
+#include <vector>
 
 class cmCPackComponentGroup;
 

@@ -12,21 +12,20 @@
 
 #include "cmCPackIFWGenerator.h"
 
-#include <CPack/cmCPackComponentGroup.h>
-#include <CPack/cmCPackLog.h>
+#include "CPack/cmCPackComponentGroup.h"
+#include "CPack/cmCPackGenerator.h"
+#include "CPack/cmCPackLog.h"
+#include "cmCPackIFWInstaller.h"
+#include "cmCPackIFWPackage.h"
+#include "cmCPackIFWRepository.h"
+#include "cmGeneratedFileStream.h"
+#include "cmSystemTools.h"
+#include "cmTimestamp.h"
+#include "cmVersionConfig.h"
+#include "cmXMLWriter.h"
 
-#include <cmsys/Directory.hxx>
-#include <cmsys/Glob.hxx>
-#include <cmsys/RegularExpression.hxx>
-#include <cmsys/SystemTools.hxx>
-
-#include <cmGeneratedFileStream.h>
-#include <cmGlobalGenerator.h>
-#include <cmMakefile.h>
-#include <cmSystemTools.h>
-#include <cmTimestamp.h>
-#include <cmVersionConfig.h>
-#include <cmXMLWriter.h>
+#include <sstream>
+#include <utility>
 
 cmCPackIFWGenerator::cmCPackIFWGenerator()
 {
