@@ -162,6 +162,8 @@ private:
   std::string CPackTopLevel;
 
   cmWIXPatch* Patch;
+
+  cmWIXSourceWriter::GuidType ComponentGuidType;
 };
 
 #endif

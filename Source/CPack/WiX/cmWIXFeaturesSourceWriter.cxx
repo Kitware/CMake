@@ -13,8 +13,8 @@
 #include "cmWIXFeaturesSourceWriter.h"
 
 cmWIXFeaturesSourceWriter::cmWIXFeaturesSourceWriter(
-  cmCPackLog* logger, std::string const& filename)
-  : cmWIXSourceWriter(logger, filename)
+  cmCPackLog* logger, std::string const& filename, GuidType componentGuidType)
+  : cmWIXSourceWriter(logger, filename, componentGuidType)
 {
 }
 
@@ -24,7 +24,7 @@ void cmWIXFeaturesSourceWriter::CreateCMakePackageRegistryEntry(
   BeginElement("Component");
   AddAttribute("Id", "CM_PACKAGE_REGISTRY");
   AddAttribute("Directory", "TARGETDIR");
-  AddAttribute("Guid", "*");
+  AddAttribute("Guid", CreateGuidFromComponentId("CM_PACKAGE_REGISTRY"));
 
   std::string registryKey =
     std::string("Software\\Kitware\\CMake\\Packages\\") + package;
