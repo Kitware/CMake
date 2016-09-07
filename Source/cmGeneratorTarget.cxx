@@ -327,7 +327,6 @@ cmGeneratorTarget::~cmGeneratorTarget()
   cmDeleteAll(this->CompileDefinitionsEntries);
   cmDeleteAll(this->SourceEntries);
   cmDeleteAll(this->LinkInformation);
-  this->LinkInformation.clear();
 }
 
 cmLocalGenerator* cmGeneratorTarget::GetLocalGenerator() const
