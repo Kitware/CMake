@@ -839,14 +839,10 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
                               &dagChecker, result, excludeImported);
     }
 
-    std::set<std::string> unique;
-    for (std::vector<std::string>::iterator li = result.begin();
-         li != result.end(); ++li) {
-      cmSystemTools::ConvertToUnixSlashes(*li);
-      unique.insert(*li);
-    }
-    result.clear();
-    result.insert(result.end(), unique.begin(), unique.end());
+    std::for_each(result.begin(), result.end(),
+                  cmSystemTools::ConvertToUnixSlashes);
+    std::sort(result.begin(), result.end());
+    result.erase(std::unique(result.begin(), result.end()), result.end());
 
     IncludeCacheType::value_type entry(config_upper, result);
     iter = this->SystemIncludesCache.insert(entry).first;
