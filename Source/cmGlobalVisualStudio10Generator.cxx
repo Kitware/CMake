@@ -350,16 +350,22 @@ std::string const& cmGlobalVisualStudio10Generator::GetMSBuildCommand()
 std::string cmGlobalVisualStudio10Generator::FindMSBuildCommand()
 {
   std::string msbuild;
-  std::string mskey =
-    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\";
+  std::string mskey;
+
+  // Search in standard location.
+  mskey = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\";
   mskey += this->GetToolsVersion();
   mskey += ";MSBuildToolsPath";
   if (cmSystemTools::ReadRegistryValue(mskey.c_str(), msbuild,
                                        cmSystemTools::KeyWOW64_32)) {
     cmSystemTools::ConvertToUnixSlashes(msbuild);
-    msbuild += "/";
+    msbuild += "/MSBuild.exe";
+    if (cmSystemTools::FileExists(msbuild, true)) {
+      return msbuild;
+    }
   }
-  msbuild += "MSBuild.exe";
+
+  msbuild = "MSBuild.exe";
   return msbuild;
 }
 

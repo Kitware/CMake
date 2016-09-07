@@ -150,13 +150,20 @@ std::string const& cmGlobalVisualStudio7Generator::GetDevEnvCommand()
 std::string cmGlobalVisualStudio7Generator::FindDevEnvCommand()
 {
   std::string vscmd;
-  std::string vskey = this->GetRegistryBase() + ";InstallDir";
+  std::string vskey;
+
+  // Search in standard location.
+  vskey = this->GetRegistryBase() + ";InstallDir";
   if (cmSystemTools::ReadRegistryValue(vskey.c_str(), vscmd,
                                        cmSystemTools::KeyWOW64_32)) {
     cmSystemTools::ConvertToUnixSlashes(vscmd);
-    vscmd += "/";
+    vscmd += "/devenv.com";
+    if (cmSystemTools::FileExists(vscmd, true)) {
+      return vscmd;
+    }
   }
-  vscmd += "devenv.com";
+
+  vscmd = "devenv.com";
   return vscmd;
 }
 
