@@ -17,10 +17,12 @@ set(CPACK_COMPONENTS_IGNORE_GROUPS 1)
 # overriding previous descriptions
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY           "main description 2")
 
+# and override CPACK_PACKAGE_DESCRIPTION_SUMMARY because of precedence
+set(CPACK_PACKAGE_DESCRIPTION_FILE
+  "@CPackComponentsDEB_SOURCE_DIR@/pkg_description.txt")
+
 # Components do not have any description
 unset(CPACK_COMPONENT_APPLICATIONS_DESCRIPTION)
 unset(CPACK_COMPONENT_HEADERS_DESCRIPTION)
-unset(CPACK_COMPONENT_LIBRARIES_DESCRIPTION)
-
 
 set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION       "library description")
