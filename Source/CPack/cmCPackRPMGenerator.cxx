@@ -11,8 +11,16 @@
 ============================================================================*/
 #include "cmCPackRPMGenerator.h"
 
+#include "cmCPackComponentGroup.h"
+#include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmSystemTools.h"
+
+#include <algorithm>
+#include <map>
+#include <ostream>
+#include <utility>
+#include <vector>
 
 cmCPackRPMGenerator::cmCPackRPMGenerator()
 {

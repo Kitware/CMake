@@ -13,10 +13,14 @@
 #ifndef cmCPackIFWInstaller_h
 #define cmCPackIFWInstaller_h
 
-#include <cmStandardIncludes.h>
+#include <cmConfigure.h> // IWYU pragma: keep
 
-class cmCPackIFWPackage;
+#include <map>
+#include <string>
+#include <vector>
+
 class cmCPackIFWGenerator;
+class cmCPackIFWPackage;
 class cmCPackIFWRepository;
 class cmXMLWriter;
 

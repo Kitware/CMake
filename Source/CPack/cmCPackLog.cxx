@@ -15,6 +15,8 @@
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 
+#include <iostream>
+
 cmCPackLog::cmCPackLog()
 {
   this->Verbose = false;

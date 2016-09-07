@@ -17,14 +17,17 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmState.h"
 #include "cmXMLSafe.h"
+#include "cm_auto_ptr.hxx"
 #include "cmake.h"
 
 #include <algorithm>
 #include <cmsys/FStream.hxx>
 #include <cmsys/Glob.hxx>
-#include <cmsys/SystemTools.hxx>
+#include <cmsys/RegularExpression.hxx>
 #include <list>
+#include <utility>
 
 #if defined(__HAIKU__)
 #include <FindDirectory.h>

@@ -49,6 +49,9 @@
 #include "cmAlgorithms.h"
 #include "cmCPackLog.h"
 
+#include <ostream>
+#include <utility>
+
 cmCPackGeneratorFactory::cmCPackGeneratorFactory()
 {
   if (cmCPackTGZGenerator::CanGenerate()) {

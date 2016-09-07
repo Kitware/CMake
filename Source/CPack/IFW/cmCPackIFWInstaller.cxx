@@ -12,12 +12,16 @@
 
 #include "cmCPackIFWInstaller.h"
 
+#include "CPack/cmCPackGenerator.h"
 #include "cmCPackIFWGenerator.h"
+#include "cmCPackIFWPackage.h"
+#include "cmCPackIFWRepository.h"
+#include "cmGeneratedFileStream.h"
+#include "cmSystemTools.h"
+#include "cmXMLWriter.h"
 
-#include <CPack/cmCPackLog.h>
-
-#include <cmGeneratedFileStream.h>
-#include <cmXMLWriter.h>
+#include <cmConfigure.h>
+#include <utility>
 
 #ifdef cmCPackLogger
 #undef cmCPackLogger

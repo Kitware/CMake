@@ -13,7 +13,14 @@
 #ifndef cmCPackLog_h
 #define cmCPackLog_h
 
+#include <cmConfigure.h>
+
 #include "cmObject.h"
+#include "cmTypeMacro.h"
+
+#include <ostream>
+#include <string.h>
+#include <string>
 
 #define cmCPack_Log(ctSelf, logType, msg)                                     \
   do {                                                                        \

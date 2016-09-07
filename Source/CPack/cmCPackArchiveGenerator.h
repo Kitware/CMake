@@ -13,9 +13,16 @@
 #ifndef cmCPackArchiveGenerator_h
 #define cmCPackArchiveGenerator_h
 
-#include "cmCPackGenerator.h"
+#include <cmConfigure.h>
 
 #include "cmArchiveWrite.h"
+#include "cmCPackGenerator.h"
+#include "cmTypeMacro.h"
+
+#include <iosfwd>
+#include <string>
+
+class cmCPackComponent;
 
 /** \class cmCPackArchiveGenerator
  * \brief A generator base for libarchive generation.

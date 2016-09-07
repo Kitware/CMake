@@ -13,7 +13,11 @@
 #ifndef cmCPackTXZGenerator_h
 #define cmCPackTXZGenerator_h
 
+#include <cmConfigure.h>
+
 #include "cmCPackArchiveGenerator.h"
+#include "cmCPackGenerator.h"
+#include "cmTypeMacro.h"
 
 /** \class cmCPackTXZGenerator
  * \brief A generator for TXZ files

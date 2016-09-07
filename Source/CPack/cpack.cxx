@@ -9,22 +9,30 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include "cmSystemTools.h"
+#include <cmConfigure.h>
 
-// Need these for documentation support.
 #include "cmCPackGenerator.h"
 #include "cmCPackGeneratorFactory.h"
+#include "cmCPackLog.h"
 #include "cmDocumentation.h"
+#include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmState.h"
+#include "cmSystemTools.h"
+#include "cmTypeMacro.h"
+#include "cm_auto_ptr.hxx"
 #include "cmake.h"
-#include "cmake.h"
-
-#include "cmCPackLog.h"
 
 #include <cmsys/CommandLineArguments.hxx>
 #include <cmsys/Encoding.hxx>
-#include <cmsys/SystemTools.hxx>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <stddef.h>
+#include <string>
+#include <utility>
+#include <vector>
 
 static const char* cmDocumentationName[][2] = {
   { CM_NULLPTR, "  cpack - Packaging driver provided by CMake." },

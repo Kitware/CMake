@@ -12,17 +12,16 @@
 
 #include "cmCPackArchiveGenerator.h"
 
+#include "cmCPackComponentGroup.h"
+#include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
-#include <errno.h>
 
-#include <cm_libarchive.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/SystemTools.hxx>
+#include <map>
+#include <ostream>
+#include <utility>
+#include <vector>
 
 cmCPackArchiveGenerator::cmCPackArchiveGenerator(cmArchiveWrite::Compress t,
                                                  std::string const& format)

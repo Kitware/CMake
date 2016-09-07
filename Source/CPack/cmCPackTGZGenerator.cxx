@@ -12,6 +12,9 @@
 
 #include "cmCPackTGZGenerator.h"
 
+#include "cmArchiveWrite.h"
+#include "cmCPackArchiveGenerator.h"
+
 cmCPackTGZGenerator::cmCPackTGZGenerator()
   : cmCPackArchiveGenerator(cmArchiveWrite::CompressGZip, "paxr")
 {
