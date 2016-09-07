@@ -900,13 +900,13 @@ bool cmMakefileTargetGenerator::WriteMakeRule(
 
   // For multiple outputs, make the extra ones depend on the first one.
   std::vector<std::string> const output_depends(1, outputs[0]);
+  std::string binDir = this->LocalGenerator->GetBinaryDirectory();
   for (std::vector<std::string>::const_iterator o = outputs.begin() + 1;
        o != outputs.end(); ++o) {
     // Touch the extra output so "make" knows that it was updated,
     // but only if the output was acually created.
     std::string const out = this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->ConvertToRelativePath(
-        this->LocalGenerator->GetBinaryDirectory(), *o),
+      this->LocalGenerator->ConvertToRelativePath(binDir, *o),
       cmOutputConverter::SHELL);
     std::vector<std::string> output_commands;
 
