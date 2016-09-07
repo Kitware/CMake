@@ -581,12 +581,12 @@ void cmLocalUnixMakefileGenerator3::WriteMakeRule(
   } else {
     // Split dependencies into multiple rule lines.  This allows for
     // very long dependency lists even on older make implementations.
+    std::string binDir = this->GetBinaryDirectory();
     for (std::vector<std::string>::const_iterator dep = depends.begin();
          dep != depends.end(); ++dep) {
       replace = *dep;
       replace = cmSystemTools::ConvertToOutputPath(
-        this->ConvertToRelativePath(this->GetBinaryDirectory(), replace)
-          .c_str());
+        this->ConvertToRelativePath(binDir, replace).c_str());
       os << cmMakeSafe(tgt) << space << ": " << cmMakeSafe(replace) << "\n";
     }
   }
