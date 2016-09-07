@@ -48,7 +48,7 @@ int strverscmp(const std::string& lhs, const std::string& rhs)
   bool collectDigitL = false;
   bool collectDigitR = false;
 
-  int ms = std::min<int>(lhs.size(), rhs.size());
+  int ms = static_cast<int>(std::min<size_t>(lhs.size(), rhs.size()));
   for (int i = 0; i < ms; i++) {
     const char& lc = lhs[i];
     const char& rc = rhs[i];
@@ -141,30 +141,39 @@ int strverscmp(const std::string& lhs, const std::string& rhs)
   return (ln - rn);
 }
 
+
+struct verscmp_greater
+{
+  bool operator() (const std::string& lhs, const std::string& rhs) const { return strverscmp(lhs, rhs) > 0; }
+};
+
+struct verscmp_lesser
+{
+  bool operator() (const std::string& lhs, const std::string& rhs) const { return strverscmp(lhs, rhs) < 0; }
+};
+
+
+
+
 void cmFindPackageCommand::Sort(std::vector<std::string>::iterator begin,
                                 std::vector<std::string>::iterator end,
                                 SortOrder order, SortDirection dir)
 {
-  if (order == SortOrder::Name) {
+  if (order == SortOrder::Name_order) 
+  {
     if (dir == SortDirection::Dec)
-      std::sort(begin, end, [](const std::string& lhs,
-                               const std::string& rhs) { return lhs > rhs; });
+      std::sort(begin, end, std::greater<std::string>());
     else
       std::sort(begin, end);
-  } else if (order == SortOrder::Natural)
+  } 
+  else if (order == SortOrder::Natural)
   // natural order uses letters and numbers (contiguous numbers digit are
   // compared such that e.g. 000  00 < 01 < 010 < 09 < 0 < 1 < 9 < 10
   {
     if (dir == SortDirection::Dec)
-      std::sort(begin, end,
-                [](const std::string& lhs, const std::string& rhs) {
-                  return strverscmp(lhs, rhs) > 0;
-                });
+      std::sort(begin, end, verscmp_greater());
     else
-      std::sort(begin, end,
-                [](const std::string& lhs, const std::string& rhs) {
-                  return strverscmp(lhs, rhs) < 0;
-                });
+      std::sort(begin, end, verscmp_lesser());
   }
   // else do not sort
 }
@@ -277,7 +286,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
         this->Makefile->GetDefinition("CMAKE_FIND_PACKAGE_SORT_ORDER")) {
 
     if (strcmp(so, "Name") == 0)
-      this->sortOrder = SortOrder::Name;
+      this->sortOrder = SortOrder::Name_order;
     else if (strcmp(so, "Natural") == 0)
       this->sortOrder = SortOrder::Natural;
     else

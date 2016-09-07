@@ -26,15 +26,15 @@ class cmFindPackageCommand : public cmFindCommon
 public:
   /*! A sorting order strategy to be applied to recovered package folders (see
    * FIND_PACKAGE_SORT_ORDER)*/
-  enum class SortOrder
+  enum /*class*/ SortOrder
   {
     None,
-    Name,
+    Name_order,
     Natural
   };
   /*! A sorting direction to be applied to recovered package folders (see
    * FIND_PACKAGE_SORT_DIRECTION)*/
-  enum class SortDirection
+  enum /*class*/ SortDirection
   {
     Asc,
     Dec
