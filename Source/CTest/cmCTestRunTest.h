@@ -49,6 +49,11 @@ public:
 
   int GetIndex() { return this->Index; }
 
+  void AddFailedDependency(const std::string& failedTest)
+  {
+    this->FailedDependencies.insert(failedTest);
+  }
+
   std::string GetProcessOutput() { return this->ProcessOutput; }
 
   bool IsStopTimePassed() { return this->StopTimePassed; }
@@ -106,6 +111,7 @@ private:
   // The test results
   cmCTestTestHandler::cmCTestTestResult TestResult;
   int Index;
+  std::set<std::string> FailedDependencies;
   std::string StartTime;
   std::string ActualCommand;
   std::vector<std::string> Arguments;

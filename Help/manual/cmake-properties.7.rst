@@ -304,6 +304,9 @@ Properties on Tests
    /prop_test/DEPENDS
    /prop_test/ENVIRONMENT
    /prop_test/FAIL_REGULAR_EXPRESSION
+   /prop_test/FIXTURES_CLEANUP
+   /prop_test/FIXTURES_REQUIRED
+   /prop_test/FIXTURES_SETUP
    /prop_test/LABELS
    /prop_test/MEASUREMENT
    /prop_test/PASS_REGULAR_EXPRESSION

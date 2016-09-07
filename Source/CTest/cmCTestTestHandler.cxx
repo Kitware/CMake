@@ -33,6 +33,7 @@
 #include <cmsys/RegularExpression.hxx>
 #include <functional>
 #include <iomanip>
+#include <iterator>
 #include <set>
 #include <sstream>
 #include <stdio.h>
@@ -762,6 +763,9 @@ void cmCTestTestHandler::ComputeTestList()
     it->Index = cnt; // save the index into the test list for this test
     finalList.push_back(*it);
   }
+
+  UpdateForFixtures(finalList);
+
   // Save the total number of tests before exclusions
   this->TotalNumberOfTests = this->TestList.size();
   // Set the TestList to the final list of all test
@@ -791,6 +795,8 @@ void cmCTestTestHandler::ComputeTestListForRerunFailed()
     finalList.push_back(*it);
   }
 
+  UpdateForFixtures(finalList);
+
   // Save the total number of tests before exclusions
   this->TotalNumberOfTests = this->TestList.size();
 
@@ -798,6 +804,169 @@ void cmCTestTestHandler::ComputeTestListForRerunFailed()
   this->TestList = finalList;
 
   this->UpdateMaxTestNameWidth();
+}
+
+void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
+{
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                     "Updating test list for fixtures" << std::endl,
+                     this->Quiet);
+
+  // Prepare some maps to help us find setup and cleanup tests for
+  // any given fixture
+  typedef std::set<ListOfTests::const_iterator> TestIteratorSet;
+  typedef std::map<std::string, TestIteratorSet> FixtureDependencies;
+  FixtureDependencies fixtureSetups;
+  FixtureDependencies fixtureDeps;
+
+  for (ListOfTests::const_iterator it = this->TestList.begin();
+       it != this->TestList.end(); ++it) {
+    const cmCTestTestProperties& p = *it;
+
+    const std::set<std::string>& setups = p.FixturesSetup;
+    for (std::set<std::string>::const_iterator depsIt = setups.begin();
+         depsIt != setups.end(); ++depsIt) {
+      fixtureSetups[*depsIt].insert(it);
+      fixtureDeps[*depsIt].insert(it);
+    }
+
+    const std::set<std::string>& cleanups = p.FixturesCleanup;
+    for (std::set<std::string>::const_iterator depsIt = cleanups.begin();
+         depsIt != cleanups.end(); ++depsIt) {
+      fixtureDeps[*depsIt].insert(it);
+    }
+  }
+
+  // Prepare fast lookup of tests already included in our list of tests
+  std::set<std::string> addedTests;
+  for (ListOfTests::const_iterator it = tests.begin(); it != tests.end();
+       ++it) {
+    const cmCTestTestProperties& p = *it;
+    addedTests.insert(p.Name);
+  }
+
+  // This is a lookup of fixture name to a list of indices into the
+  // final tests array for tests which require that fixture. It is
+  // needed at the end to populate dependencies of the cleanup tests
+  // in our final list of tests.
+  std::map<std::string, std::vector<size_t> > fixtureRequirements;
+
+  // Use integer index for iteration because we append to
+  // the tests vector as we go
+  size_t fixtureTestsAdded = 0;
+  std::set<std::string> addedFixtures;
+  for (size_t i = 0; i < tests.size(); ++i) {
+    if (tests[i].FixturesRequired.empty()) {
+      continue;
+    }
+    // Must copy the set of fixtures because we may invalidate
+    // the tests array by appending to it
+    const std::set<std::string> fixtures = tests[i].FixturesRequired;
+    for (std::set<std::string>::const_iterator fixturesIt = fixtures.begin();
+         fixturesIt != fixtures.end(); ++fixturesIt) {
+
+      const std::string& requiredFixtureName = *fixturesIt;
+      if (requiredFixtureName.empty()) {
+        continue;
+      }
+
+      fixtureRequirements[requiredFixtureName].push_back(i);
+
+      // Add dependencies to this test for all of the setup tests
+      // associated with the required fixture. If any of those setup
+      // tests fail, this test should not run. We make the fixture's
+      // cleanup tests depend on this test case later.
+      FixtureDependencies::const_iterator setupIt =
+        fixtureSetups.find(requiredFixtureName);
+      if (setupIt != fixtureSetups.end()) {
+        for (TestIteratorSet::const_iterator sIt = setupIt->second.begin();
+             sIt != setupIt->second.end(); ++sIt) {
+          const std::string& setupTestName = (**sIt).Name;
+          tests[i].RequireSuccessDepends.insert(setupTestName);
+          if (std::find(tests[i].Depends.begin(), tests[i].Depends.end(),
+                        setupTestName) == tests[i].Depends.end()) {
+            tests[i].Depends.push_back(setupTestName);
+          }
+        }
+      }
+
+      // Append any fixture setup/cleanup tests to our test list if they
+      // are not already in it (they could have been in the original
+      // set of tests passed to us at the outset or have already been
+      // added from a previously checked test). A fixture isn't required
+      // to have setup/cleanup tests.
+      if (!addedFixtures.insert(requiredFixtureName).second) {
+        // Already added this fixture
+        continue;
+      }
+      FixtureDependencies::const_iterator fixtureIt =
+        fixtureDeps.find(requiredFixtureName);
+      if (fixtureIt == fixtureDeps.end()) {
+        // No setup or cleanup tests for this fixture
+        continue;
+      }
+
+      const TestIteratorSet& testIters = fixtureIt->second;
+      for (TestIteratorSet::const_iterator depsIt = testIters.begin();
+           depsIt != testIters.end(); ++depsIt) {
+        ListOfTests::const_iterator lotIt = *depsIt;
+        const cmCTestTestProperties& p = *lotIt;
+
+        if (!addedTests.insert(p.Name).second) {
+          // Already have p in our test list
+          continue;
+        }
+
+        // This is a test not yet in our list, so add it and
+        // update its index to reflect where it was in the original
+        // full list of all tests (needed to track individual tests
+        // across ctest runs for re-run failed, etc.)
+        tests.push_back(p);
+        tests.back().Index =
+          1 + static_cast<int>(std::distance(this->TestList.begin(), lotIt));
+        ++fixtureTestsAdded;
+
+        cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Added test "
+                             << p.Name << " required by fixture "
+                             << requiredFixtureName << std::endl,
+                           this->Quiet);
+      }
+    }
+  }
+
+  // Now that we have the final list of tests, we can update all cleanup
+  // tests to depend on those tests which require that fixture
+  for (ListOfTests::iterator tIt = tests.begin(); tIt != tests.end(); ++tIt) {
+    cmCTestTestProperties& p = *tIt;
+    const std::set<std::string>& cleanups = p.FixturesCleanup;
+    for (std::set<std::string>::const_iterator fIt = cleanups.begin();
+         fIt != cleanups.end(); ++fIt) {
+      const std::string& fixture = *fIt;
+      std::map<std::string, std::vector<size_t> >::const_iterator cIt =
+        fixtureRequirements.find(fixture);
+      if (cIt == fixtureRequirements.end()) {
+        // No test cases require the fixture this cleanup test is for.
+        // This cleanup test must have been part of the original test
+        // list passed in (which is not an error)
+        continue;
+      }
+
+      const std::vector<size_t>& indices = cIt->second;
+      for (std::vector<size_t>::const_iterator indexIt = indices.begin();
+           indexIt != indices.end(); ++indexIt) {
+        const std::string& reqTestName = tests[*indexIt].Name;
+        if (std::find(p.Depends.begin(), p.Depends.end(), reqTestName) ==
+            p.Depends.end()) {
+          p.Depends.push_back(reqTestName);
+        }
+      }
+    }
+  }
+
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Added "
+                       << fixtureTestsAdded
+                       << " tests to meet fixture requirements" << std::endl,
+                     this->Quiet);
 }
 
 void cmCTestTestHandler::UpdateMaxTestNameWidth()
@@ -1828,6 +1997,24 @@ bool cmCTestTestHandler::SetTestsProperties(
             cmSystemTools::ExpandListArgument(val, lval);
 
             rtit->LockedResources.insert(lval.begin(), lval.end());
+          }
+          if (key == "FIXTURES_SETUP") {
+            std::vector<std::string> lval;
+            cmSystemTools::ExpandListArgument(val, lval);
+
+            rtit->FixturesSetup.insert(lval.begin(), lval.end());
+          }
+          if (key == "FIXTURES_CLEANUP") {
+            std::vector<std::string> lval;
+            cmSystemTools::ExpandListArgument(val, lval);
+
+            rtit->FixturesCleanup.insert(lval.begin(), lval.end());
+          }
+          if (key == "FIXTURES_REQUIRED") {
+            std::vector<std::string> lval;
+            cmSystemTools::ExpandListArgument(val, lval);
+
+            rtit->FixturesRequired.insert(lval.begin(), lval.end());
           }
           if (key == "TIMEOUT") {
             rtit->Timeout = atof(val.c_str());

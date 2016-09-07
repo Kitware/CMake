@@ -177,7 +177,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     passIt;
   bool forceFail = false;
   bool outputTestErrorsToConsole = false;
-  if (!this->TestProperties->RequiredRegularExpressions.empty()) {
+  if (!this->TestProperties->RequiredRegularExpressions.empty() &&
+      this->FailedDependencies.empty()) {
     bool found = false;
     for (passIt = this->TestProperties->RequiredRegularExpressions.begin();
          passIt != this->TestProperties->RequiredRegularExpressions.end();
@@ -201,7 +202,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     }
     reason += "]";
   }
-  if (!this->TestProperties->ErrorRegularExpressions.empty()) {
+  if (!this->TestProperties->ErrorRegularExpressions.empty() &&
+      this->FailedDependencies.empty()) {
     for (passIt = this->TestProperties->ErrorRegularExpressions.begin();
          passIt != this->TestProperties->ErrorRegularExpressions.end();
          ++passIt) {
@@ -436,6 +438,23 @@ bool cmCTestRunTest::StartTest(size_t total)
   this->TestResult.TestCount = this->TestProperties->Index;
   this->TestResult.Name = this->TestProperties->Name;
   this->TestResult.Path = this->TestProperties->Directory;
+
+  if (!this->FailedDependencies.empty()) {
+    this->TestProcess = new cmProcess;
+    std::string msg = "Failed test dependencies:";
+    for (std::set<std::string>::const_iterator it =
+           this->FailedDependencies.begin();
+         it != this->FailedDependencies.end(); ++it) {
+      msg += " " + *it;
+    }
+    *this->TestHandler->LogFile << msg << std::endl;
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, msg << std::endl);
+    this->TestResult.Output = msg;
+    this->TestResult.FullCommandLine = "";
+    this->TestResult.CompletionStatus = "Not Run";
+    this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
+    return false;
+  }
 
   if (args.size() >= 2 && args[1] == "NOT_AVAILABLE") {
     this->TestProcess = new cmProcess;
