@@ -263,8 +263,8 @@ bool cmAddCustomCommandCommand::InitialPass(
 
     // No command for this output exists.
     std::ostringstream e;
-    e << "given APPEND option with output \"" << output[0]
-      << "\" which is not already a custom command output.";
+    e << "given APPEND option with output\n\"" << output[0]
+      << "\"\nwhich is not already a custom command output.";
     this->SetError(e.str());
     return false;
   }
