@@ -20,6 +20,8 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
 {
   // cmake_parse_arguments(prefix options single multi <ARGN>)
   //                         1       2      3      4
+  // or
+  // cmake_parse_arguments(PARSE_ARGV N prefix options single multi)
   if (args.size() < 4) {
     this->SetError("must be called with at least 4 arguments.");
     return false;
@@ -27,6 +29,27 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
 
   std::vector<std::string>::const_iterator argIter = args.begin(),
                                            argEnd = args.end();
+  bool parseFromArgV = false;
+  unsigned long argvStart = 0;
+  if (*argIter == "PARSE_ARGV") {
+    if (args.size() != 6) {
+      this->Makefile->IssueMessage(
+        cmake::FATAL_ERROR,
+        "PARSE_ARGV must be called with exactly 6 arguments.");
+      cmSystemTools::SetFatalErrorOccured();
+      return true;
+    }
+    parseFromArgV = true;
+    argIter++; // move past PARSE_ARGV
+    if (!cmSystemTools::StringToULong(argIter->c_str(), &argvStart)) {
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, "PARSE_ARGV index '" +
+                                     *argIter +
+                                     "' is not an unsigned integer");
+      cmSystemTools::SetFatalErrorOccured();
+      return true;
+    }
+    argIter++; // move past N
+  }
   // the first argument is the prefix
   const std::string prefix = (*argIter++) + "_";
 
@@ -90,11 +113,37 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
   } insideValues = NONE;
   std::string currentArgName;
 
-  // Flatten ;-lists in the arguments into a single list as was done
-  // by the original function(CMAKE_PARSE_ARGUMENTS).
   list.clear();
-  for (; argIter != argEnd; ++argIter) {
-    cmSystemTools::ExpandListArgument(*argIter, list);
+  if (!parseFromArgV) {
+    // Flatten ;-lists in the arguments into a single list as was done
+    // by the original function(CMAKE_PARSE_ARGUMENTS).
+    for (; argIter != argEnd; ++argIter) {
+      cmSystemTools::ExpandListArgument(*argIter, list);
+    }
+  } else {
+    // in the PARSE_ARGV move read the arguments from ARGC and ARGV#
+    std::string argc = this->Makefile->GetSafeDefinition("ARGC");
+    unsigned long count;
+    if (!cmSystemTools::StringToULong(argc.c_str(), &count)) {
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+                                   "PARSE_ARGV called with ARGC='" + argc +
+                                     "' that is not an unsigned integer");
+      cmSystemTools::SetFatalErrorOccured();
+      return true;
+    }
+    for (unsigned long i = argvStart; i < count; ++i) {
+      std::ostringstream argName;
+      argName << "ARGV" << i;
+      const char* arg = this->Makefile->GetDefinition(argName.str());
+      if (!arg) {
+        this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+                                     "PARSE_ARGV called with " +
+                                       argName.str() + " not set");
+        cmSystemTools::SetFatalErrorOccured();
+        return true;
+      }
+      list.push_back(arg);
+    }
   }
 
   // iterate over the arguments list and fill in the values where applicable
