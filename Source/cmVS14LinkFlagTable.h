@@ -35,6 +35,12 @@ static cmVS7FlagTable cmVS14LinkFlagTable[] = {
   { "UACExecutionLevel", "level='requireAdministrator'",
     "requireAdministrator", "RequireAdministrator", 0 },
 
+  { "GenerateDebugInformation", "DEBUG:FASTLINK",
+    "Optimize for faster linking", "DebugFastLink",
+    cmVS7FlagTable::CaseInsensitive },
+  { "GenerateDebugInformation", "DEBUG", "Optimize for debugging", "Debug",
+    cmVS7FlagTable::CaseInsensitive },
+
   { "SubSystem", "", "Not Set", "NotSet", 0 },
   { "SubSystem", "SUBSYSTEM:CONSOLE", "Console", "Console", 0 },
   { "SubSystem", "SUBSYSTEM:WINDOWS", "Windows", "Windows", 0 },
@@ -54,6 +60,8 @@ static cmVS7FlagTable cmVS14LinkFlagTable[] = {
   { "Driver", "DRIVER:WDM", "WDM", "WDM", 0 },
 
   { "LinkTimeCodeGeneration", "", "Default", "Default", 0 },
+  { "LinkTimeCodeGeneration", "LTCG:incremental",
+    "Use Fast Link Time Code Generation", "UseFastLinkTimeCodeGeneration", 0 },
   { "LinkTimeCodeGeneration", "LTCG", "Use Link Time Code Generation",
     "UseLinkTimeCodeGeneration", 0 },
   { "LinkTimeCodeGeneration", "LTCG:PGInstrument",
@@ -121,6 +129,9 @@ static cmVS7FlagTable cmVS14LinkFlagTable[] = {
   { "CLRSupportLastError", "CLRSupportLastError:SYSTEMDLL", "System Dlls Only",
     "SystemDlls", 0 },
 
+  { "LinkControlFlowGuard", "guard:cf", "Enable Security Check with Guard",
+    "Guard", 0 },
+
   // Bool Properties
   { "LinkIncremental", "INCREMENTAL:NO", "", "false", 0 },
   { "LinkIncremental", "INCREMENTAL", "", "true", 0 },
@@ -138,10 +149,6 @@ static cmVS7FlagTable cmVS14LinkFlagTable[] = {
   { "UACUIAccess", "uiAccess='false'", "", "false", 0 },
   { "UACUIAccess", "uiAccess='true'", "", "true", 0 },
   { "ManifestEmbed", "manifest:embed", "", "true", 0 },
-  { "GenerateDebugInformation", "DEBUG:FASTLINK", "", "DebugFastLink",
-    cmVS7FlagTable::CaseInsensitive },
-  { "GenerateDebugInformation", "DEBUG", "", "Debug",
-    cmVS7FlagTable::CaseInsensitive },
   { "MapExports", "MAPINFO:EXPORTS", "", "true", 0 },
   { "AssemblyDebug", "ASSEMBLYDEBUG:DISABLE", "", "false", 0 },
   { "AssemblyDebug", "ASSEMBLYDEBUG", "", "true", 0 },
@@ -194,6 +201,8 @@ static cmVS7FlagTable cmVS14LinkFlagTable[] = {
   // String List Properties
   { "AdditionalLibraryDirectories", "LIBPATH:",
     "Additional Library Directories", "",
+    cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable },
+  { "Natvis", "NATVIS:", "Natvis files", "",
     cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable },
   // Skip [AdditionalDependencies] - no command line Switch.
   { "IgnoreSpecificDefaultLibraries", "NODEFAULTLIB:",

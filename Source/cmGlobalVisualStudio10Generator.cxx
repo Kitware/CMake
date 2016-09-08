@@ -365,6 +365,20 @@ std::string cmGlobalVisualStudio10Generator::FindMSBuildCommand()
     }
   }
 
+  // Search where VS15Preview places it.
+  mskey = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VS7;";
+  mskey += this->GetIDEVersion();
+  if (cmSystemTools::ReadRegistryValue(mskey.c_str(), msbuild,
+                                       cmSystemTools::KeyWOW64_32)) {
+    cmSystemTools::ConvertToUnixSlashes(msbuild);
+    msbuild += "/MSBuild/";
+    msbuild += this->GetIDEVersion();
+    msbuild += "/Bin/MSBuild.exe";
+    if (cmSystemTools::FileExists(msbuild, true)) {
+      return msbuild;
+    }
+  }
+
   msbuild = "MSBuild.exe";
   return msbuild;
 }

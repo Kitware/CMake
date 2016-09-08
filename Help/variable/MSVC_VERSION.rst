@@ -13,4 +13,4 @@ Known version numbers are::
   1600 = VS 10.0
   1700 = VS 11.0
   1800 = VS 12.0
-  1900 = VS 14.0
+  1900 = VS 14.0, 15.0

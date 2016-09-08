@@ -15,6 +15,9 @@
 #  "${PROGRAMFILES}/MSBuild/Microsoft.Cpp/v4.0/V140/1033/cl.xml"
 #  "${PROGRAMFILES}/MSBuild/Microsoft.Cpp/v4.0/V140/1033/lib.xml"
 #  "${PROGRAMFILES}/MSBuild/Microsoft.Cpp/v4.0/V140/1033/link.xml"
+#  "${PROGRAMFILES}/Microsoft Visual Studio/VS15Preview/Common7/IDE/VC/VCTargets/1033/cl.xml"
+#  "${PROGRAMFILES}/Microsoft Visual Studio/VS15Preview/Common7/IDE/VC/VCTargets/1033/lib.xml"
+#  "${PROGRAMFILES}/Microsoft Visual Studio/VS15Preview/Common7/IDE/VC/VCTargets/1033/link.xml"
 #
 #  BoolProperty  <Name>true|false</Name>
 #   simple example:
