@@ -122,7 +122,10 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
             "PATH)\n";
       dest = cmSystemTools::GetFilenamePath(dest);
     }
-    os << "\n";
+    os << "if(_IMPORT_PREFIX STREQUAL \"/\")\n"
+       << "  set(_IMPORT_PREFIX \"\")\n"
+       << "endif()\n"
+       << "\n";
   }
 
   std::vector<std::string> missingTargets;
