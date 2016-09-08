@@ -11,6 +11,7 @@ set(CMakeLib_TESTS
   testUTF8
   testXMLParser
   testXMLSafe
+  testFindPackageCommand
   )
 
 set(testRST_ARGS ${CMAKE_CURRENT_SOURCE_DIR})

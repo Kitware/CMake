@@ -12,6 +12,7 @@
 #include "cmFindPackageCommand.h"
 
 #include "cmAlgorithms.h"
+#include <cmSystemTools.h>
 #include <cmsys/Directory.hxx>
 #include <cmsys/Encoding.hxx>
 #include <cmsys/RegularExpression.hxx>
@@ -32,6 +33,45 @@ cmFindPackageCommand::PathLabel cmFindPackageCommand::PathLabel::Builds(
   "BUILDS");
 cmFindPackageCommand::PathLabel
   cmFindPackageCommand::PathLabel::SystemRegistry("SYSTEM_PACKAGE_REGISTRY");
+
+struct StrverscmpGreater
+{
+  bool operator()(const std::string& lhs, const std::string& rhs) const
+  {
+    return cmSystemTools::strverscmp(lhs, rhs) > 0;
+  }
+};
+
+struct StrverscmpLesser
+{
+  bool operator()(const std::string& lhs, const std::string& rhs) const
+  {
+    return cmSystemTools::strverscmp(lhs, rhs) < 0;
+  }
+};
+
+void cmFindPackageCommand::Sort(std::vector<std::string>::iterator begin,
+                                std::vector<std::string>::iterator end,
+                                SortOrderType order, SortDirectionType dir)
+{
+  if (order == Name_order) {
+    if (dir == Dec) {
+      std::sort(begin, end, std::greater<std::string>());
+    } else {
+      std::sort(begin, end);
+    }
+  } else if (order == Natural)
+  // natural order uses letters and numbers (contiguous numbers digit are
+  // compared such that e.g. 000  00 < 01 < 010 < 09 < 0 < 1 < 9 < 10
+  {
+    if (dir == Dec) {
+      std::sort(begin, end, StrverscmpGreater());
+    } else {
+      std::sort(begin, end, StrverscmpLesser());
+    }
+  }
+  // else do not sort
+}
 
 cmFindPackageCommand::cmFindPackageCommand()
 {
@@ -58,7 +98,8 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->VersionFoundTweak = 0;
   this->VersionFoundCount = 0;
   this->RequiredCMakeVersion = 0;
-
+  this->SortOrder = None;
+  this->SortDirection = Asc;
   this->AppendSearchPathGroups();
 }
 
@@ -133,6 +174,23 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
   // Check if System Package Registry should be disabled
   if (this->Makefile->IsOn("CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY")) {
     this->NoSystemRegistry = true;
+  }
+
+  // Check if Sorting should be enabled
+  if (const char* so =
+        this->Makefile->GetDefinition("CMAKE_FIND_PACKAGE_SORT_ORDER")) {
+
+    if (strcmp(so, "NAME") == 0) {
+      this->SortOrder = Name_order;
+    } else if (strcmp(so, "NATURAL") == 0) {
+      this->SortOrder = Natural;
+    } else {
+      this->SortOrder = None;
+    }
+  }
+  if (const char* sd =
+        this->Makefile->GetDefinition("CMAKE_FIND_PACKAGE_SORT_DIRECTION")) {
+    this->SortDirection = strcmp(sd, "ASC") == 0 ? Asc : Dec;
   }
 
   // Find the current root path mode.
@@ -1666,16 +1724,32 @@ private:
 class cmFileListGeneratorProject : public cmFileListGeneratorBase
 {
 public:
-  cmFileListGeneratorProject(std::vector<std::string> const& names)
+  cmFileListGeneratorProject(std::vector<std::string> const& names,
+                             cmFindPackageCommand::SortOrderType so,
+                             cmFindPackageCommand::SortDirectionType sd)
     : cmFileListGeneratorBase()
     , Names(names)
   {
+    this->SetSort(so, sd);
   }
   cmFileListGeneratorProject(cmFileListGeneratorProject const& r)
     : cmFileListGeneratorBase()
     , Names(r.Names)
   {
+    this->SetSort(r.SortOrder, r.SortDirection);
   }
+
+  void SetSort(cmFindPackageCommand::SortOrderType o,
+               cmFindPackageCommand::SortDirectionType d)
+  {
+    SortOrder = o;
+    SortDirection = d;
+  }
+
+protected:
+  // sort parameters
+  cmFindPackageCommand::SortOrderType SortOrder;
+  cmFindPackageCommand::SortDirectionType SortDirection;
 
 private:
   std::vector<std::string> const& Names;
@@ -1696,6 +1770,13 @@ private:
           matches.push_back(fname);
         }
       }
+    }
+
+    // before testing the matches check if there is a specific sorting order to
+    // perform
+    if (this->SortOrder != cmFindPackageCommand::None) {
+      cmFindPackageCommand::Sort(matches.begin(), matches.end(), SortOrder,
+                                 SortDirection);
     }
 
     for (std::vector<std::string>::const_iterator i = matches.begin();
@@ -1895,7 +1976,8 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   {
     cmFindPackageFileList lister(this);
     lister / cmFileListGeneratorFixed(prefix) /
-      cmFileListGeneratorProject(this->Names);
+      cmFileListGeneratorProject(this->Names, this->SortOrder,
+                                 this->SortDirection);
     if (lister.Search()) {
       return true;
     }
@@ -1905,7 +1987,8 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   {
     cmFindPackageFileList lister(this);
     lister / cmFileListGeneratorFixed(prefix) /
-      cmFileListGeneratorProject(this->Names) /
+      cmFileListGeneratorProject(this->Names, this->SortOrder,
+                                 this->SortDirection) /
       cmFileListGeneratorCaseInsensitive("cmake");
     if (lister.Search()) {
       return true;
@@ -1932,7 +2015,8 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
     lister / cmFileListGeneratorFixed(prefix) /
       cmFileListGeneratorEnumerate(common) /
       cmFileListGeneratorFixed("cmake") /
-      cmFileListGeneratorProject(this->Names);
+      cmFileListGeneratorProject(this->Names, this->SortOrder,
+                                 this->SortDirection);
     if (lister.Search()) {
       return true;
     }
@@ -1943,7 +2027,8 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
     cmFindPackageFileList lister(this);
     lister / cmFileListGeneratorFixed(prefix) /
       cmFileListGeneratorEnumerate(common) /
-      cmFileListGeneratorProject(this->Names);
+      cmFileListGeneratorProject(this->Names, this->SortOrder,
+                                 this->SortDirection);
     if (lister.Search()) {
       return true;
     }
@@ -1954,7 +2039,8 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
     cmFindPackageFileList lister(this);
     lister / cmFileListGeneratorFixed(prefix) /
       cmFileListGeneratorEnumerate(common) /
-      cmFileListGeneratorProject(this->Names) /
+      cmFileListGeneratorProject(this->Names, this->SortOrder,
+                                 this->SortDirection) /
       cmFileListGeneratorCaseInsensitive("cmake");
     if (lister.Search()) {
       return true;
@@ -1965,10 +2051,12 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   {
     cmFindPackageFileList lister(this);
     lister / cmFileListGeneratorFixed(prefix) /
-      cmFileListGeneratorProject(this->Names) /
+      cmFileListGeneratorProject(this->Names, this->SortOrder,
+                                 this->SortDirection) /
       cmFileListGeneratorEnumerate(common) /
       cmFileListGeneratorFixed("cmake") /
-      cmFileListGeneratorProject(this->Names);
+      cmFileListGeneratorProject(this->Names, this->SortOrder,
+                                 this->SortDirection);
     if (lister.Search()) {
       return true;
     }
@@ -1978,9 +2066,11 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   {
     cmFindPackageFileList lister(this);
     lister / cmFileListGeneratorFixed(prefix) /
-      cmFileListGeneratorProject(this->Names) /
+      cmFileListGeneratorProject(this->Names, this->SortOrder,
+                                 this->SortDirection) /
       cmFileListGeneratorEnumerate(common) /
-      cmFileListGeneratorProject(this->Names);
+      cmFileListGeneratorProject(this->Names, this->SortOrder,
+                                 this->SortDirection);
     if (lister.Search()) {
       return true;
     }
@@ -1990,9 +2080,11 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   {
     cmFindPackageFileList lister(this);
     lister / cmFileListGeneratorFixed(prefix) /
-      cmFileListGeneratorProject(this->Names) /
+      cmFileListGeneratorProject(this->Names, this->SortOrder,
+                                 this->SortDirection) /
       cmFileListGeneratorEnumerate(common) /
-      cmFileListGeneratorProject(this->Names) /
+      cmFileListGeneratorProject(this->Names, this->SortOrder,
+                                 this->SortDirection) /
       cmFileListGeneratorCaseInsensitive("cmake");
     if (lister.Search()) {
       return true;
