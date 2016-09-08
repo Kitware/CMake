@@ -544,7 +544,7 @@ function(gp_resolved_file_type original_file file exepath dirs type_var)
       string(TOLOWER "$ENV{windir}" windir)
       file(TO_CMAKE_PATH "${windir}" windir)
 
-      if(lower MATCHES "^(api-ms-win-|${sysroot}/sys(tem|wow)|${windir}/sys(tem|wow)|(.*/)*msvc[^/]+dll)")
+      if(lower MATCHES "^(${sysroot}/sys(tem|wow)|${windir}/sys(tem|wow)|(.*/)*(msvc|api-ms-win-)[^/]+dll)")
         set(is_system 1)
       endif()
 
@@ -572,7 +572,7 @@ function(gp_resolved_file_type original_file file exepath dirs type_var)
           string(TOLOWER "${env_windir}" windir)
           string(TOLOWER "${env_sysdir}" sysroot)
 
-          if(lower MATCHES "^(api-ms-win-|${sysroot}/sys(tem|wow)|${windir}/sys(tem|wow)|(.*/)*msvc[^/]+dll)")
+          if(lower MATCHES "^(${sysroot}/sys(tem|wow)|${windir}/sys(tem|wow)|(.*/)*(msvc|api-ms-win-)[^/]+dll)")
             set(is_system 1)
           endif()
         endif()
