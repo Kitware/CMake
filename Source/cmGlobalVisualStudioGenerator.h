@@ -34,7 +34,8 @@ public:
     VS11 = 110,
     VS12 = 120,
     /* VS13 = 130 was skipped */
-    VS14 = 140
+    VS14 = 140,
+    VS15 = 150
   };
 
   cmGlobalVisualStudioGenerator(cmake* cm);

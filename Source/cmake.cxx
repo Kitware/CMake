@@ -60,6 +60,7 @@
 #include "cmGlobalVisualStudio11Generator.h"
 #include "cmGlobalVisualStudio12Generator.h"
 #include "cmGlobalVisualStudio14Generator.h"
+#include "cmGlobalVisualStudio15Generator.h"
 #include "cmGlobalVisualStudio71Generator.h"
 #include "cmGlobalVisualStudio8Generator.h"
 #include "cmGlobalVisualStudio9Generator.h"
@@ -1130,7 +1131,8 @@ int cmake::Configure()
       }
     }
   }
-
+  int val;
+  scanf_s("%d", &val);
   int ret = this->ActualConfigure();
   const char* delCacheVars =
     this->State->GetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_");
@@ -1205,6 +1207,7 @@ int cmake::ActualConfigure()
         { "11.0", "Visual Studio 11 2012" },
         { "12.0", "Visual Studio 12 2013" },
         { "14.0", "Visual Studio 14 2015" },
+        { "15.0", "Visual Studio 15 2016" },
         { 0, 0 }
       };
       for (int i = 0; version[i].MSVersion != 0; i++) {
@@ -1219,7 +1222,11 @@ int cmake::ActualConfigure()
         }
       }
       cmGlobalGenerator* gen =
-        this->CreateGlobalGenerator(installedCompiler.c_str());
+        this->CreateGlobalGenerator("Visual Studio 15 2016");
+      if (!gen)
+      {
+          gen = new cmGlobalNMakeMakefileGenerator(this);
+      }
       if (!gen) {
         gen = new cmGlobalNMakeMakefileGenerator(this);
       }
@@ -1528,6 +1535,7 @@ void cmake::AddDefaultGenerators()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #if !defined(CMAKE_BOOT_MINGW)
+  this->Generators.push_back(cmGlobalVisualStudio15Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio14Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio12Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio11Generator::NewFactory());

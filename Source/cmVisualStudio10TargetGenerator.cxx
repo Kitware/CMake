@@ -39,6 +39,11 @@
 #include "cmVS14LinkFlagTable.h"
 #include "cmVS14MASMFlagTable.h"
 #include "cmVS14RCFlagTable.h"
+#include "cmVS15CLFlagTable.h"
+#include "cmVS15LibFlagTable.h"
+#include "cmVS15LinkFlagTable.h"
+#include "cmVS15MASMFlagTable.h"
+#include "cmVS15RCFlagTable.h"
 #include "cmVisualStudioGeneratorOptions.h"
 #include "windows.h"
 
@@ -49,7 +54,9 @@ cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetClFlagTable() const
   if (this->MSTools) {
     cmGlobalVisualStudioGenerator::VSVersion v =
       this->LocalGenerator->GetVersion();
-    if (v >= cmGlobalVisualStudioGenerator::VS14) {
+    if (v >= cmGlobalVisualStudioGenerator::VS15) {
+        return cmVS15CLFlagTable;
+    } else if (v >= cmGlobalVisualStudioGenerator::VS14) {
       return cmVS14CLFlagTable;
     } else if (v >= cmGlobalVisualStudioGenerator::VS12) {
       return cmVS12CLFlagTable;
@@ -67,7 +74,9 @@ cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetRcFlagTable() const
   if (this->MSTools) {
     cmGlobalVisualStudioGenerator::VSVersion v =
       this->LocalGenerator->GetVersion();
-    if (v >= cmGlobalVisualStudioGenerator::VS14) {
+    if (v >= cmGlobalVisualStudioGenerator::VS15) {
+        return cmVS15MASMFlagTable;
+    } else if (v >= cmGlobalVisualStudioGenerator::VS14) {
       return cmVS14RCFlagTable;
     } else if (v >= cmGlobalVisualStudioGenerator::VS12) {
       return cmVS12RCFlagTable;
@@ -85,7 +94,9 @@ cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetLibFlagTable() const
   if (this->MSTools) {
     cmGlobalVisualStudioGenerator::VSVersion v =
       this->LocalGenerator->GetVersion();
-    if (v >= cmGlobalVisualStudioGenerator::VS14) {
+    if (v >= cmGlobalVisualStudioGenerator::VS15) {
+        return cmVS15LibFlagTable;
+    } else if (v >= cmGlobalVisualStudioGenerator::VS14) {
       return cmVS14LibFlagTable;
     } else if (v >= cmGlobalVisualStudioGenerator::VS12) {
       return cmVS12LibFlagTable;
@@ -103,7 +114,9 @@ cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetLinkFlagTable() const
   if (this->MSTools) {
     cmGlobalVisualStudioGenerator::VSVersion v =
       this->LocalGenerator->GetVersion();
-    if (v >= cmGlobalVisualStudioGenerator::VS14) {
+    if (v >= cmGlobalVisualStudioGenerator::VS15) {
+        return cmVS15LinkFlagTable;
+    } else if (v >= cmGlobalVisualStudioGenerator::VS14) {
       return cmVS14LinkFlagTable;
     } else if (v >= cmGlobalVisualStudioGenerator::VS12) {
       return cmVS12LinkFlagTable;
@@ -121,7 +134,9 @@ cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetMasmFlagTable() const
   if (this->MSTools) {
     cmGlobalVisualStudioGenerator::VSVersion v =
       this->LocalGenerator->GetVersion();
-    if (v >= cmGlobalVisualStudioGenerator::VS14) {
+    if (v >= cmGlobalVisualStudioGenerator::VS15) {
+        return cmVS15MASMFlagTable;
+    } else if (v >= cmGlobalVisualStudioGenerator::VS14) {
       return cmVS14MASMFlagTable;
     } else if (v >= cmGlobalVisualStudioGenerator::VS12) {
       return cmVS12MASMFlagTable;
