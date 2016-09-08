@@ -1,6 +1,6 @@
 /*============================================================================
   Kitware Information Macro Library
-  Copyright 2010-2015 Kitware, Inc.
+  Copyright 2010-2016 Kitware, Inc.
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -465,6 +465,10 @@ suppression macro KWIML_ABI_NO_VERIFY was defined.
 #elif defined(__XTENSA_EB__)
 # define KWIML_ABI_ENDIAN_ID KWIML_ABI_ENDIAN_ID_BIG
 #elif defined(__XTENSA_EL__)
+# define KWIML_ABI_ENDIAN_ID KWIML_ABI_ENDIAN_ID_LITTLE
+
+/* RISC-V */
+#elif defined(__riscv__)
 # define KWIML_ABI_ENDIAN_ID KWIML_ABI_ENDIAN_ID_LITTLE
 
 /* Unknown CPU */
