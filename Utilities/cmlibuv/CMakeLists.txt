@@ -168,6 +168,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
+  list(APPEND uv_libraries
+    kvm
+    )
   list(APPEND uv_headers
     include/uv-bsd.h
     )
