@@ -1766,9 +1766,7 @@ bool cmSystemTools::CopyFileTime(const char* fromFile, const char* toFile)
   if (!GetFileTime(hFrom, &timeCreation, &timeLastAccess, &timeLastWrite)) {
     return false;
   }
-  if (!SetFileTime(hTo, &timeCreation, &timeLastAccess, &timeLastWrite)) {
-    return false;
-  }
+  return SetFileTime(hTo, &timeCreation, &timeLastAccess, &timeLastWrite) != 0;
 #else
   struct stat fromStat;
   if (stat(fromFile, &fromStat) < 0) {
@@ -1778,11 +1776,8 @@ bool cmSystemTools::CopyFileTime(const char* fromFile, const char* toFile)
   struct utimbuf buf;
   buf.actime = fromStat.st_atime;
   buf.modtime = fromStat.st_mtime;
-  if (utime(toFile, &buf) < 0) {
-    return false;
-  }
+  return utime(toFile, &buf) >= 0;
 #endif
-  return true;
 }
 
 cmSystemToolsFileTime* cmSystemTools::FileTimeNew()
@@ -1828,16 +1823,11 @@ bool cmSystemTools::FileTimeSet(const char* fname, cmSystemToolsFileTime* t)
   if (!h) {
     return false;
   }
-  if (!SetFileTime(h, &t->timeCreation, &t->timeLastAccess,
-                   &t->timeLastWrite)) {
-    return false;
-  }
+  return SetFileTime(h, &t->timeCreation, &t->timeLastAccess,
+                     &t->timeLastWrite) != 0;
 #else
-  if (utime(fname, &t->timeBuf) < 0) {
-    return false;
-  }
+  return utime(fname, &t->timeBuf) >= 0;
 #endif
-  return true;
 }
 
 #ifdef _WIN32
