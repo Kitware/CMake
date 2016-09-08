@@ -95,10 +95,7 @@ protected:
     // if there are no children
     if (!m->hasChildren(idx)) {
       bool adv = m->data(idx, QCMakeCacheModel::AdvancedRole).toBool();
-      if (!adv || (adv && this->ShowAdvanced)) {
-        return true;
-      }
-      return false;
+      return !adv || this->ShowAdvanced;
     }
 
     // check children
