@@ -130,6 +130,12 @@ bool cmDependsFortran::WriteDependencies(const std::set<std::string>& sources,
     if (cmFortran_yyparse(parser.Scanner) != 0) {
       // Failed to parse the file.  Report failure to write dependencies.
       okay = false;
+      /* clang-format off */
+      std::cerr <<
+        "warning: failed to parse dependencies from Fortran source "
+        "'" << src << "': " << parser.Error << std::endl
+        ;
+      /* clang-format on */
     }
   }
   return okay;

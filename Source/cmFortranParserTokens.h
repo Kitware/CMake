@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.2.  */
+/* A Bison parser, made by GNU Bison 3.0.4.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -70,11 +70,10 @@ extern int cmFortran_yydebug;
     F90PPR_ENDIF = 280,
     COMMA = 281,
     DCOLON = 282,
-    CPP_TOENDL = 283,
-    UNTERMINATED_STRING = 284,
-    STRING = 285,
-    WORD = 286,
-    CPP_INCLUDE_ANGLE = 287
+    UNTERMINATED_STRING = 283,
+    STRING = 284,
+    WORD = 285,
+    CPP_INCLUDE_ANGLE = 286
   };
 #endif
 /* Tokens.  */
@@ -103,23 +102,24 @@ extern int cmFortran_yydebug;
 #define F90PPR_ENDIF 280
 #define COMMA 281
 #define DCOLON 282
-#define CPP_TOENDL 283
-#define UNTERMINATED_STRING 284
-#define STRING 285
-#define WORD 286
-#define CPP_INCLUDE_ANGLE 287
+#define UNTERMINATED_STRING 283
+#define STRING 284
+#define WORD 285
+#define CPP_INCLUDE_ANGLE 286
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE YYSTYPE;
+
 union YYSTYPE
 {
 #line 81 "cmFortranParser.y" /* yacc.c:1909  */
 
   char* string;
 
-#line 122 "cmFortranParserTokens.h" /* yacc.c:1909  */
+#line 120 "cmFortranParserTokens.h" /* yacc.c:1909  */
 };
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif

@@ -24,28 +24,21 @@
 
 This file must be translated to C and modified to build everywhere.
 
-Run flex like this:
+Run flex >= 2.6 like this:
 
   flex -i --prefix=cmFortran_yy --header-file=cmFortranLexer.h -ocmFortranLexer.cxx cmFortranLexer.in.l
 
 Modify cmFortranLexer.cxx:
-  - remove TABs
-  - remove use of the 'register' storage class specifier
-  - remove "yyscanner" argument from these methods:
-      yy_fatal_error, cmFortran_yyalloc, cmFortran_yyrealloc, cmFortran_yyfree
+  - remove trailing whitespace: sed -i 's/\s*$//' cmFortranLexer.h cmFortranLexer.cxx
+  - remove blank lines at end of file
   - remove "yyscanner = NULL" from end of cmFortran_yylex_destroy
   - remove all YY_BREAK lines occurring right after return statements
-  - change while ( 1 ) to for(;;)
-
-Modify cmFortranLexer.h:
-  - remove TABs
-  - remove the yy_init_globals function
-  - remove the block that includes unistd.h
-  - remove #line directives (avoids bogus warning on old Sun)
+  - add cast in yy_scan_bytes for loop condition of _yybytes_len to size_t
 
 */
 
 #include "cmStandardLexer.h"
+#undef YY_NO_UNPUT
 
 #define cmFortranLexer_cxx
 #include "cmFortranParser.h" /* Interface to parser object.  */

@@ -3,3 +3,5 @@ cm_sha2.*        whitespace=indent-with-non-tab
 
 # Preserve indentation style in generated code.
 cmListFileLexer.c       whitespace=-tab-in-indent,-indent-with-non-tab
+cmFortranLexer.cxx      whitespace=-tab-in-indent,-indent-with-non-tab
+cmFortranLexer.h        whitespace=-tab-in-indent,-indent-with-non-tab

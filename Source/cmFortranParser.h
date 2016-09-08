@@ -73,6 +73,7 @@ union cmFortran_yystype_u
 #define YYSTYPE cmFortran_yystype
 #define YYSTYPE_IS_DECLARED 1
 #if !defined(cmFortranLexer_cxx)
+#define YY_NO_UNISTD_H
 #include "cmFortranLexer.h"
 #endif
 #if !defined(cmFortranLexer_cxx)
@@ -117,11 +118,13 @@ struct cmFortranFile
     : File(file)
     , Buffer(buffer)
     , Directory(dir)
+    , LastCharWasNewline(false)
   {
   }
   FILE* File;
   YY_BUFFER_STATE Buffer;
   std::string Directory;
+  bool LastCharWasNewline;
 };
 
 struct cmFortranParser_s
@@ -145,6 +148,9 @@ struct cmFortranParser_s
 
   // Buffer for string literals.
   std::string TokenString;
+
+  // Error message text if a parser error occurs.
+  std::string Error;
 
   // Flag for whether lexer is reading from inside an interface.
   bool InInterface;
