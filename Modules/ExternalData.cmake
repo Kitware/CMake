@@ -86,6 +86,10 @@ Module Functions
   in one of the paths specified in the ``ExternalData_OBJECT_STORES``
   variable.
 
+  Typically only one target is needed to manage all external data within
+  a project.  Call this function once at the end of configuration after
+  all data references have been processed.
+
 Module Variables
 ^^^^^^^^^^^^^^^^
 
@@ -394,8 +398,14 @@ function(ExternalData_add_target target)
 
   set(files "")
 
-  # Set "_ExternalData_FILE_${file}" for each output file to avoid duplicate
-  # rules.  Use local data first to prefer real files over content links.
+  # Set a "_ExternalData_FILE_${file}" variable for each output file to avoid
+  # duplicate entries within this target.  Set a directory property of the same
+  # name to avoid repeating custom commands with the same output in this directory.
+  # Repeating custom commands with the same output across directories or across
+  # targets in the same directory may be a race, but this is likely okay because
+  # we use atomic replacement of output files.
+  #
+  # Use local data first to prefer real files over content links.
 
   # Custom commands to copy or link local data.
   get_property(data_local GLOBAL PROPERTY _ExternalData_${target}_LOCAL)
@@ -405,16 +415,20 @@ function(ExternalData_add_target target)
     list(GET tuple 1 name)
     if(NOT DEFINED "_ExternalData_FILE_${file}")
       set("_ExternalData_FILE_${file}" 1)
-      add_custom_command(
-        COMMENT "Generating ${file}"
-        OUTPUT "${file}"
-        COMMAND ${CMAKE_COMMAND} -Drelative_top=${CMAKE_BINARY_DIR}
-                                 -Dfile=${file} -Dname=${name}
-                                 -DExternalData_ACTION=local
-                                 -DExternalData_CONFIG=${config}
-                                 -P ${_ExternalData_SELF}
-        MAIN_DEPENDENCY "${name}"
-        )
+      get_property(added DIRECTORY PROPERTY "_ExternalData_FILE_${file}")
+      if(NOT added)
+        set_property(DIRECTORY PROPERTY "_ExternalData_FILE_${file}" 1)
+        add_custom_command(
+          COMMENT "Generating ${file}"
+          OUTPUT "${file}"
+          COMMAND ${CMAKE_COMMAND} -Drelative_top=${CMAKE_BINARY_DIR}
+                                   -Dfile=${file} -Dname=${name}
+                                   -DExternalData_ACTION=local
+                                   -DExternalData_CONFIG=${config}
+                                   -P ${_ExternalData_SELF}
+          MAIN_DEPENDENCY "${name}"
+          )
+      endif()
       list(APPEND files "${file}")
     endif()
   endforeach()
@@ -429,23 +443,27 @@ function(ExternalData_add_target target)
     set(stamp "${ext}-stamp")
     if(NOT DEFINED "_ExternalData_FILE_${file}")
       set("_ExternalData_FILE_${file}" 1)
-      add_custom_command(
-        # Users care about the data file, so hide the hash/timestamp file.
-        COMMENT "Generating ${file}"
-        # The hash/timestamp file is the output from the build perspective.
-        # List the real file as a second output in case it is a broken link.
-        # The files must be listed in this order so CMake can hide from the
-        # make tool that a symlink target may not be newer than the input.
-        OUTPUT "${file}${stamp}" "${file}"
-        # Run the data fetch/update script.
-        COMMAND ${CMAKE_COMMAND} -Drelative_top=${CMAKE_BINARY_DIR}
-                                 -Dfile=${file} -Dname=${name} -Dext=${ext}
-                                 -DExternalData_ACTION=fetch
-                                 -DExternalData_CONFIG=${config}
-                                 -P ${_ExternalData_SELF}
-        # Update whenever the object hash changes.
-        MAIN_DEPENDENCY "${name}${ext}"
-        )
+      get_property(added DIRECTORY PROPERTY "_ExternalData_FILE_${file}")
+      if(NOT added)
+        set_property(DIRECTORY PROPERTY "_ExternalData_FILE_${file}" 1)
+        add_custom_command(
+          # Users care about the data file, so hide the hash/timestamp file.
+          COMMENT "Generating ${file}"
+          # The hash/timestamp file is the output from the build perspective.
+          # List the real file as a second output in case it is a broken link.
+          # The files must be listed in this order so CMake can hide from the
+          # make tool that a symlink target may not be newer than the input.
+          OUTPUT "${file}${stamp}" "${file}"
+          # Run the data fetch/update script.
+          COMMAND ${CMAKE_COMMAND} -Drelative_top=${CMAKE_BINARY_DIR}
+                                   -Dfile=${file} -Dname=${name} -Dext=${ext}
+                                   -DExternalData_ACTION=fetch
+                                   -DExternalData_CONFIG=${config}
+                                   -P ${_ExternalData_SELF}
+          # Update whenever the object hash changes.
+          MAIN_DEPENDENCY "${name}${ext}"
+          )
+      endif()
       list(APPEND files "${file}${stamp}")
     endif()
   endforeach()
