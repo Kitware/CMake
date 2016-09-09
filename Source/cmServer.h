@@ -43,6 +43,8 @@ public:
 private:
   void RegisterProtocol(cmServerProtocol* protocol);
 
+  static void reportProgress(const char* msg, float progress, void* data);
+
   // Handle requests:
   cmServerResponse SetProtocolVersion(const cmServerRequest& request);
 

@@ -134,8 +134,13 @@ void cmServer::PopOne()
     return;
   }
 
-  this->WriteResponse(this->Protocol ? this->Protocol->Process(request)
-                                     : this->SetProtocolVersion(request));
+  if (this->Protocol) {
+    this->Protocol->CMakeInstance()->SetProgressCallback(
+      reportProgress, const_cast<cmServerRequest*>(&request));
+    this->WriteResponse(this->Protocol->Process(request));
+  } else {
+    this->WriteResponse(this->SetProtocolVersion(request));
+  }
 }
 
 void cmServer::handleData(const std::string& data)
@@ -208,6 +213,17 @@ void cmServer::PrintHello() const
   }
 
   this->WriteJsonObject(hello);
+}
+
+void cmServer::reportProgress(const char* msg, float progress, void* data)
+{
+  const cmServerRequest* request = static_cast<const cmServerRequest*>(data);
+  assert(request);
+  if (progress < 0.0 || progress > 1.0) {
+    request->ReportProgress(0, 0, 0, msg);
+  } else {
+    request->ReportProgress(0, static_cast<int>(progress * 1000), 1000, msg);
+  }
 }
 
 cmServerResponse cmServer::SetProtocolVersion(const cmServerRequest& request)
