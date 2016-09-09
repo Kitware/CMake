@@ -42,7 +42,7 @@ void cmWIXFeaturesSourceWriter::CreateCMakePackageRegistryEntry(
 }
 
 void cmWIXFeaturesSourceWriter::EmitFeatureForComponentGroup(
-  cmCPackComponentGroup const& group)
+  cmCPackComponentGroup const& group, cmWIXPatch& patch)
 {
   BeginElement("Feature");
   AddAttribute("Id", "CM_G_" + group.Name);
@@ -57,20 +57,22 @@ void cmWIXFeaturesSourceWriter::EmitFeatureForComponentGroup(
   for (std::vector<cmCPackComponentGroup*>::const_iterator i =
          group.Subgroups.begin();
        i != group.Subgroups.end(); ++i) {
-    EmitFeatureForComponentGroup(**i);
+    EmitFeatureForComponentGroup(**i, patch);
   }
 
   for (std::vector<cmCPackComponent*>::const_iterator i =
          group.Components.begin();
        i != group.Components.end(); ++i) {
-    EmitFeatureForComponent(**i);
+    EmitFeatureForComponent(**i, patch);
   }
+
+  patch.ApplyFragment("CM_G_" + group.Name, *this);
 
   EndElement("Feature");
 }
 
 void cmWIXFeaturesSourceWriter::EmitFeatureForComponent(
-  cmCPackComponent const& component)
+  cmCPackComponent const& component, cmWIXPatch& patch)
 {
   BeginElement("Feature");
   AddAttribute("Id", "CM_C_" + component.Name);
@@ -89,6 +91,8 @@ void cmWIXFeaturesSourceWriter::EmitFeatureForComponent(
   if (component.IsDisabledByDefault) {
     AddAttribute("Level", "2");
   }
+
+  patch.ApplyFragment("CM_C_" + component.Name, *this);
 
   EndElement("Feature");
 }
