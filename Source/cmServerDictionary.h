@@ -22,6 +22,7 @@ static const std::string kHANDSHAKE_TYPE = "handshake";
 static const std::string kMESSAGE_TYPE = "message";
 static const std::string kPROGRESS_TYPE = "progress";
 static const std::string kREPLY_TYPE = "reply";
+static const std::string kSET_GLOBAL_SETTINGS_TYPE = "setGlobalSettings";
 static const std::string kSIGNAL_TYPE = "signal";
 
 static const std::string kBUILD_DIRECTORY_KEY = "buildDirectory";

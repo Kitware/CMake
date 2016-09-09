@@ -154,12 +154,16 @@ def validateGlobalSettings(cmakeCommand, cmakeCommandPath, data):
   for line in cmakeoutput[index + 12:].splitlines():
     if not line.startswith('  '):
       continue
+    if line.startswith('    '):
+      continue
     equalPos = line.find('=')
     tmp = ''
     if (equalPos > 0):
       tmp = line[2:equalPos].strip()
     else:
       tmp = line.strip()
+    if tmp.endswith(" [arch]"):
+      tmp = tmp[0:len(tmp) - 7]
     if (len(tmp) > 0) and (" - " not in tmp) and (tmp != 'KDevelop3'):
       cmakeGenerators.append(tmp)
 
@@ -170,8 +174,9 @@ def validateGlobalSettings(cmakeCommand, cmakeCommandPath, data):
   generators.sort()
   cmakeGenerators.sort()
 
-  if (generators != cmakeGenerators):
-    sys.exit(1)
+  for gen in cmakeGenerators:
+    if (not gen in generators):
+        sys.exit(1)
 
   gen = packet['generator']
   if (gen != '' and not (gen in generators)):

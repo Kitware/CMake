@@ -119,6 +119,7 @@ private:
 
   // Handle requests:
   cmServerResponse ProcessGlobalSettings(const cmServerRequest& request);
+  cmServerResponse ProcessSetGlobalSettings(const cmServerRequest& request);
 
   enum State
   {

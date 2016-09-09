@@ -302,3 +302,29 @@ which will result in a response type "reply"::
     "warnUnusedCli": true
   }
   ]== CMake Server ==]
+
+
+Type "setGlobalSettings"
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+This request can be sent to change the global settings attributes. Unknown
+attributes are going to be ignored. Read-only attributes reported by
+"globalSettings" are all capabilities, buildDirectory, generator,
+extraGenerator and sourceDirectory. Any attempt to set these will be ignored,
+too.
+
+All other settings will be changed.
+
+The server will respond with an empty reply message or an error.
+
+Example::
+
+  [== CMake Server ==[
+  {"type":"setGlobalSettings","debugOutput":true}
+  ]== CMake Server ==]
+
+CMake will reply to this with::
+
+  [== CMake Server ==[
+  {"inReplyTo":"setGlobalSettings","type":"reply"}
+  ]== CMake Server ==]
