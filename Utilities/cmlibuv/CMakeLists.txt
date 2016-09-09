@@ -181,6 +181,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "NetBSD")
+  list(APPEND uv_libraries
+    kvm
+    )
   list(APPEND uv_headers
     include/uv-bsd.h
     )
@@ -191,6 +194,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "NetBSD")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
+  list(APPEND uv_libraries
+    kvm
+    )
   list(APPEND uv_headers
     include/uv-bsd.h
     )
