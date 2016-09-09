@@ -122,6 +122,13 @@ bool cmServerProtocol::Activate(cmServer* server,
   return result;
 }
 
+void cmServerProtocol::SendSignal(const std::string& name,
+                                  const Json::Value& data) const
+{
+  if (this->m_Server)
+    this->m_Server->WriteSignal(name, data);
+}
+
 cmake* cmServerProtocol::CMakeInstance() const
 {
   return this->m_CMakeInstance.get();

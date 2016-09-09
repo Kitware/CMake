@@ -90,6 +90,8 @@ public:
   bool Activate(cmServer* server, const cmServerRequest& request,
                 std::string* errorMessage);
 
+  void SendSignal(const std::string& name, const Json::Value& data) const;
+
 protected:
   cmake* CMakeInstance() const;
   // Implement protocol specific activation tasks here. Called from Activate().

@@ -21,6 +21,7 @@ static const std::string kHANDSHAKE_TYPE = "handshake";
 static const std::string kMESSAGE_TYPE = "message";
 static const std::string kPROGRESS_TYPE = "progress";
 static const std::string kREPLY_TYPE = "reply";
+static const std::string kSIGNAL_TYPE = "signal";
 
 static const std::string kBUILD_DIRECTORY_KEY = "buildDirectory";
 static const std::string kCOOKIE_KEY = "cookie";
@@ -31,6 +32,7 @@ static const std::string kIS_EXPERIMENTAL_KEY = "isExperimental";
 static const std::string kMAJOR_KEY = "major";
 static const std::string kMESSAGE_KEY = "message";
 static const std::string kMINOR_KEY = "minor";
+static const std::string kNAME_KEY = "name";
 static const std::string kPROGRESS_CURRENT_KEY = "progressCurrent";
 static const std::string kPROGRESS_MAXIMUM_KEY = "progressMaximum";
 static const std::string kPROGRESS_MESSAGE_KEY = "progressMessage";
