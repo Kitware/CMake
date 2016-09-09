@@ -85,7 +85,8 @@ void read_stdin(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf)
     free(buf->base);
 }
 
-cmServer::cmServer()
+cmServer::cmServer(bool supportExperimental)
+  : SupportExperimental(supportExperimental)
 {
   // Register supported protocols:
   this->RegisterProtocol(new cmServerProtocol1_0);
@@ -93,8 +94,9 @@ cmServer::cmServer()
 
 cmServer::~cmServer()
 {
-  if (!this->Protocol) // Daemon was never fully started!
+  if (!this->Protocol) { // Server was never fully started!
     return;
+  }
 
   uv_close(reinterpret_cast<uv_handle_t*>(this->InputStream), NULL);
   uv_close(reinterpret_cast<uv_handle_t*>(this->OutputStream), NULL);
@@ -171,6 +173,9 @@ void cmServer::handleData(const std::string& data)
 
 void cmServer::RegisterProtocol(cmServerProtocol* protocol)
 {
+  if (protocol->IsExperimental() && !this->SupportExperimental) {
+    return;
+  }
   auto version = protocol->ProtocolVersion();
   assert(version.first >= 0);
   assert(version.second >= 0);
@@ -196,6 +201,9 @@ void cmServer::PrintHello() const
     Json::Value tmp = Json::objectValue;
     tmp["major"] = version.first;
     tmp["minor"] = version.second;
+    if (proto->IsExperimental()) {
+      tmp["experimental"] = true;
+    }
     protocolVersions.append(tmp);
   }
 
@@ -245,9 +253,11 @@ cmServerResponse cmServer::SetProtocolVersion(const cmServerRequest& request)
   return request.Reply(Json::objectValue);
 }
 
-void cmServer::Serve()
+bool cmServer::Serve()
 {
-  assert(!this->SupportedProtocols.empty());
+  if (this->SupportedProtocols.empty()) {
+    return false;
+  }
   assert(!this->Protocol);
 
   this->Loop = uv_default_loop();
@@ -279,6 +289,7 @@ void cmServer::Serve()
   uv_read_start(this->InputStream, alloc_buffer, read_stdin);
 
   uv_run(this->Loop, UV_RUN_DEFAULT);
+  return true;
 }
 
 void cmServer::WriteJsonObject(const Json::Value& jsonValue) const

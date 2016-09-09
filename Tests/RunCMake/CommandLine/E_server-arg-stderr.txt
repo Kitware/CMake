@@ -1,1 +1,1 @@
-^CMake Error: Too many arguments to start server mode$
+^CMake Error: Unknown argument for server mode$
