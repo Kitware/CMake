@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmServerProtocol.h"
 
+#include "cmCacheManager.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -58,6 +59,15 @@ static Json::Value fromStringList(const T& in)
   Json::Value result = Json::arrayValue;
   for (const std::string& i : in) {
     result.append(i);
+  }
+  return result;
+}
+
+static std::vector<std::string> toStringList(const Json::Value& in)
+{
+  std::vector<std::string> result;
+  for (const auto& it : in) {
+    result.push_back(it.asString());
   }
   return result;
 }
@@ -360,6 +370,9 @@ const cmServerResponse cmServerProtocol1_0::Process(
 {
   assert(this->m_State >= STATE_ACTIVE);
 
+  if (request.Type == kCACHE_TYPE) {
+    return this->ProcessCache(request);
+  }
   if (request.Type == kCMAKE_INPUTS_TYPE) {
     return this->ProcessCMakeInputs(request);
   }
@@ -385,6 +398,57 @@ const cmServerResponse cmServerProtocol1_0::Process(
 bool cmServerProtocol1_0::IsExperimental() const
 {
   return true;
+}
+
+cmServerResponse cmServerProtocol1_0::ProcessCache(
+  const cmServerRequest& request)
+{
+  if (this->m_State < STATE_CONFIGURED) {
+    return request.ReportError("This project was not configured yet.");
+  }
+
+  cmState* state = this->CMakeInstance()->GetState();
+
+  Json::Value result = Json::objectValue;
+
+  std::vector<std::string> allKeys = state->GetCacheEntryKeys();
+
+  Json::Value list = Json::arrayValue;
+  std::vector<std::string> keys = toStringList(request.Data[kKEYS_KEY]);
+  if (keys.empty()) {
+    keys = allKeys;
+  } else {
+    for (auto i : keys) {
+      if (std::find_if(allKeys.begin(), allKeys.end(),
+                       [i](const std::string& j) { return i == j; }) ==
+          allKeys.end()) {
+        return request.ReportError("Key \"" + i + "\" not found in cache.");
+      }
+    }
+  }
+  std::sort(keys.begin(), keys.end());
+  for (auto key : keys) {
+    Json::Value entry = Json::objectValue;
+    entry[kKEY_KEY] = key;
+    entry[kTYPE_KEY] =
+      cmState::CacheEntryTypeToString(state->GetCacheEntryType(key));
+    entry[kVALUE_KEY] = state->GetCacheEntryValue(key);
+
+    Json::Value props = Json::objectValue;
+    bool haveProperties = false;
+    for (auto prop : state->GetCacheEntryPropertyList(key)) {
+      haveProperties = true;
+      props[prop] = state->GetCacheEntryProperty(key, prop);
+    }
+    if (haveProperties) {
+      entry[kPROPERTIES_KEY] = props;
+    }
+
+    list.append(entry);
+  }
+
+  result[kCACHE_KEY] = list;
+  return request.Reply(result);
 }
 
 cmServerResponse cmServerProtocol1_0::ProcessCMakeInputs(

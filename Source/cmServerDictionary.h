@@ -6,6 +6,7 @@
 
 // Vocabulary:
 
+static const std::string kCACHE_TYPE = "cache";
 static const std::string kCMAKE_INPUTS_TYPE = "cmakeInputs";
 static const std::string kCODE_MODEL_TYPE = "codemodel";
 static const std::string kCOMPUTE_TYPE = "compute";
@@ -23,6 +24,7 @@ static const std::string kARTIFACTS_KEY = "artifacts";
 static const std::string kBUILD_DIRECTORY_KEY = "buildDirectory";
 static const std::string kBUILD_FILES_KEY = "buildFiles";
 static const std::string kCACHE_ARGUMENTS_KEY = "cacheArguments";
+static const std::string kCACHE_KEY = "cache";
 static const std::string kCAPABILITIES_KEY = "capabilities";
 static const std::string kCHECK_SYSTEM_VARS_KEY = "checkSystemVars";
 static const std::string kCMAKE_ROOT_DIRECTORY_KEY = "cmakeRootDirectory";
@@ -43,6 +45,8 @@ static const std::string kIS_EXPERIMENTAL_KEY = "isExperimental";
 static const std::string kIS_GENERATED_KEY = "isGenerated";
 static const std::string kIS_SYSTEM_KEY = "isSystem";
 static const std::string kIS_TEMPORARY_KEY = "isTemporary";
+static const std::string kKEY_KEY = "key";
+static const std::string kKEYS_KEY = "keys";
 static const std::string kLANGUAGE_KEY = "language";
 static const std::string kLINKER_LANGUAGE_KEY = "linkerLanguage";
 static const std::string kLINK_FLAGS_KEY = "linkFlags";
@@ -59,6 +63,7 @@ static const std::string kPROGRESS_MAXIMUM_KEY = "progressMaximum";
 static const std::string kPROGRESS_MESSAGE_KEY = "progressMessage";
 static const std::string kPROGRESS_MINIMUM_KEY = "progressMinimum";
 static const std::string kPROJECTS_KEY = "projects";
+static const std::string kPROPERTIES_KEY = "properties";
 static const std::string kPROTOCOL_VERSION_KEY = "protocolVersion";
 static const std::string kREPLY_TO_KEY = "inReplyTo";
 static const std::string kSOURCE_DIRECTORY_KEY = "sourceDirectory";
@@ -71,6 +76,7 @@ static const std::string kTITLE_KEY = "title";
 static const std::string kTRACE_EXPAND_KEY = "traceExpand";
 static const std::string kTRACE_KEY = "trace";
 static const std::string kTYPE_KEY = "type";
+static const std::string kVALUE_KEY = "value";
 static const std::string kWARN_UNINITIALIZED_KEY = "warnUninitialized";
 static const std::string kWARN_UNUSED_CLI_KEY = "warnUnusedCli";
 static const std::string kWARN_UNUSED_KEY = "warnUnused";
