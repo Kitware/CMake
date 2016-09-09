@@ -1046,6 +1046,28 @@ const char* cmake::GetHomeOutputDirectory() const
   return this->State->GetBinaryDirectory();
 }
 
+std::string cmake::FindCacheFile(const std::string& binaryDir) const
+{
+  std::string cachePath = binaryDir;
+  cmSystemTools::ConvertToUnixSlashes(cachePath);
+  std::string cacheFile = cachePath;
+  cacheFile += "/CMakeCache.txt";
+  if (!cmSystemTools::FileExists(cacheFile.c_str())) {
+    // search in parent directories for cache
+    std::string cmakeFiles = cachePath;
+    cmakeFiles += "/CMakeFiles";
+    if (cmSystemTools::FileExists(cmakeFiles.c_str())) {
+      std::string cachePathFound =
+        cmSystemTools::FileExistsInParentDirectories("CMakeCache.txt",
+                                                     cachePath.c_str(), "/");
+      if (!cachePathFound.empty()) {
+        cachePath = cmSystemTools::GetFilenamePath(cachePathFound);
+      }
+    }
+  }
+  return cachePath;
+}
+
 void cmake::SetGlobalGenerator(cmGlobalGenerator* gg)
 {
   if (!gg) {
@@ -2344,24 +2366,8 @@ int cmake::Build(const std::string& dir, const std::string& target,
     std::cerr << "Error: " << dir << " is not a directory\n";
     return 1;
   }
-  std::string cachePath = dir;
-  cmSystemTools::ConvertToUnixSlashes(cachePath);
-  std::string cacheFile = cachePath;
-  cacheFile += "/CMakeCache.txt";
-  if (!cmSystemTools::FileExists(cacheFile.c_str())) {
-    // search in parent directories for cache
-    std::string cmakeFiles = cachePath;
-    cmakeFiles += "/CMakeFiles";
-    if (cmSystemTools::FileExists(cmakeFiles.c_str())) {
-      std::string cachePathFound =
-        cmSystemTools::FileExistsInParentDirectories("CMakeCache.txt",
-                                                     cachePath.c_str(), "/");
-      if (!cachePathFound.empty()) {
-        cachePath = cmSystemTools::GetFilenamePath(cachePathFound);
-      }
-    }
-  }
 
+  std::string cachePath = FindCacheFile(dir);
   if (!this->LoadCache(cachePath)) {
     std::cerr << "Error: could not load cache\n";
     return 1;
