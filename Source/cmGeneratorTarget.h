@@ -540,6 +540,8 @@ public:
   std::string GetFortranModuleDirectory() const;
 
 private:
+  void AddSourceCommon(const std::string& src);
+
   std::string CreateFortranModuleDirectory() const;
   mutable bool FortranModuleDirectoryCreated;
   mutable std::string FortranModuleDirectory;

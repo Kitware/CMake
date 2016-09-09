@@ -327,7 +327,6 @@ cmGeneratorTarget::~cmGeneratorTarget()
   cmDeleteAll(this->CompileDefinitionsEntries);
   cmDeleteAll(this->SourceEntries);
   cmDeleteAll(this->LinkInformation);
-  this->LinkInformation.clear();
 }
 
 cmLocalGenerator* cmGeneratorTarget::GetLocalGenerator() const
@@ -469,9 +468,8 @@ std::string cmGeneratorTarget::GetOutputName(const std::string& config,
   return i->second;
 }
 
-void cmGeneratorTarget::AddSource(const std::string& src)
+void cmGeneratorTarget::AddSourceCommon(const std::string& src)
 {
-  this->Target->AddSource(src);
   cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
   cmGeneratorExpression ge(lfbt);
   CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(src);
@@ -481,19 +479,17 @@ void cmGeneratorTarget::AddSource(const std::string& src)
   this->LinkImplementationLanguageIsContextDependent = true;
 }
 
+void cmGeneratorTarget::AddSource(const std::string& src)
+{
+  this->Target->AddSource(src);
+  this->AddSourceCommon(src);
+}
+
 void cmGeneratorTarget::AddTracedSources(std::vector<std::string> const& srcs)
 {
   this->Target->AddTracedSources(srcs);
   if (!srcs.empty()) {
-    std::string srcFiles = cmJoin(srcs, ";");
-    this->SourceFilesMap.clear();
-    this->LinkImplementationLanguageIsContextDependent = true;
-    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    cmGeneratorExpression ge(lfbt);
-    CM_AUTO_PTR<cmCompiledGeneratorExpression> cge = ge.Parse(srcFiles);
-    cge->SetEvaluateForBuildsystem(true);
-    this->SourceEntries.push_back(
-      new cmGeneratorTarget::TargetPropertyEntry(cge));
+    this->AddSourceCommon(cmJoin(srcs, ";"));
   }
 }
 
@@ -840,14 +836,10 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
                               &dagChecker, result, excludeImported);
     }
 
-    std::set<std::string> unique;
-    for (std::vector<std::string>::iterator li = result.begin();
-         li != result.end(); ++li) {
-      cmSystemTools::ConvertToUnixSlashes(*li);
-      unique.insert(*li);
-    }
-    result.clear();
-    result.insert(result.end(), unique.begin(), unique.end());
+    std::for_each(result.begin(), result.end(),
+                  cmSystemTools::ConvertToUnixSlashes);
+    std::sort(result.begin(), result.end());
+    result.erase(std::unique(result.begin(), result.end()), result.end());
 
     IncludeCacheType::value_type entry(config_upper, result);
     iter = this->SystemIncludesCache.insert(entry).first;
