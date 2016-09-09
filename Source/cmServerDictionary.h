@@ -16,6 +16,7 @@
 
 // Vocabulary:
 
+static const std::string kCONFIGURE_TYPE = "configure";
 static const std::string kERROR_TYPE = "error";
 static const std::string kGLOBAL_SETTINGS_TYPE = "globalSettings";
 static const std::string kHANDSHAKE_TYPE = "handshake";
@@ -26,6 +27,7 @@ static const std::string kSET_GLOBAL_SETTINGS_TYPE = "setGlobalSettings";
 static const std::string kSIGNAL_TYPE = "signal";
 
 static const std::string kBUILD_DIRECTORY_KEY = "buildDirectory";
+static const std::string kCACHE_ARGUMENTS_KEY = "cacheArguments";
 static const std::string kCAPABILITIES_KEY = "capabilities";
 static const std::string kCHECK_SYSTEM_VARS_KEY = "checkSystemVars";
 static const std::string kCOOKIE_KEY = "cookie";
