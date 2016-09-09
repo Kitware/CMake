@@ -117,6 +117,7 @@ private:
   cmServerResponse ProcessConfigure(const cmServerRequest& request);
   cmServerResponse ProcessGlobalSettings(const cmServerRequest& request);
   cmServerResponse ProcessSetGlobalSettings(const cmServerRequest& request);
+  cmServerResponse ProcessFileSystemWatchers(const cmServerRequest& request);
 
   enum State
   {

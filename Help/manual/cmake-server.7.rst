@@ -635,3 +635,26 @@ CMake will respond with the following output::
 
 The output can be limited to a list of keys by passing an array of key names
 to the "keys" optional field of the "cache" request.
+
+
+Type "fileSystemWatchers"
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The server can watch the filesystem for changes. The "fileSystemWatchers"
+command will report on the files and directories watched.
+
+Example::
+
+  [== CMake Server ==]
+  {"type":"fileSystemWatchers"}
+  [== CMake Server ==]
+
+CMake will respond with the following output::
+
+  [== CMake Server ==]
+  {
+    "cookie":"","inReplyTo":"fileSystemWatchers","type":"reply",
+    "watchedFiles": [ "/absolute/path" ],
+    "watchedDirectories": [ "/absolute" ]
+  }
+  [== CMake Server ==]
