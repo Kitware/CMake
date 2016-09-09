@@ -13,6 +13,7 @@
 
 #include "cmServer.h"
 
+#include "cmServerConnection.h"
 #include "cmServerProtocol.h"
 #include "cmSystemTools.h"
 #include "cmVersionMacros.h"
@@ -40,57 +41,6 @@ static const std::string kMESSAGE_TYPE = "message";
 static const std::string kSTART_MAGIC = "[== CMake Server ==[";
 static const std::string kEND_MAGIC = "]== CMake Server ==]";
 
-typedef struct
-{
-  uv_write_t req;
-  uv_buf_t buf;
-} write_req_t;
-
-void alloc_buffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
-{
-  (void)handle;
-  *buf = uv_buf_init(static_cast<char*>(malloc(suggested_size)),
-                     static_cast<unsigned int>(suggested_size));
-}
-
-void free_write_req(uv_write_t* req)
-{
-  write_req_t* wr = reinterpret_cast<write_req_t*>(req);
-  free(wr->buf.base);
-  free(wr);
-}
-
-void on_stdout_write(uv_write_t* req, int status)
-{
-  (void)status;
-  auto server = reinterpret_cast<cmServer*>(req->data);
-  free_write_req(req);
-  server->PopOne();
-}
-
-void write_data(uv_stream_t* dest, std::string content, uv_write_cb cb)
-{
-  write_req_t* req = static_cast<write_req_t*>(malloc(sizeof(write_req_t)));
-  req->req.data = dest->data;
-  req->buf = uv_buf_init(static_cast<char*>(malloc(content.size())),
-                         static_cast<unsigned int>(content.size()));
-  memcpy(req->buf.base, content.c_str(), content.size());
-  uv_write(reinterpret_cast<uv_write_t*>(req), static_cast<uv_stream_t*>(dest),
-           &req->buf, 1, cb);
-}
-
-void read_stdin(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf)
-{
-  if (nread > 0) {
-    auto server = reinterpret_cast<cmServer*>(stream->data);
-    std::string result = std::string(buf->base, buf->base + nread);
-    server->handleData(result);
-  }
-
-  if (buf->base)
-    free(buf->base);
-}
-
 class cmServer::DebugInfo
 {
 public:
@@ -105,9 +55,11 @@ public:
   uint64_t StartTime;
 };
 
-cmServer::cmServer(bool supportExperimental)
-  : SupportExperimental(supportExperimental)
+cmServer::cmServer(cmServerConnection* conn, bool supportExperimental)
+  : Connection(conn)
+  , SupportExperimental(supportExperimental)
 {
+  this->Connection->SetServer(this);
   // Register supported protocols:
   this->RegisterProtocol(new cmServerProtocol1_0);
 }
@@ -118,18 +70,15 @@ cmServer::~cmServer()
     return;
   }
 
-  uv_close(reinterpret_cast<uv_handle_t*>(this->InputStream), NULL);
-  uv_close(reinterpret_cast<uv_handle_t*>(this->OutputStream), NULL);
-  uv_loop_close(this->Loop);
-
   for (cmServerProtocol* p : this->SupportedProtocols) {
     delete p;
   }
+
+  delete this->Connection;
 }
 
 void cmServer::PopOne()
 {
-  this->Writing = false;
   if (this->Queue.empty()) {
     return;
   }
@@ -173,39 +122,6 @@ void cmServer::PopOne()
   }
 }
 
-void cmServer::handleData(const std::string& data)
-{
-  this->DataBuffer += data;
-
-  for (;;) {
-    auto needle = this->DataBuffer.find('\n');
-
-    if (needle == std::string::npos) {
-      return;
-    }
-    std::string line = this->DataBuffer.substr(0, needle);
-    const auto ls = line.size();
-    if (ls > 1 && line.at(ls - 1) == '\r')
-      line.erase(ls - 1, 1);
-    this->DataBuffer.erase(this->DataBuffer.begin(),
-                           this->DataBuffer.begin() + needle + 1);
-    if (line == kSTART_MAGIC) {
-      this->JsonData.clear();
-      continue;
-    }
-    if (line == kEND_MAGIC) {
-      this->Queue.push_back(this->JsonData);
-      this->JsonData.clear();
-      if (!this->Writing) {
-        this->PopOne();
-      }
-    } else {
-      this->JsonData += line;
-      this->JsonData += "\n";
-    }
-  }
-}
-
 void cmServer::RegisterProtocol(cmServerProtocol* protocol)
 {
   if (protocol->IsExperimental() && !this->SupportExperimental) {
@@ -243,6 +159,12 @@ void cmServer::PrintHello() const
   }
 
   this->WriteJsonObject(hello, nullptr);
+}
+
+void cmServer::QueueRequest(const std::string& request)
+{
+  this->Queue.push_back(request);
+  this->PopOne();
 }
 
 void cmServer::reportProgress(const char* msg, float progress, void* data)
@@ -312,43 +234,16 @@ cmServerResponse cmServer::SetProtocolVersion(const cmServerRequest& request)
   return request.Reply(Json::objectValue);
 }
 
-bool cmServer::Serve()
+bool cmServer::Serve(std::string* errorMessage)
 {
   if (this->SupportedProtocols.empty()) {
+    *errorMessage =
+      "No protocol versions defined. Maybe you need --experimental?";
     return false;
   }
   assert(!this->Protocol);
 
-  this->Loop = uv_default_loop();
-
-  if (uv_guess_handle(1) == UV_TTY) {
-    uv_tty_init(this->Loop, &this->Input.tty, 0, 1);
-    uv_tty_set_mode(&this->Input.tty, UV_TTY_MODE_NORMAL);
-    this->Input.tty.data = this;
-    InputStream = reinterpret_cast<uv_stream_t*>(&this->Input.tty);
-
-    uv_tty_init(this->Loop, &this->Output.tty, 1, 0);
-    uv_tty_set_mode(&this->Output.tty, UV_TTY_MODE_NORMAL);
-    this->Output.tty.data = this;
-    OutputStream = reinterpret_cast<uv_stream_t*>(&this->Output.tty);
-  } else {
-    uv_pipe_init(this->Loop, &this->Input.pipe, 0);
-    uv_pipe_open(&this->Input.pipe, 0);
-    this->Input.pipe.data = this;
-    InputStream = reinterpret_cast<uv_stream_t*>(&this->Input.pipe);
-
-    uv_pipe_init(this->Loop, &this->Output.pipe, 0);
-    uv_pipe_open(&this->Output.pipe, 1);
-    this->Output.pipe.data = this;
-    OutputStream = reinterpret_cast<uv_stream_t*>(&this->Output.pipe);
-  }
-
-  this->PrintHello();
-
-  uv_read_start(this->InputStream, alloc_buffer, read_stdin);
-
-  uv_run(this->Loop, UV_RUN_DEFAULT);
-  return true;
+  return Connection->ProcessEvents(errorMessage);
 }
 
 void cmServer::WriteJsonObject(const Json::Value& jsonValue,
@@ -385,10 +280,8 @@ void cmServer::WriteJsonObject(const Json::Value& jsonValue,
     }
   }
 
-  this->Writing = true;
-  write_data(this->OutputStream, std::string("\n") + kSTART_MAGIC +
-               std::string("\n") + result + kEND_MAGIC + std::string("\n"),
-             on_stdout_write);
+  Connection->WriteData(std::string("\n") + kSTART_MAGIC + std::string("\n") +
+                        result + kEND_MAGIC + std::string("\n"));
 }
 
 cmServerProtocol* cmServer::FindMatchingProtocol(
