@@ -45,6 +45,7 @@
 #include "cmVS15MASMFlagTable.h"
 #include "cmVS15RCFlagTable.h"
 #include "cmVisualStudioGeneratorOptions.h"
+#include "cmVersion.h"
 #include "windows.h"
 
 #include <cmsys/auto_ptr.hxx>
@@ -428,6 +429,9 @@ void cmVisualStudio10TargetGenerator::Generate()
     (*this->BuildFileStream) << cmVS10EscapeXML(targetFrameworkVersion)
                              << "</TargetFrameworkVersion>\n";
   }
+
+  std::string cmakeGeneratedVersionString = "<VisualStudioCMakeGeneratedProject>" + std::string(cmVersion::GetCMakeVersion()) + "</VisualStudioCMakeGeneratedProject>\n";
+  this->WriteString(cmakeGeneratedVersionString.c_str() , 2);
 
   std::vector<std::string> keys = this->GeneratorTarget->GetPropertyKeys();
   for (std::vector<std::string>::const_iterator keyIt = keys.begin();

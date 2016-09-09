@@ -15,7 +15,7 @@
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 
-static const char vs15generatorName[] = "Visual Studio 15 2016";
+static const char vs15generatorName[] = "Visual Studio 15 2017";
 
 // Map generator name without year to name with year.
 static const char* cmVS15GenName(const std::string& name, std::string& genName)
@@ -25,7 +25,7 @@ static const char* cmVS15GenName(const std::string& name, std::string& genName)
     return 0;
   }
   const char* p = name.c_str() + sizeof(vs15generatorName) - 6;
-  if (cmHasLiteralPrefix(p, " 2016")) {
+  if (cmHasLiteralPrefix(p, " 2017")) {
     p += 5;
   }
   genName = std::string(vs15generatorName) + p;
@@ -216,7 +216,8 @@ std::string cmGlobalVisualStudio15Generator::FindMSBuildCommand()
     std::string cmakeCommandLocation = cmSystemTools::GetCMakeCommand();
     // For VS2017, cmake is deployed at <VSRoot>\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin
     // Use relative path to find the MSBuild location
-    std::size_t found = cmakeCommandLocation.find("/Common7/IDE/CommonExtensions/Microsoft/cmake/cmake/bin");
+    std::transform(cmakeCommandLocation.begin(), cmakeCommandLocation.end(), cmakeCommandLocation.begin(), ::tolower);
+    std::size_t found = cmakeCommandLocation.find("/common7/ide/commonextensions/microsoft/cmake/cmake/bin");
     if ( found == std::string::npos)
     {
         return MSBuildLocation;
@@ -240,7 +241,8 @@ std::string cmGlobalVisualStudio15Generator::FindDevEnvCommand()
     std::string cmakeCommandLocation = cmSystemTools::GetCMakeCommand();
     // For VS2017, cmake is deployed at <VSRoot>\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin
     // Use relative path to find the Devenv location
-    std::size_t found = cmakeCommandLocation.find("/Common7/IDE/CommonExtensions");
+    std::transform(cmakeCommandLocation.begin(), cmakeCommandLocation.end(), cmakeCommandLocation.begin(), ::tolower);
+    std::size_t found = cmakeCommandLocation.find("/common7/ide/commonextensions/microsoft/cmake/cmake/bin");
     if (found == std::string::npos)
     {
         return DevEnvLocation;

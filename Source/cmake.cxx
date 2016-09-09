@@ -1131,8 +1131,6 @@ int cmake::Configure()
       }
     }
   }
-  int val;
-  scanf_s("%d", &val);
   int ret = this->ActualConfigure();
   const char* delCacheVars =
     this->State->GetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_");
@@ -1207,7 +1205,7 @@ int cmake::ActualConfigure()
         { "11.0", "Visual Studio 11 2012" },
         { "12.0", "Visual Studio 12 2013" },
         { "14.0", "Visual Studio 14 2015" },
-        { "15.0", "Visual Studio 15 2016" },
+        { "15.0", "Visual Studio 15 2017" }, // For classic installer (Preview 4)
         { 0, 0 }
       };
       for (int i = 0; version[i].MSVersion != 0; i++) {
@@ -1221,8 +1219,20 @@ int cmake::ActualConfigure()
           }
         }
       }
+
+      // For Dev15/VS 2017, there are no registry entries exposing the install location of VS.
+      // However a Microsoft version of CMake is installed with VS (placed relative to the root of VS). 
+      // If we are running MS version of cmake, then select VS2017 generator.
+      // For VS2017, cmake is deployed at <VSRoot>\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin
+      std::string cmakeCommandLocation = cmSystemTools::GetCMakeCommand();
+      std::transform(cmakeCommandLocation.begin(), cmakeCommandLocation.end(), cmakeCommandLocation.begin(), ::tolower);
+      std::size_t found = cmakeCommandLocation.find("/common7/ide/commonextensions/microsoft/cmake/cmake/bin");
+      if (found != std::string::npos)
+      {
+          installedCompiler = "Visual Studio 15 2017";
+      }
       cmGlobalGenerator* gen =
-        this->CreateGlobalGenerator("Visual Studio 15 2016");
+        this->CreateGlobalGenerator(installedCompiler.c_str());
       if (!gen)
       {
           gen = new cmGlobalNMakeMakefileGenerator(this);

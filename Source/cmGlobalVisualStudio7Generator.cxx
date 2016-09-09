@@ -132,7 +132,7 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(
 
 void cmGlobalVisualStudio7Generator::FindMakeProgram(cmMakefile* mf)
 {
-  this->cmGlobalVisualStudioGenerator::FindMakeProgram(mf);
+  this->cmGlobalVisualStudioGenerator::FindMakeProgram(mf); 
   mf->AddDefinition("CMAKE_VS_DEVENV_COMMAND",
                     this->GetDevEnvCommand().c_str());
 }
