@@ -248,3 +248,57 @@ which will result in a response type "reply"::
   ]== CMake Server ==]
 
 indicating that the server is ready for action.
+
+
+Type "globalSettings"
+^^^^^^^^^^^^^^^^^^^^^
+
+This request can be sent after the initial handshake. It will return a
+JSON structure with information on cmake state.
+
+Example::
+
+  [== CMake Server ==[
+  {"type":"globalSettings"}
+  ]== CMake Server ==]
+
+which will result in a response type "reply"::
+
+  [== CMake Server ==[
+  {
+    "buildDirectory": "/tmp/test-build",
+    "capabilities": {
+      "generators": [
+        {
+          "extraGenerators": [],
+          "name": "Watcom WMake",
+          "platformSupport": false,
+          "toolsetSupport": false
+        },
+        <...>
+      ],
+      "serverMode": false,
+      "version": {
+        "isDirty": false,
+        "major": 3,
+        "minor": 6,
+        "patch": 20160830,
+        "string": "3.6.20160830-gd6abad",
+        "suffix": "gd6abad"
+      }
+    },
+    "checkSystemVars": false,
+    "cookie": "",
+    "extraGenerator": "",
+    "generator": "Ninja",
+    "debugOutput": false,
+    "inReplyTo": "globalSettings",
+    "sourceDirectory": "/home/code/cmake",
+    "trace": false,
+    "traceExpand": false,
+    "type": "reply",
+    "warnUninitialized": false,
+    "warnUnused": false,
+    "warnUnusedCli": true
+  }
+  ]== CMake Server ==]

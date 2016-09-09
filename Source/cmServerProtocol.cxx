@@ -13,6 +13,7 @@
 #include "cmServerProtocol.h"
 
 #include "cmExternalMakefileProjectGenerator.h"
+#include "cmGlobalGenerator.h"
 #include "cmServer.h"
 #include "cmServerDictionary.h"
 #include "cmSystemTools.h"
@@ -279,10 +280,43 @@ const cmServerResponse cmServerProtocol1_0::Process(
 {
   assert(this->m_State >= STATE_ACTIVE);
 
+  if (request.Type == kGLOBAL_SETTINGS_TYPE) {
+    return this->ProcessGlobalSettings(request);
+  }
+
   return request.ReportError("Unknown command!");
 }
 
 bool cmServerProtocol1_0::IsExperimental() const
 {
   return true;
+}
+
+cmServerResponse cmServerProtocol1_0::ProcessGlobalSettings(
+  const cmServerRequest& request)
+{
+  cmake* cm = this->CMakeInstance();
+  Json::Value obj = Json::objectValue;
+
+  // Capabilities information:
+  obj[kCAPABILITIES_KEY] = cm->ReportCapabilitiesJson(true);
+
+  obj[kDEBUG_OUTPUT_KEY] = cm->GetDebugOutput();
+  obj[kTRACE_KEY] = cm->GetTrace();
+  obj[kTRACE_EXPAND_KEY] = cm->GetTraceExpand();
+  obj[kWARN_UNINITIALIZED_KEY] = cm->GetWarnUninitialized();
+  obj[kWARN_UNUSED_KEY] = cm->GetWarnUnused();
+  obj[kWARN_UNUSED_CLI_KEY] = cm->GetWarnUnusedCli();
+  obj[kCHECK_SYSTEM_VARS_KEY] = cm->GetCheckSystemVars();
+
+  obj[kSOURCE_DIRECTORY_KEY] = cm->GetHomeDirectory();
+  obj[kBUILD_DIRECTORY_KEY] = cm->GetHomeOutputDirectory();
+
+  // Currently used generator:
+  cmGlobalGenerator* gen = cm->GetGlobalGenerator();
+  obj[kGENERATOR_KEY] = gen ? gen->GetName() : std::string();
+  obj[kEXTRA_GENERATOR_KEY] =
+    gen ? gen->GetExtraGeneratorName() : std::string();
+
+  return request.Reply(obj);
 }

@@ -17,6 +17,7 @@
 // Vocabulary:
 
 static const std::string kERROR_TYPE = "error";
+static const std::string kGLOBAL_SETTINGS_TYPE = "globalSettings";
 static const std::string kHANDSHAKE_TYPE = "handshake";
 static const std::string kMESSAGE_TYPE = "message";
 static const std::string kPROGRESS_TYPE = "progress";
@@ -24,7 +25,10 @@ static const std::string kREPLY_TYPE = "reply";
 static const std::string kSIGNAL_TYPE = "signal";
 
 static const std::string kBUILD_DIRECTORY_KEY = "buildDirectory";
+static const std::string kCAPABILITIES_KEY = "capabilities";
+static const std::string kCHECK_SYSTEM_VARS_KEY = "checkSystemVars";
 static const std::string kCOOKIE_KEY = "cookie";
+static const std::string kDEBUG_OUTPUT_KEY = "debugOutput";
 static const std::string kERROR_MESSAGE_KEY = "errorMessage";
 static const std::string kEXTRA_GENERATOR_KEY = "extraGenerator";
 static const std::string kGENERATOR_KEY = "generator";
@@ -43,7 +47,12 @@ static const std::string kSOURCE_DIRECTORY_KEY = "sourceDirectory";
 static const std::string kSUPPORTED_PROTOCOL_VERSIONS =
   "supportedProtocolVersions";
 static const std::string kTITLE_KEY = "title";
+static const std::string kTRACE_EXPAND_KEY = "traceExpand";
+static const std::string kTRACE_KEY = "trace";
 static const std::string kTYPE_KEY = "type";
+static const std::string kWARN_UNINITIALIZED_KEY = "warnUninitialized";
+static const std::string kWARN_UNUSED_CLI_KEY = "warnUnusedCli";
+static const std::string kWARN_UNUSED_KEY = "warnUnused";
 
 static const std::string kSTART_MAGIC = "[== CMake Server ==[";
 static const std::string kEND_MAGIC = "]== CMake Server ==]";

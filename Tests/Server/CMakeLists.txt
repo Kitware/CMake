@@ -19,5 +19,6 @@ macro(do_test bsname file)
 endmacro()
 
 do_test("test_handshake" "tc_handshake.json")
+do_test("test_globalSettings" "tc_globalSettings.json")
 
 add_executable(Server empty.cpp)

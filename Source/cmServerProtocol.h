@@ -13,6 +13,7 @@
 #pragma once
 
 #include "cmListFileCache.h"
+#include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cm_jsoncpp_writer.h"
@@ -115,6 +116,9 @@ public:
 private:
   bool DoActivate(const cmServerRequest& request,
                   std::string* errorMessage) override;
+
+  // Handle requests:
+  cmServerResponse ProcessGlobalSettings(const cmServerRequest& request);
 
   enum State
   {

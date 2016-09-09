@@ -106,6 +106,7 @@ def waitForReply(cmakeCommand, originalType, cookie):
   packet = waitForRawMessage(cmakeCommand)
   if packet['cookie'] != cookie or packet['type'] != 'reply' or packet['inReplyTo'] != originalType:
     sys.exit(1)
+  return packet
 
 def waitForError(cmakeCommand, originalType, cookie, message):
   packet = waitForRawMessage(cmakeCommand)
@@ -117,10 +118,66 @@ def waitForProgress(cmakeCommand, originalType, cookie, current, message):
   if packet['cookie'] != cookie or packet['type'] != 'progress' or packet['inReplyTo'] != originalType or packet['progressCurrent'] != current or packet['progressMessage'] != message:
     sys.exit(1)
 
-def handshake(cmakeCommand, major, minor):
+def handshake(cmakeCommand, major, minor, source, build, generator, extraGenerator):
   version = { 'major': major }
   if minor >= 0:
     version['minor'] = minor
 
-  writePayload(cmakeCommand, { 'type': 'handshake', 'protocolVersion': version, 'cookie': 'TEST_HANDSHAKE' })
+  writePayload(cmakeCommand, { 'type': 'handshake', 'protocolVersion': version,
+    'cookie': 'TEST_HANDSHAKE', 'sourceDirectory': source, 'buildDirectory': build,
+    'generator': generator, 'extraGenerator': extraGenerator })
   waitForReply(cmakeCommand, 'handshake', 'TEST_HANDSHAKE')
+
+def validateGlobalSettings(cmakeCommand, cmakeCommandPath, data):
+  packet = waitForReply(cmakeCommand, 'globalSettings', '')
+
+  capabilities = packet['capabilities']
+
+  # validate version:
+  cmakeoutput = subprocess.check_output([ cmakeCommandPath, "--version" ], universal_newlines=True)
+  cmakeVersion = cmakeoutput.splitlines()[0][14:]
+
+  version = capabilities['version']
+  versionString = version['string']
+  vs = str(version['major']) + '.' + str(version['minor']) + '.' + str(version['patch'])
+  if (versionString != vs and not versionString.startswith(vs + '-')):
+    sys.exit(1)
+  if (versionString != cmakeVersion):
+    sys.exit(1)
+
+  # validate generators:
+  generatorObjects = capabilities['generators']
+
+  cmakeoutput = subprocess.check_output([ cmakeCommandPath, "--help" ], universal_newlines=True)
+  index = cmakeoutput.index('\nGenerators\n\n')
+  cmakeGenerators = []
+  for line in cmakeoutput[index + 12:].splitlines():
+    if not line.startswith('  '):
+      continue
+    equalPos = line.find('=')
+    tmp = ''
+    if (equalPos > 0):
+      tmp = line[2:equalPos].strip()
+    else:
+      tmp = line.strip()
+    if (len(tmp) > 0) and (" - " not in tmp) and (tmp != 'KDevelop3'):
+      cmakeGenerators.append(tmp)
+
+  generators = []
+  for genObj in generatorObjects:
+    generators.append(genObj['name'])
+
+  generators.sort()
+  cmakeGenerators.sort()
+
+  if (generators != cmakeGenerators):
+    sys.exit(1)
+
+  gen = packet['generator']
+  if (gen != '' and not (gen in generators)):
+    sys.exit(1)
+
+  for i in data:
+    print("Validating", i)
+    if (packet[i] != data[i]):
+      sys.exit(1)
