@@ -1531,9 +1531,6 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
     linkLibs += " ";
   }
 
-  // Write the library flags to the build rule.
-  fout << linkLibs;
-
   // Check what kind of rpath flags to use.
   if (cli.GetRuntimeSep().empty()) {
     // Each rpath entry gets its own option ("-R a -R b -R c")
@@ -1559,6 +1556,9 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
       fout << " ";
     }
   }
+
+  // Write the library flags to the build rule.
+  fout << linkLibs;
 
   // Add the linker runtime search path if any.
   std::string rpath_link = cli.GetRPathLinkString();
