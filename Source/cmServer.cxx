@@ -14,6 +14,7 @@
 #include "cmServer.h"
 
 #include "cmServerProtocol.h"
+#include "cmSystemTools.h"
 #include "cmVersionMacros.h"
 #include "cmake.h"
 
@@ -30,6 +31,7 @@ static const std::string kERROR_MESSAGE_KEY = "errorMessage";
 static const std::string kERROR_TYPE = "error";
 static const std::string kREPLY_TYPE = "reply";
 static const std::string kPROGRESS_TYPE = "progress";
+static const std::string kMESSAGE_TYPE = "message";
 
 static const std::string kSTART_MAGIC = "[== CMake Server ==[";
 static const std::string kEND_MAGIC = "]== CMake Server ==]";
@@ -134,6 +136,8 @@ void cmServer::PopOne()
     return;
   }
 
+  cmSystemTools::SetMessageCallback(reportMessage,
+                                    const_cast<cmServerRequest*>(&request));
   if (this->Protocol) {
     this->Protocol->CMakeInstance()->SetProgressCallback(
       reportProgress, const_cast<cmServerRequest*>(&request));
@@ -220,10 +224,23 @@ void cmServer::reportProgress(const char* msg, float progress, void* data)
   const cmServerRequest* request = static_cast<const cmServerRequest*>(data);
   assert(request);
   if (progress < 0.0 || progress > 1.0) {
-    request->ReportProgress(0, 0, 0, msg);
+    request->ReportMessage(msg, "");
   } else {
     request->ReportProgress(0, static_cast<int>(progress * 1000), 1000, msg);
   }
+}
+
+void cmServer::reportMessage(const char* msg, const char* title,
+                             bool& /* cancel */, void* data)
+{
+  const cmServerRequest* request = static_cast<const cmServerRequest*>(data);
+  assert(request);
+  assert(msg);
+  std::string titleString;
+  if (title) {
+    titleString = title;
+  }
+  request->ReportMessage(std::string(msg), titleString);
 }
 
 cmServerResponse cmServer::SetProtocolVersion(const cmServerRequest& request)
@@ -352,6 +369,25 @@ void cmServer::WriteProgress(const cmServerRequest& request, int min,
   obj["progressCurrent"] = current;
 
   this->WriteJsonObject(obj);
+}
+
+void cmServer::WriteMessage(const cmServerRequest& request,
+                            const std::string& message,
+                            const std::string& title) const
+{
+  if (message.empty())
+    return;
+
+  Json::Value obj = Json::objectValue;
+  obj[kTYPE_KEY] = kMESSAGE_TYPE;
+  obj[kREPLY_TO_KEY] = request.Type;
+  obj[kCOOKIE_KEY] = request.Cookie;
+  obj["message"] = message;
+  if (!title.empty()) {
+    obj["title"] = title;
+  }
+
+  WriteJsonObject(obj);
 }
 
 void cmServer::WriteParseError(const std::string& message) const

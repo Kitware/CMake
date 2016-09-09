@@ -132,6 +132,21 @@ a message of type "reply" or "error" that complete the request.
 the request that triggered the responses was delivered.
 
 
+Type "message"
+^^^^^^^^^^^^^^
+
+A message is triggered when the server processes a request and produces some
+form of output that should be displayed to the user. A Message has a "message"
+with the actual text to display as well as a "title" with a suggested dialog
+box title.
+
+Example::
+
+  [== CMake Server ==[
+  {"cookie":"","message":"Something happened.","title":"Title Text","inReplyTo":"handshake","type":"message"}
+  ]== CMake Server ==]
+
+
 Specific Message Types
 ----------------------
 

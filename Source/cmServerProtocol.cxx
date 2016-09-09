@@ -46,6 +46,12 @@ void cmServerRequest::ReportProgress(int min, int current, int max,
   this->m_Server->WriteProgress(*this, min, current, max, message);
 }
 
+void cmServerRequest::ReportMessage(const std::string& message,
+                                    const std::string& title) const
+{
+  m_Server->WriteMessage(*this, message, title);
+}
+
 cmServerResponse cmServerRequest::Reply(const Json::Value& data) const
 {
   cmServerResponse response(*this);

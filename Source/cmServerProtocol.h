@@ -70,6 +70,8 @@ private:
 
   void ReportProgress(int min, int current, int max,
                       const std::string& message) const;
+  void ReportMessage(const std::string& message,
+                     const std::string& title) const;
 
   cmServer* m_Server;
 
