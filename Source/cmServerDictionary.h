@@ -16,6 +16,7 @@
 
 // Vocabulary:
 
+static const std::string kCOMPUTE_TYPE = "compute";
 static const std::string kCONFIGURE_TYPE = "configure";
 static const std::string kERROR_TYPE = "error";
 static const std::string kGLOBAL_SETTINGS_TYPE = "globalSettings";

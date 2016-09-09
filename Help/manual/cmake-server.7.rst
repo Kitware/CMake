@@ -355,3 +355,22 @@ CMake will reply like this (after reporting progress for some time)::
   [== CMake Server ==[
   {"cookie":"","inReplyTo":"configure","type":"reply"}
   ]== CMake Server ==]
+
+
+Type "compute"
+^^^^^^^^^^^^^^
+
+This requist will generate build system files in the build directory and
+is only available after a project was successfully "configure"d.
+
+Example::
+
+  [== CMake Server ==[
+  {"type":"compute"}
+  ]== CMake Server ==]
+
+CMake will reply (after reporting progress information)::
+
+  [== CMake Server ==[
+  {"cookie":"","inReplyTo":"compute","type":"reply"}
+  ]== CMake Server ==]
