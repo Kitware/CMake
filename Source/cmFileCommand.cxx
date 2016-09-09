@@ -2564,6 +2564,11 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
         return false;
       }
       hashMatchMSG = algo + " hash";
+    } else {
+      // Do not return error for compatibility reason.
+      std::string err = "Unexpected argument: ";
+      err += *i;
+      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, err.c_str());
     }
     ++i;
   }
@@ -2812,6 +2817,11 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
       statusVar = *i;
     } else if (*i == "SHOW_PROGRESS") {
       showProgress = true;
+    } else {
+      // Do not return error for compatibility reason.
+      std::string err = "Unexpected argument: ";
+      err += *i;
+      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, err.c_str());
     }
 
     ++i;
