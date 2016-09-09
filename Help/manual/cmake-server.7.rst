@@ -558,3 +558,44 @@ listed by default.
 Finally you can limit the target types that are going to be listed. This is
 done by providing a list of target types as an array of strings to the
 "targetTypes" key.
+
+
+Type "cmakeInputs"
+^^^^^^^^^^^^^^^^^^
+
+The "cmakeInputs" requests will report files used by CMake as part
+of the build system itself.
+
+This request is only available after a project was successfully
+"configure"d.
+
+Example::
+
+  [== CMake Server ==[
+  {"type":"cmakeInputs"}
+  ]== CMake Server ==]
+
+CMake will reply with the following information::
+
+  [== CMake Server ==[
+  {"buildFiles":
+    [
+      {"isCMake":true,"isTemporary":false,"sources":["/usr/lib/cmake/...", ... ]},
+      {"isCMake":false,"isTemporary":false,"sources":["CMakeLists.txt", ...]},
+      {"isCMake":false,"isTemporary":true,"sources":["/tmp/build/CMakeFiles/...", ...]}
+    ],
+    "cmakeRootDirectory":"/usr/lib/cmake",
+    "sourceDirectory":"/home/code/src/cmake",
+    "cookie":"",
+    "inReplyTo":"cmakeInputs",
+    "type":"reply"
+  }
+  ]== CMake Server ==]
+
+All file names are either relative to the top level source directory or
+absolute.
+
+The list of files which "isCMake" set to true are part of the cmake installation.
+
+The list of files witch "isTemporary" set to true are part of the build directory
+and will not survive the build directory getting cleaned out.

@@ -6,6 +6,7 @@
 
 // Vocabulary:
 
+static const std::string kCMAKE_INPUTS_TYPE = "cmakeInputs";
 static const std::string kCODE_MODEL_TYPE = "codemodel";
 static const std::string kCOMPUTE_TYPE = "compute";
 static const std::string kCONFIGURE_TYPE = "configure";
@@ -20,9 +21,11 @@ static const std::string kSIGNAL_TYPE = "signal";
 
 static const std::string kARTIFACTS_KEY = "artifacts";
 static const std::string kBUILD_DIRECTORY_KEY = "buildDirectory";
+static const std::string kBUILD_FILES_KEY = "buildFiles";
 static const std::string kCACHE_ARGUMENTS_KEY = "cacheArguments";
 static const std::string kCAPABILITIES_KEY = "capabilities";
 static const std::string kCHECK_SYSTEM_VARS_KEY = "checkSystemVars";
+static const std::string kCMAKE_ROOT_DIRECTORY_KEY = "cmakeRootDirectory";
 static const std::string kCOMPILE_FLAGS_KEY = "compileFlags";
 static const std::string kCONFIGURATIONS_KEY = "configurations";
 static const std::string kCOOKIE_KEY = "cookie";
@@ -35,9 +38,11 @@ static const std::string kFRAMEWORK_PATH_KEY = "frameworkPath";
 static const std::string kFULL_NAME_KEY = "fullName";
 static const std::string kGENERATOR_KEY = "generator";
 static const std::string kINCLUDE_PATH_KEY = "includePath";
+static const std::string kIS_CMAKE_KEY = "isCMake";
 static const std::string kIS_EXPERIMENTAL_KEY = "isExperimental";
 static const std::string kIS_GENERATED_KEY = "isGenerated";
 static const std::string kIS_SYSTEM_KEY = "isSystem";
+static const std::string kIS_TEMPORARY_KEY = "isTemporary";
 static const std::string kLANGUAGE_KEY = "language";
 static const std::string kLINKER_LANGUAGE_KEY = "linkerLanguage";
 static const std::string kLINK_FLAGS_KEY = "linkFlags";
