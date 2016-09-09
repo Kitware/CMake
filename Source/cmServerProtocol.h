@@ -13,6 +13,7 @@
 #include <string>
 
 class cmake;
+class cmFileMonitor;
 class cmServer;
 
 class cmServerRequest;
@@ -81,6 +82,7 @@ public:
   bool Activate(cmServer* server, const cmServerRequest& request,
                 std::string* errorMessage);
 
+  cmFileMonitor* FileMonitor() const;
   void SendSignal(const std::string& name, const Json::Value& data) const;
 
 protected:

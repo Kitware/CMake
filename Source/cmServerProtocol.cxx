@@ -4,6 +4,7 @@
 
 #include "cmCacheManager.h"
 #include "cmExternalMakefileProjectGenerator.h"
+#include "cmFileMonitor.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
@@ -212,6 +213,11 @@ bool cmServerProtocol::Activate(cmServer* server,
     this->m_CMakeInstance = CM_NULLPTR;
   }
   return result;
+}
+
+cmFileMonitor* cmServerProtocol::FileMonitor() const
+{
+  return this->m_Server ? this->m_Server->FileMonitor() : nullptr;
 }
 
 void cmServerProtocol::SendSignal(const std::string& name,
@@ -861,6 +867,8 @@ cmServerResponse cmServerProtocol1_0::ProcessConfigure(
   if (this->m_State == STATE_INACTIVE) {
     return request.ReportError("This instance is inactive.");
   }
+
+  FileMonitor()->StopMonitoring();
 
   // Make sure the types of cacheArguments matches (if given):
   std::vector<std::string> cacheArgs;
