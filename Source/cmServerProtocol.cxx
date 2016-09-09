@@ -14,22 +14,16 @@
 
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmServer.h"
+#include "cmServerDictionary.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
+
+#include "cmServerDictionary.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cm_jsoncpp_reader.h"
 #include "cm_jsoncpp_value.h"
 #endif
-
-// Vocabulary:
-
-static const std::string kBUILD_DIRECTORY_KEY = "buildDirectory";
-static const std::string kCOOKIE_KEY = "cookie";
-static const std::string kEXTRA_GENERATOR_KEY = "extraGenerator";
-static const std::string kGENERATOR_KEY = "generator";
-static const std::string kSOURCE_DIRECTORY_KEY = "sourceDirectory";
-static const std::string kTYPE_KEY = "type";
 
 cmServerRequest::cmServerRequest(cmServer* server, const std::string& t,
                                  const std::string& c, const Json::Value& d)
