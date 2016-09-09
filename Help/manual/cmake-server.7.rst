@@ -194,6 +194,49 @@ are of type "signal", have an empty "cookie" and "inReplyTo" field and always
 have a "name" set to show which signal was sent.
 
 
+Specific Signals
+----------------
+
+The cmake server may sent signals with the following names:
+
+"dirty" Signal
+^^^^^^^^^^^^^^
+
+The "dirty" signal is sent whenever the server determines that the configuration
+of the project is no longer up-to-date. This happens when any of the files that have
+an influence on the build system is changed.
+
+The "dirty" signal may look like this::
+
+  [== CMake Server ==[
+  {
+    "cookie":"",
+    "inReplyTo":"",
+    "name":"dirty",
+    "type":"signal"}
+  ]== CMake Server ==]
+
+
+"fileChange" Signal
+^^^^^^^^^^^^^^^^^^^
+
+The "fileChange" signal is sent whenever a watched file is changed. It contains
+the "path" that has changed and a list of "properties" with the kind of change
+that was detected. Possible changes are "change" and "rename".
+
+The "fileChange" signal looks like this::
+
+  [== CMake Server ==[
+  {
+    "cookie":"",
+    "inReplyTo":"",
+    "name":"fileChange",
+    "path":"/absolute/CMakeLists.txt",
+    "properties":["change"],
+    "type":"signal"}
+  ]== CMake Server ==]
+
+
 Specific Message Types
 ----------------------
 

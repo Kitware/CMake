@@ -6,6 +6,9 @@
 
 // Vocabulary:
 
+static const std::string kDIRTY_SIGNAL = "dirty";
+static const std::string kFILE_CHANGE_SIGNAL = "fileChange";
+
 static const std::string kCACHE_TYPE = "cache";
 static const std::string kCMAKE_INPUTS_TYPE = "cmakeInputs";
 static const std::string kCODE_MODEL_TYPE = "codemodel";
@@ -86,3 +89,6 @@ static const std::string kWATCHED_FILES_KEY = "watchedFiles";
 
 static const std::string kSTART_MAGIC = "[== CMake Server ==[";
 static const std::string kEND_MAGIC = "]== CMake Server ==]";
+
+static const std::string kRENAME_PROPERTY_VALUE = "rename";
+static const std::string kCHANGE_PROPERTY_VALUE = "change";

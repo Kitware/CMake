@@ -371,6 +371,30 @@ bool cmServerProtocol1_0::DoActivate(const cmServerRequest& request,
   return true;
 }
 
+void cmServerProtocol1_0::HandleCMakeFileChanges(const std::string& path,
+                                                 int event, int status)
+{
+  assert(status == 0);
+  static_cast<void>(status);
+
+  if (!m_isDirty) {
+    m_isDirty = true;
+    SendSignal(kDIRTY_SIGNAL, Json::objectValue);
+  }
+  Json::Value obj = Json::objectValue;
+  obj[kPATH_KEY] = path;
+  Json::Value properties = Json::arrayValue;
+  if (event & UV_RENAME) {
+    properties.append(kRENAME_PROPERTY_VALUE);
+  }
+  if (event & UV_CHANGE) {
+    properties.append(kCHANGE_PROPERTY_VALUE);
+  }
+
+  obj[kPROPERTIES_KEY] = properties;
+  SendSignal(kFILE_CHANGE_SIGNAL, obj);
+}
+
 const cmServerResponse cmServerProtocol1_0::Process(
   const cmServerRequest& request)
 {
@@ -949,7 +973,17 @@ cmServerResponse cmServerProtocol1_0::ProcessConfigure(
   if (ret < 0) {
     return request.ReportError("Configuration failed.");
   }
+
+  std::vector<std::string> toWatchList;
+  getCMakeInputs(gg, std::string(), buildDir, nullptr, &toWatchList, nullptr);
+
+  FileMonitor()->MonitorPaths(toWatchList,
+                              [this](const std::string& p, int e, int s) {
+                                this->HandleCMakeFileChanges(p, e, s);
+                              });
+
   m_State = STATE_CONFIGURED;
+  m_isDirty = false;
   return request.Reply(Json::Value());
 }
 
