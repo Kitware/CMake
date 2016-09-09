@@ -151,6 +151,12 @@ $[ \t]*endif    { return F90PPR_ENDIF; }
 
 =|=>                     { return ASSIGNMENT_OP; }
 
+[Ee][Nn][Dd] { return END; }
+[Ii][Nn][Cc][Ll][Uu][Dd][Ee] { return INCLUDE; }
+[Ii][Nn][Tt][Ee][Rr][Ff][Aa][Cc][Ee] { return INTERFACE; }
+[Mm][Oo][Dd][Uu][Ll][Ee] { return MODULE; }
+[Uu][Ss][Ee] { return USE; }
+
 [a-zA-Z_][a-zA-Z_0-9]* {
   yylvalp->string = strdup(yytext);
   return WORD;

@@ -73,7 +73,12 @@ extern int cmFortran_yydebug;
     UNTERMINATED_STRING = 283,
     STRING = 284,
     WORD = 285,
-    CPP_INCLUDE_ANGLE = 286
+    CPP_INCLUDE_ANGLE = 286,
+    END = 287,
+    INCLUDE = 288,
+    INTERFACE = 289,
+    MODULE = 290,
+    USE = 291
   };
 #endif
 /* Tokens.  */
@@ -106,17 +111,22 @@ extern int cmFortran_yydebug;
 #define STRING 284
 #define WORD 285
 #define CPP_INCLUDE_ANGLE 286
+#define END 287
+#define INCLUDE 288
+#define INTERFACE 289
+#define MODULE 290
+#define USE 291
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 81 "cmFortranParser.y" /* yacc.c:1909  */
+#line 75 "cmFortranParser.y" /* yacc.c:1909  */
 
   char* string;
 
-#line 120 "cmFortranParserTokens.h" /* yacc.c:1909  */
+#line 130 "cmFortranParserTokens.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
