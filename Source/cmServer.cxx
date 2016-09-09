@@ -220,7 +220,7 @@ cmServerResponse cmServer::SetProtocolVersion(const cmServerRequest& request)
   }
 
   std::string errorMessage;
-  if (!this->Protocol->Activate(request, &errorMessage)) {
+  if (!this->Protocol->Activate(this, request, &errorMessage)) {
     this->Protocol = CM_NULLPTR;
     return request.ReportError("Failed to activate protocol version: " +
                                errorMessage);

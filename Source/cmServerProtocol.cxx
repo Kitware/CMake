@@ -109,9 +109,12 @@ Json::Value cmServerResponse::Data() const
   return this->m_Data;
 }
 
-bool cmServerProtocol::Activate(const cmServerRequest& request,
+bool cmServerProtocol::Activate(cmServer* server,
+                                const cmServerRequest& request,
                                 std::string* errorMessage)
 {
+  assert(server);
+  this->m_Server = server;
   this->m_CMakeInstance = std::make_unique<cmake>();
   const bool result = this->DoActivate(request, errorMessage);
   if (!result)

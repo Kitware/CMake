@@ -87,7 +87,8 @@ public:
   virtual bool IsExperimental() const = 0;
   virtual const cmServerResponse Process(const cmServerRequest& request) = 0;
 
-  bool Activate(const cmServerRequest& request, std::string* errorMessage);
+  bool Activate(cmServer* server, const cmServerRequest& request,
+                std::string* errorMessage);
 
 protected:
   cmake* CMakeInstance() const;
@@ -97,6 +98,7 @@ protected:
 
 private:
   std::unique_ptr<cmake> m_CMakeInstance;
+  cmServer* m_Server = nullptr; // not owned!
 
   friend class cmServer;
 };

@@ -95,6 +95,7 @@ private:
 
   mutable bool Writing = false;
 
-  friend class cmServerRequest;
   friend class cmServerConnection;
+  friend class cmServerProtocol;
+  friend class cmServerRequest;
 };
