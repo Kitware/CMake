@@ -3,14 +3,6 @@
 
 #include "libstatic.h"
 
-// #define BUILD_FAIL
-
-#ifndef BUILD_FAIL
-#define DOES_NOT_BUILD(function)
-#else
-#define DOES_NOT_BUILD(function) function
-#endif
-
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
@@ -64,74 +56,114 @@ void compare(const char* refName, const char* testName)
 int main()
 {
   {
-    Libshared l;
-    l.libshared();
-    l.libshared_exported();
-    l.libshared_deprecated();
-    l.libshared_not_exported();
+    libshared::Class l;
+    // l.method(); LINK ERROR
+    l.method_exported();
+    // l.method_deprecated(); LINK ERROR
+    l.method_deprecated_exported();
+    // l.method_excluded(); LINK ERROR
 
-    DOES_NOT_BUILD(l.libshared_excluded();)
+    // use_int(l.data); LINK ERROR
+    use_int(l.data_exported);
+    // use_int(l.data_excluded); LINK ERROR
   }
 
   {
-    LibsharedNotExported l;
-    DOES_NOT_BUILD(l.libshared();)
-    l.libshared_exported();
-    l.libshared_deprecated();
-    DOES_NOT_BUILD(l.libshared_not_exported();)
-    DOES_NOT_BUILD(l.libshared_excluded();)
+    libshared::ExportedClass l;
+    l.method();
+    l.method_deprecated();
+#if defined(_WIN32) || defined(__CYGWIN__)
+    l.method_excluded();
+#else
+// l.method_excluded(); LINK ERROR (NOT WIN32 AND NOT CYGWIN)
+#endif
+
+    use_int(l.data);
+#if defined(_WIN32) || defined(__CYGWIN__)
+    use_int(l.data_excluded);
+#else
+// use_int(l.data_excluded); LINK ERROR (NOT WIN32 AND NOT CYGWIN)
+#endif
   }
 
   {
-    LibsharedExcluded l;
-    DOES_NOT_BUILD(l.libshared();)
-    l.libshared_exported();
-    l.libshared_deprecated();
-    DOES_NOT_BUILD(l.libshared_not_exported();)
-    DOES_NOT_BUILD(l.libshared_excluded();)
+    libshared::ExcludedClass l;
+    // l.method(); LINK ERROR
+    l.method_exported();
+    // l.method_deprecated(); LINK ERROR
+    l.method_deprecated_exported();
+    // l.method_excluded(); LINK ERROR
+
+    // use_int(l.data); LINK ERROR
+    use_int(l.data_exported);
+    // use_int(l.data_excluded); LINK ERROR
   }
 
-  libshared_exported();
-  libshared_deprecated();
-  DOES_NOT_BUILD(libshared_not_exported();)
-  DOES_NOT_BUILD(libshared_excluded();)
+  // libshared::function(); LINK ERROR
+  libshared::function_exported();
+  // libshared::function_deprecated(); LINK ERROR
+  libshared::function_deprecated_exported();
+  // libshared::function_excluded(); LINK ERROR
+
+  // use_int(libshared::data); LINK ERROR
+  use_int(libshared::data_exported);
+  // use_int(libshared::data_excluded); LINK ERROR
 
   {
-    Libstatic l;
-    l.libstatic();
-    l.libstatic_exported();
-    l.libstatic_deprecated();
-    l.libstatic_not_exported();
-    l.libstatic_excluded();
+    libstatic::Class l;
+    l.method();
+    l.method_exported();
+    l.method_deprecated();
+    l.method_deprecated_exported();
+    l.method_excluded();
+
+    use_int(l.data);
+    use_int(l.data_exported);
+    use_int(l.data_excluded);
   }
 
   {
-    LibstaticNotExported l;
-    l.libstatic();
-    l.libstatic_exported();
-    l.libstatic_deprecated();
-    l.libstatic_not_exported();
-    l.libstatic_excluded();
+    libstatic::ExportedClass l;
+    l.method();
+    l.method_exported();
+    l.method_deprecated();
+    l.method_deprecated_exported();
+    l.method_excluded();
+
+    use_int(l.data);
+    use_int(l.data_exported);
+    use_int(l.data_excluded);
   }
 
   {
-    LibstaticExcluded l;
-    l.libstatic();
-    l.libstatic_exported();
-    l.libstatic_deprecated();
-    l.libstatic_not_exported();
-    l.libstatic_excluded();
+    libstatic::ExcludedClass l;
+    l.method();
+    l.method_exported();
+    l.method_deprecated();
+    l.method_deprecated_exported();
+    l.method_excluded();
+
+    use_int(l.data);
+    use_int(l.data_exported);
+    use_int(l.data_excluded);
   }
 
-  libstatic_exported();
-  libstatic_deprecated();
-  libstatic_not_exported();
-  libstatic_excluded();
+  libstatic::function();
+  libstatic::function_exported();
+  libstatic::function_deprecated();
+  libstatic::function_deprecated_exported();
+  libstatic::function_excluded();
 
+  use_int(libstatic::data);
+  use_int(libstatic::data_exported);
+  use_int(libstatic::data_excluded);
+
+#if defined(SRC_DIR) && defined(BIN_DIR)
   compare(SRC_DIR "/libshared_export.h",
           BIN_DIR "/libshared/libshared_export.h");
   compare(SRC_DIR "/libstatic_export.h",
           BIN_DIR "/libstatic/libstatic_export.h");
+#endif
 
   return 0;
 }

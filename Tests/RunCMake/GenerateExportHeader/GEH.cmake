@@ -123,3 +123,5 @@ target_compile_definitions(GenerateExportHeader
     "SRC_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/reference/${_platform}\""
     "BIN_DIR=\"${CMAKE_CURRENT_BINARY_DIR}\""
 )
+
+include(${CMAKE_CURRENT_LIST_DIR}/GEH-failures.cmake)

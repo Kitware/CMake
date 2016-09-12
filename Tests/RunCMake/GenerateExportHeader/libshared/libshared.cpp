@@ -1,102 +1,117 @@
-
 #include "libshared.h"
 
-int Libshared::libshared() const
+int libshared::Class::method() const
 {
   return 0;
 }
 
-int Libshared::libshared_exported() const
+int libshared::Class::method_exported() const
 {
   return 0;
 }
 
-int Libshared::libshared_deprecated() const
+int libshared::Class::method_deprecated() const
 {
   return 0;
 }
 
-int Libshared::libshared_not_exported() const
+int libshared::Class::method_deprecated_exported() const
 {
   return 0;
 }
 
-int Libshared::libshared_excluded() const
+int libshared::Class::method_excluded() const
 {
   return 0;
 }
 
-int LibsharedNotExported::libshared() const
+int const libshared::Class::data = 1;
+
+int const libshared::Class::data_exported = 1;
+
+int const libshared::Class::data_excluded = 1;
+
+int libshared::ExportedClass::method() const
 {
   return 0;
 }
 
-int LibsharedNotExported::libshared_exported() const
+int libshared::ExportedClass::method_deprecated() const
 {
   return 0;
 }
 
-int LibsharedNotExported::libshared_deprecated() const
+int libshared::ExportedClass::method_excluded() const
 {
   return 0;
 }
 
-int LibsharedNotExported::libshared_not_exported() const
+int const libshared::ExportedClass::data = 1;
+
+int const libshared::ExportedClass::data_excluded = 1;
+
+int libshared::ExcludedClass::method() const
 {
   return 0;
 }
 
-int LibsharedNotExported::libshared_excluded() const
+int libshared::ExcludedClass::method_exported() const
 {
   return 0;
 }
 
-int LibsharedExcluded::libshared() const
+int libshared::ExcludedClass::method_deprecated() const
 {
   return 0;
 }
 
-int LibsharedExcluded::libshared_exported() const
+int libshared::ExcludedClass::method_deprecated_exported() const
 {
   return 0;
 }
 
-int LibsharedExcluded::libshared_deprecated() const
+int libshared::ExcludedClass::method_excluded() const
 {
   return 0;
 }
 
-int LibsharedExcluded::libshared_not_exported() const
+int const libshared::ExcludedClass::data = 1;
+
+int const libshared::ExcludedClass::data_exported = 1;
+
+int const libshared::ExcludedClass::data_excluded = 1;
+
+int libshared::function()
 {
   return 0;
 }
 
-int LibsharedExcluded::libshared_excluded() const
+int libshared::function_exported()
 {
   return 0;
 }
 
-int libshared()
+int libshared::function_deprecated()
 {
   return 0;
 }
 
-int libshared_exported()
+int libshared::function_deprecated_exported()
 {
   return 0;
 }
 
-int libshared_deprecated()
+int libshared::function_excluded()
 {
   return 0;
 }
 
-int libshared_not_exported()
-{
-  return 0;
-}
+int const libshared::data = 1;
 
-int libshared_excluded()
+int const libshared::data_exported = 1;
+
+int const libshared::data_excluded = 1;
+
+void use_int(int)
 {
-  return 0;
 }

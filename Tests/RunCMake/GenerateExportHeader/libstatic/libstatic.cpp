@@ -1,97 +1,125 @@
-
 #include "libstatic.h"
 
-int Libstatic::libstatic() const
+int libstatic::Class::method() const
 {
   return 0;
 }
 
-int Libstatic::libstatic_exported() const
+int libstatic::Class::method_exported() const
 {
   return 0;
 }
 
-int Libstatic::libstatic_deprecated() const
+int libstatic::Class::method_deprecated() const
 {
   return 0;
 }
 
-int Libstatic::libstatic_not_exported() const
+int libstatic::Class::method_deprecated_exported() const
 {
   return 0;
 }
 
-int Libstatic::libstatic_excluded() const
+int libstatic::Class::method_excluded() const
 {
   return 0;
 }
 
-int LibstaticNotExported::libstatic() const
+int const libstatic::Class::data = 1;
+
+int const libstatic::Class::data_exported = 1;
+
+int const libstatic::Class::data_excluded = 1;
+
+int libstatic::ExportedClass::method() const
 {
   return 0;
 }
 
-int LibstaticNotExported::libstatic_exported() const
+int libstatic::ExportedClass::method_exported() const
 {
   return 0;
 }
 
-int LibstaticNotExported::libstatic_deprecated() const
+int libstatic::ExportedClass::method_deprecated() const
 {
   return 0;
 }
 
-int LibstaticNotExported::libstatic_not_exported() const
+int libstatic::ExportedClass::method_deprecated_exported() const
 {
   return 0;
 }
 
-int LibstaticNotExported::libstatic_excluded() const
+int libstatic::ExportedClass::method_excluded() const
 {
   return 0;
 }
 
-int LibstaticExcluded::libstatic() const
+int const libstatic::ExportedClass::data = 1;
+
+int const libstatic::ExportedClass::data_exported = 1;
+
+int const libstatic::ExportedClass::data_excluded = 1;
+
+int libstatic::ExcludedClass::method() const
 {
   return 0;
 }
 
-int LibstaticExcluded::libstatic_exported() const
+int libstatic::ExcludedClass::method_exported() const
 {
   return 0;
 }
 
-int LibstaticExcluded::libstatic_deprecated() const
+int libstatic::ExcludedClass::method_deprecated() const
 {
   return 0;
 }
 
-int LibstaticExcluded::libstatic_not_exported() const
+int libstatic::ExcludedClass::method_deprecated_exported() const
 {
   return 0;
 }
 
-int LibstaticExcluded::libstatic_excluded() const
+int libstatic::ExcludedClass::method_excluded() const
 {
   return 0;
 }
 
-int libstatic_exported()
+int const libstatic::ExcludedClass::data = 1;
+
+int const libstatic::ExcludedClass::data_exported = 1;
+
+int const libstatic::ExcludedClass::data_excluded = 1;
+
+int libstatic::function()
 {
   return 0;
 }
 
-int libstatic_deprecated()
+int libstatic::function_exported()
 {
   return 0;
 }
 
-int libstatic_not_exported()
+int libstatic::function_deprecated()
 {
   return 0;
 }
 
-int libstatic_excluded()
+int libstatic::function_deprecated_exported()
 {
   return 0;
 }
+
+int libstatic::function_excluded()
+{
+  return 0;
+}
+
+int const libstatic::data = 1;
+
+int const libstatic::data_exported = 1;
+
+int const libstatic::data_excluded = 1;
