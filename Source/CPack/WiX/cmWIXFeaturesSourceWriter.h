@@ -13,6 +13,7 @@
 #ifndef cmWIXFeaturesSourceWriter_h
 #define cmWIXFeaturesSourceWriter_h
 
+#include "cmWIXPatch.h"
 #include "cmWIXSourceWriter.h"
 
 #include <CPack/cmCPackGenerator.h>
@@ -29,9 +30,11 @@ public:
   void CreateCMakePackageRegistryEntry(std::string const& package,
                                        std::string const& upgradeGuid);
 
-  void EmitFeatureForComponentGroup(const cmCPackComponentGroup& group);
+  void EmitFeatureForComponentGroup(const cmCPackComponentGroup& group,
+                                    cmWIXPatch& patch);
 
-  void EmitFeatureForComponent(const cmCPackComponent& component);
+  void EmitFeatureForComponent(const cmCPackComponent& component,
+                               cmWIXPatch& patch);
 
   void EmitComponentRef(std::string const& id);
 };

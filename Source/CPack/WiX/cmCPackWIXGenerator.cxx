@@ -628,7 +628,7 @@ bool cmCPackWIXGenerator::CreateFeatureHierarchy(
        i != ComponentGroups.end(); ++i) {
     cmCPackComponentGroup const& group = i->second;
     if (group.ParentGroup == 0) {
-      featureDefinitions.EmitFeatureForComponentGroup(group);
+      featureDefinitions.EmitFeatureForComponentGroup(group, *this->Patch);
     }
   }
 
@@ -638,7 +638,7 @@ bool cmCPackWIXGenerator::CreateFeatureHierarchy(
     cmCPackComponent const& component = i->second;
 
     if (!component.Group) {
-      featureDefinitions.EmitFeatureForComponent(component);
+      featureDefinitions.EmitFeatureForComponent(component, *this->Patch);
     }
   }
 

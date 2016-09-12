@@ -147,7 +147,7 @@
 #     }
 #
 #  Currently fragments can be injected into most
-#  Component, File and Directory elements.
+#  Component, File, Directory and Feature elements.
 #
 #  The following additional special Ids can be used:
 #
