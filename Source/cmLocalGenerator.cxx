@@ -181,6 +181,7 @@ void cmLocalGenerator::GenerateTestFiles()
     // TODO: Use add_subdirectory instead?
     std::string outP = i->GetDirectory().GetCurrentBinary();
     outP = this->ConvertToRelativePath(outP, START_OUTPUT);
+    outP = cmOutputConverter::EscapeForCMake(outP);
     fout << "subdirs(" << outP << ")" << std::endl;
   }
 }
