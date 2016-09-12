@@ -86,7 +86,7 @@ private:
   SVNInfo* RootInfo;
 
   std::string LoadInfo(SVNInfo& svninfo);
-  void LoadExternals();
+  void LoadRepositories();
   void LoadModifications() CM_OVERRIDE;
   void LoadRevisions() CM_OVERRIDE;
   void LoadRevisions(SVNInfo& svninfo);

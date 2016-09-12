@@ -108,13 +108,8 @@ std::string cmCTestSVN::LoadInfo(SVNInfo& svninfo)
 
 void cmCTestSVN::NoteOldRevision()
 {
-  // Info for root repository
-  this->Repositories.push_back(SVNInfo(""));
-  this->RootInfo = &(this->Repositories.back());
-  // Info for the external repositories
-  this->LoadExternals();
+  this->LoadRepositories();
 
-  // Get info for all the repositories
   std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
   std::list<SVNInfo>::iterator itend = this->Repositories.end();
   for (; itbeg != itend; itbeg++) {
@@ -134,7 +129,8 @@ void cmCTestSVN::NoteOldRevision()
 
 void cmCTestSVN::NoteNewRevision()
 {
-  // Get info for the external repositories
+  this->LoadRepositories();
+
   std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
   std::list<SVNInfo>::iterator itend = this->Repositories.end();
   for (; itbeg != itend; itbeg++) {
@@ -534,8 +530,13 @@ private:
   }
 };
 
-void cmCTestSVN::LoadExternals()
+void cmCTestSVN::LoadRepositories()
 {
+  // Info for root repository
+  this->Repositories.clear();
+  this->Repositories.push_back(SVNInfo(""));
+  this->RootInfo = &(this->Repositories.back());
+
   // Run "svn status" to get the list of external repositories
   std::vector<const char*> svn_status;
   svn_status.push_back("status");
