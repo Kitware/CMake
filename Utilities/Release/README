@@ -15,7 +15,4 @@ Then as kitware@hythloth, using an up-to-date CMake:
 create-cmake-release.cmake:  script to run to create release sh scripts
 Add or remove machines in create-cmake-release.cmake.
 
-Cygwin -> directory that contains cpack cygwin package files used in
- CMakeCPack.cmake
-
 machine_release.cmake : config files for each machine

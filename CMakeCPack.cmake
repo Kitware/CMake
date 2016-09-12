@@ -190,31 +190,6 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     set(CPACK_PACKAGE_EXECUTABLES "ccmake" "CMake")
   endif()
 
-  # cygwin specific packaging stuff
-  if(CYGWIN)
-    # setup the cygwin package name
-    set(CPACK_PACKAGE_NAME cmake)
-    # setup the name of the package for cygwin cmake-2.4.3
-    set(CPACK_PACKAGE_FILE_NAME
-      "${CPACK_PACKAGE_NAME}-${CMake_VERSION}")
-    # the source has the same name as the binary
-    set(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_PACKAGE_FILE_NAME})
-    # Create a cygwin version number in case there are changes for cygwin
-    # that are not reflected upstream in CMake
-    set(CPACK_CYGWIN_PATCH_NUMBER 1 CACHE STRING "patch number for CMake cygwin packages")
-    mark_as_advanced(CPACK_CYGWIN_PATCH_NUMBER)
-    # These files are required by the cmCPackCygwinSourceGenerator and the files
-    # put into the release tar files.
-    set(CPACK_CYGWIN_BUILD_SCRIPT
-      "${CMake_BINARY_DIR}/${CPACK_PACKAGE_FILE_NAME}-${CPACK_CYGWIN_PATCH_NUMBER}.sh")
-    set(CPACK_CYGWIN_PATCH_FILE
-      "${CMake_BINARY_DIR}/${CPACK_PACKAGE_FILE_NAME}-${CPACK_CYGWIN_PATCH_NUMBER}.patch")
-    # include the sub directory cmake file for cygwin that
-    # configures some files and adds some install targets
-    # this file uses some of the package file name variables
-    include(Utilities/Release/Cygwin/CMakeLists.txt)
-  endif()
-
   set(CPACK_WIX_UPGRADE_GUID "8ffd1d72-b7f1-11e2-8ee5-00238bca4991")
 
   if(MSVC AND NOT "$ENV{WIX}" STREQUAL "")
