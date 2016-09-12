@@ -95,10 +95,7 @@ protected:
     // if there are no children
     if (!m->hasChildren(idx)) {
       bool adv = m->data(idx, QCMakeCacheModel::AdvancedRole).toBool();
-      if (!adv || (adv && this->ShowAdvanced)) {
-        return true;
-      }
-      return false;
+      return !adv || this->ShowAdvanced;
     }
 
     // check children
@@ -554,14 +551,16 @@ QWidget* QCMakeCacheModelDelegate::createEditor(
     QObject::connect(editor, SIGNAL(fileDialogExists(bool)), this,
                      SLOT(setFileDialogFlag(bool)));
     return editor;
-  } else if (type == QCMakeProperty::FILEPATH) {
+  }
+  if (type == QCMakeProperty::FILEPATH) {
     QCMakeFilePathEditor* editor =
       new QCMakeFilePathEditor(p, var.data(Qt::DisplayRole).toString());
     QObject::connect(editor, SIGNAL(fileDialogExists(bool)), this,
                      SLOT(setFileDialogFlag(bool)));
     return editor;
-  } else if (type == QCMakeProperty::STRING &&
-             var.data(QCMakeCacheModel::StringsRole).isValid()) {
+  }
+  if (type == QCMakeProperty::STRING &&
+      var.data(QCMakeCacheModel::StringsRole).isValid()) {
     QCMakeComboBox* editor = new QCMakeComboBox(
       p, var.data(QCMakeCacheModel::StringsRole).toStringList());
     editor->setFrame(false);

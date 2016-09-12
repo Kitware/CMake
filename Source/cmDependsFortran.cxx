@@ -712,10 +712,5 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
   // Compare the remaining content.  If no compiler id matched above,
   // including the case none was given, this will compare the whole
   // content.
-  if (!cmFortranStreamsDiffer(finModFile, finStampFile)) {
-    return false;
-  }
-
-  // The modules are different.
-  return true;
+  return cmFortranStreamsDiffer(finModFile, finStampFile);
 }
