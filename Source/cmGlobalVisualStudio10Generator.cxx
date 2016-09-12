@@ -482,6 +482,10 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
 
 bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
 {
+  if (this->DefaultPlatformToolset == "v100") {
+    // The v100 64-bit toolset does not exist in the express edition.
+    this->DefaultPlatformToolset.clear();
+  }
   if (this->GetPlatformToolset()) {
     return true;
   }
