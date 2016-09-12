@@ -116,6 +116,15 @@
 #  A branding image that will be displayed inside the installer (used by GUI
 #  installers).
 #
+# .. variable:: CPACK_PACKAGE_CHECKSUM
+#
+#  An algorithm that will be used to generate additional file with checksum
+#  of the package. Output file name will be::
+#
+#     ${CPACK_PACKAGE_FILE_NAME}.${CPACK_PACKAGE_CHECKSUM}
+#
+#  Current supported alogorithms: MD5|SHA1|SHA224|SHA256|SHA384|SHA512.
+#
 # .. variable:: CPACK_PROJECT_CONFIG_FILE
 #
 #  CPack-time project CPack configuration file. This file included at cpack
