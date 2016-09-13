@@ -527,7 +527,11 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         return 1;
       }
       cmake cm;
-      std::cout << cm.ReportCapabilities();
+#if defined(HAVE_SERVER_MODE) && HAVE_SERVER_MODE
+      std::cout << cm.ReportCapabilities(true);
+#else
+      std::cout << cm.ReportCapabilities(false);
+#endif
       return 0;
     }
 
