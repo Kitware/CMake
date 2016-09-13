@@ -1,0 +1,2 @@
+# Try to generate checksum file using invalid algorithm
+set(CPACK_PACKAGE_CHECKSUM "c6790w4nv2b12n048...")
