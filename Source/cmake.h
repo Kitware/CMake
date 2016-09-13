@@ -24,6 +24,10 @@
 #include <string>
 #include <vector>
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+#include "cm_jsoncpp_value.h"
+#endif
+
 class cmExternalMakefileProjectGeneratorFactory;
 class cmFileTimeComparison;
 class cmGlobalGenerator;
@@ -118,6 +122,9 @@ public:
   /// Destructor
   ~cmake();
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  Json::Value ReportCapabilitiesJson() const;
+#endif
   std::string ReportCapabilities() const;
 
   static const char* GetCMakeFilesDirectory() { return "/CMakeFiles"; }
@@ -185,6 +192,9 @@ public:
   {
     return this->GlobalGenerator;
   }
+
+  ///! Return the full path to where the CMakeCache.txt file should be.
+  std::string FindCacheFile(const std::string& binaryDir) const;
 
   ///! Return the global generator assigned to this instance of cmake
   void SetGlobalGenerator(cmGlobalGenerator*);

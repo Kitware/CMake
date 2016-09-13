@@ -35,7 +35,7 @@
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmGraphVizWriter.h"
 #include "cmVariableWatch.h"
-#include <cm_jsoncpp_value.h>
+
 #include <cm_jsoncpp_writer.h>
 #endif
 
@@ -233,10 +233,9 @@ cmake::~cmake()
   delete this->FileComparison;
 }
 
-std::string cmake::ReportCapabilities() const
-{
-  std::string result;
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+Json::Value cmake::ReportCapabilitiesJson() const
+{
   Json::Value obj = Json::objectValue;
   // Version information:
   Json::Value version = Json::objectValue;
@@ -287,8 +286,16 @@ std::string cmake::ReportCapabilities() const
 #else
   obj["serverMode"] = false;
 #endif
+  return obj;
+}
+#endif
+
+std::string cmake::ReportCapabilities() const
+{
+  std::string result;
+#if defined(CMAKE_BUILD_WITH_CMAKE)
   Json::FastWriter writer;
-  result = writer.write(obj);
+  result = writer.write(this->ReportCapabilitiesJson());
 #else
   result = "Not supported";
 #endif
@@ -1037,6 +1044,28 @@ void cmake::SetHomeOutputDirectory(const std::string& dir)
 const char* cmake::GetHomeOutputDirectory() const
 {
   return this->State->GetBinaryDirectory();
+}
+
+std::string cmake::FindCacheFile(const std::string& binaryDir) const
+{
+  std::string cachePath = binaryDir;
+  cmSystemTools::ConvertToUnixSlashes(cachePath);
+  std::string cacheFile = cachePath;
+  cacheFile += "/CMakeCache.txt";
+  if (!cmSystemTools::FileExists(cacheFile.c_str())) {
+    // search in parent directories for cache
+    std::string cmakeFiles = cachePath;
+    cmakeFiles += "/CMakeFiles";
+    if (cmSystemTools::FileExists(cmakeFiles.c_str())) {
+      std::string cachePathFound =
+        cmSystemTools::FileExistsInParentDirectories("CMakeCache.txt",
+                                                     cachePath.c_str(), "/");
+      if (!cachePathFound.empty()) {
+        cachePath = cmSystemTools::GetFilenamePath(cachePathFound);
+      }
+    }
+  }
+  return cachePath;
 }
 
 void cmake::SetGlobalGenerator(cmGlobalGenerator* gg)
@@ -2337,24 +2366,8 @@ int cmake::Build(const std::string& dir, const std::string& target,
     std::cerr << "Error: " << dir << " is not a directory\n";
     return 1;
   }
-  std::string cachePath = dir;
-  cmSystemTools::ConvertToUnixSlashes(cachePath);
-  std::string cacheFile = cachePath;
-  cacheFile += "/CMakeCache.txt";
-  if (!cmSystemTools::FileExists(cacheFile.c_str())) {
-    // search in parent directories for cache
-    std::string cmakeFiles = cachePath;
-    cmakeFiles += "/CMakeFiles";
-    if (cmSystemTools::FileExists(cmakeFiles.c_str())) {
-      std::string cachePathFound =
-        cmSystemTools::FileExistsInParentDirectories("CMakeCache.txt",
-                                                     cachePath.c_str(), "/");
-      if (!cachePathFound.empty()) {
-        cachePath = cmSystemTools::GetFilenamePath(cachePathFound);
-      }
-    }
-  }
 
+  std::string cachePath = FindCacheFile(dir);
   if (!this->LoadCache(cachePath)) {
     std::cerr << "Error: could not load cache\n";
     return 1;
