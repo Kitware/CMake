@@ -306,6 +306,16 @@ public:
                                       std::string const& rhs);
 
   /**
+   * Compare two ASCII strings using natural versioning order.
+   * Non-numerical characters are compared directly.
+   * Numerical characters are first globbed such that, e.g.
+   * `test000 < test01 < test0 < test1 < test10`.
+   * Return a value less than, equal to, or greater than zero if lhs
+   * precedes, equals, or succeeds rhs in the defined ordering.
+   */
+  static int strverscmp(std::string const& lhs, std::string const& rhs);
+
+  /**
    * Determine the file type based on the extension
    */
   static FileFormat GetFileFormat(const char* ext);
