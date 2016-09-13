@@ -87,6 +87,8 @@ void read_stdin(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf)
 
 cmServer::cmServer()
 {
+  // Register supported protocols:
+  this->RegisterProtocol(new cmServerProtocol1_0);
 }
 
 cmServer::~cmServer()
@@ -245,6 +247,7 @@ cmServerResponse cmServer::SetProtocolVersion(const cmServerRequest& request)
 
 void cmServer::Serve()
 {
+  assert(!this->SupportedProtocols.empty());
   assert(!this->Protocol);
 
   this->Loop = uv_default_loop();

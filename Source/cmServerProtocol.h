@@ -95,3 +95,21 @@ protected:
 private:
   std::unique_ptr<cmake> m_CMakeInstance;
 };
+
+class cmServerProtocol1_0 : public cmServerProtocol
+{
+public:
+  std::pair<int, int> ProtocolVersion() const override;
+  const cmServerResponse Process(const cmServerRequest& request) override;
+
+private:
+  bool DoActivate(const cmServerRequest& request,
+                  std::string* errorMessage) override;
+
+  enum State
+  {
+    STATE_INACTIVE,
+    STATE_ACTIVE
+  };
+  State m_State = STATE_INACTIVE;
+};
