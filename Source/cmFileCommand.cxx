@@ -2481,6 +2481,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   std::string hashMatchMSG;
   CM_AUTO_PTR<cmCryptoHash> hash;
   bool showProgress = false;
+  std::string userpwd;
 
   while (i != args.end()) {
     if (*i == "TIMEOUT") {
@@ -2564,6 +2565,13 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
         return false;
       }
       hashMatchMSG = algo + " hash";
+    } else if (*i == "USERPWD") {
+      ++i;
+      if (i == args.end()) {
+        this->SetError("DOWNLOAD missing string for USERPWD.");
+        return false;
+      }
+      userpwd = *i;
     } else {
       // Do not return error for compatibility reason.
       std::string err = "Unexpected argument: ";
@@ -2703,6 +2711,11 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
     check_curl_result(res, "DOWNLOAD cannot set progress data: ");
   }
 
+  if (!userpwd.empty()) {
+    res = ::curl_easy_setopt(curl, CURLOPT_USERPWD, userpwd.c_str());
+    check_curl_result(res, "DOWNLOAD cannot set user password: ");
+  }
+
   res = ::curl_easy_perform(curl);
 
   /* always cleanup */
@@ -2783,6 +2796,7 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   std::string logVar;
   std::string statusVar;
   bool showProgress = false;
+  std::string userpwd;
 
   while (i != args.end()) {
     if (*i == "TIMEOUT") {
@@ -2817,6 +2831,13 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
       statusVar = *i;
     } else if (*i == "SHOW_PROGRESS") {
       showProgress = true;
+    } else if (*i == "USERPWD") {
+      ++i;
+      if (i == args.end()) {
+        this->SetError("UPLOAD missing string for USERPWD.");
+        return false;
+      }
+      userpwd = *i;
     } else {
       // Do not return error for compatibility reason.
       std::string err = "Unexpected argument: ";
@@ -2929,6 +2950,11 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   res =
     ::curl_easy_setopt(curl, CURLOPT_INFILESIZE, static_cast<long>(file_size));
   check_curl_result(res, "UPLOAD cannot set input file size: ");
+
+  if (!userpwd.empty()) {
+    res = ::curl_easy_setopt(curl, CURLOPT_USERPWD, userpwd.c_str());
+    check_curl_result(res, "UPLOAD cannot set user password: ");
+  }
 
   res = ::curl_easy_perform(curl);
 

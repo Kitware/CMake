@@ -222,6 +222,9 @@ Options to both ``DOWNLOAD`` and ``UPLOAD`` are:
 ``TIMEOUT <seconds>``
   Terminate the operation after a given total time has elapsed.
 
+``USERPWD <username>:<password>``
+  Set username and password for operation.
+
 Additional options to ``DOWNLOAD`` are:
 
 ``EXPECTED_HASH ALGO=<value>``
