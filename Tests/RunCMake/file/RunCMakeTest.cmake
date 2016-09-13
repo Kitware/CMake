@@ -1,6 +1,8 @@
 include(RunCMake)
 
 run_cmake(DOWNLOAD-hash-mismatch)
+run_cmake(DOWNLOAD-unused-argument)
+run_cmake(UPLOAD-unused-argument)
 run_cmake(INSTALL-DIRECTORY)
 run_cmake(INSTALL-MESSAGE-bad)
 run_cmake(FileOpenFailRead)
