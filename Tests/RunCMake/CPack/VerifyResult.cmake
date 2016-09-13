@@ -11,7 +11,7 @@ set(output_error_message
     "\nCPack output: '${output}'\nCPack error: '${error}';\nconfig file: '${config_file_content}'")
 
 # check that expected generated files exist and contain expected content
-include("${src_dir}/${GENERATOR_TYPE}/${RunCMake_TEST}-ExpectedFiles.cmake")
+include("${src_dir}/${GENERATOR_TYPE}/${RunCMake_TEST_FILE_PREFIX}-ExpectedFiles.cmake")
 
 if(NOT EXPECTED_FILES_COUNT EQUAL 0)
   foreach(file_no_ RANGE 1 ${EXPECTED_FILES_COUNT})
@@ -82,8 +82,8 @@ else()
 endif()
 
 # handle additional result verifications
-if(EXISTS "${src_dir}/${GENERATOR_TYPE}/${RunCMake_TEST}-VerifyResult.cmake")
-  include("${src_dir}/${GENERATOR_TYPE}/${RunCMake_TEST}-VerifyResult.cmake")
+if(EXISTS "${src_dir}/${GENERATOR_TYPE}/${RunCMake_TEST_FILE_PREFIX}-VerifyResult.cmake")
+  include("${src_dir}/${GENERATOR_TYPE}/${RunCMake_TEST_FILE_PREFIX}-VerifyResult.cmake")
 else()
   # by default only print out output and error so that they can be compared by
   # regex
