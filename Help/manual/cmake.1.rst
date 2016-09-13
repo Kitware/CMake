@@ -273,6 +273,9 @@ Available commands are:
 ``rename <oldname> <newname>``
   Rename a file or directory (on one volume).
 
+``server``
+  Launch :manual:`cmake-server(7)` mode.
+
 ``sleep <number>...``
   Sleep for given number of seconds.
 
