@@ -1046,7 +1046,7 @@ const char* cmake::GetHomeOutputDirectory() const
   return this->State->GetBinaryDirectory();
 }
 
-std::string cmake::FindCacheFile(const std::string& binaryDir) const
+std::string cmake::FindCacheFile(const std::string& binaryDir)
 {
   std::string cachePath = binaryDir;
   cmSystemTools::ConvertToUnixSlashes(cachePath);
