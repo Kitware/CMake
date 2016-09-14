@@ -3982,16 +3982,16 @@ std::string SystemTools::RelativePath(const std::string& local, const std::strin
 }
 
 #ifdef _WIN32
-static int GetCasePathName(const std::string & pathIn,
-                            std::string & casePath)
+static std::string GetCasePathName(std::string const& pathIn)
 {
+  std::string casePath;
   std::vector<std::string> path_components;
   SystemTools::SplitPath(pathIn, path_components);
   if(path_components[0].empty()) // First component always exists.
     {
     // Relative paths cannot be converted.
-    casePath = "";
-    return 0;
+    casePath = pathIn;
+    return casePath;
     }
 
   // Start with root component.
@@ -4015,38 +4015,45 @@ static int GetCasePathName(const std::string & pathIn,
     sep = "/";
     }
 
+  // Convert case of all components that exist.
+  bool converting = true;
   for(; idx < path_components.size(); idx++)
     {
     casePath += sep;
     sep = "/";
-    std::string test_str = casePath;
-    test_str += path_components[idx];
 
-    // If path component contains wildcards, we skip matching
-    // because these filenames are not allowed on windows,
-    // and we do not want to match a different file.
-    if(path_components[idx].find('*') != std::string::npos ||
-       path_components[idx].find('?') != std::string::npos)
+    if (converting)
       {
-      casePath = "";
-      return 0;
+      // If path component contains wildcards, we skip matching
+      // because these filenames are not allowed on windows,
+      // and we do not want to match a different file.
+      if(path_components[idx].find('*') != std::string::npos ||
+         path_components[idx].find('?') != std::string::npos)
+        {
+        converting = false;
+        }
+      else
+        {
+        std::string test_str = casePath;
+        test_str += path_components[idx];
+        WIN32_FIND_DATAW findData;
+        HANDLE hFind = ::FindFirstFileW(Encoding::ToWide(test_str).c_str(),
+          &findData);
+        if (INVALID_HANDLE_VALUE != hFind)
+          {
+          path_components[idx] = Encoding::ToNarrow(findData.cFileName);
+          ::FindClose(hFind);
+          }
+        else
+          {
+          converting = false;
+          }
+        }
       }
 
-    WIN32_FIND_DATAW findData;
-    HANDLE hFind = ::FindFirstFileW(Encoding::ToWide(test_str).c_str(),
-      &findData);
-    if (INVALID_HANDLE_VALUE != hFind)
-      {
-      casePath += Encoding::ToNarrow(findData.cFileName);
-      ::FindClose(hFind);
-      }
-    else
-      {
-      casePath = "";
-      return 0;
-      }
+    casePath += path_components[idx];
     }
-  return (int)casePath.size();
+  return casePath;
 }
 #endif
 
@@ -4065,11 +4072,10 @@ std::string SystemTools::GetActualCaseForPath(const std::string& p)
     {
     return i->second;
     }
-  std::string casePath;
-  int len = GetCasePathName(p, casePath);
-  if(len == 0 || len > MAX_PATH+1)
+  std::string casePath = GetCasePathName(p);
+  if (casePath.size() > MAX_PATH)
     {
-    return p;
+    return casePath;
     }
   (*SystemTools::PathCaseMap)[p] = casePath;
   return casePath;
