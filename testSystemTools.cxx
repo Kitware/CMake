@@ -940,7 +940,7 @@ static bool CheckRelativePath(
   const std::string& expected)
 {
   std::string result = kwsys::SystemTools::RelativePath(local, remote);
-  if(expected != result)
+  if (!kwsys::SystemTools::ComparePath(expected, result))
     {
     std::cerr << "RelativePath(" << local << ", " << remote
       << ")  yielded " << result << " instead of " << expected << std::endl;
@@ -965,7 +965,7 @@ static bool CheckCollapsePath(
   const std::string& expected)
 {
   std::string result = kwsys::SystemTools::CollapseFullPath(path);
-  if(expected != result)
+  if (!kwsys::SystemTools::ComparePath(expected, result))
     {
     std::cerr << "CollapseFullPath(" << path
       << ")  yielded " << result << " instead of " << expected << std::endl;
