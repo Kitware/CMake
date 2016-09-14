@@ -59,15 +59,22 @@ public:
   std::vector<cmListFileBacktrace> LinkImplementationPropertyBacktraces;
 };
 
-cmTarget::cmTarget()
+cmTarget::cmTarget(std::string const& name, cmState::TargetType type,
+                   Visibility vis, cmMakefile* mf)
 {
+  assert(mf || type == cmState::GLOBAL_TARGET);
   this->Makefile = CM_NULLPTR;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
   this->IsAndroid = false;
-  this->IsImportedTarget = false;
-  this->ImportedGloballyVisible = false;
+  this->IsImportedTarget =
+    (vis == VisibilityImported || vis == VisibilityImportedGlobally);
+  this->ImportedGloballyVisible = vis == VisibilityImportedGlobally;
   this->BuildInterfaceIncludesAppended = false;
+  this->SetType(type, name);
+  if (mf) {
+    this->SetMakefile(mf);
+  }
 }
 
 void cmTarget::SetType(cmState::TargetType type, const std::string& name)
@@ -1069,12 +1076,6 @@ void cmTarget::CheckProperty(const std::string& prop,
       cmTargetCheckINTERFACE_LINK_LIBRARIES(value, context);
     }
   }
-}
-
-void cmTarget::MarkAsImported(bool global)
-{
-  this->IsImportedTarget = true;
-  this->ImportedGloballyVisible = global;
 }
 
 bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const

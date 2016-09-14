@@ -63,7 +63,16 @@ private:
 class cmTarget
 {
 public:
-  cmTarget();
+  enum Visibility
+  {
+    VisibilityNormal,
+    VisibilityImported,
+    VisibilityImportedGlobally
+  };
+
+  cmTarget(std::string const& name, cmState::TargetType type, Visibility vis,
+           cmMakefile* mf);
+
   enum CustomCommandType
   {
     PRE_BUILD,
@@ -76,21 +85,13 @@ public:
    */
   cmState::TargetType GetType() const { return this->TargetTypeValue; }
 
-  /**
-   * Set the target type
-   */
-  void SetType(cmState::TargetType f, const std::string& name);
-
-  void MarkAsImported(bool global = false);
-
   ///! Set/Get the name of the target
   const std::string& GetName() const { return this->Name; }
 
   /** Get a copy of this target adapted for the given directory.  */
   cmTarget CopyForDirectory(cmMakefile* mf) const;
 
-  ///! Set the cmMakefile that owns this target
-  void SetMakefile(cmMakefile* mf);
+  /** Get the cmMakefile that owns this target.  */
   cmMakefile* GetMakefile() const { return this->Makefile; }
 
 #define DECLARE_TARGET_POLICY(POLICY)                                         \
@@ -282,6 +283,9 @@ public:
   };
 
 private:
+  void SetType(cmState::TargetType f, const std::string& name);
+  void SetMakefile(cmMakefile* mf);
+
   bool HandleLocationPropertyPolicy(cmMakefile* context) const;
 
   const char* GetSuffixVariableInternal(bool implib) const;

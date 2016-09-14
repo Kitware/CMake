@@ -1925,10 +1925,10 @@ cmTarget* cmMakefile::AddNewTarget(cmState::TargetType type,
                                    const std::string& name)
 {
   cmTargets::iterator it =
-    this->Targets.insert(cmTargets::value_type(name, cmTarget())).first;
-  cmTarget& target = it->second;
-  target.SetType(type, name);
-  target.SetMakefile(this);
+    this->Targets
+      .insert(cmTargets::value_type(
+        name, cmTarget(name, type, cmTarget::VisibilityNormal, this)))
+      .first;
   this->GetGlobalGenerator()->IndexTarget(&it->second);
   return &it->second;
 }
@@ -3710,10 +3710,10 @@ cmTarget* cmMakefile::AddImportedTarget(const std::string& name,
                                         cmState::TargetType type, bool global)
 {
   // Create the target.
-  CM_AUTO_PTR<cmTarget> target(new cmTarget);
-  target->SetType(type, name);
-  target->MarkAsImported(global);
-  target->SetMakefile(this);
+  CM_AUTO_PTR<cmTarget> target(
+    new cmTarget(name, type, global ? cmTarget::VisibilityImportedGlobally
+                                    : cmTarget::VisibilityImported,
+                 this));
 
   // Add to the set of available imported targets.
   this->ImportedTargets[name] = target.get();

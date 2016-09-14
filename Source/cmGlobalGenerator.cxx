@@ -2352,8 +2352,8 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
   const char* workingDirectory, bool uses_terminal)
 {
   // Package
-  cmTarget target;
-  target.SetType(cmState::GLOBAL_TARGET, name);
+  cmTarget target(name, cmState::GLOBAL_TARGET, cmTarget::VisibilityNormal,
+                  CM_NULLPTR);
   target.SetProperty("EXCLUDE_FROM_ALL", "TRUE");
 
   std::vector<std::string> no_outputs;
