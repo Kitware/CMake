@@ -175,15 +175,14 @@ void cmLocalGenerator::GenerateTestFiles()
     (*gi)->Compute(this);
     (*gi)->Generate(fout, config, configurationTypes);
   }
-  size_t i;
-  std::vector<cmState::Snapshot> children =
-    this->Makefile->GetStateSnapshot().GetChildren();
-  for (i = 0; i < children.size(); ++i) {
+  typedef std::vector<cmState::Snapshot> vec_t;
+  vec_t const& children = this->Makefile->GetStateSnapshot().GetChildren();
+  for (vec_t::const_iterator i = children.begin(); i != children.end(); ++i) {
     // TODO: Use add_subdirectory instead?
-    fout << "subdirs(";
-    std::string outP = children[i].GetDirectory().GetCurrentBinary();
-    fout << this->ConvertToRelativePath(outP, START_OUTPUT);
-    fout << ")" << std::endl;
+    std::string outP = i->GetDirectory().GetCurrentBinary();
+    outP = this->ConvertToRelativePath(outP, START_OUTPUT);
+    outP = cmOutputConverter::EscapeForCMake(outP);
+    fout << "subdirs(" << outP << ")" << std::endl;
   }
 }
 
