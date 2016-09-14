@@ -37,14 +37,17 @@ bool cmInstallTargetsCommand::InitialPass(std::vector<std::string> const& args,
       }
 
       runtime_dir = *s;
-    } else if (tgts.find(*s) != tgts.end()) {
-      tgts[*s].SetInstallPath(args[0].c_str());
-      tgts[*s].SetRuntimeInstallPath(runtime_dir.c_str());
-      tgts[*s].SetHaveInstallRule(true);
     } else {
-      std::string str = "Cannot find target: \"" + *s + "\" to install.";
-      this->SetError(str);
-      return false;
+      cmTargets::iterator ti = tgts.find(*s);
+      if (ti != tgts.end()) {
+        ti->second.SetInstallPath(args[0].c_str());
+        ti->second.SetRuntimeInstallPath(runtime_dir.c_str());
+        ti->second.SetHaveInstallRule(true);
+      } else {
+        std::string str = "Cannot find target: \"" + *s + "\" to install.";
+        this->SetError(str);
+        return false;
+      }
     }
   }
 

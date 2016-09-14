@@ -979,8 +979,9 @@ void cmMakefile::AddCustomCommandOldStyle(
     // then add the source to the target to make sure the rule is
     // included.
     if (sf && !sf->GetPropertyAsBool("__CMAKE_RULE")) {
-      if (this->Targets.find(target) != this->Targets.end()) {
-        this->Targets[target].AddSource(sf->GetFullPath());
+      cmTargets::iterator ti = this->Targets.find(target);
+      if (ti != this->Targets.end()) {
+        ti->second.AddSource(sf->GetFullPath());
       } else {
         cmSystemTools::Error("Attempt to add a custom rule to a target "
                              "that does not exist yet for target ",
