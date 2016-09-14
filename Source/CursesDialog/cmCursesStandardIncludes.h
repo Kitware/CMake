@@ -14,10 +14,6 @@
 
 #include <cmConfigure.h>
 
-#if defined(__sun__) && defined(__GNUC__)
-#define _MSE_INT_H
-#endif
-
 #if defined(__hpux)
 #define _BOOL_DEFINED
 #include <sys/time.h>
