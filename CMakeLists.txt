@@ -123,6 +123,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_USE_FStream 1)
   SET(KWSYS_USE_String 1)
   SET(KWSYS_USE_SystemInformation 1)
+  SET(KWSYS_USE_ConsoleBuf 1)
 ENDIF()
 
 # Enforce component dependencies.
@@ -152,6 +153,9 @@ IF(KWSYS_USE_Directory)
   SET(KWSYS_USE_Encoding 1)
 ENDIF()
 IF(KWSYS_USE_FStream)
+  SET(KWSYS_USE_Encoding 1)
+ENDIF()
+IF(KWSYS_USE_ConsoleBuf)
   SET(KWSYS_USE_Encoding 1)
 ENDIF()
 
@@ -673,7 +677,7 @@ SET(KWSYS_HXX_FILES Configure String
 # Add selected C++ classes.
 SET(cppclasses
   Directory DynamicLoader Encoding Glob RegularExpression SystemTools
-  CommandLineArguments IOStream FStream SystemInformation
+  CommandLineArguments IOStream FStream SystemInformation ConsoleBuf
   )
 FOREACH(cpp ${cppclasses})
   IF(KWSYS_USE_${cpp})
@@ -925,6 +929,20 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS}
         testFStream
         )
+    ENDIF()
+    IF(KWSYS_USE_ConsoleBuf)
+      ADD_EXECUTABLE(testConsoleBufChild testConsoleBufChild.cxx)
+      SET_PROPERTY(TARGET testConsoleBufChild PROPERTY LABELS ${KWSYS_LABELS_EXE})
+      TARGET_LINK_LIBRARIES(testConsoleBufChild ${KWSYS_NAMESPACE})
+      SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS}
+        testConsoleBuf
+        )
+      IF("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC" AND
+         NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.0")
+        set_property(SOURCE testConsoleBuf.cxx testConsoleBufChild.cxx PROPERTY COMPILE_FLAGS /utf-8)
+      ENDIF()
+      SET_PROPERTY(SOURCE testConsoleBuf.cxx APPEND PROPERTY COMPILE_DEFINITIONS
+        KWSYS_ENCODING_DEFAULT_CODEPAGE=${KWSYS_ENCODING_DEFAULT_CODEPAGE})
     ENDIF()
     IF(KWSYS_USE_SystemInformation)
       SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS} testSystemInformation)
