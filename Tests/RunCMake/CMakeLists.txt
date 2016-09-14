@@ -331,6 +331,8 @@ add_RunCMake_test_group(CPack "DEB;RPM;TGZ")
 # for MSVC compilers CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS property is used
 add_RunCMake_test(AutoExportDll)
 
+add_RunCMake_test(AndroidMK)
+
 if(CMake_TEST_ANDROID_NDK OR CMake_TEST_ANDROID_STANDALONE_TOOLCHAIN)
   if(NOT "${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
     message(FATAL_ERROR "Android tests supported only by Makefile and Ninja generators")

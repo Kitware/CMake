@@ -1,0 +1,46 @@
+/*============================================================================
+  CMake - Cross Platform Makefile Generator
+  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
+
+  Distributed under the OSI-approved BSD License (the "License");
+  see accompanying file Copyright.txt for details.
+
+  This software is distributed WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the License for more information.
+============================================================================*/
+#ifndef cmInstallExportAndroidMKGenerator_h
+#define cmInstallExportAndroidMKGenerator_h
+
+#include "cmInstallExportGenerator.h"
+
+class cmExportInstallFileGenerator;
+class cmInstallFilesGenerator;
+class cmInstallTargetGenerator;
+class cmExportSet;
+class cmMakefile;
+
+/** \class cmInstallExportAndroidMKGenerator
+ * \brief Generate rules for creating an export files.
+ */
+class cmInstallExportAndroidMKGenerator : public cmInstallExportGenerator
+{
+public:
+  cmInstallExportAndroidMKGenerator(
+    cmExportSet* exportSet, const char* dest, const char* file_permissions,
+    const std::vector<std::string>& configurations, const char* component,
+    MessageLevel message, bool exclude_from_all, const char* filename,
+    const char* name_space, bool exportOld);
+  ~cmInstallExportAndroidMKGenerator();
+
+  void Compute(cmLocalGenerator* lg);
+
+protected:
+  virtual void GenerateScript(std::ostream& os);
+  virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);
+  virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
+  void GenerateImportFile(cmExportSet const* exportSet);
+  void GenerateImportFile(const char* config, cmExportSet const* exportSet);
+};
+
+#endif

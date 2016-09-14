@@ -55,3 +55,18 @@ build tree. In some cases, for example for packaging and for system
 wide installations, it is not desirable to write the user package
 registry. If the :variable:`CMAKE_EXPORT_NO_PACKAGE_REGISTRY` variable
 is enabled, the ``export(PACKAGE)`` command will do nothing.
+
+::
+
+  export(TARGETS [target1 [target2 [...]]]  [ANDROID_MK <filename>])
+
+This signature exports cmake built targets to the android ndk build system
+by creating an Android.mk file that references the prebuilt targets. The
+Android NDK supports the use of prebuilt libraries, both static and shared.
+This allows cmake to build the libraries of a project and make them available
+to an ndk build system complete with transitive dependencies, include flags
+and defines required to use the libraries. The signature takes a list of
+targets and puts them in the Android.mk file specified by the ``<filename>``
+given. This signature can only be used if policy CMP0022 is NEW for all
+targets given. A error will be issued if that policy is set to OLD for one
+of the targets.

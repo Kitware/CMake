@@ -80,9 +80,17 @@ protected:
   std::vector<std::string> FindNamespaces(cmGlobalGenerator* gg,
                                           const std::string& name);
 
+  /** Generate the relative import prefix.  */
+  virtual void GenerateImportPrefix(std::ostream&);
+
+  /** Generate the relative import prefix.  */
+  virtual void LoadConfigFiles(std::ostream&);
+
+  virtual void CleanupTemporaryVariables(std::ostream&);
+
   /** Generate a per-configuration file for the targets.  */
-  bool GenerateImportFileConfig(const std::string& config,
-                                std::vector<std::string>& missingTargets);
+  virtual bool GenerateImportFileConfig(
+    const std::string& config, std::vector<std::string>& missingTargets);
 
   /** Fill in properties indicating installed file locations.  */
   void SetImportLocationProperty(const std::string& config,

@@ -18,6 +18,7 @@
 #include <cmsys/Encoding.hxx>
 #include <cmsys/RegularExpression.hxx>
 
+#include "cmExportBuildAndroidMKGenerator.h"
 #include "cmExportBuildFileGenerator.h"
 
 #if defined(__HAIKU__)
@@ -34,6 +35,7 @@ cmExportCommand::cmExportCommand()
   , Namespace(&Helper, "NAMESPACE", &ArgumentGroup)
   , Filename(&Helper, "FILE", &ArgumentGroup)
   , ExportOld(&Helper, "EXPORT_LINK_INTERFACE_LIBRARIES", &ArgumentGroup)
+  , AndroidMKFile(&Helper, "ANDROID_MK")
 {
   this->ExportSet = CM_NULLPTR;
 }
@@ -66,13 +68,18 @@ bool cmExportCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   std::string fname;
-  if (!this->Filename.WasFound()) {
+  bool android = false;
+  if (this->AndroidMKFile.WasFound()) {
+    fname = this->AndroidMKFile.GetString();
+    android = true;
+  }
+  if (!this->Filename.WasFound() && fname.empty()) {
     if (args[0] != "EXPORT") {
       this->SetError("FILE <filename> option missing.");
       return false;
     }
     fname = this->ExportSetName.GetString() + ".cmake";
-  } else {
+  } else if (fname.empty()) {
     // Make sure the file has a .cmake extension.
     if (cmSystemTools::GetFilenameLastExtension(this->Filename.GetCString()) !=
         ".cmake") {
@@ -176,7 +183,12 @@ bool cmExportCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // Setup export file generation.
-  cmExportBuildFileGenerator* ebfg = new cmExportBuildFileGenerator;
+  cmExportBuildFileGenerator* ebfg = CM_NULLPTR;
+  if (android) {
+    ebfg = new cmExportBuildAndroidMKGenerator;
+  } else {
+    ebfg = new cmExportBuildFileGenerator;
+  }
   ebfg->SetExportFile(fname.c_str());
   ebfg->SetNamespace(this->Namespace.GetCString());
   ebfg->SetAppendMode(this->Append.IsEnabled());

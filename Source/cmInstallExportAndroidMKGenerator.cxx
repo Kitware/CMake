@@ -1,3 +1,4 @@
+
 /*============================================================================
   CMake - Cross Platform Makefile Generator
   Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
@@ -9,129 +10,42 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include "cmInstallExportGenerator.h"
+#include "cmInstallExportAndroidMKGenerator.h"
 
-#include <algorithm>
-#include <map>
-#include <sstream>
-#include <utility>
+#include <stdio.h>
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
-#include "cmExportInstallAndroidMKGenerator.h"
-#endif
 #include "cmExportInstallFileGenerator.h"
 #include "cmExportSet.h"
-#include "cmInstallType.h"
+#include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmInstallFilesGenerator.h"
+#include "cmInstallTargetGenerator.h"
 #include "cmLocalGenerator.h"
-#include "cmSystemTools.h"
+#include "cmMakefile.h"
 #include "cmake.h"
 
-cmInstallExportGenerator::cmInstallExportGenerator(
+cmInstallExportAndroidMKGenerator::cmInstallExportAndroidMKGenerator(
   cmExportSet* exportSet, const char* destination,
   const char* file_permissions, std::vector<std::string> const& configurations,
   const char* component, MessageLevel message, bool exclude_from_all,
-  const char* filename, const char* name_space, bool exportOld, bool android)
-  : cmInstallGenerator(destination, configurations, component, message,
-                       exclude_from_all)
-  , ExportSet(exportSet)
-  , FilePermissions(file_permissions)
-  , FileName(filename)
-  , Namespace(name_space)
-  , ExportOld(exportOld)
-  , LocalGenerator(CM_NULLPTR)
+  const char* filename, const char* name_space, bool exportOld)
+  : cmInstallExportGenerator(exportSet, destination, file_permissions,
+                             configurations, component, message,
+                             exclude_from_all, filename, name_space, exportOld)
 {
-  if (android) {
-#ifdef CMAKE_BUILD_WITH_CMAKE
-    this->EFGen = new cmExportInstallAndroidMKGenerator(this);
-#endif
-  } else {
-    this->EFGen = new cmExportInstallFileGenerator(this);
-  }
-  exportSet->AddInstallation(this);
 }
 
-cmInstallExportGenerator::~cmInstallExportGenerator()
+cmInstallExportAndroidMKGenerator::~cmInstallExportAndroidMKGenerator()
 {
-  delete this->EFGen;
 }
 
-void cmInstallExportGenerator::Compute(cmLocalGenerator* lg)
+void cmInstallExportAndroidMKGenerator::Compute(cmLocalGenerator* lg)
 {
   this->LocalGenerator = lg;
   this->ExportSet->Compute(lg);
 }
 
-void cmInstallExportGenerator::ComputeTempDir()
-{
-  // Choose a temporary directory in which to generate the import
-  // files to be installed.
-  this->TempDir = this->LocalGenerator->GetCurrentBinaryDirectory();
-  this->TempDir += cmake::GetCMakeFilesDirectory();
-  this->TempDir += "/Export";
-  if (this->Destination.empty()) {
-    return;
-  }
-  this->TempDir += "/";
-
-  // Enforce a maximum length.
-  bool useMD5 = false;
-#if defined(_WIN32) || defined(__CYGWIN__)
-  std::string::size_type const max_total_len = 250;
-#else
-  std::string::size_type const max_total_len = 1000;
-#endif
-  // Will generate files of the form "<temp-dir>/<base>-<config>.<ext>".
-  std::string::size_type const len = this->TempDir.size() + 1 +
-    this->FileName.size() + 1 + this->GetMaxConfigLength();
-  if (len < max_total_len) {
-    // Keep the total path length below the limit.
-    std::string::size_type const max_len = max_total_len - len;
-    if (this->Destination.size() > max_len) {
-      useMD5 = true;
-    }
-  } else {
-    useMD5 = true;
-  }
-  if (useMD5) {
-    // Replace the destination path with a hash to keep it short.
-    this->TempDir += cmSystemTools::ComputeStringMD5(this->Destination);
-  } else {
-    std::string dest = this->Destination;
-    // Avoid unix full paths.
-    if (dest[0] == '/') {
-      dest[0] = '_';
-    }
-    // Avoid windows full paths by removing colons.
-    std::replace(dest.begin(), dest.end(), ':', '_');
-    // Avoid relative paths that go up the tree.
-    cmSystemTools::ReplaceString(dest, "../", "__/");
-    // Avoid spaces.
-    std::replace(dest.begin(), dest.end(), ' ', '_');
-    this->TempDir += dest;
-  }
-}
-
-size_t cmInstallExportGenerator::GetMaxConfigLength() const
-{
-  // Always use at least 8 for "noconfig".
-  size_t len = 8;
-  if (this->ConfigurationTypes->empty()) {
-    if (this->ConfigurationName.size() > 8) {
-      len = this->ConfigurationName.size();
-    }
-  } else {
-    for (std::vector<std::string>::const_iterator ci =
-           this->ConfigurationTypes->begin();
-         ci != this->ConfigurationTypes->end(); ++ci) {
-      if (ci->size() > len) {
-        len = ci->size();
-      }
-    }
-  }
-  return len;
-}
-
-void cmInstallExportGenerator::GenerateScript(std::ostream& os)
+void cmInstallExportAndroidMKGenerator::GenerateScript(std::ostream& os)
 {
   // Skip empty sets.
   if (ExportSet->GetTargetExports()->empty()) {
@@ -174,8 +88,8 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
   this->cmInstallGenerator::GenerateScript(os);
 }
 
-void cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
-                                                     Indent const& indent)
+void cmInstallExportAndroidMKGenerator::GenerateScriptConfigs(
+  std::ostream& os, Indent const& indent)
 {
   // Create the main install rules first.
   this->cmInstallGenerator::GenerateScriptConfigs(os, indent);
@@ -197,8 +111,8 @@ void cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
   }
 }
 
-void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
-                                                     Indent const& indent)
+void cmInstallExportAndroidMKGenerator::GenerateScriptActions(
+  std::ostream& os, Indent const& indent)
 {
   // Remove old per-configuration export files if the main changes.
   std::string installedDir = "$ENV{DESTDIR}";

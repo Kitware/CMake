@@ -221,10 +221,14 @@ set(SRCS
   cmExprLexer.cxx
   cmExprParser.cxx
   cmExprParserHelper.cxx
+  cmExportBuildAndroidMKGenerator.h
+  cmExportBuildAndroidMKGenerator.cxx
   cmExportBuildFileGenerator.h
   cmExportBuildFileGenerator.cxx
   cmExportFileGenerator.h
   cmExportFileGenerator.cxx
+  cmExportInstallAndroidMKGenerator.h
+  cmExportInstallAndroidMKGenerator.cxx
   cmExportInstallFileGenerator.h
   cmExportInstallFileGenerator.cxx
   cmExportTryCompileFileGenerator.h
