@@ -86,6 +86,9 @@ public:
   ///! Set/Get the name of the target
   const std::string& GetName() const { return this->Name; }
 
+  /** Get a copy of this target adapted for the given directory.  */
+  cmTarget CopyForDirectory(cmMakefile* mf) const;
+
   ///! Set the cmMakefile that owns this target
   void SetMakefile(cmMakefile* mf);
   cmMakefile* GetMakefile() const { return this->Makefile; }
