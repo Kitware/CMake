@@ -1280,11 +1280,11 @@ bool cmGeneratorTarget::HasMacOSXRpathInstallNameDir(
 
   if (!this->Makefile->IsSet("CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG")) {
     std::ostringstream w;
-    w << "Attempting to use";
+    w << "Attempting to use ";
     if (macosx_rpath) {
-      w << " MACOSX_RPATH";
+      w << "MACOSX_RPATH";
     } else {
-      w << " @rpath";
+      w << "@rpath";
     }
     w << " without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being set.";
     w << "  This could be because you are using a Mac OS X version";
