@@ -63,6 +63,8 @@ cmTarget::cmTarget(std::string const& name, cmState::TargetType type,
                    Visibility vis, cmMakefile* mf)
 {
   assert(mf || type == cmState::GLOBAL_TARGET);
+  this->Name = name;
+  this->TargetTypeValue = type;
   this->Makefile = CM_NULLPTR;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
@@ -71,22 +73,17 @@ cmTarget::cmTarget(std::string const& name, cmState::TargetType type,
     (vis == VisibilityImported || vis == VisibilityImportedGlobally);
   this->ImportedGloballyVisible = vis == VisibilityImportedGlobally;
   this->BuildInterfaceIncludesAppended = false;
-  this->SetType(type, name);
-  if (mf) {
-    this->SetMakefile(mf);
-  }
-}
 
-void cmTarget::SetType(cmState::TargetType type, const std::string& name)
-{
-  this->Name = name;
   // only add dependency information for library targets
-  this->TargetTypeValue = type;
   if (this->TargetTypeValue >= cmState::STATIC_LIBRARY &&
       this->TargetTypeValue <= cmState::MODULE_LIBRARY) {
     this->RecordDependencies = true;
   } else {
     this->RecordDependencies = false;
+  }
+
+  if (mf) {
+    this->SetMakefile(mf);
   }
 }
 

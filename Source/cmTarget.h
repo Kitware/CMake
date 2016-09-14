@@ -283,7 +283,6 @@ public:
   };
 
 private:
-  void SetType(cmState::TargetType f, const std::string& name);
   void SetMakefile(cmMakefile* mf);
 
   bool HandleLocationPropertyPolicy(cmMakefile* context) const;
