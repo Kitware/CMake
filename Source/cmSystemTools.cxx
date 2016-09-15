@@ -2416,6 +2416,83 @@ bool cmSystemTools::VersionCompareGreaterEq(std::string const& lhs,
                                        lhs.c_str(), rhs.c_str());
 }
 
+static size_t cm_strverscmp_find_first_difference_or_end(const char* lhs,
+                                                         const char* rhs)
+{
+  size_t i = 0;
+  /* Step forward until we find a difference or both strings end together.
+     The difference may lie on the null-terminator of one string.  */
+  while (lhs[i] == rhs[i] && lhs[i] != 0) {
+    ++i;
+  }
+  return i;
+}
+
+static size_t cm_strverscmp_find_digits_begin(const char* s, size_t i)
+{
+  /* Step back until we are not preceded by a digit.  */
+  while (i > 0 && isdigit(s[i - 1])) {
+    --i;
+  }
+  return i;
+}
+
+static size_t cm_strverscmp_find_digits_end(const char* s, size_t i)
+{
+  /* Step forward over digits.  */
+  while (isdigit(s[i])) {
+    ++i;
+  }
+  return i;
+}
+
+static size_t cm_strverscmp_count_leading_zeros(const char* s, size_t b)
+{
+  size_t i = b;
+  /* Step forward over zeros that are followed by another digit.  */
+  while (s[i] == '0' && isdigit(s[i + 1])) {
+    ++i;
+  }
+  return i - b;
+}
+
+static int cm_strverscmp(const char* lhs, const char* rhs)
+{
+  size_t const i = cm_strverscmp_find_first_difference_or_end(lhs, rhs);
+  if (lhs[i] != rhs[i]) {
+    /* The strings differ starting at 'i'.  Check for a digit sequence.  */
+    size_t const b = cm_strverscmp_find_digits_begin(lhs, i);
+    if (b != i || (isdigit(lhs[i]) && isdigit(rhs[i]))) {
+      /* A digit sequence starts at 'b', preceding or at 'i'.  */
+
+      /* Look for leading zeros, implying a leading decimal point.  */
+      size_t const lhs_zeros = cm_strverscmp_count_leading_zeros(lhs, b);
+      size_t const rhs_zeros = cm_strverscmp_count_leading_zeros(rhs, b);
+      if (lhs_zeros != rhs_zeros) {
+        /* The side with more leading zeros orders first.  */
+        return rhs_zeros > lhs_zeros ? 1 : -1;
+      }
+      if (lhs_zeros == 0) {
+        /* No leading zeros; compare digit sequence lengths.  */
+        size_t const lhs_end = cm_strverscmp_find_digits_end(lhs, i);
+        size_t const rhs_end = cm_strverscmp_find_digits_end(rhs, i);
+        if (lhs_end != rhs_end) {
+          /* The side with fewer digits orders first.  */
+          return lhs_end > rhs_end ? 1 : -1;
+        }
+      }
+    }
+  }
+
+  /* Ordering was not decided by digit sequence lengths; compare bytes.  */
+  return lhs[i] - rhs[i];
+}
+
+int cmSystemTools::strverscmp(std::string const& lhs, std::string const& rhs)
+{
+  return cm_strverscmp(lhs.c_str(), rhs.c_str());
+}
+
 bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
                                 bool* removed)
 {
