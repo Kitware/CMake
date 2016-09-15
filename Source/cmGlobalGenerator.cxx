@@ -2071,10 +2071,18 @@ inline std::string removeQuotes(const std::string& s)
 
 void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
 {
+  this->AddGlobalTarget_Package(targets);
+  this->AddGlobalTarget_PackageSource(targets);
+  this->AddGlobalTarget_Test(targets);
+  this->AddGlobalTarget_EditCache(targets);
+  this->AddGlobalTarget_RebuildCache(targets);
+  this->AddGlobalTarget_Install(targets);
+}
+
+void cmGlobalGenerator::AddGlobalTarget_Package(cmTargets* targets)
+{
   cmMakefile* mf = this->Makefiles[0];
   const char* cmakeCfgIntDir = this->GetCMakeCFGIntDir();
-
-  // CPack
   std::string workingDir = mf->GetCurrentBinaryDirectory();
   cmCustomCommandLines cpackCommandLines;
   std::vector<std::string> depends;
@@ -2086,7 +2094,6 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   }
   singleLine.push_back("--config");
   std::string configFile = mf->GetCurrentBinaryDirectory();
-  ;
   configFile += "/CPackConfig.cmake";
   std::string relConfigFile = "./CPackConfig.cmake";
   singleLine.push_back(relConfigFile);
@@ -2108,19 +2115,22 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
                                &cpackCommandLines, depends, workingDir.c_str(),
                                /*uses_terminal*/ true)));
   }
-  // CPack source
+}
+
+void cmGlobalGenerator::AddGlobalTarget_PackageSource(cmTargets* targets)
+{
+  cmMakefile* mf = this->Makefiles[0];
   const char* packageSourceTargetName = this->GetPackageSourceTargetName();
   if (packageSourceTargetName) {
-    cpackCommandLines.erase(cpackCommandLines.begin(),
-                            cpackCommandLines.end());
-    singleLine.erase(singleLine.begin(), singleLine.end());
-    depends.erase(depends.begin(), depends.end());
+    std::string workingDir = mf->GetCurrentBinaryDirectory();
+    cmCustomCommandLines cpackCommandLines;
+    std::vector<std::string> depends;
+    cmCustomCommandLine singleLine;
     singleLine.push_back(cmSystemTools::GetCPackCommand());
     singleLine.push_back("--config");
-    configFile = mf->GetCurrentBinaryDirectory();
-    ;
+    std::string configFile = mf->GetCurrentBinaryDirectory();
     configFile += "/CPackSourceConfig.cmake";
-    relConfigFile = "./CPackSourceConfig.cmake";
+    std::string relConfigFile = "./CPackSourceConfig.cmake";
     singleLine.push_back(relConfigFile);
     if (cmSystemTools::FileExists(configFile.c_str())) {
       singleLine.push_back(configFile);
@@ -2133,13 +2143,16 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
           /*uses_terminal*/ true)));
     }
   }
+}
 
-  // Test
+void cmGlobalGenerator::AddGlobalTarget_Test(cmTargets* targets)
+{
+  cmMakefile* mf = this->Makefiles[0];
+  const char* cmakeCfgIntDir = this->GetCMakeCFGIntDir();
   if (mf->IsOn("CMAKE_TESTING_ENABLED")) {
-    cpackCommandLines.erase(cpackCommandLines.begin(),
-                            cpackCommandLines.end());
-    singleLine.erase(singleLine.begin(), singleLine.end());
-    depends.erase(depends.begin(), depends.end());
+    cmCustomCommandLines cpackCommandLines;
+    std::vector<std::string> depends;
+    cmCustomCommandLine singleLine;
     singleLine.push_back(cmSystemTools::GetCTestCommand());
     singleLine.push_back("--force-new-ctest-process");
     if (cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.') {
@@ -2157,14 +2170,15 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
                                &cpackCommandLines, depends, CM_NULLPTR,
                                /*uses_terminal*/ true)));
   }
+}
 
-  // Edit Cache
+void cmGlobalGenerator::AddGlobalTarget_EditCache(cmTargets* targets)
+{
   const char* editCacheTargetName = this->GetEditCacheTargetName();
   if (editCacheTargetName) {
-    cpackCommandLines.erase(cpackCommandLines.begin(),
-                            cpackCommandLines.end());
-    singleLine.erase(singleLine.begin(), singleLine.end());
-    depends.erase(depends.begin(), depends.end());
+    cmCustomCommandLines cpackCommandLines;
+    std::vector<std::string> depends;
+    cmCustomCommandLine singleLine;
 
     // Use generator preference for the edit_cache rule if it is defined.
     std::string edit_cmd = this->GetEditCacheCommand();
@@ -2191,14 +2205,15 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
           &cpackCommandLines, depends, CM_NULLPTR, /*uses_terminal*/ false)));
     }
   }
+}
 
-  // Rebuild Cache
+void cmGlobalGenerator::AddGlobalTarget_RebuildCache(cmTargets* targets)
+{
   const char* rebuildCacheTargetName = this->GetRebuildCacheTargetName();
   if (rebuildCacheTargetName) {
-    cpackCommandLines.erase(cpackCommandLines.begin(),
-                            cpackCommandLines.end());
-    singleLine.erase(singleLine.begin(), singleLine.end());
-    depends.erase(depends.begin(), depends.end());
+    cmCustomCommandLines cpackCommandLines;
+    std::vector<std::string> depends;
+    cmCustomCommandLine singleLine;
     singleLine.push_back(cmSystemTools::GetCMakeCommand());
     singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
     singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
@@ -2209,8 +2224,12 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
         rebuildCacheTargetName, "Running CMake to regenerate build system...",
         &cpackCommandLines, depends, CM_NULLPTR, /*uses_terminal*/ true)));
   }
+}
 
-  // Install
+void cmGlobalGenerator::AddGlobalTarget_Install(cmTargets* targets)
+{
+  cmMakefile* mf = this->Makefiles[0];
+  const char* cmakeCfgIntDir = this->GetCMakeCFGIntDir();
   bool skipInstallRules = mf->IsOn("CMAKE_SKIP_INSTALL_RULES");
   if (this->InstallTargetEnabled && skipInstallRules) {
     this->CMakeInstance->IssueMessage(
@@ -2220,9 +2239,8 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   } else if (this->InstallTargetEnabled && !skipInstallRules) {
     if (!cmakeCfgIntDir || !*cmakeCfgIntDir || cmakeCfgIntDir[0] == '.') {
       std::set<std::string>* componentsSet = &this->InstallComponents;
-      cpackCommandLines.erase(cpackCommandLines.begin(),
-                              cpackCommandLines.end());
-      depends.erase(depends.begin(), depends.end());
+      cmCustomCommandLines cpackCommandLines;
+      std::vector<std::string> depends;
       std::ostringstream ostr;
       if (!componentsSet->empty()) {
         ostr << "Available install components are: ";
@@ -2230,7 +2248,6 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       } else {
         ostr << "Only default component available";
       }
-      singleLine.push_back(ostr.str());
       targets->insert(cmTargets::value_type(
         "list_install_components",
         this->CreateGlobalTarget("list_install_components", ostr.str().c_str(),
@@ -2238,10 +2255,9 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
                                  /*uses_terminal*/ false)));
     }
     std::string cmd = cmSystemTools::GetCMakeCommand();
-    cpackCommandLines.erase(cpackCommandLines.begin(),
-                            cpackCommandLines.end());
-    singleLine.erase(singleLine.begin(), singleLine.end());
-    depends.erase(depends.begin(), depends.end());
+    cmCustomCommandLines cpackCommandLines;
+    std::vector<std::string> depends;
+    cmCustomCommandLine singleLine;
     if (this->GetPreinstallTargetName()) {
       depends.push_back(this->GetPreinstallTargetName());
     } else {

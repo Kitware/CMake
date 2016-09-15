@@ -403,6 +403,12 @@ protected:
   bool IsExcluded(cmLocalGenerator* root, cmGeneratorTarget* target) const;
   virtual void InitializeProgressMarks() {}
   void CreateDefaultGlobalTargets(cmTargets* targets);
+  void AddGlobalTarget_Package(cmTargets* targets);
+  void AddGlobalTarget_PackageSource(cmTargets* targets);
+  void AddGlobalTarget_Test(cmTargets* targets);
+  void AddGlobalTarget_EditCache(cmTargets* targets);
+  void AddGlobalTarget_RebuildCache(cmTargets* targets);
+  void AddGlobalTarget_Install(cmTargets* targets);
   cmTarget CreateGlobalTarget(const std::string& name, const char* message,
                               const cmCustomCommandLines* commandLines,
                               std::vector<std::string> depends,
