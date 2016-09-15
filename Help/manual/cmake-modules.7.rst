@@ -14,6 +14,7 @@ All Modules
    :maxdepth: 1
 
    /module/AddFileDependencies
+   /module/AndroidTestUtilities
    /module/BundleUtilities
    /module/CheckCCompilerFlag
    /module/CheckCSourceCompiles
