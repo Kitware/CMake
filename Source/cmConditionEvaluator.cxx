@@ -85,7 +85,7 @@ bool cmConditionEvaluator::IsTrue(
   errorString = "";
 
   // handle empty invocation
-  if (args.size() < 1) {
+  if (args.empty()) {
     return false;
   }
 

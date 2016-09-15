@@ -76,7 +76,7 @@ void cmExportInstallAndroidMKGenerator::GenerateImportTargetCode(
   os << "LOCAL_SRC_FILES := $(_IMPORT_PREFIX)/";
   os << target->Target->GetProperty("__dest") << "/";
   std::string config = "";
-  if (this->Configurations.size()) {
+  if (!this->Configurations.empty()) {
     config = this->Configurations[0];
   }
   os << target->GetFullName(config) << "\n";
@@ -103,7 +103,7 @@ void cmExportInstallAndroidMKGenerator::GenerateInterfaceProperties(
   const ImportPropertyMap& properties)
 {
   std::string config = "";
-  if (this->Configurations.size()) {
+  if (!this->Configurations.empty()) {
     config = this->Configurations[0];
   }
   cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(

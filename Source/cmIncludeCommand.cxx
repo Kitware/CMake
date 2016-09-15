@@ -15,7 +15,7 @@
 bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args,
                                    cmExecutionStatus&)
 {
-  if (args.size() < 1 || args.size() > 4) {
+  if (args.empty() || args.size() > 4) {
     this->SetError("called with wrong number of arguments.  "
                    "include() only takes one file.");
     return false;

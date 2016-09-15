@@ -15,7 +15,7 @@
 bool cmLinkLibrariesCommand::InitialPass(std::vector<std::string> const& args,
                                          cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     return true;
   }
   // add libraries, nothe that there is an optional prefix

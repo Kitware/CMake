@@ -16,7 +16,7 @@ bool cmAddDefinitionsCommand::InitialPass(std::vector<std::string> const& args,
                                           cmExecutionStatus&)
 {
   // it is OK to have no arguments
-  if (args.size() < 1) {
+  if (args.empty()) {
     return true;
   }
 

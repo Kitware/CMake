@@ -104,7 +104,7 @@ cmVariableWatchCommand::~cmVariableWatchCommand()
 bool cmVariableWatchCommand::InitialPass(std::vector<std::string> const& args,
                                          cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("must be called with at least one argument.");
     return false;
   }
