@@ -194,7 +194,7 @@ public:
   }
 
   ///! Return the full path to where the CMakeCache.txt file should be.
-  std::string FindCacheFile(const std::string& binaryDir) const;
+  static std::string FindCacheFile(const std::string& binaryDir);
 
   ///! Return the global generator assigned to this instance of cmake
   void SetGlobalGenerator(cmGlobalGenerator*);
