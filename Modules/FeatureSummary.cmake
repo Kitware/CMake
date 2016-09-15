@@ -280,83 +280,6 @@
 include("${CMAKE_CURRENT_LIST_DIR}/CMakeParseArguments.cmake")
 
 
-function(ADD_FEATURE_INFO _name _enabled _desc)
-  if (${_enabled})
-    set_property(GLOBAL APPEND PROPERTY ENABLED_FEATURES "${_name}")
-  else ()
-    set_property(GLOBAL APPEND PROPERTY DISABLED_FEATURES "${_name}")
-  endif ()
-
-  set_property(GLOBAL PROPERTY _CMAKE_${_name}_DESCRIPTION "${_desc}" )
-endfunction()
-
-
-
-function(SET_PACKAGE_PROPERTIES _name _props)
-  if(NOT "${_props}" STREQUAL "PROPERTIES")
-    message(FATAL_ERROR "PROPERTIES keyword is missing in SET_PACKAGE_PROPERTIES() call.")
-  endif()
-
-  set(options ) # none
-  set(oneValueArgs DESCRIPTION URL TYPE PURPOSE )
-  set(multiValueArgs ) # none
-
-  CMAKE_PARSE_ARGUMENTS(_SPP "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${ARGN})
-
-  if(_SPP_UNPARSED_ARGUMENTS)
-    message(FATAL_ERROR "Unknown keywords given to SET_PACKAGE_PROPERTIES(): \"${_SPP_UNPARSED_ARGUMENTS}\"")
-  endif()
-
-  if(_SPP_DESCRIPTION)
-    get_property(_info  GLOBAL PROPERTY _CMAKE_${_name}_DESCRIPTION)
-    if(_info AND NOT "${_info}" STREQUAL "${_SPP_DESCRIPTION}")
-      message(STATUS "Warning: Property DESCRIPTION for package ${_name} already set to \"${_info}\", overriding it with \"${_SPP_DESCRIPTION}\"")
-    endif()
-
-    set_property(GLOBAL PROPERTY _CMAKE_${_name}_DESCRIPTION "${_SPP_DESCRIPTION}" )
-  endif()
-
-
-  if(_SPP_URL)
-    get_property(_info  GLOBAL PROPERTY _CMAKE_${_name}_URL)
-    if(_info AND NOT "${_info}" STREQUAL "${_SPP_URL}")
-      message(STATUS "Warning: Property URL already set to \"${_info}\", overriding it with \"${_SPP_URL}\"")
-    endif()
-
-    set_property(GLOBAL PROPERTY _CMAKE_${_name}_URL "${_SPP_URL}" )
-  endif()
-
-
-  # handle the PURPOSE: use APPEND, since there can be multiple purposes for one package inside a project
-  if(_SPP_PURPOSE)
-    set_property(GLOBAL APPEND PROPERTY _CMAKE_${_name}_PURPOSE "${_SPP_PURPOSE}" )
-  endif()
-
-  # handle the TYPE
-  if(NOT _SPP_TYPE)
-    set(_SPP_TYPE OPTIONAL)
-  endif()
-
-  # List the supported types, according to their priority
-  set(validTypes "RUNTIME" "OPTIONAL" "RECOMMENDED" "REQUIRED" )
-  list(FIND validTypes ${_SPP_TYPE} _typeIndexInList)
-  if("${_typeIndexInList}" STREQUAL "-1" )
-    message(FATAL_ERROR "Bad package property type ${_SPP_TYPE} used in SET_PACKAGE_PROPERTIES(). "
-                        "Valid types are OPTIONAL, RECOMMENDED, REQUIRED and RUNTIME." )
-  endif()
-
-  get_property(_previousType  GLOBAL PROPERTY _CMAKE_${_name}_TYPE)
-  list(FIND validTypes "${_previousType}" _prevTypeIndexInList)
-
-  # make sure a previously set TYPE is not overridden with a lower new TYPE:
-  if("${_typeIndexInList}" GREATER "${_prevTypeIndexInList}")
-    set_property(GLOBAL PROPERTY _CMAKE_${_name}_TYPE "${_SPP_TYPE}" )
-  endif()
-
-endfunction()
-
-
-
 function(_FS_GET_FEATURE_SUMMARY _property _var _includeQuiet)
 
   set(_type "ANY")
@@ -556,6 +479,79 @@ function(FEATURE_SUMMARY)
     message(FATAL_ERROR "feature_summary() Error: REQUIRED package(s) are missing, aborting CMake run.")
   endif()
 
+endfunction()
+
+function(SET_PACKAGE_PROPERTIES _name _props)
+  if(NOT "${_props}" STREQUAL "PROPERTIES")
+    message(FATAL_ERROR "PROPERTIES keyword is missing in SET_PACKAGE_PROPERTIES() call.")
+  endif()
+
+  set(options ) # none
+  set(oneValueArgs DESCRIPTION URL TYPE PURPOSE )
+  set(multiValueArgs ) # none
+
+  CMAKE_PARSE_ARGUMENTS(_SPP "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${ARGN})
+
+  if(_SPP_UNPARSED_ARGUMENTS)
+    message(FATAL_ERROR "Unknown keywords given to SET_PACKAGE_PROPERTIES(): \"${_SPP_UNPARSED_ARGUMENTS}\"")
+  endif()
+
+  if(_SPP_DESCRIPTION)
+    get_property(_info  GLOBAL PROPERTY _CMAKE_${_name}_DESCRIPTION)
+    if(_info AND NOT "${_info}" STREQUAL "${_SPP_DESCRIPTION}")
+      message(STATUS "Warning: Property DESCRIPTION for package ${_name} already set to \"${_info}\", overriding it with \"${_SPP_DESCRIPTION}\"")
+    endif()
+
+    set_property(GLOBAL PROPERTY _CMAKE_${_name}_DESCRIPTION "${_SPP_DESCRIPTION}" )
+  endif()
+
+
+  if(_SPP_URL)
+    get_property(_info  GLOBAL PROPERTY _CMAKE_${_name}_URL)
+    if(_info AND NOT "${_info}" STREQUAL "${_SPP_URL}")
+      message(STATUS "Warning: Property URL already set to \"${_info}\", overriding it with \"${_SPP_URL}\"")
+    endif()
+
+    set_property(GLOBAL PROPERTY _CMAKE_${_name}_URL "${_SPP_URL}" )
+  endif()
+
+
+  # handle the PURPOSE: use APPEND, since there can be multiple purposes for one package inside a project
+  if(_SPP_PURPOSE)
+    set_property(GLOBAL APPEND PROPERTY _CMAKE_${_name}_PURPOSE "${_SPP_PURPOSE}" )
+  endif()
+
+  # handle the TYPE
+  if(NOT _SPP_TYPE)
+    set(_SPP_TYPE OPTIONAL)
+  endif()
+
+  # List the supported types, according to their priority
+  set(validTypes "RUNTIME" "OPTIONAL" "RECOMMENDED" "REQUIRED" )
+  list(FIND validTypes ${_SPP_TYPE} _typeIndexInList)
+  if("${_typeIndexInList}" STREQUAL "-1" )
+    message(FATAL_ERROR "Bad package property type ${_SPP_TYPE} used in SET_PACKAGE_PROPERTIES(). "
+                        "Valid types are OPTIONAL, RECOMMENDED, REQUIRED and RUNTIME." )
+  endif()
+
+  get_property(_previousType  GLOBAL PROPERTY _CMAKE_${_name}_TYPE)
+  list(FIND validTypes "${_previousType}" _prevTypeIndexInList)
+
+  # make sure a previously set TYPE is not overridden with a lower new TYPE:
+  if("${_typeIndexInList}" GREATER "${_prevTypeIndexInList}")
+    set_property(GLOBAL PROPERTY _CMAKE_${_name}_TYPE "${_SPP_TYPE}" )
+  endif()
+
+endfunction()
+
+function(ADD_FEATURE_INFO _name _enabled _desc)
+  if (${_enabled})
+    set_property(GLOBAL APPEND PROPERTY ENABLED_FEATURES "${_name}")
+  else ()
+    set_property(GLOBAL APPEND PROPERTY DISABLED_FEATURES "${_name}")
+  endif ()
+
+  set_property(GLOBAL PROPERTY _CMAKE_${_name}_DESCRIPTION "${_desc}" )
 endfunction()
 
 
