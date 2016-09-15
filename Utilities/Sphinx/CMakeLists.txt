@@ -11,7 +11,7 @@
 #=============================================================================
 if(NOT CMake_SOURCE_DIR)
   set(CMakeHelp_STANDALONE 1)
-  cmake_minimum_required(VERSION 2.8.4 FATAL_ERROR)
+  cmake_minimum_required(VERSION 2.8.12.2 FATAL_ERROR)
   get_filename_component(tmp "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
   get_filename_component(CMake_SOURCE_DIR "${tmp}" PATH)
   include(${CMake_SOURCE_DIR}/Modules/CTestUseLaunchers.cmake)
