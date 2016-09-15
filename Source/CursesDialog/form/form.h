@@ -33,10 +33,6 @@
 #ifndef FORM_H
 #define FORM_H
 
-#if defined(__sun__) && defined(__GNUC__)
- #define _MSE_INT_H
-#endif
-
 #include <cmFormConfigure.h>
 
 /* figure out which curses.h to include */
