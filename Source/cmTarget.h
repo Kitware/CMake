@@ -88,9 +88,6 @@ public:
   ///! Set/Get the name of the target
   const std::string& GetName() const { return this->Name; }
 
-  /** Get a copy of this target adapted for the given directory.  */
-  cmTarget CopyForDirectory(cmMakefile* mf) const;
-
   /** Get the cmMakefile that owns this target.  */
   cmMakefile* GetMakefile() const { return this->Makefile; }
 
@@ -283,8 +280,6 @@ public:
   };
 
 private:
-  void SetMakefile(cmMakefile* mf);
-
   bool HandleLocationPropertyPolicy(cmMakefile* context) const;
 
   const char* GetSuffixVariableInternal(bool implib) const;

@@ -62,10 +62,10 @@ public:
 cmTarget::cmTarget(std::string const& name, cmState::TargetType type,
                    Visibility vis, cmMakefile* mf)
 {
-  assert(mf || type == cmState::GLOBAL_TARGET);
+  assert(mf);
   this->Name = name;
   this->TargetTypeValue = type;
-  this->Makefile = CM_NULLPTR;
+  this->Makefile = mf;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
   this->IsAndroid = false;
@@ -81,25 +81,6 @@ cmTarget::cmTarget(std::string const& name, cmState::TargetType type,
   } else {
     this->RecordDependencies = false;
   }
-
-  if (mf) {
-    this->SetMakefile(mf);
-  }
-}
-
-cmTarget cmTarget::CopyForDirectory(cmMakefile* mf) const
-{
-  assert(this->GetType() == cmState::GLOBAL_TARGET);
-  assert(this->GetMakefile() == CM_NULLPTR);
-  cmTarget result(*this);
-  result.SetMakefile(mf);
-  return result;
-}
-
-void cmTarget::SetMakefile(cmMakefile* mf)
-{
-  // Set our makefile.
-  this->Makefile = mf;
 
   // Check whether this is a DLL platform.
   this->DLLPlatform =
