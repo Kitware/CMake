@@ -196,6 +196,7 @@ endfunction()
 
   .. code-block:: cmake
 
+   include(FeatureSummary)
    feature_summary(WHAT ALL
                    FILENAME ${CMAKE_BINARY_DIR}/all.log APPEND)
 
@@ -204,6 +205,7 @@ endfunction()
 
   .. code-block:: cmake
 
+   include(FeatureSummary)
    feature_summary(WHAT ENABLED_FEATURES
                    INCLUDE_QUIET_PACKAGES
                    DESCRIPTION "Enabled Features:"
