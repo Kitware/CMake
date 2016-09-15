@@ -332,7 +332,9 @@ Variables for Languages
 .. toctree::
    :maxdepth: 1
 
-   /variable/CMAKE_COMPILER_IS_GNULANG
+   /variable/CMAKE_COMPILER_IS_GNUCC
+   /variable/CMAKE_COMPILER_IS_GNUCXX
+   /variable/CMAKE_COMPILER_IS_GNUG77
    /variable/CMAKE_C_COMPILE_FEATURES
    /variable/CMAKE_C_EXTENSIONS
    /variable/CMAKE_C_STANDARD

@@ -64,7 +64,7 @@ endif()
 
 # Workaround for short jump tables on PA-RISC
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "^parisc")
-  if(CMAKE_COMPILER_IS_GNUC)
+  if(CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mlong-calls")
   endif()
   if(CMAKE_COMPILER_IS_GNUCXX)
