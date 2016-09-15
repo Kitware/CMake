@@ -59,28 +59,41 @@ public:
   std::vector<cmListFileBacktrace> LinkImplementationPropertyBacktraces;
 };
 
-cmTarget::cmTarget()
+cmTarget::cmTarget(std::string const& name, cmState::TargetType type,
+                   Visibility vis, cmMakefile* mf)
 {
+  assert(mf || type == cmState::GLOBAL_TARGET);
+  this->Name = name;
+  this->TargetTypeValue = type;
   this->Makefile = CM_NULLPTR;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
   this->IsAndroid = false;
-  this->IsImportedTarget = false;
-  this->ImportedGloballyVisible = false;
+  this->IsImportedTarget =
+    (vis == VisibilityImported || vis == VisibilityImportedGlobally);
+  this->ImportedGloballyVisible = vis == VisibilityImportedGlobally;
   this->BuildInterfaceIncludesAppended = false;
-}
 
-void cmTarget::SetType(cmState::TargetType type, const std::string& name)
-{
-  this->Name = name;
   // only add dependency information for library targets
-  this->TargetTypeValue = type;
   if (this->TargetTypeValue >= cmState::STATIC_LIBRARY &&
       this->TargetTypeValue <= cmState::MODULE_LIBRARY) {
     this->RecordDependencies = true;
   } else {
     this->RecordDependencies = false;
   }
+
+  if (mf) {
+    this->SetMakefile(mf);
+  }
+}
+
+cmTarget cmTarget::CopyForDirectory(cmMakefile* mf) const
+{
+  assert(this->GetType() == cmState::GLOBAL_TARGET);
+  assert(this->GetMakefile() == CM_NULLPTR);
+  cmTarget result(*this);
+  result.SetMakefile(mf);
+  return result;
 }
 
 void cmTarget::SetMakefile(cmMakefile* mf)
@@ -1060,12 +1073,6 @@ void cmTarget::CheckProperty(const std::string& prop,
       cmTargetCheckINTERFACE_LINK_LIBRARIES(value, context);
     }
   }
-}
-
-void cmTarget::MarkAsImported(bool global)
-{
-  this->IsImportedTarget = true;
-  this->ImportedGloballyVisible = global;
 }
 
 bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
