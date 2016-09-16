@@ -181,142 +181,161 @@
 #
 # The module defines the following commands:
 #
-# --------------------------------------------------------------------------
-#
 # .. command:: cpack_ifw_configure_component
 #
-# Sets the arguments specific to the CPack IFW generator.
+#   Sets the arguments specific to the CPack IFW generator.
 #
-# ::
+#   ::
 #
-#   cpack_ifw_configure_component(<compname> [COMMON] [ESSENTIAL]
-#                       [NAME <name>]
-#                       [VERSION <version>]
-#                       [SCRIPT <script>]
-#                       [PRIORITY <priority>]
-#                       [DEPENDS <com_id> ...]
-#                       [LICENSES <display_name> <file_path> ...]
-#                       [USER_INTERFACES <file_path> <file_path> ...])
+#     cpack_ifw_configure_component(<compname> [COMMON] [ESSENTIAL]
+#                         [NAME <name>]
+#                         [VERSION <version>]
+#                         [SCRIPT <script>]
+#                         [PRIORITY <priority>]
+#                         [DEPENDS <com_id> ...]
+#                         [LICENSES <display_name> <file_path> ...]
+#                         [USER_INTERFACES <file_path> <file_path> ...])
 #
-# This command should be called after :command:`cpack_add_component` command.
+#   This command should be called after :command:`cpack_add_component` command.
 #
-# ``COMMON`` if set, then the component will be packaged and installed as part
-# of a group to which it belongs.
+#   ``COMMON``
+#     if set, then the component will be packaged and installed as part
+#     of a group to which it belongs.
 #
-# ``ESSENTIAL`` if set, then the package manager stays disabled until that
-# component is updated.
+#   ``ESSENTIAL``
+#     if set, then the package manager stays disabled until that
+#     component is updated.
 #
-# ``NAME`` is used to create domain-like identification for this component.
-# By default used origin component name.
+#   ``NAME``
+#     is used to create domain-like identification for this component.
+#     By default used origin component name.
 #
-# ``VERSION`` is version of component.
-# By default used :variable:`CPACK_PACKAGE_VERSION`.
+#   ``VERSION``
+#     is version of component.
+#     By default used :variable:`CPACK_PACKAGE_VERSION`.
 #
-# ``SCRIPT`` is a relative or absolute path to operations script
-# for this component.
+#   ``SCRIPT``
+#     is a relative or absolute path to operations script
+#     for this component.
 #
-# ``PRIORITY`` is priority of the component in the tree.
+#   ``PRIORITY``
+#     is priority of the component in the tree.
 #
-# ``DEPENDS`` list of dependency component identifiers in QtIFW_ style.
+#   ``DEPENDS``
+#     list of dependency component identifiers in QtIFW_ style.
 #
-# ``LICENSES`` pair of <display_name> and <file_path> of license text for this
-# component. You can specify more then one license.
+#   ``LICENSES``
+#     pair of <display_name> and <file_path> of license text for this
+#     component. You can specify more then one license.
 #
-# ``USER_INTERFACES`` a list of <file_path> representing pages to load
+#   ``USER_INTERFACES``
+#     a list of <file_path> representing pages to load
 #
-# --------------------------------------------------------------------------
 #
 # .. command:: cpack_ifw_configure_component_group
 #
-# Sets the arguments specific to the CPack IFW generator.
+#   Sets the arguments specific to the CPack IFW generator.
 #
-# ::
+#   ::
 #
-#   cpack_ifw_configure_component_group(<groupname>
-#                       [NAME <name>]
-#                       [VERSION <version>]
-#                       [SCRIPT <script>]
-#                       [PRIORITY <priority>]
-#                       [LICENSES <display_name> <file_path> ...]
-#                       [USER_INTERFACES <file_path> <file_path> ...])
+#     cpack_ifw_configure_component_group(<groupname>
+#                         [NAME <name>]
+#                         [VERSION <version>]
+#                         [SCRIPT <script>]
+#                         [PRIORITY <priority>]
+#                         [LICENSES <display_name> <file_path> ...]
+#                         [USER_INTERFACES <file_path> <file_path> ...])
 #
-# This command should be called after :command:`cpack_add_component_group`
-# command.
+#   This command should be called after :command:`cpack_add_component_group`
+#   command.
 #
-# ``NAME`` is used to create domain-like identification for this component
-# group.
-# By default used origin component group name.
+#   ``NAME``
+#     is used to create domain-like identification for this component group.
+#     By default used origin component group name.
 #
-# ``VERSION`` is version of component group.
-# By default used :variable:`CPACK_PACKAGE_VERSION`.
+#   ``VERSION``
+#     is version of component group.
+#     By default used :variable:`CPACK_PACKAGE_VERSION`.
 #
-# ``SCRIPT`` is a relative or absolute path to operations script
-# for this component group.
+#   ``SCRIPT``
+#     is a relative or absolute path to operations script
+#     for this component group.
 #
-# ``PRIORITY`` is priority of the component group in the tree.
+#   ``PRIORITY``
+#     is priority of the component group in the tree.
 #
-# ``LICENSES`` pair of <display_name> and <file_path> of license text for this
-# component group. You can specify more then one license.
+#   ``LICENSES``
+#     pair of <display_name> and <file_path> of license text for this
+#     component group. You can specify more then one license.
 #
-# ``USER_INTERFACES`` a list of <file_path> representing pages to load
+#   ``USER_INTERFACES``
+#     a list of <file_path> representing pages to load
 #
-# --------------------------------------------------------------------------
 #
 # .. command:: cpack_ifw_add_repository
 #
-# Add QtIFW_ specific remote repository to binary installer.
+#   Add QtIFW_ specific remote repository to binary installer.
 #
-# ::
+#   ::
 #
-#   cpack_ifw_add_repository(<reponame> [DISABLED]
-#                       URL <url>
-#                       [USERNAME <username>]
-#                       [PASSWORD <password>]
-#                       [DISPLAY_NAME <display_name>])
+#     cpack_ifw_add_repository(<reponame> [DISABLED]
+#                         URL <url>
+#                         [USERNAME <username>]
+#                         [PASSWORD <password>]
+#                         [DISPLAY_NAME <display_name>])
 #
-# This command will also add the <reponame> repository
-# to a variable :variable:`CPACK_IFW_REPOSITORIES_ALL`.
+#   This command will also add the <reponame> repository
+#   to a variable :variable:`CPACK_IFW_REPOSITORIES_ALL`.
 #
-# ``DISABLED`` if set, then the repository will be disabled by default.
+#   ``DISABLED``
+#     if set, then the repository will be disabled by default.
 #
-# ``URL`` is points to a list of available components.
+#   ``URL``
+#     is points to a list of available components.
 #
-# ``USERNAME`` is used as user on a protected repository.
+#   ``USERNAME``
+#     is used as user on a protected repository.
 #
-# ``PASSWORD`` is password to use on a protected repository.
+#   ``PASSWORD``
+#     is password to use on a protected repository.
 #
-# ``DISPLAY_NAME`` is string to display instead of the URL.
+#   ``DISPLAY_NAME``
+#     is string to display instead of the URL.
 #
-#
-# --------------------------------------------------------------------------
 #
 # .. command:: cpack_ifw_update_repository
 #
-# Update QtIFW_ specific repository from remote repository.
+#   Update QtIFW_ specific repository from remote repository.
 #
-# ::
+#   ::
 #
-#   cpack_ifw_update_repository(<reponame>
-#                       [[ADD|REMOVE] URL <url>]|
-#                        [REPLACE OLD_URL <old_url> NEW_URL <new_url>]]
-#                       [USERNAME <username>]
-#                       [PASSWORD <password>]
-#                       [DISPLAY_NAME <display_name>])
+#     cpack_ifw_update_repository(<reponame>
+#                         [[ADD|REMOVE] URL <url>]|
+#                          [REPLACE OLD_URL <old_url> NEW_URL <new_url>]]
+#                         [USERNAME <username>]
+#                         [PASSWORD <password>]
+#                         [DISPLAY_NAME <display_name>])
 #
-# This command will also add the <reponame> repository
-# to a variable :variable:`CPACK_IFW_REPOSITORIES_ALL`.
+#   This command will also add the <reponame> repository
+#   to a variable :variable:`CPACK_IFW_REPOSITORIES_ALL`.
 #
-# ``URL`` is points to a list of available components.
+#   ``URL``
+#     is points to a list of available components.
 #
-# ``OLD_URL`` is points to a list that will replaced.
+#   ``OLD_URL``
+#     is points to a list that will replaced.
 #
-# ``NEW_URL`` is points to a list that will replace to.
+#   ``NEW_URL``
+#     is points to a list that will replace to.
 #
-# ``USERNAME`` is used as user on a protected repository.
+#   ``USERNAME``
+#     is used as user on a protected repository.
 #
-# ``PASSWORD`` is password to use on a protected repository.
+#   ``PASSWORD``
+#     is password to use on a protected repository.
 #
-# ``DISPLAY_NAME`` is string to display instead of the URL.
+#   ``DISPLAY_NAME``
+#     is string to display instead of the URL.
 #
 # Example usage
 # ^^^^^^^^^^^^^
@@ -368,16 +387,16 @@
 #
 # Qt Installer Framework Manual:
 #
-#  Index page
+# * Index page:
 #   http://doc.qt.io/qtinstallerframework/index.html
 #
-#  Component Scripting
+# * Component Scripting:
 #   http://doc.qt.io/qtinstallerframework/scripting.html
 #
-#  Predefined Variables
+# * Predefined Variables:
 #   http://doc.qt.io/qtinstallerframework/scripting.html#predefined-variables
 #
-#  Promoting Updates
+# * Promoting Updates:
 #   http://doc.qt.io/qtinstallerframework/ifw-updates.html
 #
 # Download Qt Installer Framework for you platform from Qt site:
