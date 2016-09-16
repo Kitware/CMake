@@ -2483,6 +2483,8 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   bool showProgress = false;
   std::string userpwd;
 
+  std::list<std::string> curl_headers;
+
   while (i != args.end()) {
     if (*i == "TIMEOUT") {
       ++i;
@@ -2572,6 +2574,13 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
         return false;
       }
       userpwd = *i;
+    } else if (*i == "HTTPHEADER") {
+      ++i;
+      if (i == args.end()) {
+        this->SetError("DOWNLOAD missing string for HTTPHEADER.");
+        return false;
+      }
+      curl_headers.push_back(*i);
     } else {
       // Do not return error for compatibility reason.
       std::string err = "Unexpected argument: ";
@@ -2716,7 +2725,16 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
     check_curl_result(res, "DOWNLOAD cannot set user password: ");
   }
 
+  struct curl_slist* headers = CM_NULLPTR;
+  for (std::list<std::string>::const_iterator h = curl_headers.begin();
+       h != curl_headers.end(); ++h) {
+    headers = ::curl_slist_append(headers, h->c_str());
+  }
+  ::curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
   res = ::curl_easy_perform(curl);
+
+  ::curl_slist_free_all(headers);
 
   /* always cleanup */
   g_curl.release();
@@ -2798,6 +2816,8 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   bool showProgress = false;
   std::string userpwd;
 
+  std::list<std::string> curl_headers;
+
   while (i != args.end()) {
     if (*i == "TIMEOUT") {
       ++i;
@@ -2838,6 +2858,13 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
         return false;
       }
       userpwd = *i;
+    } else if (*i == "HTTPHEADER") {
+      ++i;
+      if (i == args.end()) {
+        this->SetError("UPLOAD missing string for HTTPHEADER.");
+        return false;
+      }
+      curl_headers.push_back(*i);
     } else {
       // Do not return error for compatibility reason.
       std::string err = "Unexpected argument: ";
@@ -2956,7 +2983,16 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
     check_curl_result(res, "UPLOAD cannot set user password: ");
   }
 
+  struct curl_slist* headers = CM_NULLPTR;
+  for (std::list<std::string>::const_iterator h = curl_headers.begin();
+       h != curl_headers.end(); ++h) {
+    headers = ::curl_slist_append(headers, h->c_str());
+  }
+  ::curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
   res = ::curl_easy_perform(curl);
+
+  ::curl_slist_free_all(headers);
 
   /* always cleanup */
   g_curl.release();
