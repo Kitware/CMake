@@ -253,7 +253,7 @@ bool cmGetPropertyCommand::HandleTargetMode()
       if (this->Makefile->IsAlias(this->Name)) {
         return this->StoreResult(target->GetName().c_str());
       }
-      return this->StoreResult(NULL);
+      return this->StoreResult(CM_NULLPTR);
     }
     return this->StoreResult(
       target->GetProperty(this->PropertyName, this->Makefile));

@@ -1118,7 +1118,7 @@ bool cmInstallCommand::HandleExportAndroidMKMode(
   cmCAEnabler exportOld(&ica.Parser, "EXPORT_LINK_INTERFACE_LIBRARIES",
                         &ica.ArgumentGroup);
   cmCAString filename(&ica.Parser, "FILE", &ica.ArgumentGroup);
-  exp.Follows(0);
+  exp.Follows(CM_NULLPTR);
 
   ica.ArgumentGroup.Follows(&exp);
   std::vector<std::string> unknownArgs;
