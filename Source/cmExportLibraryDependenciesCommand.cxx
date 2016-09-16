@@ -64,7 +64,7 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
     ap->SetCopyIfDifferent(true);
     foutPtr = ap;
   }
-  std::ostream& fout = *foutPtr.get();
+  std::ostream& fout = *foutPtr;
 
   if (!fout) {
     cmSystemTools::Error("Error Writing ", this->Filename.c_str());
