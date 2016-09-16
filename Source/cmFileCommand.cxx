@@ -600,8 +600,9 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       // how many octets are there?
       unsigned int num_utf8_bytes = 0;
       for (unsigned int j = 0; num_utf8_bytes == 0 && j < 3; j++) {
-        if ((c & utf8_check_table[j][0]) == utf8_check_table[j][1])
+        if ((c & utf8_check_table[j][0]) == utf8_check_table[j][1]) {
           num_utf8_bytes = j + 2;
+        }
       }
 
       // get subsequent octets and check that they are valid
