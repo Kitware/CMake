@@ -175,6 +175,8 @@ public:
     bool GetPropertyAsBool(const std::string& prop) const;
     std::vector<std::string> GetPropertyKeys() const;
 
+    void AddNormalTargetName(std::string const& name);
+
   private:
     void ComputeRelativePathTopSource();
     void ComputeRelativePathTopBinary();

@@ -94,6 +94,8 @@ struct cmState::BuildsystemDirectoryStateType
   std::vector<std::string> CompileOptions;
   std::vector<cmListFileBacktrace> CompileOptionsBacktraces;
 
+  std::vector<std::string> NormalTargetNames;
+
   std::string ProjectName;
 
   cmPropertyMap Properties;
@@ -324,6 +326,7 @@ cmState::Snapshot cmState::Reset()
     it->CompileOptions.clear();
     it->CompileOptionsBacktraces.clear();
     it->DirectoryEnd = pos;
+    it->NormalTargetNames.clear();
     it->Properties.clear();
     it->Children.clear();
   }
@@ -1731,6 +1734,11 @@ std::vector<std::string> cmState::Directory::GetPropertyKeys() const
     keys.push_back(it->first);
   }
   return keys;
+}
+
+void cmState::Directory::AddNormalTargetName(std::string const& name)
+{
+  this->DirectoryState->NormalTargetNames.push_back(name);
 }
 
 bool operator==(const cmState::Snapshot& lhs, const cmState::Snapshot& rhs)
