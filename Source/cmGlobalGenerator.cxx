@@ -94,6 +94,7 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   this->TryCompileOuterMakefile = CM_NULLPTR;
 
   this->ConfigureDoneCMP0026AndCMP0024 = false;
+  this->FirstTimeProgress = 0.0f;
 
   cm->GetState()->SetMinGWMake(false);
   cm->GetState()->SetMSYSShell(false);
