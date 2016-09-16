@@ -595,8 +595,8 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     gg->CreateGenerationObjects();
     cmGeneratorTarget* gtgt = gg->FindGeneratorTarget(tgt->GetName());
     cmLocalGenerator* lg = gtgt->GetLocalGenerator();
-    lg->GetTargetFlags(buildType, linkLibs, frameworkPath, linkPath, flags,
-                       linkFlags, gtgt, false);
+    lg->GetTargetFlags(buildType, linkLibs, flags, linkFlags, frameworkPath,
+                       linkPath, gtgt, false);
     linkLibs = frameworkPath + linkPath + linkLibs;
 
     printf("%s\n", linkLibs.c_str());
