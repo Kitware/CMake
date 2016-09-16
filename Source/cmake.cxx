@@ -129,8 +129,8 @@ typedef CM_UNORDERED_MAP<std::string, Json::Value> JsonValueMapType;
 
 } // namespace
 
-static bool cmakeCheckStampFile(const char* stampName);
-static bool cmakeCheckStampList(const char* stampName);
+static bool cmakeCheckStampFile(const char* stampName, bool verbose = true);
+static bool cmakeCheckStampList(const char* stampList, bool verbose = true);
 
 void cmWarnUnusedCliWarning(const std::string& variable, int /*unused*/,
                             void* ctx, const char* /*unused*/,
@@ -2233,7 +2233,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   return 0;
 }
 
-static bool cmakeCheckStampFile(const char* stampName)
+static bool cmakeCheckStampFile(const char* stampName, bool verbose)
 {
   // The stamp file does not exist.  Use the stamp dependencies to
   // determine whether it is really out of date.  This works in
@@ -2287,11 +2287,13 @@ static bool cmakeCheckStampFile(const char* stampName)
     stamp << "# CMake generation timestamp file for this directory.\n";
   }
   if (cmSystemTools::RenameFile(stampTemp, stampName)) {
-    // Notify the user why CMake is not re-running.  It is safe to
-    // just print to stdout here because this code is only reachable
-    // through an undocumented flag used by the VS generator.
-    std::cout << "CMake does not need to re-run because " << stampName
-              << " is up-to-date.\n";
+    if (verbose) {
+      // Notify the user why CMake is not re-running.  It is safe to
+      // just print to stdout here because this code is only reachable
+      // through an undocumented flag used by the VS generator.
+      std::cout << "CMake does not need to re-run because " << stampName
+                << " is up-to-date.\n";
+    }
     return true;
   }
   cmSystemTools::RemoveFile(stampTemp);
@@ -2299,7 +2301,7 @@ static bool cmakeCheckStampFile(const char* stampName)
   return false;
 }
 
-static bool cmakeCheckStampList(const char* stampList)
+static bool cmakeCheckStampList(const char* stampList, bool verbose)
 {
   // If the stamp list does not exist CMake must rerun to generate it.
   if (!cmSystemTools::FileExists(stampList)) {
@@ -2317,7 +2319,7 @@ static bool cmakeCheckStampList(const char* stampList)
   // Check each stamp.
   std::string stampName;
   while (cmSystemTools::GetLineFromStream(fin, stampName)) {
-    if (!cmakeCheckStampFile(stampName.c_str())) {
+    if (!cmakeCheckStampFile(stampName.c_str(), verbose)) {
       return false;
     }
   }
@@ -2397,6 +2399,48 @@ int cmake::Build(const std::string& dir, const std::string& target,
   if (cachedVerbose) {
     verbose = cmSystemTools::IsOn(cachedVerbose);
   }
+
+#ifdef CMAKE_HAVE_VS_GENERATORS
+  // For VS generators, explicitly check if regeneration is necessary before
+  // actually starting the build. If not done separately from the build
+  // itself, there is the risk of building an out-of-date solution file due
+  // to limitations of the underlying build system.
+  std::string const stampList = cachePath + "/" +
+    GetCMakeFilesDirectoryPostSlash() +
+    cmGlobalVisualStudio8Generator::GetGenerateStampList();
+
+  // Note that the stampList file only exists for VS generators.
+  if (cmSystemTools::FileExists(stampList.c_str()) &&
+      !cmakeCheckStampList(stampList.c_str(), false)) {
+
+    // Correctly initialize the home (=source) and home output (=binary)
+    // directories, which is required for running the generation step.
+    std::string homeOrig = this->GetHomeDirectory();
+    std::string homeOutputOrig = this->GetHomeOutputDirectory();
+    this->SetDirectoriesFromFile(cachePath.c_str());
+
+    int ret = this->Configure();
+    if (ret) {
+      cmSystemTools::Message("CMake Configure step failed.  "
+                             "Build files cannot be regenerated correctly.");
+      return ret;
+    }
+    ret = this->Generate();
+    if (ret) {
+      cmSystemTools::Message("CMake Generate step failed.  "
+                             "Build files cannot be regenerated correctly.");
+      return ret;
+    }
+    std::string message = "Build files have been written to: ";
+    message += this->GetHomeOutputDirectory();
+    this->UpdateProgress(message.c_str(), -1);
+
+    // Restore the previously set directories to their original value.
+    this->SetHomeDirectory(homeOrig);
+    this->SetHomeOutputDirectory(homeOutputOrig);
+  }
+#endif
+
   return gen->Build("", dir, projName, target, output, "", config, clean,
                     false, verbose, 0, cmSystemTools::OUTPUT_PASSTHROUGH,
                     nativeOptions);

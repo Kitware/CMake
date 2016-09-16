@@ -161,6 +161,11 @@ void cmGlobalVisualStudio8Generator::GetDocumentation(
   entry.Brief = "Generates Visual Studio 8 2005 project files.";
 }
 
+std::string cmGlobalVisualStudio8Generator::GetGenerateStampList()
+{
+  return "generate.stamp.list";
+}
+
 void cmGlobalVisualStudio8Generator::Configure()
 {
   this->cmGlobalVisualStudio7Generator::Configure();
@@ -244,7 +249,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   // Create a list of all stamp files for this project.
   std::vector<std::string> stamps;
   std::string stampList = cmake::GetCMakeFilesDirectoryPostSlash();
-  stampList += "generate.stamp.list";
+  stampList += cmGlobalVisualStudio8Generator::GetGenerateStampList();
   {
     std::string stampListFile =
       generators[0]->GetMakefile()->GetCurrentBinaryDirectory();
