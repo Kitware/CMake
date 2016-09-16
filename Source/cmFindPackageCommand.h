@@ -24,6 +24,27 @@ class cmFindPackageFileList;
 class cmFindPackageCommand : public cmFindCommon
 {
 public:
+  /*! A sorting order strategy to be applied to recovered package folders (see
+   * FIND_PACKAGE_SORT_ORDER)*/
+  enum /*class*/ SortOrderType
+  {
+    None,
+    Name_order,
+    Natural
+  };
+  /*! A sorting direction to be applied to recovered package folders (see
+   * FIND_PACKAGE_SORT_DIRECTION)*/
+  enum /*class*/ SortDirectionType
+  {
+    Asc,
+    Dec
+  };
+
+  /*! sorts a given list of string based on the input sort parameters */
+  static void Sort(std::vector<std::string>::iterator begin,
+                   std::vector<std::string>::iterator end, SortOrderType order,
+                   SortDirectionType dir);
+
   cmFindPackageCommand();
 
   /**
@@ -155,6 +176,11 @@ private:
   std::vector<std::string> Names;
   std::vector<std::string> Configs;
   std::set<std::string> IgnoredPaths;
+
+  /*! the selected sortOrder (None by default)*/
+  SortOrderType SortOrder;
+  /*! the selected sortDirection (Asc by default)*/
+  SortDirectionType SortDirection;
 
   struct ConfigFileInfo
   {
