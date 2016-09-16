@@ -36,23 +36,21 @@ bool cmUnsetCommand::InitialPass(std::vector<std::string> const& args,
     return true;
   }
   // unset(VAR)
-  else if (args.size() == 1) {
+  if (args.size() == 1) {
     this->Makefile->RemoveDefinition(variable);
     return true;
   }
   // unset(VAR CACHE)
-  else if ((args.size() == 2) && (args[1] == "CACHE")) {
+  if ((args.size() == 2) && (args[1] == "CACHE")) {
     this->Makefile->RemoveCacheDefinition(variable);
     return true;
   }
   // unset(VAR PARENT_SCOPE)
-  else if ((args.size() == 2) && (args[1] == "PARENT_SCOPE")) {
+  if ((args.size() == 2) && (args[1] == "PARENT_SCOPE")) {
     this->Makefile->RaiseScope(variable, CM_NULLPTR);
     return true;
   }
   // ERROR: second argument isn't CACHE or PARENT_SCOPE
-  else {
-    this->SetError("called with an invalid second argument");
-    return false;
-  }
+  this->SetError("called with an invalid second argument");
+  return false;
 }

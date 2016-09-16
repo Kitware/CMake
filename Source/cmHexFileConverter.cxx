@@ -89,7 +89,8 @@ static bool ConvertMotorolaSrecLine(const char* buf, FILE* outFile)
   if ((buf[1] == '5') || (buf[1] == '7') || (buf[1] == '8') ||
       (buf[1] == '9')) {
     return true;
-  } else if (buf[1] == '1') {
+  }
+  if (buf[1] == '1') {
     dataStart = 8;
   } else if (buf[1] == '2') {
     dataStart = 10;

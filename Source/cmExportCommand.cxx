@@ -51,7 +51,8 @@ bool cmExportCommand::InitialPass(std::vector<std::string> const& args,
 
   if (args[0] == "PACKAGE") {
     return this->HandlePackage(args);
-  } else if (args[0] == "EXPORT") {
+  }
+  if (args[0] == "EXPORT") {
     this->ExportSetName.Follows(CM_NULLPTR);
     this->ArgumentGroup.Follows(&this->ExportSetName);
   } else {

@@ -143,12 +143,12 @@ std::string cmInstallFilesCommand::FindInstallSource(const char* name) const
   if (cmSystemTools::FileExists(tb.c_str())) {
     // The file exists in the binary tree.  Use it.
     return tb;
-  } else if (cmSystemTools::FileExists(ts.c_str())) {
+  }
+  if (cmSystemTools::FileExists(ts.c_str())) {
     // The file exists in the source tree.  Use it.
     return ts;
-  } else {
-    // The file doesn't exist.  Assume it will be present in the
-    // binary tree when the install occurs.
-    return tb;
   }
+  // The file doesn't exist.  Assume it will be present in the
+  // binary tree when the install occurs.
+  return tb;
 }

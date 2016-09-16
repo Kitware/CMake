@@ -378,9 +378,8 @@ std::string cmFindLibraryCommand::FindNormalLibrary()
 {
   if (this->NamesPerDir) {
     return this->FindNormalLibraryNamesPerDir();
-  } else {
-    return this->FindNormalLibraryDirsPerName();
   }
+  return this->FindNormalLibraryDirsPerName();
 }
 
 std::string cmFindLibraryCommand::FindNormalLibraryNamesPerDir()
@@ -428,9 +427,8 @@ std::string cmFindLibraryCommand::FindFrameworkLibrary()
 {
   if (this->NamesPerDir) {
     return this->FindFrameworkLibraryNamesPerDir();
-  } else {
-    return this->FindFrameworkLibraryDirsPerName();
   }
+  return this->FindFrameworkLibraryDirsPerName();
 }
 
 std::string cmFindLibraryCommand::FindFrameworkLibraryNamesPerDir()

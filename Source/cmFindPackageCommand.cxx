@@ -1308,18 +1308,16 @@ bool cmFindPackageCommand::CheckPackageRegistryEntry(const std::string& fname,
         outPaths.AddPath(fname);
       }
       return true;
-    } else {
-      // The path does not exist.  Assume the stream content is
-      // associated with an old package that no longer exists, and
-      // delete it to keep the package registry clean.
-      return false;
     }
-  } else {
-    // The first line in the stream is not the full path to a file or
-    // directory.  Assume the stream content was created by a future
-    // version of CMake that uses a different format, and leave it.
-    return true;
+    // The path does not exist.  Assume the stream content is
+    // associated with an old package that no longer exists, and
+    // delete it to keep the package registry clean.
+    return false;
   }
+  // The first line in the stream is not the full path to a file or
+  // directory.  Assume the stream content was created by a future
+  // version of CMake that uses a different format, and leave it.
+  return true;
 }
 
 void cmFindPackageCommand::FillPrefixesCMakeSystemVariable()
@@ -1628,9 +1626,8 @@ private:
   {
     if (this->UseSuffixes) {
       return this->FPC->SearchDirectory(fullPath);
-    } else {
-      return this->FPC->CheckDirectory(fullPath);
     }
+    return this->FPC->CheckDirectory(fullPath);
   }
   cmFindPackageCommand* FPC;
   bool UseSuffixes;
@@ -1653,9 +1650,8 @@ bool cmFileListGeneratorBase::Consider(std::string const& fullPath,
 {
   if (this->Next.get()) {
     return this->Next->Search(fullPath + "/", listing);
-  } else {
-    return listing.Visit(fullPath + "/");
   }
+  return listing.Visit(fullPath + "/");
 }
 
 class cmFileListGeneratorFixed : public cmFileListGeneratorBase

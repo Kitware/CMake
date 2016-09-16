@@ -565,9 +565,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         if (copyFileError.empty()) {
           this->Makefile->IssueMessage(cmake::FATAL_ERROR, emsg.str());
           return -1;
-        } else {
-          copyFileErrorMessage = emsg.str();
         }
+        copyFileErrorMessage = emsg.str();
       }
     }
 

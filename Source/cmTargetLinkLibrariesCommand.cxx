@@ -353,10 +353,9 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
         "INTERFACE_LINK_LIBRARIES",
         this->Target->GetDebugGeneratorExpressions(lib, llt).c_str());
       return true;
-    } else if (this->CurrentProcessingState !=
-                 ProcessingKeywordPublicInterface &&
-               this->CurrentProcessingState !=
-                 ProcessingPlainPublicInterface) {
+    }
+    if (this->CurrentProcessingState != ProcessingKeywordPublicInterface &&
+        this->CurrentProcessingState != ProcessingPlainPublicInterface) {
       if (this->Target->GetType() == cmState::STATIC_LIBRARY) {
         std::string configLib =
           this->Target->GetDebugGeneratorExpressions(lib, llt);

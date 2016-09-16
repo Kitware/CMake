@@ -524,9 +524,8 @@ void CCONV* cmGetSource(void* arg, const char* name)
       i = cmCPluginAPISourceFiles.insert(entry).first;
     }
     return (void*)i->second;
-  } else {
-    return CM_NULLPTR;
   }
+  return CM_NULLPTR;
 }
 
 void* CCONV cmAddSource(void* arg, void* arg2)
@@ -574,12 +573,11 @@ const char* CCONV cmSourceFileGetProperty(void* arg, const char* prop)
   cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
   if (cmSourceFile* rsf = sf->RealSourceFile) {
     return rsf->GetProperty(prop);
-  } else {
-    if (!strcmp(prop, "LOCATION")) {
-      return sf->FullPath.c_str();
-    }
-    return sf->Properties.GetPropertyValue(prop);
   }
+  if (!strcmp(prop, "LOCATION")) {
+    return sf->FullPath.c_str();
+  }
+  return sf->Properties.GetPropertyValue(prop);
 }
 
 int CCONV cmSourceFileGetPropertyAsBool(void* arg, const char* prop)
@@ -587,9 +585,8 @@ int CCONV cmSourceFileGetPropertyAsBool(void* arg, const char* prop)
   cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
   if (cmSourceFile* rsf = sf->RealSourceFile) {
     return rsf->GetPropertyAsBool(prop) ? 1 : 0;
-  } else {
-    return cmSystemTools::IsOn(cmSourceFileGetProperty(arg, prop)) ? 1 : 0;
   }
+  return cmSystemTools::IsOn(cmSourceFileGetProperty(arg, prop)) ? 1 : 0;
 }
 
 void CCONV cmSourceFileSetProperty(void* arg, const char* prop,

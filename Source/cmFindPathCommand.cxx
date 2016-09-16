@@ -136,9 +136,8 @@ std::string cmFindPathCommand::FindNormalHeader()
       if (cmSystemTools::FileExists(tryPath.c_str())) {
         if (this->IncludeFileInPath) {
           return tryPath;
-        } else {
-          return *p;
         }
+        return *p;
       }
     }
   }

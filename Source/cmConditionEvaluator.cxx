@@ -249,20 +249,19 @@ bool cmConditionEvaluator::GetBooleanValueOld(
     // Old IsTrue behavior for single argument.
     if (arg == "0") {
       return false;
-    } else if (arg == "1") {
+    }
+    if (arg == "1") {
       return true;
-    } else {
-      const char* def = this->GetDefinitionIfUnquoted(arg);
-      return !cmSystemTools::IsOff(def);
     }
-  } else {
-    // Old GetVariableOrNumber behavior.
     const char* def = this->GetDefinitionIfUnquoted(arg);
-    if (!def && atoi(arg.c_str())) {
-      def = arg.c_str();
-    }
     return !cmSystemTools::IsOff(def);
   }
+  // Old GetVariableOrNumber behavior.
+  const char* def = this->GetDefinitionIfUnquoted(arg);
+  if (!def && atoi(arg.c_str())) {
+    def = arg.c_str();
+  }
+  return !cmSystemTools::IsOff(def);
 }
 
 //=========================================================================
@@ -274,7 +273,8 @@ bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
   // Use the policy if it is set.
   if (this->Policy12Status == cmPolicies::NEW) {
     return GetBooleanValue(newArg);
-  } else if (this->Policy12Status == cmPolicies::OLD) {
+  }
+  if (this->Policy12Status == cmPolicies::OLD) {
     return GetBooleanValueOld(newArg, oneArg);
   }
 

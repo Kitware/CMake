@@ -59,7 +59,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
   }
   // SET (VAR PARENT_SCOPE) // Removes the definition of VAR
   // in the parent scope.
-  else if (args.size() == 2 && args[args.size() - 1] == "PARENT_SCOPE") {
+  if (args.size() == 2 && args[args.size() - 1] == "PARENT_SCOPE") {
     this->Makefile->RaiseScope(variable, CM_NULLPTR);
     return true;
   }

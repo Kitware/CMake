@@ -140,9 +140,8 @@ std::string cmFindProgramCommand::FindNormalProgram()
 {
   if (this->NamesPerDir) {
     return this->FindNormalProgramNamesPerDir();
-  } else {
-    return this->FindNormalProgramDirsPerName();
   }
+  return this->FindNormalProgramDirsPerName();
 }
 
 std::string cmFindProgramCommand::FindNormalProgramNamesPerDir()

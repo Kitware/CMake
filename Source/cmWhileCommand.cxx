@@ -104,10 +104,9 @@ bool cmWhileFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
                                            messageType);
       }
       return true;
-    } else {
-      // decrement for each nested while that ends
-      this->Depth--;
     }
+    // decrement for each nested while that ends
+    this->Depth--;
   }
 
   // record the command
