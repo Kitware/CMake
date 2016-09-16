@@ -22,7 +22,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)
 {
   // must have one argument
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }

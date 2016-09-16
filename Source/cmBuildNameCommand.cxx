@@ -22,7 +22,7 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args,
         "The build_name command should not be called; see CMP0036.")) {
     return true;
   }
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }

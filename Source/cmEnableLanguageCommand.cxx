@@ -17,7 +17,7 @@ bool cmEnableLanguageCommand::InitialPass(std::vector<std::string> const& args,
 {
   bool optional = false;
   std::vector<std::string> languages;
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }

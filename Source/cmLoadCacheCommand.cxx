@@ -18,7 +18,7 @@
 bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& args,
                                      cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("called with wrong number of arguments.");
   }
 

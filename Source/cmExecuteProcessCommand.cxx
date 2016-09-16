@@ -31,7 +31,7 @@ void cmExecuteProcessCommandAppend(std::vector<char>& output, const char* data,
 bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
                                           cmExecutionStatus&)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }

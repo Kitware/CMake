@@ -167,10 +167,10 @@ public:
 
   iterator Truncate()
   {
-    assert(this->UpPositions.size() > 0);
+    assert(!this->UpPositions.empty());
     this->UpPositions.erase(this->UpPositions.begin() + 1,
                             this->UpPositions.end());
-    assert(this->Data.size() > 0);
+    assert(!this->Data.empty());
     this->Data.erase(this->Data.begin() + 1, this->Data.end());
     return iterator(this, 1);
   }

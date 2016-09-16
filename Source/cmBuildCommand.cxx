@@ -27,7 +27,7 @@ bool cmBuildCommand::InitialPass(std::vector<std::string> const& args,
 
 bool cmBuildCommand::MainSignature(std::vector<std::string> const& args)
 {
-  if (args.size() < 1) {
+  if (args.empty()) {
     this->SetError("requires at least one argument naming a CMake variable");
     return false;
   }

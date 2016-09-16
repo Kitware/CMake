@@ -183,7 +183,7 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
         "The load_command command should not be called; see CMP0031.")) {
     return true;
   }
-  if (args.size() < 1) {
+  if (args.empty()) {
     return true;
   }
 
