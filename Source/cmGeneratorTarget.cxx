@@ -1162,7 +1162,28 @@ bool cmGeneratorTarget::NeedRelinkBeforeInstall(
   // If either a build or install tree rpath is set then the rpath
   // will likely change between the build tree and install tree and
   // this target must be relinked.
-  return this->HaveBuildTreeRPATH(config) || this->HaveInstallTreeRPATH();
+  bool have_rpath =
+    this->HaveBuildTreeRPATH(config) || this->HaveInstallTreeRPATH();
+  bool is_ninja =
+    this->LocalGenerator->GetGlobalGenerator()->GetName() == "Ninja";
+
+  if (have_rpath && is_ninja) {
+    std::ostringstream w;
+    /* clang-format off */
+    w <<
+      "The install of the " << this->GetName() << " target requires "
+      "changing an RPATH from the build tree, but this is not supported "
+      "with the Ninja generator unless on an ELF-based platform.  The "
+      "CMAKE_BUILD_WITH_INSTALL_RPATH variable may be set to avoid this "
+      "relinking step."
+      ;
+    /* clang-format on */
+
+    cmake* cm = this->LocalGenerator->GetCMakeInstance();
+    cm->IssueMessage(cmake::FATAL_ERROR, w.str(), this->GetBacktrace());
+  }
+
+  return have_rpath;
 }
 
 bool cmGeneratorTarget::IsChrpathUsed(const std::string& config) const
