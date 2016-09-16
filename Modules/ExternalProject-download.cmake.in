@@ -135,6 +135,7 @@ foreach(i RANGE ${retry_number})
         @TIMEOUT_ARGS@
         STATUS status
         LOG log
+        @USERPWD_ARGS@
     )
 
     list(GET status 0 status_code)

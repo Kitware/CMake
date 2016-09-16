@@ -75,6 +75,10 @@ Create custom targets to build projects in external trees
     Hash of file at URL
   ``URL_MD5 md5``
     Equivalent to URL_HASH MD5=md5
+  ``HTTP_USERNAME <username>``
+    Username for download operation
+  ``HTTP_PASSWORD <username>``
+    Password for download operation
   ``TLS_VERIFY <bool>``
     Should certificate for https be checked
   ``TLS_CAINFO <file>``
@@ -858,7 +862,7 @@ endif()
 
 endfunction(_ep_write_gitupdate_script)
 
-function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_progress hash tls_verify tls_cainfo)
+function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_progress hash tls_verify tls_cainfo userpwd)
   if(timeout)
     set(TIMEOUT_ARGS TIMEOUT ${timeout})
     set(TIMEOUT_MSG "${timeout} seconds")
@@ -906,6 +910,12 @@ function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_p
     set(TLS_CAINFO_CODE "set(CMAKE_TLS_CAINFO \"${tls_cainfo}\")")
   endif()
 
+  if(userpwd STREQUAL ":")
+    set(USERPWD_ARGS)
+  else()
+    set(USERPWD_ARGS USERPWD "${userpwd}")
+  endif()
+
   # Used variables:
   # * TLS_VERIFY_CODE
   # * TLS_CAINFO_CODE
@@ -916,6 +926,7 @@ function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_p
   # * SHOW_PROGRESS
   # * TIMEOUT_ARGS
   # * TIMEOUT_MSG
+  # * USERPWD_ARGS
   configure_file(
       "${_ExternalProject_SELF_DIR}/ExternalProject-download.cmake.in"
       "${script_filename}"
@@ -1919,8 +1930,10 @@ function(_ep_add_download_command name)
         get_property(no_progress TARGET ${name} PROPERTY _EP_DOWNLOAD_NO_PROGRESS)
         get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
         get_property(tls_cainfo TARGET ${name} PROPERTY _EP_TLS_CAINFO)
+        get_property(http_username TARGET ${name} PROPERTY _EP_HTTP_USERNAME)
+        get_property(http_password TARGET ${name} PROPERTY _EP_HTTP_PASSWORD)
         set(download_script "${stamp_dir}/download-${name}.cmake")
-        _ep_write_downloadfile_script("${download_script}" "${url}" "${file}" "${timeout}" "${no_progress}" "${hash}" "${tls_verify}" "${tls_cainfo}")
+        _ep_write_downloadfile_script("${download_script}" "${url}" "${file}" "${timeout}" "${no_progress}" "${hash}" "${tls_verify}" "${tls_cainfo}" "${http_username}:${http_password}")
         set(cmd ${CMAKE_COMMAND} -P "${download_script}"
           COMMAND)
         if (no_extract)
