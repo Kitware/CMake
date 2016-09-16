@@ -402,11 +402,30 @@ protected:
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen) const;
   bool IsExcluded(cmLocalGenerator* root, cmGeneratorTarget* target) const;
   virtual void InitializeProgressMarks() {}
-  void CreateDefaultGlobalTargets(cmTargets* targets);
-  cmTarget CreateGlobalTarget(const std::string& name, const char* message,
-                              const cmCustomCommandLines* commandLines,
-                              std::vector<std::string> depends,
-                              const char* workingDir, bool uses_terminal);
+
+  struct GlobalTargetInfo
+  {
+    std::string Name;
+    std::string Message;
+    cmCustomCommandLines CommandLines;
+    std::vector<std::string> Depends;
+    std::string WorkingDir;
+    bool UsesTerminal;
+    GlobalTargetInfo()
+      : UsesTerminal(false)
+    {
+    }
+  };
+
+  void CreateDefaultGlobalTargets(std::vector<GlobalTargetInfo>& targets);
+
+  void AddGlobalTarget_Package(std::vector<GlobalTargetInfo>& targets);
+  void AddGlobalTarget_PackageSource(std::vector<GlobalTargetInfo>& targets);
+  void AddGlobalTarget_Test(std::vector<GlobalTargetInfo>& targets);
+  void AddGlobalTarget_EditCache(std::vector<GlobalTargetInfo>& targets);
+  void AddGlobalTarget_RebuildCache(std::vector<GlobalTargetInfo>& targets);
+  void AddGlobalTarget_Install(std::vector<GlobalTargetInfo>& targets);
+  cmTarget CreateGlobalTarget(GlobalTargetInfo const& gti, cmMakefile* mf);
 
   std::string FindMakeProgramFile;
   std::string ConfiguredFilesPath;
