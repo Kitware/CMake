@@ -57,14 +57,7 @@ bool cmCommandArgument::MayFollow(const cmCommandArgument* current) const
   if (this->ArgumentsBeforeEmpty) {
     return true;
   }
-
-  std::set<const cmCommandArgument*>::const_iterator argIt =
-    this->ArgumentsBefore.find(current);
-  if (argIt != this->ArgumentsBefore.end()) {
-    return true;
-  }
-
-  return false;
+  return this->ArgumentsBefore.find(current) != this->ArgumentsBefore.end();
 }
 
 bool cmCommandArgument::KeyMatches(const std::string& key) const
