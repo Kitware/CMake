@@ -336,7 +336,7 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
         std::string targetOutputReal =
           this->ConvertToNinjaPath(gt.GetFullPath(cfgName,
                                                   /*implib=*/false,
-                                                  /*realpath=*/true));
+                                                  /*realname=*/true));
         cmakeCommand += targetOutputReal;
         cmakeCommand += " || true";
         linkCmds.push_back(cmakeCommand);
@@ -414,7 +414,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   std::string targetOutputReal =
     ConvertToNinjaPath(gt.GetFullPath(cfgName,
                                       /*implib=*/false,
-                                      /*realpath=*/true));
+                                      /*realname=*/true));
   std::string targetOutputImplib =
     ConvertToNinjaPath(gt.GetFullPath(cfgName,
                                       /*implib=*/true));
