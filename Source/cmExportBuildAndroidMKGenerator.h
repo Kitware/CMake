@@ -45,24 +45,25 @@ public:
 
 protected:
   // Implement virtual methods from the superclass.
-  virtual void GeneratePolicyHeaderCode(std::ostream&) {}
-  virtual void GeneratePolicyFooterCode(std::ostream&) {}
-  virtual void GenerateImportHeaderCode(std::ostream& os,
-                                        const std::string& config = "");
-  virtual void GenerateImportFooterCode(std::ostream& os);
-  virtual void GenerateImportTargetCode(std::ostream& os,
-                                        const cmGeneratorTarget* target);
-  virtual void GenerateExpectedTargetsCode(std::ostream& os,
-                                           const std::string& expectedTargets);
-  virtual void GenerateImportPropertyCode(std::ostream& os,
-                                          const std::string& config,
-                                          cmGeneratorTarget const* target,
-                                          ImportPropertyMap const& properties);
-  virtual void GenerateMissingTargetsCheckCode(
-    std::ostream& os, const std::vector<std::string>& missingTargets);
-  virtual void GenerateInterfaceProperties(
+  void GeneratePolicyHeaderCode(std::ostream&) CM_OVERRIDE {}
+  void GeneratePolicyFooterCode(std::ostream&) CM_OVERRIDE {}
+  void GenerateImportHeaderCode(std::ostream& os,
+                                const std::string& config = "") CM_OVERRIDE;
+  void GenerateImportFooterCode(std::ostream& os) CM_OVERRIDE;
+  void GenerateImportTargetCode(std::ostream& os,
+                                const cmGeneratorTarget* target) CM_OVERRIDE;
+  void GenerateExpectedTargetsCode(
+    std::ostream& os, const std::string& expectedTargets) CM_OVERRIDE;
+  void GenerateImportPropertyCode(std::ostream& os, const std::string& config,
+                                  cmGeneratorTarget const* target,
+                                  ImportPropertyMap const& properties)
+    CM_OVERRIDE;
+  void GenerateMissingTargetsCheckCode(
+    std::ostream& os,
+    const std::vector<std::string>& missingTargets) CM_OVERRIDE;
+  void GenerateInterfaceProperties(
     cmGeneratorTarget const* target, std::ostream& os,
-    const ImportPropertyMap& properties);
+    const ImportPropertyMap& properties) CM_OVERRIDE;
 };
 
 #endif

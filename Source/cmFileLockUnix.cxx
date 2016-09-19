@@ -37,9 +37,8 @@ cmFileLockResult cmFileLock::Release()
 
   if (lockResult == 0) {
     return cmFileLockResult::MakeOk();
-  } else {
-    return cmFileLockResult::MakeSystem();
   }
+  return cmFileLockResult::MakeSystem();
 }
 
 cmFileLockResult cmFileLock::OpenFile()
@@ -47,18 +46,16 @@ cmFileLockResult cmFileLock::OpenFile()
   this->File = ::open(this->Filename.c_str(), O_RDWR);
   if (this->File == -1) {
     return cmFileLockResult::MakeSystem();
-  } else {
-    return cmFileLockResult::MakeOk();
   }
+  return cmFileLockResult::MakeOk();
 }
 
 cmFileLockResult cmFileLock::LockWithoutTimeout()
 {
   if (this->LockFile(F_SETLKW, F_WRLCK) == -1) {
     return cmFileLockResult::MakeSystem();
-  } else {
-    return cmFileLockResult::MakeOk();
   }
+  return cmFileLockResult::MakeOk();
 }
 
 cmFileLockResult cmFileLock::LockWithTimeout(unsigned long seconds)

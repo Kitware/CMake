@@ -159,10 +159,9 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
     if (cmds[i].empty()) {
       this->SetError(" given COMMAND argument with no value.");
       return false;
-    } else {
-      // Add the null terminating pointer to the command argument list.
-      cmds[i].push_back(CM_NULLPTR);
     }
+    // Add the null terminating pointer to the command argument list.
+    cmds[i].push_back(CM_NULLPTR);
   }
 
   // Parse the timeout string.

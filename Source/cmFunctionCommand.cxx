@@ -169,10 +169,9 @@ bool cmFunctionFunctionBlocker::IsFunctionBlocked(
       // remove the function blocker now that the function is defined
       mf.RemoveFunctionBlocker(this, lff);
       return true;
-    } else {
-      // decrement for each nested function that ends
-      this->Depth--;
     }
+    // decrement for each nested function that ends
+    this->Depth--;
   }
 
   // if it wasn't an endfunction and we are not executing then we must be

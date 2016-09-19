@@ -42,9 +42,9 @@ bool cmCMakeHostSystemInformationCommand::InitialPass(
       result_list += ";";
     }
     std::string value;
-    if (!this->GetValue(info, key, value))
+    if (!this->GetValue(info, key, value)) {
       return false;
-
+    }
     result_list += value;
   }
 

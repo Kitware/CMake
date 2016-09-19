@@ -81,10 +81,9 @@ bool cmForEachFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       // restore the variable to its prior value
       mf.AddDefinition(this->Args[0], oldDef.c_str());
       return true;
-    } else {
-      // close out a nested foreach
-      this->Depth--;
     }
+    // close out a nested foreach
+    this->Depth--;
   }
 
   // record the command

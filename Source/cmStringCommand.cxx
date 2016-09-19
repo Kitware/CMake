@@ -34,43 +34,61 @@ bool cmStringCommand::InitialPass(std::vector<std::string> const& args,
   const std::string& subCommand = args[0];
   if (subCommand == "REGEX") {
     return this->HandleRegexCommand(args);
-  } else if (subCommand == "REPLACE") {
+  }
+  if (subCommand == "REPLACE") {
     return this->HandleReplaceCommand(args);
-  } else if (subCommand == "MD5" || subCommand == "SHA1" ||
-             subCommand == "SHA224" || subCommand == "SHA256" ||
-             subCommand == "SHA384" || subCommand == "SHA512") {
+  }
+  if (subCommand == "MD5" || subCommand == "SHA1" || subCommand == "SHA224" ||
+      subCommand == "SHA256" || subCommand == "SHA384" ||
+      subCommand == "SHA512") {
     return this->HandleHashCommand(args);
-  } else if (subCommand == "TOLOWER") {
+  }
+  if (subCommand == "TOLOWER") {
     return this->HandleToUpperLowerCommand(args, false);
-  } else if (subCommand == "TOUPPER") {
+  }
+  if (subCommand == "TOUPPER") {
     return this->HandleToUpperLowerCommand(args, true);
-  } else if (subCommand == "COMPARE") {
+  }
+  if (subCommand == "COMPARE") {
     return this->HandleCompareCommand(args);
-  } else if (subCommand == "ASCII") {
+  }
+  if (subCommand == "ASCII") {
     return this->HandleAsciiCommand(args);
-  } else if (subCommand == "CONFIGURE") {
+  }
+  if (subCommand == "CONFIGURE") {
     return this->HandleConfigureCommand(args);
-  } else if (subCommand == "LENGTH") {
+  }
+  if (subCommand == "LENGTH") {
     return this->HandleLengthCommand(args);
-  } else if (subCommand == "APPEND") {
+  }
+  if (subCommand == "APPEND") {
     return this->HandleAppendCommand(args);
-  } else if (subCommand == "CONCAT") {
+  }
+  if (subCommand == "CONCAT") {
     return this->HandleConcatCommand(args);
-  } else if (subCommand == "SUBSTRING") {
+  }
+  if (subCommand == "SUBSTRING") {
     return this->HandleSubstringCommand(args);
-  } else if (subCommand == "STRIP") {
+  }
+  if (subCommand == "STRIP") {
     return this->HandleStripCommand(args);
-  } else if (subCommand == "RANDOM") {
+  }
+  if (subCommand == "RANDOM") {
     return this->HandleRandomCommand(args);
-  } else if (subCommand == "FIND") {
+  }
+  if (subCommand == "FIND") {
     return this->HandleFindCommand(args);
-  } else if (subCommand == "TIMESTAMP") {
+  }
+  if (subCommand == "TIMESTAMP") {
     return this->HandleTimestampCommand(args);
-  } else if (subCommand == "MAKE_C_IDENTIFIER") {
+  }
+  if (subCommand == "MAKE_C_IDENTIFIER") {
     return this->HandleMakeCIdentifierCommand(args);
-  } else if (subCommand == "GENEX_STRIP") {
+  }
+  if (subCommand == "GENEX_STRIP") {
     return this->HandleGenexStripCommand(args);
-  } else if (subCommand == "UUID") {
+  }
+  if (subCommand == "UUID") {
     return this->HandleUuidCommand(args);
   }
 
@@ -158,7 +176,8 @@ bool cmStringCommand::HandleConfigureCommand(
   if (args.size() < 2) {
     this->SetError("No input string specified.");
     return false;
-  } else if (args.size() < 3) {
+  }
+  if (args.size() < 3) {
     this->SetError("No output variable specified.");
     return false;
   }
@@ -203,14 +222,16 @@ bool cmStringCommand::HandleRegexCommand(std::vector<std::string> const& args)
       return false;
     }
     return this->RegexMatch(args);
-  } else if (mode == "MATCHALL") {
+  }
+  if (mode == "MATCHALL") {
     if (args.size() < 5) {
       this->SetError("sub-command REGEX, mode MATCHALL needs "
                      "at least 5 arguments total to command.");
       return false;
     }
     return this->RegexMatchAll(args);
-  } else if (mode == "REPLACE") {
+  }
+  if (mode == "REPLACE") {
     if (args.size() < 6) {
       this->SetError("sub-command REGEX, mode REPLACE needs "
                      "at least 6 arguments total to command.");
@@ -785,7 +806,8 @@ bool cmStringCommand::HandleTimestampCommand(
   if (args.size() < 2) {
     this->SetError("sub-command TIMESTAMP requires at least one argument.");
     return false;
-  } else if (args.size() > 4) {
+  }
+  if (args.size() > 4) {
     this->SetError("sub-command TIMESTAMP takes at most three arguments.");
     return false;
   }

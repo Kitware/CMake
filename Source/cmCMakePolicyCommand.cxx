@@ -24,23 +24,27 @@ bool cmCMakePolicyCommand::InitialPass(std::vector<std::string> const& args,
 
   if (args[0] == "SET") {
     return this->HandleSetMode(args);
-  } else if (args[0] == "GET") {
+  }
+  if (args[0] == "GET") {
     return this->HandleGetMode(args);
-  } else if (args[0] == "PUSH") {
+  }
+  if (args[0] == "PUSH") {
     if (args.size() > 1) {
       this->SetError("PUSH may not be given additional arguments.");
       return false;
     }
     this->Makefile->PushPolicy();
     return true;
-  } else if (args[0] == "POP") {
+  }
+  if (args[0] == "POP") {
     if (args.size() > 1) {
       this->SetError("POP may not be given additional arguments.");
       return false;
     }
     this->Makefile->PopPolicy();
     return true;
-  } else if (args[0] == "VERSION") {
+  }
+  if (args[0] == "VERSION") {
     return this->HandleVersionMode(args);
   }
 
@@ -148,7 +152,8 @@ bool cmCMakePolicyCommand::HandleVersionMode(
   if (args.size() <= 1) {
     this->SetError("VERSION not given an argument");
     return false;
-  } else if (args.size() >= 3) {
+  }
+  if (args.size() >= 3) {
     this->SetError("VERSION given too many arguments");
     return false;
   }

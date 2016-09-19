@@ -12,7 +12,7 @@
 #ifndef CM_AUTO_PTR_HXX
 #define CM_AUTO_PTR_HXX
 
-#include <cmsys/Configure.hxx>
+#include <cmConfigure.h>
 
 // FIXME: Use std::auto_ptr on compilers that do not warn about it.
 #define CM_AUTO_PTR cm::auto_ptr
@@ -115,7 +115,7 @@ public:
    *
    *   auto_ptr<X> ptr(new X());
    */
-  explicit auto_ptr(X* p = 0) throw()
+  explicit auto_ptr(X* p = CM_NULLPTR) throw()
     : x_(p)
   {
   }
@@ -157,7 +157,7 @@ public:
   X* release() throw()
   {
     X* x = this->x_;
-    this->x_ = 0;
+    this->x_ = CM_NULLPTR;
     return x;
   }
 

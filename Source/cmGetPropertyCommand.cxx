@@ -252,19 +252,17 @@ bool cmGetPropertyCommand::HandleTargetMode()
     if (this->PropertyName == "ALIASED_TARGET") {
       if (this->Makefile->IsAlias(this->Name)) {
         return this->StoreResult(target->GetName().c_str());
-      } else {
-        return this->StoreResult(NULL);
       }
+      return this->StoreResult(CM_NULLPTR);
     }
     return this->StoreResult(
       target->GetProperty(this->PropertyName, this->Makefile));
-  } else {
-    std::ostringstream e;
-    e << "could not find TARGET " << this->Name
-      << ".  Perhaps it has not yet been created.";
-    this->SetError(e.str());
-    return false;
   }
+  std::ostringstream e;
+  e << "could not find TARGET " << this->Name
+    << ".  Perhaps it has not yet been created.";
+  this->SetError(e.str());
+  return false;
 }
 
 bool cmGetPropertyCommand::HandleSourceMode()
@@ -277,13 +275,11 @@ bool cmGetPropertyCommand::HandleSourceMode()
   // Get the source file.
   if (cmSourceFile* sf = this->Makefile->GetOrCreateSource(this->Name)) {
     return this->StoreResult(sf->GetPropertyForUser(this->PropertyName));
-  } else {
-    std::ostringstream e;
-    e << "given SOURCE name that could not be found or created: "
-      << this->Name;
-    this->SetError(e.str());
-    return false;
   }
+  std::ostringstream e;
+  e << "given SOURCE name that could not be found or created: " << this->Name;
+  this->SetError(e.str());
+  return false;
 }
 
 bool cmGetPropertyCommand::HandleTestMode()
@@ -347,11 +343,9 @@ bool cmGetPropertyCommand::HandleInstallMode()
     bool isSet = file->GetProperty(this->PropertyName, value);
 
     return this->StoreResult(isSet ? value.c_str() : CM_NULLPTR);
-  } else {
-    std::ostringstream e;
-    e << "given INSTALL name that could not be found or created: "
-      << this->Name;
-    this->SetError(e.str());
-    return false;
   }
+  std::ostringstream e;
+  e << "given INSTALL name that could not be found or created: " << this->Name;
+  this->SetError(e.str());
+  return false;
 }

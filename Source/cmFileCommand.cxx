@@ -104,19 +104,25 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args,
   std::string subCommand = args[0];
   if (subCommand == "WRITE") {
     return this->HandleWriteCommand(args, false);
-  } else if (subCommand == "APPEND") {
+  }
+  if (subCommand == "APPEND") {
     return this->HandleWriteCommand(args, true);
-  } else if (subCommand == "DOWNLOAD") {
+  }
+  if (subCommand == "DOWNLOAD") {
     return this->HandleDownloadCommand(args);
-  } else if (subCommand == "UPLOAD") {
+  }
+  if (subCommand == "UPLOAD") {
     return this->HandleUploadCommand(args);
-  } else if (subCommand == "READ") {
+  }
+  if (subCommand == "READ") {
     return this->HandleReadCommand(args);
-  } else if (subCommand == "MD5" || subCommand == "SHA1" ||
-             subCommand == "SHA224" || subCommand == "SHA256" ||
-             subCommand == "SHA384" || subCommand == "SHA512") {
+  }
+  if (subCommand == "MD5" || subCommand == "SHA1" || subCommand == "SHA224" ||
+      subCommand == "SHA256" || subCommand == "SHA384" ||
+      subCommand == "SHA512") {
     return this->HandleHashCommand(args);
-  } else if (subCommand == "STRINGS") {
+  }
+  if (subCommand == "STRINGS") {
     return this->HandleStringsCommand(args);
   } else if (subCommand == "GLOB") {
     return this->HandleGlobCommand(args, false);
@@ -594,8 +600,9 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       // how many octets are there?
       unsigned int num_utf8_bytes = 0;
       for (unsigned int j = 0; num_utf8_bytes == 0 && j < 3; j++) {
-        if ((c & utf8_check_table[j][0]) == utf8_check_table[j][1])
+        if ((c & utf8_check_table[j][0]) == utf8_check_table[j][1]) {
           num_utf8_bytes = j + 2;
+        }
       }
 
       // get subsequent octets and check that they are valid
@@ -1408,11 +1415,14 @@ bool cmFileCopier::Install(const char* fromFile, const char* toFile)
 
   if (cmSystemTools::SameFile(fromFile, toFile)) {
     return true;
-  } else if (cmSystemTools::FileIsSymlink(fromFile)) {
+  }
+  if (cmSystemTools::FileIsSymlink(fromFile)) {
     return this->InstallSymlink(fromFile, toFile);
-  } else if (cmSystemTools::FileIsDirectory(fromFile)) {
+  }
+  if (cmSystemTools::FileIsDirectory(fromFile)) {
     return this->InstallDirectory(fromFile, toFile, match_properties);
-  } else if (cmSystemTools::FileExists(fromFile)) {
+  }
+  if (cmSystemTools::FileExists(fromFile)) {
     return this->InstallFile(fromFile, toFile, match_properties);
   }
   return this->ReportMissing(fromFile);
@@ -3129,20 +3139,20 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
       if (i >= args.size()) {
         this->Makefile->IssueMessage(cmake::FATAL_ERROR, merr);
         return false;
-      } else {
-        if (args[i] == "FUNCTION") {
-          guard = GUARD_FUNCTION;
-        } else if (args[i] == "FILE") {
-          guard = GUARD_FILE;
-        } else if (args[i] == "PROCESS") {
-          guard = GUARD_PROCESS;
-        } else {
-          std::ostringstream e;
-          e << merr << ", but got:\n  \"" << args[i] << "\".";
-          this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-          return false;
-        }
       }
+      if (args[i] == "FUNCTION") {
+        guard = GUARD_FUNCTION;
+      } else if (args[i] == "FILE") {
+        guard = GUARD_FILE;
+      } else if (args[i] == "PROCESS") {
+        guard = GUARD_PROCESS;
+      } else {
+        std::ostringstream e;
+        e << merr << ", but got:\n  \"" << args[i] << "\".";
+        this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+        return false;
+      }
+
     } else if (args[i] == "RESULT_VARIABLE") {
       ++i;
       if (i >= args.size()) {
@@ -3259,7 +3269,8 @@ bool cmFileCommand::HandleTimestampCommand(
   if (args.size() < 3) {
     this->SetError("sub-command TIMESTAMP requires at least two arguments.");
     return false;
-  } else if (args.size() > 5) {
+  }
+  if (args.size() > 5) {
     this->SetError("sub-command TIMESTAMP takes at most four arguments.");
     return false;
   }

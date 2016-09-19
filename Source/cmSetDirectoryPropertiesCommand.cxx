@@ -45,7 +45,8 @@ bool cmSetDirectoryPropertiesCommand::RunCommand(
     if (prop == "VARIABLES") {
       errors = "Variables and cache variables should be set using SET command";
       return false;
-    } else if (prop == "MACROS") {
+    }
+    if (prop == "MACROS") {
       errors = "Commands and macros cannot be set using SET_CMAKE_PROPERTIES";
       return false;
     }

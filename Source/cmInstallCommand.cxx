@@ -71,19 +71,26 @@ bool cmInstallCommand::InitialPass(std::vector<std::string> const& args,
   // Switch among the command modes.
   if (args[0] == "SCRIPT") {
     return this->HandleScriptMode(args);
-  } else if (args[0] == "CODE") {
+  }
+  if (args[0] == "CODE") {
     return this->HandleScriptMode(args);
-  } else if (args[0] == "TARGETS") {
+  }
+  if (args[0] == "TARGETS") {
     return this->HandleTargetsMode(args);
-  } else if (args[0] == "FILES") {
+  }
+  if (args[0] == "FILES") {
     return this->HandleFilesMode(args);
-  } else if (args[0] == "PROGRAMS") {
+  }
+  if (args[0] == "PROGRAMS") {
     return this->HandleFilesMode(args);
-  } else if (args[0] == "DIRECTORY") {
+  }
+  if (args[0] == "DIRECTORY") {
     return this->HandleDirectoryMode(args);
-  } else if (args[0] == "EXPORT") {
+  }
+  if (args[0] == "EXPORT") {
     return this->HandleExportMode(args);
-  } else if (args[0] == "EXPORT_ANDROID_MK") {
+  }
+  if (args[0] == "EXPORT_ANDROID_MK") {
     return this->HandleExportAndroidMKMode(args);
   }
 
@@ -340,7 +347,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           << "\" which is not an executable, library, or module.";
         this->SetError(e.str());
         return false;
-      } else if (target->GetType() == cmState::OBJECT_LIBRARY) {
+      }
+      if (target->GetType() == cmState::OBJECT_LIBRARY) {
         std::ostringstream e;
         e << "TARGETS given OBJECT library \"" << (*targetIt)
           << "\" which may not be installed.";
@@ -1110,7 +1118,7 @@ bool cmInstallCommand::HandleExportAndroidMKMode(
   cmCAEnabler exportOld(&ica.Parser, "EXPORT_LINK_INTERFACE_LIBRARIES",
                         &ica.ArgumentGroup);
   cmCAString filename(&ica.Parser, "FILE", &ica.ArgumentGroup);
-  exp.Follows(0);
+  exp.Follows(CM_NULLPTR);
 
   ica.ArgumentGroup.Follows(&exp);
   std::vector<std::string> unknownArgs;

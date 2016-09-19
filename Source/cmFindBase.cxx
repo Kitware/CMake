@@ -321,7 +321,8 @@ bool cmFindBase::CheckForVariableInCache()
         this->AlreadyInCacheWithoutMetaInfo = true;
       }
       return true;
-    } else if (cached) {
+    }
+    if (cached) {
       const char* hs =
         state->GetCacheEntryProperty(this->VariableName, "HELPSTRING");
       this->VariableDocumentation = hs ? hs : "(none)";

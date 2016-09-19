@@ -190,9 +190,8 @@ bool cmIfCommand::InvokeInitialPass(
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, err);
       cmSystemTools::SetFatalErrorOccured();
       return true;
-    } else {
-      this->Makefile->IssueMessage(status, err);
     }
+    this->Makefile->IssueMessage(status, err);
   }
 
   cmIfFunctionBlocker* f = new cmIfFunctionBlocker();

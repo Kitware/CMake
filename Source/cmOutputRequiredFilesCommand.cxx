@@ -307,10 +307,10 @@ protected:
     // If dependencies are already done, stop now.
     if (info->DependDone) {
       return;
-    } else {
-      // Make sure we don't visit the same file more than once.
-      info->DependDone = true;
     }
+    // Make sure we don't visit the same file more than once.
+    info->DependDone = true;
+
     const char* path = info->FullPath.c_str();
     if (!path) {
       cmSystemTools::Error(
@@ -405,15 +405,14 @@ protected:
     if (result != this->DependInformationMap.end()) {
       // Found an instance, return it.
       return result->second;
-    } else {
-      // Didn't find an instance.  Create a new one and save it.
-      cmDependInformation* info = new cmDependInformation;
-      info->FullPath = fullPath;
-      info->PathOnly = cmSystemTools::GetFilenamePath(fullPath);
-      info->IncludeName = file;
-      this->DependInformationMap[fullPath] = info;
-      return info;
     }
+    // Didn't find an instance.  Create a new one and save it.
+    cmDependInformation* info = new cmDependInformation;
+    info->FullPath = fullPath;
+    info->PathOnly = cmSystemTools::GetFilenamePath(fullPath);
+    info->IncludeName = file;
+    this->DependInformationMap[fullPath] = info;
+    return info;
   }
 
   /**

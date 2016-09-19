@@ -203,10 +203,9 @@ bool cmMacroFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       // remove the function blocker now that the macro is defined
       mf.RemoveFunctionBlocker(this, lff);
       return true;
-    } else {
-      // decrement for each nested macro that ends
-      this->Depth--;
     }
+    // decrement for each nested macro that ends
+    this->Depth--;
   }
 
   // if it wasn't an endmacro and we are not executing then we must be
