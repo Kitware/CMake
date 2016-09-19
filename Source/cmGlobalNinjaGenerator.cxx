@@ -1306,6 +1306,13 @@ bool cmGlobalNinjaGenerator::SupportsConsolePool() const
     RequiredNinjaVersionForConsolePool().c_str());
 }
 
+bool cmGlobalNinjaGenerator::SupportsImplicitOuts() const
+{
+  return !cmSystemTools::VersionCompare(
+    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
+    this->RequiredNinjaVersionForImplicitOuts().c_str());
+}
+
 void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
 {
   WriteRule(*this->RulesFileStream, "CLEAN", ninjaCmd() + " -t clean",
