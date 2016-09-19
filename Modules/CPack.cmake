@@ -502,6 +502,7 @@ if(NOT CPACK_SOURCE_GENERATOR)
     if(CYGWIN)
       option(CPACK_SOURCE_CYGWIN "Enable to build Cygwin source packages" ON)
     else()
+      option(CPACK_SOURCE_RPM  "Enable to build RPM source packages"  OFF)
       option(CPACK_SOURCE_TBZ2 "Enable to build TBZ2 source packages" ON)
       option(CPACK_SOURCE_TGZ  "Enable to build TGZ source packages"  ON)
       option(CPACK_SOURCE_TXZ  "Enable to build TXZ source packages"  ON)
@@ -515,6 +516,7 @@ if(NOT CPACK_SOURCE_GENERATOR)
 
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_7Z      7Z)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_CYGWIN  CygwinSource)
+  cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_RPM     RPM)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_TBZ2    TBZ2)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_TGZ     TGZ)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_TXZ     TXZ)
@@ -544,6 +546,7 @@ mark_as_advanced(
   CPACK_BINARY_ZIP
   CPACK_SOURCE_7Z
   CPACK_SOURCE_CYGWIN
+  CPACK_SOURCE_RPM
   CPACK_SOURCE_TBZ2
   CPACK_SOURCE_TGZ
   CPACK_SOURCE_TXZ
@@ -650,6 +653,8 @@ set(CPACK_TOPLEVEL_TAG "${CPACK_SOURCE_TOPLEVEL_TAG}")
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_SOURCE_PACKAGE_FILE_NAME}")
 set(CPACK_IGNORE_FILES "${CPACK_SOURCE_IGNORE_FILES}")
 set(CPACK_STRIP_FILES "${CPACK_SOURCE_STRIP_FILES}")
+
+set(CPACK_RPM_PACKAGE_SOURCES "ON")
 
 cpack_encode_variables()
 configure_file("${cpack_source_input_file}"
