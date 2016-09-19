@@ -2,6 +2,7 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 include(${CMAKE_ROOT}/Modules/CMakeDetermineCompiler.cmake)
+include(${CMAKE_ROOT}/Modules//CMakeParseImplicitLinkInfo.cmake)
 
 if( NOT ( ("${CMAKE_GENERATOR}" MATCHES "Make") OR
           ("${CMAKE_GENERATOR}" MATCHES "Ninja") ) )
@@ -43,12 +44,9 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
   set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_REGEX "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerIdCUDA/(\\./)?(CompilerIdCUDA.xctest/)?CompilerIdCUDA[ \t\n\\\"]")
   set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_INDEX 2)
 
+  set(CMAKE_CUDA_COMPILER_ID_FLAGS_ALWAYS "-v")
   if(CMAKE_CUDA_HOST_COMPILER)
-      # Each entry in this list is a set of extra flags to try
-      # adding to the compile line to see if it helps produce
-      # a valid identification file. In our case this would just
-      # be the explicit host compiler
-      set(CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "-ccbin=${CMAKE_CUDA_HOST_COMPILER}")
+      list(APPEND CMAKE_CUDA_COMPILER_ID_FLAGS_ALWAYS "-ccbin=${CMAKE_CUDA_HOST_COMPILER}")
   endif()
 
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
@@ -56,6 +54,40 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
 endif()
 
 include(CMakeFindBinUtils)
+
+#if this compiler vendor is matches NVIDIA we can determine
+#what the host compiler is. This only needs to be done if the CMAKE_CUDA_HOST_COMPILER
+#has NOT been explicitly set
+#
+#Find the line from compiler ID that contains a.out ( or last line )
+#We also need to find the implicit link lines. Which can be done by replacing
+#the compiler with cuda-fake-ld  and pass too CMAKE_PARSE_IMPLICIT_LINK_INFO
+if(CMAKE_CUDA_COMPILER_ID STREQUAL NVIDIA)
+  #grab the last line of the output which holds the link line
+  string(REPLACE "#\$ " ";" nvcc_output "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
+  list(GET nvcc_output -1 nvcc_output)
+
+  #extract the compiler that is being used for linking
+  string(REPLACE " " ";" nvcc_output_to_find_launcher "${nvcc_output}")
+  list(GET nvcc_output_to_find_launcher 0 CMAKE_CUDA_HOST_LINK_LAUNCHER)
+  #we need to remove the quotes that nvcc adds around the directory section
+  #of the path
+  string(REPLACE "\"" "" CMAKE_CUDA_HOST_LINK_LAUNCHER "${CMAKE_CUDA_HOST_LINK_LAUNCHER}")
+
+  #prefix the line with cuda-fake-ld so that implicit link info believes it is
+  #a link line
+  set(nvcc_output "cuda-fake-ld ${nvcc_output}")
+  CMAKE_PARSE_IMPLICIT_LINK_INFO("${nvcc_output}"
+                                 CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES
+                                 CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES
+                                 CMAKE_CUDA_HOST_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES
+                                 log
+                                 "${CMAKE_CUDA_IMPLICIT_OBJECT_REGEX}")
+
+  file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+          "Parsed CUDA nvcc implicit link information from above output:\n${log}\n\n")
+
+endif()
 
 # configure all variables set in this file
 configure_file(${CMAKE_ROOT}/Modules/CMakeCUDACompiler.cmake.in

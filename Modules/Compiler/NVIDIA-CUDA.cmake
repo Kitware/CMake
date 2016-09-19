@@ -1,9 +1,11 @@
-set(CMAKE_CUDA_VERBOSE_FLAG "-v -Xcompiler=-v")
+set(CMAKE_CUDA_VERBOSE_FLAG "-v")
 
 
 set(CMAKE_CUDA_COMPILE_OPTIONS_PIE -Xcompiler=-fPIE)
 set(CMAKE_CUDA_COMPILE_OPTIONS_PIC -Xcompiler=-fPIC)
-set(CMAKE_SHARED_LIBRARY_CUDA_FLAGS -Xcompiler=-fPIC)
+#CMAKE_SHARED_LIBRARY_CUDA_FLAGS is sent to the host linker so we don' need
+#to forward it through nvcc
+set(CMAKE_SHARED_LIBRARY_CUDA_FLAGS -fPIC)
 set(CMAKE_SHARED_LIBRARY_CREATE_CUDA_FLAGS -shared)
 set(CMAKE_INCLUDE_SYSTEM_FLAG_CUDA -isystem=)
 set(CMAKE_CUDA_COMPILE_OPTIONS_VISIBILITY -Xcompiler=-fvisibility=)
