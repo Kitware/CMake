@@ -3325,14 +3325,14 @@ std::string cmGlobalXCodeGenerator::RelativeToSource(const char* p)
 {
   // We force conversion because Xcode breakpoints do not work unless
   // they are in a file named relative to the source tree.
-  return this->CurrentLocalGenerator->ConvertToRelativePath(
-    this->ProjectSourceDirectoryComponents, p, true);
+  return cmOutputConverter::ForceToRelativePath(
+    cmSystemTools::JoinPath(this->ProjectSourceDirectoryComponents), p);
 }
 
 std::string cmGlobalXCodeGenerator::RelativeToBinary(const char* p)
 {
   return this->CurrentLocalGenerator->ConvertToRelativePath(
-    this->ProjectOutputDirectoryComponents, p);
+    cmSystemTools::JoinPath(this->ProjectOutputDirectoryComponents), p);
 }
 
 std::string cmGlobalXCodeGenerator::XCodeEscapePath(const std::string& p)
