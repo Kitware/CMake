@@ -123,9 +123,9 @@ public:
   ~cmake();
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-  Json::Value ReportCapabilitiesJson() const;
+  Json::Value ReportCapabilitiesJson(bool haveServerMode) const;
 #endif
-  std::string ReportCapabilities() const;
+  std::string ReportCapabilities(bool haveServerMode) const;
 
   static const char* GetCMakeFilesDirectory() { return "/CMakeFiles"; }
   static const char* GetCMakeFilesDirectoryPostSlash()

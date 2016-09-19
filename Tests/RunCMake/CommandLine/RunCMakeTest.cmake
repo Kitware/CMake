@@ -12,6 +12,7 @@ run_cmake_command(E_capabilities ${CMAKE_COMMAND} -E capabilities)
 run_cmake_command(E_capabilities-arg ${CMAKE_COMMAND} -E capabilities --extra-arg)
 run_cmake_command(E_echo_append ${CMAKE_COMMAND} -E echo_append)
 run_cmake_command(E_rename-no-arg ${CMAKE_COMMAND} -E rename)
+run_cmake_command(E_server-arg ${CMAKE_COMMAND} -E server --extra-arg)
 run_cmake_command(E_touch_nocreate-no-arg ${CMAKE_COMMAND} -E touch_nocreate)
 
 run_cmake_command(E_time ${CMAKE_COMMAND} -E time ${CMAKE_COMMAND} -E echo "hello  world")
