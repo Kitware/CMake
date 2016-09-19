@@ -29,7 +29,9 @@
 #include <string.h>
 #include <utility>
 
+static std::string const kBINARY_DIR = "BINARY_DIR";
 static std::string const kBUILDSYSTEM_TARGETS = "BUILDSYSTEM_TARGETS";
+static std::string const kSOURCE_DIR = "SOURCE_DIR";
 static std::string const kSUBDIRECTORIES = "SUBDIRECTORIES";
 
 struct cmState::SnapshotDataType
@@ -1672,6 +1674,14 @@ const char* cmState::Directory::GetProperty(const std::string& prop,
       return parent.GetDirectory().GetCurrentSource();
     }
     return "";
+  }
+  if (prop == kBINARY_DIR) {
+    output = this->GetCurrentBinary();
+    return output.c_str();
+  }
+  if (prop == kSOURCE_DIR) {
+    output = this->GetCurrentSource();
+    return output.c_str();
   }
   if (prop == kSUBDIRECTORIES) {
     std::vector<std::string> child_dirs;

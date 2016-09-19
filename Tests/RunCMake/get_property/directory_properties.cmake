@@ -23,3 +23,8 @@ check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" SUBDIRECTORIES)
 check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}/directory_properties" SUBDIRECTORIES)
 check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" BUILDSYSTEM_TARGETS)
 check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}/directory_properties" BUILDSYSTEM_TARGETS)
+
+check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" BINARY_DIR)
+check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" SOURCE_DIR)
+check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}/directory_properties" BINARY_DIR)
+check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}/directory_properties" SOURCE_DIR)
