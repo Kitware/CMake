@@ -131,6 +131,14 @@
 #
 #  Filename for a custom installer control script.
 #
+# .. variable:: CPACK_IFW_PACKAGE_RESOURCES
+#
+#  List of additional resources ('.qrc' files) to include in the installer
+#  binary.
+#
+#  You can use :command:`cpack_ifw_add_package_resources` command to resolve
+#  relative paths.
+#
 # .. variable:: CPACK_IFW_REPOSITORIES_ALL
 #
 #  The list of remote repositories.
@@ -336,6 +344,19 @@
 #
 #   ``DISPLAY_NAME``
 #     is string to display instead of the URL.
+#
+#
+# .. command:: cpack_ifw_add_package_resources
+#
+#   Add additional resources in the installer binary.
+#
+#   ::
+#
+#     cpack_ifw_add_package_resources(<file_path> <file_path> ...)
+#
+#   This command will also add the specified files
+#   to a variable :variable:`CPACK_IFW_PACKAGE_RESOURCES`.
+#
 #
 # Example usage
 # ^^^^^^^^^^^^^
@@ -739,6 +760,17 @@ macro(cpack_ifw_update_repository reponame)
     file(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${_CPACK_IFWREPO_STR}")
   endif()
 
+endmacro()
+
+# Macro for adding resources
+macro(cpack_ifw_add_package_resources)
+  set(_CPACK_IFW_PACKAGE_RESOURCES ${ARGV})
+  _cpack_ifw_resolve_file_list(_CPACK_IFW_PACKAGE_RESOURCES)
+  list(APPEND CPACK_IFW_PACKAGE_RESOURCES ${_CPACK_IFW_PACKAGE_RESOURCES})
+  set(_CPACK_IFWQRC_STR "list(APPEND CPACK_IFW_PACKAGE_RESOURCES \"${_CPACK_IFW_PACKAGE_RESOURCES}\")\n")
+  if(CPack_CMake_INCLUDED)
+    file(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${_CPACK_IFWQRC_STR}")
+  endif()
 endmacro()
 
 # Resolve package control script

@@ -94,6 +94,9 @@ public:
   /// Filename for a custom installer control script
   std::string ControlScript;
 
+  /// List of resources to include in the installer binary
+  std::vector<std::string> Resources;
+
 public:
   // Internal implementation
 

@@ -130,6 +130,19 @@ int cmCPackIFWGenerator::PackageFiles()
   {
     std::string ifwCmd = BinCreator;
     ifwCmd += " -c " + this->toplevel + "/config/config.xml";
+
+    if (!Installer.Resources.empty()) {
+      ifwCmd += " -r ";
+      std::vector<std::string>::iterator it = Installer.Resources.begin();
+      std::string path = this->toplevel + "/resources/";
+      ifwCmd += path + *it;
+      ++it;
+      while (it != Installer.Resources.end()) {
+        ifwCmd += "," + path + *it;
+        ++it;
+      }
+    }
+
     ifwCmd += " -p " + this->toplevel + "/packages";
 
     if (!PkgsDirsVector.empty()) {
