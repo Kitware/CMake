@@ -54,6 +54,7 @@ Properties on Directories
    :maxdepth: 1
 
    /prop_dir/ADDITIONAL_MAKE_CLEAN_FILES
+   /prop_dir/BUILDSYSTEM_TARGETS
    /prop_dir/CACHE_VARIABLES
    /prop_dir/CLEAN_NO_CUSTOM
    /prop_dir/CMAKE_CONFIGURE_DEPENDS

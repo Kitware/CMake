@@ -29,6 +29,7 @@
 #include <string.h>
 #include <utility>
 
+static std::string const kBUILDSYSTEM_TARGETS = "BUILDSYSTEM_TARGETS";
 static std::string const kSUBDIRECTORIES = "SUBDIRECTORIES";
 
 struct cmState::SnapshotDataType
@@ -1681,6 +1682,10 @@ const char* cmState::Directory::GetProperty(const std::string& prop,
       child_dirs.push_back(ci->GetDirectory().GetCurrentSource());
     }
     output = cmJoin(child_dirs, ";");
+    return output.c_str();
+  }
+  if (prop == kBUILDSYSTEM_TARGETS) {
+    output = cmJoin(this->DirectoryState->NormalTargetNames, ";");
     return output.c_str();
   }
 

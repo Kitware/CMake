@@ -14,6 +14,12 @@ check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" empty)
 check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" custom)
 check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" noexist)
 
+add_custom_target(CustomTop)
+add_library(InterfaceTop INTERFACE)
+add_library(my::InterfaceTop ALIAS InterfaceTop)
+
 add_subdirectory(directory_properties)
 check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" SUBDIRECTORIES)
 check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}/directory_properties" SUBDIRECTORIES)
+check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" BUILDSYSTEM_TARGETS)
+check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}/directory_properties" BUILDSYSTEM_TARGETS)
