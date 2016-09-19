@@ -241,7 +241,6 @@ private:
   std::string CurrentXCodeHackMakefile;
   std::string CurrentProject;
   std::set<std::string> TargetDoneSet;
-  std::vector<std::string> CurrentOutputDirectoryComponents;
   std::vector<std::string> ProjectSourceDirectoryComponents;
   std::vector<std::string> ProjectOutputDirectoryComponents;
   std::map<std::string, cmXCodeObject*> GroupMap;
