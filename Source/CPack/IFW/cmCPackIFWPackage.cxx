@@ -153,6 +153,7 @@ void cmCPackIFWPackage::DefaultConfiguration()
   ReleaseDate = "";
   Script = "";
   Licenses.clear();
+  UserInterfaces.clear();
   SortingPriority = "";
   Default = "";
   Essential = "";
@@ -227,6 +228,12 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
   // Script
   if (const char* option = GetOption(prefix + "SCRIPT")) {
     Script = option;
+  }
+
+  // User interfaces
+  if (const char* option = this->GetOption(prefix + "USER_INTERFACES")) {
+    UserInterfaces.clear();
+    cmSystemTools::ExpandListArgument(option, UserInterfaces);
   }
 
   // CMake dependencies
@@ -322,6 +329,12 @@ int cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup* group)
     Script = option;
   }
 
+  // User interfaces
+  if (const char* option = this->GetOption(prefix + "USER_INTERFACES")) {
+    UserInterfaces.clear();
+    cmSystemTools::ExpandListArgument(option, UserInterfaces);
+  }
+
   // Licenses
   if (const char* option = this->GetOption(prefix + "LICENSES")) {
     Licenses.clear();
@@ -415,6 +428,23 @@ void cmCPackIFWPackage::GeneratePackageFile()
     std::string path = Directory + "/meta/" + name;
     cmsys::SystemTools::CopyFileIfDifferent(Script.data(), path.data());
     xout.Element("Script", name);
+  }
+
+  // User Interfaces (copy to meta dir)
+  std::vector<std::string> userInterfaces = UserInterfaces;
+  for (size_t i = 0; i < userInterfaces.size(); i++) {
+    std::string name = cmSystemTools::GetFilenameName(userInterfaces[i]);
+    std::string path = Directory + "/meta/" + name;
+    cmsys::SystemTools::CopyFileIfDifferent(userInterfaces[i].data(),
+                                            path.data());
+    userInterfaces[i] = name;
+  }
+  if (!userInterfaces.empty()) {
+    xout.StartElement("UserInterfaces");
+    for (size_t i = 0; i < userInterfaces.size(); i++) {
+      xout.Element("UserInterface", userInterfaces[i]);
+    }
+    xout.EndElement();
   }
 
   // Dependencies

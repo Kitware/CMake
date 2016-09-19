@@ -99,6 +99,9 @@ public:
   /// List of license agreements to be accepted by the installing user
   std::vector<std::string> Licenses;
 
+  /// List of pages to load
+  std::vector<std::string> UserInterfaces;
+
   /// Priority of the component in the tree
   std::string SortingPriority;
 

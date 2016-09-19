@@ -195,7 +195,8 @@
 #                       [SCRIPT <script>]
 #                       [PRIORITY <priority>]
 #                       [DEPENDS <com_id> ...]
-#                       [LICENSES <display_name> <file_path> ...])
+#                       [LICENSES <display_name> <file_path> ...]
+#                       [USER_INTERFACES <file_path> <file_path> ...])
 #
 # This command should be called after :command:`cpack_add_component` command.
 #
@@ -221,6 +222,8 @@
 # ``LICENSES`` pair of <display_name> and <file_path> of license text for this
 # component. You can specify more then one license.
 #
+# ``USER_INTERFACES`` a list of <file_path> representing pages to load
+#
 # --------------------------------------------------------------------------
 #
 # .. command:: cpack_ifw_configure_component_group
@@ -234,7 +237,8 @@
 #                       [VERSION <version>]
 #                       [SCRIPT <script>]
 #                       [PRIORITY <priority>]
-#                       [LICENSES <display_name> <file_path> ...])
+#                       [LICENSES <display_name> <file_path> ...]
+#                       [USER_INTERFACES <file_path> <file_path> ...])
 #
 # This command should be called after :command:`cpack_add_component_group`
 # command.
@@ -253,6 +257,8 @@
 #
 # ``LICENSES`` pair of <display_name> and <file_path> of license text for this
 # component group. You can specify more then one license.
+#
+# ``USER_INTERFACES`` a list of <file_path> representing pages to load
 #
 # --------------------------------------------------------------------------
 #
@@ -543,6 +549,22 @@ macro(_cpack_ifw_resolve_lisenses _variable)
   endif()
 endmacro()
 
+# Resolve full path to a list of provided files
+macro(_cpack_ifw_resolve_file_list _variable)
+  if(${_variable})
+    set(_ifw_list_fix)
+    foreach(_ifw_file_arg ${${_variable}})
+      get_filename_component(_ifw_file_arg "${_ifw_file_arg}" ABSOLUTE)
+      if(EXISTS ${_ifw_file_arg})
+        list(APPEND _ifw_list_fix "${_ifw_file_arg}")
+      else()
+        message(WARNING "CPack IFW: page file \"${_ifw_file_arg}\" does not exist. Skipping")
+      endif()
+    endforeach(_ifw_file_arg)
+    set(${_variable} "${_ifw_list_fix}")
+  endif()
+endmacro()
+
 # Macro for configure component
 macro(cpack_ifw_configure_component compname)
 
@@ -550,11 +572,12 @@ macro(cpack_ifw_configure_component compname)
 
   set(_IFW_OPT COMMON ESSENTIAL)
   set(_IFW_ARGS NAME VERSION SCRIPT PRIORITY)
-  set(_IFW_MULTI_ARGS DEPENDS LICENSES)
+  set(_IFW_MULTI_ARGS DEPENDS LICENSES USER_INTERFACES)
   cmake_parse_arguments(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME} "${_IFW_OPT}" "${_IFW_ARGS}" "${_IFW_MULTI_ARGS}" ${ARGN})
 
   _cpack_ifw_resolve_script(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME}_SCRIPT)
   _cpack_ifw_resolve_lisenses(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME}_LICENSES)
+  _cpack_ifw_resolve_file_list(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME}_USER_INTERFACES)
 
   set(_CPACK_IFWCOMP_STR "\n# Configuration for IFW component \"${compname}\"\n")
 
@@ -589,11 +612,12 @@ macro(cpack_ifw_configure_component_group grpname)
 
   set(_IFW_OPT)
   set(_IFW_ARGS NAME VERSION SCRIPT PRIORITY)
-  set(_IFW_MULTI_ARGS LICENSES)
+  set(_IFW_MULTI_ARGS LICENSES USER_INTERFACES)
   cmake_parse_arguments(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME} "${_IFW_OPT}" "${_IFW_ARGS}" "${_IFW_MULTI_ARGS}" ${ARGN})
 
   _cpack_ifw_resolve_script(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME}_SCRIPT)
   _cpack_ifw_resolve_lisenses(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME}_LICENSES)
+  _cpack_ifw_resolve_file_list(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME}_USER_INTERFACES)
 
   set(_CPACK_IFWGRP_STR "\n# Configuration for IFW component group \"${grpname}\"\n")
 
