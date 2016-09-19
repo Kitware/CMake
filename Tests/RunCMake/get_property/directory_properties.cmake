@@ -13,3 +13,7 @@ set_directory_properties(PROPERTIES empty "" custom value)
 check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" empty)
 check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" custom)
 check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" noexist)
+
+add_subdirectory(directory_properties)
+check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}" SUBDIRECTORIES)
+check_directory_property("${CMAKE_CURRENT_SOURCE_DIR}/directory_properties" SUBDIRECTORIES)

@@ -29,6 +29,8 @@
 #include <string.h>
 #include <utility>
 
+static std::string const kSUBDIRECTORIES = "SUBDIRECTORIES";
+
 struct cmState::SnapshotDataType
 {
   cmState::PositionType ScopeParent;
@@ -1670,6 +1672,18 @@ const char* cmState::Directory::GetProperty(const std::string& prop,
     }
     return "";
   }
+  if (prop == kSUBDIRECTORIES) {
+    std::vector<std::string> child_dirs;
+    std::vector<cmState::Snapshot> const& children =
+      this->DirectoryState->Children;
+    for (std::vector<cmState::Snapshot>::const_iterator ci = children.begin();
+         ci != children.end(); ++ci) {
+      child_dirs.push_back(ci->GetDirectory().GetCurrentSource());
+    }
+    output = cmJoin(child_dirs, ";");
+    return output.c_str();
+  }
+
   if (prop == "LISTFILE_STACK") {
     std::vector<std::string> listFiles;
     cmState::Snapshot snp = this->Snapshot_;

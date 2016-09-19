@@ -73,6 +73,7 @@ Properties on Directories
    /prop_dir/RULE_LAUNCH_COMPILE
    /prop_dir/RULE_LAUNCH_CUSTOM
    /prop_dir/RULE_LAUNCH_LINK
+   /prop_dir/SUBDIRECTORIES
    /prop_dir/TEST_INCLUDE_FILE
    /prop_dir/VARIABLES
    /prop_dir/VS_GLOBAL_SECTION_POST_section
