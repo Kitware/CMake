@@ -30,8 +30,10 @@
 #cmakedefine CMAKE_USE_MACH_PARSER
 #cmakedefine CMAKE_USE_LIBUV
 #cmakedefine CMAKE_ENCODING_UTF8
+#cmakedefine CMake_HAVE_CXX_MAKE_UNIQUE
 #cmakedefine CMake_HAVE_CXX_NULLPTR
 #cmakedefine CMake_HAVE_CXX_OVERRIDE
+#cmakedefine CMake_HAVE_CXX_UNIQUE_PTR
 #cmakedefine CMake_HAVE_CXX_UNORDERED_MAP
 #cmakedefine CMake_HAVE_CXX_UNORDERED_SET
 #define CMAKE_BIN_DIR "/@CMAKE_BIN_DIR@"
