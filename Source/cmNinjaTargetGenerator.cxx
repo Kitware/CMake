@@ -607,8 +607,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   std::string const rspfile = objectFileName + ".rsp";
 
   this->GetGlobalGenerator()->WriteBuild(
-    this->GetBuildFileStream(), comment, rule, outputs, explicitDeps,
-    implicitDeps, orderOnlyDeps, vars, rspfile, commandLineLengthLimit);
+    this->GetBuildFileStream(), comment, rule, outputs,
+    /*implicitOuts=*/cmNinjaDeps(), explicitDeps, implicitDeps, orderOnlyDeps,
+    vars, rspfile, commandLineLengthLimit);
 
   if (const char* objectOutputs = source->GetProperty("OBJECT_OUTPUTS")) {
     std::vector<std::string> outputList;

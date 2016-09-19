@@ -691,7 +691,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   // Write the build statement for this target.
   bool usedResponseFile = false;
   globalGen.WriteBuild(this->GetBuildFileStream(), comment.str(),
-                       this->LanguageLinkerRule(), outputs, explicitDeps,
+                       this->LanguageLinkerRule(), outputs,
+                       /*implicitOuts=*/cmNinjaDeps(), explicitDeps,
                        implicitDeps, orderOnlyDeps, vars, rspfile,
                        commandLineLengthLimit, &usedResponseFile);
   this->WriteLinkRule(usedResponseFile);
@@ -702,7 +703,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
         this->GetBuildFileStream(),
         "Create executable symlink " + targetOutput,
         "CMAKE_SYMLINK_EXECUTABLE", cmNinjaDeps(1, targetOutput),
-        cmNinjaDeps(1, targetOutputReal), emptyDeps, emptyDeps, symlinkVars);
+        /*implicitOuts=*/cmNinjaDeps(), cmNinjaDeps(1, targetOutputReal),
+        emptyDeps, emptyDeps, symlinkVars);
     } else {
       cmNinjaDeps symlinks;
       std::string const soName =
@@ -717,7 +719,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       symlinks.push_back(targetOutput);
       globalGen.WriteBuild(
         this->GetBuildFileStream(), "Create library symlink " + targetOutput,
-        "CMAKE_SYMLINK_LIBRARY", symlinks, cmNinjaDeps(1, targetOutputReal),
+        "CMAKE_SYMLINK_LIBRARY", symlinks,
+        /*implicitOuts=*/cmNinjaDeps(), cmNinjaDeps(1, targetOutputReal),
         emptyDeps, emptyDeps, symlinkVars);
     }
   }
