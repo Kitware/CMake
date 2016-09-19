@@ -135,9 +135,6 @@ public:
     const char* GetCurrentBinary() const;
     void SetCurrentBinary(std::string const& dir);
 
-    std::vector<std::string> const& GetCurrentSourceComponents() const;
-    std::vector<std::string> const& GetCurrentBinaryComponents() const;
-
     const char* GetRelativePathTopSource() const;
     const char* GetRelativePathTopBinary() const;
     void SetRelativePathTopSource(const char* dir);
@@ -312,9 +309,6 @@ public:
   const char* GetBinaryDirectory() const;
   void SetBinaryDirectory(std::string const& binaryDirectory);
 
-  std::vector<std::string> const& GetSourceDirectoryComponents() const;
-  std::vector<std::string> const& GetBinaryDirectoryComponents() const;
-
   void SetWindowsShell(bool windowsShell);
   bool UseWindowsShell() const;
   void SetWindowsVSIDE(bool windowsVSIDE);
@@ -350,8 +344,6 @@ private:
   cmLinkedTree<SnapshotDataType> SnapshotData;
   cmLinkedTree<cmDefinitions> VarTree;
 
-  std::vector<std::string> SourceDirectoryComponents;
-  std::vector<std::string> BinaryDirectoryComponents;
   std::string SourceDirectory;
   std::string BinaryDirectory;
   bool IsInTryCompile;
