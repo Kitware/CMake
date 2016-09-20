@@ -42,16 +42,18 @@ int main(int argc, const char* argv[])
   }
 
   std::string input;
-  HANDLE syncEvent = OpenEventW(EVENT_MODIFY_STATE, FALSE, SyncEventName);
-  if (syncEvent) {
-    SetEvent(syncEvent);
+  HANDLE event = OpenEventW(EVENT_MODIFY_STATE, FALSE, BeforeInputEventName);
+  if (event) {
+    SetEvent(event);
+    CloseHandle(event);
   }
 
   std::cin >> input;
   std::cout << input << std::endl;
-  if (syncEvent) {
-    SetEvent(syncEvent);
-    CloseHandle(syncEvent);
+  event = OpenEventW(EVENT_MODIFY_STATE, FALSE, AfterOutputEventName);
+  if (event) {
+    SetEvent(event);
+    CloseHandle(event);
   }
 #else
   static_cast<void>(argc);
