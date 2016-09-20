@@ -22,17 +22,17 @@
 #include "cm_jsoncpp_value.h"
 #endif
 
-const char kTYPE_KEY[] = "type";
-const char kCOOKIE_KEY[] = "cookie";
-const char REPLY_TO_KEY[] = "inReplyTo";
-const char ERROR_MESSAGE_KEY[] = "errorMessage";
+static const std::string kTYPE_KEY = "type";
+static const std::string kCOOKIE_KEY = "cookie";
+static const std::string kREPLY_TO_KEY = "inReplyTo";
+static const std::string kERROR_MESSAGE_KEY = "errorMessage";
 
-const char ERROR_TYPE[] = "error";
-const char REPLY_TYPE[] = "reply";
-const char PROGRESS_TYPE[] = "progress";
+static const std::string kERROR_TYPE = "error";
+static const std::string kREPLY_TYPE = "reply";
+static const std::string kPROGRESS_TYPE = "progress";
 
-const char START_MAGIC[] = "[== CMake Server ==[";
-const char END_MAGIC[] = "]== CMake Server ==]";
+static const std::string kSTART_MAGIC = "[== CMake Server ==[";
+static const std::string kEND_MAGIC = "]== CMake Server ==]";
 
 typedef struct
 {
@@ -154,11 +154,11 @@ void cmServer::handleData(const std::string& data)
       line.erase(ls - 1, 1);
     this->DataBuffer.erase(this->DataBuffer.begin(),
                            this->DataBuffer.begin() + needle + 1);
-    if (line == START_MAGIC) {
+    if (line == kSTART_MAGIC) {
       this->JsonData.clear();
       continue;
     }
-    if (line == END_MAGIC) {
+    if (line == kEND_MAGIC) {
       this->Queue.push_back(this->JsonData);
       this->JsonData.clear();
       if (!this->Writing) {
@@ -296,9 +296,8 @@ void cmServer::WriteJsonObject(const Json::Value& jsonValue) const
 {
   Json::FastWriter writer;
 
-  std::string result = std::string("\n") + std::string(START_MAGIC) +
-    std::string("\n") + writer.write(jsonValue) + std::string(END_MAGIC) +
-    std::string("\n");
+  std::string result = std::string("\n") + kSTART_MAGIC + std::string("\n") +
+    writer.write(jsonValue) + kEND_MAGIC + std::string("\n");
 
   this->Writing = true;
   write_data(this->OutputStream, result, on_stdout_write);
@@ -328,8 +327,8 @@ void cmServer::WriteProgress(const cmServerRequest& request, int min,
   assert(message.length() != 0);
 
   Json::Value obj = Json::objectValue;
-  obj[kTYPE_KEY] = PROGRESS_TYPE;
-  obj[REPLY_TO_KEY] = request.Type;
+  obj[kTYPE_KEY] = kPROGRESS_TYPE;
+  obj[kREPLY_TO_KEY] = request.Type;
   obj[kCOOKIE_KEY] = request.Cookie;
   obj["progressMessage"] = message;
   obj["progressMinimum"] = min;
@@ -342,9 +341,9 @@ void cmServer::WriteProgress(const cmServerRequest& request, int min,
 void cmServer::WriteParseError(const std::string& message) const
 {
   Json::Value obj = Json::objectValue;
-  obj[kTYPE_KEY] = ERROR_TYPE;
-  obj[ERROR_MESSAGE_KEY] = message;
-  obj[REPLY_TO_KEY] = "";
+  obj[kTYPE_KEY] = kERROR_TYPE;
+  obj[kERROR_MESSAGE_KEY] = message;
+  obj[kREPLY_TO_KEY] = "";
   obj[kCOOKIE_KEY] = "";
 
   this->WriteJsonObject(obj);
@@ -356,10 +355,10 @@ void cmServer::WriteResponse(const cmServerResponse& response) const
 
   Json::Value obj = response.Data();
   obj[kCOOKIE_KEY] = response.Cookie;
-  obj[kTYPE_KEY] = response.IsError() ? ERROR_TYPE : REPLY_TYPE;
-  obj[REPLY_TO_KEY] = response.Type;
+  obj[kTYPE_KEY] = response.IsError() ? kERROR_TYPE : kREPLY_TYPE;
+  obj[kREPLY_TO_KEY] = response.Type;
   if (response.IsError()) {
-    obj[ERROR_MESSAGE_KEY] = response.ErrorMessage();
+    obj[kERROR_MESSAGE_KEY] = response.ErrorMessage();
   }
 
   this->WriteJsonObject(obj);
