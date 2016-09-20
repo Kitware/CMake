@@ -82,6 +82,7 @@ public:
   virtual ~cmServerProtocol() {}
 
   virtual std::pair<int, int> ProtocolVersion() const = 0;
+  virtual bool IsExperimental() const = 0;
   virtual const cmServerResponse Process(const cmServerRequest& request) = 0;
 
   bool Activate(const cmServerRequest& request, std::string* errorMessage);
@@ -100,6 +101,7 @@ class cmServerProtocol1_0 : public cmServerProtocol
 {
 public:
   std::pair<int, int> ProtocolVersion() const override;
+  bool IsExperimental() const override;
   const cmServerResponse Process(const cmServerRequest& request) override;
 
 private:

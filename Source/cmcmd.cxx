@@ -913,15 +913,32 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       }
       return 0;
     } else if (args[1] == "server") {
-      if (args.size() > 2) {
+      if (args.size() > 3) {
         cmSystemTools::Error("Too many arguments to start server mode");
         return 1;
       }
+      bool supportExperimental = false;
+      if (args.size() == 3) {
+        if (args[2] == "--experimental") {
+          supportExperimental = true;
+        } else {
+          cmSystemTools::Error("Unknown argument for server mode");
+          return 1;
+        }
+      }
 #if defined(HAVE_SERVER_MODE) && HAVE_SERVER_MODE
-      cmServer server;
-      server.Serve();
-      return 0;
+      cmServer server(supportExperimental);
+      if (server.Serve()) {
+        return 0;
+      } else {
+        cmSystemTools::Error(
+          "CMake server could not find any supported protocol. "
+          "Try with \"--experimental\" to enable "
+          "experimental support.");
+        return 1;
+      }
 #else
+      static_cast<void>(supportExperimental);
       cmSystemTools::Error("CMake was not built with server mode enabled");
       return 1;
 #endif
