@@ -918,7 +918,10 @@ function(cpack_rpm_prepare_content_list)
         set(_DISTINCT_PATH "${_RPM_RELOCATION_PREFIX}")
 
         string(REPLACE "/" ";" _CPACK_RPM_PACKAGE_PREFIX_ELEMS " ${_RPM_RELOCATION_PREFIX}")
-        list(REMOVE_AT _CPACK_RPM_PACKAGE_PREFIX_ELEMS -1)
+        cmake_policy(PUSH)
+          cmake_policy(SET CMP0007 NEW)
+          list(REMOVE_AT _CPACK_RPM_PACKAGE_PREFIX_ELEMS -1)
+        cmake_policy(POP)
         unset(_TMP_LIST)
         # Now generate all of the parent dirs of the relocation path
         foreach(_PREFIX_PATH_ELEM ${_CPACK_RPM_PACKAGE_PREFIX_ELEMS})
