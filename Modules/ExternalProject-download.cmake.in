@@ -136,6 +136,7 @@ foreach(i RANGE ${retry_number})
         STATUS status
         LOG log
         @USERPWD_ARGS@
+        @HTTP_HEADERS_ARGS@
     )
 
     list(GET status 0 status_code)
